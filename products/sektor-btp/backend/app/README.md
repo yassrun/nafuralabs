@@ -1,36 +1,23 @@
-# Spring Application Base Template
+# Sektor BTP — Spring Boot application (`:sektor:app`)
 
-This template is used to scaffold `backend/applications/<app>` modules.
+Boot module for the ERP. Domain logic lives in `products/sektor-btp/backend/modules/*`.
 
-Use:
+## Build
 
 ```bash
-node tools/naf/gen/create-application.mjs --app <app-id> [--port 8084]
+cd C:\nf\nafuralabs
+.\gradlew.bat :sektor:app:bootJar
 ```
 
-The scaffold command reads CRUX manifests from:
-- `naf/src/spec/applications/<app-id>/<app-id>.application.json`
-- `naf/src/spec/applications/<app-id>/domains/*.domain.json`
+## Deploy (K8s)
 
-Platform dependencies and security defaults are derived from
-`application.capabilities` in the application manifest.
-Datasource defaults are derived from
-`application.components.backend.database` in the application manifest.
+Manifests: `products/sektor-btp/deploy/k8s/` (namespace `nafura-sektor`).
 
-And generates:
-- Backend app skeleton under `backend/applications/<app-id>/`
-- Compatibility manifest copies under `backend/applications/<app-id>/src/main/resources/`
-- `backend/settings.gradle` include entry: `:applications:<app-id>`
-- Kubernetes backend manifests under `infra/k8s/base/`:
-  - `<app-id>-backend-deployment.yaml`
-  - `<app-id>-backend-service.yaml`
-- Kubernetes wiring updates:
-  - `infra/k8s/base/kustomization.yaml` resources
-  - `infra/k8s/overlays/apps/<app-id>/kustomization.yaml` app overlay
-  - `infra/k8s/overlays/dev-infra/kustomization.yaml` infra baseline
-  - `infra/k8s/overlays/prod/kustomization.yaml` image tag entry
-- PostgreSQL init DB registration in `infra/k8s/base/infra-postgres.yaml` when `components.backend.database.mode = "app"`
-- Frontend application route composition files:
-  - `web/app/applications/<app-id>/routes/<app-id>.routes.generated.ts`
-  - `web/app/applications/routes.generated.ts`
+```bash
+ENV=staging bash toolchain/ops/nlops.sh onboard-app sektor-btp   # first time
+ENV=staging bash toolchain/ops/nlops.sh deploy sektor-btp        # releases
+```
 
+Shared infra (Postgres, Keycloak, MinIO) is under `infra/k8s/` — bootstrap once per env via `bootstrap-env`, not per product deploy.
+
+See [toolchain/ops/README.md](../../../toolchain/ops/README.md).

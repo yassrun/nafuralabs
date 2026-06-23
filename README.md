@@ -19,6 +19,8 @@ npm run build:prod
 
 ```bash
 make deploy-sektor ENV=staging
+# ou
+make deploy APP=sektor-btp ENV=staging
 ```
 
 ## Produits
@@ -33,6 +35,7 @@ make deploy-sektor ENV=staging
 | Doc | Sujet |
 |-----|-------|
 | [docs/README.md](docs/README.md) | **Guide mère** |
+| [toolchain/ops/README.md](toolchain/ops/README.md) | Ops K8s : bootstrap env vs deploy produit |
 | [docs/PLATFORM_IMPORTS.md](docs/PLATFORM_IMPORTS.md) | Imports Gradle / TypeScript |
 | [docs/ARCHITECTURE_MIGRATION.md](docs/ARCHITECTURE_MIGRATION.md) | Migration depuis nafura |
 | [docs/AGENTS.md](docs/AGENTS.md) | Règles agents IA |

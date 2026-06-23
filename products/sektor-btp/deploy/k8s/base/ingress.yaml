@@ -7,7 +7,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: api.staging.sektor.nafuralabs.com
+    - host: api.sektor.nafuralabs.staging
       http:
         paths:
           - path: /
@@ -17,7 +17,7 @@ spec:
                 name: sektor-btp-backend
                 port:
                   number: 8082
-    - host: staging.sektor.nafuralabs.com
+    - host: sektor.nafuralabs.staging
       http:
         paths:
           - path: /

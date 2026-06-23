@@ -1,7 +1,7 @@
-/** Staging (local K8s overlay or staging.sektor.nafuralabs.com). */
+/** Staging cluster — sektor.nafuralabs.staging */
 export const environment = {
   production: true,
-  apiBaseUrl: 'http://api.staging.sektor.nafuralabs.com',
+  apiBaseUrl: 'http://api.sektor.nafuralabs.staging',
   keycloakUrl: 'http://iam.nafura.local',
   keycloakRealm: 'iam-portal',
   keycloakClientId: 'erp-web',

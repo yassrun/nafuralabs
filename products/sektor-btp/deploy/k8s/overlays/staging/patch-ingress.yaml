@@ -1,10 +1,10 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: erp-ingress
+  name: sektor-btp-ingress
 spec:
   rules:
-    - host: api.staging.sektor.nafuralabs.com
+    - host: api.sektor.nafuralabs.staging
       http:
         paths:
           - path: /
@@ -14,7 +14,7 @@ spec:
                 name: sektor-btp-backend
                 port:
                   number: 8082
-    - host: staging.sektor.nafuralabs.com
+    - host: sektor.nafuralabs.staging
       http:
         paths:
           - path: /

@@ -12,7 +12,8 @@
 |---|---|
 | Nom produit | **Nafura Sektor** (toujours accolé au descripteur « ERP Construction ») |
 | Marque mère | Nafura Labs |
-| Sous-domaine prod | `sektor.nafuralabs.com` (inchangé) |
+| Sous-domaine staging | `sektor.nafuralabs.staging` / `api.sektor.nafuralabs.staging` |
+| Sous-domaine prod | `sektor.nafuralabs.com` / `api.sektor.nafuralabs.com` |
 | Couleur primaire | **Cobalt `#1B3FAE`** → token `--nf-color-primary-500` |
 | Accent | **Jaune hi-vis `#F2D544`** → token `--nf-color-accent-400` (usage parcimonieux) |
 | Texte sur jaune | **Encre `#131415`** (`--nf-color-accent-contrast`) — jamais de blanc |

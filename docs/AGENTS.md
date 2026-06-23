@@ -33,7 +33,14 @@ Guide complet : [README.md](README.md).
 ## Ops
 
 ```bash
-ENV=staging bash toolchain/ops/nlops.sh infra-up
-bash toolchain/ops/nlops.sh provision-db sektor-btp
-bash toolchain/ops/nlops.sh deploy sektor-btp
+# 1× par nouveau cluster (staging ou prod)
+ENV=staging bash toolchain/ops/nlops.sh bootstrap-env
+
+# 1× par produit sur cet env
+ENV=staging bash toolchain/ops/nlops.sh onboard-app sektor-btp
+
+# Releases (infra déjà en place)
+ENV=staging bash toolchain/ops/nlops.sh deploy sektor-btp
 ```
+
+Voir [toolchain/ops/README.md](../toolchain/ops/README.md).

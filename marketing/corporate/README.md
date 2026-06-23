@@ -20,44 +20,28 @@ npm start
 
 Runs on port 3000.
 
-## Docker & deploy (dev / prod)
+## Docker & deploy (staging / prod)
 
-From repo root, use the infra script:
+Product manifests live under each product path, e.g. `marketing/corporate/deploy/k8s/` (when added).
 
-```bash
-cd infra/scripts
-
-# Dev (nafuralabs.local): build and deploy
-./nafuralabs.sh build-deploy dev
-
-# Prod (nafuralabs.com): build and deploy
-./nafuralabs.sh build-deploy prod
-```
-
-Or split build and deploy:
+Shared infra is deployed **once per cluster** via the monorepo toolchain:
 
 ```bash
-./nafuralabs.sh build dev
-./nafuralabs.sh deploy dev
+# From nafuralabs root — bootstrap shared infra (Postgres, ingress, …)
+ENV=staging bash toolchain/ops/nlops.sh bootstrap-env
 
-./nafuralabs.sh build prod
-./nafuralabs.sh deploy prod
+# Deploy marketing app when deploy/k8s exists:
+ENV=staging bash toolchain/ops/nlops.sh onboard-app corporate
+ENV=staging bash toolchain/ops/nlops.sh deploy corporate
 ```
 
-With a container registry (e.g. for prod CI):
-
-```bash
-REGISTRY=ghcr.io/yourorg ./nafuralabs.sh build prod   # build and push
-REGISTRY=ghcr.io/yourorg ./nafuralabs.sh deploy prod   # deploy using registry image
-```
-
-Ensure `127.0.0.1 nafuralabs.local` is in your hosts file for dev (see `infra/scripts/setup.sh`).
+See [toolchain/ops/README.md](../../toolchain/ops/README.md) and [docs/README.md](../../docs/README.md).
 
 ## Environments
 
-| Environment | Host |
-|-------------|------|
-| Local       | http://nafuralabs.local |
-| Production  | https://nafuralabs.com  |
+| Environment | Cluster | Host (target) |
+|-------------|---------|---------------|
+| staging | Docker Desktop K8s | http://nafuralabs.local |
+| prod | GKE | https://nafuralabs.com |
 
-Ingress and deployment are defined in `infra/k8s/` (base + overlays/infra/<env> + overlays/apps/<app>/<env>).
+Ingress for shared infra: `infra/k8s/overlays/infra/<env>/`.

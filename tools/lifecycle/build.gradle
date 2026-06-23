@@ -7,7 +7,6 @@
 
 import java.security.MessageDigest
 import java.util.Locale
-import groovy.json.JsonSlurper
 
 // Disable Java compilation for this project - we only collect SQL files
 tasks.withType(JavaCompile).configureEach {
@@ -23,280 +22,135 @@ tasks.withType(Jar).configureEach {
 def migrationOutputDir = file("${buildDir}/migrations")
 def changelogOutputDir = file("${buildDir}/changelog")
 def generatedMasterChangelog = file("${changelogOutputDir}/db.changelog-master.yaml")
-def ADMINISTRATION_FEATURES = ['iam', 'subscription'] as Set
-def CONFIGURATION_FEATURES = ['settings', 'sysconfig'] as Set
 
-// Platform feature id -> backend module path (for manifest "features" toggles)
-def PLATFORM_FEATURE_MODULE_PATHS = [
-    'iam'              : 'platform/backend/features/administration/iam',
-    'subscription'     : 'platform/backend/features/administration/subscription',
-    'app-settings'     : 'platform/backend/features/app-settings',
-    'user-settings'    : 'platform/backend/features/user-settings',
-    'sysconfig'        : 'platform/backend/features/configuration/sysconfig',
-    'notification'     : 'platform/backend/features/collaboration/notification',
-    'doc-manager'      : 'platform/backend/features/collaboration/doc-manager',
-    'audit'            : 'platform/backend/features/collaboration/audit',
-    'comment'          : 'platform/backend/features/collaboration/comment',
-    'workflow'         : 'platform/backend/features/collaboration/workflow',
-    'tagging'          : 'platform/backend/features/collaboration/tagging',
-    'doc-extractor'     : 'platform/backend/features/documents/doc-extractor',
-    'llm-provider'     : 'platform/backend/features/ai/llm-provider',
-    'ai-conversation'   : 'platform/backend/features/ai/ai-conversation',
-    'ai-agent-runtime' : 'platform/backend/features/ai/ai-agent-runtime',
-] as Map
-
-def resolveFeatureModulePath = { String featureId ->
-    def group = ADMINISTRATION_FEATURES.contains(featureId)
-                ? 'administration'
-                : CONFIGURATION_FEATURES.contains(featureId)
-                    ? 'configuration'
-                    : 'business'
-    return "platform/backend/features/${group}/${featureId}"
+def normalizeAppId = { String appId ->
+    if (appId == null || appId.trim().isEmpty()) {
+        return null
+    }
+    def normalized = appId.trim()
+    if (normalized == 'erp') {
+        return 'sektor-btp'
+    }
+    return normalized
 }
 
-def resolveSpecFeatureManifest = { File featuresRoot, String featureId ->
-    def group = ADMINISTRATION_FEATURES.contains(featureId)
-                ? 'administration'
-                : CONFIGURATION_FEATURES.contains(featureId)
-                    ? 'configuration'
-                    : 'business'
-    def groupedPath = new File(featuresRoot, "${group}/${featureId}/${featureId}.feature.json")
-    if (groupedPath.exists()) {
-        return groupedPath
+def resolveAppGradleFile = { String appId ->
+    def normalized = normalizeAppId(appId)
+    def gradleFile = new File(rootProject.projectDir, "products/${normalized}/backend/app/build.gradle")
+    if (!gradleFile.exists()) {
+        throw new GradleException("App build.gradle not found for '${appId}': ${gradleFile}")
     }
-    return new File(featuresRoot, "${featureId}/${featureId}.feature.json")
+    return gradleFile
 }
 
-def resolveAppFeatures = { String appId ->
-    def repoRoot = rootProject.projectDir
-    def appManifest = new File(repoRoot, "products/sektor-btp/sektor-btp.application.json")
-    if (!appManifest.exists()) {
-        throw new GradleException("Application manifest not found for app '${appId}': ${appManifest}")
+def gradleProjectToDiskPath = { String projectPath ->
+    def parts = projectPath.split(':').findAll { it?.trim() }
+    if (parts.isEmpty()) {
+        return null
     }
 
-    def applicationDef = new JsonSlurper().parse(appManifest)
-    def features = new LinkedHashSet<String>()
-    def domainsDir = new File(repoRoot, 'products/sektor-btp/backend/modules')
-    def standaloneDomainsRoot = domainsDir
-    def featuresRoot = new File(repoRoot, 'naf/src/spec/features')
-
-    def collectFeatureDeps
-    collectFeatureDeps = { String featureId ->
-        if (!featureId || features.contains(featureId)) {
-            return
-        }
-        features << featureId
-
-        def featureManifest = resolveSpecFeatureManifest(featuresRoot, featureId)
-        if (!featureManifest.exists()) {
-            return
-        }
-
-        def featureDef = new JsonSlurper().parse(featureManifest)
-        (featureDef.dependencies ?: []).each { dep ->
-            if (dep instanceof String && dep.trim()) {
-                collectFeatureDeps(dep.trim())
+    switch (parts[0]) {
+        case 'platform':
+            if (parts.size() < 3) {
+                return null
             }
-        }
-    }
-
-    // Platform features enabled on the application manifest (primary path; no CRUX domain specs required).
-    (applicationDef.features ?: [:]).each { String featureId, enabled ->
-        if (enabled && featureId) {
-            collectFeatureDeps(featureId.toString())
-        }
-    }
-
-    // Optional legacy CRUX domain manifests (best-effort; domains are developed manually in backend/domains).
-    (applicationDef.domains ?: []).each { domainId ->
-        def standaloneDomainFile = new File(standaloneDomainsRoot, "${domainId}/${domainId}.domain.json")
-        def legacyDomainFile = new File(domainsDir, "${domainId}.domain.json")
-        def domainFile = standaloneDomainFile.exists() ? standaloneDomainFile : legacyDomainFile
-        if (!domainFile.exists()) {
-            return
-        }
-
-        def domainDef = new JsonSlurper().parse(domainFile)
-        (domainDef.features ?: []).each { featureEntry ->
-            String featureId = null
-            if (featureEntry instanceof String) {
-                featureId = featureEntry
-            } else if (featureEntry instanceof Map && featureEntry['$ref'] instanceof String) {
-                def ref = featureEntry['$ref'].toString().replace('\\', '/')
-                def parts = ref.tokenize('/')
-                featureId = parts ? parts.last().replace('.feature.json', '') : null
+            if (parts[1] == 'core') {
+                return "platform/backend/core/${parts[2]}"
             }
-            if (featureId) {
-                collectFeatureDeps(featureId)
+            if (parts[1] == 'integrations') {
+                return "platform/backend/integrations/${parts[2]}"
             }
-        }
-    }
-
-    // Foundation removed: no longer collecting foundation modules.
-    def foundationDef = (applicationDef.foundation instanceof Map) ? applicationDef.foundation : [:]
-    def foundationEnabled = foundationDef.enabled
-    if (false && (foundationEnabled == null || foundationEnabled)) {
-        (foundationDef.modules ?: []).each { moduleEntry ->
-            String featureId = null
-            if (moduleEntry instanceof String) {
-                featureId = moduleEntry.trim()
-            } else if (moduleEntry instanceof Map) {
-                if (moduleEntry.id instanceof String) {
-                    featureId = moduleEntry.id.trim()
-                } else if (moduleEntry['$ref'] instanceof String) {
-                    def ref = moduleEntry['$ref'].toString().replace('\\', '/')
-                    def parts = ref.tokenize('/')
-                    featureId = parts ? parts.last().replace('.feature.json', '') : null
+            if (parts[1] == 'features') {
+                if (parts.size() == 3) {
+                    return "platform/backend/features/${parts[2]}"
                 }
+                return "platform/backend/features/${parts[2..-1].join('/')}"
             }
-            if (featureId) {
-                collectFeatureDeps(featureId)
+            return null
+        case 'sektor':
+            if (parts.size() < 2) {
+                return null
             }
+            return "products/sektor-btp/backend/modules/${parts[1]}"
+        case 'venue-catalog':
+            if (parts.size() < 2) {
+                return null
+            }
+            return "products/venue-catalog/backend/modules/${parts[1]}"
+        default:
+            return null
+    }
+}
+
+def resolveModulePathsFromAppGradle = { String appId ->
+    def gradleFile = resolveAppGradleFile(appId)
+    def content = gradleFile.getText('UTF-8')
+    def paths = new LinkedHashSet<String>()
+
+    def matcher = (content =~ /implementation\s+project\s*\(\s*['"]:([^'"]+)['"]\s*\)/)
+    matcher.each { match ->
+        def diskPath = gradleProjectToDiskPath(match[1])
+        if (diskPath) {
+            paths << diskPath
         }
     }
 
-    return features
-}
-
-def resolveScopedPlatformModules = { String appId ->
-    def repoRoot = rootProject.projectDir
-    def appManifest = new File(repoRoot, "products/sektor-btp/sektor-btp.application.json")
-    if (!appManifest.exists()) {
-        throw new GradleException("Application manifest not found for app '${appId}': ${appManifest}")
-    }
-
-    def applicationDef = new JsonSlurper().parse(appManifest)
-    def capabilities = (applicationDef.capabilities ?: [:]) as Map
-
-    def authorizationRequested = capabilities.authorization?.enabled
-    if (authorizationRequested == null) {
-        authorizationRequested = true
-    }
-
-    def tenancyMode = capabilities.tenancy?.mode ?: 'multi'
-    // Scoped tenant context is required for both multi-tenant and non-tenant (default scope) apps.
-    def tenantContextEnabled = true
-    def multiTenantMode = 'multi'.equalsIgnoreCase(tenancyMode?.toString())
-    def tenantAdminEnabled = capabilities.tenantAdmin?.enabled ?: false
-    def subscriptionsEnabled = capabilities.subscriptions?.enabled ?: false
-    def aiConversationRequested = capabilities.aiConversation?.enabled ?: false
-    def aiAgentRuntimeEnabled = capabilities.aiAgentRuntime?.enabled ?: false
-    def aiConversationEnabled = aiConversationRequested || aiAgentRuntimeEnabled
-    def authorizationEnabled = authorizationRequested || tenantContextEnabled || tenantAdminEnabled || subscriptionsEnabled
-    def requiresTenancyDomain = tenantContextEnabled || tenantAdminEnabled
-
-    def modulePaths = new LinkedHashSet<String>()
-    modulePaths << 'platform/backend/features/configuration/settings'
-    modulePaths << 'platform/backend/core/framework'
-    modulePaths << 'platform/backend/core/identity'
-    if (tenantContextEnabled) {
-        modulePaths << 'platform/backend/core/scope'
-    }
-
-    if (authorizationEnabled) {
-        modulePaths << 'platform/backend/core/authorization'
-    }
-    if (requiresTenancyDomain) {
-        modulePaths << 'platform/backend/core/tenancy'
-    }
-    if (subscriptionsEnabled || aiAgentRuntimeEnabled) {
-        modulePaths << 'platform/backend/features/administration/subscription'
-    }
-    if (tenantAdminEnabled) {
-        modulePaths << 'platform/backend/features/administration/iam'
-        modulePaths << 'platform/backend/features/app-settings'
-        modulePaths << 'platform/backend/features/user-settings'
-    }
-    if (aiConversationEnabled) {
-        modulePaths << 'platform/backend/features/ai/llm-provider'
-        modulePaths << 'platform/backend/features/ai/ai-conversation'
-    }
-    if (aiAgentRuntimeEnabled) {
-        modulePaths << 'platform/backend/features/ai/ai-agent-runtime'
-    }
-
-    return modulePaths
+    def normalized = normalizeAppId(appId)
+    paths << "products/${normalized}/backend/app"
+    return paths
 }
 
 def discoverSqlSources = { String scopedAppId = null ->
     def backendRoot = rootProject.projectDir
     def sourceRoots = new LinkedHashSet<File>()
 
-    def platformRoot = file("${backendRoot}/platform/backend")
-    if (platformRoot.exists()) {
-        if (scopedAppId) {
-            def platformModules = resolveScopedPlatformModules(scopedAppId)
-            platformModules.each { modulePath ->
-                def moduleDir = new File(backendRoot, modulePath)
-                if (!moduleDir.exists()) {
-                    throw new GradleException("Platform module '${modulePath}' required by app '${scopedAppId}' was not found.")
-                }
-                sourceRoots << moduleDir
+    if (scopedAppId) {
+        def modulePaths = resolveModulePathsFromAppGradle(scopedAppId)
+        modulePaths.each { modulePath ->
+            def moduleDir = new File(backendRoot, modulePath)
+            if (!moduleDir.exists()) {
+                logger.warn("Module path '${modulePath}' from app Gradle deps not found on disk; skipping migrations.")
+                return
             }
-
-            def appFeatures = resolveAppFeatures(scopedAppId)
-            appFeatures.each { featureId ->
-                def featureModulePath = PLATFORM_FEATURE_MODULE_PATHS[featureId] ?: resolveFeatureModulePath(featureId)
-                def featureDir = new File(backendRoot, featureModulePath)
-                if (!featureDir.exists()) {
-                    logger.warn("Feature '${featureId}' for app '${scopedAppId}' has no backend module at ${featureModulePath}; skipping its migrations.")
-                    return
-                }
-                sourceRoots << featureDir
-            }
-
-            def appManifest = new File(rootProject.projectDir, "products/sektor-btp/sektor-btp.application.json")
-            if (appManifest.exists()) {
-                def applicationDef = new JsonSlurper().parse(appManifest)
-
-                // App domains: collect migrations from backend/domains/<domain-id>.
-                (applicationDef.domains ?: []).each { domainId ->
-                    def domainDir = new File(backendRoot, "products/sektor-btp/backend/modules/${domainId}")
-                    if (domainDir.exists()) {
-                        sourceRoots << domainDir
-                    } else {
-                        logger.warn("Domain '${domainId}' listed for app '${scopedAppId}' has no backend module at domains/${domainId}; skipping its migrations.")
-                    }
-                }
-
-                // Manifest "features" (platform feature toggles): collect migrations from enabled modules.
-                (applicationDef.features ?: [:]).each { String featureId, enabled ->
-                    if (enabled && PLATFORM_FEATURE_MODULE_PATHS[featureId]) {
-                        def featureDir = new File(backendRoot, PLATFORM_FEATURE_MODULE_PATHS[featureId])
-                        if (featureDir.exists()) {
-                            sourceRoots << featureDir
-                        }
-                    }
-                }
-            }
-        } else {
+            sourceRoots << moduleDir
+        }
+    } else {
+        def platformRoot = file("${backendRoot}/platform/backend")
+        if (platformRoot.exists()) {
             def coreDir = new File(platformRoot, 'core')
             if (coreDir.exists()) {
                 coreDir.eachDir { sourceRoots << it }
             }
 
-            def servicesDir = new File(platformRoot, 'services')
-            if (servicesDir.exists()) {
-                servicesDir.eachDir { sourceRoots << it }
-            }
-
             def featuresDir = new File(platformRoot, 'features')
             if (featuresDir.exists()) {
-                featuresDir.eachDir { groupDir ->
-                    groupDir.eachDir { sourceRoots << it }
+                featuresDir.eachDirRecurse { dir ->
+                    if (dir.parentFile?.name == 'features' || dir.parentFile?.parentFile?.name == 'features') {
+                        if (new File(dir, 'src/main/resources/db').exists()) {
+                            sourceRoots << dir
+                        }
+                    }
                 }
+                featuresDir.eachDir { groupDir ->
+                    groupDir.eachDir { featureDir ->
+                        if (new File(featureDir, 'src/main/resources/db').exists()) {
+                            sourceRoots << featureDir
+                        }
+                    }
+                    if (new File(groupDir, 'src/main/resources/db').exists()) {
+                        sourceRoots << groupDir
+                    }
+                }
+            }
+
+            def integrationsDir = new File(platformRoot, 'integrations')
+            if (integrationsDir.exists()) {
+                integrationsDir.eachDir { sourceRoots << it }
             }
         }
     }
 
     sourceRoots << project.projectDir
-
-    if (scopedAppId) {
-        def appBackendDir = file("${backendRoot}/products/sektor-btp/backend/app")
-        if (appBackendDir.exists()) {
-            sourceRoots << appBackendDir
-        }
-    }
 
     def selections = []
 

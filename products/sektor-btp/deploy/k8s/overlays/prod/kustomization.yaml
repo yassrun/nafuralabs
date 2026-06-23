@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
   - ../../base
+  - patch-ingress.yaml
   - patch-ingress-tls.yaml
 
 images:

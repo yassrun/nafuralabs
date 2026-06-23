@@ -59,7 +59,8 @@ nf/nafuralabs/
 │   └── business/                  # vide — modules métier partagés plus tard
 │
 ├── toolchain/ops/
-│   └── nlops.sh                   # infra-up, provision-db, migrate, deploy
+│   ├── nlops.sh                   # bootstrap-env, onboard-app, deploy, …
+│   └── README.md                  # infra 1× / env vs deploy produit
 │
 ├── tools/lifecycle/               # collecte migrations SQL → Liquibase
 ├── settings.gradle.kts            # inclut platform + produits
@@ -102,6 +103,15 @@ L’**environnement = le cluster** (pas un suffixe dans le nom du namespace).
 
 **Postgres :** une instance par cluster, une base par app. Sektor → `nafura_erp`.
 
+### Hostnames Sektor (ERP)
+
+| Env | Web | API |
+|-----|-----|-----|
+| `staging` | `sektor.nafuralabs.staging` | `api.sektor.nafuralabs.staging` |
+| `prod` | `sektor.nafuralabs.com` | `api.sektor.nafuralabs.com` |
+
+Ingress : `products/sektor-btp/deploy/k8s/overlays/<env>/`.
+
 ---
 
 ## 4. Imports code
@@ -137,6 +147,22 @@ Configuré dans `web/tsconfig.json` :
 
 ## 5. Workflows quotidiens
 
+### Ops — modèle infra / produit
+
+L’**infra partagée** (`nafura-infra`) se déploie **une fois par environnement** (nouveau cluster staging ou prod).  
+Les **produits** se déploient **indépendamment** sur cette infra déjà en place.
+
+| Étape | Quand | Commande |
+|-------|--------|----------|
+| Bootstrap env | 1× par cluster | `ENV=staging bash toolchain/ops/nlops.sh bootstrap-env` |
+| Premier produit | 1× par app + env | `ENV=staging bash toolchain/ops/nlops.sh onboard-app sektor-btp` |
+| Release produit | souvent | `ENV=staging bash toolchain/ops/nlops.sh deploy sektor-btp` |
+| Upgrade infra | rare | `ENV=staging bash toolchain/ops/nlops.sh infra-up` |
+
+Via Make : `make bootstrap-env ENV=staging`, `make onboard-app APP=sektor-btp`, `make deploy APP=sektor-btp`.
+
+Détail : [toolchain/ops/README.md](../toolchain/ops/README.md).
+
 ### Backend
 
 ```powershell
@@ -155,16 +181,20 @@ npm run start:erp          # dev local
 npm run build:prod         # build production
 ```
 
-### Ops (staging)
+### Ops (staging) — exemple Sektor
 
 ```bash
-ENV=staging bash toolchain/ops/nlops.sh infra-up
-bash toolchain/ops/nlops.sh provision-db sektor-btp
-bash toolchain/ops/nlops.sh migrate sektor-btp
-bash toolchain/ops/nlops.sh deploy sektor-btp
+# Une seule fois sur un nouveau cluster staging :
+ENV=staging bash toolchain/ops/nlops.sh bootstrap-env
+
+# Première fois pour Sektor :
+ENV=staging bash toolchain/ops/nlops.sh onboard-app sektor-btp
+
+# Releases suivantes (infra déjà en place) :
+ENV=staging bash toolchain/ops/nlops.sh deploy sektor-btp
 ```
 
-Ou via Make : `make build-sektor`, `make deploy-sektor ENV=staging`.
+Ou via Make : `make bootstrap-env`, `make deploy APP=sektor-btp ENV=staging`.
 
 ### Image Docker backend
 
@@ -176,11 +206,13 @@ docker build -t sektor-btp-backend:staging -f products/sektor-btp/Dockerfile .
 
 ## 6. Ajouter un nouveau produit
 
-1. Créer `products/<app-id>/` avec `backend/app`, `web/app`, `deploy/k8s/`.
+1. Créer `products/<app-id>/` avec `backend/app`, `web/app`, `deploy/k8s/overlays/{staging,prod}/`.
 2. Enregistrer les modules dans `settings.gradle.kts`.
-3. Créer namespace `nafura-<app-id>` et base `nafura_<app_id>`.
-4. Specs produit en **Markdown** dans `products/<app-id>/docs/` (pas de JSON).
+3. Sur un env existant : `ENV=staging bash toolchain/ops/nlops.sh onboard-app <app-id>`.
+4. Specs produit en **Markdown** dans `products/<app-id>/docs/`.
 5. N’extraire vers `shared/business/` que si un **deuxième** produit réutilise le même module.
+
+Ne pas ajouter de manifests produit sous `infra/k8s/` — infra partagée uniquement.
 
 ---
 
@@ -203,7 +235,6 @@ docker build -t sektor-btp-backend:staging -f products/sektor-btp/Dockerfile .
 ### Dette connue
 
 - Le shell platform importe encore des composants Sektor via `@applications/*` — à isoler quand un 2ᵉ produit front arrive.
-- `sektor-btp.application.json` sert encore au lifecycle — à remplacer par config code.
 - Docs historiques dans `web/docs/` mentionnent parfois l’ancien chemin `app/applications/erp` — lire `@applications/*` → `products/sektor-btp/web/app/`.
 
 ---

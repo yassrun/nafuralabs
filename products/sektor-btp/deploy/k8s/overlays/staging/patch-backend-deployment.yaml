@@ -44,4 +44,4 @@ spec:
             - name: KEYCLOAK_ISSUER_URI
               value: http://iam.nafura.local/realms/iam-portal
             - name: APP_FRONTEND_BASE_URL
-              value: http://staging.sektor.nafuralabs.com
+              value: http://sektor.nafuralabs.staging
