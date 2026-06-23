@@ -1,0 +1,13 @@
+package ma.nafura.venuecatalog.api.security;
+
+import org.springframework.security.access.prepost.PreAuthorize;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Target({ElementType.METHOD, ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@PreAuthorize("hasAnyRole('PLATFORM_ADMIN','CATALOG_OPERATOR','APP_EDITOR')")
+public @interface CatalogReadAccess {}

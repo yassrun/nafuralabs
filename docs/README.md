@@ -38,13 +38,9 @@ nf/nafuralabs/
 │   └── web/                       # shell Angular, anatomy, features
 │
 ├── products/                      # produits déployables
-│   └── sektor-btp/                # ERP BTP (Sektor)
-│       ├── backend/
-│       │   ├── app/               # :sektor:app — Spring Boot bootJar
-│       │   └── modules/           # :sektor:item, :sektor:stock, …
-│       ├── web/app/               # UI métier ERP (@applications/*)
-│       ├── deploy/k8s/            # manifests K8s (staging | prod)
-│       ├── Dockerfile
+│   ├── sektor-btp/                # ERP BTP (Sektor) — en prod
+│   └── venue-catalog/             # catalogue lieux — specs, code à venir
+│       ├── docs/                  # specs produit (Markdown)
 │       └── README.md
 │
 ├── web/                           # workspace Angular (point d’entrée build Sektor)
@@ -80,6 +76,8 @@ nf/nafuralabs/
 | Onboarding, config app ERP | `products/sektor-btp/backend/app/` |
 | Écran ERP, facades Angular | `products/sektor-btp/web/app/` |
 | Auth, listing générique, shell | `platform/web/` ou `platform/backend/` |
+| Catalogue lieux, jobs Google | `products/venue-catalog/backend/modules/` (à créer) |
+| Specs produit | `products/<app-id>/docs/` |
 | Nouveau produit | `products/<app-id>/` (copier le pattern sektor-btp) |
 | Postgres, Keycloak | `infra/k8s/` |
 | Site vitrine | `marketing/corporate/` ou `marketing/products/<marque>/` |
@@ -99,6 +97,7 @@ L’**environnement = le cluster** (pas un suffixe dans le nom du namespace).
 |---------------|---------|
 | `nafura-infra` | postgres, redis, minio, keycloak, vault, ingress |
 | `nafura-sektor` | backend + frontend Sektor |
+| `nafura-venue-catalog` | venue-catalog backend (futur) |
 | `nafura-marketing` | site corporate (futur) |
 
 **Postgres :** une instance par cluster, une base par app. Sektor → `nafura_erp`.
@@ -225,6 +224,7 @@ Lister tous les projets : `.\gradlew.bat projects`
 ## 9. Liens produit
 
 - [Sektor BTP README](../products/sektor-btp/README.md)
+- [Venue Catalog README](../products/venue-catalog/README.md)
 - [Marketing corporate](../marketing/corporate/README.md)
 
 ---
@@ -240,8 +240,8 @@ Lister tous les projets : `.\gradlew.bat projects`
          ┌─────────────────────────┼─────────────────────────┐
          │                         │                         │
          ▼                         ▼                         ▼
-  nafura-sektor            nafura-marketing           (futur app)
-  sektor-btp-backend       nafuralabs.com
+  nafura-sektor            nafura-venue-catalog      nafura-marketing
+  sektor-btp-backend       (futur)                   nafuralabs.com
   sektor-btp-web
          │
          │  dépend de

@@ -1,0 +1,87 @@
+spring:
+  application:
+    name: venue-catalog-service
+
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:5432/${POSTGRES_DB:nafura_venue_catalog}
+    username: ${POSTGRES_USER:seyrura}
+    password: ${POSTGRES_PASSWORD:seyrura}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+    open-in-view: false
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://iam.nafura.local/realms/nafura}
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://iam.nafura.local/realms/nafura/protocol/openid-connect/certs}
+
+server:
+  port: ${SERVER_PORT:8085}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+venue-catalog:
+  timezone: Africa/Casablanca
+  dev-jwt:
+    enabled: true
+    secret: ${VENUE_CATALOG_DEV_JWT_SECRET:venue-catalog-local-jwt-secret-32-chars-min}
+  dedupe:
+    geo-round-decimals: 4
+    confidence-review-threshold: 0.85
+  media:
+    max-photos-per-place: 5
+    fetch-max-width-px: 1600
+    cache-ttl-days: 30
+  jobs:
+    idempotency-ttl-hours: 24
+    inter-request-delay-ms: 2000
+
+nafura:
+  storage:
+    bucket: venue-catalog-media
+    public-read-signed-url-ttl-minutes: 60
+  google-places:
+    api-key: ${GOOGLE_PLACES_API_KEY:}
+    field-masks:
+      search: places.id,places.displayName,places.formattedAddress,places.location,places.types,places.primaryType,places.businessStatus
+      details: id,displayName,formattedAddress,addressComponents,location,types,primaryType,businessStatus,nationalPhoneNumber,websiteUri,googleMapsUri,regularOpeningHours,rating,userRatingCount,priceLevel,photos,accessibilityOptions,reservable,servesBeer,servesWine,outdoorSeating,liveMusic
+  security:
+    enabled: true
+    public-endpoints:
+      - /actuator/**
+    user-context:
+      enabled: false
+    permission-enforcement:
+      enabled: false
+
+app:
+  storage:
+    type: ${APP_STORAGE_TYPE:s3}
+    s3:
+      endpoint: ${DOCUMENTS_MINIO_ENDPOINT:http://localhost:9000}
+      access-key: ${MINIO_ROOT_USER:minioadmin}
+      secret-key: ${MINIO_ROOT_PASSWORD:minioadmin}
+      bucket: ${DOCUMENTS_MINIO_BUCKET:venue-catalog-media}
+      region: us-east-1

@@ -1,0 +1,10 @@
+plugins {
+    id 'java-library'
+}
+
+dependencies {
+    implementation project(':platform:core:framework')
+    implementation project(':platform:integrations:google-places')
+    implementation project(':venue-catalog:catalog-place')
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}

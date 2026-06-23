@@ -23,9 +23,10 @@ make deploy-sektor ENV=staging
 
 ## Produits
 
-| Produit | Chemin |
-|---------|--------|
-| Sektor BTP (ERP) | [products/sektor-btp/](products/sektor-btp/) |
+| Produit | Chemin | Statut |
+|---------|--------|--------|
+| Sektor BTP (ERP) | [products/sektor-btp/](products/sektor-btp/) | migré |
+| Venue Catalog | [products/venue-catalog/](products/venue-catalog/) | specs / wp-01 à implémenter |
 
 ## Documentation
 

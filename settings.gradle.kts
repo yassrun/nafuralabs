@@ -38,6 +38,8 @@ includePlatform(":platform:features:collaboration:tagging")
 includePlatform(":platform:features:collaboration:workflow")
 includePlatform(":platform:features:collaboration:webhook")
 includePlatform(":platform:features:documents:doc-extractor")
+includePlatform(":platform:integrations:google-places")
+includePlatform(":platform:core:job-runner")
 
 // ── Sektor BTP (ERP) ────────────────────────────────────────────────────────
 include(":sektor:app")
@@ -47,6 +49,20 @@ listOf(
     "item", "stock", "currency", "finance", "partner", "achats", "ventes",
     "chantiers", "etudes", "rh", "hse", "marches", "approbations"
 ).forEach { includeSektorModule(it) }
+
+// ── Venue Catalog ───────────────────────────────────────────────────────────
+fun includeVenueCatalogModule(name: String) {
+    val path = ":venue-catalog:$name"
+    include(path)
+    project(path).projectDir = file("products/venue-catalog/backend/modules/$name")
+}
+
+include(":venue-catalog:app")
+project(":venue-catalog:app").projectDir = file("products/venue-catalog/backend/app")
+
+listOf("api", "source-adapter", "catalog-place", "catalog-job", "compliance").forEach {
+    includeVenueCatalogModule(it)
+}
 
 // ── Tools ───────────────────────────────────────────────────────────────────
 include(":tools:lifecycle")

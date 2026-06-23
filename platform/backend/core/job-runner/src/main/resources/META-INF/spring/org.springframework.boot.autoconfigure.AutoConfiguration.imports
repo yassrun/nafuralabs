@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.AutoConfiguration=\
+  ma.nafura.platform.jobrunner.JobRunnerAutoConfiguration

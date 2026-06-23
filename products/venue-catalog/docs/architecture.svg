@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 920" font-family="'Segoe UI', system-ui, sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="100%" stop-color="#eef2f7"/>
+    </linearGradient>
+    <linearGradient id="spring" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6db33f"/>
+      <stop offset="100%" stop-color="#4a8f2c"/>
+    </linearGradient>
+    <linearGradient id="domain" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#f1f5f9"/>
+    </linearGradient>
+    <linearGradient id="platform" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ede9fe"/>
+      <stop offset="100%" stop-color="#ddd6fe"/>
+    </linearGradient>
+    <linearGradient id="infra" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e0f2fe"/>
+      <stop offset="100%" stop-color="#bae6fd"/>
+    </linearGradient>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="112%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.12"/>
+    </filter>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#64748b"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#16a34a"/>
+    </marker>
+    <marker id="arrow-blue" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#0284c7"/>
+    </marker>
+    <style>
+      .title { font-size: 22px; font-weight: 700; fill: #0f172a; }
+      .subtitle { font-size: 13px; fill: #475569; }
+      .box-title { font-size: 13px; font-weight: 700; fill: #0f172a; }
+      .box-sub { font-size: 10.5px; fill: #64748b; }
+      .label { font-size: 10px; fill: #475569; }
+      .flow-label { font-size: 9.5px; fill: #64748b; font-style: italic; }
+      .badge { font-size: 9px; font-weight: 600; fill: #fff; }
+      .legend { font-size: 10px; fill: #334155; }
+    </style>
+  </defs>
+
+  <rect width="1280" height="920" fill="url(#bg)"/>
+
+  <text x="40" y="42" class="title">Venue Catalog - Architecture cible Spring Boot</text>
+  <text x="40" y="64" class="subtitle">Modular monolith | DDD | Hexagonal | Provider-first, canonical-first</text>
+
+  <g transform="translate(900, 24)">
+    <rect x="0" y="0" width="340" height="52" rx="8" fill="#fff" stroke="#cbd5e1" filter="url(#shadow)"/>
+    <line x1="16" y1="26" x2="46" y2="26" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <text x="54" y="30" class="legend">Sync / REST</text>
+    <line x1="140" y1="26" x2="170" y2="26" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrow-green)"/>
+    <text x="178" y="30" class="legend">Async jobs</text>
+    <line x1="260" y1="26" x2="290" y2="26" stroke="#0284c7" stroke-width="1.5" marker-end="url(#arrow-blue)"/>
+    <text x="298" y="30" class="legend">Pull M2M</text>
+  </g>
+
+  <g id="clients">
+    <rect x="40" y="88" width="360" height="108" rx="10" fill="#fff" stroke="#cbd5e1" filter="url(#shadow)"/>
+    <text x="56" y="112" class="box-title">Clients</text>
+
+    <rect x="56" y="124" width="148" height="58" rx="6" fill="#fff7ed" stroke="#fdba74"/>
+    <text x="68" y="144" class="box-title" font-size="11">Angular 17 Admin</text>
+    <text x="68" y="160" class="box-sub">venue-catalog-web</text>
+    <text x="68" y="174" class="box-sub">Admin | Operator | App Editor</text>
+
+    <rect x="220" y="124" width="160" height="58" rx="6" fill="#f0fdf4" stroke="#86efac"/>
+    <text x="232" y="144" class="box-title" font-size="11">Apps consommatrices</text>
+    <text x="232" y="160" class="box-sub">Layali | Beauty | ...</text>
+    <text x="232" y="174" class="box-sub">scope: catalog.consumer.read</text>
+  </g>
+
+  <g id="keycloak">
+    <rect x="420" y="88" width="160" height="52" rx="8" fill="#fef2f2" stroke="#fca5a5" filter="url(#shadow)"/>
+    <text x="436" y="112" class="box-title" font-size="11">Keycloak</text>
+    <text x="436" y="128" class="box-sub">realm nafura | JWT / M2M</text>
+  </g>
+
+  <g id="google">
+    <rect x="600" y="88" width="180" height="52" rx="8" fill="#fefce8" stroke="#fde047" filter="url(#shadow)"/>
+    <text x="616" y="112" class="box-title" font-size="11">Google Places API</text>
+    <text x="616" y="128" class="box-sub">Text | Nearby | Details | Photos</text>
+  </g>
+
+  <rect x="40" y="218" width="1200" height="580" rx="14" fill="#f0fdf4" stroke="#6db33f" stroke-width="2" stroke-dasharray="8,4" opacity="0.35"/>
+  <rect x="40" y="218" width="1200" height="580" rx="14" fill="none" stroke="#6db33f" stroke-width="1.5"/>
+  <text x="56" y="242" class="box-title" fill="#166534">venue-catalog-backend</text>
+  <text x="230" y="242" class="box-sub" fill="#166534">Spring Boot 3 | Java 21 | Gradle multi-modules</text>
+
+  <g id="api-layer">
+    <rect x="60" y="256" width="1160" height="72" rx="8" fill="url(#spring)" filter="url(#shadow)"/>
+    <text x="76" y="280" class="box-title" fill="#fff">Couche API (adapters REST)</text>
+
+    <rect x="76" y="290" width="200" height="28" rx="5" fill="#fff" fill-opacity="0.9"/>
+    <text x="88" y="308" class="box-sub" fill="#166534">CatalogPlacesController</text>
+
+    <rect x="288" y="290" width="180" height="28" rx="5" fill="#fff" fill-opacity="0.9"/>
+    <text x="300" y="308" class="box-sub" fill="#166534">CatalogJobsController</text>
+
+    <rect x="480" y="290" width="200" height="28" rx="5" fill="#fff" fill-opacity="0.9"/>
+    <text x="492" y="308" class="box-sub" fill="#166534">CatalogMappingsController</text>
+
+    <rect x="692" y="290" width="220" height="28" rx="5" fill="#fff" fill-opacity="0.9"/>
+    <text x="704" y="308" class="box-sub" fill="#166534">PublishGatewayController</text>
+
+    <rect x="924" y="290" width="280" height="28" rx="5" fill="#fff" fill-opacity="0.9"/>
+    <text x="936" y="308" class="box-sub" fill="#166534">SecurityFilter | Idempotency | Validation</text>
+  </g>
+
+  <g id="app-services">
+    <rect x="60" y="344" width="1160" height="56" rx="8" fill="#dcfce7" stroke="#86efac" filter="url(#shadow)"/>
+    <text x="76" y="368" class="box-title" fill="#166534">Application Layer (use cases / orchestration)</text>
+    <text x="76" y="386" class="box-sub">ImportPlace | ReviewPlace | CreateMapping | PublishProjection | SyncConsumerPull</text>
+  </g>
+
+  <g id="domains">
+    <text x="60" y="428" class="box-title">Domaines metier (modules Gradle isoles)</text>
+
+    <rect x="60" y="440" width="220" height="100" rx="8" fill="url(#domain)" stroke="#94a3b8" filter="url(#shadow)"/>
+    <rect x="60" y="440" width="220" height="22" rx="8" fill="#0ea5e9"/>
+    <rect x="60" y="454" width="220" height="8" fill="#0ea5e9"/>
+    <text x="72" y="455" class="badge">source-adapter</text>
+    <text x="72" y="482" class="box-sub">Ports: PlaceProviderPort</text>
+    <text x="72" y="498" class="box-sub">Google text/nearby/details</text>
+    <text x="72" y="514" class="box-sub">Quotas | retry | pagination</text>
+    <text x="72" y="530" class="box-sub">-&gt; RawPlaceCandidate</text>
+
+    <rect x="296" y="440" width="220" height="100" rx="8" fill="url(#domain)" stroke="#94a3b8" filter="url(#shadow)"/>
+    <rect x="296" y="440" width="220" height="22" rx="8" fill="#8b5cf6"/>
+    <rect x="296" y="454" width="220" height="8" fill="#8b5cf6"/>
+    <text x="308" y="455" class="badge">catalog-place</text>
+    <text x="308" y="482" class="box-sub">Aggregate: CatalogPlace</text>
+    <text x="308" y="498" class="box-sub">Status | quality scores</text>
+    <text x="308" y="514" class="box-sub">Dedup | sourceRecords[]</text>
+    <text x="308" y="530" class="box-sub">DRAFT -&gt; REVIEWED -&gt; ARCHIVED</text>
+
+    <rect x="532" y="440" width="220" height="100" rx="8" fill="url(#domain)" stroke="#94a3b8" filter="url(#shadow)"/>
+    <rect x="532" y="440" width="220" height="22" rx="8" fill="#f59e0b"/>
+    <rect x="532" y="454" width="220" height="8" fill="#f59e0b"/>
+    <text x="544" y="455" class="badge">catalog-job</text>
+    <text x="544" y="482" class="box-sub">Aggregate: CatalogJob</text>
+    <text x="544" y="498" class="box-sub">Orchestration async</text>
+    <text x="544" y="514" class="box-sub">Idempotency-Key</text>
+    <text x="544" y="530" class="box-sub">QUEUED -&gt; RUNNING -&gt; SUCCEEDED</text>
+
+    <rect x="60" y="556" width="220" height="100" rx="8" fill="url(#domain)" stroke="#94a3b8" filter="url(#shadow)"/>
+    <rect x="60" y="556" width="220" height="22" rx="8" fill="#ec4899"/>
+    <rect x="60" y="570" width="220" height="8" fill="#ec4899"/>
+    <text x="72" y="571" class="badge">catalog-mapping</text>
+    <text x="72" y="598" class="box-sub">Aggregate: CatalogMapping</text>
+    <text x="72" y="614" class="box-sub">Canonical -&gt; projection app</text>
+    <text x="72" y="630" class="box-sub">layali/venue | beauty/salon</text>
+    <text x="72" y="646" class="box-sub">sourceHash | projectionVersion</text>
+
+    <rect x="296" y="556" width="220" height="100" rx="8" fill="url(#domain)" stroke="#94a3b8" filter="url(#shadow)"/>
+    <rect x="296" y="556" width="220" height="22" rx="8" fill="#10b981"/>
+    <rect x="296" y="570" width="220" height="8" fill="#10b981"/>
+    <text x="308" y="571" class="badge">publish-gateway</text>
+    <text x="308" y="598" class="box-sub">Consumer pull API</text>
+    <text x="308" y="614" class="box-sub">GET /apps/:appId/projections</text>
+    <text x="308" y="630" class="box-sub">Versioning | sync cursors</text>
+    <text x="308" y="646" class="box-sub">Stable, idempotent payloads</text>
+
+    <rect x="532" y="556" width="220" height="100" rx="8" fill="url(#domain)" stroke="#94a3b8" filter="url(#shadow)"/>
+    <rect x="532" y="556" width="220" height="22" rx="8" fill="#64748b"/>
+    <rect x="532" y="570" width="220" height="8" fill="#64748b"/>
+    <text x="544" y="571" class="badge">compliance</text>
+    <text x="544" y="598" class="box-sub">Attribution provider</text>
+    <text x="544" y="614" class="box-sub">Champs autorises / retention</text>
+    <text x="544" y="630" class="box-sub">Audit trail imports</text>
+    <text x="544" y="646" class="box-sub">Cross-cutting domain policy</text>
+  </g>
+
+  <g id="platform">
+    <rect x="776" y="440" width="444" height="216" rx="10" fill="url(#platform)" stroke="#a78bfa" filter="url(#shadow)"/>
+    <text x="792" y="464" class="box-title" fill="#5b21b6">Platform Nafura (libs partagees)</text>
+
+    <rect x="792" y="476" width="196" height="52" rx="6" fill="#fff" stroke="#c4b5fd"/>
+    <text x="804" y="496" class="box-sub" font-weight="600" fill="#5b21b6">:core:authorization</text>
+    <text x="804" y="512" class="box-sub">Guards | permissions | scopes</text>
+
+    <rect x="1000" y="476" width="204" height="52" rx="6" fill="#fff" stroke="#c4b5fd"/>
+    <text x="1012" y="496" class="box-sub" font-weight="600" fill="#5b21b6">:core:identity</text>
+    <text x="1012" y="512" class="box-sub">Users | service accounts</text>
+
+    <rect x="792" y="538" width="196" height="52" rx="6" fill="#fff7ed" stroke="#fdba74"/>
+    <text x="804" y="558" class="box-sub" font-weight="600" fill="#c2410c">:integrations:google-places</text>
+    <text x="804" y="574" class="box-sub">a creer - client type-safe</text>
+
+    <rect x="1000" y="538" width="204" height="52" rx="6" fill="#fff7ed" stroke="#fdba74"/>
+    <text x="1012" y="558" class="box-sub" font-weight="600" fill="#c2410c">:core:job-runner</text>
+    <text x="1012" y="574" class="box-sub">a creer - async + locks</text>
+
+    <rect x="792" y="600" width="412" height="44" rx="6" fill="#fff" stroke="#c4b5fd"/>
+    <text x="804" y="620" class="box-sub" font-weight="600" fill="#5b21b6">:integrations:storage (MinIO)</text>
+    <text x="804" y="636" class="box-sub">Cache media autorise | documents audit</text>
+  </g>
+
+  <g id="persistence">
+    <rect x="60" y="672" width="1160" height="52" rx="8" fill="#f8fafc" stroke="#94a3b8" filter="url(#shadow)"/>
+    <text x="76" y="696" class="box-title">Infrastructure Layer (adapters persistence)</text>
+    <text x="76" y="714" class="box-sub">JPA Repositories | Flyway migrations | Event outbox (optionnel) | Redis locks (job-runner)</text>
+  </g>
+
+  <g id="infra">
+    <rect x="40" y="818" width="380" height="72" rx="10" fill="url(#infra)" stroke="#38bdf8" filter="url(#shadow)"/>
+    <text x="56" y="844" class="box-title">PostgreSQL</text>
+    <text x="56" y="862" class="box-sub">catalog_places | catalog_jobs | catalog_mappings</text>
+    <text x="56" y="878" class="box-sub">source_records | projection_snapshots | audit</text>
+
+    <rect x="440" y="818" width="200" height="72" rx="10" fill="url(#infra)" stroke="#38bdf8" filter="url(#shadow)"/>
+    <text x="456" y="844" class="box-title">Redis</text>
+    <text x="456" y="862" class="box-sub">Job queue / locks</text>
+    <text x="456" y="878" class="box-sub">Idempotency cache</text>
+
+    <rect x="660" y="818" width="200" height="72" rx="10" fill="url(#infra)" stroke="#38bdf8" filter="url(#shadow)"/>
+    <text x="676" y="844" class="box-title">MinIO</text>
+    <text x="676" y="862" class="box-sub">Photos cache</text>
+    <text x="676" y="878" class="box-sub">Compliance media</text>
+
+    <rect x="880" y="818" width="360" height="72" rx="10" fill="#fef3c7" stroke="#fbbf24" filter="url(#shadow)"/>
+    <text x="896" y="844" class="box-title">Observabilite</text>
+    <text x="896" y="862" class="box-sub">Actuator | structured logs | metrics jobs</text>
+    <text x="896" y="878" class="box-sub">OpenTelemetry (traces import -&gt; publish)</text>
+  </g>
+
+  <line x1="130" y1="196" x2="130" y2="256" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="138" y="230" class="flow-label">HTTPS + JWT</text>
+
+  <line x1="500" y1="140" x2="500" y2="256" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="508" y="210" class="flow-label">validate token</text>
+
+  <line x1="300" y1="182" x2="800" y2="256" stroke="#0284c7" stroke-width="1.5" marker-end="url(#arrow-blue)"/>
+  <text x="480" y="218" class="flow-label" fill="#0284c7">GET /apps/:appId/projections</text>
+
+  <line x1="690" y1="140" x2="170" y2="440" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <path d="M 406 490 C 460 490, 460 420, 580 420 C 640 420, 640 344, 700 344" fill="none" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrow-green)"/>
+  <text x="500" y="408" class="flow-label" fill="#16a34a">job async</text>
+
+  <line x1="280" y1="490" x2="296" y2="490" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="516" y1="490" x2="532" y2="490" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="350" y="478" class="flow-label">normalize</text>
+  <text x="560" y="478" class="flow-label">orchestrate</text>
+
+  <line x1="170" y1="540" x2="170" y2="556" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="406" y1="540" x2="406" y2="556" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="178" y="552" class="flow-label">approve</text>
+  <text x="414" y="552" class="flow-label">map</text>
+
+  <line x1="516" y1="606" x2="296" y2="606" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="380" y="598" class="flow-label">publish</text>
+
+  <line x1="640" y1="656" x2="640" y2="672" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="230" y1="724" x2="230" y2="818" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="540" y1="724" x2="540" y2="818" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="760" y1="724" x2="760" y2="818" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <g transform="translate(776, 672)">
+    <rect x="0" y="0" width="444" height="108" rx="8" fill="#fff" stroke="#cbd5e1" filter="url(#shadow)"/>
+    <text x="16" y="22" class="box-title">Flux de donnees (happy path)</text>
+    <text x="16" y="42" class="box-sub">1. Google -&gt; source-adapter -&gt; catalog-place (DRAFT)</text>
+    <text x="16" y="58" class="box-sub">2. Revue humaine -&gt; REVIEWED (compliance check)</text>
+    <text x="16" y="74" class="box-sub">3. catalog-mapping -&gt; projection app-specifique</text>
+    <text x="16" y="90" class="box-sub">4. publish-gateway -&gt; consumer pull (sans googlePlaceId)</text>
+  </g>
+
+  <g transform="translate(40, 898)">
+    <text x="0" y="0" class="box-sub" fill="#64748b">Structure Gradle : :venue-catalog:api | :venue-catalog:source-adapter | :venue-catalog:catalog-place | :venue-catalog:catalog-job | :venue-catalog:catalog-mapping | :venue-catalog:publish-gateway | :venue-catalog:compliance | :venue-catalog:bootstrap</text>
+  </g>
+
+</svg>
