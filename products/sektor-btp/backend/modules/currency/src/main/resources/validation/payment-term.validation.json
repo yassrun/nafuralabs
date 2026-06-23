@@ -1,0 +1,29 @@
+{
+  "entity": "PaymentTerm",
+  "fields": {
+    "code": {
+      "required": true,
+      "maxLength": 50,
+      "unique": true
+    },
+    "name": {
+      "required": true,
+      "maxLength": 200
+    },
+    "days": {
+      "required": true,
+      "min": 0,
+      "max": 365
+    },
+    "discountDays": {
+      "min": 0
+    },
+    "discountPercent": {
+      "min": 0,
+      "max": 100
+    },
+    "description": {
+      "maxLength": 2000
+    }
+  }
+}

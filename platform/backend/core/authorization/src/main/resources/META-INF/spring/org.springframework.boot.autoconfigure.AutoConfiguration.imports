@@ -1,0 +1,3 @@
+ma.nafura.platform.authorization.security.config.NafuraSecurityAutoConfiguration
+ma.nafura.platform.authorization.security.config.NafuraTenantSecurityAutoConfiguration
+

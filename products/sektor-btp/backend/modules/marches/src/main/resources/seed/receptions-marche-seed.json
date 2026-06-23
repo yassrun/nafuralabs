@@ -1,0 +1,20 @@
+{
+  "receptions": [
+    {
+      "id": "rec-001",
+      "contratMarcheId": "mar-003",
+      "type": "PROVISOIRE",
+      "dateReception": "2026-04-15",
+      "pvReference": "PV-RP-2026-018",
+      "status": "VALIDE"
+    },
+    {
+      "id": "rec-002",
+      "contratMarcheId": "mar-001",
+      "type": "PROVISOIRE",
+      "dateReception": "2026-05-01",
+      "pvReference": "PV-RP-2026-001",
+      "status": "VALIDE"
+    }
+  ]
+}

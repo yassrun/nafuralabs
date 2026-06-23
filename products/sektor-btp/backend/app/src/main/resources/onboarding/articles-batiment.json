@@ -1,0 +1,10 @@
+[
+  {"code": "ART-CIM-325", "name": "Ciment CPJ 32,5 R", "description": "Sac 50 kg"},
+  {"code": "ART-PAR-20", "name": "Parpaing creux 20 cm", "description": "Unité"},
+  {"code": "ART-ACIER-HA", "name": "Acier HA Ø12", "description": "Barre 12 m"},
+  {"code": "ART-BETON-C25", "name": "Béton C25/30", "description": "m³"},
+  {"code": "ART-ETAIS", "name": "Étais métalliques réglables", "description": "Unité"},
+  {"code": "ART-GRAV-0-25", "name": "Gravier 0/25", "description": "m³"},
+  {"code": "ART-SABLE", "name": "Sable de dune", "description": "m³"},
+  {"code": "ART-AGGLO", "name": "Agglos pleins 15×20×50", "description": "Unité"}
+]

@@ -1,0 +1,62 @@
+<nf-page-shell scroll>
+  <nf-page-header
+    [config]="{
+      title: 'financeRound2.virementRemise.title',
+      subtitle: 'financeRound2.virementRemise.subtitle'
+    }"
+  ></nf-page-header>
+
+  <div class="f8">
+    <div class="f8__toolbar">
+      <label class="f8__lbl">
+        <span>{{ 'financeRound2.virementRemise.banque' | translate }}</span>
+        <select [ngModel]="format()" (ngModelChange)="format.set($event)">
+          <option value="SEPA">SEPA</option>
+          <option value="AWB">AWB</option>
+          <option value="BMCE">BMCE</option>
+          <option value="CIH">CIH</option>
+          <option value="BP">BP</option>
+        </select>
+      </label>
+      <label class="f8__lbl">
+        <span>{{ 'financeRound2.virementRemise.date' | translate }}</span>
+        <input type="date" [ngModel]="executionDate()" (ngModelChange)="executionDate.set($event)" />
+      </label>
+      <nf-button variant="primary" class="f8__btn f8__btn--primary" (clicked)="generate()">
+        {{ 'financeRound2.virementRemise.gen' | translate }}
+      </nf-button>
+      <nf-button variant="primary" class="f8__btn" (clicked)="download()"  [disabled]="!out()">
+        {{ 'financeRound2.virementRemise.dl' | translate }}
+      </nf-button>
+    </div>
+
+    <section class="f8__card">
+      <h2 class="f8__h">{{ 'financeRound2.virementRemise.lines' | translate }}</h2>
+      <table class="f8__table">
+        <thead>
+          <tr>
+            <th>{{ 'financeRound2.virementRemise.benef' | translate }}</th>
+            <th>RIB</th>
+            <th class="f8__num">{{ 'financeRound2.virementRemise.montant' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (l of lines(); track l.id) {
+            <tr>
+              <td>{{ l.beneficiaire }}</td>
+              <td>{{ l.rib }}</td>
+              <td class="f8__num">{{ l.montant | mad:2 }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    @if (out()) {
+      <section class="f8__card">
+        <h2 class="f8__h">XML</h2>
+        <pre class="f8__pre">{{ out() }}</pre>
+      </section>
+    }
+  </div>
+</nf-page-shell>

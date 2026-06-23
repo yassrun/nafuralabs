@@ -1,0 +1,21 @@
+{
+  "root": true,
+  "overrides": [
+    {
+      "files": ["app/platform/features/**/*.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["**/platform/features/*/!(index)*"],
+                "message": "Import from feature barrel (index.ts) only, not from internal files."
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

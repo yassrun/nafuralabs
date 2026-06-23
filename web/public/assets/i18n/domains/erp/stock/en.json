@@ -1,0 +1,107 @@
+{
+  "stock": {
+    "navigation": {
+      "title": "Stock",
+      "description": "Stock Domain",
+      "locations": "Locations",
+      "stockBalances": "Stock Balances",
+      "inventoryTxes": "Inventory Txes",
+      "inventoryTxLines": "Inventory Tx Lines",
+      "costingMethods": "Costing Methods"
+    }
+  },
+  "common": {
+    "subsections": {
+      "operations": "Operations",
+      "configuration": "Configuration"
+    }
+  },
+  "directory": {
+    "fields": {
+      "code": "Code",
+      "name": "Name",
+      "locationType": "Type",
+      "parentLocation": "Parent Location Id",
+      "isPhysical": "Is Physical",
+      "affectsStock": "Affects Stock"
+    },
+    "sections": {
+      "general": "General",
+      "hierarchy": "Hierarchy",
+      "behavior": "Behavior"
+    }
+  },
+  "inventory": {
+    "navigation": {
+      "receptions": "Receipts",
+      "bonsDeSortie": "Issue Slips",
+      "transferts": "Transfers",
+      "retours": "Returns",
+      "inventaires": "Physical Counts",
+      "pertesChutes": "Losses & Waste",
+      "materiel": "Equipment",
+      "parcMateriel": "Equipment Fleet",
+      "affectations": "Site Assignments",
+      "locationsExternes": "External Rentals",
+      "stock": "Stock",
+      "etatStocks": "Stock Levels",
+      "valorisation": "Valuation",
+      "alertes": "Reorder Alerts",
+      "catalogue": "Catalogue",
+      "articles": "Items",
+      "catalogueMateriel": "Equipment & Machinery",
+      "locations": "Depots & Sites",
+      "familles": "Material Families",
+      "typesArticles": "Article Types",
+      "motifs": "Movement Reasons",
+      "uom": "Units of Measure",
+      "uomCategories": "UoM Categories",
+      "costingMethods": "Costing Methods"
+    },
+    "fields": {
+      "warehouse": "Warehouse Id",
+      "item": "Item Id",
+      "quantity": "Quantity",
+      "reservedQuantity": "Reserved Quantity",
+      "availableQuantity": "Available Quantity",
+      "lastCountDate": "Last Count Date",
+      "txNumber": "Tx Number",
+      "txType": "Tx Type",
+      "txDate": "Tx Date",
+      "reference": "Reference",
+      "status": "Status",
+      "notes": "Notes",
+      "inventoryTx": "Inventory Tx Id",
+      "lineNumber": "Line Number",
+      "unitPrice": "Unit Price",
+      "totalPrice": "Total Price",
+      "code": "Code",
+      "name": "Name",
+      "description": "Description",
+      "method": "Method",
+      "allowNegativeStock": "Allow Negative Stock",
+      "uom": "UoM"
+    },
+    "sections": {
+      "general": "General",
+      "notes": "Notes"
+    }
+  },
+  "btp": {
+    "receptions": {
+      "destWarehouse": "Receiving warehouse",
+      "site": "Site",
+      "lineCount": "Line count",
+      "lines": "Line items",
+      "section": {
+        "header": "Header",
+        "lines": "Items"
+      },
+      "addLine": "Add line",
+      "filters": {
+        "dateFrom": "From",
+        "dateTo": "To"
+      }
+    }
+  }
+}

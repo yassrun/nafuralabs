@@ -1,0 +1,775 @@
+{
+  "hse": {
+    "routes": {
+      "tableauBord": {
+        "title": "HSE Dashboard",
+        "breadcrumb": "Dashboard"
+      },
+      "epi": {
+        "title": "PPE Register",
+        "breadcrumb": "PPE"
+      },
+      "duer": { "title": "DUER", "breadcrumb": "DUER" },
+      "ppsps": { "title": "PPSPS", "breadcrumb": "PPSPS" },
+      "phs": { "title": "Company HSP", "breadcrumb": "HSP" },
+      "visiteMedicale": {
+        "title": "Medical examinations",
+        "breadcrumb": "Medical examinations"
+      },
+      "registresLegaux": {
+        "title": "Legal registers",
+        "breadcrumb": "Legal registers"
+      },
+      "incident": {
+        "list": { "title": "HSE Incidents", "breadcrumb": "Incidents" },
+        "create": { "title": "Report an incident", "breadcrumb": "New" },
+        "detail": { "title": "Incident details", "breadcrumb": "Details" },
+        "edit": { "title": "Edit incident", "breadcrumb": "Edit" }
+      },
+      "inspection": {
+        "list": { "title": "HSE Inspections", "breadcrumb": "Inspections" },
+        "create": { "title": "Schedule an inspection", "breadcrumb": "New" },
+        "detail": { "title": "Inspection details", "breadcrumb": "Details" },
+        "edit": { "title": "Edit inspection", "breadcrumb": "Edit" }
+      },
+      "formation": {
+        "list": { "title": "HSE Trainings", "breadcrumb": "Trainings" },
+        "create": { "title": "New training", "breadcrumb": "New" },
+        "detail": { "title": "Training details", "breadcrumb": "Details" },
+        "edit": { "title": "Edit training", "breadcrumb": "Edit" }
+      },
+      "nonConformite": {
+        "list": { "title": "Non-conformities", "breadcrumb": "Non-conformities" },
+        "create": { "title": "New non-conformity", "breadcrumb": "New" },
+        "detail": { "title": "Non-conformity details", "breadcrumb": "Details" },
+        "edit": { "title": "Edit non-conformity", "breadcrumb": "Edit" }
+      }
+    },
+    "common": {
+      "breadcrumb": "HSE",
+      "actions": {
+        "nouveau": "+ New",
+        "imprimer": "Print",
+        "exporter": "Export",
+        "annuler": "Cancel",
+        "fermer": "Close",
+        "enregistrer": "Save",
+        "creerBrouillon": "Create draft"
+      },
+      "placeholders": {
+        "selectionner": "— Select —",
+        "nomPrenom": "Full name"
+      },
+      "empty": {
+        "default": "No item found."
+      },
+      "messages": {
+        "tousLesStatuts": "All statuses",
+        "tousLesChantiers": "All sites",
+        "tousLesTypes": "All types"
+      }
+    },
+    "dashboard": {
+      "headerTitle": "HSE Dashboard",
+      "headerSubtitle": "Safety & quality indicators — 2026",
+      "birdTitle": "Severity pyramid (Bird)",
+      "kpi": {
+        "atYtd": { "label": "Workplace accidents YTD", "sub": "{mortels} fatal · {avecArret} with leave" },
+        "tf": { "label": "Frequency rate (TF)", "sub": "Target: TF < 5" },
+        "tg": { "label": "Severity rate (TG)", "sub": "Target: TG < 0.2" },
+        "ncOuvertes": { "label": "Open non-conformities", "sub": "{critiques} critical" },
+        "inspectionsMois": { "label": "Inspections this month", "sub": "{reste} scheduled remaining" },
+        "joursSansAT": { "label": "Days without accident", "sub": "Record: {record} days" }
+      },
+      "quickLinks": {
+        "title": "Quick access",
+        "incidents": { "label": "Incidents & workplace accidents", "count": "{n} YTD" },
+        "nc": { "label": "Non-conformities", "count": "{n} open" },
+        "inspections": { "label": "Inspections", "count": "{n} this month" },
+        "formations": { "label": "Trainings", "count": "{n} in progress" },
+        "epi": { "label": "PPE Register", "count": "{n} to renew" },
+        "phs": { "label": "Company HSP", "count": "Master plan" },
+        "ppsps": { "label": "PPSPS (sites)", "count": "Active plans" }
+      },
+      "legal": {
+        "title": "Morocco regulatory compliance",
+        "duer": "DUER drafted and signed",
+        "ppsps": "HSP / PPSPS filed with Labor Inspectorate",
+        "chs": "Safety Committee: Q2 meeting to schedule",
+        "registreAt": "Workplace accident register up to date (CNSS)",
+        "visites": "Medical examinations: 3 overdue"
+      }
+    },
+    "duer": {
+      "title": "Single Risk Assessment Document (DUER)",
+      "headerTitle": "DUER — Single Risk Assessment Document",
+      "subtitle": "Per-site assessment · periodic mandatory review",
+      "search": "Site, author, DUER no.…",
+      "count": "{n} DUER",
+      "actions": {
+        "nouveau": "+ New DUER",
+        "matrice": "Matrix",
+        "documents": "Documents",
+        "publier": "Publish DUER"
+      },
+      "columns": {
+        "chantier": "Site",
+        "numero": "No.",
+        "version": "Version",
+        "dateRevision": "Revision date",
+        "auteur": "Author",
+        "risquesIdentifies": "Risks identified",
+        "actionsCorrectives": "Corrective actions",
+        "statut": "Status",
+        "edition": "Edit",
+        "observations": "Notes"
+      },
+      "empty": "No DUER found.",
+      "modal": {
+        "title": "New DUER",
+        "hint": "Quick draft creation. The risk × probability × severity matrix can be edited via the \"Matrix\" button in the table.",
+        "chantier": "Site",
+        "auteur": "Author"
+      },
+      "documentsModal": {
+        "title": "Documents — {numero}",
+        "hint": "DUER attachments (PDF, images, Word)."
+      },
+      "matrice": {
+        "titleWithNumero": "Risk matrix — {numero}",
+        "hint": "Scale 1 (low) to 4 (high). Criticality = probability × severity (DUER demo).",
+        "risque": "Risk",
+        "probabilite": "Probability",
+        "gravite": "Severity",
+        "score": "Score"
+      },
+      "audit": {
+        "createNote": "Draft created for {chantierCode}",
+        "matriceNote": "Risk × probability × severity matrix",
+        "exportNote": "{format} — {rowCount} rows",
+        "labelListing": "DUER — listing"
+      }
+    },
+    "ppsps": {
+      "title": "Specific Health & Safety Protection Plan (PPSPS)",
+      "headerTitle": "PPSPS — Specific Health & Safety Plan",
+      "subtitle": "Per-site PPSPS · mandatory above 760 person-days",
+      "search": "Site, coordinator, PPSPS no.…",
+      "count": "{n} PPSPS",
+      "actions": {
+        "nouveau": "+ New PPSPS",
+        "pdfRappelLoi": "PDF (R4532-65 demo)",
+        "documents": "Documents"
+      },
+      "columns": {
+        "chantier": "Site",
+        "numero": "PPSPS no.",
+        "version": "Ver.",
+        "coordonnateur": "Safety coordinator",
+        "telephone": "Phone",
+        "date": "Date",
+        "mesuresCollectives": "Collective measures",
+        "effectifMaxJour": "Peak headcount/day",
+        "hommesJourEstimes": "Estimated person-days",
+        "hommesJourEstimesShort": "P·d est.",
+        "statut": "Status",
+        "edition": "Edit"
+      },
+      "empty": "No PPSPS found.",
+      "modal": {
+        "title": "New PPSPS",
+        "hint": "Draft sheet creation. The PDF generator (R4532-65 / CCAG-T outline) will be connected later.",
+        "coordonnateur": "Safety coordinator",
+        "mesureDefaut": "To be completed — see safety coordinator template."
+      },
+      "documentsModal": {
+        "title": "Documents — {numero}",
+        "hint": "PPSPS attachments (PDF, images, Word)."
+      },
+      "print": {
+        "disclaimer": "Demo document — structure inspired by the standard mentions (SPS coordination, risk analysis, measures) referenced by article R4532-65 of the French Labor Code / demo Morocco transposition.",
+        "headerTitle": "PPSPS — {chantier}",
+        "headerMeta": "No. {numero} · Site {code} · Date {date} · Version {version}",
+        "section1": "1. Company & operation identification",
+        "section1Body": "MOEX / contractor (Nafura BTP demo) — operation scope: {chantier}.",
+        "section2": "2. Safety coordinator",
+        "section3": "3. Headcount & person-days",
+        "section3Effectif": "Peak headcount / day",
+        "section3HommesJour": "Estimated person-days",
+        "section4": "4. Risk analysis & collective measures",
+        "section5": "5. PPSPS sections (markdown / 8-chapter template)",
+        "section6": "6. Prevention organisation / first aid / chain of command",
+        "section6Body": "Sensitive zones marked, on-site radio links, emergency numbers posted at the base camp (demo).",
+        "section7": "7. Notes"
+      },
+      "audit": {
+        "createNote": "Draft created for {chantierCode}",
+        "printNote": "Demo PDF article R4532-65",
+        "exportNote": "{format} — {rowCount} rows",
+        "labelListing": "PPSPS — listing"
+      }
+    },
+    "phs": {
+      "headerTitle": "HSP — Health & Safety Plan (company)",
+      "subtitle": "Master plan above per-site PPSPS",
+      "breadcrumb": "Company HSP",
+      "search": "HSP no., author…",
+      "count": "{n} document(s)",
+      "columns": {
+        "numero": "HSP no.",
+        "version": "Version",
+        "date": "Date",
+        "redacteur": "Author",
+        "statut": "Status",
+        "sections": "Sections",
+        "pdf": "PDF"
+      },
+      "rows": {
+        "sectionsCount": "{n} sections"
+      },
+      "actions": {
+        "pdfOfficiel": "Official PDF (demo)"
+      },
+      "empty": "No HSP.",
+      "print": {
+        "disclaimer": "Demo document — company HSP (version {version}).",
+        "headerTitle": "HSP — {numero}",
+        "meta": "Author: {redacteur} · Date {date} · Status {status}"
+      },
+      "audit": {
+        "printNote": "Demo company HSP PDF"
+      }
+    },
+    "incident": {
+      "entityName": "Incident",
+      "entityNamePlural": "Incidents",
+      "headerTitle": "HSE Incidents",
+      "createTitle": "Report an incident",
+      "detailTitle": "Incident details",
+      "chips": {
+        "all": "All",
+        "ouverts": "Open",
+        "investigation": "Investigation"
+      },
+      "list": {
+        "columns": {
+          "numero": "Incident no.",
+          "date": "Date",
+          "type": "Type",
+          "lieu": "Location",
+          "chantier": "Site",
+          "gravite": "Severity",
+          "joursArret": "Lost days",
+          "statut": "Status"
+        },
+        "transform": {
+          "joursSuffix": "{n}d"
+        },
+        "filters": {
+          "chantier": "Site",
+          "type": "Type",
+          "status": "Status",
+          "gravite": "Severity"
+        },
+        "emptyState": {
+          "title": "No incident",
+          "message": "Incidents reported on sites are listed here.",
+          "actionLabel": "Report an incident"
+        }
+      },
+      "form": {
+        "fields": {
+          "numero": "Incident no.",
+          "date": "Date *",
+          "heure": "Time",
+          "lieu": "Location *",
+          "chantier": "Site",
+          "typeIncident": "Type",
+          "gravite": "Severity *",
+          "description": "Description *",
+          "victimeNom": "Victim",
+          "cnssMatriculeVictime": "Victim CNSS number",
+          "joursArret": "Lost days",
+          "planAction": "Action plan",
+          "causes": "Causes",
+          "actionsImmediates": "Immediate actions",
+          "cnssReferenceDeclaration": "CNSS declaration ref.",
+          "cnssDateDeclaration": "CNSS submission date",
+          "notes": "Notes"
+        },
+        "sections": {
+          "identification": "Identification",
+          "details": "Details",
+          "actions": "Actions"
+        }
+      },
+      "actions": {
+        "investiguer": "Open investigation",
+        "cloturer": "Close",
+        "declarerCnssDat": "File CNSS DAT"
+      },
+      "confirms": {
+        "investiguer": {
+          "title": "Open the investigation?",
+          "message": "The incident will move to the investigation phase.",
+          "confirmLabel": "Confirm"
+        },
+        "cloturer": {
+          "title": "Close the incident?",
+          "message": "The incident will be marked as closed.",
+          "confirmLabel": "Close"
+        }
+      },
+      "toasts": {
+        "investigated": "Incident {numero} — investigation opened",
+        "closed": "Incident {numero} closed",
+        "saved": "Incident {numero} saved",
+        "cnssReminder": "Reminder: about {hours} h remaining within the 48 h window to file the CNSS DAT declaration.",
+        "cnssDeadlinePassed": "The legal 48 h deadline after the event has passed — urgent CNSS filing required (late by ~{hours} h).",
+        "cnssRecorded": "CNSS reference recorded: {ref} — PDF generated (M-INT-03 mock-up)."
+      },
+      "deleteConfirm": {
+        "title": "Delete incident",
+        "message": "Delete incident {numero}?"
+      }
+    },
+    "inspection": {
+      "entityName": "Inspection",
+      "entityNamePlural": "Inspections",
+      "title": "Site inspections",
+      "headerTitle": "HSE Inspections",
+      "createTitle": "Schedule an inspection",
+      "detailTitle": "Inspection details",
+      "chips": {
+        "all": "All",
+        "planifiees": "Scheduled",
+        "enCours": "In progress",
+        "terminees": "Completed"
+      },
+      "list": {
+        "columns": {
+          "numero": "Inspection no.",
+          "date": "Date",
+          "chantier": "Site",
+          "inspecteur": "Inspector",
+          "thematique": "Topic",
+          "note": "Score",
+          "nc": "NC",
+          "statut": "Status"
+        },
+        "transform": {
+          "noteSuffix": "{n}/100"
+        },
+        "filters": {
+          "status": "Status"
+        },
+        "emptyState": {
+          "title": "No inspection",
+          "message": "Scheduled and completed HSE inspections appear here.",
+          "actionLabel": "Schedule an inspection"
+        }
+      },
+      "form": {
+        "fields": {
+          "numero": "Inspection no.",
+          "date": "Date *",
+          "chantier": "Site",
+          "inspecteur": "Inspector *",
+          "thematique": "Topic *",
+          "nbObservations": "# of observations",
+          "nbNonConformites": "# of non-conformities",
+          "noteGlobale": "Overall score (0-100)",
+          "observations": "Observations",
+          "notes": "Notes"
+        },
+        "sections": {
+          "identification": "Identification",
+          "resultats": "Results"
+        }
+      },
+      "actions": {
+        "demarrer": "Start",
+        "terminer": "Complete",
+        "annuler": "Cancel"
+      },
+      "confirms": {
+        "demarrer": {
+          "title": "Start the inspection?",
+          "message": "The inspection will be marked in progress.",
+          "confirmLabel": "Start"
+        },
+        "annulerPlanifiee": {
+          "title": "Cancel the inspection?",
+          "message": "The inspection will be cancelled.",
+          "confirmLabel": "Cancel"
+        },
+        "terminer": {
+          "title": "Complete the inspection?",
+          "message": "The inspection will be marked as completed.",
+          "confirmLabel": "Complete"
+        }
+      },
+      "toasts": {
+        "started": "Inspection {numero} started",
+        "completed": "Inspection {numero} completed",
+        "cancelled": "Inspection {numero} cancelled",
+        "saved": "Inspection {numero} saved"
+      },
+      "deleteConfirm": {
+        "title": "Delete inspection",
+        "message": "Delete inspection {numero}?"
+      }
+    },
+    "formation": {
+      "entityName": "Training",
+      "entityNamePlural": "Trainings",
+      "title": "Safety trainings",
+      "headerTitle": "HSE Trainings",
+      "createTitle": "New training",
+      "detailTitle": "Training details",
+      "chips": {
+        "all": "All",
+        "planifiees": "Scheduled",
+        "enCours": "In progress",
+        "terminees": "Completed"
+      },
+      "list": {
+        "columns": {
+          "numero": "Training no.",
+          "titre": "Training",
+          "dateDebut": "Start date",
+          "duree": "Duration",
+          "formateur": "Trainer",
+          "participants": "Attendees",
+          "statut": "Status"
+        },
+        "transform": {
+          "heuresSuffix": "{n}h"
+        },
+        "filters": {
+          "status": "Status"
+        },
+        "emptyState": {
+          "title": "No training",
+          "message": "Schedule your safety trainings.",
+          "actionLabel": "New training"
+        }
+      },
+      "form": {
+        "fields": {
+          "numero": "Training no.",
+          "titre": "Title",
+          "dateDebut": "Start date",
+          "dateFin": "End date",
+          "dureeHeures": "Duration (hours)",
+          "formateur": "Trainer / Organisation",
+          "lieu": "Location",
+          "nbParticipants": "# of attendees",
+          "notes": "Notes"
+        },
+        "sections": {
+          "identification": "Identification",
+          "details": "Details"
+        }
+      },
+      "actions": {
+        "demarrer": "Start",
+        "terminer": "Complete",
+        "annuler": "Cancel"
+      },
+      "confirms": {
+        "demarrer": {
+          "title": "Start the training?",
+          "message": "The training will be marked in progress.",
+          "confirmLabel": "Start"
+        },
+        "annulerPlanifiee": {
+          "title": "Cancel the training?",
+          "message": "The training will be cancelled.",
+          "confirmLabel": "Cancel"
+        },
+        "terminer": {
+          "title": "Complete the training?",
+          "message": "The training will be marked as completed.",
+          "confirmLabel": "Complete"
+        }
+      },
+      "toasts": {
+        "saved": "Training {numero} saved"
+      },
+      "deleteConfirm": {
+        "title": "Delete training",
+        "message": "Delete training {numero}?"
+      }
+    },
+    "nonConformite": {
+      "entityName": "Non-conformity",
+      "entityNamePlural": "Non-conformities",
+      "title": "Non-conformities",
+      "headerTitle": "Non-conformities",
+      "createTitle": "New non-conformity",
+      "detailTitle": "Non-conformity details",
+      "chips": {
+        "all": "All",
+        "ouvertes": "Open",
+        "enCours": "In progress",
+        "verifiees": "Verified"
+      },
+      "list": {
+        "columns": {
+          "numero": "NC no.",
+          "date": "Date",
+          "type": "Type",
+          "chantier": "Site",
+          "description": "Description",
+          "echeance": "Deadline",
+          "statut": "Status"
+        },
+        "filters": {
+          "status": "Status",
+          "type": "Type"
+        },
+        "emptyState": {
+          "title": "No non-conformity",
+          "message": "Non-conformities detected on sites are listed here.",
+          "actionLabel": "Record a non-conformity"
+        }
+      },
+      "form": {
+        "fields": {
+          "numero": "NC no.",
+          "date": "Date *",
+          "type": "Type *",
+          "chantier": "Site",
+          "zoneChantier": "Site area",
+          "description": "Description *",
+          "causesRacines": "Root causes",
+          "actionCorrective": "Corrective action (CAPA)",
+          "actionPreventive": "Preventive action (CAPA)",
+          "verificationEfficacite": "Effectiveness review",
+          "dateVerificationEfficacite": "Effectiveness review date",
+          "sourceInspectionNumero": "Source inspection (no.)",
+          "responsableNom": "Owner",
+          "dateEcheance": "Due date",
+          "notes": "Notes"
+        },
+        "sections": {
+          "identification": "Identification",
+          "details": "Details",
+          "capa": "CAPA"
+        }
+      },
+      "actions": {
+        "traiter": "Take ownership",
+        "verifier": "Mark as verified",
+        "cloturer": "Close"
+      },
+      "confirms": {
+        "traiter": {
+          "title": "Take ownership of the NC?",
+          "message": "The non-conformity will move to in-progress.",
+          "confirmLabel": "Confirm"
+        },
+        "verifier": {
+          "title": "Verify the NC?",
+          "message": "The corrective action will be marked as verified.",
+          "confirmLabel": "Verify"
+        },
+        "cloturer": {
+          "title": "Close the NC?",
+          "message": "The non-conformity will be permanently closed.",
+          "confirmLabel": "Close"
+        }
+      },
+      "toasts": {
+        "processed": "NC {numero} — taken in charge",
+        "verified": "NC {numero} — verified",
+        "closed": "NC {numero} closed",
+        "saved": "Non-conformity {numero} saved"
+      },
+      "deleteConfirm": {
+        "title": "Delete non-conformity",
+        "message": "Delete NC {numero}?"
+      },
+      "severity": {
+        "critical": "Critical",
+        "majeure": "Major",
+        "mineure": "Minor"
+      }
+    },
+    "epi": {
+      "title": "Personal Protective Equipment (PPE)",
+      "headerTitle": "PPE Register",
+      "subtitle": "Catalogue reference · Field assignment · Periodic inspection",
+      "volets": {
+        "reference": "Reference",
+        "attribution": "Assignment",
+        "verification": "Inspection"
+      },
+      "hints": {
+        "reference": "Reference: one row per PPE item (internal catalogue).",
+        "attribution": "Assignment: employee × site allocations (demo mock).",
+        "verification": "Inspection: periodic checks, deadlines and critical statuses."
+      },
+      "search": "Employee, PPE, site…",
+      "count": "{n} row(s)",
+      "coutFiltre": "Filtered cost: {amount}",
+      "alertes": {
+        "expires": "{n} expired/lost PPE — urgent action",
+        "aRenouveler": "{n} PPE to renew within < 60 days"
+      },
+      "columns": {
+        "categorie": "Cat.",
+        "reference": "Reference",
+        "designation": "Designation",
+        "normeCE": "CE standard",
+        "employe": "Employee",
+        "chantier": "Site",
+        "attribution": "Assignment",
+        "expiration": "Expiry",
+        "derniereVerif": "Last check",
+        "prochaineVerif": "Next check",
+        "prixUnit": "Unit price",
+        "prixIndicatif": "Indicative price",
+        "statut": "Status"
+      },
+      "expirationDays": "({n}d)",
+      "empty": "No record.",
+      "categories": {
+        "casque": "Helmets",
+        "harnais": "Fall-arrest harnesses",
+        "tete": "Head protection",
+        "yeux": "Eye protection",
+        "pieds": "Footwear",
+        "mains": "Gloves",
+        "corps": "Coverall / vest",
+        "respiration": "Mask / breathing apparatus",
+        "audition": "Ear plugs / hearing protection",
+        "chute": "Fall-arrest harness"
+      },
+      "statusLabels": {
+        "ok": "OK",
+        "aRenouveler": "To renew",
+        "expire": "Expired",
+        "perdu": "Lost / missing"
+      }
+    },
+    "visiteMedicale": {
+      "title": "Medical examinations",
+      "headerTitle": "Medical examinations",
+      "subtitle": "Employee medical examinations monitoring · alerts < 30 d to deadline",
+      "search": "Employee, ID, doctor…",
+      "count": "{n} visit(s)",
+      "alertes": {
+        "inaptes": "{n} employee(s) declared unfit",
+        "echeances": "{n} deadline(s) < 30 days — to schedule"
+      },
+      "toolbar": {
+        "tousLesTypes": "All types",
+        "toutesAptitudes": "All fitness statuses",
+        "alerteEcheance": "Upcoming deadline alert"
+      },
+      "columns": {
+        "matricule": "Employee ID",
+        "employe": "Employee",
+        "poste": "Position",
+        "typeVisite": "Visit type",
+        "date": "Date",
+        "aptitude": "Medical fitness",
+        "medecin": "Doctor",
+        "prochaineEcheance": "Next deadline",
+        "restrictions": "Restrictions",
+        "type": "Type"
+      },
+      "empty": "No visit found.",
+      "echeance": {
+        "todayLabel": "today",
+        "jMoinsLabel": "D-{n}",
+        "retardLabel": "+{n} d overdue"
+      },
+      "aptitude": {
+        "apte": "Fit",
+        "inapte": "Unfit",
+        "avecRestriction": "Fit with restrictions"
+      },
+      "audit": {
+        "exportNote": "{format} — {rowCount} rows",
+        "labelListing": "Medical examinations — listing"
+      }
+    },
+    "registreLegal": {
+      "title": "Legal registers",
+      "headerTitle": "Legal registers",
+      "subtitle": "Mandatory regulatory registers — exports and printing",
+      "tabs": {
+        "at": {
+          "label": "Workplace Accidents",
+          "shortLabel": "AT",
+          "description": "Accidents reported to CNSS — 48 h deadline."
+        },
+        "mp": {
+          "label": "Occupational Diseases",
+          "shortLabel": "MP",
+          "description": "Recognised diseases — Morocco schedules."
+        },
+        "dt": {
+          "label": "Work Declarations",
+          "shortLabel": "DT",
+          "description": "Filing to Labor Inspectorate — site > 30 d or > 30 employees."
+        },
+        "chs": {
+          "label": "Health & Safety Committee",
+          "shortLabel": "CHS",
+          "description": "Minutes of CHS meetings — companies above 50 employees."
+        }
+      },
+      "printHeader": {
+        "registre": "{label} Register",
+        "societe": "Company:",
+        "ice": "ICE:",
+        "cnss": "CNSS:",
+        "editeLe": "Issued on:"
+      },
+      "actions": {
+        "imprimer": "Print",
+        "imprimerTitle": "Print this register",
+        "excel": "Excel",
+        "excelTitle": "Export to Excel (XLSX)",
+        "pdfOfficiel": "Official PDF (demo)",
+        "pdfOfficielTitle": "CNSS-style declaration / register layout (demo)"
+      },
+      "columns": {
+        "numero": "No.",
+        "date": "Date",
+        "reference": "Reference",
+        "chantier": "Site",
+        "victime": "Victim",
+        "matriculeCnss": "CNSS number",
+        "description": "Description",
+        "partieAtteinte": "Affected body part",
+        "joursArret": "Lost days",
+        "salarie": "Employee",
+        "tableauMa": "Morocco schedule",
+        "effectif": "Headcount",
+        "duree": "Duration (d)",
+        "presents": "Attendees",
+        "decisions": "Decisions",
+        "observations": "Notes"
+      },
+      "footer": "Total: <strong>{n}</strong> entry/ies",
+      "empty": "No entry in the {kind} register.",
+      "print": {
+        "titre": "National Social Security Fund — {kind} Register (demo)",
+        "meta": "{societe} — ICE {ice} — CNSS affiliation {cnss}",
+        "stamp": "Reserved for visa / CNSS stamp (demo)",
+        "footnote": "Document generated for ERP demonstration purposes — does not constitute an official bundle without legal validation."
+      },
+      "audit": {
+        "labelRegistre": "{kind} register",
+        "exportNote": "XLSX — {n} entries",
+        "printNote": "Printing — {n} entries",
+        "pdfNote": "CNSS official PDF (stampable demo)"
+      }
+    }
+  }
+}

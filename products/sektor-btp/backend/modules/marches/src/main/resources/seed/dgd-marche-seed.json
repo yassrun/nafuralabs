@@ -1,0 +1,16 @@
+{
+  "dgds": [
+    {
+      "id": "dgd-001",
+      "numero": "DGD-2026-001",
+      "contratMarcheId": "mar-003",
+      "marcheNumero": "MAR-2025-018",
+      "cumulSituationsTtc": "5004000",
+      "cumulRetenueGarantie": "291900",
+      "cumulRevisionK": "22400",
+      "cumulPenalites": "0",
+      "reprisesRg": "50000",
+      "status": "BROUILLON"
+    }
+  ]
+}

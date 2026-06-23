@@ -1,0 +1,8 @@
+// ERP backend must run on port 8082 (server.port in backend/applications/erp/src/main/resources/application.yml) for e2e.
+{
+  "/api": {
+    "target": "http://127.0.0.1:8082",
+    "secure": false,
+    "changeOrigin": true
+  }
+}

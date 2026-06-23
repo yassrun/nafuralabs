@@ -1,0 +1,33 @@
+{
+  "location": {
+    "fields": {
+      "code": "code",
+      "name": "name",
+      "type": "type",
+      "parentLocation": "parent Location Id",
+      "isPhysical": "is Physical",
+      "affectsStock": "affects Stock"
+    },
+    "sections": {
+      "hierarchy": "hierarchy",
+      "behavior": "comportement"
+    },
+    "feature": {
+      "title": "Emplacements physiques",
+      "description": "Emplacements physiques"
+    },
+    "navigation": {
+      "locations": "Emplacements"
+    },
+    "location": {
+      "title": "Emplacements",
+      "detailTitle": "Détails de l'emplacement",
+      "newTitle": "Nouvel emplacement"
+    }
+  },
+  "common": {
+    "sections": {
+      "general": "general"
+    }
+  }
+}

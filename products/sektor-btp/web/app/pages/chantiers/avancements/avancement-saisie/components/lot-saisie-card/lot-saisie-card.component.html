@@ -1,0 +1,80 @@
+<article class="lot-card">
+  <header class="lot-card__header">
+    <div>
+      <h3>{{ model().lot.code }} {{ model().lot.designation }}</h3>
+      <p>
+        {{ 'chantiers.avancement.lot.currentCumul' | translate:{
+          percent: model().previousPercent,
+          cumul: model().lastCumul,
+          unite: model().lot.unite
+        } }}
+      </p>
+    </div>
+    <nf-button variant="danger" class="lot-card__remove" (clicked)="removed.emit()">
+      {{ 'chantiers.avancement.lot.remove' | translate }}
+    </nf-button>
+  </header>
+
+  <div class="lot-card__grid">
+    @if (isForfait()) {
+      <!-- Forfait lot: show percentage input directly -->
+      <label>
+        <span>{{ 'chantiers.avancement.lot.avancementPeriod' | translate }}</span>
+        <div class="lot-card__percent-input">
+          <input
+            type="number"
+            inputmode="decimal"
+            min="0"
+            max="100"
+            step="1"
+            [ngModel]="model().newPercent"
+            (ngModelChange)="onPercentInput($event)" />
+          <span class="lot-card__percent-unit">%</span>
+        </div>
+      </label>
+      <div class="lot-card__computed">
+        <span>{{ 'chantiers.avancement.lot.cumulPercent' | translate }}</span>
+        <strong>{{ model().newPercent }}%</strong>
+      </div>
+    } @else {
+      <label>
+        <span>{{ 'chantiers.avancement.lot.period' | translate:{ unite: model().lot.unite } }}</span>
+        <input
+          type="number"
+          inputmode="decimal"
+          min="0"
+          step="0.1"
+          [ngModel]="model().quantitePeriode"
+          (ngModelChange)="onQuantityInput($event)" />
+      </label>
+      <div class="lot-card__computed">
+        <span>{{ 'chantiers.avancement.lot.cumul' | translate:{ unite: model().lot.unite } }}</span>
+        <strong>{{ model().nouveauCumul }}</strong>
+      </div>
+    }
+  </div>
+
+  <div class="lot-card__delta">
+    <strong>{{ 'chantiers.avancement.lot.progress' | translate:{
+      before: model().previousPercent,
+      after: model().newPercent
+    } }}</strong>
+    <span [class.lot-card__delta--positive]="model().deltaPercent > 0">+{{ model().deltaPercent }}%</span>
+  </div>
+
+  @if (model().warning) {
+    <p class="lot-card__warning">{{ model().warning }}</p>
+  }
+
+  <label class="lot-card__notes">
+    <span>{{ 'chantiers.avancement.lot.fieldNotes' | translate }}</span>
+    <textarea
+      rows="3"
+      [ngModel]="model().notes"
+      (ngModelChange)="notesChanged.emit($event)"></textarea>
+  </label>
+
+  <app-photo-uploader
+    [photos]="model().photos"
+    (changed)="photosChanged.emit($event)"></app-photo-uploader>
+</article>

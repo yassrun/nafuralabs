@@ -1,0 +1,89 @@
+{
+  "financial": {
+    "navigation": {
+      "currencies": "Currencies",
+      "exchangeRates": "Exchange Rates",
+      "incoterms": "Incoterms",
+      "paymentTerms": "Payment Terms",
+      "fiscalPeriods": "Fiscal Periods",
+      "fiscalYears": "Fiscal Years"
+    },
+    "currency": {
+      "title": "Currencies",
+      "detailTitle": "Currency Details",
+      "newTitle": "New Currency",
+      "fields": {
+        "code": "code",
+        "name": "name",
+        "symbol": "symbol",
+        "decimalPlaces": "decimal Places",
+        "isActive": "is Active"
+      },
+      "sections": {}
+    },
+    "exchangeRate": {
+      "title": "Exchange Rates",
+      "detailTitle": "Exchange Rate Details",
+      "newTitle": "New Exchange Rate",
+      "fields": {
+        "fromCurrencyId": "from Currency Id",
+        "toCurrencyId": "to Currency Id",
+        "rate": "rate",
+        "effectiveDate": "effective Date"
+      },
+      "sections": {}
+    },
+    "incoterm": {
+      "title": "Incoterms",
+      "detailTitle": "Incoterm Details",
+      "newTitle": "New Incoterm",
+      "fields": {
+        "code": "code",
+        "name": "name",
+        "description": "description",
+        "isActive": "is Active"
+      },
+      "sections": {}
+    },
+    "paymentTerm": {
+      "title": "Payment Terms",
+      "detailTitle": "Payment Term Details",
+      "newTitle": "New Payment Term",
+      "fields": {
+        "code": "code",
+        "name": "name",
+        "days": "days",
+        "description": "description",
+        "isActive": "is Active"
+      },
+      "sections": {}
+    },
+    "fiscalPeriod": {
+      "title": "Fiscal Periods",
+      "detailTitle": "Fiscal Period Details",
+      "newTitle": "New Fiscal Period",
+      "fields": {
+        "code": "code",
+        "fiscalYearId": "fiscal Year Id",
+        "name": "name",
+        "startDate": "start Date",
+        "endDate": "end Date",
+        "status": "status"
+      },
+      "sections": {}
+    },
+    "fiscalYear": {
+      "title": "Fiscal Years",
+      "detailTitle": "Fiscal Year Details",
+      "newTitle": "New Fiscal Year",
+      "fields": {
+        "code": "code",
+        "name": "name",
+        "startDate": "start Date",
+        "endDate": "end Date",
+        "status": "status"
+      },
+      "sections": {}
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "entity": "ItemPrice",
+  "fields": {
+    "itemId": {
+      "required": true
+    },
+    "priceType": {
+      "required": true,
+      "maxLength": 30
+    },
+    "currencyId": {
+      "required": true
+    },
+    "unitPrice": {
+      "required": true,
+      "min": 0
+    },
+    "minQuantity": {
+      "min": 0
+    },
+    "effectiveFrom": {
+      "required": true
+    }
+  }
+}

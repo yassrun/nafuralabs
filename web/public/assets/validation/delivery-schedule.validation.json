@@ -1,0 +1,23 @@
+{
+  "entity": "DeliverySchedule",
+  "fields": {
+    "scheduleCode": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "frequency": {
+      "maxLength": 120
+    },
+    "dayOfWeek": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

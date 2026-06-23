@@ -1,0 +1,28 @@
+{
+  "$comment": "Ratchet baseline for no-hardcoded-string lint rule. Total findings must NEVER regress — only decrease. Run `npm run i18n:hardcoded:snapshot` to update after a legitimate reduction. Tolerance is applied by the ratchet script to absorb spurious Angular control-flow false-positives.",
+  "totalFindings": 3916,
+  "updatedAt": "2026-05-27",
+  "tolerance": 5,
+  "byCategory": {
+    "inline_template_text": 1661,
+    "ts_literal_label": 1286,
+    "html_attribute_text": 969
+  },
+  "byKind": {
+    "inline_template_text": 1661,
+    "template_text": 865,
+    "prop:label": 611,
+    "prop:title": 251,
+    "throw": 118,
+    "prop:description": 92,
+    "prop:message": 85,
+    "prop:tooltip": 80,
+    "template_attr": 52,
+    "inline_template_attr": 45,
+    "toast": 24,
+    "dialog": 11,
+    "prop:subtitle": 9,
+    "template_bound_attr": 7,
+    "prop:placeholder": 5
+  }
+}

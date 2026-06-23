@@ -1,0 +1,24 @@
+{
+  "entity": "SourcingAward",
+  "fields": {
+    "awardNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "rfqId": {
+      "required": true
+    },
+    "vendorId": {
+      "required": true
+    },
+    "totalValue": {
+      "required": true,
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

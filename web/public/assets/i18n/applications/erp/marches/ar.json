@@ -1,0 +1,545 @@
+{
+  "marches": {
+    "module": {
+      "title": "العقود والفوترة",
+      "shortTitle": "العقود"
+    },
+    "common": {
+      "actions": {
+        "back": "← الرجوع إلى القائمة",
+        "cancel": "إلغاء",
+        "print": "🖨 طباعة / PDF",
+        "comptabiliser": "📊 محاسبة (OD آلية)",
+        "comptabilisee": "✓ تمت المحاسبة",
+        "voirPlanning": "عرض التخطيط"
+      },
+      "filters": {
+        "allStatuses": "جميع الحالات",
+        "allTypes": "جميع الأنواع"
+      },
+      "emetteur": {
+        "MOA": "MOA",
+        "MOE": "MOE",
+        "NAFURA": "NAFURA"
+      },
+      "modePaiement": {
+        "VIREMENT": "حوالة",
+        "CHEQUE": "شيك",
+        "ESPECES": "نقداً",
+        "AUTRE": "آخر"
+      }
+    },
+    "routes": {
+      "contratsTitle": "عقود الأشغال",
+      "contratsCrumb": "العقود",
+      "contratDetailTitle": "العقد",
+      "contratDetailCrumb": "التفاصيل",
+      "contratCreateTitle": "عقد جديد",
+      "contratCreateCrumb": "جديد",
+      "avenantsTitle": "الملاحق",
+      "avenantsCrumb": "الملاحق",
+      "avenantDetailTitle": "الملحق",
+      "avenantDetailCrumb": "الملحق",
+      "facturesTitle": "فواتير العقود",
+      "facturesCrumb": "الفواتير",
+      "factureDetailTitle": "فاتورة العقد",
+      "factureDetailCrumb": "التفاصيل",
+      "cautionsTitle": "الكفالات البنكية",
+      "cautionsCrumb": "الكفالات",
+      "revisionsPrixTitle": "مراجعات الأسعار K",
+      "revisionsPrixCrumb": "مراجعات الأسعار",
+      "penalitesTitle": "غرامات التأخير",
+      "penalitesCrumb": "الغرامات",
+      "dgdTitle": "الكشف العام النهائي (DGD)",
+      "dgdCrumb": "DGD",
+      "osTitle": "أوامر الخدمة",
+      "osCrumb": "OS"
+    },
+    "contrat": {
+      "listing": {
+        "title": "العقود والصفقات",
+        "subtitle": "عقود أوراش البناء بالمغرب",
+        "breadcrumb": "العقود",
+        "search": {
+          "placeholder": "الرقم، الورش، الزبون، الموضوع…"
+        },
+        "count": "{count, plural, one {# عقد} other {# عقد}}",
+        "columns": {
+          "numero": "رقم العقد",
+          "chantier": "الورش",
+          "clientMoa": "الزبون / MOA",
+          "client": "الزبون",
+          "type": "النوع",
+          "nature": "الطبيعة",
+          "montantInitialHt": "المبلغ الأولي بدون احتساب الضريبة",
+          "totalHt": "الإجمالي بدون احتساب الضريبة",
+          "totalAvenants": "الإجمالي مع الملاحق",
+          "avancement": "التقدم",
+          "avancementPercent": "التقدم %",
+          "os": "OS",
+          "dateOs": "تاريخ OS",
+          "statut": "الحالة"
+        },
+        "empty": "لا يوجد عقد مطابق للفلاتر.",
+        "exportFilename": "marches-contrats",
+        "createCta": "عقد جديد"
+      },
+      "create": {
+        "title": "عقد صفقة جديد",
+        "subtitle": "إنشاء عقد مرتبط بورش",
+        "breadcrumb": "جديد",
+        "submit": "إنشاء العقد",
+        "success": "تم إنشاء عقد الصفقة.",
+        "fields": {
+          "chantier": "الورش",
+          "chantierPlaceholder": "اختر ورشًا…",
+          "client": "الزبون / MOA",
+          "numero": "رقم العقد (اختياري)",
+          "intitule": "العنوان",
+          "type": "نوع العقد",
+          "nature": "الطبيعة",
+          "montantInitialHt": "المبلغ الأولي بدون احتساب الضريبة",
+          "tvaTaux": "الضريبة (%)",
+          "retenueGarantieTaux": "ضمان الاحتفاظ (%)",
+          "dateOrdreService": "تاريخ أمر الخدمة"
+        },
+        "errors": {
+          "required": "يرجى تعبئة الورش والعنوان ومبلغ صالح بدون احتساب الضريبة.",
+          "failed": "تعذر إنشاء عقد الصفقة."
+        }
+      },
+      "detail": {
+        "headerTitleFallback": "العقد",
+        "headerCrumbFallback": "التفاصيل",
+        "ras": "RAS 5%",
+        "kpis": {
+          "montantInitialHt": "المبلغ الأولي بدون احتساب الضريبة",
+          "avenantsHt": "الملاحق بدون احتساب الضريبة",
+          "totalHt": "إجمالي العقد بدون احتساب الضريبة",
+          "factureHt": "المفوتر بدون احتساب الضريبة",
+          "encaisseHt": "المحصل بدون احتساب الضريبة",
+          "avancement": "التقدم",
+          "pctMarche": "{pct}% من العقد"
+        },
+        "tabs": {
+          "identite": "الهوية والشروط",
+          "avenants": "الملاحق",
+          "factures": "الفواتير",
+          "cautions": "الكفالات",
+          "revision": "مراجعة K"
+        },
+        "identite": {
+          "moa": {
+            "title": "صاحب المشروع",
+            "raisonSociale": "اسم الشركة",
+            "ice": "ICE",
+            "if": "IF",
+            "rc": "RC",
+            "nature": "الطبيعة"
+          },
+          "caracteristiques": {
+            "title": "الخصائص",
+            "type": "النوع",
+            "tva": "TVA",
+            "retenueGarantie": "الضمان المحتجز",
+            "retenueSource": "الاقتطاع من المنبع",
+            "avanceForfaitaire": "التسبيق الجزافي"
+          },
+          "calendrier": {
+            "title": "التقويم",
+            "ordreService": "أمر بالخدمة",
+            "delaiExecution": "مدة التنفيذ",
+            "delaiExecutionMois": "{count} شهر",
+            "penaliteRetardJour": "غرامة التأخير / يوم",
+            "receptionProvisoire": "الاستلام المؤقت",
+            "receptionDefinitive": "الاستلام النهائي"
+          }
+        },
+        "avenants": {
+          "columns": {
+            "numero": "رقم الملحق",
+            "type": "النوع",
+            "objet": "الموضوع",
+            "montantHt": "المبلغ بدون احتساب الضريبة",
+            "delaiPlus": "المدة +",
+            "signature": "التوقيع",
+            "statut": "الحالة"
+          },
+          "delaiJoursPlus": "+{count} ي",
+          "empty": "لا يوجد ملحق على هذا العقد."
+        },
+        "factures": {
+          "columns": {
+            "numero": "رقم الفاتورة",
+            "brutHt": "الإجمالي بدون احتساب الضريبة",
+            "rg": "الضمان المحتجز ({rate}%)",
+            "netHt": "الصافي بدون احتساب الضريبة",
+            "tva": "TVA",
+            "ras": "RAS {rate}%",
+            "netAPayer": "الصافي للدفع",
+            "emission": "الإصدار",
+            "echeance": "الاستحقاق",
+            "statut": "الحالة",
+            "total": "الإجمالي"
+          },
+          "empty": "لم تُصدر أي فاتورة على هذا العقد."
+        },
+        "cautions": {
+          "columns": {
+            "numero": "الرقم",
+            "type": "النوع",
+            "banque": "البنك",
+            "montant": "المبلغ",
+            "emission": "الإصدار",
+            "validite": "الصلاحية",
+            "levee": "الإفراج",
+            "statut": "الحالة"
+          },
+          "empty": "لا توجد كفالة مسجلة."
+        },
+        "revision": {
+          "title": "صيغة مراجعة K",
+          "formula": "K = {fixe} (ثابت) + {terme}",
+          "columns": {
+            "indice": "المؤشر",
+            "coefficient": "المعامل",
+            "valeurBase": "القيمة الأساس (تاريخ العرض)"
+          },
+          "empty": "هذا العقد غير خاضع لمراجعة الأسعار."
+        },
+        "empty": {
+          "title": "العقد غير موجود",
+          "message": "المعرّف غير معروف.",
+          "action": "الرجوع إلى القائمة"
+        }
+      }
+    },
+    "avenant": {
+      "listing": {
+        "title": "الملاحق",
+        "subtitle": "التعديلات والملاحق على العقود",
+        "breadcrumb": "الملاحق",
+        "search": {
+          "placeholder": "الرقم، العقد، الموضوع…"
+        },
+        "count": "{count, plural, one {# ملحق} other {# ملحق}}",
+        "columns": {
+          "numero": "رقم الملحق",
+          "marche": "العقد",
+          "type": "النوع",
+          "objet": "الموضوع",
+          "montantHt": "المبلغ بدون احتساب الضريبة",
+          "delaiPlus": "المدة +",
+          "signature": "التوقيع",
+          "statut": "الحالة"
+        },
+        "delaiJoursPlus": "+{count} ي",
+        "empty": "لم يتم العثور على أي ملحق."
+      },
+      "detail": {
+        "empty": {
+          "title": "الملحق غير موجود",
+          "backLink": "الرجوع إلى القائمة"
+        },
+        "approval": {
+          "label": "سير عمل الموافقة"
+        },
+        "propagate": {
+          "title": "الأثر على الورش والعقد",
+          "hint": "يحدّث ميزانية الورش (+ الأثر بدون احتساب الضريبة)، ويمدد تاريخ النهاية المتوقعة عند الاقتضاء، ويعيد حساب المبلغ الإجمالي للعقد ويعدّل الكفالات النشطة (تجريبي).",
+          "cta": "نشر الأثر",
+          "done": "نُشر الأثر في {date}"
+        },
+        "sections": {
+          "identite": {
+            "title": "الهوية",
+            "marche": "العقد",
+            "chantier": "الورش",
+            "type": "النوع",
+            "statut": "الحالة"
+          },
+          "montants": {
+            "title": "المبالغ والآجال",
+            "impactHt": "الأثر بدون احتساب الضريبة",
+            "prolongation": "التمديد",
+            "dateSignature": "تاريخ التوقيع"
+          },
+          "motif": {
+            "title": "السبب"
+          }
+        },
+        "prolongationJours": "+{count} يوماً",
+        "messages": {
+          "confirmPropagate": "نشر أثر الملحق الموقَّع؟\n\n{recap}",
+          "failPropagate": "تعذّر النشر (الملحق منشور سابقاً أو غير موقَّع).",
+          "impactBudget": "ميزانية الورش {code}: {sign}{amount} MAD بدون احتساب الضريبة",
+          "impactFin": "النهاية المتوقعة: +{days} ي",
+          "impactFinUnchanged": "النهاية المتوقعة: دون تغيير",
+          "impactCautions": "الكفالات النشطة (نهائية / استرداد التسبيق): تعديل تناسبي",
+          "auditPropagation": "نشر الأثر — ميزانية Δ {budget} MAD بدون احتساب الضريبة، عقد جديد {marche} MAD بدون احتساب الضريبة، {n} كفالة (كفالات)، +{days} ي تقويمي"
+        }
+      }
+    },
+    "factureMarche": {
+      "listing": {
+        "title": "فواتير العقود",
+        "subtitle": "فوترة كشوف الأشغال",
+        "breadcrumb": "الفواتير",
+        "kpis": {
+          "totalEmisHt": "الإجمالي المُصدَر بدون احتساب الضريبة",
+          "totalNetAPayer": "الإجمالي الصافي للدفع",
+          "enRetard": "الفواتير المتأخرة"
+        },
+        "search": {
+          "placeholder": "الرقم، العقد، الزبون…"
+        },
+        "count": "{count, plural, one {# فاتورة} other {# فاتورة}}",
+        "columns": {
+          "numero": "رقم الفاتورة",
+          "marche": "العقد",
+          "client": "الزبون",
+          "brutHt": "الإجمالي بدون احتساب الضريبة",
+          "rg": "الضمان المحتجز",
+          "tva": "TVA",
+          "netAPayer": "الصافي للدفع",
+          "emission": "الإصدار",
+          "echeance": "الاستحقاق",
+          "statut": "الحالة"
+        },
+        "empty": "لا توجد فواتير."
+      },
+      "detail": {
+        "marcheRef": "العقد",
+        "decompte": {
+          "title": "الكشف المالي",
+          "montantBrutHt": "المبلغ الإجمالي بدون احتساب الضريبة (الكشوف)",
+          "deductionAvance": "خصم التسبيق الجزافي",
+          "retenueGarantie": "الضمان المحتجز ({rate}%)",
+          "netHt": "الصافي بدون احتساب الضريبة",
+          "tva": "TVA {rate}%",
+          "netTtc": "الصافي مع احتساب الضريبة",
+          "retenueSource": "الاقتطاع من المنبع {rate}% (المادة 158 CGI)",
+          "timbreFiscal": "الطابع الجبائي (الدفع نقداً)",
+          "netAPayer": "الصافي للدفع"
+        },
+        "meta": {
+          "dateEmission": "تاريخ الإصدار",
+          "echeance": "الاستحقاق",
+          "overdue": "متأخرة"
+        },
+        "paiements": {
+          "title": "المدفوعات المستلمة",
+          "columns": {
+            "date": "التاريخ",
+            "reference": "المرجع",
+            "mode": "الطريقة",
+            "montant": "المبلغ"
+          }
+        },
+        "actions": {
+          "back": "← الرجوع إلى القائمة",
+          "print": "🖨 طباعة / PDF",
+          "comptabiliser": "📊 محاسبة (OD آلية)",
+          "comptabilisee": "✓ تمت المحاسبة"
+        },
+        "od": {
+          "title": "القيد المحاسبي المُولَّد",
+          "balanced": "متوازن",
+          "unbalanced": "غير متوازن",
+          "columns": {
+            "compte": "الحساب",
+            "libelle": "البيان",
+            "debit": "مدين",
+            "credit": "دائن",
+            "totaux": "الإجماليات"
+          },
+          "linkBefore": "← التفاصيل في ",
+          "linkText": "إدارة الإسنادات المحاسبية",
+          "linkAfter": "."
+        },
+        "empty": {
+          "title": "الفاتورة غير موجودة",
+          "message": "المعرّف غير معروف.",
+          "action": "الرجوع إلى القائمة"
+        }
+      },
+      "print": {
+        "ids": {
+          "ice": "ICE",
+          "if": "I.F.",
+          "rc": "R.C.",
+          "taxePro": "الضريبة المهنية",
+          "cnss": "CNSS"
+        },
+        "docTitle": "فاتورة رقم {numero}",
+        "dateEmissionLabel": "تاريخ الإصدار: {date}",
+        "dateEcheanceLabel": "تاريخ الاستحقاق: {date}",
+        "partieClient": {
+          "title": "الزبون (MOA)",
+          "iceLine": "ICE: {value}",
+          "ifLine": "I.F.: {value}"
+        },
+        "partieRef": {
+          "title": "المراجع",
+          "marcheLine": "العقد: {numero}",
+          "chantierLine": "الورش: {code}"
+        },
+        "decompte": {
+          "designation": "التسمية",
+          "montantHt": "المبلغ (MAD بدون احتساب الضريبة)",
+          "travauxExecutes": "الأشغال المنفذة — كشوف الأشغال",
+          "deductionAvance": "خصم التسبيق الجزافي المدفوع",
+          "retenueGarantie": "الضمان المحتجز {rate}%",
+          "netHt": "المبلغ الصافي بدون احتساب الضريبة",
+          "tva": "TVA {rate}%",
+          "netTtc": "المبلغ الصافي مع احتساب الضريبة",
+          "retenueSource": "الاقتطاع من المنبع {rate}% (المادة 158 CGI)",
+          "timbreFiscal": "الطابع الجبائي",
+          "netAPayer": "الصافي للدفع"
+        },
+        "conditions": {
+          "modeLabel": "طريقة الدفع:",
+          "modeValue": "حوالة بنكية",
+          "ribLabel": "RIB:",
+          "ribValue": "XXX XXX XXXXXXXXXXXXXXXX XX (Attijariwafa Bank)",
+          "legal": "في حالة تأخر الدفع، تُطبَّق غرامات وفقاً للسعر القانوني المعمول به بالمغرب طبقاً لأحكام القانون 49-99."
+        },
+        "signatures": {
+          "prestataire": "ختم وتوقيع مقدم الخدمة",
+          "moa": "صالح للموافقة — ختم وتوقيع MOA"
+        },
+        "footer": {
+          "capitalLine": "{nom} — {forme} برأسمال {capital} MAD — {rc}",
+          "idsLine": "ICE {ice} · I.F. {if} · CNSS {cnss}"
+        }
+      }
+    },
+    "caution": {
+      "listing": {
+        "title": "الكفالات البنكية",
+        "subtitle": "كفالات مؤقتة ونهائية، الضمان المحتجز واسترداد التسبيق",
+        "breadcrumb": "الكفالات",
+        "board": {
+          "ariaLabel": "ملخص حسب الحالة",
+          "actives": "نشطة",
+          "aRenouveler": "للتجديد (< 30 ي)",
+          "mainlevees": "مفرَج عنها",
+          "finPrefix": "النهاية {date}",
+          "emptyAlert": "لا توجد تنبيهات",
+          "empty": "لا شيء"
+        },
+        "search": {
+          "placeholder": "الرقم، العقد، البنك…"
+        },
+        "count": "{count, plural, one {# كفالة} other {# كفالة}}",
+        "alert": "⚠ {count} انتهاء صلاحية < 30ي",
+        "columns": {
+          "numero": "الرقم",
+          "marche": "العقد",
+          "type": "النوع",
+          "banque": "البنك",
+          "montant": "المبلغ",
+          "emission": "الإصدار",
+          "validite": "الصلاحية",
+          "levee": "الإفراج",
+          "statut": "الحالة"
+        },
+        "empty": "لم يتم العثور على أي كفالة."
+      }
+    },
+    "dgd": {
+      "title": "الكشف العام النهائي (DGD)",
+      "subtitle": "إغلاق العقد — تراكم الكشوف، الضمان المحتجز، K، الغرامات (Task 07 M-MAR-02)",
+      "breadcrumb": "DGD",
+      "columns": {
+        "numero": "رقم DGD",
+        "marche": "العقد",
+        "cumulSituationsTtc": "تراكم الكشوف مع احتساب الضريبة",
+        "rg": "الضمان المحتجز",
+        "k": "K",
+        "penalites": "الغرامات",
+        "reprisesRg": "استرجاعات الضمان المحتجز",
+        "netAPayer": "الصافي للدفع",
+        "statut": "الحالة"
+      },
+      "empty": "لا يوجد DGD.",
+      "note": "الصيغة: الصافي = تراكم الكشوف مع احتساب الضريبة − الضمان المحتجز + استرجاعات الضمان − الغرامات + مراجعة K. PDF رسمي CCAG-T (تجريبي): يربط بتوليد الوثائق."
+    },
+    "ordreService": {
+      "title": "أوامر الخدمة",
+      "subtitle": "OS MOA / MOE — الأثر على المدة والكلفة (Task 07 M-MAR-04)",
+      "breadcrumb": "OS",
+      "columns": {
+        "numero": "رقم OS",
+        "marche": "العقد",
+        "chantier": "الورش",
+        "type": "النوع",
+        "emetteur": "المُصدِر",
+        "objet": "الموضوع",
+        "deltaDelai": "Δ المدة (ي)",
+        "statut": "الحالة",
+        "approbation": "الموافقة"
+      },
+      "empty": "لا يوجد أمر بالخدمة.",
+      "note": "أمر بالتوقف يطلق إيقافاً مؤقتاً على تخطيط الورش (تكامل Gantt: Task 07 / Task 05)."
+    },
+    "revisionsPrix": {
+      "title": "مراجعات الأسعار",
+      "subtitle": "صيغة K — مؤشرات ANP-IAB المغرب",
+      "breadcrumb": "مراجعات الأسعار",
+      "indices": {
+        "title": "مرجعية مؤشرات BTP (ANP-IAB)",
+        "columns": {
+          "mois": "الشهر",
+          "valeur": "القيمة",
+          "deltaPercent": "Δ%"
+        }
+      },
+      "coefK": {
+        "title": "معاملات K لكل عقد قابل للمراجعة",
+        "labelMois": "شهر الحساب:",
+        "columns": {
+          "marche": "العقد",
+          "type": "نوع الصيغة",
+          "termeFixe": "الحد الثابت",
+          "kCalcule": "K المحسوب"
+        },
+        "indiceMissing": "مؤشر غير موجود",
+        "typeFormulaSummary": "a={fixe} + {n} حد(حدود)"
+      },
+      "empty": "لا يوجد عقد قابل للمراجعة.",
+      "formula": "الصيغة: <code>K = a (ثابت) + Σ bᵢ × (المؤشر الحالي / المؤشر الأساس)</code> · مصدر المؤشرات: ANP-IAB المنشورة شهرياً."
+    },
+    "penalites": {
+      "title": "غرامات التأخير",
+      "subtitle": "حساب آلي وفق CCAG-T — العقود المتأخرة",
+      "breadcrumb": "الغرامات",
+      "summary": {
+        "enRetard": "العقود المتأخرة",
+        "totalPenalites": "إجمالي الغرامات المطبقة",
+        "totalApplicables": "للخصم من الفاتورة القادمة"
+      },
+      "columns": {
+        "marche": "العقد",
+        "chantier": "الورش",
+        "client": "الزبون",
+        "montantMarcheHt": "مبلغ العقد بدون احتساب الضريبة",
+        "tauxJour": "السعر / يوم",
+        "finContractuelle": "النهاية التعاقدية",
+        "finReelle": "النهاية الفعلية",
+        "joursRetard": "أيام التأخير",
+        "penalite": "الغرامة",
+        "statut": "الحالة"
+      },
+      "finReelleEnCours": "قيد التنفيذ",
+      "tauxJourSuffix": "{rate}% / ي",
+      "statuses": {
+        "applicable": "قابل للتطبيق",
+        "enCours": "قيد التنفيذ",
+        "grace": "إعفاء تعاقدي"
+      },
+      "empty": "لا يوجد عقد متأخر.",
+      "note": "الحساب: الغرامة = مبلغ العقد بدون احتساب الضريبة × السعر/يوم × أيام التأخير. تُطبَّق الغرامات اعتباراً من اليوم التالي لتاريخ النهاية التعاقدية. يمكن منح إعفاء استثنائي عبر سير عمل الموافقة."
+    }
+  }
+}

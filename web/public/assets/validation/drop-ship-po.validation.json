@@ -1,0 +1,20 @@
+{
+  "entity": "DropShipPo",
+  "fields": {
+    "poNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "shipToAddress": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

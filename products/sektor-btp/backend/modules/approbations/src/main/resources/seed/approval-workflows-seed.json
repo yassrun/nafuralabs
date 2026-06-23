@@ -1,0 +1,57 @@
+{
+  "workflows": [
+    {
+      "id": "wf-bc-500k",
+      "code": "BC-500K",
+      "label": "BC — montant élevé (≥ 500 k MAD HT)",
+      "entityType": "BC",
+      "conditionsJson": "[{\"champ\":\"montant\",\"operateur\":\">=\",\"valeur\":500000}]",
+      "etapesJson": "[{\"ordre\":0,\"type\":\"SERIE\",\"approbateurs\":[{\"type\":\"ROLE\",\"ref\":\"CONDUCTEUR_TRAVAUX\"}]},{\"ordre\":1,\"type\":\"SERIE\",\"approbateurs\":[{\"type\":\"ROLE\",\"ref\":\"DAF\"}]},{\"ordre\":2,\"type\":\"SERIE\",\"approbateurs\":[{\"type\":\"ROLE\",\"ref\":\"DG\"}]}]",
+      "slaJours": 4,
+      "escaladeApresJours": 5,
+      "isActive": true
+    },
+    {
+      "id": "wf-bc-std",
+      "code": "BC-STD",
+      "label": "BC — standard (< 500 k MAD HT)",
+      "entityType": "BC",
+      "conditionsJson": "[]",
+      "etapesJson": "[{\"ordre\":0,\"type\":\"SERIE\",\"approbateurs\":[{\"type\":\"ROLE\",\"ref\":\"CONDUCTEUR_TRAVAUX\"}]}]",
+      "slaJours": 4,
+      "escaladeApresJours": 4,
+      "isActive": true
+    },
+    {
+      "id": "wf-conge",
+      "code": "CONGE",
+      "label": "Congés — manager chantier",
+      "entityType": "CONGE",
+      "conditionsJson": "[]",
+      "etapesJson": "[{\"ordre\":0,\"type\":\"SERIE\",\"approbateurs\":[{\"type\":\"ROLE\",\"ref\":\"CONDUCTEUR_TRAVAUX\"}]}]",
+      "slaJours": 3,
+      "isActive": true
+    },
+    {
+      "id": "wf-paie",
+      "code": "PAIE",
+      "label": "Paie mensuelle — DAF puis DG",
+      "entityType": "PAIE",
+      "conditionsJson": "[]",
+      "etapesJson": "[{\"ordre\":0,\"type\":\"SERIE\",\"approbateurs\":[{\"type\":\"ROLE\",\"ref\":\"DAF\"}]},{\"ordre\":1,\"type\":\"SERIE\",\"approbateurs\":[{\"type\":\"ROLE\",\"ref\":\"DG\"}]}]",
+      "slaJours": 2,
+      "escaladeApresJours": 3,
+      "isActive": true
+    },
+    {
+      "id": "wf-vir",
+      "code": "VIR",
+      "label": "Virement interne — contrôle DAF",
+      "entityType": "VIR",
+      "conditionsJson": "[]",
+      "etapesJson": "[{\"ordre\":0,\"type\":\"SERIE\",\"approbateurs\":[{\"type\":\"ROLE\",\"ref\":\"DAF\"}]}]",
+      "slaJours": 2,
+      "isActive": true
+    }
+  ]
+}

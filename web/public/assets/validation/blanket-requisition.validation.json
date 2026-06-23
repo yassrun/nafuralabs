@@ -1,0 +1,28 @@
+{
+  "entity": "BlanketRequisition",
+  "fields": {
+    "reqNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "itemId": {
+      "required": true
+    },
+    "annualQuantity": {
+      "required": true,
+      "min": 0
+    },
+    "estimatedPrice": {
+      "min": 0
+    },
+    "period": {
+      "required": true,
+      "maxLength": 50
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

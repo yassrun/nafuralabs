@@ -1,0 +1,23 @@
+{
+  "entity": "JobRequisition",
+  "fields": {
+    "requisitionNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "headcount": {
+      "min": 0
+    },
+    "budgetAmount": {
+      "min": 0
+    },
+    "priority": {
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

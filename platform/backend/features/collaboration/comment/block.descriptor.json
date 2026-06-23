@@ -1,0 +1,16 @@
+{
+  "id": "comment",
+  "name": "Comment",
+  "description": "Comments and discussions",
+  "type": "feature",
+  "layer": "feature",
+  "group": "collaboration",
+  "provides": {
+    "backend": {
+      "gradle": ":platform:features:collaboration:comment",
+      "packages": ["ma.nafura.platform.collaboration.comment"]
+    }
+  },
+  "requires": { "core": ["identity", "tenancy"], "features": [] },
+  "manifest": { "key": "comment" }
+}

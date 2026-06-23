@@ -1,0 +1,29 @@
+{
+  "entity": "Recall",
+  "fields": {
+    "recallNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "reason": {
+      "maxLength": 120
+    },
+    "severity": {
+      "maxLength": 120
+    },
+    "affectedQuantity": {
+      "min": 0
+    },
+    "recoveredQuantity": {
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

@@ -1,0 +1,809 @@
+{
+  "chantiers": {
+    "module": {
+      "title": "Chantiers, Études & Planning",
+      "shortTitle": "Chantiers"
+    },
+    "routes": {
+      "chantiersTitle": "Mes chantiers",
+      "chantiersCrumb": "Chantiers",
+      "chantierDetailTitle": "Fiche chantier",
+      "chantierDetailCrumb": "Détail",
+      "planningTitle": "Planning Gantt",
+      "planningCrumb": "Planning",
+      "budgetTitle": "Budget chantier",
+      "budgetCrumb": "Budget",
+      "budgetDetailTitle": "Détail budget chantier",
+      "budgetDetailCrumb": "Détail",
+      "situationsTitle": "Situations de travaux",
+      "situationsCrumb": "Situations",
+      "attachementsTitle": "Attachements",
+      "attachementsCrumb": "Attachements",
+      "sousTraitanceTitle": "Contrats de sous-traitance",
+      "sousTraitanceCrumb": "Sous-traitance",
+      "documentsTitle": "Documents chantier",
+      "documentsCrumb": "Documents",
+      "journalTitle": "Journal de chantier",
+      "journalCrumb": "Journal",
+      "avancementTitle": "Saisie d'avancement",
+      "avancementCrumb": "Avancement",
+      "devisTitle": "Devis",
+      "devisCrumb": "Devis",
+      "metreTitle": "Métrés (DPGF)",
+      "metreCrumb": "Métrés",
+      "appelsOffresClientsTitle": "Appels d'offres clients",
+      "appelsOffresClientsCrumb": "AO clients",
+      "bibliothequePrixTitle": "Bibliothèque de prix",
+      "bibliothequePrixCrumb": "Bibliothèque prix"
+    },
+    "common": {
+      "actions": {
+        "back": "← Retour",
+        "backToList": "Retour à la liste",
+        "save": "Enregistrer",
+        "cancel": "Annuler",
+        "delete": "Supprimer",
+        "print": "Imprimer",
+        "export": "Exporter Excel",
+        "voirPlanning": "Voir planning",
+        "voirDetail": "Voir le détail"
+      },
+      "filters": {
+        "allStatuses": "Tous les statuts",
+        "allTypes": "Tous les types",
+        "filterByStatus": "Filtrer par statut"
+      },
+      "fields": {
+        "code": "Code",
+        "codeChantier": "Code chantier",
+        "name": "Chantier",
+        "designation": "Désignation",
+        "client": "Client",
+        "ville": "Ville",
+        "type": "Type",
+        "statut": "Statut",
+        "unite": "Unité",
+        "quantite": "Quantité",
+        "qteTotale": "Qté tot.",
+        "qtePrecedente": "Qté préc.",
+        "qteCumul": "Qté cumul",
+        "qteExecutee": "Qté exécutée",
+        "dateDebut": "Début",
+        "dateFinPrevue": "Fin prévue",
+        "dateFinReelle": "Fin réelle",
+        "dateEmission": "Date émission",
+        "periode": "Période",
+        "montantHt": "Montant HT",
+        "totalHt": "Total HT",
+        "totalTtc": "Total TTC",
+        "totalMad": "Total MAD",
+        "budgetHt": "Budget HT",
+        "factureHt": "Facturé HT",
+        "encaisseTtc": "Encaissé TTC",
+        "avancement": "Avancement",
+        "saisiPar": "Saisi par",
+        "marche": "Marché",
+        "reference": "Référence",
+        "fournisseur": "Fournisseur",
+        "montant": "Montant",
+        "date": "Date"
+      }
+    },
+    "chantier": {
+      "title": "Chantiers",
+      "list": {
+        "headerTitle": "Mes chantiers",
+        "headerSubtitle": "Tous les projets de construction",
+        "searchPlaceholder": "Code, nom, client…",
+        "countOne": "{count} chantier",
+        "countOther": "{count} chantiers",
+        "emptyState": "Aucun chantier correspondant aux filtres.",
+        "emptyFirstTitle": "Aucun chantier pour l'instant",
+        "emptyFirstHint": "Créez votre premier chantier pour débloquer le stock, la facturation et le pilotage.",
+        "columns": {
+          "code": "Code",
+          "name": "Chantier",
+          "type": "Type",
+          "client": "Client",
+          "ville": "Ville",
+          "budgetHt": "Budget HT",
+          "avancement": "Avancement",
+          "status": "Statut",
+          "dateDebut": "Début",
+          "dateFinPrevue": "Fin prévue"
+        }
+      },
+      "detail": {
+        "fallbackTitle": "Fiche chantier",
+        "marcheRef": "Marché {ref}",
+        "hero": {
+          "avancement": "Avancement",
+          "budgetHt": "Budget HT",
+          "factureHt": "Facturé HT",
+          "encaisseTtc": "Encaissé TTC"
+        },
+        "tabs": {
+          "overview": "Vue d'ensemble",
+          "lots": "Lots",
+          "phases": "Phases",
+          "budget": "Budget",
+          "situations": "Situations",
+          "documents": "Documents",
+          "photos": "Photos"
+        },
+        "sections": {
+          "equipe": "Équipe",
+          "calendrier": "Calendrier",
+          "finances": "Finances",
+          "description": "Description",
+          "syntheseBudget": "Synthèse budgétaire",
+          "brouillonCalcule": "Brouillon calculé",
+          "parLot": "Par lot"
+        },
+        "labels": {
+          "chefChantier": "Chef chantier",
+          "conducteurTravaux": "Conducteur travaux",
+          "ingenieur": "Ingénieur",
+          "ordreService": "Ordre de service",
+          "debut": "Début",
+          "finPrevue": "Fin prévue",
+          "finReelle": "Fin réelle",
+          "budgetHt": "Budget HT",
+          "budgetTtc": "Budget TTC",
+          "tva": "TVA",
+          "cautionGarantie": "Caution / garantie",
+          "delaiPaiement": "Délai paiement",
+          "delaiPaiementJours": "{count} jours",
+          "situationsCumulHt": "Situations cumulées HT",
+          "factureHt": "Facturé HT",
+          "encaisseTtc": "Encaissé TTC",
+          "marche": "Marché",
+          "travauxPeriodeHt": "Travaux période HT",
+          "revisionK": "Révision K",
+          "penalites": "Pénalités",
+          "rgPercent": "RG ({percent}%)",
+          "netHt": "Net HT",
+          "tvaMontant": "TVA {percent}%",
+          "netTtc": "Net TTC",
+          "montantHtPeriode": "Montant HT période"
+        },
+        "columns": {
+          "code": "Code",
+          "designation": "Désignation",
+          "quantite": "Quantité",
+          "unite": "Unité",
+          "prixUnitaireHt": "PU HT",
+          "montantHt": "Montant HT",
+          "avancement": "Avancement",
+          "responsable": "Responsable",
+          "debut": "Début",
+          "fin": "Fin",
+          "status": "Statut",
+          "lot": "Lot"
+        },
+        "empty": {
+          "lotsTitle": "Aucun lot",
+          "lotsMessage": "Aucun lot défini pour ce chantier.",
+          "phasesTitle": "Aucune phase",
+          "phasesMessage": "Aucune phase définie pour ce chantier.",
+          "documentsTitle": "Documents à venir",
+          "documentsMessage": "La gestion documentaire sera disponible prochainement.",
+          "notFoundTitle": "Chantier introuvable",
+          "notFoundMessage": "Référence « {ref} » : aucun chantier correspondant."
+        },
+        "situations": {
+          "hint": "Génération brouillon depuis avancement physique + lots (Task 07 M-MAR-05, démo).",
+          "generateCta": "Générer situation N (brouillon)",
+          "noMarche": "Aucun marché lié à ce chantier dans la démo — liaison requise pour la génération.",
+          "linkAll": "Voir toutes les situations de travaux pour ce chantier →"
+        },
+        "documents": {
+          "linkAll": "Voir tous les documents du chantier →"
+        },
+        "budget": {
+          "viewFullCta": "Voir le détail budgétaire complet →"
+        },
+        "lots": {
+          "addCta": "Ajouter un lot",
+          "promptCode": "Code du lot (ex. L01)",
+          "promptDesignation": "Désignation du lot",
+          "promptQuantite": "Quantité (BPU)",
+          "promptUnite": "Unité (ex. m², ml, U)",
+          "promptPrixUnitaireHt": "Prix unitaire HT (MAD)",
+          "invalidBpu": "Quantité, unité et prix unitaire HT sont obligatoires et doivent être valides.",
+          "createSuccess": "Lot ajouté.",
+          "createFailed": "Impossible d'ajouter le lot.",
+          "addTitle": "Ajouter un lot",
+          "addAction": "Ajouter"
+        },
+        "phases": {
+          "addAction": "Ajouter une phase",
+          "addTitle": "Ajouter une phase",
+          "promptCode": "Code (ex. PH01)",
+          "promptDesignation": "Désignation de la phase",
+          "promptDateDebut": "Date de début",
+          "promptDateFin": "Date de fin",
+          "promptResponsable": "Responsable",
+          "createSuccess": "Phase ajoutée.",
+          "createFailed": "Impossible d'ajouter la phase."
+        },
+        "actions": {
+          "edit": "Modifier"
+        },
+        "deleteConfirm": "Supprimer le chantier {code} — {name} ? Cette action est irréversible.",
+        "deleteSuccess": "Chantier supprimé.",
+        "deleteFailed": "Impossible de supprimer le chantier.",
+        "deleteTitle": "Supprimer le chantier",
+        "deleteAction": "Supprimer",
+        "cancel": "Annuler",
+        "marche": {
+          "createTitle": "Créer le marché",
+          "createConfirm": "Créer un marché pour le chantier {code} à partir de ses informations (montant, TVA, dates) ?",
+          "createAction": "Créer le marché",
+          "createSuccess": "Marché créé et lié au chantier.",
+          "createFailed": "Échec de la création du marché."
+        }
+      },
+      "edit": {
+        "title": "Modifier le chantier",
+        "breadcrumb": "Modifier",
+        "loading": "Chargement du chantier…",
+        "submit": "Enregistrer les modifications",
+        "success": "Chantier mis à jour.",
+        "failed": "Impossible d'enregistrer les modifications.",
+        "fields": {
+          "name": "Nom du chantier",
+          "description": "Description",
+          "marcheRef": "Référence marché",
+          "adresse": "Adresse",
+          "tva": "TVA (%)",
+          "rg": "Retenue de garantie (%)",
+          "chef": "Chef de chantier",
+          "conducteur": "Conducteur de travaux"
+        },
+        "validation": {
+          "name": "Le nom du chantier est obligatoire.",
+          "client": "Sélectionnez un client.",
+          "dates": "Ville et dates de début/fin sont obligatoires.",
+          "budget": "Le budget HT doit être supérieur à 0.",
+          "team": "Chef de chantier et conducteur de travaux sont obligatoires."
+        }
+      },
+      "create": {
+        "cta": "Nouveau chantier",
+        "stepLabel": "Étape {current} / {total}",
+        "codePreview": "Code chantier prévu : {code}"
+      }
+    },
+    "budget": {
+      "title": "Budget chantier",
+      "list": {
+        "headerTitle": "Suivi consolidé des chantiers",
+        "headerSubtitle": "Vision multi-chantiers des budgets, engagements, réalisé et marge projetée.",
+        "kpis": {
+          "realise": "Réalisé",
+          "resteEngager": "Reste à engager"
+        },
+        "filters": {
+          "allStatuses": "Tous les statuts",
+          "enCours": "En cours",
+          "toutesConsommations": "Toutes consommations",
+          "toutesMarges": "Toutes marges",
+          "enAlerte": "En alerte"
+        }
+      },
+      "detail": {
+        "backLink": "Retour à la vue consolidée",
+        "kicker": "Budget",
+        "hero": {
+          "initial": "Initial",
+          "revise": "Révisé",
+          "engage": "Engagé",
+          "realise": "Réalisé"
+        },
+        "alert": {
+          "title": "Vigilance budgétaire"
+        },
+        "summary": {
+          "resteEngager": "Reste à engager",
+          "resteExecuter": "Reste à exécuter",
+          "consommation": "Consommation",
+          "margeProjetee": "Marge projetée"
+        },
+        "tabs": {
+          "rubriques": "Vue par rubrique",
+          "lots": "Vue par lot",
+          "evolution": "Évolution mensuelle",
+          "engagements": "Engagements",
+          "revisions": "Avenants & révisions"
+        },
+        "actions": {
+          "reviser": "Réviser le budget",
+          "exportExcel": "Exporter Excel",
+          "printSuivi": "Imprimer suivi budgétaire"
+        },
+        "columns": {
+          "rubrique": "Rubrique",
+          "lot": "Lot",
+          "initial": "Initial",
+          "revise": "Révisé",
+          "engage": "Engagé",
+          "realise": "Réalisé",
+          "realiseStock": "Réalisé matière (stock)",
+          "reste": "Reste",
+          "ecart": "Écart",
+          "total": "Total"
+        },
+        "drilldown": {
+          "title": "Drilldown matériaux",
+          "subtitle": "Articles consommés sur le chantier",
+          "article": "Article",
+          "qteBudget": "Qté budget",
+          "qteCmd": "Qté cmd",
+          "qteLivr": "Qté livr",
+          "qteCons": "Qté cons",
+          "realiseStock": "Réalisé stock",
+          "mtRealise": "Mt réalisé",
+          "sortiesStock": "Sorties stock",
+          "voirSorties": "Voir sorties"
+        },
+        "empty": {
+          "notFound": "Chantier introuvable."
+        }
+      },
+      "reviser": {
+        "title": "Révision budget",
+        "before": "Avant",
+        "after": "Après",
+        "deltaTotal": "Δ total :",
+        "piece": "Pièce justificative",
+        "cancel": "Annuler",
+        "save": "Enregistrer"
+      },
+      "engagements": {
+        "subtitle": "BC et contrats liés au chantier avec leur statut de suivi.",
+        "columns": {
+          "reference": "Référence",
+          "montant": "Montant",
+          "date": "Date"
+        },
+        "empty": "Aucun engagement lié à ce chantier."
+      },
+      "revisions": {
+        "title": "Avenants et révisions",
+        "subtitle": "Historique des ajustements budgétaires et pièces jointes associées.",
+        "empty": "Aucune révision historique."
+      },
+      "evolution": {
+        "subtitle": "Empile réalisé + engagé face au budget mensuel."
+      }
+    },
+    "planning": {
+      "title": "Planning Gantt",
+      "empty": "Aucune phase planifiée pour cette sélection",
+      "toolbar": {
+        "periode": "Période",
+        "ceMois": "Ce mois",
+        "ceTrimestre": "Ce trimestre",
+        "cetteAnnee": "Cette année",
+        "tout": "Tout",
+        "granularite": "Granularité",
+        "pleinEcran": "Plein écran"
+      },
+      "drawer": {
+        "title": "Détail phase",
+        "equipe": "Équipe",
+        "debut": "Début",
+        "quantite": "Quantité",
+        "dependances": "Dépendances"
+      },
+      "placeholder": {
+        "backToPlanning": "Retour planning"
+      }
+    },
+    "situation": {
+      "title": "Situations de travaux",
+      "list": {
+        "columns": {
+          "numero": "N° situation",
+          "chantier": "Chantier",
+          "chantierName": "Désignation chantier",
+          "numeroOrdre": "N° ord.",
+          "periode": "Période",
+          "cumulHt": "Cumul HT",
+          "travauxPeriode": "Travaux période",
+          "retenue7": "Retenue 7%",
+          "netHt": "Net HT",
+          "netTtc": "Net TTC",
+          "status": "Statut",
+          "delaiAttente": "Attente MOA (j)"
+        },
+        "delai": {
+          "joursShort": "{n} j"
+        }
+      },
+      "detail": {
+        "rejectPrompt": "Motif de rejet (obligatoire) :",
+        "decompte": {
+          "title": "Décompte",
+          "cumulTravauxHt": "Cumul travaux exécutés HT",
+          "travauxPeriodeHt": "▶ Travaux période HT",
+          "resorptionAvance": "– Résorption avance (%)",
+          "netHt": "▶ Net à payer HT",
+          "netTtc": "▶ Net à payer TTC"
+        },
+        "lotsTable": {
+          "designation": "Désignation",
+          "unite": "Unité",
+          "qteTotale": "Qté tot.",
+          "qtePrecedente": "Qté préc.",
+          "qteCumul": "Qté cumul"
+        }
+      },
+      "print": {
+        "title": "SITUATION DE TRAVAUX N°{n}",
+        "periode": "Période : {from} → {to}",
+        "columns": {
+          "lotDesignation": "Lot / Désignation",
+          "unite": "Unité",
+          "qteCumulee": "Q. Cumulée",
+          "montantHt": "Montant HT"
+        },
+        "cumulPrecedent": "Cumul précédent HT (situation N°{n})",
+        "travauxPeriodeHt": "Travaux de la période HT",
+        "retenueGarantiePct": "Retenue de garantie {pct}%",
+        "netHt": "Net à payer HT",
+        "netTtc": "NET À PAYER TTC",
+        "etabliPar": "Établi par (MOE)",
+        "visaMoa": "Visa du Maître d'Ouvrage (MOA)",
+        "companyLine": "{raison} — SARL AU — ICE {ice} —",
+        "footer": "Situation N°{n} · Période {from} → {to}"
+      },
+      "decomptePrint": {
+        "title": "Décompte de travaux",
+        "periode": "Période :",
+        "dateEmission": "Date émission :",
+        "detailLots": "Détail des lots — cumul à date",
+        "columns": {
+          "designation": "Désignation",
+          "unite": "Unité",
+          "qteTotale": "Qté tot.",
+          "qteCumul": "Qté cumul"
+        },
+        "decompteTitle": "Décompte",
+        "cumulTravauxHt": "Cumul travaux exécutés HT",
+        "travauxPeriodeHt": "▶ Travaux période HT",
+        "resorptionAvance": "– Résorption avance (%)",
+        "netHt": "▶ Net à payer HT",
+        "netTtc": "▶ Net à payer TTC",
+        "pourEntrepreneur": "Pour l'entrepreneur",
+        "pourMoa": "Pour le maître d'ouvrage"
+      }
+    },
+    "attachement": {
+      "title": "Attachements",
+      "list": {
+        "searchPlaceholder": "Chantier, date…",
+        "allStatuses": "Tous les statuts",
+        "signedShort": "✍️ Signé",
+        "columns": {
+          "designation": "Désignation",
+          "unite": "Unité",
+          "qteExecutee": "Qté exécutée"
+        },
+        "emptyState": "Aucun attachement trouvé.",
+        "saisieCta": "Saisie terrain"
+      },
+      "saisie": {
+        "addLine": "Ligne",
+        "meteoEnsoleille": "Ensoleillé",
+        "lignesExecutees": "Lignes exécutées",
+        "designationPlaceholder": "Désignation",
+        "unitePlaceholder": "Unité",
+        "signatureMoeTitle": "Signature MOE (démo)",
+        "signatureMoeHint": "Signez dans le cadre ci-dessous (aperçu PNG léger, stocké avec le brouillon)."
+      }
+    },
+    "sousTraitance": {
+      "title": "Contrats de sous-traitance",
+      "list": {
+        "searchPlaceholder": "N° contrat, sous-traitant, chantier…",
+        "filterByStatus": "Filtrer par statut",
+        "createCta": "Nouveau contrat",
+        "columns": {
+          "sousTraitant": "Sous-traitant",
+          "montantHt": "Montant HT",
+          "debut": "Début"
+        },
+        "emptyState": "Aucun contrat correspondant aux filtres.",
+        "toasts": {
+          "createSoon": "Création de contrat sous-traitance — prochainement."
+        }
+      },
+      "create": {
+        "title": "Nouveau contrat de sous-traitance",
+        "subtitle": "Saisie minimale pour enregistrer un contrat",
+        "breadcrumb": "Création",
+        "submit": "Créer le contrat",
+        "fields": {
+          "chantier": "Chantier",
+          "chantierPlaceholder": "Sélectionner un chantier",
+          "sousTraitant": "Sous-traitant",
+          "objet": "Objet du contrat",
+          "montantHt": "Montant HT (MAD)",
+          "dateDebut": "Date de début",
+          "dateFin": "Date de fin"
+        },
+        "errors": {
+          "required": "Renseignez le chantier, le sous-traitant, l'objet et le montant.",
+          "failed": "Impossible de créer le contrat."
+        },
+        "success": "Contrat sous-traitance créé."
+      }
+    },
+    "journal": {
+      "title": "Journal de chantier",
+      "filters": {
+        "allTypes": "Tous les types"
+      },
+      "labels": {
+        "saisiPar": "Saisi par"
+      },
+      "empty": "Aucun événement enregistré.",
+      "create": {
+        "cta": "Nouvel événement",
+        "title": "Nouvel événement",
+        "submit": "Enregistrer",
+        "fields": {
+          "chantier": "Chantier",
+          "chantierPlaceholder": "Sélectionner un chantier",
+          "type": "Type d'événement",
+          "date": "Date",
+          "contenu": "Description"
+        },
+        "errors": {
+          "required": "Renseignez le chantier, la date et la description.",
+          "failed": "Impossible d'enregistrer l'événement."
+        },
+        "success": "Événement enregistré."
+      }
+    },
+    "documents": {
+      "title": "Documents chantier",
+      "filters": {
+        "allTypes": "Tous les types"
+      },
+      "fields": {
+        "deposeLeBy": "Déposé le {date} par {user}"
+      },
+      "emptyState": "Aucun document correspondant aux filtres.",
+      "create": {
+        "cta": "Déposer un document",
+        "title": "Déposer un document",
+        "submit": "Déposer",
+        "fields": {
+          "chantier": "Chantier",
+          "chantierPlaceholder": "Sélectionner un chantier",
+          "type": "Type de document",
+          "titre": "Titre",
+          "file": "Fichier"
+        },
+        "errors": {
+          "required": "Renseignez le chantier, le titre et le fichier.",
+          "failed": "Impossible de déposer le document."
+        },
+        "success": "Document déposé."
+      },
+      "types": {
+        "MARCHE": "Marché",
+        "PV_RECEPTION": "PV de réception",
+        "BON_COMMANDE": "Bon de commande"
+      }
+    },
+    "avancement": {
+      "title": "Saisie d'avancement",
+      "editTitle": "Modifier l'avancement",
+      "validate": "Valider",
+      "saveEdit": "Enregistrer la modification",
+      "saveDraft": "Enregistrer brouillon",
+      "entityName": "Avancement",
+      "entityNamePlural": "Avancements",
+      "fields": {
+        "dateRequired": "Date *",
+        "lotsToInput": "Lots à saisir",
+        "addLot": "Ajouter un lot",
+        "pickAdditionalLot": "Choisir un lot supplémentaire",
+        "softValidation": "Validation soft en cas de cumul supérieur au total",
+        "addPhoto": "📷 Ajouter photo"
+      },
+      "listing": {
+        "headerTitle": "Avancements chantiers",
+        "breadcrumb": "Avancements",
+        "quickFilters": {
+          "thisWeek": "Cette semaine",
+          "thisMonth": "Ce mois",
+          "myEntries": "Mes saisies",
+          "late": "En retard de saisie",
+          "lateTooltip": "Chantiers sans saisie d'avancement depuis plus de 7 jours",
+          "reset": "Réinitialiser"
+        },
+        "actions": {
+          "refresh": "Rafraîchir",
+          "saisir": "Saisir avancement",
+          "voirPhotos": "Voir photos",
+          "modifier": "Modifier"
+        },
+        "columns": {
+          "date": "Date",
+          "chantier": "Chantier",
+          "lot": "Lot",
+          "designation": "Désignation",
+          "qtePeriode": "Qté période",
+          "cumul": "Cumul",
+          "pourcentageCumule": "% cumulé",
+          "saisiPar": "Saisi par",
+          "photos": "Photos"
+        },
+        "filters": {
+          "chantiers": "Chantiers",
+          "lots": "Lots",
+          "dateFrom": "Du",
+          "dateTo": "Au",
+          "saisiPar": "Saisi par",
+          "avecPhotos": "Avec photos"
+        },
+        "emptyState": {
+          "title": "Aucun avancement sur la période",
+          "message": "Ajustez les filtres ou saisissez un nouvel avancement terrain.",
+          "actionLabel": "Saisir avancement"
+        }
+      },
+      "saisie": {
+        "breadcrumb": "Saisie",
+        "chantierRequired": "Chantier *",
+        "chefChantier": "Chef chantier : {name}",
+        "impactChantier": "Impact chantier",
+        "before": "Avant",
+        "after": "Après",
+        "ergonomieTerrain": "Ergonomie terrain",
+        "ergonomie": {
+          "touchInputs": "Inputs numériques tactiles 44px minimum",
+          "cameraUpload": "Upload caméra direct via capture environment",
+          "softValidation": "Validation soft en cas de cumul supérieur au total"
+        }
+      },
+      "lot": {
+        "currentCumul": "Cumul actuel : {percent}% ({cumul} {unite})",
+        "remove": "Retirer",
+        "period": "Période {unite}",
+        "cumul": "Cumul {unite}",
+        "avancementPeriod": "Avancement période",
+        "cumulPercent": "Cumul avancement",
+        "progress": "Avancement : {before}% → {after}%",
+        "fieldNotes": "Note terrain"
+      },
+      "warnings": {
+        "cumulExceeds": "Le cumul dépasse la quantité totale du lot ({quantite} {unite}).",
+        "highPeriodEntry": "Saisie élevée : plus de 30% du lot en une seule période."
+      },
+      "alerts": {
+        "savedDraft": "{count, plural, =0 {Aucun lot enregistré en brouillon.} one {1 lot enregistré en brouillon.} other {# lots enregistrés en brouillon.}}",
+        "validated": "{count, plural, =0 {Aucun lot validé.} one {1 lot validé.} other {# lots validés.}}"
+      },
+      "confirm": {
+        "validate": "{count, plural, =0 {Aucun lot à valider ?} one {Valider 1 lot ?} other {Valider # lots ?}} Chantier: {before}% → {after}%"
+      },
+      "summary": {
+        "lotsLoaded": "{count, plural, =0 {Aucun lot chargé} one {1 lot chargé} other {# lots chargés}}",
+        "deltaOnLots": "+{delta}% sur {count, plural, =0 {0 lot} one {1 lot} other {# lots}}"
+      },
+      "gallery": {
+        "title": "{chantierCode} - lot {lotCode}",
+        "photoCount": "{count, plural, =0 {Aucune photo} one {1 photo} other {# photos}}",
+        "close": "Fermer"
+      },
+      "errors": {
+        "loadFailedTitle": "Saisie indisponible",
+        "saisieNotFound": "Saisie à modifier introuvable.",
+        "chantierNotFound": "Chantier introuvable pour cette saisie.",
+        "chooseChantier": "Choisissez un chantier avant de poursuivre.",
+        "atLeastOnePositiveQty": "Saisissez au moins une quantité période positive.",
+        "v1SingleLine": "La modification V1 ne supporte qu'une seule ligne à la fois.",
+        "saisieUserNotFound": "Utilisateur de saisie introuvable",
+        "avancementNotFound": "Avancement introuvable : {id}",
+        "notFound": "Avancement introuvable : {id}",
+        "createFailed": "Aucun avancement créé",
+        "deleteNotAvailable": "Suppression avancement non disponible",
+        "readFileFailed": "Lecture impossible pour {name}",
+        "saveFailed": "Enregistrement impossible.",
+        "validateFailed": "Validation impossible."
+      }
+    },
+    "devis": {
+      "title": "Devis",
+      "detail": {
+        "emisLeValable": "Émis le {date} · Valable jusqu'au {valable}",
+        "columns": {
+          "designation": "Désignation",
+          "totalHt": "Total HT"
+        },
+        "totals": {
+          "totalHt": "Total HT",
+          "totalTtc": "Total TTC"
+        }
+      }
+    },
+    "metre": {
+      "title": "Métrés",
+      "dpgf": {
+        "title": "DPGF — Décomposition de prix global et forfaitaire"
+      },
+      "errors": {
+        "notFound": "Métré {id} introuvable"
+      }
+    },
+    "appelOffreClient": {
+      "title": "Appels d'offres clients"
+    },
+    "bibliothequePrix": {
+      "title": "Bibliothèque de prix",
+      "families": {
+        "GROS_OEUVRE": "Gros œuvre",
+        "ETANCHEITE": "Étanchéité",
+        "REVETEMENTS": "Revêtements",
+        "ELECTRICITE": "Électricité"
+      }
+    },
+    "photos": {
+      "upload": "Ajouter une photo",
+      "zonePlaceholder": "Zone / repère (optionnel)",
+      "uploading": "Envoi en cours…",
+      "empty": "Aucune photo pour ce chantier."
+    },
+    "etudes": {
+      "composantsEditor": {
+        "hint": "Sous-détail = matériaux + main d'œuvre + frais généraux + bénéfice",
+        "columns": {
+          "unite": "Unité",
+          "totalMad": "Total MAD"
+        },
+        "removeRow": "Supprimer",
+        "labels": {
+          "mainOeuvre": "Main d'œuvre",
+          "sousTotalDebourses": "Sous-total déboursés",
+          "fraisGeneraux": "Frais généraux",
+          "benefice": "Bénéfice"
+        }
+      },
+      "dpgfEditor": {
+        "title": "DPGF — Décomposition prix global et forfaitaire",
+        "columns": {
+          "designation": "Désignation",
+          "unite": "Unité",
+          "totalHt": "Total HT"
+        },
+        "actions": {
+          "addOuvrage": "Ajouter ouvrage au chapitre",
+          "removeChapitre": "Supprimer le chapitre",
+          "removeRow": "Supprimer la ligne",
+          "removeNote": "Supprimer la note"
+        },
+        "totalsBeforeDiscount": "Total HT (avant remise globale)"
+      },
+      "metreTableEditor": {
+        "hint": "Formules acceptées : L*l*h*N, (L*l)-(L1*l1), etc.",
+        "columns": {
+          "designation": "Désignation",
+          "unite": "Unité"
+        },
+        "designationPlaceholder": "Désignation libre",
+        "removeRow": "Supprimer la ligne",
+        "totalEstime": "Total estimé"
+      },
+      "cautionTracker": {
+        "definitive": "Définitive",
+        "totalCautions": "Total cautions"
+      }
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "core": {
+    "application": {
+      "title": "Nafura Core ERP",
+      "description": "Espace ERP Core Nafura"
+    },
+    "ai": {
+      "assistant": {
+        "title": "Assistant IA",
+        "subtitle": "Posez une question sur l'ERP",
+        "placeholder": "Ex. créer un BC pour le chantier CH-2026-003"
+      }
+    }
+  }
+}

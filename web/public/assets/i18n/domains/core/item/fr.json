@@ -1,0 +1,54 @@
+{
+  "item": {
+    "navigation": {
+      "title": "Item",
+      "description": "Item Domain",
+      "items": "Items",
+      "itemCategories": "Item Categories",
+      "itemTypes": "Item Types",
+      "unitOfMeasures": "Unités de mesure",
+      "uoMCategories": "Catégories de mesure",
+      "itemPrices": "Item Prices"
+    }
+  },
+  "common": {
+    "subsections": {
+      "operations": "Operations",
+      "configuration": "Configuration"
+    }
+  },
+  "directory": {
+    "fields": {
+      "code": "Code",
+      "name": "Name",
+      "description": "Description",
+      "itemType": "Item Type Id",
+      "itemCategory": "Item Category Id",
+      "unitOfMeasure": "ID unité de mesure",
+      "sku": "Sku",
+      "parent": "Parent Id",
+      "itemId": "Item Id",
+      "priceType": "Price Type",
+      "currencyId": "Currency Id",
+      "unitPrice": "Unit Price",
+      "minQuantity": "Min Quantity",
+      "effectiveFrom": "Effective From",
+      "effectiveTo": "Effective To"
+    },
+    "sections": {
+      "general": "General",
+      "classification": "Classification",
+      "measurement": "Measurement",
+      "status": "Status"
+    }
+  },
+  "measurement": {
+    "fields": {
+      "code": "Code",
+      "name": "Name",
+      "category": "ID catégorie de mesure",
+      "categoryCode": "Code",
+      "categoryName": "Name"
+    }
+  }
+}

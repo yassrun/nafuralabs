@@ -1,0 +1,14 @@
+<svg width="460" height="120" viewBox="0 0 460 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Nafura Sektor — ERP Construction">
+  <defs>
+    <style>@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&amp;family=Plus+Jakarta+Sans:wght@600&amp;display=swap');</style>
+  </defs>
+  <g transform="translate(18,24) scale(0.6)">
+    <rect x="26" y="26" width="68" height="68" rx="8" fill="none" stroke="#1B3FAE" stroke-width="5"/>
+    <path d="M34 86 L80 86 A46 46 0 0 0 34 40 Z" fill="#F2D544"/>
+    <circle cx="34" cy="40" r="5.5" fill="#1B3FAE"/>
+  </g>
+  <text x="100" y="60" font-family="'Space Grotesk','Plus Jakarta Sans',Arial,sans-serif"
+        font-size="36" font-weight="700" letter-spacing="-0.5" fill="#1B3FAE">Nafura <tspan fill="#131415">Sektor</tspan></text>
+  <text x="102" y="84" font-family="'Plus Jakarta Sans',Arial,sans-serif"
+        font-size="12" font-weight="600" letter-spacing="2.4" fill="#7A82A0">ERP CONSTRUCTION · NAFURA LABS</text>
+</svg>

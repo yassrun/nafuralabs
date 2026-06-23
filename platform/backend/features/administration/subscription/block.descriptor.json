@@ -1,0 +1,16 @@
+{
+  "id": "subscription",
+  "name": "Subscription Management",
+  "description": "Subscription and licensing",
+  "type": "feature",
+  "layer": "feature",
+  "group": "administration",
+  "provides": {
+    "backend": {
+      "gradle": ":platform:features:administration:subscription",
+      "packages": ["ma.nafura.platform.subscription"]
+    }
+  },
+  "requires": { "core": ["tenancy", "authorization"], "features": [] },
+  "manifest": { "key": "subscription" }
+}

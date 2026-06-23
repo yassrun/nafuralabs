@@ -1,0 +1,23 @@
+{
+  "entity": "EmployeeDocument",
+  "fields": {
+    "employeeId": {
+      "required": true
+    },
+    "documentType": {
+      "required": true,
+      "maxLength": 50
+    },
+    "fileName": {
+      "required": true,
+      "maxLength": 200
+    },
+    "fileUrl": {
+      "required": true,
+      "maxLength": 500
+    },
+    "uploadedAt": {
+      "required": true
+    }
+  }
+}

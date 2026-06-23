@@ -1,0 +1,26 @@
+{
+  "entity": "BankReconciliation",
+  "fields": {
+    "reconciliationNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "bankAccountId": {
+      "required": true
+    },
+    "statementDate": {
+      "required": true
+    },
+    "statementBalance": {
+      "required": true
+    },
+    "bookBalance": {
+      "required": true
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

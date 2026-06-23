@@ -1,0 +1,37 @@
+{
+  "currency": {
+    "navigation": {
+      "title": "Currency",
+      "description": "Currency Domain",
+      "currencies": "Currencies",
+      "exchangeRates": "Exchange Rates",
+      "paymentTerms": "Payment Terms"
+    }
+  },
+  "common": {
+    "subsections": {
+      "operations": "Operations",
+      "configuration": "Configuration"
+    }
+  },
+  "finance": {
+    "fields": {
+      "code": "Code",
+      "name": "Name",
+      "symbol": "Symbol",
+      "decimalPlaces": "Decimal Places",
+      "fromCurrency": "From Currency Id",
+      "toCurrency": "To Currency Id",
+      "rate": "Rate",
+      "effectiveDate": "Effective Date",
+      "source": "Source",
+      "days": "Days",
+      "discountDays": "Discount Days",
+      "discountPercent": "Discount Percent",
+      "description": "Description"
+    },
+    "sections": {
+      "general": "General"
+    }
+  }
+}

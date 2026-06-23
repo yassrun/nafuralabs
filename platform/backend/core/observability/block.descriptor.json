@@ -1,0 +1,16 @@
+{
+  "id": "observability",
+  "name": "Observability",
+  "description": "Tracing and metrics",
+  "type": "core",
+  "layer": "core",
+  "provides": {
+    "backend": {
+      "gradle": ":platform:core:observability",
+      "packages": ["ma.nafura.core.monitoring"]
+    }
+  },
+  "requires": { "core": ["framework"] },
+  "conditionalOn": { "profile": "with-observability" },
+  "manifest": { "key": "observability" }
+}

@@ -1,0 +1,21 @@
+{
+  "entity": "PartnerBankAccount",
+  "fields": {
+    "partnerId": {
+      "required": true
+    },
+    "bankId": {
+      "required": true
+    },
+    "accountNumber": {
+      "required": true,
+      "maxLength": 40
+    },
+    "iban": {
+      "maxLength": 34
+    },
+    "accountName": {
+      "maxLength": 200
+    }
+  }
+}

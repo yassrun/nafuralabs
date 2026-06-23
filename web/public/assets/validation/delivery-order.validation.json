@@ -1,0 +1,26 @@
+{
+  "entity": "DeliveryOrder",
+  "fields": {
+    "orderNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "deliveryAddress": {
+      "maxLength": 120
+    },
+    "priority": {
+      "min": 0
+    },
+    "deliveryInstructions": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

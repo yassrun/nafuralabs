@@ -1,0 +1,753 @@
+{
+  "ventes": {
+    "common": {
+      "dash": "—",
+      "actions": {
+        "cancel": "إلغاء",
+        "save": "حفظ",
+        "close": "إغلاق",
+        "print": "طباعة",
+        "delete": "حذف",
+        "edit": "تعديل",
+        "new": "جديد",
+        "reset": "إعادة تعيين",
+        "search": "بحث"
+      }
+    },
+    "modePaiement": {
+      "virement": "حوالة",
+      "cheque": "شيك",
+      "effet": "كمبيالة",
+      "especes": "نقدا",
+      "compensation": "مقاصة"
+    },
+    "modePaiementLong": {
+      "virement": "حوالة بنكية",
+      "cheque": "شيك",
+      "effet": "كمبيالة تجارية",
+      "especes": "نقدا",
+      "compensation": "مقاصة"
+    },
+    "formeJuridique": {
+      "sa": "SA",
+      "sarl": "SARL",
+      "sas": "SAS",
+      "particulier": "خاص",
+      "administration": "إدارة",
+      "cooperative": "تعاونية"
+    },
+    "facture": {
+      "entityName": "فاتورة",
+      "entityNamePlural": "الفواتير",
+      "headerTitle": "فواتير الزبائن",
+      "createTitle": "فاتورة جديدة",
+      "detailTitle": "تفاصيل الفاتورة",
+      "list": {
+        "columns": {
+          "numero": "الرقم",
+          "type": "النوع",
+          "client": "الزبون",
+          "chantier": "الورش",
+          "dateEmission": "تاريخ الإصدار",
+          "dateEcheance": "الاستحقاق",
+          "netTtc": "الصافي مع احتساب الضريبة",
+          "encaisse": "المحصَّل",
+          "resteTtc": "المتبقي مع احتساب الضريبة",
+          "retard": "التأخير (أيام)",
+          "status": "الحالة"
+        },
+        "transform": {
+          "retardJ": "+{n} ي"
+        },
+        "filters": {
+          "status": "الحالة",
+          "type": "النوع",
+          "client": "الزبون",
+          "chantier": "الورش",
+          "modePaiement": "طريقة الدفع",
+          "dateFrom": "أُصدرت من",
+          "dateTo": "أُصدرت إلى",
+          "netMin": "الحد الأدنى للصافي مع احتساب الضريبة",
+          "netMax": "الحد الأقصى للصافي مع احتساب الضريبة"
+        },
+        "emptyState": {
+          "title": "لا توجد فواتير",
+          "message": "أنشئ فاتورة جديدة لزبون (كشف أشغال أو دفعة على الحساب أو متنوعة).",
+          "actionLabel": "فاتورة جديدة"
+        }
+      },
+      "form": {
+        "fields": {
+          "numero": "رقم الفاتورة",
+          "numeroPlaceholder": "توليد آلي",
+          "type": "النوع",
+          "client": "الزبون",
+          "chantier": "الورش",
+          "bcClient": "سند طلب الزبون",
+          "situationSource": "كشف الأشغال المصدر",
+          "dateEmission": "تاريخ الإصدار",
+          "dateEcheance": "تاريخ الاستحقاق",
+          "modePaiement": "طريقة الدفع",
+          "totalHt": "الإجمالي بدون احتساب الضريبة (MAD)",
+          "retenueGarantie": "الضمان المحتجز (MAD)",
+          "resorptionAvance": "استنزال الدفعة على الحساب (MAD)",
+          "tvaTaux": "نسبة TVA (%)",
+          "netHt": "الصافي للدفع بدون احتساب الضريبة",
+          "tva": "TVA",
+          "netTtc": "الصافي للدفع مع احتساب الضريبة",
+          "cumulEncaisse": "إجمالي المحصَّل مع احتساب الضريبة",
+          "resteEncaisser": "المتبقي للتحصيل مع احتساب الضريبة",
+          "motifLitige": "سبب النزاع",
+          "notes": "ملاحظات داخلية",
+          "lignes": "أسطر الفاتورة",
+          "encaissements": "التحصيلات"
+        },
+        "sections": {
+          "identite": "الهوية",
+          "dates": "التواريخ والدفع",
+          "lignes": "أسطر الفوترة",
+          "decompte": "الكشف الحسابي",
+          "encaissements": "التحصيلات",
+          "autres": "ملاحظات ونزاع"
+        }
+      },
+      "actions": {
+        "emit": "إصدار",
+        "litige": "تأشير في نزاع",
+        "resolveLitige": "النزاع محلول",
+        "cancel": "إلغاء",
+        "addEncaissement": "+ تحصيل",
+        "print": "طباعة الفاتورة",
+        "creerAvoir": "إنشاء إشعار دائن"
+      },
+      "confirm": {
+        "emit": {
+          "title": "إصدار الفاتورة؟",
+          "message": "ستنتقل الفاتورة إلى حالة مُصدرة وسيكون PDF الرسمي متاحا. سيتم إرسال بريد إلكتروني تجريبي إلى الزبون.",
+          "confirmLabel": "إصدار"
+        },
+        "litige": {
+          "title": "وضع الفاتورة في نزاع؟",
+          "message": "حدد سبب النزاع (سبب التعليق من جانب الزبون).",
+          "confirmLabel": "تأكيد النزاع",
+          "notePlaceholder": "سبب النزاع"
+        },
+        "cancel": {
+          "title": "إلغاء الفاتورة؟",
+          "message": "ستُؤشَّر الفاتورة كمُلغاة. هذا الإجراء لا يمكن التراجع عنه قبل الإصدار.",
+          "confirmLabel": "إلغاء الفاتورة"
+        },
+        "removeEncaissement": "حذف هذا التحصيل؟",
+        "delete": {
+          "title": "حذف الفاتورة",
+          "message": "هل تريد حقا حذف الفاتورة {numero}؟"
+        }
+      },
+      "toasts": {
+        "saved": "تم حفظ الفاتورة {numero}"
+      },
+      "table": {
+        "header": {
+          "designation": "التسمية",
+          "quantite": "الكمية",
+          "puHt": "س.و بدون احتساب الضريبة",
+          "totalHt": "الإجمالي بدون احتساب الضريبة (MAD)",
+          "date": "التاريخ",
+          "mode": "الطريقة",
+          "reference": "المرجع",
+          "banque": "البنك",
+          "montantTtc": "المبلغ مع احتساب الضريبة"
+        },
+        "emptyLignes": "لا توجد أسطر — فاتورة منبثقة من كشف أشغال مصدر",
+        "emptyEncaissements": "لم يُسجَّل أي تحصيل حتى الآن.",
+        "deleteEncaissementAria": "حذف التحصيل"
+      }
+    },
+    "avoir": {
+      "entityName": "إشعار دائن",
+      "entityNamePlural": "الإشعارات الدائنة",
+      "headerTitle": "الإشعارات الدائنة",
+      "createTitle": "إشعار دائن جديد",
+      "detailTitle": "تفاصيل الإشعار الدائن",
+      "list": {
+        "columns": {
+          "numero": "الرقم",
+          "factureOrigine": "الفاتورة الأصلية",
+          "client": "الزبون",
+          "dateEmission": "تاريخ الإصدار",
+          "motif": "السبب",
+          "totalTtc": "الإجمالي مع احتساب الضريبة",
+          "status": "الحالة"
+        },
+        "filters": {
+          "status": "الحالة",
+          "client": "الزبون",
+          "dateFrom": "أُصدر من",
+          "dateTo": "أُصدر إلى"
+        },
+        "emptyState": {
+          "title": "لا توجد إشعارات دائنة",
+          "message": "أصدر إشعارا دائنا لتصحيح فاتورة أو رد مبلغها.",
+          "actionLabel": "إشعار دائن جديد"
+        }
+      },
+      "form": {
+        "fields": {
+          "numero": "رقم الإشعار الدائن",
+          "numeroPlaceholder": "توليد آلي",
+          "factureOrigine": "الفاتورة الأصلية",
+          "client": "الزبون",
+          "dateEmission": "تاريخ الإصدار",
+          "motif": "سبب الإشعار الدائن",
+          "totalHt": "الإجمالي بدون احتساب الضريبة (MAD)",
+          "tvaTaux": "نسبة TVA (%)",
+          "tva": "TVA",
+          "totalTtc": "الإجمالي مع احتساب الضريبة",
+          "notes": "ملاحظات داخلية",
+          "lignes": "أسطر الإشعار الدائن"
+        },
+        "sections": {
+          "identite": "الهوية",
+          "motif": "السبب",
+          "lignes": "الأسطر",
+          "totaux": "المجاميع",
+          "autres": "ملاحظات"
+        }
+      },
+      "actions": {
+        "emit": "إصدار",
+        "impute": "اقتطاع",
+        "rembourser": "رد المبلغ",
+        "cancel": "إلغاء",
+        "print": "طباعة الإشعار الدائن"
+      },
+      "confirm": {
+        "emit": {
+          "title": "إصدار الإشعار الدائن؟",
+          "message": "سينتقل الإشعار الدائن إلى حالة مُصدر. يمكنك بعد ذلك اقتطاعه على الفاتورة الأصلية أو رد مبلغه.",
+          "confirmLabel": "إصدار"
+        },
+        "imputer": {
+          "title": "اقتطاع الإشعار الدائن؟",
+          "message": "سيُقتطع الإشعار الدائن من الفاتورة الأصلية. وسيُعدَّل إجمالي المحصَّل تبعا لذلك.",
+          "confirmLabel": "اقتطاع"
+        },
+        "rembourser": {
+          "title": "رد مبلغ الإشعار الدائن؟",
+          "message": "سيُسجَّل صرف (نسخة تجريبية V1) عبر حوالة لفائدة الزبون.",
+          "confirmLabel": "رد المبلغ"
+        },
+        "cancel": {
+          "title": "إلغاء الإشعار الدائن؟",
+          "message": "هذا الإجراء لا يمكن التراجع عنه.",
+          "confirmLabel": "إلغاء"
+        },
+        "delete": {
+          "title": "حذف الإشعار الدائن",
+          "message": "هل تريد حقا حذف الإشعار الدائن {numero}؟"
+        }
+      },
+      "toasts": {
+        "saved": "تم حفظ الإشعار الدائن {numero}"
+      },
+      "table": {
+        "header": {
+          "designation": "التسمية",
+          "totalHt": "الإجمالي بدون احتساب الضريبة (MAD)"
+        },
+        "emptyLignes": "لا توجد أسطر — أضف العناصر المراد تسجيلها في الإشعار الدائن (تسويات، تخفيضات، إلخ.)"
+      }
+    },
+    "offre": {
+      "entityName": "عرض تجاري",
+      "entityNamePlural": "العروض التجارية",
+      "headerTitle": "العروض التجارية",
+      "createTitle": "عرض تجاري جديد",
+      "detailTitle": "تفاصيل العرض",
+      "list": {
+        "columns": {
+          "numero": "رقم العرض",
+          "client": "الزبون",
+          "objet": "الموضوع",
+          "dateEmission": "تاريخ الإصدار",
+          "dateValidite": "الصلاحية",
+          "joursRestants": "الأيام المتبقية",
+          "totalTtc": "المبلغ مع احتساب الضريبة",
+          "status": "الحالة"
+        },
+        "transform": {
+          "joursPositif": "{n}ي",
+          "joursAujourdhui": "ينتهي اليوم",
+          "joursExpire": "انتهى منذ {n}ي"
+        },
+        "filters": {
+          "status": "الحالة",
+          "clientId": "معرّف الزبون"
+        },
+        "chips": {
+          "all": "الكل",
+          "brouillon": "مسودة",
+          "envoyees": "مُرسلة",
+          "acceptees": "مقبولة",
+          "refusees": "مرفوضة",
+          "expirees": "منتهية الصلاحية"
+        },
+        "emptyState": {
+          "title": "لا توجد عروض تجارية",
+          "message": "تُرسَل العروض التجارية إلى الزبائن لتحفيز إصدار طلبية.",
+          "actionLabel": "عرض جديد"
+        }
+      },
+      "form": {
+        "fields": {
+          "numero": "رقم العرض",
+          "client": "الزبون *",
+          "chantier": "الورش",
+          "dateEmission": "تاريخ الإصدار *",
+          "dateValidite": "تاريخ الصلاحية *",
+          "objet": "الموضوع *",
+          "tvaTaux": "TVA (%)",
+          "notes": "ملاحظات"
+        },
+        "sections": {
+          "identification": "التعريف",
+          "details": "التفاصيل"
+        }
+      },
+      "actions": {
+        "envoyer": "إرسال",
+        "annuler": "إلغاء",
+        "accepter": "مقبول",
+        "refuser": "مرفوض"
+      },
+      "confirm": {
+        "envoyer": {
+          "title": "إرسال العرض؟",
+          "message": "سيتم إرسال العرض إلى الزبون.",
+          "confirmLabel": "إرسال"
+        },
+        "annuler": {
+          "title": "إلغاء العرض؟",
+          "message": "هذا الإجراء لا يمكن التراجع عنه.",
+          "confirmLabel": "إلغاء"
+        },
+        "accepter": {
+          "title": "تأشير العرض كمقبول؟",
+          "message": "سيُؤشَّر العرض كمقبول من طرف الزبون.",
+          "confirmLabel": "تأكيد"
+        },
+        "refuser": {
+          "title": "تأشير العرض كمرفوض؟",
+          "message": "حدد سبب الرفض.",
+          "confirmLabel": "تأكيد",
+          "notePlaceholder": "سبب الرفض إلزامي"
+        },
+        "delete": {
+          "title": "حذف العرض",
+          "message": "حذف العرض {numero}؟"
+        }
+      },
+      "toasts": {
+        "saved": "تم حفظ العرض {numero}"
+      }
+    },
+    "bcc": {
+      "entityName": "سند طلب الزبون",
+      "entityNamePlural": "سندات طلب الزبائن",
+      "headerTitle": "سندات طلب الزبائن",
+      "createTitle": "سند طلب زبون جديد",
+      "detailTitle": "تفاصيل سند طلب الزبون",
+      "list": {
+        "columns": {
+          "numero": "رقم BCC",
+          "numeroClient": "مرجع الزبون",
+          "client": "الزبون",
+          "chantier": "الورش",
+          "dateReception": "الاستلام",
+          "montantHt": "المبلغ بدون احتساب الضريبة",
+          "factureHt": "المفوتر بدون احتساب الضريبة",
+          "tauxFacturation": "نسبة التقدم",
+          "status": "الحالة"
+        },
+        "transform": {
+          "percent": "{n}%"
+        },
+        "filters": {
+          "status": "الحالة"
+        },
+        "chips": {
+          "all": "الكل",
+          "recus": "مستلَمة",
+          "enCours": "قيد التنفيذ",
+          "partFactures": "مفوترة جزئيا",
+          "factures": "مفوترة"
+        },
+        "emptyState": {
+          "title": "لا توجد سندات طلب زبائن",
+          "message": "سندات طلب الزبائن تسجّل الطلبيات الواردة وتتابع فوترتها.",
+          "actionLabel": "سند طلب زبون جديد"
+        }
+      },
+      "form": {
+        "fields": {
+          "numero": "رقم BCC",
+          "numeroClient": "مرجع الزبون *",
+          "client": "الزبون *",
+          "chantier": "الورش",
+          "dateReception": "تاريخ الاستلام *",
+          "dateFinPrevue": "تاريخ الانتهاء المتوقع",
+          "tvaTaux": "TVA (%)",
+          "notes": "ملاحظات"
+        },
+        "sections": {
+          "commande": "الطلبية",
+          "informations": "معلومات"
+        }
+      },
+      "actions": {
+        "demarrer": "البدء",
+        "annuler": "إلغاء",
+        "cloturer": "إغلاق"
+      },
+      "confirm": {
+        "demarrer": {
+          "title": "بدء سند الطلب؟",
+          "message": "سينتقل سند طلب الزبون إلى حالة قيد التنفيذ.",
+          "confirmLabel": "البدء"
+        },
+        "annuler": {
+          "title": "إلغاء سند الطلب؟",
+          "message": "هذا الإجراء لا يمكن التراجع عنه.",
+          "confirmLabel": "إلغاء"
+        },
+        "cloturer": {
+          "title": "إغلاق سند الطلب؟",
+          "message": "سيُؤشَّر سند طلب الزبون كمُغلَق.",
+          "confirmLabel": "إغلاق"
+        },
+        "cloturerPartiel": {
+          "title": "إغلاق سند الطلب؟",
+          "message": "سيُغلَق سند طلب الزبون رغم فوترة جزئية.",
+          "confirmLabel": "إغلاق"
+        },
+        "delete": {
+          "title": "حذف سند الطلب",
+          "message": "حذف سند طلب الزبون {numero}؟"
+        }
+      },
+      "toasts": {
+        "saved": "تم حفظ سند طلب الزبون {numero}"
+      },
+      "errors": {
+        "notFound": "سند طلب الزبون غير موجود"
+      }
+    },
+    "client": {
+      "entityName": "زبون",
+      "entityNamePlural": "الزبائن",
+      "headerTitle": "الزبائن",
+      "createTitle": "زبون جديد",
+      "detailTitle": "تفاصيل الزبون",
+      "list": {
+        "columns": {
+          "code": "الرمز",
+          "nom": "الزبون",
+          "forme": "الشكل",
+          "ville": "المدينة",
+          "ice": "ICE",
+          "telephone": "الهاتف",
+          "email": "البريد الإلكتروني",
+          "actif": "نشط"
+        },
+        "transform": {
+          "actif": "نشط",
+          "inactif": "غير نشط"
+        },
+        "filters": {
+          "type": "الشكل القانوني",
+          "statut": "الحالة",
+          "actif": "نشط",
+          "inactif": "غير نشط"
+        },
+        "emptyState": {
+          "title": "لا يوجد زبائن",
+          "message": "أضف زبائنك لبدء الفوترة.",
+          "actionLabel": "زبون جديد"
+        }
+      },
+      "form": {
+        "fields": {
+          "nom": "الاسم *",
+          "code": "الرمز",
+          "forme": "الشكل القانوني",
+          "ice": "ICE",
+          "iceHint": "15 رقما (المعرّف الجبائي بالمغرب)",
+          "ifFiscal": "المعرّف الجبائي (IF)",
+          "rc": "RC",
+          "patente": "الضريبة المهنية",
+          "actif": "نشط",
+          "adresse": "العنوان",
+          "ville": "المدينة *",
+          "codePostal": "الرمز البريدي",
+          "telephone": "الهاتف",
+          "email": "البريد الإلكتروني",
+          "contactNom": "اسم جهة الاتصال",
+          "contactPoste": "المنصب",
+          "conditionPaiement": "شروط الدفع",
+          "plafondCredit": "سقف الائتمان (MAD)",
+          "notes": "ملاحظات"
+        },
+        "sections": {
+          "identification": "التعريف",
+          "coordonnees": "بيانات الاتصال",
+          "contact": "جهة الاتصال",
+          "commercial": "تجاري"
+        }
+      },
+      "toasts": {
+        "saved": "تم حفظ الزبون {nom}"
+      },
+      "confirm": {
+        "delete": {
+          "title": "حذف الزبون",
+          "message": "حذف {nom}؟"
+        }
+      }
+    },
+    "encaissement": {
+      "dialog": {
+        "title": "تسجيل تحصيل",
+        "closeAria": "إغلاق",
+        "recap": {
+          "netTtc": "الصافي مع احتساب الضريبة",
+          "dejaEncaisse": "المحصَّل سابقا",
+          "resteTtc": "المتبقي مع احتساب الضريبة"
+        },
+        "fields": {
+          "dateEncaissement": "تاريخ التحصيل *",
+          "modePaiement": "طريقة الدفع *",
+          "reference": "المرجع (رقم الشيك، الحوالة…)",
+          "referencePlaceholder": "VIR-2026-0001",
+          "banque": "البنك",
+          "montantTtc": "المبلغ مع احتساب الضريبة (MAD) *",
+          "notes": "ملاحظات"
+        },
+        "warning": {
+          "depassement": "المبلغ المُدخل يتجاوز المتبقي للتحصيل ({montant} MAD)."
+        },
+        "actions": {
+          "cancel": "إلغاء",
+          "save": "حفظ"
+        }
+      }
+    },
+    "retenueGarantie": {
+      "headerTitle": "الضمانات المحتجزة",
+      "summary": {
+        "title": "الضمانات المحتجزة — رؤية موحّدة",
+        "hint": "متابعة ضمان 7 % محتجز سنة بعد الاستلام المؤقت.",
+        "totalBloque": "الإجمالي المحتجَز",
+        "aLibererSous30j": "للإفراج عنه < 30 ي",
+        "couverteCaution": "مغطّى بكفالة بنكية",
+        "libereeAnnee": "مُفرج عنه منذ 12 شهرا",
+        "sousChantiers": "على {n} ورش",
+        "chantiers": "{n} ورش",
+        "mad": "{n} MAD"
+      },
+      "chips": {
+        "aLiberer30j": "للإفراج عنه < 30 ي",
+        "caution": "مع كفالة بنكية",
+        "liberees": "المُفرج عنها",
+        "enCours": "قيد التنفيذ"
+      },
+      "filters": {
+        "searchPlaceholder": "بحث حسب الورش أو الزبون…",
+        "tousClients": "كل الزبائن",
+        "tousStatuts": "كل الحالات",
+        "statusEnCours": "قيد التنفيذ",
+        "statusLiberationDemandee": "طلب الإفراج",
+        "statusLiberee": "مُفرج عنه",
+        "statusContestee": "متنازع فيه",
+        "reset": "إعادة تعيين"
+      },
+      "table": {
+        "columns": {
+          "chantier": "الورش",
+          "client": "الزبون",
+          "retenueCumulee": "الضمان التراكمي",
+          "dejaLibere": "المُفرج عنه سابقا",
+          "resteLiberer": "المتبقي للإفراج",
+          "dateReceptionProvisoire": "الاستلام المؤقت",
+          "dateLiberationPrevue": "الإفراج المتوقع",
+          "delaiRestant": "الأجل المتبقي",
+          "cautionBancaire": "كفالة بنكية",
+          "statut": "الحالة"
+        },
+        "loading": "جاري التحميل…",
+        "empty": "لا يوجد ضمان محتجز يطابق المرشّحات.",
+        "actionsAria": "إجراءات"
+      },
+      "delai": {
+        "liberee": "مُفرج عنه",
+        "aLibererPlus": "للإفراج (+{n} ي)",
+        "jMoins": "ي − {n}"
+      },
+      "menu": {
+        "demanderLiberation": "طلب الإفراج",
+        "marquerLiberee": "تأشير كمُفرج عنه",
+        "remplacerCaution": "استبدال بكفالة بنكية"
+      }
+    },
+    "liberation": {
+      "dialog": {
+        "title": {
+          "demande": "طلب الإفراج",
+          "marquer": "تأشير كمُفرج عنه"
+        },
+        "closeAria": "إغلاق",
+        "recap": {
+          "retenueCumulee": "الضمان التراكمي",
+          "dejaLibere": "المُفرج عنه سابقا",
+          "resteLiberer": "المتبقي للإفراج"
+        },
+        "fields": {
+          "dateLiberation": "تاريخ الإفراج *",
+          "notes": "ملاحظات / تعليق",
+          "notesPlaceholderDemande": "مرجع الطلب، مرفق…",
+          "notesPlaceholderMarquer": "مرجع الحوالة، الاستحقاق…"
+        },
+        "hint": {
+          "demande": "ستُنشأ تلقائيا وثيقة طلب الإفراج وتُوجَّه إلى صاحب المشروع.",
+          "marquer": "سيُسجَّل الإفراج وستُولَّد الحركة المحاسبية المقابلة (نسخة تجريبية V1)."
+        },
+        "actions": {
+          "cancel": "إلغاء",
+          "saveDemande": "إصدار الطلب",
+          "saveMarquer": "تأشير كمُفرج عنه"
+        }
+      }
+    },
+    "cautionBancaire": {
+      "dialog": {
+        "title": "الاستبدال بكفالة بنكية",
+        "closeAria": "إغلاق",
+        "recap": {
+          "retenueASubstituer": "الضمان المراد استبداله"
+        },
+        "fields": {
+          "banque": "البنك *",
+          "numero": "رقم الكفالة البنكية *",
+          "numeroPlaceholder": "CRG-BMCE-2026-0042",
+          "montant": "المبلغ (MAD) *"
+        },
+        "hint": "سيظل الضمان مسجَّلا لكنه سيُؤشَّر كمغطّى بكفالة بنكية. والإفراج عند الاستحقاق سيُطلق استرداد الكفالة.",
+        "actions": {
+          "cancel": "إلغاء",
+          "save": "حفظ الكفالة"
+        }
+      }
+    },
+    "facturePrint": {
+      "title": "فاتورة",
+      "company": {
+        "name": "SEYRURA BTP SARL",
+        "address": "47 شارع الزرقطوني، الدار البيضاء 20100 — المغرب",
+        "contact": "الهاتف: +212 522 36 78 90 — contact@seyrura.ma",
+        "ice": "ICE: 002847593000087",
+        "rc": "RC: 715869 — الدار البيضاء",
+        "if": "IF: 40297583",
+        "patente": "الضريبة المهنية: 35628471",
+        "cnss": "CNSS: 9847562",
+        "capital": "رأس المال: 1 000 000 MAD"
+      },
+      "meta": {
+        "numero": "الرقم",
+        "dateEmission": "تاريخ الإصدار",
+        "dateEcheance": "تاريخ الاستحقاق",
+        "type": "النوع",
+        "chantier": "الورش",
+        "bcClient": "سند طلب الزبون"
+      },
+      "client": {
+        "doit": "مدين",
+        "iceClient": "ICE الزبون:"
+      },
+      "lines": {
+        "designation": "التسمية",
+        "quantite": "الكمية",
+        "puHt": "س.و بدون احتساب الضريبة",
+        "totalHt": "الإجمالي بدون احتساب الضريبة"
+      },
+      "totaux": {
+        "totalHt": "الإجمالي بدون احتساب الضريبة",
+        "retenueGarantie": "الضمان المحتجز (7 %)",
+        "resorptionAvance": "استنزال الدفعة على الحساب",
+        "netHt": "الصافي للدفع بدون احتساب الضريبة",
+        "tva": "TVA {taux} %",
+        "netTtc": "الصافي للدفع مع احتساب الضريبة"
+      },
+      "mention": "أوقفت هذه الفاتورة على مبلغ {montant}. الفوترة بالدرهم المغربي (MAD).",
+      "payment": {
+        "modalites": "شروط الدفع",
+        "echeance": "الاستحقاق: {date}",
+        "aConvenir": "حسب الاتفاق",
+        "coordonnees": "البيانات البنكية",
+        "bank": "BMCE Bank of Africa — وكالة كازا أنفا",
+        "rib": "RIB: 011 780 0000123456789012 34",
+        "swift": "SWIFT: BMCEMAMC"
+      },
+      "footer": {
+        "cachet": "ختم وتوقيع",
+        "small": "كل تأخر في الدفع يستوجب تطبيق فوائد التأخير وفقا للتشريع الجاري به العمل. الشروط العامة للبيع متاحة عند الطلب."
+      },
+      "type": {
+        "situation": "كشف الأشغال",
+        "avance": "دفعة على الحساب",
+        "acompte": "تسبيق",
+        "decompteDefinitif": "كشف نهائي",
+        "diverse": "متنوعة"
+      }
+    },
+    "avoirPrint": {
+      "title": "إشعار دائن",
+      "company": {
+        "name": "SEYRURA BTP SARL",
+        "address": "47 شارع الزرقطوني، الدار البيضاء 20100",
+        "ice": "ICE: 002847593000087",
+        "rc": "RC: 715869 — الدار البيضاء",
+        "if": "IF: 40297583",
+        "patente": "الضريبة المهنية: 35628471"
+      },
+      "meta": {
+        "numero": "الرقم",
+        "date": "التاريخ",
+        "factureOrigine": "الفاتورة الأصلية"
+      },
+      "client": {
+        "auProfitDe": "لفائدة"
+      },
+      "motif": {
+        "title": "سبب الإشعار الدائن"
+      },
+      "lines": {
+        "designation": "التسمية",
+        "totalHt": "الإجمالي بدون احتساب الضريبة"
+      },
+      "totaux": {
+        "totalHt": "الإجمالي بدون احتساب الضريبة",
+        "tva": "TVA {taux} %",
+        "totalTtc": "الإجمالي مع احتساب الضريبة"
+      },
+      "mention": "إشعار دائن محرَّر بالدرهم المغربي بمبلغ {montant}.",
+      "footer": {
+        "cachet": "ختم وتوقيع"
+      }
+    },
+    "delaiEcheance": {
+      "soldee": "مُسددة",
+      "retardJ": "+{n} ي تأخير",
+      "echeanceAjd": "الاستحقاق اليوم",
+      "jMoins": "ي − {n}"
+    }
+  }
+}

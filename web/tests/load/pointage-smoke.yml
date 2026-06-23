@@ -1,0 +1,12 @@
+config:
+  target: http://127.0.0.1:4200
+  phases:
+    - duration: 30
+      arrivalRate: 2
+      rampTo: 10
+      name: Warm pointage route
+scenarios:
+  - name: Pointage mobile shell
+    flow:
+      - get:
+          url: /rh/pointage/saisie

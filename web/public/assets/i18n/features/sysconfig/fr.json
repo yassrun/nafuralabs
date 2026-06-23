@@ -1,0 +1,54 @@
+{
+  "sysconfig": {
+    "fields": {
+      "code": "code",
+      "name": "name",
+      "timeZone": "time Zone Id",
+      "prefix": "préfixe",
+      "currentNumber": "current Number",
+      "incrementBy": "increment By",
+      "padLength": "pad Length",
+      "codeList": "code List Id",
+      "sortOrder": "sort Order",
+      "color": "couleur"
+    },
+    "navigation": {
+      "calendars": "Calendars",
+      "codeLists": "Code Lists",
+      "numberingSequences": "Numbering Sequences",
+      "referenceValues": "Reference Values",
+      "tags": "Tags"
+    },
+    "calendar": {
+      "title": "Calendars",
+      "detailTitle": "Calendar Details",
+      "newTitle": "New Calendar"
+    },
+    "codeList": {
+      "title": "Code Lists",
+      "detailTitle": "Code List Details",
+      "newTitle": "New Code List"
+    },
+    "numberingSequence": {
+      "title": "Numbering Sequences",
+      "detailTitle": "Numbering Sequence Details",
+      "newTitle": "New Numbering Sequence"
+    },
+    "referenceValue": {
+      "title": "Reference Values",
+      "detailTitle": "Reference Value Details",
+      "newTitle": "New Reference Value"
+    },
+    "tag": {
+      "title": "Tags",
+      "detailTitle": "Tag Details",
+      "newTitle": "New Tag"
+    }
+  },
+  "common": {
+    "fields": {
+      "description": "description",
+      "isActive": "is Active"
+    }
+  }
+}

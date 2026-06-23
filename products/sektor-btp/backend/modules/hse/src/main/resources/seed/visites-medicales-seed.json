@@ -1,0 +1,103 @@
+{
+  "visitesMedicales": [
+    {
+      "id": "vm-001",
+      "employeId": "emp-001",
+      "employeMatricule": "MAT-001",
+      "employeNom": "Karim El Idrissi",
+      "posteOccupe": "Conducteur travaux",
+      "type": "PERIODIQUE",
+      "date": "2026-01-15",
+      "aptitude": "APTE",
+      "medecinNom": "Dr. Tahiri",
+      "prochaineEcheance": "2027-01-15"
+    },
+    {
+      "id": "vm-002",
+      "employeId": "emp-002",
+      "employeMatricule": "MAT-002",
+      "employeNom": "Hicham Bennani",
+      "posteOccupe": "Conducteur travaux",
+      "type": "PERIODIQUE",
+      "date": "2025-06-04",
+      "aptitude": "APTE",
+      "medecinNom": "Dr. Cherkaoui",
+      "prochaineEcheance": "2026-06-04"
+    },
+    {
+      "id": "vm-003",
+      "employeId": "emp-004",
+      "employeMatricule": "MAT-004",
+      "employeNom": "Mehdi Saadi",
+      "posteOccupe": "Chef de chantier",
+      "type": "PERIODIQUE",
+      "date": "2025-05-22",
+      "aptitude": "AVEC_RESTRICTION",
+      "medecinNom": "Dr. Tahiri",
+      "restrictions": "Pas de port de charge > 15 kg pendant 6 mois (lombalgie).",
+      "prochaineEcheance": "2026-05-22"
+    },
+    {
+      "id": "vm-004",
+      "employeId": "emp-005",
+      "employeMatricule": "MAT-005",
+      "employeNom": "Rachid Alaoui",
+      "posteOccupe": "Grutier",
+      "type": "PERIODIQUE",
+      "date": "2026-02-10",
+      "aptitude": "APTE",
+      "medecinNom": "Dr. Cherkaoui",
+      "prochaineEcheance": "2027-02-10"
+    },
+    {
+      "id": "vm-005",
+      "employeId": "emp-006",
+      "employeMatricule": "MAT-006",
+      "employeNom": "Nawfal Berrada",
+      "posteOccupe": "Chef d'équipe VRD",
+      "type": "REPRISE",
+      "date": "2026-04-28",
+      "aptitude": "APTE",
+      "medecinNom": "Dr. Tahiri",
+      "restrictions": "Reprise après arrêt maladie 25 jours.",
+      "prochaineEcheance": "2027-04-28"
+    },
+    {
+      "id": "vm-006",
+      "employeId": "emp-007",
+      "employeMatricule": "MAT-007",
+      "employeNom": "Omar Ziani",
+      "posteOccupe": "Maçon",
+      "type": "EMBAUCHE",
+      "date": "2026-03-05",
+      "aptitude": "APTE",
+      "medecinNom": "Dr. Tahiri",
+      "prochaineEcheance": "2027-03-05"
+    },
+    {
+      "id": "vm-007",
+      "employeId": "emp-008",
+      "employeMatricule": "MAT-008",
+      "employeNom": "Tarik Ouahbi",
+      "posteOccupe": "Électricien",
+      "type": "PERIODIQUE",
+      "date": "2025-05-18",
+      "aptitude": "INAPTE",
+      "medecinNom": "Dr. Cherkaoui",
+      "restrictions": "Inapte temporaire 60 jours — vertiges. Reclassement étudié.",
+      "prochaineEcheance": "2026-05-30"
+    },
+    {
+      "id": "vm-008",
+      "employeId": "emp-009",
+      "employeMatricule": "MAT-009",
+      "employeNom": "Said Mansouri",
+      "posteOccupe": "Coffreur boiseur",
+      "type": "PERIODIQUE",
+      "date": "2025-06-01",
+      "aptitude": "APTE",
+      "medecinNom": "Dr. Tahiri",
+      "prochaineEcheance": "2026-06-01"
+    }
+  ]
+}

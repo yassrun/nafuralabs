@@ -1,0 +1,17 @@
+{
+  "entity": "Bank",
+  "fields": {
+    "code": {
+      "required": true,
+      "maxLength": 20,
+      "unique": true
+    },
+    "name": {
+      "required": true,
+      "maxLength": 200
+    },
+    "swiftCode": {
+      "maxLength": 11
+    }
+  }
+}

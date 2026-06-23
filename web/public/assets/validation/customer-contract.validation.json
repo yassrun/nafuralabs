@@ -1,0 +1,26 @@
+{
+  "entity": "CustomerContract",
+  "fields": {
+    "contractNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "contractType": {
+      "maxLength": 120
+    },
+    "value": {
+      "min": 0
+    },
+    "terms": {
+      "maxLength": 2000
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

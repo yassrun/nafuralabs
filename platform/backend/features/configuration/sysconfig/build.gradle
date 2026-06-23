@@ -1,0 +1,31 @@
+plugins {
+    id 'java-library'
+}
+
+sourceSets {
+    main {
+        java {
+        }
+    }
+}
+
+dependencies {
+    // Platform
+    implementation project(':platform:core:framework')
+    implementation project(':platform:core:authorization')
+    
+    // Spring Boot
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    
+    // MapStruct for DTO mapping
+    implementation 'org.mapstruct:mapstruct:1.5.5.Final'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+    
+    // Database
+    implementation 'org.postgresql:postgresql'
+    
+    // Testing
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}

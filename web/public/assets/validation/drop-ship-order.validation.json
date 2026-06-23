@@ -1,0 +1,18 @@
+{
+  "entity": "DropShipOrder",
+  "fields": {
+    "salesOrderId": {
+      "required": true
+    },
+    "vendorId": {
+      "required": true
+    },
+    "customerId": {
+      "required": true
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

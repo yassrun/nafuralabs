@@ -1,0 +1,25 @@
+{
+  "entity": "Timesheet",
+  "fields": {
+    "timesheetNumber": {
+      "required": true,
+      "maxLength": 60
+    },
+    "periodStart": {
+      "maxLength": 120
+    },
+    "periodEnd": {
+      "maxLength": 120
+    },
+    "totalHours": {
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

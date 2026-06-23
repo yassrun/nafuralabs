@@ -1,0 +1,23 @@
+{
+  "entity": "Renewal",
+  "fields": {
+    "renewalNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "customerId": {
+      "required": true
+    },
+    "currentEndDate": {
+      "required": true
+    },
+    "renewalDate": {
+      "required": true
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

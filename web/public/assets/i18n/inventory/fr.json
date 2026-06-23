@@ -1,0 +1,252 @@
+{
+  "inventory": {
+    "navigation": {
+      "title": "Inventaire",
+      "dashboard": "Tableau de bord",
+      "operations": "Opérations",
+      "stockOverview": "Aperçu du stock",
+      "items": "Articles",
+      "receipts": "Réceptions",
+      "transfers": "Transferts",
+      "adjustments": "Ajustements",
+      "warehouses": "Entrepôts",
+      "suppliers": "Fournisseurs",
+      "inventoryCount": "Inventaire physique",
+      "configuration": "Configuration",
+      "itemCategories": "Catégories d'articles",
+      "itemTypes": "Types d'articles",
+      "unitsOfMeasure": "Unités de mesure",
+      "conversionRules": "Règles de conversion",
+      "attributes": "Définitions d'attributs",
+      "barcodeSettings": "Paramètres codes-barres",
+      "inventorySettings": "Paramètres d'inventaire",
+      "reports": "Rapports",
+      "stockValuation": "Valorisation du stock",
+      "movementHistory": "Historique des mouvements",
+      "lowStock": "Stock faible",
+      "inventoryAging": "Vieillissement du stock",
+      "inventoryTxLines": "Inventory Tx Lines",
+      "inventoryTxes": "Inventory Txes",
+      "stockBalances": "Stock Balances"
+    },
+    "dashboard": {
+      "title": "Inventaire",
+      "subtitle": "État du stock et opérations en temps réel",
+      "panels": {
+        "stockHealth": "Santé du stock",
+        "alertsAttention": "Alertes et attention requise",
+        "recentOperations": "Opérations récentes",
+        "stockByLocation": "Stock par emplacement",
+        "traceabilitySnapshot": "Instantané de traçabilité",
+        "todayAtGlance": "Aujourd'hui en un coup d'œil",
+        "recentInventoryActivity": "Activité d'inventaire récente",
+        "stockAlerts": "Alertes de stock",
+        "quickActions": "Actions rapides"
+      },
+      "todayAtGlance": {
+        "blsImportedToday": "Réceptions aujourd'hui",
+        "transfersImportedToday": "Transferts aujourd'hui",
+        "receiptsToday": "Réceptions aujourd'hui",
+        "transfersToday": "Transferts aujourd'hui",
+        "adjustmentsToday": "Ajustements aujourd'hui",
+        "fromDocuments": "depuis documents",
+        "fromErp": "depuis l'ERP"
+      },
+      "actions": {
+        "viewAllAlerts": "Voir toutes les alertes",
+        "newOperation": "Nouvelle opération"
+      },
+      "columns": {
+        "type": "Type",
+        "sourceType": "Source",
+        "reference": "Référence",
+        "sourceDestination": "Source / Destination",
+        "status": "Statut",
+        "date": "Date",
+        "user": "Utilisateur",
+        "location": "Emplacement",
+        "totalQuantity": "Quantité totale",
+        "itemCount": "Nombre d'articles"
+      },
+      "traceability": {
+        "expiringLots": "Lots expirant (30 jours)",
+        "serialsWithAnomalies": "Numéros de série avec anomalies"
+      },
+      "kpis": {
+        "skusWithStock": "SKU en stock",
+        "totalQuantity": "Quantité totale",
+        "reserved": "Réservé",
+        "inTransit": "En transit",
+        "lowStockAlerts": "Alertes de stock faible"
+      },
+      "stockHealth": {
+        "available": "Disponible",
+        "reserved": "Réservé",
+        "inTransit": "En transit",
+        "blockedDamaged": "Bloqué / Endommagé"
+      },
+      "alerts": {
+        "lowStock": "Stock faible : 12 articles sous seuil",
+        "negativeStock": "Stock négatif détecté en WH-A1",
+        "unvalidatedReceipt": "Réception non validée RCPT-2026-021",
+        "lotExpiring": "Lot EXP-447 expire dans 12 jours",
+        "failedImport": "Import échoué : Items_2026_02.csv",
+        "veryLowStock": "Stock très bas : 6 articles sous le seuil de sécurité",
+        "importInconsistencies": "Incohérences d'import détectées dans 2 documents"
+      },
+      "alertActions": {
+        "view": "Voir",
+        "fix": "Corriger",
+        "validate": "Valider",
+        "review": "Examiner"
+      },
+      "alertSeverities": {
+        "info": "Info",
+        "warning": "Avertissement",
+        "critical": "Critique"
+      },
+      "operations": {
+        "types": {
+          "receipt": "Réception",
+          "transfer": "Transfert",
+          "shipment": "Expédition",
+          "adjustment": "Ajustement"
+        },
+        "statuses": {
+          "draft": "Brouillon",
+          "posted": "Comptabilisé",
+          "imported": "Importé",
+          "needsReview": "À réviser",
+          "corrected": "Corrigé"
+        },
+        "sources": {
+          "type": {
+            "document": "Document (Doxura)",
+            "erp": "ERP"
+          },
+          "vendorAtlas": "Fournisseur : Atlas Parts",
+          "whABulk": "WH-A / Vrac",
+          "whBDispatch": "WH-B / Expédition",
+          "whACycleCount": "WH-A / Comptage cyclique",
+          "vendorKappa": "Fournisseur : Kappa Tools",
+          "whCBulk": "WH-C / Vrac",
+          "whADispatch": "WH-A / Expédition",
+          "vendorNorthwind": "Fournisseur : Northwind Supplies",
+          "whBCycleCount": "WH-B / Comptage cyclique"
+        },
+        "destinations": {
+          "whAReceiving": "WH-A / Réception",
+          "whBPicking": "WH-B / Préparation",
+          "customerOryx": "Client : Oryx Retail",
+          "variance": "Écart",
+          "whABulk": "WH-A / Vrac",
+          "customerZenith": "Client : Zenith Auto",
+          "whBReceiving": "WH-B / Réception",
+          "customerNova": "Client : Nova Mart"
+        }
+      },
+      "locations": {
+        "whABulk": "WH-A / Vrac",
+        "whAPicking": "WH-A / Préparation",
+        "whBBulk": "WH-B / Vrac",
+        "whBReceiving": "WH-B / Réception",
+        "whCBulk": "WH-C / Vrac"
+      },
+      "quickActions": {
+        "receiveGoods": "Réceptionner des marchandises",
+        "transferStock": "Transférer le stock",
+        "runStocktake": "Lancer un inventaire",
+        "importOpeningStock": "Importer le stock initial",
+        "addAdjustment": "Ajouter un ajustement",
+        "createTransfer": "Créer un transfert",
+        "reviewImportedDocument": "Vérifier le document importé"
+      },
+      "operationActions": {
+        "receipt": "Réception",
+        "transfer": "Transfert",
+        "shipment": "Expédition",
+        "adjustment": "Ajustement"
+      }
+    },
+    "warehouse": {
+      "title": "Entrepôts",
+      "detailTitle": "Détails de l'entrepôt",
+      "newTitle": "Nouvel entrepôt",
+      "fields": {
+        "code": "code",
+        "name": "name",
+        "location": "emplacement",
+        "description": "description",
+        "isActive": "is Active"
+      },
+      "sections": {}
+    },
+    "inventoryTxLine": {
+      "title": "Inventory Tx Lines",
+      "detailTitle": "Inventory Tx Line Details",
+      "newTitle": "New Inventory Tx Line",
+      "fields": {
+        "inventoryTxId": "inventory Tx Id",
+        "lineNumber": "line Number",
+        "itemId": "item Id",
+        "quantity": "quantity",
+        "unitPrice": "unit Price",
+        "totalPrice": "total Price",
+        "notes": "notes"
+      },
+      "sections": {}
+    },
+    "inventoryTx": {
+      "title": "Inventory Txes",
+      "detailTitle": "Inventory Tx Details",
+      "newTitle": "New Inventory Tx",
+      "fields": {
+        "txNumber": "tx Number",
+        "txType": "tx Type",
+        "warehouseId": "warehouse Id",
+        "txDate": "tx Date",
+        "reference": "reference",
+        "status": "status",
+        "notes": "notes"
+      },
+      "sections": {}
+    },
+    "stockBalance": {
+      "title": "Stock Balances",
+      "detailTitle": "Stock Balance Details",
+      "newTitle": "New Stock Balance",
+      "fields": {
+        "warehouseId": "warehouse Id",
+        "itemId": "item Id",
+        "quantity": "quantity",
+        "reservedQuantity": "reserved Quantity",
+        "availableQuantity": "available Quantity",
+        "lastCountDate": "last Count Date"
+      },
+      "sections": {}
+    },
+    "valorisation": {
+      "title": "Valorisation du Stock",
+      "subtitle": "Valeur financière du stock par emplacement et par famille",
+      "date": "Date de valorisation",
+      "costingMethod": "Méthode de valorisation",
+      "noData": "Aucune donnée disponible",
+      "famille": "Famille",
+      "articleCount": "Nb articles",
+      "totalQty": "Qté totale",
+      "totalValue": "Valeur totale",
+      "percent": "% du stock",
+      "location": "Emplacement",
+      "type": "Type",
+      "value": "Valeur",
+      "byFamille": "Valorisation par Famille",
+      "byLocation": "Valorisation par Emplacement",
+      "kpi": {
+        "totalValue": "Valeur stock total",
+        "depotValue": "Valeur dépôts",
+        "chantierValue": "Valeur chantiers",
+        "monthlyVariation": "Variation mensuelle"
+      }
+    }
+  }
+}

@@ -1,0 +1,58 @@
+<nf-page-shell scroll>
+  <nf-page-header [config]="headerConfig">
+    @if (item(); as d) {
+      <nf-button actions variant="secondary" (clicked)="printDevis()">Imprimer</nf-button>
+    }
+  </nf-page-header>
+  <div class="devis-screen">
+    <nf-entity-detail
+      #detail
+      [config]="config"
+      [mode]="mode()"
+      [item]="item()"
+      [lookups]="lookups()"
+      [loading]="isLoading()"
+      [saving]="isSaving()"
+      (action)="onAction($event)">
+
+      <ng-template nfField="lignes" let-control>
+        <app-dpgf-editor
+          [lines]="lignesValue(item())"
+          [readonly]="mode() === 'view'"
+          (linesChange)="onLignesChange(control, $event)" />
+      </ng-template>
+
+    </nf-entity-detail>
+  </div>
+
+  @if (item(); as dv) {
+    <article class="devis-print-doc" data-print-area="devis">
+      <header>
+        <h1>Devis {{ dv.numero }} <span class="ver">V{{ dv.version }}</span></h1>
+        <p class="meta">Émis le {{ dv.dateEmission }} · Valable jusqu'au {{ dv.dateValidite }}</p>
+      </header>
+      <section class="parties">
+        <div><strong>Client</strong><br>{{ dv.clientName ?? '—' }}</div>
+        <div><strong>Objet</strong><br>{{ dv.objet }}</div>
+      </section>
+      <table>
+        <thead><tr><th>Désignation</th><th class="n">Qté</th><th class="n">PU HT</th><th class="n">Total HT</th></tr></thead>
+        <tbody>
+          @for (ln of dv.lignes; track $index) {
+            <tr>
+              <td>{{ ln.designation }}</td>
+              <td class="n">{{ ln.quantite ?? '—' }}</td>
+              <td class="n">{{ ln.prixUnitaireHt | mad }}</td>
+              <td class="n">{{ ln.totalHt | mad }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      <footer class="totaux">
+        <div>Total HT <strong>{{ dv.totalHt | mad }}</strong></div>
+        <div>TVA {{ dv.tvaTaux }}% <strong>{{ dv.totalTva | mad }}</strong></div>
+        <div>Total TTC <strong>{{ dv.totalTtc | mad }}</strong></div>
+      </footer>
+    </article>
+  }
+</nf-page-shell>

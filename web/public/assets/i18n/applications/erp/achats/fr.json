@@ -1,0 +1,647 @@
+{
+  "achats": {
+    "module": {
+      "title": "Achats & Approvisionnement",
+      "shortTitle": "Achats"
+    },
+    "common": {
+      "dash": "—",
+      "actions": {
+        "back": "← Retour",
+        "save": "Enregistrer",
+        "cancel": "Annuler",
+        "close": "Fermer",
+        "print": "Imprimer",
+        "delete": "Supprimer",
+        "edit": "Modifier",
+        "new": "Nouveau",
+        "reset": "Réinitialiser",
+        "search": "Rechercher",
+        "confirm": "Confirmer"
+      },
+      "filters": {
+        "allStatuses": "Tous les statuts",
+        "allTypes": "Tous les types",
+        "dateFrom": "Du",
+        "dateTo": "Au"
+      },
+      "approval": {
+        "label": "Workflow d'approbation",
+        "labelAttribution": "Validation attribution"
+      },
+      "errors": {
+        "missingMotif": "Motif obligatoire",
+        "missingJustification": "Justification requise pour tracer l'override (erpAudit).",
+        "attributionGeneric": "Erreur attribution"
+      },
+      "loading": "Chargement…"
+    },
+    "routes": {
+      "demandesListTitle": "Demandes d'achat",
+      "demandesListCrumb": "Demandes",
+      "demandeNewTitle": "Nouvelle demande",
+      "demandeNewCrumb": "Nouvelle",
+      "demandeDetailTitle": "Détail demande",
+      "demandeDetailCrumb": "Détail",
+      "demandeEditTitle": "Modifier demande",
+      "demandeEditCrumb": "Modifier",
+      "bcListTitle": "Bons de commande",
+      "bcListCrumb": "Commandes",
+      "bcNewTitle": "Nouveau BC",
+      "bcNewCrumb": "Nouveau",
+      "bcDetailTitle": "Détail BC",
+      "bcDetailCrumb": "Détail",
+      "bcEditTitle": "Modifier BC",
+      "bcEditCrumb": "Modifier",
+      "aoListTitle": "Appels d'offres",
+      "aoListCrumb": "AO",
+      "aoNewTitle": "Nouvel AO",
+      "aoNewCrumb": "Nouveau",
+      "aoDetailTitle": "Détail AO",
+      "aoDetailCrumb": "Détail",
+      "aoEditTitle": "Modifier AO",
+      "aoEditCrumb": "Modifier",
+      "aoComparatifTitle": "Comparatif AO",
+      "aoComparatifCrumb": "Comparatif",
+      "contratListTitle": "Contrats fournisseurs",
+      "contratListCrumb": "Contrats",
+      "contratNewTitle": "Nouveau contrat",
+      "contratNewCrumb": "Nouveau",
+      "contratDetailTitle": "Détail contrat",
+      "contratDetailCrumb": "Détail",
+      "contratEditTitle": "Modifier contrat",
+      "contratEditCrumb": "Modifier",
+      "fournisseurListTitle": "Fournisseurs",
+      "fournisseurListCrumb": "Fournisseurs",
+      "fournisseurNewTitle": "Nouveau fournisseur",
+      "fournisseurNewCrumb": "Nouveau",
+      "fournisseurDetailTitle": "Détail fournisseur",
+      "fournisseurDetailCrumb": "Détail",
+      "fournisseurEditTitle": "Modifier fournisseur",
+      "fournisseurEditCrumb": "Modifier"
+    },
+    "rubrique": {
+      "MATERIAUX": "Matériaux",
+      "SOUS_TRAITANCE": "Sous-traitance",
+      "LOCATION_MATERIEL": "Location matériel",
+      "LOCATION_MATERIEL_SHORT": "Location",
+      "CARBURANT": "Carburant",
+      "FRAIS_GENERAUX": "Frais généraux",
+      "FRAIS_GENERAUX_SHORT": "FG"
+    },
+    "modeReglement": {
+      "VIREMENT": "Virement",
+      "CHEQUE": "Chèque",
+      "EFFET": "Effet",
+      "ESPECES": "Espèces"
+    },
+    "modeReglementLong": {
+      "VIREMENT": "Virement bancaire",
+      "CHEQUE": "Chèque",
+      "EFFET": "Effet de commerce",
+      "ESPECES": "Espèces"
+    },
+    "contratType": {
+      "CADRE": "Contrat cadre",
+      "ANNUEL": "Annuel",
+      "PONCTUEL": "Ponctuel"
+    },
+    "demande": {
+      "entityName": "Demande d'achat",
+      "entityNamePlural": "Demandes d'achat",
+      "headerTitle": "Demandes d'achat",
+      "createTitle": "Nouvelle demande d'achat",
+      "detailTitle": "Détail demande",
+      "detailHeaderFallback": "Sans chantier",
+      "chips": {
+        "all": "Toutes",
+        "aApprouver": "À approuver",
+        "nonConverties": "Non converties",
+        "urgent": "Urgentes < 7j",
+        "mesDemandes": "Mes demandes"
+      },
+      "list": {
+        "columns": {
+          "numero": "N° DA",
+          "chantierCode": "Chantier",
+          "chantierName": "Désignation chantier",
+          "dateBesoin": "Besoin avant",
+          "demandeur": "Demandeur",
+          "nbLignes": "Lignes",
+          "totalEstimeHt": "Total estimé HT",
+          "status": "Statut",
+          "delaiAttente": "Attente (j)"
+        },
+        "transform": {
+          "joursSuffix": "{n} j"
+        },
+        "filters": {
+          "status": "Statut",
+          "chantier": "Chantier",
+          "dateFrom": "Créée du",
+          "dateTo": "Créée au"
+        },
+        "emptyState": {
+          "title": "Aucune demande d'achat",
+          "message": "Les demandes d'achat déclenchent le processus d'approvisionnement vers les fournisseurs.",
+          "actionLabel": "Nouvelle demande"
+        }
+      },
+      "form": {
+        "sections": {
+          "entete": "En-tête",
+          "justification": "Justification"
+        },
+        "fields": {
+          "numero": "N° DA",
+          "chantier": "Chantier",
+          "dateBesoin": "Date besoin *",
+          "demandeur": "Demandeur",
+          "totalEstimeHt": "Total estimé HT",
+          "motif": "Motif",
+          "notes": "Notes"
+        }
+      },
+      "actions": {
+        "soumettre": "Soumettre",
+        "approuver": "Approuver",
+        "rejeter": "Rejeter",
+        "convertirBc": "Créer un BC"
+      },
+      "confirms": {
+        "soumettre": {
+          "title": "Soumettre la demande ?",
+          "message": "La demande sera soumise pour approbation.",
+          "confirmLabel": "Soumettre"
+        },
+        "approuver": {
+          "title": "Approuver la demande ?",
+          "message": "La demande sera approuvée et pourra être convertie en BC.",
+          "confirmLabel": "Approuver"
+        },
+        "rejeter": {
+          "title": "Rejeter la demande ?",
+          "message": "Précisez le motif de rejet.",
+          "confirmLabel": "Rejeter",
+          "notePlaceholder": "Motif obligatoire",
+          "promptMotif": "Motif de rejet :"
+        }
+      },
+      "toasts": {
+        "saved": "Demande {numero} enregistrée",
+        "statusUpdated": "Demande {numero} — statut mis à jour",
+        "rejected": "Demande {numero} rejetée"
+      },
+      "deleteConfirm": {
+        "title": "Supprimer la demande",
+        "message": "Supprimer la demande {numero} ?"
+      }
+    },
+    "commande": {
+      "entityName": "Bon de commande",
+      "entityNamePlural": "Bons de commande",
+      "headerTitle": "Bons de commande",
+      "createTitle": "Nouveau bon de commande",
+      "detailTitle": "Détail BC",
+      "chips": {
+        "all": "Tous",
+        "aValider": "À valider",
+        "enCoursLivraison": "En cours livraison",
+        "enRetard": "En retard",
+        "aFacturer": "À facturer"
+      },
+      "list": {
+        "columns": {
+          "numero": "N° BC",
+          "fournisseur": "Fournisseur",
+          "chantierCode": "Chantier",
+          "rubrique": "Rubrique",
+          "dateCreation": "Créé le",
+          "dateLivraisonPrevue": "Livraison prévue",
+          "totalHt": "Total HT",
+          "totalLivrePercent": "Livraison %",
+          "status": "Statut"
+        },
+        "filters": {
+          "status": "Statut",
+          "fournisseur": "Fournisseur",
+          "rubrique": "Rubrique",
+          "dateFrom": "Créé du",
+          "dateTo": "Créé au"
+        },
+        "emptyState": {
+          "title": "Aucun bon de commande",
+          "message": "Les bons de commande formalisent les achats auprès des fournisseurs et pilotent la livraison.",
+          "actionLabel": "Nouveau BC"
+        }
+      },
+      "form": {
+        "sections": {
+          "entete": "En-tête",
+          "planning": "Planning & Paiement",
+          "montants": "Montants",
+          "notes": "Notes"
+        },
+        "fields": {
+          "numero": "N° BC",
+          "fournisseur": "Fournisseur *",
+          "chantier": "Chantier",
+          "rubrique": "Rubrique",
+          "dateCreation": "Date création",
+          "dateLivraisonPrevue": "Livraison prévue *",
+          "conditionsPaiement": "Conditions paiement",
+          "modeReglement": "Mode règlement",
+          "totalHt": "Total HT",
+          "tvaTaux": "TVA %",
+          "totalTtc": "Total TTC",
+          "notes": "Notes"
+        }
+      },
+      "actions": {
+        "valider": "Valider",
+        "envoyer": "Envoyer fournisseur",
+        "accuserReception": "Marquer AR",
+        "cloturer": "Clôturer",
+        "annuler": "Annuler",
+        "imprimer": "Imprimer BC"
+      },
+      "confirms": {
+        "valider": {
+          "title": "Valider le BC ?",
+          "message": "Le bon de commande sera validé et pourra être envoyé.",
+          "confirmLabel": "Valider"
+        },
+        "cloturer": {
+          "title": "Clôturer le BC ?",
+          "message": "Cette action est définitive.",
+          "confirmLabel": "Clôturer"
+        },
+        "annuler": {
+          "title": "Annuler le BC ?",
+          "message": "Cette action est irréversible.",
+          "confirmLabel": "Annuler",
+          "notePlaceholder": "Motif d'annulation"
+        }
+      },
+      "toasts": {
+        "saved": "BC {numero} enregistré",
+        "statusUpdated": "BC {numero} — statut mis à jour"
+      },
+      "deleteConfirm": {
+        "title": "Supprimer le BC",
+        "message": "Supprimer le bon de commande {numero} ?"
+      },
+      "matching3way": {
+        "title": "Réceptions & 3-way matching",
+        "statusLabel": "Statut :",
+        "matched": "Validé 3-voies",
+        "blStatus": "BL :",
+        "factureLabel": "— Facture :",
+        "toleranceHint": "Tolérance démo : ±2 % prix, ±5 % quantités (paramétrable).",
+        "analyzing": "Analyse matching en cours…",
+        "blocking": "Bloquant",
+        "columns": {
+          "article": "Article",
+          "qteCmd": "Qté cmd",
+          "qteRecue": "Qté reçue",
+          "qteFact": "Qté fact.",
+          "puBc": "PU BC",
+          "puFact": "PU fact.",
+          "ecartQte": "Écart qté %",
+          "ecartPx": "Écart px %"
+        }
+      },
+      "print": {
+        "title": "BON DE COMMANDE N° {numero}",
+        "dateLabel": "Date :",
+        "livraisonLabel": "Livraison prévue :",
+        "fournisseur": "Fournisseur",
+        "chantierLivraison": "Chantier de livraison",
+        "conditionsPaiementLabel": "Conditions paiement :",
+        "columns": {
+          "designation": "Désignation",
+          "code": "Code",
+          "qte": "Qté",
+          "unite": "Unité",
+          "puHt": "P.U. HT",
+          "totalHt": "Total HT"
+        },
+        "totals": {
+          "totalHt": "Total HT",
+          "tva": "TVA {rate}%",
+          "totalTtc": "TOTAL TTC"
+        },
+        "notesLabel": "Notes :",
+        "signatureAcheteur": "Cachet & Signature Acheteur",
+        "signatureFournisseur": "Accusé réception Fournisseur",
+        "ids": {
+          "ice": "ICE",
+          "if": "I.F.",
+          "rc": "R.C.",
+          "phonePrefix": "Tél."
+        }
+      },
+      "approvalSummary": "{numero} — {fournisseur} — {ttc} MAD TTC"
+    },
+    "appelOffre": {
+      "entityName": "Appel d'offres",
+      "entityNamePlural": "Appels d'offres",
+      "headerTitle": "Appels d'offres",
+      "createTitle": "Nouvel appel d'offres",
+      "detailTitle": "Détail AO",
+      "chips": {
+        "all": "Tous",
+        "enCours": "En cours",
+        "aCloturer": "À clôturer",
+        "attribues": "Attribués"
+      },
+      "list": {
+        "columns": {
+          "numero": "N° AO",
+          "objet": "Objet",
+          "chantierCode": "Chantier",
+          "nbInvites": "Invités",
+          "nbReponses": "Réponses",
+          "dateLimiteDepot": "Limite dépôt",
+          "totalAttribueHt": "Attribué HT",
+          "status": "Statut"
+        },
+        "filters": {
+          "status": "Statut",
+          "dateFrom": "Limite du",
+          "dateTo": "Limite au"
+        },
+        "emptyState": {
+          "title": "Aucun appel d'offres",
+          "message": "Publiez des AO pour obtenir les meilleures offres fournisseurs.",
+          "actionLabel": "Nouvel AO"
+        }
+      },
+      "form": {
+        "sections": {
+          "entete": "En-tête",
+          "attribution": "Attribution",
+          "notes": "Notes"
+        },
+        "fields": {
+          "numero": "N° AO",
+          "objet": "Objet *",
+          "chantier": "Chantier",
+          "datePublication": "Date publication",
+          "dateLimiteDepot": "Date limite dépôt *",
+          "fournisseurAttribue": "Fournisseur attribué",
+          "totalAttribueHt": "Montant attribué HT",
+          "notes": "Notes"
+        }
+      },
+      "actions": {
+        "publier": "Publier",
+        "cloturer": "Clôturer",
+        "infructueux": "Infructueux",
+        "attribuer": "Attribuer",
+        "openComparatif": "Comparatif fournisseurs & scoring",
+        "attribuerVersBc": "Attribuer → BC"
+      },
+      "confirms": {
+        "publier": {
+          "title": "Publier l'AO ?",
+          "message": "L'AO sera envoyé aux fournisseurs invités.",
+          "confirmLabel": "Publier"
+        },
+        "infructueux": {
+          "title": "Déclarer infructueux ?",
+          "message": "Aucun fournisseur ne sera sélectionné.",
+          "confirmLabel": "Confirmer"
+        }
+      },
+      "prompts": {
+        "fournisseurId": "ID fournisseur retenu :",
+        "overrideJustification": "Attribution hors recommandation automatique. Motif / justification (obligatoire) :"
+      },
+      "toasts": {
+        "saved": "AO {numero} enregistré",
+        "statusUpdated": "AO {numero} — statut mis à jour",
+        "attribue": "AO attribué — BC {numero} créé en brouillon",
+        "bcCreated": "BC {numero} créé depuis l'offre sélectionnée."
+      },
+      "deleteConfirm": {
+        "title": "Supprimer l'AO",
+        "message": "Supprimer l'AO {numero} ?"
+      },
+      "approvalSummary": "{numero} — {objet}",
+      "approvalSummaryWithAmount": "{numero} — {objet} — {amount} MAD HT attribués",
+      "comparatif": {
+        "headerTitle": "Comparatif AO",
+        "headerSubtitle": "Scoring fournisseurs & attribution BC",
+        "headerFallbackNumero": "AO",
+        "headerTitleWithNumero": "{numero} — Comparatif",
+        "notFound": "Appel d'offres introuvable.",
+        "matrixTitle": "Matrice fournisseurs × critères",
+        "ponderationHint": "Pondération : prix /50, délai /15, qualité /15, historique /10, conformité Art.187 (proxy) /10.",
+        "columns": {
+          "fournisseur": "Fournisseur",
+          "totalHt": "Total HT",
+          "delaiJours": "Délai (j)",
+          "prix50": "Prix /50",
+          "delai15": "Délai /15",
+          "qualite15": "Qualité /15",
+          "historique10": "Hist. /10",
+          "art18710": "Art.187 /10",
+          "score": "Score",
+          "reco": "Reco"
+        },
+        "empty": "Aucune offre reçue pour cet AO.",
+        "backToAo": "← Retour fiche AO",
+        "breadcrumb": {
+          "achats": "Achats",
+          "ao": "Appels d'offres",
+          "aoFallback": "AO",
+          "comparatif": "Comparatif"
+        }
+      }
+    },
+    "contrat": {
+      "entityName": "Contrat fournisseur",
+      "entityNamePlural": "Contrats fournisseurs",
+      "headerTitle": "Contrats fournisseurs",
+      "createTitle": "Nouveau contrat fournisseur",
+      "detailTitle": "Détail contrat",
+      "chips": {
+        "all": "Tous",
+        "actifs": "Actifs",
+        "expirationProche": "Exp. < 30j",
+        "echus": "Échus"
+      },
+      "list": {
+        "columns": {
+          "numero": "N° Contrat",
+          "fournisseur": "Fournisseur",
+          "type": "Type",
+          "dateDebut": "Début",
+          "dateFin": "Fin",
+          "montantPlafondHt": "Plafond HT",
+          "cumulBcEmisHt": "Consommé HT",
+          "consommationPercent": "Conso %",
+          "joursRestants": "Jours rest.",
+          "status": "Statut"
+        },
+        "transform": {
+          "joursSuffix": "{n} j"
+        },
+        "filters": {
+          "status": "Statut",
+          "fournisseur": "Fournisseur"
+        },
+        "emptyState": {
+          "title": "Aucun contrat",
+          "message": "Formalisez vos accords cadres avec les fournisseurs stratégiques.",
+          "actionLabel": "Nouveau contrat"
+        }
+      },
+      "form": {
+        "sections": {
+          "identite": "Identité",
+          "periode": "Période & Montants",
+          "notes": "Notes"
+        },
+        "fields": {
+          "numero": "N° Contrat",
+          "fournisseur": "Fournisseur *",
+          "type": "Type *",
+          "objet": "Objet *",
+          "dateDebut": "Date début *",
+          "dateFin": "Date fin *",
+          "montantPlafondHt": "Plafond HT",
+          "cumulBcEmisHt": "Consommé HT",
+          "conditionsPaiement": "Conditions paiement",
+          "notes": "Notes"
+        }
+      },
+      "actions": {
+        "signer": "Marquer signé",
+        "activer": "Activer",
+        "resilier": "Résilier"
+      },
+      "confirms": {
+        "signer": {
+          "title": "Contrat signé ?",
+          "message": "Le contrat sera marqué signé.",
+          "confirmLabel": "Confirmer"
+        },
+        "resilier": {
+          "title": "Résilier le contrat ?",
+          "message": "Cette action est irréversible.",
+          "confirmLabel": "Résilier",
+          "notePlaceholder": "Motif de résiliation"
+        }
+      },
+      "toasts": {
+        "saved": "Contrat {numero} enregistré",
+        "updated": "Contrat {numero} mis à jour"
+      },
+      "deleteConfirm": {
+        "title": "Supprimer le contrat",
+        "message": "Supprimer {numero} ?"
+      },
+      "approvalSummary": "{numero} — {type} — {fournisseur}",
+      "approvalSummaryWithCap": "{numero} — {type} — {fournisseur} — plafond {plafond} MAD"
+    },
+    "fournisseur": {
+      "entityName": "Fournisseur",
+      "entityNamePlural": "Fournisseurs",
+      "headerTitle": "Fournisseurs",
+      "createTitle": "Nouveau fournisseur",
+      "detailTitle": "Détail fournisseur",
+      "chips": {
+        "all": "Tous",
+        "actifs": "Actifs",
+        "inactifs": "Inactifs",
+        "topNotes": "Top notés (4★+)"
+      },
+      "list": {
+        "columns": {
+          "code": "Code",
+          "raisonSociale": "Raison sociale",
+          "ice": "ICE",
+          "categories": "Catégories",
+          "ville": "Ville",
+          "notation": "Note",
+          "delaiLivraisonMoyen": "Délai moy. (j)",
+          "status": "Statut"
+        },
+        "transform": {
+          "joursSuffix": "{n} j",
+          "actif": "Actif",
+          "inactif": "Inactif"
+        },
+        "filters": {
+          "categorie": "Catégorie",
+          "notation": "Note minimale",
+          "status": "Statut",
+          "notationOptions": {
+            "five": "5 étoiles",
+            "fourPlus": "4 étoiles et +",
+            "threePlus": "3 étoiles et +"
+          },
+          "statusOptions": {
+            "actifs": "Actifs",
+            "inactifs": "Inactifs"
+          }
+        },
+        "emptyState": {
+          "title": "Aucun fournisseur",
+          "message": "Constituez votre référentiel fournisseurs pour alimenter les commandes et appels d'offres.",
+          "actionLabel": "Nouveau fournisseur"
+        }
+      },
+      "form": {
+        "sections": {
+          "identite": "Identité",
+          "contact": "Contact",
+          "conditions": "Conditions & Règlement",
+          "classification": "Catégories & Évaluation",
+          "notes": "Notes"
+        },
+        "fields": {
+          "code": "Code",
+          "raisonSociale": "Raison sociale *",
+          "ice": "ICE",
+          "iceHint": "15 chiffres (identifiant fiscal Maroc)",
+          "rc": "RC",
+          "patente": "Patente",
+          "adresse": "Adresse",
+          "ville": "Ville",
+          "pays": "Pays",
+          "contactNom": "Contact principal",
+          "contactTel": "Téléphone",
+          "contactEmail": "Email",
+          "conditionsPaiement": "Conditions paiement par défaut",
+          "conditionsPaiementDefault": "30j date facture",
+          "modeReglement": "Mode règlement",
+          "delaiLivraisonMoyen": "Délai livraison moyen (j)",
+          "rib": "RIB",
+          "ribHint": "24 chiffres (RIB marocain)",
+          "banque": "Banque",
+          "categories": "Catégories",
+          "notation": "Notation",
+          "isActive": "Actif",
+          "notes": "Notes"
+        },
+        "notationOptions": {
+          "one": "1 étoile",
+          "two": "2 étoiles",
+          "three": "3 étoiles",
+          "four": "4 étoiles",
+          "five": "5 étoiles"
+        }
+      },
+      "toasts": {
+        "saved": "Fournisseur {name} enregistré"
+      },
+      "deleteConfirm": {
+        "title": "Supprimer le fournisseur",
+        "message": "Supprimer {name} ?"
+      }
+    }
+  }
+}

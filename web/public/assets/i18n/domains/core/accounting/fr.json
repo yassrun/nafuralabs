@@ -1,0 +1,72 @@
+{
+  "accounting": {
+    "navigation": {
+      "title": "Accounting",
+      "description": "Accounting Domain",
+      "accounts": "Accounts",
+      "accountTypes": "Account Types",
+      "fiscalYears": "Fiscal Years",
+      "fiscalPeriods": "Fiscal Periods",
+      "journalEntries": "Journal Entries",
+      "journalEntryLines": "Journal Entry Lines",
+      "costCenters": "Cost Centers",
+      "trialBalances": "Trial Balances"
+    },
+    "fields": {
+      "journalTypeId": "Journal Type Id"
+    }
+  },
+  "common": {
+    "subsections": {
+      "operations": "Operations",
+      "configuration": "Configuration"
+    }
+  },
+  "finance": {
+    "fields": {
+      "code": "Code",
+      "name": "Name",
+      "accountTypeId": "Account Type Id",
+      "parentAccountId": "Parent Account Id",
+      "level": "Level",
+      "isPostable": "Is Postable",
+      "normalBalance": "Normal Balance",
+      "isActive": "Is Active",
+      "classification": "Classification",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "status": "Status",
+      "fiscalYear": "Fiscal Year Id",
+      "periodNumber": "Period Number",
+      "entryNumber": "Entry Number",
+      "postingDate": "Posting Date",
+      "fiscalPeriodId": "Fiscal Period Id",
+      "currencyId": "Currency Id",
+      "description": "Description",
+      "totalDebit": "Total Debit",
+      "totalCredit": "Total Credit",
+      "reference": "Reference",
+      "sourceDocument": "Source Document",
+      "journalEntryId": "Journal Entry Id",
+      "lineNumber": "Line Number",
+      "accountId": "Account Id",
+      "costCenterId": "Cost Center Id",
+      "debitAmount": "Debit Amount",
+      "creditAmount": "Credit Amount",
+      "parentId": "Parent Id",
+      "managerId": "Manager Id",
+      "accountCode": "Account Code",
+      "accountName": "Account Name",
+      "openingDebit": "Opening Debit",
+      "openingCredit": "Opening Credit",
+      "periodDebit": "Period Debit",
+      "periodCredit": "Period Credit",
+      "closingDebit": "Closing Debit",
+      "closingCredit": "Closing Credit"
+    },
+    "sections": {
+      "general": "General",
+      "amounts": "Amounts"
+    }
+  }
+}

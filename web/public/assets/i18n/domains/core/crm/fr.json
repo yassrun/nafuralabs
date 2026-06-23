@@ -1,0 +1,55 @@
+{
+  "crm": {
+    "navigation": {
+      "title": "Crm",
+      "description": "Crm Domain",
+      "leads": "Leads",
+      "opportunities": "Opportunities",
+      "salesChannels": "Sales Channels",
+      "salesTeams": "Sales Teams",
+      "territories": "Territories",
+      "customerClassifications": "Customer Classifications"
+    }
+  },
+  "common": {
+    "subsections": {
+      "operations": "Operations",
+      "configuration": "Configuration"
+    }
+  },
+  "sales": {
+    "fields": {
+      "name": "Name",
+      "companyName": "Company Name",
+      "email": "Email",
+      "phone": "Phone",
+      "source": "Source Id",
+      "status": "Status",
+      "score": "Score",
+      "assignedTo": "Assigned To Id",
+      "notes": "Notes",
+      "customer": "Customer Id",
+      "expectedRevenue": "Expected Revenue",
+      "probability": "Probability",
+      "closeDate": "Close Date",
+      "stage": "Stage",
+      "code": "Code",
+      "managerId": "Manager Id",
+      "description": "Description",
+      "territory": "Territory",
+      "parentTerritoryId": "Parent Territory Id",
+      "customerId": "Customer Id",
+      "tier": "Tier",
+      "segment": "Segment",
+      "criteria": "Criteria",
+      "effectiveDate": "Effective Date",
+      "previousTier": "Previous Tier"
+    },
+    "sections": {
+      "general": "General",
+      "tracking": "Tracking",
+      "pipeline": "Pipeline",
+      "notes": "Notes"
+    }
+  }
+}

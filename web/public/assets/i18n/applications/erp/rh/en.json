@@ -1,0 +1,778 @@
+{
+  "rh": {
+    "routes": {
+      "employes": { "title": "Employees", "breadcrumb": "Employees" },
+      "employeNew": { "title": "New employee", "breadcrumb": "New" },
+      "employeDetail": { "title": "Employee details", "breadcrumb": "Details" },
+      "employeEdit": { "title": "Edit employee", "breadcrumb": "Edit" },
+      "conges": { "title": "Leaves", "breadcrumb": "Leaves" },
+      "congeNew": { "title": "New leave request", "breadcrumb": "New" },
+      "congeDetail": { "title": "Leave details", "breadcrumb": "Details" },
+      "congeEdit": { "title": "Edit leave", "breadcrumb": "Edit" },
+      "paie": { "title": "Payslips", "breadcrumb": "Payroll" },
+      "paieNew": { "title": "New payslip", "breadcrumb": "New" },
+      "paieDetail": { "title": "Payslip details", "breadcrumb": "Details" },
+      "paieEdit": { "title": "Edit payslip", "breadcrumb": "Edit" },
+      "paieJournal": { "title": "Payroll journal", "breadcrumb": "Journal" },
+      "damancom": { "title": "DAMANCOM declaration", "breadcrumb": "DAMANCOM" },
+      "etat1208": { "title": "1208 statement — Purchases summary", "breadcrumb": "Statement 1208" },
+      "etat9421": { "title": "9421 statement — Income tax", "breadcrumb": "Statement 9421" },
+      "pointage": { "title": "Site time clock", "breadcrumb": "Time clock" },
+      "pointageSaisie": { "title": "Time clock entry", "breadcrumb": "Entry" },
+      "pointageValidation": { "title": "Time clock validation", "breadcrumb": "Validation" },
+      "planning": { "title": "Team schedule", "breadcrumb": "Team schedule" }
+    },
+    "common": {
+      "module": "HR",
+      "actions": {
+        "create": "Create",
+        "save": "Save",
+        "cancel": "Cancel",
+        "edit": "Edit",
+        "delete": "Delete",
+        "print": "Print",
+        "export": "Export",
+        "all": "All",
+        "allF": "All",
+        "back": "Back",
+        "validate": "Validate"
+      },
+      "chips": {
+        "all": "All"
+      },
+      "filters": {
+        "month": "Month (YYYY-MM)",
+        "monthShort": "Month",
+        "exercise": "Fiscal year",
+        "chantier": "Construction site",
+        "employe": "Employee"
+      },
+      "dash": "—",
+      "noData": "No data."
+    },
+    "employe": {
+      "title": "Employees",
+      "titleSingular": "Employee",
+      "titleNew": "New employee",
+      "titleDetail": "Employee details",
+      "listing": {
+        "headerTitle": "Employees",
+        "chips": {
+          "all": "All",
+          "actifs": "Active",
+          "suspendus": "Suspended"
+        },
+        "emptyState": {
+          "title": "No employees",
+          "message": "Add your first employees to start managing your workforce.",
+          "actionLabel": "New employee"
+        }
+      },
+      "columns": {
+        "matricule": "Staff ID",
+        "nomPrenom": "Last name & first name",
+        "poste": "Position",
+        "categorie": "Category",
+        "contrat": "Contract",
+        "salaireBase": "Base salary",
+        "anciennete": "Seniority",
+        "statut": "Status"
+      },
+      "anciennete": {
+        "count": "{count, plural, =0 {Less than 1 year} one {1 year} other {# years}}",
+        "one": "{count} year",
+        "other": "{count} years"
+      },
+      "filters": {
+        "statut": "Status",
+        "typeContrat": "Contract type",
+        "categorie": "Category"
+      },
+      "fields": {
+        "nom": "Last name",
+        "prenom": "First name",
+        "cin": "CIN",
+        "cnss": "CNSS number",
+        "amo": "AMO number",
+        "dateNaissance": "Date of birth",
+        "telephone": "Phone",
+        "email": "Email",
+        "adresse": "Address",
+        "ville": "City",
+        "matricule": "Staff ID",
+        "typeContrat": "Contract type",
+        "categorie": "Category",
+        "poste": "Position",
+        "departement": "Department",
+        "dateEmbauche": "Hire date",
+        "dateFinContrat": "Contract end date",
+        "statut": "Status",
+        "salaireBase": "Base salary",
+        "indemniteRepresentation": "Representation allowance",
+        "indemniteTransport": "Transport allowance",
+        "banque": "Bank",
+        "rib": "RIB",
+        "ribHint": "24 digits (Moroccan RIB)",
+        "ice": "ICE (party / payroll)",
+        "ifFiscal": "Tax ID (IF)",
+        "rc": "RC",
+        "patente": "Patente",
+        "notes": "Notes"
+      },
+      "fieldsRequired": {
+        "nom": "Last name *",
+        "prenom": "First name *",
+        "cin": "CIN *",
+        "typeContrat": "Contract type *",
+        "categorie": "Category *",
+        "poste": "Position *",
+        "dateEmbauche": "Hire date *",
+        "salaireBase": "Base salary *"
+      },
+      "sections": {
+        "identite": "Identity",
+        "contrat": "Contract",
+        "remuneration": "Compensation",
+        "notes": "Notes"
+      },
+      "statuses": {
+        "ACTIF": "Active",
+        "SUSPENDU": "Suspended",
+        "SOLDE": "Off-payroll"
+      },
+      "types": {
+        "CDI": "CDI",
+        "CDD": "CDD",
+        "ANAPEC": "ANAPEC",
+        "Saisonnier": "Seasonal",
+        "Interim": "Temporary"
+      },
+      "categories": {
+        "Ouvrier": "Worker",
+        "Agent_maitrise": "Supervisor",
+        "Cadre": "Manager",
+        "Direction": "Executive"
+      },
+      "transitions": {
+        "suspendre": {
+          "label": "Suspend",
+          "confirmTitle": "Suspend the employee?",
+          "confirmMessage": "The employee will be suspended and will no longer be able to access the site.",
+          "confirmLabel": "Suspend"
+        },
+        "solde": {
+          "label": "Off-payroll",
+          "confirmTitle": "Take employee off payroll?",
+          "confirmMessage": "This action terminates the employee's contract.",
+          "confirmLabel": "Confirm"
+        },
+        "reactiver": {
+          "label": "Reactivate",
+          "confirmTitle": "Reactivate the employee?",
+          "confirmMessage": "The employee will regain normal access.",
+          "confirmLabel": "Reactivate"
+        }
+      },
+      "toasts": {
+        "saved": "Employee {matricule} saved",
+        "statutChanged": "Employee {matricule} — status updated"
+      },
+      "deleteConfirm": {
+        "title": "Delete the employee",
+        "message": "Delete employee {matricule} — {nom} {prenom}?"
+      },
+      "errors": {
+        "notFound": "Employee {id} not found"
+      }
+    },
+    "conge": {
+      "title": "Leaves",
+      "titleSingular": "Leave",
+      "titleNew": "New leave request",
+      "titleDetail": "Leave details",
+      "listing": {
+        "headerTitle": "Leaves",
+        "chips": {
+          "all": "All",
+          "demande": "Requested",
+          "approuve": "Approved",
+          "enCours": "In progress"
+        },
+        "emptyState": {
+          "title": "No leaves",
+          "message": "Leave requests from your employees will appear here.",
+          "actionLabel": "New request"
+        }
+      },
+      "approvalBar": {
+        "label": "Approval workflow"
+      },
+      "columns": {
+        "numero": "Leave no.",
+        "employe": "Employee",
+        "type": "Type",
+        "debut": "Start",
+        "fin": "End",
+        "jours": "Days",
+        "statut": "Status"
+      },
+      "filters": {
+        "statut": "Status",
+        "type": "Type"
+      },
+      "fields": {
+        "numero": "Leave no.",
+        "employeId": "Employee",
+        "type": "Leave type",
+        "dateDebut": "Start date",
+        "dateFin": "End date",
+        "nombreJours": "Number of days",
+        "motif": "Reason",
+        "notes": "Notes",
+        "motifRefus": "Refusal reason"
+      },
+      "fieldsRequired": {
+        "employeId": "Employee *",
+        "type": "Leave type *",
+        "dateDebut": "Start date *",
+        "dateFin": "End date *"
+      },
+      "sections": {
+        "demande": "Leave request",
+        "traitement": "Processing"
+      },
+      "statuses": {
+        "DEMANDE": "Requested",
+        "APPROUVE": "Approved",
+        "REFUSE": "Rejected",
+        "EN_COURS": "In progress",
+        "SOLDE": "Closed"
+      },
+      "types": {
+        "ANNUEL": "Annual leave",
+        "MALADIE": "Sick leave",
+        "MATERNITE": "Maternity leave",
+        "PATERNITE": "Paternity leave",
+        "SANS_SOLDE": "Unpaid leave",
+        "EXCEPTIONNEL": "Exceptional leave"
+      },
+      "transitions": {
+        "approuver": {
+          "label": "Approve",
+          "confirmTitle": "Approve the leave?",
+          "confirmMessage": "The leave will be approved.",
+          "confirmLabel": "Approve"
+        },
+        "refuser": {
+          "label": "Reject",
+          "confirmTitle": "Reject the leave?",
+          "confirmMessage": "Please provide the refusal reason.",
+          "confirmLabel": "Reject",
+          "notePlaceholder": "Reason required"
+        },
+        "demarrer": {
+          "label": "Start",
+          "confirmTitle": "Start the leave?",
+          "confirmMessage": "The leave will switch to In progress.",
+          "confirmLabel": "Start"
+        },
+        "solder": {
+          "label": "Close",
+          "confirmTitle": "Close the leave?",
+          "confirmMessage": "The leave will be closed.",
+          "confirmLabel": "Close"
+        }
+      },
+      "toasts": {
+        "saved": "Leave {numero} saved",
+        "approved": "Leave {numero} approved",
+        "refused": "Leave {numero} rejected",
+        "started": "Leave {numero} started",
+        "closed": "Leave {numero} closed"
+      },
+      "prompts": {
+        "motifRefus": "Refusal reason:",
+        "motifObligatoire": "Reason required"
+      },
+      "deleteConfirm": {
+        "title": "Delete leave request",
+        "message": "Delete leave {numero}?"
+      },
+      "errors": {
+        "notFound": "Leave {id} not found"
+      }
+    },
+    "paie": {
+      "bulletin": {
+        "title": "Payslips",
+        "titleSingular": "Payslip",
+        "titleNew": "New payslip",
+        "titleDetail": "Payslip details",
+        "actions": {
+          "generer": "Generate payslip",
+          "print": "Print"
+        },
+        "fields": {
+          "numero": "Payslip no.",
+          "employeId": "Employee",
+          "mois": "Month (YYYY-MM)",
+          "salaireBase": "Base salary",
+          "indemniteRepresentation": "Representation allowance",
+          "indemniteTransport": "Transport allowance",
+          "heuresSup": "Overtime hours",
+          "notes": "Notes",
+          "salaireBrut": "Gross salary",
+          "totalBrut": "Total gross",
+          "cnss": "CNSS (4.48%)",
+          "amo": "AMO (2.26%)",
+          "totalRetenues": "Total deductions",
+          "netImposable": "Taxable net",
+          "igr": "IGR",
+          "totalNet": "Net to pay",
+          "netAPayer": "Net to pay"
+        }
+      },
+      "listing": {
+        "headerTitle": "Payslips",
+        "chips": {
+          "all": "All",
+          "brouillon": "Drafts",
+          "validee": "Validated",
+          "payee": "Paid"
+        },
+        "emptyState": {
+          "title": "No payslips",
+          "message": "Create monthly payslips for your employees.",
+          "actionLabel": "New payslip"
+        }
+      },
+      "columns": {
+        "numero": "Payslip no.",
+        "employe": "Employee",
+        "mois": "Month/Year",
+        "brut": "Gross",
+        "retenues": "Deductions",
+        "igr": "IGR",
+        "netAPayer": "Net to pay",
+        "statut": "Status"
+      },
+      "filters": {
+        "statut": "Status",
+        "mois": "Month (YYYY-MM)"
+      },
+      "sections": {
+        "elements": "Payroll items",
+        "resultat": "Result"
+      },
+      "statuses": {
+        "BROUILLON": "Draft",
+        "VALIDEE": "Validated",
+        "PAYEE": "Paid"
+      },
+      "transitions": {
+        "valider": {
+          "label": "Validate",
+          "confirmTitle": "Validate the payslip?",
+          "confirmMessage": "The payslip will be validated and locked from edits.",
+          "confirmLabel": "Validate"
+        },
+        "payer": {
+          "label": "Mark as paid",
+          "confirmTitle": "Mark the payslip as paid?",
+          "confirmMessage": "The salary has been paid to the employee.",
+          "confirmLabel": "Confirm payment"
+        }
+      },
+      "toasts": {
+        "saved": "Payslip {numero} saved",
+        "validated": "Payslip {numero} validated",
+        "paid": "Payslip {numero} — payment recorded"
+      },
+      "deleteConfirm": {
+        "title": "Delete the payslip",
+        "message": "Delete payslip {numero}?"
+      },
+      "errors": {
+        "notFound": "Payslip {id} not found"
+      },
+      "approvalBar": {
+        "label": "Payroll approval workflow"
+      },
+      "recap": {
+        "title": "Summary (payroll preview)",
+        "ariaLabel": "Payslip summary",
+        "brut": "Gross",
+        "cnssSal": "CNSS empl.",
+        "amoSal": "AMO empl.",
+        "retenues": "Deductions",
+        "netImposable": "Taxable net",
+        "igr": "IGR",
+        "netAPayer": "Net to pay",
+        "hint": "Company header / ICE on printout: through the Administration module (demo)."
+      },
+      "print": {
+        "title": "Payslip {numero}",
+        "periode": "{employeNom} — period {mois}",
+        "headerSubtitle": "— period {mois}",
+        "tableHeaders": {
+          "libelle": "Item",
+          "montant": "Amount"
+        },
+        "lines": {
+          "salaireBase": "Base salary",
+          "brut": "Gross",
+          "retenues": "Deductions",
+          "netImposable": "Taxable net",
+          "igr": "IGR",
+          "netAPayer": "Net to pay"
+        }
+      },
+      "cotisations": {
+        "cnss": "CNSS contribution",
+        "amo": "AMO contribution",
+        "is": "Corporate income tax on salaries",
+        "cnssPercent": "Empl. CNSS contrib. (4.48%)",
+        "amoPercent": "Empl. AMO contrib. (2.26%)",
+        "totalSal": "Empl. total",
+        "patronaleEst": "Employer contrib. est.",
+        "igrRetenu": "Income tax withheld"
+      },
+      "journal": {
+        "title": "Company payroll journal",
+        "subtitle": "Monthly aggregate of payslips — demo closing",
+        "monthLabel": "Month",
+        "linkBack": "← Payslips",
+        "kpi": {
+          "brutTotal": "Total gross",
+          "cnss": "Employee CNSS",
+          "amo": "Employee AMO",
+          "igr": "IGR",
+          "net": "Net to pay"
+        },
+        "columns": {
+          "numero": "No.",
+          "employe": "Employee",
+          "statut": "Status",
+          "brut": "Gross",
+          "cnss": "CNSS",
+          "amo": "AMO",
+          "igr": "IGR",
+          "net": "Net"
+        },
+        "empty": "No payslip for this month."
+      },
+      "declarations": {
+        "common": {
+          "royaumeMaroc": "KINGDOM OF MOROCCO",
+          "dgi": "General Tax Directorate",
+          "exercice": "Fiscal year",
+          "exerciseLabel": "Fiscal year:",
+          "moisLabel": "Declaration month:",
+          "exportXml": "Export XML",
+          "exportCsv": "Export CSV",
+          "exportXlsx": "Export Excel",
+          "imprimer": "Print",
+          "totaux": "TOTALS",
+          "societe": "Company",
+          "employeur": "Employer",
+          "if": "Tax ID",
+          "ice": "ICE",
+          "rc": "RC",
+          "patente": "Patente",
+          "cnss": "CNSS no."
+        },
+        "damancom": {
+          "title": "DAMANCOM declaration — CNSS",
+          "subtitle": "Monthly slip — salaries & social contributions",
+          "exportXmlBtn": "Export DAMANCOM XML",
+          "exportCsvBtn": "Export CSV",
+          "header": {
+            "employeur": "Employer",
+            "cnss": "CNSS no.",
+            "periode": "Period",
+            "nbFiches": "Payslips count"
+          },
+          "columns": {
+            "matricule": "Staff ID",
+            "nomEmploye": "Employee name",
+            "salaireBrut": "Gross salary",
+            "baseCnss": "CNSS base",
+            "cotCnssSal": "Empl. CNSS contrib. (4.48%)",
+            "cotAmoSal": "Empl. AMO contrib. (2.26%)",
+            "totalSal": "Empl. total",
+            "cotPatronale": "Employer contrib. est.",
+            "igrRetenu": "Income tax withheld",
+            "netPaye": "Net paid"
+          },
+          "recap": {
+            "title": "Summary of payments to be made",
+            "cnssSal": "CNSS — Employee share",
+            "amoSal": "AMO — Employee share",
+            "patronale": "Estimated employer contributions",
+            "totalCnss": "Total CNSS due",
+            "igrDgi": "Income tax — Due to the DGI"
+          },
+          "empty": "No validated or paid payslip for {mois}."
+        },
+        "etat1208": {
+          "title": "1208 statement — Annual purchases summary",
+          "subtitle": "DGI declaration: supplier invoices with ICE / IF (1208 statement — purchases summary)",
+          "header": {
+            "titre": "ANNUAL PURCHASES SUMMARY",
+            "etatExercice": "1208 STATEMENT — FISCAL YEAR {annee}"
+          },
+          "filterIce": "Filter by ICE:",
+          "filterIcePlaceholder": "Enter an ICE…",
+          "kpi": {
+            "fournisseurs": "Suppliers",
+            "factures": "Invoices",
+            "totalHt": "Total excl. VAT",
+            "totalTva": "Total VAT",
+            "totalTtc": "Total incl. VAT"
+          },
+          "columns": {
+            "fournisseur": "Supplier",
+            "ice": "ICE",
+            "if": "Tax ID",
+            "ville": "City",
+            "nbFact": "Invoices",
+            "totalHt": "Total excl. VAT",
+            "tva": "VAT",
+            "totalTtc": "Total incl. VAT",
+            "retenueTva": "VAT withholding"
+          },
+          "hint": "Invoices included are: Validated, Partially paid, Paid. Drafts, disputed and cancelled invoices are excluded from the 1208 statement.",
+          "empty": "No supplier invoice retained for fiscal year {annee}."
+        },
+        "etat9421": {
+          "title": "9421 statement — Annual income tax summary",
+          "subtitle": "Annual declaration of salaries and income tax withholdings to the DGI",
+          "header": {
+            "titre": "DECLARATION OF SALARIES AND COMPENSATIONS",
+            "etatExercice": "9421 STATEMENT — FISCAL YEAR {annee}"
+          },
+          "exportXmlBtn": "Export DGI XML",
+          "imprimerBtn": "Print",
+          "columns": {
+            "cin": "CIN",
+            "nomPrenom": "Last name & first name",
+            "remunerationsBrutes": "Gross compensation",
+            "deductions": "Deductions",
+            "netImposable": "Taxable net",
+            "igrRetenu": "Income tax withheld",
+            "salaire": "Salary",
+            "indemnites": "Allowances",
+            "totalBrut": "Total gross",
+            "cnss": "CNSS",
+            "amo": "AMO",
+            "fraisPro": "Business expenses"
+          },
+          "attestation": {
+            "before": "I, the undersigned, legal representative of",
+            "after": ", certify the accuracy of the information shown in this declaration.",
+            "dateCachet": "Date & employer stamp",
+            "recuAdmin": "Received by the administration"
+          },
+          "empty": "No paid payslip for fiscal year {annee}."
+        }
+      }
+    },
+    "pointage": {
+      "title": "Time clock",
+      "listing": {
+        "title": "Site time tracking",
+        "subtitle": "Attendance & absence monitoring",
+        "controls": {
+          "tousChantiers": "All sites",
+          "btnSaisie": "+ Record today's time",
+          "btnValidation": "Approval / totals",
+          "lignesCount": "{count} row(s)"
+        },
+        "stats": {
+          "present": "{count}d present",
+          "absent": "{count}d absent",
+          "conge": "{count}d leave",
+          "maladie": "{count}d sick",
+          "heures": "{count}h"
+        },
+        "empty": "No time entry for this period."
+      },
+      "saisie": {
+        "title": "Site time entry",
+        "subtitleFallback": "Select a site",
+        "actions": {
+          "entree": "Clock in",
+          "sortie": "Clock out",
+          "valider": "Validate time entry",
+          "saved": "✓ Time entry saved",
+          "geoloc": "📍 Geolocate",
+          "geolocLoading": "…"
+        },
+        "geolocTooltip": "GPS position of the site foreman for this time entry (field proof + geofence)",
+        "sync": {
+          "offline": "Offline mode. {count} pending item(s) (time entries + photo). Local queue 7 days / sync upon reconnection.",
+          "conflict": "{count} time entry(ies) in business conflict (divergent data). Resolve on HR / server side.",
+          "syncing": "Synchronizing. {count} item(s) remaining.",
+          "syncedAt": "Synchronized on {date} at {time}.",
+          "syncedLocal": "Synchronized locally."
+        },
+        "geofence": {
+          "label": "Geofence",
+          "radius": "radius {m} m",
+          "distance": "— distance to site: {distance}",
+          "refused": "Time entry refused outside zone (M-RH-01).",
+          "activate": "— activate geolocation to validate on this site."
+        },
+        "team": {
+          "title": "Team (multi time entry)",
+          "selectAll": "Select all",
+          "selectNone": "None",
+          "selectPresent": "Present",
+          "applyToSelection": "Apply to checked:",
+          "applyMode": "Apply {mode}",
+          "selectedCount": "{count} checked"
+        },
+        "photo": {
+          "label": "Site photo (compressed ~800px, IndexedDB — offline 7 days)",
+          "previewAlt": "Site photo preview",
+          "clear": "Remove photo"
+        },
+        "empty": "Select a site to start the time entry.",
+        "quickBar": {
+          "label": "Mark all:",
+          "ariaLabel": "Mark all {mode}"
+        },
+        "signature": {
+          "label": "Signature",
+          "collectif": "Foreman collective",
+          "individuel": "Individual (present)",
+          "hint": "Single signature for the day's sheet (timestamped on save).",
+          "clear": "Clear signature",
+          "indiv": {
+            "signed": "Signed",
+            "sign": "Sign",
+            "clear": "Clear"
+          },
+          "dialog": {
+            "title": "Signature — {nom}",
+            "validate": "Validate signature",
+            "clear": "Clear",
+            "cancel": "Cancel"
+          }
+        },
+        "modes": {
+          "selectChantier": "Select…",
+          "noteAria": "Note for {nom}",
+          "notePlaceholder": "Note (optional)",
+          "modeAria": "{mode} for {nom}"
+        },
+        "arrivee": "Arrival",
+        "depart": "Departure",
+        "emptyOuvriers": "No worker assigned to this site.",
+        "summary": {
+          "presents": "{count} present",
+          "absents": "{count} absent",
+          "others": "{count} other"
+        },
+        "errors": {
+          "geofenceOff": "Geofence: move closer to the site or enable GPS within the allowed zone.",
+          "signatureCollectiveRequired": "Collective signature required (draw inside the box).",
+          "signaturesMissing": "Missing signatures for {count} present worker(s).",
+          "signatureTooShort": "Signature too short.",
+          "geolocRefused": "Geolocation refused or unavailable."
+        }
+      },
+      "validation": {
+        "title": "Time entry approval",
+        "subtitle": "Daily drafts + hours totals (desktop)",
+        "controls": {
+          "date": "Date",
+          "tousChantiers": "All sites",
+          "linkListing": "← Listing"
+        },
+        "brouillons": {
+          "title": "Drafts to approve",
+          "empty": "No draft for this date / filter.",
+          "columns": {
+            "employe": "Employee",
+            "chantier": "Site",
+            "mode": "Mode",
+            "heuresNorm": "Regular h."
+          },
+          "validerTous": "Validate all visible drafts"
+        },
+        "cumuls": {
+          "title": "Monthly total ({mois})",
+          "columns": {
+            "employe": "Employee",
+            "presents": "Days present",
+            "heures": "Cumulative hours"
+          }
+        }
+      },
+      "modes": {
+        "PRESENT": "Present",
+        "ABSENT": "Absent",
+        "CONGE": "Leave",
+        "MALADIE": "Sick",
+        "FORMATION": "Training",
+        "AUTRE": "Other"
+      },
+      "modesAbbrev": {
+        "present": "present",
+        "absent": "absent",
+        "conge": "leave",
+        "maladie": "sick",
+        "presents": "present",
+        "jPresents": "Days present"
+      }
+    },
+    "planning": {
+      "title": "Team schedule",
+      "page": {
+        "title": "Team schedule",
+        "subtitle": "Assignments, filters and overload detection (demo)"
+      },
+      "filters": {
+        "chantier": "Site",
+        "employe": "Employee",
+        "btnNew": "+ New assignment"
+      },
+      "weekNav": {
+        "prev": "‹ Previous week",
+        "next": "Next week ›",
+        "label": "Week from {start} to {end}"
+      },
+      "table": {
+        "ouvrier": "Worker",
+        "empty": "No assignment for these filters.",
+        "fonctionPct": "{role} · {pct}%"
+      },
+      "note": "Coloured cells indicate an active assignment on the day. Alert if the cumulative % exceeds 100% over the week.",
+      "dialog": {
+        "title": "New assignment",
+        "employe": "Employee",
+        "chantier": "Site",
+        "dateDebut": "Start date",
+        "role": "Role",
+        "pctTemps": "% site time",
+        "cancel": "Cancel",
+        "save": "Save"
+      },
+      "conflict": "{nom}: {pct}% cumulative on the week (> 100%).",
+      "days": {
+        "lun": "Mon",
+        "mar": "Tue",
+        "mer": "Wed",
+        "jeu": "Thu",
+        "ven": "Fri",
+        "sam": "Sat",
+        "dim": "Sun"
+      },
+      "employeFallback": "Employee"
+    },
+    "visiteMedicale": {
+      "relais": "See Medical visits (HSE)"
+    }
+  }
+}

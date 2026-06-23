@@ -1,0 +1,29 @@
+{
+  "entity": "InvoiceVariance",
+  "fields": {
+    "varianceNumber": {
+      "required": true,
+      "maxLength": 60,
+      "min": 0
+    },
+    "varianceType": {
+      "min": 0
+    },
+    "expectedAmount": {
+      "min": 0
+    },
+    "actualAmount": {
+      "min": 0
+    },
+    "varianceAmount": {
+      "min": 0
+    },
+    "resolution": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

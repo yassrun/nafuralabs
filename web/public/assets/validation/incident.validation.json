@@ -1,0 +1,23 @@
+{
+  "entity": "Incident",
+  "fields": {
+    "incidentNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "incidentType": {
+      "maxLength": 120
+    },
+    "description": {
+      "maxLength": 2000
+    },
+    "severity": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

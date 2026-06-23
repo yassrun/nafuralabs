@@ -1,0 +1,46 @@
+{
+  "inventory": {
+    "fields": {
+      "inventoryTx": "inventory Tx Id",
+      "lineNumber": "line Number",
+      "item": "item Id",
+      "quantity": "quantity",
+      "unitPrice": "unit Price",
+      "totalPrice": "total Price",
+      "txNumber": "tx Number",
+      "txType": "tx Type",
+      "warehouse": "warehouse Id",
+      "txDate": "tx Date",
+      "reference": "reference",
+      "status": "status",
+      "reservedQuantity": "reserved Quantity",
+      "availableQuantity": "available Quantity",
+      "lastCountDate": "last Count Date"
+    },
+    "navigation": {
+      "inventoryTxLines": "Inventory Tx Lines",
+      "inventoryTxes": "Inventory Txes",
+      "stockBalances": "Stock Balances"
+    },
+    "inventoryTxLine": {
+      "title": "Inventory Tx Lines",
+      "detailTitle": "Inventory Tx Line Details",
+      "newTitle": "New Inventory Tx Line"
+    },
+    "inventoryTx": {
+      "title": "Inventory Txes",
+      "detailTitle": "Inventory Tx Details",
+      "newTitle": "New Inventory Tx"
+    },
+    "stockBalance": {
+      "title": "Stock Balances",
+      "detailTitle": "Stock Balance Details",
+      "newTitle": "New Stock Balance"
+    }
+  },
+  "common": {
+    "fields": {
+      "notes": "notes"
+    }
+  }
+}

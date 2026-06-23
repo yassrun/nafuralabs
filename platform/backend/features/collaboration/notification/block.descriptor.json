@@ -1,0 +1,16 @@
+{
+  "id": "notification",
+  "name": "Notification",
+  "description": "Notifications",
+  "type": "feature",
+  "layer": "feature",
+  "group": "collaboration",
+  "provides": {
+    "backend": {
+      "gradle": ":platform:features:collaboration:notification",
+      "packages": ["ma.nafura.platform.collaboration.notification"]
+    }
+  },
+  "requires": { "core": ["identity", "tenancy"], "features": [] },
+  "manifest": { "key": "notification" }
+}

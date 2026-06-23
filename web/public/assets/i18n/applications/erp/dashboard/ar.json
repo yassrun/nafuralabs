@@ -1,0 +1,377 @@
+{
+  "dashboard": {
+    "pilotage": {
+      "title": "القيادة",
+      "subtitle": "لوحة قيادة المجموعة",
+      "breadcrumb": "القيادة"
+    },
+    "margesChantier": {
+      "title": "القيادة — هوامش الأوراش",
+      "subtitle": "نظرة موحَّدة لمردودية كل ورش",
+      "breadcrumb": "هوامش الأوراش",
+      "routeTitle": "هوامش الأوراش",
+      "routeBreadcrumb": "الهوامش",
+      "kpis": {
+        "chantiersActifs": "الأوراش النشطة",
+        "portefeuille": "إجمالي المحفظة HT",
+        "margeGlobale": "الهامش الإجمالي",
+        "margeHt": "الهامش HT (تراكمي)",
+        "alertesMargeBasse": "تنبيهات هامش < 5٪",
+        "alertesFacturationAvancement": "تنبيهات الفوترة / التقدم"
+      },
+      "filters": {
+        "searchPlaceholder": "الرمز، الاسم، المدينة…",
+        "allStatuses": "جميع الحالات",
+        "sortBy": {
+          "marge": "ترتيب حسب الهامش",
+          "avancement": "ترتيب حسب التقدم",
+          "montant": "ترتيب حسب مبلغ الصفقة",
+          "code": "ترتيب حسب الرمز"
+        }
+      },
+      "actions": {
+        "exportCsv": "تصدير CSV"
+      },
+      "count": "{count, plural, zero {لا يوجد ورش} one {ورش واحد} two {ورشان} few {# أوراش} many {# ورشاً} other {# ورش}}",
+      "columns": {
+        "chantier": "الورش",
+        "ville": "المدينة",
+        "marcheHt": "الصفقة HT",
+        "factureHt": "المفوتر HT",
+        "pctFacture": "٪ المفوتر",
+        "avancement": "التقدم",
+        "diffFactAv": "Δ فوترة/تقدم",
+        "encaisseHt": "المحصَّل HT",
+        "margeProjetee": "الهامش المتوقع",
+        "margePct": "الهامش ٪",
+        "statut": "الحالة"
+      },
+      "diffPts": "{value} نقطة",
+      "empty": "لا يوجد أي ورش.",
+      "legend": "🔴 هامش < 5٪ — تدخل عاجل · 🟡 هامش 5–15٪ — يقظة · 🟢 هامش > 15٪ · ⚠ Δ فوترة/تقدم > 10 نقاط: خطر الفوترة الزائدة",
+      "export": {
+        "filename": "pilotage-marges-chantiers",
+        "headers": {
+          "code": "الرمز",
+          "nom": "الاسم",
+          "ville": "المدينة",
+          "statut": "الحالة",
+          "marcheHt": "الصفقة HT",
+          "factureHt": "المفوتر HT",
+          "pctFacture": "٪ المفوتر",
+          "avancement": "التقدم ٪",
+          "diffFactAv": "Δ فوترة-تقدم (نقاط)",
+          "encaisseHt": "المحصَّل HT",
+          "margeProjetee": "الهامش المتوقع HT",
+          "margePct": "الهامش ٪"
+        },
+        "auditLabel": "هوامش الأوراش",
+        "auditDetail": "تصدير CSV — {count, plural, zero {لا أسطر} one {سطر واحد} two {سطران} few {# أسطر} many {# سطراً} other {# سطر}}"
+      }
+    },
+    "margeConsolidee": {
+      "title": "القيادة — الهامش الموحَّد",
+      "subtitle": "ملخص المجموعة: المحفظة، الخزينة المفوترة ومناطق الخطر",
+      "breadcrumb": "الهامش الموحَّد",
+      "routeTitle": "الهامش الموحَّد",
+      "routeBreadcrumb": "الهامش الموحَّد",
+      "intro": "عرض تنفيذي مكمِّل لـ",
+      "introLink": "هوامش الأوراش",
+      "introDetail": "(تفصيل سطراً بسطر).",
+      "kpis": {
+        "portefeuille": "محفظة الصفقات HT",
+        "factureHt": "المفوتر HT (تراكمي)",
+        "encaisseHt": "المحصَّل HT (تراكمي)",
+        "tauxEncaisse": "نسبة التحصيل / الفوترة",
+        "margeProjetee": "الهامش المتوقع للمجموعة",
+        "chantiersActifs": "الأوراش النشطة"
+      },
+      "risques": {
+        "title": "أبرز مخاطر الهامش (< 10٪)",
+        "columns": {
+          "chantier": "الورش",
+          "marcheHt": "الصفقة HT",
+          "margePct": "الهامش ٪"
+        },
+        "empty": "لا يوجد أي ورش تحت 10٪ في البيانات التجريبية."
+      },
+      "parVille": {
+        "title": "التوزيع حسب المدينة",
+        "columns": {
+          "ville": "المدينة",
+          "chantiers": "الأوراش",
+          "portefeuilleHt": "المحفظة HT",
+          "margeHt": "الهامش HT"
+        },
+        "empty": "—"
+      },
+      "alertes": {
+        "title": "تنبيهات عرضية",
+        "margeBasse": "{count, plural, zero {لا أوراش} one {ورش واحد} two {ورشان} few {# أوراش} many {# ورشاً} other {# ورش}} بهامش متوقع < 5٪",
+        "ecartFactAv": "{count, plural, zero {لا أوراش} one {ورش واحد} two {ورشان} few {# أوراش} many {# ورشاً} other {# ورش}} بفارق فوترة / تقدم > 10 نقاط"
+      }
+    },
+    "cashFlow": {
+      "title": "التدفق النقدي التوقعي",
+      "subtitle": "12 شهراً متحركة — المقبوضات والمدفوعات",
+      "breadcrumb": "التدفق النقدي",
+      "routeTitle": "التدفق النقدي التوقعي",
+      "routeBreadcrumb": "التدفق النقدي",
+      "kpis": {
+        "soldeProjete": "الرصيد المتوقع +12 شهر",
+        "seuilAlerte": "عتبة التنبيه",
+        "moisSousSeuil": "أشهر تحت العتبة"
+      },
+      "legend": {
+        "encaissements": "المقبوضات",
+        "decaissements": "المدفوعات"
+      },
+      "columns": {
+        "mois": "الشهر",
+        "encaissementsPrevus": "المقبوضات المتوقعة",
+        "decaissementsPrevus": "المدفوعات المتوقعة",
+        "soldeMensuel": "الرصيد الشهري",
+        "soldeCumule": "الرصيد التراكمي",
+        "alerte": "تنبيه"
+      },
+      "alerteBadge": "⚠ تحت العتبة",
+      "tooltip": {
+        "encaissements": "المقبوضات",
+        "decaissements": "المدفوعات",
+        "solde": "الرصيد",
+        "situations": "كشوف الأشغال",
+        "tresoChantiers": "خزينة الأوراش",
+        "ff": "فواتير الموردين",
+        "paie": "الأجور",
+        "chargesSoc": "الأعباء الاجتماعية",
+        "traites": "الكمبيالات"
+      }
+    },
+    "analyses": {
+      "title": "القيادة والتحليلات",
+      "breadcrumb": "التحليلات",
+      "rentabilite": {
+        "title": "القيادة والتحليلات — المردودية",
+        "subtitle": "هوامش الأوراش، جدول محوري متعدد المحاور",
+        "breadcrumb": "المردودية",
+        "routeTitle": "التحليلات — المردودية",
+        "routeBreadcrumb": "المردودية",
+        "kpis": {
+          "margeBrute": "الهامش الإجمالي YTD",
+          "margeNette": "الهامش الصافي YTD",
+          "margeMoyenne": "متوسط الهامش"
+        },
+        "topTitle": "أفضل 5 أوراش (هامش ٪)",
+        "flopTitle": "أضعف 5 أوراش (هامش ٪)",
+        "pivot": {
+          "title": "هوامش متعددة المحاور (TCD)",
+          "axes": {
+            "chantier": "الورش",
+            "bu": "وحدة العمل / الشركة",
+            "client": "الزبون",
+            "moa": "صاحب المشروع",
+            "typeMarche": "نوع الصفقة"
+          },
+          "exportCsv": "تصدير CSV",
+          "columns": {
+            "axe": "المحور",
+            "marcheHt": "الصفقة HT",
+            "factureHt": "المفوتر HT",
+            "margeHt": "الهامش HT",
+            "margePct": "الهامش ٪"
+          }
+        },
+        "loading": "جاري تحميل المؤشرات…",
+        "export": {
+          "filename": "pilotage-marges-pivot",
+          "headers": {
+            "axe": "المحور",
+            "marcheHt": "الصفقة HT",
+            "factureHt": "المفوتر HT",
+            "margeHt": "الهامش HT",
+            "margePct": "الهامش ٪"
+          }
+        }
+      },
+      "financier": {
+        "title": "القيادة والتحليلات — المالي",
+        "subtitle": "رقم الأعمال، الذمم، الديون، احتياج رأس المال العامل (محاسبة تجريبية)",
+        "breadcrumb": "المالي",
+        "routeTitle": "التحليلات — المالي",
+        "routeBreadcrumb": "المالي",
+        "kpis": {
+          "caFactureYtd": "رقم الأعمال المفوتر YTD",
+          "caEncaisse": "رقم الأعمال المحصَّل",
+          "creancesOuvertes": "الذمم المدينة المفتوحة",
+          "dettesFournisseurs": "ديون الموردين",
+          "bfr": "احتياج رأس المال العامل",
+          "ratioLiquidite": "نسبة السيولة"
+        }
+      },
+      "stock": {
+        "title": "القيادة والتحليلات — المخزون",
+        "subtitle": "التقييم، الدوران، الاستهلاكات",
+        "breadcrumb": "المخزون",
+        "routeTitle": "التحليلات — المخزون",
+        "routeBreadcrumb": "المخزون",
+        "kpis": {
+          "valeurStockTotale": "إجمالي قيمة المخزون",
+          "rotation": "الدوران (أيام تقريبية)",
+          "valeurChantier": "مخزون الأوراش",
+          "valeurCentral": "المخزون المركزي / المستودعات"
+        },
+        "topArticles": "أفضل 10 أصناف مُستهلكة (إخراجات)",
+        "empty": "—"
+      },
+      "achats": {
+        "title": "القيادة والتحليلات — المشتريات",
+        "subtitle": "حجم سندات الطلب، الموردون، التبعية",
+        "breadcrumb": "المشتريات",
+        "routeTitle": "التحليلات — المشتريات",
+        "routeBreadcrumb": "المشتريات",
+        "kpis": {
+          "volumeYtd": "الحجم YTD HT",
+          "nbBc": "عدد سندات الطلب",
+          "economiesVsMarche": "الوفورات مقابل السوق",
+          "dependanceMax": "أقصى تبعية"
+        },
+        "topFournisseurs": "أبرز الموردين YTD"
+      },
+      "rh": {
+        "title": "القيادة والتحليلات — الموارد البشرية",
+        "subtitle": "العدد، كتلة الأجور، التغيب",
+        "breadcrumb": "الموارد البشرية",
+        "routeTitle": "التحليلات — الموارد البشرية",
+        "routeBreadcrumb": "الموارد البشرية",
+        "kpis": {
+          "effectif": "العدد النشط",
+          "masseSalariale": "كتلة الأجور YTD (إجمالي)",
+          "absenteisme": "نسبة التغيب",
+          "rotation": "معدل الدوران",
+          "pyramide": "هرم < 35 سنة",
+          "heuresSup": "الساعات الإضافية YTD"
+        }
+      },
+      "whatIf": {
+        "title": "القيادة والتحليلات — افتراضات",
+        "subtitle": "سيناريوهات التأخير، أوامر الخدمة، ارتفاع المواد، خسارة ورش",
+        "breadcrumb": "افتراضات",
+        "routeTitle": "التحليلات — افتراضات",
+        "routeBreadcrumb": "افتراضات",
+        "controls": {
+          "retardJours": "متوسط تأخير الأوراش (أيام)",
+          "impactOs": "أثر أوامر الخدمة / الطوارئ (٪ التكلفة)",
+          "hausseMatiere": "ارتفاع الفولاذ / المواد (٪)",
+          "perteMarge": "خسارة الورش الجاري (٪ من الهامش)"
+        },
+        "scenarioActuel": "السيناريو الحالي",
+        "scenarioSimule": "السيناريو المحاكى",
+        "margeBruteYtd": "الهامش الإجمالي YTD",
+        "soldeCashflow": "رصيد التدفق النقدي +12 شهر"
+      },
+      "opexCapex": {
+        "title": "القيادة والتحليلات — OPEX / CAPEX",
+        "subtitle": "حركات YTD حسب الصنف المحاسبي (تجريبي)",
+        "breadcrumb": "OPEX / CAPEX",
+        "routeTitle": "التحليلات — OPEX / CAPEX",
+        "routeBreadcrumb": "OPEX / CAPEX",
+        "kpis": {
+          "opex": "OPEX (الصنف 6)",
+          "capex": "CAPEX (الصنف 2)"
+        }
+      },
+      "groupe": {
+        "title": "القيادة والتحليلات — المجموعة",
+        "subtitle": "عرض موحَّد (الشركة الأم — العمليات بين الشركات لاحقاً Task 13)",
+        "breadcrumb": "المجموعة",
+        "routeTitle": "التحليلات — المجموعة",
+        "routeBreadcrumb": "المجموعة",
+        "kpis": {
+          "ca": "رقم الأعمال الموحَّد",
+          "marge": "الهامش الإجمالي الموحَّد",
+          "ebitda": "EBITDA تقريبي",
+          "bfrNet": "صافي احتياج رأس المال العامل للمجموعة"
+        },
+        "hint": "إلغاء العمليات بين الشركات: عنصر نائب حتى التطبيق متعدد الشركات (M-ADM-03)."
+      }
+    },
+    "common": {
+      "loading": "جاري التحميل…"
+    },
+    "approbations": {
+      "title": "الموافقات",
+      "breadcrumb": "الموافقات",
+      "routeTitle": "الموافقات",
+      "routeBreadcrumb": "الموافقات",
+      "subtitleCount": "{count, plural, zero {لا طلبات} one {طلب واحد} two {طلبان} few {# طلبات} many {# طلباً} other {# طلب}} بانتظار القرار",
+      "tabs": {
+        "aTraiter": "للمعالجة",
+        "historique": "السجل"
+      },
+      "filters": {
+        "allTypes": "جميع الأنواع",
+        "allSocietes": "جميع الشركات",
+        "allUrgences": "جميع درجات الاستعجال"
+      },
+      "urgence": {
+        "normale": "عادي",
+        "haute": "مرتفع",
+        "critique": "حرج"
+      },
+      "card": {
+        "par": "من قِبَل {nom}",
+        "slaBadge": "SLA +{days} يوم",
+        "slaExp": "انتهاء SLA {date}",
+        "slaRestants": "{days} يوم متبقٍ",
+        "auditTitle": "السجل وبصمات SHA-256 ({count})",
+        "viewLinkAria": "عرض طلب الموافقة {id}",
+        "etape": "المرحلة {current}/{total}"
+      },
+      "actions": {
+        "approve": "✓ موافقة",
+        "reject": "✗ رفض",
+        "askComplement": "طلب تكميل",
+        "comment": "تعليق",
+        "delegate": "تفويض",
+        "viewDetail": "عرض التفاصيل ←",
+        "submit": "تقديم للموافقة"
+      },
+      "empty": {
+        "aTraiter": "لا توجد طلبات بالانتظار. 🎉",
+        "historique": "لا يوجد سجل."
+      },
+      "prompts": {
+        "rejectReason": "سبب الرفض (إلزامي):",
+        "complement": "حدّد الوثائق أو المعلومات المنتظرة من المبادر:",
+        "comment": "تعليق (داخلي / للمبادر):",
+        "delegate": "اسم المفوَّض إليه (تجريبي):"
+      },
+      "toasts": {
+        "complementSent": "تم طلب التكميل — أُشعِر المبادر (تجريبي).",
+        "commentSaved": "تم حفظ التعليق.",
+        "delegationSaved": "تم حفظ التفويض إلى {nom} (التوجيه الكامل: Task 12 P1).",
+        "entityNotLinked": "فتح البطاقة: النوع غير مرتبط في النسخة التجريبية.",
+        "submitted": "تم تقديم {ref} للموافقة."
+      },
+      "pill": {
+        "enAttente": "بانتظار الموافقة",
+        "approuve": "موافق عليه",
+        "rejete": "مرفوض",
+        "expire": "منتهي الصلاحية"
+      },
+      "audit": {
+        "submitDetail": "مقدَّم للموافقة",
+        "submitDetailWithAmount": "مقدَّم للموافقة — {amount} MAD",
+        "stepApproved": "مرحلة موافَق عليها ({current}/{total}) — {par}",
+        "fullyApproved": "تمت الموافقة على الطلب (انتهاء الدورة) — {par}",
+        "defaultRejection": "رفض — {par}",
+        "initiator": "المستخدم الحالي",
+        "selfApprover": "أنا"
+      },
+      "societes": {
+        "nafura": "Nafura SA",
+        "subsidiary": "فرع تجريبي"
+      }
+    }
+  }
+}

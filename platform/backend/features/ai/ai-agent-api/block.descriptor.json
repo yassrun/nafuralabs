@@ -1,0 +1,16 @@
+{
+  "id": "ai-agent-api",
+  "name": "AI Agent API",
+  "description": "Shared interfaces and DTOs for agent tools (used by ai-conversation and ai-agent-runtime)",
+  "type": "feature",
+  "layer": "feature",
+  "group": "ai",
+  "provides": {
+    "backend": {
+      "gradle": ":platform:features:ai:ai-agent-api",
+      "packages": ["ma.nafura.platform.ai.agent"]
+    }
+  },
+  "requires": { "core": [], "features": ["llm-provider"] },
+  "manifest": { "key": "ai-agent-api" }
+}

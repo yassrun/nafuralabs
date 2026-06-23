@@ -1,0 +1,26 @@
+{
+  "entity": "BudgetRevision",
+  "fields": {
+    "revisionNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "budgetId": {
+      "required": true
+    },
+    "revisionDate": {
+      "required": true
+    },
+    "adjustmentAmount": {
+      "required": true
+    },
+    "reason": {
+      "maxLength": 2000
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

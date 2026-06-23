@@ -1,0 +1,10 @@
+    <nf-page-shell>
+      <nf-page-header [config]="headerConfig"></nf-page-header>
+      <nf-entity-listing
+        #listing
+        [config]="config"
+        [facade]="facade"
+        (action)="onAction($event)">
+      </nf-entity-listing>
+    </nf-page-shell>
+  

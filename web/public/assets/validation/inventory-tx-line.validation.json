@@ -1,0 +1,28 @@
+{
+  "entity": "InventoryTxLine",
+  "fields": {
+    "inventoryTxId": {
+      "required": true
+    },
+    "lineNumber": {
+      "required": true,
+      "min": 1
+    },
+    "itemId": {
+      "required": true
+    },
+    "quantity": {
+      "required": true,
+      "min": 0
+    },
+    "unitPrice": {
+      "min": 0
+    },
+    "totalPrice": {
+      "min": 0
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

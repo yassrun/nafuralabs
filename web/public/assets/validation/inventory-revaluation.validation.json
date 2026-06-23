@@ -1,0 +1,25 @@
+{
+  "entity": "InventoryRevaluation",
+  "fields": {
+    "revaluationNumber": {
+      "required": true,
+      "maxLength": 60
+    },
+    "reason": {
+      "maxLength": 120
+    },
+    "totalAdjustment": {
+      "min": 0
+    },
+    "approvedBy": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

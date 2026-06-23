@@ -1,0 +1,29 @@
+{
+  "entity": "ShippingMethod",
+  "fields": {
+    "code": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "name": {
+      "maxLength": 120
+    },
+    "description": {
+      "maxLength": 2000
+    },
+    "carrierRequired": {
+      "maxLength": 120
+    },
+    "trackingRequired": {
+      "maxLength": 120
+    },
+    "insuranceRequired": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

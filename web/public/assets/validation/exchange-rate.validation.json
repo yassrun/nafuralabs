@@ -1,0 +1,21 @@
+{
+  "entity": "ExchangeRate",
+  "fields": {
+    "fromCurrencyId": {
+      "required": true
+    },
+    "toCurrencyId": {
+      "required": true
+    },
+    "rate": {
+      "required": true,
+      "min": 0
+    },
+    "effectiveDate": {
+      "required": true
+    },
+    "source": {
+      "maxLength": 50
+    }
+  }
+}

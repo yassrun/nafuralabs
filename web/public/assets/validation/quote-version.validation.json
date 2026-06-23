@@ -1,0 +1,15 @@
+{
+  "entity": "QuoteVersion",
+  "fields": {
+    "quoteId": {
+      "required": true
+    },
+    "versionNumber": {
+      "required": true,
+      "min": 1
+    },
+    "createdAt": {
+      "required": true
+    }
+  }
+}

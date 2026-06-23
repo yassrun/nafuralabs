@@ -1,0 +1,29 @@
+{
+  "entity": "RateContract",
+  "fields": {
+    "contractNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "agreedRate": {
+      "min": 0
+    },
+    "currency": {
+      "maxLength": 120
+    },
+    "validFrom": {
+      "maxLength": 120
+    },
+    "validTo": {
+      "maxLength": 120
+    },
+    "volumeCommitment": {
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

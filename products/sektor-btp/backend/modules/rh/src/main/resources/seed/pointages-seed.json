@@ -1,0 +1,56 @@
+{
+  "batches": [
+    {
+      "id": "pb-2026-05-08-ch-001",
+      "clientId": "a1000001-0000-4000-8000-000000000001",
+      "chefEmployeId": "emp-004",
+      "chantierId": "ch-001",
+      "datePointage": "2026-05-08",
+      "status": "VALIDE",
+      "pointages": [
+        { "id": "pt-2026-05-08-emp-001", "employeId": "emp-001", "date": "2026-05-08", "mode": "PRESENT", "heureArrivee": "07:45", "heureDepart": "17:00", "heuresNormales": "8", "heuresSup": "0", "status": "VALIDE" },
+        { "id": "pt-2026-05-08-emp-004", "employeId": "emp-004", "date": "2026-05-08", "mode": "PRESENT", "heureArrivee": "07:50", "heureDepart": "17:15", "heuresNormales": "8", "heuresSup": "0", "status": "VALIDE" },
+        { "id": "pt-2026-05-08-emp-006", "employeId": "emp-006", "date": "2026-05-08", "mode": "CONGE", "heuresNormales": "0", "heuresSup": "0", "status": "VALIDE" },
+        { "id": "pt-2026-05-08-emp-003", "employeId": "emp-003", "date": "2026-05-08", "mode": "PRESENT", "heureArrivee": "07:40", "heureDepart": "17:00", "heuresNormales": "8", "heuresSup": "0", "status": "VALIDE" }
+      ]
+    },
+    {
+      "id": "pb-2026-05-08-ch-002",
+      "clientId": "a1000001-0000-4000-8000-000000000002",
+      "chefEmployeId": "emp-005",
+      "chantierId": "ch-002",
+      "datePointage": "2026-05-08",
+      "status": "VALIDE",
+      "pointages": [
+        { "id": "pt-2026-05-08-emp-002", "employeId": "emp-002", "date": "2026-05-08", "mode": "PRESENT", "heureArrivee": "07:45", "heureDepart": "17:00", "heuresNormales": "8", "heuresSup": "0", "status": "VALIDE" },
+        { "id": "pt-2026-05-08-emp-005", "employeId": "emp-005", "date": "2026-05-08", "mode": "MALADIE", "heuresNormales": "0", "heuresSup": "0", "status": "VALIDE" }
+      ]
+    },
+    {
+      "id": "pb-2026-05-07-ch-001",
+      "clientId": "a1000001-0000-4000-8000-000000000003",
+      "chefEmployeId": "emp-004",
+      "chantierId": "ch-001",
+      "datePointage": "2026-05-07",
+      "status": "VALIDE",
+      "pointages": [
+        { "id": "pt-2026-05-07-emp-001", "employeId": "emp-001", "date": "2026-05-07", "mode": "PRESENT", "heureArrivee": "07:45", "heureDepart": "17:00", "heuresNormales": "8", "heuresSup": "0", "status": "VALIDE" },
+        { "id": "pt-2026-05-07-emp-004", "employeId": "emp-004", "date": "2026-05-07", "mode": "PRESENT", "heureArrivee": "07:45", "heureDepart": "17:00", "heuresNormales": "8", "heuresSup": "0", "status": "VALIDE" },
+        { "id": "pt-2026-05-07-emp-006", "employeId": "emp-006", "date": "2026-05-07", "mode": "ABSENT", "heuresNormales": "0", "heuresSup": "0", "status": "VALIDE" },
+        { "id": "pt-2026-05-07-emp-003", "employeId": "emp-003", "date": "2026-05-07", "mode": "PRESENT", "heureArrivee": "07:45", "heureDepart": "17:00", "heuresNormales": "8", "heuresSup": "0", "status": "VALIDE" }
+      ]
+    },
+    {
+      "id": "pb-2026-05-10-ch-001",
+      "clientId": "a1000001-0000-4000-8000-000000000004",
+      "chefEmployeId": "emp-004",
+      "chantierId": "ch-001",
+      "datePointage": "2026-05-10",
+      "status": "BROUILLON",
+      "pointages": [
+        { "id": "pt-2026-05-10-emp-001", "employeId": "emp-001", "date": "2026-05-10", "mode": "PRESENT", "heureArrivee": "07:45", "heureDepart": "17:00", "heuresNormales": "8", "heuresSup": "0", "status": "BROUILLON" },
+        { "id": "pt-2026-05-10-emp-004", "employeId": "emp-004", "date": "2026-05-10", "mode": "ABSENT", "heureArrivee": "07:45", "heureDepart": "17:00", "heuresNormales": "0", "heuresSup": "0", "status": "BROUILLON" }
+      ]
+    }
+  ]
+}

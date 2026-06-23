@@ -1,0 +1,8 @@
+{
+  "entity": "TrialBalance",
+  "fields": {
+    "accountId": {
+      "required": true
+    }
+  }
+}

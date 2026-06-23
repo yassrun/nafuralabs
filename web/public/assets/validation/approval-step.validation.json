@@ -1,0 +1,23 @@
+{
+  "entity": "ApprovalStep",
+  "fields": {
+    "approvalRequestId": {
+      "required": true
+    },
+    "stepNumber": {
+      "required": true,
+      "min": 1
+    },
+    "approverRole": {
+      "required": true,
+      "maxLength": 80
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "comment": {
+      "maxLength": 2000
+    }
+  }
+}

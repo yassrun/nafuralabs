@@ -1,0 +1,36 @@
+{
+  "entity": "BlanketOrder",
+  "fields": {
+    "orderNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "customerId": {
+      "required": true
+    },
+    "startDate": {
+      "required": true
+    },
+    "endDate": {
+      "required": true
+    },
+    "currencyId": {
+      "required": true
+    },
+    "totalCommitment": {
+      "required": true,
+      "min": 0
+    },
+    "releasedAmount": {
+      "min": 0
+    },
+    "remainingAmount": {
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

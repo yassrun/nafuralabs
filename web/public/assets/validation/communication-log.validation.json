@@ -1,0 +1,29 @@
+{
+  "entity": "CommunicationLog",
+  "fields": {
+    "logNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "channel": {
+      "maxLength": 120
+    },
+    "direction": {
+      "maxLength": 120
+    },
+    "subject": {
+      "maxLength": 120
+    },
+    "content": {
+      "maxLength": 2000
+    },
+    "loggedBy": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

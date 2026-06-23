@@ -1,0 +1,33 @@
+{
+  "location": {
+    "fields": {
+      "code": "الرمز",
+      "name": "الاسم",
+      "type": "النوع",
+      "parentLocation": "معرّف الموقع الأصل",
+      "isPhysical": "موقع فعلي",
+      "affectsStock": "يؤثر على المخزون"
+    },
+    "sections": {
+      "hierarchy": "التسلسل الهرمي",
+      "behavior": "السلوك"
+    },
+    "feature": {
+      "title": "المواقع الفعلية",
+      "description": "المواقع الفعلية"
+    },
+    "navigation": {
+      "locations": "المواقع"
+    },
+    "location": {
+      "title": "المواقع",
+      "detailTitle": "تفاصيل الموقع",
+      "newTitle": "موقع جديد"
+    }
+  },
+  "common": {
+    "sections": {
+      "general": "عام"
+    }
+  }
+}

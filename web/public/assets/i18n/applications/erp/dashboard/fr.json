@@ -1,0 +1,377 @@
+{
+  "dashboard": {
+    "pilotage": {
+      "title": "Pilotage",
+      "subtitle": "Tableau de bord groupe",
+      "breadcrumb": "Pilotage"
+    },
+    "margesChantier": {
+      "title": "Pilotage — Marges chantiers",
+      "subtitle": "Vue consolidée rentabilité par chantier",
+      "breadcrumb": "Marges chantiers",
+      "routeTitle": "Marges chantiers",
+      "routeBreadcrumb": "Marges",
+      "kpis": {
+        "chantiersActifs": "Chantiers actifs",
+        "portefeuille": "Portefeuille total HT",
+        "margeGlobale": "Marge globale",
+        "margeHt": "Marge HT (cumul)",
+        "alertesMargeBasse": "Alertes marge < 5%",
+        "alertesFacturationAvancement": "Alertes facturé/avancement"
+      },
+      "filters": {
+        "searchPlaceholder": "Code, nom, ville…",
+        "allStatuses": "Tous les statuts",
+        "sortBy": {
+          "marge": "Trier par marge",
+          "avancement": "Trier par avancement",
+          "montant": "Trier par montant marché",
+          "code": "Trier par code"
+        }
+      },
+      "actions": {
+        "exportCsv": "Exporter CSV"
+      },
+      "count": "{count} chantier(s)",
+      "columns": {
+        "chantier": "Chantier",
+        "ville": "Ville",
+        "marcheHt": "Marché HT",
+        "factureHt": "Facturé HT",
+        "pctFacture": "% Facturé",
+        "avancement": "Avancement",
+        "diffFactAv": "Δ Fact./Av.",
+        "encaisseHt": "Encaissé HT",
+        "margeProjetee": "Marge projetée",
+        "margePct": "Marge %",
+        "statut": "Statut"
+      },
+      "diffPts": "{value} pts",
+      "empty": "Aucun chantier.",
+      "legend": "🔴 Marge < 5% — intervention urgente · 🟡 Marge 5–15% — vigilance · 🟢 Marge > 15% · ⚠ Δ Fact./Av. > 10 pts : risque de sur-facturation",
+      "export": {
+        "filename": "pilotage-marges-chantiers",
+        "headers": {
+          "code": "Code",
+          "nom": "Nom",
+          "ville": "Ville",
+          "statut": "Statut",
+          "marcheHt": "Marché HT",
+          "factureHt": "Facturé HT",
+          "pctFacture": "% Facturé",
+          "avancement": "Avancement %",
+          "diffFactAv": "Δ Fact-Av (pts)",
+          "encaisseHt": "Encaissé HT",
+          "margeProjetee": "Marge projetée HT",
+          "margePct": "Marge %"
+        },
+        "auditLabel": "Marges chantiers",
+        "auditDetail": "Export CSV — {count} ligne(s)"
+      }
+    },
+    "margeConsolidee": {
+      "title": "Pilotage — Marge consolidée",
+      "subtitle": "Synthèse groupe : portefeuille, trésorerie facturée et zones à risque",
+      "breadcrumb": "Marge consolidée",
+      "routeTitle": "Marge consolidée",
+      "routeBreadcrumb": "Marge consolidée",
+      "intro": "Vue exécutive complémentaire de",
+      "introLink": "Marges chantiers",
+      "introDetail": "(détail ligne par ligne).",
+      "kpis": {
+        "portefeuille": "Portefeuille marchés HT",
+        "factureHt": "Facturé HT (cumul)",
+        "encaisseHt": "Encaissé HT (cumul)",
+        "tauxEncaisse": "Taux encaissement / facturé",
+        "margeProjetee": "Marge projetée groupe",
+        "chantiersActifs": "Chantiers actifs"
+      },
+      "risques": {
+        "title": "Top risques marge (< 10%)",
+        "columns": {
+          "chantier": "Chantier",
+          "marcheHt": "Marché HT",
+          "margePct": "Marge %"
+        },
+        "empty": "Aucun chantier sous les 10% sur les données mock."
+      },
+      "parVille": {
+        "title": "Répartition par ville",
+        "columns": {
+          "ville": "Ville",
+          "chantiers": "Chantiers",
+          "portefeuilleHt": "Portefeuille HT",
+          "margeHt": "Marge HT"
+        },
+        "empty": "—"
+      },
+      "alertes": {
+        "title": "Alertes transverses",
+        "margeBasse": "{count} chantier(s) avec marge projetée < 5%",
+        "ecartFactAv": "{count} chantier(s) avec écart facturation / avancement > 10 pts"
+      }
+    },
+    "cashFlow": {
+      "title": "Cash-flow prévisionnel",
+      "subtitle": "12 mois glissants — Encaissements & décaissements",
+      "breadcrumb": "Cash-flow",
+      "routeTitle": "Cash-flow prévisionnel",
+      "routeBreadcrumb": "Cash-flow",
+      "kpis": {
+        "soldeProjete": "Solde projeté M+12",
+        "seuilAlerte": "Seuil d'alerte",
+        "moisSousSeuil": "Mois sous seuil"
+      },
+      "legend": {
+        "encaissements": "Encaissements",
+        "decaissements": "Décaissements"
+      },
+      "columns": {
+        "mois": "Mois",
+        "encaissementsPrevus": "Encaissements prévus",
+        "decaissementsPrevus": "Décaissements prévus",
+        "soldeMensuel": "Solde mensuel",
+        "soldeCumule": "Solde cumulé",
+        "alerte": "Alerte"
+      },
+      "alerteBadge": "⚠ Sous seuil",
+      "tooltip": {
+        "encaissements": "Encaissements",
+        "decaissements": "Décaissements",
+        "solde": "Solde",
+        "situations": "Situations",
+        "tresoChantiers": "Tréso chantiers",
+        "ff": "FF",
+        "paie": "Paie",
+        "chargesSoc": "Charges soc.",
+        "traites": "Traites"
+      }
+    },
+    "analyses": {
+      "title": "Pilotage & Analyses",
+      "breadcrumb": "Analyses",
+      "rentabilite": {
+        "title": "Pilotage & Analyses — Rentabilité",
+        "subtitle": "Marges chantiers, pivot multi-axes",
+        "breadcrumb": "Rentabilité",
+        "routeTitle": "Analyses — Rentabilité",
+        "routeBreadcrumb": "Rentabilité",
+        "kpis": {
+          "margeBrute": "Marge brute YTD",
+          "margeNette": "Marge nette YTD",
+          "margeMoyenne": "Marge moyenne"
+        },
+        "topTitle": "Top 5 chantiers (marge %)",
+        "flopTitle": "Flop 5 chantiers (marge %)",
+        "pivot": {
+          "title": "Marges multi-axes (TCD)",
+          "axes": {
+            "chantier": "Chantier",
+            "bu": "BU / Société",
+            "client": "Client",
+            "moa": "Maître d'ouvrage",
+            "typeMarche": "Type de marché"
+          },
+          "exportCsv": "Exporter CSV",
+          "columns": {
+            "axe": "Axe",
+            "marcheHt": "Marché HT",
+            "factureHt": "Facturé HT",
+            "margeHt": "Marge HT",
+            "margePct": "Marge %"
+          }
+        },
+        "loading": "Chargement des indicateurs…",
+        "export": {
+          "filename": "pilotage-marges-pivot",
+          "headers": {
+            "axe": "Axe",
+            "marcheHt": "Marché HT",
+            "factureHt": "Facturé HT",
+            "margeHt": "Marge HT",
+            "margePct": "Marge %"
+          }
+        }
+      },
+      "financier": {
+        "title": "Pilotage & Analyses — Financier",
+        "subtitle": "CA, créances, dettes, BFR (comptabilité mock)",
+        "breadcrumb": "Financier",
+        "routeTitle": "Analyses — Financier",
+        "routeBreadcrumb": "Financier",
+        "kpis": {
+          "caFactureYtd": "CA facturé YTD",
+          "caEncaisse": "CA encaissé",
+          "creancesOuvertes": "Créances ouvertes",
+          "dettesFournisseurs": "Dettes fournisseurs",
+          "bfr": "BFR",
+          "ratioLiquidite": "Ratio liquidité"
+        }
+      },
+      "stock": {
+        "title": "Pilotage & Analyses — Stock",
+        "subtitle": "Valorisation, rotation, consommations",
+        "breadcrumb": "Stock",
+        "routeTitle": "Analyses — Stock",
+        "routeBreadcrumb": "Stock",
+        "kpis": {
+          "valeurStockTotale": "Valeur stock totale",
+          "rotation": "Rotation (jours approx.)",
+          "valeurChantier": "Stock chantier",
+          "valeurCentral": "Stock central / dépôts"
+        },
+        "topArticles": "Top 10 articles consommés (sorties)",
+        "empty": "—"
+      },
+      "achats": {
+        "title": "Pilotage & Analyses — Achats",
+        "subtitle": "Volume BC, fournisseurs, dépendance",
+        "breadcrumb": "Achats",
+        "routeTitle": "Analyses — Achats",
+        "routeBreadcrumb": "Achats",
+        "kpis": {
+          "volumeYtd": "Volume YTD HT",
+          "nbBc": "Nombre de BC",
+          "economiesVsMarche": "Économies vs marché",
+          "dependanceMax": "Dépendance max"
+        },
+        "topFournisseurs": "Top fournisseurs YTD"
+      },
+      "rh": {
+        "title": "Pilotage & Analyses — RH",
+        "subtitle": "Effectif, masse salariale, absentéisme",
+        "breadcrumb": "RH",
+        "routeTitle": "Analyses — RH",
+        "routeBreadcrumb": "RH",
+        "kpis": {
+          "effectif": "Effectif actif",
+          "masseSalariale": "Masse salariale YTD (brut)",
+          "absenteisme": "Absentéisme",
+          "rotation": "Rotation",
+          "pyramide": "Pyramide < 35 ans",
+          "heuresSup": "Heures sup. YTD"
+        }
+      },
+      "whatIf": {
+        "title": "Pilotage & Analyses — What-if",
+        "subtitle": "Scénarios retard, OS, hausse matière, perte chantier",
+        "breadcrumb": "What-if",
+        "routeTitle": "Analyses — What-if",
+        "routeBreadcrumb": "What-if",
+        "controls": {
+          "retardJours": "Retard moyen chantiers (jours)",
+          "impactOs": "Impact OS / aléas (% coût)",
+          "hausseMatiere": "Hausse acier / matière (%)",
+          "perteMarge": "Perte chantier en cours (% marge)"
+        },
+        "scenarioActuel": "Scénario actuel",
+        "scenarioSimule": "Scénario simulé",
+        "margeBruteYtd": "Marge brute YTD",
+        "soldeCashflow": "Solde cash-flow M+12"
+      },
+      "opexCapex": {
+        "title": "Pilotage & Analyses — OPEX / CAPEX",
+        "subtitle": "Mouvements YTD par classe comptable (démo)",
+        "breadcrumb": "OPEX / CAPEX",
+        "routeTitle": "Analyses — OPEX / CAPEX",
+        "routeBreadcrumb": "OPEX / CAPEX",
+        "kpis": {
+          "opex": "OPEX (classe 6)",
+          "capex": "CAPEX (classe 2)"
+        }
+      },
+      "groupe": {
+        "title": "Pilotage & Analyses — Groupe",
+        "subtitle": "Vue consolidée (société principale — intercos à venir Task 13)",
+        "breadcrumb": "Groupe",
+        "routeTitle": "Analyses — Groupe",
+        "routeBreadcrumb": "Groupe",
+        "kpis": {
+          "ca": "CA consolidé",
+          "marge": "Marge brute consolidée",
+          "ebitda": "EBITDA approx.",
+          "bfrNet": "BFR net groupe"
+        },
+        "hint": "Élimination intercos : placeholder jusqu'à multi-société (M-ADM-03)."
+      }
+    },
+    "common": {
+      "loading": "Chargement…"
+    },
+    "approbations": {
+      "title": "Approbations",
+      "breadcrumb": "Approbations",
+      "routeTitle": "Approbations",
+      "routeBreadcrumb": "Approbations",
+      "subtitleCount": "{count} demande(s) en attente de décision",
+      "tabs": {
+        "aTraiter": "À traiter",
+        "historique": "Historique"
+      },
+      "filters": {
+        "allTypes": "Tous les types",
+        "allSocietes": "Toutes les sociétés",
+        "allUrgences": "Toutes urgences"
+      },
+      "urgence": {
+        "normale": "Normale",
+        "haute": "Haute",
+        "critique": "Critique"
+      },
+      "card": {
+        "par": "Par {nom}",
+        "slaBadge": "SLA +{days}j",
+        "slaExp": "SLA exp. {date}",
+        "slaRestants": "{days}j restants",
+        "auditTitle": "Journal & empreintes SHA-256 ({count})",
+        "viewLinkAria": "Voir la demande d'approbation {id}",
+        "etape": "étape {current}/{total}"
+      },
+      "actions": {
+        "approve": "✓ Approuver",
+        "reject": "✗ Rejeter",
+        "askComplement": "Demander complément",
+        "comment": "Commenter",
+        "delegate": "Déléguer",
+        "viewDetail": "Voir détail →",
+        "submit": "Soumettre pour approbation"
+      },
+      "empty": {
+        "aTraiter": "Aucune demande en attente. 🎉",
+        "historique": "Aucun historique."
+      },
+      "prompts": {
+        "rejectReason": "Motif de rejet (obligatoire) :",
+        "complement": "Précisez les pièces ou informations attendues pour l'initiateur :",
+        "comment": "Commentaire (interne / initiateur) :",
+        "delegate": "Nom du délégataire (démo) :"
+      },
+      "toasts": {
+        "complementSent": "Complément demandé — l'initiateur est notifié (démo).",
+        "commentSaved": "Commentaire enregistré.",
+        "delegationSaved": "Délégation enregistrée vers {nom} (routage complet : Task 12 P1).",
+        "entityNotLinked": "Ouverture de la fiche : type non relié en démo.",
+        "submitted": "{ref} soumis pour approbation."
+      },
+      "pill": {
+        "enAttente": "En attente d'approbation",
+        "approuve": "Approuvé",
+        "rejete": "Rejeté",
+        "expire": "Expiré"
+      },
+      "audit": {
+        "submitDetail": "Soumis pour approbation",
+        "submitDetailWithAmount": "Soumis pour approbation — {amount} MAD",
+        "stepApproved": "Étape approuvée ({current}/{total}) — {par}",
+        "fullyApproved": "Demande approuvée (circuit terminé) — {par}",
+        "defaultRejection": "Rejet — {par}",
+        "initiator": "Utilisateur courant",
+        "selfApprover": "Moi"
+      },
+      "societes": {
+        "nafura": "Nafura SA",
+        "subsidiary": "Filiale démo"
+      }
+    }
+  }
+}

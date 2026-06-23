@@ -1,0 +1,23 @@
+{
+  "entity": "OvertimeRequest",
+  "fields": {
+    "requestNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "hours": {
+      "min": 0
+    },
+    "reason": {
+      "maxLength": 120
+    },
+    "approvedBy": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

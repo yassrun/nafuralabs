@@ -1,0 +1,29 @@
+{
+  "entity": "AttendanceCorrection",
+  "fields": {
+    "correctionNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "originalClockIn": {
+      "maxLength": 120
+    },
+    "originalClockOut": {
+      "maxLength": 120
+    },
+    "correctedClockIn": {
+      "maxLength": 120
+    },
+    "correctedClockOut": {
+      "maxLength": 120
+    },
+    "reason": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

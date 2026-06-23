@@ -1,0 +1,16 @@
+{
+  "id": "settings",
+  "name": "Settings Framework",
+  "description": "Configuration and app/user settings",
+  "type": "feature",
+  "layer": "infrastructure",
+  "group": "configuration",
+  "provides": {
+    "backend": {
+      "gradle": ":platform:features:configuration:settings",
+      "packages": ["ma.nafura.platform.settings"]
+    }
+  },
+  "requires": { "core": ["tenancy", "framework"], "features": [] },
+  "manifest": { "key": "settings" }
+}

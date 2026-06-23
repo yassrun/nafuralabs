@@ -1,0 +1,19 @@
+{
+  "entity": "RecurringJournal",
+  "fields": {
+    "name": {
+      "required": true,
+      "maxLength": 200
+    },
+    "templateId": {
+      "required": true
+    },
+    "frequency": {
+      "required": true,
+      "maxLength": 30
+    },
+    "nextRunDate": {
+      "required": true
+    }
+  }
+}

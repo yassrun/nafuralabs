@@ -1,0 +1,415 @@
+/**
+ * Nafura Platform - Global Styles
+ *
+ * Entry point for all application styles.
+ *
+ * Architecture:
+ * 1. Platform tokens (platform/core/styles) - Base design system
+ * 2. Platform lib design-system tokens (platform/lib/design-system)
+ * 3. Feature layouts (optional) - Domain-specific styles
+ *
+ * The cascade: Platform Core → Platform Lib → Feature → Component
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Platform Design System (Base tokens + Reset)
+   ═══════════════════════════════════════════════════════════════════════════ */
+@use '../app/platform/core/styles' as platform;
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Feature Layouts (Domain-specific utilities)
+   ═══════════════════════════════════════════════════════════════════════════ */
+@use '../app/platform/features/documents/doc-extractor/layout' as doc-layout;
+
+/* Shared design system tokens used by framework features */
+@use '../app/platform/lib/design-system/tokens' as shared-tokens;
+@use '../app/platform/lib/design-system/typography' as shared-typography;
+
+/* ERP BTP anatomy tokens */
+@use '../app/platform/lib/anatomy/styles/tokens' as erp-tokens;
+
+/* Nafura Sektor — product brand override (cobalt + hi-vis yellow). Loaded last so it wins. */
+@use '../app/applications/erp/styles/brand-sektor' as sektor-brand;
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   External Dependencies
+   ═══════════════════════════════════════════════════════════════════════════ */
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+@import '@fortawesome/fontawesome-free/css/all.css';
+@import 'primeicons/primeicons.css';
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Engine Theme Overrides (Tomic Single Source of Truth)
+   
+   These overrides ensure Material and PrimeNG use --nf-* tokens instead of
+   their default theme colors. See TOMIC_UI_CONSTITUTION.md.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/*
+ * Material Checkbox Override
+ * Fixes: pink accent from indigo-pink theme → uses --nf-primary
+ * 
+ * Visual hierarchy: checkbox is a CONTROL, row highlight is FEEDBACK
+ * - Unchecked: very subtle (light gray border)
+ * - Checked: primary blue but not overwhelming
+ * - Let the row background do most of the selection feedback work
+ */
+.mat-mdc-checkbox {
+  /* Checked state */
+  --mdc-checkbox-selected-checkmark-color: white;
+  --mdc-checkbox-selected-focus-icon-color: var(--nf-primary);
+  --mdc-checkbox-selected-hover-icon-color: var(--nf-primary-hover);
+  --mdc-checkbox-selected-icon-color: var(--nf-primary);
+  --mdc-checkbox-selected-pressed-icon-color: var(--nf-primary-active);
+  
+  /* Unchecked state - VERY SUBTLE (lighter than before) */
+  --mdc-checkbox-unselected-focus-icon-color: var(--nf-color-gray-400);
+  --mdc-checkbox-unselected-hover-icon-color: var(--nf-color-gray-500);
+  --mdc-checkbox-unselected-icon-color: var(--nf-color-gray-300);
+  --mdc-checkbox-unselected-pressed-icon-color: var(--nf-color-gray-400);
+  
+  /* Focus ring (a11y) - smaller/subtler state layer */
+  --mdc-checkbox-selected-focus-state-layer-color: var(--nf-primary);
+  --mdc-checkbox-selected-hover-state-layer-color: var(--nf-primary);
+  --mdc-checkbox-selected-pressed-state-layer-color: var(--nf-primary);
+  --mdc-checkbox-unselected-focus-state-layer-color: var(--nf-color-gray-400);
+  --mdc-checkbox-unselected-hover-state-layer-color: var(--nf-color-gray-400);
+  --mdc-checkbox-unselected-pressed-state-layer-color: var(--nf-color-gray-400);
+  
+  /* State layer opacity - reduced for subtlety */
+  --mdc-checkbox-selected-focus-state-layer-opacity: 0.08;
+  --mdc-checkbox-selected-hover-state-layer-opacity: 0.04;
+  --mdc-checkbox-selected-pressed-state-layer-opacity: 0.12;
+  --mdc-checkbox-unselected-focus-state-layer-opacity: 0.08;
+  --mdc-checkbox-unselected-hover-state-layer-opacity: 0.04;
+  --mdc-checkbox-unselected-pressed-state-layer-opacity: 0.08;
+}
+
+/*
+ * Table Checkbox Column - Reduced Visual Weight
+ * Rule: checkbox = control, row highlight = feedback
+ */
+.nf-data-table {
+  /* Checkbox column: compact width */
+  .mat-column-select {
+    width: var(--nf-table-checkbox-column-width, 48px);
+    max-width: var(--nf-table-checkbox-column-width, 48px);
+    padding-left: var(--nf-space-2, 8px);
+    padding-right: 0;
+  }
+
+  /* Reduce checkbox touch target in dense table context */
+  .mat-mdc-checkbox .mdc-checkbox {
+    padding: 8px;
+  }
+  
+  .mat-mdc-checkbox .mat-mdc-checkbox-touch-target {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+/*
+ * Listing Controls - Filter Menu Panel (Overlay)
+ * Panel is rendered in CDK overlay (outside component), so width must be set globally.
+ * Ensures Type/Category and dropdown arrows are not truncated.
+ */
+.mat-mdc-menu-panel.nf-listing-controls-menu--filter {
+  min-width: 520px !important;
+  max-width: 600px;
+  max-height: min(80vh, 420px);
+}
+
+/*
+ * Material Radio Override
+ * Consistent with checkbox styling
+ */
+.mat-mdc-radio-button {
+  --mdc-radio-selected-focus-icon-color: var(--nf-primary);
+  --mdc-radio-selected-hover-icon-color: var(--nf-primary-hover);
+  --mdc-radio-selected-icon-color: var(--nf-primary);
+  --mdc-radio-selected-pressed-icon-color: var(--nf-primary-active);
+  --mdc-radio-unselected-focus-icon-color: var(--nf-border-strong);
+  --mdc-radio-unselected-hover-icon-color: var(--nf-border-strong);
+  --mdc-radio-unselected-icon-color: var(--nf-border-default);
+  --mdc-radio-unselected-pressed-icon-color: var(--nf-border-strong);
+  
+  /* Focus ring */
+  --mat-radio-checked-ripple-color: var(--nf-primary);
+  --mat-radio-ripple-color: var(--nf-color-gray-500);
+}
+
+/*
+ * Material Slide Toggle Override
+ */
+.mat-mdc-slide-toggle {
+  --mdc-switch-selected-focus-handle-color: var(--nf-primary);
+  --mdc-switch-selected-hover-handle-color: var(--nf-primary-hover);
+  --mdc-switch-selected-handle-color: var(--nf-primary);
+  --mdc-switch-selected-pressed-handle-color: var(--nf-primary-active);
+  --mdc-switch-selected-focus-track-color: var(--nf-color-primary-200);
+  --mdc-switch-selected-hover-track-color: var(--nf-color-primary-200);
+  --mdc-switch-selected-track-color: var(--nf-color-primary-200);
+  --mdc-switch-selected-pressed-track-color: var(--nf-color-primary-300);
+  
+  --mdc-switch-unselected-focus-handle-color: var(--nf-color-gray-600);
+  --mdc-switch-unselected-hover-handle-color: var(--nf-color-gray-700);
+  --mdc-switch-unselected-handle-color: var(--nf-color-gray-500);
+  --mdc-switch-unselected-pressed-handle-color: var(--nf-color-gray-700);
+  --mdc-switch-unselected-focus-track-color: var(--nf-color-gray-300);
+  --mdc-switch-unselected-hover-track-color: var(--nf-color-gray-300);
+  --mdc-switch-unselected-track-color: var(--nf-color-gray-300);
+  --mdc-switch-unselected-pressed-track-color: var(--nf-color-gray-400);
+}
+
+/*
+ * Material prebuilt themes set stronger selectors like:
+ *   html .mat-mdc-slide-toggle.mat-accent { ...pink vars... }
+ * Override them with equal/higher specificity so app tokens always win.
+ */
+html .mat-mdc-slide-toggle.mat-accent,
+html .mat-mdc-slide-toggle.mat-primary,
+html .mat-mdc-slide-toggle.mat-warn {
+  --mdc-switch-selected-focus-state-layer-color: var(--nf-primary);
+  --mdc-switch-selected-hover-state-layer-color: var(--nf-primary-hover);
+  --mdc-switch-selected-pressed-state-layer-color: var(--nf-primary-active);
+
+  --mdc-switch-selected-handle-color: var(--nf-primary);
+  --mdc-switch-selected-focus-handle-color: var(--nf-primary);
+  --mdc-switch-selected-hover-handle-color: var(--nf-primary-hover);
+  --mdc-switch-selected-pressed-handle-color: var(--nf-primary-active);
+
+  --mdc-switch-selected-track-color: var(--nf-color-primary-200);
+  --mdc-switch-selected-focus-track-color: var(--nf-color-primary-200);
+  --mdc-switch-selected-hover-track-color: var(--nf-color-primary-200);
+  --mdc-switch-selected-pressed-track-color: var(--nf-color-primary-300);
+}
+
+/*
+ * Material Progress Spinner Override
+ */
+.mat-mdc-progress-spinner {
+  --mdc-circular-progress-active-indicator-color: var(--nf-primary);
+}
+
+/*
+ * PrimeNG Theme Overrides
+ * Binds Aura primary to --nf-* tokens for visual consistency
+ */
+:root {
+  /* Primary colors - bind to Tomic tokens */
+  --p-primary-color: var(--nf-primary);
+  --p-primary-hover-color: var(--nf-primary-hover);
+  --p-primary-active-color: var(--nf-primary-active);
+  --p-primary-contrast-color: white;
+  
+  /* Primary color shades for various states */
+  --p-primary-50: var(--nf-color-primary-50);
+  --p-primary-100: var(--nf-color-primary-100);
+  --p-primary-200: var(--nf-color-primary-200);
+  --p-primary-300: var(--nf-color-primary-300);
+  --p-primary-400: var(--nf-color-primary-400);
+  --p-primary-500: var(--nf-color-primary-500);
+  --p-primary-600: var(--nf-color-primary-600);
+  --p-primary-700: var(--nf-color-primary-700);
+  --p-primary-800: var(--nf-color-primary-800);
+  --p-primary-900: var(--nf-color-primary-900);
+  
+  /* Surface and text colors */
+  --p-surface-0: var(--nf-color-surface);
+  --p-surface-50: var(--nf-color-gray-50);
+  --p-surface-100: var(--nf-color-gray-100);
+  --p-surface-200: var(--nf-color-gray-200);
+  --p-surface-300: var(--nf-color-gray-300);
+  --p-surface-400: var(--nf-color-gray-400);
+  --p-surface-500: var(--nf-color-gray-500);
+  --p-surface-600: var(--nf-color-gray-600);
+  --p-surface-700: var(--nf-color-gray-700);
+  --p-surface-800: var(--nf-color-gray-800);
+  --p-surface-900: var(--nf-color-gray-900);
+  
+  /* Text colors */
+  --p-text-color: var(--nf-color-text);
+  --p-text-muted-color: var(--nf-color-text-muted);
+  
+  /* Border colors */
+  --p-content-border-color: var(--nf-border-default);
+  
+  /* Focus ring */
+  --p-focus-ring-color: var(--nf-primary);
+}
+
+/*
+ * PrimeNG Select/Dropdown focused state
+ */
+.p-select:not(.p-disabled).p-focus,
+.p-multiselect:not(.p-disabled).p-focus,
+.p-datepicker:not(.p-disabled).p-focus,
+.p-inputnumber:not(.p-disabled).p-focus {
+  border-color: var(--nf-border-focus);
+  box-shadow: 0 0 0 2px var(--nf-color-primary-100);
+}
+
+/*
+ * PrimeNG Select option hover/selected
+ */
+.p-select-option:not(.p-disabled):hover,
+.p-multiselect-option:not(.p-disabled):hover {
+  background-color: var(--nf-surface-hover);
+}
+
+.p-select-option.p-highlight,
+.p-multiselect-option.p-highlight {
+  background-color: var(--nf-primary-subtle);
+  color: var(--nf-primary);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Utility Classes
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Legacy Variable Aliases (Backward compatibility)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Map old variable names to new --nf-* tokens */
+  --color-primary: var(--nf-color-primary);
+  --color-primary-hover: var(--nf-color-primary-hover);
+  --color-primary-light: var(--nf-color-primary-light);
+
+  --color-secondary: var(--nf-color-gray-500);
+  --color-secondary-hover: var(--nf-color-gray-600);
+
+  --color-success: var(--nf-color-success);
+  --color-success-light: var(--nf-color-success-50);
+
+  --color-warning: var(--nf-color-warning);
+  --color-warning-light: var(--nf-color-warning-50);
+
+  --color-error: var(--nf-color-danger);
+  --color-error-light: var(--nf-color-danger-50);
+
+  --color-info: var(--nf-color-info);
+  --color-info-light: var(--nf-color-info-50);
+
+  /* Grays */
+  --color-gray-50: var(--nf-color-gray-50);
+  --color-gray-100: var(--nf-color-gray-100);
+  --color-gray-200: var(--nf-color-gray-200);
+  --color-gray-300: var(--nf-color-gray-300);
+  --color-gray-400: var(--nf-color-gray-400);
+  --color-gray-500: var(--nf-color-gray-500);
+  --color-gray-600: var(--nf-color-gray-600);
+  --color-gray-700: var(--nf-color-gray-700);
+  --color-gray-800: var(--nf-color-gray-800);
+  --color-gray-900: var(--nf-color-gray-900);
+
+  /* Semantic */
+  --color-bg: var(--nf-color-bg);
+  --color-bg-elevated: var(--nf-color-bg-elevated);
+  --color-text: var(--nf-color-text);
+  --color-text-muted: var(--nf-color-text-muted);
+  --color-border: var(--nf-color-border);
+
+  /* Sidebar (legacy) */
+  --sidebar-bg: var(--nf-sidebar-bg);
+  --sidebar-text: var(--nf-sidebar-text);
+  --sidebar-text-muted: var(--nf-sidebar-text-muted);
+  --sidebar-hover-bg: var(--nf-sidebar-hover-bg);
+  --sidebar-active-bg: var(--nf-sidebar-active-bg);
+  --sidebar-active-text: var(--nf-sidebar-active-text);
+  --sidebar-border: var(--nf-sidebar-border);
+  --sidebar-width: var(--nf-sidebar-width);
+  --sidebar-collapsed-width: var(--nf-sidebar-collapsed-width);
+
+  /* Top Bar (legacy) */
+  --topbar-height: var(--nf-topbar-height);
+  --topbar-bg: var(--nf-topbar-bg);
+  --topbar-border: var(--nf-topbar-border);
+
+  /* Spacing (legacy) */
+  --spacing-xs: var(--nf-space-xs);
+  --spacing-sm: var(--nf-space-sm);
+  --spacing-md: var(--nf-space-md);
+  --spacing-lg: var(--nf-space-lg);
+  --spacing-xl: var(--nf-space-xl);
+  --spacing-2xl: var(--nf-space-2xl);
+
+  /* Border Radius (legacy) */
+  --radius-sm: var(--nf-radius-sm);
+  --radius-md: var(--nf-radius-md);
+  --radius-lg: var(--nf-radius-lg);
+  --radius-xl: var(--nf-radius-xl);
+  --radius-full: var(--nf-radius-full);
+
+  /* Shadows (legacy) */
+  --shadow-sm: var(--nf-shadow-sm);
+  --shadow-md: var(--nf-shadow-md);
+  --shadow-lg: var(--nf-shadow-lg);
+  --shadow-xl: var(--nf-shadow-xl);
+
+  /* Transitions (legacy) */
+  --transition-fast: var(--nf-transition-fast);
+  --transition-normal: var(--nf-transition-normal);
+  --transition-slow: var(--nf-transition-slow);
+
+  /* Z-Index (legacy) */
+  --z-dropdown: var(--nf-z-dropdown);
+  --z-sticky: var(--nf-z-sticky);
+  --z-fixed: var(--nf-z-fixed);
+  --z-modal-backdrop: var(--nf-z-modal-backdrop);
+  --z-modal: var(--nf-z-modal);
+  --z-popover: var(--nf-z-popover);
+  --z-tooltip: var(--nf-z-tooltip);
+
+  /* Task 15.8 — échelle typo globale (variables `--nf-text-*`, alignement design system) */
+  --nf-text-xs: 0.75rem;
+  --nf-text-sm: 0.8125rem;
+  --nf-text-md: 0.9375rem;
+  --nf-text-base: 1rem;
+  --nf-text-lg: 1.125rem;
+  --nf-text-xl: 1.25rem;
+  --nf-text-2xl: 1.5rem;
+}
+
+
+/* ─── RTL (Arabic) — shell / tables / forms baseline (Task 3.4) ───────────────── */
+[dir='rtl'] {
+  .nf-page-header__actions {
+    margin-left: 0;
+    margin-right: auto;
+  }
+
+  .nf-data-table th.mat-mdc-header-cell,
+  .nf-data-table td.mat-mdc-cell {
+    text-align: start;
+  }
+
+  .nf-entity-listing__toolbar-inner {
+    flex-direction: row-reverse;
+  }
+
+  .nf-listing-controls {
+    flex-direction: row-reverse;
+  }
+}
+

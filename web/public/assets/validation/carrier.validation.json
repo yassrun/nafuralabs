@@ -1,0 +1,35 @@
+{
+  "entity": "Carrier",
+  "fields": {
+    "code": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "name": {
+      "maxLength": 120
+    },
+    "carrierType": {
+      "maxLength": 120
+    },
+    "contactName": {
+      "maxLength": 120
+    },
+    "contactEmail": {
+      "maxLength": 255
+    },
+    "contactPhone": {
+      "maxLength": 50
+    },
+    "website": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

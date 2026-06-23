@@ -1,0 +1,41 @@
+{
+  "entity": "AlertRule",
+  "fields": {
+    "code": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "name": {
+      "required": true,
+      "maxLength": 200
+    },
+    "entityType": {
+      "required": true,
+      "maxLength": 80
+    },
+    "condition": {
+      "required": true,
+      "maxLength": 2000
+    },
+    "severity": {
+      "required": true,
+      "maxLength": 30
+    },
+    "recipients": {
+      "required": true,
+      "maxLength": 2000
+    },
+    "channel": {
+      "required": true,
+      "maxLength": 30
+    },
+    "cooldownMinutes": {
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

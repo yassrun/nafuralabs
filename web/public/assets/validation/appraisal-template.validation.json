@@ -1,0 +1,26 @@
+{
+  "entity": "AppraisalTemplate",
+  "fields": {
+    "code": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "name": {
+      "maxLength": 120
+    },
+    "description": {
+      "maxLength": 2000
+    },
+    "sections": {
+      "maxLength": 120
+    },
+    "competencies": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

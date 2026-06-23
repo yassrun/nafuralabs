@@ -1,0 +1,217 @@
+<mat-sidenav-container class="workspace">
+  <!-- Child Sidebar: Contextual, only shown when a doc type is selected -->
+  @if (definition()) {
+    <mat-sidenav mode="side" opened class="left">
+      <div class="left__header">
+        <div class="left__title">Workspace</div>
+      </div>
+
+      <mat-divider />
+
+      <div class="left__body">
+        <div class="left__nav">
+          <div class="contextual-nav">
+            <div class="contextual-nav__section">
+              <div class="contextual-nav__label">ACTIVE TYPE</div>
+              <div class="contextual-nav__item is-active">
+                <mat-icon>{{ getDomainIcon(definition()?.domainKey || '') }}</mat-icon>
+                <span>{{ definition()?.name }}</span>
+              </div>
+            </div>
+
+            <div class="contextual-nav__divider"></div>
+
+            <div class="contextual-nav__section">
+              <button mat-button class="contextual-nav__button" (click)="definition.set(null)">
+                <mat-icon appFlipIconRtl>arrow_back</mat-icon>
+                <span>All Document Types</span>
+              </button>
+            </div>
+            
+            <div class="contextual-nav__section">
+              <button mat-button class="contextual-nav__button" (click)="onOpenSettings()">
+                <mat-icon>settings</mat-icon>
+                <span>Extraction Settings</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-sidenav>
+  }
+
+  <mat-sidenav-content class="content">
+    <input
+      #fileInput
+      type="file"
+      accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff"
+      (change)="onFileSelected(fileInput.files)"
+      hidden
+    />
+
+    @if (definition()) {
+      <div class="main-header">
+        <!-- Doxura Context Header (Sticky) -->
+        <div class="sticky-header">
+          <dox-context-header
+            [docType]="definition()?.name"
+            [version]="definition()?.version?.toString()"
+            [hint]="definition() ? ('docExtractor.contextBar.schemaDescription' | translate) : undefined"
+            [emptyMessage]="'docExtractor.workspace.selectType' | translate"
+          />
+
+          <!-- Section 2: Actions Bar -->
+          <div class="actions-bar">
+            <div class="actions-group actions-group--primary">
+              <button
+                mat-flat-button
+                class="primary-action"
+                (click)="addDocumentFromPicker(fileInput)"
+                [disabled]="uploading()"
+                [matTooltip]="'docExtractor.workspace.importDocumentTooltip' | translate"
+              >
+                <mat-icon>upload_file</mat-icon>
+                {{ 'docExtractor.workspace.importDocument' | translate }}
+              </button>
+              
+              @if (uploading()) {
+                <div class="extraction-status">
+                  <mat-spinner diameter="20" class="extraction-status__spinner"></mat-spinner>
+                  <span class="extraction-status__text">{{ 'docExtractor.workspace.extracting' | translate }}</span>
+                </div>
+              }
+
+              <button
+                mat-stroked-button
+                [matMenuTriggerFor]="exportMenu"
+                [disabled]="records().length === 0"
+                class="export-action"
+              >
+                <mat-icon>ios_share</mat-icon>
+                {{ 'docExtractor.workspace.export' | translate }}
+                <mat-icon iconPositionEnd>arrow_drop_down</mat-icon>
+              </button>
+              <mat-menu #exportMenu="matMenu">
+                <button mat-menu-item (click)="exportExcel()">
+                  <mat-icon>table_view</mat-icon>
+                  <span>{{ 'docExtractor.workspace.excelSpreadsheet' | translate }}</span>
+                </button>
+                <button mat-menu-item (click)="exportToSeyruraInternal()">
+                  <mat-icon>cloud_upload</mat-icon>
+                  <span>{{ 'docExtractor.workspace.seyruraIntegration' | translate }}</span>
+                </button>
+              </mat-menu>
+            </div>
+
+            <span class="spacer"></span>
+
+            @if (selection.hasValue()) {
+              <div class="actions-group actions-group--selection">
+                <button mat-button (click)="editSelectedRecord()">
+                  <mat-icon>edit</mat-icon> {{ 'docExtractor.workspace.edit' | translate }}
+                </button>
+                <button mat-button color="warn" (click)="removeRecord()">
+                  <mat-icon>delete_outline</mat-icon> {{ 'docExtractor.workspace.delete' | translate }}
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Extraction Progress Indicator -->
+        @if (uploading()) {
+          <div class="extraction-progress">
+            <mat-progress-bar mode="indeterminate" class="extraction-progress__bar"></mat-progress-bar>
+          </div>
+        }
+      </div>
+
+      <div class="workspace-body">
+        <!-- Filters (Secondary) -->
+        <div class="filters-container">
+          <app-standard-record-filters
+            [loading]="loadingSession()"
+            [totalItems]="totalItems()"
+            (apply)="onFiltersApply($event)"
+            (clear)="onFiltersClear()"
+          />
+        </div>
+
+        <div class="grid">
+          <div class="grid__table">
+            <table mat-table [dataSource]="records()" class="mat-elevation-z0">
+              <!-- Status Column -->
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <td mat-cell *matCellDef="let row">
+                  @if (getStatusInfo(row.status); as statusInfo) {
+                    <dox-status-chip [status]="statusInfo.label" [matTooltip]="statusInfo.tooltip" />
+                  }
+                </td>
+              </ng-container>
+
+              @for (col of gridColumns(); track col.id) {
+                <ng-container [matColumnDef]="col.id">
+                  <th mat-header-cell *matHeaderCellDef [style.width.px]="col.widthPx ?? null">
+                    {{ col.label }}
+                  </th>
+                  <td mat-cell *matCellDef="let row">
+                    {{ cellValue(col, row) }}
+                  </td>
+                </ng-container>
+              }
+
+              <ng-container matColumnDef="createdAt">
+                <th mat-header-cell *matHeaderCellDef>{{ 'docExtractor.workspace.created' | translate }}</th>
+                <td mat-cell *matCellDef="let row">
+                  {{ row.createdAt | date:'yyyy-MM-dd HH:mm' }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="document">
+                <th mat-header-cell *matHeaderCellDef>Document</th>
+                <td mat-cell *matCellDef="let row">
+                  @if (row.storedDocumentId) {
+                    <button
+                      mat-icon-button
+                      color="primary"
+                      (click)="openStoredDocument(row.storedDocumentId!)"
+                      matTooltip="Open stored document"
+                    >
+                      <mat-icon>open_in_new</mat-icon>
+                    </button>
+                  } @else {
+                    <span class="no-document" matTooltip="Not stored">—</span>
+                  }
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumnIds()"></tr>
+              <tr 
+                mat-row 
+                *matRowDef="let row; columns: displayedColumnIds()"
+                (click)="selection.toggle(row)"
+                (dblclick)="editRecord(row)"
+                [class.selected-row]="selection.isSelected(row)"
+                style="cursor: pointer;">
+              </tr>
+            </table>
+
+            @if (records().length === 0) {
+              <div class="empty" [innerHTML]="'docExtractor.workspace.noRecords' | translate"></div>
+            }
+          </div>
+        </div>
+      </div>
+    } @else {
+      <!-- Extraction Discovery Screen -->
+      <app-extraction-discovery
+        [domains]="domains()"
+        [docTypesByDomain]="docTypesByDomain()"
+        (selectDocType)="selectDocType($event.domainKey, $event.docTypeKey)"
+        (createCustom)="onCreateCustomDocType()"
+      />
+    }
+
+  </mat-sidenav-content>
+</mat-sidenav-container>

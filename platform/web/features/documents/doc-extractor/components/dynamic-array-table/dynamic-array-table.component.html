@@ -1,0 +1,108 @@
+<div class="array-table">
+  <div class="array-table__header">
+    <div class="array-table__title">{{ title }}</div>
+
+    <span class="spacer"></span>
+
+    <button mat-stroked-button type="button" (click)="addRow()" [disabled]="readonly">
+      <mat-icon>add</mat-icon>
+      Add row
+    </button>
+  </div>
+
+  <div class="array-table__table">
+    <table mat-table [dataSource]="rows" class="mat-elevation-z0">
+      @for (col of columns; track col.path) {
+        @let s = schemaFor(col.path);
+        <ng-container [matColumnDef]="col.path">
+          <th mat-header-cell *matHeaderCellDef [style.width.px]="col.widthPx ?? null">
+            {{ col.label }}
+          </th>
+
+          <td mat-cell *matCellDef="let row">
+            @let g = rowGroup(row);
+            @let c = $any(g.get(col.path));
+
+            <!-- Boolean -->
+            @if (isBoolean(s)) {
+              <mat-checkbox [formControl]="c"></mat-checkbox>
+            }
+
+            <!-- Enum -->
+            @else if (isEnum(s)) {
+              <mat-form-field appearance="outline" class="cell-field" subscriptSizing="dynamic">
+                <mat-select [formControl]="c">
+                  @for (opt of enumOptions(s); track opt) {
+                    <mat-option [value]="opt">{{ opt }}</mat-option>
+                  }
+                </mat-select>
+                @if (hasFieldError(c)) {
+                  <mat-error>{{ getFieldError(c) }}</mat-error>
+                }
+              </mat-form-field>
+            }
+
+            <!-- Date -->
+            @else if (isDate(s)) {
+              <mat-form-field appearance="outline" class="cell-field" subscriptSizing="dynamic">
+                <input matInput [matDatepicker]="picker" [formControl]="c" />
+                <ng-container matIconSuffix>
+                  <mat-datepicker-toggle [for]="picker" />
+                </ng-container>
+                <mat-datepicker #picker />
+                @if (hasFieldError(c)) {
+                  <mat-error>{{ getFieldError(c) }}</mat-error>
+                }
+              </mat-form-field>
+            }
+
+            <!-- Number/integer -->
+            @else if (isNumber(s)) {
+              <mat-form-field appearance="outline" class="cell-field" subscriptSizing="dynamic">
+                <input matInput type="number" [formControl]="c" />
+                @if (hasFieldError(c)) {
+                  <mat-error>{{ getFieldError(c) }}</mat-error>
+                }
+              </mat-form-field>
+            }
+
+            <!-- String -->
+            @else {
+              <mat-form-field appearance="outline" class="cell-field" subscriptSizing="dynamic">
+                <input matInput type="text" [formControl]="c" />
+                @if (hasFieldError(c)) {
+                  <mat-error>{{ getFieldError(c) }}</mat-error>
+                }
+              </mat-form-field>
+            }
+          </td>
+        </ng-container>
+      }
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef class="actions-header">Actions</th>
+        <td mat-cell *matCellDef="let row; let i = index" class="actions-cell">
+          <button
+            mat-icon-button
+            type="button"
+            (click)="removeRow(i)"
+            [disabled]="readonly"
+            matTooltip="Remove row"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+
+    @if (rows.length === 0) {
+      <div class="empty">
+        No rows yet. Click <b>Add row</b>.
+      </div>
+    }
+  </div>
+</div>
+

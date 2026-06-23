@@ -1,0 +1,51 @@
+# Delete secret/nafura/<env>/apps/<APP>/db, apps/<APP>/minio, policy and role for <APP>-backend.
+# ConfigMap vault-delete: ENV, APP.
+# Used by nafops delete app (runtime phase).
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: vault-delete
+spec:
+  ttlSecondsAfterFinished: 120
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: delete
+          image: hashicorp/vault:1.15
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              ENV="${ENV:-dev}"
+              if [ -z "$APP" ]; then
+                echo "Missing APP"
+                exit 1
+              fi
+              export VAULT_ADDR="${VAULT_ADDR:-http://vault:8200}"
+              vault login "$VAULT_TOKEN" 2>/dev/null || true
+              vault kv metadata delete "secret/nafura/$ENV/apps/$APP/db" 2>/dev/null || true
+              vault kv metadata delete "secret/nafura/$ENV/apps/$APP/minio" 2>/dev/null || true
+              vault policy delete "$APP-backend" 2>/dev/null || true
+              vault delete "auth/kubernetes/role/$APP-backend" 2>/dev/null || true
+              echo "Vault delete complete: $APP (env=$ENV)"
+          env:
+            - name: VAULT_ADDR
+              value: "http://vault:8200"
+            - name: VAULT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: vault-sync-token
+                  key: token
+            - name: ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: vault-delete
+                  key: ENV
+                  optional: true
+            - name: APP
+              valueFrom:
+                configMapKeyRef:
+                  name: vault-delete
+                  key: APP

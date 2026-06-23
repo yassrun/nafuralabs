@@ -1,0 +1,50 @@
+/**
+ * Doc Extractor Layout Toolkit
+ * 
+ * Minimal utility classes for consistent layout patterns in the doc-extractor module.
+ * Uses global CSS custom properties from src/styles.scss.
+ */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Spacing Aliases (using global tokens)
+   ───────────────────────────────────────────────────────────────────────────── */
+// SCSS variables that reference CSS custom properties
+$spacing-xs: var(--spacing-xs);  // 4px
+$spacing-sm: var(--spacing-sm);  // 8px
+$spacing-md: var(--spacing-md);  // 16px
+$spacing-lg: var(--spacing-lg);  // 24px
+$spacing-xl: var(--spacing-xl);  // 32px
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Utility Classes
+   ───────────────────────────────────────────────────────────────────────────── */
+
+// Grid-based toolbar layout (replaces flexbox for horizontal toolbars)
+.toolbar-grid {
+  display: grid;
+  gap: $spacing-sm;
+  align-items: start;
+}
+
+// Right-aligned actions container
+.toolbar-actions {
+  display: flex;
+  gap: $spacing-xs;
+  align-items: center;
+  justify-self: end;
+}
+
+// Dense form fields (reduced padding for compact layouts)
+.dense-fields {
+  ::ng-deep {
+    .mat-mdc-form-field-infix {
+      min-height: 32px;
+      padding-top: $spacing-xs;
+      padding-bottom: $spacing-xs;
+    }
+
+    .mat-mdc-select-trigger {
+      min-height: 32px;
+    }
+  }
+}

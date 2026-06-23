@@ -1,0 +1,29 @@
+{
+  "entity": "FreightAudit",
+  "fields": {
+    "auditNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "carrierInvoiceAmount": {
+      "min": 0
+    },
+    "expectedAmount": {
+      "min": 0
+    },
+    "varianceAmount": {
+      "min": 0
+    },
+    "varianceReason": {
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

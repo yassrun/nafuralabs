@@ -1,0 +1,63 @@
+{
+  "financial": {
+    "fields": {
+      "code": "code",
+      "name": "name",
+      "symbol": "symbol",
+      "decimalPlaces": "decimal Places",
+      "fromCurrency": "from Currency Id",
+      "toCurrency": "to Currency Id",
+      "rate": "rate",
+      "effectiveDate": "effective Date",
+      "fiscalYear": "fiscal Year Id",
+      "startDate": "start Date",
+      "endDate": "end Date",
+      "status": "status",
+      "description": "description",
+      "days": "jours"
+    },
+    "navigation": {
+      "currencies": "Devises",
+      "exchangeRates": "Exchange Rates",
+      "fiscalPeriods": "Fiscal Periods",
+      "fiscalYears": "Fiscal Years",
+      "incoterms": "Incoterms",
+      "paymentTerms": "Payment Terms"
+    },
+    "currency": {
+      "title": "Devises",
+      "detailTitle": "Currency Details",
+      "newTitle": "New Currency"
+    },
+    "exchangeRate": {
+      "title": "Exchange Rates",
+      "detailTitle": "Exchange Rate Details",
+      "newTitle": "New Exchange Rate"
+    },
+    "fiscalPeriod": {
+      "title": "Fiscal Periods",
+      "detailTitle": "Fiscal Period Details",
+      "newTitle": "New Fiscal Period"
+    },
+    "fiscalYear": {
+      "title": "Fiscal Years",
+      "detailTitle": "Fiscal Year Details",
+      "newTitle": "New Fiscal Year"
+    },
+    "incoterm": {
+      "title": "Incoterms",
+      "detailTitle": "Incoterm Details",
+      "newTitle": "New Incoterm"
+    },
+    "paymentTerm": {
+      "title": "Payment Terms",
+      "detailTitle": "Payment Term Details",
+      "newTitle": "New Payment Term"
+    }
+  },
+  "common": {
+    "fields": {
+      "isActive": "is Active"
+    }
+  }
+}

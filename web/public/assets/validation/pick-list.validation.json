@@ -1,0 +1,26 @@
+{
+  "entity": "PickList",
+  "fields": {
+    "pickListNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "shipmentId": {
+      "required": true
+    },
+    "warehouseId": {
+      "required": true
+    },
+    "priority": {
+      "maxLength": 20
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "itemCount": {
+      "min": 0
+    }
+  }
+}

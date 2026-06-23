@@ -1,0 +1,45 @@
+<nf-page-shell>
+  <nf-page-header [config]="headerConfig()"></nf-page-header>
+
+  <div class="analytics-toolbar">
+    <label>
+      {{ 'erp.analyticsTableau.common.periodFrom' | translate }}
+      <input type="date" [ngModel]="periodFrom()" (ngModelChange)="periodFrom.set($event)" />
+    </label>
+    <label>
+      {{ 'erp.analyticsTableau.common.periodTo' | translate }}
+      <input type="date" [ngModel]="periodTo()" (ngModelChange)="periodTo.set($event)" />
+    </label>
+    <nf-button variant="secondary" icon="refresh-cw" iconLibrary="lucide" (clicked)="refresh()">
+      {{ 'erp.analyticsTableau.common.refresh' | translate }}
+    </nf-button>
+  </div>
+
+  @if (loaded()) {
+    <div class="analytics-grid">
+      <nf-stat-card [label]="'erp.analyticsTableau.achats.stats.fournisseurs' | translate" [value]="totalFournisseurs()" icon="users" variant="primary"></nf-stat-card>
+      <nf-stat-card [label]="'erp.analyticsTableau.achats.stats.da' | translate" [value]="daEnAttente()" icon="file-text" variant="warning"></nf-stat-card>
+      <nf-stat-card [label]="'erp.analyticsTableau.achats.stats.commandes' | translate" [value]="commandesEnCours()" icon="shopping-cart" variant="default"></nf-stat-card>
+      <nf-stat-card [label]="'erp.analyticsTableau.achats.stats.montantEngage' | translate" [value]="(montantEngage() | mad) ?? '—'" icon="wallet" variant="success"></nf-stat-card>
+      <nf-stat-card [label]="'erp.analyticsTableau.achats.stats.contrats' | translate" [value]="contratsActifs()" icon="file-signature" variant="info"></nf-stat-card>
+      <nf-stat-card [label]="'erp.analyticsTableau.achats.stats.ao' | translate" [value]="aoEnCours()" icon="gavel" variant="default"></nf-stat-card>
+    </div>
+
+    <div class="analytics-charts">
+      <section class="analytics-chart-card">
+        <h3 class="analytics-chart-card__title">{{ 'erp.analyticsTableau.achats.charts.pipeline' | translate }}</h3>
+        <div class="analytics-chart-card__body">
+          <nf-chart type="bar" [data]="pipelineChart()" [options]="chartOptions()" height="240px" [minHeight]="200" />
+        </div>
+      </section>
+      <section class="analytics-chart-card">
+        <h3 class="analytics-chart-card__title">{{ 'erp.analyticsTableau.achats.charts.engageByRubrique' | translate }}</h3>
+        <div class="analytics-chart-card__body">
+          <nf-chart type="bar" [data]="engageChart()" [options]="chartOptions()" height="240px" [minHeight]="200" />
+        </div>
+      </section>
+    </div>
+  } @else {
+    <p class="loading-msg">{{ 'erp.analyticsTableau.common.loading' | translate }}</p>
+  }
+</nf-page-shell>

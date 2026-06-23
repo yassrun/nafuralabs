@@ -1,0 +1,30 @@
+{
+  "entity": "CreditNote",
+  "fields": {
+    "noteNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "customerId": {
+      "required": true
+    },
+    "noteDate": {
+      "required": true
+    },
+    "amount": {
+      "required": true,
+      "min": 0
+    },
+    "currencyId": {
+      "required": true
+    },
+    "reason": {
+      "maxLength": 2000
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "accounts": [
+    {
+      "code": "CB-AWB-01",
+      "name": "AWB Casablanca — Compte courant",
+      "accountType": "BANQUE",
+      "bankName": "Attijariwafa Bank",
+      "rib": "007 780 0001234567890123 45",
+      "branch": "Casablanca Anfa",
+      "currencyCode": "MAD",
+      "glAccountCode": "5141",
+      "openingBalance": 2800000
+    },
+    {
+      "code": "CB-BMCE-02",
+      "name": "BMCE — Compte courant",
+      "accountType": "BANQUE",
+      "bankName": "BMCE Bank",
+      "rib": "011 810 0009876543210987 60",
+      "branch": "Rabat Agdal",
+      "currencyCode": "MAD",
+      "glAccountCode": "5141",
+      "openingBalance": 1100000
+    },
+    {
+      "code": "CB-CIH-03",
+      "name": "CIH Casablanca",
+      "accountType": "BANQUE",
+      "bankName": "CIH Bank",
+      "rib": "230 770 0001112223334444 12",
+      "branch": "Casablanca Maârif",
+      "currencyCode": "MAD",
+      "glAccountCode": "5141",
+      "openingBalance": 450000
+    }
+  ]
+}

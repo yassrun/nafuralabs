@@ -1,0 +1,23 @@
+{
+  "entity": "DeliverySplit",
+  "fields": {
+    "splitNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "splitQuantity": {
+      "min": 0
+    },
+    "reason": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

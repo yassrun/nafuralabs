@@ -1,0 +1,22 @@
+<nf-page-shell>
+  <nf-page-header [config]="headerConfig"></nf-page-header>
+
+  <div class="srt-kpi-banner">
+    <div class="srt-kpi">
+      <span class="srt-kpi__label">{{ 'inventory.mouvement.sortie.kpis.month' | translate }}</span>
+      <span class="srt-kpi__value">{{ kpiMonth() | number:'1.2-2' }} MAD</span>
+    </div>
+    <div class="srt-kpi">
+      <span class="srt-kpi__label">{{ 'inventory.mouvement.sortie.kpis.valide' | translate }}</span>
+      <span class="srt-kpi__value">{{ kpiValide() | number:'1.2-2' }} MAD</span>
+    </div>
+  </div>
+
+  <nf-entity-listing
+    #listing
+    [config]="config"
+    [facade]="facade"
+    [openOnRowClick]="true"
+    (action)="onAction($event)">
+  </nf-entity-listing>
+</nf-page-shell>

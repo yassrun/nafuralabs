@@ -1,0 +1,26 @@
+{
+  "entity": "ServiceReceipt",
+  "fields": {
+    "receiptNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "completionPercent": {
+      "min": 0
+    },
+    "hoursDelivered": {
+      "min": 0
+    },
+    "acceptedBy": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

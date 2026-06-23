@@ -1,0 +1,15 @@
+{
+  "entity": "PartnerAddress",
+  "fields": {
+    "partnerId": {
+      "required": true
+    },
+    "addressType": {
+      "required": true,
+      "maxLength": 30
+    },
+    "addressId": {
+      "required": true
+    }
+  }
+}

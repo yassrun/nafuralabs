@@ -1,0 +1,33 @@
+{
+  "entity": "LoadPlan",
+  "fields": {
+    "planNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "shipmentId": {
+      "required": true
+    },
+    "loadDate": {
+      "required": true
+    },
+    "totalWeight": {
+      "min": 0
+    },
+    "totalVolume": {
+      "min": 0
+    },
+    "utilizationPercent": {
+      "min": 0,
+      "max": 100
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

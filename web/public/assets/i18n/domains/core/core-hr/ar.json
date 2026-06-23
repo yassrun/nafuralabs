@@ -1,0 +1,80 @@
+{
+  "core-hr": {
+    "navigation": {
+      "title": "الموارد البشرية الأساسية",
+      "description": "مجال الموارد البشرية الأساسية",
+      "employees": "الموظفون",
+      "departments": "الأقسام",
+      "designations": "الألقاب الوظيفية",
+      "positions": "المناصب",
+      "employmentTypes": "أنواع التشغيل",
+      "employeeDocuments": "وثائق الموظفين",
+      "employeePromotions": "ترقيات الموظفين",
+      "employeeTransfers": "تنقلات الموظفين",
+      "separations": "إنهاءات الخدمة"
+    },
+    "fields": {
+      "gradeBand": "معرّف الدرجة الوظيفية",
+      "fromGrade": "معرّف الدرجة المنطلق",
+      "toGrade": "معرّف الدرجة الوجهة"
+    }
+  },
+  "common": {
+    "subsections": {
+      "operations": "العمليات",
+      "configuration": "الإعدادات"
+    }
+  },
+  "hr": {
+    "fields": {
+      "employeeNumber": "رقم الموظف",
+      "firstName": "الاسم الأول",
+      "lastName": "اسم العائلة",
+      "email": "البريد الإلكتروني",
+      "phone": "الهاتف",
+      "dateOfBirth": "تاريخ الميلاد",
+      "hireDate": "تاريخ التوظيف",
+      "department": "معرّف القسم",
+      "position": "معرّف المنصب",
+      "manager": "معرّف المسؤول",
+      "designation": "معرّف اللقب الوظيفي",
+      "employmentType": "معرّف نوع التشغيل",
+      "status": "الحالة",
+      "photo": "الصورة",
+      "code": "الرمز",
+      "name": "الاسم",
+      "title": "العنوان",
+      "employee": "معرّف الموظف",
+      "documentType": "نوع الوثيقة",
+      "fileName": "اسم الملف",
+      "fileUrl": "رابط الملف",
+      "expiryDate": "تاريخ الانتهاء",
+      "isVerified": "موثّق",
+      "uploadedAt": "تاريخ الرفع",
+      "promotionNumber": "رقم الترقية",
+      "fromDesignation": "معرّف اللقب المنطلق",
+      "toDesignation": "معرّف اللقب الوجهة",
+      "effectiveDate": "تاريخ السريان",
+      "salaryRevision": "معرّف مراجعة الراتب",
+      "transferNumber": "رقم التنقل",
+      "fromDepartment": "معرّف القسم المنطلق",
+      "toDepartment": "معرّف القسم الوجهة",
+      "fromPosition": "معرّف المنصب المنطلق",
+      "toPosition": "معرّف المنصب الوجهة",
+      "reason": "السبب",
+      "separationNumber": "رقم إنهاء الخدمة",
+      "type": "النوع",
+      "lastWorkingDay": "آخر يوم عمل",
+      "exitInterviewDone": "تم إجراء مقابلة الخروج",
+      "clearance": "بيان المخالصة (JSON)"
+    },
+    "sections": {
+      "general": "عام",
+      "personal": "شخصي",
+      "employment": "التشغيل",
+      "promotion": "الترقية",
+      "transfer": "التنقل",
+      "details": "التفاصيل"
+    }
+  }
+}

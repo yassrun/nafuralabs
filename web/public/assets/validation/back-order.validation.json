@@ -1,0 +1,22 @@
+{
+  "entity": "BackOrder",
+  "fields": {
+    "salesOrderId": {
+      "required": true
+    },
+    "salesOrderLineId": {
+      "required": true
+    },
+    "itemId": {
+      "required": true
+    },
+    "backOrderQuantity": {
+      "required": true,
+      "min": 0.0001
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

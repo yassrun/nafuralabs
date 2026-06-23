@@ -1,0 +1,1 @@
+export { buildEmployesListingConfig } from './config';

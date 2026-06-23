@@ -1,0 +1,23 @@
+{
+  "entity": "ReorderRule",
+  "fields": {
+    "code": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "reorderPoint": {
+      "maxLength": 120
+    },
+    "reorderQuantity": {
+      "min": 0
+    },
+    "safetyStock": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

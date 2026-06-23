@@ -1,0 +1,24 @@
+{
+  "entity": "FiscalYear",
+  "fields": {
+    "code": {
+      "required": true,
+      "maxLength": 50,
+      "unique": true
+    },
+    "name": {
+      "required": true,
+      "maxLength": 200
+    },
+    "startDate": {
+      "required": true
+    },
+    "endDate": {
+      "required": true
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

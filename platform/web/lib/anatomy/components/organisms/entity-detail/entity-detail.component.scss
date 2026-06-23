@@ -1,0 +1,329 @@
+/**
+ * Entity Detail Component Styles
+ */
+
+.nf-entity-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
+  &--loading {
+    opacity: 0.7;
+    pointer-events: none;
+  }
+}
+
+.nf-entity-detail__tab-content {
+  padding-top: 16px;
+}
+
+// ─── Workflow (approval) slot ─────────────────────────────────────────────────
+
+.nf-entity-detail__workflow {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.nf-entity-detail__workflow-submit {
+  margin-top: 4px;
+}
+
+.nf-entity-detail__workflow-submit-btn {
+  min-width: 160px;
+}
+
+// ─── Actions Bar ──────────────────────────────────────────────────────────────
+
+.nf-entity-detail__actions-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--nf-color-border, #e0e0e0);
+
+  &--footer {
+    margin-bottom: 0;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-bottom: none;
+    border-top: 1px solid var(--nf-color-border, #e0e0e0);
+  }
+}
+
+.nf-entity-detail__actions-left,
+.nf-entity-detail__actions-center,
+.nf-entity-detail__actions-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nf-entity-detail__actions-center {
+  flex: 1;
+  justify-content: center;
+}
+
+.nf-entity-detail__actions-left {
+  ::ng-deep .nf-button-list > *:not(:first-child) {
+    position: relative;
+    margin-left: 10px;
+    padding-left: 10px;
+  }
+
+  ::ng-deep .nf-button-list > *:not(:first-child)::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1px;
+    height: 18px;
+    background: var(--nf-color-border, #e0e0e0);
+  }
+}
+
+// Right side: consistent gap between actions (same as listing toolbar)
+.nf-entity-detail__actions-right {
+  nf-status-machine {
+    margin-right: 8px;
+  }
+
+  nf-button-list {
+    ::ng-deep .nf-button-list {
+      gap: 4px;
+    }
+  }
+}
+
+// ─── Form ─────────────────────────────────────────────────────────────────────
+
+.nf-entity-detail__form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+// ─── Fields Grid (Flat Layout) ────────────────────────────────────────────────
+
+.nf-entity-detail__fields {
+  display: grid;
+  gap: 16px 24px;
+}
+
+// ─── Sections ─────────────────────────────────────────────────────────────────
+
+.nf-entity-detail__section {
+  border: 1px solid var(--nf-color-border, #e0e0e0);
+  border-radius: 8px;
+  padding: 24px;
+  margin: 0;
+  background-color: var(--nf-surface, #fff);
+
+  // Add subtle shadow on hover for interactivity feel
+  transition: box-shadow 0.2s ease;
+
+  &--collapsible {
+    cursor: pointer;
+  }
+
+  &--collapsed {
+    .nf-entity-detail__section-fields {
+      display: none;
+    }
+  }
+
+  &:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+}
+
+.nf-entity-detail__section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding: 0;
+  border: none;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--nf-color-text-primary, #1a1a1a);
+}
+
+.nf-entity-detail__section-icon {
+  font-size: 20px;
+  color: var(--nf-color-text-secondary, #666);
+}
+
+.nf-entity-detail__section-title {
+  flex: 1;
+}
+
+.nf-entity-detail__section-description {
+  font-size: 0.8125rem;
+  font-weight: 400;
+  color: var(--nf-color-text-tertiary, #999);
+  margin-left: 4px;
+
+  &::before {
+    content: '—';
+    margin-right: 6px;
+    color: var(--nf-color-border, #e0e0e0);
+  }
+}
+
+.nf-entity-detail__section-fields {
+  display: grid;
+  gap: 16px 24px;
+}
+
+// ─── Field ────────────────────────────────────────────────────────────────────
+
+.nf-entity-detail__field {
+  min-width: 0; // Prevent grid blowout
+}
+
+.nf-entity-detail__readonly-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 56px;
+  padding: 2px 0;
+}
+
+.nf-entity-detail__readonly-label {
+  font-size: 0.75rem;
+  line-height: 1;
+  color: var(--nf-color-text-secondary, #666);
+}
+
+.nf-entity-detail__readonly-value {
+  font-size: 0.95rem;
+  line-height: 1.35;
+  color: var(--nf-color-text-primary, #111827);
+  white-space: pre-wrap;
+}
+
+.nf-entity-detail__mat-field {
+  width: 100%;
+}
+
+::ng-deep .nf-entity-detail__select-search-option {
+  height: auto !important;
+  opacity: 1 !important;
+  min-height: 56px !important;
+  padding: 8px 12px !important;
+
+  &.mdc-list-item--disabled {
+    pointer-events: auto !important;
+    opacity: 1 !important;
+  }
+
+  .mdc-list-item__primary-text {
+    width: 100%;
+    opacity: 1 !important;
+  }
+
+  .nf-entity-detail__select-search-input {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid var(--nf-color-border, #d0d5dd);
+    border-radius: 6px;
+    padding: 8px 10px;
+    background: var(--nf-surface, #ffffff);
+    color: var(--nf-color-text-primary, #111827);
+    font: inherit;
+    outline: none;
+  }
+
+  .nf-entity-detail__select-search-input:focus {
+    border-color: var(--nf-primary, #3b82f6);
+  }
+}
+
+// ─── Atom Fields (ICE/RIB/Phone-MA/Money-MA) ─────────────────────────────────
+
+.nf-entity-detail__atom-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 4px;
+  width: 100%;
+}
+
+.nf-entity-detail__atom-label {
+  font-size: 0.75rem;
+  line-height: 1;
+  color: var(--nf-color-text-secondary, #64748b);
+  font-weight: 500;
+}
+
+.nf-entity-detail__atom-hint {
+  font-size: 0.7rem;
+  color: var(--nf-color-text-secondary, #64748b);
+}
+
+// ─── Checkbox & Toggle Fields ─────────────────────────────────────────────────
+
+.nf-entity-detail__checkbox-field,
+.nf-entity-detail__toggle-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 8px; // Align with mat-form-field
+}
+
+.nf-entity-detail__hint {
+  font-size: 0.75rem;
+  color: var(--nf-color-text-secondary, #666);
+  margin-left: 32px; // Align with checkbox/toggle label
+}
+
+// ─── Responsive ───────────────────────────────────────────────────────────────
+
+@media (max-width: 1200px) {
+  .nf-entity-detail__fields,
+  .nf-entity-detail__section-fields {
+    // Max 2 columns on tablet
+    .nf-entity-detail__field {
+      grid-column: span 6 !important;
+    }
+
+    // Full width fields stay full
+    .nf-entity-detail__field[style*="span 12"] {
+      grid-column: span 12 !important;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .nf-entity-detail__fields,
+  .nf-entity-detail__section-fields {
+    // Single column on mobile
+    grid-template-columns: 1fr !important;
+
+    .nf-entity-detail__field {
+      grid-column: span 1 !important;
+    }
+  }
+
+  .nf-entity-detail__section {
+    padding: 16px;
+  }
+
+  .nf-entity-detail__section-header {
+    flex-wrap: wrap;
+  }
+
+  .nf-entity-detail__section-description {
+    width: 100%;
+    margin-left: 0;
+    margin-top: 4px;
+
+    &::before {
+      display: none;
+    }
+  }
+}

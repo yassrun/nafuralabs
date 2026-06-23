@@ -1,0 +1,214 @@
+<div class="entry-page">
+  <!-- Fast Path Section (when not in domain selection) -->
+  @if (!selectedDomain()) {
+    <div class="fast-path">
+      <!-- Continue Section -->
+      <div class="continue-section">
+        <div class="continue-header">
+          <h2 class="dox-h3">Continue where you left off</h2>
+        </div>
+
+        <div class="continue-content">
+          <!-- Recent Doc Types -->
+          <div class="recents">
+            <div class="recents__label">Recent Document Types</div>
+            <div class="recents__chips">
+              @for (recent of recentDocTypes(); track recent.docTypeKey) {
+                <button 
+                  mat-stroked-button 
+                  class="recent-chip"
+                  (click)="onRecentDocTypeClick(recent)"
+                  [matTooltip]="formatRelativeTime(recent.lastUsed)"
+                >
+                  <mat-icon [style.color]="recent.color">{{ recent.icon }}</mat-icon>
+                  <span>{{ recent.name }}</span>
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Last Workspace -->
+          @if (lastWorkspace(); as last) {
+            <div class="last-workspace">
+              <button 
+                mat-flat-button 
+                class="workspace-button"
+                (click)="onContinueLastWorkspace()"
+              >
+                <mat-icon>history</mat-icon>
+                Continue: {{ last.name }}
+              </button>
+            </div>
+          }
+
+          <!-- Primary CTA -->
+          <div class="primary-cta">
+            <button 
+              mat-flat-button 
+              color="primary"
+              class="import-button"
+              (click)="onImportDocument()"
+            >
+              <mat-icon>upload_file</mat-icon>
+              Import Document
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search Section -->
+      <div class="search-section">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-icon matPrefix>search</mat-icon>
+          <input 
+            matInput 
+            [formControl]="searchQuery"
+            placeholder="Search document type (BL, Invoice, Packing list…)"
+            (focus)="showSearchResults.set(searchResults().length > 0)"
+            autocomplete="off"
+          />
+          @if (searchQuery.value) {
+            <button mat-icon-button matSuffix (click)="clearSearch()">
+              <mat-icon>close</mat-icon>
+            </button>
+          }
+        </mat-form-field>
+
+        <!-- Search Results Dropdown -->
+        @if (showSearchResults() && searchResults().length > 0) {
+          <div class="search-results">
+            @for (result of searchResults(); track result.docTypeKey) {
+              <button 
+                class="search-result-item"
+                (click)="onSearchResultClick(result)"
+              >
+                <mat-icon>description</mat-icon>
+                <div class="search-result-info">
+                  <span class="search-result-name">{{ result.name }}</span>
+                  @if (result.description) {
+                    <span class="search-result-desc">{{ result.description }}</span>
+                  }
+                </div>
+              </button>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Discovery Section (part of the same flow as Continue) -->
+    <div class="discovery">
+      <div class="discovery__header">
+        <h2>Start a new extraction</h2>
+        <p>Choose a category or create a custom document type.</p>
+      </div>
+
+      @if (loading()) {
+        <div class="loading-container">
+          <mat-spinner diameter="48"></mat-spinner>
+          <p>Loading document types...</p>
+        </div>
+      } @else {
+        <div class="discovery__grid">
+          @for (domain of domainCards(); track domain.id) {
+            <mat-card class="domain-card" matRipple (click)="onDomainClick(domain.id)">
+              <div class="domain-card__icon-wrapper" [style.background-color]="domain.color + '10'">
+                <mat-icon [style.color]="domain.color">{{ domain.icon }}</mat-icon>
+              </div>
+              <mat-card-header>
+                <mat-card-title>{{ domain.label }}</mat-card-title>
+                <mat-card-subtitle>{{ domain.description }}</mat-card-subtitle>
+              </mat-card-header>
+              <div class="domain-card__footer">
+                <span class="doc-type-count">{{ domain.docTypeCount }} templates</span>
+                <mat-icon appFlipIconRtl>arrow_forward</mat-icon>
+              </div>
+            </mat-card>
+          }
+
+          <!-- Custom card -->
+          <mat-card class="domain-card domain-card--custom" matRipple (click)="onCreateCustomDocType()">
+            <div class="domain-card__badge">MOST FLEXIBLE</div>
+            <div class="domain-card__icon-wrapper">
+              <mat-icon>add_circle_outline</mat-icon>
+            </div>
+            <mat-card-header>
+              <mat-card-title>Custom Document Type</mat-card-title>
+              <mat-card-subtitle>
+                Define your own schema and extraction rules.<br>
+                <span class="effort-hint">Best for advanced use cases.</span>
+              </mat-card-subtitle>
+            </mat-card-header>
+            <div class="domain-card__footer">
+              <button mat-button color="primary">CREATE FROM SCRATCH</button>
+            </div>
+          </mat-card>
+        </div>
+      }
+    </div>
+  } @else {
+    <!-- Templates View for Selected Domain -->
+    <div class="templates-view">
+      <div class="templates-header">
+        <button mat-icon-button (click)="onBackToCategories()" class="back-button">
+          <mat-icon appFlipIconRtl>arrow_back</mat-icon>
+        </button>
+        <div class="templates-header__text">
+          <h2 class="dox-h2">{{ selectedDomainLabel() }} Templates</h2>
+          <p class="dox-body-sm">Select a template to start extracting data from your documents.</p>
+        </div>
+      </div>
+
+      <div class="templates-grid">
+        @for (template of selectedDomainTemplates(); track template.docTypeKey) {
+          <mat-card 
+            class="template-card" 
+            matRipple 
+            (click)="onTemplateClick(selectedDomain()!, template.docTypeKey)"
+          >
+            <mat-card-header>
+              <mat-card-title>{{ template.name }}</mat-card-title>
+              <mat-card-subtitle>
+                {{ template.description || 'Optimized extraction for ' + template.name + ' documents.' }}
+              </mat-card-subtitle>
+            </mat-card-header>
+            
+            <div class="template-card__metadata">
+              @let meta = getTemplateMetadata(template);
+              <span class="meta-item">
+                <mat-icon>list_alt</mat-icon>
+                {{ meta.fields }} Fields
+              </span>
+              @if (meta.hasTables) {
+                <span class="meta-item">
+                  <mat-icon>table_chart</mat-icon>
+                  Tables
+                </span>
+              }
+              <span class="meta-item">
+                <mat-icon>download</mat-icon>
+                {{ meta.exportFormats.join(', ') }}
+              </span>
+            </div>
+
+            <div class="template-card__action">
+              <span class="select-hint">Click to select</span>
+              <mat-icon appFlipIconRtl>arrow_forward</mat-icon>
+            </div>
+          </mat-card>
+        }
+
+        @if (selectedDomainTemplates().length === 0) {
+          <div class="templates-empty">
+            <mat-icon>search_off</mat-icon>
+            <h3>No templates found</h3>
+            <p>No templates are available for this category yet.</p>
+            <button mat-stroked-button color="primary" (click)="onCreateCustomDocType()">
+              Create Custom Document Type
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

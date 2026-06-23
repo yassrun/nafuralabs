@@ -1,0 +1,129 @@
+# HashiCorp Vault Server (file storage on PVC — same mode for Docker Desktop staging and prod).
+# Docker Desktop (overlay staging): vault-init Job + vault-unseal CronJob auto-unseal from secret/vault-bootstrap.
+# Prod: optional KMS auto-unseal; one-time infra/scripts/vault-init.sh then revoke root.
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vault-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vault-config
+data:
+  vault-config.hcl: |
+    ui = true
+
+    listener "tcp" {
+      address     = "0.0.0.0:8200"
+      tls_disable = 1
+    }
+
+    storage "file" {
+      path = "/vault/data"
+    }
+
+    api_addr = "http://vault:8200"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: vault
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: vault-auth-delegator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:auth-delegator
+subjects:
+  - kind: ServiceAccount
+    name: vault
+    namespace: default
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vault
+  labels:
+    app: vault
+spec:
+  replicas: 1
+  # RWO PVC: avoid two pods mounting vault-data during rollout.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: vault
+  template:
+    metadata:
+      labels:
+        app: vault
+    spec:
+      serviceAccountName: vault
+      containers:
+        - name: vault
+          image: hashicorp/vault:1.15
+          # Use "vault server" as command (not args starting with "server") so the
+          # image entrypoint does not inject -dev-listen-address on :8200.
+          command: ["vault", "server", "-config=/vault/config/vault-config.hcl"]
+          env:
+            - name: SKIP_CHOWN
+              value: "true"
+            - name: VAULT_ADDR
+              value: "http://127.0.0.1:8200"
+          ports:
+            - containerPort: 8200
+              name: http
+          volumeMounts:
+            - name: vault-data
+              mountPath: /vault/data
+            - name: vault-config
+              mountPath: /vault/config
+            - name: vault-logs
+              mountPath: /vault/logs
+          securityContext:
+            capabilities:
+              add: ["IPC_LOCK"]
+          readinessProbe:
+            httpGet:
+              path: /v1/sys/health?standbyok=true&uninitcode=200&sealedcode=200
+              port: 8200
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /v1/sys/health?standbyok=true&uninitcode=200&sealedcode=200
+              port: 8200
+            initialDelaySeconds: 15
+            periodSeconds: 30
+      volumes:
+        - name: vault-data
+          persistentVolumeClaim:
+            claimName: vault-data
+        - name: vault-config
+          configMap:
+            name: vault-config
+        - name: vault-logs
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vault
+spec:
+  selector:
+    app: vault
+  ports:
+    - port: 8200
+      targetPort: 8200
+      name: http

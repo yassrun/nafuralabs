@@ -1,0 +1,213 @@
+<div class="rs">
+  <header class="rs__header">
+    <nf-button variant="primary" class="rs__back" (clicked)="back()">{{ 'finance.reglement.actions.retour' | translate }}</nf-button>
+    <div class="rs__title-block">
+      <div class="rs__breadcrumb">
+        @if (type() === 'CLIENT') { {{ 'finance.recouvrement.title' | translate }} }
+        @else if (type() === 'FOURNISSEUR') { {{ 'finance.reglement.title' | translate }} }
+        @else { {{ 'finance.reglement.entityName' | translate }} }
+        @if (existing()) { · {{ existing()!.numero }} }
+      </div>
+      <h1 class="rs__title">
+        {{ isCreate ? ('finance.reglement.newTitle' | translate) : existing()?.numero }}
+      </h1>
+    </div>
+    @if (existing(); as r) {
+      <span class="rs__badge"
+            [attr.data-variant]="r.status === 'VALIDE' ? 'success' : r.status === 'BROUILLON' ? 'warning' : 'default'">
+        {{ (r.status === 'VALIDE' ? 'finance.common.toasts.validated'
+              : r.status === 'BROUILLON' ? 'finance.declarations.status.BROUILLON'
+              : 'finance.common.toasts.cancelled') | translate }}
+      </span>
+    }
+  </header>
+
+  @if (isCreate) {
+    <section class="rs__type-row">
+      <nf-button variant="ghost" class="rs__type-card" [active]="type() === 'CLIENT'" (clicked)="setType('CLIENT')">
+        <span class="rs__type-name">{{ 'finance.recouvrement.headers.client' | translate }}</span>
+        <span class="rs__type-hint">{{ 'finance.recouvrement.actions.marquerEncaisse' | translate }}</span>
+      </nf-button>
+      <nf-button variant="ghost" class="rs__type-card" [active]="type() === 'FOURNISSEUR'" (clicked)="setType('FOURNISSEUR')">
+        <span class="rs__type-name">{{ 'finance.factureFournisseur.form.fields.fournisseur' | translate }}</span>
+        <span class="rs__type-hint">{{ 'finance.reglement.actions.create' | translate }}</span>
+      </nf-button>
+      <nf-button variant="ghost" class="rs__type-card" [active]="type() === 'EMPLOYE'" (clicked)="setType('EMPLOYE')">
+        <span class="rs__type-name">{{ 'finance.ecriture.form.fields.tiers' | translate }}</span>
+        <span class="rs__type-hint">{{ 'finance.declarations.simplIs.title' | translate }}</span>
+      </nf-button>
+    </section>
+  }
+
+  <section class="rs__form">
+    <h3 class="rs__section-title">{{ 'finance.ecriture.detail.infoSection' | translate }}</h3>
+    <div class="rs__row">
+      <label class="rs__field">
+        <span>{{ 'finance.reglement.form.fields.date' | translate }} *</span>
+        <input
+          type="date"
+          [ngModel]="date()"
+          (ngModelChange)="date.set($event)"
+          [disabled]="isReadonly()"
+        />
+      </label>
+      <label class="rs__field">
+        <span>{{ 'finance.reglement.form.fields.modePaiement' | translate }} *</span>
+        <select [ngModel]="modePaiement()" (ngModelChange)="modePaiement.set($event)" [disabled]="isReadonly()">
+          <option value="VIREMENT">{{ 'enum.mode.VIREMENT' | translate }}</option>
+          <option value="CHEQUE">{{ 'enum.mode.CHEQUE' | translate }}</option>
+          <option value="EFFET">{{ 'enum.mode.EFFET' | translate }}</option>
+          <option value="ESPECES">{{ 'enum.mode.ESPECES' | translate }}</option>
+          <option value="COMPENSATION">{{ 'enum.mode.COMPENSATION' | translate }}</option>
+          <option value="CARTE">{{ 'enum.mode.CARTE' | translate }}</option>
+        </select>
+      </label>
+      <label class="rs__field">
+        <span>{{ 'finance.reglement.form.fields.reference' | translate }}</span>
+        <input
+          type="text"
+          [ngModel]="reference()"
+          (ngModelChange)="reference.set($event)"
+          [attr.placeholder]="'finance.reglement.form.fields.reference' | translate"
+          [disabled]="isReadonly()"
+        />
+      </label>
+      @if (modePaiement() === 'CHEQUE' || modePaiement() === 'EFFET') {
+        <label class="rs__field">
+          <span>{{ 'finance.virement.form.fields.banque' | translate }}</span>
+          <input
+            type="text"
+            [ngModel]="banqueEmise()"
+            (ngModelChange)="banqueEmise.set($event)"
+            [attr.placeholder]="'finance.virement.form.fields.banque' | translate"
+            [disabled]="isReadonly()"
+          />
+        </label>
+      }
+    </div>
+
+    <div class="rs__row">
+      <label class="rs__field">
+        <span>{{ (type() === 'CLIENT' ? 'finance.recouvrement.headers.client'
+              : type() === 'FOURNISSEUR' ? 'finance.factureFournisseur.form.fields.fournisseur'
+              : 'finance.ecriture.form.fields.tiers') | translate }} *</span>
+        <select
+          [ngModel]="contrePartieId()"
+          (ngModelChange)="setContrePartie($event)"
+          [disabled]="isReadonly() || !isCreate"
+        >
+          <option value="">{{ 'finance.factureFournisseur.form.fields.fournisseurPlaceholder' | translate }}</option>
+          @for (cp of contreParties(); track cp.id) {
+            <option [value]="cp.id">{{ cp.name }}</option>
+          }
+        </select>
+      </label>
+      <label class="rs__field">
+        <span>{{ 'finance.reglement.form.fields.compteEmetteur' | translate }} *</span>
+        <select
+          [ngModel]="compteFinancierId()"
+          (ngModelChange)="compteFinancierId.set($event)"
+          [disabled]="isReadonly()"
+        >
+          <option value="">{{ 'finance.factureFournisseur.form.fields.fournisseurPlaceholder' | translate }}</option>
+          @for (c of comptes(); track c.id) {
+            @if (c.isActive) {
+              <option [value]="c.id">{{ c.libelle }}</option>
+            }
+          }
+        </select>
+      </label>
+    </div>
+  </section>
+
+  @if (type() !== 'EMPLOYE') {
+    <section class="rs__form">
+      <h3 class="rs__section-title">{{ 'finance.reglement.form.selectFactures' | translate }}</h3>
+      <app-imputation-picker
+        [type]="type() === 'CLIENT' ? 'CLIENT' : 'FOURNISSEUR'"
+        [factures]="factures()"
+        [contrePartieId]="contrePartieId()"
+        [initialMontantTotal]="montantTotal()"
+        [initialImputations]="imputations()"
+        (imputationsChange)="onImputationsChange($event)"
+        (montantTotalChange)="onMontantChange($event)"
+      />
+    </section>
+  } @else {
+    <section class="rs__form">
+      <h3 class="rs__section-title">{{ 'finance.reglement.form.fields.montant' | translate }}</h3>
+      <div class="rs__row">
+        <label class="rs__field">
+          <span>{{ 'finance.reglement.form.fields.montant' | translate }} *</span>
+          <input
+            type="number"
+            min="0"
+            step="0.01"
+            [ngModel]="montantTotal()"
+            (ngModelChange)="montantTotal.set($event)"
+            [disabled]="isReadonly()"
+          />
+        </label>
+      </div>
+    </section>
+  }
+
+  <section class="rs__form">
+    <h3 class="rs__section-title">{{ 'finance.reglement.form.fields.libelle' | translate }}</h3>
+    <textarea
+      rows="3"
+      [ngModel]="notes()"
+      (ngModelChange)="notes.set($event)"
+      [disabled]="isReadonly()"
+      [attr.placeholder]="'finance.reglement.form.fields.libelle' | translate"
+    ></textarea>
+  </section>
+
+  <section class="rs__summary">
+    <div class="rs__summary-row">
+      <span>{{ 'finance.reglement.list.columns.modePaiement' | translate }}</span>
+      <strong>
+        {{ (type() === 'CLIENT' ? 'finance.recouvrement.actions.marquerEncaisse'
+              : type() === 'FOURNISSEUR' ? 'finance.reglement.actions.create'
+              : 'finance.declarations.simplIs.title') | translate }}
+      </strong>
+    </div>
+    <div class="rs__summary-row">
+      <span>{{ 'finance.reglement.form.fields.montant' | translate }}</span>
+      <strong>{{ format(montantTotal()) }} {{ 'finance.common.currency.mad' | translate }}</strong>
+    </div>
+    <div class="rs__summary-row">
+      <span>{{ 'finance.reglement.form.selectFactures' | translate }}</span>
+      <strong>{{ imputations().length }}</strong>
+    </div>
+    @if (impDiff() !== 0 && type() !== 'EMPLOYE') {
+      <div class="rs__summary-row rs__summary-row--err">
+        <span>{{ 'finance.reglement.form.factureSelector.ecart' | translate }}</span>
+        <strong>{{ format(impDiff()) }} {{ 'finance.common.currency.mad' | translate }}</strong>
+      </div>
+    }
+  </section>
+
+  <footer class="rs__foot">
+    <nf-button variant="ghost" class="rs__btn rs__btn--ghost" (clicked)="back()">
+      {{ 'finance.common.actions.cancel' | translate }}
+    </nf-button>
+    @if (existing()?.status === 'VALIDE') {
+      <nf-button variant="danger" class="rs__btn rs__btn--danger" (clicked)="cancelReglement()"  [disabled]="busy()">
+        {{ 'finance.reglement.toasts.cancelled' | translate }}
+      </nf-button>
+    } @else {
+      <nf-button variant="ghost" class="rs__btn rs__btn--ghost" (clicked)="saveAsDraft()"  [disabled]="!canSave() || busy()">
+        {{ 'finance.common.actions.save' | translate }}
+      </nf-button>
+      <nf-button variant="primary" class="rs__btn" (clicked)="saveAndValide()"  [disabled]="!canSave() || busy()">
+        {{ 'finance.reglement.actions.validate' | translate }}
+      </nf-button>
+    }
+    @if (existing() && existing()!.status !== 'VALIDE') {
+      <nf-button variant="danger" class="rs__btn rs__btn--danger" (clicked)="deleteReglement()"  [disabled]="busy()">
+        {{ 'finance.common.actions.delete' | translate }}
+      </nf-button>
+    }
+  </footer>
+</div>

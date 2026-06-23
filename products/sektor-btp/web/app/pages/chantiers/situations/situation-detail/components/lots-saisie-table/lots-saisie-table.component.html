@@ -1,0 +1,89 @@
+<div class="lst" [class.lst--readonly]="readonly">
+  <div class="lst__table-wrap">
+    <table class="lst__table">
+      <colgroup>
+        <col class="col-lot" />
+        <col />
+        <col class="col-unite" />
+        <col class="col-qte" />
+        <col class="col-qte-prev" />
+        <col class="col-qte-cumul" />
+        <col class="col-pct" />
+        <col class="col-pu" />
+        <col class="col-total" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Lot</th>
+          <th>{{ 'chantiers.situation.detail.lotsTable.designation' | translate }}</th>
+          <th>{{ 'chantiers.situation.detail.lotsTable.unite' | translate }}</th>
+          <th class="lst__num">{{ 'chantiers.situation.detail.lotsTable.qteTotale' | translate }}</th>
+          <th class="lst__num">{{ 'chantiers.situation.detail.lotsTable.qtePrecedente' | translate }}</th>
+          <th class="lst__num">{{ 'chantiers.situation.detail.lotsTable.qteCumul' | translate }}</th>
+          <th class="lst__num">%</th>
+          <th class="lst__num">PU MAD</th>
+          <th class="lst__num">Cumul MAD HT</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (displayLines().length === 0) {
+          <tr>
+            <td colspan="9" class="lst__empty">
+              Aucun lot — sélectionnez un chantier pour pré-remplir les lignes.
+            </td>
+          </tr>
+        }
+        @for (line of displayLines(); track trackById($index, line); let i = $index) {
+          <tr [class.lst__row--alert]="alerteRegression(line)">
+            <td class="lst__cell-strong">{{ line.lotCode || '—' }}</td>
+            <td>
+              <div class="lst__designation">{{ line.designation }}</div>
+            </td>
+            <td>{{ line.unite || '—' }}</td>
+            <td class="lst__num">
+              {{ line.quantiteTotale | number: '1.0-2' }}
+            </td>
+            <td class="lst__num lst__muted">
+              {{ line.quantitePrecedente | number: '1.0-2' }}
+            </td>
+            <td class="lst__num">
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                class="lst__input lst__input--num"
+                [disabled]="readonly"
+                [ngModel]="line.quantiteCumulee"
+                (ngModelChange)="patchLine(i, { quantiteCumulee: +$event })"
+                [ngModelOptions]="{ standalone: true }" />
+            </td>
+            <td class="lst__num lst__pct" [class.lst__pct--full]="pourcentage(line) >= 100">
+              {{ pourcentage(line) }}%
+            </td>
+            <td class="lst__num lst__muted">
+              {{ line.prixUnitaire | number: '1.2-2' }}
+            </td>
+            <td class="lst__num lst__total">
+              {{ line.montantHt | number: '1.2-2' }}
+            </td>
+          </tr>
+        }
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="8" class="lst__total-label">Cumul N HT</td>
+          <td class="lst__num lst__total lst__total--big">
+            {{ totalCumulHt() | number: '1.2-2' }}
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  @if (displayLines().length > 0) {
+    <div class="lst__legend">
+      <span class="lst__legend-dot lst__legend-dot--alert"></span>
+      Une ligne en rouge indique une régression (cumul saisi &lt; cumul précédent).
+    </div>
+  }
+</div>

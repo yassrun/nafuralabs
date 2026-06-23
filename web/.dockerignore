@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+.npm/
+
+# Build output
+dist/
+.angular/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# Test
+coverage/
+.nyc_output/
+
+# Misc
+*.log
+*.md
+.editorconfig

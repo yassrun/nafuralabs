@@ -1,0 +1,83 @@
+# MinIO Object Storage
+# S3-compatible storage for documents and files
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: minio-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio
+spec:
+  ports:
+    - name: api
+      port: 9000
+      targetPort: 9000
+    - name: console
+      port: 9001
+      targetPort: 9001
+  selector:
+    app: minio
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: minio
+  template:
+    metadata:
+      labels:
+        app: minio
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/role: "minio"
+        vault.hashicorp.com/agent-inject-secret-minio: "secret/data/nafura/dev/infra/minio"
+        vault.hashicorp.com/agent-inject-template-minio: |
+          {{- with secret "secret/data/nafura/dev/infra/minio" -}}
+          export MINIO_ROOT_USER="{{ .Data.data.root_user }}"
+          export MINIO_ROOT_PASSWORD="{{ .Data.data.root_password }}"
+          {{- end }}
+    spec:
+      serviceAccountName: minio
+      containers:
+        - name: minio
+          image: minio/minio:latest
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              . /vault/secrets/minio
+              exec minio server /data --console-address ":9001"
+          ports:
+            - containerPort: 9000
+            - containerPort: 9001
+          readinessProbe:
+            httpGet:
+              path: /minio/health/ready
+              port: 9000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /minio/health/live
+              port: 9000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          volumeMounts:
+            - name: minio-storage
+              mountPath: /data
+      volumes:
+        - name: minio-storage
+          persistentVolumeClaim:
+            claimName: minio-data

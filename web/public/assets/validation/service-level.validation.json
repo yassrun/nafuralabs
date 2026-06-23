@@ -1,0 +1,29 @@
+{
+  "entity": "ServiceLevel",
+  "fields": {
+    "code": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "name": {
+      "maxLength": 120
+    },
+    "transitDays": {
+      "min": 0
+    },
+    "priority": {
+      "min": 0
+    },
+    "costMultiplier": {
+      "min": 0
+    },
+    "description": {
+      "maxLength": 2000
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

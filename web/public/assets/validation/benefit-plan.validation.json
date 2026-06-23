@@ -1,0 +1,32 @@
+{
+  "entity": "BenefitPlan",
+  "fields": {
+    "code": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "name": {
+      "maxLength": 120
+    },
+    "description": {
+      "maxLength": 2000
+    },
+    "planType": {
+      "maxLength": 120
+    },
+    "employerContribution": {
+      "min": 0
+    },
+    "employeeContribution": {
+      "min": 0
+    },
+    "eligibility": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "entity": "ApprovalRequest",
+  "fields": {
+    "entityType": {
+      "required": true,
+      "maxLength": 80
+    },
+    "entityId": {
+      "required": true
+    },
+    "title": {
+      "required": true,
+      "maxLength": 180
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "currentStep": {
+      "maxLength": 80
+    },
+    "requestedBy": {
+      "required": true,
+      "maxLength": 120
+    },
+    "requestedAt": {
+      "required": true
+    },
+    "approvedBy": {
+      "maxLength": 120
+    },
+    "decisionComment": {
+      "maxLength": 2000
+    }
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "entity": "DiscountStructure",
+  "fields": {
+    "code": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "name": {
+      "maxLength": 120
+    },
+    "discountType": {
+      "min": 0
+    },
+    "value": {
+      "min": 0
+    },
+    "minQuantity": {
+      "min": 0
+    },
+    "maxQuantity": {
+      "min": 0
+    },
+    "validFrom": {
+      "maxLength": 120
+    },
+    "validTo": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

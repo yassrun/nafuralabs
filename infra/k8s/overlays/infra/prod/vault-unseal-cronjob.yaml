@@ -1,0 +1,60 @@
+# After a Docker Desktop restart Vault stays sealed but data on PVC is intact — auto-unseal only.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: vault-unseal
+spec:
+  schedule: "*/5 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 300
+      template:
+        spec:
+          serviceAccountName: vault-bootstrap
+          restartPolicy: OnFailure
+          containers:
+            - name: unseal
+              image: hashicorp/vault:1.15
+              env:
+                - name: VAULT_ADDR
+                  value: "http://vault:8200"
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -e
+                  apk add --no-cache curl >/dev/null 2>&1
+                  SA_DIR="/var/run/secrets/kubernetes.io/serviceaccount"
+                  KUBE_API="https://${KUBERNETES_SERVICE_HOST}:${KUBERNETES_SERVICE_PORT}"
+                  KUBE_TOKEN="$(cat "${SA_DIR}/token")"
+                  KUBE_CA="${SA_DIR}/ca.crt"
+                  KUBE_NS="$(cat "${SA_DIR}/namespace")"
+
+                  set +e
+                  vault status >/dev/null 2>&1
+                  code=$?
+                  set -e
+                  [ "$code" -eq 0 ] || [ "$code" -eq 2 ] || exit 0
+                  if ! vault status 2>&1 | grep -q "Sealed.*true"; then
+                    echo "Vault already unsealed"
+                    exit 0
+                  fi
+
+                  SECRET_JSON="$(curl -sf --cacert "${KUBE_CA}" \
+                    -H "Authorization: Bearer ${KUBE_TOKEN}" \
+                    "${KUBE_API}/api/v1/namespaces/${KUBE_NS}/secrets/vault-bootstrap" 2>/dev/null || true)"
+                  if [ -z "${SECRET_JSON}" ]; then
+                    echo "secret/vault-bootstrap missing — run vault-init job first"
+                    exit 0
+                  fi
+                  UNSEAL_KEY="$(echo "${SECRET_JSON}" | grep -o '"unseal_key": "[^"]*"' | head -1 | cut -d'"' -f4 | base64 -d)"
+                  if [ -z "${UNSEAL_KEY}" ]; then
+                    echo "unseal_key empty in secret/vault-bootstrap"
+                    exit 1
+                  fi
+                  echo "Unsealing Vault..."
+                  vault operator unseal "${UNSEAL_KEY}" >/dev/null
+                  echo "Done"

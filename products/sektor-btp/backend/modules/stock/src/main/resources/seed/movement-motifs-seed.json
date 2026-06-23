@@ -1,0 +1,18 @@
+{
+  "motifs": [
+    { "code": "CHANTIER", "name": "Besoin chantier", "txType": "TRANSFERT" },
+    { "code": "TRANSFERT_INT", "name": "Transfert interne", "txType": "TRANSFERT" },
+    { "code": "PERIODIQUE", "name": "Inventaire périodique", "txType": "INVENTAIRE" },
+    { "code": "CONTROLE", "name": "Contrôle ponctuel", "txType": "INVENTAIRE" },
+    { "code": "RETOUR_CHANTIER", "name": "Retour chantier", "txType": "RETOUR" },
+    { "code": "RETOUR_FOURNISSEUR", "name": "Retour fournisseur", "txType": "RETOUR" },
+    { "code": "CHUTE_DECOUPE", "name": "Chute découpe", "txType": "PERTE" },
+    { "code": "CASSE", "name": "Casse", "txType": "PERTE" },
+    { "code": "VOL", "name": "Vol", "txType": "PERTE" },
+    { "code": "INTEMPERIES", "name": "Intempéries", "txType": "PERTE" },
+    { "code": "MALFACON", "name": "Malfaçon", "txType": "PERTE" },
+    { "code": "CONSO_CHANTIER", "name": "Consommation chantier", "txType": "SORTIE" },
+    { "code": "LIV_SOUS_TRAITANT", "name": "Livraison sous-traitant", "txType": "SORTIE" },
+    { "code": "REAPPRO_CH", "name": "Réapprovisionnement magasin chantier", "txType": "SORTIE" }
+  ]
+}

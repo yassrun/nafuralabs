@@ -1,0 +1,58 @@
+{
+  "caisses": [
+    {
+      "caisseType": "CENTRALE",
+      "code": "CA-CASA-01",
+      "name": "Caisse Casablanca",
+      "currencyCode": "MAD",
+      "glAccountCode": "5161",
+      "openingBalance": 15000,
+      "status": "OUVERTE",
+      "openedAt": "2026-01-01",
+      "notes": "Caisse principale siège — menues dépenses"
+    },
+    {
+      "caisseType": "CENTRALE",
+      "code": "CA-CHANT-02",
+      "name": "Caisse Chantier Pont Bouregreg",
+      "currencyCode": "MAD",
+      "glAccountCode": "5161",
+      "openingBalance": 8000,
+      "status": "OUVERTE",
+      "openedAt": "2026-01-01",
+      "notes": "Caisse de chantier — outillage & consommables"
+    },
+    {
+      "caisseType": "CHANTIER",
+      "code": "CC-CH-001",
+      "name": "Caisse chantier CH-2025-001",
+      "chantierId": "ch-001",
+      "chantierLabel": "CH-2025-001",
+      "chefChantierId": "emp-chef-1",
+      "chefChantierName": "Chef chantier démo",
+      "openingBalance": 5000,
+      "status": "OUVERTE",
+      "openedAt": "2026-01-10"
+    }
+  ],
+  "mouvements": [
+    {
+      "caisseCode": "CC-CH-001",
+      "movementDate": "2026-02-02",
+      "movementType": "AVANCE_RECUE",
+      "amount": 5000,
+      "description": "Avance conducteur travaux",
+      "workflowStatus": "VALIDE"
+    },
+    {
+      "caisseCode": "CC-CH-001",
+      "movementDate": "2026-02-05",
+      "movementType": "DEPENSE",
+      "amount": 1800,
+      "category": "Carburant",
+      "description": "Plein chantier",
+      "photoTicketUrl": "/assets/mock/ticket-placeholder.png",
+      "workflowStatus": "VALIDE"
+    }
+  ]
+}

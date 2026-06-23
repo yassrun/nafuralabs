@@ -1,0 +1,73 @@
+{
+  "partner": {
+    "fields": {
+      "organization": "معرّف المنظمة",
+      "code": "الرمز",
+      "name": "الاسم",
+      "email": "البريد الإلكتروني",
+      "phone": "الهاتف",
+      "mobile": "المحمول",
+      "taxId": "الرقم الضريبي",
+      "description": "الوصف",
+      "address": "معرّف العنوان",
+      "paymentTerm": "معرّف شرط الدفع",
+      "roles": "الأدوار",
+      "siteType": "نوع الموقع",
+      "businessUnit": "معرّف وحدة الأعمال"
+    },
+    "sections": {
+      "contact": "جهة الاتصال",
+      "legal": "قانوني",
+      "financial": "مالي",
+      "address": "العنوان"
+    },
+    "navigation": {
+      "businessUnits": "وحدات الأعمال",
+      "contacts": "جهات الاتصال",
+      "organizations": "المنظمات",
+      "partnerCategories": "فئات الشركاء",
+      "partners": "الشركاء",
+      "sites": "المواقع"
+    },
+    "businessUnit": {
+      "title": "وحدات الأعمال",
+      "detailTitle": "تفاصيل وحدة الأعمال",
+      "newTitle": "وحدة أعمال جديدة"
+    },
+    "contact": {
+      "title": "جهات الاتصال",
+      "detailTitle": "تفاصيل جهة الاتصال",
+      "newTitle": "جهة اتصال جديدة"
+    },
+    "organization": {
+      "title": "المنظمات",
+      "detailTitle": "تفاصيل المنظمة",
+      "newTitle": "منظمة جديدة"
+    },
+    "partnerCategory": {
+      "title": "فئات الشركاء",
+      "detailTitle": "تفاصيل فئة الشريك",
+      "newTitle": "فئة شريك جديدة"
+    },
+    "partner": {
+      "title": "الشركاء",
+      "detailTitle": "تفاصيل الشريك",
+      "newTitle": "شريك جديد"
+    },
+    "site": {
+      "title": "المواقع",
+      "detailTitle": "تفاصيل الموقع",
+      "newTitle": "موقع جديد"
+    }
+  },
+  "common": {
+    "fields": {
+      "description": "الوصف",
+      "isActive": "نشط"
+    },
+    "sections": {
+      "general": "عام",
+      "status": "الحالة"
+    }
+  }
+}

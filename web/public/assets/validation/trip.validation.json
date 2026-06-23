@@ -1,0 +1,29 @@
+{
+  "entity": "Trip",
+  "fields": {
+    "tripNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "startOdometer": {
+      "min": 0
+    },
+    "endOdometer": {
+      "min": 0
+    },
+    "fuelUsed": {
+      "min": 0
+    },
+    "stops": {
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

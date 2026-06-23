@@ -1,0 +1,46 @@
+{
+  "geo": {
+    "fields": {
+      "addressLine1": "السطر الأول",
+      "addressLine2": "السطر الثاني",
+      "country": "معرّف البلد",
+      "region": "معرّف الجهة",
+      "city": "معرّف المدينة",
+      "postalCode": "الرمز البريدي",
+      "code": "الرمز",
+      "name": "الاسم"
+    },
+    "navigation": {
+      "addresses": "العناوين",
+      "cities": "المدن",
+      "countries": "البلدان",
+      "regions": "الجهات"
+    },
+    "address": {
+      "title": "العناوين",
+      "detailTitle": "تفاصيل العنوان",
+      "newTitle": "عنوان جديد"
+    },
+    "city": {
+      "title": "المدن",
+      "detailTitle": "تفاصيل المدينة",
+      "newTitle": "مدينة جديدة"
+    },
+    "country": {
+      "title": "البلدان",
+      "detailTitle": "تفاصيل البلد",
+      "newTitle": "بلد جديد"
+    },
+    "region": {
+      "title": "الجهات",
+      "detailTitle": "تفاصيل الجهة",
+      "newTitle": "جهة جديدة"
+    }
+  },
+  "common": {
+    "fields": {
+      "description": "الوصف",
+      "isActive": "نشط"
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "entity": "EvaluatedReceipt",
+  "fields": {
+    "receiptNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

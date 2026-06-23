@@ -1,0 +1,33 @@
+{
+  "entity": "WarrantyClaim",
+  "fields": {
+    "claimNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "customerId": {
+      "required": true
+    },
+    "serialNumber": {
+      "maxLength": 100
+    },
+    "claimDate": {
+      "required": true
+    },
+    "issueDescription": {
+      "required": true,
+      "maxLength": 2000
+    },
+    "resolution": {
+      "maxLength": 2000
+    },
+    "resolutionType": {
+      "maxLength": 30
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

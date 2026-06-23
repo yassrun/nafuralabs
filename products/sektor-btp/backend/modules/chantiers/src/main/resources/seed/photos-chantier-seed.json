@@ -1,0 +1,30 @@
+{
+  "photos": [
+    {
+      "id": "photo-001",
+      "chantierId": "ch-001",
+      "filename": "niveau3-aile-est-2026-05-08.jpg",
+      "contentType": "image/jpeg",
+      "storagePath": "photos/ch-001/niveau3-aile-est-2026-05-08.jpg",
+      "lat": 33.5731,
+      "lng": -7.5898,
+      "zone": "Niveau 3 — Aile Est",
+      "takenAt": "2026-05-08T10:32:00Z",
+      "exifJson": "{\"make\":\"Apple\",\"model\":\"iPhone 15\",\"iso\":100,\"focalLength\":\"26mm\"}",
+      "uploadedBy": "Karim El Mansouri"
+    },
+    {
+      "id": "photo-002",
+      "chantierId": "ch-001",
+      "filename": "facade-nord-2026-05-07.jpg",
+      "contentType": "image/jpeg",
+      "storagePath": "photos/ch-001/facade-nord-2026-05-07.jpg",
+      "lat": 33.5725,
+      "lng": -7.5905,
+      "zone": "Façade Nord",
+      "takenAt": "2026-05-07T16:15:00Z",
+      "exifJson": "{\"make\":\"Samsung\",\"model\":\"Galaxy S24\",\"iso\":200,\"focalLength\":\"24mm\"}",
+      "uploadedBy": "Sofia Tazi"
+    }
+  ]
+}

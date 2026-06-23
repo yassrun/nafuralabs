@@ -1,0 +1,32 @@
+{
+  "entity": "HsCode",
+  "fields": {
+    "code": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "description": {
+      "maxLength": 2000
+    },
+    "chapter": {
+      "maxLength": 120
+    },
+    "heading": {
+      "maxLength": 120
+    },
+    "subheading": {
+      "maxLength": 120
+    },
+    "dutyRate": {
+      "min": 0
+    },
+    "notes": {
+      "maxLength": 2000
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

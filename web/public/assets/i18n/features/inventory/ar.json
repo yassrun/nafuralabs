@@ -1,0 +1,46 @@
+{
+  "inventory": {
+    "fields": {
+      "inventoryTx": "معرّف حركة المخزون",
+      "lineNumber": "رقم السطر",
+      "item": "معرّف الصنف",
+      "quantity": "الكمية",
+      "unitPrice": "سعر الوحدة",
+      "totalPrice": "السعر الإجمالي",
+      "txNumber": "رقم الحركة",
+      "txType": "نوع الحركة",
+      "warehouse": "معرّف المستودع",
+      "txDate": "تاريخ الحركة",
+      "reference": "المرجع",
+      "status": "الحالة",
+      "reservedQuantity": "الكمية المحجوزة",
+      "availableQuantity": "الكمية المتاحة",
+      "lastCountDate": "تاريخ آخر جرد"
+    },
+    "navigation": {
+      "inventoryTxLines": "أسطر حركات المخزون",
+      "inventoryTxes": "حركات المخزون",
+      "stockBalances": "أرصدة المخزون"
+    },
+    "inventoryTxLine": {
+      "title": "أسطر حركات المخزون",
+      "detailTitle": "تفاصيل سطر حركة المخزون",
+      "newTitle": "سطر حركة مخزون جديد"
+    },
+    "inventoryTx": {
+      "title": "حركات المخزون",
+      "detailTitle": "تفاصيل حركة المخزون",
+      "newTitle": "حركة مخزون جديدة"
+    },
+    "stockBalance": {
+      "title": "أرصدة المخزون",
+      "detailTitle": "تفاصيل رصيد المخزون",
+      "newTitle": "رصيد مخزون جديد"
+    }
+  },
+  "common": {
+    "fields": {
+      "notes": "ملاحظات"
+    }
+  }
+}

@@ -1,0 +1,108 @@
+/**
+ * Nafura Platform - Typography System
+ *
+ * Font families, sizes, weights, and line heights.
+ * Follows a modular scale for consistency.
+ *
+ * Naming: --nf-font-{property}-{variant}
+ */
+
+:root {
+  /* ═══════════════════════════════════════════════════════════════════════════
+     Font Families
+     ═══════════════════════════════════════════════════════════════════════════ */
+  --nf-font-family-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  --nf-font-family-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    'Liberation Mono', 'Courier New', monospace;
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     Font Sizes (Major Third Scale - 1.25 ratio)
+     ═══════════════════════════════════════════════════════════════════════════ */
+  --nf-font-size-xs: 0.75rem;     /* 12px */
+  --nf-font-size-sm: 0.875rem;    /* 14px */
+  --nf-font-size-base: 1rem;      /* 16px */
+  --nf-font-size-lg: 1.125rem;    /* 18px */
+  --nf-font-size-xl: 1.25rem;     /* 20px */
+  --nf-font-size-2xl: 1.5rem;     /* 24px */
+  --nf-font-size-3xl: 1.875rem;   /* 30px */
+  --nf-font-size-4xl: 2.25rem;    /* 36px */
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     Font Weights
+     ═══════════════════════════════════════════════════════════════════════════ */
+  --nf-font-weight-normal: 400;
+  --nf-font-weight-medium: 500;
+  --nf-font-weight-semibold: 600;
+  --nf-font-weight-bold: 700;
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     Line Heights
+     ═══════════════════════════════════════════════════════════════════════════ */
+  --nf-line-height-none: 1;
+  --nf-line-height-tight: 1.25;
+  --nf-line-height-snug: 1.375;
+  --nf-line-height-normal: 1.5;
+  --nf-line-height-relaxed: 1.625;
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     Letter Spacing
+     ═══════════════════════════════════════════════════════════════════════════ */
+  --nf-letter-spacing-tighter: -0.05em;
+  --nf-letter-spacing-tight: -0.025em;
+  --nf-letter-spacing-normal: 0;
+  --nf-letter-spacing-wide: 0.025em;
+  --nf-letter-spacing-wider: 0.05em;
+  --nf-letter-spacing-widest: 0.1em;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Typography Utility Classes
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.nf-heading-1 {
+  font-size: var(--nf-font-size-2xl);
+  font-weight: var(--nf-font-weight-semibold);
+  line-height: var(--nf-line-height-tight);
+  letter-spacing: var(--nf-letter-spacing-tight);
+}
+
+.nf-heading-2 {
+  font-size: var(--nf-font-size-xl);
+  font-weight: var(--nf-font-weight-semibold);
+  line-height: var(--nf-line-height-tight);
+}
+
+.nf-heading-3 {
+  font-size: var(--nf-font-size-lg);
+  font-weight: var(--nf-font-weight-semibold);
+  line-height: var(--nf-line-height-snug);
+}
+
+.nf-heading-4 {
+  font-size: var(--nf-font-size-base);
+  font-weight: var(--nf-font-weight-semibold);
+  line-height: var(--nf-line-height-snug);
+}
+
+.nf-body {
+  font-size: var(--nf-font-size-sm);
+  line-height: var(--nf-line-height-normal);
+}
+
+.nf-body-sm {
+  font-size: var(--nf-font-size-xs);
+  line-height: var(--nf-line-height-normal);
+}
+
+.nf-label {
+  font-size: var(--nf-font-size-xs);
+  font-weight: var(--nf-font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--nf-letter-spacing-wide);
+}
+
+.nf-mono {
+  font-family: var(--nf-font-family-mono);
+  font-size: var(--nf-font-size-sm);
+}

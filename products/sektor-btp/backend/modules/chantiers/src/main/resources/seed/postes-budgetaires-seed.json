@@ -1,0 +1,59 @@
+{
+  "postes": [
+    {
+      "id": "ch-001-lot-01-poste-01",
+      "lotId": "ch-001-lot-01",
+      "code": "01.1",
+      "designation": "Terrassements généraux",
+      "unite": "m3",
+      "quantite": "1200",
+      "prixUnitaireHt": "85",
+      "montantHt": "102000",
+      "ordre": 1
+    },
+    {
+      "id": "ch-001-lot-01-poste-02",
+      "lotId": "ch-001-lot-01",
+      "code": "01.2",
+      "designation": "Fondations et soubassements",
+      "unite": "m3",
+      "quantite": "980",
+      "prixUnitaireHt": "1450",
+      "montantHt": "1421000",
+      "ordre": 2
+    },
+    {
+      "id": "ch-001-lot-01-poste-03",
+      "lotId": "ch-001-lot-01",
+      "code": "01.3",
+      "designation": "Élévation béton armé",
+      "unite": "m3",
+      "quantite": "1020",
+      "prixUnitaireHt": "1680",
+      "montantHt": "1713600",
+      "ordre": 3
+    },
+    {
+      "id": "ch-001-lot-02-poste-01",
+      "lotId": "ch-001-lot-02",
+      "code": "02.1",
+      "designation": "Couverture étanchéité",
+      "unite": "m2",
+      "quantite": "980",
+      "prixUnitaireHt": "420",
+      "montantHt": "411600",
+      "ordre": 1
+    },
+    {
+      "id": "ch-001-lot-02-poste-02",
+      "lotId": "ch-001-lot-02",
+      "code": "02.2",
+      "designation": "Menuiseries extérieures",
+      "unite": "m2",
+      "quantite": "1460",
+      "prixUnitaireHt": "1850",
+      "montantHt": "2701000",
+      "ordre": 2
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "entity": "LeaveRequest",
+  "fields": {
+    "requestNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "totalDays": {
+      "min": 0
+    },
+    "reason": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "approvedBy": {
+      "maxLength": 120
+    }
+  }
+}

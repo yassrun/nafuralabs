@@ -1,0 +1,77 @@
+.rd__mode-wrap {
+  margin-bottom: 12px;
+}
+
+.rd__file-input {
+  display: none;
+}
+
+.rd__reference-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.rd__mode-group {
+  width: 100%;
+}
+
+.rd__field {
+  width: 100%;
+}
+
+.rd__mode-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.875rem;
+  color: var(--nf-text-secondary, var(--nf-text-muted));
+}
+
+.rd__mode-badge mat-icon {
+  font-size: 1rem;
+  width: 1rem;
+  height: 1rem;
+}
+
+.rd__lines-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
+.rd__lines-total {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--nf-text-primary);
+}
+
+:host ::ng-deep .nf-entity-detail__form {
+  gap: 12px;
+}
+
+:host ::ng-deep .nf-entity-detail__section {
+  padding: 14px 18px;
+}
+
+:host ::ng-deep .nf-entity-detail__section-header {
+  margin-bottom: 8px;
+}
+
+:host ::ng-deep .nf-entity-detail__section-fields {
+  gap: 10px 16px;
+}
+
+:host ::ng-deep .nf-entity-detail__actions-bar {
+  margin-bottom: 10px;
+  padding: 6px 0;
+}
+
+:host ::ng-deep .nf-entity-detail__actions-left .nf-button__content {
+  white-space: nowrap;
+}
+
+:host ::ng-deep .nf-entity-detail__actions-right nf-status-machine .nf-badge {
+  font-weight: 600;
+  padding: 6px 10px;
+}

@@ -1,0 +1,11 @@
+# Prod: Vault runs in server mode (base). Optional: enable auto-unseal via cloud KMS
+# by patching the ConfigMap vault-config to add in vault-config.hcl:
+#
+#   seal "awskms" {
+#     region     = "eu-west-3"
+#     kms_key_id = "<kms-key-id>"
+#   }
+#
+# Or seal "gcpckms" / seal "azurekeyvault". Then re-deploy Vault.
+# One-time: run vault-init.sh, save unseal key + root token, then revoke root
+# and use app-specific tokens or K8s auth for admin.

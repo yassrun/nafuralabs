@@ -1,0 +1,38 @@
+.article-stock-ext {
+  margin: 1rem 1.5rem 2rem;
+  padding: 1rem;
+  border: 1px solid var(--nf-border-default);
+  border-radius: 8px;
+  background: var(--nf-color-bg-subtle);
+}
+.article-stock-ext h3 {
+  margin: 0.75rem 0 0.5rem;
+  font-size: 1rem;
+}
+.article-stock-ext .row {
+  margin-bottom: 0.75rem;
+}
+.article-stock-ext .btn {
+  padding: 0.45rem 0.85rem;
+  border-radius: 8px;
+  border: 0;
+  background: var(--nf-color-teal-800, var(--nf-color-primary-800));
+  color: var(--nf-color-surface);
+  font-weight: 600;
+  cursor: pointer;
+}
+.article-stock-ext .muted {
+  color: var(--nf-color-text-secondary);
+  font-size: 0.9rem;
+}
+.article-stock-ext table.rs {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.article-stock-ext table.rs th,
+.article-stock-ext table.rs td {
+  padding: 0.4rem 0.5rem;
+  border-bottom: 1px solid var(--nf-border-default);
+  text-align: left;
+}

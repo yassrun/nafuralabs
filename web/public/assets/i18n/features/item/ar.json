@@ -1,0 +1,59 @@
+{
+  "item": {
+    "fields": {
+      "item": "معرّف الصنف",
+      "barcode": "القيمة",
+      "barcodeType": "النوع",
+      "parent": "معرّف الأصل",
+      "code": "الرمز",
+      "name": "الاسم",
+      "description": "الوصف",
+      "type": "معرّف نوع الصنف",
+      "itemType": "معرّف نوع الصنف",
+      "itemCategory": "معرّف فئة الصنف",
+      "unitOfMeasure": "معرّف وحدة القياس",
+      "baseUnit": "الوحدة الأساسية",
+      "sku": "SKU"
+    },
+    "sections": {
+      "classification": "التصنيف",
+      "measurement": "القياس"
+    },
+    "navigation": {
+      "barcodes": "الباركود",
+      "items": "الأصناف",
+      "itemCategories": "فئات الأصناف",
+      "itemTypes": "أنواع الأصناف"
+    },
+    "barcode": {
+      "title": "الباركود",
+      "detailTitle": "تفاصيل الباركود",
+      "newTitle": "باركود جديد"
+    },
+    "item": {
+      "title": "الأصناف",
+      "detailTitle": "تفاصيل الصنف",
+      "newTitle": "صنف جديد"
+    },
+    "itemCategory": {
+      "title": "فئات الأصناف",
+      "detailTitle": "تفاصيل فئة الصنف",
+      "newTitle": "فئة صنف جديدة"
+    },
+    "itemType": {
+      "title": "أنواع الأصناف",
+      "detailTitle": "تفاصيل نوع الصنف",
+      "newTitle": "نوع صنف جديد"
+    }
+  },
+  "common": {
+    "fields": {
+      "isActive": "نشط",
+      "description": "الوصف"
+    },
+    "sections": {
+      "general": "عام",
+      "status": "الحالة"
+    }
+  }
+}

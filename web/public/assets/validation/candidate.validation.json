@@ -1,0 +1,37 @@
+{
+  "entity": "Candidate",
+  "fields": {
+    "candidateNumber": {
+      "required": true,
+      "maxLength": 60
+    },
+    "firstName": {
+      "maxLength": 120
+    },
+    "lastName": {
+      "maxLength": 120
+    },
+    "email": {
+      "maxLength": 255
+    },
+    "phone": {
+      "maxLength": 50
+    },
+    "resumeUrl": {
+      "maxLength": 500
+    },
+    "source": {
+      "maxLength": 120
+    },
+    "currentStage": {
+      "maxLength": 120
+    },
+    "score": {
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

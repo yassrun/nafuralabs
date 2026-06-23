@@ -1,0 +1,42 @@
+{
+  "incidents": [
+    {
+      "id": "inc001",
+      "numero": "INC-2026-0001",
+      "dateIncident": "2026-01-12",
+      "heureIncident": "09:30:00",
+      "lieu": "Niveau R+3 – Zone coffrages",
+      "chantierId": "ch-001",
+      "chantierCode": "CH-2025-001",
+      "typeIncident": "AT",
+      "temoins": ["Omar Ziani", "Conducteur grue"],
+      "photosUrls": ["/assets/demo/hse/inc001-photo1.jpg"],
+      "planAction": "Revue échafaudage + filets R+3 avant reprise.",
+      "victimeNom": "Mohamed Lachgar",
+      "gravite": "MODERE",
+      "description": "Chute de hauteur depuis un échafaudage au niveau R+3. Le travailleur a glissé sur une planche mouillée et est tombé de 2,5 m.",
+      "causes": "Planche d'échafaudage non fixée, absence de filet de sécurité, travail sous conditions pluvieuses sans arrêt de chantier.",
+      "actionsImmediates": "Évacuation vers l'hôpital, sécurisation de la zone, avertissement des équipes.",
+      "joursArret": 14,
+      "status": "CLOS",
+      "notes": "Formation sécurité en hauteur planifiée pour toute l'équipe."
+    },
+    {
+      "id": "inc003",
+      "numero": "INC-2026-0003",
+      "dateIncident": "2026-02-03",
+      "heureIncident": "11:15:00",
+      "lieu": "Atelier mécanique – Garage engins",
+      "chantierId": "ch-003",
+      "chantierCode": "CH-2025-003",
+      "typeIncident": "AT",
+      "victimeNom": "Khalid Oufkir",
+      "gravite": "MODERE",
+      "description": "Intoxication aux vapeurs de solvant lors d'opération de dégraissage sans ventilation suffisante.",
+      "causes": "Absence de ventilation, EPI inadaptés, procédure non respectée.",
+      "actionsImmediates": "Évacuation du travailleur, aération des locaux, consultation médicale.",
+      "joursArret": 3,
+      "status": "INVESTIGATION"
+    }
+  ]
+}

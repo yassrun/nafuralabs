@@ -1,0 +1,70 @@
+{
+  "appelsOffres": [
+    {
+      "numero": "AO-2026-0001",
+      "objet": "Fourniture ronds à béton T12 et T16 – Lot fondations CH-2025-001",
+      "chantierId": "ch-001",
+      "chantierCode": "CH-2025-001",
+      "chantierName": "Résidence Yasmine — Casa",
+      "fournisseurInvitesIds": ["f001", "f009", "f003"],
+      "datePublication": "2025-12-20",
+      "dateLimiteDepot": "2026-01-10",
+      "status": "ATTRIBUEE",
+      "fournisseurAttribueId": "f001",
+      "fournisseurAttribueName": "Sonasid",
+      "bcGenereId": "bc001",
+      "bcGenereNumero": "BC-2026-00001",
+      "totalAttribueHt": "285000",
+      "lignes": [
+        {
+          "articleId": "art021",
+          "articleCode": "ART-021",
+          "articleName": "Rond à béton T12",
+          "quantite": "10",
+          "uomCode": "T"
+        },
+        {
+          "articleId": "art022",
+          "articleCode": "ART-022",
+          "articleName": "Rond à béton T16",
+          "quantite": "10",
+          "uomCode": "T"
+        }
+      ],
+      "reponses": [
+        {
+          "fournisseurId": "f001",
+          "fournisseurName": "Sonasid",
+          "dateReponse": "2026-01-08",
+          "totalHt": "285000",
+          "delaiLivraisonJours": 7,
+          "conditionsPaiement": "30j fin de mois",
+          "retenue": true,
+          "score": "87.5",
+          "lignes": [
+            { "articleId": "art021", "prixUnitaireHt": "14200", "totalHt": "142000" },
+            { "articleId": "art022", "prixUnitaireHt": "14300", "totalHt": "143000" }
+          ]
+        }
+      ]
+    },
+    {
+      "numero": "AO-2026-0002",
+      "objet": "Adjuvants béton chantiers actifs Q2-2026",
+      "fournisseurInvitesIds": ["f015", "f004"],
+      "datePublication": "2026-04-01",
+      "dateLimiteDepot": "2026-04-20",
+      "status": "PUBLIEE",
+      "lignes": [
+        {
+          "articleId": "art071",
+          "articleCode": "ART-071",
+          "articleName": "Super-plastifiant Sika 2000",
+          "quantite": "500",
+          "uomCode": "Bidon 25L"
+        }
+      ],
+      "reponses": []
+    }
+  ]
+}

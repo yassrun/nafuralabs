@@ -1,0 +1,8 @@
+[
+  {"code": "ART-ENROBE", "name": "Enrobé bitumineux BB", "description": "Tonne"},
+  {"code": "ART-GNF1", "name": "Grave non traitée GNF1", "description": "m³"},
+  {"code": "ART-GNF2", "name": "Grave non traitée GNF2", "description": "m³"},
+  {"code": "ART-GRAVILLON", "name": "Gravillon 25/40", "description": "m³"},
+  {"code": "ART-BORDURE", "name": "Bordure béton T2", "description": "ml"},
+  {"code": "ART-SIGNAL", "name": "Signalisation chantier", "description": "Lot"}
+]

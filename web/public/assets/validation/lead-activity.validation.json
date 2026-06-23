@@ -1,0 +1,24 @@
+{
+  "entity": "LeadActivity",
+  "fields": {
+    "leadId": {
+      "required": true
+    },
+    "activityType": {
+      "required": true,
+      "maxLength": 30
+    },
+    "date": {
+      "required": true
+    },
+    "duration": {
+      "min": 0
+    },
+    "notes": {
+      "maxLength": 2000
+    },
+    "nextAction": {
+      "maxLength": 200
+    }
+  }
+}

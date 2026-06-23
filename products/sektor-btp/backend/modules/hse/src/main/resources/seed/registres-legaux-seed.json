@@ -1,0 +1,151 @@
+{
+  "registresLegaux": [
+    {
+      "id": "reg-at-001",
+      "registre": "AT",
+      "numero": "ATR-2026-001",
+      "date": "2026-02-08",
+      "reference": "CNSS-DA-2026-00231",
+      "chantierId": "ch-001",
+      "chantierCode": "CH-2025-001",
+      "employeNom": "Mehdi Saadi",
+      "description": "Chute de plain-pied — torsion cheville droite.",
+      "cnssMatricule": "CNSS-1234567",
+      "joursArret": 7,
+      "partieDuCorps": "Cheville droite"
+    },
+    {
+      "id": "reg-at-002",
+      "registre": "AT",
+      "numero": "ATR-2026-002",
+      "date": "2026-03-22",
+      "reference": "CNSS-DA-2026-00298",
+      "chantierId": "ch-002",
+      "chantierCode": "CH-2025-002",
+      "employeNom": "Rachid Alaoui",
+      "description": "Coupure main gauche lors de manutention coffrage métallique.",
+      "cnssMatricule": "CNSS-2345678",
+      "joursArret": 3,
+      "partieDuCorps": "Main gauche"
+    },
+    {
+      "id": "reg-at-003",
+      "registre": "AT",
+      "numero": "ATR-2026-003",
+      "date": "2026-04-11",
+      "reference": "CNSS-DA-2026-00342",
+      "chantierId": "ch-005",
+      "chantierCode": "CH-2025-005",
+      "employeNom": "Said Mansouri",
+      "description": "Projection oculaire poussière béton — port lunettes oublié.",
+      "cnssMatricule": "CNSS-3456789",
+      "joursArret": 1,
+      "partieDuCorps": "Œil droit",
+      "observations": "Sensibilisation collective lendemain matin."
+    },
+    {
+      "id": "reg-at-004",
+      "registre": "AT",
+      "numero": "ATR-2026-004",
+      "date": "2026-04-29",
+      "reference": "CNSS-DA-2026-00388",
+      "chantierId": "ch-001",
+      "chantierCode": "CH-2025-001",
+      "employeNom": "Omar Ziani",
+      "description": "Chute de hauteur 1,80 m depuis échafaudage — fracture poignet.",
+      "cnssMatricule": "CNSS-4567890",
+      "joursArret": 21,
+      "partieDuCorps": "Poignet droit",
+      "observations": "Audit échafaudage déclenché — NC majeure ouverte."
+    },
+    {
+      "id": "reg-mp-001",
+      "registre": "MP",
+      "numero": "MPR-2026-001",
+      "date": "2026-01-30",
+      "reference": "CNSS-MP-2026-00012",
+      "employeNom": "Driss El Ouafi",
+      "description": "Surdité professionnelle — exposition bruit > 85 dB(A) chantier TP.",
+      "cnssMatricule": "CNSS-5678901",
+      "tableauMP": "Tableau MA n°42 — Surdité",
+      "observations": "Reclassement sur poste atelier proposé."
+    },
+    {
+      "id": "reg-mp-002",
+      "registre": "MP",
+      "numero": "MPR-2026-002",
+      "date": "2026-03-14",
+      "reference": "CNSS-MP-2026-00023",
+      "employeNom": "Fouad Mansouri",
+      "description": "Affections périarticulaires épaule — gestes répétitifs port armatures.",
+      "cnssMatricule": "CNSS-6789012",
+      "tableauMP": "Tableau MA n°57 — TMS"
+    },
+    {
+      "id": "reg-dt-001",
+      "registre": "DT",
+      "numero": "DT-2026-001",
+      "date": "2026-01-20",
+      "reference": "ITT-CASA-2026-0014",
+      "chantierId": "ch-001",
+      "chantierCode": "CH-2025-001",
+      "description": "Déclaration d'ouverture chantier R+5 résidentiel.",
+      "effectif": 38,
+      "dureeJours": 540
+    },
+    {
+      "id": "reg-dt-002",
+      "registre": "DT",
+      "numero": "DT-2026-002",
+      "date": "2026-02-26",
+      "reference": "ITT-RABAT-2026-0008",
+      "chantierId": "ch-002",
+      "chantierCode": "CH-2025-002",
+      "description": "Déclaration ouvrage d'art — pont mixte fluvial.",
+      "effectif": 65,
+      "dureeJours": 920
+    },
+    {
+      "id": "reg-dt-003",
+      "registre": "DT",
+      "numero": "DT-2026-003",
+      "date": "2026-04-30",
+      "reference": "ITT-TANGER-2026-0021",
+      "chantierId": "ch-004",
+      "chantierCode": "CH-2025-004",
+      "description": "Déclaration phase 2 école Tanger Med — gros œuvre.",
+      "effectif": 24,
+      "dureeJours": 240
+    },
+    {
+      "id": "reg-chs-001",
+      "registre": "CHS",
+      "numero": "CHS-2026-Q1",
+      "date": "2026-02-12",
+      "reference": "PV-CHS-Q1-2026",
+      "description": "Réunion trimestrielle CHS Q1 — bilan AT 2025 et plan 2026.",
+      "presents": 9,
+      "decisions": "Renouvellement campagne EPI Q2; audit échafaudages chantiers BAT."
+    },
+    {
+      "id": "reg-chs-002",
+      "registre": "CHS",
+      "numero": "CHS-2026-EXT-01",
+      "date": "2026-04-15",
+      "reference": "PV-CHS-EXT-2026-01",
+      "description": "Réunion extraordinaire suite AT grave CH-2025-001.",
+      "presents": 11,
+      "decisions": "Mise sous surveillance échafaudage Phase 2; sensibilisation hauteur."
+    },
+    {
+      "id": "reg-chs-003",
+      "registre": "CHS",
+      "numero": "CHS-2026-Q2",
+      "date": "2026-05-06",
+      "reference": "PV-CHS-Q2-2026",
+      "description": "Réunion trimestrielle CHS Q2 — suivi actions Q1 et nouveaux risques.",
+      "presents": 8,
+      "decisions": "Plan canicule été; budget formation CACES R486 validé."
+    }
+  ]
+}

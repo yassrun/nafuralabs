@@ -1,0 +1,778 @@
+{
+  "rh": {
+    "routes": {
+      "employes": { "title": "Employés", "breadcrumb": "Employés" },
+      "employeNew": { "title": "Nouvel employé", "breadcrumb": "Nouveau" },
+      "employeDetail": { "title": "Détail employé", "breadcrumb": "Détail" },
+      "employeEdit": { "title": "Modifier employé", "breadcrumb": "Modifier" },
+      "conges": { "title": "Congés", "breadcrumb": "Congés" },
+      "congeNew": { "title": "Nouvelle demande de congé", "breadcrumb": "Nouvelle" },
+      "congeDetail": { "title": "Détail congé", "breadcrumb": "Détail" },
+      "congeEdit": { "title": "Modifier congé", "breadcrumb": "Modifier" },
+      "paie": { "title": "Fiches de paie", "breadcrumb": "Paie" },
+      "paieNew": { "title": "Nouvelle fiche de paie", "breadcrumb": "Nouvelle" },
+      "paieDetail": { "title": "Détail fiche de paie", "breadcrumb": "Détail" },
+      "paieEdit": { "title": "Modifier fiche de paie", "breadcrumb": "Modifier" },
+      "paieJournal": { "title": "Journal de paie", "breadcrumb": "Journal" },
+      "damancom": { "title": "Déclaration DAMANCOM", "breadcrumb": "DAMANCOM" },
+      "etat1208": { "title": "État 1208 — Récap. achats", "breadcrumb": "État 1208" },
+      "etat9421": { "title": "État 9421 IGR", "breadcrumb": "État 9421" },
+      "pointage": { "title": "Pointage chantiers", "breadcrumb": "Pointage" },
+      "pointageSaisie": { "title": "Saisie pointage", "breadcrumb": "Saisie" },
+      "pointageValidation": { "title": "Validation pointage", "breadcrumb": "Validation" },
+      "planning": { "title": "Planning équipes", "breadcrumb": "Planning équipes" }
+    },
+    "common": {
+      "module": "RH",
+      "actions": {
+        "create": "Créer",
+        "save": "Enregistrer",
+        "cancel": "Annuler",
+        "edit": "Modifier",
+        "delete": "Supprimer",
+        "print": "Imprimer",
+        "export": "Exporter",
+        "all": "Tous",
+        "allF": "Toutes",
+        "back": "Retour",
+        "validate": "Valider"
+      },
+      "chips": {
+        "all": "Tous"
+      },
+      "filters": {
+        "month": "Mois (YYYY-MM)",
+        "monthShort": "Mois",
+        "exercise": "Exercice",
+        "chantier": "Chantier",
+        "employe": "Employé"
+      },
+      "dash": "—",
+      "noData": "Pas de données."
+    },
+    "employe": {
+      "title": "Employés",
+      "titleSingular": "Employé",
+      "titleNew": "Nouvel employé",
+      "titleDetail": "Détail employé",
+      "listing": {
+        "headerTitle": "Employés",
+        "chips": {
+          "all": "Tous",
+          "actifs": "Actifs",
+          "suspendus": "Suspendus"
+        },
+        "emptyState": {
+          "title": "Aucun employé",
+          "message": "Ajoutez vos premiers employés pour commencer à gérer votre personnel.",
+          "actionLabel": "Nouvel employé"
+        }
+      },
+      "columns": {
+        "matricule": "Matricule",
+        "nomPrenom": "Nom & Prénom",
+        "poste": "Poste",
+        "categorie": "Catégorie",
+        "contrat": "Contrat",
+        "salaireBase": "Salaire base",
+        "anciennete": "Ancienneté",
+        "statut": "Statut"
+      },
+      "anciennete": {
+        "count": "{count, plural, =0 {Moins d’un an} one {1 an} other {# ans}}",
+        "one": "{count} an",
+        "other": "{count} ans"
+      },
+      "filters": {
+        "statut": "Statut",
+        "typeContrat": "Type contrat",
+        "categorie": "Catégorie"
+      },
+      "fields": {
+        "nom": "Nom",
+        "prenom": "Prénom",
+        "cin": "CIN",
+        "cnss": "N° CNSS",
+        "amo": "N° AMO",
+        "dateNaissance": "Date de naissance",
+        "telephone": "Téléphone",
+        "email": "Email",
+        "adresse": "Adresse",
+        "ville": "Ville",
+        "matricule": "Matricule",
+        "typeContrat": "Type de contrat",
+        "categorie": "Catégorie",
+        "poste": "Poste",
+        "departement": "Département",
+        "dateEmbauche": "Date d'embauche",
+        "dateFinContrat": "Date fin contrat",
+        "statut": "Statut",
+        "salaireBase": "Salaire de base",
+        "indemniteRepresentation": "Ind. représentation",
+        "indemniteTransport": "Ind. transport",
+        "banque": "Banque",
+        "rib": "RIB",
+        "ribHint": "24 chiffres (RIB marocain)",
+        "ice": "ICE (tiers / paie)",
+        "ifFiscal": "Identifiant fiscal (IF)",
+        "rc": "RC",
+        "patente": "Patente",
+        "notes": "Notes"
+      },
+      "fieldsRequired": {
+        "nom": "Nom *",
+        "prenom": "Prénom *",
+        "cin": "CIN *",
+        "typeContrat": "Type de contrat *",
+        "categorie": "Catégorie *",
+        "poste": "Poste *",
+        "dateEmbauche": "Date d'embauche *",
+        "salaireBase": "Salaire de base *"
+      },
+      "sections": {
+        "identite": "Identité",
+        "contrat": "Contrat",
+        "remuneration": "Rémunération",
+        "notes": "Notes"
+      },
+      "statuses": {
+        "ACTIF": "Actif",
+        "SUSPENDU": "Suspendu",
+        "SOLDE": "Soldé"
+      },
+      "types": {
+        "CDI": "CDI",
+        "CDD": "CDD",
+        "ANAPEC": "ANAPEC",
+        "Saisonnier": "Saisonnier",
+        "Interim": "Intérim"
+      },
+      "categories": {
+        "Ouvrier": "Ouvrier",
+        "Agent_maitrise": "Agent de maîtrise",
+        "Cadre": "Cadre",
+        "Direction": "Direction"
+      },
+      "transitions": {
+        "suspendre": {
+          "label": "Suspendre",
+          "confirmTitle": "Suspendre l'employé ?",
+          "confirmMessage": "L'employé sera suspendu et ne pourra plus accéder au site.",
+          "confirmLabel": "Suspendre"
+        },
+        "solde": {
+          "label": "Solder",
+          "confirmTitle": "Solder l'employé ?",
+          "confirmMessage": "Cette action met fin au contrat de l'employé.",
+          "confirmLabel": "Solder"
+        },
+        "reactiver": {
+          "label": "Réactiver",
+          "confirmTitle": "Réactiver l'employé ?",
+          "confirmMessage": "L'employé retrouvera son accès normal.",
+          "confirmLabel": "Réactiver"
+        }
+      },
+      "toasts": {
+        "saved": "Employé {matricule} enregistré",
+        "statutChanged": "Employé {matricule} — statut mis à jour"
+      },
+      "deleteConfirm": {
+        "title": "Supprimer l'employé",
+        "message": "Supprimer l'employé {matricule} — {nom} {prenom} ?"
+      },
+      "errors": {
+        "notFound": "Employé {id} introuvable"
+      }
+    },
+    "conge": {
+      "title": "Congés",
+      "titleSingular": "Congé",
+      "titleNew": "Nouvelle demande de congé",
+      "titleDetail": "Détail congé",
+      "listing": {
+        "headerTitle": "Congés",
+        "chips": {
+          "all": "Tous",
+          "demande": "Demandés",
+          "approuve": "Approuvés",
+          "enCours": "En cours"
+        },
+        "emptyState": {
+          "title": "Aucun congé",
+          "message": "Les demandes de congé de vos employés apparaîtront ici.",
+          "actionLabel": "Nouvelle demande"
+        }
+      },
+      "approvalBar": {
+        "label": "Workflow d'approbation"
+      },
+      "columns": {
+        "numero": "N° Congé",
+        "employe": "Employé",
+        "type": "Type",
+        "debut": "Début",
+        "fin": "Fin",
+        "jours": "Jours",
+        "statut": "Statut"
+      },
+      "filters": {
+        "statut": "Statut",
+        "type": "Type"
+      },
+      "fields": {
+        "numero": "N° Congé",
+        "employeId": "Employé",
+        "type": "Type de congé",
+        "dateDebut": "Date début",
+        "dateFin": "Date fin",
+        "nombreJours": "Nombre de jours",
+        "motif": "Motif",
+        "notes": "Notes",
+        "motifRefus": "Motif de refus"
+      },
+      "fieldsRequired": {
+        "employeId": "Employé *",
+        "type": "Type de congé *",
+        "dateDebut": "Date début *",
+        "dateFin": "Date fin *"
+      },
+      "sections": {
+        "demande": "Demande de congé",
+        "traitement": "Traitement"
+      },
+      "statuses": {
+        "DEMANDE": "Demandé",
+        "APPROUVE": "Approuvé",
+        "REFUSE": "Refusé",
+        "EN_COURS": "En cours",
+        "SOLDE": "Soldé"
+      },
+      "types": {
+        "ANNUEL": "Annuel",
+        "MALADIE": "Maladie",
+        "MATERNITE": "Maternité",
+        "PATERNITE": "Paternité",
+        "SANS_SOLDE": "Sans solde",
+        "EXCEPTIONNEL": "Exceptionnel"
+      },
+      "transitions": {
+        "approuver": {
+          "label": "Approuver",
+          "confirmTitle": "Approuver le congé ?",
+          "confirmMessage": "Le congé sera approuvé.",
+          "confirmLabel": "Approuver"
+        },
+        "refuser": {
+          "label": "Refuser",
+          "confirmTitle": "Refuser le congé ?",
+          "confirmMessage": "Précisez le motif de refus.",
+          "confirmLabel": "Refuser",
+          "notePlaceholder": "Motif obligatoire"
+        },
+        "demarrer": {
+          "label": "Démarrer",
+          "confirmTitle": "Démarrer le congé ?",
+          "confirmMessage": "Le congé passera en statut En cours.",
+          "confirmLabel": "Démarrer"
+        },
+        "solder": {
+          "label": "Solder",
+          "confirmTitle": "Solder le congé ?",
+          "confirmMessage": "Le congé sera soldé et clôturé.",
+          "confirmLabel": "Solder"
+        }
+      },
+      "toasts": {
+        "saved": "Congé {numero} enregistré",
+        "approved": "Congé {numero} approuvé",
+        "refused": "Congé {numero} refusé",
+        "started": "Congé {numero} démarré",
+        "closed": "Congé {numero} soldé"
+      },
+      "prompts": {
+        "motifRefus": "Motif de refus :",
+        "motifObligatoire": "Motif obligatoire"
+      },
+      "deleteConfirm": {
+        "title": "Supprimer la demande de congé",
+        "message": "Supprimer le congé {numero} ?"
+      },
+      "errors": {
+        "notFound": "Congé {id} introuvable"
+      }
+    },
+    "paie": {
+      "bulletin": {
+        "title": "Bulletins de paie",
+        "titleSingular": "Fiche de paie",
+        "titleNew": "Nouvelle fiche de paie",
+        "titleDetail": "Détail fiche de paie",
+        "actions": {
+          "generer": "Générer le bulletin",
+          "print": "Imprimer"
+        },
+        "fields": {
+          "numero": "N° Fiche",
+          "employeId": "Employé",
+          "mois": "Mois (YYYY-MM)",
+          "salaireBase": "Salaire de base",
+          "indemniteRepresentation": "Ind. représentation",
+          "indemniteTransport": "Ind. transport",
+          "heuresSup": "Heures supplémentaires",
+          "notes": "Notes",
+          "salaireBrut": "Salaire brut",
+          "totalBrut": "Total brut",
+          "cnss": "CNSS (4.48%)",
+          "amo": "AMO (2.26%)",
+          "totalRetenues": "Total retenues",
+          "netImposable": "Net imposable",
+          "igr": "IGR",
+          "totalNet": "Net à payer",
+          "netAPayer": "Net à payer"
+        }
+      },
+      "listing": {
+        "headerTitle": "Fiches de paie",
+        "chips": {
+          "all": "Toutes",
+          "brouillon": "Brouillons",
+          "validee": "Validées",
+          "payee": "Payées"
+        },
+        "emptyState": {
+          "title": "Aucune fiche de paie",
+          "message": "Créez les fiches de paie mensuelles pour vos employés.",
+          "actionLabel": "Nouvelle fiche"
+        }
+      },
+      "columns": {
+        "numero": "N° Fiche",
+        "employe": "Employé",
+        "mois": "Mois/Année",
+        "brut": "Brut",
+        "retenues": "Retenues",
+        "igr": "IGR",
+        "netAPayer": "Net à payer",
+        "statut": "Statut"
+      },
+      "filters": {
+        "statut": "Statut",
+        "mois": "Mois (YYYY-MM)"
+      },
+      "sections": {
+        "elements": "Éléments de paie",
+        "resultat": "Résultat"
+      },
+      "statuses": {
+        "BROUILLON": "Brouillon",
+        "VALIDEE": "Validée",
+        "PAYEE": "Payée"
+      },
+      "transitions": {
+        "valider": {
+          "label": "Valider",
+          "confirmTitle": "Valider la fiche de paie ?",
+          "confirmMessage": "La fiche sera validée et ne pourra plus être modifiée.",
+          "confirmLabel": "Valider"
+        },
+        "payer": {
+          "label": "Marquer payée",
+          "confirmTitle": "Marquer la fiche comme payée ?",
+          "confirmMessage": "Le salaire a bien été versé à l'employé.",
+          "confirmLabel": "Confirmer le paiement"
+        }
+      },
+      "toasts": {
+        "saved": "Fiche {numero} enregistrée",
+        "validated": "Fiche {numero} validée",
+        "paid": "Fiche {numero} — paiement enregistré"
+      },
+      "deleteConfirm": {
+        "title": "Supprimer la fiche de paie",
+        "message": "Supprimer la fiche {numero} ?"
+      },
+      "errors": {
+        "notFound": "Fiche de paie {id} introuvable"
+      },
+      "approvalBar": {
+        "label": "Validation circuit paie"
+      },
+      "recap": {
+        "title": "Récapitulatif (aperçu paie)",
+        "ariaLabel": "Récapitulatif fiche",
+        "brut": "Brut",
+        "cnssSal": "CNSS sal.",
+        "amoSal": "AMO sal.",
+        "retenues": "Retenues",
+        "netImposable": "Net imposable",
+        "igr": "IGR",
+        "netAPayer": "Net à payer",
+        "hint": "En-tête société / ICE sur impression : via module Administration (démo)."
+      },
+      "print": {
+        "title": "Fiche de paie {numero}",
+        "periode": "{employeNom} — période {mois}",
+        "headerSubtitle": "— période {mois}",
+        "tableHeaders": {
+          "libelle": "Libellé",
+          "montant": "Montant"
+        },
+        "lines": {
+          "salaireBase": "Salaire de base",
+          "brut": "Brut",
+          "retenues": "Retenues",
+          "netImposable": "Net imposable",
+          "igr": "IGR",
+          "netAPayer": "Net à payer"
+        }
+      },
+      "cotisations": {
+        "cnss": "Cotisation CNSS",
+        "amo": "Cotisation AMO",
+        "is": "IS sur traitements",
+        "cnssPercent": "Cot. CNSS sal. (4.48%)",
+        "amoPercent": "Cot. AMO sal. (2.26%)",
+        "totalSal": "Total sal.",
+        "patronaleEst": "Cot. patronale est.",
+        "igrRetenu": "IGR retenu"
+      },
+      "journal": {
+        "title": "Journal de paie société",
+        "subtitle": "Agrégat mensuel des fiches — clôture démo",
+        "monthLabel": "Mois",
+        "linkBack": "← Fiches de paie",
+        "kpi": {
+          "brutTotal": "Brut total",
+          "cnss": "CNSS salariale",
+          "amo": "AMO salariale",
+          "igr": "IGR",
+          "net": "Net à payer"
+        },
+        "columns": {
+          "numero": "N°",
+          "employe": "Employé",
+          "statut": "Statut",
+          "brut": "Brut",
+          "cnss": "CNSS",
+          "amo": "AMO",
+          "igr": "IGR",
+          "net": "Net"
+        },
+        "empty": "Aucune fiche pour ce mois."
+      },
+      "declarations": {
+        "common": {
+          "royaumeMaroc": "ROYAUME DU MAROC",
+          "dgi": "Direction Générale des Impôts",
+          "exercice": "Exercice",
+          "exerciseLabel": "Exercice :",
+          "moisLabel": "Mois de déclaration :",
+          "exportXml": "Exporter XML",
+          "exportCsv": "Exporter CSV",
+          "exportXlsx": "Exporter Excel",
+          "imprimer": "Imprimer",
+          "totaux": "TOTAUX",
+          "societe": "Société",
+          "employeur": "Employeur",
+          "if": "I.F.",
+          "ice": "ICE",
+          "rc": "RC",
+          "patente": "Patente",
+          "cnss": "N° CNSS"
+        },
+        "damancom": {
+          "title": "Déclaration DAMANCOM — CNSS",
+          "subtitle": "Bordereau mensuel salaires & cotisations sociales",
+          "exportXmlBtn": "Exporter XML DAMANCOM",
+          "exportCsvBtn": "Exporter CSV",
+          "header": {
+            "employeur": "Employeur",
+            "cnss": "N° CNSS",
+            "periode": "Période",
+            "nbFiches": "N° fiches"
+          },
+          "columns": {
+            "matricule": "Matricule",
+            "nomEmploye": "Nom employé",
+            "salaireBrut": "Salaire brut",
+            "baseCnss": "Base CNSS",
+            "cotCnssSal": "Cot. CNSS sal. (4.48%)",
+            "cotAmoSal": "Cot. AMO sal. (2.26%)",
+            "totalSal": "Total sal.",
+            "cotPatronale": "Cot. patronale est.",
+            "igrRetenu": "IGR retenu",
+            "netPaye": "Net payé"
+          },
+          "recap": {
+            "title": "Récapitulatif des versements à effectuer",
+            "cnssSal": "CNSS — Part salariale",
+            "amoSal": "AMO — Part salariale",
+            "patronale": "Cotisations patronales estimées",
+            "totalCnss": "Total CNSS à verser",
+            "igrDgi": "IGR — À verser à la DGI"
+          },
+          "empty": "Aucune fiche de paie validée ou payée pour {mois}."
+        },
+        "etat1208": {
+          "title": "État 1208 — Récapitulatif annuel des achats",
+          "subtitle": "Déclaration DGI : factures fournisseurs avec ICE / IF (état 1208 — récap. achats)",
+          "header": {
+            "titre": "RÉCAPITULATIF ANNUEL DES ACHATS",
+            "etatExercice": "ÉTAT 1208 — EXERCICE {annee}"
+          },
+          "filterIce": "Filtrer par ICE :",
+          "filterIcePlaceholder": "Saisir un ICE…",
+          "kpi": {
+            "fournisseurs": "Fournisseurs",
+            "factures": "Factures",
+            "totalHt": "Total HT",
+            "totalTva": "Total TVA",
+            "totalTtc": "Total TTC"
+          },
+          "columns": {
+            "fournisseur": "Fournisseur",
+            "ice": "ICE",
+            "if": "IF",
+            "ville": "Ville",
+            "nbFact": "Nb fact.",
+            "totalHt": "Total HT",
+            "tva": "TVA",
+            "totalTtc": "Total TTC",
+            "retenueTva": "Retenue TVA"
+          },
+          "hint": "Sont incluses les factures aux statuts : Validée, Partiellement payée, Payée. Les brouillons, litiges et factures annulées sont exclus de l'état 1208.",
+          "empty": "Aucune facture fournisseur retenue pour l'exercice {annee}."
+        },
+        "etat9421": {
+          "title": "État 9421 — Récapitulatif IGR Annuel",
+          "subtitle": "Déclaration annuelle des salaires et retenues IGR à la DGI",
+          "header": {
+            "titre": "DÉCLARATION DES TRAITEMENTS ET SALAIRES",
+            "etatExercice": "ÉTAT 9421 — EXERCICE {annee}"
+          },
+          "exportXmlBtn": "Exporter XML DGI",
+          "imprimerBtn": "Imprimer",
+          "columns": {
+            "cin": "CIN",
+            "nomPrenom": "Nom & Prénom",
+            "remunerationsBrutes": "Rémunérations brutes",
+            "deductions": "Déductions",
+            "netImposable": "Net imposable",
+            "igrRetenu": "IGR retenu",
+            "salaire": "Salaire",
+            "indemnites": "Indemnités",
+            "totalBrut": "Total brut",
+            "cnss": "CNSS",
+            "amo": "AMO",
+            "fraisPro": "Frais pro."
+          },
+          "attestation": {
+            "before": "Je soussigné, représentant légal de",
+            "after": ", certifie l'exactitude des informations portées sur la présente déclaration.",
+            "dateCachet": "Date & Cachet de l'employeur",
+            "recuAdmin": "Reçu par l'administration"
+          },
+          "empty": "Aucune fiche de paie payée pour l'exercice {annee}."
+        }
+      }
+    },
+    "pointage": {
+      "title": "Pointage",
+      "listing": {
+        "title": "Pointage chantiers",
+        "subtitle": "Suivi présences & absences",
+        "controls": {
+          "tousChantiers": "Tous les chantiers",
+          "btnSaisie": "+ Saisir pointage du jour",
+          "btnValidation": "Validation / cumuls",
+          "lignesCount": "{count} ligne(s)"
+        },
+        "stats": {
+          "present": "{count}j présent",
+          "absent": "{count}j absent",
+          "conge": "{count}j congé",
+          "maladie": "{count}j maladie",
+          "heures": "{count}h"
+        },
+        "empty": "Aucun pointage sur cette période."
+      },
+      "saisie": {
+        "title": "Pointage chantier",
+        "subtitleFallback": "Sélectionner un chantier",
+        "actions": {
+          "entree": "Pointer l'entrée",
+          "sortie": "Pointer la sortie",
+          "valider": "Valider le pointage",
+          "saved": "✓ Pointage sauvegardé",
+          "geoloc": "📍 Géolocaliser",
+          "geolocLoading": "…"
+        },
+        "geolocTooltip": "Position GPS du chef de chantier pour ce pointage (preuve terrain + géofencing)",
+        "sync": {
+          "offline": "Mode hors ligne. {count} élément(s) en attente (pointages + photo). File locale 7 j / sync au retour réseau.",
+          "conflict": "{count} pointage(s) en conflit métier (données divergentes). Résolvez côté RH / serveur.",
+          "syncing": "Synchronisation en cours. {count} élément(s) restant(s).",
+          "syncedAt": "Synchronisé le {date} à {time}.",
+          "syncedLocal": "Synchronisé localement."
+        },
+        "geofence": {
+          "label": "Géofencing",
+          "radius": "rayon {m} m",
+          "distance": "— distance au chantier : {distance}",
+          "refused": "Pointage refusé hors zone (M-RH-01).",
+          "activate": "— activez la géolocalisation pour valider sur ce chantier."
+        },
+        "team": {
+          "title": "Équipe (multi-pointage)",
+          "selectAll": "Tout sélectionner",
+          "selectNone": "Aucun",
+          "selectPresent": "Présents",
+          "applyToSelection": "Appliquer aux cochés :",
+          "applyMode": "Appliquer {mode}",
+          "selectedCount": "{count} coché(s)"
+        },
+        "photo": {
+          "label": "Photo chantier (compressée ~800px, IndexedDB — offline 7 j)",
+          "previewAlt": "Aperçu photo chantier",
+          "clear": "Retirer la photo"
+        },
+        "empty": "Sélectionnez un chantier pour commencer le pointage.",
+        "quickBar": {
+          "label": "Tout marquer :",
+          "ariaLabel": "Tout marquer {mode}"
+        },
+        "signature": {
+          "label": "Signature",
+          "collectif": "Collectif chef",
+          "individuel": "Individuelle (présents)",
+          "hint": "Signature unique pour la feuille du jour (horodatage à l'enregistrement).",
+          "clear": "Effacer signature",
+          "indiv": {
+            "signed": "Signé",
+            "sign": "Signer",
+            "clear": "Effacer"
+          },
+          "dialog": {
+            "title": "Signature — {nom}",
+            "validate": "Valider signature",
+            "clear": "Effacer",
+            "cancel": "Annuler"
+          }
+        },
+        "modes": {
+          "selectChantier": "Sélectionner…",
+          "noteAria": "Note pour {nom}",
+          "notePlaceholder": "Note (optionnel)",
+          "modeAria": "{mode} pour {nom}"
+        },
+        "arrivee": "Arrivée",
+        "depart": "Départ",
+        "emptyOuvriers": "Aucun ouvrier affecté à ce chantier.",
+        "summary": {
+          "presents": "{count} présents",
+          "absents": "{count} absents",
+          "others": "{count} autres"
+        },
+        "errors": {
+          "geofenceOff": "Géofencing : rapprochez-vous du chantier ou activez le GPS dans la zone autorisée.",
+          "signatureCollectiveRequired": "Signature collective requise (tracez dans le cadre).",
+          "signaturesMissing": "Signatures manquantes pour {count} présent(s).",
+          "signatureTooShort": "Signature trop courte.",
+          "geolocRefused": "Géolocalisation refusée ou indisponible."
+        }
+      },
+      "validation": {
+        "title": "Validation pointage",
+        "subtitle": "Brouillons du jour + cumuls heures (desktop)",
+        "controls": {
+          "date": "Date",
+          "tousChantiers": "Tous chantiers",
+          "linkListing": "← Listing"
+        },
+        "brouillons": {
+          "title": "Brouillons à valider",
+          "empty": "Aucun brouillon pour cette date / ce filtre.",
+          "columns": {
+            "employe": "Employé",
+            "chantier": "Chantier",
+            "mode": "Mode",
+            "heuresNorm": "H. norm."
+          },
+          "validerTous": "Valider tous les brouillons visibles"
+        },
+        "cumuls": {
+          "title": "Cumul mois ({mois})",
+          "columns": {
+            "employe": "Employé",
+            "presents": "J. présents",
+            "heures": "Heures cumul"
+          }
+        }
+      },
+      "modes": {
+        "PRESENT": "Présent",
+        "ABSENT": "Absent",
+        "CONGE": "Congé",
+        "MALADIE": "Maladie",
+        "FORMATION": "Formation",
+        "AUTRE": "Autre"
+      },
+      "modesAbbrev": {
+        "present": "présent",
+        "absent": "absent",
+        "conge": "congé",
+        "maladie": "maladie",
+        "presents": "présents",
+        "jPresents": "J. présents"
+      }
+    },
+    "planning": {
+      "title": "Planning des équipes",
+      "page": {
+        "title": "Planning équipes",
+        "subtitle": "Affectations, filtres et détection de surcharge (démo)"
+      },
+      "filters": {
+        "chantier": "Chantier",
+        "employe": "Employé",
+        "btnNew": "+ Nouvelle affectation"
+      },
+      "weekNav": {
+        "prev": "‹ Semaine précédente",
+        "next": "Semaine suivante ›",
+        "label": "Semaine du {start} au {end}"
+      },
+      "table": {
+        "ouvrier": "Ouvrier",
+        "empty": "Aucune affectation pour ces filtres.",
+        "fonctionPct": "{role} · {pct}%"
+      },
+      "note": "Les cellules colorées indiquent une affectation active sur la journée. Alerte si le cumul % dépasse 100 % sur la semaine.",
+      "dialog": {
+        "title": "Nouvelle affectation",
+        "employe": "Employé",
+        "chantier": "Chantier",
+        "dateDebut": "Date début",
+        "role": "Rôle",
+        "pctTemps": "% temps chantier",
+        "cancel": "Annuler",
+        "save": "Enregistrer"
+      },
+      "conflict": "{nom} : {pct}% cumulé sur la semaine (> 100 %).",
+      "days": {
+        "lun": "Lun",
+        "mar": "Mar",
+        "mer": "Mer",
+        "jeu": "Jeu",
+        "ven": "Ven",
+        "sam": "Sam",
+        "dim": "Dim"
+      },
+      "employeFallback": "Employé"
+    },
+    "visiteMedicale": {
+      "relais": "Voir Visites médicales (HSE)"
+    }
+  }
+}

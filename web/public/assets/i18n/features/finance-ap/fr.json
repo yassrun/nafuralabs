@@ -1,0 +1,61 @@
+{
+  "finance-ap": {
+    "fields": {
+      "runNumber": "run Number",
+      "plannedDate": "planned Date",
+      "executedAt": "executed At",
+      "currency": "currency Id",
+      "invoiceCount": "invoice Count",
+      "vendorCount": "vendor Count",
+      "totalAmount": "total Amount",
+      "status": "status",
+      "criteria": "criteria Json",
+      "vendorInvoice": "vendor Invoice Id",
+      "lineNumber": "line Number",
+      "item": "item Id",
+      "description": "description",
+      "quantity": "quantity",
+      "unitPrice": "unit Price",
+      "taxCode": "tax Code",
+      "taxAmount": "tax Amount",
+      "lineTotal": "line Total",
+      "invoiceNumber": "invoice Number",
+      "vendor": "vendor Id",
+      "invoiceDate": "invoice Date",
+      "dueDate": "due Date",
+      "subtotalAmount": "subtotal Amount",
+      "approvalRequest": "approval Request Id",
+      "notes": "notes"
+    },
+    "sections": {
+      "general": "general",
+      "summary": "résumé",
+      "amounts": "amounts",
+      "workflow": "workflow"
+    },
+    "feature": {
+      "title": "Finance Ap",
+      "description": "Finance Ap"
+    },
+    "navigation": {
+      "paymentRuns": "Payment Runs",
+      "vendorInvoices": "Vendor Invoices",
+      "vendorInvoiceLines": "Vendor Invoice Lines"
+    },
+    "paymentRun": {
+      "title": "Payment Runs",
+      "detailTitle": "Payment Run Details",
+      "newTitle": "New Payment Run"
+    },
+    "vendorInvoice": {
+      "title": "Vendor Invoices",
+      "detailTitle": "Vendor Invoice Details",
+      "newTitle": "New Vendor Invoice"
+    },
+    "vendorInvoiceLine": {
+      "title": "Vendor Invoice Lines",
+      "detailTitle": "Vendor Invoice Line Details",
+      "newTitle": "New Vendor Invoice Line"
+    }
+  }
+}

@@ -1,0 +1,45 @@
+<nf-page-shell>
+  <nf-page-header [config]="headerConfig()"></nf-page-header>
+
+  <div class="analytics-toolbar">
+    <label>
+      {{ 'erp.analyticsTableau.common.periodFrom' | translate }}
+      <input type="date" [ngModel]="periodFrom()" (ngModelChange)="periodFrom.set($event)" />
+    </label>
+    <label>
+      {{ 'erp.analyticsTableau.common.periodTo' | translate }}
+      <input type="date" [ngModel]="periodTo()" (ngModelChange)="periodTo.set($event)" />
+    </label>
+    <nf-button variant="secondary" icon="refresh-cw" iconLibrary="lucide" (clicked)="refresh()">
+      {{ 'erp.analyticsTableau.common.refresh' | translate }}
+    </nf-button>
+  </div>
+
+  @if (loaded()) {
+    <div class="analytics-grid">
+      <nf-stat-card [label]="'erp.analyticsTableau.rh.stats.actifs' | translate" [value]="totalActifs()" icon="users" variant="primary"></nf-stat-card>
+      <nf-stat-card [label]="'erp.analyticsTableau.rh.stats.masse' | translate" [value]="(massSalariale() | mad) ?? '—'" icon="wallet" variant="success"></nf-stat-card>
+      <nf-stat-card [label]="'erp.analyticsTableau.rh.stats.conges' | translate" [value]="congesEnAttente()" icon="calendar" variant="warning"></nf-stat-card>
+      <nf-stat-card [label]="'erp.analyticsTableau.rh.stats.paie' | translate" [value]="paieAValider()" icon="file-text" variant="default"></nf-stat-card>
+      <nf-stat-card [label]="'erp.analyticsTableau.rh.stats.cdi' | translate" [value]="totalCDI()" icon="badge" variant="info"></nf-stat-card>
+      <nf-stat-card [label]="'erp.analyticsTableau.rh.stats.tauxConge' | translate" [value]="tauxConge() + '%'" icon="percent" variant="default"></nf-stat-card>
+    </div>
+
+    <div class="analytics-charts">
+      <section class="analytics-chart-card">
+        <h3 class="analytics-chart-card__title">{{ 'erp.analyticsTableau.rh.charts.payrollByCategory' | translate }}</h3>
+        <div class="analytics-chart-card__body">
+          <nf-chart type="bar" [data]="payrollChart()" [options]="chartOptions()" height="240px" [minHeight]="200" />
+        </div>
+      </section>
+      <section class="analytics-chart-card">
+        <h3 class="analytics-chart-card__title">{{ 'erp.analyticsTableau.rh.charts.contractSplit' | translate }}</h3>
+        <div class="analytics-chart-card__body">
+          <nf-chart type="doughnut" [data]="contractChart()" [options]="chartOptions()" height="240px" [minHeight]="200" />
+        </div>
+      </section>
+    </div>
+  } @else {
+    <p class="loading-msg">{{ 'erp.analyticsTableau.common.loading' | translate }}</p>
+  }
+</nf-page-shell>

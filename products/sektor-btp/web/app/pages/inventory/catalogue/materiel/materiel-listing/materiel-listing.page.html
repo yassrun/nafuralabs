@@ -1,0 +1,17 @@
+    <nf-page-shell>
+      <nf-page-header [config]="headerConfig"></nf-page-header>
+      <nf-entity-listing
+        #listing
+        [config]="config"
+        [facade]="facade"
+        (action)="onAction($event)">
+        <ng-template #marqueModele let-row>
+          @if (row.marque || row.modele) {
+            {{ row.marque }}{{ row.marque && row.modele ? ' / ' : '' }}{{ row.modele }}
+          } @else {
+            <span class="text-muted">—</span>
+          }
+        </ng-template>
+      </nf-entity-listing>
+    </nf-page-shell>
+  

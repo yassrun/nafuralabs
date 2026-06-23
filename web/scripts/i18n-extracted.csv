@@ -1,0 +1,408 @@
+file,line,column,kind,raw_string,suggested_key,context
+app/applications/erp/approbations/services/approval-engine.service.ts,62,7,error,Aucun workflow actif pour le type ${entityType},approbations.services.error.aucun-workflow-actif-pour,throw new Error(…)
+app/applications/erp/chantiers/mock/seeds.ts,854,11,error,Chantier ${id} introuvable dans seeds,chantiers.mock.error.chantier-id-introuvable-dans,throw new Error(…)
+app/applications/erp/etudes/components/composants-editor/composants-editor.component.html,6,28,template_text,Sous-détail = matériaux + main d'œuvre + frais généraux + bénéfice,etudes.components.text.sous-detail-materiaux-main-uvre,>…<
+app/applications/erp/etudes/components/composants-editor/composants-editor.component.html,23,12,template_text,Unité,etudes.components.text.unite,>…<
+app/applications/erp/etudes/components/composants-editor/composants-editor.component.html,26,29,template_text,Total MAD,etudes.components.text.total-mad,>…<
+app/applications/erp/etudes/components/composants-editor/composants-editor.component.html,97,15,template_attr,Supprimer,etudes.components.label.supprimer,aria-label=…
+app/applications/erp/etudes/components/composants-editor/composants-editor.component.html,106,32,template_text,Main d'œuvre,etudes.components.text.main-uvre,>…<
+app/applications/erp/etudes/components/composants-editor/composants-editor.component.html,133,41,template_text,Sous-total déboursés,etudes.components.text.sous-total-debourses,>…<
+app/applications/erp/etudes/components/composants-editor/composants-editor.component.html,138,24,template_text,Frais généraux,etudes.components.text.frais-generaux,>…<
+app/applications/erp/etudes/components/composants-editor/composants-editor.component.html,153,24,template_text,Bénéfice,etudes.components.text.benefice,>…<
+app/applications/erp/etudes/components/dpgf-editor/dpgf-editor.component.html,12,29,template_text,DPGF — Décomposition prix global et forfaitaire,etudes.components.text.dpgf-decomposition-prix-global,>…<
+app/applications/erp/etudes/components/dpgf-editor/dpgf-editor.component.html,30,14,template_text,Désignation,etudes.components.text.designation,>…<
+app/applications/erp/etudes/components/dpgf-editor/dpgf-editor.component.html,32,14,template_text,Unité,etudes.components.text.unite,>…<
+app/applications/erp/etudes/components/dpgf-editor/dpgf-editor.component.html,35,32,template_text,Total HT,etudes.components.text.total-ht,>…<
+app/applications/erp/etudes/components/dpgf-editor/dpgf-editor.component.html,77,19,template_attr,Ajouter ouvrage au chapitre,etudes.components.label.ajouter-ouvrage-au-chapitre,aria-label=…
+app/applications/erp/etudes/components/dpgf-editor/dpgf-editor.component.html,87,19,template_attr,Supprimer le chapitre,etudes.components.label.supprimer-le-chapitre,aria-label=…
+app/applications/erp/etudes/components/dpgf-editor/dpgf-editor.component.html,163,19,template_attr,Supprimer la ligne,etudes.components.label.supprimer-la-ligne,aria-label=…
+app/applications/erp/etudes/components/dpgf-editor/dpgf-editor.component.html,186,19,template_attr,Supprimer la note,etudes.components.label.supprimer-la-note,aria-label=…
+app/applications/erp/etudes/components/dpgf-editor/dpgf-editor.component.html,196,52,template_text,Total HT (avant remise globale),etudes.components.text.total-ht-avant-remise,>…<
+app/applications/erp/etudes/components/metre-table-editor/metre-table-editor.component.html,9,28,template_text,"Formules acceptées : L*l*h*N, (L*l)-(L1*l1), etc.",etudes.components.text.formules-acceptees-l1-l1,>…<
+app/applications/erp/etudes/components/metre-table-editor/metre-table-editor.component.html,30,14,template_text,Désignation,etudes.components.text.designation,>…<
+app/applications/erp/etudes/components/metre-table-editor/metre-table-editor.component.html,36,14,template_text,Unité,etudes.components.text.unite,>…<
+app/applications/erp/etudes/components/metre-table-editor/metre-table-editor.component.html,60,17,template_attr,Désignation libre,etudes.components.label.designation-libre,placeholder=…
+app/applications/erp/etudes/components/metre-table-editor/metre-table-editor.component.html,144,17,template_attr,Supprimer la ligne,etudes.components.label.supprimer-la-ligne,aria-label=…
+app/applications/erp/etudes/components/metre-table-editor/metre-table-editor.component.html,153,51,template_text,Total estimé,etudes.components.text.total-estime,>…<
+app/applications/erp/etudes/mock/etudes-mock.service.ts,187,7,error,Métré ${id} introuvable,etudes.mock.error.metre-id-introuvable,throw new Error(…)
+app/applications/erp/etudes/mock/etudes-mock.service.ts,289,7,error,Métré ${metreId} introuvable,etudes.mock.error.metre-metreid-introuvable,throw new Error(…)
+app/applications/erp/finance/mock/finance-comptabilite-mock.service.ts,170,7,error,Aucune ligne sélectionnée.,finance.mock.error.aucune-ligne-selectionnee,throw new Error(…)
+app/applications/erp/finance/mock/finance-comptabilite-mock.service.ts,178,26,error,Ligne introuvable pour ${key},finance.mock.error.ligne-introuvable-pour-key,throw new Error(…)
+app/applications/erp/finance/mock/finance-comptabilite-mock.service.ts,341,18,error,Écriture ${id} introuvable,finance.mock.error.ecriture-id-introuvable,throw new Error(…)
+app/applications/erp/finance/mock/finance-comptabilite-mock.service.ts,344,7,error,Une écriture clôturée ne peut pas être modifiée.,finance.mock.error.une-ecriture-cloturee-ne,throw new Error(…)
+app/applications/erp/finance/mock/finance-comptabilite-mock.service.ts,376,18,error,Écriture ${id} introuvable,finance.mock.error.ecriture-id-introuvable,throw new Error(…)
+app/applications/erp/finance/mock/finance-comptabilite-mock.service.ts,379,7,error,Écriture non équilibrée — impossible de valider.,finance.mock.error.ecriture-non-equilibree-impossible,throw new Error(…)
+app/applications/erp/finance/mock/finance-comptabilite-mock.service.ts,400,7,error,Seules les écritures BROUILLON peuvent être supprimées.,finance.mock.error.seules-les-ecritures-brouillon,throw new Error(…)
+app/applications/erp/finance/mock/finance-comptabilite-mock.service.ts,409,15,error,Écriture ${id} introuvable,finance.mock.error.ecriture-id-introuvable,throw new Error(…)
+app/applications/erp/finance/mock/finance-comptabilite-mock.service.ts,411,7,error,Seule une écriture VALIDEE peut être contre-passée.,finance.mock.error.seule-une-ecriture-validee,throw new Error(…)
+app/applications/erp/finance/mock/finance-comptabilite-mock.service.ts,534,7,error,Seule une facture BROUILLON peut être supprimée.,finance.mock.error.seule-une-facture-brouillon,throw new Error(…)
+app/applications/erp/finance/mock/finance-comptabilite-mock.service.ts,546,7,error,Seule une facture BROUILLON peut être validée.,finance.mock.error.seule-une-facture-brouillon,throw new Error(…)
+app/applications/erp/finance/mock/finance-tresorerie-mock.service.ts,397,18,error,Règlement ${id} introuvable,finance.mock.error.reglement-id-introuvable,throw new Error(…)
+app/applications/erp/finance/mock/finance-tresorerie-mock.service.ts,411,18,error,Règlement ${id} introuvable,finance.mock.error.reglement-id-introuvable,throw new Error(…)
+app/applications/erp/inventory/components/inventaire-lines-editor/inventaire-lines-editor.component.ts,59,18,inline_template_text,Désignation,inventory.components.text.designation,>…<
+app/applications/erp/inventory/components/inventaire-lines-editor/inventaire-lines-editor.component.ts,60,35,inline_template_text,Qté théorique,inventory.components.text.qte-theorique,>…<
+app/applications/erp/inventory/components/inventaire-lines-editor/inventaire-lines-editor.component.ts,61,35,inline_template_text,Qté comptée,inventory.components.text.qte-comptee,>…<
+app/applications/erp/inventory/components/inventaire-lines-editor/inventaire-lines-editor.component.ts,62,35,inline_template_text,Écart,inventory.components.text.ecart,>…<
+app/applications/erp/inventory/components/inventaire-lines-editor/inventaire-lines-editor.component.ts,63,18,inline_template_text,Unité,inventory.components.text.unite,>…<
+app/applications/erp/inventory/components/inventaire-lines-editor/inventaire-lines-editor.component.ts,125,21,inline_template_attr,Supprimer la ligne,inventory.components.label.supprimer-la-ligne,aria-label=…
+app/applications/erp/inventory/components/inventaire-lines-editor/inventaire-lines-editor.component.ts,135,58,inline_template_text,Écart total,inventory.components.text.ecart-total,>…<
+app/applications/erp/inventory/components/perte-lines-editor/perte-lines-editor.component.ts,58,18,inline_template_text,Désignation,inventory.components.text.designation,>…<
+app/applications/erp/inventory/components/perte-lines-editor/perte-lines-editor.component.ts,60,18,inline_template_text,Unité,inventory.components.text.unite,>…<
+app/applications/erp/inventory/components/perte-lines-editor/perte-lines-editor.component.ts,62,20,inline_template_text,Cause détaillée,inventory.components.text.cause-detaillee,>…<
+app/applications/erp/inventory/components/perte-lines-editor/perte-lines-editor.component.ts,124,21,inline_template_attr,Supprimer la ligne,inventory.components.label.supprimer-la-ligne,aria-label=…
+app/applications/erp/inventory/components/reception-lines-editor/reception-lines-editor.component.ts,45,18,inline_template_text,Désignation,inventory.components.text.designation,>…<
+app/applications/erp/inventory/components/reception-lines-editor/reception-lines-editor.component.ts,46,35,inline_template_text,Qté reçue,inventory.components.text.qte-recue,>…<
+app/applications/erp/inventory/components/reception-lines-editor/reception-lines-editor.component.ts,48,35,inline_template_text,Total,inventory.components.text.total,>…<
+app/applications/erp/inventory/components/reception-lines-editor/reception-lines-editor.component.ts,49,18,inline_template_text,Unité,inventory.components.text.unite,>…<
+app/applications/erp/inventory/components/reception-lines-editor/reception-lines-editor.component.ts,57,51,inline_template_text,"Aucune ligne — cliquez sur ""Ligne"" pour ajouter un article",inventory.components.text.aucune-ligne-cliquez-sur,>…<
+app/applications/erp/inventory/components/reception-lines-editor/reception-lines-editor.component.ts,123,21,inline_template_attr,Supprimer la ligne,inventory.components.label.supprimer-la-ligne,aria-label=…
+app/applications/erp/inventory/components/reception-lines-editor/reception-lines-editor.component.ts,133,58,inline_template_text,Total réception,inventory.components.text.total-reception,>…<
+app/applications/erp/inventory/components/retour-lines-editor/retour-lines-editor.component.ts,57,18,inline_template_text,Désignation,inventory.components.text.designation,>…<
+app/applications/erp/inventory/components/retour-lines-editor/retour-lines-editor.component.ts,58,35,inline_template_text,Qté retournée,inventory.components.text.qte-retournee,>…<
+app/applications/erp/inventory/components/retour-lines-editor/retour-lines-editor.component.ts,59,18,inline_template_text,Unité,inventory.components.text.unite,>…<
+app/applications/erp/inventory/components/retour-lines-editor/retour-lines-editor.component.ts,60,18,inline_template_text,État article,inventory.components.text.etat-article,>…<
+app/applications/erp/inventory/components/retour-lines-editor/retour-lines-editor.component.ts,99,31,inline_template_text,État,inventory.components.text.etat,>…<
+app/applications/erp/inventory/components/retour-lines-editor/retour-lines-editor.component.ts,127,21,inline_template_attr,Supprimer la ligne,inventory.components.label.supprimer-la-ligne,aria-label=…
+app/applications/erp/inventory/components/transfert-lines-editor/transfert-lines-editor.component.ts,47,18,inline_template_text,Désignation,inventory.components.text.designation,>…<
+app/applications/erp/inventory/components/transfert-lines-editor/transfert-lines-editor.component.ts,50,18,inline_template_text,Unité,inventory.components.text.unite,>…<
+app/applications/erp/inventory/components/transfert-lines-editor/transfert-lines-editor.component.ts,109,21,inline_template_attr,Supprimer la ligne,inventory.components.label.supprimer-la-ligne,aria-label=…
+app/applications/erp/pages/achats/commandes/services/bc-api.service.ts,71,13,error,Bon de commande ${id} introuvable,achats.commandes.error.bon-de-commande-id,throw new Error(…)
+app/applications/erp/pages/administration/moa/models/index.ts,54,1,type_label,État,administration.moa.label.etat,MOA_TYPE_LABELS.ETAT
+app/applications/erp/pages/administration/moa/models/index.ts,55,15,type_label,Établissement public,administration.moa.label.etablissement-public,MOA_TYPE_LABELS.EP
+app/applications/erp/pages/administration/moa/models/index.ts,56,29,type_label,Collectivité territoriale,administration.moa.label.collectivite-territoriale,MOA_TYPE_LABELS.COLLECTIVITE
+app/applications/erp/pages/administration/moa/models/index.ts,57,44,type_label,Privé,administration.moa.label.prive,MOA_TYPE_LABELS.PRIVE
+app/applications/erp/pages/administration/societe/models/index.ts,79,1,type_label,Siège,administration.societe.label.siege,ETABLISSEMENT_TYPE_LABELS.SIEGE
+app/applications/erp/pages/administration/societe/models/index.ts,88,15,status_label,SARL à Associé Unique,administration.societe.status.sarl-associe-unique,FORME_JURIDIQUE_LABELS.SARLAU
+app/applications/erp/pages/analytics/tableau-achats/tableau-achats.page.html,7,21,template_attr,DA en attente,analytics.tableau-achats.label.da-en-attente,label=…
+app/applications/erp/pages/analytics/tableau-achats/tableau-achats.page.html,8,21,template_attr,Commandes en cours,analytics.tableau-achats.label.commandes-en-cours,label=…
+app/applications/erp/pages/analytics/tableau-achats/tableau-achats.page.html,9,21,template_attr,Montant engagé TTC (MAD),analytics.tableau-achats.label.montant-engage-ttc-mad,label=…
+app/applications/erp/pages/analytics/tableau-achats/tableau-achats.page.html,11,21,template_attr,AO en cours,analytics.tableau-achats.label.ao-en-cours,label=…
+app/applications/erp/pages/analytics/tableau-chantiers/tableau-chantiers.page.html,6,21,template_attr,Total chantiers,analytics.tableau-chantiers.label.total-chantiers,label=…
+app/applications/erp/pages/analytics/tableau-chantiers/tableau-chantiers.page.html,7,21,template_attr,En cours,analytics.tableau-chantiers.label.en-cours,label=…
+app/applications/erp/pages/analytics/tableau-chantiers/tableau-chantiers.page.html,8,21,template_attr,Terminés,analytics.tableau-chantiers.label.termines,label=…
+app/applications/erp/pages/analytics/tableau-chantiers/tableau-chantiers.page.html,9,21,template_attr,Situations émises,analytics.tableau-chantiers.label.situations-emises,label=…
+app/applications/erp/pages/analytics/tableau-chantiers/tableau-chantiers.page.html,11,21,template_attr,Budget total HT (MAD),analytics.tableau-chantiers.label.budget-total-ht-mad,label=…
+app/applications/erp/pages/analytics/tableau-financier/tableau-financier.page.html,6,21,template_attr,CA facturé HT (MAD),analytics.tableau-financier.label.ca-facture-ht-mad,label=…
+app/applications/erp/pages/analytics/tableau-financier/tableau-financier.page.html,7,21,template_attr,CA encaissé TTC (MAD),analytics.tableau-financier.label.ca-encaisse-ttc-mad,label=…
+app/applications/erp/pages/analytics/tableau-financier/tableau-financier.page.html,8,21,template_attr,Reste à encaisser (MAD),analytics.tableau-financier.label.reste-encaisser-mad,label=…
+app/applications/erp/pages/analytics/tableau-financier/tableau-financier.page.html,9,21,template_attr,Factures émises,analytics.tableau-financier.label.factures-emises,label=…
+app/applications/erp/pages/analytics/tableau-financier/tableau-financier.page.html,10,21,template_attr,Factures en retard,analytics.tableau-financier.label.factures-en-retard,label=…
+app/applications/erp/pages/analytics/tableau-hse/tableau-hse.page.html,8,21,template_attr,Jours d'arrêt YTD,analytics.tableau-hse.label.jours-arret-ytd,label=…
+app/applications/erp/pages/analytics/tableau-hse/tableau-hse.page.html,9,21,template_attr,Non-conformités ouvertes,analytics.tableau-hse.label.non-conformites-ouvertes,label=…
+app/applications/erp/pages/analytics/tableau-hse/tableau-hse.page.html,10,21,template_attr,Inspections planifiées/en cours,analytics.tableau-hse.label.inspections-planifiees-en-cours,label=…
+app/applications/erp/pages/analytics/tableau-hse/tableau-hse.page.html,11,21,template_attr,Formations terminées,analytics.tableau-hse.label.formations-terminees,label=…
+app/applications/erp/pages/analytics/tableau-rh/tableau-rh.page.html,6,21,template_attr,Employés actifs,analytics.tableau-rh.label.employes-actifs,label=…
+app/applications/erp/pages/analytics/tableau-rh/tableau-rh.page.html,8,21,template_attr,Congés en attente,analytics.tableau-rh.label.conges-en-attente,label=…
+app/applications/erp/pages/analytics/tableau-rh/tableau-rh.page.html,9,21,template_attr,Fiches paie à valider,analytics.tableau-rh.label.fiches-paie-valider,label=…
+app/applications/erp/pages/analytics/tableau-rh/tableau-rh.page.html,11,21,template_attr,Taux congé en cours,analytics.tableau-rh.label.taux-conge-en-cours,label=…
+app/applications/erp/pages/approbations/models/index.ts,75,37,type_label,Bon de commande,approbations.models.label.bon-de-commande,ENTITY_TYPE_LABELS.BC
+app/applications/erp/pages/approbations/models/index.ts,77,28,type_label,Situation de travaux,approbations.models.label.situation-de-travaux,ENTITY_TYPE_LABELS.SIT
+app/applications/erp/pages/approbations/models/index.ts,78,30,type_label,Demande de congé,approbations.models.label.demande-de-conge,ENTITY_TYPE_LABELS.CONGE
+app/applications/erp/pages/approbations/models/index.ts,79,28,type_label,Fiche de paie (validation),approbations.models.label.fiche-de-paie-validation,ENTITY_TYPE_LABELS.PAIE
+app/applications/erp/pages/approbations/models/index.ts,81,26,type_label,Avenant marché,approbations.models.label.avenant-marche,ENTITY_TYPE_LABELS.AVN
+app/applications/erp/pages/approbations/models/index.ts,82,24,type_label,Ordre de service,approbations.models.label.ordre-de-service,ENTITY_TYPE_LABELS.OS
+app/applications/erp/pages/approbations/models/index.ts,84,35,type_label,Note de frais,approbations.models.label.note-de-frais,ENTITY_TYPE_LABELS.NOTE_FRAIS
+app/applications/erp/pages/approbations/models/index.ts,85,30,type_label,Contrat sous-traitance,approbations.models.label.contrat-sous-traitance,ENTITY_TYPE_LABELS.CONTRAT_ST
+app/applications/erp/pages/chantiers/avancements/avancement-saisie/avancement-saisie.page.html,3,69,template_text,← Retour,chantiers.avancements.text.retour,>…<
+app/applications/erp/pages/chantiers/avancements/avancement-saisie/avancement-saisie.page.html,25,16,template_text,Date *,chantiers.avancements.text.date,>…<
+app/applications/erp/pages/chantiers/avancements/avancement-saisie/avancement-saisie.page.html,35,14,template_text,Lots a saisir,chantiers.avancements.text.lots-saisir,>…<
+app/applications/erp/pages/chantiers/avancements/avancement-saisie/avancement-saisie.page.html,50,18,template_text,Ajouter un lot,chantiers.avancements.text.ajouter-un-lot,>…<
+app/applications/erp/pages/chantiers/avancements/avancement-saisie/avancement-saisie.page.html,52,39,template_text,Choisir un lot supplementaire,chantiers.avancements.text.choisir-un-lot-supplementaire,>…<
+app/applications/erp/pages/chantiers/avancements/avancement-saisie/avancement-saisie.page.html,84,14,template_text,Validation soft en cas de cumul superieur au total,chantiers.avancements.text.validation-soft-en-cas,>…<
+app/applications/erp/pages/chantiers/avancements/avancement-saisie/avancement-saisie.page.ts,40,6,alert,${count} lot(s) enregistres en brouillon.,chantiers.avancements.confirm.count-lot-enregistres-en,alert(…)
+app/applications/erp/pages/chantiers/avancements/avancement-saisie/components/photo-uploader/photo-uploader.component.html,9,10,template_text,📷 Ajouter photo,chantiers.avancements.text.ajouter-photo,>…<
+app/applications/erp/pages/chantiers/avancements/services/avancement-mock.service.ts,185,7,error,Utilisateur de saisie introuvable,chantiers.avancements.error.utilisateur-de-saisie-introuvable,throw new Error(…)
+app/applications/erp/pages/chantiers/avancements/services/avancement-mock.service.ts,249,7,error,Avancement à modifier introuvable,chantiers.avancements.error.avancement-modifier-introuvable,throw new Error(…)
+app/applications/erp/pages/chantiers/avancements/services/avancement.facade.ts,161,9,error,Saisie à modifier introuvable.,chantiers.avancements.error.saisie-modifier-introuvable,throw new Error(…)
+app/applications/erp/pages/chantiers/avancements/services/avancement.facade.ts,272,7,error,Choisissez un chantier avant de poursuivre.,chantiers.avancements.error.choisissez-un-chantier-avant,throw new Error(…)
+app/applications/erp/pages/chantiers/avancements/services/avancement.facade.ts,285,7,error,Saisissez au moins une quantite periode positive.,chantiers.avancements.error.saisissez-au-moins-une,throw new Error(…)
+app/applications/erp/pages/chantiers/avancements/services/avancement.facade.ts,294,9,error,La modification V1 ne supporte qu\'une seule ligne a la fois.,chantiers.avancements.error.la-modification-v1-ne,throw new Error(…)
+app/applications/erp/pages/chantiers/budget/budget-chantier-detail/components/revisions-history/revisions-history.component.ts,27,23,inline_template_text,Pièce :,chantiers.budget.text.piece,>…<
+app/applications/erp/pages/chantiers/budget/budget-chantier-listing/budget-chantier-listing.page.ts,19,36,inline_template_text,Chantiers · Budget vs réalisé,chantiers.budget.text.chantiers-budget-vs-realise,>…<
+app/applications/erp/pages/chantiers/budget/budget-chantier-listing/budget-chantier-listing.page.ts,25,18,inline_template_text,Budget révisé,chantiers.budget.text.budget-revise,>…<
+app/applications/erp/pages/chantiers/budget/budget-chantier-listing/budget-chantier-listing.page.ts,42,134,inline_template_text,Terminé,chantiers.budget.text.termine,>…<
+app/applications/erp/pages/chantiers/budget/budget-chantier-listing/budget-chantier-listing.page.ts,54,35,inline_template_text,Marge négative,chantiers.budget.text.marge-negative,>…<
+app/applications/erp/pages/chantiers/budget/budget-chantier-listing/budget-chantier-listing.page.ts,67,18,inline_template_text,Désignation,chantiers.budget.text.designation,>…<
+app/applications/erp/pages/chantiers/budget/budget-chantier-listing/budget-chantier-listing.page.ts,69,18,inline_template_text,Révisé,chantiers.budget.text.revise,>…<
+app/applications/erp/pages/chantiers/budget/budget-chantier-listing/budget-chantier-listing.page.ts,70,18,inline_template_text,Engagé,chantiers.budget.text.engage,>…<
+app/applications/erp/pages/chantiers/budget/budget-chantier-listing/budget-chantier-listing.page.ts,74,18,inline_template_text,Marge projetée,chantiers.budget.text.marge-projetee,>…<
+app/applications/erp/pages/chantiers/situations/components/decompte-print/decompte-print.component.html,116,41,template_text,Pour l'entrepreneur,chantiers.situations.text.pour-entrepreneur,>…<
+app/applications/erp/pages/chantiers/situations/components/decompte-print/decompte-print.component.html,120,41,template_text,Pour le maître d'ouvrage,chantiers.situations.text.pour-le-maitre-ouvrage,>…<
+app/applications/erp/pages/etudes/devis/devis-detail/devis-detail.page.html,32,24,template_text,Émis le  · Valable jusqu'au,etudes.devis.text.emis-le-valable-jusqu,>…<
+app/applications/erp/pages/etudes/devis/devis-detail/devis-detail.page.html,39,23,template_text,Désignation,etudes.devis.text.designation,>…<
+app/applications/erp/pages/etudes/devis/devis-detail/devis-detail.page.html,39,99,template_text,Total HT,etudes.devis.text.total-ht,>…<
+app/applications/erp/pages/etudes/devis/devis-detail/devis-detail.page.html,52,13,template_text,Total HT,etudes.devis.text.total-ht,>…<
+app/applications/erp/pages/etudes/devis/devis-detail/devis-detail.page.html,54,13,template_text,Total TTC,etudes.devis.text.total-ttc,>…<
+app/applications/erp/pages/etudes/metres/services/metre-api.service.ts,78,13,error,Métré ${id} introuvable,etudes.metres.error.metre-id-introuvable,throw new Error(…)
+app/applications/erp/pages/finance/rapprochement/rapprochement.page.ts,195,9,confirm,Effacer toutes les lignes du relevé ?,finance.rapprochement.confirm.effacer-toutes-les-lignes,confirm(…)
+app/applications/erp/pages/finance/rapprochement/rapprochement.page.ts,265,9,confirm,Supprimer ce rapprochement ?,finance.rapprochement.confirm.supprimer-ce-rapprochement,confirm(…)
+app/applications/erp/pages/finance/reglements/reglement-saisie/reglement-saisie.page.ts,158,9,confirm,Annuler ce règlement ? Les factures seront restaurées.,finance.reglements.confirm.annuler-ce-reglement-les,confirm(…)
+app/applications/erp/pages/finance/reglements/reglement-saisie/reglement-saisie.page.ts,170,9,confirm,Supprimer définitivement ce règlement ?,finance.reglements.confirm.supprimer-definitivement-ce-reglement,confirm(…)
+app/applications/erp/pages/finance/virements/virement-detail/virement-detail.page.ts,107,9,confirm,Annuler ce virement et supprimer les mouvements associés ?,finance.virements.confirm.annuler-ce-virement-et,confirm(…)
+app/applications/erp/pages/finance/virements/virement-detail/virement-detail.page.ts,119,9,confirm,Supprimer définitivement ce virement ?,finance.virements.confirm.supprimer-definitivement-ce-virement,confirm(…)
+app/applications/erp/pages/hse/non-conformites/services/nc-api.service.ts,49,16,error,Non-conformité ${id} introuvable,hse.non-conformites.error.non-conformite-id-introuvable,throw new Error(…)
+app/applications/erp/pages/inventory/catalogue/materiel/services/materiel-api.service.ts,70,7,error,Matériel ${String(id)} introuvable,inventory.catalogue.error.materiel-string-id-introuvable,throw new Error(…)
+app/applications/erp/pages/inventory/configuration/uom/services/uom.facade.ts,48,7,error,Unité de mesure introuvable : ${id},inventory.configuration.error.unite-de-mesure-introuvable,throw new Error(…)
+app/applications/erp/pages/inventory/configuration/uom/services/uom.facade.ts,60,7,error,Unité de mesure introuvable : ${id},inventory.configuration.error.unite-de-mesure-introuvable,throw new Error(…)
+app/applications/erp/pages/inventory/configuration/uom/services/uom.facade.ts,68,7,error,Échec de la suppression de l'unité de mesure : ${id},inventory.configuration.error.echec-de-la-suppression,throw new Error(…)
+app/applications/erp/pages/inventory/magasin-chantier/magasin-chantier.page.ts,26,83,inline_template_text,Transfert vers chantier,inventory.magasin-chantier.text.transfert-vers-chantier,>…<
+app/applications/erp/pages/inventory/magasin-chantier/magasin-chantier.page.ts,51,22,inline_template_text,Magasin chantier introuvable pour ce paramètre.,inventory.magasin-chantier.text.magasin-chantier-introuvable-pour,>…<
+app/applications/erp/pages/inventory/materiel/affectations/affectations.page.ts,32,18,inline_template_text,Matériel,inventory.materiel.text.materiel,>…<
+app/applications/erp/pages/inventory/materiel/affectations/affectations.page.ts,34,18,inline_template_text,Début,inventory.materiel.text.debut,>…<
+app/applications/erp/pages/inventory/materiel/affectations/affectations.page.ts,56,46,inline_template_text,Aucune affectation disponible.,inventory.materiel.text.aucune-affectation-disponible,>…<
+app/applications/erp/pages/inventory/mobile/inventory-mobile-scanner.page.ts,25,24,inline_template_text,Caméra refusée : autorisez l’accès dans les paramètres du navigateur.,inventory.mobile.text.camera-refusee-autorisez-acces,>…<
+app/applications/erp/pages/inventory/mobile/inventory-mobile-scanner.page.ts,40,38,inline_template_attr,Code-barres ou URL nafura://,inventory.mobile.label.code-barres-ou-url-nafura,placeholder=…
+app/applications/erp/pages/inventory/mobile/inventory-mobile-scanner.page.ts,41,88,inline_template_text,Valider,inventory.mobile.text.valider,>…<
+app/applications/erp/pages/inventory/mouvements/inventaires/services/inventaire.facade.ts,135,7,error,Un inventaire validé ne peut pas être modifié.,inventory.mouvements.error.un-inventaire-valide-ne,throw new Error(…)
+app/applications/erp/pages/inventory/mouvements/inventaires/services/inventaire.facade.ts,144,7,error,Échec de la mise à jour,inventory.mouvements.error.echec-de-la-mise,throw new Error(…)
+app/applications/erp/pages/inventory/mouvements/inventaires/services/inventaire.facade.ts,152,7,error,Un inventaire validé ne peut pas être supprimé.,inventory.mouvements.error.un-inventaire-valide-ne,throw new Error(…)
+app/applications/erp/pages/inventory/mouvements/pertes-chutes/services/perte.facade.ts,143,7,error,Déclaration de perte introuvable,inventory.mouvements.error.declaration-de-perte-introuvable,throw new Error(…)
+app/applications/erp/pages/inventory/mouvements/pertes-chutes/services/perte.facade.ts,174,7,error,Déclaration de perte introuvable,inventory.mouvements.error.declaration-de-perte-introuvable,throw new Error(…)
+app/applications/erp/pages/inventory/mouvements/pertes-chutes/services/perte.facade.ts,177,7,error,Une déclaration validée ne peut pas être modifiée.,inventory.mouvements.error.une-declaration-validee-ne,throw new Error(…)
+app/applications/erp/pages/inventory/mouvements/pertes-chutes/services/perte.facade.ts,187,7,error,Échec de la mise à jour,inventory.mouvements.error.echec-de-la-mise,throw new Error(…)
+app/applications/erp/pages/inventory/mouvements/pertes-chutes/services/perte.facade.ts,195,7,error,Une déclaration validée ne peut pas être supprimée.,inventory.mouvements.error.une-declaration-validee-ne,throw new Error(…)
+app/applications/erp/pages/inventory/mouvements/receptions/services/reception.facade.ts,143,7,error,Réception introuvable,inventory.mouvements.error.reception-introuvable,throw new Error(…)
+app/applications/erp/pages/inventory/mouvements/receptions/services/reception.facade.ts,176,7,error,Réception introuvable,inventory.mouvements.error.reception-introuvable,throw new Error(…)
+app/applications/erp/pages/inventory/mouvements/receptions/services/reception.facade.ts,179,7,error,Une réception validée ne peut pas être modifiée.,inventory.mouvements.error.une-reception-validee-ne,throw new Error(…)
+app/applications/erp/pages/inventory/mouvements/receptions/services/reception.facade.ts,194,7,error,Échec de la mise à jour,inventory.mouvements.error.echec-de-la-mise,throw new Error(…)
+app/applications/erp/pages/inventory/mouvements/receptions/services/reception.facade.ts,202,7,error,Supprimez via annulation pour une réception validée.,inventory.mouvements.error.supprimez-via-annulation-pour,throw new Error(…)
+app/applications/erp/pages/inventory/mouvements/receptions/services/reception.facade.ts,209,14,error,Réception introuvable,inventory.mouvements.error.reception-introuvable,throw new Error(…)
+app/applications/erp/pages/inventory/mouvements/receptions/services/reception.facade.ts,210,36,error,"Seule une réception ""À valider"" peut être validée",inventory.mouvements.error.seule-une-reception-valider,throw new Error(…)
+app/applications/erp/pages/inventory/mouvements/receptions/services/reception.facade.ts,218,14,error,Réception introuvable,inventory.mouvements.error.reception-introuvable,throw new Error(…)
+app/applications/erp/pages/inventory/mouvements/receptions/services/reception.facade.ts,219,36,error,"Seule une réception ""À valider"" peut être rejetée",inventory.mouvements.error.seule-une-reception-valider,throw new Error(…)
+app/applications/erp/pages/inventory/mouvements/receptions/services/reception.facade.ts,227,14,error,Réception introuvable,inventory.mouvements.error.reception-introuvable,throw new Error(…)
+app/applications/erp/pages/inventory/mouvements/receptions/services/reception.facade.ts,228,33,error,Seule une réception validée peut être remise en brouillon,inventory.mouvements.error.seule-une-reception-validee,throw new Error(…)
+app/applications/erp/pages/inventory/mouvements/receptions/services/reception.facade.ts,230,19,error,Impossible de remettre en brouillon,inventory.mouvements.error.impossible-de-remettre-en,throw new Error(…)
+app/applications/erp/pages/inventory/mouvements/retours/services/retour.facade.ts,145,7,error,Retour introuvable,inventory.mouvements.error.retour-introuvable,throw new Error(…)
+app/applications/erp/pages/inventory/mouvements/retours/services/retour.facade.ts,177,7,error,Retour introuvable,inventory.mouvements.error.retour-introuvable,throw new Error(…)
+app/applications/erp/pages/inventory/mouvements/retours/services/retour.facade.ts,180,7,error,Un retour validé ne peut pas être modifié.,inventory.mouvements.error.un-retour-valide-ne,throw new Error(…)
+app/applications/erp/pages/inventory/mouvements/retours/services/retour.facade.ts,191,7,error,Échec de la mise à jour,inventory.mouvements.error.echec-de-la-mise,throw new Error(…)
+app/applications/erp/pages/inventory/mouvements/retours/services/retour.facade.ts,199,7,error,Suppression impossible pour un retour validé.,inventory.mouvements.error.suppression-impossible-pour-un,throw new Error(…)
+app/applications/erp/pages/inventory/mouvements/sorties/services/sortie.facade.ts,184,7,error,Une sortie validée ne peut pas être modifiée.,inventory.mouvements.error.une-sortie-validee-ne,throw new Error(…)
+app/applications/erp/pages/inventory/mouvements/sorties/services/sortie.facade.ts,194,7,error,Échec de la mise à jour,inventory.mouvements.error.echec-de-la-mise,throw new Error(…)
+app/applications/erp/pages/inventory/mouvements/sorties/services/sortie.facade.ts,202,7,error,Une sortie validée ne peut pas être supprimée.,inventory.mouvements.error.une-sortie-validee-ne,throw new Error(…)
+app/applications/erp/pages/inventory/mouvements/transferts/services/transfert.facade.ts,179,7,error,Un transfert validé ne peut pas être modifié.,inventory.mouvements.error.un-transfert-valide-ne,throw new Error(…)
+app/applications/erp/pages/inventory/mouvements/transferts/services/transfert.facade.ts,191,7,error,Échec de la mise à jour,inventory.mouvements.error.echec-de-la-mise,throw new Error(…)
+app/applications/erp/pages/inventory/mouvements/transferts/services/transfert.facade.ts,199,7,error,Supprimez via annulation pour un transfert validé.,inventory.mouvements.error.supprimez-via-annulation-pour,throw new Error(…)
+app/applications/erp/pages/inventory/reservations/reservations-stock.page.ts,16,12,inline_template_text,Réservations stock chantier,inventory.reservations.text.reservations-stock-chantier,>…<
+app/applications/erp/pages/inventory/reservations/reservations-stock.page.ts,17,23,inline_template_text,Disponible = stock physique − réservations actives (M-STK-02).,inventory.reservations.text.disponible-stock-physique-reservations,>…<
+app/applications/erp/pages/inventory/reservations/reservations-stock.page.ts,29,15,inline_template_text,Date besoin,inventory.reservations.text.date-besoin,>…<
+app/applications/erp/pages/inventory/reservations/reservations-stock.page.ts,31,15,inline_template_text,Date expiration,inventory.reservations.text.date-expiration,>…<
+app/applications/erp/pages/inventory/reservations/reservations-stock.page.ts,35,46,inline_template_text,Créer réservation,inventory.reservations.text.creer-reservation,>…<
+app/applications/erp/pages/inventory/reservations/reservations-stock.page.ts,61,81,inline_template_text,Annuler,inventory.reservations.text.annuler,>…<
+app/applications/erp/pages/inventory/suivi/alertes/alertes-reappro.page.ts,54,16,inline_template_text,Modifier le seuil minimum,inventory.suivi.text.modifier-le-seuil-minimum,>…<
+app/applications/erp/pages/inventory/suivi/alertes/alertes-reappro.page.ts,67,80,inline_template_text,Annuler,inventory.suivi.text.annuler,>…<
+app/applications/erp/pages/inventory/suivi/alertes/alertes-reappro.page.ts,68,71,inline_template_text,Enregistrer,inventory.suivi.text.enregistrer,>…<
+app/applications/erp/pages/inventory/suivi/etat-stock/etat-stocks.page.ts,68,34,inline_template_text,Tous,inventory.suivi.text.tous,>…<
+app/applications/erp/pages/inventory/suivi/etat-stock/etat-stocks.page.ts,69,36,inline_template_text,Dépôt / entrepôt / transit,inventory.suivi.text.depot-entrepot-transit,>…<
+app/applications/erp/pages/inventory/suivi/etat-stock/etat-stocks.page.ts,80,31,inline_template_text,Toutes,inventory.suivi.text.toutes,>…<
+app/applications/erp/pages/inventory/suivi/etat-stock/etat-stocks.page.ts,93,31,inline_template_text,Toutes,inventory.suivi.text.toutes,>…<
+app/applications/erp/pages/inventory/suivi/etat-stock/etat-stocks.page.ts,106,34,inline_template_text,Tous,inventory.suivi.text.tous,>…<
+app/applications/erp/pages/inventory/suivi/etat-stock/etat-stocks.page.ts,107,36,inline_template_text,En alerte,inventory.suivi.text.en-alerte,>…<
+app/applications/erp/pages/inventory/suivi/etat-stock/etat-stocks.page.ts,108,40,inline_template_text,Épuisés,inventory.suivi.text.epuises,>…<
+app/applications/erp/pages/inventory/suivi/etat-stock/etat-stocks.page.ts,113,47,inline_template_text,Recherche,inventory.suivi.text.recherche,>…<
+app/applications/erp/pages/marches/avenants/avenant-detail/avenant-detail.page.ts,114,49,inline_template_text,"0"" [class.negative]=""a.montantHt",marches.avenants.text.class-negative-montantht,>…<
+app/applications/erp/pages/marches/avenants/avenant-listing/avenant-listing.page.ts,60,63,inline_template_text,"0"" [class.negative]=""a.montantHt",marches.avenants.text.class-negative-montantht,>…<
+app/applications/erp/pages/marches/contrats/contrat-detail/contrat-detail.page.ts,171,69,inline_template_text,"0"" [class.negative]=""a.montantHt",marches.contrats.text.class-negative-montantht,>…<
+app/applications/erp/pages/marches/models/index.ts,227,34,type_label,Régie,marches.models.label.regie,MARCHE_TYPE_LABELS.REGIE
+app/applications/erp/pages/marches/models/index.ts,233,1,status_label,Public (État / CT),marches.models.status.public-etat-ct,MARCHE_NATURE_LABELS.PUBLIC
+app/applications/erp/pages/marches/models/index.ts,234,31,status_label,Privé grand compte,marches.models.status.prive-grand-compte,MARCHE_NATURE_LABELS.PRIVE_GRAND_COMPTE
+app/applications/erp/pages/marches/models/index.ts,235,43,status_label,Privé PME,marches.models.status.prive-pme,MARCHE_NATURE_LABELS.PRIVE_PME
+app/applications/erp/pages/marches/models/index.ts,242,25,status_label,Signé,marches.models.status.signe,MARCHE_STATUS_LABELS.SIGNE
+app/applications/erp/pages/marches/models/index.ts,243,17,status_label,En exécution,marches.models.status.en-execution,MARCHE_STATUS_LABELS.EN_EXECUTION
+app/applications/erp/pages/marches/models/index.ts,244,31,status_label,Récep. provisoire,marches.models.status.recep-provisoire,MARCHE_STATUS_LABELS.RECEPTION_PROVISOIRE
+app/applications/erp/pages/marches/models/index.ts,245,44,status_label,Récep. définitive,marches.models.status.recep-definitive,MARCHE_STATUS_LABELS.RECEPTION_DEFINITIVE
+app/applications/erp/pages/marches/models/index.ts,246,44,status_label,Clôturé,marches.models.status.cloture,MARCHE_STATUS_LABELS.CLOTURE
+app/applications/erp/pages/marches/models/index.ts,247,21,status_label,Résilié,marches.models.status.resilie,MARCHE_STATUS_LABELS.RESILIE
+app/applications/erp/pages/marches/models/index.ts,262,1,type_label,Travaux supplémentaires,marches.models.label.travaux-supplementaires,AVENANT_TYPE_LABELS.TVX_SUPPLEMENTAIRES
+app/applications/erp/pages/marches/models/index.ts,263,49,type_label,Prolongation de délai,marches.models.label.prolongation-de-delai,AVENANT_TYPE_LABELS.PROLONGATION_DELAI
+app/applications/erp/pages/marches/models/index.ts,272,25,status_label,Proposé,marches.models.status.propose,AVENANT_STATUS_LABELS.PROPOSE
+app/applications/erp/pages/marches/models/index.ts,273,21,status_label,Signé,marches.models.status.signe,AVENANT_STATUS_LABELS.SIGNE
+app/applications/erp/pages/marches/models/index.ts,274,17,status_label,Rejeté,marches.models.status.rejete,AVENANT_STATUS_LABELS.REJETE
+app/applications/erp/pages/marches/models/index.ts,280,25,status_label,Émise,marches.models.status.emise,FACTURE_STATUS_LABELS.EMISE
+app/applications/erp/pages/marches/models/index.ts,281,17,status_label,Envoyée MOA,marches.models.status.envoyee-moa,FACTURE_STATUS_LABELS.ENVOYEE_MOA
+app/applications/erp/pages/marches/models/index.ts,282,29,status_label,Acceptée,marches.models.status.acceptee,FACTURE_STATUS_LABELS.ACCEPTEE
+app/applications/erp/pages/marches/models/index.ts,283,23,status_label,Part. payée,marches.models.status.part-payee,FACTURE_STATUS_LABELS.PAYEE_PARTIEL
+app/applications/erp/pages/marches/models/index.ts,284,31,status_label,Payée,marches.models.status.payee,FACTURE_STATUS_LABELS.PAYEE
+app/applications/erp/pages/marches/models/index.ts,285,17,status_label,Contestée,marches.models.status.contestee,FACTURE_STATUS_LABELS.CONTESTEE
+app/applications/erp/pages/marches/models/index.ts,301,35,type_label,Caution définitive,marches.models.label.caution-definitive,CAUTION_TYPE_LABELS.DEFINITIVE
+app/applications/erp/pages/marches/models/index.ts,303,43,type_label,Retenue de garantie,marches.models.label.retenue-de-garantie,CAUTION_TYPE_LABELS.RETENUE_GARANTIE
+app/applications/erp/pages/marches/models/index.ts,308,1,status_label,Émise,marches.models.status.emise,CAUTION_STATUS_LABELS.EMISE
+app/applications/erp/pages/marches/models/index.ts,310,19,status_label,Levée,marches.models.status.levee,CAUTION_STATUS_LABELS.LEVEE
+app/applications/erp/pages/marches/models/index.ts,311,17,status_label,Expirée,marches.models.status.expiree,CAUTION_STATUS_LABELS.EXPIRE
+app/applications/erp/pages/marches/models/index.ts,312,20,status_label,Jouée,marches.models.status.jouee,CAUTION_STATUS_LABELS.JOUE
+app/applications/erp/pages/marches/models/index.ts,319,27,status_label,Notifié,marches.models.status.notifie,DGD_STATUS_LABELS.NOTIFIE
+app/applications/erp/pages/marches/models/index.ts,320,21,status_label,Payé,marches.models.status.paye,DGD_STATUS_LABELS.PAYE
+app/applications/erp/pages/marches/models/index.ts,321,15,status_label,Contesté,marches.models.status.conteste,DGD_STATUS_LABELS.CONTESTE
+app/applications/erp/pages/marches/models/index.ts,327,31,type_label,Arrêt,marches.models.label.arret,ORDRE_SERVICE_TYPE_LABELS.ARRET
+app/applications/erp/pages/marches/models/index.ts,335,1,status_label,Émis,marches.models.status.emis,ORDRE_SERVICE_STATUS_LABELS.EMIS
+app/applications/erp/pages/marches/models/index.ts,336,15,status_label,Réceptionné,marches.models.status.receptionne,ORDRE_SERVICE_STATUS_LABELS.RECEPTIONNE
+app/applications/erp/pages/marches/models/index.ts,337,29,status_label,Contesté,marches.models.status.conteste,ORDRE_SERVICE_STATUS_LABELS.CONTESTE
+app/applications/erp/pages/rh/pointage/models/index.ts,33,1,status_label,Présent,rh.pointage.status.present,MODE_LABELS.PRESENT
+app/applications/erp/pages/rh/pointage/models/index.ts,35,19,status_label,Congé,rh.pointage.status.conge,MODE_LABELS.CONGE
+app/applications/erp/pages/ventes/bons-commandes-clients/config/listing/columns.ts,5,1,status_label,Reçu,ventes.bons-commandes-clients.status.recu,BCC_STATUS_LABELS.RECU
+app/applications/erp/pages/ventes/bons-commandes-clients/config/listing/columns.ts,6,15,status_label,En cours,ventes.bons-commandes-clients.status.en-cours,BCC_STATUS_LABELS.EN_COURS
+app/applications/erp/pages/ventes/bons-commandes-clients/config/listing/columns.ts,6,37,status_label,Part. facturé,ventes.bons-commandes-clients.status.part-facture,BCC_STATUS_LABELS.PARTIELLEMENT_FACTURE
+app/applications/erp/pages/ventes/bons-commandes-clients/config/listing/columns.ts,6,77,status_label,Facturé,ventes.bons-commandes-clients.status.facture,BCC_STATUS_LABELS.FACTURE
+app/applications/erp/pages/ventes/bons-commandes-clients/config/listing/columns.ts,7,21,status_label,Clôturé,ventes.bons-commandes-clients.status.cloture,BCC_STATUS_LABELS.CLOTURE
+app/applications/erp/pages/ventes/bons-commandes-clients/config/listing/columns.ts,7,41,status_label,Annulé,ventes.bons-commandes-clients.status.annule,BCC_STATUS_LABELS.ANNULE
+app/applications/erp/pages/ventes/bons-commandes-clients/services/bcc-api.service.ts,59,13,error,Bon de commande client ${id} introuvable,ventes.bons-commandes-clients.error.bon-de-commande-client,throw new Error(…)
+app/applications/erp/pages/ventes/retenues-garantie/retenues-garantie.page.html,25,13,template_attr,Rechercher par chantier ou client…,ventes.retenues-garantie.label.rechercher-par-chantier-ou,placeholder=…
+app/applications/erp/pages/ventes/retenues-garantie/retenues-garantie.page.html,33,27,template_text,Tous les clients,ventes.retenues-garantie.text.tous-les-clients,>…<
+app/applications/erp/pages/ventes/retenues-garantie/retenues-garantie.page.html,42,27,template_text,Tous statuts,ventes.retenues-garantie.text.tous-statuts,>…<
+app/applications/erp/pages/ventes/retenues-garantie/retenues-garantie.page.html,43,35,template_text,En cours,ventes.retenues-garantie.text.en-cours,>…<
+app/applications/erp/pages/ventes/retenues-garantie/retenues-garantie.page.html,44,46,template_text,Libération demandée,ventes.retenues-garantie.text.liberation-demandee,>…<
+app/applications/erp/pages/ventes/retenues-garantie/retenues-garantie.page.html,45,34,template_text,Libérée,ventes.retenues-garantie.text.liberee,>…<
+app/applications/erp/pages/ventes/retenues-garantie/retenues-garantie.page.html,46,36,template_text,Contestée,ventes.retenues-garantie.text.contestee,>…<
+app/applications/erp/pages/ventes/retenues-garantie/retenues-garantie.page.html,65,28,template_text,Retenue cumulée,ventes.retenues-garantie.text.retenue-cumulee,>…<
+app/applications/erp/pages/ventes/retenues-garantie/retenues-garantie.page.html,66,28,template_text,Déjà libéré,ventes.retenues-garantie.text.deja-libere,>…<
+app/applications/erp/pages/ventes/retenues-garantie/retenues-garantie.page.html,67,28,template_text,Reste à libérer,ventes.retenues-garantie.text.reste-liberer,>…<
+app/applications/erp/pages/ventes/retenues-garantie/retenues-garantie.page.html,68,16,template_text,Récept. provisoire,ventes.retenues-garantie.text.recept-provisoire,>…<
+app/applications/erp/pages/ventes/retenues-garantie/retenues-garantie.page.html,69,16,template_text,Libération prévue,ventes.retenues-garantie.text.liberation-prevue,>…<
+app/applications/erp/pages/ventes/retenues-garantie/retenues-garantie.page.html,70,16,template_text,Délai restant,ventes.retenues-garantie.text.delai-restant,>…<
+app/applications/erp/security/erp-permissions.catalog.ts,84,1,status_label,Tableau de bord,shared.erp-permissions.catalog.status.tableau-de-bord,ERP_MODULE_LABELS.dashboard
+app/applications/erp/security/erp-permissions.catalog.ts,88,30,status_label,Matériel & Engins,shared.erp-permissions.catalog.status.materiel-engins,ERP_MODULE_LABELS.materiel
+app/applications/erp/security/erp-permissions.catalog.ts,89,32,status_label,Études & Métrés,shared.erp-permissions.catalog.status.etudes-metres,ERP_MODULE_LABELS.etudes
+app/applications/erp/security/erp-permissions.catalog.ts,90,28,status_label,Marchés & Facturation,shared.erp-permissions.catalog.status.marches-facturation,ERP_MODULE_LABELS.marches
+app/applications/erp/security/erp-permissions.catalog.ts,92,19,status_label,Finance & Comptabilité,shared.erp-permissions.catalog.status.finance-comptabilite,ERP_MODULE_LABELS.finance
+app/applications/erp/security/erp-permissions.catalog.ts,94,28,status_label,HSE & Qualité,shared.erp-permissions.catalog.status.hse-qualite,ERP_MODULE_LABELS.hse
+app/applications/erp/security/erp-permissions.catalog.ts,106,15,status_label,Créer,shared.erp-permissions.catalog.status.creer,ERP_ACTION_LABELS.create
+app/applications/erp/security/erp-permissions.catalog.ts,107,18,status_label,Modifier,shared.erp-permissions.catalog.status.modifier,ERP_ACTION_LABELS.update
+app/applications/erp/security/erp-permissions.catalog.ts,108,21,status_label,Supprimer,shared.erp-permissions.catalog.status.supprimer,ERP_ACTION_LABELS.delete
+app/applications/erp/security/erp-permissions.catalog.ts,111,21,status_label,Valider,shared.erp-permissions.catalog.status.valider,ERP_ACTION_LABELS.validate
+app/applications/erp/security/erp-permissions.catalog.ts,113,23,status_label,Tout gérer,shared.erp-permissions.catalog.status.tout-gerer,ERP_ACTION_LABELS.manage
+app/applications/erp/shell/chantier-drilldown.service.ts,36,12,toast,Impossible d’ouvrir le chantier : lien indisponible ou chantier non renseigné.,shared.chantier-drilldown.service.toast.impossible-ouvrir-le-chantier,toast.warning()
+app/applications/erp/shell/components/societe-switcher/societe-switcher.component.ts,52,51,inline_template_text,Société,shared.components.text.societe,>…<
+app/applications/erp/shell/components/societe-switcher/societe-switcher.component.ts,70,53,inline_template_text,Établissement,shared.components.text.etablissement,>…<
+app/applications/erp/shell/comptable-mapping.service.ts,35,59,status_label,Vente marché public (Situation travaux),shared.comptable-mapping.service.status.vente-marche-public-situation,OPERATION_LABELS.VENTE_MARCHE_PUBLIC
+app/applications/erp/shell/comptable-mapping.service.ts,36,65,status_label,Vente marché privé (Situation travaux),shared.comptable-mapping.service.status.vente-marche-prive-situation,OPERATION_LABELS.VENTE_MARCHE_PRIVE
+app/applications/erp/shell/comptable-mapping.service.ts,37,63,status_label,Achat matières premières,shared.comptable-mapping.service.status.achat-matieres-premieres,OPERATION_LABELS.ACHAT_MATIERES
+app/applications/erp/shell/comptable-mapping.service.ts,38,45,status_label,Achat sous-traitance BTP,shared.comptable-mapping.service.status.achat-sous-traitance-btp,OPERATION_LABELS.ACHAT_SOUS_TRAITANCE
+app/applications/erp/shell/comptable-mapping.service.ts,39,51,status_label,Achat frais généraux,shared.comptable-mapping.service.status.achat-frais-generaux,OPERATION_LABELS.ACHAT_FRAIS_GENERAUX
+app/applications/erp/shell/comptable-mapping.service.ts,40,47,status_label,Règlement client (banque),shared.comptable-mapping.service.status.reglement-client-banque,OPERATION_LABELS.REGLEMENT_CLIENT_BANQUE
+app/applications/erp/shell/comptable-mapping.service.ts,41,55,status_label,Règlement client (caisse),shared.comptable-mapping.service.status.reglement-client-caisse,OPERATION_LABELS.REGLEMENT_CLIENT_CAISSE
+app/applications/erp/shell/comptable-mapping.service.ts,42,55,status_label,Règlement fournisseur (banque),shared.comptable-mapping.service.status.reglement-fournisseur-banque,OPERATION_LABELS.REGLEMENT_FOURNISSEUR_BANQUE
+app/applications/erp/shell/comptable-mapping.service.ts,43,65,status_label,Règlement fournisseur (caisse),shared.comptable-mapping.service.status.reglement-fournisseur-caisse,OPERATION_LABELS.REGLEMENT_FOURNISSEUR_CAISSE
+app/applications/erp/shell/comptable-mapping.service.ts,46,63,status_label,Déclaration TVA mensuelle,shared.comptable-mapping.service.status.declaration-tva-mensuelle,OPERATION_LABELS.DECLARATION_TVA
+app/applications/erp/shell/comptable-mapping.service.ts,47,47,status_label,Déclaration RAS (reversement DGI),shared.comptable-mapping.service.status.declaration-ras-reversement-dgi,OPERATION_LABELS.DECLARATION_RAS
+app/applications/erp/shell/erp-audit.service.ts,20,1,status_label,Création,shared.erp-audit.service.status.creation,ACTION_LABELS.CREATE
+app/applications/erp/shell/erp-audit.service.ts,29,23,status_label,Déconnexion,shared.erp-audit.service.status.deconnexion,ACTION_LABELS.LOGOUT
+app/applications/erp/shell/erp-notification-panel.component.ts,35,13,inline_template_text,Aucune alerte en attente,shared.erp-notification-panel.component.text.aucune-alerte-en-attente,>…<
+app/applications/erp/shell/numbering-policy.service.ts,54,17,type_label,Bon de commande (achat),shared.numbering-policy.service.label.bon-de-commande-achat,NUMBERING_DOC_TYPE_LABELS.BON_COMMANDE_ACHAT
+app/applications/erp/shell/numbering-policy.service.ts,56,34,type_label,Bon de livraison / Réception,shared.numbering-policy.service.label.bon-de-livraison-reception,NUMBERING_DOC_TYPE_LABELS.BON_LIVRAISON
+app/applications/erp/shell/numbering-policy.service.ts,57,48,type_label,Situation de travaux,shared.numbering-policy.service.label.situation-de-travaux,NUMBERING_DOC_TYPE_LABELS.SITUATION_TRAVAUX
+app/applications/erp/shell/numbering-policy.service.ts,59,29,type_label,Contrat de sous-traitance,shared.numbering-policy.service.label.contrat-de-sous-traitance,NUMBERING_DOC_TYPE_LABELS.CONTRAT_SOUS_TRAITANCE
+app/applications/erp/shell/session-audit.service.ts,55,1,status_label,Mot de passe erroné,shared.session-audit.service.status.mot-de-passe-errone,FAILURE_REASON_LABELS.BAD_PASSWORD
+app/applications/erp/shell/session-audit.service.ts,56,38,status_label,Utilisateur inconnu,shared.session-audit.service.status.utilisateur-inconnu,FAILURE_REASON_LABELS.USER_NOT_FOUND
+app/applications/erp/shell/session-audit.service.ts,57,40,status_label,Compte verrouillé,shared.session-audit.service.status.compte-verrouille,FAILURE_REASON_LABELS.ACCOUNT_LOCKED
+app/applications/erp/shell/session-audit.service.ts,59,29,status_label,IP bloquée,shared.session-audit.service.status.ip-bloquee,FAILURE_REASON_LABELS.IP_BLOCKED
+app/applications/erp/shell/session-audit.service.ts,60,27,status_label,Token expiré,shared.session-audit.service.status.token-expire,FAILURE_REASON_LABELS.EXPIRED_TOKEN
+app/applications/erp/shell/session-audit.service.ts,65,1,status_label,Succès,shared.session-audit.service.status.succes,OUTCOME_LABELS.SUCCESS
+app/applications/erp/shell/session-audit.service.ts,66,20,status_label,Échec,shared.session-audit.service.status.echec,OUTCOME_LABELS.FAILED
+app/applications/erp/ventes/components/avoir-print/avoir-print.component.ts,38,18,inline_template_text,Date,ventes.components.text.date,>…<
+app/applications/erp/ventes/components/avoir-print/avoir-print.component.ts,50,12,inline_template_text,Au profit de,ventes.components.text.au-profit-de,>…<
+app/applications/erp/ventes/components/avoir-print/avoir-print.component.ts,55,12,inline_template_text,Motif de l'avoir,ventes.components.text.motif-de-avoir,>…<
+app/applications/erp/ventes/components/avoir-print/avoir-print.component.ts,62,16,inline_template_text,Désignation,ventes.components.text.designation,>…<
+app/applications/erp/ventes/components/avoir-print/avoir-print.component.ts,63,28,inline_template_text,Total HT,ventes.components.text.total-ht,>…<
+app/applications/erp/ventes/components/avoir-print/avoir-print.component.ts,79,18,inline_template_text,Total HT,ventes.components.text.total-ht,>…<
+app/applications/erp/ventes/components/avoir-print/avoir-print.component.ts,87,18,inline_template_text,Total TTC,ventes.components.text.total-ttc,>…<
+app/applications/erp/ventes/components/avoir-print/avoir-print.component.ts,98,38,inline_template_text,Cachet et signature,ventes.components.text.cachet-et-signature,>…<
+app/applications/erp/ventes/components/caution-bancaire-dialog/caution-bancaire-dialog.component.ts,44,13,inline_template_text,Substitution par caution bancaire,ventes.components.text.substitution-par-caution-bancaire,>…<
+app/applications/erp/ventes/components/caution-bancaire-dialog/caution-bancaire-dialog.component.ts,54,37,inline_template_text,Retenue à substituer,ventes.components.text.retenue-substituer,>…<
+app/applications/erp/ventes/components/caution-bancaire-dialog/caution-bancaire-dialog.component.ts,79,21,inline_template_text,Montant (MAD) *,ventes.components.text.montant-mad,>…<
+app/applications/erp/ventes/components/caution-bancaire-dialog/caution-bancaire-dialog.component.ts,95,45,inline_template_text,Annuler,ventes.components.text.annuler,>…<
+app/applications/erp/ventes/components/encaissement-form-dialog/encaissement-form-dialog.component.ts,44,13,inline_template_text,Enregistrer un encaissement,ventes.components.text.enregistrer-un-encaissement,>…<
+app/applications/erp/ventes/components/encaissement-form-dialog/encaissement-form-dialog.component.ts,58,37,inline_template_text,Déjà encaissé,ventes.components.text.deja-encaisse,>…<
+app/applications/erp/ventes/components/encaissement-form-dialog/encaissement-form-dialog.component.ts,69,21,inline_template_text,Date encaissement *,ventes.components.text.date-encaissement,>…<
+app/applications/erp/ventes/components/encaissement-form-dialog/encaissement-form-dialog.component.ts,83,39,inline_template_text,Chèque,ventes.components.text.cheque,>…<
+app/applications/erp/ventes/components/encaissement-form-dialog/encaissement-form-dialog.component.ts,85,40,inline_template_text,Espèces,ventes.components.text.especes,>…<
+app/applications/erp/ventes/components/encaissement-form-dialog/encaissement-form-dialog.component.ts,91,21,inline_template_text,"Référence (n° chèque, virement…)",ventes.components.text.reference-cheque-virement,>…<
+app/applications/erp/ventes/components/encaissement-form-dialog/encaissement-form-dialog.component.ts,110,21,inline_template_text,Montant TTC (MAD) *,ventes.components.text.montant-ttc-mad,>…<
+app/applications/erp/ventes/components/encaissement-form-dialog/encaissement-form-dialog.component.ts,137,45,inline_template_text,Annuler,ventes.components.text.annuler,>…<
+app/applications/erp/ventes/components/facture-print/facture-print.component.ts,27,13,inline_template_text,Tél : +212 522 36 78 90 — contact&#64;seyrura.ma,ventes.components.text.tel-212-522-36,>…<
+app/applications/erp/ventes/components/facture-print/facture-print.component.ts,45,18,inline_template_text,Date émission,ventes.components.text.date-emission,>…<
+app/applications/erp/ventes/components/facture-print/facture-print.component.ts,49,18,inline_template_text,Date échéance,ventes.components.text.date-echeance,>…<
+app/applications/erp/ventes/components/facture-print/facture-print.component.ts,83,16,inline_template_text,Désignation,ventes.components.text.designation,>…<
+app/applications/erp/ventes/components/facture-print/facture-print.component.ts,86,28,inline_template_text,Total HT,ventes.components.text.total-ht,>…<
+app/applications/erp/ventes/components/facture-print/facture-print.component.ts,106,18,inline_template_text,Total HT,ventes.components.text.total-ht,>…<
+app/applications/erp/ventes/components/facture-print/facture-print.component.ts,117,20,inline_template_text,Résorption avance,ventes.components.text.resorption-avance,>…<
+app/applications/erp/ventes/components/facture-print/facture-print.component.ts,122,18,inline_template_text,Net à payer HT,ventes.components.text.net-payer-ht,>…<
+app/applications/erp/ventes/components/facture-print/facture-print.component.ts,130,18,inline_template_text,Net à payer TTC,ventes.components.text.net-payer-ttc,>…<
+app/applications/erp/ventes/components/facture-print/facture-print.component.ts,142,14,inline_template_text,Modalités de paiement,ventes.components.text.modalites-de-paiement,>…<
+app/applications/erp/ventes/components/facture-print/facture-print.component.ts,144,13,inline_template_text,Échéance :,ventes.components.text.echeance,>…<
+app/applications/erp/ventes/components/facture-print/facture-print.component.ts,147,14,inline_template_text,Coordonnées bancaires,ventes.components.text.coordonnees-bancaires,>…<
+app/applications/erp/ventes/components/facture-print/facture-print.component.ts,156,16,inline_template_text,Cachet et signature,ventes.components.text.cachet-et-signature,>…<
+app/applications/erp/ventes/components/liberation-dialog/liberation-dialog.component.ts,51,37,inline_template_text,Retenue cumulée,ventes.components.text.retenue-cumulee,>…<
+app/applications/erp/ventes/components/liberation-dialog/liberation-dialog.component.ts,55,37,inline_template_text,Déjà libéré,ventes.components.text.deja-libere,>…<
+app/applications/erp/ventes/components/liberation-dialog/liberation-dialog.component.ts,59,37,inline_template_text,Reste à libérer,ventes.components.text.reste-liberer,>…<
+app/applications/erp/ventes/components/liberation-dialog/liberation-dialog.component.ts,66,21,inline_template_text,Date de libération *,ventes.components.text.date-de-liberation,>…<
+app/applications/erp/ventes/components/liberation-dialog/liberation-dialog.component.ts,95,45,inline_template_text,Annuler,ventes.components.text.annuler,>…<
+app/applications/erp/ventes/components/retenue-summary-card/retenue-summary-card.component.ts,17,12,inline_template_text,Retenues garanties — vue consolidée,ventes.components.text.retenues-garanties-vue-consolidee,>…<
+app/applications/erp/ventes/components/retenue-summary-card/retenue-summary-card.component.ts,25,35,inline_template_text,Total bloqué,ventes.components.text.total-bloque,>…<
+app/applications/erp/ventes/components/retenue-summary-card/retenue-summary-card.component.ts,27,33,inline_template_text,sur  chantiers,ventes.components.text.sur-chantiers,>…<
+app/applications/erp/ventes/components/retenue-summary-card/retenue-summary-card.component.ts,30,35,inline_template_text,À libérer &lt; 30 j,ventes.components.text.liberer-lt-30,>…<
+app/applications/erp/ventes/components/retenue-summary-card/retenue-summary-card.component.ts,40,35,inline_template_text,Libérée 12 mois,ventes.components.text.liberee-12-mois,>…<
+app/platform/core/guards/unsaved-changes.guard.ts,13,9,confirm,Vous avez des modifications non sauvegardées. Quitter quand même ?,shared.misc.confirm.vous-avez-des-modifications,confirm(…)
+app/platform/core/onboarding/onboarding-tour.component.ts,23,56,inline_template_attr,Fermer le tour,shared.misc.label.fermer-le-tour,title=…
+app/platform/core/onboarding/onboarding-tour.component.ts,32,66,inline_template_text,← Précédent,shared.misc.text.precedent,>…<
+app/platform/core/onboarding/onboarding-tour.component.ts,35,68,inline_template_text,Suivant →,shared.misc.text.suivant,>…<
+app/platform/core/pages/errors/maintenance.page.ts,12,32,inline_template_text,Maintenance en cours,shared.misc.text.maintenance-en-cours,>…<
+app/platform/core/pages/errors/maintenance.page.ts,18,34,inline_template_text,Reprise estimée,shared.misc.text.reprise-estimee,>…<
+app/platform/core/pages/errors/maintenance.page.ts,21,52,inline_template_text,🔄 Vérifier la disponibilité,shared.misc.text.verifier-la-disponibilite,>…<
+app/platform/core/pages/errors/maintenance.page.ts,23,72,inline_template_text,support&#64;nafura-btp.ma,shared.misc.text.support-64-nafura-btp-ma,>…<
+app/platform/core/pages/errors/not-found.page.ts,48,14,inline_template_text,Vous cherchiez peut-être :,shared.misc.text.vous-cherchiez-peut-etre,>…<
+app/platform/core/pages/errors/not-found.page.ts,51,41,inline_template_text,Marchés &amp; Facturation,shared.misc.text.marches-amp-facturation,>…<
+app/platform/core/pages/errors/not-found.page.ts,54,43,inline_template_text,Stock &amp; Matériel,shared.misc.text.stock-amp-materiel,>…<
+app/platform/core/pages/errors/server-error.page.ts,17,32,inline_template_text,Erreur serveur inattendue,shared.misc.text.erreur-serveur-inattendue,>…<
+app/platform/core/pages/errors/server-error.page.ts,23,53,inline_template_text,← Retour à l'accueil,shared.misc.text.retour-accueil,>…<
+app/platform/core/pages/errors/server-error.page.ts,24,60,inline_template_text,🔄 Réessayer,shared.misc.text.reessayer,>…<
+app/platform/core/pages/login/login.page.ts,32,31,inline_template_text,Connexion démo — mot de passe,shared.misc.text.connexion-demo-mot-de,>…<
+app/platform/core/pages/login/login.page.ts,38,15,inline_template_attr,Mot de passe,shared.misc.label.mot-de-passe,placeholder=…
+app/platform/core/pages/login/login.page.ts,40,76,inline_template_text,(voir,shared.misc.text.voir,>…<
+app/platform/core/pages/login/login.page.ts,43,31,inline_template_text,Deuxième facteur (démo),shared.misc.text.deuxieme-facteur-demo,>…<
+app/platform/core/pages/login/login.page.ts,50,15,inline_template_attr,Code à 6 chiffres,shared.misc.label.code-chiffres,placeholder=…
+app/platform/core/pages/login/login.page.ts,52,28,inline_template_text,OTP simulé :,shared.misc.text.otp-simule,>…<
+app/platform/core/pages/login/login.page.ts,52,71,inline_template_text,"— en production, Keycloak exige TOTP/WebAuthn/e-mail selon politique IAM.",shared.misc.text.en-production-keycloak-exige,>…<
+app/platform/core/pages/login/login.page.ts,54,86,inline_template_text,Retour,shared.misc.text.retour,>…<
+app/platform/core/pages/login/login.page.ts,55,81,inline_template_text,Valider et ouvrir la session,shared.misc.text.valider-et-ouvrir-la,>…<
+app/platform/features/app-settings/sections/branding/branding.section.ts,436,12,toast,"Invalid logo type. Use PNG, JPG, or SVG.",app-settings.sections.toast.invalid-logo-type-use,toast.error()
+app/platform/features/app-settings/sections/branding/branding.section.ts,440,12,toast,Logo must be 2MB or less.,app-settings.sections.toast.logo-must-be-2mb,toast.error()
+app/platform/features/app-settings/sections/branding/branding.section.ts,469,12,toast,"Invalid favicon type. Use PNG, ICO, or SVG.",app-settings.sections.toast.invalid-favicon-type-use,toast.error()
+app/platform/features/app-settings/sections/branding/branding.section.ts,473,12,toast,Favicon must be 500KB or less.,app-settings.sections.toast.favicon-must-be-500kb,toast.error()
+app/platform/features/documents/doc-extractor/components/doc-extraction-workspace/doc-extraction-workspace.component.html,27,22,template_text,All Document Types,documents.doc-extractor.text.all-document-types,>…<
+app/platform/features/documents/doc-extractor/components/doc-extraction-workspace/doc-extraction-workspace.component.html,172,54,template_text,Document,documents.doc-extractor.text.document,>…<
+app/platform/features/documents/doc-extractor/components/doc-extraction-workspace/doc-extraction-workspace.component.html,179,23,template_attr,Open stored document,documents.doc-extractor.label.open-stored-document,matTooltip=…
+app/platform/features/documents/doc-extractor/components/doc-extractor-settings/doc-extractor-settings.component.html,16,14,template_text,Loading document type definitions…,documents.doc-extractor.text.loading-document-type-definitions,>…<
+app/platform/features/documents/doc-extractor/components/doc-extractor-settings/doc-extractor-settings.component.html,50,41,template_text,No document type definitions found.,documents.doc-extractor.text.no-document-type-definitions,>…<
+app/platform/features/documents/doc-extractor/components/doc-extractor-settings/doc-extractor-settings.component.html,63,37,template_text,Failed to load document type definitions.,documents.doc-extractor.text.failed-to-load-document,>…<
+app/platform/features/documents/doc-extractor/components/document-type-picker/document-type-picker.component.html,4,29,template_text,Choose a document type,documents.doc-extractor.text.choose-document-type,>…<
+app/platform/features/documents/doc-extractor/components/document-type-picker/document-type-picker.component.html,17,9,template_attr,Search document types...,documents.doc-extractor.label.search-document-types,placeholder=…
+app/platform/features/documents/doc-extractor/components/document-type-picker/document-type-picker.component.html,33,30,template_text,No document types found,documents.doc-extractor.text.no-document-types-found,>…<
+app/platform/features/documents/doc-extractor/components/extraction-discovery/extraction-discovery.component.html,4,27,template_text,Choose a category or create a custom one to start extracting data.,documents.doc-extractor.text.choose-category-or-create,>…<
+app/platform/features/documents/doc-extractor/components/extraction-discovery/extraction-discovery.component.html,28,26,template_text,Custom Document Type,documents.doc-extractor.text.custom-document-type,>…<
+app/platform/features/documents/doc-extractor/components/extraction-discovery/extraction-discovery.component.html,29,29,template_text,Define your own schema and extraction rules for any document.,documents.doc-extractor.text.define-your-own-schema,>…<
+app/platform/features/documents/doc-extractor/components/extraction-discovery/extraction-discovery.component.html,45,33,template_text,Select a template to initialize your extraction workspace.,documents.doc-extractor.text.select-template-to-initialize,>…<
+app/platform/features/documents/doc-extractor/components/standard-record-filters/standard-record-filters.component.html,15,17,template_text,Date Field,documents.doc-extractor.text.date-field,>…<
+app/platform/features/documents/doc-extractor/pages/doc-types-page/doc-types-page.component.html,5,25,template_text,Document Types,documents.doc-extractor.text.document-types,>…<
+app/platform/features/documents/doc-extractor/pages/doc-types-page/doc-types-page.component.html,6,26,template_text,Browse and manage document type definitions for extraction.,documents.doc-extractor.text.browse-and-manage-document,>…<
+app/platform/features/documents/doc-extractor/pages/doc-types-page/doc-types-page.component.html,18,51,template_attr,Search document types...,documents.doc-extractor.label.search-document-types,placeholder=…
+app/platform/features/documents/doc-extractor/pages/doc-types-page/doc-types-page.component.html,37,30,template_text,document types,documents.doc-extractor.text.document-types,>…<
+app/platform/features/documents/doc-extractor/pages/doc-types-page/doc-types-page.component.html,49,12,template_text,Failed to load document types,documents.doc-extractor.text.failed-to-load-document,>…<
+app/platform/features/documents/doc-extractor/pages/doc-types-page/doc-types-page.component.html,56,12,template_text,No document types available,documents.doc-extractor.text.no-document-types-available,>…<
+app/platform/features/documents/doc-extractor/pages/doc-types-page/doc-types-page.component.html,57,11,template_text,Create your first document type to start extracting data.,documents.doc-extractor.text.create-your-first-document,>…<
+app/platform/features/documents/doc-extractor/pages/doc-types-page/doc-types-page.component.html,67,12,template_text,No matching document types,documents.doc-extractor.text.no-matching-document-types,>…<
+app/platform/features/documents/doc-extractor/pages/doc-types-page/doc-types-page.component.html,68,11,template_text,Try adjusting your search or filters.,documents.doc-extractor.text.try-adjusting-your-search,>…<
+app/platform/features/documents/doc-extractor/pages/extraction-entry-page/extraction-entry-page.component.html,14,40,template_text,Recent Document Types,documents.doc-extractor.text.recent-document-types,>…<
+app/platform/features/documents/doc-extractor/pages/extraction-entry-page/extraction-entry-page.component.html,66,13,template_attr,"Search document type (BL, Invoice, Packing list…)",documents.doc-extractor.label.search-document-type-bl,placeholder=…
+app/platform/features/documents/doc-extractor/pages/extraction-entry-page/extraction-entry-page.component.html,102,12,template_text,Start a new extraction,documents.doc-extractor.text.start-new-extraction,>…<
+app/platform/features/documents/doc-extractor/pages/extraction-entry-page/extraction-entry-page.component.html,103,11,template_text,Choose a category or create a custom document type.,documents.doc-extractor.text.choose-category-or-create,>…<
+app/platform/features/documents/doc-extractor/pages/extraction-entry-page/extraction-entry-page.component.html,109,13,template_text,Loading document types...,documents.doc-extractor.text.loading-document-types,>…<
+app/platform/features/documents/doc-extractor/pages/extraction-entry-page/extraction-entry-page.component.html,136,30,template_text,Custom Document Type,documents.doc-extractor.text.custom-document-type,>…<
+app/platform/features/documents/doc-extractor/pages/extraction-entry-page/extraction-entry-page.component.html,158,33,template_text,Select a template to start extracting data from your documents.,documents.doc-extractor.text.select-template-to-start,>…<
+app/platform/features/documents/doc-extractor/pages/extraction-settings-doc-type-page/extraction-settings-doc-type-page.component.html,6,10,template_text,Document Type Builder,documents.doc-extractor.text.document-type-builder,>…<
+app/platform/features/documents/doc-extractor/pages/extraction-settings-doc-type-page/extraction-settings-doc-type-page.component.html,24,28,template_text,Document Type,documents.doc-extractor.text.document-type,>…<
+app/platform/features/documents/doc-extractor/pages/extraction-settings-doc-type-page/extraction-settings-doc-type-page.component.html,175,9,template_text,No versions found for this document type.,documents.doc-extractor.text.no-versions-found-for,>…<
+app/platform/features/documents/doc-extractor/pages/extraction-settings-doc-type-page/extraction-settings-doc-type-page.component.html,176,22,template_text,This document type may not exist or has no versions yet.,documents.doc-extractor.text.this-document-type-may,>…<
+app/platform/features/documents/doc-extractor/pages/extraction-workspace-page/extraction-workspace-page.component.html,13,9,template_text,Loading document type...,documents.doc-extractor.text.loading-document-type,>…<
+app/platform/features/documents/doc-extractor/pages/extraction-workspace-page/extraction-workspace-page.component.html,131,10,template_text,Document type not found,documents.doc-extractor.text.document-type-not-found,>…<
+app/platform/features/documents/doc-extractor/pages/extraction-workspace-page/extraction-workspace-page.component.html,132,9,template_text,The requested document type could not be loaded.,documents.doc-extractor.text.the-requested-document-type,>…<

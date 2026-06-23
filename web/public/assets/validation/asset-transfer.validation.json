@@ -1,0 +1,35 @@
+{
+  "entity": "AssetTransfer",
+  "fields": {
+    "transferNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "assetId": {
+      "required": true
+    },
+    "fromLocation": {
+      "maxLength": 200
+    },
+    "toLocation": {
+      "maxLength": 200
+    },
+    "fromDepartment": {
+      "maxLength": 200
+    },
+    "toDepartment": {
+      "maxLength": 200
+    },
+    "transferDate": {
+      "required": true
+    },
+    "reason": {
+      "maxLength": 2000
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

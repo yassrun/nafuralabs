@@ -1,0 +1,16 @@
+{
+  "id": "app-settings",
+  "name": "Application Settings",
+  "description": "Application-wide settings",
+  "type": "feature",
+  "layer": "feature",
+  "group": "configuration",
+  "provides": {
+    "backend": {
+      "gradle": ":platform:features:app-settings",
+      "packages": ["ma.nafura.platform.appsettings"]
+    }
+  },
+  "requires": { "core": ["tenancy", "authorization"], "features": [] },
+  "manifest": { "key": "app-settings" }
+}

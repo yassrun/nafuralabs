@@ -1,0 +1,111 @@
+﻿app/applications/erp/pages/rh/conges/conge-detail/conge-detail.page.ts,60,20,prompt,Motif de refus :,rh.conges.confirm.motif-de-refus,prompt(â€¦)
+app/applications/erp/pages/rh/conges/services/conge-api.service.ts,44,13,error,CongÃ© ${id} introuvable,rh.conges.error.conge-id-introuvable,throw new Error(â€¦)
+app/applications/erp/pages/rh/employes/services/employe-api.service.ts,59,13,error,EmployÃ© ${id} introuvable,rh.employes.error.employe-id-introuvable,throw new Error(â€¦)
+app/applications/erp/pages/rh/paie/declarations/damancom.page.ts,44,21,inline_template_text,PÃ©riode :,rh.paie.text.periode,>â€¦<
+app/applications/erp/pages/rh/paie/declarations/damancom.page.ts,53,36,inline_template_text,Nom employÃ©,rh.paie.text.nom-employe,>â€¦<
+app/applications/erp/pages/rh/paie/declarations/damancom.page.ts,58,30,inline_template_text,Total sal.,rh.paie.text.total-sal,>â€¦<
+app/applications/erp/pages/rh/paie/declarations/damancom.page.ts,59,30,inline_template_text,Cot. patronale est.,rh.paie.text.cot-patronale-est,>â€¦<
+app/applications/erp/pages/rh/paie/declarations/damancom.page.ts,61,30,inline_template_text,Net payÃ©,rh.paie.text.net-paye,>â€¦<
+app/applications/erp/pages/rh/paie/declarations/damancom.page.ts,97,14,inline_template_text,RÃ©capitulatif des versements Ã  effectuer,rh.paie.text.recapitulatif-des-versements-effectuer,>â€¦<
+app/applications/erp/pages/rh/paie/declarations/damancom.page.ts,108,20,inline_template_text,Cotisations patronales estimÃ©es,rh.paie.text.cotisations-patronales-estimees,>â€¦<
+app/applications/erp/pages/rh/paie/declarations/damancom.page.ts,112,28,inline_template_text,Total CNSS Ã  verser,rh.paie.text.total-cnss-verser,>â€¦<
+app/applications/erp/pages/rh/paie/declarations/damancom.page.ts,116,20,inline_template_text,IGR â€” Ã€ verser Ã  la DGI,rh.paie.text.igr-verser-la-dgi,>â€¦<
+app/applications/erp/pages/rh/paie/declarations/damancom.page.ts,123,27,inline_template_text,Aucune fiche de paie validÃ©e ou payÃ©e pour .,rh.paie.text.aucune-fiche-de-paie,>â€¦<
+app/applications/erp/pages/rh/paie/declarations/etat-1208.page.ts,90,13,inline_template_attr,Saisir un ICEâ€¦,rh.paie.label.saisir-un-ice,placeholder=â€¦
+app/applications/erp/pages/rh/paie/declarations/etat-1208.page.ts,101,18,inline_template_text,ROYAUME DU MAROC,rh.paie.text.royaume-du-maroc,>â€¦<
+app/applications/erp/pages/rh/paie/declarations/etat-1208.page.ts,102,13,inline_template_text,Direction GÃ©nÃ©rale des ImpÃ´ts,rh.paie.text.direction-generale-des-impots,>â€¦<
+app/applications/erp/pages/rh/paie/declarations/etat-1208.page.ts,103,13,inline_template_text,RÃ‰CAPITULATIF ANNUEL DES ACHATS,rh.paie.text.recapitulatif-annuel-des-achats,>â€¦<
+app/applications/erp/pages/rh/paie/declarations/etat-1208.page.ts,104,30,inline_template_text,Ã‰TAT 1208 â€” EXERCICE,rh.paie.text.etat-1208-exercice,>â€¦<
+app/applications/erp/pages/rh/paie/declarations/etat-1208.page.ts,108,20,inline_template_text,SociÃ©tÃ©,rh.paie.text.societe,>â€¦<
+app/applications/erp/pages/rh/paie/declarations/etat-1208.page.ts,121,31,inline_template_text,Total HT,rh.paie.text.total-ht,>â€¦<
+app/applications/erp/pages/rh/paie/declarations/etat-1208.page.ts,122,31,inline_template_text,Total TVA,rh.paie.text.total-tva,>â€¦<
+app/applications/erp/pages/rh/paie/declarations/etat-1208.page.ts,123,43,inline_template_text,Total TTC,rh.paie.text.total-ttc,>â€¦<
+app/applications/erp/pages/rh/paie/declarations/etat-1208.page.ts,136,32,inline_template_text,Total HT,rh.paie.text.total-ht,>â€¦<
+app/applications/erp/pages/rh/paie/declarations/etat-1208.page.ts,138,32,inline_template_text,Total TTC,rh.paie.text.total-ttc,>â€¦<
+app/applications/erp/pages/rh/paie/declarations/etat-1208.page.ts,176,27,inline_template_text,Aucune facture fournisseur retenue pour l'exercice .,rh.paie.text.aucune-facture-fournisseur-retenue,>â€¦<
+app/applications/erp/pages/rh/paie/declarations/igr-etat-9421.page.ts,40,18,inline_template_text,ROYAUME DU MAROC,rh.paie.text.royaume-du-maroc,>â€¦<
+app/applications/erp/pages/rh/paie/declarations/igr-etat-9421.page.ts,41,13,inline_template_text,Direction GÃ©nÃ©rale des ImpÃ´ts,rh.paie.text.direction-generale-des-impots,>â€¦<
+app/applications/erp/pages/rh/paie/declarations/igr-etat-9421.page.ts,42,13,inline_template_text,DÃ‰CLARATION DES TRAITEMENTS ET SALAIRES,rh.paie.text.declaration-des-traitements-et,>â€¦<
+app/applications/erp/pages/rh/paie/declarations/igr-etat-9421.page.ts,43,30,inline_template_text,Ã‰TAT 9421 â€” EXERCICE,rh.paie.text.etat-9421-exercice,>â€¦<
+app/applications/erp/pages/rh/paie/declarations/igr-etat-9421.page.ts,62,32,inline_template_text,Nom & PrÃ©nom,rh.paie.text.nom-prenom,>â€¦<
+app/applications/erp/pages/rh/paie/declarations/igr-etat-9421.page.ts,63,44,inline_template_text,RÃ©munÃ©rations brutes,rh.paie.text.remunerations-brutes,>â€¦<
+app/applications/erp/pages/rh/paie/declarations/igr-etat-9421.page.ts,64,44,inline_template_text,DÃ©ductions,rh.paie.text.deductions,>â€¦<
+app/applications/erp/pages/rh/paie/declarations/igr-etat-9421.page.ts,70,36,inline_template_text,IndemnitÃ©s,rh.paie.text.indemnites,>â€¦<
+app/applications/erp/pages/rh/paie/declarations/igr-etat-9421.page.ts,71,36,inline_template_text,Total brut,rh.paie.text.total-brut,>â€¦<
+app/applications/erp/pages/rh/paie/declarations/igr-etat-9421.page.ts,110,13,inline_template_text,"Je soussignÃ©, reprÃ©sentant lÃ©gal de",rh.paie.text.je-soussigne-representant-legal,>â€¦<
+app/applications/erp/pages/rh/paie/declarations/igr-etat-9421.page.ts,110,83,inline_template_text,", certifie l'exactitude des informations portÃ©es sur la prÃ©sente dÃ©claration.",rh.paie.text.certifie-exactitude-des-informations,>â€¦<
+app/applications/erp/pages/rh/paie/declarations/igr-etat-9421.page.ts,112,38,inline_template_text,Date & Cachet de l'employeur,rh.paie.text.date-cachet-de-employeur,>â€¦<
+app/applications/erp/pages/rh/paie/declarations/igr-etat-9421.page.ts,113,38,inline_template_text,ReÃ§u par l'administration,rh.paie.text.recu-par-administration,>â€¦<
+app/applications/erp/pages/rh/paie/declarations/igr-etat-9421.page.ts,118,27,inline_template_text,Aucune fiche de paie payÃ©e pour l'exercice .,rh.paie.text.aucune-fiche-de-paie,>â€¦<
+app/applications/erp/pages/rh/paie/paie-detail/paie-detail.page.html,24,33,template_attr,RÃ©capitulatif fiche,rh.paie.label.recapitulatif-fiche,aria-label=â€¦
+app/applications/erp/pages/rh/paie/paie-detail/paie-detail.page.html,25,36,template_text,RÃ©capitulatif (aperÃ§u paie),rh.paie.text.recapitulatif-apercu-paie,>â€¦<
+app/applications/erp/pages/rh/paie/paie-detail/paie-detail.page.html,33,41,template_text,Net Ã  payer,rh.paie.text.net-payer,>â€¦<
+app/applications/erp/pages/rh/paie/paie-detail/paie-detail.page.html,35,34,template_text,En-tÃªte sociÃ©tÃ© / ICE sur impression : via module Administration (dÃ©mo).,rh.paie.text.en-tete-societe-ice-sur,>â€¦<
+app/applications/erp/pages/rh/paie/paie-detail/paie-detail.page.html,54,10,template_text,Fiche de paie,rh.paie.text.fiche-de-paie,>â€¦<
+app/applications/erp/pages/rh/paie/paie-detail/paie-detail.page.html,55,9,template_text,â€” pÃ©riode,rh.paie.text.periode,>â€¦<
+app/applications/erp/pages/rh/paie/paie-detail/paie-detail.page.html,58,18,template_text,LibellÃ©,rh.paie.text.libelle,>â€¦<
+app/applications/erp/pages/rh/paie/paie-detail/paie-detail.page.html,58,44,template_text,Montant,rh.paie.text.montant,>â€¦<
+app/applications/erp/pages/rh/paie/paie-detail/paie-detail.page.html,61,18,template_text,Salaire de base,rh.paie.text.salaire-de-base,>â€¦<
+app/applications/erp/pages/rh/paie/paie-detail/paie-detail.page.html,66,18,template_text,Net Ã  payer,rh.paie.text.net-payer,>â€¦<
+app/applications/erp/pages/rh/paie/paie-journal/paie-journal.page.ts,36,51,inline_template_text,â† Fiches de paie,rh.paie.text.fiches-de-paie,>â€¦<
+app/applications/erp/pages/rh/paie/paie-journal/paie-journal.page.ts,40,31,inline_template_text,Brut total,rh.paie.text.brut-total,>â€¦<
+app/applications/erp/pages/rh/paie/paie-journal/paie-journal.page.ts,44,43,inline_template_text,Net Ã  payer,rh.paie.text.net-payer,>â€¦<
+app/applications/erp/pages/rh/paie/paie-journal/paie-journal.page.ts,50,27,inline_template_text,EmployÃ©,rh.paie.text.employe,>â€¦<
+app/applications/erp/pages/rh/paie/paie-journal/paie-journal.page.ts,66,48,inline_template_text,Aucune fiche pour ce mois.,rh.paie.text.aucune-fiche-pour-ce,>â€¦<
+app/applications/erp/pages/rh/paie/services/paie-api.service.ts,45,13,error,Fiche de paie ${id} introuvable,rh.paie.error.fiche-de-paie-id,throw new Error(â€¦)
+app/applications/erp/pages/rh/planning-equipes/planning-equipes.page.ts,63,29,inline_template_text,Tous,rh.planning-equipes.text.tous,>â€¦<
+app/applications/erp/pages/rh/planning-equipes/planning-equipes.page.ts,71,29,inline_template_text,Tous,rh.planning-equipes.text.tous,>â€¦<
+app/applications/erp/pages/rh/planning-equipes/planning-equipes.page.ts,77,73,inline_template_text,+ Nouvelle affectation,rh.planning-equipes.text.nouvelle-affectation,>â€¦<
+app/applications/erp/pages/rh/planning-equipes/planning-equipes.page.ts,89,67,inline_template_text,â€¹ Semaine prÃ©cÃ©dente,rh.planning-equipes.text.semaine-precedente,>â€¦<
+app/applications/erp/pages/rh/planning-equipes/planning-equipes.page.ts,90,33,inline_template_text,Semaine du  au,rh.planning-equipes.text.semaine-du-au,>â€¦<
+app/applications/erp/pages/rh/planning-equipes/planning-equipes.page.ts,135,50,inline_template_text,Aucune affectation pour ces filtres.,rh.planning-equipes.text.aucune-affectation-pour-ces,>â€¦<
+app/applications/erp/pages/rh/planning-equipes/planning-equipes.page.ts,141,22,inline_template_text,Les cellules colorÃ©es indiquent une affectation active sur la journÃ©e. Alerte si le cumul % dÃ©passe 100&nbsp;% sur la semaine.,rh.planning-equipes.text.les-cellules-colorees-indiquent,>â€¦<
+app/applications/erp/pages/rh/planning-equipes/planning-equipes.page.ts,147,12,inline_template_text,Nouvelle affectation,rh.planning-equipes.text.nouvelle-affectation,>â€¦<
+app/applications/erp/pages/rh/planning-equipes/planning-equipes.page.ts,172,82,inline_template_text,Annuler,rh.planning-equipes.text.annuler,>â€¦<
+app/applications/erp/pages/rh/planning-equipes/planning-equipes.page.ts,173,74,inline_template_text,Enregistrer,rh.planning-equipes.text.enregistrer,>â€¦<
+app/applications/erp/pages/rh/pointage/models/index.ts,33,1,status_label,PrÃ©sent,rh.pointage.status.present,MODE_LABELS.PRESENT
+app/applications/erp/pages/rh/pointage/models/index.ts,35,19,status_label,CongÃ©,rh.pointage.status.conge,MODE_LABELS.CONGE
+app/applications/erp/pages/rh/pointage/pointage-listing/pointage-listing.page.ts,26,27,inline_template_text,Tous les chantiers,rh.pointage.text.tous-les-chantiers,>â€¦<
+app/applications/erp/pages/rh/pointage/pointage-listing/pointage-listing.page.ts,34,63,inline_template_text,+ Saisir pointage du jour,rh.pointage.text.saisir-pointage-du-jour,>â€¦<
+app/applications/erp/pages/rh/pointage/pointage-listing/pointage-listing.page.ts,46,45,inline_template_text,j prÃ©sent,rh.pointage.text.present,>â€¦<
+app/applications/erp/pages/rh/pointage/pointage-listing/pointage-listing.page.ts,48,66,inline_template_text,j congÃ©,rh.pointage.text.conge,>â€¦<
+app/applications/erp/pages/rh/pointage/pointage-listing/pointage-listing.page.ts,65,27,inline_template_text,Aucun pointage sur cette pÃ©riode.,rh.pointage.text.aucun-pointage-sur-cette,>â€¦<
+app/applications/erp/pages/rh/pointage/pointage-saisie/pointage-saisie.page.ts,59,16,inline_template_text,Mode hors ligne.  Ã©lÃ©ment(s) en attente (pointages + photo). File locale 7 j / sync au retour rÃ©seau.,rh.pointage.text.mode-hors-ligne-element,>â€¦<
+app/applications/erp/pages/rh/pointage/pointage-saisie/pointage-saisie.page.ts,61,16,inline_template_text,pointage(s) en conflit mÃ©tier (donnÃ©es divergentes). RÃ©solvez cÃ´tÃ© RH / serveur.,rh.pointage.text.pointage-en-conflit-metier,>â€¦<
+app/applications/erp/pages/rh/pointage/pointage-saisie/pointage-saisie.page.ts,63,16,inline_template_text,Synchronisation en cours.  Ã©lÃ©ment(s) restant(s).,rh.pointage.text.synchronisation-en-cours-element,>â€¦<
+app/applications/erp/pages/rh/pointage/pointage-saisie/pointage-saisie.page.ts,65,16,inline_template_text,SynchronisÃ© @if (lastSyncedAt()) { le  Ã   } @else { localement }.,rh.pointage.text.synchronise-if-lastsyncedat-le,>â€¦<
+app/applications/erp/pages/rh/pointage/pointage-saisie/pointage-saisie.page.ts,77,29,inline_template_text,SÃ©lectionnerâ€¦,rh.pointage.text.selectionner,>â€¦<
+app/applications/erp/pages/rh/pointage/pointage-saisie/pointage-saisie.page.ts,84,56,inline_template_text,Date,rh.pointage.text.date,>â€¦<
+app/applications/erp/pages/rh/pointage/pointage-saisie/pointage-saisie.page.ts,100,18,inline_template_text,GÃ©ofencing,rh.pointage.text.geofencing,>â€¦<
+app/applications/erp/pages/rh/pointage/pointage-saisie/pointage-saisie.page.ts,103,18,inline_template_text,â€” distance au chantier :,rh.pointage.text.distance-au-chantier,>â€¦<
+app/applications/erp/pages/rh/pointage/pointage-saisie/pointage-saisie.page.ts,105,40,inline_template_text,Pointage refusÃ© hors zone (M-RH-01).,rh.pointage.text.pointage-refuse-hors-zone,>â€¦<
+app/applications/erp/pages/rh/pointage/pointage-saisie/pointage-saisie.page.ts,108,40,inline_template_text,â€” activez la gÃ©olocalisation pour valider sur ce chantier.,rh.pointage.text.activez-la-geolocalisation-pour,>â€¦<
+app/applications/erp/pages/rh/pointage/pointage-saisie/pointage-saisie.page.ts,115,44,inline_template_text,Ã‰quipe (multi-pointage),rh.pointage.text.equipe-multi-pointage,>â€¦<
+app/applications/erp/pages/rh/pointage/pointage-saisie/pointage-saisie.page.ts,116,79,inline_template_text,Tout sÃ©lectionner,rh.pointage.text.tout-selectionner,>â€¦<
+app/applications/erp/pages/rh/pointage/pointage-saisie/pointage-saisie.page.ts,117,72,inline_template_text,Aucun,rh.pointage.text.aucun,>â€¦<
+app/applications/erp/pages/rh/pointage/pointage-saisie/pointage-saisie.page.ts,118,79,inline_template_text,PrÃ©sents,rh.pointage.text.presents,>â€¦<
+app/applications/erp/pages/rh/pointage/pointage-saisie/pointage-saisie.page.ts,119,42,inline_template_text,Appliquer aux cochÃ©s :,rh.pointage.text.appliquer-aux-coches,>â€¦<
+app/applications/erp/pages/rh/pointage/pointage-saisie/pointage-saisie.page.ts,128,44,inline_template_text,cochÃ©(s),rh.pointage.text.coche,>â€¦<
+app/applications/erp/pages/rh/pointage/pointage-saisie/pointage-saisie.page.ts,134,58,inline_template_text,"Photo chantier (compressÃ©e ~800px, IndexedDB â€” offline 7 j)",rh.pointage.text.photo-chantier-compressee-800px,>â€¦<
+app/applications/erp/pages/rh/pointage/pointage-saisie/pointage-saisie.page.ts,139,47,inline_template_attr,AperÃ§u photo chantier,rh.pointage.label.apercu-photo-chantier,alt=â€¦
+app/applications/erp/pages/rh/pointage/pointage-saisie/pointage-saisie.page.ts,140,83,inline_template_text,Retirer la photo,rh.pointage.text.retirer-la-photo,>â€¦<
+app/applications/erp/pages/rh/pointage/pointage-saisie/pointage-saisie.page.ts,147,31,inline_template_text,SÃ©lectionnez un chantier pour commencer le pointage.,rh.pointage.text.selectionnez-un-chantier-pour,>â€¦<
+app/applications/erp/pages/rh/pointage/pointage-saisie/pointage-saisie.page.ts,150,36,inline_template_text,Tout marquer :,rh.pointage.text.tout-marquer,>â€¦<
+app/applications/erp/pages/rh/pointage/pointage-saisie/pointage-saisie.page.ts,152,96,inline_template_attr,'Tout marquer ' + modeLabel(m),rh.pointage.label.tout-marquer-modelabel,aria-label]=â€¦
+app/applications/erp/pages/rh/pointage/pointage-saisie/pointage-saisie.page.ts,161,162,inline_template_text,Individuelle (prÃ©sents),rh.pointage.text.individuelle-presents,>â€¦<
+app/applications/erp/pages/rh/pointage/pointage-saisie/pointage-saisie.page.ts,166,28,inline_template_text,Signature unique pour la feuille du jour (horodatage Ã  lâ€™enregistrement).,rh.pointage.text.signature-unique-pour-la,>â€¦<
+app/applications/erp/pages/rh/pointage/pointage-saisie/pointage-saisie.page.ts,190,29,inline_template_attr,modeLabel(m) + ' pour ' + entry.employeNom,rh.pointage.label.modelabel-pour-entry-employenom,aria-label]=â€¦
+app/applications/erp/pages/rh/pointage/pointage-saisie/pointage-saisie.page.ts,199,43,inline_template_text,SignÃ©,rh.pointage.text.signe,>â€¦<
+app/applications/erp/pages/rh/pointage/pointage-saisie/pointage-saisie.page.ts,221,94,inline_template_attr,'Note pour ' + entry.employeNom,rh.pointage.label.note-pour-entry-employenom,aria-label]=â€¦
+app/applications/erp/pages/rh/pointage/pointage-saisie/pointage-saisie.page.ts,226,35,inline_template_text,Aucun ouvrier affectÃ© Ã  ce chantier.,rh.pointage.text.aucun-ouvrier-affecte-ce,>â€¦<
+app/applications/erp/pages/rh/pointage/pointage-saisie/pointage-saisie.page.ts,232,47,inline_template_text,prÃ©sents,rh.pointage.text.presents,>â€¦<
+app/applications/erp/pages/rh/pointage/pointage-saisie/pointage-saisie.page.ts,254,85,inline_template_text,Valider signature,rh.pointage.text.valider-signature,>â€¦<
+app/applications/erp/pages/rh/pointage/pointage-saisie/pointage-saisie.page.ts,255,79,inline_template_text,Annuler,rh.pointage.text.annuler,>â€¦<
+app/applications/erp/pages/rh/pointage/pointage-validation/pointage-validation.page.ts,24,27,inline_template_text,Tous chantiers,rh.pointage.text.tous-chantiers,>â€¦<
+app/applications/erp/pages/rh/pointage/pointage-validation/pointage-validation.page.ts,33,12,inline_template_text,Brouillons Ã  valider,rh.pointage.text.brouillons-valider,>â€¦<
+app/applications/erp/pages/rh/pointage/pointage-validation/pointage-validation.page.ts,35,27,inline_template_text,Aucun brouillon pour cette date / ce filtre.,rh.pointage.text.aucun-brouillon-pour-cette,>â€¦<
+app/applications/erp/pages/rh/pointage/pointage-validation/pointage-validation.page.ts,40,20,inline_template_text,EmployÃ©,rh.pointage.text.employe,>â€¦<
+app/applications/erp/pages/rh/pointage/pointage-validation/pointage-validation.page.ts,55,64,inline_template_text,Valider tous les brouillons visibles,rh.pointage.text.valider-tous-les-brouillons,>â€¦<
+app/applications/erp/pages/rh/pointage/pointage-validation/pointage-validation.page.ts,63,20,inline_template_text,EmployÃ©,rh.pointage.text.employe,>â€¦<
+app/applications/erp/pages/rh/pointage/pointage-validation/pointage-validation.page.ts,63,36,inline_template_text,J. prÃ©sents,rh.pointage.text.presents,>â€¦<
+app/applications/erp/pages/rh/pointage/pointage-validation/pointage-validation.page.ts,73,48,inline_template_text,Pas de donnÃ©es.,rh.pointage.text.pas-de-donnees,>â€¦<

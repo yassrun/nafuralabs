@@ -1,0 +1,26 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: minio-init-nafura
+spec:
+  template:
+    spec:
+      containers:
+        - name: minio-mc
+          image: minio/mc:latest
+          command:
+            - /bin/sh
+            - -c
+            - |
+              until mc alias set myminio http://minio:9000 minioadmin minioadmin; do
+                echo "Waiting for MinIO..."
+                sleep 2
+              done
+              mc mb myminio/documents --ignore-existing
+              mc anonymous set none myminio/documents
+              # Per-app buckets (template: nafura-{{appId}} from infra-block descriptor)
+              mc mb myminio/nafura-erp --ignore-existing
+              mc anonymous set none myminio/nafura-erp
+              echo "Nafura buckets initialized"
+      restartPolicy: OnFailure
+  backoffLimit: 4

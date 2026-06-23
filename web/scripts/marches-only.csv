@@ -1,0 +1,179 @@
+﻿app/applications/erp/pages/marches/avenants/avenant-detail/avenant-detail.page.ts,70,22,inline_template_text,Impact chantier &amp; marchÃ©,marches.avenants.text.impact-chantier-amp-marche,>â€¦<
+app/applications/erp/pages/marches/avenants/avenant-detail/avenant-detail.page.ts,80,36,inline_template_text,Impact propagÃ© le,marches.avenants.text.impact-propage-le,>â€¦<
+app/applications/erp/pages/marches/avenants/avenant-detail/avenant-detail.page.ts,85,16,inline_template_text,IdentitÃ©,marches.avenants.text.identite,>â€¦<
+app/applications/erp/pages/marches/avenants/avenant-detail/avenant-detail.page.ts,87,18,inline_template_text,MarchÃ©,marches.avenants.text.marche,>â€¦<
+app/applications/erp/pages/marches/avenants/avenant-detail/avenant-detail.page.ts,113,16,inline_template_text,Montants & dÃ©lais,marches.avenants.text.montants-delais,>â€¦<
+app/applications/erp/pages/marches/avenants/avenant-detail/avenant-detail.page.ts,116,49,inline_template_text,"0"" [class.negative]=""a.montantHt",marches.avenants.text.class-negative-montantht,>â€¦<
+app/applications/erp/pages/marches/avenants/avenant-detail/avenant-detail.page.ts,124,42,inline_template_text,0 ? '+' + a.prolongationJours + ' jours' : 'â€”' }},marches.avenants.text.prolongationjours-jours,>â€¦<
+app/applications/erp/pages/marches/avenants/avenant-detail/avenant-detail.page.ts,125,18,inline_template_text,Date signature,marches.avenants.text.date-signature,>â€¦<
+app/applications/erp/pages/marches/avenants/avenant-detail/avenant-detail.page.ts,140,59,inline_template_text,Retour Ã  la liste,marches.avenants.text.retour-la-liste,>â€¦<
+app/applications/erp/pages/marches/avenants/avenant-listing/avenant-listing.page.ts,29,45,inline_template_attr,"NÂ°, marchÃ©, objetâ€¦",marches.avenants.label.marche-objet,placeholder=â€¦
+app/applications/erp/pages/marches/avenants/avenant-listing/avenant-listing.page.ts,32,27,inline_template_text,Tous les statuts,marches.avenants.text.tous-les-statuts,>â€¦<
+app/applications/erp/pages/marches/avenants/avenant-listing/avenant-listing.page.ts,42,35,inline_template_text,MarchÃ©,marches.avenants.text.marche,>â€¦<
+app/applications/erp/pages/marches/avenants/avenant-listing/avenant-listing.page.ts,43,28,inline_template_text,Montant HT,marches.avenants.text.montant-ht,>â€¦<
+app/applications/erp/pages/marches/avenants/avenant-listing/avenant-listing.page.ts,43,47,inline_template_text,DÃ©lai +,marches.avenants.text.delai,>â€¦<
+app/applications/erp/pages/marches/avenants/avenant-listing/avenant-listing.page.ts,52,63,inline_template_text,"0"" [class.negative]=""a.montantHt",marches.avenants.text.class-negative-montantht,>â€¦<
+app/applications/erp/pages/marches/avenants/avenant-listing/avenant-listing.page.ts,55,44,inline_template_text,0 ? '+' + a.prolongationJours + ' j' : 'â€”' }},marches.avenants.text.prolongationjours,>â€¦<
+app/applications/erp/pages/marches/avenants/avenant-listing/avenant-listing.page.ts,60,48,inline_template_text,Aucun avenant trouvÃ©.,marches.avenants.text.aucun-avenant-trouve,>â€¦<
+app/applications/erp/pages/marches/cautions/caution-listing/caution-listing.page.ts,27,26,inline_template_attr,SynthÃ¨se par statut,marches.cautions.label.synthese-par-statut,aria-label=â€¦
+app/applications/erp/pages/marches/cautions/caution-listing/caution-listing.page.ts,34,41,inline_template_text,Aucune,marches.cautions.text.aucune,>â€¦<
+app/applications/erp/pages/marches/cautions/caution-listing/caution-listing.page.ts,38,35,inline_template_text,Ã€ renouveler (&lt; 30 j),marches.cautions.text.renouveler-lt-30,>â€¦<
+app/applications/erp/pages/marches/cautions/caution-listing/caution-listing.page.ts,43,41,inline_template_text,Aucune alerte,marches.cautions.text.aucune-alerte,>â€¦<
+app/applications/erp/pages/marches/cautions/caution-listing/caution-listing.page.ts,47,35,inline_template_text,MainlevÃ©es,marches.cautions.text.mainlevees,>â€¦<
+app/applications/erp/pages/marches/cautions/caution-listing/caution-listing.page.ts,52,41,inline_template_text,Aucune,marches.cautions.text.aucune,>â€¦<
+app/applications/erp/pages/marches/cautions/caution-listing/caution-listing.page.ts,58,45,inline_template_attr,"NÂ°, marchÃ©, banqueâ€¦",marches.cautions.label.marche-banque,placeholder=â€¦
+app/applications/erp/pages/marches/cautions/caution-listing/caution-listing.page.ts,61,27,inline_template_text,Tous les types,marches.cautions.text.tous-les-types,>â€¦<
+app/applications/erp/pages/marches/cautions/caution-listing/caution-listing.page.ts,73,27,inline_template_text,MarchÃ©,marches.cautions.text.marche,>â€¦<
+app/applications/erp/pages/marches/cautions/caution-listing/caution-listing.page.ts,74,28,inline_template_text,Montant,marches.cautions.text.montant,>â€¦<
+app/applications/erp/pages/marches/cautions/caution-listing/caution-listing.page.ts,74,44,inline_template_text,Ã‰mission,marches.cautions.text.emission,>â€¦<
+app/applications/erp/pages/marches/cautions/caution-listing/caution-listing.page.ts,74,61,inline_template_text,ValiditÃ©,marches.cautions.text.validite,>â€¦<
+app/applications/erp/pages/marches/cautions/caution-listing/caution-listing.page.ts,74,78,inline_template_text,LevÃ©e,marches.cautions.text.levee,>â€¦<
+app/applications/erp/pages/marches/cautions/caution-listing/caution-listing.page.ts,90,48,inline_template_text,Aucune caution trouvÃ©e.,marches.cautions.text.aucune-caution-trouvee,>â€¦<
+app/applications/erp/pages/marches/contrats/contrat-detail/contrat-detail.page.ts,57,18,inline_template_text,Montant initial HT,marches.contrats.text.montant-initial-ht,>â€¦<
+app/applications/erp/pages/marches/contrats/contrat-detail/contrat-detail.page.ts,69,18,inline_template_text,Total marchÃ© HT,marches.contrats.text.total-marche-ht,>â€¦<
+app/applications/erp/pages/marches/contrats/contrat-detail/contrat-detail.page.ts,73,18,inline_template_text,FacturÃ© HT,marches.contrats.text.facture-ht,>â€¦<
+app/applications/erp/pages/marches/contrats/contrat-detail/contrat-detail.page.ts,75,19,inline_template_text,% du marchÃ©,marches.contrats.text.du-marche,>â€¦<
+app/applications/erp/pages/marches/contrats/contrat-detail/contrat-detail.page.ts,78,18,inline_template_text,EncaissÃ© HT,marches.contrats.text.encaisse-ht,>â€¦<
+app/applications/erp/pages/marches/contrats/contrat-detail/contrat-detail.page.ts,100,20,inline_template_text,MaÃ®tre d'Ouvrage,marches.contrats.text.maitre-ouvrage,>â€¦<
+app/applications/erp/pages/marches/contrats/contrat-detail/contrat-detail.page.ts,110,20,inline_template_text,CaractÃ©ristiques,marches.contrats.text.caracteristiques,>â€¦<
+app/applications/erp/pages/marches/contrats/contrat-detail/contrat-detail.page.ts,114,22,inline_template_text,Retenue de garantie,marches.contrats.text.retenue-de-garantie,>â€¦<
+app/applications/erp/pages/marches/contrats/contrat-detail/contrat-detail.page.ts,124,22,inline_template_text,Ordre de service,marches.contrats.text.ordre-de-service,>â€¦<
+app/applications/erp/pages/marches/contrats/contrat-detail/contrat-detail.page.ts,125,22,inline_template_text,DÃ©lai d'exÃ©cution,marches.contrats.text.delai-execution,>â€¦<
+app/applications/erp/pages/marches/contrats/contrat-detail/contrat-detail.page.ts,127,24,inline_template_text,PÃ©nalitÃ© retard / jour,marches.contrats.text.penalite-retard-jour,>â€¦<
+app/applications/erp/pages/marches/contrats/contrat-detail/contrat-detail.page.ts,130,24,inline_template_text,RÃ©cep. provisoire,marches.contrats.text.recep-provisoire,>â€¦<
+app/applications/erp/pages/marches/contrats/contrat-detail/contrat-detail.page.ts,133,24,inline_template_text,RÃ©cep. dÃ©finitive,marches.contrats.text.recep-definitive,>â€¦<
+app/applications/erp/pages/marches/contrats/contrat-detail/contrat-detail.page.ts,148,34,inline_template_text,Montant HT,marches.contrats.text.montant-ht,>â€¦<
+app/applications/erp/pages/marches/contrats/contrat-detail/contrat-detail.page.ts,148,53,inline_template_text,DÃ©lai +,marches.contrats.text.delai,>â€¦<
+app/applications/erp/pages/marches/contrats/contrat-detail/contrat-detail.page.ts,156,69,inline_template_text,"0"" [class.negative]=""a.montantHt",marches.contrats.text.class-negative-montantht,>â€¦<
+app/applications/erp/pages/marches/contrats/contrat-detail/contrat-detail.page.ts,159,50,inline_template_text,0 ? '+' + a.prolongationJours + ' j' : 'â€”' }},marches.contrats.text.prolongationjours,>â€¦<
+app/applications/erp/pages/marches/contrats/contrat-detail/contrat-detail.page.ts,167,36,inline_template_text,Aucun avenant sur ce marchÃ©.,marches.contrats.text.aucun-avenant-sur-ce,>â€¦<
+app/applications/erp/pages/marches/contrats/contrat-detail/contrat-detail.page.ts,182,34,inline_template_text,Net Ã  payer,marches.contrats.text.net-payer,>â€¦<
+app/applications/erp/pages/marches/contrats/contrat-detail/contrat-detail.page.ts,183,22,inline_template_text,Ã‰mission,marches.contrats.text.emission,>â€¦<
+app/applications/erp/pages/marches/contrats/contrat-detail/contrat-detail.page.ts,183,39,inline_template_text,Ã‰chÃ©ance,marches.contrats.text.echeance,>â€¦<
+app/applications/erp/pages/marches/contrats/contrat-detail/contrat-detail.page.ts,205,32,inline_template_text,TOTAL,marches.contrats.text.total,>â€¦<
+app/applications/erp/pages/marches/contrats/contrat-detail/contrat-detail.page.ts,212,36,inline_template_text,Aucune facture Ã©mise sur ce marchÃ©.,marches.contrats.text.aucune-facture-emise-sur,>â€¦<
+app/applications/erp/pages/marches/contrats/contrat-detail/contrat-detail.page.ts,224,34,inline_template_text,Montant,marches.contrats.text.montant,>â€¦<
+app/applications/erp/pages/marches/contrats/contrat-detail/contrat-detail.page.ts,224,50,inline_template_text,Ã‰mission,marches.contrats.text.emission,>â€¦<
+app/applications/erp/pages/marches/contrats/contrat-detail/contrat-detail.page.ts,224,67,inline_template_text,ValiditÃ©,marches.contrats.text.validite,>â€¦<
+app/applications/erp/pages/marches/contrats/contrat-detail/contrat-detail.page.ts,224,84,inline_template_text,LevÃ©e,marches.contrats.text.levee,>â€¦<
+app/applications/erp/pages/marches/contrats/contrat-detail/contrat-detail.page.ts,244,36,inline_template_text,Aucune caution enregistrÃ©e.,marches.contrats.text.aucune-caution-enregistree,>â€¦<
+app/applications/erp/pages/marches/contrats/contrat-detail/contrat-detail.page.ts,254,20,inline_template_text,Formule de rÃ©vision K,marches.contrats.text.formule-de-revision,>â€¦<
+app/applications/erp/pages/marches/contrats/contrat-detail/contrat-detail.page.ts,257,92,inline_template_text,Valeur base (date offre),marches.contrats.text.valeur-base-date-offre,>â€¦<
+app/applications/erp/pages/marches/contrats/contrat-detail/contrat-detail.page.ts,270,36,inline_template_text,Ce marchÃ© n'est pas soumis Ã  rÃ©vision de prix.,marches.contrats.text.ce-marche-est-pas,>â€¦<
+app/applications/erp/pages/marches/contrats/contrat-detail/contrat-detail.page.ts,276,54,inline_template_text,â† Retour Ã  la liste,marches.contrats.text.retour-la-liste,>â€¦<
+app/applications/erp/pages/marches/contrats/contrat-detail/contrat-detail.page.ts,280,38,inline_template_attr,MarchÃ© introuvable,marches.contrats.label.marche-introuvable,title=â€¦
+app/applications/erp/pages/marches/contrats/contrat-listing/contrat-listing.page.ts,33,27,inline_template_text,Tous les statuts,marches.contrats.text.tous-les-statuts,>â€¦<
+app/applications/erp/pages/marches/contrats/contrat-listing/contrat-listing.page.ts,47,18,inline_template_text,NÂ° MarchÃ©,marches.contrats.text.marche,>â€¦<
+app/applications/erp/pages/marches/contrats/contrat-listing/contrat-listing.page.ts,52,30,inline_template_text,Montant Initial HT,marches.contrats.text.montant-initial-ht,>â€¦<
+app/applications/erp/pages/marches/contrats/contrat-listing/contrat-listing.page.ts,53,30,inline_template_text,Total incl. Av.,marches.contrats.text.total-incl-av,>â€¦<
+app/applications/erp/pages/marches/contrats/contrat-listing/contrat-listing.page.ts,87,49,inline_template_text,Aucun marchÃ© correspondant aux filtres.,marches.contrats.text.aucun-marche-correspondant-aux,>â€¦<
+app/applications/erp/pages/marches/dgd/dgd-listing.page.ts,33,31,inline_template_text,MarchÃ©,marches.dgd.text.marche,>â€¦<
+app/applications/erp/pages/marches/dgd/dgd-listing.page.ts,35,73,inline_template_text,PÃ©nalitÃ©s,marches.dgd.text.penalites,>â€¦<
+app/applications/erp/pages/marches/dgd/dgd-listing.page.ts,36,60,inline_template_text,Net Ã  payer,marches.dgd.text.net-payer,>â€¦<
+app/applications/erp/pages/marches/dgd/dgd-listing.page.ts,52,48,inline_template_text,Aucun DGD.,marches.dgd.text.aucun-dgd,>â€¦<
+app/applications/erp/pages/marches/factures/facture-detail/facture-detail.page.ts,43,35,inline_template_text,MarchÃ©,marches.factures.text.marche,>â€¦<
+app/applications/erp/pages/marches/factures/facture-detail/facture-detail.page.ts,48,14,inline_template_text,DÃ©compte financier,marches.factures.text.decompte-financier,>â€¦<
+app/applications/erp/pages/marches/factures/facture-detail/facture-detail.page.ts,53,34,inline_template_text,Montant brut HT (situations),marches.factures.text.montant-brut-ht-situations,>â€¦<
+app/applications/erp/pages/marches/factures/facture-detail/facture-detail.page.ts,58,36,inline_template_text,DÃ©duction avance forfaitaire,marches.factures.text.deduction-avance-forfaitaire,>â€¦<
+app/applications/erp/pages/marches/factures/facture-detail/facture-detail.page.ts,63,34,inline_template_text,Retenue de garantie (%),marches.factures.text.retenue-de-garantie,>â€¦<
+app/applications/erp/pages/marches/factures/facture-detail/facture-detail.page.ts,80,36,inline_template_text,Retenue Ã  la source % (art. 158 CGI),marches.factures.text.retenue-la-source-art,>â€¦<
+app/applications/erp/pages/marches/factures/facture-detail/facture-detail.page.ts,86,36,inline_template_text,Timbre fiscal (paiement espÃ¨ces),marches.factures.text.timbre-fiscal-paiement-especes,>â€¦<
+app/applications/erp/pages/marches/factures/facture-detail/facture-detail.page.ts,91,42,inline_template_text,NET Ã€ PAYER,marches.factures.text.net-payer,>â€¦<
+app/applications/erp/pages/marches/factures/facture-detail/facture-detail.page.ts,101,18,inline_template_text,Date d'Ã©mission,marches.factures.text.date-emission,>â€¦<
+app/applications/erp/pages/marches/factures/facture-detail/facture-detail.page.ts,105,18,inline_template_text,Ã‰chÃ©ance,marches.factures.text.echeance,>â€¦<
+app/applications/erp/pages/marches/factures/facture-detail/facture-detail.page.ts,107,40,inline_template_text,EN RETARD,marches.factures.text.en-retard,>â€¦<
+app/applications/erp/pages/marches/factures/facture-detail/facture-detail.page.ts,114,16,inline_template_text,Paiements reÃ§us,marches.factures.text.paiements-recus,>â€¦<
+app/applications/erp/pages/marches/factures/facture-detail/facture-detail.page.ts,117,20,inline_template_text,Date,marches.factures.text.date,>â€¦<
+app/applications/erp/pages/marches/factures/facture-detail/facture-detail.page.ts,117,33,inline_template_text,RÃ©fÃ©rence,marches.factures.text.reference,>â€¦<
+app/applications/erp/pages/marches/factures/facture-detail/facture-detail.page.ts,117,76,inline_template_text,Montant,marches.factures.text.montant,>â€¦<
+app/applications/erp/pages/marches/factures/facture-detail/facture-detail.page.ts,134,54,inline_template_text,â† Retour Ã  la liste,marches.factures.text.retour-la-liste,>â€¦<
+app/applications/erp/pages/marches/factures/facture-detail/facture-detail.page.ts,144,16,inline_template_text,Ã‰criture comptable gÃ©nÃ©rÃ©e,marches.factures.text.ecriture-comptable-generee,>â€¦<
+app/applications/erp/pages/marches/factures/facture-detail/facture-detail.page.ts,148,51,inline_template_text,Ã‰quilibrÃ©e,marches.factures.text.equilibree,>â€¦<
+app/applications/erp/pages/marches/factures/facture-detail/facture-detail.page.ts,150,50,inline_template_text,DÃ©sÃ©quilibrÃ©e,marches.factures.text.desequilibree,>â€¦<
+app/applications/erp/pages/marches/factures/facture-detail/facture-detail.page.ts,157,22,inline_template_text,LibellÃ©,marches.factures.text.libelle,>â€¦<
+app/applications/erp/pages/marches/factures/facture-detail/facture-detail.page.ts,158,34,inline_template_text,DÃ©bit,marches.factures.text.debit,>â€¦<
+app/applications/erp/pages/marches/factures/facture-detail/facture-detail.page.ts,159,34,inline_template_text,CrÃ©dit,marches.factures.text.credit,>â€¦<
+app/applications/erp/pages/marches/factures/facture-detail/facture-detail.page.ts,181,93,inline_template_text,l'administration des mappings comptables,marches.factures.text.administration-des-mappings-comptables,>â€¦<
+app/applications/erp/pages/marches/factures/facture-listing/facture-listing.page.ts,26,35,inline_template_text,Total Ã©mis HT,marches.factures.text.total-emis-ht,>â€¦<
+app/applications/erp/pages/marches/factures/facture-listing/facture-listing.page.ts,27,35,inline_template_text,Total net Ã  payer,marches.factures.text.total-net-payer,>â€¦<
+app/applications/erp/pages/marches/factures/facture-listing/facture-listing.page.ts,28,35,inline_template_text,Factures en retard,marches.factures.text.factures-en-retard,>â€¦<
+app/applications/erp/pages/marches/factures/facture-listing/facture-listing.page.ts,32,45,inline_template_attr,"NÂ°, marchÃ©, clientâ€¦",marches.factures.label.marche-client,placeholder=â€¦
+app/applications/erp/pages/marches/factures/facture-listing/facture-listing.page.ts,35,27,inline_template_text,Tous les statuts,marches.factures.text.tous-les-statuts,>â€¦<
+app/applications/erp/pages/marches/factures/facture-listing/facture-listing.page.ts,45,35,inline_template_text,MarchÃ©,marches.factures.text.marche,>â€¦<
+app/applications/erp/pages/marches/factures/facture-listing/facture-listing.page.ts,47,52,inline_template_text,Net Ã  payer,marches.factures.text.net-payer,>â€¦<
+app/applications/erp/pages/marches/factures/facture-listing/facture-listing.page.ts,48,16,inline_template_text,Ã‰mission,marches.factures.text.emission,>â€¦<
+app/applications/erp/pages/marches/factures/facture-listing/facture-listing.page.ts,48,33,inline_template_text,Ã‰chÃ©ance,marches.factures.text.echeance,>â€¦<
+app/applications/erp/pages/marches/factures/facture-listing/facture-listing.page.ts,65,49,inline_template_text,Aucune facture.,marches.factures.text.aucune-facture,>â€¦<
+app/applications/erp/pages/marches/factures/print/facture-marche-print.component.ts,37,17,inline_template_text,TÃ©l.  Â·,marches.factures.text.tel,>â€¦<
+app/applications/erp/pages/marches/factures/print/facture-marche-print.component.ts,57,15,inline_template_text,Date d'Ã©mission :,marches.factures.text.date-emission,>â€¦<
+app/applications/erp/pages/marches/factures/print/facture-marche-print.component.ts,58,15,inline_template_text,Date d'Ã©chÃ©ance :,marches.factures.text.date-echeance,>â€¦<
+app/applications/erp/pages/marches/factures/print/facture-marche-print.component.ts,71,16,inline_template_text,RÃ©fÃ©rences,marches.factures.text.references,>â€¦<
+app/applications/erp/pages/marches/factures/print/facture-marche-print.component.ts,72,15,inline_template_text,MarchÃ© :,marches.factures.text.marche,>â€¦<
+app/applications/erp/pages/marches/factures/print/facture-marche-print.component.ts,81,31,inline_template_text,DÃ©signation,marches.factures.text.designation,>â€¦<
+app/applications/erp/pages/marches/factures/print/facture-marche-print.component.ts,82,30,inline_template_text,Montant (MAD HT),marches.factures.text.montant-mad-ht,>â€¦<
+app/applications/erp/pages/marches/factures/print/facture-marche-print.component.ts,87,18,inline_template_text,Travaux exÃ©cutÃ©s â€” situations de travaux,marches.factures.text.travaux-executes-situations-de,>â€¦<
+app/applications/erp/pages/marches/factures/print/facture-marche-print.component.ts,92,20,inline_template_text,DÃ©duction avance forfaitaire versÃ©e,marches.factures.text.deduction-avance-forfaitaire-versee,>â€¦<
+app/applications/erp/pages/marches/factures/print/facture-marche-print.component.ts,97,18,inline_template_text,Retenue de garantie %,marches.factures.text.retenue-de-garantie,>â€¦<
+app/applications/erp/pages/marches/factures/print/facture-marche-print.component.ts,103,26,inline_template_text,Montant Net HT,marches.factures.text.montant-net-ht,>â€¦<
+app/applications/erp/pages/marches/factures/print/facture-marche-print.component.ts,111,26,inline_template_text,Montant Net TTC,marches.factures.text.montant-net-ttc,>â€¦<
+app/applications/erp/pages/marches/factures/print/facture-marche-print.component.ts,116,20,inline_template_text,Retenue Ã  la source % (Art. 158 CGI),marches.factures.text.retenue-la-source-art,>â€¦<
+app/applications/erp/pages/marches/factures/print/facture-marche-print.component.ts,127,26,inline_template_text,NET Ã€ PAYER,marches.factures.text.net-payer,>â€¦<
+app/applications/erp/pages/marches/factures/print/facture-marche-print.component.ts,135,21,inline_template_text,Mode de rÃ¨glement :,marches.factures.text.mode-de-reglement,>â€¦<
+app/applications/erp/pages/marches/factures/print/facture-marche-print.component.ts,137,27,inline_template_text,"En cas de retard de paiement, des pÃ©nalitÃ©s au taux lÃ©gal en vigueur au Maroc seront appliquÃ©es conformÃ©ment aux dispositions de la loi 49-99.",marches.factures.text.en-cas-de-retard,>â€¦<
+app/applications/erp/pages/marches/factures/print/facture-marche-print.component.ts,143,15,inline_template_text,Cachet & Signature du Prestataire,marches.factures.text.cachet-signature-du-prestataire,>â€¦<
+app/applications/erp/pages/marches/factures/print/facture-marche-print.component.ts,148,15,inline_template_text,Bon pour accord â€” Cachet & Signature du MOA,marches.factures.text.bon-pour-accord-cachet,>â€¦<
+app/applications/erp/pages/marches/factures/print/facture-marche-print.component.ts,156,13,inline_template_text,â€”  au capital de  MAD â€”,marches.factures.text.au-capital-de-mad,>â€¦<
+app/applications/erp/pages/marches/models/index.ts,227,34,type_label,RÃ©gie,marches.models.label.regie,MARCHE_TYPE_LABELS.REGIE
+app/applications/erp/pages/marches/models/index.ts,233,1,status_label,Public (Ã‰tat / CT),marches.models.status.public-etat-ct,MARCHE_NATURE_LABELS.PUBLIC
+app/applications/erp/pages/marches/models/index.ts,234,31,status_label,PrivÃ© grand compte,marches.models.status.prive-grand-compte,MARCHE_NATURE_LABELS.PRIVE_GRAND_COMPTE
+app/applications/erp/pages/marches/models/index.ts,235,43,status_label,PrivÃ© PME,marches.models.status.prive-pme,MARCHE_NATURE_LABELS.PRIVE_PME
+app/applications/erp/pages/marches/models/index.ts,242,25,status_label,SignÃ©,marches.models.status.signe,MARCHE_STATUS_LABELS.SIGNE
+app/applications/erp/pages/marches/models/index.ts,243,17,status_label,En exÃ©cution,marches.models.status.en-execution,MARCHE_STATUS_LABELS.EN_EXECUTION
+app/applications/erp/pages/marches/models/index.ts,244,31,status_label,RÃ©cep. provisoire,marches.models.status.recep-provisoire,MARCHE_STATUS_LABELS.RECEPTION_PROVISOIRE
+app/applications/erp/pages/marches/models/index.ts,245,44,status_label,RÃ©cep. dÃ©finitive,marches.models.status.recep-definitive,MARCHE_STATUS_LABELS.RECEPTION_DEFINITIVE
+app/applications/erp/pages/marches/models/index.ts,246,44,status_label,ClÃ´turÃ©,marches.models.status.cloture,MARCHE_STATUS_LABELS.CLOTURE
+app/applications/erp/pages/marches/models/index.ts,247,21,status_label,RÃ©siliÃ©,marches.models.status.resilie,MARCHE_STATUS_LABELS.RESILIE
+app/applications/erp/pages/marches/models/index.ts,262,1,type_label,Travaux supplÃ©mentaires,marches.models.label.travaux-supplementaires,AVENANT_TYPE_LABELS.TVX_SUPPLEMENTAIRES
+app/applications/erp/pages/marches/models/index.ts,263,49,type_label,Prolongation de dÃ©lai,marches.models.label.prolongation-de-delai,AVENANT_TYPE_LABELS.PROLONGATION_DELAI
+app/applications/erp/pages/marches/models/index.ts,272,25,status_label,ProposÃ©,marches.models.status.propose,AVENANT_STATUS_LABELS.PROPOSE
+app/applications/erp/pages/marches/models/index.ts,273,21,status_label,SignÃ©,marches.models.status.signe,AVENANT_STATUS_LABELS.SIGNE
+app/applications/erp/pages/marches/models/index.ts,274,17,status_label,RejetÃ©,marches.models.status.rejete,AVENANT_STATUS_LABELS.REJETE
+app/applications/erp/pages/marches/models/index.ts,280,25,status_label,Ã‰mise,marches.models.status.emise,FACTURE_STATUS_LABELS.EMISE
+app/applications/erp/pages/marches/models/index.ts,281,17,status_label,EnvoyÃ©e MOA,marches.models.status.envoyee-moa,FACTURE_STATUS_LABELS.ENVOYEE_MOA
+app/applications/erp/pages/marches/models/index.ts,282,29,status_label,AcceptÃ©e,marches.models.status.acceptee,FACTURE_STATUS_LABELS.ACCEPTEE
+app/applications/erp/pages/marches/models/index.ts,283,23,status_label,Part. payÃ©e,marches.models.status.part-payee,FACTURE_STATUS_LABELS.PAYEE_PARTIEL
+app/applications/erp/pages/marches/models/index.ts,284,31,status_label,PayÃ©e,marches.models.status.payee,FACTURE_STATUS_LABELS.PAYEE
+app/applications/erp/pages/marches/models/index.ts,285,17,status_label,ContestÃ©e,marches.models.status.contestee,FACTURE_STATUS_LABELS.CONTESTEE
+app/applications/erp/pages/marches/models/index.ts,301,35,type_label,Caution dÃ©finitive,marches.models.label.caution-definitive,CAUTION_TYPE_LABELS.DEFINITIVE
+app/applications/erp/pages/marches/models/index.ts,303,43,type_label,Retenue de garantie,marches.models.label.retenue-de-garantie,CAUTION_TYPE_LABELS.RETENUE_GARANTIE
+app/applications/erp/pages/marches/models/index.ts,308,1,status_label,Ã‰mise,marches.models.status.emise,CAUTION_STATUS_LABELS.EMISE
+app/applications/erp/pages/marches/models/index.ts,310,19,status_label,LevÃ©e,marches.models.status.levee,CAUTION_STATUS_LABELS.LEVEE
+app/applications/erp/pages/marches/models/index.ts,311,17,status_label,ExpirÃ©e,marches.models.status.expiree,CAUTION_STATUS_LABELS.EXPIRE
+app/applications/erp/pages/marches/models/index.ts,312,20,status_label,JouÃ©e,marches.models.status.jouee,CAUTION_STATUS_LABELS.JOUE
+app/applications/erp/pages/marches/models/index.ts,319,27,status_label,NotifiÃ©,marches.models.status.notifie,DGD_STATUS_LABELS.NOTIFIE
+app/applications/erp/pages/marches/models/index.ts,320,21,status_label,PayÃ©,marches.models.status.paye,DGD_STATUS_LABELS.PAYE
+app/applications/erp/pages/marches/models/index.ts,321,15,status_label,ContestÃ©,marches.models.status.conteste,DGD_STATUS_LABELS.CONTESTE
+app/applications/erp/pages/marches/models/index.ts,327,31,type_label,ArrÃªt,marches.models.label.arret,ORDRE_SERVICE_TYPE_LABELS.ARRET
+app/applications/erp/pages/marches/models/index.ts,335,1,status_label,Ã‰mis,marches.models.status.emis,ORDRE_SERVICE_STATUS_LABELS.EMIS
+app/applications/erp/pages/marches/models/index.ts,336,15,status_label,RÃ©ceptionnÃ©,marches.models.status.receptionne,ORDRE_SERVICE_STATUS_LABELS.RECEPTIONNE
+app/applications/erp/pages/marches/models/index.ts,337,29,status_label,ContestÃ©,marches.models.status.conteste,ORDRE_SERVICE_STATUS_LABELS.CONTESTE
+app/applications/erp/pages/marches/os/os-listing.page.ts,39,30,inline_template_text,MarchÃ©,marches.os.text.marche,>â€¦<
+app/applications/erp/pages/marches/os/os-listing.page.ts,40,16,inline_template_text,Ã‰metteur,marches.os.text.emetteur,>â€¦<
+app/applications/erp/pages/marches/os/os-listing.page.ts,40,59,inline_template_text,Î” dÃ©lai (j),marches.os.text.delai,>â€¦<
+app/applications/erp/pages/marches/os/os-listing.page.ts,67,48,inline_template_text,Aucun ordre de service.,marches.os.text.aucun-ordre-de-service,>â€¦<
+app/applications/erp/pages/marches/penalites/penalites.page.ts,46,16,inline_template_text,MarchÃ©s avec retard,marches.penalites.text.marches-avec-retard,>â€¦<
+app/applications/erp/pages/marches/penalites/penalites.page.ts,50,16,inline_template_text,Total pÃ©nalitÃ©s applicables,marches.penalites.text.total-penalites-applicables,>â€¦<
+app/applications/erp/pages/marches/penalites/penalites.page.ts,54,16,inline_template_text,Ã€ dÃ©duire prochaine facture,marches.penalites.text.deduire-prochaine-facture,>â€¦<
+app/applications/erp/pages/marches/penalites/penalites.page.ts,63,16,inline_template_text,MarchÃ©,marches.penalites.text.marche,>â€¦<
+app/applications/erp/pages/marches/penalites/penalites.page.ts,64,28,inline_template_text,Montant marchÃ© HT,marches.penalites.text.montant-marche-ht,>â€¦<
+app/applications/erp/pages/marches/penalites/penalites.page.ts,67,16,inline_template_text,Fin rÃ©elle,marches.penalites.text.fin-reelle,>â€¦<
+app/applications/erp/pages/marches/penalites/penalites.page.ts,69,28,inline_template_text,PÃ©nalitÃ©,marches.penalites.text.penalite,>â€¦<
+app/applications/erp/pages/marches/penalites/penalites.page.ts,87,76,inline_template_text,En cours,marches.penalites.text.en-cours,>â€¦<
+app/applications/erp/pages/marches/penalites/penalites.page.ts,88,68,inline_template_text,GrÃ¢ce contractuelle,marches.penalites.text.grace-contractuelle,>â€¦<
+app/applications/erp/pages/marches/penalites/penalites.page.ts,93,49,inline_template_text,Aucun marchÃ© en retard.,marches.penalites.text.aucun-marche-en-retard,>â€¦<
+app/applications/erp/pages/marches/revisions-prix/revisions-prix.page.ts,52,34,inline_template_text,RÃ©fÃ©rentiel indices BTP (ANP-IAB),marches.revisions-prix.text.referentiel-indices-btp-anp-iab,>â€¦<
+app/applications/erp/pages/marches/revisions-prix/revisions-prix.page.ts,79,34,inline_template_text,Coefficients K par marchÃ© rÃ©visable,marches.revisions-prix.text.coefficients-par-marche-revisable,>â€¦<
+app/applications/erp/pages/marches/revisions-prix/revisions-prix.page.ts,90,16,inline_template_text,MarchÃ©,marches.revisions-prix.text.marche,>â€¦<
+app/applications/erp/pages/marches/revisions-prix/revisions-prix.page.ts,92,33,inline_template_text,K calculÃ©,marches.revisions-prix.text.calcule,>â€¦<
+app/applications/erp/pages/marches/revisions-prix/revisions-prix.page.ts,112,81,inline_template_text,Aucun marchÃ© rÃ©visable.,marches.revisions-prix.text.aucun-marche-revisable,>â€¦<
+app/applications/erp/pages/marches/revisions-prix/revisions-prix.page.ts,119,28,inline_template_text,K = a (fixe) + Î£ báµ¢ Ã— (Indice courant / Indice base),marches.revisions-prix.text.fixe-indice-courant-indice,>â€¦<

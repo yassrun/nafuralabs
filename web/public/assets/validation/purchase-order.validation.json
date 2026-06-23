@@ -1,0 +1,20 @@
+{
+  "entity": "PurchaseOrder",
+  "fields": {
+    "poNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "vendorId": {
+      "required": true
+    },
+    "orderDate": {
+      "required": true
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

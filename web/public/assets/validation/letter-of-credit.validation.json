@@ -1,0 +1,29 @@
+{
+  "entity": "LetterOfCredit",
+  "fields": {
+    "lcNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "beneficiary": {
+      "maxLength": 120
+    },
+    "amount": {
+      "min": 0
+    },
+    "currency": {
+      "maxLength": 120
+    },
+    "shipmentDeadline": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "entity": "ServiceRequest",
+  "fields": {
+    "requestNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "customerId": {
+      "required": true
+    },
+    "issue": {
+      "required": true,
+      "maxLength": 2000
+    },
+    "priority": {
+      "required": true,
+      "maxLength": 20
+    },
+    "category": {
+      "maxLength": 60
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

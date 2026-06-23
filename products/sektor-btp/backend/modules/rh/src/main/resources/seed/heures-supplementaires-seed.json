@@ -1,0 +1,44 @@
+{
+  "heuresSupplementaires": [
+    {
+      "id": "hs-001",
+      "employeId": "emp-001",
+      "date": "2026-05-07",
+      "type": "HS25",
+      "heures": "2",
+      "montant": "55.08",
+      "status": "VALIDE",
+      "pointageId": "pt-2026-05-07-emp-001"
+    },
+    {
+      "id": "hs-002",
+      "employeId": "emp-001",
+      "date": "2026-05-08",
+      "type": "HS25",
+      "heures": "1.5",
+      "montant": "41.31",
+      "status": "BROUILLON",
+      "pointageId": "pt-2026-05-08-emp-001"
+    },
+    {
+      "id": "hs-003",
+      "employeId": "emp-002",
+      "date": "2026-05-08",
+      "type": "HS50",
+      "heures": "3",
+      "montant": "106.02",
+      "status": "VALIDE",
+      "pointageId": "pt-2026-05-08-emp-002"
+    },
+    {
+      "id": "hs-004",
+      "employeId": "emp-003",
+      "date": "2026-05-07",
+      "type": "HS100",
+      "heures": "4",
+      "montant": "175.92",
+      "status": "BROUILLON",
+      "pointageId": "pt-2026-05-07-emp-003"
+    }
+  ]
+}

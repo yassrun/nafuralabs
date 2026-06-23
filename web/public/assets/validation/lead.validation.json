@@ -1,0 +1,30 @@
+{
+  "entity": "Lead",
+  "fields": {
+    "name": {
+      "required": true,
+      "maxLength": 200
+    },
+    "companyName": {
+      "maxLength": 200
+    },
+    "email": {
+      "maxLength": 200,
+      "pattern": "^[^@]+@[^@]+$"
+    },
+    "phone": {
+      "maxLength": 30
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "score": {
+      "min": 0,
+      "max": 100
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

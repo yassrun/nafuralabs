@@ -1,0 +1,12 @@
+{
+  "entity": "NotificationPreference",
+  "fields": {
+    "userId": {
+      "required": true
+    },
+    "eventType": {
+      "required": true,
+      "maxLength": 80
+    }
+  }
+}

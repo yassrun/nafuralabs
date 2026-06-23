@@ -1,0 +1,194 @@
+{
+  "lots": [
+    {
+      "id": "ch-001-lot-01",
+      "chantierId": "ch-001",
+      "code": "01",
+      "designation": "Gros oeuvre",
+      "quantite": "3200",
+      "unite": "m3",
+      "avancementPercent": "93",
+      "ordre": 1
+    },
+    {
+      "id": "ch-001-lot-02",
+      "chantierId": "ch-001",
+      "code": "02",
+      "designation": "Clos couvert",
+      "quantite": "4100",
+      "unite": "m2",
+      "avancementPercent": "19",
+      "ordre": 2
+    },
+    {
+      "id": "ch-001-lot-03",
+      "chantierId": "ch-001",
+      "code": "03",
+      "designation": "Second oeuvre",
+      "quantite": "5200",
+      "unite": "m2",
+      "avancementPercent": "2",
+      "ordre": 3
+    },
+    {
+      "id": "ch-001-lot-04",
+      "chantierId": "ch-001",
+      "code": "04",
+      "designation": "VRD et abords",
+      "quantite": "1800",
+      "unite": "m2",
+      "avancementPercent": "0",
+      "ordre": 4
+    },
+    {
+      "id": "ch-002-lot-01",
+      "chantierId": "ch-002",
+      "code": "01",
+      "designation": "Fondations profondes",
+      "quantite": "128",
+      "unite": "U",
+      "avancementPercent": "90",
+      "ordre": 1
+    },
+    {
+      "id": "ch-002-lot-02",
+      "chantierId": "ch-002",
+      "code": "02",
+      "designation": "Tablier principal",
+      "quantite": "1",
+      "unite": "ff",
+      "avancementPercent": "19",
+      "ordre": 2
+    },
+    {
+      "id": "ch-002-lot-03",
+      "chantierId": "ch-002",
+      "code": "03",
+      "designation": "Equipements et securite",
+      "quantite": "1",
+      "unite": "ff",
+      "avancementPercent": "0",
+      "ordre": 3
+    },
+    {
+      "id": "ch-003-lot-01",
+      "chantierId": "ch-003",
+      "code": "01",
+      "designation": "Structure",
+      "quantite": "2800",
+      "unite": "m3",
+      "avancementPercent": "97",
+      "ordre": 1
+    },
+    {
+      "id": "ch-003-lot-02",
+      "chantierId": "ch-003",
+      "code": "02",
+      "designation": "Corps d etat techniques",
+      "quantite": "1",
+      "unite": "ff",
+      "avancementPercent": "21",
+      "ordre": 2
+    },
+    {
+      "id": "ch-003-lot-03",
+      "chantierId": "ch-003",
+      "code": "03",
+      "designation": "Finitions medicales",
+      "quantite": "1",
+      "unite": "ff",
+      "avancementPercent": "0",
+      "ordre": 3
+    },
+    {
+      "id": "ch-004-lot-01",
+      "chantierId": "ch-004",
+      "code": "01",
+      "designation": "Voirie et plateformes",
+      "quantite": "15000",
+      "unite": "m2",
+      "avancementPercent": "79",
+      "ordre": 1
+    },
+    {
+      "id": "ch-004-lot-02",
+      "chantierId": "ch-004",
+      "code": "02",
+      "designation": "Reseaux humides",
+      "quantite": "4600",
+      "unite": "ml",
+      "avancementPercent": "82",
+      "ordre": 2
+    },
+    {
+      "id": "ch-004-lot-03",
+      "chantierId": "ch-004",
+      "code": "03",
+      "designation": "Eclairage exterieur",
+      "quantite": "1",
+      "unite": "ff",
+      "avancementPercent": "32",
+      "ordre": 3
+    },
+    {
+      "id": "ch-005-lot-01",
+      "chantierId": "ch-005",
+      "code": "01",
+      "designation": "Demolition et gros oeuvre",
+      "quantite": "1",
+      "unite": "ff",
+      "avancementPercent": "100",
+      "ordre": 1
+    },
+    {
+      "id": "ch-005-lot-02",
+      "chantierId": "ch-005",
+      "code": "02",
+      "designation": "MEP et domotique",
+      "quantite": "1",
+      "unite": "ff",
+      "avancementPercent": "86",
+      "ordre": 2
+    },
+    {
+      "id": "ch-005-lot-03",
+      "chantierId": "ch-005",
+      "code": "03",
+      "designation": "Decoration et exterior",
+      "quantite": "1",
+      "unite": "ff",
+      "avancementPercent": "36",
+      "ordre": 3
+    },
+    {
+      "id": "ch-006-lot-01",
+      "chantierId": "ch-006",
+      "code": "01",
+      "designation": "Batiments pedagogiques",
+      "quantite": "5400",
+      "unite": "m2",
+      "avancementPercent": "61",
+      "ordre": 1
+    },
+    {
+      "id": "ch-006-lot-02",
+      "chantierId": "ch-006",
+      "code": "02",
+      "designation": "Amenagements sportifs",
+      "quantite": "2800",
+      "unite": "m2",
+      "avancementPercent": "79",
+      "ordre": 2
+    },
+    {
+      "id": "ch-006-lot-03",
+      "chantierId": "ch-006",
+      "code": "03",
+      "designation": "Lots techniques",
+      "quantite": "1",
+      "unite": "ff",
+      "avancementPercent": "53",
+      "ordre": 3
+    }
+  ]
+}

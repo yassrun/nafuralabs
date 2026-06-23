@@ -1,0 +1,392 @@
+{
+  "ouvrages": [
+    {
+      "code": "OUV-T01-001",
+      "designation": "Décapage terre végétale ép. 30cm",
+      "category": "TERRASSEMENT",
+      "unite": "m³",
+      "uniteMain": { "heures": "0.05", "tauxHoraire": "60", "total": "3" },
+      "composants": [
+        {
+          "type": "LOCATION",
+          "designation": "Pelle 220 (location)",
+          "unite": "h",
+          "rendement": "0.04",
+          "prixUnitaire": "350",
+          "total": "14"
+        },
+        {
+          "type": "MATERIAU",
+          "designation": "Gasoil 50",
+          "unite": "L",
+          "rendement": "0.5",
+          "prixUnitaire": "12.5",
+          "total": "6.25"
+        }
+      ],
+      "fraisGenerauxPercent": "8",
+      "beneficePercent": "7",
+      "isActive": true,
+      "derniereMaj": "2026-04-15"
+    },
+    {
+      "code": "OUV-T01-002",
+      "designation": "Fouilles en pleine masse pour fondations",
+      "category": "TERRASSEMENT",
+      "unite": "m³",
+      "uniteMain": { "heures": "0.15", "tauxHoraire": "55", "total": "8.25" },
+      "composants": [
+        {
+          "type": "LOCATION",
+          "designation": "Pelle hydraulique 220",
+          "unite": "h",
+          "rendement": "0.06",
+          "prixUnitaire": "350",
+          "total": "21"
+        }
+      ],
+      "fraisGenerauxPercent": "8",
+      "beneficePercent": "7",
+      "isActive": true,
+      "derniereMaj": "2026-04-15"
+    },
+    {
+      "code": "OUV-T01-003",
+      "designation": "Remblai compacté en tout-venant",
+      "category": "TERRASSEMENT",
+      "unite": "m³",
+      "uniteMain": { "heures": "0.2", "tauxHoraire": "50", "total": "10" },
+      "composants": [
+        {
+          "type": "MATERIAU",
+          "designation": "Tout-venant 0/40",
+          "unite": "m³",
+          "rendement": "1.15",
+          "prixUnitaire": "95",
+          "total": "109.25"
+        },
+        {
+          "type": "LOCATION",
+          "designation": "Compacteur",
+          "unite": "h",
+          "rendement": "0.08",
+          "prixUnitaire": "280",
+          "total": "22.4"
+        }
+      ],
+      "fraisGenerauxPercent": "8",
+      "beneficePercent": "7",
+      "isActive": true,
+      "derniereMaj": "2026-04-15"
+    },
+    {
+      "code": "OUV-T01-004",
+      "designation": "Évacuation déblais — décharge agréée",
+      "category": "TERRASSEMENT",
+      "unite": "m³",
+      "uniteMain": { "heures": "0.05", "tauxHoraire": "50", "total": "2.5" },
+      "composants": [
+        {
+          "type": "LOCATION",
+          "designation": "Camion benne 16T",
+          "unite": "h",
+          "rendement": "0.1",
+          "prixUnitaire": "320",
+          "total": "32"
+        }
+      ],
+      "fraisGenerauxPercent": "8",
+      "beneficePercent": "7",
+      "isActive": true,
+      "derniereMaj": "2026-04-15"
+    },
+    {
+      "code": "OUV-G01-001",
+      "designation": "Béton armé pour semelle isolée — BCN 25",
+      "category": "GO",
+      "unite": "m³",
+      "uniteMain": { "heures": "5.5", "tauxHoraire": "55", "total": "302.5" },
+      "composants": [
+        {
+          "type": "MATERIAU",
+          "designation": "Ciment CPJ 35",
+          "unite": "sac",
+          "rendement": "7",
+          "prixUnitaire": "78",
+          "total": "546"
+        },
+        {
+          "type": "MATERIAU",
+          "designation": "Sable 0/4",
+          "unite": "m³",
+          "rendement": "0.4",
+          "prixUnitaire": "180",
+          "total": "72"
+        },
+        {
+          "type": "MATERIAU",
+          "designation": "Gravette 4/6",
+          "unite": "m³",
+          "rendement": "0.4",
+          "prixUnitaire": "220",
+          "total": "88"
+        },
+        {
+          "type": "MATERIAU",
+          "designation": "Gravier 6/10",
+          "unite": "m³",
+          "rendement": "0.4",
+          "prixUnitaire": "240",
+          "total": "96"
+        },
+        {
+          "type": "MATERIAU",
+          "designation": "Acier T12 façonné",
+          "unite": "kg",
+          "rendement": "80",
+          "prixUnitaire": "14.5",
+          "total": "1160"
+        }
+      ],
+      "fraisGenerauxPercent": "8",
+      "beneficePercent": "7",
+      "isActive": true,
+      "derniereMaj": "2026-04-15"
+    },
+    {
+      "code": "OUV-G01-002",
+      "designation": "Béton armé pour longrines",
+      "category": "GO",
+      "unite": "m³",
+      "uniteMain": { "heures": "6", "tauxHoraire": "55", "total": "330" },
+      "composants": [
+        {
+          "type": "MATERIAU",
+          "designation": "Ciment CPJ 45",
+          "unite": "sac",
+          "rendement": "8",
+          "prixUnitaire": "92",
+          "total": "736"
+        },
+        {
+          "type": "MATERIAU",
+          "designation": "Granulats 0/20",
+          "unite": "m³",
+          "rendement": "1",
+          "prixUnitaire": "210",
+          "total": "210"
+        },
+        {
+          "type": "MATERIAU",
+          "designation": "Acier T14 façonné",
+          "unite": "kg",
+          "rendement": "90",
+          "prixUnitaire": "14.8",
+          "total": "1332"
+        }
+      ],
+      "fraisGenerauxPercent": "8",
+      "beneficePercent": "7",
+      "isActive": true,
+      "derniereMaj": "2026-04-15"
+    },
+    {
+      "code": "OUV-G01-003",
+      "designation": "Dalle pleine BA 15cm — RDC",
+      "category": "GO",
+      "unite": "m²",
+      "uniteMain": { "heures": "0.8", "tauxHoraire": "55", "total": "44" },
+      "composants": [
+        {
+          "type": "MATERIAU",
+          "designation": "Béton BCN 30 prêt",
+          "unite": "m³",
+          "rendement": "0.16",
+          "prixUnitaire": "1100",
+          "total": "176"
+        },
+        {
+          "type": "MATERIAU",
+          "designation": "Treillis soudé ST25",
+          "unite": "m²",
+          "rendement": "1.05",
+          "prixUnitaire": "32",
+          "total": "33.6"
+        },
+        {
+          "type": "MATERIAU",
+          "designation": "Coffrage perdu PVC",
+          "unite": "m²",
+          "rendement": "0.3",
+          "prixUnitaire": "45",
+          "total": "13.5"
+        }
+      ],
+      "fraisGenerauxPercent": "8",
+      "beneficePercent": "7",
+      "isActive": true,
+      "derniereMaj": "2026-04-15"
+    },
+    {
+      "code": "OUV-G01-004",
+      "designation": "Voile béton armé ép. 20cm",
+      "category": "GO",
+      "unite": "m²",
+      "uniteMain": { "heures": "1.2", "tauxHoraire": "60", "total": "72" },
+      "composants": [
+        {
+          "type": "MATERIAU",
+          "designation": "Béton BCN 30",
+          "unite": "m³",
+          "rendement": "0.21",
+          "prixUnitaire": "1100",
+          "total": "231"
+        },
+        {
+          "type": "MATERIAU",
+          "designation": "Acier T12",
+          "unite": "kg",
+          "rendement": "25",
+          "prixUnitaire": "14.5",
+          "total": "362.5"
+        },
+        {
+          "type": "LOCATION",
+          "designation": "Coffrage banche",
+          "unite": "m²",
+          "rendement": "1",
+          "prixUnitaire": "65",
+          "total": "65"
+        }
+      ],
+      "fraisGenerauxPercent": "8",
+      "beneficePercent": "7",
+      "isActive": true,
+      "derniereMaj": "2026-04-15"
+    },
+    {
+      "code": "OUV-G01-005",
+      "designation": "Poteau béton armé 30x30",
+      "category": "GO",
+      "unite": "ml",
+      "uniteMain": { "heures": "1.8", "tauxHoraire": "60", "total": "108" },
+      "composants": [
+        {
+          "type": "MATERIAU",
+          "designation": "Béton BCN 30",
+          "unite": "m³",
+          "rendement": "0.09",
+          "prixUnitaire": "1100",
+          "total": "99"
+        },
+        {
+          "type": "MATERIAU",
+          "designation": "Acier T16 façonné",
+          "unite": "kg",
+          "rendement": "16",
+          "prixUnitaire": "15.2",
+          "total": "243.2"
+        }
+      ],
+      "fraisGenerauxPercent": "8",
+      "beneficePercent": "7",
+      "isActive": true,
+      "derniereMaj": "2026-04-15"
+    },
+    {
+      "code": "OUV-G01-006",
+      "designation": "Mur agglos 20 hourdé au mortier",
+      "category": "GO",
+      "unite": "m²",
+      "uniteMain": { "heures": "1", "tauxHoraire": "50", "total": "50" },
+      "composants": [
+        {
+          "type": "MATERIAU",
+          "designation": "Agglos 20x20x40",
+          "unite": "U",
+          "rendement": "12.5",
+          "prixUnitaire": "7.5",
+          "total": "93.75"
+        },
+        {
+          "type": "MATERIAU",
+          "designation": "Mortier ciment",
+          "unite": "m³",
+          "rendement": "0.02",
+          "prixUnitaire": "850",
+          "total": "17"
+        }
+      ],
+      "fraisGenerauxPercent": "8",
+      "beneficePercent": "7",
+      "isActive": true,
+      "derniereMaj": "2026-04-15"
+    },
+    {
+      "code": "OUV-G01-007",
+      "designation": "Plancher hourdis 16+5",
+      "category": "GO",
+      "unite": "m²",
+      "uniteMain": { "heures": "1.2", "tauxHoraire": "55", "total": "66" },
+      "composants": [
+        {
+          "type": "MATERIAU",
+          "designation": "Hourdis 16x20x60",
+          "unite": "U",
+          "rendement": "8",
+          "prixUnitaire": "14",
+          "total": "112"
+        },
+        {
+          "type": "MATERIAU",
+          "designation": "Poutrelles BA",
+          "unite": "ml",
+          "rendement": "1.6",
+          "prixUnitaire": "85",
+          "total": "136"
+        },
+        {
+          "type": "MATERIAU",
+          "designation": "Béton de dalle",
+          "unite": "m³",
+          "rendement": "0.06",
+          "prixUnitaire": "1100",
+          "total": "66"
+        }
+      ],
+      "fraisGenerauxPercent": "8",
+      "beneficePercent": "7",
+      "isActive": true,
+      "derniereMaj": "2026-04-15"
+    },
+    {
+      "code": "OUV-G01-008",
+      "designation": "Escalier béton armé droit",
+      "category": "GO",
+      "unite": "ml",
+      "uniteMain": { "heures": "4", "tauxHoraire": "60", "total": "240" },
+      "composants": [
+        {
+          "type": "MATERIAU",
+          "designation": "Béton BCN 30",
+          "unite": "m³",
+          "rendement": "0.25",
+          "prixUnitaire": "1100",
+          "total": "275"
+        },
+        {
+          "type": "MATERIAU",
+          "designation": "Acier façonné",
+          "unite": "kg",
+          "rendement": "30",
+          "prixUnitaire": "14.8",
+          "total": "444"
+        }
+      ],
+      "fraisGenerauxPercent": "8",
+      "beneficePercent": "7",
+      "isActive": true,
+      "derniereMaj": "2026-04-15"
+    }
+  ]
+}

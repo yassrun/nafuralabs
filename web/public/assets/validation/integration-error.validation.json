@@ -1,0 +1,29 @@
+{
+  "entity": "IntegrationError",
+  "fields": {
+    "errorNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "source": {
+      "required": true,
+      "maxLength": 120
+    },
+    "errorType": {
+      "required": true,
+      "maxLength": 80
+    },
+    "errorMessage": {
+      "required": true,
+      "maxLength": 4000
+    },
+    "occurredAt": {
+      "required": true
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

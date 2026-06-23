@@ -1,0 +1,20 @@
+{
+  "entity": "ContractRenewal",
+  "fields": {
+    "renewalNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "newTerms": {
+      "maxLength": 2000
+    },
+    "priceAdjustment": {
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

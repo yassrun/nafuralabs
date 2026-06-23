@@ -1,0 +1,70 @@
+{
+  "avenants": [
+    {
+      "id": "av-001",
+      "numero": "AV-MAR-2026-001-01",
+      "contratMarcheId": "mar-001",
+      "marcheNumero": "MAR-2026-001",
+      "type": "TVX_SUPPLEMENTAIRES",
+      "objet": "Extension sous-sol — parking 20 places",
+      "motif": "Demande MOA : ajout parking souterrain non prévu au marché initial.",
+      "montantHt": "2200000",
+      "prolongationJours": 45,
+      "dateSignature": "2026-03-15",
+      "status": "SIGNE",
+      "impactPropageLe": "2026-03-16T09:00:00+00:00"
+    },
+    {
+      "id": "av-002",
+      "numero": "AV-MAR-2026-001-02",
+      "contratMarcheId": "mar-001",
+      "marcheNumero": "MAR-2026-001",
+      "type": "PROLONGATION_DELAI",
+      "objet": "Intempéries — prolongation 30 jours",
+      "motif": "Arrêt de chantier suite aux intempéries exceptionnelles de mars 2026 (pluies torrentielles).",
+      "montantHt": "0",
+      "prolongationJours": 30,
+      "dateSignature": "2026-04-05",
+      "status": "SIGNE",
+      "impactPropageLe": "2026-04-06T11:00:00+00:00"
+    },
+    {
+      "id": "av-003",
+      "numero": "AV-MAR-2026-001-03",
+      "contratMarcheId": "mar-001",
+      "marcheNumero": "MAR-2026-001",
+      "type": "ADAPTATION_TECHNIQUE",
+      "objet": "Remplacement acier HA32 par HA40 — fondations bloc A",
+      "motif": "Note de calcul révisée par le BET structure : acier HA40 requis sur les poteaux porteurs du bloc A.",
+      "montantHt": "-350000",
+      "prolongationJours": 0,
+      "status": "PROPOSE"
+    },
+    {
+      "id": "av-004",
+      "numero": "AV-MAR-2026-002-01",
+      "contratMarcheId": "mar-002",
+      "marcheNumero": "MAR-2026-002",
+      "type": "TVX_SUPPLEMENTAIRES",
+      "objet": "Mur de soutènement aval — fondations imprévues",
+      "motif": "Sondages complémentaires ont révélé une roche instable aval nécessitant un mur béton armé supplémentaire.",
+      "montantHt": "3800000",
+      "prolongationJours": 20,
+      "dateSignature": "2026-04-20",
+      "status": "SIGNE"
+    },
+    {
+      "id": "av-005",
+      "numero": "AV-MAR-2025-018-01",
+      "contratMarcheId": "mar-003",
+      "marcheNumero": "MAR-2025-018",
+      "type": "TVX_SUPPLEMENTAIRES",
+      "objet": "Remplacement menuiseries aluminium — spécifications révisées",
+      "motif": "Demande MEN : remplacement des menuiseries simple vitrage par double vitrage sécurit.",
+      "montantHt": "320000",
+      "prolongationJours": 10,
+      "dateSignature": "2026-01-10",
+      "status": "SIGNE"
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "purchasing": {
+    "navigation": {
+      "title": "Purchasing",
+      "description": "Purchasing Domain",
+      "purchaseOrders": "Purchase Orders",
+      "purchaseOrderLines": "Purchase Order Lines",
+      "purchaseRequisitions": "Purchase Requisitions",
+      "purchaseRequisitionLines": "Purchase Requisition Lines",
+      "goodsReceipts": "Goods Receipts",
+      "goodsReceiptLines": "Goods Receipt Lines",
+      "vendorCategories": "Vendor Categories",
+      "vendorScorecards": "Vendor Scorecards"
+    }
+  },
+  "common": {
+    "subsections": {
+      "operations": "Operations",
+      "configuration": "Configuration"
+    }
+  },
+  "procurement": {
+    "fields": {
+      "poNumber": "Po Number",
+      "vendor": "Vendor Id",
+      "orderDate": "Order Date",
+      "status": "Status",
+      "purchaseOrderId": "Purchase Order Id",
+      "itemId": "Item Id",
+      "description": "Description",
+      "quantity": "Quantity",
+      "unitPrice": "Unit Price",
+      "totalAmount": "Total Amount",
+      "deliveryDate": "Delivery Date",
+      "warehouseId": "Warehouse Id",
+      "reqNumber": "Req Number",
+      "requester": "Requester Id",
+      "department": "Department Id",
+      "needByDate": "Need By Date",
+      "costCenter": "Cost Center Id",
+      "currency": "Currency Id",
+      "totalEstimate": "Total Estimate",
+      "justification": "Justification",
+      "purchaseRequisition": "Req Id",
+      "lineNumber": "Line Number",
+      "item": "Item Id",
+      "estimatedUnitPrice": "Estimated Unit Price",
+      "preferredVendor": "Preferred Vendor Id",
+      "lineTotal": "Line Total",
+      "receiptNumber": "Receipt Number",
+      "vendorId": "Vendor Id",
+      "receiptDate": "Receipt Date",
+      "receivedBy": "Received By",
+      "totalItems": "Total Items",
+      "notes": "Notes",
+      "goodsReceiptId": "Goods Receipt Id",
+      "orderedQty": "Ordered Qty",
+      "receivedQty": "Received Qty",
+      "acceptedQty": "Accepted Qty",
+      "rejectedQty": "Rejected Qty",
+      "binLocation": "Bin Location",
+      "code": "Code",
+      "name": "Name",
+      "qualificationRequired": "Qualification Required",
+      "paymentTermDefault": "Payment Term Default",
+      "scorecardNumber": "Scorecard Number",
+      "periodStart": "Period Start",
+      "periodEnd": "Period End",
+      "onTimeDelivery": "On Time Delivery",
+      "qualityScore": "Quality Score",
+      "priceCompetitiveness": "Price Competitiveness",
+      "responsiveness": "Responsiveness",
+      "overallScore": "Overall Score"
+    },
+    "sections": {
+      "general": "General",
+      "notes": "Notes",
+      "amounts": "Amounts",
+      "workflow": "Workflow"
+    }
+  }
+}

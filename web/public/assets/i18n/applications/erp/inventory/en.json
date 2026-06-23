@@ -1,0 +1,1634 @@
+{
+  "inventory": {
+    "routes": {
+      "scanner": {
+        "title": "Stock scanner",
+        "breadcrumb": "Scanner"
+      },
+      "magasinChantier": {
+        "title": "Site warehouse",
+        "breadcrumb": "Site warehouse"
+      },
+      "reservations": {
+        "title": "Stock reservations",
+        "breadcrumb": "Reservations"
+      },
+      "etatStock": {
+        "title": "Stock status",
+        "breadcrumb": "Stock status"
+      },
+      "valorisation": {
+        "title": "Valuation",
+        "breadcrumb": "Valuation"
+      },
+      "alertes": {
+        "title": "Replenishment alerts",
+        "breadcrumb": "Alerts"
+      },
+      "articles": {
+        "title": "Items",
+        "breadcrumb": "Items",
+        "new": "New item",
+        "detail": "Item details",
+        "newBreadcrumb": "New",
+        "detailBreadcrumb": "Details"
+      },
+      "materielCatalogue": {
+        "title": "Equipment catalogue",
+        "breadcrumb": "Equipment",
+        "new": "New equipment",
+        "detail": "Equipment details"
+      },
+      "depots": {
+        "title": "Warehouses & locations",
+        "breadcrumb": "Warehouses",
+        "new": "New warehouse",
+        "detail": "Warehouse details"
+      },
+      "familles": {
+        "title": "Item families",
+        "breadcrumb": "Families",
+        "new": "New family",
+        "detail": "Family details"
+      },
+      "typesArticles": {
+        "title": "Item types",
+        "breadcrumb": "Item types",
+        "new": "New type",
+        "detail": "Type details"
+      },
+      "motifs": {
+        "title": "Movement reasons",
+        "breadcrumb": "Reasons",
+        "new": "New reason",
+        "detail": "Reason details"
+      },
+      "uom": {
+        "title": "Units of measure",
+        "breadcrumb": "UoM",
+        "new": "New unit",
+        "detail": "Unit details"
+      },
+      "uomCategories": {
+        "title": "Unit of measure categories",
+        "breadcrumb": "UoM categories",
+        "new": "New UoM category",
+        "detail": "UoM category details"
+      },
+      "costingMethods": {
+        "title": "Costing methods",
+        "breadcrumb": "Costing methods",
+        "new": "New method",
+        "detail": "Method details"
+      },
+      "receptions": {
+        "title": "Goods receipts",
+        "breadcrumb": "Receipts",
+        "new": "New goods receipt",
+        "detail": "Receipt details"
+      },
+      "transferts": {
+        "title": "Transfers",
+        "breadcrumb": "Transfers",
+        "new": "New transfer",
+        "detail": "Transfer details"
+      },
+      "sorties": {
+        "title": "Stock issues",
+        "breadcrumb": "Issues",
+        "new": "New issue",
+        "detail": "Issue details"
+      },
+      "retours": {
+        "title": "Returns",
+        "breadcrumb": "Returns",
+        "new": "New return",
+        "detail": "Return details"
+      },
+      "inventaires": {
+        "title": "Physical counts",
+        "breadcrumb": "Counts",
+        "new": "New count",
+        "detail": "Count details"
+      },
+      "pertesChutes": {
+        "title": "Losses & scraps",
+        "breadcrumb": "Losses & scraps",
+        "new": "New loss/scrap",
+        "detail": "Loss/scrap details"
+      },
+      "stockBalances": {
+        "title": "Stock balances",
+        "breadcrumb": "Balances"
+      },
+      "parcMateriel": {
+        "title": "Equipment fleet",
+        "breadcrumb": "Equipment fleet",
+        "new": "New equipment",
+        "detail": "Equipment detail"
+      },
+      "affectationsMateriel": {
+        "title": "Equipment assignments",
+        "breadcrumb": "Assignments"
+      },
+      "ficheEngin": {
+        "title": "Equipment card",
+        "breadcrumb": "Equipment"
+      },
+      "planningMateriel": {
+        "title": "Equipment schedule",
+        "breadcrumb": "Equipment schedule"
+      },
+      "pointageEngin": {
+        "title": "Equipment time-log",
+        "breadcrumb": "Time-log"
+      },
+      "controlesReglementaires": {
+        "title": "Regulatory inspections",
+        "breadcrumb": "Inspections"
+      },
+      "locationsExternes": {
+        "title": "External rentals",
+        "breadcrumb": "Rentals"
+      },
+      "plansMaintenance": {
+        "title": "Maintenance plans",
+        "breadcrumb": "Plans"
+      },
+      "ordresTravail": {
+        "title": "Work orders",
+        "breadcrumb": "WO"
+      },
+      "ordreTravail": {
+        "title": "Work order",
+        "breadcrumb": "WO"
+      },
+      "historiqueMaintenance": {
+        "title": "Maintenance history",
+        "breadcrumb": "History"
+      },
+      "carnetsCarburant": {
+        "title": "Fuel logbooks",
+        "breadcrumb": "Logbooks"
+      },
+      "pleinsCarburant": {
+        "title": "Fuel refills",
+        "breadcrumb": "Refills"
+      },
+      "consommationsCarburant": {
+        "title": "Consumption",
+        "breadcrumb": "Consumption"
+      }
+    },
+    "common": {
+      "yes": "Yes",
+      "no": "No",
+      "active": "Active",
+      "inactive": "Inactive",
+      "dash": "—",
+      "all": "All",
+      "loading": "Loading…",
+      "noData": "No data"
+    },
+    "enums": {
+      "articleType": {
+        "MATERIAU": "Material",
+        "CONSOMMABLE": "Consumable",
+        "ENGIN": "Machinery",
+        "OUTILLAGE": "Tooling"
+      },
+      "locationType": {
+        "DEPOT": "Warehouse",
+        "ENTREPOT": "Storage warehouse",
+        "CHANTIER": "Site",
+        "TRANSIT": "In transit",
+        "VIRTUEL": "Virtual"
+      },
+      "materielStatus": {
+        "DISPONIBLE": "Available",
+        "AFFECTE": "Assigned",
+        "MAINTENANCE": "Under maintenance",
+        "HORS_SERVICE": "Out of service"
+      },
+      "txType": {
+        "RECEPTION": "Goods receipt",
+        "TRANSFERT": "Transfer",
+        "RETOUR": "Return",
+        "INVENTAIRE": "Stock take",
+        "PERTE": "Loss / Scrap",
+        "SORTIE": "Issue"
+      },
+      "txStatus": {
+        "BROUILLON": "Draft",
+        "VALIDE": "Validated",
+        "CONFIRME": "Confirmed",
+        "ANNULE": "Cancelled",
+        "EN_COURS": "In progress",
+        "CLOTURE": "Closed",
+        "PARTIEL": "Partial"
+      },
+      "alertUrgency": {
+        "CRITIQUE": "Critical",
+        "EN_ALERTE": "Alert"
+      },
+      "costingMethod": {
+        "AVCO": "AVCO (average cost)",
+        "FIFO": "FIFO (first in, first out)",
+        "STD": "Standard cost",
+        "CUMP": "WAC (weighted average cost)",
+        "LIFO": "LIFO (last in, first out)"
+      },
+      "locationExterneStatus": {
+        "EN_COURS": "In progress",
+        "TERMINEE": "Completed",
+        "ANNULEE": "Cancelled"
+      },
+      "posteBudget": {
+        "MATERIAUX": "Materials",
+        "MO": "Labour",
+        "SOUS_TRAITANCE": "Subcontracting",
+        "LOCATION_MATERIEL": "Equipment rental",
+        "CARBURANT": "Fuel",
+        "FRAIS_GENERAUX": "Overhead",
+        "IMPREVUS": "Contingencies"
+      },
+      "devise": {
+        "MAD": "MAD — Moroccan dirham",
+        "EUR": "EUR — Euro",
+        "USD": "USD — US dollar"
+      },
+      "etatArticle": {
+        "BON": "Good condition",
+        "ABIME": "Damaged",
+        "INUTILISABLE": "Unusable"
+      },
+      "motifPerteType": {
+        "CASSE": "Breakage",
+        "VOL": "Theft",
+        "DEGRADATION": "Degradation",
+        "CHUTE_OBLIGATOIRE": "Required offcut",
+        "FIN_LOT": "End of lot",
+        "AUTRE": "Other"
+      },
+      "causeDetaillee": {
+        "DECOUPE": "Cutting offcut",
+        "CASSE": "Breakage",
+        "DETERIORATION": "Deterioration",
+        "AUTRE": "Other"
+      }
+    },
+    "catalogue": {
+      "title": "Item catalogue",
+      "article": {
+        "entityName": "Item",
+        "entityNamePlural": "Items",
+        "headerTitle": "Items",
+        "headerTitleNew": "New item",
+        "headerTitleDetail": "Item details",
+        "permissionPrefix": "inventory.article",
+        "saveSuccess": "Item \"{name}\" saved successfully",
+        "deleteConfirm": {
+          "title": "Delete item",
+          "message": "Do you really want to delete the item \"{name}\"?"
+        },
+        "actions": {
+          "printLabels": "Print labels (batch / location)"
+        },
+        "reservations": {
+          "title": "Active reservations",
+          "empty": "No active reservation for this item.",
+          "columns": {
+            "chantier": "Site",
+            "qte": "Qty",
+            "expiration": "Expiry",
+            "statut": "Status"
+          }
+        },
+        "fields": {
+          "code": "Code",
+          "name": "Designation",
+          "description": "Description",
+          "familleId": "Family",
+          "articleType": "Item type",
+          "uomId": "Unit of measure",
+          "uomSecondaireId": "Secondary unit (e.g. bag)",
+          "conversionFactor": "Conversion factor (2nd → 1st UoM)",
+          "conversionFactorHint": "E.g. 50 if 1 bag = 50 kg",
+          "prixUnitaire": "Catalogue price (MAD)",
+          "prixAchatDernier": "Last purchase price (MAD)",
+          "pmp": "WAC — weighted average price (MAD)",
+          "pmpHint": "Stock valuation / issue budget link",
+          "delaiReapproJours": "Lead time (days)",
+          "devise": "Currency",
+          "stockMin": "Minimum stock",
+          "stockMax": "Maximum stock",
+          "posteBudgetId": "Budget heading (actuals)",
+          "posteBudgetHint": "Overrides the item → heading heuristic",
+          "isPerissable": "Perishable",
+          "isSerialise": "Serial number tracked",
+          "isActive": "Active"
+        },
+        "list": {
+          "columns": {
+            "code": "Code",
+            "name": "Designation",
+            "familleName": "Family",
+            "articleType": "Type",
+            "uomCode": "Unit",
+            "prixUnitaire": "Cat. price (MAD)",
+            "pmp": "WAC (MAD)",
+            "delaiReapproJours": "Lead (d)",
+            "posteBudgetId": "Budget heading",
+            "stockTotal": "Total stock",
+            "isActive": "Active"
+          },
+          "filters": {
+            "famille": "Family",
+            "type": "Type",
+            "isActive": "Active"
+          }
+        },
+        "sections": {
+          "identification": "Identification",
+          "mesurePrix": "Measurement & valuation",
+          "appro": "Replenishment & budget",
+          "seuilsStock": "Stock thresholds",
+          "statut": "Status & traceability"
+        }
+      },
+      "materiel": {
+        "entityName": "Equipment",
+        "entityNamePlural": "Equipment",
+        "headerTitle": "Equipment & machinery",
+        "headerTitleNew": "New equipment",
+        "headerTitleDetail": "Equipment details",
+        "permissionPrefix": "inventory.materiel",
+        "saveSuccess": "Equipment \"{name}\" saved",
+        "deleteConfirm": {
+          "title": "Delete equipment",
+          "message": "Do you really want to delete \"{name}\"?"
+        },
+        "search": "Code, designation, serial #…",
+        "all": "All",
+        "allFem": "All",
+        "affectations": {
+          "empty": "No assignment recorded for this equipment.",
+          "columns": {
+            "chantier": "Site",
+            "dateDebut": "Start date",
+            "dateFin": "End date",
+            "status": "Status",
+            "notes": "Notes"
+          },
+          "status": {
+            "active": "In progress",
+            "completed": "Completed"
+          }
+        },
+        "fields": {
+          "code": "Code",
+          "name": "Designation",
+          "description": "Description",
+          "marque": "Brand",
+          "modele": "Model",
+          "numeroSerie": "Serial number",
+          "anneeMiseEnService": "Year commissioned",
+          "puissanceCapacite": "Power / capacity",
+          "status": "Status",
+          "dateDernierEntretien": "Last service",
+          "prochaineMaintenance": "Next maintenance",
+          "notesMaintenance": "Maintenance notes",
+          "familleId": "Family",
+          "chantierActuelId": "Current site",
+          "isActive": "Active"
+        },
+        "sections": {
+          "identification": "Identification",
+          "caracteristiques": "Technical specifications",
+          "maintenance": "Maintenance & assignment",
+          "statut": "Status"
+        },
+        "list": {
+          "columns": {
+            "code": "Code",
+            "name": "Designation",
+            "marque": "Brand",
+            "modele": "Model",
+            "numeroSerie": "Serial #",
+            "status": "Status",
+            "chantierActuelName": "Current site",
+            "prochaineMaintenance": "Next maintenance",
+            "isActive": "Active"
+          },
+          "filters": {
+            "status": "Status",
+            "famille": "Family",
+            "isActive": "Active"
+          }
+        }
+      },
+      "items": {
+        "headerTitle": "Items (legacy)",
+        "headerTitleNew": "New item",
+        "headerTitleDetail": "Item details"
+      },
+      "itemPrices": {
+        "headerTitle": "Item prices",
+        "headerTitleNew": "New price",
+        "headerTitleDetail": "Price details"
+      }
+    },
+    "mouvement": {
+      "common": {
+        "notSet": "Not set",
+        "notSetFem": "Not set",
+        "all": "All",
+        "back": "← Back",
+        "save": "Save",
+        "edit": "Edit",
+        "noChanges": "No changes to save",
+        "selectDepot": "Please select a destination warehouse.",
+        "selectChantier": "Please select a destination site.",
+        "needLine": "Please add at least one receipt line.",
+        "scanBlOpen": "Unable to open the delivery slip scanner right now.",
+        "tenantMissing": "Tenant not found to start the slip scan",
+        "scanBlFailed": "Delivery slip scan failed",
+        "scanBlSuccess": "Slip scanned, receipt pre-filled",
+        "scanBlImpossible": "Unable to scan the delivery slip",
+        "formNotReady": "The receipt form is not ready",
+        "transitionFailed": "Transition not possible",
+        "transitionUnknown": "Unknown transition: {action}"
+      },
+      "reception": {
+        "title": "Goods receipts",
+        "deliveryMode": {
+          "toDepot": "To a warehouse",
+          "toChantier": "Direct site delivery",
+          "depotReceiver": "Receiving warehouse",
+          "chantierDestination": "Destination site",
+          "phase": "Phase",
+          "blReference": "Delivery slip reference",
+          "linesTotal": "Total: {value} MAD"
+        },
+        "entityName": "Goods receipt",
+        "entityNamePlural": "Goods receipts",
+        "headerTitle": "Goods receipts",
+        "headerTitleNew": "New goods receipt",
+        "headerTitleDetail": "Goods receipt",
+        "subtitleNumber": "No. {number}",
+        "saveSuccess": "Receipt {number} saved",
+        "validateSuccess": "Receipt {number} validated — stock updated",
+        "cancelSuccess": "Receipt rejected",
+        "resetSuccess": "Receipt reset to draft — you may edit it",
+        "actions": {
+          "scanBl": "Scan delivery slip",
+          "newReception": "New goods receipt"
+        },
+        "prerequisites": {
+          "title": "Before creating a receipt, set up:",
+          "fournisseur": "At least one supplier",
+          "depot": "At least one warehouse",
+          "bc": "At least one purchase order"
+        },
+        "status": {
+          "BROUILLON": "To validate",
+          "VALIDE": "Validated",
+          "ANNULE": "Rejected"
+        },
+        "transitions": {
+          "rejectLabel": "Reject",
+          "rejectTitle": "Reject the receipt?",
+          "rejectMessage": "The delivery will be marked as rejected. This action is irreversible.",
+          "validateLabel": "Validate",
+          "validateTitle": "Validate the receipt?",
+          "validateMessage": "Stock will be updated for {number}.",
+          "validateFallback": "this receipt"
+        },
+        "fields": {
+          "txNumber": "Receipt #",
+          "txNumberPlaceholder": "Auto-generated on validation",
+          "status": "Status",
+          "txDate": "Receipt date",
+          "fournisseurId": "Supplier",
+          "destLocationId": "Destination",
+          "chantierLocationId": "Destination site",
+          "phaseRef": "Phase",
+          "reference": "Delivery slip reference",
+          "notes": "Notes",
+          "lines": "Receipt lines"
+        },
+        "sections": {
+          "identification": "Identification",
+          "destination": "Destination",
+          "lines": "Receipt lines"
+        },
+        "list": {
+          "columns": {
+            "txNumber": "Receipt #",
+            "txDate": "Date",
+            "fournisseurName": "Supplier",
+            "destLocationName": "Destination",
+            "reference": "Slip ref.",
+            "bcOrigine": "Source PO",
+            "status": "Status",
+            "totalValue": "Value (MAD)"
+          },
+          "filters": {
+            "status": "Status",
+            "fournisseur": "Supplier",
+            "depot": "Receiving warehouse",
+            "from": "From",
+            "to": "To",
+            "all": "All"
+          },
+          "emptyState": {
+            "title": "No receipt",
+            "message": "Create a new receipt to record a supplier delivery."
+          }
+        }
+      },
+      "transfert": {
+        "title": "Transfers",
+        "entityName": "Transfer",
+        "entityNamePlural": "Transfers",
+        "headerTitle": "Transfers",
+        "headerTitleNew": "New transfer",
+        "headerTitleDetail": "Transfer",
+        "headerTitleDetailFallback": "Transfer details",
+        "saveSuccess": "Transfer saved",
+        "validateSuccess": "Transfer validated — source stock decreased, destination stock increased (mock)",
+        "cancelSuccess": "Transfer rejected",
+        "saveErrorDefault": "Save failed",
+        "destDiffSource": "Destination must differ from source",
+        "status": {
+          "BROUILLON": "To validate",
+          "VALIDE": "Validated",
+          "ANNULE": "Rejected"
+        },
+        "transitions": {
+          "rejectLabel": "Reject",
+          "rejectTitle": "Reject the transfer?",
+          "rejectMessage": "The transfer will be marked as rejected. This action is irreversible.",
+          "validateLabel": "Validate",
+          "validateTitle": "Validate the transfer?",
+          "validateMessage": "Stock will be moved for {number}.",
+          "validateFallback": "this transfer"
+        },
+        "fields": {
+          "txNumber": "Transfer #",
+          "status": "Status",
+          "txDate": "Transfer date",
+          "sourceLocationId": "Source location",
+          "destLocationId": "Destination location",
+          "chantierLocationId": "Site (optional)",
+          "phaseRef": "Site phase",
+          "motifId": "Site reason",
+          "reference": "Reference",
+          "notes": "Notes",
+          "lines": "Lines"
+        },
+        "sections": {
+          "header": "Header",
+          "lines": "Lines"
+        },
+        "list": {
+          "columns": {
+            "txNumber": "Transfer #",
+            "txDate": "Date",
+            "sourceLocationName": "From",
+            "destLocationName": "To",
+            "reference": "Reference",
+            "phaseRef": "Phase",
+            "motifName": "Reason",
+            "status": "Status"
+          },
+          "filters": {
+            "status": "Status",
+            "sourceLocationId": "Source location",
+            "destLocationId": "Destination location",
+            "dateFrom": "From",
+            "dateTo": "To",
+            "all": "All"
+          },
+          "emptyState": {
+            "title": "No transfer",
+            "message": "Create a transfer to move stock between two locations.",
+            "actionLabel": "New transfer"
+          }
+        }
+      },
+      "sortie": {
+        "title": "Issues",
+        "entityName": "Stock issue",
+        "entityNamePlural": "Stock issues",
+        "headerTitle": "Stock issues",
+        "headerTitleNew": "New stock issue",
+        "headerTitleDetail": "Stock issue",
+        "headerTitleDetailFallback": "Issue details",
+        "saveSuccess": "Issue saved",
+        "saveErrorDefault": "Save failed",
+        "validateSuccess": "Issue validated — stock and budget synced (mock)",
+        "validateError": "Validation not possible",
+        "kpis": {
+          "month": "Issues this month (ex-tax value)",
+          "valide": "Total validated issues"
+        },
+        "status": {
+          "BROUILLON": "Draft",
+          "VALIDE": "Validated"
+        },
+        "actions": {
+          "validate": "Validate"
+        },
+        "transitions": {
+          "validateTitle": "Validate the issue",
+          "validateMessage": "Source warehouse stock will be decreased and site budget will be updated (ex-tax actuals). Continue?",
+          "validateConfirm": "Validate",
+          "validateCancel": "Cancel"
+        },
+        "fields": {
+          "txDate": "Date",
+          "sourceLocationId": "Source warehouse",
+          "sourceLocationIdHint": "Warehouse, depot or site store the goods leave from",
+          "chantierBudgetId": "Site (budget control)",
+          "chantierBudgetIdHint": "Links the consumption to the site budget (ex-tax actuals)",
+          "motifId": "Issue reason",
+          "reference": "Reference (issue slip, internal voucher…)",
+          "notes": "Notes",
+          "lines": "Lines"
+        },
+        "sections": {
+          "header": "Header",
+          "lines": "Issued items"
+        },
+        "list": {
+          "columns": {
+            "txNumber": "Issue #",
+            "txDate": "Date",
+            "sourceLocationName": "Source warehouse",
+            "chantierRef": "Site (budget)",
+            "motifName": "Reason",
+            "totalValue": "Ex-tax value",
+            "reference": "Reference",
+            "status": "Status"
+          },
+          "filters": {
+            "chantierContains": "Site / budget",
+            "chantierPlaceholder": "Search…",
+            "status": "Status",
+            "motifId": "Reason",
+            "dateFrom": "From",
+            "dateTo": "To",
+            "all": "All"
+          },
+          "emptyState": {
+            "title": "No issue",
+            "message": "Record issues to sites or external deliveries: source stock is decreased on validation, site budget is updated.",
+            "actionLabel": "New issue"
+          }
+        }
+      },
+      "tx": {
+        "title": "Stock movements",
+        "titleNew": "New movement",
+        "titleDetail": "Movement detail",
+        "headerTitle": "Stock movements",
+        "entityName": "Stock movement",
+        "selectHint": "Select a movement from the list or create a new one.",
+        "saveSuccess": "Movement {number} saved",
+        "saveError": "Failed to save movement",
+        "deleteTitle": "Delete movement",
+        "deleteMessage": "Delete this draft movement? This cannot be undone.",
+        "deleteSuccess": "Movement deleted",
+        "errors": {
+          "cannotModifyValidated": "Cannot modify a validated movement",
+          "cannotDeleteValidated": "Cannot delete a validated movement"
+        },
+        "fields": {
+          "txType": "Movement type",
+          "txDate": "Date",
+          "sourceLocationId": "Source location",
+          "destLocationId": "Destination location",
+          "reference": "Reference",
+          "notes": "Notes",
+          "lines": "Lines"
+        },
+        "sections": {
+          "header": "Header",
+          "lines": "Item lines"
+        }
+      },
+      "retour": {
+        "title": "Returns",
+        "entityName": "Return",
+        "entityNamePlural": "Returns",
+        "headerTitle": "Returns",
+        "headerTitleNew": "New return",
+        "headerTitleDetail": "Return",
+        "headerTitleDetailFallback": "Return details",
+        "saveSuccess": "Return saved",
+        "saveErrorDefault": "Save failed",
+        "validateSuccess": "Return validated — stock updated (mock)",
+        "cancelSuccess": "Return rejected",
+        "status": {
+          "BROUILLON": "To validate",
+          "VALIDE": "Validated",
+          "ANNULE": "Rejected"
+        },
+        "transitions": {
+          "rejectLabel": "Reject",
+          "rejectTitle": "Reject the return?",
+          "rejectMessage": "The return will be marked as rejected. This action is irreversible.",
+          "validateLabel": "Validate",
+          "validateTitle": "Validate the return?",
+          "validateMessage": "Stock will be updated for {number}.",
+          "validateFallback": "this return"
+        },
+        "fields": {
+          "txDate": "Return date",
+          "retourType": "Return type",
+          "sourceLocationId": "Source",
+          "sourceLocationIdHint": "Source site or warehouse",
+          "destLocationId": "Destination",
+          "destLocationIdHint": "Warehouse (site return) or leave empty (supplier return)",
+          "motifId": "Reason",
+          "reference": "Reference",
+          "referenceHint": "Supplier return slip # if applicable",
+          "notes": "Notes",
+          "lines": "Lines"
+        },
+        "sections": {
+          "header": "Header",
+          "lines": "Lines"
+        },
+        "list": {
+          "columns": {
+            "txNumber": "Return #",
+            "txDate": "Date",
+            "motifName": "Return type",
+            "sourceLocationName": "Source",
+            "destLocationName": "Destination",
+            "destLocationExterne": "External",
+            "reference": "Reference",
+            "status": "Status"
+          },
+          "filters": {
+            "status": "Status",
+            "sourceLocationId": "Source",
+            "dateFrom": "From",
+            "dateTo": "To",
+            "all": "All"
+          },
+          "emptyState": {
+            "title": "No return",
+            "message": "Create a return to bring stock back from a site or to a supplier.",
+            "actionLabel": "New return"
+          }
+        }
+      },
+      "inventaire": {
+        "title": "Physical counts",
+        "entityName": "Stock count",
+        "entityNamePlural": "Stock counts",
+        "headerTitle": "Stock counts",
+        "headerTitleNew": "New stock count",
+        "headerTitleDetail": "Stock count",
+        "headerTitleDetailFallback": "Count details",
+        "saveSuccess": "Stock count saved",
+        "saveErrorDefault": "Save failed",
+        "validateSuccess": "Stock count validated — stock adjustments applied (mock)",
+        "validateError": "Validation not possible",
+        "actions": {
+          "validate": "Validate stock count"
+        },
+        "status": {
+          "BROUILLON": "Draft",
+          "VALIDE": "Validated",
+          "ANNULE": "Cancelled"
+        },
+        "fields": {
+          "txDate": "Count date",
+          "destLocationId": "Location to count",
+          "reference": "Reference",
+          "notes": "Notes",
+          "lines": "Lines"
+        },
+        "sections": {
+          "header": "Header",
+          "lines": "Count"
+        },
+        "list": {
+          "columns": {
+            "txNumber": "Count #",
+            "txDate": "Date",
+            "destLocationName": "Location",
+            "linesCount": "Items",
+            "totalVariance": "Total variance",
+            "status": "Status"
+          },
+          "filters": {
+            "destLocationId": "Location",
+            "status": "Status",
+            "dateFrom": "From",
+            "dateTo": "To",
+            "all": "All"
+          },
+          "emptyState": {
+            "title": "No stock count",
+            "message": "Create a stock count to perform a physical count.",
+            "actionLabel": "New stock count"
+          }
+        }
+      },
+      "perte": {
+        "title": "Losses & Scraps",
+        "entityName": "Loss report",
+        "entityNamePlural": "Loss reports",
+        "headerTitle": "Losses & Scraps",
+        "headerTitleNew": "New loss report",
+        "headerTitleDetail": "Loss report",
+        "headerTitleDetailFallback": "Loss report details",
+        "saveSuccess": "Report saved",
+        "saveErrorDefault": "Save failed",
+        "validateSuccess": "Report validated — stock decreased (mock)",
+        "validateError": "Validation not possible",
+        "kpis": {
+          "month": "Losses this month",
+          "total": "Total losses (all sites)"
+        },
+        "actions": {
+          "validate": "Validate"
+        },
+        "status": {
+          "BROUILLON": "Draft",
+          "VALIDE": "Validated"
+        },
+        "transitions": {
+          "validateTitle": "Validate the loss report",
+          "validateMessage": "This action is final. Site stock will be decreased. Continue?",
+          "validateConfirm": "Validate",
+          "validateCancel": "Cancel"
+        },
+        "fields": {
+          "txDate": "Date",
+          "chantierLocationId": "Site",
+          "motifId": "Loss type",
+          "motifIdHint": "Cutting scrap / Breakage / Theft / Weather / Defect",
+          "reference": "Reported by",
+          "notes": "Notes (critical for traceability)",
+          "lines": "Lines"
+        },
+        "sections": {
+          "header": "Header",
+          "lines": "Lost items"
+        },
+        "list": {
+          "columns": {
+            "txNumber": "Report #",
+            "txDate": "Date",
+            "chantierRef": "Site",
+            "motifName": "Loss type",
+            "totalValue": "Lost value",
+            "reference": "Reported by",
+            "status": "Status"
+          },
+          "filters": {
+            "chantierContains": "Site",
+            "chantierPlaceholder": "Search…",
+            "status": "Status",
+            "motifId": "Loss type",
+            "dateFrom": "From",
+            "dateTo": "To",
+            "all": "All"
+          },
+          "emptyState": {
+            "title": "No loss report",
+            "message": "Record material losses on sites (scrap, breakage, defects).",
+            "actionLabel": "New loss report"
+          }
+        }
+      },
+      "tx": {
+        "title": "Inventory transactions",
+        "entityName": "Movement",
+        "entityNamePlural": "Movements",
+        "headerTitle": "All movements",
+        "headerTitleDetail": "Movement details",
+        "list": {
+          "columns": {
+            "txNumber": "#",
+            "txType": "Type",
+            "txDate": "Date",
+            "sourceLocationName": "Source",
+            "destLocationName": "Destination",
+            "status": "Status",
+            "nbLines": "Lines"
+          },
+          "filters": {
+            "txType": "Movement type",
+            "status": "Status",
+            "from": "From",
+            "to": "To"
+          }
+        }
+      },
+      "txLines": {
+        "title": "Movement lines",
+        "entityName": "Line",
+        "entityNamePlural": "Lines",
+        "list": {
+          "columns": {
+            "lineNumber": "#",
+            "articleCode": "Item code",
+            "articleName": "Designation",
+            "quantity": "Quantity",
+            "uomCode": "UoM",
+            "unitPrice": "Unit price",
+            "totalPrice": "Total"
+          },
+          "filters": {
+            "articleId": "Item",
+            "uomId": "UoM"
+          }
+        },
+        "fields": {
+          "articleId": "Item",
+          "quantity": "Quantity",
+          "uomId": "UoM",
+          "unitPrice": "Unit price",
+          "totalPrice": "Total",
+          "emplacementId": "Bin location",
+          "lotStockId": "Batch",
+          "numeroLot": "Batch #",
+          "datePeremption": "Expiry date",
+          "notes": "Notes"
+        },
+        "sections": {
+          "article": "Item",
+          "tracabilite": "Traceability (batch / bin)"
+        },
+        "new": "New line",
+        "newBreadcrumb": "New",
+        "edit": "Edit line",
+        "editBreadcrumb": "Edit"
+      }
+    },
+    "configuration": {
+      "title": "Configuration",
+      "depot": {
+        "entityName": "Warehouse",
+        "entityNamePlural": "Warehouses & sites",
+        "headerTitle": "Warehouses & locations",
+        "headerTitleNew": "New warehouse",
+        "headerTitleDetail": "Warehouse details",
+        "permissionPrefix": "inventory.location",
+        "saveSuccess": "Warehouse \"{name}\" saved successfully",
+        "deleteConfirm": {
+          "title": "Delete warehouse",
+          "message": "Do you really want to delete the warehouse \"{name}\"?"
+        },
+        "fields": {
+          "code": "Code",
+          "name": "Name",
+          "type": "Type",
+          "address": "Address",
+          "ville": "City",
+          "latitude": "Latitude",
+          "longitude": "Longitude",
+          "capaciteM3": "Capacity (m³)",
+          "capaciteTonnes": "Capacity (tonnes)",
+          "responsableId": "Manager",
+          "responsableNom": "Manager name",
+          "chantierId": "Linked site",
+          "projectRef": "Site reference",
+          "parentId": "Parent location",
+          "notes": "Notes",
+          "budgetChantierId": "Site budget (steering id)",
+          "budgetChantierHint": "E.g. ch-2026-001 — links issues to the ERP budget",
+          "isActive": "Active"
+        },
+        "sections": {
+          "identification": "Identification",
+          "localisation": "Location & geocoding",
+          "capacite": "Storage capacity",
+          "rattachement": "Site link & manager",
+          "statut": "Status"
+        },
+        "list": {
+          "columns": {
+            "code": "Code",
+            "name": "Name",
+            "type": "Type",
+            "ville": "City",
+            "capacite": "Capacity",
+            "responsableNom": "Manager",
+            "projectRef": "Site ref.",
+            "isActive": "Active"
+          },
+          "filters": {
+            "code": "Code",
+            "name": "Name",
+            "type": "Type",
+            "isActive": "Active"
+          }
+        }
+      },
+      "famille": {
+        "entityName": "Item family",
+        "entityNamePlural": "Item families",
+        "headerTitle": "Item families",
+        "headerTitleNew": "New family",
+        "headerTitleDetail": "Family details",
+        "permissionPrefix": "inventory.famille",
+        "saveSuccess": "Family \"{name}\" saved successfully",
+        "deleteConfirm": {
+          "title": "Delete family",
+          "message": "Do you really want to delete the family \"{name}\"?"
+        },
+        "fields": {
+          "code": "Code",
+          "name": "Label",
+          "description": "Description",
+          "isActive": "Active"
+        },
+        "sections": {
+          "identification": "Identification",
+          "statut": "Status"
+        },
+        "list": {
+          "columns": {
+            "code": "Code",
+            "name": "Label",
+            "description": "Description",
+            "isActive": "Active"
+          },
+          "filters": {
+            "code": "Code",
+            "name": "Label",
+            "isActive": "Active"
+          }
+        }
+      },
+      "typeArticle": {
+        "entityName": "Item type",
+        "entityNamePlural": "Item types",
+        "headerTitle": "Item types",
+        "headerTitleNew": "New type",
+        "headerTitleDetail": "Type details",
+        "permissionPrefix": "inventory.typeArticle",
+        "saveSuccess": "Item type \"{name}\" saved successfully",
+        "deleteConfirm": {
+          "title": "Delete item type",
+          "message": "Do you really want to delete the type \"{name}\"?"
+        },
+        "fields": {
+          "code": "Code",
+          "name": "Label",
+          "articleType": "Family (MATERIAU/CONSOMMABLE/ENGIN/OUTILLAGE)",
+          "isActive": "Active"
+        },
+        "sections": {
+          "identification": "Identification",
+          "statut": "Status"
+        },
+        "list": {
+          "columns": {
+            "code": "Code",
+            "name": "Label",
+            "articleType": "Item family",
+            "isActive": "Active"
+          },
+          "filters": {
+            "articleType": "Item family",
+            "isActive": "Active"
+          }
+        }
+      },
+      "motif": {
+        "entityName": "Movement reason",
+        "entityNamePlural": "Movement reasons",
+        "headerTitle": "Movement reasons",
+        "headerTitleNew": "New reason",
+        "headerTitleDetail": "Reason details",
+        "permissionPrefix": "inventory.motif",
+        "saveSuccess": "Reason \"{name}\" saved successfully",
+        "deleteConfirm": {
+          "title": "Delete reason",
+          "message": "Do you really want to delete the reason \"{name}\"?"
+        },
+        "fields": {
+          "code": "Code",
+          "name": "Label",
+          "txType": "Movement type",
+          "isActive": "Active"
+        },
+        "sections": {
+          "identification": "Identification",
+          "statut": "Status"
+        },
+        "list": {
+          "columns": {
+            "code": "Code",
+            "name": "Label",
+            "txType": "Movement type",
+            "isActive": "Active"
+          },
+          "filters": {
+            "txType": "Movement type",
+            "isActive": "Active"
+          }
+        }
+      },
+      "uom": {
+        "entityName": "Unit of measure",
+        "entityNamePlural": "Units of measure",
+        "headerTitle": "Units of measure",
+        "headerTitleNew": "New unit",
+        "headerTitleDetail": "Unit details",
+        "permissionPrefix": "inventory.uom",
+        "saveSuccess": "Unit \"{name}\" saved successfully",
+        "deleteConfirm": {
+          "title": "Delete unit",
+          "message": "Do you really want to delete the unit \"{name}\"?"
+        },
+        "fields": {
+          "code": "Code",
+          "name": "Label",
+          "uomCategoryId": "Category",
+          "isActive": "Active"
+        },
+        "sections": {
+          "identification": "Identification",
+          "statut": "Status"
+        },
+        "list": {
+          "columns": {
+            "code": "Code",
+            "name": "Label",
+            "uomCategoryId": "Category",
+            "isActive": "Active"
+          },
+          "filters": {
+            "uomCategoryId": "Category",
+            "isActive": "Active"
+          }
+        }
+      },
+      "uomCategory": {
+        "entityName": "UoM category",
+        "entityNamePlural": "UoM categories",
+        "headerTitle": "Unit of measure categories",
+        "headerTitleNew": "New category",
+        "headerTitleDetail": "Category details",
+        "permissionPrefix": "inventory.uomCategory",
+        "saveSuccess": "Category \"{name}\" saved successfully",
+        "deleteConfirm": {
+          "title": "Delete category",
+          "message": "Do you really want to delete the category \"{name}\"?"
+        },
+        "fields": {
+          "code": "Code",
+          "name": "Label",
+          "isActive": "Active"
+        },
+        "sections": {
+          "identification": "Identification",
+          "statut": "Status"
+        },
+        "list": {
+          "columns": {
+            "code": "Code",
+            "name": "Label",
+            "isActive": "Active"
+          },
+          "filters": {
+            "code": "Code",
+            "isActive": "Active"
+          }
+        }
+      },
+      "costingMethod": {
+        "entityName": "Costing method",
+        "entityNamePlural": "Costing methods",
+        "headerTitle": "Costing methods",
+        "headerTitleNew": "New method",
+        "headerTitleDetail": "Method details",
+        "permissionPrefix": "inventory.costingMethod",
+        "saveSuccess": "Method \"{name}\" saved successfully",
+        "deleteConfirm": {
+          "title": "Delete method",
+          "message": "Do you really want to delete the method \"{name}\"?"
+        },
+        "fields": {
+          "code": "Code",
+          "name": "Label",
+          "method": "Algorithm",
+          "description": "Description",
+          "isDefault": "Default method",
+          "isDefaultHint": "Only one method may be set as the default",
+          "isActive": "Active"
+        },
+        "sections": {
+          "identification": "Identification",
+          "configuration": "Parameters",
+          "statut": "Status"
+        },
+        "list": {
+          "columns": {
+            "code": "Code",
+            "name": "Label",
+            "method": "Method",
+            "isDefault": "Default",
+            "isActive": "Active"
+          },
+          "filters": {
+            "method": "Method",
+            "isActive": "Active"
+          }
+        }
+      },
+      "itemCategory": {
+        "headerTitle": "Item categories",
+        "headerTitleNew": "New category",
+        "headerTitleDetail": "Category details",
+        "loading": "Loading categories…",
+        "saveSuccess": "Category \"{name}\" saved successfully",
+        "tree": {
+          "title": "Category tree",
+          "empty": "No categories yet.",
+          "addRoot": "Add root"
+        },
+        "detail": {
+          "title": "Category details",
+          "empty": "Select a category in the tree."
+        },
+        "fields": {
+          "code": "Code",
+          "name": "Name",
+          "description": "Description",
+          "isActive": "Active"
+        },
+        "add": {
+          "title": "New category",
+          "confirm": "Create"
+        },
+        "deleteConfirm": {
+          "title": "Delete category",
+          "message": "Are you sure you want to delete the category \"{name}\"?"
+        },
+        "deleteBlocked": {
+          "title": "Cannot delete",
+          "message": "This category has child categories. Remove or reassign them first.",
+          "confirm": "OK"
+        }
+      },
+      "itemType": {
+        "headerTitle": "Item types (legacy)",
+        "headerTitleNew": "New type",
+        "headerTitleDetail": "Type details"
+      },
+      "unitOfMeasure": {
+        "headerTitle": "Units of measure (legacy)",
+        "headerTitleNew": "New unit",
+        "headerTitleDetail": "Unit details"
+      },
+      "uoMCategory": {
+        "headerTitle": "UoM categories (legacy)",
+        "headerTitleNew": "New category",
+        "headerTitleDetail": "Category details"
+      }
+    },
+    "errors": {
+      "common": {
+        "updateFailed": "Update failed",
+        "validateFailed": "Validation failed",
+        "rejectFailed": "Rejection failed",
+        "cancelFailed": "Cancellation failed",
+        "resetDraftFailed": "Cannot reset to draft",
+        "missingItemId": "Missing identifier"
+      },
+      "reception": {
+        "notFound": "Receipt not found",
+        "cannotModifyValidated": "A validated receipt cannot be modified.",
+        "cannotDeleteValidated": "Use cancellation to remove a validated receipt.",
+        "cannotValidate": "Only a \"To validate\" receipt can be validated",
+        "cannotReject": "Only a \"To validate\" receipt can be rejected",
+        "cannotResetDraft": "Only a validated receipt can be reset to draft"
+      },
+      "retour": {
+        "notFound": "Return not found",
+        "cannotModifyValidated": "A validated return cannot be modified.",
+        "cannotDeleteValidated": "Cannot delete a validated return."
+      },
+      "transfert": {
+        "notFound": "Transfer not found",
+        "cannotModifyValidated": "A validated transfer cannot be modified.",
+        "cannotDeleteValidated": "Use cancellation to remove a validated transfer."
+      },
+      "sortie": {
+        "notFound": "Stock issue not found",
+        "cannotModifyValidated": "A validated issue cannot be modified.",
+        "cannotDeleteValidated": "A validated issue cannot be deleted."
+      },
+      "inventaire": {
+        "notFound": "Stock count not found",
+        "cannotModifyValidated": "A validated stock count cannot be modified.",
+        "cannotDeleteValidated": "A validated stock count cannot be deleted."
+      },
+      "perte": {
+        "notFound": "Loss declaration not found",
+        "cannotModifyValidated": "A validated declaration cannot be modified.",
+        "cannotDeleteValidated": "A validated declaration cannot be deleted."
+      }
+    },
+    "suivi": {
+      "alertes": {
+        "headerTitle": "Replenishment alerts",
+        "subtitle": "Items in alert or stock-out (stock < minimum). Automatic generation of RFQ or PR.",
+        "kpi": {
+          "criticalCount": "Critical items",
+          "criticalLabel": "Stock depleted or very low",
+          "warningCount": "Items in alert",
+          "warningLabel": "Stock below threshold",
+          "unique": "Distinct items",
+          "uniqueLabel": "In alert or stock-out",
+          "suggestedAo": "Suggested RFQs",
+          "suggestedAoLabel": "Drafts to generate"
+        },
+        "list": {
+          "title": "Items to replenish",
+          "columns": {
+            "articleCode": "Code",
+            "articleName": "Description",
+            "locationName": "Location",
+            "stockOnHand": "Stock on hand",
+            "stockMin": "Min stock",
+            "stockMax": "Max stock",
+            "deficit": "Deficit",
+            "urgency": "Urgency",
+            "delaiReapproJours": "Lead time (d)",
+            "fournisseurName": "Preferred supplier"
+          },
+          "filters": {
+            "urgency": "Urgency",
+            "urgencyPlaceholder": "All",
+            "fournisseur": "Supplier",
+            "fournisseurPlaceholder": "All",
+            "article": "Item",
+            "allArticles": "All",
+            "allCritical": "Critical",
+            "allInAlert": "In alert"
+          },
+          "emptyTitle": "No alerts",
+          "emptyMessage": "All items have sufficient stock level."
+        },
+        "actions": {
+          "createReception": "Create receipt",
+          "editThreshold": "Edit threshold"
+        },
+        "dialog": {
+          "title": "Edit minimum threshold",
+          "newThresholdLabel": "New minimum threshold",
+          "cancel": "Cancel",
+          "save": "Save"
+        },
+        "toasts": {
+          "thresholdUpdated": "Threshold updated"
+        }
+      },
+      "etatStock": {
+        "headerTitle": "Stock status",
+        "subtitle": "Balances by item and location. Filter and export.",
+        "kpis": {
+          "totalArticles": "Distinct items",
+          "totalArticlesHint": "With stock movement",
+          "totalSku": "Tracked SKUs",
+          "totalSkuHint": "Item × location",
+          "valueMad": "Total valuation",
+          "valueMadHint": "Stock value × WAC",
+          "rupture": "Stock-outs",
+          "ruptureHint": "Stock = 0",
+          "belowMin": "Below min",
+          "belowMinHint": "Stock < min stock"
+        },
+        "columns": {
+          "articleCode": "Item code",
+          "articleName": "Description",
+          "locationName": "Location",
+          "locationType": "Location type",
+          "familleName": "Family",
+          "uomCode": "Unit",
+          "stockOnHand": "On hand",
+          "stockReserved": "Reserved",
+          "stockAvailable": "Available",
+          "pmp": "WAC (MAD)",
+          "valueMad": "Value (MAD)",
+          "stockMin": "Min stock",
+          "derniereOperation": "Last movement"
+        },
+        "filters": {
+          "article": "Item",
+          "articlePlaceholder": "Code, name…",
+          "location": "Location",
+          "locationPlaceholder": "All",
+          "famille": "Family",
+          "famillePlaceholder": "All",
+          "statut": "Stock status",
+          "statutAll": "All",
+          "statutRupture": "Stock-out",
+          "statutBelowMin": "Below min",
+          "statutOk": "OK"
+        },
+        "actions": {
+          "export": "Export (Excel)",
+          "exportPdf": "Export (PDF)",
+          "printLabels": "Print labels"
+        },
+        "exportToast": {
+          "title": "Export in progress",
+          "message": "The Excel export will be downloaded in a few seconds."
+        },
+        "labelsToast": {
+          "title": "Printing labels",
+          "message": "Labels will be printed for {count} items."
+        },
+        "emptyTitle": "No items in stock",
+        "noData": "No data available for the selected filters.",
+        "currency": "MAD",
+        "lookups": {
+          "allDepots": "All"
+        }
+      },
+      "valorisation": {
+        "headerTitle": "Stock valuation",
+        "subtitle": "Method: {method} — Period: {period}",
+        "methods": {
+          "AVCO": "AVCO (weighted average cost)",
+          "FIFO": "FIFO (first in, first out)",
+          "CUMP": "WAC / CUMP"
+        },
+        "columns": {
+          "articleCode": "Code",
+          "articleName": "Description",
+          "familleName": "Family",
+          "stockOnHand": "Stock",
+          "uomCode": "Unit",
+          "coutUnitaire": "Unit cost",
+          "valueMad": "Value (MAD)",
+          "evolution": "Trend"
+        },
+        "filters": {
+          "method": "Method",
+          "famille": "Family",
+          "famillePlaceholder": "All",
+          "period": "Period",
+          "all": "All"
+        },
+        "noData": "No data available",
+        "currency": "MAD"
+      },
+      "stockBalances": {
+        "entityName": "Stock balance",
+        "entityNamePlural": "Stock balances",
+        "headerTitle": "Stock balances",
+        "headerTitleNew": "New balance",
+        "headerTitleDetail": "Balance details",
+        "saveSuccess": "Balance \"{name}\" saved",
+        "deleteConfirm": {
+          "title": "Delete balance",
+          "message": "Are you sure you want to delete \"{name}\"?"
+        }
+      }
+    },
+    "reservations": {
+      "headerTitle": "Site stock reservations",
+      "subtitle": "Available = physical stock − active reservations (M-STK-02).",
+      "form": {
+        "articleId": "Item id",
+        "chantierId": "Site budget id",
+        "qte": "Qty",
+        "uom": "Unit",
+        "dateBesoin": "Need date",
+        "dateExpiration": "Expiry date",
+        "motif": "Reason",
+        "submit": "Create reservation"
+      },
+      "columns": {
+        "article": "Item",
+        "chantier": "Site",
+        "qte": "Qty",
+        "besoin": "Need",
+        "expiration": "Expiry",
+        "statut": "Status"
+      },
+      "actions": {
+        "cancel": "Cancel"
+      },
+      "footer": {
+        "sortiesLink": "Issues",
+        "sortiesText": "consume reservations FIFO upon validation."
+      }
+    },
+    "components": {
+      "linesEditor": {
+        "addLine": "Line",
+        "empty": "No lines — click \"Line\" to add an item",
+        "removeAria": "Remove line",
+        "columns": {
+          "article": "Item",
+          "designation": "Description",
+          "qty": "Qty",
+          "qtyReceived": "Qty received",
+          "qtyTransfer": "Qty to transfer",
+          "qtyReturn": "Return qty",
+          "qtyTheoretical": "Theoretical qty",
+          "qtyPhysical": "Physical qty",
+          "variance": "Variance",
+          "unitPrice": "Unit price (MAD)",
+          "total": "Total",
+          "uom": "Unit",
+          "notes": "Notes",
+          "actions": "Actions",
+          "qtySortie": "Issue qty",
+          "qtyPerdue": "Lost qty",
+          "causeDetaillee": "Detailed cause",
+          "totalHT": "Total excl. tax",
+          "valeur": "Value"
+        },
+        "total": {
+          "reception": "Receipt total",
+          "transfert": "Transfer total",
+          "retour": "Return total",
+          "perte": "Loss total",
+          "inventaire": "Total variance"
+        },
+        "reception": {
+          "emptyMessage": "No line — click \"Line\" to add an article",
+          "articleLabel": "Article"
+        },
+        "transfert": {
+          "emptyMessage": "No line to transfer — click \"Line\".",
+          "sourceStockLabel": "Source available"
+        },
+        "retour": {
+          "emptyMessage": "No line — click \"Line\" to add a return.",
+          "motifLabel": "Return reason"
+        },
+        "perte": {
+          "emptyMessage": "No line — click \"Line\" to record a loss.",
+          "motifLabel": "Reason",
+          "causeLabel": "Cause",
+          "totalSortieHT": "Total issue (excl. tax)",
+          "totalValeurPerdue": "Total lost value"
+        },
+        "inventaire": {
+          "emptyMessage": "No line — click \"Load stock\" to start the count.",
+          "loadStock": "Load stock",
+          "loadStockButton": "Load stock",
+          "emptyAfterLoad": "No stock to count at this location.",
+          "emptyInitial": "Click \"Load stock\" to start the count.",
+          "ecartLabel": "Variance"
+        },
+        "etatArticle": "Article condition",
+        "etatLabel": "Condition",
+        "motifLabel": "Reason",
+        "loadStock": "Load stock"
+      },
+      "stockCell": {
+        "reserved": "({value} reserved)",
+        "available": "({value} available)",
+        "unitSuffix": "{value} {uom}"
+      },
+      "locationBadge": {
+        "DEPOT": "Warehouse",
+        "ENTREPOT": "Storage",
+        "CHANTIER": "Site",
+        "TRANSIT": "Transit",
+        "VIRTUEL": "Virtual"
+      }
+    },
+    "valorisation": {
+      "title": "Stock valuation",
+      "subtitle": "Trend & breakdown by family and location",
+      "date": "Valuation date",
+      "costingMethod": "Method",
+      "byFamille": "By family",
+      "byLocation": "By location",
+      "noData": "No data available",
+      "famille": "Family",
+      "articleCount": "Items",
+      "totalQty": "Total qty",
+      "totalValue": "Total value (MAD)",
+      "percent": "% of total",
+      "location": "Location",
+      "type": "Type",
+      "value": "Value (MAD)",
+      "kpi": {
+        "totalValue": "Total stock value",
+        "depotValue": "Warehouse value",
+        "chantierValue": "Site value",
+        "monthlyVariation": "Monthly change"
+      }
+    }
+  }
+}

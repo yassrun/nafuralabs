@@ -1,0 +1,75 @@
+{
+  "zones": {
+    "inventory": "Inventory",
+    "finance": "Finance",
+    "sales": "Sales",
+    "procurement": "Procurement",
+    "hr": "Human Resources",
+    "directory": "Directory"
+  },
+  "item": {
+    "navigation": {
+      "items": "Items",
+      "barcodes": "Barcodes",
+      "itemCategories": "Item Categories",
+      "itemTypes": "Item Types"
+    },
+    "item": {
+      "title": "Items",
+      "detailTitle": "Item Details",
+      "newTitle": "New Item",
+      "fields": {
+        "code": "code",
+        "name": "name",
+        "description": "description",
+        "type": "type",
+        "itemTypeId": "item Type Id",
+        "itemCategoryId": "item Category Id",
+        "unitOfMeasureId": "unit Of Measure Id",
+        "baseUnit": "base Unit",
+        "sku": "sku",
+        "isActive": "is Active"
+      },
+      "sections": {
+        "classification": "classification",
+        "measurement": "measurement"
+      }
+    },
+    "barcode": {
+      "title": "Barcodes",
+      "detailTitle": "Barcode Details",
+      "newTitle": "New Barcode",
+      "fields": {
+        "itemId": "item Id",
+        "value": "value",
+        "type": "type"
+      },
+      "sections": {}
+    },
+    "itemCategory": {
+      "title": "Item Categories",
+      "detailTitle": "Item Category Details",
+      "newTitle": "New Item Category",
+      "fields": {
+        "parentId": "parent Id",
+        "code": "code",
+        "name": "name",
+        "description": "description",
+        "isActive": "is Active"
+      },
+      "sections": {}
+    },
+    "itemType": {
+      "title": "Item Types",
+      "detailTitle": "Item Type Details",
+      "newTitle": "New Item Type",
+      "fields": {
+        "code": "code",
+        "name": "name",
+        "description": "description",
+        "isActive": "is Active"
+      },
+      "sections": {}
+    }
+  }
+}

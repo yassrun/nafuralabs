@@ -1,0 +1,22 @@
+@use '@angular/material' as mat;
+
+/* Shared Material Theme */
+
+@include mat.core();
+
+$dox-primary: mat.define-palette(mat.$slate-palette, 800);
+$dox-accent: mat.define-palette(mat.$blue-palette, 500);
+
+$dox-theme: mat.define-light-theme((
+  color: (
+    primary: $dox-primary,
+    accent: $dox-accent,
+  ),
+  typography: mat.define-typography-config(),
+  density: -1, /* Enterprise density */
+));
+
+/* Apply theme to generated application shell scope */
+.app-shell {
+  @include mat.all-component-themes($dox-theme);
+}

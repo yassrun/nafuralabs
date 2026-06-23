@@ -1,0 +1,19 @@
+{
+  "entity": "Certification",
+  "fields": {
+    "certificationNumber": {
+      "required": true,
+      "maxLength": 60
+    },
+    "certName": {
+      "maxLength": 120
+    },
+    "documentUrl": {
+      "maxLength": 500
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

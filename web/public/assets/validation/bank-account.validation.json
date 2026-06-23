@@ -1,0 +1,34 @@
+{
+  "entity": "BankAccount",
+  "fields": {
+    "accountNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "name": {
+      "required": true,
+      "maxLength": 200
+    },
+    "bankName": {
+      "required": true,
+      "maxLength": 200
+    },
+    "currencyId": {
+      "required": true
+    },
+    "accountType": {
+      "required": true,
+      "maxLength": 30
+    },
+    "balance": {
+      "min": 0
+    },
+    "iban": {
+      "maxLength": 34
+    },
+    "swiftCode": {
+      "maxLength": 11
+    }
+  }
+}

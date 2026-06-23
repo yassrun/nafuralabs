@@ -1,0 +1,61 @@
+/**
+ * Nafura Sektor — Product brand override (ERP Construction)
+ *
+ * Overrides the platform default primary palette (blue) with the Sektor
+ * signature: Cobalt #1B3FAE + Hi-vis Yellow accent #F2D544.
+ *
+ * This is the SINGLE SOURCE OF TRUTH for the product brand color.
+ * Loaded after platform tokens in src/styles.scss so it wins the cascade.
+ * Components must consume --nf-color-primary-* / --nf-color-accent-* tokens,
+ * never hardcoded hex — see docs/AGENTS-HOMOGENIZATION.md.
+ */
+
+:root {
+  /* ── Primary — Cobalt ramp (brand action color) ─────────────────────────── */
+  --nf-color-primary-50: #eef1fb;
+  --nf-color-primary-100: #dce2f6;
+  --nf-color-primary-200: #a9b6e6;
+  --nf-color-primary-300: #7286d6;
+  --nf-color-primary-400: #3d5dc4;
+  --nf-color-primary-500: #1b3fae; /* brand cobalt */
+  --nf-color-primary-600: #163491; /* hover */
+  --nf-color-primary-700: #122a75; /* active */
+  --nf-color-primary-800: #0e2059;
+  --nf-color-primary-900: #0a1840;
+
+  /* Semantic aliases (cascade from ramp — consumed by platform + anatomy) */
+  --nf-color-primary: var(--nf-color-primary-500);
+  --nf-color-primary-hover: var(--nf-color-primary-600);
+  --nf-color-primary-active: var(--nf-color-primary-700);
+  --nf-color-primary-contrast: #ffffff;
+
+  /* ── Accent — Hi-vis Yellow (sparing: highlights, attention, charts) ─────── */
+  --nf-color-accent-50: #fefbe8;
+  --nf-color-accent-100: #fbf3c9;
+  --nf-color-accent-200: #f8e9a0;
+  --nf-color-accent-300: #f6e27a;
+  --nf-color-accent-400: #f2d544; /* brand accent */
+  --nf-color-accent-500: #e6c320;
+  --nf-color-accent-600: #c9a40f;
+  --nf-color-accent-700: #8a6d00; /* accessible text on light bg */
+
+  --nf-color-accent: var(--nf-color-accent-400);
+  --nf-color-accent-hover: var(--nf-color-accent-500);
+  --nf-color-accent-contrast: #131415; /* ink — always use on yellow, never white */
+
+  /* Status info — cobalt (replaces Tailwind blue in anatomy tokens) */
+  --nf-status-info-bg: var(--nf-color-primary-100);
+  --nf-status-info-fg: var(--nf-color-primary-700);
+
+  /* PrimeNG bridge (mirror of src/styles.scss --p-primary-500) */
+  --p-primary-500: var(--nf-color-primary-500);
+}
+
+/* Dark mode: lift cobalt for contrast on dark surfaces */
+.nf-theme-dark {
+  --nf-color-primary: var(--nf-color-primary-400);
+  --nf-primary: var(--nf-color-primary-400);
+  --nf-color-text-link: var(--nf-color-primary-300);
+  --nf-status-info-bg: var(--nf-color-primary-900);
+  --nf-status-info-fg: var(--nf-color-primary-300);
+}

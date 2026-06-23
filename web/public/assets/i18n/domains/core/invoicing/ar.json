@@ -1,0 +1,72 @@
+{
+  "invoicing": {
+    "navigation": {
+      "title": "الفوترة",
+      "description": "مجال الفوترة",
+      "customerInvoices": "فواتير الزبائن",
+      "customerInvoiceLines": "سطور فاتورة الزبون",
+      "creditNotes": "إشعارات دائنة",
+      "vendorInvoices": "فواتير الموردين",
+      "vendorInvoiceLines": "سطور فاتورة المورد",
+      "paymentMethods": "طرق الدفع",
+      "customerPayments": "مدفوعات الزبائن"
+    }
+  },
+  "common": {
+    "subsections": {
+      "operations": "العمليات",
+      "configuration": "الإعدادات"
+    }
+  },
+  "finance": {
+    "fields": {
+      "invoiceNumber": "رقم الفاتورة",
+      "customerId": "معرّف الزبون",
+      "invoiceDate": "تاريخ الفاتورة",
+      "dueDate": "تاريخ الاستحقاق",
+      "currencyId": "معرّف العملة",
+      "subtotalAmount": "المبلغ الفرعي",
+      "taxAmount": "مبلغ الضريبة",
+      "totalAmount": "المبلغ الإجمالي",
+      "paidAmount": "المبلغ المدفوع",
+      "balanceAmount": "الرصيد المتبقي",
+      "status": "الحالة",
+      "customerInvoiceId": "معرّف فاتورة الزبون",
+      "lineNumber": "رقم السطر",
+      "itemId": "معرّف الصنف",
+      "description": "الوصف",
+      "quantity": "الكمية",
+      "unitPrice": "سعر الوحدة",
+      "lineTotal": "إجمالي السطر",
+      "noteNumber": "رقم الإشعار",
+      "originalInvoiceId": "معرّف الفاتورة الأصلية",
+      "noteDate": "تاريخ الإشعار",
+      "amount": "المبلغ",
+      "reason": "السبب",
+      "vendor": "معرّف المورد",
+      "purchaseOrder": "معرّف أمر الشراء",
+      "currency": "معرّف العملة",
+      "paymentTerm": "معرّف شرط الدفع",
+      "notes": "ملاحظات",
+      "vendorInvoice": "معرّف فاتورة المورد",
+      "item": "معرّف الصنف",
+      "account": "معرّف الحساب",
+      "costCenter": "معرّف مركز التكلفة",
+      "taxCode": "معرّف رمز الضريبة",
+      "code": "الرمز",
+      "name": "الاسم",
+      "type": "النوع",
+      "requiresBankAccount": "يتطلب حسابا بنكيا",
+      "isActive": "نشط",
+      "paymentNumber": "رقم التسديد",
+      "paymentDate": "تاريخ التسديد",
+      "paymentMethodId": "معرّف طريقة الدفع",
+      "reference": "المرجع"
+    },
+    "sections": {
+      "general": "عام",
+      "amounts": "المبالغ",
+      "workflow": "سير العمل"
+    }
+  }
+}

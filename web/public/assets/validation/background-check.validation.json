@@ -1,0 +1,26 @@
+{
+  "entity": "BackgroundCheck",
+  "fields": {
+    "checkNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "checkType": {
+      "maxLength": 120
+    },
+    "vendorName": {
+      "maxLength": 120
+    },
+    "result": {
+      "maxLength": 120
+    },
+    "notes": {
+      "maxLength": 2000
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

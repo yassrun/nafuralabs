@@ -1,0 +1,28 @@
+<nf-page-shell>
+  <nf-page-header [config]="headerConfig"></nf-page-header>
+
+  @if (mode() === 'view' && item(); as cg) {
+    <section class="approval-bar">
+      <span class="approval-bar__label">{{ 'rh.conge.approvalBar.label' | translate }}</span>
+      <app-submit-approval-button
+        entityType="CONGE"
+        [entityId]="cg.id"
+        [entityRef]="cg.numero"
+        [entitySummary]="(cg.employeNom ?? '') + ' — ' + cg.dateDebut + ' → ' + cg.dateFin + ' (' + cg.nombreJours + ' j)'"
+        [disabled]="cg.status !== 'DEMANDE'">
+      </app-submit-approval-button>
+    </section>
+  }
+
+  <nf-entity-detail
+    #detail
+    [config]="config"
+    [mode]="mode()"
+    [item]="item()"
+    [lookups]="lookups()"
+    [loading]="isLoading()"
+    [saving]="isSaving()"
+    (action)="onAction($event)"
+    (transitionRequest)="handleTransition($event)">
+  </nf-entity-detail>
+</nf-page-shell>

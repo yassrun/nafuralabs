@@ -1,0 +1,20 @@
+{
+  "entity": "JobPosting",
+  "fields": {
+    "postingNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "channel": {
+      "maxLength": 120
+    },
+    "applicantCount": {
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

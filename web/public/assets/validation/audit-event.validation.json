@@ -1,0 +1,26 @@
+{
+  "entity": "AuditEvent",
+  "fields": {
+    "entityType": {
+      "required": true,
+      "maxLength": 80
+    },
+    "entityId": {
+      "required": true
+    },
+    "action": {
+      "required": true,
+      "maxLength": 80
+    },
+    "actor": {
+      "required": true,
+      "maxLength": 120
+    },
+    "eventAt": {
+      "required": true
+    },
+    "details": {
+      "maxLength": 2000
+    }
+  }
+}

@@ -1,0 +1,83 @@
+<form [formGroup]="addressForm" class="nf-address-form" [attr.data-mode]="mode">
+  <!-- Line 1 (Primary Address) -->
+  <nf-input
+    *ngIf="isFieldVisible('line1')"
+    formControlName="line1"
+    [label]="'Address.Line1'"
+    [placeholder]="'Address.Placeholder.Line1'"
+    [required]="isFieldRequired('line1')"
+    [error]="getErrorKey('line1')"
+    maxlength="120">
+  </nf-input>
+
+  <!-- Line 2 (Secondary Address) -->
+  <nf-input
+    *ngIf="isFieldVisible('line2')"
+    formControlName="line2"
+    [label]="'Address.Line2'"
+    [placeholder]="'Address.Placeholder.Line2'"
+    [required]="isFieldRequired('line2')"
+    [error]="getErrorKey('line2')"
+    maxlength="120">
+  </nf-input>
+
+  <!-- City and Postal Code Row -->
+  <div class="nf-field-row">
+    <!-- City -->
+    <nf-input
+      *ngIf="isFieldVisible('city')"
+      formControlName="city"
+      [label]="'Address.City'"
+      [placeholder]="'Address.Placeholder.City'"
+      [required]="isFieldRequired('city')"
+      [error]="getErrorKey('city')"
+      maxlength="60">
+    </nf-input>
+
+    <!-- Postal Code -->
+    <nf-input
+      *ngIf="isFieldVisible('postalCode')"
+      formControlName="postalCode"
+      [label]="'Address.PostalCode'"
+      [placeholder]="'Address.Placeholder.PostalCode'"
+      [required]="isFieldRequired('postalCode')"
+      [error]="getErrorKey('postalCode')"
+      maxlength="16">
+    </nf-input>
+  </div>
+
+  <!-- Region -->
+  <nf-input
+    *ngIf="isFieldVisible('region')"
+    formControlName="region"
+    [label]="'Address.Region'"
+    [placeholder]="'Address.Placeholder.Region'"
+    [required]="isFieldRequired('region')"
+    [error]="getErrorKey('region')"
+    maxlength="60">
+  </nf-input>
+
+  <!-- Country -->
+  <nf-select
+    *ngIf="isFieldVisible('countryCode')"
+    formControlName="countryCode"
+    [label]="'Address.Country'"
+    [placeholder]="'Address.Placeholder.Country'"
+    [options]="getCountrySelectOptions()"
+    [required]="isFieldRequired('countryCode')"
+    [error]="getErrorKey('countryCode')">
+  </nf-select>
+
+  <!-- Notes -->
+  <nf-textarea
+    *ngIf="isFieldVisible('notes')"
+    formControlName="notes"
+    [label]="'Address.Notes'"
+    [placeholder]="'Address.Placeholder.Notes'"
+    [required]="isFieldRequired('notes')"
+    [error]="getErrorKey('notes')"
+    [rows]="3"
+    maxlength="200">
+  </nf-textarea>
+</form>
+

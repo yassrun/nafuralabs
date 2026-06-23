@@ -1,0 +1,73 @@
+{
+  "partner": {
+    "fields": {
+      "organization": "organization Id",
+      "code": "code",
+      "name": "name",
+      "email": "email",
+      "phone": "phone",
+      "mobile": "mobile",
+      "taxId": "tax Id",
+      "description": "description",
+      "address": "address Id",
+      "paymentTerm": "payment Term Id",
+      "roles": "roles",
+      "siteType": "site Type",
+      "businessUnit": "business Unit Id"
+    },
+    "sections": {
+      "contact": "contact",
+      "legal": "legal",
+      "financial": "financial",
+      "address": "address"
+    },
+    "navigation": {
+      "businessUnits": "Business Units",
+      "contacts": "Contacts",
+      "organizations": "Organizations",
+      "partnerCategories": "Partner Categories",
+      "partners": "Partners",
+      "sites": "Sites"
+    },
+    "businessUnit": {
+      "title": "Business Units",
+      "detailTitle": "Business Unit Details",
+      "newTitle": "New Business Unit"
+    },
+    "contact": {
+      "title": "Contacts",
+      "detailTitle": "Contact Details",
+      "newTitle": "New Contact"
+    },
+    "organization": {
+      "title": "Organizations",
+      "detailTitle": "Organization Details",
+      "newTitle": "New Organization"
+    },
+    "partnerCategory": {
+      "title": "Partner Categories",
+      "detailTitle": "Partner Category Details",
+      "newTitle": "New Partner Category"
+    },
+    "partner": {
+      "title": "Partners",
+      "detailTitle": "Partner Details",
+      "newTitle": "New Partner"
+    },
+    "site": {
+      "title": "Sites",
+      "detailTitle": "Site Details",
+      "newTitle": "New Site"
+    }
+  },
+  "common": {
+    "fields": {
+      "description": "description",
+      "isActive": "is Active"
+    },
+    "sections": {
+      "general": "general",
+      "status": "status"
+    }
+  }
+}

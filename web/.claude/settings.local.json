@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/yassiveco/Desktop/Seyrura/nafura/**)",
+      "Bash(dir /B /S /AD)",
+      "Bash(dir /B /AD \"c:\\\\Users\\\\yassiveco\\\\Desktop\\\\Seyrura\\\\nafura\\\\web\\\\app\\\\applications\\\\erp\\\\pages\\\\inventory\" 2>nul)",
+      "Bash(npm start *)",
+      "Bash(Get-Content \"C:\\\\Users\\\\YASSIV~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-yassiveco-Desktop-Seyrura-nafura-web\\\\84b4b93e-8557-4fad-a6d0-a7895e47aa0a\\\\tasks\\\\bcogr1rbc.output\" -Wait)",
+      "Bash(Select-String -Pattern \"error|Error|ERROR|warning|Warning|✓|compiled|failed|Building\" --SimpleMatch)",
+      "Bash(Start-Sleep -Seconds 30)",
+      "Bash(Get-Content \"C:\\\\Users\\\\YASSIV~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-yassiveco-Desktop-Seyrura-nafura-web\\\\84b4b93e-8557-4fad-a6d0-a7895e47aa0a\\\\tasks\\\\bcogr1rbc.output\" -Tail 80)",
+      "Bash(sed 's/\\\\x1b\\\\[[0-9;]*m//g' \"C:\\\\Users\\\\YASSIV~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-yassiveco-Desktop-Seyrura-nafura-web\\\\84b4b93e-8557-4fad-a6d0-a7895e47aa0a\\\\tasks\\\\bcogr1rbc.output\" 2>/dev/null | grep -E \"app/.*\\\\.ts:[0-9]+:\" | grep -oE \"app/[^:]+\\\\.ts\" | sort -u)",
+      "Bash(sed 's/\\\\x1b\\\\[[0-9;]*m//g' \"C:\\\\Users\\\\YASSIV~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-yassiveco-Desktop-Seyrura-nafura-web\\\\84b4b93e-8557-4fad-a6d0-a7895e47aa0a\\\\tasks\\\\bcogr1rbc.output\" 2>/dev/null | grep -A 10 \"NG5:\")",
+      "Bash(sed 's/\\\\x1b\\\\[[0-9;]*m//g' \"C:\\\\Users\\\\YASSIV~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-yassiveco-Desktop-Seyrura-nafura-web\\\\84b4b93e-8557-4fad-a6d0-a7895e47aa0a\\\\tasks\\\\bcogr1rbc.output\" 2>/dev/null | grep -E \"TS2322.*BadgeVariant|BadgeVariant.*config\\\\.ts\" | head -30)",
+      "Bash(sed 's/\\\\x1b\\\\[[0-9;]*m//g' \"C:\\\\Users\\\\YASSIV~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-yassiveco-Desktop-Seyrura-nafura-web\\\\84b4b93e-8557-4fad-a6d0-a7895e47aa0a\\\\tasks\\\\bcogr1rbc.output\" 2>/dev/null | grep -B2 \"BadgeVariant\\\\|balance\\\\.page\" | head -60)",
+      "Bash(sed 's/\\\\x1b\\\\[[0-9;]*m//g' \"C:\\\\Users\\\\YASSIV~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-yassiveco-Desktop-Seyrura-nafura-web\\\\84b4b93e-8557-4fad-a6d0-a7895e47aa0a\\\\tasks\\\\bcogr1rbc.output\" 2>/dev/null | grep \"\\\\.ts:[0-9]\" | grep -E \"columns|config\\\\.ts\" | grep -oE \"app/[^:]+\\\\.ts\" | sort -u)",
+      "Bash(sed 's/\\\\x1b\\\\[[0-9;]*m//g' \"C:\\\\Users\\\\YASSIV~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-yassiveco-Desktop-Seyrura-nafura-web\\\\84b4b93e-8557-4fad-a6d0-a7895e47aa0a\\\\tasks\\\\bcogr1rbc.output\" 2>/dev/null | grep \"^\\\\[ERROR\\\\]\\\\|^X \\\\[ERROR\\\\]\" | sed 's/X \\\\[ERROR\\\\] //' | sed 's/\\\\[ERROR\\\\] //' | grep -oE \"^[A-Z]+[0-9]*:\" | sort | uniq -c | sort -rn)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\yassiveco\\\\Desktop\\\\Seyrura\\\\nafura\\\\web\\\\app\\\\applications\\\\erp\\\\pages\\\\\" -Directory | Select-Object -ExpandProperty Name)",
+      "Bash(xargs cat)",
+      "Bash(grep -v \".js$\")",
+      "Bash(xargs grep -l \"routerLinkActive\\\\|is-active\\\\|activeNode\")",
+      "Bash(xargs grep -l \"activeNodeId\\\\|active-node\\\\|is-active\")",
+      "PowerShell(cd \"c:\\\\Users\\\\yassiveco\\\\Desktop\\\\Seyrura\\\\nafura\\\\web\" && npx tsc --noEmit 2>&1; Write-Host \"Exit: $LASTEXITCODE\")",
+      "Bash(grep -rln \"currency.*USD\\\\|'\\\\\\\\$'\\\\|: '\\\\\\\\$'\\\\| '\\\\\\\\$'\\\\|currency:'USD\\\\|fr-US\" c:/Users/yassiveco/Desktop/Seyrura/nafura/web/app/applications/erp/pages)",
+      "Bash(grep -rn \"currency:'USD'\\\\| currency '\\\\\\\\$' \\\\|toLocaleString.*US\\\\|en-US\" c:/Users/yassiveco/Desktop/Seyrura/nafura/web/app/applications/erp)",
+      "Bash(npx tsc *)",
+      "Bash(xargs grep -l \"administration.navigation\")",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\yassiveco\\\\Desktop\\\\Seyrura\\\\nafura\\\\web\\\\app\\\\applications\\\\erp\\\\pages\" -Directory | Where-Object { $_.Name -match \"^chantiers$|^marches$\" } | Select-Object Name)",
+      "Bash(node -e ' *)",
+      "Bash(npx ng *)",
+      "Bash(python3 -c ' *)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\yassiveco\\Desktop\\Seyrura\\nafura\\web\\app\\applications\\erp\\pages\\inventory",
+      "C:\\Users\\YASSIV~1\\AppData\\Local\\Temp\\claude\\c--Users-yassiveco-Desktop-Seyrura-nafura-web\\84b4b93e-8557-4fad-a6d0-a7895e47aa0a\\tasks"
+    ]
+  }
+}

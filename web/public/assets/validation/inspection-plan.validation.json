@@ -1,0 +1,29 @@
+{
+  "entity": "InspectionPlan",
+  "fields": {
+    "code": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "name": {
+      "maxLength": 120
+    },
+    "triggerEvent": {
+      "maxLength": 120
+    },
+    "sampleMethod": {
+      "maxLength": 120
+    },
+    "sampleSize": {
+      "maxLength": 120
+    },
+    "parameters": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

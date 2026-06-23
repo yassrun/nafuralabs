@@ -1,0 +1,29 @@
+{
+  "entity": "Webhook",
+  "fields": {
+    "code": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "name": {
+      "required": true,
+      "maxLength": 200
+    },
+    "eventType": {
+      "required": true,
+      "maxLength": 80
+    },
+    "targetUrl": {
+      "required": true,
+      "maxLength": 500
+    },
+    "retryPolicy": {
+      "maxLength": 30
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

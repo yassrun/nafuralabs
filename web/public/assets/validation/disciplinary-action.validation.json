@@ -1,0 +1,20 @@
+{
+  "entity": "DisciplinaryAction",
+  "fields": {
+    "actionNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "description": {
+      "maxLength": 2000
+    },
+    "actionType": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

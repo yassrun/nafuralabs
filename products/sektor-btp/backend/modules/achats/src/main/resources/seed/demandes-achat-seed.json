@@ -1,0 +1,99 @@
+{
+  "demandes": [
+    {
+      "numero": "DA-2026-0001",
+      "chantierId": "ch-001",
+      "chantierCode": "CH-2025-001",
+      "chantierName": "Résidence Yasmine — Casa",
+      "dateBesoin": "2026-02-15",
+      "demandeurId": "emp001",
+      "demandeurName": "K. Alami",
+      "motif": "Approvisionnement ronds à béton T12 et T16 phase fondations",
+      "status": "CONVERTIE",
+      "approbateurId": "emp005",
+      "approbateurName": "M. Berrada",
+      "approbationDate": "2026-01-20",
+      "bcId": "bc001",
+      "bcNumero": "BC-2026-00001",
+      "totalEstimeHt": "285000",
+      "lignes": [
+        {
+          "articleId": "art021",
+          "articleCode": "ART-021",
+          "articleName": "Rond à béton T12",
+          "quantite": "10",
+          "uomCode": "T",
+          "prixEstimeHt": "14200",
+          "totalEstimeHt": "142000"
+        },
+        {
+          "articleId": "art022",
+          "articleCode": "ART-022",
+          "articleName": "Rond à béton T16",
+          "quantite": "10",
+          "uomCode": "T",
+          "prixEstimeHt": "14300",
+          "totalEstimeHt": "143000"
+        }
+      ]
+    },
+    {
+      "numero": "DA-2026-0002",
+      "chantierId": "ch-001",
+      "chantierCode": "CH-2025-001",
+      "chantierName": "Résidence Yasmine — Casa",
+      "dateBesoin": "2026-02-20",
+      "demandeurId": "emp001",
+      "demandeurName": "K. Alami",
+      "motif": "Ciment CPJ-45 pour dallage RDC",
+      "status": "APPROUVEE",
+      "approbateurId": "emp005",
+      "approbateurName": "M. Berrada",
+      "approbationDate": "2026-01-25",
+      "totalEstimeHt": "45000",
+      "lignes": [
+        {
+          "articleId": "art001",
+          "articleCode": "ART-001",
+          "articleName": "Ciment CPJ-45",
+          "quantite": "300",
+          "uomCode": "Sac 50kg",
+          "prixEstimeHt": "150",
+          "totalEstimeHt": "45000"
+        }
+      ]
+    },
+    {
+      "numero": "DA-2026-0003",
+      "chantierId": "ch-002",
+      "chantierCode": "CH-2025-002",
+      "chantierName": "Pont Bouregreg ouvrage 3",
+      "dateBesoin": "2026-03-01",
+      "demandeurId": "emp002",
+      "demandeurName": "H. Bennis",
+      "motif": "Agrégats pour béton coulé",
+      "status": "SOUMISE",
+      "totalEstimeHt": "32000",
+      "lignes": [
+        {
+          "articleId": "art003",
+          "articleCode": "ART-003",
+          "articleName": "Sable de dune",
+          "quantite": "200",
+          "uomCode": "m³",
+          "prixEstimeHt": "80",
+          "totalEstimeHt": "16000"
+        },
+        {
+          "articleId": "art004",
+          "articleCode": "ART-004",
+          "articleName": "Gravier 10/20",
+          "quantite": "200",
+          "uomCode": "m³",
+          "prixEstimeHt": "80",
+          "totalEstimeHt": "16000"
+        }
+      ]
+    }
+  ]
+}

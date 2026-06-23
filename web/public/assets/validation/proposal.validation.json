@@ -1,0 +1,38 @@
+{
+  "entity": "Proposal",
+  "fields": {
+    "proposalNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "opportunityId": {
+      "required": true
+    },
+    "customerId": {
+      "required": true
+    },
+    "title": {
+      "required": true,
+      "maxLength": 200
+    },
+    "content": {
+      "maxLength": 10000
+    },
+    "totalAmount": {
+      "required": true,
+      "min": 0
+    },
+    "validUntil": {
+      "required": true
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "version": {
+      "required": true,
+      "min": 1
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "id": "identity",
+  "name": "Identity",
+  "description": "Identity and user context",
+  "type": "core",
+  "layer": "core",
+  "provides": {
+    "backend": {
+      "gradle": ":platform:core:identity",
+      "packages": ["ma.nafura.core.identity"]
+    }
+  },
+  "requires": { "core": ["framework"] },
+  "manifest": { "key": "identity" }
+}

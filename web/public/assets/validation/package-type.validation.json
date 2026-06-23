@@ -1,0 +1,32 @@
+{
+  "entity": "PackageType",
+  "fields": {
+    "code": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "name": {
+      "maxLength": 120
+    },
+    "length": {
+      "maxLength": 120
+    },
+    "width": {
+      "maxLength": 120
+    },
+    "height": {
+      "maxLength": 120
+    },
+    "maxWeight": {
+      "min": 0
+    },
+    "stackable": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

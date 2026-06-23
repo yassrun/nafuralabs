@@ -1,0 +1,8 @@
+[
+  {"code": "ART-PAVE", "name": "Pavés autobloquants", "description": "m²"},
+  {"code": "ART-REGARD", "name": "Regard béton 60×60", "description": "Unité"},
+  {"code": "ART-BUSE-400", "name": "Buse béton Ø400", "description": "ml"},
+  {"code": "ART-BORD-VRD", "name": "Bordure VRD", "description": "ml"},
+  {"code": "ART-CANIVEAU", "name": "Caniveau béton", "description": "ml"},
+  {"code": "ART-GAINE", "name": "Gaine TPC Ø160", "description": "ml"}
+]

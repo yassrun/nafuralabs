@@ -1,0 +1,17 @@
+{
+  "entity": "Offer",
+  "fields": {
+    "offerNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "offerLetterUrl": {
+      "maxLength": 500
+    }
+  }
+}

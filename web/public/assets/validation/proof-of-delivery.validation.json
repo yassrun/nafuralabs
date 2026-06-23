@@ -1,0 +1,36 @@
+{
+  "entity": "ProofOfDelivery",
+  "fields": {
+    "podNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "shipmentId": {
+      "required": true
+    },
+    "receivedBy": {
+      "required": true,
+      "maxLength": 120
+    },
+    "receivedDate": {
+      "required": true
+    },
+    "signatureUrl": {
+      "maxLength": 500
+    },
+    "condition": {
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    },
+    "photoUrl": {
+      "maxLength": 500
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

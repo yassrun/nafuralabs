@@ -1,0 +1,29 @@
+{
+  "entity": "DisposalOrder",
+  "fields": {
+    "orderNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "disposalMethod": {
+      "maxLength": 120
+    },
+    "reason": {
+      "maxLength": 120
+    },
+    "quantity": {
+      "min": 0
+    },
+    "approvedBy": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

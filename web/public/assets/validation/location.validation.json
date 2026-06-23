@@ -1,0 +1,25 @@
+{
+  "entity": "Location",
+  "fields": {
+    "code": {
+      "required": true,
+      "maxLength": 50,
+      "unique": true
+    },
+    "name": {
+      "required": true,
+      "maxLength": 200
+    },
+    "type": {
+      "required": true,
+      "maxLength": 30,
+      "pattern": "^(WAREHOUSE|BIN|SHELF|ZONE)$"
+    },
+    "isPhysical": {
+      "required": true
+    },
+    "affectsStock": {
+      "required": true
+    }
+  }
+}

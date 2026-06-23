@@ -1,0 +1,16 @@
+{
+  "id": "doc-manager",
+  "name": "Document Manager",
+  "description": "Document management",
+  "type": "feature",
+  "layer": "feature",
+  "group": "collaboration",
+  "provides": {
+    "backend": {
+      "gradle": ":platform:features:collaboration:doc-manager",
+      "packages": ["ma.nafura.platform.collaboration.docmanager"]
+    }
+  },
+  "requires": { "core": ["tenancy"], "features": [] },
+  "manifest": { "key": "doc-manager" }
+}

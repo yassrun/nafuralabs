@@ -1,0 +1,45 @@
+{
+  "uom": {
+    "navigation": {
+      "itemUnitConversions": "تحويلات وحدات الأصناف",
+      "unitOfMeasures": "وحدات القياس",
+      "uoMCategories": "فئات القياس"
+    },
+    "itemUnitConversion": {
+      "title": "تحويلات وحدات الأصناف",
+      "detailTitle": "تفاصيل تحويل الوحدات",
+      "newTitle": "تحويل وحدات جديد",
+      "fields": {
+        "itemId": "معرّف الصنف",
+        "fromUomId": "معرّف وحدة المصدر",
+        "toUomId": "معرّف وحدة الوجهة",
+        "factor": "المعامل"
+      },
+      "sections": {}
+    },
+    "unitOfMeasure": {
+      "title": "وحدات القياس",
+      "detailTitle": "تفاصيل وحدة القياس",
+      "newTitle": "وحدة قياس جديدة",
+      "fields": {
+        "code": "الرمز",
+        "name": "الاسم",
+        "description": "الوصف",
+        "isActive": "نشط"
+      },
+      "sections": {}
+    },
+    "uoMCategory": {
+      "title": "فئات القياس",
+      "detailTitle": "تفاصيل فئة القياس",
+      "newTitle": "فئة قياس جديدة",
+      "fields": {
+        "code": "الرمز",
+        "name": "الاسم",
+        "description": "الوصف",
+        "isActive": "نشط"
+      },
+      "sections": {}
+    }
+  }
+}

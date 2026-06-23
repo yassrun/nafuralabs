@@ -1,0 +1,23 @@
+{
+  "entity": "CommissionAdjustment",
+  "fields": {
+    "adjustmentNumber": {
+      "required": true,
+      "maxLength": 60,
+      "min": 0
+    },
+    "amount": {
+      "min": 0
+    },
+    "reason": {
+      "maxLength": 120
+    },
+    "approvedBy": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

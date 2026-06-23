@@ -1,0 +1,14 @@
+{
+  "entity": "VendorStatement",
+  "fields": {
+    "vendorId": {
+      "required": true
+    },
+    "periodStart": {
+      "required": true
+    },
+    "periodEnd": {
+      "required": true
+    }
+  }
+}

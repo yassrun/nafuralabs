@@ -1,0 +1,63 @@
+{
+  "stock": {
+    "navigation": {
+      "title": "المخزون",
+      "description": "مجال المخزون",
+      "locations": "المواقع",
+      "stockBalances": "أرصدة المخزون",
+      "inventoryTxes": "حركات المخزون",
+      "inventoryTxLines": "أسطر حركات المخزون",
+      "costingMethods": "طرق التكلفة"
+    }
+  },
+  "common": {
+    "subsections": {
+      "operations": "العمليات",
+      "configuration": "الإعدادات"
+    }
+  },
+  "directory": {
+    "fields": {
+      "code": "الرمز",
+      "name": "الاسم",
+      "locationType": "النوع",
+      "parentLocation": "معرّف الموقع الأصل",
+      "isPhysical": "موقع فعلي",
+      "affectsStock": "يؤثر على المخزون"
+    },
+    "sections": {
+      "general": "عام",
+      "hierarchy": "التسلسل الهرمي",
+      "behavior": "السلوك"
+    }
+  },
+  "inventory": {
+    "fields": {
+      "warehouse": "معرّف المستودع",
+      "item": "معرّف الصنف",
+      "quantity": "الكمية",
+      "reservedQuantity": "الكمية المحجوزة",
+      "availableQuantity": "الكمية المتاحة",
+      "lastCountDate": "تاريخ آخر جرد",
+      "txNumber": "رقم الحركة",
+      "txType": "نوع الحركة",
+      "txDate": "تاريخ الحركة",
+      "reference": "المرجع",
+      "status": "الحالة",
+      "notes": "ملاحظات",
+      "inventoryTx": "معرّف حركة المخزون",
+      "lineNumber": "رقم السطر",
+      "unitPrice": "سعر الوحدة",
+      "totalPrice": "السعر الإجمالي",
+      "code": "الرمز",
+      "name": "الاسم",
+      "description": "الوصف",
+      "method": "الطريقة",
+      "allowNegativeStock": "السماح بمخزون سالب"
+    },
+    "sections": {
+      "general": "عام",
+      "notes": "ملاحظات"
+    }
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "name": "Sektor — ERP Construction",
+  "short_name": "Sektor",
+  "description": "ERP métier BTP Maroc : chantiers, marchés, facturation, paie, HSE.",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#1b3fae",
+  "background_color": "#ffffff",
+  "lang": "fr",
+  "dir": "ltr",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {
+      "src": "/assets/branding/sektor-favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Chantiers",
+      "short_name": "Chantiers",
+      "description": "Accéder à la liste des chantiers",
+      "url": "/chantiers",
+      "icons": [{ "src": "/assets/branding/sektor-favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Pointage",
+      "short_name": "Pointage",
+      "description": "Saisir le pointage du jour",
+      "url": "/rh/pointage/saisie",
+      "icons": [{ "src": "/assets/branding/sektor-favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Approbations",
+      "short_name": "Approbations",
+      "description": "Traiter les demandes en attente",
+      "url": "/approbations",
+      "icons": [{ "src": "/assets/branding/sektor-favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    }
+  ]
+}

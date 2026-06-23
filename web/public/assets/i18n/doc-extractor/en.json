@@ -1,0 +1,187 @@
+{
+  "common": {
+    "logout": "Logout",
+    "comingSoon": "Coming soon",
+    "brandName": "Doxura",
+    "tagline": "by Seyrura"
+  },
+  "docExtractor": {
+    "navigation": {
+      "title": "Doc Extractor",
+      "extraction": "Extraction",
+      "records": "Records",
+      "documents": "Documents",
+      "docTypes": "Document Types",
+      "settings": "Settings",
+      "extract": "Extraction Workspace",
+      "workspace": "Workspace",
+      "collapse": "Collapse sidebar"
+    },
+    "workspace": {
+      "title": "Document Extraction",
+      "loading": "Loading definitions...",
+      "noTypes": "No document types available.",
+      "failedToLoad": "Failed to load document types.",
+      "selectType": "Select a document type from the sidebar to initialize workspace.",
+      "processingDocuments": "Extracting data...",
+      "synchronizingRules": "Syncing definitions...",
+      "restoringSession": "Loading workspace state...",
+      "importDocument": "Import Document",
+      "importDocumentTooltip": "Creates a new extraction record",
+      "extracting": "Extracting data from document...",
+      "edit": "Open",
+      "delete": "Remove",
+      "export": "Export",
+      "excelSpreadsheet": "Excel Spreadsheet (.xlsx)",
+      "seyruraIntegration": "System Integration",
+      "status": "Status",
+      "created": "Extracted",
+      "document": "Source",
+      "noRecords": "<h3>No extraction records yet</h3><p>Import a document to create the first extraction record.</p>",
+      "selectDocType": "Initialize workspace",
+      "openStoredDocument": "View source document",
+      "notStored": "No source"
+    },
+    "contextBar": {
+      "domain": "Domain",
+      "documentType": "Document Type",
+      "schemaVersion": "Definition Version",
+      "schemaDescription": "This definition ensures data consistency and auditability.",
+      "settings": "Rules",
+      "openSettings": "Manage extraction rules"
+    },
+    "status": {
+      "draft": "Draft",
+      "draftTooltip": "Record saved as draft, not yet finalized",
+      "validated": "Valid",
+      "validatedTooltip": "Data verified and compliant with definition",
+      "invalid": "Invalid",
+      "invalidTooltip": "Record does not meet audit requirements",
+      "corrected": "Corrected",
+      "correctedTooltip": "Data was manually corrected to match source",
+      "rejected": "Rejected",
+      "rejectedTooltip": "Document invalid, unreadable, or wrong type",
+      "exported": "Exported",
+      "exportedTooltip": "Data transmitted to downstream systems",
+      "error": "Error",
+      "errorTooltip": "System error during processing"
+    },
+    "workflow": {
+      "badges": {
+        "draftPartial": "Draft · Partial",
+        "draftComplete": "Draft · Complete",
+        "draftErrors": "Draft · Errors ({count})",
+        "validated": "Validated",
+        "rejected": "Rejected"
+      },
+      "actions": {
+        "validate": "Validate",
+        "validateTooltip": "Validate this document",
+        "validateDisabledTooltip": "Fix validation errors before validating",
+        "reject": "Reject",
+        "rejectTooltip": "Reject this document",
+        "close": "Close",
+        "cancel": "Cancel"
+      },
+      "validation": {
+        "valid": "Valid",
+        "invalid": "Invalid",
+        "partial": "Partial",
+        "complete": "Complete",
+        "errorsCount": "Errors ({count})",
+        "fixErrorsBeforeValidation": "Fix validation errors before validating",
+        "requiredFieldMissing": "{field} is required",
+        "invalidFieldFormat": "{field} has invalid format",
+        "moreErrors": "+ {count, plural, one {1 more error} other {# more errors}}"
+      },
+      "autoSave": {
+        "saving": "Saving...",
+        "saved": "Saved",
+        "saveError": "Failed to save changes"
+      },
+      "reject": {
+        "title": "Reject Document",
+        "reasonLabel": "Rejection reason",
+        "reasonRequired": "Rejection reason is required",
+        "reasonPlaceholder": "Enter reason for rejection...",
+        "confirm": "Confirm Rejection",
+        "cancel": "Cancel"
+      },
+      "messages": {
+        "validatedSuccess": "Document validated successfully",
+        "rejectedSuccess": "Document rejected",
+        "transitionNotAllowed": "This transition is not allowed",
+        "cannotValidateInvalid": "Cannot validate: document has validation errors"
+      }
+    },
+    "messages": {
+      "chooseTypeFirst": "Choose a domain and document type first.",
+      "noRecordsToExport": "No records to export.",
+      "recordRemoved": "Record removed from workspace.",
+      "undo": "Undo",
+      "dismiss": "Dismiss",
+      "recordNotAdded": "Record schema version mismatch; record was not added.",
+      "cannotEditVersion": "Cannot edit: record uses schema v{version1} but session is locked to v{version2}.",
+      "exportingToSeyrura": "Exporting to Seyrura Internal...",
+      "onlyBLSupported": "Export to Seyrura Internal is only supported for BL (Bon de Livraison) documents.",
+      "storageNotAvailable": "Storage module not enabled / document not available",
+      "tenantIdRequired": "Tenant ID is required for extraction.",
+      "failedToParse": "Failed to parse extracted data.",
+      "unexpectedError": "Unexpected error.",
+      "requestFailed": "Request failed ({status})."
+    },
+    "settings": {
+      "shell": {
+        "eyebrow": "Doc extractor",
+        "title": "Extraction Settings",
+        "general": "General",
+        "documentType": "Document Type",
+        "openFromWorkspace": "Open from a document type in the workspace.",
+        "openFromWorkspaceTooltip": "Open from a document type in the workspace."
+      },
+      "general": {
+        "eyebrow": "Extraction",
+        "title": "General",
+        "saved": "Saved",
+        "autoValidateTitle": "Auto-validate all extracted records",
+        "autoValidateDescription": "When enabled, newly extracted records are automatically marked as Validated. (WIP)",
+        "autoValidationPolicy": "Auto-validation policy",
+        "policyManual": "Manual (default)",
+        "policyConfidence": "Confidence threshold (Coming soon)",
+        "policyAlways": "Always (Coming soon)",
+        "comingSoon": "Coming soon"
+      }
+    },
+    "filters": {
+      "title": "Filters",
+      "apply": "Apply",
+      "clear": "Clear",
+      "dateFieldHint": "Select a date field to enable filtering"
+    },
+    "dialog": {
+      "reference": "Reference",
+      "items": "Items",
+      "readyToValidate": "Ready to validate.",
+      "fixErrorsBeforeValidation": "Fix validation errors before validating.",
+      "cancel": "Cancel",
+      "finishLater": "Finish later",
+      "validate": "Validate",
+      "extracted": "Extracted",
+      "validated": "Validated",
+      "draft": "Draft"
+    },
+    "exportResult": {
+      "titleSuccess": "Export Successful",
+      "titleErrors": "Export Completed with Errors",
+      "suppliersCreated": "{count, plural, =0 {No supplier created} one {1 supplier created} other {# suppliers created}}",
+      "itemsCreated": "{count, plural, =0 {No item created} one {1 item created} other {# items created}}",
+      "transactionsCreated": "{count, plural, =0 {No transaction created} one {1 transaction created} other {# transactions created}}",
+      "linesInfo": "with {count, plural, =0 {0 lines} one {1 line} other {# lines}}",
+      "errorsTitle": "Errors:",
+      "close": "Close"
+    },
+    "deleteConfirm": {
+      "message": "{count, plural, =0 {No record selected.} one {Are you sure you want to delete this record?\n\nThis action cannot be undone.} other {Are you sure you want to delete these # records?\n\nThis action cannot be undone.}}"
+    }
+  }
+}

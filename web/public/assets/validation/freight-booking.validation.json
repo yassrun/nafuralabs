@@ -1,0 +1,35 @@
+{
+  "entity": "FreightBooking",
+  "fields": {
+    "bookingNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "shipmentId": {
+      "required": true
+    },
+    "carrierId": {
+      "required": true
+    },
+    "serviceLevel": {
+      "maxLength": 60
+    },
+    "bookedDate": {
+      "required": true
+    },
+    "estimatedCost": {
+      "min": 0
+    },
+    "actualCost": {
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "confirmationNumber": {
+      "maxLength": 100
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "entity": "ShippingLabel",
+  "fields": {
+    "labelNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "shipmentId": {
+      "required": true
+    },
+    "trackingBarcode": {
+      "required": true,
+      "maxLength": 200
+    },
+    "labelFormat": {
+      "maxLength": 30
+    },
+    "weight": {
+      "min": 0
+    },
+    "dimensions": {
+      "maxLength": 60
+    }
+  }
+}

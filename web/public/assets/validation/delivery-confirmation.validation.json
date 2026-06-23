@@ -1,0 +1,25 @@
+{
+  "entity": "DeliveryConfirmation",
+  "fields": {
+    "confirmationNumber": {
+      "required": true,
+      "maxLength": 60
+    },
+    "confirmedBy": {
+      "maxLength": 120
+    },
+    "recipientName": {
+      "maxLength": 120
+    },
+    "condition": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

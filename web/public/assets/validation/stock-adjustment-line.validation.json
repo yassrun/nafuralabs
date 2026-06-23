@@ -1,0 +1,27 @@
+{
+  "entity": "StockAdjustmentLine",
+  "fields": {
+    "stockAdjustmentId": {
+      "required": true
+    },
+    "currentQty": {
+      "min": 0
+    },
+    "adjustedQty": {
+      "min": 0
+    },
+    "varianceQty": {
+      "min": 0
+    },
+    "reason": {
+      "maxLength": 120
+    },
+    "binLocation": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

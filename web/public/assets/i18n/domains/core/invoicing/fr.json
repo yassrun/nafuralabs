@@ -1,0 +1,72 @@
+{
+  "invoicing": {
+    "navigation": {
+      "title": "Invoicing",
+      "description": "Invoicing Domain",
+      "customerInvoices": "Customer Invoices",
+      "customerInvoiceLines": "Customer Invoice Lines",
+      "creditNotes": "Credit Notes",
+      "vendorInvoices": "Vendor Invoices",
+      "vendorInvoiceLines": "Vendor Invoice Lines",
+      "paymentMethods": "Payment Methods",
+      "customerPayments": "Customer Payments"
+    }
+  },
+  "common": {
+    "subsections": {
+      "operations": "Operations",
+      "configuration": "Configuration"
+    }
+  },
+  "finance": {
+    "fields": {
+      "invoiceNumber": "Invoice Number",
+      "customerId": "Customer Id",
+      "invoiceDate": "Invoice Date",
+      "dueDate": "Due Date",
+      "currencyId": "Currency Id",
+      "subtotalAmount": "Subtotal Amount",
+      "taxAmount": "Tax Amount",
+      "totalAmount": "Total Amount",
+      "paidAmount": "Paid Amount",
+      "balanceAmount": "Balance Amount",
+      "status": "Status",
+      "customerInvoiceId": "Customer Invoice Id",
+      "lineNumber": "Line Number",
+      "itemId": "Item Id",
+      "description": "Description",
+      "quantity": "Quantity",
+      "unitPrice": "Unit Price",
+      "lineTotal": "Line Total",
+      "noteNumber": "Note Number",
+      "originalInvoiceId": "Original Invoice Id",
+      "noteDate": "Note Date",
+      "amount": "Amount",
+      "reason": "Reason",
+      "vendor": "Vendor Id",
+      "purchaseOrder": "Purchase Order Id",
+      "currency": "Currency Id",
+      "paymentTerm": "Payment Term Id",
+      "notes": "Notes",
+      "vendorInvoice": "Vendor Invoice Id",
+      "item": "Item Id",
+      "account": "Account Id",
+      "costCenter": "Cost Center Id",
+      "taxCode": "Tax Code Id",
+      "code": "Code",
+      "name": "Name",
+      "type": "Type",
+      "requiresBankAccount": "Requires Bank Account",
+      "isActive": "Is Active",
+      "paymentNumber": "Payment Number",
+      "paymentDate": "Payment Date",
+      "paymentMethodId": "Payment Method Id",
+      "reference": "Reference"
+    },
+    "sections": {
+      "general": "General",
+      "amounts": "Amounts",
+      "workflow": "Workflow"
+    }
+  }
+}

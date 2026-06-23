@@ -1,0 +1,76 @@
+package ma.nafura.finance.domain.model;
+
+import jakarta.persistence.*;
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Table(name = "bank_accounts")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class BankAccount {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+
+    @Column(name = "tenant_id", nullable = false)
+    private UUID tenantId;
+
+    @Column(name = "code", nullable = false, length = 30)
+    private String code;
+
+    @Column(name = "name", nullable = false, length = 255)
+    private String name;
+
+    @Column(name = "account_type", nullable = false, length = 20)
+    private String accountType;
+
+    @Column(name = "bank_name", length = 100)
+    private String bankName;
+
+    @Column(name = "rib", length = 50)
+    private String rib;
+
+    @Column(name = "branch", length = 100)
+    private String branch;
+
+    @Column(name = "currency_code", nullable = false, length = 3)
+    private String currencyCode;
+
+    @Column(name = "gl_account_code", length = 50)
+    private String glAccountCode;
+
+    @Column(name = "opening_balance", nullable = false, precision = 18, scale = 4)
+    private BigDecimal openingBalance;
+
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive;
+
+    @Column(name = "notes")
+    private String notes;
+
+    @Column(name = "created_at", nullable = false)
+    private OffsetDateTime createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private OffsetDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = OffsetDateTime.now();
+        this.updatedAt = OffsetDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = OffsetDateTime.now();
+    }
+}

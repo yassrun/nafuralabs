@@ -1,0 +1,26 @@
+{
+  "entity": "PutawayTask",
+  "fields": {
+    "taskNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "suggestedBin": {
+      "maxLength": 120
+    },
+    "actualBin": {
+      "maxLength": 120
+    },
+    "quantity": {
+      "min": 0
+    },
+    "assignedTo": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

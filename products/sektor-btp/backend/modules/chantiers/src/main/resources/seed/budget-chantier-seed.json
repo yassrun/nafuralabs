@@ -1,0 +1,18 @@
+{
+  "budgets": [
+    {
+      "chantierId": "ch-001",
+      "previsionnelHt": "24500000",
+      "reviseHt": "25200000",
+      "lignes": [
+        { "rubrique": "MATERIAUX", "label": "Materiaux", "lot": "Gros oeuvre", "previsionnelHt": "8200000", "reviseHt": "8400000", "engageHt": "6100000", "realiseHt": "5200000" },
+        { "rubrique": "MO", "label": "Main d oeuvre", "lot": "Execution", "previsionnelHt": "4800000", "reviseHt": "4800000", "engageHt": "4800000", "realiseHt": "3200000" },
+        { "rubrique": "SOUS_TRAITANCE", "label": "Sous-traitance", "lot": "Second oeuvre", "previsionnelHt": "6500000", "reviseHt": "7000000", "engageHt": "5200000", "realiseHt": "3800000" },
+        { "rubrique": "LOCATION_MATERIEL", "label": "Location materiel", "lot": "Materiel", "previsionnelHt": "1800000", "reviseHt": "1800000", "engageHt": "1100000", "realiseHt": "850000" },
+        { "rubrique": "CARBURANT", "label": "Carburant", "lot": "Logistique", "previsionnelHt": "600000", "reviseHt": "650000", "engageHt": "400000", "realiseHt": "320000" },
+        { "rubrique": "FRAIS_GENERAUX", "label": "Frais generaux", "lot": "Support", "previsionnelHt": "800000", "reviseHt": "800000", "engageHt": "200000", "realiseHt": "180000" },
+        { "rubrique": "IMPREVUS", "label": "Imprevus", "lot": "Pilotage", "previsionnelHt": "1800000", "reviseHt": "1750000", "engageHt": "50000", "realiseHt": "50000" }
+      ]
+    }
+  ]
+}

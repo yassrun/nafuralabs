@@ -1,0 +1,16 @@
+{
+  "indices": [
+    { "code": "BTP01", "periode": "2026-01", "valeur": "1010" },
+    { "code": "BTP01", "periode": "2026-02", "valeur": "1015" },
+    { "code": "BTP01", "periode": "2026-03", "valeur": "1022" },
+    { "code": "BTP01", "periode": "2026-04", "valeur": "1028" },
+    { "code": "BTP18", "periode": "2026-01", "valeur": "1280" },
+    { "code": "BTP18", "periode": "2026-02", "valeur": "1295" },
+    { "code": "BTP18", "periode": "2026-03", "valeur": "1310" },
+    { "code": "BTP18", "periode": "2026-04", "valeur": "1325" },
+    { "code": "MO", "periode": "2026-01", "valeur": "752" },
+    { "code": "MO", "periode": "2026-02", "valeur": "755" },
+    { "code": "MO", "periode": "2026-03", "valeur": "758" },
+    { "code": "MO", "periode": "2026-04", "valeur": "762" }
+  ]
+}

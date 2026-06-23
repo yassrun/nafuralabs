@@ -1,0 +1,43 @@
+{
+  "entity": "CustomerInvoice",
+  "fields": {
+    "invoiceNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "customerId": {
+      "required": true
+    },
+    "invoiceDate": {
+      "required": true
+    },
+    "dueDate": {
+      "required": true
+    },
+    "currencyId": {
+      "required": true
+    },
+    "subtotalAmount": {
+      "required": true,
+      "min": 0
+    },
+    "taxAmount": {
+      "min": 0
+    },
+    "totalAmount": {
+      "required": true,
+      "min": 0
+    },
+    "paidAmount": {
+      "min": 0
+    },
+    "balanceAmount": {
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

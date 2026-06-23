@@ -1,0 +1,16 @@
+{
+  "id": "ai-agent-runtime",
+  "name": "AI Agent Runtime",
+  "description": "AI agent runtime",
+  "type": "feature",
+  "layer": "feature",
+  "group": "ai",
+  "provides": {
+    "backend": {
+      "gradle": ":platform:features:ai:ai-agent-runtime",
+      "packages": ["ma.nafura.platform.ai.agent"]
+    }
+  },
+  "requires": { "core": [], "features": ["ai-conversation"] },
+  "manifest": { "key": "ai-agent-runtime" }
+}

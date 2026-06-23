@@ -1,0 +1,29 @@
+{
+  "entity": "CycleCount",
+  "fields": {
+    "countNumber": {
+      "required": true,
+      "maxLength": 60,
+      "min": 0
+    },
+    "zone": {
+      "maxLength": 120
+    },
+    "assignedTo": {
+      "maxLength": 120
+    },
+    "itemsCounted": {
+      "min": 0
+    },
+    "variancesFound": {
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

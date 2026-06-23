@@ -1,0 +1,187 @@
+{
+  "common": {
+    "logout": "تسجيل الخروج",
+    "comingSoon": "قريبا",
+    "brandName": "Doxura",
+    "tagline": "من Seyrura"
+  },
+  "docExtractor": {
+    "navigation": {
+      "title": "مستخرج الوثائق",
+      "extraction": "الاستخراج",
+      "records": "السجلات",
+      "documents": "الوثائق",
+      "docTypes": "أنواع الوثائق",
+      "settings": "الإعدادات",
+      "extract": "مساحة عمل الاستخراج",
+      "workspace": "مساحة العمل",
+      "collapse": "طي الشريط"
+    },
+    "workspace": {
+      "title": "استخراج الوثائق",
+      "loading": "جاري تحميل أنواع الوثائق…",
+      "noTypes": "لا يوجد نوع وثيقة متاح.",
+      "failedToLoad": "فشل تحميل أنواع الوثائق.",
+      "selectType": "اختر نوع وثيقة من الشريط الجانبي لتهيئة مساحة العمل.",
+      "processingDocuments": "جاري معالجة الوثائق...",
+      "synchronizingRules": "جاري مزامنة قواعد الاستخراج...",
+      "restoringSession": "جاري استعادة الجلسة...",
+      "importDocument": "استيراد وثيقة",
+      "importDocumentTooltip": "استيراد وثيقة من ملف أو ماسح ضوئي أو مصدر خارجي",
+      "extracting": "جاري استخراج بيانات الوثيقة...",
+      "edit": "تعديل",
+      "delete": "حذف",
+      "export": "تصدير",
+      "excelSpreadsheet": "جدول بيانات Excel (.xlsx)",
+      "seyruraIntegration": "التكامل مع Seyrura ERP",
+      "status": "الحالة",
+      "created": "تاريخ الإنشاء",
+      "document": "الوثيقة",
+      "noRecords": "لا توجد سجلات مصدّقة حاليا. استخدم <b>استيراد وثيقة</b> لإنشاء سجل.",
+      "selectDocType": "اختر نوع وثيقة",
+      "openStoredDocument": "فتح الوثيقة المخزنة",
+      "notStored": "غير مخزن"
+    },
+    "contextBar": {
+      "domain": "المجال",
+      "documentType": "نوع الوثيقة",
+      "schemaVersion": "نسخة المخطط",
+      "schemaDescription": "يحدد هذا المخطط كيفية استخراج الحقول من وثائقك.",
+      "settings": "الإعدادات",
+      "openSettings": "فتح إعدادات الاستخراج"
+    },
+    "status": {
+      "draft": "مسودة",
+      "draftTooltip": "الوثيقة موجودة، البيانات قابلة للتعديل، الحفظ التلقائي مستمر",
+      "validated": "مصدّق",
+      "validatedTooltip": "بيانات مصدّقة صراحة، الوثيقة قابلة للاستخدام",
+      "invalid": "غير صالح",
+      "invalidTooltip": "الوثيقة لا تلبي متطلبات التحقق",
+      "corrected": "مصحّح",
+      "correctedTooltip": "بيانات مصححة يدويا لتطابق المصدر",
+      "rejected": "مرفوض",
+      "rejectedTooltip": "وثيقة غير صالحة أو غير قابلة للقراءة أو ذات نوع خاطئ",
+      "exported": "مُصدَّر",
+      "exportedTooltip": "تم الإرسال إلى ERP / المخزون",
+      "error": "خطأ",
+      "errorTooltip": "حدث خطأ أثناء المعالجة"
+    },
+    "workflow": {
+      "badges": {
+        "draftPartial": "مسودة · جزئي",
+        "draftComplete": "مسودة · مكتمل",
+        "draftErrors": "مسودة · أخطاء ({count})",
+        "validated": "مصدّق",
+        "rejected": "مرفوض"
+      },
+      "actions": {
+        "validate": "تحقق",
+        "validateTooltip": "تحقق من هذه الوثيقة",
+        "validateDisabledTooltip": "صحح أخطاء التحقق قبل التصديق",
+        "reject": "رفض",
+        "rejectTooltip": "رفض هذه الوثيقة",
+        "close": "إغلاق",
+        "cancel": "إلغاء"
+      },
+      "validation": {
+        "valid": "صالح",
+        "invalid": "غير صالح",
+        "partial": "جزئي",
+        "complete": "مكتمل",
+        "errorsCount": "أخطاء ({count})",
+        "fixErrorsBeforeValidation": "صحح أخطاء التحقق قبل التصديق",
+        "requiredFieldMissing": "{field} مطلوب",
+        "invalidFieldFormat": "{field} له تنسيق غير صالح",
+        "moreErrors": "+ {count, plural, zero {لا أخطاء أخرى} one {خطأ آخر} two {خطآن آخران} few {# أخطاء أخرى} many {# خطأ آخر} other {# خطأ آخر}}"
+      },
+      "autoSave": {
+        "saving": "جاري الحفظ...",
+        "saved": "تم الحفظ",
+        "saveError": "فشل حفظ التعديلات"
+      },
+      "reject": {
+        "title": "رفض الوثيقة",
+        "reasonLabel": "سبب الرفض",
+        "reasonRequired": "سبب الرفض مطلوب",
+        "reasonPlaceholder": "أدخل سبب الرفض...",
+        "confirm": "تأكيد الرفض",
+        "cancel": "إلغاء"
+      },
+      "messages": {
+        "validatedSuccess": "تم التحقق من الوثيقة بنجاح",
+        "rejectedSuccess": "تم رفض الوثيقة",
+        "transitionNotAllowed": "هذا الانتقال غير مسموح",
+        "cannotValidateInvalid": "لا يمكن التحقق: تحتوي الوثيقة على أخطاء تحقق"
+      }
+    },
+    "messages": {
+      "chooseTypeFirst": "اختر أولا مجالا ونوع وثيقة.",
+      "noRecordsToExport": "لا توجد سجلات للتصدير.",
+      "recordRemoved": "تم حذف السجل من مساحة العمل.",
+      "undo": "تراجع",
+      "dismiss": "إغلاق",
+      "recordNotAdded": "عدم توافق نسخة مخطط السجل؛ لم تتم إضافة السجل.",
+      "cannotEditVersion": "لا يمكن التعديل: السجل يستخدم المخطط v{version1} لكن الجلسة مقفلة على v{version2}.",
+      "exportingToSeyrura": "جاري التصدير إلى Seyrura Internal...",
+      "onlyBLSupported": "التصدير إلى Seyrura Internal مدعوم فقط لوثائق BL (سند التسليم).",
+      "storageNotAvailable": "وحدة التخزين غير مفعلة / الوثيقة غير متوفرة",
+      "tenantIdRequired": "معرّف المستأجر مطلوب للاستخراج.",
+      "failedToParse": "فشل تحليل البيانات المستخرجة.",
+      "unexpectedError": "خطأ غير متوقع.",
+      "requestFailed": "فشل الطلب ({status})."
+    },
+    "settings": {
+      "shell": {
+        "eyebrow": "مستخرج الوثائق",
+        "title": "إعدادات الاستخراج",
+        "general": "عام",
+        "documentType": "نوع الوثيقة",
+        "openFromWorkspace": "افتح من نوع وثيقة في مساحة العمل.",
+        "openFromWorkspaceTooltip": "افتح من نوع وثيقة في مساحة العمل."
+      },
+      "general": {
+        "eyebrow": "الاستخراج",
+        "title": "عام",
+        "saved": "تم الحفظ",
+        "autoValidateTitle": "التحقق التلقائي من جميع السجلات المستخرجة",
+        "autoValidateDescription": "عند التفعيل، تُوسَم السجلات المستخرجة الجديدة تلقائيا كمصدّقة. (قيد التطوير)",
+        "autoValidationPolicy": "سياسة التحقق التلقائي",
+        "policyManual": "يدوي (افتراضي)",
+        "policyConfidence": "حد الثقة (قريبا)",
+        "policyAlways": "دائما (قريبا)",
+        "comingSoon": "قريبا"
+      }
+    },
+    "filters": {
+      "title": "عوامل التصفية",
+      "apply": "تطبيق",
+      "clear": "مسح",
+      "dateFieldHint": "اختر حقل تاريخ لتفعيل التصفية"
+    },
+    "dialog": {
+      "reference": "المرجع",
+      "items": "الأصناف",
+      "readyToValidate": "جاهز للتصديق.",
+      "fixErrorsBeforeValidation": "صحح أخطاء التحقق قبل التصديق.",
+      "cancel": "إلغاء",
+      "finishLater": "إنهاء لاحقا",
+      "validate": "تحقق",
+      "extracted": "مستخرج",
+      "validated": "مصدّق",
+      "draft": "مسودة"
+    },
+    "exportResult": {
+      "titleSuccess": "تصدير ناجح",
+      "titleErrors": "اكتمل التصدير مع أخطاء",
+      "suppliersCreated": "{count, plural, =0 {لم يتم إنشاء أي مورد} zero {لم يتم إنشاء أي مورد} one {تم إنشاء مورد واحد} two {تم إنشاء موردين} few {تم إنشاء # موردين} many {تم إنشاء # موردا} other {تم إنشاء # مورد}}",
+      "itemsCreated": "{count, plural, =0 {لم يتم إنشاء أي صنف} zero {لم يتم إنشاء أي صنف} one {تم إنشاء صنف واحد} two {تم إنشاء صنفين} few {تم إنشاء # أصناف} many {تم إنشاء # صنفا} other {تم إنشاء # صنف}}",
+      "transactionsCreated": "{count, plural, =0 {لم يتم إنشاء أي معاملة} zero {لم يتم إنشاء أي معاملة} one {تم إنشاء معاملة واحدة} two {تم إنشاء معاملتين} few {تم إنشاء # معاملات} many {تم إنشاء # معاملة} other {تم إنشاء # معاملة}}",
+      "linesInfo": "مع {count, plural, =0 {0 سطر} zero {0 سطر} one {سطر واحد} two {سطرين} few {# أسطر} many {# سطرا} other {# سطر}}",
+      "errorsTitle": "أخطاء:",
+      "close": "إغلاق"
+    },
+    "deleteConfirm": {
+      "message": "{count, plural, =0 {لم يتم تحديد أي سجل.} one {هل تريد فعلا حذف هذا السجل؟\n\nهذا الإجراء لا يمكن التراجع عنه.} other {هل تريد فعلا حذف هذه السجلات (#)؟\n\nهذا الإجراء لا يمكن التراجع عنه.}}"
+    }
+  }
+}

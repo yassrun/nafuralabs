@@ -1,0 +1,528 @@
+{
+  "nav": {
+    "solutions": "Solutions",
+    "portfolio": "Portfolio",
+    "process": "Processus",
+    "about": "À propos",
+    "sektor": "Sektor",
+    "getStarted": "Démarrer →",
+    "openMenu": "Ouvrir le menu",
+    "closeMenu": "Fermer le menu",
+    "menu": "Menu",
+    "switchToEn": "English",
+    "switchToFr": "Français"
+  },
+  "footer": {
+    "tagline": "Fluidité dans l'intelligence.",
+    "explore": "Explorer",
+    "getStarted": "Démarrer",
+    "getInTouch": "Contact",
+    "copyright": "© {year} Nafura Labs. Tous droits réservés.",
+    "linkedIn": "LinkedIn →",
+    "location": "Casablanca, Maroc"
+  },
+  "meta": {
+    "site": {
+      "title": "Nafura Labs — Fluidité dans l'intelligence",
+      "description": "Nafura Labs conçoit des logiciels d'entreprise intelligents propulsés par sa propre plateforme agentique. Premier hub d'IA agentique au Maroc.",
+      "ogDescription": "Logiciels d'entreprise intelligents grâce à l'IA agentique. Cloud ou sur site. Sécurité intégrée."
+    },
+    "home": {
+      "title": "Nafura Labs — Fluidité dans l'intelligence",
+      "description": "Nafura Labs conçoit des logiciels d'entreprise intelligents propulsés par sa propre plateforme agentique. Premier hub d'IA agentique au Maroc."
+    },
+    "solutions": {
+      "title": "Solutions — Nafura Labs",
+      "description": "Produits et services propulsés par la plateforme agentique Nafura. ERP, transformation numérique, intégration IA, et plus."
+    },
+    "portfolio": {
+      "title": "Portfolio — Nafura Labs",
+      "description": "Expérience en architecture d'entreprise : banque, finance, paiements et construction. Découvrez le vertical Nafura Sektor."
+    },
+    "process": {
+      "title": "Processus — Nafura Labs",
+      "description": "Notre processus en 4 phases : Découverte, Spécification, Construction, Lancement et évolution. De la stratégie à la production en semaines."
+    },
+    "about": {
+      "title": "À propos — Nafura Labs",
+      "description": "L'histoire de Nafura Labs. Premier hub d'IA agentique au Maroc, au service des logiciels d'entreprise intelligents."
+    },
+    "contact": {
+      "title": "Démarrer — Nafura Labs",
+      "description": "Contactez Nafura Labs. Parlez-nous de votre projet — nous répondons sous 48 heures."
+    },
+    "sektor": {
+      "title": "Nafura Sektor — L'ERP du BTP marocain",
+      "description": "Nafura Sektor : l'ERP de chantier pensé pour le BTP au Maroc. Chantiers, situations de travaux, stock, paie CNSS et comptabilité CGNC — du devis à l'encaissement."
+    }
+  },
+  "common": {
+    "comingSoon": "Bientôt",
+    "deliverablePrefix": "Livrable :"
+  },
+  "home": {
+    "hero": {
+      "badge": "Plateforme IA agentique",
+      "headlinePart1": "Fluidité dans",
+      "headlinePart2": "l'intelligence",
+      "subtext": "Nous concevons des systèmes agentiques qui orchestrent vos processus, accélèrent vos décisions et livrent des logiciels d'entreprise en semaines — sur une plateforme sécurisée que vous maîtrisez, cloud ou sur site.",
+      "primaryCta": "Explorer la plateforme",
+      "secondaryCta": "Parler à un expert"
+    },
+    "stats": [
+      { "value": "12+", "label": "Années d'architecture d'entreprise" },
+      { "value": "3", "label": "Secteurs accompagnés" },
+      { "value": "5x", "label": "Livraison plus rapide avec la plateforme agentique" },
+      { "value": "0", "label": "Fuites de données — sécurité intégrée" }
+    ],
+    "statement": {
+      "title": "Nous ne nous contentons pas de livrer du logiciel — nous avons conçu le moteur qui le construit.",
+      "body": "Notre plateforme Nafura propriétaire combine une architecture pilotée par les spécifications avec des agents IA pour produire des applications de niveau entreprise à un rythme que le développement traditionnel ne peut égaler. Chaque produit est prêt pour la production, flexible sur le déploiement et augmenté par l'IA."
+    },
+    "products": {
+      "title": "Des produits intelligents, pensés pour votre secteur",
+      "subtitle": "Chaque solution verticale naît de la plateforme Nafura — le même moteur, adapté à votre métier.",
+      "items": [
+        {
+          "title": "Nafura Sektor",
+          "description": "ERP dédié au BTP : suivi de chantier, achats, sous-traitance, logistique terrain, maîtrise des coûts.",
+          "tag": "Construction",
+          "soon": false
+        },
+        {
+          "title": "Nafura Finance",
+          "description": "Plateforme des opérations financières pour la banque, le crédit et les services financiers.",
+          "tag": "Finance",
+          "soon": true
+        },
+        {
+          "title": "Nafura Retail",
+          "description": "Pilotage retail de bout en bout : point de vente, stocks, supply chain et intelligence client.",
+          "tag": "Distribution",
+          "soon": true
+        },
+        {
+          "title": "Nafura Logistics",
+          "description": "Supply chain et transport : flotte, entrepôts, optimisation des tournées.",
+          "tag": "Logistique",
+          "soon": true
+        }
+      ]
+    },
+    "services": {
+      "title": "Services",
+      "subtitle": "Au-delà des produits, nous accompagnons les organisations pour accélérer leurs ambitions numériques.",
+      "items": [
+        {
+          "title": "Livraison produit",
+          "description": "Nous construisons des applications d'entreprise sur mesure avec notre plateforme, prêtes pour la production en quelques semaines."
+        },
+        {
+          "title": "Équipe agentique",
+          "description": "Un développeur agentique senior propulsé par la plateforme Nafura, avec la productivité d'une équipe entière."
+        },
+        {
+          "title": "Transformation numérique",
+          "description": "Modernisation du legacy, migration cloud et réingénierie des processus pour les organisations en mouvement."
+        },
+        {
+          "title": "Intégration IA",
+          "description": "Intégration des capacités agentiques dans vos systèmes existants, avec une approche sécurité d'abord."
+        }
+      ]
+    },
+    "credibility": {
+      "label": "Notre équipe s'appuie sur une expérience acquise chez"
+    },
+    "cta": {
+      "title": "Prêt à construire quelque chose d'intelligent ?",
+      "subtitle": "Qu'il s'agisse d'un nouveau produit, d'une transformation numérique ou d'une équipe agentique — parlons-en.",
+      "button": "Parler à un expert"
+    }
+  },
+  "solutions": {
+    "hero": {
+      "title": "Solutions",
+      "subtitle": "Des produits bâtis sur notre plateforme. Des services portés par notre expertise. Le tout sécurisé par conception."
+    },
+    "platform": {
+      "title": "La plateforme Nafura",
+      "subtitle": "Notre plateforme de développement agentique propriétaire. Le socle sur lequel tout repose.",
+      "features": [
+        {
+          "title": "Architecture pilotée par les spécifications",
+          "body": "Les applications sont définies par des manifestes structurés, pas par du code ad hoc. Vous validez la spécification avant la première ligne de code."
+        },
+        {
+          "title": "Génération agentique",
+          "body": "Les agents IA interprètent les spécifications et produisent du code prêt pour la production sur toute la stack — front, back et infrastructure."
+        },
+        {
+          "title": "Enveloppe de sécurité",
+          "body": "Chaque interaction agentique passe par une couche de filtrage qui protège les données sensibles. Zéro fuite par conception."
+        },
+        {
+          "title": "Multi-produits",
+          "body": "La même plateforme alimente ERP, CRM, applications verticales et solutions sur mesure. Un moteur, une infinité de produits."
+        }
+      ]
+    },
+    "verticals": {
+      "title": "Produits verticaux",
+      "subtitle": "Des solutions métiers bâties sur un socle commun.",
+      "items": [
+        {
+          "title": "Nafura Sektor",
+          "body": "ERP dédié au BTP : suivi de chantier, achats, sous-traitance, logistique terrain, maîtrise des coûts. Notre premier vertical, déjà au service du secteur BTP marocain. Cycle de vie projet, flux d'achats, coordination sous-traitants, logistique terrain et contrôle des coûts en temps réel — dans une seule plateforme.",
+          "tag": "Construction",
+          "soon": false
+        },
+        {
+          "title": "Nafura Finance",
+          "body": "Plateforme des opérations financières pour la banque, le crédit et les services financiers. Conçue pour la conformité et la réglementation au cœur du système.",
+          "tag": "Finance",
+          "soon": true
+        },
+        {
+          "title": "Nafura Retail",
+          "body": "Pilotage retail : point de vente, stocks, visibilité supply chain et intelligence client. Du magasin unique aux réseaux multi-sites.",
+          "tag": "Distribution",
+          "soon": true
+        },
+        {
+          "title": "Nafura Logistics",
+          "body": "Supply chain et transport : flotte, entrepôts, optimisation des tournées et suivi des expéditions. Pour opérateurs de transport et logisticiens.",
+          "tag": "Logistique",
+          "soon": true
+        }
+      ]
+    },
+    "services": {
+      "title": "Services",
+      "items": [
+        {
+          "title": "Livraison produit",
+          "body": "Nous construisons des applications d'entreprise sur mesure avec notre plateforme. De la spec à la production en semaines, pas en mois. Vous obtenez un produit prêt pour la prod, pas un prototype."
+        },
+        {
+          "title": "Équipe agentique",
+          "body": "Un développeur agentique senior propulsé par la plateforme Nafura. Il livre ce qu'une équipe entière produirait — sans le coût ni la friction du recrutement."
+        },
+        {
+          "title": "Transformation numérique",
+          "body": "Modernisation du legacy, migration cloud et réingénierie des processus. Nous aidons les organisations à passer d'où elles sont à où elles doivent être."
+        },
+        {
+          "title": "Intégration IA",
+          "body": "Nous intégrons des capacités agentiques dans vos systèmes existants. Notre approche sécurité d'abord protège vos données sensibles à chaque étape."
+        },
+        {
+          "title": "Services managés",
+          "body": "Hébergement, supervision, support et évolution continue du produit. Nous ne livrons pas et ne disparaissons pas — nous opérons et améliorons."
+        }
+      ]
+    },
+    "advantage": {
+      "title": "L'avantage agentique",
+      "subtitle": "Ce qui nous distingue à l'ère de l'IA.",
+      "colTraditional": "Conseil traditionnel",
+      "colNafura": "Nafura Labs",
+      "rows": [
+        {
+          "label": "Approche IA",
+          "traditional": "S'appuie sur des outils tiers",
+          "nafura": "Possède la plateforme et les agents"
+        },
+        {
+          "label": "Vitesse",
+          "traditional": "Accéléré avec des copilotes IA",
+          "nafura": "Accéléré avec agents IA + moteur de specs"
+        },
+        {
+          "label": "Sécurité",
+          "traditional": "Dépend des politiques des éditeurs",
+          "nafura": "Enveloppe de sécurité sur chaque agent"
+        },
+        {
+          "label": "Propriété intellectuelle",
+          "traditional": "Le client reçoit le code",
+          "nafura": "Le client reçoit le code + l'évolution produit"
+        },
+        {
+          "label": "Déploiement",
+          "traditional": "Souvent cloud uniquement",
+          "nafura": "Cloud ou sur site"
+        }
+      ]
+    },
+    "cta": {
+      "title": "Construisons votre prochain produit",
+      "subtitle": "Dites-nous ce dont vous avez besoin. Nous le mapperons sur notre plateforme et vous montrerons le possible.",
+      "button": "Parler à un expert"
+    }
+  },
+  "portfolio": {
+    "hero": {
+      "title": "Portfolio",
+      "subtitle": "Une expérience de niveau entreprise en finance, paiements et construction."
+    },
+    "origin": {
+      "title": "D'où nous venons",
+      "intro": "L'expérience des fondateurs inclut notamment..."
+    },
+    "experience": [
+      {
+        "title": "Architecture des services financiers",
+        "subtitle": "Société Générale",
+        "description": "Architecture des systèmes bancaires de cœur et ingénierie de plateforme pour l'un des plus grands groupes financiers européens. Haute disponibilité, conformité et traitement transactionnel à grande échelle.",
+        "tag": "Finance"
+      },
+      {
+        "title": "Plateformes d'investissement public",
+        "subtitle": "BPI France",
+        "description": "Ingénierie de plateformes financières pour la banque publique d'investissement. Systèmes data-intensive au service des décisions d'investissement et des politiques publiques.",
+        "tag": "Finance"
+      },
+      {
+        "title": "Systèmes de paiement",
+        "subtitle": "Monetici",
+        "description": "Architecture des systèmes de traitement des paiements. Pipelines sécurisés à fort débit et infrastructure conforme PCI.",
+        "tag": "Paiements"
+      }
+    ],
+    "btp": {
+      "title": "Nafura Sektor",
+      "subtitle": "Notre premier produit vertical — ERP pour le secteur de la construction au Maroc.",
+      "industryLabel": "Secteur :",
+      "industryValue": "BTP / Construction",
+      "challengeLabel": "Enjeu :",
+      "challengeBody": "Les entreprises de construction marocaines s'appuient sur des outils fragmentés — tableurs, comptabilité déconnectée, achats manuels. Aucune plateforme unique ne couvre tout le cycle de vie du projet.",
+      "solutionLabel": "Solution :",
+      "solutionBody": "Nafura Sektor est un ERP dédié couvrant suivi de chantier, achats, sous-traitance, logistique terrain et contrôle des coûts en temps réel. Déploiement sur site ou cloud, avec localisation arabe et française intégrée.",
+      "featuresTitle": "Fonctionnalités clés",
+      "features": [
+        "Gestion du cycle de vie des projets",
+        "Flux d'achats et fournisseurs",
+        "Coordination des sous-traitants",
+        "Logistique terrain et suivi des matériaux",
+        "Contrôle des coûts et reporting en temps réel",
+        "Support arabe et français"
+      ],
+      "badge": "Disponible"
+    },
+    "tech": {
+      "title": "Construit avec",
+      "stack": "Angular · Spring Boot · Flutter · PostgreSQL · Kubernetes · Keycloak"
+    },
+    "cta": {
+      "title": "Vous voulez voir ce que nous pouvons bâtir pour votre secteur ?",
+      "subtitle": "Chaque vertical commence par une conversation.",
+      "button": "Démarrer la conversation"
+    }
+  },
+  "process": {
+    "hero": {
+      "title": "Notre façon de travailler",
+      "subtitle": "Quatre phases. Transparence et rapidité. De la stratégie à la production."
+    },
+    "phases": [
+      {
+        "num": "01",
+        "title": "Découverte",
+        "description": "Nous cartographions vos processus, contraintes et objectifs lors d'une session stratégique. Nous comprenons votre secteur, vos irritants et votre vision. Pas de modèles toutes tailles — chaque mission commence par une compréhension profonde.",
+        "duration": "1–2 semaines",
+        "deliverable": "Document d'exigences métier + évaluation de faisabilité"
+      },
+      {
+        "num": "02",
+        "title": "Spécification",
+        "description": "Nous traduisons vos besoins en manifestes structurés sur la plateforme Nafura. Chaque entité, workflow et règle est formalisé — vous validez avant la moindre ligne de code. C'est là que la plateforme brille : les specs ne sont pas de la documentation, elles sont la source de vérité.",
+        "duration": "2–3 semaines",
+        "deliverable": "Spécification applicative validée + schéma d'architecture"
+      },
+      {
+        "num": "03",
+        "title": "Construction",
+        "description": "Notre moteur agentique génère, nos architectes peaufinent. La plateforme produit du code prêt pour la production sur front, back et infrastructure. Démos itératives chaque semaine — pas de boîte noire, pas de surprises.",
+        "duration": "4–8 semaines",
+        "deliverable": "Application fonctionnelle avec démos itératives"
+      },
+      {
+        "num": "04",
+        "title": "Lancement et évolution",
+        "description": "Déploiement sur l'infrastructure de votre choix — cloud ou sur site. Formation de vos équipes. Puis : services managés, supervision et évolution continue du produit. Nous ne livrons pas pour disparaître.",
+        "duration": "En continu",
+        "deliverable": "Mise en production + accord de services managés"
+      }
+    ],
+    "quote": "Le développement traditionnel demande 6 à 12 mois pour une application d'entreprise. Avec la plateforme Nafura, nous passons de la spec à la production en 6 à 12 semaines.",
+    "quoteTagline": "C'est la différence agentique.",
+    "cta": {
+      "title": "Prêt à commencer ?",
+      "subtitle": "Réservez une session de découverte. Nous mapperons vos besoins et vous montrerons le chemin de l'idée à la production.",
+      "button": "Réserver une session de découverte"
+    }
+  },
+  "about": {
+    "hero": {
+      "title": "À propos de Nafura Labs",
+      "subtitle": "La fontaine qui alimente les logiciels d'entreprise intelligents."
+    },
+    "name": {
+      "title": "Nafura (نافورة)",
+      "body": "En arabe, « fontaine ». Une source qui coule, nourrit et ne tarit pas. Nafura Labs est le laboratoire où s'ingénient les produits d'entreprise intelligents — propulsés par notre propre plateforme agentique, sécurisés par conception.",
+      "tagline": "Fluidité dans l'intelligence."
+    },
+    "beliefs": {
+      "title": "Ce en quoi nous croyons",
+      "items": [
+        {
+          "title": "Vitesse sans raccourcis",
+          "body": "Les agents IA accélèrent la livraison, mais l'architecture et la qualité ne sont pas négociables."
+        },
+        {
+          "title": "Des produits, pas des projets",
+          "body": "Nous bâtissons des logiciels dont la valeur se capitalise, pas des livrables jetables."
+        },
+        {
+          "title": "La sécurité n'est pas optionnelle",
+          "body": "Chaque agent IA transite par notre couche de sécurité pour que les informations sensibles ne fuient jamais."
+        },
+        {
+          "title": "La flexibilité plutôt que l'enfermement",
+          "body": "Cloud ou sur site, nos produits s'adaptent à la réalité infrastructurelle du client."
+        }
+      ]
+    },
+    "positioning": {
+      "badge": "Premier hub d'IA agentique au Maroc",
+      "body": "Nous sommes basés au Maroc — un marché en transformation numérique rapide, avec une forte demande de solutions d'entreprise souveraines et sécurisées. Notre trajectoire : MENA, Afrique francophone, et au-delà — partout où les organisations ont besoin de logiciels qui respectent leur souveraineté des données."
+    },
+    "difference": {
+      "line1": "Nafura Labs n'est pas un cabinet qui utilise l'IA.",
+      "line2": "Nous sommes une entreprise technologique qui a construit le moteur.",
+      "body": "La fontaine coule — et chaque produit qui en émane porte le même ADN : livraison rapide, rigueur entreprise, flexibilité de déploiement, et intelligence agentique enveloppée de sécurité."
+    },
+    "cta": {
+      "title": "Rejoignez le flux",
+      "subtitle": "Client, partenaire ou collaborateur futur — nous serions ravis d'échanger avec vous.",
+      "button": "Nous contacter"
+    }
+  },
+  "contact": {
+    "hero": {
+      "title": "Démarrer",
+      "subtitle": "Parlez-nous de votre projet. Nous répondons sous 48 heures."
+    },
+    "sidebar": {
+      "heading": "Discutons-en",
+      "response": "Nous répondons sous 48 heures.",
+      "bookTitle": "Ou réservez une session directement",
+      "calendly": "Planifier sur Calendly →",
+      "linkedin": "Suivez-nous sur LinkedIn →"
+    },
+    "form": {
+      "name": "Nom",
+      "email": "E-mail",
+      "company": "Entreprise",
+      "interest": "Qu'est-ce qui vous intéresse ?",
+      "message": "Message",
+      "placeholderName": "Votre nom",
+      "placeholderEmail": "vous@entreprise.com",
+      "placeholderCompany": "Entreprise (facultatif)",
+      "placeholderMessage": "Comment pouvons-nous vous aider ?",
+      "selectPlaceholder": "Choisir une option",
+      "submitIdle": "Envoyer le message",
+      "submitSending": "Envoi…",
+      "submitSent": "Message envoyé",
+      "success": "Merci. Nous vous répondrons sous 48 heures."
+    },
+    "interestOptions": [
+      "Développement produit",
+      "Équipe agentique",
+      "Transformation numérique",
+      "Intégration IA",
+      "Partenariat",
+      "Autre"
+    ]
+  },
+  "sektor": {
+    "hero": {
+      "badge": "ERP BTP · pensé pour le Maroc",
+      "headlinePart1": "Pilotez vos chantiers,",
+      "headlinePart2": "du devis à l'encaissement",
+      "subtext": "Nafura Sektor réunit chantiers, situations de travaux, facturation, stock, matériel, comptabilité et paie dans un seul ERP — conçu pour les règles du BTP marocain.",
+      "primaryCta": "Démarrer un pilote",
+      "secondaryCta": "Accéder à l'application"
+    },
+    "trust": [
+      "TVA 20 % · décomptes conformes",
+      "Retenue de garantie automatisée",
+      "CNSS · DAMANCOM · IGR",
+      "Plan comptable CGNC",
+      "100 % MAD · interface FR"
+    ],
+    "modules": {
+      "title": "Tout votre BTP, dans un seul ERP",
+      "subtitle": "Activez les modules dont vous avez besoin. Ils partagent les mêmes données — zéro ressaisie.",
+      "items": [
+        { "title": "Chantiers", "description": "Lots & BPU, planning, avancements terrain valorisés, journal et carnets d'attachement." },
+        { "title": "Marchés & Facturation", "description": "Situations de travaux, retenues de garantie, avenants, factures et encaissements." },
+        { "title": "Achats & Sous-traitance", "description": "Demandes d'achat, appels d'offres, bons de commande, réception et fournisseurs." },
+        { "title": "Stock & Logistique", "description": "Mouvements, valorisation, alertes de seuil et catalogue articles multi-dépôts." },
+        { "title": "Matériel & Équipements", "description": "Parc, affectations, locations, pointage engins, maintenance et carburant." },
+        { "title": "Études & Devis", "description": "Bibliothèque de prix, métrés DPGF, devis et conversion directe en chantier." },
+        { "title": "Finance & Compta", "description": "Comptabilité CGNC, trésorerie, déclarations fiscales et analytique par chantier." },
+        { "title": "RH & Paie", "description": "Employés, pointage, congés, paie et déclarations CNSS / DAMANCOM / IGR." },
+        { "title": "Pilotage & Analyses", "description": "Marges par chantier, cash-flow, rentabilité et consolidation multi-sociétés." }
+      ]
+    },
+    "loop": {
+      "title": "Du chantier à l'encaissement, sans rupture",
+      "subtitle": "Chaque étape alimente la suivante. La saisie terrain devient automatiquement de la facturation.",
+      "steps": [
+        { "title": "1 · Chantier", "body": "Lots, BPU et planning paramétrés en quelques clics." },
+        { "title": "2 · Avancement", "body": "Le terrain saisit le % réalisé, photos à l'appui." },
+        { "title": "3 · Situation", "body": "Décompte valorisé auto : RG 7 %, TVA 20 %, net à payer." },
+        { "title": "4 · Facture", "body": "Émission en un clic, suivi des échéances." },
+        { "title": "5 · Encaissement", "body": "Trésorerie et marge mises à jour en temps réel." }
+      ]
+    },
+    "maroc": {
+      "title": "Les règles du Maroc, intégrées d'usine",
+      "subtitle": "Pas un ERP étranger francisé. Sektor parle la langue de votre comptable et de votre conducteur de travaux.",
+      "chips": [
+        "RG 7 % automatique",
+        "TVA 20 %",
+        "CGNC · 116 comptes",
+        "DAMANCOM",
+        "IGR · État 9421/1208",
+        "CNSS · AMO"
+      ],
+      "points": [
+        "Décomptes et situations conformes aux marchés publics et privés marocains.",
+        "Paie complète avec cotisations CNSS, AMO et IGR — bulletins et déclarations prêts.",
+        "Comptabilité sur plan CGNC, déclarations SIMPL-IS et états réglementaires.",
+        "Tout en MAD, interface en français, hébergé sur une infrastructure cloud sécurisée."
+      ]
+    },
+    "pricing": {
+      "title": "Un prix par société, pas par tête",
+      "subtitle": "Donnez l'accès à toute votre équipe terrain sans exploser la facture. Vous payez selon votre activité, pas vos effectifs.",
+      "from": "À partir de",
+      "billing": "facturation annuelle",
+      "plans": [
+        { "name": "Starter", "who": "TPE — l'essentiel du chantier", "price": "1 500", "unit": "MAD/mois", "features": ["Jusqu'à 3 chantiers actifs", "5 utilisateurs inclus", "Chantiers, Achats, Stock", "Marchés & Facturation"], "cta": "Essayer", "popular": false },
+        { "name": "Pro", "who": "PME — l'ERP complet", "price": "4 500", "unit": "MAD/mois", "features": ["Jusqu'à 10 chantiers actifs", "20 utilisateurs inclus", "+ Finance & Comptabilité", "+ RH & Paie", "+ HSE · IA incluse"], "cta": "Démarrer le pilote", "popular": true },
+        { "name": "Business", "who": "PME structurée — piloter & consolider", "price": "9 500", "unit": "MAD/mois", "features": ["Jusqu'à 25 chantiers actifs", "50 utilisateurs inclus", "+ Pilotage & Analyses", "+ Multi-société"], "cta": "Demander une démo", "popular": false },
+        { "name": "Enterprise", "who": "Groupe BTP — sur mesure", "price": "Sur devis", "unit": "", "features": ["Chantiers & utilisateurs illimités", "Consolidation groupe", "SLA & support dédié"], "cta": "Nous contacter", "popular": false }
+      ],
+      "note": "Add-ons à la carte : Pack IA, utilisateurs et chantiers supplémentaires. Onboarding crédité en cas de signature."
+    },
+    "cta": {
+      "title": "Testez Sektor sur un de vos chantiers, 30 jours",
+      "subtitle": "On configure un chantier réel avec vous et on vous montre la boucle complète. Sans engagement.",
+      "button": "Réserver mon pilote"
+    }
+  }
+}

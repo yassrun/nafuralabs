@@ -1,0 +1,34 @@
+{
+  "entity": "AssetRevaluation",
+  "fields": {
+    "revaluationNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "assetId": {
+      "required": true
+    },
+    "revaluationDate": {
+      "required": true
+    },
+    "previousValue": {
+      "required": true,
+      "min": 0
+    },
+    "newValue": {
+      "required": true,
+      "min": 0
+    },
+    "reason": {
+      "maxLength": 2000
+    },
+    "approvedBy": {
+      "maxLength": 200
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

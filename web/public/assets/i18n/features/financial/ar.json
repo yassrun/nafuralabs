@@ -1,0 +1,63 @@
+{
+  "financial": {
+    "fields": {
+      "code": "الرمز",
+      "name": "الاسم",
+      "symbol": "الرمز المختصر",
+      "decimalPlaces": "الخانات العشرية",
+      "fromCurrency": "معرّف العملة المصدر",
+      "toCurrency": "معرّف العملة الهدف",
+      "rate": "السعر",
+      "effectiveDate": "تاريخ السريان",
+      "fiscalYear": "معرّف السنة المالية",
+      "startDate": "تاريخ البدء",
+      "endDate": "تاريخ الانتهاء",
+      "status": "الحالة",
+      "description": "الوصف",
+      "days": "الأيام"
+    },
+    "navigation": {
+      "currencies": "العملات",
+      "exchangeRates": "أسعار الصرف",
+      "fiscalPeriods": "الفترات المالية",
+      "fiscalYears": "السنوات المالية",
+      "incoterms": "شروط التجارة الدولية",
+      "paymentTerms": "شروط الدفع"
+    },
+    "currency": {
+      "title": "العملات",
+      "detailTitle": "تفاصيل العملة",
+      "newTitle": "عملة جديدة"
+    },
+    "exchangeRate": {
+      "title": "أسعار الصرف",
+      "detailTitle": "تفاصيل سعر الصرف",
+      "newTitle": "سعر صرف جديد"
+    },
+    "fiscalPeriod": {
+      "title": "الفترات المالية",
+      "detailTitle": "تفاصيل الفترة المالية",
+      "newTitle": "فترة مالية جديدة"
+    },
+    "fiscalYear": {
+      "title": "السنوات المالية",
+      "detailTitle": "تفاصيل السنة المالية",
+      "newTitle": "سنة مالية جديدة"
+    },
+    "incoterm": {
+      "title": "شروط التجارة الدولية",
+      "detailTitle": "تفاصيل شرط التجارة الدولية",
+      "newTitle": "شرط تجارة دولية جديد"
+    },
+    "paymentTerm": {
+      "title": "شروط الدفع",
+      "detailTitle": "تفاصيل شرط الدفع",
+      "newTitle": "شرط دفع جديد"
+    }
+  },
+  "common": {
+    "fields": {
+      "isActive": "نشط"
+    }
+  }
+}

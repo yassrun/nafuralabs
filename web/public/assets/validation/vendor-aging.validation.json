@@ -1,0 +1,8 @@
+{
+  "entity": "VendorAging",
+  "fields": {
+    "vendorId": {
+      "required": true
+    }
+  }
+}

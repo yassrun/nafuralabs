@@ -1,0 +1,15 @@
+{
+  "id": "framework",
+  "name": "Platform Framework",
+  "description": "Core framework and base utilities",
+  "type": "core",
+  "layer": "infrastructure",
+  "provides": {
+    "backend": {
+      "gradle": ":platform:core:framework",
+      "packages": ["ma.nafura.framework"]
+    }
+  },
+  "requires": {},
+  "manifest": { "key": "framework" }
+}

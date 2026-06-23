@@ -1,0 +1,23 @@
+{
+  "entity": "RatingScale",
+  "fields": {
+    "code": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "name": {
+      "maxLength": 120
+    },
+    "levels": {
+      "maxLength": 120
+    },
+    "descriptions": {
+      "maxLength": 2000
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

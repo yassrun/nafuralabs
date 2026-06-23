@@ -1,0 +1,52 @@
+{
+  "bonsCommandeClient": [
+    {
+      "numero": "CMD-2025-0001",
+      "numeroClient": "OCP-BC-2025-4521",
+      "clientId": "cli-001",
+      "clientName": "OCP Promotion SA",
+      "chantierId": "chantier-001",
+      "chantierCode": "CH-2025-001",
+      "dateReception": "2025-10-01",
+      "dateFinPrevue": "2026-09-30",
+      "tvaTaux": "20",
+      "montantFactureHt": "9800000",
+      "status": "EN_COURS",
+      "lignes": [
+        { "designation": "Résidence Yasmine — Marché principal gros œuvre", "totalHt": "18500000" }
+      ]
+    },
+    {
+      "numero": "CMD-2025-0002",
+      "numeroClient": "ADM-2025-0047",
+      "clientId": "cli-002",
+      "clientName": "ADM (Autoroutes du Maroc)",
+      "chantierId": "chantier-002",
+      "chantierCode": "CH-2025-002",
+      "dateReception": "2025-09-15",
+      "dateFinPrevue": "2026-06-30",
+      "tvaTaux": "20",
+      "montantFactureHt": "14200000",
+      "status": "PARTIELLEMENT_FACTURE",
+      "lignes": [
+        { "designation": "Pont Bouregreg ouvrage 3 — marché travaux", "totalHt": "24800000" }
+      ]
+    },
+    {
+      "numero": "CMD-2026-0003",
+      "numeroClient": "AKS-PO-2026-0012",
+      "clientId": "cli-009",
+      "clientName": "Aksal Group SA",
+      "chantierId": "chantier-009",
+      "chantierCode": "CH-2025-009",
+      "dateReception": "2026-02-20",
+      "dateFinPrevue": "2027-12-31",
+      "tvaTaux": "20",
+      "montantFactureHt": "0",
+      "status": "RECU",
+      "lignes": [
+        { "designation": "Centre Commercial Tanger phase 2 — gros œuvre", "totalHt": "13100000" }
+      ]
+    }
+  ]
+}

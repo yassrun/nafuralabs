@@ -1,0 +1,84 @@
+{
+  "sysconfig": {
+    "navigation": {
+      "calendars": "التقويمات",
+      "codeLists": "قوائم الرموز",
+      "numberingSequences": "تسلسلات الترقيم",
+      "referenceValues": "القيم المرجعية",
+      "tags": "الوسوم",
+      "timeZones": "المناطق الزمنية"
+    },
+    "calendar": {
+      "title": "التقويمات",
+      "detailTitle": "تفاصيل التقويم",
+      "newTitle": "تقويم جديد",
+      "fields": {
+        "code": "الرمز",
+        "name": "الاسم",
+        "timeZoneId": "معرّف المنطقة الزمنية",
+        "description": "الوصف",
+        "isActive": "نشط"
+      },
+      "sections": {}
+    },
+    "codeList": {
+      "title": "قوائم الرموز",
+      "detailTitle": "تفاصيل قائمة الرموز",
+      "newTitle": "قائمة رموز جديدة",
+      "fields": {
+        "code": "الرمز",
+        "name": "الاسم",
+        "description": "الوصف"
+      },
+      "sections": {}
+    },
+    "numberingSequence": {
+      "title": "تسلسلات الترقيم",
+      "detailTitle": "تفاصيل تسلسل الترقيم",
+      "newTitle": "تسلسل ترقيم جديد",
+      "fields": {
+        "name": "الاسم",
+        "prefix": "بادئة",
+        "currentNumber": "الرقم الحالي",
+        "incrementBy": "خطوة الزيادة",
+        "padLength": "طول الحشو",
+        "code": "الرمز"
+      },
+      "sections": {}
+    },
+    "referenceValue": {
+      "title": "القيم المرجعية",
+      "detailTitle": "تفاصيل القيمة المرجعية",
+      "newTitle": "قيمة مرجعية جديدة",
+      "fields": {
+        "codeListId": "معرّف قائمة الرموز",
+        "code": "الرمز",
+        "name": "الاسم",
+        "sortOrder": "ترتيب الفرز"
+      },
+      "sections": {}
+    },
+    "tag": {
+      "title": "الوسوم",
+      "detailTitle": "تفاصيل الوسم",
+      "newTitle": "وسم جديد",
+      "fields": {
+        "code": "الرمز",
+        "name": "الاسم",
+        "color": "اللون"
+      },
+      "sections": {}
+    },
+    "timeZone": {
+      "title": "المناطق الزمنية",
+      "detailTitle": "تفاصيل المنطقة الزمنية",
+      "newTitle": "منطقة زمنية جديدة",
+      "fields": {
+        "code": "الرمز",
+        "name": "الاسم",
+        "offset": "الإزاحة"
+      },
+      "sections": {}
+    }
+  }
+}

@@ -1,0 +1,106 @@
+{
+  "shared": {
+    "dataTable": {
+      "empty": {
+        "title": "No data",
+        "message": "No items to display at the moment."
+      },
+      "boolean": {
+        "yes": "Yes",
+        "no": "No"
+      },
+      "export": {
+        "csv": "Export CSV",
+        "xlsx": "Export Excel"
+      }
+    },
+    "emptyState": {
+      "defaultTitle": "No results",
+      "actionLabel": "New entry"
+    },
+    "pageShell": {
+      "actions": {
+        "refresh": "Refresh",
+        "back": "Back",
+        "close": "Close"
+      }
+    },
+    "pagination": {
+      "rowsPerPage": "Rows per page:",
+      "counter": "{from}–{to} of {total}",
+      "firstPage": "First page",
+      "previousPage": "Previous page",
+      "nextPage": "Next page",
+      "lastPage": "Last page"
+    },
+    "filters": {
+      "reset": "Reset",
+      "resetTitle": "Reset filters",
+      "resetTooltip": "Clear filters, search and visible sort (listing)"
+    },
+    "entityDetail": {
+      "actions": {
+        "save": "Save",
+        "cancel": "Cancel",
+        "edit": "Edit",
+        "delete": "Delete",
+        "close": "Close"
+      }
+    },
+    "statusBadge": {
+      "unknown": "Unknown"
+    },
+    "moneyInput": {
+      "placeholder": "0.00"
+    },
+    "confirmDialog": {
+      "ok": "OK",
+      "cancel": "Cancel",
+      "title": "Confirmation",
+      "message": "Are you sure?"
+    },
+    "phoneMa": {
+      "placeholder": "+212 6 XX XX XX XX",
+      "error": "Invalid number — format +212 6/7 XX XX XX XX",
+      "validatorMessage": "Invalid Moroccan number"
+    },
+    "documentWorkspace": {
+      "exportNotImplemented": "Export is not implemented for this document yet.",
+      "actions": {
+        "validate": "Validate",
+        "post": "Post",
+        "print": "Print",
+        "export": "Export",
+        "cancel": "Cancel",
+        "submit": "Submit"
+      }
+    },
+    "sendEmail": {
+      "defaultSubject": "About {ref}"
+    },
+    "alerts": {
+      "bellTitle": "Business alerts",
+      "centerSectionTitle": "Business alerts",
+      "centerPlatformSectionTitle": "System notifications",
+      "factureLate": "{numero} {count, plural, =0 {0 days overdue} one {1 day overdue} other {# days overdue}}",
+      "cautionExpiry": "{numero} {count, plural, =0 {expires in less than a day} one {expires in 1 day} other {expires in # days}}",
+      "noPendingAlert": "No pending alert",
+      "dismiss": "Dismiss"
+    },
+    "entityListing": {
+      "bulkDelete": {
+        "title": "{count, plural, =0 {Delete} one {Delete 1 {entity}} other {Delete # {entity}}}",
+        "message": "{count, plural, =0 {No item selected.} one {Are you sure you want to delete this item? This action cannot be undone.} other {Are you sure you want to delete these # items? This action cannot be undone.}}",
+        "confirmLabel": "Delete All"
+      },
+      "toast": {
+        "deleted": "{count, plural, =0 {No item deleted.} one {1 item deleted.} other {# items deleted.}}",
+        "exported": "{count, plural, =0 {No item exported.} one {1 item exported.} other {# items exported.}}",
+        "archived": "{count, plural, =0 {No item archived.} one {1 item archived.} other {# items archived.}}"
+      },
+      "importExport": {
+        "importButton": "{count, plural, =0 {Import} one {Import 1 item} other {Import # items}}"
+      }
+    }
+  }
+}

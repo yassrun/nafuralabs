@@ -1,0 +1,15 @@
+{
+  "id": "authorization",
+  "name": "Authorization",
+  "description": "Permission and role enforcement",
+  "type": "core",
+  "layer": "core",
+  "provides": {
+    "backend": {
+      "gradle": ":platform:core:authorization",
+      "packages": ["ma.nafura.core.security", "ma.nafura.core.service", "ma.nafura.core.repository", "ma.nafura.core.domain"]
+    }
+  },
+  "requires": { "core": ["identity", "scope"] },
+  "manifest": { "key": "authorization" }
+}

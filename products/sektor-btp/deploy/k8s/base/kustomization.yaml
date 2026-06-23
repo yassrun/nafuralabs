@@ -1,0 +1,21 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: nafura-sektor
+
+resources:
+  - namespace.yaml
+  - backend-service-account.yaml
+  - backend-deployment.yaml
+  - backend-service.yaml
+  - frontend-deployment.yaml
+  - frontend-service.yaml
+  - ingress.yaml
+
+images:
+  - name: sektor-btp-backend
+    newName: sektor-btp-backend
+    newTag: staging
+  - name: sektor-btp-web
+    newName: sektor-btp-web
+    newTag: staging

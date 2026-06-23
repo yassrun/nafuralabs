@@ -1,0 +1,30 @@
+{
+  "geography": {
+    "navigation": {
+      "title": "Geography",
+      "description": "Geography Domain",
+      "addresses": "Addresses",
+      "cities": "Cities",
+      "countries": "Countries",
+      "regions": "Regions"
+    }
+  },
+  "common": {
+    "subsections": {
+      "operations": "Operations",
+      "configuration": "Configuration"
+    }
+  },
+  "geo": {
+    "fields": {
+      "addressLine1": "Line1",
+      "addressLine2": "Line2",
+      "country": "Country Id",
+      "region": "Region Id",
+      "city": "City Id",
+      "postalCode": "Postal Code",
+      "code": "Code",
+      "name": "Name"
+    }
+  }
+}

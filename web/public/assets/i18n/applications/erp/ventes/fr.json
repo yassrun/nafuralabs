@@ -1,0 +1,753 @@
+{
+  "ventes": {
+    "common": {
+      "dash": "—",
+      "actions": {
+        "cancel": "Annuler",
+        "save": "Enregistrer",
+        "close": "Fermer",
+        "print": "Imprimer",
+        "delete": "Supprimer",
+        "edit": "Modifier",
+        "new": "Nouveau",
+        "reset": "Réinitialiser",
+        "search": "Rechercher"
+      }
+    },
+    "modePaiement": {
+      "virement": "Virement",
+      "cheque": "Chèque",
+      "effet": "Effet",
+      "especes": "Espèces",
+      "compensation": "Compensation"
+    },
+    "modePaiementLong": {
+      "virement": "Virement bancaire",
+      "cheque": "Chèque",
+      "effet": "Effet de commerce",
+      "especes": "Espèces",
+      "compensation": "Compensation"
+    },
+    "formeJuridique": {
+      "sa": "SA",
+      "sarl": "SARL",
+      "sas": "SAS",
+      "particulier": "Particulier",
+      "administration": "Administration",
+      "cooperative": "Coopérative"
+    },
+    "facture": {
+      "entityName": "Facture",
+      "entityNamePlural": "Factures",
+      "headerTitle": "Factures clients",
+      "createTitle": "Nouvelle facture",
+      "detailTitle": "Détail facture",
+      "list": {
+        "columns": {
+          "numero": "N°",
+          "type": "Type",
+          "client": "Client",
+          "chantier": "Chantier",
+          "dateEmission": "Émise le",
+          "dateEcheance": "Échéance",
+          "netTtc": "Net TTC",
+          "encaisse": "Encaissé",
+          "resteTtc": "Reste TTC",
+          "retard": "Retard (j)",
+          "status": "Statut"
+        },
+        "transform": {
+          "retardJ": "+{n} j"
+        },
+        "filters": {
+          "status": "Statut",
+          "type": "Type",
+          "client": "Client",
+          "chantier": "Chantier",
+          "modePaiement": "Mode paiement",
+          "dateFrom": "Émise du",
+          "dateTo": "Émise au",
+          "netMin": "Net TTC min",
+          "netMax": "Net TTC max"
+        },
+        "emptyState": {
+          "title": "Aucune facture",
+          "message": "Créez une nouvelle facture client (situation, avance ou diverse).",
+          "actionLabel": "Nouvelle facture"
+        }
+      },
+      "form": {
+        "fields": {
+          "numero": "N° facture",
+          "numeroPlaceholder": "Auto-généré",
+          "type": "Type",
+          "client": "Client",
+          "chantier": "Chantier",
+          "bcClient": "Bon de commande client",
+          "situationSource": "Situation source",
+          "dateEmission": "Date émission",
+          "dateEcheance": "Date échéance",
+          "modePaiement": "Mode paiement",
+          "totalHt": "Total HT (MAD)",
+          "retenueGarantie": "Retenue garantie (MAD)",
+          "resorptionAvance": "Résorption avance (MAD)",
+          "tvaTaux": "Taux TVA (%)",
+          "netHt": "Net à payer HT",
+          "tva": "TVA",
+          "netTtc": "Net à payer TTC",
+          "cumulEncaisse": "Cumul encaissé TTC",
+          "resteEncaisser": "Reste à encaisser TTC",
+          "motifLitige": "Motif litige",
+          "notes": "Notes internes",
+          "lignes": "Lignes de la facture",
+          "encaissements": "Encaissements"
+        },
+        "sections": {
+          "identite": "Identité",
+          "dates": "Dates & paiement",
+          "lignes": "Lignes de facturation",
+          "decompte": "Décompte",
+          "encaissements": "Encaissements",
+          "autres": "Notes & litige"
+        }
+      },
+      "actions": {
+        "emit": "Émettre",
+        "litige": "Marquer en litige",
+        "resolveLitige": "Litige résolu",
+        "cancel": "Annuler",
+        "addEncaissement": "+ Encaissement",
+        "print": "Imprimer facture",
+        "creerAvoir": "Créer avoir"
+      },
+      "confirm": {
+        "emit": {
+          "title": "Émettre la facture ?",
+          "message": "La facture passera en statut Émise et le PDF officiel sera disponible. Un mail mock sera adressé au client.",
+          "confirmLabel": "Émettre"
+        },
+        "litige": {
+          "title": "Marquer la facture en litige ?",
+          "message": "Indiquez le motif du litige (raison du blocage côté client).",
+          "confirmLabel": "Confirmer le litige",
+          "notePlaceholder": "Motif du litige"
+        },
+        "cancel": {
+          "title": "Annuler la facture ?",
+          "message": "La facture sera marquée Annulée. Cette action est irréversible avant émission.",
+          "confirmLabel": "Annuler la facture"
+        },
+        "removeEncaissement": "Supprimer cet encaissement ?",
+        "delete": {
+          "title": "Supprimer la facture",
+          "message": "Voulez-vous vraiment supprimer la facture {numero} ?"
+        }
+      },
+      "toasts": {
+        "saved": "Facture {numero} enregistrée"
+      },
+      "table": {
+        "header": {
+          "designation": "Désignation",
+          "quantite": "Qté",
+          "puHt": "P.U. HT",
+          "totalHt": "Total HT (MAD)",
+          "date": "Date",
+          "mode": "Mode",
+          "reference": "Référence",
+          "banque": "Banque",
+          "montantTtc": "Montant TTC"
+        },
+        "emptyLignes": "Aucune ligne — facture issue d'une situation source",
+        "emptyEncaissements": "Aucun encaissement enregistré pour le moment.",
+        "deleteEncaissementAria": "Supprimer encaissement"
+      }
+    },
+    "avoir": {
+      "entityName": "Avoir",
+      "entityNamePlural": "Avoirs",
+      "headerTitle": "Avoirs",
+      "createTitle": "Nouvel avoir",
+      "detailTitle": "Détail avoir",
+      "list": {
+        "columns": {
+          "numero": "N°",
+          "factureOrigine": "Facture origine",
+          "client": "Client",
+          "dateEmission": "Émis le",
+          "motif": "Motif",
+          "totalTtc": "Total TTC",
+          "status": "Statut"
+        },
+        "filters": {
+          "status": "Statut",
+          "client": "Client",
+          "dateFrom": "Émis du",
+          "dateTo": "Émis au"
+        },
+        "emptyState": {
+          "title": "Aucun avoir",
+          "message": "Émettez un avoir pour rectifier ou rembourser une facture.",
+          "actionLabel": "Nouvel avoir"
+        }
+      },
+      "form": {
+        "fields": {
+          "numero": "N° avoir",
+          "numeroPlaceholder": "Auto-généré",
+          "factureOrigine": "Facture d'origine",
+          "client": "Client",
+          "dateEmission": "Date émission",
+          "motif": "Motif de l'avoir",
+          "totalHt": "Total HT (MAD)",
+          "tvaTaux": "Taux TVA (%)",
+          "tva": "TVA",
+          "totalTtc": "Total TTC",
+          "notes": "Notes internes",
+          "lignes": "Lignes de l'avoir"
+        },
+        "sections": {
+          "identite": "Identité",
+          "motif": "Motif",
+          "lignes": "Lignes",
+          "totaux": "Totaux",
+          "autres": "Notes"
+        }
+      },
+      "actions": {
+        "emit": "Émettre",
+        "impute": "Imputer",
+        "rembourser": "Rembourser",
+        "cancel": "Annuler",
+        "print": "Imprimer avoir"
+      },
+      "confirm": {
+        "emit": {
+          "title": "Émettre l'avoir ?",
+          "message": "L'avoir passera en statut Émis. Vous pourrez ensuite l'imputer sur la facture d'origine ou le rembourser.",
+          "confirmLabel": "Émettre"
+        },
+        "imputer": {
+          "title": "Imputer l'avoir ?",
+          "message": "L'avoir sera imputé sur la facture d'origine. Le cumul encaissé sera ajusté en conséquence.",
+          "confirmLabel": "Imputer"
+        },
+        "rembourser": {
+          "title": "Rembourser l'avoir ?",
+          "message": "Un décaissement sera enregistré (mock V1) avec virement vers le client.",
+          "confirmLabel": "Rembourser"
+        },
+        "cancel": {
+          "title": "Annuler l'avoir ?",
+          "message": "Cette action est irréversible.",
+          "confirmLabel": "Annuler"
+        },
+        "delete": {
+          "title": "Supprimer l'avoir",
+          "message": "Voulez-vous vraiment supprimer l'avoir {numero} ?"
+        }
+      },
+      "toasts": {
+        "saved": "Avoir {numero} enregistré"
+      },
+      "table": {
+        "header": {
+          "designation": "Désignation",
+          "totalHt": "Total HT (MAD)"
+        },
+        "emptyLignes": "Aucune ligne — Ajoutez les éléments à porter en avoir (régularisations, remises, etc.)"
+      }
+    },
+    "offre": {
+      "entityName": "Offre commerciale",
+      "entityNamePlural": "Offres commerciales",
+      "headerTitle": "Offres commerciales",
+      "createTitle": "Nouvelle offre commerciale",
+      "detailTitle": "Détail offre",
+      "list": {
+        "columns": {
+          "numero": "N° offre",
+          "client": "Client",
+          "objet": "Objet",
+          "dateEmission": "Date émission",
+          "dateValidite": "Validité",
+          "joursRestants": "Jours rest.",
+          "totalTtc": "Montant TTC",
+          "status": "Statut"
+        },
+        "transform": {
+          "joursPositif": "{n}j",
+          "joursAujourdhui": "Expire auj.",
+          "joursExpire": "Expiré {n}j"
+        },
+        "filters": {
+          "status": "Statut",
+          "clientId": "Client ID"
+        },
+        "chips": {
+          "all": "Toutes",
+          "brouillon": "Brouillon",
+          "envoyees": "Envoyées",
+          "acceptees": "Acceptées",
+          "refusees": "Refusées",
+          "expirees": "Expirées"
+        },
+        "emptyState": {
+          "title": "Aucune offre commerciale",
+          "message": "Les offres commerciales sont envoyées aux clients pour déclencher une commande.",
+          "actionLabel": "Nouvelle offre"
+        }
+      },
+      "form": {
+        "fields": {
+          "numero": "N° offre",
+          "client": "Client *",
+          "chantier": "Chantier",
+          "dateEmission": "Date émission *",
+          "dateValidite": "Date validité *",
+          "objet": "Objet *",
+          "tvaTaux": "TVA (%)",
+          "notes": "Notes"
+        },
+        "sections": {
+          "identification": "Identification",
+          "details": "Détails"
+        }
+      },
+      "actions": {
+        "envoyer": "Envoyer",
+        "annuler": "Annuler",
+        "accepter": "Acceptée",
+        "refuser": "Refusée"
+      },
+      "confirm": {
+        "envoyer": {
+          "title": "Envoyer l'offre ?",
+          "message": "L'offre sera envoyée au client.",
+          "confirmLabel": "Envoyer"
+        },
+        "annuler": {
+          "title": "Annuler l'offre ?",
+          "message": "Cette action est irréversible.",
+          "confirmLabel": "Annuler"
+        },
+        "accepter": {
+          "title": "Marquer comme acceptée ?",
+          "message": "L'offre sera marquée comme acceptée par le client.",
+          "confirmLabel": "Confirmer"
+        },
+        "refuser": {
+          "title": "Marquer comme refusée ?",
+          "message": "Précisez le motif de refus.",
+          "confirmLabel": "Confirmer",
+          "notePlaceholder": "Motif de refus obligatoire"
+        },
+        "delete": {
+          "title": "Supprimer l'offre",
+          "message": "Supprimer l'offre {numero} ?"
+        }
+      },
+      "toasts": {
+        "saved": "Offre {numero} enregistrée"
+      }
+    },
+    "bcc": {
+      "entityName": "Bon de commande client",
+      "entityNamePlural": "Bons de commande clients",
+      "headerTitle": "Bons de commande clients",
+      "createTitle": "Nouveau bon de commande client",
+      "detailTitle": "Détail BCC",
+      "list": {
+        "columns": {
+          "numero": "N° BCC",
+          "numeroClient": "Réf. client",
+          "client": "Client",
+          "chantier": "Chantier",
+          "dateReception": "Réception",
+          "montantHt": "Montant HT",
+          "factureHt": "Facturé HT",
+          "tauxFacturation": "Avancement",
+          "status": "Statut"
+        },
+        "transform": {
+          "percent": "{n}%"
+        },
+        "filters": {
+          "status": "Statut"
+        },
+        "chips": {
+          "all": "Tous",
+          "recus": "Reçus",
+          "enCours": "En cours",
+          "partFactures": "Part. facturés",
+          "factures": "Facturés"
+        },
+        "emptyState": {
+          "title": "Aucun bon de commande client",
+          "message": "Les bons de commande clients enregistrent les commandes reçues et suivent leur facturation.",
+          "actionLabel": "Nouveau BCC"
+        }
+      },
+      "form": {
+        "fields": {
+          "numero": "N° BCC",
+          "numeroClient": "Réf. client *",
+          "client": "Client *",
+          "chantier": "Chantier",
+          "dateReception": "Date réception *",
+          "dateFinPrevue": "Date fin prévue",
+          "tvaTaux": "TVA (%)",
+          "notes": "Notes"
+        },
+        "sections": {
+          "commande": "Commande",
+          "informations": "Informations"
+        }
+      },
+      "actions": {
+        "demarrer": "Démarrer",
+        "annuler": "Annuler",
+        "cloturer": "Clôturer"
+      },
+      "confirm": {
+        "demarrer": {
+          "title": "Démarrer le bon de commande ?",
+          "message": "Le BCC passera en statut En cours.",
+          "confirmLabel": "Démarrer"
+        },
+        "annuler": {
+          "title": "Annuler le bon de commande ?",
+          "message": "Cette action est irréversible.",
+          "confirmLabel": "Annuler"
+        },
+        "cloturer": {
+          "title": "Clôturer le bon de commande ?",
+          "message": "Le BCC sera marqué clôturé.",
+          "confirmLabel": "Clôturer"
+        },
+        "cloturerPartiel": {
+          "title": "Clôturer le bon de commande ?",
+          "message": "Le BCC sera clôturé malgré une facturation partielle.",
+          "confirmLabel": "Clôturer"
+        },
+        "delete": {
+          "title": "Supprimer le bon de commande",
+          "message": "Supprimer le BCC {numero} ?"
+        }
+      },
+      "toasts": {
+        "saved": "BCC {numero} enregistré"
+      },
+      "errors": {
+        "notFound": "Bon de commande client introuvable"
+      }
+    },
+    "client": {
+      "entityName": "Client",
+      "entityNamePlural": "Clients",
+      "headerTitle": "Clients",
+      "createTitle": "Nouveau client",
+      "detailTitle": "Détail client",
+      "list": {
+        "columns": {
+          "code": "Code",
+          "nom": "Client",
+          "forme": "Forme",
+          "ville": "Ville",
+          "ice": "ICE",
+          "telephone": "Tél.",
+          "email": "Email",
+          "actif": "Actif"
+        },
+        "transform": {
+          "actif": "Actif",
+          "inactif": "Inactif"
+        },
+        "filters": {
+          "type": "Forme juridique",
+          "statut": "Statut",
+          "actif": "Actif",
+          "inactif": "Inactif"
+        },
+        "emptyState": {
+          "title": "Aucun client",
+          "message": "Ajoutez vos clients pour commencer à facturer.",
+          "actionLabel": "Nouveau client"
+        }
+      },
+      "form": {
+        "fields": {
+          "nom": "Nom *",
+          "code": "Code",
+          "forme": "Forme juridique",
+          "ice": "ICE",
+          "iceHint": "15 chiffres (identifiant fiscal Maroc)",
+          "ifFiscal": "Identifiant fiscal (IF)",
+          "rc": "RC",
+          "patente": "Patente",
+          "actif": "Actif",
+          "adresse": "Adresse",
+          "ville": "Ville *",
+          "codePostal": "Code postal",
+          "telephone": "Téléphone",
+          "email": "Email",
+          "contactNom": "Nom du contact",
+          "contactPoste": "Poste",
+          "conditionPaiement": "Conditions de paiement",
+          "plafondCredit": "Plafond de crédit (MAD)",
+          "notes": "Notes"
+        },
+        "sections": {
+          "identification": "Identification",
+          "coordonnees": "Coordonnées",
+          "contact": "Contact",
+          "commercial": "Commercial"
+        }
+      },
+      "toasts": {
+        "saved": "Client {nom} enregistré"
+      },
+      "confirm": {
+        "delete": {
+          "title": "Supprimer le client",
+          "message": "Supprimer {nom} ?"
+        }
+      }
+    },
+    "encaissement": {
+      "dialog": {
+        "title": "Enregistrer un encaissement",
+        "closeAria": "Fermer",
+        "recap": {
+          "netTtc": "Net TTC",
+          "dejaEncaisse": "Déjà encaissé",
+          "resteTtc": "Reste TTC"
+        },
+        "fields": {
+          "dateEncaissement": "Date encaissement *",
+          "modePaiement": "Mode paiement *",
+          "reference": "Référence (n° chèque, virement…)",
+          "referencePlaceholder": "VIR-2026-0001",
+          "banque": "Banque",
+          "montantTtc": "Montant TTC (MAD) *",
+          "notes": "Notes"
+        },
+        "warning": {
+          "depassement": "Le montant saisi dépasse le reste à encaisser ({montant} MAD)."
+        },
+        "actions": {
+          "cancel": "Annuler",
+          "save": "Enregistrer"
+        }
+      }
+    },
+    "retenueGarantie": {
+      "headerTitle": "Retenues garanties",
+      "summary": {
+        "title": "Retenues garanties — vue consolidée",
+        "hint": "Suivi caution 7 % bloquée 1 an post-réception provisoire.",
+        "totalBloque": "Total bloqué",
+        "aLibererSous30j": "À libérer < 30 j",
+        "couverteCaution": "Couverte caution bancaire",
+        "libereeAnnee": "Libérée 12 mois",
+        "sousChantiers": "sur {n} chantiers",
+        "chantiers": "{n} chantiers",
+        "mad": "{n} MAD"
+      },
+      "chips": {
+        "aLiberer30j": "À libérer < 30 j",
+        "caution": "Avec caution bancaire",
+        "liberees": "Libérées",
+        "enCours": "En cours"
+      },
+      "filters": {
+        "searchPlaceholder": "Rechercher par chantier ou client…",
+        "tousClients": "Tous les clients",
+        "tousStatuts": "Tous statuts",
+        "statusEnCours": "En cours",
+        "statusLiberationDemandee": "Libération demandée",
+        "statusLiberee": "Libérée",
+        "statusContestee": "Contestée",
+        "reset": "Réinitialiser"
+      },
+      "table": {
+        "columns": {
+          "chantier": "Chantier",
+          "client": "Client",
+          "retenueCumulee": "Retenue cumulée",
+          "dejaLibere": "Déjà libéré",
+          "resteLiberer": "Reste à libérer",
+          "dateReceptionProvisoire": "Récept. provisoire",
+          "dateLiberationPrevue": "Libération prévue",
+          "delaiRestant": "Délai restant",
+          "cautionBancaire": "Caution bancaire",
+          "statut": "Statut"
+        },
+        "loading": "Chargement…",
+        "empty": "Aucune retenue garantie ne correspond aux filtres.",
+        "actionsAria": "Actions"
+      },
+      "delai": {
+        "liberee": "Libérée",
+        "aLibererPlus": "À libérer (+{n} j)",
+        "jMoins": "J − {n}"
+      },
+      "menu": {
+        "demanderLiberation": "Demander libération",
+        "marquerLiberee": "Marquer libérée",
+        "remplacerCaution": "Remplacer par caution bancaire"
+      }
+    },
+    "liberation": {
+      "dialog": {
+        "title": {
+          "demande": "Demande de libération",
+          "marquer": "Marquer libérée"
+        },
+        "closeAria": "Fermer",
+        "recap": {
+          "retenueCumulee": "Retenue cumulée",
+          "dejaLibere": "Déjà libéré",
+          "resteLiberer": "Reste à libérer"
+        },
+        "fields": {
+          "dateLiberation": "Date de libération *",
+          "notes": "Notes / commentaire",
+          "notesPlaceholderDemande": "Référence demande, pièce jointe…",
+          "notesPlaceholderMarquer": "Référence virement, échéance…"
+        },
+        "hint": {
+          "demande": "Un document de demande de libération sera généré automatiquement et adressé au maître d'ouvrage.",
+          "marquer": "La libération sera enregistrée et déclenchera le mouvement comptable correspondant (mock V1)."
+        },
+        "actions": {
+          "cancel": "Annuler",
+          "saveDemande": "Émettre la demande",
+          "saveMarquer": "Marquer libérée"
+        }
+      }
+    },
+    "cautionBancaire": {
+      "dialog": {
+        "title": "Substitution par caution bancaire",
+        "closeAria": "Fermer",
+        "recap": {
+          "retenueASubstituer": "Retenue à substituer"
+        },
+        "fields": {
+          "banque": "Banque *",
+          "numero": "N° caution bancaire *",
+          "numeroPlaceholder": "CRG-BMCE-2026-0042",
+          "montant": "Montant (MAD) *"
+        },
+        "hint": "La retenue restera enregistrée mais sera marquée comme couverte par une caution bancaire. La libération à échéance déclenchera la restitution de la caution.",
+        "actions": {
+          "cancel": "Annuler",
+          "save": "Enregistrer la caution"
+        }
+      }
+    },
+    "facturePrint": {
+      "title": "FACTURE",
+      "company": {
+        "name": "SEYRURA BTP SARL",
+        "address": "47 Boulevard Zerktouni, Casablanca 20100 — Maroc",
+        "contact": "Tél : +212 522 36 78 90 — contact@seyrura.ma",
+        "ice": "ICE : 002847593000087",
+        "rc": "RC : 715869 — Casablanca",
+        "if": "IF : 40297583",
+        "patente": "Patente : 35628471",
+        "cnss": "CNSS : 9847562",
+        "capital": "Capital : 1 000 000 MAD"
+      },
+      "meta": {
+        "numero": "N°",
+        "dateEmission": "Date émission",
+        "dateEcheance": "Date échéance",
+        "type": "Type",
+        "chantier": "Chantier",
+        "bcClient": "BC Client"
+      },
+      "client": {
+        "doit": "Doit",
+        "iceClient": "ICE Client :"
+      },
+      "lines": {
+        "designation": "Désignation",
+        "quantite": "Qté",
+        "puHt": "P.U. HT",
+        "totalHt": "Total HT"
+      },
+      "totaux": {
+        "totalHt": "Total HT",
+        "retenueGarantie": "Retenue garantie (7 %)",
+        "resorptionAvance": "Résorption avance",
+        "netHt": "Net à payer HT",
+        "tva": "TVA {taux} %",
+        "netTtc": "Net à payer TTC"
+      },
+      "mention": "Arrêté la présente facture à la somme de {montant}. Facturé en MAD (dirhams marocains).",
+      "payment": {
+        "modalites": "Modalités de paiement",
+        "echeance": "Échéance : {date}",
+        "aConvenir": "À convenir",
+        "coordonnees": "Coordonnées bancaires",
+        "bank": "BMCE Bank of Africa — Agence Casa Anfa",
+        "rib": "RIB : 011 780 0000123456789012 34",
+        "swift": "SWIFT : BMCEMAMC"
+      },
+      "footer": {
+        "cachet": "Cachet et signature",
+        "small": "Tout retard de paiement entraînera l'application d'intérêts moratoires conformément à la réglementation en vigueur. Conditions générales de vente disponibles sur demande."
+      },
+      "type": {
+        "situation": "Situation de travaux",
+        "avance": "Avance",
+        "acompte": "Acompte",
+        "decompteDefinitif": "Décompte définitif",
+        "diverse": "Diverse"
+      }
+    },
+    "avoirPrint": {
+      "title": "AVOIR",
+      "company": {
+        "name": "SEYRURA BTP SARL",
+        "address": "47 Boulevard Zerktouni, Casablanca 20100",
+        "ice": "ICE : 002847593000087",
+        "rc": "RC : 715869 — Casablanca",
+        "if": "IF : 40297583",
+        "patente": "Patente : 35628471"
+      },
+      "meta": {
+        "numero": "N°",
+        "date": "Date",
+        "factureOrigine": "Facture origine"
+      },
+      "client": {
+        "auProfitDe": "Au profit de"
+      },
+      "motif": {
+        "title": "Motif de l'avoir"
+      },
+      "lines": {
+        "designation": "Désignation",
+        "totalHt": "Total HT"
+      },
+      "totaux": {
+        "totalHt": "Total HT",
+        "tva": "TVA {taux} %",
+        "totalTtc": "Total TTC"
+      },
+      "mention": "Avoir établi en MAD pour un montant de {montant}.",
+      "footer": {
+        "cachet": "Cachet et signature"
+      }
+    },
+    "delaiEcheance": {
+      "soldee": "Soldée",
+      "retardJ": "+{n} j retard",
+      "echeanceAjd": "Échéance ajd",
+      "jMoins": "J − {n}"
+    }
+  }
+}

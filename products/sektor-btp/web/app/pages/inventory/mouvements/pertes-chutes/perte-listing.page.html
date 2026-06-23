@@ -1,0 +1,22 @@
+<nf-page-shell>
+  <nf-page-header [config]="headerConfig"></nf-page-header>
+
+  <div class="pcp-kpi-banner">
+    <div class="pcp-kpi">
+      <span class="pcp-kpi__label">{{ 'inventory.mouvement.perte.kpis.month' | translate }}</span>
+      <span class="pcp-kpi__value">{{ kpiMonth() | number:'1.2-2' }} MAD</span>
+    </div>
+    <div class="pcp-kpi">
+      <span class="pcp-kpi__label">{{ 'inventory.mouvement.perte.kpis.total' | translate }}</span>
+      <span class="pcp-kpi__value">{{ kpiTotal() | number:'1.2-2' }} MAD</span>
+    </div>
+  </div>
+
+  <nf-entity-listing
+    #listing
+    [config]="config"
+    [facade]="facade"
+    [openOnRowClick]="true"
+    (action)="onAction($event)">
+  </nf-entity-listing>
+</nf-page-shell>

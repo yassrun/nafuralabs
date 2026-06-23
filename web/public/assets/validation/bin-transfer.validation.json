@@ -1,0 +1,29 @@
+{
+  "entity": "BinTransfer",
+  "fields": {
+    "transferNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "fromBin": {
+      "maxLength": 120
+    },
+    "toBin": {
+      "maxLength": 120
+    },
+    "quantity": {
+      "min": 0
+    },
+    "transferredBy": {
+      "maxLength": 120
+    },
+    "reason": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

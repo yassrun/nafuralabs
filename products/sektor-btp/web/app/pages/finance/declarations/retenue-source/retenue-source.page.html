@@ -1,0 +1,45 @@
+<nf-page-shell scroll>
+  <nf-page-header
+    [config]="{
+      title: 'financeRound2.retenueSource.title',
+      subtitle: 'financeRound2.retenueSource.subtitle'
+    }"
+  ></nf-page-header>
+
+  <div class="f8">
+    <div class="f8__toolbar">
+      <label class="f8__lbl">
+        <span>{{ 'financeRound2.retenueSource.trim' | translate }}</span>
+        <select [ngModel]="trimestre()" (ngModelChange)="trimestre.set($event)">
+          <option value="T1-2026">T1 2026</option>
+          <option value="T2-2026">T2 2026</option>
+        </select>
+      </label>
+      <nf-button variant="primary" class="f8__btn f8__btn--primary" (clicked)="exportXml()">
+        {{ 'financeRound2.retenueSource.export' | translate }}
+      </nf-button>
+    </div>
+
+    <section class="f8__card">
+      <p>{{ 'financeRound2.retenueSource.total' | translate }} : <strong>{{ totalRas() | mad:2 }}</strong></p>
+      <table class="f8__table">
+        <thead>
+          <tr>
+            <th>{{ 'financeRound2.retenueSource.colFacture' | translate }}</th>
+            <th>{{ 'financeRound2.retenueSource.colClient' | translate }}</th>
+            <th class="f8__num">RAS</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (f of lignes(); track f.id) {
+            <tr>
+              <td>{{ f.numero }}</td>
+              <td>{{ f.clientName }}</td>
+              <td class="f8__num">{{ f.retenueSourceMontantMad | mad:2 }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+  </div>
+</nf-page-shell>

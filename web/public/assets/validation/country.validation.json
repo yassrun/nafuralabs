@@ -1,0 +1,16 @@
+{
+  "entity": "Country",
+  "fields": {
+    "code": {
+      "required": true,
+      "minLength": 2,
+      "maxLength": 3,
+      "pattern": "^[A-Z]{2,3}$",
+      "unique": true
+    },
+    "name": {
+      "required": true,
+      "maxLength": 255
+    }
+  }
+}

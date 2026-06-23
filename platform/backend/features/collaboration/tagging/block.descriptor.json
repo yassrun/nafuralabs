@@ -1,0 +1,16 @@
+{
+  "id": "tagging",
+  "name": "Tagging",
+  "description": "Tags and taxonomies",
+  "type": "feature",
+  "layer": "feature",
+  "group": "collaboration",
+  "provides": {
+    "backend": {
+      "gradle": ":platform:features:collaboration:tagging",
+      "packages": ["ma.nafura.platform.collaboration.tagging"]
+    }
+  },
+  "requires": { "core": ["tenancy"], "features": [] },
+  "manifest": { "key": "tagging" }
+}

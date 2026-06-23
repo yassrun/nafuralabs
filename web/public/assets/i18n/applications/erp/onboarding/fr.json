@@ -1,0 +1,110 @@
+{
+  "onboarding": {
+    "signup": {
+      "title": "Créer votre compte Nafura",
+      "subtitle": "Moins de 5 minutes pour lancer votre ERP BTP.",
+      "email": "Email professionnel",
+      "password": "Mot de passe",
+      "passwordHint": "8 caractères minimum, une majuscule et un chiffre",
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "locale": "Langue",
+      "submit": "Créer mon compte",
+      "submitting": "Création…",
+      "createSuccess": "Compte créé. Redirection vers la configuration…",
+      "resumeSuccess": "Configuration reprise. Redirection…",
+      "verifyEmailSent": "Un email de confirmation vous a été envoyé. Cliquez sur le lien pour activer votre compte.",
+      "checkEmailTitle": "Vérifiez votre boîte mail",
+      "checkEmailIntro": "Nous avons envoyé un lien de confirmation à :",
+      "checkEmailHint": "Cliquez sur le lien dans l'email pour activer votre compte, puis poursuivez la configuration. Pensez à vérifier les spams.",
+      "verifyTitle": "Confirmation de l'email",
+      "verifyPending": "Vérification en cours…",
+      "verifySuccess": "Email confirmé. Redirection…",
+      "verifyFailed": "Lien invalide ou expiré. Réinscrivez-vous ou demandez un nouvel email.",
+      "verifyMissingToken": "Lien de confirmation incomplet.",
+      "resend": "Renvoyer l'email de confirmation",
+      "resendSubmitting": "Envoi en cours…",
+      "resendCooldown": "Renvoyer dans {seconds} s",
+      "resendSuccess": "Si une inscription est en attente, un nouvel email vient d'être envoyé.",
+      "resendError": "Impossible de renvoyer l'email pour le moment. Réessayez dans un instant.",
+      "backToSignup": "Retour à l'inscription",
+      "errorEmailTaken": "Cet email est déjà associé à un compte dont la configuration est terminée. Connectez-vous via la page de connexion.",
+      "errorEmailResumeHint": "Si votre inscription a été interrompue, cliquez à nouveau sur « Créer mon compte » avec le même email pour reprendre.",
+      "errorGeneric": "Impossible de créer le compte. Réessayez."
+    },
+    "flow": {
+      "title": "Configuration de Nafura",
+      "progressTitle": "Ce qu'on configure pour vous",
+      "q1": "Quel est le nom de votre société et son ICE ?",
+      "q2": "Quelle est votre activité principale ?",
+      "q3": "Combien de personnes dans l'équipe ?",
+      "q4": "Vous travaillez sur quels types de marchés ?",
+      "q5": "Votre comptabilité est gérée comment ?",
+      "next": "Continuer",
+      "finish": "Configurer Nafura",
+      "ready": "Nafura est prêt. On crée maintenant votre premier chantier ?",
+      "goChantier": "Oui, j'ai un chantier en cours",
+      "exploreLater": "Plus tard, je veux explorer",
+      "ice": "ICE (15 chiffres)",
+      "iceHint": "ICE : {count}/15 chiffres (identifiant commun de l'entreprise)",
+      "errorIce": "L'ICE doit contenir exactement 15 chiffres.",
+      "errorCompany": "Indiquez le nom de votre société.",
+      "errorChoice": "Choisissez une option pour continuer.",
+      "errorCreateTenant": "Impossible de créer votre société. Vérifiez l'ICE et réessayez.",
+      "errorPresetConflict": "La configuration a déjà été partiellement appliquée. Cliquez à nouveau sur « Configurer Nafura ».",
+      "errorGeneric": "Une erreur est survenue. Réessayez.",
+      "companyFree": "Nom de la société",
+      "secteur": {
+        "BATIMENT": "Bâtiment",
+        "TP": "Travaux publics",
+        "VRD": "VRD",
+        "MIXTE": "Mixte BTP"
+      },
+      "taille": {
+        "S": "Moins de 10",
+        "M": "10 à 50",
+        "L": "50 à 200",
+        "XL": "200+"
+      },
+      "marches": {
+        "PRIVE": "Privés",
+        "PUBLIC": "Publics",
+        "MIXTE": "Les deux"
+      },
+      "compta": {
+        "INTERNE": "Interne",
+        "EXTERNE": "Cabinet externe",
+        "AUCUNE": "Pas encore"
+      },
+      "checklist": {
+        "identity": "Identité société créée",
+        "chart": "Plan comptable BTP marocain chargé",
+        "numbering": "Séquences de numérotation initialisées",
+        "fiscal": "Paramètres fiscaux (TVA 20%, retenue si public)",
+        "print": "Modèles d'impression préparés",
+        "articles": "Articles BTP standards chargés",
+        "roles": "Rôles par défaut créés",
+        "dashboards": "Dashboards pré-configurés par rôle"
+      }
+    },
+    "chantier": {
+      "welcome": "Bienvenue sur Nafura",
+      "created": "Votre chantier {name} est créé.",
+      "dashboard": "Voir mon tableau de bord"
+    },
+    "invite": {
+      "title": "Invitez vos collègues pour exploiter Nafura à fond",
+      "emails": "Emails (séparés par virgule ou ligne)",
+      "role": "Rôle par défaut",
+      "send": "Envoyer les invitations",
+      "dismiss": "Plus tard",
+      "csv": "Importer depuis un CSV"
+    },
+    "completeness": {
+      "label": "Complétude",
+      "tooltipTitle": "Configuration du tenant",
+      "panelTitle": "Étapes restantes",
+      "loadDemo": "Charger des données de démo →"
+    }
+  }
+}

@@ -1,0 +1,90 @@
+{
+  "documents": [
+    {
+      "id": "doc-001",
+      "chantierId": "ch-001",
+      "type": "MARCHE",
+      "titre": "Marché n° OCP-2026-001 signé",
+      "fichier": "marche-ocp-2026-001.pdf",
+      "taille": 1240000,
+      "uploadedAt": "2026-01-15",
+      "uploadedPar": "Karim El Mansouri",
+      "tags": ["signé", "original"]
+    },
+    {
+      "id": "doc-002",
+      "chantierId": "ch-001",
+      "type": "PLAN",
+      "titre": "Plans architecturaux R+5 — révision A",
+      "fichier": "plans-arch-rev-A.pdf",
+      "taille": 8500000,
+      "uploadedAt": "2026-01-20",
+      "uploadedPar": "Sofia Tazi"
+    },
+    {
+      "id": "doc-006",
+      "chantierId": "ch-002",
+      "type": "MARCHE",
+      "titre": "Marché ADM — Pont Bouregreg",
+      "fichier": "marche-adm-pont.pdf",
+      "taille": 2100000,
+      "uploadedAt": "2026-01-05",
+      "uploadedPar": "Khalid Naciri",
+      "tags": ["signé"]
+    }
+  ],
+  "attachements": [
+    {
+      "id": "att-001",
+      "chantierId": "ch-001",
+      "numero": "ATT-CH-2025-001-2026-05-08",
+      "date": "2026-05-08",
+      "meteoCode": "SOLEIL",
+      "temperatureC": 24,
+      "effectifPresent": 22,
+      "status": "SIGNE_MOE",
+      "lignes": [
+        {
+          "posteCode": "03.02.01",
+          "designation": "Cloisons carreaux de plâtre ep. 10",
+          "quantiteExecutee": 180,
+          "unite": "m²",
+          "zone": "Niveau 3 — Aile Est"
+        },
+        {
+          "posteCode": "03.04.01",
+          "designation": "Enduit de ciment façade",
+          "quantiteExecutee": 95,
+          "unite": "m²",
+          "zone": "Façade Nord"
+        }
+      ]
+    },
+    {
+      "id": "att-002",
+      "chantierId": "ch-001",
+      "numero": "ATT-CH-2025-001-2026-05-07",
+      "date": "2026-05-07",
+      "meteoCode": "NUAGEUX",
+      "temperatureC": 20,
+      "effectifPresent": 18,
+      "status": "CONTRESIGNE_MOA",
+      "lignes": [
+        {
+          "posteCode": "03.02.01",
+          "designation": "Cloisons carreaux de plâtre ep. 10",
+          "quantiteExecutee": 160,
+          "unite": "m²",
+          "zone": "Niveau 3 — Aile Ouest"
+        },
+        {
+          "posteCode": "07.01.03",
+          "designation": "Colonne plomberie DN50",
+          "quantiteExecutee": 12,
+          "unite": "ml",
+          "zone": "Gaine technique"
+        }
+      ]
+    }
+  ]
+}

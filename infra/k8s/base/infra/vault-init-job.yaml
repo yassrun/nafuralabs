@@ -1,0 +1,152 @@
+# Idempotent Vault bootstrap for local staging (Docker Desktop = prod-like server mode).
+# - First run: operator init → store unseal key + root token in secret/vault-bootstrap
+# - Every run: unseal if sealed, then ensure KV paths + Kubernetes auth (no-op if already configured)
+# Prod: do not use this job — run infra/scripts/vault-init.sh once manually.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: vault-init
+spec:
+  ttlSecondsAfterFinished: 300
+  template:
+    spec:
+      serviceAccountName: vault-bootstrap
+      restartPolicy: OnFailure
+      containers:
+        - name: vault-init
+          image: hashicorp/vault:1.15
+          env:
+            - name: VAULT_ENV
+              value: "dev"
+            - name: INFRA_NAMESPACE
+              value: "default"
+            - name: VAULT_ADDR
+              value: "http://vault:8200"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              apk add --no-cache curl >/dev/null 2>&1
+              ENV="${VAULT_ENV:-dev}"
+              INFRA_NS="${INFRA_NAMESPACE:-default}"
+              SECRET_NAME="vault-bootstrap"
+              SA_DIR="/var/run/secrets/kubernetes.io/serviceaccount"
+              KUBE_API="https://${KUBERNETES_SERVICE_HOST}:${KUBERNETES_SERVICE_PORT}"
+              KUBE_TOKEN="$(cat "${SA_DIR}/token")"
+              KUBE_CA="${SA_DIR}/ca.crt"
+              KUBE_NS="$(cat "${SA_DIR}/namespace")"
+
+              k8s_secret_get() {
+                curl -sf --cacert "${KUBE_CA}" \
+                  -H "Authorization: Bearer ${KUBE_TOKEN}" \
+                  "${KUBE_API}/api/v1/namespaces/${KUBE_NS}/secrets/${SECRET_NAME}" 2>/dev/null || true
+              }
+
+              k8s_secret_upsert() {
+                local unseal_key="$1"
+                local root_token="$2"
+                if k8s_secret_get | grep -q '"kind": "Secret"'; then
+                  curl -sf --cacert "${KUBE_CA}" \
+                    -H "Authorization: Bearer ${KUBE_TOKEN}" \
+                    -H "Content-Type: application/strategic-merge-patch+json" \
+                    -X PATCH \
+                    "${KUBE_API}/api/v1/namespaces/${KUBE_NS}/secrets/${SECRET_NAME}" \
+                    -d "{\"stringData\":{\"unseal_key\":\"${unseal_key}\",\"root_token\":\"${root_token}\"}}"
+                else
+                  curl -sf --cacert "${KUBE_CA}" \
+                    -H "Authorization: Bearer ${KUBE_TOKEN}" \
+                    -H "Content-Type: application/json" \
+                    -X POST \
+                    "${KUBE_API}/api/v1/namespaces/${KUBE_NS}/secrets" \
+                    -d "{\"apiVersion\":\"v1\",\"kind\":\"Secret\",\"metadata\":{\"name\":\"${SECRET_NAME}\"},\"type\":\"Opaque\",\"stringData\":{\"unseal_key\":\"${unseal_key}\",\"root_token\":\"${root_token}\"}}"
+                fi
+              }
+
+              k8s_secret_field() {
+                local field="$1"
+                k8s_secret_get | grep -o "\"${field}\": \"[^\"]*\"" | head -1 | cut -d'"' -f4 | base64 -d
+              }
+
+              vault_api_ready() {
+                set +e
+                vault status >/dev/null 2>&1
+                code=$?
+                set -e
+                [ "$code" -eq 0 ] || [ "$code" -eq 2 ]
+              }
+
+              echo "Waiting for Vault API..."
+              for _ in $(seq 1 90); do
+                if vault_api_ready; then
+                  break
+                fi
+                sleep 2
+              done
+              vault_api_ready || { echo "Vault API not reachable"; exit 1; }
+
+              if vault status 2>&1 | grep -q "Initialized.*false"; then
+                echo "Initializing Vault (first time)..."
+                INIT_OUT="$(vault operator init -key-shares=1 -key-threshold=1)"
+                UNSEAL_KEY="$(echo "${INIT_OUT}" | awk '/Unseal Key 1:/{print $4}')"
+                ROOT_TOKEN="$(echo "${INIT_OUT}" | awk '/Initial Root Token:/{print $4}')"
+                k8s_secret_upsert "${UNSEAL_KEY}" "${ROOT_TOKEN}"
+                echo "Stored unseal key + root token in secret/${SECRET_NAME}"
+              fi
+
+              UNSEAL_KEY="$(k8s_secret_field unseal_key)"
+              ROOT_TOKEN="$(k8s_secret_field root_token)"
+              if [ -z "${UNSEAL_KEY}" ] || [ -z "${ROOT_TOKEN}" ]; then
+                echo "Missing secret/${SECRET_NAME} — run vault-init.sh manually for prod-like first init"
+                exit 1
+              fi
+
+              if vault status 2>&1 | grep -q "Sealed.*true"; then
+                echo "Unsealing Vault..."
+                vault operator unseal "${UNSEAL_KEY}" >/dev/null
+              fi
+
+              export VAULT_TOKEN="${ROOT_TOKEN}"
+              vault login "${VAULT_TOKEN}" >/dev/null
+
+              vault secrets enable -path=secret kv-v2 2>/dev/null || true
+              vault kv put "secret/nafura/${ENV}/infra/postgres" username=nafura password=nafura host=postgres port=5432 database_keycloak=keycloak
+              vault kv put "secret/nafura/${ENV}/infra/keycloak" admin_username=admin admin_password=admin db_username=nafura db_password=nafura db_database=keycloak
+              vault kv put "secret/nafura/${ENV}/infra/minio" root_user=minioadmin root_password=minioadmin access_key=minioadmin secret_key=minioadmin
+              vault kv put "secret/nafura/${ENV}/infra/llm" gemini_api_key="" brevo_api_key="" sendgrid_api_key=""
+              vault kv put "secret/nafura/${ENV}/infra/app" invitation_token_secret=change-me-in-production
+              vault kv put "secret/nafura/${ENV}/infra/keycloak-clients" _placeholder=-
+
+              vault auth enable kubernetes 2>/dev/null || true
+              # Token reviewer must use the Vault server SA (system:auth-delegator), not vault-bootstrap.
+              REVIEWER_JWT="$(curl -sf --cacert "${KUBE_CA}" \
+                -H "Authorization: Bearer ${KUBE_TOKEN}" \
+                -H "Content-Type: application/json" \
+                -X POST \
+                "${KUBE_API}/api/v1/namespaces/${INFRA_NS}/serviceaccounts/vault/token" \
+                -d '{"spec":{"expirationSeconds":86400}}' \
+                | sed -n 's/.*"token": "\([^"]*\)".*/\1/p' | head -1)"
+              if [ -z "${REVIEWER_JWT}" ]; then
+                echo "Failed to obtain vault service account token for Kubernetes auth"
+                exit 1
+              fi
+              vault write auth/kubernetes/config \
+                kubernetes_host="https://${KUBERNETES_SERVICE_HOST}:${KUBERNETES_SERVICE_PORT}" \
+                kubernetes_ca_cert=@"${SA_DIR}/ca.crt" \
+                token_reviewer_jwt="${REVIEWER_JWT}"
+
+              vault policy write postgres - <<POL
+              path "secret/data/nafura/${ENV}/infra/postgres" { capabilities = ["read"] }
+              POL
+              vault policy write keycloak - <<POL
+              path "secret/data/nafura/${ENV}/infra/keycloak" { capabilities = ["read"] }
+              path "secret/data/nafura/${ENV}/infra/postgres" { capabilities = ["read"] }
+              POL
+              vault policy write minio - <<POL
+              path "secret/data/nafura/${ENV}/infra/minio" { capabilities = ["read"] }
+              POL
+              vault write auth/kubernetes/role/postgres bound_service_account_names=postgres bound_service_account_namespaces="${INFRA_NS}" policies=postgres ttl=1h
+              vault write auth/kubernetes/role/keycloak bound_service_account_names=keycloak bound_service_account_namespaces="${INFRA_NS}" policies=keycloak ttl=1h
+              vault write auth/kubernetes/role/minio bound_service_account_names=minio bound_service_account_namespaces="${INFRA_NS}" policies=minio ttl=1h
+
+              echo "Vault bootstrap complete (env=${ENV}, server mode, persistent storage)"

@@ -1,0 +1,24 @@
+{
+  "entity": "GoodsReceiptLine",
+  "fields": {
+    "goodsReceiptId": {
+      "required": true
+    },
+    "orderedQty": {
+      "min": 0
+    },
+    "receivedQty": {
+      "min": 0
+    },
+    "binLocation": {
+      "maxLength": 120
+    },
+    "batchNumber": {
+      "maxLength": 60
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

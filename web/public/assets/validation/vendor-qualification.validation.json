@@ -1,0 +1,25 @@
+{
+  "entity": "VendorQualification",
+  "fields": {
+    "qualificationNumber": {
+      "required": true,
+      "maxLength": 60
+    },
+    "criteria": {
+      "maxLength": 120
+    },
+    "overallScore": {
+      "min": 0
+    },
+    "result": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

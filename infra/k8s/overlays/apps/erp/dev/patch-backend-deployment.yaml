@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: erp-backend
+spec:
+  template:
+    metadata:
+      annotations:
+        vault.hashicorp.com/agent-inject-secret-app-db: secret/data/nafura/dev/apps/erp/db
+        vault.hashicorp.com/agent-inject-template-app-db: |
+          {{- with secret "secret/data/nafura/dev/apps/erp/db" -}}
+          export POSTGRES_DB="{{ .Data.data.name }}"
+          export POSTGRES_SCHEMA="{{ .Data.data.schema }}"
+          export POSTGRES_USER="{{ .Data.data.user }}"
+          export POSTGRES_PASSWORD="{{ .Data.data.pass }}"
+          export NAFURA_AI_SQL_READ_ONLY_DATASOURCE_USERNAME="{{ .Data.data.ai_user }}"
+          export NAFURA_AI_SQL_READ_ONLY_DATASOURCE_PASSWORD="{{ .Data.data.ai_user_password }}"
+          {{- end }}
+        vault.hashicorp.com/agent-inject-secret-app-minio: secret/data/nafura/dev/apps/erp/minio
+        vault.hashicorp.com/agent-inject-template-app-minio: |
+          {{- with secret "secret/data/nafura/dev/apps/erp/minio" -}}
+          export DOCUMENTS_MINIO_ENDPOINT="{{ .Data.data.endpoint }}"
+          export DOCUMENTS_MINIO_BUCKET="{{ .Data.data.bucket }}"
+          export MINIO_ROOT_USER="{{ .Data.data.user }}"
+          export MINIO_ROOT_PASSWORD="{{ .Data.data.password }}"
+          {{- end }}
+        vault.hashicorp.com/agent-inject-secret-app-llm: secret/data/nafura/dev/infra/llm
+        vault.hashicorp.com/agent-inject-template-app-llm: |
+          {{- with secret "secret/data/nafura/dev/infra/llm" -}}
+          export AI_GEMINI_API_KEY="{{ .Data.data.gemini_api_key }}"
+          export BREVO_API_KEY="{{ .Data.data.brevo_api_key }}"
+          export SENDGRID_API_KEY="{{ .Data.data.sendgrid_api_key }}"
+          {{- end }}
+        vault.hashicorp.com/agent-inject-secret-app-keycloak: secret/data/nafura/dev/infra/keycloak
+        vault.hashicorp.com/agent-inject-template-app-keycloak: |
+          {{- with secret "secret/data/nafura/dev/infra/keycloak" -}}
+          export KEYCLOAK_ADMIN_USERNAME="{{ .Data.data.admin_username }}"
+          export KEYCLOAK_ADMIN_PASSWORD="{{ .Data.data.admin_password }}"
+          {{- end }}
+    spec:
+      containers:
+        - name: erp-backend
+          env:
+            - name: KEYCLOAK_ISSUER_URI
+              value: http://iam.nafura.local/realms/iam-portal
+            - name: APP_FRONTEND_BASE_URL
+              value: http://erp.nafura.local

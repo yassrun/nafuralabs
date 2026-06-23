@@ -1,0 +1,50 @@
+{
+  "fiscal": {
+    "navigation": {
+      "fiscalPeriods": "الفترات المحاسبية",
+      "fiscalYears": "السنوات المحاسبية",
+      "taxCodes": "رموز الضرائب"
+    },
+    "fiscalPeriod": {
+      "title": "الفترات المحاسبية",
+      "detailTitle": "تفاصيل الفترة المحاسبية",
+      "newTitle": "فترة محاسبية جديدة",
+      "fields": {
+        "fiscalYearId": "معرّف السنة المحاسبية",
+        "code": "الرمز",
+        "name": "الاسم",
+        "startDate": "تاريخ البدء",
+        "endDate": "تاريخ الانتهاء",
+        "status": "الحالة"
+      },
+      "sections": {}
+    },
+    "fiscalYear": {
+      "title": "السنوات المحاسبية",
+      "detailTitle": "تفاصيل السنة المحاسبية",
+      "newTitle": "سنة محاسبية جديدة",
+      "fields": {
+        "code": "الرمز",
+        "name": "الاسم",
+        "startDate": "تاريخ البدء",
+        "endDate": "تاريخ الانتهاء",
+        "status": "الحالة"
+      },
+      "sections": {}
+    },
+    "taxCode": {
+      "title": "رموز الضرائب",
+      "detailTitle": "تفاصيل رمز الضريبة",
+      "newTitle": "رمز ضريبة جديد",
+      "fields": {
+        "code": "الرمز",
+        "description": "الوصف",
+        "percentage": "النسبة المئوية",
+        "isActive": "نشط",
+        "name": "الاسم",
+        "rate": "النسبة"
+      },
+      "sections": {}
+    }
+  }
+}

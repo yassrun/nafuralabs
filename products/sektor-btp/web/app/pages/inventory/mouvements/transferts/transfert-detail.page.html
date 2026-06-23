@@ -1,0 +1,21 @@
+
+    <nf-page-shell scroll>
+      <nf-page-header [config]="headerConfig"></nf-page-header>
+      <nf-entity-detail
+        #detail
+        [config]="config"
+        [mode]="mode()"
+        [item]="item()"
+        [lookups]="lookups()"
+        [loading]="isLoading()"
+        [saving]="isSaving()"
+        (action)="onAction($event)">
+        <ng-template nfField="lines" let-control let-form="form">
+          <app-transfert-lines-editor
+            [linesControl]="control"
+            [headerForm]="asHeaderForm(form)"
+          />
+        </ng-template>
+      </nf-entity-detail>
+    </nf-page-shell>
+  

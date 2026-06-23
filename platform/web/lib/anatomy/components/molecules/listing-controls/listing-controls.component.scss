@@ -1,0 +1,128 @@
+.nf-listing-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--nf-space-1, 4px);
+}
+
+.nf-listing-controls__search {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--nf-space-1, 4px);
+  min-height: var(--nf-input-height, 40px);
+  padding: 0 var(--nf-space-3, 12px);
+  background: var(--nf-surface-hover, #f3f4f6);
+  border: none;
+  border-radius: var(--nf-input-radius, var(--nf-radius-md));
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background: var(--nf-color-gray-200, #e5e7eb);
+  }
+
+  &:focus-within {
+    background: var(--nf-color-gray-200, #e5e7eb);
+    outline: none;
+  }
+}
+
+.nf-listing-controls__search-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--nf-color-text-muted);
+  flex-shrink: 0;
+}
+
+.nf-listing-controls__search-input {
+  flex: 1;
+  min-width: 120px;
+  max-width: 240px;
+  padding: 0;
+  font-size: var(--nf-font-size-sm);
+  color: var(--nf-text-primary);
+  background: none;
+  border: none;
+  outline: none;
+
+  &::placeholder {
+    color: var(--nf-input-placeholder-color, var(--nf-text-muted));
+  }
+}
+
+/* Hide/show columns popup (in-place below trigger) */
+.nf-listing-controls-menu__content {
+  padding: var(--nf-space-2) var(--nf-space-3);
+  min-width: 200px;
+  max-width: 280px;
+}
+
+.nf-listing-controls-menu__header {
+  margin: 0 0 var(--nf-space-2) 0;
+  padding: 0 0 var(--nf-space-2) 0;
+  font-size: var(--nf-font-size-sm);
+  font-weight: 600;
+  color: var(--nf-text-primary);
+  border-bottom: 1px solid var(--nf-border-default);
+}
+
+.nf-listing-controls-menu__row {
+  display: flex;
+  align-items: center;
+  gap: var(--nf-space-2);
+  padding: var(--nf-space-1) 0;
+  cursor: pointer;
+  font-size: var(--nf-font-size-sm);
+  color: var(--nf-text-primary);
+}
+
+.nf-listing-controls-menu__empty {
+  margin: 0;
+  padding: var(--nf-space-2) 0;
+  font-size: var(--nf-font-size-sm);
+  color: var(--nf-text-muted);
+}
+
+.mat-mdc-menu-panel.nf-listing-controls-menu--columns,
+.mat-mdc-menu-panel.nf-listing-controls-menu--filter {
+  background: var(--nf-surface-section);
+  border: 1px solid var(--nf-border-default);
+  border-radius: var(--nf-radius-md);
+  box-shadow: var(--nf-shadow-md);
+}
+
+.nf-listing-controls-menu--filter .nf-listing-controls-menu__content {
+  padding: 0;
+  min-width: auto;
+  max-width: none;
+}
+
+/* Filter popup: force width so Type/Category aren't truncated; allow full height for fields + buttons */
+.mat-mdc-menu-panel.nf-listing-controls-menu--filter {
+  min-width: 500px !important;
+  max-width: 560px;
+  max-height: min(80vh, 420px);
+}
+
+@media (max-width: 640px) {
+  .mat-mdc-menu-panel.nf-listing-controls-menu--filter {
+    min-width: min(100vw - 24px, 560px) !important;
+    max-width: calc(100vw - 24px);
+  }
+}
+
+/* Tomic skin for checkboxes in columns popup */
+.nf-listing-controls-menu--columns .mat-mdc-checkbox {
+  .mdc-label {
+    color: var(--nf-text-primary);
+  }
+
+  .mdc-checkbox__background {
+    border-color: var(--nf-border-default);
+  }
+
+  &.mat-mdc-checkbox-checked .mdc-checkbox__background,
+  &.mat-mdc-checkbox-indeterminate .mdc-checkbox__background {
+    border-color: var(--nf-primary);
+    background-color: var(--nf-primary);
+  }
+}

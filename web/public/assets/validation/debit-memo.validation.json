@@ -1,0 +1,26 @@
+{
+  "entity": "DebitMemo",
+  "fields": {
+    "memoNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "amount": {
+      "min": 0
+    },
+    "currency": {
+      "maxLength": 120
+    },
+    "reason": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

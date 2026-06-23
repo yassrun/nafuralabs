@@ -1,0 +1,26 @@
+{
+  "entity": "RepairOrder",
+  "fields": {
+    "orderNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "description": {
+      "maxLength": 2000
+    },
+    "assignedTo": {
+      "maxLength": 120
+    },
+    "actualCost": {
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

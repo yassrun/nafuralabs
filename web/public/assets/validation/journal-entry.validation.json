@@ -1,0 +1,43 @@
+{
+  "entity": "JournalEntry",
+  "fields": {
+    "entryNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "journalTypeId": {
+      "required": true
+    },
+    "postingDate": {
+      "required": true
+    },
+    "fiscalPeriodId": {
+      "required": true
+    },
+    "currencyId": {
+      "required": true
+    },
+    "description": {
+      "maxLength": 500
+    },
+    "totalDebit": {
+      "required": true,
+      "min": 0
+    },
+    "totalCredit": {
+      "required": true,
+      "min": 0
+    },
+    "reference": {
+      "maxLength": 200
+    },
+    "sourceDocument": {
+      "maxLength": 200
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

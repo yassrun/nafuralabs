@@ -1,0 +1,35 @@
+{
+  "entity": "Complaint",
+  "fields": {
+    "complaintNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "customerId": {
+      "required": true
+    },
+    "category": {
+      "required": true,
+      "maxLength": 60
+    },
+    "description": {
+      "required": true,
+      "maxLength": 2000
+    },
+    "severity": {
+      "required": true,
+      "maxLength": 20
+    },
+    "investigationNotes": {
+      "maxLength": 2000
+    },
+    "resolution": {
+      "maxLength": 2000
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

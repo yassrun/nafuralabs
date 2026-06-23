@@ -1,0 +1,26 @@
+﻿====== i18n extraction report ======
+Files scanned: 2203
+Hardcoded strings detected: 407
+By kind:
+  inline_template_text: 123
+  template_text: 75
+  status_label: 68
+  error: 62
+  template_attr: 34
+  type_label: 23
+  inline_template_attr: 9
+  confirm: 7
+  toast: 5
+  alert: 1
+By module (top 10):
+  inventory: 87
+  ventes: 63
+  shared: 62
+  marches: 37
+  documents: 37
+  etudes: 31
+  chantiers: 26
+  analytics: 22
+  finance: 19
+  approbations: 9
+Output: scripts/i18n-extracted.csv

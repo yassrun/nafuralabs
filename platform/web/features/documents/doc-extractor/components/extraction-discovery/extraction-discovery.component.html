@@ -1,0 +1,71 @@
+<div class="discovery">
+  <div class="discovery__header">
+    <h1 class="dox-h1">How can Doxura help you today?</h1>
+    <p class="dox-body-md">Choose a category or create a custom one to start extracting data.</p>
+  </div>
+
+  @if (!selectedDomain()) {
+    <div class="discovery__grid">
+      @for (domain of domainCards(); track domain.id) {
+        <mat-card class="domain-card" matRipple (click)="onDomainClick(domain.id)">
+          <div class="domain-card__icon-wrapper" [style.background-color]="domain.color + '10'">
+            <mat-icon [style.color]="domain.color">{{ domain.icon }}</mat-icon>
+          </div>
+          <mat-card-header>
+            <mat-card-title>{{ domain.label }}</mat-card-title>
+            <mat-card-subtitle>{{ domain.description }}</mat-card-subtitle>
+          </mat-card-header>
+        </mat-card>
+      }
+
+      <!-- Custom card strictly aligned to the grid -->
+      <mat-card class="domain-card domain-card--custom" matRipple (click)="createCustom.emit()">
+        <div class="domain-card__badge">MOST FLEXIBLE</div>
+        <div class="domain-card__icon-wrapper">
+          <mat-icon>add_circle_outline</mat-icon>
+        </div>
+        <mat-card-header>
+          <mat-card-title>Custom Document Type</mat-card-title>
+          <mat-card-subtitle>Define your own schema and extraction rules for any document.</mat-card-subtitle>
+        </mat-card-header>
+        <div class="spacer"></div>
+        <mat-card-actions>
+          <button mat-button color="primary">CREATE FROM SCRATCH</button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  } @else {
+    <div class="discovery__types">
+      <div class="types-header">
+        <button mat-icon-button (click)="onBack()">
+          <mat-icon appFlipIconRtl>arrow_back</mat-icon>
+        </button>
+        <div>
+          <h2 class="dox-h2">{{ selectedDomainLabel() }} templates</h2>
+          <p class="dox-body-sm">Select a template to initialize your extraction workspace.</p>
+        </div>
+      </div>
+
+      <div class="types-grid">
+        @for (type of getDocTypesForDomain(selectedDomain()!); track type.docTypeKey) {
+          <mat-card class="type-card" matRipple (click)="onDocTypeClick(selectedDomain()!, type.docTypeKey)">
+            <mat-card-header>
+              <mat-card-title>{{ type.name }}</mat-card-title>
+              <mat-card-subtitle>{{ type.description || 'Optimized extraction for ' + type.name + ' documents.' }}</mat-card-subtitle>
+            </mat-card-header>
+          </mat-card>
+        }
+
+        @if (getDocTypesForDomain(selectedDomain()!).length === 0) {
+          <div class="types-empty">
+            <mat-icon>search_off</mat-icon>
+            <p>No templates found for this category yet.</p>
+            <button mat-stroked-button color="primary" (click)="createCustom.emit()">
+              Create first document type
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

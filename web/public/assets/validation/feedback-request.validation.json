@@ -1,0 +1,17 @@
+{
+  "entity": "FeedbackRequest",
+  "fields": {
+    "requestNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "feedbackType": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

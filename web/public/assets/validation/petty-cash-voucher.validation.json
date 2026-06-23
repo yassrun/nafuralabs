@@ -1,0 +1,39 @@
+{
+  "entity": "PettyCashVoucher",
+  "fields": {
+    "voucherNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "amount": {
+      "required": true,
+      "min": 0
+    },
+    "currency": {
+      "required": true,
+      "maxLength": 10
+    },
+    "expenseCategory": {
+      "required": true,
+      "maxLength": 100
+    },
+    "description": {
+      "maxLength": 2000
+    },
+    "requestedBy": {
+      "required": true,
+      "maxLength": 200
+    },
+    "approvedBy": {
+      "maxLength": 200
+    },
+    "voucherDate": {
+      "required": true
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

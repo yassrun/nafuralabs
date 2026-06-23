@@ -1,0 +1,33 @@
+{
+  "formations": [
+    {
+      "id": "form001",
+      "numero": "FORM-2026-0001",
+      "titre": "Sécurité au travail – Induction chantier",
+      "dateDebut": "2026-01-08",
+      "dateFin": "2026-01-08",
+      "dureeHeures": 4,
+      "formateur": "Rachid Amrani",
+      "lieu": "Bureau de chantier CH-2025-001",
+      "nbParticipants": 22,
+      "status": "TERMINEE",
+      "notes": "Formation obligatoire pour tout nouveau personnel."
+    },
+    {
+      "id": "form002",
+      "numero": "FORM-2026-0002",
+      "titre": "Travaux en hauteur & port du harnais",
+      "dateDebut": "2026-01-22",
+      "dateFin": "2026-01-23",
+      "dureeHeures": 14,
+      "formateur": "Organisme OPTIMA Formation",
+      "lieu": "Centre de formation – Casablanca",
+      "nbParticipants": 12,
+      "habilitationCode": "HAUTEUR",
+      "attestationReference": "OPT-2026-0142",
+      "attestationValidite": "2026-06-15",
+      "status": "TERMINEE",
+      "notes": "Habilitation délivrée valable 3 ans."
+    }
+  ]
+}

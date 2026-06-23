@@ -1,0 +1,23 @@
+{
+  "entity": "EmployeePromotion",
+  "fields": {
+    "promotionNumber": {
+      "required": true,
+      "maxLength": 30,
+      "unique": true
+    },
+    "employeeId": {
+      "required": true
+    },
+    "toDesignationId": {
+      "required": true
+    },
+    "effectiveDate": {
+      "required": true
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

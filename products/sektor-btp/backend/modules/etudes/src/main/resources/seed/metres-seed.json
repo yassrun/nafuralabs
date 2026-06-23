@@ -1,0 +1,120 @@
+{
+  "metres": [
+    {
+      "numero": "MET-2026-001",
+      "projetNom": "Résidence Yasmine — Casa",
+      "ville": "Casablanca",
+      "dateMetre": "2026-01-15",
+      "metreurId": "emp-met-01",
+      "metreurName": "Karim Bennani",
+      "notes": "Métré béton armé fondations + RDC",
+      "status": "TERMINE",
+      "lignes": [
+        {
+          "ouvrageCode": "OUV-G01-001",
+          "lotCode": "01",
+          "sousLotCode": "01.01",
+          "lotLibelle": "Gros œuvre",
+          "sousLotLibelle": "Fondations & semelles",
+          "designationLibre": "Semelles isolées P1-P12",
+          "unite": "m³",
+          "longueur": 2.5,
+          "largeur": 2.5,
+          "hauteur": 0.5,
+          "nombre": 12,
+          "formule": "L*l*h*N",
+          "quantiteCalculee": 37.5
+        },
+        {
+          "ouvrageCode": "OUV-G01-002",
+          "lotCode": "01",
+          "sousLotCode": "01.01",
+          "lotLibelle": "Gros œuvre",
+          "sousLotLibelle": "Fondations & semelles",
+          "designationLibre": "Longrines périphériques",
+          "unite": "m³",
+          "longueur": 0.4,
+          "largeur": 0.4,
+          "hauteur": 1,
+          "nombre": 400,
+          "formule": "L*l*ml",
+          "quantiteCalculee": 64
+        },
+        {
+          "ouvrageCode": "OUV-G01-003",
+          "lotCode": "01",
+          "sousLotCode": "01.02",
+          "lotLibelle": "Gros œuvre",
+          "sousLotLibelle": "Dalles & planchers",
+          "designationLibre": "Dalle pleine RDC",
+          "unite": "m²",
+          "longueur": 28,
+          "largeur": 18,
+          "nombre": 1,
+          "formule": "L*l",
+          "quantiteCalculee": 504
+        }
+      ]
+    },
+    {
+      "numero": "MET-2026-002",
+      "projetNom": "Pont Bouregreg ouvrage 3",
+      "ville": "Salé",
+      "dateMetre": "2026-02-08",
+      "metreurId": "emp-met-02",
+      "metreurName": "Hicham Idrissi",
+      "status": "TERMINE",
+      "lignes": [
+        {
+          "ouvrageCode": "OUV-T01-002",
+          "designationLibre": "Fouilles culées",
+          "unite": "m³",
+          "longueur": 12,
+          "largeur": 8,
+          "hauteur": 3.5,
+          "nombre": 2,
+          "formule": "L*l*h*N",
+          "quantiteCalculee": 672
+        },
+        {
+          "ouvrageCode": "OUV-G01-004",
+          "designationLibre": "Voile pile centrale",
+          "unite": "m²",
+          "longueur": 8,
+          "hauteur": 12,
+          "nombre": 4,
+          "formule": "L*h*N",
+          "quantiteCalculee": 384
+        }
+      ]
+    },
+    {
+      "numero": "MET-2026-003",
+      "projetNom": "Lotissement Al Boustane",
+      "ville": "Casablanca",
+      "dateMetre": "2026-02-22",
+      "metreurId": "emp-met-01",
+      "metreurName": "Karim Bennani",
+      "status": "TERMINE",
+      "lignes": [
+        {
+          "ouvrageCode": "OUV-V01-001",
+          "designationLibre": "Bordures T2 voirie principale",
+          "unite": "ml",
+          "longueur": 2400,
+          "formule": "L",
+          "quantiteCalculee": 2400
+        },
+        {
+          "ouvrageCode": "OUV-V01-002",
+          "designationLibre": "Couche roulement BBSG",
+          "unite": "m²",
+          "longueur": 1200,
+          "largeur": 7,
+          "formule": "L*l",
+          "quantiteCalculee": 8400
+        }
+      ]
+    }
+  ]
+}

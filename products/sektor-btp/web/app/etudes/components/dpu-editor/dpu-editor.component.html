@@ -1,0 +1,142 @@
+<div class="dpu" [class.dpu--readonly]="readonly">
+  <div class="dpu__toolbar">
+    <nf-button type="button" class="dpu__btn" [disabled]="readonly" (clicked)="importer()" variant="secondary">
+      {{ 'etudesDpu.importSousDetail' | translate }}
+    </nf-button>
+    <nf-button type="button" class="dpu__btn" [disabled]="readonly" (clicked)="addLigne()" variant="secondary">
+      {{ 'etudesDpu.addLine' | translate }}
+    </nf-button>
+    <nf-button type="button" class="dpu__btn dpu__btn--ghost" [disabled]="readonly" (clicked)="snapshot()" variant="ghost">
+      {{ 'etudesDpu.snapshot' | translate }}
+    </nf-button>
+    <nf-button type="button" class="dpu__btn dpu__btn--primary" [disabled]="readonly" (clicked)="appliquerPrix()" variant="primary">
+      {{ 'etudesDpu.applyBiblio' | translate }}
+    </nf-button>
+  </div>
+
+  <div class="dpu__sliders">
+    <label class="dpu__slider">
+      <span>{{ 'etudesDpu.fg' | translate }} ({{ fgPct() }}%)</span>
+      <input
+        type="range"
+        min="0"
+        max="40"
+        step="0.5"
+        [disabled]="readonly"
+        [ngModel]="fgPct()"
+        (ngModelChange)="setFg(+$event)"
+        [ngModelOptions]="{ standalone: true }" />
+    </label>
+    <label class="dpu__slider">
+      <span>{{ 'etudesDpu.marge' | translate }} ({{ margePct() }}%)</span>
+      <input
+        type="range"
+        min="0"
+        max="35"
+        step="0.5"
+        [disabled]="readonly"
+        [ngModel]="margePct()"
+        (ngModelChange)="setMarge(+$event)"
+        [ngModelOptions]="{ standalone: true }" />
+    </label>
+  </div>
+
+  <div class="dpu__totals">
+    <span>{{ 'etudesDpu.deboursSec' | translate }} : <strong>{{ deboursSec() | number: '1.2-2' }}</strong> MAD</span>
+    <span>{{ 'etudesDpu.puHt' | translate }} : <strong>{{ prixVenteHt() | mad }}</strong></span>
+  </div>
+
+  <div class="dpu__table-wrap">
+    <table class="dpu__table">
+      <thead>
+        <tr>
+          <th>{{ 'etudesDpu.colType' | translate }}</th>
+          <th>{{ 'etudesDpu.colRef' | translate }}</th>
+          <th>{{ 'etudesDpu.colQty' | translate }}</th>
+          <th>{{ 'etudesDpu.colUnite' | translate }}</th>
+          <th>{{ 'etudesDpu.colPu' | translate }}</th>
+          <th>{{ 'etudesDpu.colTotal' | translate }}</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (composants().length === 0) {
+          <tr>
+            <td colspan="7" class="dpu__empty">{{ 'etudesDpu.empty' | translate }}</td>
+          </tr>
+        }
+        @for (c of composants(); track trackById($index, c)) {
+          <tr>
+            <td>
+              <select
+                class="dpu__input"
+                [disabled]="readonly"
+                [ngModel]="c.type"
+                (ngModelChange)="patch(c.id, { type: $event })"
+                [ngModelOptions]="{ standalone: true }">
+                @for (t of types; track t.value) {
+                  <option [ngValue]="t.value">{{ t.labelKey | translate }}</option>
+                }
+              </select>
+            </td>
+            <td>
+              <input
+                type="text"
+                class="dpu__input"
+                [disabled]="readonly"
+                [ngModel]="c.articleOuPosteId"
+                (ngModelChange)="patch(c.id, { articleOuPosteId: $event })"
+                [ngModelOptions]="{ standalone: true }" />
+            </td>
+            <td>
+              <input
+                type="number"
+                class="dpu__input dpu__input--num"
+                [disabled]="readonly"
+                [ngModel]="c.quantite"
+                (ngModelChange)="patch(c.id, { quantite: +$event })"
+                [ngModelOptions]="{ standalone: true }" />
+            </td>
+            <td>
+              <input
+                type="text"
+                class="dpu__input dpu__input--sm"
+                [disabled]="readonly"
+                [ngModel]="c.unite"
+                (ngModelChange)="patch(c.id, { unite: $event })"
+                [ngModelOptions]="{ standalone: true }" />
+            </td>
+            <td>
+              <input
+                type="number"
+                class="dpu__input dpu__input--num"
+                [disabled]="readonly"
+                [ngModel]="c.prixUnitaire"
+                (ngModelChange)="patch(c.id, { prixUnitaire: +$event })"
+                [ngModelOptions]="{ standalone: true }" />
+            </td>
+            <td class="dpu__num">{{ c.total | number: '1.2-2' }}</td>
+            <td class="dpu__actions">
+              <nf-button type="button" class="dpu__icon" [disabled]="readonly" (clicked)="duplicate(c.id)" variant="secondary">⎘</nf-button>
+              <nf-button type="button" class="dpu__icon" [disabled]="readonly" (clicked)="remove(c.id)" variant="secondary">×</nf-button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (historiqueRows().length) {
+    <div class="dpu__hist">
+      <h4 class="dpu__hist-title">{{ 'etudesDpu.historyTitle' | translate }}</h4>
+      <ul>
+        @for (h of historiqueRows(); track h.id) {
+          <li>
+            {{ h.savedAt | slice: 0:16 }} — PU {{ h.prixVenteHt | number: '1.2-2' }} MAD (FG {{ h.fraisGenerauxPercent }}% /
+            {{ 'etudesDpu.marge' | translate }} {{ h.margePercent }}%)
+          </li>
+        }
+      </ul>
+    </div>
+  }
+</div>

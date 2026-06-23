@@ -1,0 +1,1 @@
+export * from './avancements-listing.page';

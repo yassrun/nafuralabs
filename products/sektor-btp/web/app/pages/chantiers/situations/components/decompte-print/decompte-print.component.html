@@ -1,0 +1,131 @@
+<!-- i18n-exempt: A4 print output fixed FR-MA per BTP MA legal req -->
+<div class="dp">
+  <header class="dp__header">
+    <div class="dp__society">
+      <div class="dp__society-name">SEYRURA BTP SARL</div>
+      <div class="dp__society-meta">
+        ICE : 003456789012345 · Casablanca, Maroc
+      </div>
+    </div>
+    <div class="dp__doc-title">
+      <div class="dp__doc-kind">{{ 'chantiers.situation.decomptePrint.title' | translate }}</div>
+      <div class="dp__doc-num">{{ situation().numero }}</div>
+      <div class="dp__doc-ord">Situation N° {{ situation().numeroOrdre }}</div>
+    </div>
+  </header>
+
+  <section class="dp__chantier">
+    <div>
+      <span class="dp__lbl">Chantier :</span>
+      <strong>{{ situation().chantierCode }} — {{ situation().chantierName }}</strong>
+    </div>
+    <div class="dp__period">
+      <span class="dp__lbl">{{ 'chantiers.situation.decomptePrint.periode' | translate }}</span>
+      du {{ situation().datePeriodeDebut | date: 'mediumDate':'':'fr-MA' }}
+      au {{ situation().datePeriodeFin | date: 'mediumDate':'':'fr-MA' }}
+    </div>
+    <div>
+      <span class="dp__lbl">{{ 'chantiers.situation.decomptePrint.dateEmission' | translate }}</span>
+      {{ situation().dateEmission | date: 'mediumDate':'':'fr-MA' }}
+    </div>
+  </section>
+
+  <section class="dp__lots">
+    <h3 class="dp__h3">{{ 'chantiers.situation.decomptePrint.detailLots' | translate }}</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Lot</th>
+          <th>{{ 'chantiers.situation.decomptePrint.columns.designation' | translate }}</th>
+          <th>{{ 'chantiers.situation.decomptePrint.columns.unite' | translate }}</th>
+          <th class="r">{{ 'chantiers.situation.decomptePrint.columns.qteTotale' | translate }}</th>
+          <th class="r">{{ 'chantiers.situation.decomptePrint.columns.qteCumul' | translate }}</th>
+          <th class="r">PU MAD</th>
+          <th class="r">Cumul HT MAD</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (l of situation().lignes; track l.id) {
+          <tr>
+            <td>{{ l.lotCode }}</td>
+            <td>{{ l.designation }}</td>
+            <td>{{ l.unite }}</td>
+            <td class="r">{{ l.quantiteTotale | number: '1.0-2' }}</td>
+            <td class="r">{{ l.quantiteCumulee | number: '1.0-2' }}</td>
+            <td class="r">{{ l.prixUnitaire | number: '1.2-2' }}</td>
+            <td class="r">{{ l.montantHt | number: '1.2-2' }}</td>
+          </tr>
+        }
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="6" class="r"><strong>Cumul N HT</strong></td>
+          <td class="r"><strong>{{ situation().cumulCourantHt | number: '1.2-2' }}</strong></td>
+        </tr>
+      </tfoot>
+    </table>
+  </section>
+
+  <section class="dp__decompte">
+    <h3 class="dp__h3">{{ 'chantiers.situation.decomptePrint.decompteTitle' | translate }}</h3>
+    <table class="dp__decompte-table">
+      <tr>
+        <td>{{ 'chantiers.situation.decomptePrint.cumulTravauxHt' | translate }}</td>
+        <td class="r">{{ situation().cumulCourantHt | number: '1.2-2' }} MAD</td>
+      </tr>
+      <tr>
+        <td>– Cumul situation N-1</td>
+        <td class="r">{{ situation().cumulPrecedentHt | number: '1.2-2' }} MAD</td>
+      </tr>
+      <tr class="strong">
+        <td>{{ 'chantiers.situation.decomptePrint.travauxPeriodeHt' | translate }}</td>
+        <td class="r">{{ situation().travauxPeriodeHt | number: '1.2-2' }} MAD</td>
+      </tr>
+      <tr>
+        <td>– Retenue garantie ({{ situation().retenueGarantiePercent }}%)</td>
+        <td class="r">{{ situation().retenueGarantieMontant | number: '1.2-2' }} MAD</td>
+      </tr>
+      @if ((situation().retenueAvancePercent ?? 0) > 0) {
+        <tr>
+          <td>{{ 'chantiers.situation.decomptePrint.resorptionAvance' | translate }} ({{ situation().retenueAvancePercent }}%)</td>
+          <td class="r">{{ situation().retenueAvanceMontant | number: '1.2-2' }} MAD</td>
+        </tr>
+      }
+      <tr class="strong">
+        <td>{{ 'chantiers.situation.decomptePrint.netHt' | translate }}</td>
+        <td class="r">{{ situation().netAPayerHt | number: '1.2-2' }} MAD</td>
+      </tr>
+      <tr>
+        <td>+ TVA ({{ situation().tvaTaux }}%)</td>
+        <td class="r">{{ tva() | number: '1.2-2' }} MAD</td>
+      </tr>
+      <tr class="final">
+        <td>{{ 'chantiers.situation.decomptePrint.netTtc' | translate }}</td>
+        <td class="r">{{ situation().netAPayerTtc | number: '1.2-2' }} MAD</td>
+      </tr>
+    </table>
+  </section>
+
+  <footer class="dp__footer">
+    <div class="dp__legal">
+      Retenue garantie {{ situation().retenueGarantiePercent }}% conformément à l'article du marché
+      — restitution à la réception définitive (1 an après la réception provisoire).
+    </div>
+
+    <div class="dp__signatures">
+      <div class="dp__signature">
+        <div class="dp__signature-label">Pour l'entrepreneur</div>
+        <div class="dp__signature-box">SEYRURA BTP SARL</div>
+      </div>
+      <div class="dp__signature">
+        <div class="dp__signature-label">Pour le maître d'ouvrage</div>
+        <div class="dp__signature-box">
+          @if (situation().approbateurMOAName) {
+            {{ situation().approbateurMOAName }}<br />
+            le {{ situation().approbationDate | date: 'mediumDate':'':'fr-MA' }}
+          }
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>

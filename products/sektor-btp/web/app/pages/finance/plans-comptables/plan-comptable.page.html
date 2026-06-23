@@ -1,0 +1,66 @@
+<nf-page-shell scroll>
+  <nf-page-header [config]="headerConfig"></nf-page-header>
+
+  <div class="pc">
+    <div class="pc__tabs">
+      <nf-button variant="ghost" class="pc__tab" [active]="tab() === 'arbre'" (clicked)="setTab('arbre')">
+        {{ 'finance.planComptable.tabs.arbre' | translate }}
+        <span class="pc__count">{{ facade.nbComptes() }}</span>
+      </nf-button>
+      <nf-button variant="ghost" class="pc__tab" [active]="tab() === 'journaux'" (clicked)="setTab('journaux')">
+        {{ 'finance.planComptable.tabs.journaux' | translate }}
+        <span class="pc__count">{{ journaux().length }}</span>
+      </nf-button>
+
+      <div class="pc__tab-actions">
+        @if (tab() === 'arbre') {
+          <nf-button variant="ghost" class="pc__btn pc__btn--ghost" (clicked)="resetSeed()">
+            {{ 'finance.planComptable.actions.importBtp' | translate }}
+          </nf-button>
+          <nf-button variant="primary" class="pc__btn pc__btn--primary" (clicked)="openCreate()">
+            {{ 'finance.planComptable.actions.newCompte' | translate }}
+          </nf-button>
+        }
+      </div>
+    </div>
+
+    @if (tab() === 'arbre') {
+      <div class="pc__stats">
+        <div class="pc__stat">
+          <span class="pc__stat-label">{{ 'finance.planComptable.stats.total' | translate }}</span>
+          <strong>{{ facade.nbComptes() }}</strong>
+        </div>
+        <div class="pc__stat">
+          <span class="pc__stat-label">{{ 'finance.planComptable.stats.actifs' | translate }}</span>
+          <strong>{{ facade.nbComptesActifs() }}</strong>
+        </div>
+        <div class="pc__stat">
+          <span class="pc__stat-label">{{ 'finance.planComptable.stats.auxiliaires' | translate }}</span>
+          <strong>{{ facade.nbAuxiliaires() }}</strong>
+        </div>
+      </div>
+
+      @if (facade.loading()) {
+        <div class="pc__loading">{{ 'finance.planComptable.loading' | translate }}</div>
+      } @else {
+        <app-compte-tree-picker
+          [comptes]="comptes()"
+          [selectedCode]="drawerCompte()?.code"
+          (compteSelected)="onCompteSelected($event)" />
+      }
+    } @else {
+      <app-journal-config
+        [journaux]="journaux()"
+        (created)="onJournalCreated($event)"
+        (updated)="onJournalUpdated($event)"
+        (deleted)="onJournalDeleted($event)" />
+    }
+  </div>
+
+  <app-compte-edit-drawer
+    [openCompte]="drawerCompte()"
+    [createMode]="drawerCreate()"
+    (closed)="closeDrawer()"
+    (saved)="onCompteSaved($event)"
+    (deleted)="onCompteDeleted($event)" />
+</nf-page-shell>

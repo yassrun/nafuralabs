@@ -1,0 +1,108 @@
+<div class="vil">
+  <header class="vil__header">
+    <div>
+      <h1 class="vil__title">{{ 'finance.virement.title' | translate }}</h1>
+      <p class="vil__subtitle">
+        {{ 'finance.virement.subtitle' | translate }}
+      </p>
+    </div>
+    <nf-button variant="primary" class="vil__btn" (clicked)="newVirement()">
+      {{ 'finance.virement.actions.create' | translate }}
+    </nf-button>
+  </header>
+
+  <section class="vil__kpi">
+    <div class="vil__kpi-card">
+      <span class="vil__kpi-label">{{ 'finance.virement.entityNamePlural' | translate }}</span>
+      <span class="vil__kpi-value">{{ filtered().length }}</span>
+    </div>
+    <div class="vil__kpi-card">
+      <span class="vil__kpi-label">{{ 'finance.common.toasts.validated' | translate }}</span>
+      <span class="vil__kpi-value">
+        {{ format(totalMontant()) }} {{ 'finance.common.currency.mad' | translate }}
+      </span>
+    </div>
+  </section>
+
+  <section class="vil__filters">
+    <input
+      type="search"
+      [attr.placeholder]="'finance.common.filters.searchPlaceholder' | translate"
+      [ngModel]="filterText()"
+      (ngModelChange)="filterText.set($event)"
+      class="vil__search"
+    />
+    <select [ngModel]="filterStatus()" (ngModelChange)="filterStatus.set($event)" class="vil__select">
+      <option value="">{{ 'finance.common.filters.allStatuses' | translate }}</option>
+      <option value="BROUILLON">{{ 'finance.declarations.status.BROUILLON' | translate }}</option>
+      <option value="VALIDE">{{ 'finance.common.toasts.validated' | translate }}</option>
+      <option value="ANNULE">{{ 'finance.common.toasts.cancelled' | translate }}</option>
+    </select>
+    <select [ngModel]="filterSource()" (ngModelChange)="filterSource.set($event)" class="vil__select">
+      <option value="">{{ 'finance.virement.form.fields.compteEmetteur' | translate }}</option>
+      @for (c of comptes(); track c.id) {
+        <option [value]="c.id">{{ c.libelle }}</option>
+      }
+    </select>
+    <select [ngModel]="filterDest()" (ngModelChange)="filterDest.set($event)" class="vil__select">
+      <option value="">{{ 'finance.virement.form.fields.beneficiaire' | translate }}</option>
+      @for (c of comptes(); track c.id) {
+        <option [value]="c.id">{{ c.libelle }}</option>
+      }
+    </select>
+    <input
+      type="date"
+      [ngModel]="filterFrom()"
+      (ngModelChange)="filterFrom.set($event)"
+      class="vil__date"
+    />
+    <input
+      type="date"
+      [ngModel]="filterTo()"
+      (ngModelChange)="filterTo.set($event)"
+      class="vil__date"
+    />
+    <nf-button variant="ghost" class="vil__btn vil__btn--ghost" (clicked)="reset()">
+      {{ 'finance.common.actions.refresh' | translate }}
+    </nf-button>
+  </section>
+
+  <section class="vil__table-wrap">
+    <table class="vil__table">
+      <thead>
+        <tr>
+          <th>{{ 'finance.virement.list.columns.numero' | translate }}</th>
+          <th>{{ 'finance.virement.list.columns.date' | translate }}</th>
+          <th>{{ 'finance.virement.form.fields.compteEmetteur' | translate }}</th>
+          <th>{{ 'finance.virement.form.fields.beneficiaire' | translate }}</th>
+          <th class="vil__th-num">{{ 'finance.virement.list.columns.montant' | translate }}</th>
+          <th>{{ 'finance.virement.list.columns.motif' | translate }}</th>
+          <th>{{ 'finance.virement.list.columns.status' | translate }}</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (v of filtered(); track v.id) {
+          <tr (click)="open(v)" class="vil__row">
+            <td class="vil__num">{{ v.numero }}</td>
+            <td>{{ formatDate(v.date) }}</td>
+            <td>{{ v.compteSourceLibelle }}</td>
+            <td>{{ v.compteDestLibelle }}</td>
+            <td class="vil__td-num">{{ format(v.montant) }}</td>
+            <td class="vil__motif">{{ v.motif }}</td>
+            <td>
+              <span class="vil__badge" [attr.data-variant]="statusVariant(v.status)">
+                {{ statusLabel(v.status) }}
+              </span>
+            </td>
+            <td class="vil__chev">→</td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="8" class="vil__empty">{{ 'finance.virement.list.emptyState.title' | translate }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </section>
+</div>

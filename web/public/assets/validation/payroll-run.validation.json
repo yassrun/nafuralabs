@@ -1,0 +1,35 @@
+{
+  "entity": "PayrollRun",
+  "fields": {
+    "runNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "periodStart": {
+      "maxLength": 120
+    },
+    "periodEnd": {
+      "maxLength": 120
+    },
+    "employeeCount": {
+      "min": 0
+    },
+    "grossTotal": {
+      "min": 0
+    },
+    "netTotal": {
+      "min": 0
+    },
+    "deductionsTotal": {
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "processedBy": {
+      "maxLength": 120
+    }
+  }
+}

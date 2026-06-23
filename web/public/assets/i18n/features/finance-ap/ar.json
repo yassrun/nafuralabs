@@ -1,0 +1,61 @@
+{
+  "finance-ap": {
+    "fields": {
+      "runNumber": "رقم الدفعة",
+      "plannedDate": "التاريخ المخطط",
+      "executedAt": "تاريخ التنفيذ",
+      "currency": "معرّف العملة",
+      "invoiceCount": "عدد الفواتير",
+      "vendorCount": "عدد الموردين",
+      "totalAmount": "المبلغ الإجمالي",
+      "status": "الحالة",
+      "criteria": "معايير JSON",
+      "vendorInvoice": "معرّف فاتورة المورد",
+      "lineNumber": "رقم السطر",
+      "item": "معرّف الصنف",
+      "description": "الوصف",
+      "quantity": "الكمية",
+      "unitPrice": "سعر الوحدة",
+      "taxCode": "رمز الضريبة",
+      "taxAmount": "مبلغ الضريبة",
+      "lineTotal": "إجمالي السطر",
+      "invoiceNumber": "رقم الفاتورة",
+      "vendor": "معرّف المورد",
+      "invoiceDate": "تاريخ الفاتورة",
+      "dueDate": "تاريخ الاستحقاق",
+      "subtotalAmount": "المبلغ الجزئي",
+      "approvalRequest": "معرّف طلب الموافقة",
+      "notes": "ملاحظات"
+    },
+    "sections": {
+      "general": "عام",
+      "summary": "الملخص",
+      "amounts": "المبالغ",
+      "workflow": "سير العمل"
+    },
+    "feature": {
+      "title": "المحاسبة الدائنة",
+      "description": "المحاسبة الدائنة"
+    },
+    "navigation": {
+      "paymentRuns": "دفعات السداد",
+      "vendorInvoices": "فواتير الموردين",
+      "vendorInvoiceLines": "أسطر فواتير الموردين"
+    },
+    "paymentRun": {
+      "title": "دفعات السداد",
+      "detailTitle": "تفاصيل دفعة السداد",
+      "newTitle": "دفعة سداد جديدة"
+    },
+    "vendorInvoice": {
+      "title": "فواتير الموردين",
+      "detailTitle": "تفاصيل فاتورة المورد",
+      "newTitle": "فاتورة مورد جديدة"
+    },
+    "vendorInvoiceLine": {
+      "title": "أسطر فواتير الموردين",
+      "detailTitle": "تفاصيل سطر فاتورة المورد",
+      "newTitle": "سطر فاتورة مورد جديد"
+    }
+  }
+}

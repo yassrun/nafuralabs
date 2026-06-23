@@ -1,0 +1,24 @@
+{
+  "entity": "SalesOrderAmendment",
+  "fields": {
+    "amendmentNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "salesOrderId": {
+      "required": true
+    },
+    "amendmentDate": {
+      "required": true
+    },
+    "reason": {
+      "required": true,
+      "maxLength": 2000
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

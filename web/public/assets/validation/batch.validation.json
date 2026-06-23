@@ -1,0 +1,19 @@
+{
+  "entity": "Batch",
+  "fields": {
+    "batchNumber": {
+      "required": true,
+      "maxLength": 60
+    },
+    "quantity": {
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

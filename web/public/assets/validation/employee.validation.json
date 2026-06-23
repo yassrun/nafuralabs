@@ -1,0 +1,45 @@
+{
+  "entity": "Employee",
+  "fields": {
+    "employeeNumber": {
+      "required": true,
+      "maxLength": 30,
+      "unique": true
+    },
+    "firstName": {
+      "required": true,
+      "maxLength": 100
+    },
+    "lastName": {
+      "required": true,
+      "maxLength": 100
+    },
+    "email": {
+      "required": true,
+      "maxLength": 200,
+      "pattern": "^[^@]+@[^@]+$"
+    },
+    "phone": {
+      "maxLength": 30
+    },
+    "hireDate": {
+      "required": true
+    },
+    "departmentId": {
+      "required": true
+    },
+    "positionId": {
+      "required": true
+    },
+    "employmentTypeId": {
+      "required": true
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "photo": {
+      "maxLength": 500
+    }
+  }
+}

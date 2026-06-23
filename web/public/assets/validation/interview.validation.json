@@ -1,0 +1,20 @@
+{
+  "entity": "Interview",
+  "fields": {
+    "interviewNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "interviewType": {
+      "maxLength": 120
+    },
+    "feedback": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

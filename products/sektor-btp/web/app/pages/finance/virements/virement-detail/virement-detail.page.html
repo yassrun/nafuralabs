@@ -1,0 +1,183 @@
+<div class="vd">
+  <header class="vd__header">
+    <nf-button variant="primary" class="vd__back" (clicked)="back()">{{ 'finance.common.actions.back' | translate }}</nf-button>
+    <div class="vd__title-block">
+      <div class="vd__breadcrumb">
+        {{ 'finance.virement.entityName' | translate }}
+        @if (existing()) { · {{ existing()!.numero }} }
+      </div>
+      <h1 class="vd__title">
+        {{ isCreate ? ('finance.virement.actions.create' | translate) : existing()?.numero }}
+      </h1>
+    </div>
+    @if (existing(); as v) {
+      <span class="vd__badge"
+            [attr.data-variant]="v.status === 'VALIDE' ? 'success' : v.status === 'BROUILLON' ? 'warning' : 'default'">
+        {{ (v.status === 'VALIDE' ? 'finance.common.toasts.validated'
+              : v.status === 'BROUILLON' ? 'finance.declarations.status.BROUILLON'
+              : 'finance.common.toasts.cancelled') | translate }}
+      </span>
+    }
+  </header>
+
+  <section class="vd__form">
+    <div class="vd__row">
+      <label class="vd__field">
+        <span>{{ 'finance.reglement.form.fields.date' | translate }} *</span>
+        <input
+          type="date"
+          [ngModel]="date()"
+          (ngModelChange)="date.set($event)"
+          [disabled]="!!existing() && existing()!.status === 'VALIDE'"
+        />
+      </label>
+      <label class="vd__field">
+        <span>{{ 'finance.virement.form.fields.reference' | translate }}</span>
+        <input
+          type="text"
+          [ngModel]="reference()"
+          (ngModelChange)="reference.set($event)"
+          [attr.placeholder]="'finance.virement.form.fields.reference' | translate"
+          [disabled]="!!existing() && existing()!.status === 'VALIDE'"
+        />
+      </label>
+      <label class="vd__field">
+        <span>{{ 'finance.virement.form.fields.montant' | translate }} *</span>
+        <input
+          type="number"
+          min="0"
+          step="0.01"
+          [ngModel]="montant()"
+          (ngModelChange)="montant.set($event)"
+          [disabled]="!!existing() && existing()!.status === 'VALIDE'"
+        />
+      </label>
+    </div>
+
+    <div class="vd__compte-block">
+      <div class="vd__compte-card">
+        <span class="vd__compte-label">{{ 'finance.virement.form.fields.compteEmetteur' | translate }}</span>
+        <select
+          [ngModel]="compteSourceId()"
+          (ngModelChange)="compteSourceId.set($event)"
+          [disabled]="!!existing() && existing()!.status === 'VALIDE'"
+        >
+          <option value="">{{ 'finance.factureFournisseur.form.fields.fournisseurPlaceholder' | translate }}</option>
+          @for (c of comptes(); track c.id) {
+            @if (c.isActive) {
+              <option [value]="c.id">{{ c.libelle }} ({{ format(c.soldeActuel) }} {{ 'finance.common.currency.mad' | translate }})</option>
+            }
+          }
+        </select>
+        @if (compteSource(); as c) {
+          <div class="vd__compte-info">
+            <div>{{ 'finance.compte.list.columns.soldeComptable' | translate }} : <strong>{{ format(c.soldeActuel) }} {{ 'finance.common.currency.mad' | translate }}</strong></div>
+            @if (montant() > 0) {
+              <div [class.vd__compte-warn]="soldeApresSource() < 0">
+                {{ 'finance.common.labels.soldeFinal' | translate }} : <strong>{{ format(soldeApresSource()) }} {{ 'finance.common.currency.mad' | translate }}</strong>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="vd__arrow">→</div>
+
+      <div class="vd__compte-card">
+        <span class="vd__compte-label">{{ 'finance.virement.form.fields.beneficiaire' | translate }}</span>
+        <select
+          [ngModel]="compteDestId()"
+          (ngModelChange)="compteDestId.set($event)"
+          [disabled]="!!existing() && existing()!.status === 'VALIDE'"
+        >
+          <option value="">{{ 'finance.factureFournisseur.form.fields.fournisseurPlaceholder' | translate }}</option>
+          @for (c of comptesDest(); track c.id) {
+            <option [value]="c.id">{{ c.libelle }} ({{ format(c.soldeActuel) }} {{ 'finance.common.currency.mad' | translate }})</option>
+          }
+        </select>
+        @if (compteDest(); as c) {
+          <div class="vd__compte-info">
+            <div>{{ 'finance.compte.list.columns.soldeComptable' | translate }} : <strong>{{ format(c.soldeActuel) }} {{ 'finance.common.currency.mad' | translate }}</strong></div>
+            @if (montant() > 0) {
+              <div>
+                {{ 'finance.common.labels.soldeFinal' | translate }} : <strong>{{ format(soldeApresDest()) }} {{ 'finance.common.currency.mad' | translate }}</strong>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <label class="vd__field">
+      <span>{{ 'finance.virement.form.fields.motif' | translate }} *</span>
+      <textarea
+        rows="3"
+        [attr.placeholder]="'finance.virement.form.fields.motif' | translate"
+        [ngModel]="motif()"
+        (ngModelChange)="motif.set($event)"
+        [disabled]="!!existing() && existing()!.status === 'VALIDE'"
+      ></textarea>
+    </label>
+
+    <label class="vd__field">
+      <span>{{ 'finance.ecriture.form.fields.libelle' | translate }}</span>
+      <textarea
+        rows="2"
+        [ngModel]="notes()"
+        (ngModelChange)="notes.set($event)"
+        [disabled]="!!existing() && existing()!.status === 'VALIDE'"
+      ></textarea>
+    </label>
+  </section>
+
+  @if (existing(); as ev) {
+    @if (ev.status === 'BROUILLON') {
+      <section class="vd__approval">
+        <h3>{{ 'finance.factureFournisseur.sections.approval' | translate }}</h3>
+        <app-submit-approval-button
+          entityType="VIR"
+          [entityId]="ev.id"
+          [entityRef]="ev.numero"
+          [entitySummary]="ev.numero + ' — ' + ev.motif + ' — ' + ev.montant + ' ' + ('finance.common.currency.mad' | translate)"
+          [montantConcerne]="ev.montant"
+          [disabled]="false">
+        </app-submit-approval-button>
+      </section>
+    }
+  }
+
+  @if (existing(); as v) {
+    <section class="vd__info-card">
+      <h3>{{ 'finance.ecriture.toasts.created' | translate }}</h3>
+      <p>
+        {{ 'finance.factureFournisseur.recap.ecritureComptable' | translate }} :
+      </p>
+      <pre class="vd__ecriture">
+{{ v.compteDestLibelle }}      {{ 'finance.common.labels.debit' | translate }}  {{ format(v.montant) }} {{ 'finance.common.currency.mad' | translate }}
+{{ v.compteSourceLibelle }}    {{ 'finance.common.labels.credit' | translate }} {{ format(v.montant) }} {{ 'finance.common.currency.mad' | translate }}</pre>
+    </section>
+  }
+
+  <footer class="vd__foot">
+    <nf-button variant="ghost" class="vd__btn vd__btn--ghost" (clicked)="back()">
+      {{ 'finance.common.actions.cancel' | translate }}
+    </nf-button>
+    @if (existing()?.status === 'VALIDE') {
+      <nf-button variant="danger" class="vd__btn vd__btn--danger" (clicked)="cancel()"  [disabled]="busy()">
+        {{ 'finance.virement.toasts.cancelled' | translate }}
+      </nf-button>
+    } @else {
+      <nf-button variant="ghost" class="vd__btn vd__btn--ghost" (clicked)="saveAsBrouillon()"  [disabled]="!canSave() || busy()">
+        {{ 'finance.common.actions.save' | translate }}
+      </nf-button>
+      <nf-button variant="primary" class="vd__btn" (clicked)="saveAndValide()"  [disabled]="!canSave() || busy()">
+        {{ 'finance.virement.actions.validate' | translate }}
+      </nf-button>
+    }
+    @if (existing() && existing()!.status !== 'VALIDE') {
+      <nf-button variant="danger" class="vd__btn vd__btn--danger" (clicked)="deleteVirement()"  [disabled]="busy()">
+        {{ 'finance.common.actions.delete' | translate }}
+      </nf-button>
+    }
+  </footer>
+</div>

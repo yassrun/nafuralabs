@@ -1,0 +1,20 @@
+{
+  "entity": "AccountGroup",
+  "fields": {
+    "code": {
+      "required": true,
+      "maxLength": 30,
+      "unique": true
+    },
+    "name": {
+      "required": true,
+      "maxLength": 200
+    },
+    "level": {
+      "min": 0
+    },
+    "order": {
+      "min": 0
+    }
+  }
+}

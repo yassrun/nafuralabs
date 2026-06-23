@@ -1,0 +1,30 @@
+{
+  "geography": {
+    "navigation": {
+      "title": "الجغرافيا",
+      "description": "مجال الجغرافيا",
+      "addresses": "العناوين",
+      "cities": "المدن",
+      "countries": "البلدان",
+      "regions": "الجهات"
+    }
+  },
+  "common": {
+    "subsections": {
+      "operations": "العمليات",
+      "configuration": "الإعدادات"
+    }
+  },
+  "geo": {
+    "fields": {
+      "addressLine1": "السطر 1",
+      "addressLine2": "السطر 2",
+      "country": "معرّف البلد",
+      "region": "معرّف الجهة",
+      "city": "معرّف المدينة",
+      "postalCode": "الرمز البريدي",
+      "code": "الرمز",
+      "name": "الاسم"
+    }
+  }
+}

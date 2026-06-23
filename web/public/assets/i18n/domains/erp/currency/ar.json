@@ -1,0 +1,37 @@
+{
+  "currency": {
+    "navigation": {
+      "title": "العملة",
+      "description": "مجال العملات",
+      "currencies": "العملات",
+      "exchangeRates": "أسعار الصرف",
+      "paymentTerms": "شروط الدفع"
+    }
+  },
+  "common": {
+    "subsections": {
+      "operations": "العمليات",
+      "configuration": "الإعدادات"
+    }
+  },
+  "finance": {
+    "fields": {
+      "code": "الرمز",
+      "name": "الاسم",
+      "symbol": "الرمز",
+      "decimalPlaces": "المنازل العشرية",
+      "fromCurrency": "معرّف عملة المصدر",
+      "toCurrency": "معرّف عملة الوجهة",
+      "rate": "السعر",
+      "effectiveDate": "تاريخ السريان",
+      "source": "المصدر",
+      "days": "الأيام",
+      "discountDays": "أيام الخصم",
+      "discountPercent": "نسبة الخصم",
+      "description": "الوصف"
+    },
+    "sections": {
+      "general": "عام"
+    }
+  }
+}

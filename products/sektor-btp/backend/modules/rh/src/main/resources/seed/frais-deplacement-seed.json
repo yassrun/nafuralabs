@@ -1,0 +1,23 @@
+{
+  "fraisDeplacement": [
+    {
+      "id": "frd-001",
+      "employeId": "emp-001",
+      "employeNom": "Benmoussa Khalid",
+      "type": "INDEMNITE_KM",
+      "date": "2026-05-12",
+      "montant": "480.00",
+      "km": "320",
+      "status": "BROUILLON"
+    },
+    {
+      "id": "frd-002",
+      "employeId": "emp-002",
+      "employeNom": "El Fassi Rachid",
+      "type": "PANIER_REPAS",
+      "date": "2026-05-08",
+      "montant": "150.00",
+      "status": "APPROUVE"
+    }
+  ]
+}

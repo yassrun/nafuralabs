@@ -1,0 +1,89 @@
+<div class="standard-record-filters">
+  <form [formGroup]="filterForm" class="filters-toolbar" (ngSubmit)="applyFilters()" (keydown.enter)="$event.preventDefault(); applyFilters()">
+    <!-- Status -->
+    <mat-form-field appearance="outline" class="filter-field filter-field--dense filter-field--status">
+      <mat-label>Status</mat-label>
+      <mat-select formControlName="status">
+        <mat-option *ngFor="let option of statusOptions" [value]="option.value">
+          {{ option.label }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Date Field -->
+    <mat-form-field appearance="outline" class="filter-field filter-field--dense filter-field--date-field">
+      <mat-label>Date Field</mat-label>
+      <mat-select formControlName="dateField">
+        <mat-option *ngFor="let option of dateFieldOptions" [value]="option.value">
+          {{ option.label }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Date Range Group (From + To) -->
+    <div class="date-range-group" [class.date-range-group--inactive]="!isDateFieldActive()">
+      <mat-form-field appearance="outline" class="filter-field filter-field--dense filter-field--date">
+        <mat-label>From</mat-label>
+        <input 
+          matInput 
+          [matDatepicker]="pickerFrom" 
+          formControlName="dateFrom"
+          [placeholder]="!isDateFieldActive() ? ('docExtractor.filters.dateFieldHint' | translate) : ''"
+        />
+        <mat-datepicker-toggle matSuffix [for]="pickerFrom" [disabled]="filterForm.get('dateFrom')?.disabled"></mat-datepicker-toggle>
+        <mat-datepicker #pickerFrom></mat-datepicker>
+        @if (dateRangeError() && filterForm.get('dateFrom')?.touched) {
+          <mat-error>{{ dateRangeError() }}</mat-error>
+        }
+      </mat-form-field>
+
+      <span class="date-range-separator">–</span>
+
+      <mat-form-field appearance="outline" class="filter-field filter-field--dense filter-field--date">
+        <mat-label>To</mat-label>
+        <input 
+          matInput 
+          [matDatepicker]="pickerTo" 
+          formControlName="dateTo"
+          [placeholder]="!isDateFieldActive() ? ('docExtractor.filters.dateFieldHint' | translate) : ''"
+        />
+        <mat-datepicker-toggle matSuffix [for]="pickerTo" [disabled]="filterForm.get('dateTo')?.disabled"></mat-datepicker-toggle>
+        <mat-datepicker #pickerTo></mat-datepicker>
+        @if (dateRangeError() && filterForm.get('dateTo')?.touched) {
+          <mat-error>{{ dateRangeError() }}</mat-error>
+        }
+      </mat-form-field>
+      
+      @if (!isDateFieldActive()) {
+        <span class="date-range-hint">{{ 'docExtractor.filters.dateFieldHint' | translate }}</span>
+      }
+    </div>
+
+    <!-- Actions -->
+    <div class="filters-actions">
+      @if (activeFiltersCount() > 0) {
+        <span class="filters-active-indicator" title="Filters active"></span>
+      }
+      <button
+        mat-button
+        type="submit"
+        (click)="applyFilters()"
+        [disabled]="loading || filterForm.invalid"
+        class="filter-action filter-action--apply"
+      >
+        Apply
+      </button>
+      <button
+        mat-button
+        type="button"
+        (click)="clearFilters()"
+        [disabled]="loading"
+        [class.filter-action--clear-active]="activeFiltersCount() > 0"
+        class="filter-action filter-action--clear"
+      >
+        Clear
+      </button>
+    </div>
+  </form>
+  <div class="filters-divider"></div>
+</div>

@@ -1,0 +1,140 @@
+{
+  "notifications": {
+    "workflow": {
+      "approvalRequested": "طلب موافقة: {entityType} {code}",
+      "approved": "تمت الموافقة على {entityType} {code}",
+      "rejected": "تم رفض {entityType} {code}"
+    },
+    "assignment": {
+      "assigned": "تم تعيين {entityType} {code} إليك"
+    },
+    "mention": {
+      "mentioned": "تمت الإشارة إليك في {entityType} {code}"
+    },
+    "digest": {
+      "subject": "ملخصك اليومي للإشعارات",
+      "header": "في ما يلي ما حدث منذ ملخصك الأخير",
+      "footer": "أدر تفضيلات الإشعارات من الإعدادات"
+    },
+    "center": {
+      "title": "الإشعارات",
+      "subtitle": "ابقَ مطلعاً على نشاطك",
+      "viewAll": "عرض جميع الإشعارات",
+      "unread": "{count} غير مقروءة",
+      "markAllRead": "تحديد الكل كمقروء",
+      "markSelectedRead": "تحديد المحدد كمقروء",
+      "clearOldRead": "مسح القديم المقروء",
+      "clearOldReadConfirm": "حذف جميع الإشعارات المقروءة الأقدم من 30 يوماً؟",
+      "deleted": "{count, plural, zero {لم يتم حذف أي إشعار} one {تم حذف إشعار واحد} two {تم حذف إشعارين} few {تم حذف # إشعارات} many {تم حذف # إشعاراً} other {تم حذف # إشعار}}",
+      "empty": "لا توجد إشعارات",
+      "emptyUnread": "لا توجد إشعارات غير مقروءة",
+      "emptyFiltered": "لا توجد إشعارات تطابق المرشحات",
+      "loading": "جاري التحميل…",
+      "confirmClearOldRead": "حذف جميع الإشعارات المقروءة الأقدم من 30 يوماً؟",
+      "actions": {
+        "markAllRead": "تحديد الكل كمقروء",
+        "markSelectedRead": "تحديد المحدد كمقروء",
+        "clearOldRead": "مسح القديم المقروء",
+        "markRead": "تحديد كمقروء"
+      },
+      "filters": {
+        "source": {
+          "label": "المصدر",
+          "all": "الكل",
+          "workflow": "سير العمل",
+          "assignment": "تعيين",
+          "mention": "إشارة",
+          "system": "النظام"
+        },
+        "status": {
+          "label": "الحالة",
+          "all": "الكل",
+          "unread": "غير مقروءة",
+          "read": "مقروءة"
+        },
+        "range": {
+          "label": "الفترة",
+          "24h": "آخر 24 ساعة",
+          "7d": "آخر 7 أيام",
+          "30d": "آخر 30 يوماً",
+          "all": "الكل"
+        }
+      },
+      "source": {
+        "WORKFLOW": "سير العمل",
+        "ASSIGNMENT": "تعيين",
+        "MENTION": "إشارة",
+        "SYSTEM": "النظام"
+      }
+    }
+  },
+  "collaboration": {
+    "fields": {
+      "entityType": "نوع الكيان",
+      "entityId": "معرّف الكيان",
+      "title": "العنوان",
+      "status": "الحالة",
+      "currentStep": "المرحلة الحالية",
+      "requestedBy": "طُلب من قِبَل",
+      "requestedAt": "تاريخ الطلب",
+      "approvedBy": "تمت الموافقة من قِبَل",
+      "approvedAt": "تاريخ الموافقة",
+      "decisionComment": "تعليق القرار",
+      "action": "الإجراء",
+      "actor": "الفاعل",
+      "eventAt": "تاريخ الحدث",
+      "details": "التفاصيل",
+      "payload": "الحمولة",
+      "fileName": "اسم الملف",
+      "fileUrl": "رابط الملف",
+      "mimeType": "نوع المحتوى",
+      "sizeBytes": "الحجم بالبايت",
+      "uploadedBy": "تم الرفع من قِبَل",
+      "uploadedAt": "تاريخ الرفع",
+      "isPrimary": "أساسي",
+      "author": "المؤلف",
+      "body": "المحتوى",
+      "isInternal": "داخلي",
+      "createdAt": "تاريخ الإنشاء",
+      "editedAt": "تاريخ التعديل"
+    },
+    "sections": {
+      "target": "الهدف",
+      "request": "الطلب",
+      "actors": "الفاعلون",
+      "event": "الحدث",
+      "file": "الملف",
+      "comment": "التعليق"
+    },
+    "feature": {
+      "title": "التعاون",
+      "description": "التعاون"
+    },
+    "navigation": {
+      "approvalRequests": "طلبات الموافقة",
+      "auditEvents": "أحداث التدقيق",
+      "recordAttachments": "مرفقات السجل",
+      "recordComments": "تعليقات السجل"
+    },
+    "approvalRequest": {
+      "title": "طلبات الموافقة",
+      "detailTitle": "تفاصيل طلب الموافقة",
+      "newTitle": "طلب موافقة جديد"
+    },
+    "auditEvent": {
+      "title": "أحداث التدقيق",
+      "detailTitle": "تفاصيل حدث التدقيق",
+      "newTitle": "حدث تدقيق جديد"
+    },
+    "recordAttachment": {
+      "title": "مرفقات السجل",
+      "detailTitle": "تفاصيل مرفق السجل",
+      "newTitle": "مرفق سجل جديد"
+    },
+    "recordComment": {
+      "title": "تعليقات السجل",
+      "detailTitle": "تفاصيل تعليق السجل",
+      "newTitle": "تعليق سجل جديد"
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "entity": "Wave",
+  "fields": {
+    "waveNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "orderCount": {
+      "min": 0
+    },
+    "lineCount": {
+      "min": 0
+    },
+    "totalItems": {
+      "maxLength": 120
+    },
+    "priority": {
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

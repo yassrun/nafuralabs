@@ -1,0 +1,16 @@
+{
+  "id": "doc-extractor",
+  "name": "Document Extractor",
+  "description": "Document extraction",
+  "type": "feature",
+  "layer": "feature",
+  "group": "documents",
+  "provides": {
+    "backend": {
+      "gradle": ":platform:features:documents:doc-extractor",
+      "packages": ["ma.nafura.platform.documents.docextractor"]
+    }
+  },
+  "requires": { "core": ["tenancy"], "features": [] },
+  "manifest": { "key": "doc-extractor" }
+}

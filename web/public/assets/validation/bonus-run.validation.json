@@ -1,0 +1,32 @@
+{
+  "entity": "BonusRun",
+  "fields": {
+    "runNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "bonusType": {
+      "maxLength": 120
+    },
+    "periodStart": {
+      "maxLength": 120
+    },
+    "periodEnd": {
+      "maxLength": 120
+    },
+    "employeeCount": {
+      "min": 0
+    },
+    "totalAmount": {
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "processedBy": {
+      "maxLength": 120
+    }
+  }
+}

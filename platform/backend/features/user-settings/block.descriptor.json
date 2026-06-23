@@ -1,0 +1,16 @@
+{
+  "id": "user-settings",
+  "name": "User Settings",
+  "description": "User profile and preferences",
+  "type": "feature",
+  "layer": "feature",
+  "group": "configuration",
+  "provides": {
+    "backend": {
+      "gradle": ":platform:features:user-settings",
+      "packages": ["ma.nafura.platform.usersettings"]
+    }
+  },
+  "requires": { "core": ["identity"], "features": [] },
+  "manifest": { "key": "user-settings" }
+}

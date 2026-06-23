@@ -1,0 +1,25 @@
+﻿{
+  "$schema": "../../../../../naf/src/spec/schemas/feature.schema.json",
+  "feature": "sysconfig",
+  "name": "System Configuration",
+  "description": "Numbering sequences, code lists, calendars, and tags",
+
+  "dependencies": [],
+
+  "entities": [
+    { "$ref": "./entities/numbering-sequence.entity.json" },
+    { "$ref": "./entities/code-list.entity.json" },
+    { "$ref": "./entities/reference-value.entity.json" },
+    { "$ref": "./entities/calendar.entity.json" },
+    { "$ref": "./entities/tag.entity.json" }
+  ],
+
+  "settings": {
+    "defaultCalendarId": {
+      "type": "uuid",
+      "lookup": "sysconfig.calendar",
+      "description": "Default business calendar"
+    }
+  }
+}
+

@@ -1,0 +1,1634 @@
+{
+  "inventory": {
+    "routes": {
+      "scanner": {
+        "title": "Scanner stock",
+        "breadcrumb": "Scanner"
+      },
+      "magasinChantier": {
+        "title": "Magasin chantier",
+        "breadcrumb": "Magasin chantier"
+      },
+      "reservations": {
+        "title": "Réservations stock",
+        "breadcrumb": "Réservations"
+      },
+      "etatStock": {
+        "title": "État des stocks",
+        "breadcrumb": "État des stocks"
+      },
+      "valorisation": {
+        "title": "Valorisation",
+        "breadcrumb": "Valorisation"
+      },
+      "alertes": {
+        "title": "Alertes réapprovisionnement",
+        "breadcrumb": "Alertes"
+      },
+      "articles": {
+        "title": "Articles",
+        "breadcrumb": "Articles",
+        "new": "Nouvel article",
+        "detail": "Détail article",
+        "newBreadcrumb": "Nouveau",
+        "detailBreadcrumb": "Détail"
+      },
+      "materielCatalogue": {
+        "title": "Catalogue matériel",
+        "breadcrumb": "Catalogue matériel",
+        "new": "Nouveau matériel",
+        "detail": "Détail matériel"
+      },
+      "depots": {
+        "title": "Dépôts & emplacements",
+        "breadcrumb": "Dépôts",
+        "new": "Nouveau dépôt",
+        "detail": "Détail dépôt"
+      },
+      "familles": {
+        "title": "Familles d'articles",
+        "breadcrumb": "Familles",
+        "new": "Nouvelle famille",
+        "detail": "Détail famille"
+      },
+      "typesArticles": {
+        "title": "Types d'articles",
+        "breadcrumb": "Types d'articles",
+        "new": "Nouveau type",
+        "detail": "Détail type"
+      },
+      "motifs": {
+        "title": "Motifs de mouvement",
+        "breadcrumb": "Motifs",
+        "new": "Nouveau motif",
+        "detail": "Détail motif"
+      },
+      "uom": {
+        "title": "Unités de mesure",
+        "breadcrumb": "UoM",
+        "new": "Nouvelle unité",
+        "detail": "Détail unité"
+      },
+      "uomCategories": {
+        "title": "Catégories d'unités de mesure",
+        "breadcrumb": "Catégories UoM",
+        "new": "Nouvelle catégorie UoM",
+        "detail": "Détail catégorie UoM"
+      },
+      "costingMethods": {
+        "title": "Méthodes de valorisation",
+        "breadcrumb": "Méthodes valorisation",
+        "new": "Nouvelle méthode",
+        "detail": "Détail méthode"
+      },
+      "receptions": {
+        "title": "Réceptions",
+        "breadcrumb": "Réceptions",
+        "new": "Nouvelle réception",
+        "detail": "Détail réception"
+      },
+      "transferts": {
+        "title": "Transferts",
+        "breadcrumb": "Transferts",
+        "new": "Nouveau transfert",
+        "detail": "Détail transfert"
+      },
+      "sorties": {
+        "title": "Sorties",
+        "breadcrumb": "Sorties",
+        "new": "Nouvelle sortie",
+        "detail": "Détail sortie"
+      },
+      "retours": {
+        "title": "Retours",
+        "breadcrumb": "Retours",
+        "new": "Nouveau retour",
+        "detail": "Détail retour"
+      },
+      "inventaires": {
+        "title": "Inventaires physiques",
+        "breadcrumb": "Inventaires",
+        "new": "Nouvel inventaire",
+        "detail": "Détail inventaire"
+      },
+      "pertesChutes": {
+        "title": "Pertes & chutes",
+        "breadcrumb": "Pertes & chutes",
+        "new": "Nouvelle perte/chute",
+        "detail": "Détail perte/chute"
+      },
+      "stockBalances": {
+        "title": "Soldes de stock",
+        "breadcrumb": "Soldes"
+      },
+      "parcMateriel": {
+        "title": "Parc matériel",
+        "breadcrumb": "Parc matériel",
+        "new": "Nouveau matériel",
+        "detail": "Détail matériel"
+      },
+      "affectationsMateriel": {
+        "title": "Affectations matériel",
+        "breadcrumb": "Affectations"
+      },
+      "ficheEngin": {
+        "title": "Fiche engin",
+        "breadcrumb": "Engin"
+      },
+      "planningMateriel": {
+        "title": "Planning matériel",
+        "breadcrumb": "Planning matériel"
+      },
+      "pointageEngin": {
+        "title": "Pointage engin",
+        "breadcrumb": "Pointage"
+      },
+      "controlesReglementaires": {
+        "title": "Contrôles réglementaires",
+        "breadcrumb": "Contrôles"
+      },
+      "locationsExternes": {
+        "title": "Locations externes",
+        "breadcrumb": "Locations"
+      },
+      "plansMaintenance": {
+        "title": "Plans maintenance",
+        "breadcrumb": "Plans"
+      },
+      "ordresTravail": {
+        "title": "Ordres de travail",
+        "breadcrumb": "OT"
+      },
+      "ordreTravail": {
+        "title": "Ordre de travail",
+        "breadcrumb": "OT"
+      },
+      "historiqueMaintenance": {
+        "title": "Historique maintenance",
+        "breadcrumb": "Historique"
+      },
+      "carnetsCarburant": {
+        "title": "Carnets carburant",
+        "breadcrumb": "Carnets"
+      },
+      "pleinsCarburant": {
+        "title": "Pleins carburant",
+        "breadcrumb": "Pleins"
+      },
+      "consommationsCarburant": {
+        "title": "Consommations",
+        "breadcrumb": "Consommations"
+      }
+    },
+    "common": {
+      "yes": "Oui",
+      "no": "Non",
+      "active": "Actif",
+      "inactive": "Inactif",
+      "dash": "—",
+      "all": "Tous",
+      "loading": "Chargement…",
+      "noData": "Aucune donnée"
+    },
+    "enums": {
+      "articleType": {
+        "MATERIAU": "Matériau",
+        "CONSOMMABLE": "Consommable",
+        "ENGIN": "Engin",
+        "OUTILLAGE": "Outillage"
+      },
+      "locationType": {
+        "DEPOT": "Dépôt",
+        "ENTREPOT": "Entrepôt",
+        "CHANTIER": "Chantier",
+        "TRANSIT": "Transit",
+        "VIRTUEL": "Virtuel"
+      },
+      "materielStatus": {
+        "DISPONIBLE": "Disponible",
+        "AFFECTE": "Affecté",
+        "MAINTENANCE": "En maintenance",
+        "HORS_SERVICE": "Hors service"
+      },
+      "txType": {
+        "RECEPTION": "Réception",
+        "TRANSFERT": "Transfert",
+        "RETOUR": "Retour",
+        "INVENTAIRE": "Inventaire",
+        "PERTE": "Perte / Chute",
+        "SORTIE": "Sortie"
+      },
+      "txStatus": {
+        "BROUILLON": "Brouillon",
+        "VALIDE": "Validé",
+        "CONFIRME": "Confirmé",
+        "ANNULE": "Annulé",
+        "EN_COURS": "En cours",
+        "CLOTURE": "Clôturé",
+        "PARTIEL": "Partiel"
+      },
+      "alertUrgency": {
+        "CRITIQUE": "Critique",
+        "EN_ALERTE": "En alerte"
+      },
+      "costingMethod": {
+        "AVCO": "AVCO (coût moyen)",
+        "FIFO": "FIFO (premier entré, premier sorti)",
+        "STD": "Coût standard",
+        "CUMP": "CUMP / PMP",
+        "LIFO": "LIFO (dernier entré, premier sorti)"
+      },
+      "locationExterneStatus": {
+        "EN_COURS": "En cours",
+        "TERMINEE": "Terminée",
+        "ANNULEE": "Annulée"
+      },
+      "posteBudget": {
+        "MATERIAUX": "Matériaux",
+        "MO": "Main d'œuvre",
+        "SOUS_TRAITANCE": "Sous-traitance",
+        "LOCATION_MATERIEL": "Location matériel",
+        "CARBURANT": "Carburant",
+        "FRAIS_GENERAUX": "Frais généraux",
+        "IMPREVUS": "Imprévus"
+      },
+      "devise": {
+        "MAD": "MAD — Dirham marocain",
+        "EUR": "EUR — Euro",
+        "USD": "USD — Dollar américain"
+      },
+      "etatArticle": {
+        "BON": "Bon état",
+        "ABIME": "Abîmé",
+        "INUTILISABLE": "Inutilisable"
+      },
+      "motifPerteType": {
+        "CASSE": "Casse",
+        "VOL": "Vol",
+        "DEGRADATION": "Dégradation",
+        "CHUTE_OBLIGATOIRE": "Chute obligatoire",
+        "FIN_LOT": "Fin de lot",
+        "AUTRE": "Autre"
+      },
+      "causeDetaillee": {
+        "DECOUPE": "Chute découpe",
+        "CASSE": "Casse",
+        "DETERIORATION": "Détérioration",
+        "AUTRE": "Autre"
+      }
+    },
+    "catalogue": {
+      "title": "Catalogue articles",
+      "article": {
+        "entityName": "Article",
+        "entityNamePlural": "Articles",
+        "headerTitle": "Articles",
+        "headerTitleNew": "Nouvel article",
+        "headerTitleDetail": "Détail article",
+        "permissionPrefix": "inventory.article",
+        "saveSuccess": "Article « {name} » enregistré avec succès",
+        "deleteConfirm": {
+          "title": "Supprimer l'article",
+          "message": "Voulez-vous vraiment supprimer l'article « {name} » ?"
+        },
+        "actions": {
+          "printLabels": "Imprimer étiquettes (lot / emplacement)"
+        },
+        "reservations": {
+          "title": "Réservations actives",
+          "empty": "Aucune réservation pour cet article.",
+          "columns": {
+            "chantier": "Chantier",
+            "qte": "Qté",
+            "expiration": "Expiration",
+            "statut": "Statut"
+          }
+        },
+        "fields": {
+          "code": "Code",
+          "name": "Désignation",
+          "description": "Description",
+          "familleId": "Famille",
+          "articleType": "Type d'article",
+          "uomId": "Unité de mesure",
+          "uomSecondaireId": "Unité secondaire (ex. sac)",
+          "conversionFactor": "Facteur conversion (2e → 1re UM)",
+          "conversionFactorHint": "Ex. 50 si 1 sac = 50 kg",
+          "prixUnitaire": "Prix catalogue (MAD)",
+          "prixAchatDernier": "Dernier prix achat (MAD)",
+          "pmp": "PMP — prix moyen pondéré (MAD)",
+          "pmpHint": "Valorisation stock / liaison budget sorties",
+          "delaiReapproJours": "Délai réappro. (jours)",
+          "devise": "Devise",
+          "stockMin": "Stock minimum",
+          "stockMax": "Stock maximum",
+          "posteBudgetId": "Rubrique budget (réalisé)",
+          "posteBudgetHint": "Prime sur l'heuristique article → rubrique",
+          "isPerissable": "Périssable",
+          "isSerialise": "Suivi n° série",
+          "isActive": "Actif"
+        },
+        "list": {
+          "columns": {
+            "code": "Code",
+            "name": "Désignation",
+            "familleName": "Famille",
+            "articleType": "Type",
+            "uomCode": "Unité",
+            "prixUnitaire": "Prix cat. (MAD)",
+            "pmp": "PMP (MAD)",
+            "delaiReapproJours": "Réappro (j)",
+            "posteBudgetId": "Rubrique budget",
+            "stockTotal": "Stock total",
+            "isActive": "Actif"
+          },
+          "filters": {
+            "famille": "Famille",
+            "type": "Type",
+            "isActive": "Actif"
+          }
+        },
+        "sections": {
+          "identification": "Identification",
+          "mesurePrix": "Mesure & valorisation",
+          "appro": "Réapprovisionnement & budget",
+          "seuilsStock": "Seuils de stock",
+          "statut": "Statut & traçabilité"
+        }
+      },
+      "materiel": {
+        "entityName": "Matériel",
+        "entityNamePlural": "Matériels",
+        "headerTitle": "Matériel & Engins",
+        "headerTitleNew": "Nouveau matériel",
+        "headerTitleDetail": "Détail matériel",
+        "permissionPrefix": "inventory.materiel",
+        "saveSuccess": "Matériel « {name} » enregistré",
+        "deleteConfirm": {
+          "title": "Supprimer le matériel",
+          "message": "Voulez-vous vraiment supprimer « {name} » ?"
+        },
+        "search": "Code, désignation, N° série…",
+        "all": "Tous",
+        "allFem": "Toutes",
+        "affectations": {
+          "empty": "Aucune affectation enregistrée pour ce matériel.",
+          "columns": {
+            "chantier": "Chantier",
+            "dateDebut": "Date début",
+            "dateFin": "Date fin",
+            "status": "Statut",
+            "notes": "Notes"
+          },
+          "status": {
+            "active": "En cours",
+            "completed": "Terminée"
+          }
+        },
+        "fields": {
+          "code": "Code",
+          "name": "Désignation",
+          "description": "Description",
+          "marque": "Marque",
+          "modele": "Modèle",
+          "numeroSerie": "Numéro de série",
+          "anneeMiseEnService": "Année mise en service",
+          "puissanceCapacite": "Puissance / capacité",
+          "status": "Statut",
+          "dateDernierEntretien": "Dernier entretien",
+          "prochaineMaintenance": "Prochaine maintenance",
+          "notesMaintenance": "Notes maintenance",
+          "familleId": "Famille",
+          "chantierActuelId": "Chantier actuel",
+          "isActive": "Actif"
+        },
+        "sections": {
+          "identification": "Identification",
+          "caracteristiques": "Caractéristiques techniques",
+          "maintenance": "Maintenance & affectation",
+          "statut": "Statut"
+        },
+        "list": {
+          "columns": {
+            "code": "Code",
+            "name": "Désignation",
+            "marque": "Marque",
+            "modele": "Modèle",
+            "numeroSerie": "N° série",
+            "status": "Statut",
+            "chantierActuelName": "Chantier actuel",
+            "prochaineMaintenance": "Prochaine maintenance",
+            "isActive": "Actif"
+          },
+          "filters": {
+            "status": "Statut",
+            "famille": "Famille",
+            "isActive": "Actif"
+          }
+        }
+      },
+      "items": {
+        "headerTitle": "Articles (legacy)",
+        "headerTitleNew": "Nouvel article",
+        "headerTitleDetail": "Détail article"
+      },
+      "itemPrices": {
+        "headerTitle": "Prix articles",
+        "headerTitleNew": "Nouveau prix",
+        "headerTitleDetail": "Détail prix"
+      }
+    },
+    "mouvement": {
+      "common": {
+        "notSet": "Non renseigné",
+        "notSetFem": "Non renseignée",
+        "all": "Tous",
+        "back": "← Retour",
+        "save": "Enregistrer",
+        "edit": "Modifier",
+        "noChanges": "Aucune modification à enregistrer",
+        "selectDepot": "Veuillez sélectionner un dépôt récepteur.",
+        "selectChantier": "Veuillez sélectionner un chantier destination.",
+        "needLine": "Veuillez saisir au moins une ligne de réception.",
+        "scanBlOpen": "Impossible d'ouvrir le scanner BL pour le moment.",
+        "tenantMissing": "Tenant introuvable pour lancer le scan BL",
+        "scanBlFailed": "Le scan BL a échoué",
+        "scanBlSuccess": "BL scanné, réception préremplie",
+        "scanBlImpossible": "Impossible de scanner le BL",
+        "formNotReady": "Le formulaire réception n'est pas prêt",
+        "transitionFailed": "Transition impossible",
+        "transitionUnknown": "Transition inconnue : {action}"
+      },
+      "reception": {
+        "title": "Réceptions",
+        "deliveryMode": {
+          "toDepot": "Vers un dépôt",
+          "toChantier": "Livraison directe chantier",
+          "depotReceiver": "Dépôt récepteur",
+          "chantierDestination": "Chantier destination",
+          "phase": "Phase",
+          "blReference": "Réf. BL / Bon de livraison",
+          "linesTotal": "Total : {value} MAD"
+        },
+        "entityName": "Réception",
+        "entityNamePlural": "Réceptions",
+        "headerTitle": "Réceptions",
+        "headerTitleNew": "Nouvelle réception",
+        "headerTitleDetail": "Réception",
+        "subtitleNumber": "N° {number}",
+        "saveSuccess": "Réception {number} enregistrée",
+        "validateSuccess": "Réception {number} validée — stock mis à jour",
+        "cancelSuccess": "Réception rejetée",
+        "resetSuccess": "Réception remise en brouillon — vous pouvez la modifier",
+        "actions": {
+          "scanBl": "Scanner BL",
+          "newReception": "Nouvelle réception"
+        },
+        "prerequisites": {
+          "title": "Avant de créer une réception, configurez :",
+          "fournisseur": "Au moins un fournisseur",
+          "depot": "Au moins un dépôt",
+          "bc": "Au moins un bon de commande"
+        },
+        "status": {
+          "BROUILLON": "À valider",
+          "VALIDE": "Validé",
+          "ANNULE": "Rejeté"
+        },
+        "transitions": {
+          "rejectLabel": "Rejeter",
+          "rejectTitle": "Rejeter la réception ?",
+          "rejectMessage": "La livraison sera marquée comme rejetée. Cette action est irréversible.",
+          "validateLabel": "Valider",
+          "validateTitle": "Valider la réception ?",
+          "validateMessage": "Le stock sera mis à jour pour {number}.",
+          "validateFallback": "cette réception"
+        },
+        "fields": {
+          "txNumber": "N° Réception",
+          "txNumberPlaceholder": "Auto-généré à la validation",
+          "status": "Statut",
+          "txDate": "Date de réception",
+          "fournisseurId": "Fournisseur",
+          "destLocationId": "Destination",
+          "chantierLocationId": "Chantier destination",
+          "phaseRef": "Phase",
+          "reference": "Réf. BL / Bon de livraison",
+          "notes": "Notes",
+          "lines": "Lignes de réception"
+        },
+        "sections": {
+          "identification": "Identification",
+          "destination": "Destination",
+          "lines": "Lignes de réception"
+        },
+        "list": {
+          "columns": {
+            "txNumber": "N° Réception",
+            "txDate": "Date",
+            "fournisseurName": "Fournisseur",
+            "destLocationName": "Destination",
+            "reference": "Réf. BL",
+            "bcOrigine": "BC d'origine",
+            "status": "Statut",
+            "totalValue": "Valeur (MAD)"
+          },
+          "filters": {
+            "status": "Statut",
+            "fournisseur": "Fournisseur",
+            "depot": "Dépôt récepteur",
+            "from": "Du",
+            "to": "Au",
+            "all": "Tous"
+          },
+          "emptyState": {
+            "title": "Aucune réception",
+            "message": "Créez une nouvelle réception pour enregistrer une livraison fournisseur."
+          }
+        }
+      },
+      "transfert": {
+        "title": "Transferts",
+        "entityName": "Transfert",
+        "entityNamePlural": "Transferts",
+        "headerTitle": "Transferts",
+        "headerTitleNew": "Nouveau transfert",
+        "headerTitleDetail": "Transfert",
+        "headerTitleDetailFallback": "Détail transfert",
+        "saveSuccess": "Transfert enregistré",
+        "validateSuccess": "Transfert validé — stock source décrémenté, stock destination incrémenté (mock)",
+        "cancelSuccess": "Transfert rejeté",
+        "saveErrorDefault": "Échec de l'enregistrement",
+        "destDiffSource": "La destination doit être différente de la source",
+        "status": {
+          "BROUILLON": "À valider",
+          "VALIDE": "Validé",
+          "ANNULE": "Rejeté"
+        },
+        "transitions": {
+          "rejectLabel": "Rejeter",
+          "rejectTitle": "Rejeter le transfert ?",
+          "rejectMessage": "Le transfert sera marqué comme rejeté. Cette action est irréversible.",
+          "validateLabel": "Valider",
+          "validateTitle": "Valider le transfert ?",
+          "validateMessage": "Le stock sera déplacé pour {number}.",
+          "validateFallback": "ce transfert"
+        },
+        "fields": {
+          "txNumber": "N° Transfert",
+          "status": "Statut",
+          "txDate": "Date de transfert",
+          "sourceLocationId": "Location source",
+          "destLocationId": "Location destination",
+          "chantierLocationId": "Chantier (optionnel)",
+          "phaseRef": "Phase chantier",
+          "motifId": "Motif chantier",
+          "reference": "Référence",
+          "notes": "Notes",
+          "lines": "Lignes"
+        },
+        "sections": {
+          "header": "En-tête",
+          "lines": "Lignes"
+        },
+        "list": {
+          "columns": {
+            "txNumber": "N° Transfert",
+            "txDate": "Date",
+            "sourceLocationName": "De",
+            "destLocationName": "Vers",
+            "reference": "Référence",
+            "phaseRef": "Phase",
+            "motifName": "Motif",
+            "status": "Statut"
+          },
+          "filters": {
+            "status": "Statut",
+            "sourceLocationId": "Location source",
+            "destLocationId": "Location destination",
+            "dateFrom": "Du",
+            "dateTo": "Au",
+            "all": "Tous"
+          },
+          "emptyState": {
+            "title": "Aucun transfert",
+            "message": "Créez un transfert pour déplacer du stock entre deux locations.",
+            "actionLabel": "Nouveau transfert"
+          }
+        }
+      },
+      "sortie": {
+        "title": "Sorties",
+        "entityName": "Sortie stock",
+        "entityNamePlural": "Sorties stock",
+        "headerTitle": "Sorties stock",
+        "headerTitleNew": "Nouvelle sortie stock",
+        "headerTitleDetail": "Sortie stock",
+        "headerTitleDetailFallback": "Détail sortie",
+        "saveSuccess": "Sortie enregistrée",
+        "saveErrorDefault": "Échec de l'enregistrement",
+        "validateSuccess": "Sortie validée — stock et budget synchronisés (mock)",
+        "validateError": "Validation impossible",
+        "kpis": {
+          "month": "Sorties ce mois (valeur HT)",
+          "valide": "Total sorties validées"
+        },
+        "status": {
+          "BROUILLON": "Brouillon",
+          "VALIDE": "Validé"
+        },
+        "actions": {
+          "validate": "Valider"
+        },
+        "transitions": {
+          "validateTitle": "Valider la sortie",
+          "validateMessage": "Le stock du magasin source sera décrémenté et le budget chantier sera mis à jour (réalisé HT). Continuer ?",
+          "validateConfirm": "Valider",
+          "validateCancel": "Annuler"
+        },
+        "fields": {
+          "txDate": "Date",
+          "sourceLocationId": "Magasin source",
+          "sourceLocationIdHint": "Dépôt, entrepôt ou magasin chantier d'où part la marchandise",
+          "chantierBudgetId": "Chantier (pilotage budget)",
+          "chantierBudgetIdHint": "Rattache la consommation au budget chantier (réalisé HT)",
+          "motifId": "Motif de sortie",
+          "reference": "Référence (BS, bon interne…)",
+          "notes": "Notes",
+          "lines": "Lignes"
+        },
+        "sections": {
+          "header": "En-tête",
+          "lines": "Articles sortis"
+        },
+        "list": {
+          "columns": {
+            "txNumber": "N° sortie",
+            "txDate": "Date",
+            "sourceLocationName": "Magasin source",
+            "chantierRef": "Chantier (budget)",
+            "motifName": "Motif",
+            "totalValue": "Valeur HT",
+            "reference": "Référence",
+            "status": "Statut"
+          },
+          "filters": {
+            "chantierContains": "Chantier / budget",
+            "chantierPlaceholder": "Rechercher…",
+            "status": "Statut",
+            "motifId": "Motif",
+            "dateFrom": "Du",
+            "dateTo": "Au",
+            "all": "Tous"
+          },
+          "emptyState": {
+            "title": "Aucune sortie",
+            "message": "Enregistrez les sorties vers chantier ou livraisons externes : le stock source est décrémenté à la validation, le budget chantier est alimenté.",
+            "actionLabel": "Nouvelle sortie"
+          }
+        }
+      },
+      "tx": {
+        "title": "Mouvements de stock",
+        "titleNew": "Nouveau mouvement",
+        "titleDetail": "Détail mouvement",
+        "headerTitle": "Mouvements de stock",
+        "entityName": "Mouvement de stock",
+        "selectHint": "Sélectionnez un mouvement dans la liste ou créez-en un nouveau.",
+        "saveSuccess": "Mouvement {number} enregistré",
+        "saveError": "Échec de l'enregistrement du mouvement",
+        "deleteTitle": "Supprimer le mouvement",
+        "deleteMessage": "Supprimer ce mouvement brouillon ? Cette action est irréversible.",
+        "deleteSuccess": "Mouvement supprimé",
+        "errors": {
+          "cannotModifyValidated": "Impossible de modifier un mouvement validé",
+          "cannotDeleteValidated": "Impossible de supprimer un mouvement validé"
+        },
+        "fields": {
+          "txType": "Type de mouvement",
+          "txDate": "Date",
+          "sourceLocationId": "Emplacement source",
+          "destLocationId": "Emplacement destination",
+          "reference": "Référence",
+          "notes": "Notes",
+          "lines": "Lignes"
+        },
+        "sections": {
+          "header": "En-tête",
+          "lines": "Lignes d'articles"
+        }
+      },
+      "retour": {
+        "title": "Retours",
+        "entityName": "Retour",
+        "entityNamePlural": "Retours",
+        "headerTitle": "Retours",
+        "headerTitleNew": "Nouveau retour",
+        "headerTitleDetail": "Retour",
+        "headerTitleDetailFallback": "Détail retour",
+        "saveSuccess": "Retour enregistré",
+        "saveErrorDefault": "Échec de l'enregistrement",
+        "validateSuccess": "Retour validé — stock mis à jour (mock)",
+        "cancelSuccess": "Retour rejeté",
+        "status": {
+          "BROUILLON": "À valider",
+          "VALIDE": "Validé",
+          "ANNULE": "Rejeté"
+        },
+        "transitions": {
+          "rejectLabel": "Rejeter",
+          "rejectTitle": "Rejeter le retour ?",
+          "rejectMessage": "Le retour sera marqué comme rejeté. Cette action est irréversible.",
+          "validateLabel": "Valider",
+          "validateTitle": "Valider le retour ?",
+          "validateMessage": "Le stock sera mis à jour pour {number}.",
+          "validateFallback": "ce retour"
+        },
+        "fields": {
+          "txDate": "Date retour",
+          "retourType": "Type de retour",
+          "sourceLocationId": "Origine",
+          "sourceLocationIdHint": "Chantier ou dépôt source",
+          "destLocationId": "Destination",
+          "destLocationIdHint": "Dépôt (retour chantier) ou laisser vide (retour fournisseur)",
+          "motifId": "Motif",
+          "reference": "Référence",
+          "referenceHint": "N° BL retour fournisseur si applicable",
+          "notes": "Notes",
+          "lines": "Lignes"
+        },
+        "sections": {
+          "header": "En-tête",
+          "lines": "Lignes"
+        },
+        "list": {
+          "columns": {
+            "txNumber": "N° Retour",
+            "txDate": "Date",
+            "motifName": "Type retour",
+            "sourceLocationName": "Origine",
+            "destLocationName": "Destination",
+            "destLocationExterne": "Externe",
+            "reference": "Référence",
+            "status": "Statut"
+          },
+          "filters": {
+            "status": "Statut",
+            "sourceLocationId": "Origine",
+            "dateFrom": "Du",
+            "dateTo": "Au",
+            "all": "Tous"
+          },
+          "emptyState": {
+            "title": "Aucun retour",
+            "message": "Créez un retour pour réintégrer du stock depuis un chantier ou vers un fournisseur.",
+            "actionLabel": "Nouveau retour"
+          }
+        }
+      },
+      "inventaire": {
+        "title": "Inventaires physiques",
+        "entityName": "Inventaire",
+        "entityNamePlural": "Inventaires",
+        "headerTitle": "Inventaires",
+        "headerTitleNew": "Nouvel inventaire",
+        "headerTitleDetail": "Inventaire",
+        "headerTitleDetailFallback": "Détail inventaire",
+        "saveSuccess": "Inventaire enregistré",
+        "saveErrorDefault": "Échec de l'enregistrement",
+        "validateSuccess": "Inventaire validé — ajustements de stock appliqués (mock)",
+        "validateError": "Validation impossible",
+        "actions": {
+          "validate": "Valider inventaire"
+        },
+        "status": {
+          "BROUILLON": "Brouillon",
+          "VALIDE": "Validé",
+          "ANNULE": "Annulé"
+        },
+        "fields": {
+          "txDate": "Date inventaire",
+          "destLocationId": "Location à inventorier",
+          "reference": "Référence",
+          "notes": "Notes",
+          "lines": "Lignes"
+        },
+        "sections": {
+          "header": "En-tête",
+          "lines": "Comptage"
+        },
+        "list": {
+          "columns": {
+            "txNumber": "N° Inventaire",
+            "txDate": "Date",
+            "destLocationName": "Emplacement",
+            "linesCount": "Nb articles",
+            "totalVariance": "Écart total",
+            "status": "Statut"
+          },
+          "filters": {
+            "destLocationId": "Emplacement",
+            "status": "Statut",
+            "dateFrom": "Du",
+            "dateTo": "Au",
+            "all": "Tous"
+          },
+          "emptyState": {
+            "title": "Aucun inventaire",
+            "message": "Créez un inventaire pour effectuer un comptage physique.",
+            "actionLabel": "Nouvel inventaire"
+          }
+        }
+      },
+      "perte": {
+        "title": "Pertes & Chutes",
+        "entityName": "Déclaration de perte",
+        "entityNamePlural": "Déclarations de pertes",
+        "headerTitle": "Pertes & Chutes",
+        "headerTitleNew": "Nouvelle déclaration de perte",
+        "headerTitleDetail": "Déclaration de perte",
+        "headerTitleDetailFallback": "Détail déclaration de perte",
+        "saveSuccess": "Déclaration enregistrée",
+        "saveErrorDefault": "Échec de l'enregistrement",
+        "validateSuccess": "Déclaration validée — stock décrémenté (mock)",
+        "validateError": "Validation impossible",
+        "kpis": {
+          "month": "Pertes ce mois",
+          "total": "Total pertes (tous chantiers)"
+        },
+        "actions": {
+          "validate": "Valider"
+        },
+        "status": {
+          "BROUILLON": "Brouillon",
+          "VALIDE": "Validé"
+        },
+        "transitions": {
+          "validateTitle": "Valider la déclaration",
+          "validateMessage": "Cette action est définitive. Le stock chantier sera décrémenté. Continuer ?",
+          "validateConfirm": "Valider",
+          "validateCancel": "Annuler"
+        },
+        "fields": {
+          "txDate": "Date",
+          "chantierLocationId": "Chantier",
+          "motifId": "Type de perte",
+          "motifIdHint": "Chute découpe / Casse / Vol / Intempéries / Malfaçon",
+          "reference": "Déclaré par",
+          "notes": "Notes (important pour traçabilité)",
+          "lines": "Lignes"
+        },
+        "sections": {
+          "header": "En-tête",
+          "lines": "Articles perdus"
+        },
+        "list": {
+          "columns": {
+            "txNumber": "N° Déclaration",
+            "txDate": "Date",
+            "chantierRef": "Chantier",
+            "motifName": "Type perte",
+            "totalValue": "Valeur perdue",
+            "reference": "Référence",
+            "status": "Statut"
+          },
+          "filters": {
+            "chantierContains": "Chantier",
+            "chantierPlaceholder": "Rechercher…",
+            "status": "Statut",
+            "motifId": "Type perte",
+            "dateFrom": "Du",
+            "dateTo": "Au",
+            "all": "Tous"
+          },
+          "emptyState": {
+            "title": "Aucune déclaration de perte",
+            "message": "Déclarez les pertes matériaux sur chantier (déchets, casse, malfaçons).",
+            "actionLabel": "Nouvelle déclaration"
+          }
+        }
+      },
+      "tx": {
+        "title": "Mouvements (vue brute)",
+        "entityName": "Mouvement",
+        "entityNamePlural": "Mouvements",
+        "headerTitle": "Tous les mouvements",
+        "headerTitleDetail": "Détail mouvement",
+        "list": {
+          "columns": {
+            "txNumber": "N°",
+            "txType": "Type",
+            "txDate": "Date",
+            "sourceLocationName": "Source",
+            "destLocationName": "Destination",
+            "status": "Statut",
+            "nbLines": "Lignes"
+          },
+          "filters": {
+            "txType": "Type mouvement",
+            "status": "Statut",
+            "from": "Du",
+            "to": "Au"
+          }
+        }
+      },
+      "txLines": {
+        "title": "Lignes de mouvement",
+        "entityName": "Ligne",
+        "entityNamePlural": "Lignes",
+        "list": {
+          "columns": {
+            "lineNumber": "#",
+            "articleCode": "Code article",
+            "articleName": "Désignation",
+            "quantity": "Quantité",
+            "uomCode": "UoM",
+            "unitPrice": "Prix unitaire",
+            "totalPrice": "Total"
+          },
+          "filters": {
+            "articleId": "Article",
+            "uomId": "UoM"
+          }
+        },
+        "fields": {
+          "articleId": "Article",
+          "quantity": "Quantité",
+          "uomId": "UoM",
+          "unitPrice": "Prix unitaire",
+          "totalPrice": "Total",
+          "emplacementId": "Emplacement",
+          "lotStockId": "Lot",
+          "numeroLot": "N° de lot",
+          "datePeremption": "Date péremption",
+          "notes": "Notes"
+        },
+        "sections": {
+          "article": "Article",
+          "tracabilite": "Traçabilité (lot / emplacement)"
+        },
+        "new": "Nouvelle ligne",
+        "newBreadcrumb": "Nouvelle",
+        "edit": "Modifier ligne",
+        "editBreadcrumb": "Modifier"
+      }
+    },
+    "configuration": {
+      "title": "Configuration",
+      "depot": {
+        "entityName": "Dépôt",
+        "entityNamePlural": "Dépôts & chantiers",
+        "headerTitle": "Dépôts & emplacements",
+        "headerTitleNew": "Nouveau dépôt",
+        "headerTitleDetail": "Détail dépôt",
+        "permissionPrefix": "inventory.location",
+        "saveSuccess": "Dépôt « {name} » enregistré avec succès",
+        "deleteConfirm": {
+          "title": "Supprimer le dépôt",
+          "message": "Voulez-vous vraiment supprimer le dépôt « {name} » ?"
+        },
+        "fields": {
+          "code": "Code",
+          "name": "Nom",
+          "type": "Type",
+          "address": "Adresse",
+          "ville": "Ville",
+          "latitude": "Latitude",
+          "longitude": "Longitude",
+          "capaciteM3": "Capacité (m³)",
+          "capaciteTonnes": "Capacité (tonnes)",
+          "responsableId": "Responsable",
+          "responsableNom": "Nom du responsable",
+          "chantierId": "Chantier rattaché",
+          "projectRef": "Réf. chantier",
+          "parentId": "Emplacement parent",
+          "notes": "Notes",
+          "budgetChantierId": "Budget chantier (id pilotage)",
+          "budgetChantierHint": "Ex. ch-2026-001 — pour rattacher sorties stock au budget ERP",
+          "isActive": "Actif"
+        },
+        "sections": {
+          "identification": "Identification",
+          "localisation": "Localisation & géolocalisation",
+          "capacite": "Capacité de stockage",
+          "rattachement": "Rattachement chantier & responsable",
+          "statut": "Statut"
+        },
+        "list": {
+          "columns": {
+            "code": "Code",
+            "name": "Nom",
+            "type": "Type",
+            "ville": "Ville",
+            "capacite": "Capacité",
+            "responsableNom": "Responsable",
+            "projectRef": "Réf. chantier",
+            "isActive": "Actif"
+          },
+          "filters": {
+            "code": "Code",
+            "name": "Nom",
+            "type": "Type",
+            "isActive": "Actif"
+          }
+        }
+      },
+      "famille": {
+        "entityName": "Famille d'articles",
+        "entityNamePlural": "Familles d'articles",
+        "headerTitle": "Familles d'articles",
+        "headerTitleNew": "Nouvelle famille",
+        "headerTitleDetail": "Détail famille",
+        "permissionPrefix": "inventory.famille",
+        "saveSuccess": "Famille « {name} » enregistrée avec succès",
+        "deleteConfirm": {
+          "title": "Supprimer la famille",
+          "message": "Voulez-vous vraiment supprimer la famille « {name} » ?"
+        },
+        "fields": {
+          "code": "Code",
+          "name": "Libellé",
+          "description": "Description",
+          "isActive": "Actif"
+        },
+        "sections": {
+          "identification": "Identification",
+          "statut": "Statut"
+        },
+        "list": {
+          "columns": {
+            "code": "Code",
+            "name": "Libellé",
+            "description": "Description",
+            "isActive": "Actif"
+          },
+          "filters": {
+            "code": "Code",
+            "name": "Libellé",
+            "isActive": "Actif"
+          }
+        }
+      },
+      "typeArticle": {
+        "entityName": "Type d'article",
+        "entityNamePlural": "Types d'articles",
+        "headerTitle": "Types d'articles",
+        "headerTitleNew": "Nouveau type",
+        "headerTitleDetail": "Détail type",
+        "permissionPrefix": "inventory.typeArticle",
+        "saveSuccess": "Type d'article « {name} » enregistré avec succès",
+        "deleteConfirm": {
+          "title": "Supprimer le type d'article",
+          "message": "Voulez-vous vraiment supprimer le type « {name} » ?"
+        },
+        "fields": {
+          "code": "Code",
+          "name": "Libellé",
+          "articleType": "Famille (MATERIAU/CONSOMMABLE/ENGIN/OUTILLAGE)",
+          "isActive": "Actif"
+        },
+        "sections": {
+          "identification": "Identification",
+          "statut": "Statut"
+        },
+        "list": {
+          "columns": {
+            "code": "Code",
+            "name": "Libellé",
+            "articleType": "Famille article",
+            "isActive": "Actif"
+          },
+          "filters": {
+            "articleType": "Famille article",
+            "isActive": "Actif"
+          }
+        }
+      },
+      "motif": {
+        "entityName": "Motif de mouvement",
+        "entityNamePlural": "Motifs de mouvement",
+        "headerTitle": "Motifs de mouvement",
+        "headerTitleNew": "Nouveau motif",
+        "headerTitleDetail": "Détail motif",
+        "permissionPrefix": "inventory.motif",
+        "saveSuccess": "Motif « {name} » enregistré avec succès",
+        "deleteConfirm": {
+          "title": "Supprimer le motif",
+          "message": "Voulez-vous vraiment supprimer le motif « {name} » ?"
+        },
+        "fields": {
+          "code": "Code",
+          "name": "Libellé",
+          "txType": "Type de mouvement",
+          "isActive": "Actif"
+        },
+        "sections": {
+          "identification": "Identification",
+          "statut": "Statut"
+        },
+        "list": {
+          "columns": {
+            "code": "Code",
+            "name": "Libellé",
+            "txType": "Type mouvement",
+            "isActive": "Actif"
+          },
+          "filters": {
+            "txType": "Type mouvement",
+            "isActive": "Actif"
+          }
+        }
+      },
+      "uom": {
+        "entityName": "Unité de mesure",
+        "entityNamePlural": "Unités de mesure",
+        "headerTitle": "Unités de mesure",
+        "headerTitleNew": "Nouvelle unité",
+        "headerTitleDetail": "Détail unité",
+        "permissionPrefix": "inventory.uom",
+        "saveSuccess": "Unité « {name} » enregistrée avec succès",
+        "deleteConfirm": {
+          "title": "Supprimer l'unité",
+          "message": "Voulez-vous vraiment supprimer l'unité « {name} » ?"
+        },
+        "fields": {
+          "code": "Code",
+          "name": "Libellé",
+          "uomCategoryId": "Catégorie",
+          "isActive": "Actif"
+        },
+        "sections": {
+          "identification": "Identification",
+          "statut": "Statut"
+        },
+        "list": {
+          "columns": {
+            "code": "Code",
+            "name": "Libellé",
+            "uomCategoryId": "Catégorie",
+            "isActive": "Actif"
+          },
+          "filters": {
+            "uomCategoryId": "Catégorie",
+            "isActive": "Actif"
+          }
+        }
+      },
+      "uomCategory": {
+        "entityName": "Catégorie d'unité",
+        "entityNamePlural": "Catégories d'unités",
+        "headerTitle": "Catégories d'unités de mesure",
+        "headerTitleNew": "Nouvelle catégorie",
+        "headerTitleDetail": "Détail catégorie",
+        "permissionPrefix": "inventory.uomCategory",
+        "saveSuccess": "Catégorie « {name} » enregistrée avec succès",
+        "deleteConfirm": {
+          "title": "Supprimer la catégorie",
+          "message": "Voulez-vous vraiment supprimer la catégorie « {name} » ?"
+        },
+        "fields": {
+          "code": "Code",
+          "name": "Libellé",
+          "isActive": "Actif"
+        },
+        "sections": {
+          "identification": "Identification",
+          "statut": "Statut"
+        },
+        "list": {
+          "columns": {
+            "code": "Code",
+            "name": "Libellé",
+            "isActive": "Actif"
+          },
+          "filters": {
+            "code": "Code",
+            "isActive": "Actif"
+          }
+        }
+      },
+      "costingMethod": {
+        "entityName": "Méthode de valorisation",
+        "entityNamePlural": "Méthodes de valorisation",
+        "headerTitle": "Méthodes de valorisation",
+        "headerTitleNew": "Nouvelle méthode",
+        "headerTitleDetail": "Détail méthode",
+        "permissionPrefix": "inventory.costingMethod",
+        "saveSuccess": "Méthode « {name} » enregistrée avec succès",
+        "deleteConfirm": {
+          "title": "Supprimer la méthode",
+          "message": "Voulez-vous vraiment supprimer la méthode « {name} » ?"
+        },
+        "fields": {
+          "code": "Code",
+          "name": "Libellé",
+          "method": "Algorithme",
+          "description": "Description",
+          "isDefault": "Méthode par défaut",
+          "isDefaultHint": "Une seule méthode peut être définie par défaut",
+          "isActive": "Actif"
+        },
+        "sections": {
+          "identification": "Identification",
+          "configuration": "Paramètres",
+          "statut": "Statut"
+        },
+        "list": {
+          "columns": {
+            "code": "Code",
+            "name": "Libellé",
+            "method": "Méthode",
+            "isDefault": "Par défaut",
+            "isActive": "Actif"
+          },
+          "filters": {
+            "method": "Méthode",
+            "isActive": "Actif"
+          }
+        }
+      },
+      "itemCategory": {
+        "headerTitle": "Catégories d'articles",
+        "headerTitleNew": "Nouvelle catégorie",
+        "headerTitleDetail": "Détail catégorie",
+        "loading": "Chargement des catégories…",
+        "saveSuccess": "Catégorie « {name} » enregistrée avec succès",
+        "tree": {
+          "title": "Arborescence",
+          "empty": "Aucune catégorie pour le moment.",
+          "addRoot": "Ajouter une racine"
+        },
+        "detail": {
+          "title": "Détail de la catégorie",
+          "empty": "Sélectionnez une catégorie dans l'arborescence."
+        },
+        "fields": {
+          "code": "Code",
+          "name": "Libellé",
+          "description": "Description",
+          "isActive": "Actif"
+        },
+        "add": {
+          "title": "Nouvelle catégorie",
+          "confirm": "Créer"
+        },
+        "deleteConfirm": {
+          "title": "Supprimer la catégorie",
+          "message": "Voulez-vous vraiment supprimer la catégorie « {name} » ?"
+        },
+        "deleteBlocked": {
+          "title": "Suppression impossible",
+          "message": "Cette catégorie contient des sous-catégories. Supprimez ou déplacez-les d'abord.",
+          "confirm": "Compris"
+        }
+      },
+      "itemType": {
+        "headerTitle": "Types d'articles (legacy)",
+        "headerTitleNew": "Nouveau type",
+        "headerTitleDetail": "Détail type"
+      },
+      "unitOfMeasure": {
+        "headerTitle": "Unités de mesure (legacy)",
+        "headerTitleNew": "Nouvelle unité",
+        "headerTitleDetail": "Détail unité"
+      },
+      "uoMCategory": {
+        "headerTitle": "Catégories d'unités (legacy)",
+        "headerTitleNew": "Nouvelle catégorie",
+        "headerTitleDetail": "Détail catégorie"
+      }
+    },
+    "errors": {
+      "common": {
+        "updateFailed": "Échec de la mise à jour",
+        "validateFailed": "Validation impossible",
+        "rejectFailed": "Rejet impossible",
+        "cancelFailed": "Annulation impossible",
+        "resetDraftFailed": "Impossible de remettre en brouillon",
+        "missingItemId": "Identifiant manquant"
+      },
+      "reception": {
+        "notFound": "Réception introuvable",
+        "cannotModifyValidated": "Une réception validée ne peut pas être modifiée.",
+        "cannotDeleteValidated": "Supprimez via annulation pour une réception validée.",
+        "cannotValidate": "Seule une réception « À valider » peut être validée",
+        "cannotReject": "Seule une réception « À valider » peut être rejetée",
+        "cannotResetDraft": "Seule une réception validée peut être remise en brouillon"
+      },
+      "retour": {
+        "notFound": "Retour introuvable",
+        "cannotModifyValidated": "Un retour validé ne peut pas être modifié.",
+        "cannotDeleteValidated": "Suppression impossible pour un retour validé."
+      },
+      "transfert": {
+        "notFound": "Transfert introuvable",
+        "cannotModifyValidated": "Un transfert validé ne peut pas être modifié.",
+        "cannotDeleteValidated": "Supprimez via annulation pour un transfert validé."
+      },
+      "sortie": {
+        "notFound": "Sortie stock introuvable",
+        "cannotModifyValidated": "Une sortie validée ne peut pas être modifiée.",
+        "cannotDeleteValidated": "Une sortie validée ne peut pas être supprimée."
+      },
+      "inventaire": {
+        "notFound": "Inventaire introuvable",
+        "cannotModifyValidated": "Un inventaire validé ne peut pas être modifié.",
+        "cannotDeleteValidated": "Un inventaire validé ne peut pas être supprimé."
+      },
+      "perte": {
+        "notFound": "Déclaration de perte introuvable",
+        "cannotModifyValidated": "Une déclaration validée ne peut pas être modifiée.",
+        "cannotDeleteValidated": "Une déclaration validée ne peut pas être supprimée."
+      }
+    },
+    "suivi": {
+      "alertes": {
+        "headerTitle": "Alertes de réapprovisionnement",
+        "subtitle": "Articles en alerte ou rupture (stock < stock minimum). Génération automatique d'AO ou de DA.",
+        "kpi": {
+          "criticalCount": "Articles critiques",
+          "criticalLabel": "Stock épuisé ou très bas",
+          "warningCount": "Articles en alerte",
+          "warningLabel": "Stock inférieur au seuil",
+          "unique": "Articles uniques",
+          "uniqueLabel": "En alerte ou rupture",
+          "suggestedAo": "AO suggérés",
+          "suggestedAoLabel": "Brouillons à générer"
+        },
+        "list": {
+          "title": "Articles à réapprovisionner",
+          "columns": {
+            "articleCode": "Code",
+            "articleName": "Désignation",
+            "locationName": "Emplacement",
+            "stockOnHand": "Stock disponible",
+            "stockMin": "Stock min.",
+            "stockMax": "Stock max.",
+            "deficit": "Déficit",
+            "urgency": "Urgence",
+            "delaiReapproJours": "Délai (j)",
+            "fournisseurName": "Fournisseur préféré"
+          },
+          "filters": {
+            "urgency": "Urgence",
+            "urgencyPlaceholder": "Toutes",
+            "fournisseur": "Fournisseur",
+            "fournisseurPlaceholder": "Tous",
+            "article": "Article",
+            "allArticles": "Tous",
+            "allCritical": "Critique",
+            "allInAlert": "En alerte"
+          },
+          "emptyTitle": "Aucune alerte",
+          "emptyMessage": "Tous les articles ont un niveau de stock suffisant."
+        },
+        "actions": {
+          "createReception": "Créer réception",
+          "editThreshold": "Modifier seuil"
+        },
+        "dialog": {
+          "title": "Modifier le seuil minimum",
+          "newThresholdLabel": "Nouveau seuil minimum",
+          "cancel": "Annuler",
+          "save": "Enregistrer"
+        },
+        "toasts": {
+          "thresholdUpdated": "Seuil mis à jour"
+        }
+      },
+      "etatStock": {
+        "headerTitle": "État des stocks",
+        "subtitle": "Soldes par article et emplacement. Filtrez et exportez.",
+        "kpis": {
+          "totalArticles": "Articles distincts",
+          "totalArticlesHint": "Avec mouvement de stock",
+          "totalSku": "SKU suivis",
+          "totalSkuHint": "Article × emplacement",
+          "valueMad": "Valorisation totale",
+          "valueMadHint": "Valeur stock × PMP",
+          "rupture": "Ruptures",
+          "ruptureHint": "Stock = 0",
+          "belowMin": "Sous seuil",
+          "belowMinHint": "Stock < stock min"
+        },
+        "columns": {
+          "articleCode": "Code article",
+          "articleName": "Désignation",
+          "locationName": "Emplacement",
+          "locationType": "Type emplacement",
+          "familleName": "Famille",
+          "uomCode": "Unité",
+          "stockOnHand": "Stock physique",
+          "stockReserved": "Réservé",
+          "stockAvailable": "Disponible",
+          "pmp": "PMP (MAD)",
+          "valueMad": "Valeur (MAD)",
+          "stockMin": "Stock min.",
+          "derniereOperation": "Dernier mouvement"
+        },
+        "filters": {
+          "article": "Article",
+          "articlePlaceholder": "Code, désignation…",
+          "location": "Emplacement",
+          "locationPlaceholder": "Tous",
+          "famille": "Famille",
+          "famillePlaceholder": "Toutes",
+          "statut": "Statut stock",
+          "statutAll": "Tous",
+          "statutRupture": "Rupture",
+          "statutBelowMin": "Sous min.",
+          "statutOk": "OK"
+        },
+        "actions": {
+          "export": "Exporter (Excel)",
+          "exportPdf": "Exporter (PDF)",
+          "printLabels": "Imprimer étiquettes"
+        },
+        "exportToast": {
+          "title": "Export en cours",
+          "message": "L'export Excel sera téléchargé dans quelques secondes."
+        },
+        "labelsToast": {
+          "title": "Impression étiquettes",
+          "message": "Les étiquettes vont être imprimées pour {count} articles."
+        },
+        "emptyTitle": "Aucun article en stock",
+        "noData": "Aucune donnée disponible pour les filtres sélectionnés.",
+        "currency": "MAD",
+        "lookups": {
+          "allDepots": "Tous"
+        }
+      },
+      "valorisation": {
+        "headerTitle": "Valorisation stock",
+        "subtitle": "Méthode : {method} — Période : {period}",
+        "methods": {
+          "AVCO": "AVCO (coût moyen pondéré)",
+          "FIFO": "FIFO (premier entré, premier sorti)",
+          "CUMP": "CUMP / PMP"
+        },
+        "columns": {
+          "articleCode": "Code",
+          "articleName": "Désignation",
+          "familleName": "Famille",
+          "stockOnHand": "Stock",
+          "uomCode": "Unité",
+          "coutUnitaire": "Coût unit.",
+          "valueMad": "Valeur (MAD)",
+          "evolution": "Évolution"
+        },
+        "filters": {
+          "method": "Méthode",
+          "famille": "Famille",
+          "famillePlaceholder": "Toutes",
+          "period": "Période",
+          "all": "Tous"
+        },
+        "noData": "Aucune donnée disponible",
+        "currency": "MAD"
+      },
+      "stockBalances": {
+        "entityName": "Solde de stock",
+        "entityNamePlural": "Soldes de stock",
+        "headerTitle": "Soldes de stock",
+        "headerTitleNew": "Nouveau solde",
+        "headerTitleDetail": "Détail solde",
+        "saveSuccess": "Solde « {name} » enregistré",
+        "deleteConfirm": {
+          "title": "Supprimer le solde",
+          "message": "Voulez-vous vraiment supprimer « {name} » ?"
+        }
+      }
+    },
+    "reservations": {
+      "headerTitle": "Réservations stock chantier",
+      "subtitle": "Disponible = stock physique − réservations actives (M-STK-02).",
+      "form": {
+        "articleId": "Article id",
+        "chantierId": "Chantier budget id",
+        "qte": "Qté",
+        "uom": "Unité",
+        "dateBesoin": "Date besoin",
+        "dateExpiration": "Date expiration",
+        "motif": "Motif",
+        "submit": "Créer réservation"
+      },
+      "columns": {
+        "article": "Article",
+        "chantier": "Chantier",
+        "qte": "Qté",
+        "besoin": "Besoin",
+        "expiration": "Expiration",
+        "statut": "Statut"
+      },
+      "actions": {
+        "cancel": "Annuler"
+      },
+      "footer": {
+        "sortiesLink": "Sorties",
+        "sortiesText": "consomment les réservations FIFO à la validation."
+      }
+    },
+    "components": {
+      "linesEditor": {
+        "addLine": "Ligne",
+        "empty": "Aucune ligne — cliquez sur « Ligne » pour ajouter un article",
+        "removeAria": "Supprimer la ligne",
+        "columns": {
+          "article": "Article",
+          "designation": "Désignation",
+          "qty": "Qté",
+          "qtyReceived": "Qté reçue",
+          "qtyTransfer": "Qté à transférer",
+          "qtyReturn": "Qté retour",
+          "qtyTheoretical": "Qté théorique",
+          "qtyPhysical": "Qté physique",
+          "variance": "Écart",
+          "unitPrice": "Prix unit. (MAD)",
+          "total": "Total",
+          "uom": "Unité",
+          "notes": "Notes",
+          "actions": "Actions",
+          "qtySortie": "Qté sortie",
+          "qtyPerdue": "Qté perdue",
+          "causeDetaillee": "Cause détaillée",
+          "totalHT": "Total HT",
+          "valeur": "Valeur"
+        },
+        "total": {
+          "reception": "Total réception",
+          "transfert": "Total transfert",
+          "retour": "Total retour",
+          "perte": "Total perte",
+          "inventaire": "Variance totale"
+        },
+        "reception": {
+          "emptyMessage": "Aucune ligne — cliquez sur « Ligne » pour ajouter un article",
+          "articleLabel": "Article"
+        },
+        "transfert": {
+          "emptyMessage": "Aucune ligne à transférer — cliquez sur « Ligne ».",
+          "sourceStockLabel": "Dispo source"
+        },
+        "retour": {
+          "emptyMessage": "Aucune ligne — cliquez sur « Ligne » pour ajouter un retour.",
+          "motifLabel": "Motif retour"
+        },
+        "perte": {
+          "emptyMessage": "Aucune ligne — cliquez sur « Ligne » pour déclarer une perte.",
+          "motifLabel": "Motif",
+          "causeLabel": "Cause",
+          "totalSortieHT": "Total HT sortie",
+          "totalValeurPerdue": "Total valeur perdue"
+        },
+        "inventaire": {
+          "emptyMessage": "Aucune ligne — cliquez sur « Charger stock » pour démarrer l’inventaire.",
+          "loadStock": "Charger stock",
+          "loadStockButton": "Charger stock",
+          "emptyAfterLoad": "Aucun stock à inventorier dans cet emplacement.",
+          "emptyInitial": "Cliquez sur « Charger stock » pour démarrer l’inventaire.",
+          "ecartLabel": "Écart"
+        },
+        "etatArticle": "État article",
+        "etatLabel": "État",
+        "motifLabel": "Motif",
+        "loadStock": "Charger stock"
+      },
+      "stockCell": {
+        "reserved": "({value} réservé)",
+        "available": "({value} dispo)",
+        "unitSuffix": "{value} {uom}"
+      },
+      "locationBadge": {
+        "DEPOT": "Dépôt",
+        "ENTREPOT": "Entrepôt",
+        "CHANTIER": "Chantier",
+        "TRANSIT": "Transit",
+        "VIRTUEL": "Virtuel"
+      }
+    },
+    "valorisation": {
+      "title": "Valorisation stock",
+      "subtitle": "Évolution & ventilation par famille et emplacement",
+      "date": "Date de valorisation",
+      "costingMethod": "Méthode",
+      "byFamille": "Par famille",
+      "byLocation": "Par emplacement",
+      "noData": "Aucune donnée disponible",
+      "famille": "Famille",
+      "articleCount": "Articles",
+      "totalQty": "Qté totale",
+      "totalValue": "Valeur totale (MAD)",
+      "percent": "% du total",
+      "location": "Emplacement",
+      "type": "Type",
+      "value": "Valeur (MAD)",
+      "kpi": {
+        "totalValue": "Valeur totale stock",
+        "depotValue": "Valeur en dépôt",
+        "chantierValue": "Valeur en chantier",
+        "monthlyVariation": "Variation mensuelle"
+      }
+    }
+  }
+}

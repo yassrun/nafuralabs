@@ -1,0 +1,377 @@
+{
+  "dashboard": {
+    "pilotage": {
+      "title": "Steering",
+      "subtitle": "Group dashboard",
+      "breadcrumb": "Steering"
+    },
+    "margesChantier": {
+      "title": "Steering — Site margins",
+      "subtitle": "Consolidated view of per-site profitability",
+      "breadcrumb": "Site margins",
+      "routeTitle": "Site margins",
+      "routeBreadcrumb": "Margins",
+      "kpis": {
+        "chantiersActifs": "Active sites",
+        "portefeuille": "Total portfolio (excl. VAT)",
+        "margeGlobale": "Overall margin",
+        "margeHt": "Margin (excl. VAT, cumulated)",
+        "alertesMargeBasse": "Margin < 5% alerts",
+        "alertesFacturationAvancement": "Invoiced vs progress alerts"
+      },
+      "filters": {
+        "searchPlaceholder": "Code, name, city…",
+        "allStatuses": "All statuses",
+        "sortBy": {
+          "marge": "Sort by margin",
+          "avancement": "Sort by progress",
+          "montant": "Sort by contract amount",
+          "code": "Sort by code"
+        }
+      },
+      "actions": {
+        "exportCsv": "Export CSV"
+      },
+      "count": "{count} site(s)",
+      "columns": {
+        "chantier": "Site",
+        "ville": "City",
+        "marcheHt": "Contract (excl. VAT)",
+        "factureHt": "Invoiced (excl. VAT)",
+        "pctFacture": "% Invoiced",
+        "avancement": "Progress",
+        "diffFactAv": "Δ Inv./Prog.",
+        "encaisseHt": "Received (excl. VAT)",
+        "margeProjetee": "Projected margin",
+        "margePct": "Margin %",
+        "statut": "Status"
+      },
+      "diffPts": "{value} pts",
+      "empty": "No sites.",
+      "legend": "🔴 Margin < 5% — urgent action · 🟡 Margin 5–15% — caution · 🟢 Margin > 15% · ⚠ Δ Inv./Prog. > 10 pts: over-invoicing risk",
+      "export": {
+        "filename": "steering-site-margins",
+        "headers": {
+          "code": "Code",
+          "nom": "Name",
+          "ville": "City",
+          "statut": "Status",
+          "marcheHt": "Contract (excl. VAT)",
+          "factureHt": "Invoiced (excl. VAT)",
+          "pctFacture": "% Invoiced",
+          "avancement": "Progress %",
+          "diffFactAv": "Δ Inv-Prog (pts)",
+          "encaisseHt": "Received (excl. VAT)",
+          "margeProjetee": "Projected margin (excl. VAT)",
+          "margePct": "Margin %"
+        },
+        "auditLabel": "Site margins",
+        "auditDetail": "CSV export — {count} row(s)"
+      }
+    },
+    "margeConsolidee": {
+      "title": "Steering — Consolidated margin",
+      "subtitle": "Group overview: portfolio, invoiced cash and risk zones",
+      "breadcrumb": "Consolidated margin",
+      "routeTitle": "Consolidated margin",
+      "routeBreadcrumb": "Consolidated margin",
+      "intro": "Executive view complementing",
+      "introLink": "Site margins",
+      "introDetail": "(line-by-line detail).",
+      "kpis": {
+        "portefeuille": "Contract portfolio (excl. VAT)",
+        "factureHt": "Invoiced (excl. VAT, cumulated)",
+        "encaisseHt": "Received (excl. VAT, cumulated)",
+        "tauxEncaisse": "Collection rate (received / invoiced)",
+        "margeProjetee": "Group projected margin",
+        "chantiersActifs": "Active sites"
+      },
+      "risques": {
+        "title": "Top margin risks (< 10%)",
+        "columns": {
+          "chantier": "Site",
+          "marcheHt": "Contract (excl. VAT)",
+          "margePct": "Margin %"
+        },
+        "empty": "No site below 10% on mock data."
+      },
+      "parVille": {
+        "title": "Breakdown by city",
+        "columns": {
+          "ville": "City",
+          "chantiers": "Sites",
+          "portefeuilleHt": "Portfolio (excl. VAT)",
+          "margeHt": "Margin (excl. VAT)"
+        },
+        "empty": "—"
+      },
+      "alertes": {
+        "title": "Cross-cutting alerts",
+        "margeBasse": "{count} site(s) with projected margin < 5%",
+        "ecartFactAv": "{count} site(s) with invoicing / progress gap > 10 pts"
+      }
+    },
+    "cashFlow": {
+      "title": "Cash-flow forecast",
+      "subtitle": "Rolling 12 months — Inflows & outflows",
+      "breadcrumb": "Cash flow",
+      "routeTitle": "Cash-flow forecast",
+      "routeBreadcrumb": "Cash flow",
+      "kpis": {
+        "soldeProjete": "Projected balance M+12",
+        "seuilAlerte": "Alert threshold",
+        "moisSousSeuil": "Months below threshold"
+      },
+      "legend": {
+        "encaissements": "Inflows",
+        "decaissements": "Outflows"
+      },
+      "columns": {
+        "mois": "Month",
+        "encaissementsPrevus": "Expected inflows",
+        "decaissementsPrevus": "Expected outflows",
+        "soldeMensuel": "Monthly balance",
+        "soldeCumule": "Cumulated balance",
+        "alerte": "Alert"
+      },
+      "alerteBadge": "⚠ Below threshold",
+      "tooltip": {
+        "encaissements": "Inflows",
+        "decaissements": "Outflows",
+        "solde": "Balance",
+        "situations": "Progress statements",
+        "tresoChantiers": "Site cash",
+        "ff": "Supplier invoices",
+        "paie": "Payroll",
+        "chargesSoc": "Social charges",
+        "traites": "Bills"
+      }
+    },
+    "analyses": {
+      "title": "Steering & Analytics",
+      "breadcrumb": "Analytics",
+      "rentabilite": {
+        "title": "Steering & Analytics — Profitability",
+        "subtitle": "Site margins, multi-axis pivot",
+        "breadcrumb": "Profitability",
+        "routeTitle": "Analytics — Profitability",
+        "routeBreadcrumb": "Profitability",
+        "kpis": {
+          "margeBrute": "Gross margin YTD",
+          "margeNette": "Net margin YTD",
+          "margeMoyenne": "Average margin"
+        },
+        "topTitle": "Top 5 sites (margin %)",
+        "flopTitle": "Bottom 5 sites (margin %)",
+        "pivot": {
+          "title": "Multi-axis margins (pivot)",
+          "axes": {
+            "chantier": "Site",
+            "bu": "BU / Company",
+            "client": "Customer",
+            "moa": "Project Owner",
+            "typeMarche": "Contract type"
+          },
+          "exportCsv": "Export CSV",
+          "columns": {
+            "axe": "Axis",
+            "marcheHt": "Contract (excl. VAT)",
+            "factureHt": "Invoiced (excl. VAT)",
+            "margeHt": "Margin (excl. VAT)",
+            "margePct": "Margin %"
+          }
+        },
+        "loading": "Loading indicators…",
+        "export": {
+          "filename": "steering-margins-pivot",
+          "headers": {
+            "axe": "Axis",
+            "marcheHt": "Contract (excl. VAT)",
+            "factureHt": "Invoiced (excl. VAT)",
+            "margeHt": "Margin (excl. VAT)",
+            "margePct": "Margin %"
+          }
+        }
+      },
+      "financier": {
+        "title": "Steering & Analytics — Financial",
+        "subtitle": "Revenue, receivables, payables, BFR (mock accounting)",
+        "breadcrumb": "Financial",
+        "routeTitle": "Analytics — Financial",
+        "routeBreadcrumb": "Financial",
+        "kpis": {
+          "caFactureYtd": "Invoiced revenue YTD",
+          "caEncaisse": "Cash collected",
+          "creancesOuvertes": "Open receivables",
+          "dettesFournisseurs": "Supplier payables",
+          "bfr": "Working capital requirement (BFR)",
+          "ratioLiquidite": "Liquidity ratio"
+        }
+      },
+      "stock": {
+        "title": "Steering & Analytics — Stock",
+        "subtitle": "Valuation, turnover, consumption",
+        "breadcrumb": "Stock",
+        "routeTitle": "Analytics — Stock",
+        "routeBreadcrumb": "Stock",
+        "kpis": {
+          "valeurStockTotale": "Total stock value",
+          "rotation": "Turnover (days approx.)",
+          "valeurChantier": "Site stock",
+          "valeurCentral": "Central stock / warehouses"
+        },
+        "topArticles": "Top 10 items consumed (issues)",
+        "empty": "—"
+      },
+      "achats": {
+        "title": "Steering & Analytics — Procurement",
+        "subtitle": "PO volume, suppliers, dependency",
+        "breadcrumb": "Procurement",
+        "routeTitle": "Analytics — Procurement",
+        "routeBreadcrumb": "Procurement",
+        "kpis": {
+          "volumeYtd": "Volume YTD (excl. VAT)",
+          "nbBc": "Number of POs",
+          "economiesVsMarche": "Savings vs market",
+          "dependanceMax": "Maximum dependency"
+        },
+        "topFournisseurs": "Top suppliers YTD"
+      },
+      "rh": {
+        "title": "Steering & Analytics — HR",
+        "subtitle": "Headcount, payroll mass, absenteeism",
+        "breadcrumb": "HR",
+        "routeTitle": "Analytics — HR",
+        "routeBreadcrumb": "HR",
+        "kpis": {
+          "effectif": "Active headcount",
+          "masseSalariale": "Payroll mass YTD (gross)",
+          "absenteisme": "Absenteeism",
+          "rotation": "Turnover",
+          "pyramide": "Under 35 (age pyramid)",
+          "heuresSup": "Overtime YTD"
+        }
+      },
+      "whatIf": {
+        "title": "Steering & Analytics — What-if",
+        "subtitle": "Delay, change orders, material price hike, site loss scenarios",
+        "breadcrumb": "What-if",
+        "routeTitle": "Analytics — What-if",
+        "routeBreadcrumb": "What-if",
+        "controls": {
+          "retardJours": "Average site delay (days)",
+          "impactOs": "Service order / risk impact (% cost)",
+          "hausseMatiere": "Steel / material price hike (%)",
+          "perteMarge": "Active site loss (% margin)"
+        },
+        "scenarioActuel": "Current scenario",
+        "scenarioSimule": "Simulated scenario",
+        "margeBruteYtd": "Gross margin YTD",
+        "soldeCashflow": "Cash-flow balance M+12"
+      },
+      "opexCapex": {
+        "title": "Steering & Analytics — OPEX / CAPEX",
+        "subtitle": "YTD movements by accounting class (demo)",
+        "breadcrumb": "OPEX / CAPEX",
+        "routeTitle": "Analytics — OPEX / CAPEX",
+        "routeBreadcrumb": "OPEX / CAPEX",
+        "kpis": {
+          "opex": "OPEX (class 6)",
+          "capex": "CAPEX (class 2)"
+        }
+      },
+      "groupe": {
+        "title": "Steering & Analytics — Group",
+        "subtitle": "Consolidated view (main entity — intercos coming Task 13)",
+        "breadcrumb": "Group",
+        "routeTitle": "Analytics — Group",
+        "routeBreadcrumb": "Group",
+        "kpis": {
+          "ca": "Consolidated revenue",
+          "marge": "Consolidated gross margin",
+          "ebitda": "EBITDA approx.",
+          "bfrNet": "Group net working capital"
+        },
+        "hint": "Inter-company elimination: placeholder until multi-entity (M-ADM-03)."
+      }
+    },
+    "common": {
+      "loading": "Loading…"
+    },
+    "approbations": {
+      "title": "Approvals",
+      "breadcrumb": "Approvals",
+      "routeTitle": "Approvals",
+      "routeBreadcrumb": "Approvals",
+      "subtitleCount": "{count} request(s) pending decision",
+      "tabs": {
+        "aTraiter": "To process",
+        "historique": "History"
+      },
+      "filters": {
+        "allTypes": "All types",
+        "allSocietes": "All companies",
+        "allUrgences": "All urgencies"
+      },
+      "urgence": {
+        "normale": "Normal",
+        "haute": "High",
+        "critique": "Critical"
+      },
+      "card": {
+        "par": "By {nom}",
+        "slaBadge": "SLA +{days}d",
+        "slaExp": "SLA exp. {date}",
+        "slaRestants": "{days}d remaining",
+        "auditTitle": "Journal & SHA-256 fingerprints ({count})",
+        "viewLinkAria": "View approval request {id}",
+        "etape": "step {current}/{total}"
+      },
+      "actions": {
+        "approve": "✓ Approve",
+        "reject": "✗ Reject",
+        "askComplement": "Request more info",
+        "comment": "Comment",
+        "delegate": "Delegate",
+        "viewDetail": "View details →",
+        "submit": "Submit for approval"
+      },
+      "empty": {
+        "aTraiter": "No pending requests. 🎉",
+        "historique": "No history."
+      },
+      "prompts": {
+        "rejectReason": "Reason for rejection (required):",
+        "complement": "Specify the documents or information expected from the initiator:",
+        "comment": "Comment (internal / initiator):",
+        "delegate": "Delegate name (demo):"
+      },
+      "toasts": {
+        "complementSent": "Request for more info sent — the initiator is notified (demo).",
+        "commentSaved": "Comment saved.",
+        "delegationSaved": "Delegation saved to {nom} (full routing: Task 12 P1).",
+        "entityNotLinked": "Open detail: this type is not wired in the demo.",
+        "submitted": "{ref} submitted for approval."
+      },
+      "pill": {
+        "enAttente": "Pending approval",
+        "approuve": "Approved",
+        "rejete": "Rejected",
+        "expire": "Expired"
+      },
+      "audit": {
+        "submitDetail": "Submitted for approval",
+        "submitDetailWithAmount": "Submitted for approval — {amount} MAD",
+        "stepApproved": "Step approved ({current}/{total}) — {par}",
+        "fullyApproved": "Request approved (workflow complete) — {par}",
+        "defaultRejection": "Rejection — {par}",
+        "initiator": "Current user",
+        "selfApprover": "Me"
+      },
+      "societes": {
+        "nafura": "Nafura SA",
+        "subsidiary": "Demo subsidiary"
+      }
+    }
+  }
+}

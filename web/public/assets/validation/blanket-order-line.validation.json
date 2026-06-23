@@ -1,0 +1,23 @@
+{
+  "entity": "BlanketOrderLine",
+  "fields": {
+    "blanketOrderId": {
+      "required": true
+    },
+    "lineNumber": {
+      "required": true,
+      "min": 1
+    },
+    "quantity": {
+      "required": true,
+      "min": 0.0001
+    },
+    "unitPrice": {
+      "required": true,
+      "min": 0
+    },
+    "releasedQuantity": {
+      "min": 0
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "entity": "VendorInvoice",
+  "fields": {
+    "invoiceNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "vendorId": {
+      "required": true
+    },
+    "invoiceDate": {
+      "required": true
+    },
+    "dueDate": {
+      "required": true
+    },
+    "currencyId": {
+      "required": true
+    },
+    "subtotalAmount": {
+      "required": true,
+      "min": 0
+    },
+    "taxAmount": {
+      "min": 0
+    },
+    "totalAmount": {
+      "required": true,
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

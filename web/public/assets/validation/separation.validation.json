@@ -1,0 +1,27 @@
+{
+  "entity": "Separation",
+  "fields": {
+    "separationNumber": {
+      "required": true,
+      "maxLength": 30,
+      "unique": true
+    },
+    "employeeId": {
+      "required": true
+    },
+    "type": {
+      "required": true,
+      "maxLength": 30
+    },
+    "effectiveDate": {
+      "required": true
+    },
+    "reason": {
+      "maxLength": 2000
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

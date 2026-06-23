@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --surface: #fafaf8;
+  --surface-container-low: #eeebe4;
+  --surface-container-highest: #ffffff;
+  --surface-dark: #00333c;
+  --surface-dark-elevated: #004b57;
+  --primary: #00333c;
+  --primary-container: #004b57;
+  --primary-light: #005566;
+  --accent: #e9c176;
+  --accent-light: #f0d49a;
+  --secondary: #5cb8c4;
+  --secondary-container: #d4eef1;
+  --border-ghost: rgba(0, 51, 60, 0.15);
+  --text: #131415;
+  --text-muted: #757778;
+  --text-on-dark: #fafaf8;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--surface);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Hero: deep teal authority + soft amber light + primary-container glow */
+.hero-mesh {
+  background:
+    linear-gradient(180deg, #00333c 0%, #004b57 42%, #00333c 100%),
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(233, 193, 118, 0.12), transparent),
+    radial-gradient(ellipse 60% 40% at 82% 58%, rgba(0, 75, 87, 0.35), transparent);
+}
+
+@layer components {
+  /* Primary CTA — gradient soul (primary → primary-container) */
+  .btn-primary-gradient {
+    @apply inline-flex items-center justify-center rounded bg-gradient-to-br from-primary to-primary-container px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-none transition;
+    @apply hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent/50;
+  }
+
+  .btn-primary-gradient-lg {
+    @apply inline-flex items-center justify-center rounded px-6 py-3 text-sm font-semibold text-primary-foreground shadow-none transition;
+    @apply bg-gradient-to-br from-primary to-primary-container hover:brightness-110;
+    @apply focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent/50;
+  }
+
+  /* Secondary — ghost, blueprint outline */
+  .btn-secondary-ghost {
+    @apply rounded border border-ghost-line-strong bg-transparent transition;
+    @apply hover:bg-ghost-line/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent/40;
+  }
+
+  .btn-secondary-ghost-on-dark {
+    @apply rounded border border-white/20 bg-transparent text-white transition;
+    @apply hover:border-white/35 hover:bg-white/5;
+  }
+
+  /* Nav / overlays — glass (60% + 12px blur) */
+  .glass-nav {
+    @apply bg-surface/60 backdrop-blur-[12px];
+  }
+
+  /* Architect inputs — surface tier + bottom rule only */
+  .input-architect {
+    @apply w-full rounded-t border-0 border-b border-ghost-line-strong bg-surface-container-low px-0 py-3 text-body-lg text-neutral-900 placeholder:text-neutral-400;
+    @apply focus:border-primary focus:outline-none focus:ring-0;
+  }
+
+  .input-architect-boxed {
+    @apply w-full rounded border-0 border-b border-ghost-line-strong bg-surface-container-low px-4 py-3 text-body-lg text-neutral-900 placeholder:text-neutral-400;
+    @apply focus:border-primary focus:outline-none focus:ring-0;
+  }
+}

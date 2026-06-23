@@ -1,0 +1,110 @@
+/**
+ * Anatomy ERP — design tokens + global utility styles (BTP Maroc)
+ * Extends platform/core/styles/_colors.scss.
+ */
+
+:root {
+  // Typography scale (design system §11) — use for body + headings outside Material
+  --nf-text-xs: 0.75rem;
+  --nf-text-sm: 0.8125rem;
+  --nf-text-base: 0.875rem;
+  --nf-text-md: 1rem;
+  --nf-text-lg: 1.125rem;
+  --nf-text-xl: 1.25rem;
+  --nf-text-2xl: 1.5rem;
+  --nf-text-3xl: 2rem;
+  --nf-leading-tight: 1.25;
+  --nf-leading-normal: 1.5;
+  --nf-leading-relaxed: 1.625;
+  // Aliases consumed by molecules (backward compatible)
+  --nf-font-size-xs: var(--nf-text-xs);
+  --nf-font-size-sm: var(--nf-text-sm);
+  --nf-font-size-base: var(--nf-text-base);
+  --nf-font-size-md: var(--nf-text-md);
+  --nf-font-size-lg: var(--nf-text-lg);
+  --nf-font-size-xl: var(--nf-text-xl);
+  --nf-font-size-2xl: var(--nf-text-2xl);
+  --nf-font-size-3xl: var(--nf-text-3xl);
+  --nf-line-height-tight: var(--nf-leading-tight);
+  --nf-line-height-normal: var(--nf-leading-normal);
+  --nf-line-height-relaxed: var(--nf-leading-relaxed);
+
+  // Status — consistent across all ERP entities
+  --nf-status-brouillon-bg: #f1f5f9;
+  --nf-status-brouillon-fg: #475569;
+  --nf-status-info-bg: #dbeafe;
+  --nf-status-info-fg: #1d4ed8;
+  --nf-status-success-bg: #dcfce7;
+  --nf-status-success-fg: #166534;
+  --nf-status-warning-bg: #fef9c3;
+  --nf-status-warning-fg: #854d0e;
+  --nf-status-danger-bg: #fee2e2;
+  --nf-status-danger-fg: #991b1b;
+  --nf-status-neutral-bg: #f8fafc;
+  --nf-status-neutral-fg: #64748b;
+
+  // Currency / finance
+  --nf-color-amount-positive: #166534;
+  --nf-color-amount-negative: #991b1b;
+  --nf-color-amount-neutral: #1e293b;
+
+  // BTP specific
+  --nf-color-chantier-en-cours: #0d9488;
+  --nf-color-chantier-suspendu: #f59e0b;
+  --nf-color-chantier-termine: #0284c7;
+  --nf-color-chantier-retard: #dc2626;
+}
+
+// ── F-40: Dark mode overrides (applied by ThemeModeService via .nf-theme-dark) ─
+.nf-theme-dark {
+  --nf-status-brouillon-bg: #1e293b;
+  --nf-status-brouillon-fg: #94a3b8;
+  --nf-status-info-bg: #1e3a5f;
+  --nf-status-info-fg: #93c5fd;
+  --nf-status-success-bg: #14532d;
+  --nf-status-success-fg: #86efac;
+  --nf-status-warning-bg: #422006;
+  --nf-status-warning-fg: #fde68a;
+  --nf-status-danger-bg: #450a0a;
+  --nf-status-danger-fg: #fca5a5;
+}
+
+// ── F-23: Filter tabs / status pill strips — mobile scrollable ──────────────
+// Apply .filter-tabs to any horizontal filter row.
+.filter-tabs,
+.nf-filter-tabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 2px; // leave room for focus ring
+
+  // Hide scrollbar (still scrollable)
+  &::-webkit-scrollbar { display: none; }
+  scrollbar-width: none;
+
+  > * {
+    scroll-snap-align: start;
+    flex-shrink: 0;
+  }
+}
+
+// ── F-23: Toolbar rows — prevent overflow on small screens ─────────────────
+.erp-toolbar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    align-items: stretch;
+
+    input[type="search"],
+    select {
+      width: 100%;
+    }
+  }
+}

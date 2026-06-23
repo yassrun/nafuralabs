@@ -1,0 +1,18 @@
+{
+  "entity": "ItemUnitConversion",
+  "fields": {
+    "itemId": {
+      "required": true
+    },
+    "fromUnit": {
+      "maxLength": 30
+    },
+    "toUnit": {
+      "maxLength": 30
+    },
+    "factor": {
+      "required": true,
+      "min": 0
+    }
+  }
+}

@@ -1,0 +1,26 @@
+plugins {
+    id 'java-library'
+}
+
+dependencies {
+    implementation project(':platform:core:framework')
+    implementation project(':platform:core:authorization')
+    implementation project(':platform:core:identity')
+    implementation project(':platform:features:collaboration:doc-manager')
+    implementation project(':platform:features:collaboration:audit')
+    implementation project(':platform:features:collaboration:comment')
+    implementation project(':platform:features:collaboration:workflow')
+
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // SendGrid Email Service
+    implementation 'com.sendgrid:sendgrid-java:4.10.1'
+
+    // Thymeleaf for email template variable substitution (same as Print Templates)
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+    // Testing
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}

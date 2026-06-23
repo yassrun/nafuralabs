@@ -1,0 +1,25 @@
+{
+  "entity": "PaySlip",
+  "fields": {
+    "paySlipNumber": {
+      "required": true,
+      "maxLength": 60
+    },
+    "grossAmount": {
+      "min": 0
+    },
+    "deductions": {
+      "min": 0
+    },
+    "netAmount": {
+      "min": 0
+    },
+    "paymentMethod": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

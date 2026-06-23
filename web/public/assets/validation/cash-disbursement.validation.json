@@ -1,0 +1,38 @@
+{
+  "entity": "CashDisbursement",
+  "fields": {
+    "disbursementNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "disbursementDate": {
+      "required": true
+    },
+    "amount": {
+      "required": true,
+      "min": 0
+    },
+    "currency": {
+      "required": true,
+      "maxLength": 10
+    },
+    "paymentMethod": {
+      "required": true,
+      "maxLength": 30
+    },
+    "bankAccountId": {
+      "required": true
+    },
+    "reference": {
+      "maxLength": 200
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "entity": "ScheduledRelease",
+  "fields": {
+    "releaseNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "quantity": {
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

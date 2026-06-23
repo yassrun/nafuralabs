@@ -1,0 +1,16 @@
+{
+  "entity": "LeaveCancellation",
+  "fields": {
+    "cancellationNumber": {
+      "required": true,
+      "maxLength": 60
+    },
+    "reason": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

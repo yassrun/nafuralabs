@@ -1,0 +1,534 @@
+/**
+ * Nafura Lifecycle - Database Migrations (Liquibase)
+ *
+ * Collects SQL migration files from platform/backend/features/lifecycle sources
+ * and generates a single Liquibase master changelog consumed by the lifecycle image.
+ */
+
+import java.security.MessageDigest
+import java.util.Locale
+import groovy.json.JsonSlurper
+
+// Disable Java compilation for this project - we only collect SQL files
+tasks.withType(JavaCompile).configureEach {
+    enabled = false
+}
+tasks.withType(ProcessResources).configureEach {
+    enabled = false
+}
+tasks.withType(Jar).configureEach {
+    enabled = false
+}
+
+def migrationOutputDir = file("${buildDir}/migrations")
+def changelogOutputDir = file("${buildDir}/changelog")
+def generatedMasterChangelog = file("${changelogOutputDir}/db.changelog-master.yaml")
+def ADMINISTRATION_FEATURES = ['iam', 'subscription'] as Set
+def CONFIGURATION_FEATURES = ['settings', 'sysconfig'] as Set
+
+// Platform feature id -> backend module path (for manifest "features" toggles)
+def PLATFORM_FEATURE_MODULE_PATHS = [
+    'iam'              : 'platform/backend/features/administration/iam',
+    'subscription'     : 'platform/backend/features/administration/subscription',
+    'app-settings'     : 'platform/backend/features/app-settings',
+    'user-settings'    : 'platform/backend/features/user-settings',
+    'sysconfig'        : 'platform/backend/features/configuration/sysconfig',
+    'notification'     : 'platform/backend/features/collaboration/notification',
+    'doc-manager'      : 'platform/backend/features/collaboration/doc-manager',
+    'audit'            : 'platform/backend/features/collaboration/audit',
+    'comment'          : 'platform/backend/features/collaboration/comment',
+    'workflow'         : 'platform/backend/features/collaboration/workflow',
+    'tagging'          : 'platform/backend/features/collaboration/tagging',
+    'doc-extractor'     : 'platform/backend/features/documents/doc-extractor',
+    'llm-provider'     : 'platform/backend/features/ai/llm-provider',
+    'ai-conversation'   : 'platform/backend/features/ai/ai-conversation',
+    'ai-agent-runtime' : 'platform/backend/features/ai/ai-agent-runtime',
+] as Map
+
+def resolveFeatureModulePath = { String featureId ->
+    def group = ADMINISTRATION_FEATURES.contains(featureId)
+                ? 'administration'
+                : CONFIGURATION_FEATURES.contains(featureId)
+                    ? 'configuration'
+                    : 'business'
+    return "platform/backend/features/${group}/${featureId}"
+}
+
+def resolveSpecFeatureManifest = { File featuresRoot, String featureId ->
+    def group = ADMINISTRATION_FEATURES.contains(featureId)
+                ? 'administration'
+                : CONFIGURATION_FEATURES.contains(featureId)
+                    ? 'configuration'
+                    : 'business'
+    def groupedPath = new File(featuresRoot, "${group}/${featureId}/${featureId}.feature.json")
+    if (groupedPath.exists()) {
+        return groupedPath
+    }
+    return new File(featuresRoot, "${featureId}/${featureId}.feature.json")
+}
+
+def resolveAppFeatures = { String appId ->
+    def repoRoot = rootProject.projectDir
+    def appManifest = new File(repoRoot, "products/sektor-btp/sektor-btp.application.json")
+    if (!appManifest.exists()) {
+        throw new GradleException("Application manifest not found for app '${appId}': ${appManifest}")
+    }
+
+    def applicationDef = new JsonSlurper().parse(appManifest)
+    def features = new LinkedHashSet<String>()
+    def domainsDir = new File(repoRoot, 'products/sektor-btp/backend/modules')
+    def standaloneDomainsRoot = domainsDir
+    def featuresRoot = new File(repoRoot, 'naf/src/spec/features')
+
+    def collectFeatureDeps
+    collectFeatureDeps = { String featureId ->
+        if (!featureId || features.contains(featureId)) {
+            return
+        }
+        features << featureId
+
+        def featureManifest = resolveSpecFeatureManifest(featuresRoot, featureId)
+        if (!featureManifest.exists()) {
+            return
+        }
+
+        def featureDef = new JsonSlurper().parse(featureManifest)
+        (featureDef.dependencies ?: []).each { dep ->
+            if (dep instanceof String && dep.trim()) {
+                collectFeatureDeps(dep.trim())
+            }
+        }
+    }
+
+    // Platform features enabled on the application manifest (primary path; no CRUX domain specs required).
+    (applicationDef.features ?: [:]).each { String featureId, enabled ->
+        if (enabled && featureId) {
+            collectFeatureDeps(featureId.toString())
+        }
+    }
+
+    // Optional legacy CRUX domain manifests (best-effort; domains are developed manually in backend/domains).
+    (applicationDef.domains ?: []).each { domainId ->
+        def standaloneDomainFile = new File(standaloneDomainsRoot, "${domainId}/${domainId}.domain.json")
+        def legacyDomainFile = new File(domainsDir, "${domainId}.domain.json")
+        def domainFile = standaloneDomainFile.exists() ? standaloneDomainFile : legacyDomainFile
+        if (!domainFile.exists()) {
+            return
+        }
+
+        def domainDef = new JsonSlurper().parse(domainFile)
+        (domainDef.features ?: []).each { featureEntry ->
+            String featureId = null
+            if (featureEntry instanceof String) {
+                featureId = featureEntry
+            } else if (featureEntry instanceof Map && featureEntry['$ref'] instanceof String) {
+                def ref = featureEntry['$ref'].toString().replace('\\', '/')
+                def parts = ref.tokenize('/')
+                featureId = parts ? parts.last().replace('.feature.json', '') : null
+            }
+            if (featureId) {
+                collectFeatureDeps(featureId)
+            }
+        }
+    }
+
+    // Foundation removed: no longer collecting foundation modules.
+    def foundationDef = (applicationDef.foundation instanceof Map) ? applicationDef.foundation : [:]
+    def foundationEnabled = foundationDef.enabled
+    if (false && (foundationEnabled == null || foundationEnabled)) {
+        (foundationDef.modules ?: []).each { moduleEntry ->
+            String featureId = null
+            if (moduleEntry instanceof String) {
+                featureId = moduleEntry.trim()
+            } else if (moduleEntry instanceof Map) {
+                if (moduleEntry.id instanceof String) {
+                    featureId = moduleEntry.id.trim()
+                } else if (moduleEntry['$ref'] instanceof String) {
+                    def ref = moduleEntry['$ref'].toString().replace('\\', '/')
+                    def parts = ref.tokenize('/')
+                    featureId = parts ? parts.last().replace('.feature.json', '') : null
+                }
+            }
+            if (featureId) {
+                collectFeatureDeps(featureId)
+            }
+        }
+    }
+
+    return features
+}
+
+def resolveScopedPlatformModules = { String appId ->
+    def repoRoot = rootProject.projectDir
+    def appManifest = new File(repoRoot, "products/sektor-btp/sektor-btp.application.json")
+    if (!appManifest.exists()) {
+        throw new GradleException("Application manifest not found for app '${appId}': ${appManifest}")
+    }
+
+    def applicationDef = new JsonSlurper().parse(appManifest)
+    def capabilities = (applicationDef.capabilities ?: [:]) as Map
+
+    def authorizationRequested = capabilities.authorization?.enabled
+    if (authorizationRequested == null) {
+        authorizationRequested = true
+    }
+
+    def tenancyMode = capabilities.tenancy?.mode ?: 'multi'
+    // Scoped tenant context is required for both multi-tenant and non-tenant (default scope) apps.
+    def tenantContextEnabled = true
+    def multiTenantMode = 'multi'.equalsIgnoreCase(tenancyMode?.toString())
+    def tenantAdminEnabled = capabilities.tenantAdmin?.enabled ?: false
+    def subscriptionsEnabled = capabilities.subscriptions?.enabled ?: false
+    def aiConversationRequested = capabilities.aiConversation?.enabled ?: false
+    def aiAgentRuntimeEnabled = capabilities.aiAgentRuntime?.enabled ?: false
+    def aiConversationEnabled = aiConversationRequested || aiAgentRuntimeEnabled
+    def authorizationEnabled = authorizationRequested || tenantContextEnabled || tenantAdminEnabled || subscriptionsEnabled
+    def requiresTenancyDomain = tenantContextEnabled || tenantAdminEnabled
+
+    def modulePaths = new LinkedHashSet<String>()
+    modulePaths << 'platform/backend/features/configuration/settings'
+    modulePaths << 'platform/backend/core/framework'
+    modulePaths << 'platform/backend/core/identity'
+    if (tenantContextEnabled) {
+        modulePaths << 'platform/backend/core/scope'
+    }
+
+    if (authorizationEnabled) {
+        modulePaths << 'platform/backend/core/authorization'
+    }
+    if (requiresTenancyDomain) {
+        modulePaths << 'platform/backend/core/tenancy'
+    }
+    if (subscriptionsEnabled || aiAgentRuntimeEnabled) {
+        modulePaths << 'platform/backend/features/administration/subscription'
+    }
+    if (tenantAdminEnabled) {
+        modulePaths << 'platform/backend/features/administration/iam'
+        modulePaths << 'platform/backend/features/app-settings'
+        modulePaths << 'platform/backend/features/user-settings'
+    }
+    if (aiConversationEnabled) {
+        modulePaths << 'platform/backend/features/ai/llm-provider'
+        modulePaths << 'platform/backend/features/ai/ai-conversation'
+    }
+    if (aiAgentRuntimeEnabled) {
+        modulePaths << 'platform/backend/features/ai/ai-agent-runtime'
+    }
+
+    return modulePaths
+}
+
+def discoverSqlSources = { String scopedAppId = null ->
+    def backendRoot = rootProject.projectDir
+    def sourceRoots = new LinkedHashSet<File>()
+
+    def platformRoot = file("${backendRoot}/platform/backend")
+    if (platformRoot.exists()) {
+        if (scopedAppId) {
+            def platformModules = resolveScopedPlatformModules(scopedAppId)
+            platformModules.each { modulePath ->
+                def moduleDir = new File(backendRoot, modulePath)
+                if (!moduleDir.exists()) {
+                    throw new GradleException("Platform module '${modulePath}' required by app '${scopedAppId}' was not found.")
+                }
+                sourceRoots << moduleDir
+            }
+
+            def appFeatures = resolveAppFeatures(scopedAppId)
+            appFeatures.each { featureId ->
+                def featureModulePath = PLATFORM_FEATURE_MODULE_PATHS[featureId] ?: resolveFeatureModulePath(featureId)
+                def featureDir = new File(backendRoot, featureModulePath)
+                if (!featureDir.exists()) {
+                    logger.warn("Feature '${featureId}' for app '${scopedAppId}' has no backend module at ${featureModulePath}; skipping its migrations.")
+                    return
+                }
+                sourceRoots << featureDir
+            }
+
+            def appManifest = new File(rootProject.projectDir, "products/sektor-btp/sektor-btp.application.json")
+            if (appManifest.exists()) {
+                def applicationDef = new JsonSlurper().parse(appManifest)
+
+                // App domains: collect migrations from backend/domains/<domain-id>.
+                (applicationDef.domains ?: []).each { domainId ->
+                    def domainDir = new File(backendRoot, "products/sektor-btp/backend/modules/${domainId}")
+                    if (domainDir.exists()) {
+                        sourceRoots << domainDir
+                    } else {
+                        logger.warn("Domain '${domainId}' listed for app '${scopedAppId}' has no backend module at domains/${domainId}; skipping its migrations.")
+                    }
+                }
+
+                // Manifest "features" (platform feature toggles): collect migrations from enabled modules.
+                (applicationDef.features ?: [:]).each { String featureId, enabled ->
+                    if (enabled && PLATFORM_FEATURE_MODULE_PATHS[featureId]) {
+                        def featureDir = new File(backendRoot, PLATFORM_FEATURE_MODULE_PATHS[featureId])
+                        if (featureDir.exists()) {
+                            sourceRoots << featureDir
+                        }
+                    }
+                }
+            }
+        } else {
+            def coreDir = new File(platformRoot, 'core')
+            if (coreDir.exists()) {
+                coreDir.eachDir { sourceRoots << it }
+            }
+
+            def servicesDir = new File(platformRoot, 'services')
+            if (servicesDir.exists()) {
+                servicesDir.eachDir { sourceRoots << it }
+            }
+
+            def featuresDir = new File(platformRoot, 'features')
+            if (featuresDir.exists()) {
+                featuresDir.eachDir { groupDir ->
+                    groupDir.eachDir { sourceRoots << it }
+                }
+            }
+        }
+    }
+
+    sourceRoots << project.projectDir
+
+    if (scopedAppId) {
+        def appBackendDir = file("${backendRoot}/products/sektor-btp/backend/app")
+        if (appBackendDir.exists()) {
+            sourceRoots << appBackendDir
+        }
+    }
+
+    def selections = []
+
+    sourceRoots.each { File root ->
+        def dbRoot = new File(root, 'src/main/resources/db')
+        if (!dbRoot.exists()) {
+            return
+        }
+
+        def changelogRoot = new File(dbRoot, 'changelog')
+        def migrationRoot = new File(dbRoot, 'migration')
+
+        def changelogSql = changelogRoot.exists()
+                ? fileTree(changelogRoot) { include '**/*.sql' }.files.toList().sort { it.path }
+                : []
+        def migrationSql = migrationRoot.exists()
+                ? fileTree(migrationRoot) { include '**/*.sql' }.files.toList().sort { it.path }
+                : []
+
+        // Prefer Liquibase-native changelog SQL when present for a module/feature.
+        def selectedFiles = !changelogSql.isEmpty() ? changelogSql : migrationSql
+        if (selectedFiles.isEmpty()) {
+            return
+        }
+
+        selectedFiles.each { File sqlFile ->
+            def relativePath = backendRoot.toPath().relativize(sqlFile.toPath()).toString().replace('\\', '/')
+            def content = sqlFile.getText('UTF-8')
+            def disableSplitStatements = content.contains('DO $$')
+            selections << [
+                    source: sqlFile,
+                    relativePath: relativePath,
+                    disableSplitStatements: disableSplitStatements
+            ]
+        }
+    }
+
+    return selections
+}
+
+def migrationSortKey = { String relativePath ->
+    def lower = relativePath.toLowerCase(Locale.ROOT)
+    def filename = relativePath.tokenize('/').last()
+
+    int layerRank = 50
+    int moduleRank = 500
+    if (lower.startsWith('platform/backend/core/')) {
+        layerRank = 10
+    } else if (lower.startsWith('platform/backend/features/configuration/')) {
+        layerRank = 25
+    } else if (lower.startsWith('platform/backend/features/business/')) {
+        layerRank = 30
+    } else if (lower.startsWith('platform/backend/features/administration/')) {
+        layerRank = 35
+    } else if (lower.startsWith('platform/backend/features/ai/ai-conversation/')) {
+        // Keep AI migrations appended (to avoid reindexing existing app changelogs)
+        // while guaranteeing conversation schema exists before agent runtime schema.
+        layerRank = 95
+        moduleRank = 10
+    } else if (lower.startsWith('platform/backend/features/ai/ai-agent-runtime/')) {
+        layerRank = 95
+        moduleRank = 20
+    } else if (lower.startsWith('platform/backend/features/')) {
+        layerRank = 35
+    } else if (lower.startsWith('platform/')) {
+        layerRank = 45
+    } else if (lower.startsWith('tools/lifecycle/')) {
+        layerRank = 90
+    }
+
+    int kindRank = 3
+    if (lower.contains('/db/changelog/schema/') || lower.contains('/db/migration/schema/')) {
+        kindRank = 1
+    } else if (lower.contains('/db/changelog/data/') || lower.contains('/db/migration/data/')) {
+        kindRank = 2
+    }
+
+    def versionedFilename = (filename =~ /^V(\d+)_(\d+)_(\d+)__.*\.sql$/)
+    if (versionedFilename.matches()) {
+        return String.format(
+                '%02d-%03d-%02d-%06d-%06d-%06d-%s',
+                layerRank,
+                moduleRank,
+                kindRank,
+                versionedFilename[0][1] as int,
+                versionedFilename[0][2] as int,
+                versionedFilename[0][3] as int,
+                relativePath
+        )
+    }
+
+    def semanticVersion = (lower =~ /\/v(\d+)\.(\d+)\//)
+    if (semanticVersion.find()) {
+        return String.format(
+                '%02d-%03d-%02d-%06d-%06d-%s',
+                layerRank,
+                moduleRank,
+                kindRank,
+                semanticVersion.group(1) as int,
+                semanticVersion.group(2) as int,
+                relativePath
+        )
+    }
+
+    if (filename.startsWith('R__')) {
+        return String.format('%02d-%03d-%02d-999999-999999-%s', layerRank, moduleRank, kindRank, relativePath)
+    }
+
+    return String.format('%02d-%03d-%02d-500000-500000-%s', layerRank, moduleRank, kindRank, relativePath)
+}
+
+/**
+ * Stable Liquibase changeset id from repo-relative SQL path only (UTF-8, forward slashes).
+ * Not derived from sort index, so adding/reordering other migrations does not retarget this id.
+ * Format: m- + first 24 hex chars of SHA-256(path) (96-bit space; path uniqueness enforced by discovery).
+ *
+ * Legacy ids used auto-NNNN-slug-md5 — upgrading existing DBs may require aligning DATABASECHANGELOG
+ * or resetting dev databases once, because Liquibase treats a new id as a new changeset.
+ */
+def stableChangeSetIdForMigration = { String relativePath ->
+    def normalized = relativePath.replace('\\', '/')
+    def digest = MessageDigest.getInstance('SHA-256')
+    digest.update(normalized.getBytes('UTF-8'))
+    def hex = digest.digest().encodeHex().toString()
+    return "m-${hex.substring(0, 24)}"
+}
+
+/**
+ * Collect SQL migrations and generate Liquibase master changelog.
+ */
+task collectMigrations {
+    description = 'Collects SQL migrations and generates Liquibase master changelog'
+    group = 'build'
+
+    doLast {
+        def scopedAppId = project.findProperty('appId')?.toString()?.trim()
+        delete migrationOutputDir
+        delete changelogOutputDir
+        migrationOutputDir.mkdirs()
+        changelogOutputDir.mkdirs()
+
+        def discovered = discoverSqlSources(scopedAppId ?: null)
+        if (discovered.isEmpty()) {
+            if (scopedAppId) {
+                throw new GradleException("No SQL migration sources found for app '${scopedAppId}'.")
+            }
+            throw new GradleException('No SQL migration sources found under platform/backend/features/lifecycle.')
+        }
+
+        def ordered = discovered.sort { left, right ->
+            migrationSortKey(left.relativePath) <=> migrationSortKey(right.relativePath)
+        }
+
+        ordered.each { entry ->
+            def destination = new File(migrationOutputDir, entry.relativePath)
+            destination.parentFile.mkdirs()
+            copy {
+                from entry.source
+                into destination.parentFile
+                rename { destination.name }
+            }
+        }
+
+        def yaml = []
+        yaml << 'databaseChangeLog:'
+        yaml << ''
+
+        ordered.each { entry ->
+            def filename = entry.relativePath.tokenize('/').last()
+            def normalizedRelativePath = entry.relativePath.replace('\\', '/')
+            def isIamBootstrapData = normalizedRelativePath.contains('/db/changelog/data/') && filename.contains('iam_bootstrap')
+            def runOnChange = filename.startsWith('R__') || isIamBootstrapData
+            def changeSetId = stableChangeSetIdForMigration(normalizedRelativePath)
+            def sqlPath = "../migrations/${entry.relativePath}".replace('\\', '/')
+
+            yaml << '  - changeSet:'
+            yaml << "      id: ${changeSetId}"
+            yaml << '      author: lifecycle'
+            if (runOnChange) {
+                yaml << '      runOnChange: true'
+            }
+            yaml << '      changes:'
+            yaml << '        - sqlFile:'
+            yaml << "            path: ${sqlPath}"
+            yaml << '            relativeToChangelogFile: true'
+            if (entry.disableSplitStatements) {
+                yaml << '            splitStatements: false'
+            }
+            yaml << ''
+        }
+
+        generatedMasterChangelog.text = yaml.join('\n') + '\n'
+
+        println "\n=== Lifecycle Migrations ==="
+        println "App scope         : ${scopedAppId ?: 'all'}"
+        println "Collected SQL files : ${ordered.size()}"
+        println "Migrations dir      : ${migrationOutputDir}"
+        println "Master changelog    : ${generatedMasterChangelog}\n"
+    }
+}
+
+// Hook into standard Gradle lifecycle
+tasks.named('assemble') {
+    dependsOn collectMigrations
+}
+
+/**
+ * List all collected migrations (for debugging)
+ */
+task listMigrations {
+    dependsOn collectMigrations
+    description = 'Lists collected SQL files and generated Liquibase changelog'
+    group = 'help'
+
+    doLast {
+        if (!migrationOutputDir.exists()) {
+            println "No migrations collected yet. Run 'collectMigrations' first."
+            return
+        }
+
+        println "\n=== Collected SQL Files ==="
+        fileTree(migrationOutputDir)
+                .matching { include '**/*.sql' }
+                .files
+                .sort { it.path }
+                .each { sql ->
+                    def rel = migrationOutputDir.toPath().relativize(sql.toPath()).toString().replace('\\', '/')
+                    println "  ${rel}"
+                }
+
+        println "\n=== Master Changelog ==="
+        println generatedMasterChangelog
+        println ''
+    }
+}

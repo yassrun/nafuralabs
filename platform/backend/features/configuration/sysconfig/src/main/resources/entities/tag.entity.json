@@ -1,0 +1,21 @@
+{
+  "$schema": "../../../tools/generator/src/main/resources/entity.schema.json",
+  "entity": "Tag",
+  "feature": "sysconfig",
+  "table": "tag",
+  "packagePath": "sysconfig",
+  "category": "refdata",
+  "api": {
+    "basePath": "/api/v1/tags",
+    "product": "agora",
+    "generate": { "dto": true, "mapper": true, "service": true, "controller": true }
+  },
+  "fields": [
+    { "name": "code", "type": "string", "column": "code", "validation": { "required": true, "unique": true, "maxLength": 50 }, "db": { "nullable": false, "length": 50, "index": true }, "ui": { "label": "sysconfig.fields.code", "showInListing": true, "listingOrder": 1, "showInDetail": true, "detailSection": "general", "detailOrder": 1, "component": "nf-input", "readonlyOnEdit": true, "filterable": true } },
+    { "name": "name", "type": "string", "column": "name", "validation": { "required": true, "maxLength": 200 }, "db": { "nullable": false, "length": 200 }, "ui": { "label": "sysconfig.fields.name", "showInListing": true, "listingOrder": 2, "showInDetail": true, "detailSection": "general", "detailOrder": 2, "component": "nf-input", "filterable": true, "sortable": true } },
+    { "name": "color", "type": "string", "column": "color", "validation": { "maxLength": 20 }, "db": { "nullable": true, "length": 20 }, "ui": { "label": "sysconfig.fields.color", "showInListing": false, "showInDetail": true, "detailSection": "general", "detailOrder": 3, "component": "nf-input" } }
+  ],
+  "listing": { "defaultSort": { "field": "name", "direction": "asc" }, "searchFields": ["code", "name"], "features": ["search"] },
+  "navigation": { "parent": "settings", "icon": "tag", "order": 74, "zone": "administration", "route": "/settings/tags" },
+  "migration": { "version": "v1.0", "seed": false }
+}

@@ -1,0 +1,23 @@
+{
+  "entity": "MeritIncrease",
+  "fields": {
+    "increaseNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "currentSalary": {
+      "maxLength": 120
+    },
+    "newSalary": {
+      "maxLength": 120
+    },
+    "increasePercent": {
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

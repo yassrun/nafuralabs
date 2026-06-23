@@ -1,0 +1,98 @@
+{
+  "contrats": [
+    {
+      "id": "mar-001",
+      "numero": "MAR-2026-001",
+      "reference": "OCP-2026-ATLAS-001",
+      "intitule": "Construction Résidence Atlas R+5 — 48 logements",
+      "chantierId": "ch-001",
+      "chantierCode": "CH-2025-001",
+      "chantierNom": "Résidence Yasmine — Casa",
+      "clientId": "cli-001",
+      "clientNom": "OCP Promotion SA",
+      "typeMarche": "FORFAITAIRE",
+      "typeCcagT": "TRAVAUX",
+      "natureMarche": "PRIVE_GRAND_COMPTE",
+      "dateDemarrage": "2026-01-06",
+      "dureeMois": 18,
+      "montantHt": "38200000",
+      "tauxTva": "20",
+      "tauxRg": "7",
+      "tauxRas": "0",
+      "tauxAvance": "10",
+      "status": "EN_COURS"
+    },
+    {
+      "id": "mar-002",
+      "numero": "MAR-2026-002",
+      "reference": "ADM-2026-PONT-003",
+      "intitule": "Construction pont mixte — Oued Bouregreg",
+      "chantierId": "ch-002",
+      "chantierCode": "CH-2025-002",
+      "chantierNom": "Pont Bouregreg ouvrage 3",
+      "clientId": "cli-002",
+      "clientNom": "ADM (Autoroutes du Maroc)",
+      "typeMarche": "BPU",
+      "typeCcagT": "TRAVAUX",
+      "natureMarche": "PUBLIC",
+      "dateDemarrage": "2026-01-12",
+      "dureeMois": 30,
+      "montantHt": "69100000",
+      "tauxTva": "20",
+      "tauxRg": "7",
+      "tauxRas": "5",
+      "tauxAvance": "15",
+      "status": "EN_COURS",
+      "lignes": [
+        {
+          "id": "bpu-mar2-01",
+          "posteCode": "01.01.01",
+          "designation": "Terrassement général en pleine masse",
+          "unite": "m³",
+          "quantite": "12500",
+          "prixUnitaireHt": "85",
+          "ordre": 0
+        },
+        {
+          "id": "bpu-mar2-02",
+          "posteCode": "02.03.01",
+          "designation": "Béton armé fondations — classe C30/37",
+          "unite": "m³",
+          "quantite": "4200",
+          "prixUnitaireHt": "1850",
+          "ordre": 1
+        },
+        {
+          "id": "bpu-mar2-03",
+          "posteCode": "04.02.05",
+          "designation": "Ouvrage tablier mixte acier-béton",
+          "unite": "t",
+          "quantite": "680",
+          "prixUnitaireHt": "12400",
+          "ordre": 2
+        }
+      ]
+    },
+    {
+      "id": "mar-003",
+      "numero": "MAR-2025-018",
+      "reference": "EDU-2025-AIN-SEBAA",
+      "intitule": "Réhabilitation école primaire — Ain Sebaa",
+      "chantierId": "ch-004",
+      "chantierCode": "CH-2025-004",
+      "chantierNom": "École Tanger Med phase 2",
+      "clientId": "cli-004",
+      "clientNom": "Ministère Education Nationale",
+      "typeMarche": "BPU",
+      "typeCcagT": "TRAVAUX",
+      "natureMarche": "PUBLIC",
+      "dateDemarrage": "2025-09-01",
+      "dureeMois": 8,
+      "montantHt": "3850000",
+      "tauxTva": "20",
+      "tauxRg": "7",
+      "tauxRas": "5",
+      "status": "RECEPTION_PROVISOIRE"
+    }
+  ]
+}

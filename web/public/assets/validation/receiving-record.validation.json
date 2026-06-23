@@ -1,0 +1,26 @@
+{
+  "entity": "ReceivingRecord",
+  "fields": {
+    "recordNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "receivedBy": {
+      "maxLength": 120
+    },
+    "totalItems": {
+      "maxLength": 120
+    },
+    "totalQuantity": {
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

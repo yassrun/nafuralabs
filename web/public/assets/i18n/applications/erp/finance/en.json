@@ -1,0 +1,1806 @@
+{
+  "finance": {
+    "module": {
+      "title": "Finance & Accounting",
+      "shortTitle": "Finance"
+    },
+    "common": {
+      "dash": "—",
+      "currency": {
+        "mad": "MAD",
+        "dh": "DH"
+      },
+      "actions": {
+        "back": "← Back",
+        "save": "Save",
+        "cancel": "Cancel",
+        "close": "Close",
+        "delete": "Delete",
+        "edit": "Edit",
+        "create": "Create",
+        "new": "New",
+        "validate": "Validate",
+        "print": "Print",
+        "export": "Export",
+        "refresh": "Refresh",
+        "ok": "OK",
+        "search": "Search",
+        "filter": "Filter",
+        "viewDetail": "View detail",
+        "viewEcriture": "View journal entry",
+        "voirReglements": "View payments",
+        "downloadXml": "Download XML",
+        "downloadCsv": "Download CSV",
+        "importStatement": "Import statement",
+        "open": "Open →"
+      },
+      "labels": {
+        "all": "All",
+        "none": "None",
+        "loading": "Loading…",
+        "noResult": "No result",
+        "total": "Total",
+        "totalHt": "Total excl. VAT",
+        "totalTva": "Total VAT",
+        "totalTtc": "Total incl. VAT",
+        "soldeDebiteur": "Debit balance",
+        "soldeCrediteur": "Credit balance",
+        "soldeFinal": "Closing balance",
+        "ouverture": "Opening",
+        "cloture": "Closing",
+        "debit": "Debit",
+        "credit": "Credit",
+        "balance": "Balance",
+        "ecart": "Variance",
+        "selection": "Selection",
+        "selected": "Selected",
+        "selectAll": "Select all",
+        "unselectAll": "Unselect all"
+      },
+      "filters": {
+        "all": "All",
+        "period": "Period",
+        "from": "From",
+        "to": "To",
+        "journal": "Journal",
+        "status": "Status",
+        "type": "Type",
+        "compte": "Account",
+        "tiers": "Third party",
+        "chantier": "Site",
+        "devise": "Currency",
+        "allJournals": "All journals",
+        "allStatuses": "All statuses",
+        "allTypes": "All types",
+        "allDevises": "All currencies",
+        "searchPlaceholder": "Search…"
+      },
+      "emptyState": {
+        "noData": "No data",
+        "noResults": "No results",
+        "tryAdjustFilters": "Try adjusting the filters."
+      },
+      "validation": {
+        "required": "Required field",
+        "invalidNumber": "Invalid number",
+        "invalidDate": "Invalid date",
+        "mustBalance": "Debit must equal Credit",
+        "amountPositive": "Amount must be positive"
+      },
+      "toasts": {
+        "saved": "Saved",
+        "validated": "Validated",
+        "deleted": "Deleted",
+        "cancelled": "Cancelled",
+        "exportStarted": "Export started",
+        "loading": "Loading…",
+        "error": "Error",
+        "unexpectedError": "Unexpected error"
+      },
+      "confirm": {
+        "delete": "Confirm deletion?",
+        "cancel": "Confirm cancellation?",
+        "validate": "Confirm validation?"
+      }
+    },
+    "routes": {
+      "journauxTitle": "Accounting journals",
+      "journauxCrumb": "Journals",
+      "ecrituresTitle": "Journal entries",
+      "ecrituresCrumb": "Entries",
+      "ecritureDetailTitle": "Journal entry",
+      "ecritureSaisieTitle": "New journal entry",
+      "balanceTitle": "Trial balance",
+      "balanceCrumb": "Trial balance",
+      "grandLivreTitle": "General ledger",
+      "grandLivreCrumb": "General ledger",
+      "facturesFournisseursTitle": "Supplier invoices",
+      "facturesFournisseursCrumb": "Supplier invoices",
+      "ffDetailTitle": "Supplier invoice",
+      "reglementsTitle": "Payments",
+      "reglementsCrumb": "Payments",
+      "reglementSaisieTitle": "New payment",
+      "rapprochementTitle": "Bank reconciliation",
+      "rapprochementCrumb": "Bank reconciliation",
+      "lettrageTitle": "Matching",
+      "lettrageCrumb": "Matching",
+      "virementsTitle": "Wire transfers",
+      "virementsCrumb": "Wire transfers",
+      "virementDetailTitle": "Wire transfer",
+      "virementRemiseTitle": "Wire transfer batch",
+      "plansComptablesTitle": "Chart of accounts",
+      "plansComptablesCrumb": "Chart of accounts",
+      "compteDetailTitle": "Account",
+      "tauxChangeTitle": "Exchange rates",
+      "tauxChangeCrumb": "Exchange rates",
+      "tauxChangeDetailTitle": "Exchange rate",
+      "devisesTitle": "Currencies",
+      "devisesCrumb": "Currencies",
+      "conditionsPaiementTitle": "Payment terms",
+      "conditionsPaiementCrumb": "Payment terms",
+      "caissesTitle": "Cash & banks",
+      "caissesCrumb": "Cash accounts",
+      "caisseDetailTitle": "Cash account",
+      "analytiqueTitle": "Cost accounting",
+      "analytiqueCrumb": "Cost accounting",
+      "recouvrementTitle": "Collections",
+      "recouvrementCrumb": "Collections",
+      "effetsTitle": "Commercial paper",
+      "effetsCrumb": "Commercial paper",
+      "declarationsTitle": "Tax returns",
+      "declarationsCrumb": "Tax returns",
+      "simplIsTitle": "SIMPL-IS",
+      "retenueSourceTitle": "Withholding tax (RAS)",
+      "caissesChantierTitle": "Site petty cash",
+      "caissesChantierCrumb": "Site petty cash"
+    },
+    "journal": {
+      "entityName": "Journal",
+      "entityNamePlural": "Journals",
+      "title": "Accounting journals",
+      "subtitle": "Summary per journal and period",
+      "list": {
+        "columns": {
+          "code": "Code",
+          "libelle": "Label",
+          "type": "Type",
+          "compteContrepartie": "Counter-entry account",
+          "exercice": "Fiscal year",
+          "nbEcritures": "Entries",
+          "totalDebit": "Total Debit",
+          "totalCredit": "Total Credit",
+          "solde": "Balance",
+          "actions": "Actions"
+        },
+        "filters": {
+          "period": "Period",
+          "type": "Journal type",
+          "exercice": "Fiscal year"
+        },
+        "emptyState": {
+          "title": "No journal",
+          "message": "No accounting journal configured."
+        }
+      },
+      "form": {
+        "fields": {
+          "code": "Journal code",
+          "libelle": "Label",
+          "type": "Type",
+          "compteContrepartie": "Default counter-entry account",
+          "exercice": "Fiscal year",
+          "actif": "Active"
+        }
+      },
+      "types": {
+        "vente": "Sales",
+        "achat": "Purchases",
+        "banque": "Bank",
+        "caisse": "Cash",
+        "operationsDiverses": "OD",
+        "nouveaux": "Opening balances"
+      },
+      "status": {
+        "equilibre": "✓ Balanced",
+        "desequilibre": "⚠ Δ"
+      },
+      "actions": {
+        "create": "New journal",
+        "edit": "Edit journal",
+        "viewEcritures": "View entries"
+      }
+    },
+    "ecriture": {
+      "entityName": "Journal entry",
+      "entityNamePlural": "Journal entries",
+      "title": "Journal entries",
+      "subtitle": "General ledger tracking",
+      "list": {
+        "columns": {
+          "numero": "#",
+          "date": "Date",
+          "journal": "Journal",
+          "reference": "Reference",
+          "libelle": "Description",
+          "tiers": "Third party",
+          "chantier": "Site",
+          "totalDebit": "Total debit",
+          "totalCredit": "Total credit",
+          "origine": "Origin",
+          "status": "Status",
+          "actions": "Actions"
+        },
+        "filters": {
+          "journal": "Journal",
+          "status": "Status",
+          "origine": "Origin",
+          "tiers": "Third party",
+          "chantier": "Site",
+          "dateFrom": "Date from",
+          "dateTo": "Date to",
+          "exercice": "Fiscal year"
+        },
+        "emptyState": {
+          "title": "No entries",
+          "message": "No accounting entries recorded for this period."
+        }
+      },
+      "detail": {
+        "title": "Entry {numero}",
+        "infoSection": "Information",
+        "lignesSection": "Entry lines",
+        "totauxSection": "Totals",
+        "audit": "Audit"
+      },
+      "form": {
+        "fields": {
+          "numero": "Entry number",
+          "date": "Entry date",
+          "journal": "Journal",
+          "reference": "Reference",
+          "libelle": "Description",
+          "libelleCompte": "Account label",
+          "tiers": "Third party",
+          "chantier": "Site",
+          "axeAnalytique": "Cost-accounting axis",
+          "exercice": "Fiscal year",
+          "origine": "Origin"
+        },
+        "ligne": {
+          "compte": "Account",
+          "libelle": "Description",
+          "debit": "Debit",
+          "credit": "Credit",
+          "tiers": "Third party",
+          "axeAnalytique": "Axis",
+          "addLigne": "+ Add line",
+          "removeLigne": "Remove line",
+          "empty": "No line. Add the first one."
+        }
+      },
+      "fields": {
+        "documentSource": "Source document",
+        "validatedBy": "Validated by"
+      },
+      "saisie": {
+        "title": "New entry",
+        "subtitle": "Balanced manual entry",
+        "crumb": "Entry",
+        "lignesSection": "Entry lines",
+        "selectPlaceholder": "— Select —",
+        "referencePlaceholder": "Document #, delivery note, contract…",
+        "libellePlaceholder": "E.g. Customer invoice SIT-CH-001-04",
+        "comptePlaceholder": "6111…",
+        "axePlaceholder": "CH-001…",
+        "saveDraft": "Save draft"
+      },
+      "origine": {
+        "manuelle": "Manual"
+      },
+      "balance": {
+        "equilibre": "✓ Debit = Credit",
+        "delta": "⚠ Δ ="
+      },
+      "actions": {
+        "create": "+ New entry",
+        "validate": "Validate",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "duplicate": "Duplicate",
+        "contrePasser": "Reverse",
+        "viewSource": "View source document"
+      },
+      "toasts": {
+        "created": "Entry created",
+        "validated": "Entry validated",
+        "validatedNumero": "Entry {numero} validated",
+        "savedNumero": "Entry {numero} saved",
+        "cancelled": "Entry cancelled",
+        "deleted": "Entry deleted",
+        "notFound": "Entry not found.",
+        "contrePassationCreated": "Reversal {numero} created",
+        "unbalanced": "Entry is unbalanced (Debit ≠ Credit)"
+      }
+    },
+    "factureFournisseur": {
+      "entityName": "Supplier invoice",
+      "entityNamePlural": "Supplier invoices",
+      "title": "Supplier invoices",
+      "subtitle": "Entry, validation and payment",
+      "newTitle": "New supplier invoice",
+      "draftSubtitle": "Draft",
+      "list": {
+        "columns": {
+          "numeroInterne": "Internal #",
+          "numeroFournisseur": "Supplier #",
+          "fournisseur": "Supplier",
+          "dateFacture": "Invoice date",
+          "dateReception": "Received",
+          "dateEcheance": "Due date",
+          "chantier": "Site",
+          "totalHt": "Total excl. VAT",
+          "totalTva": "VAT",
+          "totalTtc": "Total incl. VAT",
+          "cumulRegle": "Paid to date",
+          "resteARegler": "Outstanding",
+          "status": "Status",
+          "rubrique": "Category",
+          "actions": "Actions"
+        },
+        "filters": {
+          "status": "Status",
+          "fournisseur": "Supplier",
+          "chantier": "Site",
+          "rubrique": "Category",
+          "dateFrom": "Received from",
+          "dateTo": "Received to",
+          "echeanceFrom": "Due from",
+          "echeanceTo": "Due to"
+        },
+        "emptyState": {
+          "title": "No supplier invoice",
+          "message": "No supplier invoice recorded.",
+          "actionLabel": "Enter an invoice"
+        }
+      },
+      "sections": {
+        "approval": "Approval workflow",
+        "matching3Way": "3-way matching (PO ↔ GR ↔ invoice)",
+        "identite": "Header",
+        "lignes": "Invoice lines",
+        "recap": "Summary",
+        "dgiLinks": "DGI returns (linked)",
+        "activity": "Activity"
+      },
+      "form": {
+        "fields": {
+          "fournisseur": "Supplier",
+          "fournisseurPlaceholder": "— Select —",
+          "numeroFournisseur": "Supplier number",
+          "dateFacture": "Invoice date",
+          "dateReception": "Received date",
+          "dateEcheance": "Due date",
+          "bcNumero": "Source PO",
+          "bcPlaceholder": "PO-2026-…",
+          "chantier": "Site",
+          "chantierPlaceholder": "Site code",
+          "rubrique": "Category",
+          "designation": "Description",
+          "compte": "Account",
+          "axe": "Axis",
+          "quantite": "Qty",
+          "prixUnitaireHt": "Unit price excl. VAT",
+          "totalHt": "Total excl. VAT",
+          "tvaTaux": "VAT %"
+        }
+      },
+      "lignes": {
+        "addLigne": "+ Add line",
+        "removeLigne": "×",
+        "empty": "No line. Add the first one.",
+        "defaultLabel": "Line {n}"
+      },
+      "recap": {
+        "totalHt": "Total excl. VAT",
+        "tvaFacture": "VAT on supplier invoice",
+        "tvaAutoliq": "Reverse-charge VAT (return)",
+        "retenueTva": "VAT withholding (reverse charge)",
+        "totalTtc": "Total incl. VAT",
+        "netAPayer": "Net amount payable to supplier",
+        "cumulRegle": "Paid to date",
+        "resteARegler": "Outstanding",
+        "ecritureComptable": "Accounting entry",
+        "voirEcriture": "View entry →"
+      },
+      "hints": {
+        "nonResident": "Service provider <strong>outside Morocco</strong>: if the VAT reverse-charge option is enabled (Administration → Tax settings), VAT does not appear on the supplier invoice; the <strong>net amount payable</strong> takes into account any <strong>VAT withholding</strong> on the reverse charge (tax setting).",
+        "residentB2b": "<strong>Morocco-resident</strong> (B2B) service provider: standard invoice VAT — no reverse charge in this demo flow.",
+        "fournisseurNonMaroc": "(outside MA)",
+        "dgiHint": "HT / VAT / withholding amounts from validated invoices feed into the <strong>1208 statement</strong> (purchases) and tax settings (monthly VAT / reverse charge — demo).",
+        "etat1208Link": "1208 statement — annual recap of purchases",
+        "etat1208Note": "(supplier ICE, FF aggregation)",
+        "parametresFiscalLink": "Tax settings",
+        "parametresFiscalNote": "(reverse charge, % VAT withholding)"
+      },
+      "matching": {
+        "title": "3-way matching (PO ↔ GR ↔ invoice)",
+        "bc": "PO",
+        "bl": "GR",
+        "status": "Status",
+        "aligned": "— aligned",
+        "headers": {
+          "article": "Item",
+          "qteCommandee": "Ord.",
+          "qteRecue": "Rec.",
+          "qteFacturee": "Inv.",
+          "puBc": "PO unit price",
+          "puFacture": "Inv. unit price",
+          "ecartQte": "Qty variance %",
+          "ecartPx": "Price variance %"
+        },
+        "bloquant": "Blocking",
+        "blockingError": "3-way matching: blocking variance (PO / GR / invoice). Fix the invoice or attach the correct GR before validating."
+      },
+      "activity": {
+        "creation": "Creation / Entry",
+        "validee": "Validated — accounting entry {state}",
+        "ecritureGeneree": "generated",
+        "ecritureEnAttente": "pending",
+        "reglement": "Payment {state} — {amount}",
+        "complet": "complete",
+        "partiel": "partial",
+        "enLitige": "In dispute",
+        "motifManquant": "Reason not provided"
+      },
+      "actions": {
+        "create": "Create (draft)",
+        "save": "Save",
+        "validate": "Validate · generate AC entry",
+        "validateShort": "Validate",
+        "litige": "Mark as disputed",
+        "annuler": "Cancel",
+        "retour": "Back"
+      },
+      "prompts": {
+        "motifLitige": "Dispute reason?",
+        "confirmAnnulation": "Cancel this invoice?"
+      },
+      "toasts": {
+        "missingFields": "Please fill in supplier, supplier number and invoice date.",
+        "created": "Invoice {numero} created",
+        "saved": "Invoice saved",
+        "validated": "Invoice validated — accounting entry generated",
+        "litige": "Invoice marked as disputed",
+        "annulee": "Invoice cancelled",
+        "error": "Error"
+      }
+    },
+    "reglement": {
+      "entityName": "Payment",
+      "entityNamePlural": "Payments",
+      "title": "Supplier payments",
+      "newTitle": "New payment",
+      "list": {
+        "columns": {
+          "numero": "#",
+          "date": "Date",
+          "fournisseur": "Supplier",
+          "modePaiement": "Method",
+          "montant": "Amount",
+          "compteEmetteur": "Issuing account",
+          "reference": "Reference",
+          "status": "Status",
+          "facturesReglees": "Settled invoices",
+          "actions": "Actions"
+        },
+        "filters": {
+          "fournisseur": "Supplier",
+          "modePaiement": "Payment method",
+          "compteEmetteur": "Account",
+          "status": "Status",
+          "dateFrom": "From",
+          "dateTo": "To",
+          "montantMin": "Min amount",
+          "montantMax": "Max amount"
+        },
+        "emptyState": {
+          "title": "No payment",
+          "message": "No payment recorded for this period.",
+          "actionLabel": "New payment"
+        }
+      },
+      "form": {
+        "title": "Entry of a supplier payment",
+        "subtitle": "Invoice selection and payment method",
+        "fields": {
+          "fournisseur": "Supplier",
+          "date": "Payment date",
+          "modePaiement": "Payment method",
+          "compteEmetteur": "Issuing account",
+          "reference": "Reference (cheque #, wire transfer…)",
+          "montant": "Amount",
+          "libelle": "Description"
+        },
+        "selectFactures": "Invoices to settle",
+        "factureSelector": {
+          "title": "Select invoices to settle",
+          "headers": {
+            "numero": "#",
+            "dateFacture": "Date",
+            "dateEcheance": "Due date",
+            "totalTtc": "Total incl. VAT",
+            "deja": "Already paid",
+            "reste": "Outstanding",
+            "imputation": "Allocation"
+          },
+          "selected": "{n} invoice(s) selected",
+          "totalImpute": "Total allocated",
+          "ecart": "Variance"
+        },
+        "validation": {
+          "atLeastOneFacture": "Select at least one invoice",
+          "imputationMismatch": "Total allocated ≠ Payment amount",
+          "amountRequired": "Amount required"
+        }
+      },
+      "actions": {
+        "create": "+ New payment",
+        "save": "Save",
+        "validate": "Validate · generate bank/cash entry",
+        "imputer": "Allocate",
+        "cancel": "Cancel",
+        "retour": "Back to payments"
+      },
+      "toasts": {
+        "created": "Payment created",
+        "validated": "Payment validated — entry generated",
+        "cancelled": "Payment cancelled",
+        "error": "Payment error"
+      }
+    },
+    "rapprochement": {
+      "entityName": "Bank reconciliation",
+      "title": "Bank reconciliation",
+      "subtitle": "Match bank statements with ERP movements",
+      "selectAccount": "Select a bank account",
+      "periodFilter": "Period",
+      "import": {
+        "title": "Import a bank statement",
+        "subtitle": "Supported formats: OFX, CSV",
+        "dropzone": "Drop the OFX or CSV file here",
+        "chooseFile": "Choose a file",
+        "format": "Format",
+        "encoding": "Encoding",
+        "preview": "Preview",
+        "linesImported": "{n} line(s) imported",
+        "errors": "{n} error(s) detected",
+        "actions": {
+          "import": "Import",
+          "cancel": "Cancel",
+          "downloadTemplate": "Download CSV template"
+        },
+        "toasts": {
+          "imported": "Statement imported ({n} lines)",
+          "error": "Import failed"
+        }
+      },
+      "matcher": {
+        "title": "Matcher",
+        "subtitle": "Match statement lines with ERP movements",
+        "headers": {
+          "date": "Date",
+          "libelle": "Description",
+          "reference": "Reference",
+          "debit": "Debit",
+          "credit": "Credit",
+          "match": "Match",
+          "status": "Status"
+        },
+        "matchTypes": {
+          "auto": "Auto",
+          "manuel": "Manual",
+          "suggestion": "Suggestion",
+          "none": "—"
+        },
+        "filters": {
+          "matched": "Matched",
+          "unmatched": "Unmatched",
+          "all": "All"
+        },
+        "actions": {
+          "matchSelected": "Match selection",
+          "unmatch": "Unmatch",
+          "createEcriture": "Create entry",
+          "ignore": "Ignore"
+        },
+        "unmatchedMvt": "unmatched movement(s)",
+        "unmatchedReleve": "unmatched statement line(s)",
+        "inProgress": "pending match(es)",
+        "autoMatch": "⚡ Auto match",
+        "mvtTitle": "Unmatched accounting movements",
+        "releveTitle": "Unmatched bank statement lines",
+        "matchAction": "↔ Match",
+        "unlinkAction": "✕ Unlink",
+        "createMvt": "+ New movement",
+        "createMvtTooltip": "Create an accounting movement from this line",
+        "allMvtReconciled": "All movements are reconciled ✓",
+        "allReleveMatched": "All statement lines are matched ✓",
+        "pairsTitle": "Pending reconciliations",
+        "unlinkTooltip": "Unlink this reconciliation",
+        "cols": {
+          "mouvement": "Movement",
+          "releve": "Statement line",
+          "mvtShort": "Mvmt",
+          "releveShort": "Statement"
+        }
+      },
+      "lettrage": {
+        "partial": "Partial matching",
+        "complet": "Full matching",
+        "none": "Unmatched"
+      },
+      "summary": {
+        "soldeReleve": "Statement balance",
+        "soldeErp": "ERP balance",
+        "ecart": "Variance",
+        "matched": "Matched",
+        "unmatched": "Unmatched"
+      },
+      "toasts": {
+        "matched": "Lines matched",
+        "unmatched": "Lines unmatched",
+        "ecritureCreated": "Entry created from bank line"
+      }
+    },
+    "lettrage": {
+      "entityName": "Matching",
+      "title": "Account matching",
+      "subtitle": "Match entries on a third-party account",
+      "selectAccount": "Select an account",
+      "noAccount": "No account selected",
+      "headers": {
+        "date": "Date",
+        "journal": "Journal",
+        "reference": "Reference",
+        "libelle": "Description",
+        "debit": "Debit",
+        "credit": "Credit",
+        "lettre": "Letter"
+      },
+      "summary": {
+        "totalDebit": "Total debit",
+        "totalCredit": "Total credit",
+        "solde": "Balance",
+        "lettre": "To match"
+      },
+      "actions": {
+        "letter": "Match",
+        "unletter": "Unmatch",
+        "auto": "Auto matching"
+      },
+      "toasts": {
+        "lettered": "Entries matched (letter {code})",
+        "unlettered": "Matching cleared",
+        "autoSuccess": "{n} group(s) auto-matched"
+      }
+    },
+    "planComptable": {
+      "entityName": "Chart of accounts",
+      "title": "Chart of accounts (CGNC)",
+      "subtitle": "Morocco GAAP (CGNC) chart of accounts",
+      "list": {
+        "columns": {
+          "code": "Code",
+          "libelle": "Label",
+          "classe": "Class",
+          "type": "Type",
+          "auxiliaire": "Auxiliary",
+          "actif": "Active",
+          "soldeOuverture": "Opening bal.",
+          "soldeCourant": "Current bal.",
+          "actions": "Actions"
+        },
+        "filters": {
+          "classe": "Class",
+          "type": "Type",
+          "auxiliaire": "Auxiliary",
+          "actif": "Active"
+        }
+      },
+      "cgnc": {
+        "classe1": "Class 1 — Permanent financing",
+        "classe2": "Class 2 — Fixed assets",
+        "classe3": "Class 3 — Stocks and receivables",
+        "classe4": "Class 4 — Current liabilities",
+        "classe5": "Class 5 — Cash",
+        "classe6": "Class 6 — Expenses",
+        "classe7": "Class 7 — Income",
+        "classe8": "Class 8 — Profit & loss accounts",
+        "classe9": "Class 9 — Cost-accounting accounts",
+        "classe0": "Class 0 — Special accounts",
+        "classeGeneric": "Class {classe}"
+      },
+      "tree": {
+        "searchPlaceholder": "Search account (code or label)…",
+        "expandAll": "Expand all",
+        "collapseAll": "Collapse all",
+        "emptySearch": "No account matches the search.",
+        "ecritureCount": "{count} entries"
+      },
+      "tags": {
+        "collectif": "collective",
+        "lettrable": "matchable",
+        "analytique": "cost-accounting",
+        "inactive": "inactive"
+      },
+      "compteType": {
+        "CHARGE": "Expense",
+        "PRODUIT": "Income",
+        "ACTIF": "Asset",
+        "PASSIF": "Liability",
+        "TIERS": "Third party",
+        "TRESORERIE": "Cash"
+      },
+      "page": {
+        "title": "BTP chart of accounts — Moroccan GAAP",
+        "subtitle": "CGNC reference, auxiliary accounts and journals. Essential for finance configuration."
+      },
+      "tabs": {
+        "arbre": "Chart of accounts",
+        "journaux": "Journals"
+      },
+      "actions": {
+        "importBtp": "Import BTP template",
+        "newCompte": "+ New account"
+      },
+      "stats": {
+        "total": "Total accounts",
+        "actifs": "Active accounts",
+        "auxiliaires": "Auxiliaries"
+      },
+      "loading": "Loading chart of accounts…",
+      "resetConfirm": "Reset the chart of accounts from the Morocco BTP template? Manual additions will be lost.",
+      "journalConfig": {
+        "title": "Journals ({count})",
+        "newJournal": "+ New journal",
+        "codePlaceholder": "OD",
+        "contrepartiePlaceholder": "5141 / 5161",
+        "cols": {
+          "code": "Code",
+          "libelle": "Label",
+          "type": "Type",
+          "contrepartie": "Default offset account",
+          "actif": "Active"
+        }
+      },
+      "drawer": {
+        "createBadge": "New account",
+        "editBadge": "Edit account",
+        "createTitle": "Create an account",
+        "codePlaceholder": "6111",
+        "libellePlaceholder": "Raw material purchases",
+        "parentPlaceholder": "611",
+        "typeComptable": "Accounting type",
+        "attributs": "Attributes",
+        "attrs": {
+          "collectif": "Collective account (requires sub-accounts)",
+          "lettrable": "Matchable (customer/supplier reconciliation)",
+          "auxiliaire": "Auxiliary (third-party sub-account)",
+          "analytiqueObligatoire": "Cost-accounting axis required (site / department)",
+          "actif": "Active"
+        },
+        "usageTitle": "Usage",
+        "usageCount": "{count} associated entries.",
+        "deleteBlocked": "Deletion blocked while at least one entry uses this account.",
+        "deleteBlockedError": "Deletion blocked: {count} entries use this account."
+      },
+      "category": {
+        "ACTIF": "Assets",
+        "PASSIF": "Liabilities",
+        "CHARGE": "Expenses",
+        "PRODUIT": "Income",
+        "RESULTAT": "Result"
+      },
+      "type": {
+        "GENERAL": "General",
+        "AUXILIAIRE": "Auxiliary",
+        "TIERS": "Third party",
+        "ANALYTIQUE": "Cost accounting"
+      },
+      "form": {
+        "fields": {
+          "code": "Account code",
+          "libelle": "Label",
+          "classe": "Class",
+          "type": "Type",
+          "auxiliaire": "Auxiliary",
+          "parent": "Parent account",
+          "actif": "Active",
+          "lettrable": "Matchable",
+          "analytiqueObligatoire": "Cost accounting required"
+        }
+      },
+      "tree": {
+        "rootLabel": "Chart of accounts",
+        "noResult": "No account matches the search",
+        "search": "Search by code or label…",
+        "expandAll": "Expand all",
+        "collapseAll": "Collapse all"
+      },
+      "drawer": {
+        "createTitle": "New account",
+        "editTitle": "Edit account {code}",
+        "actions": {
+          "save": "Save",
+          "delete": "Delete",
+          "cancel": "Cancel"
+        },
+        "toasts": {
+          "created": "Account created",
+          "saved": "Account updated",
+          "deleted": "Account deleted"
+        }
+      },
+      "actions": {
+        "createCompte": "New account",
+        "importPlan": "Import plan",
+        "exportPlan": "Export plan",
+        "configureJournals": "Configure journals"
+      }
+    },
+    "journalConfig": {
+      "title": "Journals configuration",
+      "subtitle": "Journals and default counter-entry account",
+      "headers": {
+        "code": "Code",
+        "libelle": "Label",
+        "type": "Type",
+        "compteContrepartie": "Counter-entry account",
+        "exercice": "Fiscal year",
+        "actions": "Actions"
+      },
+      "actions": {
+        "create": "Add a journal",
+        "edit": "Edit",
+        "delete": "Delete"
+      },
+      "form": {
+        "fields": {
+          "code": "Journal code",
+          "libelle": "Label",
+          "type": "Type",
+          "compteContrepartie": "Counter-entry account",
+          "actif": "Active"
+        }
+      },
+      "toasts": {
+        "created": "Journal created",
+        "saved": "Journal updated",
+        "deleted": "Journal deleted"
+      }
+    },
+    "balance": {
+      "entityName": "Trial balance",
+      "title": "General trial balance",
+      "subtitle": "Account balances per fiscal year",
+      "routeTitle": "General trial balance",
+      "routeBreadcrumb": "Balance",
+      "filters": {
+        "exercice": "Fiscal year",
+        "periodFrom": "Period from",
+        "periodTo": "Period to",
+        "classe": "Class",
+        "type": "Account type",
+        "showZero": "Include zero balances"
+      },
+      "headers": {
+        "code": "Code",
+        "libelle": "Label",
+        "soldeOuvertureDebit": "Opening bal. (D)",
+        "soldeOuvertureCredit": "Opening bal. (C)",
+        "movementsDebit": "Movements (D)",
+        "movementsCredit": "Movements (C)",
+        "soldeFinalDebit": "Closing bal. (D)",
+        "soldeFinalCredit": "Closing bal. (C)"
+      },
+      "totals": {
+        "label": "TOTAL",
+        "subtotalClasse": "Subtotal class {n}"
+      },
+      "actions": {
+        "exportCsv": "Export CSV",
+        "exportPdf": "Export PDF",
+        "drillDown": "View account detail"
+      },
+      "emptyState": {
+        "title": "No entries",
+        "message": "No accounting entries for this fiscal year."
+      }
+    },
+    "grandLivre": {
+      "entityName": "General ledger",
+      "title": "General ledger",
+      "subtitle": "Detail of entries per account",
+      "selectAccount": "Select an account",
+      "headers": {
+        "date": "Date",
+        "journal": "Journal",
+        "reference": "Reference",
+        "libelle": "Description",
+        "debit": "Debit",
+        "credit": "Credit",
+        "soldeProgressif": "Running balance"
+      }
+    },
+    "virement": {
+      "entityName": "Wire transfer",
+      "entityNamePlural": "Wire transfers",
+      "title": "Bank wire transfers",
+      "subtitle": "Issue, follow-up and batch of wire transfers",
+      "list": {
+        "columns": {
+          "numero": "#",
+          "date": "Date",
+          "compteEmetteur": "Issuing account",
+          "beneficiaire": "Beneficiary",
+          "rib": "RIB",
+          "montant": "Amount",
+          "devise": "Currency",
+          "motif": "Reason",
+          "status": "Status",
+          "actions": "Actions"
+        },
+        "filters": {
+          "status": "Status",
+          "compteEmetteur": "Account",
+          "beneficiaire": "Beneficiary",
+          "dateFrom": "From",
+          "dateTo": "To"
+        },
+        "emptyState": {
+          "title": "No wire transfer",
+          "message": "No wire transfer recorded.",
+          "actionLabel": "New wire transfer"
+        }
+      },
+      "form": {
+        "fields": {
+          "compteEmetteur": "Issuing account",
+          "beneficiaire": "Beneficiary",
+          "rib": "Beneficiary RIB",
+          "banque": "Beneficiary bank",
+          "montant": "Amount",
+          "devise": "Currency",
+          "motif": "Reason",
+          "reference": "Reference",
+          "dateExecution": "Execution date"
+        }
+      },
+      "remise": {
+        "title": "Wire transfer batch",
+        "subtitle": "Generate the XML file for the bank",
+        "selectVirements": "Select wire transfers to include",
+        "summary": "Summary",
+        "totalAmount": "Total to transfer",
+        "nbVirements": "Number of wire transfers",
+        "format": "Batch format",
+        "actions": {
+          "generate": "Generate XML file",
+          "download": "Download XML",
+          "send": "Mark as sent"
+        },
+        "toasts": {
+          "generated": "Batch file generated",
+          "sent": "Batch marked as sent"
+        }
+      },
+      "actions": {
+        "create": "New wire transfer",
+        "validate": "Validate",
+        "execute": "Mark executed",
+        "cancel": "Cancel",
+        "downloadXml": "Download XML"
+      },
+      "toasts": {
+        "created": "Wire transfer created",
+        "validated": "Wire transfer validated",
+        "executed": "Wire transfer marked executed",
+        "cancelled": "Wire transfer cancelled"
+      }
+    },
+    "compte": {
+      "entityName": "Cash account",
+      "title": "Cash & banks",
+      "subtitle": "ERP cash accounts",
+      "list": {
+        "columns": {
+          "code": "Code",
+          "libelle": "Label",
+          "type": "Type",
+          "banque": "Bank",
+          "rib": "RIB",
+          "devise": "Currency",
+          "soldeInitial": "Opening balance",
+          "soldeComptable": "Book balance",
+          "soldeBancaire": "Bank balance (statement)",
+          "actions": "Actions"
+        }
+      },
+      "type": {
+        "CAISSE": "Cash",
+        "BANQUE": "Bank",
+        "CARTE_BANCAIRE": "Credit card",
+        "EFFETS_A_RECEVOIR": "Notes receivable",
+        "AUTRE": "Other"
+      },
+      "types": {
+        "banque": "🏦 Bank",
+        "caisse": "💵 Cash"
+      },
+      "form": {
+        "fields": {
+          "rib": "RIB"
+        }
+      },
+      "detail": {
+        "title": "{code} — {libelle}",
+        "infoSection": "Information",
+        "mouvementsSection": "Movements",
+        "rapprochementSection": "Reconciliation",
+        "back": "← Cash accounts",
+        "viewMouvements": "View movements →",
+        "identification": "Identification",
+        "compteCgnc": "GAAP account",
+        "active": "Active",
+        "inactive": "Inactive",
+        "coordonneesBancaires": "Bank details",
+        "agence": "Branch",
+        "soldes": "Balances",
+        "mouvementsMois": "Movements (month)",
+        "recettesMois": "Inflows (month)",
+        "depensesMois": "Outflows (month)",
+        "notes": "Notes"
+      },
+      "actions": {
+        "create": "New account",
+        "edit": "Edit",
+        "saisirMouvement": "Enter a movement",
+        "rapprocher": "Reconcile",
+        "voirReleves": "View statements"
+      },
+      "financierCard": {
+        "inactive": "Inactive",
+        "rib": "RIB",
+        "currentBalance": "Current balance",
+        "vsYesterday": "vs yesterday",
+        "mvtsThisMonth": "Movements this month",
+        "recettes": "Income",
+        "depenses": "Expenses",
+        "viewMvts": "View movements",
+        "newMvt": "+ New movement"
+      }
+    },
+    "mouvement": {
+      "entityName": "Movement",
+      "entityNamePlural": "Movements",
+      "headers": {
+        "date": "Date",
+        "libelle": "Description",
+        "reference": "Reference",
+        "tiers": "Third party",
+        "type": "Type",
+        "debit": "Debit",
+        "credit": "Credit",
+        "solde": "Balance",
+        "matched": "Matched"
+      },
+      "row": {
+        "matched": "Reconciled"
+      },
+      "list": {
+        "columns": {
+          "date": "Date",
+          "numero": "#",
+          "type": "Type",
+          "libelle": "Description",
+          "reference": "Reference",
+          "recette": "Inflow",
+          "depense": "Outflow",
+          "solde": "Balance"
+        },
+        "emptyState": {
+          "title": "No movement matches the filters."
+        }
+      },
+      "filters": {
+        "type": "Movement type",
+        "matched": "Matching status",
+        "dateFrom": "From",
+        "dateTo": "To",
+        "searchPlaceholder": "Search (description, #, counterparty, ref)…",
+        "rapproche": {
+          "all": "Reconciliation: all",
+          "yes": "Reconciled",
+          "no": "Not reconciled"
+        }
+      },
+      "types": {
+        "REGLEMENT_CLIENT": "Customer payments",
+        "REGLEMENT_FOURN": "Supplier payments",
+        "PAIEMENT_PAIE": "Payroll / Expense",
+        "VIREMENT_INTERNE": "Internal transfers",
+        "FRAIS_BANCAIRES": "Bank fees",
+        "COMMISSIONS": "Commissions",
+        "AUTRE_RECETTE": "Other inflows",
+        "AUTRE_DEPENSE": "Other outflows"
+      },
+      "summary": {
+        "displayed": "Movements shown",
+        "totalRecettes": "Total inflows",
+        "totalDepenses": "Total outflows",
+        "totals": "Displayed totals"
+      },
+      "labels": {
+        "vsYesterday": "vs yesterday"
+      },
+      "csv": {
+        "date": "Date",
+        "numero": "Number",
+        "type": "Type",
+        "libelle": "Description",
+        "reference": "Reference",
+        "contrepartie": "Counterparty",
+        "recette": "Inflow",
+        "depense": "Outflow",
+        "solde": "Balance",
+        "rapproche": "Reconciled"
+      },
+      "form": {
+        "title": "Movement entry",
+        "fields": {
+          "compte": "Cash account",
+          "date": "Date",
+          "type": "Type",
+          "montant": "Amount",
+          "sens": "Direction",
+          "libelle": "Description",
+          "reference": "Reference",
+          "tiers": "Third party",
+          "imputation": "Accounting allocation"
+        },
+        "sens": {
+          "debit": "Debit (inflow)",
+          "credit": "Credit (outflow)"
+        }
+      },
+      "modes": {
+        "VIREMENT": "Wire transfer",
+        "CHEQUE": "Check",
+        "ESPECES": "Cash",
+        "CARTE": "Card",
+        "EFFET": "Bill of exchange"
+      },
+      "defaultLibelle": {
+        "FRAIS_BANCAIRES": "Account-keeping fees",
+        "COMMISSIONS": "Transaction commission"
+      },
+      "dialog": {
+        "title": "Enter a movement",
+        "mode": "Method",
+        "referencePlaceholder": "Check #, transfer #…",
+        "libellePlaceholder": "Movement description",
+        "recetteLabel": "Inflow",
+        "depenseLabel": "Outflow",
+        "contrepartieLabel": "Counterparty",
+        "contrepartiePlaceholder": "Beneficiary or issuer",
+        "justificatifLabel": "Supporting document (expense report)",
+        "justificatifPlaceholder": "Expense report ref / mandatory supporting document for cash",
+        "justificatifPrefix": "Doc: {ref}",
+        "delegateInfo": "This movement type uses a dedicated workflow to automatically generate accounting entries and update invoices.",
+        "delegateHint": "Click \"Continue\" to open the matching form.",
+        "empty": "Choose a movement type.",
+        "continueAction": "Continue →",
+        "options": {
+          "REGLEMENT_CLIENT": { "label": "Customer payment", "hint": "Incoming" },
+          "REGLEMENT_FOURN": { "label": "Supplier payment", "hint": "Outgoing" },
+          "VIREMENT_INTERNE": { "label": "Internal transfer", "hint": "Cross-account" },
+          "AUTRE_RECETTE": { "label": "Other inflow", "hint": "Miscellaneous inflow" },
+          "AUTRE_DEPENSE": { "label": "Other outflow", "hint": "Miscellaneous outflow" },
+          "FRAIS_BANCAIRES": { "label": "Bank fees", "hint": "Account keeping…" },
+          "COMMISSIONS": { "label": "Commission", "hint": "On transactions" },
+          "PAIEMENT_PAIE": { "label": "Payroll / Expense report", "hint": "Personnel" }
+        }
+      },
+      "actions": {
+        "create": "+ Enter movement",
+        "lettrer": "Match",
+        "supprimer": "Delete"
+      },
+      "toasts": {
+        "created": "Movement recorded",
+        "deleted": "Movement deleted"
+      }
+    },
+    "tauxChange": {
+      "entityName": "Exchange rate",
+      "entityNamePlural": "Exchange rates",
+      "title": "Exchange rates",
+      "subtitle": "BAM quotations used for currency conversion",
+      "list": {
+        "columns": {
+          "deviseBase": "Base currency",
+          "deviseCible": "Target currency",
+          "taux": "Rate",
+          "dateCotation": "Quotation date",
+          "source": "Source",
+          "actions": "Actions"
+        },
+        "filters": {
+          "deviseBase": "Base currency",
+          "deviseCible": "Target currency",
+          "source": "Source",
+          "dateFrom": "Quoted from",
+          "dateTo": "Quoted to"
+        },
+        "emptyState": {
+          "title": "No rate",
+          "message": "No exchange rate recorded."
+        }
+      },
+      "form": {
+        "fields": {
+          "deviseBase": "Base currency",
+          "deviseCible": "Target currency",
+          "taux": "Rate",
+          "dateCotation": "Quotation date",
+          "source": "Source"
+        }
+      },
+      "source": {
+        "BAM": "Bank Al-Maghrib (BAM)",
+        "MANUEL": "Manually entered",
+        "IMPORT": "Imported"
+      },
+      "converter": {
+        "title": "Currency converter",
+        "amount": "Amount",
+        "from": "From",
+        "to": "To",
+        "rate": "Rate",
+        "result": "Result",
+        "asOf": "as of",
+        "noRate": "No rate available for this pair"
+      },
+      "chart": {
+        "title": "Rate evolution",
+        "period": "Period",
+        "min": "Min",
+        "max": "Max",
+        "avg": "Average"
+      },
+      "evolutionChart": {
+        "title": "Rate evolution (12 months)",
+        "noData": "No data available."
+      },
+      "actions": {
+        "create": "New rate",
+        "importBam": "Import BAM quotations",
+        "edit": "Edit",
+        "delete": "Delete"
+      },
+      "toasts": {
+        "created": "Rate recorded",
+        "saved": "Rate updated",
+        "deleted": "Rate deleted",
+        "imported": "{n} quotation(s) imported"
+      }
+    },
+    "devise": {
+      "entityName": "Currency",
+      "entityNamePlural": "Currencies",
+      "title": "Currencies",
+      "subtitle": "Currencies supported by the ERP",
+      "detailTitle": "Currency detail",
+      "detailBreadcrumb": "Detail",
+      "actionNew": "New currency",
+      "statusActive": "Active",
+      "statusInactive": "Inactive",
+      "referenceBadge": "Reference",
+      "emptyTitle": "No currency",
+      "emptyMessage": "Start with MAD (reference), EUR, USD…",
+      "list": {
+        "columns": {
+          "code": "Code",
+          "libelle": "Label",
+          "symbole": "Symbol",
+          "precision": "Precision",
+          "reference": "Reference",
+          "actif": "Active",
+          "decimales": "Decimals",
+          "active": "Active",
+          "isDefault": "Default"
+        },
+        "filters": {
+          "status": "Status",
+          "reference": "Reference",
+          "referenceYes": "Reference currency",
+          "referenceNo": "Other"
+        }
+      },
+      "form": {
+        "fields": {
+          "codeIso": "ISO code",
+          "libelle": "Label",
+          "symbole": "Symbol",
+          "precision": "Decimal precision",
+          "reference": "Reference currency",
+          "actif": "Active"
+        },
+        "hints": {
+          "codeIso": "3 uppercase letters (MAD, EUR, USD…)",
+          "reference": "Only one currency can be the reference (MAD)."
+        }
+      },
+      "sections": {
+        "general": "General",
+        "statut": "Status"
+      },
+      "deleteConfirm": {
+        "title": "Delete the currency",
+        "message": "Do you really want to delete currency {code}?"
+      },
+      "toasts": {
+        "saved": "Currency saved"
+      }
+    },
+    "conditionPaiement": {
+      "entityName": "Payment term",
+      "entityNamePlural": "Payment terms",
+      "title": "Payment terms",
+      "subtitle": "Payment periods and methods",
+      "list": {
+        "columns": {
+          "code": "Code",
+          "libelle": "Label",
+          "type": "Type",
+          "delaiJours": "Term (days)",
+          "echeance": "Due date",
+          "actif": "Active"
+        },
+        "filters": {
+          "type": "Type",
+          "actif": "Active"
+        }
+      },
+      "form": {
+        "fields": {
+          "code": "Code",
+          "libelle": "Label",
+          "type": "Type",
+          "delaiJours": "Term (days)",
+          "echeance": "Due-date mode",
+          "actif": "Active"
+        }
+      },
+      "display": {
+        "delai": "{n} days",
+        "finMois": "End of month",
+        "finMoisX": "End of month + {n} days",
+        "leX": "The {n}th of next month",
+        "comptant": "Cash",
+        "default": "default"
+      },
+      "echeances": {
+        "title": "Instalments",
+        "mustBeHundred": "(must total 100%)",
+        "add": "+ Add an instalment",
+        "descriptionPlaceholder": "e.g. On order",
+        "emptyState": "No instalment defined. Use this table to record staggered payments (30/40/30…).",
+        "cols": {
+          "ordre": "Order",
+          "delai": "Delay (days)",
+          "description": "Description"
+        }
+      }
+    },
+    "analytique": {
+      "entityName": "Cost accounting",
+      "title": "Cost accounting",
+      "subtitle": "Cost/revenue pivot by axis",
+      "fields": {
+        "axe": "Axis",
+        "comptes": "Accounts"
+      },
+      "axeTypes": {
+        "CHANTIER": "Sites",
+        "DEPARTEMENT": "Departments",
+        "ACTIVITE": "Activities"
+      },
+      "compteSets": {
+        "both": "Costs + Revenues",
+        "charges": "Costs (class 6)",
+        "produits": "Revenues (class 7)"
+      },
+      "searchPlaceholder": "Account code or description",
+      "margeLabel": "MARGIN (Σ7 - Σ6)",
+      "margeShort": "MARGIN",
+      "emptyState": "No data for these criteria.",
+      "filters": {
+        "axe": "Cost-accounting axis",
+        "chantier": "Site",
+        "rubrique": "Category",
+        "periodFrom": "Period from",
+        "periodTo": "Period to",
+        "compte": "Account"
+      },
+      "headers": {
+        "axe": "Axis",
+        "chantier": "Site",
+        "rubrique": "Category",
+        "compte": "Account",
+        "libelle": "Description",
+        "totalDebit": "Total debit",
+        "totalCredit": "Total credit",
+        "solde": "Balance"
+      },
+      "sections": {
+        "byChantier": "By site",
+        "byRubrique": "By category",
+        "byAxe": "By axis"
+      },
+      "actions": {
+        "exportCsv": "Export CSV",
+        "exportExcel": "Export Excel",
+        "drillDown": "View detail"
+      },
+      "toasts": {
+        "exported": "Cost accounting exported (CSV)."
+      }
+    },
+    "recouvrement": {
+      "entityName": "Collections",
+      "title": "Customer collections",
+      "subtitle": "Receivables and dunning follow-up",
+      "headers": {
+        "client": "Customer",
+        "factureNumero": "Invoice #",
+        "dateEmission": "Issued",
+        "dateEcheance": "Due",
+        "montantTtc": "Amount incl. VAT",
+        "encaisse": "Collected",
+        "reste": "Outstanding",
+        "joursRetard": "Days late",
+        "niveauRelance": "Dunning level",
+        "dernierContact": "Last contact",
+        "actions": "Actions"
+      },
+      "bucket": {
+        "current": "Current",
+        "j1_30": "1-30 days",
+        "j31_60": "31-60 days",
+        "j61_90": "61-90 days",
+        "j91_180": "91-180 days",
+        "j180Plus": "> 180 days"
+      },
+      "relance": {
+        "niveau1": "Level 1 — Reminder",
+        "niveau2": "Level 2 — Dunning",
+        "niveau3": "Level 3 — Formal notice",
+        "contentieux": "Legal proceedings"
+      },
+      "actions": {
+        "envoyerRelance": "Send dunning",
+        "marquerEncaisse": "Mark collected",
+        "voirHistorique": "History",
+        "contacterClient": "Contact customer",
+        "exportPdf": "Export PDF",
+        "exportCsv": "Export CSV"
+      },
+      "toasts": {
+        "relanceSent": "Dunning sent to {client}",
+        "encaisseSaved": "Collection recorded"
+      }
+    },
+    "effets": {
+      "entityName": "Commercial paper",
+      "entityNamePlural": "Commercial paper",
+      "title": "Commercial paper",
+      "subtitle": "Notes receivable / payable",
+      "routeTitle": "Commercial paper",
+      "routeBreadcrumb": "Notes",
+      "list": {
+        "columns": {
+          "numero": "#",
+          "type": "Type",
+          "tireur": "Drawer",
+          "tire": "Drawee",
+          "montant": "Amount",
+          "dateEmission": "Issued",
+          "dateEcheance": "Due date",
+          "domicile": "Domiciliation",
+          "status": "Status",
+          "actions": "Actions"
+        },
+        "filters": {
+          "type": "Type",
+          "status": "Status",
+          "dateFrom": "Due from",
+          "dateTo": "Due to"
+        }
+      },
+      "type": {
+        "AR": "Receivable",
+        "AP": "Payable"
+      },
+      "status": {
+        "ENCOURS": "In progress",
+        "REMIS_ENCAISSEMENT": "Sent for collection",
+        "REMIS_ESCOMPTE": "Sent for discount",
+        "PAYE": "Paid",
+        "IMPAYE": "Unpaid",
+        "ANNULE": "Cancelled"
+      },
+      "actions": {
+        "remiseEncaissement": "Send for collection",
+        "remiseEscompte": "Send for discount",
+        "marquerPaye": "Mark paid",
+        "marquerImpaye": "Mark unpaid"
+      }
+    },
+    "declarations": {
+      "entityName": "Returns",
+      "title": "Tax returns",
+      "subtitle": "Generation and follow-up of e-filings",
+      "common": {
+        "exercice": "Fiscal year",
+        "periode": "Period",
+        "month": "Month",
+        "trimester": "Quarter",
+        "dateLimite": "Deadline",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "status": {
+        "BROUILLON": "Draft",
+        "PRETE": "Ready to e-file",
+        "TELEDECLAREE": "E-filed",
+        "PAYEE": "Paid",
+        "ARCHIVEE": "Archived"
+      },
+      "actions": {
+        "generate": "Generate the return",
+        "preview": "Preview",
+        "downloadEdi": "Download EDI file",
+        "markTeledeclared": "Mark e-filed",
+        "markPaid": "Mark paid"
+      },
+      "simplIs": {
+        "title": "SIMPL-IS — VAT return",
+        "subtitle": "Sales & purchase annexes — Monthly DGI return",
+        "crumb": "SIMPL-IS VAT",
+        "routeTitle": "SIMPL-IS VAT",
+        "routeBreadcrumb": "SIMPL-IS",
+        "monthLabel": "Month:",
+        "exportXml": "📥 Export SIMPL-IS XML",
+        "exportXlsx": "📊 Sales annex Excel",
+        "headers": {
+          "societe": "Company",
+          "if": "Tax ID",
+          "ice": "ICE",
+          "periode": "Period"
+        },
+        "annexA": {
+          "title": "Annex A — VAT collected on sales",
+          "cols": {
+            "numero": "Invoice #",
+            "client": "Customer",
+            "iceClient": "Customer ICE",
+            "montantHt": "Amount excl. VAT",
+            "tauxTva": "VAT rate",
+            "tvaCollectee": "VAT collected",
+            "ttc": "Incl. VAT"
+          },
+          "empty": "No sales invoiced in {month}."
+        },
+        "recap": {
+          "title": "VAT recap to file",
+          "tvaCollectee": "VAT collected (sales)",
+          "tvaDeductible": "Estimated deductible VAT (purchases)",
+          "tvaNet": "Net VAT payable"
+        },
+        "note": "VAT to remit before the 20th of next month. E-filing via DGI portal simpl.tax.gov.ma",
+        "xlsx": {
+          "ht": "Excl. VAT",
+          "tauxTva": "VAT rate %",
+          "tva": "VAT",
+          "ttc": "Incl. VAT"
+        },
+        "audit": {
+          "xlsx": "XLSX sales annex — {count} line(s)",
+          "xml": "VAT e-filing XML (demo)"
+        },
+        "sections": {
+          "acomptes": "Quarterly instalments",
+          "regularisation": "Annual reconciliation",
+          "telechargement": "EDI download"
+        },
+        "acompteLabels": {
+          "T1": "1st instalment (before 03/31)",
+          "T2": "2nd instalment (before 06/30)",
+          "T3": "3rd instalment (before 09/30)",
+          "T4": "4th instalment (before 12/31)"
+        },
+        "hints": {
+          "intro": "IS instalments are based on the prior-year tax result. Reconciliation occurs with the annual return.",
+          "tauxBareme": "IS rate per CGI schedule: 12.5% / 20% / 25% / 32% / 35% depending on bracket."
+        }
+      },
+      "tva": {
+        "title": "VAT return",
+        "regime": "Regime",
+        "regimeDebit": "Debit regime",
+        "regimeEncaissement": "Cash basis regime",
+        "cycle": "Reporting cycle",
+        "cycleMensuel": "Monthly",
+        "cycleTrimestriel": "Quarterly",
+        "tvaCollectee": "VAT collected",
+        "tvaDeductible": "VAT deductible",
+        "tvaPayer": "VAT payable",
+        "creditTva": "VAT credit carry-forward"
+      },
+      "retenueSource": {
+        "title": "Withholding tax (RAS)",
+        "subtitle": "Statement of amounts withheld on non-resident suppliers",
+        "routeTitle": "Withholding tax",
+        "routeBreadcrumb": "Withholding tax",
+        "headers": {
+          "fournisseur": "Supplier",
+          "ice": "ICE",
+          "baseHt": "Base excl. VAT",
+          "tauxRas": "RAS rate",
+          "montantRetenue": "Amount withheld",
+          "datePaiement": "Payment date",
+          "reverse": "Remitted"
+        },
+        "summary": {
+          "totalBase": "Total base excl. VAT",
+          "totalRetenue": "Total RAS withheld",
+          "totalReverse": "Total RAS remitted"
+        },
+        "actions": {
+          "generateEtat": "Generate RAS statement",
+          "exportXml": "Export SIMPL XML",
+          "markReverse": "Mark remitted"
+        }
+      }
+    },
+    "caissesChantier": {
+      "entityName": "Site cash registers",
+      "title": "Cash & banks",
+      "subtitle": "Consolidated view of multi-bank and cash treasury.",
+      "kpi": {
+        "soldeTotal": "Total balance",
+        "activeAccounts": "{count} active account(s)",
+        "accounts": "{count} account(s)",
+        "caisses": "{count} cash account(s)",
+        "recettesMois": "Monthly inflows",
+        "depensesMois": "Monthly outflows",
+        "fluxNetMois": "Net monthly flow"
+      },
+      "list": {
+        "columns": {
+          "chantier": "Site",
+          "responsable": "Responsible",
+          "fondInitial": "Initial float",
+          "soldeCourant": "Current balance",
+          "depenses": "Expenses",
+          "reapprovs": "Top-ups",
+          "status": "Status",
+          "actions": "Actions"
+        }
+      },
+      "actions": {
+        "ouvrir": "Open cash",
+        "reapprovisionner": "Top up",
+        "saisirDepense": "Enter expense",
+        "cloturer": "Close cash"
+      }
+    },
+    "import": {
+      "releve": {
+        "title": "Import bank statement",
+        "subtitle": "OFX or CSV format — BAM-compatible format",
+        "dropzone": "Drop an OFX/CSV file here",
+        "or": "or",
+        "selectFile": "Select a file",
+        "format": "Detected format",
+        "compteCible": "Target account",
+        "dateRange": "Detected range",
+        "preview": "Preview ({n} lines)",
+        "headers": {
+          "date": "Date",
+          "libelle": "Description",
+          "reference": "Reference",
+          "debit": "Debit",
+          "credit": "Credit"
+        },
+        "errors": {
+          "title": "Detected errors",
+          "lineN": "Line {n}",
+          "invalidDate": "Invalid date",
+          "invalidAmount": "Invalid amount",
+          "missingRequired": "Required field missing"
+        },
+        "actions": {
+          "import": "Import",
+          "cancel": "Cancel",
+          "downloadTemplate": "CSV template"
+        },
+        "toasts": {
+          "imported": "{n} movements imported",
+          "duplicate": "{n} duplicate(s) ignored",
+          "error": "Import failed"
+        }
+      },
+      "dialog": {
+        "title": "Bank statement import",
+        "uploadText": "Click or drop a CSV or OFX file here",
+        "uploadHint": "CSV: Date · Description · Reference · Credit · Debit — OFX: STMTTRN extraction",
+        "pasteLabel": "Or paste the CSV content below",
+        "pastePlaceholder": "Date,Description,Reference,Credit,Debit\n2026-04-15,Wire OCP Promotion,VIR-OCP-001,1504800,\n2026-04-16,Bank fees,,,180",
+        "analyze": "Analyze",
+        "validLines": "valid lines",
+        "errorLines": "{count} with errors",
+        "restart": "Restart",
+        "refShort": "Ref.",
+        "importCount": "Import {count} line(s)",
+        "errors": {
+          "missingLibelle": "Missing description",
+          "noAmount": "No amount"
+        }
+      }
+    },
+    "imputation": {
+      "title": "Accounting allocation",
+      "subtitle": "Select the allocation account",
+      "search": "Search for an account…",
+      "noResult": "No account matches",
+      "favorites": "Favourite accounts",
+      "recents": "Recent accounts",
+      "actions": {
+        "select": "Select",
+        "clear": "Clear",
+        "createNew": "Create a new account"
+      },
+      "openInvoices": "{count} open invoice(s)",
+      "totalDue": "Total due",
+      "amountReceived": "Total amount received",
+      "amountToPay": "Total amount to pay",
+      "autoAllocate": "Auto allocate",
+      "emptyForContrepartie": "No open invoices for this counterparty.",
+      "emptySelectContrepartie": "Select a counterparty to display open invoices.",
+      "totalImpute": "Total allocated",
+      "cols": {
+        "numero": "Invoice no.",
+        "date": "Date",
+        "echeance": "Due date",
+        "resteARegler": "Remaining",
+        "impute": "Allocated"
+      }
+    },
+    "soldeIndicator": {
+      "label": "Balance",
+      "positive": "Surplus",
+      "negative": "Deficit",
+      "zero": "Balanced",
+      "trend": {
+        "up": "Rising",
+        "down": "Falling",
+        "stable": "Stable"
+      }
+    },
+    "deviseFlag": {
+      "label": "Currency {code}"
+    }
+  }
+}

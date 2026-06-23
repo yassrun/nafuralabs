@@ -1,0 +1,29 @@
+{
+  "entity": "ToleranceGroup",
+  "fields": {
+    "code": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "name": {
+      "maxLength": 120
+    },
+    "priceVariancePercent": {
+      "min": 0
+    },
+    "quantityVariancePercent": {
+      "min": 0
+    },
+    "amountVarianceMax": {
+      "min": 0
+    },
+    "currency": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

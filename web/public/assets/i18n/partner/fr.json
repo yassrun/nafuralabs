@@ -1,0 +1,117 @@
+{
+  "partner": {
+    "navigation": {
+      "partners": "Partners",
+      "businessUnits": "Business Units",
+      "contacts": "Contacts",
+      "organizations": "Organizations",
+      "partnerCategories": "Partner Categories",
+      "partnerRoles": "Partner Roles",
+      "sites": "Sites"
+    },
+    "partner": {
+      "title": "Partners",
+      "detailTitle": "Partner Details",
+      "newTitle": "New Partner",
+      "fields": {
+        "code": "code",
+        "name": "name",
+        "taxId": "tax Id",
+        "email": "email",
+        "phone": "phone",
+        "description": "description",
+        "addressId": "address Id",
+        "paymentTermId": "payment Term Id",
+        "isActive": "is Active",
+        "roles": "roles"
+      },
+      "sections": {
+        "contact": "contact",
+        "legal": "legal",
+        "financial": "financier"
+      }
+    },
+    "businessUnit": {
+      "title": "Business Units",
+      "detailTitle": "Business Unit Details",
+      "newTitle": "New Business Unit",
+      "fields": {
+        "organizationId": "organization Id",
+        "code": "code",
+        "name": "name",
+        "description": "description",
+        "isActive": "is Active"
+      },
+      "sections": {}
+    },
+    "contact": {
+      "title": "Contacts",
+      "detailTitle": "Contact Details",
+      "newTitle": "New Contact",
+      "fields": {
+        "code": "code",
+        "name": "name",
+        "email": "email",
+        "phone": "phone",
+        "mobile": "mobile",
+        "description": "description",
+        "isActive": "is Active"
+      },
+      "sections": {}
+    },
+    "organization": {
+      "title": "Organizations",
+      "detailTitle": "Organization Details",
+      "newTitle": "New Organization",
+      "fields": {
+        "code": "code",
+        "name": "name",
+        "description": "description",
+        "isActive": "is Active"
+      },
+      "sections": {}
+    },
+    "partnerCategory": {
+      "title": "Partner Categories",
+      "detailTitle": "Partner Category Details",
+      "newTitle": "New Partner Category",
+      "fields": {
+        "code": "code",
+        "name": "name",
+        "description": "description",
+        "isActive": "is Active"
+      },
+      "sections": {}
+    },
+    "partnerRole": {
+      "title": "Partner Roles",
+      "detailTitle": "Partner Role Details",
+      "newTitle": "New Partner Role",
+      "fields": {
+        "code": "code",
+        "name": "name",
+        "description": "description",
+        "isActive": "is Active"
+      },
+      "sections": {}
+    },
+    "site": {
+      "title": "Sites",
+      "detailTitle": "Site Details",
+      "newTitle": "New Site",
+      "fields": {
+        "code": "code",
+        "name": "name",
+        "organizationId": "organization Id",
+        "businessUnitId": "business Unit Id",
+        "addressId": "address Id",
+        "description": "description",
+        "isActive": "is Active",
+        "siteType": "site Type"
+      },
+      "sections": {
+        "address": "adresse"
+      }
+    }
+  }
+}

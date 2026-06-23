@@ -1,0 +1,16 @@
+{
+  "revisions": [
+    {
+      "id": "rev-001",
+      "contratMarcheId": "mar-002",
+      "periode": "2026-03",
+      "status": "CALCULE"
+    },
+    {
+      "id": "rev-002",
+      "contratMarcheId": "mar-002",
+      "periode": "2026-04",
+      "status": "CALCULE"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/storybook",
+    "types": ["node"]
+  },
+  "include": [
+    ".storybook/**/*.ts",
+    "app/**/*.stories.ts",
+    "app/**/*.story.ts",
+    "app/**/*.mdx"
+  ],
+  "exclude": [
+    "**/*.spec.ts",
+    "tests/**/*.ts",
+    "playwright.config.ts"
+  ]
+}

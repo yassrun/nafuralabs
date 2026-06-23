@@ -1,0 +1,775 @@
+{
+  "hse": {
+    "routes": {
+      "tableauBord": {
+        "title": "لوحة قيادة HSE",
+        "breadcrumb": "لوحة القيادة"
+      },
+      "epi": {
+        "title": "سجل EPI",
+        "breadcrumb": "EPI"
+      },
+      "duer": { "title": "DUER", "breadcrumb": "DUER" },
+      "ppsps": { "title": "PPSPS", "breadcrumb": "PPSPS" },
+      "phs": { "title": "PHS الشركة", "breadcrumb": "PHS" },
+      "visiteMedicale": {
+        "title": "الزيارات الطبية",
+        "breadcrumb": "الزيارات الطبية"
+      },
+      "registresLegaux": {
+        "title": "السجلات القانونية",
+        "breadcrumb": "السجلات القانونية"
+      },
+      "incident": {
+        "list": { "title": "حوادث HSE", "breadcrumb": "الحوادث" },
+        "create": { "title": "التصريح بحادث", "breadcrumb": "جديد" },
+        "detail": { "title": "تفاصيل الحادث", "breadcrumb": "التفاصيل" },
+        "edit": { "title": "تعديل الحادث", "breadcrumb": "تعديل" }
+      },
+      "inspection": {
+        "list": { "title": "فحوصات HSE", "breadcrumb": "الفحوصات" },
+        "create": { "title": "تخطيط فحص", "breadcrumb": "جديد" },
+        "detail": { "title": "تفاصيل الفحص", "breadcrumb": "التفاصيل" },
+        "edit": { "title": "تعديل الفحص", "breadcrumb": "تعديل" }
+      },
+      "formation": {
+        "list": { "title": "تكوينات HSE", "breadcrumb": "التكوينات" },
+        "create": { "title": "تكوين جديد", "breadcrumb": "جديد" },
+        "detail": { "title": "تفاصيل التكوين", "breadcrumb": "التفاصيل" },
+        "edit": { "title": "تعديل التكوين", "breadcrumb": "تعديل" }
+      },
+      "nonConformite": {
+        "list": { "title": "حالات عدم المطابقة", "breadcrumb": "عدم المطابقة" },
+        "create": { "title": "عدم مطابقة جديد", "breadcrumb": "جديد" },
+        "detail": { "title": "تفاصيل عدم المطابقة", "breadcrumb": "التفاصيل" },
+        "edit": { "title": "تعديل عدم المطابقة", "breadcrumb": "تعديل" }
+      }
+    },
+    "common": {
+      "breadcrumb": "HSE",
+      "actions": {
+        "nouveau": "+ جديد",
+        "imprimer": "طباعة",
+        "exporter": "تصدير",
+        "annuler": "إلغاء",
+        "fermer": "إغلاق",
+        "enregistrer": "حفظ",
+        "creerBrouillon": "إنشاء مسودة"
+      },
+      "placeholders": {
+        "selectionner": "— اختيار —",
+        "nomPrenom": "الاسم واللقب"
+      },
+      "empty": {
+        "default": "لم يتم العثور على أي عنصر."
+      },
+      "messages": {
+        "tousLesStatuts": "جميع الحالات",
+        "tousLesChantiers": "جميع الأوراش",
+        "tousLesTypes": "جميع الأنواع"
+      }
+    },
+    "dashboard": {
+      "headerTitle": "لوحة قيادة HSE",
+      "headerSubtitle": "مؤشرات السلامة والجودة — 2026",
+      "birdTitle": "هرم الخطورة (Bird)",
+      "kpi": {
+        "atYtd": { "label": "حوادث الشغل YTD", "sub": "{mortels} مميت(ة) · {avecArret} بانقطاع" },
+        "tf": { "label": "معدل التكرار (TF)", "sub": "الهدف: TF < 5" },
+        "tg": { "label": "معدل الخطورة (TG)", "sub": "الهدف: TG < 0.2" },
+        "ncOuvertes": { "label": "حالات عدم المطابقة المفتوحة", "sub": "{critiques} حرج(ة)" },
+        "inspectionsMois": { "label": "الفحوصات هذا الشهر", "sub": "{reste} مخطط(ة) متبقي(ة)" },
+        "joursSansAT": { "label": "أيام بلا حادث", "sub": "الرقم القياسي: {record} يومًا" }
+      },
+      "quickLinks": {
+        "title": "روابط سريعة",
+        "incidents": { "label": "الحوادث وAT", "count": "{n} YTD" },
+        "nc": { "label": "حالات عدم المطابقة", "count": "{n} مفتوحة" },
+        "inspections": { "label": "الفحوصات", "count": "{n} هذا الشهر" },
+        "formations": { "label": "التكوينات", "count": "{n} قيد التنفيذ" },
+        "epi": { "label": "سجل EPI", "count": "{n} للتجديد" },
+        "phs": { "label": "PHS الشركة", "count": "المخطط العام" },
+        "ppsps": { "label": "PPSPS الأوراش", "count": "مخططات نشطة" }
+      },
+      "legal": {
+        "title": "المطابقة القانونية المغربية",
+        "duer": "DUER محرر وموقع",
+        "ppsps": "PHS / PPSPS مودع لدى ITT",
+        "chs": "CHS: اجتماع الفصل الثاني يجب تخطيطه",
+        "registreAt": "سجل AT محدّث (CNSS)",
+        "visites": "الزيارات الطبية: 3 متأخرة"
+      }
+    },
+    "duer": {
+      "title": "الوثيقة الفريدة لتقييم المخاطر (DUER)",
+      "headerTitle": "DUER — الوثيقة الفريدة لتقييم المخاطر",
+      "subtitle": "تقييم حسب الورش · مراجعة دورية إلزامية",
+      "search": "ورش، مؤلف، رقم DUER…",
+      "count": "{n} DUER",
+      "actions": {
+        "nouveau": "+ DUER جديد",
+        "matrice": "المصفوفة",
+        "documents": "الوثائق",
+        "publier": "نشر DUER"
+      },
+      "columns": {
+        "chantier": "الورش",
+        "numero": "الرقم",
+        "version": "النسخة",
+        "dateRevision": "تاريخ المراجعة",
+        "auteur": "المؤلف",
+        "risquesIdentifies": "المخاطر المحددة",
+        "actionsCorrectives": "الإجراءات التصحيحية",
+        "statut": "الحالة",
+        "edition": "الإصدار",
+        "observations": "الملاحظات"
+      },
+      "empty": "لم يتم العثور على أي DUER.",
+      "modal": {
+        "title": "DUER جديد",
+        "hint": "إنشاء سريع لمسودة. مصفوفة المخاطر × الاحتمالية × درجة الخطورة قابلة للتعديل من زر «المصفوفة» في الجدول.",
+        "chantier": "الورش",
+        "auteur": "المؤلف"
+      },
+      "documentsModal": {
+        "title": "الوثائق — {numero}",
+        "hint": "مرفقات DUER (PDF، صور، Word)."
+      },
+      "matrice": {
+        "titleWithNumero": "مصفوفة المخاطر — {numero}",
+        "hint": "السلم من 1 (ضعيف) إلى 4 (قوي). درجة الحرج = الاحتمالية × درجة الخطورة (تجريبي DUER).",
+        "risque": "الخطر",
+        "probabilite": "الاحتمالية",
+        "gravite": "درجة الخطورة",
+        "score": "النتيجة"
+      },
+      "audit": {
+        "createNote": "تم إنشاء مسودة لـ {chantierCode}",
+        "matriceNote": "مصفوفة المخاطر × الاحتمالية × درجة الخطورة",
+        "exportNote": "{format} — {rowCount} سطور",
+        "labelListing": "DUER — القائمة"
+      }
+    },
+    "ppsps": {
+      "title": "المخطط الخاص بالسلامة وحماية الصحة (PPSPS)",
+      "headerTitle": "PPSPS — المخطط الخاص بالسلامة وحماية الصحة",
+      "subtitle": "PPSPS حسب الورش · إلزامي > 760 رجل·يوم",
+      "search": "ورش، منسق، رقم PPSPS…",
+      "count": "{n} PPSPS",
+      "actions": {
+        "nouveau": "+ PPSPS جديد",
+        "pdfRappelLoi": "PDF (تجريبي R4532-65)",
+        "documents": "الوثائق"
+      },
+      "columns": {
+        "chantier": "الورش",
+        "numero": "رقم PPSPS",
+        "version": "النسخة",
+        "coordonnateur": "منسق SPS",
+        "telephone": "الهاتف",
+        "date": "التاريخ",
+        "mesuresCollectives": "التدابير الجماعية",
+        "effectifMaxJour": "أقصى عدد/يوم",
+        "hommesJourEstimes": "رجال·يوم تقديري",
+        "hommesJourEstimesShort": "ر·ي تقديري",
+        "statut": "الحالة",
+        "edition": "الإصدار"
+      },
+      "empty": "لم يتم العثور على أي PPSPS.",
+      "modal": {
+        "title": "PPSPS جديد",
+        "hint": "إنشاء بطاقة مسودة. سيتم ربط مولّد PDF (موجز المادة R4532-65 / CCAG-T) لاحقاً.",
+        "coordonnateur": "منسق SPS",
+        "mesureDefaut": "لإكماله — انظر هيكل منسق SPS."
+      },
+      "documentsModal": {
+        "title": "الوثائق — {numero}",
+        "hint": "مرفقات PPSPS (PDF، صور، Word)."
+      },
+      "print": {
+        "disclaimer": "وثيقة تجريبية — الهيكل مستوحى من البيانات النموذجية (تنسيق SPS، تحليل المخاطر، التدابير) المنصوص عليها في المادة R4532-65 من قانون الشغل (فرنسا) / تكييف للاستخدام التجريبي بورش مغربي.",
+        "headerTitle": "PPSPS — {chantier}",
+        "headerMeta": "الرقم {numero} · ورش {code} · التاريخ {date} · النسخة {version}",
+        "section1": "1. تعريف المقاولة والعملية",
+        "section1Body": "MOEX / مقاولة منفذة (تجريبي Nafura BTP) — نطاق العملية: {chantier}.",
+        "section2": "2. منسق SPS",
+        "section3": "3. العمالة ورجال·يوم",
+        "section3Effectif": "أقصى عدد / يوم",
+        "section3HommesJour": "رجال·يوم تقديري",
+        "section4": "4. تحليل المخاطر والتدابير الجماعية",
+        "section5": "5. أقسام PPSPS (markdown / هيكل 8 فصول)",
+        "section6": "6. تنظيم الوقاية / الإسعاف / التسلسل الإداري",
+        "section6Body": "مناطق حساسة معلَّمة، وصلات راديو الورش، أرقام الطوارئ معلقة بالقاعدة الحياتية (تجريبي).",
+        "section7": "7. الملاحظات"
+      },
+      "audit": {
+        "createNote": "تم إنشاء مسودة لـ {chantierCode}",
+        "printNote": "PDF تجريبي للمادة R4532-65",
+        "exportNote": "{format} — {rowCount} سطور",
+        "labelListing": "PPSPS — القائمة"
+      }
+    },
+    "phs": {
+      "headerTitle": "PHS — مخطط الصحة والسلامة (الشركة)",
+      "subtitle": "وثيقة عامة قبل PPSPS الورش",
+      "breadcrumb": "PHS الشركة",
+      "search": "رقم PHS، محرر…",
+      "count": "{n} وثيقة(وثائق)",
+      "columns": {
+        "numero": "رقم PHS",
+        "version": "النسخة",
+        "date": "التاريخ",
+        "redacteur": "المحرر",
+        "statut": "الحالة",
+        "sections": "الأقسام",
+        "pdf": "PDF"
+      },
+      "rows": {
+        "sectionsCount": "{n} أقسام"
+      },
+      "actions": {
+        "pdfOfficiel": "PDF رسمي (تجريبي)"
+      },
+      "empty": "لا يوجد أي PHS.",
+      "print": {
+        "disclaimer": "وثيقة تجريبية — PHS الشركة (النسخة {version}).",
+        "headerTitle": "PHS — {numero}",
+        "meta": "المحرر: {redacteur} · التاريخ {date} · الحالة {status}"
+      },
+      "audit": {
+        "printNote": "PDF تجريبي لـ PHS الشركة"
+      }
+    },
+    "incident": {
+      "entityName": "حادث",
+      "entityNamePlural": "الحوادث",
+      "headerTitle": "حوادث HSE",
+      "createTitle": "التصريح بحادث",
+      "detailTitle": "تفاصيل الحادث",
+      "chips": {
+        "all": "الكل",
+        "ouverts": "المفتوحة",
+        "investigation": "تحقيق"
+      },
+      "list": {
+        "columns": {
+          "numero": "رقم الحادث",
+          "date": "التاريخ",
+          "type": "النوع",
+          "lieu": "المكان",
+          "chantier": "الورش",
+          "gravite": "درجة الخطورة",
+          "joursArret": "أيام الانقطاع",
+          "statut": "الحالة"
+        },
+        "transform": {
+          "joursSuffix": "{n}ي"
+        },
+        "filters": {
+          "chantier": "الورش",
+          "type": "النوع",
+          "status": "الحالة",
+          "gravite": "درجة الخطورة"
+        },
+        "emptyState": {
+          "title": "لا توجد حوادث",
+          "message": "الحوادث المصرح بها في الأوراش تظهر هنا.",
+          "actionLabel": "التصريح بحادث"
+        }
+      },
+      "form": {
+        "fields": {
+          "numero": "رقم الحادث",
+          "date": "التاريخ *",
+          "heure": "الساعة",
+          "lieu": "المكان *",
+          "chantier": "الورش",
+          "typeIncident": "النوع",
+          "gravite": "درجة الخطورة *",
+          "description": "الوصف *",
+          "victimeNom": "الضحية",
+          "cnssMatriculeVictime": "رقم CNSS للضحية",
+          "joursArret": "أيام الانقطاع",
+          "planAction": "خطة العمل",
+          "causes": "الأسباب",
+          "actionsImmediates": "الإجراءات الفورية",
+          "cnssReferenceDeclaration": "مرجع تصريح CNSS",
+          "cnssDateDeclaration": "تاريخ إرسال CNSS",
+          "notes": "ملاحظات"
+        },
+        "sections": {
+          "identification": "التعريف",
+          "details": "التفاصيل",
+          "actions": "الإجراءات"
+        }
+      },
+      "actions": {
+        "investiguer": "فتح تحقيق",
+        "cloturer": "إغلاق",
+        "declarerCnssDat": "التصريح CNSS DAT"
+      },
+      "confirms": {
+        "investiguer": {
+          "title": "فتح التحقيق؟",
+          "message": "سينتقل الحادث إلى مرحلة التحقيق.",
+          "confirmLabel": "تأكيد"
+        },
+        "cloturer": {
+          "title": "إغلاق الحادث؟",
+          "message": "سيتم وضع علامة الإغلاق على الحادث.",
+          "confirmLabel": "إغلاق"
+        }
+      },
+      "toasts": {
+        "investigated": "الحادث {numero} — تم فتح التحقيق",
+        "closed": "تم إغلاق الحادث {numero}",
+        "saved": "تم حفظ الحادث {numero}",
+        "cnssReminder": "تذكير: تبقى حوالي {hours} ساعة في نافذة 48 ساعة لإرسال تصريح CNSS DAT.",
+        "cnssDeadlinePassed": "تم تجاوز الأجل القانوني 48 ساعة بعد الوقوع — تصريح CNSS بصفة استعجالية (تأخر ~{hours} ساعة).",
+        "cnssRecorded": "تم تسجيل مرجع CNSS: {ref} — تم إنشاء PDF (نموذج M-INT-03)."
+      },
+      "deleteConfirm": {
+        "title": "حذف الحادث",
+        "message": "هل تريد حذف الحادث {numero}؟"
+      }
+    },
+    "inspection": {
+      "entityName": "فحص",
+      "entityNamePlural": "الفحوصات",
+      "title": "فحوصات الورش",
+      "headerTitle": "فحوصات HSE",
+      "createTitle": "تخطيط فحص",
+      "detailTitle": "تفاصيل الفحص",
+      "chips": {
+        "all": "الكل",
+        "planifiees": "مخططة",
+        "enCours": "قيد التنفيذ",
+        "terminees": "مكتملة"
+      },
+      "list": {
+        "columns": {
+          "numero": "رقم الفحص",
+          "date": "التاريخ",
+          "chantier": "الورش",
+          "inspecteur": "المفتش",
+          "thematique": "الموضوع",
+          "note": "النقطة",
+          "nc": "NC",
+          "statut": "الحالة"
+        },
+        "transform": {
+          "noteSuffix": "{n}/100"
+        },
+        "filters": {
+          "status": "الحالة"
+        },
+        "emptyState": {
+          "title": "لا توجد فحوصات",
+          "message": "تظهر هنا فحوصات HSE المخططة والمنجزة.",
+          "actionLabel": "تخطيط فحص"
+        }
+      },
+      "form": {
+        "fields": {
+          "numero": "رقم الفحص",
+          "date": "التاريخ *",
+          "chantier": "الورش",
+          "inspecteur": "المفتش *",
+          "thematique": "الموضوع *",
+          "nbObservations": "عدد الملاحظات",
+          "nbNonConformites": "عدد حالات عدم المطابقة",
+          "noteGlobale": "النقطة الإجمالية (0-100)",
+          "observations": "الملاحظات",
+          "notes": "ملاحظات"
+        },
+        "sections": {
+          "identification": "التعريف",
+          "resultats": "النتائج"
+        }
+      },
+      "actions": {
+        "demarrer": "تشغيل",
+        "terminer": "إنهاء",
+        "annuler": "إلغاء"
+      },
+      "confirms": {
+        "demarrer": {
+          "title": "تشغيل الفحص؟",
+          "message": "سيتم وضع الفحص قيد التنفيذ.",
+          "confirmLabel": "تشغيل"
+        },
+        "annulerPlanifiee": {
+          "title": "إلغاء الفحص؟",
+          "message": "سيتم إلغاء الفحص.",
+          "confirmLabel": "إلغاء"
+        },
+        "terminer": {
+          "title": "إنهاء الفحص؟",
+          "message": "سيتم وضع علامة الانتهاء على الفحص.",
+          "confirmLabel": "إنهاء"
+        }
+      },
+      "toasts": {
+        "started": "تم تشغيل الفحص {numero}",
+        "completed": "تم إنهاء الفحص {numero}",
+        "cancelled": "تم إلغاء الفحص {numero}",
+        "saved": "تم حفظ الفحص {numero}"
+      },
+      "deleteConfirm": {
+        "title": "حذف الفحص",
+        "message": "هل تريد حذف الفحص {numero}؟"
+      }
+    },
+    "formation": {
+      "entityName": "تكوين",
+      "entityNamePlural": "التكوينات",
+      "title": "تكوينات السلامة",
+      "headerTitle": "تكوينات HSE",
+      "createTitle": "تكوين جديد",
+      "detailTitle": "تفاصيل التكوين",
+      "chips": {
+        "all": "الكل",
+        "planifiees": "مخططة",
+        "enCours": "قيد التنفيذ",
+        "terminees": "مكتملة"
+      },
+      "list": {
+        "columns": {
+          "numero": "رقم التكوين",
+          "titre": "التكوين",
+          "dateDebut": "تاريخ البداية",
+          "duree": "المدة",
+          "formateur": "المكوّن",
+          "participants": "المشاركون",
+          "statut": "الحالة"
+        },
+        "transform": {
+          "heuresSuffix": "{n}س"
+        },
+        "filters": {
+          "status": "الحالة"
+        },
+        "emptyState": {
+          "title": "لا توجد تكوينات",
+          "message": "خطّط لتكوينات السلامة الخاصة بك.",
+          "actionLabel": "تكوين جديد"
+        }
+      },
+      "form": {
+        "fields": {
+          "numero": "رقم التكوين",
+          "titre": "العنوان",
+          "dateDebut": "تاريخ البداية",
+          "dateFin": "تاريخ النهاية",
+          "dureeHeures": "المدة (ساعات)",
+          "formateur": "المكوّن / الهيئة",
+          "lieu": "المكان",
+          "nbParticipants": "عدد المشاركين",
+          "notes": "ملاحظات"
+        },
+        "sections": {
+          "identification": "التعريف",
+          "details": "التفاصيل"
+        }
+      },
+      "actions": {
+        "demarrer": "تشغيل",
+        "terminer": "إنهاء",
+        "annuler": "إلغاء"
+      },
+      "confirms": {
+        "demarrer": {
+          "title": "تشغيل التكوين؟",
+          "message": "سيتم وضع التكوين قيد التنفيذ.",
+          "confirmLabel": "تشغيل"
+        },
+        "annulerPlanifiee": {
+          "title": "إلغاء التكوين؟",
+          "message": "سيتم إلغاء التكوين.",
+          "confirmLabel": "إلغاء"
+        },
+        "terminer": {
+          "title": "إنهاء التكوين؟",
+          "message": "سيتم وضع علامة الانتهاء على التكوين.",
+          "confirmLabel": "إنهاء"
+        }
+      },
+      "toasts": {
+        "saved": "تم حفظ التكوين {numero}"
+      },
+      "deleteConfirm": {
+        "title": "حذف التكوين",
+        "message": "هل تريد حذف التكوين {numero}؟"
+      }
+    },
+    "nonConformite": {
+      "entityName": "عدم المطابقة",
+      "entityNamePlural": "حالات عدم المطابقة",
+      "title": "حالات عدم المطابقة",
+      "headerTitle": "حالات عدم المطابقة",
+      "createTitle": "عدم مطابقة جديد",
+      "detailTitle": "تفاصيل عدم المطابقة",
+      "chips": {
+        "all": "الكل",
+        "ouvertes": "المفتوحة",
+        "enCours": "قيد التنفيذ",
+        "verifiees": "المتحقق منها"
+      },
+      "list": {
+        "columns": {
+          "numero": "رقم NC",
+          "date": "التاريخ",
+          "type": "النوع",
+          "chantier": "الورش",
+          "description": "الوصف",
+          "echeance": "الاستحقاق",
+          "statut": "الحالة"
+        },
+        "filters": {
+          "status": "الحالة",
+          "type": "النوع"
+        },
+        "emptyState": {
+          "title": "لا توجد حالات عدم مطابقة",
+          "message": "حالات عدم المطابقة المكتشفة في الأوراش تظهر هنا.",
+          "actionLabel": "تسجيل NC"
+        }
+      },
+      "form": {
+        "fields": {
+          "numero": "رقم NC",
+          "date": "التاريخ *",
+          "type": "النوع *",
+          "chantier": "الورش",
+          "zoneChantier": "منطقة الورش",
+          "description": "الوصف *",
+          "causesRacines": "الأسباب الجذرية",
+          "actionCorrective": "إجراء تصحيحي (CAPA)",
+          "actionPreventive": "إجراء وقائي (CAPA)",
+          "verificationEfficacite": "التحقق من الفعالية",
+          "dateVerificationEfficacite": "تاريخ التحقق من الفعالية",
+          "sourceInspectionNumero": "فحص المصدر (رقم)",
+          "responsableNom": "المسؤول",
+          "dateEcheance": "تاريخ الاستحقاق",
+          "notes": "ملاحظات"
+        },
+        "sections": {
+          "identification": "التعريف",
+          "details": "التفاصيل",
+          "capa": "CAPA"
+        }
+      },
+      "actions": {
+        "traiter": "تكفل",
+        "verifier": "وضع علامة متحقق منها",
+        "cloturer": "إغلاق"
+      },
+      "confirms": {
+        "traiter": {
+          "title": "التكفل بـ NC؟",
+          "message": "ستنتقل حالة عدم المطابقة إلى قيد المعالجة.",
+          "confirmLabel": "تأكيد"
+        },
+        "verifier": {
+          "title": "التحقق من NC؟",
+          "message": "سيتم وضع علامة التحقق على الإجراء التصحيحي.",
+          "confirmLabel": "تحقق"
+        },
+        "cloturer": {
+          "title": "إغلاق NC؟",
+          "message": "سيتم إغلاق حالة عدم المطابقة نهائياً.",
+          "confirmLabel": "إغلاق"
+        }
+      },
+      "toasts": {
+        "processed": "NC {numero} — تم التكفل",
+        "verified": "NC {numero} — تم التحقق",
+        "closed": "تم إغلاق NC {numero}",
+        "saved": "تم حفظ عدم المطابقة {numero}"
+      },
+      "deleteConfirm": {
+        "title": "حذف عدم المطابقة",
+        "message": "هل تريد حذف NC {numero}؟"
+      },
+      "severity": {
+        "critical": "حرج",
+        "majeure": "كبير",
+        "mineure": "صغير"
+      }
+    },
+    "epi": {
+      "title": "معدات الحماية الفردية (EPI)",
+      "headerTitle": "سجل EPI",
+      "subtitle": "مرجع الكاتالوغ · إسناد ميداني · فحص دوري",
+      "volets": {
+        "reference": "المرجع",
+        "attribution": "الإسناد",
+        "verification": "الفحص"
+      },
+      "hints": {
+        "reference": "المرجع: سطر واحد لكل صنف EPI (كاتالوغ داخلي).",
+        "attribution": "الإسناد: إسنادات موظف × ورش (نموذج تجريبي).",
+        "verification": "الفحص: فحوصات دورية، استحقاقات وحالات حرجة."
+      },
+      "search": "موظف، EPI، ورش…",
+      "count": "{n} سطر(سطور)",
+      "coutFiltre": "التكلفة المُصفّاة: {amount}",
+      "alertes": {
+        "expires": "{n} EPI منتهي(ة) الصلاحية أو ضائع(ة) — إجراء عاجل",
+        "aRenouveler": "{n} EPI للتجديد خلال < 60 يومًا"
+      },
+      "columns": {
+        "categorie": "الفئة",
+        "reference": "المرجع",
+        "designation": "التسمية",
+        "normeCE": "المعيار CE",
+        "employe": "الموظف",
+        "chantier": "الورش",
+        "attribution": "الإسناد",
+        "expiration": "انتهاء الصلاحية",
+        "derniereVerif": "آخر فحص",
+        "prochaineVerif": "الفحص التالي",
+        "prixUnit": "السعر الوحدوي",
+        "prixIndicatif": "السعر الإرشادي",
+        "statut": "الحالة"
+      },
+      "expirationDays": "({n}ي)",
+      "empty": "لا يوجد أي تسجيل.",
+      "categories": {
+        "casque": "خوذات",
+        "harnais": "أحزمة مضادة للسقوط",
+        "tete": "حماية الرأس",
+        "yeux": "حماية العينين",
+        "pieds": "أحذية",
+        "mains": "قفازات",
+        "corps": "بدلة / صدرية",
+        "respiration": "قناع / ARI",
+        "audition": "سدادات / خوذة مضادة للضوضاء",
+        "chute": "حزام مضاد للسقوط"
+      },
+      "statusLabels": {
+        "ok": "OK",
+        "aRenouveler": "للتجديد",
+        "expire": "منتهي الصلاحية",
+        "perdu": "ضائع / مفقود"
+      }
+    },
+    "visiteMedicale": {
+      "title": "الزيارات الطبية",
+      "headerTitle": "الزيارات الطبية",
+      "subtitle": "تتبع الزيارات الطبية للموظفين · تنبيهات الاستحقاقات < 30 يومًا",
+      "search": "موظف، رقم تعريف، طبيب…",
+      "count": "{n} زيارة(زيارات)",
+      "alertes": {
+        "inaptes": "{n} أجير(أجراء) معلَن(ون) غير لائق(ين)",
+        "echeances": "{n} استحقاق(ات) < 30 يومًا — للبرمجة"
+      },
+      "toolbar": {
+        "tousLesTypes": "جميع الأنواع",
+        "toutesAptitudes": "جميع درجات اللياقة",
+        "alerteEcheance": "تنبيه استحقاق قريب"
+      },
+      "columns": {
+        "matricule": "رقم التعريف",
+        "employe": "الموظف",
+        "poste": "المنصب",
+        "typeVisite": "نوع الزيارة",
+        "date": "التاريخ",
+        "aptitude": "اللياقة",
+        "medecin": "الطبيب",
+        "prochaineEcheance": "الاستحقاق التالي",
+        "restrictions": "القيود",
+        "type": "النوع"
+      },
+      "empty": "لم يتم العثور على أي زيارة.",
+      "echeance": {
+        "todayLabel": "اليوم",
+        "jMoinsLabel": "ي-{n}",
+        "retardLabel": "+{n} ي تأخر"
+      },
+      "aptitude": {
+        "apte": "لائق",
+        "inapte": "غير لائق",
+        "avecRestriction": "لائق مع قيود"
+      },
+      "audit": {
+        "exportNote": "{format} — {rowCount} سطور",
+        "labelListing": "الزيارات الطبية — القائمة"
+      }
+    },
+    "registreLegal": {
+      "title": "السجلات القانونية",
+      "headerTitle": "السجلات القانونية",
+      "subtitle": "السجلات التنظيمية الإلزامية — تصدير وطباعة",
+      "tabs": {
+        "at": {
+          "label": "حوادث الشغل",
+          "shortLabel": "AT",
+          "description": "حوادث مصرح بها لـ CNSS — أجل 48 ساعة."
+        },
+        "mp": {
+          "label": "الأمراض المهنية",
+          "shortLabel": "MP",
+          "description": "أمراض معترف بها — جداول مغربية."
+        },
+        "dt": {
+          "label": "تصاريح الأشغال",
+          "shortLabel": "DT",
+          "description": "DT لمفتشية الشغل — ورش > 30 يومًا أو > 30 أجيرًا."
+        },
+        "chs": {
+          "label": "لجنة الصحة والسلامة",
+          "shortLabel": "CHS",
+          "description": "محاضر اجتماعات CHS — مقاولات > 50 أجيرًا."
+        }
+      },
+      "printHeader": {
+        "registre": "سجل {label}",
+        "societe": "الشركة:",
+        "ice": "ICE:",
+        "cnss": "CNSS:",
+        "editeLe": "صدر في:"
+      },
+      "actions": {
+        "imprimer": "طباعة",
+        "imprimerTitle": "طباعة هذا السجل",
+        "excel": "Excel",
+        "excelTitle": "تصدير إلى Excel (XLSX)",
+        "pdfOfficiel": "PDF رسمي (تجريبي)",
+        "pdfOfficielTitle": "تصميم نموذجي للتصريح / سجل CNSS (تجريبي)"
+      },
+      "columns": {
+        "numero": "الرقم",
+        "date": "التاريخ",
+        "reference": "المرجع",
+        "chantier": "الورش",
+        "victime": "الضحية",
+        "matriculeCnss": "رقم CNSS",
+        "description": "الوصف",
+        "partieAtteinte": "الجزء المصاب",
+        "joursArret": "أيام الانقطاع",
+        "salarie": "الأجير",
+        "tableauMa": "الجدول المغربي",
+        "effectif": "العدد",
+        "duree": "المدة (ي)",
+        "presents": "الحاضرون",
+        "decisions": "القرارات",
+        "observations": "الملاحظات"
+      },
+      "footer": "المجموع: <strong>{n}</strong> إدخال(إدخالات)",
+      "empty": "لا يوجد أي إدخال في سجل {kind}.",
+      "print": {
+        "titre": "الصندوق الوطني للضمان الاجتماعي — سجل {kind} (تجريبي)",
+        "meta": "{societe} — ICE {ice} — انتساب CNSS {cnss}",
+        "stamp": "مساحة مخصصة لتأشيرة / ختم CNSS (تجريبي)",
+        "footnote": "وثيقة مولّدة لأغراض تجريبية ERP — لا تشكل ملفاً رسمياً دون تحقق قانوني."
+      },
+      "audit": {
+        "labelRegistre": "سجل {kind}",
+        "exportNote": "XLSX — {n} إدخالات",
+        "printNote": "طباعة — {n} إدخالات",
+        "pdfNote": "PDF رسمي CNSS (تجريبي قابل للختم)"
+      }
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "entity": "TaxReturn",
+  "fields": {
+    "returnNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "fiscalPeriodId": {
+      "required": true
+    },
+    "taxType": {
+      "required": true,
+      "maxLength": 30
+    },
+    "taxableAmount": {
+      "required": true,
+      "min": 0
+    },
+    "taxAmount": {
+      "required": true,
+      "min": 0
+    },
+    "dueDate": {
+      "required": true
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

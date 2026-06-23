@@ -1,0 +1,29 @@
+{
+  "entity": "InventoryTx",
+  "fields": {
+    "txNumber": {
+      "required": true,
+      "maxLength": 50,
+      "unique": true
+    },
+    "txType": {
+      "required": true,
+      "maxLength": 50
+    },
+    "warehouseId": {
+      "required": true
+    },
+    "txDate": {
+      "required": true
+    },
+    "reference": {
+      "maxLength": 100
+    },
+    "status": {
+      "maxLength": 50
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

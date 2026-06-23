@@ -1,0 +1,67 @@
+<nf-page-shell scroll>
+  <nf-page-header
+    [config]="{
+      title: 'financeRound2.recouvrement.title',
+      subtitle: 'financeRound2.recouvrement.subtitle'
+    }"
+  ></nf-page-header>
+
+  <div class="f8">
+    <div class="f8__toolbar">
+      <nf-button variant="primary" class="f8__btn" (clicked)="refresh()">
+        {{ 'financeRound2.recouvrement.refresh' | translate }}
+      </nf-button>
+    </div>
+
+    <section class="f8__card">
+      <h2 class="f8__h">{{ 'financeRound2.recouvrement.tableTitle' | translate }}</h2>
+      <div class="f8__tablewrap">
+        <table class="f8__table">
+          <thead>
+            <tr>
+              <th>{{ 'financeRound2.recouvrement.colFacture' | translate }}</th>
+              <th>{{ 'financeRound2.recouvrement.colClient' | translate }}</th>
+              <th>{{ 'financeRound2.recouvrement.colMontant' | translate }}</th>
+              <th>{{ 'financeRound2.recouvrement.colEcheance' | translate }}</th>
+              <th>{{ 'financeRound2.recouvrement.colRetard' | translate }}</th>
+              <th>{{ 'financeRound2.recouvrement.colNiveau' | translate }}</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (r of rows(); track r.factureId) {
+              <tr>
+                <td>{{ r.numeroFacture }}</td>
+                <td>{{ r.clientName ?? r.clientId }}</td>
+                <td class="f8__num">{{ r.montantTtc | mad:2 }}</td>
+                <td>{{ r.dateEcheance }}</td>
+                <td>{{ r.joursRetard }} j</td>
+                <td>{{ r.niveauRelance }}</td>
+                <td>
+                  <nf-button variant="ghost" class="f8__link" (clicked)="envoyerRelance(r)">
+                    {{ 'financeRound2.recouvrement.relance' | translate }}
+                  </nf-button>
+                  ·
+                  <nf-button variant="ghost" class="f8__link" (clicked)="miseEnDemeure(r)">
+                    {{ 'financeRound2.recouvrement.med' | translate }}
+                  </nf-button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    @if (log().length) {
+      <section class="f8__card">
+        <h2 class="f8__h">{{ 'financeRound2.recouvrement.logTitle' | translate }}</h2>
+        <ul class="f8__log">
+          @for (l of log(); track $index) {
+            <li>{{ l }}</li>
+          }
+        </ul>
+      </section>
+    }
+  </div>
+</nf-page-shell>

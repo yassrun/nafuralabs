@@ -1,0 +1,35 @@
+{
+  "entity": "Vehicle",
+  "fields": {
+    "vehicleNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "vehicleType": {
+      "maxLength": 120
+    },
+    "make": {
+      "maxLength": 120
+    },
+    "model": {
+      "maxLength": 120
+    },
+    "year": {
+      "min": 0
+    },
+    "capacity": {
+      "maxLength": 120
+    },
+    "weightLimit": {
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

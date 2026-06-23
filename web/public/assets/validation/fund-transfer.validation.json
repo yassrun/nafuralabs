@@ -1,0 +1,33 @@
+{
+  "entity": "FundTransfer",
+  "fields": {
+    "transferNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "fromBankAccountId": {
+      "required": true
+    },
+    "toBankAccountId": {
+      "required": true
+    },
+    "amount": {
+      "required": true,
+      "min": 0
+    },
+    "currencyId": {
+      "required": true
+    },
+    "transferDate": {
+      "required": true
+    },
+    "reference": {
+      "maxLength": 200
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

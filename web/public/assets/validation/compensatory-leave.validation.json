@@ -1,0 +1,20 @@
+{
+  "entity": "CompensatoryLeave",
+  "fields": {
+    "grantNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "grantedDays": {
+      "min": 0
+    },
+    "reason": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

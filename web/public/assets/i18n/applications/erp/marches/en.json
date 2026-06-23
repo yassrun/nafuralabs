@@ -1,0 +1,545 @@
+{
+  "marches": {
+    "module": {
+      "title": "Contracts & Billing",
+      "shortTitle": "Contracts"
+    },
+    "common": {
+      "actions": {
+        "back": "← Back to list",
+        "cancel": "Cancel",
+        "print": "🖨 Print / PDF",
+        "comptabiliser": "📊 Post journal entry (auto)",
+        "comptabilisee": "✓ Posted",
+        "voirPlanning": "View schedule"
+      },
+      "filters": {
+        "allStatuses": "All statuses",
+        "allTypes": "All types"
+      },
+      "emetteur": {
+        "MOA": "MOA",
+        "MOE": "MOE",
+        "NAFURA": "NAFURA"
+      },
+      "modePaiement": {
+        "VIREMENT": "Bank transfer",
+        "CHEQUE": "Cheque",
+        "ESPECES": "Cash",
+        "AUTRE": "Other"
+      }
+    },
+    "routes": {
+      "contratsTitle": "Contracts",
+      "contratsCrumb": "Contracts",
+      "contratDetailTitle": "Contract",
+      "contratDetailCrumb": "Details",
+      "contratCreateTitle": "New contract",
+      "contratCreateCrumb": "New",
+      "avenantsTitle": "Amendments",
+      "avenantsCrumb": "Amendments",
+      "avenantDetailTitle": "Amendment",
+      "avenantDetailCrumb": "Amendment",
+      "facturesTitle": "Contract invoices",
+      "facturesCrumb": "Invoices",
+      "factureDetailTitle": "Contract invoice",
+      "factureDetailCrumb": "Details",
+      "cautionsTitle": "Bank guarantees",
+      "cautionsCrumb": "Guarantees",
+      "revisionsPrixTitle": "Price revisions (K)",
+      "revisionsPrixCrumb": "Price revisions",
+      "penalitesTitle": "Late delivery penalties",
+      "penalitesCrumb": "Penalties",
+      "dgdTitle": "Final settlement statement (DGD)",
+      "dgdCrumb": "DGD",
+      "osTitle": "Service orders",
+      "osCrumb": "OS"
+    },
+    "contrat": {
+      "listing": {
+        "title": "Contracts",
+        "subtitle": "Construction contracts (Morocco)",
+        "breadcrumb": "Contracts",
+        "search": {
+          "placeholder": "No., site, customer, subject…"
+        },
+        "count": "{count, plural, one {# contract} other {# contracts}}",
+        "columns": {
+          "numero": "Contract no.",
+          "chantier": "Site",
+          "clientMoa": "Customer / MOA",
+          "client": "Customer",
+          "type": "Type",
+          "nature": "Nature",
+          "montantInitialHt": "Initial amount excl. VAT",
+          "totalHt": "Total excl. VAT",
+          "totalAvenants": "Total incl. amend.",
+          "avancement": "Progress",
+          "avancementPercent": "Progress %",
+          "os": "OS",
+          "dateOs": "OS date",
+          "statut": "Status"
+        },
+        "empty": "No contract matches the filters.",
+        "exportFilename": "contracts",
+        "createCta": "New contract"
+      },
+      "create": {
+        "title": "New contract",
+        "subtitle": "Create a contract linked to a site",
+        "breadcrumb": "New",
+        "submit": "Create contract",
+        "success": "Contract created.",
+        "fields": {
+          "chantier": "Site",
+          "chantierPlaceholder": "Select a site…",
+          "client": "Customer / MOA",
+          "numero": "Contract no. (optional)",
+          "intitule": "Title",
+          "type": "Contract type",
+          "nature": "Nature",
+          "montantInitialHt": "Initial amount excl. VAT",
+          "tvaTaux": "VAT (%)",
+          "retenueGarantieTaux": "Retention guarantee (%)",
+          "dateOrdreService": "Service order date"
+        },
+        "errors": {
+          "required": "Please fill in the site, title, and a valid excl. VAT amount.",
+          "failed": "Unable to create the contract."
+        }
+      },
+      "detail": {
+        "headerTitleFallback": "Contract",
+        "headerCrumbFallback": "Details",
+        "ras": "RAS 5%",
+        "kpis": {
+          "montantInitialHt": "Initial amount excl. VAT",
+          "avenantsHt": "Amendments excl. VAT",
+          "totalHt": "Total contract excl. VAT",
+          "factureHt": "Invoiced excl. VAT",
+          "encaisseHt": "Collected excl. VAT",
+          "avancement": "Progress",
+          "pctMarche": "{pct}% of contract"
+        },
+        "tabs": {
+          "identite": "Identity & terms",
+          "avenants": "Amendments",
+          "factures": "Invoices",
+          "cautions": "Guarantees",
+          "revision": "Price revision (K)"
+        },
+        "identite": {
+          "moa": {
+            "title": "Project Owner (MOA)",
+            "raisonSociale": "Legal name",
+            "ice": "ICE",
+            "if": "IF",
+            "rc": "RC",
+            "nature": "Nature"
+          },
+          "caracteristiques": {
+            "title": "Characteristics",
+            "type": "Type",
+            "tva": "VAT",
+            "retenueGarantie": "Retention guarantee",
+            "retenueSource": "Withholding tax",
+            "avanceForfaitaire": "Lump-sum advance"
+          },
+          "calendrier": {
+            "title": "Schedule",
+            "ordreService": "Service order",
+            "delaiExecution": "Execution period",
+            "delaiExecutionMois": "{count} months",
+            "penaliteRetardJour": "Penalty / day",
+            "receptionProvisoire": "Provisional acceptance",
+            "receptionDefinitive": "Final acceptance"
+          }
+        },
+        "avenants": {
+          "columns": {
+            "numero": "Amend. no.",
+            "type": "Type",
+            "objet": "Subject",
+            "montantHt": "Amount excl. VAT",
+            "delaiPlus": "Time +",
+            "signature": "Signature",
+            "statut": "Status"
+          },
+          "delaiJoursPlus": "+{count} d",
+          "empty": "No amendment on this contract."
+        },
+        "factures": {
+          "columns": {
+            "numero": "Invoice no.",
+            "brutHt": "Gross excl. VAT",
+            "rg": "RG ({rate}%)",
+            "netHt": "Net excl. VAT",
+            "tva": "VAT",
+            "ras": "RAS {rate}%",
+            "netAPayer": "Net to pay",
+            "emission": "Issue",
+            "echeance": "Due",
+            "statut": "Status",
+            "total": "TOTAL"
+          },
+          "empty": "No invoice issued on this contract."
+        },
+        "cautions": {
+          "columns": {
+            "numero": "No.",
+            "type": "Type",
+            "banque": "Bank",
+            "montant": "Amount",
+            "emission": "Issue",
+            "validite": "Validity",
+            "levee": "Released",
+            "statut": "Status"
+          },
+          "empty": "No guarantee recorded."
+        },
+        "revision": {
+          "title": "Price revision formula (K)",
+          "formula": "K = {fixe} (fixed) + {terme}",
+          "columns": {
+            "indice": "Index",
+            "coefficient": "Coefficient",
+            "valeurBase": "Base value (offer date)"
+          },
+          "empty": "This contract is not subject to price revision."
+        },
+        "empty": {
+          "title": "Contract not found",
+          "message": "Identifier not recognised.",
+          "action": "Back to list"
+        }
+      }
+    },
+    "avenant": {
+      "listing": {
+        "title": "Amendments",
+        "subtitle": "Contract changes and amendments",
+        "breadcrumb": "Amendments",
+        "search": {
+          "placeholder": "No., contract, subject…"
+        },
+        "count": "{count, plural, one {# amendment} other {# amendments}}",
+        "columns": {
+          "numero": "Amend. no.",
+          "marche": "Contract",
+          "type": "Type",
+          "objet": "Subject",
+          "montantHt": "Amount excl. VAT",
+          "delaiPlus": "Time +",
+          "signature": "Signature",
+          "statut": "Status"
+        },
+        "delaiJoursPlus": "+{count} d",
+        "empty": "No amendment found."
+      },
+      "detail": {
+        "empty": {
+          "title": "Amendment not found",
+          "backLink": "Back to list"
+        },
+        "approval": {
+          "label": "Approval workflow"
+        },
+        "propagate": {
+          "title": "Site & contract impact",
+          "hint": "Updates the site budget (+ amount excl. VAT), extends the planned end date if applicable, recalculates the total contract amount and proportionally adjusts active guarantees (demo).",
+          "cta": "Propagate impact",
+          "done": "Impact propagated on {date}"
+        },
+        "sections": {
+          "identite": {
+            "title": "Identity",
+            "marche": "Contract",
+            "chantier": "Site",
+            "type": "Type",
+            "statut": "Status"
+          },
+          "montants": {
+            "title": "Amounts & schedule",
+            "impactHt": "Impact excl. VAT",
+            "prolongation": "Extension",
+            "dateSignature": "Signature date"
+          },
+          "motif": {
+            "title": "Reason"
+          }
+        },
+        "prolongationJours": "+{count} days",
+        "messages": {
+          "confirmPropagate": "Propagate the impact of the signed amendment?\n\n{recap}",
+          "failPropagate": "Cannot propagate (amendment already propagated or not signed).",
+          "impactBudget": "Site budget {code}: {sign}{amount} MAD excl. VAT",
+          "impactFin": "Planned end: +{days} d",
+          "impactFinUnchanged": "Planned end: unchanged",
+          "impactCautions": "Active guarantees (performance / advance refund): proportional adjustment",
+          "auditPropagation": "Impact propagation — budget Δ {budget} MAD excl. VAT, new contract {marche} MAD excl. VAT, {n} guarantee(s), +{days} d schedule"
+        }
+      }
+    },
+    "factureMarche": {
+      "listing": {
+        "title": "Contract invoices",
+        "subtitle": "Progress payment billing",
+        "breadcrumb": "Invoices",
+        "kpis": {
+          "totalEmisHt": "Total issued excl. VAT",
+          "totalNetAPayer": "Total net to pay",
+          "enRetard": "Overdue invoices"
+        },
+        "search": {
+          "placeholder": "No., contract, customer…"
+        },
+        "count": "{count, plural, one {# invoice} other {# invoices}}",
+        "columns": {
+          "numero": "Invoice no.",
+          "marche": "Contract",
+          "client": "Customer",
+          "brutHt": "Gross excl. VAT",
+          "rg": "RG",
+          "tva": "VAT",
+          "netAPayer": "Net to pay",
+          "emission": "Issue",
+          "echeance": "Due",
+          "statut": "Status"
+        },
+        "empty": "No invoice."
+      },
+      "detail": {
+        "marcheRef": "Contract",
+        "decompte": {
+          "title": "Financial breakdown",
+          "montantBrutHt": "Gross amount excl. VAT (progress)",
+          "deductionAvance": "Lump-sum advance deduction",
+          "retenueGarantie": "Retention guarantee ({rate}%)",
+          "netHt": "Net excl. VAT",
+          "tva": "VAT {rate}%",
+          "netTtc": "Net incl. VAT",
+          "retenueSource": "Withholding tax {rate}% (CGI art. 158)",
+          "timbreFiscal": "Stamp duty (cash payment)",
+          "netAPayer": "NET TO PAY"
+        },
+        "meta": {
+          "dateEmission": "Issue date",
+          "echeance": "Due date",
+          "overdue": "OVERDUE"
+        },
+        "paiements": {
+          "title": "Payments received",
+          "columns": {
+            "date": "Date",
+            "reference": "Reference",
+            "mode": "Method",
+            "montant": "Amount"
+          }
+        },
+        "actions": {
+          "back": "← Back to list",
+          "print": "🖨 Print / PDF",
+          "comptabiliser": "📊 Post journal entry (auto)",
+          "comptabilisee": "✓ Posted"
+        },
+        "od": {
+          "title": "Generated journal entry",
+          "balanced": "Balanced",
+          "unbalanced": "Unbalanced",
+          "columns": {
+            "compte": "Account",
+            "libelle": "Label",
+            "debit": "Debit",
+            "credit": "Credit",
+            "totaux": "TOTALS"
+          },
+          "linkBefore": "→ Details in ",
+          "linkText": "accounting mappings administration",
+          "linkAfter": "."
+        },
+        "empty": {
+          "title": "Invoice not found",
+          "message": "Identifier not recognised.",
+          "action": "Back to list"
+        }
+      },
+      "print": {
+        "ids": {
+          "ice": "ICE",
+          "if": "I.F.",
+          "rc": "R.C.",
+          "taxePro": "Patente",
+          "cnss": "CNSS"
+        },
+        "docTitle": "INVOICE No. {numero}",
+        "dateEmissionLabel": "Issue date: {date}",
+        "dateEcheanceLabel": "Due date: {date}",
+        "partieClient": {
+          "title": "Customer (MOA)",
+          "iceLine": "ICE: {value}",
+          "ifLine": "I.F.: {value}"
+        },
+        "partieRef": {
+          "title": "References",
+          "marcheLine": "Contract: {numero}",
+          "chantierLine": "Site: {code}"
+        },
+        "decompte": {
+          "designation": "Description",
+          "montantHt": "Amount (MAD excl. VAT)",
+          "travauxExecutes": "Executed works — progress",
+          "deductionAvance": "Paid lump-sum advance deduction",
+          "retenueGarantie": "Retention guarantee {rate}%",
+          "netHt": "Net amount excl. VAT",
+          "tva": "VAT {rate}%",
+          "netTtc": "Net amount incl. VAT",
+          "retenueSource": "Withholding tax {rate}% (CGI art. 158)",
+          "timbreFiscal": "Stamp duty",
+          "netAPayer": "NET TO PAY"
+        },
+        "conditions": {
+          "modeLabel": "Payment method:",
+          "modeValue": "Bank transfer",
+          "ribLabel": "RIB:",
+          "ribValue": "XXX XXX XXXXXXXXXXXXXXXX XX (Attijariwafa Bank)",
+          "legal": "Late payment will incur penalties at the legal rate in force in Morocco, in accordance with law 49-99."
+        },
+        "signatures": {
+          "prestataire": "Provider stamp & signature",
+          "moa": "Approved — MOA stamp & signature"
+        },
+        "footer": {
+          "capitalLine": "{nom} — {forme} with capital of {capital} MAD — {rc}",
+          "idsLine": "ICE {ice} · I.F. {if} · CNSS {cnss}"
+        }
+      }
+    },
+    "caution": {
+      "listing": {
+        "title": "Bank guarantees",
+        "subtitle": "Bid bonds, performance bonds, retention and advance refund",
+        "breadcrumb": "Guarantees",
+        "board": {
+          "ariaLabel": "Status summary",
+          "actives": "Active",
+          "aRenouveler": "To renew (< 30 d)",
+          "mainlevees": "Released",
+          "finPrefix": "ends {date}",
+          "emptyAlert": "No alert",
+          "empty": "None"
+        },
+        "search": {
+          "placeholder": "No., contract, bank…"
+        },
+        "count": "{count, plural, one {# guarantee} other {# guarantees}}",
+        "alert": "⚠ {count} expiration(s) < 30d",
+        "columns": {
+          "numero": "No.",
+          "marche": "Contract",
+          "type": "Type",
+          "banque": "Bank",
+          "montant": "Amount",
+          "emission": "Issue",
+          "validite": "Validity",
+          "levee": "Released",
+          "statut": "Status"
+        },
+        "empty": "No guarantee found."
+      }
+    },
+    "dgd": {
+      "title": "Final settlement statement (DGD)",
+      "subtitle": "Contract close-out — cumulative progress, RG, K, penalties (Task 07 M-MAR-02)",
+      "breadcrumb": "DGD",
+      "columns": {
+        "numero": "DGD no.",
+        "marche": "Contract",
+        "cumulSituationsTtc": "Cumul. progress incl. VAT",
+        "rg": "RG",
+        "k": "K",
+        "penalites": "Penalties",
+        "reprisesRg": "RG releases",
+        "netAPayer": "Net to pay",
+        "statut": "Status"
+      },
+      "empty": "No DGD.",
+      "note": "Formula: net = cumul. progress incl. VAT − retention guarantee + RG releases − penalties + price revision K. Official CCAG-T PDF (demo): to wire to document generation."
+    },
+    "ordreService": {
+      "title": "Service orders",
+      "subtitle": "MOA / MOE service orders — schedule & cost impact (Task 07 M-MAR-04)",
+      "breadcrumb": "OS",
+      "columns": {
+        "numero": "OS no.",
+        "marche": "Contract",
+        "chantier": "Site",
+        "type": "Type",
+        "emetteur": "Issuer",
+        "objet": "Subject",
+        "deltaDelai": "Δ schedule (d)",
+        "statut": "Status",
+        "approbation": "Approval"
+      },
+      "empty": "No service order.",
+      "note": "A stop OS triggers a pause on the site schedule (Gantt integration: Task 07 / Task 05)."
+    },
+    "revisionsPrix": {
+      "title": "Price revisions",
+      "subtitle": "Formula K — ANP-IAB Morocco indices",
+      "breadcrumb": "Price revisions",
+      "indices": {
+        "title": "BTP index reference (ANP-IAB)",
+        "columns": {
+          "mois": "Month",
+          "valeur": "Value",
+          "deltaPercent": "Δ%"
+        }
+      },
+      "coefK": {
+        "title": "K coefficients per revisable contract",
+        "labelMois": "Calculation month:",
+        "columns": {
+          "marche": "Contract",
+          "type": "Formula type",
+          "termeFixe": "Fixed term",
+          "kCalcule": "K computed"
+        },
+        "indiceMissing": "missing index",
+        "typeFormulaSummary": "a={fixe} + {n} term(s)"
+      },
+      "empty": "No revisable contract.",
+      "formula": "Formula: <code>K = a (fixed) + Σ bᵢ × (current index / base index)</code> · Index source: ANP-IAB published monthly."
+    },
+    "penalites": {
+      "title": "Late delivery penalties",
+      "subtitle": "Automatic CCAG-T calculation — overdue contracts",
+      "breadcrumb": "Penalties",
+      "summary": {
+        "enRetard": "Overdue contracts",
+        "totalPenalites": "Total applicable penalties",
+        "totalApplicables": "To deduct from next invoice"
+      },
+      "columns": {
+        "marche": "Contract",
+        "chantier": "Site",
+        "client": "Customer",
+        "montantMarcheHt": "Contract amount excl. VAT",
+        "tauxJour": "Rate / day",
+        "finContractuelle": "Contract end",
+        "finReelle": "Actual end",
+        "joursRetard": "Days late",
+        "penalite": "Penalty",
+        "statut": "Status"
+      },
+      "finReelleEnCours": "In progress",
+      "tauxJourSuffix": "{rate}% / d",
+      "statuses": {
+        "applicable": "Applicable",
+        "enCours": "In progress",
+        "grace": "Contractual grace"
+      },
+      "empty": "No overdue contract.",
+      "note": "Calculation: Penalty = Contract amount excl. VAT × Rate/day × Days late. Penalties apply from the day after the contractual end date. A discretionary waiver may be granted via approval workflow."
+    }
+  }
+}

@@ -1,0 +1,69 @@
+/**
+ * Master–Slave Shell
+ * Two panes: master (list) | slave (detail). Responsive: slave becomes overlay on narrow.
+ */
+
+.nf-master-slave-shell {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  height: 100%;
+  min-height: 0;
+  position: relative;
+}
+
+.nf-master-slave-shell--has-selection {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+}
+
+.nf-master-slave-shell__backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background-color: rgba(0, 0, 0, 0.4);
+  border: none;
+  cursor: pointer;
+}
+
+.nf-master-slave-shell__master {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  border-right: 1px solid var(--nf-color-border, #e5e7eb);
+}
+
+.nf-master-slave-shell__slave {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  background-color: var(--nf-color-background, #fff);
+}
+
+/* Narrow: slave as overlay (drawer-like) */
+@media (max-width: 1024px) {
+  .nf-master-slave-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .nf-master-slave-shell__backdrop {
+    display: block;
+  }
+
+  .nf-master-slave-shell__slave {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-width: 480px;
+    z-index: 1001;
+    box-shadow: -4px 0 16px rgba(0, 0, 0, 0.1);
+    transform: translateX(100%);
+    transition: transform 0.25s ease-out;
+  }
+
+  .nf-master-slave-shell__slave--open {
+    transform: translateX(0);
+  }
+}

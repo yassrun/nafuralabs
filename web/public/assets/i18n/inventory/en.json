@@ -1,0 +1,252 @@
+{
+  "inventory": {
+    "navigation": {
+      "title": "Inventory",
+      "dashboard": "Dashboard",
+      "operations": "Operations",
+      "stockOverview": "Stock Overview",
+      "items": "Items",
+      "receipts": "Receipts",
+      "transfers": "Transfers",
+      "adjustments": "Adjustments",
+      "warehouses": "Warehouses",
+      "suppliers": "Suppliers",
+      "inventoryCount": "Inventory Count",
+      "configuration": "Configuration",
+      "itemCategories": "Item Categories",
+      "itemTypes": "Item Types",
+      "unitsOfMeasure": "Units of Measure",
+      "conversionRules": "Conversion Rules",
+      "attributes": "Attribute Definitions",
+      "barcodeSettings": "Barcode Settings",
+      "inventorySettings": "Inventory Settings",
+      "reports": "Reports",
+      "stockValuation": "Stock Valuation",
+      "movementHistory": "Movement History",
+      "lowStock": "Low Stock",
+      "inventoryAging": "Inventory Aging",
+      "inventoryTxLines": "Inventory Tx Lines",
+      "inventoryTxes": "Inventory Txes",
+      "stockBalances": "Stock Balances"
+    },
+    "dashboard": {
+      "title": "Inventory",
+      "subtitle": "Documents to stock, every day",
+      "panels": {
+        "stockHealth": "Stock Health",
+        "alertsAttention": "Alerts & Attention Required",
+        "recentOperations": "Recent Operations",
+        "stockByLocation": "Stock by Location",
+        "traceabilitySnapshot": "Traceability Snapshot",
+        "quickActions": "Quick Actions",
+        "todayAtGlance": "Today at a glance",
+        "recentInventoryActivity": "Recent inventory activity",
+        "stockAlerts": "Stock alerts"
+      },
+      "todayAtGlance": {
+        "blsImportedToday": "Receipts today",
+        "transfersImportedToday": "Transfers today",
+        "receiptsToday": "Receipts today",
+        "transfersToday": "Transfers today",
+        "adjustmentsToday": "Adjustments today",
+        "fromDocuments": "from documents",
+        "fromErp": "from ERP"
+      },
+      "actions": {
+        "viewAllAlerts": "View all alerts",
+        "newOperation": "New Operation"
+      },
+      "columns": {
+        "type": "Type",
+        "sourceType": "Source",
+        "reference": "Reference",
+        "sourceDestination": "Source / Destination",
+        "status": "Status",
+        "date": "Date",
+        "user": "User",
+        "location": "Location",
+        "itemCount": "Item Count",
+        "totalQuantity": "Total Quantity"
+      },
+      "traceability": {
+        "expiringLots": "Expiring lots (30 days)",
+        "serialsWithAnomalies": "Serials with anomalies"
+      },
+      "kpis": {
+        "skusWithStock": "SKUs with Stock",
+        "totalQuantity": "Total Quantity",
+        "reserved": "Reserved",
+        "inTransit": "In Transit",
+        "lowStockAlerts": "Low Stock Alerts"
+      },
+      "stockHealth": {
+        "available": "Available",
+        "reserved": "Reserved",
+        "inTransit": "In Transit",
+        "blockedDamaged": "Blocked / Damaged"
+      },
+      "alerts": {
+        "lowStock": "Low stock: 12 items below threshold",
+        "negativeStock": "Negative stock detected in WH-A1",
+        "unvalidatedReceipt": "Unvalidated receipt RCPT-2026-021",
+        "lotExpiring": "Lot EXP-447 expiring in 12 days",
+        "failedImport": "Failed import: Items_2026_02.csv",
+        "veryLowStock": "Very low stock: 6 items below safety level",
+        "importInconsistencies": "Import inconsistencies detected in 2 documents"
+      },
+      "alertActions": {
+        "view": "View",
+        "fix": "Fix",
+        "validate": "Validate",
+        "review": "Review"
+      },
+      "alertSeverities": {
+        "info": "Info",
+        "warning": "Warning",
+        "critical": "Critical"
+      },
+      "operations": {
+        "types": {
+          "receipt": "BL",
+          "transfer": "Transfer",
+          "shipment": "Shipment",
+          "adjustment": "Adjustment"
+        },
+        "statuses": {
+          "draft": "Draft",
+          "posted": "Posted",
+          "imported": "Imported",
+          "needsReview": "Needs review",
+          "corrected": "Corrected"
+        },
+        "sources": {
+          "type": {
+            "document": "Document (Doxura)",
+            "erp": "ERP"
+          },
+          "vendorAtlas": "Vendor: Atlas Parts",
+          "whABulk": "WH-A / Bulk",
+          "whBDispatch": "WH-B / Dispatch",
+          "whACycleCount": "WH-A / Cycle Count",
+          "vendorKappa": "Vendor: Kappa Tools",
+          "whCBulk": "WH-C / Bulk",
+          "whADispatch": "WH-A / Dispatch",
+          "vendorNorthwind": "Vendor: Northwind Supplies",
+          "whBCycleCount": "WH-B / Cycle Count"
+        },
+        "destinations": {
+          "whAReceiving": "WH-A / Receiving",
+          "whBPicking": "WH-B / Picking",
+          "customerOryx": "Customer: Oryx Retail",
+          "variance": "Variance",
+          "whABulk": "WH-A / Bulk",
+          "customerZenith": "Customer: Zenith Auto",
+          "whBReceiving": "WH-B / Receiving",
+          "customerNova": "Customer: Nova Mart"
+        }
+      },
+      "locations": {
+        "whABulk": "WH-A / Bulk",
+        "whAPicking": "WH-A / Picking",
+        "whBBulk": "WH-B / Bulk",
+        "whBReceiving": "WH-B / Receiving",
+        "whCBulk": "WH-C / Bulk"
+      },
+      "quickActions": {
+        "receiveGoods": "Receive Goods",
+        "transferStock": "Transfer Stock",
+        "runStocktake": "Run Stocktake",
+        "importOpeningStock": "Import Opening Stock",
+        "addAdjustment": "Add adjustment",
+        "createTransfer": "Create transfer",
+        "reviewImportedDocument": "Review imported document"
+      },
+      "operationActions": {
+        "receipt": "Receipt",
+        "transfer": "Transfer",
+        "shipment": "Shipment",
+        "adjustment": "Adjustment"
+      }
+    },
+    "warehouse": {
+      "title": "Warehouses",
+      "detailTitle": "Warehouse Details",
+      "newTitle": "New Warehouse",
+      "fields": {
+        "code": "code",
+        "name": "name",
+        "location": "location",
+        "description": "description",
+        "isActive": "is Active"
+      },
+      "sections": {}
+    },
+    "inventoryTxLine": {
+      "title": "Inventory Tx Lines",
+      "detailTitle": "Inventory Tx Line Details",
+      "newTitle": "New Inventory Tx Line",
+      "fields": {
+        "inventoryTxId": "inventory Tx Id",
+        "lineNumber": "line Number",
+        "itemId": "item Id",
+        "quantity": "quantity",
+        "unitPrice": "unit Price",
+        "totalPrice": "total Price",
+        "notes": "notes"
+      },
+      "sections": {}
+    },
+    "inventoryTx": {
+      "title": "Inventory Txes",
+      "detailTitle": "Inventory Tx Details",
+      "newTitle": "New Inventory Tx",
+      "fields": {
+        "txNumber": "tx Number",
+        "txType": "tx Type",
+        "warehouseId": "warehouse Id",
+        "txDate": "tx Date",
+        "reference": "reference",
+        "status": "status",
+        "notes": "notes"
+      },
+      "sections": {}
+    },
+    "stockBalance": {
+      "title": "Stock Balances",
+      "detailTitle": "Stock Balance Details",
+      "newTitle": "New Stock Balance",
+      "fields": {
+        "warehouseId": "warehouse Id",
+        "itemId": "item Id",
+        "quantity": "quantity",
+        "reservedQuantity": "reserved Quantity",
+        "availableQuantity": "available Quantity",
+        "lastCountDate": "last Count Date"
+      },
+      "sections": {}
+    },
+    "valorisation": {
+      "title": "Stock Valuation",
+      "subtitle": "Financial value of stock by location and family",
+      "date": "Valuation Date",
+      "costingMethod": "Costing Method",
+      "noData": "No data available",
+      "famille": "Family",
+      "articleCount": "Item Count",
+      "totalQty": "Total Qty",
+      "totalValue": "Total Value",
+      "percent": "% of Total",
+      "location": "Location",
+      "type": "Type",
+      "value": "Value",
+      "byFamille": "Valuation by Family",
+      "byLocation": "Valuation by Location",
+      "kpi": {
+        "totalValue": "Total Stock Value",
+        "depotValue": "Depot Value",
+        "chantierValue": "Site Value",
+        "monthlyVariation": "Monthly Variation"
+      }
+    }
+  }
+}

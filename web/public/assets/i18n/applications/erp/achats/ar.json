@@ -1,0 +1,647 @@
+{
+  "achats": {
+    "module": {
+      "title": "المشتريات والتموين",
+      "shortTitle": "المشتريات"
+    },
+    "common": {
+      "dash": "—",
+      "actions": {
+        "back": "← رجوع",
+        "save": "حفظ",
+        "cancel": "إلغاء",
+        "close": "إغلاق",
+        "print": "طباعة",
+        "delete": "حذف",
+        "edit": "تعديل",
+        "new": "جديد",
+        "reset": "إعادة تعيين",
+        "search": "بحث",
+        "confirm": "تأكيد"
+      },
+      "filters": {
+        "allStatuses": "كل الحالات",
+        "allTypes": "كل الأنواع",
+        "dateFrom": "من",
+        "dateTo": "إلى"
+      },
+      "approval": {
+        "label": "سير الموافقة",
+        "labelAttribution": "تأكيد الإسناد"
+      },
+      "errors": {
+        "missingMotif": "السبب إلزامي",
+        "missingJustification": "التبرير مطلوب لتتبع التجاوز (erpAudit).",
+        "attributionGeneric": "خطأ في الإسناد"
+      },
+      "loading": "جاري التحميل…"
+    },
+    "routes": {
+      "demandesListTitle": "طلبات الشراء",
+      "demandesListCrumb": "الطلبات",
+      "demandeNewTitle": "طلب جديد",
+      "demandeNewCrumb": "جديد",
+      "demandeDetailTitle": "تفاصيل الطلب",
+      "demandeDetailCrumb": "التفاصيل",
+      "demandeEditTitle": "تعديل الطلب",
+      "demandeEditCrumb": "تعديل",
+      "bcListTitle": "سندات الطلب",
+      "bcListCrumb": "الطلبيات",
+      "bcNewTitle": "سند طلب جديد",
+      "bcNewCrumb": "جديد",
+      "bcDetailTitle": "تفاصيل سند الطلب",
+      "bcDetailCrumb": "التفاصيل",
+      "bcEditTitle": "تعديل سند الطلب",
+      "bcEditCrumb": "تعديل",
+      "aoListTitle": "طلبات العروض",
+      "aoListCrumb": "AO",
+      "aoNewTitle": "طلب عروض جديد",
+      "aoNewCrumb": "جديد",
+      "aoDetailTitle": "تفاصيل طلب العروض",
+      "aoDetailCrumb": "التفاصيل",
+      "aoEditTitle": "تعديل طلب العروض",
+      "aoEditCrumb": "تعديل",
+      "aoComparatifTitle": "مقارنة طلب العروض",
+      "aoComparatifCrumb": "المقارنة",
+      "contratListTitle": "عقود الموردين",
+      "contratListCrumb": "العقود",
+      "contratNewTitle": "عقد جديد",
+      "contratNewCrumb": "جديد",
+      "contratDetailTitle": "تفاصيل العقد",
+      "contratDetailCrumb": "التفاصيل",
+      "contratEditTitle": "تعديل العقد",
+      "contratEditCrumb": "تعديل",
+      "fournisseurListTitle": "الموردون",
+      "fournisseurListCrumb": "الموردون",
+      "fournisseurNewTitle": "مورد جديد",
+      "fournisseurNewCrumb": "جديد",
+      "fournisseurDetailTitle": "تفاصيل المورد",
+      "fournisseurDetailCrumb": "التفاصيل",
+      "fournisseurEditTitle": "تعديل المورد",
+      "fournisseurEditCrumb": "تعديل"
+    },
+    "rubrique": {
+      "MATERIAUX": "مواد",
+      "SOUS_TRAITANCE": "مقاولة من الباطن",
+      "LOCATION_MATERIEL": "كراء العتاد",
+      "LOCATION_MATERIEL_SHORT": "كراء",
+      "CARBURANT": "محروقات",
+      "FRAIS_GENERAUX": "مصاريف عامة",
+      "FRAIS_GENERAUX_SHORT": "م.ع"
+    },
+    "modeReglement": {
+      "VIREMENT": "حوالة",
+      "CHEQUE": "شيك",
+      "EFFET": "كمبيالة",
+      "ESPECES": "نقدا"
+    },
+    "modeReglementLong": {
+      "VIREMENT": "حوالة بنكية",
+      "CHEQUE": "شيك",
+      "EFFET": "كمبيالة تجارية",
+      "ESPECES": "نقدا"
+    },
+    "contratType": {
+      "CADRE": "عقد إطار",
+      "ANNUEL": "سنوي",
+      "PONCTUEL": "ظرفي"
+    },
+    "demande": {
+      "entityName": "طلب شراء",
+      "entityNamePlural": "طلبات الشراء",
+      "headerTitle": "طلبات الشراء",
+      "createTitle": "طلب شراء جديد",
+      "detailTitle": "تفاصيل الطلب",
+      "detailHeaderFallback": "بدون ورش",
+      "chips": {
+        "all": "الكل",
+        "aApprouver": "بانتظار الموافقة",
+        "nonConverties": "غير محوّلة",
+        "urgent": "عاجلة < 7 أيام",
+        "mesDemandes": "طلباتي"
+      },
+      "list": {
+        "columns": {
+          "numero": "رقم طلب الشراء",
+          "chantierCode": "الورش",
+          "chantierName": "تسمية الورش",
+          "dateBesoin": "تاريخ الحاجة",
+          "demandeur": "الطالب",
+          "nbLignes": "الأسطر",
+          "totalEstimeHt": "الإجمالي المقدّر بدون احتساب الضريبة",
+          "status": "الحالة",
+          "delaiAttente": "الانتظار (أيام)"
+        },
+        "transform": {
+          "joursSuffix": "{n} ي"
+        },
+        "filters": {
+          "status": "الحالة",
+          "chantier": "الورش",
+          "dateFrom": "أنشئ من",
+          "dateTo": "أنشئ إلى"
+        },
+        "emptyState": {
+          "title": "لا توجد طلبات شراء",
+          "message": "طلبات الشراء تطلق مسار التموين عبر الموردين.",
+          "actionLabel": "طلب جديد"
+        }
+      },
+      "form": {
+        "sections": {
+          "entete": "الترويسة",
+          "justification": "التبرير"
+        },
+        "fields": {
+          "numero": "رقم طلب الشراء",
+          "chantier": "الورش",
+          "dateBesoin": "تاريخ الحاجة *",
+          "demandeur": "الطالب",
+          "totalEstimeHt": "الإجمالي المقدّر بدون احتساب الضريبة",
+          "motif": "السبب",
+          "notes": "ملاحظات"
+        }
+      },
+      "actions": {
+        "soumettre": "تقديم",
+        "approuver": "موافقة",
+        "rejeter": "رفض",
+        "convertirBc": "إنشاء سند طلب"
+      },
+      "confirms": {
+        "soumettre": {
+          "title": "تقديم الطلب؟",
+          "message": "سيتم تقديم الطلب للموافقة.",
+          "confirmLabel": "تقديم"
+        },
+        "approuver": {
+          "title": "الموافقة على الطلب؟",
+          "message": "سيتم الموافقة على الطلب وسيمكن تحويله إلى سند طلب.",
+          "confirmLabel": "موافقة"
+        },
+        "rejeter": {
+          "title": "رفض الطلب؟",
+          "message": "يرجى تحديد سبب الرفض.",
+          "confirmLabel": "رفض",
+          "notePlaceholder": "السبب إلزامي",
+          "promptMotif": "سبب الرفض:"
+        }
+      },
+      "toasts": {
+        "saved": "تم حفظ الطلب {numero}",
+        "statusUpdated": "الطلب {numero} — تم تحديث الحالة",
+        "rejected": "تم رفض الطلب {numero}"
+      },
+      "deleteConfirm": {
+        "title": "حذف الطلب",
+        "message": "حذف الطلب {numero}؟"
+      }
+    },
+    "commande": {
+      "entityName": "سند الطلب",
+      "entityNamePlural": "سندات الطلب",
+      "headerTitle": "سندات الطلب",
+      "createTitle": "سند طلب جديد",
+      "detailTitle": "تفاصيل سند الطلب",
+      "chips": {
+        "all": "الكل",
+        "aValider": "بانتظار التحقق",
+        "enCoursLivraison": "قيد التسليم",
+        "enRetard": "متأخرة",
+        "aFacturer": "بانتظار الفوترة"
+      },
+      "list": {
+        "columns": {
+          "numero": "رقم سند الطلب",
+          "fournisseur": "المورد",
+          "chantierCode": "الورش",
+          "rubrique": "البند",
+          "dateCreation": "تاريخ الإنشاء",
+          "dateLivraisonPrevue": "التسليم المتوقع",
+          "totalHt": "الإجمالي بدون احتساب الضريبة",
+          "totalLivrePercent": "نسبة التسليم %",
+          "status": "الحالة"
+        },
+        "filters": {
+          "status": "الحالة",
+          "fournisseur": "المورد",
+          "rubrique": "البند",
+          "dateFrom": "أنشئ من",
+          "dateTo": "أنشئ إلى"
+        },
+        "emptyState": {
+          "title": "لا توجد سندات طلب",
+          "message": "سندات الطلب تُرسم المشتريات لدى الموردين وتتحكم في التسليم.",
+          "actionLabel": "سند طلب جديد"
+        }
+      },
+      "form": {
+        "sections": {
+          "entete": "الترويسة",
+          "planning": "الجدولة والدفع",
+          "montants": "المبالغ",
+          "notes": "ملاحظات"
+        },
+        "fields": {
+          "numero": "رقم سند الطلب",
+          "fournisseur": "المورد *",
+          "chantier": "الورش",
+          "rubrique": "البند",
+          "dateCreation": "تاريخ الإنشاء",
+          "dateLivraisonPrevue": "التسليم المتوقع *",
+          "conditionsPaiement": "شروط الدفع",
+          "modeReglement": "طريقة التسديد",
+          "totalHt": "الإجمالي بدون احتساب الضريبة",
+          "tvaTaux": "TVA %",
+          "totalTtc": "الإجمالي مع احتساب الضريبة",
+          "notes": "ملاحظات"
+        }
+      },
+      "actions": {
+        "valider": "تحقق",
+        "envoyer": "إرسال إلى المورد",
+        "accuserReception": "تأشير الاستلام",
+        "cloturer": "إغلاق",
+        "annuler": "إلغاء",
+        "imprimer": "طباعة سند الطلب"
+      },
+      "confirms": {
+        "valider": {
+          "title": "تأكيد سند الطلب؟",
+          "message": "سيتم تأكيد سند الطلب وسيمكن إرساله.",
+          "confirmLabel": "تحقق"
+        },
+        "cloturer": {
+          "title": "إغلاق سند الطلب؟",
+          "message": "هذا الإجراء نهائي.",
+          "confirmLabel": "إغلاق"
+        },
+        "annuler": {
+          "title": "إلغاء سند الطلب؟",
+          "message": "هذا الإجراء لا يمكن التراجع عنه.",
+          "confirmLabel": "إلغاء",
+          "notePlaceholder": "سبب الإلغاء"
+        }
+      },
+      "toasts": {
+        "saved": "تم حفظ سند الطلب {numero}",
+        "statusUpdated": "سند الطلب {numero} — تم تحديث الحالة"
+      },
+      "deleteConfirm": {
+        "title": "حذف سند الطلب",
+        "message": "حذف سند الطلب {numero}؟"
+      },
+      "matching3way": {
+        "title": "الاستلامات والمطابقة الثلاثية",
+        "statusLabel": "الحالة:",
+        "matched": "مطابقة ثلاثية صحيحة",
+        "blStatus": "سند التسليم:",
+        "factureLabel": "— الفاتورة:",
+        "toleranceHint": "هامش التسامح للعرض التجريبي: ±2 % للسعر، ±5 % للكميات (قابل للضبط).",
+        "analyzing": "جاري تحليل المطابقة…",
+        "blocking": "حاجب",
+        "columns": {
+          "article": "الصنف",
+          "qteCmd": "الكمية المطلوبة",
+          "qteRecue": "الكمية المستلمة",
+          "qteFact": "الكمية المفوترة",
+          "puBc": "سعر الوحدة بسند الطلب",
+          "puFact": "سعر الوحدة بالفاتورة",
+          "ecartQte": "فارق الكمية %",
+          "ecartPx": "فارق السعر %"
+        }
+      },
+      "print": {
+        "title": "سند طلب رقم {numero}",
+        "dateLabel": "التاريخ:",
+        "livraisonLabel": "التسليم المتوقع:",
+        "fournisseur": "المورد",
+        "chantierLivraison": "ورش التسليم",
+        "conditionsPaiementLabel": "شروط الدفع:",
+        "columns": {
+          "designation": "التسمية",
+          "code": "الرمز",
+          "qte": "الكمية",
+          "unite": "الوحدة",
+          "puHt": "س.و بدون احتساب الضريبة",
+          "totalHt": "الإجمالي بدون احتساب الضريبة"
+        },
+        "totals": {
+          "totalHt": "الإجمالي بدون احتساب الضريبة",
+          "tva": "TVA {rate}%",
+          "totalTtc": "الإجمالي مع احتساب الضريبة"
+        },
+        "notesLabel": "ملاحظات:",
+        "signatureAcheteur": "ختم وتوقيع المشتري",
+        "signatureFournisseur": "إشعار باستلام المورد",
+        "ids": {
+          "ice": "ICE",
+          "if": "IF",
+          "rc": "RC",
+          "phonePrefix": "هاتف"
+        }
+      },
+      "approvalSummary": "{numero} — {fournisseur} — {ttc} MAD مع احتساب الضريبة"
+    },
+    "appelOffre": {
+      "entityName": "طلب عروض",
+      "entityNamePlural": "طلبات العروض",
+      "headerTitle": "طلبات العروض",
+      "createTitle": "طلب عروض جديد",
+      "detailTitle": "تفاصيل طلب العروض",
+      "chips": {
+        "all": "الكل",
+        "enCours": "قيد التنفيذ",
+        "aCloturer": "بانتظار الإغلاق",
+        "attribues": "مُسندة"
+      },
+      "list": {
+        "columns": {
+          "numero": "رقم طلب العروض",
+          "objet": "الموضوع",
+          "chantierCode": "الورش",
+          "nbInvites": "المدعوون",
+          "nbReponses": "الردود",
+          "dateLimiteDepot": "أجل الإيداع",
+          "totalAttribueHt": "المسند بدون احتساب الضريبة",
+          "status": "الحالة"
+        },
+        "filters": {
+          "status": "الحالة",
+          "dateFrom": "الأجل من",
+          "dateTo": "الأجل إلى"
+        },
+        "emptyState": {
+          "title": "لا توجد طلبات عروض",
+          "message": "انشر طلبات العروض للحصول على أفضل عروض الموردين.",
+          "actionLabel": "طلب عروض جديد"
+        }
+      },
+      "form": {
+        "sections": {
+          "entete": "الترويسة",
+          "attribution": "الإسناد",
+          "notes": "ملاحظات"
+        },
+        "fields": {
+          "numero": "رقم طلب العروض",
+          "objet": "الموضوع *",
+          "chantier": "الورش",
+          "datePublication": "تاريخ النشر",
+          "dateLimiteDepot": "تاريخ أجل الإيداع *",
+          "fournisseurAttribue": "المورد المُسند له",
+          "totalAttribueHt": "المبلغ المسند بدون احتساب الضريبة",
+          "notes": "ملاحظات"
+        }
+      },
+      "actions": {
+        "publier": "نشر",
+        "cloturer": "إغلاق",
+        "infructueux": "بدون جدوى",
+        "attribuer": "إسناد",
+        "openComparatif": "مقارنة الموردين والتنقيط",
+        "attribuerVersBc": "إسناد ← سند طلب"
+      },
+      "confirms": {
+        "publier": {
+          "title": "نشر طلب العروض؟",
+          "message": "سيتم إرسال طلب العروض إلى الموردين المدعوين.",
+          "confirmLabel": "نشر"
+        },
+        "infructueux": {
+          "title": "الإعلان بدون جدوى؟",
+          "message": "لن يتم اختيار أي مورد.",
+          "confirmLabel": "تأكيد"
+        }
+      },
+      "prompts": {
+        "fournisseurId": "معرّف المورد المختار:",
+        "overrideJustification": "إسناد خارج التوصية الآلية. السبب / التبرير (إلزامي):"
+      },
+      "toasts": {
+        "saved": "تم حفظ طلب العروض {numero}",
+        "statusUpdated": "طلب العروض {numero} — تم تحديث الحالة",
+        "attribue": "تم إسناد طلب العروض — سند طلب {numero} أُنشئ في مسودة",
+        "bcCreated": "أُنشئ سند الطلب {numero} انطلاقا من العرض المختار."
+      },
+      "deleteConfirm": {
+        "title": "حذف طلب العروض",
+        "message": "حذف طلب العروض {numero}؟"
+      },
+      "approvalSummary": "{numero} — {objet}",
+      "approvalSummaryWithAmount": "{numero} — {objet} — {amount} MAD بدون احتساب الضريبة مسنَدة",
+      "comparatif": {
+        "headerTitle": "مقارنة طلب العروض",
+        "headerSubtitle": "تنقيط الموردين وإسناد سند الطلب",
+        "headerFallbackNumero": "طلب عروض",
+        "headerTitleWithNumero": "{numero} — المقارنة",
+        "notFound": "طلب العروض غير موجود.",
+        "matrixTitle": "مصفوفة الموردين × المعايير",
+        "ponderationHint": "الترجيح: السعر /50، الأجل /15، الجودة /15، التاريخ /10، المطابقة للمادة 187 (تقريب) /10.",
+        "columns": {
+          "fournisseur": "المورد",
+          "totalHt": "الإجمالي بدون احتساب الضريبة",
+          "delaiJours": "الأجل (أيام)",
+          "prix50": "السعر /50",
+          "delai15": "الأجل /15",
+          "qualite15": "الجودة /15",
+          "historique10": "التاريخ /10",
+          "art18710": "المادة 187 /10",
+          "score": "التنقيط",
+          "reco": "التوصية"
+        },
+        "empty": "لم يصل أي عرض لهذا الطلب.",
+        "backToAo": "← الرجوع إلى ملف طلب العروض",
+        "breadcrumb": {
+          "achats": "المشتريات",
+          "ao": "طلبات العروض",
+          "aoFallback": "طلب عروض",
+          "comparatif": "المقارنة"
+        }
+      }
+    },
+    "contrat": {
+      "entityName": "عقد مورد",
+      "entityNamePlural": "عقود الموردين",
+      "headerTitle": "عقود الموردين",
+      "createTitle": "عقد مورد جديد",
+      "detailTitle": "تفاصيل العقد",
+      "chips": {
+        "all": "الكل",
+        "actifs": "النشطة",
+        "expirationProche": "انتهاء < 30 ي",
+        "echus": "منتهية"
+      },
+      "list": {
+        "columns": {
+          "numero": "رقم العقد",
+          "fournisseur": "المورد",
+          "type": "النوع",
+          "dateDebut": "البداية",
+          "dateFin": "النهاية",
+          "montantPlafondHt": "السقف بدون احتساب الضريبة",
+          "cumulBcEmisHt": "المستهلَك بدون احتساب الضريبة",
+          "consommationPercent": "نسبة الاستهلاك %",
+          "joursRestants": "الأيام المتبقية",
+          "status": "الحالة"
+        },
+        "transform": {
+          "joursSuffix": "{n} ي"
+        },
+        "filters": {
+          "status": "الحالة",
+          "fournisseur": "المورد"
+        },
+        "emptyState": {
+          "title": "لا توجد عقود",
+          "message": "أضفِ صبغة رسمية على اتفاقاتك الإطارية مع الموردين الاستراتيجيين.",
+          "actionLabel": "عقد جديد"
+        }
+      },
+      "form": {
+        "sections": {
+          "identite": "الهوية",
+          "periode": "الفترة والمبالغ",
+          "notes": "ملاحظات"
+        },
+        "fields": {
+          "numero": "رقم العقد",
+          "fournisseur": "المورد *",
+          "type": "النوع *",
+          "objet": "الموضوع *",
+          "dateDebut": "تاريخ البدء *",
+          "dateFin": "تاريخ الانتهاء *",
+          "montantPlafondHt": "السقف بدون احتساب الضريبة",
+          "cumulBcEmisHt": "المستهلَك بدون احتساب الضريبة",
+          "conditionsPaiement": "شروط الدفع",
+          "notes": "ملاحظات"
+        }
+      },
+      "actions": {
+        "signer": "تأشير التوقيع",
+        "activer": "تفعيل",
+        "resilier": "فسخ"
+      },
+      "confirms": {
+        "signer": {
+          "title": "تم توقيع العقد؟",
+          "message": "سيتم تأشير العقد كموقّع.",
+          "confirmLabel": "تأكيد"
+        },
+        "resilier": {
+          "title": "فسخ العقد؟",
+          "message": "هذا الإجراء لا يمكن التراجع عنه.",
+          "confirmLabel": "فسخ",
+          "notePlaceholder": "سبب الفسخ"
+        }
+      },
+      "toasts": {
+        "saved": "تم حفظ العقد {numero}",
+        "updated": "تم تحديث العقد {numero}"
+      },
+      "deleteConfirm": {
+        "title": "حذف العقد",
+        "message": "حذف {numero}؟"
+      },
+      "approvalSummary": "{numero} — {type} — {fournisseur}",
+      "approvalSummaryWithCap": "{numero} — {type} — {fournisseur} — السقف {plafond} MAD"
+    },
+    "fournisseur": {
+      "entityName": "مورد",
+      "entityNamePlural": "الموردون",
+      "headerTitle": "الموردون",
+      "createTitle": "مورد جديد",
+      "detailTitle": "تفاصيل المورد",
+      "chips": {
+        "all": "الكل",
+        "actifs": "النشطون",
+        "inactifs": "غير النشطين",
+        "topNotes": "الأعلى تقييما (4★+)"
+      },
+      "list": {
+        "columns": {
+          "code": "الرمز",
+          "raisonSociale": "التسمية الاجتماعية",
+          "ice": "ICE",
+          "categories": "الفئات",
+          "ville": "المدينة",
+          "notation": "التقييم",
+          "delaiLivraisonMoyen": "متوسط أجل التسليم (أيام)",
+          "status": "الحالة"
+        },
+        "transform": {
+          "joursSuffix": "{n} ي",
+          "actif": "نشط",
+          "inactif": "غير نشط"
+        },
+        "filters": {
+          "categorie": "الفئة",
+          "notation": "الحد الأدنى للتقييم",
+          "status": "الحالة",
+          "notationOptions": {
+            "five": "5 نجوم",
+            "fourPlus": "4 نجوم وما فوق",
+            "threePlus": "3 نجوم وما فوق"
+          },
+          "statusOptions": {
+            "actifs": "النشطون",
+            "inactifs": "غير النشطين"
+          }
+        },
+        "emptyState": {
+          "title": "لا يوجد موردون",
+          "message": "كوّن قائمة موردين مرجعية لتغذية الطلبات وطلبات العروض.",
+          "actionLabel": "مورد جديد"
+        }
+      },
+      "form": {
+        "sections": {
+          "identite": "الهوية",
+          "contact": "جهة الاتصال",
+          "conditions": "الشروط والتسديد",
+          "classification": "الفئات والتقييم",
+          "notes": "ملاحظات"
+        },
+        "fields": {
+          "code": "الرمز",
+          "raisonSociale": "التسمية الاجتماعية *",
+          "ice": "ICE",
+          "iceHint": "15 رقما (المعرّف الجبائي بالمغرب)",
+          "rc": "RC",
+          "patente": "الضريبة المهنية",
+          "adresse": "العنوان",
+          "ville": "المدينة",
+          "pays": "البلد",
+          "contactNom": "جهة الاتصال الرئيسية",
+          "contactTel": "الهاتف",
+          "contactEmail": "البريد الإلكتروني",
+          "conditionsPaiement": "شروط الدفع الافتراضية",
+          "conditionsPaiementDefault": "30 يوما من تاريخ الفاتورة",
+          "modeReglement": "طريقة التسديد",
+          "delaiLivraisonMoyen": "متوسط أجل التسليم (أيام)",
+          "rib": "RIB",
+          "ribHint": "24 رقما (رقم الحساب البنكي بالمغرب)",
+          "banque": "البنك",
+          "categories": "الفئات",
+          "notation": "التقييم",
+          "isActive": "نشط",
+          "notes": "ملاحظات"
+        },
+        "notationOptions": {
+          "one": "نجمة واحدة",
+          "two": "نجمتان",
+          "three": "3 نجوم",
+          "four": "4 نجوم",
+          "five": "5 نجوم"
+        }
+      },
+      "toasts": {
+        "saved": "تم حفظ المورد {name}"
+      },
+      "deleteConfirm": {
+        "title": "حذف المورد",
+        "message": "حذف {name}؟"
+      }
+    }
+  }
+}

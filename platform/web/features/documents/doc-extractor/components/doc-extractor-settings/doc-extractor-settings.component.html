@@ -1,0 +1,71 @@
+<div class="settings-page">
+  <app-breadcrumb [items]="breadcrumbs()" />
+
+  <div class="settings-page__header">
+    <h1 class="settings-page__title">{{ pageTitle }}</h1>
+    <button mat-flat-button color="primary" type="button" (click)="createNew()">
+      <mat-icon>add</mat-icon>
+      New Doc Type Definition
+    </button>
+  </div>
+
+  <div class="settings-page__content">
+    @if (loading()) {
+      <div class="loading">
+        <mat-spinner diameter="32"></mat-spinner>
+        <span>Loading document type definitions…</span>
+      </div>
+    }
+
+    @if (!loading() && docTypesByDomain()) {
+      <div class="doc-types-list">
+        @for (domain of domainsList(); track domain) {
+          <div class="domain-section">
+            <div class="domain-section__header">
+              <mat-icon class="domain-section__icon">folder</mat-icon>
+              <h2 class="domain-section__title">{{ domain }}</h2>
+            </div>
+
+            <div class="domain-section__content">
+              @for (docType of getDocTypesForDomain(domain); track docType.docTypeKey) {
+                <div class="doc-type-card" (click)="viewDefinition(domain, docType.docTypeKey)">
+                  <div class="doc-type-card__main">
+                    <div class="doc-type-card__name">{{ docType.name }}</div>
+                    <div class="doc-type-card__meta">
+                      <span class="meta-item">{{ docType.docTypeKey }}</span>
+                      <span class="meta-separator">·</span>
+                      <span class="meta-item">v{{ docType.activeVersion }}</span>
+                    </div>
+                  </div>
+                  <mat-icon class="doc-type-card__arrow">chevron_right</mat-icon>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        @if (domainsList().length === 0) {
+          <div class="empty-state">
+            <mat-icon class="empty-state__icon">description</mat-icon>
+            <p class="empty-state__text">No document type definitions found.</p>
+            <button mat-stroked-button type="button" (click)="createNew()">
+              <mat-icon>add</mat-icon>
+              Create your first definition
+            </button>
+          </div>
+        }
+      </div>
+    }
+
+    @if (!loading() && !docTypesByDomain()) {
+      <div class="error-state">
+        <mat-icon class="error-state__icon">error_outline</mat-icon>
+        <p class="error-state__text">Failed to load document type definitions.</p>
+        <button mat-stroked-button type="button" (click)="loadDocTypes()">
+          <mat-icon>refresh</mat-icon>
+          Retry
+        </button>
+      </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,11 @@
+{
+  "reserves": [
+    {
+      "id": "rsv-001",
+      "receptionId": "rec-001",
+      "libelle": "Finitions menuiseries aluminium — aile est",
+      "dateLimiteLevee": "2026-07-15",
+      "status": "OUVERTE"
+    }
+  ]
+}

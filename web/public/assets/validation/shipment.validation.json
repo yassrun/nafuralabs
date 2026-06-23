@@ -1,0 +1,36 @@
+{
+  "entity": "Shipment",
+  "fields": {
+    "shipmentNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "customerId": {
+      "required": true
+    },
+    "shipFromLocationId": {
+      "required": true
+    },
+    "shipToAddress": {
+      "required": true,
+      "maxLength": 500
+    },
+    "serviceLevel": {
+      "maxLength": 60
+    },
+    "trackingNumber": {
+      "maxLength": 120
+    },
+    "weight": {
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "entity": "SalaryRevision",
+  "fields": {
+    "revisionNumber": {
+      "required": true,
+      "maxLength": 30,
+      "unique": true
+    },
+    "employeeId": {
+      "required": true
+    },
+    "effectiveDate": {
+      "required": true
+    },
+    "oldSalary": {
+      "min": 0
+    },
+    "newSalary": {
+      "required": true,
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

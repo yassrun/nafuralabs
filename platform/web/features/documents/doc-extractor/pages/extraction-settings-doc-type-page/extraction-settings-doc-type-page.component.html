@@ -1,0 +1,179 @@
+<div class="doc-type-settings">
+  <!-- Header -->
+  <header class="page-header">
+    <div>
+      <div class="eyebrow">Extraction Settings</div>
+      <h2>Document Type Builder</h2>
+    </div>
+    <div class="header-actions">
+      <button mat-button (click)="goBack()">
+        <mat-icon appFlipIconRtl>arrow_back</mat-icon>
+        Back
+      </button>
+    </div>
+  </header>
+
+  <!-- Context Bar -->
+  <section class="card context-card">
+    <div class="context">
+      <div class="context__item">
+        <span class="label">Domain</span>
+        <span class="value">{{ domainKey() || '—' }}</span>
+      </div>
+      <div class="context__item">
+        <span class="label">Document Type</span>
+        <span class="value">{{ docTypeKey() || '—' }}</span>
+      </div>
+      <div class="context__item">
+        <span class="label">Version</span>
+        @if (versions().length > 0) {
+          <mat-form-field appearance="outline" class="version-select">
+            <mat-select 
+              [value]="selectedVersionId()" 
+              (selectionChange)="selectVersion($event.value)">
+              @for (version of versions(); track version.id) {
+                <mat-option [value]="version.id">
+                  v{{ version.version }} 
+                  <span class="version-status" [class]="version.status.toLowerCase()">
+                    ({{ version.status }})
+                  </span>
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        } @else {
+          <span class="value">—</span>
+        }
+      </div>
+      <div class="context__item">
+        <span class="label">Status</span>
+        @if (status()) {
+          <mat-chip-set>
+            <mat-chip [color]="statusColor()" selected>{{ status() }}</mat-chip>
+          </mat-chip-set>
+        } @else {
+          <span class="value">—</span>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="loading-overlay">
+      <mat-spinner diameter="40"></mat-spinner>
+      <span>Loading...</span>
+    </div>
+  }
+
+  <!-- Main Builder Area -->
+  @if (currentVersion() && !loading()) {
+    <section class="card builder-card">
+      <!-- Validation Errors -->
+      @if (validationErrors().length > 0) {
+        <div class="validation-errors">
+          <mat-icon>warning</mat-icon>
+          <div class="error-list">
+            <strong>Validation Issues:</strong>
+            <ul>
+              @for (error of validationErrors(); track error) {
+                <li>{{ error }}</li>
+              }
+            </ul>
+          </div>
+        </div>
+      }
+
+      <!-- Builder Tabs -->
+      <mat-tab-group 
+        [selectedIndex]="activeTab()" 
+        (selectedIndexChange)="onTabChange($event)"
+        [class.readonly]="!canEdit()">
+        
+        <!-- Fields Tab -->
+        <mat-tab label="Fields">
+          <div class="tab-content">
+            <app-field-editor 
+              [readonly]="!canEdit()">
+            </app-field-editor>
+          </div>
+        </mat-tab>
+
+        <!-- Layout Tab -->
+        <mat-tab label="Layout">
+          <div class="tab-content">
+            <app-layout-editor 
+              [readonly]="!canEdit()">
+            </app-layout-editor>
+          </div>
+        </mat-tab>
+
+        <!-- Preview Tab -->
+        <mat-tab label="Preview">
+          <div class="tab-content">
+            <app-preview-renderer></app-preview-renderer>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+
+      <!-- Actions -->
+      <div class="actions">
+        @if (canEdit()) {
+          <!-- Draft Actions -->
+          <button mat-button (click)="cancel()">
+            Cancel
+          </button>
+          
+          <button 
+            mat-stroked-button 
+            color="primary" 
+            (click)="saveDraft()"
+            [disabled]="saving() || !hasChanges()">
+            @if (saving()) {
+              <mat-spinner diameter="18"></mat-spinner>
+            }
+            Save Draft
+          </button>
+
+          <button 
+            mat-flat-button 
+            color="primary" 
+            (click)="publish()"
+            [disabled]="publishing() || !canPublish()"
+            [matTooltip]="!canPublish() ? 'Fix validation errors to publish' : ''">
+            @if (publishing()) {
+              <mat-spinner diameter="18"></mat-spinner>
+            }
+            Publish
+          </button>
+        } @else if (canCreateNewVersion()) {
+          <!-- Published/Deprecated Actions -->
+          <button mat-button (click)="cancel()">
+            Close
+          </button>
+          
+          <button 
+            mat-flat-button 
+            color="primary" 
+            (click)="createNewVersion()">
+            <mat-icon>content_copy</mat-icon>
+            Create New Version
+          </button>
+        } @else {
+          <button mat-button (click)="cancel()">
+            Close
+          </button>
+        }
+      </div>
+    </section>
+  }
+
+  <!-- Empty State -->
+  @if (!currentVersion() && !loading() && versions().length === 0) {
+    <section class="card empty-state">
+      <mat-icon>description</mat-icon>
+      <p>No versions found for this document type.</p>
+      <p class="hint">This document type may not exist or has no versions yet.</p>
+    </section>
+  }
+</div>

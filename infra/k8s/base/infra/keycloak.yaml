@@ -1,0 +1,91 @@
+# Keycloak Authentication Server
+# Uses PostgreSQL keycloak database
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak
+spec:
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+    - name: health
+      port: 9000
+      targetPort: 9000
+  selector:
+    app: keycloak
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/role: "keycloak"
+        vault.hashicorp.com/agent-inject-secret-keycloak: "secret/data/nafura/dev/infra/keycloak"
+        vault.hashicorp.com/agent-inject-template-keycloak: |
+          {{- with secret "secret/data/nafura/dev/infra/keycloak" -}}
+          export KC_BOOTSTRAP_ADMIN_USERNAME="{{ .Data.data.admin_username }}"
+          export KC_BOOTSTRAP_ADMIN_PASSWORD="{{ .Data.data.admin_password }}"
+          export KC_DB_USERNAME="{{ .Data.data.db_username }}"
+          export KC_DB_PASSWORD="{{ .Data.data.db_password }}"
+          {{- end }}
+    spec:
+      serviceAccountName: keycloak
+      containers:
+        - name: keycloak
+          image: nafura-keycloak:dev
+          command: ["/opt/keycloak/bin/start-with-bootstrap.sh"]
+          args: []
+          env:
+            - name: KC_DB
+              value: postgres
+            - name: KC_DB_URL
+              value: jdbc:postgresql://postgres:5432/keycloak
+            # Hostname configuration
+            # External URL for browser access (via ingress)
+            - name: KC_HOSTNAME
+              value: iam.nafura.local
+            - name: KC_HOSTNAME_STRICT
+              value: "false"
+            # Allow backend services to access via internal URL (keycloak:8080)
+            - name: KC_HOSTNAME_STRICT_BACKCHANNEL
+              value: "false"
+            - name: KC_HTTP_ENABLED
+              value: "true"
+            - name: KC_PROXY_HEADERS
+              value: xforwarded
+          ports:
+            - containerPort: 8080
+            - containerPort: 9000
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 9000
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 60
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 9000
+            initialDelaySeconds: 60
+            periodSeconds: 10
+          volumeMounts:
+            - name: realm-import
+              mountPath: /opt/keycloak/data/import
+      volumes:
+        - name: realm-import
+          configMap:
+            name: keycloak-realm

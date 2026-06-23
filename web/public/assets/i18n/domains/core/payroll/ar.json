@@ -1,0 +1,65 @@
+{
+  "payroll": {
+    "navigation": {
+      "title": "الأجور",
+      "description": "مجال الأجور",
+      "payrollRuns": "دفعات الأجور",
+      "paySlips": "كشوف الراتب",
+      "payStructures": "هياكل الأجور",
+      "salaryComponents": "مكوّنات الراتب",
+      "salaryRevisions": "مراجعات الراتب",
+      "deductionTypes": "أنواع الاقتطاع",
+      "bonusRuns": "دفعات العلاوات"
+    }
+  },
+  "common": {
+    "subsections": {
+      "operations": "العمليات",
+      "configuration": "الإعدادات"
+    }
+  },
+  "hr": {
+    "fields": {
+      "runNumber": "رقم الدفعة",
+      "periodStart": "بداية الفترة",
+      "periodEnd": "نهاية الفترة",
+      "employeeCount": "عدد الموظفين",
+      "grossTotal": "الإجمالي قبل الاقتطاعات",
+      "netTotal": "الإجمالي الصافي",
+      "deductionsTotal": "إجمالي الاقتطاعات",
+      "status": "الحالة",
+      "processedBy": "معالَج من طرف",
+      "processedAt": "تاريخ المعالجة",
+      "paySlipNumber": "رقم كشف الراتب",
+      "payrollRunId": "معرّف دفعة الأجور",
+      "employeeId": "معرّف الموظف",
+      "grossAmount": "المبلغ قبل الاقتطاع",
+      "deductions": "الاقتطاعات",
+      "netAmount": "المبلغ الصافي",
+      "paymentMethod": "طريقة الدفع",
+      "paymentDate": "تاريخ الدفع",
+      "code": "الرمز",
+      "name": "الاسم",
+      "description": "الوصف",
+      "components": "المكوّنات",
+      "effectiveDate": "تاريخ السريان",
+      "componentType": "نوع المكوّن",
+      "calculationType": "نوع الحساب",
+      "percentage": "النسبة المئوية",
+      "isTaxable": "خاضع للضريبة",
+      "isMandatory": "إلزامي",
+      "revisionNumber": "رقم المراجعة",
+      "employee": "معرّف الموظف",
+      "oldSalary": "الراتب السابق",
+      "newSalary": "الراتب الجديد",
+      "deductionCategory": "فئة الاقتطاع",
+      "taxDeductible": "قابل للخصم الضريبي",
+      "bonusType": "نوع العلاوة",
+      "totalAmount": "المبلغ الإجمالي"
+    },
+    "sections": {
+      "general": "عام",
+      "notes": "ملاحظات"
+    }
+  }
+}

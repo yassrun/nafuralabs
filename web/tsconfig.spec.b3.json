@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "//": "Temporary tsconfig for running B3 pipe specs in isolation. To delete once Wave B is merged.",
+  "compilerOptions": {
+    "outDir": "./out-tsc/spec-b3",
+    "types": ["jasmine"]
+  },
+  "include": [
+    "src/**/*.d.ts",
+    "app/platform/lib/anatomy/pipes/**/*.spec.ts"
+  ]
+}

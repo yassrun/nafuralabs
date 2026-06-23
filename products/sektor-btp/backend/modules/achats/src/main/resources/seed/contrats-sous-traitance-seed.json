@@ -1,0 +1,55 @@
+{
+  "contrats": [
+    {
+      "numero": "ST-2026-001",
+      "sousTraitantId": "st-ent-001",
+      "sousTraitantNom": "ELEC PRO SARL",
+      "ice": "002123456789012",
+      "chantierId": "ch-001",
+      "chantierCode": "CH-2025-001",
+      "chantierNom": "Résidence Yasmine — Casa",
+      "objet": "Travaux d'électricité CFO/CFA",
+      "montantHt": "2850000",
+      "retenueGarantieTaux": "7",
+      "dateDebut": "2026-05-15",
+      "dateFin": "2026-09-30",
+      "avancementPercent": "15",
+      "status": "EN_COURS",
+      "declarationArt187": true
+    },
+    {
+      "numero": "ST-2026-002",
+      "sousTraitantId": "st-ent-002",
+      "sousTraitantNom": "PLOMB TECH SA",
+      "ice": "001987654321098",
+      "chantierId": "ch-001",
+      "chantierCode": "CH-2025-001",
+      "chantierNom": "Résidence Yasmine — Casa",
+      "objet": "Plomberie sanitaire et réseau incendie",
+      "montantHt": "1920000",
+      "retenueGarantieTaux": "7",
+      "dateDebut": "2026-04-22",
+      "dateFin": "2026-09-12",
+      "avancementPercent": "22",
+      "status": "EN_COURS",
+      "declarationArt187": true
+    },
+    {
+      "numero": "ST-2026-003",
+      "sousTraitantId": "st-ent-003",
+      "sousTraitantNom": "METAL STRUCT SARL",
+      "ice": "003456789012345",
+      "chantierId": "ch-002",
+      "chantierCode": "CH-2025-002",
+      "chantierNom": "Pont Bouregreg ouvrage 3",
+      "objet": "Charpente métallique tablier",
+      "montantHt": "12500000",
+      "retenueGarantieTaux": "10",
+      "dateDebut": "2026-03-01",
+      "dateFin": "2026-08-31",
+      "avancementPercent": "60",
+      "status": "EN_COURS",
+      "declarationArt187": true
+    }
+  ]
+}

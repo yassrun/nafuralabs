@@ -1,0 +1,29 @@
+{
+  "entity": "RateCard",
+  "fields": {
+    "code": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "originZone": {
+      "maxLength": 120
+    },
+    "weightMin": {
+      "min": 0
+    },
+    "weightMax": {
+      "min": 0
+    },
+    "rate": {
+      "min": 0
+    },
+    "currency": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

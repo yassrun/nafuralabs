@@ -1,0 +1,13 @@
+ALTER TABLE items ADD COLUMN IF NOT EXISTS article_type VARCHAR(30);
+ALTER TABLE items ADD COLUMN IF NOT EXISTS poste_budget_id VARCHAR(50);
+ALTER TABLE items ADD COLUMN IF NOT EXISTS default_location_id UUID;
+ALTER TABLE items ADD COLUMN IF NOT EXISTS is_perissable BOOLEAN DEFAULT false;
+ALTER TABLE items ADD COLUMN IF NOT EXISTS abc_class VARCHAR(1);
+ALTER TABLE items ADD COLUMN IF NOT EXISTS pmp NUMERIC(18,4);
+ALTER TABLE items ADD COLUMN IF NOT EXISTS prix_unitaire NUMERIC(18,4);
+ALTER TABLE items ADD COLUMN IF NOT EXISTS stock_min NUMERIC(18,4);
+ALTER TABLE items ADD COLUMN IF NOT EXISTS stock_max NUMERIC(18,4);
+ALTER TABLE items ADD COLUMN IF NOT EXISTS delai_reappro_jours INTEGER;
+
+CREATE INDEX IF NOT EXISTS idx_items_article_type ON items(tenant_id, article_type);
+CREATE INDEX IF NOT EXISTS idx_items_poste_budget ON items(tenant_id, poste_budget_id);

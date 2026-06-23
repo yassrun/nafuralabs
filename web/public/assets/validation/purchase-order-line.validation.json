@@ -1,0 +1,24 @@
+{
+  "entity": "PurchaseOrderLine",
+  "fields": {
+    "purchaseOrderId": {
+      "required": true
+    },
+    "description": {
+      "maxLength": 2000
+    },
+    "quantity": {
+      "min": 0
+    },
+    "unitPrice": {
+      "min": 0
+    },
+    "totalAmount": {
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

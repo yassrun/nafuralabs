@@ -1,0 +1,53 @@
+/**
+ * Nafura Platform - Layout Tokens
+ *
+ * Tokens for layout components (sidebar, topbar, content area).
+ * Products will override these for their shell designs.
+ * See DESIGN-SYSTEM.md for containers, max-width, and listing opt-out.
+ *
+ * Naming: --nf-{component}-{property}
+ */
+
+:root {
+  /* ═══════════════════════════════════════════════════════════════════════════
+     Sidebar
+     ═══════════════════════════════════════════════════════════════════════════ */
+  --nf-sidebar-width: 260px;
+  --nf-sidebar-collapsed-width: 64px;
+  --nf-sidebar-bg: var(--nf-color-gray-900);
+  --nf-sidebar-text: var(--nf-color-gray-300);
+  --nf-sidebar-text-muted: var(--nf-color-gray-500);
+  --nf-sidebar-hover-bg: rgba(255, 255, 255, 0.08);
+  --nf-sidebar-active-bg: rgba(255, 255, 255, 0.12);
+  --nf-sidebar-active-text: #ffffff;
+  --nf-sidebar-border: rgba(255, 255, 255, 0.1);
+  --nf-sidebar-item-padding: var(--nf-space-3) var(--nf-space-4);
+  --nf-sidebar-item-radius: var(--nf-radius-md);
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     Topbar
+     ═══════════════════════════════════════════════════════════════════════════ */
+  --nf-topbar-height: 56px;
+  --nf-topbar-bg: var(--nf-surface-section);
+  --nf-topbar-border: var(--nf-border-default);
+  --nf-topbar-shadow: var(--nf-shadow-xs);
+  --nf-topbar-padding-x: var(--nf-space-4);
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     Content Area
+     ═══════════════════════════════════════════════════════════════════════════ */
+  --nf-content-padding: var(--nf-space-6);
+  /** Default 1400px; listing pages may opt out (full-width) if data-heavy (design system). */
+  --nf-content-max-width: 1400px;
+  --nf-content-bg: var(--nf-surface-page);
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     Page Layout (generic: any page type)
+     ═══════════════════════════════════════════════════════════════════════════ */
+  /** Space between parent (e.g. shell content) and the page container */
+  --nf-page-container-padding: var(--nf-space-4);
+  /** Inner padding of any page section (listing, detail, form, etc.) */
+  --nf-page-section-padding: var(--nf-space-4);
+  --nf-page-padding: var(--nf-space-6);
+  --nf-page-gap: var(--nf-space-6);
+}

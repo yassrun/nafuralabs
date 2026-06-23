@@ -1,0 +1,1865 @@
+{
+  "common": {
+    "subsections": {
+      "operations": "Operations",
+      "configuration": "Configuration"
+    },
+    "sections": {
+      "general": "General",
+      "status": "Status"
+    },
+    "fields": {
+      "isActive": "Active",
+      "description": "Description",
+      "notes": "Notes",
+      "createdAt": "Date de creation",
+      "updatedAt": "Date de mise a jour"
+    },
+    "actions": {
+      "cancel": "Annuler",
+      "delete": "Supprimer",
+      "save": "Enregistrer",
+      "edit": "Modifier",
+      "moveUp": "Monter",
+      "moveDown": "Descendre"
+    },
+    "none": "Aucun",
+    "errors": {
+      "deleteFailed": "Échec de la suppression.",
+      "updateFailed": "Échec de la mise à jour.",
+      "saveFailed": "Échec de l'enregistrement."
+    },
+    "loading": "Chargement...",
+    "validation": {
+      "required": "Ce champ est obligatoire."
+    },
+    "all": "Tous",
+    "search": "Rechercher"
+  },
+  "Search": "Rechercher",
+  "Filters": "Filtres",
+  "Filter": "Filtrer",
+  "Remove filter": "Retirer le filtre",
+  "Sort": "Trier",
+  "Columns": "Colonnes",
+  "Clear": "Effacer",
+  "Apply": "Appliquer",
+  "Reset": "Réinitialiser",
+  "Cancel": "Annuler",
+  "Confirm": "Confirmer",
+  "Save": "Enregistrer",
+  "Delete": "Supprimer",
+  "Delete All": "Tout supprimer",
+  "Yes": "Oui",
+  "No": "Non",
+  "All": "Tous",
+  "selected": "sélectionné",
+  "listing": {
+    "action": {
+      "new": "Nouveau",
+      "newAria": "Créer un nouvel enregistrement"
+    }
+  },
+  "Loading": "Chargement",
+  "Total": "Total",
+  "form": {
+    "errorSummary": {
+      "title": "Veuillez corriger les erreurs suivantes :"
+    }
+  },
+  "audit": {
+    "timeline": {
+      "title": "Activité",
+      "detailsTab": "Détails",
+      "search": "Rechercher dans l'activité...",
+      "loading": "Chargement...",
+      "loadMore": "Charger plus",
+      "empty": "Aucune activité enregistrée pour cet enregistrement.",
+      "filter": {
+        "all": "Tout",
+        "creates": "Créations",
+        "updates": "Modifications",
+        "statusChanges": "Changements de statut",
+        "deletes": "Suppressions",
+        "publish": "Publication",
+        "approve": "Approbation",
+        "reject": "Rejet"
+      }
+    },
+    "action": {
+      "create": "a créé",
+      "update": "a modifié",
+      "delete": "a supprimé",
+      "status_change": "a changé le statut",
+      "publish": "a publié",
+      "approve": "a approuvé",
+      "reject": "a rejeté",
+      "assign": "a assigné à",
+      "comment": "a commenté",
+      "attach": "a joint"
+    }
+  },
+  "print": {
+    "dialog": {
+      "title": "Imprimer le document",
+      "template": "Modèle",
+      "preview": "Aperçu",
+      "download": "Télécharger le PDF",
+      "email": "Envoyer par e-mail",
+      "email.disabled": "Envoi par e-mail bientôt disponible",
+      "noTemplates": "Aucun modèle disponible pour ce type d'entité.",
+      "loading": "Génération du document..."
+    }
+  },
+  "email": {
+    "send": {
+      "title": "Envoyer un e-mail",
+      "to": "À",
+      "cc": "CC",
+      "addCc": "Ajouter CC",
+      "hideCc": "Masquer CC",
+      "subject": "Objet",
+      "template": "Modèle",
+      "bodyPreview": "Aperçu du corps",
+      "selectTemplate": "Sélectionnez un modèle pour prévisualiser le corps.",
+      "attachPdf": "Joindre un PDF",
+      "printTemplate": "Modèle d'impression",
+      "send": "Envoyer",
+      "toRequired": "Au moins un destinataire est requis.",
+      "subjectRequired": "L'objet est requis.",
+      "templateRequired": "Veuillez sélectionner un modèle d'e-mail.",
+      "success": "E-mail envoyé avec succès"
+    }
+  },
+  "attachments": {
+    "title": "Pièces jointes",
+    "upload": "Téléverser des fichiers",
+    "dragDrop": "Glissez des fichiers ici ou cliquez pour parcourir",
+    "empty": "Aucun fichier joint.",
+    "download": "Télécharger",
+    "delete": {
+      "confirm": "Supprimer ce fichier ?",
+      "success": "Fichier supprimé"
+    },
+    "error": {
+      "tooLarge": "Le fichier dépasse la taille maximale de {maxSize}",
+      "invalidType": "Type de fichier non autorisé",
+      "maxFiles": "Maximum de {max} fichiers atteint"
+    },
+    "upload.success": "Fichier téléversé",
+    "preview": "Aperçu"
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "subtitle": "Vue d'ensemble",
+    "navigation": {
+      "title": "Accueil"
+    },
+    "widgets": {
+      "revenue": "Chiffre d'affaires",
+      "invoices": "Factures",
+      "overdue": "En retard",
+      "revenueTrend": "Tendance du chiffre d'affaires",
+      "expenseBreakdown": "Dépenses par catégorie",
+      "recentActivity": "Activité récente",
+      "recentInvoices": "Factures récentes"
+    },
+    "empty": {
+      "title": "Bienvenue sur Nafura !",
+      "message": "Pour commencer :",
+      "inviteMembers": "Inviter des membres",
+      "activateDomains": "Activer les domaines",
+      "configureSettings": "Configurer les paramètres"
+    }
+  },
+  "approvals": {
+    "title": "Approbations",
+    "subtitle": "Demandes en attente et passées",
+    "navigation": {
+      "title": "Approbations"
+    },
+    "tabs": {
+      "pending": "En attente",
+      "history": "Historique"
+    },
+    "columns": {
+      "entity": "Entité",
+      "title": "Titre",
+      "requestedBy": "Demandé par",
+      "requestedAt": "Demandé le",
+      "step": "Étape",
+      "actions": "Actions",
+      "decision": "Décision",
+      "decisionAt": "Décidé le",
+      "comment": "Commentaire"
+    },
+    "approve": "Approuver",
+    "reject": "Rejeter",
+    "commentRequired": "Un commentaire est requis pour rejeter.",
+    "comment": "Commentaire",
+    "commentPlaceholderApprove": "Commentaire (optionnel)",
+    "commentPlaceholderReject": "Commentaire (obligatoire)",
+    "emptyTitle": "Aucune approbation en attente",
+    "emptyMessage": "Vous êtes à jour !",
+    "historyEmpty": "Aucun historique d'approbation.",
+    "loading": "Chargement...",
+    "approved": "Approuvé avec succès.",
+    "rejected": "Rejeté.",
+    "actionFailed": "Échec de l'action.",
+    "time": {
+      "agoSeconds": "Il y a {count} s",
+      "agoMinutes": "Il y a {count} min",
+      "agoHours": "Il y a {count} h",
+      "agoDays": "Il y a {count} j"
+    }
+  },
+  "workflow": {
+    "submitForApproval": "Soumettre pour approbation",
+    "resubmit": "Resoumettre",
+    "approve": "Approuver",
+    "reject": "Rejeter",
+    "banner": {
+      "pending": "En attente d'approbation",
+      "approved": "Approuvé",
+      "rejected": "Rejeté"
+    },
+    "action": {
+      "title": "Approbation requise",
+      "commentPlaceholder": "Commentaire (optionnel pour Approuver, requis pour Rejeter)",
+      "rejectCommentRequired": "Un commentaire est requis pour rejeter."
+    },
+    "submit": {
+      "selectTemplateTitle": "Choisir un modèle de workflow",
+      "selectTemplateHint": "Choisissez un modèle pour démarrer le workflow d'approbation."
+    },
+    "toast": {
+      "triggered": "Workflow démarré.",
+      "approved": "Approuvé avec succès.",
+      "rejected": "Rejeté."
+    }
+  },
+  "administration": {
+    "navigation": {
+      "title": "Administration",
+      "members": "Membres",
+      "roles": "Roles",
+      "domainActivation": "Activation des domaines",
+      "audit": "Journal d'audit",
+      "templates": "Modèles d'impression",
+      "emailTemplates": "Modèles d'e-mail",
+      "workflows": "Workflows",
+      "subscriptions": "Abonnements",
+      "scheduledJobs": "Tâches planifiées",
+      "webhooks": "Webhooks",
+      "apiKeys": "Clés API",
+      "numberingSequences": "Séquences de numérotation",
+      "auditLog": "Journal d'audit ERP",
+      "societe": "Identité société",
+      "fiscal": "Paramètres fiscaux",
+      "demo": "Jeu de données démo",
+      "hub": "Accueil administration"
+    },
+    "hub": {
+      "title": "Centre d'administration",
+      "subtitle": "Paramètres locataire, IAM, conformité et données de démonstration",
+      "intro": "Choisissez une section ci-dessous. Les écrans détaillés restent sous /administration/… (chemins historiques conservés).",
+      "appSettings": "Paramètres application",
+      "descriptions": {
+        "members": "Comptes utilisateurs et invitations",
+        "roles": "Rôles et droits d'accès",
+        "domainActivation": "Domaines et activation produit",
+        "audit": "Journal d'audit plateforme",
+        "templates": "Gabarits d'impression PDF",
+        "emailTemplates": "Modèles de courriels transactionnels",
+        "workflows": "Modèles de workflow d'approbation",
+        "scheduledJobs": "Tâches planifiées et surveillance",
+        "webhooks": "Intégrations sortantes HTTP",
+        "apiKeys": "Clés d'API et accès programmatique",
+        "numberingSequences": "Préfixes et séquences documentaires",
+        "subscriptions": "Abonnements et capacités SaaS",
+        "settings": "Options générales de l'application",
+        "societe": "Identité légale, ICE, RIB, logo",
+        "fiscal": "TVA, retenues, timbres et exonérations",
+        "auditLog": "Journal métier ERP (hash chaîné)",
+        "demo": "Réinitialisation du jeu de données démo"
+      }
+    },
+    "audit": {
+      "title": "Journal d'audit",
+      "search": "Rechercher dans le journal...",
+      "columns": {
+        "date": "Date",
+        "actor": "Acteur",
+        "action": "Action",
+        "entityType": "Type d'entité",
+        "details": "Détails"
+      },
+      "filters": {
+        "search": "Recherche (acteur, détails)",
+        "entityType": "Type d'entité",
+        "action": "Action",
+        "actor": "Acteur",
+        "from": "Du",
+        "to": "Au"
+      },
+      "export": "Exporter en CSV",
+      "exportSuccess": "{count, plural, =0 {Aucune entrée exportée.} one {1 entrée exportée.} other {# entrées exportées.}}",
+      "exportError": "Échec de l'export du journal d'audit.",
+      "empty": "Aucune entrée d'audit.",
+      "detail": {
+        "title": "Entrée d'audit",
+        "viewEntity": "Voir {entityType}",
+        "payload": "Modifications"
+      }
+    },
+    "scheduledJobs": {
+      "title": "Tâches planifiées",
+      "subtitle": "Surveiller et gérer les tâches en arrière-plan",
+      "columns": {
+        "name": "Nom de la tâche",
+        "key": "Clé",
+        "schedule": "Planification",
+        "tenantScoped": "Par locataire",
+        "status": "Statut",
+        "lastRun": "Dernière exécution",
+        "enabled": "Activée"
+      },
+      "actions": {
+        "runNow": "Exécuter maintenant",
+        "runNowSuccess": "Tâche déclenchée avec succès"
+      },
+      "detail": {
+        "title": "Détails de la tâche",
+        "totalRuns": "Nombre d'exécutions",
+        "successRate": "Taux de réussite",
+        "avgDuration": "Durée moyenne",
+        "lastRun": "Dernière exécution",
+        "executions": "Historique des exécutions",
+        "columns": {
+          "started": "Début",
+          "ended": "Fin",
+          "duration": "Durée",
+          "status": "Statut",
+          "tenant": "Locataire",
+          "error": "Erreur"
+        }
+      }
+    },
+    "webhooks": {
+      "title": "Webhooks",
+      "subtitle": "Configurer les notifications d'événements sortants",
+      "loading": "Chargement des webhooks...",
+      "empty": "Aucun webhook configuré.",
+      "saving": "Enregistrement...",
+      "fields": {
+        "name": "Nom",
+        "url": "URL",
+        "secret": "Secret",
+        "events": "Événements",
+        "active": "Actif"
+      },
+      "form": {
+        "name": "Nom",
+        "url": "URL du webhook",
+        "secret": "Secret",
+        "generateSecret": "Générer un secret",
+        "events": "Événements",
+        "active": "Actif"
+      },
+      "actions": {
+        "create": "Nouveau webhook",
+        "edit": "Modifier",
+        "test": "Tester le webhook",
+        "testSuccess": "Test envoyé avec succès",
+        "testFailed": "Échec de l'envoi du test",
+        "delete": "Supprimer",
+        "generate": "Générer"
+      },
+      "dialog": {
+        "createTitle": "Créer un webhook",
+        "editTitle": "Modifier le webhook"
+      },
+      "detail": {
+        "title": "Détails du webhook",
+        "back": "Retour",
+        "loading": "Chargement des journaux de livraison...",
+        "empty": "Aucune livraison pour le moment.",
+        "payload": "Payload",
+        "response": "Réponse",
+        "columns": {
+          "event": "Événement",
+          "status": "Statut",
+          "attempts": "Tentatives",
+          "response": "Réponse",
+          "responseCode": "Réponse",
+          "timestamp": "Horodatage",
+          "payload": "Payload"
+        }
+      },
+      "columns": {
+        "name": "Nom",
+        "url": "URL",
+        "events": "Événements",
+        "active": "Actif",
+        "lastDelivery": "Dernière livraison",
+        "created": "Créé le",
+        "actions": "Actions"
+      }
+    },
+    "apiKeys": {
+      "title": "Clés API",
+      "subtitle": "Gérer les clés API pour les intégrations externes",
+      "loading": "Chargement des clés API...",
+      "empty": "Aucune clé API pour le moment.",
+      "creating": "Création...",
+      "never": "Jamais",
+      "status": {
+        "active": "Active",
+        "revoked": "Révoquée",
+        "expired": "Expirée"
+      },
+      "fields": {
+        "name": "Nom",
+        "permissions": "Permissions (séparées par des virgules)",
+        "expiry": "Expiration",
+        "expiresAt": "Expire le"
+      },
+      "form": {
+        "name": "Nom de la clé",
+        "permissions": "Permissions",
+        "expiry": "Expiration",
+        "expiryNever": "Jamais",
+        "expiry30d": "30 jours",
+        "expiry90d": "90 jours",
+        "expiry1y": "1 an",
+        "expiryCustom": "Date personnalisée"
+      },
+      "expiry": {
+        "never": "Jamais",
+        "30d": "30 jours",
+        "90d": "90 jours",
+        "1y": "1 an",
+        "custom": "Date personnalisée"
+      },
+      "actions": {
+        "create": "Générer une clé API",
+        "revoke": "Révoquer",
+        "revokeConfirm": "Êtes-vous sûr de vouloir révoquer cette clé API ? Cette action est irréversible."
+      },
+      "dialog": {
+        "createTitle": "Créer une clé API"
+      },
+      "created": {
+        "title": "Clé API créée",
+        "warning": "Cette clé ne sera affichée qu'une seule fois. Copiez-la maintenant.",
+        "copy": "Copier la clé",
+        "copied": "Clé copiée dans le presse-papiers",
+        "done": "Terminé"
+      },
+      "columns": {
+        "name": "Nom",
+        "key": "Clé",
+        "permissions": "Permissions",
+        "createdBy": "Créée par",
+        "expires": "Expire le",
+        "lastUsed": "Dernière utilisation",
+        "status": "Statut",
+        "actions": "Actions"
+      }
+    },
+    "numberingSequences": {
+      "title": "Séquences de numérotation",
+      "subtitle": "Configurer la numérotation automatique des documents",
+      "loading": "Chargement des séquences...",
+      "empty": "Aucune séquence configurée.",
+      "saving": "Enregistrement...",
+      "preview": "Aperçu",
+      "fields": {
+        "name": "Nom",
+        "code": "Code",
+        "prefix": "Préfixe",
+        "separator": "Séparateur",
+        "yearFormat": "Format d'année",
+        "padLength": "Longueur de remplissage",
+        "incrementBy": "Incrément",
+        "currentNumber": "Numéro actuel",
+        "startingNumber": "Numéro de départ",
+        "resetPolicy": "Politique de réinitialisation"
+      },
+      "reset": {
+        "never": "Jamais",
+        "yearly": "Annuel",
+        "monthly": "Mensuel"
+      },
+      "resetPolicy": {
+        "NEVER": "Jamais",
+        "YEARLY": "Annuel",
+        "MONTHLY": "Mensuel"
+      },
+      "actions": {
+        "create": "Nouvelle séquence",
+        "edit": "Modifier",
+        "delete": "Supprimer"
+      },
+      "dialog": {
+        "createTitle": "Créer une séquence de numérotation",
+        "editTitle": "Modifier la séquence de numérotation"
+      },
+      "columns": {
+        "name": "Nom",
+        "code": "Code",
+        "prefix": "Préfixe",
+        "current": "Actuel",
+        "preview": "Aperçu du modèle",
+        "resetPolicy": "Politique de réinitialisation",
+        "actions": "Actions"
+      }
+    },
+    "templates": {
+      "title": "Modèles d'impression",
+      "create": "Nouveau modèle",
+      "clone": "Dupliquer le modèle",
+      "editor": {
+        "title": "Éditeur de modèle",
+        "variables": "Variables",
+        "variablesEmpty": "Sélectionnez un type d'entité pour charger les variables.",
+        "settings": "Paramètres de page",
+        "preview": "Aperçu",
+        "previewEmpty": "Enregistrez le modèle pour voir un aperçu.",
+        "save": "Enregistrer le modèle",
+        "system": "Modèle système (lecture seule)"
+      },
+      "paperSize": "Format",
+      "orientation": "Orientation",
+      "margins": "Marges",
+      "columns": {
+        "name": "Nom",
+        "entityType": "Type d'entité",
+        "type": "Type",
+        "paperSize": "Format",
+        "updatedAt": "Modifié"
+      },
+      "type": {
+        "system": "Système",
+        "custom": "Personnalisé"
+      },
+      "filters": {
+        "search": "Recherche",
+        "entityType": "Type d'entité",
+        "type": "Type"
+      },
+      "fields": {
+        "name": "Nom",
+        "code": "Code",
+        "entityType": "Type d'entité"
+      },
+      "validation": {
+        "nameRequired": "Le nom est requis",
+        "codeRequired": "Le code est requis",
+        "entityTypeRequired": "Le type d'entité est requis"
+      },
+      "empty": "Aucun modèle d'impression",
+      "emptyMessage": "Créez un modèle pour générer des PDF à partir de vos données.",
+      "createSuccess": "Modèle « {name} » créé.",
+      "cloneSuccess": "Modèle « {name} » créé à partir d'une copie.",
+      "saveSuccess": "Modèle enregistré.",
+      "saveError": "Échec de l'enregistrement du modèle.",
+      "loadError": "Modèle introuvable.",
+      "delete": {
+        "confirmTitle": "Supprimer le modèle",
+        "confirmMessage": "Supprimer « {name} » ? Cette action est irréversible.",
+        "success": "Modèle supprimé.",
+        "inUse": "Ce modèle est utilisé et ne peut pas être supprimé."
+      }
+    },
+    "emailTemplates": {
+      "title": "Modèles d'e-mail",
+      "create": "Nouveau modèle d'e-mail",
+      "editor": {
+        "title": "Éditeur de modèle d'e-mail",
+        "preview": "Aperçu",
+        "previewEmpty": "Cliquez sur Aperçu pour afficher avec des données d'exemple.",
+        "save": "Enregistrer le modèle"
+      },
+      "columns": {
+        "name": "Nom",
+        "code": "Code",
+        "type": "Type",
+        "entityType": "Type d'entité",
+        "updatedAt": "Modifié"
+      },
+      "type": {
+        "system": "Système",
+        "custom": "Personnalisé"
+      },
+      "filters": {
+        "type": "Type",
+        "entityType": "Type d'entité"
+      },
+      "fields": {
+        "name": "Nom",
+        "code": "Code",
+        "subject": "Objet",
+        "htmlBody": "Corps HTML",
+        "textBody": "Corps texte",
+        "entityType": "Type d'entité"
+      },
+      "empty": "Aucun modèle d'e-mail",
+      "emptyMessage": "Créez un modèle pour les e-mails système ou métier.",
+      "createSuccess": "Modèle d'e-mail \"{name}\" créé.",
+      "saveSuccess": "Modèle enregistré.",
+      "saveError": "Échec de l'enregistrement.",
+      "loadError": "Modèle introuvable.",
+      "previewError": "Échec du chargement de l'aperçu.",
+      "delete": {
+        "confirmTitle": "Supprimer le modèle d'e-mail",
+        "confirmMessage": "Supprimer \"{name}\" ? Cette action est irréversible.",
+        "success": "Modèle supprimé."
+      }
+    },
+    "workflows": {
+      "title": "Modèles de workflow",
+      "create": "Nouveau modèle",
+      "editorTitle": "Modèle de workflow",
+      "toggleActive": "Activer / Désactiver",
+      "toggleSuccess": "Le modèle « {name} » est maintenant {state}.",
+      "addStep": "Ajouter une étape",
+      "stepsTitle": "Étapes",
+      "status": {
+        "active": "Actif",
+        "inactive": "Inactif"
+      },
+      "columns": {
+        "name": "Nom",
+        "code": "Code",
+        "entityType": "Type d'entité",
+        "steps": "Étapes",
+        "status": "Statut"
+      },
+      "filters": {
+        "search": "Recherche",
+        "entityType": "Type d'entité",
+        "status": "Statut"
+      },
+      "fields": {
+        "name": "Nom",
+        "code": "Code",
+        "entityType": "Type d'entité",
+        "description": "Description",
+        "active": "Actif"
+      },
+      "empty": "Aucun modèle de workflow",
+      "emptyMessage": "Créez un modèle de workflow pour définir des chaînes d'approbation.",
+      "createSuccess": "Modèle de workflow créé.",
+      "saveSuccess": "Modèle de workflow enregistré.",
+      "saveError": "Échec de l'enregistrement du modèle de workflow.",
+      "loadError": "Modèle de workflow introuvable.",
+      "delete": {
+        "confirmTitle": "Supprimer le modèle de workflow",
+        "confirmMessage": "Supprimer « {name} » ? Cette action est irréversible.",
+        "success": "Modèle de workflow supprimé.",
+        "inUse": "Ce modèle a des instances de workflow actives et ne peut pas être supprimé."
+      },
+      "stepDialog": {
+        "title": "Étape du workflow",
+        "stepName": "Nom de l'étape",
+        "approverRole": "Rôle approbateur",
+        "timeoutHours": "Délai (heures)",
+        "escalationRole": "Rôle d'escalade",
+        "condition": "Condition (SpEL, optionnel)"
+      }
+    },
+    "members": {
+      "sections": {
+        "identity": "Identite",
+        "access": "Acces"
+      },
+      "title": "Membres",
+      "invite": "Inviter un membre",
+      "invite.success": "Invitation envoyee a {email}",
+      "invite.duplicate": "Cet email a deja ete invite",
+      "invite.error": "Echec de l'envoi de l'invitation",
+      "emptyTitle": "Aucun membre trouve",
+      "empty": "Aucun membre trouve. Invitez votre premier membre d'equipe.",
+      "fields": {
+        "firstName": "Prenom",
+        "lastName": "Nom",
+        "email": "Email",
+        "displayName": "Nom affiche",
+        "roles": "Roles",
+        "status": "Statut",
+        "lastLoginAt": "Derniere connexion",
+        "message": "Message (optionnel)"
+      },
+      "columns": {
+        "name": "Nom",
+        "email": "Email",
+        "role": "Role",
+        "status": "Statut",
+        "lastActivity": "Derniere activite",
+        "joined": "Inscrit"
+      },
+      "filters": {
+        "status": "Statut",
+        "role": "Role"
+      },
+      "status": {
+        "active": "Actif",
+        "invited": "Invite",
+        "suspended": "Suspendu"
+      },
+      "actions": {
+        "viewDetail": "Voir le detail",
+        "deactivate": "Desactiver",
+        "deactivate.success": "Membre desactive",
+        "deactivateSelected": "Desactiver la selection",
+        "deactivateSelected.success": "{count, plural, =0 {Aucun membre désactivé.} one {1 membre désactivé.} other {# membres désactivés.}}",
+        "reactivate": "Reactiver",
+        "reactivate.success": "Membre reactive",
+        "resendInvitation": "Renvoyer l'invitation",
+        "resendInvitation.success": "Invitation renvoyee",
+        "remove": "Supprimer",
+        "remove.success": "Membre supprime"
+      },
+      "deactivate": {
+        "confirm": {
+          "title": "Desactiver le membre",
+          "message": "Cela suspendra l'acces de {name}. Il pourra etre reactive plus tard."
+        },
+        "bulkConfirm": {
+          "title": "Desactiver les membres",
+          "message": "Cela suspendra l'accès pour {count, plural, one {1 membre sélectionné.} other {# membres sélectionnés.}}"
+        }
+      },
+      "remove": {
+        "confirm": {
+          "title": "Supprimer le membre",
+          "message": "Cela supprimera definitivement {name} de ce tenant."
+        }
+      },
+      "detail": {
+        "title": "Profil du membre",
+        "back": "Retour aux membres",
+        "joined": "Inscrit",
+        "lastActivity": "Derniere activite",
+        "roles": {
+          "title": "Roles assignes",
+          "edit": "Modifier les roles",
+          "save": "Enregistrer les roles",
+          "saved": "Roles mis a jour",
+          "saveError": "Echec de la mise a jour des roles",
+          "system": "Role systeme (non supprimable)"
+        },
+        "actions": {
+          "title": "Actions",
+          "deactivate": "Desactiver le membre",
+          "deactivateConfirm": "Suspendre l'acces de {name} ?",
+          "reactivate": "Reactiver le membre",
+          "resend": "Renvoyer l'invitation",
+          "remove": "Supprimer le membre",
+          "removeConfirm": "Supprimer {name} de ce tenant ?",
+          "updateError": "Echec de l'action. Veuillez reessayer."
+        },
+        "email": {
+          "copied": "Email copie dans le presse-papiers",
+          "copyError": "Impossible de copier l'email"
+        }
+      },
+      "validation": {
+        "emailRequired": "L'email est obligatoire",
+        "emailInvalid": "Entrez un email valide",
+        "roleRequired": "Le role est obligatoire",
+        "messageMaxLength": "Le message doit contenir 500 caracteres maximum"
+      }
+    },
+    "subscriptions": {
+      "title": "Abonnements",
+      "subtitle": "Consultez l'utilisation du forfait et les options de mise à niveau.",
+      "currentPlan": "Forfait actuel",
+      "usage": "Utilisation",
+      "included": "Inclus :",
+      "upgrade": {
+        "title": "Besoin de plus ?",
+        "description": "Passez à un forfait supérieur pour débloquer les utilisateurs illimités, tous les domaines et le support prioritaire.",
+        "cta": "Contacter les ventes",
+        "comingSoon": "Gestion des abonnements bientôt disponible"
+      }
+    },
+    "roles": {
+      "title": "Roles",
+      "create": "Nouveau role",
+      "create.success": "Role '{name}' cree",
+      "sections": {
+        "permissions": "Permissions"
+      },
+      "fields": {
+        "roleCode": "Code du role",
+        "roleCodePlaceholder": "ex. directeur-commercial",
+        "roleCodeHint": "Lettres minuscules, chiffres et tirets uniquement. Ne peut pas etre modifie apres creation.",
+        "name": "Nom",
+        "namePlaceholder": "ex. Directeur commercial",
+        "description": "Description",
+        "descriptionPlaceholder": "Description facultative",
+        "isSystem": "Role systeme",
+        "priority": "Priorite",
+        "permissions": "Permissions"
+      },
+      "columns": {
+        "name": "Nom",
+        "description": "Description",
+        "type": "Type",
+        "members": "Membres",
+        "priority": "Priorite"
+      },
+      "filters": {
+        "type": "Type"
+      },
+      "type": {
+        "system": "Systeme",
+        "custom": "Personnalise"
+      },
+      "delete": {
+        "confirm": {
+          "title": "Supprimer le role",
+          "message": "Ce role a {count} membres. Ils perdront toutes les permissions accordees par ce role.",
+          "messageEmpty": "Voulez-vous vraiment supprimer le role \"{name}\" ? Cette action est irreversible."
+        },
+        "hasMembers": "Impossible de supprimer un role avec des membres assignes. Reassignez les membres d'abord."
+      },
+      "validation": {
+        "nameRequired": "Le nom est obligatoire",
+        "nameMaxLength": "Le nom doit contenir 100 caracteres maximum",
+        "codeRequired": "Le code du role est obligatoire",
+        "codeKebabCase": "Le code doit etre en minuscules avec des tirets (ex. directeur-commercial)",
+        "codeConflict": "Un role avec ce code existe deja",
+        "descriptionMaxLength": "La description doit contenir 500 caracteres maximum"
+      },
+      "detail": {
+        "title": "Detail du role",
+        "systemBanner": "Les roles systeme ne peuvent pas etre modifies",
+        "permissions": {
+          "title": "Permissions",
+          "count": "{count} permissions selectionnees",
+          "selectAll": "Tout selectionner",
+          "clear": "Effacer",
+          "search": "Rechercher des permissions..."
+        },
+        "members": {
+          "title": "Membres du role",
+          "add": "Ajouter des membres",
+          "remove": "Retirer",
+          "search": "Rechercher des membres...",
+          "loading": "Chargement des membres…",
+          "empty": "Aucun membre assigne a ce role.",
+          "removeError": "Echec lors du retrait du membre",
+          "addError": "Echec lors de l'ajout des membres",
+          "columns": {
+            "email": "Email",
+            "displayName": "Nom affiche",
+            "status": "Statut",
+            "joined": "Adhesion"
+          },
+          "pagination": {
+            "previous": "Precedent",
+            "next": "Suivant",
+            "page": "Page {current} sur {total}"
+          },
+          "removeConfirm": {
+            "title": "Retirer le membre",
+            "message": "Voulez-vous vraiment retirer ce membre du role ?"
+          },
+          "addDialog": {
+            "title": "Ajouter des membres au role",
+            "subtitle": "Selectionnez les membres a ajouter a ce role.",
+            "search": "Rechercher des membres…",
+            "noCandidates": "Tous les membres sont deja assignes a ce role.",
+            "noResults": "Aucun membre ne correspond a votre recherche.",
+            "confirm": "Ajouter la selection",
+            "confirmCount": "Ajouter la selection ({count})"
+          }
+        },
+        "save": "Enregistrer le role",
+        "save.success": "Role '{name}' mis a jour"
+      }
+    },
+    "domains": {
+      "title": "Activation des domaines",
+      "subtitle": "Activez ou desactivez les domaines pour votre organisation. Les domaines desactives sont masques de la navigation et leurs permissions sont revoquees.",
+      "entities": "{count} entites",
+      "active": "Actif",
+      "inactive": "Inactif",
+      "since": "Depuis le {date}",
+      "locked": "Ce domaine est obligatoire et ne peut pas etre desactive",
+      "activate": {
+        "success": "{name} a ete active"
+      },
+      "deactivate": {
+        "confirm": {
+          "title": "Desactiver {name} ?",
+          "message": "Desactiver {name} le masquera de la navigation et revoquera les permissions associees pour tous les utilisateurs.",
+          "confirmLabel": "Desactiver"
+        },
+        "success": "{name} a ete desactive"
+      },
+      "readOnlyTooltip": "Vous n'avez pas la permission de modifier l'activation du domaine.",
+      "empty": "Aucun domaine disponible. Contactez le support.",
+      "loading": "Chargement des domaines...",
+      "error": "Echec du chargement des domaines.",
+      "toggleError": "Echec de la mise a jour de l'activation du domaine."
+    }
+  },
+  "scheduling": {
+    "jobs": {
+      "email-digest": "Résumé par e-mail",
+      "overdue-alert": "Alerte de retard",
+      "session-cleanup": "Nettoyage des sessions",
+      "audit-archive": "Archivage d'audit",
+      "temp-file-cleanup": "Nettoyage des fichiers temporaires"
+    },
+    "status": {
+      "RUNNING": "En cours",
+      "SUCCESS": "Succès",
+      "FAILED": "Échoué"
+    }
+  },
+  "appSettings": {
+    "subtitle": "Configurer les options de l'application pour le tenant",
+    "tabs": {
+      "general": "General",
+      "localization": "Localisation",
+      "branding": "Image de marque"
+    },
+    "general": {
+      "title": "General",
+      "tenantName": "Nom de l'organisation",
+      "tenantName.hint": "Affiché dans toute la plateforme",
+      "timezone": "Fuseau horaire",
+      "contactEmail": "Email de contact",
+      "supportEmail": "Email de support",
+      "save": "Enregistrer les parametres generaux",
+      "save.success": "Parametres generaux mis a jour",
+      "save.error": "Echec de la mise a jour des parametres generaux"
+    },
+    "localization": {
+      "title": "Localisation",
+      "defaultLocale": "Langue par defaut",
+      "supportedLocales": "Langues prises en charge",
+      "supportedLocalesMustIncludeDefault": "Les langues prises en charge doivent inclure la langue par defaut.",
+      "defaultCurrency": "Devise par defaut",
+      "dateFormat": "Format de date",
+      "dateFormat.preview": "Apercu : {value}",
+      "numberFormat": "Format des nombres",
+      "numberFormat.preview": "Apercu : {value}",
+      "save": "Enregistrer les parametres de localisation",
+      "save.success": "Parametres de localisation mis a jour",
+      "save.error": "Echec de la mise a jour des parametres de localisation"
+    },
+    "branding": {
+      "title": "Image de marque",
+      "displayName": "Nom d'affichage",
+      "displayName.hint": "Affiché dans la barre latérale et le titre du navigateur",
+      "primaryColor": "Couleur principale",
+      "primaryColor.default": "Par défaut",
+      "primaryColor.reset": "Réinitialiser",
+      "primaryColor.preview": "Aperçu",
+      "logo": "Logo",
+      "logo.hint": "PNG, JPG ou SVG. Max 2 Mo.",
+      "logo.change": "Changer",
+      "logo.remove": "Supprimer",
+      "favicon": "Favicon",
+      "favicon.hint": "PNG, ICO ou SVG. Max 500 Ko.",
+      "save": "Enregistrer l'image de marque",
+      "save.success": "Image de marque mise à jour",
+      "save.error": "Échec de la mise à jour de l'image de marque"
+    }
+  },
+  "userSettings": {
+    "subtitle": "Gérer votre profil, préférences et sécurité",
+    "tabs": {
+      "profile": "Profil",
+      "preferences": "Préférences",
+      "security": "Sécurité",
+      "notifications": "Notifications"
+    },
+    "profile": {
+      "title": "Profil",
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "displayName": "Nom d'affichage",
+      "displayName.hint": "Affiché à la place de votre prénom et nom",
+      "phone": "Téléphone",
+      "email": "E-mail",
+      "email.hint": "Géré par votre fournisseur d'identité",
+      "save": "Enregistrer le profil",
+      "save.success": "Profil mis à jour",
+      "save.error": "Échec de la mise à jour du profil"
+    },
+    "preferences": {
+      "title": "Préférences",
+      "locale": "Langue",
+      "timezone": "Fuseau horaire",
+      "theme": "Thème",
+      "theme.light": "Clair",
+      "theme.dark": "Sombre",
+      "theme.system": "Système",
+      "dateFormat": "Format de date",
+      "dateFormat.preview": "Aperçu : {value}",
+      "defaultHint": "Par défaut : paramètre de l'organisation ({value})",
+      "defaultOption": "Utiliser le défaut de l'organisation",
+      "save": "Enregistrer les préférences",
+      "save.success": "Préférences mises à jour",
+      "save.error": "Échec de la mise à jour des préférences",
+      "load.error": "Échec du chargement des préférences"
+    },
+    "security": {
+      "title": "Sécurité",
+      "password": {
+        "title": "Changer le mot de passe",
+        "comingSoon": "Le changement de mot de passe sera bientôt disponible. Votre mot de passe est géré par votre fournisseur d'identité.",
+        "current": "Mot de passe actuel",
+        "new": "Nouveau mot de passe",
+        "confirm": "Confirmer le nouveau mot de passe",
+        "mismatch": "Les mots de passe ne correspondent pas",
+        "strength": {
+          "weak": "Faible",
+          "fair": "Moyen",
+          "strong": "Fort",
+          "veryStrong": "Très fort"
+        }
+      },
+      "sessions": {
+        "title": "Sessions actives",
+        "comingSoon": "La gestion des sessions arrive bientôt.",
+        "comingSoonHint": "Vous pouvez gérer vos sessions depuis votre fournisseur d'identité.",
+        "current": "Cet appareil",
+        "revoke": "Révoquer",
+        "revokeAll": "Révoquer toutes les autres sessions"
+      },
+      "twoFactor": {
+        "title": "Authentification à deux facteurs",
+        "comingSoon": "L'authentification à deux facteurs arrive bientôt"
+      }
+    },
+    "notifications": {
+      "title": "Notifications",
+      "banner": "La diffusion des notifications n'est pas encore active. Vos préférences seront appliquées lorsque les notifications seront activées pour votre organisation.",
+      "email": "Notifications par e-mail",
+      "email.hint": "Recevoir les notifications par e-mail",
+      "inApp": "Notifications dans l'application",
+      "inApp.hint": "Recevoir les notifications dans l'application",
+      "digest": "Fréquence du résumé",
+      "digest.hint": "À quelle fréquence recevoir un résumé",
+      "digest.disabled": "Activez les notifications par e-mail pour configurer le résumé",
+      "digest.none": "Aucun",
+      "digest.daily": "Quotidien",
+      "digest.weekly": "Hebdomadaire",
+      "save": "Enregistrer les préférences",
+      "save.success": "Préférences de notifications mises à jour"
+    }
+  },
+  "notifications": {
+    "bell": {
+      "title": "Notifications",
+      "ariaLabel": "Ouvrir les notifications",
+      "empty": "Aucune notification.",
+      "loading": "Chargement…",
+      "markAllRead": "Tout marquer comme lu",
+      "viewAll": "Voir tout"
+    },
+    "center": {
+      "title": "Notifications",
+      "subtitle": "Suivez les mises à jour de workflow, les affectations, les mentions et les événements système.",
+      "unread": "Non lues : {count}",
+      "loading": "Chargement des notifications...",
+      "empty": "Aucune notification ne correspond aux filtres actuels.",
+      "confirmClearOldRead": "Supprimer les notifications lues de plus de 30 jours ?",
+      "filters": {
+        "source": {
+          "label": "Source",
+          "all": "Toutes",
+          "workflow": "Workflow",
+          "assignment": "Affectation",
+          "mention": "Mention",
+          "system": "Système"
+        },
+        "status": {
+          "label": "Statut",
+          "all": "Tous",
+          "unread": "Non lues",
+          "read": "Lues"
+        },
+        "range": {
+          "label": "Période",
+          "24h": "24 heures",
+          "7d": "7 jours",
+          "30d": "30 jours",
+          "all": "Toute la période"
+        }
+      },
+      "actions": {
+        "markRead": "Marquer comme lue",
+        "markAllRead": "Tout marquer comme lu",
+        "markSelectedRead": "Marquer la sélection comme lue",
+        "clearOldRead": "Nettoyer les lues"
+      }
+    },
+    "workflow": {
+      "title": "Workflow",
+      "description": "Notifications liées aux validations et workflows."
+    },
+    "assignment": {
+      "title": "Affectation",
+      "description": "Notifications liées aux tâches et aux responsables."
+    },
+    "mention": {
+      "title": "Mention",
+      "description": "Mentions directes dans les commentaires et discussions."
+    },
+    "digest": {
+      "title": "Résumé",
+      "description": "Notifications récapitulatives périodiques."
+    }
+  },
+  "core": {
+    "search": {
+      "trigger": "Ouvrir la recherche",
+      "placeholder": "Rechercher pages, enregistrements, paramètres...",
+      "noResults": "Aucun résultat trouvé",
+      "recent": "Récents",
+      "pages": "Pages",
+      "sectionActions": "Actions",
+      "actions": {
+        "newChantier": "+ Nouveau chantier",
+        "newBc": "+ Nouveau bon de commande",
+        "newDa": "+ Nouvelle demande d'achat",
+        "newEmploye": "+ Nouvel employé",
+        "newFactureVente": "+ Nouvelle facture vente"
+      },
+      "records": "Enregistrements",
+      "loading": "Recherche en cours...",
+      "minChars": "Tapez au moins 2 caractères pour rechercher des enregistrements",
+      "clearRecent": "Effacer les récents"
+    },
+    "topbar": {
+      "notifications": "Notifications",
+      "mySettings": "Mes paramètres",
+      "appSettings": "Parametres de l'application",
+      "logout": "Se deconnecter"
+    },
+    "conversation": {
+      "title": "Conversations",
+      "toggle": "Afficher/Masquer le panneau de conversation",
+      "close": "Fermer le panneau de conversation",
+      "agent": "Agent ERP",
+      "you": "Vous",
+      "roles": {
+        "system": "Système",
+        "tool": "Outil"
+      },
+      "mode": {
+        "ask": "Question",
+        "agent": "Agent"
+      },
+      "welcome": "Posez vos questions sur cette application. Je peux vous aider à naviguer, expliquer les données et déclencher des actions.",
+      "loading": "Chargement de la conversation...",
+      "errorGeneric": "La requête de conversation a échoué.",
+      "placeholder": "Écrire un message...",
+      "send": "Envoyer",
+      "sendHint": "Entrée pour envoyer · Maj+Entrée pour une nouvelle ligne",
+      "sendInProgress": "Envoi...",
+      "newChat": "Nouvelle conversation",
+      "noHistory": "Aucune conversation",
+      "sessionDefault": "Conversation",
+      "sessionUntitled": "Conversation du {date}",
+      "pendingReply": "Compris. Le branchement des workflows agentiques est la prochaine étape.",
+      "actions": {
+        "title": "Actions proposées",
+        "empty": "Aucune action proposée pour le moment.",
+        "approve": "Approuver",
+        "reject": "Rejeter",
+        "execute": "Exécuter",
+        "status": {
+          "proposed": "Proposée",
+          "pending_approval": "En attente d'approbation",
+          "approved": "Approuvée",
+          "rejected": "Rejetée",
+          "executed": "Exécutée",
+          "failed": "Échouée"
+        }
+      }
+    },
+    "navigation": {
+      "teamAndAccess": "Équipes et accès",
+      "empty": "Aucune navigation disponible",
+      "zones": {
+        "work": "ESPACE DE TRAVAIL",
+        "administration": "ADMINISTRATION",
+        "platform": "PLATEFORME",
+        "inventory": "STOCK",
+        "finance": "FINANCE"
+      }
+    },
+    "settings": {
+      "title": "Paramètres",
+      "subtitle": "Configurer les options de l'application",
+      "tabs": {
+        "general": "Général",
+        "notifications": "Notifications",
+        "integrations": "Intégrations"
+      },
+      "sections": {
+        "general": {
+          "title": "Général",
+          "description": "Démo : les options seraient configurées ici avec les primitives nf-*."
+        },
+        "notifications": {
+          "title": "Notifications",
+          "description": "Préférences de notifications email et in-app."
+        },
+        "integrations": {
+          "title": "Intégrations",
+          "description": "Connecter des services externes."
+        }
+      },
+      "actions": {
+        "restoreDefaults": "Restaurer les valeurs par défaut",
+        "save": "Enregistrer",
+        "restoreToast": "Valeurs par défaut restaurées. Cliquez sur Enregistrer pour appliquer.",
+        "saveToast": "Paramètres enregistrés"
+      }
+    },
+    "wizard": {
+      "actions": {
+        "back": "Retour",
+        "next": "Suivant",
+        "submit": "Créer"
+      },
+      "productCreate": {
+        "title": "Nouveau produit (assistant)",
+        "steps": {
+          "basics": "Bases",
+          "pricing": "Tarification",
+          "review": "Revue"
+        },
+        "review": {
+          "title": "Revue",
+          "fields": {
+            "name": "Nom",
+            "code": "Code",
+            "price": "Prix"
+          }
+        },
+        "validation": {
+          "missingRequired": "Le nom et le code sont requis"
+        },
+        "toast": {
+          "created": "Produit \"{name}\" créé",
+          "error": "Échec de la création du produit"
+        }
+      }
+    }
+  },
+  "ai": {
+    "assistant": {
+      "title": "Assistant IA",
+      "placeholder": "Posez-moi n'importe quelle question sur la plateforme...",
+      "send": "Envoyer",
+      "typing": "Réflexion en cours...",
+      "clear": "Effacer la conversation",
+      "close": "Fermer",
+      "minimize": "Réduire",
+      "action": {
+        "approve": "Approuver",
+        "reject": "Rejeter",
+        "executed": "Exécutée",
+        "pending": "En attente d'approbation"
+      },
+      "welcome": "Bonjour ! Je suis votre assistant IA. Je peux vous aider à naviguer sur la plateforme, trouver des données et effectuer des actions. Que souhaitez-vous faire ?",
+      "error": "Une erreur s'est produite. Veuillez réessayer.",
+      "offline": "L'assistant IA est actuellement indisponible."
+    },
+    "tools": {
+      "search": {
+        "noResults": "Aucun résultat pour « {query} »",
+        "results": "{count, plural, =0 {Aucun résultat pour « {query} »} one {1 résultat pour « {query} »} other {# résultats pour « {query} »}}"
+      },
+      "navigate": {
+        "navigating": "Navigation vers {target}...",
+        "notFound": "Je n'ai pas trouvé de page correspondant à « {target} »"
+      },
+      "summarize": {
+        "notFound": "Entité introuvable"
+      },
+      "action": {
+        "proposed": "Je peux {operation} {entityType}. Veuillez vérifier et approuver :",
+        "executed": "Terminé ! {description}",
+        "rejected": "Action annulée.",
+        "noPermission": "Vous n'avez pas la permission de {operation} {entityType}"
+      },
+      "help": {
+        "noAnswer": "Je ne suis pas sûr de cela. Consultez la documentation ou contactez votre administrateur."
+      },
+      "dashboard": {
+        "noData": "Aucune donnée de tableau de bord pour cette période"
+      },
+      "list": {
+        "empty": "Aucun(e) {entityType} ne correspond à vos critères",
+        "found": "{count, plural, =0 {Aucun élément :} one {1 {entityType} trouvé :} other {# {entityType} trouvés :}}"
+      }
+    }
+  },
+  "enum": {
+    "facture": {
+      "status": {
+        "brouillon": "Brouillon",
+        "emise": "Émise",
+        "partiellement_payee": "Partiellement payée",
+        "payee": "Payée",
+        "en_litige": "En litige",
+        "avoirisee": "Avoirisée",
+        "annulee": "Annulée"
+      },
+      "type": {
+        "situation": "Situation",
+        "avance": "Avance",
+        "acompte": "Acompte",
+        "decompte_definitif": "Décompte définitif",
+        "diverse": "Diverse"
+      }
+    },
+    "marche": {
+      "status": {
+        "brouillon": "Brouillon",
+        "signe": "Signé",
+        "en_execution": "En exécution",
+        "reception_provisoire": "Réception provisoire",
+        "reception_definitive": "Réception définitive",
+        "cloture": "Clôturé",
+        "resilie": "Résilié"
+      },
+      "type": {
+        "forfait": "Prix global forfaitaire",
+        "bpu": "Bordereau de prix unitaires (BPU)",
+        "regie": "Régie",
+        "mixte": "Mixte"
+      },
+      "nature": {
+        "public": "Public (État / collectivité)",
+        "prive_grand_compte": "Privé grand compte",
+        "prive_pme": "Privé PME",
+        "particulier": "Particulier"
+      }
+    },
+    "avenant": {
+      "type": {
+        "tvx_supplementaires": "Travaux supplémentaires",
+        "prolongation_delai": "Prolongation de délai",
+        "mixte": "Mixte",
+        "adaptation_technique": "Adaptation technique",
+        "autre": "Autre"
+      },
+      "status": {
+        "brouillon": "Brouillon",
+        "propose": "Proposé",
+        "signe": "Signé",
+        "rejete": "Rejeté"
+      }
+    },
+    "caution": {
+      "type": {
+        "provisoire": "Caution provisoire",
+        "definitive": "Caution définitive",
+        "restitution_avance": "Restitution d'avance",
+        "retenue_garantie": "Retenue de garantie"
+      },
+      "status": {
+        "emise": "Émise",
+        "active": "Active",
+        "levee": "Levée",
+        "expire": "Expirée",
+        "joue": "Jouée"
+      }
+    },
+    "dgd": {
+      "status": {
+        "brouillon": "Brouillon",
+        "soumis_moa": "Soumis MOA",
+        "notifie": "Notifié",
+        "paye": "Payé",
+        "conteste": "Contesté"
+      }
+    },
+    "ordre_service": {
+      "type": {
+        "commencement": "Commencement",
+        "arret": "Arrêt",
+        "reprise": "Reprise",
+        "modification": "Modification",
+        "notification": "Notification"
+      },
+      "status": {
+        "emis": "Émis",
+        "receptionne": "Réceptionné",
+        "conteste": "Contesté",
+        "clos": "Clos"
+      }
+    },
+    "facture_marche": {
+      "status": {
+        "brouillon": "Brouillon",
+        "emise": "Émise",
+        "envoyee_moa": "Envoyée MOA",
+        "acceptee": "Acceptée",
+        "payee_partiel": "Partiellement payée",
+        "payee": "Payée",
+        "contestee": "Contestée"
+      }
+    },
+    "ao": {
+      "status": {
+        "brouillon": "Brouillon",
+        "publiee": "Publiée",
+        "cloturee": "Clôturée",
+        "attribuee": "Attribuée",
+        "infructueuse": "Infructueuse",
+        "annulee": "Annulée"
+      }
+    },
+    "bcc": {
+      "status": {
+        "recu": "Reçu",
+        "en_cours": "En cours",
+        "partiellement_facture": "Partiellement facturé",
+        "facture": "Facturé",
+        "cloture": "Clôturé",
+        "annule": "Annulé"
+      }
+    },
+    "offre": {
+      "status": {
+        "brouillon": "Brouillon",
+        "envoyee": "Envoyée",
+        "acceptee": "Acceptée",
+        "refusee": "Refusée",
+        "expiree": "Expirée",
+        "annulee": "Annulée"
+      }
+    },
+    "da": {
+      "status": {
+        "brouillon": "Brouillon",
+        "soumise": "Soumise",
+        "approuvee": "Approuvée",
+        "rejetee": "Rejetée",
+        "convertie": "Convertie"
+      }
+    },
+    "ct": {
+      "status": {
+        "brouillon": "Brouillon",
+        "signe": "Signé",
+        "en_cours": "En cours",
+        "echu": "Échu",
+        "resilie": "Résilié"
+      }
+    },
+    "bc": {
+      "status": {
+        "brouillon": "Brouillon",
+        "valide": "Validé",
+        "envoye": "Envoyé",
+        "accuse_reception": "Accusé de réception reçu",
+        "partiellement_livre": "Partiellement livré",
+        "livre": "Livré",
+        "facture": "Facturé",
+        "cloture": "Clôturé",
+        "annule": "Annulé"
+      }
+    },
+    "numbering_doc_type": {
+      "devis": "Devis",
+      "bon_commande_achat": "Bon de commande (achat)",
+      "facture_vente": "Facture client",
+      "bon_livraison": "Bon de livraison / Réception",
+      "situation_travaux": "Situation de travaux",
+      "attachement": "Attachement",
+      "contrat_sous_traitance": "Contrat de sous-traitance"
+    },
+    "failure_reason": {
+      "bad_password": "Mot de passe erroné",
+      "user_not_found": "Utilisateur inconnu",
+      "account_locked": "Compte verrouillé",
+      "mfa_failed": "MFA invalide",
+      "ip_blocked": "IP bloquée",
+      "expired_token": "Token expiré"
+    },
+    "outcome": {
+      "success": "Succès",
+      "failed": "Échec",
+      "timeout": "Délai dépassé"
+    },
+    "pointage_mode": {
+      "present": "Présent",
+      "absent": "Absent",
+      "conge": "Congé",
+      "maladie": "Maladie",
+      "formation": "Formation",
+      "autre": "Autre"
+    },
+    "gravite": {
+      "sans_arret": "Sans arrêt",
+      "avec_arret": "Avec arrêt",
+      "grave": "Grave",
+      "mortel": "Mortel"
+    },
+    "aptitude": {
+      "apte": "Apte",
+      "inapte": "Inapte",
+      "avec_restriction": "Apte avec restriction"
+    },
+    "type_visite": {
+      "embauche": "Embauche",
+      "periodique": "Périodique",
+      "reprise": "Reprise"
+    },
+    "perimetre": {
+      "livraison": "Livraison de biens",
+      "prestation": "Prestation de services",
+      "importation": "Importation",
+      "exportation": "Exportation",
+      "tous": "Tous types"
+    },
+    "etablissement_type": {
+      "siege": "Siège",
+      "filiale": "Filiale",
+      "agence": "Agence",
+      "chantier_base": "Base chantier"
+    },
+    "phase_status": {
+      "planifie": "Planifié",
+      "en_cours": "En cours",
+      "termine": "Terminé",
+      "en_retard": "En retard"
+    },
+    "forme_juridique": {
+      "sarl": "SARL",
+      "sarlau": "SARL à Associé Unique",
+      "sa": "SA",
+      "sas": "SAS",
+      "eurl": "EURL",
+      "autoentrepreneur": "Auto-entrepreneur"
+    },
+    "source": {
+      "bam": "Bank Al-Maghrib",
+      "manuel": "Manuel",
+      "api": "API"
+    },
+    "day": {
+      "mon": "Lun",
+      "tue": "Mar",
+      "wed": "Mer",
+      "thu": "Jeu",
+      "fri": "Ven",
+      "sat": "Sam",
+      "sun": "Dim"
+    },
+    "amount_source": {
+      "ht": "HT",
+      "tva": "TVA",
+      "ttc": "TTC",
+      "ras": "RAS",
+      "net_a_payer": "Net à payer",
+      "timbre": "Timbre",
+      "charge_patr": "Charges patronales",
+      "salaire_net": "Salaire net",
+      "ir": "IR"
+    },
+    "chantier": {
+      "status": {
+        "prospect": "Prospect",
+        "en_cours": "En cours",
+        "suspendu": "Suspendu",
+        "termine": "Terminé",
+        "receptionne": "Réceptionné",
+        "cloture": "Clôturé",
+        "annule": "Annulé"
+      },
+      "type": {
+        "batiment": "Bâtiment",
+        "tp": "Travaux publics",
+        "vrd": "VRD",
+        "go": "Gros œuvre",
+        "tce": "TCE",
+        "rehabilitation": "Réhabilitation"
+      }
+    },
+    "attachement": {
+      "status": {
+        "brouillon": "Brouillon",
+        "signe_moe": "Signé MOE",
+        "contresigne_moa": "Contresigné MOA",
+        "conteste": "Contesté"
+      }
+    },
+    "sous_traitance": {
+      "status": {
+        "brouillon": "Brouillon",
+        "signe": "Signé",
+        "en_cours": "En cours",
+        "termine": "Terminé",
+        "resilie": "Résilié"
+      }
+    },
+    "ff": {
+      "status": {
+        "brouillon": "Brouillon",
+        "validee": "Validée",
+        "partiellement_payee": "Partiellement payée",
+        "payee": "Payée",
+        "en_litige": "En litige",
+        "avoirisee": "Avoirisée",
+        "annulee": "Annulée"
+      }
+    },
+    "ecriture": {
+      "status": {
+        "brouillon": "Brouillon",
+        "validee": "Validée",
+        "cloturee": "Clôturée"
+      },
+      "origine": {
+        "manuelle": "Manuelle",
+        "auto_facture_client": "Auto · Facture client",
+        "auto_facture_fourn": "Auto · Facture fournisseur",
+        "auto_reglement": "Auto · Règlement",
+        "auto_paie": "Auto · Paie",
+        "auto_avoir": "Auto · Avoir",
+        "auto_situation": "Auto · Situation"
+      }
+    },
+    "duer": {
+      "status": {
+        "brouillon": "Brouillon",
+        "valide": "Validé",
+        "revision": "En révision"
+      }
+    },
+    "ppsps": {
+      "status": {
+        "brouillon": "Brouillon",
+        "valide": "Validé",
+        "revision": "En révision",
+        "applicatif": "Applicatif",
+        "archive": "Archivé"
+      }
+    },
+    "incident": {
+      "status": {
+        "declare": "Ouvert",
+        "en_investigation": "En investigation",
+        "cloture": "Clos"
+      },
+      "type": {
+        "at_travail": "Accident du travail",
+        "at_trajet": "Accident de trajet",
+        "presque_accident": "Presque accident",
+        "dommage_materiel": "Dommage matériel",
+        "mp": "Maladie professionnelle (MP)",
+        "autre": "Autre"
+      }
+    },
+    "inspection": {
+      "status": {
+        "planifiee": "Planifiée",
+        "en_cours": "En cours",
+        "terminee": "Terminée",
+        "annulee": "Annulée"
+      }
+    },
+    "formation": {
+      "status": {
+        "planifiee": "Planifiée",
+        "en_cours": "En cours",
+        "terminee": "Terminée",
+        "annulee": "Annulée"
+      }
+    },
+    "nc": {
+      "status": {
+        "ouverte": "Ouverte",
+        "en_cours": "En cours",
+        "verifiee": "Vérifiée",
+        "cloturee": "Clôturée"
+      },
+      "type": {
+        "securite": "Sécurité",
+        "qualite": "Qualité",
+        "environnement": "Environnement",
+        "reglementaire": "Réglementaire"
+      }
+    },
+    "epi": {
+      "status": {
+        "ok": "OK",
+        "a_renouveler": "À renouveler",
+        "expire": "Expiré",
+        "perdu": "Perdu / manquant"
+      },
+      "cat": {
+        "tete": "Protection tête",
+        "yeux": "Protection yeux",
+        "pieds": "Chaussures",
+        "mains": "Gants",
+        "corps": "Combinaison / gilet",
+        "respiration": "Masque / ARI",
+        "audition": "Bouchons / casque anti-bruit",
+        "chute": "Harnais anti-chute"
+      }
+    },
+    "journal_event": {
+      "type": {
+        "visite_moa": "Visite MOA",
+        "intemperie": "Intempérie",
+        "livraison": "Livraison",
+        "incident": "Incident",
+        "ordre_service": "Ordre de service",
+        "reunion": "Réunion",
+        "constat": "Constat",
+        "autre": "Autre"
+      }
+    },
+    "condition_paiement": {
+      "type": {
+        "immediat": "Immédiat",
+        "delai_simple": "Délai simple",
+        "fin_de_mois": "Fin de mois",
+        "echeances_multiples": "Échéances multiples"
+      }
+    },
+    "journal": {
+      "type": {
+        "vente": "Vente",
+        "achat": "Achat",
+        "banque": "Banque",
+        "caisse": "Caisse",
+        "operations_diverses": "Opérations diverses (OD)",
+        "nouveaux": "À nouveaux"
+      }
+    },
+    "mouvement_tresorerie": {
+      "type": {
+        "reglement_client": "Règlement client",
+        "reglement_fourn": "Règlement fournisseur",
+        "paiement_paie": "Paiement paie",
+        "virement_interne": "Virement interne",
+        "frais_bancaires": "Frais bancaires",
+        "commissions": "Commission",
+        "autre_recette": "Recette diverse",
+        "autre_depense": "Dépense diverse"
+      }
+    },
+    "devis": {
+      "status": {
+        "brouillon": "Brouillon",
+        "emis": "Émis",
+        "negociation": "Négociation",
+        "approuve": "Approuvé",
+        "perdu": "Perdu",
+        "annule": "Annulé",
+        "expire": "Expiré"
+      }
+    },
+    "metre": {
+      "status": {
+        "brouillon": "Brouillon",
+        "termine": "Terminé"
+      }
+    },
+    "ao_client": {
+      "status": {
+        "a_etudier": "À étudier",
+        "en_preparation": "En préparation",
+        "soumis": "Soumis",
+        "attribue": "Attribué",
+        "perdu": "Perdu",
+        "infructueux": "Infructueux",
+        "annule": "Annulé"
+      },
+      "type": {
+        "public": "Public",
+        "prive": "Privé"
+      }
+    },
+    "moa_type": {
+      "etat": "État",
+      "ep": "Établissement public",
+      "collectivite": "Collectivité territoriale",
+      "prive": "Privé"
+    },
+    "document_chantier": {
+      "type": {
+        "marche": "Marché",
+        "avenant": "Avenant",
+        "pv_reception": "PV de réception",
+        "plan": "Plan",
+        "photo": "Photo",
+        "bc": "Bon de commande",
+        "facture": "Facture",
+        "attestation_assurance": "Attestation d'assurance",
+        "caution_bancaire": "Caution bancaire",
+        "ppsps": "PPSPS",
+        "plan_prevention": "Plan de prévention",
+        "note_calcul": "Note de calcul",
+        "autre": "Autre"
+      }
+    },
+    "approval_entity_type": {
+      "da": "Demande d'achat",
+      "ao": "Appel d'offres (attribution)",
+      "bc": "Bon de commande",
+      "ff": "Facture fournisseur",
+      "sit": "Situation de travaux",
+      "conge": "Demande de congé",
+      "paie": "Fiche de paie (validation)",
+      "vir": "Virement interne",
+      "avn": "Avenant marché",
+      "os": "Ordre de service",
+      "facture_client": "Facture client",
+      "note_frais": "Note de frais",
+      "contrat_st": "Contrat sous-traitance"
+    },
+    "avoir": {
+      "status": {
+        "brouillon": "Brouillon",
+        "emis": "Émis",
+        "impute": "Imputé",
+        "rembourse": "Remboursé",
+        "annule": "Annulé"
+      }
+    },
+    "situation": {
+      "status": {
+        "brouillon": "Brouillon",
+        "soumise": "Soumise",
+        "validee_moa": "Validée MOA",
+        "facturee": "Facturée",
+        "payee": "Payée",
+        "rejetee": "Rejetée"
+      }
+    }
+  },
+  "i18n": {
+    "hijri": {
+      "toggle": {
+        "label": "Afficher dates hijri en parallèle",
+        "tooltip": "Affiche la date hégire à côté de la date grégorienne"
+      }
+    },
+    "numerals": {
+      "toggle": {
+        "label": "Chiffres arabes",
+        "tooltip": "Afficher les chiffres en écriture arabe (٠-٩) au lieu des chiffres occidentaux (0-9)"
+      }
+    }
+  }
+}

@@ -1,0 +1,88 @@
+<nf-page-shell scroll>
+  <nf-page-header
+    [config]="{
+      title: 'financeRound2.caissesChantier.title',
+      subtitle: 'financeRound2.caissesChantier.subtitle'
+    }"
+  ></nf-page-header>
+
+  <div class="f8">
+    <div class="f8__toolbar">
+      <label class="f8__lbl">
+        <span>{{ 'financeRound2.caissesChantier.caisse' | translate }}</span>
+        <select [ngModel]="caisseId()" (ngModelChange)="pickCaisse($event)">
+          @for (c of caisses(); track c.id) {
+            <option [value]="c.id">{{ c.chantierLabel }} ({{ c.soldeActuel | mad:2 }})</option>
+          }
+        </select>
+      </label>
+    </div>
+
+    <section class="f8__card">
+      <h2 class="f8__h">{{ 'financeRound2.caissesChantier.mouvements' | translate }}</h2>
+      <table class="f8__table">
+        <thead>
+          <tr>
+            <th>{{ 'financeRound2.caissesChantier.colDate' | translate }}</th>
+            <th>{{ 'financeRound2.caissesChantier.colType' | translate }}</th>
+            <th class="f8__num">{{ 'financeRound2.caissesChantier.colMontant' | translate }}</th>
+            <th>{{ 'financeRound2.caissesChantier.colDesc' | translate }}</th>
+            <th>{{ 'financeRound2.caissesChantier.colJustificatif' | translate }}</th>
+            <th>{{ 'financeRound2.caissesChantier.colStatus' | translate }}</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (m of mouvements(); track m.id) {
+            <tr>
+              <td>{{ m.date }}</td>
+              <td>{{ m.type }}</td>
+              <td class="f8__num">{{ m.montant | mad:2 }}</td>
+              <td>{{ m.description }}</td>
+              <td>
+                @if (m.photoTicketUrl) {
+                  <button type="button" class="f8__link" (click)="openJustificatif(m.photoTicketUrl)">
+                    {{ 'financeRound2.caissesChantier.viewJustificatif' | translate }}
+                  </button>
+                }
+              </td>
+              <td>{{ m.status }}</td>
+              <td>
+                @if (canValider(m)) {
+                  <nf-button variant="primary" class="f8__btn f8__btn--primary" (clicked)="valider(m)"  [disabled]="validatingId() === m.id">
+                    {{ 'financeRound2.caissesChantier.valider' | translate }}
+                  </nf-button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <section class="f8__card">
+      <h2 class="f8__h">{{ 'financeRound2.caissesChantier.saisie' | translate }}</h2>
+      <div class="f8__toolbar">
+        <select [ngModel]="formType()" (ngModelChange)="formType.set($event)">
+          <option value="DEPENSE">DEPENSE</option>
+          <option value="AVANCE_RECUE">AVANCE_RECUE</option>
+        </select>
+        <input type="number" [ngModel]="formMontant()" (ngModelChange)="formMontant.set(+$event || 0)" />
+        <input
+          type="text"
+          [placeholder]="'financeRound2.caissesChantier.descPh' | translate"
+          [ngModel]="formDesc()"
+          (ngModelChange)="formDesc.set($event)"
+        />
+        <input
+          type="file"
+          accept="image/*,application/pdf"
+          (change)="onPhotoSelected($event)"
+        />
+        <nf-button variant="primary" class="f8__btn f8__btn--primary" (clicked)="submit()">
+          {{ 'financeRound2.caissesChantier.add' | translate }}
+        </nf-button>
+      </div>
+    </section>
+  </div>
+</nf-page-shell>

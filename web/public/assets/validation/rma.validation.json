@@ -1,0 +1,23 @@
+{
+  "entity": "Rma",
+  "fields": {
+    "rmaNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "reason": {
+      "maxLength": 120
+    },
+    "returnType": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "entity": "RfqLine",
+  "fields": {
+    "rfqId": {
+      "required": true
+    },
+    "lineNumber": {
+      "required": true,
+      "min": 1
+    },
+    "itemId": {
+      "required": true
+    },
+    "description": {
+      "maxLength": 500
+    },
+    "quantity": {
+      "required": true,
+      "min": 0
+    },
+    "specifications": {
+      "maxLength": 4000
+    }
+  }
+}

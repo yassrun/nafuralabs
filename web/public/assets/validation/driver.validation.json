@@ -1,0 +1,32 @@
+{
+  "entity": "Driver",
+  "fields": {
+    "driverCode": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "firstName": {
+      "maxLength": 120
+    },
+    "lastName": {
+      "maxLength": 120
+    },
+    "licenseNumber": {
+      "maxLength": 60
+    },
+    "licenseExpiry": {
+      "maxLength": 120
+    },
+    "phone": {
+      "maxLength": 50
+    },
+    "email": {
+      "maxLength": 255
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

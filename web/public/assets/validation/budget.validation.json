@@ -1,0 +1,32 @@
+{
+  "entity": "Budget",
+  "fields": {
+    "code": {
+      "required": true,
+      "maxLength": 50,
+      "unique": true
+    },
+    "name": {
+      "required": true,
+      "maxLength": 200
+    },
+    "fiscalYearId": {
+      "required": true
+    },
+    "budgetType": {
+      "required": true,
+      "maxLength": 30
+    },
+    "currencyId": {
+      "required": true
+    },
+    "totalAmount": {
+      "required": true,
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

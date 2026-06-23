@@ -1,0 +1,23 @@
+{
+  "entity": "PackingSession",
+  "fields": {
+    "sessionNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "totalItems": {
+      "maxLength": 120
+    },
+    "totalPackages": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

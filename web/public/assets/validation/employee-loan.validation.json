@@ -1,0 +1,32 @@
+{
+  "entity": "EmployeeLoan",
+  "fields": {
+    "loanNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "loanType": {
+      "maxLength": 120
+    },
+    "amount": {
+      "min": 0
+    },
+    "interestRate": {
+      "min": 0
+    },
+    "tenure": {
+      "min": 0
+    },
+    "emiAmount": {
+      "min": 0
+    },
+    "outstandingBalance": {
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

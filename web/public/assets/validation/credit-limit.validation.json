@@ -1,0 +1,27 @@
+{
+  "entity": "CreditLimit",
+  "fields": {
+    "customerId": {
+      "required": true
+    },
+    "currentLimit": {
+      "min": 0
+    },
+    "approvedLimit": {
+      "min": 0
+    },
+    "usedAmount": {
+      "min": 0
+    },
+    "availableAmount": {
+      "min": 0
+    },
+    "approvedBy": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

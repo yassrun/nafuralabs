@@ -1,0 +1,75 @@
+{
+  "zones": {
+    "inventory": "المخزون",
+    "finance": "المالية",
+    "sales": "المبيعات",
+    "procurement": "المشتريات",
+    "hr": "الموارد البشرية",
+    "directory": "الدليل"
+  },
+  "item": {
+    "navigation": {
+      "items": "الأصناف",
+      "barcodes": "الباركود",
+      "itemCategories": "فئات الأصناف",
+      "itemTypes": "أنواع الأصناف"
+    },
+    "item": {
+      "title": "الأصناف",
+      "detailTitle": "تفاصيل الصنف",
+      "newTitle": "صنف جديد",
+      "fields": {
+        "code": "الرمز",
+        "name": "الاسم",
+        "description": "الوصف",
+        "type": "النوع",
+        "itemTypeId": "معرّف نوع الصنف",
+        "itemCategoryId": "معرّف فئة الصنف",
+        "unitOfMeasureId": "معرّف وحدة القياس",
+        "baseUnit": "الوحدة الأساسية",
+        "sku": "SKU",
+        "isActive": "نشط"
+      },
+      "sections": {
+        "classification": "التصنيف",
+        "measurement": "القياس"
+      }
+    },
+    "barcode": {
+      "title": "الباركود",
+      "detailTitle": "تفاصيل الباركود",
+      "newTitle": "باركود جديد",
+      "fields": {
+        "itemId": "معرّف الصنف",
+        "value": "القيمة",
+        "type": "النوع"
+      },
+      "sections": {}
+    },
+    "itemCategory": {
+      "title": "فئات الأصناف",
+      "detailTitle": "تفاصيل فئة الصنف",
+      "newTitle": "فئة صنف جديدة",
+      "fields": {
+        "parentId": "معرّف الأصل",
+        "code": "الرمز",
+        "name": "الاسم",
+        "description": "الوصف",
+        "isActive": "نشط"
+      },
+      "sections": {}
+    },
+    "itemType": {
+      "title": "أنواع الأصناف",
+      "detailTitle": "تفاصيل نوع الصنف",
+      "newTitle": "نوع صنف جديد",
+      "fields": {
+        "code": "الرمز",
+        "name": "الاسم",
+        "description": "الوصف",
+        "isActive": "نشط"
+      },
+      "sections": {}
+    }
+  }
+}

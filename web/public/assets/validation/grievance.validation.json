@@ -1,0 +1,20 @@
+{
+  "entity": "Grievance",
+  "fields": {
+    "grievanceNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "description": {
+      "maxLength": 2000
+    },
+    "resolution": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

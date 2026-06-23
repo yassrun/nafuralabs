@@ -1,0 +1,76 @@
+{
+  "geo": {
+    "navigation": {
+      "addresses": "Addresses",
+      "cities": "Cities",
+      "countries": "Countries",
+      "postalCodes": "Postal Codes",
+      "regions": "Regions"
+    },
+    "address": {
+      "title": "Addresses",
+      "detailTitle": "Address Details",
+      "newTitle": "New Address",
+      "fields": {
+        "line1": "line1",
+        "line2": "line2",
+        "countryId": "country Id",
+        "regionId": "region Id",
+        "cityId": "city Id",
+        "postalCodeId": "postal Code Id",
+        "description": "description",
+        "postalCode": "postal Code"
+      },
+      "sections": {}
+    },
+    "city": {
+      "title": "Cities",
+      "detailTitle": "City Details",
+      "newTitle": "New City",
+      "fields": {
+        "countryId": "country Id",
+        "regionId": "region Id",
+        "code": "code",
+        "name": "name",
+        "description": "description",
+        "isActive": "is Active"
+      },
+      "sections": {}
+    },
+    "country": {
+      "title": "Countries",
+      "detailTitle": "Country Details",
+      "newTitle": "New Country",
+      "fields": {
+        "code": "code",
+        "name": "name",
+        "isActive": "is Active"
+      },
+      "sections": {}
+    },
+    "postalCode": {
+      "title": "Postal Codes",
+      "detailTitle": "Postal Code Details",
+      "newTitle": "New Postal Code",
+      "fields": {
+        "code": "code",
+        "name": "name",
+        "cityId": "city Id"
+      },
+      "sections": {}
+    },
+    "region": {
+      "title": "Regions",
+      "detailTitle": "Region Details",
+      "newTitle": "New Region",
+      "fields": {
+        "countryId": "country Id",
+        "code": "code",
+        "name": "name",
+        "description": "description",
+        "isActive": "is Active"
+      },
+      "sections": {}
+    }
+  }
+}

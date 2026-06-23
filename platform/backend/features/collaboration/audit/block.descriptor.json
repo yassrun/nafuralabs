@@ -1,0 +1,16 @@
+{
+  "id": "audit",
+  "name": "Audit",
+  "description": "Audit trail",
+  "type": "feature",
+  "layer": "feature",
+  "group": "collaboration",
+  "provides": {
+    "backend": {
+      "gradle": ":platform:features:collaboration:audit",
+      "packages": ["ma.nafura.platform.collaboration.audit"]
+    }
+  },
+  "requires": { "core": ["identity", "tenancy"], "features": [] },
+  "manifest": { "key": "audit" }
+}

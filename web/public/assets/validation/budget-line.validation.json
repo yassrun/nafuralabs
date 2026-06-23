@@ -1,0 +1,24 @@
+{
+  "entity": "BudgetLine",
+  "fields": {
+    "budgetId": {
+      "required": true
+    },
+    "accountId": {
+      "required": true
+    },
+    "fiscalPeriodId": {
+      "required": true
+    },
+    "plannedAmount": {
+      "required": true,
+      "min": 0
+    },
+    "actualAmount": {
+      "min": 0
+    },
+    "committedAmount": {
+      "min": 0
+    }
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "entity": "Escalation",
+  "fields": {
+    "escalationNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "workflowInstanceId": {
+      "required": true
+    },
+    "taskId": {
+      "required": true
+    },
+    "originalAssignee": {
+      "required": true,
+      "maxLength": 120
+    },
+    "escalatedTo": {
+      "required": true,
+      "maxLength": 120
+    },
+    "escalationDate": {
+      "required": true
+    },
+    "reason": {
+      "required": true,
+      "maxLength": 2000
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

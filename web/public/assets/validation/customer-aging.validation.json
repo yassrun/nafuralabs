@@ -1,0 +1,8 @@
+{
+  "entity": "CustomerAging",
+  "fields": {
+    "customerId": {
+      "required": true
+    }
+  }
+}

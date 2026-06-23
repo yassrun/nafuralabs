@@ -1,0 +1,32 @@
+{
+  "entity": "FeedbackSurvey",
+  "fields": {
+    "surveyNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "customerId": {
+      "required": true
+    },
+    "surveyType": {
+      "required": true,
+      "maxLength": 30
+    },
+    "npsScore": {
+      "min": 0,
+      "max": 10
+    },
+    "csatScore": {
+      "min": 1,
+      "max": 5
+    },
+    "comments": {
+      "maxLength": 2000
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

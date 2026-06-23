@@ -1,0 +1,21 @@
+{
+  "entity": "StockBalance",
+  "fields": {
+    "warehouseId": {
+      "required": true
+    },
+    "itemId": {
+      "required": true
+    },
+    "quantity": {
+      "required": true,
+      "min": 0
+    },
+    "reservedQuantity": {
+      "min": 0
+    },
+    "availableQuantity": {
+      "min": 0
+    }
+  }
+}

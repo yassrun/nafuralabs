@@ -1,0 +1,252 @@
+file,line,column,kind,raw_string,suggested_key,context
+app/applications/erp/pages/administration/audit-log/erp-audit-log.page.ts,52,34,inline_template_text,Total,administration.audit-log.text.total,>…<
+app/applications/erp/pages/administration/audit-log/erp-audit-log.page.ts,66,33,inline_template_text,entrées,administration.audit-log.text.entrees,>…<
+app/applications/erp/pages/administration/audit-log/erp-audit-log.page.ts,76,45,inline_template_attr,"Utilisateur, entité, ref, détail…",administration.audit-log.label.utilisateur-entite-ref-detail,placeholder=…
+app/applications/erp/pages/administration/audit-log/erp-audit-log.page.ts,80,27,inline_template_text,Tous utilisateurs,administration.audit-log.text.tous-utilisateurs,>…<
+app/applications/erp/pages/administration/audit-log/erp-audit-log.page.ts,85,27,inline_template_text,Toutes actions,administration.audit-log.text.toutes-actions,>…<
+app/applications/erp/pages/administration/audit-log/erp-audit-log.page.ts,90,27,inline_template_text,Tous types,administration.audit-log.text.tous-types,>…<
+app/applications/erp/pages/administration/audit-log/erp-audit-log.page.ts,104,38,inline_template_text,/  total,administration.audit-log.text.total,>…<
+app/applications/erp/pages/administration/audit-log/erp-audit-log.page.ts,117,16,inline_template_text,Utilisateur,administration.audit-log.text.utilisateur,>…<
+app/applications/erp/pages/administration/audit-log/erp-audit-log.page.ts,119,16,inline_template_text,Type entité,administration.audit-log.text.type-entite,>…<
+app/applications/erp/pages/administration/audit-log/erp-audit-log.page.ts,120,16,inline_template_text,Référence,administration.audit-log.text.reference,>…<
+app/applications/erp/pages/administration/audit-log/erp-audit-log.page.ts,121,16,inline_template_text,Détail,administration.audit-log.text.detail,>…<
+app/applications/erp/pages/administration/audit-log/erp-audit-log.page.ts,141,26,inline_template_text,Détail complet,administration.audit-log.text.detail-complet,>…<
+app/applications/erp/pages/administration/audit-log/erp-audit-log.page.ts,147,48,inline_template_text,Aucune entrée ne correspond aux filtres.,administration.audit-log.text.aucune-entree-ne-correspond,>…<
+app/applications/erp/pages/administration/audit-log/erp-audit-log.page.ts,156,96,inline_template_text,← Précédente,administration.audit-log.text.precedente,>…<
+app/applications/erp/pages/administration/banques/banques.page.ts,33,54,inline_template_text,✓ Banque enregistrée,administration.banques.text.banque-enregistree,>…<
+app/applications/erp/pages/administration/banques/banques.page.ts,34,56,inline_template_text,✓ Banque supprimée,administration.banques.text.banque-supprimee,>…<
+app/applications/erp/pages/administration/banques/banques.page.ts,46,37,inline_template_text,Ajouter une banque au référentiel,administration.banques.text.ajouter-une-banque-au,>…<
+app/applications/erp/pages/administration/banques/banques.page.ts,57,23,inline_template_text,SWIFT / BIC (8 car.) *,administration.banques.text.swift-bic-car,>…<
+app/applications/erp/pages/administration/banques/banques.page.ts,90,83,inline_template_text,Annuler,administration.banques.text.annuler,>…<
+app/applications/erp/pages/administration/banques/banques.page.ts,91,79,inline_template_text,Créer la banque,administration.banques.text.creer-la-banque,>…<
+app/applications/erp/pages/administration/banques/banques.page.ts,141,84,inline_template_text,Éditer,administration.banques.text.editer,>…<
+app/applications/erp/pages/administration/demo-reset/demo-reset.page.ts,32,16,inline_template_text,Société modèle : SOMACOM BTP SARL,administration.demo-reset.text.societe-modele-somacom-btp,>…<
+app/applications/erp/pages/administration/demo-reset/demo-reset.page.ts,34,15,inline_template_text,Périmètre démo : 6 chantiers actifs · 12 marchés (4 publics + 8 privés) · 15 employés · 8 fournisseurs · HSE complet,administration.demo-reset.text.perimetre-demo-chantiers-actifs,>…<
+app/applications/erp/pages/administration/demo-reset/demo-reset.page.ts,43,18,inline_template_text,Réinitialiser toutes les données,administration.demo-reset.text.reinitialiser-toutes-les-donnees,>…<
+app/applications/erp/pages/administration/demo-reset/demo-reset.page.ts,44,17,inline_template_text,Recharge le seed demo complet. Efface toutes les modifications locales (localStorage). Idéal avant une démo client.,administration.demo-reset.text.recharge-le-seed-demo,>…<
+app/applications/erp/pages/administration/demo-reset/demo-reset.page.ts,54,18,inline_template_text,Exporter l'état actuel,administration.demo-reset.text.exporter-etat-actuel,>…<
+app/applications/erp/pages/administration/demo-reset/demo-reset.page.ts,55,17,inline_template_text,Télécharge un snapshot JSON de toutes les données mockées (utile pour backup ou partage équipe).,administration.demo-reset.text.telecharge-un-snapshot-json,>…<
+app/applications/erp/pages/administration/demo-reset/demo-reset.page.ts,70,14,inline_template_text,Contenu du seed démo,administration.demo-reset.text.contenu-du-seed-demo,>…<
+app/applications/erp/pages/administration/demo-reset/demo-reset.page.ts,73,75,inline_template_text,Marchés BTP,administration.demo-reset.text.marches-btp,>…<
+app/applications/erp/pages/administration/demo-reset/demo-reset.page.ts,77,75,inline_template_text,Employés,administration.demo-reset.text.employes,>…<
+app/applications/erp/pages/administration/demo-reset/demo-reset.page.ts,79,74,inline_template_text,Approbations en cours,administration.demo-reset.text.approbations-en-cours,>…<
+app/applications/erp/pages/administration/demo-reset/demo-reset.page.ts,81,74,inline_template_text,EPI à surveiller,administration.demo-reset.text.epi-surveiller,>…<
+app/applications/erp/pages/administration/erp-roles/erp-roles.page.ts,63,61,inline_template_text,✓ Rôle enregistré,administration.erp-roles.text.role-enregistre,>…<
+app/applications/erp/pages/administration/erp-roles/erp-roles.page.ts,64,61,inline_template_text,↺ Rôle système restauré aux valeurs seed,administration.erp-roles.text.role-systeme-restaure-aux,>…<
+app/applications/erp/pages/administration/erp-roles/erp-roles.page.ts,65,63,inline_template_text,✓ Rôle supprimé,administration.erp-roles.text.role-supprime,>…<
+app/applications/erp/pages/administration/erp-roles/erp-roles.page.ts,71,38,inline_template_text,Rôles (),administration.erp-roles.text.roles,>…<
+app/applications/erp/pages/administration/erp-roles/erp-roles.page.ts,88,80,inline_template_text,Annuler,administration.erp-roles.text.annuler,>…<
+app/applications/erp/pages/administration/erp-roles/erp-roles.page.ts,89,99,inline_template_text,Créer,administration.erp-roles.text.creer,>…<
+app/applications/erp/pages/administration/erp-roles/erp-roles.page.ts,105,53,inline_template_text,Système,administration.erp-roles.text.systeme,>…<
+app/applications/erp/pages/administration/erp-roles/erp-roles.page.ts,110,55,inline_template_text,Modifié,administration.erp-roles.text.modifie,>…<
+app/applications/erp/pages/administration/erp-roles/erp-roles.page.ts,137,91,inline_template_text,Supprimer,administration.erp-roles.text.supprimer,>…<
+app/applications/erp/pages/administration/erp-roles/erp-roles.page.ts,147,49,inline_template_text,) — accès à tout l'ERP,administration.erp-roles.text.acces-tout-erp,>…<
+app/applications/erp/pages/administration/erp-roles/erp-roles.page.ts,149,33,inline_template_text,Cocher une cellule pour accorder,administration.erp-roles.text.cocher-une-cellule-pour,>…<
+app/applications/erp/pages/administration/erp-roles/erp-roles.page.ts,149,92,inline_template_text,. Toggle « Tout » par ligne pour,administration.erp-roles.text.toggle-tout-par-ligne,>…<
+app/applications/erp/pages/administration/erp-roles/erp-roles.page.ts,157,45,inline_template_text,Tout (,administration.erp-roles.text.tout,>…<
+app/applications/erp/pages/administration/erp-roles/erp-roles.page.ts,191,23,inline_template_text,Voir la liste brute des permissions (),administration.erp-roles.text.voir-la-liste-brute,>…<
+app/applications/erp/pages/administration/erp-roles/erp-roles.page.ts,199,38,inline_template_text,Sélectionnez un rôle dans la liste à gauche.,administration.erp-roles.text.selectionnez-un-role-dans,>…<
+app/applications/erp/pages/administration/erp-roles/erp-roles.page.ts,412,15,confirm,Restaurer ce rôle à sa définition seed initiale ?,administration.erp-roles.confirm.restaurer-ce-role-sa,confirm(…)
+app/applications/erp/pages/administration/mappings-comptables/mappings-comptables.page.ts,25,13,status_label,Net à payer,administration.mappings-comptables.status.net-payer,AMOUNT_SOURCE_LABELS.NET_A_PAYER
+app/applications/erp/pages/administration/mappings-comptables/mappings-comptables.page.ts,56,84,inline_template_text,Mappings total,administration.mappings-comptables.text.mappings-total,>…<
+app/applications/erp/pages/administration/mappings-comptables/mappings-comptables.page.ts,57,85,inline_template_text,Système,administration.mappings-comptables.text.systeme,>…<
+app/applications/erp/pages/administration/mappings-comptables/mappings-comptables.page.ts,60,133,inline_template_text,Personnalisés,administration.mappings-comptables.text.personnalises,>…<
+app/applications/erp/pages/administration/mappings-comptables/mappings-comptables.page.ts,61,105,inline_template_text,OD générées,administration.mappings-comptables.text.od-generees,>…<
+app/applications/erp/pages/administration/mappings-comptables/mappings-comptables.page.ts,78,38,inline_template_text,Journal des écritures auto-générées,administration.mappings-comptables.text.journal-des-ecritures-auto-generees,>…<
+app/applications/erp/pages/administration/mappings-comptables/mappings-comptables.page.ts,113,98,inline_template_attr,Supprimer,administration.mappings-comptables.label.supprimer,title=…
+app/applications/erp/pages/administration/mappings-comptables/mappings-comptables.page.ts,121,26,inline_template_text,Libellé,administration.mappings-comptables.text.libelle,>…<
+app/applications/erp/pages/administration/mappings-comptables/mappings-comptables.page.ts,122,38,inline_template_text,Débit,administration.mappings-comptables.text.debit,>…<
+app/applications/erp/pages/administration/mappings-comptables/mappings-comptables.page.ts,123,38,inline_template_text,Crédit,administration.mappings-comptables.text.credit,>…<
+app/applications/erp/pages/administration/mappings-comptables/mappings-comptables.page.ts,151,17,inline_template_text,Société,administration.mappings-comptables.text.societe,>…<
+app/applications/erp/pages/administration/mappings-comptables/mappings-comptables.page.ts,153,37,inline_template_text,Toutes (vue globale __ALL__),administration.mappings-comptables.text.toutes-vue-globale-all,>…<
+app/applications/erp/pages/administration/mappings-comptables/mappings-comptables.page.ts,160,17,inline_template_text,Opération sélectionnée,administration.mappings-comptables.text.operation-selectionnee,>…<
+app/applications/erp/pages/administration/mappings-comptables/mappings-comptables.page.ts,168,75,inline_template_text,Restaurer les défauts,administration.mappings-comptables.text.restaurer-les-defauts,>…<
+app/applications/erp/pages/administration/mappings-comptables/mappings-comptables.page.ts,178,55,inline_template_text,Système,administration.mappings-comptables.text.systeme,>…<
+app/applications/erp/pages/administration/mappings-comptables/mappings-comptables.page.ts,180,74,inline_template_text,Personnalisé,administration.mappings-comptables.text.personnalise,>…<
+app/applications/erp/pages/administration/mappings-comptables/mappings-comptables.page.ts,188,78,inline_template_text,Annuler les modifications,administration.mappings-comptables.text.annuler-les-modifications,>…<
+app/applications/erp/pages/administration/mappings-comptables/mappings-comptables.page.ts,191,102,inline_template_text,Supprimer,administration.mappings-comptables.text.supprimer,>…<
+app/applications/erp/pages/administration/mappings-comptables/mappings-comptables.page.ts,202,21,inline_template_text,Libellé écriture (template),administration.mappings-comptables.text.libelle-ecriture-template,>…<
+app/applications/erp/pages/administration/mappings-comptables/mappings-comptables.page.ts,211,21,inline_template_text,Libellé journal,administration.mappings-comptables.text.libelle-journal,>…<
+app/applications/erp/pages/administration/mappings-comptables/mappings-comptables.page.ts,216,36,inline_template_text,Lignes d'écriture,administration.mappings-comptables.text.lignes-ecriture,>…<
+app/applications/erp/pages/administration/mappings-comptables/mappings-comptables.page.ts,222,20,inline_template_text,Libellé,administration.mappings-comptables.text.libelle,>…<
+app/applications/erp/pages/administration/mappings-comptables/mappings-comptables.page.ts,223,20,inline_template_text,Montant source,administration.mappings-comptables.text.montant-source,>…<
+app/applications/erp/pages/administration/mappings-comptables/mappings-comptables.page.ts,233,44,inline_template_text,Débit,administration.mappings-comptables.text.debit,>…<
+app/applications/erp/pages/administration/mappings-comptables/mappings-comptables.page.ts,234,45,inline_template_text,Crédit,administration.mappings-comptables.text.credit,>…<
+app/applications/erp/pages/administration/mappings-comptables/mappings-comptables.page.ts,264,69,inline_template_text,+ Ajouter une ligne,administration.mappings-comptables.text.ajouter-une-ligne,>…<
+app/applications/erp/pages/administration/mappings-comptables/mappings-comptables.page.ts,274,21,inline_template_text,Montant HT,administration.mappings-comptables.text.montant-ht,>…<
+app/applications/erp/pages/administration/mappings-comptables/mappings-comptables.page.ts,278,21,inline_template_text,Montant TVA,administration.mappings-comptables.text.montant-tva,>…<
+app/applications/erp/pages/administration/mappings-comptables/mappings-comptables.page.ts,312,24,inline_template_text,Libellé,administration.mappings-comptables.text.libelle,>…<
+app/applications/erp/pages/administration/mappings-comptables/mappings-comptables.page.ts,313,36,inline_template_text,Débit,administration.mappings-comptables.text.debit,>…<
+app/applications/erp/pages/administration/mappings-comptables/mappings-comptables.page.ts,314,36,inline_template_text,Crédit,administration.mappings-comptables.text.credit,>…<
+app/applications/erp/pages/administration/mappings-comptables/mappings-comptables.page.ts,337,74,inline_template_text,Équilibrée,administration.mappings-comptables.text.equilibree,>…<
+app/applications/erp/pages/administration/mappings-comptables/mappings-comptables.page.ts,338,62,inline_template_text,Déséquilibre,administration.mappings-comptables.text.desequilibre,>…<
+app/applications/erp/pages/administration/mappings-comptables/mappings-comptables.page.ts,348,13,inline_template_text,Aucun mapping trouvé pour cette opération sur cette société.,administration.mappings-comptables.text.aucun-mapping-trouve-pour,>…<
+app/applications/erp/pages/administration/mappings-comptables/mappings-comptables.page.ts,533,15,confirm,Supprimer le mapping « ${OPERATION_LABELS[m.operationType]} » ?,administration.mappings-comptables.confirm.supprimer-le-mapping-operation,confirm(…)
+app/applications/erp/pages/administration/mappings-comptables/mappings-comptables.page.ts,559,15,confirm,Vider complètement le journal des OD auto-générées ?,administration.mappings-comptables.confirm.vider-completement-le-journal,confirm(…)
+app/applications/erp/pages/administration/moa/moa.page.ts,41,54,inline_template_text,✓ MOA enregistré,administration.moa.text.moa-enregistre,>…<
+app/applications/erp/pages/administration/moa/moa.page.ts,42,56,inline_template_text,✓ MOA supprimé,administration.moa.text.moa-supprime,>…<
+app/applications/erp/pages/administration/moa/moa.page.ts,47,38,inline_template_text,Maîtres d'Ouvrage ( / ),administration.moa.text.maitres-ouvrage,>…<
+app/applications/erp/pages/administration/moa/moa.page.ts,51,33,inline_template_text,Tous,administration.moa.text.tous,>…<
+app/applications/erp/pages/administration/moa/moa.page.ts,65,37,inline_template_text,Ajouter un Maître d'Ouvrage,administration.moa.text.ajouter-un-maitre-ouvrage,>…<
+app/applications/erp/pages/administration/moa/moa.page.ts,111,23,inline_template_text,Téléphone,administration.moa.text.telephone,>…<
+app/applications/erp/pages/administration/moa/moa.page.ts,136,83,inline_template_text,Annuler,administration.moa.text.annuler,>…<
+app/applications/erp/pages/administration/moa/moa.page.ts,137,79,inline_template_text,Créer le MOA,administration.moa.text.creer-le-moa,>…<
+app/applications/erp/pages/administration/moa/moa.page.ts,188,29,inline_template_text,Aucun MOA ne correspond au filtre.,administration.moa.text.aucun-moa-ne-correspond,>…<
+app/applications/erp/pages/administration/moa/models/index.ts,54,1,type_label,État,administration.moa.label.etat,MOA_TYPE_LABELS.ETAT
+app/applications/erp/pages/administration/moa/models/index.ts,55,15,type_label,Établissement public,administration.moa.label.etablissement-public,MOA_TYPE_LABELS.EP
+app/applications/erp/pages/administration/moa/models/index.ts,56,29,type_label,Collectivité territoriale,administration.moa.label.collectivite-territoriale,MOA_TYPE_LABELS.COLLECTIVITE
+app/applications/erp/pages/administration/moa/models/index.ts,57,44,type_label,Privé,administration.moa.label.prive,MOA_TYPE_LABELS.PRIVE
+app/applications/erp/pages/administration/numerotation/numerotation.page.ts,74,103,inline_template_text,Système,administration.numerotation.text.systeme,>…<
+app/applications/erp/pages/administration/numerotation/numerotation.page.ts,83,38,inline_template_text,Politique de numérotation par type de document,administration.numerotation.text.politique-de-numerotation-par,>…<
+app/applications/erp/pages/administration/numerotation/numerotation.page.ts,91,20,inline_template_text,Société,administration.numerotation.text.societe,>…<
+app/applications/erp/pages/administration/numerotation/numerotation.page.ts,108,20,inline_template_text,Type de document,administration.numerotation.text.type-de-document,>…<
+app/applications/erp/pages/administration/numerotation/numerotation.page.ts,109,20,inline_template_text,Préfixe,administration.numerotation.text.prefixe,>…<
+app/applications/erp/pages/administration/numerotation/numerotation.page.ts,110,20,inline_template_text,Sép.,administration.numerotation.text.sep,>…<
+app/applications/erp/pages/administration/numerotation/numerotation.page.ts,111,20,inline_template_text,Année,administration.numerotation.text.annee,>…<
+app/applications/erp/pages/administration/numerotation/numerotation.page.ts,115,40,inline_template_text,Aperçu prochain numéro,administration.numerotation.text.apercu-prochain-numero,>…<
+app/applications/erp/pages/administration/numerotation/numerotation.page.ts,125,59,inline_template_attr,Hérité du seed système,administration.numerotation.label.herite-du-seed-systeme,title=…
+app/applications/erp/pages/administration/numerotation/numerotation.page.ts,125,89,inline_template_text,Hérité,administration.numerotation.text.herite,>…<
+app/applications/erp/pages/administration/numerotation/numerotation.page.ts,127,58,inline_template_attr,Seed système modifié,administration.numerotation.label.seed-systeme-modifie,title=…
+app/applications/erp/pages/administration/numerotation/numerotation.page.ts,127,86,inline_template_text,Modifié,administration.numerotation.text.modifie,>…<
+app/applications/erp/pages/administration/numerotation/numerotation.page.ts,144,43,inline_template_text,Aucune,administration.numerotation.text.aucune,>…<
+app/applications/erp/pages/administration/numerotation/numerotation.page.ts,160,89,inline_template_attr,Remettre à 0,administration.numerotation.label.remettre,title=…
+app/applications/erp/pages/administration/numerotation/numerotation.page.ts,178,93,inline_template_text,Supprimer,administration.numerotation.text.supprimer,>…<
+app/applications/erp/pages/administration/numerotation/numerotation.page.ts,190,34,inline_template_text,Aide — jetons disponibles dans le format,administration.numerotation.text.aide-jetons-disponibles-dans,>…<
+app/applications/erp/pages/administration/numerotation/numerotation.page.ts,192,43,inline_template_text,→ préfixe de la policy (ex :,administration.numerotation.text.prefixe-de-la-policy,>…<
+app/applications/erp/pages/administration/numerotation/numerotation.page.ts,193,40,inline_template_text,→ séparateur (ex :,administration.numerotation.text.separateur-ex,>…<
+app/applications/erp/pages/administration/numerotation/numerotation.page.ts,194,41,inline_template_text,→ année 4 chiffres (ex :,administration.numerotation.text.annee-chiffres-ex,>…<
+app/applications/erp/pages/administration/numerotation/numerotation.page.ts,195,39,inline_template_text,→ année 2 chiffres (ex :,administration.numerotation.text.annee-chiffres-ex,>…<
+app/applications/erp/pages/administration/numerotation/numerotation.page.ts,197,40,inline_template_text,→ code court de la société (ex :,administration.numerotation.text.code-court-de-la,>…<
+app/applications/erp/pages/administration/numerotation/numerotation.page.ts,198,40,inline_template_text,→ compteur séquentiel zero-padded (obligatoire),administration.numerotation.text.compteur-sequentiel-zero-padded-obligatoire,>…<
+app/applications/erp/pages/administration/numerotation/numerotation.page.ts,419,15,confirm,Supprimer la policy ${this.labels[row.docType]} (${row.prefix}) ?,administration.numerotation.confirm.supprimer-la-policy-this,confirm(…)
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,32,1,type_label,"État (ministères, directions)",administration.parametres-fiscal.label.etat-ministeres-directions,MOA_TYPE_LABELS.ETAT
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,33,40,type_label,"Établissement public (ONCF, ONEE, OFPPT…)",administration.parametres-fiscal.label.etablissement-public-oncf-onee,MOA_TYPE_LABELS.EP
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,34,50,type_label,"Collectivité territoriale (wilaya, commune)",administration.parametres-fiscal.label.collectivite-territoriale-wilaya-commune,MOA_TYPE_LABELS.COLLECTIVITE
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,35,62,type_label,"Privé (promoteur, particulier, société)",administration.parametres-fiscal.label.prive-promoteur-particulier-societe,MOA_TYPE_LABELS.PRIVE
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,40,1,status_label,Livraison de biens,administration.parametres-fiscal.status.livraison-de-biens,PERIMETRE_LABELS.LIVRAISON
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,41,34,status_label,Prestation de services,administration.parametres-fiscal.status.prestation-de-services,PERIMETRE_LABELS.PRESTATION
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,44,29,status_label,Tous types,administration.parametres-fiscal.status.tous-types,PERIMETRE_LABELS.TOUS
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,63,127,inline_template_text,Exonérations actives,administration.parametres-fiscal.text.exonerations-actives,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,64,88,inline_template_text,Régime TVA,administration.parametres-fiscal.text.regime-tva,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,65,84,inline_template_text,Cycle déclaration,administration.parametres-fiscal.text.cycle-declaration,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,66,83,inline_template_text,RAS État,administration.parametres-fiscal.text.ras-etat,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,91,40,inline_template_text,Taux de TVA applicables,administration.parametres-fiscal.text.taux-de-tva-applicables,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,92,72,inline_template_text,+ Ajouter un taux,administration.parametres-fiscal.text.ajouter-un-taux,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,102,27,inline_template_text,Libellé,administration.parametres-fiscal.text.libelle,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,110,27,inline_template_text,Défaut,administration.parametres-fiscal.text.defaut,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,124,38,inline_template_text,Retenue à la source — taux par typologie de Maître d'Ouvrage,administration.parametres-fiscal.text.retenue-la-source-taux,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,127,37,inline_template_text,retenue à la source (RAS),administration.parametres-fiscal.text.retenue-la-source-ras,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,129,39,inline_template_text,du montant HT. Le secteur privé est généralement à,administration.parametres-fiscal.text.du-montant-ht-le,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,153,41,inline_template_text,Appliqué si le MOA n'a pas de typologie connue.,administration.parametres-fiscal.text.applique-si-le-moa,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,158,41,inline_template_text,0 = applicable sans seuil minimum,administration.parametres-fiscal.text.applicable-sans-seuil-minimum,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,168,17,inline_template_text,Le timbre fiscal s'applique sur les paiements en espèces dépassant le seuil défini. Il est plafonné au montant maximum configuré.,administration.parametres-fiscal.text.le-timbre-fiscal-applique,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,187,38,inline_template_text,Autoliquidation TVA (prestataires non-résidents),administration.parametres-fiscal.text.autoliquidation-tva-prestataires-non-residents,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,190,23,inline_template_text,Retenue TVA sur autoliquidation (% de la TVA déclarée),administration.parametres-fiscal.text.retenue-tva-sur-autoliquidation,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,192,41,inline_template_text,100 = retenue intégrale de la TVA autoliquidée ; 0 = aucune retenue.,administration.parametres-fiscal.text.100-retenue-integrale-de,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,199,26,inline_template_text,Autoliquidation TVA activée,administration.parametres-fiscal.text.autoliquidation-tva-activee,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,200,21,inline_template_text,Applicable aux sous-traitants non-résidents ou certains services intracommunautaires.,administration.parametres-fiscal.text.applicable-aux-sous-traitants-non-residents,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,206,26,inline_template_text,Exonération logement social,administration.parametres-fiscal.text.exoneration-logement-social,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,207,21,inline_template_text,TVA 14% pour logements dont superficie ≤ 100 m² et prix ≤ 250 000 MAD.,administration.parametres-fiscal.text.tva-14-pour-logements,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,217,40,inline_template_text,Catalogue des motifs d'exonération TVA,administration.parametres-fiscal.text.catalogue-des-motifs-exoneration,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,232,48,inline_template_text,Nouveau motif d'exonération,administration.parametres-fiscal.text.nouveau-motif-exoneration,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,239,27,inline_template_text,Libellé *,administration.parametres-fiscal.text.libelle,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,240,90,inline_template_attr,Ex. Exportation de services,administration.parametres-fiscal.label.ex-exportation-de-services,placeholder=…
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,243,27,inline_template_text,Référence légale *,administration.parametres-fiscal.text.reference-legale,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,247,27,inline_template_text,Périmètre,administration.parametres-fiscal.text.perimetre,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,253,43,inline_template_text,Tous types,administration.parametres-fiscal.text.tous-types,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,257,27,inline_template_text,Date fin validité (optionnel),administration.parametres-fiscal.text.date-fin-validite-optionnel,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,263,23,inline_template_attr,Texte affiché sur la facture sous le total HT,administration.parametres-fiscal.label.texte-affiche-sur-la,placeholder=…
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,267,92,inline_template_text,Annuler,administration.parametres-fiscal.text.annuler,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,268,88,inline_template_text,Ajouter au catalogue,administration.parametres-fiscal.text.ajouter-au-catalogue,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,279,24,inline_template_text,Libellé,administration.parametres-fiscal.text.libelle,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,280,24,inline_template_text,Référence,administration.parametres-fiscal.text.reference,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,281,24,inline_template_text,Périmètre,administration.parametres-fiscal.text.perimetre,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,282,24,inline_template_text,Validité,administration.parametres-fiscal.text.validite,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,298,76,inline_template_text,Système,administration.parametres-fiscal.text.systeme,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,305,110,inline_template_text,Supprimer,administration.parametres-fiscal.text.supprimer,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,320,38,inline_template_text,Régime fiscal société,administration.parametres-fiscal.text.regime-fiscal-societe,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,324,34,inline_template_text,débit,administration.parametres-fiscal.text.debit,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,331,23,inline_template_text,Régime TVA,administration.parametres-fiscal.text.regime-tva,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,333,40,inline_template_text,Débit (par défaut),administration.parametres-fiscal.text.debit-par-defaut,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,334,47,inline_template_text,Encaissement (sur option),administration.parametres-fiscal.text.encaissement-sur-option,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,336,41,inline_template_text,Option encaissement valable pour certains secteurs.,administration.parametres-fiscal.text.option-encaissement-valable-pour,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,339,23,inline_template_text,Cycle de déclaration,administration.parametres-fiscal.text.cycle-de-declaration,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,353,19,inline_template_attr,cabinet@expertise-comptable.ma,administration.parametres-fiscal.label.cabinet-expertise-comptable-ma,placeholder=…
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,354,41,inline_template_text,Destination des copies de déclarations / écritures.,administration.parametres-fiscal.text.destination-des-copies-de,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,362,77,inline_template_text,Restaurer les valeurs par défaut,administration.parametres-fiscal.text.restaurer-les-valeurs-par,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,363,51,inline_template_text,Sauvegarder les paramètres fiscaux,administration.parametres-fiscal.text.sauvegarder-les-parametres-fiscaux,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,370,36,inline_template_text,Simulateur — TVA facture sous-traitance,administration.parametres-fiscal.text.simulateur-tva-facture-sous-traitance,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,376,21,inline_template_text,Montant HT (MAD),administration.parametres-fiscal.text.montant-ht-mad,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,392,23,inline_template_text,Net à payer fournisseur,administration.parametres-fiscal.text.net-payer-fournisseur,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,393,23,inline_template_text,TVA sur facture,administration.parametres-fiscal.text.tva-sur-facture,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,394,23,inline_template_text,TVA autoliquidation (décl.),administration.parametres-fiscal.text.tva-autoliquidation-decl,>…<
+app/applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page.ts,599,15,confirm,Supprimer le motif « ${motif.libelle} » ?,administration.parametres-fiscal.confirm.supprimer-le-motif-motif,confirm(…)
+app/applications/erp/pages/administration/rbac-preview/rbac-preview.page.ts,68,18,inline_template_text,Mode aperçu uniquement.,administration.rbac-preview.text.mode-apercu-uniquement,>…<
+app/applications/erp/pages/administration/rbac-preview/rbac-preview.page.ts,78,66,inline_template_text,Rôles BTP seedés,administration.rbac-preview.text.roles-btp-seedes,>…<
+app/applications/erp/pages/administration/rbac-preview/rbac-preview.page.ts,134,22,inline_template_text,Permission(s) requise(s) (OU),administration.rbac-preview.text.permission-requise-ou,>…<
+app/applications/erp/pages/administration/rbac-preview/rbac-preview.page.ts,146,48,inline_template_text,aucune,administration.rbac-preview.text.aucune,>…<
+app/applications/erp/pages/administration/rbac-preview/rbac-preview.page.ts,157,65,inline_template_attr,Masqué,administration.rbac-preview.label.masque,aria-label=…
+app/applications/erp/pages/administration/rbac-preview/rbac-preview.page.ts,194,55,inline_template_attr,Accordée,administration.rbac-preview.label.accordee,aria-label=…
+app/applications/erp/pages/administration/rbac-preview/rbac-preview.page.ts,208,15,inline_template_text,Sélectionnez un rôle ci-dessus pour voir le détail de ses permissions.,administration.rbac-preview.text.selectionnez-un-role-ci-dessus,>…<
+app/applications/erp/pages/administration/sessions/sessions.page.ts,65,34,inline_template_text,Échecs 24h,administration.sessions.text.echecs-24h,>…<
+app/applications/erp/pages/administration/sessions/sessions.page.ts,69,34,inline_template_text,IPs suspectes (3+ échecs),administration.sessions.text.ips-suspectes-echecs,>…<
+app/applications/erp/pages/administration/sessions/sessions.page.ts,82,29,inline_template_text,Le bouton « Force logout » termine la session immédiatement (mock).,administration.sessions.text.le-bouton-force-logout,>…<
+app/applications/erp/pages/administration/sessions/sessions.page.ts,87,18,inline_template_text,Utilisateur,administration.sessions.text.utilisateur,>…<
+app/applications/erp/pages/administration/sessions/sessions.page.ts,88,18,inline_template_text,Démarrée,administration.sessions.text.demarree,>…<
+app/applications/erp/pages/administration/sessions/sessions.page.ts,89,18,inline_template_text,Dernière activité,administration.sessions.text.derniere-activite,>…<
+app/applications/erp/pages/administration/sessions/sessions.page.ts,112,50,inline_template_text,Aucune session active.,administration.sessions.text.aucune-session-active,>…<
+app/applications/erp/pages/administration/sessions/sessions.page.ts,123,38,inline_template_text,Tentatives de connexion ( / ),administration.sessions.text.tentatives-de-connexion,>…<
+app/applications/erp/pages/administration/sessions/sessions.page.ts,129,47,inline_template_attr,"Utilisateur, IP, location…",administration.sessions.label.utilisateur-ip-location,placeholder=…
+app/applications/erp/pages/administration/sessions/sessions.page.ts,133,29,inline_template_text,Tous résultats,administration.sessions.text.tous-resultats,>…<
+app/applications/erp/pages/administration/sessions/sessions.page.ts,138,29,inline_template_text,Tous utilisateurs,administration.sessions.text.tous-utilisateurs,>…<
+app/applications/erp/pages/administration/sessions/sessions.page.ts,149,18,inline_template_text,Utilisateur,administration.sessions.text.utilisateur,>…<
+app/applications/erp/pages/administration/sessions/sessions.page.ts,150,18,inline_template_text,Résultat,administration.sessions.text.resultat,>…<
+app/applications/erp/pages/administration/sessions/sessions.page.ts,151,18,inline_template_text,Raison échec,administration.sessions.text.raison-echec,>…<
+app/applications/erp/pages/administration/sessions/sessions.page.ts,174,50,inline_template_text,Aucune tentative ne correspond aux filtres.,administration.sessions.text.aucune-tentative-ne-correspond,>…<
+app/applications/erp/pages/administration/sessions/sessions.page.ts,182,98,inline_template_text,← Précédente,administration.sessions.text.precedente,>…<
+app/applications/erp/pages/administration/societe/models/index.ts,79,1,type_label,Siège,administration.societe.label.siege,ETABLISSEMENT_TYPE_LABELS.SIEGE
+app/applications/erp/pages/administration/societe/models/index.ts,88,15,status_label,SARL à Associé Unique,administration.societe.status.sarl-associe-unique,FORME_JURIDIQUE_LABELS.SARLAU
+app/applications/erp/pages/administration/societe/societe.page.ts,198,35,inline_template_text,✓ Paramètres sauvegardés,administration.societe.text.parametres-sauvegardes,>…<
+app/applications/erp/pages/administration/societe/societe.page.ts,201,33,inline_template_text,⚠ Corrigez les champs en erreur avant de sauvegarder,administration.societe.text.corrigez-les-champs-en,>…<
+app/applications/erp/pages/administration/societe/societe.page.ts,205,35,inline_template_text,✓ Société supprimée,administration.societe.text.societe-supprimee,>…<
+app/applications/erp/pages/administration/societe/societe.page.ts,211,36,inline_template_text,Sociétés du groupe,administration.societe.text.societes-du-groupe,>…<
+app/applications/erp/pages/administration/societe/societe.page.ts,213,31,inline_template_text,sociétés · cliquez pour éditer,administration.societe.text.societes-cliquez-pour-editer,>…<
+app/applications/erp/pages/administration/societe/societe.page.ts,222,37,inline_template_text,Créer une nouvelle société,administration.societe.text.creer-une-nouvelle-societe,>…<
+app/applications/erp/pages/administration/societe/societe.page.ts,251,112,inline_template_attr,7 à 8 chiffres,administration.societe.label.chiffres,placeholder=…
+app/applications/erp/pages/administration/societe/societe.page.ts,268,23,inline_template_text,Adresse du siège *,administration.societe.text.adresse-du-siege,>…<
+app/applications/erp/pages/administration/societe/societe.page.ts,276,83,inline_template_text,Annuler,administration.societe.text.annuler,>…<
+app/applications/erp/pages/administration/societe/societe.page.ts,277,79,inline_template_text,Créer la société,administration.societe.text.creer-la-societe,>…<
+app/applications/erp/pages/administration/societe/societe.page.ts,289,20,inline_template_text,Siège,administration.societe.text.siege,>…<
+app/applications/erp/pages/administration/societe/societe.page.ts,290,20,inline_template_text,Établissements,administration.societe.text.etablissements,>…<
+app/applications/erp/pages/administration/societe/societe.page.ts,333,43,inline_template_text,Société sélectionnée,administration.societe.text.societe-selectionnee,>…<
+app/applications/erp/pages/administration/societe/societe.page.ts,357,38,inline_template_text,Identification légale,administration.societe.text.identification-legale,>…<
+app/applications/erp/pages/administration/societe/societe.page.ts,399,19,inline_template_attr,7 à 8 chiffres,administration.societe.label.chiffres,placeholder=…
+app/applications/erp/pages/administration/societe/societe.page.ts,405,23,inline_template_text,Registre de Commerce (R.C.),administration.societe.text.registre-de-commerce,>…<
+app/applications/erp/pages/administration/societe/societe.page.ts,423,19,inline_template_attr,7 à 10 chiffres,administration.societe.label.10-chiffres,placeholder=…
+app/applications/erp/pages/administration/societe/societe.page.ts,435,19,inline_template_attr,7 à 9 chiffres,administration.societe.label.chiffres,placeholder=…
+app/applications/erp/pages/administration/societe/societe.page.ts,468,23,inline_template_text,Adresse du siège *,administration.societe.text.adresse-du-siege,>…<
+app/applications/erp/pages/administration/societe/societe.page.ts,484,38,inline_template_text,Logo société,administration.societe.text.logo-societe,>…<
+app/applications/erp/pages/administration/societe/societe.page.ts,488,44,inline_template_attr,Logo société,administration.societe.label.logo-societe,alt=…
+app/applications/erp/pages/administration/societe/societe.page.ts,490,49,inline_template_text,Aucun logo,administration.societe.text.aucun-logo,>…<
+app/applications/erp/pages/administration/societe/societe.page.ts,521,76,inline_template_text,+ Ajouter un exercice,administration.societe.text.ajouter-un-exercice,>…<
+app/applications/erp/pages/administration/societe/societe.page.ts,524,31,inline_template_text,Aucun exercice enregistré.,administration.societe.text.aucun-exercice-enregistre,>…<
+app/applications/erp/pages/administration/societe/societe.page.ts,530,24,inline_template_text,Début,administration.societe.text.debut,>…<
+app/applications/erp/pages/administration/societe/societe.page.ts,533,24,inline_template_text,Clos le,administration.societe.text.clos-le,>…<
+app/applications/erp/pages/administration/societe/societe.page.ts,548,53,inline_template_text,Clôturé,administration.societe.text.cloture,>…<
+app/applications/erp/pages/administration/societe/societe.page.ts,555,88,inline_template_text,Clôturer,administration.societe.text.cloturer,>…<
+app/applications/erp/pages/administration/societe/societe.page.ts,566,38,inline_template_text,Paramètres de gestion (extras société),administration.societe.text.parametres-de-gestion-extras,>…<
+app/applications/erp/pages/administration/societe/societe.page.ts,567,40,inline_template_text,"Compléments audit multi-entité : persistance locale par société, complémentaires au modèle canonique ci-dessus.",administration.societe.text.complements-audit-multi-entite-persistance,>…<
+app/applications/erp/pages/administration/societe/societe.page.ts,574,23,inline_template_text,Devise de référence,administration.societe.text.devise-de-reference,>…<
+app/applications/erp/pages/administration/societe/societe.page.ts,578,23,inline_template_text,Mois de clôture d'exercice,administration.societe.text.mois-de-cloture-exercice,>…<
+app/applications/erp/pages/administration/societe/societe.page.ts,582,23,inline_template_text,Ville (siège / correspondance),administration.societe.text.ville-siege-correspondance,>…<
+app/applications/erp/pages/administration/societe/societe.page.ts,590,23,inline_template_text,Représentant légal — nom,administration.societe.text.representant-legal-nom,>…<
+app/applications/erp/pages/administration/societe/societe.page.ts,594,23,inline_template_text,Représentant légal — qualité,administration.societe.text.representant-legal-qualite,>…<
+app/applications/erp/pages/administration/societe/societe.page.ts,595,96,inline_template_attr,"Gérant, PDG…",administration.societe.label.gerant-pdg,placeholder=…
+app/applications/erp/pages/administration/societe/societe.page.ts,602,38,inline_template_text,Coordonnées,administration.societe.text.coordonnees,>…<
+app/applications/erp/pages/administration/societe/societe.page.ts,609,23,inline_template_text,Téléphone,administration.societe.text.telephone,>…<
+app/applications/erp/pages/administration/societe/societe.page.ts,625,38,inline_template_text,Établissements (),administration.societe.text.etablissements,>…<
+app/applications/erp/pages/administration/societe/societe.page.ts,627,31,inline_template_text,Aucun établissement enregistré.,administration.societe.text.aucun-etablissement-enregistre,>…<
+app/applications/erp/pages/administration/societe/societe.page.ts,651,71,inline_template_text,+ Ajouter un RIB,administration.societe.text.ajouter-un-rib,>…<
+app/applications/erp/pages/administration/societe/societe.page.ts,663,27,inline_template_text,Intitulé du compte,administration.societe.text.intitule-du-compte,>…<
+app/applications/erp/pages/administration/societe/societe.page.ts,675,81,inline_template_attr,Supprimer,administration.societe.label.supprimer,title=…
+app/applications/erp/pages/administration/societe/societe.page.ts,685,37,inline_template_text,Sélectionnez une société dans le tableau ci-dessus.,administration.societe.text.selectionnez-une-societe-dans,>…<

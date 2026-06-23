@@ -1,0 +1,23 @@
+{
+  "entity": "SkillAssessment",
+  "fields": {
+    "assessmentNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "skillName": {
+      "maxLength": 120
+    },
+    "requiredLevel": {
+      "maxLength": 120
+    },
+    "gapAnalysis": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

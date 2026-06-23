@@ -1,0 +1,140 @@
+{
+  "notifications": {
+    "workflow": {
+      "approvalRequested": "Approval requested: {entityType} {code}",
+      "approved": "{entityType} {code} has been approved",
+      "rejected": "{entityType} {code} has been rejected"
+    },
+    "assignment": {
+      "assigned": "{entityType} {code} assigned to you"
+    },
+    "mention": {
+      "mentioned": "You were mentioned in {entityType} {code}"
+    },
+    "digest": {
+      "subject": "Your daily notification digest",
+      "header": "Here's what happened since your last digest",
+      "footer": "Manage your notification preferences in Settings"
+    },
+    "center": {
+      "title": "Notifications",
+      "subtitle": "Stay up to date with your activity",
+      "viewAll": "View All Notifications",
+      "unread": "{count} unread",
+      "markAllRead": "Mark All as Read",
+      "markSelectedRead": "Mark Selected as Read",
+      "clearOldRead": "Clear Old Read",
+      "clearOldReadConfirm": "Delete all read notifications older than 30 days?",
+      "deleted": "{count} notifications cleared",
+      "empty": "No notifications",
+      "emptyUnread": "No unread notifications",
+      "emptyFiltered": "No notifications matching your filters",
+      "loading": "Loading…",
+      "confirmClearOldRead": "Delete all read notifications older than 30 days?",
+      "actions": {
+        "markAllRead": "Mark All as Read",
+        "markSelectedRead": "Mark Selected as Read",
+        "clearOldRead": "Clear Old Read",
+        "markRead": "Mark as read"
+      },
+      "filters": {
+        "source": {
+          "label": "Source",
+          "all": "All",
+          "workflow": "Workflow",
+          "assignment": "Assignment",
+          "mention": "Mention",
+          "system": "System"
+        },
+        "status": {
+          "label": "Status",
+          "all": "All",
+          "unread": "Unread",
+          "read": "Read"
+        },
+        "range": {
+          "label": "Date Range",
+          "24h": "Last 24 hours",
+          "7d": "Last 7 days",
+          "30d": "Last 30 days",
+          "all": "All"
+        }
+      },
+      "source": {
+        "WORKFLOW": "Workflow",
+        "ASSIGNMENT": "Assignment",
+        "MENTION": "Mention",
+        "SYSTEM": "System"
+      }
+    }
+  },
+  "collaboration": {
+    "fields": {
+      "entityType": "entity Type",
+      "entityId": "entity Id",
+      "title": "title",
+      "status": "status",
+      "currentStep": "current Step",
+      "requestedBy": "requested By",
+      "requestedAt": "requested At",
+      "approvedBy": "approved By",
+      "approvedAt": "approved At",
+      "decisionComment": "decision Comment",
+      "action": "action",
+      "actor": "actor",
+      "eventAt": "event At",
+      "details": "details",
+      "payload": "payload",
+      "fileName": "file Name",
+      "fileUrl": "file Url",
+      "mimeType": "mime Type",
+      "sizeBytes": "size Bytes",
+      "uploadedBy": "uploaded By",
+      "uploadedAt": "uploaded At",
+      "isPrimary": "is Primary",
+      "author": "author",
+      "body": "body",
+      "isInternal": "is Internal",
+      "createdAt": "created At",
+      "editedAt": "edited At"
+    },
+    "sections": {
+      "target": "target",
+      "request": "request",
+      "actors": "actors",
+      "event": "event",
+      "file": "file",
+      "comment": "comment"
+    },
+    "feature": {
+      "title": "Collaboration",
+      "description": "Collaboration"
+    },
+    "navigation": {
+      "approvalRequests": "Approval Requests",
+      "auditEvents": "Audit Events",
+      "recordAttachments": "Record Attachments",
+      "recordComments": "Record Comments"
+    },
+    "approvalRequest": {
+      "title": "Approval Requests",
+      "detailTitle": "Approval Request Details",
+      "newTitle": "New Approval Request"
+    },
+    "auditEvent": {
+      "title": "Audit Events",
+      "detailTitle": "Audit Event Details",
+      "newTitle": "New Audit Event"
+    },
+    "recordAttachment": {
+      "title": "Record Attachments",
+      "detailTitle": "Record Attachment Details",
+      "newTitle": "New Record Attachment"
+    },
+    "recordComment": {
+      "title": "Record Comments",
+      "detailTitle": "Record Comment Details",
+      "newTitle": "New Record Comment"
+    }
+  }
+}

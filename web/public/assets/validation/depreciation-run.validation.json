@@ -1,0 +1,27 @@
+{
+  "entity": "DepreciationRun",
+  "fields": {
+    "runNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "periodId": {
+      "required": true
+    },
+    "assetScope": {
+      "required": true,
+      "maxLength": 30
+    },
+    "assetCount": {
+      "min": 0
+    },
+    "totalDepreciation": {
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

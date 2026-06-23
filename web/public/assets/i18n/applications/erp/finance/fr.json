@@ -1,0 +1,1806 @@
+{
+  "finance": {
+    "module": {
+      "title": "Finance & Comptabilité",
+      "shortTitle": "Finance"
+    },
+    "common": {
+      "dash": "—",
+      "currency": {
+        "mad": "MAD",
+        "dh": "DH"
+      },
+      "actions": {
+        "back": "← Retour",
+        "save": "Enregistrer",
+        "cancel": "Annuler",
+        "close": "Fermer",
+        "delete": "Supprimer",
+        "edit": "Modifier",
+        "create": "Créer",
+        "new": "Nouveau",
+        "validate": "Valider",
+        "print": "Imprimer",
+        "export": "Exporter",
+        "refresh": "Actualiser",
+        "ok": "OK",
+        "search": "Rechercher",
+        "filter": "Filtrer",
+        "viewDetail": "Voir le détail",
+        "viewEcriture": "Voir l'écriture",
+        "voirReglements": "Voir règlements",
+        "downloadXml": "Télécharger XML",
+        "downloadCsv": "Télécharger CSV",
+        "importStatement": "Importer relevé",
+        "open": "Ouvrir →"
+      },
+      "labels": {
+        "all": "Tous",
+        "none": "Aucun",
+        "loading": "Chargement…",
+        "noResult": "Aucun résultat",
+        "total": "Total",
+        "totalHt": "Total HT",
+        "totalTva": "Total TVA",
+        "totalTtc": "Total TTC",
+        "soldeDebiteur": "Solde débiteur",
+        "soldeCrediteur": "Solde créditeur",
+        "soldeFinal": "Solde final",
+        "ouverture": "Ouverture",
+        "cloture": "Clôture",
+        "debit": "Débit",
+        "credit": "Crédit",
+        "balance": "Balance",
+        "ecart": "Écart",
+        "selection": "Sélection",
+        "selected": "Sélectionnés",
+        "selectAll": "Tout sélectionner",
+        "unselectAll": "Tout désélectionner"
+      },
+      "filters": {
+        "all": "Tous",
+        "period": "Période",
+        "from": "Du",
+        "to": "Au",
+        "journal": "Journal",
+        "status": "Statut",
+        "type": "Type",
+        "compte": "Compte",
+        "tiers": "Tiers",
+        "chantier": "Chantier",
+        "devise": "Devise",
+        "allJournals": "Tous les journaux",
+        "allStatuses": "Tous les statuts",
+        "allTypes": "Tous les types",
+        "allDevises": "Toutes les devises",
+        "searchPlaceholder": "Rechercher…"
+      },
+      "emptyState": {
+        "noData": "Aucune donnée",
+        "noResults": "Aucun résultat",
+        "tryAdjustFilters": "Essayez d'ajuster les filtres."
+      },
+      "validation": {
+        "required": "Champ requis",
+        "invalidNumber": "Nombre invalide",
+        "invalidDate": "Date invalide",
+        "mustBalance": "Débit = Crédit obligatoire",
+        "amountPositive": "Montant doit être positif"
+      },
+      "toasts": {
+        "saved": "Enregistré",
+        "validated": "Validé",
+        "deleted": "Supprimé",
+        "cancelled": "Annulé",
+        "exportStarted": "Export lancé",
+        "loading": "Chargement…",
+        "error": "Erreur",
+        "unexpectedError": "Erreur inattendue"
+      },
+      "confirm": {
+        "delete": "Confirmer la suppression ?",
+        "cancel": "Confirmer l'annulation ?",
+        "validate": "Confirmer la validation ?"
+      }
+    },
+    "routes": {
+      "journauxTitle": "Journaux comptables",
+      "journauxCrumb": "Journaux",
+      "ecrituresTitle": "Écritures",
+      "ecrituresCrumb": "Écritures",
+      "ecritureDetailTitle": "Écriture",
+      "ecritureSaisieTitle": "Saisie écriture",
+      "balanceTitle": "Balance générale",
+      "balanceCrumb": "Balance",
+      "grandLivreTitle": "Grand livre",
+      "grandLivreCrumb": "Grand livre",
+      "facturesFournisseursTitle": "Factures fournisseurs",
+      "facturesFournisseursCrumb": "Factures fournisseurs",
+      "ffDetailTitle": "Facture fournisseur",
+      "reglementsTitle": "Règlements",
+      "reglementsCrumb": "Règlements",
+      "reglementSaisieTitle": "Nouveau règlement",
+      "rapprochementTitle": "Rapprochement bancaire",
+      "rapprochementCrumb": "Rapprochement",
+      "lettrageTitle": "Lettrage",
+      "lettrageCrumb": "Lettrage",
+      "virementsTitle": "Virements",
+      "virementsCrumb": "Virements",
+      "virementDetailTitle": "Virement",
+      "virementRemiseTitle": "Remise de virements",
+      "plansComptablesTitle": "Plan comptable",
+      "plansComptablesCrumb": "Plan comptable",
+      "compteDetailTitle": "Compte",
+      "tauxChangeTitle": "Taux de change",
+      "tauxChangeCrumb": "Taux de change",
+      "tauxChangeDetailTitle": "Taux de change",
+      "devisesTitle": "Devises",
+      "devisesCrumb": "Devises",
+      "conditionsPaiementTitle": "Conditions de paiement",
+      "conditionsPaiementCrumb": "Conditions de paiement",
+      "caissesTitle": "Caisses & Banques",
+      "caissesCrumb": "Caisses",
+      "caisseDetailTitle": "Compte de trésorerie",
+      "analytiqueTitle": "Comptabilité analytique",
+      "analytiqueCrumb": "Analytique",
+      "recouvrementTitle": "Recouvrement",
+      "recouvrementCrumb": "Recouvrement",
+      "effetsTitle": "Effets de commerce",
+      "effetsCrumb": "Effets",
+      "declarationsTitle": "Déclarations fiscales",
+      "declarationsCrumb": "Déclarations",
+      "simplIsTitle": "SIMPL-IS",
+      "retenueSourceTitle": "Retenue à la source (RAS)",
+      "caissesChantierTitle": "Caisses chantier",
+      "caissesChantierCrumb": "Caisses chantier"
+    },
+    "journal": {
+      "entityName": "Journal",
+      "entityNamePlural": "Journaux",
+      "title": "Journaux comptables",
+      "subtitle": "Synthèse par journal et période",
+      "list": {
+        "columns": {
+          "code": "Code",
+          "libelle": "Libellé",
+          "type": "Type",
+          "compteContrepartie": "Compte contrepartie",
+          "exercice": "Exercice",
+          "nbEcritures": "Nb écritures",
+          "totalDebit": "Total Débit",
+          "totalCredit": "Total Crédit",
+          "solde": "Solde",
+          "actions": "Actions"
+        },
+        "filters": {
+          "period": "Période",
+          "type": "Type journal",
+          "exercice": "Exercice"
+        },
+        "emptyState": {
+          "title": "Aucun journal",
+          "message": "Aucun journal comptable configuré."
+        }
+      },
+      "form": {
+        "fields": {
+          "code": "Code journal",
+          "libelle": "Libellé",
+          "type": "Type",
+          "compteContrepartie": "Compte de contrepartie par défaut",
+          "exercice": "Exercice comptable",
+          "actif": "Actif"
+        }
+      },
+      "types": {
+        "vente": "Ventes",
+        "achat": "Achats",
+        "banque": "Banque",
+        "caisse": "Caisse",
+        "operationsDiverses": "OD",
+        "nouveaux": "À nouveaux"
+      },
+      "status": {
+        "equilibre": "✓ Équilibré",
+        "desequilibre": "⚠ Δ"
+      },
+      "actions": {
+        "create": "Nouveau journal",
+        "edit": "Modifier le journal",
+        "viewEcritures": "Voir les écritures"
+      }
+    },
+    "ecriture": {
+      "entityName": "Écriture",
+      "entityNamePlural": "Écritures",
+      "title": "Écritures comptables",
+      "subtitle": "Suivi du grand livre",
+      "list": {
+        "columns": {
+          "numero": "N°",
+          "date": "Date",
+          "journal": "Journal",
+          "reference": "Référence",
+          "libelle": "Libellé",
+          "tiers": "Tiers",
+          "chantier": "Chantier",
+          "totalDebit": "Total débit",
+          "totalCredit": "Total crédit",
+          "origine": "Origine",
+          "status": "Statut",
+          "actions": "Actions"
+        },
+        "filters": {
+          "journal": "Journal",
+          "status": "Statut",
+          "origine": "Origine",
+          "tiers": "Tiers",
+          "chantier": "Chantier",
+          "dateFrom": "Date du",
+          "dateTo": "Date au",
+          "exercice": "Exercice"
+        },
+        "emptyState": {
+          "title": "Aucune écriture",
+          "message": "Aucune écriture comptable enregistrée pour cette période."
+        }
+      },
+      "detail": {
+        "title": "Écriture {numero}",
+        "infoSection": "Informations",
+        "lignesSection": "Lignes d'écriture",
+        "totauxSection": "Totaux",
+        "audit": "Audit"
+      },
+      "form": {
+        "fields": {
+          "numero": "Numéro d'écriture",
+          "date": "Date écriture",
+          "journal": "Journal",
+          "reference": "Référence",
+          "libelle": "Libellé",
+          "libelleCompte": "Libellé compte",
+          "tiers": "Tiers",
+          "chantier": "Chantier",
+          "axeAnalytique": "Axe analytique",
+          "exercice": "Exercice",
+          "origine": "Origine"
+        },
+        "ligne": {
+          "compte": "Compte",
+          "libelle": "Libellé",
+          "debit": "Débit",
+          "credit": "Crédit",
+          "tiers": "Tiers",
+          "axeAnalytique": "Axe",
+          "addLigne": "+ Ajouter ligne",
+          "removeLigne": "Supprimer la ligne",
+          "empty": "Aucune ligne. Ajoutez la première."
+        }
+      },
+      "fields": {
+        "documentSource": "Document source",
+        "validatedBy": "Validé par"
+      },
+      "saisie": {
+        "title": "Nouvelle écriture",
+        "subtitle": "Saisie manuelle équilibrée",
+        "crumb": "Saisie",
+        "lignesSection": "Lignes d'écriture",
+        "selectPlaceholder": "— Sélectionner —",
+        "referencePlaceholder": "N° pièce, BL, contrat…",
+        "libellePlaceholder": "Ex : Facture client SIT-CH-001-04",
+        "comptePlaceholder": "6111…",
+        "axePlaceholder": "CH-001…",
+        "saveDraft": "Enregistrer brouillon"
+      },
+      "origine": {
+        "manuelle": "Manuelle"
+      },
+      "balance": {
+        "equilibre": "✓ Débit = Crédit",
+        "delta": "⚠ Δ ="
+      },
+      "actions": {
+        "create": "+ Nouvelle écriture",
+        "validate": "Valider",
+        "cancel": "Annuler",
+        "delete": "Supprimer",
+        "duplicate": "Dupliquer",
+        "contrePasser": "Contre-passer",
+        "viewSource": "Voir la pièce source"
+      },
+      "toasts": {
+        "created": "Écriture créée",
+        "validated": "Écriture validée",
+        "validatedNumero": "Écriture {numero} validée",
+        "savedNumero": "Écriture {numero} enregistrée",
+        "cancelled": "Écriture annulée",
+        "deleted": "Écriture supprimée",
+        "notFound": "Écriture introuvable.",
+        "contrePassationCreated": "Contre-passation {numero} créée",
+        "unbalanced": "L'écriture n'est pas équilibrée (Débit ≠ Crédit)"
+      }
+    },
+    "factureFournisseur": {
+      "entityName": "Facture fournisseur",
+      "entityNamePlural": "Factures fournisseurs",
+      "title": "Factures fournisseurs",
+      "subtitle": "Saisie, validation et règlement",
+      "newTitle": "Nouvelle facture fournisseur",
+      "draftSubtitle": "Saisie",
+      "list": {
+        "columns": {
+          "numeroInterne": "N° interne",
+          "numeroFournisseur": "N° fournisseur",
+          "fournisseur": "Fournisseur",
+          "dateFacture": "Date facture",
+          "dateReception": "Réception",
+          "dateEcheance": "Échéance",
+          "chantier": "Chantier",
+          "totalHt": "Total HT",
+          "totalTva": "TVA",
+          "totalTtc": "Total TTC",
+          "cumulRegle": "Cumul réglé",
+          "resteARegler": "Reste à régler",
+          "status": "Statut",
+          "rubrique": "Rubrique",
+          "actions": "Actions"
+        },
+        "filters": {
+          "status": "Statut",
+          "fournisseur": "Fournisseur",
+          "chantier": "Chantier",
+          "rubrique": "Rubrique",
+          "dateFrom": "Reçue du",
+          "dateTo": "Reçue au",
+          "echeanceFrom": "Échéance du",
+          "echeanceTo": "Échéance au"
+        },
+        "emptyState": {
+          "title": "Aucune facture fournisseur",
+          "message": "Aucune facture fournisseur enregistrée.",
+          "actionLabel": "Saisir une facture"
+        }
+      },
+      "sections": {
+        "approval": "Workflow d'approbation",
+        "matching3Way": "Matching 3-way (BC ↔ BL ↔ facture)",
+        "identite": "Identité",
+        "lignes": "Lignes de facture",
+        "recap": "Récapitulatif",
+        "dgiLinks": "Déclarations DGI (liées)",
+        "activity": "Activité"
+      },
+      "form": {
+        "fields": {
+          "fournisseur": "Fournisseur",
+          "fournisseurPlaceholder": "— Sélectionner —",
+          "numeroFournisseur": "N° fournisseur",
+          "dateFacture": "Date facture",
+          "dateReception": "Date réception",
+          "dateEcheance": "Date échéance",
+          "bcNumero": "BC source",
+          "bcPlaceholder": "BC-2026-…",
+          "chantier": "Chantier",
+          "chantierPlaceholder": "Code chantier",
+          "rubrique": "Rubrique",
+          "designation": "Désignation",
+          "compte": "Compte",
+          "axe": "Axe",
+          "quantite": "Qté",
+          "prixUnitaireHt": "PU HT",
+          "totalHt": "Total HT",
+          "tvaTaux": "TVA %"
+        }
+      },
+      "lignes": {
+        "addLigne": "+ Ajouter ligne",
+        "removeLigne": "×",
+        "empty": "Aucune ligne. Ajoutez la première.",
+        "defaultLabel": "Ligne {n}"
+      },
+      "recap": {
+        "totalHt": "Total HT",
+        "tvaFacture": "TVA sur facture fournisseur",
+        "tvaAutoliq": "TVA autoliquidation (décl.)",
+        "retenueTva": "Retenue TVA (autoliquidation)",
+        "totalTtc": "Total TTC",
+        "netAPayer": "Net à payer fournisseur",
+        "cumulRegle": "Cumul réglé",
+        "resteARegler": "Reste à payer",
+        "ecritureComptable": "Écriture comptable",
+        "voirEcriture": "Voir l'écriture →"
+      },
+      "hints": {
+        "nonResident": "Prestataire <strong>hors Maroc</strong> : si l'option autoliquidation TVA est activée (Administration → Paramètres fiscaux), la TVA n'apparaît pas sur la facture fournisseur ; le <strong>net à payer</strong> tient compte d'une éventuelle <strong>retenue TVA</strong> sur l'autoliquidation (réglage fiscal).",
+        "residentB2b": "Prestataire <strong>résident Maroc</strong> (B2B) : TVA classique sur facture — pas d'autoliquidation sur ce flux démo.",
+        "fournisseurNonMaroc": "(hors MA)",
+        "dgiHint": "Les montants HT / TVA / retenues des factures validées alimentent l'<strong>état 1208</strong> (achats) et les paramètres fiscaux (TVA mensuelle / autoliquidation — démo).",
+        "etat1208Link": "État 1208 — récapitulatif annuel des achats",
+        "etat1208Note": "(ICE fournisseur, agrégation FF)",
+        "parametresFiscalLink": "Paramètres fiscaux",
+        "parametresFiscalNote": "(autoliquidation, % retenue TVA)"
+      },
+      "matching": {
+        "title": "Matching 3-way (BC ↔ BL ↔ facture)",
+        "bc": "BC",
+        "bl": "BL",
+        "status": "Statut",
+        "aligned": "— aligné",
+        "headers": {
+          "article": "Article",
+          "qteCommandee": "Cmd",
+          "qteRecue": "Reçu",
+          "qteFacturee": "Fact.",
+          "puBc": "PU BC",
+          "puFacture": "PU fact.",
+          "ecartQte": "Écart qté %",
+          "ecartPx": "Écart px %"
+        },
+        "bloquant": "Bloquant",
+        "blockingError": "3-way matching : écart bloquant (BC / BL / facture). Corrigez la facture ou rattachez le bon BL avant validation."
+      },
+      "activity": {
+        "creation": "Création / Saisie",
+        "validee": "Validée — écriture comptable {state}",
+        "ecritureGeneree": "générée",
+        "ecritureEnAttente": "en attente",
+        "reglement": "Règlement {state} — {amount}",
+        "complet": "complet",
+        "partiel": "partiel",
+        "enLitige": "En litige",
+        "motifManquant": "Motif non renseigné"
+      },
+      "actions": {
+        "create": "Créer (brouillon)",
+        "save": "Enregistrer",
+        "validate": "Valider · génère écriture AC",
+        "validateShort": "Valider",
+        "litige": "Marquer en litige",
+        "annuler": "Annuler",
+        "retour": "Retour"
+      },
+      "prompts": {
+        "motifLitige": "Motif du litige ?",
+        "confirmAnnulation": "Annuler cette facture ?"
+      },
+      "toasts": {
+        "missingFields": "Renseignez fournisseur, n° fournisseur et date facture.",
+        "created": "Facture {numero} créée",
+        "saved": "Facture enregistrée",
+        "validated": "Facture validée — écriture comptable générée",
+        "litige": "Facture marquée en litige",
+        "annulee": "Facture annulée",
+        "error": "Erreur"
+      }
+    },
+    "reglement": {
+      "entityName": "Règlement",
+      "entityNamePlural": "Règlements",
+      "title": "Règlements fournisseurs",
+      "newTitle": "Nouveau règlement",
+      "list": {
+        "columns": {
+          "numero": "N°",
+          "date": "Date",
+          "fournisseur": "Fournisseur",
+          "modePaiement": "Mode",
+          "montant": "Montant",
+          "compteEmetteur": "Compte émetteur",
+          "reference": "Référence",
+          "status": "Statut",
+          "facturesReglees": "Factures réglées",
+          "actions": "Actions"
+        },
+        "filters": {
+          "fournisseur": "Fournisseur",
+          "modePaiement": "Mode de paiement",
+          "compteEmetteur": "Compte",
+          "status": "Statut",
+          "dateFrom": "Du",
+          "dateTo": "Au",
+          "montantMin": "Montant min",
+          "montantMax": "Montant max"
+        },
+        "emptyState": {
+          "title": "Aucun règlement",
+          "message": "Aucun règlement enregistré pour cette période.",
+          "actionLabel": "Nouveau règlement"
+        }
+      },
+      "form": {
+        "title": "Saisie d'un règlement fournisseur",
+        "subtitle": "Sélection facture(s) et mode de paiement",
+        "fields": {
+          "fournisseur": "Fournisseur",
+          "date": "Date règlement",
+          "modePaiement": "Mode de paiement",
+          "compteEmetteur": "Compte émetteur",
+          "reference": "Référence (n° chèque, virement…)",
+          "montant": "Montant",
+          "libelle": "Libellé"
+        },
+        "selectFactures": "Factures à régler",
+        "factureSelector": {
+          "title": "Sélectionner les factures à régler",
+          "headers": {
+            "numero": "N°",
+            "dateFacture": "Date",
+            "dateEcheance": "Échéance",
+            "totalTtc": "TTC",
+            "deja": "Déjà réglé",
+            "reste": "Reste",
+            "imputation": "Imputation"
+          },
+          "selected": "{n} facture(s) sélectionnée(s)",
+          "totalImpute": "Total imputé",
+          "ecart": "Écart"
+        },
+        "validation": {
+          "atLeastOneFacture": "Sélectionnez au moins une facture",
+          "imputationMismatch": "Total imputé ≠ Montant règlement",
+          "amountRequired": "Montant requis"
+        }
+      },
+      "actions": {
+        "create": "+ Nouveau règlement",
+        "save": "Enregistrer",
+        "validate": "Valider · génère écriture banque/caisse",
+        "imputer": "Imputer",
+        "cancel": "Annuler",
+        "retour": "Retour règlements"
+      },
+      "toasts": {
+        "created": "Règlement créé",
+        "validated": "Règlement validé — écriture générée",
+        "cancelled": "Règlement annulé",
+        "error": "Erreur lors du règlement"
+      }
+    },
+    "rapprochement": {
+      "entityName": "Rapprochement bancaire",
+      "title": "Rapprochement bancaire",
+      "subtitle": "Lettrage des relevés bancaires avec les mouvements ERP",
+      "selectAccount": "Sélectionner un compte bancaire",
+      "periodFilter": "Période",
+      "import": {
+        "title": "Importer un relevé bancaire",
+        "subtitle": "Formats supportés : OFX, CSV",
+        "dropzone": "Glissez le fichier OFX ou CSV ici",
+        "chooseFile": "Choisir un fichier",
+        "format": "Format",
+        "encoding": "Encodage",
+        "preview": "Aperçu",
+        "linesImported": "{n} ligne(s) importée(s)",
+        "errors": "{n} erreur(s) détectée(s)",
+        "actions": {
+          "import": "Importer",
+          "cancel": "Annuler",
+          "downloadTemplate": "Télécharger modèle CSV"
+        },
+        "toasts": {
+          "imported": "Relevé importé ({n} lignes)",
+          "error": "Erreur lors de l'import"
+        }
+      },
+      "matcher": {
+        "title": "Matcher",
+        "subtitle": "Associer les lignes du relevé avec les mouvements ERP",
+        "headers": {
+          "date": "Date",
+          "libelle": "Libellé",
+          "reference": "Référence",
+          "debit": "Débit",
+          "credit": "Crédit",
+          "match": "Match",
+          "status": "Statut"
+        },
+        "matchTypes": {
+          "auto": "Auto",
+          "manuel": "Manuel",
+          "suggestion": "Suggestion",
+          "none": "—"
+        },
+        "filters": {
+          "matched": "Lettrés",
+          "unmatched": "Non lettrés",
+          "all": "Tous"
+        },
+        "actions": {
+          "matchSelected": "Lettrer la sélection",
+          "unmatch": "Délettrer",
+          "createEcriture": "Créer écriture",
+          "ignore": "Ignorer"
+        },
+        "unmatchedMvt": "mouvement(s) non rapproché(s)",
+        "unmatchedReleve": "ligne(s) relevé non matchée(s)",
+        "inProgress": "match(s) en cours",
+        "autoMatch": "⚡ Matching auto",
+        "mvtTitle": "Mouvements comptables non rapprochés",
+        "releveTitle": "Lignes relevé bancaire non matchées",
+        "matchAction": "↔ Rapprocher",
+        "unlinkAction": "✕ Délier",
+        "createMvt": "+ Créer mvt",
+        "createMvtTooltip": "Créer un mouvement comptable depuis cette ligne",
+        "allMvtReconciled": "Tous les mouvements sont rapprochés ✓",
+        "allReleveMatched": "Toutes les lignes du relevé sont matchées ✓",
+        "pairsTitle": "Rapprochements en cours",
+        "unlinkTooltip": "Délier ce rapprochement",
+        "cols": {
+          "mouvement": "Mouvement",
+          "releve": "Ligne relevé",
+          "mvtShort": "Mvt",
+          "releveShort": "Relevé"
+        }
+      },
+      "lettrage": {
+        "partial": "Lettrage partiel",
+        "complet": "Lettrage complet",
+        "none": "Non lettré"
+      },
+      "summary": {
+        "soldeReleve": "Solde relevé",
+        "soldeErp": "Solde ERP",
+        "ecart": "Écart",
+        "matched": "Lettrés",
+        "unmatched": "Non lettrés"
+      },
+      "toasts": {
+        "matched": "Lignes lettrées",
+        "unmatched": "Lignes délettrées",
+        "ecritureCreated": "Écriture créée à partir de la ligne bancaire"
+      }
+    },
+    "lettrage": {
+      "entityName": "Lettrage",
+      "title": "Lettrage comptes",
+      "subtitle": "Lettrer les écritures sur un compte de tiers",
+      "selectAccount": "Sélectionner un compte",
+      "noAccount": "Aucun compte sélectionné",
+      "headers": {
+        "date": "Date",
+        "journal": "Journal",
+        "reference": "Référence",
+        "libelle": "Libellé",
+        "debit": "Débit",
+        "credit": "Crédit",
+        "lettre": "Lettre"
+      },
+      "summary": {
+        "totalDebit": "Total débit",
+        "totalCredit": "Total crédit",
+        "solde": "Solde",
+        "lettre": "À lettrer"
+      },
+      "actions": {
+        "letter": "Lettrer",
+        "unletter": "Délettrer",
+        "auto": "Lettrage automatique"
+      },
+      "toasts": {
+        "lettered": "Écritures lettrées (lettre {code})",
+        "unlettered": "Lettrage annulé",
+        "autoSuccess": "{n} groupe(s) lettré(s) automatiquement"
+      }
+    },
+    "planComptable": {
+      "entityName": "Plan comptable",
+      "title": "Plan comptable (CGNC)",
+      "subtitle": "Plan comptable normalisé CGNC Maroc",
+      "list": {
+        "columns": {
+          "code": "Code",
+          "libelle": "Libellé",
+          "classe": "Classe",
+          "type": "Type",
+          "auxiliaire": "Auxiliaire",
+          "actif": "Actif",
+          "soldeOuverture": "Solde ouv.",
+          "soldeCourant": "Solde courant",
+          "actions": "Actions"
+        },
+        "filters": {
+          "classe": "Classe",
+          "type": "Type",
+          "auxiliaire": "Auxiliaire",
+          "actif": "Actif"
+        }
+      },
+      "cgnc": {
+        "classe1": "Classe 1 — Financement permanent",
+        "classe2": "Classe 2 — Immobilisations",
+        "classe3": "Classe 3 — Stocks et créances",
+        "classe4": "Classe 4 — Dettes du passif circulant",
+        "classe5": "Classe 5 — Trésorerie",
+        "classe6": "Classe 6 — Charges",
+        "classe7": "Classe 7 — Produits",
+        "classe8": "Classe 8 — Comptes de résultat",
+        "classe9": "Classe 9 — Comptes analytiques",
+        "classe0": "Classe 0 — Comptes spéciaux",
+        "classeGeneric": "Classe {classe}"
+      },
+      "tree": {
+        "searchPlaceholder": "Rechercher compte (code ou libellé)…",
+        "expandAll": "Tout déplier",
+        "collapseAll": "Tout replier",
+        "emptySearch": "Aucun compte ne correspond à la recherche.",
+        "ecritureCount": "{count} écritures"
+      },
+      "tags": {
+        "collectif": "collectif",
+        "lettrable": "lettrable",
+        "analytique": "analytique",
+        "inactive": "inactif"
+      },
+      "compteType": {
+        "CHARGE": "Charge",
+        "PRODUIT": "Produit",
+        "ACTIF": "Actif",
+        "PASSIF": "Passif",
+        "TIERS": "Tiers",
+        "TRESORERIE": "Trésorerie"
+      },
+      "page": {
+        "title": "Plan comptable BTP — CGNC Maroc",
+        "subtitle": "Référentiel CGNC, comptes auxiliaires et journaux. Indispensable au paramétrage finance."
+      },
+      "tabs": {
+        "arbre": "Plan comptable",
+        "journaux": "Journaux"
+      },
+      "actions": {
+        "importBtp": "Importer modèle BTP",
+        "newCompte": "+ Nouveau compte"
+      },
+      "stats": {
+        "total": "Comptes total",
+        "actifs": "Comptes actifs",
+        "auxiliaires": "Auxiliaires"
+      },
+      "loading": "Chargement du plan comptable…",
+      "resetConfirm": "Réinitialiser le plan comptable depuis le modèle BTP Maroc ? Les ajouts manuels seront perdus.",
+      "journalConfig": {
+        "title": "Journaux ({count})",
+        "newJournal": "+ Nouveau journal",
+        "codePlaceholder": "OD",
+        "contrepartiePlaceholder": "5141 / 5161",
+        "cols": {
+          "code": "Code",
+          "libelle": "Libellé",
+          "type": "Type",
+          "contrepartie": "Contre-partie défaut",
+          "actif": "Actif"
+        }
+      },
+      "drawer": {
+        "createBadge": "Nouveau compte",
+        "editBadge": "Édition compte",
+        "createTitle": "Créer un compte",
+        "codePlaceholder": "6111",
+        "libellePlaceholder": "Achats matières premières",
+        "parentPlaceholder": "611",
+        "typeComptable": "Type comptable",
+        "attributs": "Attributs",
+        "attrs": {
+          "collectif": "Compte collectif (impose comptes auxiliaires)",
+          "lettrable": "Lettrable (rapprochement clients/fournisseurs)",
+          "auxiliaire": "Auxiliaire (sous compte tiers)",
+          "analytiqueObligatoire": "Axe analytique obligatoire (chantier / département)",
+          "actif": "Actif"
+        },
+        "usageTitle": "Usage",
+        "usageCount": "{count} écritures associées.",
+        "deleteBlocked": "Suppression bloquée tant qu'au moins une écriture utilise ce compte.",
+        "deleteBlockedError": "Suppression bloquée : {count} écritures utilisent ce compte."
+      },
+      "category": {
+        "ACTIF": "Actif",
+        "PASSIF": "Passif",
+        "CHARGE": "Charges",
+        "PRODUIT": "Produits",
+        "RESULTAT": "Résultat"
+      },
+      "type": {
+        "GENERAL": "Général",
+        "AUXILIAIRE": "Auxiliaire",
+        "TIERS": "Tiers",
+        "ANALYTIQUE": "Analytique"
+      },
+      "form": {
+        "fields": {
+          "code": "Code compte",
+          "libelle": "Libellé",
+          "classe": "Classe",
+          "type": "Type",
+          "auxiliaire": "Auxiliaire",
+          "parent": "Compte parent",
+          "actif": "Actif",
+          "lettrable": "Lettrable",
+          "analytiqueObligatoire": "Analytique obligatoire"
+        }
+      },
+      "tree": {
+        "rootLabel": "Plan comptable",
+        "noResult": "Aucun compte ne correspond à la recherche",
+        "search": "Rechercher par code ou libellé…",
+        "expandAll": "Tout déplier",
+        "collapseAll": "Tout replier"
+      },
+      "drawer": {
+        "createTitle": "Nouveau compte",
+        "editTitle": "Modifier compte {code}",
+        "actions": {
+          "save": "Enregistrer",
+          "delete": "Supprimer",
+          "cancel": "Annuler"
+        },
+        "toasts": {
+          "created": "Compte créé",
+          "saved": "Compte modifié",
+          "deleted": "Compte supprimé"
+        }
+      },
+      "actions": {
+        "createCompte": "Nouveau compte",
+        "importPlan": "Importer plan",
+        "exportPlan": "Exporter plan",
+        "configureJournals": "Configurer journaux"
+      }
+    },
+    "journalConfig": {
+      "title": "Configuration des journaux",
+      "subtitle": "Journaux et compte de contrepartie par défaut",
+      "headers": {
+        "code": "Code",
+        "libelle": "Libellé",
+        "type": "Type",
+        "compteContrepartie": "Compte contrepartie",
+        "exercice": "Exercice",
+        "actions": "Actions"
+      },
+      "actions": {
+        "create": "Ajouter un journal",
+        "edit": "Modifier",
+        "delete": "Supprimer"
+      },
+      "form": {
+        "fields": {
+          "code": "Code journal",
+          "libelle": "Libellé",
+          "type": "Type",
+          "compteContrepartie": "Compte de contrepartie",
+          "actif": "Actif"
+        }
+      },
+      "toasts": {
+        "created": "Journal créé",
+        "saved": "Journal mis à jour",
+        "deleted": "Journal supprimé"
+      }
+    },
+    "balance": {
+      "entityName": "Balance",
+      "title": "Balance générale",
+      "subtitle": "Balance des comptes par exercice",
+      "routeTitle": "Balance générale",
+      "routeBreadcrumb": "Balance",
+      "filters": {
+        "exercice": "Exercice",
+        "periodFrom": "Période du",
+        "periodTo": "Période au",
+        "classe": "Classe",
+        "type": "Type compte",
+        "showZero": "Inclure les soldes nuls"
+      },
+      "headers": {
+        "code": "Code",
+        "libelle": "Libellé",
+        "soldeOuvertureDebit": "Solde ouv. (D)",
+        "soldeOuvertureCredit": "Solde ouv. (C)",
+        "movementsDebit": "Mouvements (D)",
+        "movementsCredit": "Mouvements (C)",
+        "soldeFinalDebit": "Solde final (D)",
+        "soldeFinalCredit": "Solde final (C)"
+      },
+      "totals": {
+        "label": "TOTAL",
+        "subtotalClasse": "Sous-total classe {n}"
+      },
+      "actions": {
+        "exportCsv": "Exporter CSV",
+        "exportPdf": "Exporter PDF",
+        "drillDown": "Voir détail compte"
+      },
+      "emptyState": {
+        "title": "Aucune écriture",
+        "message": "Aucune écriture comptable pour cet exercice."
+      }
+    },
+    "grandLivre": {
+      "entityName": "Grand livre",
+      "title": "Grand livre",
+      "subtitle": "Détail des écritures par compte",
+      "selectAccount": "Sélectionner un compte",
+      "headers": {
+        "date": "Date",
+        "journal": "Journal",
+        "reference": "Référence",
+        "libelle": "Libellé",
+        "debit": "Débit",
+        "credit": "Crédit",
+        "soldeProgressif": "Solde progressif"
+      }
+    },
+    "virement": {
+      "entityName": "Virement",
+      "entityNamePlural": "Virements",
+      "title": "Virements bancaires",
+      "subtitle": "Émission, suivi et remise de virements",
+      "list": {
+        "columns": {
+          "numero": "N°",
+          "date": "Date",
+          "compteEmetteur": "Compte émetteur",
+          "beneficiaire": "Bénéficiaire",
+          "rib": "RIB",
+          "montant": "Montant",
+          "devise": "Devise",
+          "motif": "Motif",
+          "status": "Statut",
+          "actions": "Actions"
+        },
+        "filters": {
+          "status": "Statut",
+          "compteEmetteur": "Compte",
+          "beneficiaire": "Bénéficiaire",
+          "dateFrom": "Du",
+          "dateTo": "Au"
+        },
+        "emptyState": {
+          "title": "Aucun virement",
+          "message": "Aucun virement enregistré.",
+          "actionLabel": "Nouveau virement"
+        }
+      },
+      "form": {
+        "fields": {
+          "compteEmetteur": "Compte émetteur",
+          "beneficiaire": "Bénéficiaire",
+          "rib": "RIB bénéficiaire",
+          "banque": "Banque bénéficiaire",
+          "montant": "Montant",
+          "devise": "Devise",
+          "motif": "Motif",
+          "reference": "Référence",
+          "dateExecution": "Date d'exécution"
+        }
+      },
+      "remise": {
+        "title": "Remise de virements",
+        "subtitle": "Générer le fichier XML pour la banque",
+        "selectVirements": "Sélectionner les virements à inclure",
+        "summary": "Récapitulatif",
+        "totalAmount": "Total à virer",
+        "nbVirements": "Nombre de virements",
+        "format": "Format de remise",
+        "actions": {
+          "generate": "Générer le fichier XML",
+          "download": "Télécharger XML",
+          "send": "Marquer comme envoyée"
+        },
+        "toasts": {
+          "generated": "Fichier de remise généré",
+          "sent": "Remise marquée comme envoyée"
+        }
+      },
+      "actions": {
+        "create": "Nouveau virement",
+        "validate": "Valider",
+        "execute": "Marquer exécuté",
+        "cancel": "Annuler",
+        "downloadXml": "Télécharger XML"
+      },
+      "toasts": {
+        "created": "Virement créé",
+        "validated": "Virement validé",
+        "executed": "Virement marqué exécuté",
+        "cancelled": "Virement annulé"
+      }
+    },
+    "compte": {
+      "entityName": "Compte de trésorerie",
+      "title": "Caisses & Banques",
+      "subtitle": "Comptes de trésorerie ERP",
+      "list": {
+        "columns": {
+          "code": "Code",
+          "libelle": "Libellé",
+          "type": "Type",
+          "banque": "Banque",
+          "rib": "RIB",
+          "devise": "Devise",
+          "soldeInitial": "Solde initial",
+          "soldeComptable": "Solde comptable",
+          "soldeBancaire": "Solde bancaire (relevé)",
+          "actions": "Actions"
+        }
+      },
+      "type": {
+        "CAISSE": "Caisse",
+        "BANQUE": "Banque",
+        "CARTE_BANCAIRE": "Carte bancaire",
+        "EFFETS_A_RECEVOIR": "Effets à recevoir",
+        "AUTRE": "Autre"
+      },
+      "types": {
+        "banque": "🏦 Banque",
+        "caisse": "💵 Caisse"
+      },
+      "form": {
+        "fields": {
+          "rib": "RIB"
+        }
+      },
+      "detail": {
+        "title": "{code} — {libelle}",
+        "infoSection": "Informations",
+        "mouvementsSection": "Mouvements",
+        "rapprochementSection": "Rapprochement",
+        "back": "← Caisses",
+        "viewMouvements": "Voir mouvements →",
+        "identification": "Identification",
+        "compteCgnc": "Compte CGNC",
+        "active": "Actif",
+        "inactive": "Inactif",
+        "coordonneesBancaires": "Coordonnées bancaires",
+        "agence": "Agence",
+        "soldes": "Soldes",
+        "mouvementsMois": "Mouvements (mois)",
+        "recettesMois": "Recettes (mois)",
+        "depensesMois": "Dépenses (mois)",
+        "notes": "Notes"
+      },
+      "actions": {
+        "create": "Nouveau compte",
+        "edit": "Modifier",
+        "saisirMouvement": "Saisir un mouvement",
+        "rapprocher": "Rapprocher",
+        "voirReleves": "Voir relevés"
+      },
+      "financierCard": {
+        "inactive": "Inactif",
+        "rib": "RIB",
+        "currentBalance": "Solde actuel",
+        "vsYesterday": "vs hier",
+        "mvtsThisMonth": "Mouvements ce mois",
+        "recettes": "Recettes",
+        "depenses": "Dépenses",
+        "viewMvts": "Voir mouvements",
+        "newMvt": "+ Saisir mvt"
+      }
+    },
+    "mouvement": {
+      "entityName": "Mouvement",
+      "entityNamePlural": "Mouvements",
+      "headers": {
+        "date": "Date",
+        "libelle": "Libellé",
+        "reference": "Référence",
+        "tiers": "Tiers",
+        "type": "Type",
+        "debit": "Débit",
+        "credit": "Crédit",
+        "solde": "Solde",
+        "matched": "Lettré"
+      },
+      "row": {
+        "matched": "Rapproché"
+      },
+      "list": {
+        "columns": {
+          "date": "Date",
+          "numero": "N°",
+          "type": "Type",
+          "libelle": "Libellé",
+          "reference": "Référence",
+          "recette": "Recette",
+          "depense": "Dépense",
+          "solde": "Solde"
+        },
+        "emptyState": {
+          "title": "Aucun mouvement ne correspond aux filtres."
+        }
+      },
+      "filters": {
+        "type": "Type mouvement",
+        "matched": "Statut lettrage",
+        "dateFrom": "Du",
+        "dateTo": "Au",
+        "searchPlaceholder": "Rechercher (libellé, n°, contrepartie, réf)…",
+        "rapproche": {
+          "all": "Rapprochement : tous",
+          "yes": "Rapprochés",
+          "no": "Non rapprochés"
+        }
+      },
+      "types": {
+        "REGLEMENT_CLIENT": "Règl. clients",
+        "REGLEMENT_FOURN": "Règl. fournisseurs",
+        "PAIEMENT_PAIE": "Paie / NDF",
+        "VIREMENT_INTERNE": "Vir. internes",
+        "FRAIS_BANCAIRES": "Frais bancaires",
+        "COMMISSIONS": "Commissions",
+        "AUTRE_RECETTE": "Autres recettes",
+        "AUTRE_DEPENSE": "Autres dépenses"
+      },
+      "summary": {
+        "displayed": "Mouvements affichés",
+        "totalRecettes": "Total recettes",
+        "totalDepenses": "Total dépenses",
+        "totals": "Totaux affichés"
+      },
+      "labels": {
+        "vsYesterday": "vs hier"
+      },
+      "csv": {
+        "date": "Date",
+        "numero": "Numéro",
+        "type": "Type",
+        "libelle": "Libellé",
+        "reference": "Référence",
+        "contrepartie": "Contrepartie",
+        "recette": "Recette",
+        "depense": "Dépense",
+        "solde": "Solde",
+        "rapproche": "Rapproché"
+      },
+      "form": {
+        "title": "Saisie d'un mouvement",
+        "fields": {
+          "compte": "Compte de trésorerie",
+          "date": "Date",
+          "type": "Type",
+          "montant": "Montant",
+          "sens": "Sens",
+          "libelle": "Libellé",
+          "reference": "Référence",
+          "tiers": "Tiers",
+          "imputation": "Imputation comptable"
+        },
+        "sens": {
+          "debit": "Débit (entrée)",
+          "credit": "Crédit (sortie)"
+        }
+      },
+      "modes": {
+        "VIREMENT": "Virement",
+        "CHEQUE": "Chèque",
+        "ESPECES": "Espèces",
+        "CARTE": "Carte",
+        "EFFET": "Effet"
+      },
+      "defaultLibelle": {
+        "FRAIS_BANCAIRES": "Frais tenue de compte",
+        "COMMISSIONS": "Commission opération"
+      },
+      "dialog": {
+        "title": "Saisir un mouvement",
+        "mode": "Mode",
+        "referencePlaceholder": "N° chèque, virement…",
+        "libellePlaceholder": "Description du mouvement",
+        "recetteLabel": "Recette (entrée)",
+        "depenseLabel": "Dépense (sortie)",
+        "contrepartieLabel": "Contrepartie",
+        "contrepartiePlaceholder": "Bénéficiaire ou émetteur",
+        "justificatifLabel": "Justificatif (note de frais)",
+        "justificatifPlaceholder": "Réf NDF / pièce justificative obligatoire pour caisse",
+        "justificatifPrefix": "Justif: {ref}",
+        "delegateInfo": "Ce type de mouvement passe par un workflow dédié pour générer automatiquement les écritures comptables et la mise à jour des factures.",
+        "delegateHint": "Cliquez « Continuer » pour ouvrir le formulaire correspondant.",
+        "empty": "Choisissez un type de mouvement.",
+        "continueAction": "Continuer →",
+        "options": {
+          "REGLEMENT_CLIENT": { "label": "Règlement client", "hint": "Encaissement" },
+          "REGLEMENT_FOURN": { "label": "Règlement fournisseur", "hint": "Décaissement" },
+          "VIREMENT_INTERNE": { "label": "Virement interne", "hint": "Inter-comptes" },
+          "AUTRE_RECETTE": { "label": "Autre recette", "hint": "Encaissement divers" },
+          "AUTRE_DEPENSE": { "label": "Autre dépense", "hint": "Décaissement divers" },
+          "FRAIS_BANCAIRES": { "label": "Frais bancaires", "hint": "Tenue de compte…" },
+          "COMMISSIONS": { "label": "Commission", "hint": "Sur opérations" },
+          "PAIEMENT_PAIE": { "label": "Paie / Note de frais", "hint": "Personnel" }
+        }
+      },
+      "actions": {
+        "create": "+ Saisir mouvement",
+        "lettrer": "Lettrer",
+        "supprimer": "Supprimer"
+      },
+      "toasts": {
+        "created": "Mouvement enregistré",
+        "deleted": "Mouvement supprimé"
+      }
+    },
+    "tauxChange": {
+      "entityName": "Taux de change",
+      "entityNamePlural": "Taux de change",
+      "title": "Taux de change",
+      "subtitle": "Cotations BAM utilisées pour la conversion devises",
+      "list": {
+        "columns": {
+          "deviseBase": "Devise de base",
+          "deviseCible": "Devise cible",
+          "taux": "Taux",
+          "dateCotation": "Date cotation",
+          "source": "Source",
+          "actions": "Actions"
+        },
+        "filters": {
+          "deviseBase": "Devise de base",
+          "deviseCible": "Devise cible",
+          "source": "Source",
+          "dateFrom": "Cotation du",
+          "dateTo": "Cotation au"
+        },
+        "emptyState": {
+          "title": "Aucun taux",
+          "message": "Aucun taux de change enregistré."
+        }
+      },
+      "form": {
+        "fields": {
+          "deviseBase": "Devise de base",
+          "deviseCible": "Devise cible",
+          "taux": "Taux",
+          "dateCotation": "Date de cotation",
+          "source": "Source"
+        }
+      },
+      "source": {
+        "BAM": "Bank Al-Maghrib (BAM)",
+        "MANUEL": "Saisi manuellement",
+        "IMPORT": "Importé"
+      },
+      "converter": {
+        "title": "Convertisseur de devises",
+        "amount": "Montant",
+        "from": "De",
+        "to": "Vers",
+        "rate": "Taux",
+        "result": "Résultat",
+        "asOf": "au",
+        "noRate": "Aucun taux disponible pour cette paire"
+      },
+      "chart": {
+        "title": "Évolution du taux",
+        "period": "Période",
+        "min": "Min",
+        "max": "Max",
+        "avg": "Moyenne"
+      },
+      "evolutionChart": {
+        "title": "Évolution des taux (12 mois)",
+        "noData": "Aucune donnée disponible."
+      },
+      "actions": {
+        "create": "Nouveau taux",
+        "importBam": "Importer cotations BAM",
+        "edit": "Modifier",
+        "delete": "Supprimer"
+      },
+      "toasts": {
+        "created": "Taux enregistré",
+        "saved": "Taux modifié",
+        "deleted": "Taux supprimé",
+        "imported": "{n} cotation(s) importée(s)"
+      }
+    },
+    "devise": {
+      "entityName": "Devise",
+      "entityNamePlural": "Devises",
+      "title": "Devises",
+      "subtitle": "Devises supportées par l'ERP",
+      "detailTitle": "Détail devise",
+      "detailBreadcrumb": "Détail",
+      "actionNew": "Nouvelle devise",
+      "statusActive": "Actif",
+      "statusInactive": "Inactif",
+      "referenceBadge": "Référence",
+      "emptyTitle": "Aucune devise",
+      "emptyMessage": "Démarrez avec MAD (référence), EUR, USD…",
+      "list": {
+        "columns": {
+          "code": "Code",
+          "libelle": "Libellé",
+          "symbole": "Symbole",
+          "precision": "Précision",
+          "reference": "Référence",
+          "actif": "Actif",
+          "decimales": "Décimales",
+          "active": "Active",
+          "isDefault": "Par défaut"
+        },
+        "filters": {
+          "status": "Statut",
+          "reference": "Référence",
+          "referenceYes": "Devise de référence",
+          "referenceNo": "Autre"
+        }
+      },
+      "form": {
+        "fields": {
+          "codeIso": "Code ISO",
+          "libelle": "Libellé",
+          "symbole": "Symbole",
+          "precision": "Précision décimales",
+          "reference": "Devise de référence",
+          "actif": "Actif"
+        },
+        "hints": {
+          "codeIso": "3 lettres majuscules (MAD, EUR, USD…)",
+          "reference": "Une seule devise peut être référence (MAD)."
+        }
+      },
+      "sections": {
+        "general": "Général",
+        "statut": "Statut"
+      },
+      "deleteConfirm": {
+        "title": "Supprimer la devise",
+        "message": "Voulez-vous vraiment supprimer la devise {code} ?"
+      },
+      "toasts": {
+        "saved": "Devise enregistrée"
+      }
+    },
+    "conditionPaiement": {
+      "entityName": "Condition de paiement",
+      "entityNamePlural": "Conditions de paiement",
+      "title": "Conditions de paiement",
+      "subtitle": "Délais et modalités de règlement",
+      "list": {
+        "columns": {
+          "code": "Code",
+          "libelle": "Libellé",
+          "type": "Type",
+          "delaiJours": "Délai (jours)",
+          "echeance": "Échéance",
+          "actif": "Actif"
+        },
+        "filters": {
+          "type": "Type",
+          "actif": "Actif"
+        }
+      },
+      "form": {
+        "fields": {
+          "code": "Code",
+          "libelle": "Libellé",
+          "type": "Type",
+          "delaiJours": "Délai (jours)",
+          "echeance": "Mode d'échéance",
+          "actif": "Actif"
+        }
+      },
+      "display": {
+        "delai": "{n} jours",
+        "finMois": "Fin de mois",
+        "finMoisX": "Fin de mois + {n} jours",
+        "leX": "Le {n} du mois suivant",
+        "comptant": "Comptant",
+        "default": "défaut"
+      },
+      "echeances": {
+        "title": "Échéances",
+        "mustBeHundred": "(doit être 100 %)",
+        "add": "+ Ajouter une échéance",
+        "descriptionPlaceholder": "Ex. À la commande",
+        "emptyState": "Aucune échéance définie. Utilisez ce tableau pour saisir des paiements échelonnés (30/40/30…).",
+        "cols": {
+          "ordre": "Ordre",
+          "delai": "Délai (j)",
+          "description": "Description"
+        }
+      }
+    },
+    "analytique": {
+      "entityName": "Analytique",
+      "title": "Analytique",
+      "subtitle": "Pivot charges/produits par axe",
+      "fields": {
+        "axe": "Axe",
+        "comptes": "Comptes"
+      },
+      "axeTypes": {
+        "CHANTIER": "Chantiers",
+        "DEPARTEMENT": "Départements",
+        "ACTIVITE": "Activités"
+      },
+      "compteSets": {
+        "both": "Charges + Produits",
+        "charges": "Charges (classe 6)",
+        "produits": "Produits (classe 7)"
+      },
+      "searchPlaceholder": "Code ou libellé compte",
+      "margeLabel": "MARGE (Σ7 - Σ6)",
+      "margeShort": "MARGE",
+      "emptyState": "Aucune donnée pour ces critères.",
+      "filters": {
+        "axe": "Axe analytique",
+        "chantier": "Chantier",
+        "rubrique": "Rubrique",
+        "periodFrom": "Période du",
+        "periodTo": "Période au",
+        "compte": "Compte"
+      },
+      "headers": {
+        "axe": "Axe",
+        "chantier": "Chantier",
+        "rubrique": "Rubrique",
+        "compte": "Compte",
+        "libelle": "Libellé",
+        "totalDebit": "Total débit",
+        "totalCredit": "Total crédit",
+        "solde": "Solde"
+      },
+      "sections": {
+        "byChantier": "Par chantier",
+        "byRubrique": "Par rubrique",
+        "byAxe": "Par axe"
+      },
+      "actions": {
+        "exportCsv": "Exporter CSV",
+        "exportExcel": "Exporter Excel",
+        "drillDown": "Voir détail"
+      },
+      "toasts": {
+        "exported": "Analytique exportée (CSV)."
+      }
+    },
+    "recouvrement": {
+      "entityName": "Recouvrement",
+      "title": "Recouvrement clients",
+      "subtitle": "Suivi des créances et relances",
+      "headers": {
+        "client": "Client",
+        "factureNumero": "N° facture",
+        "dateEmission": "Émise le",
+        "dateEcheance": "Échéance",
+        "montantTtc": "Montant TTC",
+        "encaisse": "Encaissé",
+        "reste": "Reste",
+        "joursRetard": "Jours retard",
+        "niveauRelance": "Niveau relance",
+        "dernierContact": "Dernier contact",
+        "actions": "Actions"
+      },
+      "bucket": {
+        "current": "Non échu",
+        "j1_30": "1-30 jours",
+        "j31_60": "31-60 jours",
+        "j61_90": "61-90 jours",
+        "j91_180": "91-180 jours",
+        "j180Plus": "> 180 jours"
+      },
+      "relance": {
+        "niveau1": "Niveau 1 — Rappel",
+        "niveau2": "Niveau 2 — Relance",
+        "niveau3": "Niveau 3 — Mise en demeure",
+        "contentieux": "Contentieux"
+      },
+      "actions": {
+        "envoyerRelance": "Envoyer relance",
+        "marquerEncaisse": "Marquer encaissé",
+        "voirHistorique": "Historique",
+        "contacterClient": "Contacter client",
+        "exportPdf": "Exporter PDF",
+        "exportCsv": "Exporter CSV"
+      },
+      "toasts": {
+        "relanceSent": "Relance envoyée à {client}",
+        "encaisseSaved": "Encaissement enregistré"
+      }
+    },
+    "effets": {
+      "entityName": "Effet de commerce",
+      "entityNamePlural": "Effets de commerce",
+      "title": "Effets de commerce",
+      "subtitle": "Effets à recevoir / à payer",
+      "routeTitle": "Effets de commerce",
+      "routeBreadcrumb": "Effets",
+      "list": {
+        "columns": {
+          "numero": "N°",
+          "type": "Type",
+          "tireur": "Tireur",
+          "tire": "Tiré",
+          "montant": "Montant",
+          "dateEmission": "Émis le",
+          "dateEcheance": "Échéance",
+          "domicile": "Domiciliation",
+          "status": "Statut",
+          "actions": "Actions"
+        },
+        "filters": {
+          "type": "Type",
+          "status": "Statut",
+          "dateFrom": "Échéance du",
+          "dateTo": "Échéance au"
+        }
+      },
+      "type": {
+        "AR": "À recevoir",
+        "AP": "À payer"
+      },
+      "status": {
+        "ENCOURS": "En cours",
+        "REMIS_ENCAISSEMENT": "Remis à l'encaissement",
+        "REMIS_ESCOMPTE": "Remis à l'escompte",
+        "PAYE": "Payé",
+        "IMPAYE": "Impayé",
+        "ANNULE": "Annulé"
+      },
+      "actions": {
+        "remiseEncaissement": "Remise à l'encaissement",
+        "remiseEscompte": "Remise à l'escompte",
+        "marquerPaye": "Marquer payé",
+        "marquerImpaye": "Marquer impayé"
+      }
+    },
+    "declarations": {
+      "entityName": "Déclarations",
+      "title": "Déclarations fiscales",
+      "subtitle": "Génération et suivi des télé-déclarations",
+      "common": {
+        "exercice": "Exercice fiscal",
+        "periode": "Période",
+        "month": "Mois",
+        "trimester": "Trimestre",
+        "dateLimite": "Date limite",
+        "status": "Statut",
+        "actions": "Actions"
+      },
+      "status": {
+        "BROUILLON": "Brouillon",
+        "PRETE": "Prête à télé-déclarer",
+        "TELEDECLAREE": "Télé-déclarée",
+        "PAYEE": "Payée",
+        "ARCHIVEE": "Archivée"
+      },
+      "actions": {
+        "generate": "Générer la déclaration",
+        "preview": "Aperçu",
+        "downloadEdi": "Télécharger fichier EDI",
+        "markTeledeclared": "Marquer télé-déclarée",
+        "markPaid": "Marquer payée"
+      },
+      "simplIs": {
+        "title": "SIMPL-IS — Déclaration TVA",
+        "subtitle": "Annexes ventes & achats — Déclaration mensuelle DGI",
+        "crumb": "SIMPL-IS TVA",
+        "routeTitle": "SIMPL-IS TVA",
+        "routeBreadcrumb": "SIMPL-IS",
+        "monthLabel": "Mois :",
+        "exportXml": "📥 Exporter XML SIMPL-IS",
+        "exportXlsx": "📊 Excel annexe ventes",
+        "headers": {
+          "societe": "Société",
+          "if": "I.F.",
+          "ice": "ICE",
+          "periode": "Période"
+        },
+        "annexA": {
+          "title": "Annexe A — TVA collectée sur ventes",
+          "cols": {
+            "numero": "N° Facture",
+            "client": "Client",
+            "iceClient": "ICE Client",
+            "montantHt": "Montant HT",
+            "tauxTva": "Taux TVA",
+            "tvaCollectee": "TVA collectée",
+            "ttc": "TTC"
+          },
+          "empty": "Aucune vente facturée sur {month}."
+        },
+        "recap": {
+          "title": "Récapitulatif TVA à déclarer",
+          "tvaCollectee": "TVA collectée (ventes)",
+          "tvaDeductible": "TVA déductible estimée (achats)",
+          "tvaNet": "TVA nette à payer"
+        },
+        "note": "TVA à reverser avant le 20 du mois suivant. Télédéclaration via portail DGI simpl.tax.gov.ma",
+        "xlsx": {
+          "ht": "HT",
+          "tauxTva": "Taux TVA %",
+          "tva": "TVA",
+          "ttc": "TTC"
+        },
+        "audit": {
+          "xlsx": "XLSX annexe ventes — {count} ligne(s)",
+          "xml": "XML télédéclaration TVA (démo)"
+        },
+        "sections": {
+          "acomptes": "Acomptes trimestriels",
+          "regularisation": "Régularisation annuelle",
+          "telechargement": "Téléchargement EDI"
+        },
+        "acompteLabels": {
+          "T1": "1er acompte (avant 31/03)",
+          "T2": "2ème acompte (avant 30/06)",
+          "T3": "3ème acompte (avant 30/09)",
+          "T4": "4ème acompte (avant 31/12)"
+        },
+        "hints": {
+          "intro": "Le calcul des acomptes IS est basé sur le résultat fiscal N-1. La régularisation s'effectue avec la déclaration annuelle.",
+          "tauxBareme": "Taux IS selon barème CGI : 12,5 % / 20 % / 25 % / 32 % / 35 % selon tranche."
+        }
+      },
+      "tva": {
+        "title": "Déclaration TVA",
+        "regime": "Régime",
+        "regimeDebit": "Régime débit",
+        "regimeEncaissement": "Régime encaissement",
+        "cycle": "Cycle de déclaration",
+        "cycleMensuel": "Mensuel",
+        "cycleTrimestriel": "Trimestriel",
+        "tvaCollectee": "TVA collectée",
+        "tvaDeductible": "TVA déductible",
+        "tvaPayer": "TVA à payer",
+        "creditTva": "Crédit de TVA reportable"
+      },
+      "retenueSource": {
+        "title": "Retenue à la source (RAS)",
+        "subtitle": "État des retenues opérées sur les fournisseurs hors résidence",
+        "routeTitle": "Retenue source",
+        "routeBreadcrumb": "Retenue source",
+        "headers": {
+          "fournisseur": "Fournisseur",
+          "ice": "ICE",
+          "baseHt": "Base HT",
+          "tauxRas": "Taux RAS",
+          "montantRetenue": "Montant retenu",
+          "datePaiement": "Date paiement",
+          "reverse": "Reversée"
+        },
+        "summary": {
+          "totalBase": "Total base HT",
+          "totalRetenue": "Total RAS retenue",
+          "totalReverse": "Total RAS reversée"
+        },
+        "actions": {
+          "generateEtat": "Générer état RAS",
+          "exportXml": "Exporter XML SIMPL",
+          "markReverse": "Marquer reversée"
+        }
+      }
+    },
+    "caissesChantier": {
+      "entityName": "Caisses chantier",
+      "title": "Caisses & banques",
+      "subtitle": "Vue consolidée de la trésorerie multi-banques et caisses.",
+      "kpi": {
+        "soldeTotal": "Solde total",
+        "activeAccounts": "{count} compte(s) actif(s)",
+        "accounts": "{count} compte(s)",
+        "caisses": "{count} caisse(s)",
+        "recettesMois": "Recettes du mois",
+        "depensesMois": "Dépenses du mois",
+        "fluxNetMois": "Flux net du mois"
+      },
+      "list": {
+        "columns": {
+          "chantier": "Chantier",
+          "responsable": "Responsable",
+          "fondInitial": "Fond initial",
+          "soldeCourant": "Solde courant",
+          "depenses": "Dépenses",
+          "reapprovs": "Réapprovisionnements",
+          "status": "Statut",
+          "actions": "Actions"
+        }
+      },
+      "actions": {
+        "ouvrir": "Ouvrir caisse",
+        "reapprovisionner": "Réapprovisionner",
+        "saisirDepense": "Saisir dépense",
+        "cloturer": "Clôturer caisse"
+      }
+    },
+    "import": {
+      "releve": {
+        "title": "Importer relevé bancaire",
+        "subtitle": "Format OFX ou CSV — format BAM compatible",
+        "dropzone": "Glissez un fichier OFX/CSV ici",
+        "or": "ou",
+        "selectFile": "Sélectionner un fichier",
+        "format": "Format détecté",
+        "compteCible": "Compte cible",
+        "dateRange": "Période détectée",
+        "preview": "Aperçu ({n} lignes)",
+        "headers": {
+          "date": "Date",
+          "libelle": "Libellé",
+          "reference": "Référence",
+          "debit": "Débit",
+          "credit": "Crédit"
+        },
+        "errors": {
+          "title": "Erreurs détectées",
+          "lineN": "Ligne {n}",
+          "invalidDate": "Date invalide",
+          "invalidAmount": "Montant invalide",
+          "missingRequired": "Champ requis manquant"
+        },
+        "actions": {
+          "import": "Importer",
+          "cancel": "Annuler",
+          "downloadTemplate": "Modèle CSV"
+        },
+        "toasts": {
+          "imported": "{n} mouvements importés",
+          "duplicate": "{n} doublon(s) ignoré(s)",
+          "error": "Échec de l'import"
+        }
+      },
+      "dialog": {
+        "title": "Import du relevé bancaire",
+        "uploadText": "Cliquez ou déposez un fichier CSV ou OFX ici",
+        "uploadHint": "CSV : Date · Libellé · Référence · Crédit · Débit — OFX : extraction STMTTRN",
+        "pasteLabel": "Ou collez le contenu CSV ci-dessous",
+        "pastePlaceholder": "Date,Libellé,Référence,Crédit,Débit\n2026-04-15,Vir. OCP Promotion,VIR-OCP-001,1504800,\n2026-04-16,Frais bancaires,,,180",
+        "analyze": "Analyser",
+        "validLines": "lignes valides",
+        "errorLines": "{count} en erreur",
+        "restart": "Recommencer",
+        "refShort": "Réf.",
+        "importCount": "Importer {count} ligne(s)",
+        "errors": {
+          "missingLibelle": "Libellé manquant",
+          "noAmount": "Aucun montant"
+        }
+      }
+    },
+    "imputation": {
+      "title": "Imputation comptable",
+      "subtitle": "Sélectionner le compte d'imputation",
+      "search": "Rechercher un compte…",
+      "noResult": "Aucun compte ne correspond",
+      "favorites": "Comptes favoris",
+      "recents": "Comptes récents",
+      "actions": {
+        "select": "Sélectionner",
+        "clear": "Effacer",
+        "createNew": "Créer un nouveau compte"
+      },
+      "openInvoices": "{count} facture(s) ouverte(s)",
+      "totalDue": "Total dû",
+      "amountReceived": "Montant total reçu",
+      "amountToPay": "Montant total à payer",
+      "autoAllocate": "Affectation auto",
+      "emptyForContrepartie": "Aucune facture ouverte pour cette contrepartie.",
+      "emptySelectContrepartie": "Sélectionnez une contrepartie pour afficher les factures ouvertes.",
+      "totalImpute": "Total imputé",
+      "cols": {
+        "numero": "N° facture",
+        "date": "Date",
+        "echeance": "Échéance",
+        "resteARegler": "Reste à régler",
+        "impute": "Imputé"
+      }
+    },
+    "soldeIndicator": {
+      "label": "Solde",
+      "positive": "Excédent",
+      "negative": "Déficit",
+      "zero": "Équilibré",
+      "trend": {
+        "up": "En hausse",
+        "down": "En baisse",
+        "stable": "Stable"
+      }
+    },
+    "deviseFlag": {
+      "label": "Devise {code}"
+    }
+  }
+}

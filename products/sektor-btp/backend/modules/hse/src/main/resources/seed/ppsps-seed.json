@@ -1,0 +1,59 @@
+{
+  "ppsps": [
+    {
+      "id": "ppsps-001",
+      "numero": "PPSPS-CH-2025-001",
+      "chantierId": "ch-001",
+      "chantierCode": "CH-2025-001",
+      "chantierNom": "Résidence Yasmine — Casa",
+      "coordonnateurSpsNom": "Mohammed Lahlou",
+      "coordonnateurSpsTel": "+212 661 22 33 44",
+      "date": "2026-02-18",
+      "mesuresCollectives": "Garde-corps périphérique R+5, filets anti-chute, balisage zone grue.",
+      "effectifsMaxJour": 38,
+      "hommesJourEstimes": 9120,
+      "status": "VALIDE",
+      "version": 1
+    },
+    {
+      "id": "ppsps-002",
+      "numero": "PPSPS-CH-2025-002",
+      "chantierId": "ch-002",
+      "chantierCode": "CH-2025-002",
+      "chantierNom": "Pont Bouregreg ouvrage 3",
+      "coordonnateurSpsNom": "Saïd Bennis",
+      "coordonnateurSpsTel": "+212 662 11 22 33",
+      "date": "2026-03-04",
+      "mesuresCollectives": "Plateformes travail en encorbellement, lignes de vie, surveillant fluvial 24h/24.",
+      "effectifsMaxJour": 65,
+      "hommesJourEstimes": 32100,
+      "status": "VALIDE",
+      "version": 1
+    },
+    {
+      "id": "ppsps-003",
+      "numero": "PPSPS-CH-2025-004",
+      "chantierId": "ch-004",
+      "chantierCode": "CH-2025-004",
+      "chantierNom": "École Tanger Med phase 2",
+      "coordonnateurSpsNom": "Fatima Zahra Kabbaj",
+      "date": "2026-05-02",
+      "mesuresCollectives": "Clôture chantier béton 2 m, signalétique cour, livraison hors heures scolaires.",
+      "effectifsMaxJour": 24,
+      "hommesJourEstimes": 5400,
+      "observations": "En relecture coordonnateur SPS — V0 envoyée 02/05.",
+      "status": "REVISION",
+      "version": 1
+    }
+  ],
+  "sectionsTemplate": [
+    { "code": "1", "titre": "Renseignements administratifs", "contenu": "" },
+    { "code": "2", "titre": "Description de l'ouvrage", "contenu": "" },
+    { "code": "3", "titre": "Coordination de la prévention", "contenu": "" },
+    { "code": "4", "titre": "Organisation générale — prévention", "contenu": "" },
+    { "code": "5", "titre": "Mesures techniques", "contenu": "" },
+    { "code": "6", "titre": "Évaluation des risques & DUER", "contenu": "" },
+    { "code": "7", "titre": "Premiers secours & organisation des secours", "contenu": "" },
+    { "code": "8", "titre": "Coactivité", "contenu": "" }
+  ]
+}

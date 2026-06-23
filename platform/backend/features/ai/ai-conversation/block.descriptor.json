@@ -1,0 +1,16 @@
+{
+  "id": "ai-conversation",
+  "name": "AI Conversation",
+  "description": "AI conversation feature",
+  "type": "feature",
+  "layer": "feature",
+  "group": "ai",
+  "provides": {
+    "backend": {
+      "gradle": ":platform:features:ai:ai-conversation",
+      "packages": ["ma.nafura.platform.ai.conversation"]
+    }
+  },
+  "requires": { "core": ["identity", "tenancy"], "features": ["llm-provider", "ai-agent-api"] },
+  "manifest": { "key": "ai-conversation" }
+}

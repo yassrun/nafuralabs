@@ -1,0 +1,23 @@
+{
+  "entity": "Pip",
+  "fields": {
+    "pipNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "deficiencyAreas": {
+      "maxLength": 120
+    },
+    "improvementTargets": {
+      "maxLength": 120
+    },
+    "reviewSchedule": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

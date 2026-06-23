@@ -1,0 +1,20 @@
+{
+  "entity": "Onboarding",
+  "fields": {
+    "onboardingNumber": {
+      "required": true,
+      "maxLength": 30,
+      "unique": true
+    },
+    "employeeId": {
+      "required": true
+    },
+    "startDate": {
+      "required": true
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

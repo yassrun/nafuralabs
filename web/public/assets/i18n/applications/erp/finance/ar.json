@@ -1,0 +1,1774 @@
+{
+  "finance": {
+    "module": {
+      "title": "المالية والمحاسبة",
+      "shortTitle": "المالية"
+    },
+    "common": {
+      "dash": "—",
+      "currency": {
+        "mad": "MAD",
+        "dh": "DH"
+      },
+      "actions": {
+        "back": "← رجوع",
+        "save": "حفظ",
+        "cancel": "إلغاء",
+        "close": "إغلاق",
+        "delete": "حذف",
+        "edit": "تعديل",
+        "create": "إنشاء",
+        "new": "جديد",
+        "validate": "تحقق",
+        "print": "طباعة",
+        "export": "تصدير",
+        "refresh": "تحديث",
+        "ok": "موافق",
+        "search": "بحث",
+        "filter": "تصفية",
+        "viewDetail": "عرض التفاصيل",
+        "viewEcriture": "عرض القيد",
+        "voirReglements": "عرض التسديدات",
+        "downloadXml": "تحميل XML",
+        "downloadCsv": "تحميل CSV",
+        "importStatement": "استيراد كشف",
+        "open": "فتح ←"
+      },
+      "labels": {
+        "all": "الكل",
+        "none": "لا شيء",
+        "loading": "جاري التحميل…",
+        "noResult": "لا توجد نتائج",
+        "total": "الإجمالي",
+        "totalHt": "الإجمالي بدون احتساب الضريبة",
+        "totalTva": "إجمالي TVA",
+        "totalTtc": "الإجمالي مع احتساب الضريبة",
+        "soldeDebiteur": "الرصيد المدين",
+        "soldeCrediteur": "الرصيد الدائن",
+        "soldeFinal": "الرصيد النهائي",
+        "ouverture": "افتتاح",
+        "cloture": "إقفال",
+        "debit": "مدين",
+        "credit": "دائن",
+        "balance": "ميزان",
+        "ecart": "فارق",
+        "selection": "اختيار",
+        "selected": "المحدّدة",
+        "selectAll": "اختيار الكل",
+        "unselectAll": "إلغاء اختيار الكل"
+      },
+      "filters": {
+        "all": "الكل",
+        "period": "الفترة",
+        "from": "من",
+        "to": "إلى",
+        "journal": "اليومية",
+        "status": "الحالة",
+        "type": "النوع",
+        "compte": "الحساب",
+        "tiers": "الطرف",
+        "chantier": "الورش",
+        "devise": "العملة",
+        "allJournals": "جميع اليوميات",
+        "allStatuses": "جميع الحالات",
+        "allTypes": "جميع الأنواع",
+        "allDevises": "جميع العملات",
+        "searchPlaceholder": "بحث…"
+      },
+      "emptyState": {
+        "noData": "لا توجد بيانات",
+        "noResults": "لا توجد نتائج",
+        "tryAdjustFilters": "حاول تعديل عوامل التصفية."
+      },
+      "validation": {
+        "required": "حقل إلزامي",
+        "invalidNumber": "رقم غير صالح",
+        "invalidDate": "تاريخ غير صالح",
+        "mustBalance": "مدين = دائن إلزامي",
+        "amountPositive": "يجب أن يكون المبلغ موجبا"
+      },
+      "toasts": {
+        "saved": "تم الحفظ",
+        "validated": "تم التحقق",
+        "deleted": "تم الحذف",
+        "cancelled": "تم الإلغاء",
+        "exportStarted": "تم إطلاق التصدير",
+        "loading": "جاري التحميل…",
+        "error": "خطأ",
+        "unexpectedError": "خطأ غير متوقع"
+      },
+      "confirm": {
+        "delete": "تأكيد الحذف؟",
+        "cancel": "تأكيد الإلغاء؟",
+        "validate": "تأكيد التحقق؟"
+      }
+    },
+    "routes": {
+      "journauxTitle": "اليوميات المحاسبية",
+      "journauxCrumb": "اليوميات",
+      "ecrituresTitle": "القيود",
+      "ecrituresCrumb": "القيود",
+      "ecritureDetailTitle": "قيد",
+      "ecritureSaisieTitle": "إدخال قيد",
+      "balanceTitle": "الميزان العام",
+      "balanceCrumb": "الميزان",
+      "grandLivreTitle": "دفتر الأستاذ",
+      "grandLivreCrumb": "دفتر الأستاذ",
+      "facturesFournisseursTitle": "فواتير الموردين",
+      "facturesFournisseursCrumb": "فواتير الموردين",
+      "ffDetailTitle": "فاتورة المورد",
+      "reglementsTitle": "التسديدات",
+      "reglementsCrumb": "التسديدات",
+      "reglementSaisieTitle": "تسديد جديد",
+      "rapprochementTitle": "التسوية البنكية",
+      "rapprochementCrumb": "التسوية",
+      "lettrageTitle": "المطابقة",
+      "lettrageCrumb": "المطابقة",
+      "virementsTitle": "الحوالات",
+      "virementsCrumb": "الحوالات",
+      "virementDetailTitle": "حوالة",
+      "virementRemiseTitle": "تسليم الحوالات",
+      "plansComptablesTitle": "دليل الحسابات",
+      "plansComptablesCrumb": "دليل الحسابات",
+      "compteDetailTitle": "حساب",
+      "tauxChangeTitle": "أسعار الصرف",
+      "tauxChangeCrumb": "أسعار الصرف",
+      "tauxChangeDetailTitle": "سعر الصرف",
+      "devisesTitle": "العملات",
+      "devisesCrumb": "العملات",
+      "conditionsPaiementTitle": "شروط الدفع",
+      "conditionsPaiementCrumb": "شروط الدفع",
+      "caissesTitle": "الصناديق والبنوك",
+      "caissesCrumb": "الصناديق",
+      "caisseDetailTitle": "حساب الخزينة",
+      "analytiqueTitle": "المحاسبة التحليلية",
+      "analytiqueCrumb": "التحليلية",
+      "recouvrementTitle": "التحصيل",
+      "recouvrementCrumb": "التحصيل",
+      "effetsTitle": "الأوراق التجارية",
+      "effetsCrumb": "الأوراق التجارية",
+      "declarationsTitle": "التصاريح الضريبية",
+      "declarationsCrumb": "التصاريح",
+      "simplIsTitle": "SIMPL-IS",
+      "retenueSourceTitle": "الاقتطاع من المنبع (RAS)",
+      "caissesChantierTitle": "صناديق الورش",
+      "caissesChantierCrumb": "صناديق الورش"
+    },
+    "journal": {
+      "entityName": "يومية",
+      "entityNamePlural": "اليوميات",
+      "title": "اليوميات المحاسبية",
+      "subtitle": "ملخص حسب اليومية والفترة",
+      "list": {
+        "columns": {
+          "code": "الرمز",
+          "libelle": "البيان",
+          "type": "النوع",
+          "compteContrepartie": "الحساب المقابل",
+          "exercice": "السنة المحاسبية",
+          "nbEcritures": "عدد القيود",
+          "totalDebit": "إجمالي المدين",
+          "totalCredit": "إجمالي الدائن",
+          "solde": "الرصيد",
+          "actions": "الإجراءات"
+        },
+        "filters": {
+          "period": "الفترة",
+          "type": "نوع اليومية",
+          "exercice": "السنة المحاسبية"
+        },
+        "emptyState": {
+          "title": "لا توجد يومية",
+          "message": "لم تتم تهيئة أي يومية محاسبية."
+        }
+      },
+      "form": {
+        "fields": {
+          "code": "رمز اليومية",
+          "libelle": "البيان",
+          "type": "النوع",
+          "compteContrepartie": "الحساب المقابل الافتراضي",
+          "exercice": "السنة المحاسبية",
+          "actif": "نشط"
+        }
+      },
+      "types": {
+        "vente": "المبيعات",
+        "achat": "المشتريات",
+        "banque": "البنك",
+        "caisse": "الصندوق",
+        "operationsDiverses": "OD",
+        "nouveaux": "إعادة فتح"
+      },
+      "status": {
+        "equilibre": "✓ متوازن",
+        "desequilibre": "⚠ Δ"
+      },
+      "actions": {
+        "create": "يومية جديدة",
+        "edit": "تعديل اليومية",
+        "viewEcritures": "عرض القيود"
+      }
+    },
+    "ecriture": {
+      "entityName": "قيد",
+      "entityNamePlural": "القيود",
+      "title": "القيود المحاسبية",
+      "subtitle": "متابعة دفتر الأستاذ",
+      "list": {
+        "columns": {
+          "numero": "الرقم",
+          "date": "التاريخ",
+          "journal": "اليومية",
+          "reference": "المرجع",
+          "libelle": "البيان",
+          "tiers": "الطرف",
+          "chantier": "الورش",
+          "totalDebit": "إجمالي المدين",
+          "totalCredit": "إجمالي الدائن",
+          "origine": "المصدر",
+          "status": "الحالة",
+          "actions": "الإجراءات"
+        },
+        "filters": {
+          "journal": "اليومية",
+          "status": "الحالة",
+          "origine": "المصدر",
+          "tiers": "الطرف",
+          "chantier": "الورش",
+          "dateFrom": "التاريخ من",
+          "dateTo": "التاريخ إلى",
+          "exercice": "السنة المحاسبية"
+        },
+        "emptyState": {
+          "title": "لا توجد قيود",
+          "message": "لا يوجد أي قيد محاسبي مسجل لهذه الفترة."
+        }
+      },
+      "detail": {
+        "title": "القيد {numero}",
+        "infoSection": "المعلومات",
+        "lignesSection": "أسطر القيد",
+        "totauxSection": "الإجماليات",
+        "audit": "التدقيق"
+      },
+      "form": {
+        "fields": {
+          "numero": "رقم القيد",
+          "date": "تاريخ القيد",
+          "journal": "اليومية",
+          "reference": "المرجع",
+          "libelle": "البيان",
+          "libelleCompte": "بيان الحساب",
+          "tiers": "الطرف",
+          "chantier": "الورش",
+          "axeAnalytique": "المحور التحليلي",
+          "exercice": "السنة المحاسبية",
+          "origine": "المصدر"
+        },
+        "ligne": {
+          "compte": "الحساب",
+          "libelle": "البيان",
+          "debit": "مدين",
+          "credit": "دائن",
+          "tiers": "الطرف",
+          "axeAnalytique": "المحور",
+          "addLigne": "+ إضافة سطر",
+          "removeLigne": "حذف السطر",
+          "empty": "لا توجد أسطر. أضف الأول."
+        }
+      },
+      "fields": {
+        "documentSource": "وثيقة المصدر",
+        "validatedBy": "صودق من طرف"
+      },
+      "saisie": {
+        "title": "قيد جديد",
+        "subtitle": "إدخال يدوي متوازن",
+        "crumb": "إدخال",
+        "lignesSection": "أسطر القيد",
+        "selectPlaceholder": "— اختر —",
+        "referencePlaceholder": "رقم الوثيقة، سند التسليم، عقد…",
+        "libellePlaceholder": "مثال: فاتورة زبون SIT-CH-001-04",
+        "comptePlaceholder": "6111…",
+        "axePlaceholder": "CH-001…",
+        "saveDraft": "حفظ المسودة"
+      },
+      "origine": {
+        "manuelle": "يدوي"
+      },
+      "balance": {
+        "equilibre": "✓ مدين = دائن",
+        "delta": "⚠ Δ ="
+      },
+      "actions": {
+        "create": "+ قيد جديد",
+        "validate": "تحقق",
+        "cancel": "إلغاء",
+        "delete": "حذف",
+        "duplicate": "تكرار",
+        "contrePasser": "قيد عكسي",
+        "viewSource": "عرض وثيقة المصدر"
+      },
+      "toasts": {
+        "created": "تم إنشاء القيد",
+        "validated": "تم التحقق من القيد",
+        "validatedNumero": "تم التحقق من القيد {numero}",
+        "savedNumero": "تم حفظ القيد {numero}",
+        "cancelled": "تم إلغاء القيد",
+        "deleted": "تم حذف القيد",
+        "notFound": "القيد غير موجود.",
+        "contrePassationCreated": "تم إنشاء القيد العكسي {numero}",
+        "unbalanced": "القيد غير متوازن (المدين ≠ الدائن)"
+      }
+    },
+    "factureFournisseur": {
+      "entityName": "فاتورة المورد",
+      "entityNamePlural": "فواتير الموردين",
+      "title": "فواتير الموردين",
+      "subtitle": "الإدخال والتحقق والتسديد",
+      "newTitle": "فاتورة مورد جديدة",
+      "draftSubtitle": "إدخال",
+      "list": {
+        "columns": {
+          "numeroInterne": "الرقم الداخلي",
+          "numeroFournisseur": "رقم المورد",
+          "fournisseur": "المورد",
+          "dateFacture": "تاريخ الفاتورة",
+          "dateReception": "الاستلام",
+          "dateEcheance": "الاستحقاق",
+          "chantier": "الورش",
+          "totalHt": "الإجمالي بدون احتساب الضريبة",
+          "totalTva": "TVA",
+          "totalTtc": "الإجمالي مع احتساب الضريبة",
+          "cumulRegle": "إجمالي المسدد",
+          "resteARegler": "المتبقي للتسديد",
+          "status": "الحالة",
+          "rubrique": "البند",
+          "actions": "الإجراءات"
+        },
+        "filters": {
+          "status": "الحالة",
+          "fournisseur": "المورد",
+          "chantier": "الورش",
+          "rubrique": "البند",
+          "dateFrom": "مستلمة من",
+          "dateTo": "مستلمة إلى",
+          "echeanceFrom": "الاستحقاق من",
+          "echeanceTo": "الاستحقاق إلى"
+        },
+        "emptyState": {
+          "title": "لا توجد فواتير موردين",
+          "message": "لم تُسجَّل أي فاتورة مورد.",
+          "actionLabel": "إدخال فاتورة"
+        }
+      },
+      "sections": {
+        "approval": "سير الموافقة",
+        "matching3Way": "المطابقة الثلاثية (سند الطلب ↔ سند التسليم ↔ الفاتورة)",
+        "identite": "الهوية",
+        "lignes": "أسطر الفاتورة",
+        "recap": "الكشف الحسابي",
+        "dgiLinks": "تصاريح DGI (مرتبطة)",
+        "activity": "النشاط"
+      },
+      "form": {
+        "fields": {
+          "fournisseur": "المورد",
+          "fournisseurPlaceholder": "— اختر —",
+          "numeroFournisseur": "رقم المورد",
+          "dateFacture": "تاريخ الفاتورة",
+          "dateReception": "تاريخ الاستلام",
+          "dateEcheance": "تاريخ الاستحقاق",
+          "bcNumero": "سند الطلب المصدر",
+          "bcPlaceholder": "BC-2026-…",
+          "chantier": "الورش",
+          "chantierPlaceholder": "رمز الورش",
+          "rubrique": "البند",
+          "designation": "التعيين",
+          "compte": "الحساب",
+          "axe": "المحور",
+          "quantite": "الكمية",
+          "prixUnitaireHt": "السعر الوحدوي بدون احتساب الضريبة",
+          "totalHt": "الإجمالي بدون احتساب الضريبة",
+          "tvaTaux": "TVA %"
+        }
+      },
+      "lignes": {
+        "addLigne": "+ إضافة سطر",
+        "removeLigne": "×",
+        "empty": "لا توجد أسطر. أضف الأول.",
+        "defaultLabel": "السطر {n}"
+      },
+      "recap": {
+        "totalHt": "الإجمالي بدون احتساب الضريبة",
+        "tvaFacture": "TVA على فاتورة المورد",
+        "tvaAutoliq": "TVA بالإقرار العكسي (تصريح)",
+        "retenueTva": "اقتطاع TVA (إقرار عكسي)",
+        "totalTtc": "الإجمالي مع احتساب الضريبة",
+        "netAPayer": "الصافي للدفع للمورد",
+        "cumulRegle": "إجمالي المسدد",
+        "resteARegler": "المتبقي للدفع",
+        "ecritureComptable": "القيد المحاسبي",
+        "voirEcriture": "عرض القيد ←"
+      },
+      "hints": {
+        "nonResident": "مقدم خدمة <strong>خارج المغرب</strong>: إذا فُعِّل خيار الإقرار العكسي للـ TVA (الإدارة → الإعدادات الضريبية)، لا تظهر TVA على فاتورة المورد؛ ويأخذ <strong>الصافي للدفع</strong> بعين الاعتبار <strong>اقتطاع TVA</strong> المحتمل على الإقرار العكسي (إعداد ضريبي).",
+        "residentB2b": "مقدم خدمة <strong>مقيم بالمغرب</strong> (B2B): TVA كلاسيكي على الفاتورة — لا إقرار عكسي على هذا التدفق التجريبي.",
+        "fournisseurNonMaroc": "(خارج المغرب)",
+        "dgiHint": "تغذي مبالغ بدون احتساب الضريبة / TVA / الاقتطاعات للفواتير المصدّقة <strong>بيان 1208</strong> (المشتريات) والإعدادات الضريبية (TVA شهرية / إقرار عكسي — تجريبي).",
+        "etat1208Link": "بيان 1208 — كشف سنوي للمشتريات",
+        "etat1208Note": "(ICE المورد، تجميع فاتورة المورد)",
+        "parametresFiscalLink": "الإعدادات الضريبية",
+        "parametresFiscalNote": "(إقرار عكسي، نسبة اقتطاع TVA)"
+      },
+      "matching": {
+        "title": "المطابقة الثلاثية (سند الطلب ↔ سند التسليم ↔ الفاتورة)",
+        "bc": "سند الطلب",
+        "bl": "سند التسليم",
+        "status": "الحالة",
+        "aligned": "— متوافق",
+        "headers": {
+          "article": "الصنف",
+          "qteCommandee": "المطلوب",
+          "qteRecue": "المُستلم",
+          "qteFacturee": "المُفوتر",
+          "puBc": "السعر الوحدوي للطلب",
+          "puFacture": "السعر الوحدوي للفاتورة",
+          "ecartQte": "فارق الكمية %",
+          "ecartPx": "فارق السعر %"
+        },
+        "bloquant": "حاجب",
+        "blockingError": "المطابقة الثلاثية: فارق حاجب (سند الطلب / سند التسليم / الفاتورة). صحّح الفاتورة أو اربط سند التسليم الصحيح قبل التحقق."
+      },
+      "activity": {
+        "creation": "إنشاء / إدخال",
+        "validee": "مصدّقة — القيد المحاسبي {state}",
+        "ecritureGeneree": "مُولَّد",
+        "ecritureEnAttente": "قيد الانتظار",
+        "reglement": "تسديد {state} — {amount}",
+        "complet": "كامل",
+        "partiel": "جزئي",
+        "enLitige": "في نزاع",
+        "motifManquant": "السبب غير محدد"
+      },
+      "actions": {
+        "create": "إنشاء (مسودة)",
+        "save": "حفظ",
+        "validate": "تحقق · يولّد قيد المشتريات",
+        "validateShort": "تحقق",
+        "litige": "تأشير في نزاع",
+        "annuler": "إلغاء",
+        "retour": "رجوع"
+      },
+      "prompts": {
+        "motifLitige": "سبب النزاع؟",
+        "confirmAnnulation": "هل تريد إلغاء هذه الفاتورة؟"
+      },
+      "toasts": {
+        "missingFields": "أدخل المورد ورقم المورد وتاريخ الفاتورة.",
+        "created": "تم إنشاء الفاتورة {numero}",
+        "saved": "تم حفظ الفاتورة",
+        "validated": "تم التحقق من الفاتورة — تم توليد القيد المحاسبي",
+        "litige": "تم تأشير الفاتورة في نزاع",
+        "annulee": "تم إلغاء الفاتورة",
+        "error": "خطأ"
+      }
+    },
+    "reglement": {
+      "entityName": "تسديد",
+      "entityNamePlural": "التسديدات",
+      "title": "تسديدات الموردين",
+      "newTitle": "تسديد جديد",
+      "list": {
+        "columns": {
+          "numero": "الرقم",
+          "date": "التاريخ",
+          "fournisseur": "المورد",
+          "modePaiement": "الطريقة",
+          "montant": "المبلغ",
+          "compteEmetteur": "الحساب المُصدِر",
+          "reference": "المرجع",
+          "status": "الحالة",
+          "facturesReglees": "الفواتير المسددة",
+          "actions": "الإجراءات"
+        },
+        "filters": {
+          "fournisseur": "المورد",
+          "modePaiement": "طريقة الدفع",
+          "compteEmetteur": "الحساب",
+          "status": "الحالة",
+          "dateFrom": "من",
+          "dateTo": "إلى",
+          "montantMin": "الحد الأدنى للمبلغ",
+          "montantMax": "الحد الأقصى للمبلغ"
+        },
+        "emptyState": {
+          "title": "لا توجد تسديدات",
+          "message": "لم يُسجَّل أي تسديد لهذه الفترة.",
+          "actionLabel": "تسديد جديد"
+        }
+      },
+      "form": {
+        "title": "إدخال تسديد مورد",
+        "subtitle": "اختيار الفاتورة (الفواتير) وطريقة الدفع",
+        "fields": {
+          "fournisseur": "المورد",
+          "date": "تاريخ التسديد",
+          "modePaiement": "طريقة الدفع",
+          "compteEmetteur": "الحساب المُصدِر",
+          "reference": "المرجع (رقم الشيك، الحوالة…)",
+          "montant": "المبلغ",
+          "libelle": "البيان"
+        },
+        "selectFactures": "الفواتير المراد تسديدها",
+        "factureSelector": {
+          "title": "اختر الفواتير المراد تسديدها",
+          "headers": {
+            "numero": "الرقم",
+            "dateFacture": "التاريخ",
+            "dateEcheance": "الاستحقاق",
+            "totalTtc": "الإجمالي مع الضريبة",
+            "deja": "المسدد سابقا",
+            "reste": "المتبقي",
+            "imputation": "الإسناد"
+          },
+          "selected": "{n} فاتورة (فواتير) محددة",
+          "totalImpute": "إجمالي المُسند",
+          "ecart": "الفارق"
+        },
+        "validation": {
+          "atLeastOneFacture": "اختر فاتورة واحدة على الأقل",
+          "imputationMismatch": "إجمالي المُسند ≠ مبلغ التسديد",
+          "amountRequired": "المبلغ مطلوب"
+        }
+      },
+      "actions": {
+        "create": "+ تسديد جديد",
+        "save": "حفظ",
+        "validate": "تحقق · يولّد قيد البنك/الصندوق",
+        "imputer": "إسناد",
+        "cancel": "إلغاء",
+        "retour": "الرجوع إلى التسديدات"
+      },
+      "toasts": {
+        "created": "تم إنشاء التسديد",
+        "validated": "تم التحقق من التسديد — تم توليد القيد",
+        "cancelled": "تم إلغاء التسديد",
+        "error": "خطأ أثناء التسديد"
+      }
+    },
+    "rapprochement": {
+      "entityName": "تسوية بنكية",
+      "title": "التسوية البنكية",
+      "subtitle": "مطابقة الكشوف البنكية مع حركات ERP",
+      "selectAccount": "اختر حسابا بنكيا",
+      "periodFilter": "الفترة",
+      "import": {
+        "title": "استيراد كشف بنكي",
+        "subtitle": "الصيغ المدعومة: OFX، CSV",
+        "dropzone": "اسحب ملف OFX أو CSV هنا",
+        "chooseFile": "اختر ملفا",
+        "format": "الصيغة",
+        "encoding": "الترميز",
+        "preview": "معاينة",
+        "linesImported": "{n} سطر (أسطر) مستورد",
+        "errors": "{n} خطأ (أخطاء) مكتشف",
+        "actions": {
+          "import": "استيراد",
+          "cancel": "إلغاء",
+          "downloadTemplate": "تحميل قالب CSV"
+        },
+        "toasts": {
+          "imported": "تم استيراد الكشف ({n} أسطر)",
+          "error": "خطأ أثناء الاستيراد"
+        }
+      },
+      "matcher": {
+        "title": "المُطابق",
+        "subtitle": "ربط أسطر الكشف بحركات ERP",
+        "headers": {
+          "date": "التاريخ",
+          "libelle": "البيان",
+          "reference": "المرجع",
+          "debit": "مدين",
+          "credit": "دائن",
+          "match": "مطابقة",
+          "status": "الحالة"
+        },
+        "matchTypes": {
+          "auto": "تلقائي",
+          "manuel": "يدوي",
+          "suggestion": "اقتراح",
+          "none": "—"
+        },
+        "filters": {
+          "matched": "مطابَقة",
+          "unmatched": "غير مطابَقة",
+          "all": "الكل"
+        },
+        "actions": {
+          "matchSelected": "مطابقة المحدد",
+          "unmatch": "فك المطابقة",
+          "createEcriture": "إنشاء قيد",
+          "ignore": "تجاهل"
+        },
+        "unmatchedMvt": "حركة (حركات) غير مسوّاة",
+        "unmatchedReleve": "سطر (أسطر) كشف غير مطابق",
+        "inProgress": "مطابقة (مطابقات) قيد التنفيذ",
+        "autoMatch": "⚡ مطابقة تلقائية",
+        "mvtTitle": "الحركات المحاسبية غير المسوّاة",
+        "releveTitle": "أسطر الكشف البنكي غير المطابقة",
+        "matchAction": "↔ تسوية",
+        "unlinkAction": "✕ فك الربط",
+        "createMvt": "+ إنشاء حركة",
+        "createMvtTooltip": "إنشاء حركة محاسبية من هذا السطر",
+        "allMvtReconciled": "جميع الحركات مسوّاة ✓",
+        "allReleveMatched": "جميع أسطر الكشف مطابقة ✓",
+        "pairsTitle": "التسويات قيد التنفيذ",
+        "unlinkTooltip": "فك ربط هذه التسوية",
+        "cols": {
+          "mouvement": "الحركة",
+          "releve": "سطر الكشف",
+          "mvtShort": "حركة",
+          "releveShort": "كشف"
+        }
+      },
+      "lettrage": {
+        "partial": "مطابقة جزئية",
+        "complet": "مطابقة كاملة",
+        "none": "غير مطابق"
+      },
+      "summary": {
+        "soldeReleve": "رصيد الكشف",
+        "soldeErp": "رصيد ERP",
+        "ecart": "الفارق",
+        "matched": "مطابَقة",
+        "unmatched": "غير مطابَقة"
+      },
+      "toasts": {
+        "matched": "تم مطابقة الأسطر",
+        "unmatched": "تم فك مطابقة الأسطر",
+        "ecritureCreated": "تم إنشاء قيد من سطر بنكي"
+      }
+    },
+    "lettrage": {
+      "entityName": "مطابقة",
+      "title": "مطابقة الحسابات",
+      "subtitle": "مطابقة قيود حساب طرف",
+      "selectAccount": "اختر حسابا",
+      "noAccount": "لم يُختر أي حساب",
+      "headers": {
+        "date": "التاريخ",
+        "journal": "اليومية",
+        "reference": "المرجع",
+        "libelle": "البيان",
+        "debit": "مدين",
+        "credit": "دائن",
+        "lettre": "حرف"
+      },
+      "summary": {
+        "totalDebit": "إجمالي المدين",
+        "totalCredit": "إجمالي الدائن",
+        "solde": "الرصيد",
+        "lettre": "للمطابقة"
+      },
+      "actions": {
+        "letter": "مطابقة",
+        "unletter": "فك المطابقة",
+        "auto": "مطابقة تلقائية"
+      },
+      "toasts": {
+        "lettered": "تمت مطابقة القيود (الحرف {code})",
+        "unlettered": "تم إلغاء المطابقة",
+        "autoSuccess": "تم مطابقة {n} مجموعة (مجموعات) تلقائيا"
+      }
+    },
+    "planComptable": {
+      "entityName": "دليل الحسابات",
+      "title": "دليل الحسابات (CGNC)",
+      "subtitle": "دليل الحسابات الموحد CGNC المغرب",
+      "list": {
+        "columns": {
+          "code": "الرمز",
+          "libelle": "البيان",
+          "classe": "الفئة",
+          "type": "النوع",
+          "auxiliaire": "مساعد",
+          "actif": "نشط",
+          "soldeOuverture": "رصيد افتتاحي",
+          "soldeCourant": "الرصيد الحالي",
+          "actions": "الإجراءات"
+        },
+        "filters": {
+          "classe": "الفئة",
+          "type": "النوع",
+          "auxiliaire": "مساعد",
+          "actif": "نشط"
+        }
+      },
+      "cgnc": {
+        "classe1": "الفئة 1 — التمويل الدائم",
+        "classe2": "الفئة 2 — الأصول الثابتة",
+        "classe3": "الفئة 3 — المخزونات والديون",
+        "classe4": "الفئة 4 — ديون الخصوم المتداولة",
+        "classe5": "الفئة 5 — الخزينة",
+        "classe6": "الفئة 6 — الأعباء",
+        "classe7": "الفئة 7 — المنتجات",
+        "classe8": "الفئة 8 — حسابات النتيجة",
+        "classe9": "الفئة 9 — الحسابات التحليلية",
+        "classe0": "الفئة 0 — الحسابات الخاصة",
+        "classeGeneric": "الفئة {classe}"
+      },
+      "tree": {
+        "rootLabel": "دليل الحسابات",
+        "noResult": "لا يوجد حساب يطابق البحث",
+        "search": "بحث بالرمز أو البيان…",
+        "expandAll": "توسيع الكل",
+        "collapseAll": "طي الكل"
+      },
+      "tags": {
+        "collectif": "جماعي",
+        "lettrable": "قابل للمطابقة",
+        "analytique": "تحليلي",
+        "inactive": "غير نشط"
+      },
+      "compteType": {
+        "CHARGE": "عبء",
+        "PRODUIT": "منتج",
+        "ACTIF": "أصل",
+        "PASSIF": "خصم",
+        "TIERS": "طرف",
+        "TRESORERIE": "خزينة"
+      },
+      "page": {
+        "title": "دليل حسابات البناء — CGNC المغرب",
+        "subtitle": "مرجعية CGNC، الحسابات المساعدة واليوميات. ضرورية لإعداد المالية."
+      },
+      "tabs": {
+        "arbre": "دليل الحسابات",
+        "journaux": "اليوميات"
+      },
+      "stats": {
+        "total": "مجموع الحسابات",
+        "actifs": "الحسابات النشطة",
+        "auxiliaires": "المساعدة"
+      },
+      "loading": "جاري تحميل دليل الحسابات…",
+      "resetConfirm": "إعادة تعيين دليل الحسابات من قالب البناء المغرب؟ ستفقد الإضافات اليدوية.",
+      "journalConfig": {
+        "title": "اليوميات ({count})",
+        "newJournal": "+ يومية جديدة",
+        "codePlaceholder": "OD",
+        "contrepartiePlaceholder": "5141 / 5161",
+        "cols": {
+          "code": "الرمز",
+          "libelle": "البيان",
+          "type": "النوع",
+          "contrepartie": "الحساب المقابل الافتراضي",
+          "actif": "نشط"
+        }
+      },
+      "category": {
+        "ACTIF": "أصل",
+        "PASSIF": "خصم",
+        "CHARGE": "أعباء",
+        "PRODUIT": "منتجات",
+        "RESULTAT": "النتيجة"
+      },
+      "type": {
+        "GENERAL": "عام",
+        "AUXILIAIRE": "مساعد",
+        "TIERS": "طرف",
+        "ANALYTIQUE": "تحليلي"
+      },
+      "form": {
+        "fields": {
+          "code": "رمز الحساب",
+          "libelle": "البيان",
+          "classe": "الفئة",
+          "type": "النوع",
+          "auxiliaire": "مساعد",
+          "parent": "الحساب الأب",
+          "actif": "نشط",
+          "lettrable": "قابل للمطابقة",
+          "analytiqueObligatoire": "تحليلي إلزامي"
+        }
+      },
+      "drawer": {
+        "createTitle": "حساب جديد",
+        "editTitle": "تعديل الحساب {code}",
+        "actions": {
+          "save": "حفظ",
+          "delete": "حذف",
+          "cancel": "إلغاء"
+        },
+        "toasts": {
+          "created": "تم إنشاء الحساب",
+          "saved": "تم تعديل الحساب",
+          "deleted": "تم حذف الحساب"
+        }
+      },
+      "actions": {
+        "createCompte": "حساب جديد",
+        "importPlan": "استيراد الدليل",
+        "exportPlan": "تصدير الدليل",
+        "configureJournals": "تهيئة اليوميات"
+      }
+    },
+    "journalConfig": {
+      "title": "تهيئة اليوميات",
+      "subtitle": "اليوميات والحساب المقابل الافتراضي",
+      "headers": {
+        "code": "الرمز",
+        "libelle": "البيان",
+        "type": "النوع",
+        "compteContrepartie": "الحساب المقابل",
+        "exercice": "السنة المحاسبية",
+        "actions": "الإجراءات"
+      },
+      "actions": {
+        "create": "إضافة يومية",
+        "edit": "تعديل",
+        "delete": "حذف"
+      },
+      "form": {
+        "fields": {
+          "code": "رمز اليومية",
+          "libelle": "البيان",
+          "type": "النوع",
+          "compteContrepartie": "الحساب المقابل",
+          "actif": "نشط"
+        }
+      },
+      "toasts": {
+        "created": "تم إنشاء اليومية",
+        "saved": "تم تحديث اليومية",
+        "deleted": "تم حذف اليومية"
+      }
+    },
+    "balance": {
+      "entityName": "ميزان",
+      "title": "الميزان العام",
+      "subtitle": "ميزان الحسابات حسب السنة المحاسبية",
+      "routeTitle": "الميزان العام",
+      "routeBreadcrumb": "الميزان",
+      "filters": {
+        "exercice": "السنة المحاسبية",
+        "periodFrom": "الفترة من",
+        "periodTo": "الفترة إلى",
+        "classe": "الفئة",
+        "type": "نوع الحساب",
+        "showZero": "تضمين الأرصدة الصفرية"
+      },
+      "headers": {
+        "code": "الرمز",
+        "libelle": "البيان",
+        "soldeOuvertureDebit": "رصيد افتتاحي (م)",
+        "soldeOuvertureCredit": "رصيد افتتاحي (د)",
+        "movementsDebit": "الحركات (م)",
+        "movementsCredit": "الحركات (د)",
+        "soldeFinalDebit": "الرصيد النهائي (م)",
+        "soldeFinalCredit": "الرصيد النهائي (د)"
+      },
+      "totals": {
+        "label": "الإجمالي",
+        "subtotalClasse": "المجموع الفرعي للفئة {n}"
+      },
+      "actions": {
+        "exportCsv": "تصدير CSV",
+        "exportPdf": "تصدير PDF",
+        "drillDown": "عرض تفاصيل الحساب"
+      },
+      "emptyState": {
+        "title": "لا توجد قيود",
+        "message": "لا يوجد قيد محاسبي لهذه السنة."
+      }
+    },
+    "grandLivre": {
+      "entityName": "دفتر الأستاذ",
+      "title": "دفتر الأستاذ",
+      "subtitle": "تفاصيل القيود حسب الحساب",
+      "selectAccount": "اختر حسابا",
+      "headers": {
+        "date": "التاريخ",
+        "journal": "اليومية",
+        "reference": "المرجع",
+        "libelle": "البيان",
+        "debit": "مدين",
+        "credit": "دائن",
+        "soldeProgressif": "الرصيد التراكمي"
+      }
+    },
+    "virement": {
+      "entityName": "حوالة",
+      "entityNamePlural": "الحوالات",
+      "title": "الحوالات البنكية",
+      "subtitle": "إصدار ومتابعة وتسليم الحوالات",
+      "list": {
+        "columns": {
+          "numero": "الرقم",
+          "date": "التاريخ",
+          "compteEmetteur": "الحساب المُصدِر",
+          "beneficiaire": "المستفيد",
+          "rib": "RIB",
+          "montant": "المبلغ",
+          "devise": "العملة",
+          "motif": "السبب",
+          "status": "الحالة",
+          "actions": "الإجراءات"
+        },
+        "filters": {
+          "status": "الحالة",
+          "compteEmetteur": "الحساب",
+          "beneficiaire": "المستفيد",
+          "dateFrom": "من",
+          "dateTo": "إلى"
+        },
+        "emptyState": {
+          "title": "لا توجد حوالات",
+          "message": "لم تُسجَّل أي حوالة.",
+          "actionLabel": "حوالة جديدة"
+        }
+      },
+      "form": {
+        "fields": {
+          "compteEmetteur": "الحساب المُصدِر",
+          "beneficiaire": "المستفيد",
+          "rib": "RIB المستفيد",
+          "banque": "بنك المستفيد",
+          "montant": "المبلغ",
+          "devise": "العملة",
+          "motif": "السبب",
+          "reference": "المرجع",
+          "dateExecution": "تاريخ التنفيذ"
+        }
+      },
+      "remise": {
+        "title": "تسليم الحوالات",
+        "subtitle": "توليد ملف XML للبنك",
+        "selectVirements": "اختر الحوالات المراد إدراجها",
+        "summary": "الكشف الحسابي",
+        "totalAmount": "الإجمالي المراد تحويله",
+        "nbVirements": "عدد الحوالات",
+        "format": "صيغة التسليم",
+        "actions": {
+          "generate": "توليد ملف XML",
+          "download": "تحميل XML",
+          "send": "تأشير كمُرسَل"
+        },
+        "toasts": {
+          "generated": "تم توليد ملف التسليم",
+          "sent": "تم تأشير التسليم كمُرسَل"
+        }
+      },
+      "actions": {
+        "create": "حوالة جديدة",
+        "validate": "تحقق",
+        "execute": "تأشير كمُنفَّذة",
+        "cancel": "إلغاء",
+        "downloadXml": "تحميل XML"
+      },
+      "toasts": {
+        "created": "تم إنشاء الحوالة",
+        "validated": "تم التحقق من الحوالة",
+        "executed": "تم تأشير الحوالة كمُنفَّذة",
+        "cancelled": "تم إلغاء الحوالة"
+      }
+    },
+    "compte": {
+      "entityName": "حساب الخزينة",
+      "title": "الصناديق والبنوك",
+      "subtitle": "حسابات خزينة ERP",
+      "list": {
+        "columns": {
+          "code": "الرمز",
+          "libelle": "البيان",
+          "type": "النوع",
+          "banque": "البنك",
+          "rib": "RIB",
+          "devise": "العملة",
+          "soldeInitial": "الرصيد الافتتاحي",
+          "soldeComptable": "الرصيد المحاسبي",
+          "soldeBancaire": "الرصيد البنكي (الكشف)",
+          "actions": "الإجراءات"
+        }
+      },
+      "type": {
+        "CAISSE": "صندوق",
+        "BANQUE": "بنك",
+        "CARTE_BANCAIRE": "بطاقة بنكية",
+        "EFFETS_A_RECEVOIR": "أوراق للقبض",
+        "AUTRE": "أخرى"
+      },
+      "types": {
+        "banque": "🏦 بنك",
+        "caisse": "💵 صندوق"
+      },
+      "form": {
+        "fields": {
+          "rib": "RIB"
+        }
+      },
+      "detail": {
+        "title": "{code} — {libelle}",
+        "infoSection": "المعلومات",
+        "mouvementsSection": "الحركات",
+        "rapprochementSection": "التسوية",
+        "back": "← الصناديق",
+        "viewMouvements": "عرض الحركات ←",
+        "identification": "التعريف",
+        "compteCgnc": "حساب CGNC",
+        "active": "نشط",
+        "inactive": "غير نشط",
+        "coordonneesBancaires": "البيانات البنكية",
+        "agence": "الوكالة",
+        "soldes": "الأرصدة",
+        "mouvementsMois": "حركات الشهر",
+        "recettesMois": "مقبوضات الشهر",
+        "depensesMois": "مدفوعات الشهر",
+        "notes": "ملاحظات"
+      },
+      "actions": {
+        "create": "حساب جديد",
+        "edit": "تعديل",
+        "saisirMouvement": "إدخال حركة",
+        "rapprocher": "تسوية",
+        "voirReleves": "عرض الكشوف"
+      },
+      "financierCard": {
+        "inactive": "غير نشط",
+        "rib": "RIB",
+        "currentBalance": "الرصيد الحالي",
+        "vsYesterday": "مقارنة بالأمس",
+        "mvtsThisMonth": "حركات هذا الشهر",
+        "recettes": "المقبوضات",
+        "depenses": "المدفوعات",
+        "viewMvts": "عرض الحركات",
+        "newMvt": "+ إدخال حركة"
+      }
+    },
+    "mouvement": {
+      "entityName": "حركة",
+      "entityNamePlural": "الحركات",
+      "headers": {
+        "date": "التاريخ",
+        "libelle": "البيان",
+        "reference": "المرجع",
+        "tiers": "الطرف",
+        "type": "النوع",
+        "debit": "مدين",
+        "credit": "دائن",
+        "solde": "الرصيد",
+        "matched": "مطابَق"
+      },
+      "row": {
+        "matched": "مسوّى"
+      },
+      "list": {
+        "columns": {
+          "date": "التاريخ",
+          "numero": "الرقم",
+          "type": "النوع",
+          "libelle": "البيان",
+          "reference": "المرجع",
+          "recette": "مقبوض",
+          "depense": "مدفوع",
+          "solde": "الرصيد"
+        },
+        "emptyState": {
+          "title": "لا توجد حركة تطابق عوامل التصفية."
+        }
+      },
+      "filters": {
+        "type": "نوع الحركة",
+        "matched": "حالة المطابقة",
+        "dateFrom": "من",
+        "dateTo": "إلى",
+        "searchPlaceholder": "بحث (البيان، الرقم، الطرف المقابل، المرجع)…",
+        "rapproche": {
+          "all": "التسوية: الكل",
+          "yes": "مسوّاة",
+          "no": "غير مسوّاة"
+        }
+      },
+      "types": {
+        "REGLEMENT_CLIENT": "تسديد الزبائن",
+        "REGLEMENT_FOURN": "تسديد الموردين",
+        "PAIEMENT_PAIE": "أجور / نفقات",
+        "VIREMENT_INTERNE": "حوالات داخلية",
+        "FRAIS_BANCAIRES": "مصاريف بنكية",
+        "COMMISSIONS": "عمولات",
+        "AUTRE_RECETTE": "مقبوضات أخرى",
+        "AUTRE_DEPENSE": "مدفوعات أخرى"
+      },
+      "summary": {
+        "displayed": "الحركات المعروضة",
+        "totalRecettes": "إجمالي المقبوضات",
+        "totalDepenses": "إجمالي المدفوعات",
+        "totals": "الإجماليات المعروضة"
+      },
+      "labels": {
+        "vsYesterday": "مقارنة بالأمس"
+      },
+      "csv": {
+        "date": "التاريخ",
+        "numero": "الرقم",
+        "type": "النوع",
+        "libelle": "البيان",
+        "reference": "المرجع",
+        "contrepartie": "الطرف المقابل",
+        "recette": "مقبوض",
+        "depense": "مدفوع",
+        "solde": "الرصيد",
+        "rapproche": "مسوّى"
+      },
+      "form": {
+        "title": "إدخال حركة",
+        "fields": {
+          "compte": "حساب الخزينة",
+          "date": "التاريخ",
+          "type": "النوع",
+          "montant": "المبلغ",
+          "sens": "الاتجاه",
+          "libelle": "البيان",
+          "reference": "المرجع",
+          "tiers": "الطرف",
+          "imputation": "الإسناد المحاسبي"
+        },
+        "sens": {
+          "debit": "مدين (دخول)",
+          "credit": "دائن (خروج)"
+        }
+      },
+      "modes": {
+        "VIREMENT": "حوالة",
+        "CHEQUE": "شيك",
+        "ESPECES": "نقدا",
+        "CARTE": "بطاقة",
+        "EFFET": "كمبيالة"
+      },
+      "defaultLibelle": {
+        "FRAIS_BANCAIRES": "مصاريف تسيير الحساب",
+        "COMMISSIONS": "عمولة عملية"
+      },
+      "dialog": {
+        "title": "إدخال حركة",
+        "mode": "الطريقة",
+        "referencePlaceholder": "رقم الشيك، الحوالة…",
+        "libellePlaceholder": "وصف الحركة",
+        "recetteLabel": "مقبوض (دخول)",
+        "depenseLabel": "مدفوع (خروج)",
+        "contrepartieLabel": "الطرف المقابل",
+        "contrepartiePlaceholder": "المستفيد أو المُصدِر",
+        "justificatifLabel": "وثيقة إثبات (تذكرة مصاريف)",
+        "justificatifPlaceholder": "مرجع تذكرة المصاريف / وثيقة إثبات إلزامية للصندوق",
+        "justificatifPrefix": "إثبات: {ref}",
+        "delegateInfo": "يمر هذا النوع من الحركات عبر سير عمل مخصص لتوليد القيود المحاسبية تلقائيا وتحديث الفواتير.",
+        "delegateHint": "انقر «متابعة» لفتح الاستمارة المقابلة.",
+        "empty": "اختر نوع الحركة.",
+        "continueAction": "متابعة ←",
+        "options": {
+          "REGLEMENT_CLIENT": { "label": "تسديد زبون", "hint": "تحصيل" },
+          "REGLEMENT_FOURN": { "label": "تسديد مورد", "hint": "دفع" },
+          "VIREMENT_INTERNE": { "label": "حوالة داخلية", "hint": "بين الحسابات" },
+          "AUTRE_RECETTE": { "label": "مقبوض آخر", "hint": "تحصيل متنوع" },
+          "AUTRE_DEPENSE": { "label": "مدفوع آخر", "hint": "دفع متنوع" },
+          "FRAIS_BANCAIRES": { "label": "مصاريف بنكية", "hint": "تسيير الحساب…" },
+          "COMMISSIONS": { "label": "عمولة", "hint": "على العمليات" },
+          "PAIEMENT_PAIE": { "label": "أجور / تذكرة مصاريف", "hint": "الموظفون" }
+        }
+      },
+      "actions": {
+        "create": "+ إدخال حركة",
+        "lettrer": "مطابقة",
+        "supprimer": "حذف"
+      },
+      "toasts": {
+        "created": "تم تسجيل الحركة",
+        "deleted": "تم حذف الحركة"
+      }
+    },
+    "tauxChange": {
+      "entityName": "سعر الصرف",
+      "entityNamePlural": "أسعار الصرف",
+      "title": "أسعار الصرف",
+      "subtitle": "تسعيرات بنك المغرب المستعملة لتحويل العملات",
+      "list": {
+        "columns": {
+          "deviseBase": "العملة الأساسية",
+          "deviseCible": "العملة المستهدفة",
+          "taux": "السعر",
+          "dateCotation": "تاريخ التسعير",
+          "source": "المصدر",
+          "actions": "الإجراءات"
+        },
+        "filters": {
+          "deviseBase": "العملة الأساسية",
+          "deviseCible": "العملة المستهدفة",
+          "source": "المصدر",
+          "dateFrom": "التسعير من",
+          "dateTo": "التسعير إلى"
+        },
+        "emptyState": {
+          "title": "لا يوجد سعر",
+          "message": "لم يُسجَّل أي سعر صرف."
+        }
+      },
+      "form": {
+        "fields": {
+          "deviseBase": "العملة الأساسية",
+          "deviseCible": "العملة المستهدفة",
+          "taux": "السعر",
+          "dateCotation": "تاريخ التسعير",
+          "source": "المصدر"
+        }
+      },
+      "source": {
+        "BAM": "بنك المغرب (BAM)",
+        "MANUEL": "أُدخل يدويا",
+        "IMPORT": "مستورد"
+      },
+      "converter": {
+        "title": "محول العملات",
+        "amount": "المبلغ",
+        "from": "من",
+        "to": "إلى",
+        "rate": "السعر",
+        "result": "النتيجة",
+        "asOf": "في",
+        "noRate": "لا يوجد سعر متاح لهذا الزوج"
+      },
+      "chart": {
+        "title": "تطور السعر",
+        "period": "الفترة",
+        "min": "أدنى",
+        "max": "أعلى",
+        "avg": "متوسط"
+      },
+      "evolutionChart": {
+        "title": "تطور الأسعار (12 شهرا)",
+        "noData": "لا تتوفر بيانات."
+      },
+      "actions": {
+        "create": "سعر جديد",
+        "importBam": "استيراد تسعيرات BAM",
+        "edit": "تعديل",
+        "delete": "حذف"
+      },
+      "toasts": {
+        "created": "تم تسجيل السعر",
+        "saved": "تم تعديل السعر",
+        "deleted": "تم حذف السعر",
+        "imported": "{n} تسعيرة (تسعيرات) مستوردة"
+      }
+    },
+    "devise": {
+      "entityName": "عملة",
+      "entityNamePlural": "العملات",
+      "title": "العملات",
+      "subtitle": "العملات المدعومة من طرف ERP",
+      "detailTitle": "تفاصيل العملة",
+      "detailBreadcrumb": "تفاصيل",
+      "actionNew": "عملة جديدة",
+      "statusActive": "نشط",
+      "statusInactive": "غير نشط",
+      "referenceBadge": "المرجع",
+      "emptyTitle": "لا توجد عملة",
+      "emptyMessage": "ابدأ بـ MAD (المرجع)، EUR، USD…",
+      "list": {
+        "columns": {
+          "code": "الرمز",
+          "libelle": "البيان",
+          "symbole": "الرمز",
+          "precision": "الدقة",
+          "reference": "المرجع",
+          "actif": "نشط",
+          "decimales": "الأرقام العشرية",
+          "active": "نشطة",
+          "isDefault": "الافتراضية"
+        },
+        "filters": {
+          "status": "الحالة",
+          "reference": "المرجع",
+          "referenceYes": "العملة المرجعية",
+          "referenceNo": "أخرى"
+        }
+      },
+      "form": {
+        "fields": {
+          "codeIso": "رمز ISO",
+          "libelle": "البيان",
+          "symbole": "الرمز",
+          "precision": "دقة الأرقام العشرية",
+          "reference": "العملة المرجعية",
+          "actif": "نشط"
+        },
+        "hints": {
+          "codeIso": "3 أحرف كبيرة (MAD، EUR، USD…)",
+          "reference": "عملة واحدة فقط يمكن أن تكون مرجعا (MAD)."
+        }
+      },
+      "sections": {
+        "general": "عام",
+        "statut": "الحالة"
+      },
+      "deleteConfirm": {
+        "title": "حذف العملة",
+        "message": "هل تريد فعلا حذف العملة {code}؟"
+      },
+      "toasts": {
+        "saved": "تم حفظ العملة"
+      }
+    },
+    "conditionPaiement": {
+      "entityName": "شرط الدفع",
+      "entityNamePlural": "شروط الدفع",
+      "title": "شروط الدفع",
+      "subtitle": "آجال وطرق التسديد",
+      "list": {
+        "columns": {
+          "code": "الرمز",
+          "libelle": "البيان",
+          "type": "النوع",
+          "delaiJours": "الأجل (أيام)",
+          "echeance": "الاستحقاق",
+          "actif": "نشط"
+        },
+        "filters": {
+          "type": "النوع",
+          "actif": "نشط"
+        }
+      },
+      "form": {
+        "fields": {
+          "code": "الرمز",
+          "libelle": "البيان",
+          "type": "النوع",
+          "delaiJours": "الأجل (أيام)",
+          "echeance": "نمط الاستحقاق",
+          "actif": "نشط"
+        }
+      },
+      "display": {
+        "delai": "{n} أيام",
+        "finMois": "نهاية الشهر",
+        "finMoisX": "نهاية الشهر + {n} أيام",
+        "leX": "في اليوم {n} من الشهر الموالي",
+        "comptant": "نقدا",
+        "default": "افتراضي"
+      },
+      "echeances": {
+        "title": "الاستحقاقات",
+        "mustBeHundred": "(يجب أن تكون 100 %)",
+        "add": "+ إضافة استحقاق",
+        "descriptionPlaceholder": "مثال: عند الطلب",
+        "emptyState": "لم يُحدَّد أي استحقاق. استعمل هذا الجدول لإدخال دفعات مجزأة (30/40/30…).",
+        "cols": {
+          "ordre": "الترتيب",
+          "delai": "الأجل (ي)",
+          "description": "الوصف"
+        }
+      }
+    },
+    "analytique": {
+      "entityName": "تحليلية",
+      "title": "التحليلية",
+      "subtitle": "محور الأعباء/المنتجات حسب المحور",
+      "fields": {
+        "axe": "المحور",
+        "comptes": "الحسابات"
+      },
+      "axeTypes": {
+        "CHANTIER": "الورشات",
+        "DEPARTEMENT": "الأقسام",
+        "ACTIVITE": "الأنشطة"
+      },
+      "compteSets": {
+        "both": "أعباء + منتجات",
+        "charges": "الأعباء (الفئة 6)",
+        "produits": "المنتجات (الفئة 7)"
+      },
+      "searchPlaceholder": "رمز أو بيان الحساب",
+      "margeLabel": "الهامش (Σ7 - Σ6)",
+      "margeShort": "الهامش",
+      "emptyState": "لا توجد بيانات لهذه المعايير.",
+      "filters": {
+        "axe": "المحور التحليلي",
+        "chantier": "الورش",
+        "rubrique": "البند",
+        "periodFrom": "الفترة من",
+        "periodTo": "الفترة إلى",
+        "compte": "الحساب"
+      },
+      "headers": {
+        "axe": "المحور",
+        "chantier": "الورش",
+        "rubrique": "البند",
+        "compte": "الحساب",
+        "libelle": "البيان",
+        "totalDebit": "إجمالي المدين",
+        "totalCredit": "إجمالي الدائن",
+        "solde": "الرصيد"
+      },
+      "sections": {
+        "byChantier": "حسب الورش",
+        "byRubrique": "حسب البند",
+        "byAxe": "حسب المحور"
+      },
+      "actions": {
+        "exportCsv": "تصدير CSV",
+        "exportExcel": "تصدير Excel",
+        "drillDown": "عرض التفاصيل"
+      },
+      "toasts": {
+        "exported": "تم تصدير التحليلية (CSV)."
+      }
+    },
+    "recouvrement": {
+      "entityName": "تحصيل",
+      "title": "تحصيل الزبائن",
+      "subtitle": "متابعة الديون والتذكيرات",
+      "headers": {
+        "client": "الزبون",
+        "factureNumero": "رقم الفاتورة",
+        "dateEmission": "أُصدرت في",
+        "dateEcheance": "الاستحقاق",
+        "montantTtc": "المبلغ مع الضريبة",
+        "encaisse": "المُحصَّل",
+        "reste": "المتبقي",
+        "joursRetard": "أيام التأخير",
+        "niveauRelance": "مستوى التذكير",
+        "dernierContact": "آخر تواصل",
+        "actions": "الإجراءات"
+      },
+      "bucket": {
+        "current": "غير مستحقة",
+        "j1_30": "1-30 يوما",
+        "j31_60": "31-60 يوما",
+        "j61_90": "61-90 يوما",
+        "j91_180": "91-180 يوما",
+        "j180Plus": "> 180 يوما"
+      },
+      "relance": {
+        "niveau1": "المستوى 1 — تذكير",
+        "niveau2": "المستوى 2 — متابعة",
+        "niveau3": "المستوى 3 — إنذار",
+        "contentieux": "منازعات"
+      },
+      "actions": {
+        "envoyerRelance": "إرسال تذكير",
+        "marquerEncaisse": "تأشير كمُحصَّل",
+        "voirHistorique": "السجل",
+        "contacterClient": "الاتصال بالزبون",
+        "exportPdf": "تصدير PDF",
+        "exportCsv": "تصدير CSV"
+      },
+      "toasts": {
+        "relanceSent": "تم إرسال التذكير إلى {client}",
+        "encaisseSaved": "تم تسجيل التحصيل"
+      }
+    },
+    "effets": {
+      "entityName": "ورقة تجارية",
+      "entityNamePlural": "الأوراق التجارية",
+      "title": "الأوراق التجارية",
+      "subtitle": "أوراق للقبض / للدفع",
+      "routeTitle": "الأوراق التجارية",
+      "routeBreadcrumb": "الأوراق التجارية",
+      "list": {
+        "columns": {
+          "numero": "الرقم",
+          "type": "النوع",
+          "tireur": "الساحب",
+          "tire": "المسحوب عليه",
+          "montant": "المبلغ",
+          "dateEmission": "أُصدرت في",
+          "dateEcheance": "الاستحقاق",
+          "domicile": "محل الدفع",
+          "status": "الحالة",
+          "actions": "الإجراءات"
+        },
+        "filters": {
+          "type": "النوع",
+          "status": "الحالة",
+          "dateFrom": "الاستحقاق من",
+          "dateTo": "الاستحقاق إلى"
+        }
+      },
+      "type": {
+        "AR": "للقبض",
+        "AP": "للدفع"
+      },
+      "status": {
+        "ENCOURS": "قيد التنفيذ",
+        "REMIS_ENCAISSEMENT": "مُسلَّمة للتحصيل",
+        "REMIS_ESCOMPTE": "مُسلَّمة للخصم",
+        "PAYE": "مدفوع",
+        "IMPAYE": "غير مدفوع",
+        "ANNULE": "ملغى"
+      },
+      "actions": {
+        "remiseEncaissement": "التسليم للتحصيل",
+        "remiseEscompte": "التسليم للخصم",
+        "marquerPaye": "تأشير كمدفوع",
+        "marquerImpaye": "تأشير كغير مدفوع"
+      }
+    },
+    "declarations": {
+      "entityName": "التصاريح",
+      "title": "التصاريح الضريبية",
+      "subtitle": "توليد ومتابعة التصاريح الإلكترونية",
+      "common": {
+        "exercice": "السنة الضريبية",
+        "periode": "الفترة",
+        "month": "الشهر",
+        "trimester": "الفصل",
+        "dateLimite": "آخر أجل",
+        "status": "الحالة",
+        "actions": "الإجراءات"
+      },
+      "status": {
+        "BROUILLON": "مسودة",
+        "PRETE": "جاهزة للتصريح الإلكتروني",
+        "TELEDECLAREE": "مصرّح بها إلكترونيا",
+        "PAYEE": "مدفوعة",
+        "ARCHIVEE": "مؤرشفة"
+      },
+      "actions": {
+        "generate": "توليد التصريح",
+        "preview": "معاينة",
+        "downloadEdi": "تحميل ملف EDI",
+        "markTeledeclared": "تأشير كمصرّح بها إلكترونيا",
+        "markPaid": "تأشير كمدفوعة"
+      },
+      "simplIs": {
+        "title": "SIMPL-IS — تصريح TVA",
+        "subtitle": "ملاحق المبيعات والمشتريات — تصريح شهري DGI",
+        "crumb": "SIMPL-IS TVA",
+        "routeTitle": "SIMPL-IS TVA",
+        "routeBreadcrumb": "SIMPL-IS",
+        "monthLabel": "الشهر:",
+        "exportXml": "📥 تصدير XML SIMPL-IS",
+        "exportXlsx": "📊 Excel ملحق المبيعات",
+        "headers": {
+          "societe": "الشركة",
+          "if": "IF",
+          "ice": "ICE",
+          "periode": "الفترة"
+        },
+        "annexA": {
+          "title": "الملحق أ — TVA محصلة على المبيعات",
+          "cols": {
+            "numero": "رقم الفاتورة",
+            "client": "الزبون",
+            "iceClient": "ICE الزبون",
+            "montantHt": "المبلغ بدون احتساب الضريبة",
+            "tauxTva": "نسبة TVA",
+            "tvaCollectee": "TVA محصلة",
+            "ttc": "مع احتساب الضريبة"
+          },
+          "empty": "لا توجد مبيعات مفوترة في {month}."
+        },
+        "recap": {
+          "title": "كشف TVA للتصريح",
+          "tvaCollectee": "TVA محصلة (المبيعات)",
+          "tvaDeductible": "TVA قابلة للخصم مُقدَّرة (المشتريات)",
+          "tvaNet": "TVA الصافية المستحقة الدفع"
+        },
+        "note": "TVA يجب دفعها قبل اليوم 20 من الشهر الموالي. التصريح الإلكتروني عبر بوابة DGI simpl.tax.gov.ma",
+        "xlsx": {
+          "ht": "بدون احتساب الضريبة",
+          "tauxTva": "نسبة TVA %",
+          "tva": "TVA",
+          "ttc": "مع احتساب الضريبة"
+        },
+        "audit": {
+          "xlsx": "XLSX ملحق المبيعات — {count} سطر",
+          "xml": "XML تصريح TVA الإلكتروني (تجريبي)"
+        },
+        "sections": {
+          "acomptes": "الدفعات الفصلية على الحساب",
+          "regularisation": "التسوية السنوية",
+          "telechargement": "تحميل EDI"
+        },
+        "acompteLabels": {
+          "T1": "الدفعة الأولى على الحساب (قبل 31/03)",
+          "T2": "الدفعة الثانية على الحساب (قبل 30/06)",
+          "T3": "الدفعة الثالثة على الحساب (قبل 30/09)",
+          "T4": "الدفعة الرابعة على الحساب (قبل 31/12)"
+        },
+        "hints": {
+          "intro": "يستند حساب دفعات IS على الحساب إلى النتيجة الضريبية للسنة السابقة. تتم التسوية مع التصريح السنوي.",
+          "tauxBareme": "نسبة IS حسب جدول CGI: 12,5 % / 20 % / 25 % / 32 % / 35 % حسب الشريحة."
+        }
+      },
+      "tva": {
+        "title": "تصريح TVA",
+        "regime": "النظام",
+        "regimeDebit": "نظام المدين",
+        "regimeEncaissement": "نظام التحصيل",
+        "cycle": "دورة التصريح",
+        "cycleMensuel": "شهري",
+        "cycleTrimestriel": "فصلي",
+        "tvaCollectee": "TVA محصلة",
+        "tvaDeductible": "TVA قابلة للخصم",
+        "tvaPayer": "TVA المستحقة الدفع",
+        "creditTva": "رصيد TVA قابل للترحيل"
+      },
+      "retenueSource": {
+        "title": "الاقتطاع من المنبع (RAS)",
+        "subtitle": "كشف الاقتطاعات المطبقة على الموردين غير المقيمين",
+        "routeTitle": "اقتطاع من المنبع",
+        "routeBreadcrumb": "اقتطاع من المنبع",
+        "headers": {
+          "fournisseur": "المورد",
+          "ice": "ICE",
+          "baseHt": "الوعاء بدون احتساب الضريبة",
+          "tauxRas": "نسبة RAS",
+          "montantRetenue": "المبلغ المقتطع",
+          "datePaiement": "تاريخ الدفع",
+          "reverse": "محوّل"
+        },
+        "summary": {
+          "totalBase": "إجمالي الوعاء بدون احتساب الضريبة",
+          "totalRetenue": "إجمالي RAS المقتطع",
+          "totalReverse": "إجمالي RAS المحوّل"
+        },
+        "actions": {
+          "generateEtat": "توليد كشف RAS",
+          "exportXml": "تصدير XML SIMPL",
+          "markReverse": "تأشير كمحوّل"
+        }
+      }
+    },
+    "caissesChantier": {
+      "entityName": "صناديق الورش",
+      "title": "الصناديق والبنوك",
+      "subtitle": "عرض موحد للخزينة متعدد البنوك والصناديق.",
+      "kpi": {
+        "soldeTotal": "الرصيد الإجمالي",
+        "activeAccounts": "{count} حساب (حسابات) نشط",
+        "accounts": "{count} حساب (حسابات)",
+        "caisses": "{count} صندوق (صناديق)",
+        "recettesMois": "مقبوضات الشهر",
+        "depensesMois": "مدفوعات الشهر",
+        "fluxNetMois": "التدفق الصافي للشهر"
+      },
+      "list": {
+        "columns": {
+          "chantier": "الورش",
+          "responsable": "المسؤول",
+          "fondInitial": "الرصيد الافتتاحي",
+          "soldeCourant": "الرصيد الحالي",
+          "depenses": "المدفوعات",
+          "reapprovs": "إعادة التموين",
+          "status": "الحالة",
+          "actions": "الإجراءات"
+        }
+      },
+      "actions": {
+        "ouvrir": "فتح الصندوق",
+        "reapprovisionner": "إعادة التموين",
+        "saisirDepense": "إدخال مصروف",
+        "cloturer": "إقفال الصندوق"
+      }
+    },
+    "import": {
+      "releve": {
+        "title": "استيراد كشف بنكي",
+        "subtitle": "صيغة OFX أو CSV — صيغة BAM متوافقة",
+        "dropzone": "اسحب ملف OFX/CSV هنا",
+        "or": "أو",
+        "selectFile": "اختر ملفا",
+        "format": "الصيغة المكتشفة",
+        "compteCible": "الحساب المستهدف",
+        "dateRange": "الفترة المكتشفة",
+        "preview": "معاينة ({n} أسطر)",
+        "headers": {
+          "date": "التاريخ",
+          "libelle": "البيان",
+          "reference": "المرجع",
+          "debit": "مدين",
+          "credit": "دائن"
+        },
+        "errors": {
+          "title": "أخطاء مكتشفة",
+          "lineN": "السطر {n}",
+          "invalidDate": "تاريخ غير صالح",
+          "invalidAmount": "مبلغ غير صالح",
+          "missingRequired": "حقل إلزامي ناقص"
+        },
+        "actions": {
+          "import": "استيراد",
+          "cancel": "إلغاء",
+          "downloadTemplate": "قالب CSV"
+        },
+        "toasts": {
+          "imported": "{n} حركات مستوردة",
+          "duplicate": "{n} مكرر (مكررة) متجاهلة",
+          "error": "فشل الاستيراد"
+        }
+      },
+      "dialog": {
+        "title": "استيراد الكشف البنكي",
+        "uploadText": "انقر أو ضع ملف CSV أو OFX هنا",
+        "uploadHint": "CSV: التاريخ · البيان · المرجع · دائن · مدين — OFX: استخراج STMTTRN",
+        "pasteLabel": "أو الصق محتوى CSV أسفله",
+        "pastePlaceholder": "Date,Libellé,Référence,Crédit,Débit\n2026-04-15,Vir. OCP Promotion,VIR-OCP-001,1504800,\n2026-04-16,Frais bancaires,,,180",
+        "analyze": "تحليل",
+        "validLines": "أسطر صالحة",
+        "errorLines": "{count} بها أخطاء",
+        "restart": "إعادة البدء",
+        "refShort": "مرجع",
+        "importCount": "استيراد {count} سطر",
+        "errors": {
+          "missingLibelle": "البيان ناقص",
+          "noAmount": "لا يوجد مبلغ"
+        }
+      }
+    },
+    "imputation": {
+      "title": "الإسناد المحاسبي",
+      "subtitle": "اختر حساب الإسناد",
+      "search": "بحث عن حساب…",
+      "noResult": "لا يوجد حساب مطابق",
+      "favorites": "الحسابات المفضلة",
+      "recents": "الحسابات الأخيرة",
+      "actions": {
+        "select": "اختيار",
+        "clear": "مسح",
+        "createNew": "إنشاء حساب جديد"
+      },
+      "openInvoices": "{count} فاتورة (فواتير) مفتوحة",
+      "totalDue": "الإجمالي المستحق",
+      "amountReceived": "إجمالي المبلغ المستلم",
+      "amountToPay": "إجمالي المبلغ المراد دفعه",
+      "autoAllocate": "إسناد تلقائي",
+      "emptyForContrepartie": "لا توجد فاتورة مفتوحة لهذا الطرف المقابل.",
+      "emptySelectContrepartie": "اختر طرفا مقابلا لعرض الفواتير المفتوحة.",
+      "totalImpute": "الإجمالي المُسند",
+      "cols": {
+        "numero": "رقم الفاتورة",
+        "date": "التاريخ",
+        "echeance": "الاستحقاق",
+        "resteARegler": "المتبقي للتسديد",
+        "impute": "مُسند"
+      }
+    },
+    "soldeIndicator": {
+      "label": "الرصيد",
+      "positive": "فائض",
+      "negative": "عجز",
+      "zero": "متوازن",
+      "trend": {
+        "up": "في ارتفاع",
+        "down": "في انخفاض",
+        "stable": "مستقر"
+      }
+    },
+    "deviseFlag": {
+      "label": "عملة {code}"
+    }
+  }
+}

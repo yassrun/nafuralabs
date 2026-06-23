@@ -1,0 +1,252 @@
+{
+  "inventory": {
+    "navigation": {
+      "title": "المخزون",
+      "dashboard": "لوحة القيادة",
+      "operations": "العمليات",
+      "stockOverview": "نظرة عامة على المخزون",
+      "items": "الأصناف",
+      "receipts": "الاستلامات",
+      "transfers": "التحويلات",
+      "adjustments": "التعديلات",
+      "warehouses": "المستودعات",
+      "suppliers": "الموردون",
+      "inventoryCount": "الجرد الفعلي",
+      "configuration": "الإعدادات",
+      "itemCategories": "فئات الأصناف",
+      "itemTypes": "أنواع الأصناف",
+      "unitsOfMeasure": "وحدات القياس",
+      "conversionRules": "قواعد التحويل",
+      "attributes": "تعريفات السمات",
+      "barcodeSettings": "إعدادات الباركود",
+      "inventorySettings": "إعدادات المخزون",
+      "reports": "التقارير",
+      "stockValuation": "تقييم المخزون",
+      "movementHistory": "سجل الحركات",
+      "lowStock": "مخزون منخفض",
+      "inventoryAging": "تقادم المخزون",
+      "inventoryTxLines": "أسطر حركات المخزون",
+      "inventoryTxes": "حركات المخزون",
+      "stockBalances": "أرصدة المخزون"
+    },
+    "dashboard": {
+      "title": "المخزون",
+      "subtitle": "حالة المخزون والعمليات في الوقت الحقيقي",
+      "panels": {
+        "stockHealth": "صحة المخزون",
+        "alertsAttention": "التنبيهات والحالات المستوجبة للاهتمام",
+        "recentOperations": "العمليات الأخيرة",
+        "stockByLocation": "المخزون حسب الموقع",
+        "traceabilitySnapshot": "لقطة التتبع",
+        "todayAtGlance": "اليوم في لمحة",
+        "recentInventoryActivity": "النشاط الأخير للمخزون",
+        "stockAlerts": "تنبيهات المخزون",
+        "quickActions": "إجراءات سريعة"
+      },
+      "todayAtGlance": {
+        "blsImportedToday": "استلامات اليوم",
+        "transfersImportedToday": "تحويلات اليوم",
+        "receiptsToday": "استلامات اليوم",
+        "transfersToday": "تحويلات اليوم",
+        "adjustmentsToday": "تعديلات اليوم",
+        "fromDocuments": "من الوثائق",
+        "fromErp": "من ERP"
+      },
+      "actions": {
+        "viewAllAlerts": "عرض جميع التنبيهات",
+        "newOperation": "عملية جديدة"
+      },
+      "columns": {
+        "type": "النوع",
+        "sourceType": "المصدر",
+        "reference": "المرجع",
+        "sourceDestination": "المصدر / الوجهة",
+        "status": "الحالة",
+        "date": "التاريخ",
+        "user": "المستخدم",
+        "location": "الموقع",
+        "totalQuantity": "الكمية الإجمالية",
+        "itemCount": "عدد الأصناف"
+      },
+      "traceability": {
+        "expiringLots": "دفعات منتهية الصلاحية (30 يوماً)",
+        "serialsWithAnomalies": "أرقام تسلسلية بها شذوذ"
+      },
+      "kpis": {
+        "skusWithStock": "SKU في المخزون",
+        "totalQuantity": "الكمية الإجمالية",
+        "reserved": "محجوز",
+        "inTransit": "قيد النقل",
+        "lowStockAlerts": "تنبيهات المخزون المنخفض"
+      },
+      "stockHealth": {
+        "available": "متاح",
+        "reserved": "محجوز",
+        "inTransit": "قيد النقل",
+        "blockedDamaged": "محجوب / تالف"
+      },
+      "alerts": {
+        "lowStock": "مخزون منخفض: 12 صنفاً تحت العتبة",
+        "negativeStock": "مخزون سالب مرصود في WH-A1",
+        "unvalidatedReceipt": "استلام غير مُصادق عليه RCPT-2026-021",
+        "lotExpiring": "الدفعة EXP-447 تنتهي خلال 12 يوماً",
+        "failedImport": "فشل الاستيراد: Items_2026_02.csv",
+        "veryLowStock": "مخزون متدنٍ جداً: 6 أصناف تحت عتبة الأمان",
+        "importInconsistencies": "تباينات استيراد مرصودة في وثيقتين"
+      },
+      "alertActions": {
+        "view": "عرض",
+        "fix": "تصحيح",
+        "validate": "تحقق",
+        "review": "مراجعة"
+      },
+      "alertSeverities": {
+        "info": "معلومة",
+        "warning": "تحذير",
+        "critical": "حرج"
+      },
+      "operations": {
+        "types": {
+          "receipt": "استلام",
+          "transfer": "تحويل",
+          "shipment": "إرسالية",
+          "adjustment": "تعديل"
+        },
+        "statuses": {
+          "draft": "مسودة",
+          "posted": "محاسب",
+          "imported": "مستورد",
+          "needsReview": "بحاجة إلى مراجعة",
+          "corrected": "مصحَّح"
+        },
+        "sources": {
+          "type": {
+            "document": "وثيقة (Doxura)",
+            "erp": "ERP"
+          },
+          "vendorAtlas": "المورد: Atlas Parts",
+          "whABulk": "WH-A / غير معبأ",
+          "whBDispatch": "WH-B / الإرسال",
+          "whACycleCount": "WH-A / جرد دوري",
+          "vendorKappa": "المورد: Kappa Tools",
+          "whCBulk": "WH-C / غير معبأ",
+          "whADispatch": "WH-A / الإرسال",
+          "vendorNorthwind": "المورد: Northwind Supplies",
+          "whBCycleCount": "WH-B / جرد دوري"
+        },
+        "destinations": {
+          "whAReceiving": "WH-A / الاستلام",
+          "whBPicking": "WH-B / التحضير",
+          "customerOryx": "الزبون: Oryx Retail",
+          "variance": "الفارق",
+          "whABulk": "WH-A / غير معبأ",
+          "customerZenith": "الزبون: Zenith Auto",
+          "whBReceiving": "WH-B / الاستلام",
+          "customerNova": "الزبون: Nova Mart"
+        }
+      },
+      "locations": {
+        "whABulk": "WH-A / غير معبأ",
+        "whAPicking": "WH-A / التحضير",
+        "whBBulk": "WH-B / غير معبأ",
+        "whBReceiving": "WH-B / الاستلام",
+        "whCBulk": "WH-C / غير معبأ"
+      },
+      "quickActions": {
+        "receiveGoods": "استلام البضائع",
+        "transferStock": "تحويل المخزون",
+        "runStocktake": "إطلاق جرد",
+        "importOpeningStock": "استيراد المخزون الافتتاحي",
+        "addAdjustment": "إضافة تعديل",
+        "createTransfer": "إنشاء تحويل",
+        "reviewImportedDocument": "مراجعة الوثيقة المستوردة"
+      },
+      "operationActions": {
+        "receipt": "استلام",
+        "transfer": "تحويل",
+        "shipment": "إرسالية",
+        "adjustment": "تعديل"
+      }
+    },
+    "warehouse": {
+      "title": "المستودعات",
+      "detailTitle": "تفاصيل المستودع",
+      "newTitle": "مستودع جديد",
+      "fields": {
+        "code": "الرمز",
+        "name": "الاسم",
+        "location": "الموقع",
+        "description": "الوصف",
+        "isActive": "نشط"
+      },
+      "sections": {}
+    },
+    "inventoryTxLine": {
+      "title": "أسطر حركات المخزون",
+      "detailTitle": "تفاصيل سطر حركة المخزون",
+      "newTitle": "سطر حركة مخزون جديد",
+      "fields": {
+        "inventoryTxId": "معرّف حركة المخزون",
+        "lineNumber": "رقم السطر",
+        "itemId": "معرّف الصنف",
+        "quantity": "الكمية",
+        "unitPrice": "سعر الوحدة",
+        "totalPrice": "السعر الإجمالي",
+        "notes": "ملاحظات"
+      },
+      "sections": {}
+    },
+    "inventoryTx": {
+      "title": "حركات المخزون",
+      "detailTitle": "تفاصيل حركة المخزون",
+      "newTitle": "حركة مخزون جديدة",
+      "fields": {
+        "txNumber": "رقم الحركة",
+        "txType": "نوع الحركة",
+        "warehouseId": "معرّف المستودع",
+        "txDate": "تاريخ الحركة",
+        "reference": "المرجع",
+        "status": "الحالة",
+        "notes": "ملاحظات"
+      },
+      "sections": {}
+    },
+    "stockBalance": {
+      "title": "أرصدة المخزون",
+      "detailTitle": "تفاصيل رصيد المخزون",
+      "newTitle": "رصيد مخزون جديد",
+      "fields": {
+        "warehouseId": "معرّف المستودع",
+        "itemId": "معرّف الصنف",
+        "quantity": "الكمية",
+        "reservedQuantity": "الكمية المحجوزة",
+        "availableQuantity": "الكمية المتاحة",
+        "lastCountDate": "تاريخ آخر جرد"
+      },
+      "sections": {}
+    },
+    "valorisation": {
+      "title": "تقييم المخزون",
+      "subtitle": "القيمة المالية للمخزون حسب الموقع والعائلة",
+      "date": "تاريخ التقييم",
+      "costingMethod": "طريقة التقييم",
+      "noData": "لا توجد بيانات متاحة",
+      "famille": "العائلة",
+      "articleCount": "عدد الأصناف",
+      "totalQty": "الكمية الإجمالية",
+      "totalValue": "القيمة الإجمالية",
+      "percent": "% من المخزون",
+      "location": "الموقع",
+      "type": "النوع",
+      "value": "القيمة",
+      "byFamille": "التقييم حسب العائلة",
+      "byLocation": "التقييم حسب الموقع",
+      "kpi": {
+        "totalValue": "إجمالي قيمة المخزون",
+        "depotValue": "قيمة المستودعات",
+        "chantierValue": "قيمة الورش",
+        "monthlyVariation": "التغير الشهري"
+      }
+    }
+  }
+}

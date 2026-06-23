@@ -1,0 +1,15 @@
+{
+  "entity": "EntityTag",
+  "fields": {
+    "entityType": {
+      "required": true,
+      "maxLength": 80
+    },
+    "entityId": {
+      "required": true
+    },
+    "tagId": {
+      "required": true
+    }
+  }
+}

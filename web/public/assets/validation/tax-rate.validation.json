@@ -1,0 +1,16 @@
+{
+  "entity": "TaxRate",
+  "fields": {
+    "taxCodeId": {
+      "required": true
+    },
+    "effectiveFrom": {
+      "required": true
+    },
+    "rate": {
+      "required": true,
+      "min": 0,
+      "max": 100
+    }
+  }
+}

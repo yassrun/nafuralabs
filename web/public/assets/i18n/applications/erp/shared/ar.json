@@ -1,0 +1,106 @@
+{
+  "shared": {
+    "dataTable": {
+      "empty": {
+        "title": "لا توجد بيانات",
+        "message": "لا توجد عناصر لعرضها في الوقت الحالي."
+      },
+      "boolean": {
+        "yes": "نعم",
+        "no": "لا"
+      },
+      "export": {
+        "csv": "تصدير CSV",
+        "xlsx": "تصدير Excel"
+      }
+    },
+    "emptyState": {
+      "defaultTitle": "لا توجد نتائج",
+      "actionLabel": "إدخال جديد"
+    },
+    "pageShell": {
+      "actions": {
+        "refresh": "تحديث",
+        "back": "رجوع",
+        "close": "إغلاق"
+      }
+    },
+    "pagination": {
+      "rowsPerPage": "صفوف لكل صفحة:",
+      "counter": "{from}–{to} من {total}",
+      "firstPage": "الصفحة الأولى",
+      "previousPage": "الصفحة السابقة",
+      "nextPage": "الصفحة التالية",
+      "lastPage": "الصفحة الأخيرة"
+    },
+    "filters": {
+      "reset": "إعادة تعيين",
+      "resetTitle": "إعادة تعيين الفلاتر",
+      "resetTooltip": "مسح الفلاتر والبحث والترتيب المرئي (القائمة)"
+    },
+    "entityDetail": {
+      "actions": {
+        "save": "حفظ",
+        "cancel": "إلغاء",
+        "edit": "تعديل",
+        "delete": "حذف",
+        "close": "إغلاق"
+      }
+    },
+    "statusBadge": {
+      "unknown": "غير معروف"
+    },
+    "moneyInput": {
+      "placeholder": "0,00"
+    },
+    "confirmDialog": {
+      "ok": "موافق",
+      "cancel": "إلغاء",
+      "title": "تأكيد",
+      "message": "هل أنت متأكد؟"
+    },
+    "phoneMa": {
+      "placeholder": "+212 6 XX XX XX XX",
+      "error": "رقم غير صالح — التنسيق +212 6/7 XX XX XX XX",
+      "validatorMessage": "رقم مغربي غير صالح"
+    },
+    "documentWorkspace": {
+      "exportNotImplemented": "التصدير غير متاح بعد لهذه الوثيقة.",
+      "actions": {
+        "validate": "تحقق",
+        "post": "محاسبة",
+        "print": "طباعة",
+        "export": "تصدير",
+        "cancel": "إلغاء",
+        "submit": "إرسال"
+      }
+    },
+    "sendEmail": {
+      "defaultSubject": "بشأن {ref}"
+    },
+    "alerts": {
+      "bellTitle": "تنبيهات العمل",
+      "centerSectionTitle": "تنبيهات العمل",
+      "centerPlatformSectionTitle": "إشعارات النظام",
+      "factureLate": "{numero} متأخرة منذ {count, plural, =0 {0 يوم} one {يوم واحد} other {# يوماً}}",
+      "cautionExpiry": "{numero} تنتهي صلاحيتها خلال {count, plural, =0 {أقل من يوم} one {يوم واحد} other {# يوماً}}",
+      "noPendingAlert": "لا توجد تنبيهات قيد الانتظار",
+      "dismiss": "إخفاء"
+    },
+    "entityListing": {
+      "bulkDelete": {
+        "title": "{count, plural, =0 {حذف} one {حذف 1 {entity}} other {حذف # {entity}}}",
+        "message": "{count, plural, =0 {لم يتم تحديد أي عنصر.} one {هل تريد فعلاً حذف هذا العنصر؟ هذا الإجراء لا يمكن التراجع عنه.} other {هل تريد فعلاً حذف هذه العناصر #؟ هذا الإجراء لا يمكن التراجع عنه.}}",
+        "confirmLabel": "حذف الكل"
+      },
+      "toast": {
+        "deleted": "{count, plural, =0 {لم يتم حذف أي عنصر.} one {تم حذف عنصر واحد.} other {تم حذف # عناصر.}}",
+        "exported": "{count, plural, =0 {لم يتم تصدير أي عنصر.} one {تم تصدير عنصر واحد.} other {تم تصدير # عناصر.}}",
+        "archived": "{count, plural, =0 {لم تتم أرشفة أي عنصر.} one {تمت أرشفة عنصر واحد.} other {تمت أرشفة # عناصر.}}"
+      },
+      "importExport": {
+        "importButton": "{count, plural, =0 {استيراد} one {استيراد عنصر واحد} other {استيراد # عناصر}}"
+      }
+    }
+  }
+}

@@ -1,0 +1,223 @@
+{
+  "inspections": [
+    {
+      "id": "ins001",
+      "numero": "INSP-2026-0001",
+      "dateInspection": "2026-01-10",
+      "chantierId": "ch-001",
+      "chantierCode": "CH-2025-001",
+      "inspecteurNom": "Rachid Amrani (HSE Manager)",
+      "thematique": "Travaux en hauteur & échafaudages",
+      "nbObservations": 12,
+      "nbNonConformites": 3,
+      "noteGlobale": 72,
+      "status": "TERMINEE",
+      "observations": "3 NC relevées : garde-corps manquants, platelages mal fixés, harnais non portés. Actions correctives engagées."
+    },
+    {
+      "id": "ins002",
+      "numero": "INSP-2026-0002",
+      "dateInspection": "2026-01-24",
+      "chantierId": "ch-002",
+      "chantierCode": "CH-2025-002",
+      "inspecteurNom": "Fatima Lahlou (Ingénieure HSE)",
+      "thematique": "Engins de chantier & zone de circulation",
+      "nbObservations": 8,
+      "nbNonConformites": 1,
+      "noteGlobale": 85,
+      "status": "TERMINEE",
+      "observations": "1 NC : signalisation insuffisante voie d'accès engins. Autres points conformes."
+    },
+    {
+      "id": "ins003",
+      "numero": "INSP-2026-0003",
+      "dateInspection": "2026-02-14",
+      "chantierId": "ch-003",
+      "chantierCode": "CH-2025-003",
+      "inspecteurNom": "Youssef Bennis (HSE Manager)",
+      "thematique": "Stockage & manutention produits chimiques",
+      "nbObservations": 10,
+      "nbNonConformites": 4,
+      "noteGlobale": 60,
+      "status": "TERMINEE",
+      "observations": "4 NC : étiquetage produits, bacs de rétention absents, FDS non accessibles, extincteur inadapté."
+    },
+    {
+      "id": "ins004",
+      "numero": "INSP-2026-0004",
+      "dateInspection": "2026-03-05",
+      "chantierId": "ch-004",
+      "chantierCode": "CH-2025-004",
+      "inspecteurNom": "Rachid Amrani (HSE Manager)",
+      "thematique": "EPI & hygiène des vestiaires",
+      "nbObservations": 7,
+      "nbNonConformites": 2,
+      "noteGlobale": 78,
+      "status": "TERMINEE",
+      "observations": "2 NC : manque EPI spécifiques toiture, vestiaires sans eau chaude. Plan d'action en cours."
+    },
+    {
+      "id": "ins005",
+      "numero": "INSP-2026-0005",
+      "dateInspection": "2026-03-20",
+      "chantierId": "ch-005",
+      "chantierCode": "CH-2025-005",
+      "inspecteurNom": "Fatima Lahlou (Ingénieure HSE)",
+      "thematique": "Fouilles & tranchées – Risques d'éboulement",
+      "nbObservations": 9,
+      "nbNonConformites": 2,
+      "noteGlobale": 80,
+      "status": "TERMINEE",
+      "observations": "2 NC : balisage insuffisant, pas de détection réseaux avant creusement."
+    },
+    {
+      "id": "ins006",
+      "numero": "INSP-2026-0006",
+      "dateInspection": "2026-04-08",
+      "chantierId": "ch-006",
+      "chantierCode": "CH-2025-006",
+      "inspecteurNom": "Youssef Bennis (HSE Manager)",
+      "thematique": "Incendie & évacuation",
+      "nbObservations": 6,
+      "nbNonConformites": 3,
+      "noteGlobale": 63,
+      "status": "TERMINEE",
+      "observations": "3 NC : extincteurs périmés, issues de secours bloquées, pas d'exercice évacuation planifié."
+    },
+    {
+      "id": "ins007",
+      "numero": "INSP-2026-0007",
+      "dateInspection": "2026-05-06",
+      "chantierId": "ch-007",
+      "chantierCode": "CH-2025-007",
+      "inspecteurNom": "Rachid Amrani (HSE Manager)",
+      "thematique": "Risques électriques & armoires de chantier",
+      "nbObservations": 5,
+      "nbNonConformites": 1,
+      "noteGlobale": 90,
+      "status": "EN_COURS"
+    },
+    {
+      "id": "ins008",
+      "numero": "INSP-2026-0008",
+      "dateInspection": "2026-05-20",
+      "chantierId": "ch-008",
+      "chantierCode": "CH-2025-008",
+      "inspecteurNom": "Fatima Lahlou (Ingénieure HSE)",
+      "thematique": "Soudage & travaux par points chauds",
+      "nbObservations": 0,
+      "nbNonConformites": 0,
+      "status": "PLANIFIEE"
+    }
+  ],
+  "audits": [
+    {
+      "id": "aud001",
+      "numero": "AUD-2026-0001",
+      "chantierId": "ch-001",
+      "chantierCode": "CH-2025-001",
+      "templateCode": "ECHAFAUDAGES",
+      "titre": "Audit échafaudages — Tour A",
+      "auditeurNom": "Rachid Amrani (HSE Manager)",
+      "dateAudit": "2026-05-15",
+      "status": "EN_COURS",
+      "lignes": [
+        {
+          "id": "aud001-l001",
+          "ordre": 0,
+          "code": "ECH-01",
+          "libelle": "Platelages complets sans trou",
+          "categorie": "Structure",
+          "reponse": "OUI"
+        },
+        {
+          "id": "aud001-l002",
+          "ordre": 1,
+          "code": "ECH-02",
+          "libelle": "Garde-corps conformes (1,00 m)",
+          "categorie": "Protection collective",
+          "reponse": "NON",
+          "commentaire": "Garde-corps absent côté façade nord R+2"
+        },
+        {
+          "id": "aud001-l003",
+          "ordre": 2,
+          "code": "ECH-03",
+          "libelle": "Ancrage au bâtiment vérifié",
+          "categorie": "Fixation",
+          "reponse": "OUI"
+        },
+        {
+          "id": "aud001-l004",
+          "ordre": 3,
+          "code": "ECH-04",
+          "libelle": "Accès sécurisé (échelle/escalier)",
+          "categorie": "Accès",
+          "reponse": "NON",
+          "commentaire": "Échelle non fixée en pied"
+        },
+        {
+          "id": "aud001-l005",
+          "ordre": 4,
+          "code": "ECH-05",
+          "libelle": "Harnais portés en hauteur",
+          "categorie": "EPI",
+          "reponse": "OUI"
+        }
+      ]
+    },
+    {
+      "id": "aud002",
+      "numero": "AUD-2026-0002",
+      "chantierId": "ch-006",
+      "chantierCode": "CH-2025-006",
+      "templateCode": "INCENDIE",
+      "titre": "Audit incendie — Entrepôt provisoire",
+      "auditeurNom": "Fatima Lahlou (Ingénieure HSE)",
+      "dateAudit": "2026-04-20",
+      "status": "CLOTURE",
+      "scoreGlobal": 50,
+      "notes": "Clôturé avec 2 NC générées (stub).",
+      "lignes": [
+        {
+          "id": "aud002-l001",
+          "ordre": 0,
+          "code": "INC-01",
+          "libelle": "Extincteurs en bon état et accessibles",
+          "categorie": "Matériel",
+          "reponse": "NON",
+          "commentaire": "2 extincteurs périmés",
+          "ncId": "nc-stub-aud002-l001",
+          "ncNumero": "NC-2026-0001"
+        },
+        {
+          "id": "aud002-l002",
+          "ordre": 1,
+          "code": "INC-02",
+          "libelle": "Issues de secours dégagées",
+          "categorie": "Évacuation",
+          "reponse": "OUI"
+        },
+        {
+          "id": "aud002-l003",
+          "ordre": 2,
+          "code": "INC-03",
+          "libelle": "Plan d'évacuation affiché",
+          "categorie": "Signalisation",
+          "reponse": "OUI"
+        },
+        {
+          "id": "aud002-l004",
+          "ordre": 3,
+          "code": "INC-04",
+          "libelle": "Exercice évacuation planifié (< 6 mois)",
+          "categorie": "Organisation",
+          "reponse": "NON",
+          "commentaire": "Dernier exercice > 8 mois",
+          "ncId": "nc-stub-aud002-l004",
+          "ncNumero": "NC-2026-0002"
+        }
+      ]
+    }
+  ]
+}

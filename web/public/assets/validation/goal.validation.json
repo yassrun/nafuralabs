@@ -1,0 +1,25 @@
+{
+  "entity": "Goal",
+  "fields": {
+    "goalTitle": {
+      "required": true,
+      "maxLength": 120
+    },
+    "description": {
+      "maxLength": 2000
+    },
+    "targetKpi": {
+      "maxLength": 120
+    },
+    "weight": {
+      "min": 0
+    },
+    "progress": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

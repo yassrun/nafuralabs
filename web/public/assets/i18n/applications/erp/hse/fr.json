@@ -1,0 +1,775 @@
+{
+  "hse": {
+    "routes": {
+      "tableauBord": {
+        "title": "Tableau de bord HSE",
+        "breadcrumb": "Tableau de bord"
+      },
+      "epi": {
+        "title": "Registre EPI",
+        "breadcrumb": "EPI"
+      },
+      "duer": { "title": "DUER", "breadcrumb": "DUER" },
+      "ppsps": { "title": "PPSPS", "breadcrumb": "PPSPS" },
+      "phs": { "title": "PHS société", "breadcrumb": "PHS" },
+      "visiteMedicale": {
+        "title": "Visites médicales",
+        "breadcrumb": "Visites médicales"
+      },
+      "registresLegaux": {
+        "title": "Registres légaux",
+        "breadcrumb": "Registres légaux"
+      },
+      "incident": {
+        "list": { "title": "Incidents HSE", "breadcrumb": "Incidents" },
+        "create": { "title": "Déclarer un incident", "breadcrumb": "Nouveau" },
+        "detail": { "title": "Détail incident", "breadcrumb": "Détail" },
+        "edit": { "title": "Modifier incident", "breadcrumb": "Modifier" }
+      },
+      "inspection": {
+        "list": { "title": "Inspections HSE", "breadcrumb": "Inspections" },
+        "create": { "title": "Planifier une inspection", "breadcrumb": "Nouvelle" },
+        "detail": { "title": "Détail inspection", "breadcrumb": "Détail" },
+        "edit": { "title": "Modifier inspection", "breadcrumb": "Modifier" }
+      },
+      "formation": {
+        "list": { "title": "Formations HSE", "breadcrumb": "Formations" },
+        "create": { "title": "Nouvelle formation", "breadcrumb": "Nouvelle" },
+        "detail": { "title": "Détail formation", "breadcrumb": "Détail" },
+        "edit": { "title": "Modifier formation", "breadcrumb": "Modifier" }
+      },
+      "nonConformite": {
+        "list": { "title": "Non-conformités", "breadcrumb": "Non-conformités" },
+        "create": { "title": "Nouvelle non-conformité", "breadcrumb": "Nouvelle" },
+        "detail": { "title": "Détail non-conformité", "breadcrumb": "Détail" },
+        "edit": { "title": "Modifier non-conformité", "breadcrumb": "Modifier" }
+      }
+    },
+    "common": {
+      "breadcrumb": "HSE",
+      "actions": {
+        "nouveau": "Nouveau",
+        "imprimer": "Imprimer",
+        "exporter": "Exporter",
+        "annuler": "Annuler",
+        "fermer": "Fermer",
+        "enregistrer": "Enregistrer",
+        "creerBrouillon": "Créer brouillon"
+      },
+      "placeholders": {
+        "selectionner": "— Sélectionner —",
+        "nomPrenom": "Nom prénom"
+      },
+      "empty": {
+        "default": "Aucun élément trouvé."
+      },
+      "messages": {
+        "tousLesStatuts": "Tous les statuts",
+        "tousLesChantiers": "Tous les chantiers",
+        "tousLesTypes": "Tous les types"
+      }
+    },
+    "dashboard": {
+      "headerTitle": "Tableau de bord HSE",
+      "headerSubtitle": "Indicateurs sécurité & qualité — 2026",
+      "birdTitle": "Pyramide gravité (Bird)",
+      "kpi": {
+        "atYtd": { "label": "Accidents de travail YTD", "sub": "{mortels} mortel(s) · {avecArret} avec arrêt" },
+        "tf": { "label": "Taux de fréquence (TF)", "sub": "Objectif : TF < 5" },
+        "tg": { "label": "Taux de gravité (TG)", "sub": "Objectif : TG < 0.2" },
+        "ncOuvertes": { "label": "NC ouvertes", "sub": "{critiques} critique(s)" },
+        "inspectionsMois": { "label": "Inspections ce mois", "sub": "{reste} planifiée(s) restantes" },
+        "joursSansAT": { "label": "Jours sans accident", "sub": "Record : {record} jours" }
+      },
+      "quickLinks": {
+        "title": "Accès rapides",
+        "incidents": { "label": "Incidents & AT", "count": "{n} YTD" },
+        "nc": { "label": "Non-conformités", "count": "{n} ouvertes" },
+        "inspections": { "label": "Inspections", "count": "{n} ce mois" },
+        "formations": { "label": "Formations", "count": "{n} en cours" },
+        "epi": { "label": "Registre EPI", "count": "{n} à renouveler" },
+        "phs": { "label": "PHS société", "count": "Plan chapeau" },
+        "ppsps": { "label": "PPSPS chantiers", "count": "Plans actifs" }
+      },
+      "legal": {
+        "title": "Conformité légale Maroc",
+        "duer": "DUER rédigé et signé",
+        "ppsps": "PHS / PPSPS déposé à l'ITT",
+        "chs": "CHS : réunion Q2 à planifier",
+        "registreAt": "Registre AT à jour (CNSS)",
+        "visites": "Visites médicales : 3 en retard"
+      }
+    },
+    "duer": {
+      "title": "Document Unique d'Évaluation des Risques (DUER)",
+      "headerTitle": "DUER — Document Unique d'Évaluation des Risques",
+      "subtitle": "Évaluation par chantier · révision périodique obligatoire",
+      "search": "Chantier, auteur, n° DUER…",
+      "count": "{n} DUER",
+      "actions": {
+        "nouveau": "Nouveau DUER",
+        "matrice": "Matrice",
+        "documents": "Documents",
+        "publier": "Publier le DUER"
+      },
+      "columns": {
+        "chantier": "Chantier",
+        "numero": "N°",
+        "version": "Version",
+        "dateRevision": "Date révision",
+        "auteur": "Auteur",
+        "risquesIdentifies": "Risques identifiés",
+        "actionsCorrectives": "Actions correctives",
+        "statut": "Statut",
+        "edition": "Édition",
+        "observations": "Observations"
+      },
+      "empty": "Aucun DUER trouvé.",
+      "modal": {
+        "title": "Nouveau DUER",
+        "hint": "Création rapide d'un brouillon. La matrice risque × probabilité × gravité est éditable depuis le bouton « Matrice » du tableau.",
+        "chantier": "Chantier",
+        "auteur": "Auteur"
+      },
+      "documentsModal": {
+        "title": "Documents — {numero}",
+        "hint": "Pièces jointes DUER (PDF, images, Word)."
+      },
+      "matrice": {
+        "titleWithNumero": "Matrice risques — {numero}",
+        "hint": "Échelle 1 (faible) à 4 (fort). Criticité = probabilité × gravité (démo DUER).",
+        "risque": "Risque",
+        "probabilite": "Probabilité",
+        "gravite": "Gravité",
+        "score": "Score"
+      },
+      "audit": {
+        "createNote": "Brouillon créé pour {chantierCode}",
+        "matriceNote": "Matrice risques × proba × gravité",
+        "exportNote": "{format} — {rowCount} lignes",
+        "labelListing": "DUER — listing"
+      }
+    },
+    "ppsps": {
+      "title": "Plan Particulier de Sécurité et de Protection de la Santé (PPSPS)",
+      "headerTitle": "PPSPS — Plan Particulier Sécurité Protection Santé",
+      "subtitle": "PPSPS par chantier · obligatoire > 760 hommes-jour",
+      "search": "Chantier, coordonnateur, n° PPSPS…",
+      "count": "{n} PPSPS",
+      "actions": {
+        "nouveau": "Nouveau PPSPS",
+        "pdfRappelLoi": "PDF (démo R4532-65)",
+        "documents": "Documents"
+      },
+      "columns": {
+        "chantier": "Chantier",
+        "numero": "N° PPSPS",
+        "version": "Ver.",
+        "coordonnateur": "Coordonnateur SPS",
+        "telephone": "Téléphone",
+        "date": "Date",
+        "mesuresCollectives": "Mesures collectives",
+        "effectifMaxJour": "Effectif max/jour",
+        "hommesJourEstimes": "Hommes·jour estimés",
+        "hommesJourEstimesShort": "H·j est.",
+        "statut": "Statut",
+        "edition": "Édition"
+      },
+      "empty": "Aucun PPSPS trouvé.",
+      "modal": {
+        "title": "Nouveau PPSPS",
+        "hint": "Création d'une fiche brouillon. Le générateur PDF (sommaire art. R4532-65 / CCAG-T) sera connecté ultérieurement.",
+        "coordonnateur": "Coordonnateur SPS",
+        "mesureDefaut": "À compléter — voir trame coordonnateur SPS."
+      },
+      "documentsModal": {
+        "title": "Documents — {numero}",
+        "hint": "Pièces jointes PPSPS (PDF, images, Word)."
+      },
+      "print": {
+        "disclaimer": "Document de démonstration — structure inspirée des mentions types (coordination SPS, analyse des risques, mesures) visées par l'art. R4532-65 du Code du travail (France) / transposition usage démo chantier MA.",
+        "headerTitle": "PPSPS — {chantier}",
+        "headerMeta": "N° {numero} · Chantier {code} · Date {date} · Version {version}",
+        "section1": "1. Identification entreprise & opération",
+        "section1Body": "MOEX / entreprise exécutante (démo Nafura BTP) — périmètre opération : {chantier}.",
+        "section2": "2. Coordonnateur SPS",
+        "section3": "3. Effectifs & hommes-jour",
+        "section3Effectif": "Effectif max / jour",
+        "section3HommesJour": "Hommes-jour estimés",
+        "section4": "4. Analyse des risques & mesures collectives",
+        "section5": "5. Sections PPSPS (markdown / trame 8 chapitres)",
+        "section6": "6. Organisation de la prévention / secours / hiérarchie",
+        "section6Body": "Zones sensibles balisées, liaisons radio chantier, numéros d'urgence affichés base-vie (démo).",
+        "section7": "7. Observations"
+      },
+      "audit": {
+        "createNote": "Brouillon créé pour {chantierCode}",
+        "printNote": "PDF démo art. R4532-65",
+        "exportNote": "{format} — {rowCount} lignes",
+        "labelListing": "PPSPS — listing"
+      }
+    },
+    "phs": {
+      "headerTitle": "PHS — Plan Hygiène & Sécurité (société)",
+      "subtitle": "Document chapeau avant PPSPS chantier",
+      "breadcrumb": "PHS société",
+      "search": "N° PHS, rédacteur…",
+      "count": "{n} document(s)",
+      "columns": {
+        "numero": "N° PHS",
+        "version": "Version",
+        "date": "Date",
+        "redacteur": "Rédacteur",
+        "statut": "Statut",
+        "sections": "Sections",
+        "pdf": "PDF"
+      },
+      "rows": {
+        "sectionsCount": "{n} sections"
+      },
+      "actions": {
+        "pdfOfficiel": "PDF officiel (démo)"
+      },
+      "empty": "Aucun PHS.",
+      "print": {
+        "disclaimer": "Document de démonstration — PHS société (version {version}).",
+        "headerTitle": "PHS — {numero}",
+        "meta": "Rédacteur : {redacteur} · Date {date} · Statut {status}"
+      },
+      "audit": {
+        "printNote": "PDF démo PHS société"
+      }
+    },
+    "incident": {
+      "entityName": "Incident",
+      "entityNamePlural": "Incidents",
+      "headerTitle": "Incidents HSE",
+      "createTitle": "Déclarer un incident",
+      "detailTitle": "Détail incident",
+      "chips": {
+        "all": "Tous",
+        "ouverts": "Ouverts",
+        "investigation": "Investigation"
+      },
+      "list": {
+        "columns": {
+          "numero": "N° Incident",
+          "date": "Date",
+          "type": "Type",
+          "lieu": "Lieu",
+          "chantier": "Chantier",
+          "gravite": "Gravité",
+          "joursArret": "Jours arrêt",
+          "statut": "Statut"
+        },
+        "transform": {
+          "joursSuffix": "{n}j"
+        },
+        "filters": {
+          "chantier": "Chantier",
+          "type": "Type",
+          "status": "Statut",
+          "gravite": "Gravité"
+        },
+        "emptyState": {
+          "title": "Aucun incident",
+          "message": "Les incidents déclarés sur les chantiers apparaissent ici.",
+          "actionLabel": "Déclarer un incident"
+        }
+      },
+      "form": {
+        "fields": {
+          "numero": "N° Incident",
+          "date": "Date *",
+          "heure": "Heure",
+          "lieu": "Lieu *",
+          "chantier": "Chantier",
+          "typeIncident": "Type",
+          "gravite": "Gravité *",
+          "description": "Description *",
+          "victimeNom": "Victime",
+          "cnssMatriculeVictime": "Matricule CNSS victime",
+          "joursArret": "Jours d'arrêt",
+          "planAction": "Plan d'action",
+          "causes": "Causes",
+          "actionsImmediates": "Actions immédiates",
+          "cnssReferenceDeclaration": "Réf. déclaration CNSS",
+          "cnssDateDeclaration": "Date envoi CNSS",
+          "notes": "Notes"
+        },
+        "sections": {
+          "identification": "Identification",
+          "details": "Détails",
+          "actions": "Actions"
+        }
+      },
+      "actions": {
+        "investiguer": "Ouvrir investigation",
+        "cloturer": "Clôturer",
+        "declarerCnssDat": "Déclarer CNSS DAT"
+      },
+      "confirms": {
+        "investiguer": {
+          "title": "Ouvrir l'investigation ?",
+          "message": "L'incident passera en phase d'investigation.",
+          "confirmLabel": "Confirmer"
+        },
+        "cloturer": {
+          "title": "Clôturer l'incident ?",
+          "message": "L'incident sera marqué comme clôturé.",
+          "confirmLabel": "Clôturer"
+        }
+      },
+      "toasts": {
+        "investigated": "Incident {numero} — investigation ouverte",
+        "closed": "Incident {numero} clôturé",
+        "saved": "Incident {numero} enregistré",
+        "cnssReminder": "Rappel : il reste environ {hours} h dans la fenêtre des 48 h pour transmettre la déclaration CNSS DAT.",
+        "cnssDeadlinePassed": "Délai légal de 48 h après la survenance est dépassé — déclaration CNSS en urgence (retard ~{hours} h).",
+        "cnssRecorded": "Référence CNSS enregistrée : {ref} — PDF généré (maquette M-INT-03)."
+      },
+      "deleteConfirm": {
+        "title": "Supprimer l'incident",
+        "message": "Supprimer l'incident {numero} ?"
+      }
+    },
+    "inspection": {
+      "entityName": "Inspection",
+      "entityNamePlural": "Inspections",
+      "title": "Inspections de chantier",
+      "headerTitle": "Inspections HSE",
+      "createTitle": "Planifier une inspection",
+      "detailTitle": "Détail inspection",
+      "chips": {
+        "all": "Toutes",
+        "planifiees": "Planifiées",
+        "enCours": "En cours",
+        "terminees": "Terminées"
+      },
+      "list": {
+        "columns": {
+          "numero": "N° Inspection",
+          "date": "Date",
+          "chantier": "Chantier",
+          "inspecteur": "Inspecteur",
+          "thematique": "Thématique",
+          "note": "Note",
+          "nc": "NC",
+          "statut": "Statut"
+        },
+        "transform": {
+          "noteSuffix": "{n}/100"
+        },
+        "filters": {
+          "status": "Statut"
+        },
+        "emptyState": {
+          "title": "Aucune inspection",
+          "message": "Les inspections HSE planifiées et réalisées apparaissent ici.",
+          "actionLabel": "Planifier une inspection"
+        }
+      },
+      "form": {
+        "fields": {
+          "numero": "N° Inspection",
+          "date": "Date *",
+          "chantier": "Chantier",
+          "inspecteur": "Inspecteur *",
+          "thematique": "Thématique *",
+          "nbObservations": "Nb observations",
+          "nbNonConformites": "Nb non-conformités",
+          "noteGlobale": "Note globale (0-100)",
+          "observations": "Observations",
+          "notes": "Notes"
+        },
+        "sections": {
+          "identification": "Identification",
+          "resultats": "Résultats"
+        }
+      },
+      "actions": {
+        "demarrer": "Démarrer",
+        "terminer": "Terminer",
+        "annuler": "Annuler"
+      },
+      "confirms": {
+        "demarrer": {
+          "title": "Démarrer l'inspection ?",
+          "message": "L'inspection sera marquée en cours.",
+          "confirmLabel": "Démarrer"
+        },
+        "annulerPlanifiee": {
+          "title": "Annuler l'inspection ?",
+          "message": "L'inspection sera annulée.",
+          "confirmLabel": "Annuler"
+        },
+        "terminer": {
+          "title": "Terminer l'inspection ?",
+          "message": "L'inspection sera marquée comme terminée.",
+          "confirmLabel": "Terminer"
+        }
+      },
+      "toasts": {
+        "started": "Inspection {numero} démarrée",
+        "completed": "Inspection {numero} terminée",
+        "cancelled": "Inspection {numero} annulée",
+        "saved": "Inspection {numero} enregistrée"
+      },
+      "deleteConfirm": {
+        "title": "Supprimer l'inspection",
+        "message": "Supprimer l'inspection {numero} ?"
+      }
+    },
+    "formation": {
+      "entityName": "Formation",
+      "entityNamePlural": "Formations",
+      "title": "Formations sécurité",
+      "headerTitle": "Formations HSE",
+      "createTitle": "Nouvelle formation",
+      "detailTitle": "Détail formation",
+      "chips": {
+        "all": "Toutes",
+        "planifiees": "Planifiées",
+        "enCours": "En cours",
+        "terminees": "Terminées"
+      },
+      "list": {
+        "columns": {
+          "numero": "N° Formation",
+          "titre": "Formation",
+          "dateDebut": "Date début",
+          "duree": "Durée",
+          "formateur": "Formateur",
+          "participants": "Participants",
+          "statut": "Statut"
+        },
+        "transform": {
+          "heuresSuffix": "{n}h"
+        },
+        "filters": {
+          "status": "Statut"
+        },
+        "emptyState": {
+          "title": "Aucune formation",
+          "message": "Planifiez vos formations sécurité.",
+          "actionLabel": "Nouvelle formation"
+        }
+      },
+      "form": {
+        "fields": {
+          "numero": "N° formation",
+          "titre": "Titre",
+          "dateDebut": "Date début",
+          "dateFin": "Date fin",
+          "dureeHeures": "Durée (heures)",
+          "formateur": "Formateur / Organisme",
+          "lieu": "Lieu",
+          "nbParticipants": "Nb participants",
+          "notes": "Notes"
+        },
+        "sections": {
+          "identification": "Identification",
+          "details": "Détails"
+        }
+      },
+      "actions": {
+        "demarrer": "Démarrer",
+        "terminer": "Terminer",
+        "annuler": "Annuler"
+      },
+      "confirms": {
+        "demarrer": {
+          "title": "Démarrer la formation ?",
+          "message": "La formation sera marquée en cours.",
+          "confirmLabel": "Démarrer"
+        },
+        "annulerPlanifiee": {
+          "title": "Annuler la formation ?",
+          "message": "La formation sera annulée.",
+          "confirmLabel": "Annuler"
+        },
+        "terminer": {
+          "title": "Terminer la formation ?",
+          "message": "La formation sera marquée comme terminée.",
+          "confirmLabel": "Terminer"
+        }
+      },
+      "toasts": {
+        "saved": "Formation {numero} enregistrée"
+      },
+      "deleteConfirm": {
+        "title": "Supprimer la formation",
+        "message": "Supprimer la formation {numero} ?"
+      }
+    },
+    "nonConformite": {
+      "entityName": "Non-conformité",
+      "entityNamePlural": "Non-conformités",
+      "title": "Non-conformités",
+      "headerTitle": "Non-conformités",
+      "createTitle": "Nouvelle non-conformité",
+      "detailTitle": "Détail non-conformité",
+      "chips": {
+        "all": "Toutes",
+        "ouvertes": "Ouvertes",
+        "enCours": "En cours",
+        "verifiees": "Vérifiées"
+      },
+      "list": {
+        "columns": {
+          "numero": "N° NC",
+          "date": "Date",
+          "type": "Type",
+          "chantier": "Chantier",
+          "description": "Description",
+          "echeance": "Échéance",
+          "statut": "Statut"
+        },
+        "filters": {
+          "status": "Statut",
+          "type": "Type"
+        },
+        "emptyState": {
+          "title": "Aucune non-conformité",
+          "message": "Les non-conformités détectées sur les chantiers apparaissent ici.",
+          "actionLabel": "Enregistrer une NC"
+        }
+      },
+      "form": {
+        "fields": {
+          "numero": "N° NC",
+          "date": "Date *",
+          "type": "Type *",
+          "chantier": "Chantier",
+          "zoneChantier": "Zone chantier",
+          "description": "Description *",
+          "causesRacines": "Causes racines",
+          "actionCorrective": "Action corrective (CAPA)",
+          "actionPreventive": "Action préventive (CAPA)",
+          "verificationEfficacite": "Vérification efficacité",
+          "dateVerificationEfficacite": "Date vérif. efficacité",
+          "sourceInspectionNumero": "Inspection source (n°)",
+          "responsableNom": "Responsable",
+          "dateEcheance": "Date d'échéance",
+          "notes": "Notes"
+        },
+        "sections": {
+          "identification": "Identification",
+          "details": "Détails",
+          "capa": "CAPA"
+        }
+      },
+      "actions": {
+        "traiter": "Prendre en charge",
+        "verifier": "Marquer vérifiée",
+        "cloturer": "Clôturer"
+      },
+      "confirms": {
+        "traiter": {
+          "title": "Prendre en charge la NC ?",
+          "message": "La non-conformité passera en cours de traitement.",
+          "confirmLabel": "Confirmer"
+        },
+        "verifier": {
+          "title": "Vérifier la NC ?",
+          "message": "L'action corrective sera marquée comme vérifiée.",
+          "confirmLabel": "Vérifier"
+        },
+        "cloturer": {
+          "title": "Clôturer la NC ?",
+          "message": "La non-conformité sera définitivement clôturée.",
+          "confirmLabel": "Clôturer"
+        }
+      },
+      "toasts": {
+        "processed": "NC {numero} — prise en charge",
+        "verified": "NC {numero} — vérifiée",
+        "closed": "NC {numero} clôturée",
+        "saved": "Non-conformité {numero} enregistrée"
+      },
+      "deleteConfirm": {
+        "title": "Supprimer la non-conformité",
+        "message": "Supprimer la NC {numero} ?"
+      },
+      "severity": {
+        "critical": "Critique",
+        "majeure": "Majeure",
+        "mineure": "Mineure"
+      }
+    },
+    "epi": {
+      "title": "Équipements de protection individuelle (EPI)",
+      "headerTitle": "Registre EPI",
+      "subtitle": "Référence catalogue · Attribution terrain · Vérification périodique",
+      "volets": {
+        "reference": "Référence",
+        "attribution": "Attribution",
+        "verification": "Vérification"
+      },
+      "hints": {
+        "reference": "Référence : une ligne par article EPI (catalogue interne).",
+        "attribution": "Attribution : affectations employé × chantier (mock démo).",
+        "verification": "Vérification : contrôles périodiques, échéances et statuts critiques."
+      },
+      "search": "Employé, EPI, chantier…",
+      "count": "{n} ligne(s)",
+      "coutFiltre": "Coût filtré : {amount}",
+      "alertes": {
+        "expires": "{n} EPI expiré(s) ou perdu(s) — action urgente",
+        "aRenouveler": "{n} EPI à renouveler dans < 60 jours"
+      },
+      "columns": {
+        "categorie": "Cat.",
+        "reference": "Référence",
+        "designation": "Désignation",
+        "normeCE": "Norme CE",
+        "employe": "Employé",
+        "chantier": "Chantier",
+        "attribution": "Attribution",
+        "expiration": "Expiration",
+        "derniereVerif": "Dernière vérif.",
+        "prochaineVerif": "Prochaine vérif.",
+        "prixUnit": "Prix unit.",
+        "prixIndicatif": "Prix indicatif",
+        "statut": "Statut"
+      },
+      "expirationDays": "({n}j)",
+      "empty": "Aucun enregistrement.",
+      "categories": {
+        "casque": "Casques",
+        "harnais": "Harnais antichute",
+        "tete": "Protection tête",
+        "yeux": "Protection yeux",
+        "pieds": "Chaussures",
+        "mains": "Gants",
+        "corps": "Combinaison / gilet",
+        "respiration": "Masque / ARI",
+        "audition": "Bouchons / casque anti-bruit",
+        "chute": "Harnais anti-chute"
+      },
+      "statusLabels": {
+        "ok": "OK",
+        "aRenouveler": "À renouveler",
+        "expire": "Expiré",
+        "perdu": "Perdu / manquant"
+      }
+    },
+    "visiteMedicale": {
+      "title": "Visites médicales",
+      "headerTitle": "Visites médicales",
+      "subtitle": "Suivi visites médicales employés · alertes échéances < 30 j",
+      "search": "Employé, matricule, médecin…",
+      "count": "{n} visite(s)",
+      "alertes": {
+        "inaptes": "{n} salarié(s) déclaré(s) inapte(s)",
+        "echeances": "{n} échéance(s) < 30 jours — à programmer"
+      },
+      "toolbar": {
+        "tousLesTypes": "Tous les types",
+        "toutesAptitudes": "Toutes aptitudes",
+        "alerteEcheance": "Alerte échéance proche"
+      },
+      "columns": {
+        "matricule": "Matricule",
+        "employe": "Employé",
+        "poste": "Poste",
+        "typeVisite": "Type visite",
+        "date": "Date",
+        "aptitude": "Aptitude",
+        "medecin": "Médecin",
+        "prochaineEcheance": "Prochaine échéance",
+        "restrictions": "Restrictions",
+        "type": "Type"
+      },
+      "empty": "Aucune visite trouvée.",
+      "echeance": {
+        "todayLabel": "aujourd'hui",
+        "jMoinsLabel": "J-{n}",
+        "retardLabel": "+{n} j retard"
+      },
+      "aptitude": {
+        "apte": "Apte",
+        "inapte": "Inapte",
+        "avecRestriction": "Apte avec restriction"
+      },
+      "audit": {
+        "exportNote": "{format} — {rowCount} lignes",
+        "labelListing": "Visites médicales — listing"
+      }
+    },
+    "registreLegal": {
+      "title": "Registres légaux",
+      "headerTitle": "Registres légaux",
+      "subtitle": "Registres réglementaires obligatoires — exports et impressions",
+      "tabs": {
+        "at": {
+          "label": "Accidents du Travail",
+          "shortLabel": "AT",
+          "description": "Accidents déclarés à la CNSS — délai 48h."
+        },
+        "mp": {
+          "label": "Maladies Professionnelles",
+          "shortLabel": "MP",
+          "description": "Maladies reconnues — tableaux MA."
+        },
+        "dt": {
+          "label": "Déclarations de Travaux",
+          "shortLabel": "DT",
+          "description": "DT à l'Inspection du Travail — chantier > 30 j ou > 30 salariés."
+        },
+        "chs": {
+          "label": "Comité Hygiène & Sécurité",
+          "shortLabel": "CHS",
+          "description": "PV des réunions CHS — entreprises > 50 salariés."
+        }
+      },
+      "printHeader": {
+        "registre": "Registre {label}",
+        "societe": "Société :",
+        "ice": "ICE :",
+        "cnss": "CNSS :",
+        "editeLe": "Édité le :"
+      },
+      "actions": {
+        "imprimer": "Imprimer",
+        "imprimerTitle": "Imprimer ce registre",
+        "excel": "Excel",
+        "excelTitle": "Exporter en Excel (XLSX)",
+        "pdfOfficiel": "PDF officiel (démo)",
+        "pdfOfficielTitle": "Mise en page type déclaration / registre CNSS (démo)"
+      },
+      "columns": {
+        "numero": "N°",
+        "date": "Date",
+        "reference": "Référence",
+        "chantier": "Chantier",
+        "victime": "Victime",
+        "matriculeCnss": "Matricule CNSS",
+        "description": "Description",
+        "partieAtteinte": "Partie atteinte",
+        "joursArret": "Jours arrêt",
+        "salarie": "Salarié",
+        "tableauMa": "Tableau MA",
+        "effectif": "Effectif",
+        "duree": "Durée (j)",
+        "presents": "Présents",
+        "decisions": "Décisions",
+        "observations": "Observations"
+      },
+      "footer": "Total : <strong>{n}</strong> entrée(s)",
+      "empty": "Aucune entrée dans le registre {kind}.",
+      "print": {
+        "titre": "Caisse Nationale de Sécurité Sociale — Registre {kind} (démonstration)",
+        "meta": "{societe} — ICE {ice} — Affiliation CNSS {cnss}",
+        "stamp": "Espace réservé visa / cachet CNSS (démo)",
+        "footnote": "Document généré à des fins de démonstration ERP — ne constitue pas une liasse officielle sans validation juridique."
+      },
+      "audit": {
+        "labelRegistre": "Registre {kind}",
+        "exportNote": "XLSX — {n} entrées",
+        "printNote": "Impression — {n} entrées",
+        "pdfNote": "PDF officiel CNSS (démo tamponnable)"
+      }
+    }
+  }
+}

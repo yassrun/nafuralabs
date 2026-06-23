@@ -1,0 +1,34 @@
+{
+  "entity": "DutyCalculation",
+  "fields": {
+    "calculationNumber": {
+      "required": true,
+      "maxLength": 60
+    },
+    "hsCode": {
+      "maxLength": 60
+    },
+    "assessableValue": {
+      "min": 0
+    },
+    "dutyRate": {
+      "min": 0
+    },
+    "dutyAmount": {
+      "min": 0
+    },
+    "taxRate": {
+      "min": 0
+    },
+    "taxAmount": {
+      "min": 0
+    },
+    "totalAmount": {
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

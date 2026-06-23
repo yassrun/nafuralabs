@@ -1,0 +1,6 @@
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Nafura Sektor">
+  <rect x="4" y="4" width="112" height="112" rx="26" fill="#1B3FAE"/>
+  <rect x="30" y="30" width="60" height="60" rx="7" fill="none" stroke="#DCE6FF" stroke-width="4.5"/>
+  <path d="M37 84 L77 84 A40 40 0 0 0 37 44 Z" fill="#F2D544"/>
+  <circle cx="37" cy="44" r="5" fill="#DCE6FF"/>
+</svg>

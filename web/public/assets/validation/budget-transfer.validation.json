@@ -1,0 +1,27 @@
+{
+  "entity": "BudgetTransfer",
+  "fields": {
+    "transferNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "fromBudgetLineId": {
+      "required": true
+    },
+    "toBudgetLineId": {
+      "required": true
+    },
+    "amount": {
+      "required": true,
+      "min": 0
+    },
+    "reason": {
+      "maxLength": 2000
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

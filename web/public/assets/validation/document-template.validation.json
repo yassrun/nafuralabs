@@ -1,0 +1,22 @@
+{
+  "entity": "DocumentTemplate",
+  "fields": {
+    "code": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "name": {
+      "required": true,
+      "maxLength": 200
+    },
+    "entityType": {
+      "required": true,
+      "maxLength": 80
+    },
+    "format": {
+      "required": true,
+      "maxLength": 20
+    }
+  }
+}

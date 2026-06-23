@@ -1,0 +1,22 @@
+{
+  "entity": "FailedDelivery",
+  "fields": {
+    "attemptNumber": {
+      "required": true,
+      "maxLength": 60
+    },
+    "failureReason": {
+      "maxLength": 120
+    },
+    "driverNotes": {
+      "maxLength": 2000
+    },
+    "photoUrl": {
+      "maxLength": 500
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

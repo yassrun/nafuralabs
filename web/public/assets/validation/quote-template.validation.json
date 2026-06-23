@@ -1,0 +1,26 @@
+{
+  "entity": "QuoteTemplate",
+  "fields": {
+    "code": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "name": {
+      "maxLength": 120
+    },
+    "description": {
+      "maxLength": 2000
+    },
+    "headerFields": {
+      "maxLength": 120
+    },
+    "footerFields": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

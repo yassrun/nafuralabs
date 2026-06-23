@@ -1,0 +1,138 @@
+<div class="workspace-page">
+  <input
+    #fileInput
+    type="file"
+    accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff"
+    (change)="onFileSelected(fileInput.files)"
+    hidden
+  />
+
+  @if (loading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p>Loading document type...</p>
+    </div>
+  } @else if (definition()) {
+    <!-- Header Section -->
+    <div class="workspace-header">
+      <!-- Breadcrumb -->
+      <nav class="breadcrumb">
+        @for (crumb of breadcrumbs(); track crumb.label; let last = $last) {
+          @if (crumb.route) {
+            <a [routerLink]="crumb.route" [queryParams]="crumb.queryParams" class="breadcrumb__link">
+              {{ crumb.label }}
+            </a>
+            <mat-icon class="breadcrumb__separator">chevron_right</mat-icon>
+          } @else {
+            <span class="breadcrumb__current">{{ crumb.label }}</span>
+          }
+        }
+      </nav>
+
+      <!-- Title Row -->
+      <div class="title-row">
+        <div class="title-info">
+          <div class="title-main">
+            <h1 class="dox-h2">{{ definition()!.name }}</h1>
+            <span class="version-badge">v{{ definition()!.version }}</span>
+            <dox-status-chip [status]="'Active'" class="status-badge" />
+          </div>
+          <p class="subtitle">Definition: v{{ definition()!.version }} • {{ getDomainLabel(definition()!.domainKey) }}</p>
+        </div>
+
+        <!-- Doc Type Switcher -->
+        <div class="doc-type-switcher">
+          <button mat-stroked-button [matMenuTriggerFor]="docTypeSwitcherMenu" class="switcher-button">
+            <mat-icon>swap_horiz</mat-icon>
+            Switch Type
+            <mat-icon iconPositionEnd>arrow_drop_down</mat-icon>
+          </button>
+          <mat-menu #docTypeSwitcherMenu="matMenu" class="switcher-menu">
+            @for (docType of allDocTypes(); track docType.docTypeKey) {
+              <button 
+                mat-menu-item 
+                (click)="onDocTypeSwitcherChange(docType)"
+                [class.active]="docType.docTypeKey === definition()!.docTypeKey"
+              >
+                <span class="menu-item-domain">{{ getDomainLabel(docType.domainKey) }}</span>
+                <span class="menu-item-name">{{ docType.name }}</span>
+              </button>
+            }
+          </mat-menu>
+        </div>
+      </div>
+
+      <!-- Actions Row -->
+      <div class="actions-row">
+        <div class="primary-actions">
+          <button
+            mat-flat-button
+            color="primary"
+            class="import-button"
+            (click)="onImportDocument(fileInput)"
+            [disabled]="uploading()"
+          >
+            @if (uploading()) {
+              <mat-spinner diameter="18" class="button-spinner"></mat-spinner>
+            } @else {
+              <mat-icon>upload_file</mat-icon>
+            }
+            Import Document
+          </button>
+
+          <button
+            mat-stroked-button
+            [matMenuTriggerFor]="exportMenu"
+            [disabled]="records().length === 0"
+            class="export-button"
+          >
+            <mat-icon>ios_share</mat-icon>
+            Export
+            <mat-icon iconPositionEnd>arrow_drop_down</mat-icon>
+          </button>
+          <mat-menu #exportMenu="matMenu">
+            <button mat-menu-item (click)="onExportExcel()">
+              <mat-icon>table_view</mat-icon>
+              <span>Excel Spreadsheet</span>
+            </button>
+            <button mat-menu-item (click)="onExportSeyrura()">
+              <mat-icon>cloud_upload</mat-icon>
+              <span>Seyrura Integration</span>
+            </button>
+          </mat-menu>
+        </div>
+
+        <button mat-icon-button matTooltip="Settings" (click)="onNavigateToSettings()">
+          <mat-icon>settings</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- Record Datatable Component -->
+    <app-record-datatable
+      [records]="records()"
+      [gridColumns]="gridColumns()"
+      [totalItems]="totalItems()"
+      [loading]="loadingRecords()"
+      [enableSelection]="true"
+      [selection]="selection"
+      [dateFormat]="'absolute'"
+      [actions]="tableActions()"
+      [emptyMessage]="'No records for ' + (definition()?.name || 'this document type')"
+      [emptyAction]="emptyActionConfig()"
+      (filtersApply)="onFiltersApply($event)"
+      (filtersClear)="onFiltersClear()"
+      (rowDblClick)="onEditRecord($event)"
+    />
+  } @else {
+    <!-- No Definition Found -->
+    <div class="error-state">
+      <mat-icon>error_outline</mat-icon>
+      <h3>Document type not found</h3>
+      <p>The requested document type could not be loaded.</p>
+      <button mat-flat-button color="primary" routerLink="/doc-extractor/extraction">
+        Back to Extraction
+      </button>
+    </div>
+  }
+</div>

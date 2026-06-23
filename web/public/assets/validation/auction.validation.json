@@ -1,0 +1,26 @@
+{
+  "entity": "Auction",
+  "fields": {
+    "auctionNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "startTime": {
+      "required": true
+    },
+    "endTime": {
+      "required": true
+    },
+    "reservePrice": {
+      "min": 0
+    },
+    "currentBid": {
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

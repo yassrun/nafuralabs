@@ -1,0 +1,23 @@
+{
+  "entity": "TradeDocument",
+  "fields": {
+    "documentNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "documentType": {
+      "maxLength": 120
+    },
+    "fileUrl": {
+      "maxLength": 500
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

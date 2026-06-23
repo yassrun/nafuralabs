@@ -1,0 +1,95 @@
+<nf-page-shell scroll>
+  <nf-page-header [config]="headerConfig"></nf-page-header>
+  <nf-entity-detail
+    #detail
+    [config]="config"
+    [mode]="mode()"
+    [item]="item()"
+    [lookups]="lookups()"
+    [loading]="isLoading()"
+    [saving]="isSaving()"
+    (action)="onAction($event)">
+
+    <ng-template nfField="lignes" let-control>
+      <div class="lignes-table">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>{{ 'ventes.facture.table.header.designation' | translate }}</th>
+              <th class="num">{{ 'ventes.facture.table.header.quantite' | translate }}</th>
+              <th class="num">{{ 'ventes.facture.table.header.puHt' | translate }}</th>
+              <th class="num">{{ 'ventes.facture.table.header.totalHt' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (l of lignesValue(item()); track l.id) {
+              <tr>
+                <td class="num">{{ l.ordre }}</td>
+                <td>{{ l.designation }}</td>
+                <td class="num">{{ l.quantite ?? '—' }} {{ l.unite ?? '' }}</td>
+                <td class="num">
+                  {{ l.prixUnitaireHt != null ? (l.prixUnitaireHt | mad:2) : '—' }}
+                </td>
+                <td class="num">{{ l.totalHt | mad:2 }}</td>
+              </tr>
+            }
+            @if (lignesValue(item()).length === 0) {
+              <tr>
+                <td class="num">—</td>
+                <td colspan="4">{{ 'ventes.facture.table.emptyLignes' | translate }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </ng-template>
+
+    <ng-template nfField="encaissements" let-control>
+      <div class="enc-table">
+        @if (encaissementsValue(item()).length === 0) {
+          <p class="enc-empty">{{ 'ventes.facture.table.emptyEncaissements' | translate }}</p>
+        } @else {
+          <table>
+            <thead>
+              <tr>
+                <th>{{ 'ventes.facture.table.header.date' | translate }}</th>
+                <th>{{ 'ventes.facture.table.header.mode' | translate }}</th>
+                <th>{{ 'ventes.facture.table.header.reference' | translate }}</th>
+                <th>{{ 'ventes.facture.table.header.banque' | translate }}</th>
+                <th class="num">{{ 'ventes.facture.table.header.montantTtc' | translate }}</th>
+                <th class="actions"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (e of encaissementsValue(item()); track e.id) {
+                <tr>
+                  <td>{{ e.dateEncaissement | dateLocalized }}</td>
+                  <td>{{ formatModePaiement(e.modePaiement) }}</td>
+                  <td>{{ e.reference || '—' }}</td>
+                  <td>{{ e.banque || '—' }}</td>
+                  <td class="num">{{ e.montantTtc | mad:2 }}</td>
+                  <td class="actions">
+                    @if (mode() !== 'create') {
+                      <nf-button variant="ghost" icon="delete-outline" iconLibrary="lucide"
+                        color="warn"
+                        [attr.aria-label]="'ventes.facture.table.deleteEncaissementAria' | translate"
+                        (clicked)="removeEncaissement(e.id)" ></nf-button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+    </ng-template>
+
+  </nf-entity-detail>
+
+  @if (item() && mode() !== 'create') {
+    <section class="print-area">
+      <app-facture-print [facture]="item()!"></app-facture-print>
+    </section>
+  }
+</nf-page-shell>

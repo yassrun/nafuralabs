@@ -1,0 +1,20 @@
+{
+  "entity": "TrainingCompletion",
+  "fields": {
+    "completionNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "courseName": {
+      "maxLength": 120
+    },
+    "score": {
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+spec:
+  template:
+    metadata:
+      annotations:
+        vault.hashicorp.com/agent-inject-secret-keycloak: "secret/data/nafura/prod/infra/keycloak"
+        vault.hashicorp.com/agent-inject-template-keycloak: |
+          {{- with secret "secret/data/nafura/prod/infra/keycloak" -}}
+          export KC_BOOTSTRAP_ADMIN_USERNAME="{{ .Data.data.admin_username }}"
+          export KC_BOOTSTRAP_ADMIN_PASSWORD="{{ .Data.data.admin_password }}"
+          export KC_DB_USERNAME="{{ .Data.data.db_username }}"
+          export KC_DB_PASSWORD="{{ .Data.data.db_password }}"
+          {{- end }}

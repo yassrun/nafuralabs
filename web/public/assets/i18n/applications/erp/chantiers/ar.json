@@ -1,0 +1,807 @@
+{
+  "chantiers": {
+    "module": {
+      "title": "الأوراش والدراسات والتخطيط",
+      "shortTitle": "الأوراش"
+    },
+    "routes": {
+      "chantiersTitle": "أوراشي",
+      "chantiersCrumb": "الأوراش",
+      "chantierDetailTitle": "بطاقة الورش",
+      "chantierDetailCrumb": "التفاصيل",
+      "planningTitle": "مخطط Gantt",
+      "planningCrumb": "التخطيط",
+      "budgetTitle": "ميزانية الورش",
+      "budgetCrumb": "الميزانية",
+      "budgetDetailTitle": "تفاصيل ميزانية الورش",
+      "budgetDetailCrumb": "التفاصيل",
+      "situationsTitle": "كشوف الأشغال",
+      "situationsCrumb": "الكشوف",
+      "attachementsTitle": "المرفقات",
+      "attachementsCrumb": "المرفقات",
+      "sousTraitanceTitle": "عقود المقاولة من الباطن",
+      "sousTraitanceCrumb": "المقاولة من الباطن",
+      "documentsTitle": "وثائق الورش",
+      "documentsCrumb": "الوثائق",
+      "journalTitle": "يومية الورش",
+      "journalCrumb": "اليومية",
+      "avancementTitle": "إدخال التقدم",
+      "avancementCrumb": "التقدم",
+      "devisTitle": "عروض الأسعار",
+      "devisCrumb": "عروض الأسعار",
+      "metreTitle": "كشوف الكميات (DPGF)",
+      "metreCrumb": "كشوف الكميات",
+      "appelsOffresClientsTitle": "طلبات عروض الزبائن",
+      "appelsOffresClientsCrumb": "AO الزبائن",
+      "bibliothequePrixTitle": "مكتبة الأسعار",
+      "bibliothequePrixCrumb": "مكتبة الأسعار"
+    },
+    "common": {
+      "actions": {
+        "back": "← رجوع",
+        "backToList": "الرجوع إلى القائمة",
+        "save": "حفظ",
+        "cancel": "إلغاء",
+        "delete": "حذف",
+        "print": "طباعة",
+        "export": "تصدير Excel",
+        "voirPlanning": "عرض التخطيط",
+        "voirDetail": "عرض التفاصيل"
+      },
+      "filters": {
+        "allStatuses": "جميع الحالات",
+        "allTypes": "جميع الأنواع",
+        "filterByStatus": "تصفية حسب الحالة"
+      },
+      "fields": {
+        "code": "الرمز",
+        "codeChantier": "رمز الورش",
+        "name": "الورش",
+        "designation": "التسمية",
+        "client": "الزبون",
+        "ville": "المدينة",
+        "type": "النوع",
+        "statut": "الحالة",
+        "unite": "الوحدة",
+        "quantite": "الكمية",
+        "qteTotale": "الكمية الإجمالية",
+        "qtePrecedente": "الكمية السابقة",
+        "qteCumul": "الكمية التراكمية",
+        "qteExecutee": "الكمية المنفذة",
+        "dateDebut": "البداية",
+        "dateFinPrevue": "النهاية المتوقعة",
+        "dateFinReelle": "النهاية الفعلية",
+        "dateEmission": "تاريخ الإصدار",
+        "periode": "الفترة",
+        "montantHt": "المبلغ بدون احتساب الضريبة",
+        "totalHt": "الإجمالي بدون احتساب الضريبة",
+        "totalTtc": "الإجمالي مع احتساب الضريبة",
+        "totalMad": "الإجمالي MAD",
+        "budgetHt": "الميزانية بدون احتساب الضريبة",
+        "factureHt": "المفوتر بدون احتساب الضريبة",
+        "encaisseTtc": "المحصل مع احتساب الضريبة",
+        "avancement": "التقدم",
+        "saisiPar": "أدخل من طرف",
+        "marche": "العقد",
+        "reference": "المرجع",
+        "fournisseur": "المورد",
+        "montant": "المبلغ",
+        "date": "التاريخ"
+      }
+    },
+    "chantier": {
+      "title": "الأوراش",
+      "list": {
+        "headerTitle": "أوراشي",
+        "headerSubtitle": "جميع مشاريع البناء",
+        "searchPlaceholder": "الرمز، الاسم، الزبون…",
+        "countOne": "{count} ورش",
+        "countOther": "{count} ورش",
+        "emptyState": "لا يوجد ورش مطابق للفلاتر.",
+        "emptyFirstTitle": "لا توجد ورش بعد",
+        "emptyFirstHint": "أنشئ أول ورش لإطلاق المخزون والفوترة ومتابعة المشاريع.",
+        "columns": {
+          "code": "الرمز",
+          "name": "الورش",
+          "type": "النوع",
+          "client": "الزبون",
+          "ville": "المدينة",
+          "budgetHt": "الميزانية بدون احتساب الضريبة",
+          "avancement": "التقدم",
+          "status": "الحالة",
+          "dateDebut": "البداية",
+          "dateFinPrevue": "النهاية المتوقعة"
+        }
+      },
+      "detail": {
+        "fallbackTitle": "بطاقة الورش",
+        "marcheRef": "العقد {ref}",
+        "hero": {
+          "avancement": "التقدم",
+          "budgetHt": "الميزانية بدون احتساب الضريبة",
+          "factureHt": "المفوتر بدون احتساب الضريبة",
+          "encaisseTtc": "المحصل مع احتساب الضريبة"
+        },
+        "tabs": {
+          "overview": "نظرة عامة",
+          "lots": "الدفعات",
+          "phases": "المراحل",
+          "budget": "الميزانية",
+          "situations": "الكشوف",
+          "documents": "الوثائق",
+          "photos": "الصور"
+        },
+        "sections": {
+          "equipe": "الفريق",
+          "calendrier": "التقويم",
+          "finances": "المالية",
+          "description": "الوصف",
+          "syntheseBudget": "الملخص المالي للميزانية",
+          "brouillonCalcule": "مسودة محسوبة",
+          "parLot": "حسب الدفعة"
+        },
+        "labels": {
+          "chefChantier": "رئيس الورش",
+          "conducteurTravaux": "مدير الأشغال",
+          "ingenieur": "المهندس",
+          "ordreService": "أمر بالخدمة",
+          "debut": "البداية",
+          "finPrevue": "النهاية المتوقعة",
+          "finReelle": "النهاية الفعلية",
+          "budgetHt": "الميزانية بدون احتساب الضريبة",
+          "budgetTtc": "الميزانية مع احتساب الضريبة",
+          "tva": "TVA",
+          "cautionGarantie": "الضمان / الكفالة",
+          "delaiPaiement": "أجل الدفع",
+          "delaiPaiementJours": "{count} يوماً",
+          "situationsCumulHt": "الكشوف التراكمية بدون احتساب الضريبة",
+          "factureHt": "المفوتر بدون احتساب الضريبة",
+          "encaisseTtc": "المحصل مع احتساب الضريبة",
+          "marche": "العقد",
+          "travauxPeriodeHt": "أشغال الفترة بدون احتساب الضريبة",
+          "revisionK": "مراجعة K",
+          "penalites": "الغرامات",
+          "rgPercent": "الضمان المحتجز ({percent}%)",
+          "netHt": "الصافي بدون احتساب الضريبة",
+          "tvaMontant": "TVA {percent}%",
+          "netTtc": "الصافي مع احتساب الضريبة",
+          "montantHtPeriode": "مبلغ الفترة بدون احتساب الضريبة"
+        },
+        "columns": {
+          "code": "الرمز",
+          "designation": "التسمية",
+          "quantite": "الكمية",
+          "unite": "الوحدة",
+          "prixUnitaireHt": "سعر الوحدة بدون ضريبة",
+          "montantHt": "المبلغ بدون ضريبة",
+          "avancement": "التقدم",
+          "responsable": "المسؤول",
+          "debut": "البداية",
+          "fin": "النهاية",
+          "status": "الحالة",
+          "lot": "الدفعة"
+        },
+        "empty": {
+          "lotsTitle": "لا توجد دفعات",
+          "lotsMessage": "لم يتم تحديد أي دفعة لهذا الورش.",
+          "phasesTitle": "لا توجد مراحل",
+          "phasesMessage": "لم يتم تحديد أي مرحلة لهذا الورش.",
+          "documentsTitle": "الوثائق قريباً",
+          "documentsMessage": "ستتوفر إدارة الوثائق قريباً.",
+          "notFoundTitle": "الورش غير موجود",
+          "notFoundMessage": "المرجع «{ref}»: لا يوجد ورش مطابق."
+        },
+        "situations": {
+          "hint": "توليد المسودة من التقدم الفعلي + الدفعات (Task 07 M-MAR-05، تجريبي).",
+          "generateCta": "توليد الكشف N (مسودة)",
+          "noMarche": "لا يوجد عقد مرتبط بهذا الورش في النسخة التجريبية — الربط مطلوب للتوليد.",
+          "linkAll": "عرض جميع كشوف الأشغال لهذا الورش ←"
+        },
+        "documents": {
+          "linkAll": "عرض جميع وثائق الورش ←"
+        },
+        "budget": {
+          "viewFullCta": "عرض التفاصيل الكاملة للميزانية ←"
+        },
+        "lots": {
+          "addCta": "إضافة دفعة",
+          "promptCode": "رمز الدفعة (مثال L01)",
+          "promptDesignation": "تسمية الدفعة",
+          "promptQuantite": "الكمية (DPGF)",
+          "promptUnite": "الوحدة (مثال m²، ml، U)",
+          "promptPrixUnitaireHt": "سعر الوحدة بدون ضريبة (MAD)",
+          "invalidBpu": "الكمية والوحدة وسعر الوحدة مطلوبة ويجب أن تكون صالحة.",
+          "createSuccess": "تمت إضافة الدفعة.",
+          "createFailed": "تعذرت إضافة الدفعة.",
+          "addTitle": "إضافة دفعة",
+          "addAction": "إضافة"
+        },
+        "phases": {
+          "addAction": "إضافة مرحلة",
+          "addTitle": "إضافة مرحلة",
+          "promptCode": "الرمز (مثال PH01)",
+          "promptDesignation": "اسم المرحلة",
+          "promptDateDebut": "تاريخ البداية",
+          "promptDateFin": "تاريخ النهاية",
+          "promptResponsable": "المسؤول",
+          "createSuccess": "تمت إضافة المرحلة.",
+          "createFailed": "تعذرت إضافة المرحلة."
+        },
+        "actions": {
+          "edit": "تعديل"
+        },
+        "deleteConfirm": "حذف الورش {code} — {name}؟ لا يمكن التراجع عن هذا الإجراء.",
+        "deleteSuccess": "تم حذف الورش.",
+        "deleteFailed": "تعذر حذف الورش.",
+        "deleteTitle": "حذف الورش",
+        "deleteAction": "حذف",
+        "cancel": "إلغاء",
+        "marche": {
+          "createTitle": "إنشاء العقد",
+          "createConfirm": "إنشاء عقد للورش {code} من بياناته (المبلغ، الضريبة، التواريخ)؟",
+          "createAction": "إنشاء العقد",
+          "createSuccess": "تم إنشاء العقد وربطه بالورش.",
+          "createFailed": "فشل إنشاء العقد."
+        }
+      },
+      "edit": {
+        "title": "تعديل الورش",
+        "breadcrumb": "تعديل",
+        "loading": "جارٍ تحميل الورش…",
+        "submit": "حفظ التعديلات",
+        "success": "تم تحديث الورش.",
+        "failed": "تعذّر حفظ التعديلات.",
+        "fields": {
+          "name": "اسم الورش",
+          "description": "الوصف",
+          "marcheRef": "مرجع العقد",
+          "adresse": "العنوان",
+          "tva": "الضريبة (%)",
+          "rg": "ضمان حسن التنفيذ (%)",
+          "chef": "رئيس الورش",
+          "conducteur": "مراقب الأشغال"
+        },
+        "validation": {
+          "name": "اسم الورش إلزامي.",
+          "client": "يرجى اختيار عميل.",
+          "dates": "المدينة وتواريخ البداية والنهاية إلزامية.",
+          "budget": "يجب أن تكون الميزانية بدون ضريبة أكبر من 0.",
+          "team": "رئيس الورش ومراقب الأشغال إلزاميان."
+        }
+      },
+      "create": {
+        "cta": "ورش جديد",
+        "stepLabel": "الخطوة {current} / {total}",
+        "codePreview": "رمز الورش المتوقع: {code}"
+      }
+    },
+    "budget": {
+      "title": "ميزانية الورش",
+      "list": {
+        "headerTitle": "متابعة موحدة للأوراش",
+        "headerSubtitle": "رؤية متعددة الأوراش للميزانيات والالتزامات والمنجز والهامش المتوقع.",
+        "kpis": {
+          "realise": "المنجز",
+          "resteEngager": "المتبقي للالتزام"
+        },
+        "filters": {
+          "allStatuses": "جميع الحالات",
+          "enCours": "قيد التنفيذ",
+          "toutesConsommations": "جميع الاستهلاكات",
+          "toutesMarges": "جميع الهوامش",
+          "enAlerte": "في حالة تنبيه"
+        }
+      },
+      "detail": {
+        "backLink": "الرجوع إلى العرض الموحد",
+        "kicker": "الميزانية",
+        "hero": {
+          "initial": "الأولي",
+          "revise": "المراجَع",
+          "engage": "الملتزَم به",
+          "realise": "المنجز"
+        },
+        "alert": {
+          "title": "يقظة الميزانية"
+        },
+        "summary": {
+          "resteEngager": "المتبقي للالتزام",
+          "resteExecuter": "المتبقي للتنفيذ",
+          "consommation": "الاستهلاك",
+          "margeProjetee": "الهامش المتوقع"
+        },
+        "tabs": {
+          "rubriques": "عرض حسب البند",
+          "lots": "عرض حسب الدفعة",
+          "evolution": "التطور الشهري",
+          "engagements": "الالتزامات",
+          "revisions": "الملاحق والمراجعات"
+        },
+        "actions": {
+          "reviser": "مراجعة الميزانية",
+          "exportExcel": "تصدير Excel",
+          "printSuivi": "طباعة متابعة الميزانية"
+        },
+        "columns": {
+          "rubrique": "البند",
+          "lot": "الدفعة",
+          "initial": "الأولي",
+          "revise": "المراجَع",
+          "engage": "الملتزَم به",
+          "realise": "المنجز",
+          "realiseStock": "المنجز المادي (المخزون)",
+          "reste": "المتبقي",
+          "ecart": "الفرق",
+          "total": "الإجمالي"
+        },
+        "drilldown": {
+          "title": "تفاصيل المواد",
+          "subtitle": "الأصناف المستهلكة في الورش",
+          "article": "الصنف",
+          "qteBudget": "الكمية الميزانية",
+          "qteCmd": "الكمية المطلوبة",
+          "qteLivr": "الكمية المستلمة",
+          "qteCons": "الكمية المستهلكة",
+          "realiseStock": "المنجز من المخزون",
+          "mtRealise": "مبلغ المنجز",
+          "sortiesStock": "إخراجات المخزون",
+          "voirSorties": "عرض الإخراجات"
+        },
+        "empty": {
+          "notFound": "الورش غير موجود."
+        }
+      },
+      "reviser": {
+        "title": "مراجعة الميزانية",
+        "before": "قبل",
+        "after": "بعد",
+        "deltaTotal": "Δ الإجمالي:",
+        "piece": "وثيقة مبررة",
+        "cancel": "إلغاء",
+        "save": "حفظ"
+      },
+      "engagements": {
+        "subtitle": "سندات الطلب والعقود المرتبطة بالورش مع حالة متابعتها.",
+        "columns": {
+          "reference": "المرجع",
+          "montant": "المبلغ",
+          "date": "التاريخ"
+        },
+        "empty": "لا توجد التزامات مرتبطة بهذا الورش."
+      },
+      "revisions": {
+        "title": "الملاحق والمراجعات",
+        "subtitle": "سجل التعديلات على الميزانية والمرفقات المرتبطة.",
+        "empty": "لا توجد مراجعات في السجل."
+      },
+      "evolution": {
+        "subtitle": "تكديس المنجز + الملتزَم به مقابل الميزانية الشهرية."
+      }
+    },
+    "planning": {
+      "title": "مخطط Gantt",
+      "empty": "لا توجد مرحلة مخططة لهذا التحديد",
+      "toolbar": {
+        "periode": "الفترة",
+        "ceMois": "هذا الشهر",
+        "ceTrimestre": "هذا الفصل",
+        "cetteAnnee": "هذه السنة",
+        "tout": "الكل",
+        "granularite": "الدقة",
+        "pleinEcran": "ملء الشاشة"
+      },
+      "drawer": {
+        "title": "تفاصيل المرحلة",
+        "equipe": "الفريق",
+        "debut": "البداية",
+        "quantite": "الكمية",
+        "dependances": "التبعيات"
+      },
+      "placeholder": {
+        "backToPlanning": "الرجوع إلى التخطيط"
+      }
+    },
+    "situation": {
+      "title": "كشوف الأشغال",
+      "list": {
+        "columns": {
+          "numero": "رقم الكشف",
+          "chantier": "الورش",
+          "chantierName": "تسمية الورش",
+          "numeroOrdre": "رقم الترتيب",
+          "periode": "الفترة",
+          "cumulHt": "التراكم بدون احتساب الضريبة",
+          "travauxPeriode": "أشغال الفترة",
+          "retenue7": "الاقتطاع 7%",
+          "netHt": "الصافي بدون احتساب الضريبة",
+          "netTtc": "الصافي مع احتساب الضريبة",
+          "status": "الحالة",
+          "delaiAttente": "انتظار MOA (يوم)"
+        },
+        "delai": {
+          "joursShort": "{n} ي"
+        }
+      },
+      "detail": {
+        "rejectPrompt": "سبب الرفض (إلزامي):",
+        "decompte": {
+          "title": "الكشف الحسابي",
+          "cumulTravauxHt": "تراكم الأشغال المنفذة بدون احتساب الضريبة",
+          "travauxPeriodeHt": "▶ أشغال الفترة بدون احتساب الضريبة",
+          "resorptionAvance": "– استرداد التسبيق (%)",
+          "netHt": "▶ الصافي للدفع بدون احتساب الضريبة",
+          "netTtc": "▶ الصافي للدفع مع احتساب الضريبة"
+        },
+        "lotsTable": {
+          "designation": "التسمية",
+          "unite": "الوحدة",
+          "qteTotale": "الكمية الإجمالية",
+          "qtePrecedente": "الكمية السابقة",
+          "qteCumul": "الكمية التراكمية"
+        }
+      },
+      "print": {
+        "title": "كشف الأشغال رقم {n}",
+        "periode": "الفترة: {from} ← {to}",
+        "columns": {
+          "lotDesignation": "الدفعة / التسمية",
+          "unite": "الوحدة",
+          "qteCumulee": "الكمية التراكمية",
+          "montantHt": "المبلغ بدون احتساب الضريبة"
+        },
+        "cumulPrecedent": "التراكم السابق بدون احتساب الضريبة (الكشف رقم {n})",
+        "travauxPeriodeHt": "أشغال الفترة بدون احتساب الضريبة",
+        "retenueGarantiePct": "الضمان المحتجز {pct}%",
+        "netHt": "الصافي للدفع بدون احتساب الضريبة",
+        "netTtc": "الصافي للدفع مع احتساب الضريبة",
+        "etabliPar": "أعدّ من طرف (MOE)",
+        "visaMoa": "تأشيرة صاحب المشروع (MOA)",
+        "companyLine": "{raison} — SARL AU — ICE {ice} —",
+        "footer": "الكشف رقم {n} · الفترة {from} ← {to}"
+      },
+      "decomptePrint": {
+        "title": "كشف حسابي للأشغال",
+        "periode": "الفترة:",
+        "dateEmission": "تاريخ الإصدار:",
+        "detailLots": "تفاصيل الدفعات — التراكم في التاريخ",
+        "columns": {
+          "designation": "التسمية",
+          "unite": "الوحدة",
+          "qteTotale": "الكمية الإجمالية",
+          "qteCumul": "الكمية التراكمية"
+        },
+        "decompteTitle": "الكشف الحسابي",
+        "cumulTravauxHt": "تراكم الأشغال المنفذة بدون احتساب الضريبة",
+        "travauxPeriodeHt": "▶ أشغال الفترة بدون احتساب الضريبة",
+        "resorptionAvance": "– استرداد التسبيق (%)",
+        "netHt": "▶ الصافي للدفع بدون احتساب الضريبة",
+        "netTtc": "▶ الصافي للدفع مع احتساب الضريبة",
+        "pourEntrepreneur": "للمقاولة",
+        "pourMoa": "لصاحب المشروع"
+      }
+    },
+    "attachement": {
+      "title": "المرفقات",
+      "list": {
+        "searchPlaceholder": "الورش، التاريخ…",
+        "allStatuses": "جميع الحالات",
+        "signedShort": "✍️ موقَّع",
+        "columns": {
+          "designation": "التسمية",
+          "unite": "الوحدة",
+          "qteExecutee": "الكمية المنفذة"
+        },
+        "emptyState": "لم يتم العثور على أي مرفق.",
+        "saisieCta": "إدخال ميداني"
+      },
+      "saisie": {
+        "addLine": "سطر",
+        "meteoEnsoleille": "مشمس",
+        "lignesExecutees": "الأسطر المنفذة",
+        "designationPlaceholder": "التسمية",
+        "unitePlaceholder": "الوحدة",
+        "signatureMoeTitle": "توقيع MOE (تجريبي)",
+        "signatureMoeHint": "وقّع داخل الإطار أدناه (معاينة PNG خفيفة، تُحفظ مع المسودة)."
+      }
+    },
+    "sousTraitance": {
+      "title": "عقود المقاولة من الباطن",
+      "list": {
+        "searchPlaceholder": "رقم العقد، المقاول من الباطن، الورش…",
+        "filterByStatus": "تصفية حسب الحالة",
+        "createCta": "عقد جديد",
+        "columns": {
+          "sousTraitant": "المقاول من الباطن",
+          "montantHt": "المبلغ بدون احتساب الضريبة",
+          "debut": "البداية"
+        },
+        "emptyState": "لا يوجد عقد مطابق للفلاتر.",
+        "toasts": {
+          "createSoon": "إنشاء عقد مقاولة من الباطن — قريباً."
+        }
+      },
+      "create": {
+        "title": "عقد مقاولة من الباطن جديد",
+        "subtitle": "إدخال أدنى لتسجيل عقد",
+        "breadcrumb": "إنشاء",
+        "submit": "إنشاء العقد",
+        "fields": {
+          "chantier": "الورش",
+          "chantierPlaceholder": "اختيار ورش",
+          "sousTraitant": "المقاول من الباطن",
+          "objet": "موضوع العقد",
+          "montantHt": "المبلغ بدون ضريبة (MAD)",
+          "dateDebut": "تاريخ البداية",
+          "dateFin": "تاريخ النهاية"
+        },
+        "errors": {
+          "required": "يرجى إدخال الورش والمقاول من الباطن والموضوع والمبلغ.",
+          "failed": "تعذّر إنشاء العقد."
+        },
+        "success": "تم إنشاء عقد المقاولة من الباطن."
+      }
+    },
+    "journal": {
+      "title": "يومية الورش",
+      "filters": {
+        "allTypes": "جميع الأنواع"
+      },
+      "labels": {
+        "saisiPar": "أدخل من طرف"
+      },
+      "empty": "لا يوجد حدث مسجَّل.",
+      "create": {
+        "cta": "حدث جديد",
+        "title": "حدث جديد",
+        "submit": "حفظ",
+        "fields": {
+          "chantier": "الورش",
+          "chantierPlaceholder": "اختيار ورش",
+          "type": "نوع الحدث",
+          "date": "التاريخ",
+          "contenu": "الوصف"
+        },
+        "errors": {
+          "required": "يرجى إدخال الورش والتاريخ والوصف.",
+          "failed": "تعذّر حفظ الحدث."
+        },
+        "success": "تم حفظ الحدث."
+      }
+    },
+    "documents": {
+      "title": "وثائق الورش",
+      "filters": {
+        "allTypes": "جميع الأنواع"
+      },
+      "fields": {
+        "deposeLeBy": "أودِع في {date} من طرف {user}"
+      },
+      "emptyState": "لا توجد وثيقة مطابقة للفلاتر.",
+      "create": {
+        "cta": "إيداع وثيقة",
+        "title": "إيداع وثيقة",
+        "submit": "إيداع",
+        "fields": {
+          "chantier": "الورش",
+          "chantierPlaceholder": "اختيار ورش",
+          "type": "نوع الوثيقة",
+          "titre": "العنوان",
+          "file": "الملف"
+        },
+        "errors": {
+          "required": "يرجى إدخال الورش والعنوان والملف.",
+          "failed": "تعذّر إيداع الوثيقة."
+        },
+        "success": "تم إيداع الوثيقة."
+      },
+      "types": {
+        "MARCHE": "عقد",
+        "PV_RECEPTION": "محضر الاستلام",
+        "BON_COMMANDE": "سند الطلب"
+      }
+    },
+    "avancement": {
+      "title": "إدخال التقدم",
+      "editTitle": "تعديل التقدم",
+      "validate": "اعتماد",
+      "saveEdit": "حفظ التعديل",
+      "saveDraft": "حفظ المسودة",
+      "entityName": "تقدم",
+      "entityNamePlural": "تقدمات",
+      "fields": {
+        "dateRequired": "التاريخ *",
+        "lotsToInput": "الدفعات المراد إدخالها",
+        "addLot": "إضافة دفعة",
+        "pickAdditionalLot": "اختيار دفعة إضافية",
+        "softValidation": "تحقق مرن في حالة تجاوز التراكم للإجمالي",
+        "addPhoto": "📷 إضافة صورة"
+      },
+      "listing": {
+        "headerTitle": "تقدمات الورش",
+        "breadcrumb": "التقدم",
+        "quickFilters": {
+          "thisWeek": "هذا الأسبوع",
+          "thisMonth": "هذا الشهر",
+          "myEntries": "إدخالاتي",
+          "late": "متأخر عن الإدخال",
+          "lateTooltip": "مواقع بدون إدخال تقدم منذ أكثر من 7 أيام",
+          "reset": "إعادة التعيين"
+        },
+        "actions": {
+          "refresh": "تحديث",
+          "saisir": "إدخال التقدم",
+          "voirPhotos": "عرض الصور",
+          "modifier": "تعديل"
+        },
+        "columns": {
+          "date": "التاريخ",
+          "chantier": "الورش",
+          "lot": "الدفعة",
+          "designation": "التسمية",
+          "qtePeriode": "كمية الفترة",
+          "cumul": "التراكم",
+          "pourcentageCumule": "% التراكم",
+          "saisiPar": "أُدخل بواسطة",
+          "photos": "الصور"
+        },
+        "filters": {
+          "chantiers": "الورش",
+          "lots": "الدفعات",
+          "dateFrom": "من",
+          "dateTo": "إلى",
+          "saisiPar": "أُدخل بواسطة",
+          "avecPhotos": "مع صور"
+        },
+        "emptyState": {
+          "title": "لا يوجد تقدم في هذه الفترة",
+          "message": "عدّل المرشحات أو أدخل تقدماً ميدانياً جديداً.",
+          "actionLabel": "إدخال التقدم"
+        }
+      },
+      "saisie": {
+        "breadcrumb": "الإدخال",
+        "chantierRequired": "الورش *",
+        "chefChantier": "رئيس الورش: {name}",
+        "impactChantier": "تأثير الورش",
+        "before": "قبل",
+        "after": "بعد",
+        "ergonomieTerrain": "إرغونوميا الميدان",
+        "ergonomie": {
+          "touchInputs": "مدخلات رقمية لمسية بحد أدنى 44 بكسل",
+          "cameraUpload": "رفع مباشر من الكاميرا عبر capture environment",
+          "softValidation": "تحقق مرن في حالة تجاوز التراكم للإجمالي"
+        }
+      },
+      "lot": {
+        "currentCumul": "التراكم الحالي: {percent}% ({cumul} {unite})",
+        "remove": "إزالة",
+        "period": "الفترة {unite}",
+        "cumul": "التراكم {unite}",
+        "progress": "التقدم: {before}% ← {after}%",
+        "fieldNotes": "ملاحظة ميدانية"
+      },
+      "warnings": {
+        "cumulExceeds": "يتجاوز التراكم الكمية الإجمالية للدفعة ({quantite} {unite}).",
+        "highPeriodEntry": "إدخال مرتفع: أكثر من 30% من الدفعة في فترة واحدة."
+      },
+      "alerts": {
+        "savedDraft": "{count, plural, =0 {لم يتم حفظ أي دفعة كمسودة.} one {تم حفظ دفعة واحدة كمسودة.} two {تم حفظ دفعتين كمسودة.} few {تم حفظ # دفعات كمسودة.} many {تم حفظ # دفعة كمسودة.} other {تم حفظ # دفعة كمسودة.}}",
+        "validated": "{count, plural, =0 {لم يتم اعتماد أي دفعة.} one {تم اعتماد دفعة واحدة.} two {تم اعتماد دفعتين.} few {تم اعتماد # دفعات.} many {تم اعتماد # دفعة.} other {تم اعتماد # دفعة.}}"
+      },
+      "confirm": {
+        "validate": "{count, plural, =0 {لا توجد دفعة للاعتماد؟} one {اعتماد دفعة واحدة؟} two {اعتماد دفعتين؟} few {اعتماد # دفعات؟} many {اعتماد # دفعة؟} other {اعتماد # دفعة؟}} الورش: {before}% ← {after}%"
+      },
+      "summary": {
+        "lotsLoaded": "{count, plural, =0 {لم يتم تحميل أي دفعة} one {تم تحميل دفعة واحدة} two {تم تحميل دفعتين} few {تم تحميل # دفعات} many {تم تحميل # دفعة} other {تم تحميل # دفعة}}",
+        "deltaOnLots": "+{delta}% على {count, plural, =0 {0 دفعة} one {دفعة واحدة} two {دفعتين} few {# دفعات} many {# دفعة} other {# دفعة}}"
+      },
+      "gallery": {
+        "title": "{chantierCode} - دفعة {lotCode}",
+        "photoCount": "{count, plural, =0 {لا توجد صور} one {صورة واحدة} two {صورتان} few {# صور} many {# صورة} other {# صورة}}",
+        "close": "إغلاق"
+      },
+      "errors": {
+        "loadFailedTitle": "الإدخال غير متاح",
+        "saisieNotFound": "الإدخال المراد تعديله غير موجود.",
+        "chantierNotFound": "الورش غير موجود لهذا الإدخال.",
+        "chooseChantier": "اختر ورشاً قبل المتابعة.",
+        "atLeastOnePositiveQty": "أدخل على الأقل كمية فترة موجبة.",
+        "v1SingleLine": "تعديل V1 يدعم سطراً واحداً فقط في كل مرة.",
+        "saisieUserNotFound": "مستخدم الإدخال غير موجود",
+        "avancementNotFound": "التقدم غير موجود: {id}",
+        "notFound": "التقدم غير موجود: {id}",
+        "createFailed": "لم يتم إنشاء أي تقدم",
+        "deleteNotAvailable": "حذف التقدم غير متاح",
+        "readFileFailed": "تعذّرت القراءة لـ {name}",
+        "saveFailed": "تعذّر الحفظ.",
+        "validateFailed": "تعذّر الاعتماد."
+      }
+    },
+    "devis": {
+      "title": "عروض الأسعار",
+      "detail": {
+        "emisLeValable": "صدر في {date} · صالح حتى {valable}",
+        "columns": {
+          "designation": "التسمية",
+          "totalHt": "الإجمالي بدون احتساب الضريبة"
+        },
+        "totals": {
+          "totalHt": "الإجمالي بدون احتساب الضريبة",
+          "totalTtc": "الإجمالي مع احتساب الضريبة"
+        }
+      }
+    },
+    "metre": {
+      "title": "كشوف الكميات",
+      "dpgf": {
+        "title": "DPGF — تفصيل السعر الإجمالي الجزافي"
+      },
+      "errors": {
+        "notFound": "كشف الكميات {id} غير موجود"
+      }
+    },
+    "appelOffreClient": {
+      "title": "طلبات عروض الزبائن"
+    },
+    "bibliothequePrix": {
+      "title": "مكتبة الأسعار",
+      "families": {
+        "GROS_OEUVRE": "الأشغال الكبرى",
+        "ETANCHEITE": "العزل المائي",
+        "REVETEMENTS": "التكسيات",
+        "ELECTRICITE": "الكهرباء"
+      }
+    },
+    "photos": {
+      "upload": "إضافة صورة",
+      "zonePlaceholder": "المنطقة / المعلم (اختياري)",
+      "uploading": "جاري الإرسال…",
+      "empty": "لا توجد صور لهذا الورش."
+    },
+    "etudes": {
+      "composantsEditor": {
+        "hint": "التفصيل الفرعي = مواد + يد عاملة + مصاريف عامة + هامش",
+        "columns": {
+          "unite": "الوحدة",
+          "totalMad": "الإجمالي MAD"
+        },
+        "removeRow": "حذف",
+        "labels": {
+          "mainOeuvre": "يد عاملة",
+          "sousTotalDebourses": "المجموع الفرعي للمصاريف",
+          "fraisGeneraux": "المصاريف العامة",
+          "benefice": "الربح"
+        }
+      },
+      "dpgfEditor": {
+        "title": "DPGF — تفصيل السعر الإجمالي الجزافي",
+        "columns": {
+          "designation": "التسمية",
+          "unite": "الوحدة",
+          "totalHt": "الإجمالي بدون احتساب الضريبة"
+        },
+        "actions": {
+          "addOuvrage": "إضافة بند للفصل",
+          "removeChapitre": "حذف الفصل",
+          "removeRow": "حذف السطر",
+          "removeNote": "حذف الملاحظة"
+        },
+        "totalsBeforeDiscount": "الإجمالي بدون احتساب الضريبة (قبل التخفيض العام)"
+      },
+      "metreTableEditor": {
+        "hint": "الصيغ المقبولة: L*l*h*N، (L*l)-(L1*l1)، إلخ.",
+        "columns": {
+          "designation": "التسمية",
+          "unite": "الوحدة"
+        },
+        "designationPlaceholder": "تسمية حرة",
+        "removeRow": "حذف السطر",
+        "totalEstime": "الإجمالي المقدّر"
+      },
+      "cautionTracker": {
+        "definitive": "نهائي",
+        "totalCautions": "إجمالي الكفالات"
+      }
+    }
+  }
+}

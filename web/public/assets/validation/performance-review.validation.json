@@ -1,0 +1,20 @@
+{
+  "entity": "PerformanceReview",
+  "fields": {
+    "reviewNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "reviewPeriod": {
+      "maxLength": 120
+    },
+    "comments": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "entity": "CustomerPayment",
+  "fields": {
+    "paymentNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "customerId": {
+      "required": true
+    },
+    "paymentDate": {
+      "required": true
+    },
+    "amount": {
+      "required": true,
+      "min": 0
+    },
+    "currencyId": {
+      "required": true
+    },
+    "reference": {
+      "maxLength": 200
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

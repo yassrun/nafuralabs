@@ -1,0 +1,20 @@
+{
+  "entity": "CarrierAssignment",
+  "fields": {
+    "assignmentNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "currency": {
+      "maxLength": 120
+    },
+    "serviceLevel": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

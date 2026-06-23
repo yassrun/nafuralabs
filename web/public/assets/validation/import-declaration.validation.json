@@ -1,0 +1,31 @@
+{
+  "entity": "ImportDeclaration",
+  "fields": {
+    "declarationNumber": {
+      "required": true,
+      "maxLength": 60
+    },
+    "countryOfOrigin": {
+      "min": 0
+    },
+    "portOfEntry": {
+      "maxLength": 120
+    },
+    "hsCode": {
+      "maxLength": 60
+    },
+    "dutyAmount": {
+      "min": 0
+    },
+    "taxAmount": {
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

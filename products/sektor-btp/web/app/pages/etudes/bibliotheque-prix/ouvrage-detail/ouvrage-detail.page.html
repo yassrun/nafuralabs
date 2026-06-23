@@ -1,0 +1,45 @@
+<nf-page-shell scroll>
+  <nf-page-header [config]="headerConfig"></nf-page-header>
+  <nf-entity-detail
+    #detail
+    [config]="config"
+    [mode]="mode()"
+    [item]="item()"
+    [lookups]="lookups()"
+    [loading]="isLoading()"
+    [saving]="isSaving()"
+    (action)="onAction($event)">
+
+    <ng-template nfField="composants" let-control>
+      <app-composants-editor
+        [composantsValue]="composantsValue(item())"
+        [uniteMainValue]="uniteMainValue(item())"
+        [fraisGenerauxPercent]="item()?.fraisGenerauxPercent ?? 8"
+        [beneficePercent]="item()?.beneficePercent ?? 7"
+        [readonly]="mode() === 'view'"
+        [ouvrageId]="item()?.id ?? ''"
+        (composantsChange)="onComposantsChange(control, $event)"
+        (uniteMainChange)="onUniteMainPatch($event)"
+        (prixCalculated)="onPrixChange($event)" />
+    </ng-template>
+
+    <ng-template nfField="dpuComposants" let-control let-form="form">
+      <app-dpu-editor
+        [composantsValue]="dpuComposantsValue(item())"
+        [historiqueValue]="dpuHistoriqueValue(item())"
+        [fraisGenerauxPercent]="item()?.fraisGenerauxPercent ?? 8"
+        [margePercent]="item()?.beneficePercent ?? 7"
+        [articleId]="item()?.id ?? ''"
+        [uniteArticle]="item()?.unite"
+        [composantsOuvrage]="composantsValue(item())"
+        [uniteMainOuvrage]="uniteMainValue(item())"
+        [readonly]="mode() === 'view'"
+        (composantsChange)="onDpuComposantsChange(control, $event)"
+        (fraisGenerauxChange)="onDpuFgChange(form.get('fraisGenerauxPercent'), $event)"
+        (margeChange)="onDpuMargeChange(form.get('beneficePercent'), $event)"
+        (applyPrixBiblio)="onPrixChange($event)"
+        (historiqueChange)="onDpuHistoriqueChange(form.get('dpuHistorique'), $event)" />
+    </ng-template>
+
+  </nf-entity-detail>
+</nf-page-shell>

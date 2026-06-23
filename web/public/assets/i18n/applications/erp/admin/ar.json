@@ -1,0 +1,913 @@
+{
+  "admin": {
+    "common": {
+      "actions": {
+        "cancel": "إلغاء",
+        "save": "حفظ",
+        "saveShort": "حفظ",
+        "edit": "تعديل",
+        "delete": "حذف",
+        "deleteShort": "حذف",
+        "create": "إنشاء",
+        "add": "إضافة",
+        "reset": "↻ إعادة تعيين",
+        "previous": "← السابق",
+        "next": "التالي →",
+        "saveSettings": "حفظ الإعدادات"
+      },
+      "labels": {
+        "active": "نشط",
+        "inactive": "غير نشط",
+        "yes": "نعم",
+        "no": "لا",
+        "all": "الكل",
+        "total": "الإجمالي",
+        "loading": "جاري التحميل…",
+        "empty": "—",
+        "system": "النظام",
+        "custom": "مخصص",
+        "modified": "معدّل",
+        "override": "مخصص",
+        "today": "اليوم",
+        "page": "الصفحة",
+        "filter": "تصفية:",
+        "reference": "المرجع",
+        "details": "التفاصيل"
+      },
+      "breadcrumb": {
+        "administration": "الإدارة"
+      },
+      "toasts": {
+        "saved": "✓ تم الحفظ",
+        "deleted": "✓ تم الحذف",
+        "reset": "✓ تمت إعادة التعيين",
+        "saveError": "⚠ صحح الحقول الخاطئة قبل الحفظ"
+      },
+      "labelFields": {
+        "raisonSociale": "اسم الشركة",
+        "ice": "ICE",
+        "rc": "RC",
+        "if": "IF",
+        "patente": "الضريبة المهنية",
+        "cnss": "CNSS",
+        "cnaem": "CNAEM",
+        "tvaIntra": "TVA داخل الاتحاد",
+        "siegeAdresse": "عنوان المقر",
+        "capitalSocial": "رأس المال الاجتماعي",
+        "formeJuridique": "الشكل القانوني",
+        "ville": "المدينة",
+        "telephone": "الهاتف",
+        "email": "البريد الإلكتروني",
+        "siteWeb": "الموقع الإلكتروني"
+      }
+    },
+    "auditLog": {
+      "breadcrumb": "سجل التدقيق",
+      "title": "سجل تدقيق ERP",
+      "subtitle": "بحث متعدد المعايير من / ماذا / متى. انقر على سطر لعرض التفاصيل.",
+      "stats": {
+        "total": "الإجمالي",
+        "today": "اليوم",
+        "last7d": "آخر 7 أيام",
+        "topAction": "الإجراء رقم 1",
+        "activeUsers": "المستخدمون النشطون",
+        "topActionCount": "{count} إدخالات"
+      },
+      "filters": {
+        "search": "مستخدم، كيان، مرجع، تفصيل…",
+        "allUsers": "كل المستخدمين",
+        "allActions": "كل الإجراءات",
+        "allTypes": "كل الأنواع",
+        "dateFrom": "من",
+        "dateTo": "إلى"
+      },
+      "table": {
+        "headers": {
+          "timestamp": "الطابع الزمني",
+          "user": "المستخدم",
+          "action": "الإجراء",
+          "entityType": "نوع الكيان",
+          "reference": "المرجع",
+          "detail": "التفاصيل",
+          "id": "المعرّف",
+          "type": "النوع",
+          "entityId": "معرّف الكيان"
+        },
+        "expanded": {
+          "auditId": "معرّف التدقيق",
+          "entityId": "معرّف الكيان",
+          "timestampIso": "الطابع الزمني ISO",
+          "detailFull": "التفاصيل الكاملة"
+        },
+        "empty": "لا توجد إدخالات تطابق المرشحات."
+      },
+      "count": {
+        "label": "{count, plural, zero {لا توجد إدخالات} one {إدخال واحد} two {إدخالان} few {# إدخالات} many {# إدخالاً} other {# إدخال}}",
+        "singular": "إدخال",
+        "plural": "إدخالات",
+        "ofTotal": "/ {count} في المجموع"
+      },
+      "exportFilename": "audit-log"
+    },
+    "banques": {
+      "breadcrumb": "البنوك",
+      "title": "دليل البنوك",
+      "subtitle": "كتالوغ البنوك المغربية — رموز BAM، SWIFT/BIC، الخدمات المصرفية المفتوحة",
+      "toasts": {
+        "saved": "✓ تم حفظ البنك",
+        "deleted": "✓ تم حذف البنك"
+      },
+      "section": {
+        "title": "البنوك ({count})",
+        "addNew": "بنك جديد",
+        "cancel": "× إلغاء",
+        "createTitle": "إضافة بنك إلى الدليل"
+      },
+      "fields": {
+        "codeBanque": "رمز البنك (3 أرقام) *",
+        "swift": "SWIFT / BIC (8 أحرف) *",
+        "raisonSociale": "اسم الشركة *",
+        "marque": "العلامة التجارية *",
+        "siteWeb": "الموقع الإلكتروني",
+        "sitePlaceholder": "https://",
+        "openBanking": "Open Banking"
+      },
+      "actions": {
+        "confirmCreate": "إنشاء البنك",
+        "save": "حفظ",
+        "edit": "تعديل",
+        "delete": "حذف"
+      },
+      "table": {
+        "code": "الرمز",
+        "swift": "SWIFT",
+        "raisonSociale": "اسم الشركة",
+        "marque": "العلامة التجارية",
+        "openBanking": "Open Banking",
+        "siteWeb": "الموقع الإلكتروني",
+        "apiBadge": "API"
+      },
+      "errors": {
+        "raisonSocialeRequired": "اسم الشركة إلزامي",
+        "marqueRequired": "العلامة التجارية إلزامية",
+        "codeRequired": "الرمز إلزامي (3 أرقام)",
+        "codeInvalid": "تنسيق غير صالح — 3 أرقام مطلوبة",
+        "swiftRequired": "SWIFT إلزامي",
+        "swiftInvalid": "تنسيق غير صالح — 8 أو 11 حرفاً أبجدياً رقمياً"
+      },
+      "confirmDelete": "حذف البنك «{raisonSociale}» من الدليل؟\n\nهذا الإجراء قابل للتراجع في وضع العرض التوضيحي (إعادة تعيين الدليل)."
+    },
+    "demoReset": {
+      "breadcrumb": "العرض التوضيحي",
+      "title": "مجموعة بيانات العرض التوضيحي",
+      "subtitle": "إعادة تعيين للعروض التجارية — SOMACOM BTP",
+      "card": {
+        "title": "الشركة النموذجية: SOMACOM BTP SARL",
+        "identite": "ICE: 001234567000088 · RC Casa 715869 · رأس المال: 5 000 000 MAD",
+        "perimetre": "نطاق العرض التوضيحي: 6 أوراش نشطة · 12 عقداً (4 عمومية + 8 خاصة) · 15 موظفاً · 8 موردين · HSE كامل"
+      },
+      "actions": {
+        "resetTitle": "إعادة تعيين كل البيانات",
+        "resetDesc": "إعادة تحميل بذرة العرض الكاملة. تمسح كل التعديلات المحلية (localStorage). مثالية قبل عرض توضيحي لزبون.",
+        "resetButton": "🔄 إعادة تعيين",
+        "resetting": "جاري إعادة التعيين…",
+        "exportTitle": "تصدير الحالة الحالية",
+        "exportDesc": "تنزيل لقطة JSON لكل البيانات المحاكاة (مفيد للنسخ الاحتياطي أو مشاركة الفريق).",
+        "exportButton": "📥 تصدير اللقطة"
+      },
+      "success": {
+        "banner": "✓ تم إعادة تعيين البيانات! أعد تحميل الصفحة لرؤية بذرة العرض التوضيحي.",
+        "reload": "إعادة تحميل التطبيق"
+      },
+      "summary": {
+        "title": "محتوى بذرة العرض التوضيحي",
+        "items": {
+          "chantiers": "أوراش نشطة",
+          "marches": "عقود BTP",
+          "avenants": "ملاحق",
+          "factures": "فواتير كشوف الأشغال",
+          "cautions": "ضمانات بنكية",
+          "employes": "موظفون",
+          "fournisseurs": "موردون",
+          "approbations": "موافقات قيد التنفيذ",
+          "ncHse": "حالات عدم مطابقة HSE مفتوحة",
+          "epi": "EPI تحت المراقبة"
+        }
+      }
+    },
+    "erpRoles": {
+      "breadcrumb": "أدوار ERP",
+      "title": "أدوار ERP — محرر المصفوفة",
+      "subtitle": "تحديد الصلاحيات حسب الدور BTP — وحدة × إجراء (14 × 9)",
+      "toasts": {
+        "saved": "✓ تم حفظ الدور",
+        "reverted": "↺ تمت استعادة دور النظام إلى قيم البذرة",
+        "deleted": "✓ تم حذف الدور"
+      },
+      "sidebar": {
+        "title": "الأدوار ({count})",
+        "addNew": "+",
+        "cancel": "×"
+      },
+      "create": {
+        "name": "الاسم *",
+        "description": "الوصف",
+        "submit": "إنشاء"
+      },
+      "badges": {
+        "system": "النظام",
+        "custom": "مخصص",
+        "overridden": "معدّل",
+        "permCount": "{count, plural, zero {0 صلاحية} one {صلاحية واحدة} two {صلاحيتان} few {# صلاحيات} many {# صلاحية} other {# صلاحية}}",
+        "super": "مدير أعلى"
+      },
+      "editor": {
+        "descriptionPlaceholder": "وصف وظيفي",
+        "permCount": "{count, plural, zero {لا توجد صلاحية نشطة} one {صلاحية واحدة نشطة} two {صلاحيتان نشطتان} few {# صلاحيات نشطة} many {# صلاحية نشطة} other {# صلاحية نشطة}}",
+        "permCountSingular": "{count} صلاحية نشطة",
+        "permCountPlural": "{count} صلاحيات نشطة",
+        "revertSeed": "↺ استعادة البذرة",
+        "delete": "حذف",
+        "save": "حفظ",
+        "emptyState": "اختر دوراً من القائمة على اليمين."
+      },
+      "matrix": {
+        "superAdminLabel": "المدير الأعلى (*) — وصول إلى كل ERP",
+        "hint": "حدد خانة لمنح module.action. مفتاح «الكل» لكل سطر يعطي module.*.",
+        "module": "الوحدة",
+        "wildcard": "الكل (*)",
+        "rawTitle": "عرض القائمة الخام للصلاحيات ({count})"
+      },
+      "newRoleDefaults": {
+        "description": "دور مخصص"
+      },
+      "confirmRevert": "استعادة هذا الدور إلى تعريف البذرة الأولي؟",
+      "confirmDeleteSystem": "إخفاء دور النظام «{name}» من القائمة؟\nيتم الاحتفاظ بتعريف البذرة ويمكن إعادة تفعيله عبر إعادة تعيين الدليل.",
+      "confirmDeleteCustom": "حذف الدور المخصص «{name}»؟"
+    },
+    "mappings": {
+      "breadcrumb": "الإسنادات المحاسبية",
+      "title": "الإسنادات المحاسبية الآلية",
+      "subtitle": "تكوين القيود المتنوعة المُنشأة تلقائياً حسب العملية التجارية (CGNC المغرب — 15 نموذجاً).",
+      "stats": {
+        "total": "إجمالي الإسنادات",
+        "system": "النظام",
+        "custom": "مخصص",
+        "active": "نشطة",
+        "personalized": "مخصصة",
+        "odCount": "قيود متنوعة مُنشأة"
+      },
+      "tabs": {
+        "config": "تكوين الإسنادات",
+        "journal": "دفتر القيود المتنوعة الآلية"
+      },
+      "journal": {
+        "title": "دفتر القيود المنشأة آلياً",
+        "summary": "{total} قيد متنوع مسجل — {balanced} متوازنة / {unbalanced} غير متوازنة — إجمالي المدين {totalDebit} / إجمالي الدائن {totalCredit}.",
+        "clear": "تفريغ الدفتر",
+        "empty": "لم يتم إنشاء أي قيد متنوع حتى الآن. صادق على فاتورة بيع (إجراء «إصدار») أو انقر على «محاسبة» في فاتورة عقد لتغذية الدفتر.",
+        "balanced": "متوازنة",
+        "unbalanced": "غير متوازنة",
+        "removeTitle": "حذف"
+      },
+      "filters": {
+        "societe": "الشركة",
+        "allSocietes": "الكل (عرض عام __ALL__)",
+        "operation": "العملية المحددة",
+        "resetDefaults": "استعادة القيم الافتراضية"
+      },
+      "panel": {
+        "badges": {
+          "system": "النظام",
+          "custom": "مخصص",
+          "personalized": "مخصص"
+        },
+        "journalLabel": "دفتر اليومية {code} — {libelle}",
+        "revertAction": "إلغاء التعديلات",
+        "delete": "حذف",
+        "libelleLabel": "بيان القيد (قالب)",
+        "libelleHint": "المتغيرات المتاحة: {numero}, {ref}, {periode}.",
+        "journalCode": "رمز دفتر اليومية",
+        "journalLibelle": "بيان دفتر اليومية",
+        "linesTitle": "سطور القيد",
+        "table": {
+          "side": "الاتجاه",
+          "compte": "حساب CGNC",
+          "libelle": "البيان",
+          "amountSource": "المبلغ المصدر",
+          "condition": "الشرط",
+          "compteCol": "الحساب",
+          "debit": "مدين",
+          "credit": "دائن",
+          "source": "المصدر",
+          "totals": "المجاميع"
+        },
+        "side": {
+          "debit": "مدين",
+          "credit": "دائن"
+        },
+        "conditionPlaceholder": "(اختياري)",
+        "addLine": "إضافة سطر",
+        "emptyMatch": "لم يتم العثور على أي إسناد لهذه العملية في هذه الشركة."
+      },
+      "simulator": {
+        "title": "محاكي القيود المتنوعة",
+        "subtitle": "أدخل المبالغ لتوليد قيد محاسبي نموذجي وفقاً للإسناد أعلاه.",
+        "amounts": {
+          "ht": "المبلغ بدون ضريبة",
+          "tva": "مبلغ TVA",
+          "ras": "الاقتطاع من المنبع",
+          "timbre": "الطابع الجبائي",
+          "chargePatr": "العبء المُشغّل",
+          "salaireNet": "الراتب الصافي",
+          "ir": "الضريبة على الدخل"
+        },
+        "imbalance": "اختلال {amount}"
+      },
+      "amountSource": {
+        "ht": "HT",
+        "tva": "TVA",
+        "ttc": "TTC",
+        "ras": "الاقتطاع من المنبع",
+        "netAPayer": "الصافي للدفع",
+        "timbre": "الطابع",
+        "chargePatr": "الأعباء المُشغّلة",
+        "salaireNet": "الراتب الصافي",
+        "ir": "الضريبة على الدخل"
+      },
+      "operationLabels": {
+        "VENTE_DIRECTE": "بيع مباشر (فاتورة زبون نقداً)",
+        "VENTE_MARCHE_PUBLIC": "بيع عقد عمومي (كشف أشغال)",
+        "VENTE_MARCHE_PRIVE": "بيع عقد خاص (كشف أشغال)",
+        "ACHAT_MATIERES": "شراء مواد أولية",
+        "ACHAT_SOUS_TRAITANCE": "شراء مقاولة من الباطن BTP",
+        "ACHAT_FRAIS_GENERAUX": "شراء مصاريف عامة",
+        "REGLEMENT_CLIENT_BANQUE": "تسديد الزبون (بنك)",
+        "REGLEMENT_CLIENT_CAISSE": "تسديد الزبون (صندوق)",
+        "REGLEMENT_FOURNISSEUR_BANQUE": "تسديد المورد (بنك)",
+        "REGLEMENT_FOURNISSEUR_CAISSE": "تسديد المورد (صندوق)",
+        "PAIE_SALAIRE": "الأجور — رواتب إجمالية",
+        "PAIE_CHARGES_SOCIALES": "الأجور — اشتراكات اجتماعية (CNSS، AMO)",
+        "DECLARATION_TVA": "تصريح TVA شهري",
+        "DECLARATION_RAS": "تصريح الاقتطاع من المنبع (تحويل DGI)",
+        "IMMOBILISATION_ACQUISITION": "اقتناء أصل ثابت"
+      },
+      "toasts": {
+        "mappingDeleted": "✓ تم حذف الإسناد",
+        "mappingReverted": "✓ تمت استعادة الإسناد إلى قيمته الأصلية",
+        "mappingsReset": "✓ تمت استعادة الإسنادات",
+        "journalEntryRemoved": "✓ تم حذف إدخال الدفتر",
+        "journalCleared": "✓ تم تفريغ الدفتر"
+      },
+      "confirm": {
+        "delete": "حذف الإسناد «{operation}»؟",
+        "reset": "استعادة كل الإسنادات المحاسبية إلى البذور النظامية الـ15 (سيتم فقدان التعديلات والإسنادات المخصصة المُنشأة)؟",
+        "clearJournal": "تفريغ دفتر القيود المنشأة آلياً بالكامل؟"
+      }
+    },
+    "moa": {
+      "breadcrumb": "أصحاب المشاريع",
+      "title": "دليل أصحاب المشاريع",
+      "subtitle": "كتالوغ الجهات الآمرة — الدولة، المؤسسات العمومية، الجماعات، القطاع الخاص",
+      "toasts": {
+        "saved": "✓ تم حفظ صاحب المشروع",
+        "deleted": "✓ تم حذف صاحب المشروع"
+      },
+      "section": {
+        "title": "أصحاب المشاريع ({filtered} / {total})",
+        "addNew": "صاحب مشروع جديد",
+        "cancel": "× إلغاء",
+        "createTitle": "إضافة صاحب مشروع"
+      },
+      "fields": {
+        "raisonSociale": "اسم الشركة *",
+        "sigle": "الرمز",
+        "siglePlaceholder": "DRCR, ONCF…",
+        "type": "النوع *",
+        "ice": "ICE",
+        "adresse": "العنوان *",
+        "ville": "المدينة *",
+        "telephone": "الهاتف",
+        "email": "البريد الإلكتروني",
+        "siteWeb": "الموقع الإلكتروني",
+        "sitePlaceholder": "https://",
+        "contactNom": "جهة الاتصال — الاسم",
+        "contactFonction": "جهة الاتصال — الوظيفة",
+        "notes": "ملاحظات"
+      },
+      "actions": {
+        "confirmCreate": "إنشاء صاحب المشروع",
+        "delete": "حذف",
+        "deactivate": "تعطيل",
+        "reactivate": "إعادة التفعيل"
+      },
+      "table": {
+        "sigle": "الرمز",
+        "raisonSociale": "اسم الشركة",
+        "type": "النوع",
+        "ville": "المدينة",
+        "ice": "ICE",
+        "contact": "جهة الاتصال",
+        "active": "نشط",
+        "empty": "لا يوجد صاحب مشروع يطابق التصفية."
+      },
+      "errors": {
+        "raisonSocialeRequired": "اسم الشركة إلزامي",
+        "adresseRequired": "العنوان إلزامي",
+        "villeRequired": "المدينة إلزامية",
+        "iceInvalid": "ICE غير صالح — 15 رقماً مطلوب"
+      },
+      "confirmDelete": "حذف صاحب المشروع «{raisonSociale}» من الدليل؟\n\nهذا الإجراء قابل للتراجع في وضع العرض التوضيحي (إعادة تعيين الدليل)."
+    },
+    "numerotation": {
+      "breadcrumb": "الترقيم",
+      "title": "الترقيم التسلسلي",
+      "subtitle": "تنسيق، فاصل، سنة، تعبئة وإعادة تعيين حسب الشركة × نوع الوثيقة",
+      "stats": {
+        "total": "السياسات",
+        "system": "النظام",
+        "custom": "مخصص",
+        "active": "نشطة",
+        "counters": "العدّادات المتتبعة"
+      },
+      "section": {
+        "title": "سياسة الترقيم حسب نوع الوثيقة",
+        "help": "اختر شركة لعرض وتخصيص التنسيقات المطبقة. تُستخدم بذور النظام (شارة «موروث») من قبل كل الشركات ما لم يتم إنشاء تخصيص محدد.",
+        "societe": "الشركة",
+        "resetAll": "إعادة تعيين الكل (QA)"
+      },
+      "table": {
+        "headers": {
+          "docType": "نوع الوثيقة",
+          "prefix": "البادئة",
+          "separator": "فاصل",
+          "year": "السنة",
+          "padding": "التعبئة",
+          "reset": "إعادة التعيين",
+          "counter": "العدّاد",
+          "preview": "معاينة الرقم التالي",
+          "actions": "الإجراءات"
+        }
+      },
+      "badges": {
+        "inherited": "موروث",
+        "modified": "معدّل",
+        "custom": "مخصص",
+        "inheritedTitle": "موروث من بذرة النظام",
+        "modifiedTitle": "بذرة النظام معدّلة"
+      },
+      "year": {
+        "yyyy": "2026 (YYYY)",
+        "yy": "26 (YY)",
+        "none": "لا شيء"
+      },
+      "reset": {
+        "yearly": "سنوي",
+        "monthly": "شهري",
+        "never": "أبداً"
+      },
+      "actions": {
+        "resetTitle": "إعادة إلى 0",
+        "personalize": "تخصيص",
+        "save": "حفظ",
+        "revertSeed": "↺ البذرة",
+        "delete": "حذف"
+      },
+      "help": {
+        "title": "مساعدة — الرموز المتاحة في التنسيق",
+        "items": {
+          "prefix": "بادئة السياسة (مثل: BC)",
+          "sep": "فاصل (مثل: -, /)",
+          "yyyy": "سنة من 4 أرقام (مثل: 2026)",
+          "yy": "سنة من رقمين (مثل: 26)",
+          "mm": "شهر من رقمين (مثل: 05)",
+          "soc": "رمز قصير للشركة (مثل: SOM)",
+          "seq": "عدّاد تسلسلي بتعبئة أصفار (إلزامي)"
+        },
+        "footer": "التنسيق الافتراضي: {prefix}{sep}{yyyy}{sep}{seq} يعطي مثلاً BC-2026-00042. التنسيق المخصص غير معروض في هذا الإصدار الأول: الإعدادات أعلاه كافية لتغطية 95% من الاحتياجات."
+      },
+      "preview": {
+        "invalid": "⚠ تنسيق غير صالح"
+      },
+      "toasts": {
+        "policySaved": "✓ تم حفظ السياسة {label}",
+        "overrideCreated": "✓ تم إنشاء تخصيص لـ {label}",
+        "seedRestored": "↺ تمت استعادة البذرة لـ {label}",
+        "deleted": "✓ تم حذف السياسة",
+        "deleteBlocked": "غير ممكن: بذرة النظام (استخدم استعادة)",
+        "counterReset": "↺ تمت إعادة عدّاد {label} إلى 0",
+        "resetDone": "✓ تمت إعادة التعيين"
+      },
+      "confirm": {
+        "delete": "حذف السياسة {label} ({prefix})؟",
+        "resetCounter": "إعادة عدّاد {label} إلى 0؟\nالرقم التالي = {nextSample}",
+        "resetAll": "استعادة كل السياسات إلى قيم البذور + إعادة كل العدّادات إلى 0؟\nهذا الإجراء يمسح كل التخصيصات والسياسات المخصصة والعدّادات المحفوظة."
+      }
+    },
+    "parametresFiscal": {
+      "breadcrumb": "الإعدادات الضريبية",
+      "title": "الإعدادات الضريبية",
+      "subtitle": "TVA، الاقتطاع من المنبع، الطابع الجبائي، الإعفاءات، النظام — المغرب (CGI 2026)",
+      "stats": {
+        "tva": "نسبة TVA",
+        "exonerations": "الإعفاءات النشطة",
+        "regime": "نظام TVA",
+        "cycle": "دورة التصريح",
+        "rasEtat": "الاقتطاع من المنبع للدولة"
+      },
+      "tabs": {
+        "tva": "نسب TVA",
+        "ras": "الاقتطاعات من المنبع",
+        "timbre": "الطابع الجبائي",
+        "exonerations": "الإعفاءات",
+        "regime": "نظام الشركة"
+      },
+      "tva": {
+        "title": "نسب TVA المطبقة",
+        "addRate": "إضافة نسبة",
+        "fields": {
+          "rate": "النسبة %",
+          "label": "البيان",
+          "labelPlaceholder": "مثال: TVA قياسية",
+          "application": "التطبيق",
+          "applicationPlaceholder": "مثال: BTP قياسي، أشغال جديدة",
+          "default": "افتراضي"
+        },
+        "newRate": {
+          "label": "TVA مخفضة 7%"
+        }
+      },
+      "ras": {
+        "title": "الاقتطاع من المنبع — نسب حسب نوع صاحب المشروع",
+        "info": "في المغرب، يُطبق الاقتطاع من المنبع (RAS) على الأشغال والخدمات على الأشخاص المعنويين في القانون العام (المادة 158 من المدونة العامة للضرائب) ويكون عادة بنسبة 5% من المبلغ HT. القطاع الخاص في الغالب 0. خصص النسبة حسب النوع لتسهيل الفوترة عبر أصحاب المشاريع.",
+        "fallback": "نسبة RAS العامة (احتياطية)",
+        "fallbackHint": "تُطبق إذا لم يكن لصاحب المشروع نوع معروف.",
+        "seuil": "عتبة التطبيق (MAD HT)",
+        "seuilHint": "0 = قابل للتطبيق بدون عتبة دنيا"
+      },
+      "moaTypeFull": {
+        "etat": "الدولة (وزارات، مديريات)",
+        "ep": "مؤسسة عمومية (ONCF، ONEE، OFPPT…)",
+        "collectivite": "جماعة ترابية (ولاية، جماعة)",
+        "prive": "القطاع الخاص (منعش، خاص، شركة)"
+      },
+      "perimetre": {
+        "livraison": "تسليم السلع",
+        "prestation": "تقديم الخدمات",
+        "importation": "الاستيراد",
+        "exportation": "التصدير",
+        "tous": "كل الأنواع",
+        "livraisonShort": "تسليم",
+        "prestationShort": "خدمة"
+      },
+      "timbre": {
+        "title": "الطابع الجبائي (المادة 252 من المدونة العامة للضرائب)",
+        "info": "يُطبق الطابع الجبائي على المدفوعات النقدية التي تتجاوز العتبة المحددة. وهو محدد بالمبلغ الأقصى المضبوط.",
+        "rate": "نسبة الطابع (%)",
+        "seuil": "عتبة الدفع (MAD TTC)",
+        "plafond": "سقف الطابع (MAD)"
+      },
+      "autoliquidation": {
+        "title": "إقرار TVA عكسي (مقدمو خدمات غير مقيمين)",
+        "rate": "اقتطاع TVA على الإقرار العكسي (% من TVA المُصرح بها)",
+        "rateHint": "100 = اقتطاع كلي لـ TVA المصرح بها عكسياً ؛ 0 = لا اقتطاع.",
+        "toggle": "إقرار TVA العكسي مفعّل",
+        "toggleDesc": "ينطبق على المقاولين من الباطن غير المقيمين أو بعض الخدمات داخل الاتحاد الأوروبي.",
+        "logementToggle": "إعفاء السكن الاجتماعي",
+        "logementDesc": "TVA 14% للسكنات ذات المساحة ≤ 100 م² والسعر ≤ 250 000 MAD."
+      },
+      "exonerations": {
+        "title": "كتالوغ أسباب إعفاء TVA",
+        "addNew": "سبب جديد",
+        "cancel": "× إلغاء",
+        "info": "قابل للاختيار من نموذج العرض/الفاتورة لتطبيق نسبة 0% تلقائياً مع الذكر القانوني في PDF. كتالوغ مطابق للمدونة العامة للضرائب المغربية 2026 (المواد 91 إلى 94).",
+        "createTitle": "سبب إعفاء جديد",
+        "fields": {
+          "code": "الرمز *",
+          "codePlaceholder": "92-I-X / COOP-XX",
+          "libelle": "البيان *",
+          "libellePlaceholder": "مثال: تصدير الخدمات",
+          "refLegale": "المرجع القانوني *",
+          "refLegalePlaceholder": "مثال: المادة 92-I-2° من المدونة العامة للضرائب",
+          "perimetre": "النطاق",
+          "dateFin": "تاريخ انتهاء الصلاحية (اختياري)",
+          "mention": "ذكر على الفاتورة *",
+          "mentionPlaceholder": "نص يُعرض على الفاتورة تحت الإجمالي HT"
+        },
+        "addToCatalog": "إضافة إلى الكتالوغ",
+        "table": {
+          "status": "الحالة",
+          "code": "الرمز",
+          "libelle": "البيان",
+          "reference": "المرجع",
+          "perimetre": "النطاق",
+          "validity": "الصلاحية"
+        },
+        "actions": {
+          "delete": "حذف",
+          "restore": "استعادة"
+        }
+      },
+      "regime": {
+        "title": "النظام الضريبي للشركة",
+        "info": "يحدد متى تصبح TVA مستحقة وتواتر تصاريح DGI. نظام الالتزام يجعل TVA مستحقة عند الفوترة ؛ نظام التحصيل عند استلام الدفع. مطابقة المادة 95 من المدونة العامة للضرائب.",
+        "tvaLabel": "نظام TVA",
+        "tvaDebit": "الالتزام (افتراضي)",
+        "tvaEncaissement": "التحصيل (اختياري)",
+        "tvaHint": "خيار التحصيل صالح لبعض القطاعات.",
+        "cycleLabel": "دورة التصريح",
+        "cycleMensuel": "شهري (رقم المعاملات > 1 مليون MAD)",
+        "cycleTrimestriel": "فصلي (رقم المعاملات ≤ 1 مليون MAD)",
+        "numContribuable": "رقم الملزم بالضريبة على الشركات",
+        "numContribuablePlaceholder": "مثال: 12345678",
+        "cabinetEmail": "بريد إلكتروني لمكتب المحاسبة",
+        "cabinetEmailPlaceholder": "cabinet@expertise-comptable.ma",
+        "cabinetHint": "وجهة نسخ التصاريح / القيود."
+      },
+      "formActions": {
+        "reset": "استعادة القيم الافتراضية",
+        "save": "حفظ الإعدادات الضريبية"
+      },
+      "simulator": {
+        "title": "محاكي — TVA فاتورة مقاولة من الباطن",
+        "hint": "بعد تعديل خيار الإقرار العكسي، انقر على حفظ لتحديث هذا الحساب.",
+        "fields": {
+          "ht": "المبلغ HT (MAD)",
+          "rate": "نسبة TVA (%)",
+          "nonResident": "مقدم الخدمة غير مقيم بالمغرب"
+        },
+        "mode": "الوضع",
+        "netFournisseur": "الصافي للدفع للمورد",
+        "tvaFacture": "TVA على الفاتورة",
+        "tvaAuto": "TVA الإقرار العكسي (تصريح)",
+        "retenueTva": "اقتطاع TVA"
+      },
+      "toasts": {
+        "motifAdded": "✓ تم إضافة سبب الإعفاء",
+        "motifAddedError": "كل الحقول المُعلّمة بـ * إلزامية",
+        "motifRestored": "تمت استعادة سبب النظام",
+        "motifDeleted": "✓ تم حذف السبب",
+        "settingsRestored": "✓ تمت استعادة الإعدادات",
+        "settingsSaved": "✓ تم حفظ الإعدادات الضريبية",
+        "settingsSavedToast": "تم حفظ الإعدادات الضريبية"
+      },
+      "confirm": {
+        "deleteMotif": "حذف السبب «{libelle}»؟",
+        "resetAll": "استعادة كل الإعدادات الضريبية إلى القيم الافتراضية (نسب TVA، الاقتطاع من المنبع، الطابع، الإقرار العكسي، أسباب الإعفاء، النظام)؟"
+      }
+    },
+    "rbacPreview": {
+      "breadcrumb": "معاينة RBAC",
+      "title": "معاينة RBAC — أدوار BTP",
+      "subtitle": "اطّلع على الصلاحيات والتنقل المتاح لكل دور نموذجي مُنشأ ببذور.",
+      "notice": {
+        "lead": "وضع المعاينة فقط.",
+        "body": "اختيار دور أدناه لا يؤثر على جلستك: التنقل والصلاحيات في الواجهة تبقى تلك الخاصة بالمستخدم المتصل. توثق هذه الصفحة أي تنقل سيكون مرئياً لو كان مستخدم يحمل هذا الدور."
+      },
+      "roles": {
+        "title": "أدوار BTP المُنشأة ببذور",
+        "reset": "إعادة تعيين",
+        "meta": "{count} صلاحية — أولوية {priority}"
+      },
+      "permissions": {
+        "title": "الصلاحيات الممنوحة — {name}"
+      },
+      "nav": {
+        "title": "تنقل جذري قابل للوصول",
+        "hint": "الحساب مبني على وسوم permissionsAny الموضوعة على عقد التنقل الجذرية (erp-nav.generated.ts). تبقى الوحدة بدون وسم مرئية افتراضياً.",
+        "module": "الوحدة",
+        "required": "الصلاحية (الصلاحيات) المطلوبة (OR)",
+        "visible": "مرئية",
+        "none": "لا شيء",
+        "yes": "نعم",
+        "no": "لا",
+        "yesAria": "مرئية",
+        "noAria": "مخفية"
+      },
+      "matrix": {
+        "title": "مصفوفة الوحدة × الإجراء",
+        "hint": "خانة محددة تعني أن الدور يملك صلاحية module.action (مباشرة أو عبر بدل).",
+        "module": "الوحدة",
+        "granted": "ممنوحة"
+      },
+      "empty": "اختر دوراً أعلاه لرؤية تفاصيل صلاحياته."
+    },
+    "sessions": {
+      "breadcrumb": "الجلسات",
+      "title": "الجلسات والاتصالات",
+      "subtitle": "الجلسات النشطة + سجل محاولات المصادقة",
+      "stats": {
+        "active": "الجلسات النشطة",
+        "success24h": "اتصالات ناجحة 24 ساعة",
+        "failed24h": "إخفاقات 24 ساعة",
+        "suspectIps": "عناوين IP مشبوهة (3+ إخفاقات)",
+        "uniqueUsers": "المستخدمون النشطون 24 ساعة"
+      },
+      "active": {
+        "title": "الجلسات النشطة ({count})",
+        "hint": "زر «إنهاء جلسة قسري» ينهي الجلسة فوراً (محاكاة).",
+        "table": {
+          "user": "المستخدم",
+          "started": "بدأت في",
+          "lastActivity": "آخر نشاط",
+          "ip": "IP",
+          "browser": "المتصفح",
+          "location": "الموقع"
+        },
+        "staleBadge": "غير نشط",
+        "forceLogout": "إنهاء جلسة قسري",
+        "empty": "لا توجد جلسة نشطة."
+      },
+      "logins": {
+        "title": "محاولات الاتصال ({filtered} / {total})",
+        "searchPlaceholder": "مستخدم، IP، موقع…",
+        "allOutcomes": "كل النتائج",
+        "allUsers": "كل المستخدمين",
+        "reset": "↻ إعادة تعيين",
+        "table": {
+          "timestamp": "الطابع الزمني",
+          "user": "المستخدم",
+          "outcome": "النتيجة",
+          "failureReason": "سبب الإخفاق",
+          "ip": "IP",
+          "browser": "المتصفح",
+          "location": "الموقع"
+        },
+        "empty": "لا توجد محاولة تطابق المرشحات."
+      },
+      "exportFilename": "login-attempts",
+      "confirm": {
+        "forceLogout": "إنهاء جلسة قسري لـ «{user}»؟\n\n(IP {ip}, {browser})"
+      },
+      "toasts": {
+        "sessionEnded": "تم إنهاء جلسة {user}"
+      }
+    },
+    "societe": {
+      "breadcrumb": "الشركات",
+      "title": "شركات المجموعة",
+      "subtitle": "متعدد الكيانات — اختر شركة لتعديل هويتها القانونية وشعارها وسنواتها المحاسبية",
+      "toasts": {
+        "saved": "✓ تم حفظ الإعدادات",
+        "saveError": "⚠ صحح الحقول الخاطئة قبل الحفظ",
+        "deleted": "✓ تم حذف الشركة"
+      },
+      "listing": {
+        "title": "شركات المجموعة",
+        "hint": "{count} شركات · انقر للتعديل",
+        "addNew": "شركة جديدة",
+        "cancel": "× إلغاء"
+      },
+      "create": {
+        "title": "إنشاء شركة جديدة",
+        "hint": "أدخل المعلومات القانونية الإلزامية. يمكنك إكمال الشعار والسنوات وحسابات RIB بعد الإنشاء.",
+        "submit": "إنشاء الشركة",
+        "fields": {
+          "raisonSociale": "اسم الشركة *",
+          "formeJuridique": "الشكل القانوني *",
+          "ice": "ICE *",
+          "if": "IF",
+          "ifPlaceholder": "7 إلى 8 أرقام",
+          "rc": "RC",
+          "rcPlaceholder": "المدينة - 123456",
+          "capital": "رأس المال الاجتماعي (MAD)",
+          "adresse": "عنوان المقر *"
+        }
+      },
+      "table": {
+        "raisonSociale": "اسم الشركة",
+        "forme": "الشكل",
+        "ice": "ICE",
+        "rc": "RC",
+        "siege": "المقر",
+        "etablissements": "المؤسسات",
+        "status": "الحالة",
+        "active": "نشطة",
+        "actif": "نشط",
+        "inactif": "غير نشط"
+      },
+      "detail": {
+        "label": "الشركة المحددة",
+        "activate": "تفعيل هذه الشركة",
+        "delete": "حذف الشركة",
+        "deleteDisabled": "الحذف معطّل"
+      },
+      "identite": {
+        "title": "الهوية القانونية",
+        "fields": {
+          "raisonSociale": "اسم الشركة *",
+          "formeJuridique": "الشكل القانوني *",
+          "ice": "ICE (15 رقماً)",
+          "if": "الرقم الضريبي (I.F.)",
+          "ifPlaceholder": "7 إلى 8 أرقام",
+          "rc": "السجل التجاري (R.C.)",
+          "rcPlaceholder": "المدينة - 123456",
+          "patente": "الضريبة المهنية",
+          "patentePlaceholder": "7 إلى 10 أرقام",
+          "cnss": "رقم الانتساب CNSS",
+          "cnssPlaceholder": "7 إلى 9 أرقام",
+          "cnaem": "رقم CNAEM",
+          "cnaemNote": "(بحري، اختياري)",
+          "cnaemPlaceholder": "رمز CNAEM إذا كان قابلاً للتطبيق",
+          "tvaIntra": "TVA داخل الاتحاد",
+          "capital": "رأس المال الاجتماعي (MAD) *",
+          "adresse": "عنوان المقر *"
+        },
+        "hint": "تحقق MA: ICE 15 رقماً، IF 7-8 أرقام، RC 4-8 أرقام، الضريبة المهنية 7-10 أرقام، CNSS 7-9 أرقام. التعديلات محفوظة محلياً (محاكاة — تخصيصات على البذور)."
+      },
+      "logo": {
+        "title": "شعار الشركة",
+        "altImg": "شعار الشركة",
+        "placeholder": "لا يوجد شعار",
+        "choose": "اختر ملفاً…",
+        "remove": "حذف الشعار",
+        "hint": "PNG / JPG / SVG / WebP — حد أقصى 512 كيلوبايت. مخزّن بصيغة data URL (محاكاة فقط).",
+        "errors": {
+          "unsupportedType": "نوع غير مدعوم: {type}",
+          "tooLarge": "الملف كبير جداً (الحد الأقصى 512 كيلوبايت، المُستلم {size} كيلوبايت)",
+          "readError": "تعذرت قراءة الملف"
+        }
+      },
+      "exercices": {
+        "title": "السنوات المحاسبية",
+        "addNew": "إضافة سنة محاسبية",
+        "empty": "لا توجد سنة محاسبية مسجلة.",
+        "table": {
+          "code": "الرمز",
+          "debut": "البداية",
+          "fin": "النهاية",
+          "statut": "الحالة",
+          "closLe": "أُغلقت في",
+          "notes": "ملاحظات"
+        },
+        "status": {
+          "ouvert": "مفتوحة",
+          "cloture": "مغلقة"
+        },
+        "actions": {
+          "cloturer": "إغلاق"
+        },
+        "newNotes": "سنة محاسبية جديدة"
+      },
+      "extras": {
+        "title": "إعدادات التسيير (إضافات الشركة)",
+        "hint": "مكملات تدقيق متعدد الكيانات: محفوظة محلياً لكل شركة، مكملة للنموذج الموحد أعلاه.",
+        "fields": {
+          "codeCourtGroupe": "رمز قصير للمجموعة",
+          "codeCourtPlaceholder": "مثال: SOM-BTP",
+          "devise": "العملة المرجعية",
+          "moisCloture": "شهر إغلاق السنة المحاسبية",
+          "villeSiege": "المدينة (المقر / المراسلة)",
+          "paysSiege": "البلد (رمز ISO)",
+          "paysSiegePlaceholder": "MA",
+          "rlNom": "الممثل القانوني — الاسم",
+          "rlQualite": "الممثل القانوني — الصفة",
+          "rlQualitePlaceholder": "مسير، رئيس مدير عام…"
+        }
+      },
+      "contacts": {
+        "title": "بيانات الاتصال",
+        "fields": {
+          "codePostal": "الرمز البريدي",
+          "telephone": "الهاتف",
+          "email": "البريد الإلكتروني",
+          "siteWeb": "الموقع الإلكتروني",
+          "sitePlaceholder": "https://"
+        }
+      },
+      "etabs": {
+        "title": "المؤسسات ({count})",
+        "empty": "لا توجد مؤسسة مسجلة."
+      },
+      "ribs": {
+        "title": "حسابات RIB البنكية",
+        "addNew": "إضافة RIB",
+        "fields": {
+          "banque": "البنك",
+          "intitule": "تسمية الحساب",
+          "intitulePlaceholder": "مثال: الحساب الرئيسي MAD",
+          "rib": "RIB (24 رقماً)",
+          "principal": "رئيسي"
+        },
+        "removeTitle": "حذف"
+      },
+      "empty": "اختر شركة من الجدول أعلاه.",
+      "errors": {
+        "raisonSocialeRequired": "اسم الشركة إلزامي",
+        "siegeRequired": "عنوان المقر إلزامي",
+        "iceRequired": "ICE إلزامي (15 رقماً)",
+        "iceInvalid": "ICE غير صالح — 15 رقماً مطلوب",
+        "ifInvalid": "IF غير صالح — 7 إلى 8 أرقام",
+        "rcInvalid": "RC غير صالح — 4 إلى 8 أرقام",
+        "patenteInvalid": "الضريبة المهنية غير صالحة — 7 إلى 10 أرقام",
+        "cnssInvalid": "CNSS غير صالح — 7 إلى 9 أرقام"
+      },
+      "deleteReasons": {
+        "lastOne": "يجب أن تبقى شركة واحدة على الأقل",
+        "switchFirst": "تحول إلى شركة أخرى قبل الحذف",
+        "generic": "الحذف غير ممكن"
+      },
+      "confirmDelete": "حذف نهائي لـ «{raisonSociale}»؟\n\nهذا الإجراء قابل للتراجع في وضع العرض التوضيحي (resetOverrides)، وليس في الإنتاج."
+    }
+  }
+}

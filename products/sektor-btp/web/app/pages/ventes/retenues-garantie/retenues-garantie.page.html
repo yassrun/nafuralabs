@@ -1,0 +1,139 @@
+<nf-page-shell>
+  <nf-page-header [config]="headerConfig"></nf-page-header>
+
+  <div class="rgp">
+    <app-retenue-summary-card [retenues]="facade.retenues()"></app-retenue-summary-card>
+
+    <section class="rgp__filters">
+      <div class="rgp__chips">
+        @for (chip of chips(); track chip.id) {
+          <nf-button
+            type="button"
+            class="rgp__chip"
+            [class.rgp__chip--active]="chip.active"
+            (clicked)="toggleChip(chip.id)" variant="secondary">
+            {{ chip.label }}
+          </nf-button>
+        }
+      </div>
+
+      <div class="rgp__controls">
+        <div class="rgp__search">
+          <nf-icon name="search"></nf-icon>
+          <input
+            type="search"
+            placeholder="Rechercher par chantier ou client…"
+            [ngModel]="searchTerm()"
+            (ngModelChange)="onSearchChange($event)" />
+        </div>
+        <select
+          class="rgp__select"
+          [ngModel]="facade.filters().clientId ?? ''"
+          (ngModelChange)="onClientChange($event || null)">
+          <option value="">Tous les clients</option>
+          @for (c of clientOptions(); track c.id) {
+            <option [value]="c.id">{{ c.name }}</option>
+          }
+        </select>
+        <select
+          class="rgp__select"
+          [ngModel]="activeStatus() ?? ''"
+          (ngModelChange)="onStatusChange($event || null)">
+          <option value="">Tous statuts</option>
+          <option value="EN_COURS">En cours</option>
+          <option value="LIBERATION_DEMANDEE">Libération demandée</option>
+          <option value="LIBEREE">Libérée</option>
+          <option value="CONTESTEE">Contestée</option>
+        </select>
+        <nf-button
+          variant="secondary"
+          icon="filter-x"
+          (clicked)="resetFilters()"
+          [disabled]="!searchTerm() && !activeStatus()">
+          Réinitialiser
+        </nf-button>
+      </div>
+    </section>
+
+    <section class="rgp__tablewrap">
+      <table class="rgp__table">
+        <thead>
+          <tr>
+            <th>Chantier</th>
+            <th>Client</th>
+            <th class="num">Retenue cumulée</th>
+            <th class="num">Déjà libéré</th>
+            <th class="num">Reste à libérer</th>
+            <th>Récept. provisoire</th>
+            <th>Libération prévue</th>
+            <th>Délai restant</th>
+            <th>Caution bancaire</th>
+            <th>Statut</th>
+            <th class="actions"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (facade.loading()) {
+            <tr>
+              <td colspan="11" class="rgp__loading">Chargement…</td>
+            </tr>
+          } @else if (facade.filtered().length === 0) {
+            <tr>
+              <td colspan="11" class="rgp__empty">
+                Aucune retenue garantie ne correspond aux filtres.
+              </td>
+            </tr>
+          } @else {
+            @for (r of facade.filtered(); track r.id) {
+              <tr>
+                <td class="rgp__chantier">
+                  <strong>{{ r.chantierCode }}</strong>
+                </td>
+                <td>{{ r.clientName }}</td>
+                <td class="num">{{ r.cumulRetenueHt | mad }}</td>
+                <td class="num">{{ r.cumulLibereHt | mad }}</td>
+                <td class="num"><strong>{{ r.resteARelibererHt | mad }}</strong></td>
+                <td>{{ formatDate(r.dateReceptionProvisoire) }}</td>
+                <td>{{ formatDate(r.dateLiberationPrevue) }}</td>
+                <td>
+                  <span class="rgp__delai" [attr.data-tone]="delaiTone(r)">
+                    {{ delaiLabel(r) }}
+                  </span>
+                </td>
+                <td>
+                  @if (r.cautionBanqueId) {
+                    <span class="rgp__caution" [matTooltip]="r.cautionNumero ?? ''">
+                      <nf-icon name="verified"></nf-icon>
+                      {{ r.cautionBanque }}
+                    </span>
+                  } @else {
+                    <span class="rgp__no-caution">—</span>
+                  }
+                </td>
+                <td>
+                  <app-facture-status-badge [status]="r.status"></app-facture-status-badge>
+                </td>
+                <td class="actions">
+                  <button mat-icon-button type="button" [matMenuTriggerFor]="rowMenu" aria-label="Actions">
+                    <nf-icon name="more-vertical"></nf-icon>
+                  </button>
+                  <mat-menu #rowMenu="matMenu">
+                    <button mat-menu-item type="button" [disabled]="!canDemanderLiberation(r)" (click)="openDemanderLiberation(r)">
+                      Demander libération
+                    </button>
+                    <button mat-menu-item type="button" [disabled]="!canMarquerLiberee(r)" (click)="openMarquerLiberee(r)">
+                      Marquer libérée
+                    </button>
+                    <button mat-menu-item type="button" [disabled]="!canRemplacerCaution(r)" (click)="openRemplacerCaution(r)">
+                      Remplacer par caution bancaire
+                    </button>
+                  </mat-menu>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </section>
+  </div>
+</nf-page-shell>

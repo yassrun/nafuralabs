@@ -1,0 +1,65 @@
+{
+  "payroll": {
+    "navigation": {
+      "title": "Payroll",
+      "description": "Payroll Domain",
+      "payrollRuns": "Payroll Runs",
+      "paySlips": "Pay Slips",
+      "payStructures": "Pay Structures",
+      "salaryComponents": "Salary Components",
+      "salaryRevisions": "Salary Revisions",
+      "deductionTypes": "Deduction Types",
+      "bonusRuns": "Bonus Runs"
+    }
+  },
+  "common": {
+    "subsections": {
+      "operations": "Operations",
+      "configuration": "Configuration"
+    }
+  },
+  "hr": {
+    "fields": {
+      "runNumber": "Run Number",
+      "periodStart": "Period Start",
+      "periodEnd": "Period End",
+      "employeeCount": "Employee Count",
+      "grossTotal": "Gross Total",
+      "netTotal": "Net Total",
+      "deductionsTotal": "Deductions Total",
+      "status": "Status",
+      "processedBy": "Processed By",
+      "processedAt": "Processed At",
+      "paySlipNumber": "Pay Slip Number",
+      "payrollRunId": "Payroll Run Id",
+      "employeeId": "Employee Id",
+      "grossAmount": "Gross Amount",
+      "deductions": "Deductions",
+      "netAmount": "Net Amount",
+      "paymentMethod": "Payment Method",
+      "paymentDate": "Payment Date",
+      "code": "Code",
+      "name": "Name",
+      "description": "Description",
+      "components": "Components",
+      "effectiveDate": "Effective Date",
+      "componentType": "Component Type",
+      "calculationType": "Calculation Type",
+      "percentage": "Percentage",
+      "isTaxable": "Is Taxable",
+      "isMandatory": "Is Mandatory",
+      "revisionNumber": "Revision Number",
+      "employee": "Employee Id",
+      "oldSalary": "Old Salary",
+      "newSalary": "New Salary",
+      "deductionCategory": "Deduction Category",
+      "taxDeductible": "Tax Deductible",
+      "bonusType": "Bonus Type",
+      "totalAmount": "Total Amount"
+    },
+    "sections": {
+      "general": "General",
+      "notes": "Notes"
+    }
+  }
+}

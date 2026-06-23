@@ -1,0 +1,41 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap");
+
+:root {
+  --pf-v5-global--primary-color--100: #00333c;
+  --pf-v5-global--primary-color--200: #004b57;
+  --pf-v5-global--link--Color: #004b57;
+  --pf-v5-global--link--Color--hover: #005566;
+  --pf-v5-global--active-color--100: #e9c176;
+  --pf-v5-global--BackgroundColor--100: #fafaf8;
+  --pf-v5-global--BackgroundColor--200: #eeebe4;
+  --pf-v5-global--FontFamily--text: "Manrope", system-ui, sans-serif;
+  --pf-v5-global--FontFamily--heading: "Space Grotesk", system-ui, sans-serif;
+}
+
+body {
+  font-family: "Manrope", system-ui, sans-serif;
+}
+
+.pf-v5-c-brand img {
+  max-height: 2.25rem;
+  width: auto;
+}
+
+.pf-v5-c-button.pf-m-primary {
+  background: linear-gradient(135deg, #00333c 0%, #004b57 100%) !important;
+  border: none !important;
+}
+
+.pf-v5-c-button.pf-m-primary:hover {
+  filter: brightness(1.08);
+}
+
+.pf-v5-c-page__header {
+  border-bottom: 2px solid #e9c176;
+}
+
+.pf-v5-c-nav__link.pf-m-current,
+.pf-v5-c-nav__link.pf-m-current:hover {
+  background-color: rgba(0, 51, 60, 0.08);
+  color: #00333c;
+}

@@ -1,0 +1,890 @@
+{
+  "journals": [
+    {
+      "code": "VT",
+      "name": "Ventes",
+      "journalType": "VENTE"
+    },
+    {
+      "code": "AC",
+      "name": "Achats",
+      "journalType": "ACHAT"
+    },
+    {
+      "code": "BQ-AWB",
+      "name": "Banque AWB",
+      "journalType": "BANQUE",
+      "defaultCounterpartCode": "5141"
+    },
+    {
+      "code": "BQ-BMCE",
+      "name": "Banque BMCE",
+      "journalType": "BANQUE",
+      "defaultCounterpartCode": "5141"
+    },
+    {
+      "code": "BQ-CIH",
+      "name": "Banque CIH",
+      "journalType": "BANQUE",
+      "defaultCounterpartCode": "5141"
+    },
+    {
+      "code": "CA",
+      "name": "Caisse Casa",
+      "journalType": "CAISSE",
+      "defaultCounterpartCode": "5161"
+    },
+    {
+      "code": "OD",
+      "name": "Opérations diverses",
+      "journalType": "OPERATIONS_DIVERSES"
+    },
+    {
+      "code": "AN",
+      "name": "À nouveaux",
+      "journalType": "NOUVEAUX"
+    }
+  ],
+  "accounts": [
+    {
+      "code": "1",
+      "name": "Financement permanent",
+      "accountClass": 1,
+      "accountType": "PASSIF"
+    },
+    {
+      "code": "11",
+      "name": "Capitaux propres",
+      "accountClass": 1,
+      "accountType": "PASSIF",
+      "parentAccountCode": "1"
+    },
+    {
+      "code": "111",
+      "name": "Capital social ou personnel",
+      "accountClass": 1,
+      "accountType": "PASSIF",
+      "parentAccountCode": "11"
+    },
+    {
+      "code": "1111",
+      "name": "Capital social",
+      "accountClass": 1,
+      "accountType": "PASSIF",
+      "parentAccountCode": "111"
+    },
+    {
+      "code": "14",
+      "name": "Dettes de financement",
+      "accountClass": 1,
+      "accountType": "PASSIF",
+      "parentAccountCode": "1"
+    },
+    {
+      "code": "1481",
+      "name": "Emprunts auprès des établissements de crédit",
+      "accountClass": 1,
+      "accountType": "PASSIF",
+      "parentAccountCode": "148"
+    },
+    {
+      "code": "2",
+      "name": "Actif immobilisé",
+      "accountClass": 2,
+      "accountType": "ACTIF"
+    },
+    {
+      "code": "23",
+      "name": "Immobilisations corporelles",
+      "accountClass": 2,
+      "accountType": "ACTIF",
+      "parentAccountCode": "2"
+    },
+    {
+      "code": "231",
+      "name": "Terrains",
+      "accountClass": 2,
+      "accountType": "ACTIF",
+      "parentAccountCode": "23"
+    },
+    {
+      "code": "2311",
+      "name": "Terrains nus",
+      "accountClass": 2,
+      "accountType": "ACTIF",
+      "parentAccountCode": "231"
+    },
+    {
+      "code": "233",
+      "name": "Constructions",
+      "accountClass": 2,
+      "accountType": "ACTIF",
+      "parentAccountCode": "23"
+    },
+    {
+      "code": "2331",
+      "name": "Bâtiments",
+      "accountClass": 2,
+      "accountType": "ACTIF",
+      "parentAccountCode": "233"
+    },
+    {
+      "code": "234",
+      "name": "Matériel et outillage",
+      "accountClass": 2,
+      "accountType": "ACTIF",
+      "parentAccountCode": "23"
+    },
+    {
+      "code": "2340",
+      "name": "Matériel et outillage de chantier",
+      "accountClass": 2,
+      "accountType": "ACTIF",
+      "parentAccountCode": "234"
+    },
+    {
+      "code": "235",
+      "name": "Matériel de transport",
+      "accountClass": 2,
+      "accountType": "ACTIF",
+      "parentAccountCode": "23"
+    },
+    {
+      "code": "2350",
+      "name": "Véhicules de transport",
+      "accountClass": 2,
+      "accountType": "ACTIF",
+      "parentAccountCode": "235"
+    },
+    {
+      "code": "238",
+      "name": "Autres immobilisations corporelles",
+      "accountClass": 2,
+      "accountType": "ACTIF",
+      "parentAccountCode": "23"
+    },
+    {
+      "code": "2382",
+      "name": "Matériel informatique",
+      "accountClass": 2,
+      "accountType": "ACTIF",
+      "parentAccountCode": "238"
+    },
+    {
+      "code": "2383",
+      "name": "Mobilier de bureau",
+      "accountClass": 2,
+      "accountType": "ACTIF",
+      "parentAccountCode": "238"
+    },
+    {
+      "code": "28",
+      "name": "Amortissements des immobilisations",
+      "accountClass": 2,
+      "accountType": "ACTIF",
+      "parentAccountCode": "2"
+    },
+    {
+      "code": "2833",
+      "name": "Amortissements des bâtiments",
+      "accountClass": 2,
+      "accountType": "ACTIF",
+      "parentAccountCode": "283"
+    },
+    {
+      "code": "2834",
+      "name": "Amortissements du matériel et outillage",
+      "accountClass": 2,
+      "accountType": "ACTIF",
+      "parentAccountCode": "283"
+    },
+    {
+      "code": "2835",
+      "name": "Amortissements du matériel de transport",
+      "accountClass": 2,
+      "accountType": "ACTIF",
+      "parentAccountCode": "283"
+    },
+    {
+      "code": "3",
+      "name": "Actif circulant (hors trésorerie)",
+      "accountClass": 3,
+      "accountType": "ACTIF"
+    },
+    {
+      "code": "31",
+      "name": "Stocks",
+      "accountClass": 3,
+      "accountType": "ACTIF",
+      "parentAccountCode": "3"
+    },
+    {
+      "code": "311",
+      "name": "Marchandises",
+      "accountClass": 3,
+      "accountType": "ACTIF",
+      "parentAccountCode": "31"
+    },
+    {
+      "code": "3111",
+      "name": "Marchandises (groupe A)",
+      "accountClass": 3,
+      "accountType": "ACTIF",
+      "parentAccountCode": "311"
+    },
+    {
+      "code": "312",
+      "name": "Matières et fournitures consommables",
+      "accountClass": 3,
+      "accountType": "ACTIF",
+      "parentAccountCode": "31"
+    },
+    {
+      "code": "3121",
+      "name": "Matières premières",
+      "accountClass": 3,
+      "accountType": "ACTIF",
+      "parentAccountCode": "312"
+    },
+    {
+      "code": "3122",
+      "name": "Matières et fournitures consommables",
+      "accountClass": 3,
+      "accountType": "ACTIF",
+      "parentAccountCode": "312"
+    },
+    {
+      "code": "3125",
+      "name": "Carburants et lubrifiants",
+      "accountClass": 3,
+      "accountType": "ACTIF",
+      "parentAccountCode": "312"
+    },
+    {
+      "code": "34",
+      "name": "Créances et dettes",
+      "accountClass": 3,
+      "accountType": "TIERS",
+      "parentAccountCode": "3"
+    },
+    {
+      "code": "341",
+      "name": "Fournisseurs débiteurs, avances et acomptes",
+      "accountClass": 3,
+      "accountType": "TIERS",
+      "parentAccountCode": "34"
+    },
+    {
+      "code": "3411",
+      "name": "Travaux en cours",
+      "accountClass": 3,
+      "accountType": "ACTIF",
+      "parentAccountCode": "341"
+    },
+    {
+      "code": "342",
+      "name": "Clients et comptes rattachés",
+      "accountClass": 3,
+      "accountType": "TIERS",
+      "parentAccountCode": "34"
+    },
+    {
+      "code": "3421",
+      "name": "Clients (compte collectif)",
+      "accountClass": 3,
+      "accountType": "TIERS",
+      "isCollectif": true,
+      "isLettrable": true,
+      "parentAccountCode": "342"
+    },
+    {
+      "code": "3427",
+      "name": "Clients — avances reçues",
+      "accountClass": 3,
+      "accountType": "TIERS",
+      "isLettrable": true,
+      "parentAccountCode": "342"
+    },
+    {
+      "code": "3428",
+      "name": "Clients — factures à établir",
+      "accountClass": 3,
+      "accountType": "TIERS",
+      "parentAccountCode": "342"
+    },
+    {
+      "code": "345",
+      "name": "État — créances",
+      "accountClass": 3,
+      "accountType": "ACTIF",
+      "parentAccountCode": "34"
+    },
+    {
+      "code": "3455",
+      "name": "État, TVA récupérable",
+      "accountClass": 3,
+      "accountType": "ACTIF",
+      "parentAccountCode": "345"
+    },
+    {
+      "code": "3458",
+      "name": "État, autres comptes débiteurs",
+      "accountClass": 3,
+      "accountType": "ACTIF",
+      "parentAccountCode": "345"
+    },
+    {
+      "code": "4",
+      "name": "Passif circulant (hors trésorerie)",
+      "accountClass": 4,
+      "accountType": "PASSIF"
+    },
+    {
+      "code": "44",
+      "name": "Dettes du passif circulant",
+      "accountClass": 4,
+      "accountType": "PASSIF",
+      "parentAccountCode": "4"
+    },
+    {
+      "code": "441",
+      "name": "Fournisseurs et comptes rattachés",
+      "accountClass": 4,
+      "accountType": "TIERS",
+      "parentAccountCode": "44"
+    },
+    {
+      "code": "4411",
+      "name": "Fournisseurs (compte collectif)",
+      "accountClass": 4,
+      "accountType": "TIERS",
+      "isCollectif": true,
+      "isLettrable": true,
+      "parentAccountCode": "441"
+    },
+    {
+      "code": "4413",
+      "name": "Fournisseurs — retenues de garantie",
+      "accountClass": 4,
+      "accountType": "TIERS",
+      "isLettrable": true,
+      "parentAccountCode": "441"
+    },
+    {
+      "code": "4417",
+      "name": "Fournisseurs — factures non parvenues",
+      "accountClass": 4,
+      "accountType": "TIERS",
+      "parentAccountCode": "441"
+    },
+    {
+      "code": "444",
+      "name": "Personnel et charges associées",
+      "accountClass": 4,
+      "accountType": "PASSIF",
+      "parentAccountCode": "44"
+    },
+    {
+      "code": "4441",
+      "name": "Personnel — rémunérations dues",
+      "accountClass": 4,
+      "accountType": "PASSIF",
+      "parentAccountCode": "444"
+    },
+    {
+      "code": "4443",
+      "name": "Personnel — charges sociales",
+      "accountClass": 4,
+      "accountType": "PASSIF",
+      "parentAccountCode": "444"
+    },
+    {
+      "code": "4445",
+      "name": "CNSS",
+      "accountClass": 4,
+      "accountType": "PASSIF",
+      "parentAccountCode": "444"
+    },
+    {
+      "code": "445",
+      "name": "État — dettes",
+      "accountClass": 4,
+      "accountType": "PASSIF",
+      "parentAccountCode": "44"
+    },
+    {
+      "code": "4452",
+      "name": "État — IS",
+      "accountClass": 4,
+      "accountType": "PASSIF",
+      "parentAccountCode": "445"
+    },
+    {
+      "code": "4456",
+      "name": "État, TVA collectée",
+      "accountClass": 4,
+      "accountType": "PASSIF",
+      "parentAccountCode": "445"
+    },
+    {
+      "code": "4438",
+      "name": "État — TVA retenue à la source / autoliquidation à payer",
+      "accountClass": 4,
+      "accountType": "PASSIF",
+      "parentAccountCode": "443"
+    },
+    {
+      "code": "4486",
+      "name": "Retenues de garantie",
+      "accountClass": 4,
+      "accountType": "PASSIF",
+      "isLettrable": true,
+      "parentAccountCode": "448"
+    },
+    {
+      "code": "5",
+      "name": "Trésorerie",
+      "accountClass": 5,
+      "accountType": "TRESORERIE"
+    },
+    {
+      "code": "51",
+      "name": "Trésorerie — Actif",
+      "accountClass": 5,
+      "accountType": "TRESORERIE",
+      "parentAccountCode": "5"
+    },
+    {
+      "code": "511",
+      "name": "Chèques et valeurs à encaisser",
+      "accountClass": 5,
+      "accountType": "TRESORERIE",
+      "parentAccountCode": "51"
+    },
+    {
+      "code": "5115",
+      "name": "Virements de fonds",
+      "accountClass": 5,
+      "accountType": "TRESORERIE",
+      "parentAccountCode": "511"
+    },
+    {
+      "code": "514",
+      "name": "Banques, TG et CCP",
+      "accountClass": 5,
+      "accountType": "TRESORERIE",
+      "parentAccountCode": "51"
+    },
+    {
+      "code": "5141",
+      "name": "Banques (compte collectif)",
+      "accountClass": 5,
+      "accountType": "TRESORERIE",
+      "parentAccountCode": "514"
+    },
+    {
+      "code": "516",
+      "name": "Caisses",
+      "accountClass": 5,
+      "accountType": "TRESORERIE",
+      "parentAccountCode": "51"
+    },
+    {
+      "code": "5161",
+      "name": "Caisses",
+      "accountClass": 5,
+      "accountType": "TRESORERIE",
+      "parentAccountCode": "516"
+    },
+    {
+      "code": "6",
+      "name": "Charges",
+      "accountClass": 6,
+      "accountType": "CHARGE"
+    },
+    {
+      "code": "61",
+      "name": "Charges d'exploitation",
+      "accountClass": 6,
+      "accountType": "CHARGE",
+      "parentAccountCode": "6"
+    },
+    {
+      "code": "611",
+      "name": "Achats revendus de marchandises",
+      "accountClass": 6,
+      "accountType": "CHARGE",
+      "parentAccountCode": "61"
+    },
+    {
+      "code": "6111",
+      "name": "Achats matières premières",
+      "accountClass": 6,
+      "accountType": "CHARGE",
+      "axeAnalytiqueObligatoire": true,
+      "parentAccountCode": "611"
+    },
+    {
+      "code": "612",
+      "name": "Achats consommés de matières et fournitures",
+      "accountClass": 6,
+      "accountType": "CHARGE",
+      "parentAccountCode": "61"
+    },
+    {
+      "code": "6121",
+      "name": "Achats matières et fournitures consommables",
+      "accountClass": 6,
+      "accountType": "CHARGE",
+      "axeAnalytiqueObligatoire": true,
+      "parentAccountCode": "612"
+    },
+    {
+      "code": "6125",
+      "name": "Achats de carburants",
+      "accountClass": 6,
+      "accountType": "CHARGE",
+      "axeAnalytiqueObligatoire": true,
+      "parentAccountCode": "612"
+    },
+    {
+      "code": "613",
+      "name": "Autres charges externes",
+      "accountClass": 6,
+      "accountType": "CHARGE",
+      "parentAccountCode": "61"
+    },
+    {
+      "code": "6131",
+      "name": "Sous-traitance générale",
+      "accountClass": 6,
+      "accountType": "CHARGE",
+      "axeAnalytiqueObligatoire": true,
+      "parentAccountCode": "613"
+    },
+    {
+      "code": "6132",
+      "name": "Locations matériel",
+      "accountClass": 6,
+      "accountType": "CHARGE",
+      "axeAnalytiqueObligatoire": true,
+      "parentAccountCode": "613"
+    },
+    {
+      "code": "6133",
+      "name": "Locations immobilières",
+      "accountClass": 6,
+      "accountType": "CHARGE",
+      "parentAccountCode": "613"
+    },
+    {
+      "code": "6135",
+      "name": "Entretien et réparations",
+      "accountClass": 6,
+      "accountType": "CHARGE",
+      "parentAccountCode": "613"
+    },
+    {
+      "code": "614",
+      "name": "Autres charges externes (suite)",
+      "accountClass": 6,
+      "accountType": "CHARGE",
+      "parentAccountCode": "61"
+    },
+    {
+      "code": "6141",
+      "name": "Études, recherches, documentation",
+      "accountClass": 6,
+      "accountType": "CHARGE",
+      "parentAccountCode": "614"
+    },
+    {
+      "code": "6142",
+      "name": "Transports",
+      "accountClass": 6,
+      "accountType": "CHARGE",
+      "parentAccountCode": "614"
+    },
+    {
+      "code": "6145",
+      "name": "Frais postaux et de télécommunications",
+      "accountClass": 6,
+      "accountType": "CHARGE",
+      "parentAccountCode": "614"
+    },
+    {
+      "code": "6147",
+      "name": "Services bancaires",
+      "accountClass": 6,
+      "accountType": "CHARGE",
+      "parentAccountCode": "614"
+    },
+    {
+      "code": "617",
+      "name": "Charges de personnel",
+      "accountClass": 6,
+      "accountType": "CHARGE",
+      "parentAccountCode": "61"
+    },
+    {
+      "code": "6171",
+      "name": "Rémunérations du personnel",
+      "accountClass": 6,
+      "accountType": "CHARGE",
+      "parentAccountCode": "617"
+    },
+    {
+      "code": "618",
+      "name": "Charges sociales",
+      "accountClass": 6,
+      "accountType": "CHARGE",
+      "parentAccountCode": "61"
+    },
+    {
+      "code": "6181",
+      "name": "Charges sociales CNSS / AMO",
+      "accountClass": 6,
+      "accountType": "CHARGE",
+      "parentAccountCode": "618"
+    },
+    {
+      "code": "619",
+      "name": "Autres charges externes",
+      "accountClass": 6,
+      "accountType": "CHARGE",
+      "parentAccountCode": "61"
+    },
+    {
+      "code": "6193",
+      "name": "Dotations aux amortissements des immobilisations corporelles",
+      "accountClass": 6,
+      "accountType": "CHARGE",
+      "parentAccountCode": "619"
+    },
+    {
+      "code": "7",
+      "name": "Produits",
+      "accountClass": 7,
+      "accountType": "PRODUIT"
+    },
+    {
+      "code": "71",
+      "name": "Produits d'exploitation",
+      "accountClass": 7,
+      "accountType": "PRODUIT",
+      "parentAccountCode": "7"
+    },
+    {
+      "code": "711",
+      "name": "Ventes de marchandises",
+      "accountClass": 7,
+      "accountType": "PRODUIT",
+      "parentAccountCode": "71"
+    },
+    {
+      "code": "7111",
+      "name": "Ventes de travaux",
+      "accountClass": 7,
+      "accountType": "PRODUIT",
+      "axeAnalytiqueObligatoire": true,
+      "parentAccountCode": "711"
+    },
+    {
+      "code": "712",
+      "name": "Ventes de biens et services produits",
+      "accountClass": 7,
+      "accountType": "PRODUIT",
+      "parentAccountCode": "71"
+    },
+    {
+      "code": "7121",
+      "name": "Ventes prestations de services",
+      "accountClass": 7,
+      "accountType": "PRODUIT",
+      "axeAnalytiqueObligatoire": true,
+      "parentAccountCode": "712"
+    },
+    {
+      "code": "7124",
+      "name": "Travaux facturés",
+      "accountClass": 7,
+      "accountType": "PRODUIT",
+      "axeAnalytiqueObligatoire": true,
+      "parentAccountCode": "712"
+    },
+    {
+      "code": "718",
+      "name": "Autres produits d'exploitation",
+      "accountClass": 7,
+      "accountType": "PRODUIT",
+      "parentAccountCode": "71"
+    },
+    {
+      "code": "7181",
+      "name": "Jetons de présence reçus",
+      "accountClass": 7,
+      "accountType": "PRODUIT",
+      "parentAccountCode": "718"
+    },
+    {
+      "code": "3421-CLI-001",
+      "name": "OCP Promotion (auxiliaire)",
+      "accountClass": 3,
+      "accountType": "TIERS",
+      "parentAccountCode": "3421",
+      "isAuxiliaire": true
+    },
+    {
+      "code": "3421-CLI-002",
+      "name": "ADM — Autoroutes du Maroc",
+      "accountClass": 3,
+      "accountType": "TIERS",
+      "parentAccountCode": "3421",
+      "isAuxiliaire": true
+    },
+    {
+      "code": "3421-CLI-003",
+      "name": "ONEE Branche Eau",
+      "accountClass": 3,
+      "accountType": "TIERS",
+      "parentAccountCode": "3421",
+      "isAuxiliaire": true
+    },
+    {
+      "code": "3421-CLI-004",
+      "name": "Commune Mohammedia",
+      "accountClass": 3,
+      "accountType": "TIERS",
+      "parentAccountCode": "3421",
+      "isAuxiliaire": true
+    },
+    {
+      "code": "3421-CLI-005",
+      "name": "Groupe Addoha",
+      "accountClass": 3,
+      "accountType": "TIERS",
+      "parentAccountCode": "3421",
+      "isAuxiliaire": true
+    },
+    {
+      "code": "3421-CLI-006",
+      "name": "Atlas Hospitality",
+      "accountClass": 3,
+      "accountType": "TIERS",
+      "parentAccountCode": "3421",
+      "isAuxiliaire": true
+    },
+    {
+      "code": "3421-CLI-007",
+      "name": "Aksal Group",
+      "accountClass": 3,
+      "accountType": "TIERS",
+      "parentAccountCode": "3421",
+      "isAuxiliaire": true
+    },
+    {
+      "code": "3421-CLI-008",
+      "name": "Université Mohammed V",
+      "accountClass": 3,
+      "accountType": "TIERS",
+      "parentAccountCode": "3421",
+      "isAuxiliaire": true
+    },
+    {
+      "code": "4411-FRS-001",
+      "name": "Lafarge Holcim Maroc",
+      "accountClass": 4,
+      "accountType": "TIERS",
+      "parentAccountCode": "4411",
+      "isAuxiliaire": true
+    },
+    {
+      "code": "4411-FRS-002",
+      "name": "Sonasid",
+      "accountClass": 4,
+      "accountType": "TIERS",
+      "parentAccountCode": "4411",
+      "isAuxiliaire": true
+    },
+    {
+      "code": "4411-FRS-003",
+      "name": "Ciments du Maroc",
+      "accountClass": 4,
+      "accountType": "TIERS",
+      "parentAccountCode": "4411",
+      "isAuxiliaire": true
+    },
+    {
+      "code": "4411-FRS-004",
+      "name": "Maghreb Steel",
+      "accountClass": 4,
+      "accountType": "TIERS",
+      "parentAccountCode": "4411",
+      "isAuxiliaire": true
+    },
+    {
+      "code": "4411-FRS-005",
+      "name": "Béton Maroc",
+      "accountClass": 4,
+      "accountType": "TIERS",
+      "parentAccountCode": "4411",
+      "isAuxiliaire": true
+    },
+    {
+      "code": "4411-FRS-006",
+      "name": "Loca BTP",
+      "accountClass": 4,
+      "accountType": "TIERS",
+      "parentAccountCode": "4411",
+      "isAuxiliaire": true
+    },
+    {
+      "code": "4411-FRS-007",
+      "name": "AFM Engins",
+      "accountClass": 4,
+      "accountType": "TIERS",
+      "parentAccountCode": "4411",
+      "isAuxiliaire": true
+    },
+    {
+      "code": "4411-FRS-008",
+      "name": "Afriquia (carburants)",
+      "accountClass": 4,
+      "accountType": "TIERS",
+      "parentAccountCode": "4411",
+      "isAuxiliaire": true
+    },
+    {
+      "code": "4411-FRS-009",
+      "name": "ETB Mansouri (sous-traitance)",
+      "accountClass": 4,
+      "accountType": "TIERS",
+      "parentAccountCode": "4411",
+      "isAuxiliaire": true
+    },
+    {
+      "code": "4411-FRS-010",
+      "name": "Façade Pro Maroc",
+      "accountClass": 4,
+      "accountType": "TIERS",
+      "parentAccountCode": "4411",
+      "isAuxiliaire": true
+    },
+    {
+      "code": "4411-FRS-011",
+      "name": "Distri Pro (consommables)",
+      "accountClass": 4,
+      "accountType": "TIERS",
+      "parentAccountCode": "4411",
+      "isAuxiliaire": true
+    },
+    {
+      "code": "4411-FRS-012",
+      "name": "Sécuripro (EPI)",
+      "accountClass": 4,
+      "accountType": "TIERS",
+      "parentAccountCode": "4411",
+      "isAuxiliaire": true
+    }
+  ]
+}

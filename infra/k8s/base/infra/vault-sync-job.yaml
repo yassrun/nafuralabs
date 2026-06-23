@@ -1,0 +1,150 @@
+# Create secret/nafura/<env>/apps/<APP>/db and apps/<APP>/minio (infra per app), policy and role for <APP>-backend.
+# ConfigMap vault-sync: ENV, APP, USER, PASS, AI_USER, AI_PASSWORD, DB_NAME, DB_SCHEMA, MINIO_ENABLED, MINIO_*; optional KEYCLOAK_CLIENT_SECRET.
+# Used by nafops provision. App backends read only apps/<APP>/db and apps/<APP>/minio (duplicated per app).
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: vault-sync
+spec:
+  ttlSecondsAfterFinished: 120
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: sync
+          image: hashicorp/vault:1.15
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              ENV="${ENV:-dev}"
+              APP_NS="${APP_NAMESPACE:-default}"
+              if [ -z "$APP" ]; then
+                echo "Missing APP"
+                exit 1
+              fi
+              export VAULT_ADDR="${VAULT_ADDR:-http://vault:8200}"
+              vault login "$VAULT_TOKEN" 2>/dev/null || true
+              vault kv put "secret/nafura/$ENV/apps/$APP/db" \
+                name="${DB_NAME:-nafura_${APP}}" schema="${DB_SCHEMA:-public}" \
+                user="${USER:-nafura}" pass="${PASS:-nafura}" \
+                ai_user="${AI_USER:-nafura_ai_reader}" ai_user_password="${AI_PASSWORD:-changeme}"
+              if [ "${MINIO_ENABLED:-0}" = "1" ]; then
+                vault kv put "secret/nafura/$ENV/apps/$APP/minio" \
+                  endpoint="${MINIO_ENDPOINT:-http://minio:9000}" bucket="${MINIO_BUCKET:-nafura-$APP}" \
+                  user="${MINIO_USER:-minioadmin}" password="${MINIO_PASSWORD:-minioadmin}"
+              fi
+              if [ -n "$KEYCLOAK_CLIENT_SECRET" ]; then
+                vault kv patch "secret/nafura/$ENV/infra/keycloak-clients" "${APP}_backend_secret=$KEYCLOAK_CLIENT_SECRET"
+              fi
+              vault policy write "$APP-backend" - <<POL
+              path "secret/data/nafura/$ENV/apps/$APP/db" { capabilities = ["read"] }
+              path "secret/data/nafura/$ENV/apps/$APP/minio" { capabilities = ["read"] }
+              path "secret/data/nafura/$ENV/infra/llm" { capabilities = ["read"] }
+              path "secret/data/nafura/$ENV/infra/keycloak" { capabilities = ["read"] }
+              path "secret/data/nafura/$ENV/infra/app" { capabilities = ["read"] }
+              path "secret/data/nafura/$ENV/infra/keycloak-clients" { capabilities = ["read"] }
+              POL
+              vault write "auth/kubernetes/role/$APP-backend" \
+                bound_service_account_names="$APP-backend" \
+                bound_service_account_namespaces="$APP_NS" \
+                policies="$APP-backend" ttl=1h
+              echo "Vault sync complete: $APP (env=$ENV)"
+          env:
+            - name: VAULT_ADDR
+              value: "http://vault:8200"
+            - name: VAULT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: vault-bootstrap
+                  key: root_token
+            - name: ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: vault-sync
+                  key: ENV
+                  optional: true
+            - name: APP
+              valueFrom:
+                configMapKeyRef:
+                  name: vault-sync
+                  key: APP
+            - name: APP_NAMESPACE
+              valueFrom:
+                configMapKeyRef:
+                  name: vault-sync
+                  key: APP_NAMESPACE
+                  optional: true
+            - name: USER
+              valueFrom:
+                configMapKeyRef:
+                  name: vault-sync
+                  key: USER
+                  optional: true
+            - name: PASS
+              valueFrom:
+                configMapKeyRef:
+                  name: vault-sync
+                  key: PASS
+                  optional: true
+            - name: AI_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: vault-sync
+                  key: AI_USER
+                  optional: true
+            - name: AI_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: vault-sync
+                  key: AI_PASSWORD
+                  optional: true
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: vault-sync
+                  key: DB_NAME
+                  optional: true
+            - name: DB_SCHEMA
+              valueFrom:
+                configMapKeyRef:
+                  name: vault-sync
+                  key: DB_SCHEMA
+                  optional: true
+            - name: MINIO_ENABLED
+              valueFrom:
+                configMapKeyRef:
+                  name: vault-sync
+                  key: MINIO_ENABLED
+                  optional: true
+            - name: MINIO_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: vault-sync
+                  key: MINIO_ENDPOINT
+                  optional: true
+            - name: MINIO_BUCKET
+              valueFrom:
+                configMapKeyRef:
+                  name: vault-sync
+                  key: MINIO_BUCKET
+                  optional: true
+            - name: MINIO_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: vault-sync
+                  key: MINIO_USER
+                  optional: true
+            - name: MINIO_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: vault-sync
+                  key: MINIO_PASSWORD
+                  optional: true
+            - name: KEYCLOAK_CLIENT_SECRET
+              valueFrom:
+                configMapKeyRef:
+                  name: vault-sync
+                  key: KEYCLOAK_CLIENT_SECRET
+                  optional: true

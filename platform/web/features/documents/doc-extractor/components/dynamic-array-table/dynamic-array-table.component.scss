@@ -1,0 +1,48 @@
+.array-table {
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.array-table__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.array-table__title {
+  font-weight: 600;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.array-table__table {
+  padding: 8px 12px 12px;
+  overflow: auto;
+}
+
+table {
+  width: 100%;
+  min-width: 720px;
+}
+
+.cell-field {
+  width: 100%;
+}
+
+.actions-header,
+.actions-cell {
+  width: 72px;
+  text-align: right;
+}
+
+.empty {
+  padding: 12px 4px;
+  color: rgba(0, 0, 0, 0.6);
+}
+

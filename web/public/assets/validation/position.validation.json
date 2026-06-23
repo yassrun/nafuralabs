@@ -1,0 +1,14 @@
+{
+  "entity": "Position",
+  "fields": {
+    "code": {
+      "required": true,
+      "maxLength": 30,
+      "unique": true
+    },
+    "title": {
+      "required": true,
+      "maxLength": 200
+    }
+  }
+}

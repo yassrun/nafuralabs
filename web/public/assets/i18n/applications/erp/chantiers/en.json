@@ -1,0 +1,786 @@
+{
+  "chantiers": {
+    "module": {
+      "title": "Sites, Studies & Schedule",
+      "shortTitle": "Sites"
+    },
+    "routes": {
+      "chantiersTitle": "My construction sites",
+      "chantiersCrumb": "Sites",
+      "chantierDetailTitle": "Site sheet",
+      "chantierDetailCrumb": "Detail",
+      "planningTitle": "Gantt schedule",
+      "planningCrumb": "Schedule",
+      "budgetTitle": "Site budget",
+      "budgetCrumb": "Budget",
+      "budgetDetailTitle": "Site budget detail",
+      "budgetDetailCrumb": "Detail",
+      "situationsTitle": "Progress payment certificates",
+      "situationsCrumb": "Certificates",
+      "attachementsTitle": "As-built records",
+      "attachementsCrumb": "As-built",
+      "sousTraitanceTitle": "Subcontracting contracts",
+      "sousTraitanceCrumb": "Subcontracting",
+      "documentsTitle": "Site documents",
+      "documentsCrumb": "Documents",
+      "journalTitle": "Site diary",
+      "journalCrumb": "Diary",
+      "avancementTitle": "Progress entry",
+      "avancementCrumb": "Progress",
+      "devisTitle": "Quotes",
+      "devisCrumb": "Quotes",
+      "metreTitle": "Quantity take-off (DPGF)",
+      "metreCrumb": "Take-off",
+      "appelsOffresClientsTitle": "Customer tenders",
+      "appelsOffresClientsCrumb": "Customer tenders",
+      "bibliothequePrixTitle": "Price library",
+      "bibliothequePrixCrumb": "Price library"
+    },
+    "common": {
+      "actions": {
+        "back": "← Back",
+        "backToList": "Back to list",
+        "save": "Save",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "print": "Print",
+        "export": "Export to Excel",
+        "voirPlanning": "View schedule",
+        "voirDetail": "View detail"
+      },
+      "filters": {
+        "allStatuses": "All statuses",
+        "allTypes": "All types",
+        "filterByStatus": "Filter by status"
+      },
+      "fields": {
+        "code": "Code",
+        "codeChantier": "Site code",
+        "name": "Site",
+        "designation": "Description",
+        "client": "Customer",
+        "ville": "City",
+        "type": "Type",
+        "statut": "Status",
+        "unite": "Unit",
+        "quantite": "Quantity",
+        "qteTotale": "Total qty",
+        "qtePrecedente": "Prev. qty",
+        "qteCumul": "Cumulative qty",
+        "qteExecutee": "Executed qty",
+        "dateDebut": "Start",
+        "dateFinPrevue": "Planned end",
+        "dateFinReelle": "Actual end",
+        "dateEmission": "Issue date",
+        "periode": "Period",
+        "montantHt": "Amount excl. VAT",
+        "totalHt": "Total excl. VAT",
+        "totalTtc": "Total incl. VAT",
+        "totalMad": "Total MAD",
+        "budgetHt": "Budget excl. VAT",
+        "factureHt": "Invoiced excl. VAT",
+        "encaisseTtc": "Collected incl. VAT",
+        "avancement": "Progress",
+        "saisiPar": "Entered by",
+        "marche": "Contract",
+        "reference": "Reference",
+        "fournisseur": "Supplier",
+        "montant": "Amount",
+        "date": "Date"
+      }
+    },
+    "chantier": {
+      "title": "Construction sites",
+      "list": {
+        "headerTitle": "My construction sites",
+        "headerSubtitle": "All construction projects",
+        "searchPlaceholder": "Code, name, customer…",
+        "countOne": "{count} site",
+        "countOther": "{count} sites",
+        "emptyState": "No site matches the filters.",
+        "emptyFirstTitle": "No construction sites yet",
+        "emptyFirstHint": "Create your first site to unlock inventory, billing, and project tracking.",
+        "columns": {
+          "code": "Code",
+          "name": "Site",
+          "type": "Type",
+          "client": "Customer",
+          "ville": "City",
+          "budgetHt": "Budget excl. VAT",
+          "avancement": "Progress",
+          "status": "Status",
+          "dateDebut": "Start",
+          "dateFinPrevue": "Planned end"
+        }
+      },
+      "detail": {
+        "fallbackTitle": "Site sheet",
+        "marcheRef": "Contract {ref}",
+        "hero": {
+          "avancement": "Progress",
+          "budgetHt": "Budget excl. VAT",
+          "factureHt": "Invoiced excl. VAT",
+          "encaisseTtc": "Collected incl. VAT"
+        },
+        "tabs": {
+          "overview": "Overview",
+          "lots": "Work packages",
+          "phases": "Phases",
+          "budget": "Budget",
+          "situations": "Progress certificates",
+          "documents": "Documents",
+          "photos": "Photos"
+        },
+        "sections": {
+          "equipe": "Team",
+          "calendrier": "Schedule",
+          "finances": "Finance",
+          "description": "Description",
+          "syntheseBudget": "Budget summary",
+          "brouillonCalcule": "Computed draft",
+          "parLot": "By work package"
+        },
+        "labels": {
+          "chefChantier": "Site foreman",
+          "conducteurTravaux": "Works supervisor",
+          "ingenieur": "Engineer",
+          "ordreService": "Service order",
+          "debut": "Start",
+          "finPrevue": "Planned end",
+          "finReelle": "Actual end",
+          "budgetHt": "Budget excl. VAT",
+          "budgetTtc": "Budget incl. VAT",
+          "tva": "VAT",
+          "cautionGarantie": "Bond / guarantee",
+          "delaiPaiement": "Payment terms",
+          "delaiPaiementJours": "{count} days",
+          "situationsCumulHt": "Cumulative certificates excl. VAT",
+          "factureHt": "Invoiced excl. VAT",
+          "encaisseTtc": "Collected incl. VAT",
+          "marche": "Contract",
+          "travauxPeriodeHt": "Period works excl. VAT",
+          "revisionK": "Price revision K",
+          "penalites": "Penalties",
+          "rgPercent": "Retention ({percent}%)",
+          "netHt": "Net excl. VAT",
+          "tvaMontant": "VAT {percent}%",
+          "netTtc": "Net incl. VAT",
+          "montantHtPeriode": "Period amount excl. VAT"
+        },
+        "columns": {
+          "code": "Code",
+          "designation": "Description",
+          "quantite": "Quantity",
+          "unite": "Unit",
+          "prixUnitaireHt": "Unit price excl. VAT",
+          "montantHt": "Amount excl. VAT",
+          "avancement": "Progress",
+          "responsable": "Owner",
+          "debut": "Start",
+          "fin": "End",
+          "status": "Status",
+          "lot": "Work package"
+        },
+        "empty": {
+          "lotsTitle": "No work package",
+          "lotsMessage": "No work package defined for this site.",
+          "phasesTitle": "No phase",
+          "phasesMessage": "No phase defined for this site.",
+          "documentsTitle": "Documents coming soon",
+          "documentsMessage": "Document management will be available shortly.",
+          "notFoundTitle": "Site not found",
+          "notFoundMessage": "Reference “{ref}”: no matching site."
+        },
+        "situations": {
+          "hint": "Draft generation from physical progress + work packages (Task 07 M-MAR-05, demo).",
+          "generateCta": "Generate certificate N (draft)",
+          "noMarche": "No contract linked to this site in the demo — link required for generation.",
+          "linkAll": "View all progress certificates for this site →"
+        },
+        "documents": {
+          "linkAll": "View all site documents →"
+        },
+        "budget": {
+          "viewFullCta": "View full budget detail →"
+        },
+        "lots": {
+          "addCta": "Add work package",
+          "promptCode": "Work package code (e.g. L01)",
+          "promptDesignation": "Work package description",
+          "promptQuantite": "Quantity (BOQ)",
+          "promptUnite": "Unit (e.g. m², ml, U)",
+          "promptPrixUnitaireHt": "Unit price excl. VAT (MAD)",
+          "invalidBpu": "Quantity, unit and unit price are required and must be valid.",
+          "createSuccess": "Work package added.",
+          "createFailed": "Could not add work package.",
+          "addTitle": "Add a lot",
+          "addAction": "Add"
+        },
+        "phases": {
+          "addAction": "Add a phase",
+          "addTitle": "Add a phase",
+          "promptCode": "Code (e.g. PH01)",
+          "promptDesignation": "Phase description",
+          "promptDateDebut": "Start date",
+          "promptDateFin": "End date",
+          "promptResponsable": "Responsible",
+          "createSuccess": "Phase added.",
+          "createFailed": "Could not add phase."
+        },
+        "actions": {
+          "edit": "Edit"
+        },
+        "deleteConfirm": "Delete site {code} — {name}? This cannot be undone.",
+        "deleteSuccess": "Site deleted.",
+        "deleteFailed": "Could not delete the site.",
+        "deleteTitle": "Delete project",
+        "deleteAction": "Delete",
+        "cancel": "Cancel",
+        "marche": {
+          "createTitle": "Create the contract",
+          "createConfirm": "Create a contract for project {code} from its data (amount, VAT, dates)?",
+          "createAction": "Create contract",
+          "createSuccess": "Contract created and linked to the project.",
+          "createFailed": "Failed to create the contract."
+        }
+      },
+      "edit": {
+        "title": "Edit site",
+        "breadcrumb": "Edit",
+        "loading": "Loading site…",
+        "submit": "Save changes",
+        "success": "Site updated.",
+        "failed": "Could not save changes.",
+        "fields": {
+          "name": "Site name",
+          "description": "Description",
+          "marcheRef": "Contract reference",
+          "adresse": "Address",
+          "tva": "VAT (%)",
+          "rg": "Retention bond (%)",
+          "chef": "Site foreman",
+          "conducteur": "Works supervisor"
+        },
+        "validation": {
+          "name": "Site name is required.",
+          "client": "Select a customer.",
+          "dates": "City and start/end dates are required.",
+          "budget": "Budget excl. VAT must be greater than 0.",
+          "team": "Site foreman and works supervisor are required."
+        }
+      },
+      "create": {
+        "cta": "New site",
+        "stepLabel": "Step {current} / {total}",
+        "codePreview": "Planned project code: {code}"
+      }
+    },
+    "budget": {
+      "title": "Site budget",
+      "list": {
+        "headerTitle": "Consolidated site monitoring",
+        "headerSubtitle": "Multi-site view of budgets, commitments, actuals and projected margin.",
+        "kpis": {
+          "realise": "Actual",
+          "resteEngager": "Remaining to commit"
+        },
+        "filters": {
+          "allStatuses": "All statuses",
+          "enCours": "In progress",
+          "toutesConsommations": "All consumptions",
+          "toutesMarges": "All margins",
+          "enAlerte": "On alert"
+        }
+      },
+      "detail": {
+        "backLink": "Back to consolidated view",
+        "kicker": "Budget",
+        "hero": {
+          "initial": "Initial",
+          "revise": "Revised",
+          "engage": "Committed",
+          "realise": "Actual"
+        },
+        "alert": {
+          "title": "Budget warning"
+        },
+        "summary": {
+          "resteEngager": "Remaining to commit",
+          "resteExecuter": "Remaining to execute",
+          "consommation": "Consumption",
+          "margeProjetee": "Projected margin"
+        },
+        "tabs": {
+          "rubriques": "By heading",
+          "lots": "By work package",
+          "evolution": "Monthly trend",
+          "engagements": "Commitments",
+          "revisions": "Variations & revisions"
+        },
+        "actions": {
+          "reviser": "Revise budget",
+          "exportExcel": "Export to Excel",
+          "printSuivi": "Print budget tracking"
+        },
+        "columns": {
+          "rubrique": "Heading",
+          "lot": "Work package",
+          "initial": "Initial",
+          "revise": "Revised",
+          "engage": "Committed",
+          "realise": "Actual",
+          "realiseStock": "Actual material (stock)",
+          "reste": "Remaining",
+          "ecart": "Variance",
+          "total": "Total"
+        },
+        "drilldown": {
+          "title": "Material drilldown",
+          "subtitle": "Items consumed on the site",
+          "article": "Item",
+          "qteBudget": "Budget qty",
+          "qteCmd": "Ordered qty",
+          "qteLivr": "Delivered qty",
+          "qteCons": "Consumed qty",
+          "realiseStock": "Stock actual",
+          "mtRealise": "Actual amount",
+          "sortiesStock": "Stock issues",
+          "voirSorties": "View issues"
+        },
+        "empty": {
+          "notFound": "Site not found."
+        }
+      },
+      "reviser": {
+        "title": "Budget revision",
+        "before": "Before",
+        "after": "After",
+        "deltaTotal": "Δ total:",
+        "piece": "Supporting document",
+        "cancel": "Cancel",
+        "save": "Save"
+      },
+      "engagements": {
+        "subtitle": "Purchase orders and contracts linked to the site with their tracking status.",
+        "columns": {
+          "reference": "Reference",
+          "montant": "Amount",
+          "date": "Date"
+        },
+        "empty": "No commitment linked to this site."
+      },
+      "revisions": {
+        "title": "Variations and revisions",
+        "subtitle": "History of budget adjustments and associated attachments.",
+        "empty": "No revision history."
+      },
+      "evolution": {
+        "subtitle": "Stacks actual + committed against the monthly budget."
+      }
+    },
+    "planning": {
+      "title": "Gantt schedule",
+      "empty": "No phase scheduled for this selection",
+      "toolbar": {
+        "periode": "Period",
+        "ceMois": "This month",
+        "ceTrimestre": "This quarter",
+        "cetteAnnee": "This year",
+        "tout": "All",
+        "granularite": "Granularity",
+        "pleinEcran": "Full screen"
+      },
+      "drawer": {
+        "title": "Phase detail",
+        "equipe": "Team",
+        "debut": "Start",
+        "quantite": "Quantity",
+        "dependances": "Dependencies"
+      },
+      "placeholder": {
+        "backToPlanning": "Back to schedule"
+      }
+    },
+    "situation": {
+      "title": "Progress payment certificates",
+      "list": {
+        "columns": {
+          "numero": "Certificate no.",
+          "chantier": "Site",
+          "chantierName": "Site name",
+          "numeroOrdre": "Order no.",
+          "periode": "Period",
+          "cumulHt": "Cumulative excl. VAT",
+          "travauxPeriode": "Period works",
+          "retenue7": "Retention 7%",
+          "netHt": "Net excl. VAT",
+          "netTtc": "Net incl. VAT",
+          "status": "Status",
+          "delaiAttente": "Project Owner wait (days)"
+        },
+        "delai": {
+          "joursShort": "{n} d"
+        }
+      },
+      "detail": {
+        "rejectPrompt": "Rejection reason (required):",
+        "decompte": {
+          "title": "Settlement statement",
+          "cumulTravauxHt": "Cumulative works excl. VAT",
+          "travauxPeriodeHt": "▶ Period works excl. VAT",
+          "resorptionAvance": "– Advance recovery (%)",
+          "netHt": "▶ Net payable excl. VAT",
+          "netTtc": "▶ Net payable incl. VAT"
+        },
+        "lotsTable": {
+          "designation": "Description",
+          "unite": "Unit",
+          "qteTotale": "Total qty",
+          "qtePrecedente": "Prev. qty",
+          "qteCumul": "Cumulative qty"
+        }
+      },
+      "print": {
+        "title": "PROGRESS CERTIFICATE NO.{n}",
+        "periode": "Period: {from} → {to}",
+        "columns": {
+          "lotDesignation": "Work package / Description",
+          "unite": "Unit",
+          "qteCumulee": "Cumulative Qty",
+          "montantHt": "Amount excl. VAT"
+        },
+        "cumulPrecedent": "Previous cumulative excl. VAT (certificate no. {n})",
+        "travauxPeriodeHt": "Period works excl. VAT",
+        "retenueGarantiePct": "Retention guarantee {pct}%",
+        "netHt": "Net payable excl. VAT",
+        "netTtc": "NET PAYABLE INCL. VAT",
+        "etabliPar": "Prepared by (MOE)",
+        "visaMoa": "Project Owner (MOA) sign-off",
+        "companyLine": "{raison} — SARL AU — ICE {ice} —",
+        "footer": "Certificate no. {n} · Period {from} → {to}"
+      },
+      "decomptePrint": {
+        "title": "Works settlement statement",
+        "periode": "Period:",
+        "dateEmission": "Issue date:",
+        "detailLots": "Work package detail — cumulative to date",
+        "columns": {
+          "designation": "Description",
+          "unite": "Unit",
+          "qteTotale": "Total qty",
+          "qteCumul": "Cumulative qty"
+        },
+        "decompteTitle": "Settlement statement",
+        "cumulTravauxHt": "Cumulative works excl. VAT",
+        "travauxPeriodeHt": "▶ Period works excl. VAT",
+        "resorptionAvance": "– Advance recovery (%)",
+        "netHt": "▶ Net payable excl. VAT",
+        "netTtc": "▶ Net payable incl. VAT",
+        "pourEntrepreneur": "For the contractor",
+        "pourMoa": "For the Project Owner"
+      }
+    },
+    "attachement": {
+      "title": "As-built records",
+      "list": {
+        "searchPlaceholder": "Site, date…",
+        "allStatuses": "All statuses",
+        "signedShort": "✍️ Signed",
+        "columns": {
+          "designation": "Description",
+          "unite": "Unit",
+          "qteExecutee": "Executed qty"
+        },
+        "emptyState": "No as-built record found.",
+        "saisieCta": "Field entry"
+      },
+      "saisie": {
+        "addLine": "Line",
+        "meteoEnsoleille": "Sunny",
+        "lignesExecutees": "Executed lines",
+        "designationPlaceholder": "Description",
+        "unitePlaceholder": "Unit",
+        "signatureMoeTitle": "MOE signature (demo)",
+        "signatureMoeHint": "Sign in the box below (lightweight PNG preview, stored with the draft)."
+      }
+    },
+    "sousTraitance": {
+      "title": "Subcontracting contracts",
+      "list": {
+        "searchPlaceholder": "Contract no., subcontractor, site…",
+        "filterByStatus": "Filter by status",
+        "columns": {
+          "sousTraitant": "Subcontractor",
+          "montantHt": "Amount excl. VAT",
+          "debut": "Start"
+        },
+        "emptyState": "No contract matches the filters.",
+        "toasts": {
+          "createSoon": "Subcontracting contract creation — coming soon."
+        }
+      }
+    },
+    "journal": {
+      "title": "Site diary",
+      "filters": {
+        "allTypes": "All types"
+      },
+      "labels": {
+        "saisiPar": "Entered by"
+      },
+      "empty": "No event recorded.",
+      "create": {
+        "cta": "New event",
+        "title": "New event",
+        "submit": "Save",
+        "fields": {
+          "chantier": "Site",
+          "chantierPlaceholder": "Select a site",
+          "type": "Event type",
+          "date": "Date",
+          "contenu": "Description"
+        },
+        "errors": {
+          "required": "Site, date and description are required.",
+          "failed": "Could not save the event."
+        },
+        "success": "Event saved."
+      }
+    },
+    "documents": {
+      "title": "Site documents",
+      "filters": {
+        "allTypes": "All types"
+      },
+      "fields": {
+        "deposeLeBy": "Uploaded on {date} by {user}"
+      },
+      "emptyState": "No document matches the filters.",
+      "create": {
+        "cta": "Upload document",
+        "title": "Upload document",
+        "submit": "Upload",
+        "fields": {
+          "chantier": "Site",
+          "chantierPlaceholder": "Select a site",
+          "type": "Document type",
+          "titre": "Title",
+          "file": "File"
+        },
+        "errors": {
+          "required": "Site, title and file are required.",
+          "failed": "Could not upload the document."
+        },
+        "success": "Document uploaded."
+      },
+      "types": {
+        "MARCHE": "Contract",
+        "PV_RECEPTION": "Acceptance report",
+        "BON_COMMANDE": "Purchase order"
+      }
+    },
+    "avancement": {
+      "title": "Progress entry",
+      "editTitle": "Edit progress entry",
+      "validate": "Validate",
+      "saveEdit": "Save changes",
+      "saveDraft": "Save draft",
+      "entityName": "Progress entry",
+      "entityNamePlural": "Progress entries",
+      "fields": {
+        "dateRequired": "Date *",
+        "lotsToInput": "Work packages to record",
+        "addLot": "Add a work package",
+        "pickAdditionalLot": "Pick an additional work package",
+        "softValidation": "Soft validation when cumulative exceeds total",
+        "addPhoto": "📷 Add photo"
+      },
+      "listing": {
+        "headerTitle": "Site progress entries",
+        "breadcrumb": "Progress",
+        "quickFilters": {
+          "thisWeek": "This week",
+          "thisMonth": "This month",
+          "myEntries": "My entries",
+          "late": "Late entries",
+          "lateTooltip": "Sites with no progress entry in the last 7 days",
+          "reset": "Reset"
+        },
+        "actions": {
+          "refresh": "Refresh",
+          "saisir": "Record progress",
+          "voirPhotos": "View photos",
+          "modifier": "Edit"
+        },
+        "columns": {
+          "date": "Date",
+          "chantier": "Site",
+          "lot": "Package",
+          "designation": "Description",
+          "qtePeriode": "Period qty",
+          "cumul": "Cumulative",
+          "pourcentageCumule": "Cumulative %",
+          "saisiPar": "Entered by",
+          "photos": "Photos"
+        },
+        "filters": {
+          "chantiers": "Sites",
+          "lots": "Packages",
+          "dateFrom": "From",
+          "dateTo": "To",
+          "saisiPar": "Entered by",
+          "avecPhotos": "With photos"
+        },
+        "emptyState": {
+          "title": "No progress on this period",
+          "message": "Adjust filters or record new field progress.",
+          "actionLabel": "Record progress"
+        }
+      },
+      "saisie": {
+        "breadcrumb": "Entry",
+        "chantierRequired": "Site *",
+        "chefChantier": "Site manager: {name}",
+        "impactChantier": "Site impact",
+        "before": "Before",
+        "after": "After",
+        "ergonomieTerrain": "Field ergonomics",
+        "ergonomie": {
+          "touchInputs": "Touch-friendly numeric inputs (44px minimum)",
+          "cameraUpload": "Direct camera upload via environment capture",
+          "softValidation": "Soft validation when cumulative exceeds total"
+        }
+      },
+      "lot": {
+        "currentCumul": "Current cumulative: {percent}% ({cumul} {unite})",
+        "remove": "Remove",
+        "period": "Period {unite}",
+        "cumul": "Cumulative {unite}",
+        "progress": "Progress: {before}% → {after}%",
+        "fieldNotes": "Field note"
+      },
+      "warnings": {
+        "cumulExceeds": "Cumulative exceeds the work package total quantity ({quantite} {unite}).",
+        "highPeriodEntry": "High entry: more than 30% of the package in a single period."
+      },
+      "alerts": {
+        "savedDraft": "{count, plural, =0 {No work package saved as draft.} one {1 work package saved as draft.} other {# work packages saved as draft.}}",
+        "validated": "{count, plural, =0 {No work package validated.} one {1 work package validated.} other {# work packages validated.}}"
+      },
+      "confirm": {
+        "validate": "{count, plural, =0 {No work package to validate?} one {Validate 1 work package?} other {Validate # work packages?}} Site: {before}% → {after}%"
+      },
+      "summary": {
+        "lotsLoaded": "{count, plural, =0 {No work package loaded} one {1 work package loaded} other {# work packages loaded}}",
+        "deltaOnLots": "+{delta}% on {count, plural, =0 {0 work packages} one {1 work package} other {# work packages}}"
+      },
+      "gallery": {
+        "title": "{chantierCode} - package {lotCode}",
+        "photoCount": "{count, plural, =0 {No photo} one {1 photo} other {# photos}}",
+        "close": "Close"
+      },
+      "errors": {
+        "loadFailedTitle": "Entry unavailable",
+        "saisieNotFound": "Entry to update not found.",
+        "chantierNotFound": "Site not found for this entry.",
+        "chooseChantier": "Choose a site before proceeding.",
+        "atLeastOnePositiveQty": "Enter at least one positive period quantity.",
+        "v1SingleLine": "V1 update supports only one line at a time.",
+        "saisieUserNotFound": "Entry user not found",
+        "avancementNotFound": "Progress entry not found: {id}",
+        "notFound": "Progress entry not found: {id}",
+        "createFailed": "No progress entry created",
+        "deleteNotAvailable": "Progress entry deletion is not available",
+        "readFileFailed": "Unable to read {name}",
+        "saveFailed": "Unable to save.",
+        "validateFailed": "Unable to validate."
+      }
+    },
+    "devis": {
+      "title": "Quotes",
+      "detail": {
+        "emisLeValable": "Issued on {date} · Valid until {valable}",
+        "columns": {
+          "designation": "Description",
+          "totalHt": "Total excl. VAT"
+        },
+        "totals": {
+          "totalHt": "Total excl. VAT",
+          "totalTtc": "Total incl. VAT"
+        }
+      }
+    },
+    "metre": {
+      "title": "Quantity take-off",
+      "dpgf": {
+        "title": "DPGF — Detailed lump-sum cost breakdown"
+      },
+      "errors": {
+        "notFound": "Take-off {id} not found"
+      }
+    },
+    "appelOffreClient": {
+      "title": "Customer tenders"
+    },
+    "bibliothequePrix": {
+      "title": "Price library",
+      "families": {
+        "GROS_OEUVRE": "Shell & core",
+        "ETANCHEITE": "Waterproofing",
+        "REVETEMENTS": "Finishes",
+        "ELECTRICITE": "Electrical"
+      }
+    },
+    "photos": {
+      "upload": "Add photo",
+      "zonePlaceholder": "Zone / landmark (optional)",
+      "uploading": "Uploading…",
+      "empty": "No photos for this site yet."
+    },
+    "etudes": {
+      "composantsEditor": {
+        "hint": "Cost breakdown = materials + labour + overhead + profit",
+        "columns": {
+          "unite": "Unit",
+          "totalMad": "Total MAD"
+        },
+        "removeRow": "Remove",
+        "labels": {
+          "mainOeuvre": "Labour",
+          "sousTotalDebourses": "Direct cost subtotal",
+          "fraisGeneraux": "General overhead",
+          "benefice": "Profit"
+        }
+      },
+      "dpgfEditor": {
+        "title": "DPGF — Detailed lump-sum cost breakdown",
+        "columns": {
+          "designation": "Description",
+          "unite": "Unit",
+          "totalHt": "Total excl. VAT"
+        },
+        "actions": {
+          "addOuvrage": "Add work item to chapter",
+          "removeChapitre": "Remove chapter",
+          "removeRow": "Remove row",
+          "removeNote": "Remove note"
+        },
+        "totalsBeforeDiscount": "Total excl. VAT (before global discount)"
+      },
+      "metreTableEditor": {
+        "hint": "Accepted formulas: L*w*h*N, (L*w)-(L1*w1), etc.",
+        "columns": {
+          "designation": "Description",
+          "unite": "Unit"
+        },
+        "designationPlaceholder": "Free description",
+        "removeRow": "Remove row",
+        "totalEstime": "Estimated total"
+      },
+      "cautionTracker": {
+        "definitive": "Final",
+        "totalCautions": "Total bonds"
+      }
+    }
+  }
+}

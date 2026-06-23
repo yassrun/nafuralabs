@@ -1,0 +1,595 @@
+<!-- Entity Detail Component Template -->
+
+<div class="nf-entity-detail" [class.nf-entity-detail--loading]="loading()">
+
+  <!-- Workflow (approval) banner + actions + Submit for Approval -->
+  @if (showWorkflowSlot()) {
+    <div class="nf-entity-detail__workflow">
+      <nf-approval-banner
+        [entityType]="workflowEntityType()"
+        [entityId]="workflowEntityId()"
+        [refreshTrigger]="workflowRefreshTrigger()"
+        [pendingLabel]="'workflow.banner.pending' | translate"
+        [approvedLabel]="'workflow.banner.approved' | translate"
+        [rejectedLabel]="'workflow.banner.rejected' | translate"
+        [resubmitLabel]="'workflow.resubmit' | translate"
+        (resubmitRequested)="onWorkflowResubmit()"
+        (approvalState)="onWorkflowApprovalState($event)"
+      />
+      <nf-approval-action
+        [entityType]="workflowEntityType()"
+        [entityId]="workflowEntityId()"
+        [approvalTitle]="'workflow.action.title' | translate"
+        [approveLabel]="'workflow.approve' | translate"
+        [rejectLabel]="'workflow.reject' | translate"
+        [commentPlaceholder]="'workflow.action.commentPlaceholder' | translate"
+        [rejectCommentRequiredMessage]="'workflow.action.rejectCommentRequired' | translate"
+        (actionDone)="onWorkflowActionDone($event)"
+      />
+      @if (showWorkflowSubmitButton()) {
+        <div class="nf-entity-detail__workflow-submit">
+          <button
+            type="button"
+            class="nf-entity-detail__workflow-submit-btn"
+            mat-flat-button
+            color="primary"
+            [disabled]="workflowTriggering()"
+            (click)="onWorkflowSubmit()">
+            {{ workflowSubmitLabel() | translate }}
+          </button>
+        </div>
+      }
+    </div>
+  }
+
+  @if (showTabGroup()) {
+    <mat-tab-group
+      [selectedIndex]="selectedTabIndex()"
+      (selectedIndexChange)="onTabChange($event)">
+      @for (tab of detailTabs(); track tab.id) {
+        <mat-tab>
+          <ng-template mat-tab-label>
+            {{ tab.labelKey | translate }}{{ tab.count != null ? ' (' + tab.count + ')' : '' }}
+          </ng-template>
+          <div class="nf-entity-detail__tab-content">
+            @switch (tab.id) {
+              @case ('details') {
+                <ng-container *ngTemplateOutlet="detailContent"></ng-container>
+              }
+              @case ('activity') {
+                <nf-audit-timeline
+                  [entityType]="auditEntityType()"
+                  [entityId]="auditEntityId()"
+                  [active]="activityTabActive()"
+                />
+              }
+              @case ('attachments') {
+                <nf-attachment-list
+                  [entityType]="attachmentEntityType()"
+                  [entityId]="attachmentEntityId()"
+                  [readonly]="isViewMode()"
+                  [attachmentConfig]="config().features?.attachmentConfig"
+                  (attachmentCountChange)="onAttachmentCountChange($event)"
+                />
+              }
+            }
+          </div>
+        </mat-tab>
+      }
+    </mat-tab-group>
+  } @else {
+    <ng-container *ngTemplateOutlet="detailContent"></ng-container>
+  }
+
+  <ng-template #detailContent>
+  <!-- Actions Bar (Header Position) -->
+  @if (config().actionsPosition === 'header') {
+    <div class="nf-entity-detail__actions-bar">
+      <!-- Left Actions (Cancel/Back) -->
+      <div class="nf-entity-detail__actions-left">
+        @if (leftActions().length > 0) {
+          <nf-button-list
+            [actions]="leftActions()"
+            [size]="'md'"
+            (actionClick)="onActionClick($event)">
+          </nf-button-list>
+        }
+      </div>
+
+      <!-- Center slot: status machine (when position=center) or legacy nfActionCenter -->
+      <div class="nf-entity-detail__actions-center">
+        <ng-content select="[nfActionCenter]"></ng-content>
+        @if (useStatusMachineInActionsBar() && statusMachineInCenter()) {
+          <nf-status-machine
+            [config]="config().statusMachine"
+            [item]="item()"
+            [disabled]="saving()"
+            (transitionRequest)="onStatusTransitionRequest($event)">
+          </nf-status-machine>
+        }
+      </div>
+
+      <!-- Right Actions (Delete, Duplicate, Save) -->
+      <div class="nf-entity-detail__actions-right">
+        @if (useStatusMachineInActionsBar() && !statusMachineInCenter()) {
+          <nf-status-machine
+            [config]="config().statusMachine"
+            [item]="item()"
+            [disabled]="saving()"
+            (transitionRequest)="onStatusTransitionRequest($event)">
+          </nf-status-machine>
+        }
+
+        @if (rightActions().length > 0) {
+          <nf-button-list
+            [actions]="rightActions()"
+            [size]="'md'"
+            (actionClick)="onActionClick($event)">
+          </nf-button-list>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Form Content (only render when form is ready) -->
+  @if (formReady()) {
+    <form [formGroup]="form" class="nf-entity-detail__form">
+      @if (!isViewMode()) {
+        <nf-form-error-summary
+          [form]="form"
+          [labelMap]="formErrorSummaryLabels()"
+          [title]="'form.errorSummary.title' | translate"
+          [show]="formSubmitAttempted()">
+        </nf-form-error-summary>
+      }
+
+      <!-- Sectioned Layout -->
+      @if (useSections()) {
+        @for (section of visibleSections(); track section.id) {
+          <fieldset
+            class="nf-entity-detail__section"
+            [class.nf-entity-detail__section--collapsible]="section.collapsible"
+            [class.nf-entity-detail__section--collapsed]="section.collapsed">
+
+            @if (section.title) {
+              <legend class="nf-entity-detail__section-header">
+                @if (section.icon) {
+                  <span class="nf-entity-detail__section-icon material-icons">{{ section.icon }}</span>
+                }
+                <span class="nf-entity-detail__section-title">{{ section.title | translate }}</span>
+                @if (section.description) {
+                  <span class="nf-entity-detail__section-description">{{ section.description | translate }}</span>
+                }
+              </legend>
+            }
+
+            <div
+              class="nf-entity-detail__section-fields"
+              [style.grid-template-columns]="getSectionGridColumns(section)">
+              @for (field of getFieldsForSection(section); track field.key) {
+                <ng-container [ngTemplateOutlet]="fieldTpl" [ngTemplateOutletContext]="{ $implicit: field }">
+                </ng-container>
+              }
+            </div>
+          </fieldset>
+        }
+      }
+
+      <!-- Flat Layout (No Sections) -->
+      @if (!useSections()) {
+        <div
+          class="nf-entity-detail__fields"
+          [style.grid-template-columns]="gridColumns()">
+          @for (field of visibleFields(); track field.key) {
+            <ng-container [ngTemplateOutlet]="fieldTpl" [ngTemplateOutletContext]="{ $implicit: field }">
+            </ng-container>
+          }
+        </div>
+      }
+
+      <!-- Field Template (inside form for formControlName to work) -->
+      <ng-template #fieldTpl let-field>
+        <div
+          class="nf-entity-detail__field"
+          [id]="fieldAnchorId(field.key)"
+          [style.grid-column]="getFieldSpan(field)">
+
+          <!-- Custom Template -->
+          @if (getFieldTemplate(field.key); as customTemplate) {
+            <ng-container
+              *ngTemplateOutlet="customTemplate; context: {
+                $implicit: getFieldControl(field.key),
+                field: field,
+                form: form
+              }">
+            </ng-container>
+          } @else if (isReadonlyRenderableField(field)) {
+            <div class="nf-entity-detail__readonly-field">
+              <label class="nf-entity-detail__readonly-label">{{ field.label | translate }}</label>
+              <div class="nf-entity-detail__readonly-value">{{ getReadonlyDisplayValue(field) }}</div>
+            </div>
+          } @else {
+            <!-- Built-in Field Types -->
+            @switch (field.type) {
+
+              <!-- Text Input -->
+              @case ('text') {
+                <mat-form-field appearance="outline" class="nf-entity-detail__mat-field">
+                  <mat-label>{{ field.label | translate }}</mat-label>
+                  @if (field.prefix) {
+                    <span matTextPrefix>{{ field.prefix }}</span>
+                  }
+                  <input
+                    matInput
+                    type="text"
+                    [formControlName]="field.key"
+                    [placeholder]="(field.placeholder || '') | translate"
+                    [readonly]="isViewMode()"/>
+                  @if (field.suffix) {
+                    <span matTextSuffix>{{ field.suffix }}</span>
+                  }
+                  @if (field.hint) {
+                    <mat-hint>{{ field.hint | translate }}</mat-hint>
+                  }
+                  <mat-error>{{ getErrorMessage(field) }}</mat-error>
+                </mat-form-field>
+              }
+
+              <!-- Email Input -->
+              @case ('email') {
+                <mat-form-field appearance="outline" class="nf-entity-detail__mat-field">
+                  <mat-label>{{ field.label | translate }}</mat-label>
+                  <input
+                    matInput
+                    type="email"
+                    [formControlName]="field.key"
+                    [placeholder]="(field.placeholder || '') | translate"
+                    [readonly]="isViewMode()"/>
+                  @if (field.hint) {
+                    <mat-hint>{{ field.hint | translate }}</mat-hint>
+                  }
+                  <mat-error>{{ getErrorMessage(field) }}</mat-error>
+                </mat-form-field>
+              }
+
+              <!-- Password Input -->
+              @case ('password') {
+                <mat-form-field appearance="outline" class="nf-entity-detail__mat-field">
+                  <mat-label>{{ field.label | translate }}</mat-label>
+                  <input
+                    matInput
+                    type="password"
+                    [formControlName]="field.key"
+                    [placeholder]="(field.placeholder || '') | translate"
+                    [readonly]="isViewMode()"/>
+                  @if (field.hint) {
+                    <mat-hint>{{ field.hint | translate }}</mat-hint>
+                  }
+                  <mat-error>{{ getErrorMessage(field) }}</mat-error>
+                </mat-form-field>
+              }
+
+              <!-- URL Input -->
+              @case ('url') {
+                <mat-form-field appearance="outline" class="nf-entity-detail__mat-field">
+                  <mat-label>{{ field.label | translate }}</mat-label>
+                  <input
+                    matInput
+                    type="url"
+                    [formControlName]="field.key"
+                    [placeholder]="(field.placeholder || '') | translate"
+                    [readonly]="isViewMode()"/>
+                  @if (field.hint) {
+                    <mat-hint>{{ field.hint | translate }}</mat-hint>
+                  }
+                  <mat-error>{{ getErrorMessage(field) }}</mat-error>
+                </mat-form-field>
+              }
+
+              <!-- Tel Input -->
+              @case ('tel') {
+                <mat-form-field appearance="outline" class="nf-entity-detail__mat-field">
+                  <mat-label>{{ field.label | translate }}</mat-label>
+                  <input
+                    matInput
+                    type="tel"
+                    [formControlName]="field.key"
+                    [placeholder]="(field.placeholder || '') | translate"
+                    [readonly]="isViewMode()"/>
+                  @if (field.hint) {
+                    <mat-hint>{{ field.hint | translate }}</mat-hint>
+                  }
+                  <mat-error>{{ getErrorMessage(field) }}</mat-error>
+                </mat-form-field>
+              }
+
+              <!-- Number Input -->
+              @case ('number') {
+                <mat-form-field appearance="outline" class="nf-entity-detail__mat-field">
+                  <mat-label>{{ field.label | translate }}</mat-label>
+                  @if (field.prefix) {
+                    <span matTextPrefix>{{ field.prefix }}</span>
+                  }
+                  <input
+                    matInput
+                    type="number"
+                    [formControlName]="field.key"
+                    [placeholder]="(field.placeholder || '') | translate"
+                    [readonly]="isViewMode()"/>
+                  @if (field.suffix) {
+                    <span matTextSuffix>{{ field.suffix }}</span>
+                  }
+                  @if (field.hint) {
+                    <mat-hint>{{ field.hint | translate }}</mat-hint>
+                  }
+                  <mat-error>{{ getErrorMessage(field) }}</mat-error>
+                </mat-form-field>
+              }
+
+              <!-- Currency Input -->
+              @case ('currency') {
+                <mat-form-field appearance="outline" class="nf-entity-detail__mat-field">
+                  <mat-label>{{ field.label | translate }}</mat-label>
+                  <span matTextPrefix>{{ field.prefix || 'MAD' }}&nbsp;</span>
+                  <input
+                    matInput
+                    type="number"
+                    step="0.01"
+                    [formControlName]="field.key"
+                    [placeholder]="(field.placeholder || '0.00') | translate"
+                    [readonly]="isViewMode()"/>
+                  @if (field.hint) {
+                    <mat-hint>{{ field.hint | translate }}</mat-hint>
+                  }
+                  <mat-error>{{ getErrorMessage(field) }}</mat-error>
+                </mat-form-field>
+              }
+
+              <!-- Textarea -->
+              @case ('textarea') {
+                <mat-form-field appearance="outline" class="nf-entity-detail__mat-field">
+                  <mat-label>{{ field.label | translate }}</mat-label>
+                  <textarea
+                    matInput
+                    [formControlName]="field.key"
+                    [placeholder]="(field.placeholder || '') | translate"
+                    [readonly]="isViewMode()"
+                    rows="4">
+                  </textarea>
+                  @if (field.hint) {
+                    <mat-hint>{{ field.hint | translate }}</mat-hint>
+                  }
+                  <mat-error>{{ getErrorMessage(field) }}</mat-error>
+                </mat-form-field>
+              }
+
+              <!-- Select -->
+              @case ('select') {
+                <mat-form-field appearance="outline" class="nf-entity-detail__mat-field">
+                  <mat-label>{{ field.label | translate }}</mat-label>
+                  <mat-select
+                    [formControlName]="field.key"
+                    [placeholder]="(field.placeholder || '') | translate">
+                    @if (field.searchable) {
+                      <mat-option class="nf-entity-detail__select-search-option" [disabled]="true">
+                        <input
+                          class="nf-entity-detail__select-search-input"
+                          type="text"
+                          [placeholder]="getLookupSearchPlaceholder()"
+                          [value]="getLookupSearchTerm(field)"
+                          (click)="$event.stopPropagation()"
+                          (keydown)="$event.stopPropagation()"
+                          (input)="onLookupSearch(field, $event)" />
+                      </mat-option>
+                    }
+                    @if (isFieldClearable(field)) {
+                      <mat-option [value]="null">{{ getNoneOptionLabel() }}</mat-option>
+                    }
+                    @for (opt of getFilteredOptions(field); track opt.value) {
+                      <mat-option [value]="opt.value">{{ opt.label | translate }}</mat-option>
+                    }
+                  </mat-select>
+                  @if (isFieldClearable(field) && hasFieldValue(field) && !isViewMode()) {
+                    <button
+                      mat-icon-button
+                      matSuffix
+                      type="button"
+                      [attr.aria-label]="'Clear value'"
+                      (click)="clearFieldValue(field, $event)">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  }
+                  @if (hasReferenceListShortcut(field) && !isViewMode()) {
+                    <button
+                      mat-icon-button
+                      matSuffix
+                      type="button"
+                      [attr.aria-label]="getOpenReferenceLabel(field)"
+                      [matTooltip]="getOpenReferenceLabel(field)"
+                      (click)="openReferenceShortcut(field, $event)">
+                      <mat-icon>visibility</mat-icon>
+                    </button>
+                  }
+                  @if (field.hint) {
+                    <mat-hint>{{ field.hint | translate }}</mat-hint>
+                  }
+                  <mat-error>{{ getErrorMessage(field) }}</mat-error>
+                </mat-form-field>
+              }
+
+              <!-- Multi-Select -->
+              @case ('multi-select') {
+                <mat-form-field appearance="outline" class="nf-entity-detail__mat-field">
+                  <mat-label>{{ field.label | translate }}</mat-label>
+                  <mat-select
+                    multiple
+                    [formControlName]="field.key"
+                    [placeholder]="(field.placeholder || '') | translate">
+                    @for (opt of getOptions(field); track opt.value) {
+                      <mat-option [value]="opt.value">{{ opt.label | translate }}</mat-option>
+                    }
+                  </mat-select>
+                  @if (field.hint) {
+                    <mat-hint>{{ field.hint | translate }}</mat-hint>
+                  }
+                  <mat-error>{{ getErrorMessage(field) }}</mat-error>
+                </mat-form-field>
+              }
+
+              <!-- Checkbox -->
+              @case ('checkbox') {
+                <div class="nf-entity-detail__checkbox-field">
+                  <mat-checkbox
+                    [formControlName]="field.key"
+                    [disabled]="isViewMode()">
+                    {{ field.label | translate }}
+                  </mat-checkbox>
+                  @if (field.hint) {
+                    <span class="nf-entity-detail__hint">{{ field.hint | translate }}</span>
+                  }
+                </div>
+              }
+
+              <!-- Toggle -->
+              @case ('toggle') {
+                <div class="nf-entity-detail__toggle-field">
+                  <mat-slide-toggle
+                    [formControlName]="field.key"
+                    [disabled]="isViewMode()">
+                    {{ field.label | translate }}
+                  </mat-slide-toggle>
+                  @if (field.hint) {
+                    <span class="nf-entity-detail__hint">{{ field.hint | translate }}</span>
+                  }
+                </div>
+              }
+
+              <!-- ICE Input (Maroc — 15 chiffres) -->
+              @case ('ice') {
+                <div class="nf-entity-detail__atom-field">
+                  <label class="nf-entity-detail__atom-label">{{ field.label | translate }}</label>
+                  <nf-ice-input
+                    [formControlName]="field.key"
+                    [placeholder]="(field.placeholder || '00000 00000 00000') | translate">
+                  </nf-ice-input>
+                  @if (field.hint) {
+                    <span class="nf-entity-detail__atom-hint">{{ field.hint | translate }}</span>
+                  }
+                </div>
+              }
+
+              <!-- RIB Input (Maroc — 24 chiffres) -->
+              @case ('rib') {
+                <div class="nf-entity-detail__atom-field">
+                  <label class="nf-entity-detail__atom-label">{{ field.label | translate }}</label>
+                  <nf-rib-input
+                    [formControlName]="field.key"
+                    [placeholder]="(field.placeholder || 'XXX XXX XXXXXXXXXXXXXXXX XX') | translate">
+                  </nf-rib-input>
+                  @if (field.hint) {
+                    <span class="nf-entity-detail__atom-hint">{{ field.hint | translate }}</span>
+                  }
+                </div>
+              }
+
+              <!-- Phone MA Input (+212 6/7 XX XX XX XX) -->
+              @case ('phone-ma') {
+                <div class="nf-entity-detail__atom-field">
+                  <label class="nf-entity-detail__atom-label">{{ field.label | translate }}</label>
+                  <nf-phone-ma-input
+                    [formControlName]="field.key"
+                    [placeholder]="(field.placeholder || '+212 6 XX XX XX XX') | translate">
+                  </nf-phone-ma-input>
+                  @if (field.hint) {
+                    <span class="nf-entity-detail__atom-hint">{{ field.hint | translate }}</span>
+                  }
+                </div>
+              }
+
+              <!-- Money MA Input (number stored, fr-MA + MAD suffix) -->
+              @case ('money-ma') {
+                <div class="nf-entity-detail__atom-field">
+                  <label class="nf-entity-detail__atom-label">{{ field.label | translate }}</label>
+                  <nf-money-input
+                    [formControlName]="field.key"
+                    [placeholder]="(field.placeholder || '0') | translate"
+                    [currency]="field.suffix || 'MAD'">
+                  </nf-money-input>
+                  @if (field.hint) {
+                    <span class="nf-entity-detail__atom-hint">{{ field.hint | translate }}</span>
+                  }
+                </div>
+              }
+
+              <!-- Date -->
+              @case ('date') {
+                <mat-form-field appearance="outline" class="nf-entity-detail__mat-field">
+                  <mat-label>{{ field.label | translate }}</mat-label>
+                  <input
+                    matInput
+                    [matDatepicker]="picker"
+                    [formControlName]="field.key"
+                    [placeholder]="(field.placeholder || '') | translate"
+                    [readonly]="isViewMode()"/>
+                  <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                  <mat-datepicker #picker></mat-datepicker>
+                  @if (field.hint) {
+                    <mat-hint>{{ field.hint | translate }}</mat-hint>
+                  }
+                  <mat-error>{{ getErrorMessage(field) }}</mat-error>
+                </mat-form-field>
+              }
+
+              <!-- Default (Text) -->
+              @default {
+                <mat-form-field appearance="outline" class="nf-entity-detail__mat-field">
+                  <mat-label>{{ field.label | translate }}</mat-label>
+                  <input
+                    matInput
+                    type="text"
+                    [formControlName]="field.key"
+                    [placeholder]="(field.placeholder || '') | translate"
+                    [readonly]="isViewMode()"/>
+                  @if (field.hint) {
+                    <mat-hint>{{ field.hint | translate }}</mat-hint>
+                  }
+                  <mat-error>{{ getErrorMessage(field) }}</mat-error>
+                </mat-form-field>
+              }
+            }
+          }
+        </div>
+      </ng-template>
+
+    </form>
+  }
+
+  <!-- Actions Bar (Footer Position) -->
+  @if (config().actionsPosition === 'footer') {
+    <div class="nf-entity-detail__actions-bar nf-entity-detail__actions-bar--footer">
+      <!-- Left Actions -->
+      <div class="nf-entity-detail__actions-left">
+        @if (leftActions().length > 0) {
+          <nf-button-list
+            [actions]="leftActions()"
+            [size]="'md'"
+            (actionClick)="onActionClick($event)">
+          </nf-button-list>
+        }
+      </div>
+
+      <!-- Right Actions -->
+      <div class="nf-entity-detail__actions-right">
+        @if (rightActions().length > 0) {
+          <nf-button-list
+            [actions]="rightActions()"
+            [size]="'md'"
+            (actionClick)="onActionClick($event)">
+          </nf-button-list>
+        }
+      </div>
+    </div>
+  }
+  </ng-template>
+
+</div>

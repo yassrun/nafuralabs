@@ -1,0 +1,85 @@
+{
+  "uomCategories": [
+    { "code": "MASSE", "name": "Masse", "description": "Poids et masse" },
+    { "code": "VOLUME", "name": "Volume", "description": "Volumes et quantités volumiques" },
+    { "code": "LONGUEUR", "name": "Longueur", "description": "Longueurs et surfaces" },
+    { "code": "COMPTAGE", "name": "Comptage", "description": "Unités discrètes" },
+    { "code": "TEMPS", "name": "Temps", "description": "Durées et temps de travail" }
+  ],
+  "unitsOfMeasure": [
+    { "code": "T", "name": "Tonne", "categoryCode": "MASSE" },
+    { "code": "KG", "name": "Kilogramme", "categoryCode": "MASSE" },
+    { "code": "G", "name": "Gramme", "categoryCode": "MASSE" },
+    { "code": "M3", "name": "Mètre cube", "categoryCode": "VOLUME" },
+    { "code": "L", "name": "Litre", "categoryCode": "VOLUME" },
+    { "code": "ML", "name": "Millilitre", "categoryCode": "VOLUME" },
+    { "code": "M", "name": "Mètre linéaire", "categoryCode": "LONGUEUR" },
+    { "code": "M2", "name": "Mètre carré", "categoryCode": "LONGUEUR" },
+    { "code": "CM", "name": "Centimètre", "categoryCode": "LONGUEUR" },
+    { "code": "U", "name": "Unité", "categoryCode": "COMPTAGE" },
+    { "code": "EA", "name": "Pièce", "categoryCode": "COMPTAGE" },
+    { "code": "LOT", "name": "Lot", "categoryCode": "COMPTAGE" },
+    { "code": "H", "name": "Heure", "categoryCode": "TEMPS" },
+    { "code": "J", "name": "Jour", "categoryCode": "TEMPS" }
+  ],
+  "itemTypes": [
+    { "code": "MATERIAU", "name": "Matériau", "description": "Matériaux de chantier" },
+    { "code": "CONSOMMABLE", "name": "Consommable", "description": "Consommables et EPI" },
+    { "code": "EQUIPEMENT", "name": "Équipement", "description": "Matériel et engins" },
+    { "code": "PRESTATION", "name": "Prestation", "description": "Prestations et sous-traitance" }
+  ],
+  "itemCategories": [
+    { "code": "GROS_OEUVRE", "name": "Gros œuvre", "description": "Structure et gros œuvre" },
+    { "code": "VRD", "name": "VRD", "description": "Voirie et réseaux divers" },
+    { "code": "FINITIONS", "name": "Finitions", "description": "Peinture, revêtements" },
+    { "code": "EPI", "name": "EPI", "description": "Équipements de protection individuelle" }
+  ],
+  "costingMethods": [
+    {
+      "code": "AVCO",
+      "name": "Coût moyen pondéré",
+      "method": "AVCO",
+      "description": "Coût moyen pondéré recalculé à chaque entrée (standard Maroc).",
+      "allowNegativeStock": false,
+      "status": "Active"
+    },
+    {
+      "code": "FIFO",
+      "name": "Premier entré, premier sorti",
+      "method": "FIFO",
+      "description": "Les entrées les plus anciennes sont consommées en premier.",
+      "allowNegativeStock": false,
+      "status": "Active"
+    },
+    {
+      "code": "STD",
+      "name": "Coût standard",
+      "method": "STD",
+      "description": "Coût prédéfini par article.",
+      "allowNegativeStock": false,
+      "status": "Active"
+    }
+  ],
+  "movementMotifs": [
+    { "code": "RECEPTION_ACHAT", "name": "Réception achat", "txType": "RECEPTION" },
+    { "code": "CHANTIER", "name": "Besoin chantier", "txType": "TRANSFERT" },
+    { "code": "TRANSFERT_INT", "name": "Transfert interne", "txType": "TRANSFERT" },
+    { "code": "PERIODIQUE", "name": "Inventaire périodique", "txType": "INVENTAIRE" },
+    { "code": "CONTROLE", "name": "Contrôle ponctuel", "txType": "INVENTAIRE" },
+    { "code": "RETOUR_CHANTIER", "name": "Retour chantier", "txType": "RETOUR" },
+    { "code": "RETOUR_FOURNISSEUR", "name": "Retour fournisseur", "txType": "RETOUR" },
+    { "code": "CHUTE_DECOUPE", "name": "Chute découpe", "txType": "PERTE" },
+    { "code": "CASSE", "name": "Casse", "txType": "PERTE" },
+    { "code": "VOL", "name": "Vol", "txType": "PERTE" },
+    { "code": "INTEMPERIES", "name": "Intempéries", "txType": "PERTE" },
+    { "code": "MALFACON", "name": "Malfaçon", "txType": "PERTE" },
+    { "code": "CONSO_CHANTIER", "name": "Consommation chantier", "txType": "SORTIE" },
+    { "code": "LIV_SOUS_TRAITANT", "name": "Livraison sous-traitant", "txType": "SORTIE" },
+    { "code": "REAPPRO_CH", "name": "Réappro magasin chantier", "txType": "SORTIE" }
+  ],
+  "currencies": [
+    { "code": "MAD", "name": "Dirham marocain", "symbol": "DH", "decimalPlaces": 2, "isReference": true },
+    { "code": "EUR", "name": "Euro", "symbol": "€", "decimalPlaces": 2, "isReference": false },
+    { "code": "USD", "name": "Dollar américain", "symbol": "$", "decimalPlaces": 2, "isReference": false }
+  ]
+}

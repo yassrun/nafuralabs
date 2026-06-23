@@ -1,0 +1,31 @@
+{
+  "entity": "CustomerInvoiceLine",
+  "fields": {
+    "customerInvoiceId": {
+      "required": true
+    },
+    "lineNumber": {
+      "required": true,
+      "min": 1
+    },
+    "description": {
+      "required": true,
+      "maxLength": 200
+    },
+    "quantity": {
+      "required": true,
+      "min": 0.0001
+    },
+    "unitPrice": {
+      "required": true,
+      "min": 0
+    },
+    "taxAmount": {
+      "min": 0
+    },
+    "lineTotal": {
+      "required": true,
+      "min": 0
+    }
+  }
+}

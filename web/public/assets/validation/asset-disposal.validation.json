@@ -1,0 +1,33 @@
+{
+  "entity": "AssetDisposal",
+  "fields": {
+    "disposalNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "assetId": {
+      "required": true
+    },
+    "disposalDate": {
+      "required": true
+    },
+    "disposalMethod": {
+      "required": true,
+      "maxLength": 30
+    },
+    "saleAmount": {
+      "min": 0
+    },
+    "bookValue": {
+      "min": 0
+    },
+    "buyerName": {
+      "maxLength": 200
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

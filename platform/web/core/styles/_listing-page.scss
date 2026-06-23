@@ -1,0 +1,333 @@
+/**
+ * Nafura Platform - Listing Page Layout
+ *
+ * Use with .nf-page (page container) and .nf-page__section (section padding).
+ * Add .nf-listing-page--sections for flex layout (header/toolbar/pagination content-sized, view fills).
+ * See DESIGN-SYSTEM.md for vertical rhythm, toolbar target height, and section padding.
+ *
+ * - .nf-listing-page--no-spacing  → strip all padding/margin/flex in content area (single source of gaps).
+ * - .nf-listing-page--design      → show section borders (debug).
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Listing page: CSS variables (gaps, section padding)
+   ═══════════════════════════════════════════════════════════════════════════ */
+.nf-listing-page {
+  /** Vertical rhythm: Header → Toolbar (identity & intent) | Toolbar → View | View → Pagination (design system). */
+  --nf-listing-header-to-toolbar-gap: var(--nf-space-5);
+  /** Toolbar and table stacked together (no gap). */
+  --nf-listing-toolbar-to-view-gap: 0;
+  --nf-listing-view-to-pagination-gap: var(--nf-space-2);
+  /** Horizontal gap inside toolbar (search | filters | actions). Token from _components.scss. */
+  --nf-listing-toolbar-gap: var(--nf-space-2);
+  /** Gap between the three action buttons (Export, More options, View). */
+  --nf-listing-toolbar-actions-gap: var(--nf-space-4);
+  /** Section container padding (inner padding of header/toolbar/view/pagination). Token from _components.scss. */
+  --nf-listing-section-padding: var(--nf-space-3);
+
+  nf-filter-bar {
+    margin-bottom: 0;
+  }
+
+  nf-pagination {
+    margin-top: 0;
+  }
+
+  .nf-page__section {
+    padding: var(--nf-listing-section-padding);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Reset: no spacing in content area (add .nf-listing-page--no-spacing to wrapper)
+   ═══════════════════════════════════════════════════════════════════════════ */
+.nf-listing-page--no-spacing {
+  padding: var(--nf-page-container-padding) !important;
+  margin: 0 !important;
+  gap: 0 !important;
+
+  .nf-page__section {
+    padding: var(--nf-listing-section-padding) !important;
+    margin: 0 !important;
+    gap: 0 !important;
+  }
+
+  .nf-listing-page__header {
+    margin-bottom: var(--nf-listing-header-to-toolbar-gap) !important;
+  }
+
+  .nf-listing-page__toolbar-view-stack {
+    margin-bottom: var(--nf-listing-view-to-pagination-gap) !important;
+  }
+
+  .nf-listing-page__header,
+  .nf-listing-page__toolbar,
+  .nf-listing-page__pagination {
+    flex: none !important;
+  }
+
+  .nf-listing-page__toolbar-view-stack {
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: var(--nf-listing-toolbar-to-view-gap) !important;
+  }
+
+  .nf-listing-page__toolbar {
+    min-width: 0 !important;
+    padding-bottom: 0 !important; /* Stack flush with table */
+  }
+
+  .nf-listing-page__view {
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    overflow: auto !important;
+    padding-top: 0 !important; /* Stack flush with toolbar */
+  }
+
+  nf-page-header,
+  nf-listing-toolbar,
+  nf-filter-bar,
+  nf-pagination {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .nf-listing-page__view nf-data-table,
+  .nf-listing-page__view nf-loading-state,
+  .nf-listing-page__view nf-error-state,
+  .nf-listing-page__view nf-empty-state {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  nf-page-header::ng-deep {
+    .nf-page-header {
+      padding: var(--nf-page-header-padding-top) 0 var(--nf-page-header-padding-bottom) 0 !important;
+      margin: 0 !important;
+      gap: var(--nf-page-header-row-gap) !important;
+    }
+    .nf-page-header__row {
+      margin: 0 !important;
+      padding: 0 !important;
+      gap: 0 !important;
+    }
+    .nf-page-header__row--two-cols {
+      align-items: flex-start !important;
+      gap: var(--nf-page-header-gap) !important;
+    }
+    .nf-page-header__content {
+      padding: 0 !important;
+      margin: 0 !important;
+      gap: var(--nf-page-header-gap) !important;
+    }
+    .nf-page-header__actions {
+      padding: 0 !important;
+      margin: 0 !important;
+      gap: var(--nf-page-header-actions-gap) !important;
+    }
+  }
+
+  nf-listing-toolbar::ng-deep {
+    .nf-listing-toolbar {
+      padding: var(--nf-listing-toolbar-padding) !important;
+      margin: 0 !important;
+      gap: var(--nf-listing-toolbar-gap) !important;
+      align-items: center !important;
+      min-width: 0 !important;
+    }
+    .nf-listing-toolbar__search {
+      padding: 0 !important;
+      margin: 0 !important;
+      gap: var(--nf-listing-toolbar-gap) !important;
+      min-width: 0 !important;
+      max-width: none !important;
+      flex: 0 0 auto !important;
+      width: auto !important;
+    }
+    .nf-listing-toolbar__filters {
+      padding: 0 !important;
+      margin: 0 !important;
+      gap: var(--nf-listing-toolbar-gap) !important;
+      flex: 0 1 auto !important;
+      min-width: 0 !important;
+    }
+    .nf-listing-toolbar__actions {
+      padding: 0 !important;
+      margin: 0 !important;
+      margin-left: auto !important;
+      gap: var(--nf-listing-toolbar-actions-gap) !important;
+    }
+  }
+
+  nf-filter-bar::ng-deep {
+    .nf-filter-bar,
+    .nf-filter-bar__row,
+    .nf-filter-bar__filters {
+      padding: 0 !important;
+      margin: 0 !important;
+      gap: var(--nf-listing-toolbar-gap) !important;
+    }
+  }
+
+  .nf-listing-toolbar__filters nf-filter-bar::ng-deep .nf-filter-bar {
+    row-gap: 0 !important;
+  }
+  .nf-listing-toolbar__filters nf-filter-bar::ng-deep .nf-filter-bar__filters {
+    align-items: center !important;
+  }
+  .nf-listing-toolbar__filters nf-filter-bar::ng-deep .nf-filter-bar__field p-select,
+  .nf-listing-toolbar__filters nf-filter-bar::ng-deep .nf-filter-bar__field p-multiSelect,
+  .nf-listing-toolbar__filters nf-filter-bar::ng-deep .nf-filter-bar__field p-datePicker,
+  .nf-listing-toolbar__filters nf-filter-bar::ng-deep .nf-filter-bar__field p-inputNumber,
+  .nf-listing-toolbar__filters nf-filter-bar::ng-deep .nf-filter-bar__field p-floatlabel,
+  .nf-listing-toolbar__filters nf-filter-bar::ng-deep .nf-filter-bar__filters > nf-button {
+    margin: 0 !important;
+  }
+
+  nf-pagination::ng-deep {
+    .nf-pagination,
+    .mat-mdc-paginator-container {
+      padding: 0 !important;
+      margin: 0 !important;
+      min-height: 0 !important;
+    }
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Section layout: header/toolbar/pagination = content height, view = fills
+   ═══════════════════════════════════════════════════════════════════════════ */
+.nf-listing-page--sections {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 100%;
+  min-height: calc(100vh - var(--nf-topbar-height, 56px));
+
+  .nf-listing-page__header {
+    flex: 0 0 auto;
+    min-height: 0;
+  }
+
+  .nf-listing-page__toolbar-view-stack {
+    flex: 1 1 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--nf-listing-toolbar-to-view-gap);
+  }
+
+  .nf-listing-page__toolbar {
+    flex: 0 0 auto;
+    min-height: 0;
+    min-width: 0;
+  }
+
+  .nf-listing-page__selection {
+    flex: 0 0 auto;
+    min-height: 0;
+  }
+
+  .nf-listing-page__view {
+    flex: 1 1 0;
+    min-height: 0;
+    overflow: auto;
+  }
+
+  .nf-listing-page__pagination {
+    flex: 0 0 auto;
+    min-height: 0;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Selection Mode: De-emphasize toolbar when bulk actions are primary context
+   Rule: When selection bar visible, bulk actions are the focus, not toolbar
+   ═══════════════════════════════════════════════════════════════════════════ */
+.nf-listing-page--selection-active {
+  /* De-emphasize toolbar actions when in selection mode */
+  .nf-listing-page__toolbar {
+    .nf-listing-toolbar__actions {
+      opacity: 0.6;
+      transition: opacity 0.15s ease;
+      
+      &:hover,
+      &:focus-within {
+        opacity: 1;
+      }
+    }
+  }
+  
+  /* Selection bar gets visual anchor - already handled in component */
+  .nf-listing-page__selection {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+/* Alternative: use :has() selector if browser support allows */
+.nf-listing-page:has(.nf-listing-page__selection) {
+  .nf-listing-page__toolbar .nf-listing-toolbar__actions {
+    opacity: 0.6;
+    transition: opacity 0.15s ease;
+    
+    &:hover,
+    &:focus-within {
+      opacity: 1;
+    }
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Design mode: section borders (debug)
+   ═══════════════════════════════════════════════════════════════════════════ */
+.nf-listing-page--design {
+  --nf-listing-section-border: var(--nf-separator-border);
+
+  .nf-listing-page__header,
+  .nf-listing-page__toolbar,
+  .nf-listing-page__view,
+  .nf-listing-page__pagination {
+    border: var(--nf-listing-section-border);
+    background-color: var(--nf-surface-section);
+    border-radius: var(--nf-radius-md);
+  }
+
+  .nf-listing-page__header nf-page-header .nf-page-header__row {
+    outline: 1px dashed rgba(59, 130, 246, 0.7);
+    outline-offset: 2px;
+  }
+  .nf-listing-page__header nf-page-header .nf-page-header__row--one-col {
+    outline-color: rgba(34, 197, 94, 0.7);
+  }
+  .nf-listing-page__header nf-page-header .nf-page-header__row--two-cols {
+    outline-color: rgba(168, 85, 247, 0.7);
+  }
+  .nf-listing-page__header nf-page-header .nf-page-header__content {
+    outline: 1px dashed rgba(234, 88, 12, 0.7);
+    outline-offset: 1px;
+  }
+  .nf-listing-page__header nf-page-header .nf-page-header__actions {
+    outline: 1px dashed rgba(236, 72, 153, 0.7);
+    outline-offset: 1px;
+  }
+
+  .nf-listing-page__toolbar nf-listing-toolbar .nf-listing-toolbar {
+    outline: 1px dashed rgba(59, 130, 246, 0.6);
+    outline-offset: 2px;
+  }
+  .nf-listing-page__toolbar nf-listing-toolbar .nf-listing-toolbar__search {
+    outline: 1px dashed rgba(34, 197, 94, 0.7);
+    outline-offset: 1px;
+  }
+  .nf-listing-page__toolbar nf-listing-toolbar .nf-listing-toolbar__filters {
+    outline: 1px dashed rgba(234, 88, 12, 0.7);
+    outline-offset: 1px;
+  }
+  .nf-listing-page__toolbar nf-listing-toolbar .nf-listing-toolbar__actions {
+    outline: 1px dashed rgba(236, 72, 153, 0.7);
+    outline-offset: 1px;
+  }
+}

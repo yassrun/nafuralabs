@@ -1,0 +1,35 @@
+<nf-page-shell>
+  <nf-page-header [config]="headerConfig"></nf-page-header>
+
+  @if (mode() === 'view' && item(); as ao) {
+    <div class="ao-toolbar">
+      <a [routerLink]="['/achats/appels-offres', ao.id, 'comparatif']" class="ao-toolbar__link">
+        {{ 'achats.appelOffre.actions.openComparatif' | translate }}
+      </a>
+    </div>
+    <section class="ao-approval">
+      <span class="ao-approval__label">{{ 'achats.common.approval.labelAttribution' | translate }}</span>
+      <app-submit-approval-button
+        entityType="AO"
+        [entityId]="ao.id"
+        [entityRef]="ao.numero"
+        [entitySummary]="ao.numero + ' — ' + ao.objet + (ao.totalAttribueHt != null ? ' — ' + (ao.totalAttribueHt | number) + ' MAD HT attribués' : '')"
+          [montantConcerne]="ao.totalAttribueHt ?? ao.reponses[0].totalHt"
+        [chantierId]="ao.chantierId"
+        [chantierCode]="ao.chantierCode"
+        [disabled]="ao.status === 'BROUILLON' || ao.status === 'INFRUCTUEUSE' || ao.status === 'ANNULEE'">
+      </app-submit-approval-button>
+    </section>
+  }
+
+  <nf-entity-detail
+    #detail
+    [config]="config"
+    [mode]="mode()"
+    [item]="item()"
+    [lookups]="lookups()"
+    [loading]="isLoading()"
+    [saving]="isSaving()"
+    (action)="onAction($event)">
+  </nf-entity-detail>
+</nf-page-shell>

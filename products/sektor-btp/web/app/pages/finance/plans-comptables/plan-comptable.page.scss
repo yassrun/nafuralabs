@@ -1,0 +1,126 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.pc {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 20px 32px;
+}
+
+.pc__tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-bottom: 1px solid var(--nf-color-border);
+}
+
+.pc__tab {
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--nf-color-text-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pc__tab:hover {
+  color: var(--nf-text-primary);
+}
+
+.pc__tab--active {
+  color: var(--nf-color-primary-700);
+  border-bottom-color: var(--nf-color-primary-700);
+}
+
+.pc__count {
+  background: var(--nf-color-primary-50);
+  color: var(--nf-color-primary-700);
+  font-size: 11px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+.pc__tab--active .pc__count {
+  background: var(--nf-color-primary-100);
+}
+
+.pc__tab-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+}
+
+.pc__btn {
+  padding: 7px 14px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pc__btn--primary {
+  background: var(--nf-color-primary-700);
+  color: var(--nf-color-surface);
+}
+
+.pc__btn--primary:hover {
+  background: var(--nf-color-primary-800);
+}
+
+.pc__btn--ghost {
+  background: var(--nf-color-surface);
+  color: var(--nf-color-primary-700);
+  border-color: var(--nf-color-primary-200);
+}
+
+.pc__btn--ghost:hover {
+  background: var(--nf-color-primary-50);
+}
+
+.pc__stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.pc__stat {
+  background: var(--nf-color-surface);
+  border: 1px solid var(--nf-color-border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pc__stat-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--nf-color-text-secondary);
+  font-weight: 600;
+}
+
+.pc__stat strong {
+  color: var(--nf-text-primary);
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.pc__loading {
+  padding: 24px;
+  text-align: center;
+  color: var(--nf-color-text-secondary);
+  background: var(--nf-color-bg-subtle);
+  border-radius: 10px;
+}

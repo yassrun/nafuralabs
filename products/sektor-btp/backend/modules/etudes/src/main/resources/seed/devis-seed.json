@@ -1,0 +1,97 @@
+{
+  "devis": [
+    {
+      "numero": "DV-2026-0001",
+      "clientId": "cli-001",
+      "clientName": "OCP Promotion SA",
+      "contactClient": "M. Lahcen Ouali",
+      "objet": "Construction Résidence Yasmine — Lot Gros Œuvre",
+      "ville": "Casablanca",
+      "dateEmission": "2026-01-22",
+      "dateValidite": "2026-03-22",
+      "metreNumero": "MET-2026-001",
+      "bibliothequeReference": "Bordereau standard SEYRURA 2026",
+      "conditionsPaiement": "30% acompte, 60% sit. mensuelles, 10% retenue de garantie 12 mois",
+      "delaiExecutionJours": 540,
+      "tvaTaux": 20,
+      "status": "APPROUVE",
+      "chantierGenereId": "CH-2025-001",
+      "notes": "Devis approuvé — chantier généré le 18/02/2026",
+      "lignes": [
+        {
+          "ordre": 1,
+          "type": "CHAPITRE",
+          "code": "LOT-01",
+          "designation": "Lot 01 — Gros Œuvre"
+        },
+        {
+          "ordre": 2,
+          "parentOrdre": 1,
+          "type": "OUVRAGE",
+          "code": "1.1",
+          "designation": "Semelles isolées BA",
+          "ouvrageCode": "OUV-G01-001",
+          "unite": "m³",
+          "quantite": 37.5,
+          "prixUnitaireHt": 3050,
+          "totalHt": 114375
+        },
+        {
+          "ordre": 3,
+          "parentOrdre": 1,
+          "type": "OUVRAGE",
+          "code": "1.2",
+          "designation": "Longrines BA",
+          "ouvrageCode": "OUV-G01-002",
+          "unite": "m³",
+          "quantite": 64,
+          "prixUnitaireHt": 3220,
+          "totalHt": 206080
+        }
+      ],
+      "versions": [
+        {
+          "version": 1,
+          "date": "2026-01-22",
+          "totalHt": 320455,
+          "modifications": "Version initiale — soumission"
+        }
+      ]
+    },
+    {
+      "numero": "DV-2026-0002",
+      "clientId": "cli-006",
+      "clientName": "Atlas Hospitality",
+      "contactClient": "Mme. Nadia Benkirane",
+      "objet": "Hôtel Atlas Marrakech — Aménagement chambres niveau 3",
+      "ville": "Marrakech",
+      "dateEmission": "2026-04-10",
+      "dateValidite": "2026-06-10",
+      "conditionsPaiement": "30j fin de mois — virement",
+      "delaiExecutionJours": 90,
+      "tvaTaux": 20,
+      "status": "NEGOCIATION",
+      "notes": "Client négocie une remise de 5% sur le total",
+      "lignes": [
+        {
+          "ordre": 1,
+          "type": "CHAPITRE",
+          "code": "LOT-01",
+          "designation": "Lot 01 — Revêtements"
+        },
+        {
+          "ordre": 2,
+          "parentOrdre": 1,
+          "type": "OUVRAGE",
+          "code": "1.1",
+          "designation": "Carrelage sol chambre",
+          "ouvrageCode": "OUV-G01-003",
+          "unite": "m²",
+          "quantite": 420,
+          "prixUnitaireHt": 185,
+          "totalHt": 77700
+        }
+      ]
+    }
+  ]
+}

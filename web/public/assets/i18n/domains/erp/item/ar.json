@@ -1,0 +1,54 @@
+{
+  "item": {
+    "navigation": {
+      "title": "الصنف",
+      "description": "مجال الصنف",
+      "items": "الأصناف",
+      "itemCategories": "فئات الأصناف",
+      "itemTypes": "أنواع الأصناف",
+      "unitOfMeasures": "وحدات القياس",
+      "uoMCategories": "فئات وحدات القياس",
+      "itemPrices": "أسعار الأصناف"
+    }
+  },
+  "common": {
+    "subsections": {
+      "operations": "العمليات",
+      "configuration": "الإعدادات"
+    }
+  },
+  "directory": {
+    "fields": {
+      "code": "الرمز",
+      "name": "الاسم",
+      "description": "الوصف",
+      "itemType": "معرّف نوع الصنف",
+      "itemCategory": "معرّف فئة الصنف",
+      "unitOfMeasure": "معرّف وحدة القياس",
+      "sku": "SKU",
+      "parent": "معرّف الأصل",
+      "itemId": "معرّف الصنف",
+      "priceType": "نوع السعر",
+      "currencyId": "معرّف العملة",
+      "unitPrice": "سعر الوحدة",
+      "minQuantity": "الكمية الدنيا",
+      "effectiveFrom": "ساري من",
+      "effectiveTo": "ساري إلى"
+    },
+    "sections": {
+      "general": "عام",
+      "classification": "التصنيف",
+      "measurement": "القياس",
+      "status": "الحالة"
+    }
+  },
+  "measurement": {
+    "fields": {
+      "code": "الرمز",
+      "name": "الاسم",
+      "category": "معرّف فئة الوحدة",
+      "categoryCode": "الرمز",
+      "categoryName": "الاسم"
+    }
+  }
+}

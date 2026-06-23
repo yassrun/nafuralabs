@@ -1,0 +1,26 @@
+{
+  "entity": "PickingStrategy",
+  "fields": {
+    "code": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "name": {
+      "maxLength": 120
+    },
+    "description": {
+      "maxLength": 2000
+    },
+    "algorithm": {
+      "maxLength": 120
+    },
+    "priorityMode": {
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

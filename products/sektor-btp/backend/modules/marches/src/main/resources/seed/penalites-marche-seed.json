@@ -1,0 +1,40 @@
+{
+  "penalites": [
+    {
+      "id": "pen-001",
+      "numero": "PEN-2026-001",
+      "contratMarcheId": "mar-003",
+      "marcheNumero": "MAR-2025-018",
+      "type": "RETARD",
+      "motif": "Retard réception provisoire — lots finitions",
+      "montantHt": "291900",
+      "joursRetard": 25,
+      "dateConstat": "2026-04-15",
+      "status": "VALIDEE"
+    },
+    {
+      "id": "pen-002",
+      "numero": "PEN-2026-002",
+      "contratMarcheId": "mar-002",
+      "marcheNumero": "MAR-2026-002",
+      "type": "RETARD",
+      "motif": "Retard phasage tablier — impact planning",
+      "montantHt": "518250",
+      "joursRetard": 12,
+      "dateConstat": "2026-03-15",
+      "status": "BROUILLON"
+    },
+    {
+      "id": "pen-003",
+      "numero": "PEN-2026-003",
+      "contratMarcheId": "mar-001",
+      "marcheNumero": "MAR-2026-001",
+      "type": "QUALITE",
+      "motif": "Non-conformité étanchéité terrasses R+4",
+      "montantHt": "150000",
+      "joursRetard": 0,
+      "dateConstat": "2026-02-20",
+      "status": "VALIDEE"
+    }
+  ]
+}

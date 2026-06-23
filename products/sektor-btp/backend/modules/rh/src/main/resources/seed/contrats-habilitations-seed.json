@@ -1,0 +1,39 @@
+{
+  "contrats": [
+    {
+      "id": "ctr-001",
+      "employeId": "emp-001",
+      "typeContrat": "CDI",
+      "dateDebut": "2021-03-01",
+      "salaireBase": "4200",
+      "status": "EN_COURS"
+    },
+    {
+      "id": "ctr-002",
+      "employeId": "emp-005",
+      "typeContrat": "CDI",
+      "dateDebut": "2020-03-15",
+      "salaireBase": "8500",
+      "status": "SIGNE",
+      "signatureDataUrl": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+    }
+  ],
+  "habilitations": [
+    {
+      "id": "hab-001",
+      "employeId": "emp-001",
+      "code": "CACES_R482",
+      "libelle": "CACES R482 — Chariots élévateurs",
+      "dateObtention": "2023-06-15",
+      "dateExpiration": "2026-06-15"
+    },
+    {
+      "id": "hab-002",
+      "employeId": "emp-004",
+      "code": "SST",
+      "libelle": "Sauveteur Secouriste du Travail",
+      "dateObtention": "2024-01-20",
+      "dateExpiration": "2026-05-20"
+    }
+  ]
+}

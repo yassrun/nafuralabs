@@ -1,0 +1,16 @@
+{
+  "id": "workflow",
+  "name": "Workflow",
+  "description": "Workflow engine",
+  "type": "feature",
+  "layer": "feature",
+  "group": "collaboration",
+  "provides": {
+    "backend": {
+      "gradle": ":platform:features:collaboration:workflow",
+      "packages": ["ma.nafura.platform.collaboration.workflow"]
+    }
+  },
+  "requires": { "core": ["identity", "tenancy"], "features": [] },
+  "manifest": { "key": "workflow" }
+}

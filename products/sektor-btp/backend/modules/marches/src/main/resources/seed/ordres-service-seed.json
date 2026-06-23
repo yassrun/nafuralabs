@@ -1,0 +1,51 @@
+{
+  "ordresService": [
+    {
+      "id": "os-001",
+      "numero": "OS-2026-001",
+      "contratMarcheId": "mar-002",
+      "chantierId": "ch-002",
+      "chantierCode": "CH-2025-002",
+      "type": "COMMENCEMENT",
+      "dateEmission": "2026-01-10",
+      "emetteur": "MOA",
+      "objet": "Ordre de commencement",
+      "description": "Démarrage travaux rive gauche — zone pile P3.",
+      "impactDelai": 0,
+      "impactCout": "0",
+      "status": "RECEPTIONNE",
+      "dateAccuseReception": "2026-01-11"
+    },
+    {
+      "id": "os-002",
+      "numero": "OS-2026-002",
+      "contratMarcheId": "mar-002",
+      "chantierId": "ch-002",
+      "chantierCode": "CH-2025-002",
+      "type": "MODIFICATION",
+      "dateEmission": "2026-03-02",
+      "emetteur": "MOE",
+      "objet": "Modification phasage tablier",
+      "description": "Report fabrication préfabriqués — ajustement planning.",
+      "impactDelai": 12,
+      "impactCout": "0",
+      "status": "EMIS"
+    },
+    {
+      "id": "os-003",
+      "numero": "OS-2026-003",
+      "contratMarcheId": "mar-001",
+      "chantierId": "ch-001",
+      "chantierCode": "CH-2025-001",
+      "type": "ARRET",
+      "dateEmission": "2026-04-01",
+      "emetteur": "MOA",
+      "objet": "OS d'arrêt travaux",
+      "description": "Arrêt pour coordination réseaux VRD.",
+      "impactDelai": 0,
+      "impactCout": "0",
+      "status": "RECEPTIONNE",
+      "dateAccuseReception": "2026-04-02"
+    }
+  ]
+}

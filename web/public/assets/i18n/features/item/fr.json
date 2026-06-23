@@ -1,0 +1,59 @@
+{
+  "item": {
+    "fields": {
+      "item": "item Id",
+      "barcode": "value",
+      "barcodeType": "type",
+      "parent": "parent Id",
+      "code": "code",
+      "name": "name",
+      "description": "description",
+      "type": "item Type Id",
+      "itemType": "item Type Id",
+      "itemCategory": "item Category Id",
+      "unitOfMeasure": "unit Of Measure Id",
+      "baseUnit": "base Unit",
+      "sku": "sku"
+    },
+    "sections": {
+      "classification": "classification",
+      "measurement": "measurement"
+    },
+    "navigation": {
+      "barcodes": "Codes-barres",
+      "items": "Articles",
+      "itemCategories": "Item Categories",
+      "itemTypes": "Item Types"
+    },
+    "barcode": {
+      "title": "Codes-barres",
+      "detailTitle": "Détails du code-barres",
+      "newTitle": "Nouveau code-barres"
+    },
+    "item": {
+      "title": "Items",
+      "detailTitle": "Item Details",
+      "newTitle": "New Item"
+    },
+    "itemCategory": {
+      "title": "Item Categories",
+      "detailTitle": "Item Category Details",
+      "newTitle": "New Item Category"
+    },
+    "itemType": {
+      "title": "Item Types",
+      "detailTitle": "Item Type Details",
+      "newTitle": "New Item Type"
+    }
+  },
+  "common": {
+    "fields": {
+      "isActive": "is Active",
+      "description": "description"
+    },
+    "sections": {
+      "general": "general",
+      "status": "status"
+    }
+  }
+}

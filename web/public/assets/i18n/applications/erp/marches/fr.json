@@ -1,0 +1,545 @@
+{
+  "marches": {
+    "module": {
+      "title": "Marchés & Facturation",
+      "shortTitle": "Marchés"
+    },
+    "common": {
+      "actions": {
+        "back": "← Retour à la liste",
+        "cancel": "Annuler",
+        "print": "🖨 Imprimer / PDF",
+        "comptabiliser": "📊 Comptabiliser (OD auto)",
+        "comptabilisee": "✓ Comptabilisée",
+        "voirPlanning": "Voir planning"
+      },
+      "filters": {
+        "allStatuses": "Tous les statuts",
+        "allTypes": "Tous les types"
+      },
+      "emetteur": {
+        "MOA": "MOA",
+        "MOE": "MOE",
+        "NAFURA": "NAFURA"
+      },
+      "modePaiement": {
+        "VIREMENT": "Virement",
+        "CHEQUE": "Chèque",
+        "ESPECES": "Espèces",
+        "AUTRE": "Autre"
+      }
+    },
+    "routes": {
+      "contratsTitle": "Contrats marchés",
+      "contratsCrumb": "Contrats",
+      "contratDetailTitle": "Marché",
+      "contratDetailCrumb": "Détail",
+      "contratCreateTitle": "Nouveau contrat",
+      "contratCreateCrumb": "Nouveau",
+      "avenantsTitle": "Avenants",
+      "avenantsCrumb": "Avenants",
+      "avenantDetailTitle": "Avenant",
+      "avenantDetailCrumb": "Avenant",
+      "facturesTitle": "Factures marchés",
+      "facturesCrumb": "Factures",
+      "factureDetailTitle": "Facture marché",
+      "factureDetailCrumb": "Détail",
+      "cautionsTitle": "Cautions bancaires",
+      "cautionsCrumb": "Cautions",
+      "revisionsPrixTitle": "Révisions de prix K",
+      "revisionsPrixCrumb": "Révisions prix",
+      "penalitesTitle": "Pénalités de retard",
+      "penalitesCrumb": "Pénalités",
+      "dgdTitle": "Décompte général définitif (DGD)",
+      "dgdCrumb": "DGD",
+      "osTitle": "Ordres de service",
+      "osCrumb": "OS"
+    },
+    "contrat": {
+      "listing": {
+        "title": "Marchés & Contrats",
+        "subtitle": "Contrats chantiers BTP Maroc",
+        "breadcrumb": "Contrats",
+        "search": {
+          "placeholder": "N°, chantier, client, objet…"
+        },
+        "count": "{count, plural, one {# marché} other {# marchés}}",
+        "columns": {
+          "numero": "N° Marché",
+          "chantier": "Chantier",
+          "clientMoa": "Client / MOA",
+          "client": "Client",
+          "type": "Type",
+          "nature": "Nature",
+          "montantInitialHt": "Montant Initial HT",
+          "totalHt": "Total HT",
+          "totalAvenants": "Total incl. Av.",
+          "avancement": "Avancement",
+          "avancementPercent": "Avancement %",
+          "os": "OS",
+          "dateOs": "Date OS",
+          "statut": "Statut"
+        },
+        "empty": "Aucun marché correspondant aux filtres.",
+        "exportFilename": "marches-contrats",
+        "createCta": "Nouveau contrat"
+      },
+      "create": {
+        "title": "Nouveau contrat de marché",
+        "subtitle": "Créer un contrat lié à un chantier",
+        "breadcrumb": "Nouveau",
+        "submit": "Créer le contrat",
+        "success": "Contrat de marché créé.",
+        "fields": {
+          "chantier": "Chantier",
+          "chantierPlaceholder": "Sélectionner un chantier…",
+          "client": "Client / MOA",
+          "numero": "N° marché (optionnel)",
+          "intitule": "Intitulé",
+          "type": "Type de marché",
+          "nature": "Nature",
+          "montantInitialHt": "Montant initial HT",
+          "tvaTaux": "TVA (%)",
+          "retenueGarantieTaux": "Retenue de garantie (%)",
+          "dateOrdreService": "Date ordre de service"
+        },
+        "errors": {
+          "required": "Veuillez renseigner le chantier, l'intitulé et un montant HT valide.",
+          "failed": "Impossible de créer le contrat de marché."
+        }
+      },
+      "detail": {
+        "headerTitleFallback": "Marché",
+        "headerCrumbFallback": "Détail",
+        "ras": "RAS 5%",
+        "kpis": {
+          "montantInitialHt": "Montant initial HT",
+          "avenantsHt": "Avenants HT",
+          "totalHt": "Total marché HT",
+          "factureHt": "Facturé HT",
+          "encaisseHt": "Encaissé HT",
+          "avancement": "Avancement",
+          "pctMarche": "{pct}% du marché"
+        },
+        "tabs": {
+          "identite": "Identité & Conditions",
+          "avenants": "Avenants",
+          "factures": "Factures",
+          "cautions": "Cautions",
+          "revision": "Révision K"
+        },
+        "identite": {
+          "moa": {
+            "title": "Maître d'Ouvrage",
+            "raisonSociale": "Raison sociale",
+            "ice": "ICE",
+            "if": "IF",
+            "rc": "RC",
+            "nature": "Nature"
+          },
+          "caracteristiques": {
+            "title": "Caractéristiques",
+            "type": "Type",
+            "tva": "TVA",
+            "retenueGarantie": "Retenue de garantie",
+            "retenueSource": "Retenue source",
+            "avanceForfaitaire": "Avance forfaitaire"
+          },
+          "calendrier": {
+            "title": "Calendrier",
+            "ordreService": "Ordre de service",
+            "delaiExecution": "Délai d'exécution",
+            "delaiExecutionMois": "{count} mois",
+            "penaliteRetardJour": "Pénalité retard / jour",
+            "receptionProvisoire": "Récep. provisoire",
+            "receptionDefinitive": "Récep. définitive"
+          }
+        },
+        "avenants": {
+          "columns": {
+            "numero": "N° Avenant",
+            "type": "Type",
+            "objet": "Objet",
+            "montantHt": "Montant HT",
+            "delaiPlus": "Délai +",
+            "signature": "Signature",
+            "statut": "Statut"
+          },
+          "delaiJoursPlus": "+{count} j",
+          "empty": "Aucun avenant sur ce marché."
+        },
+        "factures": {
+          "columns": {
+            "numero": "N° Facture",
+            "brutHt": "Brut HT",
+            "rg": "RG ({rate}%)",
+            "netHt": "Net HT",
+            "tva": "TVA",
+            "ras": "RAS {rate}%",
+            "netAPayer": "Net à payer",
+            "emission": "Émission",
+            "echeance": "Échéance",
+            "statut": "Statut",
+            "total": "TOTAL"
+          },
+          "empty": "Aucune facture émise sur ce marché."
+        },
+        "cautions": {
+          "columns": {
+            "numero": "N°",
+            "type": "Type",
+            "banque": "Banque",
+            "montant": "Montant",
+            "emission": "Émission",
+            "validite": "Validité",
+            "levee": "Levée",
+            "statut": "Statut"
+          },
+          "empty": "Aucune caution enregistrée."
+        },
+        "revision": {
+          "title": "Formule de révision K",
+          "formula": "K = {fixe} (fixe) + {terme}",
+          "columns": {
+            "indice": "Indice",
+            "coefficient": "Coefficient",
+            "valeurBase": "Valeur base (date offre)"
+          },
+          "empty": "Ce marché n'est pas soumis à révision de prix."
+        },
+        "empty": {
+          "title": "Marché introuvable",
+          "message": "Identifiant non reconnu.",
+          "action": "Retour à la liste"
+        }
+      }
+    },
+    "avenant": {
+      "listing": {
+        "title": "Avenants",
+        "subtitle": "Modifications et avenants aux marchés",
+        "breadcrumb": "Avenants",
+        "search": {
+          "placeholder": "N°, marché, objet…"
+        },
+        "count": "{count, plural, one {# avenant} other {# avenants}}",
+        "columns": {
+          "numero": "N° Avenant",
+          "marche": "Marché",
+          "type": "Type",
+          "objet": "Objet",
+          "montantHt": "Montant HT",
+          "delaiPlus": "Délai +",
+          "signature": "Signature",
+          "statut": "Statut"
+        },
+        "delaiJoursPlus": "+{count} j",
+        "empty": "Aucun avenant trouvé."
+      },
+      "detail": {
+        "empty": {
+          "title": "Avenant introuvable",
+          "backLink": "Retour à la liste"
+        },
+        "approval": {
+          "label": "Workflow d'approbation"
+        },
+        "propagate": {
+          "title": "Impact chantier & marché",
+          "hint": "Met à jour le budget chantier (+ impact HT), prolonge la fin prévue si applicable, recalcule montant total marché et réajuste les cautions actives (démo).",
+          "cta": "Propager impact",
+          "done": "Impact propagé le {date}"
+        },
+        "sections": {
+          "identite": {
+            "title": "Identité",
+            "marche": "Marché",
+            "chantier": "Chantier",
+            "type": "Type",
+            "statut": "Statut"
+          },
+          "montants": {
+            "title": "Montants & délais",
+            "impactHt": "Impact HT",
+            "prolongation": "Prolongation",
+            "dateSignature": "Date signature"
+          },
+          "motif": {
+            "title": "Motif"
+          }
+        },
+        "prolongationJours": "+{count} jours",
+        "messages": {
+          "confirmPropagate": "Propager l'impact de l'avenant signé ?\n\n{recap}",
+          "failPropagate": "Propagation impossible (avenant déjà propagé ou non signé).",
+          "impactBudget": "Budget chantier {code} : {sign}{amount} MAD HT",
+          "impactFin": "Fin prévue : +{days} j",
+          "impactFinUnchanged": "Fin prévue : inchangée",
+          "impactCautions": "Cautions actives (définitive / restitution) : réajustement proportionnel",
+          "auditPropagation": "Propagation impact — budget Δ {budget} MAD HT, nouveau marché {marche} MAD HT, {n} caution(s), +{days} j calendrier"
+        }
+      }
+    },
+    "factureMarche": {
+      "listing": {
+        "title": "Factures marchés",
+        "subtitle": "Facturation situations de travaux",
+        "breadcrumb": "Factures",
+        "kpis": {
+          "totalEmisHt": "Total émis HT",
+          "totalNetAPayer": "Total net à payer",
+          "enRetard": "Factures en retard"
+        },
+        "search": {
+          "placeholder": "N°, marché, client…"
+        },
+        "count": "{count, plural, one {# facture} other {# factures}}",
+        "columns": {
+          "numero": "N° Facture",
+          "marche": "Marché",
+          "client": "Client",
+          "brutHt": "Brut HT",
+          "rg": "RG",
+          "tva": "TVA",
+          "netAPayer": "Net à payer",
+          "emission": "Émission",
+          "echeance": "Échéance",
+          "statut": "Statut"
+        },
+        "empty": "Aucune facture."
+      },
+      "detail": {
+        "marcheRef": "Marché",
+        "decompte": {
+          "title": "Décompte financier",
+          "montantBrutHt": "Montant brut HT (situations)",
+          "deductionAvance": "Déduction avance forfaitaire",
+          "retenueGarantie": "Retenue de garantie ({rate}%)",
+          "netHt": "Net HT",
+          "tva": "TVA {rate}%",
+          "netTtc": "Net TTC",
+          "retenueSource": "Retenue à la source {rate}% (art. 158 CGI)",
+          "timbreFiscal": "Timbre fiscal (paiement espèces)",
+          "netAPayer": "NET À PAYER"
+        },
+        "meta": {
+          "dateEmission": "Date d'émission",
+          "echeance": "Échéance",
+          "overdue": "EN RETARD"
+        },
+        "paiements": {
+          "title": "Paiements reçus",
+          "columns": {
+            "date": "Date",
+            "reference": "Référence",
+            "mode": "Mode",
+            "montant": "Montant"
+          }
+        },
+        "actions": {
+          "back": "← Retour à la liste",
+          "print": "🖨 Imprimer / PDF",
+          "comptabiliser": "📊 Comptabiliser (OD auto)",
+          "comptabilisee": "✓ Comptabilisée"
+        },
+        "od": {
+          "title": "Écriture comptable générée",
+          "balanced": "Équilibrée",
+          "unbalanced": "Déséquilibrée",
+          "columns": {
+            "compte": "Compte",
+            "libelle": "Libellé",
+            "debit": "Débit",
+            "credit": "Crédit",
+            "totaux": "TOTAUX"
+          },
+          "linkBefore": "→ Détail dans ",
+          "linkText": "l'administration des mappings comptables",
+          "linkAfter": "."
+        },
+        "empty": {
+          "title": "Facture introuvable",
+          "message": "Identifiant non reconnu.",
+          "action": "Retour à la liste"
+        }
+      },
+      "print": {
+        "ids": {
+          "ice": "ICE",
+          "if": "I.F.",
+          "rc": "R.C.",
+          "taxePro": "Taxe Prof.",
+          "cnss": "CNSS"
+        },
+        "docTitle": "FACTURE N° {numero}",
+        "dateEmissionLabel": "Date d'émission : {date}",
+        "dateEcheanceLabel": "Date d'échéance : {date}",
+        "partieClient": {
+          "title": "Client (MOA)",
+          "iceLine": "ICE : {value}",
+          "ifLine": "I.F. : {value}"
+        },
+        "partieRef": {
+          "title": "Références",
+          "marcheLine": "Marché : {numero}",
+          "chantierLine": "Chantier : {code}"
+        },
+        "decompte": {
+          "designation": "Désignation",
+          "montantHt": "Montant (MAD HT)",
+          "travauxExecutes": "Travaux exécutés — situations de travaux",
+          "deductionAvance": "Déduction avance forfaitaire versée",
+          "retenueGarantie": "Retenue de garantie {rate}%",
+          "netHt": "Montant Net HT",
+          "tva": "TVA {rate}%",
+          "netTtc": "Montant Net TTC",
+          "retenueSource": "Retenue à la source {rate}% (Art. 158 CGI)",
+          "timbreFiscal": "Timbre fiscal",
+          "netAPayer": "NET À PAYER"
+        },
+        "conditions": {
+          "modeLabel": "Mode de règlement :",
+          "modeValue": "Virement bancaire",
+          "ribLabel": "RIB :",
+          "ribValue": "XXX XXX XXXXXXXXXXXXXXXX XX (Attijariwafa Bank)",
+          "legal": "En cas de retard de paiement, des pénalités au taux légal en vigueur au Maroc seront appliquées conformément aux dispositions de la loi 49-99."
+        },
+        "signatures": {
+          "prestataire": "Cachet & Signature du Prestataire",
+          "moa": "Bon pour accord — Cachet & Signature du MOA"
+        },
+        "footer": {
+          "capitalLine": "{nom} — {forme} au capital de {capital} MAD — {rc}",
+          "idsLine": "ICE {ice} · I.F. {if} · CNSS {cnss}"
+        }
+      }
+    },
+    "caution": {
+      "listing": {
+        "title": "Cautions bancaires",
+        "subtitle": "Cautions provisoires, définitives, RG et restitution avance",
+        "breadcrumb": "Cautions",
+        "board": {
+          "ariaLabel": "Synthèse par statut",
+          "actives": "Actives",
+          "aRenouveler": "À renouveler (< 30 j)",
+          "mainlevees": "Mainlevées",
+          "finPrefix": "fin {date}",
+          "emptyAlert": "Aucune alerte",
+          "empty": "Aucune"
+        },
+        "search": {
+          "placeholder": "N°, marché, banque…"
+        },
+        "count": "{count, plural, one {# caution} other {# cautions}}",
+        "alert": "⚠ {count} expiration(s) < 30j",
+        "columns": {
+          "numero": "N°",
+          "marche": "Marché",
+          "type": "Type",
+          "banque": "Banque",
+          "montant": "Montant",
+          "emission": "Émission",
+          "validite": "Validité",
+          "levee": "Levée",
+          "statut": "Statut"
+        },
+        "empty": "Aucune caution trouvée."
+      }
+    },
+    "dgd": {
+      "title": "Décompte général définitif (DGD)",
+      "subtitle": "Clôture marché — cumul situations, RG, K, pénalités (Task 07 M-MAR-02)",
+      "breadcrumb": "DGD",
+      "columns": {
+        "numero": "N° DGD",
+        "marche": "Marché",
+        "cumulSituationsTtc": "Cumul situations TTC",
+        "rg": "RG",
+        "k": "K",
+        "penalites": "Pénalités",
+        "reprisesRg": "Reprises RG",
+        "netAPayer": "Net à payer",
+        "statut": "Statut"
+      },
+      "empty": "Aucun DGD.",
+      "note": "Formule : net = cumul situations TTC − retenue de garantie + reprises RG − pénalités + révision K. PDF officiel CCAG-T (démo) : à brancher sur génération document."
+    },
+    "ordreService": {
+      "title": "Ordres de service",
+      "subtitle": "OS MOA / MOE — impact délai & coût (Task 07 M-MAR-04)",
+      "breadcrumb": "OS",
+      "columns": {
+        "numero": "N° OS",
+        "marche": "Marché",
+        "chantier": "Chantier",
+        "type": "Type",
+        "emetteur": "Émetteur",
+        "objet": "Objet",
+        "deltaDelai": "Δ délai (j)",
+        "statut": "Statut",
+        "approbation": "Approbation"
+      },
+      "empty": "Aucun ordre de service.",
+      "note": "Un OS d'arrêt déclenche une pause sur le planning chantier (intégration Gantt : Task 07 / Task 05)."
+    },
+    "revisionsPrix": {
+      "title": "Révisions de prix",
+      "subtitle": "Formule K — Indices ANP-IAB Maroc",
+      "breadcrumb": "Révisions prix",
+      "indices": {
+        "title": "Référentiel indices BTP (ANP-IAB)",
+        "columns": {
+          "mois": "Mois",
+          "valeur": "Valeur",
+          "deltaPercent": "Δ%"
+        }
+      },
+      "coefK": {
+        "title": "Coefficients K par marché révisable",
+        "labelMois": "Mois de calcul :",
+        "columns": {
+          "marche": "Marché",
+          "type": "Type formule",
+          "termeFixe": "Terme fixe",
+          "kCalcule": "K calculé"
+        },
+        "indiceMissing": "indice manquant",
+        "typeFormulaSummary": "a={fixe} + {n} terme(s)"
+      },
+      "empty": "Aucun marché révisable.",
+      "formula": "Formule : <code>K = a (fixe) + Σ bᵢ × (Indice courant / Indice base)</code> · Source indices : ANP-IAB publiés mensuellement."
+    },
+    "penalites": {
+      "title": "Pénalités de retard",
+      "subtitle": "Calcul automatique selon CCAG-T — marchés en retard",
+      "breadcrumb": "Pénalités",
+      "summary": {
+        "enRetard": "Marchés avec retard",
+        "totalPenalites": "Total pénalités applicables",
+        "totalApplicables": "À déduire prochaine facture"
+      },
+      "columns": {
+        "marche": "Marché",
+        "chantier": "Chantier",
+        "client": "Client",
+        "montantMarcheHt": "Montant marché HT",
+        "tauxJour": "Taux / jour",
+        "finContractuelle": "Fin contractuelle",
+        "finReelle": "Fin réelle",
+        "joursRetard": "Jours retard",
+        "penalite": "Pénalité",
+        "statut": "Statut"
+      },
+      "finReelleEnCours": "En cours",
+      "tauxJourSuffix": "{rate}% / j",
+      "statuses": {
+        "applicable": "Applicable",
+        "enCours": "En cours",
+        "grace": "Grâce contractuelle"
+      },
+      "empty": "Aucun marché en retard.",
+      "note": "Calcul : Pénalité = Montant marché HT × Taux/jour × Jours de retard. Les pénalités sont applicables à partir du lendemain de la date de fin contractuelle. Une remise gracieuse peut être accordée via workflow approbation."
+    }
+  }
+}

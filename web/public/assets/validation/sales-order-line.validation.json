@@ -1,0 +1,41 @@
+{
+  "entity": "SalesOrderLine",
+  "fields": {
+    "salesOrderId": {
+      "required": true
+    },
+    "lineNumber": {
+      "required": true,
+      "min": 1
+    },
+    "description": {
+      "required": true,
+      "maxLength": 200
+    },
+    "quantity": {
+      "required": true,
+      "min": 0.0001
+    },
+    "unitPrice": {
+      "required": true,
+      "min": 0
+    },
+    "discountPercent": {
+      "min": 0,
+      "max": 100
+    },
+    "taxAmount": {
+      "min": 0
+    },
+    "lineTotal": {
+      "required": true,
+      "min": 0
+    },
+    "deliveredQuantity": {
+      "min": 0
+    },
+    "invoicedQuantity": {
+      "min": 0
+    }
+  }
+}

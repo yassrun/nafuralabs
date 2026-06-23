@@ -1,0 +1,187 @@
+{
+  "common": {
+    "logout": "Déconnexion",
+    "comingSoon": "Bientôt disponible",
+    "brandName": "Doxura",
+    "tagline": "par Seyrura"
+  },
+  "docExtractor": {
+    "navigation": {
+      "title": "Extracteur de Documents",
+      "extraction": "Extraction",
+      "records": "Enregistrements",
+      "documents": "Documents",
+      "docTypes": "Types de Documents",
+      "settings": "Paramètres",
+      "extract": "Espace de Travail d'Extraction",
+      "workspace": "Espace de Travail",
+      "collapse": "Réduire la barre"
+    },
+    "workspace": {
+      "title": "Extraction de documents",
+      "loading": "Chargement des types de documents…",
+      "noTypes": "Aucun type de document disponible.",
+      "failedToLoad": "Échec du chargement des types de documents.",
+      "selectType": "Sélectionnez un type de document dans la barre latérale pour initialiser l'espace de travail.",
+      "processingDocuments": "Traitement des documents...",
+      "synchronizingRules": "Synchronisation des règles d'extraction...",
+      "restoringSession": "Restauration de la session...",
+      "importDocument": "Importer un Document",
+      "importDocumentTooltip": "Importer un document depuis un fichier, un scanner ou une source externe",
+      "extracting": "Extraction des données du document...",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "export": "Exporter",
+      "excelSpreadsheet": "Feuille de calcul Excel (.xlsx)",
+      "seyruraIntegration": "Intégration Seyrura ERP",
+      "status": "Statut",
+      "created": "Créé",
+      "document": "Document",
+      "noRecords": "Aucun enregistrement validé pour le moment. Utilisez <b>Importer un Document</b> pour en créer un.",
+      "selectDocType": "Sélectionnez un type de document",
+      "openStoredDocument": "Ouvrir le document stocké",
+      "notStored": "Non stocké"
+    },
+    "contextBar": {
+      "domain": "Domaine",
+      "documentType": "Type de Document",
+      "schemaVersion": "Version du Schéma",
+      "schemaDescription": "Ce schéma définit comment les champs sont extraits de vos documents.",
+      "settings": "Paramètres",
+      "openSettings": "Ouvrir les paramètres d'extraction"
+    },
+    "status": {
+      "draft": "Brouillon",
+      "draftTooltip": "Document existe, données modifiables, sauvegarde automatique continue",
+      "validated": "Validé",
+      "validatedTooltip": "Données explicitement validées, document exploitable",
+      "invalid": "Invalide",
+      "invalidTooltip": "Le document ne satisfait pas les exigences de validation",
+      "corrected": "Corrigé",
+      "correctedTooltip": "Données corrigées manuellement pour correspondre à la source",
+      "rejected": "Rejeté",
+      "rejectedTooltip": "Document invalide, illisible ou mauvais type",
+      "exported": "Exporté",
+      "exportedTooltip": "Envoyé vers ERP / Inventaire",
+      "error": "Erreur",
+      "errorTooltip": "Une erreur s'est produite lors du traitement"
+    },
+    "workflow": {
+      "badges": {
+        "draftPartial": "Brouillon · Partiel",
+        "draftComplete": "Brouillon · Complet",
+        "draftErrors": "Brouillon · Erreurs ({count})",
+        "validated": "Validé",
+        "rejected": "Rejeté"
+      },
+      "actions": {
+        "validate": "Valider",
+        "validateTooltip": "Valider ce document",
+        "validateDisabledTooltip": "Corrigez les erreurs de validation avant de valider",
+        "reject": "Rejeter",
+        "rejectTooltip": "Rejeter ce document",
+        "close": "Fermer",
+        "cancel": "Annuler"
+      },
+      "validation": {
+        "valid": "Valide",
+        "invalid": "Invalide",
+        "partial": "Partiel",
+        "complete": "Complet",
+        "errorsCount": "Erreurs ({count})",
+        "fixErrorsBeforeValidation": "Corrigez les erreurs de validation avant de valider",
+        "requiredFieldMissing": "{field} est requis",
+        "invalidFieldFormat": "{field} a un format invalide",
+        "moreErrors": "+ {count, plural, one {1 autre erreur} other {# autres erreurs}}"
+      },
+      "autoSave": {
+        "saving": "Enregistrement...",
+        "saved": "Enregistré",
+        "saveError": "Échec de l'enregistrement des modifications"
+      },
+      "reject": {
+        "title": "Rejeter le Document",
+        "reasonLabel": "Raison du rejet",
+        "reasonRequired": "La raison du rejet est requise",
+        "reasonPlaceholder": "Entrez la raison du rejet...",
+        "confirm": "Confirmer le Rejet",
+        "cancel": "Annuler"
+      },
+      "messages": {
+        "validatedSuccess": "Document validé avec succès",
+        "rejectedSuccess": "Document rejeté",
+        "transitionNotAllowed": "Cette transition n'est pas autorisée",
+        "cannotValidateInvalid": "Impossible de valider : le document contient des erreurs de validation"
+      }
+    },
+    "messages": {
+      "chooseTypeFirst": "Choisissez d'abord un domaine et un type de document.",
+      "noRecordsToExport": "Aucun enregistrement à exporter.",
+      "recordRemoved": "Enregistrement supprimé de l'espace de travail.",
+      "undo": "Annuler",
+      "dismiss": "Fermer",
+      "recordNotAdded": "Incompatibilité de version de schéma d'enregistrement ; l'enregistrement n'a pas été ajouté.",
+      "cannotEditVersion": "Impossible de modifier : l'enregistrement utilise le schéma v{version1} mais la session est verrouillée sur v{version2}.",
+      "exportingToSeyrura": "Exportation vers Seyrura Internal...",
+      "onlyBLSupported": "L'export vers Seyrura Internal n'est pris en charge que pour les documents BL (Bon de Livraison).",
+      "storageNotAvailable": "Module de stockage non activé / document non disponible",
+      "tenantIdRequired": "L'ID du locataire est requis pour l'extraction.",
+      "failedToParse": "Échec de l'analyse des données extraites.",
+      "unexpectedError": "Erreur inattendue.",
+      "requestFailed": "Échec de la requête ({status})."
+    },
+    "settings": {
+      "shell": {
+        "eyebrow": "Extracteur de documents",
+        "title": "Paramètres d'Extraction",
+        "general": "Général",
+        "documentType": "Type de Document",
+        "openFromWorkspace": "Ouvrir depuis un type de document dans l'espace de travail.",
+        "openFromWorkspaceTooltip": "Ouvrir depuis un type de document dans l'espace de travail."
+      },
+      "general": {
+        "eyebrow": "Extraction",
+        "title": "Général",
+        "saved": "Enregistré",
+        "autoValidateTitle": "Valider automatiquement tous les enregistrements extraits",
+        "autoValidateDescription": "Lorsqu'elle est activée, les nouveaux enregistrements extraits sont automatiquement marqués comme Validés. (WIP)",
+        "autoValidationPolicy": "Politique de validation automatique",
+        "policyManual": "Manuel (par défaut)",
+        "policyConfidence": "Seuil de confiance (À venir)",
+        "policyAlways": "Toujours (À venir)",
+        "comingSoon": "À venir"
+      }
+    },
+    "filters": {
+      "title": "Filtres",
+      "apply": "Appliquer",
+      "clear": "Effacer",
+      "dateFieldHint": "Sélectionnez un champ date pour activer le filtre"
+    },
+    "dialog": {
+      "reference": "Référence",
+      "items": "Articles",
+      "readyToValidate": "Prêt à valider.",
+      "fixErrorsBeforeValidation": "Corrigez les erreurs de validation avant de valider.",
+      "cancel": "Annuler",
+      "finishLater": "Terminer plus tard",
+      "validate": "Valider",
+      "extracted": "Extrait",
+      "validated": "Validé",
+      "draft": "Brouillon"
+    },
+    "exportResult": {
+      "titleSuccess": "Export réussi",
+      "titleErrors": "Export terminé avec des erreurs",
+      "suppliersCreated": "{count, plural, =0 {Aucun fournisseur créé} one {1 fournisseur créé} other {# fournisseurs créés}}",
+      "itemsCreated": "{count, plural, =0 {Aucun article créé} one {1 article créé} other {# articles créés}}",
+      "transactionsCreated": "{count, plural, =0 {Aucune transaction créée} one {1 transaction créée} other {# transactions créées}}",
+      "linesInfo": "avec {count, plural, =0 {0 ligne} one {1 ligne} other {# lignes}}",
+      "errorsTitle": "Erreurs :",
+      "close": "Fermer"
+    },
+    "deleteConfirm": {
+      "message": "{count, plural, =0 {Aucun enregistrement sélectionné.} one {Voulez-vous vraiment supprimer cet enregistrement ?\n\nCette action est irréversible.} other {Voulez-vous vraiment supprimer ces # enregistrements ?\n\nCette action est irréversible.}}"
+    }
+  }
+}

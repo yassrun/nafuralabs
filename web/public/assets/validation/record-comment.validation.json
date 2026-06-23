@@ -1,0 +1,20 @@
+{
+  "entity": "RecordComment",
+  "fields": {
+    "entityType": {
+      "required": true,
+      "maxLength": 80
+    },
+    "entityId": {
+      "required": true
+    },
+    "author": {
+      "required": true,
+      "maxLength": 120
+    },
+    "body": {
+      "required": true,
+      "maxLength": 4000
+    }
+  }
+}

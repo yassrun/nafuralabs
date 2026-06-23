@@ -1,0 +1,37 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Monitoring Ingress
+# ═══════════════════════════════════════════════════════════════════════════════
+# Routes external traffic to monitoring services.
+#
+# Hosts:
+#   - monitoring.nafura.local → Grafana (main dashboard)
+#   - monitoring.nafura.local/prometheus → Prometheus UI
+# ═══════════════════════════════════════════════════════════════════════════════
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: monitoring-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: monitoring.nafura.local
+      http:
+        paths:
+          # Prometheus UI (sub-path)
+          - path: /prometheus
+            pathType: Prefix
+            backend:
+              service:
+                name: prometheus
+                port:
+                  number: 9090
+          # Grafana (root)
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: grafana
+                port:
+                  number: 3000

@@ -1,0 +1,35 @@
+<nf-page-shell>
+  <nf-page-header [config]="headerConfig"></nf-page-header>
+
+  <div class="situations-toolbar">
+    @if (chantierOptions().length > 0) {
+      <select
+        class="chantier-select"
+        [ngModel]="selectedChantier()"
+        (ngModelChange)="onChantierChange($event)">
+        <option value="">Tous les chantiers</option>
+        @for (opt of chantierOptions(); track opt.key) {
+          <option [value]="opt.key">{{ opt.value }}</option>
+        }
+      </select>
+    }
+  </div>
+
+  <div class="situations-chips">
+    @for (chip of chips; track chip.id) {
+      <nf-button
+        class="situations-chips__btn"
+        [variant]="currentChip() === chip.id ? 'primary' : 'secondary'"
+        (clicked)="selectChip(chip.id)">
+        {{ chip.label }}
+      </nf-button>
+    }
+  </div>
+
+  <nf-entity-listing
+    #listing
+    [config]="config"
+    [facade]="facade"
+    (action)="onAction($event)">
+  </nf-entity-listing>
+</nf-page-shell>

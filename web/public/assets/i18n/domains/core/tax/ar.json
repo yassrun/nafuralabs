@@ -1,0 +1,34 @@
+{
+  "tax": {
+    "navigation": {
+      "title": "الضرائب",
+      "description": "مجال الضرائب",
+      "taxCodes": "رموز الضرائب",
+      "taxRates": "نسب الضرائب",
+      "taxGroups": "مجموعات الضرائب"
+    }
+  },
+  "common": {
+    "subsections": {
+      "operations": "العمليات",
+      "configuration": "الإعدادات"
+    }
+  },
+  "finance": {
+    "fields": {
+      "code": "الرمز",
+      "name": "الاسم",
+      "rate": "النسبة",
+      "taxGroupId": "معرّف مجموعة الضرائب",
+      "taxType": "نوع الضريبة",
+      "isActive": "نشط",
+      "taxCodeId": "معرّف رمز الضريبة",
+      "effectiveFrom": "ساري من",
+      "effectiveTo": "ساري إلى",
+      "description": "الوصف"
+    },
+    "sections": {
+      "general": "عام"
+    }
+  }
+}

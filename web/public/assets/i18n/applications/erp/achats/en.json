@@ -1,0 +1,647 @@
+{
+  "achats": {
+    "module": {
+      "title": "Procurement & Supply",
+      "shortTitle": "Procurement"
+    },
+    "common": {
+      "dash": "—",
+      "actions": {
+        "back": "← Back",
+        "save": "Save",
+        "cancel": "Cancel",
+        "close": "Close",
+        "print": "Print",
+        "delete": "Delete",
+        "edit": "Edit",
+        "new": "New",
+        "reset": "Reset",
+        "search": "Search",
+        "confirm": "Confirm"
+      },
+      "filters": {
+        "allStatuses": "All statuses",
+        "allTypes": "All types",
+        "dateFrom": "From",
+        "dateTo": "To"
+      },
+      "approval": {
+        "label": "Approval workflow",
+        "labelAttribution": "Award validation"
+      },
+      "errors": {
+        "missingMotif": "Reason required",
+        "missingJustification": "Justification required to trace the override (erpAudit).",
+        "attributionGeneric": "Award error"
+      },
+      "loading": "Loading…"
+    },
+    "routes": {
+      "demandesListTitle": "Purchase requisitions",
+      "demandesListCrumb": "Requisitions",
+      "demandeNewTitle": "New requisition",
+      "demandeNewCrumb": "New",
+      "demandeDetailTitle": "Requisition details",
+      "demandeDetailCrumb": "Details",
+      "demandeEditTitle": "Edit requisition",
+      "demandeEditCrumb": "Edit",
+      "bcListTitle": "Purchase orders",
+      "bcListCrumb": "Orders",
+      "bcNewTitle": "New PO",
+      "bcNewCrumb": "New",
+      "bcDetailTitle": "PO details",
+      "bcDetailCrumb": "Details",
+      "bcEditTitle": "Edit PO",
+      "bcEditCrumb": "Edit",
+      "aoListTitle": "Calls for tenders",
+      "aoListCrumb": "Tenders",
+      "aoNewTitle": "New tender",
+      "aoNewCrumb": "New",
+      "aoDetailTitle": "Tender details",
+      "aoDetailCrumb": "Details",
+      "aoEditTitle": "Edit tender",
+      "aoEditCrumb": "Edit",
+      "aoComparatifTitle": "Tender comparison",
+      "aoComparatifCrumb": "Comparison",
+      "contratListTitle": "Supplier contracts",
+      "contratListCrumb": "Contracts",
+      "contratNewTitle": "New contract",
+      "contratNewCrumb": "New",
+      "contratDetailTitle": "Contract details",
+      "contratDetailCrumb": "Details",
+      "contratEditTitle": "Edit contract",
+      "contratEditCrumb": "Edit",
+      "fournisseurListTitle": "Suppliers",
+      "fournisseurListCrumb": "Suppliers",
+      "fournisseurNewTitle": "New supplier",
+      "fournisseurNewCrumb": "New",
+      "fournisseurDetailTitle": "Supplier details",
+      "fournisseurDetailCrumb": "Details",
+      "fournisseurEditTitle": "Edit supplier",
+      "fournisseurEditCrumb": "Edit"
+    },
+    "rubrique": {
+      "MATERIAUX": "Materials",
+      "SOUS_TRAITANCE": "Subcontracting",
+      "LOCATION_MATERIEL": "Equipment rental",
+      "LOCATION_MATERIEL_SHORT": "Rental",
+      "CARBURANT": "Fuel",
+      "FRAIS_GENERAUX": "Overheads",
+      "FRAIS_GENERAUX_SHORT": "OH"
+    },
+    "modeReglement": {
+      "VIREMENT": "Bank transfer",
+      "CHEQUE": "Cheque",
+      "EFFET": "Bill of exchange",
+      "ESPECES": "Cash"
+    },
+    "modeReglementLong": {
+      "VIREMENT": "Bank transfer",
+      "CHEQUE": "Cheque",
+      "EFFET": "Commercial paper",
+      "ESPECES": "Cash"
+    },
+    "contratType": {
+      "CADRE": "Framework contract",
+      "ANNUEL": "Annual",
+      "PONCTUEL": "One-off"
+    },
+    "demande": {
+      "entityName": "Purchase requisition",
+      "entityNamePlural": "Purchase requisitions",
+      "headerTitle": "Purchase requisitions",
+      "createTitle": "New purchase requisition",
+      "detailTitle": "Requisition details",
+      "detailHeaderFallback": "No site",
+      "chips": {
+        "all": "All",
+        "aApprouver": "To approve",
+        "nonConverties": "Not converted",
+        "urgent": "Urgent < 7d",
+        "mesDemandes": "My requisitions"
+      },
+      "list": {
+        "columns": {
+          "numero": "PR #",
+          "chantierCode": "Site",
+          "chantierName": "Site description",
+          "dateBesoin": "Needed by",
+          "demandeur": "Requester",
+          "nbLignes": "Lines",
+          "totalEstimeHt": "Estimated total ex. tax",
+          "status": "Status",
+          "delaiAttente": "Waiting (d)"
+        },
+        "transform": {
+          "joursSuffix": "{n} d"
+        },
+        "filters": {
+          "status": "Status",
+          "chantier": "Site",
+          "dateFrom": "Created from",
+          "dateTo": "Created to"
+        },
+        "emptyState": {
+          "title": "No purchase requisitions",
+          "message": "Purchase requisitions trigger the supplier procurement process.",
+          "actionLabel": "New requisition"
+        }
+      },
+      "form": {
+        "sections": {
+          "entete": "Header",
+          "justification": "Justification"
+        },
+        "fields": {
+          "numero": "PR #",
+          "chantier": "Site",
+          "dateBesoin": "Needed by date *",
+          "demandeur": "Requester",
+          "totalEstimeHt": "Estimated total ex. tax",
+          "motif": "Reason",
+          "notes": "Notes"
+        }
+      },
+      "actions": {
+        "soumettre": "Submit",
+        "approuver": "Approve",
+        "rejeter": "Reject",
+        "convertirBc": "Create a PO"
+      },
+      "confirms": {
+        "soumettre": {
+          "title": "Submit the requisition?",
+          "message": "The requisition will be submitted for approval.",
+          "confirmLabel": "Submit"
+        },
+        "approuver": {
+          "title": "Approve the requisition?",
+          "message": "The requisition will be approved and can be converted into a PO.",
+          "confirmLabel": "Approve"
+        },
+        "rejeter": {
+          "title": "Reject the requisition?",
+          "message": "Provide the rejection reason.",
+          "confirmLabel": "Reject",
+          "notePlaceholder": "Reason required",
+          "promptMotif": "Rejection reason:"
+        }
+      },
+      "toasts": {
+        "saved": "Requisition {numero} saved",
+        "statusUpdated": "Requisition {numero} — status updated",
+        "rejected": "Requisition {numero} rejected"
+      },
+      "deleteConfirm": {
+        "title": "Delete requisition",
+        "message": "Delete requisition {numero}?"
+      }
+    },
+    "commande": {
+      "entityName": "Purchase order",
+      "entityNamePlural": "Purchase orders",
+      "headerTitle": "Purchase orders",
+      "createTitle": "New purchase order",
+      "detailTitle": "PO details",
+      "chips": {
+        "all": "All",
+        "aValider": "To validate",
+        "enCoursLivraison": "Delivery in progress",
+        "enRetard": "Overdue",
+        "aFacturer": "To invoice"
+      },
+      "list": {
+        "columns": {
+          "numero": "PO #",
+          "fournisseur": "Supplier",
+          "chantierCode": "Site",
+          "rubrique": "Category",
+          "dateCreation": "Created",
+          "dateLivraisonPrevue": "Expected delivery",
+          "totalHt": "Total ex. tax",
+          "totalLivrePercent": "Delivery %",
+          "status": "Status"
+        },
+        "filters": {
+          "status": "Status",
+          "fournisseur": "Supplier",
+          "rubrique": "Category",
+          "dateFrom": "Created from",
+          "dateTo": "Created to"
+        },
+        "emptyState": {
+          "title": "No purchase orders",
+          "message": "Purchase orders formalise procurement and drive supplier deliveries.",
+          "actionLabel": "New PO"
+        }
+      },
+      "form": {
+        "sections": {
+          "entete": "Header",
+          "planning": "Schedule & Payment",
+          "montants": "Amounts",
+          "notes": "Notes"
+        },
+        "fields": {
+          "numero": "PO #",
+          "fournisseur": "Supplier *",
+          "chantier": "Site",
+          "rubrique": "Category",
+          "dateCreation": "Creation date",
+          "dateLivraisonPrevue": "Expected delivery *",
+          "conditionsPaiement": "Payment terms",
+          "modeReglement": "Payment method",
+          "totalHt": "Total ex. tax",
+          "tvaTaux": "VAT %",
+          "totalTtc": "Total incl. tax",
+          "notes": "Notes"
+        }
+      },
+      "actions": {
+        "valider": "Validate",
+        "envoyer": "Send to supplier",
+        "accuserReception": "Mark AR",
+        "cloturer": "Close",
+        "annuler": "Cancel",
+        "imprimer": "Print PO"
+      },
+      "confirms": {
+        "valider": {
+          "title": "Validate the PO?",
+          "message": "The purchase order will be validated and can be sent.",
+          "confirmLabel": "Validate"
+        },
+        "cloturer": {
+          "title": "Close the PO?",
+          "message": "This action is final.",
+          "confirmLabel": "Close"
+        },
+        "annuler": {
+          "title": "Cancel the PO?",
+          "message": "This action is irreversible.",
+          "confirmLabel": "Cancel",
+          "notePlaceholder": "Cancellation reason"
+        }
+      },
+      "toasts": {
+        "saved": "PO {numero} saved",
+        "statusUpdated": "PO {numero} — status updated"
+      },
+      "deleteConfirm": {
+        "title": "Delete PO",
+        "message": "Delete purchase order {numero}?"
+      },
+      "matching3way": {
+        "title": "Receipts & three-way matching",
+        "statusLabel": "Status:",
+        "matched": "3-way OK",
+        "blStatus": "GRN:",
+        "factureLabel": "— Invoice:",
+        "toleranceHint": "Demo tolerance: ±2% price, ±5% quantities (configurable).",
+        "analyzing": "Matching analysis in progress…",
+        "blocking": "Blocking",
+        "columns": {
+          "article": "Item",
+          "qteCmd": "Ord. qty",
+          "qteRecue": "Rec. qty",
+          "qteFact": "Inv. qty",
+          "puBc": "PO unit price",
+          "puFact": "Invoice unit price",
+          "ecartQte": "Qty gap %",
+          "ecartPx": "Price gap %"
+        }
+      },
+      "print": {
+        "title": "PURCHASE ORDER #{numero}",
+        "dateLabel": "Date:",
+        "livraisonLabel": "Expected delivery:",
+        "fournisseur": "Supplier",
+        "chantierLivraison": "Delivery site",
+        "conditionsPaiementLabel": "Payment terms:",
+        "columns": {
+          "designation": "Description",
+          "code": "Code",
+          "qte": "Qty",
+          "unite": "Unit",
+          "puHt": "Unit price ex. tax",
+          "totalHt": "Total ex. tax"
+        },
+        "totals": {
+          "totalHt": "Total ex. tax",
+          "tva": "VAT {rate}%",
+          "totalTtc": "TOTAL INCL. TAX"
+        },
+        "notesLabel": "Notes:",
+        "signatureAcheteur": "Buyer stamp & signature",
+        "signatureFournisseur": "Supplier acknowledgement",
+        "ids": {
+          "ice": "ICE",
+          "if": "I.F.",
+          "rc": "R.C.",
+          "phonePrefix": "Tel."
+        }
+      },
+      "approvalSummary": "{numero} — {fournisseur} — {ttc} MAD incl. tax"
+    },
+    "appelOffre": {
+      "entityName": "Call for tenders",
+      "entityNamePlural": "Calls for tenders",
+      "headerTitle": "Calls for tenders",
+      "createTitle": "New call for tenders",
+      "detailTitle": "Tender details",
+      "chips": {
+        "all": "All",
+        "enCours": "Ongoing",
+        "aCloturer": "To close",
+        "attribues": "Awarded"
+      },
+      "list": {
+        "columns": {
+          "numero": "Tender #",
+          "objet": "Subject",
+          "chantierCode": "Site",
+          "nbInvites": "Invited",
+          "nbReponses": "Bids",
+          "dateLimiteDepot": "Submission deadline",
+          "totalAttribueHt": "Awarded ex. tax",
+          "status": "Status"
+        },
+        "filters": {
+          "status": "Status",
+          "dateFrom": "Deadline from",
+          "dateTo": "Deadline to"
+        },
+        "emptyState": {
+          "title": "No calls for tenders",
+          "message": "Publish tenders to capture the best supplier bids.",
+          "actionLabel": "New tender"
+        }
+      },
+      "form": {
+        "sections": {
+          "entete": "Header",
+          "attribution": "Award",
+          "notes": "Notes"
+        },
+        "fields": {
+          "numero": "Tender #",
+          "objet": "Subject *",
+          "chantier": "Site",
+          "datePublication": "Publication date",
+          "dateLimiteDepot": "Submission deadline *",
+          "fournisseurAttribue": "Awarded supplier",
+          "totalAttribueHt": "Awarded amount ex. tax",
+          "notes": "Notes"
+        }
+      },
+      "actions": {
+        "publier": "Publish",
+        "cloturer": "Close",
+        "infructueux": "Unsuccessful",
+        "attribuer": "Award",
+        "openComparatif": "Supplier comparison & scoring",
+        "attribuerVersBc": "Award → PO"
+      },
+      "confirms": {
+        "publier": {
+          "title": "Publish the tender?",
+          "message": "The tender will be sent to invited suppliers.",
+          "confirmLabel": "Publish"
+        },
+        "infructueux": {
+          "title": "Declare unsuccessful?",
+          "message": "No supplier will be selected.",
+          "confirmLabel": "Confirm"
+        }
+      },
+      "prompts": {
+        "fournisseurId": "Awarded supplier ID:",
+        "overrideJustification": "Award outside automatic recommendation. Reason / justification (required):"
+      },
+      "toasts": {
+        "saved": "Tender {numero} saved",
+        "statusUpdated": "Tender {numero} — status updated",
+        "attribue": "Tender awarded — PO {numero} created as draft",
+        "bcCreated": "PO {numero} created from the selected bid."
+      },
+      "deleteConfirm": {
+        "title": "Delete tender",
+        "message": "Delete tender {numero}?"
+      },
+      "approvalSummary": "{numero} — {objet}",
+      "approvalSummaryWithAmount": "{numero} — {objet} — {amount} MAD ex. tax awarded",
+      "comparatif": {
+        "headerTitle": "Tender comparison",
+        "headerSubtitle": "Supplier scoring & PO award",
+        "headerFallbackNumero": "Tender",
+        "headerTitleWithNumero": "{numero} — Comparison",
+        "notFound": "Call for tenders not found.",
+        "matrixTitle": "Supplier × criteria matrix",
+        "ponderationHint": "Weighting: price /50, lead time /15, quality /15, history /10, Art.187 compliance (proxy) /10.",
+        "columns": {
+          "fournisseur": "Supplier",
+          "totalHt": "Total ex. tax",
+          "delaiJours": "Lead time (d)",
+          "prix50": "Price /50",
+          "delai15": "Lead time /15",
+          "qualite15": "Quality /15",
+          "historique10": "Hist. /10",
+          "art18710": "Art.187 /10",
+          "score": "Score",
+          "reco": "Reco"
+        },
+        "empty": "No bids received for this tender.",
+        "backToAo": "← Back to tender",
+        "breadcrumb": {
+          "achats": "Procurement",
+          "ao": "Calls for tenders",
+          "aoFallback": "Tender",
+          "comparatif": "Comparison"
+        }
+      }
+    },
+    "contrat": {
+      "entityName": "Supplier contract",
+      "entityNamePlural": "Supplier contracts",
+      "headerTitle": "Supplier contracts",
+      "createTitle": "New supplier contract",
+      "detailTitle": "Contract details",
+      "chips": {
+        "all": "All",
+        "actifs": "Active",
+        "expirationProche": "Exp. < 30d",
+        "echus": "Expired"
+      },
+      "list": {
+        "columns": {
+          "numero": "Contract #",
+          "fournisseur": "Supplier",
+          "type": "Type",
+          "dateDebut": "Start",
+          "dateFin": "End",
+          "montantPlafondHt": "Cap ex. tax",
+          "cumulBcEmisHt": "Consumed ex. tax",
+          "consommationPercent": "Usage %",
+          "joursRestants": "Days left",
+          "status": "Status"
+        },
+        "transform": {
+          "joursSuffix": "{n} d"
+        },
+        "filters": {
+          "status": "Status",
+          "fournisseur": "Supplier"
+        },
+        "emptyState": {
+          "title": "No contracts",
+          "message": "Formalise framework agreements with your strategic suppliers.",
+          "actionLabel": "New contract"
+        }
+      },
+      "form": {
+        "sections": {
+          "identite": "Identity",
+          "periode": "Period & Amounts",
+          "notes": "Notes"
+        },
+        "fields": {
+          "numero": "Contract #",
+          "fournisseur": "Supplier *",
+          "type": "Type *",
+          "objet": "Subject *",
+          "dateDebut": "Start date *",
+          "dateFin": "End date *",
+          "montantPlafondHt": "Cap ex. tax",
+          "cumulBcEmisHt": "Consumed ex. tax",
+          "conditionsPaiement": "Payment terms",
+          "notes": "Notes"
+        }
+      },
+      "actions": {
+        "signer": "Mark signed",
+        "activer": "Activate",
+        "resilier": "Terminate"
+      },
+      "confirms": {
+        "signer": {
+          "title": "Contract signed?",
+          "message": "The contract will be marked signed.",
+          "confirmLabel": "Confirm"
+        },
+        "resilier": {
+          "title": "Terminate the contract?",
+          "message": "This action is irreversible.",
+          "confirmLabel": "Terminate",
+          "notePlaceholder": "Termination reason"
+        }
+      },
+      "toasts": {
+        "saved": "Contract {numero} saved",
+        "updated": "Contract {numero} updated"
+      },
+      "deleteConfirm": {
+        "title": "Delete contract",
+        "message": "Delete {numero}?"
+      },
+      "approvalSummary": "{numero} — {type} — {fournisseur}",
+      "approvalSummaryWithCap": "{numero} — {type} — {fournisseur} — cap {plafond} MAD"
+    },
+    "fournisseur": {
+      "entityName": "Supplier",
+      "entityNamePlural": "Suppliers",
+      "headerTitle": "Suppliers",
+      "createTitle": "New supplier",
+      "detailTitle": "Supplier details",
+      "chips": {
+        "all": "All",
+        "actifs": "Active",
+        "inactifs": "Inactive",
+        "topNotes": "Top rated (4★+)"
+      },
+      "list": {
+        "columns": {
+          "code": "Code",
+          "raisonSociale": "Legal name",
+          "ice": "ICE",
+          "categories": "Categories",
+          "ville": "City",
+          "notation": "Rating",
+          "delaiLivraisonMoyen": "Avg lead time (d)",
+          "status": "Status"
+        },
+        "transform": {
+          "joursSuffix": "{n} d",
+          "actif": "Active",
+          "inactif": "Inactive"
+        },
+        "filters": {
+          "categorie": "Category",
+          "notation": "Minimum rating",
+          "status": "Status",
+          "notationOptions": {
+            "five": "5 stars",
+            "fourPlus": "4 stars and up",
+            "threePlus": "3 stars and up"
+          },
+          "statusOptions": {
+            "actifs": "Active",
+            "inactifs": "Inactive"
+          }
+        },
+        "emptyState": {
+          "title": "No suppliers",
+          "message": "Build your supplier directory to fuel orders and tenders.",
+          "actionLabel": "New supplier"
+        }
+      },
+      "form": {
+        "sections": {
+          "identite": "Identity",
+          "contact": "Contact",
+          "conditions": "Terms & Payment",
+          "classification": "Categories & Rating",
+          "notes": "Notes"
+        },
+        "fields": {
+          "code": "Code",
+          "raisonSociale": "Legal name *",
+          "ice": "ICE",
+          "iceHint": "15 digits (Morocco tax identifier)",
+          "rc": "RC",
+          "patente": "Business licence",
+          "adresse": "Address",
+          "ville": "City",
+          "pays": "Country",
+          "contactNom": "Primary contact",
+          "contactTel": "Phone",
+          "contactEmail": "Email",
+          "conditionsPaiement": "Default payment terms",
+          "conditionsPaiementDefault": "30d invoice date",
+          "modeReglement": "Payment method",
+          "delaiLivraisonMoyen": "Average lead time (d)",
+          "rib": "RIB",
+          "ribHint": "24 digits (Moroccan RIB)",
+          "banque": "Bank",
+          "categories": "Categories",
+          "notation": "Rating",
+          "isActive": "Active",
+          "notes": "Notes"
+        },
+        "notationOptions": {
+          "one": "1 star",
+          "two": "2 stars",
+          "three": "3 stars",
+          "four": "4 stars",
+          "five": "5 stars"
+        }
+      },
+      "toasts": {
+        "saved": "Supplier {name} saved"
+      },
+      "deleteConfirm": {
+        "title": "Delete supplier",
+        "message": "Delete {name}?"
+      }
+    }
+  }
+}

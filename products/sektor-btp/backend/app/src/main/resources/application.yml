@@ -1,0 +1,118 @@
+spring:
+  application:
+    name: erp-service
+
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:5432/${POSTGRES_DB:nafura_erp}?currentSchema=${POSTGRES_SCHEMA:public}
+    username: ${POSTGRES_USER:seyrura}
+    password: ${POSTGRES_PASSWORD:seyrura}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: ${POSTGRES_SCHEMA:public}
+        format_sql: true
+        show_sql: false
+    open-in-view: false
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://iam.nafura.local/realms/iam-portal}
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://iam.nafura.local/realms/iam-portal/protocol/openid-connect/certs}
+
+management:
+  tracing:
+    enabled: false
+
+server:
+  port: 8082
+
+nafura:
+  application:
+    id: erp
+  demo:
+    runtime-seed-enabled: ${NAFURA_DEMO_RUNTIME_SEED:false}
+  onboarding:
+    v2-enabled: ${NAFURA_ONBOARDING_V2_ENABLED:true}
+    signup-enabled: true
+    dev-signup-bypass: ${NAFURA_ONBOARDING_DEV_SIGNUP:false}
+    keycloak-provisioning-enabled: ${NAFURA_ONBOARDING_KEYCLOAK_PROVISIONING:true}
+    keycloak-admin-url: ${KEYCLOAK_ADMIN_URL:}
+    keycloak-admin-username: ${KEYCLOAK_ADMIN_USERNAME:}
+    keycloak-admin-password: ${KEYCLOAK_ADMIN_PASSWORD:}
+    keycloak-realm: ${KEYCLOAK_REALM:iam-portal}
+    keycloak-client-id: ${KEYCLOAK_CLIENT_ID:erp-web}
+    application-id: ${NAFURA_APPLICATION_ID:erp}
+    dev-jwt-secret: ${NAFURA_ONBOARDING_DEV_JWT_SECRET:nafura-local-onboarding-jwt-secret-32b-min}
+    demo-prospect-email: prospect@nafura-demo.local
+  security:
+    enabled: true
+    public-endpoints:
+      - /actuator/**
+      - /api/sync/**
+      - /api/public/**
+    user-context:
+      enabled: true
+    tenant:
+      mode: multi
+      enabled: true
+      validate-membership: true
+      allow-default-tenant-fallback: ${NAFURA_ALLOW_DEFAULT_TENANT_FALLBACK:false}
+      default-tenant-id: ${NAFURA_DEFAULT_TENANT_ID:}
+      skip-paths:
+        - /api/auth/
+        - /api/public/
+        - /api/onboarding/
+        - /actuator/
+
+# Email (module notification — Brevo by default; keys in backend/.env.local or Vault)
+app:
+  email:
+    provider: ${EMAIL_PROVIDER:brevo}
+    from-address: ${EMAIL_FROM_ADDRESS:noreply@nafuralabs.com}
+    from-name: ${EMAIL_FROM_NAME:Nafura}
+  frontend-base-url: ${APP_FRONTEND_BASE_URL:http://localhost:4200}
+  storage:
+    type: ${APP_STORAGE_TYPE:s3}
+    s3:
+      endpoint: ${DOCUMENTS_MINIO_ENDPOINT:http://localhost:9000}
+      access-key: ${MINIO_ROOT_USER:minioadmin}
+      secret-key: ${MINIO_ROOT_PASSWORD:minioadmin}
+      bucket: ${DOCUMENTS_MINIO_BUCKET:nafura-erp}
+      region: us-east-1
+    local:
+      base-path: ${APP_STORAGE_LOCAL_PATH:${java.io.tmpdir}/nafura-attachments}
+
+brevo:
+  api-key: ${BREVO_API_KEY:}
+
+sendgrid:
+  api-key: ${SENDGRID_API_KEY:}
+
+# Doc-manager / MinIO (injected by nafgen when infrastructure.objectStorage.enabled)
+documents:
+  minio:
+    endpoint: ${DOCUMENTS_MINIO_ENDPOINT:http://localhost:9000}
+    accessKey: ${MINIO_ROOT_USER:minioadmin}
+    secretKey: ${MINIO_ROOT_PASSWORD:minioadmin}
+    bucket: ${DOCUMENTS_MINIO_BUCKET:nafura-erp}
+    secure: false
+
+ai:
+  provider: ${AI_PROVIDER:gemini}
+  gemini:
+    api-key: ${AI_GEMINI_API_KEY:}
+    base-url: ${AI_GEMINI_BASE_URL:https://generativelanguage.googleapis.com}
+    model: ${AI_GEMINI_MODEL:gemini-2.5-flash}
+
+logging:
+  level:
+    root: INFO
+    ma.nafura.erp: DEBUG
+    org.springframework.security: DEBUG

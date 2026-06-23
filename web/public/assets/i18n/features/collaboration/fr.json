@@ -1,0 +1,140 @@
+{
+  "notifications": {
+    "workflow": {
+      "approvalRequested": "Approbation demandée : {entityType} {code}",
+      "approved": "{entityType} {code} a été approuvé",
+      "rejected": "{entityType} {code} a été rejeté"
+    },
+    "assignment": {
+      "assigned": "{entityType} {code} vous a été assigné"
+    },
+    "mention": {
+      "mentioned": "Vous avez été mentionné dans {entityType} {code}"
+    },
+    "digest": {
+      "subject": "Votre résumé quotidien de notifications",
+      "header": "Voici ce qui s'est passé depuis votre dernier résumé",
+      "footer": "Gérez vos préférences de notifications dans Paramètres"
+    },
+    "center": {
+      "title": "Notifications",
+      "subtitle": "Restez informé de votre activité",
+      "viewAll": "Voir toutes les notifications",
+      "unread": "{count} non lues",
+      "markAllRead": "Tout marquer comme lu",
+      "markSelectedRead": "Marquer la sélection comme lue",
+      "clearOldRead": "Effacer les anciennes lues",
+      "clearOldReadConfirm": "Supprimer toutes les notifications lues de plus de 30 jours ?",
+      "deleted": "{count} notifications supprimées",
+      "empty": "Aucune notification",
+      "emptyUnread": "Aucune notification non lue",
+      "emptyFiltered": "Aucune notification ne correspond à vos filtres",
+      "loading": "Chargement…",
+      "confirmClearOldRead": "Supprimer toutes les notifications lues de plus de 30 jours ?",
+      "actions": {
+        "markAllRead": "Tout marquer comme lu",
+        "markSelectedRead": "Marquer la sélection comme lue",
+        "clearOldRead": "Effacer les anciennes lues",
+        "markRead": "Marquer comme lu"
+      },
+      "filters": {
+        "source": {
+          "label": "Source",
+          "all": "Toutes",
+          "workflow": "Workflow",
+          "assignment": "Assignation",
+          "mention": "Mention",
+          "system": "Système"
+        },
+        "status": {
+          "label": "Statut",
+          "all": "Toutes",
+          "unread": "Non lues",
+          "read": "Lues"
+        },
+        "range": {
+          "label": "Période",
+          "24h": "Dernières 24 heures",
+          "7d": "7 derniers jours",
+          "30d": "30 derniers jours",
+          "all": "Tout"
+        }
+      },
+      "source": {
+        "WORKFLOW": "Workflow",
+        "ASSIGNMENT": "Assignation",
+        "MENTION": "Mention",
+        "SYSTEM": "Système"
+      }
+    }
+  },
+  "collaboration": {
+    "fields": {
+      "entityType": "entity Type",
+      "entityId": "entity Id",
+      "title": "title",
+      "status": "status",
+      "currentStep": "current Step",
+      "requestedBy": "requested By",
+      "requestedAt": "requested At",
+      "approvedBy": "approved By",
+      "approvedAt": "approved At",
+      "decisionComment": "decision Comment",
+      "action": "action",
+      "actor": "acteur",
+      "eventAt": "event At",
+      "details": "détails",
+      "payload": "payload",
+      "fileName": "file Name",
+      "fileUrl": "file Url",
+      "mimeType": "mime Type",
+      "sizeBytes": "size Bytes",
+      "uploadedBy": "uploaded By",
+      "uploadedAt": "uploaded At",
+      "isPrimary": "is Primary",
+      "author": "auteur",
+      "body": "corps",
+      "isInternal": "is Internal",
+      "createdAt": "created At",
+      "editedAt": "edited At"
+    },
+    "sections": {
+      "target": "cible",
+      "request": "requête",
+      "actors": "acteurs",
+      "event": "événement",
+      "file": "fichier",
+      "comment": "commentaire"
+    },
+    "feature": {
+      "title": "Collaboration",
+      "description": "Collaboration"
+    },
+    "navigation": {
+      "approvalRequests": "Approval Requests",
+      "auditEvents": "Audit Events",
+      "recordAttachments": "Record Attachments",
+      "recordComments": "Record Comments"
+    },
+    "approvalRequest": {
+      "title": "Approval Requests",
+      "detailTitle": "Approval Request Details",
+      "newTitle": "New Approval Request"
+    },
+    "auditEvent": {
+      "title": "Audit Events",
+      "detailTitle": "Audit Event Details",
+      "newTitle": "New Audit Event"
+    },
+    "recordAttachment": {
+      "title": "Record Attachments",
+      "detailTitle": "Record Attachment Details",
+      "newTitle": "New Record Attachment"
+    },
+    "recordComment": {
+      "title": "Record Comments",
+      "detailTitle": "Record Comment Details",
+      "newTitle": "New Record Comment"
+    }
+  }
+}

@@ -1,0 +1,913 @@
+{
+  "admin": {
+    "common": {
+      "actions": {
+        "cancel": "Cancel",
+        "save": "Save",
+        "saveShort": "Save",
+        "edit": "Edit",
+        "delete": "Delete",
+        "deleteShort": "Del.",
+        "create": "Create",
+        "add": "Add",
+        "reset": "↻ Reset",
+        "previous": "← Previous",
+        "next": "Next →",
+        "saveSettings": "Save settings"
+      },
+      "labels": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "yes": "Yes",
+        "no": "No",
+        "all": "All",
+        "total": "Total",
+        "loading": "Loading…",
+        "empty": "—",
+        "system": "System",
+        "custom": "Custom",
+        "modified": "Modified",
+        "override": "Custom",
+        "today": "Today",
+        "page": "Page",
+        "filter": "Filter:",
+        "reference": "Reference",
+        "details": "Details"
+      },
+      "breadcrumb": {
+        "administration": "Administration"
+      },
+      "toasts": {
+        "saved": "✓ Saved",
+        "deleted": "✓ Deleted",
+        "reset": "✓ Reset done",
+        "saveError": "⚠ Fix the fields in error before saving"
+      },
+      "labelFields": {
+        "raisonSociale": "Company name",
+        "ice": "ICE",
+        "rc": "RC",
+        "if": "IF",
+        "patente": "Patente",
+        "cnss": "CNSS",
+        "cnaem": "CNAEM",
+        "tvaIntra": "Intra-community VAT",
+        "siegeAdresse": "Head office address",
+        "capitalSocial": "Share capital",
+        "formeJuridique": "Legal form",
+        "ville": "City",
+        "telephone": "Phone",
+        "email": "E-mail",
+        "siteWeb": "Website"
+      }
+    },
+    "auditLog": {
+      "breadcrumb": "Audit log",
+      "title": "ERP audit log",
+      "subtitle": "Multi-criteria search who / what / when. Click a row for details.",
+      "stats": {
+        "total": "Total",
+        "today": "Today",
+        "last7d": "Last 7 days",
+        "topAction": "Top action",
+        "activeUsers": "Active users",
+        "topActionCount": "{count} entries"
+      },
+      "filters": {
+        "search": "User, entity, ref, detail…",
+        "allUsers": "All users",
+        "allActions": "All actions",
+        "allTypes": "All types",
+        "dateFrom": "From",
+        "dateTo": "to"
+      },
+      "table": {
+        "headers": {
+          "timestamp": "Timestamp",
+          "user": "User",
+          "action": "Action",
+          "entityType": "Entity type",
+          "reference": "Reference",
+          "detail": "Detail",
+          "id": "ID",
+          "type": "Type",
+          "entityId": "Entity ID"
+        },
+        "expanded": {
+          "auditId": "Audit ID",
+          "entityId": "Entity ID",
+          "timestampIso": "ISO timestamp",
+          "detailFull": "Full detail"
+        },
+        "empty": "No entry matches the filters."
+      },
+      "count": {
+        "label": "{count, plural, =0 {No entry} one {1 entry} other {# entries}}",
+        "singular": "entry",
+        "plural": "entries",
+        "ofTotal": "/ {count} total"
+      },
+      "exportFilename": "audit-log"
+    },
+    "banques": {
+      "breadcrumb": "Banks",
+      "title": "Banks reference data",
+      "subtitle": "MA banks catalogue — BAM codes, SWIFT/BIC, open banking",
+      "toasts": {
+        "saved": "✓ Bank saved",
+        "deleted": "✓ Bank deleted"
+      },
+      "section": {
+        "title": "Banks ({count})",
+        "addNew": "New bank",
+        "cancel": "× Cancel",
+        "createTitle": "Add a bank to the reference data"
+      },
+      "fields": {
+        "codeBanque": "Bank code (3 digits) *",
+        "swift": "SWIFT / BIC (8 chars) *",
+        "raisonSociale": "Company name *",
+        "marque": "Brand *",
+        "siteWeb": "Website",
+        "sitePlaceholder": "https://",
+        "openBanking": "Open Banking"
+      },
+      "actions": {
+        "confirmCreate": "Create bank",
+        "save": "Save",
+        "edit": "Edit",
+        "delete": "Del."
+      },
+      "table": {
+        "code": "Code",
+        "swift": "SWIFT",
+        "raisonSociale": "Company name",
+        "marque": "Brand",
+        "openBanking": "Open Banking",
+        "siteWeb": "Website",
+        "apiBadge": "API"
+      },
+      "errors": {
+        "raisonSocialeRequired": "Company name required",
+        "marqueRequired": "Brand required",
+        "codeRequired": "Code required (3 digits)",
+        "codeInvalid": "Invalid format — 3 digits required",
+        "swiftRequired": "SWIFT required",
+        "swiftInvalid": "Invalid format — 8 or 11 alphanumeric characters"
+      },
+      "confirmDelete": "Remove the bank « {raisonSociale} » from the reference data?\n\nThis action is reversible on the demo side (reset reference data)."
+    },
+    "demoReset": {
+      "breadcrumb": "Demo",
+      "title": "Demo data set",
+      "subtitle": "Reset for sales demos — SOMACOM BTP",
+      "card": {
+        "title": "Model company: SOMACOM BTP SARL",
+        "identite": "ICE: 001234567000088 · RC Casa 715869 · Capital: 5,000,000 MAD",
+        "perimetre": "Demo scope: 6 active projects · 12 contracts (4 public + 8 private) · 15 employees · 8 suppliers · full HSE"
+      },
+      "actions": {
+        "resetTitle": "Reset all data",
+        "resetDesc": "Reloads the full demo seed. Clears all local changes (localStorage). Ideal before a client demo.",
+        "resetButton": "🔄 Reset",
+        "resetting": "Resetting…",
+        "exportTitle": "Export current state",
+        "exportDesc": "Downloads a JSON snapshot of all mock data (useful for backup or team sharing).",
+        "exportButton": "📥 Export snapshot"
+      },
+      "success": {
+        "banner": "✓ Data reset! Reload the page to see the demo seed.",
+        "reload": "Reload the application"
+      },
+      "summary": {
+        "title": "Demo seed contents",
+        "items": {
+          "chantiers": "Active projects",
+          "marches": "BTP contracts",
+          "avenants": "Amendments",
+          "factures": "Progress invoices",
+          "cautions": "Bank guarantees",
+          "employes": "Employees",
+          "fournisseurs": "Suppliers",
+          "approbations": "Pending approvals",
+          "ncHse": "Open HSE NCs",
+          "epi": "PPE to monitor"
+        }
+      }
+    },
+    "erpRoles": {
+      "breadcrumb": "ERP roles",
+      "title": "ERP roles — matrix editor",
+      "subtitle": "Define permissions per BTP role — module × action (14 × 9)",
+      "toasts": {
+        "saved": "✓ Role saved",
+        "reverted": "↺ System role restored to seed values",
+        "deleted": "✓ Role deleted"
+      },
+      "sidebar": {
+        "title": "Roles ({count})",
+        "addNew": "+",
+        "cancel": "×"
+      },
+      "create": {
+        "name": "Name *",
+        "description": "Description",
+        "submit": "Create"
+      },
+      "badges": {
+        "system": "System",
+        "custom": "Custom",
+        "overridden": "Modified",
+        "permCount": "{count, plural, =0 {0 perm.} one {1 perm.} other {# perm.}}",
+        "super": "SUPER ADMIN"
+      },
+      "editor": {
+        "descriptionPlaceholder": "Functional description",
+        "permCount": "{count, plural, =0 {No active permission} one {1 active permission} other {# active permissions}}",
+        "permCountSingular": "{count} active permission",
+        "permCountPlural": "{count} active permissions",
+        "revertSeed": "↺ Revert seed",
+        "delete": "Delete",
+        "save": "Save",
+        "emptyState": "Select a role from the list on the left."
+      },
+      "matrix": {
+        "superAdminLabel": "Super-admin (*) — access to the entire ERP",
+        "hint": "Tick a cell to grant module.action. Toggle « All » per row for module.*.",
+        "module": "Module",
+        "wildcard": "All (*)",
+        "rawTitle": "View raw permissions list ({count})"
+      },
+      "newRoleDefaults": {
+        "description": "Custom role"
+      },
+      "confirmRevert": "Restore this role to its initial seed definition?",
+      "confirmDeleteSystem": "Hide the SYSTEM role « {name} » from the listing?\nThe seed definition is kept and can be reactivated via reset reference data.",
+      "confirmDeleteCustom": "Delete the custom role « {name} »?"
+    },
+    "mappings": {
+      "breadcrumb": "Accounting mappings",
+      "title": "Automatic accounting mappings",
+      "subtitle": "Configuration of journal entries generated automatically per business operation (CGNC Morocco — 15 templates).",
+      "stats": {
+        "total": "Total mappings",
+        "system": "System",
+        "custom": "Custom",
+        "active": "Active",
+        "personalized": "Customized",
+        "odCount": "Generated entries"
+      },
+      "tabs": {
+        "config": "Mappings configuration",
+        "journal": "Auto journal entries"
+      },
+      "journal": {
+        "title": "Auto-generated journal entries log",
+        "summary": "{total} entries recorded — {balanced} balanced / {unbalanced} unbalanced — total debit {totalDebit} / total credit {totalCredit}.",
+        "clear": "Clear the log",
+        "empty": "No auto journal entry yet. Validate a sales invoice (action « Issue ») or click on « Post » in a contract invoice to feed the log.",
+        "balanced": "Balanced",
+        "unbalanced": "Unbalanced",
+        "removeTitle": "Delete"
+      },
+      "filters": {
+        "societe": "Company",
+        "allSocietes": "All (global view __ALL__)",
+        "operation": "Selected operation",
+        "resetDefaults": "Restore defaults"
+      },
+      "panel": {
+        "badges": {
+          "system": "System",
+          "custom": "Custom",
+          "personalized": "Customized"
+        },
+        "journalLabel": "Journal {code} — {libelle}",
+        "revertAction": "Discard changes",
+        "delete": "Delete",
+        "libelleLabel": "Entry label (template)",
+        "libelleHint": "Available variables: {numero}, {ref}, {periode}.",
+        "journalCode": "Journal code",
+        "journalLibelle": "Journal label",
+        "linesTitle": "Entry lines",
+        "table": {
+          "side": "Side",
+          "compte": "CGNC account",
+          "libelle": "Label",
+          "amountSource": "Amount source",
+          "condition": "Condition",
+          "compteCol": "Account",
+          "debit": "Debit",
+          "credit": "Credit",
+          "source": "Source",
+          "totals": "TOTALS"
+        },
+        "side": {
+          "debit": "Debit",
+          "credit": "Credit"
+        },
+        "conditionPlaceholder": "(optional)",
+        "addLine": "Add a line",
+        "emptyMatch": "No mapping found for this operation on this company."
+      },
+      "simulator": {
+        "title": "Entry simulator",
+        "subtitle": "Enter the amounts to generate a sample accounting entry according to the mapping above.",
+        "amounts": {
+          "ht": "Net amount",
+          "tva": "VAT amount",
+          "ras": "RAS",
+          "timbre": "Stamp duty",
+          "chargePatr": "Employer contribution",
+          "salaireNet": "Net salary",
+          "ir": "IR"
+        },
+        "imbalance": "Imbalance {amount}"
+      },
+      "amountSource": {
+        "ht": "Net",
+        "tva": "VAT",
+        "ttc": "Gross",
+        "ras": "RAS",
+        "netAPayer": "Net payable",
+        "timbre": "Stamp duty",
+        "chargePatr": "Employer contributions",
+        "salaireNet": "Net salary",
+        "ir": "IR"
+      },
+      "operationLabels": {
+        "VENTE_DIRECTE": "Direct sale (cash customer invoice)",
+        "VENTE_MARCHE_PUBLIC": "Public contract sale (work progress invoice)",
+        "VENTE_MARCHE_PRIVE": "Private contract sale (work progress invoice)",
+        "ACHAT_MATIERES": "Raw materials purchase",
+        "ACHAT_SOUS_TRAITANCE": "BTP subcontracting purchase",
+        "ACHAT_FRAIS_GENERAUX": "General expenses purchase",
+        "REGLEMENT_CLIENT_BANQUE": "Customer payment (bank)",
+        "REGLEMENT_CLIENT_CAISSE": "Customer payment (cash)",
+        "REGLEMENT_FOURNISSEUR_BANQUE": "Supplier payment (bank)",
+        "REGLEMENT_FOURNISSEUR_CAISSE": "Supplier payment (cash)",
+        "PAIE_SALAIRE": "Payroll — gross salaries",
+        "PAIE_CHARGES_SOCIALES": "Payroll — social contributions (CNSS, AMO)",
+        "DECLARATION_TVA": "Monthly VAT return",
+        "DECLARATION_RAS": "RAS return (remittance to DGI)",
+        "IMMOBILISATION_ACQUISITION": "Fixed-asset acquisition"
+      },
+      "toasts": {
+        "mappingDeleted": "✓ Mapping deleted",
+        "mappingReverted": "✓ Mapping restored to its original value",
+        "mappingsReset": "✓ Mappings restored",
+        "journalEntryRemoved": "✓ Journal entry removed",
+        "journalCleared": "✓ Journal cleared"
+      },
+      "confirm": {
+        "delete": "Delete the mapping « {operation} »?",
+        "reset": "Restore all accounting mappings to the 15 system seeds (losing overrides and customs created)?",
+        "clearJournal": "Clear all auto-generated journal entries?"
+      }
+    },
+    "moa": {
+      "breadcrumb": "Project Owners",
+      "title": "Project Owners reference data",
+      "subtitle": "Catalogue of contracting authorities — State, public bodies, local authorities, private",
+      "toasts": {
+        "saved": "✓ Project Owner saved",
+        "deleted": "✓ Project Owner deleted"
+      },
+      "section": {
+        "title": "Project Owners ({filtered} / {total})",
+        "addNew": "New Project Owner",
+        "cancel": "× Cancel",
+        "createTitle": "Add a Project Owner"
+      },
+      "fields": {
+        "raisonSociale": "Company name *",
+        "sigle": "Acronym",
+        "siglePlaceholder": "DRCR, ONCF…",
+        "type": "Type *",
+        "ice": "ICE",
+        "adresse": "Address *",
+        "ville": "City *",
+        "telephone": "Phone",
+        "email": "E-mail",
+        "siteWeb": "Website",
+        "sitePlaceholder": "https://",
+        "contactNom": "Contact — name",
+        "contactFonction": "Contact — role",
+        "notes": "Notes"
+      },
+      "actions": {
+        "confirmCreate": "Create Project Owner",
+        "delete": "Del.",
+        "deactivate": "Deactivate",
+        "reactivate": "Reactivate"
+      },
+      "table": {
+        "sigle": "Acronym",
+        "raisonSociale": "Company name",
+        "type": "Type",
+        "ville": "City",
+        "ice": "ICE",
+        "contact": "Contact",
+        "active": "Active",
+        "empty": "No Project Owner matches the filter."
+      },
+      "errors": {
+        "raisonSocialeRequired": "Company name required",
+        "adresseRequired": "Address required",
+        "villeRequired": "City required",
+        "iceInvalid": "Invalid ICE — 15 digits required"
+      },
+      "confirmDelete": "Remove the Project Owner « {raisonSociale} » from the reference data?\n\nThis action is reversible on the demo side (reset reference data)."
+    },
+    "numerotation": {
+      "breadcrumb": "Numbering",
+      "title": "Sequential numbering",
+      "subtitle": "Format, separator, year, padding and reset per company × document type",
+      "stats": {
+        "total": "Policies",
+        "system": "System",
+        "custom": "Custom",
+        "active": "Active",
+        "counters": "Tracked counters"
+      },
+      "section": {
+        "title": "Numbering policy per document type",
+        "help": "Select a company to view and customize the applied formats. System seeds (badge « Inherited ») are used by all companies until a specific override is created.",
+        "societe": "Company",
+        "resetAll": "Reset all (QA)"
+      },
+      "table": {
+        "headers": {
+          "docType": "Document type",
+          "prefix": "Prefix",
+          "separator": "Sep.",
+          "year": "Year",
+          "padding": "Padding",
+          "reset": "Reset",
+          "counter": "Counter",
+          "preview": "Next number preview",
+          "actions": "Actions"
+        }
+      },
+      "badges": {
+        "inherited": "Inherited",
+        "modified": "Modified",
+        "custom": "Custom",
+        "inheritedTitle": "Inherited from system seed",
+        "modifiedTitle": "System seed modified"
+      },
+      "year": {
+        "yyyy": "2026 (YYYY)",
+        "yy": "26 (YY)",
+        "none": "None"
+      },
+      "reset": {
+        "yearly": "Yearly",
+        "monthly": "Monthly",
+        "never": "Never"
+      },
+      "actions": {
+        "resetTitle": "Reset to 0",
+        "personalize": "Customize",
+        "save": "Save",
+        "revertSeed": "↺ Seed",
+        "delete": "Delete"
+      },
+      "help": {
+        "title": "Help — tokens available in the format",
+        "items": {
+          "prefix": "policy prefix (e.g. BC)",
+          "sep": "separator (e.g. -, /)",
+          "yyyy": "4-digit year (e.g. 2026)",
+          "yy": "2-digit year (e.g. 26)",
+          "mm": "2-digit month (e.g. 05)",
+          "soc": "company short code (e.g. SOM)",
+          "seq": "zero-padded sequential counter (mandatory)"
+        },
+        "footer": "Default format: {prefix}{sep}{yyyy}{sep}{seq} yields e.g. BC-2026-00042. The custom format is not exposed in this first version: the parameters above cover 95% of needs."
+      },
+      "preview": {
+        "invalid": "⚠ invalid format"
+      },
+      "toasts": {
+        "policySaved": "✓ Policy {label} saved",
+        "overrideCreated": "✓ Override created for {label}",
+        "seedRestored": "↺ Seed restored for {label}",
+        "deleted": "✓ Policy deleted",
+        "deleteBlocked": "Not possible: system seed (use Revert)",
+        "counterReset": "↺ Counter {label} reset to 0",
+        "resetDone": "✓ Reset done"
+      },
+      "confirm": {
+        "delete": "Delete the policy {label} ({prefix})?",
+        "resetCounter": "Reset the counter {label} to 0?\nNext number = {nextSample}",
+        "resetAll": "Restore all policies to seed values + reset all counters to 0?\nThis action clears all overrides, custom policies and persisted counters."
+      }
+    },
+    "parametresFiscal": {
+      "breadcrumb": "Tax settings",
+      "title": "Tax settings",
+      "subtitle": "VAT, RAS, stamp duty, exemptions, regime — Morocco (CGI 2026)",
+      "stats": {
+        "tva": "VAT rates",
+        "exonerations": "Active exemptions",
+        "regime": "VAT regime",
+        "cycle": "Filing cycle",
+        "rasEtat": "RAS State"
+      },
+      "tabs": {
+        "tva": "VAT rates",
+        "ras": "Withholding tax",
+        "timbre": "Stamp duty",
+        "exonerations": "Exemptions",
+        "regime": "Company regime"
+      },
+      "tva": {
+        "title": "Applicable VAT rates",
+        "addRate": "Add a rate",
+        "fields": {
+          "rate": "Rate %",
+          "label": "Label",
+          "labelPlaceholder": "E.g. Standard VAT",
+          "application": "Application",
+          "applicationPlaceholder": "E.g. BTP standard, new works",
+          "default": "Default"
+        },
+        "newRate": {
+          "label": "Reduced VAT 7%"
+        }
+      },
+      "ras": {
+        "title": "Withholding tax — rate per Project Owner type",
+        "info": "In Morocco, withholding tax (RAS) on works and services applies to public-law legal entities (Art. 158 CGI) and is generally 5% of the net amount. The private sector is generally at 0. Customize the rate per type to ease cross-Project-Owner invoicing.",
+        "fallback": "Global RAS rate (fallback)",
+        "fallbackHint": "Applied if the Project Owner has no known type.",
+        "seuil": "Application threshold (MAD net)",
+        "seuilHint": "0 = applicable without minimum threshold"
+      },
+      "moaTypeFull": {
+        "etat": "State (ministries, directorates)",
+        "ep": "Public body (ONCF, ONEE, OFPPT…)",
+        "collectivite": "Local authority (wilaya, commune)",
+        "prive": "Private (developer, individual, company)"
+      },
+      "perimetre": {
+        "livraison": "Goods delivery",
+        "prestation": "Services",
+        "importation": "Import",
+        "exportation": "Export",
+        "tous": "All types",
+        "livraisonShort": "Delivery",
+        "prestationShort": "Services"
+      },
+      "timbre": {
+        "title": "Stamp duty (Art. 252 CGI)",
+        "info": "Stamp duty applies to cash payments exceeding the defined threshold. It is capped at the configured maximum amount.",
+        "rate": "Stamp rate (%)",
+        "seuil": "Payment threshold (MAD gross)",
+        "plafond": "Stamp cap (MAD)"
+      },
+      "autoliquidation": {
+        "title": "Reverse-charge VAT (non-resident providers)",
+        "rate": "VAT withholding on reverse-charge (% of declared VAT)",
+        "rateHint": "100 = full withholding of the reverse-charged VAT; 0 = no withholding.",
+        "toggle": "Reverse-charge VAT enabled",
+        "toggleDesc": "Applicable to non-resident subcontractors or certain intra-community services.",
+        "logementToggle": "Social housing exemption",
+        "logementDesc": "14% VAT for housing with area ≤ 100 m² and price ≤ 250,000 MAD."
+      },
+      "exonerations": {
+        "title": "VAT exemption motives catalogue",
+        "addNew": "New motive",
+        "cancel": "× Cancel",
+        "info": "Selectable from the quote/invoice form to automatically apply the 0% rate with the legal mention in the PDF. Catalogue compliant with the 2026 Moroccan General Tax Code (Art. 91 to 94).",
+        "createTitle": "New exemption motive",
+        "fields": {
+          "code": "Code *",
+          "codePlaceholder": "92-I-X / COOP-XX",
+          "libelle": "Label *",
+          "libellePlaceholder": "E.g. Export of services",
+          "refLegale": "Legal reference *",
+          "refLegalePlaceholder": "E.g. Art. 92-I-2° CGI",
+          "perimetre": "Scope",
+          "dateFin": "End validity date (optional)",
+          "mention": "Invoice mention *",
+          "mentionPlaceholder": "Text shown on the invoice under the net total"
+        },
+        "addToCatalog": "Add to catalogue",
+        "table": {
+          "status": "Status",
+          "code": "Code",
+          "libelle": "Label",
+          "reference": "Reference",
+          "perimetre": "Scope",
+          "validity": "Validity"
+        },
+        "actions": {
+          "delete": "Delete",
+          "restore": "Restore"
+        }
+      },
+      "regime": {
+        "title": "Company tax regime",
+        "info": "Determines when VAT becomes due and the frequency of DGI filings. The debit regime makes VAT due upon invoicing; the cash regime upon payment receipt. Art. 95 CGI compliance.",
+        "tvaLabel": "VAT regime",
+        "tvaDebit": "Debit (default)",
+        "tvaEncaissement": "Cash basis (option)",
+        "tvaHint": "Cash basis option available for certain sectors.",
+        "cycleLabel": "Filing cycle",
+        "cycleMensuel": "Monthly (turnover > 1 M MAD)",
+        "cycleTrimestriel": "Quarterly (turnover ≤ 1 M MAD)",
+        "numContribuable": "IS taxpayer number",
+        "numContribuablePlaceholder": "E.g. 12345678",
+        "cabinetEmail": "Accounting firm e-mail",
+        "cabinetEmailPlaceholder": "cabinet@expertise-comptable.ma",
+        "cabinetHint": "Destination for copies of filings / entries."
+      },
+      "formActions": {
+        "reset": "Restore default values",
+        "save": "Save tax settings"
+      },
+      "simulator": {
+        "title": "Simulator — VAT subcontracting invoice",
+        "hint": "After changing the reverse-charge option, click Save to update this calculation.",
+        "fields": {
+          "ht": "Net amount (MAD)",
+          "rate": "VAT rate (%)",
+          "nonResident": "Provider non-resident in Morocco"
+        },
+        "mode": "Mode",
+        "netFournisseur": "Net payable to supplier",
+        "tvaFacture": "VAT on invoice",
+        "tvaAuto": "Reverse-charge VAT (declared)",
+        "retenueTva": "VAT withholding"
+      },
+      "toasts": {
+        "motifAdded": "✓ Exemption motive added",
+        "motifAddedError": "All fields marked * are required",
+        "motifRestored": "System motive restored",
+        "motifDeleted": "✓ Motive deleted",
+        "settingsRestored": "✓ Settings restored",
+        "settingsSaved": "✓ Tax settings saved",
+        "settingsSavedToast": "Tax settings saved"
+      },
+      "confirm": {
+        "deleteMotif": "Delete the motive « {libelle} »?",
+        "resetAll": "Restore all tax settings to default values (VAT rates, RAS, stamp duty, reverse-charge, exemption motives, regime)?"
+      }
+    },
+    "rbacPreview": {
+      "breadcrumb": "RBAC preview",
+      "title": "RBAC preview — BTP roles",
+      "subtitle": "View the permissions and navigation accessible for each of the seeded role types.",
+      "notice": {
+        "lead": "Preview mode only.",
+        "body": "Selecting a role below does not affect your session: the shell nav and permissions remain those of the connected user. This page documents which navigation would be visible if a user held this role."
+      },
+      "roles": {
+        "title": "Seeded BTP roles",
+        "reset": "Reset",
+        "meta": "{count} permission(s) — priority {priority}"
+      },
+      "permissions": {
+        "title": "Granted permissions — {name}"
+      },
+      "nav": {
+        "title": "Accessible root navigation",
+        "hint": "Calculation based on the permissionsAny tags on the root nodes of the nav (erp-nav.generated.ts). A module without a tag remains visible by default.",
+        "module": "Module",
+        "required": "Required permission(s) (OR)",
+        "visible": "Visible",
+        "none": "none",
+        "yes": "Yes",
+        "no": "No",
+        "yesAria": "Visible",
+        "noAria": "Hidden"
+      },
+      "matrix": {
+        "title": "Module × action matrix",
+        "hint": "A ticked cell means the role has the module.action permission (directly or via a wildcard).",
+        "module": "Module",
+        "granted": "Granted"
+      },
+      "empty": "Select a role above to see the details of its permissions."
+    },
+    "sessions": {
+      "breadcrumb": "Sessions",
+      "title": "Sessions & logins",
+      "subtitle": "Active sessions + log of authentication attempts",
+      "stats": {
+        "active": "Active sessions",
+        "success24h": "Successful logins 24h",
+        "failed24h": "Failures 24h",
+        "suspectIps": "Suspicious IPs (3+ failures)",
+        "uniqueUsers": "Active users 24h"
+      },
+      "active": {
+        "title": "Active sessions ({count})",
+        "hint": "The « Force logout » button ends the session immediately (mock).",
+        "table": {
+          "user": "User",
+          "started": "Started",
+          "lastActivity": "Last activity",
+          "ip": "IP",
+          "browser": "Browser",
+          "location": "Location"
+        },
+        "staleBadge": "inactive",
+        "forceLogout": "Force logout",
+        "empty": "No active session."
+      },
+      "logins": {
+        "title": "Login attempts ({filtered} / {total})",
+        "searchPlaceholder": "User, IP, location…",
+        "allOutcomes": "All outcomes",
+        "allUsers": "All users",
+        "reset": "↻ Reset",
+        "table": {
+          "timestamp": "Timestamp",
+          "user": "User",
+          "outcome": "Outcome",
+          "failureReason": "Failure reason",
+          "ip": "IP",
+          "browser": "Browser",
+          "location": "Location"
+        },
+        "empty": "No attempt matches the filters."
+      },
+      "exportFilename": "login-attempts",
+      "confirm": {
+        "forceLogout": "Force logout the session of « {user} »?\n\n(IP {ip}, {browser})"
+      },
+      "toasts": {
+        "sessionEnded": "Session of {user} ended"
+      }
+    },
+    "societe": {
+      "breadcrumb": "Companies",
+      "title": "Group companies",
+      "subtitle": "Multi-entity — select a company to edit its legal identity, logo and accounting periods",
+      "toasts": {
+        "saved": "✓ Settings saved",
+        "saveError": "⚠ Fix the fields in error before saving",
+        "deleted": "✓ Company deleted"
+      },
+      "listing": {
+        "title": "Group companies",
+        "hint": "{count} companies · click to edit",
+        "addNew": "New company",
+        "cancel": "× Cancel"
+      },
+      "create": {
+        "title": "Create a new company",
+        "hint": "Enter the mandatory legal information. You will be able to add logo, periods and bank accounts after creation.",
+        "submit": "Create company",
+        "fields": {
+          "raisonSociale": "Company name *",
+          "formeJuridique": "Legal form *",
+          "ice": "ICE *",
+          "if": "IF",
+          "ifPlaceholder": "7 to 8 digits",
+          "rc": "RC",
+          "rcPlaceholder": "City - 123456",
+          "capital": "Share capital (MAD)",
+          "adresse": "Head office address *"
+        }
+      },
+      "table": {
+        "raisonSociale": "Company name",
+        "forme": "Form",
+        "ice": "ICE",
+        "rc": "RC",
+        "siege": "Head office",
+        "etablissements": "Establishments",
+        "status": "Status",
+        "active": "Active",
+        "actif": "Active",
+        "inactif": "Inactive"
+      },
+      "detail": {
+        "label": "Selected company",
+        "activate": "Activate this company",
+        "delete": "Delete the company",
+        "deleteDisabled": "Deletion disabled"
+      },
+      "identite": {
+        "title": "Legal identification",
+        "fields": {
+          "raisonSociale": "Company name *",
+          "formeJuridique": "Legal form *",
+          "ice": "ICE (15 digits)",
+          "if": "Tax Identifier (I.F.)",
+          "ifPlaceholder": "7 to 8 digits",
+          "rc": "Trade Register (R.C.)",
+          "rcPlaceholder": "City - 123456",
+          "patente": "Professional Tax",
+          "patentePlaceholder": "7 to 10 digits",
+          "cnss": "CNSS Affiliation No.",
+          "cnssPlaceholder": "7 to 9 digits",
+          "cnaem": "CNAEM No.",
+          "cnaemNote": "(maritime, optional)",
+          "cnaemPlaceholder": "CNAEM code if applicable",
+          "tvaIntra": "Intra-community VAT",
+          "capital": "Share capital (MAD) *",
+          "adresse": "Head office address *"
+        },
+        "hint": "MA validation: ICE 15 chars, IF 7-8 chars, RC 4-8 chars, Patente 7-10 chars, CNSS 7-9 chars. Changes are persisted locally (mock — overrides on seeds)."
+      },
+      "logo": {
+        "title": "Company logo",
+        "altImg": "Company logo",
+        "placeholder": "No logo",
+        "choose": "Choose a file…",
+        "remove": "Remove logo",
+        "hint": "PNG / JPG / SVG / WebP — max 512 KB. Stored as data URL (mock-only).",
+        "errors": {
+          "unsupportedType": "Unsupported type: {type}",
+          "tooLarge": "File too large (max 512 KB, received {size} KB)",
+          "readError": "Could not read the file"
+        }
+      },
+      "exercices": {
+        "title": "Accounting periods",
+        "addNew": "Add a period",
+        "empty": "No period recorded.",
+        "table": {
+          "code": "Code",
+          "debut": "Start",
+          "fin": "End",
+          "statut": "Status",
+          "closLe": "Closed on",
+          "notes": "Notes"
+        },
+        "status": {
+          "ouvert": "Open",
+          "cloture": "Closed"
+        },
+        "actions": {
+          "cloturer": "Close"
+        },
+        "newNotes": "New period"
+      },
+      "extras": {
+        "title": "Management settings (company extras)",
+        "hint": "Multi-entity audit complements: local persistence per company, complementary to the canonical model above.",
+        "fields": {
+          "codeCourtGroupe": "Group short code",
+          "codeCourtPlaceholder": "E.g. SOM-BTP",
+          "devise": "Reference currency",
+          "moisCloture": "Period closing month",
+          "villeSiege": "City (head office / correspondence)",
+          "paysSiege": "Country (ISO code)",
+          "paysSiegePlaceholder": "MA",
+          "rlNom": "Legal representative — name",
+          "rlQualite": "Legal representative — title",
+          "rlQualitePlaceholder": "Manager, CEO…"
+        }
+      },
+      "contacts": {
+        "title": "Contact details",
+        "fields": {
+          "codePostal": "Postal code",
+          "telephone": "Phone",
+          "email": "E-mail",
+          "siteWeb": "Website",
+          "sitePlaceholder": "https://"
+        }
+      },
+      "etabs": {
+        "title": "Establishments ({count})",
+        "empty": "No establishment recorded."
+      },
+      "ribs": {
+        "title": "Bank accounts (RIBs)",
+        "addNew": "Add a RIB",
+        "fields": {
+          "banque": "Bank",
+          "intitule": "Account name",
+          "intitulePlaceholder": "E.g. Main MAD account",
+          "rib": "RIB (24 digits)",
+          "principal": "Primary"
+        },
+        "removeTitle": "Delete"
+      },
+      "empty": "Select a company in the table above.",
+      "errors": {
+        "raisonSocialeRequired": "Company name required",
+        "siegeRequired": "Head office address required",
+        "iceRequired": "ICE required (15 digits)",
+        "iceInvalid": "Invalid ICE — 15 digits required",
+        "ifInvalid": "Invalid IF — 7 to 8 digits",
+        "rcInvalid": "Invalid RC — 4 to 8 digits",
+        "patenteInvalid": "Invalid Patente — 7 to 10 digits",
+        "cnssInvalid": "Invalid CNSS — 7 to 9 digits"
+      },
+      "deleteReasons": {
+        "lastOne": "At least one company must remain",
+        "switchFirst": "Switch to another company before deleting",
+        "generic": "Deletion not possible"
+      },
+      "confirmDelete": "Permanently delete « {raisonSociale} »?\n\nThis action is reversible on the demo side (resetOverrides), not in prod."
+    }
+  }
+}

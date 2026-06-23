@@ -1,0 +1,47 @@
+{
+  "measurement": {
+    "navigation": {
+      "itemUnitConversions": "Item Unit Conversions",
+      "unitOfMeasures": "Units of Measure",
+      "uoMCategories": "Measurement Categories"
+    },
+    "itemUnitConversion": {
+      "title": "Item Unit Conversions",
+      "detailTitle": "Item Unit Conversion Details",
+      "newTitle": "New Item Unit Conversion",
+      "fields": {
+        "itemId": "item Id",
+        "fromUnit": "from Unit",
+        "toUnit": "to Unit",
+        "factor": "factor",
+        "isActive": "is Active"
+      },
+      "sections": {}
+    },
+    "unitOfMeasure": {
+      "title": "Units of Measure",
+      "detailTitle": "Unit of Measure Details",
+      "newTitle": "New Unit of Measure",
+      "fields": {
+        "code": "code",
+        "name": "name",
+        "uomCategoryId": "Measurement Category ID",
+        "description": "description",
+        "isActive": "is Active"
+      },
+      "sections": {}
+    },
+    "uoMCategory": {
+      "title": "Measurement Categories",
+      "detailTitle": "Measurement Category Details",
+      "newTitle": "New Measurement Category",
+      "fields": {
+        "code": "code",
+        "name": "name",
+        "description": "description",
+        "isActive": "is Active"
+      },
+      "sections": {}
+    }
+  }
+}

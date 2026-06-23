@@ -1,0 +1,79 @@
+/* Doxura Design System v1 - Design Tokens */
+
+:root {
+  /* Colors - Primary Brand & Accent */
+  --dox-color-primary: #1e293b; /* Slate 800 - Deep, professional navy */
+  --dox-color-primary-light: #334155;
+  --dox-color-accent: #3b82f6; /* Blue 500 - Clear, functional blue */
+  --dox-color-accent-hover: #2563eb;
+  --dox-color-accent-light: #eff6ff;
+
+  /* Surfaces & Backgrounds */
+  --dox-color-bg: #f8fafc; /* Slate 50 - Calm workspace background */
+  --dox-color-surface: #ffffff;
+  --dox-color-surface-hover: #f1f5f9;
+  --dox-color-surface-selected: #f1f5f9;
+
+  /* Borders & Dividers */
+  --dox-color-border: #e2e8f0; /* Slate 200 - Subtle borders */
+  --dox-color-border-hover: #cbd5e1;
+  --dox-color-divider: #f1f5f9;
+
+  /* Typography Colors */
+  --dox-color-text: #1e293b; /* Slate 800 */
+  --dox-color-text-secondary: #64748b; /* Slate 500 */
+  --dox-color-text-muted: #94a3b8; /* Slate 400 */
+  --dox-color-text-on-primary: #ffffff;
+  --dox-color-text-on-accent: #ffffff;
+
+  /* Status Colors (Chips/Badges Only) */
+  --dox-status-draft-bg: #f1f5f9;
+  --dox-status-draft-text: #475569;
+  --dox-status-valid-bg: #f0fdf4;
+  --dox-status-valid-text: #166534;
+  --dox-status-invalid-bg: #fef2f2;
+  --dox-status-invalid-text: #991b1b;
+  --dox-status-corrected-bg: #fff7ed;
+  --dox-status-corrected-text: #9a3412;
+  --dox-status-exported-bg: #f0f9ff;
+  --dox-status-exported-text: #075985;
+
+  /* Spacing Scale (8px base) */
+  --dox-spacing-none: 0;
+  --dox-spacing-4xs: 0.125rem; /* 2px */
+  --dox-spacing-3xs: 0.25rem;  /* 4px */
+  --dox-spacing-2xs: 0.375rem; /* 6px */
+  --dox-spacing-xs: 0.5rem;    /* 8px */
+  --dox-spacing-sm: 0.75rem;   /* 12px */
+  --dox-spacing-md: 1rem;      /* 16px */
+  --dox-spacing-lg: 1.5rem;    /* 24px */
+  --dox-spacing-xl: 2rem;      /* 32px */
+  --dox-spacing-2xl: 3rem;     /* 48px */
+  --dox-spacing-3xl: 4rem;     /* 64px */
+
+  /* Radii */
+  --dox-radius-none: 0;
+  --dox-radius-xs: 2px;
+  --dox-radius-sm: 4px;
+  --dox-radius-md: 6px;
+  --dox-radius-lg: 8px;
+  --dox-radius-full: 9999px;
+
+  /* Shadows (Minimal) */
+  --dox-shadow-none: none;
+  --dox-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --dox-shadow-md: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+
+  /* Sidebar Tokens */
+  --dox-sidebar-bg: #ffffff;
+  --dox-sidebar-text: #475569;
+  --dox-sidebar-text-active: #1e293b;
+  --dox-sidebar-item-hover: #f1f5f9;
+  --dox-sidebar-item-active: #f1f5f9;
+  --dox-sidebar-border: #e2e8f0;
+
+  /* Topbar Tokens */
+  --dox-topbar-bg: #ffffff;
+  --dox-topbar-height: 56px;
+  --dox-topbar-border: #e2e8f0;
+}

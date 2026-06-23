@@ -1,0 +1,117 @@
+{
+  "partner": {
+    "navigation": {
+      "partners": "الشركاء",
+      "businessUnits": "وحدات الأعمال",
+      "contacts": "جهات الاتصال",
+      "organizations": "المؤسسات",
+      "partnerCategories": "فئات الشركاء",
+      "partnerRoles": "أدوار الشركاء",
+      "sites": "المواقع"
+    },
+    "partner": {
+      "title": "الشركاء",
+      "detailTitle": "تفاصيل الشريك",
+      "newTitle": "شريك جديد",
+      "fields": {
+        "code": "الرمز",
+        "name": "الاسم",
+        "taxId": "الرقم الضريبي",
+        "email": "البريد الإلكتروني",
+        "phone": "الهاتف",
+        "description": "الوصف",
+        "addressId": "معرّف العنوان",
+        "paymentTermId": "معرّف شرط الدفع",
+        "isActive": "نشط",
+        "roles": "الأدوار"
+      },
+      "sections": {
+        "contact": "الاتصال",
+        "legal": "القانوني",
+        "financial": "المالي"
+      }
+    },
+    "businessUnit": {
+      "title": "وحدات الأعمال",
+      "detailTitle": "تفاصيل وحدة الأعمال",
+      "newTitle": "وحدة أعمال جديدة",
+      "fields": {
+        "organizationId": "معرّف المؤسسة",
+        "code": "الرمز",
+        "name": "الاسم",
+        "description": "الوصف",
+        "isActive": "نشط"
+      },
+      "sections": {}
+    },
+    "contact": {
+      "title": "جهات الاتصال",
+      "detailTitle": "تفاصيل جهة الاتصال",
+      "newTitle": "جهة اتصال جديدة",
+      "fields": {
+        "code": "الرمز",
+        "name": "الاسم",
+        "email": "البريد الإلكتروني",
+        "phone": "الهاتف",
+        "mobile": "الجوال",
+        "description": "الوصف",
+        "isActive": "نشط"
+      },
+      "sections": {}
+    },
+    "organization": {
+      "title": "المؤسسات",
+      "detailTitle": "تفاصيل المؤسسة",
+      "newTitle": "مؤسسة جديدة",
+      "fields": {
+        "code": "الرمز",
+        "name": "الاسم",
+        "description": "الوصف",
+        "isActive": "نشط"
+      },
+      "sections": {}
+    },
+    "partnerCategory": {
+      "title": "فئات الشركاء",
+      "detailTitle": "تفاصيل فئة الشريك",
+      "newTitle": "فئة شريك جديدة",
+      "fields": {
+        "code": "الرمز",
+        "name": "الاسم",
+        "description": "الوصف",
+        "isActive": "نشط"
+      },
+      "sections": {}
+    },
+    "partnerRole": {
+      "title": "أدوار الشركاء",
+      "detailTitle": "تفاصيل دور الشريك",
+      "newTitle": "دور شريك جديد",
+      "fields": {
+        "code": "الرمز",
+        "name": "الاسم",
+        "description": "الوصف",
+        "isActive": "نشط"
+      },
+      "sections": {}
+    },
+    "site": {
+      "title": "المواقع",
+      "detailTitle": "تفاصيل الموقع",
+      "newTitle": "موقع جديد",
+      "fields": {
+        "code": "الرمز",
+        "name": "الاسم",
+        "organizationId": "معرّف المؤسسة",
+        "businessUnitId": "معرّف وحدة الأعمال",
+        "addressId": "معرّف العنوان",
+        "description": "الوصف",
+        "isActive": "نشط",
+        "siteType": "نوع الموقع"
+      },
+      "sections": {
+        "address": "العنوان"
+      }
+    }
+  }
+}

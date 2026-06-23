@@ -1,0 +1,36 @@
+<div class="nf-input-wrapper" [class]="class">
+  <!-- Label -->
+  <label *ngIf="label" [for]="id" class="nf-input-label">
+    {{ label }}
+    <span class="nf-required-indicator" *ngIf="required">*</span>
+  </label>
+
+  <!-- Input element -->
+  <input
+    [id]="id"
+    [type]="type"
+    [value]="value()"
+    [placeholder]="placeholder || ''"
+    [disabled]="disabled"
+    [required]="required"
+    [maxLength]="maxlength"
+    [autocomplete]="autocomplete || 'off'"
+    [attr.aria-invalid]="shouldShowError()"
+    [attr.aria-required]="required"
+    [attr.aria-describedby]="shouldShowError() ? id + '-error' : null"
+    class="nf-input-field"
+    (input)="onValueChange($event)"
+    (focus)="onFocus()"
+    (blur)="onBlur()"
+  />
+
+  <!-- Error message -->
+  <span
+    *ngIf="shouldShowError()"
+    [id]="id + '-error'"
+    class="nf-input-error"
+    role="alert"
+  >
+    {{ error }}
+  </span>
+</div>

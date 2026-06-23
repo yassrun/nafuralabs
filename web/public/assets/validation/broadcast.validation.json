@@ -1,0 +1,38 @@
+{
+  "entity": "Broadcast",
+  "fields": {
+    "broadcastNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "title": {
+      "required": true,
+      "maxLength": 200
+    },
+    "message": {
+      "required": true,
+      "maxLength": 4000
+    },
+    "audience": {
+      "required": true,
+      "maxLength": 60
+    },
+    "channel": {
+      "required": true,
+      "maxLength": 30
+    },
+    "urgency": {
+      "required": true,
+      "maxLength": 30
+    },
+    "sentBy": {
+      "required": true,
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

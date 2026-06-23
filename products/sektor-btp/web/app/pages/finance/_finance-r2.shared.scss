@@ -1,0 +1,114 @@
+.f8 {
+  padding: 0 16px 32px;
+  max-width: 1200px;
+}
+.f8__alert {
+  background: var(--nf-color-danger-50);
+  color: var(--nf-color-danger-800);
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+.f8__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+  margin-bottom: 16px;
+}
+.f8__lbl {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--nf-color-text-secondary);
+}
+.f8__lbl select,
+.f8__lbl input {
+  min-width: 140px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--nf-color-border);
+}
+.f8__chk {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+.f8__btn {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--nf-color-border);
+  background: var(--nf-color-surface);
+  cursor: pointer;
+}
+.f8__btn--primary {
+  background: var(--nf-color-primary-700);
+  color: var(--nf-color-surface);
+  border-color: var(--nf-color-primary-700);
+}
+.f8__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.f8__card {
+  background: var(--nf-color-surface);
+  border: 1px solid var(--nf-color-border);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.f8__h {
+  margin: 0 0 12px;
+  font-size: 16px;
+}
+.f8__totals {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+.f8__diff {
+  color: var(--nf-color-warning-700);
+}
+.f8__tablewrap {
+  overflow-x: auto;
+}
+.f8__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.f8__table th,
+.f8__table td {
+  border-bottom: 1px solid var(--nf-color-bg-muted);
+  padding: 8px 6px;
+  text-align: left;
+}
+.f8__num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.f8__link {
+  background: none;
+  border: none;
+  color: var(--nf-color-primary-600);
+  cursor: pointer;
+  text-decoration: underline;
+}
+.f8__log {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13px;
+  color: var(--nf-color-text-primary);
+}
+.f8__pre {
+  max-height: 280px;
+  overflow: auto;
+  font-size: 11px;
+  background: var(--nf-text-primary);
+  color: var(--nf-color-border);
+  padding: 12px;
+  border-radius: 8px;
+}

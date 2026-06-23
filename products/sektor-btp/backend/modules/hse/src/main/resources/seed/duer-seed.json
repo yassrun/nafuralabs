@@ -1,0 +1,71 @@
+{
+  "duer": [
+    {
+      "id": "duer-001",
+      "numero": "DUER-2026-001",
+      "chantierId": "ch-001",
+      "chantierCode": "CH-2025-001",
+      "chantierName": "Résidence Yasmine — Casa",
+      "version": "v1.2",
+      "dateRevision": "2026-03-12",
+      "auteurId": "emp-001",
+      "auteurNom": "Karim El Idrissi",
+      "risquesIdentifies": 18,
+      "actionsCorrectives": 14,
+      "observations": "Mise à jour suite à arrivée engins de levage Phase 2.",
+      "status": "VALIDE",
+      "risques": [
+        { "id": "mx-1", "libelle": "Chutes plain-pied / obstacles", "probabilite": 2, "gravite": 2, "ordre": 1 },
+        { "id": "mx-2", "libelle": "Chute de hauteur / échafaudages", "probabilite": 2, "gravite": 4, "ordre": 2 },
+        { "id": "mx-3", "libelle": "Effondrement / fouilles / tranchées", "probabilite": 1, "gravite": 4, "ordre": 3 },
+        { "id": "mx-4", "libelle": "Circulation engins / coactivité piétons", "probabilite": 3, "gravite": 3, "ordre": 4 },
+        { "id": "mx-5", "libelle": "Exposition poussières / bruit", "probabilite": 2, "gravite": 2, "ordre": 5 },
+        { "id": "mx-go", "libelle": "Levage > 25 t — coordination grues", "probabilite": 2, "gravite": 4, "codeActivite": "GO", "ordre": 6 }
+      ]
+    },
+    {
+      "id": "duer-002",
+      "numero": "DUER-2026-002",
+      "chantierId": "ch-002",
+      "chantierCode": "CH-2025-002",
+      "chantierName": "Pont Bouregreg ouvrage 3",
+      "version": "v2.0",
+      "dateRevision": "2026-04-22",
+      "auteurId": "emp-002",
+      "auteurNom": "Hicham Bennani",
+      "risquesIdentifies": 27,
+      "actionsCorrectives": 19,
+      "observations": "Travaux en hauteur + travaux fluviaux — 6 risques critiques.",
+      "status": "VALIDE",
+      "risques": [
+        { "id": "mx-1-b", "libelle": "Chutes plain-pied / obstacles", "probabilite": 2, "gravite": 2, "ordre": 1 },
+        { "id": "mx-2-b", "libelle": "Chute de hauteur / échafaudages", "probabilite": 2, "gravite": 4, "ordre": 2 },
+        { "id": "mx-3-b", "libelle": "Effondrement / fouilles / tranchées", "probabilite": 1, "gravite": 4, "ordre": 3 },
+        { "id": "mx-4-b", "libelle": "Circulation engins / coactivité piétons", "probabilite": 3, "gravite": 3, "ordre": 4 },
+        { "id": "mx-5-b", "libelle": "Exposition poussières / bruit", "probabilite": 2, "gravite": 2, "ordre": 5 }
+      ]
+    },
+    {
+      "id": "duer-003",
+      "numero": "DUER-2026-003",
+      "chantierId": "ch-005",
+      "chantierCode": "CH-2025-005",
+      "chantierName": "Voirie Mohammedia secteur 7",
+      "version": "v1.0",
+      "dateRevision": "2026-05-04",
+      "auteurId": "emp-003",
+      "auteurNom": "Younes Tazi",
+      "risquesIdentifies": 12,
+      "actionsCorrectives": 8,
+      "observations": "Première version — circulation piétons riverains à sécuriser.",
+      "status": "BROUILLON",
+      "risques": [
+        { "id": "mx-1-c", "libelle": "Chutes plain-pied / obstacles", "probabilite": 2, "gravite": 2, "ordre": 1 },
+        { "id": "mx-2-c", "libelle": "Chute de hauteur / échafaudages", "probabilite": 2, "gravite": 4, "ordre": 2 },
+        { "id": "mx-3-c", "libelle": "Effondrement / fouilles / tranchées", "probabilite": 1, "gravite": 4, "ordre": 3 },
+        { "id": "mx-4-c", "libelle": "Circulation engins / coactivité piétons", "probabilite": 3, "gravite": 3, "ordre": 4 },
+        { "id": "mx-5-c", "libelle": "Exposition poussières / bruit", "probabilite": 2, "gravite": 2, "ordre": 5 }
+      ]
+    }
+  ]
+}

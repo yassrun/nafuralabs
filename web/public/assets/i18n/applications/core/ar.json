@@ -1,0 +1,15 @@
+{
+  "core": {
+    "application": {
+      "title": "Nafura Core ERP",
+      "description": "مساحة ERP الأساسية لـ Nafura"
+    },
+    "ai": {
+      "assistant": {
+        "title": "المساعد الذكي",
+        "subtitle": "اطرح سؤالاً حول ERP",
+        "placeholder": "مثال: إنشاء سند طلب للورش CH-2026-003"
+      }
+    }
+  }
+}

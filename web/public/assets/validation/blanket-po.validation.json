@@ -1,0 +1,29 @@
+{
+  "entity": "BlanketPo",
+  "fields": {
+    "poNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "contractPeriodStart": {
+      "maxLength": 120
+    },
+    "contractPeriodEnd": {
+      "maxLength": 120
+    },
+    "totalCommitment": {
+      "maxLength": 120
+    },
+    "releasedAmount": {
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

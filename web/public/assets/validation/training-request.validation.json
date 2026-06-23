@@ -1,0 +1,20 @@
+{
+  "entity": "TrainingRequest",
+  "fields": {
+    "requestNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "courseName": {
+      "maxLength": 120
+    },
+    "provider": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

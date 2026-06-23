@@ -1,0 +1,34 @@
+{
+  "entity": "WorkflowInstance",
+  "fields": {
+    "instanceNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "templateId": {
+      "required": true
+    },
+    "documentType": {
+      "required": true,
+      "maxLength": 80
+    },
+    "documentId": {
+      "required": true
+    },
+    "startedAt": {
+      "required": true
+    },
+    "initiatedBy": {
+      "required": true,
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

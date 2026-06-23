@@ -1,0 +1,778 @@
+{
+  "rh": {
+    "routes": {
+      "employes": { "title": "الموظفون", "breadcrumb": "الموظفون" },
+      "employeNew": { "title": "موظف جديد", "breadcrumb": "جديد" },
+      "employeDetail": { "title": "تفاصيل الموظف", "breadcrumb": "التفاصيل" },
+      "employeEdit": { "title": "تعديل الموظف", "breadcrumb": "تعديل" },
+      "conges": { "title": "الإجازات", "breadcrumb": "الإجازات" },
+      "congeNew": { "title": "طلب إجازة جديد", "breadcrumb": "جديدة" },
+      "congeDetail": { "title": "تفاصيل الإجازة", "breadcrumb": "التفاصيل" },
+      "congeEdit": { "title": "تعديل الإجازة", "breadcrumb": "تعديل" },
+      "paie": { "title": "كشوف الرواتب", "breadcrumb": "الرواتب" },
+      "paieNew": { "title": "كشف راتب جديد", "breadcrumb": "جديد" },
+      "paieDetail": { "title": "تفاصيل كشف الراتب", "breadcrumb": "التفاصيل" },
+      "paieEdit": { "title": "تعديل كشف الراتب", "breadcrumb": "تعديل" },
+      "paieJournal": { "title": "دفتر يومية الرواتب", "breadcrumb": "اليومية" },
+      "damancom": { "title": "تصريح DAMANCOM", "breadcrumb": "DAMANCOM" },
+      "etat1208": { "title": "البيان 1208 — ملخص المشتريات", "breadcrumb": "البيان 1208" },
+      "etat9421": { "title": "البيان 9421 IGR", "breadcrumb": "البيان 9421" },
+      "pointage": { "title": "الحضور بالأوراش", "breadcrumb": "الحضور" },
+      "pointageSaisie": { "title": "تسجيل الحضور", "breadcrumb": "التسجيل" },
+      "pointageValidation": { "title": "تحقق الحضور", "breadcrumb": "التحقق" },
+      "planning": { "title": "جدولة الفرق", "breadcrumb": "جدولة الفرق" }
+    },
+    "common": {
+      "module": "الموارد البشرية",
+      "actions": {
+        "create": "إنشاء",
+        "save": "حفظ",
+        "cancel": "إلغاء",
+        "edit": "تعديل",
+        "delete": "حذف",
+        "print": "طباعة",
+        "export": "تصدير",
+        "all": "الكل",
+        "allF": "الكل",
+        "back": "رجوع",
+        "validate": "تحقق"
+      },
+      "chips": {
+        "all": "الكل"
+      },
+      "filters": {
+        "month": "الشهر (YYYY-MM)",
+        "monthShort": "الشهر",
+        "exercise": "السنة المحاسبية",
+        "chantier": "الورش",
+        "employe": "الموظف"
+      },
+      "dash": "—",
+      "noData": "لا توجد بيانات."
+    },
+    "employe": {
+      "title": "الموظفون",
+      "titleSingular": "موظف",
+      "titleNew": "موظف جديد",
+      "titleDetail": "تفاصيل الموظف",
+      "listing": {
+        "headerTitle": "الموظفون",
+        "chips": {
+          "all": "الكل",
+          "actifs": "النشطون",
+          "suspendus": "المعلقون"
+        },
+        "emptyState": {
+          "title": "لا يوجد أي موظف",
+          "message": "أضف أول موظفين لديك لبدء إدارة فريق العمل.",
+          "actionLabel": "موظف جديد"
+        }
+      },
+      "columns": {
+        "matricule": "رقم التعريف",
+        "nomPrenom": "الاسم واللقب",
+        "poste": "المنصب",
+        "categorie": "الفئة",
+        "contrat": "العقد",
+        "salaireBase": "الراتب الأساسي",
+        "anciennete": "الأقدمية",
+        "statut": "الحالة"
+      },
+      "anciennete": {
+        "count": "{count, plural, =0 {أقل من سنة} zero {أقل من سنة} one {سنة واحدة} two {سنتان} few {# سنوات} many {# سنة} other {# سنة}}",
+        "one": "{count} سنة",
+        "other": "{count} سنوات"
+      },
+      "filters": {
+        "statut": "الحالة",
+        "typeContrat": "نوع العقد",
+        "categorie": "الفئة"
+      },
+      "fields": {
+        "nom": "الاسم العائلي",
+        "prenom": "الاسم الشخصي",
+        "cin": "CIN",
+        "cnss": "رقم CNSS",
+        "amo": "رقم AMO",
+        "dateNaissance": "تاريخ الازدياد",
+        "telephone": "الهاتف",
+        "email": "البريد الإلكتروني",
+        "adresse": "العنوان",
+        "ville": "المدينة",
+        "matricule": "رقم التعريف",
+        "typeContrat": "نوع العقد",
+        "categorie": "الفئة",
+        "poste": "المنصب",
+        "departement": "القسم",
+        "dateEmbauche": "تاريخ التوظيف",
+        "dateFinContrat": "تاريخ نهاية العقد",
+        "statut": "الحالة",
+        "salaireBase": "الراتب الأساسي",
+        "indemniteRepresentation": "تعويض التمثيل",
+        "indemniteTransport": "تعويض التنقل",
+        "banque": "البنك",
+        "rib": "RIB",
+        "ribHint": "24 رقمًا (RIB مغربي)",
+        "ice": "ICE (الطرف / الراتب)",
+        "ifFiscal": "الرقم الضريبي (IF)",
+        "rc": "RC",
+        "patente": "الضريبة المهنية",
+        "notes": "ملاحظات"
+      },
+      "fieldsRequired": {
+        "nom": "الاسم العائلي *",
+        "prenom": "الاسم الشخصي *",
+        "cin": "CIN *",
+        "typeContrat": "نوع العقد *",
+        "categorie": "الفئة *",
+        "poste": "المنصب *",
+        "dateEmbauche": "تاريخ التوظيف *",
+        "salaireBase": "الراتب الأساسي *"
+      },
+      "sections": {
+        "identite": "الهوية",
+        "contrat": "العقد",
+        "remuneration": "الأجر",
+        "notes": "ملاحظات"
+      },
+      "statuses": {
+        "ACTIF": "نشط",
+        "SUSPENDU": "معلق",
+        "SOLDE": "مُسوّى"
+      },
+      "types": {
+        "CDI": "CDI",
+        "CDD": "CDD",
+        "ANAPEC": "ANAPEC",
+        "Saisonnier": "موسمي",
+        "Interim": "مؤقت"
+      },
+      "categories": {
+        "Ouvrier": "عامل",
+        "Agent_maitrise": "عون تأطير",
+        "Cadre": "إطار",
+        "Direction": "إدارة"
+      },
+      "transitions": {
+        "suspendre": {
+          "label": "تعليق",
+          "confirmTitle": "تعليق الموظف؟",
+          "confirmMessage": "سيتم تعليق الموظف ولن يتمكن من الوصول إلى الورش.",
+          "confirmLabel": "تعليق"
+        },
+        "solde": {
+          "label": "تسوية",
+          "confirmTitle": "تسوية الموظف؟",
+          "confirmMessage": "ينهي هذا الإجراء عقد الموظف.",
+          "confirmLabel": "تسوية"
+        },
+        "reactiver": {
+          "label": "إعادة التفعيل",
+          "confirmTitle": "إعادة تفعيل الموظف؟",
+          "confirmMessage": "سيستعيد الموظف وصوله العادي.",
+          "confirmLabel": "إعادة التفعيل"
+        }
+      },
+      "toasts": {
+        "saved": "تم حفظ الموظف {matricule}",
+        "statutChanged": "الموظف {matricule} — تم تحديث الحالة"
+      },
+      "deleteConfirm": {
+        "title": "حذف الموظف",
+        "message": "هل تريد حذف الموظف {matricule} — {nom} {prenom}؟"
+      },
+      "errors": {
+        "notFound": "الموظف {id} غير موجود"
+      }
+    },
+    "conge": {
+      "title": "الإجازات",
+      "titleSingular": "إجازة",
+      "titleNew": "طلب إجازة جديد",
+      "titleDetail": "تفاصيل الإجازة",
+      "listing": {
+        "headerTitle": "الإجازات",
+        "chips": {
+          "all": "الكل",
+          "demande": "المطلوبة",
+          "approuve": "الموافق عليها",
+          "enCours": "قيد التنفيذ"
+        },
+        "emptyState": {
+          "title": "لا توجد إجازات",
+          "message": "ستظهر هنا طلبات الإجازة الخاصة بموظفيك.",
+          "actionLabel": "طلب جديد"
+        }
+      },
+      "approvalBar": {
+        "label": "سير عمل الموافقة"
+      },
+      "columns": {
+        "numero": "رقم الإجازة",
+        "employe": "الموظف",
+        "type": "النوع",
+        "debut": "البداية",
+        "fin": "النهاية",
+        "jours": "الأيام",
+        "statut": "الحالة"
+      },
+      "filters": {
+        "statut": "الحالة",
+        "type": "النوع"
+      },
+      "fields": {
+        "numero": "رقم الإجازة",
+        "employeId": "الموظف",
+        "type": "نوع الإجازة",
+        "dateDebut": "تاريخ البداية",
+        "dateFin": "تاريخ النهاية",
+        "nombreJours": "عدد الأيام",
+        "motif": "السبب",
+        "notes": "ملاحظات",
+        "motifRefus": "سبب الرفض"
+      },
+      "fieldsRequired": {
+        "employeId": "الموظف *",
+        "type": "نوع الإجازة *",
+        "dateDebut": "تاريخ البداية *",
+        "dateFin": "تاريخ النهاية *"
+      },
+      "sections": {
+        "demande": "طلب الإجازة",
+        "traitement": "المعالجة"
+      },
+      "statuses": {
+        "DEMANDE": "مطلوبة",
+        "APPROUVE": "موافق عليها",
+        "REFUSE": "مرفوضة",
+        "EN_COURS": "قيد التنفيذ",
+        "SOLDE": "مُسوّاة"
+      },
+      "types": {
+        "ANNUEL": "سنوية",
+        "MALADIE": "مرضية",
+        "MATERNITE": "الأمومة",
+        "PATERNITE": "الأبوة",
+        "SANS_SOLDE": "بدون أجر",
+        "EXCEPTIONNEL": "استثنائية"
+      },
+      "transitions": {
+        "approuver": {
+          "label": "موافقة",
+          "confirmTitle": "الموافقة على الإجازة؟",
+          "confirmMessage": "سيتم الموافقة على الإجازة.",
+          "confirmLabel": "موافقة"
+        },
+        "refuser": {
+          "label": "رفض",
+          "confirmTitle": "رفض الإجازة؟",
+          "confirmMessage": "حدد سبب الرفض.",
+          "confirmLabel": "رفض",
+          "notePlaceholder": "السبب إلزامي"
+        },
+        "demarrer": {
+          "label": "تشغيل",
+          "confirmTitle": "تشغيل الإجازة؟",
+          "confirmMessage": "ستنتقل الإجازة إلى حالة قيد التنفيذ.",
+          "confirmLabel": "تشغيل"
+        },
+        "solder": {
+          "label": "تسوية",
+          "confirmTitle": "تسوية الإجازة؟",
+          "confirmMessage": "ستتم تسوية الإجازة وإغلاقها.",
+          "confirmLabel": "تسوية"
+        }
+      },
+      "toasts": {
+        "saved": "تم حفظ الإجازة {numero}",
+        "approved": "تمت الموافقة على الإجازة {numero}",
+        "refused": "تم رفض الإجازة {numero}",
+        "started": "تم تشغيل الإجازة {numero}",
+        "closed": "تمت تسوية الإجازة {numero}"
+      },
+      "prompts": {
+        "motifRefus": "سبب الرفض:",
+        "motifObligatoire": "السبب إلزامي"
+      },
+      "deleteConfirm": {
+        "title": "حذف طلب الإجازة",
+        "message": "هل تريد حذف الإجازة {numero}؟"
+      },
+      "errors": {
+        "notFound": "الإجازة {id} غير موجودة"
+      }
+    },
+    "paie": {
+      "bulletin": {
+        "title": "كشوف الرواتب",
+        "titleSingular": "كشف الراتب",
+        "titleNew": "كشف راتب جديد",
+        "titleDetail": "تفاصيل كشف الراتب",
+        "actions": {
+          "generer": "إنشاء كشف الراتب",
+          "print": "طباعة"
+        },
+        "fields": {
+          "numero": "رقم الكشف",
+          "employeId": "الموظف",
+          "mois": "الشهر (YYYY-MM)",
+          "salaireBase": "الراتب الأساسي",
+          "indemniteRepresentation": "تعويض التمثيل",
+          "indemniteTransport": "تعويض التنقل",
+          "heuresSup": "الساعات الإضافية",
+          "notes": "ملاحظات",
+          "salaireBrut": "الراتب الإجمالي",
+          "totalBrut": "مجموع الإجمالي",
+          "cnss": "CNSS (4.48%)",
+          "amo": "AMO (2.26%)",
+          "totalRetenues": "مجموع الاقتطاعات",
+          "netImposable": "الصافي الخاضع للضريبة",
+          "igr": "IGR",
+          "totalNet": "الصافي المستحق",
+          "netAPayer": "الصافي المستحق"
+        }
+      },
+      "listing": {
+        "headerTitle": "كشوف الرواتب",
+        "chips": {
+          "all": "الكل",
+          "brouillon": "المسودات",
+          "validee": "المصدّقة",
+          "payee": "المدفوعة"
+        },
+        "emptyState": {
+          "title": "لا توجد كشوف رواتب",
+          "message": "أنشئ كشوف الرواتب الشهرية لموظفيك.",
+          "actionLabel": "كشف جديد"
+        }
+      },
+      "columns": {
+        "numero": "رقم الكشف",
+        "employe": "الموظف",
+        "mois": "الشهر/السنة",
+        "brut": "الإجمالي",
+        "retenues": "الاقتطاعات",
+        "igr": "IGR",
+        "netAPayer": "الصافي المستحق",
+        "statut": "الحالة"
+      },
+      "filters": {
+        "statut": "الحالة",
+        "mois": "الشهر (YYYY-MM)"
+      },
+      "sections": {
+        "elements": "عناصر الراتب",
+        "resultat": "النتيجة"
+      },
+      "statuses": {
+        "BROUILLON": "مسودة",
+        "VALIDEE": "مصدّقة",
+        "PAYEE": "مدفوعة"
+      },
+      "transitions": {
+        "valider": {
+          "label": "تصديق",
+          "confirmTitle": "تصديق كشف الراتب؟",
+          "confirmMessage": "سيتم تصديق الكشف ولن يكون بالإمكان تعديله بعد ذلك.",
+          "confirmLabel": "تصديق"
+        },
+        "payer": {
+          "label": "وضع كمدفوع",
+          "confirmTitle": "وضع الكشف كمدفوع؟",
+          "confirmMessage": "تم صرف الراتب فعلاً للموظف.",
+          "confirmLabel": "تأكيد الدفع"
+        }
+      },
+      "toasts": {
+        "saved": "تم حفظ الكشف {numero}",
+        "validated": "تم تصديق الكشف {numero}",
+        "paid": "الكشف {numero} — تم تسجيل الدفع"
+      },
+      "deleteConfirm": {
+        "title": "حذف كشف الراتب",
+        "message": "هل تريد حذف الكشف {numero}؟"
+      },
+      "errors": {
+        "notFound": "كشف الراتب {id} غير موجود"
+      },
+      "approvalBar": {
+        "label": "مسار تصديق الرواتب"
+      },
+      "recap": {
+        "title": "ملخص (معاينة الراتب)",
+        "ariaLabel": "ملخص الكشف",
+        "brut": "الإجمالي",
+        "cnssSal": "CNSS الأجير",
+        "amoSal": "AMO الأجير",
+        "retenues": "الاقتطاعات",
+        "netImposable": "الصافي الخاضع للضريبة",
+        "igr": "IGR",
+        "netAPayer": "الصافي المستحق",
+        "hint": "ترويسة الشركة / ICE عند الطباعة: عبر وحدة الإدارة (تجريبي)."
+      },
+      "print": {
+        "title": "كشف الراتب {numero}",
+        "periode": "{employeNom} — الفترة {mois}",
+        "headerSubtitle": "— الفترة {mois}",
+        "tableHeaders": {
+          "libelle": "البيان",
+          "montant": "المبلغ"
+        },
+        "lines": {
+          "salaireBase": "الراتب الأساسي",
+          "brut": "الإجمالي",
+          "retenues": "الاقتطاعات",
+          "netImposable": "الصافي الخاضع للضريبة",
+          "igr": "IGR",
+          "netAPayer": "الصافي المستحق"
+        }
+      },
+      "cotisations": {
+        "cnss": "اشتراك CNSS",
+        "amo": "اشتراك AMO",
+        "is": "IS على الأجور",
+        "cnssPercent": "اشتراك CNSS الأجير (4.48%)",
+        "amoPercent": "اشتراك AMO الأجير (2.26%)",
+        "totalSal": "مجموع الأجير",
+        "patronaleEst": "اشتراك المشغل التقديري",
+        "igrRetenu": "IGR المقتطع"
+      },
+      "journal": {
+        "title": "دفتر يومية الرواتب للشركة",
+        "subtitle": "إجمالي شهري للكشوف — إغلاق تجريبي",
+        "monthLabel": "الشهر",
+        "linkBack": "← كشوف الرواتب",
+        "kpi": {
+          "brutTotal": "مجموع الإجمالي",
+          "cnss": "CNSS الأجير",
+          "amo": "AMO الأجير",
+          "igr": "IGR",
+          "net": "الصافي المستحق"
+        },
+        "columns": {
+          "numero": "الرقم",
+          "employe": "الموظف",
+          "statut": "الحالة",
+          "brut": "الإجمالي",
+          "cnss": "CNSS",
+          "amo": "AMO",
+          "igr": "IGR",
+          "net": "الصافي"
+        },
+        "empty": "لا يوجد أي كشف لهذا الشهر."
+      },
+      "declarations": {
+        "common": {
+          "royaumeMaroc": "المملكة المغربية",
+          "dgi": "المديرية العامة للضرائب",
+          "exercice": "السنة المحاسبية",
+          "exerciseLabel": "السنة المحاسبية:",
+          "moisLabel": "شهر التصريح:",
+          "exportXml": "تصدير XML",
+          "exportCsv": "تصدير CSV",
+          "exportXlsx": "تصدير Excel",
+          "imprimer": "طباعة",
+          "totaux": "المجاميع",
+          "societe": "الشركة",
+          "employeur": "المشغل",
+          "if": "I.F.",
+          "ice": "ICE",
+          "rc": "RC",
+          "patente": "الضريبة المهنية",
+          "cnss": "رقم CNSS"
+        },
+        "damancom": {
+          "title": "تصريح DAMANCOM — CNSS",
+          "subtitle": "كشف شهري للأجور والاشتراكات الاجتماعية",
+          "exportXmlBtn": "تصدير XML DAMANCOM",
+          "exportCsvBtn": "تصدير CSV",
+          "header": {
+            "employeur": "المشغل",
+            "cnss": "رقم CNSS",
+            "periode": "الفترة",
+            "nbFiches": "عدد الكشوف"
+          },
+          "columns": {
+            "matricule": "رقم التعريف",
+            "nomEmploye": "اسم الموظف",
+            "salaireBrut": "الراتب الإجمالي",
+            "baseCnss": "أساس CNSS",
+            "cotCnssSal": "اشتراك CNSS الأجير (4.48%)",
+            "cotAmoSal": "اشتراك AMO الأجير (2.26%)",
+            "totalSal": "مجموع الأجير",
+            "cotPatronale": "اشتراك المشغل التقديري",
+            "igrRetenu": "IGR المقتطع",
+            "netPaye": "الصافي المدفوع"
+          },
+          "recap": {
+            "title": "ملخص المبالغ الواجب صرفها",
+            "cnssSal": "CNSS — الحصة الأجيرة",
+            "amoSal": "AMO — الحصة الأجيرة",
+            "patronale": "اشتراكات المشغل التقديرية",
+            "totalCnss": "مجموع CNSS الواجب الصرف",
+            "igrDgi": "IGR — يصرف إلى DGI"
+          },
+          "empty": "لا يوجد أي كشف راتب مصدّق أو مدفوع لشهر {mois}."
+        },
+        "etat1208": {
+          "title": "البيان 1208 — الملخص السنوي للمشتريات",
+          "subtitle": "تصريح DGI: فواتير الموردين بحوزتها ICE / IF (البيان 1208 — ملخص المشتريات)",
+          "header": {
+            "titre": "الملخص السنوي للمشتريات",
+            "etatExercice": "البيان 1208 — السنة المحاسبية {annee}"
+          },
+          "filterIce": "تصفية حسب ICE:",
+          "filterIcePlaceholder": "أدخل ICE…",
+          "kpi": {
+            "fournisseurs": "الموردون",
+            "factures": "الفواتير",
+            "totalHt": "المجموع HT",
+            "totalTva": "مجموع TVA",
+            "totalTtc": "المجموع TTC"
+          },
+          "columns": {
+            "fournisseur": "المورد",
+            "ice": "ICE",
+            "if": "IF",
+            "ville": "المدينة",
+            "nbFact": "عدد الفواتير",
+            "totalHt": "المجموع HT",
+            "tva": "TVA",
+            "totalTtc": "المجموع TTC",
+            "retenueTva": "اقتطاع TVA"
+          },
+          "hint": "تدرج الفواتير ذات الحالات: مصدّقة، مدفوعة جزئيًا، مدفوعة. تُستثنى المسودات والنزاعات والفواتير الملغاة من البيان 1208.",
+          "empty": "لا توجد فاتورة مورد محتسبة للسنة المحاسبية {annee}."
+        },
+        "etat9421": {
+          "title": "البيان 9421 — الملخص السنوي IGR",
+          "subtitle": "التصريح السنوي بالأجور واقتطاعات IGR إلى DGI",
+          "header": {
+            "titre": "التصريح بالأجور والمعاشات",
+            "etatExercice": "البيان 9421 — السنة المحاسبية {annee}"
+          },
+          "exportXmlBtn": "تصدير XML DGI",
+          "imprimerBtn": "طباعة",
+          "columns": {
+            "cin": "CIN",
+            "nomPrenom": "الاسم واللقب",
+            "remunerationsBrutes": "الأجور الإجمالية",
+            "deductions": "الاقتطاعات",
+            "netImposable": "الصافي الخاضع للضريبة",
+            "igrRetenu": "IGR المقتطع",
+            "salaire": "الأجر",
+            "indemnites": "التعويضات",
+            "totalBrut": "مجموع الإجمالي",
+            "cnss": "CNSS",
+            "amo": "AMO",
+            "fraisPro": "المصاريف المهنية"
+          },
+          "attestation": {
+            "before": "أنا الموقع أسفله، الممثل القانوني لـ",
+            "after": "،‏ أشهد على صحة المعلومات الواردة في هذا التصريح.",
+            "dateCachet": "تاريخ وختم المشغل",
+            "recuAdmin": "متسلَّم من قبل الإدارة"
+          },
+          "empty": "لا يوجد أي كشف راتب مدفوع للسنة المحاسبية {annee}."
+        }
+      }
+    },
+    "pointage": {
+      "title": "الحضور",
+      "listing": {
+        "title": "الحضور بالأوراش",
+        "subtitle": "تتبع الحضور والغياب",
+        "controls": {
+          "tousChantiers": "جميع الأوراش",
+          "btnSaisie": "+ تسجيل حضور اليوم",
+          "btnValidation": "التحقق / المجاميع",
+          "lignesCount": "{count} سطر(سطور)"
+        },
+        "stats": {
+          "present": "{count}ي حاضر",
+          "absent": "{count}ي غائب",
+          "conge": "{count}ي إجازة",
+          "maladie": "{count}ي مرض",
+          "heures": "{count}س"
+        },
+        "empty": "لا يوجد أي حضور في هذه الفترة."
+      },
+      "saisie": {
+        "title": "الحضور بالورش",
+        "subtitleFallback": "اختر ورشًا",
+        "actions": {
+          "entree": "تسجيل الدخول",
+          "sortie": "تسجيل الخروج",
+          "valider": "تصديق الحضور",
+          "saved": "✓ تم حفظ الحضور",
+          "geoloc": "📍 تحديد الموقع",
+          "geolocLoading": "…"
+        },
+        "geolocTooltip": "موقع GPS لرئيس الورش لهذا الحضور (إثبات ميداني + تحديد النطاق الجغرافي)",
+        "sync": {
+          "offline": "وضع غير متصل. {count} عنصر(عناصر) في الانتظار (الحضور + الصور). قائمة محلية 7 أيام / مزامنة عند عودة الشبكة.",
+          "conflict": "{count} حضور بنزاع في البيانات (بيانات متباينة). يرجى الحل من جانب RH / الخادم.",
+          "syncing": "المزامنة جارية. يبقى {count} عنصر(عناصر).",
+          "syncedAt": "تمت المزامنة في {date} الساعة {time}.",
+          "syncedLocal": "تمت المزامنة محلياً."
+        },
+        "geofence": {
+          "label": "تحديد النطاق الجغرافي",
+          "radius": "نصف القطر {m} م",
+          "distance": "— المسافة إلى الورش: {distance}",
+          "refused": "رُفض الحضور خارج المنطقة (M-RH-01).",
+          "activate": "— فعّل تحديد الموقع للتصديق على هذا الورش."
+        },
+        "team": {
+          "title": "الفريق (حضور متعدد)",
+          "selectAll": "اختيار الكل",
+          "selectNone": "لا شيء",
+          "selectPresent": "الحاضرون",
+          "applyToSelection": "تطبيق على المحدد:",
+          "applyMode": "تطبيق {mode}",
+          "selectedCount": "{count} محدّد"
+        },
+        "photo": {
+          "label": "صورة الورش (مضغوطة ~800 بكسل، IndexedDB — غير متصل 7 أيام)",
+          "previewAlt": "معاينة صورة الورش",
+          "clear": "إزالة الصورة"
+        },
+        "empty": "اختر ورشًا لبدء تسجيل الحضور.",
+        "quickBar": {
+          "label": "وضع علامة على الكل:",
+          "ariaLabel": "وضع علامة على الكل {mode}"
+        },
+        "signature": {
+          "label": "التوقيع",
+          "collectif": "جماعي للرئيس",
+          "individuel": "فردي (للحاضرين)",
+          "hint": "توقيع موحّد لورقة اليوم (الطابع الزمني عند الحفظ).",
+          "clear": "مسح التوقيع",
+          "indiv": {
+            "signed": "موقّع",
+            "sign": "توقيع",
+            "clear": "مسح"
+          },
+          "dialog": {
+            "title": "التوقيع — {nom}",
+            "validate": "تصديق التوقيع",
+            "clear": "مسح",
+            "cancel": "إلغاء"
+          }
+        },
+        "modes": {
+          "selectChantier": "اختيار…",
+          "noteAria": "ملاحظة لـ {nom}",
+          "notePlaceholder": "ملاحظة (اختياري)",
+          "modeAria": "{mode} لـ {nom}"
+        },
+        "arrivee": "الوصول",
+        "depart": "المغادرة",
+        "emptyOuvriers": "لا يوجد أي عامل مُسند إلى هذا الورش.",
+        "summary": {
+          "presents": "{count} حاضرون",
+          "absents": "{count} غائبون",
+          "others": "{count} آخرون"
+        },
+        "errors": {
+          "geofenceOff": "تحديد النطاق الجغرافي: اقترب من الورش أو فعّل GPS داخل المنطقة المسموح بها.",
+          "signatureCollectiveRequired": "التوقيع الجماعي مطلوب (وقّع داخل الإطار).",
+          "signaturesMissing": "توقيعات ناقصة لـ {count} حاضر(ين).",
+          "signatureTooShort": "التوقيع قصير جداً.",
+          "geolocRefused": "تحديد الموقع مرفوض أو غير متاح."
+        }
+      },
+      "validation": {
+        "title": "تحقق الحضور",
+        "subtitle": "مسودات اليوم + مجاميع الساعات (سطح المكتب)",
+        "controls": {
+          "date": "التاريخ",
+          "tousChantiers": "جميع الأوراش",
+          "linkListing": "← القائمة"
+        },
+        "brouillons": {
+          "title": "مسودات للتصديق",
+          "empty": "لا توجد مسودة لهذا التاريخ / هذه التصفية.",
+          "columns": {
+            "employe": "الموظف",
+            "chantier": "الورش",
+            "mode": "الوضع",
+            "heuresNorm": "س. عادية"
+          },
+          "validerTous": "تصديق جميع المسودات الظاهرة"
+        },
+        "cumuls": {
+          "title": "مجاميع الشهر ({mois})",
+          "columns": {
+            "employe": "الموظف",
+            "presents": "أ. حضور",
+            "heures": "مجموع الساعات"
+          }
+        }
+      },
+      "modes": {
+        "PRESENT": "حاضر",
+        "ABSENT": "غائب",
+        "CONGE": "إجازة",
+        "MALADIE": "مرض",
+        "FORMATION": "تكوين",
+        "AUTRE": "أخرى"
+      },
+      "modesAbbrev": {
+        "present": "حاضر",
+        "absent": "غائب",
+        "conge": "إجازة",
+        "maladie": "مرض",
+        "presents": "حاضرون",
+        "jPresents": "أ. حضور"
+      }
+    },
+    "planning": {
+      "title": "جدولة الفرق",
+      "page": {
+        "title": "جدولة الفرق",
+        "subtitle": "الإسنادات والتصفية وكشف فرط الحمل (تجريبي)"
+      },
+      "filters": {
+        "chantier": "الورش",
+        "employe": "الموظف",
+        "btnNew": "+ إسناد جديد"
+      },
+      "weekNav": {
+        "prev": "‹ الأسبوع السابق",
+        "next": "الأسبوع التالي ›",
+        "label": "الأسبوع من {start} إلى {end}"
+      },
+      "table": {
+        "ouvrier": "العامل",
+        "empty": "لا يوجد إسناد لهذه التصفية.",
+        "fonctionPct": "{role} · {pct}٪"
+      },
+      "note": "الخلايا الملوّنة تشير إلى إسناد نشط خلال اليوم. تنبيه إذا تجاوز مجموع النسبة المئوية 100٪ في الأسبوع.",
+      "dialog": {
+        "title": "إسناد جديد",
+        "employe": "الموظف",
+        "chantier": "الورش",
+        "dateDebut": "تاريخ البداية",
+        "role": "الدور",
+        "pctTemps": "٪ وقت الورش",
+        "cancel": "إلغاء",
+        "save": "حفظ"
+      },
+      "conflict": "{nom}: {pct}٪ تراكمياً في الأسبوع (> 100 ٪).",
+      "days": {
+        "lun": "إثن",
+        "mar": "ثلا",
+        "mer": "أرب",
+        "jeu": "خمي",
+        "ven": "جمع",
+        "sam": "سبت",
+        "dim": "أحد"
+      },
+      "employeFallback": "موظف"
+    },
+    "visiteMedicale": {
+      "relais": "عرض الزيارات الطبية (HSE)"
+    }
+  }
+}

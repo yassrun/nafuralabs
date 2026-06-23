@@ -1,0 +1,913 @@
+{
+  "admin": {
+    "common": {
+      "actions": {
+        "cancel": "Annuler",
+        "save": "Sauvegarder",
+        "saveShort": "Sauver",
+        "edit": "Éditer",
+        "delete": "Supprimer",
+        "deleteShort": "Suppr.",
+        "create": "Créer",
+        "add": "Ajouter",
+        "reset": "↻ Reset",
+        "previous": "← Précédente",
+        "next": "Suivante →",
+        "saveSettings": "Sauvegarder les paramètres"
+      },
+      "labels": {
+        "active": "Actif",
+        "inactive": "Inactif",
+        "yes": "Oui",
+        "no": "Non",
+        "all": "Tous",
+        "total": "Total",
+        "loading": "Chargement…",
+        "empty": "—",
+        "system": "Système",
+        "custom": "Custom",
+        "modified": "Modifié",
+        "override": "Personnalisé",
+        "today": "Aujourd'hui",
+        "page": "Page",
+        "filter": "Filtrer :",
+        "reference": "Référence",
+        "details": "Détails"
+      },
+      "breadcrumb": {
+        "administration": "Administration"
+      },
+      "toasts": {
+        "saved": "✓ Enregistré",
+        "deleted": "✓ Supprimé",
+        "reset": "✓ Reset effectué",
+        "saveError": "⚠ Corrigez les champs en erreur avant de sauvegarder"
+      },
+      "labelFields": {
+        "raisonSociale": "Raison sociale",
+        "ice": "ICE",
+        "rc": "RC",
+        "if": "IF",
+        "patente": "Patente",
+        "cnss": "CNSS",
+        "cnaem": "CNAEM",
+        "tvaIntra": "TVA intracommunautaire",
+        "siegeAdresse": "Adresse du siège",
+        "capitalSocial": "Capital social",
+        "formeJuridique": "Forme juridique",
+        "ville": "Ville",
+        "telephone": "Téléphone",
+        "email": "E-mail",
+        "siteWeb": "Site web"
+      }
+    },
+    "auditLog": {
+      "breadcrumb": "Audit log",
+      "title": "Journal d'audit ERP",
+      "subtitle": "Recherche multi-critère qui / quoi / quand. Cliquez sur une ligne pour le détail.",
+      "stats": {
+        "total": "Total",
+        "today": "Aujourd'hui",
+        "last7d": "7 derniers jours",
+        "topAction": "Action n°1",
+        "activeUsers": "Utilisateurs actifs",
+        "topActionCount": "{count} entrées"
+      },
+      "filters": {
+        "search": "Utilisateur, entité, ref, détail…",
+        "allUsers": "Tous utilisateurs",
+        "allActions": "Toutes actions",
+        "allTypes": "Tous types",
+        "dateFrom": "Du",
+        "dateTo": "au"
+      },
+      "table": {
+        "headers": {
+          "timestamp": "Horodatage",
+          "user": "Utilisateur",
+          "action": "Action",
+          "entityType": "Type entité",
+          "reference": "Référence",
+          "detail": "Détail",
+          "id": "ID",
+          "type": "Type",
+          "entityId": "Entity ID"
+        },
+        "expanded": {
+          "auditId": "ID audit",
+          "entityId": "Entity ID",
+          "timestampIso": "Timestamp ISO",
+          "detailFull": "Détail complet"
+        },
+        "empty": "Aucune entrée ne correspond aux filtres."
+      },
+      "count": {
+        "label": "{count, plural, =0 {Aucune entrée} one {1 entrée} other {# entrées}}",
+        "singular": "entrée",
+        "plural": "entrées",
+        "ofTotal": "/ {count} au total"
+      },
+      "exportFilename": "audit-log"
+    },
+    "banques": {
+      "breadcrumb": "Banques",
+      "title": "Référentiel Banques",
+      "subtitle": "Catalogue des banques MA — codes BAM, SWIFT/BIC, open banking",
+      "toasts": {
+        "saved": "✓ Banque enregistrée",
+        "deleted": "✓ Banque supprimée"
+      },
+      "section": {
+        "title": "Banques ({count})",
+        "addNew": "Nouvelle banque",
+        "cancel": "× Annuler",
+        "createTitle": "Ajouter une banque au référentiel"
+      },
+      "fields": {
+        "codeBanque": "Code banque (3 chiffres) *",
+        "swift": "SWIFT / BIC (8 car.) *",
+        "raisonSociale": "Raison sociale *",
+        "marque": "Marque *",
+        "siteWeb": "Site web",
+        "sitePlaceholder": "https://",
+        "openBanking": "Open Banking"
+      },
+      "actions": {
+        "confirmCreate": "Créer la banque",
+        "save": "Sauver",
+        "edit": "Éditer",
+        "delete": "Suppr."
+      },
+      "table": {
+        "code": "Code",
+        "swift": "SWIFT",
+        "raisonSociale": "Raison sociale",
+        "marque": "Marque",
+        "openBanking": "Open Banking",
+        "siteWeb": "Site web",
+        "apiBadge": "API"
+      },
+      "errors": {
+        "raisonSocialeRequired": "Raison sociale obligatoire",
+        "marqueRequired": "Marque obligatoire",
+        "codeRequired": "Code obligatoire (3 chiffres)",
+        "codeInvalid": "Format invalide — 3 chiffres requis",
+        "swiftRequired": "SWIFT obligatoire",
+        "swiftInvalid": "Format invalide — 8 ou 11 caractères alphanumériques"
+      },
+      "confirmDelete": "Supprimer la banque « {raisonSociale} » du référentiel ?\n\nCette action est réversible côté démo (reset référentiel)."
+    },
+    "demoReset": {
+      "breadcrumb": "Démo",
+      "title": "Jeu de données démo",
+      "subtitle": "Réinitialisation pour démonstrations commerciales — SOMACOM BTP",
+      "card": {
+        "title": "Société modèle : SOMACOM BTP SARL",
+        "identite": "ICE : 001234567000088 · RC Casa 715869 · Capital : 5 000 000 MAD",
+        "perimetre": "Périmètre démo : 6 chantiers actifs · 12 marchés (4 publics + 8 privés) · 15 employés · 8 fournisseurs · HSE complet"
+      },
+      "actions": {
+        "resetTitle": "Réinitialiser toutes les données",
+        "resetDesc": "Recharge le seed demo complet. Efface toutes les modifications locales (localStorage). Idéal avant une démo client.",
+        "resetButton": "🔄 Réinitialiser",
+        "resetting": "Réinitialisation…",
+        "exportTitle": "Exporter l'état actuel",
+        "exportDesc": "Télécharge un snapshot JSON de toutes les données mockées (utile pour backup ou partage équipe).",
+        "exportButton": "📥 Exporter snapshot"
+      },
+      "success": {
+        "banner": "✓ Données réinitialisées ! Rechargez la page pour voir le seed démo.",
+        "reload": "Recharger l'application"
+      },
+      "summary": {
+        "title": "Contenu du seed démo",
+        "items": {
+          "chantiers": "Chantiers actifs",
+          "marches": "Marchés BTP",
+          "avenants": "Avenants",
+          "factures": "Factures situations",
+          "cautions": "Cautions bancaires",
+          "employes": "Employés",
+          "fournisseurs": "Fournisseurs",
+          "approbations": "Approbations en cours",
+          "ncHse": "NC HSE ouvertes",
+          "epi": "EPI à surveiller"
+        }
+      }
+    },
+    "erpRoles": {
+      "breadcrumb": "Rôles ERP",
+      "title": "Rôles ERP — éditeur matrice",
+      "subtitle": "Définir les permissions par rôle BTP — module × action (14 × 9)",
+      "toasts": {
+        "saved": "✓ Rôle enregistré",
+        "reverted": "↺ Rôle système restauré aux valeurs seed",
+        "deleted": "✓ Rôle supprimé"
+      },
+      "sidebar": {
+        "title": "Rôles ({count})",
+        "addNew": "+",
+        "cancel": "×"
+      },
+      "create": {
+        "name": "Nom *",
+        "description": "Description",
+        "submit": "Créer"
+      },
+      "badges": {
+        "system": "Système",
+        "custom": "Custom",
+        "overridden": "Modifié",
+        "permCount": "{count, plural, =0 {0 perm.} one {1 perm.} other {# perm.}}",
+        "super": "SUPER ADMIN"
+      },
+      "editor": {
+        "descriptionPlaceholder": "Description fonctionnelle",
+        "permCount": "{count, plural, =0 {Aucune permission active} one {1 permission active} other {# permissions actives}}",
+        "permCountSingular": "{count} permission active",
+        "permCountPlural": "{count} permissions actives",
+        "revertSeed": "↺ Revert seed",
+        "delete": "Supprimer",
+        "save": "Sauvegarder",
+        "emptyState": "Sélectionnez un rôle dans la liste à gauche."
+      },
+      "matrix": {
+        "superAdminLabel": "Super-admin (*) — accès à tout l'ERP",
+        "hint": "Cocher une cellule pour accorder module.action. Toggle « Tout » par ligne pour module.*.",
+        "module": "Module",
+        "wildcard": "Tout (*)",
+        "rawTitle": "Voir la liste brute des permissions ({count})"
+      },
+      "newRoleDefaults": {
+        "description": "Rôle personnalisé"
+      },
+      "confirmRevert": "Restaurer ce rôle à sa définition seed initiale ?",
+      "confirmDeleteSystem": "Masquer le rôle SYSTÈME « {name} » du listing ?\nLa définition seed est conservée et peut être réactivée via reset référentiel.",
+      "confirmDeleteCustom": "Supprimer le rôle custom « {name} » ?"
+    },
+    "mappings": {
+      "breadcrumb": "Mappings comptables",
+      "title": "Mappings comptables automatiques",
+      "subtitle": "Configuration des OD générées automatiquement par opération métier (CGNC Maroc — 15 modèles).",
+      "stats": {
+        "total": "Mappings total",
+        "system": "Système",
+        "custom": "Custom",
+        "active": "Actifs",
+        "personalized": "Personnalisés",
+        "odCount": "OD générées"
+      },
+      "tabs": {
+        "config": "Configuration mappings",
+        "journal": "Journal OD auto"
+      },
+      "journal": {
+        "title": "Journal des écritures auto-générées",
+        "summary": "{total} OD enregistrées — {balanced} équilibrées / {unbalanced} déséquilibrées — débit total {totalDebit} / crédit total {totalCredit}.",
+        "clear": "Vider le journal",
+        "empty": "Aucune OD générée pour l'instant. Validez une facture vente (action « Émettre ») ou cliquez sur « Comptabiliser » dans une facture marché pour alimenter le journal.",
+        "balanced": "Équilibrée",
+        "unbalanced": "Déséquilibrée",
+        "removeTitle": "Supprimer"
+      },
+      "filters": {
+        "societe": "Société",
+        "allSocietes": "Toutes (vue globale __ALL__)",
+        "operation": "Opération sélectionnée",
+        "resetDefaults": "Restaurer les défauts"
+      },
+      "panel": {
+        "badges": {
+          "system": "Système",
+          "custom": "Custom",
+          "personalized": "Personnalisé"
+        },
+        "journalLabel": "Journal {code} — {libelle}",
+        "revertAction": "Annuler les modifications",
+        "delete": "Supprimer",
+        "libelleLabel": "Libellé écriture (template)",
+        "libelleHint": "Variables disponibles : {numero}, {ref}, {periode}.",
+        "journalCode": "Code journal",
+        "journalLibelle": "Libellé journal",
+        "linesTitle": "Lignes d'écriture",
+        "table": {
+          "side": "Sens",
+          "compte": "Compte CGNC",
+          "libelle": "Libellé",
+          "amountSource": "Montant source",
+          "condition": "Condition",
+          "compteCol": "Compte",
+          "debit": "Débit",
+          "credit": "Crédit",
+          "source": "Source",
+          "totals": "TOTAUX"
+        },
+        "side": {
+          "debit": "Débit",
+          "credit": "Crédit"
+        },
+        "conditionPlaceholder": "(optionnel)",
+        "addLine": "Ajouter une ligne",
+        "emptyMatch": "Aucun mapping trouvé pour cette opération sur cette société."
+      },
+      "simulator": {
+        "title": "Simulateur OD",
+        "subtitle": "Renseignez les montants pour générer une écriture comptable d'exemple selon le mapping ci-dessus.",
+        "amounts": {
+          "ht": "Montant HT",
+          "tva": "Montant TVA",
+          "ras": "RAS",
+          "timbre": "Timbre",
+          "chargePatr": "Charge patronale",
+          "salaireNet": "Salaire net",
+          "ir": "IR"
+        },
+        "imbalance": "Déséquilibre {amount}"
+      },
+      "amountSource": {
+        "ht": "HT",
+        "tva": "TVA",
+        "ttc": "TTC",
+        "ras": "RAS",
+        "netAPayer": "Net à payer",
+        "timbre": "Timbre",
+        "chargePatr": "Charges patronales",
+        "salaireNet": "Salaire net",
+        "ir": "IR"
+      },
+      "operationLabels": {
+        "VENTE_DIRECTE": "Vente directe (Facture client comptant)",
+        "VENTE_MARCHE_PUBLIC": "Vente marché public (Situation travaux)",
+        "VENTE_MARCHE_PRIVE": "Vente marché privé (Situation travaux)",
+        "ACHAT_MATIERES": "Achat matières premières",
+        "ACHAT_SOUS_TRAITANCE": "Achat sous-traitance BTP",
+        "ACHAT_FRAIS_GENERAUX": "Achat frais généraux",
+        "REGLEMENT_CLIENT_BANQUE": "Règlement client (banque)",
+        "REGLEMENT_CLIENT_CAISSE": "Règlement client (caisse)",
+        "REGLEMENT_FOURNISSEUR_BANQUE": "Règlement fournisseur (banque)",
+        "REGLEMENT_FOURNISSEUR_CAISSE": "Règlement fournisseur (caisse)",
+        "PAIE_SALAIRE": "Paie — salaires bruts",
+        "PAIE_CHARGES_SOCIALES": "Paie — charges sociales (CNSS, AMO)",
+        "DECLARATION_TVA": "Déclaration TVA mensuelle",
+        "DECLARATION_RAS": "Déclaration RAS (reversement DGI)",
+        "IMMOBILISATION_ACQUISITION": "Acquisition immobilisation"
+      },
+      "toasts": {
+        "mappingDeleted": "✓ Mapping supprimé",
+        "mappingReverted": "✓ Mapping restauré à sa valeur d'origine",
+        "mappingsReset": "✓ Mappings restaurés",
+        "journalEntryRemoved": "✓ Entrée journal supprimée",
+        "journalCleared": "✓ Journal vidé"
+      },
+      "confirm": {
+        "delete": "Supprimer le mapping « {operation} » ?",
+        "reset": "Restaurer tous les mappings comptables aux 15 seeds système (perd les overrides et customs créés) ?",
+        "clearJournal": "Vider complètement le journal des OD auto-générées ?"
+      }
+    },
+    "moa": {
+      "breadcrumb": "Maîtres d'Ouvrage",
+      "title": "Référentiel Maîtres d'Ouvrage",
+      "subtitle": "Catalogue des donneurs d'ordre — État, établissements publics, collectivités, privé",
+      "toasts": {
+        "saved": "✓ MOA enregistré",
+        "deleted": "✓ MOA supprimé"
+      },
+      "section": {
+        "title": "Maîtres d'Ouvrage ({filtered} / {total})",
+        "addNew": "Nouveau MOA",
+        "cancel": "× Annuler",
+        "createTitle": "Ajouter un Maître d'Ouvrage"
+      },
+      "fields": {
+        "raisonSociale": "Raison sociale *",
+        "sigle": "Sigle",
+        "siglePlaceholder": "DRCR, ONCF…",
+        "type": "Type *",
+        "ice": "ICE",
+        "adresse": "Adresse *",
+        "ville": "Ville *",
+        "telephone": "Téléphone",
+        "email": "E-mail",
+        "siteWeb": "Site web",
+        "sitePlaceholder": "https://",
+        "contactNom": "Contact — nom",
+        "contactFonction": "Contact — fonction",
+        "notes": "Notes"
+      },
+      "actions": {
+        "confirmCreate": "Créer le MOA",
+        "delete": "Suppr.",
+        "deactivate": "Désactiver",
+        "reactivate": "Réactiver"
+      },
+      "table": {
+        "sigle": "Sigle",
+        "raisonSociale": "Raison sociale",
+        "type": "Type",
+        "ville": "Ville",
+        "ice": "ICE",
+        "contact": "Contact",
+        "active": "Actif",
+        "empty": "Aucun MOA ne correspond au filtre."
+      },
+      "errors": {
+        "raisonSocialeRequired": "Raison sociale obligatoire",
+        "adresseRequired": "Adresse obligatoire",
+        "villeRequired": "Ville obligatoire",
+        "iceInvalid": "ICE invalide — 15 chiffres requis"
+      },
+      "confirmDelete": "Supprimer le MOA « {raisonSociale} » du référentiel ?\n\nCette action est réversible côté démo (reset référentiel)."
+    },
+    "numerotation": {
+      "breadcrumb": "Numérotation",
+      "title": "Numérotation séquentielle",
+      "subtitle": "Format, séparateur, année, padding et reset par société × type de document",
+      "stats": {
+        "total": "Policies",
+        "system": "Système",
+        "custom": "Custom",
+        "active": "Actives",
+        "counters": "Compteurs suivis"
+      },
+      "section": {
+        "title": "Politique de numérotation par type de document",
+        "help": "Sélectionnez une société pour visualiser et personnaliser les formats appliqués. Les seeds système (badge « Hérité ») sont utilisés par toutes les sociétés tant qu'aucun override spécifique n'est créé.",
+        "societe": "Société",
+        "resetAll": "Réinitialiser tout (QA)"
+      },
+      "table": {
+        "headers": {
+          "docType": "Type de document",
+          "prefix": "Préfixe",
+          "separator": "Sép.",
+          "year": "Année",
+          "padding": "Padding",
+          "reset": "Reset",
+          "counter": "Compteur",
+          "preview": "Aperçu prochain numéro",
+          "actions": "Actions"
+        }
+      },
+      "badges": {
+        "inherited": "Hérité",
+        "modified": "Modifié",
+        "custom": "Custom",
+        "inheritedTitle": "Hérité du seed système",
+        "modifiedTitle": "Seed système modifié"
+      },
+      "year": {
+        "yyyy": "2026 (YYYY)",
+        "yy": "26 (YY)",
+        "none": "Aucune"
+      },
+      "reset": {
+        "yearly": "Annuel",
+        "monthly": "Mensuel",
+        "never": "Jamais"
+      },
+      "actions": {
+        "resetTitle": "Remettre à 0",
+        "personalize": "Personnaliser",
+        "save": "Sauver",
+        "revertSeed": "↺ Seed",
+        "delete": "Supprimer"
+      },
+      "help": {
+        "title": "Aide — jetons disponibles dans le format",
+        "items": {
+          "prefix": "préfixe de la policy (ex : BC)",
+          "sep": "séparateur (ex : -, /)",
+          "yyyy": "année 4 chiffres (ex : 2026)",
+          "yy": "année 2 chiffres (ex : 26)",
+          "mm": "mois 2 chiffres (ex : 05)",
+          "soc": "code court de la société (ex : SOM)",
+          "seq": "compteur séquentiel zero-padded (obligatoire)"
+        },
+        "footer": "Format par défaut : {prefix}{sep}{yyyy}{sep}{seq} donne par ex. BC-2026-00042. Le format custom n'est pas exposé dans cette première version : les paramètres ci-dessus suffisent à couvrir 95 % des besoins."
+      },
+      "preview": {
+        "invalid": "⚠ format invalide"
+      },
+      "toasts": {
+        "policySaved": "✓ Policy {label} enregistrée",
+        "overrideCreated": "✓ Override créé pour {label}",
+        "seedRestored": "↺ Seed restauré pour {label}",
+        "deleted": "✓ Policy supprimée",
+        "deleteBlocked": "Impossible : seed système (utiliser Revert)",
+        "counterReset": "↺ Compteur {label} remis à 0",
+        "resetDone": "✓ Reset effectué"
+      },
+      "confirm": {
+        "delete": "Supprimer la policy {label} ({prefix}) ?",
+        "resetCounter": "Remettre le compteur {label} à 0 ?\nProchain numéro = {nextSample}",
+        "resetAll": "Restaurer toutes les policies aux valeurs seeds + remettre tous les compteurs à 0 ?\nCette action efface tous les overrides, les policies custom et les compteurs persistés."
+      }
+    },
+    "parametresFiscal": {
+      "breadcrumb": "Paramètres fiscaux",
+      "title": "Paramètres fiscaux",
+      "subtitle": "TVA, RAS, timbre fiscal, exonérations, régime — Maroc (CGI 2026)",
+      "stats": {
+        "tva": "Taux TVA",
+        "exonerations": "Exonérations actives",
+        "regime": "Régime TVA",
+        "cycle": "Cycle déclaration",
+        "rasEtat": "RAS État"
+      },
+      "tabs": {
+        "tva": "Taux TVA",
+        "ras": "Retenues à la source",
+        "timbre": "Timbre fiscal",
+        "exonerations": "Exonérations",
+        "regime": "Régime société"
+      },
+      "tva": {
+        "title": "Taux de TVA applicables",
+        "addRate": "Ajouter un taux",
+        "fields": {
+          "rate": "Taux %",
+          "label": "Libellé",
+          "labelPlaceholder": "Ex. TVA Standard",
+          "application": "Application",
+          "applicationPlaceholder": "Ex. BTP standard, travaux neufs",
+          "default": "Défaut"
+        },
+        "newRate": {
+          "label": "TVA Réduite 7%"
+        }
+      },
+      "ras": {
+        "title": "Retenue à la source — taux par typologie de Maître d'Ouvrage",
+        "info": "Au Maroc, la retenue à la source (RAS) sur les travaux et services s'applique aux personnes morales de droit public (Art. 158 CGI) et est généralement de 5 % du montant HT. Le secteur privé est généralement à 0. Personnalisez le taux par typologie pour faciliter la facturation cross-MOA.",
+        "fallback": "Taux RAS global (fallback)",
+        "fallbackHint": "Appliqué si le MOA n'a pas de typologie connue.",
+        "seuil": "Seuil d'application (MAD HT)",
+        "seuilHint": "0 = applicable sans seuil minimum"
+      },
+      "moaTypeFull": {
+        "etat": "État (ministères, directions)",
+        "ep": "Établissement public (ONCF, ONEE, OFPPT…)",
+        "collectivite": "Collectivité territoriale (wilaya, commune)",
+        "prive": "Privé (promoteur, particulier, société)"
+      },
+      "perimetre": {
+        "livraison": "Livraison de biens",
+        "prestation": "Prestation de services",
+        "importation": "Importation",
+        "exportation": "Exportation",
+        "tous": "Tous types",
+        "livraisonShort": "Livraison",
+        "prestationShort": "Prestation"
+      },
+      "timbre": {
+        "title": "Timbre fiscal (Art. 252 CGI)",
+        "info": "Le timbre fiscal s'applique sur les paiements en espèces dépassant le seuil défini. Il est plafonné au montant maximum configuré.",
+        "rate": "Taux timbre (%)",
+        "seuil": "Seuil paiement (MAD TTC)",
+        "plafond": "Plafond timbre (MAD)"
+      },
+      "autoliquidation": {
+        "title": "Autoliquidation TVA (prestataires non-résidents)",
+        "rate": "Retenue TVA sur autoliquidation (% de la TVA déclarée)",
+        "rateHint": "100 = retenue intégrale de la TVA autoliquidée ; 0 = aucune retenue.",
+        "toggle": "Autoliquidation TVA activée",
+        "toggleDesc": "Applicable aux sous-traitants non-résidents ou certains services intracommunautaires.",
+        "logementToggle": "Exonération logement social",
+        "logementDesc": "TVA 14% pour logements dont superficie ≤ 100 m² et prix ≤ 250 000 MAD."
+      },
+      "exonerations": {
+        "title": "Catalogue des motifs d'exonération TVA",
+        "addNew": "Nouveau motif",
+        "cancel": "× Annuler",
+        "info": "Sélectionnable depuis le formulaire de devis/facture pour appliquer automatiquement le taux 0% avec la mention légale dans le PDF. Catalogue conforme au Code Général des Impôts marocain 2026 (Art. 91 à 94).",
+        "createTitle": "Nouveau motif d'exonération",
+        "fields": {
+          "code": "Code *",
+          "codePlaceholder": "92-I-X / COOP-XX",
+          "libelle": "Libellé *",
+          "libellePlaceholder": "Ex. Exportation de services",
+          "refLegale": "Référence légale *",
+          "refLegalePlaceholder": "Ex. Art. 92-I-2° CGI",
+          "perimetre": "Périmètre",
+          "dateFin": "Date fin validité (optionnel)",
+          "mention": "Mention facture *",
+          "mentionPlaceholder": "Texte affiché sur la facture sous le total HT"
+        },
+        "addToCatalog": "Ajouter au catalogue",
+        "table": {
+          "status": "Statut",
+          "code": "Code",
+          "libelle": "Libellé",
+          "reference": "Référence",
+          "perimetre": "Périmètre",
+          "validity": "Validité"
+        },
+        "actions": {
+          "delete": "Supprimer",
+          "restore": "Restaurer"
+        }
+      },
+      "regime": {
+        "title": "Régime fiscal société",
+        "info": "Détermine quand la TVA devient exigible et la fréquence des déclarations DGI. Le régime débit rend la TVA exigible à la facturation ; le régime encaissement à la réception du paiement. Conformité Art. 95 CGI.",
+        "tvaLabel": "Régime TVA",
+        "tvaDebit": "Débit (par défaut)",
+        "tvaEncaissement": "Encaissement (sur option)",
+        "tvaHint": "Option encaissement valable pour certains secteurs.",
+        "cycleLabel": "Cycle de déclaration",
+        "cycleMensuel": "Mensuel (CA > 1 M MAD)",
+        "cycleTrimestriel": "Trimestriel (CA ≤ 1 M MAD)",
+        "numContribuable": "N° contribuable IS",
+        "numContribuablePlaceholder": "Ex. 12345678",
+        "cabinetEmail": "E-mail cabinet comptable",
+        "cabinetEmailPlaceholder": "cabinet@expertise-comptable.ma",
+        "cabinetHint": "Destination des copies de déclarations / écritures."
+      },
+      "formActions": {
+        "reset": "Restaurer les valeurs par défaut",
+        "save": "Sauvegarder les paramètres fiscaux"
+      },
+      "simulator": {
+        "title": "Simulateur — TVA facture sous-traitance",
+        "hint": "Après modification de l'option autoliquidation, cliquez sur Sauvegarder pour mettre à jour ce calcul.",
+        "fields": {
+          "ht": "Montant HT (MAD)",
+          "rate": "Taux TVA (%)",
+          "nonResident": "Prestataire non résident au Maroc"
+        },
+        "mode": "Mode",
+        "netFournisseur": "Net à payer fournisseur",
+        "tvaFacture": "TVA sur facture",
+        "tvaAuto": "TVA autoliquidation (décl.)",
+        "retenueTva": "Retenue TVA"
+      },
+      "toasts": {
+        "motifAdded": "✓ Motif d'exonération ajouté",
+        "motifAddedError": "Tous les champs marqués * sont obligatoires",
+        "motifRestored": "Motif système restauré",
+        "motifDeleted": "✓ Motif supprimé",
+        "settingsRestored": "✓ Paramètres restaurés",
+        "settingsSaved": "✓ Paramètres fiscaux sauvegardés",
+        "settingsSavedToast": "Paramètres fiscaux sauvegardés"
+      },
+      "confirm": {
+        "deleteMotif": "Supprimer le motif « {libelle} » ?",
+        "resetAll": "Restaurer tous les paramètres fiscaux aux valeurs par défaut (taux TVA, RAS, timbre, autoliquidation, motifs d'exonération, régime) ?"
+      }
+    },
+    "rbacPreview": {
+      "breadcrumb": "Aperçu RBAC",
+      "title": "Aperçu RBAC — rôles BTP",
+      "subtitle": "Visualisez les permissions et la navigation accessibles pour chacun des rôles types seedés.",
+      "notice": {
+        "lead": "Mode aperçu uniquement.",
+        "body": "Sélectionner un rôle ci-dessous n'affecte pas votre session : la nav et les permissions du shell restent celles de l'utilisateur connecté. Cette page documente quelle navigation serait visible si un utilisateur portait ce rôle."
+      },
+      "roles": {
+        "title": "Rôles BTP seedés",
+        "reset": "Réinitialiser",
+        "meta": "{count} permission(s) — priorité {priority}"
+      },
+      "permissions": {
+        "title": "Permissions accordées — {name}"
+      },
+      "nav": {
+        "title": "Navigation racine accessible",
+        "hint": "Calcul basé sur les tags permissionsAny posés sur les nœuds racine de la nav (erp-nav.generated.ts). Un module sans tag reste visible par défaut.",
+        "module": "Module",
+        "required": "Permission(s) requise(s) (OU)",
+        "visible": "Visible",
+        "none": "aucune",
+        "yes": "Oui",
+        "no": "Non",
+        "yesAria": "Visible",
+        "noAria": "Masqué"
+      },
+      "matrix": {
+        "title": "Matrice module × action",
+        "hint": "Une case cochée signifie que le rôle dispose de la permission module.action (directement ou via un wildcard).",
+        "module": "Module",
+        "granted": "Accordée"
+      },
+      "empty": "Sélectionnez un rôle ci-dessus pour voir le détail de ses permissions."
+    },
+    "sessions": {
+      "breadcrumb": "Sessions",
+      "title": "Sessions & connexions",
+      "subtitle": "Sessions actives + journal des tentatives d'authentification",
+      "stats": {
+        "active": "Sessions actives",
+        "success24h": "Connexions OK 24h",
+        "failed24h": "Échecs 24h",
+        "suspectIps": "IPs suspectes (3+ échecs)",
+        "uniqueUsers": "Utilisateurs actifs 24h"
+      },
+      "active": {
+        "title": "Sessions actives ({count})",
+        "hint": "Le bouton « Force logout » termine la session immédiatement (mock).",
+        "table": {
+          "user": "Utilisateur",
+          "started": "Démarrée",
+          "lastActivity": "Dernière activité",
+          "ip": "IP",
+          "browser": "Navigateur",
+          "location": "Localisation"
+        },
+        "staleBadge": "inactif",
+        "forceLogout": "Déconnexion forcée",
+        "empty": "Aucune session active."
+      },
+      "logins": {
+        "title": "Tentatives de connexion ({filtered} / {total})",
+        "searchPlaceholder": "Utilisateur, IP, location…",
+        "allOutcomes": "Tous résultats",
+        "allUsers": "Tous utilisateurs",
+        "reset": "↻ Reset",
+        "table": {
+          "timestamp": "Horodatage",
+          "user": "Utilisateur",
+          "outcome": "Résultat",
+          "failureReason": "Raison échec",
+          "ip": "IP",
+          "browser": "Navigateur",
+          "location": "Localisation"
+        },
+        "empty": "Aucune tentative ne correspond aux filtres."
+      },
+      "exportFilename": "login-attempts",
+      "confirm": {
+        "forceLogout": "Force logout de la session de « {user} » ?\n\n(IP {ip}, {browser})"
+      },
+      "toasts": {
+        "sessionEnded": "Session de {user} terminée"
+      }
+    },
+    "societe": {
+      "breadcrumb": "Sociétés",
+      "title": "Sociétés du groupe",
+      "subtitle": "Multi-entité — sélectionnez une société pour éditer son identité légale, son logo et ses exercices comptables",
+      "toasts": {
+        "saved": "✓ Paramètres sauvegardés",
+        "saveError": "⚠ Corrigez les champs en erreur avant de sauvegarder",
+        "deleted": "✓ Société supprimée"
+      },
+      "listing": {
+        "title": "Sociétés du groupe",
+        "hint": "{count} sociétés · cliquez pour éditer",
+        "addNew": "Nouvelle société",
+        "cancel": "× Annuler"
+      },
+      "create": {
+        "title": "Créer une nouvelle société",
+        "hint": "Renseignez les informations légales obligatoires. Vous pourrez compléter logo, exercices et RIBs après création.",
+        "submit": "Créer la société",
+        "fields": {
+          "raisonSociale": "Raison sociale *",
+          "formeJuridique": "Forme juridique *",
+          "ice": "ICE *",
+          "if": "IF",
+          "ifPlaceholder": "7 à 8 chiffres",
+          "rc": "RC",
+          "rcPlaceholder": "Ville - 123456",
+          "capital": "Capital social (MAD)",
+          "adresse": "Adresse du siège *"
+        }
+      },
+      "table": {
+        "raisonSociale": "Raison sociale",
+        "forme": "Forme",
+        "ice": "ICE",
+        "rc": "RC",
+        "siege": "Siège",
+        "etablissements": "Établissements",
+        "status": "Statut",
+        "active": "Active",
+        "actif": "Actif",
+        "inactif": "Inactif"
+      },
+      "detail": {
+        "label": "Société sélectionnée",
+        "activate": "Activer cette société",
+        "delete": "Supprimer la société",
+        "deleteDisabled": "Suppression désactivée"
+      },
+      "identite": {
+        "title": "Identification légale",
+        "fields": {
+          "raisonSociale": "Raison sociale *",
+          "formeJuridique": "Forme juridique *",
+          "ice": "ICE (15 chiffres)",
+          "if": "Identifiant Fiscal (I.F.)",
+          "ifPlaceholder": "7 à 8 chiffres",
+          "rc": "Registre de Commerce (R.C.)",
+          "rcPlaceholder": "Ville - 123456",
+          "patente": "Taxe Professionnelle",
+          "patentePlaceholder": "7 à 10 chiffres",
+          "cnss": "N° Affiliation CNSS",
+          "cnssPlaceholder": "7 à 9 chiffres",
+          "cnaem": "N° CNAEM",
+          "cnaemNote": "(maritime, optionnel)",
+          "cnaemPlaceholder": "Code CNAEM si applicable",
+          "tvaIntra": "TVA intracommunautaire",
+          "capital": "Capital social (MAD) *",
+          "adresse": "Adresse du siège *"
+        },
+        "hint": "Validation MA : ICE 15 ch., IF 7-8 ch., RC 4-8 ch., Patente 7-10 ch., CNSS 7-9 ch. Les modifications sont persistées localement (mock — overrides sur seeds)."
+      },
+      "logo": {
+        "title": "Logo société",
+        "altImg": "Logo société",
+        "placeholder": "Aucun logo",
+        "choose": "Choisir un fichier…",
+        "remove": "Supprimer le logo",
+        "hint": "PNG / JPG / SVG / WebP — max 512 Ko. Stocké en data URL (mock-only).",
+        "errors": {
+          "unsupportedType": "Type non supporté : {type}",
+          "tooLarge": "Fichier trop volumineux (max 512 Ko, reçu {size} Ko)",
+          "readError": "Lecture du fichier impossible"
+        }
+      },
+      "exercices": {
+        "title": "Exercices comptables",
+        "addNew": "Ajouter un exercice",
+        "empty": "Aucun exercice enregistré.",
+        "table": {
+          "code": "Code",
+          "debut": "Début",
+          "fin": "Fin",
+          "statut": "Statut",
+          "closLe": "Clos le",
+          "notes": "Notes"
+        },
+        "status": {
+          "ouvert": "Ouvert",
+          "cloture": "Clôturé"
+        },
+        "actions": {
+          "cloturer": "Clôturer"
+        },
+        "newNotes": "Nouvel exercice"
+      },
+      "extras": {
+        "title": "Paramètres de gestion (extras société)",
+        "hint": "Compléments audit multi-entité : persistance locale par société, complémentaires au modèle canonique ci-dessus.",
+        "fields": {
+          "codeCourtGroupe": "Code court groupe",
+          "codeCourtPlaceholder": "Ex. SOM-BTP",
+          "devise": "Devise de référence",
+          "moisCloture": "Mois de clôture d'exercice",
+          "villeSiege": "Ville (siège / correspondance)",
+          "paysSiege": "Pays (code ISO)",
+          "paysSiegePlaceholder": "MA",
+          "rlNom": "Représentant légal — nom",
+          "rlQualite": "Représentant légal — qualité",
+          "rlQualitePlaceholder": "Gérant, PDG…"
+        }
+      },
+      "contacts": {
+        "title": "Coordonnées",
+        "fields": {
+          "codePostal": "Code postal",
+          "telephone": "Téléphone",
+          "email": "E-mail",
+          "siteWeb": "Site web",
+          "sitePlaceholder": "https://"
+        }
+      },
+      "etabs": {
+        "title": "Établissements ({count})",
+        "empty": "Aucun établissement enregistré."
+      },
+      "ribs": {
+        "title": "RIBs bancaires",
+        "addNew": "Ajouter un RIB",
+        "fields": {
+          "banque": "Banque",
+          "intitule": "Intitulé du compte",
+          "intitulePlaceholder": "Ex. Compte principal MAD",
+          "rib": "RIB (24 chiffres)",
+          "principal": "Principal"
+        },
+        "removeTitle": "Supprimer"
+      },
+      "empty": "Sélectionnez une société dans le tableau ci-dessus.",
+      "errors": {
+        "raisonSocialeRequired": "Raison sociale obligatoire",
+        "siegeRequired": "Adresse du siège obligatoire",
+        "iceRequired": "ICE obligatoire (15 chiffres)",
+        "iceInvalid": "ICE invalide — 15 chiffres requis",
+        "ifInvalid": "IF invalide — 7 à 8 chiffres",
+        "rcInvalid": "RC invalide — 4 à 8 chiffres",
+        "patenteInvalid": "Patente invalide — 7 à 10 chiffres",
+        "cnssInvalid": "CNSS invalide — 7 à 9 chiffres"
+      },
+      "deleteReasons": {
+        "lastOne": "Au moins une société doit rester",
+        "switchFirst": "Basculer sur une autre société avant de supprimer",
+        "generic": "Suppression impossible"
+      },
+      "confirmDelete": "Supprimer définitivement « {raisonSociale} » ?\n\nCette action est réversible côté démo (resetOverrides), pas en prod."
+    }
+  }
+}

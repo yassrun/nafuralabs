@@ -1,0 +1,1880 @@
+{
+  "common": {
+    "subsections": {
+      "operations": "العمليات",
+      "configuration": "التكوين"
+    },
+    "sections": {
+      "general": "عام",
+      "status": "الحالة"
+    },
+    "fields": {
+      "isActive": "نشط",
+      "description": "الوصف",
+      "notes": "ملاحظات",
+      "createdAt": "تاريخ الإنشاء",
+      "updatedAt": "تاريخ التحديث"
+    },
+    "actions": {
+      "cancel": "إلغاء",
+      "delete": "حذف",
+      "save": "حفظ",
+      "edit": "تعديل",
+      "moveUp": "تحريك لأعلى",
+      "moveDown": "تحريك لأسفل"
+    },
+    "none": "لا شيء",
+    "errors": {
+      "deleteFailed": "فشل الحذف.",
+      "updateFailed": "فشل التحديث.",
+      "saveFailed": "فشل الحفظ."
+    },
+    "loading": "جاري التحميل...",
+    "validation": {
+      "required": "هذا الحقل إلزامي."
+    },
+    "all": "الكل",
+    "search": "بحث"
+  },
+  "Search": "بحث",
+  "Filters": "عوامل التصفية",
+  "Filter": "تصفية",
+  "Remove filter": "إزالة عامل التصفية",
+  "Sort": "ترتيب",
+  "Columns": "أعمدة",
+  "Clear": "مسح",
+  "Apply": "تطبيق",
+  "Reset": "إعادة تعيين",
+  "Cancel": "إلغاء",
+  "Confirm": "تأكيد",
+  "Save": "حفظ",
+  "Delete": "حذف",
+  "Delete All": "حذف الكل",
+  "Yes": "نعم",
+  "No": "لا",
+  "All": "الكل",
+  "selected": "محدّد",
+  "listing": {
+    "action": {
+      "new": "جديد",
+      "newAria": "إنشاء سجل جديد"
+    }
+  },
+  "Loading": "جاري التحميل",
+  "Total": "المجموع",
+  "form": {
+    "errorSummary": {
+      "title": "يرجى تصحيح الأخطاء التالية:"
+    }
+  },
+  "audit": {
+    "timeline": {
+      "title": "النشاط",
+      "detailsTab": "التفاصيل",
+      "search": "بحث في النشاط...",
+      "loading": "جاري التحميل...",
+      "loadMore": "تحميل المزيد",
+      "empty": "لا يوجد نشاط مسجل لهذا السجل.",
+      "filter": {
+        "all": "الكل",
+        "creates": "الإنشاءات",
+        "updates": "التعديلات",
+        "statusChanges": "تغييرات الحالة",
+        "deletes": "الحذف",
+        "publish": "نشر",
+        "approve": "موافقة",
+        "reject": "رفض"
+      }
+    },
+    "action": {
+      "create": "أنشأ",
+      "update": "عدّل",
+      "delete": "حذف",
+      "status_change": "غيّر الحالة",
+      "publish": "نشر",
+      "approve": "وافق",
+      "reject": "رفض",
+      "assign": "أسند إلى",
+      "comment": "علّق",
+      "attach": "أرفق"
+    }
+  },
+  "print": {
+    "dialog": {
+      "title": "طباعة الوثيقة",
+      "template": "النموذج",
+      "preview": "معاينة",
+      "download": "تحميل PDF",
+      "email": "إرسال بالبريد الإلكتروني",
+      "email.disabled": "الإرسال بالبريد الإلكتروني متاح قريباً",
+      "noTemplates": "لا يوجد نموذج متاح لهذا النوع من الكيانات.",
+      "loading": "جاري إنشاء الوثيقة..."
+    }
+  },
+  "email": {
+    "send": {
+      "title": "إرسال بريد إلكتروني",
+      "to": "إلى",
+      "cc": "نسخة",
+      "addCc": "إضافة نسخة",
+      "hideCc": "إخفاء النسخة",
+      "subject": "الموضوع",
+      "template": "النموذج",
+      "bodyPreview": "معاينة المحتوى",
+      "selectTemplate": "اختر نموذجاً لمعاينة المحتوى.",
+      "attachPdf": "إرفاق PDF",
+      "printTemplate": "نموذج الطباعة",
+      "send": "إرسال",
+      "toRequired": "مستلم واحد على الأقل مطلوب.",
+      "subjectRequired": "الموضوع مطلوب.",
+      "templateRequired": "يرجى اختيار نموذج بريد إلكتروني.",
+      "success": "تم إرسال البريد الإلكتروني بنجاح"
+    }
+  },
+  "attachments": {
+    "title": "المرفقات",
+    "upload": "رفع ملفات",
+    "dragDrop": "اسحب الملفات هنا أو انقر للتصفح",
+    "empty": "لا توجد ملفات مرفقة.",
+    "download": "تحميل",
+    "delete": {
+      "confirm": "حذف هذا الملف؟",
+      "success": "تم حذف الملف"
+    },
+    "error": {
+      "tooLarge": "يتجاوز الملف الحجم الأقصى {maxSize}",
+      "invalidType": "نوع الملف غير مسموح به",
+      "maxFiles": "تم بلوغ الحد الأقصى {max} ملفات"
+    },
+    "upload.success": "تم رفع الملف",
+    "preview": "معاينة"
+  },
+  "dashboard": {
+    "title": "لوحة القيادة",
+    "subtitle": "نظرة عامة",
+    "navigation": {
+      "title": "الرئيسية"
+    },
+    "widgets": {
+      "revenue": "رقم المعاملات",
+      "invoices": "الفواتير",
+      "overdue": "متأخر",
+      "revenueTrend": "اتجاه رقم المعاملات",
+      "expenseBreakdown": "النفقات حسب الفئة",
+      "recentActivity": "النشاط الأخير",
+      "recentInvoices": "الفواتير الأخيرة"
+    },
+    "empty": {
+      "title": "مرحباً بك في Nafura!",
+      "message": "للبدء:",
+      "inviteMembers": "دعوة أعضاء",
+      "activateDomains": "تفعيل المجالات",
+      "configureSettings": "إعداد التكوين"
+    }
+  },
+  "approvals": {
+    "title": "الموافقات",
+    "subtitle": "الطلبات قيد الانتظار والسابقة",
+    "navigation": {
+      "title": "الموافقات"
+    },
+    "tabs": {
+      "pending": "قيد الانتظار",
+      "history": "السجل"
+    },
+    "columns": {
+      "entity": "الكيان",
+      "title": "العنوان",
+      "requestedBy": "طُلب بواسطة",
+      "requestedAt": "تاريخ الطلب",
+      "step": "المرحلة",
+      "actions": "الإجراءات",
+      "decision": "القرار",
+      "decisionAt": "تاريخ القرار",
+      "comment": "تعليق"
+    },
+    "approve": "موافقة",
+    "reject": "رفض",
+    "commentRequired": "التعليق مطلوب للرفض.",
+    "comment": "تعليق",
+    "commentPlaceholderApprove": "تعليق (اختياري)",
+    "commentPlaceholderReject": "تعليق (إلزامي)",
+    "emptyTitle": "لا توجد موافقات قيد الانتظار",
+    "emptyMessage": "أنت محدّث!",
+    "historyEmpty": "لا يوجد سجل موافقات.",
+    "loading": "جاري التحميل...",
+    "approved": "تمت الموافقة بنجاح.",
+    "rejected": "تم الرفض.",
+    "actionFailed": "فشل الإجراء.",
+    "time": {
+      "agoSeconds": "منذ {count} ثانية",
+      "agoMinutes": "منذ {count} د",
+      "agoHours": "منذ {count} س",
+      "agoDays": "منذ {count} ي"
+    }
+  },
+  "workflow": {
+    "submitForApproval": "إرسال للموافقة",
+    "resubmit": "إعادة الإرسال",
+    "approve": "موافقة",
+    "reject": "رفض",
+    "banner": {
+      "pending": "قيد انتظار الموافقة",
+      "approved": "موافق عليه",
+      "rejected": "مرفوض"
+    },
+    "action": {
+      "title": "الموافقة مطلوبة",
+      "commentPlaceholder": "تعليق (اختياري للموافقة، إلزامي للرفض)",
+      "rejectCommentRequired": "التعليق مطلوب للرفض."
+    },
+    "submit": {
+      "selectTemplateTitle": "اختر نموذج سير العمل",
+      "selectTemplateHint": "اختر نموذجاً لبدء سير عمل الموافقة."
+    },
+    "toast": {
+      "triggered": "تم تشغيل سير العمل.",
+      "approved": "تمت الموافقة بنجاح.",
+      "rejected": "تم الرفض."
+    }
+  },
+  "administration": {
+    "navigation": {
+      "title": "الإدارة",
+      "members": "الأعضاء",
+      "roles": "الأدوار",
+      "domainActivation": "تفعيل المجالات",
+      "audit": "سجل التدقيق",
+      "templates": "نماذج الطباعة",
+      "emailTemplates": "نماذج البريد الإلكتروني",
+      "workflows": "سير العمل",
+      "subscriptions": "الاشتراكات",
+      "scheduledJobs": "المهام المجدولة",
+      "webhooks": "Webhooks",
+      "apiKeys": "مفاتيح API",
+      "numberingSequences": "تسلسلات الترقيم",
+      "auditLog": "سجل تدقيق ERP",
+      "rbacPreview": "معاينة RBAC",
+      "erpRoles": "أدوار ERP — محرر المصفوفة",
+      "sessions": "الجلسات والاتصالات",
+      "numerotation": "الترقيم التسلسلي",
+      "mappingsComptables": "ربط محاسبي تلقائي",
+      "banques": "مرجع البنوك",
+      "moa": "مرجع أصحاب المشاريع",
+      "clientsReferentiel": "مرجع الزبائن",
+      "societe": "هوية الشركة",
+      "fiscal": "الإعدادات الضريبية",
+      "demo": "بيانات العرض التجريبي",
+      "hub": "الصفحة الرئيسية للإدارة"
+    },
+    "hub": {
+      "title": "مركز الإدارة",
+      "subtitle": "إعدادات المستأجر، IAM، الامتثال وبيانات العرض",
+      "intro": "اختر قسماً أدناه. تبقى الشاشات التفصيلية ضمن /administration/… (المسارات التاريخية محفوظة).",
+      "appSettings": "إعدادات التطبيق",
+      "descriptions": {
+        "members": "حسابات المستخدمين والدعوات",
+        "roles": "الأدوار وحقوق الوصول",
+        "domainActivation": "المجالات وتفعيل المنتجات",
+        "audit": "سجل تدقيق المنصة",
+        "templates": "قوالب طباعة PDF",
+        "emailTemplates": "نماذج رسائل البريد الإلكتروني المعاملاتية",
+        "workflows": "نماذج سير عمل الموافقات",
+        "scheduledJobs": "المهام المجدولة والمراقبة",
+        "webhooks": "تكاملات HTTP الصادرة",
+        "apiKeys": "مفاتيح API والوصول البرمجي",
+        "numberingSequences": "بادئات وتسلسلات الوثائق",
+        "subscriptions": "اشتراكات وقدرات SaaS",
+        "settings": "الخيارات العامة للتطبيق",
+        "societe": "الهوية القانونية، ICE، RIB، الشعار",
+        "fiscal": "TVA، الاقتطاع من المنبع (حسب فئة صاحب المشروع)، الطوابع، الإعفاءات CGI (12 سبباً)، نظام الشركة",
+        "auditLog": "سجل أعمال ERP (تجزئة متسلسلة)",
+        "rbacPreview": "مصفوفة الأذونات × الأدوار BTP المعدّة مسبقاً (المدير العام، DAF، RAF، مدير الأشغال، رئيس الورش، المشتري، الموارد البشرية، HSE)",
+        "erpRoles": "تحرير كاتالوغ أدوار ERP: مصفوفة 14 وحدة × 9 إجراءات، إنشاء أدوار مخصصة",
+        "sessions": "الجلسات النشطة + سجل محاولات الاتصال (نجاح/فشل/IPs مشبوهة)",
+        "numerotation": "تنسيق الأرقام (البادئة، السنة، الحشو، إعادة التعيين) لكل شركة × نوع وثيقة",
+        "mappingsComptables": "التوليد التلقائي للقيود المحاسبية (OD) لكل عملية أعمال — 15 نموذجاً CGNC المغرب + محاكي توازن مدين/دائن",
+        "banques": "كاتالوغ البنوك المغربية (رموز BAM، SWIFT، الأنظمة المصرفية المفتوحة)",
+        "moa": "أصحاب المشاريع: الدولة، المؤسسات العمومية، الجماعات، القطاع الخاص",
+        "clientsReferentiel": "زبائن البيع (اختصار نحو المبيعات / الزبائن)",
+        "demo": "إعادة تعيين بيانات العرض التجريبي"
+      }
+    },
+    "audit": {
+      "title": "سجل التدقيق",
+      "search": "بحث في السجل...",
+      "columns": {
+        "date": "التاريخ",
+        "actor": "الفاعل",
+        "action": "الإجراء",
+        "entityType": "نوع الكيان",
+        "details": "التفاصيل"
+      },
+      "filters": {
+        "search": "بحث (فاعل، تفاصيل)",
+        "entityType": "نوع الكيان",
+        "action": "الإجراء",
+        "actor": "الفاعل",
+        "from": "من",
+        "to": "إلى"
+      },
+      "export": "تصدير إلى CSV",
+      "exportSuccess": "{count, plural, =0 {لم يتم تصدير أي إدخال.} one {تم تصدير إدخال واحد.} two {تم تصدير إدخالين.} few {تم تصدير # إدخالات.} many {تم تصدير # إدخالاً.} other {تم تصدير # إدخال.}}",
+      "exportError": "فشل تصدير سجل التدقيق.",
+      "empty": "لا توجد إدخالات تدقيق.",
+      "detail": {
+        "title": "إدخال تدقيق",
+        "viewEntity": "عرض {entityType}",
+        "payload": "التعديلات"
+      }
+    },
+    "scheduledJobs": {
+      "title": "المهام المجدولة",
+      "subtitle": "مراقبة وإدارة المهام في الخلفية",
+      "columns": {
+        "name": "اسم المهمة",
+        "key": "المفتاح",
+        "schedule": "الجدولة",
+        "tenantScoped": "حسب المستأجر",
+        "status": "الحالة",
+        "lastRun": "آخر تنفيذ",
+        "enabled": "مفعّل"
+      },
+      "actions": {
+        "runNow": "تنفيذ الآن",
+        "runNowSuccess": "تم تشغيل المهمة بنجاح"
+      },
+      "detail": {
+        "title": "تفاصيل المهمة",
+        "totalRuns": "عدد التنفيذات",
+        "successRate": "معدل النجاح",
+        "avgDuration": "المدة المتوسطة",
+        "lastRun": "آخر تنفيذ",
+        "executions": "سجل التنفيذات",
+        "columns": {
+          "started": "البداية",
+          "ended": "النهاية",
+          "duration": "المدة",
+          "status": "الحالة",
+          "tenant": "المستأجر",
+          "error": "الخطأ"
+        }
+      }
+    },
+    "webhooks": {
+      "title": "Webhooks",
+      "subtitle": "إعداد إشعارات الأحداث الصادرة",
+      "loading": "جاري تحميل Webhooks...",
+      "empty": "لا يوجد Webhook مُعدّ.",
+      "saving": "جاري الحفظ...",
+      "fields": {
+        "name": "الاسم",
+        "url": "URL",
+        "secret": "المفتاح السري",
+        "events": "الأحداث",
+        "active": "نشط"
+      },
+      "form": {
+        "name": "الاسم",
+        "url": "URL الخاص بـ Webhook",
+        "secret": "المفتاح السري",
+        "generateSecret": "توليد مفتاح سري",
+        "events": "الأحداث",
+        "active": "نشط"
+      },
+      "actions": {
+        "create": "Webhook جديد",
+        "edit": "تعديل",
+        "test": "اختبار Webhook",
+        "testSuccess": "تم إرسال الاختبار بنجاح",
+        "testFailed": "فشل إرسال الاختبار",
+        "delete": "حذف",
+        "generate": "توليد"
+      },
+      "dialog": {
+        "createTitle": "إنشاء Webhook",
+        "editTitle": "تعديل Webhook"
+      },
+      "detail": {
+        "title": "تفاصيل Webhook",
+        "back": "رجوع",
+        "loading": "جاري تحميل سجلات التسليم...",
+        "empty": "لا توجد تسليمات حتى الآن.",
+        "payload": "الحمولة",
+        "response": "الاستجابة",
+        "columns": {
+          "event": "الحدث",
+          "status": "الحالة",
+          "attempts": "المحاولات",
+          "response": "الاستجابة",
+          "responseCode": "الاستجابة",
+          "timestamp": "الطابع الزمني",
+          "payload": "الحمولة"
+        }
+      },
+      "columns": {
+        "name": "الاسم",
+        "url": "URL",
+        "events": "الأحداث",
+        "active": "نشط",
+        "lastDelivery": "آخر تسليم",
+        "created": "تاريخ الإنشاء",
+        "actions": "الإجراءات"
+      }
+    },
+    "apiKeys": {
+      "title": "مفاتيح API",
+      "subtitle": "إدارة مفاتيح API للتكاملات الخارجية",
+      "loading": "جاري تحميل مفاتيح API...",
+      "empty": "لا توجد مفاتيح API حتى الآن.",
+      "creating": "جاري الإنشاء...",
+      "never": "أبداً",
+      "status": {
+        "active": "نشط",
+        "revoked": "ملغى",
+        "expired": "منتهي الصلاحية"
+      },
+      "fields": {
+        "name": "الاسم",
+        "permissions": "الأذونات (مفصولة بفواصل)",
+        "expiry": "الانتهاء",
+        "expiresAt": "ينتهي في"
+      },
+      "form": {
+        "name": "اسم المفتاح",
+        "permissions": "الأذونات",
+        "expiry": "الانتهاء",
+        "expiryNever": "أبداً",
+        "expiry30d": "30 يوماً",
+        "expiry90d": "90 يوماً",
+        "expiry1y": "سنة واحدة",
+        "expiryCustom": "تاريخ مخصص"
+      },
+      "expiry": {
+        "never": "أبداً",
+        "30d": "30 يوماً",
+        "90d": "90 يوماً",
+        "1y": "سنة واحدة",
+        "custom": "تاريخ مخصص"
+      },
+      "actions": {
+        "create": "توليد مفتاح API",
+        "revoke": "إلغاء",
+        "revokeConfirm": "هل أنت متأكد من إلغاء مفتاح API هذا؟ هذا الإجراء لا يمكن التراجع عنه."
+      },
+      "dialog": {
+        "createTitle": "إنشاء مفتاح API"
+      },
+      "created": {
+        "title": "تم إنشاء مفتاح API",
+        "warning": "لن يُعرض هذا المفتاح إلا مرة واحدة. انسخه الآن.",
+        "copy": "نسخ المفتاح",
+        "copied": "تم نسخ المفتاح إلى الحافظة",
+        "done": "تم"
+      },
+      "columns": {
+        "name": "الاسم",
+        "key": "المفتاح",
+        "permissions": "الأذونات",
+        "createdBy": "أنشئ بواسطة",
+        "expires": "ينتهي في",
+        "lastUsed": "آخر استخدام",
+        "status": "الحالة",
+        "actions": "الإجراءات"
+      }
+    },
+    "numberingSequences": {
+      "title": "تسلسلات الترقيم",
+      "subtitle": "إعداد الترقيم التلقائي للوثائق",
+      "loading": "جاري تحميل التسلسلات...",
+      "empty": "لا يوجد تسلسل مُعدّ.",
+      "saving": "جاري الحفظ...",
+      "preview": "معاينة",
+      "fields": {
+        "name": "الاسم",
+        "code": "الرمز",
+        "prefix": "البادئة",
+        "separator": "الفاصل",
+        "yearFormat": "تنسيق السنة",
+        "padLength": "طول الحشو",
+        "incrementBy": "خطوة الزيادة",
+        "currentNumber": "الرقم الحالي",
+        "startingNumber": "رقم البداية",
+        "resetPolicy": "سياسة إعادة التعيين"
+      },
+      "reset": {
+        "never": "أبداً",
+        "yearly": "سنوي",
+        "monthly": "شهري"
+      },
+      "resetPolicy": {
+        "NEVER": "أبداً",
+        "YEARLY": "سنوي",
+        "MONTHLY": "شهري"
+      },
+      "actions": {
+        "create": "تسلسل جديد",
+        "edit": "تعديل",
+        "delete": "حذف"
+      },
+      "dialog": {
+        "createTitle": "إنشاء تسلسل ترقيم",
+        "editTitle": "تعديل تسلسل الترقيم"
+      },
+      "columns": {
+        "name": "الاسم",
+        "code": "الرمز",
+        "prefix": "البادئة",
+        "current": "الحالي",
+        "preview": "معاينة النموذج",
+        "resetPolicy": "سياسة إعادة التعيين",
+        "actions": "الإجراءات"
+      }
+    },
+    "templates": {
+      "title": "نماذج الطباعة",
+      "create": "نموذج جديد",
+      "clone": "تكرار النموذج",
+      "editor": {
+        "title": "محرر النماذج",
+        "variables": "المتغيرات",
+        "variablesEmpty": "اختر نوع كيان لتحميل المتغيرات.",
+        "settings": "إعدادات الصفحة",
+        "preview": "معاينة",
+        "livePreview": "معاينة فورية",
+        "previewEmpty": "أدخل HTML لتوليد معاينة.",
+        "save": "حفظ النموذج",
+        "system": "نموذج النظام (للقراءة فقط)",
+        "downloadHtml": "تحميل HTML",
+        "openInBrowser": "فتح في المتصفح",
+        "mockHint": "وضع العرض: التعديلات محفوظة محلياً (localStorage). استخدم « فتح في المتصفح » ثم Ctrl+P لإنتاج PDF."
+      },
+      "paperSize": "الحجم",
+      "orientation": "الاتجاه",
+      "margins": "الهوامش",
+      "columns": {
+        "name": "الاسم",
+        "entityType": "نوع الكيان",
+        "type": "النوع",
+        "paperSize": "الحجم",
+        "updatedAt": "آخر تعديل"
+      },
+      "type": {
+        "system": "نظام",
+        "custom": "مخصص"
+      },
+      "filters": {
+        "search": "بحث",
+        "entityType": "نوع الكيان",
+        "type": "النوع"
+      },
+      "fields": {
+        "name": "الاسم",
+        "code": "الرمز",
+        "entityType": "نوع الكيان"
+      },
+      "validation": {
+        "nameRequired": "الاسم مطلوب",
+        "codeRequired": "الرمز مطلوب",
+        "entityTypeRequired": "نوع الكيان مطلوب"
+      },
+      "empty": "لا يوجد نموذج طباعة",
+      "emptyMessage": "أنشئ نموذجاً لتوليد ملفات PDF من بياناتك.",
+      "createSuccess": "تم إنشاء النموذج « {name} ».",
+      "cloneSuccess": "تم إنشاء النموذج « {name} » من نسخة.",
+      "saveSuccess": "تم حفظ النموذج.",
+      "saveError": "فشل حفظ النموذج.",
+      "loadError": "النموذج غير موجود.",
+      "delete": {
+        "confirmTitle": "حذف النموذج",
+        "confirmMessage": "حذف « {name} »؟ هذا الإجراء لا يمكن التراجع عنه.",
+        "success": "تم حذف النموذج.",
+        "inUse": "هذا النموذج قيد الاستخدام ولا يمكن حذفه."
+      }
+    },
+    "emailTemplates": {
+      "title": "نماذج البريد الإلكتروني",
+      "create": "نموذج بريد إلكتروني جديد",
+      "editor": {
+        "title": "محرر نموذج البريد الإلكتروني",
+        "preview": "معاينة",
+        "previewEmpty": "انقر على معاينة للعرض ببيانات مثال.",
+        "save": "حفظ النموذج"
+      },
+      "columns": {
+        "name": "الاسم",
+        "code": "الرمز",
+        "type": "النوع",
+        "entityType": "نوع الكيان",
+        "updatedAt": "آخر تعديل"
+      },
+      "type": {
+        "system": "نظام",
+        "custom": "مخصص"
+      },
+      "filters": {
+        "type": "النوع",
+        "entityType": "نوع الكيان"
+      },
+      "fields": {
+        "name": "الاسم",
+        "code": "الرمز",
+        "subject": "الموضوع",
+        "htmlBody": "محتوى HTML",
+        "textBody": "محتوى نصي",
+        "entityType": "نوع الكيان"
+      },
+      "empty": "لا يوجد نموذج بريد إلكتروني",
+      "emptyMessage": "أنشئ نموذجاً لرسائل النظام أو الأعمال.",
+      "createSuccess": "تم إنشاء نموذج البريد الإلكتروني \"{name}\".",
+      "saveSuccess": "تم حفظ النموذج.",
+      "saveError": "فشل الحفظ.",
+      "loadError": "النموذج غير موجود.",
+      "previewError": "فشل تحميل المعاينة.",
+      "delete": {
+        "confirmTitle": "حذف نموذج البريد الإلكتروني",
+        "confirmMessage": "حذف \"{name}\"؟ هذا الإجراء لا يمكن التراجع عنه.",
+        "success": "تم حذف النموذج."
+      }
+    },
+    "workflows": {
+      "title": "نماذج سير العمل",
+      "create": "نموذج جديد",
+      "editorTitle": "نموذج سير العمل",
+      "toggleActive": "تفعيل / تعطيل",
+      "toggleSuccess": "النموذج « {name} » أصبح الآن {state}.",
+      "addStep": "إضافة مرحلة",
+      "stepsTitle": "المراحل",
+      "status": {
+        "active": "نشط",
+        "inactive": "غير نشط"
+      },
+      "columns": {
+        "name": "الاسم",
+        "code": "الرمز",
+        "entityType": "نوع الكيان",
+        "steps": "المراحل",
+        "status": "الحالة"
+      },
+      "filters": {
+        "search": "بحث",
+        "entityType": "نوع الكيان",
+        "status": "الحالة"
+      },
+      "fields": {
+        "name": "الاسم",
+        "code": "الرمز",
+        "entityType": "نوع الكيان",
+        "description": "الوصف",
+        "active": "نشط"
+      },
+      "empty": "لا يوجد نموذج سير عمل",
+      "emptyMessage": "أنشئ نموذج سير عمل لتحديد سلاسل الموافقات.",
+      "createSuccess": "تم إنشاء نموذج سير العمل.",
+      "saveSuccess": "تم حفظ نموذج سير العمل.",
+      "saveError": "فشل حفظ نموذج سير العمل.",
+      "loadError": "نموذج سير العمل غير موجود.",
+      "delete": {
+        "confirmTitle": "حذف نموذج سير العمل",
+        "confirmMessage": "حذف « {name} »؟ هذا الإجراء لا يمكن التراجع عنه.",
+        "success": "تم حذف نموذج سير العمل.",
+        "inUse": "لهذا النموذج نسخ سير عمل نشطة ولا يمكن حذفه."
+      },
+      "stepDialog": {
+        "title": "مرحلة سير العمل",
+        "stepName": "اسم المرحلة",
+        "approverRole": "دور الموافِق",
+        "timeoutHours": "المهلة (ساعات)",
+        "escalationRole": "دور التصعيد",
+        "condition": "الشرط (SpEL، اختياري)"
+      }
+    },
+    "members": {
+      "sections": {
+        "identity": "الهوية",
+        "access": "الوصول"
+      },
+      "title": "الأعضاء",
+      "invite": "دعوة عضو",
+      "invite.success": "تم إرسال الدعوة إلى {email}",
+      "invite.duplicate": "تم دعوة هذا البريد الإلكتروني مسبقاً",
+      "invite.error": "فشل إرسال الدعوة",
+      "emptyTitle": "لا يوجد أعضاء",
+      "empty": "لا يوجد أعضاء. ادعُ أول عضو في فريقك.",
+      "fields": {
+        "firstName": "الاسم الشخصي",
+        "lastName": "الاسم العائلي",
+        "email": "البريد الإلكتروني",
+        "displayName": "اسم العرض",
+        "roles": "الأدوار",
+        "status": "الحالة",
+        "lastLoginAt": "آخر اتصال",
+        "message": "رسالة (اختياري)"
+      },
+      "columns": {
+        "name": "الاسم",
+        "email": "البريد الإلكتروني",
+        "role": "الدور",
+        "status": "الحالة",
+        "lastActivity": "آخر نشاط",
+        "joined": "تاريخ الانتساب"
+      },
+      "filters": {
+        "status": "الحالة",
+        "role": "الدور"
+      },
+      "status": {
+        "active": "نشط",
+        "invited": "مدعو",
+        "suspended": "معلق"
+      },
+      "actions": {
+        "viewDetail": "عرض التفاصيل",
+        "deactivate": "تعطيل",
+        "deactivate.success": "تم تعطيل العضو",
+        "deactivateSelected": "تعطيل التحديد",
+        "deactivateSelected.success": "{count, plural, =0 {لم يتم تعطيل أي عضو.} one {تم تعطيل عضو واحد.} two {تم تعطيل عضوين.} few {تم تعطيل # أعضاء.} many {تم تعطيل # عضواً.} other {تم تعطيل # عضو.}}",
+        "reactivate": "إعادة التفعيل",
+        "reactivate.success": "تم إعادة تفعيل العضو",
+        "resendInvitation": "إعادة إرسال الدعوة",
+        "resendInvitation.success": "تم إعادة إرسال الدعوة",
+        "remove": "إزالة",
+        "remove.success": "تمت إزالة العضو"
+      },
+      "deactivate": {
+        "confirm": {
+          "title": "تعطيل العضو",
+          "message": "سيؤدي ذلك إلى تعليق وصول {name}. يمكن إعادة تفعيله لاحقاً."
+        },
+        "bulkConfirm": {
+          "title": "تعطيل الأعضاء",
+          "message": "سيؤدي ذلك إلى تعليق الوصول لـ {count, plural, one {عضو واحد محدد.} two {عضوين محددين.} few {# أعضاء محددين.} many {# عضواً محدداً.} other {# عضو محدد.}}"
+        }
+      },
+      "remove": {
+        "confirm": {
+          "title": "إزالة العضو",
+          "message": "سيؤدي ذلك إلى إزالة {name} نهائياً من هذا المستأجر."
+        }
+      },
+      "detail": {
+        "title": "ملف العضو",
+        "back": "العودة إلى الأعضاء",
+        "joined": "تاريخ الانتساب",
+        "lastActivity": "آخر نشاط",
+        "roles": {
+          "title": "الأدوار المسندة",
+          "edit": "تعديل الأدوار",
+          "save": "حفظ الأدوار",
+          "saved": "تم تحديث الأدوار",
+          "saveError": "فشل تحديث الأدوار",
+          "system": "دور النظام (غير قابل للإزالة)"
+        },
+        "actions": {
+          "title": "الإجراءات",
+          "deactivate": "تعطيل العضو",
+          "deactivateConfirm": "تعليق وصول {name}؟",
+          "reactivate": "إعادة تفعيل العضو",
+          "resend": "إعادة إرسال الدعوة",
+          "remove": "إزالة العضو",
+          "removeConfirm": "إزالة {name} من هذا المستأجر؟",
+          "updateError": "فشل الإجراء. يرجى إعادة المحاولة."
+        },
+        "email": {
+          "copied": "تم نسخ البريد الإلكتروني إلى الحافظة",
+          "copyError": "تعذّر نسخ البريد الإلكتروني"
+        }
+      },
+      "validation": {
+        "emailRequired": "البريد الإلكتروني إلزامي",
+        "emailInvalid": "أدخل بريداً إلكترونياً صالحاً",
+        "roleRequired": "الدور إلزامي",
+        "messageMaxLength": "يجب أن تحتوي الرسالة على 500 حرف كحد أقصى"
+      }
+    },
+    "subscriptions": {
+      "title": "الاشتراكات",
+      "subtitle": "اطّلع على استخدام الباقة وخيارات الترقية.",
+      "currentPlan": "الباقة الحالية",
+      "usage": "الاستخدام",
+      "included": "مشمول:",
+      "upgrade": {
+        "title": "تحتاج إلى المزيد؟",
+        "description": "انتقل إلى باقة أعلى لفتح المستخدمين غير المحدودين، جميع المجالات والدعم ذي الأولوية.",
+        "cta": "تواصل مع المبيعات",
+        "comingSoon": "إدارة الاشتراكات متاحة قريباً"
+      }
+    },
+    "roles": {
+      "title": "الأدوار",
+      "create": "دور جديد",
+      "create.success": "تم إنشاء الدور '{name}'",
+      "sections": {
+        "permissions": "الأذونات"
+      },
+      "fields": {
+        "roleCode": "رمز الدور",
+        "roleCodePlaceholder": "مثال: directeur-commercial",
+        "roleCodeHint": "حروف صغيرة وأرقام وشرطات فقط. لا يمكن تعديله بعد الإنشاء.",
+        "name": "الاسم",
+        "namePlaceholder": "مثال: المدير التجاري",
+        "description": "الوصف",
+        "descriptionPlaceholder": "وصف اختياري",
+        "isSystem": "دور النظام",
+        "priority": "الأولوية",
+        "permissions": "الأذونات"
+      },
+      "columns": {
+        "name": "الاسم",
+        "description": "الوصف",
+        "type": "النوع",
+        "members": "الأعضاء",
+        "priority": "الأولوية"
+      },
+      "filters": {
+        "type": "النوع"
+      },
+      "type": {
+        "system": "نظام",
+        "custom": "مخصص"
+      },
+      "delete": {
+        "confirm": {
+          "title": "حذف الدور",
+          "message": "هذا الدور يحتوي على {count} أعضاء. سيفقدون جميع الأذونات الممنوحة من خلاله.",
+          "messageEmpty": "هل تريد فعلاً حذف الدور \"{name}\"؟ هذا الإجراء لا يمكن التراجع عنه."
+        },
+        "hasMembers": "لا يمكن حذف دور يحتوي على أعضاء مسندين. أعد إسناد الأعضاء أولاً."
+      },
+      "validation": {
+        "nameRequired": "الاسم إلزامي",
+        "nameMaxLength": "يجب أن يحتوي الاسم على 100 حرف كحد أقصى",
+        "codeRequired": "رمز الدور إلزامي",
+        "codeKebabCase": "يجب أن يكون الرمز بحروف صغيرة مع شرطات (مثال: directeur-commercial)",
+        "codeConflict": "يوجد دور بهذا الرمز مسبقاً",
+        "descriptionMaxLength": "يجب أن يحتوي الوصف على 500 حرف كحد أقصى"
+      },
+      "detail": {
+        "title": "تفاصيل الدور",
+        "systemBanner": "لا يمكن تعديل أدوار النظام",
+        "permissions": {
+          "title": "الأذونات",
+          "count": "{count} أذونات محددة",
+          "selectAll": "تحديد الكل",
+          "clear": "مسح",
+          "search": "بحث عن الأذونات..."
+        },
+        "members": {
+          "title": "أعضاء الدور",
+          "add": "إضافة أعضاء",
+          "remove": "إزالة",
+          "search": "بحث عن الأعضاء...",
+          "loading": "جاري تحميل الأعضاء…",
+          "empty": "لا يوجد عضو مسند إلى هذا الدور.",
+          "removeError": "فشل إزالة العضو",
+          "addError": "فشل إضافة الأعضاء",
+          "columns": {
+            "email": "البريد الإلكتروني",
+            "displayName": "اسم العرض",
+            "status": "الحالة",
+            "joined": "الانتساب"
+          },
+          "pagination": {
+            "previous": "السابق",
+            "next": "التالي",
+            "page": "الصفحة {current} من {total}"
+          },
+          "removeConfirm": {
+            "title": "إزالة العضو",
+            "message": "هل تريد فعلاً إزالة هذا العضو من الدور؟"
+          },
+          "addDialog": {
+            "title": "إضافة أعضاء إلى الدور",
+            "subtitle": "اختر الأعضاء لإضافتهم إلى هذا الدور.",
+            "search": "بحث عن الأعضاء…",
+            "noCandidates": "جميع الأعضاء مسندون مسبقاً إلى هذا الدور.",
+            "noResults": "لا يوجد عضو يطابق بحثك.",
+            "confirm": "إضافة التحديد",
+            "confirmCount": "إضافة التحديد ({count})"
+          }
+        },
+        "save": "حفظ الدور",
+        "save.success": "تم تحديث الدور '{name}'"
+      }
+    },
+    "domains": {
+      "title": "تفعيل المجالات",
+      "subtitle": "فعّل أو عطّل المجالات لمنظمتك. تُخفى المجالات المعطّلة من التنقل وتُلغى أذوناتها.",
+      "entities": "{count} كيانات",
+      "active": "نشط",
+      "inactive": "غير نشط",
+      "since": "منذ {date}",
+      "locked": "هذا المجال إلزامي ولا يمكن تعطيله",
+      "activate": {
+        "success": "تم تفعيل {name}"
+      },
+      "deactivate": {
+        "confirm": {
+          "title": "تعطيل {name}؟",
+          "message": "سيؤدي تعطيل {name} إلى إخفائه من التنقل وإلغاء الأذونات المرتبطة لجميع المستخدمين.",
+          "confirmLabel": "تعطيل"
+        },
+        "success": "تم تعطيل {name}"
+      },
+      "readOnlyTooltip": "ليس لديك إذن لتعديل تفعيل المجال.",
+      "empty": "لا توجد مجالات متاحة. تواصل مع الدعم.",
+      "loading": "جاري تحميل المجالات...",
+      "error": "فشل تحميل المجالات.",
+      "toggleError": "فشل تحديث تفعيل المجال."
+    }
+  },
+  "scheduling": {
+    "jobs": {
+      "email-digest": "الملخص عبر البريد الإلكتروني",
+      "overdue-alert": "تنبيه التأخر",
+      "session-cleanup": "تنظيف الجلسات",
+      "audit-archive": "أرشفة التدقيق",
+      "temp-file-cleanup": "تنظيف الملفات المؤقتة"
+    },
+    "status": {
+      "RUNNING": "قيد التنفيذ",
+      "SUCCESS": "نجاح",
+      "FAILED": "فشل"
+    }
+  },
+  "appSettings": {
+    "subtitle": "تكوين خيارات التطبيق للمستأجر",
+    "tabs": {
+      "general": "عام",
+      "localization": "التوطين",
+      "branding": "الهوية البصرية"
+    },
+    "general": {
+      "title": "عام",
+      "tenantName": "اسم المنظمة",
+      "tenantName.hint": "يُعرض في جميع أنحاء المنصة",
+      "timezone": "المنطقة الزمنية",
+      "contactEmail": "البريد الإلكتروني للاتصال",
+      "supportEmail": "البريد الإلكتروني للدعم",
+      "save": "حفظ الإعدادات العامة",
+      "save.success": "تم تحديث الإعدادات العامة",
+      "save.error": "فشل تحديث الإعدادات العامة"
+    },
+    "localization": {
+      "title": "التوطين",
+      "defaultLocale": "اللغة الافتراضية",
+      "supportedLocales": "اللغات المدعومة",
+      "supportedLocalesMustIncludeDefault": "يجب أن تتضمن اللغات المدعومة اللغة الافتراضية.",
+      "defaultCurrency": "العملة الافتراضية",
+      "dateFormat": "تنسيق التاريخ",
+      "dateFormat.preview": "معاينة: {value}",
+      "numberFormat": "تنسيق الأرقام",
+      "numberFormat.preview": "معاينة: {value}",
+      "save": "حفظ إعدادات التوطين",
+      "save.success": "تم تحديث إعدادات التوطين",
+      "save.error": "فشل تحديث إعدادات التوطين"
+    },
+    "branding": {
+      "title": "الهوية البصرية",
+      "displayName": "اسم العرض",
+      "displayName.hint": "يُعرض في الشريط الجانبي وعنوان المتصفح",
+      "primaryColor": "اللون الأساسي",
+      "primaryColor.default": "افتراضي",
+      "primaryColor.reset": "إعادة تعيين",
+      "primaryColor.preview": "معاينة",
+      "logo": "الشعار",
+      "logo.hint": "PNG أو JPG أو SVG. الحد الأقصى 2 ميجابايت.",
+      "logo.change": "تغيير",
+      "logo.remove": "إزالة",
+      "favicon": "أيقونة المفضلة",
+      "favicon.hint": "PNG أو ICO أو SVG. الحد الأقصى 500 كيلوبايت.",
+      "save": "حفظ الهوية البصرية",
+      "save.success": "تم تحديث الهوية البصرية",
+      "save.error": "فشل تحديث الهوية البصرية"
+    }
+  },
+  "userSettings": {
+    "subtitle": "إدارة ملفك الشخصي وتفضيلاتك وأمنك",
+    "tabs": {
+      "profile": "الملف الشخصي",
+      "preferences": "التفضيلات",
+      "security": "الأمن",
+      "notifications": "الإشعارات"
+    },
+    "profile": {
+      "title": "الملف الشخصي",
+      "firstName": "الاسم الشخصي",
+      "lastName": "الاسم العائلي",
+      "displayName": "اسم العرض",
+      "displayName.hint": "يُعرض بدلاً من اسمك الشخصي والعائلي",
+      "phone": "الهاتف",
+      "email": "البريد الإلكتروني",
+      "email.hint": "تتم إدارته بواسطة مزوّد الهوية الخاص بك",
+      "save": "حفظ الملف الشخصي",
+      "save.success": "تم تحديث الملف الشخصي",
+      "save.error": "فشل تحديث الملف الشخصي"
+    },
+    "preferences": {
+      "title": "التفضيلات",
+      "locale": "اللغة",
+      "timezone": "المنطقة الزمنية",
+      "theme": "السمة",
+      "theme.light": "فاتح",
+      "theme.dark": "داكن",
+      "theme.system": "النظام",
+      "dateFormat": "تنسيق التاريخ",
+      "dateFormat.preview": "معاينة: {value}",
+      "defaultHint": "افتراضي: إعداد المنظمة ({value})",
+      "defaultOption": "استخدام الإعداد الافتراضي للمنظمة",
+      "save": "حفظ التفضيلات",
+      "save.success": "تم تحديث التفضيلات",
+      "save.error": "فشل تحديث التفضيلات",
+      "load.error": "فشل تحميل التفضيلات"
+    },
+    "security": {
+      "title": "الأمن",
+      "password": {
+        "title": "تغيير كلمة السر",
+        "comingSoon": "تغيير كلمة السر متاح قريباً. تتم إدارة كلمة السر بواسطة مزوّد الهوية الخاص بك.",
+        "current": "كلمة السر الحالية",
+        "new": "كلمة السر الجديدة",
+        "confirm": "تأكيد كلمة السر الجديدة",
+        "mismatch": "كلمتا السر غير متطابقتين",
+        "strength": {
+          "weak": "ضعيفة",
+          "fair": "متوسطة",
+          "strong": "قوية",
+          "veryStrong": "قوية جداً"
+        }
+      },
+      "sessions": {
+        "title": "الجلسات النشطة",
+        "comingSoon": "إدارة الجلسات قادمة قريباً.",
+        "comingSoonHint": "يمكنك إدارة جلساتك من مزوّد الهوية الخاص بك.",
+        "current": "هذا الجهاز",
+        "revoke": "إلغاء",
+        "revokeAll": "إلغاء جميع الجلسات الأخرى"
+      },
+      "twoFactor": {
+        "title": "المصادقة الثنائية",
+        "comingSoon": "المصادقة الثنائية قادمة قريباً"
+      }
+    },
+    "notifications": {
+      "title": "الإشعارات",
+      "banner": "بث الإشعارات غير مفعّل بعد. ستُطبَّق تفضيلاتك عند تفعيل الإشعارات لمنظمتك.",
+      "email": "الإشعارات بالبريد الإلكتروني",
+      "email.hint": "استلام الإشعارات عبر البريد الإلكتروني",
+      "inApp": "الإشعارات داخل التطبيق",
+      "inApp.hint": "استلام الإشعارات داخل التطبيق",
+      "digest": "تواتر الملخص",
+      "digest.hint": "كم مرة يتم استلام ملخص",
+      "digest.disabled": "فعّل الإشعارات بالبريد الإلكتروني لإعداد الملخص",
+      "digest.none": "لا شيء",
+      "digest.daily": "يومي",
+      "digest.weekly": "أسبوعي",
+      "save": "حفظ التفضيلات",
+      "save.success": "تم تحديث تفضيلات الإشعارات"
+    }
+  },
+  "notifications": {
+    "bell": {
+      "title": "الإشعارات",
+      "ariaLabel": "فتح الإشعارات",
+      "empty": "لا توجد إشعارات.",
+      "loading": "جاري التحميل…",
+      "markAllRead": "تعليم الكل كمقروء",
+      "viewAll": "عرض الكل"
+    },
+    "center": {
+      "title": "الإشعارات",
+      "subtitle": "تتبّع تحديثات سير العمل والإسنادات والإشارات وأحداث النظام.",
+      "unread": "غير المقروءة: {count}",
+      "loading": "جاري تحميل الإشعارات...",
+      "empty": "لا توجد إشعارات تطابق عوامل التصفية الحالية.",
+      "confirmClearOldRead": "حذف الإشعارات المقروءة منذ أكثر من 30 يوماً؟",
+      "filters": {
+        "source": {
+          "label": "المصدر",
+          "all": "الكل",
+          "workflow": "سير العمل",
+          "assignment": "الإسناد",
+          "mention": "الإشارة",
+          "system": "النظام"
+        },
+        "status": {
+          "label": "الحالة",
+          "all": "الكل",
+          "unread": "غير المقروءة",
+          "read": "المقروءة"
+        },
+        "range": {
+          "label": "الفترة",
+          "24h": "24 ساعة",
+          "7d": "7 أيام",
+          "30d": "30 يوماً",
+          "all": "كل الفترة"
+        }
+      },
+      "actions": {
+        "markRead": "تعليم كمقروء",
+        "markAllRead": "تعليم الكل كمقروء",
+        "markSelectedRead": "تعليم التحديد كمقروء",
+        "clearOldRead": "تنظيف المقروءة"
+      }
+    },
+    "workflow": {
+      "title": "سير العمل",
+      "description": "الإشعارات المرتبطة بالتحقق وسير العمل."
+    },
+    "assignment": {
+      "title": "الإسناد",
+      "description": "الإشعارات المرتبطة بالمهام والمسؤولين."
+    },
+    "mention": {
+      "title": "الإشارة",
+      "description": "الإشارات المباشرة في التعليقات والنقاشات."
+    },
+    "digest": {
+      "title": "الملخص",
+      "description": "إشعارات ملخصة دورية."
+    }
+  },
+  "core": {
+    "search": {
+      "trigger": "فتح البحث",
+      "placeholder": "بحث في الصفحات والسجلات والإعدادات...",
+      "noResults": "لم يتم العثور على نتائج",
+      "recent": "الأخيرة",
+      "pages": "الصفحات",
+      "sectionActions": "الإجراءات",
+      "actions": {
+        "newChantier": "+ ورش جديد",
+        "newBc": "+ سند طلب جديد",
+        "newDa": "+ طلب شراء جديد",
+        "newEmploye": "+ موظف جديد",
+        "newFactureVente": "+ فاتورة بيع جديدة"
+      },
+      "records": "السجلات",
+      "loading": "جاري البحث...",
+      "minChars": "اكتب حرفين على الأقل للبحث عن السجلات",
+      "clearRecent": "مسح الأخيرة"
+    },
+    "topbar": {
+      "notifications": "الإشعارات",
+      "mySettings": "إعداداتي",
+      "appSettings": "إعدادات التطبيق",
+      "logout": "تسجيل الخروج"
+    },
+    "conversation": {
+      "title": "المحادثات",
+      "toggle": "إظهار/إخفاء لوحة المحادثة",
+      "close": "إغلاق لوحة المحادثة",
+      "agent": "مساعد ERP",
+      "you": "أنت",
+      "roles": {
+        "system": "النظام",
+        "tool": "الأداة"
+      },
+      "mode": {
+        "ask": "سؤال",
+        "agent": "مساعد"
+      },
+      "welcome": "اطرح أسئلتك حول هذا التطبيق. يمكنني مساعدتك في التنقل وشرح البيانات وتشغيل الإجراءات.",
+      "loading": "جاري تحميل المحادثة...",
+      "errorGeneric": "فشل طلب المحادثة.",
+      "placeholder": "اكتب رسالة...",
+      "send": "إرسال",
+      "sendInProgress": "جاري الإرسال...",
+      "pendingReply": "مفهوم. توصيل سير العمل الذكي هو الخطوة التالية.",
+      "actions": {
+        "title": "الإجراءات المقترحة",
+        "empty": "لا يوجد إجراء مقترح في الوقت الحالي.",
+        "approve": "موافقة",
+        "reject": "رفض",
+        "execute": "تنفيذ",
+        "status": {
+          "proposed": "مقترح",
+          "pending_approval": "قيد انتظار الموافقة",
+          "approved": "موافق عليه",
+          "rejected": "مرفوض",
+          "executed": "منفّذ",
+          "failed": "فشل"
+        }
+      }
+    },
+    "navigation": {
+      "teamAndAccess": "الفِرَق والوصول",
+      "empty": "لا يوجد تنقل متاح",
+      "zones": {
+        "work": "فضاء العمل",
+        "administration": "الإدارة",
+        "platform": "المنصة",
+        "inventory": "المخزون",
+        "finance": "المالية"
+      }
+    },
+    "settings": {
+      "title": "الإعدادات",
+      "subtitle": "تكوين خيارات التطبيق",
+      "tabs": {
+        "general": "عام",
+        "notifications": "الإشعارات",
+        "integrations": "التكاملات"
+      },
+      "sections": {
+        "general": {
+          "title": "عام",
+          "description": "تجريبي: ستُعدّ الخيارات هنا باستخدام أوليات nf-*."
+        },
+        "notifications": {
+          "title": "الإشعارات",
+          "description": "تفضيلات الإشعارات عبر البريد الإلكتروني وداخل التطبيق."
+        },
+        "integrations": {
+          "title": "التكاملات",
+          "description": "ربط الخدمات الخارجية."
+        }
+      },
+      "actions": {
+        "restoreDefaults": "استعادة القيم الافتراضية",
+        "save": "حفظ",
+        "restoreToast": "تم استعادة القيم الافتراضية. انقر على حفظ لتطبيقها.",
+        "saveToast": "تم حفظ الإعدادات"
+      }
+    },
+    "wizard": {
+      "actions": {
+        "back": "رجوع",
+        "next": "التالي",
+        "submit": "إنشاء"
+      },
+      "productCreate": {
+        "title": "منتج جديد (المساعد)",
+        "steps": {
+          "basics": "الأساسيات",
+          "pricing": "التسعير",
+          "review": "المراجعة"
+        },
+        "review": {
+          "title": "المراجعة",
+          "fields": {
+            "name": "الاسم",
+            "code": "الرمز",
+            "price": "السعر"
+          }
+        },
+        "validation": {
+          "missingRequired": "الاسم والرمز مطلوبان"
+        },
+        "toast": {
+          "created": "تم إنشاء المنتج \"{name}\"",
+          "error": "فشل إنشاء المنتج"
+        }
+      }
+    }
+  },
+  "ai": {
+    "assistant": {
+      "title": "مساعد الذكاء الاصطناعي",
+      "placeholder": "اطرح عليّ أي سؤال حول المنصة...",
+      "send": "إرسال",
+      "typing": "جاري التفكير...",
+      "clear": "مسح المحادثة",
+      "close": "إغلاق",
+      "minimize": "تصغير",
+      "action": {
+        "approve": "موافقة",
+        "reject": "رفض",
+        "executed": "منفّذ",
+        "pending": "قيد انتظار الموافقة"
+      },
+      "welcome": "مرحباً! أنا مساعدك الذكي. يمكنني مساعدتك في التنقل عبر المنصة، إيجاد البيانات وتنفيذ الإجراءات. ماذا تريد أن تفعل؟",
+      "error": "حدث خطأ. يرجى إعادة المحاولة.",
+      "offline": "مساعد الذكاء الاصطناعي غير متاح حالياً."
+    },
+    "tools": {
+      "search": {
+        "noResults": "لا توجد نتائج لـ « {query} »",
+        "results": "{count, plural, =0 {لا توجد نتائج لـ « {query} »} one {نتيجة واحدة لـ « {query} »} two {نتيجتان لـ « {query} »} few {# نتائج لـ « {query} »} many {# نتيجة لـ « {query} »} other {# نتيجة لـ « {query} »}}"
+      },
+      "navigate": {
+        "navigating": "التنقل نحو {target}...",
+        "notFound": "لم أجد صفحة تطابق « {target} »"
+      },
+      "summarize": {
+        "notFound": "الكيان غير موجود"
+      },
+      "action": {
+        "proposed": "يمكنني {operation} {entityType}. يرجى التحقق والموافقة:",
+        "executed": "تم! {description}",
+        "rejected": "تم إلغاء الإجراء.",
+        "noPermission": "ليس لديك إذن لـ {operation} {entityType}"
+      },
+      "help": {
+        "noAnswer": "لست متأكداً من ذلك. راجع الوثائق أو تواصل مع مديرك."
+      },
+      "dashboard": {
+        "noData": "لا توجد بيانات لوحة قيادة لهذه الفترة"
+      },
+      "list": {
+        "empty": "لا يوجد {entityType} يطابق معاييرك",
+        "found": "{count, plural, =0 {لا يوجد عنصر:} one {تم العثور على {entityType} واحد:} two {تم العثور على {entityType}ين:} few {تم العثور على # {entityType}:} many {تم العثور على # {entityType}:} other {تم العثور على # {entityType}:}}"
+      }
+    }
+  },
+  "enum": {
+    "facture": {
+      "status": {
+        "brouillon": "مسودة",
+        "emise": "صادرة",
+        "partiellement_payee": "مدفوعة جزئياً",
+        "payee": "مدفوعة",
+        "en_litige": "في نزاع",
+        "avoirisee": "صدر بشأنها إشعار دائن",
+        "annulee": "ملغاة"
+      },
+      "type": {
+        "situation": "كشف الأشغال",
+        "avance": "مقدّم",
+        "acompte": "دفعة على الحساب",
+        "decompte_definitif": "كشف نهائي",
+        "diverse": "متنوعة"
+      }
+    },
+    "marche": {
+      "status": {
+        "brouillon": "مسودة",
+        "signe": "موقّع",
+        "en_execution": "قيد التنفيذ",
+        "reception_provisoire": "تسلّم مؤقت",
+        "reception_definitive": "تسلّم نهائي",
+        "cloture": "مغلق",
+        "resilie": "مفسوخ"
+      },
+      "type": {
+        "forfait": "السعر الإجمالي الجزافي",
+        "bpu": "جدول الأسعار الوحدوية (BPU)",
+        "regie": "بالأمانة",
+        "mixte": "مختلط"
+      },
+      "nature": {
+        "public": "عمومي (الدولة / الجماعة)",
+        "prive_grand_compte": "خاص — مؤسسة كبرى",
+        "prive_pme": "خاص — مقاولة صغرى أو متوسطة",
+        "particulier": "خاص"
+      }
+    },
+    "avenant": {
+      "type": {
+        "tvx_supplementaires": "أشغال إضافية",
+        "prolongation_delai": "تمديد الأجل",
+        "mixte": "مختلط",
+        "adaptation_technique": "تكييف تقني",
+        "autre": "آخر"
+      },
+      "status": {
+        "brouillon": "مسودة",
+        "propose": "مقترح",
+        "signe": "موقّع",
+        "rejete": "مرفوض"
+      }
+    },
+    "caution": {
+      "type": {
+        "provisoire": "ضمان مؤقت",
+        "definitive": "ضمان نهائي",
+        "restitution_avance": "ضمان استرداد المقدّم",
+        "retenue_garantie": "ضمان الاقتطاع"
+      },
+      "status": {
+        "emise": "صادرة",
+        "active": "نشطة",
+        "levee": "مرفوعة",
+        "expire": "منتهية الصلاحية",
+        "joue": "مفعَّلة"
+      }
+    },
+    "dgd": {
+      "status": {
+        "brouillon": "مسودة",
+        "soumis_moa": "مقدَّم إلى صاحب المشروع",
+        "notifie": "مبلَّغ به",
+        "paye": "مدفوع",
+        "conteste": "معترَض عليه"
+      }
+    },
+    "ordre_service": {
+      "type": {
+        "commencement": "بدء الأشغال",
+        "arret": "توقف",
+        "reprise": "استئناف",
+        "modification": "تعديل",
+        "notification": "تبليغ"
+      },
+      "status": {
+        "emis": "صادر",
+        "receptionne": "مستلَم",
+        "conteste": "معترَض عليه",
+        "clos": "مقفل"
+      }
+    },
+    "facture_marche": {
+      "status": {
+        "brouillon": "مسودة",
+        "emise": "صادرة",
+        "envoyee_moa": "مرسلة إلى صاحب المشروع",
+        "acceptee": "مقبولة",
+        "payee_partiel": "مدفوعة جزئياً",
+        "payee": "مدفوعة",
+        "contestee": "معترَض عليها"
+      }
+    },
+    "ao": {
+      "status": {
+        "brouillon": "مسودة",
+        "publiee": "منشورة",
+        "cloturee": "مغلقة",
+        "attribuee": "مسندة",
+        "infructueuse": "بدون جدوى",
+        "annulee": "ملغاة"
+      }
+    },
+    "bcc": {
+      "status": {
+        "recu": "مستلَم",
+        "en_cours": "قيد التنفيذ",
+        "partiellement_facture": "مفوتر جزئياً",
+        "facture": "مفوتر",
+        "cloture": "مغلق",
+        "annule": "ملغى"
+      }
+    },
+    "offre": {
+      "status": {
+        "brouillon": "مسودة",
+        "envoyee": "مرسلة",
+        "acceptee": "مقبولة",
+        "refusee": "مرفوضة",
+        "expiree": "منتهية الصلاحية",
+        "annulee": "ملغاة"
+      }
+    },
+    "da": {
+      "status": {
+        "brouillon": "مسودة",
+        "soumise": "مقدمة",
+        "approuvee": "موافق عليها",
+        "rejetee": "مرفوضة",
+        "convertie": "محوَّلة"
+      }
+    },
+    "ct": {
+      "status": {
+        "brouillon": "مسودة",
+        "signe": "موقّع",
+        "en_cours": "قيد التنفيذ",
+        "echu": "منتهٍ",
+        "resilie": "مفسوخ"
+      }
+    },
+    "bc": {
+      "status": {
+        "brouillon": "مسودة",
+        "valide": "مصدّق",
+        "envoye": "مرسَل",
+        "accuse_reception": "تم استلام إشعار التسلم",
+        "partiellement_livre": "مسلَّم جزئياً",
+        "livre": "مسلَّم",
+        "facture": "مفوتر",
+        "cloture": "مغلق",
+        "annule": "ملغى"
+      }
+    },
+    "numbering_doc_type": {
+      "devis": "عرض أسعار",
+      "bon_commande_achat": "سند طلب (شراء)",
+      "facture_vente": "فاتورة الزبون",
+      "bon_livraison": "سند التسليم / الاستلام",
+      "situation_travaux": "كشف الأشغال",
+      "attachement": "مرفق",
+      "contrat_sous_traitance": "عقد المقاولة من الباطن"
+    },
+    "failure_reason": {
+      "bad_password": "كلمة سر خاطئة",
+      "user_not_found": "مستخدم غير معروف",
+      "account_locked": "حساب مقفل",
+      "mfa_failed": "MFA غير صالح",
+      "ip_blocked": "IP محجوب",
+      "expired_token": "Token منتهي الصلاحية"
+    },
+    "outcome": {
+      "success": "نجاح",
+      "failed": "فشل",
+      "timeout": "انتهت المهلة"
+    },
+    "pointage_mode": {
+      "present": "حاضر",
+      "absent": "غائب",
+      "conge": "إجازة",
+      "maladie": "مرض",
+      "formation": "تكوين",
+      "autre": "آخر"
+    },
+    "gravite": {
+      "sans_arret": "دون توقف",
+      "avec_arret": "مع توقف",
+      "grave": "خطير",
+      "mortel": "مميت"
+    },
+    "aptitude": {
+      "apte": "لائق",
+      "inapte": "غير لائق",
+      "avec_restriction": "لائق مع تقييد"
+    },
+    "type_visite": {
+      "embauche": "توظيف",
+      "periodique": "دورية",
+      "reprise": "استئناف"
+    },
+    "perimetre": {
+      "livraison": "تسليم البضائع",
+      "prestation": "تقديم الخدمات",
+      "importation": "استيراد",
+      "exportation": "تصدير",
+      "tous": "جميع الأنواع"
+    },
+    "etablissement_type": {
+      "siege": "المقر",
+      "filiale": "فرع",
+      "agence": "وكالة",
+      "chantier_base": "قاعدة ورش"
+    },
+    "phase_status": {
+      "planifie": "مخطّط",
+      "en_cours": "قيد التنفيذ",
+      "termine": "منتهٍ",
+      "en_retard": "متأخر"
+    },
+    "forme_juridique": {
+      "sarl": "SARL",
+      "sarlau": "SARL بشريك وحيد",
+      "sa": "SA",
+      "sas": "SAS",
+      "eurl": "EURL",
+      "autoentrepreneur": "مقاول ذاتي"
+    },
+    "source": {
+      "bam": "بنك المغرب",
+      "manuel": "يدوي",
+      "api": "API"
+    },
+    "day": {
+      "mon": "الإثنين",
+      "tue": "الثلاثاء",
+      "wed": "الأربعاء",
+      "thu": "الخميس",
+      "fri": "الجمعة",
+      "sat": "السبت",
+      "sun": "الأحد"
+    },
+    "amount_source": {
+      "ht": "HT",
+      "tva": "TVA",
+      "ttc": "TTC",
+      "ras": "RAS",
+      "net_a_payer": "الصافي للدفع",
+      "timbre": "طابع",
+      "charge_patr": "تحملات المشغّل",
+      "salaire_net": "الراتب الصافي",
+      "ir": "IR"
+    },
+    "chantier": {
+      "status": {
+        "prospect": "محتمل",
+        "en_cours": "قيد التنفيذ",
+        "suspendu": "معلق",
+        "termine": "منتهٍ",
+        "receptionne": "مستلَم",
+        "cloture": "مغلق",
+        "annule": "ملغى"
+      },
+      "type": {
+        "batiment": "بناء",
+        "tp": "أشغال عمومية",
+        "vrd": "VRD",
+        "go": "الأشغال الكبرى",
+        "tce": "TCE",
+        "rehabilitation": "تأهيل"
+      }
+    },
+    "attachement": {
+      "status": {
+        "brouillon": "مسودة",
+        "signe_moe": "موقّع من المهندس",
+        "contresigne_moa": "موقّع بالمقابل من صاحب المشروع",
+        "conteste": "معترَض عليه"
+      }
+    },
+    "sous_traitance": {
+      "status": {
+        "brouillon": "مسودة",
+        "signe": "موقّع",
+        "en_cours": "قيد التنفيذ",
+        "termine": "منتهٍ",
+        "resilie": "مفسوخ"
+      }
+    },
+    "ff": {
+      "status": {
+        "brouillon": "مسودة",
+        "validee": "مصدّقة",
+        "partiellement_payee": "مدفوعة جزئياً",
+        "payee": "مدفوعة",
+        "en_litige": "في نزاع",
+        "avoirisee": "صدر بشأنها إشعار دائن",
+        "annulee": "ملغاة"
+      }
+    },
+    "ecriture": {
+      "status": {
+        "brouillon": "مسودة",
+        "validee": "مصدّقة",
+        "cloturee": "مقفلة"
+      },
+      "origine": {
+        "manuelle": "يدوية",
+        "auto_facture_client": "تلقائية · فاتورة الزبون",
+        "auto_facture_fourn": "تلقائية · فاتورة المورد",
+        "auto_reglement": "تلقائية · تسديد",
+        "auto_paie": "تلقائية · أجور",
+        "auto_avoir": "تلقائية · إشعار دائن",
+        "auto_situation": "تلقائية · كشف الأشغال"
+      }
+    },
+    "duer": {
+      "status": {
+        "brouillon": "مسودة",
+        "valide": "مصدّق",
+        "revision": "قيد المراجعة"
+      }
+    },
+    "ppsps": {
+      "status": {
+        "brouillon": "مسودة",
+        "valide": "مصدّق",
+        "revision": "قيد المراجعة",
+        "applicatif": "ساري التطبيق",
+        "archive": "مؤرشف"
+      }
+    },
+    "incident": {
+      "status": {
+        "declare": "مفتوح",
+        "en_investigation": "قيد التحقيق",
+        "cloture": "مقفل"
+      },
+      "type": {
+        "at_travail": "حادث شغل",
+        "at_trajet": "حادث طريق",
+        "presque_accident": "شبه حادث",
+        "dommage_materiel": "ضرر مادي",
+        "mp": "مرض مهني (MP)",
+        "autre": "آخر"
+      }
+    },
+    "inspection": {
+      "status": {
+        "planifiee": "مخطّطة",
+        "en_cours": "قيد التنفيذ",
+        "terminee": "منتهية",
+        "annulee": "ملغاة"
+      }
+    },
+    "formation": {
+      "status": {
+        "planifiee": "مخطّطة",
+        "en_cours": "قيد التنفيذ",
+        "terminee": "منتهية",
+        "annulee": "ملغاة"
+      }
+    },
+    "nc": {
+      "status": {
+        "ouverte": "مفتوحة",
+        "en_cours": "قيد التنفيذ",
+        "verifiee": "متحقق منها",
+        "cloturee": "مقفلة"
+      },
+      "type": {
+        "securite": "السلامة",
+        "qualite": "الجودة",
+        "environnement": "البيئة",
+        "reglementaire": "تنظيمي"
+      }
+    },
+    "epi": {
+      "status": {
+        "ok": "OK",
+        "a_renouveler": "للتجديد",
+        "expire": "منتهية الصلاحية",
+        "perdu": "مفقودة / ناقصة"
+      },
+      "cat": {
+        "tete": "حماية الرأس",
+        "yeux": "حماية العينين",
+        "pieds": "أحذية",
+        "mains": "قفازات",
+        "corps": "بدلة / سترة",
+        "respiration": "كمامة / جهاز تنفس",
+        "audition": "سدّادات / واقي ضد الضجيج",
+        "chute": "حزام مانع للسقوط"
+      }
+    },
+    "journal_event": {
+      "type": {
+        "visite_moa": "زيارة صاحب المشروع",
+        "intemperie": "تقلبات جوية",
+        "livraison": "تسليم",
+        "incident": "حادث",
+        "ordre_service": "أمر بالخدمة",
+        "reunion": "اجتماع",
+        "constat": "محضر معاينة",
+        "autre": "آخر"
+      }
+    },
+    "condition_paiement": {
+      "type": {
+        "immediat": "فوري",
+        "delai_simple": "أجل بسيط",
+        "fin_de_mois": "نهاية الشهر",
+        "echeances_multiples": "آجال متعددة"
+      }
+    },
+    "journal": {
+      "type": {
+        "vente": "بيع",
+        "achat": "شراء",
+        "banque": "بنك",
+        "caisse": "صندوق",
+        "operations_diverses": "عمليات متنوعة (OD)",
+        "nouveaux": "أرصدة افتتاحية"
+      }
+    },
+    "mouvement_tresorerie": {
+      "type": {
+        "reglement_client": "تسديد الزبون",
+        "reglement_fourn": "تسديد المورد",
+        "paiement_paie": "أداء الأجور",
+        "virement_interne": "حوالة داخلية",
+        "frais_bancaires": "مصاريف بنكية",
+        "commissions": "عمولة",
+        "autre_recette": "مدخول متنوع",
+        "autre_depense": "نفقة متنوعة"
+      }
+    },
+    "devis": {
+      "status": {
+        "brouillon": "مسودة",
+        "emis": "صادر",
+        "negociation": "تفاوض",
+        "approuve": "موافق عليه",
+        "perdu": "ضائع",
+        "annule": "ملغى",
+        "expire": "منتهي الصلاحية"
+      }
+    },
+    "metre": {
+      "status": {
+        "brouillon": "مسودة",
+        "termine": "منتهٍ"
+      }
+    },
+    "ao_client": {
+      "status": {
+        "a_etudier": "للدراسة",
+        "en_preparation": "قيد الإعداد",
+        "soumis": "مقدَّم",
+        "attribue": "مُسنَد",
+        "perdu": "ضائع",
+        "infructueux": "بدون جدوى",
+        "annule": "ملغى"
+      },
+      "type": {
+        "public": "عمومي",
+        "prive": "خاص"
+      }
+    },
+    "moa_type": {
+      "etat": "الدولة",
+      "ep": "مؤسسة عمومية",
+      "collectivite": "جماعة ترابية",
+      "prive": "خاص"
+    },
+    "document_chantier": {
+      "type": {
+        "marche": "عقد",
+        "avenant": "ملحق",
+        "pv_reception": "محضر تسلّم",
+        "plan": "تصميم",
+        "photo": "صورة",
+        "bc": "سند طلب",
+        "facture": "فاتورة",
+        "attestation_assurance": "شهادة تأمين",
+        "caution_bancaire": "ضمان بنكي",
+        "ppsps": "PPSPS",
+        "plan_prevention": "خطة الوقاية",
+        "note_calcul": "مذكرة حساب",
+        "autre": "آخر"
+      }
+    },
+    "approval_entity_type": {
+      "da": "طلب شراء",
+      "ao": "طلب عروض (إسناد)",
+      "bc": "سند طلب",
+      "ff": "فاتورة المورد",
+      "sit": "كشف الأشغال",
+      "conge": "طلب إجازة",
+      "paie": "كشف الراتب (تصديق)",
+      "vir": "حوالة داخلية",
+      "avn": "ملحق العقد",
+      "os": "أمر بالخدمة",
+      "facture_client": "فاتورة الزبون",
+      "note_frais": "بيان المصاريف",
+      "contrat_st": "عقد المقاولة من الباطن"
+    },
+    "avoir": {
+      "status": {
+        "brouillon": "مسودة",
+        "emis": "صادر",
+        "impute": "محسوب",
+        "rembourse": "مسترجع",
+        "annule": "ملغى"
+      }
+    },
+    "situation": {
+      "status": {
+        "brouillon": "مسودة",
+        "soumise": "مقدَّمة",
+        "validee_moa": "مصدّقة من صاحب المشروع",
+        "facturee": "مفوترة",
+        "payee": "مدفوعة",
+        "rejetee": "مرفوضة"
+      }
+    }
+  },
+  "i18n": {
+    "hijri": {
+      "toggle": {
+        "label": "عرض التواريخ الهجرية بالتوازي",
+        "tooltip": "يعرض التاريخ الهجري بجانب التاريخ الميلادي"
+      }
+    },
+    "numerals": {
+      "toggle": {
+        "label": "الأرقام العربية",
+        "tooltip": "عرض الأرقام بالأرقام العربية (٠-٩) بدلاً من الأرقام الغربية (0-9)"
+      }
+    }
+  }
+}

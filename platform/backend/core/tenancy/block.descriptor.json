@@ -1,0 +1,16 @@
+{
+  "id": "tenancy",
+  "name": "Tenancy",
+  "description": "Multi-tenant data isolation",
+  "type": "core",
+  "layer": "core",
+  "provides": {
+    "backend": {
+      "gradle": ":platform:core:tenancy",
+      "packages": ["ma.nafura.core.tenancy"]
+    }
+  },
+  "requires": { "core": ["identity", "scope"] },
+  "conditionalOn": { "profile": "multi-tenant" },
+  "manifest": { "key": "tenancy" }
+}

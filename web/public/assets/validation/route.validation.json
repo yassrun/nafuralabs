@@ -1,0 +1,26 @@
+{
+  "entity": "Route",
+  "fields": {
+    "routeCode": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "name": {
+      "maxLength": 120
+    },
+    "distance": {
+      "maxLength": 120
+    },
+    "transportMode": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

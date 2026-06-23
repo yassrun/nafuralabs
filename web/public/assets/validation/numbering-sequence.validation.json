@@ -1,0 +1,29 @@
+{
+  "entity": "NumberingSequence",
+  "fields": {
+    "code": {
+      "required": true,
+      "maxLength": 50,
+      "unique": true
+    },
+    "name": {
+      "required": true,
+      "maxLength": 100
+    },
+    "prefix": {
+      "maxLength": 50
+    },
+    "currentNumber": {
+      "required": true,
+      "min": 0
+    },
+    "incrementBy": {
+      "required": true,
+      "min": 1
+    },
+    "padLength": {
+      "required": true,
+      "min": 0
+    }
+  }
+}

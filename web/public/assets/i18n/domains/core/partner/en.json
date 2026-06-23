@@ -1,0 +1,50 @@
+{
+  "partner": {
+    "navigation": {
+      "title": "Partner",
+      "description": "Partner Domain",
+      "partners": "Partners",
+      "partnerAddresses": "Partner Addresses",
+      "partnerBankAccounts": "Partner Bank Accounts",
+      "partnerCategories": "Partner Categories",
+      "contacts": "Contacts"
+    }
+  },
+  "common": {
+    "subsections": {
+      "operations": "Operations",
+      "configuration": "Configuration"
+    }
+  },
+  "directory": {
+    "fields": {
+      "code": "Code",
+      "name": "Name",
+      "taxId": "Tax Id",
+      "email": "Email",
+      "phone": "Phone",
+      "description": "Description",
+      "address": "Address Id",
+      "paymentTerm": "Payment Term Id",
+      "roles": "Roles",
+      "partnerId": "Partner Id",
+      "addressType": "Address Type",
+      "addressId": "Address Id",
+      "isPrimary": "Is Primary",
+      "isActive": "Is Active",
+      "bankId": "Bank Id",
+      "accountNumber": "Account Number",
+      "iban": "Iban",
+      "accountName": "Account Name",
+      "currencyId": "Currency Id",
+      "mobile": "Mobile"
+    },
+    "sections": {
+      "general": "General",
+      "contact": "Contact",
+      "legal": "Legal",
+      "financial": "Financial",
+      "status": "Status"
+    }
+  }
+}

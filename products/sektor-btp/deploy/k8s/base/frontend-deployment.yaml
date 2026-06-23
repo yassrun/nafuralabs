@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sektor-btp-web
+  spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sektor-btp-web
+  template:
+    metadata:
+      labels:
+        app: sektor-btp-web
+    spec:
+      containers:
+        - name: sektor-btp-web
+          image: sektor-btp-web:staging
+          ports:
+            - containerPort: 80

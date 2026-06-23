@@ -1,0 +1,20 @@
+{
+  "entity": "AdvanceShipNotice",
+  "fields": {
+    "asnNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "trackingNumber": {
+      "maxLength": 60
+    },
+    "totalItems": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

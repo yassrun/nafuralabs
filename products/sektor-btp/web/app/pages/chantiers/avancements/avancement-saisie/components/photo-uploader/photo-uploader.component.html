@@ -1,0 +1,27 @@
+<div class="photo-uploader">
+  <label class="photo-uploader__trigger">
+    <input
+      type="file"
+      accept="image/*"
+      capture="environment"
+      multiple
+      (change)="onFilesSelected($event)" />
+    <span>{{ 'chantiers.avancement.fields.addPhoto' | translate }}</span>
+  </label>
+
+  @if (photos().length > 0) {
+    <div class="photo-uploader__grid">
+      @for (photo of photos(); track photo.id) {
+        <figure>
+          <img [src]="photo.url" [alt]="photo.name" />
+          <figcaption>
+            <span>{{ photo.name }}</span>
+            <nf-button variant="danger" (clicked)="removePhoto(photo.id)">
+              {{ 'chantiers.avancement.lot.remove' | translate }}
+            </nf-button>
+          </figcaption>
+        </figure>
+      }
+    </div>
+  }
+</div>

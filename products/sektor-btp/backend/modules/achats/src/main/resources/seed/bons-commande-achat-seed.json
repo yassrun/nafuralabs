@@ -1,0 +1,52 @@
+{
+  "bonsCommande": [
+    {
+      "numero": "BC-2026-00001",
+      "fournisseurId": "f001",
+      "fournisseurName": "Sonasid",
+      "chantierId": "ch-001",
+      "chantierCode": "CH-2025-001",
+      "chantierName": "Résidence Yasmine — Casa",
+      "daId": "da001",
+      "daNumero": "DA-2026-0001",
+      "aoId": "ao001",
+      "aoNumero": "AO-2026-0001",
+      "rubrique": "MATERIAUX",
+      "dateCreation": "2026-01-15",
+      "dateLivraisonPrevue": "2026-02-01",
+      "conditionsPaiement": "30j fin de mois",
+      "modeReglement": "VIREMENT",
+      "tvaTaux": "20",
+      "status": "LIVRE",
+      "validateurId": "emp005",
+      "validateurName": "M. Berrada",
+      "validationDate": "2026-01-16",
+      "totalLivreHt": "285000",
+      "totalFactureHt": "285000",
+      "lignes": [
+        {
+          "articleId": "art021",
+          "articleCode": "ART-021",
+          "articleName": "Rond à béton T12",
+          "quantite": "10",
+          "quantiteLivree": "10",
+          "quantiteFacturee": "10",
+          "uomCode": "T",
+          "prixUnitaireHt": "14200",
+          "totalHt": "142000"
+        },
+        {
+          "articleId": "art022",
+          "articleCode": "ART-022",
+          "articleName": "Rond à béton T16",
+          "quantite": "10",
+          "quantiteLivree": "10",
+          "quantiteFacturee": "10",
+          "uomCode": "T",
+          "prixUnitaireHt": "14300",
+          "totalHt": "143000"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "entity": "Enrollment",
+  "fields": {
+    "enrollmentNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "courseName": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

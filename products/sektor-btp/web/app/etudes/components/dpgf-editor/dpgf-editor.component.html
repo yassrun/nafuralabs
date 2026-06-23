@@ -1,0 +1,203 @@
+<div class="dpgf" [class.dpgf--readonly]="readonly">
+  <div class="dpgf__toolbar">
+    <nf-button type="button" class="dpgf__btn" [disabled]="readonly" (clicked)="addChapitre()" variant="secondary">
+      + Chapitre
+    </nf-button>
+    <nf-button type="button" class="dpgf__btn dpgf__btn--ghost" [disabled]="readonly" (clicked)="addOuvrage()" variant="ghost">
+      + Ouvrage
+    </nf-button>
+    <nf-button type="button" class="dpgf__btn dpgf__btn--ghost" [disabled]="readonly" (clicked)="addTexte()" variant="ghost">
+      + Texte
+    </nf-button>
+    <span class="dpgf__hint">DPGF — Décomposition prix global et forfaitaire</span>
+  </div>
+
+  <div class="dpgf__table-wrap">
+    <table class="dpgf__table">
+      <colgroup>
+        <col />
+        <col />
+        <col />
+        <col />
+        <col />
+        <col />
+        <col />
+        <col />
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Désignation</th>
+          <th>Ouvrage (lookup)</th>
+          <th>Unité</th>
+          <th class="dpgf__num">Qté</th>
+          <th class="dpgf__num">PU HT</th>
+          <th class="dpgf__num">Total HT</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (displayLines().length === 0) {
+          <tr>
+            <td colspan="8" class="dpgf__empty">
+              Vide — démarrez par ajouter un chapitre puis des ouvrages dedans.
+            </td>
+          </tr>
+        }
+        @for (line of displayLines(); track trackById($index, line)) {
+          @if (line.type === 'CHAPITRE') {
+            <tr class="dpgf__row dpgf__row--chapitre">
+              <td>
+                <input
+                  type="text"
+                  class="dpgf__input dpgf__input--bold"
+                  [disabled]="readonly"
+                  [ngModel]="line.code"
+                  (ngModelChange)="patchLine(line.id, { code: $event })"
+                  [ngModelOptions]="{ standalone: true }" />
+              </td>
+              <td colspan="2">
+                <input
+                  type="text"
+                  class="dpgf__input dpgf__input--bold"
+                  [disabled]="readonly"
+                  [ngModel]="line.designation"
+                  (ngModelChange)="patchLine(line.id, { designation: $event })"
+                  [ngModelOptions]="{ standalone: true }" />
+              </td>
+              <td colspan="3" class="dpgf__num dpgf__chap-total">
+                {{ chapitreTotal(line.id) | number: '1.2-2' }} MAD
+              </td>
+              <td>
+                <nf-button
+                  type="button"
+                  class="dpgf__btn-icon"
+                  [disabled]="readonly"
+                  (clicked)="addOuvrage(line.id)"
+                  aria-label="Ajouter ouvrage au chapitre" variant="secondary">
+                  +
+                </nf-button>
+              </td>
+              <td>
+                <nf-button
+                  type="button"
+                  class="dpgf__btn-icon"
+                  [disabled]="readonly"
+                  (clicked)="removeLine(line.id)"
+                  aria-label="Supprimer le chapitre" variant="secondary">
+                  ×
+                </nf-button>
+              </td>
+            </tr>
+          } @else if (line.type === 'OUVRAGE') {
+            <tr class="dpgf__row dpgf__row--ouvrage" [class.dpgf__row--child]="isInsideChapitre(line)">
+              <td>
+                <input
+                  type="text"
+                  class="dpgf__input"
+                  [disabled]="readonly"
+                  [ngModel]="line.code"
+                  (ngModelChange)="patchLine(line.id, { code: $event })"
+                  [ngModelOptions]="{ standalone: true }" />
+              </td>
+              <td>
+                <input
+                  type="text"
+                  class="dpgf__input"
+                  [disabled]="readonly"
+                  [ngModel]="line.designation"
+                  (ngModelChange)="patchLine(line.id, { designation: $event })"
+                  [ngModelOptions]="{ standalone: true }" />
+              </td>
+              <td>
+                <select
+                  class="dpgf__input"
+                  [disabled]="readonly"
+                  [ngModel]="line.ouvrageId"
+                  (ngModelChange)="onOuvrageSelect(line.id, $event)"
+                  [ngModelOptions]="{ standalone: true }">
+                  <option [ngValue]="undefined">— libre —</option>
+                  @for (o of ouvrages(); track o.id) {
+                    <option [value]="o.id">{{ o.code }} — {{ o.designation }}</option>
+                  }
+                </select>
+              </td>
+              <td>
+                <input
+                  type="text"
+                  class="dpgf__input dpgf__input--small"
+                  [disabled]="readonly"
+                  [ngModel]="line.unite"
+                  (ngModelChange)="patchLine(line.id, { unite: $event })"
+                  [ngModelOptions]="{ standalone: true }" />
+              </td>
+              <td>
+                <input
+                  type="number"
+                  step="0.01"
+                  class="dpgf__input dpgf__input--num"
+                  [disabled]="readonly"
+                  [ngModel]="line.quantite"
+                  (ngModelChange)="patchLine(line.id, { quantite: +$event })"
+                  [ngModelOptions]="{ standalone: true }" />
+              </td>
+              <td>
+                <input
+                  type="number"
+                  step="0.01"
+                  class="dpgf__input dpgf__input--num"
+                  [disabled]="readonly"
+                  [ngModel]="line.prixUnitaireHt"
+                  (ngModelChange)="patchLine(line.id, { prixUnitaireHt: +$event })"
+                  [ngModelOptions]="{ standalone: true }" />
+              </td>
+              <td class="dpgf__num dpgf__total">
+                {{ line.totalHt | number: '1.2-2' }}
+              </td>
+              <td>
+                <nf-button
+                  type="button"
+                  class="dpgf__btn-icon"
+                  [disabled]="readonly"
+                  (clicked)="removeLine(line.id)"
+                  aria-label="Supprimer la ligne" variant="secondary">
+                  ×
+                </nf-button>
+              </td>
+            </tr>
+          } @else {
+            <tr class="dpgf__row dpgf__row--texte" [class.dpgf__row--child]="isInsideChapitre(line)">
+              <td></td>
+              <td colspan="6">
+                <input
+                  type="text"
+                  class="dpgf__input dpgf__input--italic"
+                  [disabled]="readonly"
+                  [ngModel]="line.designation"
+                  (ngModelChange)="patchLine(line.id, { designation: $event })"
+                  [ngModelOptions]="{ standalone: true }" />
+              </td>
+              <td>
+                <nf-button
+                  type="button"
+                  class="dpgf__btn-icon"
+                  [disabled]="readonly"
+                  (clicked)="removeLine(line.id)"
+                  aria-label="Supprimer la note" variant="secondary">
+                  ×
+                </nf-button>
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="6" class="dpgf__total-label">Total HT (avant remise globale)</td>
+          <td class="dpgf__num dpgf__total">{{ totalHt() | number: '1.2-2' }} MAD</td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>

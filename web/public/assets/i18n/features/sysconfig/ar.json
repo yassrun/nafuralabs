@@ -1,0 +1,54 @@
+{
+  "sysconfig": {
+    "fields": {
+      "code": "الرمز",
+      "name": "الاسم",
+      "timeZone": "معرّف المنطقة الزمنية",
+      "prefix": "البادئة",
+      "currentNumber": "الرقم الحالي",
+      "incrementBy": "زيادة بمقدار",
+      "padLength": "طول الحشو",
+      "codeList": "معرّف قائمة الرموز",
+      "sortOrder": "ترتيب الفرز",
+      "color": "اللون"
+    },
+    "navigation": {
+      "calendars": "التقاويم",
+      "codeLists": "قوائم الرموز",
+      "numberingSequences": "تسلسلات الترقيم",
+      "referenceValues": "القيم المرجعية",
+      "tags": "الوسوم"
+    },
+    "calendar": {
+      "title": "التقاويم",
+      "detailTitle": "تفاصيل التقويم",
+      "newTitle": "تقويم جديد"
+    },
+    "codeList": {
+      "title": "قوائم الرموز",
+      "detailTitle": "تفاصيل قائمة الرموز",
+      "newTitle": "قائمة رموز جديدة"
+    },
+    "numberingSequence": {
+      "title": "تسلسلات الترقيم",
+      "detailTitle": "تفاصيل تسلسل الترقيم",
+      "newTitle": "تسلسل ترقيم جديد"
+    },
+    "referenceValue": {
+      "title": "القيم المرجعية",
+      "detailTitle": "تفاصيل القيمة المرجعية",
+      "newTitle": "قيمة مرجعية جديدة"
+    },
+    "tag": {
+      "title": "الوسوم",
+      "detailTitle": "تفاصيل الوسم",
+      "newTitle": "وسم جديد"
+    }
+  },
+  "common": {
+    "fields": {
+      "description": "الوصف",
+      "isActive": "نشط"
+    }
+  }
+}

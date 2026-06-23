@@ -1,0 +1,23 @@
+{
+  "entity": "LeaveAdjustment",
+  "fields": {
+    "adjustmentNumber": {
+      "required": true,
+      "maxLength": 60,
+      "min": 0
+    },
+    "adjustmentDays": {
+      "min": 0
+    },
+    "reason": {
+      "maxLength": 120
+    },
+    "adjustedBy": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

@@ -1,0 +1,30 @@
+/**
+ * Nafura Platform - Design System
+ *
+ * Entry point for all platform-level styles.
+ * Import this in your main styles.scss or product theme.
+ *
+ * Hierarchy:
+ * 1. Platform (this file) - Base tokens, reset, utilities
+ * 2. Product - Brand overrides (Doxura, Agora)
+ * 3. Module - Domain-specific tokens (optional)
+ *
+ * Usage:
+ * @use 'app/core/styles' as nf;
+ */
+
+// Base Design Tokens
+@forward 'colors';
+@forward 'typography';
+@forward 'spacing';
+
+// Component Tokens
+@forward 'components';
+@forward 'layout';
+
+// Page Layouts (generic then listing)
+@forward 'page';
+@forward 'listing-page';
+
+// CSS Reset
+@forward 'reset';

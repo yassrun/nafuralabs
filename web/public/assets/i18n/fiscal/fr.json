@@ -1,0 +1,50 @@
+{
+  "fiscal": {
+    "navigation": {
+      "fiscalPeriods": "Fiscal Periods",
+      "fiscalYears": "Fiscal Years",
+      "taxCodes": "Tax Codes"
+    },
+    "fiscalPeriod": {
+      "title": "Fiscal Periods",
+      "detailTitle": "Fiscal Period Details",
+      "newTitle": "New Fiscal Period",
+      "fields": {
+        "fiscalYearId": "fiscal Year Id",
+        "code": "code",
+        "name": "name",
+        "startDate": "start Date",
+        "endDate": "end Date",
+        "status": "status"
+      },
+      "sections": {}
+    },
+    "fiscalYear": {
+      "title": "Fiscal Years",
+      "detailTitle": "Fiscal Year Details",
+      "newTitle": "New Fiscal Year",
+      "fields": {
+        "code": "code",
+        "name": "name",
+        "startDate": "start Date",
+        "endDate": "end Date",
+        "status": "status"
+      },
+      "sections": {}
+    },
+    "taxCode": {
+      "title": "Tax Codes",
+      "detailTitle": "Tax Code Details",
+      "newTitle": "New Tax Code",
+      "fields": {
+        "code": "code",
+        "description": "description",
+        "percentage": "percentage",
+        "isActive": "is Active",
+        "name": "name",
+        "rate": "rate"
+      },
+      "sections": {}
+    }
+  }
+}

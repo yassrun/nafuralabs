@@ -1,0 +1,89 @@
+{
+  "financial": {
+    "navigation": {
+      "currencies": "العملات",
+      "exchangeRates": "أسعار الصرف",
+      "incoterms": "شروط التسليم",
+      "paymentTerms": "شروط الدفع",
+      "fiscalPeriods": "الفترات المحاسبية",
+      "fiscalYears": "السنوات المحاسبية"
+    },
+    "currency": {
+      "title": "العملات",
+      "detailTitle": "تفاصيل العملة",
+      "newTitle": "عملة جديدة",
+      "fields": {
+        "code": "الرمز",
+        "name": "الاسم",
+        "symbol": "الرمز",
+        "decimalPlaces": "المنازل العشرية",
+        "isActive": "نشط"
+      },
+      "sections": {}
+    },
+    "exchangeRate": {
+      "title": "أسعار الصرف",
+      "detailTitle": "تفاصيل سعر الصرف",
+      "newTitle": "سعر صرف جديد",
+      "fields": {
+        "fromCurrencyId": "معرّف عملة المصدر",
+        "toCurrencyId": "معرّف عملة الوجهة",
+        "rate": "النسبة",
+        "effectiveDate": "تاريخ السريان"
+      },
+      "sections": {}
+    },
+    "incoterm": {
+      "title": "شروط التسليم",
+      "detailTitle": "تفاصيل شرط التسليم",
+      "newTitle": "شرط تسليم جديد",
+      "fields": {
+        "code": "الرمز",
+        "name": "الاسم",
+        "description": "الوصف",
+        "isActive": "نشط"
+      },
+      "sections": {}
+    },
+    "paymentTerm": {
+      "title": "شروط الدفع",
+      "detailTitle": "تفاصيل شرط الدفع",
+      "newTitle": "شرط دفع جديد",
+      "fields": {
+        "code": "الرمز",
+        "name": "الاسم",
+        "days": "أيام",
+        "description": "الوصف",
+        "isActive": "نشط"
+      },
+      "sections": {}
+    },
+    "fiscalPeriod": {
+      "title": "الفترات المحاسبية",
+      "detailTitle": "تفاصيل الفترة المحاسبية",
+      "newTitle": "فترة محاسبية جديدة",
+      "fields": {
+        "code": "الرمز",
+        "fiscalYearId": "معرّف السنة المحاسبية",
+        "name": "الاسم",
+        "startDate": "تاريخ البدء",
+        "endDate": "تاريخ الانتهاء",
+        "status": "الحالة"
+      },
+      "sections": {}
+    },
+    "fiscalYear": {
+      "title": "السنوات المحاسبية",
+      "detailTitle": "تفاصيل السنة المحاسبية",
+      "newTitle": "سنة محاسبية جديدة",
+      "fields": {
+        "code": "الرمز",
+        "name": "الاسم",
+        "startDate": "تاريخ البدء",
+        "endDate": "تاريخ الانتهاء",
+        "status": "الحالة"
+      },
+      "sections": {}
+    }
+  }
+}

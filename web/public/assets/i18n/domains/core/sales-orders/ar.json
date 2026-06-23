@@ -1,0 +1,69 @@
+{
+  "sales-orders": {
+    "navigation": {
+      "title": "أوامر البيع",
+      "description": "مجال أوامر البيع",
+      "salesOrders": "أوامر البيع",
+      "salesOrderLines": "سطور أمر البيع",
+      "quotes": "عروض الأسعار",
+      "quoteLines": "سطور عرض السعر",
+      "priceLists": "قوائم الأسعار",
+      "discountStructures": "هياكل التخفيضات"
+    }
+  },
+  "common": {
+    "subsections": {
+      "operations": "العمليات",
+      "configuration": "الإعدادات"
+    }
+  },
+  "sales": {
+    "fields": {
+      "orderNumber": "رقم الأمر",
+      "customer": "معرّف الزبون",
+      "orderDate": "تاريخ الأمر",
+      "requestedDeliveryDate": "تاريخ التسليم المطلوب",
+      "warehouse": "معرّف المستودع",
+      "currency": "معرّف العملة",
+      "priceList": "معرّف قائمة الأسعار",
+      "subtotalAmount": "المبلغ الفرعي",
+      "discountAmount": "مبلغ التخفيض",
+      "taxAmount": "مبلغ الضريبة",
+      "totalAmount": "المبلغ الإجمالي",
+      "status": "الحالة",
+      "quote": "معرّف عرض السعر",
+      "notes": "ملاحظات",
+      "salesOrder": "معرّف أمر البيع",
+      "lineNumber": "رقم السطر",
+      "item": "معرّف الصنف",
+      "description": "الوصف",
+      "quantity": "الكمية",
+      "unitPrice": "سعر الوحدة",
+      "discountPercent": "نسبة التخفيض",
+      "taxCode": "معرّف رمز الضريبة",
+      "lineTotal": "إجمالي السطر",
+      "deliveredQuantity": "الكمية المسلَّمة",
+      "invoicedQuantity": "الكمية المفوترة",
+      "quoteNumber": "رقم عرض السعر",
+      "quoteDate": "تاريخ عرض السعر",
+      "validUntil": "صالح حتى",
+      "code": "الرمز",
+      "name": "الاسم",
+      "effectiveFrom": "ساري من",
+      "effectiveTo": "ساري إلى",
+      "discountType": "نوع التخفيض",
+      "value": "القيمة",
+      "minQuantity": "الكمية الدنيا",
+      "maxQuantity": "الكمية القصوى",
+      "validFrom": "صالح من",
+      "validTo": "صالح إلى"
+    },
+    "sections": {
+      "general": "عام",
+      "amounts": "المبالغ",
+      "workflow": "سير العمل",
+      "fulfillment": "التنفيذ",
+      "notes": "ملاحظات"
+    }
+  }
+}

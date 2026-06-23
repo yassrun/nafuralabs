@@ -1,0 +1,82 @@
+{
+  "purchasing": {
+    "navigation": {
+      "title": "المشتريات",
+      "description": "مجال المشتريات",
+      "purchaseOrders": "أوامر الشراء",
+      "purchaseOrderLines": "سطور أمر الشراء",
+      "purchaseRequisitions": "طلبات الشراء",
+      "purchaseRequisitionLines": "سطور طلب الشراء",
+      "goodsReceipts": "سندات استلام البضاعة",
+      "goodsReceiptLines": "سطور سند الاستلام",
+      "vendorCategories": "فئات الموردين",
+      "vendorScorecards": "بطاقات أداء الموردين"
+    }
+  },
+  "common": {
+    "subsections": {
+      "operations": "العمليات",
+      "configuration": "الإعدادات"
+    }
+  },
+  "procurement": {
+    "fields": {
+      "poNumber": "رقم أمر الشراء",
+      "vendor": "معرّف المورد",
+      "orderDate": "تاريخ الأمر",
+      "status": "الحالة",
+      "purchaseOrderId": "معرّف أمر الشراء",
+      "itemId": "معرّف الصنف",
+      "description": "الوصف",
+      "quantity": "الكمية",
+      "unitPrice": "سعر الوحدة",
+      "totalAmount": "المبلغ الإجمالي",
+      "deliveryDate": "تاريخ التسليم",
+      "warehouseId": "معرّف المستودع",
+      "reqNumber": "رقم طلب الشراء",
+      "requester": "معرّف الطالب",
+      "department": "معرّف القسم",
+      "needByDate": "تاريخ الحاجة إليه",
+      "costCenter": "معرّف مركز التكلفة",
+      "currency": "معرّف العملة",
+      "totalEstimate": "الإجمالي التقديري",
+      "justification": "التبرير",
+      "purchaseRequisition": "معرّف طلب الشراء",
+      "lineNumber": "رقم السطر",
+      "item": "معرّف الصنف",
+      "estimatedUnitPrice": "سعر الوحدة التقديري",
+      "preferredVendor": "معرّف المورد المفضل",
+      "lineTotal": "إجمالي السطر",
+      "receiptNumber": "رقم سند الاستلام",
+      "vendorId": "معرّف المورد",
+      "receiptDate": "تاريخ الاستلام",
+      "receivedBy": "المستلِم",
+      "totalItems": "إجمالي الأصناف",
+      "notes": "ملاحظات",
+      "goodsReceiptId": "معرّف سند الاستلام",
+      "orderedQty": "الكمية المطلوبة",
+      "receivedQty": "الكمية المستلمة",
+      "acceptedQty": "الكمية المقبولة",
+      "rejectedQty": "الكمية المرفوضة",
+      "binLocation": "موقع التخزين",
+      "code": "الرمز",
+      "name": "الاسم",
+      "qualificationRequired": "التأهيل المطلوب",
+      "paymentTermDefault": "شرط الدفع الافتراضي",
+      "scorecardNumber": "رقم بطاقة الأداء",
+      "periodStart": "بداية الفترة",
+      "periodEnd": "نهاية الفترة",
+      "onTimeDelivery": "التسليم في الموعد",
+      "qualityScore": "نقاط الجودة",
+      "priceCompetitiveness": "تنافسية السعر",
+      "responsiveness": "سرعة الاستجابة",
+      "overallScore": "النقاط الإجمالية"
+    },
+    "sections": {
+      "general": "عام",
+      "notes": "ملاحظات",
+      "amounts": "المبالغ",
+      "workflow": "سير العمل"
+    }
+  }
+}

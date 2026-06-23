@@ -1,0 +1,1865 @@
+{
+  "common": {
+    "subsections": {
+      "operations": "Operations",
+      "configuration": "Configuration"
+    },
+    "sections": {
+      "general": "General",
+      "status": "Status"
+    },
+    "fields": {
+      "isActive": "Active",
+      "description": "Description",
+      "notes": "Notes",
+      "createdAt": "Created At",
+      "updatedAt": "Updated At"
+    },
+    "actions": {
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "save": "Save",
+      "edit": "Edit",
+      "moveUp": "Move up",
+      "moveDown": "Move down"
+    },
+    "none": "None",
+    "errors": {
+      "deleteFailed": "Failed to delete.",
+      "updateFailed": "Update failed.",
+      "saveFailed": "Failed to save."
+    },
+    "loading": "Loading...",
+    "validation": {
+      "required": "This field is required."
+    },
+    "all": "All",
+    "search": "Search"
+  },
+  "Search": "Search",
+  "Filters": "Filters",
+  "Filter": "Filter",
+  "Remove filter": "Remove filter",
+  "Sort": "Sort",
+  "Columns": "Columns",
+  "Clear": "Clear",
+  "Apply": "Apply",
+  "Reset": "Reset",
+  "Cancel": "Cancel",
+  "Confirm": "Confirm",
+  "Save": "Save",
+  "Delete": "Delete",
+  "Delete All": "Delete All",
+  "Yes": "Yes",
+  "No": "No",
+  "All": "All",
+  "selected": "selected",
+  "listing": {
+    "action": {
+      "new": "New",
+      "newAria": "Create a new record"
+    }
+  },
+  "Loading": "Loading",
+  "Total": "Total",
+  "form": {
+    "errorSummary": {
+      "title": "Please fix the following errors:"
+    }
+  },
+  "audit": {
+    "timeline": {
+      "title": "Activity",
+      "detailsTab": "Details",
+      "search": "Search activity...",
+      "loading": "Loading...",
+      "loadMore": "Load more",
+      "empty": "No activity recorded for this record.",
+      "filter": {
+        "all": "All",
+        "creates": "Creates",
+        "updates": "Updates",
+        "statusChanges": "Status Changes",
+        "deletes": "Deletes",
+        "publish": "Publish",
+        "approve": "Approve",
+        "reject": "Reject"
+      }
+    },
+    "action": {
+      "create": "created",
+      "update": "updated",
+      "delete": "deleted",
+      "status_change": "changed status",
+      "publish": "published",
+      "approve": "approved",
+      "reject": "rejected",
+      "assign": "assigned to",
+      "comment": "commented",
+      "attach": "attached"
+    }
+  },
+  "print": {
+    "dialog": {
+      "title": "Print Document",
+      "template": "Template",
+      "preview": "Preview",
+      "download": "Download PDF",
+      "email": "Send via Email",
+      "email.disabled": "Email sending coming soon",
+      "noTemplates": "No templates available for this entity type.",
+      "loading": "Generating document..."
+    }
+  },
+  "email": {
+    "send": {
+      "title": "Send Email",
+      "to": "To",
+      "cc": "CC",
+      "addCc": "Add CC",
+      "hideCc": "Hide CC",
+      "subject": "Subject",
+      "template": "Template",
+      "bodyPreview": "Body preview",
+      "selectTemplate": "Select a template to preview the body.",
+      "attachPdf": "Attach PDF",
+      "printTemplate": "Print template",
+      "send": "Send",
+      "toRequired": "At least one recipient is required.",
+      "subjectRequired": "Subject is required.",
+      "templateRequired": "Please select an email template.",
+      "success": "Email sent successfully"
+    }
+  },
+  "attachments": {
+    "title": "Attachments",
+    "upload": "Upload Files",
+    "dragDrop": "Drag files here or click to browse",
+    "empty": "No files attached.",
+    "download": "Download",
+    "delete": {
+      "confirm": "Delete this file?",
+      "success": "File deleted"
+    },
+    "error": {
+      "tooLarge": "File exceeds maximum size of {maxSize}",
+      "invalidType": "File type not allowed",
+      "maxFiles": "Maximum of {max} files reached"
+    },
+    "upload.success": "File uploaded",
+    "preview": "Preview"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Cross-domain overview",
+    "navigation": {
+      "title": "Home"
+    },
+    "widgets": {
+      "revenue": "Revenue",
+      "invoices": "Invoices",
+      "overdue": "Overdue",
+      "revenueTrend": "Revenue Trend",
+      "expenseBreakdown": "Expenses by Category",
+      "recentActivity": "Recent Activity",
+      "recentInvoices": "Recent Invoices"
+    },
+    "empty": {
+      "title": "Welcome to Nafura!",
+      "message": "Get started:",
+      "inviteMembers": "Invite team members",
+      "activateDomains": "Activate domains",
+      "configureSettings": "Configure settings"
+    }
+  },
+  "approvals": {
+    "title": "Approvals",
+    "subtitle": "Pending and past approval requests",
+    "navigation": {
+      "title": "Approvals"
+    },
+    "tabs": {
+      "pending": "Pending",
+      "history": "History"
+    },
+    "columns": {
+      "entity": "Entity",
+      "title": "Title",
+      "requestedBy": "Requested By",
+      "requestedAt": "Requested At",
+      "step": "Step",
+      "actions": "Actions",
+      "decision": "Decision",
+      "decisionAt": "Decided At",
+      "comment": "Comment"
+    },
+    "approve": "Approve",
+    "reject": "Reject",
+    "commentRequired": "Comment is required when rejecting.",
+    "comment": "Comment",
+    "commentPlaceholderApprove": "Comment (optional)",
+    "commentPlaceholderReject": "Comment (required)",
+    "emptyTitle": "No pending approvals",
+    "emptyMessage": "You're all caught up!",
+    "historyEmpty": "No approval history yet.",
+    "loading": "Loading...",
+    "approved": "Approved successfully.",
+    "rejected": "Rejected.",
+    "actionFailed": "Action failed.",
+    "time": {
+      "agoSeconds": "{count}s ago",
+      "agoMinutes": "{count}m ago",
+      "agoHours": "{count}h ago",
+      "agoDays": "{count}d ago"
+    }
+  },
+  "workflow": {
+    "submitForApproval": "Submit for Approval",
+    "resubmit": "Resubmit",
+    "approve": "Approve",
+    "reject": "Reject",
+    "banner": {
+      "pending": "Pending Approval",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "action": {
+      "title": "Approval required",
+      "commentPlaceholder": "Comment (optional for Approve, required for Reject)",
+      "rejectCommentRequired": "Comment is required when rejecting."
+    },
+    "submit": {
+      "selectTemplateTitle": "Select workflow template",
+      "selectTemplateHint": "Choose a template to start the approval workflow."
+    },
+    "toast": {
+      "triggered": "Workflow started.",
+      "approved": "Approved successfully.",
+      "rejected": "Rejected."
+    }
+  },
+  "administration": {
+    "navigation": {
+      "title": "Administration",
+      "members": "Members",
+      "roles": "Roles",
+      "domainActivation": "Domain Activation",
+      "audit": "Audit Log",
+      "templates": "Print Templates",
+      "emailTemplates": "Email Templates",
+      "workflows": "Workflows",
+      "subscriptions": "Subscriptions",
+      "scheduledJobs": "Scheduled Jobs",
+      "webhooks": "Webhooks",
+      "apiKeys": "API Keys",
+      "numberingSequences": "Numbering Sequences",
+      "auditLog": "ERP audit log",
+      "societe": "Company identity",
+      "fiscal": "Tax settings",
+      "demo": "Demo dataset",
+      "hub": "Admin home"
+    },
+    "hub": {
+      "title": "Administration center",
+      "subtitle": "Tenant settings, IAM, compliance, and demo data",
+      "intro": "Pick a section below. Detail screens keep their /administration/… URLs (legacy paths preserved).",
+      "appSettings": "Application settings",
+      "descriptions": {
+        "members": "User accounts and invitations",
+        "roles": "Roles and access rights",
+        "domainActivation": "Domains and product activation",
+        "audit": "Platform audit log",
+        "templates": "PDF print templates",
+        "emailTemplates": "Transactional email templates",
+        "workflows": "Approval workflow templates",
+        "scheduledJobs": "Scheduled jobs and monitoring",
+        "webhooks": "Outbound HTTP integrations",
+        "apiKeys": "API keys and programmatic access",
+        "numberingSequences": "Document prefixes and sequences",
+        "subscriptions": "Subscriptions and SaaS capacity",
+        "settings": "General application options",
+        "societe": "Legal identity, tax IDs, RIB, logo",
+        "fiscal": "VAT, withholdings, stamps, exemptions",
+        "auditLog": "ERP business audit trail",
+        "demo": "Reset demo dataset"
+      }
+    },
+    "audit": {
+      "title": "Audit Log",
+      "search": "Search audit log...",
+      "columns": {
+        "date": "Date",
+        "actor": "Actor",
+        "action": "Action",
+        "entityType": "Entity Type",
+        "details": "Details"
+      },
+      "filters": {
+        "search": "Search (actor, details)",
+        "entityType": "Entity Type",
+        "action": "Action",
+        "actor": "Actor",
+        "from": "From",
+        "to": "To"
+      },
+      "export": "Export CSV",
+      "exportSuccess": "{count, plural, =0 {No audit entries exported.} one {1 audit entry exported.} other {# audit entries exported.}}",
+      "exportError": "Failed to export audit log.",
+      "empty": "No audit entries found.",
+      "detail": {
+        "title": "Audit Entry",
+        "viewEntity": "View {entityType}",
+        "payload": "Changes"
+      }
+    },
+    "scheduledJobs": {
+      "title": "Scheduled Jobs",
+      "subtitle": "Monitor and manage background tasks",
+      "columns": {
+        "name": "Job Name",
+        "key": "Key",
+        "schedule": "Schedule",
+        "tenantScoped": "Tenant Scoped",
+        "status": "Status",
+        "lastRun": "Last Run",
+        "enabled": "Enabled"
+      },
+      "actions": {
+        "runNow": "Run Now",
+        "runNowSuccess": "Job triggered successfully"
+      },
+      "detail": {
+        "title": "Job Details",
+        "totalRuns": "Total Runs",
+        "successRate": "Success Rate",
+        "avgDuration": "Avg Duration",
+        "lastRun": "Last Run",
+        "executions": "Execution History",
+        "columns": {
+          "started": "Started",
+          "ended": "Ended",
+          "duration": "Duration",
+          "status": "Status",
+          "tenant": "Tenant",
+          "error": "Error"
+        }
+      }
+    },
+    "webhooks": {
+      "title": "Webhooks",
+      "subtitle": "Configure outgoing event notifications",
+      "loading": "Loading webhooks...",
+      "empty": "No webhooks configured yet.",
+      "saving": "Saving...",
+      "fields": {
+        "name": "Name",
+        "url": "URL",
+        "secret": "Secret",
+        "events": "Events",
+        "active": "Active"
+      },
+      "form": {
+        "name": "Name",
+        "url": "Webhook URL",
+        "secret": "Secret",
+        "generateSecret": "Generate Secret",
+        "events": "Events",
+        "active": "Active"
+      },
+      "actions": {
+        "create": "New Webhook",
+        "edit": "Edit",
+        "test": "Test Webhook",
+        "testSuccess": "Test delivered successfully",
+        "testFailed": "Test delivery failed",
+        "delete": "Delete",
+        "generate": "Generate"
+      },
+      "dialog": {
+        "createTitle": "Create Webhook",
+        "editTitle": "Edit Webhook"
+      },
+      "detail": {
+        "title": "Webhook Details",
+        "back": "Back",
+        "loading": "Loading delivery logs...",
+        "empty": "No deliveries yet.",
+        "payload": "Payload",
+        "response": "Response",
+        "columns": {
+          "event": "Event",
+          "status": "Status",
+          "attempts": "Attempts",
+          "response": "Response",
+          "responseCode": "Response",
+          "timestamp": "Timestamp",
+          "payload": "Payload"
+        }
+      },
+      "columns": {
+        "name": "Name",
+        "url": "URL",
+        "events": "Events",
+        "active": "Active",
+        "lastDelivery": "Last Delivery",
+        "created": "Created",
+        "actions": "Actions"
+      }
+    },
+    "apiKeys": {
+      "title": "API Keys",
+      "subtitle": "Manage API keys for external integrations",
+      "loading": "Loading API keys...",
+      "empty": "No API keys yet.",
+      "creating": "Creating...",
+      "never": "Never",
+      "status": {
+        "active": "Active",
+        "revoked": "Revoked",
+        "expired": "Expired"
+      },
+      "fields": {
+        "name": "Name",
+        "permissions": "Permissions (comma separated)",
+        "expiry": "Expiry",
+        "expiresAt": "Expires at"
+      },
+      "form": {
+        "name": "Key Name",
+        "permissions": "Permissions",
+        "expiry": "Expiration",
+        "expiryNever": "Never",
+        "expiry30d": "30 days",
+        "expiry90d": "90 days",
+        "expiry1y": "1 year",
+        "expiryCustom": "Custom date"
+      },
+      "expiry": {
+        "never": "Never",
+        "30d": "30 days",
+        "90d": "90 days",
+        "1y": "1 year",
+        "custom": "Custom date"
+      },
+      "actions": {
+        "create": "Generate API Key",
+        "revoke": "Revoke",
+        "revokeConfirm": "Are you sure you want to revoke this API key? This cannot be undone."
+      },
+      "dialog": {
+        "createTitle": "Create API Key"
+      },
+      "created": {
+        "title": "API Key Created",
+        "warning": "This key will only be shown once. Copy it now.",
+        "copy": "Copy Key",
+        "copied": "Key copied to clipboard",
+        "done": "Done"
+      },
+      "columns": {
+        "name": "Name",
+        "key": "Key",
+        "permissions": "Permissions",
+        "createdBy": "Created By",
+        "expires": "Expires",
+        "lastUsed": "Last Used",
+        "status": "Status",
+        "actions": "Actions"
+      }
+    },
+    "numberingSequences": {
+      "title": "Numbering Sequences",
+      "subtitle": "Configure automatic document numbering",
+      "loading": "Loading numbering sequences...",
+      "empty": "No sequences configured yet.",
+      "saving": "Saving...",
+      "preview": "Preview",
+      "fields": {
+        "name": "Name",
+        "code": "Code",
+        "prefix": "Prefix",
+        "separator": "Separator",
+        "yearFormat": "Year format",
+        "padLength": "Pad length",
+        "incrementBy": "Increment by",
+        "currentNumber": "Current number",
+        "startingNumber": "Starting number",
+        "resetPolicy": "Reset policy"
+      },
+      "reset": {
+        "never": "Never",
+        "yearly": "Yearly",
+        "monthly": "Monthly"
+      },
+      "resetPolicy": {
+        "NEVER": "Never",
+        "YEARLY": "Yearly",
+        "MONTHLY": "Monthly"
+      },
+      "actions": {
+        "create": "New Sequence",
+        "edit": "Edit",
+        "delete": "Delete"
+      },
+      "dialog": {
+        "createTitle": "Create Numbering Sequence",
+        "editTitle": "Edit Numbering Sequence"
+      },
+      "columns": {
+        "name": "Name",
+        "code": "Code",
+        "prefix": "Prefix",
+        "current": "Current",
+        "preview": "Pattern Preview",
+        "resetPolicy": "Reset Policy",
+        "actions": "Actions"
+      }
+    },
+    "templates": {
+      "title": "Print Templates",
+      "create": "New Template",
+      "clone": "Clone Template",
+      "editor": {
+        "title": "Template Editor",
+        "variables": "Variables",
+        "variablesEmpty": "Select an entity type to load variables.",
+        "settings": "Page Settings",
+        "preview": "Preview",
+        "previewEmpty": "Save the template to see a preview.",
+        "save": "Save Template",
+        "system": "System template (read-only)"
+      },
+      "paperSize": "Paper Size",
+      "orientation": "Orientation",
+      "margins": "Margins",
+      "columns": {
+        "name": "Name",
+        "entityType": "Entity Type",
+        "type": "Type",
+        "paperSize": "Paper Size",
+        "updatedAt": "Updated"
+      },
+      "type": {
+        "system": "System",
+        "custom": "Custom"
+      },
+      "filters": {
+        "search": "Search",
+        "entityType": "Entity Type",
+        "type": "Type"
+      },
+      "fields": {
+        "name": "Name",
+        "code": "Code",
+        "entityType": "Entity Type"
+      },
+      "validation": {
+        "nameRequired": "Name is required",
+        "codeRequired": "Code is required",
+        "entityTypeRequired": "Entity type is required"
+      },
+      "empty": "No print templates found",
+      "emptyMessage": "Create a template to generate PDFs from your data.",
+      "createSuccess": "Template \"{name}\" created.",
+      "cloneSuccess": "Template \"{name}\" created from clone.",
+      "saveSuccess": "Template saved.",
+      "saveError": "Failed to save template.",
+      "loadError": "Template not found.",
+      "delete": {
+        "confirmTitle": "Delete Template",
+        "confirmMessage": "Delete \"{name}\"? This cannot be undone.",
+        "success": "Template deleted.",
+        "inUse": "This template is in use and cannot be deleted."
+      }
+    },
+    "emailTemplates": {
+      "title": "Email Templates",
+      "create": "New Email Template",
+      "editor": {
+        "title": "Email Template Editor",
+        "preview": "Preview",
+        "previewEmpty": "Click Preview to render with sample data.",
+        "save": "Save Template"
+      },
+      "columns": {
+        "name": "Name",
+        "code": "Code",
+        "type": "Type",
+        "entityType": "Entity Type",
+        "updatedAt": "Updated"
+      },
+      "type": {
+        "system": "System",
+        "custom": "Custom"
+      },
+      "filters": {
+        "type": "Type",
+        "entityType": "Entity Type"
+      },
+      "fields": {
+        "name": "Name",
+        "code": "Code",
+        "subject": "Subject",
+        "htmlBody": "HTML Body",
+        "textBody": "Plain Text Body",
+        "entityType": "Entity Type"
+      },
+      "empty": "No email templates found",
+      "emptyMessage": "Create a template for system or entity emails.",
+      "createSuccess": "Email template \"{name}\" created.",
+      "saveSuccess": "Template saved.",
+      "saveError": "Failed to save template.",
+      "loadError": "Template not found.",
+      "previewError": "Failed to load preview.",
+      "delete": {
+        "confirmTitle": "Delete Email Template",
+        "confirmMessage": "Delete \"{name}\"? This cannot be undone.",
+        "success": "Template deleted."
+      }
+    },
+    "workflows": {
+      "title": "Workflow Templates",
+      "create": "New Template",
+      "editorTitle": "Workflow Template",
+      "toggleActive": "Toggle active",
+      "toggleSuccess": "Template \"{name}\" is now {state}.",
+      "addStep": "Add Step",
+      "stepsTitle": "Steps",
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "columns": {
+        "name": "Name",
+        "code": "Code",
+        "entityType": "Entity Type",
+        "steps": "Steps",
+        "status": "Status"
+      },
+      "filters": {
+        "search": "Search",
+        "entityType": "Entity Type",
+        "status": "Status"
+      },
+      "fields": {
+        "name": "Name",
+        "code": "Code",
+        "entityType": "Entity Type",
+        "description": "Description",
+        "active": "Active"
+      },
+      "empty": "No workflow templates",
+      "emptyMessage": "Create a workflow template to define approval chains for your entities.",
+      "createSuccess": "Workflow template created.",
+      "saveSuccess": "Workflow template saved.",
+      "saveError": "Failed to save workflow template.",
+      "loadError": "Workflow template not found.",
+      "delete": {
+        "confirmTitle": "Delete Workflow Template",
+        "confirmMessage": "Delete \"{name}\"? This cannot be undone.",
+        "success": "Workflow template deleted.",
+        "inUse": "This template has active workflow instances and cannot be deleted."
+      },
+      "stepDialog": {
+        "title": "Workflow Step",
+        "stepName": "Step Name",
+        "approverRole": "Approver Role",
+        "timeoutHours": "Timeout (hours)",
+        "escalationRole": "Escalation Role",
+        "condition": "Condition (SpEL, optional)"
+      }
+    },
+    "members": {
+      "sections": {
+        "identity": "Identity",
+        "access": "Access"
+      },
+      "title": "Members",
+      "invite": "Invite Member",
+      "invite.success": "Invitation sent to {email}",
+      "invite.duplicate": "This email has already been invited",
+      "invite.error": "Failed to send invitation",
+      "emptyTitle": "No members found",
+      "empty": "No members found. Invite your first team member.",
+      "fields": {
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "email": "Email",
+        "displayName": "Display Name",
+        "roles": "Roles",
+        "status": "Status",
+        "lastLoginAt": "Last Login",
+        "message": "Message (optional)"
+      },
+      "columns": {
+        "name": "Name",
+        "email": "Email",
+        "role": "Role",
+        "status": "Status",
+        "lastActivity": "Last Activity",
+        "joined": "Joined"
+      },
+      "filters": {
+        "status": "Status",
+        "role": "Role"
+      },
+      "status": {
+        "active": "Active",
+        "invited": "Invited",
+        "suspended": "Suspended"
+      },
+      "actions": {
+        "viewDetail": "View Detail",
+        "deactivate": "Deactivate",
+        "deactivate.success": "Member deactivated",
+        "deactivateSelected": "Deactivate Selected",
+        "deactivateSelected.success": "{count, plural, =0 {No members deactivated.} one {1 member deactivated.} other {# members deactivated.}}",
+        "reactivate": "Reactivate",
+        "reactivate.success": "Member reactivated",
+        "resendInvitation": "Resend Invitation",
+        "resendInvitation.success": "Invitation resent",
+        "remove": "Remove",
+        "remove.success": "Member removed"
+      },
+      "deactivate": {
+        "confirm": {
+          "title": "Deactivate Member",
+          "message": "This will suspend {name}'s access. They can be reactivated later."
+        },
+        "bulkConfirm": {
+          "title": "Deactivate Members",
+          "message": "This will suspend access for {count, plural, one {1 selected member.} other {# selected members.}}"
+        }
+      },
+      "remove": {
+        "confirm": {
+          "title": "Remove Member",
+          "message": "This will permanently remove {name} from this tenant."
+        }
+      },
+      "detail": {
+        "title": "Member Profile",
+        "back": "Back to Members",
+        "joined": "Joined",
+        "lastActivity": "Last activity",
+        "roles": {
+          "title": "Assigned Roles",
+          "edit": "Edit Roles",
+          "save": "Save Roles",
+          "saved": "Roles updated successfully",
+          "saveError": "Failed to update roles",
+          "system": "System role (cannot remove)"
+        },
+        "actions": {
+          "title": "Actions",
+          "deactivate": "Deactivate Member",
+          "deactivateConfirm": "Suspend access for {name}?",
+          "reactivate": "Reactivate Member",
+          "resend": "Resend Invitation",
+          "remove": "Remove Member",
+          "removeConfirm": "Remove {name} from this tenant?",
+          "updateError": "Action failed. Please try again."
+        },
+        "email": {
+          "copied": "Email copied to clipboard",
+          "copyError": "Unable to copy email"
+        }
+      },
+      "validation": {
+        "emailRequired": "Email is required",
+        "emailInvalid": "Enter a valid email",
+        "roleRequired": "Role is required",
+        "messageMaxLength": "Message must be 500 characters or less"
+      }
+    },
+    "subscriptions": {
+      "title": "Subscriptions",
+      "subtitle": "Review plan usage and upgrade options.",
+      "currentPlan": "Current Plan",
+      "usage": "Usage",
+      "included": "Included:",
+      "upgrade": {
+        "title": "Need more?",
+        "description": "Upgrade your plan to unlock unlimited users, all domains, and priority support.",
+        "cta": "Contact Sales",
+        "comingSoon": "Subscription management coming soon"
+      }
+    },
+    "roles": {
+      "title": "Roles",
+      "create": "New Role",
+      "create.success": "Role '{name}' created",
+      "sections": {
+        "permissions": "Permissions"
+      },
+      "fields": {
+        "roleCode": "Role Code",
+        "roleCodePlaceholder": "e.g. sales-manager",
+        "roleCodeHint": "Lowercase letters, numbers and hyphens only. Cannot be changed later.",
+        "name": "Name",
+        "namePlaceholder": "e.g. Sales Manager",
+        "description": "Description",
+        "descriptionPlaceholder": "Optional description",
+        "isSystem": "System Role",
+        "priority": "Priority",
+        "permissions": "Permissions"
+      },
+      "columns": {
+        "name": "Name",
+        "description": "Description",
+        "type": "Type",
+        "members": "Members",
+        "priority": "Priority"
+      },
+      "filters": {
+        "type": "Type"
+      },
+      "type": {
+        "system": "System",
+        "custom": "Custom"
+      },
+      "delete": {
+        "confirm": {
+          "title": "Delete Role",
+          "message": "This role has {count} members. They will lose all permissions granted by this role.",
+          "messageEmpty": "Are you sure you want to delete the role \"{name}\"? This action cannot be undone."
+        },
+        "hasMembers": "Cannot delete role with assigned members. Reassign members first."
+      },
+      "validation": {
+        "nameRequired": "Name is required",
+        "nameMaxLength": "Name must be 100 characters or less",
+        "codeRequired": "Role code is required",
+        "codeKebabCase": "Role code must be lowercase letters, numbers and hyphens (e.g. sales-manager)",
+        "codeConflict": "A role with this code already exists",
+        "descriptionMaxLength": "Description must be 500 characters or less"
+      },
+      "detail": {
+        "title": "Role Detail",
+        "systemBanner": "System roles cannot be modified",
+        "permissions": {
+          "title": "Permissions",
+          "count": "{count} permissions selected",
+          "selectAll": "Select All",
+          "clear": "Clear",
+          "search": "Search permissions..."
+        },
+        "members": {
+          "title": "Role Members",
+          "add": "Add Members",
+          "remove": "Remove",
+          "search": "Search members...",
+          "loading": "Loading members…",
+          "empty": "No members assigned to this role.",
+          "removeError": "Failed to remove member",
+          "addError": "Failed to add members",
+          "columns": {
+            "email": "Email",
+            "displayName": "Display Name",
+            "status": "Status",
+            "joined": "Joined"
+          },
+          "pagination": {
+            "previous": "Previous",
+            "next": "Next",
+            "page": "Page {current} of {total}"
+          },
+          "removeConfirm": {
+            "title": "Remove Member",
+            "message": "Are you sure you want to remove this member from the role?"
+          },
+          "addDialog": {
+            "title": "Add Members to Role",
+            "subtitle": "Select members to add to this role.",
+            "search": "Search members…",
+            "noCandidates": "All members are already assigned to this role.",
+            "noResults": "No members match your search.",
+            "confirm": "Add Selected",
+            "confirmCount": "Add Selected ({count})"
+          }
+        },
+        "save": "Save Role",
+        "save.success": "Role '{name}' updated"
+      }
+    },
+    "domains": {
+      "title": "Domain Activation",
+      "subtitle": "Enable or disable domains for your organization. Disabled domains are hidden from navigation and their permissions are revoked.",
+      "entities": "{count} entities",
+      "active": "Active",
+      "inactive": "Inactive",
+      "since": "Since {date}",
+      "locked": "This domain is required and cannot be disabled",
+      "activate": {
+        "success": "{name} has been activated"
+      },
+      "deactivate": {
+        "confirm": {
+          "title": "Disable {name}?",
+          "message": "Disabling {name} will hide it from navigation and revoke related permissions for all users.",
+          "confirmLabel": "Disable"
+        },
+        "success": "{name} has been deactivated"
+      },
+      "readOnlyTooltip": "You do not have permission to change domain activation.",
+      "empty": "No domains available. Contact support.",
+      "loading": "Loading domains...",
+      "error": "Failed to load domains.",
+      "toggleError": "Failed to update domain activation."
+    }
+  },
+  "scheduling": {
+    "jobs": {
+      "email-digest": "Email Digest",
+      "overdue-alert": "Overdue Alert",
+      "session-cleanup": "Session Cleanup",
+      "audit-archive": "Audit Archive",
+      "temp-file-cleanup": "Temp File Cleanup"
+    },
+    "status": {
+      "RUNNING": "Running",
+      "SUCCESS": "Success",
+      "FAILED": "Failed"
+    }
+  },
+  "appSettings": {
+    "subtitle": "Configure tenant-wide application options",
+    "tabs": {
+      "general": "General",
+      "localization": "Localization",
+      "branding": "Branding"
+    },
+    "general": {
+      "title": "General",
+      "tenantName": "Organization Name",
+      "tenantName.hint": "Displayed across the platform",
+      "timezone": "Timezone",
+      "contactEmail": "Contact Email",
+      "supportEmail": "Support Email",
+      "save": "Save General Settings",
+      "save.success": "General settings updated",
+      "save.error": "Failed to update general settings"
+    },
+    "localization": {
+      "title": "Localization",
+      "defaultLocale": "Default Language",
+      "supportedLocales": "Supported Languages",
+      "supportedLocalesMustIncludeDefault": "Supported languages must include the default language.",
+      "defaultCurrency": "Default Currency",
+      "dateFormat": "Date Format",
+      "dateFormat.preview": "Preview: {value}",
+      "numberFormat": "Number Format",
+      "numberFormat.preview": "Preview: {value}",
+      "save": "Save Localization Settings",
+      "save.success": "Localization settings updated",
+      "save.error": "Failed to update localization settings"
+    },
+    "branding": {
+      "title": "Branding",
+      "displayName": "Display Name",
+      "displayName.hint": "Shown in the sidebar and browser title",
+      "primaryColor": "Primary Color",
+      "primaryColor.default": "Default",
+      "primaryColor.reset": "Reset to default",
+      "primaryColor.preview": "Preview",
+      "logo": "Logo",
+      "logo.hint": "PNG, JPG, or SVG. Max 2MB.",
+      "logo.change": "Change",
+      "logo.remove": "Remove",
+      "favicon": "Favicon",
+      "favicon.hint": "PNG, ICO, or SVG. Max 500KB.",
+      "save": "Save Branding",
+      "save.success": "Branding updated",
+      "save.error": "Failed to update branding"
+    }
+  },
+  "userSettings": {
+    "subtitle": "Manage your profile, preferences, and security",
+    "tabs": {
+      "profile": "Profile",
+      "preferences": "Preferences",
+      "security": "Security",
+      "notifications": "Notifications"
+    },
+    "profile": {
+      "title": "Profile",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "displayName": "Display Name",
+      "displayName.hint": "Shown instead of your full name",
+      "phone": "Phone",
+      "email": "Email",
+      "email.hint": "Managed by your identity provider",
+      "save": "Save Profile",
+      "save.success": "Profile updated",
+      "save.error": "Failed to update profile"
+    },
+    "preferences": {
+      "title": "Preferences",
+      "locale": "Language",
+      "timezone": "Timezone",
+      "theme": "Theme",
+      "theme.light": "Light",
+      "theme.dark": "Dark",
+      "theme.system": "System",
+      "dateFormat": "Date Format",
+      "dateFormat.preview": "Preview: {value}",
+      "defaultHint": "Defaults to organization setting ({value})",
+      "defaultOption": "Use organization default",
+      "save": "Save Preferences",
+      "save.success": "Preferences updated",
+      "save.error": "Failed to update preferences",
+      "load.error": "Failed to load preferences"
+    },
+    "security": {
+      "title": "Security",
+      "password": {
+        "title": "Change Password",
+        "comingSoon": "Password change will be available soon. Your password is managed by your identity provider.",
+        "current": "Current Password",
+        "new": "New Password",
+        "confirm": "Confirm New Password",
+        "mismatch": "Passwords do not match",
+        "strength": {
+          "weak": "Weak",
+          "fair": "Fair",
+          "strong": "Strong",
+          "veryStrong": "Very Strong"
+        }
+      },
+      "sessions": {
+        "title": "Active Sessions",
+        "comingSoon": "Session management coming soon.",
+        "comingSoonHint": "You can manage your sessions from your identity provider.",
+        "current": "This device",
+        "revoke": "Revoke",
+        "revokeAll": "Revoke All Other Sessions"
+      },
+      "twoFactor": {
+        "title": "Two-Factor Authentication",
+        "comingSoon": "Two-factor authentication coming soon"
+      }
+    },
+    "notifications": {
+      "title": "Notifications",
+      "banner": "Notification delivery is not yet active. Your preferences will be applied when notifications are enabled for your organization.",
+      "email": "Email Notifications",
+      "email.hint": "Receive notifications via email",
+      "inApp": "In-App Notifications",
+      "inApp.hint": "Receive notifications in the app",
+      "digest": "Digest Frequency",
+      "digest.hint": "How often to receive a summary",
+      "digest.disabled": "Enable email notifications to configure digest",
+      "digest.none": "None",
+      "digest.daily": "Daily",
+      "digest.weekly": "Weekly",
+      "save": "Save Preferences",
+      "save.success": "Notification preferences updated"
+    }
+  },
+  "notifications": {
+    "bell": {
+      "title": "Notifications",
+      "ariaLabel": "Open notifications",
+      "empty": "No notifications.",
+      "loading": "Loading…",
+      "markAllRead": "Mark all as read",
+      "viewAll": "View all"
+    },
+    "center": {
+      "title": "Notifications",
+      "subtitle": "Track workflow updates, assignments, mentions, and system events.",
+      "unread": "Unread: {count}",
+      "loading": "Loading notifications...",
+      "empty": "No notifications match your current filters.",
+      "confirmClearOldRead": "Delete read notifications older than 30 days?",
+      "filters": {
+        "source": {
+          "label": "Source",
+          "all": "All",
+          "workflow": "Workflow",
+          "assignment": "Assignment",
+          "mention": "Mention",
+          "system": "System"
+        },
+        "status": {
+          "label": "Status",
+          "all": "All",
+          "unread": "Unread",
+          "read": "Read"
+        },
+        "range": {
+          "label": "Date range",
+          "24h": "24 hours",
+          "7d": "7 days",
+          "30d": "30 days",
+          "all": "All time"
+        }
+      },
+      "actions": {
+        "markRead": "Mark read",
+        "markAllRead": "Mark all read",
+        "markSelectedRead": "Mark selected read",
+        "clearOldRead": "Clear old read"
+      }
+    },
+    "workflow": {
+      "title": "Workflow",
+      "description": "Approval and workflow related notifications."
+    },
+    "assignment": {
+      "title": "Assignment",
+      "description": "Task and ownership assignment notifications."
+    },
+    "mention": {
+      "title": "Mention",
+      "description": "Direct mentions from comments and discussions."
+    },
+    "digest": {
+      "title": "Digest",
+      "description": "Periodic summary notifications."
+    }
+  },
+  "core": {
+    "search": {
+      "trigger": "Open search",
+      "placeholder": "Search pages, records, settings...",
+      "noResults": "No results found",
+      "recent": "Recent",
+      "pages": "Pages",
+      "sectionActions": "Actions",
+      "actions": {
+        "newChantier": "+ New site / project",
+        "newBc": "+ New purchase order",
+        "newDa": "+ New purchase request",
+        "newEmploye": "+ New employee",
+        "newFactureVente": "+ New sales invoice"
+      },
+      "records": "Records",
+      "loading": "Searching...",
+      "minChars": "Type at least 2 characters to search records",
+      "clearRecent": "Clear Recent"
+    },
+    "topbar": {
+      "notifications": "Notifications",
+      "mySettings": "My Settings",
+      "appSettings": "Application Settings",
+      "logout": "Log Out"
+    },
+    "conversation": {
+      "title": "Conversations",
+      "toggle": "Toggle conversation panel",
+      "close": "Close conversation panel",
+      "agent": "ERP Agent",
+      "you": "You",
+      "roles": {
+        "system": "System",
+        "tool": "Tool"
+      },
+      "mode": {
+        "ask": "Ask",
+        "agent": "Agent"
+      },
+      "welcome": "Ask anything about this application. I can help you navigate, explain data, and trigger actions.",
+      "loading": "Loading conversation...",
+      "errorGeneric": "Conversation request failed.",
+      "placeholder": "Type a message...",
+      "send": "Send",
+      "sendHint": "Enter to send · Shift+Enter for a new line",
+      "sendInProgress": "Sending...",
+      "newChat": "New conversation",
+      "noHistory": "No conversations yet",
+      "sessionDefault": "Conversation",
+      "sessionUntitled": "Conversation on {date}",
+      "pendingReply": "Understood. Agent workflow hookup comes next.",
+      "actions": {
+        "title": "Proposed actions",
+        "empty": "No actions proposed yet.",
+        "approve": "Approve",
+        "reject": "Reject",
+        "execute": "Execute",
+        "status": {
+          "proposed": "Proposed",
+          "pending_approval": "Pending approval",
+          "approved": "Approved",
+          "rejected": "Rejected",
+          "executed": "Executed",
+          "failed": "Failed"
+        }
+      }
+    },
+    "navigation": {
+      "teamAndAccess": "Team & Access",
+      "empty": "No navigation available",
+      "zones": {
+        "work": "WORKSPACE",
+        "administration": "ADMINISTRATION",
+        "platform": "PLATFORM",
+        "inventory": "INVENTORY",
+        "finance": "FINANCE"
+      }
+    },
+    "settings": {
+      "title": "Settings",
+      "subtitle": "Configure application options",
+      "tabs": {
+        "general": "General",
+        "notifications": "Notifications",
+        "integrations": "Integrations"
+      },
+      "sections": {
+        "general": {
+          "title": "General",
+          "description": "Demo: toggles and options would go here using nf-* form primitives."
+        },
+        "notifications": {
+          "title": "Notifications",
+          "description": "Email and in-app notification preferences."
+        },
+        "integrations": {
+          "title": "Integrations",
+          "description": "Connect external services."
+        }
+      },
+      "actions": {
+        "restoreDefaults": "Restore defaults",
+        "save": "Save",
+        "restoreToast": "Defaults restored. Click Save to apply.",
+        "saveToast": "Settings saved"
+      }
+    },
+    "wizard": {
+      "actions": {
+        "back": "Back",
+        "next": "Next",
+        "submit": "Create"
+      },
+      "productCreate": {
+        "title": "New Product (Wizard)",
+        "steps": {
+          "basics": "Basics",
+          "pricing": "Pricing",
+          "review": "Review"
+        },
+        "review": {
+          "title": "Review",
+          "fields": {
+            "name": "Name",
+            "code": "Code",
+            "price": "Price"
+          }
+        },
+        "validation": {
+          "missingRequired": "Name and code are required"
+        },
+        "toast": {
+          "created": "Product \"{name}\" created",
+          "error": "Failed to create product"
+        }
+      }
+    }
+  },
+  "ai": {
+    "assistant": {
+      "title": "AI Assistant",
+      "placeholder": "Ask me anything about the platform...",
+      "send": "Send",
+      "typing": "Thinking...",
+      "clear": "Clear Conversation",
+      "close": "Close",
+      "minimize": "Minimize",
+      "action": {
+        "approve": "Approve",
+        "reject": "Reject",
+        "executed": "Executed",
+        "pending": "Pending Approval"
+      },
+      "welcome": "Hi! I'm your AI assistant. I can help you navigate the platform, find data, and perform actions. What would you like to do?",
+      "error": "Something went wrong. Please try again.",
+      "offline": "AI Assistant is currently unavailable."
+    },
+    "tools": {
+      "search": {
+        "noResults": "No results found for \"{query}\"",
+        "results": "{count, plural, =0 {No results for \"{query}\"} one {1 result for \"{query}\"} other {# results for \"{query}\"}}"
+      },
+      "navigate": {
+        "navigating": "Navigating to {target}...",
+        "notFound": "I couldn't find a page matching \"{target}\""
+      },
+      "summarize": {
+        "notFound": "Entity not found"
+      },
+      "action": {
+        "proposed": "I can {operation} {entityType}. Please review and approve:",
+        "executed": "Done! {description}",
+        "rejected": "Action cancelled.",
+        "noPermission": "You don't have permission to {operation} {entityType}"
+      },
+      "help": {
+        "noAnswer": "I'm not sure about that. Try checking the documentation or asking your administrator."
+      },
+      "dashboard": {
+        "noData": "No dashboard data available for this period"
+      },
+      "list": {
+        "empty": "No {entityType} matching your criteria",
+        "found": "{count, plural, =0 {No items:} one {Found 1 {entityType}:} other {Found # {entityType}:}}"
+      }
+    }
+  },
+  "enum": {
+    "facture": {
+      "status": {
+        "brouillon": "Draft",
+        "emise": "Issued",
+        "partiellement_payee": "Partially paid",
+        "payee": "Paid",
+        "en_litige": "Disputed",
+        "avoirisee": "Credited",
+        "annulee": "Cancelled"
+      },
+      "type": {
+        "situation": "Work progress invoice",
+        "avance": "Advance",
+        "acompte": "Down payment",
+        "decompte_definitif": "Final settlement",
+        "diverse": "Miscellaneous"
+      }
+    },
+    "marche": {
+      "status": {
+        "brouillon": "Draft",
+        "signe": "Signed",
+        "en_execution": "In execution",
+        "reception_provisoire": "Provisional acceptance",
+        "reception_definitive": "Final acceptance",
+        "cloture": "Closed",
+        "resilie": "Terminated"
+      },
+      "type": {
+        "forfait": "Lump sum price",
+        "bpu": "Schedule of unit prices (BPU)",
+        "regie": "Time & materials",
+        "mixte": "Mixed"
+      },
+      "nature": {
+        "public": "Public (State / local government)",
+        "prive_grand_compte": "Key account private",
+        "prive_pme": "SME private",
+        "particulier": "Individual customer"
+      }
+    },
+    "avenant": {
+      "type": {
+        "tvx_supplementaires": "Additional works",
+        "prolongation_delai": "Time extension",
+        "mixte": "Mixed",
+        "adaptation_technique": "Technical adaptation",
+        "autre": "Other"
+      },
+      "status": {
+        "brouillon": "Draft",
+        "propose": "Proposed",
+        "signe": "Signed",
+        "rejete": "Rejected"
+      }
+    },
+    "caution": {
+      "type": {
+        "provisoire": "Bid bond",
+        "definitive": "Performance bond",
+        "restitution_avance": "Advance payment bond",
+        "retenue_garantie": "Retention bond"
+      },
+      "status": {
+        "emise": "Issued",
+        "active": "Active",
+        "levee": "Released",
+        "expire": "Expired",
+        "joue": "Called"
+      }
+    },
+    "dgd": {
+      "status": {
+        "brouillon": "Draft",
+        "soumis_moa": "Submitted to MOA",
+        "notifie": "Notified",
+        "paye": "Paid",
+        "conteste": "Contested"
+      }
+    },
+    "ordre_service": {
+      "type": {
+        "commencement": "Notice to proceed",
+        "arret": "Stop order",
+        "reprise": "Resume order",
+        "modification": "Change order",
+        "notification": "Notification"
+      },
+      "status": {
+        "emis": "Issued",
+        "receptionne": "Acknowledged",
+        "conteste": "Contested",
+        "clos": "Closed"
+      }
+    },
+    "facture_marche": {
+      "status": {
+        "brouillon": "Draft",
+        "emise": "Issued",
+        "envoyee_moa": "Sent to MOA",
+        "acceptee": "Accepted",
+        "payee_partiel": "Partially paid",
+        "payee": "Paid",
+        "contestee": "Contested"
+      }
+    },
+    "ao": {
+      "status": {
+        "brouillon": "Draft",
+        "publiee": "Published",
+        "cloturee": "Closed",
+        "attribuee": "Awarded",
+        "infructueuse": "Unsuccessful",
+        "annulee": "Cancelled"
+      }
+    },
+    "bcc": {
+      "status": {
+        "recu": "Received",
+        "en_cours": "In progress",
+        "partiellement_facture": "Partially invoiced",
+        "facture": "Invoiced",
+        "cloture": "Closed",
+        "annule": "Cancelled"
+      }
+    },
+    "offre": {
+      "status": {
+        "brouillon": "Draft",
+        "envoyee": "Sent",
+        "acceptee": "Accepted",
+        "refusee": "Refused",
+        "expiree": "Expired",
+        "annulee": "Cancelled"
+      }
+    },
+    "da": {
+      "status": {
+        "brouillon": "Draft",
+        "soumise": "Submitted",
+        "approuvee": "Approved",
+        "rejetee": "Rejected",
+        "convertie": "Converted"
+      }
+    },
+    "ct": {
+      "status": {
+        "brouillon": "Draft",
+        "signe": "Signed",
+        "en_cours": "In progress",
+        "echu": "Expired",
+        "resilie": "Terminated"
+      }
+    },
+    "bc": {
+      "status": {
+        "brouillon": "Draft",
+        "valide": "Validated",
+        "envoye": "Sent",
+        "accuse_reception": "Acknowledgement received",
+        "partiellement_livre": "Partially delivered",
+        "livre": "Delivered",
+        "facture": "Invoiced",
+        "cloture": "Closed",
+        "annule": "Cancelled"
+      }
+    },
+    "numbering_doc_type": {
+      "devis": "Quotation",
+      "bon_commande_achat": "Purchase order",
+      "facture_vente": "Customer invoice",
+      "bon_livraison": "Delivery note / Goods receipt",
+      "situation_travaux": "Work progress statement",
+      "attachement": "Site work statement",
+      "contrat_sous_traitance": "Subcontracting contract"
+    },
+    "failure_reason": {
+      "bad_password": "Wrong password",
+      "user_not_found": "Unknown user",
+      "account_locked": "Account locked",
+      "mfa_failed": "MFA failed",
+      "ip_blocked": "IP blocked",
+      "expired_token": "Token expired"
+    },
+    "outcome": {
+      "success": "Success",
+      "failed": "Failed",
+      "timeout": "Timed out"
+    },
+    "pointage_mode": {
+      "present": "Present",
+      "absent": "Absent",
+      "conge": "On leave",
+      "maladie": "Sick leave",
+      "formation": "Training",
+      "autre": "Other"
+    },
+    "gravite": {
+      "sans_arret": "Without leave",
+      "avec_arret": "With leave",
+      "grave": "Severe",
+      "mortel": "Fatal"
+    },
+    "aptitude": {
+      "apte": "Fit",
+      "inapte": "Unfit",
+      "avec_restriction": "Fit with restriction"
+    },
+    "type_visite": {
+      "embauche": "New hire",
+      "periodique": "Periodic",
+      "reprise": "Return to work"
+    },
+    "perimetre": {
+      "livraison": "Goods delivery",
+      "prestation": "Services",
+      "importation": "Imports",
+      "exportation": "Exports",
+      "tous": "All types"
+    },
+    "etablissement_type": {
+      "siege": "Head office",
+      "filiale": "Subsidiary",
+      "agence": "Branch",
+      "chantier_base": "Site base"
+    },
+    "phase_status": {
+      "planifie": "Planned",
+      "en_cours": "In progress",
+      "termine": "Completed",
+      "en_retard": "Overdue"
+    },
+    "forme_juridique": {
+      "sarl": "SARL",
+      "sarlau": "SARL single-member",
+      "sa": "SA",
+      "sas": "SAS",
+      "eurl": "EURL",
+      "autoentrepreneur": "Self-entrepreneur"
+    },
+    "source": {
+      "bam": "Bank Al-Maghrib",
+      "manuel": "Manual",
+      "api": "API"
+    },
+    "day": {
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    },
+    "amount_source": {
+      "ht": "Net (HT)",
+      "tva": "VAT",
+      "ttc": "Gross (TTC)",
+      "ras": "Withholding (RAS)",
+      "net_a_payer": "Net to pay",
+      "timbre": "Fiscal stamp",
+      "charge_patr": "Employer contributions",
+      "salaire_net": "Net salary",
+      "ir": "Income tax (IR)"
+    },
+    "chantier": {
+      "status": {
+        "prospect": "Prospect",
+        "en_cours": "In progress",
+        "suspendu": "Suspended",
+        "termine": "Completed",
+        "receptionne": "Accepted",
+        "cloture": "Closed",
+        "annule": "Cancelled"
+      },
+      "type": {
+        "batiment": "Building",
+        "tp": "Public works",
+        "vrd": "VRD (roadworks & utilities)",
+        "go": "Structural works",
+        "tce": "All trades",
+        "rehabilitation": "Renovation"
+      }
+    },
+    "attachement": {
+      "status": {
+        "brouillon": "Draft",
+        "signe_moe": "Signed by MOE",
+        "contresigne_moa": "Countersigned by MOA",
+        "conteste": "Contested"
+      }
+    },
+    "sous_traitance": {
+      "status": {
+        "brouillon": "Draft",
+        "signe": "Signed",
+        "en_cours": "In progress",
+        "termine": "Completed",
+        "resilie": "Terminated"
+      }
+    },
+    "ff": {
+      "status": {
+        "brouillon": "Draft",
+        "validee": "Validated",
+        "partiellement_payee": "Partially paid",
+        "payee": "Paid",
+        "en_litige": "Disputed",
+        "avoirisee": "Credited",
+        "annulee": "Cancelled"
+      }
+    },
+    "ecriture": {
+      "status": {
+        "brouillon": "Draft",
+        "validee": "Validated",
+        "cloturee": "Closed"
+      },
+      "origine": {
+        "manuelle": "Manual",
+        "auto_facture_client": "Auto · Customer invoice",
+        "auto_facture_fourn": "Auto · Supplier invoice",
+        "auto_reglement": "Auto · Payment",
+        "auto_paie": "Auto · Payroll",
+        "auto_avoir": "Auto · Credit note",
+        "auto_situation": "Auto · Work progress"
+      }
+    },
+    "duer": {
+      "status": {
+        "brouillon": "Draft",
+        "valide": "Validated",
+        "revision": "Under revision"
+      }
+    },
+    "ppsps": {
+      "status": {
+        "brouillon": "Draft",
+        "valide": "Validated",
+        "revision": "Under revision",
+        "applicatif": "Applied",
+        "archive": "Archived"
+      }
+    },
+    "incident": {
+      "status": {
+        "declare": "Open",
+        "en_investigation": "Under investigation",
+        "cloture": "Closed"
+      },
+      "type": {
+        "at_travail": "Work accident",
+        "at_trajet": "Commute accident",
+        "presque_accident": "Near miss",
+        "dommage_materiel": "Material damage",
+        "mp": "Occupational disease (MP)",
+        "autre": "Other"
+      }
+    },
+    "inspection": {
+      "status": {
+        "planifiee": "Planned",
+        "en_cours": "In progress",
+        "terminee": "Completed",
+        "annulee": "Cancelled"
+      }
+    },
+    "formation": {
+      "status": {
+        "planifiee": "Planned",
+        "en_cours": "In progress",
+        "terminee": "Completed",
+        "annulee": "Cancelled"
+      }
+    },
+    "nc": {
+      "status": {
+        "ouverte": "Open",
+        "en_cours": "In progress",
+        "verifiee": "Verified",
+        "cloturee": "Closed"
+      },
+      "type": {
+        "securite": "Safety",
+        "qualite": "Quality",
+        "environnement": "Environment",
+        "reglementaire": "Regulatory"
+      }
+    },
+    "epi": {
+      "status": {
+        "ok": "OK",
+        "a_renouveler": "To renew",
+        "expire": "Expired",
+        "perdu": "Lost / missing"
+      },
+      "cat": {
+        "tete": "Head protection",
+        "yeux": "Eye protection",
+        "pieds": "Footwear",
+        "mains": "Gloves",
+        "corps": "Coverall / hi-vis vest",
+        "respiration": "Respirator / SCBA",
+        "audition": "Hearing protection",
+        "chute": "Fall arrest harness"
+      }
+    },
+    "journal_event": {
+      "type": {
+        "visite_moa": "MOA visit",
+        "intemperie": "Bad weather",
+        "livraison": "Delivery",
+        "incident": "Incident",
+        "ordre_service": "Service order",
+        "reunion": "Meeting",
+        "constat": "Observation report",
+        "autre": "Other"
+      }
+    },
+    "condition_paiement": {
+      "type": {
+        "immediat": "Immediate",
+        "delai_simple": "Simple deadline",
+        "fin_de_mois": "End of month",
+        "echeances_multiples": "Multiple due dates"
+      }
+    },
+    "journal": {
+      "type": {
+        "vente": "Sales",
+        "achat": "Purchases",
+        "banque": "Bank",
+        "caisse": "Cash",
+        "operations_diverses": "Miscellaneous (OD)",
+        "nouveaux": "Opening entries"
+      }
+    },
+    "mouvement_tresorerie": {
+      "type": {
+        "reglement_client": "Customer payment",
+        "reglement_fourn": "Supplier payment",
+        "paiement_paie": "Payroll payment",
+        "virement_interne": "Internal transfer",
+        "frais_bancaires": "Bank fees",
+        "commissions": "Commission",
+        "autre_recette": "Misc. income",
+        "autre_depense": "Misc. expense"
+      }
+    },
+    "devis": {
+      "status": {
+        "brouillon": "Draft",
+        "emis": "Issued",
+        "negociation": "Negotiation",
+        "approuve": "Approved",
+        "perdu": "Lost",
+        "annule": "Cancelled",
+        "expire": "Expired"
+      }
+    },
+    "metre": {
+      "status": {
+        "brouillon": "Draft",
+        "termine": "Completed"
+      }
+    },
+    "ao_client": {
+      "status": {
+        "a_etudier": "To study",
+        "en_preparation": "In preparation",
+        "soumis": "Submitted",
+        "attribue": "Awarded",
+        "perdu": "Lost",
+        "infructueux": "Unsuccessful",
+        "annule": "Cancelled"
+      },
+      "type": {
+        "public": "Public",
+        "prive": "Private"
+      }
+    },
+    "moa_type": {
+      "etat": "State",
+      "ep": "Public establishment",
+      "collectivite": "Local government",
+      "prive": "Private"
+    },
+    "document_chantier": {
+      "type": {
+        "marche": "Contract",
+        "avenant": "Amendment",
+        "pv_reception": "Acceptance report",
+        "plan": "Plan",
+        "photo": "Photo",
+        "bc": "Purchase order",
+        "facture": "Invoice",
+        "attestation_assurance": "Insurance certificate",
+        "caution_bancaire": "Bank guarantee",
+        "ppsps": "PPSPS",
+        "plan_prevention": "Prevention plan",
+        "note_calcul": "Calculation note",
+        "autre": "Other"
+      }
+    },
+    "approval_entity_type": {
+      "da": "Purchase request",
+      "ao": "Tender (award)",
+      "bc": "Purchase order",
+      "ff": "Supplier invoice",
+      "sit": "Work progress statement",
+      "conge": "Leave request",
+      "paie": "Payslip (validation)",
+      "vir": "Internal transfer",
+      "avn": "Contract amendment",
+      "os": "Service order",
+      "facture_client": "Customer invoice",
+      "note_frais": "Expense report",
+      "contrat_st": "Subcontracting contract"
+    },
+    "avoir": {
+      "status": {
+        "brouillon": "Draft",
+        "emis": "Issued",
+        "impute": "Applied",
+        "rembourse": "Refunded",
+        "annule": "Cancelled"
+      }
+    },
+    "situation": {
+      "status": {
+        "brouillon": "Draft",
+        "soumise": "Submitted",
+        "validee_moa": "Validated by MOA",
+        "facturee": "Invoiced",
+        "payee": "Paid",
+        "rejetee": "Rejected"
+      }
+    }
+  },
+  "i18n": {
+    "hijri": {
+      "toggle": {
+        "label": "Show Hijri dates alongside",
+        "tooltip": "Displays the Hijri date next to the Gregorian date"
+      }
+    },
+    "numerals": {
+      "toggle": {
+        "label": "Arabic numerals",
+        "tooltip": "Display digits using Arabic numerals (٠-٩) instead of Western digits (0-9)"
+      }
+    }
+  }
+}

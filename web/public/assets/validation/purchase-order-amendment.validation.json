@@ -1,0 +1,20 @@
+{
+  "entity": "PurchaseOrderAmendment",
+  "fields": {
+    "amendmentNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "changeReason": {
+      "maxLength": 120
+    },
+    "approvedBy": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

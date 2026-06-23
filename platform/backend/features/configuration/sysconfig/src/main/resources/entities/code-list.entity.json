@@ -1,0 +1,21 @@
+{
+  "$schema": "../../../tools/generator/src/main/resources/entity.schema.json",
+  "entity": "CodeList",
+  "feature": "sysconfig",
+  "table": "code_list",
+  "packagePath": "sysconfig",
+  "category": "config",
+  "api": {
+    "basePath": "/api/v1/code-lists",
+    "product": "agora",
+    "generate": { "dto": true, "mapper": true, "service": true, "controller": true }
+  },
+  "fields": [
+    { "name": "code", "type": "string", "column": "code", "validation": { "required": true, "maxLength": 50 }, "db": { "nullable": false, "length": 50, "index": true }, "ui": { "label": "sysconfig.fields.code", "showInListing": true, "listingOrder": 1, "showInDetail": true, "detailSection": "general", "detailOrder": 1, "component": "nf-input", "filterable": true, "sortable": true } },
+    { "name": "name", "type": "string", "column": "name", "validation": { "required": true, "maxLength": 200 }, "db": { "nullable": false, "length": 200 }, "ui": { "label": "sysconfig.fields.name", "showInListing": true, "listingOrder": 2, "showInDetail": true, "detailSection": "general", "detailOrder": 2, "component": "nf-input", "filterable": true, "sortable": true } },
+    { "name": "description", "type": "text", "column": "description", "validation": { "maxLength": 2000 }, "db": { "nullable": true }, "ui": { "label": "common.fields.description", "showInListing": false, "showInDetail": true, "detailSection": "general", "detailOrder": 3, "component": "nf-textarea" } }
+  ],
+  "listing": { "defaultSort": { "field": "code", "direction": "asc" }, "searchFields": ["code", "name"], "features": ["search"] },
+  "navigation": { "parent": "settings", "icon": "list", "order": 72, "zone": "administration", "route": "/settings/code-lists" },
+  "migration": { "version": "v1.0", "seed": false }
+}

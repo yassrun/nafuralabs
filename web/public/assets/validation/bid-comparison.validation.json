@@ -1,0 +1,14 @@
+{
+  "entity": "BidComparison",
+  "fields": {
+    "rfqId": {
+      "required": true
+    },
+    "comparisonDate": {
+      "required": true
+    },
+    "recommendation": {
+      "maxLength": 2000
+    }
+  }
+}

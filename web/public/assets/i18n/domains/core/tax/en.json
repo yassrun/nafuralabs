@@ -1,0 +1,34 @@
+{
+  "tax": {
+    "navigation": {
+      "title": "Tax",
+      "description": "Tax Domain",
+      "taxCodes": "Tax Codes",
+      "taxRates": "Tax Rates",
+      "taxGroups": "Tax Groups"
+    }
+  },
+  "common": {
+    "subsections": {
+      "operations": "Operations",
+      "configuration": "Configuration"
+    }
+  },
+  "finance": {
+    "fields": {
+      "code": "Code",
+      "name": "Name",
+      "rate": "Rate",
+      "taxGroupId": "Tax Group Id",
+      "taxType": "Tax Type",
+      "isActive": "Is Active",
+      "taxCodeId": "Tax Code Id",
+      "effectiveFrom": "Effective From",
+      "effectiveTo": "Effective To",
+      "description": "Description"
+    },
+    "sections": {
+      "general": "General"
+    }
+  }
+}

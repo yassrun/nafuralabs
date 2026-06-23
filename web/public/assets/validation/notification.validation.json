@@ -1,0 +1,25 @@
+{
+  "entity": "Notification",
+  "fields": {
+    "recipientId": {
+      "required": true
+    },
+    "title": {
+      "required": true,
+      "maxLength": 200
+    },
+    "body": {
+      "maxLength": 2000
+    },
+    "channel": {
+      "required": true,
+      "maxLength": 30
+    },
+    "entityType": {
+      "maxLength": 80
+    },
+    "sentAt": {
+      "required": true
+    }
+  }
+}

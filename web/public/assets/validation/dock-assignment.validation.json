@@ -1,0 +1,23 @@
+{
+  "entity": "DockAssignment",
+  "fields": {
+    "assignmentNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "dockDoor": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "vehicleInfo": {
+      "maxLength": 120
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

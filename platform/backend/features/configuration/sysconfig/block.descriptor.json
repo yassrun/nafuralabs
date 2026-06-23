@@ -1,0 +1,16 @@
+{
+  "id": "sysconfig",
+  "name": "System Configuration",
+  "description": "System-wide configuration",
+  "type": "feature",
+  "layer": "feature",
+  "group": "configuration",
+  "provides": {
+    "backend": {
+      "gradle": ":platform:features:configuration:sysconfig",
+      "packages": ["ma.nafura.platform.configuration.sysconfig"]
+    }
+  },
+  "requires": { "core": ["tenancy", "framework"], "features": [] },
+  "manifest": { "key": "sysconfig" }
+}

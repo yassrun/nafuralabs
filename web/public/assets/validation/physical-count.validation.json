@@ -1,0 +1,29 @@
+{
+  "entity": "PhysicalCount",
+  "fields": {
+    "countNumber": {
+      "required": true,
+      "maxLength": 60,
+      "min": 0
+    },
+    "countType": {
+      "min": 0
+    },
+    "assignedTo": {
+      "maxLength": 120
+    },
+    "totalItems": {
+      "maxLength": 120
+    },
+    "varianceItems": {
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

@@ -1,0 +1,307 @@
+/**
+ * Nafura Labs IAM — Keycloak login theme
+ * Palette aligned with marketing/nafuralabs (globals.css + tailwind.config.ts)
+ */
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap");
+
+:root {
+  --nafura-surface: #fafaf8;
+  --nafura-surface-container-low: #eeebe4;
+  --nafura-primary: #00333c;
+  --nafura-primary-container: #004b57;
+  --nafura-primary-light: #005566;
+  --nafura-accent: #e9c176;
+  --nafura-accent-light: #f0d49a;
+  --nafura-secondary: #5cb8c4;
+  --nafura-text: #131415;
+  --nafura-text-muted: #757778;
+  --nafura-ghost-line: rgba(0, 51, 60, 0.15);
+  --nafura-ghost-line-strong: rgba(0, 51, 60, 0.2);
+  --nafura-login-width: 32rem;
+  --nafura-login-padding-x: 2.25rem;
+  --nafura-login-padding-y: 2rem;
+}
+
+/* Hero mesh background (marketing site) */
+.login-pf body,
+body {
+  font-family: "Manrope", system-ui, sans-serif !important;
+  background:
+    linear-gradient(180deg, #00333c 0%, #004b57 42%, #00333c 100%),
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(233, 193, 118, 0.12), transparent),
+    radial-gradient(ellipse 60% 40% at 82% 58%, rgba(0, 75, 87, 0.35), transparent) !important;
+  background-color: #00333c !important;
+  min-height: 100vh;
+}
+
+/* Keep brand background even when Keycloak v2 enables dark mode */
+html.pf-v5-theme-dark .login-pf body,
+html.pf-v5-theme-dark body {
+  background:
+    linear-gradient(180deg, #00333c 0%, #004b57 42%, #00333c 100%),
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(233, 193, 118, 0.12), transparent),
+    radial-gradient(ellipse 60% 40% at 82% 58%, rgba(0, 75, 87, 0.35), transparent) !important;
+}
+
+.pf-v5-c-login {
+  --pf-v5-c-login__container--MaxWidth: var(--nafura-login-width);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+}
+
+.pf-v5-c-login__container {
+  width: min(100%, var(--nafura-login-width)) !important;
+  max-width: var(--nafura-login-width) !important;
+  grid-template-columns: 1fr !important;
+  grid-template-areas: "main" !important;
+  background: var(--nafura-surface);
+  border-radius: 0.25rem;
+  box-shadow:
+    0 24px 48px -12px rgba(30, 58, 64, 0.12),
+    0 12px 24px -8px rgba(30, 58, 64, 0.08);
+  border-top: 3px solid var(--nafura-accent);
+  overflow: hidden;
+}
+
+.pf-v5-c-login__main {
+  grid-area: main;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0;
+  background: transparent !important;
+  border-radius: 0;
+  box-shadow: none;
+  border-top: 0;
+}
+
+.pf-v5-c-login__main-header,
+.pf-v5-c-login__main-body {
+  padding-inline: var(--nafura-login-padding-x) !important;
+}
+
+.pf-v5-c-login__main-header {
+  padding-top: var(--nafura-login-padding-y) !important;
+  padding-bottom: 0.5rem !important;
+}
+
+.pf-v5-c-login__main-body {
+  padding-top: 0.75rem !important;
+  padding-bottom: 0.5rem !important;
+}
+
+.pf-v5-c-login__main-footer {
+  padding-inline: var(--nafura-login-padding-x) !important;
+  padding-bottom: 0.25rem !important;
+}
+
+html.pf-v5-theme-dark .pf-v5-c-login__main {
+  background: var(--nafura-surface) !important;
+  color: var(--nafura-text) !important;
+}
+
+/* Header: locale on top-right, brand block full width below */
+.nafura-login-main-header {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.nafura-login-locale {
+  align-self: flex-end;
+  width: auto !important;
+  max-width: 8.5rem;
+}
+
+.nafura-login-locale .pf-v5-c-form-control,
+.nafura-login-locale select {
+  font-size: 0.8125rem;
+  min-height: 2rem;
+  padding-block: 0.25rem;
+}
+
+.nafura-login-header,
+#kc-page-title {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* Brand header */
+.nafura-login-brand {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.nafura-login-logo {
+  width: min(100%, 13.5rem);
+  height: auto;
+}
+
+.nafura-login-heading {
+  text-align: center;
+  margin-top: 0;
+}
+
+.nafura-login-title {
+  font-family: "Space Grotesk", system-ui, sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--nafura-primary) !important;
+  text-align: center;
+  margin: 0 0 0.25rem;
+}
+
+.nafura-login-subtitle {
+  font-size: 0.9375rem;
+  color: var(--nafura-text-muted);
+  text-align: center;
+  margin: 0 0 0.75rem;
+  line-height: 1.45;
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
+/* Architect-style inputs (bottom border, warm surface) */
+.pf-v5-c-form-control {
+  background-color: var(--nafura-surface-container-low) !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--nafura-ghost-line-strong) !important;
+  border-radius: 0.25rem 0.25rem 0 0 !important;
+  color: var(--nafura-text) !important;
+  min-height: 2.5rem;
+  font-size: 0.9375rem;
+}
+
+.pf-v5-c-form-control:focus,
+.pf-v5-c-form-control:focus-visible {
+  border-bottom-color: var(--nafura-primary) !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.pf-v5-c-form__label-text {
+  color: var(--nafura-text) !important;
+  font-weight: 600;
+}
+
+/* Primary CTA — gradient soul */
+.pf-v5-c-button.pf-m-primary {
+  background: linear-gradient(135deg, var(--nafura-primary) 0%, var(--nafura-primary-container) 100%) !important;
+  border: none !important;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  min-height: 2.625rem;
+  transition: filter 0.15s ease;
+}
+
+.pf-v5-c-button.pf-m-primary:hover,
+.pf-v5-c-button.pf-m-primary:focus {
+  filter: brightness(1.1);
+}
+
+.pf-v5-c-button.pf-m-link {
+  color: var(--nafura-primary-container) !important;
+}
+
+.pf-v5-c-button.pf-m-link:hover {
+  color: var(--nafura-primary-light) !important;
+}
+
+a {
+  color: var(--nafura-primary-container);
+}
+
+a:hover {
+  color: var(--nafura-primary-light);
+}
+
+/* Alerts */
+.pf-v5-c-alert.pf-m-success {
+  --pf-v5-c-alert--BackgroundColor: rgba(92, 184, 196, 0.14);
+  --pf-v5-c-alert__title--Color: var(--nafura-primary);
+}
+
+.pf-v5-c-alert.pf-m-warning {
+  --pf-v5-c-alert--BackgroundColor: rgba(233, 193, 118, 0.18);
+}
+
+/* Footer inside card */
+.pf-v5-c-login__main-footer {
+  margin-top: 0.5rem;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.nafura-login-footer {
+  text-align: center;
+  font-size: 0.6875rem;
+  color: var(--nafura-text-muted);
+  padding: 0.75rem var(--nafura-login-padding-x) 1.25rem;
+  margin: 0 calc(-1 * var(--nafura-login-padding-x));
+  background: var(--nafura-surface);
+  border-top: 1px solid var(--nafura-ghost-line);
+}
+
+.nafura-login-footer a {
+  color: var(--nafura-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.nafura-login-footer a:hover {
+  color: var(--nafura-primary-light);
+  text-decoration: underline;
+}
+
+.nafura-login-footer-sep {
+  margin: 0 0.35rem;
+  opacity: 0.6;
+}
+
+.nafura-login-footer-tagline {
+  color: var(--nafura-text-muted);
+}
+
+/* Locale switcher on dark background */
+.pf-v5-c-login__main-header-utilities button,
+.pf-v5-c-login__main-header-utilities a {
+  color: var(--nafura-text-muted) !important;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --nafura-login-width: 40rem;
+    --nafura-login-padding-x: 3rem;
+  }
+
+  .nafura-login-logo {
+    width: min(100%, 16.5rem);
+  }
+}
+
+@media (min-width: 1200px) {
+  :root {
+    --nafura-login-width: 42rem;
+  }
+}
+
+@media (max-width: 767px) {
+  :root {
+    --nafura-login-width: min(100%, 24rem);
+    --nafura-login-padding-x: 1.5rem;
+    --nafura-login-padding-y: 1.5rem;
+  }
+
+  .login-pf body,
+  body {
+    background: var(--nafura-primary) !important;
+  }
+}

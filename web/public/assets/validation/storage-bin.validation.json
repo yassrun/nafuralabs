@@ -1,0 +1,32 @@
+{
+  "entity": "StorageBin",
+  "fields": {
+    "code": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "aisle": {
+      "maxLength": 120
+    },
+    "rack": {
+      "maxLength": 120
+    },
+    "shelf": {
+      "maxLength": 120
+    },
+    "bin": {
+      "maxLength": 120
+    },
+    "maxWeight": {
+      "min": 0
+    },
+    "maxVolume": {
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

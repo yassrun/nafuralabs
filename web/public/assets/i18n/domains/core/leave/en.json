@@ -1,0 +1,45 @@
+{
+  "leave": {
+    "navigation": {
+      "title": "Leave",
+      "description": "Leave Domain",
+      "leaveRequests": "Leave Requests",
+      "leaveTypes": "Leave Types",
+      "accrualRules": "Accrual Rules"
+    }
+  },
+  "common": {
+    "subsections": {
+      "operations": "Operations",
+      "configuration": "Configuration"
+    }
+  },
+  "hr": {
+    "fields": {
+      "requestNumber": "Request Number",
+      "employeeId": "Employee Id",
+      "leaveTypeId": "Leave Type Id",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "totalDays": "Total Days",
+      "reason": "Reason",
+      "status": "Status",
+      "approvedBy": "Approved By",
+      "code": "Code",
+      "name": "Name",
+      "description": "Description",
+      "paidLeave": "Paid Leave",
+      "maxDays": "Max Days",
+      "carryForward": "Carry Forward",
+      "accrualBased": "Accrual Based",
+      "frequency": "Frequency",
+      "amount": "Amount",
+      "maxBalance": "Max Balance",
+      "proRataOnJoin": "Pro Rata On Join"
+    },
+    "sections": {
+      "general": "General",
+      "notes": "Notes"
+    }
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "requests": [
+    {
+      "id": "apr-001",
+      "workflowId": "wf-bc-500k",
+      "entityType": "BC",
+      "entityId": "bc007",
+      "entityRef": "BC-2026-00007",
+      "entitySummary": "BC-2026-00007 — Aciers ronds à béton T12/T16 — Sonasid — 1 050 000 MAD HT",
+      "montantConcerne": 1050000,
+      "chantierId": "ch-005",
+      "initiateurUserId": "emp-001",
+      "initiateurNom": "Karim El Idrissi",
+      "status": "EN_COURS",
+      "etapeCouranteIndex": 0,
+      "dateSoumission": "2026-05-06",
+      "urgence": "HAUTE",
+      "events": [
+        {
+          "action": "SOUMIS",
+          "userId": "emp-001",
+          "userNom": "Karim El Idrissi",
+          "commentaire": "Soumission pour approbation",
+          "createdAt": "2026-05-06T09:15:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "apr-002",
+      "workflowId": "wf-bc-std",
+      "entityType": "BC",
+      "entityId": "bc004",
+      "entityRef": "BC-2026-00004",
+      "entitySummary": "BC-2026-00004 — Sable / gravier — Maghreb Aggregats — 32 000 MAD HT",
+      "montantConcerne": 32000,
+      "chantierId": "ch-003",
+      "initiateurUserId": "emp-004",
+      "initiateurNom": "Mehdi Saadi",
+      "status": "EN_COURS",
+      "etapeCouranteIndex": 0,
+      "dateSoumission": "2026-05-07",
+      "urgence": "NORMALE",
+      "events": [
+        {
+          "action": "SOUMIS",
+          "userId": "emp-004",
+          "userNom": "Mehdi Saadi",
+          "commentaire": "Soumission pour approbation",
+          "createdAt": "2026-05-07T11:30:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "apr-004",
+      "workflowId": "wf-conge",
+      "entityType": "CONGE",
+      "entityId": "cng-001",
+      "entityRef": "CNG-2026-0001",
+      "entitySummary": "Congé annuel — Benmoussa Khalid — 01/07/2026 au 21/07/2026 (21 jours)",
+      "initiateurUserId": "emp-003",
+      "initiateurNom": "Younes Tazi",
+      "status": "EN_COURS",
+      "etapeCouranteIndex": 0,
+      "dateSoumission": "2026-05-04",
+      "urgence": "NORMALE",
+      "events": [
+        {
+          "action": "SOUMIS",
+          "userId": "emp-003",
+          "userNom": "Younes Tazi",
+          "commentaire": "Soumission pour approbation",
+          "createdAt": "2026-05-04T08:45:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "apr-005",
+      "workflowId": "wf-bc-std",
+      "entityType": "BC",
+      "entityId": "bc001",
+      "entityRef": "BC-2026-00001",
+      "entitySummary": "BC-2026-00001 — Ronds à béton T12/T16 — Sonasid — 285 000 MAD HT",
+      "montantConcerne": 285000,
+      "chantierId": "ch-001",
+      "initiateurUserId": "emp-002",
+      "initiateurNom": "Hicham Bennani",
+      "status": "APPROUVE",
+      "etapeCouranteIndex": 0,
+      "dateSoumission": "2026-05-02",
+      "dateCloture": "2026-05-03",
+      "urgence": "HAUTE",
+      "events": [
+        {
+          "action": "SOUMIS",
+          "userId": "emp-002",
+          "userNom": "Hicham Bennani",
+          "commentaire": "Soumission pour approbation",
+          "createdAt": "2026-05-02T09:00:00+01:00"
+        },
+        {
+          "action": "APPROUVE",
+          "userId": "emp-002",
+          "userNom": "Hicham Bennani",
+          "commentaire": "Approuvé — fournisseur homologué, devis conforme marché.",
+          "createdAt": "2026-05-03T10:00:00+01:00"
+        }
+      ]
+    }
+  ]
+}

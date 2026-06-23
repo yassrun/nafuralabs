@@ -1,0 +1,106 @@
+{
+  "shared": {
+    "dataTable": {
+      "empty": {
+        "title": "Aucune donnée",
+        "message": "Aucun élément à afficher pour le moment."
+      },
+      "boolean": {
+        "yes": "Oui",
+        "no": "Non"
+      },
+      "export": {
+        "csv": "Exporter CSV",
+        "xlsx": "Exporter Excel"
+      }
+    },
+    "emptyState": {
+      "defaultTitle": "Aucun résultat",
+      "actionLabel": "Nouvelle entrée"
+    },
+    "pageShell": {
+      "actions": {
+        "refresh": "Actualiser",
+        "back": "Retour",
+        "close": "Fermer"
+      }
+    },
+    "pagination": {
+      "rowsPerPage": "Lignes par page :",
+      "counter": "{from}–{to} sur {total}",
+      "firstPage": "Première page",
+      "previousPage": "Page précédente",
+      "nextPage": "Page suivante",
+      "lastPage": "Dernière page"
+    },
+    "filters": {
+      "reset": "Réinitialiser",
+      "resetTitle": "Réinitialiser les filtres",
+      "resetTooltip": "Effacer filtres, recherche et tri visible (listing)"
+    },
+    "entityDetail": {
+      "actions": {
+        "save": "Enregistrer",
+        "cancel": "Annuler",
+        "edit": "Modifier",
+        "delete": "Supprimer",
+        "close": "Fermer"
+      }
+    },
+    "statusBadge": {
+      "unknown": "Inconnu"
+    },
+    "moneyInput": {
+      "placeholder": "0,00"
+    },
+    "confirmDialog": {
+      "ok": "OK",
+      "cancel": "Annuler",
+      "title": "Confirmation",
+      "message": "Êtes-vous sûr ?"
+    },
+    "phoneMa": {
+      "placeholder": "+212 6 XX XX XX XX",
+      "error": "Numéro invalide — format +212 6/7 XX XX XX XX",
+      "validatorMessage": "Numéro marocain invalide"
+    },
+    "documentWorkspace": {
+      "exportNotImplemented": "L'export n'est pas encore disponible pour ce document.",
+      "actions": {
+        "validate": "Valider",
+        "post": "Comptabiliser",
+        "print": "Imprimer",
+        "export": "Exporter",
+        "cancel": "Annuler",
+        "submit": "Soumettre"
+      }
+    },
+    "sendEmail": {
+      "defaultSubject": "À propos de {ref}"
+    },
+    "alerts": {
+      "bellTitle": "Alertes métier",
+      "centerSectionTitle": "Alertes métier",
+      "centerPlatformSectionTitle": "Notifications système",
+      "factureLate": "{numero} en retard de {count, plural, =0 {0 jour} one {1 jour} other {# jours}}",
+      "cautionExpiry": "{numero} expire dans {count, plural, =0 {moins d’un jour} one {1 jour} other {# jours}}",
+      "noPendingAlert": "Aucune alerte en attente",
+      "dismiss": "Masquer"
+    },
+    "entityListing": {
+      "bulkDelete": {
+        "title": "{count, plural, =0 {Supprimer} one {Supprimer 1 {entity}} other {Supprimer # {entity}}}",
+        "message": "{count, plural, =0 {Aucun élément sélectionné.} one {Voulez-vous vraiment supprimer cet élément ? Cette action est irréversible.} other {Voulez-vous vraiment supprimer ces # éléments ? Cette action est irréversible.}}",
+        "confirmLabel": "Tout supprimer"
+      },
+      "toast": {
+        "deleted": "{count, plural, =0 {Aucun élément supprimé.} one {1 élément supprimé.} other {# éléments supprimés.}}",
+        "exported": "{count, plural, =0 {Aucun élément exporté.} one {1 élément exporté.} other {# éléments exportés.}}",
+        "archived": "{count, plural, =0 {Aucun élément archivé.} one {1 élément archivé.} other {# éléments archivés.}}"
+      },
+      "importExport": {
+        "importButton": "{count, plural, =0 {Importer} one {Importer 1 élément} other {Importer # éléments}}"
+      }
+    }
+  }
+}

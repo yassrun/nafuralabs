@@ -1,0 +1,29 @@
+{
+  "entity": "BankTransaction",
+  "fields": {
+    "transactionId": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "bankAccountId": {
+      "required": true
+    },
+    "transactionDate": {
+      "required": true
+    },
+    "amount": {
+      "required": true
+    },
+    "type": {
+      "required": true,
+      "maxLength": 10
+    },
+    "reference": {
+      "maxLength": 200
+    },
+    "description": {
+      "maxLength": 500
+    }
+  }
+}

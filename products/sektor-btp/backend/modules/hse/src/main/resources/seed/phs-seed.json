@@ -1,0 +1,24 @@
+{
+  "phs": [
+    {
+      "id": "phs-001",
+      "numero": "PHS-GROUPE-2026-001",
+      "titre": "PHS groupe — version validée",
+      "version": 2,
+      "dateRevision": "2026-01-10",
+      "auteurNom": "Direction QHSE",
+      "status": "VALIDE",
+      "contenu": "[{\"code\":\"1\",\"titre\":\"Renseignements administratifs\",\"contenu\":\"Politique intégrée qualité — sécurité — environnement (démo groupe).\"},{\"code\":\"2\",\"titre\":\"Description de l'ouvrage\",\"contenu\":\"Activités BTP : gros œuvre, VRD, lots techniques (démo).\"}]"
+    },
+    {
+      "id": "phs-002",
+      "numero": "PHS-GROUPE-2026-DRAFT",
+      "titre": "PHS groupe — brouillon",
+      "version": 1,
+      "dateRevision": "2026-05-01",
+      "auteurNom": "Karim El Idrissi",
+      "status": "BROUILLON",
+      "contenu": "[]"
+    }
+  ]
+}

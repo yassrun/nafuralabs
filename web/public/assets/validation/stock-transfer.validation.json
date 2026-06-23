@@ -1,0 +1,23 @@
+{
+  "entity": "StockTransfer",
+  "fields": {
+    "transferNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "requestedBy": {
+      "maxLength": 120
+    },
+    "totalItems": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

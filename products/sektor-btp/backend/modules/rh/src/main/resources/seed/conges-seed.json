@@ -1,0 +1,122 @@
+{
+  "conges": [
+    {
+      "id": "cng-001",
+      "numero": "CNG-2026-0001",
+      "employeId": "emp-001",
+      "employeNom": "Benmoussa Khalid",
+      "type": "ANNUEL",
+      "dateDebut": "2026-07-01",
+      "dateFin": "2026-07-21",
+      "nombreJours": 21,
+      "status": "DEMANDE",
+      "motif": "Congé annuel été"
+    },
+    {
+      "id": "cng-002",
+      "numero": "CNG-2026-0002",
+      "employeId": "emp-005",
+      "employeNom": "Tahiri Mohamed",
+      "type": "ANNUEL",
+      "dateDebut": "2026-06-15",
+      "dateFin": "2026-07-05",
+      "nombreJours": 21,
+      "status": "APPROUVE",
+      "motif": "Congé annuel"
+    },
+    {
+      "id": "cng-003",
+      "numero": "CNG-2026-0003",
+      "employeId": "emp-008",
+      "employeNom": "Alaoui Karim",
+      "type": "ANNUEL",
+      "dateDebut": "2026-04-10",
+      "dateFin": "2026-04-30",
+      "nombreJours": 21,
+      "status": "SOLDE"
+    },
+    {
+      "id": "cng-004",
+      "numero": "CNG-2026-0004",
+      "employeId": "emp-007",
+      "employeNom": "Chraïbi Nadia",
+      "type": "MATERNITE",
+      "dateDebut": "2026-03-01",
+      "dateFin": "2026-07-27",
+      "nombreJours": 98,
+      "status": "EN_COURS"
+    },
+    {
+      "id": "cng-005",
+      "numero": "CNG-2026-0005",
+      "employeId": "emp-002",
+      "employeNom": "El Fassi Rachid",
+      "type": "MALADIE",
+      "dateDebut": "2026-04-14",
+      "dateFin": "2026-04-18",
+      "nombreJours": 5,
+      "status": "SOLDE",
+      "motif": "Grippe"
+    },
+    {
+      "id": "cng-006",
+      "numero": "CNG-2026-0006",
+      "employeId": "emp-009",
+      "employeNom": "Berrada Samir",
+      "type": "EXCEPTIONNEL",
+      "dateDebut": "2026-05-02",
+      "dateFin": "2026-05-04",
+      "nombreJours": 3,
+      "status": "APPROUVE",
+      "motif": "Mariage"
+    },
+    {
+      "id": "cng-007",
+      "numero": "CNG-2026-0007",
+      "employeId": "emp-003",
+      "employeNom": "Aouine Youssef",
+      "type": "SANS_SOLDE",
+      "dateDebut": "2026-06-01",
+      "dateFin": "2026-06-10",
+      "nombreJours": 10,
+      "status": "REFUSE",
+      "motif": "Voyage personnel",
+      "motifRefus": "Charge de travail sur chantier Hay Riad — report demandé"
+    },
+    {
+      "id": "cng-008",
+      "numero": "CNG-2026-0008",
+      "employeId": "emp-016",
+      "employeNom": "Lahrichi Mourad",
+      "type": "ANNUEL",
+      "dateDebut": "2026-08-01",
+      "dateFin": "2026-08-21",
+      "nombreJours": 21,
+      "status": "DEMANDE",
+      "motif": "Congé annuel"
+    },
+    {
+      "id": "cng-009",
+      "numero": "CNG-2026-0009",
+      "employeId": "emp-010",
+      "employeNom": "Hajji Fatima Zahra",
+      "type": "MALADIE",
+      "dateDebut": "2026-05-05",
+      "dateFin": "2026-05-09",
+      "nombreJours": 5,
+      "status": "DEMANDE"
+    },
+    {
+      "id": "cng-010",
+      "numero": "CNG-2026-0010",
+      "employeId": "emp-011",
+      "employeNom": "Mansouri Omar",
+      "type": "ANNUEL",
+      "dateDebut": "2026-07-15",
+      "dateFin": "2026-08-04",
+      "nombreJours": 21,
+      "status": "APPROUVE",
+      "motif": "Congé direction"
+    }
+  ]
+}

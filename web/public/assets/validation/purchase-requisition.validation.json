@@ -1,0 +1,32 @@
+{
+  "entity": "PurchaseRequisition",
+  "fields": {
+    "reqNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "requesterId": {
+      "required": true
+    },
+    "departmentId": {
+      "required": true
+    },
+    "needByDate": {
+      "required": true
+    },
+    "currencyId": {
+      "required": true
+    },
+    "totalEstimate": {
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "justification": {
+      "maxLength": 2000
+    }
+  }
+}

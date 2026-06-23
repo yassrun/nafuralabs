@@ -1,0 +1,573 @@
+# Audit Fonctionnel — Round 2 — Nafura ERP BTP
+
+> **Focus** : Inventaire détaillé des **fonctionnalités manquantes** module par module pour finaliser Nafura ERP face à la concurrence marocaine (Sage, Batigest, Odoo BTP, SAP B1, ERPGEC, Cogilog).
+> **Périmètre audité** : Tous les modules accessibles via la sidebar sur `localhost:4200`, mock data.
+> **Date** : 13/05/2026
+> **Convention** : Chaque feature manquante a un ID stable (`M-XX`), une priorité business (P0/P1/P2/P3) et une description actionnable.
+
+---
+
+## 0. Évolutions notables depuis le round 1
+
+Bonnes nouvelles — beaucoup de progrès :
+
+- `<html lang="fr" dir="ltr">` — F-14 ✅ résolu
+- PWA manifest + Service Worker activés — F-41 ✅ résolu
+- Devise MAD désormais utilisée dans Situations, Devis, Bibliothèque de prix — F-03 ✅ résolu pour ces écrans
+- Clés i18n du module Matériel traduites — F-06 ✅ résolu
+- Modules `Stock & Logistique` (`/inventory/...`) **implémentés** avec 16 sous-routes — F-07 ✅ résolu
+- Modules `Marchés BTP` (contrats, avenants, cautions, révisions K, pénalités) **implémentés** — F-08 ✅ résolu
+- `Pilotage` (marges chantier, marge consolidée, cash-flow) **implémenté** — F-09 (partiel) ✅
+- `Carnets d'attachement` et `Journal de chantier` ajoutés (excellents !) ✅
+- Sous-routes `/chantiers/sous-traitance`, `/chantiers/documents`, `/chantiers/attachements`, `/chantiers/journal` **opérationnelles** — F-05 ✅ résolu
+- Finance enrichie : `SIMPL-IS TVA`, `État 9421`, `État 1208`, `DAMANCOM` ✅
+- Picker société multi-tenant dans le header (« SOMACOM BTP SARL — Siège Casablanca ») ✅
+- Page 404 propre avec suggestions ✅
+- Format chiffres `1.234.567,89 MAD` cohérent dans Règlements/Cautions/Pénalités ✅
+
+Régressions / problèmes persistants :
+
+- F-01 ❌ **Fiche chantier toujours « introuvable »** — drill-down individuel toujours cassé
+- F-02 ❌ Lignes de tableaux **non cliquables** (constaté sur Mes chantiers, vraisemblablement partout)
+- F-04 ⚠️ Cohérence des IDs : amélioration, mais **toujours mélange** `CH-2025-XXX` (situations, sous-traitance) et `CH-2026-XXX` (planning, chantiers) ; codes chantiers du budget mélangent les deux ; F-11 ❌ Command palette toujours non fonctionnelle (`Ctrl+K`)
+- F-13 ❌ Toggle langue toujours inopérant
+- Notifications panel : ouvre maintenant mais labels en anglais (« No notifications », « View All »)
+- Modules toujours absents : **Qualité & HSE**, **Administration** (404), **Pilotage & Analyses** sous-routes vides (KPIs à 0)
+
+---
+
+## 1. Cartographie complète à jour (état actuel)
+
+| Section sidebar | Module | Sous-routes existantes | État données |
+|---|---|---|---|
+| GÉNÉRAL | Tableau de bord | `/dashboard` | KPIs OK |
+| OPÉRATIONS | **Chantiers** | Mes chantiers, Planning, Avancements, Situations, Budget, Sous-traitance, Documents, Carnets d'attachement, Journal de chantier | OK sauf détail |
+| OPÉRATIONS | **Achats & Sous-traitance** | DA, AO, BC, Contrats fournisseurs, Fournisseurs | OK |
+| OPÉRATIONS | **Stock & Logistique** | Réceptions, Sorties, Transferts, Retours, Inventaires, Pertes-chutes, État stock, Valorisation, Alertes, Articles, Familles, Types, UoM, Dépôts, Motifs, Costing | **Très complet** |
+| OPÉRATIONS | **Matériel & Équipements** | Parc, Affectations, Locations (stub), Maintenance (404 dans la route), Carburant (404) | Partiel |
+| BUSINESS | **Études & Soumissions** | Bibliothèque prix, Métrés, Devis, AO clients | OK basique |
+| BUSINESS | **Marchés BTP** | Contrats, Avenants, Factures situations, Cautions, Révisions K, Pénalités | **Très bon** |
+| BUSINESS | **Marchés & Facturation** | duplique « Marchés BTP » dans le menu | À fusionner |
+| BUSINESS | **Finance & Trésorerie** | Journaux, Balance, Analytique, Factures fournisseurs, Caisses, Virements, Règlements, Rapprochement, SIMPL-IS, État 9421, État 1208, Devises, TC, Conditions paiement, PCG | **Très complet** |
+| ÉQUIPE | **Ressources Humaines** | Employés, Pointage, Planning équipes, Congés, Paie, Journal paie, DAMANCOM, IGR, État 1208 | Bon |
+| ÉQUIPE | **Qualité & HSE** | aucune route — 404 | **Absent** |
+| PILOTAGE | **Pilotage** | Marges chantiers, Marge consolidée, Cash-flow | OK |
+| PILOTAGE | **Pilotage & Analyses** | Rentabilité, Analyse financière, Stock, Achats, RH | Stubs (KPIs à 0) |
+| PILOTAGE | **Approbations** | `/approvals` | Page vide « Aucune » |
+| PILOTAGE | **Administration** | aucune route — 404 | **Absent** |
+
+**Verdict de complétude** : ~70 % des modules ont au moins un écran fonctionnel, mais :
+- 2 modules totalement absents : **Qualité & HSE** et **Administration**
+- 1 module dupliqué dans le menu : **Marchés BTP** vs **Marchés & Facturation**
+- 5 modules « stubs » sans données : **Pilotage & Analyses** (analytics/*), **Approbations**, **Matériel/Maintenance**, **Matériel/Carburant**, **Matériel/Locations**
+
+---
+
+## 2. Gap fonctionnel détaillé par module
+
+### 2.1 Tableau de bord
+
+État : 8 KPIs en tuiles (CA facturé, factures en retard, BC en cours, DA, employés, congés, incidents YTD, NC ouvertes). Le KPI « Avancement moyen » est passé de 0 % à 47 % (data branchée).
+
+**Features manquantes :**
+
+| ID | Sévérité | Feature | Pourquoi |
+|---|---|---|---|
+| M-DASH-01 | P1 | **Personnalisation du dashboard** (drag & drop widgets, layout par rôle) | Un DG, un conducteur de travaux, un comptable n'ont pas les mêmes besoins. |
+| M-DASH-02 | P1 | **Graphes & tendances** (courbe CA cumul vs N-1, sparklines marge, top 5 chantiers en alerte) | Tuiles seules = ERP années 2010. |
+| M-DASH-03 | P1 | **Drill-down depuis chaque KPI** (clic « Factures en retard 6 » → liste filtrée). | Découverte naturelle, sans navigation manuelle. |
+| M-DASH-04 | P2 | **Alertes temps réel** centralisées (engagements > 90 % budget, situations > 60 j MOA, cautions < 30 j d'échéance, retard pointage chantier) | Le rôle d'un dashboard est l'alerting. |
+| M-DASH-05 | P2 | **Filtres** : société, chantier, période, MOA, métier. | Multi-entité indispensable. |
+| M-DASH-06 | P2 | **Export PDF / planning du jour** envoyable au top management. | Cas d'usage classique du matin. |
+| M-DASH-07 | P3 | **Widgets HSE & RH** plus riches (TF/TG, pyramide âges, taux d'absentéisme). | Pour DRH/QHSE. |
+| M-DASH-08 | P3 | **Mode TV** plein écran pour salle de pilotage. | Différenciateur. |
+
+---
+
+### 2.2 Chantiers
+
+État : 9 sous-modules opérationnels (Mes chantiers, Planning Gantt, Avancements, Situations, Budget, Sous-traitance, Documents, Attachements, Journal). Excellent niveau métier sur les attachements (signature MOE/MOA, météo, nb ouvriers, zones) et le journal (OS, visite MOA, incident, livraison, intempérie).
+
+**Features manquantes :**
+
+| ID | Sévérité | Feature | Pourquoi |
+|---|---|---|---|
+| M-CHA-01 | **P0** | **Page de détail chantier accessible et fonctionnelle** (résume tout : équipe, planning, budget, marché, attachements, journal, photos, docs) | Fonctionnalité centrale toujours cassée (« Chantier introuvable »). |
+| M-CHA-02 | **P0** | **Wizard de création chantier** (étapes : info marché → équipe → lots/phases → planning prévisionnel → budget initial → cautions → documents initiaux) | Aujourd'hui aucun bouton « + Nouveau chantier » visible. |
+| M-CHA-03 | P1 | **Onglets fiche chantier** : Vue d'ensemble / Marché / Planning / Budget / Avancement / Achats liés / Stock / Matériel / RH / Documents / Journal / Risques | Pattern attendu (Sage, BatiSimply, Eligo). |
+| M-CHA-04 | P1 | **Équipe chantier** (rôles : chef chantier, conducteur de travaux, ingénieur, BET, MOE, MOA — avec téléphones, photos, badges) | Annuaire opérationnel quotidien. |
+| M-CHA-05 | P1 | **Carte interactive** chantiers (Mapbox/Leaflet) avec pins géolocalisés et état | Différenciateur visuel commercial. |
+| M-CHA-06 | P1 | **Carnet d'attachement → signature MOE/MOA en ligne** (e-signature, lien d'invitation, horodatage, hash) | Le mock affiche « Signé MOE » mais aucun workflow visible. |
+| M-CHA-07 | P1 | **Photos chantier géolocalisées** : upload depuis mobile, regroupement par jour/zone, comparaison avant/après, EXIF préservé | Module Documents montre une catégorie Photo mais pas de visionneuse ni de workflow. |
+| M-CHA-08 | P1 | **Plans BIM / DWG / PDF** : visionneuse intégrée + révisions + annotations + lien direct depuis l'attachement | Aujourd'hui upload simple. |
+| M-CHA-09 | P1 | **Risques chantier** (registre, criticité, propriétaire, plan d'action) | Demandé par certification ISO et MOA publics. |
+| M-CHA-10 | P1 | **Planning : exporter MS-Project (XML) / Primavera / Excel** + import | Compatibilité avec BET et clients. |
+| M-CHA-11 | P1 | **Avancements** : import mobile (photo + saisie offline), validation chef chantier, lien direct vers ligne situation | Aujourd'hui saisie purement web. |
+| M-CHA-12 | P2 | **Métrés As-built** vs métrés prévisionnels (écarts par lot) | Permet d'objectiver dépassements. |
+| M-CHA-13 | P2 | **Météo automatique** (open-meteo / Météo Maroc API) sur le journal et l'attachement, et déclenchement « intempérie » > seuils contractuels | Important pour justification décalages. |
+| M-CHA-14 | P2 | **Réceptions** (provisoire / définitive) avec PV, réserves, levée de réserves, dates retenue de garantie | Génère automatiquement DGD. |
+| M-CHA-15 | P2 | **Budget chantier** : drill-down ligne → engagements liés (BC, contrats sous-traitance, paie affectée), marges absurdes actuelles (`3.250 %`) à corriger | Bug visible sur écran budget. |
+| M-CHA-16 | P3 | **Calendrier équipes** par chantier (synchro Outlook / Google) | Confort de planification. |
+
+---
+
+### 2.3 Achats & Sous-traitance
+
+État : 5 sous-modules (DA, AO, BC, Contrats fournisseurs, Fournisseurs).
+
+**Features manquantes :**
+
+| ID | Sévérité | Feature | Pourquoi |
+|---|---|---|---|
+| M-ACH-01 | **P0** | **Module Réceptions intégré** (entre BC et facture fournisseur). Aujourd'hui les réceptions sont dans `/inventory/mouvements/receptions` sans lien direct côté BC. | Pas de matching BC ↔ BL ↔ Facture (« 3-way matching ») = perte de contrôle. |
+| M-ACH-02 | **P0** | **Comparatif fournisseurs / scoring offres AO** (matrice prix × délai × note qualité × historique × Art. 187 OK ?) avec recommandation IA | Le but de l'AO. |
+| M-ACH-03 | P1 | **Fournisseur — vue 360°** (KPI : volume YTD, OTIF % livraison, retard moyen, taux litige, notes, encours, attestations CNSS/fiscale/AMO à jour, RIB par banque) | Sourcing moderne. |
+| M-ACH-04 | P1 | **Workflow DA → AO → BC → Réception → Facture** : statut, dépendances, traçabilité (origine d'un BC = DA-XXX). Aujourd'hui pas de lien explicite. | Audit trail obligatoire. |
+| M-ACH-05 | P1 | **Catalogue articles fournisseurs** + tarifs négociés + grilles remises | Évite ressaisie prix. |
+| M-ACH-06 | P1 | **Portail fournisseur** (login fournisseur, soumission AO, suivi BC, dépôt factures, dépôt attestations, signature électronique) | Réduit drastiquement la friction. |
+| M-ACH-07 | P1 | **Attestations légales** à vérifier automatiquement à chaque BC : Attestation fiscale, Attestation CNSS, Attestation RC, IF, ICE, Patente, RIB. Alerte si périmées. | Conformité art. 60 LF 2024 (interdiction règlement sans attestations). |
+| M-ACH-08 | P1 | **Sous-traitance — contrat type** + champ déclaratif obligatoire **Art. 187 CGI** + suivi RG + validation client MOA si imposée par CCAG | Conformité Maroc. |
+| M-ACH-09 | P1 | **BC catalogue / rapide** (sortie de stock interne, BC sur contrat cadre, sans workflow AO) | 80 % des achats courants. |
+| M-ACH-10 | P2 | **Cadre normatif marchés publics** (BPU, PUF, PGF, marché de régie, ordre de service, OS d'arrêt, OS de reprise, OS de modification) | Argument vente vs MOA publics. |
+| M-ACH-11 | P2 | **Tableau de bord achats** (économies réalisées vs marché, dépendance fournisseur >25 %, top fournisseurs litige) | KPI direction. |
+| M-ACH-12 | P3 | **Suggestions IA** d'articles à commander selon planning chantier et stock projeté | Différenciateur. |
+
+---
+
+### 2.4 Stock & Logistique
+
+État : **module le plus complet** — 16 sous-routes, mouvements complets (réceptions/sorties/transferts/retours/inventaires/pertes-chutes), suivi (état/valorisation/alertes), référentiel (articles/familles/types/UoM/dépôts/motifs/costing-methods).
+
+**Features manquantes :**
+
+| ID | Sévérité | Feature | Pourquoi |
+|---|---|---|---|
+| M-STK-01 | P1 | **Scanner mobile (douchette + QR codes / code-barres)** pour réception BL, sortie stock, inventaire | Le bouton « Scanner BL » existe sur l'écran réceptions mais ne déclenche pas un workflow mobile complet. |
+| M-STK-02 | P1 | **Réservation stock chantier** (« 2 t de fer HA12 réservées pour CH-2026-001 semaine 21 ») | Évite ruptures et conflits. |
+| M-STK-03 | P1 | **Magasin chantier digital** : entrée par BC → sortie par bon de matières signé chef chantier → consommation valorisée → écart inventaire de chantier hebdo | Cœur métier BTP. |
+| M-STK-04 | P1 | **Liaison sortie stock ↔ consommation chantier ↔ budget** (visualiser le réalisé matière par chantier vs prévu métré) | Pivote le contrôle budgétaire. |
+| M-STK-05 | P1 | **Étiquetage** (impression étiquettes lot/emplacement, QR codes) | Standard logistique. |
+| M-STK-06 | P1 | **Multi-emplacements par dépôt** + emplacement par défaut par article | Précision inventaire. |
+| M-STK-07 | P1 | **Date péremption / lot** pour produits chimiques (étanchéité, adjuvants, peintures) | Souvent oublié, important. |
+| M-STK-08 | P2 | **Demande de transfert** workflow (chantier A demande → magasin valide → transporteur ramasse → chantier B reçoit) | Évite appels téléphone. |
+| M-STK-09 | P2 | **Coût moyen pondéré (CMP) / FIFO réel** (la route `costing-methods` existe — vérifier que la valorisation suit la méthode choisie). | Norme comptable. |
+| M-STK-10 | P2 | **ABC analysis** (Pareto stock 80/20) | Aide à décider seuils réappro. |
+| M-STK-11 | P2 | **Suggestion réappro auto** (sur stock mini × consommation prévisionnelle × délai fournisseur) → génère DA brouillon | Automatisation. |
+| M-STK-12 | P3 | **Carte des dépôts** + tournée optimale livraison chantiers (Google Maps API) | Différenciateur logistique. |
+
+---
+
+### 2.5 Matériel & Équipements
+
+État : Parc OK (engins, marque, série, statut), Affectations OK. **Maintenance et Carburant redirigent vers `/parc`** → pas de page dédiée. **Locations externes** stub.
+
+**Features manquantes :**
+
+| ID | Sévérité | Feature | Pourquoi |
+|---|---|---|---|
+| M-MAT-01 | **P0** | **Maintenance préventive et corrective** : planning entretien (h compteur, km, dates), OT (ordre de travail), pièces consommées, coût, durée, prochain entretien. | Cœur de la GMAO. Aujourd'hui 0 contenu. |
+| M-MAT-02 | **P0** | **Carburant & Consommables** : carnet par engin, jauge début/fin, consommation L/h, alerte vol/anomalie, coût analytique chantier. | Poste de coût majeur (5–15 % CA chantier VRD/TP). |
+| M-MAT-03 | P1 | **Fiche engin 360°** (caractéristiques, photos, contrôles réglementaires, dates VGP — visite générale périodique — assurance, carte grise, conducteurs habilités, historique mvt) | Référentiel pour audits. |
+| M-MAT-04 | P1 | **Locations externes** (vraie module, pas stub) : contrats avec loueur, période, tarif j/sem/mois, lien chantier, échéance retour, état contradictoire | Le mock affiche « Vue provisoire ». |
+| M-MAT-05 | P1 | **Réservation / planning matériel** (Gantt par engin sur chantiers) avec détection conflits | Évite mobilisations doubles. |
+| M-MAT-06 | P1 | **Pointage matériel chantier** (heures fonctionnement quotidien par engin × chantier) → coûts analytiques | Standard BTP. |
+| M-MAT-07 | P1 | **Contrôles réglementaires** (VGP grue/nacelle annuel, contrôle technique camions, étalonnage outils) avec rappels et bloqueur si périmé | Conformité légale. |
+| M-MAT-08 | P2 | **GPS / télémétrie** (intégration boîtiers Fleetio / Geotab / SQUOR) avec position temps réel, heures moteur, alerte sortie de zone | Différenciateur. |
+| M-MAT-09 | P2 | **Habilitations conducteurs** (CACES R482/R486/R489/R490) avec dates de validité, blocage affectation si expirée | Légal + sécurité. |
+| M-MAT-10 | P2 | **Calcul TCO** par engin (achat + amortissement + maintenance + carburant + utilisation) → décision conserver/vendre/louer | Pilotage parc. |
+| M-MAT-11 | P3 | **Maintenance prédictive** via heures compteur + IA | Différenciateur. |
+
+---
+
+### 2.6 Études & Soumissions
+
+État : 4 modules basiques (Bibliothèque prix, Métrés, Devis, AO clients).
+
+**Features manquantes :**
+
+| ID | Sévérité | Feature | Pourquoi |
+|---|---|---|---|
+| M-ETU-01 | **P0** | **Décomposition Prix Unitaire (DPU)** : pour chaque article, composition matière × MO × matériel × frais généraux × marge — modifiable. | Sans DPU, pas de chiffrage sérieux. La biblio actuelle n'affiche que le prix de vente. |
+| M-ETU-02 | **P0** | **Métré → DPGF** (Décomposition Prix Global et Forfaitaire) avec hiérarchie lots / sous-lots / articles, et **génération automatique devis** à partir du métré | Pivot du module Études. |
+| M-ETU-03 | P1 | **Soumission AO client** : assistant de réponse (cahier des charges → métré → bordereau → mémoire technique → planning → cautions → dossier qualif) | Augmente taux de gain. |
+| M-ETU-04 | P1 | **Courbe en S prévisionnelle** depuis le DPGF + planning + cash plan | Différenciateur direction. |
+| M-ETU-05 | P1 | **Bibliothèque prix** : import depuis Excel, export, versioning, % de marge cible global, indexation des prix sur indices BTP01/BTP18 | Aujourd'hui simple liste statique. |
+| M-ETU-06 | P1 | **Mémoire technique** auto-généré (paragraphes réutilisables, références chantier, CV équipe, attestations qualif) | Demande forte des MOA publics. |
+| M-ETU-07 | P1 | **Variantes de chiffrage** (avec/sans option, scénarios marge) et comparatif côté à côte | Phase de négociation. |
+| M-ETU-08 | P1 | **Import BPU client** (Excel/CSV) — chargement direct du bordereau MOA → ajout des prix → édition de la réponse | Productivité études. |
+| M-ETU-09 | P2 | **Bibliothèque qualifs & références** (Qualibat, Qualiopi, classifications marocaines des entreprises BTP) | Pour dossier soumission. |
+| M-ETU-10 | P2 | **Bordereaux de prix officiels** (MTE/AFRA/Provinces) chargés et mappés | Productivité publics. |
+| M-ETU-11 | P2 | **Comparatif appel d'offres reçus** (déjà côté Achats AO) — penser miroir côté études pour AO client : analyse concurrents quand info publique. | Veille commerciale. |
+| M-ETU-12 | P3 | **IA générative** : « génère le mémoire technique pour ce chantier » à partir des fiches références + cahier des charges | Différenciateur. |
+
+---
+
+### 2.7 Marchés BTP
+
+État : très bon module — Contrats / Avenants / Factures situations / Cautions bancaires / Révisions K (BTP01, BTP18, MO) / Pénalités. Conforme CCAG-T marocain.
+
+**Features manquantes :**
+
+| ID | Sévérité | Feature | Pourquoi |
+|---|---|---|---|
+| M-MAR-01 | P1 | **Avenants : workflow complet** (rédaction → signature → impact budget / planning / cautions) — aujourd'hui vu une simple liste. | Avenants = 10–30 % chiffre d'affaires marchés publics. |
+| M-MAR-02 | P1 | **Décompte général définitif (DGD)** : génération auto depuis cumul situations + retenues + révision K + pénalités + reprise RG | Document légal de clôture obligatoire. |
+| M-MAR-03 | P1 | **Caution : alerte expiration** + workflow renouvellement / mainlevée auprès banque + dossier électronique constitué | Risque immobilisation trésorerie. |
+| M-MAR-04 | P1 | **OS (Ordre de Service)** : émission, accusé de réception, impact délai (constatation intempérie, OS d'arrêt, OS de reprise) | Aujourd'hui visible dans journal mais pas relié au marché. |
+| M-MAR-05 | P1 | **Situations** : génération automatique mensuelle depuis avancements physiques saisis + métré + révision K + pénalités | Aujourd'hui en saisie manuelle vraisemblablement. |
+| M-MAR-06 | P1 | **Acomptes / paiements anticipés / Avance de démarrage** (typiquement 10–30 % du marché public Maroc avec caution restitution) avec amortissement automatique | Fréquent et complexe. |
+| M-MAR-07 | P2 | **Sous-traitance déclarée vs effective** (Art. 187 CGI) — déclaration MOA, validation, RG, paiement direct | Conformité. |
+| M-MAR-08 | P2 | **Réception provisoire + Levée de réserves + Réception définitive** : workflow PV, photos, dates → libération RG | Workflow chronologique standard. |
+| M-MAR-09 | P2 | **Indices BTP01..BTPxx automatisés** : import mensuel depuis ANP / HCP (CSV public) au lieu de saisir à la main | Conformité données officielles. |
+| M-MAR-10 | P3 | **Litige / réclamation MOA** (registre, courriers, expertise, médiation) | Cas marchés publics. |
+
+> ⚠️ **Marchés & Facturation** dans la sidebar duplique « Marchés BTP » — à fusionner ou clarifier (peut-être un était prévu pour la facturation côté privé non marché ?).
+
+---
+
+### 2.8 Finance & Trésorerie
+
+État : très bon — Journaux comptables, Balance, Analytique, Factures fournisseurs, Caisses, Virements, Règlements, Rapprochement, SIMPL-IS, État 9421, État 1208, Devises, TC, Conditions paiement, Plans comptables. Niveau de finition élevé.
+
+**Features manquantes :**
+
+| ID | Sévérité | Feature | Pourquoi |
+|---|---|---|---|
+| M-FIN-01 | P1 | **Lettrage automatique facture ↔ règlement** (ouvert / lettré / partiel) avec UI manuelle de lettrage | Indispensable comptabilité. |
+| M-FIN-02 | P1 | **Recouvrement** : âge des créances, échéancier, relances auto (J+15/J+30/J+45) email/SMS, lettres de relance, mise en demeure | 70 % des entreprises BTP MA ont besoin. |
+| M-FIN-03 | P1 | **Effets de commerce** (LCR/LCN) : portefeuille effets, remise à l'encaissement, escompte bancaire, suivi impayés | Pratique courante Maroc. |
+| M-FIN-04 | P1 | **Multi-banques** : remise virements XML SEPA / format AWB / BMCE / CIH / Banque Populaire | Réduction temps trésorier. |
+| M-FIN-05 | P1 | **Rapprochement bancaire** : import relevé OFX/CSV banque + matching auto + écarts | Vérifier que la route /finance/rapprochement implémente ce niveau. |
+| M-FIN-06 | P1 | **Facture électronique** conforme **DGI e-facture** (qui devient obligatoire entreprises CA > 50 M MAD en 2026–2027) : QR code, signature, archive électronique 10 ans | Législation imminente. |
+| M-FIN-07 | P1 | **Retenue à la source 5 %** travaux marchés publics : calcul auto, déclaration trimestrielle | Manquant alors qu'imposé. |
+| M-FIN-08 | P1 | **Régime auto-entrepreneur fournisseurs** : autoliquidation TVA & RAS spécifique | Cas BTP fréquent. |
+| M-FIN-09 | P1 | **Caisses chantier** : avances aux chefs chantier, justificatifs photo (ticket), validation, refacturation analytique chantier | Train de cash terrain. |
+| M-FIN-10 | P2 | **Comptabilité analytique multi-axes** : chantier × lot × phase × catégorie × société | Vérifier la route /finance/analytique. |
+| M-FIN-11 | P2 | **Budget trésorerie glissant 12 mois** par chantier et consolidé | Cash-flow exists au pilotage mais branche analytique manque. |
+| M-FIN-12 | P2 | **Clôture périodique** (mensuelle/annuelle), report à nouveau, ouverture exercice | Obligation comptable. |
+| M-FIN-13 | P2 | **Liasse fiscale** (CGAOI/CGAEDD, IS, Bilan, CPC, ESG, Tableau de financement) au format DGI | Demandé par DAF. |
+| M-FIN-14 | P3 | **Connecteur banques** API (PSD2-like : AWB Open Banking, CIH OpenAPI) | Différenciateur. |
+
+---
+
+### 2.9 Ressources Humaines
+
+État : bon — Employés, Pointage, Planning équipes, Congés, Paie, Journal paie, DAMANCOM (CSS+AMO calcul correct), IGR État 9421, État 1208.
+
+**Features manquantes :**
+
+| ID | Sévérité | Feature | Pourquoi |
+|---|---|---|---|
+| M-RH-01 | **P0** | **Pointage mobile chantier** (app mobile / PWA dédiée chef chantier) : pointer une équipe en quelques tap, photo de groupe, géoloc, signature, mode offline | Différenciateur fort vs concurrence MA. Sage et Batigest n'ont pas. |
+| M-RH-02 | P1 | **Contrats** : génération auto depuis modèle (CDI/CDD/ANAPEC/intérim/chantier) avec champs marocains (matricule CNSS, AMO, IF salarié si concerné) + signature électronique | Productivité RH. |
+| M-RH-03 | P1 | **Heures supplémentaires** (HS25/HS50/HS100) : barèmes marocains (jour ouvré +25 % au-delà 44 h, dimanche +50 %, jour férié +100 %), validation chef chantier | Calcul paie BTP critique. |
+| M-RH-04 | P1 | **Frais de déplacement chantier** : indemnités km, panier repas, hébergement, remboursements, refacturation analytique | Fréquent dans BTP. |
+| M-RH-05 | P1 | **Carrière** : entretien annuel, formations, habilitations CACES/SST/électricité, alertes échéances | Compliance ISO. |
+| M-RH-06 | P1 | **Sécurité paie** : restriction d'accès, signature électronique fiche paie, archivage légal 5 ans | Confidentialité. |
+| M-RH-07 | P1 | **Paie intérim** : pré-calcul + commande agence + saisie heures + facturation | Très utilisé BTP MA. |
+| M-RH-08 | P1 | **Congés** : compteur automatique 1,5 j/mois, soldes par employé, workflow validation hiérarchique, planning équipe avec impact chantier | Standard. |
+| M-RH-09 | P1 | **Accidents du travail** : déclaration auto **CNSS DAT** + lien HSE + suivi indemnités journalières | Conformité légale obligatoire. |
+| M-RH-10 | P1 | **Maladies & arrêts** : suivi, IJSS CNSS, contre-visite éventuelle | Obligation employeur. |
+| M-RH-11 | P2 | **Self-service employé** : fiche paie en ligne, demande congés, justificatifs, attestation travail | Gain admin RH. |
+| M-RH-12 | P2 | **Formation continue** & **TFP 1,6 %** (Taxe Formation Professionnelle, employeur Maroc) : gestion budget OFPPT, conventions, remboursements | Cadre légal. |
+| M-RH-13 | P2 | **Médecine du travail** : visites embauche / périodique / reprise (obligation Code du Travail MA) | Compliance. |
+| M-RH-14 | P3 | **Engagement / pulse surveys** | Différenciateur tech RH. |
+
+---
+
+### 2.10 Qualité & HSE — **MODULE ABSENT**
+
+Le bouton est dans la sidebar mais cliquer affiche `/qualite` → 404. C'est un gros manque pour un ERP BTP Maroc, car les MOA publics et grands MOA privés (OCP, ONEE, ADM, Holdings) **exigent** la traçabilité HSE.
+
+**Features à créer (toutes P0/P1) :**
+
+| ID | Sévérité | Feature |
+|---|---|---|
+| M-HSE-01 | **P0** | **Registre des incidents/accidents** : déclaration, type (AT, AT trajet, presque accident, dommage matériel), gravité, EPI portés, causes, plan d'action |
+| M-HSE-02 | **P0** | **Non-conformités (NC)** : ouverture, criticité, action corrective/préventive (CAPA), responsable, échéance, vérification efficacité |
+| M-HSE-03 | **P0** | **PPSPS** (Plan Particulier Sécurité et Protection de la Santé) — document obligatoire par chantier MA |
+| M-HSE-04 | **P0** | **PHS** (Plan Hygiène & Sécurité) générique société |
+| M-HSE-05 | P1 | **Causerie 1/4 h sécurité** : registre quotidien chantier (sujet, présents, signature) |
+| M-HSE-06 | P1 | **Audits HSE** : checklists configurables, score, photo, plan d'action |
+| M-HSE-07 | P1 | **EPI** : dotation par employé, dates de remplacement, suivi |
+| M-HSE-08 | P1 | **Risques chimiques** : fiches FDS, formation |
+| M-HSE-09 | P1 | **Plans d'évacuation, exercices, alarmes** : registre |
+| M-HSE-10 | P1 | **KPIs HSE** : TF1, TF2, TG, ratio dépenses HSE / CA, jours sans accident, dashboard direction |
+| M-HSE-11 | P1 | **Déclarations CNSS DAT** + CNAOPS si applicable |
+| M-HSE-12 | P2 | **Audits qualité ISO 9001 / 45001** : ISO 9001 (QMS), 14001 (env.), 45001 (HSE) — checklists, suivi |
+| M-HSE-13 | P2 | **Risques environnementaux** chantier (eau, déchets, bruit, poussière) + registres |
+| M-HSE-14 | P2 | **PV de levée de réserves QHSE** |
+
+---
+
+### 2.11 Pilotage & Pilotage & Analyses
+
+État : Pilotage (Marges chantiers, Marge consolidée, Cash-flow) **fonctionne** avec des données. Pilotage & Analyses (rentabilité, financier, stock, achats, RH) affiche des **stubs avec KPIs à 0**.
+
+**Features manquantes :**
+
+| ID | Sévérité | Feature | Pourquoi |
+|---|---|---|---|
+| M-PIL-01 | **P0** | **Pilotage & Analyses : brancher les données réelles** sur les 5 vues analytics (chantiers, financier, stock, achats, RH) | Aujourd'hui : « Avancement moyen 0% », « Budget total 0 MAD ». |
+| M-PIL-02 | P1 | **Indicateurs de marge** : marge brute, marge nette par chantier, par BU, par client, par MOA | Vrai pilotage. |
+| M-PIL-03 | P1 | **OPEX vs CAPEX** par mois et par chantier | Direction finance. |
+| M-PIL-04 | P1 | **Reporting groupe** (multi-sociétés / multi-entités) | Multi-tenant indispensable. |
+| M-PIL-05 | P1 | **Cash-flow** : actuelement projection linéaire post-mois 2 (« +658.148 MAD » constant sur 10 mois). À remplacer par projection dynamique selon échéances facturation/règlement/situations | Bug visible. |
+| M-PIL-06 | P1 | **What-if simulator** : impact d'un OS, d'un retard 3 mois, d'une hausse acier 10 % sur marge | Différenciateur direction. |
+| M-PIL-07 | P2 | **Exports finance pour CAC / DAF** (FEC, balance N-1, mapping IFRS / CGNC) | Vérifier exhaustivité. |
+| M-PIL-08 | P2 | **Benchmark sectoriel** (avec données anonymisées intra-clients Nafura) : un client BTP a une marge moyenne X %, top 10 % à Y % | Différenciateur futur. |
+| M-PIL-09 | P3 | **Alertes IA proactives** : « Tu vas dépasser le budget chantier CH-2026-004 dans 21 jours selon la trajectoire » | Différenciateur. |
+
+---
+
+### 2.12 Approbations
+
+État : Page existe (`/approvals`) mais affiche « Aucune approbation en attente ». Pas de configuration visible des workflows ni d'historique réel.
+
+**Features manquantes (toutes P0/P1) :**
+
+| ID | Sévérité | Feature |
+|---|---|---|
+| M-APR-01 | **P0** | **Engine workflow** générique : entité × montant × rôles approbateurs (en série ou en parallèle), avec délégation et escalade SLA |
+| M-APR-02 | **P0** | **Approbations multi-types** : DA, AO attribution, BC, facture fournisseur, situation, congés, paie, virement bancaire, avenant, OS |
+| M-APR-03 | **P0** | **Inbox approbateur** : carte synthèse, commentaires, demande complément, approbation/rejet, audit log immuable |
+| M-APR-04 | P1 | **Délégation** absence approbateur → délégué automatique |
+| M-APR-05 | P1 | **Notifications** email/push/in-app, escalade après X jours |
+| M-APR-06 | P1 | **Configuration matricielle** par société/division/chantier de la matrice de pouvoirs (ex. < 50K MAD → directeur travaux, 50-500K → DG, > 500K → comité) |
+| M-APR-07 | P1 | **Approbation mobile** (1-clic depuis email/notification) |
+| M-APR-08 | P2 | **Audit trail** complet avec hash & timestamping pour conformité judiciaire |
+
+---
+
+### 2.13 Administration — **MODULE ABSENT**
+
+Page `/admin` → 404. **Bloquant pour mise en production**.
+
+**Features à créer (toutes P0/P1) :**
+
+| ID | Sévérité | Feature |
+|---|---|---|
+| M-ADM-01 | **P0** | **Utilisateurs & Rôles** : CRUD, permissions granulaires (RBAC) module × action × scope (société, chantier) |
+| M-ADM-02 | **P0** | **SSO** (Microsoft Entra ID, Google Workspace, OIDC) + 2FA TOTP/SMS, gestion sessions |
+| M-ADM-03 | **P0** | **Sociétés / Entités juridiques** : multi-tenant (un groupe BTP a souvent 3–10 sociétés). Header montre « SOMACOM BTP SARL — Siège Casablanca » — UI déjà prête, manque le back-office |
+| M-ADM-04 | **P0** | **Paramètres société** : raison sociale, ICE, IF, RC, Patente, CNSS, CNAEM, RIB par banque, logo (pour PDF), adresse, exercices comptables |
+| M-ADM-05 | **P0** | **Référentiels** : clients, fournisseurs (déjà OK), articles (déjà OK), employés (déjà OK), MOA, banques |
+| M-ADM-06 | P1 | **Audit log global** (qui a fait quoi quand où), recherchable |
+| M-ADM-07 | P1 | **Templates documents** : devis, BC, facture, BL, situation, attachement, contrat (modèles avec variables + WYSIWYG) |
+| M-ADM-08 | P1 | **Numérotation séquentielle** : modèles par type doc (préfixe, séparateur, année, séquence) et par société |
+| M-ADM-09 | P1 | **Paramètres fiscaux** : taux TVA, retenues à la source, timbres, exonérations |
+| M-ADM-10 | P1 | **Mappings comptables** : OD automatiques par type d'opération (facture vente → 411/707/4456, facture achat → 401/61, paie → 64/44/4453 etc.) |
+| M-ADM-11 | P1 | **Gestion abonnements / licences** (si SaaS) : nb utilisateurs, modules activés, usage |
+| M-ADM-12 | P1 | **Sauvegarde & restauration** données |
+| M-ADM-13 | P2 | **API publique** : tokens, scope, quotas, webhooks |
+| M-ADM-14 | P2 | **Import / Migration** depuis Sage Maroc, Batigest, Excel, Odoo, SAGEAR (l'agent connu Maroc) |
+| M-ADM-15 | P2 | **Internationalisation** : config locales (FR/AR/EN), formats (devise, date, heure, calendrier hijri optionnel) |
+| M-ADM-16 | P3 | **Thème / White-label** par société (logo, couleurs) |
+
+---
+
+## 3. Features transversales manquantes
+
+| ID | Sévérité | Feature | Détail |
+|---|---|---|---|
+| M-TRA-01 | **P0** | **Command palette `Ctrl+K`** | Toujours non fonctionnelle (constaté). Pattern Linear : recherche pages + entités (BC, fournisseur, employé, chantier, facture). Indispensable à 50+ écrans. |
+| M-TRA-02 | **P0** | **Drill-down clic-ligne universel** | Toutes les tables doivent être cliquables (chantiers, BC, DA, factures, employés, contrats, attachements, journaux). Critique pour UX. |
+| M-TRA-03 | **P0** | **Workflow approbation transversal** | Cf §2.12 (M-APR-01) |
+| M-TRA-04 | P1 | **Exports CSV / XLSX / PDF** uniformes sur **toutes** les listes | Quelques modules ont un bouton « Exporter » (cf marges-chantier, SIMPL-IS), à généraliser. |
+| M-TRA-05 | P1 | **Impression PDF** (templates) pour BC, devis, factures, situations, attachements, contrats sous-traitance, fiches paie, ordres de service | Aucune visualisation impression vue. |
+| M-TRA-06 | P1 | **Filtres avancés / sauvegarde de vues** par utilisateur (« Mes chantiers Casa en cours », « BC > 100K en attente livraison ») | UX productive. |
+| M-TRA-07 | P1 | **Recherche full-text** dans documents PDF / scans BL / factures (OCR) | Productivité comptable. |
+| M-TRA-08 | P1 | **Notifications applicatives** : centre de notifications fonctionnel (vu : ouvre mais vide & en anglais) | Cf §0. |
+| M-TRA-09 | P1 | **Bilingue FR / AR (RTL)** + Anglais pour expatriés | Toggle langue non fonctionnel constaté. |
+| M-TRA-10 | P1 | **Mode sombre** (dark mode) | Pas en place. |
+| M-TRA-11 | P1 | **États vides / loading / erreur** uniformes (skeletons, empty illustrations, retry) | Pas vu de skeleton/empty sur les écrans testés. |
+| M-TRA-12 | P1 | **Feedback toasts** sur toutes les actions CRUD (succès, erreur, undo court) | Pas vu de toast. |
+| M-TRA-13 | P1 | **Aide contextuelle** : tooltip `?` à côté des termes métier (Art. 187, RG, IGR, BTP18, K, SIMPL-IS, DAMANCOM, ANAPEC, OPPCM…) | Onboarding des nouveaux users. |
+| M-TRA-14 | P1 | **Tour produit / Onboarding** premier login (Walktrhough avec Intro.js / Driver.js) | Réduit churn. |
+| M-TRA-15 | P2 | **Historique & restauration** d'enregistrements (versions précédentes, restauration soft-delete) | Productivité user. |
+| M-TRA-16 | P2 | **Commentaires & mentions @user** sur entités (chantier, BC, NC, facture) avec fil de discussion | Collaboration interne. |
+| M-TRA-17 | P2 | **Pièces jointes** universelles (toute entité accepte des fichiers, photos, dossier zip) avec preview | Productivité. |
+| M-TRA-18 | P2 | **Activity feed** par entité (timeline qui a fait quoi) | Audit trail visible. |
+| M-TRA-19 | P3 | **Bulk actions** sur listes (sélectionner N lignes, action groupée) | Power user. |
+| M-TRA-20 | P3 | **Saved searches → automation** (« quand BC > 200K et fournisseur sans attestation à jour, alerter DAF ») | Différenciateur. |
+
+---
+
+## 4. Mobile / Terrain — Quasi inexistant
+
+Le besoin critique d'un ERP BTP est **terrain**. Aujourd'hui aucun screen ne semble pensé mobile.
+
+| ID | Sévérité | Feature |
+|---|---|---|
+| M-MOB-01 | **P0** | **App mobile (PWA installable)** ou **app native React Native / Flutter** dédiée chef chantier : pointage, photos, journal, attachement, sortie matières, BL réception, demande matériel, demande achat express, urgent HSE |
+| M-MOB-02 | **P0** | **Mode offline** (IndexedDB / SQLite) avec sync différée pour zones sans réseau |
+| M-MOB-03 | P1 | **Géolocalisation** : prouve la présence sur chantier, géofencing pointage |
+| M-MOB-04 | P1 | **Capture photo** native avec compression et géotag |
+| M-MOB-05 | P1 | **Scanner QR / code-barres** intégré (BL, matériel, articles) |
+| M-MOB-06 | P1 | **Signature digitale** (canvas) pour PV, attachements |
+| M-MOB-07 | P2 | **Notifications push** (FCM / APNs) |
+| M-MOB-08 | P2 | **Mode très basse bande passante** (texte uniquement) pour chantiers reculés |
+
+---
+
+## 5. Intégrations & Connecteurs à brancher
+
+| ID | Sévérité | Cible | Pourquoi |
+|---|---|---|---|
+| M-INT-01 | **P0** | **DGI SIMPL-IS** (XML mensuel TVA) | Module existe mais à brancher API DGI |
+| M-INT-02 | **P0** | **CNSS DAMANCOM** (XML mensuel BAP) | idem |
+| M-INT-03 | P1 | **CNSS DAT** (déclaration accident travail) | HSE |
+| M-INT-04 | P1 | **API banques** marocaines (AWB, BMCE BoA, CIH, BP, BMCI, SGM, CAM, CFG) : virements XML, relevés OFX, e-banking | Trésorerie. |
+| M-INT-05 | P1 | **eFacture DGI** quand opérationnel (2026-2027) | Législation. |
+| M-INT-06 | P1 | **Indices BTP01..BTPxx** via ANP/HCP CSV mensuel | Révision auto. |
+| M-INT-07 | P1 | **Annuaire entreprises** : OMPIC API (ICE / IF / RC) → autocomplétion création fournisseur/client | UX. |
+| M-INT-08 | P1 | **Bureaux qualifications** : classification entreprises BTP MA (qualif & classif), Qualibat équivalent local | Études. |
+| M-INT-09 | P1 | **WhatsApp Business API** : envois automatiques notifications chefs chantier (Maroc = WhatsApp first) | Différenciateur fort. |
+| M-INT-10 | P2 | **Google Drive / OneDrive / Dropbox** : synchro documents chantier | Productivité. |
+| M-INT-11 | P2 | **Outlook / Gmail / Calendar** : événements chantier, OS, réunions | Productivité. |
+| M-INT-12 | P2 | **MS Project / Primavera P6** : export/import planning | Compatibilité BET. |
+| M-INT-13 | P2 | **Bentley / AutoCAD / Revit** : visionneuse + lien avec lots | BIM Level 1+. |
+| M-INT-14 | P2 | **Météo officielle Maroc** (DMN) | Justification intempérie. |
+| M-INT-15 | P3 | **PowerBI / Looker / Tableau** : exposition cube analytique via API | Direction analytique. |
+| M-INT-16 | P3 | **Comptabilité externe** : Sage 100/Sage 1000 (export FEC) | Migration progressive. |
+
+---
+
+## 6. Spécificités Maroc à compléter
+
+| ID | Sévérité | Feature | Détail |
+|---|---|---|---|
+| M-MA-01 | **P0** | **ICE, IF, RC, Patente, RIB, CNSS, AMO** : champs présents par endroits mais à **généraliser** sur tous les référentiels (clients, fournisseurs, sous-traitants, employés, sociétés du groupe). Avec **validation format** (ICE 15 chiffres, RIB 24, IF 8…) | Compliance + UX |
+| M-MA-02 | **P0** | **Retenue à la source 5 %** marchés publics (art. 158 CGI) : config par marché, calcul auto sur facture, déclaration trimestrielle DGI | Légal |
+| M-MA-03 | **P0** | **Timbre fiscal** sur facture espèces > 100 MAD | Légal |
+| M-MA-04 | P1 | **TVA 20 / 14 / 10 %** : configuration paramétrable, exonération marchés publics si applicable, autoliquidation | Légal |
+| M-MA-05 | P1 | **Régime TPCC** (Promotion Paysage Audiovisuel) — taxe sur certains chantiers publics | Légal |
+| M-MA-06 | P1 | **CIMR** (retraite complémentaire cadres) calcul paie | Cas cadres |
+| M-MA-07 | P1 | **OPPCM** (Outils Public de Passation des Commandes des MOA) — interface dépôt soumission marché public dématérialisé | Modernisation MA |
+| M-MA-08 | P1 | **CCAG-T marocain** : terminologie alignée (MOA, MOE, OS, PV, DGD, RG, RAS, etc.) — globalement OK, à vérifier |
+| M-MA-09 | P1 | **Calendrier hijri** optionnel + jours fériés MA (Aïd, fête du Trône, Marche Verte, etc.) | UX |
+| M-MA-10 | P2 | **Code des marchés publics MA** (décret 2-22-431) : seuils, modalités, transparence — modules AO clients préparés | Compliance |
+| M-MA-11 | P2 | **Banques marocaines** : référentiel SWIFT, agences, RIB structure validation | UX |
+| M-MA-12 | P2 | **Régions / Provinces / Communes** marocaines : référentiel à utiliser pour chantiers, fournisseurs, employés | Localization |
+| M-MA-13 | P2 | **Devise** : MAD primaire, EUR/USD pour fournisseurs étrangers (Maroc BTP importe acier, équipements) avec conversion | Réalisme |
+| M-MA-14 | P3 | **Calendrier prière** intégré chantier (option) | Différenciateur culturel |
+
+---
+
+## 7. Liste consolidée des features manquantes (tickets prêts)
+
+```
+[P0] M-CHA-01 Détail chantier accessible
+[P0] M-CHA-02 Wizard création chantier
+[P0] M-ACH-01 Module Réceptions intégré (3-way matching)
+[P0] M-ACH-02 Comparatif fournisseurs / scoring AO
+[P0] M-ETU-01 DPU (déboursé sec) bibliothèque prix
+[P0] M-ETU-02 Métré → DPGF → Devis auto
+[P0] M-MAT-01 Maintenance préventive/corrective GMAO
+[P0] M-MAT-02 Carburant & consommables
+[P0] M-RH-01 Pointage mobile chantier offline
+[P0] M-HSE-01..04 Module HSE complet (NC, AT, PPSPS, PHS)
+[P0] M-PIL-01 Brancher données Pilotage & Analyses
+[P0] M-APR-01..03 Engine workflow approbations
+[P0] M-ADM-01..05 Module Administration (users/rôles/sociétés/paramètres/référentiels)
+[P0] M-TRA-01 Command palette Ctrl+K
+[P0] M-TRA-02 Drill-down universel
+[P0] M-TRA-03 Workflow approbation transversal
+[P0] M-MOB-01 App mobile / PWA terrain
+[P0] M-MOB-02 Mode offline
+[P0] M-INT-01 SIMPL-IS API DGI
+[P0] M-INT-02 DAMANCOM API CNSS
+[P0] M-MA-01 ICE/IF/RC/Patente/RIB/CNSS partout + validation
+[P0] M-MA-02 Retenue à la source 5%
+[P0] M-MA-03 Timbre fiscal espèces
+
+[P1] M-DASH-01..04 Personnalisation, drill, alertes, filtres
+[P1] M-CHA-03..14 Onglets, équipe, carte, e-signature, photos géoloc, plans, risques, exports planning, mobile, métré as-built, météo, réceptions, budget drill
+[P1] M-ACH-03..10 360° fournisseur, workflow DA→facture, catalogue, portail, attestations, sous-traitance, BC catalogue, marchés publics
+[P1] M-STK-01..07 Scanner mobile, réservation, magasin chantier, conso↔budget, étiquettes, multi-emplacements, péremption
+[P1] M-MAT-03..07 Fiche 360°, locations, planning, pointage matériel, contrôles réglementaires
+[P1] M-ETU-03..08 Soumission AO, courbe S, biblio avancée, mémoire, variantes, import BPU
+[P1] M-MAR-01..06 Avenants workflow, DGD, alertes cautions, OS, situations auto, acomptes
+[P1] M-FIN-01..09 Lettrage, recouvrement, effets, multi-banques, rapprochement, e-facture, RAS 5%, auto-entrepreneur, caisses chantier
+[P1] M-RH-02..10 Contrats, HS, frais, carrière, sécurité paie, intérim, congés, AT CNSS, maladie
+[P1] M-HSE-05..11 Causerie, audits, EPI, FDS, évacuation, KPIs, déclarations
+[P1] M-PIL-02..06 Marges multi-axes, OPEX/CAPEX, groupe, cash-flow dynamique, what-if
+[P1] M-APR-04..07 Délégation, notifications, matrice, mobile
+[P1] M-ADM-06..12 Audit log, templates docs, numérotation, fiscal, mappings, licences, backup
+[P1] M-TRA-04..14 Exports, impression PDF, filtres avancés, OCR, notifications, bilingue, dark mode, états vides, toasts, aide, onboarding
+[P1] M-MOB-03..06 Géoloc, photo, scanner, signature
+[P1] M-INT-03..09 CNSS DAT, banques, e-facture, indices BTP, OMPIC, qualifs, WhatsApp
+[P1] M-MA-04..09 TVA paramétrable, TPCC, CIMR, OPPCM, CCAG-T, hijri
+
+[P2] M-DASH-05..07 Filtres, export PDF dashboard, widgets HSE
+[P2] M-CHA-15..16 Drill budget, calendrier équipes
+[P2] M-ACH-11..12 Tableau de bord achats, IA suggestion
+[P2] M-STK-08..12 Demande transfert, CMP/FIFO, ABC, réappro auto, carte
+[P2] M-MAT-08..10 GPS, habilitations CACES, TCO
+[P2] M-ETU-09..11 Qualifs, bordereaux MA, comparatif AO
+[P2] M-MAR-07..09 Sous-traitance déclarative, réception, indices auto
+[P2] M-FIN-10..13 Analytique multi-axes, budget tréso, clôture, liasse
+[P2] M-RH-11..13 Self-service, formation TFP, médecine
+[P2] M-HSE-12..14 ISO 9001/45001, environnement, levée réserves
+[P2] M-PIL-07..08 Exports CAC, benchmark
+[P2] M-APR-08 Audit trail
+[P2] M-ADM-13..15 API, import, locales
+[P2] M-TRA-15..18 Historique, commentaires, pièces jointes, activity
+[P2] M-MOB-07..08 Push, low bandwidth
+[P2] M-INT-10..14 Drive, Outlook, MS-Project, BIM, météo
+[P2] M-MA-10..13 Code marchés publics, banques, régions, multi-devises
+
+[P3] M-DASH-08 Mode TV
+[P3] M-CHA-... Calendrier sync Outlook
+[P3] M-ACH-12 IA suggestion
+[P3] M-ETU-12 IA mémoire technique
+[P3] M-MAR-10 Litige MOA
+[P3] M-FIN-14 Open banking
+[P3] M-RH-14 Engagement surveys
+[P3] M-PIL-09 Alertes IA proactives
+[P3] M-ADM-16 White-label
+[P3] M-TRA-19..20 Bulk, automation
+[P3] M-INT-15..16 PowerBI, Sage migration
+[P3] M-MA-14 Calendrier prière
+```
+
+---
+
+## 8. Recommandation finale
+
+Le produit progresse vite et a déjà des **différenciateurs forts** vs la concurrence MA :
+
+- **Révisions de prix K (BTP01/BTP18/MO)** : c'est rare et excellent.
+- **SIMPL-IS / DAMANCOM / État 9421** : conformité fiscale/sociale MA pré-câblée — gros avantage.
+- **Carnets d'attachement** avec météo + nb ouvriers + signature : niveau métier supérieur à Sage Maroc standard.
+- **Journal de chantier** avec OS / visite MOA / intempérie / impact j+MAD : à promouvoir comme killer feature.
+- **Cautions bancaires** avec type / banque / échéance : standard MA bien implémenté.
+- **Module Stock** très complet (16 sous-routes) : niveau Odoo+.
+
+**Points bloquants pour passer en production / pour vendre** :
+
+1. **M-ADM** (Administration absente) → bloque la vente B2B
+2. **M-HSE** (Qualité & HSE absent) → bloque les MOA publics et grands MOA privés
+3. **M-APR** (Approbations sans engine) → bloque la gouvernance entreprise
+4. **M-CHA-01** (Fiche chantier cassée) → bloque la démo commerciale
+5. **M-MOB-01** (App mobile terrain) → bloque l'usage terrain réel
+
+Si tu m'écoutes, **traite ces 5 points pendant les 6 prochaines semaines** et tu auras un produit vendable. Le reste est de l'enrichissement progressif.
+
+---
+
+## 9. Conseil d'orchestration pour les agents
+
+Pour chaque feature `M-XX` :
+1. **Lire** le périmètre et la priorité.
+2. **Créer un epic** dans le backlog (Jira/Linear/GitHub Projects) avec libellé `[ID] [Module] Feature`.
+3. **Decomposer** en stories (UI, API, DB, tests, documentation, i18n FR/AR).
+4. **Tester** : tests unitaires sur les calculs fiscaux/sociaux/K-révision (référence légale).
+5. **Documenter** : ajouter une fiche dans `/docs/features/<M-XX>.md`.
+
+Exemples de prompt agent :
+- « Implémente M-CHA-01. Le service `ChantierService.getById` doit consulter `assets/mocks/chantiers.mock.ts` et renvoyer le bon objet. La fiche doit avoir 8 onglets (Vue d'ensemble, Marché, Planning, Budget, Avancement, Achats liés, RH, Documents). Ajoute un test Playwright. »
+- « Implémente M-HSE-01 (Registre incidents). Modèle Incident { id, chantier, date, type, gravité, EPI, causes, plan_action, photos, déclaration_CNSS_DAT_id }. Écran liste + détail + formulaire création. Lien sidebar `/qualite/incidents`. i18n FR/AR. »
+- « Implémente M-TRA-01 (Command palette). Utilise `cdk-overlay` + `cdk-listbox`. Indexe : routes (avec libellés i18n), chantiers, fournisseurs, BC, factures, employés. Raccourci Ctrl+K et Cmd+K (Mac). »
+
+— **Fin du rapport round 2.**

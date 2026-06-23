@@ -1,0 +1,48 @@
+{
+  "entity": "FixedAsset",
+  "fields": {
+    "assetNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "name": {
+      "required": true,
+      "maxLength": 200
+    },
+    "description": {
+      "maxLength": 2000
+    },
+    "categoryId": {
+      "required": true
+    },
+    "acquisitionDate": {
+      "required": true
+    },
+    "acquisitionCost": {
+      "required": true,
+      "min": 0
+    },
+    "currentValue": {
+      "min": 0
+    },
+    "depreciationMethod": {
+      "required": true,
+      "maxLength": 30
+    },
+    "usefulLife": {
+      "required": true,
+      "min": 1
+    },
+    "salvageValue": {
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

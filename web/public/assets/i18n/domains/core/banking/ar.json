@@ -1,0 +1,65 @@
+{
+  "banking": {
+    "navigation": {
+      "title": "الخدمات البنكية",
+      "description": "مجال الخدمات البنكية",
+      "banks": "البنوك",
+      "bankAccounts": "الحسابات البنكية",
+      "bankReconciliations": "التسويات البنكية",
+      "bankTransactions": "العمليات البنكية",
+      "fundTransfers": "تحويلات الأموال"
+    }
+  },
+  "common": {
+    "subsections": {
+      "operations": "العمليات",
+      "configuration": "الإعدادات"
+    }
+  },
+  "directory": {
+    "fields": {
+      "code": "الرمز",
+      "name": "الاسم",
+      "swiftCode": "رمز SWIFT",
+      "countryId": "معرّف البلد",
+      "isActive": "نشط"
+    },
+    "sections": {
+      "general": "عام"
+    }
+  },
+  "finance": {
+    "fields": {
+      "accountNumber": "رقم الحساب",
+      "name": "الاسم",
+      "bankName": "اسم البنك",
+      "currencyId": "معرّف العملة",
+      "accountType": "نوع الحساب",
+      "balance": "الرصيد",
+      "iban": "IBAN",
+      "swiftCode": "رمز SWIFT",
+      "isActive": "نشط",
+      "reconciliationNumber": "رقم التسوية",
+      "bankAccountId": "معرّف الحساب البنكي",
+      "statementDate": "تاريخ الكشف",
+      "statementBalance": "رصيد الكشف",
+      "bookBalance": "الرصيد الدفتري",
+      "difference": "الفرق",
+      "status": "الحالة",
+      "transactionId": "معرّف العملية",
+      "transactionDate": "تاريخ العملية",
+      "amount": "المبلغ",
+      "type": "النوع",
+      "reference": "المرجع",
+      "description": "الوصف",
+      "isReconciled": "مُسوَّى",
+      "transferNumber": "رقم التحويل",
+      "fromBankAccountId": "معرّف الحساب المصدر",
+      "toBankAccountId": "معرّف الحساب الوجهة",
+      "transferDate": "تاريخ التحويل"
+    },
+    "sections": {
+      "general": "عام"
+    }
+  }
+}

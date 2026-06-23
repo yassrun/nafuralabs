@@ -1,0 +1,41 @@
+    .affectations-tab {
+      padding: 1rem;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-muted);
+    }
+    .affectations-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .affectations-table th,
+    .affectations-table td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .affectations-table th {
+      font-weight: 600;
+      background: var(--bg-subtle);
+    }
+    .affectations-table tr.current {
+      background: var(--bg-accent-subtle);
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    .badge-info {
+      background: var(--color-info-subtle);
+      color: var(--color-info);
+    }
+    .badge-muted {
+      background: var(--bg-muted);
+      color: var(--text-muted);
+    }
+    

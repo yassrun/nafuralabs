@@ -1,0 +1,47 @@
+<div class="general-settings">
+  <header class="page-header">
+    <div>
+      <div class="eyebrow">{{ 'docExtractor.settings.general.eyebrow' | translate }}</div>
+      <h2>{{ 'docExtractor.settings.general.title' | translate }}</h2>
+    </div>
+    @if (saved()) {
+      <div class="saved-indicator">
+        <mat-icon>check_circle</mat-icon>
+        {{ 'docExtractor.settings.general.saved' | translate }}
+      </div>
+    }
+  </header>
+
+  <section class="card">
+    <div class="card__row">
+      <div class="card__content">
+        <div class="card__title">{{ 'docExtractor.settings.general.autoValidateTitle' | translate }}</div>
+        <div class="card__description">
+          {{ 'docExtractor.settings.general.autoValidateDescription' | translate }}
+        </div>
+      </div>
+      <mat-slide-toggle
+        color="primary"
+        [checked]="settings().autoValidateAll"
+        [disabled]="saving()"
+        (change)="onAutoValidateChange($event.checked)"
+      >
+        {{ 'docExtractor.settings.general.autoValidateTitle' | translate }}
+      </mat-slide-toggle>
+    </div>
+
+    <mat-form-field appearance="outline" class="card__select" color="primary">
+      <mat-label>{{ 'docExtractor.settings.general.autoValidationPolicy' | translate }}</mat-label>
+      <mat-select
+        [disabled]="true"
+        [value]="settings().autoValidationPolicy"
+        (selectionChange)="onPolicyChange($event.value)"
+      >
+        <mat-option value="MANUAL">{{ 'docExtractor.settings.general.policyManual' | translate }}</mat-option>
+        <mat-option value="CONFIDENCE" disabled>{{ 'docExtractor.settings.general.policyConfidence' | translate }}</mat-option>
+        <mat-option value="ALWAYS" disabled>{{ 'docExtractor.settings.general.policyAlways' | translate }}</mat-option>
+      </mat-select>
+      <mat-hint>{{ 'docExtractor.settings.general.comingSoon' | translate }}</mat-hint>
+    </mat-form-field>
+  </section>
+</div>

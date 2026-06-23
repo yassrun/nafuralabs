@@ -1,0 +1,1634 @@
+{
+  "inventory": {
+    "routes": {
+      "scanner": {
+        "title": "ماسح المخزون",
+        "breadcrumb": "ماسح"
+      },
+      "magasinChantier": {
+        "title": "مخزن الورش",
+        "breadcrumb": "مخزن الورش"
+      },
+      "reservations": {
+        "title": "حجوزات المخزون",
+        "breadcrumb": "الحجوزات"
+      },
+      "etatStock": {
+        "title": "حالة المخزون",
+        "breadcrumb": "حالة المخزون"
+      },
+      "valorisation": {
+        "title": "التقييم",
+        "breadcrumb": "التقييم"
+      },
+      "alertes": {
+        "title": "تنبيهات إعادة التموين",
+        "breadcrumb": "التنبيهات"
+      },
+      "articles": {
+        "title": "الأصناف",
+        "breadcrumb": "الأصناف",
+        "new": "صنف جديد",
+        "detail": "تفاصيل الصنف",
+        "newBreadcrumb": "جديد",
+        "detailBreadcrumb": "التفاصيل"
+      },
+      "materielCatalogue": {
+        "title": "كاتالوغ العتاد",
+        "breadcrumb": "كاتالوغ العتاد",
+        "new": "عتاد جديد",
+        "detail": "تفاصيل العتاد"
+      },
+      "depots": {
+        "title": "المستودعات والمواقع",
+        "breadcrumb": "المستودعات",
+        "new": "مستودع جديد",
+        "detail": "تفاصيل المستودع"
+      },
+      "familles": {
+        "title": "عائلات الأصناف",
+        "breadcrumb": "العائلات",
+        "new": "عائلة جديدة",
+        "detail": "تفاصيل العائلة"
+      },
+      "typesArticles": {
+        "title": "أنواع الأصناف",
+        "breadcrumb": "أنواع الأصناف",
+        "new": "نوع جديد",
+        "detail": "تفاصيل النوع"
+      },
+      "motifs": {
+        "title": "دوافع الحركة",
+        "breadcrumb": "الدوافع",
+        "new": "دافع جديد",
+        "detail": "تفاصيل الدافع"
+      },
+      "uom": {
+        "title": "وحدات القياس",
+        "breadcrumb": "UoM",
+        "new": "وحدة جديدة",
+        "detail": "تفاصيل الوحدة"
+      },
+      "uomCategories": {
+        "title": "فئات وحدات القياس",
+        "breadcrumb": "فئات UoM",
+        "new": "فئة UoM جديدة",
+        "detail": "تفاصيل فئة UoM"
+      },
+      "costingMethods": {
+        "title": "طرق التقييم",
+        "breadcrumb": "طرق التقييم",
+        "new": "طريقة جديدة",
+        "detail": "تفاصيل الطريقة"
+      },
+      "receptions": {
+        "title": "الاستلامات",
+        "breadcrumb": "الاستلامات",
+        "new": "استلام جديد",
+        "detail": "تفاصيل الاستلام"
+      },
+      "transferts": {
+        "title": "التحويلات",
+        "breadcrumb": "التحويلات",
+        "new": "تحويل جديد",
+        "detail": "تفاصيل التحويل"
+      },
+      "sorties": {
+        "title": "الإخراجات",
+        "breadcrumb": "الإخراجات",
+        "new": "إخراج جديد",
+        "detail": "تفاصيل الإخراج"
+      },
+      "retours": {
+        "title": "الإرجاعات",
+        "breadcrumb": "الإرجاعات",
+        "new": "إرجاع جديد",
+        "detail": "تفاصيل الإرجاع"
+      },
+      "inventaires": {
+        "title": "الجرود المادية",
+        "breadcrumb": "الجرود",
+        "new": "جرد جديد",
+        "detail": "تفاصيل الجرد"
+      },
+      "pertesChutes": {
+        "title": "الفقد والنفايات",
+        "breadcrumb": "الفقد والنفايات",
+        "new": "فقد/نفاية جديدة",
+        "detail": "تفاصيل الفقد/النفاية"
+      },
+      "stockBalances": {
+        "title": "أرصدة المخزون",
+        "breadcrumb": "الأرصدة"
+      },
+      "parcMateriel": {
+        "title": "أسطول العتاد",
+        "breadcrumb": "أسطول العتاد",
+        "new": "عتاد جديد",
+        "detail": "تفاصيل العتاد"
+      },
+      "affectationsMateriel": {
+        "title": "تخصيصات العتاد",
+        "breadcrumb": "التخصيصات"
+      },
+      "ficheEngin": {
+        "title": "بطاقة الآلية",
+        "breadcrumb": "الآلية"
+      },
+      "planningMateriel": {
+        "title": "جدولة العتاد",
+        "breadcrumb": "جدولة العتاد"
+      },
+      "pointageEngin": {
+        "title": "تسجيل حضور الآلية",
+        "breadcrumb": "تسجيل الحضور"
+      },
+      "controlesReglementaires": {
+        "title": "الفحوصات التنظيمية",
+        "breadcrumb": "الفحوصات"
+      },
+      "locationsExternes": {
+        "title": "الإيجارات الخارجية",
+        "breadcrumb": "الإيجارات"
+      },
+      "plansMaintenance": {
+        "title": "خطط الصيانة",
+        "breadcrumb": "الخطط"
+      },
+      "ordresTravail": {
+        "title": "أوامر الشغل",
+        "breadcrumb": "أوامر الشغل"
+      },
+      "ordreTravail": {
+        "title": "أمر الشغل",
+        "breadcrumb": "أمر الشغل"
+      },
+      "historiqueMaintenance": {
+        "title": "سجل الصيانة",
+        "breadcrumb": "السجل"
+      },
+      "carnetsCarburant": {
+        "title": "دفاتر الوقود",
+        "breadcrumb": "الدفاتر"
+      },
+      "pleinsCarburant": {
+        "title": "تعبئات الوقود",
+        "breadcrumb": "التعبئات"
+      },
+      "consommationsCarburant": {
+        "title": "الاستهلاكات",
+        "breadcrumb": "الاستهلاكات"
+      }
+    },
+    "common": {
+      "yes": "نعم",
+      "no": "لا",
+      "active": "نشط",
+      "inactive": "غير نشط",
+      "dash": "—",
+      "all": "الكل",
+      "loading": "جاري التحميل…",
+      "noData": "لا توجد بيانات"
+    },
+    "enums": {
+      "articleType": {
+        "MATERIAU": "مادة",
+        "CONSOMMABLE": "مادة استهلاكية",
+        "ENGIN": "آلية",
+        "OUTILLAGE": "أدوات"
+      },
+      "locationType": {
+        "DEPOT": "مستودع",
+        "ENTREPOT": "مخزن",
+        "CHANTIER": "ورش",
+        "TRANSIT": "عبور",
+        "VIRTUEL": "افتراضي"
+      },
+      "materielStatus": {
+        "DISPONIBLE": "متاح",
+        "AFFECTE": "مخصص",
+        "MAINTENANCE": "قيد الصيانة",
+        "HORS_SERVICE": "خارج الخدمة"
+      },
+      "txType": {
+        "RECEPTION": "استلام",
+        "TRANSFERT": "تحويل",
+        "RETOUR": "إرجاع",
+        "INVENTAIRE": "جرد",
+        "PERTE": "فقد / نفاية",
+        "SORTIE": "إخراج"
+      },
+      "txStatus": {
+        "BROUILLON": "مسودة",
+        "VALIDE": "مصدّق",
+        "CONFIRME": "مؤكد",
+        "ANNULE": "ملغى",
+        "EN_COURS": "قيد التنفيذ",
+        "CLOTURE": "مغلق",
+        "PARTIEL": "جزئي"
+      },
+      "alertUrgency": {
+        "CRITIQUE": "حرج",
+        "EN_ALERTE": "في حالة تنبيه"
+      },
+      "costingMethod": {
+        "AVCO": "AVCO (التكلفة المتوسطة)",
+        "FIFO": "FIFO (الداخل أولاً، الخارج أولاً)",
+        "STD": "التكلفة المعيارية",
+        "CUMP": "CUMP / PMP",
+        "LIFO": "LIFO (الداخل أخيراً، الخارج أولاً)"
+      },
+      "locationExterneStatus": {
+        "EN_COURS": "قيد التنفيذ",
+        "TERMINEE": "منتهية",
+        "ANNULEE": "ملغاة"
+      },
+      "posteBudget": {
+        "MATERIAUX": "المواد",
+        "MO": "اليد العاملة",
+        "SOUS_TRAITANCE": "المقاولة من الباطن",
+        "LOCATION_MATERIEL": "إيجار العتاد",
+        "CARBURANT": "الوقود",
+        "FRAIS_GENERAUX": "المصاريف العامة",
+        "IMPREVUS": "غير المتوقعة"
+      },
+      "devise": {
+        "MAD": "MAD — درهم مغربي",
+        "EUR": "EUR — يورو",
+        "USD": "USD — دولار أمريكي"
+      },
+      "etatArticle": {
+        "BON": "حالة جيدة",
+        "ABIME": "متضرر",
+        "INUTILISABLE": "غير قابل للاستعمال"
+      },
+      "motifPerteType": {
+        "CASSE": "كسر",
+        "VOL": "سرقة",
+        "DEGRADATION": "تدهور",
+        "CHUTE_OBLIGATOIRE": "نفاية إجبارية",
+        "FIN_LOT": "نهاية الدفعة",
+        "AUTRE": "أخرى"
+      },
+      "causeDetaillee": {
+        "DECOUPE": "نفاية قص",
+        "CASSE": "كسر",
+        "DETERIORATION": "تلف",
+        "AUTRE": "أخرى"
+      }
+    },
+    "catalogue": {
+      "title": "كاتالوغ الأصناف",
+      "article": {
+        "entityName": "صنف",
+        "entityNamePlural": "أصناف",
+        "headerTitle": "الأصناف",
+        "headerTitleNew": "صنف جديد",
+        "headerTitleDetail": "تفاصيل الصنف",
+        "permissionPrefix": "inventory.article",
+        "saveSuccess": "تم حفظ الصنف «{name}» بنجاح",
+        "deleteConfirm": {
+          "title": "حذف الصنف",
+          "message": "هل تريد فعلاً حذف الصنف «{name}»؟"
+        },
+        "actions": {
+          "printLabels": "طباعة الملصقات (دفعة / موقع)"
+        },
+        "reservations": {
+          "title": "الحجوزات النشطة",
+          "empty": "لا توجد حجوزات لهذا الصنف.",
+          "columns": {
+            "chantier": "الورش",
+            "qte": "الكمية",
+            "expiration": "تاريخ الانتهاء",
+            "statut": "الحالة"
+          }
+        },
+        "fields": {
+          "code": "الرمز",
+          "name": "التسمية",
+          "description": "الوصف",
+          "familleId": "العائلة",
+          "articleType": "نوع الصنف",
+          "uomId": "وحدة القياس",
+          "uomSecondaireId": "الوحدة الثانوية (مثلاً كيس)",
+          "conversionFactor": "معامل التحويل (الثانية → الأولى)",
+          "conversionFactorHint": "مثلاً 50 إذا كان 1 كيس = 50 كغ",
+          "prixUnitaire": "سعر الكاتالوغ (MAD)",
+          "prixAchatDernier": "آخر سعر شراء (MAD)",
+          "pmp": "PMP — السعر المتوسط المرجح (MAD)",
+          "pmpHint": "تقييم المخزون / ربط بميزانية الإخراجات",
+          "delaiReapproJours": "أجل إعادة التموين (بالأيام)",
+          "devise": "العملة",
+          "stockMin": "الحد الأدنى للمخزون",
+          "stockMax": "الحد الأقصى للمخزون",
+          "posteBudgetId": "بند الميزانية (المُنجَز)",
+          "posteBudgetHint": "أولوية على الإسناد الافتراضي صنف → بند",
+          "isPerissable": "قابل للتلف",
+          "isSerialise": "متابعة بالرقم التسلسلي",
+          "isActive": "نشط"
+        },
+        "list": {
+          "columns": {
+            "code": "الرمز",
+            "name": "التسمية",
+            "familleName": "العائلة",
+            "articleType": "النوع",
+            "uomCode": "الوحدة",
+            "prixUnitaire": "سعر الكات. (MAD)",
+            "pmp": "PMP (MAD)",
+            "delaiReapproJours": "إعادة التموين (يوم)",
+            "posteBudgetId": "بند الميزانية",
+            "stockTotal": "إجمالي المخزون",
+            "isActive": "نشط"
+          },
+          "filters": {
+            "famille": "العائلة",
+            "type": "النوع",
+            "isActive": "نشط"
+          }
+        },
+        "sections": {
+          "identification": "التعريف",
+          "mesurePrix": "القياس والتقييم",
+          "appro": "إعادة التموين والميزانية",
+          "seuilsStock": "عتبات المخزون",
+          "statut": "الحالة والتتبع"
+        }
+      },
+      "materiel": {
+        "entityName": "عتاد",
+        "entityNamePlural": "العتاد",
+        "headerTitle": "العتاد والآليات",
+        "headerTitleNew": "عتاد جديد",
+        "headerTitleDetail": "تفاصيل العتاد",
+        "permissionPrefix": "inventory.materiel",
+        "saveSuccess": "تم حفظ العتاد «{name}»",
+        "deleteConfirm": {
+          "title": "حذف العتاد",
+          "message": "هل تريد فعلاً حذف «{name}»؟"
+        },
+        "search": "الرمز، التسمية، الرقم التسلسلي…",
+        "all": "الكل",
+        "allFem": "الكل",
+        "affectations": {
+          "empty": "لا توجد تخصيصات مسجلة لهذا العتاد.",
+          "columns": {
+            "chantier": "الورش",
+            "dateDebut": "تاريخ البدء",
+            "dateFin": "تاريخ الانتهاء",
+            "status": "الحالة",
+            "notes": "ملاحظات"
+          },
+          "status": {
+            "active": "قيد التنفيذ",
+            "completed": "منتهية"
+          }
+        },
+        "fields": {
+          "code": "الرمز",
+          "name": "التسمية",
+          "description": "الوصف",
+          "marque": "العلامة التجارية",
+          "modele": "الطراز",
+          "numeroSerie": "الرقم التسلسلي",
+          "anneeMiseEnService": "سنة الإدخال للخدمة",
+          "puissanceCapacite": "القدرة / السعة",
+          "status": "الحالة",
+          "dateDernierEntretien": "آخر صيانة",
+          "prochaineMaintenance": "الصيانة القادمة",
+          "notesMaintenance": "ملاحظات الصيانة",
+          "familleId": "العائلة",
+          "chantierActuelId": "الورش الحالي",
+          "isActive": "نشط"
+        },
+        "sections": {
+          "identification": "التعريف",
+          "caracteristiques": "الخصائص التقنية",
+          "maintenance": "الصيانة والتخصيص",
+          "statut": "الحالة"
+        },
+        "list": {
+          "columns": {
+            "code": "الرمز",
+            "name": "التسمية",
+            "marque": "العلامة التجارية",
+            "modele": "الطراز",
+            "numeroSerie": "الرقم التسلسلي",
+            "status": "الحالة",
+            "chantierActuelName": "الورش الحالي",
+            "prochaineMaintenance": "الصيانة القادمة",
+            "isActive": "نشط"
+          },
+          "filters": {
+            "status": "الحالة",
+            "famille": "العائلة",
+            "isActive": "نشط"
+          }
+        }
+      },
+      "items": {
+        "headerTitle": "الأصناف (قديم)",
+        "headerTitleNew": "صنف جديد",
+        "headerTitleDetail": "تفاصيل الصنف"
+      },
+      "itemPrices": {
+        "headerTitle": "أسعار الأصناف",
+        "headerTitleNew": "سعر جديد",
+        "headerTitleDetail": "تفاصيل السعر"
+      }
+    },
+    "mouvement": {
+      "common": {
+        "notSet": "غير مُعيَّن",
+        "notSetFem": "غير مُعيَّنة",
+        "all": "الكل",
+        "back": "← رجوع",
+        "save": "حفظ",
+        "edit": "تعديل",
+        "noChanges": "لا توجد تعديلات للحفظ",
+        "selectDepot": "يرجى اختيار مستودع مستلم.",
+        "selectChantier": "يرجى اختيار ورش الوجهة.",
+        "needLine": "يرجى إدخال سطر استلام واحد على الأقل.",
+        "scanBlOpen": "تعذّر فتح ماسح سند التسليم حالياً.",
+        "tenantMissing": "الجهة (Tenant) غير موجودة لإطلاق مسح سند التسليم",
+        "scanBlFailed": "فشل مسح سند التسليم",
+        "scanBlSuccess": "تم مسح سند التسليم، الاستلام مُعبَّأ مسبقاً",
+        "scanBlImpossible": "تعذّر مسح سند التسليم",
+        "formNotReady": "نموذج الاستلام غير جاهز",
+        "transitionFailed": "تعذّر إجراء الانتقال",
+        "transitionUnknown": "انتقال غير معروف: {action}"
+      },
+      "reception": {
+        "title": "الاستلامات",
+        "deliveryMode": {
+          "toDepot": "نحو مستودع",
+          "toChantier": "تسليم مباشر للورش",
+          "depotReceiver": "المستودع المستلم",
+          "chantierDestination": "ورش الوجهة",
+          "phase": "المرحلة",
+          "blReference": "مرجع BL / سند التسليم",
+          "linesTotal": "الإجمالي: {value} MAD"
+        },
+        "entityName": "استلام",
+        "entityNamePlural": "استلامات",
+        "headerTitle": "الاستلامات",
+        "headerTitleNew": "استلام جديد",
+        "headerTitleDetail": "استلام",
+        "subtitleNumber": "رقم {number}",
+        "saveSuccess": "تم حفظ الاستلام {number}",
+        "validateSuccess": "تم تصديق الاستلام {number} — المخزون مُحدَّث",
+        "cancelSuccess": "تم رفض الاستلام",
+        "resetSuccess": "تمت إعادة الاستلام إلى المسودة — يمكنك تعديله",
+        "actions": {
+          "scanBl": "مسح سند التسليم",
+          "newReception": "استلام جديد"
+        },
+        "prerequisites": {
+          "title": "قبل إنشاء استلام، أكمل:",
+          "fournisseur": "مورد واحد على الأقل",
+          "depot": "مستودع واحد على الأقل",
+          "bc": "أمر شراء واحد على الأقل"
+        },
+        "status": {
+          "BROUILLON": "بانتظار التصديق",
+          "VALIDE": "مصدّق",
+          "ANNULE": "مرفوض"
+        },
+        "transitions": {
+          "rejectLabel": "رفض",
+          "rejectTitle": "رفض الاستلام؟",
+          "rejectMessage": "سيتم وسم التسليم كمرفوض. هذا الإجراء لا يمكن التراجع عنه.",
+          "validateLabel": "تصديق",
+          "validateTitle": "تصديق الاستلام؟",
+          "validateMessage": "سيتم تحديث المخزون لـ {number}.",
+          "validateFallback": "هذا الاستلام"
+        },
+        "fields": {
+          "txNumber": "رقم الاستلام",
+          "txNumberPlaceholder": "يُولَّد تلقائياً عند التصديق",
+          "status": "الحالة",
+          "txDate": "تاريخ الاستلام",
+          "fournisseurId": "المورد",
+          "destLocationId": "الوجهة",
+          "chantierLocationId": "ورش الوجهة",
+          "phaseRef": "المرحلة",
+          "reference": "مرجع BL / سند التسليم",
+          "notes": "ملاحظات",
+          "lines": "أسطر الاستلام"
+        },
+        "sections": {
+          "identification": "التعريف",
+          "destination": "الوجهة",
+          "lines": "أسطر الاستلام"
+        },
+        "list": {
+          "columns": {
+            "txNumber": "رقم الاستلام",
+            "txDate": "التاريخ",
+            "fournisseurName": "المورد",
+            "destLocationName": "الوجهة",
+            "reference": "مرجع BL",
+            "bcOrigine": "سند الطلب الأصلي",
+            "status": "الحالة",
+            "totalValue": "القيمة (MAD)"
+          },
+          "filters": {
+            "status": "الحالة",
+            "fournisseur": "المورد",
+            "depot": "المستودع المستلم",
+            "from": "من",
+            "to": "إلى",
+            "all": "الكل"
+          },
+          "emptyState": {
+            "title": "لا توجد استلامات",
+            "message": "أنشئ استلاماً جديداً لتسجيل تسليم من مورد."
+          }
+        }
+      },
+      "transfert": {
+        "title": "التحويلات",
+        "entityName": "تحويل",
+        "entityNamePlural": "تحويلات",
+        "headerTitle": "التحويلات",
+        "headerTitleNew": "تحويل جديد",
+        "headerTitleDetail": "تحويل",
+        "headerTitleDetailFallback": "تفاصيل التحويل",
+        "saveSuccess": "تم حفظ التحويل",
+        "validateSuccess": "تم تصديق التحويل — تم إنقاص المخزون من المصدر وزيادته في الوجهة (تجريبي)",
+        "cancelSuccess": "تم رفض التحويل",
+        "saveErrorDefault": "فشل الحفظ",
+        "destDiffSource": "يجب أن تكون الوجهة مختلفة عن المصدر",
+        "status": {
+          "BROUILLON": "بانتظار التصديق",
+          "VALIDE": "مصدّق",
+          "ANNULE": "مرفوض"
+        },
+        "transitions": {
+          "rejectLabel": "رفض",
+          "rejectTitle": "رفض التحويل؟",
+          "rejectMessage": "سيتم وسم التحويل كمرفوض. هذا الإجراء لا يمكن التراجع عنه.",
+          "validateLabel": "تصديق",
+          "validateTitle": "تصديق التحويل؟",
+          "validateMessage": "سيتم نقل المخزون لـ {number}.",
+          "validateFallback": "هذا التحويل"
+        },
+        "fields": {
+          "txNumber": "رقم التحويل",
+          "status": "الحالة",
+          "txDate": "تاريخ التحويل",
+          "sourceLocationId": "موقع المصدر",
+          "destLocationId": "موقع الوجهة",
+          "chantierLocationId": "الورش (اختياري)",
+          "phaseRef": "مرحلة الورش",
+          "motifId": "دافع الورش",
+          "reference": "المرجع",
+          "notes": "ملاحظات",
+          "lines": "الأسطر"
+        },
+        "sections": {
+          "header": "الترويسة",
+          "lines": "الأسطر"
+        },
+        "list": {
+          "columns": {
+            "txNumber": "رقم التحويل",
+            "txDate": "التاريخ",
+            "sourceLocationName": "من",
+            "destLocationName": "إلى",
+            "reference": "المرجع",
+            "phaseRef": "المرحلة",
+            "motifName": "الدافع",
+            "status": "الحالة"
+          },
+          "filters": {
+            "status": "الحالة",
+            "sourceLocationId": "موقع المصدر",
+            "destLocationId": "موقع الوجهة",
+            "dateFrom": "من",
+            "dateTo": "إلى",
+            "all": "الكل"
+          },
+          "emptyState": {
+            "title": "لا يوجد تحويل",
+            "message": "أنشئ تحويلاً لنقل المخزون بين موقعين.",
+            "actionLabel": "تحويل جديد"
+          }
+        }
+      },
+      "sortie": {
+        "title": "الإخراجات",
+        "entityName": "إخراج مخزون",
+        "entityNamePlural": "إخراجات المخزون",
+        "headerTitle": "إخراجات المخزون",
+        "headerTitleNew": "إخراج مخزون جديد",
+        "headerTitleDetail": "إخراج المخزون",
+        "headerTitleDetailFallback": "تفاصيل الإخراج",
+        "saveSuccess": "تم حفظ الإخراج",
+        "saveErrorDefault": "فشل الحفظ",
+        "validateSuccess": "تم تصديق الإخراج — تم تحديث المخزون والميزانية (تجريبي)",
+        "validateError": "تعذّر التصديق",
+        "kpis": {
+          "month": "إخراجات هذا الشهر (القيمة بدون ضريبة)",
+          "valide": "إجمالي الإخراجات المصدَّقة"
+        },
+        "status": {
+          "BROUILLON": "مسودة",
+          "VALIDE": "مصدّق"
+        },
+        "actions": {
+          "validate": "تصديق"
+        },
+        "transitions": {
+          "validateTitle": "تصديق الإخراج",
+          "validateMessage": "سيتم إنقاص مخزون المخزن المصدر وتحديث ميزانية الورش (المُنجَز بدون ضريبة). هل تريد المتابعة؟",
+          "validateConfirm": "تصديق",
+          "validateCancel": "إلغاء"
+        },
+        "fields": {
+          "txDate": "التاريخ",
+          "sourceLocationId": "المخزن المصدر",
+          "sourceLocationIdHint": "المستودع أو المخزن أو مخزن الورش الذي تنطلق منه البضاعة",
+          "chantierBudgetId": "الورش (قيادة الميزانية)",
+          "chantierBudgetIdHint": "يربط الاستهلاك بميزانية الورش (المُنجَز بدون ضريبة)",
+          "motifId": "دافع الإخراج",
+          "reference": "المرجع (سند صرف، سند داخلي…)",
+          "notes": "ملاحظات",
+          "lines": "الأسطر"
+        },
+        "sections": {
+          "header": "الترويسة",
+          "lines": "الأصناف المُخرَجة"
+        },
+        "list": {
+          "columns": {
+            "txNumber": "رقم الإخراج",
+            "txDate": "التاريخ",
+            "sourceLocationName": "المخزن المصدر",
+            "chantierRef": "الورش (الميزانية)",
+            "motifName": "الدافع",
+            "totalValue": "القيمة بدون ضريبة",
+            "reference": "المرجع",
+            "status": "الحالة"
+          },
+          "filters": {
+            "chantierContains": "الورش / الميزانية",
+            "chantierPlaceholder": "بحث…",
+            "status": "الحالة",
+            "motifId": "الدافع",
+            "dateFrom": "من",
+            "dateTo": "إلى",
+            "all": "الكل"
+          },
+          "emptyState": {
+            "title": "لا يوجد إخراج",
+            "message": "سجّل الإخراجات نحو الورش أو التسليمات الخارجية: يتم إنقاص المخزون المصدر عند التصديق وتغذية ميزانية الورش.",
+            "actionLabel": "إخراج جديد"
+          }
+        }
+      },
+      "tx": {
+        "title": "حركات المخزون",
+        "titleNew": "حركة جديدة",
+        "titleDetail": "تفاصيل الحركة",
+        "headerTitle": "حركات المخزون",
+        "entityName": "حركة مخزون",
+        "selectHint": "اختر حركة من القائمة أو أنشئ حركة جديدة.",
+        "saveSuccess": "تم حفظ الحركة {number}",
+        "saveError": "فشل حفظ الحركة",
+        "deleteTitle": "حذف الحركة",
+        "deleteMessage": "حذف مسودة هذه الحركة؟ لا يمكن التراجع عن هذا الإجراء.",
+        "deleteSuccess": "تم حذف الحركة",
+        "errors": {
+          "cannotModifyValidated": "لا يمكن تعديل حركة مصدّقة",
+          "cannotDeleteValidated": "لا يمكن حذف حركة مصدّقة"
+        },
+        "fields": {
+          "txType": "نوع الحركة",
+          "txDate": "التاريخ",
+          "sourceLocationId": "الموقع المصدر",
+          "destLocationId": "موقع الوجهة",
+          "reference": "المرجع",
+          "notes": "ملاحظات",
+          "lines": "الأسطر"
+        },
+        "sections": {
+          "header": "الترويسة",
+          "lines": "أسطر الأصناف"
+        }
+      },
+      "retour": {
+        "title": "الإرجاعات",
+        "entityName": "إرجاع",
+        "entityNamePlural": "الإرجاعات",
+        "headerTitle": "الإرجاعات",
+        "headerTitleNew": "إرجاع جديد",
+        "headerTitleDetail": "إرجاع",
+        "headerTitleDetailFallback": "تفاصيل الإرجاع",
+        "saveSuccess": "تم حفظ الإرجاع",
+        "saveErrorDefault": "فشل الحفظ",
+        "validateSuccess": "تم تصديق الإرجاع — المخزون مُحدَّث (تجريبي)",
+        "cancelSuccess": "تم رفض الإرجاع",
+        "status": {
+          "BROUILLON": "بانتظار التصديق",
+          "VALIDE": "مصدّق",
+          "ANNULE": "مرفوض"
+        },
+        "transitions": {
+          "rejectLabel": "رفض",
+          "rejectTitle": "رفض الإرجاع؟",
+          "rejectMessage": "سيتم وسم الإرجاع كمرفوض. هذا الإجراء لا يمكن التراجع عنه.",
+          "validateLabel": "تصديق",
+          "validateTitle": "تصديق الإرجاع؟",
+          "validateMessage": "سيتم تحديث المخزون لـ {number}.",
+          "validateFallback": "هذا الإرجاع"
+        },
+        "fields": {
+          "txDate": "تاريخ الإرجاع",
+          "retourType": "نوع الإرجاع",
+          "sourceLocationId": "المنشأ",
+          "sourceLocationIdHint": "الورش أو المستودع المصدر",
+          "destLocationId": "الوجهة",
+          "destLocationIdHint": "المستودع (إرجاع من ورش) أو اتركه فارغاً (إرجاع للمورد)",
+          "motifId": "الدافع",
+          "reference": "المرجع",
+          "referenceHint": "رقم سند تسليم إرجاع المورد إن أمكن",
+          "notes": "ملاحظات",
+          "lines": "الأسطر"
+        },
+        "sections": {
+          "header": "الترويسة",
+          "lines": "الأسطر"
+        },
+        "list": {
+          "columns": {
+            "txNumber": "رقم الإرجاع",
+            "txDate": "التاريخ",
+            "motifName": "نوع الإرجاع",
+            "sourceLocationName": "المنشأ",
+            "destLocationName": "الوجهة",
+            "destLocationExterne": "خارجي",
+            "reference": "المرجع",
+            "status": "الحالة"
+          },
+          "filters": {
+            "status": "الحالة",
+            "sourceLocationId": "المنشأ",
+            "dateFrom": "من",
+            "dateTo": "إلى",
+            "all": "الكل"
+          },
+          "emptyState": {
+            "title": "لا يوجد إرجاع",
+            "message": "أنشئ إرجاعاً لإعادة إدخال المخزون من ورش أو نحو مورد.",
+            "actionLabel": "إرجاع جديد"
+          }
+        }
+      },
+      "inventaire": {
+        "title": "الجرود المادية",
+        "entityName": "جرد",
+        "entityNamePlural": "الجرود",
+        "headerTitle": "الجرود",
+        "headerTitleNew": "جرد جديد",
+        "headerTitleDetail": "جرد",
+        "headerTitleDetailFallback": "تفاصيل الجرد",
+        "saveSuccess": "تم حفظ الجرد",
+        "saveErrorDefault": "فشل الحفظ",
+        "validateSuccess": "تم تصديق الجرد — تم تطبيق تعديلات المخزون (تجريبي)",
+        "validateError": "تعذّر التصديق",
+        "actions": {
+          "validate": "تصديق الجرد"
+        },
+        "status": {
+          "BROUILLON": "مسودة",
+          "VALIDE": "مصدّق",
+          "ANNULE": "ملغى"
+        },
+        "fields": {
+          "txDate": "تاريخ الجرد",
+          "destLocationId": "الموقع المراد جرده",
+          "reference": "المرجع",
+          "notes": "ملاحظات",
+          "lines": "الأسطر"
+        },
+        "sections": {
+          "header": "الترويسة",
+          "lines": "العد"
+        },
+        "list": {
+          "columns": {
+            "txNumber": "رقم الجرد",
+            "txDate": "التاريخ",
+            "destLocationName": "الموقع",
+            "linesCount": "عدد الأصناف",
+            "totalVariance": "إجمالي الفارق",
+            "status": "الحالة"
+          },
+          "filters": {
+            "destLocationId": "الموقع",
+            "status": "الحالة",
+            "dateFrom": "من",
+            "dateTo": "إلى",
+            "all": "الكل"
+          },
+          "emptyState": {
+            "title": "لا يوجد جرد",
+            "message": "أنشئ جرداً للقيام بعد مادي.",
+            "actionLabel": "جرد جديد"
+          }
+        }
+      },
+      "perte": {
+        "title": "الفقد والنفايات",
+        "entityName": "تصريح بالفقد",
+        "entityNamePlural": "تصريحات الفقد",
+        "headerTitle": "الفقد والنفايات",
+        "headerTitleNew": "تصريح بالفقد جديد",
+        "headerTitleDetail": "تصريح بالفقد",
+        "headerTitleDetailFallback": "تفاصيل تصريح الفقد",
+        "saveSuccess": "تم حفظ التصريح",
+        "saveErrorDefault": "فشل الحفظ",
+        "validateSuccess": "تم تصديق التصريح — تم إنقاص المخزون (تجريبي)",
+        "validateError": "تعذّر التصديق",
+        "kpis": {
+          "month": "الفقد هذا الشهر",
+          "total": "إجمالي الفقد (جميع الأوراش)"
+        },
+        "actions": {
+          "validate": "تصديق"
+        },
+        "status": {
+          "BROUILLON": "مسودة",
+          "VALIDE": "مصدّق"
+        },
+        "transitions": {
+          "validateTitle": "تصديق التصريح",
+          "validateMessage": "هذا الإجراء نهائي. سيتم إنقاص مخزون الورش. هل تريد المتابعة؟",
+          "validateConfirm": "تصديق",
+          "validateCancel": "إلغاء"
+        },
+        "fields": {
+          "txDate": "التاريخ",
+          "chantierLocationId": "الورش",
+          "motifId": "نوع الفقد",
+          "motifIdHint": "نفاية قص / كسر / سرقة / عوامل جوية / عيب صناعة",
+          "reference": "صرّح به",
+          "notes": "ملاحظات (مهم للتتبع)",
+          "lines": "الأسطر"
+        },
+        "sections": {
+          "header": "الترويسة",
+          "lines": "الأصناف المفقودة"
+        },
+        "list": {
+          "columns": {
+            "txNumber": "رقم التصريح",
+            "txDate": "التاريخ",
+            "chantierRef": "الورش",
+            "motifName": "نوع الفقد",
+            "totalValue": "القيمة المفقودة",
+            "reference": "صرّح به",
+            "status": "الحالة"
+          },
+          "filters": {
+            "chantierContains": "الورش",
+            "chantierPlaceholder": "بحث…",
+            "status": "الحالة",
+            "motifId": "نوع الفقد",
+            "dateFrom": "من",
+            "dateTo": "إلى",
+            "all": "الكل"
+          },
+          "emptyState": {
+            "title": "لا يوجد تصريح بالفقد",
+            "message": "صرّح بفقد المواد في الورش (نفايات، كسر، عيوب صناعة).",
+            "actionLabel": "تصريح جديد"
+          }
+        }
+      },
+      "tx": {
+        "title": "الحركات (عرض خام)",
+        "entityName": "حركة",
+        "entityNamePlural": "الحركات",
+        "headerTitle": "جميع الحركات",
+        "headerTitleDetail": "تفاصيل الحركة",
+        "list": {
+          "columns": {
+            "txNumber": "الرقم",
+            "txType": "النوع",
+            "txDate": "التاريخ",
+            "sourceLocationName": "المصدر",
+            "destLocationName": "الوجهة",
+            "status": "الحالة",
+            "nbLines": "الأسطر"
+          },
+          "filters": {
+            "txType": "نوع الحركة",
+            "status": "الحالة",
+            "from": "من",
+            "to": "إلى"
+          }
+        }
+      },
+      "txLines": {
+        "title": "أسطر الحركة",
+        "entityName": "سطر",
+        "entityNamePlural": "الأسطر",
+        "list": {
+          "columns": {
+            "lineNumber": "#",
+            "articleCode": "رمز الصنف",
+            "articleName": "التسمية",
+            "quantity": "الكمية",
+            "uomCode": "UoM",
+            "unitPrice": "سعر الوحدة",
+            "totalPrice": "الإجمالي"
+          },
+          "filters": {
+            "articleId": "الصنف",
+            "uomId": "UoM"
+          }
+        },
+        "fields": {
+          "articleId": "الصنف",
+          "quantity": "الكمية",
+          "uomId": "UoM",
+          "unitPrice": "سعر الوحدة",
+          "totalPrice": "الإجمالي",
+          "emplacementId": "الموقع",
+          "lotStockId": "الدفعة",
+          "numeroLot": "رقم الدفعة",
+          "datePeremption": "تاريخ الانتهاء",
+          "notes": "ملاحظات"
+        },
+        "sections": {
+          "article": "الصنف",
+          "tracabilite": "التتبع (دفعة / موقع)"
+        },
+        "new": "سطر جديد",
+        "newBreadcrumb": "جديد",
+        "edit": "تعديل السطر",
+        "editBreadcrumb": "تعديل"
+      }
+    },
+    "configuration": {
+      "title": "الإعدادات",
+      "depot": {
+        "entityName": "مستودع",
+        "entityNamePlural": "المستودعات والأوراش",
+        "headerTitle": "المستودعات والمواقع",
+        "headerTitleNew": "مستودع جديد",
+        "headerTitleDetail": "تفاصيل المستودع",
+        "permissionPrefix": "inventory.location",
+        "saveSuccess": "تم حفظ المستودع «{name}» بنجاح",
+        "deleteConfirm": {
+          "title": "حذف المستودع",
+          "message": "هل تريد فعلاً حذف المستودع «{name}»؟"
+        },
+        "fields": {
+          "code": "الرمز",
+          "name": "الاسم",
+          "type": "النوع",
+          "address": "العنوان",
+          "ville": "المدينة",
+          "latitude": "خط العرض",
+          "longitude": "خط الطول",
+          "capaciteM3": "السعة (م³)",
+          "capaciteTonnes": "السعة (طن)",
+          "responsableId": "المسؤول",
+          "responsableNom": "اسم المسؤول",
+          "chantierId": "الورش المرتبط",
+          "projectRef": "مرجع الورش",
+          "parentId": "الموقع الأب",
+          "notes": "ملاحظات",
+          "budgetChantierId": "ميزانية الورش (معرّف القيادة)",
+          "budgetChantierHint": "مثلاً ch-2026-001 — لربط إخراجات المخزون بميزانية ERP",
+          "isActive": "نشط"
+        },
+        "sections": {
+          "identification": "التعريف",
+          "localisation": "الموقع وتحديد الإحداثيات",
+          "capacite": "سعة التخزين",
+          "rattachement": "ربط بالورش والمسؤول",
+          "statut": "الحالة"
+        },
+        "list": {
+          "columns": {
+            "code": "الرمز",
+            "name": "الاسم",
+            "type": "النوع",
+            "ville": "المدينة",
+            "capacite": "السعة",
+            "responsableNom": "المسؤول",
+            "projectRef": "مرجع الورش",
+            "isActive": "نشط"
+          },
+          "filters": {
+            "code": "الرمز",
+            "name": "الاسم",
+            "type": "النوع",
+            "isActive": "نشط"
+          }
+        }
+      },
+      "famille": {
+        "entityName": "عائلة الأصناف",
+        "entityNamePlural": "عائلات الأصناف",
+        "headerTitle": "عائلات الأصناف",
+        "headerTitleNew": "عائلة جديدة",
+        "headerTitleDetail": "تفاصيل العائلة",
+        "permissionPrefix": "inventory.famille",
+        "saveSuccess": "تم حفظ العائلة «{name}» بنجاح",
+        "deleteConfirm": {
+          "title": "حذف العائلة",
+          "message": "هل تريد فعلاً حذف العائلة «{name}»؟"
+        },
+        "fields": {
+          "code": "الرمز",
+          "name": "التسمية",
+          "description": "الوصف",
+          "isActive": "نشط"
+        },
+        "sections": {
+          "identification": "التعريف",
+          "statut": "الحالة"
+        },
+        "list": {
+          "columns": {
+            "code": "الرمز",
+            "name": "التسمية",
+            "description": "الوصف",
+            "isActive": "نشط"
+          },
+          "filters": {
+            "code": "الرمز",
+            "name": "التسمية",
+            "isActive": "نشط"
+          }
+        }
+      },
+      "typeArticle": {
+        "entityName": "نوع الصنف",
+        "entityNamePlural": "أنواع الأصناف",
+        "headerTitle": "أنواع الأصناف",
+        "headerTitleNew": "نوع جديد",
+        "headerTitleDetail": "تفاصيل النوع",
+        "permissionPrefix": "inventory.typeArticle",
+        "saveSuccess": "تم حفظ نوع الصنف «{name}» بنجاح",
+        "deleteConfirm": {
+          "title": "حذف نوع الصنف",
+          "message": "هل تريد فعلاً حذف النوع «{name}»؟"
+        },
+        "fields": {
+          "code": "الرمز",
+          "name": "التسمية",
+          "articleType": "العائلة (MATERIAU/CONSOMMABLE/ENGIN/OUTILLAGE)",
+          "isActive": "نشط"
+        },
+        "sections": {
+          "identification": "التعريف",
+          "statut": "الحالة"
+        },
+        "list": {
+          "columns": {
+            "code": "الرمز",
+            "name": "التسمية",
+            "articleType": "عائلة الصنف",
+            "isActive": "نشط"
+          },
+          "filters": {
+            "articleType": "عائلة الصنف",
+            "isActive": "نشط"
+          }
+        }
+      },
+      "motif": {
+        "entityName": "دافع الحركة",
+        "entityNamePlural": "دوافع الحركة",
+        "headerTitle": "دوافع الحركة",
+        "headerTitleNew": "دافع جديد",
+        "headerTitleDetail": "تفاصيل الدافع",
+        "permissionPrefix": "inventory.motif",
+        "saveSuccess": "تم حفظ الدافع «{name}» بنجاح",
+        "deleteConfirm": {
+          "title": "حذف الدافع",
+          "message": "هل تريد فعلاً حذف الدافع «{name}»؟"
+        },
+        "fields": {
+          "code": "الرمز",
+          "name": "التسمية",
+          "txType": "نوع الحركة",
+          "isActive": "نشط"
+        },
+        "sections": {
+          "identification": "التعريف",
+          "statut": "الحالة"
+        },
+        "list": {
+          "columns": {
+            "code": "الرمز",
+            "name": "التسمية",
+            "txType": "نوع الحركة",
+            "isActive": "نشط"
+          },
+          "filters": {
+            "txType": "نوع الحركة",
+            "isActive": "نشط"
+          }
+        }
+      },
+      "uom": {
+        "entityName": "وحدة القياس",
+        "entityNamePlural": "وحدات القياس",
+        "headerTitle": "وحدات القياس",
+        "headerTitleNew": "وحدة جديدة",
+        "headerTitleDetail": "تفاصيل الوحدة",
+        "permissionPrefix": "inventory.uom",
+        "saveSuccess": "تم حفظ الوحدة «{name}» بنجاح",
+        "deleteConfirm": {
+          "title": "حذف الوحدة",
+          "message": "هل تريد فعلاً حذف الوحدة «{name}»؟"
+        },
+        "fields": {
+          "code": "الرمز",
+          "name": "التسمية",
+          "uomCategoryId": "الفئة",
+          "isActive": "نشط"
+        },
+        "sections": {
+          "identification": "التعريف",
+          "statut": "الحالة"
+        },
+        "list": {
+          "columns": {
+            "code": "الرمز",
+            "name": "التسمية",
+            "uomCategoryId": "الفئة",
+            "isActive": "نشط"
+          },
+          "filters": {
+            "uomCategoryId": "الفئة",
+            "isActive": "نشط"
+          }
+        }
+      },
+      "uomCategory": {
+        "entityName": "فئة الوحدة",
+        "entityNamePlural": "فئات الوحدات",
+        "headerTitle": "فئات وحدات القياس",
+        "headerTitleNew": "فئة جديدة",
+        "headerTitleDetail": "تفاصيل الفئة",
+        "permissionPrefix": "inventory.uomCategory",
+        "saveSuccess": "تم حفظ الفئة «{name}» بنجاح",
+        "deleteConfirm": {
+          "title": "حذف الفئة",
+          "message": "هل تريد فعلاً حذف الفئة «{name}»؟"
+        },
+        "fields": {
+          "code": "الرمز",
+          "name": "التسمية",
+          "isActive": "نشط"
+        },
+        "sections": {
+          "identification": "التعريف",
+          "statut": "الحالة"
+        },
+        "list": {
+          "columns": {
+            "code": "الرمز",
+            "name": "التسمية",
+            "isActive": "نشط"
+          },
+          "filters": {
+            "code": "الرمز",
+            "isActive": "نشط"
+          }
+        }
+      },
+      "costingMethod": {
+        "entityName": "طريقة التقييم",
+        "entityNamePlural": "طرق التقييم",
+        "headerTitle": "طرق التقييم",
+        "headerTitleNew": "طريقة جديدة",
+        "headerTitleDetail": "تفاصيل الطريقة",
+        "permissionPrefix": "inventory.costingMethod",
+        "saveSuccess": "تم حفظ الطريقة «{name}» بنجاح",
+        "deleteConfirm": {
+          "title": "حذف الطريقة",
+          "message": "هل تريد فعلاً حذف الطريقة «{name}»؟"
+        },
+        "fields": {
+          "code": "الرمز",
+          "name": "التسمية",
+          "method": "الخوارزمية",
+          "description": "الوصف",
+          "isDefault": "الطريقة الافتراضية",
+          "isDefaultHint": "يمكن تعيين طريقة واحدة فقط كافتراضية",
+          "isActive": "نشط"
+        },
+        "sections": {
+          "identification": "التعريف",
+          "configuration": "الإعدادات",
+          "statut": "الحالة"
+        },
+        "list": {
+          "columns": {
+            "code": "الرمز",
+            "name": "التسمية",
+            "method": "الطريقة",
+            "isDefault": "افتراضية",
+            "isActive": "نشط"
+          },
+          "filters": {
+            "method": "الطريقة",
+            "isActive": "نشط"
+          }
+        }
+      },
+      "itemCategory": {
+        "headerTitle": "فئات الأصناف",
+        "headerTitleNew": "فئة جديدة",
+        "headerTitleDetail": "تفاصيل الفئة",
+        "loading": "جارٍ تحميل الفئات…",
+        "saveSuccess": "تم حفظ الفئة « {name} » بنجاح",
+        "tree": {
+          "title": "شجرة الفئات",
+          "empty": "لا توجد فئات بعد.",
+          "addRoot": "إضافة جذر"
+        },
+        "detail": {
+          "title": "تفاصيل الفئة",
+          "empty": "اختر فئة من الشجرة."
+        },
+        "fields": {
+          "code": "الرمز",
+          "name": "التسمية",
+          "description": "الوصف",
+          "isActive": "نشط"
+        },
+        "add": {
+          "title": "فئة جديدة",
+          "confirm": "إنشاء"
+        },
+        "deleteConfirm": {
+          "title": "حذف الفئة",
+          "message": "هل تريد حقًا حذف الفئة « {name} »؟"
+        },
+        "deleteBlocked": {
+          "title": "تعذّر الحذف",
+          "message": "تحتوي هذه الفئة على فئات فرعية. احذفها أو أعد تعيينها أولًا.",
+          "confirm": "حسنًا"
+        }
+      },
+      "itemType": {
+        "headerTitle": "أنواع الأصناف (قديم)",
+        "headerTitleNew": "نوع جديد",
+        "headerTitleDetail": "تفاصيل النوع"
+      },
+      "unitOfMeasure": {
+        "headerTitle": "وحدات القياس (قديم)",
+        "headerTitleNew": "وحدة جديدة",
+        "headerTitleDetail": "تفاصيل الوحدة"
+      },
+      "uoMCategory": {
+        "headerTitle": "فئات الوحدات (قديم)",
+        "headerTitleNew": "فئة جديدة",
+        "headerTitleDetail": "تفاصيل الفئة"
+      }
+    },
+    "errors": {
+      "common": {
+        "updateFailed": "فشل التحديث",
+        "validateFailed": "تعذّر التصديق",
+        "rejectFailed": "تعذّر الرفض",
+        "cancelFailed": "تعذّر الإلغاء",
+        "resetDraftFailed": "تعذّرت إعادة الحالة إلى مسودة",
+        "missingItemId": "المعرّف غير موجود"
+      },
+      "reception": {
+        "notFound": "الاستلام غير موجود",
+        "cannotModifyValidated": "لا يمكن تعديل استلام مصدّق.",
+        "cannotDeleteValidated": "للاستلام المصدّق، احذف عبر الإلغاء.",
+        "cannotValidate": "يمكن تصديق الاستلام الذي حالته «بانتظار التصديق» فقط",
+        "cannotReject": "يمكن رفض الاستلام الذي حالته «بانتظار التصديق» فقط",
+        "cannotResetDraft": "يمكن إعادة الاستلام المصدّق إلى مسودة فقط"
+      },
+      "retour": {
+        "notFound": "الإرجاع غير موجود",
+        "cannotModifyValidated": "لا يمكن تعديل إرجاع مصدّق.",
+        "cannotDeleteValidated": "لا يمكن حذف إرجاع مصدّق."
+      },
+      "transfert": {
+        "notFound": "التحويل غير موجود",
+        "cannotModifyValidated": "لا يمكن تعديل تحويل مصدّق.",
+        "cannotDeleteValidated": "للتحويل المصدّق، احذف عبر الإلغاء."
+      },
+      "sortie": {
+        "notFound": "إخراج المخزون غير موجود",
+        "cannotModifyValidated": "لا يمكن تعديل إخراج مصدّق.",
+        "cannotDeleteValidated": "لا يمكن حذف إخراج مصدّق."
+      },
+      "inventaire": {
+        "notFound": "الجرد غير موجود",
+        "cannotModifyValidated": "لا يمكن تعديل جرد مصدّق.",
+        "cannotDeleteValidated": "لا يمكن حذف جرد مصدّق."
+      },
+      "perte": {
+        "notFound": "تصريح الفقد غير موجود",
+        "cannotModifyValidated": "لا يمكن تعديل تصريح مصدّق.",
+        "cannotDeleteValidated": "لا يمكن حذف تصريح مصدّق."
+      }
+    },
+    "suivi": {
+      "alertes": {
+        "headerTitle": "تنبيهات إعادة التموين",
+        "subtitle": "أصناف في حالة تنبيه أو نفاد (المخزون < الحد الأدنى). توليد تلقائي لطلب العروض أو طلب الشراء.",
+        "kpi": {
+          "criticalCount": "أصناف حرجة",
+          "criticalLabel": "مخزون نافد أو منخفض جداً",
+          "warningCount": "أصناف في حالة تنبيه",
+          "warningLabel": "مخزون دون العتبة",
+          "unique": "أصناف فريدة",
+          "uniqueLabel": "في حالة تنبيه أو نفاد",
+          "suggestedAo": "طلبات عروض مقترحة",
+          "suggestedAoLabel": "مسودات للتوليد"
+        },
+        "list": {
+          "title": "أصناف لإعادة تموينها",
+          "columns": {
+            "articleCode": "الرمز",
+            "articleName": "التسمية",
+            "locationName": "الموقع",
+            "stockOnHand": "المخزون المتاح",
+            "stockMin": "الحد الأدنى",
+            "stockMax": "الحد الأقصى",
+            "deficit": "العجز",
+            "urgency": "درجة الإلحاح",
+            "delaiReapproJours": "المهلة (يوم)",
+            "fournisseurName": "المورد المفضل"
+          },
+          "filters": {
+            "urgency": "درجة الإلحاح",
+            "urgencyPlaceholder": "الكل",
+            "fournisseur": "المورد",
+            "fournisseurPlaceholder": "الكل",
+            "article": "الصنف",
+            "allArticles": "الكل",
+            "allCritical": "حرج",
+            "allInAlert": "في حالة تنبيه"
+          },
+          "emptyTitle": "لا يوجد تنبيه",
+          "emptyMessage": "جميع الأصناف لديها مستوى مخزون كافٍ."
+        },
+        "actions": {
+          "createReception": "إنشاء استلام",
+          "editThreshold": "تعديل العتبة"
+        },
+        "dialog": {
+          "title": "تعديل الحد الأدنى",
+          "newThresholdLabel": "الحد الأدنى الجديد",
+          "cancel": "إلغاء",
+          "save": "حفظ"
+        },
+        "toasts": {
+          "thresholdUpdated": "تم تحديث العتبة"
+        }
+      },
+      "etatStock": {
+        "headerTitle": "حالة المخزون",
+        "subtitle": "الأرصدة حسب الصنف والموقع. صفِّ وصدِّر.",
+        "kpis": {
+          "totalArticles": "أصناف متمايزة",
+          "totalArticlesHint": "ذات حركة مخزون",
+          "totalSku": "وحدات SKU متابعة",
+          "totalSkuHint": "صنف × موقع",
+          "valueMad": "إجمالي التقييم",
+          "valueMadHint": "قيمة المخزون × PMP",
+          "rupture": "حالات النفاد",
+          "ruptureHint": "المخزون = 0",
+          "belowMin": "دون العتبة",
+          "belowMinHint": "المخزون < الحد الأدنى"
+        },
+        "columns": {
+          "articleCode": "رمز الصنف",
+          "articleName": "التسمية",
+          "locationName": "الموقع",
+          "locationType": "نوع الموقع",
+          "familleName": "العائلة",
+          "uomCode": "الوحدة",
+          "stockOnHand": "المخزون المادي",
+          "stockReserved": "محجوز",
+          "stockAvailable": "متاح",
+          "pmp": "PMP (MAD)",
+          "valueMad": "القيمة (MAD)",
+          "stockMin": "الحد الأدنى",
+          "derniereOperation": "آخر حركة"
+        },
+        "filters": {
+          "article": "الصنف",
+          "articlePlaceholder": "رمز، تسمية…",
+          "location": "الموقع",
+          "locationPlaceholder": "الكل",
+          "famille": "العائلة",
+          "famillePlaceholder": "الكل",
+          "statut": "حالة المخزون",
+          "statutAll": "الكل",
+          "statutRupture": "نفاد",
+          "statutBelowMin": "دون العتبة",
+          "statutOk": "سليم"
+        },
+        "actions": {
+          "export": "تصدير (Excel)",
+          "exportPdf": "تصدير (PDF)",
+          "printLabels": "طباعة الملصقات"
+        },
+        "exportToast": {
+          "title": "جاري التصدير",
+          "message": "سيتم تنزيل ملف Excel خلال بضع ثوانٍ."
+        },
+        "labelsToast": {
+          "title": "طباعة الملصقات",
+          "message": "ستتم طباعة الملصقات لـ {count} صنف."
+        },
+        "emptyTitle": "لا توجد أصناف في المخزون",
+        "noData": "لا توجد بيانات متاحة للمرشحات المحددة.",
+        "currency": "MAD",
+        "lookups": {
+          "allDepots": "الكل"
+        }
+      },
+      "valorisation": {
+        "headerTitle": "تقييم المخزون",
+        "subtitle": "الطريقة: {method} — الفترة: {period}",
+        "methods": {
+          "AVCO": "AVCO (التكلفة المتوسطة المرجحة)",
+          "FIFO": "FIFO (الداخل أولاً، الخارج أولاً)",
+          "CUMP": "CUMP / PMP"
+        },
+        "columns": {
+          "articleCode": "الرمز",
+          "articleName": "التسمية",
+          "familleName": "العائلة",
+          "stockOnHand": "المخزون",
+          "uomCode": "الوحدة",
+          "coutUnitaire": "تكلفة الوحدة",
+          "valueMad": "القيمة (MAD)",
+          "evolution": "التطور"
+        },
+        "filters": {
+          "method": "الطريقة",
+          "famille": "العائلة",
+          "famillePlaceholder": "الكل",
+          "period": "الفترة",
+          "all": "الكل"
+        },
+        "noData": "لا توجد بيانات متاحة",
+        "currency": "MAD"
+      },
+      "stockBalances": {
+        "entityName": "رصيد مخزون",
+        "entityNamePlural": "أرصدة المخزون",
+        "headerTitle": "أرصدة المخزون",
+        "headerTitleNew": "رصيد جديد",
+        "headerTitleDetail": "تفاصيل الرصيد",
+        "saveSuccess": "تم حفظ الرصيد «{name}»",
+        "deleteConfirm": {
+          "title": "حذف الرصيد",
+          "message": "هل تريد فعلاً حذف «{name}»؟"
+        }
+      }
+    },
+    "reservations": {
+      "headerTitle": "حجوزات مخزون الورش",
+      "subtitle": "المتاح = المخزون المادي − الحجوزات النشطة (M-STK-02).",
+      "form": {
+        "articleId": "معرّف الصنف",
+        "chantierId": "معرّف ميزانية الورش",
+        "qte": "الكمية",
+        "uom": "الوحدة",
+        "dateBesoin": "تاريخ الحاجة",
+        "dateExpiration": "تاريخ الانتهاء",
+        "motif": "الدافع",
+        "submit": "إنشاء حجز"
+      },
+      "columns": {
+        "article": "الصنف",
+        "chantier": "الورش",
+        "qte": "الكمية",
+        "besoin": "الحاجة",
+        "expiration": "الانتهاء",
+        "statut": "الحالة"
+      },
+      "actions": {
+        "cancel": "إلغاء"
+      },
+      "footer": {
+        "sortiesLink": "الإخراجات",
+        "sortiesText": "تستهلك الحجوزات وفق FIFO عند التصديق."
+      }
+    },
+    "components": {
+      "linesEditor": {
+        "addLine": "سطر",
+        "empty": "لا يوجد سطر — انقر على «سطر» لإضافة صنف",
+        "removeAria": "حذف السطر",
+        "columns": {
+          "article": "الصنف",
+          "designation": "التسمية",
+          "qty": "الكمية",
+          "qtyReceived": "الكمية المستلمة",
+          "qtyTransfer": "الكمية المراد تحويلها",
+          "qtyReturn": "كمية الإرجاع",
+          "qtyTheoretical": "الكمية النظرية",
+          "qtyPhysical": "الكمية المادية",
+          "variance": "الفارق",
+          "unitPrice": "سعر الوحدة (MAD)",
+          "total": "الإجمالي",
+          "uom": "الوحدة",
+          "notes": "ملاحظات",
+          "actions": "الإجراءات",
+          "qtySortie": "كمية الإخراج",
+          "qtyPerdue": "الكمية المفقودة",
+          "causeDetaillee": "السبب التفصيلي",
+          "totalHT": "الإجمالي بدون ضريبة",
+          "valeur": "القيمة"
+        },
+        "total": {
+          "reception": "إجمالي الاستلام",
+          "transfert": "إجمالي التحويل",
+          "retour": "إجمالي الإرجاع",
+          "perte": "إجمالي الفقد",
+          "inventaire": "إجمالي الفارق"
+        },
+        "reception": {
+          "emptyMessage": "لا يوجد سطر — انقر على «سطر» لإضافة صنف",
+          "articleLabel": "الصنف"
+        },
+        "transfert": {
+          "emptyMessage": "لا يوجد سطر للتحويل — انقر على «سطر».",
+          "sourceStockLabel": "المتاح في المصدر"
+        },
+        "retour": {
+          "emptyMessage": "لا يوجد سطر — انقر على «سطر» لإضافة إرجاع.",
+          "motifLabel": "دافع الإرجاع"
+        },
+        "perte": {
+          "emptyMessage": "لا يوجد سطر — انقر على «سطر» للتصريح بفقد.",
+          "motifLabel": "الدافع",
+          "causeLabel": "السبب",
+          "totalSortieHT": "إجمالي الإخراج بدون ضريبة",
+          "totalValeurPerdue": "إجمالي القيمة المفقودة"
+        },
+        "inventaire": {
+          "emptyMessage": "لا يوجد سطر — انقر على «تحميل المخزون» لبدء الجرد.",
+          "loadStock": "تحميل المخزون",
+          "loadStockButton": "تحميل المخزون",
+          "emptyAfterLoad": "لا يوجد مخزون للجرد في هذا الموقع.",
+          "emptyInitial": "انقر على «تحميل المخزون» لبدء الجرد.",
+          "ecartLabel": "الفارق"
+        },
+        "etatArticle": "حالة الصنف",
+        "etatLabel": "الحالة",
+        "motifLabel": "الدافع",
+        "loadStock": "تحميل المخزون"
+      },
+      "stockCell": {
+        "reserved": "({value} محجوز)",
+        "available": "({value} متاح)",
+        "unitSuffix": "{value} {uom}"
+      },
+      "locationBadge": {
+        "DEPOT": "مستودع",
+        "ENTREPOT": "مخزن",
+        "CHANTIER": "ورش",
+        "TRANSIT": "عبور",
+        "VIRTUEL": "افتراضي"
+      }
+    },
+    "valorisation": {
+      "title": "تقييم المخزون",
+      "subtitle": "التطور والتوزيع حسب العائلة والموقع",
+      "date": "تاريخ التقييم",
+      "costingMethod": "الطريقة",
+      "byFamille": "حسب العائلة",
+      "byLocation": "حسب الموقع",
+      "noData": "لا توجد بيانات متاحة",
+      "famille": "العائلة",
+      "articleCount": "الأصناف",
+      "totalQty": "الكمية الإجمالية",
+      "totalValue": "القيمة الإجمالية (MAD)",
+      "percent": "% من الإجمالي",
+      "location": "الموقع",
+      "type": "النوع",
+      "value": "القيمة (MAD)",
+      "kpi": {
+        "totalValue": "إجمالي قيمة المخزون",
+        "depotValue": "القيمة في المستودع",
+        "chantierValue": "القيمة في الورش",
+        "monthlyVariation": "التغير الشهري"
+      }
+    }
+  }
+}

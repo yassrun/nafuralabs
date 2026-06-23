@@ -1,0 +1,69 @@
+{
+  "sales-orders": {
+    "navigation": {
+      "title": "Sales Orders",
+      "description": "Sales Orders Domain",
+      "salesOrders": "Sales Orders",
+      "salesOrderLines": "Sales Order Lines",
+      "quotes": "Quotes",
+      "quoteLines": "Quote Lines",
+      "priceLists": "Price Lists",
+      "discountStructures": "Discount Structures"
+    }
+  },
+  "common": {
+    "subsections": {
+      "operations": "Operations",
+      "configuration": "Configuration"
+    }
+  },
+  "sales": {
+    "fields": {
+      "orderNumber": "Order Number",
+      "customer": "Customer Id",
+      "orderDate": "Order Date",
+      "requestedDeliveryDate": "Requested Delivery Date",
+      "warehouse": "Warehouse Id",
+      "currency": "Currency Id",
+      "priceList": "Price List Id",
+      "subtotalAmount": "Subtotal Amount",
+      "discountAmount": "Discount Amount",
+      "taxAmount": "Tax Amount",
+      "totalAmount": "Total Amount",
+      "status": "Status",
+      "quote": "Quote Id",
+      "notes": "Notes",
+      "salesOrder": "Sales Order Id",
+      "lineNumber": "Line Number",
+      "item": "Item Id",
+      "description": "Description",
+      "quantity": "Quantity",
+      "unitPrice": "Unit Price",
+      "discountPercent": "Discount Percent",
+      "taxCode": "Tax Code Id",
+      "lineTotal": "Line Total",
+      "deliveredQuantity": "Delivered Quantity",
+      "invoicedQuantity": "Invoiced Quantity",
+      "quoteNumber": "Quote Number",
+      "quoteDate": "Quote Date",
+      "validUntil": "Valid Until",
+      "code": "Code",
+      "name": "Name",
+      "effectiveFrom": "Effective From",
+      "effectiveTo": "Effective To",
+      "discountType": "Discount Type",
+      "value": "Value",
+      "minQuantity": "Min Quantity",
+      "maxQuantity": "Max Quantity",
+      "validFrom": "Valid From",
+      "validTo": "Valid To"
+    },
+    "sections": {
+      "general": "General",
+      "amounts": "Amounts",
+      "workflow": "Workflow",
+      "fulfillment": "Fulfillment",
+      "notes": "Notes"
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "entity": "FinalSettlement",
+  "fields": {
+    "settlementNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "pendingSalary": {
+      "maxLength": 120
+    },
+    "leaveEncashment": {
+      "maxLength": 120
+    },
+    "bonusDue": {
+      "maxLength": 120
+    },
+    "deductions": {
+      "min": 0
+    },
+    "netAmount": {
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

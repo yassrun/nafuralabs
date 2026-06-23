@@ -1,0 +1,28 @@
+{
+  "entity": "PurchaseRequisitionLine",
+  "fields": {
+    "reqId": {
+      "required": true
+    },
+    "lineNumber": {
+      "required": true,
+      "min": 1
+    },
+    "itemId": {
+      "required": true
+    },
+    "description": {
+      "maxLength": 500
+    },
+    "quantity": {
+      "required": true,
+      "min": 0
+    },
+    "estimatedUnitPrice": {
+      "min": 0
+    },
+    "lineTotal": {
+      "min": 0
+    }
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "partner": {
+    "navigation": {
+      "title": "الشركاء",
+      "description": "مجال الشركاء",
+      "partners": "الشركاء",
+      "partnerAddresses": "عناوين الشركاء",
+      "partnerBankAccounts": "الحسابات البنكية للشركاء",
+      "partnerCategories": "فئات الشركاء",
+      "contacts": "جهات الاتصال"
+    }
+  },
+  "common": {
+    "subsections": {
+      "operations": "العمليات",
+      "configuration": "الإعدادات"
+    }
+  },
+  "directory": {
+    "fields": {
+      "code": "الرمز",
+      "name": "الاسم",
+      "taxId": "الرقم الضريبي",
+      "email": "البريد الإلكتروني",
+      "phone": "الهاتف",
+      "description": "الوصف",
+      "address": "معرّف العنوان",
+      "paymentTerm": "معرّف شرط الدفع",
+      "roles": "الأدوار",
+      "partnerId": "معرّف الشريك",
+      "addressType": "نوع العنوان",
+      "addressId": "معرّف العنوان",
+      "isPrimary": "أساسي",
+      "isActive": "نشط",
+      "bankId": "معرّف البنك",
+      "accountNumber": "رقم الحساب",
+      "iban": "IBAN",
+      "accountName": "اسم الحساب",
+      "currencyId": "معرّف العملة",
+      "mobile": "المحمول"
+    },
+    "sections": {
+      "general": "عام",
+      "contact": "الاتصال",
+      "legal": "قانوني",
+      "financial": "مالي",
+      "status": "الحالة"
+    }
+  }
+}

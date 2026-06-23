@@ -1,0 +1,29 @@
+{
+  "entity": "WorkflowStep",
+  "fields": {
+    "workflowTemplateId": {
+      "required": true
+    },
+    "stepNumber": {
+      "required": true,
+      "min": 1
+    },
+    "name": {
+      "required": true,
+      "maxLength": 200
+    },
+    "approverRole": {
+      "required": true,
+      "maxLength": 80
+    },
+    "condition": {
+      "maxLength": 1000
+    },
+    "timeoutHours": {
+      "min": 0
+    },
+    "escalationRole": {
+      "maxLength": 80
+    }
+  }
+}

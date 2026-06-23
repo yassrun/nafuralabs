@@ -1,0 +1,28 @@
+{
+  "entity": "StandardCostUpdate",
+  "fields": {
+    "updateNumber": {
+      "required": true,
+      "maxLength": 60
+    },
+    "currentCost": {
+      "min": 0
+    },
+    "newCost": {
+      "min": 0
+    },
+    "varianceAmount": {
+      "min": 0
+    },
+    "reason": {
+      "maxLength": 120
+    },
+    "approvedBy": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

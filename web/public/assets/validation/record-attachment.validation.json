@@ -1,0 +1,26 @@
+{
+  "entity": "RecordAttachment",
+  "fields": {
+    "entityType": {
+      "required": true,
+      "maxLength": 80
+    },
+    "entityId": {
+      "required": true
+    },
+    "fileName": {
+      "required": true,
+      "maxLength": 255
+    },
+    "fileUrl": {
+      "required": true,
+      "maxLength": 1000
+    },
+    "mimeType": {
+      "maxLength": 120
+    },
+    "uploadedBy": {
+      "maxLength": 120
+    }
+  }
+}

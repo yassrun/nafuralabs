@@ -1,0 +1,26 @@
+{
+  "entity": "ReturnInspection",
+  "fields": {
+    "inspectionNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "inspectedBy": {
+      "maxLength": 120
+    },
+    "condition": {
+      "maxLength": 120
+    },
+    "disposition": {
+      "maxLength": 120
+    },
+    "notes": {
+      "maxLength": 2000
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

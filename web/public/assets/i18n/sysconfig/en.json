@@ -1,0 +1,84 @@
+{
+  "sysconfig": {
+    "navigation": {
+      "calendars": "Calendars",
+      "codeLists": "Code Lists",
+      "numberingSequences": "Numbering Sequences",
+      "referenceValues": "Reference Values",
+      "tags": "Tags",
+      "timeZones": "Time Zones"
+    },
+    "calendar": {
+      "title": "Calendars",
+      "detailTitle": "Calendar Details",
+      "newTitle": "New Calendar",
+      "fields": {
+        "code": "code",
+        "name": "name",
+        "timeZoneId": "time Zone Id",
+        "description": "description",
+        "isActive": "is Active"
+      },
+      "sections": {}
+    },
+    "codeList": {
+      "title": "Code Lists",
+      "detailTitle": "Code List Details",
+      "newTitle": "New Code List",
+      "fields": {
+        "code": "code",
+        "name": "name",
+        "description": "description"
+      },
+      "sections": {}
+    },
+    "numberingSequence": {
+      "title": "Numbering Sequences",
+      "detailTitle": "Numbering Sequence Details",
+      "newTitle": "New Numbering Sequence",
+      "fields": {
+        "name": "name",
+        "prefix": "prefix",
+        "currentNumber": "current Number",
+        "incrementBy": "increment By",
+        "padLength": "pad Length",
+        "code": "code"
+      },
+      "sections": {}
+    },
+    "referenceValue": {
+      "title": "Reference Values",
+      "detailTitle": "Reference Value Details",
+      "newTitle": "New Reference Value",
+      "fields": {
+        "codeListId": "code List Id",
+        "code": "code",
+        "name": "name",
+        "sortOrder": "sort Order"
+      },
+      "sections": {}
+    },
+    "tag": {
+      "title": "Tags",
+      "detailTitle": "Tag Details",
+      "newTitle": "New Tag",
+      "fields": {
+        "code": "code",
+        "name": "name",
+        "color": "color"
+      },
+      "sections": {}
+    },
+    "timeZone": {
+      "title": "Time Zones",
+      "detailTitle": "Time Zone Details",
+      "newTitle": "New Time Zone",
+      "fields": {
+        "code": "code",
+        "name": "name",
+        "offset": "offset"
+      },
+      "sections": {}
+    }
+  }
+}

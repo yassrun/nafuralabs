@@ -1,0 +1,76 @@
+{
+  "cautions": [
+    {
+      "id": "cb-001",
+      "numero": "CB-2026-001",
+      "contratMarcheId": "mar-001",
+      "marcheNumero": "MAR-2026-001",
+      "type": "PROVISOIRE",
+      "banqueNom": "Attijariwafa Bank",
+      "montant": "1146000",
+      "dateEmission": "2025-12-15",
+      "dateExpiration": "2026-06-15",
+      "status": "MAINLEVEE"
+    },
+    {
+      "id": "cb-002",
+      "numero": "CB-2026-002",
+      "contratMarcheId": "mar-001",
+      "marcheNumero": "MAR-2026-001",
+      "type": "DEFINITIVE",
+      "banqueNom": "Attijariwafa Bank",
+      "montant": "1146000",
+      "dateEmission": "2026-01-10",
+      "dateExpiration": "2027-06-10",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "cb-003",
+      "numero": "CB-2026-003",
+      "contratMarcheId": "mar-001",
+      "marcheNumero": "MAR-2026-001",
+      "type": "AVANCE",
+      "banqueNom": "BMCE Bank",
+      "montant": "3820000",
+      "dateEmission": "2026-01-20",
+      "dateExpiration": "2026-12-31",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "cb-004",
+      "numero": "CB-2026-004",
+      "contratMarcheId": "mar-002",
+      "marcheNumero": "MAR-2026-002",
+      "type": "PROVISOIRE",
+      "banqueNom": "CIH Bank",
+      "montant": "2073000",
+      "dateEmission": "2025-12-01",
+      "dateExpiration": "2026-05-01",
+      "status": "MAINLEVEE"
+    },
+    {
+      "id": "cb-005",
+      "numero": "CB-2026-005",
+      "contratMarcheId": "mar-002",
+      "marcheNumero": "MAR-2026-002",
+      "type": "DEFINITIVE",
+      "banqueNom": "CIH Bank",
+      "montant": "2073000",
+      "dateEmission": "2026-01-15",
+      "dateExpiration": "2028-07-15",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "cb-006",
+      "numero": "CB-2026-006",
+      "contratMarcheId": "mar-003",
+      "marcheNumero": "MAR-2025-018",
+      "type": "RG",
+      "banqueNom": "Banque Populaire",
+      "montant": "291900",
+      "dateEmission": "2026-04-20",
+      "dateExpiration": "2027-04-15",
+      "status": "ACTIVE"
+    }
+  ]
+}

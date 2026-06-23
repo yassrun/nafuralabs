@@ -1,0 +1,80 @@
+{
+  "core-hr": {
+    "navigation": {
+      "title": "Core Hr",
+      "description": "Core Hr Domain",
+      "employees": "Employees",
+      "departments": "Departments",
+      "designations": "Designations",
+      "positions": "Positions",
+      "employmentTypes": "Employment Types",
+      "employeeDocuments": "Employee Documents",
+      "employeePromotions": "Employee Promotions",
+      "employeeTransfers": "Employee Transfers",
+      "separations": "Separations"
+    },
+    "fields": {
+      "gradeBand": "Grade Band Id",
+      "fromGrade": "From Grade Id",
+      "toGrade": "To Grade Id"
+    }
+  },
+  "common": {
+    "subsections": {
+      "operations": "Operations",
+      "configuration": "Configuration"
+    }
+  },
+  "hr": {
+    "fields": {
+      "employeeNumber": "Employee Number",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "phone": "Phone",
+      "dateOfBirth": "Date Of Birth",
+      "hireDate": "Hire Date",
+      "department": "Department Id",
+      "position": "Position Id",
+      "manager": "Manager Id",
+      "designation": "Designation Id",
+      "employmentType": "Employment Type Id",
+      "status": "Status",
+      "photo": "Photo",
+      "code": "Code",
+      "name": "Name",
+      "title": "Title",
+      "employee": "Employee Id",
+      "documentType": "Document Type",
+      "fileName": "File Name",
+      "fileUrl": "File Url",
+      "expiryDate": "Expiry Date",
+      "isVerified": "Is Verified",
+      "uploadedAt": "Uploaded At",
+      "promotionNumber": "Promotion Number",
+      "fromDesignation": "From Designation Id",
+      "toDesignation": "To Designation Id",
+      "effectiveDate": "Effective Date",
+      "salaryRevision": "Salary Revision Id",
+      "transferNumber": "Transfer Number",
+      "fromDepartment": "From Department Id",
+      "toDepartment": "To Department Id",
+      "fromPosition": "From Position Id",
+      "toPosition": "To Position Id",
+      "reason": "Reason",
+      "separationNumber": "Separation Number",
+      "type": "Type",
+      "lastWorkingDay": "Last Working Day",
+      "exitInterviewDone": "Exit Interview Done",
+      "clearance": "Clearance Json"
+    },
+    "sections": {
+      "general": "General",
+      "personal": "Personal",
+      "employment": "Employment",
+      "promotion": "Promotion",
+      "transfer": "Transfer",
+      "details": "Details"
+    }
+  }
+}

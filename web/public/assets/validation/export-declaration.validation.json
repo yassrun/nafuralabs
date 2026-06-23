@@ -1,0 +1,22 @@
+{
+  "entity": "ExportDeclaration",
+  "fields": {
+    "declarationNumber": {
+      "required": true,
+      "maxLength": 60
+    },
+    "portOfExit": {
+      "maxLength": 120
+    },
+    "hsCode": {
+      "maxLength": 60
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

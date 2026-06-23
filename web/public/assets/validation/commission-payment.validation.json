@@ -1,0 +1,20 @@
+{
+  "entity": "CommissionPayment",
+  "fields": {
+    "paymentNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "amount": {
+      "min": 0
+    },
+    "paymentMethod": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

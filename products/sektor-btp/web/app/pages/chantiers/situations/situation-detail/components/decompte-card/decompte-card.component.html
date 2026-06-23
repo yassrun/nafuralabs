@@ -1,0 +1,42 @@
+<div class="dc" [class.dc--sticky]="sticky()" [class.dc--compact]="compact()">
+  <div class="dc__title">{{ 'chantiers.situation.detail.decompte.title' | translate }}</div>
+  <div class="dc__row">
+    <span>{{ 'chantiers.situation.detail.decompte.cumulTravauxHt' | translate }}</span>
+    <strong>{{ v().cumulCourantHt | number: '1.2-2' }} MAD</strong>
+  </div>
+  <div class="dc__row dc__row--minus">
+    <span>– Cumul situation N-1</span>
+    <span>{{ v().cumulPrecedentHt | number: '1.2-2' }} MAD</span>
+  </div>
+  <div class="dc__row dc__row--strong dc__row--accent">
+    <span>{{ 'chantiers.situation.detail.decompte.travauxPeriodeHt' | translate }}</span>
+    <strong>{{ v().travauxPeriodeHt | number: '1.2-2' }} MAD</strong>
+  </div>
+  <div class="dc__row dc__row--minus">
+    <span>– Retenue garantie ({{ v().retenueGarantiePercent }}%)</span>
+    <span>{{ v().retenueGarantieMontant | number: '1.2-2' }} MAD</span>
+  </div>
+  @if ((v().retenueAvancePercent || 0) > 0) {
+    <div class="dc__row dc__row--minus">
+      <span>{{ 'chantiers.situation.detail.decompte.resorptionAvance' | translate }} ({{ v().retenueAvancePercent }}%)</span>
+      <span>{{ v().retenueAvanceMontant | number: '1.2-2' }} MAD</span>
+    </div>
+  }
+  <div class="dc__row dc__row--strong dc__row--accent">
+    <span>{{ 'chantiers.situation.detail.decompte.netHt' | translate }}</span>
+    <strong>{{ v().netAPayerHt | number: '1.2-2' }} MAD</strong>
+  </div>
+  <div class="dc__row">
+    <span>+ TVA ({{ v().tvaTaux }}%)</span>
+    <span>
+      {{ v().netAPayerHt * v().tvaTaux / 100 | number: '1.2-2' }} MAD
+    </span>
+  </div>
+  <div class="dc__row dc__row--final">
+    <span>{{ 'chantiers.situation.detail.decompte.netTtc' | translate }}</span>
+    <strong>{{ v().netAPayerTtc | number: '1.2-2' }} MAD</strong>
+  </div>
+  <div class="dc__legal">
+    Retenue garantie {{ v().retenueGarantiePercent }}% conformément à l'article du marché.
+  </div>
+</div>

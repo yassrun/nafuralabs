@@ -1,0 +1,74 @@
+{
+  "directory": {
+    "navigation": {
+      "title": "الدليل",
+      "description": "مجال الدليل",
+      "partners": "الشركاء",
+      "contacts": "جهات الاتصال",
+      "partnerCategories": "فئات الشركاء",
+      "partnerAddresses": "عناوين الشركاء",
+      "partnerBankAccounts": "الحسابات البنكية للشركاء",
+      "countries": "البلدان",
+      "regions": "الجهات",
+      "cities": "المدن",
+      "addresses": "العناوين"
+    },
+    "partners": {
+      "navigation": {
+        "title": "الشركاء"
+      }
+    },
+    "geography": {
+      "navigation": {
+        "title": "الجغرافيا"
+      }
+    },
+    "fields": {
+      "code": "الرمز",
+      "name": "الاسم",
+      "taxId": "الرقم الضريبي",
+      "email": "البريد الإلكتروني",
+      "phone": "الهاتف",
+      "description": "الوصف",
+      "address": "معرّف العنوان",
+      "paymentTerm": "معرّف شرط الدفع",
+      "roles": "الأدوار",
+      "mobile": "المحمول",
+      "partnerId": "معرّف الشريك",
+      "addressType": "نوع العنوان",
+      "addressId": "معرّف العنوان",
+      "isPrimary": "أساسي",
+      "isActive": "نشط",
+      "bankId": "معرّف البنك",
+      "accountNumber": "رقم الحساب",
+      "iban": "IBAN",
+      "accountName": "اسم الحساب",
+      "currencyId": "معرّف العملة"
+    },
+    "sections": {
+      "general": "عام",
+      "contact": "الاتصال",
+      "legal": "قانوني",
+      "financial": "مالي",
+      "status": "الحالة"
+    }
+  },
+  "common": {
+    "subsections": {
+      "operations": "العمليات",
+      "configuration": "الإعدادات"
+    }
+  },
+  "geo": {
+    "fields": {
+      "code": "الرمز",
+      "name": "الاسم",
+      "country": "معرّف البلد",
+      "region": "معرّف الجهة",
+      "addressLine1": "السطر 1",
+      "addressLine2": "السطر 2",
+      "city": "معرّف المدينة",
+      "postalCode": "الرمز البريدي"
+    }
+  }
+}

@@ -1,0 +1,52 @@
+/* Doxura Design System v1 - Typography */
+
+.dox-typography {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  color: var(--dox-color-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, .dox-h1 {
+  font-size: 1.25rem; /* 20px - Enterprise scale is smaller/tighter */
+  font-weight: 600;
+  line-height: 1.75rem;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+h2, .dox-h2 {
+  font-size: 1rem; /* 16px */
+  font-weight: 600;
+  line-height: 1.5rem;
+  margin: 0;
+}
+
+h3, .dox-h3 {
+  font-size: 0.875rem; /* 14px */
+  font-weight: 600;
+  line-height: 1.25rem;
+  margin: 0;
+}
+
+.dox-body {
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.25rem;
+}
+
+.dox-body-sm {
+  font-size: 0.75rem; /* 12px */
+  line-height: 1.125rem;
+}
+
+.dox-label {
+  font-size: 0.6875rem; /* 11px */
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--dox-color-text-secondary);
+}
+
+.dox-mono {
+  font-family: 'ui-monospace', 'SFMono-Regular', Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.8125rem;
+}

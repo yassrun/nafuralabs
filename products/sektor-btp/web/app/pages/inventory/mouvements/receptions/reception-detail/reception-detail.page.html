@@ -1,0 +1,93 @@
+<nf-page-shell scroll>
+  <nf-page-header [config]="headerConfig"></nf-page-header>
+
+  <nf-entity-detail
+    #detail
+    [config]="config"
+    [mode]="mode()"
+    [item]="item()"
+    [lookups]="lookups()"
+    [loading]="isLoading()"
+    [saving]="isSaving()"
+    (action)="onAction($event)"
+    (transitionRequest)="handleTransition($event)">
+
+    <input
+      #blFileInput
+      class="rd__file-input"
+      type="file"
+      accept=".pdf,.png,.jpg,.jpeg,.webp"
+      (change)="onBlFileSelected($event)" />
+
+    <ng-template nfField="destLocationId" let-control let-form="form">
+      @if (mode() !== 'view') {
+        <div class="rd__mode-wrap">
+          <mat-button-toggle-group
+            class="rd__mode-group"
+            [value]="deliveryMode()"
+            (change)="onModeChange($event.value, form)">
+            <mat-button-toggle value="DEPOT">
+              <nf-icon name="warehouse"></nf-icon>
+              {{ 'inventory.mouvement.reception.deliveryMode.toDepot' | translate }}
+            </mat-button-toggle>
+            <mat-button-toggle value="CHANTIER_DIRECT">
+              <nf-icon name="construction"></nf-icon>
+              {{ 'inventory.mouvement.reception.deliveryMode.toChantier' | translate }}
+            </mat-button-toggle>
+          </mat-button-toggle-group>
+        </div>
+      }
+      @if (deliveryMode() === 'DEPOT') {
+        <nf-select
+          class="rd__field"
+          [label]="'inventory.mouvement.reception.deliveryMode.depotReceiver' | translate"
+          [formControl]="asFormControl(control)"
+          [options]="depotSelectOptions()" />
+      } @else if (mode() === 'view') {
+        <span class="rd__mode-badge">
+          <nf-icon name="construction"></nf-icon> {{ 'inventory.mouvement.reception.deliveryMode.toChantier' | translate }}
+        </span>
+      }
+    </ng-template>
+
+    <ng-template nfField="chantierLocationId" let-control>
+      @if (deliveryMode() === 'CHANTIER_DIRECT') {
+        <nf-select
+          class="rd__field"
+          [label]="'inventory.mouvement.reception.deliveryMode.chantierDestination' | translate"
+          [formControl]="asFormControl(control)"
+          [options]="chantierSelectOptions()" />
+      }
+    </ng-template>
+
+    <ng-template nfField="phaseRef" let-control>
+      @if (deliveryMode() === 'CHANTIER_DIRECT') {
+        <nf-select
+          class="rd__field"
+          [label]="'inventory.mouvement.reception.deliveryMode.phase' | translate"
+          [formControl]="asFormControl(control)"
+          [options]="phaseSelectOptions()" />
+      }
+    </ng-template>
+
+    <ng-template nfField="reference" let-control>
+      <div class="rd__reference-stack">
+        <nf-input
+          class="rd__field"
+          type="text"
+          [label]="'inventory.mouvement.reception.deliveryMode.blReference' | translate"
+          [formControl]="asFormControl(control)"
+          [disabled]="mode() === 'view'" />
+      </div>
+    </ng-template>
+
+    <ng-template nfField="lines" let-control>
+      <div class="rd__lines-header">
+        <span class="rd__lines-total">{{ 'inventory.mouvement.reception.deliveryMode.linesTotal' | translate:{ value: linesTotal() } }}</span>
+      </div>
+      <app-reception-lines-editor
+        [linesControl]="asLinesControl(control)" />
+    </ng-template>
+
+  </nf-entity-detail>
+</nf-page-shell>

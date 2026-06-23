@@ -1,0 +1,63 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: nafura-infra
+
+resources:
+  - ../../../base/infra/namespace.yaml
+  - ../../../base/infra/vault.yaml
+  - ../../../base/infra/vault-bootstrap-rbac.yaml
+  - ../../../base/infra/service-accounts.yaml
+  - ../../../base/infra/postgres.yaml
+  - ../../../base/infra/redis.yaml
+  - ../../../base/infra/keycloak.yaml
+  - ../../../base/infra/minio.yaml
+  - ../../../base/infra/minio-init-job.yaml
+  - ../../../base/infra/ingress.yaml
+  - ../../../base/infra/vault-init-job.yaml
+  - vault-unseal-cronjob.yaml
+  - clusterissuer-letsencrypt.yaml
+  - cert-manager-gke-rbac.yaml
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+configMapGenerator:
+  - name: keycloak-realm
+    files:
+      - iam-portal-realm.json=../../../base/infra/iam-portal-realm.json
+
+patches:
+  - target:
+      kind: Ingress
+      name: nafura-ingress
+    path: patch-ingress-hosts.yaml
+  - target:
+      kind: Ingress
+      name: nafura-ingress
+    path: patch-ingress-tls.yaml
+  - target:
+      kind: PersistentVolumeClaim
+      name: postgres-data
+    path: pvc-storageclass-gke.yaml
+  - target:
+      kind: PersistentVolumeClaim
+      name: minio-data
+    path: pvc-storageclass-gke.yaml
+  - target:
+      kind: PersistentVolumeClaim
+      name: vault-data
+    path: pvc-storageclass-gke.yaml
+  - path: patch-vault-gke-autopilot.yaml
+  - target:
+      kind: Deployment
+      name: vault
+    path: patch-vault-no-ipc-lock.yaml
+  - path: patch-postgres-vault-env.yaml
+  - path: patch-keycloak-vault-env.yaml
+  - path: patch-minio-vault-env.yaml
+  - path: patch-keycloak-hostname.yaml
+  - target:
+      kind: Job
+      name: vault-init
+    path: patch-vault-init-env.yaml

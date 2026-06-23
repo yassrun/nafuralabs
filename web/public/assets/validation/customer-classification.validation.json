@@ -1,0 +1,24 @@
+{
+  "entity": "CustomerClassification",
+  "fields": {
+    "customerId": {
+      "required": true
+    },
+    "tier": {
+      "maxLength": 120
+    },
+    "segment": {
+      "maxLength": 120
+    },
+    "criteria": {
+      "maxLength": 120
+    },
+    "previousTier": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

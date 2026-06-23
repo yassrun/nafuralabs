@@ -1,0 +1,29 @@
+{
+  "entity": "Opportunity",
+  "fields": {
+    "name": {
+      "required": true,
+      "maxLength": 200
+    },
+    "customerId": {
+      "required": true
+    },
+    "expectedRevenue": {
+      "min": 0
+    },
+    "probability": {
+      "min": 0,
+      "max": 100
+    },
+    "closeDate": {
+      "required": true
+    },
+    "stage": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

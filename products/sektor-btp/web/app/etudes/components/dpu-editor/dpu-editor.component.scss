@@ -1,0 +1,141 @@
+.dpu {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dpu--readonly {
+  opacity: 0.92;
+}
+
+.dpu__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.dpu__btn {
+  border: 1px solid var(--nf-color-border);
+  background: var(--nf-color-surface);
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.dpu__btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.dpu__btn--ghost {
+  background: var(--nf-color-bg-muted);
+}
+
+.dpu__btn--primary {
+  background: var(--nf-color-primary-600);
+  color: var(--nf-color-surface);
+  border-color: var(--nf-color-primary-600);
+}
+
+.dpu__sliders {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.dpu__slider {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 200px;
+  font-size: 13px;
+}
+
+.dpu__totals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 14px;
+}
+
+.dpu__table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--nf-color-border);
+  border-radius: 8px;
+}
+
+.dpu__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.dpu__table th,
+.dpu__table td {
+  border-bottom: 1px solid var(--nf-color-bg-muted);
+  padding: 8px;
+  text-align: left;
+}
+
+.dpu__table th {
+  background: var(--nf-color-bg-muted);
+  font-weight: 600;
+}
+
+.dpu__input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  border: 1px solid var(--nf-color-border);
+  border-radius: 4px;
+  padding: 4px 6px;
+}
+
+.dpu__input--sm {
+  max-width: 72px;
+}
+
+.dpu__input--num {
+  text-align: right;
+}
+
+.dpu__num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.dpu__actions {
+  white-space: nowrap;
+}
+
+.dpu__icon {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0 4px;
+}
+
+.dpu__empty {
+  color: var(--nf-text-muted);
+  font-style: italic;
+}
+
+.dpu__hist {
+  border-top: 1px solid var(--nf-color-border);
+  padding-top: 8px;
+}
+
+.dpu__hist-title {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+
+.dpu__hist ul {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 12px;
+  color: var(--nf-color-text-secondary);
+}

@@ -1,0 +1,40 @@
+{
+  "epiDotations": [
+    {
+      "id": "epi-001",
+      "reference": "EPI-CASQ-001",
+      "designation": "Casque chantier blanc EN397",
+      "categorie": "TETE",
+      "marque": "JSP",
+      "normeCe": "EN397",
+      "employeId": "emp-001",
+      "employeNom": "Karim El Idrissi",
+      "chantierId": "ch-001",
+      "chantierCode": "CH-2025-001",
+      "dateAttribution": "2026-01-06",
+      "dateExpiration": "2028-01-06",
+      "prixUnitaire": 85,
+      "status": "OK",
+      "dateDerniereVerification": "2026-01-10",
+      "prochaineVerification": "2026-07-10"
+    },
+    {
+      "id": "epi-002",
+      "reference": "EPI-CHAU-001",
+      "designation": "Chaussures sécurité S3 SRC",
+      "categorie": "PIEDS",
+      "marque": "Uvex",
+      "normeCe": "EN20345 S3",
+      "employeId": "emp-001",
+      "employeNom": "Karim El Idrissi",
+      "chantierId": "ch-001",
+      "chantierCode": "CH-2025-001",
+      "dateAttribution": "2026-01-06",
+      "dateExpiration": "2026-06-20",
+      "prixUnitaire": 320,
+      "status": "A_RENOUVELER",
+      "dateDerniereVerification": "2025-12-01",
+      "prochaineVerification": "2026-06-01"
+    }
+  ]
+}

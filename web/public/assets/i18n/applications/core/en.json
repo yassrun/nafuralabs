@@ -1,0 +1,15 @@
+{
+  "core": {
+    "application": {
+      "title": "Nafura Core ERP",
+      "description": "Nafura Core ERP workspace"
+    },
+    "ai": {
+      "assistant": {
+        "title": "AI Assistant",
+        "subtitle": "Ask a question about the ERP",
+        "placeholder": "E.g. create a PO for site CH-2026-003"
+      }
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "id": "scope",
+  "name": "Scope",
+  "description": "Tenant and scope context",
+  "type": "core",
+  "layer": "core",
+  "provides": {
+    "backend": {
+      "gradle": ":platform:core:scope",
+      "packages": ["ma.nafura.core.security.scope"]
+    }
+  },
+  "requires": { "core": ["framework"] },
+  "manifest": { "key": "scope" }
+}

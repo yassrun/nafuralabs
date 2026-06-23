@@ -1,0 +1,29 @@
+{
+  "entity": "ApprovalMatrix",
+  "fields": {
+    "code": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "name": {
+      "maxLength": 120
+    },
+    "documentType": {
+      "maxLength": 120
+    },
+    "amountThreshold": {
+      "min": 0
+    },
+    "approverRole": {
+      "maxLength": 120
+    },
+    "sequenceOrder": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

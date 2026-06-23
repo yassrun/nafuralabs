@@ -1,0 +1,17 @@
+{
+  "entity": "TaxGroup",
+  "fields": {
+    "code": {
+      "required": true,
+      "maxLength": 30,
+      "unique": true
+    },
+    "name": {
+      "required": true,
+      "maxLength": 200
+    },
+    "description": {
+      "maxLength": 2000
+    }
+  }
+}

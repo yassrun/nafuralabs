@@ -1,0 +1,35 @@
+{
+  "entity": "PricingRule",
+  "fields": {
+    "code": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "name": {
+      "maxLength": 120
+    },
+    "ruleType": {
+      "maxLength": 120
+    },
+    "condition": {
+      "maxLength": 120
+    },
+    "adjustment": {
+      "min": 0
+    },
+    "priority": {
+      "min": 0
+    },
+    "validFrom": {
+      "maxLength": 120
+    },
+    "validTo": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

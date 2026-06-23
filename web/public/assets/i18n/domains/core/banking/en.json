@@ -1,0 +1,65 @@
+{
+  "banking": {
+    "navigation": {
+      "title": "Banking",
+      "description": "Banking Domain",
+      "banks": "Banks",
+      "bankAccounts": "Bank Accounts",
+      "bankReconciliations": "Bank Reconciliations",
+      "bankTransactions": "Bank Transactions",
+      "fundTransfers": "Fund Transfers"
+    }
+  },
+  "common": {
+    "subsections": {
+      "operations": "Operations",
+      "configuration": "Configuration"
+    }
+  },
+  "directory": {
+    "fields": {
+      "code": "Code",
+      "name": "Name",
+      "swiftCode": "Swift Code",
+      "countryId": "Country Id",
+      "isActive": "Is Active"
+    },
+    "sections": {
+      "general": "General"
+    }
+  },
+  "finance": {
+    "fields": {
+      "accountNumber": "Account Number",
+      "name": "Name",
+      "bankName": "Bank Name",
+      "currencyId": "Currency Id",
+      "accountType": "Account Type",
+      "balance": "Balance",
+      "iban": "Iban",
+      "swiftCode": "Swift Code",
+      "isActive": "Is Active",
+      "reconciliationNumber": "Reconciliation Number",
+      "bankAccountId": "Bank Account Id",
+      "statementDate": "Statement Date",
+      "statementBalance": "Statement Balance",
+      "bookBalance": "Book Balance",
+      "difference": "Difference",
+      "status": "Status",
+      "transactionId": "Transaction Id",
+      "transactionDate": "Transaction Date",
+      "amount": "Amount",
+      "type": "Type",
+      "reference": "Reference",
+      "description": "Description",
+      "isReconciled": "Is Reconciled",
+      "transferNumber": "Transfer Number",
+      "fromBankAccountId": "From Bank Account Id",
+      "toBankAccountId": "To Bank Account Id",
+      "transferDate": "Transfer Date"
+    },
+    "sections": {
+      "general": "General"
+    }
+  }
+}

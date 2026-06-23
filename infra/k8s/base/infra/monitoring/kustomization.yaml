@@ -1,0 +1,29 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Monitoring Stack Kustomization
+# ═══════════════════════════════════════════════════════════════════════════════
+# LGTM Stack: Loki (Logs) + Grafana (Dashboards) + Tempo (Traces) + Mimir/Prometheus (Metrics)
+#
+# Components:
+#   - Prometheus: Metrics collection with K8s auto-discovery
+#   - Grafana: Unified dashboard for metrics, logs, and traces
+#   - Loki: Log aggregation
+#   - Promtail: Log collector (DaemonSet)
+#   - Tempo: Distributed tracing backend
+#
+# Access:
+#   - Grafana: http://monitoring.nafura.local
+#   - Prometheus: http://monitoring.nafura.local/prometheus
+# ═══════════════════════════════════════════════════════════════════════════════
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - prometheus.yaml
+  - grafana.yaml
+  - loki.yaml
+  - promtail.yaml
+  - tempo.yaml
+  - monitoring-ingress.yaml
+
+# Note: Common labels intentionally not added to avoid selector immutability issues
+# The 'app' label on each resource serves as the selector

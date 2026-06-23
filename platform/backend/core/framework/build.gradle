@@ -1,0 +1,28 @@
+plugins {
+    id 'java-library'
+}
+
+dependencies {
+    // Spring Data JPA for repository abstractions
+    api 'org.springframework.boot:spring-boot-starter-data-jpa'
+    
+    // Spring Web for REST abstractions
+    api 'org.springframework.boot:spring-boot-starter-web'
+    
+    // Validation
+    api 'org.springframework.boot:spring-boot-starter-validation'
+    
+    // CSV parsing for import/export
+    api 'org.apache.commons:commons-csv:1.11.0'
+    
+    // Lombok for reducing boilerplate
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    
+    // Testing
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}

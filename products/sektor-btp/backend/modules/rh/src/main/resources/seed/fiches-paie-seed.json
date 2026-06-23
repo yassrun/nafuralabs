@@ -1,0 +1,42 @@
+{
+  "fichesPaie": [
+    {
+      "id": "paie-001",
+      "numero": "PAI-2026-0001",
+      "employeId": "emp-001",
+      "employeNom": "Benmoussa Khalid",
+      "mois": "2026-04",
+      "salaireBase": "4200",
+      "indemniteRepresentation": "0",
+      "indemniteTransport": "300",
+      "montantHeuresSup": "0",
+      "salaireBrut": "4500",
+      "cotisationCNSS": "188.16",
+      "cotisationAMO": "101.70",
+      "totalRetenues": "289.86",
+      "salaireNetImposable": "4210.14",
+      "igr": "175.36",
+      "salaireNetAPayer": "4034.78",
+      "status": "PAYEE"
+    },
+    {
+      "id": "paie-002",
+      "numero": "PAI-2026-0002",
+      "employeId": "emp-001",
+      "employeNom": "Benmoussa Khalid",
+      "mois": "2026-05",
+      "salaireBase": "4200",
+      "indemniteRepresentation": "0",
+      "indemniteTransport": "300",
+      "montantHeuresSup": "150",
+      "salaireBrut": "4650",
+      "cotisationCNSS": "188.16",
+      "cotisationAMO": "105.09",
+      "totalRetenues": "293.25",
+      "salaireNetImposable": "4356.75",
+      "igr": "204.68",
+      "salaireNetAPayer": "4152.07",
+      "status": "VALIDEE"
+    }
+  ]
+}

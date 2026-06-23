@@ -1,0 +1,41 @@
+{
+  "measurement": {
+    "fields": {
+      "item": "معرّف الصنف",
+      "fromUnit": "من وحدة",
+      "toUnit": "إلى وحدة",
+      "factor": "المعامل",
+      "code": "الرمز",
+      "name": "الاسم",
+      "category": "معرّف فئة القياس",
+      "categoryCode": "الرمز",
+      "categoryName": "الاسم"
+    },
+    "navigation": {
+      "itemUnitConversions": "تحويلات وحدات الأصناف",
+      "unitOfMeasures": "وحدات القياس",
+      "uoMCategories": "فئات القياس"
+    },
+    "itemUnitConversion": {
+      "title": "تحويلات وحدات الأصناف",
+      "detailTitle": "تفاصيل تحويل وحدات",
+      "newTitle": "تحويل وحدات جديد"
+    },
+    "unitOfMeasure": {
+      "title": "وحدات القياس",
+      "detailTitle": "تفاصيل وحدة القياس",
+      "newTitle": "وحدة قياس جديدة"
+    },
+    "uoMCategory": {
+      "title": "فئات القياس",
+      "detailTitle": "تفاصيل فئة القياس",
+      "newTitle": "فئة قياس جديدة"
+    }
+  },
+  "common": {
+    "fields": {
+      "isActive": "نشط",
+      "description": "الوصف"
+    }
+  }
+}

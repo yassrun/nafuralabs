@@ -1,0 +1,32 @@
+{
+  "entity": "InspectionOrder",
+  "fields": {
+    "orderNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "referenceType": {
+      "maxLength": 120
+    },
+    "sampleSize": {
+      "maxLength": 120
+    },
+    "passedQty": {
+      "min": 0
+    },
+    "failedQty": {
+      "min": 0
+    },
+    "disposition": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "entity": "Address",
+  "fields": {
+    "line1": {
+      "maxLength": 255
+    },
+    "line2": {
+      "maxLength": 255
+    },
+    "postalCode": {
+      "maxLength": 20
+    },
+    "description": {
+      "maxLength": 2000
+    }
+  }
+}

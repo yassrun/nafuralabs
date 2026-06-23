@@ -1,0 +1,20 @@
+{
+  "entity": "CommissionSplit",
+  "fields": {
+    "splitNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "splitPercent": {
+      "min": 0
+    },
+    "amount": {
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

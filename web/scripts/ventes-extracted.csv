@@ -1,0 +1,90 @@
+﻿app/applications/erp/pages/ventes/avoirs/avoir-detail/avoir-detail.page.html,23,20,template_text,DÃ©signation,ventes.avoirs.text.designation,>â€¦<
+app/applications/erp/pages/ventes/avoirs/avoir-detail/avoir-detail.page.html,24,32,template_text,Total HT (MAD),ventes.avoirs.text.total-ht-mad,>â€¦<
+app/applications/erp/pages/ventes/avoirs/config/listing/columns.ts,6,25,status_label,Ã‰mis,ventes.avoirs.status.emis,STATUS_LABELS.EMIS
+app/applications/erp/pages/ventes/avoirs/config/listing/columns.ts,7,15,status_label,ImputÃ©,ventes.avoirs.status.impute,STATUS_LABELS.IMPUTE
+app/applications/erp/pages/ventes/avoirs/config/listing/columns.ts,8,19,status_label,RemboursÃ©,ventes.avoirs.status.rembourse,STATUS_LABELS.REMBOURSE
+app/applications/erp/pages/ventes/avoirs/config/listing/columns.ts,9,25,status_label,AnnulÃ©,ventes.avoirs.status.annule,STATUS_LABELS.ANNULE
+app/applications/erp/pages/ventes/bons-commandes-clients/config/listing/columns.ts,5,1,status_label,ReÃ§u,ventes.bons-commandes-clients.status.recu,BCC_STATUS_LABELS.RECU
+app/applications/erp/pages/ventes/bons-commandes-clients/config/listing/columns.ts,6,15,status_label,En cours,ventes.bons-commandes-clients.status.en-cours,BCC_STATUS_LABELS.EN_COURS
+app/applications/erp/pages/ventes/bons-commandes-clients/config/listing/columns.ts,6,37,status_label,Part. facturÃ©,ventes.bons-commandes-clients.status.part-facture,BCC_STATUS_LABELS.PARTIELLEMENT_FACTURE
+app/applications/erp/pages/ventes/bons-commandes-clients/config/listing/columns.ts,6,77,status_label,FacturÃ©,ventes.bons-commandes-clients.status.facture,BCC_STATUS_LABELS.FACTURE
+app/applications/erp/pages/ventes/bons-commandes-clients/config/listing/columns.ts,7,21,status_label,ClÃ´turÃ©,ventes.bons-commandes-clients.status.cloture,BCC_STATUS_LABELS.CLOTURE
+app/applications/erp/pages/ventes/bons-commandes-clients/config/listing/columns.ts,7,41,status_label,AnnulÃ©,ventes.bons-commandes-clients.status.annule,BCC_STATUS_LABELS.ANNULE
+app/applications/erp/pages/ventes/bons-commandes-clients/services/bcc-api.service.ts,59,13,error,Bon de commande client ${id} introuvable,ventes.bons-commandes-clients.error.bon-de-commande-client,throw new Error(â€¦)
+app/applications/erp/pages/ventes/factures/config/listing/columns.ts,10,25,status_label,Ã‰mise,ventes.factures.status.emise,STATUS_LABELS.EMISE
+app/applications/erp/pages/ventes/factures/config/listing/columns.ts,11,17,status_label,Part. payÃ©e,ventes.factures.status.part-payee,STATUS_LABELS.PARTIELLEMENT_PAYEE
+app/applications/erp/pages/ventes/factures/config/listing/columns.ts,12,37,status_label,PayÃ©e,ventes.factures.status.payee,STATUS_LABELS.PAYEE
+app/applications/erp/pages/ventes/factures/config/listing/columns.ts,13,17,status_label,En litige,ventes.factures.status.en-litige,STATUS_LABELS.EN_LITIGE
+app/applications/erp/pages/ventes/factures/config/listing/columns.ts,14,25,status_label,AvoirisÃ©e,ventes.factures.status.avoirisee,STATUS_LABELS.AVOIRISEE
+app/applications/erp/pages/ventes/factures/config/listing/columns.ts,15,25,status_label,AnnulÃ©e,ventes.factures.status.annulee,STATUS_LABELS.ANNULEE
+app/applications/erp/pages/ventes/factures/config/listing/columns.ts,36,21,type_label,DÃ©compte def.,ventes.factures.label.decompte-def,TYPE_LABELS.DECOMPTE_DEFINITIF
+app/applications/erp/pages/ventes/factures/facture-detail/facture-detail.page.html,19,18,template_text,DÃ©signation,ventes.factures.text.designation,>â€¦<
+app/applications/erp/pages/ventes/factures/facture-detail/facture-detail.page.html,22,30,template_text,Total HT (MAD),ventes.factures.text.total-ht-mad,>â€¦<
+app/applications/erp/pages/ventes/factures/facture-detail/facture-detail.page.html,40,32,template_text,Aucune ligne â€” facture issue d'une situation source,ventes.factures.text.aucune-ligne-facture-issue,>â€¦<
+app/applications/erp/pages/ventes/factures/facture-detail/facture-detail.page.html,51,31,template_text,Aucun encaissement enregistrÃ© pour le moment.,ventes.factures.text.aucun-encaissement-enregistre-pour,>â€¦<
+app/applications/erp/pages/ventes/factures/facture-detail/facture-detail.page.html,56,20,template_text,Date,ventes.factures.text.date,>â€¦<
+app/applications/erp/pages/ventes/factures/facture-detail/facture-detail.page.html,58,20,template_text,RÃ©fÃ©rence,ventes.factures.text.reference,>â€¦<
+app/applications/erp/pages/ventes/factures/facture-detail/facture-detail.page.html,60,32,template_text,Montant TTC,ventes.factures.text.montant-ttc,>â€¦<
+app/applications/erp/pages/ventes/factures/facture-detail/facture-detail.page.html,78,25,template_attr,Supprimer encaissement,ventes.factures.label.supprimer-encaissement,aria-label=â€¦
+app/applications/erp/pages/ventes/factures/facture-detail/facture-detail.page.ts,197,22,confirm,Supprimer cet encaissement ?,ventes.factures.confirm.supprimer-cet-encaissement,confirm(â€¦)
+app/applications/erp/pages/ventes/offres/config/listing/columns.ts,6,25,status_label,EnvoyÃ©e,ventes.offres.status.envoyee,OFFRE_STATUS_LABELS.ENVOYEE
+app/applications/erp/pages/ventes/offres/config/listing/columns.ts,6,45,status_label,AcceptÃ©e,ventes.offres.status.acceptee,OFFRE_STATUS_LABELS.ACCEPTEE
+app/applications/erp/pages/ventes/offres/config/listing/columns.ts,6,67,status_label,RefusÃ©e,ventes.offres.status.refusee,OFFRE_STATUS_LABELS.REFUSEE
+app/applications/erp/pages/ventes/offres/config/listing/columns.ts,7,21,status_label,ExpirÃ©e,ventes.offres.status.expiree,OFFRE_STATUS_LABELS.EXPIREE
+app/applications/erp/pages/ventes/offres/config/listing/columns.ts,7,41,status_label,AnnulÃ©e,ventes.offres.status.annulee,OFFRE_STATUS_LABELS.ANNULEE
+app/applications/erp/pages/ventes/retenues-garantie/retenues-garantie.page.html,25,13,template_attr,Rechercher par chantier ou clientâ€¦,ventes.retenues-garantie.label.rechercher-par-chantier-ou,placeholder=â€¦
+app/applications/erp/pages/ventes/retenues-garantie/retenues-garantie.page.html,33,27,template_text,Tous les clients,ventes.retenues-garantie.text.tous-les-clients,>â€¦<
+app/applications/erp/pages/ventes/retenues-garantie/retenues-garantie.page.html,42,27,template_text,Tous statuts,ventes.retenues-garantie.text.tous-statuts,>â€¦<
+app/applications/erp/pages/ventes/retenues-garantie/retenues-garantie.page.html,43,35,template_text,En cours,ventes.retenues-garantie.text.en-cours,>â€¦<
+app/applications/erp/pages/ventes/retenues-garantie/retenues-garantie.page.html,44,46,template_text,LibÃ©ration demandÃ©e,ventes.retenues-garantie.text.liberation-demandee,>â€¦<
+app/applications/erp/pages/ventes/retenues-garantie/retenues-garantie.page.html,45,34,template_text,LibÃ©rÃ©e,ventes.retenues-garantie.text.liberee,>â€¦<
+app/applications/erp/pages/ventes/retenues-garantie/retenues-garantie.page.html,46,36,template_text,ContestÃ©e,ventes.retenues-garantie.text.contestee,>â€¦<
+app/applications/erp/pages/ventes/retenues-garantie/retenues-garantie.page.html,65,28,template_text,Retenue cumulÃ©e,ventes.retenues-garantie.text.retenue-cumulee,>â€¦<
+app/applications/erp/pages/ventes/retenues-garantie/retenues-garantie.page.html,66,28,template_text,DÃ©jÃ  libÃ©rÃ©,ventes.retenues-garantie.text.deja-libere,>â€¦<
+app/applications/erp/pages/ventes/retenues-garantie/retenues-garantie.page.html,67,28,template_text,Reste Ã  libÃ©rer,ventes.retenues-garantie.text.reste-liberer,>â€¦<
+app/applications/erp/pages/ventes/retenues-garantie/retenues-garantie.page.html,68,16,template_text,RÃ©cept. provisoire,ventes.retenues-garantie.text.recept-provisoire,>â€¦<
+app/applications/erp/pages/ventes/retenues-garantie/retenues-garantie.page.html,69,16,template_text,LibÃ©ration prÃ©vue,ventes.retenues-garantie.text.liberation-prevue,>â€¦<
+app/applications/erp/pages/ventes/retenues-garantie/retenues-garantie.page.html,70,16,template_text,DÃ©lai restant,ventes.retenues-garantie.text.delai-restant,>â€¦<
+app/applications/erp/ventes/components/avoir-print/avoir-print.component.ts,38,18,inline_template_text,Date,ventes.components.text.date,>â€¦<
+app/applications/erp/ventes/components/avoir-print/avoir-print.component.ts,50,12,inline_template_text,Au profit de,ventes.components.text.au-profit-de,>â€¦<
+app/applications/erp/ventes/components/avoir-print/avoir-print.component.ts,55,12,inline_template_text,Motif de l'avoir,ventes.components.text.motif-de-avoir,>â€¦<
+app/applications/erp/ventes/components/avoir-print/avoir-print.component.ts,62,16,inline_template_text,DÃ©signation,ventes.components.text.designation,>â€¦<
+app/applications/erp/ventes/components/avoir-print/avoir-print.component.ts,63,28,inline_template_text,Total HT,ventes.components.text.total-ht,>â€¦<
+app/applications/erp/ventes/components/avoir-print/avoir-print.component.ts,79,18,inline_template_text,Total HT,ventes.components.text.total-ht,>â€¦<
+app/applications/erp/ventes/components/avoir-print/avoir-print.component.ts,87,18,inline_template_text,Total TTC,ventes.components.text.total-ttc,>â€¦<
+app/applications/erp/ventes/components/avoir-print/avoir-print.component.ts,98,38,inline_template_text,Cachet et signature,ventes.components.text.cachet-et-signature,>â€¦<
+app/applications/erp/ventes/components/caution-bancaire-dialog/caution-bancaire-dialog.component.ts,44,13,inline_template_text,Substitution par caution bancaire,ventes.components.text.substitution-par-caution-bancaire,>â€¦<
+app/applications/erp/ventes/components/caution-bancaire-dialog/caution-bancaire-dialog.component.ts,54,37,inline_template_text,Retenue Ã  substituer,ventes.components.text.retenue-substituer,>â€¦<
+app/applications/erp/ventes/components/caution-bancaire-dialog/caution-bancaire-dialog.component.ts,79,21,inline_template_text,Montant (MAD) *,ventes.components.text.montant-mad,>â€¦<
+app/applications/erp/ventes/components/caution-bancaire-dialog/caution-bancaire-dialog.component.ts,95,45,inline_template_text,Annuler,ventes.components.text.annuler,>â€¦<
+app/applications/erp/ventes/components/encaissement-form-dialog/encaissement-form-dialog.component.ts,44,13,inline_template_text,Enregistrer un encaissement,ventes.components.text.enregistrer-un-encaissement,>â€¦<
+app/applications/erp/ventes/components/encaissement-form-dialog/encaissement-form-dialog.component.ts,58,37,inline_template_text,DÃ©jÃ  encaissÃ©,ventes.components.text.deja-encaisse,>â€¦<
+app/applications/erp/ventes/components/encaissement-form-dialog/encaissement-form-dialog.component.ts,69,21,inline_template_text,Date encaissement *,ventes.components.text.date-encaissement,>â€¦<
+app/applications/erp/ventes/components/encaissement-form-dialog/encaissement-form-dialog.component.ts,83,39,inline_template_text,ChÃ¨que,ventes.components.text.cheque,>â€¦<
+app/applications/erp/ventes/components/encaissement-form-dialog/encaissement-form-dialog.component.ts,85,40,inline_template_text,EspÃ¨ces,ventes.components.text.especes,>â€¦<
+app/applications/erp/ventes/components/encaissement-form-dialog/encaissement-form-dialog.component.ts,91,21,inline_template_text,"RÃ©fÃ©rence (nÂ° chÃ¨que, virementâ€¦)",ventes.components.text.reference-cheque-virement,>â€¦<
+app/applications/erp/ventes/components/encaissement-form-dialog/encaissement-form-dialog.component.ts,110,21,inline_template_text,Montant TTC (MAD) *,ventes.components.text.montant-ttc-mad,>â€¦<
+app/applications/erp/ventes/components/encaissement-form-dialog/encaissement-form-dialog.component.ts,137,45,inline_template_text,Annuler,ventes.components.text.annuler,>â€¦<
+app/applications/erp/ventes/components/facture-print/facture-print.component.ts,27,13,inline_template_text,TÃ©l : +212 522 36 78 90 â€” contact&#64;seyrura.ma,ventes.components.text.tel-212-522-36,>â€¦<
+app/applications/erp/ventes/components/facture-print/facture-print.component.ts,45,18,inline_template_text,Date Ã©mission,ventes.components.text.date-emission,>â€¦<
+app/applications/erp/ventes/components/facture-print/facture-print.component.ts,49,18,inline_template_text,Date Ã©chÃ©ance,ventes.components.text.date-echeance,>â€¦<
+app/applications/erp/ventes/components/facture-print/facture-print.component.ts,83,16,inline_template_text,DÃ©signation,ventes.components.text.designation,>â€¦<
+app/applications/erp/ventes/components/facture-print/facture-print.component.ts,86,28,inline_template_text,Total HT,ventes.components.text.total-ht,>â€¦<
+app/applications/erp/ventes/components/facture-print/facture-print.component.ts,106,18,inline_template_text,Total HT,ventes.components.text.total-ht,>â€¦<
+app/applications/erp/ventes/components/facture-print/facture-print.component.ts,117,20,inline_template_text,RÃ©sorption avance,ventes.components.text.resorption-avance,>â€¦<
+app/applications/erp/ventes/components/facture-print/facture-print.component.ts,122,18,inline_template_text,Net Ã  payer HT,ventes.components.text.net-payer-ht,>â€¦<
+app/applications/erp/ventes/components/facture-print/facture-print.component.ts,130,18,inline_template_text,Net Ã  payer TTC,ventes.components.text.net-payer-ttc,>â€¦<
+app/applications/erp/ventes/components/facture-print/facture-print.component.ts,142,14,inline_template_text,ModalitÃ©s de paiement,ventes.components.text.modalites-de-paiement,>â€¦<
+app/applications/erp/ventes/components/facture-print/facture-print.component.ts,144,13,inline_template_text,Ã‰chÃ©ance :,ventes.components.text.echeance,>â€¦<
+app/applications/erp/ventes/components/facture-print/facture-print.component.ts,147,14,inline_template_text,CoordonnÃ©es bancaires,ventes.components.text.coordonnees-bancaires,>â€¦<
+app/applications/erp/ventes/components/facture-print/facture-print.component.ts,156,16,inline_template_text,Cachet et signature,ventes.components.text.cachet-et-signature,>â€¦<
+app/applications/erp/ventes/components/liberation-dialog/liberation-dialog.component.ts,51,37,inline_template_text,Retenue cumulÃ©e,ventes.components.text.retenue-cumulee,>â€¦<
+app/applications/erp/ventes/components/liberation-dialog/liberation-dialog.component.ts,55,37,inline_template_text,DÃ©jÃ  libÃ©rÃ©,ventes.components.text.deja-libere,>â€¦<
+app/applications/erp/ventes/components/liberation-dialog/liberation-dialog.component.ts,59,37,inline_template_text,Reste Ã  libÃ©rer,ventes.components.text.reste-liberer,>â€¦<
+app/applications/erp/ventes/components/liberation-dialog/liberation-dialog.component.ts,66,21,inline_template_text,Date de libÃ©ration *,ventes.components.text.date-de-liberation,>â€¦<
+app/applications/erp/ventes/components/liberation-dialog/liberation-dialog.component.ts,95,45,inline_template_text,Annuler,ventes.components.text.annuler,>â€¦<
+app/applications/erp/ventes/components/retenue-summary-card/retenue-summary-card.component.ts,17,12,inline_template_text,Retenues garanties â€” vue consolidÃ©e,ventes.components.text.retenues-garanties-vue-consolidee,>â€¦<
+app/applications/erp/ventes/components/retenue-summary-card/retenue-summary-card.component.ts,25,35,inline_template_text,Total bloquÃ©,ventes.components.text.total-bloque,>â€¦<
+app/applications/erp/ventes/components/retenue-summary-card/retenue-summary-card.component.ts,27,33,inline_template_text,sur  chantiers,ventes.components.text.sur-chantiers,>â€¦<
+app/applications/erp/ventes/components/retenue-summary-card/retenue-summary-card.component.ts,30,35,inline_template_text,Ã€ libÃ©rer &lt; 30 j,ventes.components.text.liberer-lt-30,>â€¦<
+app/applications/erp/ventes/components/retenue-summary-card/retenue-summary-card.component.ts,40,35,inline_template_text,LibÃ©rÃ©e 12 mois,ventes.components.text.liberee-12-mois,>â€¦<

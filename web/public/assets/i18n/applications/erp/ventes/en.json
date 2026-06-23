@@ -1,0 +1,753 @@
+{
+  "ventes": {
+    "common": {
+      "dash": "—",
+      "actions": {
+        "cancel": "Cancel",
+        "save": "Save",
+        "close": "Close",
+        "print": "Print",
+        "delete": "Delete",
+        "edit": "Edit",
+        "new": "New",
+        "reset": "Reset",
+        "search": "Search"
+      }
+    },
+    "modePaiement": {
+      "virement": "Bank transfer",
+      "cheque": "Cheque",
+      "effet": "Bill of exchange",
+      "especes": "Cash",
+      "compensation": "Offset"
+    },
+    "modePaiementLong": {
+      "virement": "Bank transfer",
+      "cheque": "Cheque",
+      "effet": "Bill of exchange",
+      "especes": "Cash",
+      "compensation": "Offset"
+    },
+    "formeJuridique": {
+      "sa": "SA",
+      "sarl": "SARL",
+      "sas": "SAS",
+      "particulier": "Individual",
+      "administration": "Administration",
+      "cooperative": "Cooperative"
+    },
+    "facture": {
+      "entityName": "Invoice",
+      "entityNamePlural": "Invoices",
+      "headerTitle": "Customer invoices",
+      "createTitle": "New invoice",
+      "detailTitle": "Invoice detail",
+      "list": {
+        "columns": {
+          "numero": "N°",
+          "type": "Type",
+          "client": "Customer",
+          "chantier": "Site",
+          "dateEmission": "Issued on",
+          "dateEcheance": "Due date",
+          "netTtc": "Net incl. VAT",
+          "encaisse": "Collected",
+          "resteTtc": "Outstanding",
+          "retard": "Overdue (d)",
+          "status": "Status"
+        },
+        "transform": {
+          "retardJ": "+{n} d"
+        },
+        "filters": {
+          "status": "Status",
+          "type": "Type",
+          "client": "Customer",
+          "chantier": "Site",
+          "modePaiement": "Payment method",
+          "dateFrom": "Issued from",
+          "dateTo": "Issued to",
+          "netMin": "Net min",
+          "netMax": "Net max"
+        },
+        "emptyState": {
+          "title": "No invoice",
+          "message": "Create a new customer invoice (interim, advance or miscellaneous).",
+          "actionLabel": "New invoice"
+        }
+      },
+      "form": {
+        "fields": {
+          "numero": "Invoice number",
+          "numeroPlaceholder": "Auto-generated",
+          "type": "Type",
+          "client": "Customer",
+          "chantier": "Site",
+          "bcClient": "Sales order",
+          "situationSource": "Source progress invoice",
+          "dateEmission": "Issue date",
+          "dateEcheance": "Due date",
+          "modePaiement": "Payment method",
+          "totalHt": "Total excl. VAT (MAD)",
+          "retenueGarantie": "Retention guarantee (MAD)",
+          "resorptionAvance": "Advance absorption (MAD)",
+          "tvaTaux": "VAT rate (%)",
+          "netHt": "Net payable excl. VAT",
+          "tva": "VAT",
+          "netTtc": "Net payable incl. VAT",
+          "cumulEncaisse": "Cumulative collected (incl. VAT)",
+          "resteEncaisser": "Outstanding (incl. VAT)",
+          "motifLitige": "Dispute reason",
+          "notes": "Internal notes",
+          "lignes": "Invoice lines",
+          "encaissements": "Receipts"
+        },
+        "sections": {
+          "identite": "Identity",
+          "dates": "Dates & payment",
+          "lignes": "Invoice lines",
+          "decompte": "Statement",
+          "encaissements": "Receipts",
+          "autres": "Notes & dispute"
+        }
+      },
+      "actions": {
+        "emit": "Issue",
+        "litige": "Flag as disputed",
+        "resolveLitige": "Dispute resolved",
+        "cancel": "Cancel",
+        "addEncaissement": "+ Receipt",
+        "print": "Print invoice",
+        "creerAvoir": "Create credit note"
+      },
+      "confirm": {
+        "emit": {
+          "title": "Issue the invoice?",
+          "message": "The invoice will move to Issued and the official PDF will be available. A mock email will be sent to the customer.",
+          "confirmLabel": "Issue"
+        },
+        "litige": {
+          "title": "Flag invoice as disputed?",
+          "message": "Provide the dispute reason (customer-side blocker).",
+          "confirmLabel": "Confirm dispute",
+          "notePlaceholder": "Dispute reason"
+        },
+        "cancel": {
+          "title": "Cancel the invoice?",
+          "message": "The invoice will be marked Cancelled. This action is irreversible before issuance.",
+          "confirmLabel": "Cancel invoice"
+        },
+        "removeEncaissement": "Delete this receipt?",
+        "delete": {
+          "title": "Delete invoice",
+          "message": "Do you really want to delete invoice {numero}?"
+        }
+      },
+      "toasts": {
+        "saved": "Invoice {numero} saved"
+      },
+      "table": {
+        "header": {
+          "designation": "Description",
+          "quantite": "Qty",
+          "puHt": "Unit price (excl. VAT)",
+          "totalHt": "Total excl. VAT (MAD)",
+          "date": "Date",
+          "mode": "Method",
+          "reference": "Reference",
+          "banque": "Bank",
+          "montantTtc": "Amount incl. VAT"
+        },
+        "emptyLignes": "No lines — invoice issued from a source progress statement",
+        "emptyEncaissements": "No receipt recorded yet.",
+        "deleteEncaissementAria": "Delete receipt"
+      }
+    },
+    "avoir": {
+      "entityName": "Credit note",
+      "entityNamePlural": "Credit notes",
+      "headerTitle": "Credit notes",
+      "createTitle": "New credit note",
+      "detailTitle": "Credit note detail",
+      "list": {
+        "columns": {
+          "numero": "N°",
+          "factureOrigine": "Source invoice",
+          "client": "Customer",
+          "dateEmission": "Issued on",
+          "motif": "Reason",
+          "totalTtc": "Total incl. VAT",
+          "status": "Status"
+        },
+        "filters": {
+          "status": "Status",
+          "client": "Customer",
+          "dateFrom": "Issued from",
+          "dateTo": "Issued to"
+        },
+        "emptyState": {
+          "title": "No credit note",
+          "message": "Issue a credit note to adjust or refund an invoice.",
+          "actionLabel": "New credit note"
+        }
+      },
+      "form": {
+        "fields": {
+          "numero": "Credit note number",
+          "numeroPlaceholder": "Auto-generated",
+          "factureOrigine": "Source invoice",
+          "client": "Customer",
+          "dateEmission": "Issue date",
+          "motif": "Credit note reason",
+          "totalHt": "Total excl. VAT (MAD)",
+          "tvaTaux": "VAT rate (%)",
+          "tva": "VAT",
+          "totalTtc": "Total incl. VAT",
+          "notes": "Internal notes",
+          "lignes": "Credit note lines"
+        },
+        "sections": {
+          "identite": "Identity",
+          "motif": "Reason",
+          "lignes": "Lines",
+          "totaux": "Totals",
+          "autres": "Notes"
+        }
+      },
+      "actions": {
+        "emit": "Issue",
+        "impute": "Apply",
+        "rembourser": "Refund",
+        "cancel": "Cancel",
+        "print": "Print credit note"
+      },
+      "confirm": {
+        "emit": {
+          "title": "Issue the credit note?",
+          "message": "The credit note will move to Issued. You can then apply it to the source invoice or refund it.",
+          "confirmLabel": "Issue"
+        },
+        "imputer": {
+          "title": "Apply the credit note?",
+          "message": "The credit note will be applied to the source invoice. Cumulative collected will be adjusted accordingly.",
+          "confirmLabel": "Apply"
+        },
+        "rembourser": {
+          "title": "Refund the credit note?",
+          "message": "A payment will be recorded (mock V1) with a transfer to the customer.",
+          "confirmLabel": "Refund"
+        },
+        "cancel": {
+          "title": "Cancel the credit note?",
+          "message": "This action is irreversible.",
+          "confirmLabel": "Cancel"
+        },
+        "delete": {
+          "title": "Delete credit note",
+          "message": "Do you really want to delete credit note {numero}?"
+        }
+      },
+      "toasts": {
+        "saved": "Credit note {numero} saved"
+      },
+      "table": {
+        "header": {
+          "designation": "Description",
+          "totalHt": "Total excl. VAT (MAD)"
+        },
+        "emptyLignes": "No lines — add items to credit (adjustments, discounts, etc.)"
+      }
+    },
+    "offre": {
+      "entityName": "Commercial proposal",
+      "entityNamePlural": "Commercial proposals",
+      "headerTitle": "Commercial proposals",
+      "createTitle": "New commercial proposal",
+      "detailTitle": "Proposal detail",
+      "list": {
+        "columns": {
+          "numero": "Proposal number",
+          "client": "Customer",
+          "objet": "Subject",
+          "dateEmission": "Issue date",
+          "dateValidite": "Valid until",
+          "joursRestants": "Days left",
+          "totalTtc": "Amount incl. VAT",
+          "status": "Status"
+        },
+        "transform": {
+          "joursPositif": "{n}d",
+          "joursAujourdhui": "Expires today",
+          "joursExpire": "Expired {n}d"
+        },
+        "filters": {
+          "status": "Status",
+          "clientId": "Customer ID"
+        },
+        "chips": {
+          "all": "All",
+          "brouillon": "Draft",
+          "envoyees": "Sent",
+          "acceptees": "Accepted",
+          "refusees": "Refused",
+          "expirees": "Expired"
+        },
+        "emptyState": {
+          "title": "No commercial proposal",
+          "message": "Commercial proposals are sent to customers to trigger an order.",
+          "actionLabel": "New proposal"
+        }
+      },
+      "form": {
+        "fields": {
+          "numero": "Proposal number",
+          "client": "Customer *",
+          "chantier": "Site",
+          "dateEmission": "Issue date *",
+          "dateValidite": "Valid until *",
+          "objet": "Subject *",
+          "tvaTaux": "VAT (%)",
+          "notes": "Notes"
+        },
+        "sections": {
+          "identification": "Identification",
+          "details": "Details"
+        }
+      },
+      "actions": {
+        "envoyer": "Send",
+        "annuler": "Cancel",
+        "accepter": "Accepted",
+        "refuser": "Refused"
+      },
+      "confirm": {
+        "envoyer": {
+          "title": "Send the proposal?",
+          "message": "The proposal will be sent to the customer.",
+          "confirmLabel": "Send"
+        },
+        "annuler": {
+          "title": "Cancel the proposal?",
+          "message": "This action is irreversible.",
+          "confirmLabel": "Cancel"
+        },
+        "accepter": {
+          "title": "Mark as accepted?",
+          "message": "The proposal will be marked as accepted by the customer.",
+          "confirmLabel": "Confirm"
+        },
+        "refuser": {
+          "title": "Mark as refused?",
+          "message": "Provide the refusal reason.",
+          "confirmLabel": "Confirm",
+          "notePlaceholder": "Refusal reason required"
+        },
+        "delete": {
+          "title": "Delete proposal",
+          "message": "Delete proposal {numero}?"
+        }
+      },
+      "toasts": {
+        "saved": "Proposal {numero} saved"
+      }
+    },
+    "bcc": {
+      "entityName": "Sales order",
+      "entityNamePlural": "Sales orders",
+      "headerTitle": "Customer sales orders",
+      "createTitle": "New customer sales order",
+      "detailTitle": "Sales order detail",
+      "list": {
+        "columns": {
+          "numero": "SO number",
+          "numeroClient": "Customer ref.",
+          "client": "Customer",
+          "chantier": "Site",
+          "dateReception": "Received",
+          "montantHt": "Amount excl. VAT",
+          "factureHt": "Invoiced excl. VAT",
+          "tauxFacturation": "Progress",
+          "status": "Status"
+        },
+        "transform": {
+          "percent": "{n}%"
+        },
+        "filters": {
+          "status": "Status"
+        },
+        "chips": {
+          "all": "All",
+          "recus": "Received",
+          "enCours": "In progress",
+          "partFactures": "Part. invoiced",
+          "factures": "Invoiced"
+        },
+        "emptyState": {
+          "title": "No sales order",
+          "message": "Customer sales orders record received orders and track their invoicing.",
+          "actionLabel": "New sales order"
+        }
+      },
+      "form": {
+        "fields": {
+          "numero": "SO number",
+          "numeroClient": "Customer ref. *",
+          "client": "Customer *",
+          "chantier": "Site",
+          "dateReception": "Received on *",
+          "dateFinPrevue": "Expected end date",
+          "tvaTaux": "VAT (%)",
+          "notes": "Notes"
+        },
+        "sections": {
+          "commande": "Order",
+          "informations": "Information"
+        }
+      },
+      "actions": {
+        "demarrer": "Start",
+        "annuler": "Cancel",
+        "cloturer": "Close"
+      },
+      "confirm": {
+        "demarrer": {
+          "title": "Start the sales order?",
+          "message": "The SO will move to In progress.",
+          "confirmLabel": "Start"
+        },
+        "annuler": {
+          "title": "Cancel the sales order?",
+          "message": "This action is irreversible.",
+          "confirmLabel": "Cancel"
+        },
+        "cloturer": {
+          "title": "Close the sales order?",
+          "message": "The SO will be marked closed.",
+          "confirmLabel": "Close"
+        },
+        "cloturerPartiel": {
+          "title": "Close the sales order?",
+          "message": "The SO will be closed despite partial invoicing.",
+          "confirmLabel": "Close"
+        },
+        "delete": {
+          "title": "Delete sales order",
+          "message": "Delete sales order {numero}?"
+        }
+      },
+      "toasts": {
+        "saved": "SO {numero} saved"
+      },
+      "errors": {
+        "notFound": "Customer sales order not found"
+      }
+    },
+    "client": {
+      "entityName": "Customer",
+      "entityNamePlural": "Customers",
+      "headerTitle": "Customers",
+      "createTitle": "New customer",
+      "detailTitle": "Customer detail",
+      "list": {
+        "columns": {
+          "code": "Code",
+          "nom": "Customer",
+          "forme": "Form",
+          "ville": "City",
+          "ice": "ICE",
+          "telephone": "Phone",
+          "email": "Email",
+          "actif": "Active"
+        },
+        "transform": {
+          "actif": "Active",
+          "inactif": "Inactive"
+        },
+        "filters": {
+          "type": "Legal form",
+          "statut": "Status",
+          "actif": "Active",
+          "inactif": "Inactive"
+        },
+        "emptyState": {
+          "title": "No customer",
+          "message": "Add your customers to start invoicing.",
+          "actionLabel": "New customer"
+        }
+      },
+      "form": {
+        "fields": {
+          "nom": "Name *",
+          "code": "Code",
+          "forme": "Legal form",
+          "ice": "ICE",
+          "iceHint": "15 digits (Moroccan tax identifier)",
+          "ifFiscal": "Tax identifier (IF)",
+          "rc": "RC",
+          "patente": "Patente",
+          "actif": "Active",
+          "adresse": "Address",
+          "ville": "City *",
+          "codePostal": "Postal code",
+          "telephone": "Phone",
+          "email": "Email",
+          "contactNom": "Contact name",
+          "contactPoste": "Position",
+          "conditionPaiement": "Payment terms",
+          "plafondCredit": "Credit limit (MAD)",
+          "notes": "Notes"
+        },
+        "sections": {
+          "identification": "Identification",
+          "coordonnees": "Contact information",
+          "contact": "Contact",
+          "commercial": "Commercial"
+        }
+      },
+      "toasts": {
+        "saved": "Customer {nom} saved"
+      },
+      "confirm": {
+        "delete": {
+          "title": "Delete customer",
+          "message": "Delete {nom}?"
+        }
+      }
+    },
+    "encaissement": {
+      "dialog": {
+        "title": "Record a receipt",
+        "closeAria": "Close",
+        "recap": {
+          "netTtc": "Net incl. VAT",
+          "dejaEncaisse": "Already collected",
+          "resteTtc": "Outstanding"
+        },
+        "fields": {
+          "dateEncaissement": "Receipt date *",
+          "modePaiement": "Payment method *",
+          "reference": "Reference (cheque, transfer no.…)",
+          "referencePlaceholder": "VIR-2026-0001",
+          "banque": "Bank",
+          "montantTtc": "Amount incl. VAT (MAD) *",
+          "notes": "Notes"
+        },
+        "warning": {
+          "depassement": "The amount exceeds the outstanding balance ({montant} MAD)."
+        },
+        "actions": {
+          "cancel": "Cancel",
+          "save": "Save"
+        }
+      }
+    },
+    "retenueGarantie": {
+      "headerTitle": "Retention guarantees",
+      "summary": {
+        "title": "Retention guarantees — consolidated view",
+        "hint": "7% retention tracking, blocked 1 year after provisional acceptance.",
+        "totalBloque": "Total blocked",
+        "aLibererSous30j": "To release < 30 d",
+        "couverteCaution": "Covered by bank guarantee",
+        "libereeAnnee": "Released 12 months",
+        "sousChantiers": "across {n} sites",
+        "chantiers": "{n} sites",
+        "mad": "{n} MAD"
+      },
+      "chips": {
+        "aLiberer30j": "To release < 30 d",
+        "caution": "With bank guarantee",
+        "liberees": "Released",
+        "enCours": "In progress"
+      },
+      "filters": {
+        "searchPlaceholder": "Search by site or customer…",
+        "tousClients": "All customers",
+        "tousStatuts": "All statuses",
+        "statusEnCours": "In progress",
+        "statusLiberationDemandee": "Release requested",
+        "statusLiberee": "Released",
+        "statusContestee": "Contested",
+        "reset": "Reset"
+      },
+      "table": {
+        "columns": {
+          "chantier": "Site",
+          "client": "Customer",
+          "retenueCumulee": "Cumulative retention",
+          "dejaLibere": "Already released",
+          "resteLiberer": "Remaining to release",
+          "dateReceptionProvisoire": "Provisional acceptance",
+          "dateLiberationPrevue": "Planned release",
+          "delaiRestant": "Time left",
+          "cautionBancaire": "Bank guarantee",
+          "statut": "Status"
+        },
+        "loading": "Loading…",
+        "empty": "No retention guarantee matches the filters.",
+        "actionsAria": "Actions"
+      },
+      "delai": {
+        "liberee": "Released",
+        "aLibererPlus": "To release (+{n} d)",
+        "jMoins": "D − {n}"
+      },
+      "menu": {
+        "demanderLiberation": "Request release",
+        "marquerLiberee": "Mark as released",
+        "remplacerCaution": "Replace by bank guarantee"
+      }
+    },
+    "liberation": {
+      "dialog": {
+        "title": {
+          "demande": "Release request",
+          "marquer": "Mark as released"
+        },
+        "closeAria": "Close",
+        "recap": {
+          "retenueCumulee": "Cumulative retention",
+          "dejaLibere": "Already released",
+          "resteLiberer": "Remaining to release"
+        },
+        "fields": {
+          "dateLiberation": "Release date *",
+          "notes": "Notes / comment",
+          "notesPlaceholderDemande": "Request reference, attachment…",
+          "notesPlaceholderMarquer": "Transfer reference, due date…"
+        },
+        "hint": {
+          "demande": "A release request document will be generated automatically and sent to the project owner.",
+          "marquer": "The release will be recorded and trigger the corresponding accounting entry (mock V1)."
+        },
+        "actions": {
+          "cancel": "Cancel",
+          "saveDemande": "Issue the request",
+          "saveMarquer": "Mark as released"
+        }
+      }
+    },
+    "cautionBancaire": {
+      "dialog": {
+        "title": "Substitution by bank guarantee",
+        "closeAria": "Close",
+        "recap": {
+          "retenueASubstituer": "Retention to substitute"
+        },
+        "fields": {
+          "banque": "Bank *",
+          "numero": "Bank guarantee number *",
+          "numeroPlaceholder": "CRG-BMCE-2026-0042",
+          "montant": "Amount (MAD) *"
+        },
+        "hint": "The retention will remain recorded but flagged as covered by a bank guarantee. Release at maturity will trigger the return of the bank guarantee.",
+        "actions": {
+          "cancel": "Cancel",
+          "save": "Save the bank guarantee"
+        }
+      }
+    },
+    "facturePrint": {
+      "title": "INVOICE",
+      "company": {
+        "name": "SEYRURA BTP SARL",
+        "address": "47 Boulevard Zerktouni, Casablanca 20100 — Morocco",
+        "contact": "Tel: +212 522 36 78 90 — contact@seyrura.ma",
+        "ice": "ICE: 002847593000087",
+        "rc": "RC: 715869 — Casablanca",
+        "if": "IF: 40297583",
+        "patente": "Patente: 35628471",
+        "cnss": "CNSS: 9847562",
+        "capital": "Capital: 1,000,000 MAD"
+      },
+      "meta": {
+        "numero": "N°",
+        "dateEmission": "Issue date",
+        "dateEcheance": "Due date",
+        "type": "Type",
+        "chantier": "Site",
+        "bcClient": "Sales order"
+      },
+      "client": {
+        "doit": "Bill to",
+        "iceClient": "Customer ICE:"
+      },
+      "lines": {
+        "designation": "Description",
+        "quantite": "Qty",
+        "puHt": "Unit price (excl. VAT)",
+        "totalHt": "Total excl. VAT"
+      },
+      "totaux": {
+        "totalHt": "Total excl. VAT",
+        "retenueGarantie": "Retention guarantee (7%)",
+        "resorptionAvance": "Advance absorption",
+        "netHt": "Net payable excl. VAT",
+        "tva": "VAT {taux}%",
+        "netTtc": "Net payable incl. VAT"
+      },
+      "mention": "Invoice issued for the amount of {montant}. Billed in MAD (Moroccan dirhams).",
+      "payment": {
+        "modalites": "Payment terms",
+        "echeance": "Due date: {date}",
+        "aConvenir": "To be agreed",
+        "coordonnees": "Bank details",
+        "bank": "BMCE Bank of Africa — Casa Anfa branch",
+        "rib": "RIB: 011 780 0000123456789012 34",
+        "swift": "SWIFT: BMCEMAMC"
+      },
+      "footer": {
+        "cachet": "Stamp and signature",
+        "small": "Any late payment will incur interest in accordance with applicable regulations. General sales conditions available upon request."
+      },
+      "type": {
+        "situation": "Work progress",
+        "avance": "Advance",
+        "acompte": "Down payment",
+        "decompteDefinitif": "Final statement",
+        "diverse": "Miscellaneous"
+      }
+    },
+    "avoirPrint": {
+      "title": "CREDIT NOTE",
+      "company": {
+        "name": "SEYRURA BTP SARL",
+        "address": "47 Boulevard Zerktouni, Casablanca 20100",
+        "ice": "ICE: 002847593000087",
+        "rc": "RC: 715869 — Casablanca",
+        "if": "IF: 40297583",
+        "patente": "Patente: 35628471"
+      },
+      "meta": {
+        "numero": "N°",
+        "date": "Date",
+        "factureOrigine": "Source invoice"
+      },
+      "client": {
+        "auProfitDe": "In favor of"
+      },
+      "motif": {
+        "title": "Credit note reason"
+      },
+      "lines": {
+        "designation": "Description",
+        "totalHt": "Total excl. VAT"
+      },
+      "totaux": {
+        "totalHt": "Total excl. VAT",
+        "tva": "VAT {taux}%",
+        "totalTtc": "Total incl. VAT"
+      },
+      "mention": "Credit note issued in MAD for the amount of {montant}.",
+      "footer": {
+        "cachet": "Stamp and signature"
+      }
+    },
+    "delaiEcheance": {
+      "soldee": "Settled",
+      "retardJ": "+{n} d overdue",
+      "echeanceAjd": "Due today",
+      "jMoins": "D − {n}"
+    }
+  }
+}

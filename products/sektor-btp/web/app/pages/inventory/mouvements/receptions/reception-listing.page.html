@@ -1,0 +1,38 @@
+    <nf-page-shell>
+      <nf-page-header [config]="headerConfig"></nf-page-header>
+
+      @if (prerequisitesReady() && prerequisites().length && !canCreate()) {
+        <aside class="reception-prereq" role="note">
+          <p class="reception-prereq__title">
+            {{ 'inventory.mouvement.reception.prerequisites.title' | translate }}
+          </p>
+          <ul class="reception-prereq__list">
+            @for (item of prerequisites(); track item.id) {
+              @if (!item.met) {
+                <li>
+                  <a [routerLink]="item.route">{{ item.label }}</a>
+                </li>
+              }
+            }
+          </ul>
+        </aside>
+      }
+
+      <nf-entity-listing
+        #listing
+        [config]="config"
+        [facade]="facade"
+        [openOnRowClick]="true"
+        (action)="onAction($event)">
+        <ng-template nfColumn="bcOrigine" let-item="item">
+          @if (item.bcId) {
+            <a [routerLink]="['/achats/commandes', item.bcId]">{{ item.bcNumero || item.bcId }}</a>
+          } @else if (item.bcNumero) {
+            <span>{{ item.bcNumero }}</span>
+          } @else {
+            <span class="muted">—</span>
+          }
+        </ng-template>
+      </nf-entity-listing>
+    </nf-page-shell>
+  

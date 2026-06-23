@@ -1,0 +1,45 @@
+{
+  "leave": {
+    "navigation": {
+      "title": "الإجازات",
+      "description": "مجال الإجازات",
+      "leaveRequests": "طلبات الإجازة",
+      "leaveTypes": "أنواع الإجازة",
+      "accrualRules": "قواعد التراكم"
+    }
+  },
+  "common": {
+    "subsections": {
+      "operations": "العمليات",
+      "configuration": "الإعدادات"
+    }
+  },
+  "hr": {
+    "fields": {
+      "requestNumber": "رقم الطلب",
+      "employeeId": "معرّف الموظف",
+      "leaveTypeId": "معرّف نوع الإجازة",
+      "startDate": "تاريخ البدء",
+      "endDate": "تاريخ الانتهاء",
+      "totalDays": "إجمالي الأيام",
+      "reason": "السبب",
+      "status": "الحالة",
+      "approvedBy": "موافق عليه من طرف",
+      "code": "الرمز",
+      "name": "الاسم",
+      "description": "الوصف",
+      "paidLeave": "إجازة مدفوعة الأجر",
+      "maxDays": "الحد الأقصى للأيام",
+      "carryForward": "ترحيل الرصيد",
+      "accrualBased": "قائم على التراكم",
+      "frequency": "التواتر",
+      "amount": "المبلغ",
+      "maxBalance": "الرصيد الأقصى",
+      "proRataOnJoin": "نسبي عند الالتحاق"
+    },
+    "sections": {
+      "general": "عام",
+      "notes": "ملاحظات"
+    }
+  }
+}

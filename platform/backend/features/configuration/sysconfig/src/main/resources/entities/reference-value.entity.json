@@ -1,0 +1,22 @@
+{
+  "$schema": "../../../tools/generator/src/main/resources/entity.schema.json",
+  "entity": "ReferenceValue",
+  "feature": "sysconfig",
+  "table": "reference_value",
+  "packagePath": "sysconfig",
+  "category": "config",
+  "api": {
+    "basePath": "/api/v1/reference-values",
+    "product": "agora",
+    "generate": { "dto": true, "mapper": true, "service": true, "controller": true }
+  },
+  "fields": [
+    { "name": "codeListId", "type": "uuid", "column": "code_list_id", "validation": { "required": true }, "db": { "nullable": false }, "lookup": { "entity": "CodeList", "api": "/api/v1/code-lists", "displayField": "name", "valueField": "id" }, "ui": { "label": "sysconfig.fields.codeList", "showInListing": true, "listingOrder": 1, "showInDetail": true, "detailSection": "general", "detailOrder": 1, "component": "nf-lookup", "filterable": true } },
+    { "name": "code", "type": "string", "column": "code", "validation": { "required": true, "maxLength": 50 }, "db": { "nullable": false, "length": 50, "index": true }, "ui": { "label": "sysconfig.fields.code", "showInListing": true, "listingOrder": 2, "showInDetail": true, "detailSection": "general", "detailOrder": 2, "component": "nf-input", "filterable": true, "sortable": true } },
+    { "name": "name", "type": "string", "column": "name", "validation": { "required": true, "maxLength": 200 }, "db": { "nullable": false, "length": 200 }, "ui": { "label": "sysconfig.fields.name", "showInListing": true, "listingOrder": 3, "showInDetail": true, "detailSection": "general", "detailOrder": 3, "component": "nf-input", "filterable": true, "sortable": true } },
+    { "name": "sortOrder", "type": "integer", "column": "sort_order", "validation": { "min": 0 }, "db": { "nullable": true }, "ui": { "label": "sysconfig.fields.sortOrder", "showInListing": true, "listingOrder": 4, "showInDetail": true, "detailSection": "general", "detailOrder": 4, "component": "nf-number-input", "sortable": true } }
+  ],
+  "listing": { "defaultSort": { "field": "sortOrder", "direction": "asc" }, "searchFields": ["code", "name"], "features": ["search", "filters"] },
+  "navigation": { "parent": "settings", "icon": "layers", "order": 73, "zone": "administration", "route": "/settings/reference-values" },
+  "migration": { "version": "v1.0", "seed": false }
+}

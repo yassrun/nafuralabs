@@ -1,0 +1,23 @@
+{
+  "entity": "CommissionRate",
+  "fields": {
+    "code": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "thresholdMin": {
+      "min": 0
+    },
+    "thresholdMax": {
+      "min": 0
+    },
+    "rate": {
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

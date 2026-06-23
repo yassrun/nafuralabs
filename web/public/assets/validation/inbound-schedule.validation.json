@@ -1,0 +1,17 @@
+{
+  "entity": "InboundSchedule",
+  "fields": {
+    "scheduleNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    },
+    "notes": {
+      "maxLength": 2000
+    }
+  }
+}

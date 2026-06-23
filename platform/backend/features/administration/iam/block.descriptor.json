@@ -1,0 +1,17 @@
+{
+  "id": "iam",
+  "name": "Identity & Access Management",
+  "description": "IAM members and roles",
+  "type": "feature",
+  "layer": "feature",
+  "group": "administration",
+  "provides": {
+    "backend": {
+      "gradle": ":platform:features:administration:iam",
+      "packages": ["ma.nafura.platform.administration.iam"]
+    }
+  },
+  "requires": { "core": ["identity", "tenancy", "authorization"], "features": [] },
+  "conditionalOn": { "profile": "multi-tenant" },
+  "manifest": { "key": "iam" }
+}

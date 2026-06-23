@@ -1,0 +1,37 @@
+<nf-page-shell>
+  <nf-page-header [config]="headerConfig"></nf-page-header>
+
+  <nf-master-slave-shell
+    [selectedId]="selectedId()"
+    (selectedIdChange)="onSelectedIdChange($event)">
+    <ng-container master>
+      <nf-entity-listing
+        #listing
+        [config]="panelListingConfig"
+        [facade]="listingFacade"
+        (rowOpen)="onRowOpen($event)"
+        (itemsLoaded)="onItemsLoaded($event)"
+        (action)="onListingAction($event)">
+      </nf-entity-listing>
+    </ng-container>
+    <ng-container slave>
+      @if (isCreateRoute() || selectedId()) {
+        <nf-entity-detail
+          #detail
+          [config]="panelDetailConfig"
+          [mode]="detailMode()"
+          [item]="item()"
+          [lookups]="lookups()"
+          [loading]="isLoading()"
+          [saving]="isSaving()"
+          (action)="onDetailAction($event)">
+          <ng-template nfField="lines" let-control>
+            <app-perte-lines-editor [linesControl]="control" variant="sortie" />
+          </ng-template>
+        </nf-entity-detail>
+      } @else {
+        <p class="tx-panel__empty">{{ 'inventory.mouvement.tx.selectHint' | translate }}</p>
+      }
+    </ng-container>
+  </nf-master-slave-shell>
+</nf-page-shell>

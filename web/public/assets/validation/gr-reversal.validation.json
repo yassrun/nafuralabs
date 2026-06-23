@@ -1,0 +1,20 @@
+{
+  "entity": "GrReversal",
+  "fields": {
+    "reversalNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "reason": {
+      "maxLength": 120
+    },
+    "approvedBy": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

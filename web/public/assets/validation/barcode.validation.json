@@ -1,0 +1,15 @@
+{
+  "entity": "Barcode",
+  "fields": {
+    "itemId": {
+      "required": true
+    },
+    "value": {
+      "required": true,
+      "maxLength": 100
+    },
+    "type": {
+      "maxLength": 30
+    }
+  }
+}

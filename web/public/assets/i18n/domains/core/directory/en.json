@@ -1,0 +1,74 @@
+{
+  "directory": {
+    "navigation": {
+      "title": "Directory",
+      "description": "Directory Domain",
+      "partners": "Partners",
+      "contacts": "Contacts",
+      "partnerCategories": "Partner Categories",
+      "partnerAddresses": "Partner Addresses",
+      "partnerBankAccounts": "Partner Bank Accounts",
+      "countries": "Countries",
+      "regions": "Regions",
+      "cities": "Cities",
+      "addresses": "Addresses"
+    },
+    "partners": {
+      "navigation": {
+        "title": "Partners"
+      }
+    },
+    "geography": {
+      "navigation": {
+        "title": "Geography"
+      }
+    },
+    "fields": {
+      "code": "Code",
+      "name": "Name",
+      "taxId": "Tax Id",
+      "email": "Email",
+      "phone": "Phone",
+      "description": "Description",
+      "address": "Address Id",
+      "paymentTerm": "Payment Term Id",
+      "roles": "Roles",
+      "mobile": "Mobile",
+      "partnerId": "Partner Id",
+      "addressType": "Address Type",
+      "addressId": "Address Id",
+      "isPrimary": "Is Primary",
+      "isActive": "Is Active",
+      "bankId": "Bank Id",
+      "accountNumber": "Account Number",
+      "iban": "Iban",
+      "accountName": "Account Name",
+      "currencyId": "Currency Id"
+    },
+    "sections": {
+      "general": "General",
+      "contact": "Contact",
+      "legal": "Legal",
+      "financial": "Financial",
+      "status": "Status"
+    }
+  },
+  "common": {
+    "subsections": {
+      "operations": "Operations",
+      "configuration": "Configuration"
+    }
+  },
+  "geo": {
+    "fields": {
+      "code": "Code",
+      "name": "Name",
+      "country": "Country Id",
+      "region": "Region Id",
+      "addressLine1": "Line1",
+      "addressLine2": "Line2",
+      "city": "City Id",
+      "postalCode": "Postal Code"
+    }
+  }
+}

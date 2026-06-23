@@ -1,0 +1,26 @@
+{
+  "effects": [
+    {
+      "effectNumber": "LCR-2026-001",
+      "effectType": "LCR",
+      "invoiceId": "fc-seed",
+      "clientId": "CLI-001",
+      "clientName": "OCP Promotion SA",
+      "domicileBank": "AWB",
+      "amount": 240000,
+      "dueDate": "2026-06-30",
+      "status": "PORTEFEUILLE"
+    },
+    {
+      "effectNumber": "LCN-2026-002",
+      "effectType": "LCN",
+      "invoiceId": "fc-seed-2",
+      "clientId": "CLI-002",
+      "clientName": "ADM",
+      "domicileBank": "BMCE",
+      "amount": 118500,
+      "dueDate": "2026-05-20",
+      "status": "IMPAYE"
+    }
+  ]
+}

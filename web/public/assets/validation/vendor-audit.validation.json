@@ -1,0 +1,26 @@
+{
+  "entity": "VendorAudit",
+  "fields": {
+    "auditNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "auditorName": {
+      "maxLength": 120
+    },
+    "findings": {
+      "maxLength": 120
+    },
+    "severity": {
+      "maxLength": 120
+    },
+    "correctiveActions": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

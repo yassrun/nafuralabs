@@ -1,0 +1,31 @@
+{
+  "entity": "WithholdingTax",
+  "fields": {
+    "certificateNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "vendorId": {
+      "required": true
+    },
+    "taxCodeId": {
+      "required": true
+    },
+    "baseAmount": {
+      "required": true,
+      "min": 0
+    },
+    "withheldAmount": {
+      "required": true,
+      "min": 0
+    },
+    "certificateDate": {
+      "required": true
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

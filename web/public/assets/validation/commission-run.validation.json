@@ -1,0 +1,29 @@
+{
+  "entity": "CommissionRun",
+  "fields": {
+    "runNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "periodStart": {
+      "maxLength": 120
+    },
+    "periodEnd": {
+      "maxLength": 120
+    },
+    "salesRepCount": {
+      "min": 0
+    },
+    "totalAmount": {
+      "min": 0
+    },
+    "approvedBy": {
+      "maxLength": 120
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

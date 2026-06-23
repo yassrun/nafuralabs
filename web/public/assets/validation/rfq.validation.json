@@ -1,0 +1,24 @@
+{
+  "entity": "Rfq",
+  "fields": {
+    "rfqNumber": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "title": {
+      "required": true,
+      "maxLength": 200
+    },
+    "description": {
+      "maxLength": 4000
+    },
+    "deadline": {
+      "required": true
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

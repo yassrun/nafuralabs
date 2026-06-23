@@ -1,0 +1,11 @@
+{
+  "entity": "TaxReconciliation",
+  "fields": {
+    "fiscalPeriodId": {
+      "required": true
+    },
+    "taxCodeId": {
+      "required": true
+    }
+  }
+}

@@ -1,0 +1,222 @@
+{
+  "realm": "iam-portal",
+  "enabled": true,
+  "displayName": "Nafura Labs IAM",
+  "displayNameHtml": "<span class=\"kc-nafura-brand\">Nafura Labs</span> IAM",
+  "loginTheme": "nafuralabs",
+  "accountTheme": "nafuralabs",
+  "emailTheme": "nafuralabs",
+  "internationalizationEnabled": true,
+  "supportedLocales": [
+    "en",
+    "fr"
+  ],
+  "defaultLocale": "fr",
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "roles": {
+    "realm": [
+      {
+        "name": "SUPER_ADMIN",
+        "description": "Platform super administrator with full access to all tenants"
+      },
+      {
+        "name": "PLATFORM_ADMIN",
+        "description": "Platform administrator - manage applications and tenants"
+      }
+    ]
+  },
+  "users": [
+    {
+      "username": "super.admin@nafuralabs.local",
+      "email": "super.admin@nafuralabs.local",
+      "firstName": "Super",
+      "lastName": "Admin",
+      "enabled": true,
+      "emailVerified": true,
+      "attributes": {
+        "nafura_app": [
+          "core"
+        ]
+      },
+      "credentials": [
+        {
+          "type": "password",
+          "value": "ChangeMe@123!",
+          "temporary": true
+        }
+      ],
+      "realmRoles": [
+        "SUPER_ADMIN"
+      ]
+    },
+    {
+      "username": "super.admin@nafuralabs.com",
+      "email": "super.admin@nafuralabs.com",
+      "firstName": "Super",
+      "lastName": "Admin",
+      "enabled": true,
+      "emailVerified": true,
+      "attributes": {
+        "nafura_app": [
+          "erp"
+        ]
+      },
+      "credentials": [
+        {
+          "type": "password",
+          "value": "ChangeMe@123!",
+          "temporary": true
+        }
+      ],
+      "realmRoles": [
+        "SUPER_ADMIN"
+      ]
+    },
+    {
+      "username": "owner@erp.local",
+      "email": "owner@erp.local",
+      "firstName": "Owner",
+      "lastName": "User",
+      "enabled": true,
+      "emailVerified": true,
+      "attributes": {
+        "nafura_app": [
+          "erp"
+        ]
+      },
+      "credentials": [
+        {
+          "type": "password",
+          "value": "ChangeMe@123!",
+          "temporary": true
+        }
+      ]
+    },
+    {
+      "username": "admin@erp.local",
+      "email": "admin@erp.local",
+      "firstName": "Admin",
+      "lastName": "User",
+      "enabled": true,
+      "emailVerified": true,
+      "attributes": {
+        "nafura_app": [
+          "erp"
+        ]
+      },
+      "credentials": [
+        {
+          "type": "password",
+          "value": "ChangeMe@123!",
+          "temporary": true
+        }
+      ]
+    },
+    {
+      "username": "manager@erp.local",
+      "email": "manager@erp.local",
+      "firstName": "Manager",
+      "lastName": "User",
+      "enabled": true,
+      "emailVerified": true,
+      "attributes": {
+        "nafura_app": [
+          "erp"
+        ]
+      },
+      "credentials": [
+        {
+          "type": "password",
+          "value": "ChangeMe@123!",
+          "temporary": true
+        }
+      ]
+    },
+    {
+      "username": "member@erp.local",
+      "email": "member@erp.local",
+      "firstName": "Member",
+      "lastName": "User",
+      "enabled": true,
+      "emailVerified": true,
+      "attributes": {
+        "nafura_app": [
+          "erp"
+        ]
+      },
+      "credentials": [
+        {
+          "type": "password",
+          "value": "ChangeMe@123!",
+          "temporary": true
+        }
+      ]
+    },
+    {
+      "username": "viewer@erp.local",
+      "email": "viewer@erp.local",
+      "firstName": "Viewer",
+      "lastName": "User",
+      "enabled": true,
+      "emailVerified": true,
+      "attributes": {
+        "nafura_app": [
+          "erp"
+        ]
+      },
+      "credentials": [
+        {
+          "type": "password",
+          "value": "ChangeMe@123!",
+          "temporary": true
+        }
+      ]
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "erp-backend",
+      "name": "ERP Backend",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "bearerOnly": false,
+      "secret": "erp-backend-secret"
+    },
+    {
+      "clientId": "erp-web",
+      "name": "ERP Web",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "redirectUris": [
+        "https://erp.nafura.local/*",
+        "https://erp.nafura.local/auth/callback",
+        "http://erp.nafura.local/*",
+        "http://erp.nafura.local/auth/callback",
+        "http://localhost:4200/*",
+        "http://localhost:4200/auth/callback",
+        "http://erp.nafura.local:8080/*",
+        "http://erp.nafura.local:8080/auth/callback",
+        "https://erp.nafura.local:8080/*",
+        "https://erp.nafura.local:8080/auth/callback"
+      ],
+      "webOrigins": [
+        "http://erp.nafura.local",
+        "https://erp.nafura.local",
+        "http://erp.nafura.local:8080",
+        "https://erp.nafura.local:8080",
+        "http://localhost:4200"
+      ],
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false
+    }
+  ]
+}

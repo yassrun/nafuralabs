@@ -1,0 +1,16 @@
+{
+  "id": "llm-provider",
+  "name": "LLM Provider",
+  "description": "LLM integration",
+  "type": "feature",
+  "layer": "feature",
+  "group": "ai",
+  "provides": {
+    "backend": {
+      "gradle": ":platform:features:ai:llm-provider",
+      "packages": ["ma.nafura.platform.ai.llm"]
+    }
+  },
+  "requires": { "core": [], "features": [] },
+  "manifest": { "key": "llm-provider" }
+}

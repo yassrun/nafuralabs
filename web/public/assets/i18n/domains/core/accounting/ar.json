@@ -1,0 +1,72 @@
+{
+  "accounting": {
+    "navigation": {
+      "title": "المحاسبة",
+      "description": "مجال المحاسبة",
+      "accounts": "الحسابات",
+      "accountTypes": "أنواع الحسابات",
+      "fiscalYears": "السنوات المحاسبية",
+      "fiscalPeriods": "الفترات المحاسبية",
+      "journalEntries": "القيود اليومية",
+      "journalEntryLines": "سطور القيود اليومية",
+      "costCenters": "مراكز التكلفة",
+      "trialBalances": "موازين المراجعة"
+    },
+    "fields": {
+      "journalTypeId": "معرّف نوع اليومية"
+    }
+  },
+  "common": {
+    "subsections": {
+      "operations": "العمليات",
+      "configuration": "الإعدادات"
+    }
+  },
+  "finance": {
+    "fields": {
+      "code": "الرمز",
+      "name": "الاسم",
+      "accountTypeId": "معرّف نوع الحساب",
+      "parentAccountId": "معرّف الحساب الأب",
+      "level": "المستوى",
+      "isPostable": "قابل للترحيل",
+      "normalBalance": "الرصيد الطبيعي",
+      "isActive": "نشط",
+      "classification": "التصنيف",
+      "startDate": "تاريخ البدء",
+      "endDate": "تاريخ الانتهاء",
+      "status": "الحالة",
+      "fiscalYear": "معرّف السنة المحاسبية",
+      "periodNumber": "رقم الفترة",
+      "entryNumber": "رقم القيد",
+      "postingDate": "تاريخ الترحيل",
+      "fiscalPeriodId": "معرّف الفترة المحاسبية",
+      "currencyId": "معرّف العملة",
+      "description": "الوصف",
+      "totalDebit": "إجمالي المدين",
+      "totalCredit": "إجمالي الدائن",
+      "reference": "المرجع",
+      "sourceDocument": "الوثيقة المصدر",
+      "journalEntryId": "معرّف القيد اليومي",
+      "lineNumber": "رقم السطر",
+      "accountId": "معرّف الحساب",
+      "costCenterId": "معرّف مركز التكلفة",
+      "debitAmount": "المبلغ المدين",
+      "creditAmount": "المبلغ الدائن",
+      "parentId": "معرّف الأب",
+      "managerId": "معرّف المدير",
+      "accountCode": "رمز الحساب",
+      "accountName": "اسم الحساب",
+      "openingDebit": "مدين افتتاحي",
+      "openingCredit": "دائن افتتاحي",
+      "periodDebit": "مدين الفترة",
+      "periodCredit": "دائن الفترة",
+      "closingDebit": "مدين ختامي",
+      "closingCredit": "دائن ختامي"
+    },
+    "sections": {
+      "general": "عام",
+      "amounts": "المبالغ"
+    }
+  }
+}

@@ -1,0 +1,150 @@
+<div class="doc-types-page">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="dox-h2">Document Types</h1>
+      <p class="subtitle">Browse and manage document type definitions for extraction.</p>
+    </div>
+    <button mat-flat-button color="primary" (click)="onCreateDocType()">
+      <mat-icon>add</mat-icon>
+      Create Document Type
+    </button>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-section">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-icon matPrefix>search</mat-icon>
+      <input matInput [formControl]="searchQuery" placeholder="Search document types..." />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-select [formControl]="originFilter" placeholder="Source">
+        @for (option of originOptions; track option.value) {
+          <mat-option [value]="option.value">{{ option.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-select [formControl]="domainFilter" placeholder="Domain">
+        @for (option of domainOptions; track option.value) {
+          <mat-option [value]="option.value">{{ option.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <span class="count-label">{{ filteredDocTypes().length }} document types</span>
+  </div>
+
+  <!-- Doc Types Content -->
+  <div class="content-section">
+    @if (loading()) {
+      <div class="loading-container">
+        <mat-spinner diameter="48"></mat-spinner>
+      </div>
+    } @else if (error()) {
+      <div class="error-state">
+        <mat-icon>error_outline</mat-icon>
+        <h3>Failed to load document types</h3>
+        <p>{{ error() }}</p>
+      </div>
+    } @else if (docTypes().length === 0) {
+      <!-- No doc types at all -->
+      <div class="empty-state">
+        <mat-icon>description</mat-icon>
+        <h3>No document types available</h3>
+        <p>Create your first document type to start extracting data.</p>
+        <button mat-flat-button color="primary" (click)="onCreateDocType()">
+          <mat-icon>add</mat-icon>
+          Create Document Type
+        </button>
+      </div>
+    } @else if (filteredDocTypes().length === 0) {
+      <!-- No results after filtering -->
+      <div class="empty-state empty-state--filtered">
+        <mat-icon>filter_list_off</mat-icon>
+        <h3>No matching document types</h3>
+        <p>Try adjusting your search or filters.</p>
+        <button mat-stroked-button (click)="clearFilters()">
+          <mat-icon>clear</mat-icon>
+          Clear Filters
+        </button>
+      </div>
+    } @else {
+      <!-- Grouped by Domain -->
+      @for (group of groupedDocTypes(); track group.domainKey) {
+        <div class="domain-group">
+          <div class="domain-group-header">
+            <div class="domain-group-title">
+              <mat-icon [style.color]="getDomainColor(group.domainKey)">{{ getDomainIcon(group.domainKey) }}</mat-icon>
+              <h2>{{ getDomainLabel(group.domainKey) }}</h2>
+              <span class="domain-count">{{ group.docTypes.length }}</span>
+            </div>
+          </div>
+          <div class="doc-types-grid">
+            @for (docType of group.docTypes; track docType.id) {
+              <mat-card class="doc-type-card" [class.doc-type-card--system]="docType.origin === 'SYSTEM'">
+                <!-- Card Content -->
+                <div class="card-content">
+                  <div class="card-main">
+                    <!-- Title row with badge -->
+                    <div class="card-title-row">
+                      <h3 class="doc-type-name">{{ docType.name }}</h3>
+                      <div class="origin-badge" [class.origin-system]="docType.origin === 'SYSTEM'" [class.origin-tenant]="docType.origin === 'TENANT'">
+                        <span>{{ docType.origin === 'SYSTEM' ? 'Doxura' : 'Custom' }}</span>
+                      </div>
+                    </div>
+                    <!-- Description if available -->
+                    @if (docType.description) {
+                      <p class="doc-type-description">{{ docType.description }}</p>
+                    }
+                    <!-- Metadata -->
+                    <div class="card-meta">
+                      <span class="version-tag">v{{ docType.version }}</span>
+                    </div>
+                  </div>
+                  <!-- Actions -->
+                  <div class="card-actions">
+                    <button mat-icon-button class="action-primary" matTooltip="Extract documents" (click)="onViewInWorkspace(docType)">
+                      <mat-icon>play_arrow</mat-icon>
+                    </button>
+                    @if (docType.origin === 'SYSTEM') {
+                      <button mat-icon-button matTooltip="Clone to customize" (click)="onCloneDocType(docType)">
+                        <mat-icon>file_copy</mat-icon>
+                      </button>
+                      <button mat-icon-button matTooltip="View definition" (click)="onViewDocType(docType)">
+                        <mat-icon>remove_red_eye</mat-icon>
+                      </button>
+                    } @else {
+                      <button mat-icon-button matTooltip="Edit" (click)="onEditDocType(docType)">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                      <button mat-icon-button [matMenuTriggerFor]="moreMenu" matTooltip="More">
+                        <mat-icon>more_vert</mat-icon>
+                      </button>
+                      <mat-menu #moreMenu="matMenu">
+                        <button mat-menu-item (click)="onDuplicateDocType(docType)">
+                          <mat-icon>content_copy</mat-icon>
+                          <span>Duplicate</span>
+                        </button>
+                        <button mat-menu-item (click)="onEditDocType(docType)">
+                          <mat-icon>settings</mat-icon>
+                          <span>Settings</span>
+                        </button>
+                        <button mat-menu-item class="delete-action" (click)="onDeleteDocType(docType)">
+                          <mat-icon>delete</mat-icon>
+                          <span>Delete</span>
+                        </button>
+                      </mat-menu>
+                    }
+                  </div>
+                </div>
+              </mat-card>
+            }
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>

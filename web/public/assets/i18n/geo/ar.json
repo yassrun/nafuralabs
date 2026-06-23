@@ -1,0 +1,76 @@
+{
+  "geo": {
+    "navigation": {
+      "addresses": "العناوين",
+      "cities": "المدن",
+      "countries": "البلدان",
+      "postalCodes": "الرموز البريدية",
+      "regions": "الجهات"
+    },
+    "address": {
+      "title": "العناوين",
+      "detailTitle": "تفاصيل العنوان",
+      "newTitle": "عنوان جديد",
+      "fields": {
+        "line1": "السطر 1",
+        "line2": "السطر 2",
+        "countryId": "معرّف البلد",
+        "regionId": "معرّف الجهة",
+        "cityId": "معرّف المدينة",
+        "postalCodeId": "معرّف الرمز البريدي",
+        "description": "الوصف",
+        "postalCode": "الرمز البريدي"
+      },
+      "sections": {}
+    },
+    "city": {
+      "title": "المدن",
+      "detailTitle": "تفاصيل المدينة",
+      "newTitle": "مدينة جديدة",
+      "fields": {
+        "countryId": "معرّف البلد",
+        "regionId": "معرّف الجهة",
+        "code": "الرمز",
+        "name": "الاسم",
+        "description": "الوصف",
+        "isActive": "نشط"
+      },
+      "sections": {}
+    },
+    "country": {
+      "title": "البلدان",
+      "detailTitle": "تفاصيل البلد",
+      "newTitle": "بلد جديد",
+      "fields": {
+        "code": "الرمز",
+        "name": "الاسم",
+        "isActive": "نشط"
+      },
+      "sections": {}
+    },
+    "postalCode": {
+      "title": "الرموز البريدية",
+      "detailTitle": "تفاصيل الرمز البريدي",
+      "newTitle": "رمز بريدي جديد",
+      "fields": {
+        "code": "الرمز",
+        "name": "الاسم",
+        "cityId": "معرّف المدينة"
+      },
+      "sections": {}
+    },
+    "region": {
+      "title": "الجهات",
+      "detailTitle": "تفاصيل الجهة",
+      "newTitle": "جهة جديدة",
+      "fields": {
+        "countryId": "معرّف البلد",
+        "code": "الرمز",
+        "name": "الاسم",
+        "description": "الوصف",
+        "isActive": "نشط"
+      },
+      "sections": {}
+    }
+  }
+}

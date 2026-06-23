@@ -1,0 +1,29 @@
+{
+  "entity": "ReviewCycle",
+  "fields": {
+    "code": {
+      "required": true,
+      "maxLength": 60,
+      "unique": true
+    },
+    "name": {
+      "maxLength": 120
+    },
+    "frequency": {
+      "maxLength": 120
+    },
+    "startMonth": {
+      "maxLength": 120
+    },
+    "selfReviewDays": {
+      "min": 0
+    },
+    "managerReviewDays": {
+      "min": 0
+    },
+    "status": {
+      "required": true,
+      "maxLength": 30
+    }
+  }
+}

@@ -1,0 +1,143 @@
+<div class="editor-dialog">
+  @if (saving()) {
+    <mat-progress-bar mode="indeterminate" class="editor-dialog__progress"></mat-progress-bar>
+  }
+
+  <!-- Sticky Header -->
+  <div class="editor-dialog__header">
+    <div class="header__main">
+      <div class="header__title-group">
+        <h1 class="header__title">{{ title() }}</h1>
+        <span class="header__version-badge">
+          {{ definition.docTypeKey }} • v{{ definition.version }}
+        </span>
+      </div>
+      <div class="header__reference">
+        <span class="header__reference-label">{{ 'docExtractor.dialog.reference' | translate }}:</span>
+        <span class="header__reference-value">{{ blReference() }}</span>
+      </div>
+    </div>
+    <div class="header__status">
+      @if (status() === 'Extracted') {
+        <mat-chip class="status-chip status-chip--extracted">
+          <mat-icon>description</mat-icon>
+          {{ 'docExtractor.dialog.extracted' | translate }}
+        </mat-chip>
+      } @else if (status() === 'Validated') {
+        <mat-chip class="status-chip status-chip--validated">
+          <mat-icon>check_circle</mat-icon>
+          {{ 'docExtractor.dialog.validated' | translate }}
+        </mat-chip>
+      } @else {
+        <mat-chip class="status-chip status-chip--draft">
+          <mat-icon>edit</mat-icon>
+          {{ 'docExtractor.dialog.draft' | translate }}
+        </mat-chip>
+      }
+    </div>
+  </div>
+
+  <!-- Scrollable Body -->
+  <mat-dialog-content class="editor-dialog__body">
+    <div class="body__content">
+      <!-- Document Identity & Actors Sections (compact) -->
+      <div class="section section--compact">
+        <app-dynamic-form-renderer
+          [form]="form"
+          [jsonSchema]="definition.jsonSchema"
+          [uiSchema]="uiSchema"
+          [readonly]="saving()"
+        />
+      </div>
+
+      <!-- Items Section (emphasized) -->
+      @if (uiSchema.arrays?.length) {
+        <div class="section section--items">
+          <div class="section__header">
+            <h2 class="section__title">{{ 'docExtractor.dialog.items' | translate }}</h2>
+          </div>
+          <div class="section__table">
+            @for (arr of uiSchema.arrays!; track arr.path) {
+              @let arrSchema = arraySchemaAt(arr.path);
+              @if (arrSchema) {
+                <app-dynamic-array-table
+                  [title]="arr.title"
+                  [formArray]="arrayFormArray(arr.path)"
+                  [arraySchema]="arrSchema"
+                  [columns]="arr.columns"
+                  [readonly]="saving()"
+                />
+              }
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </mat-dialog-content>
+
+  <!-- Sticky Footer -->
+  <div class="editor-dialog__footer">
+    <div class="footer__helper">
+      @if (canValidate()) {
+        <span class="footer__helper-text">{{ 'docExtractor.dialog.readyToValidate' | translate }}</span>
+      } @else {
+        <div class="footer__helper-content">
+          <span class="footer__helper-text footer__helper-text--warning">
+            {{ 'docExtractor.dialog.fixErrorsBeforeValidation' | translate }}
+          </span>
+          @if (validationErrors().length > 0) {
+            <div class="footer__errors-summary">
+              <mat-icon class="footer__errors-icon">error</mat-icon>
+              <span class="footer__errors-count">
+                {{ 'docExtractor.workflow.validation.errorsCount' | translate: { count: validationErrors().length } }}
+              </span>
+              @if (validationErrors().length <= 5) {
+                <ul class="footer__errors-list">
+                  @for (error of validationErrors(); track error.field) {
+                    <li>{{ error.message }}</li>
+                  }
+                </ul>
+              } @else {
+                <ul class="footer__errors-list">
+                  @for (error of validationErrors().slice(0, 5); track error.field) {
+                    <li>{{ error.message }}</li>
+                  }
+                  <li class="footer__errors-more">
+                    {{ 'docExtractor.workflow.validation.moreErrors' | translate: { count: validationErrors().length - 5 } }}
+                  </li>
+                </ul>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+    <div class="footer__actions">
+      <button 
+        mat-button 
+        type="button" 
+        (click)="cancel()" 
+        [disabled]="saving()"
+        class="footer__action footer__action--cancel"
+      >
+        @if (data.mode === 'create') {
+          {{ 'docExtractor.dialog.finishLater' | translate }}
+        } @else {
+          {{ 'docExtractor.workflow.actions.close' | translate }}
+        }
+      </button>
+      <button
+        mat-flat-button
+        color="primary"
+        type="button"
+        (click)="validateAndSave()"
+        [disabled]="saving() || !canValidate()"
+        [matTooltip]="!canValidate() ? ('docExtractor.workflow.actions.validateDisabledTooltip' | translate) : ''"
+        class="footer__action footer__action--primary"
+      >
+        <mat-icon>check_circle</mat-icon>
+        {{ 'docExtractor.dialog.validate' | translate }}
+      </button>
+    </div>
+  </div>
+</div>

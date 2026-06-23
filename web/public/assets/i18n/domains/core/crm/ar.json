@@ -1,0 +1,55 @@
+{
+  "crm": {
+    "navigation": {
+      "title": "CRM",
+      "description": "مجال CRM",
+      "leads": "العملاء المحتملون",
+      "opportunities": "الفرص",
+      "salesChannels": "قنوات البيع",
+      "salesTeams": "فرق البيع",
+      "territories": "المناطق",
+      "customerClassifications": "تصنيفات الزبائن"
+    }
+  },
+  "common": {
+    "subsections": {
+      "operations": "العمليات",
+      "configuration": "الإعدادات"
+    }
+  },
+  "sales": {
+    "fields": {
+      "name": "الاسم",
+      "companyName": "اسم الشركة",
+      "email": "البريد الإلكتروني",
+      "phone": "الهاتف",
+      "source": "معرّف المصدر",
+      "status": "الحالة",
+      "score": "النقاط",
+      "assignedTo": "معرّف المعيّن إليه",
+      "notes": "ملاحظات",
+      "customer": "معرّف الزبون",
+      "expectedRevenue": "الإيراد المتوقع",
+      "probability": "الاحتمالية",
+      "closeDate": "تاريخ الإغلاق",
+      "stage": "المرحلة",
+      "code": "الرمز",
+      "managerId": "معرّف المسؤول",
+      "description": "الوصف",
+      "territory": "المنطقة",
+      "parentTerritoryId": "معرّف المنطقة الأم",
+      "customerId": "معرّف الزبون",
+      "tier": "الشريحة",
+      "segment": "القطاع",
+      "criteria": "المعايير",
+      "effectiveDate": "تاريخ السريان",
+      "previousTier": "الشريحة السابقة"
+    },
+    "sections": {
+      "general": "عام",
+      "tracking": "التتبع",
+      "pipeline": "مسار المبيعات",
+      "notes": "ملاحظات"
+    }
+  }
+}
