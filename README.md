@@ -28,7 +28,9 @@ make deploy APP=sektor-btp ENV=staging
 | Produit | Chemin | Statut |
 |---------|--------|--------|
 | Sektor BTP (ERP) | [products/sektor-btp/](products/sektor-btp/) | migré |
-| Venue Catalog | [products/venue-catalog/](products/venue-catalog/) | specs / wp-01 à implémenter |
+| Venue Catalog | [products/venue-catalog/](products/venue-catalog/) | specs |
+| Layali | [products/layali/](products/layali/) | prototype mobile |
+| Beauty | [products/beauty/](products/beauty/) | prototype mobile |
 
 ## Documentation
 

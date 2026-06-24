@@ -1,0 +1,145 @@
+:root {
+  /* Color Palette */
+  --ion-color-primary: #ff6b6b;
+  --ion-color-primary-rgb: 255, 107, 107;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #e65858;
+  --ion-color-primary-tint: #ff7a7a;
+
+  --ion-color-secondary: #ffa500;
+  --ion-color-secondary-rgb: 255, 165, 0;
+  --ion-color-secondary-contrast: #ffffff;
+  --ion-color-secondary-contrast-rgb: 255, 255, 255;
+  --ion-color-secondary-shade: #e69400;
+  --ion-color-secondary-tint: #ffb319;
+
+  --ion-color-tertiary: #9b59b6;
+  --ion-color-tertiary-rgb: 155, 89, 182;
+  --ion-color-tertiary-contrast: #ffffff;
+  --ion-color-tertiary-contrast-rgb: 255, 255, 255;
+  --ion-color-tertiary-shade: #8a4a9b;
+  --ion-color-tertiary-tint: #a66ac1;
+
+  /* Neutral Colors */
+  --ion-color-success: #2ecc71;
+  --ion-color-warning: #f39c12;
+  --ion-color-danger: #e74c3c;
+  --ion-color-light: #f8f9fa;
+  --ion-color-medium: #95a5a6;
+  --ion-color-dark: #2c3e50;
+
+  /* Typography */
+  --ion-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
+    'Cantarell', 'Droid Sans', 'Helvetica Neue', sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ion-color-step-50: #0d0d0d;
+    --ion-color-step-100: #1a1a1a;
+    --ion-color-step-150: #262626;
+    --ion-color-step-200: #333333;
+    --ion-color-step-250: #404040;
+    --ion-color-step-300: #4d4d4d;
+    --ion-color-step-350: #595959;
+    --ion-color-step-400: #666666;
+    --ion-color-step-450: #737373;
+    --ion-color-step-500: #808080;
+    --ion-color-step-550: #8d8d8d;
+    --ion-color-step-600: #999999;
+    --ion-color-step-650: #a6a6a6;
+    --ion-color-step-700: #b3b3b3;
+    --ion-color-step-750: #bfbfbf;
+    --ion-color-step-800: #cccccc;
+    --ion-color-step-850: #d9d9d9;
+    --ion-color-step-900: #e6e6e6;
+    --ion-color-step-950: #f2f2f2;
+
+    --ion-background-color: #111111;
+    --ion-background-color-rgb: 17, 17, 17;
+
+    --ion-text-color: #ffffff;
+    --ion-text-color-rgb: 255, 255, 255;
+
+    --ion-border-color: #222222;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --ion-color-step-50: #f2f2f2;
+    --ion-color-step-100: #e6e6e6;
+    --ion-color-step-150: #d9d9d9;
+    --ion-color-step-200: #cccccc;
+    --ion-color-step-250: #bfbfbf;
+    --ion-color-step-300: #b3b3b3;
+    --ion-color-step-350: #a6a6a6;
+    --ion-color-step-400: #999999;
+    --ion-color-step-450: #8d8d8d;
+    --ion-color-step-500: #808080;
+    --ion-color-step-550: #737373;
+    --ion-color-step-600: #666666;
+    --ion-color-step-650: #595959;
+    --ion-color-step-700: #4d4d4d;
+    --ion-color-step-750: #404040;
+    --ion-color-step-800: #333333;
+    --ion-color-step-850: #262626;
+    --ion-color-step-900: #1a1a1a;
+    --ion-color-step-950: #0d0d0d;
+
+    --ion-background-color: #ffffff;
+    --ion-background-color-rgb: 255, 255, 255;
+
+    --ion-text-color: #000000;
+    --ion-text-color-rgb: 0, 0, 0;
+
+    --ion-border-color: #e0e0e0;
+  }
+}
+
+html.ios body {
+  --ion-default-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
+    'Cantarell', 'Droid Sans', 'Helvetica Neue', sans-serif;
+}
+
+html.md body {
+  --ion-default-font: 'Roboto', sans-serif;
+}
+
+body {
+  background: var(--ion-background-color);
+  color: var(--ion-text-color);
+}
+
+ion-content ion-toolbar {
+  --background: transparent;
+  --border-color: transparent;
+}
+
+#root {
+  --ion-background-color: var(--ion-color-step-50);
+}
+
+@supports (padding: max(0px)) {
+  body,
+  ion-modal ion-header ion-toolbar {
+    padding-left: max(var(--ion-margin), env(safe-area-inset-left));
+    padding-right: max(var(--ion-margin), env(safe-area-inset-right));
+    padding-top: max(var(--ion-margin), env(safe-area-inset-top));
+    padding-bottom: max(var(--ion-margin), env(safe-area-inset-bottom));
+  }
+}
+
+@supports (margin: max(0px)) {
+  ion-modal ion-header {
+    margin-left: calc(-1 * max(var(--ion-margin), env(safe-area-inset-left)));
+    margin-right: calc(-1 * max(var(--ion-margin), env(safe-area-inset-right)));
+    margin-top: calc(-1 * max(var(--ion-margin), env(safe-area-inset-top)));
+    margin-bottom: calc(-1 * max(var(--ion-margin), env(safe-area-inset-bottom)));
+  }
+}
+
+html {
+  --ion-statusbar-padding: var(--ion-safe-area-top);
+}

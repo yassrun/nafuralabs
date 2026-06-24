@@ -38,10 +38,14 @@ nf/nafuralabs/
 │   └── web/                       # shell Angular, anatomy, features
 │
 ├── products/                      # produits déployables
-│   ├── sektor-btp/                # ERP BTP (Sektor) — en prod
-│   └── venue-catalog/             # catalogue lieux — specs, code à venir
-│       ├── docs/                  # specs produit (Markdown)
-│       └── README.md
+│   ├── sektor-btp/                # ERP BTP — migré
+│   ├── venue-catalog/             # catalogue lieux — specs
+│   ├── layali/                    # nightlife — prototype mobile Ionic
+│   │   ├── mobile/
+│   │   └── docs/
+│   └── beauty/                    # salons beauté — prototype mobile Ionic
+│       ├── mobile/
+│       └── docs/
 │
 ├── web/                           # workspace Angular (point d’entrée build Sektor)
 │   ├── src/                       # main.ts, environments
@@ -77,7 +81,8 @@ nf/nafuralabs/
 | Onboarding, config app ERP | `products/sektor-btp/backend/app/` |
 | Écran ERP, facades Angular | `products/sektor-btp/web/app/` |
 | Auth, listing générique, shell | `platform/web/` ou `platform/backend/` |
-| Catalogue lieux, jobs Google | `products/venue-catalog/backend/modules/` (à créer) |
+| Catalogue lieux, jobs Google | `products/venue-catalog/` (specs) |
+| Prototype mobile Layali / Beauty | `products/layali/mobile/`, `products/beauty/mobile/` |
 | Specs produit | `products/<app-id>/docs/` |
 | Nouveau produit | `products/<app-id>/` (copier le pattern sektor-btp) |
 | Postgres, Keycloak | `infra/k8s/` |
@@ -256,6 +261,8 @@ Lister tous les projets : `.\gradlew.bat projects`
 
 - [Sektor BTP README](../products/sektor-btp/README.md)
 - [Venue Catalog README](../products/venue-catalog/README.md)
+- [Layali README](../products/layali/README.md)
+- [Beauty README](../products/beauty/README.md)
 - [Marketing corporate](../marketing/corporate/README.md)
 
 ---
