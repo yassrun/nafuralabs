@@ -2,10 +2,15 @@ import { useMemo, useState } from 'react'
 import { IonApp, IonButton, IonChip, IonContent, IonPage, IonSearchbar } from '@ionic/react'
 import {
   allSalons,
+  commitBookingToHistory,
+  mockAdminTenants,
   mockCustomerBookings,
-  mockManagerBookings,
   mockCustomerProfile,
+  mockLoyaltyHistory,
+  mockManagerBookings,
+  MOCK_OTP,
   type Booking,
+  type CustomerProfile,
   type Salon,
 } from './prototypeData'
 import {
@@ -16,6 +21,10 @@ import {
   ManagerStaffScreen,
   ManagerServicesScreen,
   ManagerReviewsScreen,
+  ManagerAgendaScreen,
+  ManagerCustomersScreen,
+  ManagerLoyaltyScreen,
+  ManagerSettingsScreen,
 } from './ManagerScreens'
 import './App.css'
 
@@ -34,6 +43,7 @@ export interface BookingDraft {
   staffId?: string
   date: string
   time: string
+  paymentMethod: 'cash' | 'online'
 }
 
 export type Screen =
@@ -41,16 +51,16 @@ export type Screen =
   | 'home'
   | 'salon-search'
   | 'salon-detail'
-  | 'booking-create'
+  | 'service-list'
   | 'booking-select-time'
   | 'booking-payment'
   | 'booking-confirm'
   | 'bookings-list'
   | 'booking-detail'
-  | 'customer-profile'
-  | 'salon-reviews'
   | 'login'
   | 'register'
+  | 'customer-profile'
+  | 'customer-loyalty'
   | 'manager-login'
   | 'manager-dashboard'
   | 'manager-bookings-list'
@@ -58,16 +68,26 @@ export type Screen =
   | 'manager-staff'
   | 'manager-services'
   | 'manager-reviews'
+  | 'manager-agenda'
+  | 'manager-customers'
+  | 'manager-loyalty'
+  | 'manager-settings'
+  | 'admin-overview'
+  | 'admin-tenants'
+  | 'admin-tenant-detail'
 
 interface AppState {
   currentScreen: Screen
   selectedSalonId?: string
   selectedBookingId?: string
   selectedServiceId?: string
+  selectedAdminTenantId?: string
   userType?: 'customer' | 'manager'
   managerSession?: ManagerSession
-  customerProfile?: typeof mockCustomerProfile
+  customerProfile?: CustomerProfile
   bookingDraft?: BookingDraft
+  authReturnScreen?: Screen
+  confirmedBookingRef?: string
 }
 
 export default function App() {
@@ -86,10 +106,61 @@ export default function App() {
 
   // Customer functions
   const startCustomerFlow = () => {
-    navigate('home', {
+    navigate('home', { userType: 'customer' })
+  }
+
+  const loginCustomer = (profile: CustomerProfile = mockCustomerProfile) => {
+    const returnScreen = appState.authReturnScreen ?? 'home'
+    const draft = appState.bookingDraft
+
+    if (returnScreen === 'booking-confirm' && draft) {
+      const booking = commitBookingToHistory(draft, profile)
+      navigate('booking-confirm', {
+        customerProfile: profile,
+        authReturnScreen: undefined,
+        confirmedBookingRef: booking.bookingRef,
+        userType: 'customer',
+      })
+      return
+    }
+
+    navigate(returnScreen, {
+      customerProfile: profile,
+      authReturnScreen: undefined,
       userType: 'customer',
-      customerProfile: mockCustomerProfile,
     })
+  }
+
+  const registerCustomer = (profile: CustomerProfile) => {
+    loginCustomer(profile)
+  }
+
+  const proceedBooking = () => {
+    const draft = appState.bookingDraft
+    if (!draft?.time) return
+
+    if (!appState.customerProfile) {
+      navigate('login', {
+        authReturnScreen: draft.paymentMethod === 'online' ? 'booking-payment' : 'booking-confirm',
+      })
+      return
+    }
+
+    if (draft.paymentMethod === 'online') {
+      navigate('booking-payment')
+      return
+    }
+
+    finalizeBooking()
+  }
+
+  const finalizeBooking = () => {
+    const draft = appState.bookingDraft
+    const profile = appState.customerProfile ?? mockCustomerProfile
+    if (!draft) return
+
+    const booking = commitBookingToHistory(draft, profile)
+    navigate('booking-confirm', { confirmedBookingRef: booking.bookingRef })
   }
 
   const selectSalon = (salonId: string) => {
@@ -105,12 +176,17 @@ export default function App() {
         serviceId,
         date: new Date().toISOString().split('T')[0],
         time: '',
+        paymentMethod: 'cash',
       },
     })
   }
 
   const confirmBooking = () => {
-    navigate('booking-confirm')
+    proceedBooking()
+  }
+
+  const completeOnlinePayment = () => {
+    finalizeBooking()
   }
 
   const viewBookingHistory = () => {
@@ -163,6 +239,11 @@ export default function App() {
     navigate('manager-reviews')
   }
 
+  const viewManagerAgenda = () => navigate('manager-agenda')
+  const viewManagerCustomers = () => navigate('manager-customers')
+  const viewManagerLoyalty = () => navigate('manager-loyalty')
+  const viewManagerSettings = () => navigate('manager-settings')
+
   const logout = () => {
     navigate('entry', {
       userType: undefined,
@@ -184,7 +265,13 @@ export default function App() {
 
     switch (appState.currentScreen) {
       case 'entry':
-        return <EntryScreen onCustomerClick={startCustomerFlow} onManagerClick={startManagerLogin} />
+        return (
+          <EntryScreen
+            onCustomerClick={startCustomerFlow}
+            onManagerClick={startManagerLogin}
+            onAdminClick={() => navigate('admin-overview')}
+          />
+        )
 
       case 'home':
         return (
@@ -194,7 +281,18 @@ export default function App() {
             onQuickBook={startBooking}
             onViewBookings={viewBookingHistory}
             onViewProfile={() => navigate('customer-profile')}
+            onViewSearch={() => navigate('salon-search')}
+            onLogin={() => navigate('login')}
             profile={appState.customerProfile}
+          />
+        )
+
+      case 'salon-search':
+        return (
+          <SalonSearchScreen
+            salons={allSalons}
+            onSalonSelect={selectSalon}
+            onBack={() => navigate('home')}
           />
         )
 
@@ -203,7 +301,17 @@ export default function App() {
           <SalonDetailScreen
             salon={currentSalon}
             onBookService={startBooking}
+            onViewAllServices={() => navigate('service-list', { selectedSalonId: currentSalon.id })}
             onBack={() => navigate('home')}
+          />
+        ) : null
+
+      case 'service-list':
+        return currentSalon ? (
+          <ServiceListScreen
+            salon={currentSalon}
+            onBookService={startBooking}
+            onBack={() => navigate('salon-detail', { selectedSalonId: currentSalon.id })}
           />
         ) : null
 
@@ -219,13 +327,49 @@ export default function App() {
           />
         )
 
+      case 'booking-payment':
+        return (
+          <BookingPaymentScreen
+            salon={currentSalon}
+            draft={appState.bookingDraft}
+            onPay={completeOnlinePayment}
+            onBack={() => navigate('booking-select-time')}
+          />
+        )
+
       case 'booking-confirm':
         return (
           <BookingConfirmScreen
             salon={currentSalon}
             booking={appState.bookingDraft}
-            onConfirm={() => navigate('home')}
-            onCancel={() => navigate('home')}
+            bookingRef={appState.confirmedBookingRef}
+            onViewBookings={() => navigate('bookings-list')}
+            onFinish={() => navigate('home')}
+          />
+        )
+
+      case 'login':
+        return (
+          <LoginScreen
+            onBack={() => navigate(appState.authReturnScreen ? 'booking-select-time' : 'entry')}
+            onLogin={loginCustomer}
+            onRegister={() => navigate('register', { authReturnScreen: appState.authReturnScreen })}
+          />
+        )
+
+      case 'register':
+        return (
+          <RegisterScreen
+            onBack={() => navigate('login')}
+            onRegister={registerCustomer}
+          />
+        )
+
+      case 'customer-loyalty':
+        return (
+          <CustomerLoyaltyScreen
+            profile={appState.customerProfile}
+            onBack={() => navigate('customer-profile')}
           />
         )
 
@@ -249,6 +393,8 @@ export default function App() {
             profile={appState.customerProfile}
             onBack={() => navigate('home')}
             onViewBookings={viewBookingHistory}
+            onViewLoyalty={() => navigate('customer-loyalty')}
+            onLogin={() => navigate('login')}
           />
         )
 
@@ -260,9 +406,13 @@ export default function App() {
           <ManagerDashboardScreen
             session={appState.managerSession}
             onViewBookings={viewManagerBookings}
+            onViewAgenda={viewManagerAgenda}
             onViewStaff={viewManagerStaff}
             onViewServices={viewManagerServices}
+            onViewCustomers={viewManagerCustomers}
+            onViewLoyalty={viewManagerLoyalty}
             onViewReviews={viewManagerReviews}
+            onViewSettings={viewManagerSettings}
             onLogout={logout}
           />
         )
@@ -308,8 +458,50 @@ export default function App() {
           />
         )
 
+      case 'manager-agenda':
+        return <ManagerAgendaScreen onBack={() => navigate('manager-dashboard')} />
+
+      case 'manager-customers':
+        return <ManagerCustomersScreen onBack={() => navigate('manager-dashboard')} />
+
+      case 'manager-loyalty':
+        return <ManagerLoyaltyScreen onBack={() => navigate('manager-dashboard')} />
+
+      case 'manager-settings':
+        return (
+          <ManagerSettingsScreen
+            session={appState.managerSession}
+            onBack={() => navigate('manager-dashboard')}
+          />
+        )
+
+      case 'admin-overview':
+        return <AdminOverviewScreen onBack={() => navigate('entry')} onViewTenants={() => navigate('admin-tenants')} />
+
+      case 'admin-tenants':
+        return (
+          <AdminTenantsScreen
+            onBack={() => navigate('admin-overview')}
+            onSelectTenant={(id) => navigate('admin-tenant-detail', { selectedAdminTenantId: id })}
+          />
+        )
+
+      case 'admin-tenant-detail':
+        return (
+          <AdminTenantDetailScreen
+            tenantId={appState.selectedAdminTenantId}
+            onBack={() => navigate('admin-tenants')}
+          />
+        )
+
       default:
-        return <EntryScreen onCustomerClick={startCustomerFlow} onManagerClick={startManagerLogin} />
+        return (
+          <EntryScreen
+            onCustomerClick={startCustomerFlow}
+            onManagerClick={startManagerLogin}
+            onAdminClick={() => navigate('admin-overview')}
+          />
+        )
     }
   }
 
@@ -324,9 +516,11 @@ export default function App() {
 function EntryScreen({
   onCustomerClick,
   onManagerClick,
+  onAdminClick,
 }: {
   onCustomerClick: () => void
   onManagerClick: () => void
+  onAdminClick: () => void
 }) {
   return (
     <IonContent>
@@ -349,6 +543,10 @@ function EntryScreen({
         <IonButton expand="block" onClick={onManagerClick} fill="outline" className="btn-secondary">
           Je suis Propriétaire
         </IonButton>
+
+        <IonButton expand="block" onClick={onAdminClick} fill="clear" style={{ marginTop: '8px' }}>
+          Admin Nafura
+        </IonButton>
       </div>
     </IonContent>
   )
@@ -361,6 +559,8 @@ function HomeScreen({
   onQuickBook,
   onViewBookings,
   onViewProfile,
+  onViewSearch,
+  onLogin,
   profile,
 }: {
   salons: Salon[]
@@ -368,7 +568,9 @@ function HomeScreen({
   onQuickBook: (salonId: string, serviceId: string) => void
   onViewBookings: () => void
   onViewProfile: () => void
-  profile?: typeof mockCustomerProfile
+  onViewSearch: () => void
+  onLogin: () => void
+  profile?: CustomerProfile
 }) {
   const [searchTerm, setSearchTerm] = useState('')
   const [activeFilter, setActiveFilter] = useState<'all' | 'today' | 'ongles' | 'cire' | 'budget'>('all')
@@ -411,10 +613,10 @@ function HomeScreen({
           <div className="home-hero-top">
             <div>
               <p className="home-hero-kicker">Bienvenue</p>
-              <h2 className="home-hero-title">{profile?.name || 'Client'}</h2>
+              <h2 className="home-hero-title">{profile?.name || 'Invité'}</h2>
             </div>
-            <button type="button" className="home-profile-pill" onClick={onViewProfile}>
-              👤 Profil
+            <button type="button" className="home-profile-pill" onClick={profile ? onViewProfile : onLogin}>
+              {profile ? '👤 Profil' : '🔐 Connexion'}
             </button>
           </div>
 
@@ -431,6 +633,7 @@ function HomeScreen({
             onIonInput={(event) => setSearchTerm(event.detail.value ?? '')}
             placeholder="Salon, ville, service..."
             animated
+            onIonFocus={onViewSearch}
           />
 
           <div className="home-filter-row">
@@ -474,7 +677,9 @@ function HomeScreen({
         <div style={{ padding: '0 16px' }}>
           <div className="home-list-header">
             <h3>Salons disponibles</h3>
-            <span>{featuredSalons.length} résultat(s)</span>
+            <button type="button" className="salon-link" onClick={onViewSearch}>
+              Recherche avancée ({featuredSalons.length})
+            </button>
           </div>
 
           {featuredSalons.map((salon) => (
@@ -534,10 +739,12 @@ function HomeScreen({
 function SalonDetailScreen({
   salon,
   onBookService,
+  onViewAllServices,
   onBack,
 }: {
   salon: Salon
   onBookService: (salonId: string, serviceId: string) => void
+  onViewAllServices: () => void
   onBack: () => void
 }) {
   return (
@@ -563,6 +770,9 @@ function SalonDetailScreen({
         </div>
 
         <h3>Services disponibles</h3>
+        <IonButton expand="block" fill="clear" onClick={onViewAllServices} style={{ marginBottom: '8px' }}>
+          Voir tous les services ({salon.services.length})
+        </IonButton>
         {salon.services.map((service) => (
           <div key={service.id} className="service-item">
             <div>
@@ -658,6 +868,53 @@ function BookingSelectTimeScreen({
 
         <div style={{ marginBottom: '24px' }}>
           <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
+            Professionnel
+          </label>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+            <div
+              className={`time-slot ${!draft?.staffId ? 'selected' : 'available'}`}
+              onClick={() => {
+                if (draft) onDraftUpdate({ ...draft, staffId: undefined })
+              }}
+            >
+              Indifférent
+            </div>
+            {salon?.staff.map((member) => (
+              <div
+                key={member.id}
+                className={`time-slot ${draft?.staffId === member.id ? 'selected' : 'available'}`}
+                onClick={() => {
+                  if (draft) onDraftUpdate({ ...draft, staffId: member.id })
+                }}
+              >
+                {member.name}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ marginBottom: '24px' }}>
+          <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
+            Mode de paiement
+          </label>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <IonButton
+              fill={draft?.paymentMethod === 'cash' ? 'solid' : 'outline'}
+              onClick={() => draft && onDraftUpdate({ ...draft, paymentMethod: 'cash' })}
+            >
+              Au salon
+            </IonButton>
+            <IonButton
+              fill={draft?.paymentMethod === 'online' ? 'solid' : 'outline'}
+              onClick={() => draft && onDraftUpdate({ ...draft, paymentMethod: 'online' })}
+            >
+              En ligne
+            </IonButton>
+          </div>
+        </div>
+
+        <div style={{ marginBottom: '24px' }}>
+          <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
             Horaire disponible
           </label>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
@@ -683,7 +940,7 @@ function BookingSelectTimeScreen({
           disabled={!draft?.time}
           className="btn-primary"
         >
-          Confirmer la réservation
+          Continuer
         </IonButton>
       </div>
     </IonContent>
@@ -691,18 +948,69 @@ function BookingSelectTimeScreen({
 }
 
 /* Booking Confirm Screen */
+function BookingPaymentScreen({
+  salon,
+  draft,
+  onPay,
+  onBack,
+}: {
+  salon: Salon | null
+  draft?: BookingDraft
+  onPay: () => void
+  onBack: () => void
+}) {
+  const service = salon?.services.find((s) => s.id === draft?.serviceId)
+  const [processing, setProcessing] = useState(false)
+
+  const handlePay = () => {
+    setProcessing(true)
+    setTimeout(() => {
+      setProcessing(false)
+      onPay()
+    }, 800)
+  }
+
+  return (
+    <IonContent>
+      <div style={{ padding: '16px' }}>
+        <IonButton expand="block" fill="clear" onClick={onBack}>
+          ← Retour
+        </IonButton>
+        <h2>Paiement sécurisé</h2>
+        <p style={{ opacity: 0.6 }}>{salon?.name} — {service?.name}</p>
+        <div className="booking-confirm-section">
+          <div className="booking-detail-row">
+            <span className="booking-detail-label">Montant</span>
+            <span className="booking-detail-value">{service?.price} DH</span>
+          </div>
+          <div className="booking-detail-row">
+            <span className="booking-detail-label">Carte</span>
+            <span className="booking-detail-value">•••• 4242 (mock 3DS)</span>
+          </div>
+        </div>
+        <IonButton expand="block" onClick={handlePay} disabled={processing} className="btn-primary">
+          {processing ? 'Traitement...' : 'Payer maintenant'}
+        </IonButton>
+      </div>
+    </IonContent>
+  )
+}
+
 function BookingConfirmScreen({
   salon,
   booking,
-  onConfirm,
-  onCancel,
+  bookingRef,
+  onViewBookings,
+  onFinish,
 }: {
   salon: Salon | null
   booking?: BookingDraft
-  onConfirm: () => void
-  onCancel: () => void
+  bookingRef?: string
+  onViewBookings: () => void
+  onFinish: () => void
 }) {
   const service = salon?.services.find((s) => s.id === booking?.serviceId)
+  const staff = booking?.staffId ? salon?.staff.find((s) => s.id === booking.staffId) : undefined
 
   return (
     <IonContent>
@@ -710,7 +1018,7 @@ function BookingConfirmScreen({
         <div style={{ textAlign: 'center', marginBottom: '24px' }}>
           <div style={{ fontSize: '48px', marginBottom: '12px' }}>✅</div>
           <h2 style={{ margin: 0 }}>Réservation confirmée!</h2>
-          <p style={{ opacity: 0.6 }}>Numéro: BEAUTY-001</p>
+          <p style={{ opacity: 0.6 }}>Référence: {bookingRef ?? 'BK-0000'}</p>
         </div>
 
         <div className="booking-confirm-section">
@@ -722,6 +1030,12 @@ function BookingConfirmScreen({
             <span className="booking-detail-label">Service</span>
             <span className="booking-detail-value">{service?.name}</span>
           </div>
+          {staff && (
+            <div className="booking-detail-row">
+              <span className="booking-detail-label">Professionnel</span>
+              <span className="booking-detail-value">{staff.name}</span>
+            </div>
+          )}
           <div className="booking-detail-row">
             <span className="booking-detail-label">Date</span>
             <span className="booking-detail-value">{booking?.date}</span>
@@ -734,17 +1048,23 @@ function BookingConfirmScreen({
             <span className="booking-detail-label">Prix</span>
             <span className="booking-detail-value">{service?.price} DH</span>
           </div>
+          <div className="booking-detail-row">
+            <span className="booking-detail-label">Paiement</span>
+            <span className="booking-detail-value">
+              {booking?.paymentMethod === 'online' ? 'En ligne' : 'Au salon'}
+            </span>
+          </div>
         </div>
 
         <p style={{ textAlign: 'center', fontSize: '12px', opacity: 0.6, marginBottom: '24px' }}>
           Vous recevrez un SMS de confirmation
         </p>
 
-        <IonButton expand="block" onClick={onConfirm} className="btn-primary">
-          Terminer
+        <IonButton expand="block" onClick={onViewBookings} className="btn-primary">
+          Mes réservations
         </IonButton>
-        <IonButton expand="block" fill="outline" onClick={onCancel}>
-          Annuler
+        <IonButton expand="block" fill="outline" onClick={onFinish}>
+          Retour à l&apos;accueil
         </IonButton>
       </div>
     </IonContent>
@@ -852,10 +1172,14 @@ function CustomerProfileScreen({
   profile,
   onBack,
   onViewBookings,
+  onViewLoyalty,
+  onLogin,
 }: {
-  profile?: typeof mockCustomerProfile
+  profile?: CustomerProfile
   onBack: () => void
   onViewBookings: () => void
+  onViewLoyalty: () => void
+  onLogin: () => void
 }) {
   const profileOptions = [
     'Mes réservations',
@@ -876,20 +1200,29 @@ function CustomerProfileScreen({
 
         <h2>Mon Profil</h2>
 
-        <div className="loyalty-badge">
-          <div className="loyalty-points">{profile?.loyaltyPoints || 0}</div>
-          <div className="loyalty-label">Points de fidélité</div>
+        {!profile ? (
+          <>
+            <p style={{ opacity: 0.7 }}>Connectez-vous pour accéder à votre profil et vos réservations.</p>
+            <IonButton expand="block" onClick={onLogin} className="btn-primary">
+              Se connecter
+            </IonButton>
+          </>
+        ) : (
+          <>
+        <div className="loyalty-badge" onClick={onViewLoyalty} style={{ cursor: 'pointer' }}>
+          <div className="loyalty-points">{profile.loyaltyPoints}</div>
+          <div className="loyalty-label">Points de fidélité — voir détail</div>
         </div>
 
         <div style={{ background: 'var(--ion-color-step-100)', padding: '16px', borderRadius: '8px' }}>
           <p style={{ margin: '0 0 8px 0', fontSize: '12px', opacity: 0.6 }}>Nom</p>
-          <p style={{ margin: '0 0 16px 0', fontWeight: '500' }}>{profile?.name}</p>
+          <p style={{ margin: '0 0 16px 0', fontWeight: '500' }}>{profile.name}</p>
 
           <p style={{ margin: '0 0 8px 0', fontSize: '12px', opacity: 0.6 }}>Email</p>
-          <p style={{ margin: '0 0 16px 0', fontWeight: '500' }}>{profile?.email}</p>
+          <p style={{ margin: '0 0 16px 0', fontWeight: '500' }}>{profile.email}</p>
 
           <p style={{ margin: '0 0 8px 0', fontSize: '12px', opacity: 0.6 }}>Téléphone</p>
-          <p style={{ margin: 0, fontWeight: '500' }}>{profile?.phone}</p>
+          <p style={{ margin: 0, fontWeight: '500' }}>{profile.phone}</p>
         </div>
 
         <div style={{ marginTop: '16px' }}>
@@ -916,6 +1249,340 @@ function CustomerProfileScreen({
         <IonButton expand="block" fill="outline" onClick={onViewBookings} style={{ marginTop: '16px' }}>
           Voir mes réservations
         </IonButton>
+          </>
+        )}
+      </div>
+    </IonContent>
+  )
+}
+
+function SalonSearchScreen({
+  salons,
+  onSalonSelect,
+  onBack,
+}: {
+  salons: Salon[]
+  onSalonSelect: (id: string) => void
+  onBack: () => void
+}) {
+  const [searchTerm, setSearchTerm] = useState('')
+
+  const results = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase()
+    if (!term) return salons
+    return salons.filter(
+      (salon) =>
+        salon.name.toLowerCase().includes(term) ||
+        salon.city.toLowerCase().includes(term) ||
+        salon.services.some((s) => s.name.toLowerCase().includes(term)),
+    )
+  }, [salons, searchTerm])
+
+  return (
+    <IonContent>
+      <div style={{ padding: '16px' }}>
+        <IonButton expand="block" fill="clear" onClick={onBack}>
+          ← Retour
+        </IonButton>
+        <h2>Rechercher un salon</h2>
+        <IonSearchbar
+          value={searchTerm}
+          onIonInput={(e) => setSearchTerm(e.detail.value ?? '')}
+          placeholder="Ville, service, nom..."
+          animated
+        />
+        {results.length === 0 ? (
+          <p style={{ textAlign: 'center', opacity: 0.6, marginTop: '24px' }}>
+            Aucun salon ne correspond à votre recherche.
+          </p>
+        ) : (
+          results.map((salon) => (
+            <div
+              key={salon.id}
+              onClick={() => onSalonSelect(salon.id)}
+              style={{
+                padding: '14px',
+                border: '1px solid var(--ion-border-color)',
+                borderRadius: '8px',
+                marginBottom: '10px',
+                cursor: 'pointer',
+              }}
+            >
+              <strong>{salon.name}</strong>
+              <p style={{ margin: '4px 0 0 0', fontSize: '13px', opacity: 0.7 }}>
+                {salon.city} · ⭐ {salon.rating}
+              </p>
+            </div>
+          ))
+        )}
+      </div>
+    </IonContent>
+  )
+}
+
+function ServiceListScreen({
+  salon,
+  onBookService,
+  onBack,
+}: {
+  salon: Salon
+  onBookService: (salonId: string, serviceId: string) => void
+  onBack: () => void
+}) {
+  return (
+    <IonContent>
+      <div style={{ padding: '16px' }}>
+        <IonButton expand="block" fill="clear" onClick={onBack}>
+          ← Retour au salon
+        </IonButton>
+        <h2>Services — {salon.name}</h2>
+        {salon.services.map((service) => (
+          <div key={service.id} className="service-item">
+            <div>
+              <div className="service-name">{service.name}</div>
+              <div style={{ fontSize: '12px', opacity: 0.6 }}>{service.duration} min</div>
+            </div>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <div className="service-price">{service.price} DH</div>
+              <IonButton size="small" onClick={() => onBookService(salon.id, service.id)} className="btn-primary">
+                Réserver
+              </IonButton>
+            </div>
+          </div>
+        ))}
+      </div>
+    </IonContent>
+  )
+}
+
+function LoginScreen({
+  onBack,
+  onLogin,
+  onRegister,
+}: {
+  onBack: () => void
+  onLogin: (profile?: CustomerProfile) => void
+  onRegister: () => void
+}) {
+  const [phone, setPhone] = useState('')
+  const [otpSent, setOtpSent] = useState(false)
+  const [otpCode, setOtpCode] = useState('')
+  const [error, setError] = useState('')
+
+  const verify = () => {
+    if (otpCode !== MOCK_OTP) {
+      setError(`Code invalide. Utilisez ${MOCK_OTP} en démo.`)
+      return
+    }
+    onLogin({ ...mockCustomerProfile, phone: phone || mockCustomerProfile.phone })
+  }
+
+  return (
+    <IonContent>
+      <div style={{ padding: '16px' }}>
+        <IonButton expand="block" fill="clear" onClick={onBack}>
+          ← Retour
+        </IonButton>
+        <h2>Connexion</h2>
+        {!otpSent ? (
+          <>
+            <input
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="+212 6 12 34 56 78"
+              style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--ion-border-color)' }}
+            />
+            <IonButton expand="block" onClick={() => setOtpSent(true)} style={{ marginTop: '12px' }}>
+              Recevoir un code
+            </IonButton>
+          </>
+        ) : (
+          <>
+            <input
+              type="text"
+              value={otpCode}
+              onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+              placeholder="123456"
+              maxLength={6}
+              style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--ion-border-color)' }}
+            />
+            {error && <p style={{ color: 'var(--ion-color-danger)', fontSize: '13px' }}>{error}</p>}
+            <IonButton expand="block" onClick={verify} disabled={otpCode.length !== 6} style={{ marginTop: '12px' }}>
+              Vérifier
+            </IonButton>
+          </>
+        )}
+        <IonButton expand="block" fill="outline" onClick={onRegister} style={{ marginTop: '8px' }}>
+          Créer un compte
+        </IonButton>
+      </div>
+    </IonContent>
+  )
+}
+
+function RegisterScreen({
+  onBack,
+  onRegister,
+}: {
+  onBack: () => void
+  onRegister: (profile: CustomerProfile) => void
+}) {
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
+  const [otpSent, setOtpSent] = useState(false)
+  const [otpCode, setOtpCode] = useState('')
+
+  const submit = () => {
+    if (otpCode !== MOCK_OTP) return
+    onRegister({
+      id: `customer-${Date.now()}`,
+      name: `${firstName} ${lastName}`.trim() || 'Nouveau client',
+      email: email || 'nouveau@email.com',
+      phone: phone || '+212 6 00 00 00 00',
+      loyaltyPoints: 100,
+      favoriteServices: ['coiffure'],
+      bookingHistory: [],
+      reviews: [],
+    })
+  }
+
+  return (
+    <IonContent>
+      <div style={{ padding: '16px' }}>
+        <IonButton expand="block" fill="clear" onClick={onBack}>
+          ← Retour
+        </IonButton>
+        <h2>Créer un compte</h2>
+        {!otpSent ? (
+          <>
+            <input placeholder="Prénom" value={firstName} onChange={(e) => setFirstName(e.target.value)} style={{ width: '100%', padding: '10px', marginBottom: '8px', borderRadius: '8px', border: '1px solid var(--ion-border-color)' }} />
+            <input placeholder="Nom" value={lastName} onChange={(e) => setLastName(e.target.value)} style={{ width: '100%', padding: '10px', marginBottom: '8px', borderRadius: '8px', border: '1px solid var(--ion-border-color)' }} />
+            <input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} style={{ width: '100%', padding: '10px', marginBottom: '8px', borderRadius: '8px', border: '1px solid var(--ion-border-color)' }} />
+            <input placeholder="Téléphone" value={phone} onChange={(e) => setPhone(e.target.value)} style={{ width: '100%', padding: '10px', marginBottom: '8px', borderRadius: '8px', border: '1px solid var(--ion-border-color)' }} />
+            <IonButton expand="block" onClick={() => setOtpSent(true)}>Recevoir OTP</IonButton>
+          </>
+        ) : (
+          <>
+            <input placeholder={MOCK_OTP} value={otpCode} onChange={(e) => setOtpCode(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--ion-border-color)' }} />
+            <IonButton expand="block" onClick={submit} style={{ marginTop: '12px' }}>Valider ({MOCK_OTP})</IonButton>
+          </>
+        )}
+      </div>
+    </IonContent>
+  )
+}
+
+function CustomerLoyaltyScreen({
+  profile,
+  onBack,
+}: {
+  profile?: CustomerProfile
+  onBack: () => void
+}) {
+  return (
+    <IonContent>
+      <div style={{ padding: '16px' }}>
+        <IonButton expand="block" fill="clear" onClick={onBack}>
+          ← Retour
+        </IonButton>
+        <h2>Ma fidélité</h2>
+        <div className="loyalty-badge">
+          <div className="loyalty-points">{profile?.loyaltyPoints ?? 0}</div>
+          <div className="loyalty-label">Points disponibles</div>
+        </div>
+        <h3 style={{ fontSize: '16px' }}>Historique</h3>
+        {mockLoyaltyHistory.map((tx) => (
+          <div key={tx.id} style={{ padding: '12px', border: '1px solid var(--ion-border-color)', borderRadius: '8px', marginBottom: '8px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span>{tx.label}</span>
+              <strong>{tx.points > 0 ? '+' : ''}{tx.points} pts</strong>
+            </div>
+            <p style={{ margin: '4px 0 0 0', fontSize: '12px', opacity: 0.6 }}>{tx.date}</p>
+          </div>
+        ))}
+      </div>
+    </IonContent>
+  )
+}
+
+function AdminOverviewScreen({
+  onBack,
+  onViewTenants,
+}: {
+  onBack: () => void
+  onViewTenants: () => void
+}) {
+  const active = mockAdminTenants.filter((t) => t.status === 'ACTIVE').length
+
+  return (
+    <IonContent>
+      <div style={{ padding: '16px' }}>
+        <IonButton expand="block" fill="clear" onClick={onBack}>← Retour</IonButton>
+        <h2>Admin Nafura — Beauty</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
+          <div style={{ background: 'var(--ion-color-step-100)', padding: '16px', borderRadius: '8px' }}>
+            <p style={{ margin: 0, opacity: 0.6, fontSize: '12px' }}>Tenants</p>
+            <p style={{ margin: 0, fontSize: '24px', fontWeight: 700 }}>{mockAdminTenants.length}</p>
+          </div>
+          <div style={{ background: 'var(--ion-color-step-100)', padding: '16px', borderRadius: '8px' }}>
+            <p style={{ margin: 0, opacity: 0.6, fontSize: '12px' }}>Actifs</p>
+            <p style={{ margin: 0, fontSize: '24px', fontWeight: 700 }}>{active}</p>
+          </div>
+        </div>
+        <IonButton expand="block" onClick={onViewTenants}>Gérer les salons</IonButton>
+      </div>
+    </IonContent>
+  )
+}
+
+function AdminTenantsScreen({
+  onBack,
+  onSelectTenant,
+}: {
+  onBack: () => void
+  onSelectTenant: (id: string) => void
+}) {
+  return (
+    <IonContent>
+      <div style={{ padding: '16px' }}>
+        <IonButton expand="block" fill="clear" onClick={onBack}>← Retour</IonButton>
+        <h2>Salons tenants</h2>
+        {mockAdminTenants.map((tenant) => (
+          <div key={tenant.id} style={{ padding: '14px', border: '1px solid var(--ion-border-color)', borderRadius: '8px', marginBottom: '10px' }}>
+            <strong>{tenant.name}</strong>
+            <p style={{ margin: '4px 0' }}>{tenant.city} · {tenant.status}</p>
+            <button type="button" className="salon-link" onClick={() => onSelectTenant(tenant.id)}>Voir détail</button>
+          </div>
+        ))}
+      </div>
+    </IonContent>
+  )
+}
+
+function AdminTenantDetailScreen({
+  tenantId,
+  onBack,
+}: {
+  tenantId?: string
+  onBack: () => void
+}) {
+  const tenant = mockAdminTenants.find((t) => t.id === tenantId) ?? mockAdminTenants[0]
+
+  return (
+    <IonContent>
+      <div style={{ padding: '16px' }}>
+        <IonButton expand="block" fill="clear" onClick={onBack}>← Retour</IonButton>
+        <h2>{tenant.name}</h2>
+        <p><strong>Statut:</strong> {tenant.status}</p>
+        <p><strong>Ville:</strong> {tenant.city}</p>
+        <p><strong>Slug:</strong> {tenant.slug}</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '16px' }}>
+          <button type="button" style={{ padding: '10px' }}>Approuver (mock)</button>
+          <button type="button" style={{ padding: '10px' }}>Suspendre (mock)</button>
+        </div>
       </div>
     </IonContent>
   )

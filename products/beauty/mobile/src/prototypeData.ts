@@ -119,6 +119,40 @@ export interface SalonOwnerProfile {
   role: 'owner' | 'admin' | 'staff'
 }
 
+export interface AdminTenant {
+  id: string
+  name: string
+  city: string
+  status: 'ACTIVE' | 'SUSPENDED' | 'PENDING'
+  slug: string
+}
+
+export interface ManagerCustomer {
+  id: string
+  name: string
+  phone: string
+  email: string
+  visits: number
+  loyaltyPoints: number
+  lastVisit?: string
+}
+
+export interface LoyaltyTransaction {
+  id: string
+  label: string
+  points: number
+  date: string
+}
+
+export interface AgendaSlot {
+  id: string
+  time: string
+  customerName: string
+  serviceName: string
+  staffName: string
+  status: 'confirmed' | 'pending' | 'completed'
+}
+
 /* Mock Data */
 export const allSalons: Salon[] = [
   {
@@ -616,3 +650,75 @@ export const beautyServiceTemplates: ServiceTemplate[] = [
     defaultPrice: 300,
   },
 ]
+
+export const mockAdminTenants: AdminTenant[] = [
+  { id: 'tenant-silhouette', name: 'Silhouette Beauty', city: 'Casablanca', status: 'ACTIVE', slug: 'silhouette-beauty' },
+  { id: 'tenant-jamila', name: 'Jamila Spa & Beauty', city: 'Casablanca', status: 'ACTIVE', slug: 'jamila-spa' },
+  { id: 'tenant-urban', name: 'Urban Barber Club', city: 'Rabat', status: 'SUSPENDED', slug: 'urban-barber' },
+]
+
+export const mockManagerCustomers: ManagerCustomer[] = [
+  { id: 'cust-01', name: 'Layla Bennani', phone: '+212 6 12 34 56 78', email: 'layla@email.com', visits: 12, loyaltyPoints: 320, lastVisit: '2026-06-22' },
+  { id: 'cust-02', name: 'Amira Hassan', phone: '+212 6 98 76 54 32', email: 'amira@email.com', visits: 5, loyaltyPoints: 140, lastVisit: '2026-06-19' },
+  { id: 'cust-03', name: 'Sara Khalil', phone: '+212 6 55 44 33 22', email: 'sara@email.com', visits: 3, loyaltyPoints: 80, lastVisit: '2026-06-15' },
+]
+
+export const mockLoyaltyHistory: LoyaltyTransaction[] = [
+  { id: 'loy-01', label: 'Réservation Coupe Femme', points: 15, date: '2026-06-20' },
+  { id: 'loy-02', label: 'Bonus bienvenue', points: 100, date: '2026-05-01' },
+  { id: 'loy-03', label: 'Échange récompense -10%', points: -50, date: '2026-04-12' },
+]
+
+export const mockAgendaSlots: AgendaSlot[] = [
+  { id: 'ag-01', time: '09:00', customerName: 'Amira Hassan', serviceName: 'Lissage Brésilien', staffName: 'Fatima Bennani', status: 'confirmed' },
+  { id: 'ag-02', time: '10:30', customerName: 'Sara Khalil', serviceName: 'Pose Ongles Gel', staffName: 'Nadia Alaoui', status: 'pending' },
+  { id: 'ag-03', time: '14:00', customerName: 'Layla Bennani', serviceName: 'Coupe Femme', staffName: 'Fatima Bennani', status: 'confirmed' },
+  { id: 'ag-04', time: '16:30', customerName: '—', serviceName: 'Créneau libre', staffName: 'Nadia Alaoui', status: 'pending' },
+]
+
+export interface BookingDraftInput {
+  salonId: string
+  serviceId: string
+  staffId?: string
+  date: string
+  time: string
+  paymentMethod: 'cash' | 'online'
+}
+
+let bookingSeq = mockCustomerBookings.length + 1
+
+export function commitBookingToHistory(
+  draft: BookingDraftInput,
+  customer: Pick<CustomerProfile, 'name' | 'phone' | 'email'>,
+): Booking {
+  const salon = allSalons.find((s) => s.id === draft.salonId)
+  const service = salon?.services.find((s) => s.id === draft.serviceId)
+  const staff = draft.staffId ? salon?.staff.find((s) => s.id === draft.staffId) : undefined
+  const ref = `BK-${String(bookingSeq++).padStart(4, '0')}`
+
+  const booking: Booking = {
+    id: `booking-${Date.now()}`,
+    bookingRef: ref,
+    salonId: draft.salonId,
+    salonName: salon?.name ?? 'Salon',
+    serviceId: draft.serviceId,
+    serviceName: service?.name ?? 'Service',
+    staffId: draft.staffId,
+    staffName: staff?.name ?? (draft.staffId ? undefined : 'Indifférent'),
+    date: draft.date,
+    time: draft.time,
+    duration: service?.duration ?? 45,
+    totalPrice: service?.price ?? 0,
+    status: 'confirmed',
+    customerName: customer.name,
+    customerPhone: customer.phone,
+    customerEmail: customer.email,
+    createdAt: new Date().toISOString(),
+  }
+
+  mockCustomerBookings.unshift(booking)
+  mockManagerBookings.unshift(booking)
+  return booking
+}
+
+export const MOCK_OTP = '123456'

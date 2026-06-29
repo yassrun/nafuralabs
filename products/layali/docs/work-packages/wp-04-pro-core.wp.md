@@ -5,6 +5,7 @@ appId: layali
 wpId: wp-04-pro-core
 title: Pro core — dashboard, venue settings, events, tables
 status: stable
+phase: P3
 wave: 4
 dependsOn: [wp-01-platform-skeleton]
 filesAllowed:

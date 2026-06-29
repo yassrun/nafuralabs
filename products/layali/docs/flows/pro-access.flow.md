@@ -22,6 +22,8 @@ apiRefs:
 
 # Acces back-office pro / hote
 
+> **P1 walkthrough :** suivre les étapes UI ci-dessous ; données = [fixtures.md](../fixtures.md). Colonnes « Mock API » = référence **P3** uniquement.
+
 ## Objectif
 
 Permettre a un utilisateur pro (OWNER, ADMIN, HOST, BAR_MANAGER) d'acceder a la bonne surface metier du tenant courant, ou de recevoir un ecran de blocage comprehensible si l'acces n'est pas autorise.

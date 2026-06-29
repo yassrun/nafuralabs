@@ -1,10 +1,13 @@
----
+﻿---
 specVersion: 1
 kind: screen
 appId: beauty
 screenId: login
 name: Connexion
 status: stable
+phase: P1
+p1MobileId: login
+p1Impl: mock
 route: /login
 layout: public-layout
 zone: account
@@ -21,6 +24,17 @@ abstractions:
 ---
 
 # Connexion
+
+## P1 - Client Walkthrough
+
+| Champ | Valeur |
+|-------|--------|
+| Mobile `Screen` | `â€”` |
+| Impl | none |
+| Fixtures | [fixtures.md](../../fixtures.md) |
+| Cartographie | [mobile-map.md](../../mobile-map.md) |
+
+> En P1 : **ne pas** utiliser `apiRefs` / composants `@platform/` comme brief agent - mock local uniquement. *(wp-p1-01)*
 
 ## Intent
 

@@ -25,6 +25,8 @@ apiRefs:
 
 # Réservation d'une table (client)
 
+> **P1 walkthrough :** suivre les étapes UI ci-dessous ; données = [fixtures.md](../fixtures.md). Colonnes « Mock API » = référence **P3** uniquement.
+
 ## Objectif
 
 Le client identifie une table dans un venue (avec ou sans event lié), réserve un accès de type `TABLE`, paie l'acompte si requis, reçoit son QR de confirmation par email/SMS et retrouve la réservation dans `Mes réservations`.

@@ -1,10 +1,13 @@
----
+﻿---
 specVersion: 1
 kind: screen
 appId: beauty
 screenId: customer-booking-detail
 name: Détail d'un RDV
 status: stable
+phase: P1
+p1MobileId: booking-detail
+p1Impl: mock
 route: /me/bookings/:bookingId
 layout: account-layout
 zone: account
@@ -22,6 +25,17 @@ abstractions:
 ---
 
 # Détail d'un RDV
+
+## P1 - Client Walkthrough
+
+| Champ | Valeur |
+|-------|--------|
+| Mobile `Screen` | `booking-detail` |
+| Impl | mock |
+| Fixtures | [fixtures.md](../../fixtures.md) |
+| Cartographie | [mobile-map.md](../../mobile-map.md) |
+
+> En P1 : **ne pas** utiliser `apiRefs` / composants `@platform/` comme brief agent - mock local uniquement.
 
 ## Intent
 

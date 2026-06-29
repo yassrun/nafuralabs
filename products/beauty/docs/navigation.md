@@ -138,3 +138,24 @@ Guard plateforme attendu : `:platform:core:authorization` expose un `RoleGuard` 
 - Domaine admin séparé (`admin.beauty.nafura.ma`) vs chemin `/admin` ? Idem, V1 = chemin protégé.
 - Deep-linking d'une fiche staff (`/salons/:slug/staff/:staffId`) : intéressant pour le SEO mais hors scope V1. À reconsidérer V2.
 - Slug salon : généré à l'onboarding ou choisi par le pro ? Hypothèse V1 : généré (kebab-case du nom + suffixe ville si collision).
+
+## 9. Prototype mobile P1 (état interne)
+
+Le Client Walkthrough (`products/beauty/mobile/`) utilise la navigation par **état** (`Screen` dans `App.tsx`), sans URLs hash.
+
+**Cartographie officielle :** [mobile-map.md](mobile-map.md)
+
+Points clés :
+
+| Spec web (`pro-*`) | Code mobile (`manager-*`) |
+|--------------------|---------------------------|
+| pro-dashboard | `manager-dashboard` |
+| pro-bookings-list | `manager-bookings-list` |
+| pro-booking-detail | `manager-booking-detail` |
+| pro-services | `manager-services` |
+| pro-staff | `manager-staff` |
+| pro-reviews | `manager-reviews` |
+
+Écrans spec **non branchés** en P1 : `login`, `register`, `booking-payment`, `salon-search` (recherche dans `home`), `pro-agenda`, `pro-customers`, `pro-loyalty`, `pro-settings`, admin (3).
+
+Écran mobile-only : `entry` (choix Client / Manager).

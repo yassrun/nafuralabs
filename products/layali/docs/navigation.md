@@ -161,3 +161,18 @@ Les libellés sont i18n (`layali.nav.breadcrumb.*`).
 - Faut-il un domaine dédié `pro.layali.ma` global avec sélecteur de venue, ou strictement un sous-domaine par venue ? Décision provisoire : sous-domaine par venue pour V1.
 - Le `/admin` doit-il être strictement isolé sur `admin.layali.ma` ou accessible via `layali.ma/admin` ? Décision provisoire : sous-domaine dédié pour V1.
 - SEO du venue-detail : besoin de SSR dès V1 ? Décision provisoire : non, pre-rendering ciblé suffira.
+
+## 11. Prototype mobile P1 (hash routing)
+
+Le Client Walkthrough (`products/layali/mobile/`) n’implémente **pas** toutes les routes web §3–5. Il utilise un hash routing partiel et des écrans fusionnés.
+
+**Cartographie officielle :** [mobile-map.md](mobile-map.md)
+
+| Type | Exemples |
+|------|----------|
+| Hash synchronisé | `#/venues`, `#/events`, `#/login`, `#/pro`, `#/me/accesses` |
+| État interne seulement | `booking-create`, `ticket-buy`, `pro-access-requests` |
+| Mobile-only | `entry`, `pro-login`, `my-accesses` |
+| Booking unifié | 9 specs `screens/booking/*` → 3 `Screen` ids — voir [screens/booking/README.md](screens/booking/README.md) |
+
+En P1, `my-accesses` regroupe partiellement `customer-bookings` + `customer-tickets`. Le web gardera les routes séparées `/me/bookings` et `/me/tickets`.

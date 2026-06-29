@@ -3,7 +3,8 @@ specVersion: 1
 kind: api
 appId: beauty
 resource: bookings
-status: stable
+status: draft
+phase: P3
 basePath: /api/v1/bookings
 auth: required
 rateLimit: default

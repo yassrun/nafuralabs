@@ -5,6 +5,7 @@ appId: layali
 wpId: wp-03-booking-customer
 title: Booking customer — table booking, ticket purchase, account
 status: stable
+phase: P3
 wave: 3
 dependsOn: [wp-01-platform-skeleton, wp-02-discovery]
 filesAllowed:

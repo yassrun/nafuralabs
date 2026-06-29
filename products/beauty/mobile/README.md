@@ -1,146 +1,56 @@
-# Beauty Mobile App
+# Beauty — Client Walkthrough (mobile)
 
-Application mobile de réservation de services de beauté inspirée de la structure Layali.
+**Phase P1** — application mobile navigable avec fixtures locales.  
+Pas une app de production : aucune API HTTP réelle.
 
-## Features
+Specs : [../docs/phases.md](../docs/phases.md) · Progress : [../docs/00-PROGRESS.md](../docs/00-PROGRESS.md) · Données : [../docs/fixtures.md](../docs/fixtures.md)
 
-### Pour les Clients 👩‍🦰
-- ✅ Découverte de salons de beauté
-- ✅ Visualisation des services et tarifs
-- ✅ Réservation en ligne avec sélection de créneau
-- ✅ Historique des réservations
-- ✅ Système de fidélité (points)
-- ✅ Avis clients
+## Parcours actuellement jouables
 
-### Pour les Propriétaires 💼
-- ✅ Connexion manager
-- ✅ Dashboard avec statistiques
-- ✅ Gestion des réservations
-- ✅ Gestion du staff/équipe
-- ✅ Gestion des services
-- ✅ Gestion des avis clients
+**Client :** entry → home → salon-detail → booking (créneau) → confirm · bookings-list · profil  
 
-## Structure du Projet
+**Pro :** manager-login → dashboard → bookings · staff · services · reviews  
 
-```
-products/layali/mobile/
-├── src/
-│   ├── App.tsx              # Composant principal avec navigation
-│   ├── App.css              # Styles de l'app
-│   ├── ManagerScreens.tsx   # Écrans manager/propriétaire
-│   ├── prototypeData.ts     # Données mockées
-│   ├── main.tsx             # Point d'entrée React
-│   ├── index.css            # Styles globaux
-│   ├── brand/
-│   │   └── tokens.css       # Variables de design (couleurs, typo)
-│   ├── assets/              # Images et ressources
-│   └── public/              # Fichiers statiques
-├── package.json             # Dépendances et scripts
-├── vite.config.ts           # Configuration Vite
-├── tsconfig.json            # Configuration TypeScript
-└── index.html               # Point d'entrée HTML
-```
-
-## Dépendances
-
-- **React 19** - UI Framework
-- **Ionic React 8** - Composants mobiles
-- **React Router 7** - Navigation
-- **TypeScript 6** - Type safety
-- **Vite 8** - Build tool
-- **ESLint 10** - Linting
+**Manquant P1 :** login/register · payment · loyalty · agenda pro · clients · admin — voir WP `wp-p1-*`
 
 ## Installation
 
 ```bash
 cd products/beauty/mobile
 npm install
-```
-
-## Démarrage
-
-### Développement
-```bash
 npm run dev
 ```
-L'app s'ouvre sur `http://localhost:5173`
 
-### Build Production
-```bash
-npm run build
+`http://localhost:5173` · `npm run build` · `npm run lint`
+
+## Structure
+
+```
+mobile/
+├── src/
+│   ├── App.tsx              # navigation walkthrough
+│   ├── ManagerScreens.tsx   # écrans pro
+│   ├── prototypeData.ts     # fixtures P1 (→ mockFixtures.ts en P2)
+│   └── brand/tokens.css
+├── package.json
+└── vite.config.ts
 ```
 
-### Preview
-```bash
-npm run preview
-```
+## Auth mock (P1 cible)
 
-### Lint
-```bash
-npm run lint
-```
+| Rôle | Accès |
+|------|--------|
+| Client | walkthrough ; OTP mock `123456` après wp-p1-01 |
+| Manager | `fatima@silhouettebeauty.ma` / any password |
 
-## Données Mockées
+## Ajouter un écran walkthrough
 
-Les données mockées incluent:
-- **Salons**: 3 salons avec services, staff, horaires
-- **Services**: Coiffure, Esthétique, Ongles, Hammam, Barbier
-- **Réservations**: Historique de réservations clients
-- **Avis**: Avis clients sur les salons
-- **Profils**: Client et propriétaire de salon
+1. Spec screen dans `../docs/screens/` si nouveau
+2. Fixture dans `prototypeData.ts` si besoin
+3. Composant + entrée dans `App.tsx` `Screen` union + `switch`
+4. Mettre à jour `../docs/00-PROGRESS.md`
 
-Tous les tests se font avec des données stockées dans `src/prototypeData.ts`.
+## Après P1
 
-## Authentification
-
-### Client
-- Pas d'authentification requise (mode démo)
-- Accès direct aux fonctionnalités
-
-### Manager/Propriétaire
-- Email: `fatima@silhouettebeauty.ma`
-- Mot de passe: `demo123` (n'importe quel mot de passe accepté)
-
-## Personnalisation
-
-### Couleurs et Thème
-Modifiez `src/brand/tokens.css` pour ajuster:
-- Couleurs primaires/secondaires
-- Typo
-- Espacements
-
-### Ajouter des Salons
-1. Éditez `src/prototypeData.ts`
-2. Ajoutez un nouvel objet à `allSalons`
-3. Les services et staff sont liés aux salons
-
-### Ajouter des Réservations
-1. Modifiez `mockManagerBookings` ou `mockCustomerBookings` dans `prototypeData.ts`
-2. Les dates doivent être au format ISO (`YYYY-MM-DD`)
-
-## Prochaines Étapes
-
-- Intégration backend API
-- Authentification réelle (JWT)
-- Push notifications (SMS/Email)
-- Géolocalisation et filtrage par distance
-- Paiement en ligne
-- Synchronisation en temps réel
-
-## Développement
-
-### Architecture
-- **App.tsx** gère la navigation d'état
-- **ManagerScreens.tsx** exporte les composants manager
-- **prototypeData.ts** centralise les types et données mockées
-- Les écrans sont des composants React purs
-
-### Ajouter une Nouvelle Fonctionnalité
-1. Définir le type dans `prototypeData.ts`
-2. Créer le composant Screen
-3. Ajouter la navigation dans `App.tsx`
-4. Ajouter les données mockées
-
-## License
-
-Proprietary - © DIVER Booking Platform
+- **P2** : web Angular + mock server (wp-01)
+- **P3** : backend + `api/*.md` — remplacer fixtures par HTTP

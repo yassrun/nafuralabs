@@ -1,10 +1,13 @@
----
+﻿---
 specVersion: 1
 kind: screen
 appId: beauty
 screenId: booking-create
 name: Réserver un RDV
 status: stable
+phase: P1
+p1MobileId: booking-select-time
+p1Impl: mock
 route: /salons/:slug/book
 layout: booking-layout
 zone: booking
@@ -26,6 +29,17 @@ abstractions:
 ---
 
 # Réserver un RDV
+
+## P1 - Client Walkthrough
+
+| Champ | Valeur |
+|-------|--------|
+| Mobile `Screen` | `booking-select-time` |
+| Impl | partial |
+| Fixtures | [fixtures.md](../../fixtures.md) |
+| Cartographie | [mobile-map.md](../../mobile-map.md) |
+
+> En P1 : **ne pas** utiliser `apiRefs` / composants `@platform/` comme brief agent - mock local uniquement. *(staff/paiement incomplets)*
 
 ## Intent
 

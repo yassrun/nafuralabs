@@ -1,10 +1,13 @@
----
+﻿---
 specVersion: 1
 kind: screen
 appId: beauty
 screenId: customer-profile
 name: Mon profil
 status: stable
+phase: P1
+p1MobileId: customer-profile
+p1Impl: mock
 route: /me
 layout: account-layout
 zone: account
@@ -21,6 +24,17 @@ abstractions:
 ---
 
 # Mon profil
+
+## P1 - Client Walkthrough
+
+| Champ | Valeur |
+|-------|--------|
+| Mobile `Screen` | `customer-profile` |
+| Impl | mock |
+| Fixtures | [fixtures.md](../../fixtures.md) |
+| Cartographie | [mobile-map.md](../../mobile-map.md) |
+
+> En P1 : **ne pas** utiliser `apiRefs` / composants `@platform/` comme brief agent - mock local uniquement.
 
 ## Intent
 

@@ -1,10 +1,13 @@
----
+﻿---
 specVersion: 1
 kind: screen
 appId: layali
 screenId: customer-bookings
 name: Mes réservations
 status: stable
+phase: P1
+p1MobileId: bookings-list
+p1Impl: mock
 route: /me/bookings
 layout: account-shell
 zone: account
@@ -25,6 +28,18 @@ abstractions:
 ---
 
 # Mes réservations
+
+## P1 - Client Walkthrough
+
+| Champ | Valeur |
+|-------|--------|
+| Mobile `Screen` | `bookings-list` |
+| Impl | mock |
+| Fixtures | [fixtures.md](../../fixtures.md) |
+| Cartographie | [mobile-map.md](../../mobile-map.md) |
+
+> En P1 : **ne pas** utiliser `apiRefs` / composants `@platform/` comme brief agent - mock local uniquement.
+
 
 ## Intent
 

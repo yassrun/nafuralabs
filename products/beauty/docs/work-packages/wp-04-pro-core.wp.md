@@ -5,6 +5,7 @@ appId: beauty
 wpId: wp-04-pro-core
 title: Pro core — dashboard, agenda, bookings liste + détail
 status: stable
+phase: P3
 wave: 4
 dependsOn: [wp-01-platform-skeleton, wp-03-booking-customer]
 filesAllowed:

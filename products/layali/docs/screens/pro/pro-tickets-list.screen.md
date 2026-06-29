@@ -1,10 +1,13 @@
----
+﻿---
 specVersion: 1
 kind: screen
 appId: layali
 screenId: pro-tickets-list
 name: Tickets (pro)
 status: stable
+phase: P1
+p1MobileId: pro-tickets-list
+p1Impl: mock
 route: /pro/tickets
 layout: pro-shell
 zone: pro
@@ -30,6 +33,18 @@ abstractions:
 ---
 
 # Tickets (pro)
+
+## P1 - Client Walkthrough
+
+| Champ | Valeur |
+|-------|--------|
+| Mobile `Screen` | `pro-tickets-list` |
+| Impl | mock |
+| Fixtures | [fixtures.md](../../fixtures.md) |
+| Cartographie | [mobile-map.md](../../mobile-map.md) |
+
+> En P1 : **ne pas** utiliser `apiRefs` / composants `@platform/` comme brief agent - mock local uniquement.
+
 
 ## Intent
 

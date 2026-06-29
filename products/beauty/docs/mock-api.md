@@ -2,11 +2,14 @@
 specVersion: 1
 kind: mock-api
 appId: beauty
-status: stable
+status: draft
+phase: P2
 basePath: /api/v1
 ---
 
 # Beauty — Mock API conventions
+
+> **Phase P2/P3** — hors Client Walkthrough (P1). En P1, voir [fixtures.md](fixtures.md) et `mobile/src/prototypeData.ts`.
 
 ## 1. Objectif
 

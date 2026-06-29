@@ -1,10 +1,13 @@
----
+﻿---
 specVersion: 1
 kind: screen
 appId: layali
 screenId: login
 name: Connexion
 status: stable
+phase: P1
+p1MobileId: login
+p1Impl: mock
 route: /login?audience=customer|manager&returnTo=<encoded>
 layout: public-shell
 zone: account
@@ -25,6 +28,18 @@ abstractions:
 ---
 
 # Connexion
+
+## P1 - Client Walkthrough
+
+| Champ | Valeur |
+|-------|--------|
+| Mobile `Screen` | `login` |
+| Impl | mock |
+| Fixtures | [fixtures.md](../../fixtures.md) |
+| Cartographie | [mobile-map.md](../../mobile-map.md) |
+
+> En P1 : **ne pas** utiliser `apiRefs` / composants `@platform/` comme brief agent - mock local uniquement. *(#/login)*
+
 
 ## Intent
 

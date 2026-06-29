@@ -1,48 +1,40 @@
 # Layali Mobile Wireframes
 
-**Layali is specialized in nightlife and social dining** with multiple access modes depending on the venue and the night.
+Prototype Ionic React — phase **P1 Client Walkthrough**.
 
-The mobile prototype now covers:
-- table booking
-- guest list / entry request
-- counter / bar spot booking
-- ticketed special nights
-- birthday as a first-class booking occasion
-- fallback door logic based on QR or phone/name lookup
+Couverture : discovery, booking multi-modes (table / guest list / comptoir), ticketing, auth, compte, **console pro mobile** (dashboard, réservations, porte, tables, events).
 
-## Perimetre inclus
+Cartographie spec ↔ code : [../docs/mobile-map.md](../docs/mobile-map.md).
+
+## Périmètre inclus
 
 ### Discovery
-- home
-- venue-search
-- venue-detail
-- event-list
-- event-detail
+- home, venue-search, venue-detail, event-list, event-detail
 
 ### Booking / access
-- table-booking-create
-- table-booking-payment
-- table-booking-confirm
-- guest-list / counter represented as booking variants in the same mobile flow family
-- ticket-buy
-- ticket-payment
-- ticket-confirm
+- Modes TABLE / GUEST_LIST / COUNTER via écrans unifiés `booking-create` → `booking-payment` → `booking-confirm`
+- Specs web détaillées : [../docs/screens/booking/README.md](../docs/screens/booking/README.md)
+- ticket-buy, ticket-payment, ticket-confirm
 
 ### Auth + Account
-- login
-- register
-- customer-bookings
-- booking-detail
-- customer-profile
+- entry (choix Client / Manager), login, register, pro-login
+- customer-bookings, booking-detail, customer-profile
+- my-accesses (bookings + tickets fusionnés en P1)
+
+### Pro mobile (mock)
+- pro-dashboard, pro-access-requests, pro-bookings-list, pro-door-checkin, pro-tables, pro-events-list, pro-event-edit
+
+### Hors scope wireframes (specs existent, code à faire)
+- admin stub (3 écrans)
+- pro-no-access, pro-access-request, pro-venue-settings, pro-tickets-list, pro-reviews
+- écrans review guest list / comptoir dédiés
 
 ## Fichiers
-- discovery wireframes: ./discovery.wireframe.md
-- booking and ticket wireframes: ./booking-ticket.wireframe.md
-- auth + account wireframes: ./account-auth.wireframe.md
+- discovery : `./discovery.wireframe.md`
+- booking et ticket : `./booking-ticket.wireframe.md`
+- auth + account : `./account-auth.wireframe.md`
 
-## Notes de travail
-- Niveau: low-fidelity (structure, hierarchy, CTA, states)
-- Cible: mobile first
-- Source: aispecs/apps/layali + docs/briefs/layali-v1.md
-- Hors scope ici: ecrans pro/admin web, door check-in fullscreen pro
-
+## Notes
+- Niveau : low-fidelity (structure, CTA, états)
+- Cible : mobile first
+- Données : `src/prototypeData.ts`

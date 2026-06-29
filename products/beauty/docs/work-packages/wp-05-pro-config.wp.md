@@ -5,6 +5,7 @@ appId: beauty
 wpId: wp-05-pro-config
 title: Pro config — services, staff, customers, reviews, loyalty, settings
 status: stable
+phase: P3
 wave: 5
 dependsOn: [wp-01-platform-skeleton, wp-04-pro-core]
 filesAllowed:

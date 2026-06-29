@@ -3,7 +3,8 @@ specVersion: 1
 kind: api
 appId: layali
 resource: tickets
-status: stable
+status: draft
+phase: P3
 basePath: /api/v1/tickets
 auth: required
 rateLimit: default

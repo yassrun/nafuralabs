@@ -2,7 +2,13 @@ import { useMemo, useState } from 'react'
 import { IonButton, IonContent } from '@ionic/react'
 import type { ManagerSession } from './App'
 import type { Booking, Salon, Service, ServiceCategory } from './prototypeData'
-import { beautyServiceTemplates, mockSalonReviews, serviceLabels } from './prototypeData'
+import {
+  beautyServiceTemplates,
+  mockAgendaSlots,
+  mockManagerCustomers,
+  mockSalonReviews,
+  serviceLabels,
+} from './prototypeData'
 
 /* Manager Login Screen */
 export function ManagerLoginScreen({
@@ -88,16 +94,24 @@ export function ManagerLoginScreen({
 export function ManagerDashboardScreen({
   session,
   onViewBookings,
+  onViewAgenda,
   onViewStaff,
   onViewServices,
+  onViewCustomers,
+  onViewLoyalty,
   onViewReviews,
+  onViewSettings,
   onLogout,
 }: {
   session?: ManagerSession
   onViewBookings: () => void
+  onViewAgenda: () => void
   onViewStaff: () => void
   onViewServices: () => void
+  onViewCustomers: () => void
+  onViewLoyalty: () => void
   onViewReviews: () => void
+  onViewSettings: () => void
   onLogout: () => void
 }) {
   return (
@@ -135,10 +149,14 @@ export function ManagerDashboardScreen({
 
         {/* Dashboard Menu */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '24px' }}>
-          <DashboardButton label="📅 Réservations" onClick={onViewBookings} />
+          <DashboardButton label="📅 Agenda" onClick={onViewAgenda} />
+          <DashboardButton label="📋 Réservations" onClick={onViewBookings} />
           <DashboardButton label="👥 Staff" onClick={onViewStaff} />
           <DashboardButton label="💇 Services" onClick={onViewServices} />
+          <DashboardButton label="🧑 Clients" onClick={onViewCustomers} />
+          <DashboardButton label="🎁 Fidélité" onClick={onViewLoyalty} />
           <DashboardButton label="⭐ Avis" onClick={onViewReviews} />
+          <DashboardButton label="⚙️ Paramètres" onClick={onViewSettings} />
         </div>
 
         <IonButton expand="block" fill="outline" onClick={onLogout}>
@@ -684,6 +702,124 @@ export function ManagerReviewsScreen({
             </div>
           ))
         )}
+      </div>
+    </IonContent>
+  )
+}
+
+export function ManagerAgendaScreen({ onBack }: { onBack: () => void }) {
+  const today = new Date().toISOString().split('T')[0]
+
+  return (
+    <IonContent>
+      <div style={{ padding: '16px' }}>
+        <IonButton expand="block" fill="clear" onClick={onBack}>
+          ← Tableau de bord
+        </IonButton>
+        <h2>Agenda du jour</h2>
+        <p style={{ opacity: 0.6, marginTop: 0 }}>{today}</p>
+        {mockAgendaSlots.map((slot) => (
+          <div
+            key={slot.id}
+            style={{
+              padding: '14px',
+              border: '1px solid var(--ion-border-color)',
+              borderRadius: '8px',
+              marginBottom: '10px',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+              <strong>{slot.time}</strong>
+              <span style={{ fontSize: '12px', opacity: 0.7 }}>{slot.status}</span>
+            </div>
+            <p style={{ margin: '0 0 4px 0' }}>{slot.customerName} — {slot.serviceName}</p>
+            <p style={{ margin: 0, fontSize: '12px', opacity: 0.6 }}>avec {slot.staffName}</p>
+          </div>
+        ))}
+      </div>
+    </IonContent>
+  )
+}
+
+export function ManagerCustomersScreen({ onBack }: { onBack: () => void }) {
+  return (
+    <IonContent>
+      <div style={{ padding: '16px' }}>
+        <IonButton expand="block" fill="clear" onClick={onBack}>
+          ← Tableau de bord
+        </IonButton>
+        <h2>Clients</h2>
+        {mockManagerCustomers.map((customer) => (
+          <div
+            key={customer.id}
+            style={{
+              padding: '14px',
+              border: '1px solid var(--ion-border-color)',
+              borderRadius: '8px',
+              marginBottom: '10px',
+            }}
+          >
+            <strong>{customer.name}</strong>
+            <p style={{ margin: '4px 0', fontSize: '13px' }}>{customer.phone}</p>
+            <p style={{ margin: 0, fontSize: '12px', opacity: 0.6 }}>
+              {customer.visits} visites · {customer.loyaltyPoints} pts · dernière visite {customer.lastVisit ?? '—'}
+            </p>
+          </div>
+        ))}
+      </div>
+    </IonContent>
+  )
+}
+
+export function ManagerLoyaltyScreen({ onBack }: { onBack: () => void }) {
+  return (
+    <IonContent>
+      <div style={{ padding: '16px' }}>
+        <IonButton expand="block" fill="clear" onClick={onBack}>
+          ← Tableau de bord
+        </IonButton>
+        <h2>Programme fidélité</h2>
+        <div style={{ background: 'var(--ion-color-step-100)', padding: '16px', borderRadius: '8px', marginBottom: '16px' }}>
+          <p style={{ margin: 0, fontSize: '12px', opacity: 0.6 }}>Clients actifs</p>
+          <p style={{ margin: 0, fontSize: '28px', fontWeight: 700 }}>{mockManagerCustomers.length}</p>
+        </div>
+        <p style={{ fontSize: '14px', opacity: 0.7 }}>1 DH dépensé = 1 point · seuil récompense : 500 pts</p>
+      </div>
+    </IonContent>
+  )
+}
+
+export function ManagerSettingsScreen({
+  session,
+  onBack,
+}: {
+  session?: ManagerSession
+  onBack: () => void
+}) {
+  return (
+    <IonContent>
+      <div style={{ padding: '16px' }}>
+        <IonButton expand="block" fill="clear" onClick={onBack}>
+          ← Tableau de bord
+        </IonButton>
+        <h2>Paramètres salon</h2>
+        <div style={{ background: 'var(--ion-color-step-100)', padding: '16px', borderRadius: '8px' }}>
+          <p style={{ margin: '0 0 8px 0', fontSize: '12px', opacity: 0.6 }}>Salon</p>
+          <p style={{ margin: '0 0 16px 0', fontWeight: 500 }}>{session?.salonName}</p>
+          <p style={{ margin: '0 0 8px 0', fontSize: '12px', opacity: 0.6 }}>Responsable</p>
+          <p style={{ margin: 0, fontWeight: 500 }}>{session?.name} ({session?.role})</p>
+        </div>
+        <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <button type="button" style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--ion-border-color)' }}>
+            Horaires d&apos;ouverture (mock)
+          </button>
+          <button type="button" style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--ion-border-color)' }}>
+            Notifications SMS (mock)
+          </button>
+          <button type="button" style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--ion-border-color)' }}>
+            Paiement en ligne (mock)
+          </button>
+        </div>
       </div>
     </IonContent>
   )

@@ -5,6 +5,7 @@ appId: beauty
 wpId: wp-07-mobile-feed-ux-conversion
 title: Mobile feed UX — discovery first + conversion booking
 status: draft
+phase: P1
 wave: 4
 dependsOn: [wp-03-booking-customer]
 filesAllowed:

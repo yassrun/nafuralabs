@@ -1,10 +1,13 @@
----
+﻿---
 specVersion: 1
 kind: screen
 appId: beauty
 screenId: salon-detail
 name: Fiche salon
 status: stable
+phase: P1
+p1MobileId: salon-detail
+p1Impl: mock
 route: /salons/:slug
 layout: public-layout
 zone: discovery
@@ -26,6 +29,17 @@ abstractions:
 ---
 
 # Fiche salon
+
+## P1 - Client Walkthrough
+
+| Champ | Valeur |
+|-------|--------|
+| Mobile `Screen` | `salon-detail` |
+| Impl | mock |
+| Fixtures | [fixtures.md](../../fixtures.md) |
+| Cartographie | [mobile-map.md](../../mobile-map.md) |
+
+> En P1 : **ne pas** utiliser `apiRefs` / composants `@platform/` comme brief agent - mock local uniquement.
 
 ## Intent
 

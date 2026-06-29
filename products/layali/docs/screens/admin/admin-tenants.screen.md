@@ -1,10 +1,13 @@
----
+﻿---
 specVersion: 1
 kind: screen
 appId: layali
 screenId: admin-tenants
 name: Tenants (admin Nafura)
 status: stable
+phase: P1
+p1MobileId: admin-tenants
+p1Impl: mock
 route: /admin/tenants
 layout: admin-shell
 zone: admin
@@ -25,6 +28,18 @@ abstractions:
 ---
 
 # Tenants (admin Nafura)
+
+## P1 - Client Walkthrough
+
+| Champ | Valeur |
+|-------|--------|
+| Mobile `Screen` | `admin-tenants` |
+| Impl | mock |
+| Fixtures | [fixtures.md](../../fixtures.md) |
+| Cartographie | [mobile-map.md](../../mobile-map.md) |
+
+> En P1 : **ne pas** utiliser `apiRefs` / composants `@platform/` comme brief agent - mock local uniquement.
+
 
 ## Intent
 

@@ -1,10 +1,13 @@
----
+﻿---
 specVersion: 1
 kind: screen
 appId: beauty
 screenId: pro-agenda
 name: Agenda (pro)
 status: stable
+phase: P1
+p1MobileId: manager-agenda
+p1Impl: mock
 route: /pro/agenda
 layout: pro-layout
 zone: pro
@@ -21,6 +24,17 @@ abstractions:
 ---
 
 # Agenda (pro)
+
+## P1 - Client Walkthrough
+
+| Champ | Valeur |
+|-------|--------|
+| Mobile `Screen` | `â€”` |
+| Impl | none |
+| Fixtures | [fixtures.md](../../fixtures.md) |
+| Cartographie | [mobile-map.md](../../mobile-map.md) |
+
+> En P1 : **ne pas** utiliser `apiRefs` / composants `@platform/` comme brief agent - mock local uniquement. *(wp-p1-03 stub)*
 
 ## Intent
 

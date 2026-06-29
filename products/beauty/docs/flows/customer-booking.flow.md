@@ -27,6 +27,8 @@ apiRefs:
 
 # Réservation d'un RDV (client)
 
+> **P1 walkthrough :** suivre les étapes UI ci-dessous ; données = [fixtures.md](../fixtures.md). Colonnes « Mock API » = référence **P3** uniquement.
+
 ## Objectif
 
 Le client choisit un salon, un service, un staff, un créneau, paie (online ou cash) et reçoit la confirmation par SMS + email. Le RDV apparaît dans `/me/bookings`.

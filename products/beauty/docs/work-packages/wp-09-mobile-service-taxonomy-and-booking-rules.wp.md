@@ -5,6 +5,7 @@ appId: beauty
 wpId: wp-09-mobile-service-taxonomy-and-booking-rules
 title: Mobile services model — beauty taxonomy + booking minimum rules
 status: draft
+phase: P1
 wave: 4
 dependsOn: [wp-03-booking-customer]
 filesAllowed:

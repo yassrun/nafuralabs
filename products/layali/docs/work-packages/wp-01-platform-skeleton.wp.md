@@ -5,6 +5,7 @@ appId: layali
 wpId: wp-01-platform-skeleton
 title: Squelette web + auth + i18n + tenant resolver + abstractions manquantes
 status: stable
+phase: P2
 wave: 1
 dependsOn: []
 filesAllowed:
@@ -34,6 +35,8 @@ abstractionsMissing:
 ---
 
 # Squelette web + auth + i18n + tenant resolver + abstractions manquantes
+
+> **Phase P2** — après gate P1 ([phases.md](../phases.md)). Ne pas démarrer tant que le Client Walkthrough mobile n’est pas ✅.
 
 ## Scope
 

@@ -1,10 +1,13 @@
----
+﻿---
 specVersion: 1
 kind: screen
 appId: layali
 screenId: pro-access-requests
 name: Acces equipe
 status: review
+phase: P1
+p1MobileId: pro-access-requests
+p1Impl: mock
 route: /pro/access-requests
 layout: pro-shell
 zone: pro
@@ -30,6 +33,18 @@ abstractions:
 ---
 
 # Acces equipe
+
+## P1 - Client Walkthrough
+
+| Champ | Valeur |
+|-------|--------|
+| Mobile `Screen` | `pro-access-requests` |
+| Impl | mock |
+| Fixtures | [fixtures.md](../../fixtures.md) |
+| Cartographie | [mobile-map.md](../../mobile-map.md) |
+
+> En P1 : **ne pas** utiliser `apiRefs` / composants `@platform/` comme brief agent - mock local uniquement.
+
 
 ## Intent
 

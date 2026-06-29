@@ -1,27 +1,36 @@
 # Layali Mobile App
 
-Prototype Ionic React prioritaire pour Layali mobile.
+Prototype Ionic React — **phase P1 Client Walkthrough** (parcours navigables + fixtures locales).
 
-**Layali specializes in nightlife and dining only** — table reservations at venues (clubs, bars, rooftops, restaurants). No ticketing (dedicated to TicketMa in Morocco).
+Layali couvre la nightlife et la restauration au Maroc : discovery de venues, réservation table / guest list / comptoir, achat de billets, compte client et console pro mobile mock.
 
 ## Ce qui est inclus
 
-- Une version mobile client moquée de Layali (home feed, venue discovery, table booking)
-- 13 wireframe screens across discovery, booking, auth, and account flows
-- Des données centralisées dans `src/prototypeData.ts` (mockées)
-- Stack: Vite 8 + React 19 + TypeScript + Ionic React
+- App mobile client + pro moquée (hash routing `#/venues`, `#/events`, `#/pro`, …)
+- Discovery, booking multi-modes, ticketing, auth, profil, opérations pro (door, tables, events)
+- Données centralisées dans `src/prototypeData.ts`
+- Stack : Vite 8 + React 19 + TypeScript + Ionic React
 
-## Scope
+## Scope P1
 
-**Inclus**: 
-- Venue discovery (rooftops, clubs, bars, restaurants)
-- Table booking and reservations
-- Authentication & account management
-- Real-time activity feed
+**Inclus (walkthrough mock)** :
 
-**Hors scope**:
-- Generic ticketing (TicketMa covers Morocco)
-- Pro/owner console (reserved for `layali/web`)
+- Venue & event discovery
+- Réservations TABLE / GUEST_LIST / COUNTER (écran unifié `booking-create`)
+- Achat billet événement
+- Login / register / profil / historique bookings
+- Console pro mobile (dashboard, réservations, porte, plan de salle, events)
+
+**À compléter (voir [docs/00-PROGRESS.md](../docs/00-PROGRESS.md))** :
+
+- Écrans review guest list / comptoir dédiés
+- `customer-tickets`, membership pro (no-access, access-request)
+- Pro : venue settings, tickets list, reviews, admin stub
+
+**Hors P1** :
+
+- API HTTP réelle et web Angular pro (`products/layali/web/`) — P2+
+- Intégration venue-catalog partagé — P3 (wp-07)
 
 ## Commandes
 
@@ -33,5 +42,4 @@ npm run build
 
 ## Prochaine étape
 
-Remplacer les fixtures de `src/prototypeData.ts` par des APIs réelles. Backend et web pro : `products/layali/backend/`, `products/layali/web/` (à créer).
-
+Exécuter les work packages P1 : [docs/work-packages/](../docs/work-packages/) (`wp-p1-01` … `wp-p1-04`). Backend et web pro : `products/layali/backend/`, `products/layali/web/` (à créer en P2).

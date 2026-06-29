@@ -16,6 +16,8 @@ apiRefs:
 
 # Revue des demandes d'acces equipe
 
+> **P1 walkthrough :** suivre les étapes UI ci-dessous ; données = [fixtures.md](../fixtures.md). Colonnes « Mock API » = référence **P3** uniquement.
+
 ## Objectif
 
 Permettre au proprietaire d'un venue de consulter, approuver ou rejeter les demandes d'acces pro (`HOST`, `ADMIN`, `BAR_MANAGER`) rattachees a son tenant.

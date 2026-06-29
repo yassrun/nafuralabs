@@ -3,7 +3,8 @@ specVersion: 1
 kind: api
 appId: beauty
 resource: salons
-status: stable
+status: draft
+phase: P3
 basePath: /api/v1/salons
 auth: optional
 rateLimit: default

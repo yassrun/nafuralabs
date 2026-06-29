@@ -1,10 +1,13 @@
----
+﻿---
 specVersion: 1
 kind: screen
 appId: layali
 screenId: guest-list-booking-confirm
 name: Confirmation guest list
 status: review
+phase: P1
+p1MobileId: booking-confirm
+p1Impl: mock
 route: /venues/:venueSlug/guest-list/confirm/:bookingId
 layout: public-shell
 zone: booking
@@ -24,6 +27,18 @@ abstractions:
 ---
 
 # Confirmation guest list
+
+## P1 - Client Walkthrough
+
+| Champ | Valeur |
+|-------|--------|
+| Mobile `Screen` | `booking-confirm` |
+| Impl | mock |
+| Fixtures | [fixtures.md](../../fixtures.md) |
+| Cartographie | [mobile-map.md](../../mobile-map.md) |
+
+> En P1 : **ne pas** utiliser `apiRefs` / composants `@platform/` comme brief agent - mock local uniquement.
+
 
 ## Intent
 

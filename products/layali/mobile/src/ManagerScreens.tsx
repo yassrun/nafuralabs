@@ -1,10 +1,14 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { IonButton } from '@ionic/react'
 import type { ManagerSession, Screen } from './App'
 import {
   accessModeLabels,
   mockProTables,
   mockProEvents,
+  mockMembershipAccessRequests,
+  mockProTicketSales,
+  mockProReviewsPending,
+  submitMembershipAccessRequest,
 } from './prototypeData'
 import type {
   AccessMode,
@@ -14,18 +18,8 @@ import type {
   ProManagedEvent,
   ProTicketCategory,
   PaymentTiming,
+  MembershipAccessRequest,
 } from './prototypeData'
-
-interface AccessRequest {
-  id: string
-  userId: string
-  userName: string
-  userEmail: string
-  requestedRole: 'HOST' | 'ADMIN' | 'BAR_MANAGER'
-  message: string
-  createdAt: string
-  status: 'PENDING' | 'APPROVED' | 'REJECTED'
-}
 
 interface ProBooking {
   id: string
@@ -61,35 +55,11 @@ const roleLabels: Record<ManagerSession['role'], string> = {
   BAR_MANAGER: 'Responsable bar',
 }
 
-const accessRequestRoleLabels: Record<AccessRequest['requestedRole'], string> = {
+const accessRequestRoleLabels: Record<MembershipAccessRequest['requestedRole'], string> = {
   HOST: 'Accueil',
   ADMIN: 'Admin',
   BAR_MANAGER: 'Responsable bar',
 }
-
-// Mock data
-const mockAccessRequests: AccessRequest[] = [
-  {
-    id: 'req-001',
-    userId: 'usr-001',
-    userName: 'Mohamed Ben',
-    userEmail: 'med@example.ma',
-    requestedRole: 'HOST',
-    message: 'Je serai a la porte le vendredi et samedi',
-    createdAt: '2026-06-15T10:30:00Z',
-    status: 'PENDING',
-  },
-  {
-    id: 'req-002',
-    userId: 'usr-002',
-    userName: 'Amira Sola',
-    userEmail: 'amira@example.ma',
-    requestedRole: 'BAR_MANAGER',
-    message: 'Chef de bar experience 5 ans',
-    createdAt: '2026-06-14T14:15:00Z',
-    status: 'PENDING',
-  },
-]
 
 const mockProBookings: ProBooking[] = [
   {
@@ -200,6 +170,17 @@ export function ProLoginScreen({
     }
 
     const role = inferRoleFromEmail(email || 'owner@sky31.ma')
+    const emailNorm = (email || '').toLowerCase().trim()
+
+    if (emailNorm.includes('host@example') || emailNorm === 'noaccess@test.ma') {
+      navigate('pro-no-access')
+      return
+    }
+
+    if (emailNorm.includes('suspended')) {
+      navigate('pro-tenant-suspended')
+      return
+    }
 
     // Mock login for manager
     const session: ManagerSession = {
@@ -294,7 +275,7 @@ export function ProDashboardScreen({
   const todayBookings = getProBookings().filter(b => b.date === '2026-06-15')
   const arrivedCount = todayBookings.filter(b => b.status === 'ARRIVED').length
   const confirmedCount = todayBookings.filter(b => b.status === 'CONFIRMED').length
-  const pendingRequests = mockAccessRequests.filter(r => r.status === 'PENDING')
+  const pendingRequests = mockMembershipAccessRequests.filter(r => r.status === 'PENDING')
 
   return (
     <main className="screen-container reveal-up">
@@ -386,6 +367,18 @@ export function ProDashboardScreen({
             <span>👥</span>
             <span>Valider l'équipe</span>
           </button>
+          <button type="button" onClick={() => navigate('pro-venue-settings')}>
+            <span>⚙️</span>
+            <span>Parametres venue</span>
+          </button>
+          <button type="button" onClick={() => navigate('pro-tickets-list')}>
+            <span>🎫</span>
+            <span>Billets vendus</span>
+          </button>
+          <button type="button" onClick={() => navigate('pro-reviews')}>
+            <span>⭐</span>
+            <span>Avis clients</span>
+          </button>
         </div>
       </section>
     </main>
@@ -398,8 +391,14 @@ export function ProAccessRequestsScreen({
   session: ManagerSession
   navigate: (screen: Screen) => void
 }) {
-  const [requests, setRequests] = useState(mockAccessRequests)
+  const [requests, setRequests] = useState(() => [...mockMembershipAccessRequests])
   const [selectedRequest, setSelectedRequest] = useState<string | null>(null)
+
+  const refreshFromStore = () => setRequests([...mockMembershipAccessRequests])
+
+  useEffect(() => {
+    refreshFromStore()
+  }, [])
 
   const handleApprove = (requestId: string) => {
     setRequests(requests.map(r => 
@@ -492,25 +491,15 @@ export function ProAccessRequestsScreen({
 }
 
 export function ProBookingsListScreen({
-  initialBookingReference,
   navigate,
 }: {
   session: ManagerSession
-  initialBookingReference?: string
-  navigate: (screen: Screen) => void
+  navigate: (screen: Screen, id?: string) => void
 }) {
   const [filterStatus, setFilterStatus] = useState<string>('all')
   const [search, setSearch] = useState('')
-  const [selectedReference, setSelectedReference] = useState<string | null>(initialBookingReference ?? null)
-  const [editedTime, setEditedTime] = useState('')
-  const [editedGroupSize, setEditedGroupSize] = useState(2)
-  const [internalNote, setInternalNote] = useState('')
-  const [, setVersion] = useState(0)
   const statuses = ['CONFIRMED', 'PENDING', 'ARRIVED', 'NO_SHOW', 'CANCELLED']
   const bookings = getProBookings()
-  const selectedBooking = selectedReference
-    ? bookings.find((booking) => booking.reference === selectedReference)
-    : undefined
 
   const filteredBookings = bookings.filter((booking) => {
     const statusMatches = filterStatus === 'all' || booking.status === filterStatus
@@ -525,16 +514,103 @@ export function ProBookingsListScreen({
     return statusMatches && textMatches
   })
 
-  const openDetail = (booking: ProBooking) => {
-    setSelectedReference(booking.reference)
-    setEditedTime(booking.time)
-    setEditedGroupSize(booking.groupSize)
-    setInternalNote(booking.internalNote ?? '')
-  }
+  return (
+    <main className="screen-container reveal-up">
+      <header className="screen-header">
+        <button type="button" onClick={() => navigate('pro-dashboard')} aria-label="Retour">← Retour</button>
+        <h1>Réservations</h1>
+      </header>
 
-  const refreshBookings = () => {
-    setVersion((value) => value + 1)
-  }
+      <section className="search-band" style={{ paddingBottom: '0' }}>
+        <input
+          type="search"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          placeholder="Rechercher par nom, téléphone ou référence"
+        />
+      </section>
+
+      <section className="filter-chips">
+        <button
+          type="button"
+          className={`filter-btn ${filterStatus === 'all' ? 'is-active' : ''}`}
+          onClick={() => setFilterStatus('all')}
+        >
+          Tout ({bookings.length})
+        </button>
+        {statuses.map((status) => {
+          const count = bookings.filter((booking) => booking.status === status).length
+          return (
+            <button
+              key={status}
+              type="button"
+              className={`filter-btn ${filterStatus === status ? 'is-active' : ''}`}
+              onClick={() => setFilterStatus(status)}
+            >
+              {bookingStatusLabels[status as ProBooking['status']]} ({count})
+            </button>
+          )
+        })}
+      </section>
+
+      <section className="bookings-list">
+        {filteredBookings.length === 0 ? (
+          <p className="empty-state">Aucune réservation pour ce filtre</p>
+        ) : (
+          filteredBookings.map((booking) => (
+            <article
+              key={booking.id}
+              className={`booking-card booking-card--${booking.status.toLowerCase()}`}
+              onClick={() => navigate('pro-booking-detail', booking.reference)}
+              style={{ cursor: 'pointer' }}
+            >
+              <div className="booking-header">
+                <div>
+                  <strong>{booking.customerName}</strong>
+                  <p className="phone">{booking.customerPhone}</p>
+                </div>
+                <span className={`status status--${booking.status.toLowerCase()}`}>{bookingStatusLabels[booking.status]}</span>
+              </div>
+              <p className="booking-ref">{booking.reference}</p>
+              <div className="booking-details">
+                <span>{booking.date} à {booking.time}</span>
+                <span>·</span>
+                <span>{booking.accessLabel}</span>
+                <span>·</span>
+                <span>{booking.groupSize} pers.</span>
+              </div>
+              <div className="booking-footer">
+                <span className="occasion">{booking.occasion === 'BIRTHDAY' ? 'Anniversaire' : booking.occasion}</span>
+                {booking.minSpend > 0 && (
+                  <span className="min-spend">Min {booking.minSpend} MAD (payé {booking.paidAmount} MAD)</span>
+                )}
+              </div>
+            </article>
+          ))
+        )}
+      </section>
+    </main>
+  )
+}
+
+export function ProBookingDetailScreen({
+  bookingReference,
+  navigate,
+}: {
+  session?: ManagerSession
+  bookingReference?: string
+  navigate: (screen: Screen, id?: string) => void
+}) {
+  const [, setVersion] = useState(0)
+  const bookings = getProBookings()
+  const selectedBooking = bookingReference
+    ? bookings.find((booking) => booking.reference === bookingReference)
+    : undefined
+  const [editedTime, setEditedTime] = useState(selectedBooking?.time ?? '')
+  const [editedGroupSize, setEditedGroupSize] = useState(selectedBooking?.groupSize ?? 2)
+  const [internalNote, setInternalNote] = useState(selectedBooking?.internalNote ?? '')
+
+  const refreshBookings = () => setVersion((value) => value + 1)
 
   const saveDetailUpdates = () => {
     if (!selectedBooking) return
@@ -556,158 +632,97 @@ export function ProBookingsListScreen({
     refreshBookings()
   }
 
+  if (!selectedBooking) {
+    return (
+      <main className="screen-container reveal-up">
+        <header className="screen-header">
+          <button type="button" onClick={() => navigate('pro-bookings-list')} aria-label="Retour">← Retour</button>
+          <h1>Détail réservation</h1>
+        </header>
+        <p className="empty-state">Réservation introuvable.</p>
+      </main>
+    )
+  }
+
   return (
     <main className="screen-container reveal-up">
       <header className="screen-header">
-        <button type="button" onClick={() => selectedBooking ? setSelectedReference(null) : navigate('pro-dashboard')} aria-label="Retour">← Retour</button>
-        <h1>{selectedBooking ? 'Détail réservation' : 'Réservations'}</h1>
+        <button type="button" onClick={() => navigate('pro-bookings-list')} aria-label="Retour">← Retour</button>
+        <h1>Détail réservation</h1>
       </header>
 
-      {selectedBooking ? (
-        <section className="request-detail">
-          <div className="request-card-full">
-            <h2>{selectedBooking.customerName}</h2>
-            <p className="email">{selectedBooking.customerPhone} · {selectedBooking.reference}</p>
-            <div className="request-info">
-              <p><strong>Mode:</strong> {accessModeLabels[selectedBooking.accessMode as AccessMode]} ({selectedBooking.accessLabel})</p>
-              <p><strong>Date:</strong> {selectedBooking.date} à {selectedBooking.time}</p>
-              <p><strong>Groupe:</strong> {selectedBooking.groupSize} pers.</p>
-              <p><strong>Statut:</strong> {bookingStatusLabels[selectedBooking.status]}</p>
-              <p><strong>Paiement:</strong> {selectedBooking.paidAmount} MAD payé {selectedBooking.minSpend > 0 ? `/ min ${selectedBooking.minSpend} MAD` : ''}</p>
-              {selectedBooking.occasion === 'BIRTHDAY' && <p><strong>Occasion:</strong> Anniversaire</p>}
-            </div>
+      <section className="request-detail">
+        <div className="request-card-full">
+          <h2>{selectedBooking.customerName}</h2>
+          <p className="email">{selectedBooking.customerPhone} · {selectedBooking.reference}</p>
+          <div className="request-info">
+            <p><strong>Mode:</strong> {accessModeLabels[selectedBooking.accessMode as AccessMode]} ({selectedBooking.accessLabel})</p>
+            <p><strong>Date:</strong> {selectedBooking.date} à {selectedBooking.time}</p>
+            <p><strong>Groupe:</strong> {selectedBooking.groupSize} pers.</p>
+            <p><strong>Statut:</strong> {bookingStatusLabels[selectedBooking.status]}</p>
+            <p><strong>Paiement:</strong> {selectedBooking.paidAmount} MAD payé {selectedBooking.minSpend > 0 ? `/ min ${selectedBooking.minSpend} MAD` : ''}</p>
+            {selectedBooking.occasion === 'BIRTHDAY' && <p><strong>Occasion:</strong> Anniversaire</p>}
+          </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label>Heure</label>
-                <input type="time" value={editedTime} onChange={(event) => setEditedTime(event.target.value)} />
-              </div>
-              <div className="form-group">
-                <label>Taille du groupe</label>
-                <input type="number" min={1} max={20} value={editedGroupSize} onChange={(event) => setEditedGroupSize(Number(event.target.value) || 1)} />
-              </div>
-            </div>
-
+          <div className="form-row">
             <div className="form-group">
-              <label>Note interne</label>
-              <textarea value={internalNote} onChange={(event) => setInternalNote(event.target.value)} placeholder="Ex: VIP arrival, table side stage" />
+              <label>Heure</label>
+              <input type="time" value={editedTime} onChange={(event) => setEditedTime(event.target.value)} />
             </div>
-
-            <div className="action-buttons">
-              <button type="button" onClick={saveDetailUpdates}>
-                <span>💾</span>
-                <span>Enregistrer</span>
-              </button>
-
-              {selectedBooking.status === 'PENDING' && selectedBooking.accessMode === 'GUEST_LIST' && (
-                <button type="button" onClick={() => setBookingStatus('CONFIRMED')}>
-                  <span>✅</span>
-                  <span>Approuver</span>
-                </button>
-              )}
-
-              {selectedBooking.status === 'PENDING' && selectedBooking.accessMode === 'GUEST_LIST' && (
-                <button type="button" onClick={() => setBookingStatus('CANCELLED')}>
-                  <span>❌</span>
-                  <span>Refuser</span>
-                </button>
-              )}
-
-              {selectedBooking.status !== 'ARRIVED' && selectedBooking.status !== 'CANCELLED' && (
-                <button type="button" onClick={() => setBookingStatus('ARRIVED')}>
-                  <span>🚪</span>
-                  <span>Marquer arrivé</span>
-                </button>
-              )}
-
-              {selectedBooking.status !== 'NO_SHOW' && selectedBooking.status !== 'CANCELLED' && (
-                <button type="button" onClick={() => setBookingStatus('NO_SHOW')}>
-                  <span>⏱</span>
-                  <span>Marquer no-show</span>
-                </button>
-              )}
-
-              {selectedBooking.status !== 'CANCELLED' && (
-                <button type="button" onClick={() => setBookingStatus('CANCELLED')}>
-                  <span>🛑</span>
-                  <span>Annuler</span>
-                </button>
-              )}
+            <div className="form-group">
+              <label>Taille du groupe</label>
+              <input type="number" min={1} max={20} value={editedGroupSize} onChange={(event) => setEditedGroupSize(Number(event.target.value) || 1)} />
             </div>
           </div>
-        </section>
-      ) : (
-        <>
-          <section className="search-band" style={{ paddingBottom: '0' }}>
-            <input
-              type="search"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Rechercher par nom, téléphone ou référence"
-            />
-          </section>
 
-          <section className="filter-chips">
-            <button
-              type="button"
-              className={`filter-btn ${filterStatus === 'all' ? 'is-active' : ''}`}
-              onClick={() => setFilterStatus('all')}
-            >
-              Tout ({bookings.length})
+          <div className="form-group">
+            <label>Note interne</label>
+            <textarea value={internalNote} onChange={(event) => setInternalNote(event.target.value)} placeholder="Ex: VIP arrival, table side stage" />
+          </div>
+
+          <div className="action-buttons">
+            <button type="button" onClick={saveDetailUpdates}>
+              <span>💾</span>
+              <span>Enregistrer</span>
             </button>
-            {statuses.map((status) => {
-              const count = bookings.filter((booking) => booking.status === status).length
-              return (
-                <button
-                  key={status}
-                  type="button"
-                  className={`filter-btn ${filterStatus === status ? 'is-active' : ''}`}
-                  onClick={() => setFilterStatus(status)}
-                >
-                  {bookingStatusLabels[status as ProBooking['status']]} ({count})
-                </button>
-              )
-            })}
-          </section>
 
-          <section className="bookings-list">
-            {filteredBookings.length === 0 ? (
-              <p className="empty-state">Aucune réservation pour ce filtre</p>
-            ) : (
-              filteredBookings.map((booking) => (
-                <article
-                  key={booking.id}
-                  className={`booking-card booking-card--${booking.status.toLowerCase()}`}
-                  onClick={() => openDetail(booking)}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <div className="booking-header">
-                    <div>
-                      <strong>{booking.customerName}</strong>
-                      <p className="phone">{booking.customerPhone}</p>
-                    </div>
-                    <span className={`status status--${booking.status.toLowerCase()}`}>{bookingStatusLabels[booking.status]}</span>
-                  </div>
-                  <p className="booking-ref">{booking.reference}</p>
-                  <div className="booking-details">
-                    <span>{booking.date} à {booking.time}</span>
-                    <span>·</span>
-                    <span>{booking.accessLabel}</span>
-                    <span>·</span>
-                    <span>{booking.groupSize} pers.</span>
-                  </div>
-                  <div className="booking-footer">
-                    <span className="occasion">{booking.occasion === 'BIRTHDAY' ? 'Anniversaire' : booking.occasion}</span>
-                    {booking.minSpend > 0 && (
-                      <span className="min-spend">Min {booking.minSpend} MAD (payé {booking.paidAmount} MAD)</span>
-                    )}
-                  </div>
-                </article>
-              ))
+            {selectedBooking.status === 'PENDING' && selectedBooking.accessMode === 'GUEST_LIST' && (
+              <button type="button" onClick={() => setBookingStatus('CONFIRMED')}>
+                <span>✅</span>
+                <span>Approuver</span>
+              </button>
             )}
-          </section>
-        </>
-      )}
+
+            {selectedBooking.status === 'PENDING' && selectedBooking.accessMode === 'GUEST_LIST' && (
+              <button type="button" onClick={() => setBookingStatus('CANCELLED')}>
+                <span>❌</span>
+                <span>Refuser</span>
+              </button>
+            )}
+
+            {selectedBooking.status !== 'ARRIVED' && selectedBooking.status !== 'CANCELLED' && (
+              <button type="button" onClick={() => setBookingStatus('ARRIVED')}>
+                <span>🚪</span>
+                <span>Marquer arrivé</span>
+              </button>
+            )}
+
+            {selectedBooking.status !== 'NO_SHOW' && selectedBooking.status !== 'CANCELLED' && (
+              <button type="button" onClick={() => setBookingStatus('NO_SHOW')}>
+                <span>⏱</span>
+                <span>Marquer no-show</span>
+              </button>
+            )}
+
+            {selectedBooking.status !== 'CANCELLED' && (
+              <button type="button" onClick={() => setBookingStatus('CANCELLED')}>
+                <span>🛑</span>
+                <span>Annuler</span>
+              </button>
+            )}
+          </div>
+        </div>
+      </section>
     </main>
   )
 }
@@ -1429,6 +1444,197 @@ export function ProEventEditScreen({
         )}
         {!title.trim() && <p className="validation-hint">Le titre est obligatoire.</p>}
       </section>
+    </main>
+  )
+}
+
+export function ProNoAccessScreen({ navigate }: { navigate: (screen: Screen) => void }) {
+  return (
+    <main className="screen-container reveal-up">
+      <header className="screen-header">
+        <button type="button" onClick={() => navigate('pro-login')} aria-label="Retour">← Retour</button>
+        <h1>Acces non autorise</h1>
+      </header>
+      <section className="detail-section">
+        <p>Vous n'avez pas encore de rattachement pro pour ce venue.</p>
+        <p>Demandez un acces equipe (HOST, ADMIN, BAR_MANAGER) pour rejoindre le back-office.</p>
+        <IonButton expand="block" onClick={() => navigate('pro-access-request')}>Demander un acces</IonButton>
+        <button type="button" className="secondary-btn" onClick={() => navigate('entry')}>Retour a l accueil</button>
+      </section>
+    </main>
+  )
+}
+
+export function ProAccessRequestScreen({ navigate }: { navigate: (screen: Screen) => void }) {
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('host@example.ma')
+  const [role, setRole] = useState<MembershipAccessRequest['requestedRole']>('HOST')
+  const [message, setMessage] = useState('')
+  const [submitted, setSubmitted] = useState(false)
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    submitMembershipAccessRequest({
+      userName: name || 'Nouveau membre',
+      userEmail: email,
+      requestedRole: role,
+      message: message || 'Demande acces equipe',
+    })
+    setSubmitted(true)
+  }
+
+  if (submitted) {
+    return (
+      <main className="screen-container reveal-up">
+        <header className="screen-header"><h1>Demande envoyee</h1></header>
+        <section className="confirmation-section">
+          <div className="success-badge">✓</div>
+          <p>Le proprietaire du venue verra votre demande dans Access equipe.</p>
+          <IonButton expand="block" onClick={() => navigate('pro-login')}>Retour connexion</IonButton>
+        </section>
+      </main>
+    )
+  }
+
+  return (
+    <main className="screen-container reveal-up">
+      <header className="screen-header">
+        <button type="button" onClick={() => navigate('pro-no-access')} aria-label="Retour">← Retour</button>
+        <h1>Demander un acces</h1>
+      </header>
+      <form className="booking-form" onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label>Nom</label>
+          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Votre nom" />
+        </div>
+        <div className="form-group">
+          <label>Email</label>
+          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+        </div>
+        <div className="form-group">
+          <label>Role souhaite</label>
+          <select value={role} onChange={(e) => setRole(e.target.value as MembershipAccessRequest['requestedRole'])}>
+            <option value="HOST">Accueil</option>
+            <option value="BAR_MANAGER">Responsable bar</option>
+            <option value="ADMIN">Admin</option>
+          </select>
+        </div>
+        <div className="form-group">
+          <label>Message</label>
+          <textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Disponibilites, experience..." />
+        </div>
+        <IonButton expand="block" type="submit">Envoyer la demande</IonButton>
+      </form>
+    </main>
+  )
+}
+
+export function ProTenantSuspendedScreen({ navigate }: { navigate: (screen: Screen) => void }) {
+  return (
+    <main className="screen-container reveal-up">
+      <header className="screen-header">
+        <h1>Venue suspendu</h1>
+      </header>
+      <section className="detail-section">
+        <p>Ce tenant est temporairement suspendu par Nafura. Contactez le support pour reactiver l acces.</p>
+        <button type="button" className="secondary-btn" onClick={() => navigate('entry')}>Retour</button>
+      </section>
+    </main>
+  )
+}
+
+export function ProVenueSettingsScreen({
+  session,
+  navigate,
+}: {
+  session: ManagerSession
+  navigate: (screen: Screen) => void
+}) {
+  const [venueName, setVenueName] = useState(session.venueName)
+  const [hours, setHours] = useState('22:00 - 04:00')
+
+  return (
+    <main className="screen-container reveal-up">
+      <header className="screen-header">
+        <button type="button" onClick={() => navigate('pro-dashboard')} aria-label="Retour">← Retour</button>
+        <h1>Parametres venue</h1>
+      </header>
+      <section className="booking-form">
+        <div className="form-group">
+          <label>Nom affiche</label>
+          <input value={venueName} onChange={(e) => setVenueName(e.target.value)} />
+        </div>
+        <div className="form-group">
+          <label>Horaires soiree</label>
+          <input value={hours} onChange={(e) => setHours(e.target.value)} />
+        </div>
+        <div className="form-group">
+          <label>Photo principale</label>
+          <input value="https://cdn.layali.ma/venues/hero-placeholder.jpg" readOnly />
+        </div>
+        <IonButton expand="block">Enregistrer (mock)</IonButton>
+      </section>
+    </main>
+  )
+}
+
+export function ProTicketsListScreen({ navigate }: { session: ManagerSession; navigate: (screen: Screen) => void }) {
+  const [sales, setSales] = useState(mockProTicketSales)
+
+  return (
+    <main className="screen-container reveal-up">
+      <header className="screen-header">
+        <button type="button" onClick={() => navigate('pro-dashboard')} aria-label="Retour">← Retour</button>
+        <h1>Billets vendus</h1>
+      </header>
+      <div className="bookings-list">
+        {sales.map((sale) => (
+          <article key={sale.id} className="booking-card">
+            <div className="booking-header">
+              <strong>{sale.customerName}</strong>
+              <span className={`status status--${sale.status.toLowerCase()}`}>{sale.status}</span>
+            </div>
+            <p className="booking-ref">{sale.reference}</p>
+            <p>{sale.eventTitle} · {sale.categoryName} x{sale.quantity} · {sale.totalMad} MAD</p>
+            {sale.status === 'PAID' && (
+              <button type="button" className="action-link" onClick={() => setSales(sales.map((s) => s.id === sale.id ? { ...s, status: 'REFUNDED' as const } : s))}>
+                Rembourser (mock)
+              </button>
+            )}
+          </article>
+        ))}
+      </div>
+    </main>
+  )
+}
+
+export function ProReviewsScreen({ navigate }: { session: ManagerSession; navigate: (screen: Screen) => void }) {
+  const [reviews, setReviews] = useState(mockProReviewsPending)
+
+  return (
+    <main className="screen-container reveal-up">
+      <header className="screen-header">
+        <button type="button" onClick={() => navigate('pro-dashboard')} aria-label="Retour">← Retour</button>
+        <h1>Avis clients</h1>
+      </header>
+      <div className="bookings-list">
+        {reviews.map((review) => (
+          <article key={review.id} className="review-item booking-card">
+            <div className="review-header">
+              <strong>{review.author}</strong>
+              <span>★ {review.rating}</span>
+            </div>
+            <p>{review.text}</p>
+            <p className="booking-ref">Statut: {review.status}</p>
+            {review.status === 'PENDING' && (
+              <div className="action-buttons">
+                <button type="button" onClick={() => setReviews(reviews.map((r) => r.id === review.id ? { ...r, status: 'PUBLISHED' as const } : r))}>Publier</button>
+                <button type="button" onClick={() => setReviews(reviews.map((r) => r.id === review.id ? { ...r, status: 'HIDDEN' as const } : r))}>Masquer</button>
+              </div>
+            )}
+          </article>
+        ))}
+      </div>
     </main>
   )
 }

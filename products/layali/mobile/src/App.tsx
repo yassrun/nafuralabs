@@ -6,6 +6,10 @@ import {
   layaliHomeFeed,
   mockBooking,
   mockBookingHistory,
+  commitBookingToHistory,
+  mockCustomerTicketAccesses,
+  commitTicketToAccesses,
+  mockAdminTenants,
   mockEvents,
   mockUserProfile,
   occasionLabels,
@@ -16,10 +20,17 @@ import {
   ProDashboardScreen,
   ProAccessRequestsScreen,
   ProBookingsListScreen,
+  ProBookingDetailScreen,
   ProDoorCheckinScreen,
   ProTablesScreen,
   ProEventsListScreen,
   ProEventEditScreen,
+  ProNoAccessScreen,
+  ProAccessRequestScreen,
+  ProTenantSuspendedScreen,
+  ProVenueSettingsScreen,
+  ProTicketsListScreen,
+  ProReviewsScreen,
 } from './ManagerScreens'
 import './App.css'
 
@@ -38,11 +49,13 @@ export type Screen =
   | 'venue-search'
   | 'venue-detail'
   | 'booking-create'
+  | 'booking-review'
   | 'booking-payment'
   | 'booking-confirm'
   | 'bookings-list'
   | 'booking-detail'
   | 'my-accesses'
+  | 'customer-tickets'
   | 'event-list'
   | 'event-detail'
   | 'ticket-buy'
@@ -55,10 +68,20 @@ export type Screen =
   | 'pro-dashboard'
   | 'pro-access-requests'
   | 'pro-bookings-list'
+  | 'pro-booking-detail'
   | 'pro-door-checkin'
   | 'pro-tables'
   | 'pro-events-list'
   | 'pro-event-edit'
+  | 'pro-no-access'
+  | 'pro-access-request'
+  | 'pro-tenant-suspended'
+  | 'pro-venue-settings'
+  | 'pro-tickets-list'
+  | 'pro-reviews'
+  | 'admin-overview'
+  | 'admin-tenants'
+  | 'admin-tenant-detail'
 
 interface TicketDraft {
   eventId: string
@@ -84,6 +107,7 @@ interface AppState {
   isManagerMode: boolean
   isCustomerLoggedIn: boolean
   selectedProEventId?: string
+  selectedAdminTenantId?: string
   pendingCustomerScreen?: Screen
   pendingCustomerId?: string
 }
@@ -131,12 +155,14 @@ function routeFromHash(hash: string): RouteTarget {
   }
 
   if (parts[0] === 'me' && parts[1] === 'accesses') return { screen: 'my-accesses' }
+  if (parts[0] === 'me' && parts[1] === 'tickets') return { screen: 'customer-tickets' }
 
   if (parts[0] === 'pro' && parts.length === 1) return { screen: 'pro-dashboard' }
   if (parts[0] === 'pro' && parts[1] === 'door') return { screen: 'pro-door-checkin' }
-  if (parts[0] === 'pro' && parts[1] === 'bookings') {
-    return { screen: 'pro-bookings-list', id: parts[2] }
+  if (parts[0] === 'pro' && parts[1] === 'bookings' && parts[2]) {
+    return { screen: 'pro-booking-detail', id: parts[2] }
   }
+  if (parts[0] === 'pro' && parts[1] === 'bookings') return { screen: 'pro-bookings-list' }
 
   if (parts[0] === 'login') return { screen: 'login' }
   if (parts[0] === 'register') return { screen: 'register' }
@@ -156,11 +182,13 @@ function hashFromState(state: AppState): string {
     return event ? `/events/${slugify(event.title)}` : '/events'
   }
   if (state.currentScreen === 'my-accesses') return '/me/accesses'
+  if (state.currentScreen === 'customer-tickets') return '/me/tickets'
   if (state.currentScreen === 'pro-dashboard') return '/pro'
   if (state.currentScreen === 'pro-door-checkin') return '/pro/door'
-  if (state.currentScreen === 'pro-bookings-list') {
+  if (state.currentScreen === 'pro-booking-detail') {
     return state.selectedBookingId ? `/pro/bookings/${state.selectedBookingId}` : '/pro/bookings'
   }
+  if (state.currentScreen === 'pro-bookings-list') return '/pro/bookings'
   if (state.currentScreen === 'login') return '/login'
   if (state.currentScreen === 'register') return '/register'
   return '/'
@@ -302,6 +330,39 @@ function formatCountdown(totalSeconds: number) {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`
 }
 
+function usesBookingReview(accessMode: AccessMode) {
+  return accessMode === 'GUEST_LIST' || accessMode === 'COUNTER'
+}
+
+function getBookingStepCount(booking: BookingDraft) {
+  if (booking.accessMode === 'TABLE') return 3
+  let steps = 3
+  if (booking.depositAmount > 0) steps = 4
+  return steps
+}
+
+function getBookingStepLabel(booking: BookingDraft, screen: Screen) {
+  const total = getBookingStepCount(booking)
+  let current = 1
+  if (screen === 'booking-review') current = 2
+  else if (screen === 'booking-payment') current = booking.accessMode === 'TABLE' ? 2 : booking.depositAmount > 0 ? 3 : 2
+  else if (screen === 'booking-confirm') current = total
+  return `Etape ${current}/${total}`
+}
+
+function finalizeBookingDraft(booking: BookingDraft): BookingDraft {
+  const pending = booking.requiresApproval
+  const reference = booking.reference ?? `LAY-${Math.random().toString(36).slice(2, 8).toUpperCase()}`
+
+  return {
+    ...booking,
+    status: pending ? 'pending' : 'confirmed',
+    approvalStatus: pending ? 'PENDING' : 'NOT_REQUIRED',
+    reference,
+    qrCode: pending ? undefined : booking.qrCode ?? `QR-${reference}`,
+  }
+}
+
 function App() {
   const initialRoute = routeFromHash(globalThis.location.hash)
 
@@ -309,7 +370,8 @@ function App() {
     currentScreen: initialRoute.screen,
     selectedVenueId: initialRoute.screen === 'venue-detail' ? initialRoute.id : undefined,
     selectedEventId: initialRoute.screen === 'event-detail' ? initialRoute.id : undefined,
-    selectedBookingId: initialRoute.screen === 'pro-bookings-list' ? initialRoute.id : undefined,
+    selectedBookingId:
+      initialRoute.screen === 'pro-booking-detail' ? initialRoute.id : undefined,
     booking: mockBooking,
     ticket: buildTicketDraft('e1'),
     isManagerMode: false,
@@ -319,6 +381,7 @@ function App() {
   const applyNavigation = (prev: AppState, screen: Screen, id?: string): AppState => {
     const protectedScreens: Screen[] = [
       'booking-create',
+      'booking-review',
       'booking-payment',
       'booking-confirm',
       'bookings-list',
@@ -339,7 +402,7 @@ function App() {
       }
     }
 
-    if (screen.startsWith('pro-') && !prev.managerSession && screen !== 'pro-login') {
+    if (screen.startsWith('pro-') && !prev.managerSession && screen !== 'pro-login' && screen !== 'pro-no-access' && screen !== 'pro-access-request' && screen !== 'pro-tenant-suspended') {
       return {
         ...prev,
         currentScreen: 'pro-login' as Screen,
@@ -366,12 +429,16 @@ function App() {
       next.selectedProEventId = id
     }
 
+    if (screen === 'admin-tenant-detail') {
+      next.selectedAdminTenantId = id
+    }
+
     if (id) {
       if (screen === 'venue-detail') next.selectedVenueId = id
       if (screen === 'event-detail' || screen === 'ticket-buy' || screen === 'ticket-payment' || screen === 'ticket-confirm') {
         next.selectedEventId = id
       }
-      if (screen === 'booking-detail' || screen === 'pro-bookings-list') next.selectedBookingId = id
+      if (screen === 'booking-detail' || screen === 'pro-booking-detail') next.selectedBookingId = id
     }
 
     return next
@@ -478,6 +545,7 @@ function App() {
   const hideBottomNavScreens: Screen[] = [
     'entry',
     'booking-create',
+    'booking-review',
     'booking-payment',
     'booking-confirm',
     'ticket-buy',
@@ -486,7 +554,13 @@ function App() {
     'login',
     'register',
     'pro-login',
+    'pro-no-access',
+    'pro-access-request',
+    'pro-tenant-suspended',
     'pro-door-checkin',
+    'admin-overview',
+    'admin-tenants',
+    'admin-tenant-detail',
   ]
 
   const shouldShowBottomNav = !hideBottomNavScreens.includes(state.currentScreen)
@@ -519,12 +593,20 @@ function App() {
               navigate={navigate}
             />
           )}
+          {state.currentScreen === 'booking-review' && (
+            <BookingReviewScreen
+              booking={state.booking}
+              updateBooking={updateBooking}
+              navigate={navigate}
+            />
+          )}
           {state.currentScreen === 'booking-payment' && (
             <BookingPaymentScreen booking={state.booking} updateBooking={updateBooking} navigate={navigate} />
           )}
           {state.currentScreen === 'booking-confirm' && <BookingConfirmScreen booking={state.booking} navigate={navigate} />}
           {state.currentScreen === 'bookings-list' && <BookingsListScreen navigate={navigate} />}
           {state.currentScreen === 'my-accesses' && <MyAccessesScreen navigate={navigate} />}
+          {state.currentScreen === 'customer-tickets' && <CustomerTicketsScreen navigate={navigate} />}
           {state.currentScreen === 'booking-detail' && <BookingDetailScreen bookingId={state.selectedBookingId} navigate={navigate} />}
           {state.currentScreen === 'event-list' && (
             <EventListScreen navigate={navigate} openAccessFlow={openAccessFlow} openTicketFlow={openTicketFlow} />
@@ -558,14 +640,37 @@ function App() {
           {state.currentScreen === 'pro-bookings-list' && state.managerSession && (
             <ProBookingsListScreen
               session={state.managerSession}
-              initialBookingReference={state.selectedBookingId}
-              navigate={(s: any) => navigate(s as Screen)}
+              navigate={(s: any, id?: string) => navigate(s as Screen, id)}
+            />
+          )}
+          {state.currentScreen === 'pro-booking-detail' && state.managerSession && (
+            <ProBookingDetailScreen
+              session={state.managerSession}
+              bookingReference={state.selectedBookingId}
+              navigate={(s: any, id?: string) => navigate(s as Screen, id)}
             />
           )}
           {state.currentScreen === 'pro-door-checkin' && state.managerSession && <ProDoorCheckinScreen session={state.managerSession} navigate={(s: any) => navigate(s as Screen)} />}
           {state.currentScreen === 'pro-tables' && state.managerSession && <ProTablesScreen session={state.managerSession} navigate={(s: any) => navigate(s as Screen)} />}
           {state.currentScreen === 'pro-events-list' && state.managerSession && <ProEventsListScreen session={state.managerSession} navigate={(s: any, id?: string) => navigate(s as Screen, id)} />}
           {state.currentScreen === 'pro-event-edit' && state.managerSession && <ProEventEditScreen session={state.managerSession} eventId={state.selectedProEventId} navigate={(s: any, id?: string) => navigate(s as Screen, id)} />}
+          {state.currentScreen === 'pro-no-access' && <ProNoAccessScreen navigate={(s: any) => navigate(s as Screen)} />}
+          {state.currentScreen === 'pro-access-request' && <ProAccessRequestScreen navigate={(s: any) => navigate(s as Screen)} />}
+          {state.currentScreen === 'pro-tenant-suspended' && <ProTenantSuspendedScreen navigate={(s: any) => navigate(s as Screen)} />}
+          {state.currentScreen === 'pro-venue-settings' && state.managerSession && (
+            <ProVenueSettingsScreen session={state.managerSession} navigate={(s: any) => navigate(s as Screen)} />
+          )}
+          {state.currentScreen === 'pro-tickets-list' && state.managerSession && (
+            <ProTicketsListScreen session={state.managerSession} navigate={(s: any) => navigate(s as Screen)} />
+          )}
+          {state.currentScreen === 'pro-reviews' && state.managerSession && (
+            <ProReviewsScreen session={state.managerSession} navigate={(s: any) => navigate(s as Screen)} />
+          )}
+          {state.currentScreen === 'admin-overview' && <AdminOverviewScreen navigate={navigate} />}
+          {state.currentScreen === 'admin-tenants' && <AdminTenantsScreen navigate={navigate} />}
+          {state.currentScreen === 'admin-tenant-detail' && (
+            <AdminTenantDetailScreen tenantId={state.selectedAdminTenantId} navigate={navigate} />
+          )}
           {state.currentScreen === 'customer-profile' && <CustomerProfileScreen navigate={navigate} logoutCustomer={logoutCustomer} />}
         </IonContent>
         {shouldShowBottomNav && (
@@ -598,7 +703,7 @@ function App() {
                 </button>
                 <button
                   type="button"
-                  className={state.currentScreen === 'pro-bookings-list' ? 'is-active' : ''}
+                  className={state.currentScreen === 'pro-bookings-list' || state.currentScreen === 'pro-booking-detail' ? 'is-active' : ''}
                   onClick={() => navigate('pro-bookings-list')}
                 >
                   <span aria-hidden="true">📋</span>
@@ -633,7 +738,7 @@ function App() {
                 </button>
                 <button
                   type="button"
-                  className={state.currentScreen === 'my-accesses' || state.currentScreen === 'booking-detail' ? 'is-active' : ''}
+                  className={state.currentScreen === 'my-accesses' || state.currentScreen === 'booking-detail' || state.currentScreen === 'customer-tickets' ? 'is-active' : ''}
                   onClick={() => navigate('my-accesses')}
                 >
                   <span aria-hidden="true">✓</span>
@@ -696,6 +801,17 @@ function EntryScreen({
             <span className="icon" aria-hidden="true">🧑‍💼</span>
             <span className="label">Manager</span>
             <span className="desc">Connexion pro et gestion du venue</span>
+          </button>
+
+          <button
+            type="button"
+            className="audience-btn"
+            style={{ borderStyle: 'dashed' }}
+            onClick={() => navigate('admin-overview')}
+          >
+            <span className="icon" aria-hidden="true">🛡️</span>
+            <span className="label">Admin Nafura</span>
+            <span className="desc">Stub plateforme (walkthrough P1)</span>
           </button>
         </div>
       </section>
@@ -1117,7 +1233,7 @@ function BookingCreateScreen({
       <header className="screen-header">
         <button type="button" onClick={() => navigate('venue-detail', venueId)} aria-label="Retour">← Retour</button>
         <h1>{title}</h1>
-        <span className="stepper">Etape 1/3</span>
+        <span className="stepper">{getBookingStepLabel(booking, 'booking-create')}</span>
       </header>
 
       <p className="flow-crumb">{booking.venueName} › {accessModeLabels[booking.accessMode]} › Creation</p>
@@ -1221,6 +1337,7 @@ function BookingCreateScreen({
                     accessResourceLabel: spot.name,
                     tableName: spot.name,
                     minSpend: spot.minSpend,
+                    depositAmount: spot.minSpend > 0 ? Math.round(spot.minSpend * 0.25) : 0,
                   })}
                   disabled={!spot.available}
                 >
@@ -1260,11 +1377,139 @@ function BookingCreateScreen({
       </section>
 
       <section className="sticky-cta sticky-cta--stacked">
-        <IonButton expand="block" onClick={() => navigate('booking-payment')} disabled={!canContinue}>
+        <IonButton
+          expand="block"
+          onClick={() => navigate(usesBookingReview(booking.accessMode) ? 'booking-review' : 'booking-payment')}
+          disabled={!canContinue}
+        >
           Continuer
         </IonButton>
         {!canContinue && <p className="validation-hint">{validationHint}</p>}
         <button type="button" className="secondary-btn" onClick={() => navigate('venue-detail', venueId)}>Annuler</button>
+      </section>
+    </main>
+  )
+}
+
+function BookingReviewScreen({
+  booking,
+  updateBooking,
+  navigate,
+}: {
+  booking: BookingDraft
+  updateBooking: (updates: Partial<BookingDraft>) => void
+  navigate: (screen: Screen, venueId?: string) => void
+}) {
+  const [acceptedTerms, setAcceptedTerms] = useState(false)
+  const paymentNext = booking.depositAmount > 0
+
+  const title =
+    booking.accessMode === 'GUEST_LIST'
+      ? 'Relire votre demande guest list'
+      : 'Relire votre reservation comptoir'
+
+  const ctaLabel = paymentNext
+    ? 'Continuer vers le paiement'
+    : booking.requiresApproval
+      ? 'Envoyer ma demande'
+      : 'Confirmer la reservation'
+
+  const handleContinue = () => {
+    if (!acceptedTerms) return
+
+    if (paymentNext) {
+      navigate('booking-payment')
+      return
+    }
+
+    const finalized = finalizeBookingDraft(booking)
+    updateBooking(finalized)
+    commitBookingToHistory(finalized)
+    navigate('booking-confirm')
+  }
+
+  return (
+    <main className="screen-container reveal-up">
+      <header className="screen-header">
+        <button type="button" onClick={() => navigate('booking-create')} aria-label="Retour">← Retour</button>
+        <h1>{title}</h1>
+        <span className="stepper">{getBookingStepLabel(booking, 'booking-review')}</span>
+      </header>
+
+      <p className="flow-crumb">
+        {booking.venueName} › {accessModeLabels[booking.accessMode]} › Verification
+      </p>
+
+      <section className="payment-section">
+        <div className="booking-recap">
+          <h3>Recapitulatif</h3>
+          <div className="recap-item">
+            <span>{booking.venueName}</span>
+            <span>{booking.date} a {booking.time}</span>
+          </div>
+          <div className="recap-item">
+            <span>{accessModeLabels[booking.accessMode]}</span>
+            <span>{booking.accessLabel}</span>
+          </div>
+          <div className="recap-item">
+            <span>Groupe</span>
+            <span>{booking.groupSize} pers. · {occasionLabels[booking.occasion]}</span>
+          </div>
+          {booking.notes && (
+            <div className="recap-item">
+              <span>Notes</span>
+              <span>{booking.notes}</span>
+            </div>
+          )}
+          {booking.minSpend > 0 && (
+            <div className="recap-total">
+              <span>Minimum de consommation</span>
+              <strong>{booking.minSpend} MAD</strong>
+            </div>
+          )}
+          <div className="recap-item deposit">
+            <span>Validation</span>
+            <strong>
+              {booking.requiresApproval
+                ? 'Manuelle par le venue (reponse sous 30 min)'
+                : paymentNext
+                  ? `Acompte ${booking.depositAmount} MAD a l etape suivante`
+                  : 'Confirmation immediate'}
+            </strong>
+          </div>
+        </div>
+
+        {booking.accessMode === 'GUEST_LIST' && (
+          <div className="detail-section detail-section--compact">
+            <h3>Rappel guest list</h3>
+            <p>
+              {booking.requiresApproval
+                ? 'Le personnel validera votre groupe avant la soiree. Vous pouvez etre retrouve a l entree par telephone.'
+                : 'Acces confirme automatiquement apres envoi.'}
+            </p>
+          </div>
+        )}
+
+        {booking.accessMode === 'COUNTER' && (
+          <div className="detail-section detail-section--compact">
+            <h3>Rappel comptoir</h3>
+            <p>Arrivee conseillee a l heure indiquee. Le comptoir est reserve pour la duree de la soiree selon la politique du lieu.</p>
+          </div>
+        )}
+
+        <label className="checkbox-label">
+          <input type="checkbox" checked={acceptedTerms} onChange={(e) => setAcceptedTerms(e.target.checked)} />
+          J accepte les conditions et la politique d arrivee
+        </label>
+      </section>
+
+      <section className="sticky-cta sticky-cta--stacked">
+        <IonButton expand="block" onClick={handleContinue} disabled={!acceptedTerms}>
+          {ctaLabel}
+        </IonButton>
+        <button type="button" className="secondary-btn" onClick={() => navigate('booking-create')}>
+          Modifier la demande
+        </button>
       </section>
     </main>
   )
@@ -1303,22 +1548,23 @@ function BookingPaymentScreen({
   const handleContinue = () => {
     if (!canContinue) return
 
-    const pending = booking.requiresApproval
-    updateBooking({
-      status: pending ? 'pending' : 'confirmed',
-      approvalStatus: pending ? 'PENDING' : booking.approvalStatus,
-      reference: booking.reference ?? `LAY-${Math.random().toString(36).slice(2, 8).toUpperCase()}`,
-      qrCode: pending ? undefined : booking.qrCode ?? `QR-${Math.random().toString(36).slice(2, 8).toUpperCase()}`,
+    const finalized = finalizeBookingDraft({
+      ...booking,
+      status: booking.requiresApproval ? 'pending' : 'confirmed',
     })
+    updateBooking(finalized)
+    commitBookingToHistory(finalized)
     navigate('booking-confirm')
   }
+
+  const backScreen: Screen = usesBookingReview(booking.accessMode) ? 'booking-review' : 'booking-create'
 
   return (
     <main className="screen-container reveal-up">
       <header className="screen-header">
-        <button type="button" onClick={() => navigate('booking-create')} aria-label="Retour">← Retour</button>
+        <button type="button" onClick={() => navigate(backScreen)} aria-label="Retour">← Retour</button>
         <h1>{paymentRequired ? 'Paiement' : 'Verification de l acces'}</h1>
-        <span className="stepper">Etape 2/3</span>
+        <span className="stepper">{getBookingStepLabel(booking, 'booking-payment')}</span>
       </header>
 
       <p className="flow-crumb">{booking.venueName} › {accessModeLabels[booking.accessMode]} › Paiement</p>
@@ -1427,7 +1673,7 @@ function BookingPaymentScreen({
       <section className="sticky-cta sticky-cta--stacked">
         <IonButton expand="block" onClick={handleContinue} disabled={!canContinue}>{ctaLabel}</IonButton>
         {remainingSeconds === 0 && <p className="validation-hint">Reservation expiree.</p>}
-        <button type="button" className="secondary-btn" onClick={() => navigate('booking-create')}>Retour</button>
+        <button type="button" className="secondary-btn" onClick={() => navigate(backScreen)}>Retour</button>
       </section>
     </main>
   )
@@ -1482,6 +1728,7 @@ function BookingConfirmScreen({ booking, navigate }: { booking: BookingDraft; na
 
       <section className="sticky-cta sticky-cta--stacked">
         <IonButton expand="block" onClick={() => navigate('my-accesses')}>Voir mes accès</IonButton>
+        <IonButton expand="block" fill="outline" onClick={() => navigate('bookings-list')}>Mes réservations</IonButton>
         <button type="button" className="secondary-btn" onClick={() => navigate('home')}>Retour a l accueil</button>
       </section>
     </main>
@@ -1608,7 +1855,20 @@ function TicketPaymentScreen({
 
   const handlePay = () => {
     if (!selectedPaymentMethod || !acceptedTerms || remainingSeconds <= 0) return
-    updateTicket({ status: 'confirmed', reference: ticket.reference ?? `TKT-${Math.random().toString(36).slice(2, 8).toUpperCase()}` })
+    const reference = ticket.reference ?? `TKT-${Math.random().toString(36).slice(2, 8).toUpperCase()}`
+    const event = mockEvents.find((item) => item.id === ticket.eventId)
+    updateTicket({ status: 'confirmed', reference })
+    commitTicketToAccesses({
+      eventId: ticket.eventId,
+      eventTitle: ticket.eventTitle,
+      venueName: ticket.venueName,
+      categoryName: ticket.categoryName,
+      quantity: ticket.quantity,
+      total: ticket.total,
+      reference,
+      date: event?.date ?? '2026-06-20',
+      time: event?.time ?? '23:00',
+    })
     navigate('ticket-confirm')
   }
 
@@ -1747,36 +2007,7 @@ function BookingsListScreen({ navigate }: { navigate: (screen: Screen, id?: stri
 function MyAccessesScreen({ navigate }: { navigate: (screen: Screen, id?: string) => void }) {
   const [activeFilter, setActiveFilter] = useState<'upcoming' | 'pending' | 'used' | 'cancelled' | 'all'>('upcoming')
 
-  const ticketAccesses = [
-    {
-      id: 'ticket-e2-1',
-      eventId: mockEvents[1]?.id ?? 'e2',
-      type: 'ticket' as const,
-      title: mockEvents[1]?.title ?? 'Soirée ticket',
-      venueName: mockEvents[1]?.venueName ?? 'Le Mirage Club',
-      date: mockEvents[1]?.date ?? '2026-06-23',
-      time: mockEvents[1]?.time ?? '23:00',
-      status: 'confirmed' as const,
-      accessLabel: 'Early Bird',
-      accessMode: 'TICKET' as AccessMode,
-      reference: 'TKT-LAY-22A1',
-      details: '2 billets • Entrée avant 00:00',
-    },
-    {
-      id: 'ticket-e3-1',
-      eventId: mockEvents[2]?.id ?? 'e3',
-      type: 'ticket' as const,
-      title: mockEvents[2]?.title ?? 'Soirée jazz',
-      venueName: mockEvents[2]?.venueName ?? 'Palmeraie Terrace',
-      date: mockEvents[2]?.date ?? '2026-06-18',
-      time: mockEvents[2]?.time ?? '21:30',
-      status: 'cancelled' as const,
-      accessLabel: 'Standard',
-      accessMode: 'TICKET' as AccessMode,
-      reference: 'TKT-LAY-91B7',
-      details: '1 billet • Remboursé',
-    },
-  ]
+  const ticketAccesses = mockCustomerTicketAccesses
 
   const allAccesses = [
     ...mockBookingHistory.map((booking) => ({
@@ -1816,6 +2047,12 @@ function MyAccessesScreen({ navigate }: { navigate: (screen: Screen, id?: string
         <button type="button" onClick={() => navigate('home')} aria-label="Retour">← Retour</button>
         <h1>Mes accès</h1>
       </header>
+
+      <section className="dashboard-section">
+        <IonButton expand="block" fill="outline" onClick={() => navigate('customer-tickets')}>
+          Voir mes tickets uniquement
+        </IonButton>
+      </section>
 
       {nextAccess && (
         <section className="detail-section detail-section--highlight">
@@ -1861,6 +2098,42 @@ function MyAccessesScreen({ navigate }: { navigate: (screen: Screen, id?: string
           </article>
         ))}
         {filteredAccesses.length === 0 && <p className="empty-state">Aucun accès dans cet onglet.</p>}
+      </div>
+    </main>
+  )
+}
+
+function CustomerTicketsScreen({ navigate }: { navigate: (screen: Screen, id?: string) => void }) {
+  const tickets = mockCustomerTicketAccesses
+
+  return (
+    <main className="screen-container reveal-up">
+      <header className="screen-header">
+        <button type="button" onClick={() => navigate('my-accesses')} aria-label="Retour">← Retour</button>
+        <h1>Mes tickets</h1>
+      </header>
+
+      <div className="bookings-list">
+        {tickets.length === 0 ? (
+          <p className="empty-state">Aucun ticket pour le moment.</p>
+        ) : (
+          tickets.map((ticket) => (
+            <article key={ticket.id} className="booking-card">
+              <div className="booking-card__header">
+                <h3>{ticket.title}</h3>
+                <span className={`status-badge ${getStatusClass(ticket.status)}`}>{getStatusLabel(ticket.status)}</span>
+              </div>
+              <div className="booking-card__details">
+                <p><strong>{ticket.date}</strong> à <strong>{ticket.time}</strong></p>
+                <p>{ticket.venueName} · {ticket.details}</p>
+                <p>Réf : {ticket.reference}</p>
+              </div>
+              <div className="booking-card__actions">
+                <button type="button" className="action-link" onClick={() => navigate('event-detail', ticket.eventId)}>QR & Détails</button>
+              </div>
+            </article>
+          ))
+        )}
       </div>
     </main>
   )
@@ -2191,7 +2464,9 @@ function CustomerProfileScreen({ navigate, logoutCustomer }: { navigate: (screen
       </section>
 
       <section className="sticky-cta sticky-cta--stacked">
-        <IonButton expand="block">Enregistrer</IonButton>
+        <IonButton expand="block" onClick={() => navigate('my-accesses')}>Mes accès</IonButton>
+        <IonButton expand="block" fill="outline" onClick={() => navigate('customer-tickets')}>Mes tickets</IonButton>
+        <IonButton expand="block" fill="outline">Enregistrer</IonButton>
         <button type="button" className="secondary-btn" onClick={logoutCustomer}>Se déconnecter</button>
         <button type="button" className="danger-btn">Supprimer mon compte</button>
       </section>
@@ -2249,6 +2524,82 @@ function BookingDetailScreen({ bookingId, navigate }: { bookingId?: string; navi
       <section className="sticky-cta sticky-cta--stacked">
         <button type="button" className="danger-btn">Annuler la réservation</button>
         <button type="button" className="secondary-btn" onClick={() => navigate('bookings-list')}>Retour aux réservations</button>
+      </section>
+    </main>
+  )
+}
+
+function AdminOverviewScreen({ navigate }: { navigate: (screen: Screen, id?: string) => void }) {
+  const activeCount = mockAdminTenants.filter((t) => t.status === 'ACTIVE').length
+  const suspendedCount = mockAdminTenants.filter((t) => t.status === 'SUSPENDED').length
+
+  return (
+    <main className="screen-container reveal-up">
+      <header className="screen-header">
+        <button type="button" onClick={() => navigate('entry')} aria-label="Retour">← Retour</button>
+        <h1>Admin Nafura</h1>
+      </header>
+      <section className="dashboard-kpis">
+        <div className="kpi-grid">
+          <article className="kpi-card"><span className="kpi-value">{mockAdminTenants.length}</span><span className="kpi-label">Tenants</span></article>
+          <article className="kpi-card"><span className="kpi-value">{activeCount}</span><span className="kpi-label">Actifs</span></article>
+          <article className="kpi-card"><span className="kpi-value">{suspendedCount}</span><span className="kpi-label">Suspendus</span></article>
+        </div>
+      </section>
+      <section className="dashboard-section">
+        <IonButton expand="block" onClick={() => navigate('admin-tenants')}>Gerer les venues / tenants</IonButton>
+      </section>
+    </main>
+  )
+}
+
+function AdminTenantsScreen({ navigate }: { navigate: (screen: Screen, id?: string) => void }) {
+  return (
+    <main className="screen-container reveal-up">
+      <header className="screen-header">
+        <button type="button" onClick={() => navigate('admin-overview')} aria-label="Retour">← Retour</button>
+        <h1>Tenants Layali</h1>
+      </header>
+      <div className="bookings-list">
+        {mockAdminTenants.map((tenant) => (
+          <article key={tenant.id} className="booking-card">
+            <div className="booking-header">
+              <strong>{tenant.name}</strong>
+              <span className={`status status--${tenant.status.toLowerCase()}`}>{tenant.status}</span>
+            </div>
+            <p>{tenant.city} · {tenant.slug}</p>
+            <button type="button" className="action-link" onClick={() => navigate('admin-tenant-detail', tenant.id)}>Voir detail</button>
+          </article>
+        ))}
+      </div>
+    </main>
+  )
+}
+
+function AdminTenantDetailScreen({
+  tenantId,
+  navigate,
+}: {
+  tenantId?: string
+  navigate: (screen: Screen, id?: string) => void
+}) {
+  const tenant = mockAdminTenants.find((t) => t.id === tenantId) ?? mockAdminTenants[0]
+
+  return (
+    <main className="screen-container reveal-up">
+      <header className="screen-header">
+        <button type="button" onClick={() => navigate('admin-tenants')} aria-label="Retour">← Retour</button>
+        <h1>{tenant.name}</h1>
+      </header>
+      <section className="detail-section">
+        <p><strong>Statut:</strong> {tenant.status}</p>
+        <p><strong>Ville:</strong> {tenant.city}</p>
+        <p><strong>Slug:</strong> {tenant.slug}</p>
+        <div className="action-buttons">
+          <button type="button">Approuver (mock)</button>
+          <button type="button">Suspendre (mock)</button>
+          <button type="button">Reactiver (mock)</button>
+        </div>
       </section>
     </main>
   )

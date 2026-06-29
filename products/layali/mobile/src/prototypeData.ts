@@ -594,6 +594,30 @@ export const mockBookingHistory: BookingHistoryItem[] = [
   },
 ]
 
+export function commitBookingToHistory(booking: BookingDraft): string {
+  const id = `bk-${Date.now()}`
+  const status = booking.status === 'pending' ? 'pending' : 'confirmed'
+
+  mockBookingHistory.unshift({
+    id,
+    venueName: booking.venueName,
+    date: booking.date,
+    time: booking.time,
+    partySize: booking.groupSize,
+    status,
+    reference: booking.reference ?? id,
+    accessMode: booking.accessMode,
+    accessLabel: booking.accessLabel,
+    approvalStatus: booking.approvalStatus,
+    occasion: booking.occasion,
+    tableName: booking.counterSpotName ?? booking.tableName,
+    minSpend: booking.minSpend,
+    depositPaid: booking.depositAmount > 0 && status === 'confirmed' ? booking.depositAmount : 0,
+  })
+
+  return id
+}
+
 // ─── Pro Manager – Tables ─────────────────────────────────────────────────────
 
 export interface ProTable {
@@ -704,3 +728,158 @@ export const mockProEvents: ProManagedEvent[] = [
     status: 'DRAFT',
   },
 ]
+
+export interface MembershipAccessRequest {
+  id: string
+  userId: string
+  userName: string
+  userEmail: string
+  requestedRole: 'HOST' | 'ADMIN' | 'BAR_MANAGER'
+  message: string
+  createdAt: string
+  status: 'PENDING' | 'APPROVED' | 'REJECTED'
+}
+
+export const mockMembershipAccessRequests: MembershipAccessRequest[] = [
+  {
+    id: 'req-001',
+    userId: 'usr-001',
+    userName: 'Mohamed Ben',
+    userEmail: 'med@example.ma',
+    requestedRole: 'HOST',
+    message: 'Je serai a la porte le vendredi et samedi',
+    createdAt: '2026-06-15T10:30:00Z',
+    status: 'PENDING',
+  },
+  {
+    id: 'req-002',
+    userId: 'usr-002',
+    userName: 'Amira Sola',
+    userEmail: 'amira@example.ma',
+    requestedRole: 'BAR_MANAGER',
+    message: 'Chef de bar experience 5 ans',
+    createdAt: '2026-06-14T14:15:00Z',
+    status: 'PENDING',
+  },
+]
+
+export function submitMembershipAccessRequest(input: {
+  userName: string
+  userEmail: string
+  requestedRole: MembershipAccessRequest['requestedRole']
+  message: string
+}) {
+  mockMembershipAccessRequests.unshift({
+    id: `req-${Date.now()}`,
+    userId: `usr-${Date.now()}`,
+    userName: input.userName,
+    userEmail: input.userEmail,
+    requestedRole: input.requestedRole,
+    message: input.message,
+    createdAt: new Date().toISOString(),
+    status: 'PENDING',
+  })
+}
+
+export interface AdminTenant {
+  id: string
+  name: string
+  city: string
+  status: 'ACTIVE' | 'SUSPENDED' | 'PENDING'
+  slug: string
+}
+
+export const mockAdminTenants: AdminTenant[] = [
+  { id: 'tenant-sky31', name: 'Sky31 Casablanca', city: 'Casablanca', status: 'ACTIVE', slug: 'sky31' },
+  { id: 'tenant-mirage', name: 'Le Mirage Club', city: 'Casablanca', status: 'ACTIVE', slug: 'le-mirage-club' },
+  { id: 'tenant-palmeraie', name: 'Palmeraie Terrace', city: 'Casablanca', status: 'SUSPENDED', slug: 'palmeraie-terrace' },
+]
+
+export interface ProTicketSale {
+  id: string
+  reference: string
+  customerName: string
+  eventTitle: string
+  categoryName: string
+  quantity: number
+  totalMad: number
+  status: 'PAID' | 'REFUNDED' | 'PENDING'
+}
+
+export const mockProTicketSales: ProTicketSale[] = [
+  { id: 'ts-1', reference: 'TKT-LAY-22A1', customerName: 'Sara M.', eventTitle: 'Hip-Hop Summer Night', categoryName: 'Standard', quantity: 2, totalMad: 600, status: 'PAID' },
+  { id: 'ts-2', reference: 'TKT-LAY-91B7', customerName: 'Karim L.', eventTitle: 'Jazz Sunset', categoryName: 'Early Bird', quantity: 1, totalMad: 150, status: 'REFUNDED' },
+  { id: 'ts-3', reference: 'TKT-LAY-44C2', customerName: 'Ines B.', eventTitle: 'Hip-Hop Summer Night', categoryName: 'VIP', quantity: 4, totalMad: 4800, status: 'PAID' },
+]
+
+export interface ProReviewItem {
+  id: string
+  author: string
+  rating: number
+  text: string
+  status: 'PENDING' | 'PUBLISHED' | 'HIDDEN'
+}
+
+export const mockProReviewsPending: ProReviewItem[] = [
+  { id: 'rv-1', author: 'Amine K.', rating: 2, text: 'Attente longue a l entree malgre reservation.', status: 'PENDING' },
+  { id: 'rv-2', author: 'Lina R.', rating: 5, text: 'Service impeccable et ambiance top.', status: 'PUBLISHED' },
+]
+
+export interface CustomerTicketAccess {
+  id: string
+  eventId: string
+  type: 'ticket'
+  title: string
+  venueName: string
+  date: string
+  time: string
+  status: 'confirmed' | 'cancelled' | 'pending'
+  accessLabel: string
+  accessMode: AccessMode
+  reference: string
+  details: string
+}
+
+export const mockCustomerTicketAccesses: CustomerTicketAccess[] = [
+  {
+    id: 'ticket-e2-1',
+    eventId: 'e2',
+    type: 'ticket',
+    title: 'Hip-Hop Summer Night',
+    venueName: 'Le Mirage Club',
+    date: '2026-06-23',
+    time: '23:00',
+    status: 'confirmed',
+    accessLabel: 'Early Bird',
+    accessMode: 'TICKET',
+    reference: 'TKT-LAY-22A1',
+    details: '2 billets · Entree avant 00:00',
+  },
+]
+
+export function commitTicketToAccesses(input: {
+  eventId: string
+  eventTitle: string
+  venueName: string
+  categoryName: string
+  quantity: number
+  total: number
+  reference: string
+  date: string
+  time: string
+}) {
+  mockCustomerTicketAccesses.unshift({
+    id: `ticket-${Date.now()}`,
+    eventId: input.eventId,
+    type: 'ticket',
+    title: input.eventTitle,
+    venueName: input.venueName,
+    date: input.date,
+    time: input.time,
+    status: 'confirmed',
+    accessLabel: input.categoryName,
+    accessMode: 'TICKET',
+    reference: input.reference,
+    details: `${input.quantity} billet(s) · ${input.total} MAD`,
+  })
+}

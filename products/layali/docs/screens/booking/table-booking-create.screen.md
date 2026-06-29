@@ -1,10 +1,13 @@
----
+﻿---
 specVersion: 1
 kind: screen
 appId: layali
 screenId: table-booking-create
 name: Réserver une table
 status: stable
+phase: P1
+p1MobileId: booking-create
+p1Impl: mock
 route: /venues/:venueSlug/book
 layout: public-shell
 zone: booking
@@ -31,6 +34,18 @@ abstractions:
 ---
 
 # Réserver une table
+
+## P1 - Client Walkthrough
+
+| Champ | Valeur |
+|-------|--------|
+| Mobile `Screen` | `booking-create` |
+| Impl | mock |
+| Fixtures | [fixtures.md](../../fixtures.md) |
+| Cartographie | [mobile-map.md](../../mobile-map.md) |
+
+> En P1 : **ne pas** utiliser `apiRefs` / composants `@platform/` comme brief agent - mock local uniquement. *(accessMode TABLE)*
+
 
 ## Intent
 

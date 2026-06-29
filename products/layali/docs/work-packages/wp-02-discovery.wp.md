@@ -5,6 +5,7 @@ appId: layali
 wpId: wp-02-discovery
 title: Discovery — home, venues, events (public)
 status: stable
+phase: P3
 wave: 2
 dependsOn: [wp-01-platform-skeleton]
 filesAllowed:

@@ -1,10 +1,13 @@
----
+﻿---
 specVersion: 1
 kind: screen
 appId: layali
 screenId: admin-overview
 name: Vue d'ensemble (admin Nafura)
 status: stable
+phase: P1
+p1MobileId: admin-overview
+p1Impl: mock
 route: /admin
 layout: admin-shell
 zone: admin
@@ -25,6 +28,18 @@ abstractions:
 ---
 
 # Vue d'ensemble (admin Nafura)
+
+## P1 - Client Walkthrough
+
+| Champ | Valeur |
+|-------|--------|
+| Mobile `Screen` | `admin-overview` |
+| Impl | mock |
+| Fixtures | [fixtures.md](../../fixtures.md) |
+| Cartographie | [mobile-map.md](../../mobile-map.md) |
+
+> En P1 : **ne pas** utiliser `apiRefs` / composants `@platform/` comme brief agent - mock local uniquement.
+
 
 ## Intent
 

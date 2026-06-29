@@ -3,7 +3,8 @@ specVersion: 1
 kind: api
 appId: beauty
 resource: payments
-status: stable
+status: draft
+phase: P3
 basePath: /api/v1/payments
 auth: required
 rateLimit: default

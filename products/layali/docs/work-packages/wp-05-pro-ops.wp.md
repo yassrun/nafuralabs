@@ -5,6 +5,7 @@ appId: layali
 wpId: wp-05-pro-ops
 title: Pro ops — bookings, tickets, door check-in, reviews
 status: stable
+phase: P3
 wave: 5
 dependsOn: [wp-01-platform-skeleton, wp-03-booking-customer, wp-04-pro-core]
 filesAllowed:

@@ -40,10 +40,10 @@ nf/nafuralabs/
 ├── products/                      # produits déployables
 │   ├── sektor-btp/                # ERP BTP — migré
 │   ├── venue-catalog/             # catalogue lieux — specs
-│   ├── layali/                    # nightlife — prototype mobile Ionic
+│   ├── layali/                    # nightlife — P1 Client Walkthrough (mobile/)
 │   │   ├── mobile/
 │   │   └── docs/
-│   └── beauty/                    # salons beauté — prototype mobile Ionic
+│   └── beauty/                    # salons beauté — P1 Client Walkthrough (mobile/)
 │       ├── mobile/
 │       └── docs/
 │
@@ -82,7 +82,7 @@ nf/nafuralabs/
 | Écran ERP, facades Angular | `products/sektor-btp/web/app/` |
 | Auth, listing générique, shell | `platform/web/` ou `platform/backend/` |
 | Catalogue lieux, jobs Google | `products/venue-catalog/` (specs) |
-| Prototype mobile Layali / Beauty | `products/layali/mobile/`, `products/beauty/mobile/` |
+| Client Walkthrough Layali / Beauty (P1) | `products/layali/mobile/`, `products/beauty/mobile/` |
 | Specs produit | `products/<app-id>/docs/` |
 | Nouveau produit | `products/<app-id>/` (copier le pattern sektor-btp) |
 | Postgres, Keycloak | `infra/k8s/` |

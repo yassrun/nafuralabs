@@ -24,6 +24,8 @@ apiRefs:
 
 # Réservation guest list / entrée (client)
 
+> **P1 walkthrough :** suivre les étapes UI ci-dessous ; données = [fixtures.md](../fixtures.md). Colonnes « Mock API » = référence **P3** uniquement.
+
 ## Objectif
 
 Le client demande un accès de type `GUEST_LIST` pour un venue ou une soirée, renseigne son groupe et son occasion éventuelle, puis reçoit soit une confirmation immédiate, soit un statut en attente de validation, avec paiement optionnel selon les règles du lieu.
