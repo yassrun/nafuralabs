@@ -1,0 +1,10 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+spec:
+  template:
+    spec:
+      containers:
+        - name: keycloak
+          image: europe-west9-docker.pkg.dev/gen-lang-client-0875291215/nafura/nafura-keycloak:demo

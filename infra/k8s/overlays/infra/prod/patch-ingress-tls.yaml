@@ -11,4 +11,6 @@ spec:
     - hosts:
         - iam.nafuralabs.com
         - vault.nafuralabs.com
+        - minio.nafuralabs.com
+        - s3.nafuralabs.com
       secretName: nafura-infra-tls

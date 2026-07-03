@@ -1,0 +1,93 @@
+<div class="caisses">
+  <header class="caisses__header">
+    <div>
+      <h1 class="caisses__title">{{ 'finance.caissesChantier.title' | translate }}</h1>
+      <p class="caisses__subtitle">
+        {{ 'finance.caissesChantier.subtitle' | translate }}
+      </p>
+    </div>
+    <div class="caisses__header-actions">
+      <nf-button variant="ghost" class="caisses__btn caisses__btn--ghost" (clicked)="goRapprochement()">
+        {{ 'finance.rapprochement.title' | translate }}
+      </nf-button>
+      <nf-button variant="ghost" class="caisses__btn caisses__btn--ghost" (clicked)="newVirement()">
+        {{ 'finance.virement.actions.create' | translate }}
+      </nf-button>
+      <nf-button variant="primary" class="caisses__btn" (clicked)="newReglement()">
+        {{ 'finance.reglement.actions.create' | translate }}
+      </nf-button>
+    </div>
+  </header>
+
+  <section class="caisses__kpi">
+    <article class="caisses__kpi-card">
+      <span class="caisses__kpi-label">{{ 'finance.caissesChantier.kpi.soldeTotal' | translate }}</span>
+      <app-solde-indicator
+        [value]="soldeTotal()"
+        currency="MAD"
+        [variation]="variation24hTotal()"
+        [variationLabel]="'finance.mouvement.labels.vsYesterday' | translate"
+      />
+      <span class="caisses__kpi-meta">{{ 'finance.caissesChantier.kpi.activeAccounts' | translate: { count: nbActifs() } }}</span>
+    </article>
+    <article class="caisses__kpi-card">
+      <span class="caisses__kpi-label">{{ 'finance.caissesChantier.kpi.recettesMois' | translate }}</span>
+      <span class="caisses__kpi-value caisses__kpi-value--pos">
+        +{{ recettesMois() | numberLocalized:'1.0-0' }} {{ 'finance.common.currency.mad' | translate }}
+      </span>
+    </article>
+    <article class="caisses__kpi-card">
+      <span class="caisses__kpi-label">{{ 'finance.caissesChantier.kpi.depensesMois' | translate }}</span>
+      <span class="caisses__kpi-value caisses__kpi-value--neg">
+        -{{ depensesMois() | numberLocalized:'1.0-0' }} {{ 'finance.common.currency.mad' | translate }}
+      </span>
+    </article>
+    <article class="caisses__kpi-card">
+      <span class="caisses__kpi-label">{{ 'finance.caissesChantier.kpi.fluxNetMois' | translate }}</span>
+      <app-solde-indicator
+        [value]="recettesMois() - depensesMois()"
+        currency="MAD"
+      />
+    </article>
+  </section>
+
+  @if (banques().length > 0) {
+    <section class="caisses__section">
+      <header class="caisses__section-head">
+        <h2>{{ 'finance.compte.types.banque' | translate }}</h2>
+        <span class="caisses__section-count">{{ 'finance.caissesChantier.kpi.accounts' | translate: { count: banques().length } }}</span>
+      </header>
+      <div class="caisses__grid">
+        @for (c of banques(); track c.id) {
+          <app-compte-financier-card
+            [compte]="c"
+            [stats]="statsFor(c)"
+            (open)="openMouvements(c)"
+            (openMouvements)="openMouvements(c)"
+            (saisirMvt)="saisirMvt(c)"
+          />
+        }
+      </div>
+    </section>
+  }
+
+  @if (caisses().length > 0) {
+    <section class="caisses__section">
+      <header class="caisses__section-head">
+        <h2>{{ 'finance.compte.types.caisse' | translate }}</h2>
+        <span class="caisses__section-count">{{ 'finance.caissesChantier.kpi.caisses' | translate: { count: caisses().length } }}</span>
+      </header>
+      <div class="caisses__grid">
+        @for (c of caisses(); track c.id) {
+          <app-compte-financier-card
+            [compte]="c"
+            [stats]="statsFor(c)"
+            (open)="openMouvements(c)"
+            (openMouvements)="openMouvements(c)"
+            (saisirMvt)="saisirMvt(c)"
+          />
+        }
+      </div>
+    </section>
+  }
+</div>

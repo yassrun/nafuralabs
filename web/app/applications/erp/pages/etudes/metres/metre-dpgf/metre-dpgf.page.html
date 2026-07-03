@@ -1,0 +1,109 @@
+<nf-page-shell scroll>
+  <nf-page-header [config]="pageHeaderConfig()"></nf-page-header>
+
+  @if (loading()) {
+    <p class="metre-dpgf__muted">{{ 'etudesDpu.loadingMetre' | translate }}</p>
+  } @else if (!metre()) {
+    <p class="metre-dpgf__muted">{{ 'etudesDpu.noMetre' | translate }}</p>
+  } @else {
+    <div class="metre-dpgf__actions">
+      <a routerLink="/etudes/metres/{{ metre()!.id }}" class="metre-dpgf__link">{{ 'etudesDpu.backMetre' | translate }}</a>
+      <nf-button variant="secondary" icon="refresh-cw" (clicked)="generate()">
+        {{ 'etudesDpu.generateDpgf' | translate }}
+      </nf-button>
+      <nf-button variant="primary" icon="file-plus" iconLibrary="lucide" [disabled]="!dpgf()" (clicked)="createDevis()">
+        {{ 'etudesDpu.createDevis' | translate }}
+      </nf-button>
+      <nf-button variant="ghost" icon="printer" [disabled]="!dpgf()" (clicked)="printPdf()">
+        {{ 'etudesDpu.pdfDpgf' | translate }}
+      </nf-button>
+    </div>
+
+    <p class="metre-dpgf__muted">
+      {{ metre()!.numero }} — {{ metre()!.projetNom }}
+    </p>
+
+    @if (dpgf(); as d) {
+      <div id="dpgf-print-root" class="metre-dpgf__print-root">
+        <h2 class="metre-dpgf__h2">{{ 'etudesDpu.printTitle' | translate }} — {{ d.numero }}</h2>
+        <p class="metre-dpgf__muted">{{ d.projetNom }}</p>
+
+        <h3 class="metre-dpgf__h3">{{ 'etudesDpu.sommaireTitle' | translate }}</h3>
+        <table class="metre-dpgf__table">
+          <thead>
+            <tr>
+              <th>{{ 'etudesDpu.treeLot' | translate }}</th>
+              <th>{{ 'etudesDpu.dpgfLibelle' | translate }}</th>
+              <th class="metre-dpgf__num">{{ 'etudesDpu.totalHt' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (s of sommaire(); track s.code + s.libelle) {
+              <tr>
+                <td>{{ s.code }}</td>
+                <td>{{ s.libelle }}</td>
+                <td class="metre-dpgf__num">{{ s.total | number: '1.2-2' }} MAD</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+
+        <h3 class="metre-dpgf__h3">DPGF — {{ 'etudesDpu.treeLot' | translate }} / {{ 'etudesDpu.treeSousLot' | translate }} / {{ 'etudesDpu.treeArticle' | translate }}</h3>
+        <table class="metre-dpgf__table metre-dpgf__table--tree">
+          <thead>
+            <tr>
+              <th>{{ 'etudesDpu.colType' | translate }}</th>
+              <th>{{ 'etudesDpu.dpgfCode' | translate }}</th>
+              <th>{{ 'etudesDpu.dpgfLibelle' | translate }}</th>
+              <th class="metre-dpgf__num">{{ 'etudesDpu.colQty' | translate }}</th>
+              <th>{{ 'etudesDpu.colUnite' | translate }}</th>
+              <th class="metre-dpgf__num">{{ 'etudesDpu.colPu' | translate }}</th>
+              <th class="metre-dpgf__num">{{ 'etudesDpu.colTotal' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of flatRows(); track row.node.id) {
+              <tr>
+                <td>{{ row.node.type }}</td>
+                <td [style.padding-left]="rowPad(row.depth)">{{ row.node.code }}</td>
+                <td>{{ row.node.libelle }}</td>
+                <td class="metre-dpgf__num">
+                  @if (row.node.type === 'ARTICLE') {
+                    {{ row.node.quantite | number: '1.2-2' }}
+                  }
+                </td>
+                <td>{{ row.node.unite }}</td>
+                <td class="metre-dpgf__num">
+                  @if (row.node.type === 'ARTICLE') {
+                    {{ row.node.prixUnitaire | number: '1.2-2' }}
+                  }
+                </td>
+                <td class="metre-dpgf__num">
+                  @if (row.node.type === 'ARTICLE') {
+                    {{ row.node.total | number: '1.2-2' }}
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="6" class="metre-dpgf__num">{{ 'etudesDpu.totalHt' | translate }}</td>
+              <td class="metre-dpgf__num">{{ d.totalHT | mad }}</td>
+            </tr>
+            <tr>
+              <td colspan="6" class="metre-dpgf__num">{{ 'etudesDpu.tvaLine' | translate: { taux: d.tvaTaux } }}</td>
+              <td class="metre-dpgf__num">{{ d.totalTva | mad }}</td>
+            </tr>
+            <tr>
+              <td colspan="6" class="metre-dpgf__num">{{ 'etudesDpu.totalTtc' | translate }}</td>
+              <td class="metre-dpgf__num">{{ d.totalTTC | mad }}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    } @else {
+      <p class="metre-dpgf__muted">{{ 'etudesDpu.emptyDpgfHint' | translate }}</p>
+    }
+  }
+</nf-page-shell>

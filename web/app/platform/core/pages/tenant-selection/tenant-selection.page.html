@@ -1,0 +1,69 @@
+<div class="tenant-selection">
+  <div class="tenant-selection__container">
+    <div class="tenant-selection__header">
+      <h1 class="tenant-selection__title">
+        @if (isSuperAdmin()) {
+          Select Tenant to View
+        } @else {
+          Select Tenant
+        }
+      </h1>
+      <p class="tenant-selection__subtitle">
+        @if (isSuperAdmin()) {
+          Choose a tenant to view tenant-scoped data, or skip to access platform-level features.
+        } @else {
+          Choose which tenant you want to access.
+        }
+      </p>
+    </div>
+
+    @if (isLoading()) {
+      <div class="tenant-selection__loading">
+        <div class="spinner"></div>
+        <p>Loading tenants...</p>
+      </div>
+    } @else if (tenants().length === 0) {
+      <div class="tenant-selection__empty">
+        <p>No tenants available.</p>
+      </div>
+    } @else {
+      <div class="tenant-selection__grid">
+        @for (tenant of tenants(); track tenant.id) {
+          <button
+            class="tenant-card"
+            (click)="selectTenant(tenant.id)"
+            [disabled]="isLoading()"
+          >
+            <div class="tenant-card__content">
+              @if (tenant.logoUrl) {
+                <img
+                  [src]="tenant.logoUrl"
+                  [alt]="tenant.name"
+                  class="tenant-card__logo"
+                />
+              } @else {
+                <div class="tenant-card__logo-placeholder">
+                  {{ tenant.name.charAt(0).toUpperCase() }}
+                </div>
+              }
+              <h3 class="tenant-card__name">{{ tenant.name }}</h3>
+              <p class="tenant-card__type">{{ tenant.type }}</p>
+            </div>
+          </button>
+        }
+      </div>
+
+      @if (isSuperAdmin()) {
+        <div class="tenant-selection__actions">
+          <button
+            class="btn btn--secondary"
+            (click)="skipSelection()"
+            [disabled]="isLoading()"
+          >
+            Skip - Access Platform View
+          </button>
+        </div>
+      }
+    }
+  </div>
+</div>

@@ -38,52 +38,52 @@ import { HttpClient } from '@angular/common/http';
 import {
   createModuleTranslateLoader,
   TranslationLayersConfig,
-} from './platform/core/i18n/i18n.module-loader';
-import { I18N_CONFIG } from './platform/core/i18n/i18n.config';
-import { ACTIVE_TRANSLATION_LAYERS } from './applications/i18n.generated';
+} from '@platform/core/i18n/i18n.module-loader';
+import { I18N_CONFIG } from '@platform/core/i18n/i18n.config';
+import { ACTIVE_TRANSLATION_LAYERS } from '@applications/config/i18n';
 
 // Import routes
 import { APP_ROUTES } from './app.routes';
 
 // Import auth facade for initialization
-import { AuthFacade } from './platform/core/security/services/auth.facade';
-import { I18nService } from './platform/core/i18n/i18n.service';
-import { LocaleService } from './platform/core/i18n/locale.service';
-import { provideDynamicLocaleId } from './platform/core/i18n/locale-id.factory';
+import { AuthFacade } from '@platform/core/security/services/auth.facade';
+import { I18nService } from '@platform/core/i18n/i18n.service';
+import { LocaleService } from '@platform/core/i18n/locale.service';
+import { provideDynamicLocaleId } from '@platform/core/i18n/locale-id.factory';
 
 // Import HTTP interceptors
 import {
   authTokenInterceptor,
   bindAuthTokenInterceptorDeps,
-} from './platform/core/http/auth-token.interceptor';
-import { AuthStateStore } from './platform/core/security/state/auth.state';
-import { tenantHeaderInterceptor } from './platform/core/http/tenant-header.interceptor';
+} from '@platform/core/http/auth-token.interceptor';
+import { AuthStateStore } from '@platform/core/security/state/auth.state';
+import { tenantHeaderInterceptor } from '@platform/core/http/tenant-header.interceptor';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
-import { APP_SHELL_CONFIG } from './applications/shell.config';
-import { ADMINISTRATION_CONFIG } from './platform/features/administration/administration.token';
-import { USER_SETTINGS_CONFIG } from './platform/features/user-settings/user-settings.token';
-import { APP_SETTINGS_CONFIG } from './platform/features/app-settings/app-settings.token';
-import { ErpNotificationsService } from './applications/erp/shell/erp-notifications.service';
-import { ErpNotificationBellAdapter } from './applications/erp/shell/erp-notification-bell.adapter';
-import { ErpNotificationBellListComponent } from './applications/erp/shell/erp-notification-bell-list.component';
-import { ChantierDrilldownService } from './applications/erp/shell/chantier-drilldown.service';
+import { APP_SHELL_CONFIG } from '@applications/config/shell.config';
+import { ADMINISTRATION_CONFIG } from '@platform/features/administration/administration.token';
+import { USER_SETTINGS_CONFIG } from '@platform/features/user-settings/user-settings.token';
+import { APP_SETTINGS_CONFIG } from '@platform/features/app-settings/app-settings.token';
+import { ErpNotificationsService } from '@applications/erp/shell/erp-notifications.service';
+import { ErpNotificationBellAdapter } from '@applications/erp/shell/erp-notification-bell.adapter';
+import { ErpNotificationBellListComponent } from '@applications/erp/shell/erp-notification-bell-list.component';
+import { ChantierDrilldownService } from '@applications/erp/shell/chantier-drilldown.service';
 import {
   NOTIFICATION_BELL_ADAPTER,
   NOTIFICATION_BELL_DROPDOWN,
-} from './platform/features/collaboration/notification/notification-bell.adapter';
-import { NotificationStreamService } from './platform/features/collaboration/notification/services/notification-stream.service';
-import { NotificationUnreadService } from './platform/features/collaboration/notification/services/notification-unread.service';
-import { CHANTIER_ROW_NAVIGATOR } from './platform/lib/anatomy/tokens/chantier-row-navigator.token';
-import { LOOKUP_LIST_ROUTES } from './platform/lib/anatomy/tokens/lookup-list-routes.token';
-import { ERP_LOOKUP_LIST_ROUTES } from './applications/erp/shared/config/erp-lookup-list-routes';
+} from '@platform/features/collaboration/notification/notification-bell.adapter';
+import { NotificationStreamService } from '@platform/features/collaboration/notification/services/notification-stream.service';
+import { NotificationUnreadService } from '@platform/features/collaboration/notification/services/notification-unread.service';
+import { CHANTIER_ROW_NAVIGATOR } from '@platform/lib/anatomy/tokens/chantier-row-navigator.token';
+import { LOOKUP_LIST_ROUTES } from '@platform/lib/anatomy/tokens/lookup-list-routes.token';
+import { ERP_LOOKUP_LIST_ROUTES } from '@applications/erp/shared/config/erp-lookup-list-routes';
 import { environment } from '../src/environments/environment';
 import { TranslateMessageFormatCompiler } from 'ngx-translate-messageformat-compiler';
 import {
   LISTING_EXPORT_AUDIT,
   type ListingExportAuditPayload,
-} from './platform/lib/anatomy/tokens/listing-export-audit.token';
-import { ErpAuditService } from './applications/erp/shell/erp-audit.service';
-import { provideAppLucideIcons } from './platform/core/icons/app-lucide-icons';
+} from '@platform/lib/anatomy/tokens/listing-export-audit.token';
+import { ErpAuditService } from '@applications/erp/shell/erp-audit.service';
+import { provideAppLucideIcons } from '@platform/core/icons/app-lucide-icons';
 
 /**
  * Factory function for APP_INITIALIZER.

@@ -1,0 +1,77 @@
+<div class="nf-print-dialog">
+  <h2 class="nf-print-dialog__title">{{ 'print.dialog.title' | translate }}</h2>
+
+  @if (templatesLoading()) {
+    <div class="nf-print-dialog__loading">
+      <mat-spinner diameter="32"></mat-spinner>
+      <span>{{ 'print.dialog.loading' | translate }}</span>
+    </div>
+  } @else if (noTemplates()) {
+    <p class="nf-print-dialog__no-templates">{{ 'print.dialog.noTemplates' | translate }}</p>
+    <div class="nf-print-dialog__footer">
+      <button mat-flat-button color="primary" type="button" (click)="close()">
+        {{ 'Cancel' | translate }}
+      </button>
+    </div>
+  } @else {
+    <div class="nf-print-dialog__template">
+      <mat-form-field appearance="outline" class="nf-print-dialog__select">
+        <mat-label>{{ 'print.dialog.template' | translate }}</mat-label>
+        <mat-select
+          [value]="selectedTemplateId()"
+          (valueChange)="onTemplateChange($event)">
+          @for (t of templates(); track t.id) {
+            <mat-option [value]="t.id">{{ t.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="nf-print-dialog__preview-section">
+      <span class="nf-print-dialog__preview-label">{{ 'print.dialog.preview' | translate }}</span>
+      <div class="nf-print-dialog__preview">
+        @if (previewLoading()) {
+          <div class="nf-print-dialog__preview-loading">
+            <mat-spinner diameter="40"></mat-spinner>
+            <span>{{ 'print.dialog.loading' | translate }}</span>
+          </div>
+        } @else if (previewError()) {
+          <p class="nf-print-dialog__preview-error">{{ previewError() }}</p>
+        } @else {
+          @if (previewSafeUrl(); as url) {
+            <iframe
+              class="nf-print-dialog__iframe"
+              [src]="url"
+              [title]="'print.dialog.preview' | translate">
+            </iframe>
+          } @else {
+            <p class="nf-print-dialog__preview-placeholder">{{ 'print.dialog.preview' | translate }}</p>
+          }
+        }
+      </div>
+    </div>
+
+    <div class="nf-print-dialog__footer">
+      <button
+        mat-flat-button
+        color="primary"
+        type="button"
+        [disabled]="!canDownload()"
+        (click)="downloadPdf()">
+        <mat-icon>download</mat-icon>
+        {{ 'print.dialog.download' | translate }}
+      </button>
+      <button
+        mat-flat-button
+        type="button"
+        [matTooltip]="'print.dialog.email.disabled' | translate"
+        [disabled]="true">
+        <mat-icon>email</mat-icon>
+        {{ 'print.dialog.email' | translate }}
+      </button>
+      <button mat-button type="button" (click)="close()">
+        {{ 'Cancel' | translate }}
+      </button>
+    </div>
+  }
+</div>

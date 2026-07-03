@@ -1,4 +1,4 @@
-# Create secret/nafura/<env>/apps/<APP>/db and apps/<APP>/minio (infra per app), policy and role for <APP>-backend.
+# Create secret/nafura/<env>/apps/<APP>/database and object-storage, policy and role for <APP>-backend.
 # ConfigMap vault-sync: ENV, APP, USER, PASS, AI_USER, AI_PASSWORD, DB_NAME, DB_SCHEMA, MINIO_ENABLED, MINIO_*; optional KEYCLOAK_CLIENT_SECRET.
 # Used by nafops provision. App backends read only apps/<APP>/db and apps/<APP>/minio (duplicated per app).
 apiVersion: batch/v1
@@ -18,7 +18,7 @@ spec:
             - -c
             - |
               set -e
-              ENV="${ENV:-dev}"
+              ENV="${ENV:-staging}"
               APP_NS="${APP_NAMESPACE:-default}"
               if [ -z "$APP" ]; then
                 echo "Missing APP"
@@ -26,25 +26,25 @@ spec:
               fi
               export VAULT_ADDR="${VAULT_ADDR:-http://vault:8200}"
               vault login "$VAULT_TOKEN" 2>/dev/null || true
-              vault kv put "secret/nafura/$ENV/apps/$APP/db" \
+              vault kv put "secret/nafura/$ENV/apps/$APP/database" \
                 name="${DB_NAME:-nafura_${APP}}" schema="${DB_SCHEMA:-public}" \
                 user="${USER:-nafura}" pass="${PASS:-nafura}" \
                 ai_user="${AI_USER:-nafura_ai_reader}" ai_user_password="${AI_PASSWORD:-changeme}"
               if [ "${MINIO_ENABLED:-0}" = "1" ]; then
-                vault kv put "secret/nafura/$ENV/apps/$APP/minio" \
+                vault kv put "secret/nafura/$ENV/apps/$APP/object-storage" \
                   endpoint="${MINIO_ENDPOINT:-http://minio:9000}" bucket="${MINIO_BUCKET:-nafura-$APP}" \
                   user="${MINIO_USER:-minioadmin}" password="${MINIO_PASSWORD:-minioadmin}"
               fi
               if [ -n "$KEYCLOAK_CLIENT_SECRET" ]; then
-                vault kv patch "secret/nafura/$ENV/infra/keycloak-clients" "${APP}_backend_secret=$KEYCLOAK_CLIENT_SECRET"
+                vault kv put "secret/nafura/$ENV/platform/iam/clients/$APP" client_secret="$KEYCLOAK_CLIENT_SECRET"
               fi
               vault policy write "$APP-backend" - <<POL
-              path "secret/data/nafura/$ENV/apps/$APP/db" { capabilities = ["read"] }
-              path "secret/data/nafura/$ENV/apps/$APP/minio" { capabilities = ["read"] }
-              path "secret/data/nafura/$ENV/infra/llm" { capabilities = ["read"] }
-              path "secret/data/nafura/$ENV/infra/keycloak" { capabilities = ["read"] }
-              path "secret/data/nafura/$ENV/infra/app" { capabilities = ["read"] }
-              path "secret/data/nafura/$ENV/infra/keycloak-clients" { capabilities = ["read"] }
+              path "secret/data/nafura/$ENV/apps/$APP/*" { capabilities = ["read"] }
+              path "secret/data/nafura/$ENV/platform/integrations/email/brevo" { capabilities = ["read"] }
+              path "secret/data/nafura/$ENV/platform/integrations/ai/gemini" { capabilities = ["read"] }
+              path "secret/data/nafura/$ENV/platform/iam/keycloak" { capabilities = ["read"] }
+              path "secret/data/nafura/$ENV/platform/security/invitation" { capabilities = ["read"] }
+              path "secret/data/nafura/$ENV/platform/iam/clients/$APP" { capabilities = ["read"] }
               POL
               vault write "auth/kubernetes/role/$APP-backend" \
                 bound_service_account_names="$APP-backend" \

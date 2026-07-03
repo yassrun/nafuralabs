@@ -1,10 +1,10 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-namespace: nafura-infra
+namespace: nafura-infra-staging
 
 resources:
-  - ../../../base/infra/namespace.yaml
+  - patch-namespace.yaml
   - ../../../base/infra/vault.yaml
   - ../../../base/infra/vault-bootstrap-rbac.yaml
   - ../../../base/infra/service-accounts.yaml
@@ -38,3 +38,8 @@ patches:
       kind: PersistentVolumeClaim
       name: vault-data
     path: pvc-storageclass-docker-desktop.yaml
+  - path: patch-postgres-vault-env.yaml
+  - path: patch-keycloak-vault-env.yaml
+  - path: patch-minio-vault-env.yaml
+  - path: patch-vault-init-env.yaml
+  - path: patch-keycloak-image.yaml

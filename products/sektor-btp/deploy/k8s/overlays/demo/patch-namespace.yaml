@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: sektor-demo
+  labels:
+    nafura.io/app: sektor-btp
+    nafura.io/env: demo

@@ -1,3 +1,14 @@
-- op: replace
-  path: /spec/template/spec/containers/0/env/0/value
-  value: "prod"
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: vault-init
+spec:
+  template:
+    spec:
+      containers:
+        - name: vault-init
+          env:
+            - name: VAULT_ENV
+              value: "prod"
+            - name: INFRA_NAMESPACE
+              value: "nafura-infra-prod"

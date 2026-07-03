@@ -1,0 +1,170 @@
+<div class="rl">
+  <header class="rl__header">
+    <div>
+      <h1 class="rl__title">{{ 'finance.reglement.title' | translate }}</h1>
+      <p class="rl__subtitle">
+        {{ 'finance.reglement.list.emptyState.message' | translate }}
+      </p>
+    </div>
+    <div class="rl__head-actions">
+      <nf-button variant="ghost" class="rl__btn rl__btn--ghost" (clicked)="newReglement('FOURNISSEUR')">
+        {{ 'finance.factureFournisseur.form.fields.fournisseur' | translate }}
+      </nf-button>
+      <nf-button variant="primary" class="rl__btn" (clicked)="newReglement('CLIENT')">
+        {{ 'finance.recouvrement.headers.client' | translate }}
+      </nf-button>
+    </div>
+  </header>
+
+  <section class="rl__kpi">
+    <div class="rl__kpi-card">
+      <span class="rl__kpi-label">{{ 'finance.reglement.entityNamePlural' | translate }}</span>
+      <span class="rl__kpi-value">{{ filtered().length }}</span>
+    </div>
+    <div class="rl__kpi-card">
+      <span class="rl__kpi-label">{{ 'finance.recouvrement.headers.encaisse' | translate }}</span>
+      <span class="rl__kpi-value rl__kpi-value--pos">
+        +{{ format(totalEncaisse()) }} {{ 'finance.common.currency.mad' | translate }}
+      </span>
+    </div>
+    <div class="rl__kpi-card">
+      <span class="rl__kpi-label">{{ 'finance.balance.headers.movementsCredit' | translate }}</span>
+      <span class="rl__kpi-value rl__kpi-value--neg">
+        -{{ format(totalDecaisse()) }} {{ 'finance.common.currency.mad' | translate }}
+      </span>
+    </div>
+    <div class="rl__kpi-card">
+      <span class="rl__kpi-label">{{ 'finance.common.labels.soldeFinal' | translate }}</span>
+      <span class="rl__kpi-value">
+        {{ format(totalEncaisse() - totalDecaisse()) }} {{ 'finance.common.currency.mad' | translate }}
+      </span>
+    </div>
+  </section>
+
+  <section class="rl__chips">
+    <nf-button variant="ghost" class="rl__chip" [active]="chipActive() === 'today'" (clicked)="applyChip('today')">{{ 'finance.declarations.common.dateLimite' | translate }}</nf-button>
+    <nf-button variant="ghost" class="rl__chip" [active]="chipActive() === 'week'" (clicked)="applyChip('week')">{{ 'finance.common.filters.period' | translate }}</nf-button>
+    <nf-button variant="ghost" class="rl__chip" [active]="chipActive() === 'month'" (clicked)="applyChip('month')">{{ 'finance.declarations.common.month' | translate }}</nf-button>
+    <nf-button variant="ghost" class="rl__chip" [active]="chipActive() === 'drafts'" (clicked)="applyChip('drafts')">{{ 'finance.declarations.status.BROUILLON' | translate }}</nf-button>
+  </section>
+
+  <section class="rl__filters">
+    <input
+      type="search"
+      [attr.placeholder]="'finance.common.filters.searchPlaceholder' | translate"
+      [ngModel]="filterText()"
+      (ngModelChange)="filterText.set($event)"
+      class="rl__search"
+    />
+    <select [ngModel]="filterType()" (ngModelChange)="filterType.set($event)" class="rl__select">
+      <option value="">{{ 'finance.common.filters.allTypes' | translate }}</option>
+      <option value="CLIENT">{{ 'finance.recouvrement.headers.client' | translate }}</option>
+      <option value="FOURNISSEUR">{{ 'finance.factureFournisseur.form.fields.fournisseur' | translate }}</option>
+      <option value="EMPLOYE">{{ 'finance.ecriture.form.fields.tiers' | translate }}</option>
+    </select>
+    <select [ngModel]="filterMode()" (ngModelChange)="filterMode.set($event)" class="rl__select">
+      <option value="">{{ 'finance.reglement.list.filters.modePaiement' | translate }}</option>
+      <option value="VIREMENT">{{ 'enum.mode.VIREMENT' | translate }}</option>
+      <option value="CHEQUE">{{ 'enum.mode.CHEQUE' | translate }}</option>
+      <option value="EFFET">{{ 'enum.mode.EFFET' | translate }}</option>
+      <option value="ESPECES">{{ 'enum.mode.ESPECES' | translate }}</option>
+      <option value="COMPENSATION">{{ 'enum.mode.COMPENSATION' | translate }}</option>
+    </select>
+    <select [ngModel]="filterStatus()" (ngModelChange)="filterStatus.set($event)" class="rl__select">
+      <option value="">{{ 'finance.common.filters.allStatuses' | translate }}</option>
+      <option value="BROUILLON">{{ 'finance.declarations.status.BROUILLON' | translate }}</option>
+      <option value="VALIDE">{{ 'finance.common.toasts.validated' | translate }}</option>
+      <option value="ANNULE">{{ 'finance.common.toasts.cancelled' | translate }}</option>
+    </select>
+    <select [ngModel]="filterCompte()" (ngModelChange)="filterCompte.set($event)" class="rl__select">
+      <option value="">{{ 'finance.common.filters.compte' | translate }}</option>
+      @for (c of comptes(); track c.id) {
+        <option [value]="c.id">{{ c.libelle }}</option>
+      }
+    </select>
+    <select
+      [ngModel]="filterContrePartie()"
+      (ngModelChange)="filterContrePartie.set($event)"
+      class="rl__select"
+    >
+      <option value="">Contrepartie : toutes</option>
+      @for (cp of contrePartiesForFilter(); track cp.id) {
+        <option [value]="cp.id">{{ contrePartieFilterLabel(cp) }}</option>
+      }
+    </select>
+    <input
+      type="date"
+      [ngModel]="filterFrom()"
+      (ngModelChange)="filterFrom.set($event)"
+      class="rl__date"
+    />
+    <input
+      type="date"
+      [ngModel]="filterTo()"
+      (ngModelChange)="filterTo.set($event)"
+      class="rl__date"
+    />
+    <nf-button variant="ghost" class="rl__btn rl__btn--ghost" (clicked)="reset()">
+      {{ 'finance.common.actions.refresh' | translate }}
+    </nf-button>
+  </section>
+
+  <section class="rl__table-wrap">
+    <table class="rl__table">
+      <thead>
+        <tr>
+          <th>{{ 'finance.reglement.list.columns.numero' | translate }}</th>
+          <th>{{ 'finance.reglement.list.columns.modePaiement' | translate }}</th>
+          <th>{{ 'finance.reglement.list.columns.date' | translate }}</th>
+          <th>{{ 'finance.reglement.list.columns.modePaiement' | translate }}</th>
+          <th>{{ 'finance.reglement.list.columns.reference' | translate }}</th>
+          <th>{{ 'finance.reglement.list.columns.fournisseur' | translate }}</th>
+          <th class="rl__th-num">{{ 'finance.reglement.list.columns.montant' | translate }}</th>
+          <th class="rl__th-num">{{ 'finance.reglement.form.factureSelector.imputation' | translate }}</th>
+          <th>{{ 'finance.common.filters.compte' | translate }}</th>
+          <th>{{ 'finance.reglement.list.columns.status' | translate }}</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (r of filtered(); track r.id) {
+          <tr (click)="open(r)" class="rl__row">
+            <td class="rl__num">{{ r.numero }}</td>
+            <td>
+              <span class="rl__type">
+                {{ typeLabel(r.type) }}
+              </span>
+            </td>
+            <td>{{ formatDate(r.date) }}</td>
+            <td>{{ modeLabel(r.modePaiement) }}</td>
+            <td class="rl__ref">{{ r.reference || ('finance.common.dash' | translate) }}</td>
+            <td>{{ r.contrePartieName }}</td>
+            <td class="rl__td-num"
+                [class.rl__td-num--pos]="r.type === 'CLIENT'"
+                [class.rl__td-num--neg]="r.type !== 'CLIENT'">
+              {{ r.type === 'CLIENT' ? '+' : '-' }}{{ format(r.montantTotal) }}
+            </td>
+            <td class="rl__td-num">
+              @if (r.imputations.length > 0) {
+                <span class="rl__imp-badge">{{ r.imputations.length }}</span>
+              } @else {
+                <span class="rl__dash">{{ 'finance.common.dash' | translate }}</span>
+              }
+            </td>
+            <td class="rl__compte">{{ r.compteFinancierLibelle }}</td>
+            <td>
+              <span class="rl__badge" [attr.data-variant]="statusVariant(r.status)">
+                {{ statusLabel(r.status) }}
+              </span>
+            </td>
+            <td class="rl__chev">→</td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="11" class="rl__empty">{{ 'finance.reglement.list.emptyState.title' | translate }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </section>
+</div>

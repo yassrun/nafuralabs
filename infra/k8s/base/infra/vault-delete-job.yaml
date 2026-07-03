@@ -1,4 +1,4 @@
-# Delete secret/nafura/<env>/apps/<APP>/db, apps/<APP>/minio, policy and role for <APP>-backend.
+# Delete secret/nafura/<env>/apps/<APP>/database, object-storage, policy and role for <APP>-backend.
 # ConfigMap vault-delete: ENV, APP.
 # Used by nafops delete app (runtime phase).
 apiVersion: batch/v1
@@ -18,15 +18,16 @@ spec:
             - -c
             - |
               set -e
-              ENV="${ENV:-dev}"
+              ENV="${ENV:-staging}"
               if [ -z "$APP" ]; then
                 echo "Missing APP"
                 exit 1
               fi
               export VAULT_ADDR="${VAULT_ADDR:-http://vault:8200}"
               vault login "$VAULT_TOKEN" 2>/dev/null || true
-              vault kv metadata delete "secret/nafura/$ENV/apps/$APP/db" 2>/dev/null || true
-              vault kv metadata delete "secret/nafura/$ENV/apps/$APP/minio" 2>/dev/null || true
+              vault kv metadata delete "secret/nafura/$ENV/apps/$APP/database" 2>/dev/null || true
+              vault kv metadata delete "secret/nafura/$ENV/apps/$APP/object-storage" 2>/dev/null || true
+              vault kv metadata delete "secret/nafura/$ENV/platform/iam/clients/$APP" 2>/dev/null || true
               vault policy delete "$APP-backend" 2>/dev/null || true
               vault delete "auth/kubernetes/role/$APP-backend" 2>/dev/null || true
               echo "Vault delete complete: $APP (env=$ENV)"

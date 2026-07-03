@@ -1,10 +1,17 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
+namespace: sektor-staging
+
 resources:
   - ../../base
-  - patch-backend-deployment.yaml
-  - patch-ingress.yaml
+  - patch-namespace.yaml
+
+patches:
+  - path: patch-backend-deployment.yaml
+  - path: patch-backend-infra.yaml
+  - path: patch-frontend-local.yaml
+  - path: patch-ingress.yaml
 
 images:
   - name: sektor-btp-backend

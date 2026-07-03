@@ -14,22 +14,22 @@
 /* ═══════════════════════════════════════════════════════════════════════════
    Platform Design System (Base tokens + Reset)
    ═══════════════════════════════════════════════════════════════════════════ */
-@use '../app/platform/core/styles' as platform;
+@use '../../platform/web/core/styles' as platform;
 
 /* ═══════════════════════════════════════════════════════════════════════════
    Feature Layouts (Domain-specific utilities)
    ═══════════════════════════════════════════════════════════════════════════ */
-@use '../app/platform/features/documents/doc-extractor/layout' as doc-layout;
+@use '../../platform/web/features/documents/doc-extractor/layout' as doc-layout;
 
 /* Shared design system tokens used by framework features */
-@use '../app/platform/lib/design-system/tokens' as shared-tokens;
-@use '../app/platform/lib/design-system/typography' as shared-typography;
+@use '../../platform/web/lib/design-system/tokens' as shared-tokens;
+@use '../../platform/web/lib/design-system/typography' as shared-typography;
 
 /* ERP BTP anatomy tokens */
-@use '../app/platform/lib/anatomy/styles/tokens' as erp-tokens;
+@use '../../platform/web/lib/anatomy/styles/tokens' as erp-tokens;
 
 /* Nafura Sektor — product brand override (cobalt + hi-vis yellow). Loaded last so it wins. */
-@use '../app/applications/erp/styles/brand-sektor' as sektor-brand;
+@use '../../products/sektor-btp/web/app/styles/brand-sektor' as sektor-brand;
 
 /* ═══════════════════════════════════════════════════════════════════════════
    External Dependencies

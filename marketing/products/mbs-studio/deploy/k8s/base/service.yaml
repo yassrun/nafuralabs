@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mbs-studio-web
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+  selector:
+    app: mbs-studio-web

@@ -1,8 +1,12 @@
+# HTTP only — first prod tests on GKE (no TLS)
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: sektor-btp-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
 spec:
+  tls: []
   rules:
     - host: api.sektor.nafuralabs.com
       http:

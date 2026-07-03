@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
+  <!-- Figma: Multitone noise — Size 0.2, Density 70% -->
+  <filter id="multitone" x="0%" y="0%" width="100%" height="100%">
+    <feTurbulence
+      type="fractalNoise"
+      baseFrequency="1.45"
+      numOctaves="4"
+      stitchTiles="stitch"
+      result="noise"
+    />
+    <feComponentTransfer in="noise" result="dense">
+      <feFuncA type="linear" slope="2.4" intercept="-0.4" />
+    </feComponentTransfer>
+    <feColorMatrix
+      in="dense"
+      type="matrix"
+      values="
+        0.18 0.05 0.04 0 0.82
+        0.05 0.16 0.05 0 0.84
+        0.04 0.05 0.14 0 0.86
+        0    0    0    1 0
+      "
+    />
+  </filter>
+  <rect width="100" height="100" filter="url(#multitone)" />
+</svg>

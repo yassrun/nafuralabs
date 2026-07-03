@@ -1,0 +1,74 @@
+<nf-page-shell>
+  <nf-page-header [config]="headerConfig">
+    @if (item()) {
+      <div actions>
+        <nf-button variant="secondary" (clicked)="printFiche()">{{ 'rh.paie.bulletin.actions.print' | translate }}</nf-button>
+      </div>
+    }
+  </nf-page-header>
+
+  @if (item(); as fp) {
+    @if (mode() === 'view' && fp.status === 'BROUILLON') {
+      <section class="paie-approval" [attr.aria-label]="'rh.paie.approvalBar.label' | translate">
+        <span class="paie-approval__label">{{ 'rh.paie.approvalBar.label' | translate }}</span>
+        <app-submit-approval-button
+          entityType="PAIE"
+          [entityId]="fp.id"
+          [entityRef]="fp.numero"
+          [entitySummary]="fp.numero + ' — ' + (fp.employeNom ?? '') + ' — ' + fp.mois + ' — net ' + (fp.salaireNetAPayer | number) + ' MAD'"
+          [montantConcerne]="fp.salaireNetAPayer"
+          [disabled]="false">
+        </app-submit-approval-button>
+      </section>
+    }
+    <section class="paie-recap" [attr.aria-label]="'rh.paie.recap.ariaLabel' | translate">
+      <h3 class="paie-recap__title">{{ 'rh.paie.recap.title' | translate }}</h3>
+      <dl class="paie-recap__grid">
+        <div><dt>{{ 'rh.paie.recap.brut' | translate }}</dt><dd>{{ fp.salaireBrut | mad:2 }}</dd></div>
+        <div><dt>{{ 'rh.paie.recap.cnssSal' | translate }}</dt><dd>{{ fp.cotisationCNSS | mad:2 }}</dd></div>
+        <div><dt>{{ 'rh.paie.recap.amoSal' | translate }}</dt><dd>{{ fp.cotisationAMO | mad:2 }}</dd></div>
+        <div><dt>{{ 'rh.paie.recap.retenues' | translate }}</dt><dd>{{ fp.totalRetenues | mad:2 }}</dd></div>
+        <div><dt>{{ 'rh.paie.recap.netImposable' | translate }}</dt><dd>{{ fp.salaireNetImposable | mad:2 }}</dd></div>
+        <div><dt>{{ 'rh.paie.recap.igr' | translate }}</dt><dd>{{ fp.igr | mad:2 }}</dd></div>
+        <div class="paie-recap__net"><dt>{{ 'rh.paie.recap.netAPayer' | translate }}</dt><dd>{{ fp.salaireNetAPayer | mad:2 }}</dd></div>
+      </dl>
+      <p class="paie-recap__hint">{{ 'rh.paie.recap.hint' | translate }}</p>
+    </section>
+  }
+
+  <div class="paie-screen">
+    <nf-entity-detail
+      #detail
+      [config]="config"
+      [mode]="mode()"
+      [item]="item()"
+      [lookups]="lookups()"
+      [loading]="isLoading()"
+      [saving]="isSaving()"
+      (action)="onAction($event)">
+    </nf-entity-detail>
+  </div>
+
+  @if (item(); as p) {
+    <article class="paie-print-doc" data-print-area="fiche-paie">
+      <h1>{{ 'rh.paie.print.title' | translate: { numero: p.numero } }}</h1>
+      <p>{{ 'rh.paie.print.periode' | translate: { employeNom: p.employeNom ?? '', mois: p.mois } }}</p>
+      <table>
+        <thead>
+          <tr>
+            <th>{{ 'rh.paie.print.tableHeaders.libelle' | translate }}</th>
+            <th class="n">{{ 'rh.paie.print.tableHeaders.montant' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>{{ 'rh.paie.print.lines.salaireBase' | translate }}</td><td class="n">{{ p.salaireBase | mad:2 }}</td></tr>
+          <tr><td>{{ 'rh.paie.print.lines.brut' | translate }}</td><td class="n">{{ p.salaireBrut | mad:2 }}</td></tr>
+          <tr><td>{{ 'rh.paie.print.lines.retenues' | translate }}</td><td class="n">{{ p.totalRetenues | mad:2 }}</td></tr>
+          <tr><td>{{ 'rh.paie.print.lines.netImposable' | translate }}</td><td class="n">{{ p.salaireNetImposable | mad:2 }}</td></tr>
+          <tr><td>{{ 'rh.paie.print.lines.igr' | translate }}</td><td class="n">{{ p.igr | mad:2 }}</td></tr>
+          <tr><td>{{ 'rh.paie.print.lines.netAPayer' | translate }}</td><td class="n"><strong>{{ p.salaireNetAPayer | mad:2 }}</strong></td></tr>
+        </tbody>
+      </table>
+    </article>
+  }
+</nf-page-shell>

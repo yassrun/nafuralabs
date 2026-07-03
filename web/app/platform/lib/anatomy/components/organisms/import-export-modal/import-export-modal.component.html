@@ -1,0 +1,179 @@
+<div class="nf-import-export-modal">
+  <div class="nf-import-export-modal__header">
+    <h2 class="nf-import-export-modal__title">{{ title }}</h2>
+    @if (canClose()) {
+      <button
+        type="button"
+        class="nf-import-export-modal__close"
+        [attr.aria-label]="'Close' | translate"
+        (click)="onClose()"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    }
+  </div>
+
+  <nf-tabs
+    [tabs]="tabs"
+    [activeTab]="activeTab()"
+    (tabChange)="onTabChange($event)"
+  ></nf-tabs>
+
+  <div class="nf-import-export-modal__body">
+    @if (activeTab() === 'import') {
+      <!-- Import tab -->
+      <p class="nf-import-export-modal__explanation">{{ config.importExplanation }}</p>
+
+      <div class="nf-import-export-modal__template">
+        <button
+          type="button"
+          class="nf-import-export-modal__link"
+          (click)="onDownloadTemplate()"
+        >
+          <mat-icon>download</mat-icon>
+          {{ 'Download CSV template' | translate }}
+        </button>
+        <span class="nf-import-export-modal__hint">{{ 'UTF-8, first row = headers, stable column keys.' | translate }}</span>
+      </div>
+
+      <div
+        class="nf-import-export-modal__dropzone"
+        [class.nf-import-export-modal__dropzone--active]="selectedFile()"
+        (dragover)="onFileOver($event)"
+        (dragleave)="onFileOver($event)"
+        (drop)="onFileDrop($event)"
+      >
+        @if (importPhase() === 'validating') {
+          <mat-spinner diameter="32"></mat-spinner>
+          <span>{{ 'Validating file…' | translate }}</span>
+        } @else if (selectedFile()) {
+          <mat-icon>insert_drive_file</mat-icon>
+          <span>{{ selectedFile()!.name }}</span>
+          <button
+            type="button"
+            class="nf-import-export-modal__link nf-import-export-modal__link--sm"
+            (click)="onCancelImport(); $event.stopPropagation()"
+          >
+            {{ 'Choose another file' | translate }}
+          </button>
+        } @else {
+          <mat-icon>cloud_upload</mat-icon>
+          <span>{{ 'Drag & drop a CSV file here, or' | translate }}</span>
+          <button
+            type="button"
+            class="nf-import-export-modal__link"
+            (click)="onFileSelectClick()"
+          >
+            {{ 'browse' | translate }}
+          </button>
+          <input
+            #fileInput
+            type="file"
+            accept=".csv,.xlsx"
+            class="nf-import-export-modal__file-input"
+            (change)="onFileInputChange($event)"
+          >
+        }
+      </div>
+
+      @if (validationSummary(); as v) {
+        <div class="nf-import-export-modal__summary">
+          <p><strong>{{ 'Pre-import validation' | translate }}</strong></p>
+          <ul>
+            <li>{{ 'Total rows:' | translate }} {{ v.totalRows }}</li>
+            <li>{{ 'Valid rows:' | translate }} {{ v.validRows }}</li>
+            <li>{{ 'Rows with errors:' | translate }} {{ v.errorRows }}</li>
+          </ul>
+          @if (v.errors.length) {
+            <p class="nf-import-export-modal__errors">
+              @for (err of v.errors.slice(0, 5); track err.row + err.message) {
+                <span>{{ 'Row' | translate }} {{ err.row }}: {{ err.message }}</span>
+              }
+              @if (v.errors.length > 5) {
+                <span>{{ '… and' | translate }} {{ v.errors.length - 5 }} {{ 'more.' | translate }}</span>
+              }
+            </p>
+          }
+        </div>
+      }
+
+      @if (importPhase() === 'ready') {
+        <div class="nf-import-export-modal__confirm">
+          <nf-button
+            variant="primary"
+            [loading]="false"
+            (clicked)="onConfirmImport()"
+          >
+            {{ 'shared.entityListing.importExport.importButton' | translate:{ count: validImportCount() } }}
+          </nf-button>
+          <nf-button variant="secondary" (clicked)="onCancelImport()">
+            {{ 'Cancel' | translate }}
+          </nf-button>
+        </div>
+      }
+
+      @if (importPhase() === 'importing') {
+        <div class="nf-import-export-modal__progress">
+          <mat-spinner diameter="24"></mat-spinner>
+          <span>{{ 'Importing… Do not close this window.' | translate }}</span>
+        </div>
+      }
+
+      @if (importPhase() === 'done' && importResult(); as result) {
+        <div class="nf-import-export-modal__result">
+          <p><strong>{{ 'Import complete' | translate }}</strong></p>
+          <ul>
+            <li>{{ 'Created:' | translate }} {{ result.created }}</li>
+            <li>{{ 'Updated:' | translate }} {{ result.updated }}</li>
+            <li>{{ 'Skipped:' | translate }} {{ result.skipped }}</li>
+            <li>{{ 'Failed:' | translate }} {{ result.failed }}</li>
+          </ul>
+          @if (result.errors?.length) {
+            <p class="nf-import-export-modal__errors-label">{{ 'Errors:' | translate }}</p>
+            <ul class="nf-import-export-modal__errors-list">
+              @for (err of result.errors; track err.row + (err.field ?? '') + err.message) {
+                <li>
+                  {{ 'Row' | translate }} {{ err.row }}: @if (err.field) { {{ err.field }} — }{{ err.message }}
+                </li>
+              }
+            </ul>
+            <nf-button
+              variant="tertiary"
+              icon="download"
+              (clicked)="onDownloadErrorReport()"
+            >
+              {{ 'Download error report (CSV)' | translate }}
+            </nf-button>
+          }
+        </div>
+      }
+    }
+
+    @if (activeTab() === 'export') {
+      <!-- Export tab -->
+      <p class="nf-import-export-modal__explanation">{{ config.exportExplanation }}</p>
+
+      <div class="nf-import-export-modal__export-options">
+        @if (config.enableExport !== false) {
+          <nf-button
+            variant="primary"
+            [loading]="exportLoading()"
+            (clicked)="onExportView()"
+          >
+            {{ 'Export CSV' | translate }}
+          </nf-button>
+          <span class="nf-import-export-modal__hint">{{ 'Export current view (filters and sort applied).' | translate }}</span>
+        }
+        @if (config.enableSelectionExport && hasSelection()) {
+          <nf-button
+            variant="secondary"
+            [loading]="exportLoading()"
+            (clicked)="onExportSelection()"
+          >
+            {{ 'Export selected rows' | translate }}
+          </nf-button>
+        }
+      </div>
+    }
+  </div>
+</div>

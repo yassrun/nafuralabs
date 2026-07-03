@@ -1,0 +1,76 @@
+<div class="document-type-picker">
+  <!-- Header -->
+  <div class="picker-header">
+    <h2 class="picker-title">Choose a document type</h2>
+    <button mat-icon-button (click)="cancel()" class="close-button">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Search Input -->
+  <div class="picker-search">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-icon matPrefix>search</mat-icon>
+      <input 
+        matInput 
+        [formControl]="searchQuery" 
+        placeholder="Search document types..."
+        autocomplete="off"
+      />
+      @if (searchQuery.value) {
+        <button mat-icon-button matSuffix (click)="searchQuery.setValue('')">
+          <mat-icon>close</mat-icon>
+        </button>
+      }
+    </mat-form-field>
+  </div>
+
+  <!-- Document Types List (Grouped by Domain) -->
+  <div class="picker-content">
+    @if (groupedDocTypes().length === 0) {
+      <div class="picker-empty">
+        <mat-icon class="empty-icon">search_off</mat-icon>
+        <p class="empty-text">No document types found</p>
+        <p class="empty-hint">Try adjusting your search query</p>
+      </div>
+    } @else {
+      <div class="doc-types-list">
+        @for (group of groupedDocTypes(); track group.domainKey) {
+          <div class="domain-group">
+            <!-- Domain Header -->
+            <div class="domain-header">
+              <mat-icon class="domain-icon">{{ group.icon }}</mat-icon>
+              <h3 class="domain-label">{{ group.label }}</h3>
+              <span class="domain-count">{{ group.docTypes.length }}</span>
+            </div>
+
+            <!-- Document Types in this Domain -->
+            <div class="doc-types-group">
+              @for (docType of group.docTypes; track docType.domainKey + ':' + docType.docTypeKey) {
+                <button
+                  class="doc-type-item"
+                  [class.selected]="isSelected(docType.domainKey, docType.docTypeKey)"
+                  (click)="selectDocType(docType.domainKey, docType.docTypeKey)"
+                >
+                  <mat-icon class="doc-type-icon">description</mat-icon>
+                  <div class="doc-type-content">
+                    <span class="doc-type-name">{{ docType.name }}</span>
+                    <span class="doc-type-version">v{{ docType.activeVersion }}</span>
+                  </div>
+                  @if (isSelected(docType.domainKey, docType.docTypeKey)) {
+                    <mat-icon class="check-icon">check_circle</mat-icon>
+                  }
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Footer -->
+  <div class="picker-footer">
+    <button mat-button (click)="cancel()">Cancel</button>
+  </div>
+</div>

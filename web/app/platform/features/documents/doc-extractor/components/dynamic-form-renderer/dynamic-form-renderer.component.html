@@ -1,0 +1,104 @@
+<div class="renderer">
+  @for (section of uiSchema.sections; track section.title) {
+    <div class="section">
+      <div class="section__header">
+        <div class="section__title">{{ section.title }}</div>
+      </div>
+
+      <div class="section__grid" [style.--cols]="sectionColumns(section)">
+        @for (field of section.fields; track field.path) {
+          @let s = schemaFor(field);
+          @let c = $any(form.get(field.path));
+
+          <div class="field">
+            <!-- Boolean: render as checkbox (no mat-form-field wrapper) -->
+            @if (isBoolean(s)) {
+              <mat-checkbox
+                class="field__checkbox"
+                [checked]="!!c?.value"
+                [formControl]="c"
+              >
+                {{ field.label }}
+              </mat-checkbox>
+
+              @if (fieldError(field); as err) {
+                <div class="field__error">{{ err }}</div>
+              }
+            }
+
+            <!-- All other inputs -->
+            @else {
+              <mat-form-field
+                class="field__control"
+                [appearance]="field.appearance ?? 'outline'"
+                subscriptSizing="dynamic"
+                [class.field__control--error]="hasFieldError(field)"
+              >
+                <mat-label>{{ field.label }}</mat-label>
+
+                <!-- Keep suffix container outside control-flow to preserve projection -->
+                <ng-container matIconSuffix>
+                  @if (isDate(s)) {
+                    <mat-datepicker-toggle [for]="picker" />
+                  }
+                </ng-container>
+
+                @if (isEnum(s)) {
+                  <mat-select
+                    [formControl]="c"
+                  >
+                    @for (opt of enumOptions(s); track opt) {
+                      <mat-option [value]="opt">{{ opt }}</mat-option>
+                    }
+                  </mat-select>
+                }
+
+                @else if (isDate(s)) {
+                  <input
+                    matInput
+                    [matDatepicker]="picker"
+                    [placeholder]="field.placeholder ?? 'YYYY-MM-DD'"
+                    [attr.readonly]="(readonly || field.readonly || schemaReadOnly(s)) ? '' : null"
+                    [formControl]="c"
+                  />
+                }
+
+                @else if (isNumber(s)) {
+                  <input
+                    matInput
+                    type="number"
+                    [placeholder]="field.placeholder ?? ''"
+                    [attr.readonly]="(readonly || field.readonly || schemaReadOnly(s)) ? '' : null"
+                    [formControl]="c"
+                  />
+                }
+
+                @else {
+                  <input
+                    matInput
+                    type="text"
+                    [placeholder]="field.placeholder ?? ''"
+                    [attr.readonly]="(readonly || field.readonly || schemaReadOnly(s)) ? '' : null"
+                    [formControl]="c"
+                  />
+                }
+
+                @if (field.hint) {
+                  <mat-hint>{{ field.hint }}</mat-hint>
+                }
+
+                @if (fieldError(field); as err) {
+                  <mat-error>{{ err }}</mat-error>
+                }
+
+                <!-- Datepicker instance (safe even if field isn't a date) -->
+                <mat-datepicker #picker />
+              </mat-form-field>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>
+

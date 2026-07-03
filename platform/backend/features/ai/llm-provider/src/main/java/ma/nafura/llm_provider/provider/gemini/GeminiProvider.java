@@ -323,7 +323,7 @@ public class GeminiProvider implements AiProvider {
 
                 Vous pouvez filtrer par statut (à approuver, urgentes, mes demandes) et créer une nouvelle demande via **Nouveau**.
 
-                _Mode démo : ajoutez une clé Gemini dans Vault (`secret/nafura/dev/infra/llm`, champ `gemini_api_key`) pour des réponses IA complètes._
+                _Mode démo : ajoutez une clé Gemini dans Vault (`secret/nafura/staging/platform/integrations/ai/gemini`, champ `api_key`) pour des réponses IA complètes._
                 """.trim();
         }
         if (containsAny(lower, "chantier", "site", "ouvrage")) {
@@ -369,7 +369,7 @@ public class GeminiProvider implements AiProvider {
             • « Montre-moi les chantiers »
             • « Tableau de bord »
 
-            Pour activer l'IA complète : renseignez `gemini_api_key` dans Vault (`secret/nafura/dev/infra/llm`) puis redémarrez `erp-backend`.
+            Pour activer l'IA complète : renseignez `api_key` dans Vault (`secret/nafura/staging/platform/integrations/ai/gemini`) puis redémarrez `erp-backend`.
             """.trim();
     }
 

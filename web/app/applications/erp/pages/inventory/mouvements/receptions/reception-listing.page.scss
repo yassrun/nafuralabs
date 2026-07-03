@@ -1,0 +1,24 @@
+.muted { color: var(--nf-color-text-muted); }
+
+.reception-prereq {
+  margin: 0 0 1rem;
+  padding: 0.875rem 1rem;
+  background: var(--nf-color-warning-50);
+  border: 1px solid var(--nf-color-warning-300);
+  border-radius: 8px;
+}
+.reception-prereq__title {
+  margin: 0 0 0.5rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--nf-color-warning-700);
+}
+.reception-prereq__list {
+  margin: 0;
+  padding-inline-start: 1.25rem;
+  font-size: 0.8125rem;
+}
+.reception-prereq__list a {
+  color: var(--nf-color-warning-700);
+  font-weight: 500;
+}

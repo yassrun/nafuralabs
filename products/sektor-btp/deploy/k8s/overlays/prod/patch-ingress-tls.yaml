@@ -12,3 +12,24 @@ spec:
         - sektor.nafuralabs.com
         - api.sektor.nafuralabs.com
       secretName: sektor-tls
+  rules:
+    - host: api.sektor.nafuralabs.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: sektor-btp-backend
+                port:
+                  number: 8082
+    - host: sektor.nafuralabs.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: sektor-btp-web
+                port:
+                  number: 80

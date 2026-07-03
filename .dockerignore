@@ -1,0 +1,15 @@
+.git
+.github
+**/.gradle
+**/build
+!products/sektor-btp/backend/app/build/libs/*.jar
+**/node_modules
+web/dist
+!web/dist/project-fountain/**
+marketing
+docs
+*.md
+.idea
+.vscode
+**/__pycache__
+**/target

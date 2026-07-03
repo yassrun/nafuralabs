@@ -1,0 +1,194 @@
+/**
+ * Nafura Platform - Color System
+ *
+ * Base color palette shared across all products.
+ * Products can override these via their theme files.
+ *
+ * Naming: --nf-color-{category}-{variant}
+ */
+
+:root {
+  /* ═══════════════════════════════════════════════════════════════════════════
+     Gray Scale (Neutral)
+     ═══════════════════════════════════════════════════════════════════════════ */
+  --nf-color-gray-50: #f9fafb;
+  --nf-color-gray-100: #f3f4f6;
+  --nf-color-gray-200: #e5e7eb;
+  --nf-color-gray-300: #d1d5db;
+  --nf-color-gray-400: #9ca3af;
+  --nf-color-gray-500: #6b7280;
+  --nf-color-gray-600: #4b5563;
+  --nf-color-gray-700: #374151;
+  --nf-color-gray-800: #1f2937;
+  --nf-color-gray-900: #111827;
+  --nf-color-gray-950: #030712;
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     Primary Palette (Blue - Default, products override)
+     ═══════════════════════════════════════════════════════════════════════════ */
+  --nf-color-primary-50: #eff6ff;
+  --nf-color-primary-100: #dbeafe;
+  --nf-color-primary-200: #bfdbfe;
+  --nf-color-primary-300: #93c5fd;
+  --nf-color-primary-400: #60a5fa;
+  --nf-color-primary-500: #3b82f6;
+  --nf-color-primary-600: #2563eb;
+  --nf-color-primary-700: #1d4ed8;
+  --nf-color-primary-800: #1e40af;
+  --nf-color-primary-900: #1e3a8a;
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     Semantic Colors
+     ═══════════════════════════════════════════════════════════════════════════ */
+
+  /* Success (Green) */
+  --nf-color-success-50: #f0fdf4;
+  --nf-color-success-100: #dcfce7;
+  --nf-color-success-500: #22c55e;
+  --nf-color-success-600: #16a34a;
+  --nf-color-success-700: #15803d;
+
+  /* Warning (Amber) */
+  --nf-color-warning-50: #fffbeb;
+  --nf-color-warning-100: #fef3c7;
+  --nf-color-warning-500: #f59e0b;
+  --nf-color-warning-600: #d97706;
+  --nf-color-warning-700: #b45309;
+
+  /* Danger (Red) */
+  --nf-color-danger-50: #fef2f2;
+  --nf-color-danger-100: #fee2e2;
+  --nf-color-danger-500: #ef4444;
+  --nf-color-danger-600: #dc2626;
+  --nf-color-danger-700: #b91c1c;
+
+  /* Info (Sky) */
+  --nf-color-info-50: #f0f9ff;
+  --nf-color-info-100: #e0f2fe;
+  --nf-color-info-500: #0ea5e9;
+  --nf-color-info-600: #0284c7;
+  --nf-color-info-700: #0369a1;
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     Semantic Aliases (Mapped - Products can override the source)
+     ═══════════════════════════════════════════════════════════════════════════ */
+
+  /* Brand */
+  --nf-color-primary: var(--nf-color-primary-500);
+  --nf-color-primary-hover: var(--nf-color-primary-600);
+  --nf-color-primary-active: var(--nf-color-primary-700);
+  --nf-color-primary-light: var(--nf-color-primary-50);
+  --nf-color-primary-dark: var(--nf-color-primary-700);
+
+  /* Backgrounds */
+  --nf-color-bg: var(--nf-color-gray-50);
+  --nf-color-bg-elevated: #ffffff;
+  --nf-color-bg-muted: var(--nf-color-gray-100);
+  --nf-color-bg-subtle: var(--nf-color-gray-50);
+
+  /* Surfaces (cards, panels) */
+  --nf-color-surface: #ffffff;
+  --nf-color-surface-hover: var(--nf-color-gray-50);
+  --nf-color-surface-active: var(--nf-color-gray-100);
+  --nf-color-surface-muted: var(--nf-color-gray-100);
+
+  /* Text */
+  --nf-color-text: var(--nf-color-gray-900);
+  --nf-color-text-secondary: var(--nf-color-gray-600);
+  --nf-color-text-muted: var(--nf-color-gray-500);
+  --nf-color-text-disabled: var(--nf-color-gray-400);
+  --nf-color-text-inverse: #ffffff;
+  --nf-color-text-link: var(--nf-color-primary);
+  --nf-color-text-link-hover: var(--nf-color-primary-hover);
+
+  /* Borders */
+  --nf-color-border: var(--nf-color-gray-200);
+  --nf-color-border-hover: var(--nf-color-gray-300);
+  --nf-color-border-focus: var(--nf-color-primary);
+  --nf-color-border-muted: var(--nf-color-gray-100);
+
+  /* Status */
+  --nf-color-success: var(--nf-color-success-500);
+  --nf-color-warning: var(--nf-color-warning-500);
+  --nf-color-danger: var(--nf-color-danger-500);
+  --nf-color-info: var(--nf-color-info-500);
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     COLOR-SYSTEM semantic aliases (Tomic / Anatomy)
+     See COLOR-SYSTEM.md. Use these in components for hierarchy and states.
+     ═══════════════════════════════════════════════════════════════════════════ */
+
+  /* Neutral surfaces */
+  --nf-surface-page: var(--nf-color-bg);
+  --nf-surface-section: var(--nf-color-surface);
+  --nf-surface-table: var(--nf-color-surface);
+  --nf-surface-hover: var(--nf-color-surface-hover);
+  --nf-surface-selected: var(--nf-color-primary-100);
+
+  /* Text hierarchy */
+  --nf-text-primary: var(--nf-color-text);
+  --nf-text-secondary: var(--nf-color-text-secondary);
+  --nf-text-muted: var(--nf-color-text-muted);
+  --nf-text-disabled: var(--nf-color-text-disabled);
+
+  /* Borders & outlines */
+  --nf-border-default: var(--nf-color-border);
+  --nf-border-subtle: var(--nf-color-border-muted);
+  --nf-border-strong: var(--nf-color-gray-300);
+  --nf-border-focus: var(--nf-color-primary);
+
+  /* Semantic: primary */
+  --nf-primary: var(--nf-color-primary);
+  --nf-primary-hover: var(--nf-color-primary-hover);
+  --nf-primary-active: var(--nf-color-primary-active);
+  --nf-primary-subtle: var(--nf-color-primary-50);
+
+  /* Semantic: danger */
+  --nf-danger: var(--nf-color-danger);
+  --nf-danger-hover: var(--nf-color-danger-600);
+  --nf-danger-subtle: var(--nf-color-danger-50);
+
+  /* Semantic: success, warning, neutral */
+  --nf-success: var(--nf-color-success);
+  --nf-success-subtle: var(--nf-color-success-50);
+  --nf-warning: var(--nf-color-warning);
+  --nf-warning-subtle: var(--nf-color-warning-50);
+  --nf-neutral: var(--nf-color-gray-500);
+}
+
+/* Dark theme: applied by ThemeModeService when user selects Dark or System (prefers-color-scheme: dark) */
+.nf-theme-dark {
+  color-scheme: dark;
+  --nf-color-bg: var(--nf-color-gray-900);
+  --nf-color-bg-elevated: var(--nf-color-gray-800);
+  --nf-color-bg-muted: var(--nf-color-gray-800);
+  --nf-color-bg-subtle: var(--nf-color-gray-900);
+  --nf-color-surface: var(--nf-color-gray-800);
+  --nf-color-surface-hover: var(--nf-color-gray-700);
+  --nf-color-surface-active: var(--nf-color-gray-700);
+  --nf-color-surface-muted: var(--nf-color-gray-800);
+  --nf-color-text: var(--nf-color-gray-50);
+  --nf-color-text-secondary: var(--nf-color-gray-300);
+  --nf-color-text-muted: var(--nf-color-gray-400);
+  --nf-color-text-disabled: var(--nf-color-gray-500);
+  --nf-color-text-inverse: var(--nf-color-gray-900);
+  --nf-color-border: var(--nf-color-gray-600);
+  --nf-color-border-hover: var(--nf-color-gray-500);
+  --nf-color-border-muted: var(--nf-color-gray-700);
+  --nf-surface-page: var(--nf-color-gray-900);
+  --nf-surface-section: var(--nf-color-gray-800);
+  --nf-surface-table: var(--nf-color-gray-800);
+  --nf-surface-hover: var(--nf-color-gray-700);
+  --nf-surface-selected: var(--nf-color-primary-900);
+  --nf-text-primary: var(--nf-color-gray-50);
+  --nf-text-secondary: var(--nf-color-gray-300);
+  --nf-text-muted: var(--nf-color-gray-400);
+  --nf-text-disabled: var(--nf-color-gray-500);
+  --nf-border-default: var(--nf-color-gray-600);
+  --nf-border-subtle: var(--nf-color-gray-700);
+  --nf-border-strong: var(--nf-color-gray-500);
+  --nf-primary-subtle: var(--nf-color-primary-900);
+  --nf-danger-subtle: var(--nf-color-danger-700);
+  --nf-success-subtle: var(--nf-color-success-700);
+  --nf-warning-subtle: var(--nf-color-warning-700);
+}

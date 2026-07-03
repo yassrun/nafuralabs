@@ -1,0 +1,99 @@
+/**
+ * Wizard Shell — Stepper + content + actions
+ */
+
+.nf-wizard-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.nf-wizard-shell__stepper {
+  flex-shrink: 0;
+  padding: var(--nf-space-3, 12px) 0;
+  border-bottom: 1px solid var(--nf-color-border, #e5e7eb);
+}
+
+.nf-wizard-shell__steps {
+  display: flex;
+  align-items: center;
+  gap: var(--nf-space-2, 8px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nf-wizard-shell__step {
+  display: flex;
+  align-items: center;
+  gap: var(--nf-space-2, 8px);
+  font-size: var(--nf-font-size-sm, 0.875rem);
+  color: var(--nf-text-secondary, #6b7280);
+}
+
+.nf-wizard-shell__step--current {
+  color: var(--nf-primary, #2563eb);
+  font-weight: var(--nf-font-weight-medium, 500);
+}
+
+.nf-wizard-shell__step--completed {
+  color: var(--nf-text-primary, #111827);
+}
+
+.nf-wizard-shell__step:not(:last-child)::after {
+  content: '';
+  width: 24px;
+  height: 1px;
+  background: var(--nf-color-border, #e5e7eb);
+  margin-left: var(--nf-space-1, 4px);
+}
+
+.nf-wizard-shell__step-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--nf-surface-hover, #f3f4f6);
+  font-size: var(--nf-font-size-xs, 0.75rem);
+  font-weight: var(--nf-font-weight-medium, 500);
+}
+
+.nf-wizard-shell__step--current .nf-wizard-shell__step-indicator {
+  background: var(--nf-primary, #2563eb);
+  color: #fff;
+}
+
+.nf-wizard-shell__step--completed .nf-wizard-shell__step-indicator {
+  background: var(--nf-success, #059669);
+  color: #fff;
+}
+
+.nf-wizard-shell__step-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.nf-wizard-shell__content {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: auto;
+  padding: var(--nf-space-4, 16px) 0;
+}
+
+.nf-wizard-shell__actions {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--nf-space-4, 16px);
+  padding-top: var(--nf-space-4, 16px);
+  border-top: 1px solid var(--nf-color-border, #e5e7eb);
+}
+
+.nf-wizard-shell__actions nf-button-list:last-child {
+  margin-left: auto;
+}

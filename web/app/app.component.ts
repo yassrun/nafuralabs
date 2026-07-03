@@ -12,7 +12,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 
-import { AuthFacade } from './platform/core/security';
+import { AuthFacade } from '@platform/core/security';
 
 @Component({
   selector: 'app-root',

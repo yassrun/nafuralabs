@@ -1,26 +1,33 @@
 /**
  * App Routes
- * 
+ *
  * Top-level route configuration.
  * Uses lazy loading for features.
- * 
+ *
  * Route Structure:
  * - Public routes (login, auth/callback, tenant-selection)
  * - Protected routes (require tenant context)
- *   - Feature route trees from generated application composition
+ *   - Feature route trees from Sektor BTP application config
  */
 
 import { Routes } from '@angular/router';
 
-import { tenantRequiredGuard, tenantSelectionGuard } from './platform/core/tenant/tenant.guard';
-import { onboardingCompleteGuard } from './applications/erp/onboarding/guards/onboarding-complete.guard';
-import { authGuard, guestGuard } from './platform/core/security/guards/auth.guard';
-import { ACTIVE_APPLICATION_SHELL_LOADER, APPLICATION_DEFAULT_ROUTE, APPLICATION_ROUTES } from './applications/routes.generated';
-import { ONBOARDING_V2_ROUTES } from './applications/erp/onboarding/onboarding.routes';
-import { ACTIVE_APPLICATION_ID } from './applications/routes.generated';
-import { APP_SHELL_CONFIGS } from './applications/shell.config';
-import { resolveApplicationNavigation, resolveApplicationZoneConfig } from './applications/navigation.generated';
-import { SidebarNode } from './platform/core/navigation/sidebar.types';
+import { tenantRequiredGuard, tenantSelectionGuard } from '@platform/core/tenant/tenant.guard';
+import { onboardingCompleteGuard } from '@applications/erp/onboarding/guards/onboarding-complete.guard';
+import { authGuard, guestGuard } from '@platform/core/security/guards/auth.guard';
+import {
+  ACTIVE_APPLICATION_SHELL_LOADER,
+  APPLICATION_DEFAULT_ROUTE,
+  APPLICATION_ROUTES,
+  ACTIVE_APPLICATION_ID,
+} from '@applications/config/routes';
+import { ONBOARDING_V2_ROUTES } from '@applications/erp/onboarding/onboarding.routes';
+import { APP_SHELL_CONFIGS } from '@applications/config/shell.config';
+import {
+  resolveApplicationNavigation,
+  resolveApplicationZoneConfig,
+} from '@applications/config/navigation';
+import { SidebarNode } from '@platform/core/navigation/sidebar.types';
 
 const ACTIVE_APP_SHELL_CONFIG = APP_SHELL_CONFIGS[ACTIVE_APPLICATION_ID] || APP_SHELL_CONFIGS['core'];
 
@@ -210,38 +217,35 @@ const ACTIVE_APP_ZONE_CONFIG = resolveApplicationZoneConfig(ACTIVE_APPLICATION_I
 
 /**
  * Application routes.
- * 
+ *
  * Structure:
  * - Public routes (login, etc.)
  * - Protected routes (require tenant context)
- *   - Feature route trees selected by generated application routes
+ *   - Feature route trees from Sektor BTP config
  */
-export const APP_ROUTES: Routes = [
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Public Routes
-  // ─────────────────────────────────────────────────────────────────────────────
+export const APP_ROUTES = [
   ...ONBOARDING_V2_ROUTES,
   {
     path: 'login',
     canActivate: [guestGuard],
-    loadComponent: () =>
-      import('./platform/core/pages/login/login.page').then(m => m.LoginPage),
+    loadComponent: () => import('@platform/core/pages/login/login.page').then((m) => m.LoginPage),
   },
   {
     path: 'auth/callback',
     loadComponent: () =>
-      import('./platform/core/pages/auth-callback/auth-callback.page').then(m => m.AuthCallbackPage),
+      import('@platform/core/pages/auth-callback/auth-callback.page').then(
+        (m) => m.AuthCallbackPage
+      ),
   },
   {
     path: 'tenant-selection',
     canActivate: [authGuard, tenantSelectionGuard],
     loadComponent: () =>
-      import('./platform/core/pages/tenant-selection/tenant-selection.page').then(m => m.TenantSelectionPage),
+      import('@platform/core/pages/tenant-selection/tenant-selection.page').then(
+        (m) => m.TenantSelectionPage
+      ),
   },
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Protected Routes (require tenant context)
-  // ─────────────────────────────────────────────────────────────────────────────
   {
     path: '',
     canActivate: [authGuard, tenantRequiredGuard, onboardingCompleteGuard],
@@ -264,16 +268,14 @@ export const APP_ROUTES: Routes = [
       {
         path: 'approvals',
         loadChildren: () =>
-          import('./platform/features/approvals/approvals.routes').then(
-            (m) => m.APPROVALS_ROUTES
-          ),
+          import('@platform/features/approvals/approvals.routes').then((m) => m.APPROVALS_ROUTES),
       },
       {
         path: 'administration',
         canActivate: [authGuard],
         data: { breadcrumb: 'Administration' },
         loadChildren: () =>
-          import('./platform/features/administration/administration.routes').then(
+          import('@platform/features/administration/administration.routes').then(
             (m) => m.ADMINISTRATION_ROUTES
           ),
       },
@@ -282,7 +284,7 @@ export const APP_ROUTES: Routes = [
         canActivate: [authGuard],
         data: { breadcrumb: 'Administration' },
         loadComponent: () =>
-          import('./applications/erp/pages/administration/hub/admin-hub.page').then(
+          import('@applications/erp/pages/administration/hub/admin-hub.page').then(
             (m) => m.AdminHubPage
           ),
       },
@@ -291,7 +293,7 @@ export const APP_ROUTES: Routes = [
         path: 'user-settings',
         canActivate: [authGuard],
         loadChildren: () =>
-          import('./platform/features/user-settings/user-settings.routes').then(
+          import('@platform/features/user-settings/user-settings.routes').then(
             (m) => m.USER_SETTINGS_ROUTES
           ),
       },
@@ -299,51 +301,50 @@ export const APP_ROUTES: Routes = [
         path: 'notifications',
         canActivate: [authGuard],
         loadChildren: () =>
-          import('./platform/features/notifications/notifications.routes').then(
+          import('@platform/features/notifications/notifications.routes').then(
             (m) => m.NOTIFICATIONS_ROUTES
           ),
       },
       {
         path: 'access-denied',
         loadComponent: () =>
-          import('./platform/core/pages/errors/access-denied.page').then(
-            (m) => m.AccessDeniedPage
-          ),
+          import('@platform/core/pages/errors/access-denied.page').then((m) => m.AccessDeniedPage),
       },
       {
         path: 'feature-unavailable/:featureId',
         loadComponent: () =>
-          import('./platform/core/pages/errors/feature-unavailable.page').then(m => m.FeatureUnavailablePage),
+          import('@platform/core/pages/errors/feature-unavailable.page').then(
+            (m) => m.FeatureUnavailablePage
+          ),
       },
       {
         path: 'module-unavailable/:moduleId',
         loadComponent: () =>
-          import('./platform/core/pages/errors/feature-unavailable.page').then(m => m.FeatureUnavailablePage),
+          import('@platform/core/pages/errors/feature-unavailable.page').then(
+            (m) => m.FeatureUnavailablePage
+          ),
       },
-      // 404 inside the shell — preserve sidebar/topbar so user can navigate away.
       {
         path: '**',
         loadComponent: () =>
-          import('./platform/core/pages/errors/not-found.page').then(m => m.NotFoundPage),
+          import('@platform/core/pages/errors/not-found.page').then((m) => m.NotFoundPage),
       },
     ],
   },
 
-  // Public error/maintenance routes (no shell, no auth).
   {
     path: 'error/500',
     loadComponent: () =>
-      import('./platform/core/pages/errors/server-error.page').then(m => m.ServerErrorPage),
+      import('@platform/core/pages/errors/server-error.page').then((m) => m.ServerErrorPage),
   },
   {
     path: 'maintenance',
     loadComponent: () =>
-      import('./platform/core/pages/errors/maintenance.page').then(m => m.MaintenancePage),
+      import('@platform/core/pages/errors/maintenance.page').then((m) => m.MaintenancePage),
   },
-  // Public 404 — only reached when the user hits a path outside any shell context.
   {
     path: '**',
     loadComponent: () =>
-      import('./platform/core/pages/errors/not-found.page').then(m => m.NotFoundPage),
+      import('@platform/core/pages/errors/not-found.page').then((m) => m.NotFoundPage),
   },
-];
+] as Routes;

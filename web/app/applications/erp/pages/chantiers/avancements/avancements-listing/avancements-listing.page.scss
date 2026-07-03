@@ -1,0 +1,132 @@
+:host {
+  display: block;
+}
+
+.quick-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 0.5rem 1.5rem 1rem;
+}
+
+.quick-filter {
+  border-radius: 999px;
+}
+
+.quick-filter--ghost {
+  border-style: dashed;
+}
+
+.link-cell {
+  display: grid;
+  gap: 0.15rem;
+  color: var(--nf-color-primary-600);
+  text-align: left;
+  padding: 0;
+  height: auto;
+  min-height: 0;
+}
+
+.link-cell small {
+  color: var(--nf-color-text-secondary);
+}
+
+.progress-cell {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.progress-cell__bar {
+  height: 0.55rem;
+  border-radius: 999px;
+  background: var(--nf-color-border);
+  overflow: hidden;
+}
+
+.progress-cell__fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--nf-color-primary-600), var(--nf-color-primary-500));
+}
+
+.photo-pill {
+  border-radius: 999px;
+  background: var(--nf-color-primary-50);
+  color: var(--nf-color-primary-700);
+  min-height: 2rem;
+  padding: 0 0.75rem;
+  font-weight: 600;
+}
+
+.photo-pill--disabled {
+  background: var(--nf-color-bg-muted);
+  color: var(--nf-color-text-muted);
+}
+
+.gallery-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: rgba(15, 23, 42, 0.62);
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.gallery-dialog {
+  width: min(920px, 100%);
+  max-height: 90vh;
+  overflow: auto;
+  border-radius: 1.5rem;
+  background: var(--nf-color-surface);
+  box-shadow: 0 24px 80px rgba(15, 23, 42, 0.25);
+  padding: 1.25rem;
+}
+
+.gallery-dialog header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.gallery-dialog h2 {
+  margin: 0;
+}
+
+.gallery-dialog p {
+  margin: 0.25rem 0 0;
+  color: var(--nf-color-text-secondary);
+}
+
+.gallery-close {
+  border-radius: 999px;
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.gallery-grid figure {
+  margin: 0;
+  border: 1px solid var(--nf-color-border);
+  border-radius: 1rem;
+  overflow: hidden;
+  background: var(--nf-color-bg-subtle);
+}
+
+.gallery-grid img {
+  display: block;
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+.gallery-grid figcaption {
+  padding: 0.85rem 1rem;
+  font-size: 0.875rem;
+  color: var(--nf-color-text-primary);
+}

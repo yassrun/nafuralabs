@@ -32,9 +32,9 @@ spec:
       annotations:
         vault.hashicorp.com/agent-inject: "true"
         vault.hashicorp.com/role: "keycloak"
-        vault.hashicorp.com/agent-inject-secret-keycloak: "secret/data/nafura/dev/infra/keycloak"
+        vault.hashicorp.com/agent-inject-secret-keycloak: "secret/data/nafura/staging/platform/iam/keycloak"
         vault.hashicorp.com/agent-inject-template-keycloak: |
-          {{- with secret "secret/data/nafura/dev/infra/keycloak" -}}
+          {{- with secret "secret/data/nafura/staging/platform/iam/keycloak" -}}
           export KC_BOOTSTRAP_ADMIN_USERNAME="{{ .Data.data.admin_username }}"
           export KC_BOOTSTRAP_ADMIN_PASSWORD="{{ .Data.data.admin_password }}"
           export KC_DB_USERNAME="{{ .Data.data.db_username }}"

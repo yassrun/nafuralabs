@@ -1,70 +1,172 @@
 # Nafura ops (`nlops.sh`)
 
-Séparation **infra partagée** (une fois par environnement/cluster) et **produits** (déployables indépendamment).
+Séparation **infra partagée** (une fois par env/cluster) et **produits** (déployables indépendamment).
+
+**Référence agents AI** : [AGENTS.md](AGENTS.md)
 
 ## Environnements
 
-| `ENV` | Cluster |
-|-------|---------|
-| `staging` | Docker Desktop K8s / k3d |
-| `prod` | GKE |
+| `ENV` | Cluster | Namespace infra | Namespace Sektor | Images |
+|-------|---------|-----------------|------------------|--------|
+| `staging` | Docker Desktop K8s | `nafura-infra-staging` | `sektor-staging` | tags locaux `:staging` |
+| `prod` | GKE | `nafura-infra-prod` | `sektor-prod` | GAR `:prod` | HTTP only (premiers tests), PVC 5/2/1 Gi |
+| `demo` | GKE (démo client) | `nafura-infra-demo` | `sektor-demo` | GAR `:demo` |
 
-L'environnement = le cluster. Les namespaces (`nafura-infra`, `nafura-sektor`, …) sont identiques ; seul le cluster change.
+### Env `demo` (économie GKE)
 
-## Bootstrap d'un nouvel environnement (1×)
+- HTTP only — pas de cert-manager
+- PVC réduits — postgres 5 Gi, minio 2 Gi, vault 1 Gi
+- URLs : `http://sektor-demo.nafuralabs.com`, `http://iam-demo.nafuralabs.com`
 
-Déploie Postgres, Redis, MinIO, Keycloak, Vault, ingress dans `nafura-infra` :
+## Catalogue des ops
+
+### Cluster / infra (une fois par env)
+
+| Commande | Description |
+|----------|-------------|
+| `clean-env` | Supprime legacy + namespaces de l'env (**destructif**) |
+| `bootstrap-env` | Infra + vault-init + attente postgres/redis/minio/keycloak |
+| `infra-up` | Applique l'overlay infra sans attente |
+| `infra-wait` | Attend le rollout des services core |
+| `preflight` | Vérifie injector, infra, images manquantes |
+
+### Images
+
+| Commande | Description |
+|----------|-------------|
+| `build-images [app]` | Build backend + web + keycloak + lifecycle |
+| `push-images [app]` | Push vers GAR (demo/prod uniquement) |
+| `build-push [app]` | build + push |
+
+Variables : `REGISTRY`, `BUILD_IMAGES=true`, `PUSH_IMAGES=true`
+
+### Base de données
+
+| Commande | Description |
+|----------|-------------|
+| `provision-db <app>` | `CREATE DATABASE` sur Postgres partagé |
+| `drop-db <app>` | Supprime la base (**destructif**) |
+| `migrate <app>` | collectMigrations Gradle + **Job Liquibase K8s** |
+
+### Déploiement produit
+
+| Commande | Description |
+|----------|-------------|
+| `deploy <app>` | Applique l'overlay K8s complet |
+| `deploy-backend <app>` | Apply + wait rollout backend |
+| `deploy-frontend <app>` | Apply + wait rollout frontend |
+| `reset-app <app>` | Scale à 0 ; `RESET_DB=true` → drop + recreate DB |
+| `clean-app <app>` | Supprime le namespace produit |
+
+### Workflows (enchaînements)
+
+| Commande | Pipeline |
+|----------|----------|
+| `onboard-app <app>` | provision-db → **migrate** → deploy |
+| `release-app <app>` | **migrate** → deploy-backend → deploy-frontend |
+| `release-backend <app>` | migrate → deploy-backend |
+| `release-frontend <app>` | deploy-frontend |
+
+> **Ordre critique** : les migrations Liquibase tournent **avant** le backend via un Job K8s (`nafura-lifecycle:${ENV}`).
+
+## Scénarios
+
+### Nouveau cluster Docker Desktop (staging)
 
 ```bash
+ENV=staging bash toolchain/ops/nlops.sh clean-env
 ENV=staging bash toolchain/ops/nlops.sh bootstrap-env
+BUILD_IMAGES=true ENV=staging bash toolchain/ops/nlops.sh onboard-app sektor-btp
 ```
 
-Relancer `bootstrap-env` / `infra-up` uniquement pour une **montée de version infra** ou un **nouveau cluster** — pas à chaque release produit.
-
-## Premier déploiement d'un produit
+### Release quotidienne (infra déjà up)
 
 ```bash
-ENV=staging bash toolchain/ops/nlops.sh onboard-app sektor-btp
+BUILD_IMAGES=true ENV=staging bash toolchain/ops/nlops.sh release-app sektor-btp
 ```
 
-Enchaîne : `provision-db` → `migrate` → `deploy`.
-
-Prérequis : `products/<app-id>/deploy/k8s/overlays/<env>/` doit exister.
-
-## Release produit (quotidien)
+Backend seul (avec migrations) :
 
 ```bash
-ENV=staging bash toolchain/ops/nlops.sh deploy sektor-btp
+ENV=staging bash toolchain/ops/nlops.sh release-backend sektor-btp
 ```
 
-Ne touche **pas** à l'infra partagée.
+Frontend seul :
 
-## Commandes
+```bash
+BUILD_IMAGES=true ENV=staging bash toolchain/ops/nlops.sh release-frontend sektor-btp
+```
 
-| Commande | Quand |
-|----------|-------|
-| `bootstrap-env` | Nouveau cluster staging ou prod |
-| `infra-up` | Idem sans attente rollout (bas niveau) |
-| `onboard-app <app>` | Première fois qu'un produit arrive sur un env |
-| `provision-db <app>` | Créer la base Postgres dédiée |
-| `migrate <app>` | Liquibase (sektor) ou note Flyway (venue-catalog) |
-| `deploy <app>` | Appliquer le manifeste K8s produit |
+### Reset app sur cluster existant
+
+```bash
+# Soft reset (scale down, garde la DB)
+ENV=staging bash toolchain/ops/nlops.sh reset-app sektor-btp
+
+# Hard reset (drop DB + recreate)
+RESET_DB=true ENV=staging bash toolchain/ops/nlops.sh reset-app sektor-btp
+BUILD_IMAGES=true ENV=staging bash toolchain/ops/nlops.sh release-app sektor-btp
+```
+
+### Nouveau cluster GKE (demo)
+
+```bash
+BUILD_IMAGES=true PUSH_IMAGES=true ENV=demo bash toolchain/ops/nlops.sh build-push sektor-btp
+ENV=demo bash toolchain/ops/nlops.sh bootstrap-env
+ENV=demo bash toolchain/ops/nlops.sh onboard-app sektor-btp
+# ou si infra déjà up :
+ENV=demo bash toolchain/ops/nlops.sh release-app sektor-btp
+```
+
+### GKE prod — premiers tests HTTP
+
+URLs : `http://sektor.nafuralabs.com`, `http://api.sektor.nafuralabs.com`, `http://iam.nafuralabs.com`
+
+```bash
+BUILD_IMAGES=true PUSH_IMAGES=true ENV=prod bash toolchain/ops/nlops.sh build-push sektor-btp
+ENV=prod bash toolchain/ops/nlops.sh bootstrap-env
+ENV=prod bash toolchain/ops/nlops.sh release-app sektor-btp
+```
+
+Arrêt pour économiser :
+
+```bash
+kubectl scale deployment --all -n nafura-infra-demo --replicas=0
+kubectl scale deployment --all -n sektor-demo --replicas=0
+```
 
 ## Makefile
 
 ```bash
+make help
+make clean-env ENV=staging
 make bootstrap-env ENV=staging
+make preflight ENV=staging
+make build-images ENV=staging
 make onboard-app APP=sektor-btp ENV=staging
-make deploy APP=sektor-btp ENV=staging
+make release-app APP=sektor-btp ENV=staging BUILD_IMAGES=true
+make release-backend APP=sektor-btp ENV=staging
+make reset-app APP=sektor-btp ENV=staging RESET_DB=true
 ```
-
-Alias legacy : `make deploy-sektor`, `make provision-db-sektor`, …
 
 ## Bases de données
 
-| App | Base |
-|-----|------|
-| `sektor-btp` | `nafura_erp` |
-| `venue-catalog` | `nafura_venue_catalog` |
+| App | Base | Postgres |
+|-----|------|----------|
+| `sektor-btp` | `nafura_erp` | `nafura-infra-<env>` |
 
-Instance Postgres unique par cluster (`nafura-infra`).
+## Hostnames staging
+
+```
+127.0.0.1 sektor.nafuralabs.staging api.sektor.nafuralabs.staging iam.nafura.local
+```
+
+## Images Sektor (manuel)
+
+```bash
+ENV=staging bash toolchain/ops/nlops.sh build-images sektor-btp
+# ou
+docker build -t sektor-btp-backend:staging -f products/sektor-btp/Dockerfile.jar products/sektor-btp/backend/app/build/libs
+cd web && npm run build:prod
+docker build -t sektor-btp-web:staging -f products/sektor-btp/Dockerfile.web .
+```

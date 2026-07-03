@@ -6,9 +6,10 @@ spec:
   template:
     metadata:
       annotations:
-        vault.hashicorp.com/agent-inject-secret-minio: "secret/data/nafura/prod/infra/minio"
+        vault.hashicorp.com/agent-inject-address: "http://vault.nafura-infra-prod.svc:8200"
+        vault.hashicorp.com/agent-inject-secret-minio: "secret/data/nafura/prod/platform/storage/minio"
         vault.hashicorp.com/agent-inject-template-minio: |
-          {{- with secret "secret/data/nafura/prod/infra/minio" -}}
+          {{- with secret "secret/data/nafura/prod/platform/storage/minio" -}}
           export MINIO_ROOT_USER="{{ .Data.data.root_user }}"
           export MINIO_ROOT_PASSWORD="{{ .Data.data.root_password }}"
           {{- end }}

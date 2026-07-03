@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mbs-studio
+  labels:
+    nafura.io/app: mbs-studio
+    nafura.io/layer: marketing

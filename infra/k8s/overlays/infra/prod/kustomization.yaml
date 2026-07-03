@@ -1,10 +1,10 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-namespace: nafura-infra
+namespace: nafura-infra-prod
 
 resources:
-  - ../../../base/infra/namespace.yaml
+  - patch-namespace.yaml
   - ../../../base/infra/vault.yaml
   - ../../../base/infra/vault-bootstrap-rbac.yaml
   - ../../../base/infra/service-accounts.yaml
@@ -17,7 +17,6 @@ resources:
   - ../../../base/infra/vault-init-job.yaml
   - vault-unseal-cronjob.yaml
   - clusterissuer-letsencrypt.yaml
-  - cert-manager-gke-rbac.yaml
 
 generatorOptions:
   disableNameSuffixHash: true
@@ -32,23 +31,23 @@ patches:
       kind: Ingress
       name: nafura-ingress
     path: patch-ingress-hosts.yaml
-  - target:
-      kind: Ingress
-      name: nafura-ingress
-    path: patch-ingress-tls.yaml
+  - path: patch-ingress-tls.yaml
   - target:
       kind: PersistentVolumeClaim
       name: postgres-data
-    path: pvc-storageclass-gke.yaml
+    path: pvc-storageclass-k3s.yaml
   - target:
       kind: PersistentVolumeClaim
       name: minio-data
-    path: pvc-storageclass-gke.yaml
+    path: pvc-storageclass-k3s.yaml
   - target:
       kind: PersistentVolumeClaim
       name: vault-data
-    path: pvc-storageclass-gke.yaml
-  - path: patch-vault-gke-autopilot.yaml
+    path: pvc-storageclass-k3s.yaml
+  - path: patch-pvc-postgres.yaml
+  - path: patch-pvc-minio.yaml
+  - path: patch-pvc-vault.yaml
+  - path: patch-vault-disable-mlock.yaml
   - target:
       kind: Deployment
       name: vault
@@ -57,6 +56,7 @@ patches:
   - path: patch-keycloak-vault-env.yaml
   - path: patch-minio-vault-env.yaml
   - path: patch-keycloak-hostname.yaml
+  - path: patch-keycloak-image.yaml
   - target:
       kind: Job
       name: vault-init

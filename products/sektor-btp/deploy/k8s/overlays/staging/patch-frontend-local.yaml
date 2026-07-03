@@ -1,0 +1,10 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sektor-btp-web
+spec:
+  template:
+    spec:
+      containers:
+        - name: sektor-btp-web
+          imagePullPolicy: IfNotPresent

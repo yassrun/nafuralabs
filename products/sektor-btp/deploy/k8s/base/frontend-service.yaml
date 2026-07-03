@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: sektor-btp-web
-  spec:
+spec:
   ports:
     - port: 80
       targetPort: 80

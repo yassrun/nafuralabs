@@ -1,0 +1,47 @@
+<nf-page-shell scroll>
+  <nf-page-header [config]="headerConfig"></nf-page-header>
+  <nf-entity-detail
+    #detail
+    [config]="config"
+    [mode]="mode()"
+    [item]="item()"
+    [lookups]="lookups()"
+    [loading]="isLoading()"
+    [saving]="isSaving()"
+    (action)="onAction($event)">
+
+    <ng-template nfField="lignes" let-control>
+      <div class="lignes-table">
+        @if (lignesValue(item()).length === 0) {
+          <p class="lignes-empty">
+            {{ 'ventes.avoir.table.emptyLignes' | translate }}
+          </p>
+        } @else {
+          <table>
+            <thead>
+              <tr>
+                <th>{{ 'ventes.avoir.table.header.designation' | translate }}</th>
+                <th class="num">{{ 'ventes.avoir.table.header.totalHt' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (l of lignesValue(item()); track l.id) {
+                <tr>
+                  <td>{{ l.designation }}</td>
+                  <td class="num">{{ l.totalHt | mad:2 }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+    </ng-template>
+
+  </nf-entity-detail>
+
+  @if (item() && mode() === 'view') {
+    <section class="print-area">
+      <app-avoir-print [avoir]="item()!"></app-avoir-print>
+    </section>
+  }
+</nf-page-shell>

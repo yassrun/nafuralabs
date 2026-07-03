@@ -1,0 +1,116 @@
+<nf-page-shell scroll>
+  <nf-page-header
+    [config]="{
+      title: 'financeRound2.lettrage.title',
+      subtitle: 'financeRound2.lettrage.subtitle'
+    }"
+  ></nf-page-header>
+
+  <div class="f8">
+    @if (err()) {
+      <div class="f8__alert">{{ err() }}</div>
+    }
+
+    <div class="f8__toolbar">
+      <label class="f8__lbl">
+        <span>{{ 'financeRound2.lettrage.compte' | translate }}</span>
+        <select [ngModel]="compteRadical()" (ngModelChange)="onCompteChange($event)">
+          <option value="3421">3421 — {{ 'financeRound2.lettrage.clients' | translate }}</option>
+          <option value="4411">4411 — {{ 'financeRound2.lettrage.fournisseurs' | translate }}</option>
+        </select>
+      </label>
+      <label class="f8__lbl">
+        <span>{{ 'financeRound2.lettrage.tolerance' | translate }}</span>
+        <input type="number" step="0.01" [ngModel]="tolerance()" (ngModelChange)="tolerance.set(+$event); recalcTotals()" />
+      </label>
+      <label class="f8__chk">
+        <input type="checkbox" [ngModel]="allowPartiel()" (ngModelChange)="allowPartiel.set($event)" />
+        {{ 'financeRound2.lettrage.partiel' | translate }}
+      </label>
+      <nf-button variant="primary" class="f8__btn" (clicked)="suggestAuto()"  [disabled]="busy()">
+        {{ 'financeRound2.lettrage.auto' | translate }}
+      </nf-button>
+      <nf-button variant="primary" class="f8__btn f8__btn--primary" (clicked)="lettrer()"  [disabled]="busy() || !selected().size">
+        {{ 'financeRound2.lettrage.lettrer' | translate }}
+      </nf-button>
+      <nf-button variant="primary" class="f8__btn" (clicked)="exportCsv()"  [disabled]="!historique().length">
+        {{ 'financeRound2.lettrage.exportCsv' | translate }}
+      </nf-button>
+    </div>
+
+    <section class="f8__card">
+      <h2 class="f8__h">{{ 'financeRound2.lettrage.candidats' | translate }}</h2>
+      <div class="f8__totals">
+        <span>D {{ totals().totalDebit | mad:2 }}</span>
+        <span>C {{ totals().totalCredit | mad:2 }}</span>
+        <span [class.f8__diff]="totals().difference !== 0">Δ {{ totals().difference | mad:2 }}</span>
+      </div>
+      <div class="f8__tablewrap">
+        <table class="f8__table">
+          <thead>
+            <tr>
+              <th></th>
+              <th>{{ 'financeRound2.lettrage.colDate' | translate }}</th>
+              <th>{{ 'financeRound2.lettrage.colPiece' | translate }}</th>
+              <th>{{ 'financeRound2.lettrage.colLibelle' | translate }}</th>
+              <th class="f8__num">D</th>
+              <th class="f8__num">C</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (r of candidats(); track r.ligneKey) {
+              <tr>
+                <td>
+                  <input
+                    type="checkbox"
+                    [checked]="selected().has(r.ligneKey)"
+                    (change)="toggle(r.ligneKey)"
+                  />
+                </td>
+                <td>{{ r.date }}</td>
+                <td>{{ r.piece }}</td>
+                <td>{{ r.libelle }}</td>
+                <td class="f8__num">{{ r.debit | mad:2 }}</td>
+                <td class="f8__num">{{ r.credit | mad:2 }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="f8__card">
+      <h2 class="f8__h">{{ 'financeRound2.lettrage.historique' | translate }}</h2>
+      <table class="f8__table">
+        <thead>
+          <tr>
+            <th>{{ 'financeRound2.lettrage.colCode' | translate }}</th>
+            <th>{{ 'financeRound2.lettrage.colCompte' | translate }}</th>
+            <th>{{ 'financeRound2.lettrage.colStatut' | translate }}</th>
+            <th class="f8__num">D</th>
+            <th class="f8__num">C</th>
+            <th class="f8__num">Δ</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (h of historique(); track h.id) {
+            <tr>
+              <td>{{ h.codeLettrage }}</td>
+              <td>{{ h.comptePcg }}</td>
+              <td>{{ h.status }}</td>
+              <td class="f8__num">{{ h.totalDebit | mad:2 }}</td>
+              <td class="f8__num">{{ h.totalCredit | mad:2 }}</td>
+              <td class="f8__num">{{ h.difference | mad:2 }}</td>
+              <td>
+                <nf-button variant="ghost" class="f8__link" (clicked)="delettrer(h.codeLettrage)">
+                  {{ 'financeRound2.lettrage.delettrer' | translate }}
+                </nf-button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+  </div>
+</nf-page-shell>

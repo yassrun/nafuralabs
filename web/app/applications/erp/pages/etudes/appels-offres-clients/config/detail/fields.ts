@@ -1,0 +1,147 @@
+import type { DetailFieldConfig } from '@lib/anatomy/types';
+import type { AppelOffreClient } from '@applications/erp/etudes/models';
+
+export const FIELDS: DetailFieldConfig<AppelOffreClient>[] = [
+  {
+    key: 'numero',
+    label: 'N° AO interne',
+    type: 'text',
+    readonly: true,
+    width: 'md',
+    placeholder: 'Auto-généré',
+  },
+  {
+    key: 'reference',
+    label: 'Référence officielle (MOA)',
+    type: 'text',
+    required: true,
+    width: 'md',
+  },
+  {
+    key: 'donneurOrdre',
+    label: "Donneur d'ordre",
+    type: 'text',
+    required: true,
+    width: 'lg',
+  },
+  {
+    key: 'objet',
+    label: 'Objet',
+    type: 'text',
+    required: true,
+    width: 'full',
+  },
+  {
+    key: 'type',
+    label: 'Type',
+    type: 'select',
+    required: true,
+    width: 'sm',
+    defaultValue: 'PUBLIC',
+    options: [
+      { value: 'PUBLIC', label: 'Public' },
+      { value: 'PRIVE', label: 'Privé' },
+    ],
+  },
+  {
+    key: 'ville',
+    label: 'Ville',
+    type: 'text',
+    width: 'md',
+  },
+  {
+    key: 'dateLimiteDepot',
+    label: 'Date limite de dépôt',
+    type: 'date',
+    required: true,
+    width: 'md',
+  },
+  {
+    key: 'dateOuverturePlis',
+    label: 'Date ouverture des plis',
+    type: 'date',
+    width: 'md',
+  },
+  {
+    key: 'delaiExecutionJours',
+    label: 'Délai exécution (jours)',
+    type: 'number',
+    width: 'sm',
+  },
+  {
+    key: 'estimationMoaHt',
+    label: 'Estimation MOA HT (MAD)',
+    type: 'money-ma',
+    width: 'md',
+  },
+  {
+    key: 'cautionProvisoire',
+    label: 'Caution provisoire (MAD)',
+    type: 'money-ma',
+    width: 'md',
+  },
+  {
+    key: 'cautionDefinitive',
+    label: 'Caution définitive (MAD)',
+    type: 'money-ma',
+    width: 'md',
+  },
+  {
+    key: 'cautionRetenueGarantie',
+    label: 'Retenue de garantie (MAD)',
+    type: 'money-ma',
+    width: 'md',
+  },
+  {
+    key: 'metreId',
+    label: 'Métré associé',
+    type: 'select',
+    width: 'md',
+    lookupKey: 'metres',
+    clearable: true,
+  },
+  {
+    key: 'devisId',
+    label: 'Devis (offre)',
+    type: 'select',
+    width: 'md',
+    lookupKey: 'devis',
+    clearable: true,
+  },
+  {
+    key: 'resultatRangNotre',
+    label: 'Notre rang',
+    type: 'number',
+    width: 'sm',
+    visible: (form) =>
+      ['SOUMIS', 'ATTRIBUE', 'PERDU', 'INFRUCTUEUX'].includes(String(form.status)),
+  },
+  {
+    key: 'resultatNbPlis',
+    label: 'Nombre de plis',
+    type: 'number',
+    width: 'sm',
+    visible: (form) =>
+      ['SOUMIS', 'ATTRIBUE', 'PERDU', 'INFRUCTUEUX'].includes(String(form.status)),
+  },
+  {
+    key: 'resultatAttributaire',
+    label: 'Attributaire retenu',
+    type: 'text',
+    width: 'lg',
+    visible: (form) => ['ATTRIBUE', 'PERDU'].includes(String(form.status)),
+  },
+  {
+    key: 'resultatMontantHt',
+    label: 'Montant gagnant HT (MAD)',
+    type: 'money-ma',
+    width: 'md',
+    visible: (form) => ['ATTRIBUE', 'PERDU'].includes(String(form.status)),
+  },
+  {
+    key: 'notes',
+    label: 'Notes internes',
+    type: 'textarea',
+    width: 'full',
+  },
+];

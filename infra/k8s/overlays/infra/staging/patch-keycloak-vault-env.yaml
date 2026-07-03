@@ -1,0 +1,9 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+spec:
+  template:
+    metadata:
+      annotations:
+        vault.hashicorp.com/agent-inject-address: "http://vault.nafura-infra-staging.svc:8200"

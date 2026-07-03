@@ -1,3 +1,4 @@
+/** GKE prod — HTTP first tests (enable TLS + https URLs when cert-manager is on) */
 export const environment = {
   production: true,
   apiBaseUrl: 'https://api.sektor.nafuralabs.com',

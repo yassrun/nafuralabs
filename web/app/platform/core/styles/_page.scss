@@ -1,0 +1,28 @@
+/**
+ * Nafura Platform - Generic Page Layout
+ *
+ * Use on any page type (listing, detail, form, settings).
+ * See DESIGN-SYSTEM.md for padding and max-width; listing pages may use full width by overriding max-width.
+ *
+ * - .nf-page         → page container: padding = space between parent and content
+ * - .nf-page__section → section: inner padding (same for every section on any page)
+ */
+
+.nf-page {
+  padding: var(--nf-page-container-padding);
+}
+
+.nf-page__section {
+  padding: var(--nf-page-section-padding);
+}
+
+/** Less top padding for header section (reduces space above breadcrumbs/title) */
+.nf-page__section--compact-top {
+  padding-top: var(--nf-space-2);
+}
+
+/** Minimal padding for pagination section (reduces height and bottom space) */
+.nf-page__section--compact {
+  padding-top: var(--nf-space-1);
+  padding-bottom: var(--nf-space-1);
+}

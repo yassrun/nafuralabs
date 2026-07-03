@@ -1,0 +1,9 @@
+# Prod first tests — HTTP only (no cert-manager). Re-enable patch-ingress-tls when going HTTPS.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nafura-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  tls: []

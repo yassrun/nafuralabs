@@ -1,0 +1,173 @@
+.record-datatable {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+// ===========================
+// SEARCH SECTION
+// ===========================
+.search-section {
+  padding: 0.75rem 1.5rem;
+  background: var(--dox-color-surface);
+  border-bottom: 1px solid var(--dox-color-border-light);
+
+  .search-field {
+    width: 100%;
+    max-width: 400px;
+
+    mat-icon[matPrefix] {
+      margin-right: 0.5rem;
+      color: var(--dox-color-text-muted);
+    }
+  }
+}
+
+// ===========================
+// TABLE CONTAINER
+// ===========================
+.table-container {
+  flex: 1;
+  overflow: auto;
+  padding: 1.5rem;
+  position: relative;
+}
+
+.table-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  gap: 1rem;
+
+  span {
+    color: var(--dox-color-text-muted);
+    font-size: 0.875rem;
+  }
+}
+
+// ===========================
+// EMPTY STATE
+// ===========================
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  text-align: center;
+  min-height: 300px;
+
+  .empty-icon {
+    font-size: 4rem;
+    width: 4rem;
+    height: 4rem;
+    color: var(--dox-color-text-muted);
+    opacity: 0.5;
+    margin-bottom: 1rem;
+  }
+
+  h3 {
+    margin: 0 0 0.5rem;
+    color: var(--dox-color-text-primary);
+    font-size: 1.25rem;
+    font-weight: 500;
+  }
+
+  p {
+    margin: 0 0 1.5rem;
+    color: var(--dox-color-text-muted);
+    font-size: 0.875rem;
+  }
+
+  button {
+    margin-top: 1rem;
+  }
+}
+
+// ===========================
+// TABLE
+// ===========================
+.records-table {
+  width: 100%;
+  background: var(--dox-color-surface);
+  border: 1px solid var(--dox-color-border);
+  border-radius: var(--dox-radius-md);
+  overflow: hidden;
+}
+
+.clickable-row {
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--dox-color-bg-hover) !important;
+  }
+
+  &.selected-row {
+    background-color: var(--dox-color-primary-light) !important;
+  }
+
+  &.failed-row {
+    background-color: rgba(239, 68, 68, 0.08);
+    
+    &:hover {
+      background-color: rgba(239, 68, 68, 0.12) !important;
+    }
+  }
+}
+
+// Failed extraction indicator
+.extraction-failed {
+  color: var(--dox-color-text-muted);
+}
+
+.failed-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #ef4444;
+  font-size: 0.875rem;
+  font-style: italic;
+  cursor: help;
+
+  .error-icon {
+    font-size: 1.125rem;
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+}
+
+// Primary field styling (first promoted field)
+.primary-field {
+  font-weight: 600;
+  color: var(--dox-color-primary);
+}
+
+.actions-column {
+  width: 60px;
+  text-align: center;
+
+  button {
+    margin: 0 0.25rem;
+  }
+}
+
+// Table header styling
+::ng-deep .records-table {
+  th.mat-mdc-header-cell {
+    background-color: var(--dox-color-bg-subtle);
+    font-weight: 600;
+    color: var(--dox-color-text-primary);
+    border-bottom: 2px solid var(--dox-color-border);
+  }
+
+  td.mat-mdc-cell {
+    border-bottom: 1px solid var(--dox-color-border-light);
+  }
+
+  tr.mat-mdc-row:hover {
+    background-color: var(--dox-color-bg-hover);
+  }
+}

@@ -4,7 +4,6 @@ kind: Kustomization
 namespace: nafura-sektor
 
 resources:
-  - namespace.yaml
   - backend-service-account.yaml
   - backend-deployment.yaml
   - backend-service.yaml

@@ -1,0 +1,149 @@
+<nf-page-shell>
+  <nf-page-header [config]="headerConfig"></nf-page-header>
+
+  @if (mode() !== 'create' && item(); as bc) {
+    <section class="approval-bar">
+      <span class="approval-bar__label">{{ 'achats.common.approval.label' | translate }}</span>
+      <app-submit-approval-button
+        entityType="BC"
+        [entityId]="bc.id"
+        [entityRef]="bc.numero"
+        [entitySummary]="bc.numero + ' — ' + (bc.fournisseurName ?? '') + ' — ' + (bc.totalTtc | number) + ' MAD TTC'"
+        [montantConcerne]="bc.totalHt"
+        [chantierId]="bc.chantierId"
+        [chantierCode]="bc.chantierCode"
+        [disabled]="bc.status !== 'BROUILLON'">
+      </app-submit-approval-button>
+    </section>
+
+    @if (showReceptionForm()) {
+      <section class="bc-rec-form">
+        <h3>Nouvelle réception</h3>
+        <div class="bc-rec-form__row">
+          <label>
+            Dépôt / chantier destination *
+            <select [value]="destLocationId()" (change)="destLocationId.set($any($event.target).value)">
+              <option value="">— Choisir —</option>
+              @for (loc of locations(); track loc.id) {
+                <option [value]="loc.id">{{ loc.code }} — {{ loc.name }} ({{ loc.type }})</option>
+              }
+            </select>
+          </label>
+          <label>
+            N° BL fournisseur
+            <input type="text" [value]="blNumero()" (input)="blNumero.set($any($event.target).value)" placeholder="BL-…" />
+          </label>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Article</th>
+              <th class="num">Reste à recevoir</th>
+              <th class="num">Qté reçue</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (l of receptionLines(); track l.bonCommandeLigneId; let i = $index) {
+              <tr>
+                <td>{{ l.articleLabel }}</td>
+                <td class="num">{{ l.remaining | number:'1.0-2' }}</td>
+                <td class="num">
+                  <input
+                    type="number"
+                    min="0"
+                    [max]="l.remaining"
+                    [value]="l.quantiteRecue"
+                    (input)="updateLineQty(i, $any($event.target).value)"
+                    class="bc-rec-qty-input" />
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+        <div class="bc-rec-form__actions">
+          <nf-button type="button" class="primary" [disabled]="receptionSaving()" (clicked)="submitReception()" variant="secondary">
+            {{ receptionSaving() ? 'Enregistrement…' : 'Valider réception' }}
+          </nf-button>
+          <nf-button type="button" class="secondary" (clicked)="showReceptionForm.set(false)" variant="secondary">Annuler</nf-button>
+        </div>
+      </section>
+    }
+
+    @if (receptions().length) {
+      <section class="bc-rec">
+        <h3>Réceptions enregistrées</h3>
+        <ul class="bc-rec-list">
+          @for (r of receptions(); track r.id) {
+            <li>{{ r.numero }} — {{ r.dateReception }} @if (r.blNumero) { (BL {{ r.blNumero }}) }</li>
+          }
+        </ul>
+      </section>
+    }
+
+    <section class="bc-rec">
+      <h3>{{ 'achats.commande.matching3way.title' | translate }}</h3>
+      @if (matchSummary(); as m) {
+        <p class="bc-rec__meta">
+          {{ 'achats.commande.matching3way.statusLabel' | translate }}
+          <span class="bc-rec__status" [class.bc-rec__status--bloque]="m.status === 'ECART_BLOQUE'">{{ m.status }}</span>
+          @if (m.matched3Way) { <span> — {{ 'achats.commande.matching3way.matched' | translate }}</span> }
+          <br />
+          {{ 'achats.commande.matching3way.blStatus' | translate }}
+          @if (m.receptionId) {
+            <a [routerLink]="['/inventory/mouvements/receptions', m.receptionId]">{{ m.receptionNumero }}</a>
+          } @else {
+            {{ m.receptionNumero }}
+          }
+          @if (m.factureFournisseurId && m.factureNumero) {
+            {{ 'achats.commande.matching3way.factureLabel' | translate }}
+            <a [routerLink]="['/finance/factures-fournisseurs', m.factureFournisseurId]">{{ m.factureNumero }}</a>
+          }
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>{{ 'achats.commande.matching3way.columns.article' | translate }}</th>
+              <th class="num">{{ 'achats.commande.matching3way.columns.qteCmd' | translate }}</th>
+              <th class="num">{{ 'achats.commande.matching3way.columns.qteRecue' | translate }}</th>
+              <th class="num">{{ 'achats.commande.matching3way.columns.qteFact' | translate }}</th>
+              <th class="num">{{ 'achats.commande.matching3way.columns.puBc' | translate }}</th>
+              <th class="num">{{ 'achats.commande.matching3way.columns.puFact' | translate }}</th>
+              <th class="num">{{ 'achats.commande.matching3way.columns.ecartQte' | translate }}</th>
+              <th class="num">{{ 'achats.commande.matching3way.columns.ecartPx' | translate }}</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (l of m.lignes; track l.articleId) {
+              <tr>
+                <td>{{ l.articleId }}</td>
+                <td class="num">{{ l.qteCommandee | number:'1.0-2' }}</td>
+                <td class="num">{{ l.qteRecue | number:'1.0-2' }}</td>
+                <td class="num">{{ l.qteFacturee | number:'1.0-2' }}</td>
+                <td class="num">{{ l.pxUnitaireBC | number:'1.0-2' }}</td>
+                <td class="num">{{ l.pxUnitaireFacture | number:'1.0-2' }}</td>
+                <td class="num">{{ l.ecartQte | number:'1.1-1' }}</td>
+                <td class="num">{{ l.ecartPx | number:'1.1-1' }}</td>
+                <td>@if (l.bloquant) { <span class="bloq">{{ 'achats.commande.matching3way.blocking' | translate }}</span> }</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+        <p class="bc-rec__meta">{{ 'achats.commande.matching3way.toleranceHint' | translate }}</p>
+      } @else {
+        <p class="bc-rec__meta">{{ 'achats.commande.matching3way.analyzing' | translate }}</p>
+      }
+    </section>
+  }
+
+  <nf-entity-detail
+    #detail
+    [config]="config"
+    [mode]="mode()"
+    [item]="item()"
+    [lookups]="lookups()"
+    [loading]="isLoading()"
+    [saving]="isSaving()"
+    (action)="onAction($event)">
+  </nf-entity-detail>
+</nf-page-shell>

@@ -1,0 +1,170 @@
+<div class="nf-entity-listing"
+     [class.nf-entity-listing--selection-active]="selectionCount() > 1">
+
+  <!-- Section: Toolbar -->
+  <div class="nf-entity-listing__toolbar">
+    <div class="nf-entity-listing__toolbar-stack">
+      <div class="nf-entity-listing__toolbar-inner">
+        <!-- Left: Listing Controls (includes View Mode Switcher) -->
+        <nf-listing-controls
+          [showSelectionToggle]="config().features.selectionMode === 'toggleable'"
+          [selectionModeActive]="selectionMode() === 'multiple'"
+          [columns]="listingColumns()"
+          [hiddenColumnsCount]="hiddenColumnsCount()"
+          [filterActive]="hasActiveFilters()"
+          [filterFields]="config().filters"
+          [filterValues]="filterValues()"
+          [lookups]="listingLookups()"
+          [showSortButton]="false"
+          [search]="searchTerm()"
+          [showViewModeSwitcher]="config().features.viewModeToggle"
+          [viewModes]="config().viewModes.available"
+          [currentViewMode]="viewMode()"
+          (selectionToggleClick)="onToggleSelectionMode()"
+          (columnsChange)="onColumnsChange($event)"
+          (filterChange)="onFilterChange($event)"
+          (searchChange)="onSearchChange($event)"
+          (viewModeChange)="onViewModeChange($event)">
+        </nf-listing-controls>
+
+        <nf-filter-reset
+          [active]="hasActiveFilters()"
+          (reset)="onResetFilters()"
+        />
+
+        <!-- Center: Selection Count (only when 2+ items selected) -->
+        @if (selectionCount() > 1) {
+          <div class="nf-entity-listing__selection-info">
+            <span class="nf-entity-listing__selection-count">{{ selectionCount() }}</span>
+            <span class="nf-entity-listing__selection-label">{{ 'selected' | translate }}</span>
+          </div>
+        }
+
+        <!-- Right: Actions -->
+        <div class="nf-entity-listing__toolbar-actions">
+          <!-- Selection Actions (Edit, Duplicate, Delete) -->
+          @if (selectionActions().length > 0) {
+            <nf-button-list
+              [actions]="selectionActions()"
+              [size]="'md'"
+              (actionClick)="onToolbarAction($event)">
+            </nf-button-list>
+          }
+
+          <!-- Global Actions (Import/Export, New) - always visible -->
+          @if (globalActions().length > 0) {
+            <nf-button-list
+              [actions]="globalActions()"
+              [size]="'md'"
+              (actionClick)="onToolbarAction($event)">
+            </nf-button-list>
+          }
+        </div>
+      </div>
+
+      @if (mobileActiveFilterChips().length > 0) {
+        <div class="nf-entity-listing__mobile-filter-chips" role="list" [attr.aria-label]="'Filters' | translate">
+          @for (chip of mobileActiveFilterChips(); track chip.key) {
+            <button
+              type="button"
+              class="nf-entity-listing__filter-chip"
+              role="listitem"
+              (click)="clearFilterChip(chip.key)"
+              [attr.aria-label]="('Remove filter' | translate) + ' ' + chip.label">
+              <span class="nf-entity-listing__filter-chip-label">{{ chip.label | translate }}</span>
+              <span class="nf-entity-listing__filter-chip-value">{{ chip.value }}</span>
+              <span class="nf-entity-listing__filter-chip-remove" aria-hidden="true">×</span>
+            </button>
+          }
+        </div>
+      }
+    </div>
+    </div>
+
+    <!-- Section: View (loading | error | empty | data) — Task 4.2 -->
+    <div class="nf-entity-listing__view">
+      <nf-data-state
+        [state]="listingDataState()"
+        loadingVariant="inline"
+        [loadingMessage]="listingLoadingMessage()"
+        [emptyIcon]="config().emptyState.icon"
+        [emptyTitle]="listingEmptyTitle()"
+        [emptyMessage]="listingEmptyMessage()"
+        [emptyActionLabel]="listingEmptyActionLabel()"
+        [errorMessage]="listingErrorMessage()"
+        (retry)="loadData()"
+        (emptyAction)="onEmptyStateAction()">
+
+        @switch (viewMode()) {
+          @case ('table') {
+            <nf-data-table
+              [items]="items()"
+              [columns]="visibleColumns()"
+              [loading]="isRefreshing()"
+              [selectable]="selectableMode()"
+              [selection]="effectiveTableSelection()"
+              [activeRowId]="openOnRowClick() ? activeItemId() : null"
+              [sortColumn]="sort()?.column"
+              [sortDirection]="sort()?.direction"
+              [rowClickable]="true"
+              (selectionChange)="onSelectionChange($event)"
+              (sortChange)="onSortChange($event)"
+              (rowClick)="onRowClick($event)"
+              (rowDblClick)="onRowDblClick($event)"
+              (rowAction)="onRowAction($event)">
+
+            </nf-data-table>
+          }
+          @case ('cards') {
+            <nf-card-view
+              [items]="items()"
+              [config]="config().viewModes.card!"
+              [selectable]="selectableMode()"
+              [selection]="effectiveTableSelection()"
+              [loading]="isRefreshing()"
+              (selectionChange)="onSelectionChange($event)"
+              (itemClick)="onRowClick($event)"
+              (itemDblClick)="onRowDblClick($event)">
+            </nf-card-view>
+          }
+          @case ('grid') {
+            <nf-grid-view
+              [items]="items()"
+              [config]="config().viewModes.grid!"
+              [selectable]="selectableMode()"
+              [selection]="effectiveTableSelection()"
+              [loading]="isRefreshing()"
+              (selectionChange)="onSelectionChange($event)"
+              (itemClick)="onRowClick($event)"
+              (itemDblClick)="onRowDblClick($event)">
+            </nf-grid-view>
+          }
+          @case ('list') {
+            <nf-list-view
+              [items]="items()"
+              [config]="config().viewModes.list!"
+              [selectable]="selectableMode()"
+              [selection]="effectiveTableSelection()"
+              [loading]="isRefreshing()"
+              (selectionChange)="onSelectionChange($event)"
+              (itemClick)="onRowClick($event)"
+              (itemDblClick)="onRowDblClick($event)">
+            </nf-list-view>
+          }
+        }
+      </nf-data-state>
+    </div>
+
+  <!-- Section: Pagination -->
+  @if (isLoaded() && !isEmpty()) {
+    <div class="nf-entity-listing__pagination">
+      <nf-pagination
+        [total]="totalItems()"
+        [page]="currentPage()"
+        [pageSize]="pageSize()"
+        [pageSizeOptions]="config().pagination.pageSizeOptions"
+        (pageChange)="onPageChange($event)">
+      </nf-pagination>
+    </div>
+  }
+</div>

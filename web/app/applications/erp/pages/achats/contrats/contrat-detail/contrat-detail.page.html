@@ -1,0 +1,28 @@
+<nf-page-shell>
+  <nf-page-header [config]="headerConfig"></nf-page-header>
+
+  @if (mode() === 'view' && item(); as ct) {
+    <section class="approval-bar">
+      <span class="approval-bar__label">{{ 'achats.common.approval.label' | translate }}</span>
+      <app-submit-approval-button
+        entityType="CONTRAT_ST"
+        [entityId]="ct.id"
+        [entityRef]="ct.numero"
+        [entitySummary]="ct.numero + ' — ' + ct.type + ' — ' + (ct.fournisseurName ?? '') + (ct.montantPlafondHt ? ' — plafond ' + (ct.montantPlafondHt | number) + ' MAD' : '')"
+        [montantConcerne]="ct.montantPlafondHt"
+        [disabled]="ct.status !== 'BROUILLON'">
+      </app-submit-approval-button>
+    </section>
+  }
+
+  <nf-entity-detail
+    #detail
+    [config]="config"
+    [mode]="mode()"
+    [item]="item()"
+    [lookups]="lookups()"
+    [loading]="isLoading()"
+    [saving]="isSaving()"
+    (action)="onAction($event)">
+  </nf-entity-detail>
+</nf-page-shell>

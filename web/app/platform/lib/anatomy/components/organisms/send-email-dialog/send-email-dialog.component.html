@@ -1,0 +1,96 @@
+<div class="nf-send-email-dialog">
+  <h2 class="nf-send-email-dialog__title">{{ 'email.send.title' | translate }}</h2>
+
+  <form class="nf-send-email-dialog__form">
+    <mat-form-field appearance="outline" class="nf-send-email-dialog__field">
+      <mat-label>{{ 'email.send.to' | translate }}</mat-label>
+      <input matInput type="email" [formControl]="toControl" placeholder="email@example.com" />
+      <mat-error>{{ 'email.send.toRequired' | translate }}</mat-error>
+    </mat-form-field>
+
+    @if (showCc()) {
+      <mat-form-field appearance="outline" class="nf-send-email-dialog__field">
+        <mat-label>{{ 'email.send.cc' | translate }}</mat-label>
+        <input matInput type="text" [formControl]="ccControl" placeholder="cc@example.com" />
+      </mat-form-field>
+    }
+    <button mat-button type="button" class="nf-send-email-dialog__toggle-cc" (click)="toggleCc()">
+      {{ showCc() ? ('email.send.hideCc' | translate) : ('email.send.addCc' | translate) }}
+    </button>
+
+    <mat-form-field appearance="outline" class="nf-send-email-dialog__field nf-send-email-dialog__field--full">
+      <mat-label>{{ 'email.send.subject' | translate }}</mat-label>
+      <input matInput [formControl]="subjectControl" />
+      <mat-error>{{ 'email.send.subjectRequired' | translate }}</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="nf-send-email-dialog__field nf-send-email-dialog__field--full">
+      <mat-label>{{ 'email.send.template' | translate }}</mat-label>
+      <mat-select [formControl]="emailTemplateIdControl" (selectionChange)="onEmailTemplateChange($event.value)">
+        @if (emailTemplatesLoading()) {
+          <mat-option disabled>{{ 'common.loading' | translate }}</mat-option>
+        } @else {
+          @for (t of emailTemplates(); track t.id) {
+            <mat-option [value]="t.id">{{ t.name }}</mat-option>
+          }
+        }
+      </mat-select>
+      <mat-error>{{ 'email.send.templateRequired' | translate }}</mat-error>
+    </mat-form-field>
+
+    <div class="nf-send-email-dialog__body-section">
+      <span class="nf-send-email-dialog__body-label">{{ 'email.send.bodyPreview' | translate }}</span>
+      <div class="nf-send-email-dialog__body-box">
+        @if (previewLoading()) {
+          <div class="nf-send-email-dialog__body-loading">
+            <mat-spinner diameter="32"></mat-spinner>
+            <span>{{ 'common.loading' | translate }}</span>
+          </div>
+        } @else if (bodyPreview()) {
+          <div class="nf-send-email-dialog__body-content" [innerHTML]="bodyPreview()"></div>
+        } @else {
+          <p class="nf-send-email-dialog__body-placeholder">{{ 'email.send.selectTemplate' | translate }}</p>
+        }
+      </div>
+    </div>
+
+    <div class="nf-send-email-dialog__attachments">
+      <mat-checkbox [formControl]="attachPdfControl" (change)="onAttachPdfChange($event.checked)">
+        {{ 'email.send.attachPdf' | translate }}
+      </mat-checkbox>
+      @if (attachPdfControl.value) {
+        <mat-form-field appearance="outline" class="nf-send-email-dialog__field nf-send-email-dialog__print-template">
+          <mat-label>{{ 'email.send.printTemplate' | translate }}</mat-label>
+          <mat-select [formControl]="printTemplateIdControl">
+            @if (printTemplatesLoading()) {
+              <mat-option disabled>{{ 'common.loading' | translate }}</mat-option>
+            } @else {
+              @for (t of printTemplates(); track t.id) {
+                <mat-option [value]="t.id">{{ t.name }}</mat-option>
+              }
+            }
+          </mat-select>
+        </mat-form-field>
+      }
+    </div>
+  </form>
+
+  <div class="nf-send-email-dialog__footer">
+    <button
+      mat-flat-button
+      color="primary"
+      type="button"
+      [disabled]="!canSend()"
+      (click)="send()">
+      @if (sending()) {
+        <mat-spinner diameter="20"></mat-spinner>
+      } @else {
+        <mat-icon>send</mat-icon>
+      }
+      {{ 'email.send.send' | translate }}
+    </button>
+    <button mat-button type="button" (click)="close()">
+      {{ 'Cancel' | translate }}
+    </button>
+  </div>
+</div>

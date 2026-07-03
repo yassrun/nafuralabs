@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: sektor-prod
+  labels:
+    nafura.io/app: sektor-btp
+    nafura.io/env: prod

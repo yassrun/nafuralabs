@@ -43,9 +43,9 @@ spec:
       annotations:
         vault.hashicorp.com/agent-inject: "true"
         vault.hashicorp.com/role: "minio"
-        vault.hashicorp.com/agent-inject-secret-minio: "secret/data/nafura/dev/infra/minio"
+        vault.hashicorp.com/agent-inject-secret-minio: "secret/data/nafura/staging/platform/storage/minio"
         vault.hashicorp.com/agent-inject-template-minio: |
-          {{- with secret "secret/data/nafura/dev/infra/minio" -}}
+          {{- with secret "secret/data/nafura/staging/platform/storage/minio" -}}
           export MINIO_ROOT_USER="{{ .Data.data.root_user }}"
           export MINIO_ROOT_PASSWORD="{{ .Data.data.root_password }}"
           {{- end }}

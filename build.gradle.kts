@@ -1,8 +1,9 @@
 import io.spring.gradle.dependencymanagement.dsl.DependencyManagementExtension
+import org.gradle.api.plugins.JavaPluginExtension
+import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
 plugins {
-    java apply false
     id("org.springframework.boot") version "3.4.1" apply false
     id("io.spring.dependency-management") version "1.1.6" apply false
 }
@@ -20,7 +21,7 @@ subprojects {
     apply(plugin = "java")
     apply(plugin = "io.spring.dependency-management")
 
-    java {
+    configure<JavaPluginExtension> {
         toolchain {
             languageVersion.set(JavaLanguageVersion.of(21))
         }
@@ -39,6 +40,9 @@ subprojects {
     dependencies {
         "compileOnly"("org.projectlombok:lombok")
         "annotationProcessor"("org.projectlombok:lombok")
+        "compileOnly"("org.mapstruct:mapstruct:1.5.5.Final")
+        "annotationProcessor"("org.projectlombok:lombok-mapstruct-binding:0.2.0")
+        "annotationProcessor"("org.mapstruct:mapstruct-processor:1.5.5.Final")
     }
 
     tasks.withType<Test>().configureEach {

@@ -1,0 +1,15 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minio
+spec:
+  template:
+    metadata:
+      annotations:
+        vault.hashicorp.com/agent-inject-address: "http://vault.nafura-infra-demo.svc:8200"
+        vault.hashicorp.com/agent-inject-secret-minio: "secret/data/nafura/demo/platform/storage/minio"
+        vault.hashicorp.com/agent-inject-template-minio: |
+          {{- with secret "secret/data/nafura/demo/platform/storage/minio" -}}
+          export MINIO_ROOT_USER="{{ .Data.data.root_user }}"
+          export MINIO_ROOT_PASSWORD="{{ .Data.data.root_password }}"
+          {{- end }}
