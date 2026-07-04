@@ -17,8 +17,8 @@ Lire ce document avant toute opération `nlops.sh`, bootstrap, release ou reset.
 |--------|--------|---------------|-----|
 | `sektor-btp` | `:sektor:app`, `:sektor:<module>` | `sektor-${ENV}` | `nafura_erp` |
 | `venue-catalog` | — | `venue-catalog-${ENV}` | `nafura_venue_catalog` |
-| `mbs-studio` | — | `mbs-studio-${ENV}` | — |
-| `corporate` | — | `corporate-${ENV}` | — |
+| `mbs-studio` | — | `nafura-vitrine-${ENV}` | — |
+| `corporate` | — | `nafura-vitrine-${ENV}` | — |
 
 ## Imports
 
@@ -27,11 +27,10 @@ Lire ce document avant toute opération `nlops.sh`, bootstrap, release ou reset.
 
 ## Environments
 
-| `ENV` | Cluster | Infra NS | Sektor NS |
-|-------|---------|----------|-----------|
-| `staging` | Docker Desktop K8s | `nafura-infra-staging` | `sektor-staging` |
-| `prod` | GKE | `nafura-infra-prod` | `sektor-prod` |
-| `demo` | GKE (démo client) | `nafura-infra-demo` | `sektor-demo` |
+| `ENV` | Cluster | Context kubectl | Infra NS | App NS |
+|-------|---------|-----------------|----------|--------|
+| `staging` | Docker Desktop K8s (optional) | `docker-desktop` | `nafura-infra-staging` | `sektor-staging` |
+| `prod` | OVH VPS k3s | `nafura-vps-prod` | `nafura-infra-prod` | `sektor-prod`, `nafura-vitrine-prod` |
 
 Pas d’overlay `dev`.
 

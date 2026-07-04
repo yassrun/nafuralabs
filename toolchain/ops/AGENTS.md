@@ -15,10 +15,10 @@
 2. **Toujours** fixer `ENV` (`staging` | `prod` | `demo`) avant toute op.
 3. **Toujours** utiliser `KUBE_CONTEXT` quand le cluster cible n’est pas le contexte kubectl par défaut :
    - Docker Desktop → `KUBE_CONTEXT=docker-desktop`
-   - GKE prod/demo → contexte `gke_*` (vérifier avec `kubectl config get-contexts`)
+   - OVH VPS prod → contexte `nafura-vps-prod`
 4. **Ordre migrations** : Liquibase Job **avant** backend — utiliser `release-app` / `release-backend`, pas `deploy` seul après un changement de schéma.
 5. **`clean-env` et `drop-db` sont destructifs** — ne les lancer que si l’utilisateur le demande explicitement ou après confirmation implicite (« reset complet », « nouveau cluster »).
-6. **Staging = images locales** (`sektor-btp-backend:staging`). **Demo/prod = GAR** — `BUILD_IMAGES=true PUSH_IMAGES=true` obligatoire avant deploy GKE si images changées.
+6. **Staging = images locales** (`sektor-btp-backend:staging`). **Prod = registry VPS** — `BUILD_IMAGES=true PUSH_IMAGES=true REGISTRY_PASS=…` avant deploy si images changées.
 7. **Ne pas** utiliser les namespaces legacy (`nafura-erp-dev`, `nafura-infra`, `default` pour l’infra produit).
 8. **Ne pas** committer de secrets ; ne pas modifier `.env` / credentials dans les commits.
 9. Après une op, **vérifier** avec `preflight` + `kubectl get pods -n <ns>`.
@@ -30,14 +30,16 @@
 | `ENV` | Cluster typique | Contexte kubectl | Namespace infra | Namespace Sektor | Tag images | Registry |
 |-------|-----------------|------------------|-----------------|------------------|------------|----------|
 | `staging` | Docker Desktop K8s | `docker-desktop` | `nafura-infra-staging` | `sektor-staging` | `:staging` | Local Docker |
-| `prod` | GKE | `gke_*_nafura-prod` | `nafura-infra-prod` | `sektor-prod` | `nafura-vitrine-prod` | `:prod` | GAR — **HTTP only**, PVC 5/2/1 Gi |
-| `demo` | GKE (démo client) | `gke_*_nafura-prod` | `nafura-infra-demo` | `sektor-demo` | `:demo` | GAR |
+| `prod` | OVH VPS k3s | `nafura-vps-prod` | `nafura-infra-prod` | `sektor-prod` | `nafura-vitrine-prod` | `:prod` | VPS registry `54.36.183.106:30500/nafura` |
+| `demo` | *(deprecated)* | — | — | — | — | — | Legacy GKE env — not used |
 
-Registry GAR par défaut :
+Registry VPS par défaut :
 
 ```
-europe-west9-docker.pkg.dev/gen-lang-client-0875291215/nafura
+54.36.183.106:30500/nafura
 ```
+
+Public (ingress TLS) : `registry.nafuralabs.com`
 
 ---
 
@@ -86,13 +88,13 @@ Release frontend seulement                  → release-frontend <app>  [+ BUILD
 Appliquer manifests sans rebuild            → deploy <app>
 Migrations uniquement                       → migrate <app>
 Build images sans deploy                    → build-images [app]
-Push vers GAR (demo/prod)                   → push-images [app]  ou build-push
+Push vers registry VPS (prod)              → push-images [app]  ou build-push
 Vérifier état cluster/images                → preflight
 Reset pods (garder DB)                      → reset-app <app> → release-app
 Reset pods + DB vide                        → RESET_DB=true reset-app → release-app
 Supprimer app du cluster                    → clean-app <app>
 Créer la base seulement                     → provision-db <app>
-Arrêter env GKE pour économiser             → kubectl scale (voir section coût)
+Arrêter workloads VPS (scale 0)             → kubectl scale (voir section charge VPS)
 ```
 
 ---
@@ -120,7 +122,7 @@ KUBE_CONTEXT=<ctx> ENV=<env> bash toolchain/ops/nlops.sh <commande> [args]
 | Commande | Effet |
 |----------|-------|
 | `build-images [app]` | bootJar + npm build + docker (backend, web, keycloak, lifecycle pour sektor) |
-| `push-images [app]` | Push GAR (no-op sur staging) |
+| `push-images [app]` | Push registry VPS (prod ; no-op sur staging) |
 | `build-push [app]` | Les deux |
 
 Images Sektor produites :
@@ -169,9 +171,9 @@ Credentials Postgres (staging/demo) : user/pass `nafura` / `nafura`.
 | `ENV` | `staging` | Environnement cible |
 | `KUBE_CONTEXT` | (vide = contexte courant) | Forcer le cluster |
 | `BUILD_IMAGES` | `false` | Build Docker avant release/onboard |
-| `PUSH_IMAGES` | `false` | Push GAR après build |
+| `PUSH_IMAGES` | `false` | Push registry VPS après build |
 | `RESET_DB` | `false` | Avec `reset-app`, drop + recreate DB |
-| `REGISTRY` | GAR europe-west9… | Override registry |
+| `REGISTRY` | `54.36.183.106:30500/nafura` | Override registry |
 | `GRADLEW` | `./gradlew.bat` | Gradle wrapper Windows |
 | `KUBECTL_BIN` | `kubectl` | Binaire kubectl |
 
@@ -237,34 +239,21 @@ RESET_DB=true ENV=staging bash toolchain/ops/nlops.sh reset-app sektor-btp
 BUILD_IMAGES=true ENV=staging bash toolchain/ops/nlops.sh release-app sektor-btp
 ```
 
-### F — Nouveau deploy GKE demo
+### F — Deploy marketing vitrine (OVH VPS prod)
 
 ```bash
-BUILD_IMAGES=true PUSH_IMAGES=true ENV=demo bash toolchain/ops/nlops.sh build-push sektor-btp
-ENV=demo bash toolchain/ops/nlops.sh bootstrap-env
-ENV=demo bash toolchain/ops/nlops.sh release-app sektor-btp
+BUILD_IMAGES=true PUSH_IMAGES=true KUBE_CONTEXT=nafura-vps-prod ENV=prod REGISTRY_PASS=*** \
+  bash toolchain/ops/nlops.sh build-push mbs-studio
+KUBE_CONTEXT=nafura-vps-prod ENV=prod bash toolchain/ops/nlops.sh deploy mbs-studio
+
+BUILD_IMAGES=true PUSH_IMAGES=true KUBE_CONTEXT=nafura-vps-prod ENV=prod REGISTRY_PASS=*** \
+  bash toolchain/ops/nlops.sh build-push corporate
+KUBE_CONTEXT=nafura-vps-prod ENV=prod bash toolchain/ops/nlops.sh deploy corporate
 ```
 
-URLs demo (HTTP, DNS A → IP ingress) :
-- `sektor-demo.nafuralabs.com`
-- `api.sektor-demo.nafuralabs.com`
-- `iam-demo.nafuralabs.com`
+### G — OVH VPS prod (Sektor + infra)
 
-### G — GKE prod (HTTP, premiers tests)
-
-Pas de cert-manager. PVC réduits. URLs :
-
-- `http://sektor.nafuralabs.com`
-- `http://api.sektor.nafuralabs.com`
-- `http://iam.nafuralabs.com`
-
-DNS A → IP ingress GKE (même IP que demo si même cluster).
-
-```bash
-BUILD_IMAGES=true PUSH_IMAGES=true ENV=prod bash toolchain/ops/nlops.sh build-push sektor-btp
-ENV=prod bash toolchain/ops/nlops.sh bootstrap-env
-ENV=prod bash toolchain/ops/nlops.sh release-app sektor-btp
-```
+DNS A → IP VPS `54.36.183.106` (ingress nginx k3s).
 
 Namespace neuf requis pour PVC réduits (on ne peut pas shrink un PVC existant).
 
@@ -309,7 +298,7 @@ Fichiers clés :
 | Backend CrashLoop après deploy | Migrations non appliquées | `migrate sektor-btp` puis `deploy-backend` |
 | Keycloak not ready | Image keycloak ou vault secrets | Vérifier pods `-n nafura-infra-<env>`, rebuild keycloak |
 | Job lifecycle timeout | SQL error / DB absente | `provision-db`, logs `kubectl logs job/sektor-btp-lifecycle -n sektor-<env>` |
-| mauvais cluster | Contexte kubectl GKE vs local | Toujours `KUBE_CONTEXT=docker-desktop` pour staging local |
+| mauvais cluster | Contexte kubectl incorrect | `KUBE_CONTEXT=nafura-vps-prod` pour prod VPS |
 | gcloud auth error | Token expiré | `gcloud auth login` (action utilisateur) |
 
 Commandes debug utiles :
@@ -324,13 +313,14 @@ kubectl logs -n sektor-${ENV} job/sektor-btp-lifecycle
 
 ---
 
-## Réduction coûts GKE
+## Réduction charge VPS
 
 Scale à 0 (ne supprime pas les PVC) :
 
 ```bash
-kubectl scale deployment --all -n nafura-infra-demo --replicas=0
-kubectl scale deployment --all -n sektor-demo --replicas=0
+kubectl scale deployment --all -n nafura-infra-prod --replicas=0
+kubectl scale deployment --all -n sektor-prod --replicas=0
+kubectl scale deployment --all -n nafura-vitrine-prod --replicas=0
 ```
 
 Relancer :

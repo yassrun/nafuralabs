@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: nafura-vitrine-prod
+  labels:
+    nafura.io/layer: vitrine
+    nafura.io/env: prod

@@ -20,28 +20,28 @@ npm start
 
 Runs on port 3000.
 
-## Docker & deploy (staging / prod)
+## Docker & deploy (OVH VPS prod)
 
-Product manifests live under each product path, e.g. `marketing/corporate/deploy/k8s/` (when added).
+Manifests: `marketing/corporate/deploy/k8s/`
 
-Shared infra is deployed **once per cluster** via the monorepo toolchain:
+Shared infra runs in `nafura-infra-prod` on the OVH VPS k3s cluster (`nafura-vps-prod`).
 
 ```bash
-# From nafuralabs root — bootstrap shared infra (Postgres, ingress, …)
-ENV=staging bash toolchain/ops/nlops.sh bootstrap-env
+# From nafuralabs root
+kubectl config use-context nafura-vps-prod
 
-# Deploy marketing app when deploy/k8s exists:
-ENV=staging bash toolchain/ops/nlops.sh onboard-app corporate
-ENV=staging bash toolchain/ops/nlops.sh deploy corporate
+BUILD_IMAGES=true PUSH_IMAGES=true KUBE_CONTEXT=nafura-vps-prod ENV=prod \
+  REGISTRY_PASS=<secret> bash toolchain/ops/nlops.sh build-push corporate
+
+KUBE_CONTEXT=nafura-vps-prod ENV=prod bash toolchain/ops/nlops.sh deploy corporate
 ```
-
-See [toolchain/ops/README.md](../../toolchain/ops/README.md) and [docs/README.md](../../docs/README.md).
 
 ## Environments
 
-| Environment | Cluster | Host (target) |
-|-------------|---------|---------------|
-| staging | Docker Desktop K8s | http://nafuralabs.local |
-| prod | GKE | https://nafuralabs.com |
+| Environment | Cluster | Namespace | Host |
+|-------------|---------|-----------|------|
+| prod | OVH VPS k3s (`nafura-vps-prod`) | `nafura-vitrine-prod` | `nafuralabs.com`, `www.nafuralabs.com` |
 
-Ingress for shared infra: `infra/k8s/overlays/infra/<env>/`.
+Registry: `54.36.183.106:30500/nafura/corporate-web:prod`
+
+See [toolchain/ops/README.md](../../toolchain/ops/README.md) and [docs/AGENTS.md](../../docs/AGENTS.md).

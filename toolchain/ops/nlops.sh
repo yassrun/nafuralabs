@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Nafura ops — infra (once per env) vs products (repeatable deploys).
+# Nafura ops ? infra (once per env) vs products (repeatable deploys).
 # Usage: ENV=staging|prod|demo  nlops.sh <command> [args]
 set -euo pipefail
 
@@ -76,13 +76,13 @@ usage() {
 Usage: ENV=staging|prod|demo $0 <command> [args]
 
 Namespaces:
-  staging → nafura-infra-staging, sektor-staging, nafura-vitrine-staging
-  prod    → nafura-infra-prod,    sektor-prod,    nafura-vitrine-prod
-  demo    → nafura-infra-demo,   sektor-demo,    nafura-vitrine-demo
+  staging ? nafura-infra-staging, sektor-staging, nafura-vitrine-staging
+  prod    ? nafura-infra-prod,    sektor-prod,    nafura-vitrine-prod
+  demo    ? nafura-infra-demo,   sektor-demo,    nafura-vitrine-demo
 
 Cluster / infra (once per env, or after clean-env):
   clean-env                  Delete legacy + env namespaces (destructive)
-  clean-demo                 Delete demo namespaces only (GKE)
+  clean-demo                 Delete demo namespaces only (legacy)
   bootstrap-env              Infra + vault-init + wait core services
   infra-up                   Apply infra overlay only
   infra-wait                 Wait for postgres/redis/minio/keycloak
@@ -106,29 +106,30 @@ Product deploy:
   clean-app        <app-id>   Delete app namespace
 
 Workflows:
-  onboard-app      <app-id>   First time: provision-db → migrate → deploy
-  release-app      <app-id>   migrate → deploy-backend → deploy-frontend
-  release-backend  <app-id>   migrate → deploy-backend
+  onboard-app      <app-id>   First time: provision-db ? migrate ? deploy
+  release-app      <app-id>   migrate ? deploy-backend ? deploy-frontend
+  release-backend  <app-id>   migrate ? deploy-backend
   release-frontend <app-id>   deploy-frontend only
 
 Flags (env vars):
-  KUBE_CONTEXT=<name>       kubectl context (e.g. docker-desktop)
+  KUBE_CONTEXT=<name>       kubectl context (e.g. nafura-vps-prod, docker-desktop)
   BUILD_IMAGES=true          With release-app, build images first
   PUSH_IMAGES=true           With release-app, push to REGISTRY
   RESET_DB=true              With reset-app, drop and recreate database
 
-Examples — new Docker Desktop cluster:
+Examples ? new Docker Desktop cluster:
   ENV=staging $0 clean-env
   ENV=staging $0 bootstrap-env
   BUILD_IMAGES=true ENV=staging $0 onboard-app sektor-btp
 
-Examples — daily release (infra already up):
+Examples ? daily release (infra already up):
   BUILD_IMAGES=true ENV=staging $0 release-app sektor-btp
 
-Examples — GKE demo:
-  BUILD_IMAGES=true PUSH_IMAGES=true ENV=demo $0 build-push sektor-btp
-  ENV=demo $0 bootstrap-env
-  ENV=demo $0 release-app sektor-btp
+Examples ? OVH VPS prod (marketing vitrine):
+  BUILD_IMAGES=true PUSH_IMAGES=true KUBE_CONTEXT=nafura-vps-prod ENV=prod REGISTRY_PASS=*** $0 build-push mbs-studio
+  KUBE_CONTEXT=nafura-vps-prod ENV=prod $0 deploy mbs-studio
+  BUILD_IMAGES=true PUSH_IMAGES=true KUBE_CONTEXT=nafura-vps-prod ENV=prod REGISTRY_PASS=*** $0 build-push corporate
+  KUBE_CONTEXT=nafura-vps-prod ENV=prod $0 deploy corporate
 
 Supported apps: sektor-btp (alias erp), venue-catalog, mbs-studio, corporate
 EOF
@@ -258,7 +259,7 @@ configure_vault_injector() {
   local vault_addr="http://vault.${infra_ns}.svc:8200"
 
   if ! KUBECTL get deployment vault-injector-agent-injector -n default >/dev/null 2>&1; then
-    echo "WARN: vault-injector not found in default — skip injector config" >&2
+    echo "WARN: vault-injector not found in default ? skip injector config" >&2
     return 0
   fi
 
@@ -290,7 +291,7 @@ restart_vault_injected_workloads() {
 
 infra_up() {
   require_env
-  echo "Applying infra overlay: $ENV → namespace $(infra_namespace_for_env "$ENV")"
+  echo "Applying infra overlay: $ENV ? namespace $(infra_namespace_for_env "$ENV")"
   kustomize_build "$ROOT/infra/k8s/overlays/infra/$ENV" | KUBECTL apply -f -
 }
 
@@ -311,7 +312,7 @@ infra_wait() {
   wait_rollout "$infra_ns" deployment/redis 120s || true
   wait_rollout "$infra_ns" deployment/minio 300s
   wait_rollout "$infra_ns" deployment/keycloak 300s || {
-    echo "WARN: keycloak not ready — check: kubectl get pods -n $infra_ns" >&2
+    echo "WARN: keycloak not ready ? check: kubectl get pods -n $infra_ns" >&2
   }
 }
 
@@ -322,7 +323,7 @@ ensure_registry_pull_secret() {
     return 0
   fi
   if [[ -z "$REGISTRY_PASS" ]]; then
-    echo "WARN: REGISTRY_PASS not set � skip imagePullSecret for $ns" >&2
+    echo "WARN: REGISTRY_PASS not set ? skip imagePullSecret for $ns" >&2
     return 0
   fi
   KUBECTL create secret docker-registry nafura-registry     --docker-server="$REGISTRY_HOST"     --docker-username="$REGISTRY_USER"     --docker-password="$REGISTRY_PASS"     -n "$ns" --dry-run=client -o yaml | KUBECTL apply -f -
@@ -342,7 +343,7 @@ bootstrap_env() {
   configure_vault_injector
 
   if infra_is_ready; then
-    echo "Infra already ready in $infra_ns — skipping vault-init, ensuring manifests applied."
+    echo "Infra already ready in $infra_ns ? skipping vault-init, ensuring manifests applied."
     infra_up
     return 0
   fi
@@ -442,7 +443,7 @@ preflight() {
     inj_replicas="$(KUBECTL get deployment vault-injector-agent-injector -n default -o jsonpath='{.spec.replicas}' 2>/dev/null || echo 0)"
     inj_ready="$(KUBECTL get deployment vault-injector-agent-injector -n default -o jsonpath='{.status.readyReplicas}' 2>/dev/null || echo 0)"
     if [[ "${inj_replicas:-0}" -lt 1 || "${inj_ready:-0}" -lt 1 ]]; then
-      echo "WARN: vault-injector replicas=$inj_replicas ready=$inj_ready — run bootstrap-env or configure manually"
+      echo "WARN: vault-injector replicas=$inj_replicas ready=$inj_ready ? run bootstrap-env or configure manually"
     else
       echo "OK: vault-injector running"
     fi
@@ -453,16 +454,16 @@ preflight() {
   if infra_is_ready; then
     echo "OK: infra postgres ready in $infra_ns"
   else
-    echo "WARN: infra not ready — run bootstrap-env"
+    echo "WARN: infra not ready ? run bootstrap-env"
   fi
 
   if uses_remote_registry; then
     echo "Registry: $REGISTRY (tag: $(image_tag_for_env))"
-    for img in sektor-btp-backend sektor-btp-web nafura-keycloak nafura-lifecycle; do
-      if gcloud artifacts docker images describe "${REGISTRY}/${img}:$(image_tag_for_env)" >/dev/null 2>&1; then
-        echo "OK: ${img}:$(image_tag_for_env) in GAR"
+    for img in sektor-btp-backend sektor-btp-web nafura-keycloak nafura-lifecycle mbs-studio-web corporate-web; do
+      if docker manifest inspect "${REGISTRY}/${img}:$(image_tag_for_env)" >/dev/null 2>&1; then
+        echo "OK: ${img}:$(image_tag_for_env) in registry"
       else
-        echo "MISSING: ${img}:$(image_tag_for_env) — run build-push"
+        echo "MISSING: ${img}:$(image_tag_for_env) ? run build-push"
       fi
     done
   else
@@ -471,7 +472,7 @@ preflight() {
       if docker image inspect "${img}:$(image_tag_for_env)" >/dev/null 2>&1; then
         echo "OK: ${img}:$(image_tag_for_env)"
       else
-        echo "MISSING: ${img}:$(image_tag_for_env) — run build-images"
+        echo "MISSING: ${img}:$(image_tag_for_env) ? run build-images"
       fi
     done
   fi
@@ -487,22 +488,22 @@ build_sektor_images() {
   keycloak_img="$(image_ref nafura-keycloak "$tag")"
   lifecycle_img="$(image_ref nafura-lifecycle "$tag")"
 
-  echo "Building backend → $backend_img"
+  echo "Building backend ? $backend_img"
   (cd "$ROOT" && "$GRADLEW" :sektor:app:bootJar --no-daemon)
   docker build -t "$backend_img" -f "$ROOT/products/sektor-btp/Dockerfile.jar" \
     "$ROOT/products/sektor-btp/backend/app/build/libs"
 
-  echo "Building frontend → $web_img"
+  echo "Building frontend ? $web_img"
   case "$ENV" in
     staging) (cd "$ROOT/web" && npm run build:staging) ;;
     *) (cd "$ROOT/web" && npm run build:prod) ;;
   esac
   docker build -t "$web_img" -f "$ROOT/products/sektor-btp/Dockerfile.web" "$ROOT"
 
-  echo "Building keycloak → $keycloak_img"
+  echo "Building keycloak ? $keycloak_img"
   docker build -t "$keycloak_img" -f "$ROOT/infra/keycloak/Dockerfile" "$ROOT/infra/keycloak"
 
-  echo "Building lifecycle → $lifecycle_img"
+  echo "Building lifecycle ? $lifecycle_img"
   (cd "$ROOT" && "$GRADLEW" :tools:lifecycle:collectMigrations -PappId=sektor-btp --no-daemon)
   docker build -t "$lifecycle_img" -f "$ROOT/tools/lifecycle/Dockerfile" "$ROOT/tools/lifecycle"
 
@@ -514,10 +515,23 @@ build_mbs_images() {
   tag="$(image_tag_for_env)"
   local web_img
   web_img="$(image_ref mbs-studio-web "$tag")"
-  echo "Building mbs-studio-web → $web_img"
+  echo "Building mbs-studio-web ? $web_img"
   docker build -t "$web_img" -f "$(marketing_app_root mbs-studio)/Dockerfile" \
     "$(marketing_app_root mbs-studio)" 2>/dev/null || {
     echo "ERROR: mbs-studio Dockerfile not found in marketing/products/mbs-studio" >&2
+    exit 1
+  }
+}
+
+build_corporate_images() {
+  local tag
+  tag="$(image_tag_for_env)"
+  local web_img
+  web_img="$(image_ref corporate-web "$tag")"
+  echo "Building corporate-web -> $web_img"
+  docker build -t "$web_img" -f "$(marketing_app_root corporate)/Dockerfile" \
+    "$(marketing_app_root corporate)" 2>/dev/null || {
+    echo "ERROR: corporate Dockerfile not found in marketing/corporate" >&2
     exit 1
   }
 }
@@ -528,6 +542,7 @@ build_images() {
   case "$app_id" in
     sektor-btp|erp) build_sektor_images ;;
     mbs-studio) build_mbs_images ;;
+    corporate) build_corporate_images ;;
     *)
       echo "ERROR: build-images not implemented for $app_id" >&2
       exit 1
@@ -539,13 +554,13 @@ push_images() {
   local app_id="${1:-sektor-btp}"
   require_env
   if ! uses_remote_registry; then
-    echo "staging uses local Docker tags — skip push (set ENV=demo|prod for GAR)"
+    echo "staging uses local Docker tags ? skip push (set ENV=prod for VPS registry)"
     return 0
   fi
   if [[ -n "$REGISTRY_PASS" ]]; then
     echo "$REGISTRY_PASS" | docker login "$REGISTRY_HOST" -u "$REGISTRY_USER" --password-stdin
   else
-    echo "WARN: REGISTRY_PASS not set � docker login may fail" >&2
+    echo "WARN: REGISTRY_PASS not set ? docker login may fail" >&2
   fi
   local tag
   tag="$(image_tag_for_env)"
@@ -558,6 +573,9 @@ push_images() {
       ;;
     mbs-studio)
       docker push "$(image_ref mbs-studio-web "$tag")"
+      ;;
+    corporate)
+      docker push "$(image_ref corporate-web "$tag")"
       ;;
     *)
       echo "ERROR: push-images not implemented for $app_id" >&2
@@ -619,7 +637,7 @@ run_lifecycle_job() {
   fi
 
   if [[ "$engine" == "flyway" ]]; then
-    echo "Flyway app — migrations run on backend startup."
+    echo "Flyway app ? migrations run on backend startup."
     return 0
   fi
 
@@ -627,7 +645,7 @@ run_lifecycle_job() {
   (cd "$ROOT" && "$GRADLEW" :tools:lifecycle:collectMigrations -PappId="$gradle_app_id" --no-daemon)
 
   if ! docker image inspect "$image" >/dev/null 2>&1; then
-    echo "Lifecycle image missing — building $image"
+    echo "Lifecycle image missing ? building $image"
     docker build -t "$image" -f "$ROOT/tools/lifecycle/Dockerfile" "$ROOT/tools/lifecycle"
   fi
 
@@ -678,8 +696,9 @@ deploy_app() {
   assert_app_deployable "$app_id"
   local app_ns
   app_ns="$(app_namespace_for "$app_id")"
-  echo "Deploying $app_id → namespace $app_ns (ENV=$ENV)"
+  echo "Deploying $app_id ? namespace $app_ns (ENV=$ENV)"
   kustomize_build "$(app_deploy_dir "$app_id")" | KUBECTL apply -f -
+  ensure_registry_pull_secret "$app_ns"
   echo "Deploy applied for $app_id in $app_ns."
 }
 
@@ -706,6 +725,7 @@ deploy_frontend() {
   case "$app_id" in
     sektor-btp|erp) dep="sektor-btp-web" ;;
     mbs-studio) dep="mbs-studio-web" ;;
+    corporate) dep="corporate-web" ;;
     *) dep="${app_id}-web" ;;
   esac
   if KUBECTL get deployment "$dep" -n "$app_ns" >/dev/null 2>&1; then
@@ -758,7 +778,7 @@ onboard_app() {
     [[ "$PUSH_IMAGES" == "true" ]] && push_images "$app_id"
   fi
   preflight || true
-  echo "Onboarding $app_id (provision-db → migrate → deploy)"
+  echo "Onboarding $app_id (provision-db ? migrate ? deploy)"
   provision_db "$app_id"
   migrate_app "$app_id"
   deploy_app "$app_id"
@@ -796,7 +816,7 @@ release_app() {
     build_images "$app_id"
     [[ "$PUSH_IMAGES" == "true" ]] && push_images "$app_id"
   fi
-  echo "Release $app_id: migrate → backend → frontend"
+  echo "Release $app_id: migrate ? backend ? frontend"
   provision_db "$app_id"
   migrate_app "$app_id"
   deploy_backend "$app_id"

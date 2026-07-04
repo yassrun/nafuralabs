@@ -9,8 +9,8 @@ Séparation **infra partagée** (une fois par env/cluster) et **produits** (dép
 | `ENV` | Cluster | Namespace infra | Namespace Sektor | Images |
 |-------|---------|-----------------|------------------|--------|
 | `staging` | Docker Desktop K8s | `nafura-infra-staging` | `sektor-staging` | tags locaux `:staging` |
-| `prod` | GKE | `nafura-infra-prod` | `sektor-prod` | GAR `:prod` | HTTP only (premiers tests), PVC 5/2/1 Gi |
-| `demo` | GKE (démo client) | `nafura-infra-demo` | `sektor-demo` | GAR `:demo` |
+| `prod` | OVH VPS k3s | `nafura-infra-prod` | `sektor-prod` | VPS registry `:prod` |
+| `demo` | *(deprecated)* | — | — | — |
 
 ### Env `demo` (économie GKE)
 

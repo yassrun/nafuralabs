@@ -1,4 +1,4 @@
-# GKE Autopilot disallows IPC_LOCK; disable mlock in Vault config instead.
+# k3s disallows IPC_LOCK; disable mlock in Vault config instead.
 apiVersion: v1
 kind: ConfigMap
 metadata:

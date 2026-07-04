@@ -21,25 +21,12 @@ node scripts/generate-hero-svgs.mjs   # placeholder hero/CTA fragments
 npm run dev
 ```
 
-If you see `Cannot find module './897.js'` or `prerender-manifest.json` missing, the `.next` cache is corrupted (common on Windows if `build` runs while `dev` is still open):
-
-```bash
-npm run dev:clean
-```
-
 Open [http://localhost:3000](http://localhost:3000).
 
 ## Build (static export)
 
 ```bash
 npm run build
-```
-
-Output: `out/`
-
-```bash
-docker build -t mbs-studio-web:staging .
-# prod :
 docker build -t mbs-studio-web:prod .
 ```
 
@@ -47,53 +34,29 @@ docker build -t mbs-studio-web:prod .
 
 | Env | Namespace | Host |
 |-----|-----------|------|
-| staging | `mbs-studio-staging` | `mbs.nafuralabs.staging` |
-| prod | `mbs-studio-prod` | **`http://mbs.nafuralabs.com`** (HTTP only, pas de TLS) |
+| prod | `nafura-vitrine-prod` | `mbs.nafuralabs.com` |
 
 Manifestes : `deploy/k8s/`
 
-## Deploy
+## Deploy (OVH VPS prod)
 
 Depuis la racine `nafuralabs` :
 
 ```bash
-# staging (Docker Desktop K8s)
-ENV=staging bash toolchain/ops/nlops.sh onboard-app mbs-studio
+kubectl config use-context nafura-vps-prod
 
-# prod (GKE nafura-prod)
-kubectl config use-context gke_gen-lang-client-0875291215_europe-west9_nafura-prod
-ENV=prod bash toolchain/ops/nlops.sh deploy mbs-studio
+BUILD_IMAGES=true PUSH_IMAGES=true KUBE_CONTEXT=nafura-vps-prod ENV=prod \
+  REGISTRY_PASS=<secret> bash toolchain/ops/nlops.sh build-push mbs-studio
+
+KUBE_CONTEXT=nafura-vps-prod ENV=prod bash toolchain/ops/nlops.sh deploy mbs-studio
 ```
 
-Prérequis prod : infra bootstrappée (`ENV=prod bash toolchain/ops/nlops.sh bootstrap-env`).
+Prérequis : infra bootstrappée (`nafura-infra-prod` — postgres, keycloak, vault, etc.).
 
-Pour GKE prod, taguer et pousser vers Artifact Registry puis mettre à jour
-`deploy/k8s/overlays/prod/kustomization.yaml` (`images.newName`).
+Registry : `54.36.183.106:30500/nafura/mbs-studio-web:prod`
 
 ## DNS
 
 ```
-mbs.nafuralabs.com  A  34.163.148.251
+mbs.nafuralabs.com  A  54.36.183.106
 ```
-
-(même IP que `sektor.nafuralabs.com` — LoadBalancer ingress nginx)
-
-Accès : **http://mbs.nafuralabs.com** (HTTP uniquement, pas de certificat TLS).
-
-## Replace placeholders
-
-| Asset | Path |
-|-------|------|
-| Logo | `public/logo.svg`, `public/logo-white.svg` |
-| Hero lettering | `public/hero/fragment-*.svg` |
-| CTA lettering | `public/hero/cta-*.svg` |
-| Project images | `lib/projects.ts` or `public/projects/` |
-
-## Desktop interactions
-
-- Custom pencil cursor (GSAP `quickTo`)
-- Draw on empty areas (canvas overlay)
-- Circle + `mix-blend-mode: difference` on project hover
-- Drag project cards; click opens `/projects/[slug]`
-
-Mobile: standard cursor, stacked projects, tap to open.

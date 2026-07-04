@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: nafura-vitrine-prod
+
+resources:
+  - ../../base
+  - patch-namespace.yaml
+
+patches:
+  - path: patch-ingress.yaml
+  - path: patch-ingress-http-only.yaml
+
+images:
+  - name: corporate-web
+    newName: 54.36.183.106:30500/nafura/corporate-web
+    newTag: prod

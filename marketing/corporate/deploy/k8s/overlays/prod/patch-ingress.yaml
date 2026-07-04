@@ -1,30 +1,26 @@
-# Prod on OVH VPS k3s — HTTP ingress (TLS via cert-manager optional)
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: sektor-btp-ingress
-  annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+  name: corporate-ingress
 spec:
-  tls: []
   rules:
-    - host: api.sektor.nafuralabs.com
+    - host: nafuralabs.com
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: sektor-btp-backend
+                name: corporate-web
                 port:
-                  number: 8082
-    - host: sektor.nafuralabs.com
+                  number: 80
+    - host: www.nafuralabs.com
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: sektor-btp-web
+                name: corporate-web
                 port:
                   number: 80
