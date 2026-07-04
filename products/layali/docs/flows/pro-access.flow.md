@@ -22,6 +22,8 @@ apiRefs:
 
 # Acces back-office pro / hote
 
+> **P1 walkthrough :** suivre les étapes UI ci-dessous ; données = [fixtures.md](../fixtures.md). Colonnes « Mock API » = référence **P3** uniquement.
+
 ## Objectif
 
 Permettre a un utilisateur pro (OWNER, ADMIN, HOST, BAR_MANAGER) d'acceder a la bonne surface metier du tenant courant, ou de recevoir un ecran de blocage comprehensible si l'acces n'est pas autorise.
@@ -62,7 +64,7 @@ Permettre a un utilisateur pro (OWNER, ADMIN, HOST, BAR_MANAGER) d'acceder a la 
 
 ## Erreurs et reprises
 
-- Session expirée sur une route pro : redirection `/login?audience=manager&returnTo=<encoded pro route>` puis reprise automatique si l'utilisateur retrouve le bon tenant/role.
+- Session expirée sur une route pro : redirection `/pro/login?returnTo=<encoded pro route>` puis reprise automatique si l'utilisateur retrouve le bon tenant/role.
 - Tenant introuvable : si `PLATFORM_ADMIN`, routage futur vers `/admin/tenants`; sinon `pro-no-access` avec reason `tenant_mismatch`.
 - Utilisateur client simple authentifie tentant `/pro` : pas de 403 brute, mais rendu `pro-no-access`.
 - Utilisateur authentifie sans membership : depuis `pro-no-access`, il peut ouvrir `pro-access-request` et envoyer une demande rattachee au tenant.

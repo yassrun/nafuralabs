@@ -24,6 +24,8 @@ apiRefs:
 
 # Réservation comptoir / bar spot (client)
 
+> **P1 walkthrough :** suivre les étapes UI ci-dessous ; données = [fixtures.md](../fixtures.md). Colonnes « Mock API » = référence **P3** uniquement.
+
 ## Objectif
 
 Le client réserve un accès de type `COUNTER` pour un comptoir, un bar spot ou une zone debout premium, avec un parcours plus léger qu'une réservation de table et des règles de paiement ou de validation dépendantes du lieu.

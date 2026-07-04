@@ -1,0 +1,209 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--ion-default-font);
+  font-size: 1rem;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+app,
+ion-router,
+ion-split-pane,
+.ion-page {
+  all: initial;
+  display: flex;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  contain: layout style paint;
+}
+
+ion-menu.md ion-backdrop {
+  display: none;
+}
+
+ion-menu.routerLink-active {
+  --border-color: var(--ion-color-step-350, #c0c0c0);
+}
+
+ion-menu.routerLink:not(.routerLink-active) {
+  display: none;
+}
+
+ion-note {
+  display: inline-block;
+  padding: 16px 20px;
+  color: var(--ion-color-medium, #989aa2);
+}
+
+ion-item.selected ion-label {
+  color: var(--ion-color-primary, #3880ff);
+}
+
+.container {
+  text-align: center;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.container strong {
+  font-size: 20px;
+  line-height: 26px;
+}
+
+.container p {
+  font-size: 16px;
+  line-height: 22px;
+  color: #8c8c8c;
+  margin: 0;
+}
+
+.container a {
+  text-decoration: none;
+}
+
+/* Beauty App Specific Styles */
+.salon-card {
+  margin-bottom: 16px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.salon-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.salon-info {
+  padding: 16px;
+}
+
+.salon-name {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.salon-rating {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.service-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--ion-border-color);
+}
+
+.service-name {
+  font-weight: 500;
+}
+
+.service-price {
+  color: var(--ion-color-primary);
+  font-weight: 600;
+}
+
+.time-slot {
+  display: inline-block;
+  padding: 8px 12px;
+  margin: 4px;
+  border-radius: 8px;
+  border: 1px solid var(--ion-border-color);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.time-slot.available:hover {
+  background-color: var(--ion-color-primary);
+  color: white;
+  border-color: var(--ion-color-primary);
+}
+
+.time-slot.unavailable {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.time-slot.selected {
+  background-color: var(--ion-color-primary);
+  color: white;
+  border-color: var(--ion-color-primary);
+}
+
+.booking-confirm-section {
+  background: var(--ion-color-step-100);
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.booking-detail-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.booking-detail-label {
+  color: var(--ion-text-color-rgb);
+  opacity: 0.7;
+}
+
+.booking-detail-value {
+  font-weight: 600;
+}
+
+.loyalty-badge {
+  background: linear-gradient(135deg, var(--ion-color-secondary), var(--ion-color-tertiary));
+  color: white;
+  padding: 12px;
+  border-radius: 8px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.loyalty-points {
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.loyalty-label {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.btn-primary {
+  --background: var(--ion-color-primary);
+  --color: white;
+  --border-radius: 8px;
+  --padding-start: 24px;
+  --padding-end: 24px;
+  width: 100%;
+  margin-top: 16px;
+}
+
+.btn-secondary {
+  --background: var(--ion-color-step-200);
+  --color: var(--ion-text-color);
+  --border-radius: 8px;
+  --padding-start: 24px;
+  --padding-end: 24px;
+}

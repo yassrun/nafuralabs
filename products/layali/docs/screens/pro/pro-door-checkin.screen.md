@@ -1,10 +1,13 @@
----
+﻿---
 specVersion: 1
 kind: screen
 appId: layali
 screenId: pro-door-checkin
 name: Contrôle d'accès porte
 status: review
+phase: P1
+p1MobileId: pro-door-checkin
+p1Impl: mock
 route: /pro/door
 layout: fullscreen
 zone: pro
@@ -32,6 +35,18 @@ abstractions:
 ---
 
 # Contrôle d'accès porte
+
+## P1 - Client Walkthrough
+
+| Champ | Valeur |
+|-------|--------|
+| Mobile `Screen` | `pro-door-checkin` |
+| Impl | mock |
+| Fixtures | [fixtures.md](../../fixtures.md) |
+| Cartographie | [mobile-map.md](../../mobile-map.md) |
+
+> En P1 : **ne pas** utiliser `apiRefs` / composants `@platform/` comme brief agent - mock local uniquement. *(#/pro/door)*
+
 
 ## Intent
 

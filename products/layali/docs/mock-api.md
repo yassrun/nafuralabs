@@ -2,13 +2,16 @@
 specVersion: 1
 kind: mock-api
 appId: layali
-status: stable
+status: draft
+phase: P2
 basePath: /api/v1
 authHeader: Authorization
 tenantHeader: X-Tenant-Id
 ---
 
 # Layali — Conventions Mock API
+
+> **Phase P2/P3** — hors Client Walkthrough (P1). En P1, voir [fixtures.md](fixtures.md) et `mobile/src/prototypeData.ts`.
 
 ## 1. Base URL et versionnage
 

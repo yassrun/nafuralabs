@@ -1,10 +1,13 @@
----
+﻿---
 specVersion: 1
 kind: screen
 appId: beauty
 screenId: booking-confirm
 name: Confirmation du RDV
 status: stable
+phase: P1
+p1MobileId: booking-confirm
+p1Impl: mock
 route: /booking/:bookingId/confirm
 layout: booking-layout
 zone: booking
@@ -20,6 +23,17 @@ abstractions:
 ---
 
 # Confirmation du RDV
+
+## P1 - Client Walkthrough
+
+| Champ | Valeur |
+|-------|--------|
+| Mobile `Screen` | `booking-confirm` |
+| Impl | partial |
+| Fixtures | [fixtures.md](../../fixtures.md) |
+| Cartographie | [mobile-map.md](../../mobile-map.md) |
+
+> En P1 : **ne pas** utiliser `apiRefs` / composants `@platform/` comme brief agent - mock local uniquement.
 
 ## Intent
 

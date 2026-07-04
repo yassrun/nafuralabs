@@ -3,7 +3,8 @@ specVersion: 1
 kind: api
 appId: beauty
 resource: services
-status: stable
+status: draft
+phase: P3
 basePath: /api/v1/salons/:slug/services
 auth: optional
 rateLimit: default

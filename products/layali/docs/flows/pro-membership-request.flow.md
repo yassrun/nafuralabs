@@ -17,6 +17,8 @@ apiRefs:
 
 # Demande d'acces pro a un venue
 
+> **P1 walkthrough :** suivre les étapes UI ci-dessous ; données = [fixtures.md](../fixtures.md). Colonnes « Mock API » = référence **P3** uniquement.
+
 ## Objectif
 
 Donner une sortie utile a un utilisateur authentifie qui n'a pas encore de rattachement pro pour un venue cible, afin qu'il puisse demander un acces au role adequat.

@@ -5,8 +5,9 @@ appId: beauty
 wpId: wp-08-mobile-customer-profile-options
 title: Mobile account UX — profile options and account flows
 status: draft
+phase: P1
 wave: 4
-dependsOn: [wp-03-booking-customer]
+dependsOn: [wp-p1-01]
 filesAllowed:
   - beauty/mobile/src/App.tsx
   - beauty/mobile/src/App.css

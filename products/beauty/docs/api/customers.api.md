@@ -3,7 +3,8 @@ specVersion: 1
 kind: api
 appId: beauty
 resource: customers
-status: stable
+status: draft
+phase: P3
 basePath: /api/v1/customers
 auth: required
 rateLimit: default

@@ -1,10 +1,13 @@
----
+﻿---
 specVersion: 1
 kind: screen
 appId: beauty
 screenId: admin-overview
 name: Vue d'ensemble (admin Nafura)
 status: stable
+phase: P1
+p1MobileId: admin-overview
+p1Impl: mock
 route: /admin
 layout: admin-layout
 zone: admin
@@ -19,6 +22,17 @@ abstractions:
 ---
 
 # Vue d'ensemble (admin Nafura)
+
+## P1 - Client Walkthrough
+
+| Champ | Valeur |
+|-------|--------|
+| Mobile `Screen` | `â€”` |
+| Impl | none |
+| Fixtures | [fixtures.md](../../fixtures.md) |
+| Cartographie | [mobile-map.md](../../mobile-map.md) |
+
+> En P1 : **ne pas** utiliser `apiRefs` / composants `@platform/` comme brief agent - mock local uniquement. *(wp-p1-04 stub)*
 
 ## Intent
 

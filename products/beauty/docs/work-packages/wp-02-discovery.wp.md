@@ -5,6 +5,7 @@ appId: beauty
 wpId: wp-02-discovery
 title: Discovery — home, search, salon-detail, service-list
 status: stable
+phase: P3
 wave: 2
 dependsOn: [wp-01-platform-skeleton]
 filesAllowed:

@@ -1,10 +1,13 @@
----
+﻿---
 specVersion: 1
 kind: screen
 appId: layali
 screenId: pro-events-list
 name: Événements (pro)
 status: stable
+phase: P1
+p1MobileId: pro-events-list
+p1Impl: mock
 route: /pro/events
 layout: pro-shell
 zone: pro
@@ -25,6 +28,18 @@ abstractions:
 ---
 
 # Événements (pro)
+
+## P1 - Client Walkthrough
+
+| Champ | Valeur |
+|-------|--------|
+| Mobile `Screen` | `pro-events-list` |
+| Impl | mock |
+| Fixtures | [fixtures.md](../../fixtures.md) |
+| Cartographie | [mobile-map.md](../../mobile-map.md) |
+
+> En P1 : **ne pas** utiliser `apiRefs` / composants `@platform/` comme brief agent - mock local uniquement.
+
 
 ## Intent
 

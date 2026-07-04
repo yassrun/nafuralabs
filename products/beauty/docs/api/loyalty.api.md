@@ -3,7 +3,8 @@ specVersion: 1
 kind: api
 appId: beauty
 resource: loyalty
-status: stable
+status: draft
+phase: P3
 basePath: /api/v1/loyalty
 auth: required
 rateLimit: default

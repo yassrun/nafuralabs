@@ -5,6 +5,7 @@ appId: layali
 wpId: wp-06-admin
 title: Admin Nafura — overview, tenants, audit
 status: stable
+phase: P3
 wave: 6
 dependsOn: [wp-01-platform-skeleton]
 filesAllowed:

@@ -23,6 +23,8 @@ apiRefs:
 
 # Achat de billets event (client)
 
+> **P1 walkthrough :** suivre les étapes UI ci-dessous ; données = [fixtures.md](../fixtures.md). Colonnes « Mock API » = référence **P3** uniquement.
+
 ## Objectif
 
 Le client achète un ou plusieurs billets pour un event publié, paie en ligne et reçoit N QR codes (un par billet) par email + SMS. Les billets sont consultables dans `Mes tickets`.

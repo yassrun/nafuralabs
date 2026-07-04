@@ -1,10 +1,13 @@
----
+﻿---
 specVersion: 1
 kind: screen
 appId: beauty
 screenId: salon-search
 name: Recherche de salons
 status: stable
+phase: P1
+p1MobileId: salon-search
+p1Impl: mock
 route: /search
 layout: public-layout
 zone: discovery
@@ -24,6 +27,17 @@ abstractions:
 ---
 
 # Recherche de salons
+
+## P1 - Client Walkthrough
+
+| Champ | Valeur |
+|-------|--------|
+| Mobile `Screen` | `â€”` |
+| Impl | partial |
+| Fixtures | [fixtures.md](../../fixtures.md) |
+| Cartographie | [mobile-map.md](../../mobile-map.md) |
+
+> En P1 : **ne pas** utiliser `apiRefs` / composants `@platform/` comme brief agent - mock local uniquement. *(recherche dans home)*
 
 ## Intent
 

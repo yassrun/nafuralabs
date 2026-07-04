@@ -3,7 +3,8 @@ specVersion: 1
 kind: api
 appId: beauty
 resource: reviews
-status: stable
+status: draft
+phase: P3
 basePath: /api/v1/reviews
 auth: optional
 rateLimit: default

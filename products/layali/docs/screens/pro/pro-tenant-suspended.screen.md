@@ -1,10 +1,13 @@
----
+﻿---
 specVersion: 1
 kind: screen
 appId: layali
 screenId: pro-tenant-suspended
 name: Venue suspendu
 status: review
+phase: P1
+p1MobileId: pro-tenant-suspended
+p1Impl: mock
 route: /pro/tenant-suspended
 layout: public-shell
 zone: pro
@@ -22,6 +25,18 @@ abstractions:
 ---
 
 # Venue suspendu
+
+## P1 - Client Walkthrough
+
+| Champ | Valeur |
+|-------|--------|
+| Mobile `Screen` | `pro-tenant-suspended` |
+| Impl | mock |
+| Fixtures | [fixtures.md](../../fixtures.md) |
+| Cartographie | [mobile-map.md](../../mobile-map.md) |
+
+> En P1 : **ne pas** utiliser `apiRefs` / composants `@platform/` comme brief agent - mock local uniquement.
+
 
 ## Intent
 

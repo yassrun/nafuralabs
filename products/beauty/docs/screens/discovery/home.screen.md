@@ -1,10 +1,13 @@
----
+﻿---
 specVersion: 1
 kind: screen
 appId: beauty
 screenId: home
 name: Accueil découverte
 status: stable
+phase: P1
+p1MobileId: home
+p1Impl: mock
 route: /
 layout: public-layout
 zone: discovery
@@ -25,6 +28,17 @@ abstractions:
 ---
 
 # Accueil découverte
+
+## P1 - Client Walkthrough
+
+| Champ | Valeur |
+|-------|--------|
+| Mobile `Screen` | `home` |
+| Impl | mock |
+| Fixtures | [fixtures.md](../../fixtures.md) |
+| Cartographie | [mobile-map.md](../../mobile-map.md) |
+
+> En P1 : **ne pas** utiliser `apiRefs` / composants `@platform/` comme brief agent - mock local uniquement.
 
 ## Intent
 

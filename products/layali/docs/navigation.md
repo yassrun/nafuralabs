@@ -12,11 +12,11 @@ language: fr
 
 | Audience | Hôte | Description |
 |---|---|---|
-| Client public | `layali.ma` | Découverte et achat. Auth optionnelle, requise au moment de payer ou d'accéder à `account`. L'entrée auth publique propose un choix `Client` ou `Manager`. |
-| Pro (back-office venue) | `<venue-slug>.pro.layali.ma` | Tenant résolu par le sous-domaine. Auth requise. |
-| Admin plateforme | `admin.layali.ma` | Accès `PLATFORM_ADMIN` uniquement. Auth requise. |
+| Client public | `layali.ma` | Découverte et achat. Auth lazy. **Pas** de choix Client/Manager au démarrage. |
+| Pro (back-office venue) | `<venue-slug>.pro.layali.ma` | Surface séparée. Login pro uniquement. Tenant par sous-domaine. |
+| Admin plateforme | `admin.layali.ma` | Accès `PLATFORM_ADMIN` uniquement. |
 
-En mode mock/dev, un seul hôte (`localhost`) suffit ; le tenant pro est résolu par header `X-Tenant-Id` et par segment URL `/pro/:tenant` si besoin. Sur cet hôte unique, l'entrée auth doit afficher deux boutons explicites : `Je suis client` et `Je suis manager`.
+Voir [app-surfaces.md](app-surfaces.md). En dev : client `#/` ; pro `#/pro/login` (`npm run dev:pro`).
 
 ## 2. Layouts
 
@@ -53,7 +53,8 @@ En mode mock/dev, un seul hôte (`localhost`) suffit ; le tenant pro est résolu
 /events/:eventSlug/buy/payment       ticket-payment.screen
 /events/:eventSlug/buy/confirm/:ticketOrderId  ticket-confirm.screen
 
-/login                               login.screen (`?audience=customer|manager`)
+/login                               login.screen (client uniquement)
+/pro/login                           pro-login (surface pro)
 /register                            register.screen
 
 /me/bookings                         customer-bookings.screen
@@ -87,7 +88,7 @@ Guards client :
 
 Guards pro :
 - Tenant résolu obligatoirement (`X-Tenant-Id` ou sous-domaine).
-- Utilisateur anonyme : redirection `/login?audience=manager&returnTo=<encoded>`.
+- Utilisateur anonyme : redirection `/pro/login?returnTo=<encoded>`.
 - Utilisateur authentifié sans `tenantIds[]` ou sans rôle compatible : redirection `/pro/no-access?reason=<code>`.
 - `/pro/request-access` : auth requise, accessible a tout utilisateur authentifie ; `tenant` passe en querystring.
 - `/pro/access-requests` : rôles `OWNER`, `ADMIN` ; mutations approve/reject reservees a `OWNER`.
@@ -161,3 +162,18 @@ Les libellés sont i18n (`layali.nav.breadcrumb.*`).
 - Faut-il un domaine dédié `pro.layali.ma` global avec sélecteur de venue, ou strictement un sous-domaine par venue ? Décision provisoire : sous-domaine par venue pour V1.
 - Le `/admin` doit-il être strictement isolé sur `admin.layali.ma` ou accessible via `layali.ma/admin` ? Décision provisoire : sous-domaine dédié pour V1.
 - SEO du venue-detail : besoin de SSR dès V1 ? Décision provisoire : non, pre-rendering ciblé suffira.
+
+## 11. Prototype mobile P1 (hash routing)
+
+Le Client Walkthrough (`products/layali/mobile/`) n’implémente **pas** toutes les routes web §3–5. Il utilise un hash routing partiel et des écrans fusionnés.
+
+**Cartographie officielle :** [mobile-map.md](mobile-map.md)
+
+| Type | Exemples |
+|------|----------|
+| Hash synchronisé | `#/venues`, `#/events`, `#/login`, `#/pro`, `#/me/accesses` |
+| État interne seulement | `booking-create`, `ticket-buy`, `pro-access-requests` |
+| Mobile-only | `entry`, `pro-login`, `my-accesses` |
+| Booking unifié | 9 specs `screens/booking/*` → 3 `Screen` ids — voir [screens/booking/README.md](screens/booking/README.md) |
+
+En P1, `my-accesses` regroupe partiellement `customer-bookings` + `customer-tickets`. Le web gardera les routes séparées `/me/bookings` et `/me/tickets`.

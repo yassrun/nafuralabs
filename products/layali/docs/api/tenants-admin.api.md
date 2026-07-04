@@ -3,7 +3,8 @@ specVersion: 1
 kind: api
 appId: layali
 resource: tenants-admin
-status: stable
+status: draft
+phase: P3
 basePath: /api/v1/admin
 auth: required
 rateLimit: default

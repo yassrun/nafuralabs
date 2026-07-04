@@ -1,10 +1,13 @@
----
+﻿---
 specVersion: 1
 kind: screen
 appId: layali
 screenId: event-detail
 name: Fiche événement
 status: review
+phase: P1
+p1MobileId: event-detail
+p1Impl: mock
 route: /events/:eventSlug
 layout: public-shell
 zone: discovery
@@ -32,6 +35,18 @@ abstractions:
 ---
 
 # Fiche événement
+
+## P1 - Client Walkthrough
+
+| Champ | Valeur |
+|-------|--------|
+| Mobile `Screen` | `event-detail` |
+| Impl | mock |
+| Fixtures | [fixtures.md](../../fixtures.md) |
+| Cartographie | [mobile-map.md](../../mobile-map.md) |
+
+> En P1 : **ne pas** utiliser `apiRefs` / composants `@platform/` comme brief agent - mock local uniquement.
+
 
 ## Intent
 

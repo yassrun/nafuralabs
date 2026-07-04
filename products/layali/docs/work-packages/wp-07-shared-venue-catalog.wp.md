@@ -5,6 +5,7 @@ appId: layali
 wpId: wp-07-shared-venue-catalog
 title: Bootstrap venues from shared venue catalog
 status: draft
+phase: P3
 wave: 1
 dependsOn: [wp-01-platform-skeleton]
 filesAllowed:

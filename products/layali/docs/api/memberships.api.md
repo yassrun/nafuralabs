@@ -3,7 +3,8 @@ specVersion: 1
 kind: api
 appId: layali
 resource: memberships
-status: review
+status: draft
+phase: P3
 basePath: /api/v1/memberships
 auth: required
 rateLimit: standard

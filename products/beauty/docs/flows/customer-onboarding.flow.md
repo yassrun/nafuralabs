@@ -18,6 +18,8 @@ apiRefs:
 
 # Inscription et première connexion (client)
 
+> **P1 walkthrough :** OTP mock `123456` ; pas de `POST /auth/*` réel — voir [fixtures.md](../fixtures.md).
+
 ## Objectif
 
 Permettre à un nouveau client de créer un compte rapidement (OTP téléphone par défaut) et d'arriver sur son écran cible (booking ou home) avec un profil minimal créé.

@@ -1,10 +1,13 @@
----
+﻿---
 specVersion: 1
 kind: screen
 appId: layali
 screenId: pro-venue-settings
 name: Paramètres venue
 status: review
+phase: P1
+p1MobileId: pro-venue-settings
+p1Impl: mock
 route: /pro/venue
 layout: pro-shell
 zone: pro
@@ -27,6 +30,18 @@ abstractions:
 ---
 
 # Paramètres venue
+
+## P1 - Client Walkthrough
+
+| Champ | Valeur |
+|-------|--------|
+| Mobile `Screen` | `pro-venue-settings` |
+| Impl | mock |
+| Fixtures | [fixtures.md](../../fixtures.md) |
+| Cartographie | [mobile-map.md](../../mobile-map.md) |
+
+> En P1 : **ne pas** utiliser `apiRefs` / composants `@platform/` comme brief agent - mock local uniquement.
+
 
 ## Intent
 

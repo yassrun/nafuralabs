@@ -3,7 +3,8 @@ specVersion: 1
 kind: api
 appId: layali
 resource: checkins
-status: review
+status: draft
+phase: P3
 basePath: /api/v1/checkins
 auth: required
 rateLimit: high

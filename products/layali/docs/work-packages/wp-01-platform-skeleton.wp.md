@@ -5,6 +5,7 @@ appId: layali
 wpId: wp-01-platform-skeleton
 title: Squelette web + auth + i18n + tenant resolver + abstractions manquantes
 status: stable
+phase: P2
 wave: 1
 dependsOn: []
 filesAllowed:
@@ -35,9 +36,11 @@ abstractionsMissing:
 
 # Squelette web + auth + i18n + tenant resolver + abstractions manquantes
 
+> **Phase P2** — après gate P1 ([phases.md](../phases.md)). Ne pas démarrer tant que le Client Walkthrough mobile n’est pas ✅.
+
 ## Scope
 
-Mettre en place les fondations de l'application Layali : application web Angular bootstrappée (3 shells : `public-shell`, `account-shell`, `pro-shell`, `admin-shell`, `fullscreen`), routing lazy par zone, intercepteur HTTP avec `Authorization`/`X-Tenant-Id`/`Accept-Language`, i18n FR/AR/EN avec RTL, écrans `login` et `register` fonctionnels (mock auth) avec choix d'entrée `Client` / `Manager`, abstractions plateforme manquantes créées.
+Mettre en place les fondations de l'application Layali : application web Angular bootstrappée (3 shells : `public-shell`, `account-shell`, `pro-shell`, `admin-shell`, `fullscreen`), routing lazy par zone, intercepteur HTTP avec `Authorization`/`X-Tenant-Id`/`Accept-Language`, i18n FR/AR/EN avec RTL, écrans `login` (client) et `pro/login` (pro) fonctionnels (mock auth), abstractions plateforme manquantes créées. Surfaces séparées : voir [app-surfaces.md](../app-surfaces.md).
 
 ## Inputs
 
@@ -78,7 +81,7 @@ Mettre en place les fondations de l'application Layali : application web Angular
 3. Implémenter les intercepteurs HTTP : Authorization (depuis `:platform:core:identity`), `X-Tenant-Id` (depuis sous-domaine en prod, query/local en dev), `Accept-Language`.
 4. Mettre en place i18n FR/AR/EN via `@platform/core/i18n`, charger les bundles communs (`layali.common.*`).
 5. Brancher RTL : `dir="rtl"` automatique en `ar`, switch RTL au changement de locale.
-6. Implémenter les écrans `login` et `register` (mock auth, OTP placeholder, formulaire validations), avec un premier choix explicite `Je suis client` / `Je suis manager` sur `login`.
+6. Implémenter les écrans `login` (client, zone account) et login pro (`/pro/login`, zone pro) — mock auth, OTP placeholder, sans bifurcation audience sur `/login`.
 7. Créer les abstractions manquantes :
    - `:platform:integrations:realtime` : starter Spring Boot WebSocket + STOMP, ACL tenant, brokers in-memory et Redis.
    - `:platform:integrations:qr` : lib HMAC SHA256 avec key rotation, generate + verify.
@@ -93,7 +96,7 @@ Mettre en place les fondations de l'application Layali : application web Angular
 - [ ] Les intercepteurs ajoutent `Authorization`, `X-Tenant-Id` et `Accept-Language` sur toute requête sortante.
 - [ ] L'i18n bascule entre FR/AR/EN sans full reload, RTL appliqué en `ar`.
 - [ ] Les écrans `login` et `register` rendent leurs 4 états, soumettent vers `/auth/*` mockés et stockent le JWT.
-- [ ] L'écran `login` affiche deux boutons d'entrée `Client` / `Manager` si `audience` n'est pas fourni, puis adapte la copy et le `returnTo` au choix.
+- [ ] L'écran `login` client ne propose pas de choix Client/Manager ; le login pro est sur `/pro/login`.
 - [ ] Les libs `:platform:integrations:realtime`, `:platform:integrations:qr`, `@platform/core/realtime` exposent leurs interfaces publiques et passent leurs propres tests unitaires.
 - [ ] Aucune abstraction n'est réimplémentée localement.
 - [ ] Les contrats Mock API sont respectés (rien d'inventé hors `apiRefs`).

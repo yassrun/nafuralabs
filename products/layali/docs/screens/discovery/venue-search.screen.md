@@ -1,10 +1,13 @@
----
+﻿---
 specVersion: 1
 kind: screen
 appId: layali
 screenId: venue-search
 name: Recherche de venues
 status: review
+phase: P1
+p1MobileId: venue-search
+p1Impl: mock
 route: /venues
 layout: public-shell
 zone: discovery
@@ -28,6 +31,18 @@ abstractions:
 ---
 
 # Recherche de venues
+
+## P1 - Client Walkthrough
+
+| Champ | Valeur |
+|-------|--------|
+| Mobile `Screen` | `venue-search` |
+| Impl | mock |
+| Fixtures | [fixtures.md](../../fixtures.md) |
+| Cartographie | [mobile-map.md](../../mobile-map.md) |
+
+> En P1 : **ne pas** utiliser `apiRefs` / composants `@platform/` comme brief agent - mock local uniquement.
+
 
 ## Intent
 

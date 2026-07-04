@@ -1,10 +1,13 @@
----
+﻿---
 specVersion: 1
 kind: screen
 appId: layali
 screenId: ticket-buy
 name: Acheter un billet
 status: stable
+phase: P1
+p1MobileId: ticket-buy
+p1Impl: mock
 route: /events/:eventSlug/buy
 layout: public-shell
 zone: ticket
@@ -29,6 +32,18 @@ abstractions:
 ---
 
 # Acheter un billet
+
+## P1 - Client Walkthrough
+
+| Champ | Valeur |
+|-------|--------|
+| Mobile `Screen` | `ticket-buy` |
+| Impl | mock |
+| Fixtures | [fixtures.md](../../fixtures.md) |
+| Cartographie | [mobile-map.md](../../mobile-map.md) |
+
+> En P1 : **ne pas** utiliser `apiRefs` / composants `@platform/` comme brief agent - mock local uniquement.
+
 
 ## Intent
 

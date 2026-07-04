@@ -1,10 +1,13 @@
----
+﻿---
 specVersion: 1
 kind: screen
 appId: beauty
 screenId: pro-dashboard
 name: Tableau de bord (pro)
 status: stable
+phase: P1
+p1MobileId: manager-dashboard
+p1Impl: mock
 route: /pro
 layout: pro-layout
 zone: pro
@@ -21,6 +24,17 @@ abstractions:
 ---
 
 # Tableau de bord (pro)
+
+## P1 - Client Walkthrough
+
+| Champ | Valeur |
+|-------|--------|
+| Mobile `Screen` | `manager-dashboard` |
+| Impl | mock |
+| Fixtures | [fixtures.md](../../fixtures.md) |
+| Cartographie | [mobile-map.md](../../mobile-map.md) |
+
+> En P1 : **ne pas** utiliser `apiRefs` / composants `@platform/` comme brief agent - mock local uniquement.
 
 ## Intent
 

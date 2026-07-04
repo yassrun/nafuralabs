@@ -1,10 +1,13 @@
----
+﻿---
 specVersion: 1
 kind: screen
 appId: layali
 screenId: counter-booking-review
 name: Vérifier la réservation comptoir
 status: review
+phase: P1
+p1MobileId: booking-review
+p1Impl: mock
 route: /venues/:venueSlug/counter/review
 layout: public-shell
 zone: booking
@@ -30,6 +33,18 @@ abstractions:
 ---
 
 # Vérifier la réservation comptoir
+
+## P1 - Client Walkthrough
+
+| Champ | Valeur |
+|-------|--------|
+| Mobile `Screen` | `booking-review` |
+| Impl | mock |
+| Fixtures | [fixtures.md](../../fixtures.md) |
+| Cartographie | [mobile-map.md](../../mobile-map.md) |
+
+> En P1 : **ne pas** utiliser `apiRefs` / composants `@platform/` comme brief agent - mock local uniquement.
+
 
 ## Intent
 

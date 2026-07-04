@@ -1,37 +1,30 @@
-# Layali Mobile App
+# Layali Mobile
 
-Prototype Ionic React prioritaire pour Layali mobile.
+Trois applications Vite séparées + code partagé.
 
-**Layali specializes in nightlife and dining only** — table reservations at venues (clubs, bars, rooftops, restaurants). No ticketing (dedicated to TicketMa in Morocco).
+## Structure
 
-## Ce qui est inclus
-
-- Une version mobile client moquée de Layali (home feed, venue discovery, table booking)
-- 13 wireframe screens across discovery, booking, auth, and account flows
-- Des données centralisées dans `src/prototypeData.ts` (mockées)
-- Stack: Vite 8 + React 19 + TypeScript + Ionic React
-
-## Scope
-
-**Inclus**: 
-- Venue discovery (rooftops, clubs, bars, restaurants)
-- Table booking and reservations
-- Authentication & account management
-- Real-time activity feed
-
-**Hors scope**:
-- Generic ticketing (TicketMa covers Morocco)
-- Pro/owner console (reserved for `layali/web`)
+```
+mobile/
+├── client/          # App cliente (discovery, booking, tickets)
+├── pro/             # Back-office venue (#/pro/*)
+├── admin/           # Stub admin Nafura (P1)
+└── shared/          # prototypeData, types, brand, env
+```
 
 ## Commandes
 
+| Commande | Port | URL |
+|----------|------|-----|
+| `npm run dev` | 5183 | App **client** (`#/`) |
+| `npm run dev:pro` | 5184 | App **pro** (`#/pro/login`) |
+| `npm run dev:admin` | 5185 | App **admin** (`#/admin`) |
+| `npm run build` | — | Build des 3 apps |
+
 ```bash
+cd products/layali/mobile
 npm install
 npm run dev
-npm run build
 ```
 
-## Prochaine étape
-
-Remplacer les fixtures de `src/prototypeData.ts` par des APIs réelles. Backend et web pro : `products/layali/backend/`, `products/layali/web/` (à créer).
-
+Specs : [../docs/app-surfaces.md](../docs/app-surfaces.md)

@@ -3,7 +3,8 @@ specVersion: 1
 kind: api
 appId: layali
 resource: tables
-status: stable
+status: draft
+phase: P3
 basePath: /api/v1/tables
 auth: required
 rateLimit: default

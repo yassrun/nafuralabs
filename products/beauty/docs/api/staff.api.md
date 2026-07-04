@@ -3,7 +3,8 @@ specVersion: 1
 kind: api
 appId: beauty
 resource: staff
-status: stable
+status: draft
+phase: P3
 basePath: /api/v1/salons/:slug/staff
 auth: optional
 rateLimit: default

@@ -1,10 +1,13 @@
----
+﻿---
 specVersion: 1
 kind: screen
 appId: layali
 screenId: pro-booking-detail
 name: Détail réservation (pro)
 status: review
+phase: P1
+p1MobileId: pro-booking-detail
+p1Impl: mock
 route: /pro/bookings/:bookingId
 layout: pro-shell
 zone: pro
@@ -34,6 +37,18 @@ abstractions:
 ---
 
 # Détail réservation (pro)
+
+## P1 - Client Walkthrough
+
+| Champ | Valeur |
+|-------|--------|
+| Mobile `Screen` | `pro-booking-detail` |
+| Impl | mock |
+| Fixtures | [fixtures.md](../../fixtures.md) |
+| Cartographie | [mobile-map.md](../../mobile-map.md) |
+
+> En P1 : **ne pas** utiliser `apiRefs` / composants `@platform/` comme brief agent - mock local uniquement. *(#/pro/bookings/:ref)*
+
 
 ## Intent
 
