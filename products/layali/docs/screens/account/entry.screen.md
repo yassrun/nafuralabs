@@ -3,60 +3,28 @@ specVersion: 1
 kind: screen
 appId: layali
 screenId: entry
-name: Choix d'audience (entrée)
-status: stable
+name: Choix d'audience (entrée) — DÉPRÉCIÉ
+status: deprecated
 phase: P1
 p1MobileId: entry
-p1Impl: mock
-implStatus: mock
+p1Impl: removed
 platform: mobile
-route: "#/" (cold start)
+route: (retiré)
 layout: public-shell
 zone: account
 roles: [PUBLIC]
 auth: public
-flowRefs:
-  - ../../flows/pro-access.flow.md
 ---
 
-# Choix d'audience (entrée)
+# Choix d'audience (entrée) — DÉPRÉCIÉ
 
-## P1 - Client Walkthrough
+> **Retiré** — Voir [app-surfaces.md](../../app-surfaces.md).
 
-| Champ | Valeur |
-|-------|--------|
-| Mobile `Screen` | `entry` |
-| Impl | mock |
-| Fixtures | [fixtures.md](../../fixtures.md) |
-| Cartographie | [mobile-map.md](../../mobile-map.md) |
+## Remplacement
 
-> En P1 : **ne pas** utiliser `apiRefs` / composants `@platform/` comme brief agent - mock local uniquement. *(mobile only)*
+| Avant | Après |
+|-------|-------|
+| Cold start → `entry` | Client : `#/` → `home` |
+| Manager depuis entry | Pro : `#/pro/login` (`npm run dev:pro`) |
 
-
-## Intent
-
-Écran d’accueil du **prototype mobile P1** : bifurcation explicite **Client** / **Manager** avant discovery ou connexion pro. Sur le web (P2+), ce rôle est assuré par [login.screen.md](login.screen.md) (`?audience=customer|manager`).
-
-## Route et accès
-
-- Route mobile : cold start → `entry` puis navigation état
-- Layout : plein écran, sans chrome pro
-- Auth : public
-
-## Actions
-
-| CTA | Destination mobile | Équivalent web |
-|-----|-------------------|----------------|
-| Client | `home` | `/` |
-| Manager | `pro-login` | `/login?audience=manager` |
-
-## Implémentation mobile P1
-
-- Fichier : `mobile/src/App.tsx` → `EntryScreen`
-- `Screen` id : `entry`
-- Données : statique (pas d’API)
-
-## Critères d'acceptation P1
-
-- [x] Deux boutons visibles Client / Manager
-- [x] Manager → `pro-login` → session mock
+Ne pas réintroduire de bifurcation Client/Manager dans l’app cliente.

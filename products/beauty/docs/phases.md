@@ -67,7 +67,7 @@ Convention : [screens/README.md](screens/README.md) · Cartographie : [mobile-ma
 
 | zone | screenId | p1MobileId | p1Impl |
 |------|----------|------------|--------|
-| account | entry | entry | mock |
+| account | ~~entry~~ | — | removed |
 | discovery | home | home | mock |
 | discovery | salon-search | salon-search | mock |
 | discovery | salon-detail | salon-detail | mock |

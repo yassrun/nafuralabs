@@ -29,7 +29,7 @@ abstractionsMissing: []
 
 ## Scope
 
-Implémenter la zone `discovery` côté web client public : home, recherche venues, fiche venue, liste events, fiche event. Lecture publique, mock APIs `venues` et `events`. La home doit aussi offrir une bifurcation claire `Client` / `Manager` sans empêcher la découverte libre. Topics realtime pour l'availability des events.
+Implémenter la zone `discovery` côté web client public : home, recherche venues, fiche venue, liste events, fiche event. Lecture publique, mock APIs `venues` et `events`. Home discovery-first (pas de bifurcation Client/Manager). Topics realtime pour l'availability des events.
 
 ## Inputs
 
@@ -64,7 +64,7 @@ Implémenter la zone `discovery` côté web client public : home, recherche venu
 3. Brancher `@platform/core/realtime` pour s'abonner à `/topic/event/{eventId}/availability` sur les fiches event.
 4. Implémenter le composant `<EventCard>` réutilisable (poster, titre, venue, date, prix mini).
 5. Implémenter la barre de recherche multi-critères (ville, date, mood) avec routage `/venues?city=&date=&mood=`.
-6. Ajouter dans le hero de home deux CTA d'entrée `Je suis client` et `Je suis manager` pointant vers le login approprié.
+6. Ajouter un lien footer discret « Espace professionnel » vers `/pro/login` (hors hero).
 7. Cache session 5-10 min via interceptor ou service cache.
 
 ## Critères d'acceptation
@@ -74,7 +74,7 @@ Implémenter la zone `discovery` côté web client public : home, recherche venu
 - [ ] Aucune abstraction n'est réimplémentée localement.
 - [ ] Les permissions sont vérifiées avant rendu et avant mutation (lecture publique, pas de mutation ici).
 - [ ] Les tests unitaires couvrent les états d'erreur (503, 404).
-- [ ] La home expose bien les deux CTA `Client` / `Manager` sans casser la navigation publique libre.
+- [ ] La home n'expose pas de choix Client/Manager ; lien pro en footer uniquement.
 - [ ] Le topic availability met à jour live les compteurs sur la fiche event sans casser le scroll.
 - [ ] SEO : balises Open Graph présentes sur `/venues/:slug` et `/events/:slug` (titre, description, image).
 

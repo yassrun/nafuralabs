@@ -7,9 +7,8 @@ name: Parcours pro walkthrough (mobile P1)
 status: stable
 phase: P1
 actor: OWNER
-trigger: entry Manager ou pro-login
+trigger: `npm run dev:pro` (`#/pro/login`)
 screensRefs:
-  - ../screens/account/entry.screen.md
   - ../screens/pro/pro-login.screen.md
   - ../screens/pro/pro-dashboard.screen.md
   - ../screens/pro/pro-bookings-list.screen.md
@@ -36,7 +35,7 @@ Démontrer la console pro venue en mock : dashboard, réservations, porte, plan 
 
 | # | Écran | Mobile id | Impl cible |
 |---|-------|-----------|------------|
-| 1 | entry → pro-login | `pro-login` | mock |
+| 1 | pro-login | `pro-login` | mock |
 | 2 | pro-dashboard | `pro-dashboard` | mock |
 | 3 | pro-bookings-list + detail | `pro-bookings-list` | mock / partial |
 | 4 | pro-door-checkin | `pro-door-checkin` | mock |

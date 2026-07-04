@@ -1,19 +1,25 @@
 # Beauty — Client Walkthrough (mobile)
 
-**Phase P1** — application mobile navigable avec fixtures locales.  
-Pas une app de production : aucune API HTTP réelle.
+Trois applications Vite séparées + code partagé.
 
-Specs : [../docs/phases.md](../docs/phases.md) · Progress : [../docs/00-PROGRESS.md](../docs/00-PROGRESS.md) · Données : [../docs/fixtures.md](../docs/fixtures.md)
+## Structure
 
-## Parcours actuellement jouables
+```
+mobile/
+├── client/          # App cliente (discovery, booking, compte)
+├── pro/             # Back-office salon
+├── admin/           # Stub admin Nafura (P1)
+└── shared/          # prototypeData, types, brand, env
+```
 
-**Client :** entry → home → salon-detail → booking (créneau) → confirm · bookings-list · profil  
+## Commandes
 
-**Pro :** manager-login → dashboard → bookings · staff · services · reviews  
-
-**Manquant P1 :** login/register · payment · loyalty · agenda pro · clients · admin — voir WP `wp-p1-*`
-
-## Installation
+| Commande | Port | URL |
+|----------|------|-----|
+| `npm run dev` | 5173 | App **client** |
+| `npm run dev:pro` | 5174 | App **pro** |
+| `npm run dev:admin` | 5175 | App **admin** |
+| `npm run build` | — | Build client + pro + admin |
 
 ```bash
 cd products/beauty/mobile
@@ -21,36 +27,6 @@ npm install
 npm run dev
 ```
 
-`http://localhost:5173` · `npm run build` · `npm run lint`
+Le lien **« Espace professionnel »** sur la home client ouvre `http://localhost:5174` (configurable via `VITE_PRO_APP_URL`).
 
-## Structure
-
-```
-mobile/
-├── src/
-│   ├── App.tsx              # navigation walkthrough
-│   ├── ManagerScreens.tsx   # écrans pro
-│   ├── prototypeData.ts     # fixtures P1 (→ mockFixtures.ts en P2)
-│   └── brand/tokens.css
-├── package.json
-└── vite.config.ts
-```
-
-## Auth mock (P1 cible)
-
-| Rôle | Accès |
-|------|--------|
-| Client | walkthrough ; OTP mock `123456` après wp-p1-01 |
-| Manager | `fatima@silhouettebeauty.ma` / any password |
-
-## Ajouter un écran walkthrough
-
-1. Spec screen dans `../docs/screens/` si nouveau
-2. Fixture dans `prototypeData.ts` si besoin
-3. Composant + entrée dans `App.tsx` `Screen` union + `switch`
-4. Mettre à jour `../docs/00-PROGRESS.md`
-
-## Après P1
-
-- **P2** : web Angular + mock server (wp-01)
-- **P3** : backend + `api/*.md` — remplacer fixtures par HTTP
+Specs : [../docs/app-surfaces.md](../docs/app-surfaces.md)

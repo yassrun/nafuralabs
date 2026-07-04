@@ -4,10 +4,15 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "dev": "vite -c client/vite.config.ts",
+    "dev:pro": "vite -c pro/vite.config.ts",
+    "dev:admin": "vite -c admin/vite.config.ts",
+    "build": "npm run build:client && npm run build:pro && npm run build:admin",
+    "build:client": "tsc -b && vite build -c client/vite.config.ts",
+    "build:pro": "vite build -c pro/vite.config.ts",
+    "build:admin": "vite build -c admin/vite.config.ts",
+    "lint": "eslint client pro admin shared",
+    "preview": "vite preview -c client/vite.config.ts"
   },
   "dependencies": {
     "@ionic/react": "^8.8.10",
@@ -15,7 +20,7 @@
     "ionicons": "^8.0.13",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
-     "react-router-dom": "^5.3.0"
+    "react-router-dom": "^5.3.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

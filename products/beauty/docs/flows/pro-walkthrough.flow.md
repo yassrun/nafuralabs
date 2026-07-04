@@ -7,9 +7,8 @@ name: Parcours pro walkthrough (mobile P1)
 status: stable
 phase: P1
 actor: OWNER
-trigger: bouton Manager sur entry ou manager-login
+trigger: `npm run dev:pro` ou lien « Espace professionnel » (hors app client)
 screensRefs:
-  - ../screens/account/entry.screen.md
   - ../screens/pro/pro-login.screen.md
   - ../screens/pro/pro-dashboard.screen.md
   - ../screens/pro/pro-bookings-list.screen.md
@@ -39,20 +38,19 @@ Démontrer la console pro salon en mock : dashboard, réservations, services, st
 
 | # | Écran spec | Mobile id | Impl cible | Action |
 |---|------------|-----------|------------|--------|
-| 1 | entry | `entry` | mock | Choisir Manager |
-| 2 | pro-login | `manager-login` | mock | Se connecter |
-| 3 | pro-dashboard | `manager-dashboard` | mock | Voir KPIs stub |
-| 4 | pro-bookings-list | `manager-bookings-list` | mock | Ouvrir liste |
-| 5 | pro-booking-detail | `manager-booking-detail` | mock | Détail RDV |
-| 6 | pro-services | `manager-services` | mock | Liste services |
-| 7 | pro-staff | `manager-staff` | mock | Liste staff |
-| 8 | pro-reviews | `manager-reviews` | mock | Avis salon |
-| 9 | pro-agenda | — | stub | wp-p1-03 |
-| 10 | pro-customers | — | stub | wp-p1-03 |
-| 11 | pro-loyalty | — | stub | wp-p1-03 |
-| 12 | pro-settings | — | stub | wp-p1-03 |
+| 1 | pro-login | `manager-login` | mock | Se connecter (entrée `dev:pro`) |
+| 2 | pro-dashboard | `manager-dashboard` | mock | Voir KPIs stub |
+| 3 | pro-bookings-list | `manager-bookings-list` | mock | Ouvrir liste |
+| 4 | pro-booking-detail | `manager-booking-detail` | mock | Détail RDV |
+| 5 | pro-services | `manager-services` | mock | Liste services |
+| 6 | pro-staff | `manager-staff` | mock | Liste staff |
+| 7 | pro-reviews | `manager-reviews` | mock | Avis salon |
+| 8 | pro-agenda | — | stub | wp-p1-03 |
+| 9 | pro-customers | — | stub | wp-p1-03 |
+| 10 | pro-loyalty | — | stub | wp-p1-03 |
+| 11 | pro-settings | — | stub | wp-p1-03 |
 
 ## Critères de sortie flow
 
-- [ ] Étapes 1–8 jouables aujourd’hui
-- [ ] Étapes 9–12 atteignables en stub (wp-p1-03)
+- [ ] Étapes 1–7 jouables aujourd’hui
+- [ ] Étapes 8–11 atteignables en stub (wp-p1-03)

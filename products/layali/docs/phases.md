@@ -85,7 +85,7 @@ Convention : [screens/README.md](screens/README.md) · Booking unifié : [screen
 
 | zone | screenId | p1MobileId | p1Impl |
 |------|----------|------------|--------|
-| account | entry | entry | mock |
+| account | ~~entry~~ | — | removed |
 | discovery | home | home | mock |
 | discovery | venue-search | venue-search | mock |
 | discovery | venue-detail | venue-detail | mock |

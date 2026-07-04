@@ -64,7 +64,7 @@ Permettre a un utilisateur pro (OWNER, ADMIN, HOST, BAR_MANAGER) d'acceder a la 
 
 ## Erreurs et reprises
 
-- Session expirée sur une route pro : redirection `/login?audience=manager&returnTo=<encoded pro route>` puis reprise automatique si l'utilisateur retrouve le bon tenant/role.
+- Session expirée sur une route pro : redirection `/pro/login?returnTo=<encoded pro route>` puis reprise automatique si l'utilisateur retrouve le bon tenant/role.
 - Tenant introuvable : si `PLATFORM_ADMIN`, routage futur vers `/admin/tenants`; sinon `pro-no-access` avec reason `tenant_mismatch`.
 - Utilisateur client simple authentifie tentant `/pro` : pas de 403 brute, mais rendu `pro-no-access`.
 - Utilisateur authentifie sans membership : depuis `pro-no-access`, il peut ouvrir `pro-access-request` et envoyer une demande rattachee au tenant.

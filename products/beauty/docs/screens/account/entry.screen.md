@@ -3,55 +3,31 @@ specVersion: 1
 kind: screen
 appId: beauty
 screenId: entry
-name: Choix d'audience (entrée)
-status: stable
+name: Choix d'audience (entrée) — DÉPRÉCIÉ
+status: deprecated
 phase: P1
 p1MobileId: entry
-p1Impl: mock
+p1Impl: removed
 platform: mobile
-route: cold start
+route: (retiré)
 layout: public-layout
 zone: account
 roles: []
 auth: public
-flowRefs:
-  - ../../flows/customer-onboarding.flow.md
 ---
 
-# Choix d'audience (entrée)
+# Choix d'audience (entrée) — DÉPRÉCIÉ
 
-## P1 - Client Walkthrough
+> **Retiré** — Les surfaces client et pro sont **séparées**. Voir [app-surfaces.md](../../app-surfaces.md).
 
-| Champ | Valeur |
-|-------|--------|
-| Mobile `Screen` | `entry` |
-| Impl | mock |
-| Fixtures | [fixtures.md](../../fixtures.md) |
-| Cartographie | [mobile-map.md](../../mobile-map.md) |
+## Remplacement
 
-> En P1 : **ne pas** utiliser `apiRefs` / composants `@platform/` comme brief agent - mock local uniquement. *(mobile only)*
+| Avant | Après |
+|-------|-------|
+| Cold start → `entry` → Client / Manager | Client : `npm run dev` → `home` |
+| Manager depuis entry | Pro : `npm run dev:pro` → `manager-login` |
+| Admin depuis entry | Admin : `npm run dev:admin` → `admin-overview` |
 
-## Intent
+## Historique P1
 
-Écran d’accueil du **prototype mobile P1** : bifurcation **Client** / **Manager** avant discovery ou console pro mock. Sur le web (P2+), rôle assuré par [login.screen.md](login.screen.md) (`?role=pro`).
-
-## Route et accès
-
-- Mobile : cold start → `entry`
-- Auth : public
-
-## Actions
-
-| CTA | Destination mobile |
-|-----|-------------------|
-| Client | `home` |
-| Manager | `manager-login` → [pro-login](../pro/pro-login.screen.md) |
-
-## Implémentation mobile P1
-
-- Fichier : `mobile/src/App.tsx` → `EntryScreen`
-
-## Critères d'acceptation P1
-
-- [x] Deux boutons Client / Manager visibles
-- [x] Manager → `manager-login`
+Écran de bifurcation Client/Manager utilisé dans les premiers prototypes. Non conforme au standard marketplace — ne pas réimplémenter.

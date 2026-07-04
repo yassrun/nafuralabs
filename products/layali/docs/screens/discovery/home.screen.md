@@ -48,7 +48,7 @@ abstractions:
 
 ## Intent
 
-Page d'entrée publique. Donner envie en présentant les soirées du soir et du week-end, les lieux tendance, permettre une découverte rapide des modes d'accès : ticket, table, guest list, comptoir, et offrir dès l'entrée un choix clair entre `Client` et `Manager`.
+Page d'entrée publique **client**. Présenter les soirées du soir et du week-end, les lieux tendance, découverte des modes d'accès (ticket, table, guest list, comptoir). Lien discret « Espace professionnel » en footer → surface pro ([app-surfaces.md](../../app-surfaces.md)).
 
 ## Route et accès
 
@@ -89,7 +89,6 @@ Page d'entrée publique. Donner envie en présentant les soirées du soir et du 
 
 ### success
 - Hero avec recherche (ville, date, ambiance).
-- Switch d'entrée visible dans le hero : bouton `Je suis client` et bouton `Je suis manager`.
 - Section "Ce soir" (max 8 events).
 - Section "Ce week-end" (max 12 events).
 - Section "Venues tendances" (max 8 cards).
@@ -100,8 +99,7 @@ Page d'entrée publique. Donner envie en présentant les soirées du soir et du 
 | Action | Déclencheur | Résultat |
 |---|---|---|
 | Rechercher | Submit search-bar | navigation `/venues?city=&date=&mood=` |
-| Entrer en tant que client | clic bouton hero | navigation `/login?audience=customer` |
-| Entrer en tant que manager | clic bouton hero | navigation `/login?audience=manager&returnTo=/pro` |
+| Espace professionnel | lien footer discret | `pro.layali.ma` ou `/pro/login` |
 | Cliquer une carte event | clic | navigation `/events/:slug` |
 | Cliquer une carte venue | clic | navigation `/venues/:slug` |
 | Cliquer un mini CTA d'une card | bouton dans la card | navigation directe vers ticket, table, guest list ou comptoir |
@@ -119,7 +117,7 @@ Page d'entrée publique. Donner envie en présentant les soirées du soir et du 
 ## Composants internes (non réutilisables)
 
 - `<TrendingSection>` : wrap card-grid avec titre + lien "voir tout".
-- `<AudienceEntrySwitch>` : deux gros boutons `Client` / `Manager` avec micro-copy explicite.
+- `<ProFooterLink>` : lien discret « Espace professionnel » (footer).
 - `<AccessModeHighlights>` : rail de chips `Ticket`, `Table`, `Guest list`, `Comptoir` menant vers des recherches préfiltrées.
 - `<EventCardMiniCtas>` : mini pile de CTA pour les soirées mises en avant.
 - `<VenueCardMiniCtas>` : mini pile de CTA pour les lieux tendance.
@@ -145,8 +143,7 @@ Aucun. La home utilise du contenu rafraîchi à chaque visite ; pas d'abonnement
 - `layali.home.section.venues`
 - `layali.home.section.access-modes`
 - `layali.home.cta.search`
-- `layali.home.cta.customer-entry`
-- `layali.home.cta.manager-entry`
+- `layali.home.cta.pro-footer`
 - `layali.home.empty.global`
 - `layali.common.errors.retry`
 - `layali.home.card.cta.ticket`
@@ -161,8 +158,8 @@ Aucun. La home utilise du contenu rafraîchi à chaque visite ; pas d'abonnement
 - [ ] Aucun appel à un endpoint hors `apiRefs` du frontmatter.
 - [ ] Si `GET /events` retourne `503`, l'écran affiche un état d'erreur non bloquant et permet de réessayer sans recharger la page.
 - [ ] Les CTA de carte naviguent vers `/venues/:slug` ou `/events/:slug` en respectant le slug retourné par l'API (pas d'UUID exposé dans l'URL).
-- [ ] Le hero expose deux boutons d'entrée distincts : `Je suis client` et `Je suis manager`.
-- [ ] Le bouton manager ouvre `/login?audience=manager&returnTo=/pro`.
+- [ ] Pas de choix Client/Manager sur la home.
+- [ ] Le footer expose un lien discret vers la surface pro.
 - [ ] Les mini CTA de home reflètent correctement les modes d'accès réellement exposés par les données des cards.
 - [ ] La recherche soumet correctement les paramètres `city`, `date`, `mood` à `/venues`.
 

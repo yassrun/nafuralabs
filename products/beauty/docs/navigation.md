@@ -9,10 +9,15 @@ status: stable
 
 ## 1. Vue d'ensemble
 
-Trois sitemaps distincts, chacun servi par un layout dédié :
-- **Web client** (public + compte) : domaine principal `beauty.nafura.ma`.
-- **Web pro** (back-office salon) : sous-domaine tenant `<salon-slug>.beauty.nafura.ma` OU chemin `/pro` sur le domaine principal (à arbitrer, voir Open questions). Hypothèse de travail V1 : **chemin `/pro` sur le domaine principal**, avec résolution tenant via le contexte utilisateur connecté.
-- **Web admin Nafura** : domaine séparé `admin.beauty.nafura.ma` (ou chemin `/admin` protégé, idem à arbitrer ; hypothèse V1 : chemin `/admin` sur le domaine principal).
+Trois **surfaces séparées** (pas de choix Client/Pro au démarrage) — voir [app-surfaces.md](app-surfaces.md).
+
+| Surface | Hôte V1 | Layout |
+|---------|---------|--------|
+| **Client** (public + compte) | `beauty.nafura.ma` | `public-layout`, `booking-layout`, `account-layout` |
+| **Pro** (back-office salon) | `pro.beauty.nafura.ma` ou `/pro` | `pro-layout` |
+| **Admin Nafura** | `admin.beauty.nafura.ma` ou `/admin` | `admin-layout` |
+
+Lien discret **« Espace professionnel »** en footer client → `pro.beauty.nafura.ma` (ou `/pro`).
 
 ## 2. Sitemap — Web client
 
@@ -114,7 +119,7 @@ Le menu est filtré par rôle :
 | `/salons/:slug/book` | optional → required à submit | CUSTOMER (forcé à login si non auth) | `/login?redirect=...` |
 | `/booking/*` | required | CUSTOMER | `/login?redirect=...` |
 | `/me/*` | required | CUSTOMER | `/login?redirect=...` |
-| `/pro/*` | required | OWNER, ADMIN, STAFF (filtré côté écran) | `/login?role=pro&redirect=...` |
+| `/pro/*` | required | OWNER, ADMIN, STAFF (filtré côté écran) | `/pro/login?redirect=...` (surface pro, pas login client) |
 | `/admin/*` | required | PLATFORM_ADMIN | 403 page |
 
 Guard plateforme attendu : `:platform:core:authorization` expose un `RoleGuard` paramétrable par route. Les guards écrivent dans l'URL le `redirect` pour reprendre le parcours après auth.
@@ -158,4 +163,4 @@ Points clés :
 
 Écrans spec **non branchés** en P1 : `login`, `register`, `booking-payment`, `salon-search` (recherche dans `home`), `pro-agenda`, `pro-customers`, `pro-loyalty`, `pro-settings`, admin (3).
 
-Écran mobile-only : `entry` (choix Client / Manager).
+Prototype mobile P1 : apps séparées `client/`, `pro/`, `admin/` + `shared/`. Voir [app-surfaces.md](app-surfaces.md).

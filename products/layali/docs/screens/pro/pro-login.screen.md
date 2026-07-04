@@ -3,57 +3,44 @@ specVersion: 1
 kind: screen
 appId: layali
 screenId: pro-login
-name: Connexion manager (mobile)
+name: Connexion pro (surface séparée)
 status: stable
 phase: P1
 p1MobileId: pro-login
 p1Impl: mock
-implStatus: mock
 platform: mobile
-route: navigation interne depuis entry
-layout: public-shell
+route: /pro/login
+layout: pro-shell (minimal)
 zone: pro
 roles: [PUBLIC]
 auth: public
 flowRefs:
   - ../../flows/pro-access.flow.md
+  - ../../flows/pro-walkthrough.flow.md
 ---
 
-# Connexion manager (mobile)
+# Connexion pro (surface séparée)
 
-## P1 - Client Walkthrough
+## P1 - Pro Walkthrough
 
 | Champ | Valeur |
 |-------|--------|
 | Mobile `Screen` | `pro-login` |
-| Impl | mock |
+| Entrée P1 | `npm run dev:pro` → `#/pro/login` |
 | Fixtures | [fixtures.md](../../fixtures.md) |
-| Cartographie | [mobile-map.md](../../mobile-map.md) |
-
-> En P1 : **ne pas** utiliser `apiRefs` / composants `@platform/` comme brief agent - mock local uniquement.
-
 
 ## Intent
 
-Formulaire de connexion **manager** du prototype mobile. Équivalent simplifié de [login.screen.md](../account/login.screen.md) avec `audience=manager`, sans OTP en P1.
+Formulaire de connexion **manager / staff** — surface pro uniquement. Équivalent web : `/pro/login` (pas de paramètre `audience` sur `/login` client).
 
 ## Route et accès
 
-- Entrée : [entry.screen.md](../account/entry.screen.md) → bouton Manager
-- Sortie succès : `pro-dashboard` + `ManagerSession` mock
-- Sortie échec : message inline (accepte tout email/mot de passe en P1)
-
-## Implémentation mobile P1
-
-- Fichier : `mobile/src/ManagerScreens.tsx` → `ProLoginScreen`
-- `Screen` id : `pro-login`
-- Session : `ManagerSession` dans `App.tsx`
-
-## Équivalent web (P2+)
-
-`/login?audience=manager&returnTo=/pro`
+- Entrée : URL pro dédiée (`#/pro/login` mobile, `<slug>.pro.layali.ma` web)
+- Succès : `pro-dashboard` (ou `pro-door` si HOST)
+- Pas de re-choix Client/Manager
 
 ## Critères d'acceptation P1
 
-- [x] Formulaire email / mot de passe mock
-- [x] Redirection dashboard pro
+- [ ] Formulaire email/mot de passe direct
+- [ ] Emails mock : `owner@sky31.ma`, `host@example.ma`, `noaccess@test.ma`, `suspended@...`
+- [ ] Pas de bifurcation audience

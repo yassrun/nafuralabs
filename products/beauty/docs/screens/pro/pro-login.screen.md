@@ -3,50 +3,44 @@ specVersion: 1
 kind: screen
 appId: beauty
 screenId: pro-login
-name: Connexion manager (mobile)
+name: Connexion pro (surface séparée)
 status: stable
 phase: P1
 p1MobileId: manager-login
 p1Impl: mock
 platform: mobile
-route: navigation interne depuis entry
-layout: public-layout
+route: /pro/login
+layout: pro-layout (minimal)
 zone: pro
 roles: []
 auth: public
 flowRefs:
   - ../../flows/pro-walkthrough.flow.md
+  - ../../flows/pro-partner-onboarding.flow.md
 ---
 
-# Connexion manager (mobile)
+# Connexion pro (surface séparée)
 
-## P1 - Client Walkthrough
+## P1 - Pro Walkthrough
 
 | Champ | Valeur |
 |-------|--------|
 | Mobile `Screen` | `manager-login` |
-| Impl | mock |
+| Entrée P1 | `npm run dev:pro` |
 | Fixtures | [fixtures.md](../../fixtures.md) |
-| Cartographie | [mobile-map.md](../../mobile-map.md) |
-
-> En P1 : **ne pas** utiliser `apiRefs` / composants `@platform/` comme brief agent - mock local uniquement. *(id code manager-login)*
 
 ## Intent
 
-Connexion **manager / pro** mock depuis [entry.screen.md](../account/entry.screen.md). Accepte tout email/mot de passe ; session `ManagerSession` avec salon mock.
+Login **pro uniquement** (OWNER, ADMIN, STAFF). Entrée de la surface pro — **pas** accessible depuis un choix Client/Manager dans l’app cliente.
 
 ## Route et accès
 
-- Entrée : `entry` → Manager
-- Succès : `manager-dashboard` ([pro-dashboard](pro-dashboard.screen.md))
-- Web P2+ : `/login?role=pro`
+- Web : `/pro/login?redirect=...`
+- Mobile P1 : `?app=pro` ou `npm run dev:pro`
+- Succès : `manager-dashboard`
 
-## Implémentation mobile P1
+## Critères d'acceptation
 
-- Fichier : `mobile/src/ManagerScreens.tsx` → `ManagerLoginScreen`
-- `Screen` id code : `manager-login` (spec id : `pro-login`)
-
-## Critères d'acceptation P1
-
-- [x] Login mock → dashboard pro
-- [x] Retour vers `entry`
+- [ ] Formulaire direct (email + mot de passe), sans choix d’audience.
+- [ ] Pas de lien « Je suis client » vers l’app consumer.
+- [ ] Session mock `ManagerSession` avec salon fixe.
