@@ -642,6 +642,21 @@
         "title": "حذف المورد",
         "message": "حذف {name}؟"
       }
+    },
+    "smartImport": {
+      "button": "استيراد ذكي",
+      "importing": "جاري الاستيراد…",
+      "completionTitle": "أكمل الحقول الإلزامية",
+      "completionHint": "{count, plural, =1 {صف واحد يحتاج انتباهك} other {# صفوف تحتاج انتباهك}}",
+      "confirmImport": "استيراد الصفوف المصححة",
+      "resultToast": "{imported} مستورد، {skipped} متجاهل، {failed} فشل",
+      "errors": {
+        "tenantMissing": "سياق المستأجر مفقود.",
+        "extractionFailed": "تعذر قراءة الملف. تحقق من الصيغة.",
+        "noRows": "لم يتم العثور على صفوف قابلة للاستخدام.",
+        "handlerMissing": "الاستيراد غير مهيأ لهذا الكيان.",
+        "generic": "خطأ أثناء الاستيراد."
+      }
     }
   }
 }

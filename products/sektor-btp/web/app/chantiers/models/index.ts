@@ -64,6 +64,8 @@ export interface Chantier {
   cumulSituationsHt: number;
   marge?: number;
   status: ChantierStatus;
+  /** Statut métier backend (BROUILLON, EN_COURS, …) — pour règles UI (ex. suppression). */
+  lifecycleStatus?: string;
   isActive: boolean;
   createdAt?: string;
   updatedAt?: string;
@@ -80,6 +82,18 @@ export interface LotChantier {
   prixUnitaireHt?: number;
   montantHt?: number;
   avancementPercent: number;
+  ordre: number;
+}
+
+export interface PosteBudgetaire {
+  id: string;
+  lotId: string;
+  code: string;
+  designation: string;
+  unite?: string;
+  quantite?: number;
+  prixUnitaireHt?: number;
+  montantHt?: number;
   ordre: number;
 }
 

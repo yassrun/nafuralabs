@@ -31,6 +31,7 @@ public class ExtractionFlowService {
     private final HashService hashService;
     private final DedupService dedupService;
     private final ExtractedRecordRepository recordRepository;
+    private final SchemaValidator schemaValidator;
 
     public ExtractionResponse processExtraction(
             byte[] fileBytes,
@@ -159,6 +160,11 @@ public class ExtractionFlowService {
             // Set successful response
             response.setStatus("COMPLETED");
             response.setExtractedJson(llmResponse.getExtractedJson());
+            response.setValidation(schemaValidator.validate(
+                    llmResponse.getExtractedJson(),
+                    docTypeDefinition.getJsonSchema(),
+                    docTypeDefinition.getUiSchema()
+            ));
             log.info("Extraction completed successfully for record {}", recordIdString);
 
         } catch (java.util.concurrent.TimeoutException e) {

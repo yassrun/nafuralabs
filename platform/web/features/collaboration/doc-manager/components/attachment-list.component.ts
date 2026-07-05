@@ -74,6 +74,8 @@ export class AttachmentListComponent {
 
   /** Emitted when the list of attachments changes (so tab label can show count). */
   attachmentCountChange = output<number>();
+  /** Emitted after each successful upload (for entity-specific side effects). */
+  attachmentUploaded = output<RecordAttachmentDto>();
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
@@ -168,8 +170,11 @@ export class AttachmentListComponent {
     this.loading.set(true);
     const uploads = files.map((file) => this.api.uploadAttachment(et, eid, file));
     forkJoin(uploads).subscribe({
-      next: () => {
+      next: (results) => {
         this.validationError.set(null);
+        for (const dto of results) {
+          this.attachmentUploaded.emit(dto);
+        }
         this.load(et, eid);
       },
       error: (err) => {

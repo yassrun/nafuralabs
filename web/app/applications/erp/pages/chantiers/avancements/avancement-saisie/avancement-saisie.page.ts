@@ -27,8 +27,8 @@ export class AvancementSaisiePage {
   readonly chantiers = this.facade.chantiers;
   readonly currentUser = this.facade.currentUser;
   readonly chantier = this.facade.chantier;
-  readonly lots = this.facade.selectedLots;
-  readonly additionalLots = this.facade.availableAdditionalLots;
+  readonly lines = this.facade.selectedLines;
+  readonly additionalLines = this.facade.availableAdditionalLines;
   readonly summary = this.facade.summary;
   readonly isEditing = computed(() => this.facade.editingAvancementId() !== null);
   readonly loadError = signal<string | null>(null);

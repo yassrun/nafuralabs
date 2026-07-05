@@ -70,7 +70,7 @@ public class ConversationSession {
             status = ConversationStatus.ACTIVE;
         }
         if (mode == null) {
-            mode = LlmMode.ASK;
+            mode = LlmMode.ASSISTANT;
         }
         if (scopeType == null) {
             scopeType = ScopeType.GLOBAL;

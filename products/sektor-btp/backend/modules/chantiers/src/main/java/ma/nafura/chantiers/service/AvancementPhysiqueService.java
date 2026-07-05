@@ -98,8 +98,17 @@ public class AvancementPhysiqueService {
 
             ChantierLot lot = resolveLot(tenantId, chantierId, entry, lotsById);
             PosteBudgetaire poste = resolvePoste(tenantId, entry);
+            if (lot == null && poste != null) {
+                lot = lotsById.get(poste.getLotId());
+            }
 
-            BigDecimal previousCumul = computePreviousCumul(tenantId, lot != null ? lot.getId() : null, entry.getPosteId());
+            String resolvedLotId = lot != null
+                    ? lot.getId()
+                    : poste != null
+                            ? poste.getLotId()
+                            : trimOrNull(entry.getLotId());
+
+            BigDecimal previousCumul = computePreviousCumul(tenantId, resolvedLotId, entry.getPosteId());
             BigDecimal quantite = entry.getQuantiteRealisee();
             BigDecimal cumul = previousCumul.add(quantite);
             BigDecimal pourcentage = computePourcentage(cumul, lot, poste);
@@ -108,7 +117,7 @@ public class AvancementPhysiqueService {
                     .id(buildId(chantierId, index))
                     .tenantId(tenantId)
                     .chantierId(chantierId)
-                    .lotId(lot != null ? lot.getId() : trimOrNull(entry.getLotId()))
+                    .lotId(resolvedLotId)
                     .posteId(poste != null ? poste.getId() : trimOrNull(entry.getPosteId()))
                     .dateSaisie(request.getDate())
                     .quantiteRealisee(quantite)

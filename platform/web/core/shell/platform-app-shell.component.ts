@@ -35,7 +35,10 @@ import {
   ConversationMessage,
   ConversationMode,
   ConversationSession,
+  AssistantBlock,
+  AssistantLink,
 } from '../../features/ai/ai-conversation/services/conversation-api.service';
+import { AssistantBlockRendererComponent } from '../../features/ai/ai-conversation/components/assistant-block-renderer.component';
 import {
   DEFAULT_PLATFORM_APP_SHELL_OPTIONS,
   PlatformAppShellOptions,
@@ -60,6 +63,9 @@ interface UiConversationMessage {
   role: UiMessageRole;
   content: string;
   createdAt?: string;
+  blocks?: AssistantBlock[];
+  links?: AssistantLink[];
+  summary?: string | null;
 }
 
 const LUCIDE_ICON_ALIASES: Record<string, string> = {
@@ -87,7 +93,7 @@ const LUCIDE_ICON_ALIASES: Record<string, string> = {
 @Component({
   selector: 'app-platform-shell',
   standalone: true,
-  imports: [CommonModule, NgComponentOutlet, RouterModule, LucideAngularModule, LanguageSelectorComponent, AvatarComponent, NotificationBellComponent, CommandPaletteComponent, ChatPanelComponent, ShortcutsHelpComponent, OnboardingTourComponent, SocieteSwitcherComponent, TooltipDirective],
+  imports: [CommonModule, NgComponentOutlet, RouterModule, LucideAngularModule, LanguageSelectorComponent, AvatarComponent, NotificationBellComponent, CommandPaletteComponent, ChatPanelComponent, ShortcutsHelpComponent, OnboardingTourComponent, SocieteSwitcherComponent, TooltipDirective, AssistantBlockRendererComponent],
   template: `
     <div
       class="naf-shell"
@@ -368,23 +374,6 @@ const LUCIDE_ICON_ALIASES: Record<string, string> = {
             </button>
           </div>
 
-          <div class="naf-shell__conversation-modes">
-            <button
-              type="button"
-              class="naf-shell__mode-btn"
-              [class.is-active]="conversationMode() === 'ASK'"
-              (click)="setConversationMode('ASK')">
-              {{ translateLabel('core.conversation.mode.ask') }}
-            </button>
-            <button
-              type="button"
-              class="naf-shell__mode-btn"
-              [class.is-active]="conversationMode() === 'AGENT'"
-              (click)="setConversationMode('AGENT')">
-              {{ translateLabel('core.conversation.mode.agent') }}
-            </button>
-          </div>
-
           <div class="naf-shell__conversation-sessions">
             <button
               type="button"
@@ -429,9 +418,16 @@ const LUCIDE_ICON_ALIASES: Record<string, string> = {
               [class.naf-shell__message--assistant]="message.role === 'assistant'">
               <div class="naf-shell__message-role">{{ messageRoleLabel(message.role) }}</div>
               <div class="naf-shell__message-text">{{ message.content }}</div>
+              @if (message.blocks?.length || message.links?.length || message.summary) {
+                <nf-assistant-block-renderer
+                  [summary]="message.summary"
+                  [blocks]="message.blocks ?? []"
+                  [links]="message.links ?? []"
+                  (navigate)="navigateConversationLink($event)" />
+              }
             </div>
 
-            <div *ngIf="conversationMode() === 'AGENT'" class="naf-shell__agent-block">
+            <div *ngIf="agentActions().length" class="naf-shell__agent-block">
               <div class="naf-shell__agent-title">
                 {{ translateLabel('core.conversation.actions.title') }}
               </div>
@@ -1743,7 +1739,7 @@ export class PlatformAppShellComponent implements OnInit {
     if (stored !== null) return stored === '1';
     return Boolean(DEFAULT_PLATFORM_APP_SHELL_OPTIONS.conversation.initiallyOpen);
   })());
-  readonly conversationMode = signal<ConversationMode>('ASK');
+  readonly conversationMode = signal<ConversationMode>('ASSISTANT');
   readonly conversationDraft = signal<string>('');
   readonly conversationMessages = signal<UiConversationMessage[]>([]);
   readonly conversationLoading = signal<boolean>(false);
@@ -1752,6 +1748,7 @@ export class PlatformAppShellComponent implements OnInit {
   readonly conversationSessionIds = signal<Record<ConversationMode, string | null>>({
     ASK: null,
     AGENT: null,
+    ASSISTANT: null,
   });
   readonly conversationSessions = signal<ConversationSession[]>([]);
   readonly agentActions = signal<AgentActionResponse[]>([]);
@@ -2207,14 +2204,31 @@ export class PlatformAppShellComponent implements OnInit {
     this.scrollConversationToBottom(true);
     try {
       const domainKey = this.resolveConversationDomainKey();
-      const context = domainKey ? { content, domainKey } : { content };
-      if (mode === 'ASK') {
-        await this.conversationApi.sendAskMessage(conversationId, applicationId, context);
-      } else {
-        await this.conversationApi.proposeActions(conversationId, applicationId, context);
+      const turnResponse = await this.conversationApi.sendTurn(conversationId, applicationId, {
+        content,
+        domainKey,
+        currentRoute: this.currentUrl(),
+      });
+      if (turnResponse.actions?.length) {
+        this.agentActions.set(turnResponse.actions);
       }
-      await this.loadConversationSessions(mode);
-      await this.refreshConversation(mode);
+      if (turnResponse.assistantMessage) {
+        this.conversationMessages.update((messages) => [
+          ...messages.filter((m) => !m.id.startsWith('local-')),
+          {
+            id: turnResponse.assistantMessage!.id,
+            role: 'assistant',
+            content: turnResponse.summary ?? turnResponse.assistantMessage!.content ?? '',
+            summary: turnResponse.summary,
+            blocks: turnResponse.blocks ?? [],
+            links: turnResponse.links ?? [],
+            createdAt: turnResponse.assistantMessage!.createdAt,
+          },
+        ]);
+      } else {
+        await this.loadConversationSessions(mode);
+        await this.refreshConversation(mode);
+      }
     } catch (error) {
       // A duplicate unauthenticated POST can return 401 while the real request still
       // completes on the backend — reload history before surfacing a false error.
@@ -2234,6 +2248,11 @@ export class PlatformAppShellComponent implements OnInit {
       this.conversationSending.set(false);
       this.scrollConversationToBottom();
     }
+  }
+
+  navigateConversationLink(route: string): void {
+    if (!route) return;
+    void this.router.navigateByUrl(this.resolveRoute(route));
   }
 
   async approveAction(actionId: string): Promise<void> {
@@ -2352,7 +2371,7 @@ export class PlatformAppShellComponent implements OnInit {
     try {
       const [messages, actions] = await Promise.all([
         this.conversationApi.listMessages(conversationId, applicationId),
-        mode === 'AGENT'
+        mode === 'AGENT' || mode === 'ASSISTANT'
           ? this.conversationApi.listActions(conversationId, applicationId)
           : Promise.resolve<AgentActionResponse[]>([]),
       ]);
@@ -2413,6 +2432,7 @@ export class PlatformAppShellComponent implements OnInit {
     this.conversationSessionIds.update((current) => ({
       ASK: current.ASK ?? this.readStoredSessionId('ASK'),
       AGENT: current.AGENT ?? this.readStoredSessionId('AGENT'),
+      ASSISTANT: current.ASSISTANT ?? this.readStoredSessionId('ASSISTANT'),
     }));
   }
 
@@ -2451,8 +2471,8 @@ export class PlatformAppShellComponent implements OnInit {
     actionId: string,
     operation: 'approve' | 'reject' | 'execute'
   ): Promise<void> {
-    if (this.conversationMode() !== 'AGENT') return;
-    const conversationId = this.conversationSessionIds().AGENT;
+    if (this.conversationMode() !== 'AGENT' && this.conversationMode() !== 'ASSISTANT') return;
+    const conversationId = this.conversationSessionIds()[this.conversationMode()];
     if (!conversationId) return;
 
     this.agentActionBusyId.set(actionId);

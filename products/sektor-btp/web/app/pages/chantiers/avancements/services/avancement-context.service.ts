@@ -1,9 +1,10 @@
 import { Injectable, inject, signal } from '@angular/core';
 
 import { AuthFacade } from '@platform/core/security/services/auth.facade';
-import type { Chantier } from '@applications/erp/chantiers/models';
+import type { LotChantier as ApiLotChantier, PosteBudgetaire } from '@applications/erp/chantiers/models';
 import { ChantierApiService } from '../../services/chantier-api.service';
 import { ChantierLotApiService } from '../../services/chantier-lot-api.service';
+import { PosteBudgetaireApiService } from '../../services/poste-budgetaire-api.service';
 import { EmployeApiService } from '../../../rh/employes/services/employe-api.service';
 
 import type {
@@ -13,7 +14,10 @@ import type {
   EmployeLookup,
   LotChantier,
   LotStatus,
+  SaisieLineDefinition,
 } from '../models';
+import type { Chantier } from '@applications/erp/chantiers/models';
+import { buildSaisieLineDefinitions } from '../utils/saisie-line.util';
 
 function mapChantierStatus(status: Chantier['status']): ChantierStatus {
   if (status === 'TERMINE') return 'TERMINE';
@@ -39,7 +43,7 @@ function chantierToAvancement(c: Chantier): ChantierAvancement {
 }
 
 function lotToAvancementLot(
-  lot: Awaited<ReturnType<ChantierLotApiService['listByChantier']>>[number],
+  lot: ApiLotChantier,
   dernier?: AvancementListItem,
 ): LotChantier {
   const avancementPercent = dernier?.pourcentage ?? lot.avancementPercent ?? 0;
@@ -49,8 +53,11 @@ function lotToAvancementLot(
     chantierId: lot.chantierId,
     code: lot.code,
     designation: lot.designation,
+    parentLotId: lot.parentLotId,
     unite: lot.unite ?? 'U',
     quantite: lot.quantite ?? 0,
+    prixUnitaireHt: lot.prixUnitaireHt,
+    montantHt: lot.montantHt,
     cumulQuantite: dernier?.cumulQuantite ?? 0,
     avancementPercent,
     status,
@@ -62,11 +69,13 @@ function lotToAvancementLot(
 export class AvancementContextService {
   private readonly chantierApi = inject(ChantierApiService);
   private readonly lotApi = inject(ChantierLotApiService);
+  private readonly posteApi = inject(PosteBudgetaireApiService);
   private readonly employeApi = inject(EmployeApiService);
   private readonly auth = inject(AuthFacade);
 
   private readonly chantiersSignal = signal<ChantierAvancement[]>([]);
   private readonly lotsSignal = signal<LotChantier[]>([]);
+  private readonly postesByLotIdSignal = signal<Record<string, PosteBudgetaire[]>>({});
   private readonly employeesSignal = signal<EmployeLookup[]>([]);
   private loaded = false;
 
@@ -101,6 +110,28 @@ export class AvancementContextService {
     });
   }
 
+  getPostesByLotId(chantierId?: string): Record<string, PosteBudgetaire[]> {
+    const postesByLotId = this.postesByLotIdSignal();
+    if (!chantierId) return postesByLotId;
+    const lotIds = new Set(this.getLots(chantierId).map((lot) => lot.id));
+    return Object.fromEntries(
+      Object.entries(postesByLotId).filter(([lotId]) => lotIds.has(lotId)),
+    );
+  }
+
+  getSaisieLines(chantierId: string): SaisieLineDefinition[] {
+    return buildSaisieLineDefinitions(this.getLots(chantierId), this.getPostesByLotId(chantierId));
+  }
+
+  getActiveSaisieLines(chantierId: string): SaisieLineDefinition[] {
+    return this.getSaisieLines(chantierId).filter((line) => {
+      const percent = line.kind === 'poste'
+        ? 0
+        : line.lot.avancementPercent;
+      return percent < 100;
+    });
+  }
+
   getActiveLotsForChantier(chantierId: string): LotChantier[] {
     return this.getLots(chantierId).filter((lot) => lot.avancementPercent < 100);
   }
@@ -129,6 +160,23 @@ export class AvancementContextService {
     this.lotsSignal.update((current) => {
       const others = current.filter((lot) => lot.chantierId !== chantierId);
       return [...others, ...mapped];
+    });
+
+    const settled = await Promise.allSettled(
+      apiLots.map(async (lot) => [lot.id, await this.posteApi.listByLot(lot.id)] as const),
+    );
+    const postesForChantier: Record<string, PosteBudgetaire[]> = {};
+    for (const result of settled) {
+      if (result.status === 'fulfilled') {
+        const [lotId, postes] = result.value;
+        postesForChantier[lotId] = postes;
+      }
+    }
+    this.postesByLotIdSignal.update((current) => {
+      const others = Object.fromEntries(
+        Object.entries(current).filter(([lotId]) => !apiLots.some((lot) => lot.id === lotId)),
+      );
+      return { ...others, ...postesForChantier };
     });
   }
 

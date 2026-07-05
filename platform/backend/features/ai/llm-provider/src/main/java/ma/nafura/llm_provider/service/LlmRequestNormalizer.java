@@ -32,7 +32,9 @@ public class LlmRequestNormalizer {
             throw new IllegalArgumentException("LLM request must contain either prompt, media contents, or conversation history");
         }
 
-        LlmResponseFormat responseFormat = schema != null || mode == LlmMode.AGENT
+        LlmResponseFormat responseFormat = schema != null
+            || mode == LlmMode.AGENT
+            || mode == LlmMode.ASSISTANT
             ? LlmResponseFormat.JSON
             : LlmResponseFormat.TEXT;
 

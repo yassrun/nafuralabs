@@ -49,7 +49,9 @@ class PartnerAgentActionHandlerTest {
     void supportsPartnerCreate() {
         assertTrue(handler.supports("partner", "create"));
         assertTrue(handler.supports("fournisseur", "create"));
-        assertFalse(handler.supports("partner", "delete"));
+        assertTrue(handler.supports("partner", "update"));
+        assertTrue(handler.supports("partner", "delete"));
+        assertFalse(handler.supports("chantier", "create"));
     }
 
     @Test

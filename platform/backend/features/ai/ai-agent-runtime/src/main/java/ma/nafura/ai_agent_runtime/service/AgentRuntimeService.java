@@ -44,6 +44,7 @@ import ma.nafura.platform.ai.llm.model.LlmMode;
 import ma.nafura.platform.ai.llm.model.LlmRequest;
 import ma.nafura.platform.ai.llm.model.LlmResponse;
 import ma.nafura.platform.ai.llm.service.LlmService;
+import ma.nafura.platform.ai.agent.service.prompt.AssistantPromptProvider;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -92,13 +93,7 @@ public class AgentRuntimeService {
         """;
 
     private static final String DEFAULT_AGENT_SYSTEM_INSTRUCTION = """
-        You are the ERP agent planner. Propose safe, actionable steps using the available tools.
-        For creating a business partner (fournisseur/client), propose one action with:
-        - toolKey: "action"
-        - args: { "operation": "create", "entityType": "partner", "data": { "code": "...", "raisonSociale": "...", "roles": ["FOURNISSEUR"] } }
-        - requiresApproval: true
-        - permissionKey: "partner.partner.write"
-        - title: short human-readable label (e.g. "Créer le fournisseur X")
+        You are the action planner. Propose safe, actionable steps using the action tool.
         Respond in JSON matching the required schema.
         """;
 
@@ -115,6 +110,7 @@ public class AgentRuntimeService {
     private final ObjectMapper objectMapper;
     private final ObjectProvider<SubscriptionEntitlementService> entitlementServiceProvider;
     private final ConversationTitleService conversationTitleService;
+    private final ObjectProvider<AssistantPromptProvider> promptProvider;
 
     @Value("${spring.application.name:nafura-app}")
     private String defaultApplicationId;
@@ -125,6 +121,14 @@ public class AgentRuntimeService {
         AgentProposeRequest request
     ) {
         ConversationSession session = getOwnedAgentConversation(conversationId, applicationId);
+        return proposeActionsForAssistantSession(session, applicationId, request);
+    }
+
+    public AgentProposeResponse proposeActionsForAssistantSession(
+        ConversationSession session,
+        String applicationId,
+        AgentProposeRequest request
+    ) {
         ConversationMessage userMessage = persistConversationMessage(
             session,
             ConversationMessageRole.USER,
@@ -138,7 +142,7 @@ public class AgentRuntimeService {
             .featureKey(trimToNull(request.getFeatureKey()))
             .resourceKey(trimToNull(request.getResourceKey()))
             .actionKey(trimToNull(request.getActionKey()))
-            .mode(LlmMode.AGENT)
+            .mode(LlmMode.ASSISTANT)
             .conversationId(session.getId().toString())
             .messageId(userMessage.getId().toString())
             .actorSub(session.getActorSub())
@@ -439,10 +443,12 @@ public class AgentRuntimeService {
             .findByIdAndApplicationIdAndActorSub(conversationId, appId, actorSub)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Conversation not found"));
 
-        if (session.getMode() != LlmMode.AGENT) {
+        if (session.getMode() != LlmMode.AGENT
+                && session.getMode() != LlmMode.ASSISTANT
+                && session.getMode() != LlmMode.ASK) {
             throw new ResponseStatusException(
                 HttpStatus.BAD_REQUEST,
-                "Conversation mode is not AGENT. Use ASK endpoint for question answering."
+                "Conversation mode is not compatible with agent actions."
             );
         }
 
@@ -490,11 +496,19 @@ public class AgentRuntimeService {
         LlmRequest llmRequest = new LlmRequest();
         llmRequest.setPrompt(request.getContent().trim());
         String systemInstruction = trimToNull(request.getSystemInstruction());
-        llmRequest.setSystemInstruction(systemInstruction != null ? systemInstruction : DEFAULT_AGENT_SYSTEM_INSTRUCTION);
+        if (systemInstruction == null) {
+            systemInstruction = promptProvider.getIfAvailable() != null
+                    && trimToNull(promptProvider.getIfAvailable().actionPlannerInstruction()) != null
+                    ? promptProvider.getIfAvailable().actionPlannerInstruction()
+                    : DEFAULT_AGENT_SYSTEM_INSTRUCTION;
+        }
+        llmRequest.setSystemInstruction(systemInstruction);
         llmRequest.setResponseSchema(AGENT_RESPONSE_SCHEMA);
         llmRequest.setMetadata(request.getMetadata() != null ? request.getMetadata() : Map.of());
-        llmRequest.setMode(LlmMode.AGENT);
-        llmRequest.setTools(agentToolDescriptions.all());
+        llmRequest.setMode(LlmMode.ASSISTANT);
+        llmRequest.setTools(agentToolDescriptions.all().stream()
+                .filter(tool -> "action".equals(tool.getName()))
+                .toList());
         llmRequest.setToolChoice(LlmRequest.ToolChoice.AUTO);
         return llmRequest;
     }

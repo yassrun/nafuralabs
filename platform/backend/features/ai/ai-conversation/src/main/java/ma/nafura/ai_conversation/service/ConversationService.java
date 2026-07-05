@@ -9,6 +9,7 @@ import ma.nafura.platform.ai.agent.service.tool.AgentTool;
 import ma.nafura.platform.ai.agent.service.tool.AgentToolRegistry;
 import ma.nafura.platform.ai.agent.service.tool.AgentToolRequest;
 import ma.nafura.platform.ai.agent.service.tool.AgentToolResult;
+import ma.nafura.platform.ai.agent.service.prompt.AssistantPromptProvider;
 import ma.nafura.platform.ai.conversation.api.request.CreateConversationRequest;
 import ma.nafura.platform.ai.conversation.api.request.SendMessageRequest;
 import ma.nafura.platform.ai.conversation.api.response.ConversationMessageResponse;
@@ -62,13 +63,11 @@ import java.util.concurrent.CompletableFuture;
 @ConditionalOnProperty(prefix = "nafura.ai.conversation", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class ConversationService {
 
-    private static final String SQL_ASK_RULES = """
-        You answer ERP business questions using execute_sql (PostgreSQL SELECT only).
+    private static final String DEFAULT_SQL_ASK_RULES = """
+        You answer business questions using execute_sql (PostgreSQL SELECT only).
         Rules:
         - Use exact table and column names from the schema below (UI labels differ from SQL).
         - tenant_id is injected automatically — never filter tenant_id yourself.
-        - Chantiers actifs / en cours: status='EN_COURS' AND is_active=true on table chantiers.
-        - Project name in SQL is column label (not name) on chantiers.
         - Prefer COUNT(*) for totals; list key columns (code, label, status) for listings.
         - Use ILIKE for case-insensitive text search.
         """;
@@ -82,6 +81,7 @@ public class ConversationService {
     private final Optional<AiSchemaContextLoader> schemaLoader;
     private final Optional<SqlQueryConfig> sqlQueryConfig;
     private final ConversationTitleService conversationTitleService;
+    private final Optional<AssistantPromptProvider> assistantPromptProvider;
 
     @Value("${spring.application.name:nafura-app}")
     private String defaultApplicationId;
@@ -95,7 +95,8 @@ public class ConversationService {
         ConversationTitleService conversationTitleService,
         @Autowired(required = false) AgentToolRegistry agentToolRegistry,
         @Autowired(required = false) AiSchemaContextLoader schemaLoader,
-        @Autowired(required = false) SqlQueryConfig sqlQueryConfig
+        @Autowired(required = false) SqlQueryConfig sqlQueryConfig,
+        @Autowired(required = false) AssistantPromptProvider assistantPromptProvider
     ) {
         this.sessionRepository = sessionRepository;
         this.messageRepository = messageRepository;
@@ -106,6 +107,7 @@ public class ConversationService {
         this.agentToolRegistry = Optional.ofNullable(agentToolRegistry);
         this.schemaLoader = Optional.ofNullable(schemaLoader);
         this.sqlQueryConfig = Optional.ofNullable(sqlQueryConfig);
+        this.assistantPromptProvider = Optional.ofNullable(assistantPromptProvider);
     }
 
     @Transactional
@@ -115,7 +117,7 @@ public class ConversationService {
         session.setActorSub(identityResolver.currentActorSub());
         session.setTenantId(identityResolver.currentTenantId());
         session.setScopeType(identityResolver.currentScopeType());
-        session.setMode(request != null && request.getMode() != null ? request.getMode() : LlmMode.ASK);
+        session.setMode(request != null && request.getMode() != null ? request.getMode() : LlmMode.ASSISTANT);
         session.setStatus(ConversationStatus.ACTIVE);
         session.setTitle(request != null ? trimToNull(request.getTitle()) : null);
         session.setUpdatedAt(Instant.now());
@@ -183,13 +185,21 @@ public class ConversationService {
             int maxTables = sqlQueryConfig.map(SqlQueryConfig::getMaxTablesInPrompt).orElse(15);
             String schemaContext = ctx.buildLlmContext(focusDomains, maxTables);
             String baseSystem = llmRequest.getSystemInstruction();
+            String sqlRules = assistantPromptProvider
+                    .map(AssistantPromptProvider::sqlReadRules)
+                    .filter(rules -> rules != null && !rules.isBlank())
+                    .orElse(DEFAULT_SQL_ASK_RULES);
             String withSchema = (baseSystem != null && !baseSystem.isBlank() ? baseSystem + "\n\n" : "")
-                + SQL_ASK_RULES
+                + sqlRules
                 + "\n\nAVAILABLE DATABASE SCHEMA (use execute_sql to query):\n"
                 + schemaContext;
             llmRequest.setSystemInstruction(withSchema);
         } else if (llmRequest.getSystemInstruction() == null || llmRequest.getSystemInstruction().isBlank()) {
-            llmRequest.setSystemInstruction(SQL_ASK_RULES);
+            llmRequest.setSystemInstruction(
+                    assistantPromptProvider.map(AssistantPromptProvider::sqlReadRules)
+                            .filter(rules -> rules != null && !rules.isBlank())
+                            .orElse(DEFAULT_SQL_ASK_RULES)
+            );
         }
 
         LlmCallContext callContext = LlmCallContext.builder()

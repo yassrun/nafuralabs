@@ -6,6 +6,8 @@ import {ConfigDrivenListingPage,
   ConfigDrivenListingPageImports,
   ConfigDrivenListingPageStyles, ButtonComponent} from '@lib/anatomy';
 import type { Fournisseur } from '@applications/erp/achats/models';
+import { SmartImportButtonComponent } from '@applications/erp/shared/smart-import/components/smart-import-button/smart-import-button.component';
+import { FournisseurImportHandlerRegistrar } from '@applications/erp/shared/smart-import/handlers/fournisseur-import.handler';
 
 import { FournisseurFacade } from '../services';
 import { buildFournisseursListingConfig } from '../config';
@@ -16,13 +18,15 @@ type QuickFilter = 'ALL' | 'ACTIFS' | 'INACTIFS' | 'TOP_NOTES';
   selector: 'app-fournisseur-listing',
   standalone: true,
   imports: [
-    ButtonComponent,CommonModule, TranslateModule, ...ConfigDrivenListingPageImports],
+    ButtonComponent,CommonModule, TranslateModule, SmartImportButtonComponent, ...ConfigDrivenListingPageImports],
   templateUrl: './fournisseur-listing.page.html',
   styles: [ConfigDrivenListingPageStyles],
 })
 export class FournisseurListingPage extends ConfigDrivenListingPage<Fournisseur> {
   readonly facade = inject(FournisseurFacade);
   private readonly translate = inject(TranslateService);
+  /** Ensures fournisseur import handler is registered. */
+  private readonly _importHandler = inject(FournisseurImportHandlerRegistrar);
   readonly config = buildFournisseursListingConfig(this.translate);
   readonly headerTitle = this.translate.instant('achats.fournisseur.headerTitle');
 
@@ -42,5 +46,9 @@ export class FournisseurListingPage extends ConfigDrivenListingPage<Fournisseur>
     else if (id === 'INACTIFS') filters = { isActive: false };
     else if (id === 'TOP_NOTES') filters = { isActive: true };
     this.listingComponent?.onFilterChange(filters);
+  }
+
+  onSmartImportComplete(): void {
+    this.listingComponent?.refresh();
   }
 }

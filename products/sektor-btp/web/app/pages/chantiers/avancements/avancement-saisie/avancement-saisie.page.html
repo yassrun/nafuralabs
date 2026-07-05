@@ -47,25 +47,27 @@
       <section class="saisie-page__lots">
         <div class="saisie-page__section-title">
           <h2>{{ 'chantiers.avancement.fields.lotsToInput' | translate }}</h2>
-          <p>{{ 'chantiers.avancement.summary.lotsLoaded' | translate:{ count: lots().length } }}</p>
+          <p>{{ 'chantiers.avancement.summary.linesLoaded' | translate:{ count: lines().length } }}</p>
         </div>
 
-        @for (lot of lots(); track lot.lot.id) {
+        @for (line of lines(); track line.lineKey) {
           <app-lot-saisie-card
-            [model]="lot"
-            (quantityChanged)="facade.setLotQuantity(lot.lot.id, $event)"
-            (notesChanged)="facade.setLotNotes(lot.lot.id, $event)"
-            (photosChanged)="facade.setLotPhotos(lot.lot.id, $event)"
-            (removed)="facade.removeLot(lot.lot.id)"></app-lot-saisie-card>
+            [model]="line"
+            (quantityChanged)="facade.setLineQuantity(line.lineKey, $event)"
+            (notesChanged)="facade.setLineNotes(line.lineKey, $event)"
+            (photosChanged)="facade.setLinePhotos(line.lineKey, $event)"
+            (removed)="facade.removeLine(line.lineKey)"></app-lot-saisie-card>
         }
 
-        @if (additionalLots().length > 0) {
+        @if (additionalLines().length > 0) {
           <label class="saisie-page__add-lot">
-            <span>{{ 'chantiers.avancement.fields.addLot' | translate }}</span>
-            <select (ngModelChange)="$event && facade.addLot($event)" [ngModel]="null">
-              <option [ngValue]="null">{{ 'chantiers.avancement.fields.pickAdditionalLot' | translate }}</option>
-              @for (lot of additionalLots(); track lot.id) {
-                <option [ngValue]="lot.id">{{ lot.code }} - {{ lot.designation }}</option>
+            <span>{{ 'chantiers.avancement.fields.addLine' | translate }}</span>
+            <select (ngModelChange)="$event && facade.addLine($event)" [ngModel]="null">
+              <option [ngValue]="null">{{ 'chantiers.avancement.fields.pickAdditionalLine' | translate }}</option>
+              @for (line of additionalLines(); track line.key) {
+                <option [ngValue]="line.key">
+                  {{ line.poste ? line.poste.code + ' — ' + line.poste.designation : line.lot.code + ' — ' + line.lot.designation }}
+                </option>
               }
             </select>
           </label>

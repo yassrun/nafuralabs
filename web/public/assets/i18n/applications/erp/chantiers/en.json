@@ -205,6 +205,23 @@
         },
         "lots": {
           "addCta": "Add work package",
+          "addSousLotCta": "Add sub-package",
+          "addPosteCta": "Add line item",
+          "addSousLotTitle": "Add a sub-package",
+          "addPosteTitle": "Add a line item / article",
+          "typeColumn": "Type",
+          "typeLot": "Lot",
+          "typeSousLot": "Sub-package",
+          "typePoste": "Article",
+          "formParentLot": "Parent lot",
+          "formParentLotPlaceholder": "— Select a lot —",
+          "formTargetLot": "Target lot",
+          "formTargetLotPlaceholder": "— Select a lot —",
+          "formUnite": "Unit",
+          "sousLotCreateSuccess": "Sub-package added.",
+          "sousLotCreateFailed": "Could not add sub-package.",
+          "posteCreateSuccess": "Line item added.",
+          "posteCreateFailed": "Could not add line item.",
           "promptCode": "Work package code (e.g. L01)",
           "promptDesignation": "Work package description",
           "promptQuantite": "Quantity (BOQ)",
@@ -217,6 +234,11 @@
           "addAction": "Add",
           "importCta": "Import CSV/XLSX",
           "importConfirm": "Run import",
+          "importConfirmCta": "Run import",
+          "templateCta": "Download template",
+          "mappingCta": "Copy column mapping",
+          "importFileSelected": "Selected file: {fileName}",
+          "importFileRowsLabel": "row(s)",
           "importNoFile": "Select a file before running the import.",
           "importReady": "File ready: {fileName} ({count} rows).",
           "importParseCountFailed": "Could not read the selected file.",
@@ -234,7 +256,16 @@
           "mappingCopied": "Column mapping copied.",
           "mappingCopyFailed": "Could not copy column mapping.",
           "mappingHelpTitle": "Accepted columns",
-          "mappingHelpHint": "Headers are normalized (accents and spaces ignored)."
+          "mappingHelpHint": "Headers are normalized (accents and spaces ignored). Import creates root lots only; use the UI to add sub-packages and line items. BPDE Excel files (secondary lots) are auto-detected with lot → sub-lot → line item hierarchy.",
+          "bpdeImportSuccess": "BPDE imported: {lots} lot(s) and {postes} line item(s) created.",
+          "bpdeImportPartial": "BPDE partially imported: {lots} lot(s) and {postes} line item(s) created, {skipped} skipped (duplicates), {failed} failed.",
+          "bpdeImportInProgress": "Import in progress…",
+          "bpdeImportSkippedDuplicate": "Existing item skipped.",
+          "mappingHelpCode": "lot code",
+          "mappingHelpDesignation": "description",
+          "mappingHelpQuantite": "numeric quantity",
+          "mappingHelpUnite": "unit (m3, m2, ml, U, ff…)",
+          "mappingHelpPrixUnitaire": "unit price excl. VAT"
         },
         "phases": {
           "addAction": "Add a phase",
@@ -245,7 +276,21 @@
           "promptDateFin": "End date",
           "promptResponsable": "Responsible",
           "createSuccess": "Phase added.",
-          "createFailed": "Could not add phase."
+          "createFailed": "Could not add phase.",
+          "importPdfCta": "Import planning PDF",
+          "scanAiCta": "Scan with AI",
+          "importPreviewTitle": "Planning import preview",
+          "importPreviewSummary": "{selected} task(s) selected out of {total}",
+          "importPreviewLot": "Lot",
+          "importPreviewNoLot": "— No lot —",
+          "importPreviewPaymentBadge": "Payment",
+          "importPreviewConfirm": "Import {count} phase(s)",
+          "phaseImportInProgress": "Importing phases…",
+          "phaseImportSuccess": "{created} phase(s) imported.",
+          "phaseImportPartial": "Partial import: {created} created, {skipped} skipped (duplicates), {failed} failed.",
+          "importParseFailed": "Could not extract planning from this file.",
+          "importScanFailed": "AI scan failed.",
+          "importFallbackAi": "Local extraction insufficient — falling back to AI…"
         },
         "actions": {
           "edit": "Edit"
@@ -253,6 +298,7 @@
         "deleteConfirm": "Delete site {code} — {name}? This cannot be undone.",
         "deleteSuccess": "Site deleted.",
         "deleteFailed": "Could not delete the site.",
+        "deleteFailedDraftOnly": "Only draft sites can be deleted.",
         "deleteTitle": "Delete project",
         "deleteAction": "Delete",
         "cancel": "Cancel",
@@ -589,7 +635,8 @@
         },
         "errors": {
           "required": "Site, title and file are required.",
-          "failed": "Could not upload the document."
+          "failed": "Could not upload the document.",
+          "syncFailed": "File uploaded on the site, but not replicated to the global list."
         },
         "success": "Document uploaded."
       },
@@ -611,7 +658,9 @@
         "dateRequired": "Date *",
         "lotsToInput": "Work packages to record",
         "addLot": "Add a work package",
+        "addLine": "Add a line item",
         "pickAdditionalLot": "Pick an additional work package",
+        "pickAdditionalLine": "Pick an additional line item or package",
         "softValidation": "Soft validation when cumulative exceeds total",
         "addPhoto": "📷 Add photo"
       },
@@ -677,7 +726,8 @@
         "period": "Period {unite}",
         "cumul": "Cumulative {unite}",
         "progress": "Progress: {before}% → {after}%",
-        "fieldNotes": "Field note"
+        "fieldNotes": "Field note",
+        "referenceQty": "BOQ quantity: {qty} {unite}"
       },
       "warnings": {
         "cumulExceeds": "Cumulative exceeds the work package total quantity ({quantite} {unite}).",
@@ -692,6 +742,7 @@
       },
       "summary": {
         "lotsLoaded": "{count, plural, =0 {No work package loaded} one {1 work package loaded} other {# work packages loaded}}",
+        "linesLoaded": "{count, plural, =0 {No line loaded} one {1 line loaded} other {# lines loaded}}",
         "deltaOnLots": "+{delta}% on {count, plural, =0 {0 work packages} one {1 work package} other {# work packages}}"
       },
       "gallery": {

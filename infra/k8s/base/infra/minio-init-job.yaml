@@ -21,6 +21,8 @@ spec:
               # Per-app buckets (template: nafura-{{appId}} from infra-block descriptor)
               mc mb myminio/nafura-erp --ignore-existing
               mc anonymous set none myminio/nafura-erp
+              mc mb myminio/nafura-documents --ignore-existing
+              mc anonymous set none myminio/nafura-documents
               echo "Nafura buckets initialized"
       restartPolicy: OnFailure
   backoffLimit: 4

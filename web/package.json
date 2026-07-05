@@ -64,6 +64,7 @@
     "lucide-angular": "^0.563.0",
     "ng2-charts": "^8.0.0",
     "ngx-translate-messageformat-compiler": "^7.2.0",
+    "pdfjs-dist": "^4.10.38",
     "primeicons": "^7.0.0",
     "primeng": "^19.1.4",
     "rxjs": "~7.8.1",

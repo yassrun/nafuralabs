@@ -46,6 +46,10 @@ public class ConversationController {
         return ResponseEntity.ok(conversationService.listConversations(applicationId, page, size));
     }
 
+    /**
+     * @deprecated Use {@code POST /api/ai/conversations/{id}/turn} with unified ASSISTANT mode.
+     */
+    @Deprecated
     @GetMapping("/{conversationId}/messages")
     public ResponseEntity<List<ConversationMessageResponse>> listMessages(
         @PathVariable UUID conversationId,
@@ -54,6 +58,10 @@ public class ConversationController {
         return ResponseEntity.ok(conversationService.listMessages(conversationId, applicationId));
     }
 
+    /**
+     * @deprecated Use {@code POST /api/ai/conversations/{id}/turn} with unified ASSISTANT mode.
+     */
+    @Deprecated
     @PostMapping("/{conversationId}/messages")
     public CompletableFuture<ResponseEntity<SendMessageResponse>> sendMessage(
         @PathVariable UUID conversationId,

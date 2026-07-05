@@ -1,10 +1,10 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ElementRef, ViewChild, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { map } from 'rxjs/operators';
-import * as XLSX from 'xlsx';
 
 import { BadgeComponent, ButtonComponent, EmptyStateComponent } from '@lib/anatomy/components';
 import { PageHeaderComponent, PageShellComponent, ToastService, ConfirmDialogService } from '@lib/anatomy';
@@ -14,18 +14,18 @@ import {
   ERP_ATTACHMENT_ENTITY_TYPES,
 } from '@applications/erp/shared/config/attachment-detail.config';
 import { PhotoChantierGalleryComponent } from '../components/photo-chantier-gallery/photo-chantier-gallery.component';
+import { ChantierLotsTabComponent } from '../components/chantier-lots-tab/chantier-lots-tab.component';
+import { ChantierPhasesTabComponent } from '../components/chantier-phases-tab/chantier-phases-tab.component';
 import type { BadgeVariant } from '@lib/anatomy/types';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
 
 import { ChantierApiService } from '../services/chantier-api.service';
 import type { ChantierSummary } from '../services/chantier.mapper';
-import type { Chantier, ChantierStatus, LotChantier, PhaseChantier } from '../../../chantiers/models';
+import type { Chantier, ChantierStatus } from '../../../chantiers/models';
 import { ChantierLotApiService } from '../services/chantier-lot-api.service';
-import { ChantierPhaseApiService } from '../services/chantier-phase-api.service';
 import {
   CHANTIER_STATUS_KEYS,
   CHANTIER_TYPE_KEYS,
-  PHASE_STATUS_KEYS,
 } from '@applications/erp/shell/i18n-labels';
 import { ContratMarcheApiService } from '../../marches/contrats/services/contrat-marche-api.service';
 import type { Marche } from '../../marches/models';
@@ -34,24 +34,11 @@ import {
   type SituationDraftBrouillon,
 } from '../../marches/services/situation-generation.service';
 import { ErpAuditService } from '@applications/erp/shell/erp-audit.service';
+import { AuthFacade } from '@core/security/services/auth.facade';
+import type { RecordAttachmentDto } from '@platform/features/collaboration/doc-manager/services/attachment-api.service';
+import { DocumentsApiService } from '../documents/services/documents-api.service';
 
 type DetailTab = 'overview' | 'lots' | 'phases' | 'budget' | 'situations' | 'documents' | 'photos';
-type LotImportIssueReason = 'missingRequired' | 'invalidQuantite' | 'invalidPrixUnitaire' | 'apiCreateFailed';
-
-type ParsedLotImportRow = {
-  sourceLine: number;
-  data: Partial<LotChantier>;
-};
-
-type LotImportIssue = {
-  sourceLine: number;
-  reason: LotImportIssueReason;
-};
-
-type ParsedLotImportResult = {
-  rows: ParsedLotImportRow[];
-  issues: LotImportIssue[];
-};
 
 const STATUS_VARIANT: Record<ChantierStatus, BadgeVariant> = {
   PROSPECT: 'info',
@@ -63,18 +50,11 @@ const STATUS_VARIANT: Record<ChantierStatus, BadgeVariant> = {
   ANNULE: 'danger',
 };
 
-const PHASE_STATUS_CSS: Record<string, string> = {
-  PLANIFIE: 'badge--info',
-  EN_COURS: 'badge--success',
-  TERMINE: 'badge--secondary',
-  EN_RETARD: 'badge--danger',
-};
-
 @Component({
   selector: 'app-chantier-detail',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterLink, PageShellComponent, PageHeaderComponent, BadgeComponent, ButtonComponent, EmptyStateComponent, MadCurrencyPipe, TranslateModule, AttachmentListComponent, PhotoChantierGalleryComponent],
+  imports: [CommonModule, RouterLink, PageShellComponent, PageHeaderComponent, BadgeComponent, ButtonComponent, EmptyStateComponent, MadCurrencyPipe, TranslateModule, AttachmentListComponent, PhotoChantierGalleryComponent, ChantierLotsTabComponent, ChantierPhasesTabComponent],
   template: `
     <nf-page-shell [scroll]="true">
       @if (chantier(); as c) {
@@ -172,141 +152,12 @@ const PHASE_STATUS_CSS: Record<string, string> = {
 
         <!-- Tab: Lots -->
         @if (activeTab() === 'lots') {
-          <section class="tab-panel">
-            <div class="tab-panel__toolbar">
-              <nf-button variant="primary" icon="plus" iconLibrary="lucide" (clicked)="addLot()">
-                {{ 'chantiers.chantier.detail.lots.addCta' | translate }}
-              </nf-button>
-              <nf-button variant="secondary" icon="upload" iconLibrary="lucide" (clicked)="triggerLotImport()">
-                {{ 'chantiers.chantier.detail.lots.importCta' | translate }}
-              </nf-button>
-              @if (selectedLotImportFile()) {
-                <nf-button variant="secondary" icon="play" iconLibrary="lucide" (clicked)="confirmLotImport()">
-                  {{ 'chantiers.chantier.detail.lots.importConfirmCta' | translate }}
-                </nf-button>
-              }
-              <nf-button variant="ghost" icon="download" iconLibrary="lucide" (clicked)="downloadLotImportTemplate()">
-                {{ 'chantiers.chantier.detail.lots.templateCta' | translate }}
-              </nf-button>
-              <nf-button variant="ghost" icon="copy" iconLibrary="lucide" (clicked)="copyLotImportMapping()">
-                {{ 'chantiers.chantier.detail.lots.mappingCta' | translate }}
-              </nf-button>
-              <input
-                #lotImportInput
-                type="file"
-                accept=".csv,.xlsx,.xls"
-                (change)="onLotFileSelected($event)"
-                hidden />
-            </div>
-            @if (selectedLotImportFileName(); as fileName) {
-              <p class="import-file-chip">
-                {{ 'chantiers.chantier.detail.lots.importFileSelected' | translate:{ fileName: fileName } }}
-                @if (selectedLotImportRowCount(); as count) {
-                  <strong>({{ count }} {{ 'chantiers.chantier.detail.lots.importFileRowsLabel' | translate:{ count: count } }})</strong>
-                }
-              </p>
-            }
-            <div class="mapping-help">
-              <p class="mapping-help__title">{{ 'chantiers.chantier.detail.lots.mappingHelpTitle' | translate }}</p>
-              <p class="mapping-help__hint">{{ 'chantiers.chantier.detail.lots.mappingHelpHint' | translate }}</p>
-              <ul class="mapping-help__list">
-                <li><strong>code</strong>: {{ 'chantiers.chantier.detail.lots.mappingHelpCode' | translate }}</li>
-                <li><strong>designation</strong>: {{ 'chantiers.chantier.detail.lots.mappingHelpDesignation' | translate }}</li>
-                <li><strong>quantite</strong>: {{ 'chantiers.chantier.detail.lots.mappingHelpQuantite' | translate }}</li>
-                <li><strong>unite</strong>: {{ 'chantiers.chantier.detail.lots.mappingHelpUnite' | translate }}</li>
-                <li><strong>prix_unitaire_ht</strong>: {{ 'chantiers.chantier.detail.lots.mappingHelpPrixUnitaire' | translate }}</li>
-              </ul>
-            </div>
-            @if (lots().length) {
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>{{ 'chantiers.chantier.detail.columns.code' | translate }}</th>
-                    <th>{{ 'chantiers.chantier.detail.columns.designation' | translate }}</th>
-                    <th class="num">{{ 'chantiers.chantier.detail.columns.quantite' | translate }}</th>
-                    <th>{{ 'chantiers.chantier.detail.columns.unite' | translate }}</th>
-                    <th class="num">{{ 'chantiers.chantier.detail.columns.prixUnitaireHt' | translate }}</th>
-                    <th class="num">{{ 'chantiers.chantier.detail.columns.montantHt' | translate }}</th>
-                    <th class="center">{{ 'chantiers.chantier.detail.columns.avancement' | translate }}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (lot of lots(); track lot.id) {
-                    <tr>
-                      <td><strong>{{ lot.code }}</strong></td>
-                      <td>{{ lot.designation }}</td>
-                      <td class="num">{{ lot.quantite ?? '—' }}</td>
-                      <td>{{ lot.unite ?? '—' }}</td>
-                      <td class="num">{{ lot.prixUnitaireHt != null ? (lot.prixUnitaireHt | mad) : '—' }}</td>
-                      <td class="num">{{ lot.montantHt != null ? (lot.montantHt | mad) : '—' }}</td>
-                      <td class="center">
-                        <div class="progress-wrap">
-                          <div class="progress-bar sm"><div class="progress-fill" [style.width.%]="lot.avancementPercent"></div></div>
-                          <span>{{ lot.avancementPercent }}%</span>
-                        </div>
-                      </td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            } @else {
-              <nf-empty-state
-                icon="layers"
-                [title]="'chantiers.chantier.detail.empty.lotsTitle' | translate"
-                [message]="'chantiers.chantier.detail.empty.lotsMessage' | translate"
-                [actionLabel]="'chantiers.chantier.detail.lots.addCta' | translate"
-                (action)="addLot()"></nf-empty-state>
-            }
-          </section>
+          <app-chantier-lots-tab [chantierId]="c.id" />
         }
 
         <!-- Tab: Phases -->
         @if (activeTab() === 'phases') {
-          <section class="tab-panel">
-            <div class="tab-toolbar">
-              <nf-button variant="primary" (clicked)="addPhase()">
-                {{ 'chantiers.chantier.detail.phases.addAction' | translate }}
-              </nf-button>
-            </div>
-            @if (phases().length) {
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>{{ 'chantiers.chantier.detail.columns.code' | translate }}</th>
-                    <th>{{ 'chantiers.chantier.detail.columns.designation' | translate }}</th>
-                    <th>{{ 'chantiers.chantier.detail.columns.responsable' | translate }}</th>
-                    <th>{{ 'chantiers.chantier.detail.columns.debut' | translate }}</th>
-                    <th>{{ 'chantiers.chantier.detail.columns.fin' | translate }}</th>
-                    <th class="center">{{ 'chantiers.chantier.detail.columns.avancement' | translate }}</th>
-                    <th>{{ 'chantiers.chantier.detail.columns.status' | translate }}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (phase of phases(); track phase.id) {
-                    <tr>
-                      <td><strong>{{ phase.code }}</strong></td>
-                      <td>{{ phase.designation }}</td>
-                      <td>{{ phase.responsableName ?? '—' }}</td>
-                      <td class="date">{{ phase.dateDebut | date:'dd/MM/yy' }}</td>
-                      <td class="date">{{ phase.dateFin | date:'dd/MM/yy' }}</td>
-                      <td class="center">
-                        <div class="progress-wrap">
-                          <div class="progress-bar sm"><div class="progress-fill" [style.width.%]="phase.avancementPercent" [class.progress-fill--done]="phase.avancementPercent >= 100" [class.progress-fill--warn]="phase.status === 'EN_RETARD'"></div></div>
-                          <span>{{ phase.avancementPercent }}%</span>
-                        </div>
-                      </td>
-                      <td><span class="badge {{ phaseStatusCss(phase.status) }}">{{ phaseStatusLabel(phase.status) }}</span></td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            } @else {
-              <nf-empty-state
-                icon="timeline"
-                [title]="'chantiers.chantier.detail.empty.phasesTitle' | translate"
-                [message]="'chantiers.chantier.detail.empty.phasesMessage' | translate"></nf-empty-state>
-            }
-          </section>
+          <app-chantier-phases-tab [chantierId]="c.id" />
         }
 
         <!-- Tab: Budget -->
@@ -390,7 +241,8 @@ const PHASE_STATUS_CSS: Record<string, string> = {
             <nf-attachment-list
               [entityType]="attachmentEntityType"
               [entityId]="c.id"
-              [attachmentConfig]="attachmentConfig" />
+              [attachmentConfig]="attachmentConfig"
+              (attachmentUploaded)="registerChantierDocument($event)" />
             <p class="tab-hint tab-hint--sep">
               <a [routerLink]="['/chantiers/documents']" [queryParams]="{ chantierId: c.id }">
                 {{ 'chantiers.chantier.detail.documents.linkAll' | translate }}
@@ -408,7 +260,9 @@ const PHASE_STATUS_CSS: Record<string, string> = {
         <div class="actions">
           <nf-button variant="secondary" icon="arrow-left" iconLibrary="lucide" (clicked)="goBack()">{{ 'chantiers.common.actions.backToList' | translate }}</nf-button>
           <nf-button variant="secondary" icon="pencil" iconLibrary="lucide" (clicked)="editChantier()">{{ 'chantiers.chantier.detail.actions.edit' | translate }}</nf-button>
-          <nf-button variant="danger" icon="trash-2" iconLibrary="lucide" (clicked)="deleteChantier()">{{ 'chantiers.common.actions.delete' | translate }}</nf-button>
+          @if (canDeleteChantier()) {
+            <nf-button variant="danger" icon="trash-2" iconLibrary="lucide" (clicked)="deleteChantier()">{{ 'chantiers.common.actions.delete' | translate }}</nf-button>
+          }
         </div>
 
       } @else {
@@ -517,54 +371,9 @@ const PHASE_STATUS_CSS: Record<string, string> = {
 
     .actions { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: flex-start; padding-top: 1rem; border-top: 1px solid var(--nf-color-bg-muted); margin-top: 0.5rem; }
     .tab-toolbar { display: flex; gap: 0.5rem; justify-content: flex-end; margin-bottom: 0.75rem; }
-    .tab-panel__toolbar { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: flex-end; margin-bottom: 0.75rem; }
-    .import-file-chip {
-      margin: -0.2rem 0 0.65rem;
-      padding: 0.35rem 0.6rem;
-      border-radius: 999px;
-      display: inline-flex;
-      align-items: center;
-      font-size: 0.78rem;
-      color: var(--nf-color-primary-700);
-      background: color-mix(in srgb, var(--nf-color-primary-500) 10%, transparent);
-      border: 1px solid color-mix(in srgb, var(--nf-color-primary-500) 18%, transparent);
-    }
-    .mapping-help {
-      margin-bottom: 0.9rem;
-      padding: 0.75rem 0.9rem;
-      border: 1px solid var(--nf-color-border);
-      border-radius: 0.65rem;
-      background: var(--nf-color-bg-subtle);
-    }
-    .mapping-help__title {
-      margin: 0;
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: var(--nf-color-text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-    .mapping-help__hint {
-      margin: 0.25rem 0 0.5rem;
-      font-size: 0.83rem;
-      color: var(--nf-color-text-secondary);
-    }
-    .mapping-help__list {
-      margin: 0;
-      padding-left: 1.1rem;
-      font-size: 0.82rem;
-      color: var(--nf-color-text-secondary);
-      line-height: 1.45;
-    }
   `],
 })
 export class ChantierDetailPage {
-  @ViewChild('lotImportInput') private readonly lotImportInput?: ElementRef<HTMLInputElement>;
-
-  readonly selectedLotImportFile = signal<File | null>(null);
-  readonly selectedLotImportFileName = computed(() => this.selectedLotImportFile()?.name ?? '');
-  readonly selectedLotImportRowCount = signal<number | null>(null);
-
   readonly attachmentEntityType = ERP_ATTACHMENT_ENTITY_TYPES.CHANTIER;
   readonly attachmentConfig = DOCUMENT_ATTACHMENT_CONFIG;
 
@@ -572,21 +381,21 @@ export class ChantierDetailPage {
   private readonly router = inject(Router);
   private readonly chantierApi = inject(ChantierApiService);
   private readonly lotApi = inject(ChantierLotApiService);
-  private readonly phaseApi = inject(ChantierPhaseApiService);
   private readonly contratApi = inject(ContratMarcheApiService);
   private readonly situationGen = inject(SituationGenerationService);
   private readonly translate = inject(TranslateService);
   private readonly toast = inject(ToastService);
   private readonly audit = inject(ErpAuditService);
   private readonly confirmDialog = inject(ConfirmDialogService);
+  private readonly documentsApi = inject(DocumentsApiService);
+  private readonly auth = inject(AuthFacade);
 
   readonly marchesCache = signal<Marche[]>([]);
 
   readonly situationDraft = signal<SituationDraftBrouillon | null>(null);
   readonly chantier = signal<Chantier | undefined>(undefined);
+  readonly canDeleteChantier = computed(() => this.chantier()?.lifecycleStatus === 'BROUILLON');
   readonly summary = signal<ChantierSummary | undefined>(undefined);
-  readonly lots = signal<LotChantier[]>([]);
-  readonly phases = signal<PhaseChantier[]>([]);
 
   readonly paramId = toSignal(
     this.route.paramMap.pipe(map((pm) => pm.get('id')?.trim() ?? '')),
@@ -634,30 +443,6 @@ export class ChantierDetailPage {
             .catch(() => this.chantier.set(undefined));
         });
     });
-
-    effect(() => {
-      const c = this.chantier();
-      if (!c?.id) {
-        this.lots.set([]);
-        return;
-      }
-      void this.lotApi
-        .listByChantier(c.id)
-        .then((rows) => this.lots.set(rows))
-        .catch(() => this.lots.set([]));
-    });
-
-    effect(() => {
-      const c = this.chantier();
-      if (!c?.id) {
-        this.phases.set([]);
-        return;
-      }
-      void this.phaseApi
-        .listByChantier(c.id)
-        .then((rows) => this.phases.set(rows))
-        .catch(() => this.phases.set([]));
-    });
   }
 
   readonly activeTab = signal<DetailTab>(
@@ -703,13 +488,24 @@ export class ChantierDetailPage {
     const resolved = this.translate.instant(key);
     return resolved === key ? t : resolved;
   }
-  phaseStatusLabel(s: string): string {
-    const key = (PHASE_STATUS_KEYS as Record<string, string>)[s];
-    if (!key) return s;
-    const resolved = this.translate.instant(key);
-    return resolved === key ? s : resolved;
+
+  async registerChantierDocument(attachment: RecordAttachmentDto): Promise<void> {
+    const c = this.chantier();
+    if (!c?.id) return;
+    try {
+      await this.documentsApi.createForChantier(c.id, {
+        type: 'AUTRE',
+        titre: attachment.fileName.replace(/\.[^.]+$/, ''),
+        fichier: attachment.fileName,
+        storageKey: attachment.fileUrl,
+        taille: attachment.sizeBytes ?? 0,
+        uploadedAt: attachment.uploadedAt?.slice(0, 10) ?? new Date().toISOString().slice(0, 10),
+        uploadedPar: attachment.uploadedBy ?? this.auth.displayName(),
+      });
+    } catch {
+      this.toast.warning(this.translate.instant('chantiers.documents.create.errors.syncFailed'));
+    }
   }
-  phaseStatusCss(s: string): string { return PHASE_STATUS_CSS[s] ?? 'badge--secondary'; }
 
   goBack(): void {
     void this.router.navigate(['/chantiers']);
@@ -724,6 +520,10 @@ export class ChantierDetailPage {
   async deleteChantier(): Promise<void> {
     const c = this.chantier();
     if (!c?.id) return;
+    if (!this.canDeleteChantier()) {
+      this.toast.error(this.translate.instant('chantiers.chantier.detail.deleteFailedDraftOnly'));
+      return;
+    }
     const confirmed = await this.confirmDialog.confirm({
       title: this.translate.instant('chantiers.chantier.detail.deleteTitle'),
       message: this.translate.instant('chantiers.chantier.detail.deleteConfirm', { code: c.code, name: c.name }),
@@ -738,382 +538,46 @@ export class ChantierDetailPage {
       this.audit.log('DELETE', 'chantier', c.id, c.code, c.name);
       this.toast.success(this.translate.instant('chantiers.chantier.detail.deleteSuccess'));
       void this.router.navigate(['/chantiers']);
-    } catch {
-      this.toast.error(this.translate.instant('chantiers.chantier.detail.deleteFailed'));
+    } catch (error) {
+      this.toast.error(this.resolveDeleteErrorMessage(error));
     }
   }
 
-  async addLot(): Promise<void> {
-    const c = this.chantier();
-    if (!c?.id) return;
-    const result = await this.confirmDialog.prompt({
-      title: this.translate.instant('chantiers.chantier.detail.lots.addTitle'),
-      fields: [
-        { key: 'code', label: 'chantiers.chantier.detail.lots.promptCode', required: true },
-        { key: 'designation', label: 'chantiers.chantier.detail.lots.promptDesignation', required: true },
-        { key: 'quantite', label: 'chantiers.chantier.detail.lots.promptQuantite', required: true },
-        { key: 'unite', label: 'chantiers.chantier.detail.lots.promptUnite', required: true, initial: 'U' },
-        { key: 'prixUnitaireHt', label: 'chantiers.chantier.detail.lots.promptPrixUnitaireHt', required: true },
-      ],
-      confirmLabel: this.translate.instant('chantiers.chantier.detail.lots.addAction'),
-      cancelLabel: this.translate.instant('chantiers.chantier.detail.cancel'),
-      icon: 'add',
-    });
-    if (!result) return;
-    const code = result['code'];
-    const designation = result['designation'];
-    const quantite = parseFloat(result['quantite']?.replace(',', '.') ?? '');
-    const unite = result['unite']?.trim();
-    const prixUnitaireHt = parseFloat(result['prixUnitaireHt']?.replace(',', '.') ?? '');
-    if (!code?.trim() || !designation?.trim() || !unite || Number.isNaN(quantite) || Number.isNaN(prixUnitaireHt)) {
-      this.toast.error(this.translate.instant('chantiers.chantier.detail.lots.invalidBpu'));
-      return;
-    }
-    try {
-      const lot = await this.lotApi.createForChantier(c.id, {
-        code: code.trim(),
-        designation: designation.trim(),
-        quantite,
-        unite,
-        prixUnitaireHt,
-        ordre: this.lots().length + 1,
-      });
-      this.lots.update((rows) => [...rows, lot]);
-      this.toast.success(this.translate.instant('chantiers.chantier.detail.lots.createSuccess'));
-    } catch {
-      this.toast.error(this.translate.instant('chantiers.chantier.detail.lots.createFailed'));
-    }
-  }
+  private resolveDeleteErrorMessage(error: unknown): string {
+    const draftOnlyKey = 'chantiers.chantier.detail.deleteFailedDraftOnly';
+    const genericKey = 'chantiers.chantier.detail.deleteFailed';
 
-  triggerLotImport(): void {
-    this.lotImportInput?.nativeElement.click();
-  }
-
-  downloadLotImportTemplate(): void {
-    const headers = ['code', 'designation', 'quantite', 'unite', 'prix_unitaire_ht'];
-    const sample = ['L01', 'Terrassement', '100', 'm3', '250'];
-    const csvContent = `${headers.join(',')}\n${sample.join(',')}\n`;
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = globalThis.URL.createObjectURL(blob);
-    const anchor = globalThis.document.createElement('a');
-    anchor.href = url;
-    anchor.download = 'modele-import-lots.csv';
-    anchor.click();
-    globalThis.URL.revokeObjectURL(url);
-
-    this.toast.success(this.translate.instant('chantiers.chantier.detail.lots.templateDownloaded'));
-  }
-
-  async copyLotImportMapping(): Promise<void> {
-    const mapping = this.buildLotImportMappingHint();
-    try {
-      await this.writeClipboard(mapping);
-      this.toast.success(this.translate.instant('chantiers.chantier.detail.lots.mappingCopied'));
-    } catch {
-      this.toast.error(this.translate.instant('chantiers.chantier.detail.lots.mappingCopyFailed'));
-    }
-  }
-
-  async onLotFileSelected(event: Event): Promise<void> {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    input.value = '';
-
-    if (!file) {
-      return;
-    }
-
-    try {
-      const rowCount = await this.countLotsFileRows(file);
-      this.selectedLotImportFile.set(file);
-      this.selectedLotImportRowCount.set(rowCount);
-      this.toast.info(
-        this.translate.instant('chantiers.chantier.detail.lots.importReady', {
-          fileName: file.name,
-          count: rowCount,
-        }),
-      );
-    } catch {
-      this.toast.error(this.translate.instant('chantiers.chantier.detail.lots.importParseCountFailed'));
-      this.selectedLotImportFile.set(null);
-      this.selectedLotImportRowCount.set(null);
-    }
-  }
-
-  async confirmLotImport(): Promise<void> {
-    const file = this.selectedLotImportFile();
-    if (!file) {
-      this.toast.error(this.translate.instant('chantiers.chantier.detail.lots.importNoFile'));
-      return;
-    }
-
-    await this.importLotsFromFile(file);
-    this.selectedLotImportFile.set(null);
-    this.selectedLotImportRowCount.set(null);
-  }
-
-  private buildLotImportMappingHint(): string {
-    return [
-      'code: code | lot | lot_code | lotcode',
-      'designation: designation | description | intitule | name',
-      'quantite: quantite | quantity | qte',
-      'unite: unite | unit | uom',
-      'prix_unitaire_ht: prix_unitaire_ht | prixunitaireht | prixunitaire | pu | unitprice',
-    ].join('\n');
-  }
-
-  private async writeClipboard(value: string): Promise<void> {
-    if (globalThis.navigator?.clipboard?.writeText) {
-      await globalThis.navigator.clipboard.writeText(value);
-      return;
-    }
-    throw new Error('clipboard-api-unavailable');
-  }
-
-  private async importLotsFromFile(file: File): Promise<void> {
-    const chantier = this.chantier();
-    if (!chantier?.id) {
-      this.toast.error(this.translate.instant('chantiers.chantier.detail.lots.importFailed'));
-      return;
-    }
-
-    try {
-      const parsed = await this.parseLotsFile(file);
-      if (!parsed.rows.length) {
-        this.toast.error(this.translate.instant('chantiers.chantier.detail.lots.importInvalidFile'));
-        return;
+    if (error instanceof HttpErrorResponse) {
+      const apiMessage = this.readApiErrorMessage(error);
+      if (error.status === 409 || this.isDraftOnlyDeleteError(apiMessage)) {
+        return this.translate.instant(draftOnlyKey);
       }
-
-      const initialOrder = this.lots().length;
-      const created: LotChantier[] = [];
-      const issues: LotImportIssue[] = [...parsed.issues];
-
-      for (let i = 0; i < parsed.rows.length; i += 1) {
-        const row = parsed.rows[i];
-        try {
-          const lot = await this.lotApi.createForChantier(chantier.id, {
-            ...row.data,
-            ordre: initialOrder + i + 1,
-          });
-          created.push(lot);
-        } catch {
-          issues.push({ sourceLine: row.sourceLine, reason: 'apiCreateFailed' });
-        }
-      }
-
-      if (!created.length) {
-        this.toast.error(this.translate.instant('chantiers.chantier.detail.lots.importFailed'));
-        return;
-      }
-
-      this.lots.update((current) => [...current, ...created]);
-
-      if (issues.length > 0) {
-        this.toast.success(
-          this.translate.instant('chantiers.chantier.detail.lots.importPartial', {
-            imported: created.length,
-            total: parsed.rows.length + parsed.issues.length,
-          }),
-        );
-        this.toast.warning(
-          this.translate.instant('chantiers.chantier.detail.lots.importIssuesSummary', {
-            failed: issues.length,
-            total: parsed.rows.length + parsed.issues.length,
-            details: this.formatImportIssueDetails(issues),
-          }),
-        );
-      } else {
-        this.toast.success(
-          this.translate.instant('chantiers.chantier.detail.lots.importSuccess', { count: created.length }),
-        );
-      }
-    } catch {
-      this.toast.error(this.translate.instant('chantiers.chantier.detail.lots.importFailed'));
-    }
-  }
-
-  private async countLotsFileRows(file: File): Promise<number> {
-    const buffer = await file.arrayBuffer();
-    const workbook = XLSX.read(buffer, { type: 'array' });
-    const firstSheetName = workbook.SheetNames[0];
-    if (!firstSheetName) {
-      return 0;
-    }
-    const worksheet = workbook.Sheets[firstSheetName];
-    const rawRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(worksheet, { defval: '' });
-    return Math.max(0, rawRows.length);
-  }
-
-  private async parseLotsFile(file: File): Promise<ParsedLotImportResult> {
-    const buffer = await file.arrayBuffer();
-    const workbook = XLSX.read(buffer, { type: 'array' });
-    const firstSheetName = workbook.SheetNames[0];
-    if (!firstSheetName) {
-      return { rows: [], issues: [] };
-    }
-
-    const worksheet = workbook.Sheets[firstSheetName];
-    const rawRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(worksheet, { defval: '' });
-
-    const rows: ParsedLotImportRow[] = [];
-    const issues: LotImportIssue[] = [];
-
-    for (let index = 0; index < rawRows.length; index += 1) {
-      const rawRow = rawRows[index];
-      const sourceLine = index + 2;
-      const code = this.readString(rawRow, ['code', 'lot', 'lotcode', 'lot_code']);
-      const designation = this.readString(rawRow, ['designation', 'description', 'intitule', 'name']);
-      const unite = this.readString(rawRow, ['unite', 'unit', 'uom']);
-      const quantite = this.readNumber(rawRow, ['quantite', 'quantity', 'qte']);
-      const prixUnitaireHt = this.readNumber(rawRow, [
-        'prixunitaireht',
-        'prix_unitaire_ht',
-        'prixunitaire',
-        'pu',
-        'unitprice',
-      ]);
-
-      if (!code || !designation || !unite) {
-        issues.push({ sourceLine, reason: 'missingRequired' });
-        continue;
-      }
-
-      if (!Number.isFinite(quantite) || quantite <= 0) {
-        issues.push({ sourceLine, reason: 'invalidQuantite' });
-        continue;
-      }
-
-      if (!Number.isFinite(prixUnitaireHt) || prixUnitaireHt < 0) {
-        issues.push({ sourceLine, reason: 'invalidPrixUnitaire' });
-        continue;
-      }
-
-      rows.push({
-        sourceLine,
-        data: {
-          code,
-          designation,
-          unite,
-          quantite,
-          prixUnitaireHt,
-          montantHt: Math.round(quantite * prixUnitaireHt * 100) / 100,
-          avancementPercent: 0,
-        },
-      });
-    }
-
-    return { rows, issues };
-  }
-
-  private formatImportIssueDetails(issues: LotImportIssue[]): string {
-    const maxDisplayed = 3;
-    const displayed = issues.slice(0, maxDisplayed).map((issue) => this.formatImportIssue(issue));
-    const remaining = issues.length - displayed.length;
-    if (remaining <= 0) {
-      return displayed.join(' | ');
-    }
-    return `${displayed.join(' | ')} | ${this.translate.instant('chantiers.chantier.detail.lots.importIssueAndMore', { count: remaining })}`;
-  }
-
-  private formatImportIssue(issue: LotImportIssue): string {
-    const reasonKey = this.importIssueReasonKey(issue.reason);
-    return this.translate.instant(reasonKey, { line: issue.sourceLine });
-  }
-
-  private importIssueReasonKey(reason: LotImportIssueReason): string {
-    switch (reason) {
-      case 'missingRequired':
-        return 'chantiers.chantier.detail.lots.importIssueMissingRequired';
-      case 'invalidQuantite':
-        return 'chantiers.chantier.detail.lots.importIssueInvalidQuantite';
-      case 'invalidPrixUnitaire':
-        return 'chantiers.chantier.detail.lots.importIssueInvalidPrixUnitaire';
-      case 'apiCreateFailed':
-        return 'chantiers.chantier.detail.lots.importIssueApiFailed';
-      default:
-        return 'chantiers.chantier.detail.lots.importFailed';
-    }
-  }
-
-  private readString(row: Record<string, unknown>, aliases: string[]): string {
-    const value = this.readByAliases(row, aliases);
-    if (typeof value === 'string') {
-      return value.trim();
-    }
-    if (typeof value === 'number' || typeof value === 'boolean') {
-      return String(value).trim();
-    }
-    return '';
-  }
-
-  private readNumber(row: Record<string, unknown>, aliases: string[]): number {
-    const normalized = this.readString(row, aliases)
-      .replace(/\s+/g, '')
-      .replace(',', '.');
-    const parsed = Number.parseFloat(normalized);
-    return Number.isFinite(parsed) ? parsed : Number.NaN;
-  }
-
-  private readByAliases(row: Record<string, unknown>, aliases: string[]): unknown {
-    const normalizedEntries = Object.entries(row).map(([key, value]) => [
-      this.normalizeHeader(key),
-      value,
-    ] as const);
-
-    for (const alias of aliases) {
-      const aliasKey = this.normalizeHeader(alias);
-      const found = normalizedEntries.find(([key]) => key === aliasKey);
-      if (found) {
-        return found[1];
+      if (apiMessage) {
+        return apiMessage;
       }
     }
 
-    return undefined;
+    return this.translate.instant(genericKey);
   }
 
-  private normalizeHeader(value: string): string {
-    return value
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-zA-Z0-9]/g, '')
-      .toLowerCase();
-  }
-
-  async addPhase(): Promise<void> {
-    const c = this.chantier();
-    if (!c?.id) return;
-    const today = new Date().toISOString().slice(0, 10);
-    const in3m = new Date(new Date().setMonth(new Date().getMonth() + 3)).toISOString().slice(0, 10);
-    const result = await this.confirmDialog.prompt({
-      title: this.translate.instant('chantiers.chantier.detail.phases.addTitle'),
-      fields: [
-        { key: 'code', label: 'chantiers.chantier.detail.phases.promptCode', required: true },
-        { key: 'designation', label: 'chantiers.chantier.detail.phases.promptDesignation', required: true },
-        { key: 'dateDebut', label: 'chantiers.chantier.detail.phases.promptDateDebut', required: true, initial: today },
-        { key: 'dateFin', label: 'chantiers.chantier.detail.phases.promptDateFin', required: true, initial: in3m },
-        { key: 'responsableName', label: 'chantiers.chantier.detail.phases.promptResponsable', required: false },
-      ],
-      confirmLabel: this.translate.instant('chantiers.chantier.detail.phases.addAction'),
-      cancelLabel: this.translate.instant('chantiers.chantier.detail.cancel'),
-      icon: 'timeline',
-    });
-    if (!result) return;
-    try {
-      const phase = await this.phaseApi.createForChantier(c.id, {
-        code: result['code']?.trim(),
-        designation: result['designation']?.trim(),
-        dateDebut: result['dateDebut'],
-        dateFin: result['dateFin'],
-        responsableName: result['responsableName']?.trim() || undefined,
-        avancementPercent: 0,
-        status: 'PLANIFIE',
-      });
-      this.phases.update((rows) => [...rows, phase]);
-      this.toast.success(this.translate.instant('chantiers.chantier.detail.phases.createSuccess'));
-    } catch {
-      this.toast.error(this.translate.instant('chantiers.chantier.detail.phases.createFailed'));
+  private readApiErrorMessage(error: HttpErrorResponse): string | null {
+    if (typeof error.error === 'string' && error.error.trim()) {
+      return error.error.trim();
     }
+    if (error.error && typeof error.error === 'object') {
+      const message = (error.error as Record<string, unknown>)['message'];
+      if (typeof message === 'string' && message.trim()) {
+        return message.trim();
+      }
+    }
+    return null;
+  }
+
+  private isDraftOnlyDeleteError(message: string | null): boolean {
+    if (!message) return false;
+    const normalized = message.toLowerCase();
+    return normalized.includes('only draft chantiers can be deleted')
+        || normalized.includes('seuls les chantiers brouillon');
   }
 
   async creerMarche(): Promise<void> {
@@ -1153,18 +617,20 @@ export class ChantierDetailPage {
     }
   }
 
-  genererSituationN(): void {
+  async genererSituationN(): Promise<void> {
     const c = this.chantier();
     const m = this.marchePourChantier();
-    if (!c || !m) {
+    if (!c?.id || !m) {
       this.situationDraft.set(null);
       return;
     }
-    const lots = this.lots().map((l) => ({
-      code: l.code,
-      designation: l.designation,
-      avancementPercent: l.avancementPercent ?? 0,
-    }));
+    let lots;
+    try {
+      lots = await this.lotApi.listByChantier(c.id);
+    } catch {
+      this.situationDraft.set(null);
+      return;
+    }
     const draft = this.situationGen.buildDraft({
       marcheId: m.id,
       marcheNumero: m.numero,
@@ -1177,7 +643,11 @@ export class ChantierDetailPage {
       penalitesHt: 0,
       retenueGarantiePercent: c.cautionGarantie ?? m.retenueGarantieTaux,
       tvaTaux: c.tvaTaux,
-      lots,
+      lots: lots.map((l) => ({
+        code: l.code,
+        designation: l.designation,
+        avancementPercent: l.avancementPercent ?? 0,
+      })),
     });
     this.situationDraft.set(draft);
   }

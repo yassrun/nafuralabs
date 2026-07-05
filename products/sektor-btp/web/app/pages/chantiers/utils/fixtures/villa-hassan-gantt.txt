@@ -1,0 +1,115 @@
+N° Nom de la tâche Début Fin 
+1 
+2 
+3 AMENAGEMENT VILLA MR HASSAN Mar 24/03/26 Ven 30/10/26 
+4 Avance de démmarage 25% Mar 24/03/26 Mar 24/03/26 
+5 1er Règlement 15% Ven 22/05/26 Ven 22/05/26 
+6 2eme Règlement 15% Jeu 16/07/26 Jeu 16/07/26 
+7 Validation des équipements Mar 07/07/26 Mar 07/07/26 
+8 3eme Règlement 15% Jeu 27/08/26 Jeu 27/08/26 
+9 4eme Règlement 15% Mar 29/09/26 Mar 29/09/26 
+10 5eme Règlement 15% Ven 30/10/26 Ven 30/10/26 
+11 Enduits Lun 30/03/26 Mer 06/05/26 
+12 Enduits interieur Lun 30/03/26 Ven 17/04/26 
+13 SOUS SOL Lun 30/03/26 Mar 07/04/26 
+14 RDC Ven 03/04/26 Lun 13/04/26 
+15 ETAGE Jeu 09/04/26 Ven 17/04/26 
+16 Enduits exterieur Jeu 16/04/26 Mer 06/05/26 
+17 Mousse polyarethane Lun 30/03/26 Mer 29/04/26 
+18 Voile sous-sol Lun 30/03/26 Lun 30/03/26 
+19 Doubles cloison RDC Mer 08/04/26 Mer 08/04/26 
+20 Doubles Cloison étage Mar 14/04/26 Mar 14/04/26 
+21 Plafond sous sol RDC et etége Mer 29/04/26 Mer 29/04/26 
+22 Etancheite Lun 30/03/26 Mar 28/04/26 
+23 Etancheité terrasse Lun 30/03/26 Ven 17/04/26 
+24 Etancheité des salles d'eau Lun 13/04/26 Ven 24/04/26 
+25 Etancheité des balcons Jeu 23/04/26 Mar 28/04/26 
+26 Electricité Lun 20/04/26 Lun 12/10/26 
+27 fourniture et pose des tubages de tirage d'alimentation electrique Lun 20/04/26 Ven 15/05/26 
+28 Pose des coofrets Jeu 14/05/26 Ven 22/05/26 
+29 Tirage des cables (eclairage , reseau ,video survellance ,domotique) Mar 02/06/26 Lun 22/06/26 
+30 Mise en place des appareillages Mar 25/08/26 Lun 31/08/26 
+31 pose de la lustrerie et équipement domotique Ven 28/08/26 Jeu 17/09/26 
+32 testes et mise en marche Ven 18/09/26 Jeu 24/09/26 
+33 finitions Ven 25/09/26 Mar 29/09/26 
+34 Domotique Mar 01/09/26 Lun 12/10/26 
+35 Plomberie Lun 20/04/26 Jeu 01/10/26 
+36 pose des canalisation polypropilene pn 20 Lun 20/04/26 Jeu 23/04/26 
+37 pose des tuyau en polyethylene reticule et coffret de collecteur Ven 24/04/26 Jeu 11/06/26 
+38 SOUS SOL Ven 24/04/26 Mar 05/05/26 
+39 RDC Mar 05/05/26 Jeu 14/05/26 
+40 ETAGE Mer 13/05/26 Ven 22/05/26 
+41 EXTERIEUR Mar 02/06/26 Jeu 11/06/26 
+42 pose des chutes de PVC ( eau pluviale) Mer 29/04/26 Mar 12/05/26 
+43 Pose des apareillages (wc,lavabo,bidet,evier) Ven 04/09/26 Jeu 24/09/26 
+44 sous sol Ven 04/09/26 Jeu 10/09/26 
+45 RDC Ven 11/09/26 Jeu 17/09/26 
+46 Etage Ven 18/09/26 Jeu 24/09/26 
+47 Racordement au reseau definitif et mise en service Ven 25/09/26 Jeu 01/10/26 
+48 Climatisation DRV Mar 05/05/26 Mar 22/09/26 
+49 Pré-instalation de clim et pose des unitées interieur Mar 05/05/26 Mar 07/07/26 
+50 Sous-sol Mar 05/05/26 Lun 18/05/26 
+51 RDC Mar 19/05/26 Mar 09/06/26 
+52 ETAGE Mer 10/06/26 Mar 07/07/26 
+53 Racordements et pose de l'unité exterieur Mer 02/09/26 Mar 22/09/26 
+54 VMC Mar 05/05/26 Lun 18/05/26 
+55 pose des gaines , flexibles nues Mar 05/05/26 Lun 11/05/26 
+56 racordement et instalation des bouches d'extraction Mar 12/05/26 Lun 18/05/26 
+57 Revatement sol Lun 04/05/26 Lun 22/06/26 
+58 Forme Lun 04/05/26 Ven 22/05/26 
+59 SOUS SOL Lun 04/05/26 Ven 08/05/26 
+60 RDC Lun 11/05/26 Ven 15/05/26 
+61 ETAGE Lun 18/05/26 Ven 22/05/26 
+62 Pose de carrelage sol et pleinthes Mar 02/06/26 Lun 22/06/26 
+63 Sous sol Mar 02/06/26 Lun 08/06/26 
+64 RDC Mar 09/06/26 Lun 15/06/26 
+65 Etage Mar 16/06/26 Lun 22/06/26 
+66 Revetement murs Mar 16/06/26 Mar 04/08/26 
+67 SOUS SOL Mar 16/06/26 Ven 19/06/26 
+68 RDC Lun 22/06/26 Mer 01/07/26 
+69 ETAGE Jeu 02/07/26 Mar 04/08/26 
+70 Revetements exterieur sur menuiserie metalique Mar 16/06/26 Lun 22/06/26 
+71 Faux plafonds Mer 08/07/26 Mer 05/08/26 
+72 Sous sol Mer 08/07/26 Jeu 16/07/26 
+73 RDC Ven 17/07/26 Lun 27/07/26 
+74 Etage Mar 28/07/26 Mer 05/08/26 
+75 Menuiserier Bois Mer 01/04/26 Lun 12/10/26 
+76 Pose des faux cadres bois Mer 01/04/26 Mar 21/04/26 
+77 Fabrication Lun 13/04/26 Lun 24/08/26 
+78 pose des portes Mar 18/08/26 Lun 31/08/26 
+79 pose des placard et dressing Jeu 27/08/26 Mer 09/09/26 
+80 pose porte d'entré Mar 08/09/26 Jeu 10/09/26 
+81 finitions Mer 09/09/26 Mar 15/09/26 
+82 Habillage mural bois et moulures Mar 01/09/26 Lun 12/10/26 
+83 Menuiserie Metallique Lun 30/03/26 Lun 15/06/26 
+84 Fabrication Lun 30/03/26 Ven 22/05/26 
+85 Pose porte principale Mar 02/06/26 Mer 03/06/26 
+86 Pose porte de garage Jeu 04/06/26 Lun 08/06/26 
+87 Pose garde corps metallique Mar 09/06/26 Lun 15/06/26 
+88 Menuiserie PVC Mar 30/06/26 Mer 26/08/26 
+89 Prise de mesures definitifs Mar 30/06/26 Mer 01/07/26 
+90 Fabrication Jeu 02/07/26 Mer 12/08/26 
+91 Pose des rails et volets roulant Jeu 13/08/26 Mar 18/08/26 
+92 Pose des fenetres et ventails en PVC Mer 19/08/26 Mer 26/08/26 
+93 Cuisine Mar 30/06/26 Lun 21/09/26 
+94 Peinture Jeu 20/08/26 Ven 30/10/26 
+95 interieur murs et plafonds Jeu 20/08/26 Mer 14/10/26 
+96 Sous SOL Jeu 20/08/26 Mer 09/09/26 
+97 RDC Jeu 03/09/26 Mer 23/09/26 
+98 Etage Jeu 17/09/26 Mer 14/10/26 
+99 Exterieur Lun 05/10/26 Ven 30/10/26 
+100 Amenagement exterieur et paysager Lun 13/04/26 Lun 19/10/26 
+101 construction du mur de cloture exterieur Lun 13/04/26 Ven 22/05/26 
+102 Piscine et local technique Mar 02/06/26 Lun 24/08/26 
+103 enduits Mar 25/08/26 Lun 07/09/26 
+104 carrelage Mar 08/09/26 Lun 28/09/26 
+105 aménagements paysager Mar 29/09/26 Lun 19/10/26 
+24/03 
+22/05 
+16/07 
+07/07 
+27/08 
+29/09 
+30/10 
+16 19 22 25 28 31 03 06 09 12 15 18 21 24 27 30 03 06 09 12 15 18 21 24 27 30 02 05 08 11 14 17 20 23 26 29 02 05 08 11 14 17 20 23 26 29 01 04 07 10 13 16 19 22 25 28 31 03 06 09 12 15 18 21 24 27 30 03 06 09 12 15 18 21 24 27 30 02 05 08 11 
+Avril 2026 Mai 2026 Juin 2026 Juillet 2026 Août 2026 Septembre 2026 Octobre 2026 Novembre 2026 

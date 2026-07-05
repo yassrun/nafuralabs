@@ -116,6 +116,7 @@ export function chantierToUi(row: ApiChantier): Chantier {
     encaissementsTtc: num(row.encaissementsTtc),
     cumulSituationsHt: num(row.cumulSituationsHt),
     status: mapBackendStatusToUi(row.status),
+    lifecycleStatus: (row.status ?? '').toUpperCase() || undefined,
     isActive: row.isActive ?? row.active ?? true,
     chefChantierName: row.chefChantierName,
     conducteurTravauxName: row.conducteurTravauxName,

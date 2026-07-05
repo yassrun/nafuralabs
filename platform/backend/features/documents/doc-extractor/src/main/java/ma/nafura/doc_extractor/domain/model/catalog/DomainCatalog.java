@@ -24,8 +24,10 @@ public final class DomainCatalog {
         return List.of(
                 new Domain("finance", "Accounting & Finance"),
                 new Domain("btp", "Construction / BTP"),
+                new Domain("achats", "Purchasing / Achats"),
                 new Domain("logistic", "Logistics"),
-                new Domain("inventory", "Inventory")
+                new Domain("inventory", "Inventory"),
+                new Domain("chantiers", "Construction sites")
         );
     }
 }

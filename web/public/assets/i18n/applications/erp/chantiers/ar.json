@@ -205,6 +205,23 @@
         },
         "lots": {
           "addCta": "إضافة دفعة",
+          "addSousLotCta": "إضافة دفعة فرعية",
+          "addPosteCta": "إضافة بند",
+          "addSousLotTitle": "إضافة دفعة فرعية",
+          "addPosteTitle": "إضافة بند / مقال",
+          "typeColumn": "النوع",
+          "typeLot": "دفعة",
+          "typeSousLot": "دفعة فرعية",
+          "typePoste": "بند",
+          "formParentLot": "الدفعة الأم",
+          "formParentLotPlaceholder": "— اختر دفعة —",
+          "formTargetLot": "الدفعة المستهدفة",
+          "formTargetLotPlaceholder": "— اختر دفعة —",
+          "formUnite": "الوحدة",
+          "sousLotCreateSuccess": "تمت إضافة الدفعة الفرعية.",
+          "sousLotCreateFailed": "تعذرت إضافة الدفعة الفرعية.",
+          "posteCreateSuccess": "تمت إضافة البند.",
+          "posteCreateFailed": "تعذرت إضافة البند.",
           "promptCode": "رمز الدفعة (مثال L01)",
           "promptDesignation": "تسمية الدفعة",
           "promptQuantite": "الكمية (DPGF)",
@@ -217,6 +234,11 @@
           "addAction": "إضافة",
           "importCta": "استيراد CSV/XLSX",
           "importConfirm": "تشغيل الاستيراد",
+          "importConfirmCta": "تشغيل الاستيراد",
+          "templateCta": "تنزيل النموذج",
+          "mappingCta": "نسخ تطابق الأعمدة",
+          "importFileSelected": "الملف المحدد: {fileName}",
+          "importFileRowsLabel": "صف(وف)",
           "importNoFile": "اختر ملفًا قبل تشغيل الاستيراد.",
           "importReady": "الملف جاهز: {fileName} ({count} صفوف).",
           "importParseCountFailed": "تعذر قراءة الملف المحدد.",
@@ -234,7 +256,16 @@
           "mappingCopied": "تم نسخ تطابق الأعمدة.",
           "mappingCopyFailed": "تعذر نسخ تطابق الأعمدة.",
           "mappingHelpTitle": "الأعمدة المقبولة",
-          "mappingHelpHint": "يتم تطبيع العناوين (تجاهل التشكيل والمسافات)."
+          "mappingHelpHint": "يتم تطبيع العناوين (تجاهل التشكيل والمسافات). الاستيراد ينشئ دفعات جذرية فقط؛ استخدم الواجهة لإضافة الدفعات الفرعية والبنود. ملفات BPDE Excel (الدفعات الثانوية) تُكتشف تلقائياً مع التسلسل دفعة → دفعة فرعية → بنود.",
+          "bpdeImportSuccess": "تم استيراد BPDE: {lots} دفعة و {postes} بند.",
+          "bpdeImportPartial": "استيراد BPDE جزئي: {lots} دفعة و {postes} بند تم إنشاؤها، {skipped} تم تجاهلها (مكررة)، {failed} فشل.",
+          "bpdeImportInProgress": "جاري الاستيراد…",
+          "bpdeImportSkippedDuplicate": "تم تجاهل عنصر موجود مسبقاً.",
+          "mappingHelpCode": "رمز الدفعة",
+          "mappingHelpDesignation": "التسمية",
+          "mappingHelpQuantite": "كمية رقمية",
+          "mappingHelpUnite": "الوحدة (m3، m2، ml، U، ff…)",
+          "mappingHelpPrixUnitaire": "سعر الوحدة بدون ضريبة"
         },
         "phases": {
           "addAction": "إضافة مرحلة",
@@ -245,7 +276,21 @@
           "promptDateFin": "تاريخ النهاية",
           "promptResponsable": "المسؤول",
           "createSuccess": "تمت إضافة المرحلة.",
-          "createFailed": "تعذرت إضافة المرحلة."
+          "createFailed": "تعذرت إضافة المرحلة.",
+          "importPdfCta": "استيراد مخطط PDF",
+          "scanAiCta": "مسح بالذكاء الاصطناعي",
+          "importPreviewTitle": "معاينة استيراد المخطط",
+          "importPreviewSummary": "{selected} مهمة محددة من أصل {total}",
+          "importPreviewLot": "الحزمة",
+          "importPreviewNoLot": "— بدون حزمة —",
+          "importPreviewPaymentBadge": "دفعة",
+          "importPreviewConfirm": "استيراد {count} مرحلة",
+          "phaseImportInProgress": "جاري استيراد المراحل…",
+          "phaseImportSuccess": "تم استيراد {created} مرحلة.",
+          "phaseImportPartial": "استيراد جزئي: {created} مُنشأة، {skipped} متجاهلة (مكررة)، {failed} فاشلة.",
+          "importParseFailed": "تعذر استخراج المخطط من هذا الملف.",
+          "importScanFailed": "فشل المسح بالذكاء الاصطناعي.",
+          "importFallbackAi": "الاستخراج المحلي غير كافٍ — التحويل إلى الذكاء الاصطناعي…"
         },
         "actions": {
           "edit": "تعديل"
@@ -253,6 +298,7 @@
         "deleteConfirm": "حذف الورش {code} — {name}؟ لا يمكن التراجع عن هذا الإجراء.",
         "deleteSuccess": "تم حذف الورش.",
         "deleteFailed": "تعذر حذف الورش.",
+        "deleteFailedDraftOnly": "يمكن حذف الورش في حالة المسودة فقط.",
         "deleteTitle": "حذف الورش",
         "deleteAction": "حذف",
         "cancel": "إلغاء",
@@ -610,7 +656,8 @@
         },
         "errors": {
           "required": "يرجى إدخال الورش والعنوان والملف.",
-          "failed": "تعذّر إيداع الوثيقة."
+          "failed": "تعذّر إيداع الوثيقة.",
+          "syncFailed": "تم رفع الملف على الورش، لكن لم يُنسخ إلى القائمة العامة."
         },
         "success": "تم إيداع الوثيقة."
       },
@@ -632,7 +679,9 @@
         "dateRequired": "التاريخ *",
         "lotsToInput": "الدفعات المراد إدخالها",
         "addLot": "إضافة دفعة",
+        "addLine": "إضافة بند",
         "pickAdditionalLot": "اختيار دفعة إضافية",
+        "pickAdditionalLine": "اختيار بند أو دفعة إضافية",
         "softValidation": "تحقق مرن في حالة تجاوز التراكم للإجمالي",
         "addPhoto": "📷 إضافة صورة"
       },
@@ -698,7 +747,8 @@
         "period": "الفترة {unite}",
         "cumul": "التراكم {unite}",
         "progress": "التقدم: {before}% ← {after}%",
-        "fieldNotes": "ملاحظة ميدانية"
+        "fieldNotes": "ملاحظة ميدانية",
+        "referenceQty": "كمية BOQ: {qty} {unite}"
       },
       "warnings": {
         "cumulExceeds": "يتجاوز التراكم الكمية الإجمالية للدفعة ({quantite} {unite}).",
@@ -713,6 +763,7 @@
       },
       "summary": {
         "lotsLoaded": "{count, plural, =0 {لم يتم تحميل أي دفعة} one {تم تحميل دفعة واحدة} two {تم تحميل دفعتين} few {تم تحميل # دفعات} many {تم تحميل # دفعة} other {تم تحميل # دفعة}}",
+        "linesLoaded": "{count, plural, =0 {لم يتم تحميل أي بند} one {تم تحميل بند واحد} other {تم تحميل # بنود}}",
         "deltaOnLots": "+{delta}% على {count, plural, =0 {0 دفعة} one {دفعة واحدة} two {دفعتين} few {# دفعات} many {# دفعة} other {# دفعة}}"
       },
       "gallery": {

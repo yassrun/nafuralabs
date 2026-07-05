@@ -646,6 +646,21 @@
         "title": "Supprimer le fournisseur",
         "message": "Supprimer {name} ?"
       }
+    },
+    "smartImport": {
+      "button": "Import intelligent",
+      "importing": "Import en cours…",
+      "completionTitle": "Compléter les champs obligatoires",
+      "completionHint": "{count, plural, =1 {1 ligne nécessite votre attention} other {# lignes nécessitent votre attention}}",
+      "confirmImport": "Importer les lignes corrigées",
+      "resultToast": "{imported} importé(s), {skipped} ignoré(s), {failed} échec(s)",
+      "errors": {
+        "tenantMissing": "Contexte tenant manquant.",
+        "extractionFailed": "Impossible de lire le fichier. Vérifiez le format.",
+        "noRows": "Aucune ligne exploitable trouvée dans le fichier.",
+        "handlerMissing": "Import non configuré pour cette entité.",
+        "generic": "Erreur lors de l'import."
+      }
     }
   }
 }

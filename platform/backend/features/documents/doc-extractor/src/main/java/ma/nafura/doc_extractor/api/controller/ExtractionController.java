@@ -8,6 +8,7 @@ import ma.nafura.platform.documents.docextractor.domain.model.ExtractionResponse
 import ma.nafura.platform.documents.docextractor.service.DocTypeDefinitionService;
 import ma.nafura.platform.documents.docextractor.service.ExtractionFlowService;
 import ma.nafura.platform.documents.docextractor.service.ExtractionService;
+import ma.nafura.platform.documents.docextractor.service.SchemaValidator;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,6 +37,7 @@ public class ExtractionController {
     private final DocTypeDefinitionService docTypeDefinitionService;
     private final ExtractionService extractionService;
     private final ExtractionFlowService extractionFlowService;
+    private final SchemaValidator schemaValidator;
 
     @PostMapping(value = "/extract", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ExtractionResponse extract(
@@ -102,6 +104,11 @@ public class ExtractionController {
             response.setCostUsd(llmResponse.getCostUsd());
             response.setCreatedAt(llmResponse.getCreatedAt());
             response.setStatus("COMPLETED");
+            response.setValidation(schemaValidator.validate(
+                    llmResponse.getExtractedJson(),
+                    docTypeDefinition.getJsonSchema(),
+                    docTypeDefinition.getUiSchema()
+            ));
         } catch (java.util.concurrent.TimeoutException e) {
             log.error("Ephemeral extraction timed out for docType {}:{}", docTypeDefinition.getDomainKey(), docTypeDefinition.getDocTypeKey());
             response.setStatus("FAILED");

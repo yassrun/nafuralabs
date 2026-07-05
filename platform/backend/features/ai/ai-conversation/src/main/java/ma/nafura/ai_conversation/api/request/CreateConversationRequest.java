@@ -9,7 +9,7 @@ import ma.nafura.platform.ai.llm.model.LlmMode;
 public class CreateConversationRequest {
     private String applicationId;
     private String title;
-    private LlmMode mode = LlmMode.ASK;
+    private LlmMode mode = LlmMode.ASSISTANT;
 }
 
 

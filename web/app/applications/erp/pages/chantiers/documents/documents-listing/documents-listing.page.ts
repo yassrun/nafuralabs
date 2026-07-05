@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 import { FilterResetComponent } from '@lib/anatomy/components/molecules/filter-reset/filter-reset.component';
@@ -165,11 +166,13 @@ export class DocumentsListingPage implements OnInit {
   private readonly translate = inject(TranslateService);
   private readonly toast = inject(ToastService);
   private readonly auth = inject(AuthFacade);
+  private readonly route = inject(ActivatedRoute);
 
   private readonly documents = signal<DocumentChantier[]>([]);
   readonly chantiers = signal<Chantier[]>([]);
   readonly showUploadForm = signal(false);
   readonly uploading = signal(false);
+  readonly filterChantierId = signal('');
   private selectedFile: File | null = null;
 
   uploadDraft = {
@@ -200,6 +203,10 @@ export class DocumentsListingPage implements OnInit {
   readonly typeEntries = computed<[DocumentChantierType, string][]>(() => ALL_TYPES.map((t) => [t, this.trEnum(t)]));
 
   ngOnInit(): void {
+    const chantierId = this.route.snapshot.queryParamMap.get('chantierId')?.trim() ?? '';
+    if (chantierId) {
+      this.filterChantierId.set(chantierId);
+    }
     void this.load();
   }
 
@@ -209,12 +216,50 @@ export class DocumentsListingPage implements OnInit {
         this.api.getAll(),
         this.chantierApi.getAll(),
       ]);
-      this.documents.set(docs.items);
+      const attachmentDocs = await this.loadAttachmentDocuments(chantiers.items);
+      const merged = this.mergeDocuments(docs.items, attachmentDocs);
+      this.documents.set(merged);
       this.chantiers.set(chantiers.items);
     } catch {
       this.documents.set([]);
       this.chantiers.set([]);
     }
+  }
+
+  private async loadAttachmentDocuments(chantiers: Chantier[]): Promise<DocumentChantier[]> {
+    const rows: DocumentChantier[] = [];
+    await Promise.all(
+      chantiers.map(async (chantier) => {
+        try {
+          const page = await firstValueFrom(
+            this.attachmentApi.listAttachments(ERP_ATTACHMENT_ENTITY_TYPES.CHANTIER, chantier.id),
+          );
+          for (const attachment of page.content ?? []) {
+            rows.push({
+              id: `att-${attachment.id}`,
+              chantierId: chantier.id,
+              chantierCode: chantier.code,
+              type: 'AUTRE',
+              titre: attachment.fileName.replace(/\.[^.]+$/, ''),
+              fichier: attachment.fileName,
+              storageKey: attachment.fileUrl,
+              taille: attachment.sizeBytes ?? 0,
+              uploadedAt: attachment.uploadedAt?.slice(0, 10) ?? todayIso(),
+              uploadedPar: attachment.uploadedBy ?? '—',
+            });
+          }
+        } catch {
+          // ignore per-chantier attachment fetch errors
+        }
+      }),
+    );
+    return rows;
+  }
+
+  private mergeDocuments(registered: DocumentChantier[], attachments: DocumentChantier[]): DocumentChantier[] {
+    const knownKeys = new Set(registered.map((doc) => doc.storageKey).filter(Boolean));
+    const extra = attachments.filter((doc) => doc.storageKey && !knownKeys.has(doc.storageKey));
+    return [...registered, ...extra].sort((a, b) => b.uploadedAt.localeCompare(a.uploadedAt));
   }
 
   openUploadForm(): void {
@@ -273,7 +318,9 @@ export class DocumentsListingPage implements OnInit {
   readonly filtered = computed(() => {
     const q = this.search().toLowerCase().trim();
     const t = this.filterType();
+    const chantierId = this.filterChantierId();
     let all = this.documents();
+    if (chantierId) all = all.filter((d) => d.chantierId === chantierId);
     if (t) all = all.filter(d => d.type === t);
     if (!q) return all;
     return all.filter(d =>
@@ -286,11 +333,12 @@ export class DocumentsListingPage implements OnInit {
   typeLabel(t: DocumentChantierType): string { return this.trEnum(t); }
   typeIcon(t: DocumentChantierType): string { return TYPE_ICONS[t] ?? '📎'; }
   formatSize = formatSize;
-  readonly hasFilter = computed(() => !!this.search() || !!this.filterType());
+  readonly hasFilter = computed(() => !!this.search() || !!this.filterType() || !!this.filterChantierId());
 
   resetFilters(): void {
     this.search.set('');
     this.filterType.set('');
+    this.filterChantierId.set('');
   }
 
   downloadDoc(doc: DocumentChantier): void {

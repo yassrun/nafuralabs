@@ -15,8 +15,15 @@ import type {
   AvancementSaisieSummary,
   AvancementStatus,
   LotSaisieDraft,
-  LotSaisieViewModel,
+  SaisieLineDefinition,
+  SaisieLineViewModel,
 } from '../models';
+import {
+  avancementProgressKey,
+  mapDernierAvancementsByLineKey,
+  parseSaisieLineKey,
+  saisieLineKey,
+} from '../utils/saisie-line.util';
 
 export type LoadSaisieContextResult = 'ok' | 'edit-not-found' | 'chantier-not-found';
 
@@ -44,75 +51,94 @@ export class AvancementFacade extends GridFacade<
   readonly selectedDate = signal<string>(todayIso());
   readonly editingAvancementId = signal<string | null>(null);
 
-  private readonly draftByLotId = signal<Record<string, LotSaisieDraft>>({});
-  private readonly selectedLotIds = signal<string[]>([]);
-  private readonly dernierByLotId = signal<Record<string, AvancementListItem>>({});
+  private readonly draftByLineKey = signal<Record<string, LotSaisieDraft>>({});
+  private readonly selectedLineKeys = signal<string[]>([]);
+  private readonly dernierByLineKey = signal<Record<string, AvancementListItem>>({});
 
   readonly chantier = computed(() => {
     const chantierId = this.selectedChantierId();
     return chantierId ? this.chantiers().find((item) => item.id === chantierId) ?? null : null;
   });
 
-  readonly chantierLots = computed(() => {
+  readonly allSaisieLines = computed(() => {
     const chantierId = this.selectedChantierId();
-    return chantierId ? this.context.getLots(chantierId) : [];
+    return chantierId ? this.context.getSaisieLines(chantierId) : [];
   });
 
-  readonly availableAdditionalLots = computed(() =>
-    this.chantierLots().filter((lot) => !this.selectedLotIds().includes(lot.id)),
+  readonly availableAdditionalLines = computed(() =>
+    this.allSaisieLines().filter((line) => !this.selectedLineKeys().includes(line.key)),
   );
 
-  readonly selectedLots = computed(() => {
-    const drafts = this.draftByLotId();
-    const items = this.selectedLotIds()
-      .map((lotId) => {
-        const lot = this.chantierLots().find((item) => item.id === lotId);
-        if (!lot) {
-          return null;
-        }
+  readonly selectedLines = computed((): SaisieLineViewModel[] => {
+    const drafts = this.draftByLineKey();
+    const dernier = this.dernierByLineKey();
+    const lineByKey = new Map(this.allSaisieLines().map((line) => [line.key, line]));
+    const items: SaisieLineViewModel[] = [];
 
-        const draft = drafts[lotId] ?? {
-          lotId,
-          quantitePeriode: null,
-          notes: '',
-          photos: [],
-        };
-        const quantitePeriode = draft.quantitePeriode;
-        const dernier = this.dernierByLotId()[lotId];
-        const row = this.calcul.buildRow(
-          {
-            quantite: lot.quantite,
-            cumulQuantite: dernier?.cumulQuantite ?? lot.cumulQuantite,
-            avancementPercent: dernier?.pourcentage ?? lot.avancementPercent,
-            unite: lot.unite,
-          },
-          quantitePeriode,
-        );
+    for (const lineKey of this.selectedLineKeys()) {
+      const definition = lineByKey.get(lineKey);
+      if (!definition) continue;
 
-        return {
-          lot,
-          lastCumul: row.lastCumul,
-          quantitePeriode,
-          nouveauCumul: row.nouveauCumul,
-          previousPercent: row.previousPercent,
-          newPercent: row.newPercent,
-          deltaPercent: row.deltaPercent,
-          warning: row.warningKey
-            ? this.translate.instant(`chantiers.avancement.warnings.${row.warningKey}`, row.warningParams)
-            : undefined,
-          notes: draft.notes,
-          photos: draft.photos,
-        };
-      })
-      .filter((item): item is Exclude<typeof item, null> => item !== null);
+      const draft = drafts[lineKey] ?? {
+        lineKey,
+        lotId: definition.lot.id,
+        posteId: definition.poste?.id,
+        quantitePeriode: null,
+        notes: '',
+        photos: [],
+      };
 
-    return items as LotSaisieViewModel[];
+      const progressKey = avancementProgressKey(
+        definition.lot.id,
+        definition.poste?.id,
+      );
+      const last = dernier[progressKey];
+      const quantiteReference = definition.kind === 'poste'
+        ? definition.poste!.quantite
+        : definition.lot.quantite;
+      const unite = definition.kind === 'poste'
+        ? definition.poste!.unite
+        : definition.lot.unite;
+
+      const row = this.calcul.buildRow(
+        {
+          quantite: quantiteReference,
+          cumulQuantite: last?.cumulQuantite ?? 0,
+          avancementPercent: last?.pourcentage ?? 0,
+          unite,
+        },
+        draft.quantitePeriode,
+      );
+
+      items.push({
+        lineKey,
+        kind: definition.kind,
+        lot: definition.lot,
+        poste: definition.poste,
+        parentLot: definition.parentLot,
+        breadcrumb: this.buildBreadcrumb(definition),
+        unite,
+        quantiteReference,
+        lastCumul: row.lastCumul,
+        quantitePeriode: draft.quantitePeriode,
+        nouveauCumul: row.nouveauCumul,
+        previousPercent: row.previousPercent,
+        newPercent: row.newPercent,
+        deltaPercent: row.deltaPercent,
+        warning: row.warningKey
+          ? this.translate.instant(`chantiers.avancement.warnings.${row.warningKey}`, row.warningParams)
+          : undefined,
+        notes: draft.notes,
+        photos: draft.photos,
+      });
+    }
+
+    return items;
   });
 
   readonly summary = computed<AvancementSaisieSummary>(() => {
-    const chantier = this.chantier();
-    const lots = this.chantierLots();
-    if (!chantier || lots.length === 0) {
+    const lines = this.allSaisieLines();
+    if (lines.length === 0) {
       return {
         lotsCount: 0,
         chantierBeforePercent: 0,
@@ -121,21 +147,33 @@ export class AvancementFacade extends GridFacade<
       };
     }
 
-    const selectedMap = new Map(this.selectedLots().map((item) => [item.lot.id, item]));
-    const totalQuantite = lots.reduce((sum, lot) => sum + lot.quantite, 0);
-    const before = totalQuantite > 0
-      ? lots.reduce((sum, lot) => sum + lot.quantite * lot.avancementPercent, 0) / totalQuantite
-      : 0;
-    const after = totalQuantite > 0
-      ? lots.reduce((sum, lot) => {
-          const selected = selectedMap.get(lot.id);
-          return sum + lot.quantite * (selected?.newPercent ?? lot.avancementPercent);
-        }, 0) / totalQuantite
-      : 0;
-    const lotsCount = this.selectedLots().filter((item) => item.quantitePeriode != null && item.quantitePeriode > 0).length;
+    const selectedMap = new Map(this.selectedLines().map((item) => [item.lineKey, item]));
+    const totalWeight = lines.reduce((sum, line) => sum + Math.max(line.weight, 0), 0);
+
+    const weightedPercent = (picker: (line: SaisieLineDefinition, selected?: SaisieLineViewModel) => number) => {
+      if (totalWeight <= 0) return 0;
+      return lines.reduce((sum, line) => {
+        const selected = selectedMap.get(line.key);
+        const percent = picker(line, selected);
+        return sum + Math.max(line.weight, 0) * percent;
+      }, 0) / totalWeight;
+    };
+
+    const before = weightedPercent((line) => {
+      const progressKey = avancementProgressKey(line.lot.id, line.poste?.id);
+      return this.dernierByLineKey()[progressKey]?.pourcentage ?? 0;
+    });
+    const after = weightedPercent((line, selected) => {
+      const progressKey = avancementProgressKey(line.lot.id, line.poste?.id);
+      const previous = this.dernierByLineKey()[progressKey]?.pourcentage ?? 0;
+      return selected?.newPercent ?? previous;
+    });
+    const linesCount = this.selectedLines().filter(
+      (item) => item.quantitePeriode != null && item.quantitePeriode > 0,
+    ).length;
 
     return {
-      lotsCount,
+      lotsCount: linesCount,
       chantierBeforePercent: this.calcul.round(before),
       chantierAfterPercent: this.calcul.round(after),
       chantierDeltaPercent: this.calcul.round(after - before),
@@ -177,10 +215,18 @@ export class AvancementFacade extends GridFacade<
       this.editingAvancementId.set(editId);
       this.selectedChantierId.set(item.chantierId);
       this.selectedDate.set(item.date);
-      this.selectedLotIds.set([item.lotId]);
-      this.draftByLotId.set({
-        [item.lotId]: {
+      await this.loadDernierAvancements(item.chantierId);
+      await this.context.loadLotsForChantier(item.chantierId, this.legacyDernierByLotId());
+
+      const lineKey = item.posteId
+        ? saisieLineKey('poste', item.posteId)
+        : saisieLineKey('lot', item.lotId);
+      this.selectedLineKeys.set([lineKey]);
+      this.draftByLineKey.set({
+        [lineKey]: {
+          lineKey,
           lotId: item.lotId,
+          posteId: item.posteId,
           quantitePeriode: item.quantiteRealisee,
           notes: item.notes ?? '',
           photos: item.photos,
@@ -215,24 +261,26 @@ export class AvancementFacade extends GridFacade<
   selectChantier(chantierId: string | null): void {
     this.selectedChantierId.set(chantierId);
     if (!chantierId) {
-      this.selectedLotIds.set([]);
-      this.draftByLotId.set({});
-      this.dernierByLotId.set({});
+      this.selectedLineKeys.set([]);
+      this.draftByLineKey.set({});
+      this.dernierByLineKey.set({});
       return;
     }
 
-    void this.loadLotsAndDefaults(chantierId);
+    void this.loadLinesAndDefaults(chantierId);
   }
 
-  private async loadLotsAndDefaults(chantierId: string): Promise<void> {
+  private async loadLinesAndDefaults(chantierId: string): Promise<void> {
     await this.loadDernierAvancements(chantierId);
-    await this.context.loadLotsForChantier(chantierId, this.dernierByLotId());
-    const defaultLots = this.context.getActiveLotsForChantier(chantierId).slice(0, 4);
-    this.selectedLotIds.set(defaultLots.map((lot) => lot.id));
-    this.draftByLotId.set(
-      defaultLots.reduce<Record<string, LotSaisieDraft>>((accumulator, lot) => {
-        accumulator[lot.id] = {
-          lotId: lot.id,
+    await this.context.loadLotsForChantier(chantierId, this.legacyDernierByLotId());
+    const defaultLines = this.context.getActiveSaisieLines(chantierId).slice(0, 6);
+    this.selectedLineKeys.set(defaultLines.map((line) => line.key));
+    this.draftByLineKey.set(
+      defaultLines.reduce<Record<string, LotSaisieDraft>>((accumulator, line) => {
+        accumulator[line.key] = {
+          lineKey: line.key,
+          lotId: line.lot.id,
+          posteId: line.poste?.id,
           quantitePeriode: null,
           notes: '',
           photos: [],
@@ -246,16 +294,21 @@ export class AvancementFacade extends GridFacade<
     this.selectedDate.set(date);
   }
 
-  addLot(lotId: string): void {
-    if (this.selectedLotIds().includes(lotId)) {
+  addLine(lineKey: string): void {
+    if (this.selectedLineKeys().includes(lineKey)) {
       return;
     }
 
-    this.selectedLotIds.update((ids) => [...ids, lotId]);
-    this.draftByLotId.update((drafts) => ({
+    const definition = this.allSaisieLines().find((line) => line.key === lineKey);
+    if (!definition) return;
+
+    this.selectedLineKeys.update((keys) => [...keys, lineKey]);
+    this.draftByLineKey.update((drafts) => ({
       ...drafts,
-      [lotId]: drafts[lotId] ?? {
-        lotId,
+      [lineKey]: drafts[lineKey] ?? {
+        lineKey,
+        lotId: definition.lot.id,
+        posteId: definition.poste?.id,
         quantitePeriode: null,
         notes: '',
         photos: [],
@@ -263,25 +316,25 @@ export class AvancementFacade extends GridFacade<
     }));
   }
 
-  removeLot(lotId: string): void {
-    this.selectedLotIds.update((ids) => ids.filter((id) => id !== lotId));
-    this.draftByLotId.update((drafts) => {
+  removeLine(lineKey: string): void {
+    this.selectedLineKeys.update((keys) => keys.filter((key) => key !== lineKey));
+    this.draftByLineKey.update((drafts) => {
       const nextDrafts = { ...drafts };
-      delete nextDrafts[lotId];
+      delete nextDrafts[lineKey];
       return nextDrafts;
     });
   }
 
-  setLotQuantity(lotId: string, value: number | null): void {
-    this.patchDraft(lotId, { quantitePeriode: value != null && !Number.isNaN(value) ? value : null });
+  setLineQuantity(lineKey: string, value: number | null): void {
+    this.patchDraft(lineKey, { quantitePeriode: value != null && !Number.isNaN(value) ? value : null });
   }
 
-  setLotNotes(lotId: string, notes: string): void {
-    this.patchDraft(lotId, { notes });
+  setLineNotes(lineKey: string, notes: string): void {
+    this.patchDraft(lineKey, { notes });
   }
 
-  setLotPhotos(lotId: string, photos: LotSaisieDraft['photos']): void {
-    this.patchDraft(lotId, { photos });
+  setLinePhotos(lineKey: string, photos: LotSaisieDraft['photos']): void {
+    this.patchDraft(lineKey, { photos });
   }
 
   canEditItem(item: AvancementListItem): boolean {
@@ -307,10 +360,11 @@ export class AvancementFacade extends GridFacade<
       throw new Error(this.translate.instant('chantiers.avancement.errors.chooseChantier'));
     }
 
-    const entries = this.selectedLots()
+    const entries = this.selectedLines()
       .filter((item) => item.quantitePeriode != null && item.quantitePeriode > 0)
       .map((item) => ({
         lotId: item.lot.id,
+        posteId: item.poste?.id,
         quantiteRealisee: item.quantitePeriode!,
         notes: item.notes,
         photos: item.photos,
@@ -360,33 +414,52 @@ export class AvancementFacade extends GridFacade<
     return entries.length;
   }
 
-  private patchDraft(lotId: string, patch: Partial<LotSaisieDraft>): void {
-    this.draftByLotId.update((drafts) => ({
+  private patchDraft(lineKey: string, patch: Partial<LotSaisieDraft>): void {
+    const parsed = parseSaisieLineKey(lineKey);
+    this.draftByLineKey.update((drafts) => ({
       ...drafts,
-      [lotId]: {
-        ...drafts[lotId],
-        lotId,
-        quantitePeriode: drafts[lotId]?.quantitePeriode ?? null,
-        notes: drafts[lotId]?.notes ?? '',
-        photos: drafts[lotId]?.photos ?? [],
+      [lineKey]: {
+        ...drafts[lineKey],
+        lineKey,
+        lotId: drafts[lineKey]?.lotId ?? parsed.id,
+        posteId: drafts[lineKey]?.posteId,
+        quantitePeriode: drafts[lineKey]?.quantitePeriode ?? null,
+        notes: drafts[lineKey]?.notes ?? '',
+        photos: drafts[lineKey]?.photos ?? [],
         ...patch,
       },
     }));
   }
 
+  private buildBreadcrumb(definition: SaisieLineDefinition): string {
+    const parts: string[] = [];
+    if (definition.parentLot) {
+      parts.push(definition.parentLot.code);
+    }
+    parts.push(definition.lot.code);
+    if (definition.poste) {
+      parts.push(`${definition.poste.code} ${definition.poste.designation}`);
+    } else {
+      parts.push(definition.lot.designation);
+    }
+    return parts.join(' › ');
+  }
+
+  private legacyDernierByLotId(): Record<string, AvancementListItem> {
+    return Object.values(this.dernierByLineKey()).reduce<Record<string, AvancementListItem>>((acc, item) => {
+      if (item.lotId && !acc[item.lotId]) {
+        acc[item.lotId] = item;
+      }
+      return acc;
+    }, {});
+  }
+
   private async loadDernierAvancements(chantierId: string): Promise<void> {
     try {
       const items = await this.api.getDernierByChantier(chantierId);
-      this.dernierByLotId.set(
-        items.reduce<Record<string, AvancementListItem>>((accumulator, item) => {
-          if (item.lotId) {
-            accumulator[item.lotId] = item;
-          }
-          return accumulator;
-        }, {}),
-      );
+      this.dernierByLineKey.set(mapDernierAvancementsByLineKey(items));
     } catch {
-      this.dernierByLotId.set({});
+      this.dernierByLineKey.set({});
     }
   }
 }

@@ -6,16 +6,23 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import ma.nafura.platform.ai.agent.service.AgentExecutionContext;
+import ma.nafura.platform.ai.agent.service.capability.EntityReadCapability;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ListAgentTool implements AgentTool {
 
+    private final List<EntityReadCapability> readCapabilities;
     private final JdbcTemplate jdbcTemplate;
     private final AgentPermissionChecker permissionChecker;
 
-    public ListAgentTool(JdbcTemplate jdbcTemplate, AgentPermissionChecker permissionChecker) {
+    public ListAgentTool(
+            List<EntityReadCapability> readCapabilities,
+            JdbcTemplate jdbcTemplate,
+            AgentPermissionChecker permissionChecker
+    ) {
+        this.readCapabilities = readCapabilities != null ? readCapabilities : List.of();
         this.jdbcTemplate = jdbcTemplate;
         this.permissionChecker = permissionChecker;
     }
@@ -31,43 +38,48 @@ public class ListAgentTool implements AgentTool {
         String entityType = normalizeEntityType(asString(args.get("entityType")));
         int limit = parseLimit(args.get("limit"), 10);
         Map<String, Object> filters = extractFilters(args.get("filters"));
-        UUID tenantId = parseTenantId(context);
-
-        if (tenantId == null) {
-            return AgentToolResult.builder()
-                    .success(false)
-                    .message("Tenant context is required")
-                    .payload(Map.of())
-                    .build();
-        }
 
         if (entityType == null) {
-            return AgentToolResult.builder()
-                    .success(false)
-                    .message("entityType is required")
-                    .payload(Map.of())
-                    .build();
+            return unavailable("entityType is required");
+        }
+
+        for (EntityReadCapability capability : readCapabilities) {
+            if (capability.supports(entityType, "list")) {
+                EntityReadCapability.EntityReadResult result = capability.read(
+                        EntityReadCapability.EntityReadRequest.builder()
+                                .entityType(entityType)
+                                .operation("list")
+                                .filters(filters)
+                                .limit(limit)
+                                .build(),
+                        context
+                );
+                return AgentToolResult.builder()
+                        .success(result.isSuccess())
+                        .message(result.getMessage())
+                        .payload(result.getPayload() != null ? result.getPayload() : Map.of())
+                        .build();
+            }
         }
 
         return switch (entityType) {
-            case "member", "members", "user", "users" -> listMembers(context, tenantId, filters, limit);
-            case "approval", "approvals" -> listApprovals(context, tenantId, filters, limit);
-            case "api-key", "api-keys", "apikey", "apikeys" -> listApiKeys(context, tenantId, filters, limit);
-            default -> AgentToolResult.builder()
-                    .success(false)
-                    .message("Unsupported entityType: " + entityType)
-                    .payload(Map.of())
-                    .build();
+            case "member", "members", "user", "users" -> listMembers(context, filters, limit);
+            case "approval", "approvals" -> listApprovals(context, filters, limit);
+            case "api-key", "api-keys", "apikey", "apikeys" -> listApiKeys(context, filters, limit);
+            default -> unavailable("Unsupported entityType: " + entityType);
         };
     }
 
     private AgentToolResult listMembers(
             AgentExecutionContext context,
-            UUID tenantId,
             Map<String, Object> filters,
             int limit
     ) {
         permissionChecker.checkRead(context, "administration", "members");
+        UUID tenantId = parseTenantId(context);
+        if (tenantId == null) {
+            return unavailable("Tenant context is required");
+        }
         String search = asString(filters.get("search"));
         String pattern = "%" + (search != null ? search.toLowerCase(Locale.ROOT) : "") + "%";
 
@@ -130,11 +142,14 @@ public class ListAgentTool implements AgentTool {
 
     private AgentToolResult listApprovals(
             AgentExecutionContext context,
-            UUID tenantId,
             Map<String, Object> filters,
             int limit
     ) {
         permissionChecker.checkRead(context, "workflow", "approvals");
+        UUID tenantId = parseTenantId(context);
+        if (tenantId == null) {
+            return unavailable("Tenant context is required");
+        }
         String status = asString(filters.get("status"));
         String search = asString(filters.get("search"));
         String searchPattern = "%" + (search != null ? search.toLowerCase(Locale.ROOT) : "") + "%";
@@ -172,23 +187,6 @@ public class ListAgentTool implements AgentTool {
                 limit
         );
 
-        long total = jdbcTemplate.queryForObject(
-                """
-                SELECT COUNT(*)::bigint
-                FROM approval_requests ar
-                WHERE ar.tenant_id = ?
-                  AND (? IS NULL OR UPPER(ar.status) = UPPER(?))
-                  AND (? = '' OR LOWER(COALESCE(ar.title, '')) LIKE ? OR LOWER(COALESCE(ar.entity_type, '')) LIKE ?)
-                """,
-                Long.class,
-                tenantId,
-                status,
-                status,
-                search != null ? search : "",
-                searchPattern,
-                searchPattern
-        );
-
         return AgentToolResult.builder()
                 .success(true)
                 .message("Found " + items.size() + " approval request(s)")
@@ -196,7 +194,6 @@ public class ListAgentTool implements AgentTool {
                         "entityType", "approval",
                         "filters", filters,
                         "items", items,
-                        "total", total,
                         "route", "/approvals"
                 ))
                 .build();
@@ -204,11 +201,14 @@ public class ListAgentTool implements AgentTool {
 
     private AgentToolResult listApiKeys(
             AgentExecutionContext context,
-            UUID tenantId,
             Map<String, Object> filters,
             int limit
     ) {
         permissionChecker.checkRead(context, "administration", "api-keys");
+        UUID tenantId = parseTenantId(context);
+        if (tenantId == null) {
+            return unavailable("Tenant context is required");
+        }
         String search = asString(filters.get("search"));
         String pattern = "%" + (search != null ? search.toLowerCase(Locale.ROOT) : "") + "%";
 
@@ -242,20 +242,6 @@ public class ListAgentTool implements AgentTool {
                 limit
         );
 
-        long total = jdbcTemplate.queryForObject(
-                """
-                SELECT COUNT(*)::bigint
-                FROM api_keys ak
-                WHERE ak.tenant_id = ?
-                  AND (? = '' OR LOWER(COALESCE(ak.name, '')) LIKE ? OR LOWER(COALESCE(ak.key_prefix, '')) LIKE ?)
-                """,
-                Long.class,
-                tenantId,
-                search != null ? search : "",
-                pattern,
-                pattern
-        );
-
         return AgentToolResult.builder()
                 .success(true)
                 .message("Found " + items.size() + " API key(s)")
@@ -263,17 +249,23 @@ public class ListAgentTool implements AgentTool {
                         "entityType", "api-key",
                         "filters", filters,
                         "items", items,
-                        "total", total,
                         "route", "/administration/api-keys"
                 ))
                 .build();
     }
 
+    private AgentToolResult unavailable(String message) {
+        return AgentToolResult.builder()
+                .success(false)
+                .message(message)
+                .payload(Map.of())
+                .build();
+    }
+
+    @SuppressWarnings("unchecked")
     private Map<String, Object> extractFilters(Object raw) {
         if (raw instanceof Map<?, ?> map) {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> typed = (Map<String, Object>) map;
-            return typed;
+            return (Map<String, Object>) map;
         }
         return Map.of();
     }

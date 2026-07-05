@@ -27,6 +27,10 @@ import java.util.UUID;
 public class AgentRuntimeController {
     private final AgentRuntimeService agentRuntimeService;
 
+    /**
+     * @deprecated Use {@code POST /api/ai/conversations/{id}/turn} with unified ASSISTANT mode.
+     */
+    @Deprecated
     @PostMapping("/propose")
     public ResponseEntity<AgentProposeResponse> propose(
         @PathVariable UUID conversationId,

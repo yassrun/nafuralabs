@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ma.nafura.platform.documents.docextractor.api.response.DedupDto;
+import ma.nafura.platform.documents.docextractor.api.response.ExtractionValidationDto;
 
 import java.time.Instant;
 
@@ -28,5 +29,8 @@ public class ExtractionResponse {
     
     // Error information (for failed extractions)
     private String error;
+
+    /** Post-extraction schema validation (required fields, types). */
+    private ExtractionValidationDto validation;
 }
 

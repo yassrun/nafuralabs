@@ -646,6 +646,21 @@
         "title": "Delete supplier",
         "message": "Delete {name}?"
       }
+    },
+    "smartImport": {
+      "button": "Smart import",
+      "importing": "Importing…",
+      "completionTitle": "Complete required fields",
+      "completionHint": "{count, plural, =1 {1 row needs your attention} other {# rows need your attention}}",
+      "confirmImport": "Import corrected rows",
+      "resultToast": "{imported} imported, {skipped} skipped, {failed} failed",
+      "errors": {
+        "tenantMissing": "Tenant context missing.",
+        "extractionFailed": "Could not read the file. Check the format.",
+        "noRows": "No usable rows found in the file.",
+        "handlerMissing": "Import not configured for this entity.",
+        "generic": "Import error."
+      }
     }
   }
 }

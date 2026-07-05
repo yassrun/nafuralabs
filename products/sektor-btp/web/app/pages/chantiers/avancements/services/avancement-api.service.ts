@@ -26,6 +26,8 @@ interface ApiAvancementPhysique {
   lotCode?: string;
   lotDesignation?: string;
   posteId?: string;
+  posteCode?: string;
+  posteDesignation?: string;
   date: string;
   quantiteRealisee: number;
   cumulQuantite?: number;
@@ -49,6 +51,9 @@ function apiToListItem(row: ApiAvancementPhysique): AvancementListItem {
     lotId: row.lotId ?? '',
     lotCode: row.lotCode ?? '',
     lotDesignation: row.lotDesignation ?? '',
+    posteId: row.posteId,
+    posteCode: row.posteCode,
+    posteDesignation: row.posteDesignation,
     date: row.date,
     quantiteRealisee: Number(row.quantiteRealisee ?? 0),
     cumulQuantite: Number(row.cumulQuantite ?? row.quantiteRealisee ?? 0),
@@ -197,6 +202,7 @@ export class AvancementApiService extends FeatureApiService<
       saisieParId: data.saisieParId,
       entries: data.entries.map((entry) => ({
         lotId: entry.lotId,
+        posteId: entry.posteId,
         quantiteRealisee: entry.quantiteRealisee,
         notes: entry.notes,
       })),

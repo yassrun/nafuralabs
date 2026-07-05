@@ -1,14 +1,22 @@
 <article class="lot-card">
   <header class="lot-card__header">
     <div>
-      <h3>{{ model().lot.code }} {{ model().lot.designation }}</h3>
+      <h3>{{ model().breadcrumb }}</h3>
       <p>
         {{ 'chantiers.avancement.lot.currentCumul' | translate:{
           percent: model().previousPercent,
           cumul: model().lastCumul,
-          unite: model().lot.unite
+          unite: model().unite
         } }}
       </p>
+      @if (model().kind === 'poste') {
+        <p class="lot-card__ref">
+          {{ 'chantiers.avancement.lot.referenceQty' | translate:{
+            qty: model().quantiteReference,
+            unite: model().unite
+          } }}
+        </p>
+      }
     </div>
     <nf-button variant="danger" class="lot-card__remove" (clicked)="removed.emit()">
       {{ 'chantiers.avancement.lot.remove' | translate }}
@@ -17,7 +25,6 @@
 
   <div class="lot-card__grid">
     @if (isForfait()) {
-      <!-- Forfait lot: show percentage input directly -->
       <label>
         <span>{{ 'chantiers.avancement.lot.avancementPeriod' | translate }}</span>
         <div class="lot-card__percent-input">
@@ -38,7 +45,7 @@
       </div>
     } @else {
       <label>
-        <span>{{ 'chantiers.avancement.lot.period' | translate:{ unite: model().lot.unite } }}</span>
+        <span>{{ 'chantiers.avancement.lot.period' | translate:{ unite: model().unite } }}</span>
         <input
           type="number"
           inputmode="decimal"
@@ -48,7 +55,7 @@
           (ngModelChange)="onQuantityInput($event)" />
       </label>
       <div class="lot-card__computed">
-        <span>{{ 'chantiers.avancement.lot.cumul' | translate:{ unite: model().lot.unite } }}</span>
+        <span>{{ 'chantiers.avancement.lot.cumul' | translate:{ unite: model().unite } }}</span>
         <strong>{{ model().nouveauCumul }}</strong>
       </div>
     }

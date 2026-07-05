@@ -205,6 +205,23 @@
         },
         "lots": {
           "addCta": "Ajouter un lot",
+          "addSousLotCta": "Ajouter un sous-lot",
+          "addPosteCta": "Ajouter un poste",
+          "addSousLotTitle": "Ajouter un sous-lot",
+          "addPosteTitle": "Ajouter un poste / article",
+          "typeColumn": "Type",
+          "typeLot": "Lot",
+          "typeSousLot": "Sous-lot",
+          "typePoste": "Article",
+          "formParentLot": "Lot parent",
+          "formParentLotPlaceholder": "— Choisir un lot —",
+          "formTargetLot": "Lot cible",
+          "formTargetLotPlaceholder": "— Choisir un lot —",
+          "formUnite": "Unité",
+          "sousLotCreateSuccess": "Sous-lot ajouté.",
+          "sousLotCreateFailed": "Impossible d'ajouter le sous-lot.",
+          "posteCreateSuccess": "Poste ajouté.",
+          "posteCreateFailed": "Impossible d'ajouter le poste.",
           "promptCode": "Code du lot (ex. L01)",
           "promptDesignation": "Désignation du lot",
           "promptQuantite": "Quantité (BPU)",
@@ -217,6 +234,11 @@
           "addAction": "Ajouter",
           "importCta": "Importer CSV/XLSX",
           "importConfirm": "Lancer l'import",
+          "importConfirmCta": "Lancer l'import",
+          "templateCta": "Télécharger le modèle",
+          "mappingCta": "Copier la correspondance",
+          "importFileSelected": "Fichier sélectionné : {fileName}",
+          "importFileRowsLabel": "ligne(s)",
           "importNoFile": "Sélectionnez un fichier avant de lancer l'import.",
           "importReady": "Fichier prêt : {fileName} ({count} lignes).",
           "importParseCountFailed": "Impossible de lire le fichier sélectionné.",
@@ -234,7 +256,16 @@
           "mappingCopied": "Correspondance des colonnes copiée.",
           "mappingCopyFailed": "Impossible de copier la correspondance.",
           "mappingHelpTitle": "Colonnes acceptées",
-          "mappingHelpHint": "Les en-têtes sont normalisés (accents et espaces ignorés)."
+          "mappingHelpHint": "Les en-têtes sont normalisés (accents et espaces ignorés). L'import crée des lots racine ; utilisez l'interface pour ajouter sous-lots et postes. Les fichiers BPDE Excel (lots secondaires) sont détectés automatiquement avec hiérarchie lot → sous-lot → postes.",
+          "bpdeImportSuccess": "BPDE importé : {lots} lot(s) et {postes} poste(s) créés.",
+          "bpdeImportPartial": "BPDE importé partiellement : {lots} lot(s) et {postes} poste(s) créés, {skipped} ignoré(s) (doublons), {failed} en erreur.",
+          "bpdeImportInProgress": "Import en cours…",
+          "bpdeImportSkippedDuplicate": "Élément déjà existant ignoré.",
+          "mappingHelpCode": "code du lot",
+          "mappingHelpDesignation": "désignation",
+          "mappingHelpQuantite": "quantité numérique",
+          "mappingHelpUnite": "unité (m3, m2, ml, U, ff…)",
+          "mappingHelpPrixUnitaire": "prix unitaire HT"
         },
         "phases": {
           "addAction": "Ajouter une phase",
@@ -245,7 +276,21 @@
           "promptDateFin": "Date de fin",
           "promptResponsable": "Responsable",
           "createSuccess": "Phase ajoutée.",
-          "createFailed": "Impossible d'ajouter la phase."
+          "createFailed": "Impossible d'ajouter la phase.",
+          "importPdfCta": "Importer planning PDF",
+          "scanAiCta": "Scanner avec IA",
+          "importPreviewTitle": "Prévisualisation import planning",
+          "importPreviewSummary": "{selected} tâche(s) sélectionnée(s) sur {total}",
+          "importPreviewLot": "Lot",
+          "importPreviewNoLot": "— Aucun lot —",
+          "importPreviewPaymentBadge": "Règlement",
+          "importPreviewConfirm": "Importer {count} phase(s)",
+          "phaseImportInProgress": "Import des phases en cours…",
+          "phaseImportSuccess": "{created} phase(s) importée(s).",
+          "phaseImportPartial": "Import partiel : {created} créée(s), {skipped} ignorée(s) (doublons), {failed} en erreur.",
+          "importParseFailed": "Impossible d'extraire le planning depuis ce fichier.",
+          "importScanFailed": "Échec du scan IA.",
+          "importFallbackAi": "Extraction locale insuffisante — bascule vers l'IA…"
         },
         "actions": {
           "edit": "Modifier"
@@ -253,6 +298,7 @@
         "deleteConfirm": "Supprimer le chantier {code} — {name} ? Cette action est irréversible.",
         "deleteSuccess": "Chantier supprimé.",
         "deleteFailed": "Impossible de supprimer le chantier.",
+        "deleteFailedDraftOnly": "Seuls les chantiers au statut brouillon peuvent être supprimés.",
         "deleteTitle": "Supprimer le chantier",
         "deleteAction": "Supprimer",
         "cancel": "Annuler",
@@ -610,7 +656,8 @@
         },
         "errors": {
           "required": "Renseignez le chantier, le titre et le fichier.",
-          "failed": "Impossible de déposer le document."
+          "failed": "Impossible de déposer le document.",
+          "syncFailed": "Document déposé sur le chantier, mais non répliqué dans la liste globale."
         },
         "success": "Document déposé."
       },
@@ -632,7 +679,9 @@
         "dateRequired": "Date *",
         "lotsToInput": "Lots à saisir",
         "addLot": "Ajouter un lot",
+        "addLine": "Ajouter une ligne",
         "pickAdditionalLot": "Choisir un lot supplémentaire",
+        "pickAdditionalLine": "Choisir un poste ou lot supplémentaire",
         "softValidation": "Validation soft en cas de cumul supérieur au total",
         "addPhoto": "📷 Ajouter photo"
       },
@@ -700,7 +749,8 @@
         "avancementPeriod": "Avancement période",
         "cumulPercent": "Cumul avancement",
         "progress": "Avancement : {before}% → {after}%",
-        "fieldNotes": "Note terrain"
+        "fieldNotes": "Note terrain",
+        "referenceQty": "Quantité BPU : {qty} {unite}"
       },
       "warnings": {
         "cumulExceeds": "Le cumul dépasse la quantité totale du lot ({quantite} {unite}).",
@@ -715,6 +765,7 @@
       },
       "summary": {
         "lotsLoaded": "{count, plural, =0 {Aucun lot chargé} one {1 lot chargé} other {# lots chargés}}",
+        "linesLoaded": "{count, plural, =0 {Aucune ligne chargée} one {1 ligne chargée} other {# lignes chargées}}",
         "deltaOnLots": "+{delta}% sur {count, plural, =0 {0 lot} one {1 lot} other {# lots}}"
       },
       "gallery": {

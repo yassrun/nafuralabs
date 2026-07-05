@@ -4,7 +4,49 @@ import { firstValueFrom } from 'rxjs';
 
 import { ApiConfigService } from '../../../../core/config/api-config.service';
 
-export type ConversationMode = 'ASK' | 'AGENT';
+export type ConversationMode = 'ASK' | 'AGENT' | 'ASSISTANT';
+
+export type IntentType = 'READ' | 'NAVIGATE' | 'ACTION';
+
+export type AssistantBlockType = 'TEXT' | 'KPI' | 'TABLE' | 'LIST' | 'ACTION' | 'LINK' | 'CONFIRM';
+
+export interface AssistantBlock {
+  type: AssistantBlockType;
+  title?: string | null;
+  content?: string | null;
+  data?: Record<string, unknown>;
+}
+
+export interface AssistantLink {
+  label: string;
+  route: string;
+  icon?: string | null;
+  autoNavigate?: boolean;
+}
+
+export interface AssistantTurnRequest {
+  content: string;
+  systemInstruction?: string;
+  metadata?: Record<string, unknown>;
+  domainKey?: string;
+  featureKey?: string;
+  resourceKey?: string;
+  actionKey?: string;
+  currentRoute?: string;
+  entityType?: string;
+  entityId?: string;
+}
+
+export interface AssistantTurnResponse {
+  intent: IntentType;
+  summary?: string | null;
+  blocks?: AssistantBlock[];
+  links?: AssistantLink[];
+  actions?: AgentActionResponse[];
+  run?: AgentRunResponse | null;
+  userMessage?: AgentMessageResponse | null;
+  assistantMessage?: AgentMessageResponse | null;
+}
 
 export interface ConversationSession {
   id: string;
@@ -147,6 +189,21 @@ export class ConversationApiService {
     return firstValueFrom(
       this.http.get<ConversationMessage[]>(
         this.resolveUrl(`/api/ai/conversations/${conversationId}/messages`),
+        { params }
+      )
+    );
+  }
+
+  async sendTurn(
+    conversationId: string,
+    applicationId: string,
+    request: AssistantTurnRequest
+  ): Promise<AssistantTurnResponse> {
+    const params = new HttpParams().set('applicationId', applicationId);
+    return firstValueFrom(
+      this.http.post<AssistantTurnResponse>(
+        this.resolveUrl(`/api/ai/conversations/${conversationId}/turn`),
+        request,
         { params }
       )
     );

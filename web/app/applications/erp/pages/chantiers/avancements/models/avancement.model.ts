@@ -32,12 +32,37 @@ export interface LotChantier {
   chantierId: string;
   code: string;
   designation: string;
+  parentLotId?: string;
   unite: string;
   quantite: number;
+  prixUnitaireHt?: number;
+  montantHt?: number;
   cumulQuantite: number;
   avancementPercent: number;
   status: LotStatus;
   ordre: number;
+}
+
+export interface PosteSaisieContext {
+  id: string;
+  lotId: string;
+  code: string;
+  designation: string;
+  unite: string;
+  quantite: number;
+  prixUnitaireHt: number;
+  montantHt: number;
+}
+
+export type SaisieLineKind = 'poste' | 'lot';
+
+export interface SaisieLineDefinition {
+  key: string;
+  kind: SaisieLineKind;
+  lot: LotChantier;
+  poste?: PosteSaisieContext;
+  parentLot?: LotChantier;
+  weight: number;
 }
 
 export interface AvancementPhoto {
@@ -57,6 +82,9 @@ export interface AvancementLot {
   lotId: string;
   lotCode: string;
   lotDesignation: string;
+  posteId?: string;
+  posteCode?: string;
+  posteDesignation?: string;
   date: string;
   quantiteRealisee: number;
   cumulQuantite: number;
@@ -86,12 +114,35 @@ export interface AvancementQuery extends ListQuery {
 }
 
 export interface LotSaisieDraft {
+  lineKey: string;
   lotId: string;
+  posteId?: string;
   quantitePeriode: number | null;
   notes: string;
   photos: AvancementPhoto[];
 }
 
+export interface SaisieLineViewModel {
+  lineKey: string;
+  kind: SaisieLineKind;
+  lot: LotChantier;
+  poste?: PosteSaisieContext;
+  parentLot?: LotChantier;
+  breadcrumb: string;
+  unite: string;
+  quantiteReference: number;
+  lastCumul: number;
+  quantitePeriode: number | null;
+  nouveauCumul: number;
+  previousPercent: number;
+  newPercent: number;
+  deltaPercent: number;
+  warning?: string;
+  notes: string;
+  photos: AvancementPhoto[];
+}
+
+/** @deprecated Use SaisieLineViewModel */
 export interface LotSaisieViewModel {
   lot: LotChantier;
   lastCumul: number;
@@ -119,6 +170,7 @@ export interface AvancementPersistInput {
   saisieParId: string;
   entries: Array<{
     lotId: string;
+    posteId?: string;
     quantiteRealisee: number;
     notes?: string;
     photos: AvancementPhoto[];
