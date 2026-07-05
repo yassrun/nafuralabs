@@ -72,7 +72,7 @@ public class AgentToolDescriptions {
                                 ),
                                 List.of()
                         )),
-                tool("action", "Execute action proposals after approval",
+                tool("action", "Execute approved write actions (api-key, approval, partner/fournisseur with code, raisonSociale, roles)",
                         schema(
                                 List.of(
                                         property("operation", "string", "Operation to execute"),

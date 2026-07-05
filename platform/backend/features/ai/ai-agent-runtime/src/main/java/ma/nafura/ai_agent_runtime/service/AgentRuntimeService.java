@@ -35,6 +35,7 @@ import ma.nafura.platform.ai.conversation.domain.model.ConversationSession;
 import ma.nafura.platform.ai.conversation.repository.ConversationMessageRepository;
 import ma.nafura.platform.ai.conversation.repository.ConversationSessionRepository;
 import ma.nafura.platform.ai.conversation.service.ConversationIdentityResolver;
+import ma.nafura.platform.ai.conversation.service.ConversationTitleService;
 import ma.nafura.platform.subscription.domain.model.SubscriptionAssignmentOwnerType;
 import ma.nafura.platform.subscription.service.SubscriptionEntitlementService;
 import ma.nafura.platform.framework.context.UserContext;
@@ -90,6 +91,17 @@ public class AgentRuntimeService {
         }
         """;
 
+    private static final String DEFAULT_AGENT_SYSTEM_INSTRUCTION = """
+        You are the ERP agent planner. Propose safe, actionable steps using the available tools.
+        For creating a business partner (fournisseur/client), propose one action with:
+        - toolKey: "action"
+        - args: { "operation": "create", "entityType": "partner", "data": { "code": "...", "raisonSociale": "...", "roles": ["FOURNISSEUR"] } }
+        - requiresApproval: true
+        - permissionKey: "partner.partner.write"
+        - title: short human-readable label (e.g. "Créer le fournisseur X")
+        Respond in JSON matching the required schema.
+        """;
+
     private final AgentRunRepository runRepository;
     private final AgentActionRepository actionRepository;
     private final AgentApprovalRepository approvalRepository;
@@ -102,6 +114,7 @@ public class AgentRuntimeService {
     private final AgentToolDescriptions agentToolDescriptions;
     private final ObjectMapper objectMapper;
     private final ObjectProvider<SubscriptionEntitlementService> entitlementServiceProvider;
+    private final ConversationTitleService conversationTitleService;
 
     @Value("${spring.application.name:nafura-app}")
     private String defaultApplicationId;
@@ -119,24 +132,26 @@ public class AgentRuntimeService {
             null
         );
 
+        LlmCallContext callContext = LlmCallContext.builder()
+            .applicationId(session.getApplicationId())
+            .domainKey(trimToNull(request.getDomainKey()))
+            .featureKey(trimToNull(request.getFeatureKey()))
+            .resourceKey(trimToNull(request.getResourceKey()))
+            .actionKey(trimToNull(request.getActionKey()))
+            .mode(LlmMode.AGENT)
+            .conversationId(session.getId().toString())
+            .messageId(userMessage.getId().toString())
+            .actorSub(session.getActorSub())
+            .tenantId(session.getTenantId())
+            .scopeType(session.getScopeType())
+            .idempotencyKey(session.getId() + ":" + userMessage.getId() + ":agent:propose")
+            .build();
+
         LlmResponse llmResponse;
         try {
             llmResponse = llmService.callLlm(
                 toAgentLlmRequest(request),
-                LlmCallContext.builder()
-                    .applicationId(session.getApplicationId())
-                    .domainKey(trimToNull(request.getDomainKey()))
-                    .featureKey(trimToNull(request.getFeatureKey()))
-                    .resourceKey(trimToNull(request.getResourceKey()))
-                    .actionKey(trimToNull(request.getActionKey()))
-                    .mode(LlmMode.AGENT)
-                    .conversationId(session.getId().toString())
-                    .messageId(userMessage.getId().toString())
-                    .actorSub(session.getActorSub())
-                    .tenantId(session.getTenantId())
-                    .scopeType(session.getScopeType())
-                    .idempotencyKey(session.getId() + ":" + userMessage.getId() + ":agent:propose")
-                    .build()
+                callContext
             ).join();
         } catch (CompletionException ex) {
             String error = rootMessage(ex);
@@ -152,6 +167,13 @@ public class AgentRuntimeService {
             ConversationMessageRole.ASSISTANT,
             llmResponse.getContent() != null ? llmResponse.getContent() : "",
             llmResponse.getRequestId()
+        );
+
+        session = conversationTitleService.maybeGenerateTitle(
+            session,
+            request.getContent().trim(),
+            assistantMessage.getContent(),
+            callContext
         );
 
         AgentProposalPayload payload;
@@ -467,7 +489,8 @@ public class AgentRuntimeService {
     private LlmRequest toAgentLlmRequest(AgentProposeRequest request) {
         LlmRequest llmRequest = new LlmRequest();
         llmRequest.setPrompt(request.getContent().trim());
-        llmRequest.setSystemInstruction(trimToNull(request.getSystemInstruction()));
+        String systemInstruction = trimToNull(request.getSystemInstruction());
+        llmRequest.setSystemInstruction(systemInstruction != null ? systemInstruction : DEFAULT_AGENT_SYSTEM_INSTRUCTION);
         llmRequest.setResponseSchema(AGENT_RESPONSE_SCHEMA);
         llmRequest.setMetadata(request.getMetadata() != null ? request.getMetadata() : Map.of());
         llmRequest.setMode(LlmMode.AGENT);

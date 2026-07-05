@@ -81,6 +81,7 @@ public class ConversationService {
     private final Optional<AgentToolRegistry> agentToolRegistry;
     private final Optional<AiSchemaContextLoader> schemaLoader;
     private final Optional<SqlQueryConfig> sqlQueryConfig;
+    private final ConversationTitleService conversationTitleService;
 
     @Value("${spring.application.name:nafura-app}")
     private String defaultApplicationId;
@@ -91,6 +92,7 @@ public class ConversationService {
         ConversationIdentityResolver identityResolver,
         LlmService llmService,
         ObjectMapper objectMapper,
+        ConversationTitleService conversationTitleService,
         @Autowired(required = false) AgentToolRegistry agentToolRegistry,
         @Autowired(required = false) AiSchemaContextLoader schemaLoader,
         @Autowired(required = false) SqlQueryConfig sqlQueryConfig
@@ -100,6 +102,7 @@ public class ConversationService {
         this.identityResolver = identityResolver;
         this.llmService = llmService;
         this.objectMapper = objectMapper;
+        this.conversationTitleService = conversationTitleService;
         this.agentToolRegistry = Optional.ofNullable(agentToolRegistry);
         this.schemaLoader = Optional.ofNullable(schemaLoader);
         this.sqlQueryConfig = Optional.ofNullable(sqlQueryConfig);
@@ -212,8 +215,14 @@ public class ConversationService {
         return llmFuture
             .thenApply(llmResponse -> {
                 ConversationMessage assistantMessage = persistAssistantMessage(session, llmResponse);
+                ConversationSession titledSession = conversationTitleService.maybeGenerateTitle(
+                    session,
+                    request.getContent().trim(),
+                    assistantMessage.getContent(),
+                    callContext
+                );
                 return SendMessageResponse.builder()
-                    .conversation(toSessionResponse(session))
+                    .conversation(toSessionResponse(titledSession))
                     .userMessage(toMessageResponse(userMessage))
                     .assistantMessage(toMessageResponse(assistantMessage))
                     .build();

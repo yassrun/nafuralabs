@@ -13,6 +13,7 @@ import {
   inject,
   input,
   signal,
+  viewChild,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
@@ -405,7 +406,7 @@ const LUCIDE_ICON_ALIASES: Record<string, string> = {
             </select>
           </div>
 
-          <div class="naf-shell__conversation-body">
+          <div #conversationBody class="naf-shell__conversation-body">
             <div *ngIf="conversationLoading()" class="naf-shell__conversation-state">
               {{ translateLabel('core.conversation.loading') }}
             </div>
@@ -1700,6 +1701,7 @@ export class PlatformAppShellComponent implements OnInit {
   private readonly shortcuts = inject(ShortcutsService);
   readonly onboarding = inject(OnboardingService);
   private loadVersion = 0;
+  private readonly conversationBody = viewChild<ElementRef<HTMLElement>>('conversationBody');
 
   readonly shortcutsHelpOpen = signal(false);
   readonly onboardingInviteWidget = signal<Type<unknown> | null>(null);
@@ -2202,6 +2204,7 @@ export class PlatformAppShellComponent implements OnInit {
       { id: `local-${Date.now()}`, role: 'user', content },
     ]);
     this.conversationDraft.set('');
+    this.scrollConversationToBottom(true);
     try {
       const domainKey = this.resolveConversationDomainKey();
       const context = domainKey ? { content, domainKey } : { content };
@@ -2229,6 +2232,7 @@ export class PlatformAppShellComponent implements OnInit {
       this.conversationError.set(this.extractErrorMessage(error));
     } finally {
       this.conversationSending.set(false);
+      this.scrollConversationToBottom();
     }
   }
 
@@ -2253,7 +2257,7 @@ export class PlatformAppShellComponent implements OnInit {
   }
 
   messageRoleLabel(role: UiMessageRole): string {
-    if (role === 'user') return this.translateLabel('core.conversation.you');
+    if (role === 'user') return this.displayName();
     if (role === 'assistant') return this.translateLabel('core.conversation.agent');
     if (role === 'system') return this.translateLabel('core.conversation.roles.system');
     return this.translateLabel('core.conversation.roles.tool');
@@ -2323,6 +2327,19 @@ export class PlatformAppShellComponent implements OnInit {
   }
 
   // ─── Private: Conversation ───────────────────────────────────────
+  private scrollConversationToBottom(force = false): void {
+    const el = this.conversationBody()?.nativeElement;
+    if (!el) {
+      return;
+    }
+    requestAnimationFrame(() => {
+      const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+      if (force || distanceFromBottom < 80) {
+        el.scrollTop = el.scrollHeight;
+      }
+    });
+  }
+
   private async refreshConversation(mode: ConversationMode): Promise<void> {
     const applicationId = this.applicationId();
     const conversationId = await this.ensureConversationSession(mode);
@@ -2355,7 +2372,10 @@ export class PlatformAppShellComponent implements OnInit {
       }
       this.conversationError.set(this.extractErrorMessage(error));
     } finally {
-      if (version === this.loadVersion) this.conversationLoading.set(false);
+      if (version === this.loadVersion) {
+        this.conversationLoading.set(false);
+        this.scrollConversationToBottom();
+      }
     }
   }
 

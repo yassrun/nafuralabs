@@ -19,15 +19,18 @@ public class ActionAgentTool implements AgentTool {
     private final ObjectProvider<ApiKeyService> apiKeyServiceProvider;
     private final ObjectProvider<ApprovalService> approvalServiceProvider;
     private final AgentPermissionChecker permissionChecker;
+    private final List<AgentEntityActionHandler> entityActionHandlers;
 
     public ActionAgentTool(
             ObjectProvider<ApiKeyService> apiKeyServiceProvider,
             ObjectProvider<ApprovalService> approvalServiceProvider,
-            AgentPermissionChecker permissionChecker
+            AgentPermissionChecker permissionChecker,
+            List<AgentEntityActionHandler> entityActionHandlers
     ) {
         this.apiKeyServiceProvider = apiKeyServiceProvider;
         this.approvalServiceProvider = approvalServiceProvider;
         this.permissionChecker = permissionChecker;
+        this.entityActionHandlers = entityActionHandlers != null ? entityActionHandlers : List.of();
     }
 
     @Override
@@ -55,15 +58,39 @@ public class ActionAgentTool implements AgentTool {
         return switch (entityType) {
             case "api-key", "api-keys", "apikey", "apikeys" -> handleApiKeyAction(operation, context, data, entityIdRaw);
             case "approval", "approvals" -> handleApprovalAction(operation, context, data, entityIdRaw);
-            default -> AgentToolResult.builder()
-                    .success(false)
-                    .message("Unsupported action target: " + entityType)
-                    .payload(Map.of(
-                            "operation", operation,
-                            "entityType", entityType
-                    ))
-                    .build();
+            default -> {
+                UUID tenantId = parseTenantId(context);
+                if (tenantId == null) {
+                    yield unavailable("Tenant context is required");
+                }
+                yield withTenant(tenantId, () -> delegateEntityAction(
+                        request, context, operation, entityType, data, entityIdRaw
+                ));
+            }
         };
+    }
+
+    private AgentToolResult delegateEntityAction(
+            AgentToolRequest request,
+            AgentExecutionContext context,
+            String operation,
+            String entityType,
+            Map<String, Object> data,
+            String entityIdRaw
+    ) {
+        for (AgentEntityActionHandler handler : entityActionHandlers) {
+            if (handler.supports(entityType, operation)) {
+                return handler.execute(request, context, operation, entityType, data, entityIdRaw);
+            }
+        }
+        return AgentToolResult.builder()
+                .success(false)
+                .message("Unsupported action target: " + entityType)
+                .payload(Map.of(
+                        "operation", operation,
+                        "entityType", entityType
+                ))
+                .build();
     }
 
     private AgentToolResult handleApiKeyAction(
