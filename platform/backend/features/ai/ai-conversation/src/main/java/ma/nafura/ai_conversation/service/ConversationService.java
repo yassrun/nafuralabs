@@ -21,7 +21,6 @@ import ma.nafura.platform.ai.conversation.domain.model.ConversationStatus;
 import ma.nafura.platform.ai.conversation.config.SqlQueryConfig;
 import ma.nafura.platform.ai.conversation.context.AiSchemaContext;
 import ma.nafura.platform.ai.conversation.context.AiSchemaContextLoader;
-import ma.nafura.platform.ai.conversation.context.TableSchema;
 import ma.nafura.platform.ai.conversation.repository.ConversationMessageRepository;
 import ma.nafura.platform.ai.conversation.repository.ConversationSessionRepository;
 import ma.nafura.platform.ai.llm.model.ConversationTurn;
@@ -62,6 +61,17 @@ import java.util.concurrent.CompletableFuture;
 @Service
 @ConditionalOnProperty(prefix = "nafura.ai.conversation", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class ConversationService {
+
+    private static final String SQL_ASK_RULES = """
+        You answer ERP business questions using execute_sql (PostgreSQL SELECT only).
+        Rules:
+        - Use exact table and column names from the schema below (UI labels differ from SQL).
+        - tenant_id is injected automatically — never filter tenant_id yourself.
+        - Chantiers actifs / en cours: status='EN_COURS' AND is_active=true on table chantiers.
+        - Project name in SQL is column label (not name) on chantiers.
+        - Prefer COUNT(*) for totals; list key columns (code, label, status) for listings.
+        - Use ILIKE for case-insensitive text search.
+        """;
 
     private final ConversationSessionRepository sessionRepository;
     private final ConversationMessageRepository messageRepository;
@@ -166,14 +176,17 @@ public class ConversationService {
         Set<String> allowedDomains = getAllowedDomainsForSession(session);
         if (schemaLoader.isPresent()) {
             AiSchemaContext ctx = schemaLoader.get().getSchemaContext();
-            Set<String> domains = allowedDomains.isEmpty()
-                ? ctx.getTables().stream().map(TableSchema::getDomain).collect(Collectors.toSet())
-                : allowedDomains;
-            String schemaContext = ctx.buildLlmContext(domains);
+            Set<String> focusDomains = resolveFocusDomains(request, allowedDomains);
+            int maxTables = sqlQueryConfig.map(SqlQueryConfig::getMaxTablesInPrompt).orElse(15);
+            String schemaContext = ctx.buildLlmContext(focusDomains, maxTables);
             String baseSystem = llmRequest.getSystemInstruction();
             String withSchema = (baseSystem != null && !baseSystem.isBlank() ? baseSystem + "\n\n" : "")
-                + "AVAILABLE DATABASE SCHEMA (use execute_sql to query):\n" + schemaContext;
+                + SQL_ASK_RULES
+                + "\n\nAVAILABLE DATABASE SCHEMA (use execute_sql to query):\n"
+                + schemaContext;
             llmRequest.setSystemInstruction(withSchema);
+        } else if (llmRequest.getSystemInstruction() == null || llmRequest.getSystemInstruction().isBlank()) {
+            llmRequest.setSystemInstruction(SQL_ASK_RULES);
         }
 
         LlmCallContext callContext = LlmCallContext.builder()
@@ -240,6 +253,21 @@ public class ConversationService {
 
     private Set<String> getAllowedDomainsForSession(ConversationSession session) {
         return new HashSet<>();
+    }
+
+    /**
+     * Empty set = core tables only (token-efficient default).
+     * Non-empty = core + tables from the focused domain(s).
+     */
+    private Set<String> resolveFocusDomains(SendMessageRequest request, Set<String> allowedDomains) {
+        String domainKey = trimToNull(request.getDomainKey());
+        if (domainKey != null) {
+            return Set.of(domainKey);
+        }
+        if (allowedDomains != null && !allowedDomains.isEmpty()) {
+            return allowedDomains;
+        }
+        return Set.of();
     }
 
     private ToolExecutor createToolExecutor(ConversationSession session) {

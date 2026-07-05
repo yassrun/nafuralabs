@@ -78,10 +78,8 @@ fi
 if vault kv get "secret/nafura/${ENV}/infra/llm" >/dev/null 2>&1; then
   brevo="$(kv_get_field "secret/nafura/${ENV}/infra/llm" brevo_api_key)"
   gemini="$(kv_get_field "secret/nafura/${ENV}/infra/llm" gemini_api_key)"
-  sendgrid="$(kv_get_field "secret/nafura/${ENV}/infra/llm" sendgrid_api_key)"
   vault kv put "secret/nafura/${ENV}/platform/integrations/email/brevo" api_key="${brevo}"
   vault kv put "secret/nafura/${ENV}/platform/integrations/ai/gemini" api_key="${gemini}"
-  vault kv put "secret/nafura/${ENV}/platform/integrations/email/sendgrid" api_key="${sendgrid}"
 fi
 
 # --- platform/security/invitation ---

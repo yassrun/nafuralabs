@@ -70,6 +70,14 @@ nafura:
         - /api/public/
         - /api/onboarding/
         - /actuator/
+  ai:
+    sql:
+      enabled: true
+      max-tables-in-prompt: 15
+      read-only-datasource:
+        url: jdbc:postgresql://${POSTGRES_HOST:localhost}:5432/${POSTGRES_DB:nafura_erp}?currentSchema=${POSTGRES_SCHEMA:public}
+        username: ${NAFURA_AI_SQL_READ_ONLY_DATASOURCE_USERNAME:nafura_ai_reader}
+        password: ${NAFURA_AI_SQL_READ_ONLY_DATASOURCE_PASSWORD:changeme}
 
 # Email (module notification — Brevo by default; keys in backend/.env.local or Vault)
 app:
@@ -91,9 +99,6 @@ app:
 
 brevo:
   api-key: ${BREVO_API_KEY:}
-
-sendgrid:
-  api-key: ${SENDGRID_API_KEY:}
 
 # Doc-manager / MinIO (injected by nafgen when infrastructure.objectStorage.enabled)
 documents:

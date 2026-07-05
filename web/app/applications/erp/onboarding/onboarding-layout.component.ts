@@ -9,8 +9,17 @@ import { RouterOutlet } from '@angular/router';
   template: `
     <div class="onb-layout">
       <header class="onb-layout__brand">
-        <span class="onb-layout__logo" aria-hidden="true">S</span>
-        <span class="onb-layout__name">Nafura</span>
+        <img
+          class="onb-layout__mark"
+          src="/assets/branding/sektor-icon.svg"
+          alt=""
+          width="56"
+          height="56"
+          aria-hidden="true" />
+        <div class="onb-layout__lockup">
+          <span class="onb-layout__name">Sektor</span>
+          <span class="onb-layout__byline">by nafuralabs</span>
+        </div>
       </header>
       <main class="onb-layout__main">
         <router-outlet />
@@ -18,23 +27,64 @@ import { RouterOutlet } from '@angular/router';
     </div>
   `,
   styles: [`
-    :host { display: block; min-height: 100dvh; background: var(--nf-surface-muted); }
-    .onb-layout { min-height: 100dvh; display: flex; flex-direction: column; }
+    :host {
+      display: block;
+      min-height: 100dvh;
+      background: var(--nf-surface-muted, #f3f4f6);
+    }
+
+    .onb-layout {
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: clamp(1.5rem, 4vw, 2.75rem) 1.25rem 2rem;
+      box-sizing: border-box;
+    }
+
     .onb-layout__brand {
-      display: flex; align-items: center; gap: 0.5rem;
-      padding: 1rem 1.25rem;
-      background: var(--nf-color-surface);
-      border-bottom: 1px solid var(--nf-border-default);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: clamp(1.5rem, 3vw, 2rem);
+      text-align: center;
     }
-    .onb-layout__logo {
-      width: 32px; height: 32px; border-radius: 8px;
-      background: linear-gradient(135deg, var(--nf-color-primary-700), var(--nf-color-primary-500));
-      color: var(--nf-color-surface); display: grid; place-items: center; font-weight: 700;
-      box-shadow: 0 8px 18px rgba(37, 99, 235, 0.22);
+
+    .onb-layout__mark {
+      display: block;
+      width: 56px;
+      height: 56px;
+      flex-shrink: 0;
     }
-    .onb-layout__name { font-weight: 600; font-size: 1.125rem; }
-    .onb-layout__main { flex: 1; padding: 1rem; max-width: 1200px; margin: 0 auto; width: 100%; box-sizing: border-box; }
-    @media (min-width: 768px) { .onb-layout__main { padding: 2rem; } }
+
+    .onb-layout__lockup {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .onb-layout__name {
+      font-size: clamp(1.5rem, 4vw, 1.75rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      color: var(--nf-color-primary-700, #1b3fae);
+    }
+
+    .onb-layout__byline {
+      font-size: 0.8125rem;
+      font-weight: 400;
+      color: var(--nf-text-muted, #6b7280);
+      letter-spacing: 0.01em;
+    }
+
+    .onb-layout__main {
+      width: 100%;
+      max-width: 1200px;
+    }
   `],
 })
 export class OnboardingLayoutComponent {}

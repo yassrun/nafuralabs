@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 public class AiSchemaContext {
 
+    private static final String CATEGORY_CORE = "core";
+
     private final List<TableSchema> tables;
     private final Map<String, String> tableToDomain;
     private final Map<String, Set<String>> domainToTables;
@@ -65,25 +67,96 @@ public class AiSchemaContext {
         return new HashSet<>(tablesWithTenantId);
     }
 
-    public String buildLlmContext(Set<String> userDomains) {
-        Set<String> allowed = getAllowedTables(userDomains);
-        if (allowed.isEmpty()) return "(No tables available for your permissions.)";
+    public String buildLlmContext(Set<String> focusDomains) {
+        return buildLlmContext(focusDomains, 15);
+    }
+
+    /**
+     * Compact schema for LLM prompts — optimized for token cost.
+     * When focusDomains is empty: core tables only.
+     * When focusDomains is set: core + matching domain tables (capped).
+     */
+    public String buildLlmContext(Set<String> focusDomains, int maxTables) {
+        List<TableSchema> selected = selectTablesForPrompt(focusDomains, maxTables);
+        if (selected.isEmpty()) {
+            return "(No tables available — ai-schema.generated.json may be missing or empty.)";
+        }
+
         StringBuilder sb = new StringBuilder();
-        for (TableSchema t : tables) {
-            if (!allowed.contains(t.getName())) continue;
-            sb.append("\nTable: ").append(t.getName());
-            if (t.getDescription() != null && !t.getDescription().isEmpty()) {
-                sb.append(" — ").append(t.getDescription());
+        sb.append("Term → table:\n");
+        for (TableSchema t : selected) {
+            if (t.getAliases() != null && !t.getAliases().isEmpty()) {
+                sb.append("  ").append(String.join(", ", t.getAliases()))
+                    .append(" → ").append(t.getName()).append('\n');
             }
-            sb.append("\n  Columns: ");
+        }
+
+        sb.append("\nTables (PostgreSQL, tenant_id auto-filtered — do not add tenant_id yourself):\n");
+        for (TableSchema t : selected) {
+            sb.append("• ").append(t.getName());
+            if (t.getDescription() != null && !t.getDescription().isBlank()) {
+                sb.append(" — ").append(t.getDescription().trim());
+            }
+            sb.append('\n');
+            sb.append("  cols: ");
             if (t.getColumns() != null) {
                 sb.append(t.getColumns().stream()
                     .filter(c -> !"tenant_id".equalsIgnoreCase(c.getName()))
-                    .map(c -> c.getName() + " (" + c.getType() + ")" + (c.getFk() != null ? " -> " + c.getFk().get("table") : ""))
+                    .map(this::formatColumnForPrompt)
                     .collect(Collectors.joining(", ")));
             }
-            sb.append("\n");
+            sb.append('\n');
+            if (t.getHints() != null) {
+                for (String hint : t.getHints()) {
+                    if (hint != null && !hint.isBlank()) {
+                        sb.append("  ").append(hint.trim()).append('\n');
+                    }
+                }
+            }
         }
         return sb.toString();
+    }
+
+    List<TableSchema> selectTablesForPrompt(Set<String> focusDomains, int maxTables) {
+        int cap = maxTables > 0 ? maxTables : 15;
+        LinkedHashSet<TableSchema> selected = new LinkedHashSet<>();
+
+        for (TableSchema t : tables) {
+            if (CATEGORY_CORE.equalsIgnoreCase(nullToEmpty(t.getCategory()))) {
+                selected.add(t);
+            }
+        }
+
+        if (focusDomains != null && !focusDomains.isEmpty()) {
+            for (TableSchema t : tables) {
+                if (focusDomains.contains(t.getDomain())) {
+                    selected.add(t);
+                }
+            }
+        }
+
+        if (selected.isEmpty()) {
+            // Fallback when no category marked: first N tables (legacy schemas)
+            return tables.stream().limit(cap).toList();
+        }
+
+        return selected.stream().limit(cap).toList();
+    }
+
+    private String formatColumnForPrompt(TableSchema.ColumnSchema column) {
+        StringBuilder col = new StringBuilder(column.getName());
+        if (column.getType() != null && !column.getType().isBlank()) {
+            col.append('(').append(column.getType()).append(')');
+        }
+        if (column.getDescription() != null && !column.getDescription().isBlank()) {
+            col.append('=').append(column.getDescription().trim());
+        } else if (column.getFk() != null && column.getFk().get("table") != null) {
+            col.append("→").append(column.getFk().get("table"));
+        }
+        return col.toString();
+    }
+
+    private static String nullToEmpty(String value) {
+        return value != null ? value : "";
     }
 }

@@ -20,7 +20,8 @@ CLI deploy : infra partagée (1× par cluster) + produits (indépendants).
 
 | Commande | Effet |
 |----------|-------|
-| `bootstrap-env` | Infra + vault-init + wait services |
+| `bootstrap-env` | Infra + vault-init + **vault-seed** + wait services |
+| `vault-seed` | Applique `secrets/nafura.secrets` → Vault pour `ENV` |
 | `onboard-app <app>` | provision-db → migrate → deploy |
 | `release-app <app>` | migrate → deploy-backend → deploy-frontend |
 | `release-backend <app>` | migrate → deploy-backend |
@@ -34,6 +35,8 @@ CLI deploy : infra partagée (1× par cluster) + produits (indépendants).
 ### Staging — nouveau cluster
 
 ```bash
+# secrets/nafura.secrets doit exister (voir secrets/README.md)
+
 KUBE_CONTEXT=docker-desktop ENV=staging bash toolchain/ops/nlops.sh bootstrap-env
 BUILD_IMAGES=true KUBE_CONTEXT=docker-desktop ENV=staging bash toolchain/ops/nlops.sh onboard-app sektor-btp
 ```

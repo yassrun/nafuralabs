@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * Service interface for sending emails.
  * 
- * Implementations can use SendGrid, Mailgun, AWS SES, etc.
+ * Implementations use Brevo (or future providers via {@link ma.nafura.platform.collaboration.notification.config.EmailConfig}).
  */
 public interface EmailService {
     

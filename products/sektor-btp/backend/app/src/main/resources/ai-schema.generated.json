@@ -1,0 +1,198 @@
+{
+  "domainIndex": {
+    "chantiers": ["chantiers", "chantier_lots", "situations_travaux"],
+    "achats": ["demandes_achat", "bons_commande_achat", "factures_fournisseur", "receptions_achat"],
+    "ventes": ["factures_client", "bons_commande_client"],
+    "finance": ["journal_entries"],
+    "stock": ["inventory_txs", "stock_balances"],
+    "partner": ["partners"],
+    "approbations": ["erp_approval_requests"]
+  },
+  "tables": [
+    {
+      "name": "chantiers",
+      "domain": "chantiers",
+      "category": "core",
+      "description": "Construction projects / sites",
+      "aliases": ["chantier", "chantiers", "projet", "projets", "site", "construction site"],
+      "hints": [
+        "ex: SELECT COUNT(*) FROM chantiers WHERE status='EN_COURS' AND is_active=true",
+        "ex: SELECT code, label, status, ville FROM chantiers WHERE status='EN_COURS' ORDER BY code"
+      ],
+      "columns": [
+        { "name": "id", "type": "text", "pk": true },
+        { "name": "code", "type": "text", "description": "project code CH-YYYY-NNN" },
+        { "name": "label", "type": "text", "description": "project name (UI: name)" },
+        { "name": "status", "type": "text", "description": "EN_COURS|PROSPECT|SUSPENDU|TERMINE|RECEPTIONNE|CLOTURE|ANNULE" },
+        { "name": "is_active", "type": "boolean" },
+        { "name": "ville", "type": "text" },
+        { "name": "client_name", "type": "text" },
+        { "name": "montant_ht", "type": "numeric", "description": "budget HT (UI: budgetHt)" },
+        { "name": "avancement_percent", "type": "numeric" },
+        { "name": "date_demarrage", "type": "date", "description": "start date (UI: dateDebut)" },
+        { "name": "date_fin_prevue", "type": "date" },
+        { "name": "chef_chantier_name", "type": "text" },
+        { "name": "conducteur_travaux_name", "type": "text" }
+      ]
+    },
+    {
+      "name": "chantier_lots",
+      "domain": "chantiers",
+      "category": "extended",
+      "description": "Work lots within a project",
+      "aliases": ["lot", "lots", "lot chantier"],
+      "columns": [
+        { "name": "id", "type": "text", "pk": true },
+        { "name": "chantier_id", "type": "text", "fk": { "table": "chantiers" } },
+        { "name": "code", "type": "text" },
+        { "name": "label", "type": "text", "description": "lot name" },
+        { "name": "status", "type": "text" }
+      ]
+    },
+    {
+      "name": "situations_travaux",
+      "domain": "chantiers",
+      "category": "extended",
+      "description": "Work progress certificates (situations)",
+      "aliases": ["situation", "situations", "situation travaux", "attachement"],
+      "columns": [
+        { "name": "id", "type": "text", "pk": true },
+        { "name": "chantier_id", "type": "text", "fk": { "table": "chantiers" } },
+        { "name": "numero", "type": "text" },
+        { "name": "status", "type": "text", "description": "BROUILLON|SOUMISE|VALIDEE_MOA|FACTUREE|PAYEE|REJETEE" },
+        { "name": "montant_ht", "type": "numeric" }
+      ]
+    },
+    {
+      "name": "partners",
+      "domain": "partner",
+      "category": "core",
+      "description": "Clients, suppliers, subcontractors",
+      "aliases": ["client", "clients", "fournisseur", "fournisseurs", "tiers", "partenaire"],
+      "columns": [
+        { "name": "id", "type": "uuid", "pk": true },
+        { "name": "code", "type": "text" },
+        { "name": "raison_sociale", "type": "text", "description": "legal name (UI/API: name)" },
+        { "name": "ice", "type": "text" },
+        { "name": "email", "type": "text" },
+        { "name": "phone", "type": "text" }
+      ]
+    },
+    {
+      "name": "demandes_achat",
+      "domain": "achats",
+      "category": "core",
+      "description": "Purchase requests (DA)",
+      "aliases": ["demande achat", "DA", "demande d'achat"],
+      "columns": [
+        { "name": "id", "type": "text", "pk": true },
+        { "name": "code", "type": "text" },
+        { "name": "status", "type": "text" },
+        { "name": "chantier_id", "type": "text", "fk": { "table": "chantiers" } },
+        { "name": "date_demande", "type": "date" }
+      ]
+    },
+    {
+      "name": "bons_commande_achat",
+      "domain": "achats",
+      "category": "core",
+      "description": "Purchase orders (BC)",
+      "aliases": ["bon commande", "BC achat", "commande fournisseur", "purchase order"],
+      "columns": [
+        { "name": "id", "type": "text", "pk": true },
+        { "name": "code", "type": "text" },
+        { "name": "status", "type": "text" },
+        { "name": "fournisseur_id", "type": "uuid", "fk": { "table": "partners" } },
+        { "name": "montant_ht", "type": "numeric" },
+        { "name": "date_commande", "type": "date" }
+      ]
+    },
+    {
+      "name": "factures_fournisseur",
+      "domain": "achats",
+      "category": "core",
+      "description": "Supplier invoices",
+      "aliases": ["facture fournisseur", "FF", "facture achat"],
+      "columns": [
+        { "name": "id", "type": "text", "pk": true },
+        { "name": "code", "type": "text" },
+        { "name": "status", "type": "text" },
+        { "name": "fournisseur_id", "type": "uuid", "fk": { "table": "partners" } },
+        { "name": "montant_ht", "type": "numeric" },
+        { "name": "date_facture", "type": "date" },
+        { "name": "date_echeance", "type": "date" }
+      ]
+    },
+    {
+      "name": "factures_client",
+      "domain": "ventes",
+      "category": "core",
+      "description": "Customer invoices",
+      "aliases": ["facture client", "facture vente", "invoice"],
+      "columns": [
+        { "name": "id", "type": "text", "pk": true },
+        { "name": "code", "type": "text" },
+        { "name": "status", "type": "text" },
+        { "name": "client_id", "type": "uuid", "fk": { "table": "partners" } },
+        { "name": "montant_ht", "type": "numeric" },
+        { "name": "date_facture", "type": "date" }
+      ]
+    },
+    {
+      "name": "inventory_txs",
+      "domain": "stock",
+      "category": "core",
+      "description": "Stock movements (receipts, issues, transfers)",
+      "aliases": ["mouvement stock", "réception", "sortie stock", "inventory"],
+      "columns": [
+        { "name": "id", "type": "text", "pk": true },
+        { "name": "code", "type": "text" },
+        { "name": "tx_type", "type": "text" },
+        { "name": "status", "type": "text" },
+        { "name": "chantier_id", "type": "text", "fk": { "table": "chantiers" } },
+        { "name": "date_tx", "type": "date" }
+      ]
+    },
+    {
+      "name": "stock_balances",
+      "domain": "stock",
+      "category": "extended",
+      "description": "Current stock quantities by item and location",
+      "aliases": ["stock", "quantité stock", "solde stock"],
+      "columns": [
+        { "name": "id", "type": "text", "pk": true },
+        { "name": "item_id", "type": "text" },
+        { "name": "location_id", "type": "text" },
+        { "name": "quantity", "type": "numeric" }
+      ]
+    },
+    {
+      "name": "journal_entries",
+      "domain": "finance",
+      "category": "core",
+      "description": "Accounting journal entries",
+      "aliases": ["écriture", "écritures", "journal", "comptabilité"],
+      "columns": [
+        { "name": "id", "type": "text", "pk": true },
+        { "name": "code", "type": "text" },
+        { "name": "status", "type": "text" },
+        { "name": "date_ecriture", "type": "date" },
+        { "name": "libelle", "type": "text" }
+      ]
+    },
+    {
+      "name": "erp_approval_requests",
+      "domain": "approbations",
+      "category": "core",
+      "description": "Pending approvals workflow",
+      "aliases": ["approbation", "approbations", "validation"],
+      "columns": [
+        { "name": "id", "type": "uuid", "pk": true },
+        { "name": "status", "type": "text" },
+        { "name": "entity_type", "type": "text" },
+        { "name": "entity_id", "type": "text" },
+        { "name": "created_at", "type": "timestamptz" }
+      ]
+    }
+  ]
+}

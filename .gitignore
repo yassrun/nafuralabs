@@ -21,6 +21,9 @@ dist/
 .env
 .env.*
 !.env.example
+secrets/nafura.secrets
+secrets/*.local
+!secrets/README.md
 
 # OS
 .DS_Store

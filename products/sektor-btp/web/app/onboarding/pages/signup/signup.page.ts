@@ -52,7 +52,7 @@ import { ButtonComponent } from '@lib/anatomy';
           <p class="signup-error" role="alert">{{ error() }}</p>
         }
 
-        <nf-button type="submit" class="signup-submit" [disabled]="submitting()" variant="primary">
+        <nf-button type="submit" [fullWidth]="true" [disabled]="submitting()" variant="primary">
           {{ (submitting() ? 'onboarding.signup.submitting' : 'onboarding.signup.submit') | translate }}
         </nf-button>
       </form>
@@ -73,11 +73,7 @@ import { ButtonComponent } from '@lib/anatomy';
     }
     .signup-error { color: var(--nf-color-danger-700); font-size: 0.875rem; }
     .signup-info { color: var(--nf-color-success-700); font-size: 0.875rem; }
-    .signup-submit {
-      margin-top: 0.5rem; padding: 0.75rem; border: 0; border-radius: 8px;
-      background: var(--nf-color-primary-600); color: var(--nf-color-surface); font-weight: 600; cursor: pointer;
-    }
-    .signup-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+    .signup-form nf-button { margin-top: 0.5rem; }
   `],
 })
 export class SignupPage {

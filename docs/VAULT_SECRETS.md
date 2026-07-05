@@ -14,7 +14,6 @@ secret/nafura/{env}/
 │   │   └── clients/{app-id}     # client_secret (OAuth backend clients)
 │   ├── integrations/
 │   │   ├── email/brevo          # api_key
-│   │   ├── email/sendgrid       # api_key (optional)
 │   │   └── ai/gemini            # api_key
 │   └── security/invitation      # token_secret
 └── apps/
@@ -34,7 +33,16 @@ secret/nafura/{env}/
 
 ## Bootstrap
 
-New env: `ENV={env} bash toolchain/ops/nlops.sh bootstrap-env` runs `vault-init` which creates the full tree.
+1. Créer / éditer `secrets/nafura.secrets` (gitignored) — structure dans [secrets/README.md](../secrets/README.md).
+2. `ENV={env} bash toolchain/ops/nlops.sh bootstrap-env` :
+   - Job `vault-init` : arbre KV, policies, Kubernetes auth
+   - `vault-seed` : applique `secrets/nafura.secrets` pour `ENV`
+
+Re-seed sans rebootstrap :
+
+```bash
+ENV=staging bash toolchain/ops/nlops.sh vault-seed
+```
 
 Onboard app: `vault-sync` job creates `apps/{app}/database` + `object-storage` and backend policy/role.
 

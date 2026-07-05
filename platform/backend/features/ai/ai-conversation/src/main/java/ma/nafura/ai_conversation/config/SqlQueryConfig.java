@@ -12,6 +12,8 @@ public class SqlQueryConfig {
     private int maxRows = 100;
     private int timeoutSeconds = 5;
     private int maxSqlLength = 5000;
+    /** Cap tables sent to the LLM (core always included; domain tables added when focused) */
+    private int maxTablesInPrompt = 15;
     private String schemaPath;
     private ReadOnlyDatasource readOnlyDatasource = new ReadOnlyDatasource();
 

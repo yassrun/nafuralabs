@@ -27,7 +27,7 @@ public class EntityEmailController {
     private final ma.nafura.platform.collaboration.docmanager.template.TemplateVariableResolver variableResolver;
 
     /**
-     * Send an entity email: render email template with entity data, optional PDF attachment, send via SendGrid, log audit.
+     * Send an entity email: render email template with entity data, optional PDF attachment, send via Brevo, log audit.
      */
     @PostMapping("/send")
     @RequirePermission(value = "platform.collaboration.email.send", fullPermission = true)

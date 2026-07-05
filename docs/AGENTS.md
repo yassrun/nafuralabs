@@ -8,6 +8,7 @@
 | Imports Gradle / TypeScript | [PLATFORM_IMPORTS.md](PLATFORM_IMPORTS.md) |
 | Table migration `nf/nafura` → chemins actuels | [ARCHITECTURE_MIGRATION.md](ARCHITECTURE_MIGRATION.md) |
 | Secrets Vault | [VAULT_SECRETS.md](VAULT_SECRETS.md) |
+| Fichier secrets local (bootstrap) | [secrets/README.md](../secrets/README.md) |
 | Vue humaine courte | [README.md](README.md) |
 
 ---
@@ -21,7 +22,7 @@
 5. **Métier** uniquement sous `products/<app-id>/` — jamais dans `platform/`.
 6. **Pas de codegen** JSON (`nafgen`, `nafspec`, `nafops`).
 7. **Legacy** `nf/nafura` : ne plus modifier sauf hotfix prod avant bascule.
-8. **Ne pas committer** de secrets.
+8. **Ne pas committer** de secrets ; fichier local `secrets/nafura.secrets` (voir [secrets/README.md](../secrets/README.md)).
 
 ---
 
@@ -148,7 +149,8 @@ KUBE_CONTEXT=<ctx> ENV=<env> bash toolchain/ops/nlops.sh <commande> [app]
 | Intent | Commande |
 |--------|----------|
 | Diagnostic | `preflight` |
-| Nouveau cluster | `clean-env` → `bootstrap-env` → `onboard-app <app>` |
+| Nouveau cluster | `secrets/nafura.secrets` → `clean-env` → `bootstrap-env` → `onboard-app <app>` |
+| Re-seed Vault (fichier local) | `vault-seed` |
 | Release complète | `release-app <app>` (+ `BUILD_IMAGES=true`) |
 | Backend + SQL | `release-backend <app>` |
 | Frontend seul | `release-frontend <app>` |

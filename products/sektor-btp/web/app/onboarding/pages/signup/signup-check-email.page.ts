@@ -24,7 +24,8 @@ import { ButtonComponent } from '@lib/anatomy';
       @if (email()) {
         <nf-button
           class="check-email-card__resend"
-          variant="secondary"
+          variant="stroked"
+          [fullWidth]="true"
           [disabled]="resending() || resendCooldown() > 0"
           (clicked)="resend()"
         >
@@ -59,16 +60,7 @@ import { ButtonComponent } from '@lib/anatomy';
       background: var(--nf-color-surface-muted);
       word-break: break-all;
     }
-    .check-email-card__resend {
-      display: block; width: 100%; margin-top: 1rem; padding: 0.65rem 1rem;
-      border: 1px solid var(--nf-color-primary-600);
-      border-radius: 8px; background: var(--nf-color-surface);
-      color: var(--nf-color-primary-600);
-      font-weight: 600; cursor: pointer;
-    }
-    .check-email-card__resend:disabled {
-      opacity: 0.6; cursor: not-allowed;
-    }
+    .check-email-card__resend { margin-top: 1rem; }
     .check-email-card__feedback {
       margin-top: 0.75rem; color: var(--nf-color-success-700);
     }

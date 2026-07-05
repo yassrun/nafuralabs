@@ -78,8 +78,9 @@ Migration legacy : `ENV=prod bash infra/scripts/vault-migrate-platform-paths.sh`
 ```
 Intent utilisateur                          → Commande
 ─────────────────────────────────────────────────────────────────
-Nouveau cluster / tout réinstaller          → clean-env → bootstrap-env → onboard-app
+Nouveau cluster / tout réinstaller          → secrets/nafura.secrets → clean-env → bootstrap-env → onboard-app
 Infra seulement (postgres, vault, KC…)      → bootstrap-env  (ou infra-up si déjà init)
+Mettre à jour secrets Vault depuis fichier  → vault-seed
 Premier deploy d’un produit sur un env      → onboard-app <app>
 Release complète (code + migrations)        → release-app <app>  [+ BUILD_IMAGES=true]
 Release backend seulement                   → release-backend <app>
@@ -111,7 +112,8 @@ KUBE_CONTEXT=<ctx> ENV=<env> bash toolchain/ops/nlops.sh <commande> [args]
 | Commande | Effet | Destructif |
 |----------|-------|------------|
 | `clean-env` | Supprime namespaces legacy + env courant | **Oui** |
-| `bootstrap-env` | Infra + vault-init + wait services ; skip vault-init si postgres déjà ready | Non |
+| `bootstrap-env` | Infra + vault-init + **vault-seed** (lit `secrets/nafura.secrets`) + wait ; skip vault-init si postgres déjà ready | Non |
+| `vault-seed` | Applique sections `[${ENV}/...]` de `secrets/nafura.secrets` dans Vault KV | Non |
 | `infra-up` | `kubectl apply` overlay infra | Non |
 | `infra-wait` | Attend postgres/redis/minio/keycloak | Non |
 | `preflight` | Diagnostic contexte, injector, infra, images | Non |
@@ -174,6 +176,7 @@ Credentials Postgres (staging/demo) : user/pass `nafura` / `nafura`.
 | `RESET_DB` | `false` | Avec `reset-app`, drop + recreate DB |
 | `REGISTRY` | `54.36.183.106:30500/nafura` | Override registry |
 | `GRADLEW` | `./gradlew.bat` | Gradle wrapper Windows |
+| `SECRETS_FILE` | `$ROOT/secrets/nafura.secrets` | Fichier secrets local (gitignored) pour vault-seed |
 | `KUBECTL_BIN` | `kubectl` | Binaire kubectl |
 
 ---

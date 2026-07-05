@@ -114,7 +114,6 @@ spec:
               vault kv put "secret/nafura/${ENV}/platform/iam/keycloak" admin_username=admin admin_password=admin db_username=nafura db_password=nafura db_database=keycloak
               vault kv put "secret/nafura/${ENV}/platform/storage/minio" root_user=minioadmin root_password=minioadmin access_key=minioadmin secret_key=minioadmin
               vault kv put "secret/nafura/${ENV}/platform/integrations/email/brevo" api_key=""
-              vault kv put "secret/nafura/${ENV}/platform/integrations/email/sendgrid" api_key=""
               vault kv put "secret/nafura/${ENV}/platform/integrations/ai/gemini" api_key=""
               vault kv put "secret/nafura/${ENV}/platform/security/invitation" token_secret=change-me-in-production
 

@@ -19,7 +19,7 @@ import { ButtonComponent } from '@lib/anatomy';
   template: `
     @if (visible()) {
       <aside class="invite-banner" role="complementary">
-        <nf-button type="button" class="invite-banner__close" (clicked)="dismiss()" aria-label="Fermer" variant="secondary">×</nf-button>
+        <nf-button type="button" class="invite-banner__close" (clicked)="dismiss()" aria-label="Fermer" variant="ghost" size="sm">×</nf-button>
         <p class="invite-banner__title">{{ 'onboarding.invite.title' | translate }}</p>
         <textarea class="invite-banner__emails" rows="2" [(ngModel)]="emailsText" [placeholder]="'onboarding.invite.emails' | translate"></textarea>
         <label>
@@ -31,10 +31,10 @@ import { ButtonComponent } from '@lib/anatomy';
           </select>
         </label>
         <div class="invite-banner__actions">
-          <nf-button type="button" class="invite-banner__send" (clicked)="send()" [disabled]="sending()" variant="secondary">
+          <nf-button type="button" class="invite-banner__send" (clicked)="send()" [disabled]="sending()" variant="primary">
             {{ 'onboarding.invite.send' | translate }}
           </nf-button>
-          <nf-button type="button" class="invite-banner__later" (clicked)="dismiss()" variant="secondary">
+          <nf-button type="button" class="invite-banner__later" (clicked)="dismiss()" variant="ghost">
             {{ 'onboarding.invite.dismiss' | translate }}
           </nf-button>
         </div>
@@ -49,14 +49,11 @@ import { ButtonComponent } from '@lib/anatomy';
       border: 1px solid var(--nf-color-primary-200); border-radius: 10px;
     }
     .invite-banner__close {
-      position: absolute; top: 0.5rem; right: 0.5rem; border: 0; background: none;
-      font-size: 1.25rem; cursor: pointer; line-height: 1;
+      position: absolute; top: 0.5rem; right: 0.5rem;
     }
     .invite-banner__title { font-weight: 600; margin: 0 0 0.5rem; }
     .invite-banner__emails { width: 100%; box-sizing: border-box; margin-bottom: 0.5rem; font: inherit; }
     .invite-banner__actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
-    .invite-banner__send { padding: 0.5rem 1rem; border: 0; border-radius: 6px; background: var(--nf-color-primary-600); color: var(--nf-color-surface); cursor: pointer; }
-    .invite-banner__later { padding: 0.5rem 1rem; border: 0; background: none; color: var(--nf-color-primary-600); cursor: pointer; text-decoration: underline; }
   `],
 })
 export class InviteTeamBannerComponent {

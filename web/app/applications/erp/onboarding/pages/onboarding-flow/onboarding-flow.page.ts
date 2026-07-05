@@ -42,7 +42,12 @@ import { ButtonComponent } from '@lib/anatomy';
             @if (choiceStep(); as cs) {
               <div class="flow__choices" role="group">
                 @for (opt of choiceOptions(cs); track opt.value) {
-                  <nf-button type="button" class="flow__choice" [class.is-selected]="choiceValue(cs) === opt.value" (clicked)="selectChoice(cs, opt.value)" variant="secondary">
+                  <nf-button
+                    type="button"
+                    class="flow__choice"
+                    size="sm"
+                    [variant]="choiceValue(cs) === opt.value ? 'primary' : 'stroked'"
+                    (clicked)="selectChoice(cs, opt.value)">
                     {{ opt.labelKey | translate }}
                   </nf-button>
                 }
@@ -63,15 +68,15 @@ import { ButtonComponent } from '@lib/anatomy';
           @if (busy()) {
             <p class="flow__busy">…</p>
           } @else {
-            <nf-button type="button" class="flow__next" (clicked)="advance()" [disabled]="busy()" variant="secondary">
+            <nf-button type="button" class="flow__next" variant="primary" (clicked)="advance()" [disabled]="busy()">
               {{ (step() < 4 ? 'onboarding.flow.next' : 'onboarding.flow.finish') | translate }}
             </nf-button>
           }
         } @else {
           <p class="flow__ready">{{ 'onboarding.flow.ready' | translate }}</p>
           <div class="flow__actions">
-            <nf-button type="button" class="flow__next" (clicked)="goChantier()" variant="secondary">{{ 'onboarding.flow.goChantier' | translate }}</nf-button>
-            <nf-button type="button" class="flow__link" (clicked)="goDashboard()" variant="secondary">{{ 'onboarding.flow.exploreLater' | translate }}</nf-button>
+            <nf-button type="button" class="flow__next" variant="primary" (clicked)="goChantier()">{{ 'onboarding.flow.goChantier' | translate }}</nf-button>
+            <nf-button type="button" class="flow__link" variant="ghost" (clicked)="goDashboard()">{{ 'onboarding.flow.exploreLater' | translate }}</nf-button>
           </div>
         }
       </section>
@@ -103,13 +108,9 @@ import { ButtonComponent } from '@lib/anatomy';
     .flow__q { font-size: 1.125rem; font-weight: 600; margin: 1rem 0; }
     .flow__input { width: 100%; box-sizing: border-box; margin-bottom: 0.75rem; padding: 0.625rem; border-radius: 8px; border: 1px solid var(--nf-border-default); font: inherit; }
     .flow__choices { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-    .flow__choice {
-      padding: 0.5rem 0.875rem; border-radius: 999px; border: 1px solid var(--nf-border-default);
-      background: var(--nf-color-surface); cursor: pointer; font: inherit;
-    }
-    .flow__choice.is-selected { border-color: var(--nf-color-primary-600); background: var(--nf-color-primary-50); }
-    .flow__next { margin-top: 1rem; padding: 0.75rem 1.25rem; border: 0; border-radius: 8px; background: var(--nf-color-primary-600); color: var(--nf-color-surface); font-weight: 600; cursor: pointer; }
-    .flow__link { margin-top: 0.75rem; background: none; border: 0; color: var(--nf-color-primary-600); cursor: pointer; text-decoration: underline; }
+    .flow__choices ::ng-deep button { border-radius: 999px; }
+    .flow__next { margin-top: 1rem; }
+    .flow__link { margin-top: 0.75rem; }
     .flow__progress ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.5rem; }
     .flow__progress li { display: flex; gap: 0.5rem; align-items: flex-start; font-size: 0.875rem; transition: color 0.2s; }
     .flow__progress li.is-done { color: var(--nf-color-success-700); }
@@ -118,7 +119,7 @@ import { ButtonComponent } from '@lib/anatomy';
     .flow__error { color: var(--nf-color-danger-700); font-size: 0.875rem; margin-top: 0.75rem; }
     .flow__hint { font-size: 0.8125rem; color: var(--nf-text-muted); margin: 0.25rem 0 0; }
     .flow__hint--invalid { color: var(--nf-color-warning-700); }
-    .flow__next:disabled { opacity: 0.6; cursor: not-allowed; }
+    .flow__next:disabled { opacity: 0.6; }
     .flow__actions { display: flex; flex-direction: column; align-items: flex-start; }
   `],
 })

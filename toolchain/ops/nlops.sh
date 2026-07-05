@@ -16,6 +16,7 @@ PUSH_IMAGES="${PUSH_IMAGES:-false}"
 RESET_DB="${RESET_DB:-false}"
 REGISTRY_USER="${REGISTRY_USER:-nafura}"
 REGISTRY_PASS="${REGISTRY_PASS:-}"
+SECRETS_FILE="${SECRETS_FILE:-$ROOT/secrets/nafura.secrets}"
 
 if [[ -n "$KUBE_CONTEXT" ]]; then
   KUBECTL() { "$KUBECTL_BIN" --context="$KUBE_CONTEXT" "$@"; }
@@ -83,7 +84,8 @@ Namespaces:
 Cluster / infra (once per env, or after clean-env):
   clean-env                  Delete legacy + env namespaces (destructive)
   clean-demo                 Delete demo namespaces only (legacy)
-  bootstrap-env              Infra + vault-init + wait core services
+  bootstrap-env              Infra + vault-init + seed secrets + wait core services
+  vault-seed                 Apply secrets/nafura.secrets to Vault for ENV
   infra-up                   Apply infra overlay only
   infra-wait                 Wait for postgres/redis/minio/keycloak
   preflight                  Check injector, namespaces, optional images
@@ -298,10 +300,22 @@ infra_up() {
 run_vault_init() {
   local infra_ns
   infra_ns="$(infra_namespace_for_env "$ENV")"
+  if [[ ! -f "$SECRETS_FILE" ]]; then
+    echo "ERROR: Missing $SECRETS_FILE" >&2
+    echo "  Create secrets/nafura.secrets — see secrets/README.md" >&2
+    exit 1
+  fi
   KUBECTL delete job vault-init -n "$infra_ns" --ignore-not-found=true
   kustomize_build "$ROOT/infra/k8s/overlays/infra/$ENV" | KUBECTL apply -f -
   echo "Waiting for vault-init job..."
   KUBECTL wait --for=condition=complete "job/vault-init" -n "$infra_ns" --timeout=180s
+  vault_seed_from_local
+}
+
+vault_seed_from_local() {
+  echo "Seeding Vault from local secrets file..."
+  ROOT="$ROOT" ENV="$ENV" SECRETS_FILE="$SECRETS_FILE" KUBECTL_BIN="$KUBECTL_BIN" KUBE_CONTEXT="$KUBE_CONTEXT" \
+    bash "$ROOT/infra/scripts/vault-seed-from-local.sh" "$ENV"
 }
 
 infra_wait() {
@@ -826,6 +840,7 @@ release_app() {
 
 case "${1:-}" in
   bootstrap-env) bootstrap_env ;;
+  vault-seed) require_env; vault_seed_from_local ;;
   clean-env) clean_env ;;
   clean-demo) clean_demo ;;
   infra-up) infra_up ;;

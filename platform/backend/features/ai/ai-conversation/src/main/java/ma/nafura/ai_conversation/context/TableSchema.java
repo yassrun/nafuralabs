@@ -12,7 +12,12 @@ public class TableSchema {
     private String zone;
     private String entity;
     private String description;
+    /** core = always in prompt; extended = included when domain matches */
     private String category;
+    /** French / business terms mapped to this table (chantier, projet, site, …) */
+    private List<String> aliases;
+    /** Short SQL hints or status values for the model */
+    private List<String> hints;
     private List<ColumnSchema> columns;
 
     @Data

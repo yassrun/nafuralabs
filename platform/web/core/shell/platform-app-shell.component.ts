@@ -2203,10 +2203,12 @@ export class PlatformAppShellComponent implements OnInit {
     ]);
     this.conversationDraft.set('');
     try {
+      const domainKey = this.resolveConversationDomainKey();
+      const context = domainKey ? { content, domainKey } : { content };
       if (mode === 'ASK') {
-        await this.conversationApi.sendAskMessage(conversationId, applicationId, { content });
+        await this.conversationApi.sendAskMessage(conversationId, applicationId, context);
       } else {
-        await this.conversationApi.proposeActions(conversationId, applicationId, { content });
+        await this.conversationApi.proposeActions(conversationId, applicationId, context);
       }
       await this.loadConversationSessions(mode);
       await this.refreshConversation(mode);
@@ -2286,6 +2288,24 @@ export class PlatformAppShellComponent implements OnInit {
     }
     const normalized = route.trim();
     return normalized.startsWith('/') ? normalized : `/${normalized}`;
+  }
+
+  /** Maps current URL to AI schema domain for focused, token-efficient prompts. */
+  private resolveConversationDomainKey(): string | undefined {
+    const path = this.currentUrl().split('?')[0].replace(/^\/+/, '');
+    const segment = path.split('/')[0]?.toLowerCase();
+    const domainBySegment: Record<string, string> = {
+      chantiers: 'chantiers',
+      achats: 'achats',
+      ventes: 'ventes',
+      finance: 'finance',
+      inventory: 'stock',
+      hse: 'hse',
+      rh: 'rh',
+      etudes: 'etudes',
+      marches: 'marches',
+    };
+    return segment ? domainBySegment[segment] : undefined;
   }
 
   translateLabel(label: string | undefined): string {
