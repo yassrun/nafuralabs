@@ -1,6 +1,7 @@
 # Import des libs partagées — backend & frontend
 
-Guide monorepo : [README.md](README.md).
+Référence agents : [AGENTS.md](AGENTS.md).  
+Migration legacy : [ARCHITECTURE_MIGRATION.md](ARCHITECTURE_MIGRATION.md).
 
 
 ## Principe
@@ -186,21 +187,8 @@ Pas d’équivalent front obligatoire : souvent chaque app a sa UI même si le b
 
 ---
 
-## Copie depuis `nafura` — checklist imports
-
-| Étape | Action |
-|-------|--------|
-| 1 | Copier `nafura/backend/platform` → `nafuralabs/platform/backend` |
-| 2 | Copier `nafura/web/app/platform` → `nafuralabs/platform/web` |
-| 3 | Créer `settings.gradle.kts` racine avec `include` + `projectDir` |
-| 4 | Remplacer `implementation project(':domains:…')` par modules sous `products/<app>/backend/modules/` |
-| 5 | Configurer `tsconfig` paths vers `../../../platform/web` |
-| 6 | Retirer imports ERP du shell platform |
-
----
-
 ## Résumé
 
-> **Backend :** un Gradle multi-projet à la racine de `nafuralabs` — `implementation(project(":platform:…"))` et `implementation(project(":products:venue-catalog:…"))`.  
-> **Frontend :** alias TypeScript `@platform/*` → `platform/web/`.  
-> **Pas de registry** en phase solo ; **pas de dépendance** `nafura` → `nafuralabs` ou l’inverse.
+> **Backend :** Gradle multi-projet — `implementation(project(":platform:…"))`.  
+> **Frontend :** alias `@platform/*` → `platform/web/`.  
+> **Pas de registry** en solo ; **pas de split repo** tant que platform + produits cohabitent.

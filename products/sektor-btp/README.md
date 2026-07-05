@@ -1,80 +1,49 @@
 # Sektor BTP (ERP)
 
-ERP BTP migré depuis `nf/nafura`. Guide monorepo : [docs/README.md](../../docs/README.md).
+ERP BTP. Référence monorepo : [docs/AGENTS.md](../../docs/AGENTS.md).  
+Deploy : [toolchain/ops/AGENTS.md](../../toolchain/ops/AGENTS.md).
 
 ## Structure
 
 ```
 sektor-btp/
-├── backend/
-│   ├── app/              # Spring Boot (:sektor:app)
-│   └── modules/          # 13 domaines BTP (:sektor:item, :sektor:stock, …)
-├── web/app/              # UI Angular (@applications/erp paths → ./app)
-├── deploy/k8s/           # overlays staging | prod, namespace nafura-sektor
-└── docs/
+├── backend/app/          # :sektor:app
+├── backend/modules/      # :sektor:<domaine>
+├── web/app/              # UI (@applications/*)
+└── deploy/k8s/overlays/  # staging | prod
 ```
 
-## Build backend
+## Build
 
 ```bash
-cd C:\nf\nafuralabs
 .\gradlew.bat :sektor:app:bootJar
+cd web && npm run build:staging   # ou build:prod pour prod
 ```
 
-## Build frontend
+## Deploy
 
 ```bash
-cd C:\nf\nafuralabs\web
-npm install
-npm run build:prod
+# 1× infra sur nouveau cluster staging
+KUBE_CONTEXT=docker-desktop ENV=staging bash toolchain/ops/nlops.sh bootstrap-env
+
+# 1× premier onboard
+BUILD_IMAGES=true KUBE_CONTEXT=docker-desktop ENV=staging bash toolchain/ops/nlops.sh onboard-app sektor-btp
+
+# Release quotidienne
+BUILD_IMAGES=true KUBE_CONTEXT=docker-desktop ENV=staging bash toolchain/ops/nlops.sh release-app sektor-btp
 ```
-
-## Deploy (staging)
-
-**Bootstrap infra** — une seule fois sur un nouveau cluster staging :
-
-```bash
-ENV=staging bash toolchain/ops/nlops.sh bootstrap-env
-```
-
-**Premier déploiement Sektor** sur cet env :
-
-```bash
-ENV=staging bash toolchain/ops/nlops.sh onboard-app sektor-btp
-```
-
-**Releases suivantes** (infra déjà en place) :
-
-```bash
-ENV=staging bash toolchain/ops/nlops.sh deploy sektor-btp
-```
-
-Ou : `make deploy APP=sektor-btp ENV=staging`
 
 ## Environnements
 
-| Env | Cluster | Namespace app |
-|-----|---------|-----------------|
-| staging | K8s local | `nafura-sektor` |
-| prod | GKE | `nafura-sektor` |
+| Env | Cluster | Namespace | Web | API |
+|-----|---------|-----------|-----|-----|
+| staging | Docker Desktop | `sektor-staging` | `sektor.nafuralabs.staging` | `api.sektor.nafuralabs.staging` |
+| prod | OVH VPS k3s | `sektor-prod` | `sektor.nafuralabs.com` | `api.sektor.nafuralabs.com` |
 
-Infra partagée : `nafura-infra` (postgres, keycloak, minio, redis).
+Infra partagée : `nafura-infra-${ENV}`. IAM staging : `iam.nafuralabs.staging`.
 
-## Hostnames
-
-| Env | Web | API |
-|-----|-----|-----|
-| staging | [sektor.nafuralabs.staging](http://sektor.nafuralabs.staging) | `api.sektor.nafuralabs.staging` |
-| prod | [sektor.nafuralabs.com](https://sektor.nafuralabs.com) | `api.sektor.nafuralabs.com` |
-
-Ajouter dans `/etc/hosts` (staging local) :
-
-```
-127.0.0.1 sektor.nafuralabs.staging api.sektor.nafuralabs.staging iam.nafuralabs.staging minio.nafuralabs.staging s3.nafuralabs.staging vault.nafuralabs.staging
-```
-
-Ou sous Windows (admin) : `powershell -ExecutionPolicy Bypass -File toolchain/ops/add-staging-hosts.ps1`
+Hosts local : `powershell -ExecutionPolicy Bypass -File toolchain/ops/add-staging-hosts.ps1` (admin).
 
 ## DB
 
-Nom conservé pour compatibilité prod : **`nafura_erp`**.
+`nafura_erp` sur Postgres infra partagé.

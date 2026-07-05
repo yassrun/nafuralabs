@@ -1,11 +1,10 @@
 # Référence ops pour agents AI — `nlops.sh`
 
-**Document canonique** pour toute opération cluster / déploiement / migration dans ce repo.
+**Ops K8s** — complète [docs/AGENTS.md](../../docs/AGENTS.md) (monorepo, git, hostnames).
 
 - Script : `toolchain/ops/nlops.sh`
 - Makefile : racine du repo (`make help`)
-- Doc humaine : [README.md](README.md)
-- Règles repo générales : [docs/AGENTS.md](../../docs/AGENTS.md)
+- Doc humaine courte : [README.md](README.md)
 
 ---
 
@@ -293,7 +292,7 @@ Fichiers clés :
 |----------|----------------|--------------|
 | `connection refused 127.0.0.1:6443` | Docker Desktop K8s off | Demander d’activer K8s dans Docker Desktop |
 | Init container vault fail | vault-injector à 0 ou mauvaise addr | `bootstrap-env` (reconfigure injector) |
-| `ImagePullBackOff` sur GKE | Image absente dans GAR | `BUILD_IMAGES=true PUSH_IMAGES=true build-push` |
+| `ImagePullBackOff` prod | Image absente dans registry VPS | `BUILD_IMAGES=true PUSH_IMAGES=true build-push` |
 | `ImagePullBackOff` staging | Tag local manquant | `BUILD_IMAGES=true build-images sektor-btp` |
 | Backend CrashLoop après deploy | Migrations non appliquées | `migrate sektor-btp` puis `deploy-backend` |
 | Keycloak not ready | Image keycloak ou vault secrets | Vérifier pods `-n nafura-infra-<env>`, rebuild keycloak |
@@ -372,4 +371,4 @@ Après `onboard-app` / `release-app` :
 
 ---
 
-*Dernière mise à jour : aligné sur `nlops.sh` (release-app, migrate Job, KUBE_CONTEXT, env demo).*
+*Dernière mise à jour : aligné OVH VPS prod, hostnames `*.nafuralabs.staging`, voir aussi [docs/AGENTS.md](../../docs/AGENTS.md).*

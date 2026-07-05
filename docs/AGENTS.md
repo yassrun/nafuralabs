@@ -1,60 +1,200 @@
-# Agent rules — NafuraLabs
+# NafuraLabs — référence agents IA
 
-Guide complet : [README.md](README.md).
+**Document canonique** du monorepo. Lire en premier avant toute modification code, ops ou doc.
 
-**Référence ops (déploiement, migrations, cluster)** → **[toolchain/ops/AGENTS.md](../toolchain/ops/AGENTS.md)**  
-Lire ce document avant toute opération `nlops.sh`, bootstrap, release ou reset.
+| Besoin | Document |
+|--------|----------|
+| Ops K8s (deploy, migrate, reset, troubleshooting) | [toolchain/ops/AGENTS.md](../toolchain/ops/AGENTS.md) |
+| Imports Gradle / TypeScript | [PLATFORM_IMPORTS.md](PLATFORM_IMPORTS.md) |
+| Table migration `nf/nafura` → chemins actuels | [ARCHITECTURE_MIGRATION.md](ARCHITECTURE_MIGRATION.md) |
+| Secrets Vault | [VAULT_SECRETS.md](VAULT_SECRETS.md) |
+| Vue humaine courte | [README.md](README.md) |
 
 ---
 
-**`nf/nafuralabs`** — seul monorepo actif.
+## Règles impératives
 
-**`nf/nafura`** — legacy, ne plus modifier sauf hotfix prod avant bascule.
+1. **Un seul monorepo** (`nafuralabs`) — ne pas splitter platform + Sektor tant qu’ils partagent Gradle/TS.
+2. **Environnement = cluster**, pas branche Git — `ENV=staging|prod` + `KUBE_CONTEXT`, jamais de branche `staging`/`prod`.
+3. **Ops** : toujours `toolchain/ops/nlops.sh` ou `make` — pas de `kubectl apply` ad hoc sauf debug.
+4. **Migrations** : Job Liquibase **avant** backend (`release-app`, pas `deploy` seul après changement SQL).
+5. **Métier** uniquement sous `products/<app-id>/` — jamais dans `platform/`.
+6. **Pas de codegen** JSON (`nafgen`, `nafspec`, `nafops`).
+7. **Legacy** `nf/nafura` : ne plus modifier sauf hotfix prod avant bascule.
+8. **Ne pas committer** de secrets.
 
-## Products
+---
 
-| App ID | Gradle | K8s namespace | DB |
-|--------|--------|---------------|-----|
-| `sektor-btp` | `:sektor:app`, `:sektor:<module>` | `sektor-${ENV}` | `nafura_erp` |
-| `venue-catalog` | — | `venue-catalog-${ENV}` | `nafura_venue_catalog` |
-| `mbs-studio` | — | `nafura-vitrine-${ENV}` | — |
-| `corporate` | — | `nafura-vitrine-${ENV}` | — |
+## Modèle monorepo
 
-## Imports
-
-- Backend: `project(":platform:…")`, `project(":sektor:…")`
-- Frontend: `@platform/*` → `platform/web`, `@applications/*` → `products/sektor-btp/web/app`
-
-## Environments
-
-| `ENV` | Cluster | Context kubectl | Infra NS | App NS |
-|-------|---------|-----------------|----------|--------|
-| `staging` | Docker Desktop K8s (optional) | `docker-desktop` | `nafura-infra-staging` | `sektor-staging` |
-| `prod` | OVH VPS k3s | `nafura-vps-prod` | `nafura-infra-prod` | `sektor-prod`, `nafura-vitrine-prod` |
-
-Pas d’overlay `dev`.
-
-## Forbidden
-
-- JSON spec-driven codegen
-- nafgen, nafspec, nafops
-- Nouveau code métier hors `products/<app-id>/`
-- Namespaces legacy : `nafura-erp-dev`, `nafura-infra`, infra dans `default`
-
-## Ops (résumé)
-
-```bash
-# Diagnostic
-KUBE_CONTEXT=docker-desktop ENV=staging bash toolchain/ops/nlops.sh preflight
-
-# 1× nouveau cluster staging
-KUBE_CONTEXT=docker-desktop ENV=staging bash toolchain/ops/nlops.sh bootstrap-env
-
-# 1× premier produit
-BUILD_IMAGES=true ENV=staging bash toolchain/ops/nlops.sh onboard-app sektor-btp
-
-# Release (migrations AVANT backend)
-BUILD_IMAGES=true ENV=staging bash toolchain/ops/nlops.sh release-app sektor-btp
+```
+platform/          SDK partagé (auth, tenancy, UI shell) — aucun métier
+products/<app>/    Code + deploy K8s par produit
+infra/k8s/         Infra partagée (postgres, keycloak, vault…) — overlays par ENV
+marketing/         Sites vitrine (MBS, corporate)
+web/               Workspace Angular Sektor (build entrypoint)
+toolchain/ops/     nlops.sh — CLI deploy
 ```
 
-Détail complet, arbre de décision, troubleshooting : **[toolchain/ops/AGENTS.md](../toolchain/ops/AGENTS.md)**.
+**Infra** : déployée **1× par cluster** (`bootstrap-env`).  
+**Produits** : déployés **indépendamment** (`release-app <app>`).
+
+---
+
+## Git & releases
+
+| Principe | Détail |
+|----------|--------|
+| Branche principale | `main` — source de vérité |
+| Branches de travail | `feat/<scope>`, `fix/<scope>` — courtes, merge via PR |
+| Pas de branche par env | staging/prod = clusters K8s, pas Git |
+| Promotion prod | Même commit `main` (ou tag) → `ENV=prod` + `PUSH_IMAGES=true` |
+| Découpage PR | 1 PR = 1 périmètre : `products/sektor-btp`, `platform/`, `infra/k8s`, `marketing/` |
+
+### Quel deploy après merge ?
+
+| Paths modifiés | Action staging |
+|----------------|----------------|
+| `products/sektor-btp/**`, `platform/**`, `web/**` | `release-app sektor-btp` |
+| `infra/k8s/**` | `infra-up` puis vérifier apps |
+| `marketing/products/mbs-studio/**` | `deploy mbs-studio` |
+| `marketing/corporate/**` | `deploy corporate` |
+| `toolchain/ops/**` | pas de deploy cluster |
+
+**CI/CD GitHub Actions** : non implémenté — deploy manuel via `nlops.sh` (roadmap).
+
+---
+
+## Environnements
+
+| `ENV` | Cluster | `KUBE_CONTEXT` | Infra NS | Images |
+|-------|---------|----------------|----------|--------|
+| `staging` | Docker Desktop K8s | `docker-desktop` | `nafura-infra-staging` | locales `:staging` |
+| `prod` | OVH VPS k3s | `nafura-vps-prod` | `nafura-infra-prod` | registry VPS `:prod` |
+
+Registry prod : `54.36.183.106:30500/nafura` — public TLS : `registry.nafuralabs.com`
+
+Pas d’overlay K8s `dev`. Env `demo` (GKE) : **deprecated**.
+
+---
+
+## Produits déployables
+
+| App ID | Namespace | DB | Migrations | Overlay K8s |
+|--------|-----------|-----|------------|-------------|
+| `sektor-btp` | `sektor-${ENV}` | `nafura_erp` | Liquibase Job | `products/sektor-btp/deploy/k8s/overlays/${ENV}` |
+| `venue-catalog` | `venue-catalog-${ENV}` | `nafura_venue_catalog` | Flyway startup | `products/venue-catalog/deploy/k8s/overlays/${ENV}` |
+| `mbs-studio` | `nafura-vitrine-${ENV}` | — | — | `marketing/products/mbs-studio/deploy/k8s/overlays/${ENV}` |
+| `corporate` | `nafura-vitrine-${ENV}` | — | — | `marketing/corporate/deploy/k8s/overlays/${ENV}` |
+
+Layali / Beauty : `products/*/mobile/` — hors K8s pour l’instant.
+
+Gradle Sektor : `:sektor:app`, `:sektor:<module>`.  
+Frontend : `@platform/*` → `platform/web`, `@applications/*` → `products/sektor-btp/web/app`.
+
+---
+
+## Hostnames
+
+### Staging (`*.nafuralabs.staging` — fichier hosts local → `127.0.0.1`)
+
+| Rôle | Host |
+|------|------|
+| Sektor web | `sektor.nafuralabs.staging` |
+| Sektor API | `api.sektor.nafuralabs.staging` |
+| IAM | `iam.nafuralabs.staging` |
+| MBS | `mbs.nafuralabs.staging` |
+| Minio / S3 / Vault | `minio`, `s3`, `vault`.nafuralabs.staging |
+
+Hosts Windows (admin) : `powershell -ExecutionPolicy Bypass -File toolchain/ops/add-staging-hosts.ps1`
+
+### Prod (`*.nafuralabs.com` — DNS public → VPS `54.36.183.106`)
+
+| Rôle | Host |
+|------|------|
+| Sektor | `sektor.nafuralabs.com`, `api.sektor.nafuralabs.com` |
+| IAM | `iam.nafuralabs.com` |
+| MBS | `mbs.nafuralabs.com` |
+
+Config front : `web/src/environments/environment.staging.ts` / `environment.prod.ts`.
+
+---
+
+## Où mettre le code
+
+| Tâche | Chemin |
+|-------|--------|
+| Domaine ERP (stock, chantiers…) | `products/sektor-btp/backend/modules/<domaine>/` |
+| Boot app Sektor | `products/sektor-btp/backend/app/` |
+| UI ERP | `products/sektor-btp/web/app/` |
+| Auth, listing, shell UI | `platform/web/` ou `platform/backend/` |
+| Specs produit | `products/<app-id>/docs/` |
+| Manifests produit | `products/<app-id>/deploy/k8s/` — **pas** sous `infra/k8s/` |
+| Infra partagée | `infra/k8s/overlays/infra/${ENV}/` |
+| Nouveau produit | Copier pattern `sektor-btp` → `onboard-app` |
+
+`shared/business/` : uniquement si **2 produits** réutilisent le même module métier.
+
+---
+
+## Ops — commandes essentielles
+
+Toujours depuis la **racine du repo** :
+
+```bash
+KUBE_CONTEXT=<ctx> ENV=<env> bash toolchain/ops/nlops.sh <commande> [app]
+```
+
+| Intent | Commande |
+|--------|----------|
+| Diagnostic | `preflight` |
+| Nouveau cluster | `clean-env` → `bootstrap-env` → `onboard-app <app>` |
+| Release complète | `release-app <app>` (+ `BUILD_IMAGES=true`) |
+| Backend + SQL | `release-backend <app>` |
+| Frontend seul | `release-frontend <app>` |
+| Infra seule | `infra-up` |
+| Prod + images | `BUILD_IMAGES=true PUSH_IMAGES=true REGISTRY_PASS=… release-app <app>` |
+
+Staging Sektor (quotidien) :
+
+```bash
+BUILD_IMAGES=true KUBE_CONTEXT=docker-desktop ENV=staging bash toolchain/ops/nlops.sh release-app sektor-btp
+```
+
+Arbre de décision complet : [toolchain/ops/AGENTS.md](../toolchain/ops/AGENTS.md).
+
+---
+
+## Interdit
+
+| Action | Raison |
+|--------|--------|
+| Namespaces `nafura-erp-dev`, `nafura-infra`, `default` pour infra | Legacy |
+| `kubectl apply -f` hors kustomize overlay env | Drift |
+| Deploy backend sans `migrate` après changement SQL | CrashLoop |
+| Métier BTP dans `platform/` | Architecture |
+| Overlay K8s `dev` | Seulement staging + prod |
+| Dupliquer ERP sous `web/app/applications/` | Source = `products/sektor-btp/web/app/` |
+| Hostnames `*.nafura.local` en staging cluster | Remplacés par `*.nafuralabs.staging` (dev local `ng serve` peut garder `.local`) |
+
+---
+
+## Dette connue
+
+- Shell platform couplé à Sektor via `@applications/*` — à découpler au 2ᵉ produit front.
+- Docs historiques `web/docs/` : chemins `app/applications/erp` → lire `products/sektor-btp/web/app/`.
+- CI/CD automatisé : à implémenter (build PR → deploy staging → deploy prod manuel).
+
+---
+
+## Checklist post-merge (agent)
+
+- [ ] Changement SQL → `migrate` / `release-backend`, pas `deploy` seul
+- [ ] Changement `environment.*.ts` ou ingress → rebuild image web
+- [ ] Changement `infra/k8s` → `infra-up` + rollout keycloak si hostname IAM
+- [ ] Staging validé avant `ENV=prod`
+- [ ] `preflight` + `kubectl get pods -n <ns>` après deploy
+
+---
+
+*Dernière mise à jour : 2026-07 — monorepo, OVH VPS prod, hostnames `*.nafuralabs.staging`.*

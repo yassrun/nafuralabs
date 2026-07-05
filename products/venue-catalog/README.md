@@ -4,7 +4,7 @@ Service interne de collecte, normalisation et revue de lieux (Google Places → 
 
 **Statut :** backend wp-01 implémenté (Spring Boot modular monolith).
 
-Guide monorepo : [docs/README.md](../../docs/README.md).
+Guide monorepo : [docs/AGENTS.md](../../docs/AGENTS.md).
 
 ## Build backend
 
@@ -52,6 +52,6 @@ products/venue-catalog/
 
 ## K8s (futur)
 
-- Namespace : `nafura-venue-catalog`
-- DB : `nafura_venue_catalog` sur Postgres `nafura-infra`
+- Namespace : `venue-catalog-${ENV}`
+- DB : `nafura_venue_catalog` sur Postgres `nafura-infra-${ENV}`
 - Envs : `staging` | `prod` uniquement

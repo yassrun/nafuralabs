@@ -1,47 +1,35 @@
 # NafuraLabs
 
-Monorepo Nafura — produits, platform, infra.
+Monorepo Nafura — platform, produits, infra.
 
-**→ Commencer par [docs/README.md](docs/README.md)** (vision, structure, maintenance).
+## Documentation
 
-## Démarrage rapide
+| Priorité | Document |
+|----------|----------|
+| **Agents IA** | **[docs/AGENTS.md](docs/AGENTS.md)** — référence canonique |
+| Ops K8s | [toolchain/ops/AGENTS.md](toolchain/ops/AGENTS.md) |
+| Vue humaine | [docs/README.md](docs/README.md) |
 
-```powershell
-cd C:\nf\nafuralabs
-.\gradlew.bat :sektor:app:bootJar
-```
-
-```powershell
-cd web
-npm install
-npm run build:prod
-```
+## Démarrage rapide (staging)
 
 ```bash
-make deploy-sektor ENV=staging
-# ou
-make deploy APP=sektor-btp ENV=staging
+BUILD_IMAGES=true KUBE_CONTEXT=docker-desktop ENV=staging \
+  bash toolchain/ops/nlops.sh release-app sektor-btp
+```
+
+```powershell
+.\gradlew.bat :sektor:app:bootJar
+cd web && npm run build:staging
 ```
 
 ## Produits
 
-| Produit | Chemin | Statut |
-|---------|--------|--------|
-| Sektor BTP (ERP) | [products/sektor-btp/](products/sektor-btp/) | migré |
-| Venue Catalog | [products/venue-catalog/](products/venue-catalog/) | specs |
-| Layali | [products/layali/](products/layali/) | prototype mobile |
-| Beauty | [products/beauty/](products/beauty/) | prototype mobile |
+| Produit | Chemin |
+|---------|--------|
+| Sektor BTP (ERP) | [products/sektor-btp/](products/sektor-btp/) |
+| MBS Studio | [marketing/products/mbs-studio/](marketing/products/mbs-studio/) |
+| Corporate | [marketing/corporate/](marketing/corporate/) |
+| Venue Catalog | [products/venue-catalog/](products/venue-catalog/) |
+| Layali / Beauty | [products/layali/](products/layali/), [products/beauty/](products/beauty/) |
 
-## Documentation
-
-| Doc | Sujet |
-|-----|-------|
-| [docs/README.md](docs/README.md) | **Guide mère** |
-| [toolchain/ops/README.md](toolchain/ops/README.md) | Ops K8s : bootstrap env vs deploy produit |
-| [docs/PLATFORM_IMPORTS.md](docs/PLATFORM_IMPORTS.md) | Imports Gradle / TypeScript |
-| [docs/ARCHITECTURE_MIGRATION.md](docs/ARCHITECTURE_MIGRATION.md) | Migration depuis nafura |
-| [docs/AGENTS.md](docs/AGENTS.md) | Règles agents IA |
-
-## Legacy
-
-`nf/nafura` — archive, ne plus développer.
+Legacy : `nf/nafura` — ne plus développer.

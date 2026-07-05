@@ -1,304 +1,86 @@
 # NafuraLabs — guide du monorepo
 
-Document **mère** : vision, structure, navigation, maintenance quotidienne.  
-À lire en premier. Les autres docs du dossier `docs/` détaillent des sujets précis.
+**Agents IA** → lire d’abord **[AGENTS.md](AGENTS.md)** (référence canonique).
 
 | Document | Contenu |
 |----------|---------|
-| **Ce fichier** | Vision, arborescence, workflows |
-| [ARCHITECTURE_MIGRATION.md](ARCHITECTURE_MIGRATION.md) | Historique migration depuis `nf/nafura` |
-| [PLATFORM_IMPORTS.md](PLATFORM_IMPORTS.md) | Gradle + TypeScript : lier platform ↔ produits |
-| [AGENTS.md](AGENTS.md) | Règles pour agents IA / contributeurs |
+| [AGENTS.md](AGENTS.md) | **Référence agents** — monorepo, git, envs, deploy, interdits |
+| [toolchain/ops/AGENTS.md](../toolchain/ops/AGENTS.md) | Ops K8s détaillé (`nlops.sh`) |
+| [PLATFORM_IMPORTS.md](PLATFORM_IMPORTS.md) | Gradle + TypeScript paths |
+| [ARCHITECTURE_MIGRATION.md](ARCHITECTURE_MIGRATION.md) | Chemins `nf/nafura` → `nafuralabs` |
+| [VAULT_SECRETS.md](VAULT_SECRETS.md) | Arborescence secrets |
 
 ---
 
-## 1. Vision
+## Vision
 
-**NafuraLabs** est le monorepo unique de Nafura :
-
-- chaque **produit** (Sektor, futurs Beauty / Layali…) est **autonome** : code métier, déploiement, docs ;
-- seule la **platform** est partagée : auth, tenancy, composants UI, doc-manager, etc. ;
-- **pas de JSON spec** ni de codegen (`nafgen`, `nafspec`, `nafops`) — le **code** et le **Markdown** font foi ;
-- **deux environnements** : `staging` (cluster K8s local) et `prod` (GKE) ;
-- un module métier partagé (`shared/business/`) **uniquement** quand deux produits en ont besoin.
-
-**Legacy :** `nf/nafura` reste en archive jusqu’à bascule prod complète. Ne plus y développer.
+- **Un monorepo** : platform partagée + produits autonomes (`products/<app-id>/`).
+- **Code et Markdown** font foi — pas de JSON spec / codegen.
+- **Deux environnements** : `staging` (Docker Desktop K8s) et `prod` (OVH VPS k3s).
+- **Legacy** `nf/nafura` : archive, ne plus développer.
 
 ---
 
-## 2. Arborescence
+## Arborescence (résumé)
 
 ```
-nf/nafuralabs/
-│
-├── docs/                          ← vous êtes ici
-│
-├── platform/                      # SDK technique (aucun métier)
-│   ├── backend/                   # modules Gradle Java (:platform:*)
-│   └── web/                       # shell Angular, anatomy, features
-│
-├── products/                      # produits déployables
-│   ├── sektor-btp/                # ERP BTP — migré
-│   ├── venue-catalog/             # catalogue lieux — specs
-│   ├── layali/                    # nightlife — P1 Client Walkthrough (mobile/)
-│   │   ├── mobile/
-│   │   └── docs/
-│   └── beauty/                    # salons beauté — P1 Client Walkthrough (mobile/)
-│       ├── mobile/
-│       └── docs/
-│
-├── web/                           # workspace Angular (point d’entrée build Sektor)
-│   ├── src/                       # main.ts, environments
-│   ├── app/                       # app.component, app.config, routes (pas de métier ici)
-│   └── package.json
-│
-├── marketing/
-│   └── corporate/                 # site nafuralabs.com (Next.js)
-│
-├── infra/
-│   ├── k8s/                       # postgres, redis, minio, keycloak, vault
-│   └── keycloak/themes/
-│
-├── shared/
-│   └── business/                  # vide — modules métier partagés plus tard
-│
-├── toolchain/ops/
-│   ├── nlops.sh                   # bootstrap-env, onboard-app, deploy, …
-│   └── README.md                  # infra 1× / env vs deploy produit
-│
-├── tools/lifecycle/               # collecte migrations SQL → Liquibase
-├── settings.gradle.kts            # inclut platform + produits
-├── build.gradle.kts
-├── Makefile
-└── README.md
+platform/           SDK (backend Gradle + web Angular)
+products/           Sektor, venue-catalog, layali, beauty…
+infra/k8s/          Postgres, Keycloak, Vault, ingress
+marketing/          Sites vitrine
+web/                Workspace Angular Sektor
+toolchain/ops/      nlops.sh
 ```
 
-### Où mettre quoi ?
-
-| Je travaille sur… | Dossier |
-|-------------------|---------|
-| Compta, chantiers, stock… | `products/sektor-btp/backend/modules/<domaine>/` |
-| Onboarding, config app ERP | `products/sektor-btp/backend/app/` |
-| Écran ERP, facades Angular | `products/sektor-btp/web/app/` |
-| Auth, listing générique, shell | `platform/web/` ou `platform/backend/` |
-| Catalogue lieux, jobs Google | `products/venue-catalog/` (specs) |
-| Client Walkthrough Layali / Beauty (P1) | `products/layali/mobile/`, `products/beauty/mobile/` |
-| Specs produit | `products/<app-id>/docs/` |
-| Nouveau produit | `products/<app-id>/` (copier le pattern sektor-btp) |
-| Postgres, Keycloak | `infra/k8s/` |
-| Site vitrine | `marketing/corporate/` ou `marketing/products/<marque>/` |
+Détail « où mettre quoi » : [AGENTS.md § Où mettre le code](AGENTS.md#où-mettre-le-code).
 
 ---
 
-## 3. Namespaces & environnements
+## Environnements & hostnames
 
-L’**environnement = le cluster** (pas un suffixe dans le nom du namespace).
+| Env | Cluster | Sektor web | IAM |
+|-----|---------|------------|-----|
+| staging | Docker Desktop | `sektor.nafuralabs.staging` | `iam.nafuralabs.staging` |
+| prod | OVH VPS | `sektor.nafuralabs.com` | `iam.nafuralabs.com` |
 
-| Env | Cluster | Usage |
-|-----|---------|-------|
-| `staging` | Docker Desktop K8s / k3d | dev quotidien, intégration |
-| `prod` | GKE | clients |
+Namespaces : `nafura-infra-${ENV}`, `sektor-${ENV}`, `nafura-vitrine-${ENV}`.
 
-| Namespace K8s | Contenu |
-|---------------|---------|
-| `nafura-infra` | postgres, redis, minio, keycloak, vault, ingress |
-| `nafura-sektor` | backend + frontend Sektor |
-| `nafura-venue-catalog` | venue-catalog backend (futur) |
-| `nafura-marketing` | site corporate (futur) |
-
-**Postgres :** une instance par cluster, une base par app. Sektor → `nafura_erp`.
-
-### Hostnames Sektor (ERP)
-
-| Env | Web | API |
-|-----|-----|-----|
-| `staging` | `sektor.nafuralabs.staging` | `api.sektor.nafuralabs.staging` |
-| `prod` | `sektor.nafuralabs.com` | `api.sektor.nafuralabs.com` |
-
-### Hostnames infra (staging)
-
-| Service | Host |
-|---------|------|
-| IAM (Keycloak) | `iam.nafuralabs.staging` |
-| Minio console | `minio.nafuralabs.staging` |
-| Minio S3 | `s3.nafuralabs.staging` |
-| Vault | `vault.nafuralabs.staging` |
-
-Hosts file local : voir [toolchain/ops/README.md](../toolchain/ops/README.md#hostnames-staging).
-
-Ingress : `products/sektor-btp/deploy/k8s/overlays/<env>/` et `infra/k8s/overlays/infra/<env>/`.
+Hosts staging local : [toolchain/ops/README.md](../toolchain/ops/README.md#hostnames-staging).
 
 ---
 
-## 4. Imports code
+## Démarrage rapide
 
-### Backend (Gradle)
-
-```kotlin
-// Dans products/sektor-btp/backend/app/build.gradle
-implementation(project(":platform:core:framework"))
-implementation(project(":sektor:chantiers"))
+```bash
+# Staging — release Sektor
+BUILD_IMAGES=true KUBE_CONTEXT=docker-desktop ENV=staging \
+  bash toolchain/ops/nlops.sh release-app sektor-btp
 ```
-
-Modules Gradle :
-
-- platform → `:platform:core:framework`, `:platform:features:…`
-- métier Sektor → `:sektor:item`, `:sektor:stock`, …
-
-Détail : [PLATFORM_IMPORTS.md](PLATFORM_IMPORTS.md).
-
-### Frontend (TypeScript)
-
-Configuré dans `web/tsconfig.json` :
-
-| Alias | Cible |
-|-------|-------|
-| `@platform/*` | `platform/web/*` |
-| `@applications/*` | `products/sektor-btp/web/app/*` |
-| `@core/*` | `platform/web/core/*` |
-
-**Règle :** `platform/web` ne doit pas importer de fichiers sous `products/*` sauf via `@applications/*` (couplage Sektor à découpler progressivement).
-
----
-
-## 5. Workflows quotidiens
-
-### Ops — modèle infra / produit
-
-L’**infra partagée** (`nafura-infra`) se déploie **une fois par environnement** (nouveau cluster staging ou prod).  
-Les **produits** se déploient **indépendamment** sur cette infra déjà en place.
-
-| Étape | Quand | Commande |
-|-------|--------|----------|
-| Bootstrap env | 1× par cluster | `ENV=staging bash toolchain/ops/nlops.sh bootstrap-env` |
-| Premier produit | 1× par app + env | `ENV=staging bash toolchain/ops/nlops.sh onboard-app sektor-btp` |
-| Release produit | souvent | `ENV=staging bash toolchain/ops/nlops.sh deploy sektor-btp` |
-| Upgrade infra | rare | `ENV=staging bash toolchain/ops/nlops.sh infra-up` |
-
-Via Make : `make bootstrap-env ENV=staging`, `make onboard-app APP=sektor-btp`, `make deploy APP=sektor-btp`.
-
-Détail : [toolchain/ops/README.md](../toolchain/ops/README.md).
-
-### Backend
 
 ```powershell
-cd C:\nf\nafuralabs
-.\gradlew.bat :sektor:app:compileJava
+# Build local
 .\gradlew.bat :sektor:app:bootJar
-.\gradlew.bat :tools:lifecycle:collectMigrations -PappId=sektor-btp
-```
-
-### Frontend
-
-```powershell
-cd C:\nf\nafuralabs\web
-npm install
-npm run start:erp          # dev local
-npm run build:prod         # build production
-```
-
-### Ops (staging) — exemple Sektor
-
-```bash
-# Une seule fois sur un nouveau cluster staging :
-ENV=staging bash toolchain/ops/nlops.sh bootstrap-env
-
-# Première fois pour Sektor :
-ENV=staging bash toolchain/ops/nlops.sh onboard-app sektor-btp
-
-# Releases suivantes (infra déjà en place) :
-ENV=staging bash toolchain/ops/nlops.sh deploy sektor-btp
-```
-
-Ou via Make : `make bootstrap-env`, `make deploy APP=sektor-btp ENV=staging`.
-
-### Image Docker backend
-
-```bash
-docker build -t sektor-btp-backend:staging -f products/sektor-btp/Dockerfile .
+cd web && npm run build:staging
 ```
 
 ---
 
-## 6. Ajouter un nouveau produit
+## Produits
 
-1. Créer `products/<app-id>/` avec `backend/app`, `web/app`, `deploy/k8s/overlays/{staging,prod}/`.
-2. Enregistrer les modules dans `settings.gradle.kts`.
-3. Sur un env existant : `ENV=staging bash toolchain/ops/nlops.sh onboard-app <app-id>`.
-4. Specs produit en **Markdown** dans `products/<app-id>/docs/`.
-5. N’extraire vers `shared/business/` que si un **deuxième** produit réutilise le même module.
-
-Ne pas ajouter de manifests produit sous `infra/k8s/` — infra partagée uniquement.
-
----
-
-## 7. Maintenance — règles
-
-### À faire
-
-- Corriger les bugs platform dans `platform/` — envisager le portage si `nafura` legacy encore en prod.
-- Tenir `docs/` à jour quand la structure change.
-- Migrations SQL dans `src/main/resources/db/` de chaque module.
-- Déployer staging avant prod.
-
-### À ne pas faire
-
-- Rajouter des fichiers sous `naf/src/spec/` ou du codegen JSON.
-- Mettre du métier BTP dans `platform/`.
-- Créer un overlay K8s `dev` (staging + prod seulement).
-- Dupliquer du code sous `web/app/applications/` — la source ERP est `products/sektor-btp/web/app/`.
-
-### Dette connue
-
-- Le shell platform importe encore des composants Sektor via `@applications/*` — à isoler quand un 2ᵉ produit front arrive.
-- Docs historiques dans `web/docs/` mentionnent parfois l’ancien chemin `app/applications/erp` — lire `@applications/*` → `products/sektor-btp/web/app/`.
+| Produit | Chemin | Statut |
+|---------|--------|--------|
+| Sektor BTP | [products/sektor-btp/](../products/sektor-btp/) | production |
+| MBS Studio | [marketing/products/mbs-studio/](../marketing/products/mbs-studio/) | vitrine |
+| Corporate | [marketing/corporate/](../marketing/corporate/) | vitrine |
+| Venue Catalog | [products/venue-catalog/](../products/venue-catalog/) | specs |
+| Layali / Beauty | [products/layali/](../products/layali/), [products/beauty/](../products/beauty/) | mobile P1 |
 
 ---
 
-## 8. Carte rapide Gradle
+## Ajouter un produit
 
-| Module | Chemin disque |
-|--------|---------------|
-| `:sektor:app` | `products/sektor-btp/backend/app` |
-| `:sektor:chantiers` | `products/sektor-btp/backend/modules/chantiers` |
-| `:platform:core:framework` | `platform/backend/core/framework` |
-| `:tools:lifecycle` | `tools/lifecycle` |
+1. `products/<app-id>/` avec `deploy/k8s/overlays/{staging,prod}/`
+2. Enregistrer dans `settings.gradle.kts` si backend Java
+3. `ENV=staging bash toolchain/ops/nlops.sh onboard-app <app-id>`
 
-Lister tous les projets : `.\gradlew.bat projects`
-
----
-
-## 9. Liens produit
-
-- [Sektor BTP README](../products/sektor-btp/README.md)
-- [Venue Catalog README](../products/venue-catalog/README.md)
-- [Layali README](../products/layali/README.md)
-- [Beauty README](../products/beauty/README.md)
-- [Marketing corporate](../marketing/corporate/README.md)
-
----
-
-## 10. Schéma logique
-
-```
-                    ┌─────────────────────────────────────┐
-                    │           nafura-infra              │
-                    │  postgres · redis · minio · keycloak │
-                    └──────────────┬──────────────────────┘
-                                   │
-         ┌─────────────────────────┼─────────────────────────┐
-         │                         │                         │
-         ▼                         ▼                         ▼
-  nafura-sektor            nafura-venue-catalog      nafura-marketing
-  sektor-btp-backend       (futur)                   nafuralabs.com
-  sektor-btp-web
-         │
-         │  dépend de
-         ▼
-  platform/backend + platform/web
-  (framework, auth, UI shell, …)
-```
-
----
-
-*Dernière mise à jour : migration Sektor complète, nettoyage doublons `web/app/`.*
+Voir [AGENTS.md](AGENTS.md) pour le modèle complet.
