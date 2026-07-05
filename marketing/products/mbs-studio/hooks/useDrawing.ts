@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef } from "react";
+import { HERO_HEADLINE } from "@/lib/heroHeadline";
 
 /** Elements where drawing must not start (clicks pass through to UI). */
 export const DRAW_IGNORE_SELECTOR = [
@@ -20,29 +21,28 @@ export const DRAW_IGNORE_SELECTOR = [
 /** Pencil palette — 1st stroke black, then a visible color on each new stroke. */
 export const DRAW_COLORS = [
   "#000000",
-  "#2563eb",
-  "#dc2626",
-  "#16a34a",
-  "#9333ea",
-  "#ca8a04",
-  "#0891b2",
-  "#e11d48",
+  "#FEED00",
+  "#015CA4",
+  "#FD2E00",
+  "#52B702",
 ];
 
-/** Match pencil weight to hero hand-drawn stroke (~0.38% of headline display width). */
-export function getPencilLineWidth(viewportWidth = window.innerWidth) {
-  const headlineWidth = Math.min(viewportWidth * 0.94, 1187);
-  return Math.max(2.5, Math.min(4.5, headlineWidth * 0.0038));
+/** Match pencil weight to hero hand-drawn stroke (~0.38% of scaled headline width). */
+export function getPencilLineWidth(layoutScale = 1) {
+  const headlineWidth = HERO_HEADLINE.width * layoutScale;
+  return Math.max(2, Math.min(5, headlineWidth * 0.0038));
 }
 
 interface UseDrawingOptions {
   enabled: boolean;
   ignoreSelector?: string;
+  layoutScale?: number;
 }
 
 export function useDrawing({
   enabled,
   ignoreSelector = DRAW_IGNORE_SELECTOR,
+  layoutScale = 1,
 }: UseDrawingOptions) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const isDrawing = useRef(false);
@@ -65,9 +65,9 @@ export function useDrawing({
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
-      ctx.lineWidth = getPencilLineWidth(w);
+      ctx.lineWidth = getPencilLineWidth(layoutScale);
     }
-  }, []);
+  }, [layoutScale]);
 
   const isIgnoredAt = useCallback(
     (x: number, y: number) => {
@@ -93,7 +93,7 @@ export function useDrawing({
     if (!ctx) return;
 
     ctx.strokeStyle = strokeColor.current;
-    ctx.lineWidth = getPencilLineWidth();
+    ctx.lineWidth = getPencilLineWidth(layoutScale);
 
     if (!lastPoint.current) {
       lastPoint.current = { x, y };
@@ -105,7 +105,7 @@ export function useDrawing({
     ctx.lineTo(x, y);
     ctx.stroke();
     lastPoint.current = { x, y };
-  }, []);
+  }, [layoutScale]);
 
   useEffect(() => {
     if (!enabled) return;
@@ -143,7 +143,7 @@ export function useDrawing({
       window.removeEventListener("pointerup", endDraw);
       window.removeEventListener("pointercancel", endDraw);
     };
-  }, [enabled, resizeCanvas, isIgnoredAt, pickNextColor, drawLine]);
+  }, [enabled, layoutScale, resizeCanvas, isIgnoredAt, pickNextColor, drawLine]);
 
   return { canvasRef };
 }

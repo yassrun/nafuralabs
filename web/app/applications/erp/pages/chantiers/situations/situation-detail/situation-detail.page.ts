@@ -315,13 +315,16 @@ export class SituationDetailPage extends ConfigDrivenDetailPage<Situation> {
 
     chantierControl.valueChanges
       .pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
-      .subscribe((id) => {
+      .subscribe(async (id) => {
         if (this.mode() !== 'create') return;
         if (typeof id !== 'string' || !id) return;
-        runInInjectionContext(this.injector, () => {
-          void this.prefillLignesFromAvancements(id, { silent: true });
-          void this.syncNextNumeroOrdre(id);
-        });
+        try {
+          await this.prefillAllFieldsOnChantierSelect(id);
+          await this.syncNextNumeroOrdre(id);
+        } catch (err) {
+          console.error('Prefill failed:', err);
+          this.showError('Erreur lors du pré-remplissage des lots');
+        }
       });
 
     const initialChantierId = chantierControl.value;
@@ -364,6 +367,86 @@ export class SituationDetailPage extends ConfigDrivenDetailPage<Situation> {
     }
   }
 
+  private async prefillAllFieldsOnChantierSelect(chantierId: string): Promise<void> {
+    if (!chantierId) {
+      return;
+    }
+
+    if (
+      chantierId === this.lastPrefilledChantierId &&
+      this.currentLignes().length > 0
+    ) {
+      return;
+    }
+
+    try {
+      const form = this.detailComponent?.form;
+      if (!form) return;
+
+      const chantierLookups = this.crud.lookups()['chantiers'] ?? [];
+      const chantierEntry = chantierLookups.find((c) => c.key === chantierId);
+      const tvaTaux: number = (chantierEntry?.data as Record<string, number> | undefined)?.['tvaTaux'] ?? 20;
+      const retenueGarantiePercent: number =
+        (chantierEntry?.data as Record<string, number> | undefined)?.['retenueGarantie'] ?? 7;
+      const retenueAvancePercent: number | undefined =
+        (chantierEntry?.data as Record<string, number | undefined> | undefined)?.['avancePercue'] ?? undefined;
+
+      const [lots, cumulPrecedentHt] = await Promise.all([
+        this.fetchLots(chantierId),
+        this.crud.getCumulPrecedent(chantierId),
+      ]);
+
+      const lignes = this.generateLignesFromLots(lots);
+
+      const patch: Partial<Situation> = {
+        tvaTaux,
+        retenueGarantiePercent,
+        lignes,
+      };
+      form.patchValue(patch);
+      form.get('tvaTaux')?.markAsDirty();
+      form.get('retenueGarantiePercent')?.markAsDirty();
+
+      this.currentParams.set({
+        retenueGarantiePercent,
+        retenueAvancePercent: retenueAvancePercent || undefined,
+        tvaTaux,
+        cumulPrecedentHt,
+      });
+
+      this.applyLignes(lignes);
+      this.lastPrefilledChantierId = chantierId;
+    } catch {
+      // Silent error - user can still proceed manually
+    }
+  }
+
+  private generateLignesFromLots(lots: LotChantier[]): SituationLigne[] {
+    const previousLignes = this.currentLignes();
+    return lots.map((lot) => {
+      const previous = previousLignes.find((l) => l.lotId === lot.id);
+      const quantiteCumulee =
+        lot.avancementPercent > 0
+          ? Math.round(
+              ((lot.quantite ?? 0) * lot.avancementPercent) / 100 * 100,
+            ) / 100
+          : (previous?.quantiteCumulee ?? 0);
+      const prixUnitaire = lot.prixUnitaireHt ?? 0;
+      return {
+        id: previous?.id ?? safeRandomUUID(),
+        lotId: lot.id,
+        lotCode: lot.code,
+        designation: lot.designation,
+        unite: lot.unite,
+        quantiteTotale: lot.quantite,
+        quantitePrecedente: previous?.quantitePrecedente ?? 0,
+        quantiteCumulee,
+        prixUnitaire,
+        montantHt: Math.round(quantiteCumulee * prixUnitaire * 100) / 100,
+      };
+    });
+  }
+
   private async prefillLignesFromAvancements(
     chantierId: string,
     options?: { silent?: boolean },
@@ -384,29 +467,7 @@ export class SituationDetailPage extends ConfigDrivenDetailPage<Situation> {
 
     try {
       const lots = await this.fetchLots(chantierId);
-      const previousLignes = this.currentLignes();
-      const lignes: SituationLigne[] = lots.map((lot) => {
-        const previous = previousLignes.find((l) => l.lotId === lot.id);
-        const quantiteCumulee =
-          lot.avancementPercent > 0
-            ? Math.round(
-                ((lot.quantite ?? 0) * lot.avancementPercent) / 100 * 100,
-              ) / 100
-            : (previous?.quantiteCumulee ?? 0);
-        const prixUnitaire = lot.prixUnitaireHt ?? 0;
-        return {
-          id: previous?.id ?? safeRandomUUID(),
-          lotId: lot.id,
-          lotCode: lot.code,
-          designation: lot.designation,
-          unite: lot.unite,
-          quantiteTotale: lot.quantite,
-          quantitePrecedente: previous?.quantitePrecedente ?? 0,
-          quantiteCumulee,
-          prixUnitaire,
-          montantHt: Math.round(quantiteCumulee * prixUnitaire * 100) / 100,
-        };
-      });
+      const lignes = this.generateLignesFromLots(lots);
       this.applyLignes(lignes);
       this.lastPrefilledChantierId = chantierId;
       if (!options?.silent) {

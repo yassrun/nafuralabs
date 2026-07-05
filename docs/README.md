@@ -115,7 +115,18 @@ L’**environnement = le cluster** (pas un suffixe dans le nom du namespace).
 | `staging` | `sektor.nafuralabs.staging` | `api.sektor.nafuralabs.staging` |
 | `prod` | `sektor.nafuralabs.com` | `api.sektor.nafuralabs.com` |
 
-Ingress : `products/sektor-btp/deploy/k8s/overlays/<env>/`.
+### Hostnames infra (staging)
+
+| Service | Host |
+|---------|------|
+| IAM (Keycloak) | `iam.nafuralabs.staging` |
+| Minio console | `minio.nafuralabs.staging` |
+| Minio S3 | `s3.nafuralabs.staging` |
+| Vault | `vault.nafuralabs.staging` |
+
+Hosts file local : voir [toolchain/ops/README.md](../toolchain/ops/README.md#hostnames-staging).
+
+Ingress : `products/sektor-btp/deploy/k8s/overlays/<env>/` et `infra/k8s/overlays/infra/<env>/`.
 
 ---
 

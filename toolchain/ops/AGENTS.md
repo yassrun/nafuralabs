@@ -202,7 +202,7 @@ KUBE_CONTEXT=docker-desktop kubectl get pods -n sektor-staging
 Hosts file (Windows) :
 
 ```
-127.0.0.1 sektor.nafuralabs.staging api.sektor.nafuralabs.staging iam.nafura.local
+127.0.0.1 sektor.nafuralabs.staging api.sektor.nafuralabs.staging mbs.nafuralabs.staging iam.nafuralabs.staging minio.nafuralabs.staging s3.nafuralabs.staging vault.nafuralabs.staging
 ```
 
 ### B — Release quotidienne staging (infra déjà up)

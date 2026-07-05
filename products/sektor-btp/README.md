@@ -67,7 +67,13 @@ Infra partagée : `nafura-infra` (postgres, keycloak, minio, redis).
 | staging | [sektor.nafuralabs.staging](http://sektor.nafuralabs.staging) | `api.sektor.nafuralabs.staging` |
 | prod | [sektor.nafuralabs.com](https://sektor.nafuralabs.com) | `api.sektor.nafuralabs.com` |
 
-Ajouter dans `/etc/hosts` (staging local) : `127.0.0.1 sektor.nafuralabs.staging api.sektor.nafuralabs.staging`
+Ajouter dans `/etc/hosts` (staging local) :
+
+```
+127.0.0.1 sektor.nafuralabs.staging api.sektor.nafuralabs.staging iam.nafuralabs.staging minio.nafuralabs.staging s3.nafuralabs.staging vault.nafuralabs.staging
+```
+
+Ou sous Windows (admin) : `powershell -ExecutionPolicy Bypass -File toolchain/ops/add-staging-hosts.ps1`
 
 ## DB
 

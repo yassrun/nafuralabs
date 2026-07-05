@@ -16,6 +16,8 @@ const UUID_RE =
 const isExternalAuthRequest = (url: string): boolean =>
   url.includes('keycloak') ||
   url.includes('iam.nafura.local') ||
+  url.includes('iam.nafuralabs.staging') ||
+  url.includes('iam.nafuralabs.com') ||
   url.includes('/protocol/openid-connect/');
 
 export const tenantHeaderInterceptor: HttpInterceptorFn = (req, next) => {

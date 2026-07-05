@@ -680,5 +680,14 @@
       "add": "Save",
       "solde": "Balance"
     }
+  },
+  "common": {
+    "scan": {
+      "button": "Scan document",
+      "scanning": "Scanning…",
+      "tenantMissing": "Tenant missing — cannot start scan",
+      "failed": "Scan failed",
+      "error": "Unable to scan document"
+    }
   }
 }

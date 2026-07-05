@@ -34,6 +34,7 @@ docker build -t mbs-studio-web:prod .
 
 | Env | Namespace | Host |
 |-----|-----------|------|
+| staging | `nafura-vitrine-staging` | `mbs.nafuralabs.staging` |
 | prod | `nafura-vitrine-prod` | `mbs.nafuralabs.com` |
 
 Manifestes : `deploy/k8s/`
@@ -56,6 +57,16 @@ Prérequis : infra bootstrappée (`nafura-infra-prod` — postgres, keycloak, va
 Registry : `54.36.183.106:30500/nafura/mbs-studio-web:prod`
 
 ## DNS
+
+Staging local (Docker Desktop K8s) — ajouter dans `C:\Windows\System32\drivers\etc\hosts` (tous les services staging) :
+
+```
+127.0.0.1 sektor.nafuralabs.staging api.sektor.nafuralabs.staging mbs.nafuralabs.staging iam.nafuralabs.staging minio.nafuralabs.staging s3.nafuralabs.staging vault.nafuralabs.staging
+```
+
+Ou exécuter : `powershell -ExecutionPolicy Bypass -File toolchain/ops/add-staging-hosts.ps1` (admin).
+
+Prod :
 
 ```
 mbs.nafuralabs.com  A  54.36.183.106

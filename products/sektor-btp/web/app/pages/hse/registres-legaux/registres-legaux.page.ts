@@ -5,6 +5,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { PageHeaderComponent, PageShellComponent, ButtonComponent } from '@lib/anatomy';
 import { ExportService, type ExportColumn } from '@lib/anatomy/services/export.service';
 import { ErpAuditService } from '@applications/erp/shell/erp-audit.service';
+import { PrintService } from '@applications/erp/shared/services';
 import type { RegistreLegalEntry, RegistreLegalKind } from '../models';
 import { RegistreLegalApiService } from './services/registre-legal-api.service';
 
@@ -245,6 +246,7 @@ export class RegistresLegauxPage {
   private readonly audit = inject(ErpAuditService);
   private readonly exportSvc = inject(ExportService);
   private readonly translate = inject(TranslateService);
+  private readonly printService = inject(PrintService);
 
   readonly tabs = TABS;
   readonly company = COMPANY;
@@ -302,7 +304,7 @@ export class RegistresLegauxPage {
       this.translate.instant('hse.registreLegal.audit.labelRegistre', { kind }),
       this.translate.instant('hse.registreLegal.audit.printNote', { n: this.currentEntries().length }),
     );
-    window.print();
+    this.printService.printLegaux();
   }
 
   exportXlsx(): void {

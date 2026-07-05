@@ -1,8 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useLayoutScale } from "@/hooks/useLayoutScale";
+import { HEADER_LOGO } from "@/lib/headerLogo";
+import { scalePx } from "@/lib/projectLayout";
 
 const NAV_LINKS = [
   { label: "Juice", href: "#juice" },
@@ -18,6 +20,9 @@ interface HeaderProps {
 export default function Header({ onBookCall }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [overDarkSection, setOverDarkSection] = useState(false);
+  const layoutScale = useLayoutScale();
+  const logoW = scalePx(HEADER_LOGO.width, layoutScale);
+  const logoH = scalePx(HEADER_LOGO.height, layoutScale);
 
   useEffect(() => {
     const book = document.getElementById("book");
@@ -38,20 +43,15 @@ export default function Header({ onBookCall }: HeaderProps) {
           className={`relative shrink-0 transition-opacity duration-300 ${overDarkSection ? "pointer-events-none opacity-0" : "opacity-100"}`}
         >
           <Link href="/" className="relative block leading-none" data-no-draw>
-            <Image
-              src="/logo.png"
-              alt="MBS Studio"
-              width={160}
-              height={65}
-              priority
-              className="h-[48px] w-auto object-contain brightness-0 lg:h-[52px]"
+            <img
+              src={HEADER_LOGO.src}
+              alt={HEADER_LOGO.alt}
+              width={logoW}
+              height={logoH}
+              className="block object-contain"
+              draggable={false}
             />
           </Link>
-          {/* Mask below logo edge — blends with paper background */}
-          <span
-            className="absolute -bottom-1 left-0 h-2 w-full bg-[var(--color-paper)]"
-            aria-hidden
-          />
         </div>
 
         <nav className="hidden items-center gap-10 lg:flex xl:gap-12">

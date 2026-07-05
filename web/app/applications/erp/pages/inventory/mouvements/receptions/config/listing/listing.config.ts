@@ -26,7 +26,7 @@ export function buildReceptionListingConfig(t: TranslateService) {
             icon: 'file-plus',
             scope: 'global',
             variant: 'primary',
-            permission: 'stock.reception.create',
+            permission: 'stock.reception.scan',
             ariaLabel: tr('inventory.mouvement.reception.actions.scanBl'),
           },
         ],

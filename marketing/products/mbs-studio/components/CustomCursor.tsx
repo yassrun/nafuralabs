@@ -1,74 +1,22 @@
 "use client";
 
 import { useEffect } from "react";
-import { PENCIL_TIP_OFFSET, useCursor } from "@/hooks/useCursor";
+import { useCursor } from "@/hooks/useCursor";
 import { useDrawing } from "@/hooks/useDrawing";
 import { useIsDesktop } from "@/hooks/useIsDesktop";
+import { useLayoutScale } from "@/hooks/useLayoutScale";
 import { useMounted } from "@/hooks/useMounted";
-
-function PencilIcon() {
-  return (
-    <svg
-      width="36"
-      height="36"
-      viewBox="0 0 36 36"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]"
-      aria-hidden
-    >
-      {/* Wood body */}
-      <path
-        d="M6 30L20 6L28 14L14 32L6 30Z"
-        fill="#C4A574"
-        stroke="#1a1a1a"
-        strokeWidth="1.2"
-        strokeLinejoin="round"
-      />
-      {/* Lead / tip */}
-      <path
-        d="M6 30L4 32L6 34L10 32L6 30Z"
-        fill="#1a1a1a"
-        stroke="#1a1a1a"
-        strokeWidth="0.8"
-        strokeLinejoin="round"
-      />
-      {/* Ferrule */}
-      <path
-        d="M20 6L24 2L28 6L24 10L20 6Z"
-        fill="#e8e8e8"
-        stroke="#1a1a1a"
-        strokeWidth="1"
-        strokeLinejoin="round"
-      />
-      {/* Eraser */}
-      <rect
-        x="23"
-        y="1"
-        width="6"
-        height="5"
-        rx="1"
-        fill="#e8a0a0"
-        stroke="#1a1a1a"
-        strokeWidth="1"
-        transform="rotate(45 26 3.5)"
-      />
-      <path
-        d="M14 18L22 10"
-        stroke="#1a1a1a"
-        strokeWidth="0.8"
-        opacity="0.25"
-      />
-    </svg>
-  );
-}
 
 export default function CustomCursor() {
   const mounted = useMounted();
   const isDesktop = useIsDesktop();
+  const layoutScale = useLayoutScale();
   const enabled = mounted && isDesktop;
-  const { cursorRef, mode, ready, setCircleMode } = useCursor({ enabled });
-  const { canvasRef } = useDrawing({ enabled });
+  const { cursorRef, mode, ready, setCircleMode, pencil } = useCursor({
+    enabled,
+    layoutScale,
+  });
+  const { canvasRef } = useDrawing({ enabled, layoutScale });
 
   useEffect(() => {
     if (!mounted) return;
@@ -94,7 +42,7 @@ export default function CustomCursor() {
 
   return (
     <>
-      {/* Drawing layer — on top of content so strokes cover the hero image */}
+      {/* Drawing layer — behind page content (z-index in globals.css) */}
       <canvas
         ref={canvasRef}
         className="draw-canvas pointer-events-none fixed inset-0"
@@ -106,14 +54,24 @@ export default function CustomCursor() {
         aria-hidden
       >
         {mode === "pencil" ? (
-          <PencilIcon />
+          // SVG keeps Figma rotation + textured raster (PNG alone loses incline)
+          <img
+            src="/cursor/pencil.svg"
+            alt=""
+            width={pencil.size}
+            height={pencil.size}
+            className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.2)]"
+            draggable={false}
+          />
         ) : (
           <div
-            className="h-[72px] w-[72px] rounded-full bg-white"
+            className="rounded-full bg-white"
             style={{
+              width: Math.round(72 * layoutScale),
+              height: Math.round(72 * layoutScale),
               mixBlendMode: "difference",
-              marginLeft: 36 - PENCIL_TIP_OFFSET.x,
-              marginTop: 36 - PENCIL_TIP_OFFSET.y,
+              marginLeft: pencil.size / 2 - pencil.tipOffset.x,
+              marginTop: pencil.size / 2 - pencil.tipOffset.y,
             }}
           />
         )}

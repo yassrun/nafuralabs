@@ -27,6 +27,10 @@ configMapGenerator:
 
 patches:
   - target:
+      kind: Ingress
+      name: nafura-ingress
+    path: patch-ingress-hosts.yaml
+  - target:
       kind: PersistentVolumeClaim
       name: postgres-data
     path: pvc-storageclass-docker-desktop.yaml
@@ -40,6 +44,7 @@ patches:
     path: pvc-storageclass-docker-desktop.yaml
   - path: patch-postgres-vault-env.yaml
   - path: patch-keycloak-vault-env.yaml
+  - path: patch-keycloak-hostname.yaml
   - path: patch-minio-vault-env.yaml
   - path: patch-vault-init-env.yaml
   - path: patch-keycloak-image.yaml

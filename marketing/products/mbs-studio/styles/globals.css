@@ -7,11 +7,13 @@
   --color-paper: #faf8f4;
   --font-instrument: var(--font-instrument-sans), system-ui, sans-serif;
 
-  /* Figma Multitone noise — bumped for screen (Figma 8% reads lighter in browser) */
-  --paper-noise-opacity: 0.17;
-  --paper-noise-opacity-fine: 0.07;
+  /* Figma Multitone noise — stronger for visible grain on screen */
+  --paper-noise-opacity: 0.28;
+  --paper-noise-opacity-fine: 0.12;
+  --paper-noise-opacity-grain: 0.18;
   --paper-noise-tile: 100px;
   --paper-noise-tile-fine: 56px;
+  --paper-noise-tile-grain: 256px;
 
   /* Figma prototype — tight side margins (~32–40px), full-width content */
   --layout-max: 100%;
@@ -67,6 +69,19 @@ body::after {
   background-size: var(--paper-noise-tile-fine) var(--paper-noise-tile-fine);
 }
 
+/* Third pass — paper grain texture (Figma) */
+.paper-grain-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: var(--paper-noise-opacity-grain);
+  mix-blend-mode: overlay;
+  background-image: url("/textures/paper-grain.svg");
+  background-repeat: repeat;
+  background-size: var(--paper-noise-tile-grain) var(--paper-noise-tile-grain);
+}
+
 .bg-paper {
   background-color: transparent;
 }
@@ -88,9 +103,14 @@ body::after {
 }
 
 .draw-canvas {
-  z-index: 150;
+  z-index: 2;
 }
 
 .is-dragging-card {
   user-select: none;
+  z-index: 20;
+}
+
+.project-card {
+  z-index: 10;
 }

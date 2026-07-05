@@ -473,6 +473,10 @@
         "litige": "Invoice marked as disputed",
         "annulee": "Invoice cancelled",
         "error": "Error"
+      },
+      "scan": {
+        "button": "Scan supplier invoice",
+        "success": "Invoice scanned, form pre-filled"
       }
     },
     "reglement": {

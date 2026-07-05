@@ -12,6 +12,6 @@ spec:
         - name: sektor-btp-backend
           env:
             - name: KEYCLOAK_ISSUER_URI
-              value: http://iam.nafura.local/realms/iam-portal
+              value: http://iam.nafuralabs.staging/realms/iam-portal
             - name: APP_FRONTEND_BASE_URL
               value: http://sektor.nafuralabs.staging

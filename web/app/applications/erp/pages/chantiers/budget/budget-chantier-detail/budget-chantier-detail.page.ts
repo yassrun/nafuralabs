@@ -11,6 +11,7 @@ import { firstValueFrom, map } from 'rxjs';
 import { ButtonComponent } from '@lib/anatomy';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
 import { ErpAuditService } from '@applications/erp/shell/erp-audit.service';
+import { PrintService } from '@applications/erp/shared/services';
 import { EcartCellComponent } from '../components/ecart-cell/ecart-cell.component';
 import { ConsommationProgressComponent } from '../components/consommation-progress/consommation-progress.component';
 import { ReviserBudgetDialogComponent } from '../components/reviser-budget-dialog/reviser-budget-dialog.component';
@@ -294,6 +295,7 @@ export class BudgetChantierDetailPage {
   private readonly locale = inject(LOCALE_ID);
   private readonly permissionService = inject(PermissionService);
   private readonly audit = inject(ErpAuditService);
+  private readonly printService = inject(PrintService);
   private readonly translate = inject(TranslateService);
   private readonly budgetId = toSignal(
     this.route.paramMap.pipe(map((params) => params.get('id') ?? '')),
@@ -445,6 +447,6 @@ export class BudgetChantierDetailPage {
     if (chantier) {
       this.audit.log('PRINT', 'BUDGET', chantier.id, chantier.code, 'Impression fiche budget');
     }
-    window.print();
+    this.printService.printBudget();
   }
 }

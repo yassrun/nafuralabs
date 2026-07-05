@@ -1,6 +1,7 @@
 package ma.nafura.stock.api.request;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.List;
@@ -28,6 +29,7 @@ public class InventoryTxWithLinesUpdateDto {
     private UUID motifId;
     private UUID bcId;
 
+    @NotEmpty
     @Valid
     private List<InventoryTxLineInputDto> lines;
 }

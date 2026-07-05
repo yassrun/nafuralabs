@@ -28,6 +28,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class InventoryTxService extends InventoryTxServiceBase {
 
+    private static final String INVENTORY_TX_NOT_FOUND = "Inventory transaction not found";
+
     public static final String STATUS_BROUILLON = "BROUILLON";
     public static final String STATUS_SOUMIS = "SOUMIS";
     public static final String STATUS_VALIDE = "VALIDE";
@@ -64,6 +66,7 @@ public class InventoryTxService extends InventoryTxServiceBase {
 
     @Transactional
     public InventoryTxDetailDto createWithLines(InventoryTxWithLinesCreateDto request) {
+        assertLinesNotEmpty(request.getLines(), "At least one line is required");
         UUID tenantId = tenantId();
         String txNumber = resolveTxNumber(request.getTxNumber(), request.getTxType());
         if (inventoryTxRepository.existsByTenantIdAndTxNumber(tenantId, txNumber)) {
@@ -96,7 +99,7 @@ public class InventoryTxService extends InventoryTxServiceBase {
 
     @Transactional
     public InventoryTxDetailDto updateWithLines(UUID id, InventoryTxWithLinesUpdateDto request) {
-        InventoryTx tx = getById(id).orElseThrow(() -> new IllegalArgumentException("Inventory transaction not found"));
+        InventoryTx tx = getById(id).orElseThrow(() -> new IllegalArgumentException(INVENTORY_TX_NOT_FOUND));
         assertEditable(tx);
 
         if (request.getTxDate() != null) {
@@ -141,6 +144,7 @@ public class InventoryTxService extends InventoryTxServiceBase {
 
         List<InventoryTxLine> lines = loadLines(id);
         if (request.getLines() != null) {
+            assertLinesNotEmpty(request.getLines(), "At least one line is required on update");
             lineRepository.deleteByTenantIdAndInventoryTxId(tenantId(), id);
             lines = saveLines(tenantId(), id, request.getLines());
         }
@@ -352,6 +356,12 @@ public class InventoryTxService extends InventoryTxServiceBase {
 
     private List<InventoryTxLine> loadLines(UUID txId) {
         return lineRepository.findByTenantIdAndInventoryTxIdOrderByLineNumberAsc(tenantId(), txId);
+    }
+
+    private static void assertLinesNotEmpty(List<InventoryTxLineInputDto> lines, String errorMessage) {
+        if (lines == null || lines.isEmpty()) {
+            throw new IllegalArgumentException(errorMessage);
+        }
     }
 
     private static void assertEditable(InventoryTx tx) {

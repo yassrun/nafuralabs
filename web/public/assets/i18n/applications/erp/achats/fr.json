@@ -287,6 +287,10 @@
         "saved": "BC {numero} enregistré",
         "statusUpdated": "BC {numero} — statut mis à jour"
       },
+      "scan": {
+        "button": "Scanner le bon de commande",
+        "success": "BC scanné, formulaire prérempli"
+      },
       "deleteConfirm": {
         "title": "Supprimer le BC",
         "message": "Supprimer le bon de commande {numero} ?"

@@ -1,5 +1,6 @@
 package ma.nafura.chantiers.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -207,6 +208,12 @@ public class SituationTravauxService {
         chantierService.getById(chantierId);
         return situationRepository.countByTenantIdAndChantierIdAndStatusNotIn(
                 tenantId(), chantierId, TERMINAL_STATUSES);
+    }
+
+    @Transactional(readOnly = true)
+    public BigDecimal getCumulPrecedent(String chantierId) {
+        chantierService.getById(chantierId);
+        return situationRepository.sumNetAPayerHtFacturee(tenantId(), chantierId);
     }
 
     private SituationTravauxDto transition(

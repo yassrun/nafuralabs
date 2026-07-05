@@ -354,6 +354,13 @@ export class SituationApiService extends FeatureApiService<
     return apiToSituation(row, true);
   }
 
+  async getCumulPrecedent(chantierId: string): Promise<number> {
+    const result = await this.get<{ cumulPrecedentHt: number }>(
+      `/api/v1/chantiers/${chantierId}/situations/cumul-precedent`,
+    );
+    return Number(result?.cumulPrecedentHt ?? 0);
+  }
+
   async convertToFacture(id: string): Promise<{ situation: Situation; facture: FactureClient }> {
     const result = await this.post<{
       situation: ApiSituation;

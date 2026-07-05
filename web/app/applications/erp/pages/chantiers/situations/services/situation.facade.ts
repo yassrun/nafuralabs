@@ -68,6 +68,11 @@ export class SituationFacade extends GridFacade<
     return this.lotApi.listByChantier(chantierId);
   }
 
+  /** Cumul HT des situations FACTUREES/PAYEES précédentes pour un chantier. */
+  async getCumulPrecedent(chantierId: string): Promise<number> {
+    return this.api.getCumulPrecedent(chantierId);
+  }
+
   override async createItem(input: SituationCreate): Promise<Situation> {
     if (!input.chantierId) {
       throw new Error('Chantier requis');

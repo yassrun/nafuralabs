@@ -2,7 +2,7 @@
 export const environment = {
   production: true,
   apiBaseUrl: 'http://api.sektor.nafuralabs.staging',
-  keycloakUrl: 'http://iam.nafura.local',
+  keycloakUrl: 'http://iam.nafuralabs.staging',
   keycloakRealm: 'iam-portal',
   keycloakClientId: 'erp-web',
   onboardingV2Enabled: true,

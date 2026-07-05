@@ -34,6 +34,7 @@ import {
 
 import { FactureFacade } from '../services';
 import { buildFactureDetailConfig } from '../config';
+import { PrintService } from '@applications/erp/shared/services';
 
 const MODE_PAIEMENT_KEYS: Record<string, string> = {
   VIREMENT: 'ventes.modePaiement.virement',
@@ -67,6 +68,7 @@ export class FactureDetailPage extends ConfigDrivenDetailPage<FactureClient> {
   private readonly nav = inject(Router);
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
+  private readonly printService = inject(PrintService);
 
   readonly facade = createDetailFacadeFromCrud<FactureClient, FactureCreate>({
     crud: this.crud,
@@ -114,7 +116,7 @@ export class FactureDetailPage extends ConfigDrivenDetailPage<FactureClient> {
     }
 
     if (event.actionId === 'print_facture' && item) {
-      window.print();
+      this.printService.printFacture();
       return;
     }
 

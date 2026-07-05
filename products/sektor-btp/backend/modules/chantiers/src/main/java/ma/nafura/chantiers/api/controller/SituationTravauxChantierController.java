@@ -1,6 +1,8 @@
 package ma.nafura.chantiers.api.controller;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import ma.nafura.chantiers.api.dto.SituationTravauxDto;
 import ma.nafura.chantiers.service.SituationTravauxService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
@@ -29,6 +31,13 @@ public class SituationTravauxChantierController {
     @RequirePermission("chantiers.read")
     public ResponseEntity<List<SituationTravauxDto>> list(@PathVariable String chantierId) {
         return ResponseEntity.ok(service.listByChantier(chantierId));
+    }
+
+    @GetMapping("/cumul-precedent")
+    @RequirePermission("chantiers.read")
+    public ResponseEntity<Map<String, BigDecimal>> getCumulPrecedent(@PathVariable String chantierId) {
+        BigDecimal cumul = service.getCumulPrecedent(chantierId);
+        return ResponseEntity.ok(Map.of("cumulPrecedentHt", cumul));
     }
 
     @PostMapping("/generate")

@@ -145,5 +145,16 @@
     [loading]="isLoading()"
     [saving]="isSaving()"
     (action)="onAction($event)">
+    @if (mode() === 'edit' || mode() === 'create') {
+      <ng-container slot="footer">
+        <erp-doc-scan-button
+          domainKey="btp"
+          docTypeKey="BON_COMMANDE"
+          permission="achats.commande.scan"
+          labelKey="achats.commande.scan.button"
+          (extracted)="onScanCommande($event)">
+        </erp-doc-scan-button>
+      </ng-container>
+    }
   </nf-entity-detail>
 </nf-page-shell>

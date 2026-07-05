@@ -10,12 +10,19 @@ import {
   ConfigDrivenDetailPageStyles,
   createDetailFacadeFromCrud,
 } from '@lib/anatomy';
-import type { DetailActionEvent } from '@lib/anatomy/types';
-import type { BCStatus, BonCommande, BonCommandeCreate, MatchingReception } from '@applications/erp/achats/models';
+import type { DetailActionEvent, LookupItem } from '@lib/anatomy/types';
+import type { BCStatus, BonCommande, BonCommandeCreate, MatchingReception, BCLigne } from '@applications/erp/achats/models';
 import { MatchingService } from '@applications/erp/achats/services/matching.service';
 import type { Location } from '@applications/erp/inventory/models';
 import { ErpLookupService } from '@applications/erp/shared/services/erp-lookup.service';
 import { SubmitApprovalButtonComponent } from '@applications/erp/pages/approbations/components/submit-approval-button/submit-approval-button.component';
+import { DocScanButtonComponent } from '@applications/erp/shared/components/doc-scan-button/doc-scan-button.component';
+import {
+  findStringByAliases,
+  normalizeDate,
+  toNumber,
+  extractLines,
+} from '@applications/erp/shared/utils/extraction-json.utils';
 
 import { BcFacade, type ApiReceptionAchat } from '../services';
 import { buildBcDetailConfig } from '../config';
@@ -31,7 +38,7 @@ interface ReceptionLineDraft {
 @Component({
   selector: 'app-bc-detail',
   standalone: true,
-  imports: [CommonModule, DecimalPipe, RouterLink, TranslateModule, ButtonComponent, ...ConfigDrivenDetailPageImports, SubmitApprovalButtonComponent],
+  imports: [CommonModule, DecimalPipe, RouterLink, TranslateModule, ButtonComponent, DocScanButtonComponent, ...ConfigDrivenDetailPageImports, SubmitApprovalButtonComponent],
   templateUrl: './bc-detail.page.html',
   styles: [ConfigDrivenDetailPageStyles, `
     .approval-bar {
@@ -248,10 +255,110 @@ export class BcDetailPage extends ConfigDrivenDetailPage<BonCommande> {
     }
 
     if (event.actionId === 'imprimer_bc' && item) {
-      window.print();
+      globalThis.print();
       return;
     }
 
     await super.handleCustomAction(event);
+  }
+
+  private updateCommandeReference(data: Record<string, unknown>): void {
+    const cmdReference = findStringByAliases(data, [
+      'commandeNumber', 'numero', 'reference', 'docNumber', 'orderRef',
+    ]);
+    if (cmdReference) {
+      this.item.update((current) => (current ? { ...current, numero: cmdReference } : current));
+    }
+  }
+
+  private updateCommandeDate(data: Record<string, unknown>): void {
+    const dateCommande = normalizeDate(findStringByAliases(data, [
+      'commandeDate', 'dateCommande', 'date', 'orderDate', 'dateOrder',
+    ]));
+    if (dateCommande) {
+      this.item.update((current) => (current ? { ...current, dateCreation: dateCommande } : current));
+    }
+  }
+
+  private updateFournisseur(data: Record<string, unknown>): void {
+    const supplierName = findStringByAliases(data, [
+      'fournisseur', 'supplier', 'fournisseurName', 'vendorName',
+    ]);
+    if (supplierName) {
+      const normalized = supplierName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      const lookupData = this.lookups()['partenaires'] ?? [];
+      const matched = lookupData.find((p: LookupItem) =>
+        p.value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes(normalized),
+      );
+      if (matched) {
+        const fournisseurId = String(matched.key);
+        this.item.update((current) => (current ? {
+          ...current,
+          fournisseurId,
+          fournisseurName: matched.value,
+        } : current));
+      }
+    }
+  }
+
+  private updateLignes(data: Record<string, unknown>): void {
+    const rawLines = extractLines(data, [
+      'lignes', 'lines', 'items', 'details', 'lineItems',
+    ]);
+
+    if (rawLines.length > 0) {
+      const current = this.item();
+      if (!current) {
+        return;
+      }
+
+      const mappedLignes: BCLigne[] = rawLines
+        .map((line) => this.mapExtractedLine(line))
+        .filter((l) => l.articleName || l.quantite > 0);
+
+      if (mappedLignes.length > 0) {
+        this.item.set({
+          ...current,
+          lignes: mappedLignes,
+        });
+      }
+    }
+  }
+
+  private mapExtractedLine(line: Record<string, unknown>): BCLigne {
+    const current = this.item();
+    const articleId = findStringByAliases(line, [
+      'articleId', 'article', 'articleCode', 'code', 'sku',
+    ]) ?? '';
+    const designation = findStringByAliases(line, [
+      'designation', 'description', 'label', 'name', 'articleName',
+    ]) ?? articleId;
+    const quantite = toNumber(findStringByAliases(line, [
+      'quantite', 'quantity', 'qte', 'qty', 'montantCommande',
+    ]));
+    const prixUnitaire = toNumber(findStringByAliases(line, [
+      'prixUnitaire', 'price', 'unitPrice', 'prixUnitaireHt', 'pu',
+    ]));
+
+    return {
+      id: '',
+      bcId: current?.id ?? '',
+      articleId,
+      articleCode: articleId,
+      articleName: designation,
+      quantite: quantite || 0,
+      quantiteLivree: 0,
+      quantiteFacturee: 0,
+      prixUnitaireHt: prixUnitaire || 0,
+      totalHt: Math.round((quantite || 0) * (prixUnitaire || 0) * 100) / 100,
+    };
+  }
+
+  onScanCommande(data: Record<string, unknown>): void {
+    this.updateCommandeReference(data);
+    this.updateCommandeDate(data);
+    this.updateFournisseur(data);
+    this.updateLignes(data);
+    this.showSuccess(this.translate.instant('achats.commande.scan.success'));
   }
 }

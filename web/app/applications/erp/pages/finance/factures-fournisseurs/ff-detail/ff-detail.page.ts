@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, LOCALE_ID, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, LOCALE_ID, signal, type OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -24,6 +24,13 @@ import { MatchingService } from '@applications/erp/achats/services/matching.serv
 import { FfApiService } from '@applications/erp/pages/achats/factures-fournisseur/services/ff-api.service';
 import { partnerToComptaFournisseur } from '@applications/erp/pages/achats/factures-fournisseur/services/ff.mapper';
 import { PartnersApiService } from '@applications/erp/shared/services/partners-api.service';
+import { DocScanButtonComponent } from '@applications/erp/shared/components/doc-scan-button/doc-scan-button.component';
+import {
+  findStringByAliases,
+  normalizeDate,
+  toNumber,
+  extractLines,
+} from '@applications/erp/shared/utils/extraction-json.utils';
 import type {
   Compte,
   FactureFournisseur,
@@ -58,6 +65,7 @@ type ComptaFournisseurAlias = ComptaFournisseur;
     SubmitApprovalButtonComponent,
     ButtonComponent,
     AttachmentListComponent,
+    DocScanButtonComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -354,6 +362,15 @@ type ComptaFournisseurAlias = ComptaFournisseur;
         } @else {
           <nf-button variant="primary" class="btn-primary" (clicked)="onCreate()">{{ 'finance.factureFournisseur.actions.create' | translate }}</nf-button>
         }
+        @if (editable()) {
+          <erp-doc-scan-button
+            domainKey="finance"
+            docTypeKey="SUPPLIER_INVOICE"
+            permission="finance.ff.scan"
+            labelKey="finance.factureFournisseur.scan.button"
+            (extracted)="onScanFacture($event)"
+            (scanError)="onScanError($event)" />
+        }
         <a routerLink="/finance/factures-fournisseurs" class="btn-link">{{ 'finance.factureFournisseur.actions.retour' | translate }}</a>
       </footer>
     </nf-page-shell>
@@ -432,7 +449,7 @@ type ComptaFournisseurAlias = ComptaFournisseur;
     .match-card .bloq { color: var(--nf-color-danger-700); font-weight: 600; }
   `],
 })
-export class FfDetailPage {
+export class FfDetailPage implements OnInit {
   readonly attachmentEntityType = ERP_ATTACHMENT_ENTITY_TYPES.FF;
   readonly attachmentConfig = DOCUMENT_ATTACHMENT_CONFIG;
 
@@ -523,8 +540,6 @@ export class FfDetailPage {
   });
 
   constructor() {
-    void this.loadLookups();
-
     this.route.paramMap.subscribe((p) => {
       const id = p.get('id');
       if (!id) {
@@ -533,6 +548,10 @@ export class FfDetailPage {
       }
       void this.loadFacture(id);
     });
+  }
+
+  ngOnInit(): void {
+    void this.loadLookups();
   }
 
   private async loadLookups(): Promise<void> {
@@ -676,6 +695,80 @@ export class FfDetailPage {
         totalHt: l.totalHt,
         tvaTaux: l.tvaTaux,
       }));
+  }
+
+  onScanFacture(data: Record<string, unknown>): void {
+    const numFacture = findStringByAliases(data, [
+      'invoiceNumber', 'numero', 'reference', 'docNumber', 'invoiceRef',
+    ]);
+    if (numFacture) {
+      this.numeroFournisseur.set(numFacture);
+    }
+
+    const dateFacture = normalizeDate(findStringByAliases(data, [
+      'invoiceDate', 'date', 'documentDate', 'dateFacture',
+    ]));
+    if (dateFacture) {
+      this.dateFacture.set(dateFacture);
+    }
+
+    const dateEcheance = normalizeDate(findStringByAliases(data, [
+      'dueDate', 'dateEcheance', 'paymentDue',
+    ]));
+    if (dateEcheance) {
+      this.dateEcheance.set(dateEcheance);
+    }
+
+    const supplierName = findStringByAliases(data, [
+      'supplierName', 'supplier', 'fournisseur', 'vendor', 'vendorName',
+    ]);
+    if (supplierName) {
+      const normalized = supplierName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      const matched = this.fournisseurs().find((f) =>
+        f.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes(normalized),
+      );
+      if (matched) {
+        this.onFournisseur(matched.id);
+      }
+    }
+
+    const rawLines = extractLines(data, ['lineItems', 'lines', 'items', 'lignes', 'details']);
+    if (rawLines.length > 0) {
+      const f = this.fournisseurs().find((x) => x.id === this.fournisseurId());
+      const defaultCompte = f?.compteCharge ?? '6111';
+      const mappedLignes: DraftLigne[] = rawLines.map((line) => {
+        const designation = findStringByAliases(line, ['description', 'designation', 'label', 'libelle']) ?? '';
+        const quantite = toNumber(findStringByAliases(line, ['quantity', 'qty', 'quantite']) ?? 1);
+        const prixUnitaireHt = toNumber(findStringByAliases(line, ['unitPrice', 'prixUnitaire', 'price', 'pu']) ?? 0);
+        const tvaTaux = toNumber(findStringByAliases(line, ['vatRate', 'tva', 'tvaTaux', 'taxRate']) ?? 20);
+        const totalHt = Math.round(quantite * prixUnitaireHt * 100) / 100;
+        return { designation, compteCode: defaultCompte, quantite, prixUnitaireHt, totalHt, tvaTaux };
+      }).filter((l) => l.designation || l.prixUnitaireHt > 0);
+
+      if (mappedLignes.length > 0) {
+        this.lignes.set(mappedLignes);
+      }
+    } else {
+      const totalHt = toNumber(findStringByAliases(data, ['totalHt', 'subtotal', 'amountExclVat', 'baseHt']) ?? 0);
+      const tvaTaux = toNumber(findStringByAliases(data, ['vatRate', 'tva', 'tvaTaux']) ?? 20);
+      if (totalHt > 0) {
+        const f = this.fournisseurs().find((x) => x.id === this.fournisseurId());
+        this.lignes.set([{
+          designation: numFacture ?? this.translate.instant('finance.factureFournisseur.scan.button'),
+          compteCode: f?.compteCharge ?? '6111',
+          quantite: 1,
+          prixUnitaireHt: totalHt,
+          totalHt,
+          tvaTaux,
+        }]);
+      }
+    }
+
+    this.toast.success(this.translate.instant('finance.factureFournisseur.scan.success'));
+  }
+
+  onScanError(message: string): void {
+    this.toast.error(message);
   }
 
   onCreate(): void {

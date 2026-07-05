@@ -25,13 +25,22 @@ export class ApiConfigService {
     }
 
     // App-specific host convention:
-    // <app-id>.nafura.local        -> api.<app-id>.nafura.local  (local: erp.nafura.local)
-    // <slug>.nafuralabs.com        -> api.<slug>.nafuralabs.com  (prod: sektor.nafuralabs.com)
+    // <app-id>.nafura.local           -> api.<app-id>.nafura.local       (local dev)
+    // <slug>.nafuralabs.staging       -> api.<slug>.nafuralabs.staging   (staging cluster)
+    // <slug>.nafuralabs.com           -> api.<slug>.nafuralabs.com       (prod)
     const localMatch = hostname.match(/^([a-z0-9-]+)\.nafura\.local$/i);
     if (localMatch) {
       const appId = localMatch[1].toLowerCase();
       if (!['app', 'api', 'iam', 'minio', 's3'].includes(appId)) {
         return `${protocol}//api.${appId}.nafura.local`;
+      }
+    }
+
+    const stagingMatch = hostname.match(/^([a-z0-9-]+)\.nafuralabs\.staging$/i);
+    if (stagingMatch) {
+      const appId = stagingMatch[1].toLowerCase();
+      if (!['app', 'api', 'iam', 'minio', 's3', 'vault', 'www', 'mbs'].includes(appId)) {
+        return `${protocol}//api.${appId}.nafuralabs.staging`;
       }
     }
 

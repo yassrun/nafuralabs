@@ -1,12 +1,11 @@
-import { Component, ElementRef, LOCALE_ID, ViewChild, computed, effect, inject, signal, untracked } from '@angular/core';
+import { Component, ElementRef, LOCALE_ID, OnDestroy, ViewChild, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { firstValueFrom, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 
 import {
-  ButtonComponent,
   ConfigDrivenDetailPage,
   ConfigDrivenDetailPageImports,
   ConfigDrivenDetailPageStyles,
@@ -21,13 +20,20 @@ import type { DetailActionEvent, StatusTransitionEvent } from '@lib/anatomy/type
 
 import type { InventoryTx } from '../../../../../inventory/models';
 import { ReceptionLinesEditorComponent } from '../../../../../inventory/components/reception-lines-editor/reception-lines-editor.component';
-import { TenantContextService } from '../../../../../../../platform/core/tenant/tenant.context';
-import { DocTypeService } from '../../../../../../../platform/features/documents/doc-extractor/services/doc-type.service';
-import { ExtractionService } from '../../../../../../../platform/features/documents/doc-extractor/services/extraction.service';
+import { ErpDocScanService } from '@applications/erp/shared/services/erp-doc-scan.service';
+import {
+  extractLines as extractRawLines,
+  findByAliases,
+  findStringByAliases,
+  normalizeText,
+  toNumber,
+} from '@applications/erp/shared/utils/extraction-json.utils';
+import type { LookupEntry } from '@applications/erp/shared/models/doc-scan.types';
 import { buildReceptionDetailConfig } from '../config/detail/detail.config';
 import { ReceptionFacade } from '../services/reception.facade';
 
 type DeliveryMode = 'DEPOT' | 'CHANTIER_DIRECT';
+type TxLine = { totalPrice?: number; quantity: number; unitPrice?: number };
 
 @Component({
   selector: 'app-reception-detail',
@@ -39,7 +45,6 @@ type DeliveryMode = 'DEPOT' | 'CHANTIER_DIRECT';
     MatButtonToggleModule,
     NfSelectComponent,
     NfInputComponent,
-    ButtonComponent,
     IconComponent,
     ReactiveFormsModule,
     TranslateModule,
@@ -48,13 +53,11 @@ type DeliveryMode = 'DEPOT' | 'CHANTIER_DIRECT';
   styleUrls: ['./reception-detail.page.scss'],
   styles: [ConfigDrivenDetailPageStyles],
 })
-export class ReceptionDetailPage extends ConfigDrivenDetailPage<InventoryTx> {
-  @ViewChild('blFileInput') private blFileInput?: ElementRef<HTMLInputElement>;
+export class ReceptionDetailPage extends ConfigDrivenDetailPage<InventoryTx> implements OnDestroy {
+  @ViewChild('blFileInput') private readonly blFileInput?: ElementRef<HTMLInputElement>;
 
   private readonly crud = inject(ReceptionFacade);
-  private readonly tenantContext = inject(TenantContextService);
-  private readonly docTypeService = inject(DocTypeService);
-  private readonly extractionService = inject(ExtractionService);
+  private readonly erpDocScan = inject(ErpDocScanService);
   private readonly activatedRoute = inject(ActivatedRoute);
   private readonly translate = inject(TranslateService);
 
@@ -92,20 +95,11 @@ export class ReceptionDetailPage extends ConfigDrivenDetailPage<InventoryTx> {
   readonly isExtracting = signal(false);
   readonly shouldAutoScanBl = signal(this.activatedRoute.snapshot.queryParamMap.get('scanBl') === '1');
 
-  readonly depotLookups = computed(
-    () =>
-      (this.crud.lookups()['locationsDepot'] as Array<{ key: string; value: string }> | undefined) ?? [],
-  );
+  readonly depotLookups = computed(() => this.getTypedLookup<{ key: string; value: string }>('locationsDepot'));
 
-  readonly chantierLookups = computed(
-    () =>
-      (this.crud.lookups()['chantiersLookup'] as Array<{ key: string; value: string }> | undefined) ?? [],
-  );
+  readonly chantierLookups = computed(() => this.getTypedLookup<{ key: string; value: string }>('chantiersLookup'));
 
-  readonly phaseLookups = computed(
-    () =>
-      (this.crud.lookups()['phasesLookup'] as Array<{ key: string; value: string }> | undefined) ?? [],
-  );
+  readonly phaseLookups = computed(() => this.getTypedLookup<{ key: string; value: string }>('phasesLookup'));
 
   readonly depotSelectOptions = computed(() =>
     this.depotLookups().map((opt) => ({ value: opt.key, label: opt.value })),
@@ -119,15 +113,15 @@ export class ReceptionDetailPage extends ConfigDrivenDetailPage<InventoryTx> {
     this.phaseLookups().map((opt) => ({ value: opt.key, label: opt.value })),
   );
 
-  private readonly linesValue = signal<Array<{ totalPrice?: number; quantity: number; unitPrice?: number }>>([]);
+  private readonly linesValue = signal<TxLine[]>([]);
   private readonly locale = inject(LOCALE_ID);
 
   readonly linesTotal = computed(() => {
     const lines = this.lineTotalsControl
       ? this.linesValue()
-      : ((this.item()?.lines ?? []) as Array<{ totalPrice?: number; quantity: number; unitPrice?: number }>);
+      : (this.item()?.lines ?? []) as TxLine[];
     const total = lines.reduce(
-      (acc, l) => acc + (l.totalPrice ?? (l.unitPrice != null ? l.quantity * l.unitPrice : 0)),
+      (acc, l) => acc + (l.totalPrice ?? (l.unitPrice == null ? 0 : l.quantity * l.unitPrice)),
       0,
     );
     return total.toLocaleString(this.locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -136,8 +130,7 @@ export class ReceptionDetailPage extends ConfigDrivenDetailPage<InventoryTx> {
   private readonly _inferModeEffect = effect(() => {
     const item = this.item();
     const chantierIds = new Set(
-      (this.crud.lookups()['chantiersLookup'] as Array<{ key: string }> | undefined ?? [])
-        .map((c) => c.key),
+      this.getTypedLookup<{ key: string }>('chantiersLookup').map((c) => c.key),
     );
     const mode: DeliveryMode =
       item?.destLocationId && chantierIds.has(item.destLocationId)
@@ -202,19 +195,16 @@ export class ReceptionDetailPage extends ConfigDrivenDetailPage<InventoryTx> {
     this.lineTotalsControl = linesControl;
 
     const nextValue = linesControl.value;
-    this.linesValue.set(
-      Array.isArray(nextValue)
-        ? (nextValue as Array<{ totalPrice?: number; quantity: number; unitPrice?: number }>)
-        : [],
-    );
+    this.linesValue.set(Array.isArray(nextValue) ? (nextValue as TxLine[]) : []);
 
     this.lineTotalsSub = linesControl.valueChanges.subscribe((value) => {
-      this.linesValue.set(
-        Array.isArray(value)
-          ? (value as Array<{ totalPrice?: number; quantity: number; unitPrice?: number }>)
-          : [],
-      );
+      this.linesValue.set(Array.isArray(value) ? (value as TxLine[]) : []);
     });
+  }
+
+  private getTypedLookup<T>(key: string): T[] {
+    const raw = this.crud.lookups()[key];
+    return Array.isArray(raw) ? (raw as T[]) : [];
   }
 
   protected override afterSave(item: InventoryTx): void {
@@ -276,240 +266,203 @@ export class ReceptionDetailPage extends ConfigDrivenDetailPage<InventoryTx> {
     const file = input.files?.item(0);
     if (!file) return;
 
-    const tenantId = this.tenantContext.tenantId();
-    if (!tenantId) {
-      this.showError(this.translate.instant('inventory.mouvement.common.tenantMissing'));
-      return;
-    }
-
     this.isExtracting.set(true);
     try {
-      const definition = await firstValueFrom(
-        this.docTypeService.getActiveDefinition('logistic', 'BL', tenantId),
-      );
+      const patch = await this.erpDocScan.scanAndMap<InventoryTx>({
+        file,
+        domainKey: 'logistic',
+        docTypeKey: 'BL',
+        lookups: () => this.crud.lookups() as Record<string, LookupEntry[]>,
+        mapper: (data, ctx) => {
+          const fournisseurName = ctx.findStringByAliases(data, [
+            'supplierName',
+            'supplier',
+            'fournisseur',
+            'vendor',
+            'vendorName',
+          ]);
+          const fournisseurId = ctx.resolveLookupId('fournisseursLookup', fournisseurName);
 
-      const response = await firstValueFrom(
-        this.extractionService.extract({
-          file,
-          docTypeDefinitionId: definition.id,
-          persist: false,
-        }),
-      );
+          const chantierName = ctx.findStringByAliases(data, [
+            'chantier',
+            'site',
+            'project',
+            'destinationSite',
+          ]);
+          const chantierLocationId = ctx.resolveLookupId('chantiersLookup', chantierName);
 
-      if (response.status === 'FAILED') {
+          const phase = ctx.findStringByAliases(data, ['phaseRef', 'phase']);
+          const phaseRef = this.resolvePhase(phase);
+
+          const reference = ctx.findStringByAliases(data, [
+            'blReference',
+            'transferReference',
+            'reference',
+            'docReference',
+            'blNumber',
+            'number',
+          ]);
+
+          const txDateRaw = ctx.findStringByAliases(data, [
+            'txDate',
+            'documentDate',
+            'date',
+            'blDate',
+            'deliveryDate',
+          ]);
+          const txDate = ctx.normalizeDate(txDateRaw);
+
+          const lines = this.extractLines(data);
+
+          const mappedPatch: Partial<InventoryTx> = {};
+          if (fournisseurId) mappedPatch.fournisseurId = fournisseurId;
+          if (reference) mappedPatch.reference = reference;
+          if (txDate) mappedPatch.txDate = txDate;
+          if (phaseRef) mappedPatch.phaseRef = phaseRef;
+          if (lines.length > 0) mappedPatch.lines = lines;
+
+          if (chantierLocationId) {
+            mappedPatch.chantierLocationId = chantierLocationId;
+            mappedPatch.destLocationId = null as unknown as string;
+            this.deliveryMode.set('CHANTIER_DIRECT');
+          }
+
+          return mappedPatch;
+        },
+      });
+
+      this.applyScanPatch(patch);
+      this.showSuccess(this.translate.instant('inventory.mouvement.common.scanBlSuccess'));
+    } catch (err) {
+      const message = (err as Error).message;
+      if (message === 'ERP_DOC_SCAN_TENANT_MISSING') {
+        this.showError(this.translate.instant('inventory.mouvement.common.tenantMissing'));
+        return;
+      }
+      if (message === 'ERP_DOC_SCAN_FAILED') {
         this.showError(this.translate.instant('inventory.mouvement.common.scanBlFailed'));
         return;
       }
-
-      const extracted = this.extractObject(response.extractedJson);
-      this.applyExtractedBlToReception(extracted);
-      this.showSuccess(this.translate.instant('inventory.mouvement.common.scanBlSuccess'));
-    } catch (err) {
-      this.showError((err as Error).message ?? this.translate.instant('inventory.mouvement.common.scanBlImpossible'));
+      this.showError(this.translate.instant('inventory.mouvement.common.scanBlImpossible'));
     } finally {
       input.value = '';
       this.isExtracting.set(false);
     }
   }
 
-  private applyExtractedBlToReception(data: Record<string, unknown>): void {
+  private applyScanPatch(patch: Partial<InventoryTx>): void {
     const form = this.detailComponent?.form;
     if (!form) {
       this.showError(this.translate.instant('inventory.mouvement.common.formNotReady'));
       return;
     }
 
-    const fournisseurName = this.findStringByAliases(data, [
-      'supplierName',
-      'supplier',
-      'fournisseur',
-      'vendor',
-      'vendorName',
-    ]);
-    const fournisseurId = this.resolveLookupId('fournisseursLookup', fournisseurName);
-
-    const chantierName = this.findStringByAliases(data, [
-      'chantier',
-      'site',
-      'project',
-      'destinationSite',
-    ]);
-    const chantierLocationId = this.resolveLookupId('chantiersLookup', chantierName);
-
-    const phase = this.findStringByAliases(data, ['phaseRef', 'phase']);
-    const phaseRef = this.resolvePhase(phase);
-
-    const reference = this.findStringByAliases(data, [
-      'blReference',
-      'transferReference',
-      'reference',
-      'docReference',
-      'blNumber',
-      'number',
-    ]);
-
-    const txDateRaw = this.findStringByAliases(data, [
-      'txDate',
-      'documentDate',
-      'date',
-      'blDate',
-      'deliveryDate',
-    ]);
-    const txDate = this.normalizeDate(txDateRaw);
-
-    const lines = this.extractLines(data);
-
-    const patch: Partial<InventoryTx> = {};
-    if (fournisseurId) patch.fournisseurId = fournisseurId;
-    if (reference) patch.reference = reference;
-    if (txDate) patch.txDate = txDate;
-    if (phaseRef) patch.phaseRef = phaseRef;
-    if (lines.length > 0) patch.lines = lines;
-
-    if (chantierLocationId) {
-      patch.chantierLocationId = chantierLocationId;
-      patch.destLocationId = null as unknown as string;
-      this.deliveryMode.set('CHANTIER_DIRECT');
-    }
-
     form.patchValue(patch);
     form.markAsDirty();
-  }
-
-  private extractObject(value: unknown): Record<string, unknown> {
-    if (typeof value === 'string') {
-      try {
-        const parsed = JSON.parse(value);
-        return this.extractObject(parsed);
-      } catch {
-        return {};
-      }
-    }
-    if (value && typeof value === 'object' && !Array.isArray(value)) {
-      return value as Record<string, unknown>;
-    }
-    return {};
-  }
-
-  private findStringByAliases(data: Record<string, unknown>, aliases: string[]): string | undefined {
-    const raw = this.findByAliases(data, aliases);
-    if (typeof raw !== 'string') return undefined;
-    const trimmed = raw.trim();
-    return trimmed.length > 0 ? trimmed : undefined;
-  }
-
-  private findByAliases(root: unknown, aliases: string[]): unknown {
-    const normalizedAliases = new Set(aliases.map((a) => a.toLowerCase()));
-
-    const walk = (node: unknown): unknown => {
-      if (!node || typeof node !== 'object') return undefined;
-
-      if (Array.isArray(node)) {
-        for (const item of node) {
-          const found = walk(item);
-          if (found !== undefined) return found;
-        }
-        return undefined;
-      }
-
-      const record = node as Record<string, unknown>;
-      for (const [key, value] of Object.entries(record)) {
-        if (normalizedAliases.has(key.toLowerCase()) && value != null) {
-          return value;
-        }
-      }
-
-      for (const value of Object.values(record)) {
-        const found = walk(value);
-        if (found !== undefined) return found;
-      }
-
-      return undefined;
-    };
-
-    return walk(root);
-  }
-
-  private resolveLookupId(
-    lookupKey: 'fournisseursLookup' | 'chantiersLookup',
-    label?: string,
-  ): string | undefined {
-    if (!label) return undefined;
-    const entries =
-      (this.crud.lookups()[lookupKey] as Array<{ key: string; value: string }> | undefined) ?? [];
-    const normalized = this.normalizeText(label);
-    return entries.find((entry) => this.normalizeText(entry.value).includes(normalized))?.key;
   }
 
   private resolvePhase(phase?: string): string | undefined {
     if (!phase) return undefined;
     const entries = this.phaseLookups();
-    const normalized = this.normalizeText(phase);
-    return entries.find((entry) => this.normalizeText(entry.value).includes(normalized))?.key;
+    const normalized = normalizeText(phase);
+    return entries.find((entry) => normalizeText(entry.value).includes(normalized))?.key;
   }
 
   private extractLines(data: Record<string, unknown>): InventoryTx['lines'] {
-    const rawLines = this.findByAliases(data, [
-      'lines',
-      'items',
-      'lineItems',
-      'articles',
-      'produits',
-      'details',
-    ]);
-
-    if (!Array.isArray(rawLines)) return [];
-
-    const articleLookup =
-      (this.crud.lookups()['articlesAll'] as Array<{ key: string; value: string; data?: Record<string, unknown> }> | undefined) ?? [];
+    const rawLines = extractRawLines(data);
+    const articleLookup = this.getTypedLookup<{ key: string; value: string; data?: Record<string, unknown> }>('articlesAll');
 
     const resolvedLines: InventoryTx['lines'] = [];
     for (const rawLine of rawLines) {
-      if (!rawLine || typeof rawLine !== 'object') continue;
-      const line = rawLine as Record<string, unknown>;
-
-      const articleCode = this.findStringByAliases(line, ['articleCode', 'code', 'sku', 'itemCode']);
-      const articleName = this.findStringByAliases(line, ['articleName', 'name', 'designation', 'itemName']);
-      const article = this.resolveArticle(articleLookup, articleCode, articleName);
-      if (!article) continue;
-
-      const quantity = this.toNumber(this.findByAliases(line, ['quantity', 'qty', 'quantite']));
-      if (quantity <= 0) continue;
-
-      const unitPriceRaw = this.findByAliases(line, ['unitPrice', 'prixUnitaire', 'price', 'pu']);
-      const unitPrice = this.toNumber(unitPriceRaw);
-      const defaultPrice = this.toNumber(article.data?.['prix']);
-
-      const uomIdRaw = this.findByAliases(line, ['uomId', 'uom', 'unitId']);
-      const uomId = typeof uomIdRaw === 'string' && uomIdRaw.trim().length > 0
-        ? uomIdRaw.trim()
-        : (typeof article.data?.['uomId'] === 'string' ? article.data['uomId'] : undefined);
-      if (!uomId) continue;
-
-      const uomCodeRaw = this.findByAliases(line, ['uomCode', 'unit', 'uomLabel']);
-      const uomCode = typeof uomCodeRaw === 'string' && uomCodeRaw.trim().length > 0
-        ? uomCodeRaw.trim()
-        : (typeof article.data?.['uomCode'] === 'string' ? article.data['uomCode'] : undefined);
-
-      const finalUnitPrice = unitPrice > 0 ? unitPrice : (defaultPrice > 0 ? defaultPrice : undefined);
-      const totalPrice = finalUnitPrice != null ? Math.round(quantity * finalUnitPrice * 100) / 100 : undefined;
-
-      resolvedLines.push({
-        id: '',
-        txId: '',
-        lineNumber: resolvedLines.length + 1,
-        articleId: article.key,
-        articleCode: articleCode,
-        articleName: articleName,
-        quantity,
-        uomId,
-        uomCode,
-        unitPrice: finalUnitPrice,
-        totalPrice,
-      });
+      const parsedLine = this.mapExtractedLine(rawLine, articleLookup, resolvedLines.length + 1);
+      if (!parsedLine) continue;
+      resolvedLines.push(parsedLine);
     }
 
     return resolvedLines;
+  }
+
+  private mapExtractedLine(
+    line: Record<string, unknown>,
+    articleLookup: Array<{ key: string; value: string; data?: Record<string, unknown> }>,
+    lineNumber: number,
+  ): InventoryTx['lines'][number] | null {
+    const articleCode = findStringByAliases(line, ['articleCode', 'code', 'sku', 'itemCode']);
+    const articleName = findStringByAliases(line, ['articleName', 'name', 'designation', 'itemName']);
+    const article = this.resolveArticle(articleLookup, articleCode, articleName);
+    if (!article) return null;
+
+    const quantity = toNumber(findByAliases(line, ['quantity', 'qty', 'quantite']));
+    if (quantity <= 0) return null;
+
+    const unitPriceRaw = findByAliases(line, ['unitPrice', 'prixUnitaire', 'price', 'pu']);
+    const unitPrice = toNumber(unitPriceRaw);
+    const defaultPrice = toNumber(article.data?.['prix']);
+
+    const uomId = this.resolveLineUomId(line, article);
+    if (!uomId) return null;
+
+    const uomCode = this.resolveLineUomCode(line, article);
+
+    let finalUnitPrice: number | undefined;
+    if (unitPrice > 0) {
+      finalUnitPrice = unitPrice;
+    } else if (defaultPrice > 0) {
+      finalUnitPrice = defaultPrice;
+    }
+
+    let totalPrice: number | undefined;
+    if (finalUnitPrice == null) {
+      totalPrice = undefined;
+    } else {
+      totalPrice = Math.round(quantity * finalUnitPrice * 100) / 100;
+    }
+
+    return {
+      id: '',
+      txId: '',
+      lineNumber,
+      articleId: article.key,
+      articleCode,
+      articleName,
+      quantity,
+      uomId,
+      uomCode,
+      unitPrice: finalUnitPrice,
+      totalPrice,
+    };
+  }
+
+  private resolveLineUomId(
+    line: Record<string, unknown>,
+    article: { key: string; value: string; data?: Record<string, unknown> },
+  ): string | undefined {
+    const uomIdRaw = findByAliases(line, ['uomId', 'uom', 'unitId']);
+    if (typeof uomIdRaw === 'string' && uomIdRaw.trim().length > 0) {
+      return uomIdRaw.trim();
+    }
+
+    if (typeof article.data?.['uomId'] === 'string') {
+      return article.data['uomId'];
+    }
+
+    return undefined;
+  }
+
+  private resolveLineUomCode(
+    line: Record<string, unknown>,
+    article: { key: string; value: string; data?: Record<string, unknown> },
+  ): string | undefined {
+    const uomCodeRaw = findByAliases(line, ['uomCode', 'unit', 'uomLabel']);
+    if (typeof uomCodeRaw === 'string' && uomCodeRaw.trim().length > 0) {
+      return uomCodeRaw.trim();
+    }
+
+    if (typeof article.data?.['uomCode'] === 'string') {
+      return article.data['uomCode'];
+    }
+
+    return undefined;
   }
 
   private resolveArticle(
@@ -518,55 +471,20 @@ export class ReceptionDetailPage extends ConfigDrivenDetailPage<InventoryTx> {
     name?: string,
   ): { key: string; value: string; data?: Record<string, unknown> } | undefined {
     if (code) {
-      const normalizedCode = this.normalizeText(code);
+      const normalizedCode = normalizeText(code);
       const byCode = articles.find((a) => {
         const entryCode = a.value.split('—')[0]?.trim() ?? '';
-        return this.normalizeText(entryCode) === normalizedCode;
+        return normalizeText(entryCode) === normalizedCode;
       });
       if (byCode) return byCode;
     }
 
     if (name) {
-      const normalizedName = this.normalizeText(name);
-      return articles.find((a) => this.normalizeText(a.value).includes(normalizedName));
+      const normalizedName = normalizeText(name);
+      return articles.find((a) => normalizeText(a.value).includes(normalizedName));
     }
 
     return undefined;
-  }
-
-  private normalizeDate(value?: string): string | undefined {
-    if (!value) return undefined;
-
-    const iso = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    if (iso) return value;
-
-    const fr = value.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/);
-    if (fr) {
-      const day = fr[1].padStart(2, '0');
-      const month = fr[2].padStart(2, '0');
-      return `${fr[3]}-${month}-${day}`;
-    }
-
-    const parsed = new Date(value);
-    if (Number.isNaN(parsed.getTime())) return undefined;
-    return parsed.toISOString().slice(0, 10);
-  }
-
-  private toNumber(value: unknown): number {
-    if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
-    if (typeof value !== 'string') return 0;
-
-    const normalized = value.replace(/\s+/g, '').replace(',', '.');
-    const parsed = Number(normalized);
-    return Number.isFinite(parsed) ? parsed : 0;
-  }
-
-  private normalizeText(value: string): string {
-    return value
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .toLowerCase()
-      .trim();
   }
 
   protected override async loadItem(id: string): Promise<void> {

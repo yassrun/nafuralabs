@@ -2,25 +2,40 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import type { RefObject } from "react";
 import { useDraggable } from "@/hooks/useDraggable";
 import { useIsDesktop } from "@/hooks/useIsDesktop";
+import { PROJECTS_DRAG_BOTTOM_RESERVE } from "@/lib/projects";
+import { scalePx } from "@/lib/projectLayout";
 import type { Project } from "@/lib/projects";
 import { PROJECT_SIZES } from "@/lib/projects";
 
 interface ProjectCardProps {
   project: Project;
-  /** stack = mobile column; masonry = desktop absolute layout */
   layout: "stack" | "masonry";
+  boundsRef?: RefObject<HTMLDivElement | null>;
+  layoutScale?: number;
 }
 
-export default function ProjectCard({ project, layout }: ProjectCardProps) {
+export default function ProjectCard({
+  project,
+  layout,
+  boundsRef,
+  layoutScale = 1,
+}: ProjectCardProps) {
   const isDesktop = useIsDesktop();
-  const { width, height } = PROJECT_SIZES[project.size];
+  const base = PROJECT_SIZES[project.size];
+  const width = scalePx(base.width, layoutScale);
+  const height = scalePx(base.height, layoutScale);
   const href = `/projects/${project.slug}`;
   const dragEnabled = layout === "masonry" && isDesktop;
   const { cardRef, handlers } = useDraggable({
     enabled: dragEnabled,
     href,
+    boundsRef,
+    cardWidth: width,
+    cardHeight: height,
+    bottomReserve: scalePx(PROJECTS_DRAG_BOTTOM_RESERVE, layoutScale),
   });
 
   const image = (
@@ -39,7 +54,7 @@ export default function ProjectCard({ project, layout }: ProjectCardProps) {
       <Link
         href={href}
         className="relative block w-full overflow-hidden bg-neutral-200"
-        style={{ aspectRatio: `${width} / ${height}` }}
+        style={{ aspectRatio: `${base.width} / ${base.height}` }}
         data-project-card
       >
         {image}
@@ -50,8 +65,8 @@ export default function ProjectCard({ project, layout }: ProjectCardProps) {
   const style = {
     width: `${width}px`,
     height: `${height}px`,
-    left: `${project.x}px`,
-    top: `${project.y}px`,
+    left: `${scalePx(project.x, layoutScale)}px`,
+    top: `${scalePx(project.y, layoutScale)}px`,
   };
 
   return (

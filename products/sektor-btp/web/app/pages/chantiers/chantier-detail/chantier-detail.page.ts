@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, ViewChild, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { map } from 'rxjs/operators';
+import * as XLSX from 'xlsx';
 
 import { BadgeComponent, ButtonComponent, EmptyStateComponent } from '@lib/anatomy/components';
 import { PageHeaderComponent, PageShellComponent, ToastService, ConfirmDialogService } from '@lib/anatomy';
@@ -35,6 +36,22 @@ import {
 import { ErpAuditService } from '@applications/erp/shell/erp-audit.service';
 
 type DetailTab = 'overview' | 'lots' | 'phases' | 'budget' | 'situations' | 'documents' | 'photos';
+type LotImportIssueReason = 'missingRequired' | 'invalidQuantite' | 'invalidPrixUnitaire' | 'apiCreateFailed';
+
+type ParsedLotImportRow = {
+  sourceLine: number;
+  data: Partial<LotChantier>;
+};
+
+type LotImportIssue = {
+  sourceLine: number;
+  reason: LotImportIssueReason;
+};
+
+type ParsedLotImportResult = {
+  rows: ParsedLotImportRow[];
+  issues: LotImportIssue[];
+};
 
 const STATUS_VARIANT: Record<ChantierStatus, BadgeVariant> = {
   PROSPECT: 'info',
@@ -156,12 +173,51 @@ const PHASE_STATUS_CSS: Record<string, string> = {
         <!-- Tab: Lots -->
         @if (activeTab() === 'lots') {
           <section class="tab-panel">
-            @if (lots().length) {
-              <div class="tab-panel__toolbar">
-                <nf-button variant="primary" icon="plus" iconLibrary="lucide" (clicked)="addLot()">
-                  {{ 'chantiers.chantier.detail.lots.addCta' | translate }}
+            <div class="tab-panel__toolbar">
+              <nf-button variant="primary" icon="plus" iconLibrary="lucide" (clicked)="addLot()">
+                {{ 'chantiers.chantier.detail.lots.addCta' | translate }}
+              </nf-button>
+              <nf-button variant="secondary" icon="upload" iconLibrary="lucide" (clicked)="triggerLotImport()">
+                {{ 'chantiers.chantier.detail.lots.importCta' | translate }}
+              </nf-button>
+              @if (selectedLotImportFile()) {
+                <nf-button variant="secondary" icon="play" iconLibrary="lucide" (clicked)="confirmLotImport()">
+                  {{ 'chantiers.chantier.detail.lots.importConfirmCta' | translate }}
                 </nf-button>
-              </div>
+              }
+              <nf-button variant="ghost" icon="download" iconLibrary="lucide" (clicked)="downloadLotImportTemplate()">
+                {{ 'chantiers.chantier.detail.lots.templateCta' | translate }}
+              </nf-button>
+              <nf-button variant="ghost" icon="copy" iconLibrary="lucide" (clicked)="copyLotImportMapping()">
+                {{ 'chantiers.chantier.detail.lots.mappingCta' | translate }}
+              </nf-button>
+              <input
+                #lotImportInput
+                type="file"
+                accept=".csv,.xlsx,.xls"
+                (change)="onLotFileSelected($event)"
+                hidden />
+            </div>
+            @if (selectedLotImportFileName(); as fileName) {
+              <p class="import-file-chip">
+                {{ 'chantiers.chantier.detail.lots.importFileSelected' | translate:{ fileName: fileName } }}
+                @if (selectedLotImportRowCount(); as count) {
+                  <strong>({{ count }} {{ 'chantiers.chantier.detail.lots.importFileRowsLabel' | translate:{ count: count } }})</strong>
+                }
+              </p>
+            }
+            <div class="mapping-help">
+              <p class="mapping-help__title">{{ 'chantiers.chantier.detail.lots.mappingHelpTitle' | translate }}</p>
+              <p class="mapping-help__hint">{{ 'chantiers.chantier.detail.lots.mappingHelpHint' | translate }}</p>
+              <ul class="mapping-help__list">
+                <li><strong>code</strong>: {{ 'chantiers.chantier.detail.lots.mappingHelpCode' | translate }}</li>
+                <li><strong>designation</strong>: {{ 'chantiers.chantier.detail.lots.mappingHelpDesignation' | translate }}</li>
+                <li><strong>quantite</strong>: {{ 'chantiers.chantier.detail.lots.mappingHelpQuantite' | translate }}</li>
+                <li><strong>unite</strong>: {{ 'chantiers.chantier.detail.lots.mappingHelpUnite' | translate }}</li>
+                <li><strong>prix_unitaire_ht</strong>: {{ 'chantiers.chantier.detail.lots.mappingHelpPrixUnitaire' | translate }}</li>
+              </ul>
+            </div>
+            @if (lots().length) {
               <table class="data-table">
                 <thead>
                   <tr>
@@ -461,9 +517,54 @@ const PHASE_STATUS_CSS: Record<string, string> = {
 
     .actions { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: flex-start; padding-top: 1rem; border-top: 1px solid var(--nf-color-bg-muted); margin-top: 0.5rem; }
     .tab-toolbar { display: flex; gap: 0.5rem; justify-content: flex-end; margin-bottom: 0.75rem; }
+    .tab-panel__toolbar { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: flex-end; margin-bottom: 0.75rem; }
+    .import-file-chip {
+      margin: -0.2rem 0 0.65rem;
+      padding: 0.35rem 0.6rem;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--nf-color-primary-700);
+      background: color-mix(in srgb, var(--nf-color-primary-500) 10%, transparent);
+      border: 1px solid color-mix(in srgb, var(--nf-color-primary-500) 18%, transparent);
+    }
+    .mapping-help {
+      margin-bottom: 0.9rem;
+      padding: 0.75rem 0.9rem;
+      border: 1px solid var(--nf-color-border);
+      border-radius: 0.65rem;
+      background: var(--nf-color-bg-subtle);
+    }
+    .mapping-help__title {
+      margin: 0;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--nf-color-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .mapping-help__hint {
+      margin: 0.25rem 0 0.5rem;
+      font-size: 0.83rem;
+      color: var(--nf-color-text-secondary);
+    }
+    .mapping-help__list {
+      margin: 0;
+      padding-left: 1.1rem;
+      font-size: 0.82rem;
+      color: var(--nf-color-text-secondary);
+      line-height: 1.45;
+    }
   `],
 })
 export class ChantierDetailPage {
+  @ViewChild('lotImportInput') private readonly lotImportInput?: ElementRef<HTMLInputElement>;
+
+  readonly selectedLotImportFile = signal<File | null>(null);
+  readonly selectedLotImportFileName = computed(() => this.selectedLotImportFile()?.name ?? '');
+  readonly selectedLotImportRowCount = signal<number | null>(null);
+
   readonly attachmentEntityType = ERP_ATTACHMENT_ENTITY_TYPES.CHANTIER;
   readonly attachmentConfig = DOCUMENT_ATTACHMENT_CONFIG;
 
@@ -682,6 +783,301 @@ export class ChantierDetailPage {
     } catch {
       this.toast.error(this.translate.instant('chantiers.chantier.detail.lots.createFailed'));
     }
+  }
+
+  triggerLotImport(): void {
+    this.lotImportInput?.nativeElement.click();
+  }
+
+  downloadLotImportTemplate(): void {
+    const headers = ['code', 'designation', 'quantite', 'unite', 'prix_unitaire_ht'];
+    const sample = ['L01', 'Terrassement', '100', 'm3', '250'];
+    const csvContent = `${headers.join(',')}\n${sample.join(',')}\n`;
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = globalThis.URL.createObjectURL(blob);
+    const anchor = globalThis.document.createElement('a');
+    anchor.href = url;
+    anchor.download = 'modele-import-lots.csv';
+    anchor.click();
+    globalThis.URL.revokeObjectURL(url);
+
+    this.toast.success(this.translate.instant('chantiers.chantier.detail.lots.templateDownloaded'));
+  }
+
+  async copyLotImportMapping(): Promise<void> {
+    const mapping = this.buildLotImportMappingHint();
+    try {
+      await this.writeClipboard(mapping);
+      this.toast.success(this.translate.instant('chantiers.chantier.detail.lots.mappingCopied'));
+    } catch {
+      this.toast.error(this.translate.instant('chantiers.chantier.detail.lots.mappingCopyFailed'));
+    }
+  }
+
+  async onLotFileSelected(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+
+    if (!file) {
+      return;
+    }
+
+    try {
+      const rowCount = await this.countLotsFileRows(file);
+      this.selectedLotImportFile.set(file);
+      this.selectedLotImportRowCount.set(rowCount);
+      this.toast.info(
+        this.translate.instant('chantiers.chantier.detail.lots.importReady', {
+          fileName: file.name,
+          count: rowCount,
+        }),
+      );
+    } catch {
+      this.toast.error(this.translate.instant('chantiers.chantier.detail.lots.importParseCountFailed'));
+      this.selectedLotImportFile.set(null);
+      this.selectedLotImportRowCount.set(null);
+    }
+  }
+
+  async confirmLotImport(): Promise<void> {
+    const file = this.selectedLotImportFile();
+    if (!file) {
+      this.toast.error(this.translate.instant('chantiers.chantier.detail.lots.importNoFile'));
+      return;
+    }
+
+    await this.importLotsFromFile(file);
+    this.selectedLotImportFile.set(null);
+    this.selectedLotImportRowCount.set(null);
+  }
+
+  private buildLotImportMappingHint(): string {
+    return [
+      'code: code | lot | lot_code | lotcode',
+      'designation: designation | description | intitule | name',
+      'quantite: quantite | quantity | qte',
+      'unite: unite | unit | uom',
+      'prix_unitaire_ht: prix_unitaire_ht | prixunitaireht | prixunitaire | pu | unitprice',
+    ].join('\n');
+  }
+
+  private async writeClipboard(value: string): Promise<void> {
+    if (globalThis.navigator?.clipboard?.writeText) {
+      await globalThis.navigator.clipboard.writeText(value);
+      return;
+    }
+    throw new Error('clipboard-api-unavailable');
+  }
+
+  private async importLotsFromFile(file: File): Promise<void> {
+    const chantier = this.chantier();
+    if (!chantier?.id) {
+      this.toast.error(this.translate.instant('chantiers.chantier.detail.lots.importFailed'));
+      return;
+    }
+
+    try {
+      const parsed = await this.parseLotsFile(file);
+      if (!parsed.rows.length) {
+        this.toast.error(this.translate.instant('chantiers.chantier.detail.lots.importInvalidFile'));
+        return;
+      }
+
+      const initialOrder = this.lots().length;
+      const created: LotChantier[] = [];
+      const issues: LotImportIssue[] = [...parsed.issues];
+
+      for (let i = 0; i < parsed.rows.length; i += 1) {
+        const row = parsed.rows[i];
+        try {
+          const lot = await this.lotApi.createForChantier(chantier.id, {
+            ...row.data,
+            ordre: initialOrder + i + 1,
+          });
+          created.push(lot);
+        } catch {
+          issues.push({ sourceLine: row.sourceLine, reason: 'apiCreateFailed' });
+        }
+      }
+
+      if (!created.length) {
+        this.toast.error(this.translate.instant('chantiers.chantier.detail.lots.importFailed'));
+        return;
+      }
+
+      this.lots.update((current) => [...current, ...created]);
+
+      if (issues.length > 0) {
+        this.toast.success(
+          this.translate.instant('chantiers.chantier.detail.lots.importPartial', {
+            imported: created.length,
+            total: parsed.rows.length + parsed.issues.length,
+          }),
+        );
+        this.toast.warning(
+          this.translate.instant('chantiers.chantier.detail.lots.importIssuesSummary', {
+            failed: issues.length,
+            total: parsed.rows.length + parsed.issues.length,
+            details: this.formatImportIssueDetails(issues),
+          }),
+        );
+      } else {
+        this.toast.success(
+          this.translate.instant('chantiers.chantier.detail.lots.importSuccess', { count: created.length }),
+        );
+      }
+    } catch {
+      this.toast.error(this.translate.instant('chantiers.chantier.detail.lots.importFailed'));
+    }
+  }
+
+  private async countLotsFileRows(file: File): Promise<number> {
+    const buffer = await file.arrayBuffer();
+    const workbook = XLSX.read(buffer, { type: 'array' });
+    const firstSheetName = workbook.SheetNames[0];
+    if (!firstSheetName) {
+      return 0;
+    }
+    const worksheet = workbook.Sheets[firstSheetName];
+    const rawRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(worksheet, { defval: '' });
+    return Math.max(0, rawRows.length);
+  }
+
+  private async parseLotsFile(file: File): Promise<ParsedLotImportResult> {
+    const buffer = await file.arrayBuffer();
+    const workbook = XLSX.read(buffer, { type: 'array' });
+    const firstSheetName = workbook.SheetNames[0];
+    if (!firstSheetName) {
+      return { rows: [], issues: [] };
+    }
+
+    const worksheet = workbook.Sheets[firstSheetName];
+    const rawRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(worksheet, { defval: '' });
+
+    const rows: ParsedLotImportRow[] = [];
+    const issues: LotImportIssue[] = [];
+
+    for (let index = 0; index < rawRows.length; index += 1) {
+      const rawRow = rawRows[index];
+      const sourceLine = index + 2;
+      const code = this.readString(rawRow, ['code', 'lot', 'lotcode', 'lot_code']);
+      const designation = this.readString(rawRow, ['designation', 'description', 'intitule', 'name']);
+      const unite = this.readString(rawRow, ['unite', 'unit', 'uom']);
+      const quantite = this.readNumber(rawRow, ['quantite', 'quantity', 'qte']);
+      const prixUnitaireHt = this.readNumber(rawRow, [
+        'prixunitaireht',
+        'prix_unitaire_ht',
+        'prixunitaire',
+        'pu',
+        'unitprice',
+      ]);
+
+      if (!code || !designation || !unite) {
+        issues.push({ sourceLine, reason: 'missingRequired' });
+        continue;
+      }
+
+      if (!Number.isFinite(quantite) || quantite <= 0) {
+        issues.push({ sourceLine, reason: 'invalidQuantite' });
+        continue;
+      }
+
+      if (!Number.isFinite(prixUnitaireHt) || prixUnitaireHt < 0) {
+        issues.push({ sourceLine, reason: 'invalidPrixUnitaire' });
+        continue;
+      }
+
+      rows.push({
+        sourceLine,
+        data: {
+          code,
+          designation,
+          unite,
+          quantite,
+          prixUnitaireHt,
+          montantHt: Math.round(quantite * prixUnitaireHt * 100) / 100,
+          avancementPercent: 0,
+        },
+      });
+    }
+
+    return { rows, issues };
+  }
+
+  private formatImportIssueDetails(issues: LotImportIssue[]): string {
+    const maxDisplayed = 3;
+    const displayed = issues.slice(0, maxDisplayed).map((issue) => this.formatImportIssue(issue));
+    const remaining = issues.length - displayed.length;
+    if (remaining <= 0) {
+      return displayed.join(' | ');
+    }
+    return `${displayed.join(' | ')} | ${this.translate.instant('chantiers.chantier.detail.lots.importIssueAndMore', { count: remaining })}`;
+  }
+
+  private formatImportIssue(issue: LotImportIssue): string {
+    const reasonKey = this.importIssueReasonKey(issue.reason);
+    return this.translate.instant(reasonKey, { line: issue.sourceLine });
+  }
+
+  private importIssueReasonKey(reason: LotImportIssueReason): string {
+    switch (reason) {
+      case 'missingRequired':
+        return 'chantiers.chantier.detail.lots.importIssueMissingRequired';
+      case 'invalidQuantite':
+        return 'chantiers.chantier.detail.lots.importIssueInvalidQuantite';
+      case 'invalidPrixUnitaire':
+        return 'chantiers.chantier.detail.lots.importIssueInvalidPrixUnitaire';
+      case 'apiCreateFailed':
+        return 'chantiers.chantier.detail.lots.importIssueApiFailed';
+      default:
+        return 'chantiers.chantier.detail.lots.importFailed';
+    }
+  }
+
+  private readString(row: Record<string, unknown>, aliases: string[]): string {
+    const value = this.readByAliases(row, aliases);
+    if (typeof value === 'string') {
+      return value.trim();
+    }
+    if (typeof value === 'number' || typeof value === 'boolean') {
+      return String(value).trim();
+    }
+    return '';
+  }
+
+  private readNumber(row: Record<string, unknown>, aliases: string[]): number {
+    const normalized = this.readString(row, aliases)
+      .replace(/\s+/g, '')
+      .replace(',', '.');
+    const parsed = Number.parseFloat(normalized);
+    return Number.isFinite(parsed) ? parsed : Number.NaN;
+  }
+
+  private readByAliases(row: Record<string, unknown>, aliases: string[]): unknown {
+    const normalizedEntries = Object.entries(row).map(([key, value]) => [
+      this.normalizeHeader(key),
+      value,
+    ] as const);
+
+    for (const alias of aliases) {
+      const aliasKey = this.normalizeHeader(alias);
+      const found = normalizedEntries.find(([key]) => key === aliasKey);
+      if (found) {
+        return found[1];
+      }
+    }
+
+    return undefined;
+  }
+
+  private normalizeHeader(value: string): string {
+    return value
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-zA-Z0-9]/g, '')
+      .toLowerCase();
   }
 
   async addPhase(): Promise<void> {

@@ -30,9 +30,16 @@ function resolveAccessToken(): string | null {
   );
 }
 
+const isExternalAuthRequest = (url: string): boolean =>
+  url.includes('keycloak') ||
+  url.includes('iam.nafura.local') ||
+  url.includes('iam.nafuralabs.staging') ||
+  url.includes('iam.nafuralabs.com') ||
+  url.includes('/protocol/openid-connect/');
+
 export const authTokenInterceptor: HttpInterceptorFn = (req, next) => {
   // Skip token for Keycloak endpoints (external auth provider)
-  if (req.url.includes('keycloak') || req.url.includes('iam.nafura.local')) {
+  if (isExternalAuthRequest(req.url)) {
     return next(req);
   }
 

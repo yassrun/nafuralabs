@@ -680,5 +680,14 @@
       "add": "Enregistrer",
       "solde": "Solde"
     }
+  },
+  "common": {
+    "scan": {
+      "button": "Scanner un document",
+      "scanning": "Scan en cours…",
+      "tenantMissing": "Tenant introuvable pour lancer le scan",
+      "failed": "Le scan a échoué",
+      "error": "Impossible de scanner le document"
+    }
   }
 }

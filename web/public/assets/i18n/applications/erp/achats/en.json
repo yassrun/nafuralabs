@@ -287,6 +287,10 @@
         "saved": "PO {numero} saved",
         "statusUpdated": "PO {numero} — status updated"
       },
+      "scan": {
+        "button": "Scan purchase order",
+        "success": "PO scanned, form pre-filled"
+      },
       "deleteConfirm": {
         "title": "Delete PO",
         "message": "Delete purchase order {numero}?"

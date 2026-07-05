@@ -157,9 +157,21 @@ make reset-app APP=sektor-btp ENV=staging RESET_DB=true
 
 ## Hostnames staging
 
+Produits et infra partagée utilisent le suffixe `*.nafuralabs.staging` :
+
+| Service | Host |
+|---------|------|
+| Sektor web | `sektor.nafuralabs.staging` |
+| Sektor API | `api.sektor.nafuralabs.staging` |
+| MBS vitrine | `mbs.nafuralabs.staging` |
+| IAM | `iam.nafuralabs.staging` |
+| Minio / S3 / Vault | `minio.nafuralabs.staging`, `s3.nafuralabs.staging`, `vault.nafuralabs.staging` |
+
 ```
-127.0.0.1 sektor.nafuralabs.staging api.sektor.nafuralabs.staging iam.nafura.local
+127.0.0.1 sektor.nafuralabs.staging api.sektor.nafuralabs.staging mbs.nafuralabs.staging iam.nafuralabs.staging minio.nafuralabs.staging s3.nafuralabs.staging vault.nafuralabs.staging
 ```
+
+Windows (admin) : `powershell -ExecutionPolicy Bypass -File toolchain/ops/add-staging-hosts.ps1`
 
 ## Images Sektor (manuel)
 

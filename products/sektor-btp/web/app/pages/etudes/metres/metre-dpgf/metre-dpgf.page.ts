@@ -18,6 +18,7 @@ import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
 import type { DPGF, Metre, NoeudDPGF } from '@applications/erp/etudes/models';
 import { DpgfApiService } from '../services';
 import { MetreFacade } from '../services';
+import { PrintService } from '@applications/erp/shared/services';
 
 interface FlatDpgfRow {
   depth: number;
@@ -72,6 +73,7 @@ export class MetreDpgfPage {
   private readonly dpgfApi = inject(DpgfApiService);
   private readonly toast = inject(ToastService);
   private readonly translate = inject(TranslateService);
+  private readonly printService = inject(PrintService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly metre = signal<Metre | null>(null);
@@ -152,7 +154,7 @@ export class MetreDpgfPage {
   }
 
   printPdf(): void {
-    window.print();
+    this.printService.printSituation();
   }
 
   rowPad(depth: number): string {

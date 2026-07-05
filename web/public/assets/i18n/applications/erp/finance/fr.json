@@ -473,6 +473,10 @@
         "litige": "Facture marquée en litige",
         "annulee": "Facture annulée",
         "error": "Erreur"
+      },
+      "scan": {
+        "button": "Scanner la facture fournisseur",
+        "success": "Facture scannée, formulaire prérempli"
       }
     },
     "reglement": {

@@ -26,6 +26,7 @@ import { AvoirPrintComponent } from '@applications/erp/ventes/components';
 
 import { AvoirFacade } from '../services';
 import { buildAvoirDetailConfig } from '../config';
+import { PrintService } from '@applications/erp/shared/services';
 
 @Component({
   selector: 'app-avoir-detail',
@@ -47,6 +48,7 @@ export class AvoirDetailPage extends ConfigDrivenDetailPage<Avoir> {
   private readonly nav = inject(Router);
   private readonly activatedRoute = inject(ActivatedRoute);
   private readonly translate = inject(TranslateService);
+  private readonly printService = inject(PrintService);
 
   readonly facade = createDetailFacadeFromCrud<Avoir, AvoirCreate>({
     crud: this.crud,
@@ -113,7 +115,7 @@ export class AvoirDetailPage extends ConfigDrivenDetailPage<Avoir> {
     event: DetailActionEvent<Avoir>,
   ): Promise<void> {
     if (event.actionId === 'print_avoir' && event.item) {
-      window.print();
+      this.printService.printAvoir();
       return;
     }
     await super.handleCustomAction(event);

@@ -1,17 +1,32 @@
 "use client";
 
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, type RefObject } from "react";
 import { useRouter } from "next/navigation";
 
 const CLICK_MAX_MS = 200;
-const DRAG_THRESHOLD_PX = 5;
+const DRAG_THRESHOLD_PX = 3;
 
 interface UseDraggableOptions {
   enabled: boolean;
   href: string;
+  boundsRef?: RefObject<HTMLElement | null>;
+  cardWidth: number;
+  cardHeight: number;
+  bottomReserve?: number;
 }
 
-export function useDraggable({ enabled, href }: UseDraggableOptions) {
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max);
+}
+
+export function useDraggable({
+  enabled,
+  href,
+  boundsRef,
+  cardWidth,
+  cardHeight,
+  bottomReserve = 0,
+}: UseDraggableOptions) {
   const router = useRouter();
   const cardRef = useRef<HTMLDivElement>(null);
   const dragState = useRef({
@@ -24,6 +39,24 @@ export function useDraggable({ enabled, href }: UseDraggableOptions) {
     isDragging: false,
     moved: false,
   });
+
+  const clampToBounds = useCallback(
+    (x: number, y: number) => {
+      const bounds = boundsRef?.current;
+      if (!bounds) return { x, y };
+
+      const maxX = Math.max(0, bounds.clientWidth - cardWidth);
+      const maxY = Math.max(
+        0,
+        bounds.clientHeight - cardHeight - bottomReserve,
+      );
+      return {
+        x: clamp(x, 0, maxX),
+        y: clamp(y, 0, maxY),
+      };
+    },
+    [boundsRef, cardWidth, cardHeight, bottomReserve],
+  );
 
   const onPointerDown = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
@@ -52,6 +85,9 @@ export function useDraggable({ enabled, href }: UseDraggableOptions) {
       const state = dragState.current;
       if (state.pointerId !== e.pointerId) return;
 
+      const el = cardRef.current;
+      if (!el) return;
+
       const dx = e.clientX - state.startX;
       const dy = e.clientY - state.startY;
       const dist = Math.hypot(dx, dy);
@@ -62,19 +98,18 @@ export function useDraggable({ enabled, href }: UseDraggableOptions) {
           state.isDragging = true;
           state.moved = true;
           document.body.classList.add("is-dragging-card");
+          el.style.transform = "none";
         }
       }
 
       if (!state.isDragging) return;
 
-      const el = cardRef.current;
-      if (!el) return;
-
-      el.style.left = `${state.originX + dx}px`;
-      el.style.top = `${state.originY + dy}px`;
+      const next = clampToBounds(state.originX + dx, state.originY + dy);
+      el.style.left = `${next.x}px`;
+      el.style.top = `${next.y}px`;
       el.style.zIndex = "50";
     },
-    [],
+    [clampToBounds],
   );
 
   const onPointerUp = useCallback(

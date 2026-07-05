@@ -28,6 +28,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="antialiased" suppressHydrationWarning>
+        <div className="paper-grain-overlay" aria-hidden />
         <ClientProviders />
         {children}
       </body>

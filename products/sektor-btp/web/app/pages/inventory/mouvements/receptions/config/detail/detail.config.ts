@@ -106,7 +106,7 @@ export function buildReceptionDetailConfig(t: TranslateService) {
             position: 'right',
             order: 80,
             showInModes: ['create', 'edit'],
-            permission: 'stock.reception.create',
+            permission: 'stock.reception.scan',
           },
         ],
         override: {

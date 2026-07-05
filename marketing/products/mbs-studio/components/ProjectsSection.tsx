@@ -3,12 +3,21 @@
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { loadScrollTrigger } from "@/lib/gsap";
-import { PROJECTS } from "@/lib/projects";
+import { FIGMA_LAYOUT_WIDTH, scalePx } from "@/lib/projectLayout";
+import {
+  getProjectsSectionMinHeight,
+  PROJECTS,
+  SEE_MORE_TOP_GAP,
+} from "@/lib/projects";
+import { useLayoutScale } from "@/hooks/useLayoutScale";
 import ProjectCard from "./ProjectCard";
 
 export default function ProjectsSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
+  const layoutScale = useLayoutScale();
+
+  const sectionMinHeight = getProjectsSectionMinHeight(layoutScale);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -37,6 +46,9 @@ export default function ProjectsSection() {
             start: "top 75%",
             toggleActions: "play none none reverse",
           },
+          onComplete: () => {
+            gsap.set(cards, { clearProps: "transform" });
+          },
         },
       );
     })();
@@ -46,23 +58,29 @@ export default function ProjectsSection() {
       tween?.scrollTrigger?.kill();
       tween?.kill();
     };
-  }, []);
+  }, [layoutScale]);
 
   return (
     <section
       id="work"
       ref={sectionRef}
-      className="relative z-10 bg-transparent"
+      className="relative z-10 overflow-hidden bg-transparent"
     >
       <div
         ref={cardsRef}
-        className="relative mx-auto hidden min-h-[1600px] max-w-[1400px] px-6 pb-24 lg:block"
+        className="relative mx-auto hidden w-full overflow-hidden lg:block"
+        style={{
+          maxWidth: `${FIGMA_LAYOUT_WIDTH}px`,
+          minHeight: `${sectionMinHeight}px`,
+        }}
       >
         {PROJECTS.map((project) => (
           <ProjectCard
             key={project.slug}
             project={project}
             layout="masonry"
+            boundsRef={cardsRef}
+            layoutScale={layoutScale}
           />
         ))}
       </div>
@@ -73,7 +91,10 @@ export default function ProjectsSection() {
         ))}
       </div>
 
-      <div className="flex justify-center pb-24">
+      <div
+        className="flex justify-center pb-24"
+        style={{ marginTop: `${scalePx(SEE_MORE_TOP_GAP, layoutScale)}px` }}
+      >
         <Link
           href="/#work"
           className="flex h-[59px] w-[195px] items-center justify-center rounded-full bg-black text-[17px] font-medium text-white transition-opacity hover:opacity-80"

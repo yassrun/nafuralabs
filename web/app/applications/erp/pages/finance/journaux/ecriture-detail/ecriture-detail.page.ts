@@ -6,6 +6,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ButtonComponent, PageHeaderComponent, PageShellComponent, ToastService } from '@lib/anatomy/components';
 import { JournalApiService } from '@applications/erp/finance/services/journal-api.service';
 import { JournalEntryApiService } from '@applications/erp/finance/services/journal-entry-api.service';
+import { PrintService } from '@applications/erp/shared/services';
 import type { Ecriture } from '@applications/erp/finance/models';
 import { ECRITURE_STATUS_KEYS, ECRITURE_ORIGINE_KEYS } from '@applications/erp/shell/i18n-labels';
 
@@ -167,6 +168,7 @@ export class EcritureDetailPage {
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
   private readonly translate = inject(TranslateService);
+  private readonly printService = inject(PrintService);
 
   protected readonly ECRITURE_STATUS_KEYS = ECRITURE_STATUS_KEYS;
   protected readonly ECRITURE_ORIGINE_KEYS = ECRITURE_ORIGINE_KEYS;
@@ -237,9 +239,7 @@ export class EcritureDetailPage {
   }
 
   onPrint(): void {
-    if (typeof window !== 'undefined') {
-      window.print();
-    }
+    this.printService.printSituation();
   }
 
   originRoute(ec: Ecriture): unknown[] | null {
