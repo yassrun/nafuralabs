@@ -43,7 +43,7 @@ import {
   DEFAULT_PLATFORM_APP_SHELL_OPTIONS,
   PlatformAppShellOptions,
 } from './platform-app-shell.types';
-import { ThemeService, ThemeModeService, type TenantBranding } from '../theme';
+import { ThemeService, ThemeModeService } from '../theme';
 import { ShortcutsService } from '../shortcuts/shortcuts.service';
 import { ShortcutsHelpComponent } from '../shortcuts/shortcuts-help.component';
 import { OnboardingTourComponent } from '../onboarding/onboarding-tour.component';
@@ -51,9 +51,11 @@ import { OnboardingService } from '../onboarding/onboarding.service';
 import { ApiConfigService } from '../config/api-config.service';
 import { AppSettingsApiService } from '../../features/app-settings/models';
 import { ApprovalsFacade } from '../../features/approvals/services/approvals-facade.service';
-import { SocieteSwitcherComponent } from '@applications/erp/shell/components/societe-switcher/societe-switcher.component';
+import {
+  SHELL_ONBOARDING_WIDGETS_LOADER,
+  SHELL_ORG_SWITCHER,
+} from './shell-extensions.token';
 import { environment } from '@env';
-import { SocieteService } from '@applications/erp/shell/societe.service';
 import { TooltipDirective } from '../../lib/anatomy/components/atoms/tooltip/tooltip.directive';
 
 type UiMessageRole = 'user' | 'assistant' | 'system' | 'tool';
@@ -93,7 +95,7 @@ const LUCIDE_ICON_ALIASES: Record<string, string> = {
 @Component({
   selector: 'app-platform-shell',
   standalone: true,
-  imports: [CommonModule, NgComponentOutlet, RouterModule, LucideAngularModule, LanguageSelectorComponent, AvatarComponent, NotificationBellComponent, CommandPaletteComponent, ChatPanelComponent, ShortcutsHelpComponent, OnboardingTourComponent, SocieteSwitcherComponent, TooltipDirective, AssistantBlockRendererComponent],
+  imports: [CommonModule, NgComponentOutlet, RouterModule, LucideAngularModule, LanguageSelectorComponent, AvatarComponent, NotificationBellComponent, CommandPaletteComponent, ChatPanelComponent, ShortcutsHelpComponent, OnboardingTourComponent, TooltipDirective, AssistantBlockRendererComponent],
   template: `
     <div
       class="naf-shell"
@@ -138,7 +140,9 @@ const LUCIDE_ICON_ALIASES: Record<string, string> = {
         </div>
 
         <div class="naf-shell__topbar-right">
-          <app-societe-switcher (change)="onSocieteSwitcherChange()" />
+          @if (orgSwitcher) {
+            <ng-container *ngComponentOutlet="orgSwitcher" />
+          }
           @if (onboardingMeterWidget()) {
             <ng-container *ngComponentOutlet="onboardingMeterWidget()!" />
           }
@@ -1693,7 +1697,7 @@ export class PlatformAppShellComponent implements OnInit {
   private readonly apiConfig = inject(ApiConfigService);
   private readonly appSettingsApi = inject(AppSettingsApiService);
   readonly approvalsFacade = inject(ApprovalsFacade);
-  private readonly societeService = inject(SocieteService, { optional: true });
+  readonly orgSwitcher = inject(SHELL_ORG_SWITCHER, { optional: true });
   private readonly shortcuts = inject(ShortcutsService);
   readonly onboarding = inject(OnboardingService);
   private loadVersion = 0;
@@ -1839,10 +1843,11 @@ export class PlatformAppShellComponent implements OnInit {
   readonly userEmail = computed(() => this.auth.user()?.email || '');
 
   constructor() {
-    if (environment.onboardingV2Enabled) {
-      void import('@applications/erp/onboarding/onboarding-shell-widgets.component').then((m) => {
-        this.onboardingInviteWidget.set(m.OnboardingInviteBannerWidgetComponent);
-        this.onboardingMeterWidget.set(m.OnboardingCompletenessWidgetComponent);
+    const widgetsLoader = inject(SHELL_ONBOARDING_WIDGETS_LOADER, { optional: true });
+    if (environment.onboardingV2Enabled && widgetsLoader) {
+      void widgetsLoader().then((widgets) => {
+        this.onboardingInviteWidget.set(widgets.invite);
+        this.onboardingMeterWidget.set(widgets.meter);
         this.cdr.markForCheck();
       });
     }
@@ -1992,47 +1997,6 @@ export class PlatformAppShellComponent implements OnInit {
 
   closeUserMenu(): void {
     this.userMenuOpen.set(false);
-  }
-
-  /**
-   * Hook for SocieteSwitcher (Task 8.3). Today the switcher already mutates the
-   * service state ; we only re-trigger CD so any branding/title bound on the
-   * current société picks up the change immediately.
-   */
-  onSocieteSwitcherChange(): void {
-    const svc = this.societeService;
-    if (!svc) {
-      return;
-    }
-    const demoPrimaryBySociete: Record<string, string> = {
-      'soc-somacom-btp': '#0d9488',
-      'soc-somacom-tp': '#1d4ed8',
-      'soc-somacom-logistique': '#7c3aed',
-    };
-    const id = svc.currentSocieteId();
-    const b = this.themeService.branding();
-    const fallback = b?.primaryColor && /^#/.test(b.primaryColor) ? b.primaryColor : null;
-    this.themeService.applyPrimaryColor(demoPrimaryBySociete[id] ?? fallback);
-    const soc = svc.currentSociete();
-    if (soc) {
-      const merged: TenantBranding = {
-        logoUrl: b?.logoUrl ?? null,
-        faviconUrl: b?.faviconUrl ?? null,
-        primaryColor: demoPrimaryBySociete[id] ?? b?.primaryColor ?? null,
-        tenantDisplayName: soc.raisonSociale,
-      };
-      this.themeService.applyDocumentChrome(merged);
-    } else if (b) {
-      this.themeService.applyDocumentChrome({
-        logoUrl: b.logoUrl ?? null,
-        faviconUrl: b.faviconUrl ?? null,
-        primaryColor: demoPrimaryBySociete[id] ?? b.primaryColor ?? null,
-        tenantDisplayName: b.tenantDisplayName ?? null,
-      });
-    } else {
-      this.themeService.applyDocumentChrome(null);
-    }
-    this.cdr.markForCheck();
   }
 
   toggleDomain(domainId: string): void {

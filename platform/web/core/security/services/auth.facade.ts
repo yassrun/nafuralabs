@@ -8,7 +8,7 @@
 import { Injectable, Signal, computed, inject, effect } from '@angular/core';
 import { Router } from '@angular/router';
 import { environment } from '@env';
-import { APPLICATION_REQUIRES_TENANT } from '@applications/config/routes';
+import { APPLICATION_RUNTIME_CONFIG } from '../../application/application-runtime.token';
 
 import { AuthStateStore } from '../state/auth.state';
 import { AuthApiService } from './auth-api.service';
@@ -39,6 +39,7 @@ export class AuthFacade {
   private readonly tokenService = inject(TokenService);
   private readonly router = inject(Router);
   private readonly tenantContextService = inject(TenantContextService);
+  private readonly runtime = inject(APPLICATION_RUNTIME_CONFIG);
 
   // Token refresh timer
   private refreshTimer: ReturnType<typeof setTimeout> | null = null;
@@ -229,7 +230,7 @@ export class AuthFacade {
       );
 
       // Only tenant-enabled apps should resolve tenant memberships/context
-      if (APPLICATION_REQUIRES_TENANT) {
+      if (this.runtime.requiresTenant) {
         const tenants = await this.api.getUserTenants(
           result.user.id,
           result.tokens.accessToken
@@ -303,7 +304,7 @@ export class AuthFacade {
       );
 
       // Only tenant-enabled apps should resolve tenant memberships/context
-      if (APPLICATION_REQUIRES_TENANT) {
+      if (this.runtime.requiresTenant) {
         const tenants = await this.api.getUserTenants(
           response.user.id,
           response.tokens.accessToken
@@ -518,7 +519,7 @@ export class AuthFacade {
       const membership = this.buildOnboardingOwnerMembership(tenantId, tenantId);
       this.state.setTenants([membership]);
       this.state.selectTenant(tenantId, membership);
-      if (APPLICATION_REQUIRES_TENANT) {
+      if (this.runtime.requiresTenant) {
         await this.tenantContextService.initialize(tenantId);
       }
     } else {
@@ -534,7 +535,7 @@ export class AuthFacade {
       const user = await this.api.getCurrentUser(session.tokens.accessToken);
       this.state.setAuthenticatedFromToken(session.tokens, user);
 
-      if (APPLICATION_REQUIRES_TENANT) {
+      if (this.runtime.requiresTenant) {
         const tenants = await this.api.getUserTenants(user.id, session.tokens.accessToken);
         this.state.setTenants(tenants);
 
@@ -934,7 +935,7 @@ export class AuthFacade {
     }
     this.state.setAuthenticatedFromToken(session.tokens, user);
     this.state.setTenants([membership]);
-    if (APPLICATION_REQUIRES_TENANT) {
+    if (this.runtime.requiresTenant) {
       const tid = session.tenantId ?? membership.tenant.id;
       if (tid) {
         await this.tenantContextService.initialize(tid);
@@ -960,7 +961,7 @@ export class AuthFacade {
     this.state.setAuthenticatedFromToken(tokens, user);
     this.state.setTenants([membership]);
 
-    if (APPLICATION_REQUIRES_TENANT) {
+    if (this.runtime.requiresTenant) {
       await this.tenantContextService.initialize(membership.tenant.id);
     }
 

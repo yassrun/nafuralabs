@@ -1,6 +1,6 @@
 import { inject, signal } from '@angular/core';
 
-import { ErpAuditService } from '@applications/erp/shell/erp-audit.service';
+import { INTEGRATION_AUDIT } from '../integration-audit.token';
 
 import {
   buildMockAccuse,
@@ -25,7 +25,7 @@ import type {
  * AWB Open Banking JSON, CIH OpenAPI REST, autres SFTP/XML).
  */
 export abstract class BanqueAdapterBase implements BanqueAdapter {
-  protected readonly audit = inject(ErpAuditService);
+  protected readonly audit = inject(INTEGRATION_AUDIT);
 
   abstract readonly code: string;
   abstract readonly nom: string;

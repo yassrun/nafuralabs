@@ -177,7 +177,8 @@ Arbre de décision complet : [toolchain/ops/AGENTS.md](../toolchain/ops/AGENTS.m
 | Deploy backend sans `migrate` après changement SQL | CrashLoop |
 | Métier BTP dans `platform/` | Architecture |
 | Overlay K8s `dev` | Seulement staging + prod |
-| Dupliquer ERP hors `products/sektor-btp/web/app/` | Source unique produit |
+| Dupliquer ERP hors `products/sektor-btp/` | Source unique produit (front + back) |
+| Métier ERP dans `platform/` ou racine `web/` | `npm run check:sektor-scope` dans `products/sektor-btp/web/` |
 | Hostnames `*.nafura.local` en staging cluster | Remplacés par `*.nafuralabs.staging` (dev local `ng serve` peut garder `.local`) |
 
 ---

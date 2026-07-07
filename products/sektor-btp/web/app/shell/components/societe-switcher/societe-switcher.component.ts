@@ -12,6 +12,7 @@ import {
 } from '@angular/core';
 
 import { SocieteService } from '../../societe.service';
+import { SHELL_AFTER_ORG_SWITCH } from '@platform/core/shell/shell-extensions.token';
 import { ETABLISSEMENT_TYPE_LABELS } from '../../../pages/administration/societe/models';
 
 /**
@@ -248,6 +249,7 @@ import { ButtonComponent } from '@lib/anatomy';
 export class SocieteSwitcherComponent {
   private readonly societeService = inject(SocieteService);
   private readonly hostRef = inject(ElementRef);
+  private readonly afterOrgSwitch = inject(SHELL_AFTER_ORG_SWITCH, { optional: true });
 
   @Output() readonly change = new EventEmitter<{ societeId: string; etablissementId: string | null }>();
 
@@ -330,5 +332,6 @@ export class SocieteSwitcherComponent {
       societeId: this.currentSocieteId(),
       etablissementId: this.currentEtabId(),
     });
+    this.afterOrgSwitch?.();
   }
 }

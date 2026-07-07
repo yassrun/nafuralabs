@@ -275,8 +275,8 @@ export const APP_ROUTES = [
         canActivate: [authGuard],
         data: { breadcrumb: 'Administration' },
         loadChildren: () =>
-          import('@platform/features/administration/administration.routes').then(
-            (m) => m.ADMINISTRATION_ROUTES
+          import('./pages/administration/erp-administration.routes').then(
+            (m) => m.ERP_ADMINISTRATION_ROUTES
           ),
       },
       {

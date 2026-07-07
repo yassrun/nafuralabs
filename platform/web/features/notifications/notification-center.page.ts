@@ -1,11 +1,11 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgComponentOutlet } from '@angular/common';
 import { Component, OnInit, computed, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { TranslateModule } from '@ngx-translate/core';
 
-import { ErpNotificationCenterAlertsComponent } from '@applications/erp/shell/erp-notification-center-alerts.component';
+import { NOTIFICATION_CENTER_EXTRA } from './notification-center-extra.token';
 import { NOTIFICATION_BELL_ADAPTER } from '@platform/features/collaboration/notification/notification-bell.adapter';
 import {
   NOTIFICATION_RANGE_OPTIONS,
@@ -22,10 +22,10 @@ import { ConfirmDialogService } from '@lib/anatomy';
   standalone: true,
   imports: [
     CommonModule,
+    NgComponentOutlet,
     FormsModule,
     TranslateModule,
     NotificationItemComponent,
-    ErpNotificationCenterAlertsComponent,
   ],
   template: `
     <section class="notification-center">
@@ -39,8 +39,8 @@ import { ConfirmDialogService } from '@lib/anatomy';
         </div>
       </header>
 
-      @if (hasErpAlerts()) {
-        <app-erp-notification-center-alerts />
+      @if (hasProductAlerts() && productAlertsComponent) {
+        <ng-container *ngComponentOutlet="productAlertsComponent" />
       }
 
       <div class="notification-center__layout">
@@ -187,8 +187,9 @@ export class NotificationCenterPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly translate = inject(TranslateService);
   private readonly confirmDialog = inject(ConfirmDialogService);
+  readonly productAlertsComponent = inject(NOTIFICATION_CENTER_EXTRA, { optional: true });
 
-  readonly hasErpAlerts = computed(() => this.bellAdapter?.mode === 'erp-alerts');
+  readonly hasProductAlerts = computed(() => this.bellAdapter?.mode === 'erp-alerts');
   readonly totalPending = computed(
     () => this.facade.unreadCount() + (this.bellAdapter?.count() ?? 0),
   );

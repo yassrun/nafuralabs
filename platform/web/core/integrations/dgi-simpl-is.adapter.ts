@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 
-import { ErpAuditService } from '@applications/erp/shell/erp-audit.service';
+import { INTEGRATION_AUDIT } from './integration-audit.token';
 
 import {
   buildMockAccuse,
@@ -80,7 +80,7 @@ function escapeXml(s: string): string {
 
 @Injectable({ providedIn: 'root' })
 export class DgiSimplIsAdapter {
-  private readonly audit = inject(ErpAuditService);
+  private readonly audit = inject(INTEGRATION_AUDIT);
 
   /** Mode courant (par défaut MOCK pour démo / dev). */
   readonly mode = signal<IntegrationMode>('MOCK');
