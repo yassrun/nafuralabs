@@ -28,6 +28,7 @@ cd web && npm run build:staging
 |---------|--------|
 | Sektor BTP (ERP) | [products/sektor-btp/](products/sektor-btp/) |
 | MBS Studio | [marketing/products/mbs-studio/](marketing/products/mbs-studio/) |
+| Zenith | [marketing/products/zenith/](marketing/products/zenith/) |
 | Corporate | [marketing/corporate/](marketing/corporate/) |
 | Venue Catalog | [products/venue-catalog/](products/venue-catalog/) |
 | Layali / Beauty | [products/layali/](products/layali/), [products/beauty/](products/beauty/) |

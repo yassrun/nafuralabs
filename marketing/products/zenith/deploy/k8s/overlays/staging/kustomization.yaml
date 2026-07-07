@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: nafura-vitrine-staging
+
+resources:
+  - ../../base
+  - patch-namespace.yaml
+
+patches:
+  - path: patch-ingress.yaml
+
+images:
+  - name: zenith-web
+    newName: zenith-web
+    newTag: staging
