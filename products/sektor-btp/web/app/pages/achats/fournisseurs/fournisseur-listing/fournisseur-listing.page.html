@@ -12,6 +12,9 @@
         {{ chip.labelKey | translate }}
       </nf-button>
     }
+    <erp-smart-import-button
+      entityKey="fournisseur"
+      (importComplete)="onSmartImportComplete()" />
   </div>
 
   <nf-entity-listing

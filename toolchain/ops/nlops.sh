@@ -509,8 +509,8 @@ build_sektor_images() {
 
   echo "Building frontend ? $web_img"
   case "$ENV" in
-    staging) (cd "$ROOT/web" && npm run build:staging) ;;
-    *) (cd "$ROOT/web" && npm run build:prod) ;;
+    staging) (cd "$ROOT/products/sektor-btp/web" && npm run build:staging) ;;
+    *) (cd "$ROOT/products/sektor-btp/web" && npm run build:prod) ;;
   esac
   docker build -t "$web_img" -f "$ROOT/products/sektor-btp/Dockerfile.web" "$ROOT"
 

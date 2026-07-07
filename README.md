@@ -19,7 +19,7 @@ BUILD_IMAGES=true KUBE_CONTEXT=docker-desktop ENV=staging \
 
 ```powershell
 .\gradlew.bat :sektor:app:bootJar
-cd web && npm run build:staging
+cd products/sektor-btp/web && npm run build:staging
 ```
 
 ## Produits

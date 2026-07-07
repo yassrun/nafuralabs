@@ -22,8 +22,8 @@ export const APPLICATION_TENANCY_MODES: Record<string, string> = {
   erp: 'multi',
 };
 
-export const APPLICATION_SHELL_LOADERS: Record<string, () => Promise<any>> = {
-  erp: (): Promise<any> =>
+export const APPLICATION_SHELL_LOADERS: Record<string, () => Promise<unknown>> = {
+  erp: () =>
     import('@platform/core/shell/platform-app-shell.component').then(
       (m) => m.PlatformAppShellComponent
     ),
@@ -72,7 +72,7 @@ const runtimeHostname =
 export const ACTIVE_APPLICATION_ID = detectFromHostname(runtimeHostname);
 export const APPLICATION_TENANCY_MODE = APPLICATION_TENANCY_MODES[ACTIVE_APPLICATION_ID] || 'multi';
 export const APPLICATION_REQUIRES_TENANT = APPLICATION_TENANCY_MODE === 'multi';
-export const ACTIVE_APPLICATION_SHELL_LOADER: () => Promise<any> =
+export const ACTIVE_APPLICATION_SHELL_LOADER =
   APPLICATION_SHELL_LOADERS[ACTIVE_APPLICATION_ID] ||
   (() =>
     import('@platform/core/pages/errors/feature-unavailable.page').then(

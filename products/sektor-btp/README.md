@@ -17,7 +17,7 @@ sektor-btp/
 
 ```bash
 .\gradlew.bat :sektor:app:bootJar
-cd web && npm run build:staging   # ou build:prod pour prod
+cd products/sektor-btp/web && npm run build:staging   # ou build:prod pour prod
 ```
 
 ## Deploy

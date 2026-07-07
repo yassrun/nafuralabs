@@ -97,31 +97,44 @@ export interface RecordSearchResponse {
 }
 
 /**
- * Extraction response status.
+ * Response from extraction API.
  */
-export type ExtractionResponseStatus = 'SUCCESS' | 'DUPLICATE' | 'IN_PROGRESS' | 'FAILED';
+export type ExtractionResponseStatus =
+  | 'SUCCESS'
+  | 'COMPLETED'
+  | 'DUPLICATE'
+  | 'IN_PROGRESS'
+  | 'FAILED';
 
-/**
- * Deduplication result for exact duplicate detection.
- */
+export type ValidationState = 'VALID' | 'INCOMPLETE' | 'INVALID';
+
+export type FieldIssueKind = 'MISSING_REQUIRED' | 'TYPE_MISMATCH' | 'FORMAT_INVALID';
+
+export interface FieldIssue {
+  path: string;
+  rowIndex: number | null;
+  kind: FieldIssueKind;
+  message: string;
+}
+
+export interface ExtractionValidation {
+  state: ValidationState;
+  issues: FieldIssue[];
+  importPolicy: 'PARTIAL' | 'STRICT';
+}
+
 export interface ExactDuplicateResult {
   isDuplicate: boolean;
   existingRecordId?: string;
   existingStatus?: ExtractionStatus;
 }
 
-/**
- * Deduplication result for near duplicate detection.
- */
 export interface NearDuplicateResult {
   isNearDuplicate: boolean;
   candidateRecordId?: string;
   distance: number | null;
 }
 
-/**
- * Deduplication results combined.
- */
 export interface DeduplicationResult {
   exactDuplicate: ExactDuplicateResult;
   nearDuplicate: NearDuplicateResult;
@@ -134,14 +147,18 @@ export interface ExtractionResponse {
   /** Response status */
   status: ExtractionResponseStatus;
   /** The request/draft ID */
-  requestId: string;
+  requestId?: string;
   /** The created record ID (if persisted) */
   recordId?: string;
   /** Extracted JSON data (may be string or object) */
   extractedJson: string | Record<string, unknown>;
+  /** Post-extraction schema validation */
+  validation?: ExtractionValidation;
   /** The extracted record (if available) */
   record?: ExtractedRecord;
   /** Deduplication check results */
-  dedup: DeduplicationResult;
+  dedup?: DeduplicationResult;
+  /** Error message when status is FAILED */
+  error?: string;
 }
 
