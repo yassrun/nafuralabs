@@ -15,7 +15,7 @@ Ce document conserve uniquement la **table de correspondance** des chemins legac
 | `backend/applications/erp` | `products/sektor-btp/backend/app` (`:sektor:app`) |
 | `web/app/applications/erp` | `products/sektor-btp/web/app` |
 | `web/app/platform` | `platform/web` |
-| `web/` (workspace) | `nafuralabs/web/` |
+| `web/` (workspace) | `products/sektor-btp/web/` |
 | `infra/k8s/.../erp` | `products/sektor-btp/deploy/k8s/` |
 | `marketing/nafuralabs` | `marketing/corporate/` |
 | Gradle `:domains:` | `:sektor:` |

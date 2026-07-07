@@ -1,1 +1,0 @@
-export * from './perte.facade';

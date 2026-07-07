@@ -33,7 +33,7 @@ platform/          SDK partagé (auth, tenancy, UI shell) — aucun métier
 products/<app>/    Code + deploy K8s par produit
 infra/k8s/         Infra partagée (postgres, keycloak, vault…) — overlays par ENV
 marketing/         Sites vitrine (MBS, corporate)
-web/               Workspace Angular Sektor (build entrypoint)
+web/               *(deprecated)* → `products/sektor-btp/web/`
 toolchain/ops/     nlops.sh — CLI deploy
 ```
 
@@ -56,7 +56,7 @@ toolchain/ops/     nlops.sh — CLI deploy
 
 | Paths modifiés | Action staging |
 |----------------|----------------|
-| `products/sektor-btp/**`, `platform/**`, `web/**` | `release-app sektor-btp` |
+| `products/sektor-btp/**`, `platform/**` | `release-app sektor-btp` |
 | `infra/k8s/**` | `infra-up` puis vérifier apps |
 | `marketing/products/mbs-studio/**` | `deploy mbs-studio` |
 | `marketing/corporate/**` | `deploy corporate` |
@@ -91,7 +91,8 @@ Pas d’overlay K8s `dev`. Env `demo` (GKE) : **deprecated**.
 Layali / Beauty : `products/*/mobile/` — hors K8s pour l’instant.
 
 Gradle Sektor : `:sektor:app`, `:sektor:<module>`.  
-Frontend : `@platform/*` → `platform/web`, `@applications/*` → `products/sektor-btp/web/app`.
+Frontend : `@platform/*` → `platform/web`, `@applications/*` → `products/sektor-btp/web/app`.  
+Build : `cd products/sektor-btp/web && npm run build:staging`.
 
 ---
 
@@ -117,7 +118,7 @@ Hosts Windows (admin) : `powershell -ExecutionPolicy Bypass -File toolchain/ops/
 | IAM | `iam.nafuralabs.com` |
 | MBS | `mbs.nafuralabs.com` |
 
-Config front : `web/src/environments/environment.staging.ts` / `environment.prod.ts`.
+Config front : `products/sektor-btp/web/src/environments/environment.staging.ts` / `environment.prod.ts`.
 
 ---
 
@@ -176,7 +177,7 @@ Arbre de décision complet : [toolchain/ops/AGENTS.md](../toolchain/ops/AGENTS.m
 | Deploy backend sans `migrate` après changement SQL | CrashLoop |
 | Métier BTP dans `platform/` | Architecture |
 | Overlay K8s `dev` | Seulement staging + prod |
-| Dupliquer ERP sous `web/app/applications/` | Source = `products/sektor-btp/web/app/` |
+| Dupliquer ERP hors `products/sektor-btp/web/app/` | Source unique produit |
 | Hostnames `*.nafura.local` en staging cluster | Remplacés par `*.nafuralabs.staging` (dev local `ng serve` peut garder `.local`) |
 
 ---
@@ -184,8 +185,8 @@ Arbre de décision complet : [toolchain/ops/AGENTS.md](../toolchain/ops/AGENTS.m
 ## Dette connue
 
 - Shell platform couplé à Sektor via `@applications/*` — à découpler au 2ᵉ produit front.
-- Docs historiques `web/docs/` : chemins `app/applications/erp` → lire `products/sektor-btp/web/app/`.
-- CI/CD automatisé : à implémenter (build PR → deploy staging → deploy prod manuel).
+- Docs historiques sous `products/sektor-btp/web/docs/` : chemins `app/applications/erp` → lire `app/`.
+- ~~Workspace racine `web/`~~ : **supprimé** — build dans `products/sektor-btp/web/`.
 
 ---
 
