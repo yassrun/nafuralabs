@@ -24,6 +24,7 @@
     "build-storybook": "ng run project-fountain:build-storybook",
     "test:storybook": "test-storybook --url http://127.0.0.1:6006",
     "lint": "ng lint",
+    "check:sektor-scope": "node scripts/check-sektor-scope.mjs",
     "lint:no-dollar": "node scripts/check-no-dollar.mjs",
     "i18n:extract": "node scripts/extract-i18n.mjs",
     "i18n:extract:test": "node --test scripts/extract-i18n.spec.mjs",

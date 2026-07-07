@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 
-import { ErpAuditService } from '@applications/erp/shell/erp-audit.service';
+import { INTEGRATION_AUDIT } from './integration-audit.token';
 
 import {
   buildMockAccuse,
@@ -63,7 +63,7 @@ function escapeXml(s: string): string {
 
 @Injectable({ providedIn: 'root' })
 export class CnssDamancomAdapter {
-  private readonly audit = inject(ErpAuditService);
+  private readonly audit = inject(INTEGRATION_AUDIT);
 
   readonly mode = signal<IntegrationMode>('MOCK');
   readonly auth = signal<IntegrationAuthConfig>({

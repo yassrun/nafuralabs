@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 
-import { ErpAuditService } from '@applications/erp/shell/erp-audit.service';
+import { INTEGRATION_AUDIT } from './integration-audit.token';
 
 import {
   buildMockAccuse,
@@ -97,7 +97,7 @@ const TEMPLATES: Record<WhatsAppTemplateKey, TemplateDef> = {
 
 @Injectable({ providedIn: 'root' })
 export class WhatsAppNotificationAdapter implements NotificationChannelAdapter {
-  private readonly audit = inject(ErpAuditService);
+  private readonly audit = inject(INTEGRATION_AUDIT);
 
   readonly mode = signal<IntegrationMode>('MOCK');
   readonly auth = signal<IntegrationAuthConfig>({

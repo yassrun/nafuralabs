@@ -10,7 +10,7 @@
  *  - OMPIC (autocomplete tiers ICE, M-INT-07)
  *  - WhatsApp Business (notifications, M-INT-09)
  *
- * Indices BTP01..xx (M-INT-06) → `@applications/erp/integrations/services/indices-btp-import.service`.
+ * Indices BTP01..xx (M-INT-06) → product-specific import service (e.g. Sektor `indices-btp-import.service`).
  */
 
 export * from './integration.types';

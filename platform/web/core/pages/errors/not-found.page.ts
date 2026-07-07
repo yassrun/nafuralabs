@@ -1,15 +1,17 @@
 /**
  * Not Found (404) Page
  *
- * Page brandée affichée quand la route ne correspond à aucune définition.
- * Inclut une suggestion de retour vers les zones les plus fréquentées de l'ERP
- * (dashboard, chantiers, marchés, achats, finance).
+ * Generic platform page when no route matches.
+ * Quick links and default home route are provided by the product app.
  */
 
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Location } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
+
+import { APPLICATION_RUNTIME_CONFIG } from '../../application/application-runtime.token';
+import { NOT_FOUND_QUICK_LINKS } from './not-found-links.token';
 
 @Component({
   selector: 'app-not-found-page',
@@ -39,26 +41,25 @@ import { Router, RouterModule } from '@angular/router';
           <button type="button" class="nf-404__btn nf-404__btn--ghost" (click)="goBack()">
             ← Retour
           </button>
-          <a routerLink="/" class="nf-404__btn nf-404__btn--primary">
-            Tableau de bord
+          <a [routerLink]="homeLink" class="nf-404__btn nf-404__btn--primary">
+            Accueil
           </a>
         </div>
 
-        <nav class="nf-404__suggestions" aria-label="Raccourcis ERP">
-          <h2>Vous cherchiez peut-être :</h2>
-          <ul>
-            <li><a routerLink="/chantiers">Chantiers</a></li>
-            <li><a routerLink="/marches">Marchés &amp; Facturation</a></li>
-            <li><a routerLink="/achats">Achats</a></li>
-            <li><a routerLink="/finance">Finance</a></li>
-            <li><a routerLink="/inventory">Stock &amp; Matériel</a></li>
-            <li><a routerLink="/rh">RH &amp; Paie</a></li>
-          </ul>
-        </nav>
+        @if (quickLinks.length > 0) {
+          <nav class="nf-404__suggestions" aria-label="Raccourcis">
+            <h2>Vous cherchiez peut-être :</h2>
+            <ul>
+              @for (link of quickLinks; track link.route) {
+                <li><a [routerLink]="link.route">{{ link.label }}</a></li>
+              }
+            </ul>
+          </nav>
+        }
       </section>
 
       <footer class="nf-404__footer">
-        <p>Nafura ERP · BTP Maroc</p>
+        <p>Nafura Platform</p>
       </footer>
     </main>
   `,
@@ -223,7 +224,6 @@ import { Router, RouterModule } from '@angular/router';
       font-size: 0.8rem;
     }
 
-    /* Dark mode */
     :host-context(.nf-theme-dark) .nf-404 {
       background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
     }
@@ -246,6 +246,10 @@ import { Router, RouterModule } from '@angular/router';
 export class NotFoundPage {
   private readonly location = inject(Location);
   private readonly router = inject(Router);
+  private readonly runtime = inject(APPLICATION_RUNTIME_CONFIG);
+  readonly quickLinks = inject(NOT_FOUND_QUICK_LINKS);
+
+  readonly homeLink = '/' + (this.runtime.defaultRoute || '').replace(/^\//, '');
 
   currentPath(): string {
     return this.router.url || this.location.path() || '/';
@@ -255,7 +259,7 @@ export class NotFoundPage {
     if (history.length > 1) {
       this.location.back();
     } else {
-      this.router.navigateByUrl('/');
+      void this.router.navigateByUrl(this.homeLink);
     }
   }
 }

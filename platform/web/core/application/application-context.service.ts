@@ -5,13 +5,15 @@
  * Uses CRUX-generated active application id as baseline fallback.
  */
 
-import { Injectable, Signal, signal } from '@angular/core';
+import { Injectable, Signal, inject, signal } from '@angular/core';
 import { ApplicationKey } from './application-key';
-import { ACTIVE_APPLICATION_ID } from '@applications/config/routes';
+import { APPLICATION_RUNTIME_CONFIG } from './application-runtime.token';
 
 @Injectable({ providedIn: 'root' })
 export class ApplicationContextService {
-  private readonly fallbackApplicationId = this.normalizeApplicationId(ACTIVE_APPLICATION_ID) || 'unknown';
+  private readonly runtime = inject(APPLICATION_RUNTIME_CONFIG);
+  private readonly fallbackApplicationId =
+    this.normalizeApplicationId(this.runtime.activeApplicationId) || 'unknown';
   private readonly _applicationKey = signal<ApplicationKey>(this.fallbackApplicationId);
 
   /** Current application key */

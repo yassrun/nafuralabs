@@ -8,7 +8,7 @@ import { ApplicationKey } from './application-key';
 import { ApplicationContextService } from './application-context.service';
 import { TenantContextService } from '../tenant/tenant.context';
 import { AuthFacade } from '../security/services/auth.facade';
-import { APPLICATION_DEFAULT_ROUTE } from '@applications/config/routes';
+import { APPLICATION_RUNTIME_CONFIG } from './application-runtime.token';
 
 export function applicationCanMatch(expected: ApplicationKey): CanMatchFn {
   return () => {
@@ -19,7 +19,7 @@ export function applicationCanMatch(expected: ApplicationKey): CanMatchFn {
 
 export const applicationDefaultRedirectGuard: CanActivateFn = () => {
   const router = inject(Router);
-  const defaultRoute = APPLICATION_DEFAULT_ROUTE || 'feature-unavailable/unknown';
+  const defaultRoute = inject(APPLICATION_RUNTIME_CONFIG).defaultRoute || 'feature-unavailable/unknown';
   const routeSegments = defaultRoute.split('/').filter(Boolean);
 
   return router.createUrlTree(['/', ...routeSegments]);

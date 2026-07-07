@@ -14,7 +14,7 @@ import { LookupReferenceNavigationService } from '@lib/anatomy/services/lookup-r
 
 import { environment } from '@env';
 import { AuthFacade } from '../../security/services/auth.facade';
-import { APPLICATION_DEFAULT_ROUTE } from '@applications/config/routes';
+import { APPLICATION_RUNTIME_CONFIG } from '../../application/application-runtime.token';
 
 @Component({
   selector: 'app-login-page',
@@ -189,6 +189,7 @@ export class LoginPage implements OnInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly lookupRefNav = inject(LookupReferenceNavigationService);
+  private readonly runtime = inject(APPLICATION_RUNTIME_CONFIG);
 
   message = 'Authentification unique (SSO)';
   submessage =
@@ -206,7 +207,7 @@ export class LoginPage implements OnInit {
   readonly devTotpHint = (environment as { devInAppAuth?: { totp: string } }).devInAppAuth?.totp ?? '123456';
 
   private async navigateToApplicationShell(): Promise<void> {
-    const defaultRoute = APPLICATION_DEFAULT_ROUTE || 'feature-unavailable/unknown';
+    const defaultRoute = this.runtime.defaultRoute || 'feature-unavailable/unknown';
     const segments = defaultRoute.split('/').filter(Boolean);
     await this.router.navigate(['/', ...segments]);
   }

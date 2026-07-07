@@ -23,6 +23,7 @@ import { SidebarRegistry } from '../../navigation/sidebar.registry';
 import { SidebarNode } from '../../navigation/sidebar.types';
 import { PermissionService } from '../../security/services/permission.service';
 import { CommandPaletteService } from './command-palette.service';
+import { COMMAND_PALETTE_EXTRA_ACTIONS } from './command-palette-actions.token';
 
 interface PaletteDisplayItem {
   id: string;
@@ -55,49 +56,6 @@ const STATIC_PAGES: SearchResult[] = [
     icon: 'search',
     route: '/notifications',
     category: 'pages',
-    breadcrumb: '',
-  },
-];
-
-const STATIC_PALETTE_ACTIONS: SearchResult[] = [
-  {
-    id: 'action:chantier-new',
-    label: 'core.search.actions.newChantier',
-    icon: 'file',
-    route: '/chantiers/new',
-    category: 'actions',
-    breadcrumb: '',
-  },
-  {
-    id: 'action:bc-new',
-    label: 'core.search.actions.newBc',
-    icon: 'file',
-    route: '/achats/commandes/new',
-    category: 'actions',
-    breadcrumb: '',
-  },
-  {
-    id: 'action:da-new',
-    label: 'core.search.actions.newDa',
-    icon: 'file',
-    route: '/achats/demandes/new',
-    category: 'actions',
-    breadcrumb: '',
-  },
-  {
-    id: 'action:employe-new',
-    label: 'core.search.actions.newEmploye',
-    icon: 'file',
-    route: '/rh/employes/new',
-    category: 'actions',
-    breadcrumb: '',
-  },
-  {
-    id: 'action:facture-vente-new',
-    label: 'core.search.actions.newFactureVente',
-    icon: 'file',
-    route: '/ventes/factures/new',
-    category: 'actions',
     breadcrumb: '',
   },
 ];
@@ -281,6 +239,7 @@ export class CommandPaletteComponent {
   private readonly globalSearchApi = inject(GlobalSearchApiService);
   private readonly recentItems = inject(RecentItemsService);
   private readonly translateSvc = inject(TranslateService);
+  private readonly extraActions = inject(COMMAND_PALETTE_EXTRA_ACTIONS);
 
   private readonly recordsQuery$ = new Subject<string>();
 
@@ -324,7 +283,7 @@ export class CommandPaletteComponent {
 
   readonly paletteActionResults = computed(() => {
     const q = this.query().trim().toLowerCase();
-    return STATIC_PALETTE_ACTIONS.filter((item) => !q || this.matchesSearchItem(item, q));
+    return this.extraActions.filter((item) => !q || this.matchesSearchItem(item, q));
   });
 
   readonly displayItems = computed<PaletteDisplayItem[]>(() => {
