@@ -495,6 +495,25 @@ preflight() {
   echo "=== Preflight done ==="
 }
 
+link_platform_web_node_modules() {
+  local src="$ROOT/products/sektor-btp/web/node_modules"
+  local dest="$ROOT/platform/web/node_modules"
+  if [[ ! -d "$src/@angular/core" ]]; then
+    echo "ERROR: products/sektor-btp/web/node_modules missing — run: cd products/sektor-btp/web && npm ci" >&2
+    exit 1
+  fi
+  rm -rf "$dest"
+  if ln -sfn "$src" "$dest" 2>/dev/null; then
+    return 0
+  fi
+  # Windows fallback (Git Bash / cmd junction)
+  if command -v cmd.exe >/dev/null 2>&1; then
+    cmd.exe //c "mklink /J \"${dest//\//\\}\" \"${src//\//\\}\"" >/dev/null 2>&1 && return 0
+  fi
+  echo "ERROR: could not link platform/web/node_modules to sektor web node_modules" >&2
+  exit 1
+}
+
 build_sektor_images() {
   local tag
   tag="$(image_tag_for_env)"
@@ -510,6 +529,7 @@ build_sektor_images() {
     "$ROOT/products/sektor-btp/backend/app/build/libs"
 
   echo "Building frontend ? $web_img"
+  link_platform_web_node_modules
   case "$ENV" in
     staging) (cd "$ROOT/products/sektor-btp/web" && npm run build:staging) ;;
     *) (cd "$ROOT/products/sektor-btp/web" && npm run build:prod) ;;
