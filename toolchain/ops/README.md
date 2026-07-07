@@ -61,7 +61,7 @@ URLs prod : `sektor.nafuralabs.com`, `api.sektor.nafuralabs.com`, `iam.nafuralab
 Tous en `*.nafuralabs.staging` → `127.0.0.1` dans le fichier hosts :
 
 ```
-127.0.0.1 sektor.nafuralabs.staging api.sektor.nafuralabs.staging mbs.nafuralabs.staging iam.nafuralabs.staging minio.nafuralabs.staging s3.nafuralabs.staging vault.nafuralabs.staging
+127.0.0.1 sektor.nafuralabs.staging api.sektor.nafuralabs.staging mbs.nafuralabs.staging zenith.nafuralabs.staging iam.nafuralabs.staging minio.nafuralabs.staging s3.nafuralabs.staging vault.nafuralabs.staging
 ```
 
 Windows (admin) : `powershell -ExecutionPolicy Bypass -File toolchain/ops/add-staging-hosts.ps1`

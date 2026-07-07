@@ -11,7 +11,7 @@ $hosts = @'
 #	::1             localhost
 
 # Nafura staging (nlops)
-127.0.0.1 sektor.nafuralabs.staging api.sektor.nafuralabs.staging mbs.nafuralabs.staging iam.nafuralabs.staging minio.nafuralabs.staging s3.nafuralabs.staging vault.nafuralabs.staging
+127.0.0.1 sektor.nafuralabs.staging api.sektor.nafuralabs.staging mbs.nafuralabs.staging zenith.nafuralabs.staging iam.nafuralabs.staging minio.nafuralabs.staging s3.nafuralabs.staging vault.nafuralabs.staging
 '@
 
 Set-Content -Path $hostsPath -Value $hosts.TrimEnd() -Encoding ASCII

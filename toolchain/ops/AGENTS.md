@@ -49,6 +49,7 @@ Public (ingress TLS) : `registry.nafuralabs.com`
 | `sektor-btp` | `erp` | `sektor-${ENV}` | `nafura_erp` | Liquibase (Job K8s) | `products/sektor-btp/deploy/k8s/overlays/${ENV}` |
 | `venue-catalog` | — | `venue-catalog-${ENV}` | `nafura_venue_catalog` | Flyway (au startup backend) | `products/venue-catalog/deploy/k8s/overlays/${ENV}` |
 | `mbs-studio` | — | `nafura-vitrine-${ENV}` | — (vitrine) | — | `marketing/products/mbs-studio/deploy/k8s/overlays/${ENV}` |
+| `zenith` | — | `nafura-vitrine-${ENV}` | — (vitrine) | — | `marketing/products/zenith/deploy/k8s/overlays/${ENV}` |
 | `corporate` | — | `nafura-vitrine-${ENV}` | — (vitrine) | — | `marketing/corporate/deploy/k8s/overlays/${ENV}` |
 
 Deployments Sektor :
@@ -204,7 +205,7 @@ KUBE_CONTEXT=docker-desktop kubectl get pods -n sektor-staging
 Hosts file (Windows) :
 
 ```
-127.0.0.1 sektor.nafuralabs.staging api.sektor.nafuralabs.staging mbs.nafuralabs.staging iam.nafuralabs.staging minio.nafuralabs.staging s3.nafuralabs.staging vault.nafuralabs.staging
+127.0.0.1 sektor.nafuralabs.staging api.sektor.nafuralabs.staging mbs.nafuralabs.staging zenith.nafuralabs.staging iam.nafuralabs.staging minio.nafuralabs.staging s3.nafuralabs.staging vault.nafuralabs.staging
 ```
 
 ### B — Release quotidienne staging (infra déjà up)
@@ -251,6 +252,10 @@ KUBE_CONTEXT=nafura-vps-prod ENV=prod bash toolchain/ops/nlops.sh deploy mbs-stu
 BUILD_IMAGES=true PUSH_IMAGES=true KUBE_CONTEXT=nafura-vps-prod ENV=prod REGISTRY_PASS=*** \
   bash toolchain/ops/nlops.sh build-push corporate
 KUBE_CONTEXT=nafura-vps-prod ENV=prod bash toolchain/ops/nlops.sh deploy corporate
+
+BUILD_IMAGES=true PUSH_IMAGES=true KUBE_CONTEXT=nafura-vps-prod ENV=prod REGISTRY_PASS=*** \
+  bash toolchain/ops/nlops.sh build-push zenith
+KUBE_CONTEXT=nafura-vps-prod ENV=prod bash toolchain/ops/nlops.sh deploy zenith
 ```
 
 ### G — OVH VPS prod (Sektor + infra)

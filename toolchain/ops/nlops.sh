@@ -46,7 +46,7 @@ app_namespace_for() {
   case "$app_id" in
     sektor-btp|erp) echo "sektor-${ENV}" ;;
     venue-catalog) echo "venue-catalog-${ENV}" ;;
-    corporate|mbs-studio) vitrine_namespace_for_env "$ENV" ;;
+    corporate|mbs-studio|zenith) vitrine_namespace_for_env "$ENV" ;;
     *) echo "${app_id}-${ENV}" ;;
   esac
 }
@@ -132,8 +132,10 @@ Examples ? OVH VPS prod (marketing vitrine):
   KUBE_CONTEXT=nafura-vps-prod ENV=prod $0 deploy mbs-studio
   BUILD_IMAGES=true PUSH_IMAGES=true KUBE_CONTEXT=nafura-vps-prod ENV=prod REGISTRY_PASS=*** $0 build-push corporate
   KUBE_CONTEXT=nafura-vps-prod ENV=prod $0 deploy corporate
+  BUILD_IMAGES=true PUSH_IMAGES=true KUBE_CONTEXT=nafura-vps-prod ENV=prod REGISTRY_PASS=*** $0 build-push zenith
+  KUBE_CONTEXT=nafura-vps-prod ENV=prod $0 deploy zenith
 
-Supported apps: sektor-btp (alias erp), venue-catalog, mbs-studio, corporate
+Supported apps: sektor-btp (alias erp), venue-catalog, mbs-studio, corporate, zenith
 EOF
 }
 
@@ -171,7 +173,7 @@ migration_engine_for() {
 
 is_marketing_app() {
   case "$1" in
-    corporate|mbs-studio) return 0 ;;
+    corporate|mbs-studio|zenith) return 0 ;;
     *) return 1 ;;
   esac
 }
@@ -473,7 +475,7 @@ preflight() {
 
   if uses_remote_registry; then
     echo "Registry: $REGISTRY (tag: $(image_tag_for_env))"
-    for img in sektor-btp-backend sektor-btp-web nafura-keycloak nafura-lifecycle mbs-studio-web corporate-web; do
+    for img in sektor-btp-backend sektor-btp-web nafura-keycloak nafura-lifecycle mbs-studio-web corporate-web zenith-web; do
       if docker manifest inspect "${REGISTRY}/${img}:$(image_tag_for_env)" >/dev/null 2>&1; then
         echo "OK: ${img}:$(image_tag_for_env) in registry"
       else
@@ -524,28 +526,15 @@ build_sektor_images() {
   echo "Build complete."
 }
 
-build_mbs_images() {
-  local tag
+build_vitrine_images() {
+  local app_id="$1"
+  local tag web_img app_root
   tag="$(image_tag_for_env)"
-  local web_img
-  web_img="$(image_ref mbs-studio-web "$tag")"
-  echo "Building mbs-studio-web ? $web_img"
-  docker build -t "$web_img" -f "$(marketing_app_root mbs-studio)/Dockerfile" \
-    "$(marketing_app_root mbs-studio)" 2>/dev/null || {
-    echo "ERROR: mbs-studio Dockerfile not found in marketing/products/mbs-studio" >&2
-    exit 1
-  }
-}
-
-build_corporate_images() {
-  local tag
-  tag="$(image_tag_for_env)"
-  local web_img
-  web_img="$(image_ref corporate-web "$tag")"
-  echo "Building corporate-web -> $web_img"
-  docker build -t "$web_img" -f "$(marketing_app_root corporate)/Dockerfile" \
-    "$(marketing_app_root corporate)" 2>/dev/null || {
-    echo "ERROR: corporate Dockerfile not found in marketing/corporate" >&2
+  web_img="$(image_ref "${app_id}-web" "$tag")"
+  app_root="$(marketing_app_root "$app_id")"
+  echo "Building ${app_id}-web -> $web_img"
+  docker build -t "$web_img" -f "$app_root/Dockerfile" "$app_root" 2>/dev/null || {
+    echo "ERROR: $app_id Dockerfile not found in $app_root" >&2
     exit 1
   }
 }
@@ -555,8 +544,7 @@ build_images() {
   require_env
   case "$app_id" in
     sektor-btp|erp) build_sektor_images ;;
-    mbs-studio) build_mbs_images ;;
-    corporate) build_corporate_images ;;
+    mbs-studio|corporate|zenith) build_vitrine_images "$app_id" ;;
     *)
       echo "ERROR: build-images not implemented for $app_id" >&2
       exit 1
@@ -585,11 +573,8 @@ push_images() {
       docker push "$(image_ref nafura-keycloak "$tag")"
       docker push "$(image_ref nafura-lifecycle "$tag")"
       ;;
-    mbs-studio)
-      docker push "$(image_ref mbs-studio-web "$tag")"
-      ;;
-    corporate)
-      docker push "$(image_ref corporate-web "$tag")"
+    mbs-studio|corporate|zenith)
+      docker push "$(image_ref "${app_id}-web" "$tag")"
       ;;
     *)
       echo "ERROR: push-images not implemented for $app_id" >&2
@@ -740,6 +725,7 @@ deploy_frontend() {
     sektor-btp|erp) dep="sektor-btp-web" ;;
     mbs-studio) dep="mbs-studio-web" ;;
     corporate) dep="corporate-web" ;;
+    zenith) dep="zenith-web" ;;
     *) dep="${app_id}-web" ;;
   esac
   if KUBECTL get deployment "$dep" -n "$app_ns" >/dev/null 2>&1; then

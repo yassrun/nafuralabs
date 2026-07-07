@@ -58,6 +58,14 @@ Registry : `54.36.183.106:30500/nafura/zenith-web:prod`
 
 ## DNS
 
+Staging local (Docker Desktop K8s) — ajouter dans `C:\Windows\System32\drivers\etc\hosts` :
+
+```
+127.0.0.1 zenith.nafuralabs.staging
+```
+
+Ou exécuter : `powershell -ExecutionPolicy Bypass -File toolchain/ops/add-staging-hosts.ps1` (admin).
+
 Prod :
 
 ```

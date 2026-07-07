@@ -1,7 +1,7 @@
 # Requires admin to modify C:\Windows\System32\drivers\etc\hosts
 $hostsPath = 'C:\Windows\System32\drivers\etc\hosts'
 $marker = '# Nafura staging (nlops)'
-$line = '127.0.0.1 sektor.nafuralabs.staging api.sektor.nafuralabs.staging mbs.nafuralabs.staging iam.nafuralabs.staging minio.nafuralabs.staging s3.nafuralabs.staging vault.nafuralabs.staging'
+$line = '127.0.0.1 sektor.nafuralabs.staging api.sektor.nafuralabs.staging mbs.nafuralabs.staging zenith.nafuralabs.staging iam.nafuralabs.staging minio.nafuralabs.staging s3.nafuralabs.staging vault.nafuralabs.staging'
 
 $content = Get-Content $hostsPath -Raw -ErrorAction Stop
 if ([string]::IsNullOrWhiteSpace($content)) {
