@@ -70,7 +70,7 @@ cd products/sektor-btp/web && npm run build:staging
 
 | Produit | Chemin | Statut |
 |---------|--------|--------|
-| Sektor BTP | [products/sektor-btp/](../products/sektor-btp/) | production |
+| Sektor BTP | [products/sektor-btp/](../products/sektor-btp/) | production — code + [docs](../products/sektor-btp/docs/) |
 | MBS Studio | [marketing/products/mbs-studio/](../marketing/products/mbs-studio/) | vitrine |
 | Zenith | [marketing/products/zenith/](../marketing/products/zenith/) | vitrine |
 | Corporate | [marketing/corporate/](../marketing/corporate/) | vitrine |

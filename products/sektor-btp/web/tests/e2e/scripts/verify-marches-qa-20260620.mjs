@@ -1,5 +1,5 @@
 /**
- * Browser + API QA for web/docs/qa/06-marches-facturation.md unchecked items.
+ * Browser + API QA for ../docs/qa/06-marches-facturation.md unchecked items.
  * Run: node web/tests/e2e/scripts/verify-marches-qa-20260620.mjs
  */
 import { chromium } from 'playwright';

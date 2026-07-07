@@ -131,7 +131,7 @@ export const ICU_PLACEHOLDER_RE = /\{[^{}]*\}/gu;
  * Cognates FR/EN dont l'orthographe est strictement identique (à la casse
  * près) — donc une valeur identique FR/EN est légitime. Liste contribuée
  * Phase 5.3 (Wave E2) et documentée dans
- * `web/docs/specs/i18n-roadmap/GLOSSARY.md` section « Cognates FR/EN
+ * `../docs/specs/i18n-roadmap/GLOSSARY.md` section « Cognates FR/EN
  * whitelistés ». Les entrées sont en minuscules pour comparaison
  * case-insensitive.
  *
@@ -227,7 +227,7 @@ export const COGNATE_WHITELIST = new Set([
  * Round 2 backend i18n migration (catalogue `messages_fr.properties` /
  * `messages_en.properties`) remplacera entièrement ces scaffolds.
  *
- * Voir `web/docs/specs/i18n-roadmap/COVERAGE.md` section « Backend scaffolds
+ * Voir `../docs/specs/i18n-roadmap/COVERAGE.md` section « Backend scaffolds
  * (Round 2 scope) » pour la documentation complète.
  */
 export const STUB_JAVA_TOKEN_WHITELIST = new Set([

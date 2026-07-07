@@ -132,6 +132,7 @@ Config front : `products/sektor-btp/web/src/environments/environment.staging.ts`
 | Domaine ERP (stock, chantiers…) | `products/sektor-btp/backend/modules/<domaine>/` |
 | Boot app Sektor | `products/sektor-btp/backend/app/` |
 | UI ERP | `products/sektor-btp/web/app/` |
+| Specs / QA / roadmaps ERP | `products/sektor-btp/docs/` |
 | Auth, listing, shell UI | `platform/web/` ou `platform/backend/` |
 | Specs produit | `products/<app-id>/docs/` |
 | Manifests produit | `products/<app-id>/deploy/k8s/` — **pas** sous `infra/k8s/` |
@@ -190,7 +191,7 @@ Arbre de décision complet : [toolchain/ops/AGENTS.md](../toolchain/ops/AGENTS.m
 ## Dette connue
 
 - Shell platform couplé à Sektor via `@applications/*` — à découpler au 2ᵉ produit front.
-- Docs historiques sous `products/sektor-btp/web/docs/` : chemins `web/…` ou `app/applications/erp` → lire `products/sektor-btp/web/app/`.
+- Docs ERP : `products/sektor-btp/docs/` (specs, QA, roadmaps). Chemins historiques `web/…` ou `app/applications/erp` → lire `products/sektor-btp/web/app/`.
 
 ---
 

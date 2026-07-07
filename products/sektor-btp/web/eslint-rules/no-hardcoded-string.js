@@ -21,7 +21,7 @@
  *      • Property-bound string literals: [title]="'…'" / [placeholder]="'…'"
  *
  * Phase 0 of the Nafura i18n roadmap — see
- * `web/docs/specs/i18n-roadmap/AGENT_RULES.md`.
+ * `../docs/specs/i18n-roadmap/AGENT_RULES.md`.
  */
 
 'use strict';
@@ -336,7 +336,7 @@ const MESSAGE = (s) =>
   `String hardcodée détectée : "${s.length > 80 ? s.slice(0, 77) + '…' : s}". ` +
   `Utilisez \`| translate\` (Angular template) ou ` +
   `\`translateService.instant('<key>')\` (TypeScript). ` +
-  `Voir : web/docs/specs/i18n-roadmap/AGENT_RULES.md`;
+  `Voir : ../docs/specs/i18n-roadmap/AGENT_RULES.md`;
 
 const meta = {
   type: 'suggestion',

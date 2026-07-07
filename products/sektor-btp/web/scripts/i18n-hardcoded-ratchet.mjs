@@ -161,7 +161,7 @@ function main() {
     console.error('     1. Run `npm run lint:no-hardcoded-string` locally and look at the');
     console.error('        top files in the report.');
     console.error('     2. Migrate the new hardcoded strings to `| translate` pipes or');
-    console.error('        `translate.instant(...)` calls (see web/docs/specs/i18n-roadmap/AGENT_RULES.md).');
+    console.error('        `translate.instant(...)` calls (see ../docs/specs/i18n-roadmap/AGENT_RULES.md).');
     console.error('     3. If a finding is a legitimate exception (Material icon name, dev-only');
     console.error('        log, A4 print template fixed FR-MA), annotate the line with');
     console.error('        `// @i18n-exempt: <reason>` or `// eslint-disable no-hardcoded-string`.');

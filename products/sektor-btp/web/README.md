@@ -7,6 +7,7 @@ Workspace Angular complet pour Sektor BTP (ERP BTP Maroc).
 | Chemin | Rôle |
 |--------|------|
 | `app/` | Bootstrap (`app.routes.ts`) + code métier ERP |
+| `../docs/` | Specs, QA, roadmaps ERP |
 | `src/` | `main.ts`, environnements, styles globaux |
 | `public/` | i18n, assets statiques |
 | `tests/` | Playwright e2e |

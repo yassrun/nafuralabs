@@ -2,7 +2,7 @@
  * Barrel export — centralised i18n keys for every `*_LABELS` map that used to
  * be scattered across the ERP code base (~25+ declarations).
  *
- * Phase 1.2 of the i18n roadmap (cf. `web/docs/specs/i18n-roadmap/00-PROGRESS.md`).
+ * Phase 1.2 of the i18n roadmap (cf. `../../docs/specs/i18n-roadmap/00-PROGRESS.md`).
  *
  * Usage:
  *

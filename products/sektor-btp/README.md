@@ -10,6 +10,7 @@ sektor-btp/
 ├── backend/app/          # :sektor:app
 ├── backend/modules/      # :sektor:<domaine>
 ├── web/app/              # UI (@applications/*)
+├── docs/                 # specs, QA, roadmaps ERP
 └── deploy/k8s/overlays/  # staging | prod
 ```
 

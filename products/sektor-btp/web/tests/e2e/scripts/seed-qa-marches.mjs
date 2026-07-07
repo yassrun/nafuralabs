@@ -1,5 +1,5 @@
 /**
- * Seed QA marchés & ventes data via ERP API (web/docs/qa/06-marches-facturation.md).
+ * Seed QA marchés & ventes data via ERP API (../docs/qa/06-marches-facturation.md).
  * Run: node web/tests/e2e/scripts/seed-qa-marches.mjs
  */
 import { chromium } from 'playwright';

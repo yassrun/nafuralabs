@@ -8,7 +8,7 @@
  * un `fr.json` mais pas encore de `ar.json`. Idempotent — n'écrase JAMAIS
  * un placeholder AR existant (`core/ar.json` et `applications/erp/ar.json`
  * sont les seuls historiques pré-existants, voir
- * `web/docs/specs/i18n-roadmap/00-PROGRESS.md`).
+ * `../docs/specs/i18n-roadmap/00-PROGRESS.md`).
  *
  * Le squelette permet aux 60 packs FR d'avoir une couche AR vide
  * chargeable par le loader Angular (`ModuleTranslateLoader` est déjà

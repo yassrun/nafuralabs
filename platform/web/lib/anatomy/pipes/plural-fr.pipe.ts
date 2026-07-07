@@ -23,7 +23,7 @@ import { Pipe, PipeTransform } from '@angular/core';
  *
  * The pipe is preserved (no breaking removal) but flagged: no new usage should
  * appear in this codebase. `npm run i18n:check` and the ICU spec guard the
- * convention. See `web/docs/specs/i18n-roadmap/00-PROGRESS.md` — Phase 4.1.
+ * convention. See `products/sektor-btp/docs/specs/i18n-roadmap/00-PROGRESS.md` — Phase 4.1.
  */
 @Pipe({ name: 'pluralFr', standalone: true, pure: true })
 export class PluralFrPipe implements PipeTransform {

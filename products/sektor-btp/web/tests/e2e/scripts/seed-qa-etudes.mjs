@@ -1,5 +1,5 @@
 /**
- * Seed Études & Devis QA data via ERP API (web/docs/qa/05-etudes-devis.md).
+ * Seed Études & Devis QA data via ERP API (../docs/qa/05-etudes-devis.md).
  * Run: node web/tests/e2e/scripts/seed-qa-etudes.mjs
  */
 import { chromium } from 'playwright';

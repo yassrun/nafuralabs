@@ -1,5 +1,5 @@
 /**
- * Full QA route crawl — all paths from web/docs/qa/*.md
+ * Full QA route crawl — all paths from ../docs/qa/*.md
  * Run: node tests/e2e/scripts/crawl-qa-routes.mjs
  */
 import { chromium } from 'playwright';
