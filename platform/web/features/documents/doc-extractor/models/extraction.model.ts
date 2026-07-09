@@ -106,7 +106,7 @@ export type ExtractionResponseStatus =
   | 'IN_PROGRESS'
   | 'FAILED';
 
-export type ValidationState = 'VALID' | 'INCOMPLETE' | 'INVALID';
+export type ExtractionValidationState = 'VALID' | 'INCOMPLETE' | 'INVALID';
 
 export type FieldIssueKind = 'MISSING_REQUIRED' | 'TYPE_MISMATCH' | 'FORMAT_INVALID';
 
@@ -118,7 +118,7 @@ export interface FieldIssue {
 }
 
 export interface ExtractionValidation {
-  state: ValidationState;
+  state: ExtractionValidationState;
   issues: FieldIssue[];
   importPolicy: 'PARTIAL' | 'STRICT';
 }

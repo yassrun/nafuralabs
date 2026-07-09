@@ -6,13 +6,14 @@ import { useDrawing } from "@/hooks/useDrawing";
 import { useIsDesktop } from "@/hooks/useIsDesktop";
 import { useLayoutScale } from "@/hooks/useLayoutScale";
 import { useMounted } from "@/hooks/useMounted";
+import { NATIVE_CURSOR_SELECTOR } from "@/lib/cursorZones";
 
 export default function CustomCursor() {
   const mounted = useMounted();
   const isDesktop = useIsDesktop();
   const layoutScale = useLayoutScale();
   const enabled = mounted && isDesktop;
-  const { cursorRef, mode, ready, setCircleMode, pencil } = useCursor({
+  const { cursorRef, mode, ready, setCursorMode, pencil } = useCursor({
     enabled,
     layoutScale,
   });
@@ -30,15 +31,26 @@ export default function CustomCursor() {
     const onOver = (e: MouseEvent) => {
       const target = e.target;
       if (!(target instanceof Element)) return;
-      const onCard = Boolean(target.closest("[data-project-card]"));
-      setCircleMode(onCard);
+      // Cards: circle cursor (draw is disabled, drag uses the circle).
+      if (target.closest("[data-project-card]")) {
+        setCursorMode("circle");
+        return;
+      }
+      // Links, buttons, forms, chrome — native pointer/text only.
+      if (target.closest(NATIVE_CURSOR_SELECTOR)) {
+        setCursorMode("hidden");
+        return;
+      }
+      setCursorMode("pencil");
     };
 
     document.addEventListener("mouseover", onOver);
     return () => document.removeEventListener("mouseover", onOver);
-  }, [isDesktop, setCircleMode]);
+  }, [isDesktop, setCursorMode]);
 
   if (!enabled) return null;
+
+  const showCustom = ready && mode !== "hidden";
 
   return (
     <>
@@ -50,20 +62,10 @@ export default function CustomCursor() {
       />
       <div
         ref={cursorRef}
-        className={`pointer-events-none fixed top-0 left-0 z-[200] will-change-transform ${ready ? "opacity-100" : "opacity-0"}`}
+        className={`pointer-events-none fixed top-0 left-0 z-[200] will-change-transform ${showCustom ? "opacity-100" : "opacity-0"}`}
         aria-hidden
       >
-        {mode === "pencil" ? (
-          // SVG keeps Figma rotation + textured raster (PNG alone loses incline)
-          <img
-            src="/cursor/pencil.svg"
-            alt=""
-            width={pencil.size}
-            height={pencil.size}
-            className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.2)]"
-            draggable={false}
-          />
-        ) : (
+        {mode === "circle" ? (
           <div
             className="rounded-full bg-white"
             style={{
@@ -74,7 +76,17 @@ export default function CustomCursor() {
               marginTop: pencil.size / 2 - pencil.tipOffset.y,
             }}
           />
-        )}
+        ) : mode === "pencil" ? (
+          // SVG keeps Figma rotation + textured raster (PNG alone loses incline)
+          <img
+            src="/cursor/pencil.svg"
+            alt=""
+            width={pencil.size}
+            height={pencil.size}
+            className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.2)]"
+            draggable={false}
+          />
+        ) : null}
       </div>
     </>
   );

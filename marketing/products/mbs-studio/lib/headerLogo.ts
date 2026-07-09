@@ -1,7 +1,16 @@
-/** Figma header logo — MacBook Pro 16" frame @ 1728px */
+/** Header wordmark — without slogan (black on transparent). */
 export const HEADER_LOGO = {
-  src: "/logo-header.svg",
-  width: 135,
-  height: 55,
-  alt: "Mr. Big Stuff Studio",
+  src: "/logo-header.png",
+  /** Display size @ Figma 1728px frame (asset 300×87). */
+  width: 138,
+  height: 40,
+  alt: "MBS",
+};
+
+/** Footer lockup — with "BRAND INTELLIGENCE" slogan (white ink for dark footer). */
+export const FOOTER_LOGO = {
+  src: "/logo-full-white.png",
+  width: 241,
+  height: 72,
+  alt: "Mr. Big Stuff — Brand Intelligence",
 };

@@ -10,5 +10,8 @@
     "app/**/*.ts",
     "../../../platform/web/**/*.ts"
   ],
-  "exclude": ["**/*.spec.ts"]
+  "exclude": [
+    "**/*.spec.ts",
+    "../../../platform/web/**/*.spec.ts"
+  ]
 }

@@ -91,8 +91,64 @@ body::after {
 }
 
 @media (min-width: 1024px) {
+  /* Hide system cursor only on drawable empty page areas. */
   body.has-custom-cursor,
   body.has-custom-cursor * {
+    cursor: none !important;
+  }
+
+  /* Restore native cursors on interactive UI (links, buttons, forms, chrome). */
+  body.has-custom-cursor a,
+  body.has-custom-cursor button,
+  body.has-custom-cursor [role="button"],
+  body.has-custom-cursor header,
+  body.has-custom-cursor header *,
+  body.has-custom-cursor nav,
+  body.has-custom-cursor nav * {
+    cursor: pointer !important;
+  }
+
+  body.has-custom-cursor footer,
+  body.has-custom-cursor footer * {
+    cursor: default !important;
+  }
+
+  body.has-custom-cursor footer a,
+  body.has-custom-cursor footer button {
+    cursor: pointer !important;
+  }
+
+  body.has-custom-cursor input,
+  body.has-custom-cursor textarea,
+  body.has-custom-cursor select {
+    cursor: text !important;
+  }
+
+  body.has-custom-cursor dialog,
+  body.has-custom-cursor dialog *:not(a):not(button):not(input):not(textarea):not(select):not([role="button"]),
+  body.has-custom-cursor [data-no-draw]:not(a):not(button):not(input):not(textarea):not(select):not([role="button"]) {
+    cursor: default !important;
+  }
+
+  body.has-custom-cursor dialog a,
+  body.has-custom-cursor dialog button,
+  body.has-custom-cursor dialog [role="button"],
+  body.has-custom-cursor [data-no-draw] a,
+  body.has-custom-cursor [data-no-draw] button,
+  body.has-custom-cursor [data-no-draw] [role="button"] {
+    cursor: pointer !important;
+  }
+
+  body.has-custom-cursor dialog input,
+  body.has-custom-cursor dialog textarea,
+  body.has-custom-cursor [data-no-draw] input,
+  body.has-custom-cursor [data-no-draw] textarea {
+    cursor: text !important;
+  }
+
+  /* Project cards keep the custom circle (not native cursor). */
+  body.has-custom-cursor [data-project-card],
+  body.has-custom-cursor [data-project-card] * {
     cursor: none !important;
   }
 }
@@ -108,9 +164,26 @@ body::after {
 
 .is-dragging-card {
   user-select: none;
-  z-index: 20;
+  cursor: grabbing !important;
+}
+
+.is-dragging-card,
+.is-dragging-card * {
+  cursor: grabbing !important;
+  pointer-events: none;
+}
+
+.is-dragging-card [data-project-card] {
+  pointer-events: auto;
 }
 
 .project-card {
   z-index: 10;
+  will-change: auto;
+  contain: layout style;
+}
+
+.project-card.is-dragging,
+body.is-dragging-card .project-card:active {
+  z-index: 50;
 }

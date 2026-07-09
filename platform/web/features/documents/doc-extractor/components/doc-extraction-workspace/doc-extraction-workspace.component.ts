@@ -547,8 +547,11 @@ export class DocExtractionWorkspaceComponent {
         if (!version) return;
 
         // Create a draft object matching ExtractionDraft interface
+        const draftId = response.recordId ?? response.requestId;
+        if (!draftId) return;
+
         const draft: ExtractionDraft = {
-          draftId: response.requestId,
+          draftId,
           domainKey: def.domainKey,
           docTypeKey: def.docTypeKey,
           docTypeVersion: version,
@@ -574,7 +577,8 @@ export class DocExtractionWorkspaceComponent {
   }
 
   private handleExactDuplicate(response: ExtractionResponse): void {
-    const dedup = response.dedup.exactDuplicate;
+    const dedup = response.dedup?.exactDuplicate;
+    if (!dedup) return;
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
@@ -602,7 +606,8 @@ export class DocExtractionWorkspaceComponent {
   }
 
   private handleNearDuplicate(response: ExtractionResponse): void {
-    const dedup = response.dedup.nearDuplicate;
+    const dedup = response.dedup?.nearDuplicate;
+    if (!dedup) return;
     const distanceInfo = dedup.distance !== null ? ` (Distance: ${dedup.distance})` : '';
     
     const snackBarRef = this.snackBar.open(

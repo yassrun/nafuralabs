@@ -4,7 +4,7 @@
  * Creates appropriate storage adapter based on environment configuration.
  */
 
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { StorageAdapter } from './storage.adapter';
 import { MemoryStorage } from './memory.storage';
 import { SessionStorageAdapter } from './session.storage';
@@ -14,6 +14,12 @@ export type StorageMode = 'memory' | 'session' | 'local';
 
 @Injectable({ providedIn: 'root' })
 export class StorageFactory {
+  constructor(
+    private readonly memoryStorage: MemoryStorage,
+    private readonly sessionStorage: SessionStorageAdapter,
+    private readonly localStorage: LocalStorageAdapter,
+  ) {}
+
   /**
    * Create storage adapter based on mode.
    *
@@ -22,13 +28,13 @@ export class StorageFactory {
   create(mode: StorageMode = 'session'): StorageAdapter {
     switch (mode) {
       case 'memory':
-        return inject(MemoryStorage);
+        return this.memoryStorage;
       case 'session':
-        return inject(SessionStorageAdapter);
+        return this.sessionStorage;
       case 'local':
-        return inject(LocalStorageAdapter);
+        return this.localStorage;
       default:
-        return inject(SessionStorageAdapter);
+        return this.sessionStorage;
     }
   }
 

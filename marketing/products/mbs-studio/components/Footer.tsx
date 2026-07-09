@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { FOOTER_LOGO } from "@/lib/headerLogo";
 
 export default function Footer() {
   return (
@@ -8,11 +9,11 @@ export default function Footer() {
       <div className="flex w-full flex-col gap-10 lg:flex-row lg:items-end lg:justify-between">
         <Link href="/" className="relative inline-block shrink-0" data-no-draw>
           <img
-            src="/logo-white-mark.png"
-            alt="MBS Studio"
-            width={135}
-            height={55}
-            className="h-[48px] w-auto object-contain lg:h-[52px]"
+            src={FOOTER_LOGO.src}
+            alt={FOOTER_LOGO.alt}
+            width={FOOTER_LOGO.width}
+            height={FOOTER_LOGO.height}
+            className="block h-[56px] w-auto max-w-[min(70vw,260px)] object-contain object-left sm:h-[64px] lg:h-[72px]"
             draggable={false}
           />
         </Link>

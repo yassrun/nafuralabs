@@ -21,7 +21,7 @@ import {
 import { Tenant as SecurityTenant, TenantMembership } from '../security/models/tenant.models';
 import { AuthStateStore } from '../security/state/auth.state';
 import { ApiConfigService } from '../config/api-config.service';
-import { APPLICATION_RUNTIME_CONFIG } from '../application/application-runtime.token';
+import { APPLICATION_REQUIRES_TENANT } from '@applications/config/routes';
 
 /**
  * Tenant context service.
@@ -34,7 +34,6 @@ export class TenantContextService {
   private readonly authState = inject(AuthStateStore);
   private readonly http = inject(HttpClient);
   private readonly apiConfig = inject(ApiConfigService);
-  private readonly runtime = inject(APPLICATION_RUNTIME_CONFIG);
   
   private get apiBaseUrl(): string {
     return this.apiConfig.getApiBaseUrl();
@@ -173,7 +172,7 @@ export class TenantContextService {
    * For normal users: returns their tenant memberships.
    */
   async getAllTenantsForSelection(): Promise<TenantSelectorItem[]> {
-    if (!this.runtime.requiresTenant) {
+    if (!APPLICATION_REQUIRES_TENANT) {
       return [];
     }
 

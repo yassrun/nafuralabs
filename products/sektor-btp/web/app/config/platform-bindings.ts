@@ -79,12 +79,14 @@ const SEKTOR_NOT_FOUND_LINKS: NotFoundQuickLink[] = [
   { label: 'RH & Paie', route: '/rh' },
 ];
 
+export const SEKTOR_APPLICATION_RUNTIME_CONFIG: ApplicationRuntimeConfig = {
+  activeApplicationId: ACTIVE_APPLICATION_ID,
+  defaultRoute: APPLICATION_DEFAULT_ROUTE,
+  requiresTenant: APPLICATION_REQUIRES_TENANT,
+};
+
 export function createSektorApplicationRuntimeConfig(): ApplicationRuntimeConfig {
-  return {
-    activeApplicationId: ACTIVE_APPLICATION_ID,
-    defaultRoute: APPLICATION_DEFAULT_ROUTE,
-    requiresTenant: APPLICATION_REQUIRES_TENANT,
-  };
+  return SEKTOR_APPLICATION_RUNTIME_CONFIG;
 }
 
 export function createSektorOnboardingConfig(): OnboardingConfig {
@@ -132,7 +134,7 @@ export function createShellAfterOrgSwitch(): () => void {
 
 /** Platform extension providers — wire Sektor métier into the generic shell. */
 export const SEKTOR_PLATFORM_PROVIDERS = [
-  { provide: APPLICATION_RUNTIME_CONFIG, useFactory: createSektorApplicationRuntimeConfig },
+  { provide: APPLICATION_RUNTIME_CONFIG, useValue: SEKTOR_APPLICATION_RUNTIME_CONFIG },
   { provide: ONBOARDING_CONFIG, useFactory: createSektorOnboardingConfig },
   { provide: SHORTCUTS_CONFIG, useFactory: createSektorShortcutsConfig },
   { provide: COMMAND_PALETTE_EXTRA_ACTIONS, useValue: SEKTOR_PALETTE_ACTIONS },

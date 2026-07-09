@@ -21,7 +21,7 @@ import { User } from '../models/user.models';
 import { TenantMembership } from '../models/tenant.models';
 import { TokenPair } from '../models/token.models';
 import { ApiConfigService } from '../../config/api-config.service';
-import { APPLICATION_RUNTIME_CONFIG } from '../../application/application-runtime.token';
+import { APPLICATION_REQUIRES_TENANT } from '@applications/config/routes';
 
 /**
  * Auth API Service
@@ -38,7 +38,6 @@ export class AuthApiService {
   private readonly keycloakUrl = environment.keycloakUrl;
   private readonly realm = environment.keycloakRealm;
   private readonly apiConfig = inject(ApiConfigService);
-  private readonly runtime = inject(APPLICATION_RUNTIME_CONFIG);
   
   private get apiBaseUrl(): string {
     return this.apiConfig.getApiBaseUrl();
@@ -239,7 +238,7 @@ export class AuthApiService {
    * Get user's tenant memberships from backend.
    */
   async getUserTenants(userId: string, accessToken: string): Promise<TenantMembership[]> {
-    if (!this.runtime.requiresTenant) {
+    if (!APPLICATION_REQUIRES_TENANT) {
       return [];
     }
 

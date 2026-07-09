@@ -6,7 +6,7 @@
  */
 
 import { Injectable, Signal, computed, inject } from '@angular/core';
-import { APPLICATION_RUNTIME_CONFIG } from '../../application/application-runtime.token';
+import { APPLICATION_REQUIRES_TENANT } from '@applications/config/routes';
 
 import { AuthStateStore } from '../state/auth.state';
 import { Permission, matchesPermissionPattern } from '../models/user.models';
@@ -48,7 +48,6 @@ export interface PermissionCheckResult {
 @Injectable({ providedIn: 'root' })
 export class PermissionService {
   private readonly state = inject(AuthStateStore);
-  private readonly runtime = inject(APPLICATION_RUNTIME_CONFIG);
   private readonly tenantContextService = inject(TenantContextService);
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -106,7 +105,7 @@ export class PermissionService {
   hasPermission(permission: Permission): boolean {
     // Non-tenant application mode: no tenant-context RBAC resolution.
     // Keep UI actions available; backend remains source of enforcement.
-    if (!this.runtime.requiresTenant && this.state.isAuthenticated()) {
+    if (!APPLICATION_REQUIRES_TENANT && this.state.isAuthenticated()) {
       return true;
     }
 

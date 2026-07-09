@@ -84,7 +84,7 @@ export function useDrawing({
     colorIndex.current += 1;
     strokeColor.current = color;
     return color;
-  }, []);
+  }, [layoutScale]);
 
   const drawLine = useCallback((x: number, y: number) => {
     const canvas = canvasRef.current;
@@ -115,6 +115,7 @@ export function useDrawing({
 
     const onPointerDown = (e: PointerEvent) => {
       if (e.button !== 0 || isIgnoredAt(e.clientX, e.clientY)) return;
+      if (document.body.classList.contains("is-dragging-card")) return;
       isDrawing.current = true;
       lastPoint.current = null;
       pickNextColor();
@@ -123,6 +124,11 @@ export function useDrawing({
 
     const onPointerMove = (e: PointerEvent) => {
       if (!isDrawing.current) return;
+      if (document.body.classList.contains("is-dragging-card")) {
+        isDrawing.current = false;
+        lastPoint.current = null;
+        return;
+      }
       drawLine(e.clientX, e.clientY);
     };
 

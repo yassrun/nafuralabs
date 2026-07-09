@@ -73,8 +73,8 @@ export default function ProjectCard({
     <div
       ref={cardRef}
       data-project-card
-      className="project-card absolute overflow-hidden bg-neutral-200 shadow-sm touch-none"
-      style={style}
+      className="project-card absolute overflow-hidden bg-neutral-200 shadow-sm touch-none select-none"
+      style={{ ...style, backfaceVisibility: "hidden" }}
       {...(dragEnabled ? handlers : {})}
     >
       {!dragEnabled && (

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { loadGsap } from "@/lib/gsap";
 
-export type CursorMode = "pencil" | "circle";
+export type CursorMode = "pencil" | "circle" | "hidden";
 
 /** Figma pencil asset — 79×79px @ 1728px frame, inclined ~42° */
 export const PENCIL_SIZE_FIGMA = 79;
@@ -82,8 +82,9 @@ export function useCursor({ enabled, layoutScale = 1 }: UseCursorOptions) {
     return () => window.removeEventListener("pointermove", onMove);
   }, [enabled, pencil.tipOffset.x, pencil.tipOffset.y]);
 
-  const setCircleMode = useCallback((active: boolean) => {
-    setMode(active ? "circle" : "pencil");
+  const setCursorMode = useCallback((next: CursorMode) => {
+    setMode(next);
+    if (next === "hidden") return;
     void loadGsap().then((gsap) => {
       const el = cursorRef.current;
       if (!el) return;
@@ -95,11 +96,18 @@ export function useCursor({ enabled, layoutScale = 1 }: UseCursorOptions) {
     });
   }, []);
 
+  /** @deprecated prefer setCursorMode — kept for call sites */
+  const setCircleMode = useCallback(
+    (active: boolean) => setCursorMode(active ? "circle" : "pencil"),
+    [setCursorMode],
+  );
+
   return {
     cursorRef,
     mode,
     ready,
     setCircleMode,
+    setCursorMode,
     pencil,
   };
 }

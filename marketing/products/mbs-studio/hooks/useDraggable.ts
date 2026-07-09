@@ -1,10 +1,10 @@
 "use client";
 
-import { useCallback, useRef, type RefObject } from "react";
+import { useCallback, useEffect, useRef, type RefObject } from "react";
 import { useRouter } from "next/navigation";
 
-const CLICK_MAX_MS = 200;
-const DRAG_THRESHOLD_PX = 3;
+const CLICK_MAX_MS = 220;
+const DRAG_THRESHOLD_PX = 4;
 
 interface UseDraggableOptions {
   enabled: boolean;
@@ -38,6 +38,9 @@ export function useDraggable({
     startTime: 0,
     isDragging: false,
     moved: false,
+    pendingX: 0,
+    pendingY: 0,
+    raf: 0,
   });
 
   const clampToBounds = useCallback(
@@ -58,21 +61,64 @@ export function useDraggable({
     [boundsRef, cardWidth, cardHeight, bottomReserve],
   );
 
+  const flushTransform = useCallback(() => {
+    const state = dragState.current;
+    state.raf = 0;
+    const el = cardRef.current;
+    if (!el || !state.isDragging) return;
+
+    const dx = state.pendingX - state.originX;
+    const dy = state.pendingY - state.originY;
+    el.style.transform = `translate3d(${dx}px, ${dy}px, 0)`;
+  }, []);
+
+  const scheduleTransform = useCallback(
+    (x: number, y: number) => {
+      const state = dragState.current;
+      state.pendingX = x;
+      state.pendingY = y;
+      if (state.raf) return;
+      state.raf = requestAnimationFrame(flushTransform);
+    },
+    [flushTransform],
+  );
+
+  const beginDrag = useCallback((el: HTMLDivElement) => {
+    const state = dragState.current;
+    if (state.isDragging) return;
+    state.isDragging = true;
+    state.moved = true;
+    document.body.classList.add("is-dragging-card");
+    el.style.willChange = "transform";
+    el.style.zIndex = "50";
+    el.style.transition = "none";
+    // Drop any leftover GSAP/opacity transforms so translate stays clean
+    el.style.transform = "translate3d(0,0,0)";
+  }, []);
+
   const onPointerDown = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
-      if (!enabled) return;
+      if (!enabled || e.button !== 0) return;
       const el = cardRef.current;
       if (!el) return;
+
+      e.stopPropagation();
+
+      const left = parseFloat(el.style.left || "0") || 0;
+      const top = parseFloat(el.style.top || "0") || 0;
 
       dragState.current = {
         pointerId: e.pointerId,
         startX: e.clientX,
         startY: e.clientY,
-        originX: parseFloat(el.style.left || "0") || 0,
-        originY: parseFloat(el.style.top || "0") || 0,
-        startTime: Date.now(),
+        originX: left,
+        originY: top,
+        startTime: performance.now(),
         isDragging: false,
         moved: false,
+        pendingX: left,
+        pendingY: top,
+        raf: 0,
       };
 
       el.setPointerCapture(e.pointerId);
@@ -90,29 +136,22 @@ export function useDraggable({
 
       const dx = e.clientX - state.startX;
       const dy = e.clientY - state.startY;
-      const dist = Math.hypot(dx, dy);
 
       if (!state.isDragging) {
-        const held = Date.now() - state.startTime > CLICK_MAX_MS;
-        if (dist > DRAG_THRESHOLD_PX || held) {
-          state.isDragging = true;
-          state.moved = true;
-          document.body.classList.add("is-dragging-card");
-          el.style.transform = "none";
-        }
+        if (Math.hypot(dx, dy) <= DRAG_THRESHOLD_PX) return;
+        beginDrag(el);
       }
 
-      if (!state.isDragging) return;
+      e.preventDefault();
+      e.stopPropagation();
 
       const next = clampToBounds(state.originX + dx, state.originY + dy);
-      el.style.left = `${next.x}px`;
-      el.style.top = `${next.y}px`;
-      el.style.zIndex = "50";
+      scheduleTransform(next.x, next.y);
     },
-    [clampToBounds],
+    [beginDrag, clampToBounds, scheduleTransform],
   );
 
-  const onPointerUp = useCallback(
+  const endPointer = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
       const state = dragState.current;
       if (state.pointerId !== e.pointerId) return;
@@ -122,25 +161,43 @@ export function useDraggable({
         el.releasePointerCapture(e.pointerId);
       }
 
-      document.body.classList.remove("is-dragging-card");
-
-      const duration = Date.now() - state.startTime;
-      const dx = e.clientX - state.startX;
-      const dy = e.clientY - state.startY;
-      const dist = Math.hypot(dx, dy);
-
-      if (
-        !state.isDragging &&
-        duration < CLICK_MAX_MS &&
-        dist < DRAG_THRESHOLD_PX
-      ) {
-        router.push(href);
+      if (state.raf) {
+        cancelAnimationFrame(state.raf);
+        state.raf = 0;
       }
 
-      dragState.current.pointerId = -1;
+      document.body.classList.remove("is-dragging-card");
+
+      const duration = performance.now() - state.startTime;
+      const dist = Math.hypot(e.clientX - state.startX, e.clientY - state.startY);
+      const wasDragging = state.isDragging;
+
+      if (wasDragging && el) {
+        const next = clampToBounds(state.pendingX, state.pendingY);
+        el.style.left = `${next.x}px`;
+        el.style.top = `${next.y}px`;
+        el.style.transform = "";
+        el.style.willChange = "";
+        el.style.transition = "";
+      }
+
+      state.pointerId = -1;
+      state.isDragging = false;
+
+      if (!wasDragging && duration < CLICK_MAX_MS && dist < DRAG_THRESHOLD_PX) {
+        router.push(href);
+      }
     },
-    [href, router],
+    [clampToBounds, href, router],
   );
+
+  useEffect(() => {
+    return () => {
+      const state = dragState.current;
+      if (state.raf) cancelAnimationFrame(state.raf);
+      document.body.classList.remove("is-dragging-card");
+    };
+  }, []);
 
   return {
     cardRef,
@@ -148,8 +205,8 @@ export function useDraggable({
       ? {
           onPointerDown,
           onPointerMove,
-          onPointerUp,
-          onPointerCancel: onPointerUp,
+          onPointerUp: endPointer,
+          onPointerCancel: endPointer,
         }
       : {},
   };

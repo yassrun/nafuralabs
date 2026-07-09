@@ -39,12 +39,12 @@ import { AnyFormGroup, JsonSchemaFormBuilder } from '../../utils/json-schema-for
 })
 export class DynamicArrayTableComponent {
   @Input({ required: true }) title!: string;
-  @Input({ required: true }) formArray!: FormArray<AbstractControl>;
+  @Input({ required: true }) formArray!: FormArray<AnyFormGroup>;
   @Input({ required: true }) arraySchema!: JsonSchemaArray;
   @Input({ required: true }) columns!: UiArrayColumn[];
   @Input() readonly = false;
 
-  @ViewChild(MatTable) private readonly table?: MatTable<AbstractControl>;
+  @ViewChild(MatTable) private readonly table?: MatTable<AnyFormGroup>;
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['readonly'] && this.formArray) {
@@ -57,7 +57,7 @@ export class DynamicArrayTableComponent {
     return [...this.columns.map(c => c.path), 'actions'];
   }
 
-  get rows(): AbstractControl[] {
+  get rows(): AnyFormGroup[] {
     return this.formArray?.controls ?? [];
   }
 
@@ -97,8 +97,8 @@ export class DynamicArrayTableComponent {
     return (schema as any)?.type === 'string' && (schema as any)?.format === 'date';
   }
 
-  rowGroup(row: AbstractControl): AnyFormGroup {
-    return row as FormGroup as AnyFormGroup;
+  rowGroup(row: AnyFormGroup): AnyFormGroup {
+    return row;
   }
 
   addRow(): void {

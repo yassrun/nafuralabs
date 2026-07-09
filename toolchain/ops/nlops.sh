@@ -503,12 +503,22 @@ link_platform_web_node_modules() {
     exit 1
   fi
   rm -rf "$dest"
-  if ln -sfn "$src" "$dest" 2>/dev/null; then
+  if ln -sfn "$src" "$dest" 2>/dev/null && [[ -e "$dest/@angular/core" ]]; then
     return 0
   fi
-  # Windows fallback (Git Bash / cmd junction)
+  rm -rf "$dest"
+  # Windows: PowerShell junction handles paths with spaces; cmd mklink does not.
+  if command -v powershell.exe >/dev/null 2>&1; then
+    powershell.exe -NoProfile -Command \
+      "New-Item -ItemType Junction -Path '$dest' -Target '$src' -Force | Out-Null" 2>/dev/null \
+      && [[ -e "$dest/@angular/core" ]] && return 0
+  fi
   if command -v cmd.exe >/dev/null 2>&1; then
-    cmd.exe //c "mklink /J \"${dest//\//\\}\" \"${src//\//\\}\"" >/dev/null 2>&1 && return 0
+    local dest_win src_win
+    dest_win="$(cd "$(dirname "$dest")" && pwd -W 2>/dev/null)/$(basename "$dest")"
+    src_win="$(cd "$src" && pwd -W 2>/dev/null)"
+    cmd.exe //c "mklink /J \"${dest_win//\//\\}\" \"${src_win//\//\\}\"" >/dev/null 2>&1 \
+      && [[ -e "$dest/@angular/core" ]] && return 0
   fi
   echo "ERROR: could not link platform/web/node_modules to sektor web node_modules" >&2
   exit 1

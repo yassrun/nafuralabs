@@ -48,7 +48,8 @@ export default function Header({ onBookCall }: HeaderProps) {
               alt={HEADER_LOGO.alt}
               width={logoW}
               height={logoH}
-              className="block object-contain"
+              className="block max-h-[40px] w-auto object-contain object-left"
+              style={{ width: logoW, height: logoH }}
               draggable={false}
             />
           </Link>
