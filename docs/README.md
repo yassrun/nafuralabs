@@ -28,10 +28,9 @@ platform/           SDK (backend Gradle + web Angular)
 products/           Sektor, venue-catalog, layali, beauty…
 infra/k8s/          Postgres, Keycloak, Vault, ingress
 marketing/          Sites vitrine
+web/                Workspace Angular Sektor
 toolchain/ops/      nlops.sh
 ```
-
-Frontend Sektor : `products/sektor-btp/web/`
 
 Détail « où mettre quoi » : [AGENTS.md § Où mettre le code](AGENTS.md#où-mettre-le-code).
 
@@ -61,7 +60,7 @@ BUILD_IMAGES=true KUBE_CONTEXT=docker-desktop ENV=staging \
 ```powershell
 # Build local
 .\gradlew.bat :sektor:app:bootJar
-cd products/sektor-btp/web && npm run build:staging
+cd web && npm run build:staging
 ```
 
 ---
@@ -70,9 +69,8 @@ cd products/sektor-btp/web && npm run build:staging
 
 | Produit | Chemin | Statut |
 |---------|--------|--------|
-| Sektor BTP | [products/sektor-btp/](../products/sektor-btp/) | production — code + [docs](../products/sektor-btp/docs/) |
+| Sektor BTP | [products/sektor-btp/](../products/sektor-btp/) | production |
 | MBS Studio | [marketing/products/mbs-studio/](../marketing/products/mbs-studio/) | vitrine |
-| Zenith | [marketing/products/zenith/](../marketing/products/zenith/) | vitrine |
 | Corporate | [marketing/corporate/](../marketing/corporate/) | vitrine |
 | Venue Catalog | [products/venue-catalog/](../products/venue-catalog/) | specs |
 | Layali / Beauty | [products/layali/](../products/layali/), [products/beauty/](../products/beauty/) | mobile P1 |

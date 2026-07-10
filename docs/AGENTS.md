@@ -30,9 +30,10 @@
 
 ```
 platform/          SDK partagé (auth, tenancy, UI shell) — aucun métier
-products/<app>/    Code + deploy K8s par produit (front Sektor : products/sektor-btp/web/)
+products/<app>/    Code + deploy K8s par produit
 infra/k8s/         Infra partagée (postgres, keycloak, vault…) — overlays par ENV
-marketing/         Sites vitrine (MBS, Zenith, corporate)
+marketing/         Sites vitrine (MBS, corporate)
+web/               Workspace Angular Sektor (build entrypoint)
 toolchain/ops/     nlops.sh — CLI deploy
 ```
 
@@ -55,10 +56,9 @@ toolchain/ops/     nlops.sh — CLI deploy
 
 | Paths modifiés | Action staging |
 |----------------|----------------|
-| `products/sektor-btp/**`, `platform/**` | `release-app sektor-btp` |
+| `products/sektor-btp/**`, `platform/**`, `web/**` | `release-app sektor-btp` |
 | `infra/k8s/**` | `infra-up` puis vérifier apps |
 | `marketing/products/mbs-studio/**` | `deploy mbs-studio` |
-| `marketing/products/zenith/**` | `deploy zenith` |
 | `marketing/corporate/**` | `deploy corporate` |
 | `toolchain/ops/**` | pas de deploy cluster |
 
@@ -86,14 +86,12 @@ Pas d’overlay K8s `dev`. Env `demo` (GKE) : **deprecated**.
 | `sektor-btp` | `sektor-${ENV}` | `nafura_erp` | Liquibase Job | `products/sektor-btp/deploy/k8s/overlays/${ENV}` |
 | `venue-catalog` | `venue-catalog-${ENV}` | `nafura_venue_catalog` | Flyway startup | `products/venue-catalog/deploy/k8s/overlays/${ENV}` |
 | `mbs-studio` | `nafura-vitrine-${ENV}` | — | — | `marketing/products/mbs-studio/deploy/k8s/overlays/${ENV}` |
-| `zenith` | `nafura-vitrine-${ENV}` | — | — | `marketing/products/zenith/deploy/k8s/overlays/${ENV}` |
 | `corporate` | `nafura-vitrine-${ENV}` | — | — | `marketing/corporate/deploy/k8s/overlays/${ENV}` |
 
 Layali / Beauty : `products/*/mobile/` — hors K8s pour l’instant.
 
 Gradle Sektor : `:sektor:app`, `:sektor:<module>`.  
-Frontend : `@platform/*` → `platform/web`, `@applications/*` → `products/sektor-btp/web/app`.  
-Build : `cd products/sektor-btp/web && npm run build:staging`.
+Frontend : `@platform/*` → `platform/web`, `@applications/*` → `products/sektor-btp/web/app`.
 
 ---
 
@@ -107,7 +105,6 @@ Build : `cd products/sektor-btp/web && npm run build:staging`.
 | Sektor API | `api.sektor.nafuralabs.staging` |
 | IAM | `iam.nafuralabs.staging` |
 | MBS | `mbs.nafuralabs.staging` |
-| Zenith | `zenith.nafuralabs.staging` |
 | Minio / S3 / Vault | `minio`, `s3`, `vault`.nafuralabs.staging |
 
 Hosts Windows (admin) : `powershell -ExecutionPolicy Bypass -File toolchain/ops/add-staging-hosts.ps1`
@@ -119,9 +116,8 @@ Hosts Windows (admin) : `powershell -ExecutionPolicy Bypass -File toolchain/ops/
 | Sektor | `sektor.nafuralabs.com`, `api.sektor.nafuralabs.com` |
 | IAM | `iam.nafuralabs.com` |
 | MBS | `mbs.nafuralabs.com` |
-| Zenith | `zenith.nafuralabs.com` |
 
-Config front : `products/sektor-btp/web/src/environments/environment.staging.ts` / `environment.prod.ts`.
+Config front : `web/src/environments/environment.staging.ts` / `environment.prod.ts`.
 
 ---
 
@@ -132,7 +128,6 @@ Config front : `products/sektor-btp/web/src/environments/environment.staging.ts`
 | Domaine ERP (stock, chantiers…) | `products/sektor-btp/backend/modules/<domaine>/` |
 | Boot app Sektor | `products/sektor-btp/backend/app/` |
 | UI ERP | `products/sektor-btp/web/app/` |
-| Specs / QA / roadmaps ERP | `products/sektor-btp/docs/` |
 | Auth, listing, shell UI | `platform/web/` ou `platform/backend/` |
 | Specs produit | `products/<app-id>/docs/` |
 | Manifests produit | `products/<app-id>/deploy/k8s/` — **pas** sous `infra/k8s/` |
@@ -181,9 +176,7 @@ Arbre de décision complet : [toolchain/ops/AGENTS.md](../toolchain/ops/AGENTS.m
 | Deploy backend sans `migrate` après changement SQL | CrashLoop |
 | Métier BTP dans `platform/` | Architecture |
 | Overlay K8s `dev` | Seulement staging + prod |
-| Dupliquer ERP hors `products/sektor-btp/` | Source unique produit (front + back) |
-| Métier ERP dans `platform/` | `npm run check:sektor-scope` dans `products/sektor-btp/web/` |
-| Recréer un workspace `web/` à la racine | Frontend Sektor = `products/sektor-btp/web/` uniquement |
+| Dupliquer ERP sous `web/app/applications/` | Source = `products/sektor-btp/web/app/` |
 | Hostnames `*.nafura.local` en staging cluster | Remplacés par `*.nafuralabs.staging` (dev local `ng serve` peut garder `.local`) |
 
 ---
@@ -191,7 +184,8 @@ Arbre de décision complet : [toolchain/ops/AGENTS.md](../toolchain/ops/AGENTS.m
 ## Dette connue
 
 - Shell platform couplé à Sektor via `@applications/*` — à découpler au 2ᵉ produit front.
-- Docs ERP : `products/sektor-btp/docs/` (specs, QA, roadmaps). Chemins historiques `web/…` ou `app/applications/erp` → lire `products/sektor-btp/web/app/`.
+- Docs historiques `web/docs/` : chemins `app/applications/erp` → lire `products/sektor-btp/web/app/`.
+- CI/CD automatisé : à implémenter (build PR → deploy staging → deploy prod manuel).
 
 ---
 

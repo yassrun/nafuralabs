@@ -1,0 +1,29 @@
+.srt-kpi-banner {
+  display: flex;
+  gap: 24px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, var(--nf-color-primary-50) 0%, var(--nf-color-success-50) 100%);
+  border: 1px solid var(--nf-color-primary-200);
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.srt-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.srt-kpi__label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--nf-color-primary-800);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.srt-kpi__value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--nf-color-primary-700);
+}

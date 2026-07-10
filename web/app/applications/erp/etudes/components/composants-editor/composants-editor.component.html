@@ -1,0 +1,176 @@
+<div class="cmp" [class.cmp--readonly]="readonly">
+  <div class="cmp__toolbar">
+    <nf-button type="button" class="cmp__btn" [disabled]="readonly" (clicked)="addComposant()" variant="secondary">
+      + Composant
+    </nf-button>
+    <span class="cmp__hint">Sous-détail = matériaux + main d'œuvre + frais généraux + bénéfice</span>
+  </div>
+
+  <table class="cmp__table">
+    <colgroup>
+      <col />
+      <col />
+      <col />
+      <col />
+      <col />
+      <col />
+      <col />
+    </colgroup>
+    <thead>
+      <tr>
+        <th>Composant</th>
+        <th>Type</th>
+        <th>Unité</th>
+        <th class="cmp__num">Rendement</th>
+        <th class="cmp__num">PU MAD</th>
+        <th class="cmp__num">Total MAD</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @if (composants().length === 0) {
+        <tr>
+          <td colspan="7" class="cmp__empty">
+            Aucun composant — démarrez la composition de l'ouvrage.
+          </td>
+        </tr>
+      }
+      @for (c of composants(); track trackById($index, c)) {
+        <tr>
+          <td>
+            <input
+              type="text"
+              class="cmp__input"
+              [disabled]="readonly"
+              [ngModel]="c.designation"
+              (ngModelChange)="patchComposant(c.id, { designation: $event })"
+              [ngModelOptions]="{ standalone: true }" />
+          </td>
+          <td>
+            <select
+              class="cmp__input"
+              [disabled]="readonly"
+              [ngModel]="c.type"
+              (ngModelChange)="patchComposant(c.id, { type: $event })"
+              [ngModelOptions]="{ standalone: true }">
+              @for (t of types; track t.value) {
+                <option [value]="t.value">{{ t.label }}</option>
+              }
+            </select>
+          </td>
+          <td>
+            <input
+              type="text"
+              class="cmp__input cmp__input--small"
+              [disabled]="readonly"
+              [ngModel]="c.unite"
+              (ngModelChange)="patchComposant(c.id, { unite: $event })"
+              [ngModelOptions]="{ standalone: true }" />
+          </td>
+          <td>
+            <input
+              type="number"
+              step="0.01"
+              class="cmp__input cmp__input--num"
+              [disabled]="readonly"
+              [ngModel]="c.rendement"
+              (ngModelChange)="patchComposant(c.id, { rendement: +$event })"
+              [ngModelOptions]="{ standalone: true }" />
+          </td>
+          <td>
+            <input
+              type="number"
+              step="0.01"
+              class="cmp__input cmp__input--num"
+              [disabled]="readonly"
+              [ngModel]="c.prixUnitaire"
+              (ngModelChange)="patchComposant(c.id, { prixUnitaire: +$event })"
+              [ngModelOptions]="{ standalone: true }" />
+          </td>
+          <td class="cmp__num cmp__total">{{ c.total | number: '1.2-2' }}</td>
+          <td>
+            <nf-button
+              type="button"
+              class="cmp__btn-icon"
+              [disabled]="readonly"
+              (clicked)="removeComposant(c.id)"
+              aria-label="Supprimer" variant="secondary">
+              ×
+            </nf-button>
+          </td>
+        </tr>
+      }
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="3"><strong>Main d'œuvre</strong></td>
+        <td>
+          <input
+            type="number"
+            step="0.01"
+            class="cmp__input cmp__input--num"
+            [disabled]="readonly"
+            [ngModel]="uniteMain().heures"
+            (ngModelChange)="patchUniteMain({ heures: +$event })"
+            [ngModelOptions]="{ standalone: true }"
+            placeholder="Heures" />
+        </td>
+        <td>
+          <input
+            type="number"
+            step="1"
+            class="cmp__input cmp__input--num"
+            [disabled]="readonly"
+            [ngModel]="uniteMain().tauxHoraire"
+            (ngModelChange)="patchUniteMain({ tauxHoraire: +$event })"
+            [ngModelOptions]="{ standalone: true }"
+            placeholder="Taux MAD/h" />
+        </td>
+        <td class="cmp__num cmp__total">{{ uniteMain().total | number: '1.2-2' }}</td>
+        <td></td>
+      </tr>
+      <tr class="cmp__sep">
+        <td colspan="5" class="cmp__num">Sous-total déboursés</td>
+        <td class="cmp__num cmp__total">{{ sousTotalDebourse() | number: '1.2-2' }}</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td colspan="4">Frais généraux</td>
+        <td>
+          <input
+            type="number"
+            step="0.5"
+            class="cmp__input cmp__input--num"
+            [disabled]="readonly"
+            [ngModel]="fg()"
+            (ngModelChange)="setFg(+$event)"
+            [ngModelOptions]="{ standalone: true }" />
+        </td>
+        <td class="cmp__num">{{ fraisGenerauxValue() | number: '1.2-2' }}</td>
+        <td>%</td>
+      </tr>
+      <tr>
+        <td colspan="4">Bénéfice</td>
+        <td>
+          <input
+            type="number"
+            step="0.5"
+            class="cmp__input cmp__input--num"
+            [disabled]="readonly"
+            [ngModel]="benef()"
+            (ngModelChange)="setBenef(+$event)"
+            [ngModelOptions]="{ standalone: true }" />
+        </td>
+        <td class="cmp__num">{{ beneficeValue() | number: '1.2-2' }}</td>
+        <td>%</td>
+      </tr>
+      <tr class="cmp__final">
+        <td colspan="5" class="cmp__num">Prix unitaire HT</td>
+        <td class="cmp__num cmp__total cmp__total--strong">
+          {{ prixUnitaireHt() | number: '1.2-2' }} MAD
+        </td>
+        <td></td>
+      </tr>
+    </tfoot>
+  </table>
+</div>

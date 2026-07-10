@@ -1,0 +1,54 @@
+<nf-page-shell [scroll]="true">
+  <nf-page-header [config]="headerConfig()"></nf-page-header>
+
+  <section class="planning-page">
+    <app-gantt-toolbar
+      [chantiers]="facade.chantiers()"
+      [selectedChantierIds]="facade.selectedChantierIds()"
+      [periodPreset]="facade.periodPreset()"
+      [granularity]="facade.granularity()"
+      [displayMode]="facade.displayMode()"
+      (selectedChantiersChange)="onSelectChantiers($event)"
+      (periodPresetChange)="facade.setPeriodPreset($event); facade.clearCustomRange()"
+      (granularityChange)="onGranularityChange($event)"
+      (displayModeChange)="facade.setDisplayMode($event)"
+      (todayClick)="onToday()"
+      (exportClick)="onExportPdf()"
+      (fullscreenClick)="onToggleFullscreen()">
+    </app-gantt-toolbar>
+
+    <div class="planning-summary">
+      <nf-badge variant="info">{{ summary().chantierCount }} chantiers</nf-badge>
+      <nf-badge variant="default">{{ summary().phaseCount }} phases</nf-badge>
+      <nf-badge [variant]="summary().lateCount ? 'warning' : 'success'">{{ summary().lateCount }} retards</nf-badge>
+      <nf-badge variant="default">Avancement moyen {{ summary().completion }}%</nf-badge>
+    </div>
+
+    <app-gantt-legend [items]="facade.legend()" (toggle)="onLegendToggle($event)"></app-gantt-legend>
+
+    @if (hasData()) {
+      <div class="planning-workspace" #fullscreenHost>
+        <div class="planning-gantt-shell" tabindex="0" (keydown)="onGanttKeydown($event)">
+          <div class="planning-gantt" #ganttHost></div>
+        </div>
+      </div>
+    } @else {
+      <div class="planning-empty-state">
+        <nf-empty-state
+          icon="event"
+          [title]="'chantiers.planning.empty' | translate"
+          message="Ajustez les filtres ou ouvrez une fiche chantier pour ajouter des phases au planning."
+          [actionLabel]="facade.summary().monoChantier ? 'Aller à la fiche chantier' : 'Voir la liste des chantiers'"
+          (action)="onEmptyStateAction()">
+        </nf-empty-state>
+      </div>
+    }
+  </section>
+
+  <app-phase-drawer
+    [open]="!!facade.selectedPhaseDetail()"
+    [detail]="facade.selectedPhaseDetail()"
+    (closed)="facade.openPhase(null)"
+    (openChantier)="onOpenChantier($event)">
+  </app-phase-drawer>
+</nf-page-shell>

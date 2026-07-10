@@ -1,0 +1,193 @@
+<div class="ml">
+  <header class="ml__header">
+    <nf-button variant="primary" class="ml__back" (clicked)="back()">{{ 'finance.common.actions.back' | translate }}</nf-button>
+    @if (compte(); as c) {
+      <div class="ml__title-block">
+        <div class="ml__breadcrumb">
+          {{ (c.type === 'BANQUE' ? 'finance.compte.types.banque' : 'finance.compte.types.caisse') | translate }} ·
+          {{ c.compteCgncCode }} · {{ c.code }}
+        </div>
+        <h1 class="ml__title">{{ c.libelle }}</h1>
+        @if (c.rib) {
+          <div class="ml__rib">{{ 'finance.compte.form.fields.rib' | translate }} : {{ c.rib }}</div>
+        }
+      </div>
+    }
+    <div class="ml__head-actions">
+      <nf-button variant="ghost" class="ml__btn ml__btn--ghost" (clicked)="exportCSV()">
+        {{ 'finance.common.actions.downloadCsv' | translate }}
+      </nf-button>
+      <nf-button variant="primary" class="ml__btn" (clicked)="ouvrirSaisie()">
+        {{ 'finance.mouvement.actions.create' | translate }}
+      </nf-button>
+    </div>
+  </header>
+
+  @if (compte(); as c) {
+    <section class="ml__summary">
+      <div class="ml__summary-card">
+        <span class="ml__summary-label">{{ 'finance.compte.list.columns.soldeInitial' | translate }}</span>
+        <span class="ml__summary-value">
+          {{ c.soldeInitial | numberLocalized:'1.2-2' }} {{ c.devise }}
+        </span>
+      </div>
+      <div class="ml__summary-card">
+        <span class="ml__summary-label">{{ 'finance.compte.list.columns.soldeComptable' | translate }}</span>
+        <app-solde-indicator
+          [value]="c.soldeActuel"
+          [currency]="c.devise"
+        />
+      </div>
+      <div class="ml__summary-card">
+        <span class="ml__summary-label">{{ 'finance.mouvement.summary.displayed' | translate }}</span>
+        <span class="ml__summary-value">{{ mouvements().length }}</span>
+      </div>
+      <div class="ml__summary-card">
+        <span class="ml__summary-label">{{ 'finance.mouvement.summary.totalRecettes' | translate }}</span>
+        <span class="ml__summary-value ml__summary-value--pos">
+          +{{ totalRecettes() | numberLocalized:'1.2-2' }}
+        </span>
+      </div>
+      <div class="ml__summary-card">
+        <span class="ml__summary-label">{{ 'finance.mouvement.summary.totalDepenses' | translate }}</span>
+        <span class="ml__summary-value ml__summary-value--neg">
+          -{{ totalDepenses() | numberLocalized:'1.2-2' }}
+        </span>
+      </div>
+    </section>
+
+    <section class="ml__filters">
+      <input
+        type="search"
+        [attr.placeholder]="'finance.mouvement.filters.searchPlaceholder' | translate"
+        [ngModel]="filterText()"
+        (ngModelChange)="filterText.set($event)"
+        class="ml__search"
+      />
+      <select [ngModel]="filterType()" (ngModelChange)="filterType.set($event)" class="ml__select">
+        <option value="">{{ 'finance.common.filters.allTypes' | translate }}</option>
+        <option value="REGLEMENT_CLIENT">{{ 'finance.mouvement.types.REGLEMENT_CLIENT' | translate }}</option>
+        <option value="REGLEMENT_FOURN">{{ 'finance.mouvement.types.REGLEMENT_FOURN' | translate }}</option>
+        <option value="PAIEMENT_PAIE">{{ 'finance.mouvement.types.PAIEMENT_PAIE' | translate }}</option>
+        <option value="VIREMENT_INTERNE">{{ 'finance.mouvement.types.VIREMENT_INTERNE' | translate }}</option>
+        <option value="FRAIS_BANCAIRES">{{ 'finance.mouvement.types.FRAIS_BANCAIRES' | translate }}</option>
+        <option value="COMMISSIONS">{{ 'finance.mouvement.types.COMMISSIONS' | translate }}</option>
+        <option value="AUTRE_RECETTE">{{ 'finance.mouvement.types.AUTRE_RECETTE' | translate }}</option>
+        <option value="AUTRE_DEPENSE">{{ 'finance.mouvement.types.AUTRE_DEPENSE' | translate }}</option>
+      </select>
+      <select
+        [ngModel]="filterRapproche()"
+        (ngModelChange)="filterRapproche.set($event)"
+        class="ml__select"
+      >
+        <option value="all">{{ 'finance.mouvement.filters.rapproche.all' | translate }}</option>
+        <option value="yes">{{ 'finance.mouvement.filters.rapproche.yes' | translate }}</option>
+        <option value="no">{{ 'finance.mouvement.filters.rapproche.no' | translate }}</option>
+      </select>
+      <input
+        type="date"
+        [ngModel]="filterFrom()"
+        (ngModelChange)="filterFrom.set($event)"
+        class="ml__date"
+        [attr.placeholder]="'finance.common.filters.from' | translate"
+      />
+      <input
+        type="date"
+        [ngModel]="filterTo()"
+        (ngModelChange)="filterTo.set($event)"
+        class="ml__date"
+        [attr.placeholder]="'finance.common.filters.to' | translate"
+      />
+      <nf-button variant="ghost" class="ml__btn ml__btn--ghost" (clicked)="reset()">
+        {{ 'finance.common.actions.refresh' | translate }}
+      </nf-button>
+    </section>
+
+    <section class="ml__table-wrap">
+      <table class="ml__table">
+        <thead>
+          <tr>
+            <th>{{ 'finance.mouvement.list.columns.date' | translate }}</th>
+            <th>{{ 'finance.mouvement.list.columns.numero' | translate }}</th>
+            <th>{{ 'finance.mouvement.list.columns.type' | translate }}</th>
+            <th>{{ 'finance.mouvement.list.columns.libelle' | translate }}</th>
+            <th>{{ 'finance.mouvement.list.columns.reference' | translate }}</th>
+            <th class="ml__th-num">{{ 'finance.mouvement.list.columns.recette' | translate }}</th>
+            <th class="ml__th-num">{{ 'finance.mouvement.list.columns.depense' | translate }}</th>
+            <th class="ml__th-num">{{ 'finance.mouvement.list.columns.solde' | translate }}</th>
+            @if (isCaisseApi()) {
+              <th>{{ 'finance.common.filters.status' | translate }}</th>
+              <th></th>
+            } @else {
+              <th class="ml__th-center">✓</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (m of filtered(); track m.id) {
+            @if (isCaisseApi()) {
+              <tr>
+                <td>{{ m.date }}</td>
+                <td>{{ m.numero }}</td>
+                <td>{{ m.type }}</td>
+                <td>{{ m.libelle }}</td>
+                <td>{{ m.reference ?? '—' }}</td>
+                <td class="ml__th-num">{{ m.recette ? (m.recette | number:'1.2-2') : '' }}</td>
+                <td class="ml__th-num">{{ m.depense ? (m.depense | number:'1.2-2') : '' }}</td>
+                <td class="ml__th-num">{{ soldesApres().get(m.id)?.toLocaleString('fr-MA', { minimumFractionDigits: 2 }) }}</td>
+                <td>{{ caisseStatus(m.id) ?? '—' }}</td>
+                <td>
+                  @if (canValiderCaisse(m.id)) {
+                    <nf-button variant="primary" class="ml__btn" (clicked)="validerCaisseMouvement(m.id)"  [disabled]="validatingCaisseId() === m.id">
+                      Valider
+                    </nf-button>
+                  }
+                </td>
+              </tr>
+            } @else {
+              <app-mouvement-row
+                [mvt]="m"
+                [soldeApres]="soldesApres().get(m.id) ?? null"
+                [showSolde]="true"
+              />
+            }
+          } @empty {
+            <tr>
+              <td [attr.colspan]="isCaisseApi() ? 10 : 9" class="ml__empty">
+                {{ 'finance.mouvement.list.emptyState.title' | translate }}
+              </td>
+            </tr>
+          }
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="5" class="ml__foot-label">{{ 'finance.mouvement.summary.totals' | translate }}</td>
+            <td class="ml__th-num ml__foot-pos">
+              {{ totalRecettes() | numberLocalized:'1.2-2' }}
+            </td>
+            <td class="ml__th-num ml__foot-neg">
+              {{ totalDepenses() | numberLocalized:'1.2-2' }}
+            </td>
+            <td class="ml__th-num">
+              <strong>{{ c.soldeActuel | numberLocalized:'1.2-2' }}</strong>
+            </td>
+            @if (isCaisseApi()) {
+              <td colspan="2"></td>
+            } @else {
+              <td></td>
+            }
+          </tr>
+        </tfoot>
+      </table>
+    </section>
+  }
+
+  @if (showDialog() && compte()) {
+    <app-saisie-mvt-dialog
+      [compte]="compte()!"
+      [useCaisseApi]="isCaisseApi()"
+      (saved)="onMvtSaved($event)"
+      (cancel)="fermerSaisie()"
+    />
+  }
+</div>

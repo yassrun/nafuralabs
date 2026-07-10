@@ -1,0 +1,63 @@
+<nf-page-shell scroll>
+  <nf-page-header
+    [config]="{
+      title: 'financeRound2.effets.title',
+      subtitle: 'financeRound2.effets.subtitle'
+    }"
+  ></nf-page-header>
+
+  <div class="f8">
+    <div class="f8__toolbar">
+      <nf-button variant="primary" class="f8__btn" [active]="tab() === 'ALL'" (clicked)="setTab('ALL')">
+        {{ 'financeRound2.effets.all' | translate }}
+      </nf-button>
+      <nf-button variant="primary" class="f8__btn" [active]="tab() === 'PORTEFEUILLE'" (clicked)="setTab('PORTEFEUILLE')">
+        {{ 'financeRound2.effets.portefeuille' | translate }}
+      </nf-button>
+      <nf-button variant="primary" class="f8__btn" [active]="tab() === 'REMIS_ENCAISSEMENT'" (clicked)="setTab('REMIS_ENCAISSEMENT')">
+        {{ 'financeRound2.effets.remise' | translate }}
+      </nf-button>
+      <nf-button variant="primary" class="f8__btn" [active]="tab() === 'IMPAYE'" (clicked)="setTab('IMPAYE')">
+        {{ 'financeRound2.effets.impayes' | translate }}
+      </nf-button>
+      <nf-button variant="primary" class="f8__btn" (clicked)="bordereauPdf()">
+        {{ 'financeRound2.effets.bordereau' | translate }}
+      </nf-button>
+    </div>
+
+    <section class="f8__card">
+      <table class="f8__table">
+        <thead>
+          <tr>
+            <th>{{ 'financeRound2.effets.colNumero' | translate }}</th>
+            <th>{{ 'financeRound2.effets.colType' | translate }}</th>
+            <th>{{ 'financeRound2.effets.colClient' | translate }}</th>
+            <th class="f8__num">{{ 'financeRound2.effets.colMontant' | translate }}</th>
+            <th>{{ 'financeRound2.effets.colEcheance' | translate }}</th>
+            <th>{{ 'financeRound2.effets.colStatut' | translate }}</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (e of rows(); track e.id) {
+            <tr>
+              <td>{{ e.numero }}</td>
+              <td>{{ e.type }}</td>
+              <td>{{ e.clientName }}</td>
+              <td class="f8__num">{{ e.montant | mad:2 }}</td>
+              <td>{{ e.dateEcheance }}</td>
+              <td>{{ e.status }}</td>
+              <td>
+                @if (e.status === 'PORTEFEUILLE') {
+                  <nf-button variant="ghost" class="f8__link" (clicked)="setStatus(e.id, 'REMIS_ENCAISSEMENT')">
+                    {{ 'financeRound2.effets.actionRemise' | translate }}
+                  </nf-button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+  </div>
+</nf-page-shell>

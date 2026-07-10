@@ -1,0 +1,56 @@
+<div class="nf-select-wrapper" [class]="class">
+  <label *ngIf="label" [for]="id" class="nf-select-label">
+    {{ label }}
+    <span class="nf-required-indicator" *ngIf="required">*</span>
+  </label>
+
+  <div class="nf-select-row">
+    <select
+      [id]="id"
+      [value]="value()"
+      [disabled]="disabled"
+      [required]="required"
+      [attr.aria-invalid]="shouldShowError()"
+      [attr.aria-required]="required"
+      [attr.aria-describedby]="shouldShowError() ? id + '-error' : null"
+      class="nf-select-field"
+      (change)="onValueChange($event)"
+      (focus)="onFocus()"
+      (blur)="onBlur()"
+    >
+      <option value="" *ngIf="placeholder">{{ placeholder }}</option>
+      <option
+        *ngFor="let option of displayOptions()"
+        [value]="option.value"
+        [disabled]="option.disabled || false"
+      >
+        {{ option.label }}
+      </option>
+    </select>
+
+    <button
+      *ngIf="hasListShortcut()"
+      type="button"
+      class="nf-select-list"
+      [attr.aria-label]="listShortcutLabel()"
+      [title]="listShortcutLabel()"
+      [disabled]="disabled"
+      (click)="openListShortcut($event)"
+    >
+      <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+        <path
+          d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"
+        />
+      </svg>
+    </button>
+  </div>
+
+  <span
+    *ngIf="shouldShowError()"
+    [id]="id + '-error'"
+    class="nf-select-error"
+    role="alert"
+  >
+    {{ error }}
+  </span>
+</div>

@@ -1,0 +1,182 @@
+:host {
+  display: block;
+  height: 100%;
+  min-height: 0;
+}
+
+.nf-entity-listing {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.nf-entity-listing__toolbar {
+  flex: 0 0 auto;
+  padding: var(--nf-space-2, 8px) 0;
+}
+
+.nf-entity-listing__toolbar-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--nf-space-2, 8px);
+  width: 100%;
+  min-width: 0;
+}
+
+.nf-entity-listing__mobile-filter-chips {
+  display: none;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.nf-entity-listing__filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 4px 8px 4px 10px;
+  border: 1px solid var(--nf-border-default, #e5e7eb);
+  border-radius: 999px;
+  background: var(--nf-surface-hover, #f9fafb);
+  font-size: var(--nf-font-size-xs, 0.75rem);
+  color: var(--nf-text-primary, #111827);
+  cursor: pointer;
+}
+
+.nf-entity-listing__filter-chip:hover {
+  background: var(--nf-color-gray-200, #e5e7eb);
+}
+
+.nf-entity-listing__filter-chip-label {
+  font-weight: 600;
+  color: var(--nf-text-secondary, #4b5563);
+}
+
+.nf-entity-listing__filter-chip-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 140px;
+  color: var(--nf-text-primary, #111827);
+}
+
+.nf-entity-listing__filter-chip-remove {
+  font-size: 1.1rem;
+  line-height: 1;
+  padding-inline-start: 2px;
+  color: var(--nf-text-muted, #9ca3af);
+}
+
+@media (max-width: 640px) {
+  .nf-entity-listing__mobile-filter-chips {
+    display: flex;
+  }
+}
+
+.nf-entity-listing__toolbar-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--nf-space-4, 16px);
+}
+
+@media (max-width: 640px) {
+  .nf-entity-listing__toolbar-inner {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: var(--nf-space-1, 4px);
+    scrollbar-width: thin;
+  }
+}
+
+.nf-entity-listing__toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--nf-space-2, 8px);
+}
+
+.nf-entity-listing__toolbar-separator {
+  width: 1px;
+  height: 24px;
+  background-color: var(--nf-border-default, #e5e7eb);
+  margin: 0 var(--nf-space-1, 4px);
+}
+
+.nf-entity-listing__view {
+  flex: 1 1 0;
+  min-height: 0; // Allow shrinking below content size
+  overflow: auto;
+  border: 1px solid var(--nf-border-default, #e5e7eb);
+  border-radius: var(--nf-radius-md, 8px);
+  background-color: var(--nf-bg-surface, #fff);
+}
+
+.nf-entity-listing__pagination {
+  flex: 0 0 auto;
+  padding: var(--nf-space-3, 12px) 0;
+}
+
+// Row actions
+.nf-entity-listing__row-action {
+  padding: var(--nf-space-1, 4px) var(--nf-space-2, 8px);
+  font-size: var(--nf-text-sm, 0.875rem);
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--nf-text-primary);
+  border-radius: var(--nf-radius-sm, 4px);
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background-color: var(--nf-bg-hover, #f3f4f6);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &--danger {
+    color: var(--nf-color-danger, #ef4444);
+
+    &:hover {
+      background-color: var(--nf-bg-danger-subtle, #fef2f2);
+    }
+  }
+}
+
+// Selection info
+.nf-entity-listing__selection-info {
+  display: flex;
+  align-items: center;
+  gap: var(--nf-space-2, 8px);
+  padding: var(--nf-space-1, 4px) var(--nf-space-3, 12px);
+  background-color: var(--nf-color-primary, #3b82f6);
+  color: #fff;
+  border-radius: var(--nf-radius-full, 9999px);
+  font-size: var(--nf-text-sm, 0.875rem);
+  font-weight: var(--nf-font-medium, 500);
+  white-space: nowrap;
+}
+
+.nf-entity-listing__selection-count {
+  font-weight: var(--nf-font-semibold, 600);
+}
+
+.nf-entity-listing__selection-label {
+  opacity: 0.9;
+}
+
+// Selection active state
+.nf-entity-listing--selection-active {
+  .nf-entity-listing__toolbar-inner {
+    padding: var(--nf-space-2, 8px) var(--nf-space-3, 12px);
+    background-color: var(--nf-bg-primary-subtle, #eff6ff);
+    border-radius: var(--nf-radius-md, 8px);
+  }
+}

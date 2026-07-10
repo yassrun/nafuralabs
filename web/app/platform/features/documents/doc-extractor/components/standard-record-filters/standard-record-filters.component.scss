@@ -1,0 +1,241 @@
+:host {
+  display: block;
+  margin-bottom: var(--spacing-md);
+}
+
+.standard-record-filters {
+  .filters-toolbar {
+    // CSS Grid layout: Status | Date Field | Date Range | Actions
+    display: grid;
+    grid-template-columns: 
+      minmax(110px, auto)      // Status
+      minmax(120px, auto)       // Date Field
+      minmax(280px, 1fr)        // Date Range (From + To with icon)
+      auto;                     // Actions (Apply + Clear + indicator)
+    gap: var(--spacing-sm);
+    align-items: center;
+    padding: var(--spacing-xs) 0;
+    background: transparent;
+    border: none;
+
+    .filter-field {
+      width: 100%;
+
+      &--dense {
+        ::ng-deep {
+          .mat-mdc-form-field-subscript-wrapper {
+            margin-top: 0;
+            min-height: 0;
+          }
+
+          .mat-mdc-text-field-wrapper {
+            padding-bottom: 0;
+          }
+
+          .mat-mdc-form-field-infix {
+            min-height: 32px;
+            padding-top: var(--spacing-xs);
+            padding-bottom: var(--spacing-xs);
+          }
+
+          .mat-mdc-select-trigger {
+            min-height: 32px;
+            font-size: 13px;
+          }
+
+          .mat-mdc-form-field-label {
+            top: 16px;
+            font-size: 11.5px;
+            color: var(--color-gray-500); // Using token for reduced opacity
+          }
+
+          .mat-mdc-form-field-label.mdc-floating-label--float-above {
+            top: 12px;
+            font-size: 11px;
+            color: var(--color-gray-500);
+          }
+
+          .mat-mdc-form-field-wrapper {
+            padding-bottom: 0;
+          }
+
+          .mat-mdc-select-value {
+            font-size: 13px;
+            color: rgba(0, 0, 0, 0.87);
+          }
+
+          .mat-mdc-input-element {
+            font-size: 13px;
+          }
+        }
+      }
+
+      &--date {
+        min-width: 120px;
+      }
+    }
+
+    // Date Range Group: flexbox inside grid cell for tight alignment
+    .date-range-group {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      width: 100%;
+      height: 100%;
+
+      &--inactive {
+        opacity: 0.4;
+        pointer-events: none;
+      }
+
+      .date-range-separator {
+        color: rgba(0, 0, 0, 0.35);
+        font-weight: 500;
+        font-size: 13px;
+        padding: 0 1px;
+        flex-shrink: 0;
+      }
+
+      .date-range-hint {
+        font-size: 0.75rem;
+        color: var(--dox-color-text-muted);
+        margin-left: var(--dox-spacing-sm);
+        white-space: nowrap;
+      }
+    }
+
+    .filters-actions {
+      display: flex;
+      gap: var(--spacing-xs);
+      align-items: center;
+      justify-self: end;
+      flex-shrink: 0;
+
+      .filters-active-indicator {
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.4);
+        margin-right: var(--spacing-xs);
+        flex-shrink: 0;
+      }
+
+      .filter-action {
+        &--apply {
+          min-width: 60px;
+          height: 32px;
+          font-size: 12px;
+          font-weight: 400;
+          color: rgba(0, 0, 0, 0.65);
+          padding: 0 10px;
+          border: none;
+          background: transparent;
+
+          &:hover:not(:disabled) {
+            background: rgba(0, 0, 0, 0.04);
+            color: rgba(0, 0, 0, 0.87);
+          }
+
+          &:disabled {
+            color: rgba(0, 0, 0, 0.26);
+          }
+        }
+
+        &--clear {
+          min-width: 50px;
+          height: 32px;
+          font-size: 12px;
+          font-weight: 400;
+          color: rgba(0, 0, 0, 0.45);
+          padding: 0 10px;
+
+          &:hover:not(:disabled) {
+            background: rgba(0, 0, 0, 0.04);
+            color: rgba(0, 0, 0, 0.65);
+          }
+
+          &--clear-active {
+            font-weight: 500;
+            color: rgba(0, 0, 0, 0.55);
+          }
+
+          &:disabled {
+            color: rgba(0, 0, 0, 0.26);
+          }
+        }
+      }
+    }
+  }
+
+  // Subtle baseline divider
+  .filters-divider {
+    height: 1px;
+    background: rgba(0, 0, 0, 0.08);
+    margin-top: var(--spacing-xs);
+    margin-bottom: 0;
+  }
+}
+
+// Responsive: Auto-fit columns for mobile wrapping
+@media (max-width: 768px) {
+  .standard-record-filters {
+    .filters-toolbar {
+      // Switch to auto-fit for natural wrapping
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: var(--spacing-sm);
+
+      // Status and Date Field: full width on mobile
+      .filter-field--status,
+      .filter-field--date-field {
+        grid-column: 1 / -1;
+      }
+
+      // Date Range: full width, but internal flex wraps
+      .date-range-group {
+        grid-column: 1 / -1;
+        flex-wrap: wrap;
+
+        .date-range-separator {
+          display: none; // Hide separator on mobile
+        }
+
+        .filter-field--date {
+          flex: 1 1 calc(50% - var(--spacing-xs));
+          min-width: 0; // Allow shrinking
+        }
+      }
+
+      // Actions: full width, right-aligned
+      .filters-actions {
+        grid-column: 1 / -1;
+        justify-self: end;
+        width: 100%;
+        margin-top: var(--spacing-xs);
+      }
+    }
+  }
+}
+
+// Very small screens: stack date inputs vertically
+@media (max-width: 360px) {
+  .standard-record-filters {
+    .filters-toolbar {
+      .date-range-group {
+        .filter-field--date {
+          flex: 1 1 100%;
+          min-width: 100%;
+        }
+      }
+
+      .filters-actions {
+        flex-direction: column-reverse;
+        width: 100%;
+
+        .filter-action {
+          width: 100%;
+        }
+      }
+    }
+  }
+}

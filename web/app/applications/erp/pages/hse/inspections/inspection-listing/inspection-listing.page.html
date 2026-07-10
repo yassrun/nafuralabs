@@ -1,0 +1,22 @@
+<nf-page-shell>
+  <nf-page-header [config]="headerConfig"></nf-page-header>
+
+  <div class="chips-row">
+    @for (chip of chips; track chip.id) {
+      <nf-button
+        variant="ghost"
+        size="sm"
+        [active]="currentChip() === chip.id"
+        (clicked)="selectChip(chip.id)">
+        {{ chip.labelKey | translate }}
+      </nf-button>
+    }
+  </div>
+
+  <nf-entity-listing
+    #listing
+    [config]="config"
+    [facade]="facade"
+    (action)="onAction($event)">
+  </nf-entity-listing>
+</nf-page-shell>

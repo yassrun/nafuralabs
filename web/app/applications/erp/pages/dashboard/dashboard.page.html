@@ -1,0 +1,220 @@
+<nf-page-shell>
+  <nf-page-header [config]="headerConfig"></nf-page-header>
+
+  @if (loaded()) {
+    @if (isEmptyTenant()) {
+      <aside class="dashboard-empty-banner" role="note">
+        <p class="dashboard-empty-banner__title">{{ 'dashboard.empty.title' | translate }}</p>
+        <p class="dashboard-empty-banner__message">{{ 'dashboard.empty.message' | translate }}</p>
+        <div class="dashboard-empty-banner__actions">
+          <a routerLink="/chantiers/new" class="dashboard-empty-banner__cta dashboard-empty-banner__cta--primary">
+            {{ 'dashboard.empty.createChantier' | translate }}
+          </a>
+          <a routerLink="/administration/demo" class="dashboard-empty-banner__cta">
+            {{ 'dashboard.empty.loadDemo' | translate }}
+          </a>
+          <a routerLink="/onboarding" class="dashboard-empty-banner__cta">
+            {{ 'dashboard.empty.completeSetup' | translate }}
+          </a>
+        </div>
+      </aside>
+    }
+
+    <div class="dashboard-toolbar">
+      <mat-button-toggle-group
+        [value]="layout.currentPersona()"
+        (change)="onPersonaChange($event)"
+        aria-label="Dashboard layout persona"
+      >
+        <mat-button-toggle value="dg">{{ 'dashboard.layout.personaDg' | translate }}</mat-button-toggle>
+        <mat-button-toggle value="conducteur">{{ 'dashboard.layout.personaConducteur' | translate }}</mat-button-toggle>
+        <mat-button-toggle value="comptable">{{ 'dashboard.layout.personaComptable' | translate }}</mat-button-toggle>
+      </mat-button-toggle-group>
+      <nf-button variant="secondary" icon="refresh-cw" (clicked)="onResetLayout()">
+        {{ 'dashboard.layout.reset' | translate }}
+      </nf-button>
+      <span class="dashboard-toolbar__hint">{{ 'dashboard.layout.dragHint' | translate }}</span>
+    </div>
+
+    <div
+      cdkDropList
+      class="dashboard-drop-list"
+      [cdkDropListData]="layout.orderedWidgets()"
+      (cdkDropListDropped)="onDrop($event)"
+    >
+      @for (id of layout.orderedWidgets(); track id) {
+        <div
+          cdkDrag
+          class="dash-widget"
+          [cdkDragData]="id"
+          cdkDragStartDelay="200"
+        >
+          @switch (id) {
+            @case ('kpi-chantiers') {
+              <div class="dashboard-section-title-row" cdkDragHandle>
+                <nf-icon name="grip-vertical" size="sm" aria-hidden="true"></nf-icon>
+                <span class="dashboard-section-title">{{ 'dashboard.section.chantiers' | translate }}</span>
+              </div>
+              <div class="dashboard-grid">
+                <app-dashboard-kpi-tile
+                  [link]="['/chantiers']"
+                  [queryParams]="{ status: 'EN_COURS' }"
+                  labelKey="dashboard.kpi.chantiersEnCours"
+                  [value]="chantiersEnCours()"
+                  icon="construction"
+                  variant="primary"
+                  testId="dashboard-kpi-chantiers-en-cours"
+                />
+                <app-dashboard-kpi-tile
+                  [link]="['/chantiers']"
+                  [queryParams]="{ sortBy: 'avancement' }"
+                  labelKey="dashboard.kpi.avancementMoyen"
+                  [value]="avancementMoyen() + '%'"
+                  icon="trending_up"
+                  variant="primary"
+                  testId="dashboard-kpi-avancement-moyen"
+                />
+                <app-dashboard-kpi-tile
+                  [link]="['/chantiers/budget']"
+                  [queryParams]="{}"
+                  labelKey="dashboard.kpi.surconsoMatiereTop3"
+                  [value]="surconsoSummary()"
+                  icon="package"
+                  variant="warning"
+                  testId="dashboard-kpi-surconso-matiere"
+                />
+                <app-dashboard-kpi-tile
+                  [link]="['/inventory/suivi/etat-stock']"
+                  [queryParams]="{}"
+                  labelKey="dashboard.kpi.lotsPeremption30j"
+                  [value]="lotsPeremption30j()"
+                  icon="timer"
+                  variant="warning"
+                  testId="dashboard-kpi-lots-peremption"
+                />
+              </div>
+            }
+            @case ('kpi-finance') {
+              <div class="dashboard-section-title-row" cdkDragHandle>
+                <nf-icon name="grip-vertical" size="sm" aria-hidden="true"></nf-icon>
+                <span class="dashboard-section-title">{{ 'dashboard.section.finance' | translate }}</span>
+              </div>
+              <div class="dashboard-grid">
+                <app-dashboard-kpi-tile
+                  [link]="['/ventes/factures']"
+                  [queryParams]="{}"
+                  labelKey="dashboard.kpi.caFactureHt"
+                  [value]="(caFactureHt() | mad) ?? '—'"
+                  icon="payments"
+                  variant="success"
+                  testId="dashboard-kpi-ca-facture"
+                />
+                <app-dashboard-kpi-tile
+                  [link]="['/ventes/factures']"
+                  [queryParams]="{ filter: 'overdue' }"
+                  labelKey="dashboard.kpi.facturesEnRetard"
+                  [value]="facturesEnRetard()"
+                  icon="warning"
+                  variant="danger"
+                  testId="dashboard-kpi-factures-retard"
+                />
+              </div>
+            }
+            @case ('kpi-achats') {
+              <div class="dashboard-section-title-row" cdkDragHandle>
+                <nf-icon name="grip-vertical" size="sm" aria-hidden="true"></nf-icon>
+                <span class="dashboard-section-title">{{ 'dashboard.section.achats' | translate }}</span>
+              </div>
+              <div class="dashboard-grid">
+                <app-dashboard-kpi-tile
+                  [link]="['/achats/commandes']"
+                  [queryParams]="{ status: 'EN_COURS' }"
+                  labelKey="dashboard.kpi.commandesEnCours"
+                  [value]="commandesEnCours()"
+                  icon="shopping_cart"
+                  variant="primary"
+                  testId="dashboard-kpi-commandes"
+                />
+                <app-dashboard-kpi-tile
+                  [link]="['/achats/demandes']"
+                  [queryParams]="{ status: 'ATTENTE' }"
+                  labelKey="dashboard.kpi.daEnAttente"
+                  [value]="daEnAttente()"
+                  icon="assignment"
+                  variant="warning"
+                  testId="dashboard-kpi-da"
+                />
+              </div>
+            }
+            @case ('kpi-rh') {
+              <div class="dashboard-section-title-row" cdkDragHandle>
+                <nf-icon name="grip-vertical" size="sm" aria-hidden="true"></nf-icon>
+                <span class="dashboard-section-title">{{ 'dashboard.section.rh' | translate }}</span>
+              </div>
+              <div class="dashboard-grid">
+                <app-dashboard-kpi-tile
+                  [link]="['/rh/employes']"
+                  [queryParams]="{}"
+                  labelKey="dashboard.kpi.employesActifs"
+                  [value]="employes()"
+                  icon="groups"
+                  variant="primary"
+                  testId="dashboard-kpi-employes"
+                />
+                <app-dashboard-kpi-tile
+                  [link]="['/rh/conges']"
+                  [queryParams]="{ status: 'DEMANDE' }"
+                  labelKey="dashboard.kpi.congesEnAttente"
+                  [value]="congesEnAttente()"
+                  icon="event_busy"
+                  variant="warning"
+                  testId="dashboard-kpi-conges"
+                />
+              </div>
+            }
+            @case ('kpi-hse') {
+              <div class="dashboard-section-title-row" cdkDragHandle>
+                <nf-icon name="grip-vertical" size="sm" aria-hidden="true"></nf-icon>
+                <span class="dashboard-section-title">{{ 'dashboard.section.hse' | translate }}</span>
+              </div>
+              <div class="dashboard-grid">
+                <app-dashboard-kpi-tile
+                  [link]="['/hse/incidents']"
+                  [queryParams]="{ period: 'ytd' }"
+                  labelKey="dashboard.kpi.incidentsYtd"
+                  [value]="incidentsYtd()"
+                  icon="report_problem"
+                  variant="warning"
+                  testId="dashboard-kpi-incidents"
+                />
+                <app-dashboard-kpi-tile
+                  [link]="['/hse/non-conformites']"
+                  [queryParams]="{ status: 'OUVERTE' }"
+                  labelKey="dashboard.kpi.ncOuvertes"
+                  [value]="ncOuvertes()"
+                  icon="gpp_bad"
+                  variant="warning"
+                  testId="dashboard-kpi-nc"
+                />
+              </div>
+            }
+            @case ('charts-analytics') {
+              <div class="dashboard-section-title-row" cdkDragHandle>
+                <nf-icon name="grip-vertical" size="sm" aria-hidden="true"></nf-icon>
+                <span class="dashboard-section-title">{{ 'dashboard.section.analytics' | translate }}</span>
+              </div>
+              <div class="dashboard-charts-grid">
+                <app-dashboard-ca-cumul-chart />
+                <app-dashboard-marge-sparkline />
+                <app-dashboard-top-chantiers-alerte />
+                <app-dashboard-bird-pyramid-hse />
+              </div>
+            }
+          }
+        </div>
+      }
+    </div>
+  } @else {
+    <p class="dashboard-loading">{{ 'dashboard.loading' | translate }}</p>
+  }
+</nf-page-shell>

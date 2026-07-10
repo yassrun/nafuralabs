@@ -1,0 +1,51 @@
+    <nf-page-shell scroll>
+      <nf-page-header [config]="headerConfig"></nf-page-header>
+      <nf-entity-detail
+        #detail
+        [config]="config"
+        [mode]="mode()"
+        [item]="item()"
+        [lookups]="lookups()"
+        [loading]="isLoading()"
+        [saving]="isSaving()"
+        (action)="onAction($event)">
+
+        <ng-template #affectationsTab>
+          <div class="affectations-tab">
+            @if (affectations().length === 0) {
+              <div class="empty-state">
+                <p>{{ 'inventory.catalogue.materiel.affectations.empty' | translate }}</p>
+              </div>
+            } @else {
+              <table class="affectations-table">
+                <thead>
+                  <tr>
+                    <th>{{ 'inventory.catalogue.materiel.affectations.columns.chantier' | translate }}</th>
+                    <th>{{ 'inventory.catalogue.materiel.affectations.columns.dateDebut' | translate }}</th>
+                    <th>{{ 'inventory.catalogue.materiel.affectations.columns.dateFin' | translate }}</th>
+                    <th>{{ 'inventory.catalogue.materiel.affectations.columns.status' | translate }}</th>
+                    <th>{{ 'inventory.catalogue.materiel.affectations.columns.notes' | translate }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (aff of affectations(); track aff.id) {
+                    <tr [class.current]="!aff.dateFin">
+                      <td>{{ aff.locationName || aff.chantierRef }}</td>
+                      <td>{{ aff.dateDebut | date:'dd/MM/yyyy' }}</td>
+                      <td>{{ aff.dateFin ? (aff.dateFin | date:'dd/MM/yyyy') : '—' }}</td>
+                      <td>
+                        <span class="badge" [class]="'badge-' + getStatusVariant(aff)">
+                          {{ (aff.dateFin ? 'inventory.catalogue.materiel.affectations.status.completed' : 'inventory.catalogue.materiel.affectations.status.active') | translate }}
+                        </span>
+                      </td>
+                      <td>{{ aff.notes || '—' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            }
+          </div>
+        </ng-template>
+      </nf-entity-detail>
+    </nf-page-shell>
+  

@@ -1,0 +1,115 @@
+@if (loadError(); as message) {
+  <section class="saisie-page saisie-page--error">
+    <nf-empty-state
+      icon="search_off"
+      [title]="'chantiers.avancement.errors.loadFailedTitle' | translate"
+      [message]="message"
+      [actionLabel]="'chantiers.common.actions.backToList' | translate"
+      (action)="goBack()">
+    </nf-empty-state>
+  </section>
+} @else {
+<section class="saisie-page">
+  <header class="saisie-page__header">
+    <a routerLink="/chantiers/avancements" class="saisie-page__back">
+      {{ 'chantiers.common.actions.back' | translate }}
+    </a>
+    <div>
+      <h1>{{ formTitle() }}</h1>
+      <p>{{ 'chantiers.avancement.saisie.chefChantier' | translate:{ name: currentUser().name } }}</p>
+    </div>
+  </header>
+
+  <div class="saisie-page__layout">
+    <main class="saisie-page__main">
+      <section class="saisie-page__meta">
+        <label>
+          <span>{{ 'chantiers.avancement.saisie.chantierRequired' | translate }}</span>
+          <select
+            [ngModel]="facade.selectedChantierId()"
+            (ngModelChange)="facade.selectChantier($event)"
+            [disabled]="isEditing()">
+            @for (chantier of chantiers(); track chantier.id) {
+              <option [ngValue]="chantier.id">{{ chantier.code }} - {{ chantier.name }}</option>
+            }
+          </select>
+        </label>
+
+        <label>
+          <span>{{ 'chantiers.avancement.fields.dateRequired' | translate }}</span>
+          <input
+            type="date"
+            [ngModel]="facade.selectedDate()"
+            (ngModelChange)="facade.setDate($event)" />
+        </label>
+      </section>
+
+      <section class="saisie-page__lots">
+        <div class="saisie-page__section-title">
+          <h2>{{ 'chantiers.avancement.fields.lotsToInput' | translate }}</h2>
+          <p>{{ 'chantiers.avancement.summary.linesLoaded' | translate:{ count: lines().length } }}</p>
+        </div>
+
+        @for (line of lines(); track line.lineKey) {
+          <app-lot-saisie-card
+            [model]="line"
+            (quantityChanged)="facade.setLineQuantity(line.lineKey, $event)"
+            (notesChanged)="facade.setLineNotes(line.lineKey, $event)"
+            (photosChanged)="facade.setLinePhotos(line.lineKey, $event)"
+            (removed)="facade.removeLine(line.lineKey)"></app-lot-saisie-card>
+        }
+
+        @if (additionalLines().length > 0) {
+          <label class="saisie-page__add-lot">
+            <span>{{ 'chantiers.avancement.fields.addLine' | translate }}</span>
+            <select (ngModelChange)="$event && facade.addLine($event)" [ngModel]="null">
+              <option [ngValue]="null">{{ 'chantiers.avancement.fields.pickAdditionalLine' | translate }}</option>
+              @for (line of additionalLines(); track line.key) {
+                <option [ngValue]="line.key">
+                  {{ line.poste ? line.poste.code + ' — ' + line.poste.designation : line.lot.code + ' — ' + line.lot.designation }}
+                </option>
+              }
+            </select>
+          </label>
+        }
+      </section>
+    </main>
+
+    <aside class="saisie-page__sidebar">
+      <div class="summary-card">
+        <h2>{{ 'chantiers.avancement.saisie.impactChantier' | translate }}</h2>
+        <p>{{ chantier()?.code }} - {{ chantier()?.name }}</p>
+        <div class="summary-card__metric">
+          <span>{{ 'chantiers.avancement.saisie.before' | translate }}</span>
+          <strong>{{ summary().chantierBeforePercent }}%</strong>
+        </div>
+        <div class="summary-card__metric">
+          <span>{{ 'chantiers.avancement.saisie.after' | translate }}</span>
+          <strong>{{ summary().chantierAfterPercent }}%</strong>
+        </div>
+        <div class="summary-card__delta">
+          {{ 'chantiers.avancement.summary.deltaOnLots' | translate:{ delta: summary().chantierDeltaPercent, count: summary().lotsCount } }}
+        </div>
+      </div>
+
+      <div class="summary-card summary-card--compact">
+        <h3>{{ 'chantiers.avancement.saisie.ergonomieTerrain' | translate }}</h3>
+        <ul>
+          <li>{{ 'chantiers.avancement.saisie.ergonomie.touchInputs' | translate }}</li>
+          <li>{{ 'chantiers.avancement.saisie.ergonomie.cameraUpload' | translate }}</li>
+          <li>{{ 'chantiers.avancement.saisie.ergonomie.softValidation' | translate }}</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+
+  <footer class="saisie-page__sticky-bar">
+    <nf-button variant="secondary" class="sticky-bar__secondary" (clicked)="saveDraft()">
+      {{ 'chantiers.avancement.saveDraft' | translate }}
+    </nf-button>
+    <nf-button variant="primary" class="sticky-bar__primary" (clicked)="validate()">
+      {{ isEditing() ? ('chantiers.avancement.saveEdit' | translate) : ('chantiers.avancement.validate' | translate) }}
+    </nf-button>
+  </footer>
+</section>
+}

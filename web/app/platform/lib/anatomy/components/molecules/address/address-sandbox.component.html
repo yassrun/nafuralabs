@@ -1,0 +1,214 @@
+<div class="sandbox-container">
+  <header class="sandbox-header">
+    <h1>Address Component Sandbox</h1>
+    <p class="sandbox-subtitle">
+      Interactive demo of nf-address-form and nf-address-view components
+    </p>
+  </header>
+
+  <!-- Controls -->
+  <section class="sandbox-controls">
+    <h2>Controls</h2>
+    <div class="control-group">
+      <button class="sandbox-btn" (click)="toggleMode()">
+        Mode: {{ currentMode() }}
+      </button>
+      <button class="sandbox-btn" (click)="toggleNotes()">
+        Notes: {{ showNotes() ? 'Visible' : 'Hidden' }}
+      </button>
+      <button class="sandbox-btn" (click)="toggleDisabled()">
+        {{ isDisabled() ? 'Enable' : 'Disable' }} Form
+      </button>
+      <button class="sandbox-btn sandbox-btn-primary" (click)="prefillForm()">
+        Prefill Sample Data
+      </button>
+      <button class="sandbox-btn sandbox-btn-secondary" (click)="clearForm()">
+        Clear Form
+      </button>
+    </div>
+  </section>
+
+  <!-- Main Grid -->
+  <div class="sandbox-grid">
+    <!-- Full Mode Form -->
+    <section class="sandbox-section">
+      <h2>Address Form - Full Mode</h2>
+      <p class="section-description">
+        Complete form with all fields including line2, region, and optional notes.
+        Required fields: line1, city, countryCode
+      </p>
+      
+      <div class="form-wrapper">
+        <nf-address-form
+          [value]="fullModeAddress()"
+          [mode]="'full'"
+          [required]="{ line1: true, city: true, countryCode: true }"
+          [disabled]="isDisabled()"
+          [showNotes]="showNotes()"
+          (valueChange)="onFullModeAddressChange($event)"
+          (validityChange)="onFullModeValidityChange($event)">
+        </nf-address-form>
+      </div>
+
+      <div class="form-status">
+        <span class="status-badge" [class.status-valid]="fullModeValid()" [class.status-invalid]="!fullModeValid()">
+          {{ fullModeValid() ? '✓ Valid' : '✗ Invalid' }}
+        </span>
+      </div>
+
+      <details class="json-output">
+        <summary>JSON Output</summary>
+        <pre><code>{{ getAddressJson(fullModeAddress()) }}</code></pre>
+      </details>
+    </section>
+
+    <!-- Compact Mode Form -->
+    <section class="sandbox-section">
+      <h2>Address Form - Compact Mode</h2>
+      <p class="section-description">
+        Simplified form showing only essential fields: line1, city, postalCode, countryCode.
+        Perfect for quick checkout flows.
+      </p>
+
+      <div class="form-wrapper">
+        <nf-address-form
+          [value]="compactModeAddress()"
+          [mode]="'compact'"
+          [required]="{ line1: true, city: true, countryCode: true }"
+          [disabled]="isDisabled()"
+          (valueChange)="onCompactModeAddressChange($event)"
+          (validityChange)="onCompactModeValidityChange($event)">
+        </nf-address-form>
+      </div>
+
+      <div class="form-status">
+        <span class="status-badge" [class.status-valid]="compactModeValid()" [class.status-invalid]="!compactModeValid()">
+          {{ compactModeValid() ? '✓ Valid' : '✗ Invalid' }}
+        </span>
+      </div>
+
+      <details class="json-output">
+        <summary>JSON Output</summary>
+        <pre><code>{{ getAddressJson(compactModeAddress()) }}</code></pre>
+      </details>
+    </section>
+
+    <!-- View Component - Full Mode -->
+    <section class="sandbox-section">
+      <h2>Address View - Full Mode (Read-only)</h2>
+      <p class="section-description">
+        Display formatted address in full mode with all details including notes.
+      </p>
+
+      <div class="view-wrapper">
+        <nf-address-view
+          [value]="sampleAddress"
+          [mode]="'full'"
+          [countryLabelResolver]="getCountryLabel.bind(this)">
+        </nf-address-view>
+      </div>
+    </section>
+
+    <!-- View Component - Compact Mode -->
+    <section class="sandbox-section">
+      <h2>Address View - Compact Mode (Read-only)</h2>
+      <p class="section-description">
+        Display formatted address in compact mode with essential information only.
+      </p>
+
+      <div class="view-wrapper">
+        <nf-address-view
+          [value]="sampleAddress"
+          [mode]="'compact'"
+          [countryLabelResolver]="getCountryLabel.bind(this)">
+        </nf-address-view>
+      </div>
+    </section>
+
+    <!-- View Component - Empty State -->
+    <section class="sandbox-section">
+      <h2>Address View - Empty State</h2>
+      <p class="section-description">
+        How the component renders when no address data is available.
+      </p>
+
+      <div class="view-wrapper">
+        <nf-address-view
+          [value]="null"
+          [mode]="'full'">
+        </nf-address-view>
+      </div>
+    </section>
+
+    <!-- Dynamic Form -->
+    <section class="sandbox-section">
+      <h2>Dynamic Mode Switching</h2>
+      <p class="section-description">
+        Switch between full and compact modes dynamically. Current mode: <strong>{{ currentMode() }}</strong>
+      </p>
+
+      <div class="form-wrapper">
+        <nf-address-form
+          [mode]="currentMode()"
+          [required]="{ line1: true, city: true, countryCode: true }"
+          [showNotes]="showNotes()"
+          (valueChange)="onFullModeAddressChange($event)"
+          (validityChange)="onFullModeValidityChange($event)">
+        </nf-address-form>
+      </div>
+    </section>
+  </div>
+
+  <!-- Usage Examples -->
+  <section class="sandbox-section usage-section">
+    <h2>Usage Examples</h2>
+    
+    <div class="code-examples">
+      <div class="code-example">
+        <h3>Basic Form</h3>
+        <pre><code>&lt;nf-address-form
+  [value]="address"
+  [mode]="'full'"
+  [required]="&#123; line1: true, city: true, countryCode: true &#125;"
+  (valueChange)="onAddressChange($event)"
+  (validityChange)="onValidityChange($event)"&gt;
+&lt;/nf-address-form&gt;</code></pre>
+      </div>
+
+      <div class="code-example">
+        <h3>Read-only View</h3>
+        <pre><code>&lt;nf-address-view
+  [value]="address"
+  [mode]="'full'"
+  [countryLabelResolver]="getCountryLabel"&gt;
+&lt;/nf-address-view&gt;</code></pre>
+      </div>
+
+      <div class="code-example">
+        <h3>Compact Checkout Form</h3>
+        <pre><code>&lt;nf-address-form
+  [mode]="'compact'"
+  [required]="&#123; line1: true, city: true, countryCode: true &#125;"
+  (valueChange)="onShippingAddressChange($event)"&gt;
+&lt;/nf-address-form&gt;</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="sandbox-section features-section">
+    <h2>Features</h2>
+    <ul class="features-list">
+      <li>✓ Full and compact display modes</li>
+      <li>✓ Configurable required fields</li>
+      <li>✓ Real-time validation with error messages</li>
+      <li>✓ Debounced value emission (200ms)</li>
+      <li>✓ Design token-based styling</li>
+      <li>✓ i18n-ready with translation keys</li>
+      <li>✓ WCAG accessible (ARIA labels, keyboard navigation)</li>
+      <li>✓ Reactive forms integration</li>
+      <li>✓ Domain-agnostic and reusable</li>
+      <li>✓ OnPush change detection strategy</li>
+    </ul>
+  </section>
+</div>

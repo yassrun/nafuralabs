@@ -1,0 +1,417 @@
+// Full-screen editor dialog styling
+.editor-dialog {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 100vh;
+  overflow: hidden;
+  background: var(--color-bg-elevated, #ffffff);
+}
+
+.editor-dialog__progress {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+// Sticky Header
+.editor-dialog__header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--color-bg-elevated, #ffffff);
+  border-bottom: 1px solid var(--color-border, var(--color-gray-200));
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  flex-shrink: 0;
+}
+
+.header__main {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+  flex: 1;
+  min-width: 0;
+}
+
+.header__title-group {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-shrink: 0;
+}
+
+.header__title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--color-text, var(--color-gray-900));
+  line-height: 1.2;
+}
+
+.header__version-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 var(--spacing-sm);
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  background: rgba(79, 70, 229, 0.1);
+  color: var(--color-primary, #4f46e5);
+  white-space: nowrap;
+}
+
+.header__reference {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  min-width: 0;
+}
+
+.header__reference-label {
+  font-size: 13px;
+  color: var(--color-text-muted, var(--color-gray-500));
+  white-space: nowrap;
+}
+
+.header__reference-value {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text, var(--color-gray-900));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.header__status {
+  flex-shrink: 0;
+}
+
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  height: 28px;
+  padding: 0 var(--spacing-sm);
+  border-radius: 14px;
+  font-size: 12px;
+  font-weight: 500;
+  
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+
+  &--extracted {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--color-info, #3b82f6);
+  }
+
+  &--draft {
+    background: rgba(107, 114, 128, 0.1);
+    color: var(--color-gray-600, #4b5563);
+  }
+
+  &--validated {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--color-success, #10b981);
+  }
+}
+
+// Scrollable Body
+.editor-dialog__body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0;
+  margin: 0;
+  min-height: 0; // Critical for flex scrolling
+}
+
+.body__content {
+  padding: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+// Section styling
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+
+  &--compact {
+    .section__header {
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .section__title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-text-muted, var(--color-gray-600));
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  }
+
+  &--items {
+    .section__header {
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .section__title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--color-text, var(--color-gray-900));
+      margin: 0;
+    }
+  }
+}
+
+.section__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text, var(--color-gray-900));
+  margin: 0;
+}
+
+.section__fields {
+  // Compact spacing for form fields
+  ::ng-deep {
+    .section {
+      margin-bottom: var(--spacing-md);
+    }
+
+    .section__grid {
+      gap: var(--spacing-sm) var(--spacing-md);
+    }
+
+    .field__control {
+      .mat-mdc-form-field {
+        margin-bottom: var(--spacing-xs);
+      }
+    }
+  }
+}
+
+.section__table {
+  // Table styling is handled by DynamicArrayTableComponent
+  // But we can add sticky header here
+  ::ng-deep {
+    .array-table__table {
+      position: relative;
+      
+      table {
+        width: 100%;
+      }
+
+      .mat-mdc-header-row {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: var(--color-bg-elevated, #ffffff);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+      }
+
+      // Right-align numeric columns
+      .mat-column-qty,
+      .mat-column-unitPrice,
+      .mat-column-total,
+      .mat-column-price,
+      .mat-column-amount {
+        text-align: right;
+        
+        .mat-mdc-cell,
+        .mat-mdc-header-cell {
+          justify-content: flex-end;
+        }
+      }
+
+      // Display "—" for null/empty values
+      .mat-mdc-cell {
+        &::ng-deep {
+          input:placeholder-shown,
+          .mat-mdc-select-value:empty {
+            &::before {
+              content: '—';
+              color: var(--color-text-muted, var(--color-gray-400));
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Sticky Footer
+.editor-dialog__footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--color-bg-elevated, #ffffff);
+  border-top: 1px solid var(--color-border, var(--color-gray-200));
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.04);
+  flex-shrink: 0;
+}
+
+.footer__helper {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  gap: var(--spacing-xs, 8px);
+}
+
+.footer__helper-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs, 8px);
+  width: 100%;
+}
+
+.footer__helper-text {
+  font-size: 13px;
+  color: var(--color-text-muted, var(--color-gray-500));
+
+  &--warning {
+    color: var(--color-warning, #f59e0b);
+  }
+}
+
+.footer__errors-summary {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-xs, 8px);
+  margin-top: var(--spacing-xs, 8px);
+  padding: var(--spacing-xs, 8px);
+  background-color: rgba(239, 68, 68, 0.1);
+  border-radius: 4px;
+  border-left: 3px solid #ef4444;
+}
+
+.footer__errors-icon {
+  color: #ef4444;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.footer__errors-count {
+  font-weight: 500;
+  color: #ef4444;
+}
+
+.footer__errors-list {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--color-text, #333);
+  font-size: 12px;
+  
+  li {
+    margin-bottom: 2px;
+  }
+}
+
+.footer__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-shrink: 0;
+}
+
+.footer__action {
+  min-width: 100px;
+
+  &--cancel {
+    // Secondary button styling
+  }
+
+  &--primary {
+    // Primary button (Validate)
+  }
+
+  &--secondary {
+    // Secondary button (Save as Draft)
+  }
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    margin-right: var(--spacing-xs);
+  }
+}
+
+// Override Material Dialog default styles for full-screen editor feel
+::ng-deep {
+  .editor-dialog-panel {
+    .mat-mdc-dialog-container {
+      padding: 0 !important;
+      overflow: hidden !important;
+      max-height: 96vh !important;
+    }
+
+    .mat-mdc-dialog-surface {
+      border-radius: 8px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+      overflow: hidden;
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .editor-dialog__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+
+  .header__main {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+    width: 100%;
+  }
+
+  .header__reference {
+    width: 100%;
+  }
+
+  .editor-dialog__footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+
+  .footer__actions {
+    width: 100%;
+    flex-direction: column-reverse;
+
+    .footer__action {
+      width: 100%;
+    }
+  }
+}

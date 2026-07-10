@@ -1,0 +1,89 @@
+<nf-page-shell>
+  <nf-page-header [config]="headerConfig"></nf-page-header>
+
+  <section class="quick-filters">
+    <nf-button
+      class="quick-filter"
+      [variant]="activeQuickFilter() === 'week' ? 'primary' : 'secondary'"
+      (clicked)="applyQuickFilter('week')">
+      {{ 'chantiers.avancement.listing.quickFilters.thisWeek' | translate }}
+    </nf-button>
+    <nf-button
+      class="quick-filter"
+      [variant]="activeQuickFilter() === 'month' ? 'primary' : 'secondary'"
+      (clicked)="applyQuickFilter('month')">
+      {{ 'chantiers.avancement.listing.quickFilters.thisMonth' | translate }}
+    </nf-button>
+    <nf-button
+      class="quick-filter"
+      [variant]="activeQuickFilter() === 'mine' ? 'primary' : 'secondary'"
+      (clicked)="applyQuickFilter('mine')">
+      {{ 'chantiers.avancement.listing.quickFilters.myEntries' | translate }}
+    </nf-button>
+    <span title="{{ 'chantiers.avancement.listing.quickFilters.lateTooltip' | translate }}">
+      <nf-button
+        class="quick-filter"
+        [variant]="activeQuickFilter() === 'late' ? 'primary' : 'secondary'"
+        (clicked)="applyQuickFilter('late')">
+        {{ 'chantiers.avancement.listing.quickFilters.late' | translate }}
+      </nf-button>
+    </span>
+    <nf-button variant="ghost" class="quick-filter quick-filter--ghost" (clicked)="resetQuickFilters()">
+      {{ 'chantiers.avancement.listing.quickFilters.reset' | translate }}
+    </nf-button>
+  </section>
+
+  <nf-entity-listing #listing [config]="config" [facade]="facade" (action)="onAction($event)">
+    <ng-template nfColumn="chantierCode" let-value let-item="item">
+      <nf-button variant="ghost" class="link-cell" (clicked)="$event.stopPropagation(); onAction({ actionId: 'ouvrir-chantier', source: 'row', item })">
+        <span>{{ value }}</span>
+        <small>{{ item.chantierName }}</small>
+      </nf-button>
+    </ng-template>
+
+    <ng-template nfColumn="pourcentage" let-value>
+      <div class="progress-cell">
+        <div class="progress-cell__bar">
+          <span class="progress-cell__fill" [style.width.%]="value"></span>
+        </div>
+        <strong>{{ value }}%</strong>
+      </div>
+    </ng-template>
+
+    <ng-template nfColumn="photos" let-value let-item="item">
+      <nf-button
+        variant="ghost"
+        class="photo-pill"
+        [class.photo-pill--disabled]="value === 0"
+        [disabled]="value === 0"
+        (clicked)="$event.stopPropagation(); value > 0 && onAction({ actionId: 'voir-photos', source: 'row', item })">
+        📷 {{ value }}
+      </nf-button>
+    </ng-template>
+  </nf-entity-listing>
+
+  @if (galleryPhotos().length > 0) {
+    <div class="gallery-backdrop" (click)="closeGallery()">
+      <div class="gallery-dialog" (click)="$event.stopPropagation()">
+        <header>
+          <div>
+            <h2>{{ galleryTitle() }}</h2>
+            <p>{{ 'chantiers.avancement.gallery.photoCount' | translate:{ count: galleryPhotos().length } }}</p>
+          </div>
+          <nf-button variant="secondary" class="gallery-close" (clicked)="closeGallery()">
+            {{ 'chantiers.avancement.gallery.close' | translate }}
+          </nf-button>
+        </header>
+
+        <div class="gallery-grid">
+          @for (photo of galleryPhotos(); track photo.id) {
+            <figure>
+              <img [src]="photo.url" [alt]="photo.name" />
+              <figcaption>{{ photo.name }}</figcaption>
+            </figure>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</nf-page-shell>

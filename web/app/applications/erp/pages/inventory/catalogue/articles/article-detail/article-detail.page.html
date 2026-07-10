@@ -1,0 +1,46 @@
+    <nf-page-shell scroll>
+      <nf-page-header [config]="headerConfig"></nf-page-header>
+      <nf-entity-detail
+        #detail
+        [config]="config"
+        [mode]="mode()"
+        [item]="item()"
+        [lookups]="lookups()"
+        [loading]="isLoading()"
+        [saving]="isSaving()"
+        (action)="onAction($event)">
+      </nf-entity-detail>
+      @if (mode() === 'view' && item(); as art) {
+        <section class="article-stock-ext">
+          <div class="row">
+            <nf-button type="button" class="btn" (clicked)="printLabels()" variant="secondary">{{ 'inventory.catalogue.article.actions.printLabels' | translate }}</nf-button>
+          </div>
+          <h3>{{ 'inventory.catalogue.article.reservations.title' | translate }}</h3>
+          @if (reservationRows().length === 0) {
+            <p class="muted">{{ 'inventory.catalogue.article.reservations.empty' | translate }}</p>
+          } @else {
+            <table class="rs">
+              <thead>
+                <tr>
+                  <th>{{ 'inventory.catalogue.article.reservations.columns.chantier' | translate }}</th>
+                  <th>{{ 'inventory.catalogue.article.reservations.columns.qte' | translate }}</th>
+                  <th>{{ 'inventory.catalogue.article.reservations.columns.expiration' | translate }}</th>
+                  <th>{{ 'inventory.catalogue.article.reservations.columns.statut' | translate }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (r of reservationRows(); track r.id) {
+                  <tr>
+                    <td>{{ r.chantierId }}</td>
+                    <td>{{ r.qte }} {{ r.uom }}</td>
+                    <td>{{ r.dateExpiration }}</td>
+                    <td>{{ r.status }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </section>
+      }
+    </nf-page-shell>
+  

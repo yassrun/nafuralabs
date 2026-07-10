@@ -1,0 +1,143 @@
+.settings-page {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.settings-page__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 16px 0 24px;
+}
+
+.settings-page__title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.87);
+}
+
+.settings-page__content {
+  margin-top: 24px;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 48px;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.doc-types-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.domain-section {
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.domain-section__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: rgba(0, 0, 0, 0.02);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.domain-section__icon {
+  color: rgba(0, 0, 0, 0.54);
+}
+
+.domain-section__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.87);
+}
+
+.domain-section__content {
+  display: flex;
+  flex-direction: column;
+}
+
+.doc-type-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.04);
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.doc-type-card__main {
+  flex: 1;
+}
+
+.doc-type-card__name {
+  font-size: 16px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.87);
+  margin-bottom: 4px;
+}
+
+.doc-type-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.meta-separator {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.doc-type-card__arrow {
+  color: rgba(0, 0, 0, 0.54);
+}
+
+.empty-state,
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 64px 24px;
+  text-align: center;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+}
+
+.empty-state__icon,
+.error-state__icon {
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+  color: rgba(0, 0, 0, 0.38);
+}
+
+.empty-state__text,
+.error-state__text {
+  font-size: 16px;
+  color: rgba(0, 0, 0, 0.6);
+  margin: 0;
+}

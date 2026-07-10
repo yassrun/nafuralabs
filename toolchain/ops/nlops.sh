@@ -495,35 +495,6 @@ preflight() {
   echo "=== Preflight done ==="
 }
 
-link_platform_web_node_modules() {
-  local src="$ROOT/products/sektor-btp/web/node_modules"
-  local dest="$ROOT/platform/web/node_modules"
-  if [[ ! -d "$src/@angular/core" ]]; then
-    echo "ERROR: products/sektor-btp/web/node_modules missing — run: cd products/sektor-btp/web && npm ci" >&2
-    exit 1
-  fi
-  rm -rf "$dest"
-  if ln -sfn "$src" "$dest" 2>/dev/null && [[ -e "$dest/@angular/core" ]]; then
-    return 0
-  fi
-  rm -rf "$dest"
-  # Windows: PowerShell junction handles paths with spaces; cmd mklink does not.
-  if command -v powershell.exe >/dev/null 2>&1; then
-    powershell.exe -NoProfile -Command \
-      "New-Item -ItemType Junction -Path '$dest' -Target '$src' -Force | Out-Null" 2>/dev/null \
-      && [[ -e "$dest/@angular/core" ]] && return 0
-  fi
-  if command -v cmd.exe >/dev/null 2>&1; then
-    local dest_win src_win
-    dest_win="$(cd "$(dirname "$dest")" && pwd -W 2>/dev/null)/$(basename "$dest")"
-    src_win="$(cd "$src" && pwd -W 2>/dev/null)"
-    cmd.exe //c "mklink /J \"${dest_win//\//\\}\" \"${src_win//\//\\}\"" >/dev/null 2>&1 \
-      && [[ -e "$dest/@angular/core" ]] && return 0
-  fi
-  echo "ERROR: could not link platform/web/node_modules to sektor web node_modules" >&2
-  exit 1
-}
-
 build_sektor_images() {
   local tag
   tag="$(image_tag_for_env)"
@@ -539,10 +510,9 @@ build_sektor_images() {
     "$ROOT/products/sektor-btp/backend/app/build/libs"
 
   echo "Building frontend ? $web_img"
-  link_platform_web_node_modules
   case "$ENV" in
-    staging) (cd "$ROOT/products/sektor-btp/web" && npm run build:staging) ;;
-    *) (cd "$ROOT/products/sektor-btp/web" && npm run build:prod) ;;
+    staging) (cd "$ROOT/web" && npm run build:staging) ;;
+    *) (cd "$ROOT/web" && npm run build:prod) ;;
   esac
   docker build -t "$web_img" -f "$ROOT/products/sektor-btp/Dockerfile.web" "$ROOT"
 

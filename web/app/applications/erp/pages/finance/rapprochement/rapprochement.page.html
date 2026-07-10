@@ -1,0 +1,219 @@
+<div class="rp">
+  @if (err()) {
+    <div class="rp__error" role="alert">{{ err() }}</div>
+  }
+
+  <header class="rp__header">
+    <div>
+      <h1 class="rp__title">{{ 'finance.rapprochement.title' | translate }}</h1>
+      <p class="rp__subtitle">
+        {{ 'finance.rapprochement.subtitle' | translate }}
+      </p>
+    </div>
+    @if (id) {
+      <nf-button variant="ghost" class="rp__btn rp__btn--ghost" (clicked)="newRapprochement()">
+        {{ 'finance.common.actions.new' | translate }}
+      </nf-button>
+    }
+  </header>
+
+  <section class="rp__params">
+    <div class="rp__params-row">
+      <label class="rp__field">
+        <span>{{ 'finance.common.filters.compte' | translate }} *</span>
+        <select [ngModel]="compteId()" (ngModelChange)="compteId.set($event); onParamsChange()" [disabled]="!!id">
+          <option value="">{{ 'finance.rapprochement.selectAccount' | translate }}</option>
+          @for (c of comptes(); track c.id) {
+            @if (c.type === 'BANQUE') {
+              <option [value]="c.id">{{ c.libelle }} ({{ c.compteCgncCode }})</option>
+            }
+          }
+        </select>
+      </label>
+      <label class="rp__field">
+        <span>{{ 'finance.common.filters.from' | translate }} *</span>
+        <input
+          type="date"
+          [ngModel]="dateDebut()"
+          (ngModelChange)="dateDebut.set($event); onParamsChange()"
+          [disabled]="!!id"
+        />
+      </label>
+      <label class="rp__field">
+        <span>{{ 'finance.common.filters.to' | translate }} *</span>
+        <input
+          type="date"
+          [ngModel]="dateFin()"
+          (ngModelChange)="dateFin.set($event); onParamsChange()"
+          [disabled]="!!id"
+        />
+      </label>
+      @if (!id) {
+        <div class="rp__quick-periods">
+          <nf-button variant="ghost" class="rp__chip" (clicked)="setPeriodeMonth(0)">{{ 'finance.declarations.common.month' | translate }}</nf-button>
+          <nf-button variant="ghost" class="rp__chip" (clicked)="setPeriodeMonth(-1)">M-1</nf-button>
+          <nf-button variant="ghost" class="rp__chip" (clicked)="setPeriodeMonth(-2)">M-2</nf-button>
+        </div>
+      }
+    </div>
+  </section>
+
+  @if (compte()) {
+    <section class="rp__balance">
+      <div class="rp__balance-card">
+        <span class="rp__balance-label">{{ 'finance.rapprochement.summary.soldeErp' | translate }} {{ formatDate(dateFin()) }}</span>
+        <app-solde-indicator [value]="soldeFinComptable()" currency="MAD" />
+      </div>
+      <div class="rp__balance-card">
+        <span class="rp__balance-label">{{ 'finance.rapprochement.summary.soldeReleve' | translate }}</span>
+        <input
+          type="number"
+          step="0.01"
+          [ngModel]="soldeFinReleve()"
+          (ngModelChange)="soldeFinReleve.set(+$event || 0)"
+          class="rp__balance-input"
+        />
+      </div>
+      <div class="rp__balance-card rp__balance-card--diff"
+           [attr.data-tone]="ecart() === 0 ? 'ok' : 'ko'">
+        <span class="rp__balance-label">{{ 'finance.rapprochement.summary.ecart' | translate }}</span>
+        <app-solde-indicator [value]="ecart()" currency="MAD" />
+        <span class="rp__balance-tag">
+          {{ (status() === 'VALIDE'
+                ? 'finance.common.toasts.validated'
+                : ecart() > 0
+                  ? 'finance.rapprochement.summary.soldeErp'
+                  : 'finance.rapprochement.summary.soldeReleve') | translate }}
+        </span>
+      </div>
+    </section>
+
+    <section class="rp__toolbar">
+      <div class="rp__toolbar-info">
+        {{ 'finance.common.labels.ouverture' | translate }} : {{ format(soldeDebutComptable()) }} {{ 'finance.common.currency.mad' | translate }}
+        · {{ mouvements().length }} {{ 'finance.mouvement.entityNamePlural' | translate }}
+      </div>
+      <div class="rp__toolbar-actions">
+        @if (lignesReleve().length > 0) {
+          <nf-button variant="ghost" class="rp__btn rp__btn--ghost" (clicked)="resetReleve()">
+            {{ 'finance.common.actions.refresh' | translate }}
+          </nf-button>
+        }
+        <nf-button variant="ghost" class="rp__btn rp__btn--ghost" (clicked)="openImport()">
+          {{ 'finance.rapprochement.import.title' | translate }}
+        </nf-button>
+        <nf-button variant="ghost" class="rp__btn rp__btn--ghost" (clicked)="runAutoMatch()"  [disabled]="!lignesReleve().length">
+          {{ 'finance.lettrage.actions.auto' | translate }}
+        </nf-button>
+      </div>
+    </section>
+
+    <app-rapprochement-matcher
+      [mouvements]="mouvements()"
+      [lignesReleve]="lignesReleve()"
+      [pairs]="pairs()"
+      (pairsChange)="onPairsChange($event)"
+      (createMvt)="createMvtFromReleve($event)"
+    />
+
+    <section class="rp__notes">
+      <label class="rp__field">
+        <span>{{ 'finance.ecriture.form.fields.libelle' | translate }}</span>
+        <textarea
+          rows="2"
+          [attr.placeholder]="'finance.ecriture.form.fields.libelle' | translate"
+          [ngModel]="notes()"
+          (ngModelChange)="notes.set($event)"
+        ></textarea>
+      </label>
+    </section>
+
+    <footer class="rp__foot">
+      <div class="rp__foot-status">
+        {{ 'finance.common.filters.status' | translate }} :
+        <span class="rp__badge" [attr.data-variant]="statusVariant(status())">
+          {{ statusLabel(status()) }}
+        </span>
+      </div>
+      <div class="rp__foot-actions">
+        @if (id) {
+          <nf-button variant="danger" class="rp__btn rp__btn--danger" (clicked)="deleteRapprochement()"  [disabled]="busy()">
+            {{ 'finance.common.actions.delete' | translate }}
+          </nf-button>
+        }
+        <nf-button variant="primary" class="rp__btn" (clicked)="validate()"  [disabled]="busy() || !compteId()">
+          {{ 'finance.common.actions.validate' | translate }}
+        </nf-button>
+      </div>
+    </footer>
+  } @else {
+    <div class="rp__empty">
+      {{ 'finance.rapprochement.selectAccount' | translate }}
+    </div>
+  }
+
+  @if (showImport()) {
+    <div class="rp__modal-backdrop" (click)="cancelImport()"></div>
+    <div class="rp__modal-wrap">
+      <app-releve-import-dialog
+        (imported)="onLignesImported($event)"
+        (cancel)="cancelImport()"
+      />
+    </div>
+  }
+
+  @if (!id && historique().length > 0) {
+    <section class="rp__history">
+      <h2 class="rp__history-title">{{ 'finance.recouvrement.actions.voirHistorique' | translate }}</h2>
+      <div class="rp__history-table-wrap">
+        <table class="rp__history-table">
+          <thead>
+            <tr>
+              <th>{{ 'finance.reglement.list.columns.numero' | translate }}</th>
+              <th>{{ 'finance.common.filters.compte' | translate }}</th>
+              <th>{{ 'finance.common.filters.period' | translate }}</th>
+              <th class="rp__th-num">{{ 'finance.rapprochement.summary.soldeErp' | translate }}</th>
+              <th class="rp__th-num">{{ 'finance.rapprochement.summary.soldeReleve' | translate }}</th>
+              <th class="rp__th-num">{{ 'finance.common.labels.ecart' | translate }}</th>
+              <th>{{ 'finance.common.filters.status' | translate }}</th>
+              <th>{{ 'finance.common.toasts.validated' | translate }}</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (h of historique(); track h.id) {
+              <tr (click)="openExisting(h)" class="rp__history-row">
+                <td class="rp__history-num">{{ h.numero }}</td>
+                <td>{{ h.compteFinancierLibelle }}</td>
+                <td>{{ formatDate(h.dateDebut) }} → {{ formatDate(h.dateFin) }}</td>
+                <td class="rp__td-num">{{ format(h.soldeFinComptable) }}</td>
+                <td class="rp__td-num">{{ format(h.soldeFinReleve) }}</td>
+                <td class="rp__td-num"
+                    [class.rp__td-num--ok]="h.ecart === 0"
+                    [class.rp__td-num--ko]="h.ecart !== 0">
+                  {{ format(h.ecart) }}
+                </td>
+                <td>
+                  <span class="rp__badge" [attr.data-variant]="statusVariant(h.status)">
+                    {{ statusLabel(h.status) }}
+                  </span>
+                </td>
+                <td>
+                  @if (h.dateValidation) {
+                    {{ formatDate(h.dateValidation) }}
+                    @if (h.validateurName) {
+                      <div class="rp__history-validator">{{ h.validateurName }}</div>
+                    }
+                  } @else {
+                    <span class="rp__dash">{{ 'finance.common.dash' | translate }}</span>
+                  }
+                </td>
+                <td class="rp__history-chev">→</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+</div>

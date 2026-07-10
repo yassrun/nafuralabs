@@ -1,0 +1,64 @@
+<nf-page-shell scroll>
+  <nf-page-header [config]="pageHeaderConfig()">
+    <nf-button type="button" class="btn btn-secondary" (clicked)="onRecompute()" [disabled]="loading() || !ao()" variant="secondary">
+      Recalculer scores
+    </nf-button>
+  </nf-page-header>
+  @if (loading()) {
+    <p class="muted">{{ 'achats.common.loading' | translate }}</p>
+  } @else if (!ao()) {
+    <p class="warn">{{ 'achats.appelOffre.comparatif.notFound' | translate }}</p>
+  } @else {
+    <section class="card">
+      <h2>{{ 'achats.appelOffre.comparatif.matrixTitle' | translate }}</h2>
+      <p class="hint">{{ 'achats.appelOffre.comparatif.ponderationHint' | translate }}</p>
+      <div class="table-wrap">
+        <table class="matrix">
+          <thead>
+            <tr>
+              <th>{{ 'achats.appelOffre.comparatif.columns.fournisseur' | translate }}</th>
+              <th class="num">{{ 'achats.appelOffre.comparatif.columns.totalHt' | translate }}</th>
+              <th class="num">{{ 'achats.appelOffre.comparatif.columns.delaiJours' | translate }}</th>
+              <th class="num">{{ 'achats.appelOffre.comparatif.columns.prix50' | translate }}</th>
+              <th class="num">{{ 'achats.appelOffre.comparatif.columns.delai15' | translate }}</th>
+              <th class="num">{{ 'achats.appelOffre.comparatif.columns.qualite15' | translate }}</th>
+              <th class="num">{{ 'achats.appelOffre.comparatif.columns.historique10' | translate }}</th>
+              <th class="num">{{ 'achats.appelOffre.comparatif.columns.art18710' | translate }}</th>
+              <th class="num">{{ 'achats.appelOffre.comparatif.columns.score' | translate }}</th>
+              <th>{{ 'achats.appelOffre.comparatif.columns.reco' | translate }}</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (s of scores(); track s.reponseId) {
+              <tr [class.top]="s.recommandation === 'TOP'">
+                <td>{{ s.fournisseurName }}</td>
+                <td class="num">{{ totalHtFor(s) | number:'1.0-0' }}</td>
+                <td class="num">{{ delaiFor(s) }}</td>
+                <td class="num">{{ s.scoreDetail.prix | number:'1.1-1' }}</td>
+                <td class="num">{{ s.scoreDetail.delai | number:'1.1-1' }}</td>
+                <td class="num">{{ s.scoreDetail.qualite | number:'1.1-1' }}</td>
+                <td class="num">{{ s.scoreDetail.historique | number:'1.1-1' }}</td>
+                <td class="num">{{ s.scoreDetail.art187 | number:'1.1-1' }}</td>
+                <td class="num"><strong>{{ s.scoreFinal | number:'1.1-1' }}</strong></td>
+                <td><span class="pill" [class.pill--top]="s.recommandation === 'TOP'">{{ s.recommandation }}</span></td>
+                <td>
+                  <nf-button type="button" class="btn" (clicked)="onAttribuer(s)" variant="secondary">{{ 'achats.appelOffre.actions.attribuerVersBc' | translate }}</nf-button>
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="11">{{ 'achats.appelOffre.comparatif.empty' | translate }}</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      @for (s of scores(); track s.reponseId) {
+        <p class="raison"><strong>{{ s.fournisseurName }}</strong> — {{ s.raisonRecommandation }}</p>
+      }
+    </section>
+
+    <p class="footer-actions">
+      <a [routerLink]="['/achats/appels-offres', ao()!.id]" class="link">{{ 'achats.appelOffre.comparatif.backToAo' | translate }}</a>
+    </p>
+  }
+</nf-page-shell>

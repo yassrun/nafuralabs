@@ -1,0 +1,248 @@
+<nf-page-shell>
+  <nf-page-header [config]="headerConfigOverride()"></nf-page-header>
+
+  @if (mode() === 'edit') {
+    <nav class="tabs">
+      @for (tab of tabs; track tab.id) {
+        <nf-button
+          type="button"
+          class="tab"
+          [class.tab--active]="activeTab() === tab.id"
+          (clicked)="setTab(tab.id)" variant="ghost">
+          {{ tab.label }}
+        </nf-button>
+      }
+    </nav>
+  }
+
+  @if (mode() === 'create' || activeTab() === 'informations') {
+    <nf-entity-detail
+      #detail
+      [config]="config"
+      [mode]="mode()"
+      [item]="item()"
+      [lookups]="lookups()"
+      [loading]="isLoading()"
+      [saving]="isSaving()"
+      (action)="onAction($event)">
+    </nf-entity-detail>
+  }
+
+  @if (mode() === 'edit' && activeTab() === 'attestations') {
+    <section class="panel">
+      <div class="panel__header">
+        <div>
+          <h3 class="panel__title">Statut attestations</h3>
+          <p class="panel__hint">8 types obligatoires — suivi conformité fournisseur</p>
+        </div>
+      </div>
+
+      @if (attestationStatus()?.reglementBloque) {
+        <div class="alert">
+          Règlement bloqué : attestations CNSS et fiscale expirées.
+        </div>
+      }
+
+      @if (attestationsLoading()) {
+        <p class="loading-inline">Chargement des attestations…</p>
+      } @else {
+        @if (attestationStatus(); as status) {
+        <div class="chips">
+          @for (chip of status.chips; track chip.type) {
+            <nf-button
+              type="button"
+              class="chip"
+              [ngClass]="attestationStatusClass(chip.status, chip.present)"
+              (clicked)="selectChipType(chip.type)" variant="secondary">
+              <span class="chip__type">{{ attestationTypeLabel(chip.type) }}</span>
+              <span class="chip__status">
+                {{ attestationStatusLabel(chip.status, chip.present) }}
+              </span>
+              @if (chip.dateExpiration) {
+                <span class="panel__hint">Exp. {{ chip.dateExpiration | date:'dd/MM/yyyy' }}</span>
+              }
+            </nf-button>
+          }
+        </div>
+        }
+      }
+
+      <div class="panel__header">
+        <h3 class="panel__title">Attestations enregistrées</h3>
+      </div>
+
+      @if (attestations().length) {
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Émission</th>
+              <th>Expiration</th>
+              <th>Statut</th>
+              <th>Scan</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of attestations(); track row.id) {
+              <tr>
+                <td>{{ attestationTypeLabel(row.type) }}</td>
+                <td>{{ row.dateEmission | date:'dd/MM/yyyy' }}</td>
+                <td>{{ row.dateExpiration | date:'dd/MM/yyyy' }}</td>
+                <td>
+                  <span class="badge" [ngClass]="attestationBadgeClass(row.status)">
+                    {{ attestationStatusLabel(row.status, true) }}
+                  </span>
+                </td>
+                <td>
+                  @if (row.scanUrl) {
+                    <a [href]="row.scanUrl" target="_blank" rel="noopener">Voir</a>
+                  } @else {
+                    —
+                  }
+                </td>
+                <td>
+                  <div class="row-actions">
+                    <nf-button type="button" class="btn btn--sm" (clicked)="startEditAttestation(row)" variant="secondary">
+                      Modifier
+                    </nf-button>
+                    <nf-button type="button" class="btn btn--sm btn--danger" (clicked)="deleteAttestation(row)" variant="danger">
+                      Supprimer
+                    </nf-button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      } @else if (!attestationsLoading()) {
+        <div class="empty">Aucune attestation enregistrée pour ce fournisseur.</div>
+      }
+
+      <article class="form-card">
+        <h4>{{ editingAttestationId() ? 'Modifier attestation' : 'Nouvelle attestation' }}</h4>
+        <div class="form-grid">
+          <div class="field">
+            <label for="att-type">Type</label>
+            <select id="att-type" [(ngModel)]="attestationDraft.type" [disabled]="!!editingAttestationId()">
+              @for (type of attestationTypes; track type) {
+                <option [ngValue]="type">{{ attestationTypeLabel(type) }}</option>
+              }
+            </select>
+          </div>
+          <div class="field">
+            <label for="att-emission">Date émission</label>
+            <input id="att-emission" type="date" [(ngModel)]="attestationDraft.dateEmission" />
+          </div>
+          <div class="field">
+            <label for="att-expiration">Date expiration</label>
+            <input id="att-expiration" type="date" [(ngModel)]="attestationDraft.dateExpiration" />
+          </div>
+          <div class="field">
+            <label for="att-scan">URL scan</label>
+            <input id="att-scan" type="url" [(ngModel)]="attestationDraft.scanUrl" placeholder="https://…" />
+          </div>
+        </div>
+        <div class="form-actions">
+          <nf-button type="button" class="btn btn--primary" (clicked)="saveAttestation()" variant="primary">Enregistrer</nf-button>
+          @if (editingAttestationId()) {
+            <nf-button type="button" class="btn" (clicked)="cancelAttestationForm()" variant="secondary">Annuler</nf-button>
+          }
+        </div>
+      </article>
+    </section>
+  }
+
+  @if (mode() === 'edit' && activeTab() === 'catalogue') {
+    <section class="panel">
+      <div class="panel__header">
+        <div>
+          <h3 class="panel__title">Catalogue fournisseur</h3>
+          <p class="panel__hint">Prix négociés article × fournisseur</p>
+        </div>
+      </div>
+
+      @if (catalogueLoading()) {
+        <p class="loading-inline">Chargement du catalogue…</p>
+      } @else if (catalogue().length) {
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Article</th>
+              <th>Réf. fournisseur</th>
+              <th>Désignation</th>
+              <th class="num">Prix HT</th>
+              <th>Unité</th>
+              <th>Actif</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of catalogue(); track row.id) {
+              <tr>
+                <td>{{ row.articleId }}</td>
+                <td>{{ row.refFournisseur ?? '—' }}</td>
+                <td>{{ row.designation }}</td>
+                <td class="num">{{ fmtPrice(row.prixUnitaireHt) }}</td>
+                <td>{{ row.uom ?? '—' }}</td>
+                <td>
+                  <span class="badge" [ngClass]="row.actif ? { 'badge--success': true } : { 'badge--muted': true }">
+                    {{ row.actif ? 'Oui' : 'Non' }}
+                  </span>
+                </td>
+                <td>
+                  <div class="row-actions">
+                    <nf-button type="button" class="btn btn--sm" (clicked)="startEditCatalogue(row)" variant="secondary">
+                      Modifier
+                    </nf-button>
+                    <nf-button type="button" class="btn btn--sm btn--danger" (clicked)="deleteCatalogue(row)" variant="danger">
+                      Supprimer
+                    </nf-button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      } @else if (!catalogueLoading()) {
+        <div class="empty">Aucune ligne catalogue pour ce fournisseur.</div>
+      }
+
+      <article class="form-card">
+        <h4>{{ editingCatalogueId() ? 'Modifier ligne' : 'Nouvelle ligne catalogue' }}</h4>
+        <div class="form-grid">
+          <div class="field">
+            <label for="cat-article">Article ID</label>
+            <input id="cat-article" [(ngModel)]="catalogueDraft.articleId" placeholder="UUID article" />
+          </div>
+          <div class="field">
+            <label for="cat-ref">Réf. fournisseur</label>
+            <input id="cat-ref" [(ngModel)]="catalogueDraft.refFournisseur" />
+          </div>
+          <div class="field">
+            <label for="cat-designation">Désignation</label>
+            <input id="cat-designation" [(ngModel)]="catalogueDraft.designation" />
+          </div>
+          <div class="field">
+            <label for="cat-prix">Prix unitaire HT</label>
+            <input id="cat-prix" type="number" min="0" step="0.01" [(ngModel)]="catalogueDraft.prixUnitaireHt" />
+          </div>
+          <div class="field">
+            <label for="cat-uom">Unité</label>
+            <input id="cat-uom" [(ngModel)]="catalogueDraft.uom" placeholder="U, KG…" />
+          </div>
+          <div class="field field--check">
+            <input id="cat-actif" type="checkbox" [(ngModel)]="catalogueDraft.actif" />
+            <label for="cat-actif">Actif</label>
+          </div>
+        </div>
+        <div class="form-actions">
+          <nf-button type="button" class="btn btn--primary" (clicked)="saveCatalogue()" variant="primary">Enregistrer</nf-button>
+          @if (editingCatalogueId()) {
+            <nf-button type="button" class="btn" (clicked)="cancelCatalogueForm()" variant="secondary">Annuler</nf-button>
+          }
+        </div>
+      </article>
+    </section>
+  }
+</nf-page-shell>

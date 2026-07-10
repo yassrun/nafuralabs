@@ -1,0 +1,45 @@
+@use "../../../../../lib/design-system/tokens" as *;
+
+.settings-shell {
+  display: flex;
+  flex-direction: column;
+}
+
+.tabs {
+  display: flex;
+  gap: var(--dox-spacing-sm);
+  padding: 0 var(--dox-spacing-lg);
+  background: var(--dox-color-surface);
+  border-bottom: 1px solid var(--dox-color-border);
+  height: 40px;
+  align-items: center;
+
+  button {
+    border-radius: 0;
+    height: 100%;
+    padding: 0 var(--dox-spacing-md);
+    font-weight: 500;
+    font-size: 0.8125rem;
+    color: var(--dox-color-text-secondary);
+    border-bottom: 2px solid transparent;
+
+    &.is-active {
+      color: var(--dox-color-accent);
+      border-bottom-color: var(--dox-color-accent);
+      font-weight: 600;
+    }
+  }
+}
+
+.tab-hint {
+  font-size: 0.75rem;
+  color: var(--dox-color-text-muted);
+  padding: var(--dox-spacing-sm) var(--dox-spacing-lg);
+  font-style: italic;
+}
+
+.shell-body {
+  padding: var(--dox-spacing-lg);
+}
+
+

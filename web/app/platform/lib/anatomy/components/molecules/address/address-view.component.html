@@ -1,0 +1,40 @@
+<div class="nf-address-view" [attr.data-mode]="_mode()">
+  <!-- Empty state -->
+  <div class="nf-address-empty" *ngIf="isEmpty()">
+    {{ 'Common.Empty' }}
+  </div>
+
+  <!-- Address content -->
+  <div class="nf-address-content" *ngIf="!isEmpty() && address() as addr">
+    <!-- Line 1 -->
+    <div class="nf-address-line" *ngIf="hasValue('line1')">
+      {{ addr.line1 }}
+    </div>
+
+    <!-- Line 2 (only in full mode) -->
+    <div class="nf-address-line" *ngIf="!isCompactMode() && hasValue('line2')">
+      {{ addr.line2 }}
+    </div>
+
+    <!-- Postal Code + City -->
+    <div class="nf-address-line" *ngIf="getCityLine()">
+      {{ getCityLine() }}
+    </div>
+
+    <!-- Region (only in full mode) -->
+    <div class="nf-address-line" *ngIf="!isCompactMode() && hasValue('region')">
+      {{ addr.region }}
+    </div>
+
+    <!-- Country -->
+    <div class="nf-address-line nf-address-country" *ngIf="hasValue('countryCode')">
+      {{ getCountryLabel(addr.countryCode) }}
+    </div>
+
+    <!-- Notes (only in full mode) -->
+    <div class="nf-address-notes" *ngIf="!isCompactMode() && hasValue('notes')">
+      <div class="nf-address-notes-label">{{ 'Address.Notes' }}:</div>
+      <div class="nf-address-notes-content">{{ addr.notes }}</div>
+    </div>
+  </div>
+</div>

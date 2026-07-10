@@ -1,0 +1,79 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.devis-print-doc {
+  display: none;
+}
+
+@media print {
+  .devis-screen {
+    display: none !important;
+  }
+
+  .devis-print-doc {
+    display: block !important;
+    font-family: system-ui, sans-serif;
+    font-size: 11pt;
+    color: var(--nf-text-primary, var(--nf-color-text-primary));
+    max-width: 100%;
+  }
+
+  .devis-print-doc h1 {
+    margin: 0 0 0.25rem;
+    font-size: 16pt;
+  }
+
+  .devis-print-doc .ver {
+    font-weight: 500;
+    color: var(--nf-color-text-secondary);
+  }
+
+  .devis-print-doc .meta {
+    margin: 0 0 1rem;
+    color: var(--nf-color-text-secondary);
+    font-size: 10pt;
+  }
+
+  .devis-print-doc .parties {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    font-size: 10pt;
+  }
+
+  .devis-print-doc table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+  }
+
+  .devis-print-doc th,
+  .devis-print-doc td {
+    border: 1px solid var(--nf-color-border);
+    padding: 6px 8px;
+    text-align: left;
+  }
+
+  .devis-print-doc th {
+    background: var(--nf-color-bg-muted);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .devis-print-doc .n {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .devis-print-doc .totaux {
+    text-align: right;
+    font-size: 10pt;
+  }
+
+  .devis-print-doc .totaux div {
+    margin-bottom: 4px;
+  }
+}

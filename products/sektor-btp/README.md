@@ -10,7 +10,6 @@ sektor-btp/
 ├── backend/app/          # :sektor:app
 ├── backend/modules/      # :sektor:<domaine>
 ├── web/app/              # UI (@applications/*)
-├── docs/                 # specs, QA, roadmaps ERP
 └── deploy/k8s/overlays/  # staging | prod
 ```
 
@@ -18,7 +17,7 @@ sektor-btp/
 
 ```bash
 .\gradlew.bat :sektor:app:bootJar
-cd products/sektor-btp/web && npm run build:staging   # ou build:prod pour prod
+cd web && npm run build:staging   # ou build:prod pour prod
 ```
 
 ## Deploy

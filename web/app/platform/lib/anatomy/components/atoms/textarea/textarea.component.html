@@ -1,0 +1,35 @@
+<div class="nf-textarea-wrapper" [class]="class">
+  <!-- Label -->
+  <label *ngIf="label" [for]="id" class="nf-textarea-label">
+    {{ label }}
+    <span class="nf-required-indicator" *ngIf="required">*</span>
+  </label>
+
+  <!-- Textarea element -->
+  <textarea
+    [id]="id"
+    [value]="value()"
+    [placeholder]="placeholder || ''"
+    [disabled]="disabled"
+    [required]="required"
+    [rows]="rows"
+    [maxLength]="maxlength"
+    [attr.aria-invalid]="shouldShowError()"
+    [attr.aria-required]="required"
+    [attr.aria-describedby]="shouldShowError() ? id + '-error' : null"
+    class="nf-textarea-field"
+    (input)="onValueChange($event)"
+    (focus)="onFocus()"
+    (blur)="onBlur()"
+  ></textarea>
+
+  <!-- Error message -->
+  <span
+    *ngIf="shouldShowError()"
+    [id]="id + '-error'"
+    class="nf-textarea-error"
+    role="alert"
+  >
+    {{ error }}
+  </span>
+</div>

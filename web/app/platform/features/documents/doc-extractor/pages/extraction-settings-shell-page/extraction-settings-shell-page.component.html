@@ -1,0 +1,20 @@
+<div class="settings-shell">
+  <dox-context-header
+    [docType]="'docExtractor.settings.shell.title' | translate"
+    [hint]="'docExtractor.contextBar.schemaDescription' | translate"
+  />
+
+  <div class="tabs">
+    <button
+      mat-button
+      class="is-active"
+      (click)="goGeneral()"
+    >
+      {{ 'docExtractor.settings.shell.general' | translate }}
+    </button>
+  </div>
+
+  <section class="shell-body">
+    <router-outlet />
+  </section>
+</div>

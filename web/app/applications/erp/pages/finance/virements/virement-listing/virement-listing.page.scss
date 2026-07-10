@@ -1,0 +1,224 @@
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  background: var(--nf-color-bg-subtle);
+}
+
+.vil {
+  padding: 24px;
+  max-width: 1480px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--nf-text-primary);
+  }
+
+  &__subtitle {
+    margin: 4px 0 0;
+    color: var(--nf-color-text-secondary);
+    font-size: 13px;
+  }
+
+  &__btn {
+    padding: 9px 16px;
+    border-radius: 6px;
+    background: var(--nf-color-primary-600);
+    color: white;
+    border: none;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+
+    &:hover {
+      background: var(--nf-color-primary-700);
+    }
+
+    &--ghost {
+      background: transparent;
+      color: var(--nf-color-text-secondary);
+      border: 1px solid var(--nf-color-border);
+
+      &:hover {
+        background: var(--nf-color-surface);
+        border-color: var(--nf-color-primary-300);
+        color: var(--nf-color-primary-600);
+      }
+    }
+  }
+
+  &__kpi {
+    display: flex;
+    gap: 12px;
+  }
+
+  &__kpi-card {
+    background: var(--nf-color-surface);
+    border: 1px solid var(--nf-color-border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  &__kpi-label {
+    font-size: 11px;
+    color: var(--nf-color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+  }
+
+  &__kpi-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--nf-text-primary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__filters {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    background: var(--nf-color-surface);
+    border: 1px solid var(--nf-color-border);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+
+  &__search {
+    flex: 1;
+    min-width: 240px;
+    padding: 7px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--nf-color-border);
+    font-size: 13px;
+  }
+
+  &__select,
+  &__date {
+    padding: 7px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--nf-color-border);
+    font-size: 13px;
+    color: var(--nf-color-text-primary);
+    background: var(--nf-color-surface);
+  }
+
+  &__table-wrap {
+    background: var(--nf-color-surface);
+    border: 1px solid var(--nf-color-border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+
+    thead th {
+      background: var(--nf-color-bg-subtle);
+      padding: 10px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--nf-color-text-secondary);
+      text-align: left;
+      border-bottom: 1px solid var(--nf-color-border);
+    }
+
+    tbody td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--nf-color-bg-muted);
+      color: var(--nf-color-text-primary);
+    }
+  }
+
+  &__row {
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+
+  &__row:hover {
+    background: var(--nf-color-bg-subtle);
+  }
+
+  &__num {
+    font-family: ui-monospace, SF Mono, Menlo, monospace;
+    font-size: 12px;
+    color: var(--nf-color-primary-600);
+    font-weight: 600;
+  }
+
+  &__th-num {
+    text-align: right;
+  }
+
+  &__td-num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    color: var(--nf-text-primary);
+  }
+
+  &__motif {
+    color: var(--nf-color-text-secondary);
+    max-width: 280px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-weight: 600;
+
+    &[data-variant='success'] {
+      background: var(--nf-color-success-100);
+      color: var(--nf-color-success-700);
+    }
+    &[data-variant='warning'] {
+      background: var(--nf-color-warning-100);
+      color: var(--nf-color-warning-700);
+    }
+    &[data-variant='default'] {
+      background: var(--nf-color-bg-muted);
+      color: var(--nf-color-text-secondary);
+    }
+  }
+
+  &__chev {
+    text-align: right;
+    color: var(--nf-color-border);
+    font-size: 16px;
+  }
+
+  &__empty {
+    padding: 36px;
+    text-align: center;
+    color: var(--nf-color-text-secondary);
+    font-style: italic;
+  }
+}

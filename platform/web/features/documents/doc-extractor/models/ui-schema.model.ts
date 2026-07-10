@@ -7,11 +7,6 @@
 
 export interface UiSchema {
   /**
-   * Import policy for smart import: PARTIAL (skip invalid rows) or STRICT.
-   */
-  importPolicy?: 'PARTIAL' | 'STRICT';
-
-  /**
    * Form sections rendered in the record dialog.
    */
   sections: UiSection[];

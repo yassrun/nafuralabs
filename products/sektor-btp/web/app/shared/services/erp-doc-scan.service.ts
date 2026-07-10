@@ -44,10 +44,6 @@ export class ErpDocScanService {
       throw new Error('ERP_DOC_SCAN_FAILED');
     }
 
-    if (response.status !== 'COMPLETED' && response.status !== 'SUCCESS') {
-      throw new Error('ERP_DOC_SCAN_FAILED');
-    }
-
     return extractObject(response.extractedJson);
   }
 

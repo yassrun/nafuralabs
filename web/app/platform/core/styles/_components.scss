@@ -1,0 +1,222 @@
+/**
+ * Nafura Platform - Component Tokens
+ *
+ * Design tokens specific to UI components.
+ * These map to base tokens and can be overridden by products.
+ * See DESIGN-SYSTEM.md for usage (heights, padding, Separator vs spacing).
+ *
+ * Naming: --nf-{component}-{property}
+ */
+
+:root {
+  /* ═══════════════════════════════════════════════════════════════════════════
+     Button
+     ═══════════════════════════════════════════════════════════════════════════ */
+  /** Dense: sm 32px, md 40px; no 48px as default (design system). */
+  --nf-button-height-sm: 32px;
+  --nf-button-height-md: 40px;
+  --nf-button-height-lg: 48px;
+  --nf-button-padding-x-sm: var(--nf-space-3);
+  --nf-button-padding-x-md: var(--nf-space-4);
+  --nf-button-padding-x-lg: var(--nf-space-6);
+  --nf-button-radius: var(--nf-radius-md);
+  --nf-button-font-size: var(--nf-font-size-sm);
+  --nf-button-font-weight: var(--nf-font-weight-medium);
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     Page Header
+     ═══════════════════════════════════════════════════════════════════════════ */
+  /** Min/max height: breadcrumb + title + actions; compact padding (design system). */
+  --nf-page-header-min-height: 56px;
+  --nf-page-header-max-height: 80px;
+  --nf-page-header-padding-top: var(--nf-space-2);
+  --nf-page-header-padding-bottom: var(--nf-space-3);
+  --nf-page-header-margin-bottom: var(--nf-space-2);
+  /** Vertical gap between breadcrumb row and title/actions row */
+  --nf-page-header-row-gap: var(--nf-space-2);
+  /** Horizontal gap between title block and actions; gap between icon and title */
+  --nf-page-header-gap: var(--nf-space-4);
+  /** Gap between action buttons (Import / Add Product) */
+  --nf-page-header-actions-gap: var(--nf-space-2);
+  --nf-page-header-icon-size: 32px;
+  --nf-page-header-icon-color: var(--nf-primary);
+  --nf-page-header-title-size: var(--nf-font-size-2xl);
+  --nf-page-header-title-weight: var(--nf-font-weight-semibold);
+  --nf-page-header-title-color: var(--nf-text-primary);
+  --nf-page-header-subtitle-size: var(--nf-font-size-sm);
+  --nf-page-header-subtitle-color: var(--nf-text-secondary);
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     Breadcrumb
+     ═══════════════════════════════════════════════════════════════════════════ */
+  --nf-breadcrumb-font-size: var(--nf-font-size-sm);
+  --nf-breadcrumb-link-color: var(--nf-primary);
+  --nf-breadcrumb-text-color: var(--nf-text-secondary);
+  --nf-breadcrumb-current-color: var(--nf-text-primary);
+  --nf-breadcrumb-separator-color: var(--nf-text-disabled);
+  --nf-breadcrumb-gap: var(--nf-space-2);
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     Badge
+     ═══════════════════════════════════════════════════════════════════════════ */
+  --nf-badge-padding-x: var(--nf-space-2);
+  --nf-badge-padding-y: var(--nf-space-0-5);
+  --nf-badge-font-size: var(--nf-font-size-xs);
+  --nf-badge-font-weight: var(--nf-font-weight-medium);
+  --nf-badge-radius: var(--nf-radius-full);
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     Data Table
+     ═══════════════════════════════════════════════════════════════════════════ */
+  /** Slightly distinct from body (COLOR-SYSTEM: one neutral step). */
+  --nf-table-header-bg: var(--nf-surface-hover);
+  --nf-table-header-color: var(--nf-text-secondary);
+  --nf-table-header-font-size: var(--nf-font-size-xs);
+  --nf-table-header-font-weight: var(--nf-font-weight-semibold);
+  /** Slightly smaller than row (design system). */
+  --nf-table-header-height: 36px;
+  --nf-table-row-bg: var(--nf-surface-table);
+  --nf-table-row-hover-bg: var(--nf-surface-hover);
+  /** Selected row: very subtle tint - row highlight does the work, not checkbox */
+  --nf-table-row-selected-bg: var(--nf-color-primary-50);
+  /** Row 40px to align with toolbar/input (design system). */
+  --nf-table-row-height: 40px;
+  /** 12px vertical, 16px horizontal; assumes single-line content; multi-line rows may auto-expand. */
+  --nf-table-cell-padding-x: var(--nf-space-4);
+  --nf-table-cell-padding-y: var(--nf-space-3);
+  --nf-table-border-color: var(--nf-border-default);
+  /** Checkbox column: compact, control-weight (not attention-weight) */
+  --nf-table-checkbox-column-width: 48px;
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     Selection Bar (Bulk Operations)
+     ═══════════════════════════════════════════════════════════════════════════ */
+  /** Selection bar: white surface + primary border (not blue fill) */
+  --nf-selection-bar-bg: var(--nf-color-surface);
+  --nf-selection-bar-border: 1px solid var(--nf-color-primary-300);
+  --nf-selection-bar-radius: var(--nf-radius-md);
+  /** Icon color: muted when empty, primary when has selection */
+  --nf-selection-bar-icon-color: var(--nf-primary);
+  --nf-selection-bar-icon-color-empty: var(--nf-text-muted);
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     Filter Bar
+     ═══════════════════════════════════════════════════════════════════════════ */
+  --nf-filter-bar-bg: var(--nf-surface-section);
+  --nf-filter-bar-padding: var(--nf-space-4);
+  --nf-filter-bar-radius: var(--nf-radius-lg);
+  --nf-filter-bar-gap: var(--nf-space-3);
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     Listing Toolbar
+     ═══════════════════════════════════════════════════════════════════════════ */
+  /** Target height 40px; may grow vertically only when wrapping. Do not set larger (e.g. 48px) for comfort (design system). */
+  --nf-listing-toolbar-height: 40px;
+  /** Tight cushion; inner gaps between items use --nf-space-2 (8px). */
+  --nf-listing-toolbar-padding: var(--nf-space-2);
+  /** Gap between search, filters, and actions. */
+  --nf-listing-toolbar-gap: var(--nf-space-2);
+  /** Section padding on listing pages (compact). */
+  --nf-listing-section-padding: var(--nf-space-3);
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     Separator (context divider)
+     ═══════════════════════════════════════════════════════════════════════════ */
+  /** Use for borders between contexts (e.g. toolbar vs table, sidebar vs content). In code/specs use name "Separator" or "Context separator" (design system). */
+  --nf-separator-border: 1px solid var(--nf-border-default);
+  --nf-separator-color: var(--nf-border-default);
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     Pagination
+     ═══════════════════════════════════════════════════════════════════════════ */
+  /** Bar height 40px to align with toolbar and table row (design system). */
+  --nf-pagination-bar-height: 40px;
+  --nf-pagination-button-size: 36px;
+  --nf-pagination-font-size: var(--nf-font-size-sm);
+  --nf-pagination-gap: var(--nf-space-1);
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     Input / Form Controls
+     ═══════════════════════════════════════════════════════════════════════════ */
+  /** 40px to align with button-md and toolbar row (design system). */
+  --nf-input-height: 40px;
+  --nf-input-padding-x: var(--nf-space-3);
+  --nf-input-font-size: var(--nf-font-size-sm);
+  --nf-input-radius: var(--nf-radius-md);
+  --nf-input-border-color: var(--nf-border-default);
+  --nf-input-focus-border-color: var(--nf-border-focus);
+  --nf-input-bg: var(--nf-surface-section);
+  --nf-input-placeholder-color: var(--nf-text-muted);
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     Card / Panel
+     ═══════════════════════════════════════════════════════════════════════════ */
+  --nf-card-bg: var(--nf-surface-section);
+  --nf-card-border: var(--nf-border-default);
+  --nf-card-radius: var(--nf-radius-lg);
+  --nf-card-padding: var(--nf-space-4);
+  --nf-card-shadow: var(--nf-shadow-sm);
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     Modal / Dialog
+     ═══════════════════════════════════════════════════════════════════════════ */
+  --nf-modal-bg: var(--nf-surface-section);
+  --nf-modal-radius: var(--nf-radius-xl);
+  --nf-modal-padding: var(--nf-space-6);
+  --nf-modal-shadow: var(--nf-shadow-xl);
+  --nf-modal-backdrop: rgba(0, 0, 0, 0.5);
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     Toast
+     ═══════════════════════════════════════════════════════════════════════════ */
+  --nf-toast-bg: var(--nf-color-gray-900);
+  --nf-toast-color: var(--nf-color-text-inverse);
+  --nf-toast-radius: var(--nf-radius-lg);
+  --nf-toast-padding: var(--nf-space-3) var(--nf-space-4);
+  --nf-toast-shadow: var(--nf-shadow-lg);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Table Cell Utility Classes
+   Use via cssClass in ColumnConfig for data tables.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/** Text alignment */
+.nf-text-left {
+  text-align: left !important;
+}
+
+.nf-text-center {
+  text-align: center !important;
+}
+
+.nf-text-right {
+  text-align: right !important;
+}
+
+/** Text color modifiers */
+.nf-text-secondary {
+  color: var(--nf-text-secondary) !important;
+}
+
+.nf-text-muted {
+  color: var(--nf-text-muted) !important;
+}
+
+.nf-text-success {
+  color: var(--nf-color-success) !important;
+}
+
+.nf-text-warning {
+  color: var(--nf-color-warning) !important;
+}
+
+.nf-text-danger {
+  color: var(--nf-color-danger) !important;
+}
+
+/** Numeric formatting - monospace for better column alignment */
+.nf-text-numeric {
+  font-variant-numeric: tabular-nums !important;
+  text-align: right !important;
+}
