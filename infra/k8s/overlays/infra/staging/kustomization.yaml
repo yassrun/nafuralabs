@@ -16,6 +16,7 @@ resources:
   - ../../../base/infra/ingress.yaml
   - ../../../base/infra/vault-init-job.yaml
   - vault-unseal-cronjob.yaml
+  - ../prod/vault-k8s-auth-refresh-cronjob.yaml
 
 generatorOptions:
   disableNameSuffixHash: true
@@ -30,6 +31,10 @@ patches:
       kind: Ingress
       name: nafura-ingress
     path: patch-ingress-hosts.yaml
+  - target:
+      kind: Ingress
+      name: nafura-ingress
+    path: patch-ingress-http-only.yaml
   - target:
       kind: PersistentVolumeClaim
       name: postgres-data

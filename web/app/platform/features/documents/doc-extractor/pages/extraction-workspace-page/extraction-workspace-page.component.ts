@@ -364,10 +364,16 @@ export class ExtractionWorkspacePage implements OnInit {
           return;
         }
 
+        const draftId = response.recordId ?? response.requestId;
+        if (!draftId) {
+          this.snackBar.open('Extraction response missing record identifier', 'Dismiss', { duration: 5000 });
+          return;
+        }
+
         const draft: ExtractionDraft = {
           // Backend creates an extracted_record immediately; use recordId as draft identifier
           // (the validate endpoint operates on recordId, not requestId)
-          draftId: response.recordId ?? response.requestId,
+          draftId,
           domainKey: def.domainKey,
           docTypeKey: def.docTypeKey,
           docTypeVersion: def.version,
@@ -385,7 +391,8 @@ export class ExtractionWorkspacePage implements OnInit {
   }
 
   private handleExactDuplicate(response: ExtractionResponse): void {
-    const dedup = response.dedup.exactDuplicate;
+    const dedup = response.dedup?.exactDuplicate;
+    if (!dedup) return;
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
@@ -416,7 +423,8 @@ export class ExtractionWorkspacePage implements OnInit {
   }
 
   private handleNearDuplicate(response: ExtractionResponse): void {
-    const dedup = response.dedup.nearDuplicate;
+    const dedup = response.dedup?.nearDuplicate;
+    if (!dedup) return;
     const distanceInfo = dedup.distance !== null ? ` (Distance: ${dedup.distance})` : '';
     
     const snackBarRef = this.snackBar.open(

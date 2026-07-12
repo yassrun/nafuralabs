@@ -10,6 +10,8 @@ spec:
           env:
             - name: KC_HOSTNAME
               value: iam.nafuralabs.staging
+            - name: KC_HOSTNAME_URL
+              value: http://iam.nafuralabs.staging
             - name: KC_HOSTNAME_STRICT
               value: "false"
             - name: KC_HTTP_ENABLED

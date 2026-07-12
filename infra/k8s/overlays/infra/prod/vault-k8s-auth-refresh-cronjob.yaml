@@ -1,0 +1,83 @@
+# Vault Kubernetes auth uses a token_reviewer_jwt to validate pod SA tokens via the
+# TokenReview API. That JWT expires (vault-init creates one with 24h TTL) and prod
+# skips vault-init after bootstrap — without refresh, vault-injected pods get 403 on login.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: vault-k8s-auth-refresh
+spec:
+  schedule: "0 */12 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 300
+      template:
+        spec:
+          serviceAccountName: vault-bootstrap
+          restartPolicy: OnFailure
+          containers:
+            - name: refresh
+              image: hashicorp/vault:1.15
+              env:
+                - name: VAULT_ADDR
+                  value: "http://vault:8200"
+                - name: INFRA_NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.namespace
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -e
+                  apk add --no-cache curl >/dev/null 2>&1
+                  SA_DIR="/var/run/secrets/kubernetes.io/serviceaccount"
+                  KUBE_API="https://${KUBERNETES_SERVICE_HOST}:${KUBERNETES_SERVICE_PORT}"
+                  KUBE_TOKEN="$(cat "${SA_DIR}/token")"
+                  KUBE_CA="${SA_DIR}/ca.crt"
+                  KUBE_NS="$(cat "${SA_DIR}/namespace")"
+
+                  set +e
+                  vault status >/dev/null 2>&1
+                  code=$?
+                  set -e
+                  [ "$code" -eq 0 ] || [ "$code" -eq 2 ] || { echo "Vault API not reachable"; exit 0; }
+                  if vault status 2>&1 | grep -q "Sealed.*true"; then
+                    echo "Vault sealed — skip (vault-unseal cron handles unseal)"
+                    exit 0
+                  fi
+
+                  SECRET_JSON="$(curl -sf --cacert "${KUBE_CA}" \
+                    -H "Authorization: Bearer ${KUBE_TOKEN}" \
+                    "${KUBE_API}/api/v1/namespaces/${KUBE_NS}/secrets/vault-bootstrap" 2>/dev/null || true)"
+                  if [ -z "${SECRET_JSON}" ]; then
+                    echo "secret/vault-bootstrap missing"
+                    exit 1
+                  fi
+                  ROOT_TOKEN="$(echo "${SECRET_JSON}" | grep -o '"root_token": "[^"]*"' | head -1 | cut -d'"' -f4 | base64 -d)"
+                  if [ -z "${ROOT_TOKEN}" ]; then
+                    echo "root_token empty in secret/vault-bootstrap"
+                    exit 1
+                  fi
+
+                  REVIEWER_JWT="$(curl -sf --cacert "${KUBE_CA}" \
+                    -H "Authorization: Bearer ${KUBE_TOKEN}" \
+                    -H "Content-Type: application/json" \
+                    -X POST \
+                    "${KUBE_API}/api/v1/namespaces/${INFRA_NAMESPACE}/serviceaccounts/vault/token" \
+                    -d '{"spec":{"expirationSeconds":604800}}' \
+                    | sed -n 's/.*"token": "\([^"]*\)".*/\1/p' | head -1)"
+                  if [ -z "${REVIEWER_JWT}" ]; then
+                    echo "Failed to obtain vault service account token"
+                    exit 1
+                  fi
+
+                  export VAULT_TOKEN="${ROOT_TOKEN}"
+                  vault write auth/kubernetes/config \
+                    kubernetes_host="${KUBE_API}" \
+                    kubernetes_ca_cert=@"${SA_DIR}/ca.crt" \
+                    token_reviewer_jwt="${REVIEWER_JWT}" \
+                    disable_iss_validation=true
+                  echo "Vault Kubernetes auth config refreshed"

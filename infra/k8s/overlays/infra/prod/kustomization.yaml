@@ -16,6 +16,7 @@ resources:
   - ../../../base/infra/ingress.yaml
   - ../../../base/infra/vault-init-job.yaml
   - vault-unseal-cronjob.yaml
+  - vault-k8s-auth-refresh-cronjob.yaml
   - clusterissuer-letsencrypt.yaml
 
 generatorOptions:

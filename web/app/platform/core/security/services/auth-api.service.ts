@@ -21,6 +21,7 @@ import { User } from '../models/user.models';
 import { TenantMembership } from '../models/tenant.models';
 import { TokenPair } from '../models/token.models';
 import { ApiConfigService } from '../../config/api-config.service';
+import { getPublicWebOrigin } from '../../config/public-web-origin';
 import { APPLICATION_REQUIRES_TENANT } from '@applications/config/routes';
 
 /**
@@ -76,7 +77,7 @@ export class AuthApiService {
    * Initiate login by redirecting to Keycloak with PKCE.
    */
   async login(): Promise<void> {
-    const redirectUri = encodeURIComponent(window.location.origin + '/auth/callback');
+    const redirectUri = encodeURIComponent(getPublicWebOrigin() + '/auth/callback');
     
     // Generate PKCE code verifier and challenge
     const codeVerifier = this.generateCodeVerifier();
@@ -101,7 +102,7 @@ export class AuthApiService {
    * Exchange code for tokens using PKCE code verifier.
    */
   async handleCallback(code: string): Promise<LoginResponse> {
-    const redirectUri = window.location.origin + '/auth/callback';
+    const redirectUri = getPublicWebOrigin() + '/auth/callback';
     
     // Retrieve and clear the code verifier
     const codeVerifier = sessionStorage.getItem(this.CODE_VERIFIER_KEY);
@@ -162,7 +163,10 @@ export class AuthApiService {
     localStorage.removeItem(this.ID_TOKEN_KEY);
 
     // Redirect to Keycloak logout with id_token_hint to skip confirmation
-    const redirectUri = encodeURIComponent(window.location.origin + '/login');
+    const postLogoutPath = (environment as { directKeycloakLogin?: boolean }).directKeycloakLogin
+      ? '/'
+      : '/login';
+    const redirectUri = encodeURIComponent(getPublicWebOrigin() + postLogoutPath);
     let logoutUrl = `${this.keycloakUrl}/realms/${this.realm}/protocol/openid-connect/logout` +
       `?client_id=${this.clientId}` +
       `&post_logout_redirect_uri=${redirectUri}`;

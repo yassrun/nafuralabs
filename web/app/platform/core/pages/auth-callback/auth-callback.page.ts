@@ -80,19 +80,23 @@ export class AuthCallbackPage implements OnInit {
     await this.router.navigate(['/', ...segments]);
   }
 
+  private retryLogin(): void {
+    void this.auth.loginWithReturnUrl();
+  }
+
   async ngOnInit() {
     const code = this.route.snapshot.queryParams['code'];
     const error = this.route.snapshot.queryParams['error'];
 
     if (error) {
       this.message = 'Authentication failed. Redirecting to login...';
-      setTimeout(() => this.router.navigate(['/login']), 2000);
+      setTimeout(() => this.retryLogin(), 2000);
       return;
     }
 
     if (!code) {
       this.message = 'Invalid callback. Redirecting to login...';
-      setTimeout(() => this.router.navigate(['/login']), 2000);
+      setTimeout(() => this.retryLogin(), 2000);
       return;
     }
 
@@ -120,12 +124,12 @@ export class AuthCallbackPage implements OnInit {
         }
       } else {
         this.message = 'Authentication failed. Redirecting to login...';
-        setTimeout(() => this.router.navigate(['/login']), 2000);
+        setTimeout(() => this.retryLogin(), 2000);
       }
     } catch (error) {
       console.error('Auth callback error:', error);
       this.message = 'Authentication error. Redirecting to login...';
-      setTimeout(() => this.router.navigate(['/login']), 2000);
+      setTimeout(() => this.retryLogin(), 2000);
     }
   }
 }

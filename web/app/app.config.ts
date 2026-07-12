@@ -64,6 +64,7 @@ import { ADMINISTRATION_CONFIG } from '@platform/features/administration/adminis
 import { USER_SETTINGS_CONFIG } from '@platform/features/user-settings/user-settings.token';
 import { APP_SETTINGS_CONFIG } from '@platform/features/app-settings/app-settings.token';
 import { ErpNotificationsService } from '@applications/erp/shell/erp-notifications.service';
+import { ensurePublicHttpOrigin } from '@platform/core/config/public-web-origin';
 import { ErpNotificationBellAdapter } from '@applications/erp/shell/erp-notification-bell.adapter';
 import { ErpNotificationBellListComponent } from '@applications/erp/shell/erp-notification-bell-list.component';
 import { ChantierDrilldownService } from '@applications/erp/shell/chantier-drilldown.service';
@@ -100,6 +101,7 @@ function initializeApp(): () => Promise<void> {
   const unreadNotif = inject(NotificationUnreadService);
 
   return async () => {
+    ensurePublicHttpOrigin();
     locale.init();
     await auth.initialize();
     i18n.initialize();

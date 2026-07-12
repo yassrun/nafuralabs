@@ -20,6 +20,8 @@ export const environment = {
   },
   /** Feature flag: agentic onboarding v2 (/signup, /onboarding). */
   onboardingV2Enabled: true,
+  /** When true, unauthenticated routes skip /login and open Keycloak directly. */
+  directKeycloakLogin: false,
 
   devAuthUser: {
     id: 'dev-user',

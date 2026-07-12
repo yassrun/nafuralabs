@@ -10,6 +10,7 @@ import { Router, CanActivateFn, CanMatchFn, UrlTree, ActivatedRouteSnapshot } fr
 import { AuthFacade } from '../services/auth.facade';
 import { PermissionService } from '../services/permission.service';
 import { Permission } from '../models/user.models';
+import { redirectUnauthenticated } from './unauthenticated-redirect';
 
 /**
  * Route data interface for permission configuration.
@@ -48,7 +49,7 @@ export function permissionGuard(
 
     // Check authentication first
     if (!auth.isAuthenticated()) {
-      return router.createUrlTree(['/login']);
+      return redirectUnauthenticated();
     }
 
     // Super admin bypasses all
@@ -96,7 +97,7 @@ export const routePermissionGuard: CanActivateFn = (
 
   // Check authentication first
   if (!auth.isAuthenticated()) {
-    return router.createUrlTree(['/login']);
+    return redirectUnauthenticated();
   }
 
   // Super admin bypasses all
@@ -151,7 +152,7 @@ export function featureGuard(featureId: string): CanActivateFn {
     const router = inject(Router);
 
     if (!auth.isAuthenticated()) {
-      return router.createUrlTree(['/login']);
+      return redirectUnauthenticated();
     }
 
     if (!permissionService.isFeatureAccessible(featureId)) {

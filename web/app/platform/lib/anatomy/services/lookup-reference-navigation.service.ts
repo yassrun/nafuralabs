@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 
 import { AuthFacade } from '../../../core/security/services/auth.facade';
 
-const POST_AUTH_REDIRECT_KEY = 'nafura_post_auth_redirect';
+export const POST_AUTH_REDIRECT_STORAGE_KEY = 'nafura_post_auth_redirect';
 
 @Injectable({ providedIn: 'root' })
 export class LookupReferenceNavigationService {
@@ -33,12 +33,12 @@ export class LookupReferenceNavigationService {
     if (!trimmed.startsWith('/')) {
       return;
     }
-    sessionStorage.setItem(POST_AUTH_REDIRECT_KEY, trimmed);
+    sessionStorage.setItem(POST_AUTH_REDIRECT_STORAGE_KEY, trimmed);
   }
 
   consumePostAuthRedirect(): string | null {
-    const route = sessionStorage.getItem(POST_AUTH_REDIRECT_KEY);
-    sessionStorage.removeItem(POST_AUTH_REDIRECT_KEY);
+    const route = sessionStorage.getItem(POST_AUTH_REDIRECT_STORAGE_KEY);
+    sessionStorage.removeItem(POST_AUTH_REDIRECT_STORAGE_KEY);
     if (!route?.startsWith('/')) {
       return null;
     }

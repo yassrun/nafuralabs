@@ -7,6 +7,7 @@ export const environment = {
   keycloakClientId: 'erp-web',
 
   onboardingV2Enabled: true,
+  directKeycloakLogin: false,
 
   devAuthBypass: false,
   devAuthEagerBootstrap: false,

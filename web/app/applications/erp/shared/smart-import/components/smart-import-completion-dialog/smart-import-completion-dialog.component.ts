@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
-import { FormArray, ReactiveFormsModule } from '@angular/forms';
+import { FormArray, ReactiveFormsModule, AbstractControl } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 
@@ -63,7 +63,7 @@ export class SmartImportCompletionDialogComponent {
   readonly data = inject<SmartImportCompletionDialogData>(MAT_DIALOG_DATA);
   private readonly dialogRef = inject(MatDialogRef<SmartImportCompletionDialogComponent, SmartImportCompletionDialogResult>);
 
-  readonly formArray = new FormArray<ReturnType<typeof JsonSchemaFormBuilder.buildGroupForObjectSchema>>([]);
+  readonly formArray = new FormArray<AbstractControl>([]);
   readonly requiredFields: string[];
 
   constructor() {

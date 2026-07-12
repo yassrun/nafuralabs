@@ -1,11 +1,11 @@
-import { inject } from '@angular/core';
-import { CanActivateFn, Router } from '@angular/router';
+import { CanActivateFn } from '@angular/router';
 
 import { environment } from '@env';
+import { redirectUnauthenticated } from '@platform/core/security/guards/unauthenticated-redirect';
 
 export const onboardingV2EnabledGuard: CanActivateFn = () => {
   if (environment.onboardingV2Enabled) {
     return true;
   }
-  return inject(Router).createUrlTree(['/login']);
+  return redirectUnauthenticated();
 };

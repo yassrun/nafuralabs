@@ -25,6 +25,7 @@ import { User, UserProfile } from '../models/user.models';
 import { TenantMembership, TenantContext } from '../models/tenant.models';
 import { TokenPair } from '../models/token.models';
 import { SystemRoles } from '../models/user.models';
+import { POST_AUTH_REDIRECT_STORAGE_KEY } from '@lib/anatomy/services/lookup-reference-navigation.service';
 
 /**
  * Auth Facade
@@ -265,6 +266,24 @@ export class AuthFacade {
   }
 
   /**
+   * Staging rollout: skip the in-app /login splash and redirect straight to Keycloak.
+   */
+  usesDirectKeycloakLogin(): boolean {
+    return (environment as { directKeycloakLogin?: boolean }).directKeycloakLogin === true;
+  }
+
+  /**
+   * Remember intended route, then start OAuth (or dev login flow).
+   */
+  async loginWithReturnUrl(returnUrl?: string | null): Promise<void> {
+    const trimmed = returnUrl?.trim();
+    if (trimmed?.startsWith('/')) {
+      sessionStorage.setItem(POST_AUTH_REDIRECT_STORAGE_KEY, trimmed);
+    }
+    await this.login();
+  }
+
+  /**
    * Initiate login by redirecting to Keycloak.
    * This replaces the credential-based login.
    */
@@ -340,19 +359,21 @@ export class AuthFacade {
    * Logout and clear session.
    * Redirects to Keycloak logout to invalidate SSO session.
    */
-  async logout(redirectTo: string = '/login'): Promise<void> {
+  async logout(redirectTo?: string): Promise<void> {
     const tokens = this.state.tokens();
+    const fallbackRedirect = this.usesDirectKeycloakLogin() ? '/' : '/login';
+    const target = redirectTo ?? fallbackRedirect;
 
     this.cancelTokenRefresh();
     this.state.clear();
     this.state.clearPersistedTenant();
 
     if (environment.devAuthBypass) {
-      await this.router.navigateByUrl(redirectTo);
+      await this.router.navigateByUrl(target);
       return;
     }
 
-    // Redirect to Keycloak logout (will redirect back to login page)
+    // Redirect to Keycloak logout (will redirect back to app root or /login)
     await this.api.logout(tokens?.refreshToken);
   }
 

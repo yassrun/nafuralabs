@@ -135,7 +135,7 @@ export class SignupPage {
     }
     if (result.loginRequired) {
       this.info.set(result.message);
-      await this.router.navigate(['/login']);
+      await this.auth.loginWithReturnUrl('/onboarding');
       return;
     }
     if (result.resumed) {
