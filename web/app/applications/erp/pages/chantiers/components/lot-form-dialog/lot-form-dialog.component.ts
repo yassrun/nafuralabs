@@ -15,6 +15,14 @@ export interface LotFormDialogData {
   lots: LotChantier[];
   defaultParentLotId?: string;
   defaultTargetLotId?: string;
+  isEdit?: boolean;
+  initial?: {
+    code?: string;
+    designation?: string;
+    quantite?: number;
+    unite?: string;
+    prixUnitaireHt?: number;
+  };
 }
 
 export interface LotFormDialogResult {
@@ -39,7 +47,7 @@ export interface LotFormDialogResult {
         <nf-button variant="ghost" icon="x" (clicked)="close()" [attr.aria-label]="'common.close' | translate"></nf-button>
       </header>
 
-      @if (data.mode === 'sousLot') {
+      @if (data.mode === 'sousLot' && !data.isEdit) {
         <label class="field">
           <span>{{ 'chantiers.chantier.detail.lots.formParentLot' | translate }} *</span>
           <select [ngModel]="parentLotId()" (ngModelChange)="parentLotId.set($event)">
@@ -51,7 +59,7 @@ export interface LotFormDialogResult {
         </label>
       }
 
-      @if (data.mode === 'poste') {
+      @if (data.mode === 'poste' && !data.isEdit) {
         <label class="field">
           <span>{{ 'chantiers.chantier.detail.lots.formTargetLot' | translate }} *</span>
           <select [ngModel]="targetLotId()" (ngModelChange)="targetLotId.set($event)">
@@ -111,7 +119,7 @@ export interface LotFormDialogResult {
       <footer>
         <nf-button variant="secondary" (clicked)="close()">{{ 'chantiers.chantier.detail.cancel' | translate }}</nf-button>
         <nf-button variant="primary" [disabled]="!canSave()" (clicked)="save()">
-          {{ 'chantiers.chantier.detail.lots.addAction' | translate }}
+          {{ (data.isEdit ? 'chantiers.chantier.detail.lots.saveAction' : 'chantiers.chantier.detail.lots.addAction') | translate }}
         </nf-button>
       </footer>
     </div>
@@ -136,11 +144,11 @@ export class LotFormDialogComponent {
 
   readonly units = BPU_UNITS;
 
-  readonly code = signal('');
-  readonly designation = signal('');
-  readonly quantite = signal('');
-  readonly unite = signal<string>('U');
-  readonly prixUnitaireHt = signal('');
+  readonly code = signal(this.data.initial?.code ?? '');
+  readonly designation = signal(this.data.initial?.designation ?? '');
+  readonly quantite = signal(this.data.initial?.quantite != null ? String(this.data.initial.quantite) : '');
+  readonly unite = signal<string>(this.data.initial?.unite ?? 'U');
+  readonly prixUnitaireHt = signal(this.data.initial?.prixUnitaireHt != null ? String(this.data.initial.prixUnitaireHt) : '');
   readonly parentLotId = signal(this.data.defaultParentLotId ?? '');
   readonly targetLotId = signal(this.data.defaultTargetLotId ?? '');
 
@@ -155,6 +163,16 @@ export class LotFormDialogComponent {
   );
 
   readonly titleKey = computed(() => {
+    if (this.data.isEdit) {
+      switch (this.data.mode) {
+        case 'sousLot':
+          return 'chantiers.chantier.detail.lots.editSousLotTitle';
+        case 'poste':
+          return 'chantiers.chantier.detail.lots.editPosteTitle';
+        default:
+          return 'chantiers.chantier.detail.lots.editTitle';
+      }
+    }
     switch (this.data.mode) {
       case 'sousLot':
         return 'chantiers.chantier.detail.lots.addSousLotTitle';
@@ -174,12 +192,12 @@ export class LotFormDialogComponent {
     // Common: a code and a designation are always required.
     if (!this.code().trim() || !this.designation().trim()) return false;
 
-    if (this.data.mode === 'sousLot' && !this.parentLotId()) return false;
+    if (this.data.mode === 'sousLot' && !this.data.isEdit && !this.parentLotId()) return false;
 
     // Quantité / unité / prix are only meaningful for a poste (article).
     // A lot or sous-lot is a grouping whose amount is the sum of its postes.
     if (this.data.mode === 'poste') {
-      if (!this.targetLotId()) return false;
+      if (!this.data.isEdit && !this.targetLotId()) return false;
       if (!this.unite().trim()) return false;
       const q = this.parseNumber(this.quantite());
       const pu = this.parseNumber(this.prixUnitaireHt());

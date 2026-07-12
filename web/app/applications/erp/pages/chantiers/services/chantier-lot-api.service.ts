@@ -57,4 +57,23 @@ export class ChantierLotApiService extends FeatureApiService<LotChantier, Partia
     });
     return lotToUi(row);
   }
+
+  async updateForChantier(chantierId: string, lotId: string, data: Partial<LotChantier>): Promise<LotChantier> {
+    const row = await this.put<ApiChantierLot>(`${this.basePath}/${chantierId}/lots/${lotId}`, {
+      code: data.code,
+      designation: data.designation,
+      parentLotId: data.parentLotId,
+      unite: data.unite,
+      quantite: data.quantite,
+      prixUnitaireHt: data.prixUnitaireHt,
+      montantHt: data.montantHt,
+      avancementPercent: data.avancementPercent,
+      ordre: data.ordre,
+    });
+    return lotToUi(row);
+  }
+
+  async deleteForChantier(chantierId: string, lotId: string): Promise<void> {
+    await this.deleteRequest(`${this.basePath}/${chantierId}/lots/${lotId}`);
+  }
 }

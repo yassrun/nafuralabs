@@ -55,4 +55,21 @@ export class PosteBudgetaireApiService extends FeatureApiService<
     });
     return posteToUi(row);
   }
+
+  async updatePoste(posteId: string, data: Partial<PosteBudgetaire>): Promise<PosteBudgetaire> {
+    const row = await this.put<ApiPosteBudgetaire>(`/api/v1/postes-budgetaires/${posteId}`, {
+      code: data.code,
+      designation: data.designation,
+      unite: data.unite,
+      quantite: data.quantite,
+      prixUnitaireHt: data.prixUnitaireHt,
+      montantHt: data.montantHt,
+      ordre: data.ordre,
+    });
+    return posteToUi(row);
+  }
+
+  async deletePoste(posteId: string): Promise<void> {
+    await this.deleteRequest(`/api/v1/postes-budgetaires/${posteId}`);
+  }
 }

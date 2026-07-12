@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: build-intelligence-staging
+  labels:
+    nafura.io/app: build-intelligence
+    nafura.io/env: staging

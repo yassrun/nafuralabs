@@ -64,6 +64,26 @@ listOf("api", "source-adapter", "catalog-place", "catalog-job", "compliance").fo
     includeVenueCatalogModule(it)
 }
 
+// ── Build Intelligence ──────────────────────────────────────────────────────
+fun includeBuildIntelligenceModule(name: String) {
+    val path = ":build-intelligence:$name"
+    include(path)
+    project(path).projectDir = file("products/build-intelligence/backend/modules/$name")
+}
+
+include(":build-intelligence:app")
+project(":build-intelligence:app").projectDir = file("products/build-intelligence/backend/app")
+
+listOf(
+    "api",
+    "documents",
+    "extraction",
+    "catalog",
+    "retrieval",
+    "generation",
+    "integrations-sektor"
+).forEach { includeBuildIntelligenceModule(it) }
+
 // ── Tools ───────────────────────────────────────────────────────────────────
 include(":tools:lifecycle")
 project(":tools:lifecycle").projectDir = file("tools/lifecycle")

@@ -96,7 +96,11 @@ const MIN_LOCAL_PARSE_TASKS = 10;
       }
 
       @if (phases().length) {
-        <table class="data-table">
+        <div class="phases-tablebar">
+          <span class="phases-count">{{ 'chantiers.chantier.detail.phases.countLabel' | translate:{ count: phases().length } }}</span>
+        </div>
+        <div class="table-scroll">
+          <table class="data-table">
           <thead>
             <tr>
               <th>{{ 'chantiers.chantier.detail.columns.code' | translate }}</th>
@@ -126,7 +130,8 @@ const MIN_LOCAL_PARSE_TASKS = 10;
               </tr>
             }
           </tbody>
-        </table>
+          </table>
+        </div>
       } @else {
         <nf-empty-state
           icon="timeline"
@@ -139,7 +144,11 @@ const MIN_LOCAL_PARSE_TASKS = 10;
     .tab-panel__toolbar { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: flex-end; margin-bottom: 0.75rem; }
     .import-file-chip { margin: 0 0 0.75rem; font-size: 0.85rem; color: var(--nf-color-text-secondary); }
     .import-file-chip--progress { color: var(--nf-color-primary-700); font-weight: 600; }
-    .data-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; border: 1px solid var(--nf-color-border); border-radius: 8px; overflow: hidden; }
+    .table-scroll { max-height: 65vh; overflow: auto; border: 1px solid var(--nf-color-border); border-radius: 8px; }
+    .data-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    .data-table thead th { position: sticky; top: 0; z-index: 2; }
+    .phases-tablebar { display: flex; align-items: center; margin-bottom: 0.5rem; }
+    .phases-count { font-size: 0.8125rem; color: var(--nf-color-text-secondary); }
     .data-table th { text-align: left; padding: 0.65rem 1rem; background: var(--nf-color-bg-muted); font-weight: 600; color: var(--nf-color-text-secondary); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; }
     .data-table th.center { text-align: center; }
     .data-table td { padding: 0.65rem 1rem; border-bottom: 1px solid var(--nf-color-bg-muted); color: var(--nf-color-text-secondary); }

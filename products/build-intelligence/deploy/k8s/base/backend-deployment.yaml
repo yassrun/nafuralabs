@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: build-intelligence-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: build-intelligence-backend
+  template:
+    metadata:
+      labels:
+        app: build-intelligence-backend
+    spec:
+      serviceAccountName: build-intelligence-backend
+      containers:
+        - name: build-intelligence-backend
+          image: build-intelligence-backend:staging
+          ports:
+            - containerPort: 8086
+          env:
+            - name: POSTGRES_HOST
+              value: postgres.nafura-infra.svc
+            - name: POSTGRES_DB
+              value: nafura_build_intelligence
+            - name: KEYCLOAK_ISSUER_URI
+              value: http://iam.nafura.local/realms/iam-portal
+            - name: KEYCLOAK_JWK_SET_URI
+              value: http://keycloak.nafura-infra.svc:8080/realms/iam-portal/protocol/openid-connect/certs
+            - name: SEKTOR_API_BASE_URL
+              value: http://sektor-btp-backend.sektor-staging.svc:8082
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8086
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8086
+            initialDelaySeconds: 45
+            periodSeconds: 20

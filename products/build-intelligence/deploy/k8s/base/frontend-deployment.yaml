@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: build-intelligence-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: build-intelligence-web
+  template:
+    metadata:
+      labels:
+        app: build-intelligence-web
+    spec:
+      containers:
+        - name: build-intelligence-web
+          image: build-intelligence-web:staging
+          ports:
+            - containerPort: 80

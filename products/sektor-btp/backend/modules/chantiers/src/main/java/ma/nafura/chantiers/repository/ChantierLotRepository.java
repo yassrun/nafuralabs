@@ -14,6 +14,8 @@ public interface ChantierLotRepository extends TenantScopedRepository<ChantierLo
 
     Optional<ChantierLot> findByTenantIdAndChantierIdAndCode(UUID tenantId, String chantierId, String code);
 
+    List<ChantierLot> findByTenantIdAndParentLotId(UUID tenantId, String parentLotId);
+
     long countByTenantId(UUID tenantId);
 
     long countByTenantIdAndChantierId(UUID tenantId, String chantierId);

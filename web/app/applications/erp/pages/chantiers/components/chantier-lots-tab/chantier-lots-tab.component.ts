@@ -16,7 +16,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import * as XLSX from 'xlsx';
 
 import { BadgeComponent, ButtonComponent, EmptyStateComponent } from '@lib/anatomy/components';
-import { ToastService } from '@lib/anatomy';
+import { ConfirmDialogService, ToastService } from '@lib/anatomy';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
 import type { LotChantier, PosteBudgetaire } from '@applications/erp/chantiers/models';
 
@@ -146,6 +146,7 @@ type BpdeImportStats = {
               <th class="num">{{ 'chantiers.chantier.detail.columns.prixUnitaireHt' | translate }}</th>
               <th class="num">{{ 'chantiers.chantier.detail.columns.montantHt' | translate }}</th>
               <th class="center">{{ 'chantiers.chantier.detail.columns.avancement' | translate }}</th>
+              <th class="center">{{ 'chantiers.chantier.detail.lots.actionsColumn' | translate }}</th>
             </tr>
           </thead>
           <tbody>
@@ -184,6 +185,14 @@ type BpdeImportStats = {
                     <span>—</span>
                   }
                 </td>
+                <td class="center actions-cell">
+                  <button type="button" class="row-action" (click)="editRow(row)"
+                    [attr.title]="'chantiers.chantier.detail.lots.editAction' | translate"
+                    [attr.aria-label]="'chantiers.chantier.detail.lots.editAction' | translate">✎</button>
+                  <button type="button" class="row-action row-action--danger" (click)="deleteRow(row)"
+                    [attr.title]="'chantiers.chantier.detail.lots.deleteAction' | translate"
+                    [attr.aria-label]="'chantiers.chantier.detail.lots.deleteAction' | translate">🗑</button>
+                </td>
               </tr>
             }
           </tbody>
@@ -192,6 +201,7 @@ type BpdeImportStats = {
               <td colspan="6">{{ 'chantiers.chantier.detail.lots.totalLabel' | translate }}</td>
               <td class="num">{{ totalMontantHt() | mad }}</td>
               <td class="center">—</td>
+              <td class="center"></td>
             </tr>
           </tfoot>
           </table>
@@ -230,6 +240,10 @@ type BpdeImportStats = {
     .data-table tfoot .total-row td { padding: 0.75rem 1rem; border-top: 2px solid var(--nf-color-border); background: var(--nf-color-bg-subtle); font-weight: 700; color: var(--nf-color-text-primary); }
     .data-table tfoot .total-row td.num { text-align: right; font-variant-numeric: tabular-nums; }
     .data-table tfoot .total-row td.center { text-align: center; }
+    .actions-cell { white-space: nowrap; }
+    .row-action { border: none; background: transparent; cursor: pointer; font-size: 0.95rem; line-height: 1; padding: 0 0.3rem; color: var(--nf-color-text-secondary); }
+    .row-action:hover { color: var(--nf-color-text-primary); }
+    .row-action--danger:hover { color: var(--nf-color-danger-600, #c0392b); }
     .progress-wrap { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; }
     .progress-bar { width: 100%; height: 6px; background: var(--nf-color-bg-muted); border-radius: 999px; overflow: hidden; }
     .progress-bar.sm { max-width: 80px; }
@@ -249,6 +263,7 @@ export class ChantierLotsTabComponent {
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
   private readonly toast = inject(ToastService);
+  private readonly confirmDialog = inject(ConfirmDialogService);
 
   @ViewChild('lotImportInput') private readonly lotImportInput?: ElementRef<HTMLInputElement>;
 
@@ -472,6 +487,134 @@ export class ChantierLotsTabComponent {
 
   rowAvancement(row: ReturnType<typeof buildLotHierarchyRows>[number]): number {
     return row.lot?.avancementPercent ?? 0;
+  }
+
+  async editRow(row: ReturnType<typeof buildLotHierarchyRows>[number]): Promise<void> {
+    if (row.poste) {
+      await this.openEditPoste(row.poste);
+    } else if (row.lot) {
+      await this.openEditLot(row.lot, row.kind);
+    }
+  }
+
+  private async openEditLot(lot: LotChantier, kind: LotHierarchyRowKind): Promise<void> {
+    const mode: LotFormMode = kind === 'sousLot' ? 'sousLot' : 'rootLot';
+    const ref = this.dialog.open(LotFormDialogComponent, {
+      data: {
+        mode,
+        lots: this.lots(),
+        isEdit: true,
+        initial: { code: lot.code, designation: lot.designation },
+      },
+      autoFocus: 'first-tabbable',
+    });
+    const result = await firstValueFrom(ref.afterClosed());
+    if (!result) return;
+    try {
+      await this.lotApi.updateForChantier(this.chantierId(), lot.id, {
+        code: result.code,
+        designation: result.designation,
+      });
+      this.toast.success(this.translate.instant('chantiers.chantier.detail.lots.updateSuccess'));
+      await this.reload();
+    } catch {
+      this.toast.error(this.translate.instant('chantiers.chantier.detail.lots.updateFailed'));
+    }
+  }
+
+  private async openEditPoste(poste: PosteBudgetaire): Promise<void> {
+    const ref = this.dialog.open(LotFormDialogComponent, {
+      data: {
+        mode: 'poste',
+        lots: this.lots(),
+        isEdit: true,
+        initial: {
+          code: poste.code,
+          designation: poste.designation,
+          quantite: poste.quantite,
+          unite: poste.unite,
+          prixUnitaireHt: poste.prixUnitaireHt,
+        },
+      },
+      autoFocus: 'first-tabbable',
+    });
+    const result = await firstValueFrom(ref.afterClosed());
+    if (!result) return;
+    const quantite = result.quantite ?? 0;
+    const prixUnitaireHt = result.prixUnitaireHt ?? 0;
+    try {
+      await this.posteApi.updatePoste(poste.id, {
+        code: result.code,
+        designation: result.designation,
+        unite: result.unite,
+        quantite,
+        prixUnitaireHt,
+        montantHt: Math.round(quantite * prixUnitaireHt * 100) / 100,
+      });
+      this.toast.success(this.translate.instant('chantiers.chantier.detail.lots.updateSuccess'));
+      await this.reload();
+    } catch {
+      this.toast.error(this.translate.instant('chantiers.chantier.detail.lots.updateFailed'));
+    }
+  }
+
+  async deleteRow(row: ReturnType<typeof buildLotHierarchyRows>[number]): Promise<void> {
+    if (row.poste) {
+      const confirmed = await this.confirmDialog.confirm({
+        title: this.translate.instant('chantiers.chantier.detail.lots.deleteConfirmTitle'),
+        message: this.translate.instant('chantiers.chantier.detail.lots.deleteConfirmPoste', {
+          code: row.poste.code,
+          designation: row.poste.designation,
+        }),
+        confirmLabel: this.translate.instant('chantiers.chantier.detail.lots.deleteAction'),
+        cancelLabel: this.translate.instant('chantiers.chantier.detail.cancel'),
+        variant: 'danger',
+      });
+      if (!confirmed) return;
+      try {
+        await this.posteApi.deletePoste(row.poste.id);
+        this.toast.success(this.translate.instant('chantiers.chantier.detail.lots.deleteSuccess'));
+        await this.reload();
+      } catch {
+        this.toast.error(this.translate.instant('chantiers.chantier.detail.lots.deleteFailed'));
+      }
+      return;
+    }
+    if (!row.lot) return;
+    const childCount = this.countLotDescendants(row.lot.id);
+    const messageKey = childCount > 0
+      ? 'chantiers.chantier.detail.lots.deleteConfirmLotCascade'
+      : 'chantiers.chantier.detail.lots.deleteConfirmLot';
+    const confirmed = await this.confirmDialog.confirm({
+      title: this.translate.instant('chantiers.chantier.detail.lots.deleteConfirmTitle'),
+      message: this.translate.instant(messageKey, {
+        code: row.lot.code,
+        designation: row.lot.designation,
+        count: childCount,
+      }),
+      confirmLabel: this.translate.instant('chantiers.chantier.detail.lots.deleteAction'),
+      cancelLabel: this.translate.instant('chantiers.chantier.detail.cancel'),
+      variant: 'danger',
+    });
+    if (!confirmed) return;
+    try {
+      await this.lotApi.deleteForChantier(this.chantierId(), row.lot.id);
+      this.toast.success(this.translate.instant('chantiers.chantier.detail.lots.deleteSuccess'));
+      await this.reload();
+    } catch {
+      this.toast.error(this.translate.instant('chantiers.chantier.detail.lots.deleteFailed'));
+    }
+  }
+
+  private countLotDescendants(lotId: string): number {
+    const postesByLot = this.postesByLotId();
+    const sousLots = this.lots().filter((lot) => lot.parentLotId === lotId);
+    let count = postesByLot[lotId]?.length ?? 0;
+    for (const sousLot of sousLots) {
+      count += 1;
+      count += postesByLot[sousLot.id]?.length ?? 0;
+    }
+    return count;
   }
 
   triggerLotImport(): void {

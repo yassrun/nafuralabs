@@ -14,6 +14,7 @@ import ma.nafura.platform.authorization.security.authorization.SecuredResource;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import java.util.Map;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -105,6 +106,16 @@ public class OuvrageController {
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/import-proposal")
+    @RequirePermission("etudes.create")
+    public ResponseEntity<Map<String, Object>> importProposal(@RequestBody Map<String, Object> proposal) {
+        return ResponseEntity.accepted().body(Map.of(
+                "status", "PROPOSED",
+                "message", "Import Build Intelligence en attente de validation métier",
+                "proposal", proposal
+        ));
     }
 
     @PostMapping("/import-excel")

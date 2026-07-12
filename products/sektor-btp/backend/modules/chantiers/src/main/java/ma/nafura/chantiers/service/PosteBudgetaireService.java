@@ -111,6 +111,14 @@ public class PosteBudgetaireService {
         return repository.save(entity);
     }
 
+    @Transactional
+    public void delete(String id) {
+        UUID tenantId = tenantId();
+        PosteBudgetaire entity = repository.findByIdAndTenantId(id, tenantId)
+                .orElseThrow(() -> new IllegalArgumentException("Poste budgetaire not found: " + id));
+        repository.delete(entity);
+    }
+
     private ChantierLot requireLot(String lotId) {
         return lotRepository.findByIdAndTenantId(lotId, tenantId())
                 .orElseThrow(() -> new IllegalArgumentException("Lot not found: " + lotId));

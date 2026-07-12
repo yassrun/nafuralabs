@@ -14,5 +14,7 @@ public interface PosteBudgetaireRepository extends TenantScopedRepository<PosteB
 
     Optional<PosteBudgetaire> findByTenantIdAndLotIdAndCode(UUID tenantId, String lotId, String code);
 
+    void deleteByTenantIdAndLotId(UUID tenantId, String lotId);
+
     long countByTenantId(UUID tenantId);
 }

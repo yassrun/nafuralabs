@@ -8,6 +8,7 @@ import ma.nafura.platform.authorization.security.authorization.RequirePermission
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,5 +30,12 @@ public class PosteBudgetaireUpdateController {
     public ResponseEntity<PosteBudgetaire> update(
             @PathVariable String id, @Valid @RequestBody PosteBudgetaireUpdateDto body) {
         return ResponseEntity.ok(service.update(id, body));
+    }
+
+    @DeleteMapping("/{id}")
+    @RequirePermission("chantiers.delete")
+    public ResponseEntity<Void> delete(@PathVariable String id) {
+        service.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }
