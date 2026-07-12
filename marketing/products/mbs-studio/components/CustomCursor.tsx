@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useCursor } from "@/hooks/useCursor";
 import { useDrawing } from "@/hooks/useDrawing";
 import { useIsDesktop } from "@/hooks/useIsDesktop";
@@ -8,11 +8,31 @@ import { useLayoutScale } from "@/hooks/useLayoutScale";
 import { useMounted } from "@/hooks/useMounted";
 import { NATIVE_CURSOR_SELECTOR } from "@/lib/cursorZones";
 
+function useModalOpen() {
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const sync = () => {
+      setOpen(document.documentElement.hasAttribute("data-modal-open"));
+    };
+    sync();
+    const observer = new MutationObserver(sync);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-modal-open"],
+    });
+    return () => observer.disconnect();
+  }, []);
+
+  return open;
+}
+
 export default function CustomCursor() {
   const mounted = useMounted();
   const isDesktop = useIsDesktop();
+  const modalOpen = useModalOpen();
   const layoutScale = useLayoutScale();
-  const enabled = mounted && isDesktop;
+  const enabled = mounted && isDesktop && !modalOpen;
   const { cursorRef, mode, ready, setCursorMode, pencil } = useCursor({
     enabled,
     layoutScale,
@@ -21,12 +41,15 @@ export default function CustomCursor() {
 
   useEffect(() => {
     if (!mounted) return;
-    document.body.classList.toggle("has-custom-cursor", isDesktop && ready);
+    document.body.classList.toggle(
+      "has-custom-cursor",
+      isDesktop && ready && !modalOpen,
+    );
     return () => document.body.classList.remove("has-custom-cursor");
-  }, [mounted, isDesktop, ready]);
+  }, [mounted, isDesktop, ready, modalOpen]);
 
   useEffect(() => {
-    if (!isDesktop) return;
+    if (!isDesktop || modalOpen) return;
 
     const onOver = (e: MouseEvent) => {
       const target = e.target;
@@ -46,11 +69,11 @@ export default function CustomCursor() {
 
     document.addEventListener("mouseover", onOver);
     return () => document.removeEventListener("mouseover", onOver);
-  }, [isDesktop, setCursorMode]);
+  }, [isDesktop, modalOpen, setCursorMode]);
 
   if (!enabled) return null;
 
-  const showCustom = ready && mode !== "hidden";
+  const showCustom = ready && mode !== "hidden" && !modalOpen;
 
   return (
     <>

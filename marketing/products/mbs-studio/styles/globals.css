@@ -91,6 +91,11 @@ body::after {
 }
 
 @media (min-width: 1024px) {
+  html[data-modal-open] body,
+  html[data-modal-open] body * {
+    cursor: auto !important;
+  }
+
   /* Hide system cursor only on drawable empty page areas. */
   body.has-custom-cursor,
   body.has-custom-cursor * {

@@ -1,16 +1,16 @@
 /** Header wordmark — without slogan (black on transparent). */
 export const HEADER_LOGO = {
   src: "/logo-header.png",
-  /** Display size @ Figma 1728px frame (asset 300×87). */
-  width: 138,
+  /** Display size @ Figma 1728px frame (asset 864×264). */
+  width: 131,
   height: 40,
-  alt: "MBS",
+  alt: "Mr. Big Stuff",
 };
 
-/** Footer lockup — with "BRAND INTELLIGENCE" slogan (white ink for dark footer). */
+/** Footer lockup — white ink for dark footer. */
 export const FOOTER_LOGO = {
   src: "/logo-full-white.png",
-  width: 241,
-  height: 72,
-  alt: "Mr. Big Stuff — Brand Intelligence",
+  width: 200,
+  height: 61,
+  alt: "Mr. Big Stuff",
 };

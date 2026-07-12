@@ -9,15 +9,23 @@ import {
   PROJECTS,
   SEE_MORE_TOP_GAP,
 } from "@/lib/projects";
+import { useIsDesktop } from "@/hooks/useIsDesktop";
 import { useLayoutScale } from "@/hooks/useLayoutScale";
+import { useProjectMagnet } from "@/hooks/useProjectMagnet";
 import ProjectCard from "./ProjectCard";
 
 export default function ProjectsSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
   const layoutScale = useLayoutScale();
+  const isDesktop = useIsDesktop();
 
   const sectionMinHeight = getProjectsSectionMinHeight(layoutScale);
+
+  useProjectMagnet({
+    containerRef: cardsRef,
+    enabled: isDesktop,
+  });
 
   useEffect(() => {
     const section = sectionRef.current;

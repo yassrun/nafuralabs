@@ -8,8 +8,8 @@ export type CursorMode = "pencil" | "circle" | "hidden";
 /** Figma pencil asset — 79×79px @ 1728px frame, inclined ~42° */
 export const PENCIL_SIZE_FIGMA = 79;
 
-/** Tip offset for inclined pencil @ Figma size */
-export const PENCIL_TIP_OFFSET_FIGMA = { x: 11, y: 72 };
+/** Tip offset for inclined pencil @ Figma size (calibrated to stroke origin) */
+export const PENCIL_TIP_OFFSET_FIGMA = { x: 11, y: 66 };
 
 export function getScaledPencil(size = PENCIL_SIZE_FIGMA) {
   const ratio = size / PENCIL_SIZE_FIGMA;

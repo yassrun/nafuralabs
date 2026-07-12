@@ -2,8 +2,8 @@ import Image from "next/image";
 import { FIGMA_LAYOUT_WIDTH } from "@/lib/projectLayout";
 import { HERO_HEADLINE } from "@/lib/heroHeadline";
 
-/** Headline width as % of Figma 1728px frame */
-const HERO_WIDTH_RATIO = HERO_HEADLINE.width / FIGMA_LAYOUT_WIDTH;
+/** Headline width as % of Figma 1728px frame — slightly smaller than artboard export */
+const HERO_WIDTH_RATIO = (HERO_HEADLINE.width / FIGMA_LAYOUT_WIDTH) * 0.86;
 
 export default function Hero() {
   return (
@@ -17,10 +17,9 @@ export default function Hero() {
             width={HERO_HEADLINE.width}
             height={HERO_HEADLINE.height}
             priority
-            className="h-auto w-full object-contain select-none"
+            className="mx-auto h-auto w-full object-contain object-center select-none"
             style={{
-              transform: "translate(1.5%, 0.5%)",
-              maxWidth: `min(${HERO_WIDTH_RATIO * 100}vw, ${HERO_HEADLINE.width}px)`,
+              maxWidth: `min(${HERO_WIDTH_RATIO * 100}vw, ${Math.round(HERO_HEADLINE.width * 0.86)}px)`,
             }}
             unoptimized
             draggable={false}

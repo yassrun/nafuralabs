@@ -18,14 +18,8 @@ export const DRAW_IGNORE_SELECTOR = [
   "dialog",
 ].join(", ");
 
-/** Pencil palette — 1st stroke black, then a visible color on each new stroke. */
-export const DRAW_COLORS = [
-  "#000000",
-  "#FEED00",
-  "#015CA4",
-  "#FD2E00",
-  "#52B702",
-];
+/** Pencil palette — red, green, yellow, blue only (no black). */
+export const DRAW_COLORS = ["#FEED00", "#015CA4", "#FD2E00", "#52B702"];
 
 /** Match pencil weight to hero hand-drawn stroke (~0.38% of scaled headline width). */
 export function getPencilLineWidth(layoutScale = 1) {
@@ -39,6 +33,20 @@ interface UseDrawingOptions {
   layoutScale?: number;
 }
 
+function loadTexturePattern(
+  ctx: CanvasRenderingContext2D,
+): Promise<CanvasPattern | null> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const pattern = ctx.createPattern(img, "repeat");
+      resolve(pattern);
+    };
+    img.onerror = () => resolve(null);
+    img.src = "/textures/paper-grain.svg";
+  });
+}
+
 export function useDrawing({
   enabled,
   ignoreSelector = DRAW_IGNORE_SELECTOR,
@@ -49,6 +57,7 @@ export function useDrawing({
   const lastPoint = useRef<{ x: number; y: number } | null>(null);
   const colorIndex = useRef(0);
   const strokeColor = useRef(DRAW_COLORS[0]);
+  const texturePattern = useRef<CanvasPattern | null>(null);
 
   const resizeCanvas = useCallback(() => {
     const canvas = canvasRef.current;
@@ -74,6 +83,7 @@ export function useDrawing({
       const el = document.elementFromPoint(x, y);
       if (!(el instanceof Element)) return false;
       if (el.closest("canvas.draw-canvas")) return false;
+      if (document.documentElement.hasAttribute("data-modal-open")) return true;
       return Boolean(el.closest(ignoreSelector));
     },
     [ignoreSelector],
@@ -84,34 +94,66 @@ export function useDrawing({
     colorIndex.current += 1;
     strokeColor.current = color;
     return color;
-  }, [layoutScale]);
+  }, []);
 
-  const drawLine = useCallback((x: number, y: number) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+  const applyPencilTexture = useCallback(
+    (ctx: CanvasRenderingContext2D) => {
+      const pattern = texturePattern.current;
+      if (!pattern) return;
 
-    ctx.strokeStyle = strokeColor.current;
-    ctx.lineWidth = getPencilLineWidth(layoutScale);
+      ctx.save();
+      ctx.globalCompositeOperation = "multiply";
+      ctx.globalAlpha = 0.42;
+      ctx.strokeStyle = pattern;
+      ctx.lineWidth = getPencilLineWidth(layoutScale) * 1.35;
+      ctx.stroke();
+      ctx.restore();
+    },
+    [layoutScale],
+  );
 
-    if (!lastPoint.current) {
+  const drawLine = useCallback(
+    (x: number, y: number) => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      const lineWidth = getPencilLineWidth(layoutScale);
+      ctx.strokeStyle = strokeColor.current;
+      ctx.lineWidth = lineWidth;
+      ctx.globalAlpha = 0.9 + Math.random() * 0.08;
+
+      if (!lastPoint.current) {
+        lastPoint.current = { x, y };
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        return;
+      }
+
+      ctx.lineTo(x, y);
+      ctx.stroke();
+      applyPencilTexture(ctx);
       lastPoint.current = { x, y };
-      ctx.beginPath();
-      ctx.moveTo(x, y);
-      return;
-    }
-
-    ctx.lineTo(x, y);
-    ctx.stroke();
-    lastPoint.current = { x, y };
-  }, [layoutScale]);
+    },
+    [applyPencilTexture, layoutScale],
+  );
 
   useEffect(() => {
     if (!enabled) return;
 
+    let cancelled = false;
+
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
+
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (ctx) {
+      void loadTexturePattern(ctx).then((pattern) => {
+        if (!cancelled) texturePattern.current = pattern;
+      });
+    }
 
     const onPointerDown = (e: PointerEvent) => {
       if (e.button !== 0 || isIgnoredAt(e.clientX, e.clientY)) return;
@@ -143,6 +185,7 @@ export function useDrawing({
     window.addEventListener("pointercancel", endDraw);
 
     return () => {
+      cancelled = true;
       window.removeEventListener("resize", resizeCanvas);
       window.removeEventListener("pointerdown", onPointerDown);
       window.removeEventListener("pointermove", onPointerMove);

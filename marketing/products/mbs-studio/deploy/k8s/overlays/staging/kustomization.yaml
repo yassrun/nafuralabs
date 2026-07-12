@@ -9,7 +9,7 @@ resources:
 
 patches:
   - path: patch-ingress.yaml
-  - path: patch-ingress-tls.yaml
+  - path: patch-ingress-http-only.yaml
 
 images:
   - name: mbs-studio-web

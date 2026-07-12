@@ -29,7 +29,7 @@ export default function ProjectCard({
   const height = scalePx(base.height, layoutScale);
   const href = `/projects/${project.slug}`;
   const dragEnabled = layout === "masonry" && isDesktop;
-  const { cardRef, handlers } = useDraggable({
+  const { cardRef } = useDraggable({
     enabled: dragEnabled,
     href,
     boundsRef,
@@ -43,9 +43,10 @@ export default function ProjectCard({
       src={project.image}
       alt={project.title}
       fill
-      className="object-cover"
+      className="pointer-events-none object-cover select-none"
       sizes={`${width}px`}
       unoptimized
+      draggable={false}
     />
   );
 
@@ -73,19 +74,15 @@ export default function ProjectCard({
     <div
       ref={cardRef}
       data-project-card
-      className="project-card absolute overflow-hidden bg-neutral-200 shadow-sm touch-none select-none"
+      className="project-card absolute touch-none select-none"
       style={{ ...style, backfaceVisibility: "hidden" }}
-      {...(dragEnabled ? handlers : {})}
     >
-      {!dragEnabled && (
-        <Link
-          href={href}
-          className="absolute inset-0 z-10"
-          aria-label={project.title}
-          data-no-draw
-        />
-      )}
-      <div className="relative h-full w-full">{image}</div>
+      <div
+        data-magnet-layer
+        className="relative h-full w-full overflow-hidden bg-neutral-200 shadow-sm will-change-transform"
+      >
+        <div className="pointer-events-none relative h-full w-full">{image}</div>
+      </div>
     </div>
   );
 }

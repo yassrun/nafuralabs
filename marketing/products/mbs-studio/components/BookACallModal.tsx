@@ -15,6 +15,16 @@ export default function BookACallModal({ open, onClose }: BookACallModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
+    const root = document.documentElement;
+    if (open) {
+      root.setAttribute("data-modal-open", "");
+    } else {
+      root.removeAttribute("data-modal-open");
+    }
+    return () => root.removeAttribute("data-modal-open");
+  }, [open]);
+
+  useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
     if (open && !dialog.open) dialog.showModal();
@@ -25,7 +35,10 @@ export default function BookACallModal({ open, onClose }: BookACallModalProps) {
     <dialog
       ref={dialogRef}
       onClose={onClose}
-      className="fixed inset-0 z-[200] m-auto w-[min(94vw,1000px)] max-w-none border-0 bg-white p-0 shadow-[0_8px_40px_rgba(0,0,0,0.12)] backdrop:bg-black/25 backdrop:backdrop-blur-[3px] open:block"
+      onClick={(e) => {
+        if (e.target === dialogRef.current) onClose();
+      }}
+      className="fixed inset-0 z-[300] m-auto w-[min(94vw,1000px)] max-w-none border-0 bg-white p-0 shadow-[0_8px_40px_rgba(0,0,0,0.12)] backdrop:bg-black/25 backdrop:backdrop-blur-[3px] open:block"
       data-no-draw
     >
       <button
@@ -39,7 +52,6 @@ export default function BookACallModal({ open, onClose }: BookACallModalProps) {
       </button>
 
       <div className="flex flex-col md:flex-row">
-        {/* Form — left column */}
         <div className="flex flex-1 flex-col px-8 py-10 md:px-10 md:py-12 lg:px-12">
           <h2 className="mb-8 text-[22px] font-medium text-black md:text-[24px]">
             Get a call with us!
@@ -96,7 +108,6 @@ export default function BookACallModal({ open, onClose }: BookACallModalProps) {
           </form>
         </div>
 
-        {/* Telephone illustration — right column (Figma sketch) */}
         <div className="relative flex w-full shrink-0 items-center justify-center bg-white px-6 pb-8 md:w-[42%] md:px-0 md:pb-0 md:pr-8">
           <Image
             src="/modal/telephone.svg"
