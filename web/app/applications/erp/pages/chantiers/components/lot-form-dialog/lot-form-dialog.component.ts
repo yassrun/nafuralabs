@@ -21,9 +21,9 @@ export interface LotFormDialogResult {
   mode: LotFormMode;
   code: string;
   designation: string;
-  quantite: number;
-  unite: string;
-  prixUnitaireHt: number;
+  quantite?: number;
+  unite?: string;
+  prixUnitaireHt?: number;
   parentLotId?: string;
   targetLotId?: string;
 }
@@ -77,32 +77,36 @@ export interface LotFormDialogResult {
         required>
       </nf-input>
 
-      <div class="grid-2">
+      @if (data.mode === 'poste') {
+        <div class="grid-2">
+          <nf-input
+            [label]="'chantiers.chantier.detail.lots.promptQuantite' | translate"
+            type="number"
+            [ngModel]="quantite()"
+            (ngModelChange)="quantite.set($event)"
+            required>
+          </nf-input>
+
+          <label class="field">
+            <span>{{ 'chantiers.chantier.detail.lots.formUnite' | translate }} *</span>
+            <select [ngModel]="unite()" (ngModelChange)="unite.set($event)">
+              @for (unit of units; track unit) {
+                <option [value]="unit">{{ unit }}</option>
+              }
+            </select>
+          </label>
+        </div>
+
         <nf-input
-          [label]="'chantiers.chantier.detail.lots.promptQuantite' | translate"
+          [label]="'chantiers.chantier.detail.lots.promptPrixUnitaireHt' | translate"
           type="number"
-          [ngModel]="quantite()"
-          (ngModelChange)="quantite.set($event)"
+          [ngModel]="prixUnitaireHt()"
+          (ngModelChange)="prixUnitaireHt.set($event)"
           required>
         </nf-input>
-
-        <label class="field">
-          <span>{{ 'chantiers.chantier.detail.lots.formUnite' | translate }} *</span>
-          <select [ngModel]="unite()" (ngModelChange)="unite.set($event)">
-            @for (unit of units; track unit) {
-              <option [value]="unit">{{ unit }}</option>
-            }
-          </select>
-        </label>
-      </div>
-
-      <nf-input
-        [label]="'chantiers.chantier.detail.lots.promptPrixUnitaireHt' | translate"
-        type="number"
-        [ngModel]="prixUnitaireHt()"
-        (ngModelChange)="prixUnitaireHt.set($event)"
-        required>
-      </nf-input>
+      } @else {
+        <p class="form-hint">{{ 'chantiers.chantier.detail.lots.groupHint' | translate }}</p>
+      }
 
       <footer>
         <nf-button variant="secondary" (clicked)="close()">{{ 'chantiers.chantier.detail.cancel' | translate }}</nf-button>
@@ -122,6 +126,7 @@ export interface LotFormDialogResult {
       border-radius: 8px; font: inherit; background: var(--nf-color-surface);
     }
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .form-hint { margin: 0; font-size: 0.8125rem; color: var(--nf-text-secondary, var(--nf-color-text-secondary)); }
     footer { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 0.25rem; }
   `],
 })
@@ -166,26 +171,36 @@ export class LotFormDialogComponent {
   }
 
   canSave(): boolean {
-    const q = this.parseNumber(this.quantite());
-    const pu = this.parseNumber(this.prixUnitaireHt());
-    if (!this.code().trim() || !this.designation().trim() || !this.unite().trim()) return false;
-    if (!Number.isFinite(q) || q <= 0 || !Number.isFinite(pu) || pu < 0) return false;
+    // Common: a code and a designation are always required.
+    if (!this.code().trim() || !this.designation().trim()) return false;
+
     if (this.data.mode === 'sousLot' && !this.parentLotId()) return false;
-    if (this.data.mode === 'poste' && !this.targetLotId()) return false;
+
+    // Quantité / unité / prix are only meaningful for a poste (article).
+    // A lot or sous-lot is a grouping whose amount is the sum of its postes.
+    if (this.data.mode === 'poste') {
+      if (!this.targetLotId()) return false;
+      if (!this.unite().trim()) return false;
+      const q = this.parseNumber(this.quantite());
+      const pu = this.parseNumber(this.prixUnitaireHt());
+      if (!Number.isFinite(q) || q <= 0 || !Number.isFinite(pu) || pu < 0) return false;
+    }
+
     return true;
   }
 
   save(): void {
     if (!this.canSave()) return;
+    const isPoste = this.data.mode === 'poste';
     this.dialogRef.close({
       mode: this.data.mode,
       code: this.code().trim(),
       designation: this.designation().trim(),
-      quantite: this.parseNumber(this.quantite()),
-      unite: this.unite().trim(),
-      prixUnitaireHt: this.parseNumber(this.prixUnitaireHt()),
+      quantite: isPoste ? this.parseNumber(this.quantite()) : undefined,
+      unite: isPoste ? this.unite().trim() : undefined,
+      prixUnitaireHt: isPoste ? this.parseNumber(this.prixUnitaireHt()) : undefined,
       parentLotId: this.data.mode === 'sousLot' ? this.parentLotId() : undefined,
-      targetLotId: this.data.mode === 'poste' ? this.targetLotId() : undefined,
+      targetLotId: isPoste ? this.targetLotId() : undefined,
     });
   }
 

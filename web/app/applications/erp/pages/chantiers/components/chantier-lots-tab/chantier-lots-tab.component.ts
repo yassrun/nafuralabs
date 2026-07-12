@@ -115,8 +115,8 @@ type BpdeImportStats = {
         </p>
       }
 
-      <div class="mapping-help">
-        <p class="mapping-help__title">{{ 'chantiers.chantier.detail.lots.mappingHelpTitle' | translate }}</p>
+      <details class="mapping-help">
+        <summary class="mapping-help__title">{{ 'chantiers.chantier.detail.lots.mappingHelpTitle' | translate }}</summary>
         <p class="mapping-help__hint">{{ 'chantiers.chantier.detail.lots.mappingHelpHint' | translate }}</p>
         <ul class="mapping-help__list">
           <li><strong>code</strong>: {{ 'chantiers.chantier.detail.lots.mappingHelpCode' | translate }}</li>
@@ -125,10 +125,17 @@ type BpdeImportStats = {
           <li><strong>unite</strong>: {{ 'chantiers.chantier.detail.lots.mappingHelpUnite' | translate }}</li>
           <li><strong>prix_unitaire_ht</strong>: {{ 'chantiers.chantier.detail.lots.mappingHelpPrixUnitaire' | translate }}</li>
         </ul>
-      </div>
+      </details>
 
       @if (hierarchyRows().length) {
-        <table class="data-table">
+        <div class="lots-tablebar">
+          <span class="lots-count">{{ 'chantiers.chantier.detail.lots.rowsCount' | translate:{ count: hierarchyRows().length } }}</span>
+          <span class="lots-tablebar__spacer"></span>
+          <button type="button" class="linklike" (click)="collapseAll()">{{ 'chantiers.chantier.detail.lots.collapseAll' | translate }}</button>
+          <button type="button" class="linklike" (click)="expandAll()">{{ 'chantiers.chantier.detail.lots.expandAll' | translate }}</button>
+        </div>
+        <div class="table-scroll">
+          <table class="data-table">
           <thead>
             <tr>
               <th>{{ 'chantiers.chantier.detail.lots.typeColumn' | translate }}</th>
@@ -142,12 +149,22 @@ type BpdeImportStats = {
             </tr>
           </thead>
           <tbody>
-            @for (row of hierarchyRows(); track rowTrack(row)) {
+            @for (row of visibleRows(); track rowTrack(row)) {
               <tr>
                 <td>
                   <nf-badge [variant]="typeBadgeVariant(row.kind)">{{ typeLabelKey(row.kind) | translate }}</nf-badge>
                 </td>
                 <td [style.padding-left.rem]="row.depth * 1.25">
+                  @if (row.kind === 'lot') {
+                    <button
+                      type="button"
+                      class="collapse-toggle"
+                      (click)="toggleCollapse(row.lot?.id)"
+                      [attr.aria-expanded]="!isCollapsed(row.lot?.id)"
+                      [attr.aria-label]="(isCollapsed(row.lot?.id) ? 'chantiers.chantier.detail.lots.expandLot' : 'chantiers.chantier.detail.lots.collapseLot') | translate">
+                      {{ isCollapsed(row.lot?.id) ? '▸' : '▾' }}
+                    </button>
+                  }
                   <strong>{{ rowCode(row) }}</strong>
                 </td>
                 <td>{{ rowDesignation(row) }}</td>
@@ -170,7 +187,15 @@ type BpdeImportStats = {
               </tr>
             }
           </tbody>
-        </table>
+          <tfoot>
+            <tr class="total-row">
+              <td colspan="6">{{ 'chantiers.chantier.detail.lots.totalLabel' | translate }}</td>
+              <td class="num">{{ totalMontantHt() | mad }}</td>
+              <td class="center">—</td>
+            </tr>
+          </tfoot>
+          </table>
+        </div>
       } @else if (!loading()) {
         <nf-empty-state
           icon="layers"
@@ -183,7 +208,16 @@ type BpdeImportStats = {
   `,
   styles: [`
     .tab-panel__toolbar { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
-    .data-table { width: 100%; border-collapse: collapse; font-size: 0.87rem; background: var(--nf-color-surface); border: 1px solid var(--nf-color-border); border-radius: 0.75rem; overflow: hidden; }
+    .table-scroll { max-height: 65vh; overflow: auto; border: 1px solid var(--nf-color-border); border-radius: 0.75rem; }
+    .data-table { width: 100%; border-collapse: collapse; font-size: 0.87rem; background: var(--nf-color-surface); }
+    .data-table thead th { position: sticky; top: 0; z-index: 2; }
+    .data-table tfoot .total-row td { position: sticky; bottom: 0; z-index: 2; }
+    .lots-tablebar { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; }
+    .lots-tablebar__spacer { flex: 1 1 auto; }
+    .lots-count { font-size: 0.8125rem; color: var(--nf-color-text-secondary); }
+    .linklike { border: none; background: transparent; color: var(--nf-color-primary-600); cursor: pointer; font-size: 0.8125rem; padding: 0; }
+    .linklike:hover { text-decoration: underline; }
+    .mapping-help summary { cursor: pointer; font-weight: 600; color: var(--nf-color-text-primary); }
     .data-table th { padding: 0.7rem 1rem; background: var(--nf-color-bg-subtle); color: var(--nf-color-text-secondary); font-weight: 600; text-align: left; border-bottom: 2px solid var(--nf-color-border); white-space: nowrap; }
     .data-table th.num { text-align: right; }
     .data-table th.center { text-align: center; }
@@ -191,6 +225,11 @@ type BpdeImportStats = {
     .data-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
     .data-table td.center { text-align: center; }
     .data-table tbody tr:last-child td { border-bottom: none; }
+    .collapse-toggle { border: none; background: transparent; cursor: pointer; padding: 0 0.4rem 0 0; font-size: 0.8rem; line-height: 1; color: var(--nf-color-text-secondary); }
+    .collapse-toggle:hover { color: var(--nf-color-text-primary); }
+    .data-table tfoot .total-row td { padding: 0.75rem 1rem; border-top: 2px solid var(--nf-color-border); background: var(--nf-color-bg-subtle); font-weight: 700; color: var(--nf-color-text-primary); }
+    .data-table tfoot .total-row td.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .data-table tfoot .total-row td.center { text-align: center; }
     .progress-wrap { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; }
     .progress-bar { width: 100%; height: 6px; background: var(--nf-color-bg-muted); border-radius: 999px; overflow: hidden; }
     .progress-bar.sm { max-width: 80px; }
@@ -224,9 +263,67 @@ export class ChantierLotsTabComponent {
 
   readonly rootLots = computed(() => this.lots().filter((lot) => !lot.parentLotId));
 
+  /** Root lot ids that are collapsed in the table (children hidden). */
+  readonly collapsedLotIds = signal<Set<string>>(new Set());
+
   readonly hierarchyRows = computed(() =>
     buildLotHierarchyRows(this.lots(), this.postesByLotId()),
   );
+
+  /** Rows actually rendered, honouring collapsed root lots. */
+  readonly visibleRows = computed(() => {
+    const collapsed = this.collapsedLotIds();
+    const rows = this.hierarchyRows();
+    const out: typeof rows = [];
+    let hiddenRootId: string | null = null;
+    for (const row of rows) {
+      if (row.kind === 'lot') {
+        hiddenRootId = row.lot && collapsed.has(row.lot.id) ? row.lot.id : null;
+        out.push(row);
+        continue;
+      }
+      if (hiddenRootId) continue;
+      out.push(row);
+    }
+    return out;
+  });
+
+  /** Total marché HT = sum of every poste amount across all lots. */
+  readonly totalMontantHt = computed(() => {
+    const byLot = this.postesByLotId();
+    let total = 0;
+    for (const postes of Object.values(byLot)) {
+      for (const poste of postes) {
+        if (poste.montantHt != null && Number.isFinite(poste.montantHt)) {
+          total += poste.montantHt;
+        }
+      }
+    }
+    return total;
+  });
+
+  isCollapsed(lotId: string | undefined): boolean {
+    return lotId ? this.collapsedLotIds().has(lotId) : false;
+  }
+
+  toggleCollapse(lotId: string | undefined): void {
+    if (!lotId) return;
+    const next = new Set(this.collapsedLotIds());
+    if (next.has(lotId)) {
+      next.delete(lotId);
+    } else {
+      next.add(lotId);
+    }
+    this.collapsedLotIds.set(next);
+  }
+
+  collapseAll(): void {
+    this.collapsedLotIds.set(new Set(this.rootLots().map((lot) => lot.id)));
+  }
+
+  expandAll(): void {
+    this.collapsedLotIds.set(new Set());
+  }
 
   constructor() {
     effect(() => {
@@ -283,24 +380,24 @@ export class ChantierLotsTabComponent {
         const lotId = result.targetLotId;
         if (!lotId) return;
         const postes = this.postesByLotId()[lotId] ?? [];
+        const quantite = result.quantite ?? 0;
+        const prixUnitaireHt = result.prixUnitaireHt ?? 0;
         await this.posteApi.createForLot(lotId, {
           code: result.code,
           designation: result.designation,
-          quantite: result.quantite,
+          quantite,
           unite: result.unite,
-          prixUnitaireHt: result.prixUnitaireHt,
-          montantHt: Math.round(result.quantite * result.prixUnitaireHt * 100) / 100,
+          prixUnitaireHt,
+          montantHt: Math.round(quantite * prixUnitaireHt * 100) / 100,
           ordre: postes.length + 1,
         });
         this.toast.success(this.translate.instant('chantiers.chantier.detail.lots.posteCreateSuccess'));
       } else {
+        // A lot / sous-lot is a grouping: its amount is derived from its postes,
+        // so we do not send quantité / prix / montant here.
         await this.lotApi.createForChantier(chantierId, {
           code: result.code,
           designation: result.designation,
-          quantite: result.quantite,
-          unite: result.unite,
-          prixUnitaireHt: result.prixUnitaireHt,
-          montantHt: Math.round(result.quantite * result.prixUnitaireHt * 100) / 100,
           parentLotId: result.mode === 'sousLot' ? result.parentLotId : undefined,
           ordre: this.lots().length + 1,
           avancementPercent: 0,

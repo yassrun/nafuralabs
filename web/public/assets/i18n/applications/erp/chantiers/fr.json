@@ -192,9 +192,9 @@
           "notFoundMessage": "Référence « {ref} » : aucun chantier correspondant."
         },
         "situations": {
-          "hint": "Génération brouillon depuis avancement physique + lots (Task 07 M-MAR-05, démo).",
+          "hint": "Génération d'un brouillon de situation à partir de l'avancement physique et des lots.",
           "generateCta": "Générer situation N (brouillon)",
-          "noMarche": "Aucun marché lié à ce chantier dans la démo — liaison requise pour la génération.",
+          "noMarche": "Aucun marché n'est encore lié à ce chantier — créez le marché pour générer les situations.",
           "linkAll": "Voir toutes les situations de travaux pour ce chantier →"
         },
         "documents": {
@@ -227,6 +227,13 @@
           "promptQuantite": "Quantité (BPU)",
           "promptUnite": "Unité (ex. m², ml, U)",
           "promptPrixUnitaireHt": "Prix unitaire HT (MAD)",
+          "groupHint": "Un lot (ou sous-lot) est un regroupement : son montant est calculé à partir de ses postes. Ajoutez ensuite des postes pour renseigner quantités et prix.",
+          "totalLabel": "Total marché HT",
+          "collapseLot": "Réduire le lot",
+          "expandLot": "Développer le lot",
+          "rowsCount": "{count} ligne(s)",
+          "collapseAll": "Tout replier",
+          "expandAll": "Tout déplier",
           "invalidBpu": "Quantité, unité et prix unitaire HT sont obligatoires et doivent être valides.",
           "createSuccess": "Lot ajouté.",
           "createFailed": "Impossible d'ajouter le lot.",

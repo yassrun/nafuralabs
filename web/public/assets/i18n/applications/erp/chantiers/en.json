@@ -192,9 +192,9 @@
           "notFoundMessage": "Reference “{ref}”: no matching site."
         },
         "situations": {
-          "hint": "Draft generation from physical progress + work packages (Task 07 M-MAR-05, demo).",
+          "hint": "Draft situation generation from physical progress and work packages.",
           "generateCta": "Generate certificate N (draft)",
-          "noMarche": "No contract linked to this site in the demo — link required for generation.",
+          "noMarche": "No contract is linked to this site yet — create the contract to generate certificates.",
           "linkAll": "View all progress certificates for this site →"
         },
         "documents": {
@@ -227,6 +227,13 @@
           "promptQuantite": "Quantity (BOQ)",
           "promptUnite": "Unit (e.g. m², ml, U)",
           "promptPrixUnitaireHt": "Unit price excl. VAT (MAD)",
+          "groupHint": "A lot (or sub-lot) is a grouping: its amount is computed from its work packages. Add work packages afterwards to set quantities and prices.",
+          "totalLabel": "Total contract excl. VAT",
+          "collapseLot": "Collapse lot",
+          "expandLot": "Expand lot",
+          "rowsCount": "{count} row(s)",
+          "collapseAll": "Collapse all",
+          "expandAll": "Expand all",
           "invalidBpu": "Quantity, unit and unit price are required and must be valid.",
           "createSuccess": "Work package added.",
           "createFailed": "Could not add work package.",
