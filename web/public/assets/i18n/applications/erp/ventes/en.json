@@ -250,6 +250,11 @@
       "toasts": {
         "saved": "Credit note {numero} saved"
       },
+      "scan": {
+        "button": "Scan credit note",
+        "success": "Credit note scanned, form prefilled",
+        "factureNotFound": "Original invoice « {numero} » not found — select it manually"
+      },
       "table": {
         "header": {
           "designation": "Description",
@@ -437,6 +442,10 @@
       },
       "toasts": {
         "saved": "SO {numero} saved"
+      },
+      "scan": {
+        "button": "Scan sales order",
+        "success": "Sales order scanned, form prefilled"
       },
       "errors": {
         "notFound": "Customer sales order not found"

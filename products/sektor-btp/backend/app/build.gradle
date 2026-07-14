@@ -18,6 +18,7 @@ dependencies {
     // Layer 2 (enabled features)
     implementation project(':platform:features:administration:iam')
     implementation project(':platform:features:administration:subscription')
+    implementation project(':platform:features:administration:usage')
     implementation project(':platform:features:ai:ai-agent-api')
     implementation project(':platform:features:ai:ai-agent-runtime')
     implementation project(':platform:features:ai:ai-conversation')

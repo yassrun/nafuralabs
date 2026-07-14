@@ -2,10 +2,16 @@ import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 import { TenantContextService } from '@platform/core/tenant/tenant.context';
-import { DocTypeService } from '@platform/features/documents/doc-extractor/services/doc-type.service';
 import { ExtractionService } from '@platform/features/documents/doc-extractor/services/extraction.service';
+import { toReviewDefinition } from '../extraction-schemas/extraction-schema.types';
 
-import type { DocScanLookupContext, LookupMap, ScanAndMapArgs } from '../models/doc-scan.types';
+import type {
+  DocScanLookupContext,
+  DocScanReviewPayload,
+  DocScanSchemaArgs,
+  LookupMap,
+  ScanAndMapArgs,
+} from '../models/doc-scan.types';
 import {
   extractLines,
   extractObject,
@@ -19,44 +25,70 @@ import {
 @Injectable({ providedIn: 'root' })
 export class ErpDocScanService {
   private readonly tenantContext = inject(TenantContextService);
-  private readonly docTypeService = inject(DocTypeService);
   private readonly extractionService = inject(ExtractionService);
 
-  async extractJson(args: { file: File; domainKey: string; docTypeKey: string }): Promise<Record<string, unknown>> {
+  async extractJson(args: DocScanSchemaArgs & { file: File }): Promise<Record<string, unknown>> {
+    return (await this.extractForReview(args)).data;
+  }
+
+  async extractForReview(args: DocScanSchemaArgs & { file: File }): Promise<DocScanReviewPayload> {
     const tenantId = this.tenantContext.tenantId();
     if (!tenantId) {
       throw new Error('ERP_DOC_SCAN_TENANT_MISSING');
     }
-
-    const definition = await firstValueFrom(
-      this.docTypeService.getActiveDefinition(args.domainKey, args.docTypeKey, tenantId),
-    );
+    if (!args.dataSchema) {
+      throw new Error('ERP_DOC_SCAN_SCHEMA_REQUIRED');
+    }
 
     const response = await firstValueFrom(
-      this.extractionService.extract({
+      this.extractionService.extractStateless({
         file: args.file,
-        docTypeDefinitionId: definition.id,
-        persist: false,
+        inlineSchema: args.dataSchema,
+        presentationSchema: args.presentationSchema,
+        instructions: args.instructions,
       }),
     );
 
-    if (response.status === 'FAILED') {
+    if (response.outcome === 'REJECTED' || response.outcome === 'TECHNICAL_FAILURE') {
+      throw new Error(response.issues[0]?.code ?? 'ERP_DOC_SCAN_FAILED');
+    }
+
+    if (response.outcome !== 'COMPLETED' && response.outcome !== 'REVIEW_REQUIRED') {
       throw new Error('ERP_DOC_SCAN_FAILED');
     }
 
-    if (response.status !== 'COMPLETED' && response.status !== 'SUCCESS') {
-      throw new Error('ERP_DOC_SCAN_FAILED');
-    }
+    const validation = response.validation
+      ? {
+          state: response.validation.state,
+          issues: response.validation.issues,
+          importPolicy: (response.validation.importPolicy === 'STRICT' ? 'STRICT' : 'PARTIAL') as 'STRICT' | 'PARTIAL',
+        }
+      : undefined;
 
-    return extractObject(response.extractedJson);
+    const definition = toReviewDefinition({
+      name: args.schemaName ?? 'Document scan',
+      description: args.schemaDescription,
+      dataSchema: args.dataSchema,
+      presentationSchema: args.presentationSchema ?? { sections: [] },
+      instructions: args.instructions,
+    });
+
+    return {
+      data: extractObject(response.data),
+      definition,
+      validation,
+      requestId: response.requestId,
+    };
   }
 
   async scanAndMap<T>(args: ScanAndMapArgs<T>): Promise<Partial<T>> {
-    const extracted = await this.extractJson({
-      file: args.file,
-      domainKey: args.domainKey,
-      docTypeKey: args.docTypeKey,
-    });
+    const extractedResult = await this.extractForReview(args);
+    const extracted = args.review
+      ? await args.review(extractedResult)
+      : extractedResult.data;
+    if (!extracted) {
+      throw new Error('ERP_DOC_SCAN_REVIEW_CANCELLED');
+    }
     const lookups = args.lookups();
     const context = this.buildLookupContext(lookups);
 

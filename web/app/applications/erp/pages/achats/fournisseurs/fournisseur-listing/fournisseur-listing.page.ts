@@ -6,7 +6,7 @@ import {ConfigDrivenListingPage,
   ConfigDrivenListingPageImports,
   ConfigDrivenListingPageStyles, ButtonComponent} from '@lib/anatomy';
 import type { Fournisseur } from '@applications/erp/achats/models';
-import { SmartImportButtonComponent } from '@applications/erp/shared/smart-import/components/smart-import-button/smart-import-button.component';
+import { SmartImportTriggerComponent } from '@platform/features/documents/smart-import';
 import { FournisseurImportHandlerRegistrar } from '@applications/erp/shared/smart-import/handlers/fournisseur-import.handler';
 
 import { FournisseurFacade } from '../services';
@@ -18,7 +18,7 @@ type QuickFilter = 'ALL' | 'ACTIFS' | 'INACTIFS' | 'TOP_NOTES';
   selector: 'app-fournisseur-listing',
   standalone: true,
   imports: [
-    ButtonComponent,CommonModule, TranslateModule, SmartImportButtonComponent, ...ConfigDrivenListingPageImports],
+    ButtonComponent,CommonModule, TranslateModule, SmartImportTriggerComponent, ...ConfigDrivenListingPageImports],
   templateUrl: './fournisseur-listing.page.html',
   styles: [ConfigDrivenListingPageStyles],
 })

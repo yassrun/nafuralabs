@@ -14,6 +14,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { JsonSchema, JsonSchemaArray, JsonSchemaObject } from '../../models/json-schema.model';
 import { UiArrayColumn } from '../../models/ui-schema.model';
+import type { FieldIssue } from '../../models/extraction.model';
 import { AnyFormGroup, JsonSchemaFormBuilder } from '../../utils/json-schema-form-builder';
 
 @Component({
@@ -43,6 +44,8 @@ export class DynamicArrayTableComponent {
   @Input({ required: true }) arraySchema!: JsonSchemaArray;
   @Input({ required: true }) columns!: UiArrayColumn[];
   @Input() readonly = false;
+  @Input() lockStructure = false;
+  @Input() issues: FieldIssue[] = [];
 
   @ViewChild(MatTable) private readonly table?: MatTable<AbstractControl>;
 
@@ -54,7 +57,9 @@ export class DynamicArrayTableComponent {
   }
 
   get displayedColumns(): string[] {
-    return [...this.columns.map(c => c.path), 'actions'];
+    return this.lockStructure
+      ? this.columns.map(c => c.path)
+      : [...this.columns.map(c => c.path), 'actions'];
   }
 
   get rows(): AbstractControl[] {
@@ -104,7 +109,7 @@ export class DynamicArrayTableComponent {
   addRow(): void {
     const item = this.itemSchema();
     if (!item) return;
-    if (this.readonly) return;
+    if (this.readonly || this.lockStructure) return;
 
     const row = JsonSchemaFormBuilder.buildGroupForObjectSchema(item);
     this.formArray.push(row);
@@ -112,7 +117,7 @@ export class DynamicArrayTableComponent {
   }
 
   removeRow(index: number): void {
-    if (this.readonly) return;
+    if (this.readonly || this.lockStructure) return;
     this.formArray.removeAt(index);
     this.table?.renderRows();
   }
@@ -135,6 +140,12 @@ export class DynamicArrayTableComponent {
     if (control.hasError('minlength')) return `Must be at least ${control.getError('minlength')?.requiredLength} characters`;
     if (control.hasError('maxlength')) return `Must be at most ${control.getError('maxlength')?.requiredLength} characters`;
     return 'Invalid value';
+  }
+
+  issueFor(rowIndex: number, path: string): string | null {
+    return this.issues.find(
+      (issue) => issue.rowIndex === rowIndex && issue.path.split('.').pop() === path,
+    )?.message ?? null;
   }
 }
 

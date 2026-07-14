@@ -9,6 +9,8 @@ import {
   ButtonComponent,
 } from '@lib/anatomy';
 import type { Employe } from '@applications/erp/rh/models';
+import { SmartImportTriggerComponent } from '@platform/features/documents/smart-import';
+import { EmployeImportHandlerRegistrar } from '@applications/erp/shared/smart-import/handlers/employe-import.handler';
 
 import { EmployeFacade } from '../services';
 import { buildEmployesListingConfig } from '../config';
@@ -18,13 +20,14 @@ type QuickFilter = 'ALL' | 'ACTIF' | 'SUSPENDU';
 @Component({
   selector: 'app-employe-listing',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, ...ConfigDrivenListingPageImports],
+  imports: [CommonModule, ButtonComponent, SmartImportTriggerComponent, ...ConfigDrivenListingPageImports],
   templateUrl: './employe-listing.page.html',
   styles: [ConfigDrivenListingPageStyles],
 })
 export class EmployeListingPage extends ConfigDrivenListingPage<Employe> {
   private readonly translate = inject(TranslateService);
   readonly facade = inject(EmployeFacade);
+  private readonly _importHandler = inject(EmployeImportHandlerRegistrar);
   readonly config = buildEmployesListingConfig(this.translate);
   readonly headerTitle = this.translate.instant('rh.employe.listing.headerTitle');
 
@@ -40,5 +43,9 @@ export class EmployeListingPage extends ConfigDrivenListingPage<Employe> {
     this.quickFilter.set(id);
     const filters = id === 'ALL' ? {} : { statut: id };
     this.listingComponent?.onFilterChange(filters);
+  }
+
+  onSmartImportComplete(): void {
+    this.listingComponent?.refresh();
   }
 }

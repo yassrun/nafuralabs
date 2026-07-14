@@ -24,6 +24,7 @@ includePlatform(":platform:features:configuration:settings")
 includePlatform(":platform:features:configuration:sysconfig")
 includePlatform(":platform:features:administration:iam")
 includePlatform(":platform:features:administration:subscription")
+includePlatform(":platform:features:administration:usage")
 includePlatform(":platform:features:ai:ai-agent-api")
 includePlatform(":platform:features:ai:ai-agent-runtime")
 includePlatform(":platform:features:ai:ai-conversation")
@@ -83,6 +84,18 @@ listOf(
     "generation",
     "integrations-sektor"
 ).forEach { includeBuildIntelligenceModule(it) }
+
+// ── Usage Ops ───────────────────────────────────────────────────────────────
+fun includeUsageOpsModule(name: String) {
+    val path = ":usage-ops:$name"
+    include(path)
+    project(path).projectDir = file("products/usage-ops/backend/modules/$name")
+}
+
+include(":usage-ops:app")
+project(":usage-ops:app").projectDir = file("products/usage-ops/backend/app")
+
+listOf("api", "federation", "quotas", "alerts").forEach { includeUsageOpsModule(it) }
 
 // ── Tools ───────────────────────────────────────────────────────────────────
 include(":tools:lifecycle")

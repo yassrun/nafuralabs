@@ -27,6 +27,17 @@ export interface UiSchema {
    * Each entry points to a JSON path in the root record (e.g. "items").
    */
   arrays?: UiArrayConfig[];
+
+  /**
+   * Optional hierarchy description for Magic Import help (e.g. lot → sous-lot → poste).
+   */
+  hierarchyHint?: UiHierarchyHint[];
+}
+
+export interface UiHierarchyHint {
+  level: string;
+  label: string;
+  fields: string[];
 }
 
 export interface UiSection {

@@ -101,6 +101,14 @@ export class DynamicArrayTableComponent {
     return row as FormGroup as AnyFormGroup;
   }
 
+  rowErrorCount(row: AbstractControl): number {
+    if (!(row instanceof FormGroup)) return row.invalid ? 1 : 0;
+    return Object.values(row.controls).reduce(
+      (count, control) => count + this.controlErrorCount(control),
+      0
+    );
+  }
+
   addRow(): void {
     const item = this.itemSchema();
     if (!item) return;
@@ -135,6 +143,22 @@ export class DynamicArrayTableComponent {
     if (control.hasError('minlength')) return `Must be at least ${control.getError('minlength')?.requiredLength} characters`;
     if (control.hasError('maxlength')) return `Must be at most ${control.getError('maxlength')?.requiredLength} characters`;
     return 'Invalid value';
+  }
+
+  private controlErrorCount(control: AbstractControl): number {
+    let count = control.errors ? Object.keys(control.errors).length : 0;
+    if (control instanceof FormGroup) {
+      count += Object.values(control.controls).reduce(
+        (nested, child) => nested + this.controlErrorCount(child),
+        0
+      );
+    } else if (control instanceof FormArray) {
+      count += control.controls.reduce(
+        (nested, child) => nested + this.controlErrorCount(child),
+        0
+      );
+    }
+    return count;
   }
 }
 

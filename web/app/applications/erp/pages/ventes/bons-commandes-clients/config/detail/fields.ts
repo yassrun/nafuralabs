@@ -9,4 +9,5 @@ export const FIELDS: DetailFieldConfig[] = [
   { key: 'dateFinPrevue', label: 'Date fin prévue', type: 'date' },
   { key: 'tvaTaux', label: 'TVA (%)', type: 'number' },
   { key: 'notes', label: 'Notes', type: 'textarea' },
+  { key: 'lignes', label: 'Lignes', type: 'custom', width: 'full', defaultValue: [] },
 ];

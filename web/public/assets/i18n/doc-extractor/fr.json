@@ -183,5 +183,89 @@
     "deleteConfirm": {
       "message": "{count, plural, =0 {Aucun enregistrement sélectionné.} one {Voulez-vous vraiment supprimer cet enregistrement ?\n\nCette action est irréversible.} other {Voulez-vous vraiment supprimer ces # enregistrements ?\n\nCette action est irréversible.}}"
     }
+  },
+  "platform": {
+    "smartImport": {
+      "button": "Import magique",
+      "tooltip": "Importer des données avec l’IA",
+      "phase": {
+        "preflight": "Vérification…",
+        "extracting": "Analyse IA…",
+        "reviewing": "Revue…",
+        "importing": "Import…"
+      },
+      "help": {
+        "open": "Voir les formats et champs attendus",
+        "formats": "Formats acceptés",
+        "maxSize": "Taille maximale : {size} Mo",
+        "hierarchy": "Structure hiérarchique",
+        "hierarchyHint": "L’IA extrait d’abord les lots parents, puis les sous-lots et les postes (articles).",
+        "expectedFields": "Champs du lot parent",
+        "required": "Obligatoire",
+        "optional": "Facultatif",
+        "behaviour": "Comportement",
+        "partial": "Les lignes valides peuvent être importées; les autres peuvent être corrigées ou ignorées.",
+        "strict": "Toutes les lignes doivent être valides avant l’import.",
+        "duplicates": "Les doublons détectés sont ignorés et signalés dans le rapport."
+      },
+      "review": {
+        "title": "Vérifier avant d’importer",
+        "hint": "{count, plural, one {1 ligne détectée} other {# lignes détectées}}",
+        "attentionTitle": "Certaines lignes nécessitent votre attention",
+        "attentionMessage": "{count, plural, one {Corrigez ou ignorez cette ligne.} other {Corrigez ou ignorez ces # lignes.}}",
+        "ignore": "Ignorer",
+        "restore": "Restaurer",
+        "ignoreAllInvalid": "Ignorer toutes les lignes invalides",
+        "confirm": "Importer {count} ligne(s)"
+      },
+      "filters": {
+        "all": "Toutes",
+        "ready": "Prêtes",
+        "needsReview": "À corriger",
+        "duplicates": "Doublons",
+        "ignored": "Ignorées",
+        "failed": "Échecs"
+      },
+      "status": {
+        "ready": "Prête",
+        "needs_review": "À corriger",
+        "ignored": "Ignorée",
+        "duplicate": "Doublon",
+        "imported": "Importée",
+        "failed": "Échec"
+      },
+      "result": {
+        "title": "Rapport d’import",
+        "hint": "Les créations réussies sont conservées.",
+        "imported": "Importées",
+        "duplicates": "Doublons",
+        "skipped": "Ignorées",
+        "failed": "Échecs",
+        "retryHint": "{count, plural, one {1 ligne peut être réessayée.} other {# lignes peuvent être réessayées.}}",
+        "retry": "Réessayer les échecs",
+        "toast": "{imported} importée(s), {skipped} ignorée(s), {failed} échec(s)"
+      },
+      "errors": {
+        "empty": "Le fichier est vide.",
+        "typeNotAllowed": "Ce format de fichier n’est pas accepté.",
+        "tooLarge": "Le fichier dépasse la taille maximale autorisée.",
+        "tenantMissing": "Contexte organisation manquant.",
+        "handlerMissing": "L’import n’est pas configuré pour cette entité.",
+        "docTypeNotFound": "Le schéma d’import est introuvable.",
+        "schemaInvalid": "Le schéma d’import est invalide.",
+        "timeout": "L’analyse a expiré. Vous pouvez réessayer.",
+        "rateLimited": "Le service IA est temporairement saturé. Réessayez.",
+        "invalidResponse": "L’IA n’a pas retourné des données exploitables.",
+        "extractionFailed": "Impossible d’analyser ce document.",
+        "noRows": "Aucune ligne exploitable trouvée.",
+        "network": "Connexion impossible. Vérifiez votre réseau.",
+        "forbidden": "Vous n’avez pas l’autorisation d’effectuer cet import.",
+        "conflict": "Cette ligne existe déjà ou entre en conflit avec une donnée existante.",
+        "server": "Le serveur a rencontré une erreur. Vous pouvez réessayer.",
+        "validationRejected": "La donnée a été refusée par les règles métier.",
+        "strictBlocked": "Toutes les lignes doivent être corrigées avant de continuer.",
+        "unknown": "Une erreur inattendue est survenue."
+      }
+    }
   }
 }

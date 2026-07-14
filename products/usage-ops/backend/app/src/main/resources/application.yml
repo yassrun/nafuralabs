@@ -1,0 +1,84 @@
+spring:
+  application:
+    name: usage-ops-service
+
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:5432/${POSTGRES_DB:nafura_usage_ops}
+    username: ${POSTGRES_USER:nafura}
+    password: ${POSTGRES_PASSWORD:nafura}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+  security:
+    oauth2:
+      resource-server:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://iam.nafura.local/realms/nafura}
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://iam.nafura.local/realms/nafura/protocol/openid-connect/certs}
+
+server:
+  port: ${SERVER_PORT:8087}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+nafura:
+  tenancy:
+    enabled: true
+  security:
+    enabled: true
+    public-endpoints:
+      - /actuator/**
+    tenant:
+      skip-paths:
+        - /api/auth/
+        - /actuator/
+        - /api/v1/ops/
+        - /api/v1/platform/usage/
+
+# doc-manager is transitive via notification — MinIO client must start even though usage-ops does not store files locally
+documents:
+  minio:
+    endpoint: ${DOCUMENTS_MINIO_ENDPOINT:http://localhost:9000}
+    accessKey: ${MINIO_ROOT_USER:minioadmin}
+    secretKey: ${MINIO_ROOT_PASSWORD:minioadmin}
+    bucket: ${DOCUMENTS_MINIO_BUCKET:usage-ops}
+    secure: false
+
+app:
+  storage:
+    type: ${APP_STORAGE_TYPE:s3}
+    s3:
+      endpoint: ${DOCUMENTS_MINIO_ENDPOINT:http://localhost:9000}
+      access-key: ${MINIO_ROOT_USER:minioadmin}
+      secret-key: ${MINIO_ROOT_PASSWORD:minioadmin}
+      bucket: ${DOCUMENTS_MINIO_BUCKET:usage-ops}
+      region: us-east-1
+
+usage-ops:
+  dev-jwt:
+    enabled: true
+    secret: ${USAGE_OPS_DEV_JWT_SECRET:usage-ops-local-jwt-secret-32chars!!}
+  products:
+    - id: sektor-btp
+      base-url: ${USAGE_OPS_SEKTOR_BASE_URL:http://localhost:8082}
+    - id: build-intelligence
+      base-url: ${USAGE_OPS_BI_BASE_URL:http://localhost:8086}
+  alert:
+    recipients: ${USAGE_OPS_ALERT_RECIPIENTS:}
+    cron: ${USAGE_OPS_ALERT_CRON:0 0 * * * *}

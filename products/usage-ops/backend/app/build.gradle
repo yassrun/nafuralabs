@@ -1,0 +1,34 @@
+plugins {
+    id 'org.springframework.boot'
+}
+
+dependencies {
+    implementation project(':platform:core:framework')
+    implementation project(':platform:core:authorization')
+    implementation project(':platform:core:identity')
+    implementation project(':platform:core:scope')
+    implementation project(':platform:core:tenancy')
+    implementation project(':platform:core:job-runner')
+    implementation project(':platform:features:administration:iam')
+    implementation project(':platform:features:collaboration:notification')
+    implementation project(':usage-ops:api')
+    implementation project(':usage-ops:federation')
+    implementation project(':usage-ops:quotas')
+    implementation project(':usage-ops:alerts')
+
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+    implementation 'org.postgresql:postgresql'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+}
+
+tasks.named('bootJar') {
+    archiveBaseName = 'usage-ops'
+}

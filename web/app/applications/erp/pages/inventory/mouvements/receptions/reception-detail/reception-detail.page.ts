@@ -1,9 +1,10 @@
 import { Component, ElementRef, LOCALE_ID, OnDestroy, ViewChild, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { Subscription } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 
 import {
   ConfigDrivenDetailPage,
@@ -21,6 +22,8 @@ import type { DetailActionEvent, StatusTransitionEvent } from '@lib/anatomy/type
 import type { InventoryTx } from '../../../../../inventory/models';
 import { ReceptionLinesEditorComponent } from '../../../../../inventory/components/reception-lines-editor/reception-lines-editor.component';
 import { ErpDocScanService } from '@applications/erp/shared/services/erp-doc-scan.service';
+import type { DocScanReviewPayload } from '@applications/erp/shared/models/doc-scan.types';
+import { RECEPTION_BL_EXTRACTION_SCHEMA } from '@applications/erp/shared/extraction-schemas';
 import {
   extractLines as extractRawLines,
   findByAliases,
@@ -29,6 +32,11 @@ import {
   toNumber,
 } from '@applications/erp/shared/utils/extraction-json.utils';
 import type { LookupEntry } from '@applications/erp/shared/models/doc-scan.types';
+import {
+  DynamicRecordDialogComponent,
+  type DynamicRecordDialogResult,
+} from '@platform/features/documents/doc-extractor/components/dynamic-record-dialog/dynamic-record-dialog.component';
+import type { ExtractionDraft } from '@platform/features/documents/doc-extractor/models/extraction.model';
 import { buildReceptionDetailConfig } from '../config/detail/detail.config';
 import { ReceptionFacade } from '../services/reception.facade';
 
@@ -58,6 +66,7 @@ export class ReceptionDetailPage extends ConfigDrivenDetailPage<InventoryTx> imp
 
   private readonly crud = inject(ReceptionFacade);
   private readonly erpDocScan = inject(ErpDocScanService);
+  private readonly dialog = inject(MatDialog);
   private readonly activatedRoute = inject(ActivatedRoute);
   private readonly translate = inject(TranslateService);
 
@@ -268,10 +277,15 @@ export class ReceptionDetailPage extends ConfigDrivenDetailPage<InventoryTx> imp
 
     this.isExtracting.set(true);
     try {
+      const schema = RECEPTION_BL_EXTRACTION_SCHEMA;
       const patch = await this.erpDocScan.scanAndMap<InventoryTx>({
         file,
-        domainKey: 'logistic',
-        docTypeKey: 'BL',
+        dataSchema: schema.dataSchema,
+        presentationSchema: schema.presentationSchema,
+        instructions: schema.instructions,
+        schemaName: schema.name,
+        schemaDescription: schema.description,
+        review: (payload) => this.reviewExtractedBl(payload),
         lookups: () => this.crud.lookups() as Record<string, LookupEntry[]>,
         mapper: (data, ctx) => {
           const fournisseurName = ctx.findStringByAliases(data, [
@@ -335,6 +349,9 @@ export class ReceptionDetailPage extends ConfigDrivenDetailPage<InventoryTx> imp
       this.showSuccess(this.translate.instant('inventory.mouvement.common.scanBlSuccess'));
     } catch (err) {
       const message = (err as Error).message;
+      if (message === 'ERP_DOC_SCAN_REVIEW_CANCELLED') {
+        return;
+      }
       if (message === 'ERP_DOC_SCAN_TENANT_MISSING') {
         this.showError(this.translate.instant('inventory.mouvement.common.tenantMissing'));
         return;
@@ -348,6 +365,40 @@ export class ReceptionDetailPage extends ConfigDrivenDetailPage<InventoryTx> imp
       input.value = '';
       this.isExtracting.set(false);
     }
+  }
+
+  private async reviewExtractedBl(
+    payload: DocScanReviewPayload,
+  ): Promise<Record<string, unknown> | undefined> {
+    const draft: ExtractionDraft = {
+      draftId: payload.requestId ?? `stateless-${Date.now()}`,
+      domainKey: payload.definition.domainKey,
+      docTypeKey: payload.definition.docTypeKey,
+      docTypeVersion: payload.definition.version,
+      dataJson: payload.data,
+      status: 'draft',
+    };
+    const ref = this.dialog.open<
+      DynamicRecordDialogComponent,
+      unknown,
+      DynamicRecordDialogResult | undefined
+    >(DynamicRecordDialogComponent, {
+      width: '1100px',
+      maxWidth: '98vw',
+      maxHeight: '98vh',
+      disableClose: true,
+      data: {
+        definition: payload.definition,
+        lockedDocTypeVersion: payload.definition.version,
+        mode: 'create',
+        draft,
+        persistOnValidate: false,
+        initialValidation: payload.validation,
+      },
+      panelClass: 'editor-dialog-panel',
+      position: { top: '2vh' },
+    });
+    return (await firstValueFrom(ref.afterClosed()))?.dataJson;
   }
 
   private applyScanPatch(patch: Partial<InventoryTx>): void {

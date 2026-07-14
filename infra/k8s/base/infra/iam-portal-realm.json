@@ -240,6 +240,36 @@
       ],
       "standardFlowEnabled": true,
       "directAccessGrantsEnabled": false
+    },
+    {
+      "clientId": "usage-ops-web",
+      "name": "Usage Ops Web",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "redirectUris": [
+        "http://usage-ops.nafuralabs.staging/*",
+        "http://usage-ops.nafuralabs.staging/auth/callback",
+        "https://usage-ops.nafuralabs.staging/*",
+        "https://usage-ops.nafuralabs.staging/auth/callback",
+        "http://usage-ops.nafuralabs.com/*",
+        "http://usage-ops.nafuralabs.com/auth/callback",
+        "https://usage-ops.nafuralabs.com/*",
+        "https://usage-ops.nafuralabs.com/auth/callback",
+        "http://localhost:8087/*",
+        "http://127.0.0.1:18080/*"
+      ],
+      "webOrigins": [
+        "http://usage-ops.nafuralabs.staging",
+        "https://usage-ops.nafuralabs.staging",
+        "http://usage-ops.nafuralabs.com",
+        "https://usage-ops.nafuralabs.com",
+        "http://localhost:8087",
+        "http://127.0.0.1:18080",
+        "+"
+      ],
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false
     }
   ]
 }

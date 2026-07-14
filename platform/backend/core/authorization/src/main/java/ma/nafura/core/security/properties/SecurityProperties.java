@@ -132,7 +132,8 @@ public class SecurityProperties {
         private List<String> skipPaths = new ArrayList<>(Arrays.asList(
                 "/api/auth/",
                 "/actuator/",
-                "/api/sync/health"
+                "/api/sync/health",
+                "/api/v1/platform/usage/"
         ));
         
         /**

@@ -1,10 +1,16 @@
-    <nf-page-shell>
-      <nf-page-header [config]="headerConfig"></nf-page-header>
-      <nf-entity-listing
-        #listing
-        [config]="config"
-        [facade]="facade"
-        (action)="onAction($event)">
-      </nf-entity-listing>
-    </nf-page-shell>
-  
+<nf-page-shell>
+  <nf-page-header [config]="headerConfig"></nf-page-header>
+
+  <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
+    <nf-smart-import-trigger
+      entityKey="article"
+      (completed)="onSmartImportComplete()" />
+  </div>
+
+  <nf-entity-listing
+    #listing
+    [config]="config"
+    [facade]="facade"
+    (action)="onAction($event)">
+  </nf-entity-listing>
+</nf-page-shell>

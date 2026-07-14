@@ -120,7 +120,7 @@
         [disabled]="saving()"
         class="footer__action footer__action--cancel"
       >
-        @if (data.mode === 'create') {
+        @if (data.mode === 'create' && data.persistOnValidate !== false) {
           {{ 'docExtractor.dialog.finishLater' | translate }}
         } @else {
           {{ 'docExtractor.workflow.actions.close' | translate }}

@@ -4,6 +4,7 @@ import type { FournisseurCreate } from '@applications/erp/achats/models';
 import { FournisseurApiService } from '@applications/erp/pages/achats/fournisseurs/services/fournisseur-api.service';
 import { normalizeText } from '../../utils/extraction-json.utils';
 
+import { FOURNISSEUR_EXTRACTION_SCHEMA } from '../../extraction-schemas';
 import { ImportHandlerRegistry } from '../services/import-handler.registry';
 
 @Injectable({ providedIn: 'root' })
@@ -16,11 +17,15 @@ export class FournisseurImportHandlerRegistrar {
   }
 
   private register(): void {
+    const schema = FOURNISSEUR_EXTRACTION_SCHEMA;
     this.registry.register<FournisseurCreate>({
       entityKey: 'fournisseur',
-      domainKey: 'achats',
-      docTypeKey: 'FOURNISSEURS',
-      arrayPath: 'fournisseurs',
+      dataSchema: schema.dataSchema,
+      presentationSchema: schema.presentationSchema,
+      instructions: schema.instructions,
+      schemaName: schema.name,
+      schemaDescription: schema.description,
+      arrayPath: schema.arrayPath!,
       mapRowToPayload: (row: Record<string, unknown>) => ({
         raisonSociale: String(row['raisonSociale'] ?? '').trim(),
         ice: row['ice'] ? String(row['ice']).trim() : undefined,

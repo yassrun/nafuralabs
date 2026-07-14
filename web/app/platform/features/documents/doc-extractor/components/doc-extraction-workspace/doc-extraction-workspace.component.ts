@@ -489,7 +489,7 @@ export class DocExtractionWorkspaceComponent {
     if (!file) return;
 
     const def = this.definition();
-    if (!def || !def.id) return;
+    if (!def) return;
 
     const tenantId = this.tenantContext.tenantId();
     if (!tenantId) {
@@ -499,66 +499,38 @@ export class DocExtractionWorkspaceComponent {
       return;
     }
 
-    this.extractionService.extract({
+    this.extractionService.extractStateless({
       file,
-      docTypeDefinitionId: def.id,
-      persist: false,
+      inlineSchema: def.jsonSchema,
+      presentationSchema: def.uiSchema,
+      instructions: def.promptTemplate,
     }).subscribe({
       next: (response) => {
         this.uploading.set(false);
-        
-        // Handle Duplicates
-        if (response.status === 'DUPLICATE' || response.dedup?.exactDuplicate?.isDuplicate) {
-          this.handleExactDuplicate(response);
+        if (response.outcome === 'REJECTED' || response.outcome === 'TECHNICAL_FAILURE') {
+          const message = response.issues.map(issue => issue.message).join(' · ')
+            || 'Extraction failed on the server.';
+          this.snackBar.open(message, 'Dismiss', { duration: 5000 });
           return;
         }
-
-        if (response.dedup?.nearDuplicate?.isNearDuplicate) {
-          this.handleNearDuplicate(response);
-        }
-
-        if (response.status === 'IN_PROGRESS') {
-          this.snackBar.open('Extraction is running in the background. Record ID: ' + response.recordId, 'Dismiss', { duration: 5000 });
-          return;
-        }
-
-        if (response.status === 'FAILED') {
-          this.snackBar.open('Extraction failed on the server.', 'Dismiss', { duration: 5000 });
-          return;
-        }
-
-        // Parse extracted JSON
-        let extractedData: Record<string, unknown> = {};
-        try {
-          extractedData = typeof response.extractedJson === 'string' 
-            ? JSON.parse(response.extractedJson) 
-            : response.extractedJson;
-        } catch (e) {
-          this.translate.get(['docExtractor.messages.failedToParse', 'docExtractor.messages.dismiss']).subscribe(msgs => {
-            this.snackBar.open(msgs['docExtractor.messages.failedToParse'], msgs['docExtractor.messages.dismiss'], { duration: 5000 });
-          });
+        if (!response.data) {
+          this.snackBar.open('The extractor returned no data.', 'Dismiss', { duration: 5000 });
           return;
         }
 
         // Extract filename from extracted data using pattern
-        const suggestedFileName = this.extractFileNameFromData(extractedData, def, file.name);
+        const suggestedFileName = this.extractFileNameFromData(response.data, def, file.name);
         
         const version = this.currentDocTypeVersion();
         if (!version) return;
 
-        const draftId = response.requestId;
-        if (!draftId) {
-          this.snackBar.open('Extraction response missing request identifier', 'Dismiss', { duration: 7000 });
-          return;
-        }
-
         // Create a draft object matching ExtractionDraft interface
         const draft: ExtractionDraft = {
-          draftId,
+          draftId: response.requestId ?? `stateless-${Date.now()}`,
           domainKey: def.domainKey,
           docTypeKey: def.docTypeKey,
           docTypeVersion: version,
-          dataJson: extractedData,
+          dataJson: response.data,
           status: 'draft',
         };
 
@@ -570,6 +542,14 @@ export class DocExtractionWorkspaceComponent {
           lockedDocTypeVersion: version,
           mode: 'create',
           draft,
+          persistOnValidate: false,
+          initialValidation: response.validation
+            ? {
+                state: response.validation.state,
+                issues: response.validation.issues,
+                importPolicy: response.validation.importPolicy === 'STRICT' ? 'STRICT' : 'PARTIAL',
+              }
+            : undefined,
         });
       },
       error: (err: unknown) => {

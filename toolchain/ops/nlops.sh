@@ -135,7 +135,7 @@ Examples ? OVH VPS prod (marketing vitrine):
   BUILD_IMAGES=true PUSH_IMAGES=true KUBE_CONTEXT=nafura-vps-prod ENV=prod REGISTRY_PASS=*** $0 build-push zenith
   KUBE_CONTEXT=nafura-vps-prod ENV=prod $0 deploy zenith
 
-Supported apps: sektor-btp (alias erp), venue-catalog, build-intelligence, mbs-studio, corporate, zenith
+Supported apps: sektor-btp (alias erp), venue-catalog, build-intelligence, usage-ops, mbs-studio, corporate, zenith
 EOF
 }
 
@@ -154,6 +154,7 @@ db_name_for_app() {
     sektor-btp|erp) echo "nafura_erp" ;;
     venue-catalog) echo "nafura_venue_catalog" ;;
     build-intelligence) echo "nafura_build_intelligence" ;;
+    usage-ops) echo "nafura_usage_ops" ;;
     *) echo "nafura_${1//-/_}" ;;
   esac
 }
@@ -550,6 +551,29 @@ build_build_intelligence_images() {
   echo "Build complete."
 }
 
+build_usage_ops_images() {
+  local tag
+  tag="$(image_tag_for_env)"
+  local backend_img web_img lifecycle_img
+  backend_img="$(image_ref usage-ops-backend "$tag")"
+  web_img="$(image_ref usage-ops-web "$tag")"
+  lifecycle_img="$(image_ref nafura-lifecycle "$tag")"
+
+  echo "Building backend -> $backend_img"
+  (cd "$ROOT" && "$GRADLEW" :usage-ops:app:bootJar --no-daemon)
+  docker build -t "$backend_img" -f "$ROOT/products/usage-ops/Dockerfile.jar" \
+    "$ROOT/products/usage-ops/backend/app/build/libs"
+
+  echo "Building frontend -> $web_img"
+  docker build -t "$web_img" -f "$ROOT/products/usage-ops/Dockerfile.web" "$ROOT"
+
+  echo "Building lifecycle -> $lifecycle_img"
+  (cd "$ROOT" && "$GRADLEW" :tools:lifecycle:collectMigrations -PappId=usage-ops --no-daemon)
+  docker build -t "$lifecycle_img" -f "$ROOT/tools/lifecycle/Dockerfile" "$ROOT/tools/lifecycle"
+
+  echo "Build complete."
+}
+
 build_vitrine_images() {
   local app_id="$1"
   local tag web_img app_root
@@ -569,6 +593,7 @@ build_images() {
   case "$app_id" in
     sektor-btp|erp) build_sektor_images ;;
     build-intelligence) build_build_intelligence_images ;;
+    usage-ops) build_usage_ops_images ;;
     mbs-studio|corporate|zenith) build_vitrine_images "$app_id" ;;
     *)
       echo "ERROR: build-images not implemented for $app_id" >&2
@@ -601,6 +626,11 @@ push_images() {
     build-intelligence)
       docker push "$(image_ref build-intelligence-backend "$tag")"
       docker push "$(image_ref build-intelligence-web "$tag")"
+      docker push "$(image_ref nafura-lifecycle "$tag")"
+      ;;
+    usage-ops)
+      docker push "$(image_ref usage-ops-backend "$tag")"
+      docker push "$(image_ref usage-ops-web "$tag")"
       docker push "$(image_ref nafura-lifecycle "$tag")"
       ;;
     mbs-studio|corporate|zenith)

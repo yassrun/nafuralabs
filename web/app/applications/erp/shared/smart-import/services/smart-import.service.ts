@@ -2,17 +2,14 @@ import { Injectable, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { firstValueFrom } from 'rxjs';
 
-import type { DocTypeDefinition } from '@platform/features/documents/doc-extractor/models/doc-type-definition.model';
 import { TenantContextService } from '@platform/core/tenant/tenant.context';
-import { DocTypeService } from '@platform/features/documents/doc-extractor/services/doc-type.service';
 import { ExtractionService } from '@platform/features/documents/doc-extractor/services/extraction.service';
 import type { ExtractionValidation, FieldIssue } from '@platform/features/documents/doc-extractor/models/extraction.model';
+import type { SmartImportSchemaView } from '@platform/features/documents/smart-import/models/smart-import.model';
 
 import { extractObject, normalizeText } from '../../utils/extraction-json.utils';
 import {
   extractArrayRows,
-  isExtractionFailed,
-  isExtractionSuccess,
   issuesForRow,
   requiredFieldsFromArraySchema,
   rowsWithIssues,
@@ -35,7 +32,6 @@ type CorrectionRow = {
 @Injectable({ providedIn: 'root' })
 export class SmartImportService {
   private readonly tenantContext = inject(TenantContextService);
-  private readonly docTypeService = inject(DocTypeService);
   private readonly extractionService = inject(ExtractionService);
   private readonly registry = inject(ImportHandlerRegistry);
   private readonly dialog = inject(MatDialog);
@@ -47,34 +43,45 @@ export class SmartImportService {
       throw new Error('SMART_IMPORT_TENANT_MISSING');
     }
 
-    const definition = await firstValueFrom(
-      this.docTypeService.getActiveDefinition(handler.domainKey, handler.docTypeKey, tenantId),
-    );
+    const schema: SmartImportSchemaView = {
+      name: handler.schemaName ?? handler.entityKey,
+      description: handler.schemaDescription,
+      jsonSchema: handler.dataSchema,
+      uiSchema: handler.presentationSchema,
+      instructions: handler.instructions,
+    };
 
     const response = await firstValueFrom(
-      this.extractionService.extract({
+      this.extractionService.extractStateless({
         file,
-        docTypeDefinitionId: definition.id,
-        persist: false,
+        inlineSchema: handler.dataSchema,
+        presentationSchema: handler.presentationSchema,
+        instructions: handler.instructions,
       }),
     );
 
-    if (isExtractionFailed(response.status)) {
+    if (response.outcome === 'REJECTED' || response.outcome === 'TECHNICAL_FAILURE') {
       throw new Error('SMART_IMPORT_EXTRACTION_FAILED');
     }
-    if (!isExtractionSuccess(response.status)) {
+    if (response.outcome !== 'COMPLETED' && response.outcome !== 'REVIEW_REQUIRED') {
       throw new Error('SMART_IMPORT_EXTRACTION_INCOMPLETE');
     }
 
-    const data = extractObject(response.extractedJson);
+    const data = extractObject(response.data);
     const rows = extractArrayRows(data, handler.arrayPath);
     if (rows.length === 0) {
       throw new Error('SMART_IMPORT_NO_ROWS');
     }
 
-    const validation = response.validation;
+    const validation: ExtractionValidation | undefined = response.validation
+      ? {
+          state: response.validation.state,
+          issues: response.validation.issues,
+          importPolicy: response.validation.importPolicy === 'STRICT' ? 'STRICT' : 'PARTIAL',
+        }
+      : undefined;
     const invalidIndexes = rowsWithIssues(validation);
-    const requiredFields = requiredFieldsFromArraySchema(definition, handler.arrayPath);
+    const requiredFields = requiredFieldsFromArraySchema(schema, handler.arrayPath);
     const existingKeys = handler.loadExistingKeys ? await handler.loadExistingKeys() : new Set<string>();
 
     const result: SmartImportResult = {
@@ -106,7 +113,7 @@ export class SmartImportService {
     }
 
     if (rowsToCorrect.length > 0) {
-      const correctedRows = await this.openCompletionDialog(definition, handler.arrayPath, rowsToCorrect);
+      const correctedRows = await this.openCompletionDialog(schema, handler.arrayPath, rowsToCorrect);
       for (const row of correctedRows) {
         const check = validateRowRequired(row, requiredFields, -1);
         if (!check.valid) {
@@ -121,19 +128,19 @@ export class SmartImportService {
   }
 
   private async openCompletionDialog(
-    definition: DocTypeDefinition,
+    schema: SmartImportSchemaView,
     arrayPath: string,
     rows: CorrectionRow[],
   ): Promise<Record<string, unknown>[]> {
     const ref = this.dialog.open<
       SmartImportCompletionDialogComponent,
-      { definition: DocTypeDefinition; arrayPath: string; rows: CorrectionRow[] },
+      { schema: SmartImportSchemaView; arrayPath: string; rows: CorrectionRow[] },
       SmartImportCompletionDialogResult | undefined
     >(SmartImportCompletionDialogComponent, {
       width: '960px',
       maxWidth: '96vw',
       disableClose: true,
-      data: { definition, arrayPath, rows },
+      data: { schema, arrayPath, rows },
     });
 
     const outcome = await firstValueFrom(ref.afterClosed());

@@ -9,6 +9,7 @@ resources:
 
 patches:
   - path: patch-ingress.yaml
+  - path: patch-backend-infra.yaml
 
 images:
   - name: build-intelligence-backend

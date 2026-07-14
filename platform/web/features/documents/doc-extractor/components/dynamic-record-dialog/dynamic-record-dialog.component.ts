@@ -29,10 +29,13 @@ export interface DynamicRecordDialogData {
   mode: 'create' | 'edit';
   draft?: ExtractionDraft;
   record?: ExtractedRecord;
+  /** False for the stateless review flow: validation returns data to the caller only. */
+  persistOnValidate?: boolean;
 }
 
 export interface DynamicRecordDialogResult {
-  record: ExtractedRecord;
+  record?: ExtractedRecord;
+  dataJson: Record<string, unknown>;
 }
 
 @Component({
@@ -248,6 +251,11 @@ export class DynamicRecordDialogComponent {
       schema: this.definition.jsonSchema,
     });
 
+    if (this.data.persistOnValidate === false) {
+      this.dialogRef.close({ dataJson });
+      return;
+    }
+
     const tenantId = this.tenantContext.tenantId();
     if (!tenantId) {
       this.snackBar.open(
@@ -281,7 +289,7 @@ export class DynamicRecordDialogComponent {
     this.extractionService.validate(request).subscribe({
       next: (record) => {
         this.saving.set(false);
-        this.dialogRef.close({ record });
+        this.dialogRef.close({ record, dataJson });
       },
       error: (err: unknown) => {
         this.saving.set(false);

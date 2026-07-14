@@ -1,3 +1,8 @@
+import type { DocTypeDefinition } from '@platform/features/documents/doc-extractor/models/doc-type-definition.model';
+import type { ExtractionValidation } from '@platform/features/documents/doc-extractor/models/extraction.model';
+import type { JsonSchemaRoot } from '@platform/features/documents/doc-extractor/models/json-schema.model';
+import type { UiSchema } from '@platform/features/documents/doc-extractor/models/ui-schema.model';
+
 export interface LookupEntry {
   key: string;
   value: string;
@@ -17,10 +22,24 @@ export interface DocScanLookupContext {
   extractLines: (root: unknown, aliases?: string[]) => Record<string, unknown>[];
 }
 
-export interface ScanAndMapArgs<T> {
+export interface DocScanSchemaArgs {
+  dataSchema: JsonSchemaRoot;
+  presentationSchema?: UiSchema;
+  instructions?: string;
+  schemaName?: string;
+  schemaDescription?: string;
+}
+
+export interface ScanAndMapArgs<T> extends DocScanSchemaArgs {
   file: File;
-  domainKey: string;
-  docTypeKey: string;
   mapper: (data: Record<string, unknown>, ctx: DocScanLookupContext) => Partial<T> | Promise<Partial<T>>;
   lookups: () => LookupMap;
+  review?: (payload: DocScanReviewPayload) => Promise<Record<string, unknown> | undefined>;
+}
+
+export interface DocScanReviewPayload {
+  data: Record<string, unknown>;
+  definition: DocTypeDefinition;
+  validation?: ExtractionValidation;
+  requestId?: string;
 }

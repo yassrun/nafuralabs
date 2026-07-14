@@ -250,6 +250,11 @@
       "toasts": {
         "saved": "Avoir {numero} enregistré"
       },
+      "scan": {
+        "button": "Scanner l'avoir",
+        "success": "Avoir scanné, formulaire prérempli",
+        "factureNotFound": "Facture d'origine « {numero} » non trouvée — sélectionnez-la manuellement"
+      },
       "table": {
         "header": {
           "designation": "Désignation",
@@ -437,6 +442,10 @@
       },
       "toasts": {
         "saved": "BCC {numero} enregistré"
+      },
+      "scan": {
+        "button": "Scanner le BCC",
+        "success": "BCC scanné, formulaire prérempli"
       },
       "errors": {
         "notFound": "Bon de commande client introuvable"

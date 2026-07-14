@@ -11,6 +11,7 @@ dependencies {
     implementation project(':platform:core:job-runner')
     implementation project(':platform:features:administration:iam')
     implementation project(':platform:features:administration:subscription')
+    implementation project(':platform:features:administration:usage')
     implementation project(':platform:features:collaboration:doc-manager')
     implementation project(':platform:features:collaboration:audit')
     implementation project(':platform:features:documents:doc-extractor')

@@ -145,3 +145,47 @@ export interface ExtractionResponse {
   dedup: DeduplicationResult;
 }
 
+export type StatelessExtractionOutcome =
+  | 'SCHEMA_PROPOSAL_PENDING'
+  | 'COMPLETED'
+  | 'REVIEW_REQUIRED'
+  | 'REJECTED'
+  | 'TECHNICAL_FAILURE';
+
+export interface StatelessExtractionIssue {
+  source: string;
+  code: string;
+  path?: string;
+  rowIndex?: number;
+  message: string;
+  retryable: boolean;
+}
+
+export interface StatelessExtractionValidation {
+  state: 'VALID' | 'INCOMPLETE' | 'INVALID';
+  issues: Array<{
+    path: string;
+    rowIndex?: number;
+    kind: string;
+    message: string;
+  }>;
+  importPolicy: string;
+}
+
+/**
+ * The stateless API never returns record IDs, storage references or dedup data.
+ */
+export interface StatelessExtractionResponse {
+  outcome: StatelessExtractionOutcome;
+  data: Record<string, unknown> | null;
+  dataSchema: Record<string, unknown> | null;
+  presentationSchema: Record<string, unknown> | null;
+  validation: StatelessExtractionValidation | null;
+  issues: StatelessExtractionIssue[];
+  requestId?: string;
+  provider?: string;
+  model?: string;
+  costUsd?: number;
+  createdAt?: string;
+}
+

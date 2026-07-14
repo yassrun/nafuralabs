@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: usage-ops-backend
+spec:
+  template:
+    spec:
+      containers:
+        - name: usage-ops-backend
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: POSTGRES_HOST
+              value: postgres.nafura-infra-staging.svc
+            - name: POSTGRES_USER
+              value: nafura
+            - name: POSTGRES_PASSWORD
+              value: nafura
+            - name: REDIS_HOST
+              value: redis.nafura-infra-staging.svc
+            - name: KEYCLOAK_ISSUER_URI
+              value: http://iam.nafuralabs.staging/realms/iam-portal
+            - name: KEYCLOAK_JWK_SET_URI
+              value: http://keycloak.nafura-infra-staging.svc:8080/realms/iam-portal/protocol/openid-connect/certs
+            - name: USAGE_OPS_SEKTOR_BASE_URL
+              value: http://sektor-btp-backend.sektor-staging.svc:8082
+            - name: USAGE_OPS_BI_BASE_URL
+              value: http://build-intelligence-backend.build-intelligence-staging.svc:8086
+            - name: DOCUMENTS_MINIO_ENDPOINT
+              value: http://minio.nafura-infra-staging.svc:9000
+            - name: DOCUMENTS_MINIO_BUCKET
+              value: usage-ops
+            - name: MINIO_ROOT_USER
+              value: minioadmin
+            - name: MINIO_ROOT_PASSWORD
+              value: minioadmin

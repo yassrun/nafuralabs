@@ -1,7 +1,12 @@
 # Requires admin to modify C:\Windows\System32\drivers\etc\hosts
+# Windows effectively ignores past ~9 aliases on a single hosts line — keep extras on separate lines.
 $hostsPath = 'C:\Windows\System32\drivers\etc\hosts'
 $marker = '# Nafura staging (nlops)'
 $line = '127.0.0.1 sektor.nafuralabs.staging api.sektor.nafuralabs.staging mbs.nafuralabs.staging zenith.nafuralabs.staging iam.nafuralabs.staging minio.nafuralabs.staging s3.nafuralabs.staging vault.nafuralabs.staging'
+$extra = @(
+  '127.0.0.1 build-intelligence.nafuralabs.staging',
+  '127.0.0.1 usage-ops.nafuralabs.staging'
+)
 
 $content = Get-Content $hostsPath -Raw -ErrorAction Stop
 if ([string]::IsNullOrWhiteSpace($content)) {
@@ -9,14 +14,11 @@ if ([string]::IsNullOrWhiteSpace($content)) {
     exit 1
 }
 
-# Remove legacy line that pointed IAM at iam.nafura.local
+# Remove legacy / malformed entries
 $content = $content -replace '(?m)^127\.0\.0\.1[^\r\n]*iam\.nafura\.local[^\r\n]*\r?\n?', ''
-
-if ($content -match 'iam\.nafuralabs\.staging') {
-    Write-Host 'Staging hosts already present:'
-    Select-String -Path $hostsPath -Pattern 'Nafura staging|nafuralabs\.staging'
-    exit 0
-}
+$content = $content -replace 'http://usage-ops\.nafuralabs\.staging', 'usage-ops.nafuralabs.staging'
+$content = $content -replace '\s+build-intelligence\.nafuralabs\.staging', ''
+$content = $content -replace '\s+usage-ops\.nafuralabs\.staging', ''
 
 $updated = $content -replace '(?m)^127\.0\.0\.1[^\r\n]*nafuralabs\.staging[^\r\n]*', $line
 if ($updated -notmatch 'iam\.nafuralabs\.staging') {
@@ -27,6 +29,14 @@ if ($updated -notmatch 'iam\.nafuralabs\.staging') {
     }
 }
 
+foreach ($e in $extra) {
+    $hostOnly = ($e -split '\s+', 2)[1]
+    if ($updated -notmatch [regex]::Escape($hostOnly)) {
+        if (-not $updated.EndsWith("`n")) { $updated += "`r`n" }
+        $updated += "$e`r`n"
+    }
+}
+
 try {
     Set-Content -Path $hostsPath -Value $updated.TrimEnd() -Encoding ASCII -ErrorAction Stop
 } catch {
@@ -34,5 +44,12 @@ try {
     exit 1
 }
 
+ipconfig /flushdns | Out-Null
 Write-Host 'Updated Nafura staging hosts:'
-Select-String -Path $hostsPath -Pattern 'Nafura staging|iam\.nafuralabs\.staging'
+Select-String -Path $hostsPath -Pattern 'Nafura staging|nafuralabs\.staging|usage-ops'
+Write-Host 'Resolve usage-ops:'
+try {
+    Write-Host ([System.Net.Dns]::GetHostAddresses('usage-ops.nafuralabs.staging')[0].IPAddressToString)
+} catch {
+    Write-Host "FAILED: $($_.Exception.Message)"
+}

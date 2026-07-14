@@ -11,6 +11,9 @@
         {{ chip.label }}
       </nf-button>
     }
+    <nf-smart-import-trigger
+      entityKey="employe"
+      (completed)="onSmartImportComplete()" />
   </div>
 
   <nf-entity-listing

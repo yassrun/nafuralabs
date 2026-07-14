@@ -29,6 +29,7 @@ public class ExtractionResponse {
     
     // Error information (for failed extractions)
     private String error;
+    private ExtractionFailure failure;
 
     /** Post-extraction schema validation (required fields, types). */
     private ExtractionValidationDto validation;

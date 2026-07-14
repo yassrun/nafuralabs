@@ -48,6 +48,8 @@ Public (ingress TLS) : `registry.nafuralabs.com`
 |--------|-------|-----------|---------------|------------|-------------|
 | `sektor-btp` | `erp` | `sektor-${ENV}` | `nafura_erp` | Liquibase (Job K8s) | `products/sektor-btp/deploy/k8s/overlays/${ENV}` |
 | `venue-catalog` | — | `venue-catalog-${ENV}` | `nafura_venue_catalog` | Flyway (au startup backend) | `products/venue-catalog/deploy/k8s/overlays/${ENV}` |
+| `build-intelligence` | — | `build-intelligence-${ENV}` | `nafura_build_intelligence` | Liquibase (Job K8s) | `products/build-intelligence/deploy/k8s/overlays/${ENV}` |
+| `usage-ops` | — | `usage-ops-${ENV}` | `nafura_usage_ops` | Liquibase (Job K8s) | `products/usage-ops/deploy/k8s/overlays/${ENV}` |
 | `mbs-studio` | — | `nafura-vitrine-${ENV}` | — (vitrine) | — | `marketing/products/mbs-studio/deploy/k8s/overlays/${ENV}` |
 | `zenith` | — | `nafura-vitrine-${ENV}` | — (vitrine) | — | `marketing/products/zenith/deploy/k8s/overlays/${ENV}` |
 | `corporate` | — | `nafura-vitrine-${ENV}` | — (vitrine) | — | `marketing/corporate/deploy/k8s/overlays/${ENV}` |

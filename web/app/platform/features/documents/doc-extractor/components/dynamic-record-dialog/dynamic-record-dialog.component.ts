@@ -14,7 +14,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { DocTypeDefinition } from '../../models/doc-type-definition.model';
 import { DocumentWorkflowStatus } from '../../models/document-workflow.model';
-import { ExtractionDraft, ExtractedRecord } from '../../models/extraction.model';
+import { ExtractionDraft, ExtractedRecord, ExtractionValidation, FieldIssue } from '../../models/extraction.model';
 import { JsonSchemaArray } from '../../models/json-schema.model';
 import { DocumentValidationService } from '../../services/document-validation.service';
 import { ExtractionService } from '../../services/extraction.service';
@@ -29,10 +29,15 @@ export interface DynamicRecordDialogData {
   mode: 'create' | 'edit';
   draft?: ExtractionDraft;
   record?: ExtractedRecord;
+  /** False for the stateless review flow: validation returns data to the caller only. */
+  persistOnValidate?: boolean;
+  /** Server validation issues from the extraction response. */
+  initialValidation?: ExtractionValidation;
 }
 
 export interface DynamicRecordDialogResult {
-  record: ExtractedRecord;
+  record?: ExtractedRecord;
+  dataJson: Record<string, unknown>;
 }
 
 @Component({
@@ -91,10 +96,27 @@ export class DynamicRecordDialogComponent {
     );
     return this.validationService.canValidate(workflowState);
   });
-  
-  // Get validation errors for display
+
   readonly validationErrors = computed(() => {
     return this.validationResult().errors;
+  });
+
+  readonly arrayIssues = computed<FieldIssue[]>(() => {
+    const liveErrors = this.validationResult().errors;
+    const livePaths = new Set(liveErrors.map(error => error.field));
+    const live = liveErrors.map(error => ({
+      path: error.field,
+      rowIndex: this.rowIndexFromPath(error.field),
+      kind: (error.code === 'REQUIRED_FIELD_MISSING' ? 'MISSING_REQUIRED' : 'FORMAT_INVALID') as FieldIssue['kind'],
+      message: error.message,
+    }));
+    const initial = (this.data.initialValidation?.issues ?? [])
+      .filter(issue => livePaths.has(issue.path) || liveErrors.length === 0);
+    const byPath = new Map<string, FieldIssue>();
+    for (const issue of [...initial, ...live]) {
+      byPath.set(`${issue.path}:${issue.rowIndex ?? ''}`, issue);
+    }
+    return [...byPath.values()];
   });
   
   readonly blReference = computed(() => {
@@ -248,6 +270,11 @@ export class DynamicRecordDialogComponent {
       schema: this.definition.jsonSchema,
     });
 
+    if (this.data.persistOnValidate === false) {
+      this.dialogRef.close({ dataJson });
+      return;
+    }
+
     const tenantId = this.tenantContext.tenantId();
     if (!tenantId) {
       this.snackBar.open(
@@ -281,7 +308,7 @@ export class DynamicRecordDialogComponent {
     this.extractionService.validate(request).subscribe({
       next: (record) => {
         this.saving.set(false);
-        this.dialogRef.close({ record });
+        this.dialogRef.close({ record, dataJson });
       },
       error: (err: unknown) => {
         this.saving.set(false);
@@ -289,6 +316,19 @@ export class DynamicRecordDialogComponent {
         this.snackBar.open(msg, this.translate.instant('docExtractor.messages.dismiss'), { duration: 8000 });
       },
     });
+  }
+
+  issuesForArray(arrayPath: string): FieldIssue[] {
+    return this.arrayIssues().filter(issue =>
+      issue.path === arrayPath
+      || issue.path.startsWith(`${arrayPath}[`)
+      || issue.path.startsWith(`${arrayPath}.`)
+    );
+  }
+
+  private rowIndexFromPath(fieldPath: string): number | null {
+    const match = fieldPath.match(/\[(\d+)\]/);
+    return match ? Number(match[1]) : null;
   }
 
   private humanizeHttpError(err: unknown): string {

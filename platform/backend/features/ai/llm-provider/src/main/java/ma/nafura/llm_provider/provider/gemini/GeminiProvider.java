@@ -162,7 +162,10 @@ public class GeminiProvider implements AiProvider {
                 generationConfig.put("responseMimeType", "application/json");
             }
             if (!hasTools && request.getResponseSchema() != null && !request.getResponseSchema().isEmpty()) {
-                generationConfig.put("responseSchema", objectMapper.readTree(request.getResponseSchema()));
+                generationConfig.put(
+                        "responseSchema",
+                        sanitizeGeminiParameters(objectMapper.readTree(request.getResponseSchema()))
+                );
             }
             if (!generationConfig.isEmpty()) {
                 geminiRequest.put("generationConfig", generationConfig);
@@ -286,7 +289,11 @@ public class GeminiProvider implements AiProvider {
      * Gemini requires {@code items} on every array and {@code properties} on every object
      * in function-declaration parameter schemas.
      */
-    private JsonNode sanitizeGeminiParameters(JsonNode parameters) {
+    /**
+     * Gemini responseSchema / function parameters reject JSON Schema unions like
+     * {@code "type": ["string","null"]}. Convert them to a single type + nullable.
+     */
+    JsonNode sanitizeGeminiParameters(JsonNode parameters) {
         if (parameters == null || parameters.isNull()) {
             return parameters;
         }
@@ -299,6 +306,13 @@ public class GeminiProvider implements AiProvider {
     }
 
     private void sanitizeSchemaNode(ObjectNode node) {
+        normalizeTypeUnion(node);
+        node.remove("title");
+        node.remove("$schema");
+        node.remove("$defs");
+        node.remove("$ref");
+        node.remove("additionalProperties");
+
         String type = node.path("type").asText("");
         if ("array".equals(type) && !node.has("items")) {
             ObjectNode items = objectMapper.createObjectNode();
@@ -319,6 +333,42 @@ public class GeminiProvider implements AiProvider {
         JsonNode items = node.get("items");
         if (items != null && items.isObject()) {
             sanitizeSchemaNode((ObjectNode) items);
+        }
+        JsonNode anyOf = node.get("anyOf");
+        if (anyOf != null && anyOf.isArray()) {
+            for (JsonNode option : anyOf) {
+                if (option != null && option.isObject()) {
+                    sanitizeSchemaNode((ObjectNode) option);
+                }
+            }
+        }
+    }
+
+    private void normalizeTypeUnion(ObjectNode node) {
+        JsonNode typeNode = node.get("type");
+        if (typeNode == null || !typeNode.isArray()) {
+            return;
+        }
+        String primary = null;
+        boolean nullable = false;
+        for (JsonNode entry : typeNode) {
+            if (entry == null || !entry.isTextual()) {
+                continue;
+            }
+            String value = entry.asText();
+            if ("null".equals(value)) {
+                nullable = true;
+            } else if (primary == null) {
+                primary = value;
+            }
+        }
+        if (primary != null) {
+            node.put("type", primary);
+            if (nullable) {
+                node.put("nullable", true);
+            }
+        } else {
+            node.remove("type");
         }
     }
 

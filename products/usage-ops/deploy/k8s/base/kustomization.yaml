@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: usage-ops-staging
+
+resources:
+  - backend-service-account.yaml
+  - backend-deployment.yaml
+  - backend-service.yaml
+  - frontend-deployment.yaml
+  - frontend-service.yaml
+  - ingress.yaml
+
+images:
+  - name: usage-ops-backend
+    newName: usage-ops-backend
+    newTag: staging
+  - name: usage-ops-web
+    newName: usage-ops-web
+    newTag: staging

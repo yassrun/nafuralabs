@@ -86,6 +86,7 @@ Pas d’overlay K8s `dev`. Env `demo` (GKE) : **deprecated**.
 | `sektor-btp` | `sektor-${ENV}` | `nafura_erp` | Liquibase Job | `products/sektor-btp/deploy/k8s/overlays/${ENV}` |
 | `venue-catalog` | `venue-catalog-${ENV}` | `nafura_venue_catalog` | Flyway startup | `products/venue-catalog/deploy/k8s/overlays/${ENV}` |
 | `build-intelligence` | `build-intelligence-${ENV}` | `nafura_build_intelligence` | Liquibase Job | `products/build-intelligence/deploy/k8s/overlays/${ENV}` |
+| `usage-ops` | `usage-ops-${ENV}` | `nafura_usage_ops` | Liquibase Job | `products/usage-ops/deploy/k8s/overlays/${ENV}` |
 | `mbs-studio` | `nafura-vitrine-${ENV}` | — | — | `marketing/products/mbs-studio/deploy/k8s/overlays/${ENV}` |
 | `corporate` | `nafura-vitrine-${ENV}` | — | — | `marketing/corporate/deploy/k8s/overlays/${ENV}` |
 
@@ -106,6 +107,7 @@ Frontend : `@platform/*` → `platform/web`, `@applications/*` → `products/sek
 | Sektor API | `api.sektor.nafuralabs.staging` |
 | IAM | `iam.nafuralabs.staging` |
 | MBS | `mbs.nafuralabs.staging` |
+| Usage Ops | `usage-ops.nafuralabs.staging` |
 | Minio / S3 / Vault | `minio`, `s3`, `vault`.nafuralabs.staging |
 
 Hosts Windows (admin) : `powershell -ExecutionPolicy Bypass -File toolchain/ops/add-staging-hosts.ps1`
@@ -117,6 +119,7 @@ Hosts Windows (admin) : `powershell -ExecutionPolicy Bypass -File toolchain/ops/
 | Sektor | `sektor.nafuralabs.com`, `api.sektor.nafuralabs.com` |
 | IAM | `iam.nafuralabs.com` |
 | MBS | `mbs.nafuralabs.com` |
+| Usage Ops | `usage-ops.nafuralabs.com` |
 
 Config front : `web/src/environments/environment.staging.ts` / `environment.prod.ts`.
 

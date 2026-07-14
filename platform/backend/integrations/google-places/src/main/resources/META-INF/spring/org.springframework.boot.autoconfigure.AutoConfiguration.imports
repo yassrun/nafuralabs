@@ -1,2 +1,1 @@
-org.springframework.boot.autoconfigure.AutoConfiguration=\
-  ma.nafura.platform.integrations.googleplaces.GooglePlacesAutoConfiguration
+ma.nafura.platform.integrations.googleplaces.GooglePlacesAutoConfiguration

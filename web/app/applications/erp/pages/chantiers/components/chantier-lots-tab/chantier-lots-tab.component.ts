@@ -19,6 +19,8 @@ import { BadgeComponent, ButtonComponent, EmptyStateComponent } from '@lib/anato
 import { ConfirmDialogService, ToastService } from '@lib/anatomy';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
 import type { LotChantier, PosteBudgetaire } from '@applications/erp/chantiers/models';
+import { LotChantierImportHandlerRegistrar } from '@applications/erp/shared/smart-import/handlers/lot-chantier-import.handler';
+import { SmartImportTriggerComponent } from '@platform/features/documents/smart-import';
 
 import { ChantierLotApiService } from '../../services/chantier-lot-api.service';
 import { PosteBudgetaireApiService } from '../../services/poste-budgetaire-api.service';
@@ -66,6 +68,7 @@ type BpdeImportStats = {
     BadgeComponent,
     EmptyStateComponent,
     MadCurrencyPipe,
+    SmartImportTriggerComponent,
   ],
   template: `
     <section class="tab-panel">
@@ -79,20 +82,18 @@ type BpdeImportStats = {
         <nf-button variant="secondary" icon="plus" iconLibrary="lucide" (clicked)="openForm('poste')" [disabled]="!lots().length">
           {{ 'chantiers.chantier.detail.lots.addPosteCta' | translate }}
         </nf-button>
-        <nf-button variant="secondary" icon="upload" iconLibrary="lucide" (clicked)="triggerLotImport()" [disabled]="importing()">
-          {{ 'chantiers.chantier.detail.lots.importCta' | translate }}
+        <nf-smart-import-trigger
+          entityKey="lot-chantier"
+          [disabled]="importing()"
+          (completed)="onMagicImportComplete()" />
+        <nf-button variant="ghost" icon="upload" iconLibrary="lucide" (clicked)="triggerLotImport()" [disabled]="importing()">
+          {{ 'chantiers.chantier.detail.lots.bpdeImportCta' | translate }}
         </nf-button>
         @if (selectedLotImportFile()) {
           <nf-button variant="secondary" icon="play" iconLibrary="lucide" (clicked)="confirmLotImport()" [disabled]="importing()">
             {{ 'chantiers.chantier.detail.lots.importConfirmCta' | translate }}
           </nf-button>
         }
-        <nf-button variant="ghost" icon="download" iconLibrary="lucide" (clicked)="downloadLotImportTemplate()">
-          {{ 'chantiers.chantier.detail.lots.templateCta' | translate }}
-        </nf-button>
-        <nf-button variant="ghost" icon="copy" iconLibrary="lucide" (clicked)="copyLotImportMapping()">
-          {{ 'chantiers.chantier.detail.lots.mappingCta' | translate }}
-        </nf-button>
         <input
           #lotImportInput
           type="file"
@@ -114,18 +115,6 @@ type BpdeImportStats = {
           }
         </p>
       }
-
-      <details class="mapping-help">
-        <summary class="mapping-help__title">{{ 'chantiers.chantier.detail.lots.mappingHelpTitle' | translate }}</summary>
-        <p class="mapping-help__hint">{{ 'chantiers.chantier.detail.lots.mappingHelpHint' | translate }}</p>
-        <ul class="mapping-help__list">
-          <li><strong>code</strong>: {{ 'chantiers.chantier.detail.lots.mappingHelpCode' | translate }}</li>
-          <li><strong>designation</strong>: {{ 'chantiers.chantier.detail.lots.mappingHelpDesignation' | translate }}</li>
-          <li><strong>quantite</strong>: {{ 'chantiers.chantier.detail.lots.mappingHelpQuantite' | translate }}</li>
-          <li><strong>unite</strong>: {{ 'chantiers.chantier.detail.lots.mappingHelpUnite' | translate }}</li>
-          <li><strong>prix_unitaire_ht</strong>: {{ 'chantiers.chantier.detail.lots.mappingHelpPrixUnitaire' | translate }}</li>
-        </ul>
-      </details>
 
       @if (hierarchyRows().length) {
         <div class="lots-tablebar">
@@ -264,6 +253,7 @@ export class ChantierLotsTabComponent {
   private readonly translate = inject(TranslateService);
   private readonly toast = inject(ToastService);
   private readonly confirmDialog = inject(ConfirmDialogService);
+  private readonly lotMagicImport = inject(LotChantierImportHandlerRegistrar);
 
   @ViewChild('lotImportInput') private readonly lotImportInput?: ElementRef<HTMLInputElement>;
 
@@ -348,6 +338,7 @@ export class ChantierLotsTabComponent {
         this.postesByLotId.set({});
         return;
       }
+      this.lotMagicImport.bind(id);
       void this.reload(id);
     });
   }
@@ -615,6 +606,10 @@ export class ChantierLotsTabComponent {
       count += postesByLot[sousLot.id]?.length ?? 0;
     }
     return count;
+  }
+
+  onMagicImportComplete(): void {
+    void this.reload();
   }
 
   triggerLotImport(): void {

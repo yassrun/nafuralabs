@@ -52,6 +52,11 @@ nafura:
     enabled: true
     public-endpoints:
       - /actuator/**
+    tenant:
+      skip-paths:
+        - /api/auth/
+        - /actuator/
+        - /api/v1/platform/usage/
   ai:
     gemini:
       api-key: ${AI_GEMINI_API_KEY:}
@@ -65,3 +70,11 @@ app:
       secret-key: ${MINIO_ROOT_PASSWORD:minioadmin}
       bucket: ${DOCUMENTS_MINIO_BUCKET:build-intelligence-documents}
       region: us-east-1
+
+documents:
+  minio:
+    endpoint: ${DOCUMENTS_MINIO_ENDPOINT:http://localhost:9000}
+    accessKey: ${MINIO_ROOT_USER:minioadmin}
+    secretKey: ${MINIO_ROOT_PASSWORD:minioadmin}
+    bucket: ${DOCUMENTS_MINIO_BUCKET:build-intelligence-documents}
+    secure: false

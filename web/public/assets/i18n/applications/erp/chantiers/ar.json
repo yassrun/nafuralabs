@@ -255,6 +255,7 @@
           "addTitle": "إضافة دفعة",
           "addAction": "إضافة",
           "importCta": "استيراد CSV/XLSX",
+          "bpdeImportCta": "استيراد BPDE محلي",
           "importConfirm": "تشغيل الاستيراد",
           "importConfirmCta": "تشغيل الاستيراد",
           "templateCta": "تنزيل النموذج",

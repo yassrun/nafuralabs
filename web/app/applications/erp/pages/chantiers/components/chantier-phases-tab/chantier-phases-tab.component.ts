@@ -19,6 +19,8 @@ import { ConfirmDialogService, ToastService } from '@lib/anatomy';
 import type { LotChantier, PhaseChantier } from '@applications/erp/chantiers/models';
 import { DocScanButtonComponent } from '@applications/erp/shared/components/doc-scan-button/doc-scan-button.component';
 import { ErpDocScanService } from '@applications/erp/shared/services/erp-doc-scan.service';
+import { TenantContextService } from '@platform/core/tenant/tenant.context';
+import { DocTypeService } from '@platform/features/documents/doc-extractor/services/doc-type.service';
 import { PHASE_STATUS_KEYS } from '@applications/erp/shell/i18n-labels';
 
 import { ChantierLotApiService } from '../../services/chantier-lot-api.service';
@@ -178,6 +180,8 @@ export class ChantierPhasesTabComponent {
   private readonly translate = inject(TranslateService);
   private readonly toast = inject(ToastService);
   private readonly erpDocScan = inject(ErpDocScanService);
+  private readonly tenantContext = inject(TenantContextService);
+  private readonly docTypeService = inject(DocTypeService);
 
   @ViewChild('pdfImportInput') private readonly pdfImportInput?: ElementRef<HTMLInputElement>;
 
@@ -297,10 +301,19 @@ export class ChantierPhasesTabComponent {
   }
 
   private async extractWithAi(file: File): Promise<ParsedPlanningTask[]> {
+    const tenantId = this.tenantContext.tenantId();
+    if (!tenantId) {
+      throw new Error('ERP_DOC_SCAN_TENANT_MISSING');
+    }
+    const definition = await firstValueFrom(
+      this.docTypeService.getActiveDefinition('chantiers', 'PLANNING_GANTT_PDF', tenantId),
+    );
     const extracted = await this.erpDocScan.extractJson({
       file,
-      domainKey: 'chantiers',
-      docTypeKey: 'PLANNING_GANTT_PDF',
+      dataSchema: definition.jsonSchema,
+      presentationSchema: definition.uiSchema,
+      instructions: definition.promptTemplate,
+      schemaName: definition.name,
     });
     return mapAiPlanningExtraction(extracted, this.rootLots());
   }

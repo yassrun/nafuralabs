@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: usage-ops-prod
+
+resources:
+  - ../../base
+  - patch-namespace.yaml
+
+patches:
+  - path: patch-ingress.yaml
+
+images:
+  - name: usage-ops-backend
+    newName: usage-ops-backend
+    newTag: prod
+  - name: usage-ops-web
+    newName: usage-ops-web
+    newTag: prod

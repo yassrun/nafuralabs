@@ -2,7 +2,15 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { ExportRequest, ExtractedRecord, ExtractionDraft, ValidateRequest, RecordSearchRequest, RecordSearchResponse } from '../models/extraction.model';
+import {
+  ExportRequest,
+  ExtractedRecord,
+  ExtractionDraft,
+  ValidateRequest,
+  RecordSearchRequest,
+  RecordSearchResponse,
+  StatelessExtractionResponse,
+} from '../models/extraction.model';
 import { ExtractionResponse } from '../models/extraction.model';
 import { ApiConfigService } from '../../../../core/config/api-config.service';
 
@@ -146,6 +154,47 @@ export class ExtractionService {
     formData.append('persist', String(args.persist ?? false));
 
     return this.http.post<ExtractionResponse>(`${this.apiBaseUrl}/api/extractions/extract`, formData);
+  }
+
+  /**
+   * Extract without storage, deduplication or a DocTypeDefinition backend dependency.
+   * A validated data schema is mandatory for this operation.
+   */
+  extractStateless(args: {
+    file: File;
+    inlineSchema: unknown;
+    presentationSchema?: unknown;
+    instructions?: string;
+  }): Observable<StatelessExtractionResponse> {
+    const formData = new FormData();
+    formData.append('file', args.file);
+    formData.append('inlineSchema', JSON.stringify(args.inlineSchema));
+    if (args.presentationSchema) {
+      formData.append('presentationSchema', JSON.stringify(args.presentationSchema));
+    }
+    if (args.instructions?.trim()) {
+      formData.append('instructions', args.instructions.trim());
+    }
+
+    return this.http.post<StatelessExtractionResponse>(
+      `${this.apiBaseUrl}/api/stateless-extractions`,
+      formData
+    );
+  }
+
+  proposeSchema(args: {
+    file: File;
+    instructions?: string;
+  }): Observable<StatelessExtractionResponse> {
+    const formData = new FormData();
+    formData.append('file', args.file);
+    if (args.instructions?.trim()) {
+      formData.append('instructions', args.instructions.trim());
+    }
+    return this.http.post<StatelessExtractionResponse>(
+      `${this.apiBaseUrl}/api/stateless-extractions/propose-schema`,
+      formData
+    );
   }
 
   /**

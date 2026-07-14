@@ -37,7 +37,7 @@ import { StatusChipComponent } from '../../../../../lib/design-system';
 import { DocTypeService } from '../../services/doc-type.service';
 import { ExtractionService } from '../../services/extraction.service';
 import { DocTypeDefinition, DocTypeListItem, DocTypesByDomain } from '../../models/doc-type-definition.model';
-import { ExtractedRecord, ExtractionDraft, ExtractionStatus, StandardRecordFilters, RecordSearchRequest } from '../../models/extraction.model';
+import { ExtractedRecord, ExtractionDraft, ExtractionStatus, ExtractionValidation, StandardRecordFilters, RecordSearchRequest } from '../../models/extraction.model';
 import { ColumnResolver, ResolvedColumn } from '../../utils/column-resolver';
 import { DynamicRecordDialogComponent, DynamicRecordDialogResult } from '../../components/dynamic-record-dialog/dynamic-record-dialog.component';
 import { ExportResultDialogComponent, ExportResultData } from '../../components/export-result-dialog/export-result-dialog.component';
@@ -324,56 +324,41 @@ export class ExtractionWorkspacePage implements OnInit {
     if (!file) return;
 
     const def = this.definition();
-    if (!def || !def.id) return;
+    if (!def) return;
 
     const tenantId = this.tenantContext.tenantId();
     if (!tenantId) return;
 
     this.uploading.set(true);
-    this.extractionService.extract({
+    this.extractionService.extractStateless({
       file,
-      docTypeDefinitionId: def.id,
-      persist: false,
+      inlineSchema: def.jsonSchema,
+      presentationSchema: def.uiSchema,
+      instructions: def.promptTemplate,
     }).subscribe({
       next: (response) => {
         this.uploading.set(false);
-        
-        // Handle Duplicates
-        if (response.status === 'DUPLICATE' || response.dedup?.exactDuplicate?.isDuplicate) {
-          this.handleExactDuplicate(response);
-          return;
-        }
 
-        if (response.dedup?.nearDuplicate?.isNearDuplicate) {
-          this.handleNearDuplicate(response);
-        }
-
-        if (response.status === 'FAILED') {
-          const errorMsg = (response as any).error || 'Extraction failed on the server.';
+        if (response.outcome === 'REJECTED' || response.outcome === 'TECHNICAL_FAILURE') {
+          const errorMsg = response.issues.map(issue => issue.message).join(' · ')
+            || 'Extraction failed on the server.';
           this.snackBar.open(errorMsg, 'Dismiss', { duration: 7000 });
           return;
         }
 
-        let extractedData: Record<string, unknown> = {};
-        try {
-          extractedData = typeof response.extractedJson === 'string' 
-            ? JSON.parse(response.extractedJson) 
-            : response.extractedJson;
-        } catch (e) {
-          this.snackBar.open('Failed to parse extracted data', 'Dismiss', { duration: 5000 });
+        if (response.outcome === 'SCHEMA_PROPOSAL_PENDING') {
+          this.snackBar.open('A schema proposal is ready for review.', 'Dismiss', { duration: 5000 });
           return;
         }
 
-        const draftId = response.recordId ?? response.requestId;
-        if (!draftId) {
-          this.snackBar.open('Extraction response missing record identifier', 'Dismiss', { duration: 5000 });
+        const extractedData = response.data;
+        if (!extractedData) {
+          this.snackBar.open('The extractor returned no data.', 'Dismiss', { duration: 5000 });
           return;
         }
 
         const draft: ExtractionDraft = {
-          // Backend creates an extracted_record immediately; use recordId as draft identifier
-          // (the validate endpoint operates on recordId, not requestId)
-          draftId,
+          draftId: response.requestId ?? `stateless-${Date.now()}`,
           domainKey: def.domainKey,
           docTypeKey: def.docTypeKey,
           docTypeVersion: def.version,
@@ -381,7 +366,15 @@ export class ExtractionWorkspacePage implements OnInit {
           status: 'draft',
         };
 
-        this.openRecordDialog('create', draft);
+        const initialValidation = response.validation
+          ? {
+              state: response.validation.state,
+              issues: response.validation.issues,
+              importPolicy: (response.validation.importPolicy === 'STRICT' ? 'STRICT' : 'PARTIAL') as 'PARTIAL' | 'STRICT',
+            }
+          : undefined;
+
+        this.openRecordDialog('create', draft, undefined, false, initialValidation);
       },
       error: (err) => {
         this.uploading.set(false);
@@ -639,7 +632,13 @@ export class ExtractionWorkspacePage implements OnInit {
     return labelMap[domainKey] || domainKey.charAt(0).toUpperCase() + domainKey.slice(1);
   }
 
-  private openRecordDialog(mode: 'create' | 'edit', draft?: ExtractionDraft, record?: ExtractedRecord): void {
+  private openRecordDialog(
+    mode: 'create' | 'edit',
+    draft?: ExtractionDraft,
+    record?: ExtractedRecord,
+    persistOnValidate = true,
+    initialValidation?: ExtractionValidation
+  ): void {
     const def = this.definition();
     if (!def) return;
 
@@ -654,12 +653,25 @@ export class ExtractionWorkspacePage implements OnInit {
         mode,
         draft,
         record,
+        persistOnValidate,
+        initialValidation,
       },
       panelClass: 'editor-dialog-panel',
       position: { top: '2vh' },
     });
 
     ref.afterClosed().subscribe((res) => {
+      if (!persistOnValidate) {
+        if (res?.dataJson) {
+          this.snackBar.open(
+            'Extraction validated. Corrected data is ready for the calling application.',
+            'Dismiss',
+            { duration: 5000 }
+          );
+        }
+        return;
+      }
+
       // If the user closes the dialog without validating, the record is still saved as a draft
       // on the backend. Refresh so it appears in the datatable.
       if (!res?.record) {

@@ -255,6 +255,7 @@
           "addTitle": "Add a lot",
           "addAction": "Add",
           "importCta": "Import CSV/XLSX",
+          "bpdeImportCta": "Local BPDE import",
           "importConfirm": "Run import",
           "importConfirmCta": "Run import",
           "templateCta": "Download template",

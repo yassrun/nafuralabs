@@ -70,6 +70,7 @@ nafura:
         - /api/public/
         - /api/onboarding/
         - /actuator/
+        - /api/v1/platform/usage/
   ai:
     sql:
       enabled: true

@@ -106,6 +106,24 @@ export type ExtractionResponseStatus =
   | 'IN_PROGRESS'
   | 'FAILED';
 
+export type ExtractionFailureCode =
+  | 'EXTRACTION_TIMEOUT'
+  | 'LLM_PROVIDER_ERROR'
+  | 'LLM_RESPONSE_INVALID'
+  | 'LLM_REQUEST_INVALID'
+  | 'FILE_TOO_LARGE'
+  | 'FILE_TYPE_NOT_ALLOWED'
+  | 'FILE_EMPTY'
+  | 'INTERRUPTED'
+  | 'INTERNAL_ERROR';
+
+export interface ExtractionFailure {
+  code: ExtractionFailureCode;
+  message: string;
+  retryable: boolean;
+  correlationId?: string;
+}
+
 export type ExtractionValidationState = 'VALID' | 'INCOMPLETE' | 'INVALID';
 
 export type FieldIssueKind = 'MISSING_REQUIRED' | 'TYPE_MISMATCH' | 'FORMAT_INVALID';
@@ -160,5 +178,46 @@ export interface ExtractionResponse {
   dedup?: DeduplicationResult;
   /** Error message when status is FAILED */
   error?: string;
+  /** Typed failure details when status is FAILED */
+  failure?: ExtractionFailure;
+}
+
+export type StatelessExtractionOutcome =
+  | 'SCHEMA_PROPOSAL_PENDING'
+  | 'COMPLETED'
+  | 'REVIEW_REQUIRED'
+  | 'REJECTED'
+  | 'TECHNICAL_FAILURE';
+
+export interface StatelessExtractionIssue {
+  source: string;
+  code: string;
+  path?: string;
+  rowIndex?: number;
+  message: string;
+  retryable: boolean;
+}
+
+export interface StatelessExtractionValidation {
+  state: ExtractionValidationState;
+  issues: FieldIssue[];
+  importPolicy: 'PARTIAL' | 'STRICT' | string;
+}
+
+/**
+ * The stateless API never returns record IDs, storage references or dedup data.
+ */
+export interface StatelessExtractionResponse {
+  outcome: StatelessExtractionOutcome;
+  data: Record<string, unknown> | null;
+  dataSchema: Record<string, unknown> | null;
+  presentationSchema: Record<string, unknown> | null;
+  validation: StatelessExtractionValidation | null;
+  issues: StatelessExtractionIssue[];
+  requestId?: string;
+  provider?: string;
+  model?: string;
+  costUsd?: number;
+  createdAt?: string;
 }
 

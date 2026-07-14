@@ -1,0 +1,19 @@
+{
+  "id": "usage",
+  "name": "Usage Metering",
+  "description": "Cross-tenant AI and storage usage query APIs for ops",
+  "type": "feature",
+  "layer": "feature",
+  "group": "administration",
+  "provides": {
+    "backend": {
+      "gradle": ":platform:features:administration:usage",
+      "packages": ["ma.nafura.platform.administration.usage"]
+    }
+  },
+  "requires": {
+    "core": ["tenancy", "authorization", "framework"],
+    "features": ["llm-provider", "doc-manager"]
+  },
+  "manifest": { "key": "usage" }
+}

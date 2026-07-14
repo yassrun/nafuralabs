@@ -67,7 +67,7 @@ export class SmartImportCompletionDialogComponent {
   readonly requiredFields: string[];
 
   constructor() {
-    this.requiredFields = requiredFieldsFromArraySchema(this.data.definition, this.data.arrayPath);
+    this.requiredFields = requiredFieldsFromArraySchema(this.data.schema, this.data.arrayPath);
     const itemSchema = this.itemObjectSchema();
 
     for (const entry of this.data.rows) {
@@ -82,11 +82,11 @@ export class SmartImportCompletionDialogComponent {
   }
 
   arrayConfig() {
-    return this.data.definition.uiSchema.arrays?.find((a) => a.path === this.data.arrayPath);
+    return this.data.schema.uiSchema.arrays?.find((a) => a.path === this.data.arrayPath);
   }
 
   arraySchema(): JsonSchemaArray {
-    const schema = this.data.definition.jsonSchema as unknown as Record<string, unknown>;
+    const schema = this.data.schema.jsonSchema as unknown as Record<string, unknown>;
     const properties = schema['properties'] as Record<string, unknown>;
     return properties[this.data.arrayPath] as JsonSchemaArray;
   }

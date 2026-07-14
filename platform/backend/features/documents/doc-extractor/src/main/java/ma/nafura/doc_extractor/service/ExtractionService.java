@@ -4,6 +4,7 @@ import ma.nafura.platform.documents.docextractor.domain.model.DocTypeDefinition;
 import ma.nafura.platform.documents.docextractor.domain.model.ExtractionRequest;
 import ma.nafura.platform.documents.docextractor.domain.model.ExtractionResponse;
 import ma.nafura.platform.documents.docextractor.service.util.JsonDataCleaner;
+import ma.nafura.platform.documents.docextractor.service.util.SpreadsheetTextExtractor;
 import ma.nafura.platform.ai.llm.model.LlmCallContext;
 import ma.nafura.platform.ai.llm.model.LlmMode;
 import ma.nafura.platform.ai.llm.model.LlmRequest;
@@ -15,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -87,19 +89,34 @@ public class ExtractionService {
         
         // Use jsonSchema from DocTypeDefinition
         llmRequest.setResponseSchema(docTypeDefinition.getJsonSchema());
+
+        String mimeType = request.getMimeType();
+        String fileName = request.getMetadata() != null
+                ? String.valueOf(request.getMetadata().getOrDefault("fileName", "document"))
+                : "document";
+
+        // Gemini rejects spreadsheet/CSV binaries ("Unsupported MIME type"). Send tabular text instead.
+        if (SpreadsheetTextExtractor.isTabularMime(mimeType) && request.getContentBase64() != null) {
+            byte[] bytes = Base64.getDecoder().decode(request.getContentBase64());
+            String tabular = SpreadsheetTextExtractor.toPromptText(bytes, mimeType, fileName);
+            llmRequest.setPrompt(
+                    "Extract structured JSON from the following spreadsheet content.\n\n" + tabular
+            );
+            llmRequest.setMediaContents(List.of());
+            llmRequest.setMetadata(request.getMetadata());
+            return llmRequest;
+        }
         
-        // Build media contents
+        // Build media contents for PDF/images
         List<LlmRequest.MediaContent> mediaContents = new ArrayList<>();
         
         if (request.getUrl() != null && !request.getUrl().isEmpty()) {
-            // Use URL if provided
             LlmRequest.MediaContent media = new LlmRequest.MediaContent();
             media.setUrl(request.getUrl());
             media.setMimeType(request.getMimeType());
             media.setType(determineMediaType(request.getMimeType()));
             mediaContents.add(media);
         } else if (request.getContentBase64() != null && !request.getContentBase64().isEmpty()) {
-            // Use base64 content
             LlmRequest.MediaContent media = new LlmRequest.MediaContent();
             media.setContentBase64(request.getContentBase64());
             media.setMimeType(request.getMimeType());
@@ -108,8 +125,6 @@ public class ExtractionService {
         }
         
         llmRequest.setMediaContents(mediaContents);
-        
-        // Set metadata
         llmRequest.setMetadata(request.getMetadata());
         
         return llmRequest;

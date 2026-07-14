@@ -21,6 +21,7 @@ import type { DetailActionEvent, StatusTransitionEvent } from '@lib/anatomy/type
 import type { InventoryTx } from '../../../../../inventory/models';
 import { ReceptionLinesEditorComponent } from '../../../../../inventory/components/reception-lines-editor/reception-lines-editor.component';
 import { ErpDocScanService } from '@applications/erp/shared/services/erp-doc-scan.service';
+import { RECEPTION_BL_EXTRACTION_SCHEMA } from '@applications/erp/shared/extraction-schemas';
 import {
   extractLines as extractRawLines,
   findByAliases,
@@ -268,10 +269,14 @@ export class ReceptionDetailPage extends ConfigDrivenDetailPage<InventoryTx> imp
 
     this.isExtracting.set(true);
     try {
+      const schema = RECEPTION_BL_EXTRACTION_SCHEMA;
       const patch = await this.erpDocScan.scanAndMap<InventoryTx>({
         file,
-        domainKey: 'logistic',
-        docTypeKey: 'BL',
+        dataSchema: schema.dataSchema,
+        presentationSchema: schema.presentationSchema,
+        instructions: schema.instructions,
+        schemaName: schema.name,
+        schemaDescription: schema.description,
         lookups: () => this.crud.lookups() as Record<string, LookupEntry[]>,
         mapper: (data, ctx) => {
           const fournisseurName = ctx.findStringByAliases(data, [

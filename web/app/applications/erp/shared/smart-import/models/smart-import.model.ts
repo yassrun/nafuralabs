@@ -1,22 +1,10 @@
 import type { ExtractionValidation, FieldIssue } from '@platform/features/documents/doc-extractor/models/extraction.model';
-import type { DocTypeDefinition } from '@platform/features/documents/doc-extractor/models/doc-type-definition.model';
+import type {
+  ImportHandler,
+  SmartImportSchemaView,
+} from '@platform/features/documents/smart-import/models/smart-import.model';
 
-export interface ImportRowContext {
-  rowIndex: number;
-  row: Record<string, unknown>;
-}
-
-export interface ImportHandler<TCreate = unknown> {
-  entityKey: string;
-  domainKey: string;
-  docTypeKey: string;
-  /** JSON path to the array of entities (e.g. "fournisseurs"). */
-  arrayPath: string;
-  mapRowToPayload(row: Record<string, unknown>): TCreate;
-  create(payload: TCreate): Promise<unknown>;
-  dedupeKey(row: Record<string, unknown>): string | null;
-  loadExistingKeys?(): Promise<Set<string>>;
-}
+export type { ImportHandler, SmartImportSchemaView };
 
 export interface SmartImportResult {
   imported: number;
@@ -27,7 +15,7 @@ export interface SmartImportResult {
 }
 
 export interface SmartImportCompletionDialogData {
-  definition: DocTypeDefinition;
+  schema: SmartImportSchemaView;
   arrayPath: string;
   rows: Array<{ rowIndex: number; row: Record<string, unknown>; issues: FieldIssue[] }>;
 }
@@ -94,9 +82,12 @@ export function validateRowRequired(
   return { valid: issues.length === 0, issues };
 }
 
-export function requiredFieldsFromArraySchema(definition: DocTypeDefinition, arrayPath: string): string[] {
-  const schema = definition.jsonSchema as unknown as Record<string, unknown>;
-  const properties = schema['properties'] as Record<string, unknown> | undefined;
+export function requiredFieldsFromArraySchema(
+  schema: SmartImportSchemaView | { jsonSchema: SmartImportSchemaView['jsonSchema'] },
+  arrayPath: string,
+): string[] {
+  const root = schema.jsonSchema as unknown as Record<string, unknown>;
+  const properties = root['properties'] as Record<string, unknown> | undefined;
   const arraySchema = properties?.[arrayPath] as Record<string, unknown> | undefined;
   const items = arraySchema?.['items'] as Record<string, unknown> | undefined;
   const required = items?.['required'];

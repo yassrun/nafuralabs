@@ -13,8 +13,14 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
         "ma.nafura.platform",
         "ma.nafura.buildintelligence"
 })
-@EnableJpaRepositories(basePackages = "ma.nafura.buildintelligence")
-@EntityScan(basePackages = "ma.nafura.buildintelligence")
+@EnableJpaRepositories(basePackages = {
+        "ma.nafura.platform",
+        "ma.nafura.buildintelligence"
+})
+@EntityScan(basePackages = {
+        "ma.nafura.platform",
+        "ma.nafura.buildintelligence"
+})
 @EnableAsync
 @EnableScheduling
 @EnableMethodSecurity

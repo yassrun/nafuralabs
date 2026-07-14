@@ -77,21 +77,57 @@ def gradleProjectToDiskPath = { String projectPath ->
                 return null
             }
             return "products/venue-catalog/backend/modules/${parts[1]}"
+        case 'build-intelligence':
+            if (parts.size() < 2) {
+                return null
+            }
+            if (parts[1] == 'app') {
+                return "products/build-intelligence/backend/app"
+            }
+            return "products/build-intelligence/backend/modules/${parts[1]}"
+        case 'usage-ops':
+            if (parts.size() < 2) {
+                return null
+            }
+            if (parts[1] == 'app') {
+                return "products/usage-ops/backend/app"
+            }
+            return "products/usage-ops/backend/modules/${parts[1]}"
         default:
             return null
     }
 }
 
-def resolveModulePathsFromAppGradle = { String appId ->
-    def gradleFile = resolveAppGradleFile(appId)
+def collectProjectDepsFromGradleFile = { File gradleFile ->
     def content = gradleFile.getText('UTF-8')
-    def paths = new LinkedHashSet<String>()
-
-    def matcher = (content =~ /implementation\s+project\s*\(\s*['"]:([^'"]+)['"]\s*\)/)
+    def deps = new LinkedHashSet<String>()
+    def matcher = (content =~ /(?:implementation|api|runtimeOnly)\s+project\s*\(\s*['"]:([^'"]+)['"]\s*\)/)
     matcher.each { match ->
-        def diskPath = gradleProjectToDiskPath(match[1])
-        if (diskPath) {
-            paths << diskPath
+        deps << match[1]
+    }
+    return deps
+}
+
+def resolveModulePathsFromAppGradle = { String appId ->
+    def paths = new LinkedHashSet<String>()
+    def visitedProjects = new LinkedHashSet<String>()
+    def queue = new ArrayDeque<String>()
+
+    collectProjectDepsFromGradleFile(resolveAppGradleFile(appId)).each { queue.add(it) }
+
+    while (!queue.isEmpty()) {
+        def projectPath = queue.removeFirst()
+        if (!visitedProjects.add(projectPath)) {
+            continue
+        }
+        def diskPath = gradleProjectToDiskPath(projectPath)
+        if (!diskPath) {
+            continue
+        }
+        paths << diskPath
+        def moduleGradle = new File(rootProject.projectDir, "${diskPath}/build.gradle")
+        if (moduleGradle.exists()) {
+            collectProjectDepsFromGradleFile(moduleGradle).each { queue.add(it) }
         }
     }
 
