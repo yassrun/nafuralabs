@@ -32,6 +32,16 @@ if curl -sf http://127.0.0.1:9000/health/ready >/dev/null 2>&1; then
     -s emailTheme=nafuralabs \
     -s displayName="Nafura Labs IAM" \
     -s 'displayNameHtml=<span>Nafura Labs</span> IAM' >/dev/null 2>&1 || true
+
+  # Staging/local only: allow HTTP without redirect/HSTS (set KC_FORCE_HTTP=true on the Deployment).
+  if [ "${KC_FORCE_HTTP:-false}" = "true" ]; then
+    /opt/keycloak/bin/kcadm.sh update realms/master \
+      -s sslRequired=NONE \
+      -s 'browserSecurityHeaders.strictTransportSecurity=max-age=0' >/dev/null 2>&1 || true
+    /opt/keycloak/bin/kcadm.sh update realms/iam-portal \
+      -s sslRequired=NONE \
+      -s 'browserSecurityHeaders.strictTransportSecurity=max-age=0' >/dev/null 2>&1 || true
+  fi
 fi
 
 wait "$KC_PID"

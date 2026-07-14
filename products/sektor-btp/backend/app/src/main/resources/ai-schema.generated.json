@@ -16,6 +16,7 @@
       "description": "Construction projects / sites",
       "aliases": ["chantier", "chantiers", "projet", "projets", "site", "construction site"],
       "hints": [
+        "chantier actif / en cours = status='EN_COURS' (jamais ACTIVE/ACTIF)",
         "ex: SELECT COUNT(*) FROM chantiers WHERE status='EN_COURS' AND is_active=true",
         "ex: SELECT code, label, status, ville FROM chantiers WHERE status='EN_COURS' ORDER BY code"
       ],
@@ -23,8 +24,8 @@
         { "name": "id", "type": "text", "pk": true },
         { "name": "code", "type": "text", "description": "project code CH-YYYY-NNN" },
         { "name": "label", "type": "text", "description": "project name (UI: name)" },
-        { "name": "status", "type": "text", "description": "EN_COURS|PROSPECT|SUSPENDU|TERMINE|RECEPTIONNE|CLOTURE|ANNULE" },
-        { "name": "is_active", "type": "boolean" },
+        { "name": "status", "type": "text", "description": "BROUILLON|EN_PREPARATION|EN_COURS|SUSPENDU|RECEPTIONNE_PROVISOIRE|RECEPTIONNE_DEFINITIF|CLOS — never use ACTIVE" },
+        { "name": "is_active", "type": "boolean", "description": "soft flag; pair with status='EN_COURS' for actifs" },
         { "name": "ville", "type": "text" },
         { "name": "client_name", "type": "text" },
         { "name": "montant_ht", "type": "numeric", "description": "budget HT (UI: budgetHt)" },

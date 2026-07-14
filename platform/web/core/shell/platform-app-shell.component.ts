@@ -418,10 +418,10 @@ const LUCIDE_ICON_ALIASES: Record<string, string> = {
               [class.naf-shell__message--assistant]="message.role === 'assistant'">
               <div class="naf-shell__message-role">{{ messageRoleLabel(message.role) }}</div>
               <div class="naf-shell__message-text">{{ message.content }}</div>
-              @if (message.blocks?.length || message.links?.length || message.summary) {
+              @if (hasStructuredAssistantExtras(message)) {
                 <nf-assistant-block-renderer
-                  [summary]="message.summary"
-                  [blocks]="message.blocks ?? []"
+                  [summary]="assistantSummaryForRender(message)"
+                  [blocks]="assistantBlocksForRender(message)"
                   [links]="message.links ?? []"
                   (navigate)="navigateConversationLink($event)" />
               }
@@ -2213,14 +2213,31 @@ export class PlatformAppShellComponent implements OnInit {
         this.agentActions.set(turnResponse.actions);
       }
       if (turnResponse.assistantMessage) {
+        const assistantContent =
+          turnResponse.assistantMessage.content?.trim() ||
+          turnResponse.summary?.trim() ||
+          '';
+        // Backend often echoes the same reply as summary + TEXT block; the bubble
+        // already shows content — drop duplicates so they are not rendered twice.
+        const summary =
+          turnResponse.summary?.trim() && turnResponse.summary.trim() !== assistantContent
+            ? turnResponse.summary.trim()
+            : undefined;
+        const blocks = (turnResponse.blocks ?? []).filter(
+          (block) =>
+            !(
+              (block.type === 'TEXT' || !block.type) &&
+              (block.content ?? '').trim() === assistantContent
+            )
+        );
         this.conversationMessages.update((messages) => [
           ...messages.filter((m) => !m.id.startsWith('local-')),
           {
             id: turnResponse.assistantMessage!.id,
             role: 'assistant',
-            content: turnResponse.summary ?? turnResponse.assistantMessage!.content ?? '',
-            summary: turnResponse.summary,
-            blocks: turnResponse.blocks ?? [],
+            content: assistantContent,
+            summary,
+            blocks,
             links: turnResponse.links ?? [],
             createdAt: turnResponse.assistantMessage!.createdAt,
           },
@@ -2294,6 +2311,31 @@ export class PlatformAppShellComponent implements OnInit {
   trackByMessage = (_index: number, message: { id: string }): string => message.id;
   trackByAgentAction = (_index: number, action: AgentActionResponse): string => action.id;
   trackByZone = (index: number, group: SidebarZoneGroup): string => group.zone;
+
+  /** Avoid rendering summary/TEXT when they duplicate the bubble content. */
+  hasStructuredAssistantExtras(message: UiConversationMessage): boolean {
+    return (
+      !!this.assistantSummaryForRender(message) ||
+      this.assistantBlocksForRender(message).length > 0 ||
+      (message.links?.length ?? 0) > 0
+    );
+  }
+
+  assistantSummaryForRender(message: UiConversationMessage): string | null {
+    const summary = message.summary?.trim();
+    if (!summary || summary === message.content.trim()) {
+      return null;
+    }
+    return summary;
+  }
+
+  assistantBlocksForRender(message: UiConversationMessage): AssistantBlock[] {
+    const content = message.content.trim();
+    return (message.blocks ?? []).filter(
+      (block) =>
+        !((block.type === 'TEXT' || !block.type) && (block.content ?? '').trim() === content)
+    );
+  }
 
   // ─── Helpers ─────────────────────────────────────────────────────
   nodeChildren(node: SidebarNode): SidebarNode[] {

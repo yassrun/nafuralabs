@@ -114,6 +114,14 @@ public class AgentToolDescriptions {
         node.put("_key", key);
         node.put("type", type);
         node.put("description", description);
+        // Gemini rejects array/object schemas without these fields (HTTP 400).
+        if ("array".equals(type)) {
+            ObjectNode items = objectMapper.createObjectNode();
+            items.put("type", "string");
+            node.set("items", items);
+        } else if ("object".equals(type)) {
+            node.set("properties", objectMapper.createObjectNode());
+        }
         return node;
     }
 }

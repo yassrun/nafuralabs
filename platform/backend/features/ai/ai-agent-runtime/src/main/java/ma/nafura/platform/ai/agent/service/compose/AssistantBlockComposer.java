@@ -56,7 +56,12 @@ public class AssistantBlockComposer {
                     .build());
         }
 
-        if (blocks.isEmpty() && result.getMessage() != null) {
+        // execute_sql payload: never surface tool ack ("OK") — the LLM summary is the user-facing answer
+        if (payload.containsKey("rows") || payload.containsKey("rowCount") || payload.containsKey("columns")) {
+            return blocks;
+        }
+
+        if (blocks.isEmpty() && result.getMessage() != null && !isToolAckMessage(result.getMessage())) {
             blocks.add(AssistantBlock.builder()
                     .type(AssistantBlockType.TEXT)
                     .content(result.getMessage())
@@ -65,6 +70,14 @@ public class AssistantBlockComposer {
         }
 
         return blocks;
+    }
+
+    /** Success acks from tools (e.g. SqlQueryTool message "OK") must not appear as assistant bubbles. */
+    private boolean isToolAckMessage(String message) {
+        String normalized = message.trim();
+        return normalized.equalsIgnoreCase("OK")
+                || normalized.equalsIgnoreCase("Success")
+                || normalized.equalsIgnoreCase("Done");
     }
 
     public List<AssistantLink> linksFromPayload(Map<String, Object> payload) {

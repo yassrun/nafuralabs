@@ -4,9 +4,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.PostPersist;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -14,7 +17,9 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.springframework.data.domain.Persistable;
 
 @Entity
 @Table(name = "chantiers")
@@ -22,7 +27,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Chantier {
+public class Chantier implements Persistable<String> {
 
     public static final String STATUS_BROUILLON = "BROUILLON";
     public static final String STATUS_EN_PREPARATION = "EN_PREPARATION";
@@ -149,6 +154,26 @@ public class Chantier {
 
     @Column(name = "updated_at", nullable = false)
     private OffsetDateTime updatedAt;
+
+    /**
+     * Assigned string ids are otherwise treated as existing by Spring Data ({@code save} → merge).
+     * New creates must persist as INSERT.
+     */
+    @Transient
+    @Builder.Default
+    @EqualsAndHashCode.Exclude
+    private boolean newEntity = true;
+
+    @Override
+    public boolean isNew() {
+        return newEntity;
+    }
+
+    @PostLoad
+    @PostPersist
+    void markNotNew() {
+        newEntity = false;
+    }
 
     @JsonProperty("isActive")
     public boolean isActive() {

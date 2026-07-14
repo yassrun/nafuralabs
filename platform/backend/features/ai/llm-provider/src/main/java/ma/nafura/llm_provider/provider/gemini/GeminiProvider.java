@@ -2,6 +2,7 @@ package ma.nafura.platform.ai.llm.provider.gemini;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import ma.nafura.platform.ai.llm.model.ConversationTurn;
 import ma.nafura.platform.ai.llm.model.LlmCallContext;
 import ma.nafura.platform.ai.llm.model.LlmRequest;
@@ -132,7 +133,7 @@ public class GeminiProvider implements AiProvider {
                         decl.put("name", tool.getName());
                         decl.put("description", tool.getDescription() != null ? tool.getDescription() : "");
                         if (tool.getParameters() != null) {
-                            decl.put("parameters", tool.getParameters());
+                            decl.put("parameters", sanitizeGeminiParameters(tool.getParameters()));
                         }
                         return decl;
                     })
@@ -155,10 +156,12 @@ public class GeminiProvider implements AiProvider {
 
             // 5. Generation config
             Map<String, Object> generationConfig = new HashMap<>();
-            if (request.getResponseFormat() == LlmResponseFormat.JSON) {
+            boolean hasTools = request.getTools() != null && !request.getTools().isEmpty();
+            // Gemini: function calling + responseMimeType=application/json is unsupported.
+            if (!hasTools && request.getResponseFormat() == LlmResponseFormat.JSON) {
                 generationConfig.put("responseMimeType", "application/json");
             }
-            if (request.getResponseSchema() != null && !request.getResponseSchema().isEmpty()) {
+            if (!hasTools && request.getResponseSchema() != null && !request.getResponseSchema().isEmpty()) {
                 generationConfig.put("responseSchema", objectMapper.readTree(request.getResponseSchema()));
             }
             if (!generationConfig.isEmpty()) {
@@ -276,6 +279,46 @@ public class GeminiProvider implements AiProvider {
             );
         } catch (Exception e) {
             throw new RuntimeException("Failed to parse Gemini response", e);
+        }
+    }
+
+    /**
+     * Gemini requires {@code items} on every array and {@code properties} on every object
+     * in function-declaration parameter schemas.
+     */
+    private JsonNode sanitizeGeminiParameters(JsonNode parameters) {
+        if (parameters == null || parameters.isNull()) {
+            return parameters;
+        }
+        JsonNode copy = parameters.deepCopy();
+        if (!copy.isObject()) {
+            return copy;
+        }
+        sanitizeSchemaNode((ObjectNode) copy);
+        return copy;
+    }
+
+    private void sanitizeSchemaNode(ObjectNode node) {
+        String type = node.path("type").asText("");
+        if ("array".equals(type) && !node.has("items")) {
+            ObjectNode items = objectMapper.createObjectNode();
+            items.put("type", "string");
+            node.set("items", items);
+        }
+        if ("object".equals(type) && !node.has("properties")) {
+            node.set("properties", objectMapper.createObjectNode());
+        }
+        JsonNode properties = node.get("properties");
+        if (properties != null && properties.isObject()) {
+            properties.fields().forEachRemaining(entry -> {
+                if (entry.getValue() != null && entry.getValue().isObject()) {
+                    sanitizeSchemaNode((ObjectNode) entry.getValue());
+                }
+            });
+        }
+        JsonNode items = node.get("items");
+        if (items != null && items.isObject()) {
+            sanitizeSchemaNode((ObjectNode) items);
         }
     }
 

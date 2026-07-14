@@ -113,18 +113,28 @@ spec:
               vault kv put "secret/nafura/${ENV}/platform/data/postgres" username=nafura password=nafura host=postgres port=5432 database_keycloak=keycloak
               vault kv put "secret/nafura/${ENV}/platform/iam/keycloak" admin_username=admin admin_password=admin db_username=nafura db_password=nafura db_database=keycloak
               vault kv put "secret/nafura/${ENV}/platform/storage/minio" root_user=minioadmin root_password=minioadmin access_key=minioadmin secret_key=minioadmin
-              vault kv put "secret/nafura/${ENV}/platform/integrations/email/brevo" api_key=""
-              vault kv put "secret/nafura/${ENV}/platform/integrations/ai/gemini" api_key=""
-              vault kv put "secret/nafura/${ENV}/platform/security/invitation" token_secret=change-me-in-production
+              # Placeholders only — never wipe seeded integration keys (vault-seed / manual kv put).
+              ensure_kv_placeholder() {
+                path="$1"; shift
+                if vault kv get "$path" >/dev/null 2>&1; then
+                  echo "Keeping existing $path"
+                else
+                  vault kv put "$path" "$@"
+                fi
+              }
+              ensure_kv_placeholder "secret/nafura/${ENV}/platform/integrations/email/brevo" api_key=""
+              ensure_kv_placeholder "secret/nafura/${ENV}/platform/integrations/ai/gemini" api_key=""
+              ensure_kv_placeholder "secret/nafura/${ENV}/platform/security/invitation" token_secret=change-me-in-production
 
               vault auth enable kubernetes 2>/dev/null || true
               # Token reviewer must use the Vault server SA (system:auth-delegator), not vault-bootstrap.
+              # TTL 7d — matches vault-k8s-auth-refresh CronJob; 24h was too short between refresh cycles.
               REVIEWER_JWT="$(curl -sf --cacert "${KUBE_CA}" \
                 -H "Authorization: Bearer ${KUBE_TOKEN}" \
                 -H "Content-Type: application/json" \
                 -X POST \
                 "${KUBE_API}/api/v1/namespaces/${INFRA_NS}/serviceaccounts/vault/token" \
-                -d '{"spec":{"expirationSeconds":86400}}' \
+                -d '{"spec":{"expirationSeconds":604800}}' \
                 | sed -n 's/.*"token": "\([^"]*\)".*/\1/p' | head -1)"
               if [ -z "${REVIEWER_JWT}" ]; then
                 echo "Failed to obtain vault service account token for Kubernetes auth"
@@ -133,7 +143,8 @@ spec:
               vault write auth/kubernetes/config \
                 kubernetes_host="https://${KUBERNETES_SERVICE_HOST}:${KUBERNETES_SERVICE_PORT}" \
                 kubernetes_ca_cert=@"${SA_DIR}/ca.crt" \
-                token_reviewer_jwt="${REVIEWER_JWT}"
+                token_reviewer_jwt="${REVIEWER_JWT}" \
+                disable_iss_validation=true
 
               vault policy write postgres - <<POL
               path "secret/data/nafura/${ENV}/platform/data/postgres" { capabilities = ["read"] }

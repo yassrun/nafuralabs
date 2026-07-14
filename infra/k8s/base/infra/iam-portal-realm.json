@@ -1,6 +1,7 @@
 {
   "realm": "iam-portal",
   "enabled": true,
+  "sslRequired": "external",
   "displayName": "Nafura Labs IAM",
   "displayNameHtml": "<span class=\"kc-nafura-brand\">Nafura Labs</span> IAM",
   "loginTheme": "nafuralabs",
@@ -17,6 +18,16 @@
   "resetPasswordAllowed": true,
   "editUsernameAllowed": false,
   "bruteForceProtected": true,
+  "browserSecurityHeaders": {
+    "contentSecurityPolicy": "frame-src 'self'; frame-ancestors 'self'; object-src 'none';",
+    "contentSecurityPolicyReportOnly": "",
+    "referrerPolicy": "no-referrer",
+    "strictTransportSecurity": "max-age=0",
+    "xContentTypeOptions": "nosniff",
+    "xFrameOptions": "SAMEORIGIN",
+    "xRobotsTag": "none",
+    "xXSSProtection": "1; mode=block"
+  },
   "roles": {
     "realm": [
       {

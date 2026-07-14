@@ -2,6 +2,7 @@ package ma.nafura.chantiers.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
@@ -71,11 +72,11 @@ public class ChantierService {
     @Transactional
     public Chantier create(ChantierCreateDto request) {
         UUID tenantId = tenantId();
-        String id = StringUtils.hasText(request.getId()) ? request.getId().trim() : nextChantierId(tenantId);
-        if (repository.findByIdAndTenantId(id, tenantId).isPresent()) {
-            throw new IllegalArgumentException("Chantier id already exists: " + id);
-        }
+        // Global PK: never reuse tenant-local sequences (ch-001) or client-provided ids —
+        // they collide across tenants and Spring Data treats assigned ids as merge/UPDATE.
+        String id = UUID.randomUUID().toString();
         String code = StringUtils.hasText(request.getCode()) ? request.getCode().trim() : nextChantierCode(tenantId);
+        OffsetDateTime now = OffsetDateTime.now();
         Chantier entity = Chantier.builder()
                 .id(id)
                 .tenantId(tenantId)
@@ -113,6 +114,8 @@ public class ChantierService {
                 .ingenieurName(trimOrNull(request.getIngenieurName()))
                 .societeId(trimOrNull(request.getSocieteId()))
                 .active(request.getActive() == null || request.getActive())
+                .createdAt(now)
+                .updatedAt(now)
                 .build();
         return repository.save(entity);
     }
@@ -429,17 +432,6 @@ public class ChantierService {
 
     private String resolveType(String type) {
         return StringUtils.hasText(type) ? type.trim().toUpperCase(Locale.ROOT) : "BATIMENT";
-    }
-
-    private String nextChantierId(UUID tenantId) {
-        int max = 0;
-        for (Chantier c : repository.findByTenantIdOrderByCodeAsc(tenantId)) {
-            var m = Pattern.compile("^ch-(\\d+)$", Pattern.CASE_INSENSITIVE).matcher(c.getId());
-            if (m.matches()) {
-                max = Math.max(max, Integer.parseInt(m.group(1)));
-            }
-        }
-        return "ch-" + String.format("%03d", max + 1);
     }
 
     private String nextChantierCode(UUID tenantId) {

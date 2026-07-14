@@ -12,9 +12,16 @@ spec:
               value: iam.nafuralabs.staging
             - name: KC_HOSTNAME_URL
               value: http://iam.nafuralabs.staging
+            - name: KC_HOSTNAME_ADMIN_URL
+              value: http://iam.nafuralabs.staging
             - name: KC_HOSTNAME_STRICT
               value: "false"
             - name: KC_HTTP_ENABLED
               value: "true"
             - name: KC_PROXY_HEADERS
               value: xforwarded
+            # Staging is HTTP-only (no TLS terminator enforcing HTTPS).
+            - name: KC_HOSTNAME_BACKCHANNEL_DYNAMIC
+              value: "false"
+            - name: KC_FORCE_HTTP
+              value: "true"

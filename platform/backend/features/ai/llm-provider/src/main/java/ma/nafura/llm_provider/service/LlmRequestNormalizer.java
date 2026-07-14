@@ -32,11 +32,16 @@ public class LlmRequestNormalizer {
             throw new IllegalArgumentException("LLM request must contain either prompt, media contents, or conversation history");
         }
 
-        LlmResponseFormat responseFormat = schema != null
-            || mode == LlmMode.AGENT
-            || mode == LlmMode.ASSISTANT
-            ? LlmResponseFormat.JSON
-            : LlmResponseFormat.TEXT;
+        // Gemini rejects responseMimeType=application/json when tools/function-calling are present.
+        boolean hasTools = request.getTools() != null && !request.getTools().isEmpty();
+        LlmResponseFormat responseFormat;
+        if (hasTools) {
+            responseFormat = LlmResponseFormat.TEXT;
+        } else if (schema != null || mode == LlmMode.AGENT || mode == LlmMode.ASSISTANT) {
+            responseFormat = LlmResponseFormat.JSON;
+        } else {
+            responseFormat = LlmResponseFormat.TEXT;
+        }
 
         NormalizedLlmRequest.NormalizedLlmRequestBuilder builder = NormalizedLlmRequest.builder()
             .prompt(prompt)
