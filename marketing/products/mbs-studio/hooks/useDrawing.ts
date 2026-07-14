@@ -21,10 +21,10 @@ export const DRAW_IGNORE_SELECTOR = [
 /** Pencil palette — red, green, yellow, blue only (no black). */
 export const DRAW_COLORS = ["#FEED00", "#015CA4", "#FD2E00", "#52B702"];
 
-/** Match pencil weight to hero hand-drawn stroke (~0.38% of scaled headline width). */
+/** Match pencil weight to hero hand-drawn stroke (~0.36% of scaled headline width). */
 export function getPencilLineWidth(layoutScale = 1) {
   const headlineWidth = HERO_HEADLINE.width * layoutScale;
-  return Math.max(2, Math.min(5, headlineWidth * 0.0038));
+  return Math.max(2, Math.min(4.5, headlineWidth * 0.0036));
 }
 
 interface UseDrawingOptions {
@@ -79,10 +79,8 @@ export function useDrawing({
   }, []);
 
   /**
-   * Marker-ink stamp — 4 overlapping semi-transparent dabs with random offset,
-   * radius and alpha. Repeated closely along the pointer path this reproduces
-   * the rough, uneven felt-pen look of the hero "Ideas…" hand-drawn phrase
-   * (as opposed to a clean vector stroke with a paper-grain overlay).
+   * Marker-ink stamp — overlapping semi-transparent dabs with light jitter.
+   * Tuned so visible width ≈ the hero "Ideas…" stroke (felt-marker weight).
    */
   const stampInk = useCallback(
     (
@@ -97,10 +95,10 @@ export function useDrawing({
       ctx.globalCompositeOperation = "source-over";
       const dabs = 4;
       for (let i = 0; i < dabs; i++) {
-        const jx = (Math.random() - 0.5) * size * 0.55;
-        const jy = (Math.random() - 0.5) * size * 0.55;
-        const r = size * (0.28 + Math.random() * 0.22);
-        ctx.globalAlpha = 0.18 + Math.random() * 0.28;
+        const jx = (Math.random() - 0.5) * size * 0.4;
+        const jy = (Math.random() - 0.5) * size * 0.4;
+        const r = size * (0.3 + Math.random() * 0.18);
+        ctx.globalAlpha = 0.2 + Math.random() * 0.28;
         ctx.beginPath();
         ctx.arc(x + jx, y + jy, r, 0, Math.PI * 2);
         ctx.fill();
@@ -117,9 +115,8 @@ export function useDrawing({
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
 
-      // Slightly thicker than the previous linear stroke — stamps overlap so
-      // the visible width is close to the old `getPencilLineWidth` value.
-      const size = getPencilLineWidth(layoutScale) * 2.4;
+      // Mid weight between the old *1.6 (too heavy) and bare width (too thin).
+      const size = getPencilLineWidth(layoutScale) * 1.25;
       const color = strokeColor.current;
 
       if (!lastPoint.current) {

@@ -51,11 +51,12 @@ export function useCursor({ enabled, layoutScale = 1 }: UseCursorOptions) {
 
       const el = cursorRef.current;
       gsap.set(el, { xPercent: 0, yPercent: 0, force3D: true });
-      // duration: 0 — pencil tip follows the pointer 1:1 so the ink lands
-      // exactly under the drawn stroke (was 0.1s, produced a visible drag lag)
+      // quickSetter — instant property update (no tween). Ensures the pencil
+      // tip stays under the drawn stroke (quickTo{duration:0} froze the cursor
+      // because there's nothing to tween).
       quickToRef.current = {
-        x: gsap.quickTo(el, "x", { duration: 0 }),
-        y: gsap.quickTo(el, "y", { duration: 0 }),
+        x: gsap.quickSetter(el, "x", "px") as (value: number) => void,
+        y: gsap.quickSetter(el, "y", "px") as (value: number) => void,
       };
       setReady(true);
     })();
