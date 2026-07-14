@@ -9,8 +9,8 @@ export default function Hero() {
   return (
     <section className="sticky top-0 z-0 min-h-screen w-full bg-transparent">
       <div className="relative min-h-screen w-full">
-        {/* Hand-drawn headline — single static image */}
-        <div className="pointer-events-none absolute inset-0 bottom-[clamp(88px,14vh,140px)] flex items-center justify-center px-[var(--layout-gutter)]">
+        {/* Hand-drawn headline — single static image, truly centered in viewport */}
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-[var(--layout-gutter)]">
           <Image
             src={HERO_HEADLINE.src}
             alt={HERO_HEADLINE.alt}

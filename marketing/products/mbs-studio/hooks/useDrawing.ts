@@ -33,20 +33,6 @@ interface UseDrawingOptions {
   layoutScale?: number;
 }
 
-function loadTexturePattern(
-  ctx: CanvasRenderingContext2D,
-): Promise<CanvasPattern | null> {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => {
-      const pattern = ctx.createPattern(img, "repeat");
-      resolve(pattern);
-    };
-    img.onerror = () => resolve(null);
-    img.src = "/textures/paper-grain.svg";
-  });
-}
-
 export function useDrawing({
   enabled,
   ignoreSelector = DRAW_IGNORE_SELECTOR,
@@ -57,7 +43,6 @@ export function useDrawing({
   const lastPoint = useRef<{ x: number; y: number } | null>(null);
   const colorIndex = useRef(0);
   const strokeColor = useRef(DRAW_COLORS[0]);
-  const texturePattern = useRef<CanvasPattern | null>(null);
 
   const resizeCanvas = useCallback(() => {
     const canvas = canvasRef.current;
@@ -72,11 +57,8 @@ export function useDrawing({
     const ctx = canvas.getContext("2d");
     if (ctx) {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
-      ctx.lineWidth = getPencilLineWidth(layoutScale);
     }
-  }, [layoutScale]);
+  }, []);
 
   const isIgnoredAt = useCallback(
     (x: number, y: number) => {
@@ -96,20 +78,36 @@ export function useDrawing({
     return color;
   }, []);
 
-  const applyPencilTexture = useCallback(
-    (ctx: CanvasRenderingContext2D) => {
-      const pattern = texturePattern.current;
-      if (!pattern) return;
-
+  /**
+   * Marker-ink stamp — 4 overlapping semi-transparent dabs with random offset,
+   * radius and alpha. Repeated closely along the pointer path this reproduces
+   * the rough, uneven felt-pen look of the hero "Ideas…" hand-drawn phrase
+   * (as opposed to a clean vector stroke with a paper-grain overlay).
+   */
+  const stampInk = useCallback(
+    (
+      ctx: CanvasRenderingContext2D,
+      x: number,
+      y: number,
+      size: number,
+      color: string,
+    ) => {
       ctx.save();
-      ctx.globalCompositeOperation = "multiply";
-      ctx.globalAlpha = 0.42;
-      ctx.strokeStyle = pattern;
-      ctx.lineWidth = getPencilLineWidth(layoutScale) * 1.35;
-      ctx.stroke();
+      ctx.fillStyle = color;
+      ctx.globalCompositeOperation = "source-over";
+      const dabs = 4;
+      for (let i = 0; i < dabs; i++) {
+        const jx = (Math.random() - 0.5) * size * 0.55;
+        const jy = (Math.random() - 0.5) * size * 0.55;
+        const r = size * (0.28 + Math.random() * 0.22);
+        ctx.globalAlpha = 0.18 + Math.random() * 0.28;
+        ctx.beginPath();
+        ctx.arc(x + jx, y + jy, r, 0, Math.PI * 2);
+        ctx.fill();
+      }
       ctx.restore();
     },
-    [layoutScale],
+    [],
   );
 
   const drawLine = useCallback(
@@ -119,41 +117,41 @@ export function useDrawing({
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
 
-      const lineWidth = getPencilLineWidth(layoutScale);
-      ctx.strokeStyle = strokeColor.current;
-      ctx.lineWidth = lineWidth;
-      ctx.globalAlpha = 0.9 + Math.random() * 0.08;
+      // Slightly thicker than the previous linear stroke — stamps overlap so
+      // the visible width is close to the old `getPencilLineWidth` value.
+      const size = getPencilLineWidth(layoutScale) * 2.4;
+      const color = strokeColor.current;
 
       if (!lastPoint.current) {
+        stampInk(ctx, x, y, size, color);
         lastPoint.current = { x, y };
-        ctx.beginPath();
-        ctx.moveTo(x, y);
         return;
       }
 
-      ctx.lineTo(x, y);
-      ctx.stroke();
-      applyPencilTexture(ctx);
+      const prev = lastPoint.current;
+      const dx = x - prev.x;
+      const dy = y - prev.y;
+      const dist = Math.hypot(dx, dy);
+      // Stamp density: one dab per ~28% of the stamp size — closer = smoother,
+      // wider = drier/broken-up (feel free to nudge if Amine wants more ink).
+      const step = Math.max(1, size * 0.28);
+      const steps = Math.max(1, Math.ceil(dist / step));
+
+      for (let i = 1; i <= steps; i++) {
+        const t = i / steps;
+        stampInk(ctx, prev.x + dx * t, prev.y + dy * t, size, color);
+      }
+
       lastPoint.current = { x, y };
     },
-    [applyPencilTexture, layoutScale],
+    [layoutScale, stampInk],
   );
 
   useEffect(() => {
     if (!enabled) return;
 
-    let cancelled = false;
-
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
-
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext("2d");
-    if (ctx) {
-      void loadTexturePattern(ctx).then((pattern) => {
-        if (!cancelled) texturePattern.current = pattern;
-      });
-    }
 
     const onPointerDown = (e: PointerEvent) => {
       if (e.button !== 0 || isIgnoredAt(e.clientX, e.clientY)) return;
@@ -185,14 +183,13 @@ export function useDrawing({
     window.addEventListener("pointercancel", endDraw);
 
     return () => {
-      cancelled = true;
       window.removeEventListener("resize", resizeCanvas);
       window.removeEventListener("pointerdown", onPointerDown);
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", endDraw);
       window.removeEventListener("pointercancel", endDraw);
     };
-  }, [enabled, layoutScale, resizeCanvas, isIgnoredAt, pickNextColor, drawLine]);
+  }, [enabled, resizeCanvas, isIgnoredAt, pickNextColor, drawLine]);
 
   return { canvasRef };
 }
