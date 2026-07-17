@@ -6,8 +6,14 @@ import {
   ConfigDrivenListingPageImports,
   ConfigDrivenListingPageStyles,
 } from '@lib/anatomy';
-import { SmartImportTriggerComponent } from '@platform/features/documents/smart-import';
-import { OuvrageImportHandlerRegistrar } from '@applications/erp/shared/smart-import/handlers/ouvrage-import.handler';
+import {
+  SmartImportTriggerComponent,
+  type ReviewedExtraction,
+} from '@platform/features/documents/smart-import';
+import {
+  OUVRAGE_IMPORT_DEFINITION,
+  OuvrageImportService,
+} from '@applications/erp/shared/smart-import/handlers/ouvrage-import.handler';
 
 import type { Ouvrage } from '@applications/erp/etudes/models';
 
@@ -25,11 +31,13 @@ import { buildOuvrageListingConfig } from '../config';
 export class OuvrageListingPage extends ConfigDrivenListingPage<Ouvrage> {
   readonly facade = inject(OuvrageFacade);
   private readonly translate = inject(TranslateService);
-  private readonly _importHandler = inject(OuvrageImportHandlerRegistrar);
+  private readonly importer = inject(OuvrageImportService);
+  readonly importDefinition = OUVRAGE_IMPORT_DEFINITION;
   readonly config = buildOuvrageListingConfig(this.translate);
   readonly headerTitle = this.translate.instant('chantiers.bibliothequePrix.title');
 
-  onSmartImportComplete(): void {
+  async onSmartImportComplete(result: ReviewedExtraction): Promise<void> {
+    await this.importer.import(result.data);
     this.listingComponent?.refresh();
   }
 }

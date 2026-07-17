@@ -216,7 +216,20 @@
         "ignore": "تجاهل",
         "restore": "استعادة",
         "ignoreAllInvalid": "تجاهل جميع الأسطر غير الصحيحة",
-        "confirm": "استيراد {count} سطر"
+        "confirm": "استيراد {count} سطر",
+        "dblclickHint": "انقر مرتين للتصحيح",
+        "recordHeader": "رأس المستند"
+      },
+      "edit": {
+        "hint": "عدّل الحقول ثم احفظ.",
+        "save": "حفظ",
+        "titleRow": "تصحيح — {label}",
+        "titleNode": "تصحيح — {level}",
+        "titleHeader": "تصحيح الرأس"
+      },
+      "columns": {
+        "status": "الحالة",
+        "level": "المستوى"
       },
       "filters": {
         "all": "الكل",

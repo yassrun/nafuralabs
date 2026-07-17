@@ -13,8 +13,8 @@
       </nf-button>
     }
     <nf-smart-import-trigger
-      entityKey="fournisseur"
-      (completed)="onSmartImportComplete()" />
+      [definition]="importDefinition"
+      (completed)="onSmartImportComplete($event)" />
   </div>
 
   <nf-entity-listing

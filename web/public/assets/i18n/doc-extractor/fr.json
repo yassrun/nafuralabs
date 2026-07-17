@@ -216,7 +216,20 @@
         "ignore": "Ignorer",
         "restore": "Restaurer",
         "ignoreAllInvalid": "Ignorer toutes les lignes invalides",
-        "confirm": "Importer {count} ligne(s)"
+        "confirm": "Importer {count} ligne(s)",
+        "dblclickHint": "Double-cliquez pour corriger",
+        "recordHeader": "En-tête du document"
+      },
+      "edit": {
+        "hint": "Modifiez les champs puis enregistrez.",
+        "save": "Enregistrer",
+        "titleRow": "Corriger — {label}",
+        "titleNode": "Corriger — {level}",
+        "titleHeader": "Corriger l’en-tête"
+      },
+      "columns": {
+        "status": "Statut",
+        "level": "Niveau"
       },
       "filters": {
         "all": "Toutes",

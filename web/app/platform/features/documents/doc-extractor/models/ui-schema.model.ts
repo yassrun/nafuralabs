@@ -1,9 +1,11 @@
 /**
- * UI schema contract used by the frontend to render the workspace.
+ * UI schema contract used by the frontend to render the workspace / Smart Import review.
  *
- * Backend owns this structure. We provide safe defaults so the UI can still
+ * Backend may echo this structure. We provide safe defaults so the UI can still
  * function even if some optional fields are missing.
  */
+
+export type UiRootView = 'RECORD_TABLE' | 'DATA_TABLE' | 'TREE_TABLE';
 
 export interface UiSchema {
   /**
@@ -12,7 +14,17 @@ export interface UiSchema {
   importPolicy?: 'PARTIAL' | 'STRICT';
 
   /**
-   * Form sections rendered in the record dialog.
+   * Review layout for Smart Import. When omitted, the UI auto-detects from the data schema.
+   */
+  rootView?: UiRootView;
+
+  /**
+   * Tree layout config (lot → sous-lot → poste). Used when rootView is TREE_TABLE.
+   */
+  tree?: UiTreeConfig;
+
+  /**
+   * Form sections rendered in the record dialog / RECORD_TABLE header.
    */
   sections: UiSection[];
 
@@ -32,6 +44,26 @@ export interface UiSchema {
    * Optional hierarchy description for Magic Import help (e.g. lot → sous-lot → poste).
    */
   hierarchyHint?: UiHierarchyHint[];
+}
+
+export interface UiTreeConfig {
+  /**
+   * Root array path relative to extraction root (usually same as arrayPath).
+   */
+  path: string;
+  /**
+   * Child array property names expanded at every object node (display order).
+   * Example: ['sousLots', 'postes'].
+   */
+  childrenPaths: string[];
+  /**
+   * Shared columns rendered on every tree row.
+   */
+  columns: UiArrayColumn[];
+  /**
+   * Optional badge label per array key (root path + each childrenPath).
+   */
+  levelLabels?: Record<string, string>;
 }
 
 export interface UiHierarchyHint {
@@ -96,4 +128,3 @@ export interface UiArrayColumn {
   label: string;
   widthPx?: number;
 }
-

@@ -9,7 +9,6 @@ public class ChantierLotCreateDto {
 
     private String id;
 
-    @NotBlank
     private String code;
 
     @NotBlank

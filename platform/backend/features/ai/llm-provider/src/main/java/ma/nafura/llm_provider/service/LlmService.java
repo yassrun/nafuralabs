@@ -193,7 +193,7 @@ public class LlmService {
                 }
 
                 return CompletableFuture.<LlmResponse>failedFuture(
-                    new RuntimeException("LLM call failed: " + cause.getMessage(), cause)
+                    new RuntimeException(describeFailure(cause), cause)
                 );
             })
             .thenCompose(Function.identity());
@@ -202,6 +202,9 @@ public class LlmService {
     private boolean shouldRetry(int attempt, Throwable cause) {
         if (attempt >= executionProperties.getMaxRetries()) {
             return false;
+        }
+        if (isTimeout(cause)) {
+            return true;
         }
         String message = cause != null && cause.getMessage() != null
             ? cause.getMessage().toLowerCase()
@@ -212,6 +215,42 @@ public class LlmService {
             || message.contains("504")
             || message.contains("connection reset")
             || message.contains("temporarily unavailable");
+    }
+
+    private boolean isTimeout(Throwable cause) {
+        Throwable current = cause;
+        while (current != null) {
+            if (current instanceof java.util.concurrent.TimeoutException) {
+                return true;
+            }
+            String name = current.getClass().getName();
+            if (name.contains("TimeoutException") || name.contains("ReadTimeout")) {
+                return true;
+            }
+            current = current.getCause();
+        }
+        return false;
+    }
+
+    private String describeFailure(Throwable cause) {
+        if (cause == null) {
+            return "LLM call failed: unknown error";
+        }
+        if (isTimeout(cause)) {
+            return "LLM call timed out after " + executionProperties.getTimeoutMs() + "ms";
+        }
+        String message = cause.getMessage();
+        if (message != null && !message.isBlank()) {
+            return "LLM call failed: " + message;
+        }
+        Throwable root = cause;
+        while (root.getCause() != null && root.getCause() != root) {
+            root = root.getCause();
+            if (root.getMessage() != null && !root.getMessage().isBlank()) {
+                return "LLM call failed: " + root.getClass().getSimpleName() + ": " + root.getMessage();
+            }
+        }
+        return "LLM call failed: " + cause.getClass().getSimpleName();
     }
 
     private LlmResponse onSuccess(

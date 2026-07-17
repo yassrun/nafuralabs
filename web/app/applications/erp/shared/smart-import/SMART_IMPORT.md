@@ -1,7 +1,18 @@
-# Smart Import — brancher un nouvel écran (3 étapes)
+# Smart Import — architecture écran → extractor → écran
 
-1. **Seed doc type** — Ajouter un `doc_type_definition` avec `jsonSchema` (array + `required`) et `uiSchema` (`importPolicy`, `arrays`).
-2. **Handler** — Enregistrer un `ImportHandler` via `ImportHandlerRegistry` (`entityKey`, `arrayPath`, `mapRowToPayload`, `create`, `dedupeKey`).
-3. **UI** — Monter `<erp-smart-import-button entityKey="..." (importComplete)="refresh()" />` sur le listing.
+La platform extrait, valide et fait relire le document. Elle retourne ensuite le JSON métier validé sans mapper de payload ERP et sans appeler d’API.
 
-Pipeline : **1 appel IA / fichier** → validation schéma → import auto des lignes valides → popup dynamique scopé si `required` manquant.
+1. **Définition** — Créer une `ExtractionDefinition` pure à partir du schéma d’extraction : `key`, schémas data/UI, instructions, `arrayPath` et règles de review.
+2. **Écran** — Monter `<nf-smart-import-trigger [definition]="importDefinition" (completed)="consume($event)" />`.
+3. **Consommation** — Dans `consume`, l’écran choisit le traitement du `ReviewedExtraction.data` :
+   - formulaire détail : mapper puis `form.patchValue`;
+   - import métier : déléguer le mapping, la déduplication et les appels API à un service applicatif, puis rafraîchir l’écran.
+
+```text
+écran (fichier + définition)
+  → platform (extraction + validation + Magic UI)
+  → écran (JSON validé)
+  → service applicatif ERP ou patch formulaire
+```
+
+Règle de frontière : aucun service de la feature platform `smart-import` ne doit dépendre d’une API ERP ni exposer de méthode `create`.

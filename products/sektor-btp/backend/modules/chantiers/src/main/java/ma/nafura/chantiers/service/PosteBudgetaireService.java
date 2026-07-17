@@ -42,7 +42,9 @@ public class PosteBudgetaireService {
     public PosteBudgetaire create(String lotId, PosteBudgetaireCreateDto request) {
         requireLot(lotId);
         UUID tenantId = tenantId();
-        String code = request.getCode().trim();
+        String code = StringUtils.hasText(request.getCode())
+                ? request.getCode().trim()
+                : nextCode(tenantId, lotId);
         if (repository.findByTenantIdAndLotIdAndCode(tenantId, lotId, code).isPresent()) {
             throw new IllegalArgumentException("Poste code already exists for lot: " + code);
         }
@@ -130,6 +132,27 @@ public class PosteBudgetaireService {
                         .max()
                         .orElse(0)
                 + 1;
+    }
+
+    private String nextCode(UUID tenantId, String lotId) {
+        int next = repository.findByTenantIdAndLotIdOrderByOrdreAscCodeAsc(tenantId, lotId).stream()
+                        .map(PosteBudgetaire::getCode)
+                        .mapToInt(PosteBudgetaireService::numericCode)
+                        .max()
+                        .orElse(0)
+                + 1;
+        return String.format(Locale.ROOT, "%02d", next);
+    }
+
+    private static int numericCode(String value) {
+        if (value == null || !value.matches("\\d+")) {
+            return 0;
+        }
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException ignored) {
+            return 0;
+        }
     }
 
     private static String buildPosteId(String lotId, String code) {

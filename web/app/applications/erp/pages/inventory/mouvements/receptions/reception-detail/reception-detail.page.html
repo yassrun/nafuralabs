@@ -12,12 +12,12 @@
     (action)="onAction($event)"
     (transitionRequest)="handleTransition($event)">
 
-    <input
-      #blFileInput
+    <nf-smart-import-trigger
+      #blExtractor
       class="rd__file-input"
-      type="file"
+      [definition]="blExtractionDefinition"
       accept=".pdf,.png,.jpg,.jpeg,.webp"
-      (change)="onBlFileSelected($event)" />
+      (completed)="onBlExtractionComplete($event)" />
 
     <ng-template nfField="destLocationId" let-control let-form="form">
       @if (mode() !== 'view') {

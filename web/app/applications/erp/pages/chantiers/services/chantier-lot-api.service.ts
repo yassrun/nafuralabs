@@ -17,6 +17,53 @@ interface ApiChantierLot {
   ordre: number;
 }
 
+export interface ChantierLotTreePosteInput {
+  designation: string;
+  unite?: string;
+  quantite?: number;
+  prixUnitaireHt?: number;
+  montantHt?: number;
+}
+
+export interface ChantierLotTreeNodeInput {
+  designation: string;
+  children?: ChantierLotTreeNodeInput[];
+  postes?: ChantierLotTreePosteInput[];
+}
+
+export interface ChantierLotTreeRequest {
+  lots: ChantierLotTreeNodeInput[];
+}
+
+export interface ChantierLotTreePosteNode {
+  id: string;
+  lotId: string;
+  code: string;
+  designation: string;
+  unite?: string;
+  quantite?: number;
+  prixUnitaireHt?: number;
+  montantHt?: number;
+  ordre: number;
+}
+
+export interface ChantierLotTreeNode {
+  id: string;
+  chantierId: string;
+  code: string;
+  designation: string;
+  parentLotId?: string;
+  avancementPercent: number;
+  ordre: number;
+  depth: number;
+  children: ChantierLotTreeNode[];
+  postes: ChantierLotTreePosteNode[];
+}
+
+export interface ChantierLotTreeResponse {
+  lots: ChantierLotTreeNode[];
+}
+
 function lotToUi(row: ApiChantierLot): LotChantier {
   return {
     id: row.id,
@@ -30,6 +77,23 @@ function lotToUi(row: ApiChantierLot): LotChantier {
     montantHt: row.montantHt != null ? Number(row.montantHt) : undefined,
     avancementPercent: Number(row.avancementPercent ?? 0),
     ordre: row.ordre ?? 0,
+  };
+}
+
+function treeNodeToUi(node: ChantierLotTreeNode): ChantierLotTreeNode {
+  return {
+    ...node,
+    avancementPercent: Number(node.avancementPercent ?? 0),
+    ordre: node.ordre ?? 0,
+    depth: node.depth ?? 0,
+    children: (node.children ?? []).map(treeNodeToUi),
+    postes: (node.postes ?? []).map((poste) => ({
+      ...poste,
+      quantite: poste.quantite != null ? Number(poste.quantite) : undefined,
+      prixUnitaireHt: poste.prixUnitaireHt != null ? Number(poste.prixUnitaireHt) : undefined,
+      montantHt: poste.montantHt != null ? Number(poste.montantHt) : undefined,
+      ordre: poste.ordre ?? 0,
+    })),
   };
 }
 
@@ -56,6 +120,15 @@ export class ChantierLotApiService extends FeatureApiService<LotChantier, Partia
       ordre: data.ordre,
     });
     return lotToUi(row);
+  }
+
+  async createTree(chantierId: string, request: ChantierLotTreeRequest): Promise<ChantierLotTreeResponse> {
+    const row = await this.post<ChantierLotTreeResponse>(`${this.basePath}/${chantierId}/lots/tree`, {
+      lots: request.lots ?? [],
+    });
+    return {
+      lots: (row?.lots ?? []).map(treeNodeToUi),
+    };
   }
 
   async updateForChantier(chantierId: string, lotId: string, data: Partial<LotChantier>): Promise<LotChantier> {

@@ -1,8 +1,8 @@
 <nf-page-shell>
   <div class="chips-row" style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
     <nf-smart-import-trigger
-      entityKey="client"
-      (completed)="onSmartImportComplete()" />
+      [definition]="importDefinition"
+      (completed)="onSmartImportComplete($event)" />
   </div>
 
   <nf-entity-listing

@@ -35,6 +35,7 @@ CRITICAL INSTRUCTIONS:
   },
   presentationSchema: {
     importPolicy: 'PARTIAL',
+    rootView: 'DATA_TABLE',
     sections: [],
     arrays: [
       {

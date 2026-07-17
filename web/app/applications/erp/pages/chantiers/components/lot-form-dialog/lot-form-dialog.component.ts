@@ -7,6 +7,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { ButtonComponent, NfInputComponent } from '@lib/anatomy';
 import type { LotChantier } from '@applications/erp/chantiers/models';
 import { BPU_UNITS } from '../../constants/bpu-units';
+import { lotDepth, MAX_LOT_DEPTH } from '../../utils/lot-hierarchy.util';
 
 export type LotFormMode = 'rootLot' | 'sousLot' | 'poste';
 
@@ -27,7 +28,8 @@ export interface LotFormDialogData {
 
 export interface LotFormDialogResult {
   mode: LotFormMode;
-  code: string;
+  /** Technical code — omitted on create so the backend generates it. */
+  code?: string;
   designation: string;
   quantite?: number;
   unite?: string;
@@ -52,8 +54,8 @@ export interface LotFormDialogResult {
           <span>{{ 'chantiers.chantier.detail.lots.formParentLot' | translate }} *</span>
           <select [ngModel]="parentLotId()" (ngModelChange)="parentLotId.set($event)">
             <option value="">{{ 'chantiers.chantier.detail.lots.formParentLotPlaceholder' | translate }}</option>
-            @for (lot of rootLots(); track lot.id) {
-              <option [value]="lot.id">{{ lot.code }} — {{ lot.designation }}</option>
+            @for (lot of parentCandidates(); track lot.id) {
+              <option [value]="lot.id">{{ lotLabel(lot) }}</option>
             }
           </select>
         </label>
@@ -71,12 +73,14 @@ export interface LotFormDialogResult {
         </label>
       }
 
-      <nf-input
-        [label]="'chantiers.chantier.detail.lots.promptCode' | translate"
-        [ngModel]="code()"
-        (ngModelChange)="code.set($event)"
-        required>
-      </nf-input>
+      @if (data.isEdit && code()) {
+        <nf-input
+          [label]="'chantiers.chantier.detail.lots.promptCode' | translate"
+          [ngModel]="code()"
+          [disabled]="true">
+        </nf-input>
+        <p class="form-hint">{{ 'chantiers.chantier.detail.lots.technicalCodeHint' | translate }}</p>
+      }
 
       <nf-input
         [label]="'chantiers.chantier.detail.lots.promptDesignation' | translate"
@@ -152,11 +156,21 @@ export class LotFormDialogComponent {
   readonly parentLotId = signal(this.data.defaultParentLotId ?? '');
   readonly targetLotId = signal(this.data.defaultTargetLotId ?? '');
 
-  readonly rootLots = computed(() =>
-    [...this.data.lots]
-      .filter((lot) => !lot.parentLotId)
-      .sort((a, b) => a.ordre - b.ordre || a.code.localeCompare(b.code)),
-  );
+  private readonly lotsById = computed(() => {
+    const map = new Map<string, LotChantier>();
+    for (const lot of this.data.lots) {
+      map.set(lot.id, lot);
+    }
+    return map;
+  });
+
+  /** Parents allowed for a new sous-lot: any grouping node shallower than max depth. */
+  readonly parentCandidates = computed(() => {
+    const byId = this.lotsById();
+    return [...this.data.lots]
+      .filter((lot) => lotDepth(lot, byId) < MAX_LOT_DEPTH)
+      .sort((a, b) => a.ordre - b.ordre || a.code.localeCompare(b.code));
+  });
 
   readonly allLots = computed(() =>
     [...this.data.lots].sort((a, b) => a.ordre - b.ordre || a.code.localeCompare(b.code)),
@@ -184,18 +198,16 @@ export class LotFormDialogComponent {
   });
 
   lotLabel(lot: LotChantier): string {
-    const prefix = lot.parentLotId ? '↳ ' : '';
-    return `${prefix}${lot.code} — ${lot.designation}`;
+    const depth = lotDepth(lot, this.lotsById());
+    const prefix = depth > 0 ? `${' '.repeat(depth)}↳ ` : '';
+    return `${prefix}${lot.designation}`;
   }
 
   canSave(): boolean {
-    // Common: a code and a designation are always required.
-    if (!this.code().trim() || !this.designation().trim()) return false;
+    if (!this.designation().trim()) return false;
 
     if (this.data.mode === 'sousLot' && !this.data.isEdit && !this.parentLotId()) return false;
 
-    // Quantité / unité / prix are only meaningful for a poste (article).
-    // A lot or sous-lot is a grouping whose amount is the sum of its postes.
     if (this.data.mode === 'poste') {
       if (!this.data.isEdit && !this.targetLotId()) return false;
       if (!this.unite().trim()) return false;
@@ -210,9 +222,10 @@ export class LotFormDialogComponent {
   save(): void {
     if (!this.canSave()) return;
     const isPoste = this.data.mode === 'poste';
+    const trimmedCode = this.code().trim();
     this.dialogRef.close({
       mode: this.data.mode,
-      code: this.code().trim(),
+      code: this.data.isEdit && trimmedCode ? trimmedCode : undefined,
       designation: this.designation().trim(),
       quantite: isPoste ? this.parseNumber(this.quantite()) : undefined,
       unite: isPoste ? this.unite().trim() : undefined,

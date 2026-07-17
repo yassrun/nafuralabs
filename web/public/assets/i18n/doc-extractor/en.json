@@ -216,7 +216,20 @@
         "ignore": "Ignore",
         "restore": "Restore",
         "ignoreAllInvalid": "Ignore all invalid rows",
-        "confirm": "Import {count} row(s)"
+        "confirm": "Import {count} row(s)",
+        "dblclickHint": "Double-click to edit",
+        "recordHeader": "Document header"
+      },
+      "edit": {
+        "hint": "Edit the fields, then save.",
+        "save": "Save",
+        "titleRow": "Edit — {label}",
+        "titleNode": "Edit — {level}",
+        "titleHeader": "Edit header"
+      },
+      "columns": {
+        "status": "Status",
+        "level": "Level"
       },
       "filters": {
         "all": "All",

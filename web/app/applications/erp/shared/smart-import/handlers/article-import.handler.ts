@@ -5,16 +5,36 @@ import type { ArticleCreate } from '@applications/erp/pages/inventory/catalogue/
 import { ArticlesApiService } from '@applications/erp/pages/inventory/catalogue/articles/services/article-api.service';
 import { ItemCategoriesApiService } from '@applications/erp/pages/inventory/configuration/item-categories/services/item-category-api.service';
 import { UnitOfMeasuresApiService } from '@applications/erp/pages/inventory/configuration/unit-of-measures/services/unit-of-measure-api.service';
+import type { ExtractionDefinition } from '@platform/features/documents/smart-import';
 import { normalizeText, toNumber } from '../../utils/extraction-json.utils';
 
 import { ARTICLE_EXTRACTION_SCHEMA } from '../../extraction-schemas';
-import { ImportHandlerRegistry } from '../services/import-handler.registry';
+import {
+  extractionRows,
+  persistUniqueRows,
+  type ApplicationImportResult,
+} from '../services/application-import.util';
 
 const ARTICLE_TYPES: ArticleType[] = ['MATERIAU', 'CONSOMMABLE', 'ENGIN', 'OUTILLAGE'];
+const schema = ARTICLE_EXTRACTION_SCHEMA;
+const dedupeKey = (row: Record<string, unknown>): string | null => {
+  const code = row['code'];
+  return code && String(code).trim() ? String(code).trim() : null;
+};
+
+export const ARTICLE_IMPORT_DEFINITION: ExtractionDefinition = {
+  key: 'article',
+  name: schema.name,
+  description: schema.description,
+  dataSchema: schema.dataSchema,
+  presentationSchema: schema.presentationSchema,
+  instructions: schema.instructions,
+  arrayPath: schema.arrayPath!,
+  dedupeKey,
+};
 
 @Injectable({ providedIn: 'root' })
-export class ArticleImportHandlerRegistrar {
-  private readonly registry = inject(ImportHandlerRegistry);
+export class ArticleImportService {
   private readonly api = inject(ArticlesApiService);
   private readonly categoriesApi = inject(ItemCategoriesApiService);
   private readonly uomApi = inject(UnitOfMeasuresApiService);
@@ -27,21 +47,20 @@ export class ArticleImportHandlerRegistrar {
   private defaultFamilleId = '';
   private lookupsReady = false;
 
-  constructor() {
-    this.register();
-  }
-
-  private register(): void {
-    const schema = ARTICLE_EXTRACTION_SCHEMA;
-    this.registry.register<ArticleCreate>({
-      entityKey: 'article',
-      dataSchema: schema.dataSchema,
-      presentationSchema: schema.presentationSchema,
-      instructions: schema.instructions,
-      schemaName: schema.name,
-      schemaDescription: schema.description,
-      arrayPath: schema.arrayPath!,
-      mapRowToPayload: (row: Record<string, unknown>) => {
+  async import(data: Record<string, unknown>): Promise<ApplicationImportResult> {
+    await this.ensureLookups();
+    const existing = await this.api.getAll({ page: 0, pageSize: 500 });
+    const keys = new Set(
+      existing.items
+        .map((article) => article.code?.trim())
+        .filter((code): code is string => !!code)
+        .map(normalizeText),
+    );
+    return persistUniqueRows(
+      extractionRows(data, schema.arrayPath!),
+      keys,
+      dedupeKey,
+      (row): ArticleCreate => {
         const uomCode = row['uomCode'] ? String(row['uomCode']).trim() : '';
         const familleName = row['familleName'] ? String(row['familleName']).trim() : '';
         const uomId =
@@ -67,32 +86,8 @@ export class ArticleImportHandlerRegistrar {
           isActive: true,
         };
       },
-      create: async (payload: ArticleCreate) => {
-        await this.ensureLookups();
-        if (!payload.uomId) {
-          payload = { ...payload, uomId: this.defaultUomId };
-        }
-        if (!payload.familleId) {
-          payload = { ...payload, familleId: this.defaultFamilleId };
-        }
-        return this.api.create(payload);
-      },
-      dedupeKey: (row: Record<string, unknown>) => {
-        const code = row['code'];
-        return code && String(code).trim() ? String(code).trim() : null;
-      },
-      loadExistingKeys: async () => {
-        await this.ensureLookups();
-        const res = await this.api.getAll({ page: 0, pageSize: 500 });
-        const keys = new Set<string>();
-        for (const a of res.items) {
-          if (a.code?.trim()) {
-            keys.add(normalizeText(a.code));
-          }
-        }
-        return keys;
-      },
-    });
+      (payload) => this.api.create(payload),
+    );
   }
 
   private parseType(value: unknown): ArticleType {

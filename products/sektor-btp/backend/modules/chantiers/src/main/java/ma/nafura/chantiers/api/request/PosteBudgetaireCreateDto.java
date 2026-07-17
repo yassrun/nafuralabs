@@ -9,7 +9,6 @@ public class PosteBudgetaireCreateDto {
 
     private String id;
 
-    @NotBlank
     private String code;
 
     @NotBlank

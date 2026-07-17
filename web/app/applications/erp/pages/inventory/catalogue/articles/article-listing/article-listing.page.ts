@@ -7,8 +7,14 @@ import {
   ConfigDrivenListingPageStyles,
 } from '@lib/anatomy';
 import type { ListingActionEvent } from '@lib/anatomy/types';
-import { SmartImportTriggerComponent } from '@platform/features/documents/smart-import';
-import { ArticleImportHandlerRegistrar } from '@applications/erp/shared/smart-import/handlers/article-import.handler';
+import {
+  SmartImportTriggerComponent,
+  type ReviewedExtraction,
+} from '@platform/features/documents/smart-import';
+import {
+  ARTICLE_IMPORT_DEFINITION,
+  ArticleImportService,
+} from '@applications/erp/shared/smart-import/handlers/article-import.handler';
 
 import { ArticlesFacade } from '../services';
 import type { ArticleListItem } from '../models';
@@ -25,11 +31,13 @@ import { buildArticleListingConfig } from '../config';
 export class ArticleListingPage extends ConfigDrivenListingPage<ArticleListItem> {
   readonly facade = inject(ArticlesFacade);
   private readonly translate = inject(TranslateService);
-  private readonly _importHandler = inject(ArticleImportHandlerRegistrar);
+  private readonly importer = inject(ArticleImportService);
+  readonly importDefinition = ARTICLE_IMPORT_DEFINITION;
   readonly config = buildArticleListingConfig(this.translate);
   readonly headerTitle = this.translate.instant('inventory.catalogue.article.headerTitle');
 
-  onSmartImportComplete(): void {
+  async onSmartImportComplete(result: ReviewedExtraction): Promise<void> {
+    await this.importer.import(result.data);
     this.listingComponent?.refresh();
   }
 

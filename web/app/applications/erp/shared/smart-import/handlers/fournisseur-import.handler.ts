@@ -2,31 +2,62 @@ import { Injectable, inject } from '@angular/core';
 
 import type { FournisseurCreate } from '@applications/erp/achats/models';
 import { FournisseurApiService } from '@applications/erp/pages/achats/fournisseurs/services/fournisseur-api.service';
+import type { ExtractionDefinition } from '@platform/features/documents/smart-import';
 import { normalizeText } from '../../utils/extraction-json.utils';
 
 import { FOURNISSEUR_EXTRACTION_SCHEMA } from '../../extraction-schemas';
-import { ImportHandlerRegistry } from '../services/import-handler.registry';
+import {
+  extractionRows,
+  persistUniqueRows,
+  type ApplicationImportResult,
+} from '../services/application-import.util';
+
+const schema = FOURNISSEUR_EXTRACTION_SCHEMA;
+const dedupeKey = (row: Record<string, unknown>): string | null => {
+  const ice = row['ice'];
+  if (ice && String(ice).trim()) return String(ice).trim();
+  const name = row['raisonSociale'];
+  return name ? String(name).trim() : null;
+};
+
+export const FOURNISSEUR_IMPORT_DEFINITION: ExtractionDefinition = {
+  key: 'fournisseur',
+  name: schema.name,
+  description: schema.description,
+  dataSchema: schema.dataSchema,
+  presentationSchema: schema.presentationSchema,
+  instructions: schema.instructions,
+  arrayPath: schema.arrayPath!,
+  dedupeKey,
+  validateRow: (row, rowIndex) => {
+    const raisonSociale = String(row['raisonSociale'] ?? '').trim();
+    return raisonSociale
+      ? []
+      : [{
+          path: `${schema.arrayPath}[${rowIndex}].raisonSociale`,
+          rowIndex,
+          kind: 'MISSING_REQUIRED',
+          message: 'Raison sociale requise',
+        }];
+  },
+};
 
 @Injectable({ providedIn: 'root' })
-export class FournisseurImportHandlerRegistrar {
-  private readonly registry = inject(ImportHandlerRegistry);
+export class FournisseurImportService {
   private readonly api = inject(FournisseurApiService);
 
-  constructor() {
-    this.register();
-  }
-
-  private register(): void {
-    const schema = FOURNISSEUR_EXTRACTION_SCHEMA;
-    this.registry.register<FournisseurCreate>({
-      entityKey: 'fournisseur',
-      dataSchema: schema.dataSchema,
-      presentationSchema: schema.presentationSchema,
-      instructions: schema.instructions,
-      schemaName: schema.name,
-      schemaDescription: schema.description,
-      arrayPath: schema.arrayPath!,
-      mapRowToPayload: (row: Record<string, unknown>) => ({
+  async import(data: Record<string, unknown>): Promise<ApplicationImportResult> {
+    const existing = await this.api.getAll();
+    const keys = new Set<string>();
+    for (const fournisseur of existing.items) {
+      if (fournisseur.ice?.trim()) keys.add(normalizeText(fournisseur.ice));
+      keys.add(normalizeText(fournisseur.raisonSociale));
+    }
+    return persistUniqueRows(
+      extractionRows(data, schema.arrayPath!),
+      keys,
+      dedupeKey,
+      (row): FournisseurCreate => ({
         raisonSociale: String(row['raisonSociale'] ?? '').trim(),
         ice: row['ice'] ? String(row['ice']).trim() : undefined,
         ville: row['ville'] ? String(row['ville']).trim() : undefined,
@@ -37,26 +68,7 @@ export class FournisseurImportHandlerRegistrar {
         categories: [],
         isActive: true,
       }),
-      create: (payload: FournisseurCreate) => this.api.create(payload),
-      dedupeKey: (row: Record<string, unknown>) => {
-        const ice = row['ice'];
-        if (ice && String(ice).trim()) {
-          return String(ice).trim();
-        }
-        const name = row['raisonSociale'];
-        return name ? String(name).trim() : null;
-      },
-      loadExistingKeys: async () => {
-        const res = await this.api.getAll();
-        const keys = new Set<string>();
-        for (const f of res.items) {
-          if (f.ice?.trim()) {
-            keys.add(normalizeText(f.ice));
-          }
-          keys.add(normalizeText(f.raisonSociale));
-        }
-        return keys;
-      },
-    });
+      (payload) => this.api.create(payload),
+    );
   }
 }

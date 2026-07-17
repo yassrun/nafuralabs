@@ -4,10 +4,16 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import {ConfigDrivenListingPage,
   ConfigDrivenListingPageImports,
-  ConfigDrivenListingPageStyles, ButtonComponent} from '@lib/anatomy';
+  ConfigDrivenListingPageStyles, ButtonComponent, ToastService} from '@lib/anatomy';
 import type { Fournisseur } from '@applications/erp/achats/models';
-import { SmartImportTriggerComponent } from '@platform/features/documents/smart-import';
-import { FournisseurImportHandlerRegistrar } from '@applications/erp/shared/smart-import/handlers/fournisseur-import.handler';
+import {
+  SmartImportTriggerComponent,
+  type ReviewedExtraction,
+} from '@platform/features/documents/smart-import';
+import {
+  FOURNISSEUR_IMPORT_DEFINITION,
+  FournisseurImportService,
+} from '@applications/erp/shared/smart-import/handlers/fournisseur-import.handler';
 
 import { FournisseurFacade } from '../services';
 import { buildFournisseursListingConfig } from '../config';
@@ -25,8 +31,9 @@ type QuickFilter = 'ALL' | 'ACTIFS' | 'INACTIFS' | 'TOP_NOTES';
 export class FournisseurListingPage extends ConfigDrivenListingPage<Fournisseur> {
   readonly facade = inject(FournisseurFacade);
   private readonly translate = inject(TranslateService);
-  /** Ensures fournisseur import handler is registered. */
-  private readonly _importHandler = inject(FournisseurImportHandlerRegistrar);
+  private readonly importer = inject(FournisseurImportService);
+  private readonly smartImportToast = inject(ToastService);
+  readonly importDefinition = FOURNISSEUR_IMPORT_DEFINITION;
   readonly config = buildFournisseursListingConfig(this.translate);
   readonly headerTitle = this.translate.instant('achats.fournisseur.headerTitle');
 
@@ -48,7 +55,16 @@ export class FournisseurListingPage extends ConfigDrivenListingPage<Fournisseur>
     this.listingComponent?.onFilterChange(filters);
   }
 
-  onSmartImportComplete(): void {
-    this.listingComponent?.refresh();
+  async onSmartImportComplete(result: ReviewedExtraction): Promise<void> {
+    try {
+      const importResult = await this.importer.import(result.data);
+      this.listingComponent?.refresh();
+      this.smartImportToast.success(
+        `${importResult.created} fournisseur(s) ajouté(s), ${importResult.skippedDuplicates} doublon(s) ignoré(s).`,
+      );
+    } catch (error) {
+      console.error('[fournisseur-smart-import]', error);
+      this.smartImportToast.error('Impossible d’ajouter les fournisseurs extraits.');
+    }
   }
 }

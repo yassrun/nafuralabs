@@ -4,6 +4,10 @@ metadata:
   name: sektor-btp-ingress
   annotations:
     kubernetes.io/ingress.class: nginx
+    # Import magique / BL scan can wait on Gemini up to ~120s.
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "180"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "180"
 spec:
   ingressClassName: nginx
   rules:

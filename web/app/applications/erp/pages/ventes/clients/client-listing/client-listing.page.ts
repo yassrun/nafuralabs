@@ -6,8 +6,14 @@ import {
   ConfigDrivenListingPageImports,
   ConfigDrivenListingPageStyles,
 } from '@lib/anatomy';
-import { SmartImportTriggerComponent } from '@platform/features/documents/smart-import';
-import { ClientImportHandlerRegistrar } from '@applications/erp/shared/smart-import/handlers/client-import.handler';
+import {
+  SmartImportTriggerComponent,
+  type ReviewedExtraction,
+} from '@platform/features/documents/smart-import';
+import {
+  CLIENT_IMPORT_DEFINITION,
+  ClientImportService,
+} from '@applications/erp/shared/smart-import/handlers/client-import.handler';
 import type { ClientVenteListItem } from '../models';
 
 import { ClientVenteFacade } from '../services';
@@ -22,11 +28,13 @@ import { CLIENT_LISTING_CONFIG } from '../config';
 })
 export class ClientListingPage extends ConfigDrivenListingPage<ClientVenteListItem> {
   readonly facade = inject(ClientVenteFacade);
-  private readonly _importHandler = inject(ClientImportHandlerRegistrar);
+  private readonly importer = inject(ClientImportService);
+  readonly importDefinition = CLIENT_IMPORT_DEFINITION;
   readonly config = CLIENT_LISTING_CONFIG;
   readonly headerTitle = 'Clients';
 
-  onSmartImportComplete(): void {
+  async onSmartImportComplete(result: ReviewedExtraction): Promise<void> {
+    await this.importer.import(result.data);
     this.listingComponent?.refresh();
   }
 }

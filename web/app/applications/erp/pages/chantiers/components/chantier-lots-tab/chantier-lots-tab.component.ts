@@ -2,8 +2,6 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
-  ElementRef,
-  ViewChild,
   computed,
   effect,
   inject,
@@ -13,14 +11,19 @@ import {
 import { MatDialog } from '@angular/material/dialog';
 import { firstValueFrom } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import * as XLSX from 'xlsx';
 
 import { BadgeComponent, ButtonComponent, EmptyStateComponent } from '@lib/anatomy/components';
 import { ConfirmDialogService, ToastService } from '@lib/anatomy';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
 import type { LotChantier, PosteBudgetaire } from '@applications/erp/chantiers/models';
-import { LotChantierImportHandlerRegistrar } from '@applications/erp/shared/smart-import/handlers/lot-chantier-import.handler';
-import { SmartImportTriggerComponent } from '@platform/features/documents/smart-import';
+import {
+  LOT_CHANTIER_IMPORT_DEFINITION,
+  LotChantierImportService,
+} from '@applications/erp/shared/smart-import/handlers/lot-chantier-import.handler';
+import {
+  SmartImportTriggerComponent,
+  type ReviewedExtraction,
+} from '@platform/features/documents/smart-import';
 
 import { ChantierLotApiService } from '../../services/chantier-lot-api.service';
 import { PosteBudgetaireApiService } from '../../services/poste-budgetaire-api.service';
@@ -30,32 +33,6 @@ import {
   type LotFormDialogResult,
   type LotFormMode,
 } from '../lot-form-dialog/lot-form-dialog.component';
-import { isBpdeWorkbook, parseBpdeWorkbook, buildBpdeSousLotCode, type BpdeParsedLot } from '../../utils/bpde-lot-import.util';
-
-type LotImportIssueReason = 'missingRequired' | 'invalidQuantite' | 'invalidPrixUnitaire' | 'apiCreateFailed';
-
-type ParsedLotImportRow = {
-  sourceLine: number;
-  data: Partial<LotChantier>;
-};
-
-type LotImportIssue = {
-  sourceLine: number;
-  reason: LotImportIssueReason;
-};
-
-type ParsedLotImportResult = {
-  rows: ParsedLotImportRow[];
-  issues: LotImportIssue[];
-};
-
-type BpdeImportStats = {
-  createdLots: number;
-  createdPostes: number;
-  skippedLots: number;
-  skippedPostes: number;
-  failed: number;
-};
 
 @Component({
   selector: 'app-chantier-lots-tab',
@@ -83,38 +60,9 @@ type BpdeImportStats = {
           {{ 'chantiers.chantier.detail.lots.addPosteCta' | translate }}
         </nf-button>
         <nf-smart-import-trigger
-          entityKey="lot-chantier"
-          [disabled]="importing()"
-          (completed)="onMagicImportComplete()" />
-        <nf-button variant="ghost" icon="upload" iconLibrary="lucide" (clicked)="triggerLotImport()" [disabled]="importing()">
-          {{ 'chantiers.chantier.detail.lots.bpdeImportCta' | translate }}
-        </nf-button>
-        @if (selectedLotImportFile()) {
-          <nf-button variant="secondary" icon="play" iconLibrary="lucide" (clicked)="confirmLotImport()" [disabled]="importing()">
-            {{ 'chantiers.chantier.detail.lots.importConfirmCta' | translate }}
-          </nf-button>
-        }
-        <input
-          #lotImportInput
-          type="file"
-          accept=".csv,.xlsx,.xls"
-          (change)="onLotFileSelected($event)"
-          hidden />
+          [definition]="importDefinition"
+          (completed)="onMagicImportComplete($event)" />
       </div>
-
-      @if (importing()) {
-        <p class="import-file-chip import-file-chip--progress">
-          {{ 'chantiers.chantier.detail.lots.bpdeImportInProgress' | translate }}
-        </p>
-      }
-      @if (selectedLotImportFileName(); as fileName) {
-        <p class="import-file-chip">
-          {{ 'chantiers.chantier.detail.lots.importFileSelected' | translate:{ fileName: fileName } }}
-          @if (selectedLotImportRowCount(); as count) {
-            <strong>({{ count }} {{ 'chantiers.chantier.detail.lots.importFileRowsLabel' | translate:{ count: count } }})</strong>
-          }
-        </p>
-      }
 
       @if (hierarchyRows().length) {
         <div class="lots-tablebar">
@@ -128,8 +76,8 @@ type BpdeImportStats = {
           <thead>
             <tr>
               <th>{{ 'chantiers.chantier.detail.lots.typeColumn' | translate }}</th>
-              <th>{{ 'chantiers.chantier.detail.columns.code' | translate }}</th>
               <th>{{ 'chantiers.chantier.detail.columns.designation' | translate }}</th>
+              <th class="code-col">{{ 'chantiers.chantier.detail.columns.code' | translate }}</th>
               <th class="num">{{ 'chantiers.chantier.detail.columns.quantite' | translate }}</th>
               <th>{{ 'chantiers.chantier.detail.columns.unite' | translate }}</th>
               <th class="num">{{ 'chantiers.chantier.detail.columns.prixUnitaireHt' | translate }}</th>
@@ -144,8 +92,8 @@ type BpdeImportStats = {
                 <td>
                   <nf-badge [variant]="typeBadgeVariant(row.kind)">{{ typeLabelKey(row.kind) | translate }}</nf-badge>
                 </td>
-                <td [style.padding-left.rem]="row.depth * 1.25">
-                  @if (row.kind === 'lot') {
+                <td [style.padding-left.rem]="0.75 + row.depth * 1.1">
+                  @if (rowHasChildren(row)) {
                     <button
                       type="button"
                       class="collapse-toggle"
@@ -155,9 +103,9 @@ type BpdeImportStats = {
                       {{ isCollapsed(row.lot?.id) ? '▸' : '▾' }}
                     </button>
                   }
-                  <strong>{{ rowCode(row) }}</strong>
+                  <strong>{{ rowDesignation(row) }}</strong>
                 </td>
-                <td>{{ rowDesignation(row) }}</td>
+                <td class="code-col code-muted">{{ rowCode(row) }}</td>
                 <td class="num">{{ rowQuantite(row) }}</td>
                 <td>{{ rowUnite(row) }}</td>
                 <td class="num">{{ rowPrixUnitaireValue(row) != null ? (rowPrixUnitaireValue(row)! | mad) : '—' }}</td>
@@ -216,10 +164,11 @@ type BpdeImportStats = {
     .lots-count { font-size: 0.8125rem; color: var(--nf-color-text-secondary); }
     .linklike { border: none; background: transparent; color: var(--nf-color-primary-600); cursor: pointer; font-size: 0.8125rem; padding: 0; }
     .linklike:hover { text-decoration: underline; }
-    .mapping-help summary { cursor: pointer; font-weight: 600; color: var(--nf-color-text-primary); }
     .data-table th { padding: 0.7rem 1rem; background: var(--nf-color-bg-subtle); color: var(--nf-color-text-secondary); font-weight: 600; text-align: left; border-bottom: 2px solid var(--nf-color-border); white-space: nowrap; }
     .data-table th.num { text-align: right; }
     .data-table th.center { text-align: center; }
+    .data-table th.code-col, .data-table td.code-col { font-size: 0.75rem; white-space: nowrap; }
+    .data-table td.code-muted { color: var(--nf-color-text-tertiary, var(--nf-color-text-secondary)); font-variant-numeric: tabular-nums; font-weight: 400; }
     .data-table td { padding: 0.65rem 1rem; border-bottom: 1px solid var(--nf-color-bg-muted); color: var(--nf-color-text-secondary); }
     .data-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
     .data-table td.center { text-align: center; }
@@ -237,11 +186,6 @@ type BpdeImportStats = {
     .progress-bar { width: 100%; height: 6px; background: var(--nf-color-bg-muted); border-radius: 999px; overflow: hidden; }
     .progress-bar.sm { max-width: 80px; }
     .progress-fill { height: 100%; background: var(--nf-color-primary-600); border-radius: 999px; }
-    .import-file-chip { margin: 0 0 0.75rem; padding: 0.5rem 0.75rem; background: var(--nf-color-bg-subtle); border-radius: 0.5rem; font-size: 0.875rem; color: var(--nf-color-text-secondary); }
-    .mapping-help { margin-bottom: 1rem; padding: 0.75rem 1rem; background: var(--nf-color-bg-subtle); border: 1px solid var(--nf-color-border); border-radius: 0.75rem; font-size: 0.8125rem; color: var(--nf-color-text-secondary); }
-    .mapping-help__title { margin: 0 0 0.35rem; font-weight: 600; color: var(--nf-color-text-primary); }
-    .mapping-help__hint { margin: 0 0 0.5rem; }
-    .mapping-help__list { margin: 0; padding-left: 1.25rem; }
   `],
 })
 export class ChantierLotsTabComponent {
@@ -253,18 +197,12 @@ export class ChantierLotsTabComponent {
   private readonly translate = inject(TranslateService);
   private readonly toast = inject(ToastService);
   private readonly confirmDialog = inject(ConfirmDialogService);
-  private readonly lotMagicImport = inject(LotChantierImportHandlerRegistrar);
-
-  @ViewChild('lotImportInput') private readonly lotImportInput?: ElementRef<HTMLInputElement>;
+  private readonly lotImporter = inject(LotChantierImportService);
+  readonly importDefinition = LOT_CHANTIER_IMPORT_DEFINITION;
 
   readonly loading = signal(false);
-  readonly importing = signal(false);
   readonly lots = signal<LotChantier[]>([]);
   readonly postesByLotId = signal<Record<string, PosteBudgetaire[]>>({});
-
-  readonly selectedLotImportFile = signal<File | null>(null);
-  readonly selectedLotImportFileName = computed(() => this.selectedLotImportFile()?.name ?? '');
-  readonly selectedLotImportRowCount = signal<number | null>(null);
 
   readonly rootLots = computed(() => this.lots().filter((lot) => !lot.parentLotId));
 
@@ -275,20 +213,21 @@ export class ChantierLotsTabComponent {
     buildLotHierarchyRows(this.lots(), this.postesByLotId()),
   );
 
-  /** Rows actually rendered, honouring collapsed root lots. */
+  /** Rows actually rendered, honouring collapsed grouping nodes. */
   readonly visibleRows = computed(() => {
     const collapsed = this.collapsedLotIds();
     const rows = this.hierarchyRows();
     const out: typeof rows = [];
-    let hiddenRootId: string | null = null;
+    let hiddenBelowDepth: number | null = null;
     for (const row of rows) {
-      if (row.kind === 'lot') {
-        hiddenRootId = row.lot && collapsed.has(row.lot.id) ? row.lot.id : null;
-        out.push(row);
-        continue;
+      if (hiddenBelowDepth != null) {
+        if (row.depth > hiddenBelowDepth) continue;
+        hiddenBelowDepth = null;
       }
-      if (hiddenRootId) continue;
       out.push(row);
+      if (row.kind !== 'poste' && row.lot && collapsed.has(row.lot.id)) {
+        hiddenBelowDepth = row.depth;
+      }
     }
     return out;
   });
@@ -323,7 +262,17 @@ export class ChantierLotsTabComponent {
   }
 
   collapseAll(): void {
-    this.collapsedLotIds.set(new Set(this.rootLots().map((lot) => lot.id)));
+    const ids = this.hierarchyRows()
+      .filter((row) => row.kind !== 'poste' && row.lot && this.rowHasChildren(row))
+      .map((row) => row.lot!.id);
+    this.collapsedLotIds.set(new Set(ids));
+  }
+
+  rowHasChildren(row: ReturnType<typeof buildLotHierarchyRows>[number]): boolean {
+    if (row.kind === 'poste' || !row.lot) return false;
+    const lotId = row.lot.id;
+    if ((this.postesByLotId()[lotId] ?? []).length > 0) return true;
+    return this.lots().some((lot) => lot.parentLotId === lotId);
   }
 
   expandAll(): void {
@@ -338,7 +287,6 @@ export class ChantierLotsTabComponent {
         this.postesByLotId.set({});
         return;
       }
-      this.lotMagicImport.bind(id);
       void this.reload(id);
     });
   }
@@ -389,7 +337,7 @@ export class ChantierLotsTabComponent {
         const quantite = result.quantite ?? 0;
         const prixUnitaireHt = result.prixUnitaireHt ?? 0;
         await this.posteApi.createForLot(lotId, {
-          code: result.code,
+          ...(result.code ? { code: result.code } : {}),
           designation: result.designation,
           quantite,
           unite: result.unite,
@@ -402,7 +350,7 @@ export class ChantierLotsTabComponent {
         // A lot / sous-lot is a grouping: its amount is derived from its postes,
         // so we do not send quantité / prix / montant here.
         await this.lotApi.createForChantier(chantierId, {
-          code: result.code,
+          ...(result.code ? { code: result.code } : {}),
           designation: result.designation,
           parentLotId: result.mode === 'sousLot' ? result.parentLotId : undefined,
           ordre: this.lots().length + 1,
@@ -608,436 +556,8 @@ export class ChantierLotsTabComponent {
     return count;
   }
 
-  onMagicImportComplete(): void {
-    void this.reload();
-  }
-
-  triggerLotImport(): void {
-    this.lotImportInput?.nativeElement.click();
-  }
-
-  downloadLotImportTemplate(): void {
-    const headers = ['code', 'designation', 'quantite', 'unite', 'prix_unitaire_ht'];
-    const sample = ['L01', 'Terrassement', '100', 'm3', '250'];
-    const csvContent = `${headers.join(',')}\n${sample.join(',')}\n`;
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = globalThis.URL.createObjectURL(blob);
-    const anchor = globalThis.document.createElement('a');
-    anchor.href = url;
-    anchor.download = 'modele-import-lots.csv';
-    anchor.click();
-    globalThis.URL.revokeObjectURL(url);
-    this.toast.success(this.translate.instant('chantiers.chantier.detail.lots.templateDownloaded'));
-  }
-
-  async copyLotImportMapping(): Promise<void> {
-    try {
-      await this.writeClipboard(this.buildLotImportMappingHint());
-      this.toast.success(this.translate.instant('chantiers.chantier.detail.lots.mappingCopied'));
-    } catch {
-      this.toast.error(this.translate.instant('chantiers.chantier.detail.lots.mappingCopyFailed'));
-    }
-  }
-
-  async onLotFileSelected(event: Event): Promise<void> {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    input.value = '';
-    if (!file) return;
-    try {
-      const rowCount = await this.countLotsFileRows(file);
-      this.selectedLotImportFile.set(file);
-      this.selectedLotImportRowCount.set(rowCount);
-      this.toast.info(
-        this.translate.instant('chantiers.chantier.detail.lots.importReady', {
-          fileName: file.name,
-          count: rowCount,
-        }),
-      );
-    } catch {
-      this.toast.error(this.translate.instant('chantiers.chantier.detail.lots.importParseCountFailed'));
-      this.selectedLotImportFile.set(null);
-      this.selectedLotImportRowCount.set(null);
-    }
-  }
-
-  async confirmLotImport(): Promise<void> {
-    const file = this.selectedLotImportFile();
-    if (!file) {
-      this.toast.error(this.translate.instant('chantiers.chantier.detail.lots.importNoFile'));
-      return;
-    }
-    await this.importLotsFromFile(file);
-    this.selectedLotImportFile.set(null);
-    this.selectedLotImportRowCount.set(null);
-  }
-
-  private buildLotImportMappingHint(): string {
-    return [
-      'code: code | lot | lot_code | lotcode',
-      'designation: designation | description | intitule | name',
-      'quantite: quantite | quantity | qte',
-      'unite: unite | unit | uom',
-      'prix_unitaire_ht: prix_unitaire_ht | prixunitaireht | prixunitaire | pu | unitprice',
-    ].join('\n');
-  }
-
-  private async writeClipboard(value: string): Promise<void> {
-    if (globalThis.navigator?.clipboard?.writeText) {
-      await globalThis.navigator.clipboard.writeText(value);
-      return;
-    }
-    throw new Error('clipboard-api-unavailable');
-  }
-
-  private async importLotsFromFile(file: File): Promise<void> {
-    const chantierId = this.chantierId();
-    this.importing.set(true);
-    try {
-      const buffer = await file.arrayBuffer();
-      const workbook = XLSX.read(buffer, { type: 'array' });
-      if (isBpdeWorkbook(workbook)) {
-        const bpdeLots = parseBpdeWorkbook(workbook);
-        if (!bpdeLots.length) {
-          this.toast.error(this.translate.instant('chantiers.chantier.detail.lots.importInvalidFile'));
-          return;
-        }
-        const stats = await this.importBpdeLots(chantierId, bpdeLots);
-        this.showBpdeImportToast(stats);
-        return;
-      }
-
-      const parsed = await this.parseLotsFileFromWorkbook(workbook);
-      if (!parsed.rows.length) {
-        this.toast.error(this.translate.instant('chantiers.chantier.detail.lots.importInvalidFile'));
-        return;
-      }
-      const initialOrder = this.lots().length;
-      const created: LotChantier[] = [];
-      const issues: LotImportIssue[] = [...parsed.issues];
-
-      for (let i = 0; i < parsed.rows.length; i += 1) {
-        const row = parsed.rows[i];
-        try {
-          const lot = await this.lotApi.createForChantier(chantierId, {
-            ...row.data,
-            ordre: initialOrder + i + 1,
-          });
-          created.push(lot);
-        } catch {
-          issues.push({ sourceLine: row.sourceLine, reason: 'apiCreateFailed' });
-        }
-      }
-
-      if (!created.length) {
-        this.toast.error(this.translate.instant('chantiers.chantier.detail.lots.importFailed'));
-        return;
-      }
-
-      if (issues.length > 0) {
-        this.toast.success(
-          this.translate.instant('chantiers.chantier.detail.lots.importPartial', {
-            imported: created.length,
-            total: parsed.rows.length + parsed.issues.length,
-          }),
-        );
-        this.toast.warning(
-          this.translate.instant('chantiers.chantier.detail.lots.importIssuesSummary', {
-            failed: issues.length,
-            total: parsed.rows.length + parsed.issues.length,
-            details: this.formatImportIssueDetails(issues),
-          }),
-        );
-      } else {
-        this.toast.success(
-          this.translate.instant('chantiers.chantier.detail.lots.importSuccess', { count: created.length }),
-        );
-      }
-    } catch {
-      this.toast.error(this.translate.instant('chantiers.chantier.detail.lots.importFailed'));
-    } finally {
-      await this.reload();
-      this.importing.set(false);
-    }
-  }
-
-  private showBpdeImportToast(stats: BpdeImportStats): void {
-    const created = stats.createdLots + stats.createdPostes;
-    const skipped = stats.skippedLots + stats.skippedPostes;
-    if (created === 0 && stats.failed > 0) {
-      this.toast.error(this.translate.instant('chantiers.chantier.detail.lots.importFailed'));
-      return;
-    }
-    if (skipped > 0 || stats.failed > 0) {
-      this.toast.success(
-        this.translate.instant('chantiers.chantier.detail.lots.bpdeImportPartial', {
-          lots: stats.createdLots,
-          postes: stats.createdPostes,
-          skipped,
-          failed: stats.failed,
-        }),
-      );
-      return;
-    }
-    this.toast.success(
-      this.translate.instant('chantiers.chantier.detail.lots.bpdeImportSuccess', {
-        lots: stats.createdLots,
-        postes: stats.createdPostes,
-      }),
-    );
-  }
-
-  private buildLotCodeIndex(lots: LotChantier[]): Map<string, LotChantier> {
-    return new Map(lots.map((lot) => [lot.code, lot]));
-  }
-
-  private buildPosteCodeIndex(postesByLotId: Record<string, PosteBudgetaire[]>): Map<string, Set<string>> {
-    const index = new Map<string, Set<string>>();
-    for (const [lotId, postes] of Object.entries(postesByLotId)) {
-      index.set(lotId, new Set(postes.map((poste) => poste.code)));
-    }
-    return index;
-  }
-
-  private async resolveOrCreateLot(
-    chantierId: string,
-    code: string,
-    designation: string,
-    lotByCode: Map<string, LotChantier>,
-    stats: BpdeImportStats,
-    options: { parentLotId?: string; ordre: number },
-  ): Promise<LotChantier | null> {
-    const existing = lotByCode.get(code);
-    if (existing) {
-      stats.skippedLots += 1;
-      return existing;
-    }
-    try {
-      const lot = await this.lotApi.createForChantier(chantierId, {
-        code,
-        designation,
-        parentLotId: options.parentLotId,
-        ordre: options.ordre,
-        avancementPercent: 0,
-      });
-      lotByCode.set(code, lot);
-      stats.createdLots += 1;
-      return lot;
-    } catch {
-      stats.failed += 1;
-      return null;
-    }
-  }
-
-  private async createPosteIfNew(
-    lotId: string,
-    poste: BpdeParsedLot['postes'][number],
-    posteCodesByLot: Map<string, Set<string>>,
-    stats: BpdeImportStats,
-    ordre: number,
-  ): Promise<void> {
-    const codes = posteCodesByLot.get(lotId) ?? new Set<string>();
-    if (codes.has(poste.code)) {
-      stats.skippedPostes += 1;
-      return;
-    }
-    try {
-      await this.posteApi.createForLot(lotId, {
-        code: poste.code,
-        designation: poste.designation,
-        unite: poste.unite,
-        quantite: poste.quantite,
-        prixUnitaireHt: poste.prixUnitaireHt,
-        montantHt: poste.montantHt,
-        ordre,
-      });
-      codes.add(poste.code);
-      posteCodesByLot.set(lotId, codes);
-      stats.createdPostes += 1;
-    } catch {
-      stats.failed += 1;
-    }
-  }
-
-  private async importBpdeLots(chantierId: string, bpdeLots: BpdeParsedLot[]): Promise<BpdeImportStats> {
-    const stats: BpdeImportStats = {
-      createdLots: 0,
-      createdPostes: 0,
-      skippedLots: 0,
-      skippedPostes: 0,
-      failed: 0,
-    };
-    await this.reload(chantierId);
-    let order = this.lots().length;
-    const lotByCode = this.buildLotCodeIndex(this.lots());
-    const posteCodesByLot = this.buildPosteCodeIndex(this.postesByLotId());
-    let posteOrdre = 1;
-
-    for (const bpdeLot of bpdeLots) {
-      order += 1;
-      const rootLot = await this.resolveOrCreateLot(
-        chantierId,
-        bpdeLot.code,
-        bpdeLot.designation,
-        lotByCode,
-        stats,
-        { ordre: order },
-      );
-      if (!rootLot) continue;
-
-      for (const poste of bpdeLot.postes) {
-        await this.createPosteIfNew(rootLot.id, poste, posteCodesByLot, stats, posteOrdre);
-        posteOrdre += 1;
-      }
-
-      for (const sousLot of bpdeLot.sousLots) {
-        order += 1;
-        const sousLotCode = buildBpdeSousLotCode(bpdeLot.code, sousLot, order);
-        const childLot = await this.resolveOrCreateLot(
-          chantierId,
-          sousLotCode,
-          sousLot.designation,
-          lotByCode,
-          stats,
-          { parentLotId: rootLot.id, ordre: order },
-        );
-        if (!childLot) continue;
-
-        for (const poste of sousLot.postes) {
-          await this.createPosteIfNew(childLot.id, poste, posteCodesByLot, stats, posteOrdre);
-          posteOrdre += 1;
-        }
-      }
-    }
-
-    return stats;
-  }
-
-  private async countLotsFileRows(file: File): Promise<number> {
-    const buffer = await file.arrayBuffer();
-    const workbook = XLSX.read(buffer, { type: 'array' });
-    const firstSheetName = workbook.SheetNames[0];
-    if (!firstSheetName) return 0;
-    const worksheet = workbook.Sheets[firstSheetName];
-    const rawRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(worksheet, { defval: '' });
-    return Math.max(0, rawRows.length);
-  }
-
-  private async parseLotsFile(file: File): Promise<ParsedLotImportResult> {
-    const buffer = await file.arrayBuffer();
-    const workbook = XLSX.read(buffer, { type: 'array' });
-    return this.parseLotsFileFromWorkbook(workbook);
-  }
-
-  private parseLotsFileFromWorkbook(workbook: XLSX.WorkBook): ParsedLotImportResult {
-    const firstSheetName = workbook.SheetNames[0];
-    if (!firstSheetName) return { rows: [], issues: [] };
-
-    const worksheet = workbook.Sheets[firstSheetName];
-    const rawRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(worksheet, { defval: '' });
-    const rows: ParsedLotImportRow[] = [];
-    const issues: LotImportIssue[] = [];
-
-    for (let index = 0; index < rawRows.length; index += 1) {
-      const rawRow = rawRows[index];
-      const sourceLine = index + 2;
-      const code = this.readString(rawRow, ['code', 'lot', 'lotcode', 'lot_code']);
-      const designation = this.readString(rawRow, ['designation', 'description', 'intitule', 'name']);
-      const unite = this.readString(rawRow, ['unite', 'unit', 'uom']);
-      const quantite = this.readNumber(rawRow, ['quantite', 'quantity', 'qte']);
-      const prixUnitaireHt = this.readNumber(rawRow, [
-        'prixunitaireht',
-        'prix_unitaire_ht',
-        'prixunitaire',
-        'pu',
-        'unitprice',
-      ]);
-
-      if (!code || !designation || !unite) {
-        issues.push({ sourceLine, reason: 'missingRequired' });
-        continue;
-      }
-      if (!Number.isFinite(quantite) || quantite <= 0) {
-        issues.push({ sourceLine, reason: 'invalidQuantite' });
-        continue;
-      }
-      if (!Number.isFinite(prixUnitaireHt) || prixUnitaireHt < 0) {
-        issues.push({ sourceLine, reason: 'invalidPrixUnitaire' });
-        continue;
-      }
-
-      rows.push({
-        sourceLine,
-        data: {
-          code,
-          designation,
-          unite,
-          quantite,
-          prixUnitaireHt,
-          montantHt: Math.round(quantite * prixUnitaireHt * 100) / 100,
-          avancementPercent: 0,
-        },
-      });
-    }
-
-    return { rows, issues };
-  }
-
-  private formatImportIssueDetails(issues: LotImportIssue[]): string {
-    const maxDisplayed = 3;
-    const displayed = issues.slice(0, maxDisplayed).map((issue) => this.formatImportIssue(issue));
-    const remaining = issues.length - displayed.length;
-    if (remaining <= 0) return displayed.join(' | ');
-    return `${displayed.join(' | ')} | ${this.translate.instant('chantiers.chantier.detail.lots.importIssueAndMore', { count: remaining })}`;
-  }
-
-  private formatImportIssue(issue: LotImportIssue): string {
-    return this.translate.instant(this.importIssueReasonKey(issue.reason), { line: issue.sourceLine });
-  }
-
-  private importIssueReasonKey(reason: LotImportIssueReason): string {
-    switch (reason) {
-      case 'missingRequired':
-        return 'chantiers.chantier.detail.lots.importIssueMissingRequired';
-      case 'invalidQuantite':
-        return 'chantiers.chantier.detail.lots.importIssueInvalidQuantite';
-      case 'invalidPrixUnitaire':
-        return 'chantiers.chantier.detail.lots.importIssueInvalidPrixUnitaire';
-      case 'apiCreateFailed':
-        return 'chantiers.chantier.detail.lots.importIssueApiFailed';
-      default:
-        return 'chantiers.chantier.detail.lots.importFailed';
-    }
-  }
-
-  private readString(row: Record<string, unknown>, aliases: string[]): string {
-    const value = this.readByAliases(row, aliases);
-    if (typeof value === 'string') return value.trim();
-    if (typeof value === 'number' || typeof value === 'boolean') return String(value).trim();
-    return '';
-  }
-
-  private readNumber(row: Record<string, unknown>, aliases: string[]): number {
-    const normalized = this.readString(row, aliases).replace(/\s+/g, '').replace(',', '.');
-    const parsed = Number.parseFloat(normalized);
-    return Number.isFinite(parsed) ? parsed : Number.NaN;
-  }
-
-  private readByAliases(row: Record<string, unknown>, aliases: string[]): unknown {
-    const normalizedEntries = Object.entries(row).map(([key, value]) => [this.normalizeHeader(key), value] as const);
-    for (const alias of aliases) {
-      const aliasKey = this.normalizeHeader(alias);
-      const found = normalizedEntries.find(([key]) => key === aliasKey);
-      if (found) return found[1];
-    }
-    return undefined;
-  }
-
-  private normalizeHeader(value: string): string {
-    return value
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-zA-Z0-9]/g, '')
-      .toLowerCase();
+  async onMagicImportComplete(result: ReviewedExtraction): Promise<void> {
+    await this.lotImporter.import(this.chantierId(), result.data);
+    await this.reload();
   }
 }

@@ -1,28 +1,52 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
-import { AbstractControl, FormArray, ReactiveFormsModule } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { TranslateModule } from '@ngx-translate/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  inject,
+  signal,
+} from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { firstValueFrom } from 'rxjs';
 
 import { AlertComponent, ButtonComponent } from '@lib/anatomy';
-import { DynamicArrayTableComponent } from '../../doc-extractor/components/dynamic-array-table/dynamic-array-table.component';
-import type { JsonSchemaArray, JsonSchemaObject } from '../../doc-extractor/models/json-schema.model';
-import { JsonSchemaFormBuilder } from '../../doc-extractor/utils/json-schema-form-builder';
+import type { FieldIssue } from '../../doc-extractor/models/extraction.model';
+import type { JsonSchemaObject, JsonSchemaRoot } from '../../doc-extractor/models/json-schema.model';
+import type { UiArrayConfig, UiRootView, UiSchema } from '../../doc-extractor/models/ui-schema.model';
 import type { SmartImportRowStatus, SmartImportSession } from '../models/smart-import.model';
 import { SmartImportOrchestratorService } from '../services/smart-import-orchestrator.service';
+import { resolveRootView, resolveTreeConfig } from '../utils/root-view.util';
+import { mergeNodeData } from '../utils/tree-flatten.util';
+import {
+  SmartImportDataTableComponent,
+  type SmartImportDataTableRowEvent,
+} from './smart-import-data-table.component';
+import {
+  SmartImportEditDialogComponent,
+  type SmartImportEditDialogData,
+} from './smart-import-edit-dialog.component';
+import {
+  SmartImportRecordTableComponent,
+  type SmartImportRecordHeaderEvent,
+} from './smart-import-record-table.component';
+import {
+  SmartImportTreeTableComponent,
+  type SmartImportTreeNodeEvent,
+} from './smart-import-tree-table.component';
 
 @Component({
   selector: 'nf-smart-import-review-dialog',
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule,
     MatDialogModule,
     TranslateModule,
     AlertComponent,
     ButtonComponent,
-    DynamicArrayTableComponent,
+    SmartImportDataTableComponent,
+    SmartImportTreeTableComponent,
+    SmartImportRecordTableComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -54,43 +78,36 @@ import { SmartImportOrchestratorService } from '../services/smart-import-orchest
         }
       </nav>
 
-      @if (arrayConfig(); as cfg) {
-        <app-dynamic-array-table
-          [title]="cfg.title"
-          [formArray]="formArray"
-          [arraySchema]="arraySchema()"
-          [columns]="cfg.columns"
-          [issues]="allIssues()"
-          [lockStructure]="true"
-        />
-      }
-
-      <div class="row-decisions">
-        @for (entry of visibleRows(); track entry.row.sourceIndex) {
-          <article [class.invalid]="entry.row.status === 'NEEDS_REVIEW'">
-            <div>
-              <strong>{{ entry.row.label }}</strong>
-              <span class="status">{{ statusKey(entry.row.status) | translate }}</span>
-              @if (entry.row.issues.length > 0) {
-                <ul>
-                  @for (issue of entry.row.issues; track issue.path + issue.kind) {
-                    <li>{{ issue.path }} — {{ issue.message }}</li>
-                  }
-                </ul>
-              }
-            </div>
-            <div class="actions">
-              @if (entry.row.status === 'IGNORED') {
-                <nf-button variant="secondary" size="sm" (clicked)="restore(entry.index)">
-                  {{ 'platform.smartImport.review.restore' | translate }}
-                </nf-button>
-              } @else if (entry.row.status !== 'DUPLICATE') {
-                <nf-button variant="ghost" size="sm" (clicked)="ignore(entry.index)">
-                  {{ 'platform.smartImport.review.ignore' | translate }}
-                </nf-button>
-              }
-            </div>
-          </article>
+      <div class="layout-host">
+        @switch (rootView) {
+          @case ('TREE_TABLE') {
+            <nf-smart-import-tree-table
+              [title]="arrayConfig()?.title ?? ''"
+              [rows]="session.rows"
+              [tree]="treeConfig"
+              [filter]="selectedFilter()"
+              (nodeActivate)="onTreeNodeActivate($event)" />
+          }
+          @case ('RECORD_TABLE') {
+            <nf-smart-import-record-table
+              [rootData]="session.rootData"
+              [uiSchema]="session.schema.uiSchema"
+              [rows]="session.rows"
+              [columns]="arrayConfig()?.columns ?? []"
+              [arrayTitle]="arrayConfig()?.title ?? ''"
+              [filter]="selectedFilter()"
+              [headerIssues]="headerIssues()"
+              (headerActivate)="onRecordHeaderActivate($event)"
+              (rowActivate)="onDataRowActivate($event)" />
+          }
+          @default {
+            <nf-smart-import-data-table
+              [title]="arrayConfig()?.title ?? ''"
+              [rows]="session.rows"
+              [columns]="arrayConfig()?.columns ?? []"
+              [filter]="selectedFilter()"
+              (rowActivate)="onDataRowActivate($event)" />
+          }
         }
       </div>
 
@@ -114,13 +131,20 @@ import { SmartImportOrchestratorService } from '../services/smart-import-orchest
     </div>
   `,
   styles: [`
-    .review { padding: 1.25rem; display: grid; gap: 1rem; width: min(1100px, 94vw); }
-    header, footer, article { display: flex; justify-content: space-between; gap: 1rem; }
+    .review {
+      padding: 1.25rem 1.5rem;
+      display: grid;
+      gap: 1rem;
+      width: min(96vw, 1280px);
+      max-height: min(90vh, 960px);
+      grid-template-rows: auto auto auto 1fr auto;
+    }
+    header, footer { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; }
     h2, p { margin: 0; }
     header p { color: var(--nf-color-text-secondary); }
-    .policy, .status, .filters span {
+    .policy {
       padding: .15rem .45rem; border-radius: 999px; background: var(--nf-color-bg-subtle);
-      font-size: .75rem;
+      font-size: .75rem; white-space: nowrap;
     }
     .filters { display: flex; flex-wrap: wrap; gap: .4rem; }
     .filters button {
@@ -128,11 +152,8 @@ import { SmartImportOrchestratorService } from '../services/smart-import-orchest
       border-radius: 999px; padding: .35rem .6rem; cursor: pointer;
     }
     .filters button.active { border-color: var(--nf-color-primary-500); }
-    .row-decisions { display: grid; gap: .4rem; max-height: 240px; overflow: auto; }
-    article { border: 1px solid var(--nf-color-border); border-radius: .5rem; padding: .65rem; }
-    article.invalid { border-color: var(--nf-color-warning-500); }
-    article ul { margin: .35rem 0 0; color: var(--nf-color-danger-700); font-size: .8rem; }
-    .actions, .footer-actions { display: flex; align-items: center; gap: .5rem; }
+    .layout-host { min-height: 0; overflow: auto; }
+    .footer-actions { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; justify-content: flex-end; }
     footer { align-items: center; }
   `],
 })
@@ -142,9 +163,10 @@ export class SmartImportReviewDialogComponent {
     MatDialogRef<SmartImportReviewDialogComponent, SmartImportSession | undefined>,
   );
   private readonly orchestrator = inject(SmartImportOrchestratorService);
-  private readonly destroyRef = inject(DestroyRef);
+  private readonly dialog = inject(MatDialog);
+  private readonly translate = inject(TranslateService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
-  readonly formArray = new FormArray<AbstractControl>([]);
   readonly selectedFilter = signal<SmartImportRowStatus | 'ALL'>('ALL');
   readonly filters: Array<{ status: SmartImportRowStatus | 'ALL'; label: string }> = [
     { status: 'ALL', label: 'platform.smartImport.filters.all' },
@@ -152,39 +174,35 @@ export class SmartImportReviewDialogComponent {
     { status: 'NEEDS_REVIEW', label: 'platform.smartImport.filters.needsReview' },
     { status: 'DUPLICATE', label: 'platform.smartImport.filters.duplicates' },
     { status: 'IGNORED', label: 'platform.smartImport.filters.ignored' },
-    { status: 'FAILED', label: 'platform.smartImport.filters.failed' },
   ];
 
+  readonly rootView: UiRootView;
+  readonly treeConfig;
+
   constructor() {
-    const schema = this.itemObjectSchema();
-    for (const row of this.session.rows) {
-      const group = JsonSchemaFormBuilder.buildGroupForObjectSchema(schema);
-      JsonSchemaFormBuilder.patchFormFromData({ form: group, schema, dataJson: row.data });
-      this.formArray.push(group);
-    }
-    this.formArray.valueChanges
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => this.syncAndValidate());
+    this.rootView = resolveRootView(
+      this.session.schema.uiSchema,
+      this.session.schema.jsonSchema,
+      this.session.arrayPath,
+    );
+    this.treeConfig = resolveTreeConfig(this.session.schema.uiSchema, this.session.arrayPath);
   }
 
-  arrayConfig() {
+  arrayConfig(): UiArrayConfig | undefined {
     return this.session.schema.uiSchema.arrays?.find(
       (array) => array.path === this.session.arrayPath,
-    );
+    ) ?? this.session.schema.uiSchema.arrays?.[0];
   }
 
-  arraySchema(): JsonSchemaArray {
-    const schema = this.session.schema.jsonSchema as unknown as Record<string, unknown>;
-    const properties = schema['properties'] as Record<string, unknown>;
-    return properties[this.session.arrayPath] as JsonSchemaArray;
-  }
-
-  itemObjectSchema(): JsonSchemaObject {
-    return this.arraySchema().items as JsonSchemaObject;
-  }
-
-  allIssues() {
-    return this.session.rows.flatMap((row) => row.issues);
+  /** Header-level issues (RECORD_TABLE) — stored on first row during revalidate. */
+  headerIssues(): FieldIssue[] {
+    const arrayPath = this.session.arrayPath;
+    const first = this.session.rows[0];
+    if (!first || !this.session.rootData) return [];
+    return first.issues.filter((issue) => {
+      const p = issue.path ?? '';
+      return !p.startsWith(`${arrayPath}[`) && p !== arrayPath;
+    });
   }
 
   count(status: SmartImportRowStatus | 'ALL'): number {
@@ -201,69 +219,187 @@ export class SmartImportReviewDialogComponent {
     return this.count('NEEDS_REVIEW');
   }
 
-  visibleRows() {
-    return this.session.rows
-      .map((row, index) => ({ row, index }))
-      .filter(({ row }) =>
-        this.selectedFilter() === 'ALL' || row.status === this.selectedFilter(),
-      );
-  }
-
-  statusKey(status: SmartImportRowStatus): string {
-    return `platform.smartImport.status.${status.toLowerCase()}`;
-  }
-
-  ignore(index: number): void {
-    this.syncRows();
-    this.session.rows[index].status = 'IGNORED';
-  }
-
-  restore(index: number): void {
-    this.session.rows[index].status = 'READY';
-    this.syncAndValidate();
-  }
-
   ignoreAllInvalid(): void {
-    this.syncRows();
     for (const row of this.session.rows) {
       if (row.status === 'NEEDS_REVIEW') row.status = 'IGNORED';
     }
+    this.refreshRows();
   }
 
   canConfirm(): boolean {
-    if (this.readyCount() === 0 && this.count('IMPORTED') === 0) return false;
-    // Block confirm while unresolved issues remain (fix or ignore first).
+    if (this.readyCount() === 0) return false;
     if (this.invalidCount() > 0) return false;
     return true;
   }
 
   confirm(): void {
-    this.syncAndValidate();
+    this.orchestrator.revalidate(this.session);
     if (this.canConfirm()) this.ref.close(this.session);
+    else this.refreshRows();
   }
 
   cancel(): void {
     this.ref.close(undefined);
   }
 
-  private syncAndValidate(): void {
-    this.syncRows();
+  async onDataRowActivate(event: SmartImportDataTableRowEvent): Promise<void> {
+    const row = event.row;
+    if (row.status === 'IGNORED' || row.status === 'DUPLICATE') {
+      return;
+    }
+    const itemSchema = this.itemObjectSchema();
+    const patched = await this.openEditDialog({
+      title: this.translate.instant('platform.smartImport.edit.titleRow', {
+        label: row.label,
+      }),
+      objectSchema: itemSchema,
+      uiSchema: this.rowEditUiSchema(itemSchema),
+      data: { ...row.data },
+      preserveArrayKeys: this.treeConfig.childrenPaths,
+    });
+    if (!patched) return;
+    mergeNodeData(row.data, patched, this.treeConfig.childrenPaths);
     this.orchestrator.revalidate(this.session);
+    this.refreshRows();
   }
 
-  private syncRows(): void {
-    const schema = this.itemObjectSchema();
-    this.formArray.controls.forEach((control, index) => {
-      const serialized = JsonSchemaFormBuilder.serializeToDataJson({
-        form: control as ReturnType<typeof JsonSchemaFormBuilder.buildGroupForObjectSchema>,
-        schema,
-      });
-      // Preserve nested arrays (e.g. lots.sousLots/postes) not edited in the flat table.
-      this.session.rows[index].data = {
-        ...this.session.rows[index].data,
-        ...serialized,
-      };
+  async onTreeNodeActivate(event: SmartImportTreeNodeEvent): Promise<void> {
+    const node = event.node;
+    const root = this.session.rows[node.rootIndex];
+    if (!root || root.status === 'IGNORED' || root.status === 'DUPLICATE') {
+      return;
+    }
+    const objectSchema = this.schemaForTreeLevel(node.levelKey);
+    const patched = await this.openEditDialog({
+      title: this.translate.instant('platform.smartImport.edit.titleNode', {
+        level: node.levelLabel,
+      }),
+      objectSchema,
+      uiSchema: this.nodeEditUiSchema(objectSchema),
+      data: { ...node.data },
+      preserveArrayKeys: this.treeConfig.childrenPaths,
     });
+    if (!patched) return;
+    mergeNodeData(node.data, patched, this.treeConfig.childrenPaths);
+    this.orchestrator.revalidate(this.session);
+    this.refreshRows();
+  }
+
+  async onRecordHeaderActivate(_event: SmartImportRecordHeaderEvent): Promise<void> {
+    const root = this.session.rootData;
+    const rootSchema = this.session.schema.jsonSchema as JsonSchemaObject;
+    const patched = await this.openEditDialog({
+      title: this.translate.instant('platform.smartImport.edit.titleHeader'),
+      objectSchema: rootSchema,
+      uiSchema: {
+        ...this.session.schema.uiSchema,
+        arrays: [],
+      },
+      data: { ...root },
+      preserveArrayKeys: [this.session.arrayPath],
+    });
+    if (!patched) return;
+    mergeNodeData(root, patched, [this.session.arrayPath]);
+    this.orchestrator.revalidate(this.session);
+    this.refreshRows();
+  }
+
+  /** New array ref so OnPush layout children detect edits/revalidation. */
+  private refreshRows(): void {
+    this.session.rows = this.session.rows.map((row) => ({
+      ...row,
+      issues: [...row.issues],
+    }));
+    this.cdr.markForCheck();
+  }
+
+  private async openEditDialog(
+    data: SmartImportEditDialogData,
+  ): Promise<Record<string, unknown> | undefined> {
+    const ref = this.dialog.open<
+      SmartImportEditDialogComponent,
+      SmartImportEditDialogData,
+      Record<string, unknown> | undefined
+    >(SmartImportEditDialogComponent, {
+      width: '720px',
+      maxWidth: '96vw',
+      disableClose: true,
+      data,
+    });
+    return firstValueFrom(ref.afterClosed());
+  }
+
+  private itemObjectSchema(): JsonSchemaObject {
+    const root = this.session.schema.jsonSchema as JsonSchemaRoot;
+    const properties = root.properties ?? {};
+    const arraySchema = properties[this.session.arrayPath] as { items?: JsonSchemaObject };
+    return (arraySchema?.items ?? { type: 'object', properties: {} }) as JsonSchemaObject;
+  }
+
+  private schemaForTreeLevel(levelKey: string): JsonSchemaObject {
+    const root = this.session.schema.jsonSchema as JsonSchemaRoot;
+    if (levelKey === this.treeConfig.path) {
+      return this.itemObjectSchema();
+    }
+    // Walk: lots.items.properties.sousLots.items ...
+    let current: JsonSchemaObject | null = this.itemObjectSchema();
+    const queue = [...this.treeConfig.childrenPaths];
+    for (const key of queue) {
+      const prop = current?.properties?.[key] as { items?: JsonSchemaObject } | undefined;
+      const items = prop?.items ?? null;
+      if (key === levelKey && items) return items;
+      if (items) current = items;
+    }
+    // Fallback: search properties of item schema
+    const fromItem = this.itemObjectSchema().properties?.[levelKey] as
+      | { items?: JsonSchemaObject }
+      | undefined;
+    if (fromItem?.items) return fromItem.items;
+    // Postes may exist under sousLots
+    const sousLots = this.itemObjectSchema().properties?.['sousLots'] as
+      | { items?: JsonSchemaObject }
+      | undefined;
+    const postes = sousLots?.items?.properties?.['postes'] as
+      | { items?: JsonSchemaObject }
+      | undefined;
+    if (levelKey === 'postes' && postes?.items) return postes.items;
+    return { type: 'object', properties: {} };
+  }
+
+  private rowEditUiSchema(itemSchema: JsonSchemaObject): UiSchema {
+    const columns = this.arrayConfig()?.columns ?? this.treeConfig.columns;
+    return {
+      importPolicy: this.session.schema.uiSchema.importPolicy,
+      sections: [
+        {
+          title: '',
+          columns: 2,
+          fields: columns
+            .filter((col) => itemSchema.properties?.[col.path.split('.')[0]])
+            .map((col) => ({ path: col.path, label: col.label })),
+        },
+      ],
+      arrays: [],
+    };
+  }
+
+  private nodeEditUiSchema(objectSchema: JsonSchemaObject): UiSchema {
+    const preserve = new Set(this.treeConfig.childrenPaths);
+    const fields = Object.entries(objectSchema.properties ?? {})
+      .filter(([key, schema]) => {
+        if (preserve.has(key)) return false;
+        const t = schema.type;
+        const primary = Array.isArray(t) ? t.find((x) => x !== 'null') : t;
+        return primary !== 'array';
+      })
+      .map(([key, schema]) => ({
+        path: key,
+        label: (schema as { title?: string }).title ?? key,
+      }));
+    return {
+      importPolicy: this.session.schema.uiSchema.importPolicy,
+      sections: [{ title: '', columns: 2, fields }],
+      arrays: [],
+    };
   }
 }
-

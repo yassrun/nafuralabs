@@ -116,6 +116,10 @@ ai:
     api-key: ${AI_GEMINI_API_KEY:}
     base-url: ${AI_GEMINI_BASE_URL:https://generativelanguage.googleapis.com}
     model: ${AI_GEMINI_MODEL:gemini-2.5-flash}
+  # Doc extraction (Import magique / BL scan) routinely exceeds the global 30s default.
+  execution:
+    timeout-ms: ${AI_EXECUTION_TIMEOUT_MS:120000}
+    max-retries: ${AI_EXECUTION_MAX_RETRIES:1}
 
 logging:
   level:

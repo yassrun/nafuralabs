@@ -2,36 +2,55 @@ import { Injectable, inject } from '@angular/core';
 
 import type { CategoryOuvrage, OuvrageCreate } from '@applications/erp/etudes/models';
 import { OuvrageApiService } from '@applications/erp/pages/etudes/bibliotheque-prix/services/ouvrage-api.service';
+import type { ExtractionDefinition } from '@platform/features/documents/smart-import';
 import { normalizeText } from '../../utils/extraction-json.utils';
 
 import { OUVRAGE_EXTRACTION_SCHEMA } from '../../extraction-schemas';
-import { ImportHandlerRegistry } from '../services/import-handler.registry';
+import {
+  extractionRows,
+  persistUniqueRows,
+  type ApplicationImportResult,
+} from '../services/application-import.util';
 
 const CATEGORIES: CategoryOuvrage[] = [
   'TERRASSEMENT', 'GO', 'CHARPENTE', 'ETANCHEITE', 'CLOISON', 'REVETEMENT',
   'MENUISERIE', 'ELECTRICITE', 'PLOMBERIE', 'CLIM', 'PEINTURE', 'VRD', 'AUTRE',
 ];
 
+const schema = OUVRAGE_EXTRACTION_SCHEMA;
+const dedupeKey = (row: Record<string, unknown>): string | null => {
+  const code = row['code'];
+  return code && String(code).trim() ? String(code).trim() : null;
+};
+
+export const OUVRAGE_IMPORT_DEFINITION: ExtractionDefinition = {
+  key: 'ouvrage',
+  name: schema.name,
+  description: schema.description,
+  dataSchema: schema.dataSchema,
+  presentationSchema: schema.presentationSchema,
+  instructions: schema.instructions,
+  arrayPath: schema.arrayPath!,
+  dedupeKey,
+};
+
 @Injectable({ providedIn: 'root' })
-export class OuvrageImportHandlerRegistrar {
-  private readonly registry = inject(ImportHandlerRegistry);
+export class OuvrageImportService {
   private readonly api = inject(OuvrageApiService);
 
-  constructor() {
-    this.register();
-  }
-
-  private register(): void {
-    const schema = OUVRAGE_EXTRACTION_SCHEMA;
-    this.registry.register<OuvrageCreate>({
-      entityKey: 'ouvrage',
-      dataSchema: schema.dataSchema,
-      presentationSchema: schema.presentationSchema,
-      instructions: schema.instructions,
-      schemaName: schema.name,
-      schemaDescription: schema.description,
-      arrayPath: schema.arrayPath!,
-      mapRowToPayload: (row: Record<string, unknown>) => ({
+  async import(data: Record<string, unknown>): Promise<ApplicationImportResult> {
+    const existing = await this.api.getAll({ page: 0, pageSize: 500 });
+    const keys = new Set(
+      existing.items
+        .map((ouvrage) => ouvrage.code?.trim())
+        .filter((code): code is string => !!code)
+        .map(normalizeText),
+    );
+    return persistUniqueRows(
+      extractionRows(data, schema.arrayPath!),
+      keys,
+      dedupeKey,
+      (row): OuvrageCreate => ({
         code: String(row['code'] ?? '').trim(),
         designation: String(row['designation'] ?? '').trim(),
         category: this.parseCategory(row['category']),
@@ -43,22 +62,8 @@ export class OuvrageImportHandlerRegistrar {
         beneficePercent: 0,
         isActive: true,
       }),
-      create: (payload: OuvrageCreate) => this.api.create(payload),
-      dedupeKey: (row: Record<string, unknown>) => {
-        const code = row['code'];
-        return code && String(code).trim() ? String(code).trim() : null;
-      },
-      loadExistingKeys: async () => {
-        const res = await this.api.getAll({ page: 0, pageSize: 500 });
-        const keys = new Set<string>();
-        for (const o of res.items) {
-          if (o.code?.trim()) {
-            keys.add(normalizeText(o.code));
-          }
-        }
-        return keys;
-      },
-    });
+      (payload) => this.api.create(payload),
+    );
   }
 
   private parseCategory(value: unknown): CategoryOuvrage {

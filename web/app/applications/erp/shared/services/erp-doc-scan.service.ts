@@ -81,6 +81,10 @@ export class ErpDocScanService {
     };
   }
 
+  /**
+   * @deprecated New reviewed flows must use SmartImportTriggerComponent and
+   * consume ReviewedExtraction in the owning screen.
+   */
   async scanAndMap<T>(args: ScanAndMapArgs<T>): Promise<Partial<T>> {
     const extractedResult = await this.extractForReview(args);
     const extracted = args.review

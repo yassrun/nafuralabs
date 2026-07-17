@@ -73,6 +73,9 @@ public class StatelessExtractionService {
             Throwable cause = e instanceof java.util.concurrent.ExecutionException && e.getCause() != null
                     ? e.getCause()
                     : e;
+            if (isTimeout(cause)) {
+                return failure("LLM", "EXTRACTION_TIMEOUT", safeMessage(cause), true);
+            }
             return failure("LLM", "LLM_PROVIDER_ERROR", safeMessage(cause), isRetryable(cause));
         }
     }
@@ -281,7 +284,25 @@ public class StatelessExtractionService {
                 : error.getMessage();
     }
 
+    private boolean isTimeout(Throwable error) {
+        Throwable current = error;
+        while (current != null) {
+            if (current instanceof java.util.concurrent.TimeoutException) {
+                return true;
+            }
+            String message = current.getMessage();
+            if (message != null && message.toLowerCase().contains("timed out")) {
+                return true;
+            }
+            current = current.getCause();
+        }
+        return false;
+    }
+
     private boolean isRetryable(Throwable error) {
+        if (isTimeout(error)) {
+            return true;
+        }
         String message = safeMessage(error).toLowerCase();
         return message.contains("timeout")
                 || message.contains("429")

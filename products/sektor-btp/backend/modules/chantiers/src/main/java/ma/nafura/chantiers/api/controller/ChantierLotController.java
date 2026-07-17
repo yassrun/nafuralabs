@@ -2,7 +2,9 @@ package ma.nafura.chantiers.api.controller;
 
 import jakarta.validation.Valid;
 import java.util.List;
+import ma.nafura.chantiers.api.dto.ChantierLotTreeResponseDto;
 import ma.nafura.chantiers.api.request.ChantierLotCreateDto;
+import ma.nafura.chantiers.api.request.ChantierLotTreeRequestDto;
 import ma.nafura.chantiers.api.request.ChantierLotUpdateDto;
 import ma.nafura.chantiers.domain.model.ChantierLot;
 import ma.nafura.chantiers.service.ChantierLotService;
@@ -41,6 +43,13 @@ public class ChantierLotController {
     public ResponseEntity<ChantierLot> create(
             @PathVariable String chantierId, @Valid @RequestBody ChantierLotCreateDto body) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(chantierId, body));
+    }
+
+    @PostMapping("/tree")
+    @RequirePermission("chantiers.create")
+    public ResponseEntity<ChantierLotTreeResponseDto> createTree(
+            @PathVariable String chantierId, @Valid @RequestBody ChantierLotTreeRequestDto body) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.createTree(chantierId, body));
     }
 
     @PutMapping("/{lotId}")

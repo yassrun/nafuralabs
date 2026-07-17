@@ -2,21 +2,28 @@ import { HttpErrorResponse } from '@angular/common/http';
 
 import {
   DEFAULT_SMART_IMPORT_CONFIG,
-  emptySmartImportResult,
+  schemaViewFromDefinition,
+  type ExtractionDefinition,
 } from './smart-import.model';
 import { SmartImportError, mapSmartImportError } from './smart-import.errors';
 
 describe('Smart Import platform contracts', () => {
-  it('reviews rows before writing by default', () => {
-    expect(DEFAULT_SMART_IMPORT_CONFIG.writeMode).toBe('REVIEW_BEFORE_WRITE');
+  it('defines review policy without a write contract', () => {
     expect(DEFAULT_SMART_IMPORT_CONFIG.importPolicy).toBe('PARTIAL');
+    expect('writeMode' in DEFAULT_SMART_IMPORT_CONFIG).toBeFalse();
   });
 
-  it('creates a detailed empty result', () => {
-    const result = emptySmartImportResult([]);
-    expect(result.imported).toBe(0);
-    expect(result.skippedByUser).toBe(0);
-    expect(result.rows).toEqual([]);
+  it('builds the schema view from a screen-owned definition', () => {
+    const definition: ExtractionDefinition = {
+      key: 'test',
+      name: 'Test',
+      dataSchema: { type: 'object', properties: {} },
+      presentationSchema: { sections: [] },
+      arrayPath: 'rows',
+    };
+    const view = schemaViewFromDefinition(definition);
+    expect(view.name).toBe('Test');
+    expect(view.jsonSchema).toBe(definition.dataSchema);
   });
 
   it('preserves typed errors', () => {

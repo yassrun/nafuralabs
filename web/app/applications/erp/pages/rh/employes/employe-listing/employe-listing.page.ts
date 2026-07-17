@@ -9,8 +9,14 @@ import {
   ButtonComponent,
 } from '@lib/anatomy';
 import type { Employe } from '@applications/erp/rh/models';
-import { SmartImportTriggerComponent } from '@platform/features/documents/smart-import';
-import { EmployeImportHandlerRegistrar } from '@applications/erp/shared/smart-import/handlers/employe-import.handler';
+import {
+  SmartImportTriggerComponent,
+  type ReviewedExtraction,
+} from '@platform/features/documents/smart-import';
+import {
+  EMPLOYE_IMPORT_DEFINITION,
+  EmployeImportService,
+} from '@applications/erp/shared/smart-import/handlers/employe-import.handler';
 
 import { EmployeFacade } from '../services';
 import { buildEmployesListingConfig } from '../config';
@@ -27,7 +33,8 @@ type QuickFilter = 'ALL' | 'ACTIF' | 'SUSPENDU';
 export class EmployeListingPage extends ConfigDrivenListingPage<Employe> {
   private readonly translate = inject(TranslateService);
   readonly facade = inject(EmployeFacade);
-  private readonly _importHandler = inject(EmployeImportHandlerRegistrar);
+  private readonly importer = inject(EmployeImportService);
+  readonly importDefinition = EMPLOYE_IMPORT_DEFINITION;
   readonly config = buildEmployesListingConfig(this.translate);
   readonly headerTitle = this.translate.instant('rh.employe.listing.headerTitle');
 
@@ -45,7 +52,8 @@ export class EmployeListingPage extends ConfigDrivenListingPage<Employe> {
     this.listingComponent?.onFilterChange(filters);
   }
 
-  onSmartImportComplete(): void {
+  async onSmartImportComplete(result: ReviewedExtraction): Promise<void> {
+    await this.importer.import(result.data);
     this.listingComponent?.refresh();
   }
 }

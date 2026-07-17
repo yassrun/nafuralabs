@@ -2,10 +2,15 @@ import { Injectable, inject } from '@angular/core';
 
 import type { EmployeCreate, TypeContrat } from '@applications/erp/rh/models';
 import { EmployeApiService } from '@applications/erp/pages/rh/employes/services/employe-api.service';
+import type { ExtractionDefinition } from '@platform/features/documents/smart-import';
 import { normalizeText } from '../../utils/extraction-json.utils';
 
 import { EMPLOYE_EXTRACTION_SCHEMA } from '../../extraction-schemas';
-import { ImportHandlerRegistry } from '../services/import-handler.registry';
+import {
+  extractionRows,
+  persistUniqueRows,
+  type ApplicationImportResult,
+} from '../services/application-import.util';
 
 const VALID_CONTRATS: TypeContrat[] = ['CDI', 'CDD', 'ANAPEC', 'Saisonnier', 'Interim'];
 
@@ -30,26 +35,40 @@ function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
+const schema = EMPLOYE_EXTRACTION_SCHEMA;
+const dedupeKey = (row: Record<string, unknown>): string | null => {
+  const cin = row['cin'];
+  return cin && String(cin).trim() ? String(cin).trim() : null;
+};
+
+export const EMPLOYE_IMPORT_DEFINITION: ExtractionDefinition = {
+  key: 'employe',
+  name: schema.name,
+  description: schema.description,
+  dataSchema: schema.dataSchema,
+  presentationSchema: schema.presentationSchema,
+  instructions: schema.instructions,
+  arrayPath: schema.arrayPath!,
+  dedupeKey,
+};
+
 @Injectable({ providedIn: 'root' })
-export class EmployeImportHandlerRegistrar {
-  private readonly registry = inject(ImportHandlerRegistry);
+export class EmployeImportService {
   private readonly api = inject(EmployeApiService);
 
-  constructor() {
-    this.register();
-  }
-
-  private register(): void {
-    const schema = EMPLOYE_EXTRACTION_SCHEMA;
-    this.registry.register<EmployeCreate>({
-      entityKey: 'employe',
-      dataSchema: schema.dataSchema,
-      presentationSchema: schema.presentationSchema,
-      instructions: schema.instructions,
-      schemaName: schema.name,
-      schemaDescription: schema.description,
-      arrayPath: schema.arrayPath!,
-      mapRowToPayload: (row: Record<string, unknown>) => ({
+  async import(data: Record<string, unknown>): Promise<ApplicationImportResult> {
+    const existing = await this.api.getAll();
+    const keys = new Set(
+      existing.items
+        .map((employee) => employee.cin?.trim())
+        .filter((cin): cin is string => !!cin)
+        .map(normalizeText),
+    );
+    return persistUniqueRows(
+      extractionRows(data, schema.arrayPath!),
+      keys,
+      dedupeKey,
+      (row): EmployeCreate => ({
         nom: String(row['nom'] ?? '').trim(),
         prenom: String(row['prenom'] ?? '').trim(),
         cin: String(row['cin'] ?? '').trim(),
@@ -64,21 +83,7 @@ export class EmployeImportHandlerRegistrar {
           : todayIso(),
         salaireBase: parseSalaire(row['salaireBase']),
       }),
-      create: (payload: EmployeCreate) => this.api.create(payload),
-      dedupeKey: (row: Record<string, unknown>) => {
-        const cin = row['cin'];
-        return cin && String(cin).trim() ? String(cin).trim() : null;
-      },
-      loadExistingKeys: async () => {
-        const res = await this.api.getAll();
-        const keys = new Set<string>();
-        for (const e of res.items) {
-          if (e.cin?.trim()) {
-            keys.add(normalizeText(e.cin));
-          }
-        }
-        return keys;
-      },
-    });
+      (payload) => this.api.create(payload),
+    );
   }
 }

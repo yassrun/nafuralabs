@@ -28,7 +28,13 @@ describe('SmartImportTriggerComponent', () => {
 
     fixture = TestBed.createComponent(SmartImportTriggerComponent);
     component = fixture.componentInstance;
-    component.entityKey = 'fournisseur';
+    component.definition = {
+      key: 'fournisseur',
+      name: 'Fournisseurs',
+      dataSchema: { type: 'object', properties: {} },
+      presentationSchema: { sections: [] },
+      arrayPath: 'fournisseurs',
+    };
     fixture.detectChanges();
   });
 
@@ -38,14 +44,13 @@ describe('SmartImportTriggerComponent', () => {
     expect(fixture.nativeElement.querySelector('nf-button')).not.toBeNull();
   });
 
-  it('uses the native loading state during extraction and import', () => {
+  it('uses the native loading state during extraction', () => {
     component.phase.set('EXTRACTING');
     fixture.detectChanges();
     expect(component.isBusy()).toBeTrue();
     expect(component.phaseLabel()).toBe('platform.smartImport.phase.extracting');
-
-    component.phase.set('IMPORTING');
-    expect(component.isBusy()).toBeTrue();
+    component.phase.set('REVIEWING');
+    expect(component.isBusy()).toBeFalse();
   });
 });
 

@@ -1,10 +1,9 @@
-import { Component, ElementRef, LOCALE_ID, OnDestroy, ViewChild, computed, effect, inject, signal, untracked } from '@angular/core';
+import { Component, LOCALE_ID, OnDestroy, ViewChild, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { firstValueFrom, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 
 import {
   ConfigDrivenDetailPage,
@@ -21,22 +20,20 @@ import type { DetailActionEvent, StatusTransitionEvent } from '@lib/anatomy/type
 
 import type { InventoryTx } from '../../../../../inventory/models';
 import { ReceptionLinesEditorComponent } from '../../../../../inventory/components/reception-lines-editor/reception-lines-editor.component';
-import { ErpDocScanService } from '@applications/erp/shared/services/erp-doc-scan.service';
-import type { DocScanReviewPayload } from '@applications/erp/shared/models/doc-scan.types';
 import { RECEPTION_BL_EXTRACTION_SCHEMA } from '@applications/erp/shared/extraction-schemas';
 import {
   extractLines as extractRawLines,
   findByAliases,
   findStringByAliases,
+  normalizeDate,
   normalizeText,
   toNumber,
 } from '@applications/erp/shared/utils/extraction-json.utils';
-import type { LookupEntry } from '@applications/erp/shared/models/doc-scan.types';
 import {
-  DynamicRecordDialogComponent,
-  type DynamicRecordDialogResult,
-} from '@platform/features/documents/doc-extractor/components/dynamic-record-dialog/dynamic-record-dialog.component';
-import type { ExtractionDraft } from '@platform/features/documents/doc-extractor/models/extraction.model';
+  SmartImportTriggerComponent,
+  type ExtractionDefinition,
+  type ReviewedExtraction,
+} from '@platform/features/documents/smart-import';
 import { buildReceptionDetailConfig } from '../config/detail/detail.config';
 import { ReceptionFacade } from '../services/reception.facade';
 
@@ -56,17 +53,16 @@ type TxLine = { totalPrice?: number; quantity: number; unitPrice?: number };
     IconComponent,
     ReactiveFormsModule,
     TranslateModule,
+    SmartImportTriggerComponent,
   ],
   templateUrl: './reception-detail.page.html',
   styleUrls: ['./reception-detail.page.scss'],
   styles: [ConfigDrivenDetailPageStyles],
 })
 export class ReceptionDetailPage extends ConfigDrivenDetailPage<InventoryTx> implements OnDestroy {
-  @ViewChild('blFileInput') private readonly blFileInput?: ElementRef<HTMLInputElement>;
+  @ViewChild('blExtractor') private readonly blExtractor?: SmartImportTriggerComponent;
 
   private readonly crud = inject(ReceptionFacade);
-  private readonly erpDocScan = inject(ErpDocScanService);
-  private readonly dialog = inject(MatDialog);
   private readonly activatedRoute = inject(ActivatedRoute);
   private readonly translate = inject(TranslateService);
 
@@ -101,8 +97,20 @@ export class ReceptionDetailPage extends ConfigDrivenDetailPage<InventoryTx> imp
   }
 
   readonly deliveryMode = signal<DeliveryMode>('DEPOT');
-  readonly isExtracting = signal(false);
   readonly shouldAutoScanBl = signal(this.activatedRoute.snapshot.queryParamMap.get('scanBl') === '1');
+  readonly blExtractionDefinition: ExtractionDefinition = {
+    key: 'reception-bl',
+    name: RECEPTION_BL_EXTRACTION_SCHEMA.name,
+    description: RECEPTION_BL_EXTRACTION_SCHEMA.description,
+    dataSchema: RECEPTION_BL_EXTRACTION_SCHEMA.dataSchema,
+    presentationSchema: RECEPTION_BL_EXTRACTION_SCHEMA.presentationSchema,
+    instructions: RECEPTION_BL_EXTRACTION_SCHEMA.instructions,
+    arrayPath: RECEPTION_BL_EXTRACTION_SCHEMA.arrayPath!,
+    config: {
+      acceptedExtensions: ['.pdf', '.png', '.jpg', '.jpeg', '.webp'],
+      acceptedMimeTypes: ['application/pdf', 'image/png', 'image/jpeg', 'image/webp'],
+    },
+  };
 
   readonly depotLookups = computed(() => this.getTypedLookup<{ key: string; value: string }>('locationsDepot'));
 
@@ -154,11 +162,10 @@ export class ReceptionDetailPage extends ConfigDrivenDetailPage<InventoryTx> imp
 
     queueMicrotask(() => {
       if (!this.shouldAutoScanBl()) return;
-      const input = this.blFileInput?.nativeElement;
-      if (!input) return;
+      if (!this.blExtractor) return;
 
       this.shouldAutoScanBl.set(false);
-      this.onScanBlClick(input);
+      this.blExtractor.selectFile();
     });
   });
 
@@ -252,63 +259,42 @@ export class ReceptionDetailPage extends ConfigDrivenDetailPage<InventoryTx> imp
     }
 
     if (event.actionId === 'scan_bl') {
-      const input = this.blFileInput?.nativeElement;
-      if (!input) {
+      if (!this.blExtractor) {
         this.showError(this.translate.instant('inventory.mouvement.common.scanBlOpen'));
         return;
       }
-      this.onScanBlClick(input);
+      this.blExtractor.selectFile();
       return;
     }
 
     await super.handleCustomAction(event);
   }
 
-  onScanBlClick(fileInput: HTMLInputElement): void {
-    if (this.isExtracting()) return;
-    fileInput.value = '';
-    fileInput.click();
-  }
-
-  async onBlFileSelected(event: Event): Promise<void> {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.item(0);
-    if (!file) return;
-
-    this.isExtracting.set(true);
+  onBlExtractionComplete(result: ReviewedExtraction): void {
     try {
-      const schema = RECEPTION_BL_EXTRACTION_SCHEMA;
-      const patch = await this.erpDocScan.scanAndMap<InventoryTx>({
-        file,
-        dataSchema: schema.dataSchema,
-        presentationSchema: schema.presentationSchema,
-        instructions: schema.instructions,
-        schemaName: schema.name,
-        schemaDescription: schema.description,
-        review: (payload) => this.reviewExtractedBl(payload),
-        lookups: () => this.crud.lookups() as Record<string, LookupEntry[]>,
-        mapper: (data, ctx) => {
-          const fournisseurName = ctx.findStringByAliases(data, [
-            'supplierName',
-            'supplier',
-            'fournisseur',
-            'vendor',
-            'vendorName',
-          ]);
-          const fournisseurId = ctx.resolveLookupId('fournisseursLookup', fournisseurName);
+      const data = result.data;
+      const fournisseurName =
+        findStringByAliases(data, [
+          'supplierName',
+          'supplier',
+          'fournisseur',
+          'vendor',
+          'vendorName',
+        ]) ?? findStringByAliases(data['sender'], ['name']);
+      const fournisseurId = this.resolveLookupId('fournisseursLookup', fournisseurName);
 
-          const chantierName = ctx.findStringByAliases(data, [
+      const chantierName = findStringByAliases(data, [
             'chantier',
             'site',
             'project',
             'destinationSite',
           ]);
-          const chantierLocationId = ctx.resolveLookupId('chantiersLookup', chantierName);
+      const chantierLocationId = this.resolveLookupId('chantiersLookup', chantierName);
 
-          const phase = ctx.findStringByAliases(data, ['phaseRef', 'phase']);
-          const phaseRef = this.resolvePhase(phase);
+      const phase = findStringByAliases(data, ['phaseRef', 'phase']);
+      const phaseRef = this.resolvePhase(phase);
 
-          const reference = ctx.findStringByAliases(data, [
+      const reference = findStringByAliases(data, [
             'blReference',
             'transferReference',
             'reference',
@@ -317,88 +303,35 @@ export class ReceptionDetailPage extends ConfigDrivenDetailPage<InventoryTx> imp
             'number',
           ]);
 
-          const txDateRaw = ctx.findStringByAliases(data, [
+      const txDateRaw = findStringByAliases(data, [
             'txDate',
             'documentDate',
             'date',
             'blDate',
             'deliveryDate',
           ]);
-          const txDate = ctx.normalizeDate(txDateRaw);
+      const txDate = normalizeDate(txDateRaw);
 
-          const lines = this.extractLines(data);
+      const lines = this.extractLines(data);
 
-          const mappedPatch: Partial<InventoryTx> = {};
-          if (fournisseurId) mappedPatch.fournisseurId = fournisseurId;
-          if (reference) mappedPatch.reference = reference;
-          if (txDate) mappedPatch.txDate = txDate;
-          if (phaseRef) mappedPatch.phaseRef = phaseRef;
-          if (lines.length > 0) mappedPatch.lines = lines;
+      const mappedPatch: Partial<InventoryTx> = {};
+      if (fournisseurId) mappedPatch.fournisseurId = fournisseurId;
+      if (reference) mappedPatch.reference = reference;
+      if (txDate) mappedPatch.txDate = txDate;
+      if (phaseRef) mappedPatch.phaseRef = phaseRef;
+      if (lines.length > 0) mappedPatch.lines = lines;
 
-          if (chantierLocationId) {
-            mappedPatch.chantierLocationId = chantierLocationId;
-            mappedPatch.destLocationId = null as unknown as string;
-            this.deliveryMode.set('CHANTIER_DIRECT');
-          }
+      if (chantierLocationId) {
+        mappedPatch.chantierLocationId = chantierLocationId;
+        mappedPatch.destLocationId = null as unknown as string;
+        this.deliveryMode.set('CHANTIER_DIRECT');
+      }
 
-          return mappedPatch;
-        },
-      });
-
-      this.applyScanPatch(patch);
+      this.applyScanPatch(mappedPatch);
       this.showSuccess(this.translate.instant('inventory.mouvement.common.scanBlSuccess'));
-    } catch (err) {
-      const message = (err as Error).message;
-      if (message === 'ERP_DOC_SCAN_REVIEW_CANCELLED') {
-        return;
-      }
-      if (message === 'ERP_DOC_SCAN_TENANT_MISSING') {
-        this.showError(this.translate.instant('inventory.mouvement.common.tenantMissing'));
-        return;
-      }
-      if (message === 'ERP_DOC_SCAN_FAILED') {
-        this.showError(this.translate.instant('inventory.mouvement.common.scanBlFailed'));
-        return;
-      }
+    } catch {
       this.showError(this.translate.instant('inventory.mouvement.common.scanBlImpossible'));
-    } finally {
-      input.value = '';
-      this.isExtracting.set(false);
     }
-  }
-
-  private async reviewExtractedBl(
-    payload: DocScanReviewPayload,
-  ): Promise<Record<string, unknown> | undefined> {
-    const draft: ExtractionDraft = {
-      draftId: payload.requestId ?? `stateless-${Date.now()}`,
-      domainKey: payload.definition.domainKey,
-      docTypeKey: payload.definition.docTypeKey,
-      docTypeVersion: payload.definition.version,
-      dataJson: payload.data,
-      status: 'draft',
-    };
-    const ref = this.dialog.open<
-      DynamicRecordDialogComponent,
-      unknown,
-      DynamicRecordDialogResult | undefined
-    >(DynamicRecordDialogComponent, {
-      width: '1100px',
-      maxWidth: '98vw',
-      maxHeight: '98vh',
-      disableClose: true,
-      data: {
-        definition: payload.definition,
-        lockedDocTypeVersion: payload.definition.version,
-        mode: 'create',
-        draft,
-        persistOnValidate: false,
-        initialValidation: payload.validation,
-      },
-      panelClass: 'editor-dialog-panel',
-      position: { top: '2vh' },
-    });
-    return (await firstValueFrom(ref.afterClosed()))?.dataJson;
   }
 
   private applyScanPatch(patch: Partial<InventoryTx>): void {
@@ -417,6 +350,15 @@ export class ReceptionDetailPage extends ConfigDrivenDetailPage<InventoryTx> imp
     const entries = this.phaseLookups();
     const normalized = normalizeText(phase);
     return entries.find((entry) => normalizeText(entry.value).includes(normalized))?.key;
+  }
+
+  private resolveLookupId(lookupKey: string, label?: string): string | undefined {
+    if (!label) return undefined;
+    const normalized = normalizeText(label);
+    return this.getTypedLookup<{ key: string; value: string }>(lookupKey).find((entry) => {
+      const entryLabel = normalizeText(entry.value);
+      return entryLabel.includes(normalized) || normalized.includes(entryLabel);
+    })?.key;
   }
 
   private extractLines(data: Record<string, unknown>): InventoryTx['lines'] {

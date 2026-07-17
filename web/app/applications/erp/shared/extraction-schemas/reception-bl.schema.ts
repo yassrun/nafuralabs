@@ -4,6 +4,7 @@ import type { ExtractionSchemaBundle } from './extraction-schema.types';
 export const RECEPTION_BL_EXTRACTION_SCHEMA: ExtractionSchemaBundle = {
   name: 'Bon de livraison',
   description: 'Delivery note: header + parties + line items for reception form fill.',
+  arrayPath: 'items',
   instructions: `You are a document extraction assistant. Extract data for a Bon de Livraison (BL).
 Return ONLY valid JSON that matches the provided JSON Schema.
 
@@ -54,6 +55,7 @@ CRITICAL INSTRUCTIONS:
   },
   presentationSchema: {
     importPolicy: 'PARTIAL',
+    rootView: 'RECORD_TABLE',
     sections: [
       {
         title: 'Header',
