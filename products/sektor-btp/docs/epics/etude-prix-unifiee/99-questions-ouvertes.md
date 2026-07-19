@@ -38,6 +38,65 @@ masse, cf. T6.2) plutôt que pour une constante d'entreprise.
 
 ---
 
+## Q16 — Taux réels : FG 10-13 %, marge 15-20 % ✅ obtenus 2026-07-19, une confirmation restante
+
+**Réponse de l'expert métier** : « Théoriquement on est plutôt sur **10 à 13 % de frais
+généraux**, notre **marge est rajoutée indépendamment pour constituer le prix de vente** et est
+de l'ordre de **15 à 20 %**. »
+
+**Ce que ça corrige** : les 8 % / 7 % du socle généré étaient faux, et sous-estimaient
+nettement. Repli mis à jour au milieu de fourchette (11,5 % / 17,5 %), bornes documentées dans
+`ParametresEtudeService`.
+
+**Ce que ça confirme** : ce sont des **fourchettes**, pas des taux. Combiné à Q14 (marge par
+article, variable), ça enterre définitivement l'idée d'une constante d'entreprise.
+
+**Ce qui reste à confirmer** — « rajoutée indépendamment » se lit encore de deux façons :
+
+| Lecture | Calcul sur 1 000 de déboursé, FG 11,5 %, marge 17,5 % | Total |
+|---|---|---|
+| **A — composée** (implémentée) | 1 000 × 1,115 = 1 115, puis × 1,175 | **1 310,13** |
+| **B — additive** | 1 000 × (1 + 0,115 + 0,175) | **1 290,00** |
+
+Écart 1,6 % — environ **160 000 DH sur une étude à 10 MDH**.
+
+La lecture A correspond à « la marge constitue le prix de vente **à partir du** coût de
+revient », et c'est ce qu'implémente `DpuCalculator`. Confirmation demandée en section H de
+[`FICHE-RENDEMENTS.md`](FICHE-RENDEMENTS.md).
+
+---
+
+## Q17 — Unité de facturation variable, dont le forfait 🟠 lot 3 / lot 4
+
+**Réponse de l'expert métier** : « des fois la facturation de l'article se fait en m2 ou en m3
+ou même des fois en **ensemble** ».
+
+Le cas **ensemble / forfait** est structurellement différent : pas de rendement par unité,
+l'ouvrage est un bloc. Le modèle le supporte (quantité = 1, unité = `ENS`), mais l'ergonomie de
+décomposition n'a pas de sens telle quelle.
+
+À préciser (section G1 de la fiche) : quelle part des articles, et décompose-t-on quand même en
+interne pour connaître le déboursé ?
+
+---
+
+## Q18 — Le descriptif technique définit la composition 🟠 lot 4
+
+**Réponse de l'expert métier** : « Pour l'acier, le béton, le coffrage ou autres composants de
+nos articles exécutés, tout se trouve généralement sur le **descriptif technique** : qu'est-ce
+qui rentre dans le cadre de notre marché, comment il est exécuté et facturé, et même en quelle
+unité. »
+
+**Conséquence forte** : la composition d'un article n'est pas une règle générale, elle est
+**dictée par le CPS du marché en cours**. Un même libellé peut donc avoir des compositions
+différentes d'un marché à l'autre.
+
+Ça renforce l'étape 2 (descriptifs) : elle n'est pas décorative, elle conditionne l'étape 3.
+Et ça pose une question sur la bibliothèque : quand on réutilise un ouvrage type, faut-il
+**systématiquement** le reconfronter au descriptif du marché ? Voir section G2 de la fiche.
+
+---
+
 ## Q15 — Y a-t-il une marge globale en plus des marges par article ? 🟠 lot 6
 
 **Ce qu'on sait** (expert métier, 2026-07-19) : marge **par article** en pourcentage, et

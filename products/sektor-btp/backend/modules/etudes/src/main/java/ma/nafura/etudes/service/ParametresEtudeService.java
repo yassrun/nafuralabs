@@ -13,26 +13,33 @@ import org.springframework.stereotype.Service;
 public class ParametresEtudeService {
 
     /**
-     * REPLI ARBITRAIRE — NON VALIDÉ MÉTIER.
+     * Frais généraux — repli, milieu de la fourchette métier.
      *
-     * Ce 8 % provient du socle généré (il était codé en dur dans {@code PrixDpu} et
-     * {@code ConsultationNoeud}), pas d'un arbitrage de l'expert métier. Il n'a aucune
-     * autorité. Les frais généraux varient par entreprise, et vraisemblablement par
-     * affaire.
+     * L'expert métier indique <b>10 à 13 %</b> (2026-07-19). Le 8 % qui figurait ici venait
+     * du socle généré et n'avait aucune autorité ; il sous-estimait la réalité.
      *
-     * Ce repli n'existe que pour qu'un tenant non configuré ne produise pas de division
-     * par null. Tout tenant réel doit poser sa valeur via {@link #KEY_FG}.
+     * C'est une <b>fourchette</b>, pas un taux : la valeur exacte se pose par affaire, voire
+     * par article. Ce repli n'existe que pour qu'un tenant non configuré parte d'un ordre de
+     * grandeur crédible. Tout tenant réel pose sa valeur via {@link #KEY_FG}.
      */
-    public static final BigDecimal DEFAULT_FRAIS_GENERAUX_PERCENT = new BigDecimal("8");
+    public static final BigDecimal DEFAULT_FRAIS_GENERAUX_PERCENT = new BigDecimal("11.5");
+
+    public static final BigDecimal FRAIS_GENERAUX_MIN = new BigDecimal("10");
+    public static final BigDecimal FRAIS_GENERAUX_MAX = new BigDecimal("13");
 
     /**
-     * REPLI ARBITRAIRE — NON VALIDÉ MÉTIER.
+     * Marge bénéficiaire — repli, milieu de la fourchette métier.
      *
-     * Même origine que ci-dessus. Indice que ces valeurs ne veulent rien dire : le socle
-     * portait 7 % dans {@code etudes} et 0 % dans {@code consultation} pour la même notion.
-     * La marge est une décision commerciale par affaire, pas une constante.
+     * L'expert métier indique <b>15 à 20 %</b>, « rajoutée indépendamment pour constituer le
+     * prix de vente » — soit appliquée au coût de revient (déboursé + FG), ce que fait déjà
+     * {@link DpuCalculator#computePrixVenteHt}. Le 7 % précédent venait du socle généré.
+     *
+     * Fourchette large et assumée : la marge est une décision commerciale par article.
      */
-    public static final BigDecimal DEFAULT_MARGE_PERCENT = new BigDecimal("7");
+    public static final BigDecimal DEFAULT_MARGE_PERCENT = new BigDecimal("17.5");
+
+    public static final BigDecimal MARGE_MIN = new BigDecimal("15");
+    public static final BigDecimal MARGE_MAX = new BigDecimal("20");
 
     /** Taux de TVA de droit commun au Maroc — celui-ci est une donnée réglementaire. */
     public static final BigDecimal DEFAULT_TVA_TAUX = new BigDecimal("20");

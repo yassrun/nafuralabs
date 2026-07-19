@@ -43,6 +43,44 @@ Rattachement direct à un article du catalogue `item`.
 L'en-tête rappelle l'unité de l'ouvrage : « Rendement par **m³** ». Le total est libellé
 « Déboursé sec **par m³** ».
 
+#### La main d'œuvre ne se saisit pas comme les matériaux *(expert métier, 2026-07-19)*
+
+> « Pour les rendements tout dépend des équipes ; avec l'expérience on commence à avoir des
+> **rendements journaliers** plus ajustés. »
+
+Le chiffreur ne connaît pas « 1,5 h de maçon par m³ ». Il connaît « **une équipe de 4 fait
+40 m² par jour** ». Lui demander des heures par unité, c'est lui demander de faire une division
+de tête à chaque ligne — et c'est là qu'on introduit des erreurs.
+
+**Saisie attendue pour un composant MAIN_DOEUVRE :**
+
+| Champ | Exemple |
+|---|---|
+| Effectif de l'équipe | 4 |
+| Production journalière | 40 m² |
+| Base horaire journalière | 8 h *(paramètre tenant)* |
+
+**Dérivation, faite par l'outil :**
+
+```
+rendement (h/unité) = (effectif × heures_jour) ÷ production_journalière
+                    = (4 × 8) ÷ 40 = 0,80 h/m²
+```
+
+Le champ `rendement` de `ComposantDpu` reste la vérité stockée — c'est lui qui entre dans le
+calcul. Les trois champs de saisie sont **persistés en plus**, parce qu'ils portent le
+raisonnement : sans eux, personne ne peut relire un rendement de 0,80 et savoir d'où il sort,
+ni le corriger quand l'équipe change.
+
+```sql
+ALTER TABLE composants_dpu
+  ADD COLUMN equipe_effectif        INT,
+  ADD COLUMN production_journaliere NUMERIC(18,4);
+```
+
+Les deux restent `NULL` pour les matériaux et le matériel. Quand ils sont renseignés,
+l'interface affiche la saisie d'origine et le rendement dérivé côte à côte.
+
 C'est l'ambiguïté de vocabulaire qui a produit le bug d'origine. L'UI doit la rendre impossible.
 
 Types de composants (`ComposantDpu.TYPE_*`, déjà définis) : `MATIERE`, `MAIN_DOEUVRE`, `MATERIEL`,
