@@ -1,7 +1,7 @@
 # Epic — Étude de prix unifiée
 
-**Statut** : conception
-**Périmètre** : `products/sektor-btp/backend/modules/{etudes,consultation}`, `products/sektor-btp/web/app/pages/etudes/`
+**Statut** : lots 9, 1, 8, 2 (backend) et 3 livrés — voir `00-PROGRESS.md`
+**Périmètre** : `products/sektor-btp/backend/modules/{etudes,item,achats}`, `products/sektor-btp/web/app/pages/etudes/`
 **Objectif** : unifier les modules `consultation` et `etudes` en un parcours d'étude de prix unique, verrouillé manuellement, prêt à recevoir l'assistance IA.
 
 ---
@@ -31,10 +31,10 @@ Origine : le socle a été généré sans validation métier ; `consultation` es
 
 ```
 Marché entrant (CPS + bordereau)
-   → 1. Bordereau structuré      (Dpgf + DpgfNoeud)
-   → 2. Descriptifs depuis CPS   (DpgfNoeud.descriptif)
-   → 3. Décomposition            (PrixDpu + ComposantDpu, rendements)
-   → 4. Consultation fournisseurs (nouveau — remplit les prix unitaires)
+   → 1. Documents du marché      (DossierDocument + CpsDocument + CpsSection indexées)
+   → 2. Bordereau structuré      (Dpgf + DpgfNoeud)
+   → 3. Décomposition            (PrixDpu + ComposantDpu ; le CPS est interrogé ICI)
+   → 4. Consultation fournisseurs (branchée sur achats — remplit les prix unitaires)
    → 5. Chiffrage                (FG + marge + TVA → PU)
    → Validation N+1              (module approbations)
    → Devis                       (etudes/Devis)
@@ -53,7 +53,7 @@ Marché entrant (CPS + bordereau)
 | 09 | [Référentiel articles & prix](09-referentiel-articles-prix.md) | **À exécuter en premier** — `item`, `achats`, résolution de prix |
 | 01 | [Fusion du modèle](01-fusion-modele.md) | Supprimer le doublon, migrer vers `etudes` |
 | 02 | [Dossier d'étude & wizard](02-dossier-etude-wizard.md) | L'agrégat orchestrateur, machine à états |
-| 03 | [Import non destructif](03-import-bordereau-cps.md) | Bordereau + enrichissement CPS |
+| 03 | [Documents & CPS indexé](03-import-bordereau-cps.md) | Dépôt des pièces, découpage du CPS, recherche par article |
 | 04 | [Décomposition & bibliothèque](04-decomposition-bibliotheque.md) | Rendements, ouvrages composites, capitalisation |
 | 05 | [Branchement sur `achats`](05-consultation-fournisseurs.md) | Appel d'offres, comparatif, report des prix |
 | 06 | [Chiffrage & validation](06-chiffrage-validation.md) | FG/marge/TVA, approbations |
@@ -103,11 +103,10 @@ Marché entrant (CPS + bordereau)
 1. **Ne jamais réintroduire d'entité `Consultation*` de données.** Le modèle de données vit dans `etudes`.
 2. **`rendement` = par unité d'ouvrage.** Toute quantité de composant est un rendement. Voir `01-fusion-modele.md` §Invariant de prix.
 3. Respecter `docs/AGENTS.md` : métier sous `products/sektor-btp/`, jamais dans `platform/`.
-4. **Front — attention, le doc et la réalité divergent.** `docs/AGENTS.md:183` désigne
-   `products/sektor-btp/web/app/` comme source, mais **la configuration de build ne compile que
-   `web/app/applications/erp/`** (`web/tsconfig.app.json` → `include: ["app/**/*.ts"]`).
-   Tant que le chantier de réconciliation (Q5) n'a pas eu lieu, **tout code front doit être écrit
-   dans `web/app/applications/erp/`**, sinon il ne partira jamais en production.
+4. **Front — le chantier `front-ownership` est terminé.** Le code Sektor vit désormais dans
+   `products/sektor-btp/web/app/` (alias `@app/*`), la plateforme dans `platform/web/`
+   (`@core`, `@lib`, `@platform`). `web/` n'existe plus. **La plateforme n'importe jamais une
+   application** — règle ESLint dans `products/sektor-btp/web/.eslintrc.json`.
 5. Toute modification SQL passe par un changelog Liquibase versionné + `release-backend`.
 5bis. **Sektor est multi-tenant.** Une pratique observée chez un tenant s'ajoute comme
    **capacité optionnelle** (champ nullable, défaut neutre), jamais comme contrainte. Ses
