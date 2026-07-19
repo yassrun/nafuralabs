@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 public class ParametresEtudeService {
 
     /**
-     * ⚠️ REPLI ARBITRAIRE — NON VALIDÉ MÉTIER.
+     * REPLI ARBITRAIRE — NON VALIDÉ MÉTIER.
      *
      * Ce 8 % provient du socle généré (il était codé en dur dans {@code PrixDpu} et
      * {@code ConsultationNoeud}), pas d'un arbitrage de l'expert métier. Il n'a aucune
@@ -26,7 +26,7 @@ public class ParametresEtudeService {
     public static final BigDecimal DEFAULT_FRAIS_GENERAUX_PERCENT = new BigDecimal("8");
 
     /**
-     * ⚠️ REPLI ARBITRAIRE — NON VALIDÉ MÉTIER.
+     * REPLI ARBITRAIRE — NON VALIDÉ MÉTIER.
      *
      * Même origine que ci-dessus. Indice que ces valeurs ne veulent rien dire : le socle
      * portait 7 % dans {@code etudes} et 0 % dans {@code consultation} pour la même notion.
@@ -41,6 +41,7 @@ public class ParametresEtudeService {
     public static final String KEY_MARGE = "etudes.margePercentDefaut";
     public static final String KEY_TVA = "etudes.tvaTauxDefaut";
     public static final String KEY_BASE_PRIX = "etudes.basePrixChiffrage";
+    public static final String KEY_AUTEUR_PEUT_VALIDER = "etudes.auteurPeutValider";
 
     private final TenantSettingReader tenantSettingReader;
 
@@ -64,6 +65,21 @@ public class ParametresEtudeService {
         return tenantSettingReader
                 .findValue(tenantIdOrNull(), KEY_BASE_PRIX)
                 .orElse(ma.nafura.item.domain.BasePrixChiffrage.MARCHE);
+    }
+
+    /**
+     * L'auteur d'une étude peut-il la valider lui-même ?
+     *
+     * <p>Faux par défaut, volontairement. {@code ConsultationService.validate()} n'avait
+     * aucun contrôle : même permission que le rédacteur, et aucune vérification du statut de
+     * départ. Une petite structure peut lever la règle via ce paramètre, mais elle doit le
+     * faire explicitement.
+     */
+    public boolean auteurPeutValider() {
+        return tenantSettingReader
+                .findValue(tenantIdOrNull(), KEY_AUTEUR_PEUT_VALIDER)
+                .map(Boolean::parseBoolean)
+                .orElse(false);
     }
 
     private BigDecimal decimalOr(String key, BigDecimal fallback) {

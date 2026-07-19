@@ -22,7 +22,7 @@ class DPUCalculatorTest {
         calculator = new DpuCalculator();
     }
 
-    // ⚠️ TOUS CES NOMBRES SONT INVENTÉS — aucun n'a été validé par l'expert métier.
+    // TOUS CES NOMBRES SONT INVENTÉS — aucun n'a été validé par l'expert métier.
     //
     // Ils forment un jeu arithmétiquement cohérent, rien de plus. FG=8 et MARGE=7 en
     // particulier proviennent du socle généré, pas d'un arbitrage : ce ne sont PAS les
