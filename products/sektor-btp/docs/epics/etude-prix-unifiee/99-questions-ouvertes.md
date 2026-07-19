@@ -21,8 +21,20 @@ génie civil / chef de projet, pas par l'agent d'implémentation.
 Le stockage reste par article ; l'héritage n'est qu'une commodité de saisie. Un article modifié
 individuellement conserve sa valeur.
 
-**À corriger** : incohérence de défaut — marge à 7 % dans `etudes`, 0 % dans `consultation`.
-Valeur retenue à confirmer au moment du lot 9 (paramètres tenant).
+**⚠️ Correction 2026-07-19 — les taux « 8 % / 7 % » n'ont aucune autorité métier.**
+
+Ils viennent du socle généré (codés en dur dans `PrixDpu` et `ConsultationNoeud`), pas de
+l'expert métier, qui ne les a jamais prononcés. Indice qu'ils ne veulent rien dire : le socle
+portait **7 % dans `etudes` et 0 % dans `consultation`** pour la même notion.
+
+Ils survivent dans le code uniquement comme repli technique, explicitement marqué tel dans
+`ParametresEtudeService`, pour qu'un tenant non configuré ne casse pas. **Aucun tenant réel ne
+doit s'en servir.**
+
+Reste donc ouvert : **quelles sont les valeurs réelles, et à quel point varient-elles ?**
+L'expert métier indique qu'elles sont vraisemblablement variables — ce qui, combiné à la
+décision « par article », plaide pour une saisie assistée (défaut d'étude + application en
+masse, cf. T6.2) plutôt que pour une constante d'entreprise.
 
 ---
 

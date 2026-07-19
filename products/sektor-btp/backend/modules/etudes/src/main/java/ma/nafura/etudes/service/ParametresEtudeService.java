@@ -12,12 +12,29 @@ import org.springframework.stereotype.Service;
 @Service
 public class ParametresEtudeService {
 
-    /** Repli FG % — unique endroit autorisé pour cette valeur métier. */
+    /**
+     * ⚠️ REPLI ARBITRAIRE — NON VALIDÉ MÉTIER.
+     *
+     * Ce 8 % provient du socle généré (il était codé en dur dans {@code PrixDpu} et
+     * {@code ConsultationNoeud}), pas d'un arbitrage de l'expert métier. Il n'a aucune
+     * autorité. Les frais généraux varient par entreprise, et vraisemblablement par
+     * affaire.
+     *
+     * Ce repli n'existe que pour qu'un tenant non configuré ne produise pas de division
+     * par null. Tout tenant réel doit poser sa valeur via {@link #KEY_FG}.
+     */
     public static final BigDecimal DEFAULT_FRAIS_GENERAUX_PERCENT = new BigDecimal("8");
 
-    /** Repli marge % (valeur etudes ; consultation avait 0 — tranché côté etudes). */
+    /**
+     * ⚠️ REPLI ARBITRAIRE — NON VALIDÉ MÉTIER.
+     *
+     * Même origine que ci-dessus. Indice que ces valeurs ne veulent rien dire : le socle
+     * portait 7 % dans {@code etudes} et 0 % dans {@code consultation} pour la même notion.
+     * La marge est une décision commerciale par affaire, pas une constante.
+     */
     public static final BigDecimal DEFAULT_MARGE_PERCENT = new BigDecimal("7");
 
+    /** Taux de TVA de droit commun au Maroc — celui-ci est une donnée réglementaire. */
     public static final BigDecimal DEFAULT_TVA_TAUX = new BigDecimal("20");
 
     public static final String KEY_FG = "etudes.fraisGenerauxPercentDefaut";

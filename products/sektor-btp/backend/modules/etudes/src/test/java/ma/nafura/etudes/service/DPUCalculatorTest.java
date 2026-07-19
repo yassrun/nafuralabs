@@ -22,8 +22,18 @@ class DPUCalculatorTest {
         calculator = new DpuCalculator();
     }
 
-    // TODO(metier): valeurs d'illustration, à remplacer par le sous-détail B35 réel.
-    // La STRUCTURE du test est définitive ; seuls les nombres changeront.
+    // ⚠️ TOUS CES NOMBRES SONT INVENTÉS — aucun n'a été validé par l'expert métier.
+    //
+    // Ils forment un jeu arithmétiquement cohérent, rien de plus. FG=8 et MARGE=7 en
+    // particulier proviennent du socle généré, pas d'un arbitrage : ce ne sont PAS les
+    // taux de l'entreprise, et ces taux sont vraisemblablement variables par affaire.
+    //
+    // Ce que ces tests verrouillent, c'est la STRUCTURE du calcul — déboursé unitaire,
+    // ordre des étages, quantité du bordereau appliquée une seule fois. Cette structure
+    // est définitive ; les nombres seront remplacés par le sous-détail B35 réel sans
+    // toucher aux assertions de structure.
+    //
+    // TODO(metier): remplacer par le sous-détail B35 fourni par l'expert métier.
     private static final BigDecimal CIMENT_REND = new BigDecimal("350");
     private static final BigDecimal CIMENT_PU = new BigDecimal("1.20");
     private static final BigDecimal SABLE_REND = new BigDecimal("0.4");
