@@ -48,6 +48,20 @@ C'est l'ambiguïté de vocabulaire qui a produit le bug d'origine. L'UI doit la 
 Types de composants (`ComposantDpu.TYPE_*`, déjà définis) : `MATIERE`, `MAIN_DOEUVRE`, `MATERIEL`,
 `SOUS_TRAITANCE`.
 
+### T4.0 — Ce qui existe déjà côté import bibliothèque *(constat 2026-07-19)*
+
+`web/app/applications/erp/shared/smart-import/handlers/ouvrage-import.handler.ts` et
+`shared/extraction-schemas/ouvrage.schema.ts` permettent **déjà** d'importer des ouvrages en
+masse via le framework `smart-import` (schéma + instructions LLM + revue avant persistance).
+
+Limite actuelle, écrite dans le schéma lui-même : *« Bulk import of price-library ouvrages
+(**header only**) »*. Le handler crée l'ouvrage avec `composants: []`, `prixUnitaireHt: 0`,
+`uniteMain` à zéro.
+
+**Donc l'en-tête s'importe, la décomposition non.** C'est précisément ce que ce lot doit
+compléter — étendre le schéma et le handler existants aux composants et à leurs **rendements**,
+pas créer un second chemin d'import.
+
 ### T4.2 — Instanciation depuis la bibliothèque
 
 Bouton « Reprendre un ouvrage type » sur un article :

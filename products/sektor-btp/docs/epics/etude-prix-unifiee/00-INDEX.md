@@ -90,10 +90,15 @@ Marché entrant (CPS + bordereau)
 
 ## Règles pour l'agent d'implémentation
 
-0. **Avant de créer une entité ou un module, recenser l'existant** dans `item`, `achats`, `stock`,
-   `partner`, `currency`, `marches`, `chantiers`, `etudes`. Ce dépôt a déjà produit **deux**
-   doublons majeurs (`consultation` vs `etudes` ; une première version du lot 5 recréait
-   `AppelOffreAchat`). En cas de doute, demander plutôt que créer.
+0. **Avant de créer quoi que ce soit, recenser l'existant.**
+   Backend : `item`, `achats`, `stock`, `partner`, `currency`, `marches`, `chantiers`, `etudes`.
+   Front : `platform/features/documents/smart-import` (import piloté par schéma, déjà branché
+   IA), `shared/extraction-schemas`, `shared/smart-import/handlers`, `platform/lib/anatomy`.
+
+   Ce dépôt a déjà produit **trois** faux départs de ce type : `consultation` réécrivant
+   `etudes` ; une première version du lot 5 recréant `AppelOffreAchat` ; et un parseur XLSX
+   maison (`bpde-lot-import.util.ts`) supplanté par `smart-import`.
+   En cas de doute, demander plutôt que créer.
 1. **Ne jamais réintroduire d'entité `Consultation*` de données.** Le modèle de données vit dans `etudes`.
 2. **`rendement` = par unité d'ouvrage.** Toute quantité de composant est un rendement. Voir `01-fusion-modele.md` §Invariant de prix.
 3. Respecter `docs/AGENTS.md` : métier sous `products/sektor-btp/`, jamais dans `platform/`.

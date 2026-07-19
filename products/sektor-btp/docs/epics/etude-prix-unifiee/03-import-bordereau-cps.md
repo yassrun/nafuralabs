@@ -111,20 +111,50 @@ descriptifs vides ignorés pour ne pas écraser). La reprendre telle quelle, ave
 - ne pas écraser un descriptif **saisi manuellement** sans confirmation
 - tracer la provenance : `descriptif_source VARCHAR(20)` — `CPS` | `MANUEL` | `BIBLIOTHEQUE`
 
-### T3.5 — Import Excel natif
+### T3.5 — Import du bordereau : réutiliser `smart-import` *(corrigé 2026-07-19)*
 
-L'extraction IA viendra plus tard, mais un import Excel déterministe est indispensable dès
-maintenant — c'est le format réel des bordereaux reçus.
+> ⚠️ **Ne pas écrire de parseur.** Le framework existe déjà et il est mûr.
 
-- Upload `.xlsx` / `.xls`
-- Écran de mapping de colonnes (code / désignation / unité / quantité), avec détection des en-têtes
-  et mémorisation du mapping par tenant
-- Déduction de la hiérarchie : par indentation, par numérotation (`1` → `1.1` → `1.1.3`), ou par
-  colonne de niveau explicite
-- Prévisualisation avant application, puis passage par le même diff que T3.1
+`web/app/platform/features/documents/smart-import/` est un mécanisme d'import **piloté par
+schéma**, avec composants de déclenchement, revue, édition et tables (plates, arborescentes,
+par enregistrement). Il est **déjà branché sur l'extraction IA** : chaque schéma porte ses
+`instructions` LLM.
 
-C'est un chemin **non-IA** qui doit fonctionner seul. L'implémentation `BordereauExtractionPort` par
-IA viendra en complément pour les PDF, pas en remplacement.
+Handlers applicatifs déjà livrés dans `web/app/applications/erp/shared/smart-import/handlers/` :
+`article`, `client`, `employe`, `fournisseur`, `lot-chantier`, **`ouvrage`**, `reception-bl`.
+
+Un import se déclare en deux fichiers :
+
+```ts
+// shared/extraction-schemas/dpgf.schema.ts
+export const DPGF_EXTRACTION_SCHEMA = {
+  name: 'Import bordereau',
+  description: '...',
+  arrayPath: 'lignes',
+  instructions: `You are a document extraction assistant. ...`,
+  dataSchema, presentationSchema,
+};
+
+// shared/smart-import/handlers/dpgf-import.handler.ts
+export const DPGF_IMPORT_DEFINITION: ExtractionDefinition = { key: 'dpgf', ..., dedupeKey };
+
+@Injectable({ providedIn: 'root' })
+export class DpgfImportService {
+  async import(data: Record<string, unknown>): Promise<ApplicationImportResult> { ... }
+}
+```
+
+Prendre `lot-chantier-import.handler.ts` comme modèle : c'est le plus proche du besoin
+(hiérarchie lots → postes), et il a un `.spec.ts`.
+
+**Le point d'attention** : `DpgfImportService.import()` ne doit **pas** persister directement.
+Il doit alimenter le diff de T3.1 (`/bordereau/analyser`), pour que la réconciliation
+non destructive s'applique aussi à l'import IA. C'est la seule adaptation à faire au motif
+existant.
+
+> **Conséquence sur `BordereauExtractionPort`** (backend, NoOp) : l'extraction se fait
+> côté client via `smart-import` + `doc-extractor`. Vérifier si le port backend a encore une
+> raison d'être avant de l'implémenter — il pourrait être un troisième doublon.
 
 ---
 

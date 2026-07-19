@@ -92,8 +92,28 @@ Pas d’overlay K8s `dev`. Env `demo` (GKE) : **deprecated**.
 
 Layali / Beauty : `products/*/mobile/` — hors K8s pour l’instant.
 
-Gradle Sektor : `:sektor:app`, `:sektor:<module>`.  
-Frontend : `@platform/*` → `platform/web`, `@applications/*` → `products/sektor-btp/web/app`.
+Gradle Sektor : `:sektor:app`, `:sektor:<module>`.
+
+⚠️ **Frontend — le code vivant est `web/app/`, pas `platform/web/` ni `products/sektor-btp/web/app/`.**
+
+Ce que le build compile réellement (`web/angular.json` → `web/tsconfig.app.json` →
+`include: ["app/**/*.ts"]`) :
+
+| Alias | Cible réelle | État |
+|-------|--------------|------|
+| `@core/*`, `@lib/*`, `@platform/*` | `web/app/platform/` | ✅ compilé |
+| `@applications/*` | `web/app/applications/erp/` | ✅ compilé |
+| `@features/*`, `@services/*` | `platform/web/features/` | ❌ **0 import — mort** |
+| — | `products/sektor-btp/web/app/` | ❌ **mort** (hors glob) |
+
+Les deux répertoires longtemps documentés comme sources canoniques sont du **code mort**, et
+ont divergé de l'arbre vivant. Écrire dedans = code jamais déployé.
+
+**Chantier de réconciliation en cours** :
+[`products/sektor-btp/docs/epics/front-ownership/`](../products/sektor-btp/docs/epics/front-ownership/00-REVUE-ARCHI.md).
+Cible : Sektor possède son front sous `products/sektor-btp/web/`, dépendance à sens unique
+application → plateforme, `web/` disparaît. **Jusqu'à la phase 3 de ce chantier, tout code front
+s'écrit dans `web/app/`.**
 
 ---
 
@@ -180,7 +200,8 @@ Arbre de décision complet : [toolchain/ops/AGENTS.md](../toolchain/ops/AGENTS.m
 | Deploy backend sans `migrate` après changement SQL | CrashLoop |
 | Métier BTP dans `platform/` | Architecture |
 | Overlay K8s `dev` | Seulement staging + prod |
-| Dupliquer ERP sous `web/app/applications/` | Source = `products/sektor-btp/web/app/` |
+| Écrire du front dans `platform/web/` ou `products/sektor-btp/web/app/` | **Arbres morts, gelés** — non compilés. Source vivante = `web/app/` jusqu'à la fin du chantier `front-ownership` |
+| Importer `@applications/*` depuis `web/app/platform/` | Dépendance inversée — la plateforme ne doit jamais dépendre d'une application (23 occurrences à résorber) |
 | Hostnames `*.nafura.local` en staging cluster | Remplacés par `*.nafuralabs.staging` (dev local `ng serve` peut garder `.local`) |
 
 ---
