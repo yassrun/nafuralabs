@@ -66,6 +66,37 @@ raisons d'être de l'outil :
 
 Copier la structure du classeur aurait fait hériter de ses angles morts.
 
+### Le détail estimatif — ce qu'il a appris sur la hiérarchie
+
+Feuille `D.E.`, 963 lignes : **6 chapitres, 19 sous-chapitres, 84 articles, 38 variantes,
+108 lignes chiffrables.**
+
+```
+I/ - AMÉNAGEMENT EXTÉRIEUR
+  a/ - TERRASSEMENTS GÉNÉRAUX
+    a/1 - Déblais en masse          → M3 · 4310   (chiffré ici)
+  b/ - RÉSEAU D'ÉVACUATION
+    b/1 - Canalisations PVC         → ni unité ni quantité
+      a - Ø 200                     → ML · 120    (chiffré ici)
+      b - Ø 250                     → ML · 10
+```
+
+**Quatre niveaux, et la profondeur varie d'une branche à l'autre.** Certains articles portent
+leur quantité, d'autres délèguent à des variantes.
+
+**Conséquence retenue — générique** : `TYPE_ARTICLE` désigne un **rôle**, pas un niveau — celui
+de ligne chiffrable. Un nœud qui regroupe est LOT ou SOUS_LOT quelle que soit sa profondeur. Le
+modèle l'admettait déjà (`parentId` libre) ; ce qui manquait, c'était de l'écrire. Sans ça,
+quelqu'un type par profondeur et casse les gates.
+`GateBordereauStructureReelleTest` verrouille ce comportement.
+
+**Deux pièges d'import relevés** — pour le lot 3, non encore traités :
+
+| Piège | Conséquence si ignoré |
+|---|---|
+| Unité et quantité sur une **autre ligne** que la désignation (`Le mètre cube : \| M3 \| 4310`) | articles importés sans unité, gate bloqué sur 108 lignes |
+| Lignes de sous-total (`a/ - TOTAL TERRASSEMENTS…`) sans unité ni quantité | importées comme articles, elles bloquent un parcours sur des lignes qui ne sont pas des ouvrages |
+
 ---
 
 ## Source 2 — CPS réel `cps_exemple.md` *(2026-07-19)*
