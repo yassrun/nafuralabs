@@ -207,11 +207,23 @@ BROUILLON ──────────────► EN_ETUDE ─────
 
 | # | Étape | Objet produit | Gate de sortie |
 |---|---|---|---|
-| 1 | **Bordereau** | `Dpgf` + `DpgfNoeud` | ≥ 1 ARTICLE ; tout ARTICLE a unité + quantité > 0 |
-| 2 | **Descriptifs** | `DpgfNoeud.descriptif` | *avertissement* si < 80 % des articles ont un descriptif (non bloquant) |
+| 1 | **Documents du marché** | `DossierDocument` + `CpsDocument` + `CpsSection` | ≥ 1 pièce déposée |
+| 2 | **Bordereau** | `Dpgf` + `DpgfNoeud` | ≥ 1 ARTICLE ; tout ARTICLE a unité + quantité > 0 |
 | 3 | **Décomposition** | `PrixDpu` + `ComposantDpu` | chaque ARTICLE est FOURNI, ou DECOMPOSE avec ≥ 1 composant à rendement > 0 |
-| 4 | **Consultation fournisseurs** | `DemandePrix` / `OffreFournisseur` | *avertissement* si des composants restent en `sourcePrix = MANUEL` (non bloquant) |
+| 4 | **Consultation fournisseurs** | `AppelOffreAchat` / `OffreFournisseur` | *avertissement* si des composants restent en `sourcePrix = MANUEL` (non bloquant) |
 | 5 | **Chiffrage** | FG, marge, TVA → PU | tout ARTICLE a FG, marge, TVA renseignés et `prixVenteHt > 0` |
+
+> **Révision 2026-07-19 — l'étape « Descriptifs » a disparu.** Elle faisait une passe globale
+> d'appariement CPS ↔ articles par code, fragile parce qu'un CPS est de la **prose organisée par
+> chapitres**, pas une table indexée par codes de bordereau. Le code hérité l'avouait : il
+> retournait une liste `unmatchedCodes`.
+>
+> À la place, le CPS est **déposé dès l'étape 1**, découpé en sections indexées, et **interrogé à
+> la demande pendant la décomposition** — au moment où le descriptif sert réellement. C'est aussi
+> ce que fait un chiffreur : il est sur « béton B35 », il ouvre le CPS au chapitre béton.
+>
+> Effet secondaire : la recherche est locale (`tsvector` Postgres, aucun token), et le passage du
+> batch au à-la-demande divise le coût LLM par cinq.
 
 **Principe** : les étapes 2 et 4 sont **non bloquantes**. Une étude peut être chiffrée sans descriptif
 complet ni consultation fournisseur — c'est courant en avant-vente sous contrainte de délai. Elles

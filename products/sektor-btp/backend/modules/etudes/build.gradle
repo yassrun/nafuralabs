@@ -10,5 +10,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.postgresql:postgresql'
+    // Lecture de PDF natifs (CPS). Le scan n'est pas traite ici : la conversion
+    // scan -> texte est prevue plus tard, cf. lot 3 T3.2.
+    implementation 'org.apache.pdfbox:pdfbox:3.0.3'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.mockito:mockito-junit-jupiter'
 }
