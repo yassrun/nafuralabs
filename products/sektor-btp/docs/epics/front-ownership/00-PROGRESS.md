@@ -1,6 +1,6 @@
 # Suivi — chantier front-ownership
 
-**Dernière mise à jour** : 2026-07-19 — phases 0, 1 et 2 terminées et vérifiées.
+**Dernière mise à jour** : 2026-07-19 — **chantier terminé**. Les 5 phases sont livrées et vérifiées par un build AOT complet.
 
 ---
 
@@ -11,8 +11,8 @@
 | 0 | Geler et cartographier | ✅ terminée |
 | 1 | Récupérer les divergences | ✅ terminée |
 | **2** | **Inverser la dépendance** | ✅ **terminée — 0 import `@applications` dans `platform/`** |
-| 3 | Déplacer les fichiers | ⬜ à faire |
-| 4 | Garde-fous ESLint | ⬜ à faire |
+| **3** | **Déplacer les fichiers** | ✅ **terminée — `web/` supprimé, build AOT vert** |
+| **4** | **Garde-fous ESLint** | ✅ **terminée** |
 
 ---
 
@@ -97,3 +97,54 @@ Garde-fous ESLint (`no-restricted-imports` sur `platform/web/**`), frontière du
 contrôle anti-duplication, section dédiée dans `AGENTS.md`.
 
 Sans eux, la dette se reformera — c'est la phase la plus importante à long terme.
+
+
+---
+
+## Phase 3 — terminée
+
+```
+web/app/platform/         -> platform/web/                      785 fichiers
+web/app/applications/erp/ -> products/sektor-btp/web/app/      1811 fichiers
+web/src/ + configs        -> products/sektor-btp/web/
+732 imports @applications/* -> @app/*
+web/ supprimé
+```
+
+**Le point qui a coûté** : la résolution npm. `platform/web/` vivant hors du répertoire
+produit, Node remonte depuis `platform/` et ne trouve pas `node_modules`. Un repli
+`"*": ["./node_modules/*"]` dans le `tsconfig` satisfait **tsc mais pas esbuild**, qui fait sa
+propre résolution — le bundler échouait là où le typecheck passait.
+
+**Résolution** : workspaces npm à la racine. Ça introduit un `package.json` racine que le dépôt
+n'avait pas ; il ne porte aucune dépendance et n'existe que pour hisser `node_modules`.
+`platform/web/package.json` déclare ses 14 dépendances externes réelles en `peerDependencies` —
+c'est aussi le contrat de version dont un 2ᵉ produit front aura besoin.
+
+**Piège rencontré** : laisser un `node_modules` dans le workspace donnait **deux copies
+d'Angular**, et TypeScript traitait leurs types comme incompatibles. La déduplication était
+obligatoire, pas cosmétique.
+
+Chemins mis à jour : `Dockerfile.web`, `nlops.sh`, `AGENTS.md`, imports SCSS.
+
+## Phase 4 — terminée
+
+`products/sektor-btp/web/.eslintrc.json` interdit désormais :
+
+| Portée | Interdiction |
+|---|---|
+| `platform/web/**` | importer `@app/*`, `@applications/*`, `**/products/**` |
+| `platform/web/lib/**` | en plus : importer `@core/*`, `@features/*` |
+
+Ce sont exactement les deux frontières qui avaient été franchies. Sans elles, la dette se
+reforme — c'est la phase la plus importante à long terme.
+
+---
+
+## Ce qui reste hors périmètre
+
+- `platform/web/` n'a pas de build ni de test propre : il est compilé dans le contexte du
+  produit. À revoir au 2ᵉ produit front, où il faudra sans doute en faire une vraie
+  bibliothèque Angular.
+- `platform-app-shell.component.ts` fait plus de 1 800 lignes. Volontairement non refondu :
+  seuls ses points de couplage ont été traités. Dette distincte, à traiter à part.
