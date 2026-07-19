@@ -3,7 +3,7 @@
 > Mettre à jour à chaque fin de tâche. Ne pas cocher une tâche dont les critères d'acceptation du
 > lot ne sont pas vérifiés.
 
-**Dernière mise à jour** : 2026-07-19 — **J1 atteint et vérifié sur staging** (191/191 changesets, app UP en `ddl-auto=validate`)
+**Dernière mise à jour** : 2026-07-19 — J1 vérifié sur staging ; lot 2 **backend** livré ; chantier front phases 0-2 terminées
 
 ---
 
@@ -37,7 +37,7 @@ Le numéro d'un lot est un identifiant, pas un rang. Ordre d'exécution ci-desso
 | 1 | 9 | Référentiel articles et prix | ✅ terminé | Fondation — `item`, `achats`, résolution de prix |
 | 2 | 1 | Fusion du modèle | ✅ terminé | Calcul verrouillé ; rendement ; ports etudes ; consultation reporté lot 8 |
 | 3 | 8 | Suppression des tables `consultation` | ✅ terminé | Q6 confirmée ; module + tables + front retirés |
-| 4 | 2 | Dossier d'étude + wizard | ⬜ à faire | Précédé de P1 |
+| 4 | 2 | Dossier d'étude + wizard | 🟡 backend fait | Front bloqué par la phase 3 du chantier front |
 | 5 | 3 | Import non destructif | ⬜ à faire | |
 | 6 | 4 | Décomposition + bibliothèque | ⬜ à faire | Inclut les ouvrages composites (D9) |
 | 7 | 6 | Chiffrage + validation | ⬜ à faire | Débloqué — Q1 et Q2 tranchées |
