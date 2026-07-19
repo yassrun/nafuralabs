@@ -70,7 +70,7 @@ spec:
             - name: POSTGRES_HOST
               value: postgres.nafura-infra.svc
             - name: SPRING_JPA_HIBERNATE_DDL_AUTO
-              value: update
+              value: validate
             - name: KEYCLOAK_ISSUER_URI
               value: http://iam.nafura.local/realms/iam-portal
             - name: KEYCLOAK_JWK_SET_URI

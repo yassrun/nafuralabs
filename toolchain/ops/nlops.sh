@@ -24,6 +24,33 @@ else
   KUBECTL() { "$KUBECTL_BIN" "$@"; }
 fi
 
+# Garde-fou ENV <-> contexte kubectl.
+# KUBE_CONTEXT est optionnel : s'il est absent, kubectl retombe sur le contexte COURANT,
+# qui peut etre la production. Une variable oubliee suffisait donc a executer sur prod une
+# commande destinee a staging -- y compris `RESET_DB=true reset-app`, qui fait un DROP DATABASE.
+# On refuse tout croisement entre un ENV et un contexte qui ne se correspondent pas.
+assert_context_matches_env() {
+  local resolved
+  resolved="${KUBE_CONTEXT:-$("$KUBECTL_BIN" config current-context 2>/dev/null || true)}"
+  [[ -z "$resolved" ]] && return 0
+
+  local ctx_is_prod=false
+  [[ "$resolved" == *prod* ]] && ctx_is_prod=true
+
+  if [[ "$ENV" == "prod" && "$ctx_is_prod" == false ]]; then
+    echo "ABORT: ENV=prod mais contexte kubectl '$resolved' n'est pas un contexte de production." >&2
+    echo "       Definir KUBE_CONTEXT explicitement (ex. KUBE_CONTEXT=nafura-vps-prod)." >&2
+    exit 1
+  fi
+  if [[ "$ENV" != "prod" && "$ctx_is_prod" == true ]]; then
+    echo "ABORT: ENV=$ENV mais contexte kubectl '$resolved' pointe sur la PRODUCTION." >&2
+    echo "       Definir KUBE_CONTEXT explicitement (ex. KUBE_CONTEXT=docker-desktop)," >&2
+    echo "       ou basculer le contexte courant : kubectl config use-context docker-desktop" >&2
+    exit 1
+  fi
+}
+assert_context_matches_env
+
 kustomize_build() {
   KUBECTL kustomize --load-restrictor "$KUSTOMIZE_LOAD_RESTRICTOR" "$1"
 }
