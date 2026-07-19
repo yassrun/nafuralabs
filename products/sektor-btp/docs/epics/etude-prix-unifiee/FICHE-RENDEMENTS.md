@@ -3,9 +3,15 @@
 **Objet** : constituer le premier jeu de rendements réels, qui servira de référence aux tests
 de calcul et de première entrée dans la bibliothèque d'ouvrages.
 
-**Comment remplir** : ne remplissez que ce que vous connaissez. Une ligne vide vaut mieux
-qu'une estimation — les valeurs actuellement dans le code sont inventées, et c'est précisément
-ce qu'on veut arrêter. Ajoutez des lignes ou des ouvrages si le découpage ne colle pas.
+**Ce qui est déjà rempli, et pourquoi** : les cases pré-remplies en *italique* sont des
+**dosages normalisés** — le dosage d'un béton B35 ne dépend pas de l'entreprise. Corrigez-les si
+votre pratique diffère, mais elles ne sont pas des suppositions.
+
+**Ce qu'on ne peut pas deviner** : vos **rendements de main d'œuvre** et vos **prix**. Ce ne sont
+pas des questions d'expertise, ce sont des faits sur votre entreprise et vos fournisseurs.
+Personne d'autre que vous ne peut les donner.
+
+Ne remplissez que ce que vous connaissez. Une ligne vide vaut mieux qu'une estimation.
 
 ---
 
@@ -37,16 +43,18 @@ Dites-nous aussi votre **base horaire journalière** (8 h ? 9 h ?) : ______
 
 | Composant | Type | Unité | Rendement / m³ | PU (DH) |
 |---|---|---|---|---|
-| Ciment CPJ 45 | Matière | kg | | |
-| Sable | Matière | m³ | | |
-| Gravier | Matière | m³ | | |
-| Eau | Matière | l | | |
+| Ciment CPJ 45 | Matière | kg | *400* | |
+| Sable 0/4 | Matière | m³ | *0,42* | |
+| Gravier 4/20 | Matière | m³ | *0,82* | |
+| Eau | Matière | l | *180* | |
 | Adjuvant | Matière | l | | |
-| Bétonnière / centrale | Matériel | h | | |
-| Vibreur | Matériel | h | | |
+| Bétonnière + vibreur | Matériel | h | *0,35* | |
 | Pompe à béton *(si utilisée)* | Matériel | h | | |
 
+*(dosage normalisé B35 — à corriger si votre formulation diffère)*
+
 **Main d'œuvre** — effectif : ____ · production : ____ m³/jour
+*(hypothèse actuelle dans le code : 6 personnes pour 12 m³/jour, soit 4 h/m³ — à confirmer)*
 
 ### A2. Béton armé en élévation (poteaux, poutres, dalles) — unité : m³
 

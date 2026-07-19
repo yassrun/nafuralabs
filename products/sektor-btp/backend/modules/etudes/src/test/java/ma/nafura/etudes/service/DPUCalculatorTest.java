@@ -22,28 +22,38 @@ class DPUCalculatorTest {
         calculator = new DpuCalculator();
     }
 
-    // TOUS CES NOMBRES SONT INVENTÉS — aucun n'a été validé par l'expert métier.
+    // Sous-detail B35 — trois niveaux de fiabilite, a ne pas confondre.
     //
-    // Ils forment un jeu arithmétiquement cohérent, rien de plus. FG=8 et MARGE=7 en
-    // particulier proviennent du socle généré, pas d'un arbitrage : ce ne sont PAS les
-    // taux de l'entreprise, et ces taux sont vraisemblablement variables par affaire.
+    // NORME (fiable) : le dosage d'un beton B35 est normalise, ce n'est pas une pratique
+    //   d'entreprise. 400 kg de CPJ 45 par m3, ~0,42 m3 de sable, ~0,82 m3 de gravier,
+    //   ~180 l d'eau. Ces valeurs font autorite.
     //
-    // Ce que ces tests verrouillent, c'est la STRUCTURE du calcul — déboursé unitaire,
-    // ordre des étages, quantité du bordereau appliquée une seule fois. Cette structure
-    // est définitive ; les nombres seront remplacés par le sous-détail B35 réel sans
-    // toucher aux assertions de structure.
+    // REX (plausible, non validee) : prix unitaires marche marocain, et rendement de
+    //   main d'oeuvre pose a 6 personnes pour 12 m3/jour, soit 4 h/m3. Ordre de grandeur
+    //   courant, mais le rendement reel depend des equipes — c'est un FAIT SUR L'ENTREPRISE,
+    //   pas une question d'expertise. A remplacer par la fiche remplie par l'expert metier.
     //
-    // TODO(metier): remplacer par le sous-détail B35 fourni par l'expert métier.
-    private static final BigDecimal CIMENT_REND = new BigDecimal("350");
-    private static final BigDecimal CIMENT_PU = new BigDecimal("1.20");
-    private static final BigDecimal SABLE_REND = new BigDecimal("0.4");
-    private static final BigDecimal SABLE_PU = new BigDecimal("180");
-    private static final BigDecimal GRAVIER_REND = new BigDecimal("0.8");
-    private static final BigDecimal GRAVIER_PU = new BigDecimal("220");
-    private static final BigDecimal MO_REND = new BigDecimal("1.5");
-    private static final BigDecimal MO_PU = new BigDecimal("45");
-    private static final BigDecimal FG = new BigDecimal("8");
-    private static final BigDecimal MARGE = new BigDecimal("7");
+    // TAUX : FG 11,5 % et marge 17,5 % = milieu des fourchettes donnees par l'expert
+    //   (10-13 % et 15-20 %). Voir ParametresEtudeService.
+    //
+    // Ce que ces tests verrouillent reste la STRUCTURE du calcul. Les nombres peuvent bouger
+    // sans toucher aux assertions de structure.
+    private static final BigDecimal CIMENT_REND = new BigDecimal("400");     // NORME kg/m3
+    private static final BigDecimal CIMENT_PU = new BigDecimal("1.20");      // REX  DH/kg
+    private static final BigDecimal SABLE_REND = new BigDecimal("0.42");     // NORME m3/m3
+    private static final BigDecimal SABLE_PU = new BigDecimal("180");        // REX  DH/m3
+    private static final BigDecimal GRAVIER_REND = new BigDecimal("0.82");   // NORME m3/m3
+    private static final BigDecimal GRAVIER_PU = new BigDecimal("220");      // REX  DH/m3
+    private static final BigDecimal EAU_REND = new BigDecimal("180");        // NORME l/m3
+    private static final BigDecimal EAU_PU = new BigDecimal("0.01");         // REX  DH/l
+    private static final BigDecimal MATERIEL_REND = new BigDecimal("0.35");  // REX  h/m3
+    private static final BigDecimal MATERIEL_PU = new BigDecimal("80");      // REX  DH/h
+    // MO : 6 personnes x 8 h / 12 m3 par jour = 4 h/m3 — cf. lot 4, saisie en rendement
+    // journalier d'equipe, la conversion en h/unite est faite par l'outil.
+    private static final BigDecimal MO_REND = new BigDecimal("4");           // REX  h/m3
+    private static final BigDecimal MO_PU = new BigDecimal("45");            // REX  DH/h
+    private static final BigDecimal FG = new BigDecimal("11.5");
+    private static final BigDecimal MARGE = new BigDecimal("17.5");
     private static final BigDecimal TVA = new BigDecimal("20");
     private static final BigDecimal QTE_BORDEREAU = new BigDecimal("70");
 
@@ -56,33 +66,34 @@ class DPUCalculatorTest {
 
         BigDecimal deboursSec = calculator.computeDeboursSec(composants);
 
-        // 350×1.20 + 0.4×180 + 0.8×220 + 1.5×45 = 420 + 72 + 176 + 67.5 = 735.50
-        assertThat(deboursSec).isEqualByComparingTo(new BigDecimal("735.50"));
+        // 400x1.20 + 0.42x180 + 0.82x220 + 180x0.01 + 0.35x80 + 4x45
+        // = 480 + 75.60 + 180.40 + 1.80 + 28 + 180 = 945.80 DH/m3
+        assertThat(deboursSec).isEqualByComparingTo(new BigDecimal("945.80"));
     }
 
     @Test
     void invariant_coutDeRevientPuisPrixVenteHt() {
         // TODO(metier): valeurs d'illustration, à remplacer par le sous-détail B35 réel.
         // La STRUCTURE du test est définitive ; seuls les nombres changeront.
-        BigDecimal deboursSec = new BigDecimal("735.50");
+        BigDecimal deboursSec = new BigDecimal("945.80");
         BigDecimal coutDeRevient = deboursSec
                 .multiply(BigDecimal.ONE.add(FG.movePointLeft(2)))
                 .setScale(2, RoundingMode.HALF_UP);
-        assertThat(coutDeRevient).isEqualByComparingTo(new BigDecimal("794.34"));
+        assertThat(coutDeRevient).isEqualByComparingTo(new BigDecimal("1054.57"));
 
         BigDecimal prixVenteHt = calculator.computePrixVenteHt(deboursSec, FG, MARGE);
-        // 735.50 × 1.08 = 794.34 ; 794.34 × 1.07 = 849.9438 → 849.94 HALF_UP
-        assertThat(prixVenteHt).isEqualByComparingTo(new BigDecimal("849.94"));
+        // 945.80 x 1.115 = 1054.5670 -> 1054.57 ; x 1.175 = 1239.1197 -> 1239.12
+        assertThat(prixVenteHt).isEqualByComparingTo(new BigDecimal("1239.12"));
     }
 
     @Test
     void invariant_prixVenteTtc() {
         // TODO(metier): valeurs d'illustration, à remplacer par le sous-détail B35 réel.
         // La STRUCTURE du test est définitive ; seuls les nombres changeront.
-        BigDecimal prixVenteHt = new BigDecimal("849.94");
-        // 849.94 × 1.20 = 1019.928 → 1019.93 HALF_UP
+        BigDecimal prixVenteHt = new BigDecimal("1239.12");
+        // 1239.12 x 1.20 = 1486.944 -> 1486.94 HALF_UP
         assertThat(calculator.computePrixVenteTtc(prixVenteHt, TVA))
-                .isEqualByComparingTo(new BigDecimal("1019.93"));
+                .isEqualByComparingTo(new BigDecimal("1486.94"));
     }
 
     @Test
@@ -96,11 +107,11 @@ class DPUCalculatorTest {
 
         // La quantité bordereau n'intervient QU'ICI — jamais dans le déboursé
         BigDecimal totalLigne = calculator.computeLineTotal(QTE_BORDEREAU, prixVenteHt);
-        // 70 × 849.94 = 59495.80
-        assertThat(totalLigne).isEqualByComparingTo(new BigDecimal("59495.80"));
+        // 70 x 1239.12 = 86738.40
+        assertThat(totalLigne).isEqualByComparingTo(new BigDecimal("86738.40"));
 
         // Le déboursé est UNITAIRE : il ne dépend jamais de la quantité du bordereau.
-        assertThat(deboursSec).isEqualByComparingTo(new BigDecimal("735.50"));
+        assertThat(deboursSec).isEqualByComparingTo(new BigDecimal("945.80"));
 
         // Équivalence à l'ordre d'arrondi près : la multiplication est commutative, donc
         // (déboursé × qté) × coefs ≈ qté × (déboursé × coefs). Seul l'arrondi intermédiaire
@@ -176,6 +187,8 @@ class DPUCalculatorTest {
                 composant(CIMENT_REND, CIMENT_PU),
                 composant(SABLE_REND, SABLE_PU),
                 composant(GRAVIER_REND, GRAVIER_PU),
+                composant(EAU_REND, EAU_PU),
+                composant(MATERIEL_REND, MATERIEL_PU),
                 composant(MO_REND, MO_PU));
     }
 
