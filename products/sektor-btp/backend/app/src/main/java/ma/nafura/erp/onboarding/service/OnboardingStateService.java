@@ -19,16 +19,14 @@ public class OnboardingStateService {
     private final UserOnboardingStateRepository repository;
     private final ObjectMapper objectMapper;
 
+    @Transactional
     public OnboardingStateResponse getState(UUID userId) {
-        UserOnboardingState state = repository.findByUserId(userId)
-            .orElseThrow(() -> new IllegalArgumentException("Onboarding state not found"));
-        return toResponse(state);
+        return toResponse(ensureState(userId));
     }
 
     @Transactional
     public OnboardingStateResponse saveState(UUID userId, SaveOnboardingStateRequest request) {
-        UserOnboardingState state = repository.findByUserId(userId)
-            .orElseThrow(() -> new IllegalArgumentException("Onboarding state not found"));
+        UserOnboardingState state = ensureState(userId);
         state.setCurrentStep(request.currentStep());
         try {
             state.setAnswersJson(objectMapper.writeValueAsString(request.answers()));
@@ -46,10 +44,20 @@ public class OnboardingStateService {
 
     @Transactional
     public void linkTenant(UUID userId, UUID tenantId) {
-        UserOnboardingState state = repository.findByUserId(userId)
-            .orElseThrow(() -> new IllegalArgumentException("Onboarding state not found"));
+        UserOnboardingState state = ensureState(userId);
         state.setTenantId(tenantId);
         repository.save(state);
+    }
+
+    /** Creates a blank onboarding state when the user has none yet. */
+    private UserOnboardingState ensureState(UUID userId) {
+        return repository.findByUserId(userId).orElseGet(() ->
+            repository.save(UserOnboardingState.builder()
+                .userId(userId)
+                .currentStep(0)
+                .answersJson("{}")
+                .build())
+        );
     }
 
     private OnboardingStateResponse toResponse(UserOnboardingState state) {

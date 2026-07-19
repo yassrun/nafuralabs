@@ -15,3 +15,5 @@ spec:
               value: http://iam.nafuralabs.staging/realms/iam-portal
             - name: APP_FRONTEND_BASE_URL
               value: http://sektor.nafuralabs.staging
+            - name: NAFURA_ONBOARDING_SKIP_EMAIL_VERIFICATION
+              value: "true"

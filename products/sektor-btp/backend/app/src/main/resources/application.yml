@@ -50,6 +50,7 @@ nafura:
     v2-enabled: ${NAFURA_ONBOARDING_V2_ENABLED:true}
     signup-enabled: true
     dev-signup-bypass: ${NAFURA_ONBOARDING_DEV_SIGNUP:false}
+    skip-email-verification: ${NAFURA_ONBOARDING_SKIP_EMAIL_VERIFICATION:false}
     keycloak-provisioning-enabled: ${NAFURA_ONBOARDING_KEYCLOAK_PROVISIONING:true}
     keycloak-admin-url: ${KEYCLOAK_ADMIN_URL:}
     keycloak-admin-username: ${KEYCLOAK_ADMIN_USERNAME:}

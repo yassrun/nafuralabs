@@ -13,8 +13,14 @@ public class OnboardingProperties {
     /** Allow self-service signup (dev: local user; prod: requires Keycloak admin URL). */
     private boolean signupEnabled = true;
 
-    /** When true, signup skips email verification and Keycloak (local unit tests only). */
+    /** When true, signup skips email verification (local unit tests only). Prefer skipEmailVerification. */
     private boolean devSignupBypass = false;
+
+    /**
+     * When true, signup treats the email as already verified: no verification mail is sent and the
+     * user is activated immediately (useful in staging). Keycloak provisioning is unchanged.
+     */
+    private boolean skipEmailVerification = false;
 
     /** When true (default), self-service signup provisions Keycloak users (prod-like). */
     private boolean keycloakProvisioningEnabled = true;

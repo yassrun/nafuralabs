@@ -81,6 +81,8 @@ spec:
               value: http://keycloak.nafura-infra.svc:8080
             - name: NAFURA_ONBOARDING_DEV_SIGNUP
               value: "false"
+            - name: NAFURA_ONBOARDING_SKIP_EMAIL_VERIFICATION
+              value: "false"
             - name: NAFURA_ONBOARDING_KEYCLOAK_PROVISIONING
               value: "true"
             - name: EMAIL_PROVIDER

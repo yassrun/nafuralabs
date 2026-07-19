@@ -95,6 +95,7 @@ public class OnboardingSignupService {
 
         if (isOnboardingIncomplete(user.getId())) {
             updateUserName(user, request.firstName(), request.lastName());
+            ensureOnboardingState(user.getId());
             log.info("Onboarding signup resume app_user id={} email={}", user.getId(), email);
             OnboardingAccessTokenService.IssuedToken issued = issueAccessToken(user);
             return buildSignupResponse(

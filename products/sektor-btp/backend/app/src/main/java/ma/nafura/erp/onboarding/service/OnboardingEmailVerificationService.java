@@ -35,7 +35,7 @@ public class OnboardingEmailVerificationService {
     private final JwtDecoder jwtDecoder;
 
     public boolean isVerificationEnabled() {
-        return !properties.isDevSignupBypass();
+        return !properties.isDevSignupBypass() && !properties.isSkipEmailVerification();
     }
 
     public void sendVerificationForIntent(SignupIntent intent) {
@@ -62,7 +62,7 @@ public class OnboardingEmailVerificationService {
    */
     public void resendVerificationEmail(String rawEmail) {
         if (!isVerificationEnabled()) {
-            throw new IllegalStateException("Email verification is disabled in dev-signup-bypass mode");
+            throw new IllegalStateException("Email verification is disabled (skip-email-verification)");
         }
         String email = rawEmail.trim().toLowerCase(Locale.ROOT);
         var pendingIntent = signupIntentService.findIntent(email);
@@ -83,7 +83,7 @@ public class OnboardingEmailVerificationService {
     @Transactional
     public SignupResponse verifyEmail(String rawToken) {
         if (!isVerificationEnabled()) {
-            throw new IllegalStateException("Email verification is disabled in dev-signup-bypass mode");
+            throw new IllegalStateException("Email verification is disabled (skip-email-verification)");
         }
         OnboardingEmailVerificationTokenService.VerificationPayload payload =
             tokenService.validateToken(rawToken.trim());
@@ -148,6 +148,7 @@ public class OnboardingEmailVerificationService {
         }
         user.setStatus(STATUS_ACTIVE);
         appUserRepository.save(user);
+        ensureOnboardingState(user.getId());
         keycloakProvisioningService.markEmailVerified(user.getEmail());
         log.info("Legacy email verified for app_user id={} email={}", user.getId(), user.getEmail());
         return issueTokens(user, "Email confirmé. Poursuivez la configuration.");
