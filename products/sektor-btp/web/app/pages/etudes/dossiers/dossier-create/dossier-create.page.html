@@ -1,0 +1,46 @@
+<section class="creer">
+  <h1 class="creer__titre">Nouveau dossier d'étude</h1>
+  <p class="creer__aide">
+    Un dossier porte un marché entrant : ses pièces (CPS, bordereau), son chiffrage et son devis.
+    Vous pourrez tout renseigner étape par étape — l'objet suffit à démarrer.
+  </p>
+
+  @if (erreur(); as message) {
+    <p class="creer__erreur" role="alert">{{ message }}</p>
+  }
+
+  <form class="creer__form" (ngSubmit)="creer()">
+    <label class="creer__champ">
+      <span class="creer__label">Objet <span aria-hidden="true">*</span></span>
+      <input
+        name="objet"
+        required
+        autofocus
+        placeholder="Construction d'un ensemble résidentiel — lot gros œuvre"
+        [ngModel]="objet()"
+        (ngModelChange)="objet.set($event)"
+      />
+    </label>
+
+    <label class="creer__champ">
+      <span class="creer__label">Client <span class="creer__optionnel">(optionnel)</span></span>
+      <input
+        name="clientNom"
+        placeholder="Maître d'ouvrage"
+        [ngModel]="clientNom()"
+        (ngModelChange)="clientNom.set($event)"
+      />
+    </label>
+
+    <div class="creer__actions">
+      <button type="button" class="creer__bouton" (click)="annuler()">Annuler</button>
+      <button
+        type="submit"
+        class="creer__bouton creer__bouton--principal"
+        [disabled]="!objet().trim() || enCours()"
+      >
+        {{ enCours() ? 'Création…' : 'Créer et commencer' }}
+      </button>
+    </div>
+  </form>
+</section>

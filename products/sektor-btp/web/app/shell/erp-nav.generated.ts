@@ -469,6 +469,15 @@ export const ERP_NAV_CONFIG_GENERATED: SidebarNode[] = [
         order: 10,
         children: [
           {
+            // Point d'entrée du parcours d'étude : c'est ici que le CPS et le bordereau
+            // sont déposés, puis chiffrés étape par étape.
+            id: 'etudes.dossiers',
+            label: 'nav.etudes.dossiers',
+            icon: 'clipboard-list',
+            route: '/etudes/dossiers',
+            order: 5,
+          },
+          {
             id: 'etudes.bibliotheque',
             label: 'nav.etudes.bibliotheque',
             icon: 'book-open',
