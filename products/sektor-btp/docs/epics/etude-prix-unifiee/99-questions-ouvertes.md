@@ -403,7 +403,30 @@ tenant) sont **sans objet** tant que le périmètre est marocain — à rouvrir 
 
 ---
 
-## Q8 — Faut-il gérer les aléas et le coefficient de vente K ? 🟢 hors périmètre actuel
+## Q8 — Faut-il gérer les aléas ? ✅ OUI — tranchée par le sous-détail réel 2026-07-19
+
+**J'avais classé ça hors périmètre. C'était faux.** Le classeur de l'entreprise porte des aléas
+dans au moins deux ouvrages :
+
+| Ouvrage | Ligne | Base |
+|---|---|---|
+| Béton en fondation | `ALEAS` — Aléas, 50 DH | forfait, par m³ |
+| Déblais en masse | `P-A` — pannes et aléas, 200 DH | **journalier**, ÷ 100 m³/jour |
+
+Ce ne sont donc **pas un taux** appliqué au déboursé, mais des **lignes de composant** comme les
+autres — parfois forfaitaires, parfois journalières. Le modèle les supporte déjà sans rien
+ajouter : ce sont des `ComposantDpu`.
+
+Reste ouvert, mais mineur : faut-il un **type de composant `ALEAS`** distinct, pour les isoler
+dans la ventilation par nature du budget de chantier (lot 7) ? Aujourd'hui ils tomberaient en
+`MATERIEL` ou `MATIERE`, ce qui fausserait légèrement l'analyse.
+
+Le **coefficient de vente K**, lui, reste hors périmètre : l'entreprise applique bien FG puis
+marge explicites.
+
+---
+
+## Q8bis — Ancien libellé (coefficient K) 🟢 hors périmètre actuel
 
 Le modèle actuel ne connaît que FG et marge. Beaucoup d'entreprises BTP ajoutent :
 - un **taux d'aléas** (risque technique, intempéries)

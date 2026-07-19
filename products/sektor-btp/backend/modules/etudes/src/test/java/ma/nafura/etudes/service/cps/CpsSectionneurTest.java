@@ -148,4 +148,75 @@ class CpsSectionneurTest {
         assertThat(sections).extracting(SectionBrute::ordre).containsExactly(0, 1, 2);
         assertThat(sections).extracting(SectionBrute::numero).containsExactly("1", "2", "3");
     }
+
+    // ── Formes observees sur un CPS reel (cps_exemple.md) ────────────────────
+    // Ces trois tests viennent d'un document reel, pas d'une supposition : les deux premiers
+    // motifs cassaient le sectionneur, le troisieme aurait duplique toutes les sections.
+
+    @Test
+    void reel_article_avec_tirets_autour_du_numero() {
+        String cps = """
+                ARTICLE - 1 - OBJET DU MARCHE
+                Le present marche a pour objet les travaux de gros oeuvre, revetements,
+                etancheite et peinture du projet.
+
+                ARTICLE - 2 - CONSISTANCE DES TRAVAUX
+                Les travaux comprennent l'ensemble des ouvrages decrits au present cahier.
+                """;
+
+        List<SectionBrute> sections = sectionneur.decouper(cps);
+
+        assertThat(sections).extracting(SectionBrute::numero).containsExactly("1", "2");
+        assertThat(sections.get(0).titre()).isEqualTo("OBJET DU MARCHE");
+    }
+
+    @Test
+    void reel_chapitre_sans_espace() {
+        String cps = """
+                CHAPITRE-I- CAHIER DES CLAUSES ADMINISTRATIVES ET FINANCIERES
+                Le present chapitre fixe les clauses administratives applicables au marche
+                conformement a la reglementation en vigueur.
+                """;
+
+        List<SectionBrute> sections = sectionneur.decouper(cps);
+
+        assertThat(sections).hasSize(1);
+        assertThat(sections.get(0).numero()).isEqualTo("I");
+        assertThat(sections.get(0).titre()).startsWith("CAHIER DES CLAUSES");
+    }
+
+    @Test
+    void reel_le_sommaire_a_points_de_conduite_est_ignore() {
+        // Un CPS commence par une table des matieres dont chaque ligne ressemble a un titre.
+        // Sans exclusion, chaque section existerait en double, la version sommaire etant vide.
+        String cps = """
+                1.1.3 BETON ARME EN INFRASTRUCTURE POUR TOUS OUVRAGES............................. 7
+                1.1.4 ARMATURE EN ACIER TOR OU CARON EN INFRASTRUCTURE. ....................... 7
+
+                1.1.3 BETON ARME EN INFRASTRUCTURE POUR TOUS OUVRAGES
+                Beton dose a 400 kg de CPJ 45 par metre cube, mis en oeuvre par vibration.
+                Les granulats seront conformes aux specifications du laboratoire agree.
+                """;
+
+        List<SectionBrute> sections = sectionneur.decouper(cps);
+
+        assertThat(sections).hasSize(1);
+        assertThat(sections.get(0).numero()).isEqualTo("1.1.3");
+        assertThat(sections.get(0).contenu()).contains("400 kg");
+    }
+
+    @Test
+    void reel_la_numerotation_du_cps_correspond_aux_codes_du_bordereau() {
+        // Constat sur le CPS reel : la section technique 1.1.3 porte le meme numero que
+        // l'article 1-1-3 du bordereau. C'est ce qui justifie de ponderer le numero en 'A'
+        // dans la recherche plein texte.
+        String cps = """
+                1.1.3 BETON ARME EN INFRASTRUCTURE POUR TOUS OUVRAGES
+                Dosage 400 kg/m3 de CPJ 45.
+                """;
+
+        List<SectionBrute> sections = sectionneur.decouper(cps);
+
+        assertThat(sections.get(0).numero()).isEqualTo("1.1.3");
+    }
 }

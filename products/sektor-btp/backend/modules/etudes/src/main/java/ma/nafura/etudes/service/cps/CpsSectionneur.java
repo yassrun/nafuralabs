@@ -21,19 +21,34 @@ import org.springframework.stereotype.Component;
 @Component
 public class CpsSectionneur {
 
-    /** « ARTICLE 12 », « Article 12 - ... », avec ou sans tiret. */
+    /**
+     * « ARTICLE 12 », « ARTICLE - 12 - TITRE », « Article 12 : ... ».
+     *
+     * <p>Le separateur avant le numero est optionnel : les CPS reels ecrivent couramment
+     * {@code ARTICLE - 1 - OBJET DU MARCHE}, forme qu'un {@code \\s+} seul ne reconnait pas.
+     */
     private static final Pattern TITRE_ARTICLE =
-            Pattern.compile("^\\s*ARTICLE\\s+(\\d+(?:\\.\\d+)*)\\s*[-–—:.]?\\s*(.*)$",
+            Pattern.compile("^\\s*ARTICLE\\s*[-–—]?\\s*(\\d+(?:\\.\\d+)*)\\s*[-–—:.]?\\s*(.*)$",
                     Pattern.CASE_INSENSITIVE);
 
-    /** « 3.2.1 Titre », « 3.2.1 - Titre ». Au moins un point pour eviter les listes « 1. ». */
+    /** « 3.2.1 Titre », « 15.1. Titre ». Au moins un point pour eviter les listes « 1- ». */
     private static final Pattern TITRE_NUMEROTE =
-            Pattern.compile("^\\s*(\\d+(?:\\.\\d+)+)\\s*[-–—:.]?\\s+(\\S.*)$");
+            Pattern.compile("^\\s*(\\d+(?:\\.\\d+)+)\\.?\\s*[-–—:]?\\s+(\\S.*)$");
 
-    /** « CHAPITRE IV - ... » */
+    /** « CHAPITRE IV - ... », « CHAPITRE-I- ... » — sans espace, comme dans les CPS reels. */
     private static final Pattern TITRE_CHAPITRE =
-            Pattern.compile("^\\s*CHAPITRE\\s+([IVXLC]+|\\d+)\\s*[-–—:.]?\\s*(.*)$",
+            Pattern.compile("^\\s*CHAPITRE\\s*[-–—]?\\s*([IVXLC]+|\\d+)\\s*[-–—:.]?\\s*(.*)$",
                     Pattern.CASE_INSENSITIVE);
+
+    /**
+     * Entree de sommaire : points de conduite suivis d'un numero de page.
+     *
+     * <p>Un CPS reel commence par une table des matieres dont chaque ligne a la meme forme
+     * qu'un vrai titre. Sans cette exclusion, le sommaire produirait un doublon de toutes les
+     * sections, vides de contenu, qui polluerait la recherche.
+     */
+    private static final Pattern LIGNE_SOMMAIRE =
+            Pattern.compile(".*\\.{4,}\\s*\\d+\\s*$");
 
     /** En dessous, un « titre » isole n'est probablement qu'un numero de page ou un artefact. */
     private static final int LONGUEUR_MIN_SECTION = 40;
@@ -86,6 +101,10 @@ public class CpsSectionneur {
 
     /** @return {numero, titre} si la ligne est un titre, {@code null} sinon */
     private String[] detecterTitre(String ligne) {
+        // Une entree de sommaire a la forme d'un titre mais n'en est pas un.
+        if (LIGNE_SOMMAIRE.matcher(ligne).matches()) {
+            return null;
+        }
         for (Pattern p : List.of(TITRE_ARTICLE, TITRE_CHAPITRE, TITRE_NUMEROTE)) {
             Matcher m = p.matcher(ligne);
             if (m.matches()) {
@@ -102,17 +121,31 @@ public class CpsSectionneur {
     private int ajouterSiUtile(
             List<SectionBrute> sections, String numero, String titre, StringBuilder contenu, int ordre) {
         String texte = contenu.toString().trim();
-        if (numero == null && titre == null && texte.isEmpty()) {
+        if (texte.isEmpty()) {
             return ordre;
         }
         if (texte.length() < LONGUEUR_MIN_SECTION && numero == null) {
             return ordre;
         }
-        if (texte.isEmpty()) {
+        // Une table des matieres concentre TOUS les titres du document : c'est la plus forte
+        // densite de mots-cles du CPS, et elle dominerait les resultats de recherche en
+        // renvoyant systematiquement le sommaire plutot que la prescription technique.
+        if (estMajoritairementSommaire(texte)) {
             return ordre;
         }
         sections.add(new SectionBrute(numero, titre, texte, ordre));
         return ordre + 1;
+    }
+
+    /** Plus de la moitie des lignes sont des entrees de sommaire : le bloc n'est pas du contenu. */
+    private boolean estMajoritairementSommaire(String texte) {
+        String[] lignes = texte.split("\\R");
+        long sommaire = java.util.Arrays.stream(lignes)
+                .filter(l -> !l.isBlank())
+                .filter(l -> LIGNE_SOMMAIRE.matcher(l).matches())
+                .count();
+        long utiles = java.util.Arrays.stream(lignes).filter(l -> !l.isBlank()).count();
+        return utiles > 0 && sommaire * 2 > utiles;
     }
 
     /**

@@ -50,6 +50,19 @@ public class PrixDpu implements AuditableEtude {
     @JsonProperty("deboursSec")
     private BigDecimal deboursSec;
 
+    /**
+     * Production journaliere de l'ouvrage, dans son unite (30 m3/jour, 100 m3/jour, 50 ml/jour).
+     *
+     * <p>Sert a ramener a l'unite les composants chiffres a la journee. C'est la forme dans
+     * laquelle l'entreprise raisonne : elle coute une journee d'equipe complete, puis divise
+     * par ce qu'elle produit dans la journee — plutot que d'exprimer des heures par metre cube.
+     *
+     * <p>{@code null} quand tous les composants sont deja au rendement unitaire.
+     */
+    @Column(name = "rendement_journalier", precision = 18, scale = 4)
+    @JsonProperty("rendementJournalier")
+    private BigDecimal rendementJournalier;
+
     @Column(name = "frais_generaux_percent", nullable = false, precision = 8, scale = 4)
     @JsonProperty("fraisGenerauxPercent")
     private BigDecimal fraisGenerauxPercent;

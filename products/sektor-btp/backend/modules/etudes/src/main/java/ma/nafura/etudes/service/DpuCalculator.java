@@ -17,6 +17,57 @@ public class DpuCalculator {
         return q.multiply(pu).setScale(MONEY_SCALE, RoundingMode.HALF_UP);
     }
 
+    /**
+     * Deboursé sec unitaire, base mixte.
+     *
+     * <p>Constate sur le sous-detail reel de l'entreprise : un meme ouvrage melange des
+     * composants deja rapportes a l'unite et des composants chiffres a la journee.
+     *
+     * <pre>
+     *   deboursé = Σ(composants PAR_UNITE) + Σ(composants PAR_JOUR) / rendementJournalier
+     * </pre>
+     *
+     * <p>Exemple reel, « Deblais en masse » : tractopelle 1500/j et pannes 200/j pour
+     * 100 m3/jour, plus gasoil 10 DH deja au m3 → (1500 + 200)/100 + 10 = 27 DH/m3.
+     *
+     * <p>Sans rendement journalier, les composants journaliers sont ignores : les compter tels
+     * quels melangerait un cout de journee a des couts unitaires et gonflerait le deboursé
+     * d'un facteur egal a la production journaliere.
+     */
+    public BigDecimal computeDeboursSec(List<ComposantDpu> composants, BigDecimal rendementJournalier) {
+        if (composants == null || composants.isEmpty()) {
+            return BigDecimal.ZERO.setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+        }
+        BigDecimal parUnite = BigDecimal.ZERO;
+        BigDecimal parJour = BigDecimal.ZERO;
+        for (ComposantDpu c : composants) {
+            BigDecimal total = totalDe(c);
+            if (c.estJournalier()) {
+                parJour = parJour.add(total);
+            } else {
+                parUnite = parUnite.add(total);
+            }
+        }
+        if (parJour.signum() != 0) {
+            if (rendementJournalier == null || rendementJournalier.signum() <= 0) {
+                parJour = BigDecimal.ZERO;
+            } else {
+                parJour = parJour.divide(rendementJournalier, MONEY_SCALE, RoundingMode.HALF_UP);
+            }
+        }
+        return parUnite.add(parJour).setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+    }
+
+    private BigDecimal totalDe(ComposantDpu composant) {
+        BigDecimal total = composant.getTotal();
+        if (total == null) {
+            total = computeLineTotal(composant.getRendement(), composant.getPrixUnitaire());
+        }
+        return total;
+    }
+
+    /** @deprecated preferer la surcharge avec rendement journalier — base mixte. */
+    @Deprecated(since = "lot-3")
     public BigDecimal computeDeboursSec(List<ComposantDpu> composants) {
         if (composants == null || composants.isEmpty()) {
             return BigDecimal.ZERO.setScale(MONEY_SCALE, RoundingMode.HALF_UP);
