@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Bean;
  * verrouiller le processus manuel avant de brancher le modele.
  */
 @Configuration
-public class NoOpDescriptifCpsPort {
+public class NoOpDescriptifCpsPortConfig {
 
     @Bean
     @ConditionalOnMissingBean(DescriptifCpsPort.class)
