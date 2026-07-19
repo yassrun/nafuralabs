@@ -51,7 +51,7 @@ masse, cf. T6.2) plutôt que pour une constante d'entreprise.
 
 ---
 
-## Q16 — Taux réels : FG 10-13 %, marge 15-20 % ✅ obtenus 2026-07-19, une confirmation restante
+## Q16 — Taux et formule ✅ TRANCHÉE 2026-07-19
 
 **Réponse de l'expert métier** : « Théoriquement on est plutôt sur **10 à 13 % de frais
 généraux**, notre **marge est rajoutée indépendamment pour constituer le prix de vente** et est
@@ -64,18 +64,18 @@ nettement. Repli mis à jour au milieu de fourchette (11,5 % / 17,5 %), bornes d
 **Ce que ça confirme** : ce sont des **fourchettes**, pas des taux. Combiné à Q14 (marge par
 article, variable), ça enterre définitivement l'idée d'une constante d'entreprise.
 
-**Ce qui reste à confirmer** — « rajoutée indépendamment » se lit encore de deux façons :
+**Formule confirmée** — l'expert : la marge s'applique « **sur le prix de revient** ». C'est la
+lecture composée, celle qu'implémente déjà `DpuCalculator`. Aucun changement de calcul.
 
-| Lecture | Calcul sur 1 000 de déboursé, FG 11,5 %, marge 17,5 % | Total |
-|---|---|---|
-| **A — composée** (implémentée) | 1 000 × 1,115 = 1 115, puis × 1,175 | **1 310,13** |
-| **B — additive** | 1 000 × (1 + 0,115 + 0,175) | **1 290,00** |
+```
+déboursé 1 000 → +10 % FG → coût de revient 1 100 → +17,5 % marge → 1 292,50
+```
 
-Écart 1,6 % — environ **160 000 DH sur une étude à 10 MDH**.
+**Valeurs** : FG « normalement 10 % » (fourchette 10-13), marge 15-20 %. Repli mis à 10 %.
 
-La lecture A correspond à « la marge constitue le prix de vente **à partir du** coût de
-revient », et c'est ce qu'implémente `DpuCalculator`. Confirmation demandée en section 1.1 de
-[`FICHE-EXPERT-METIER.md`](FICHE-EXPERT-METIER.md).
+**Ce ne sont que des replis.** Les taux sont surchargeables à trois niveaux — paramètre tenant,
+défaut du dossier d'étude, puis **saisie par article**, qui fait foi. Aucune valeur n'est imposée
+à un tenant, et c'était la conception depuis le lot 1.
 
 ---
 
