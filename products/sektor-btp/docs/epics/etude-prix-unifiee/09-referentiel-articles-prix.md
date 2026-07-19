@@ -123,7 +123,46 @@ d'événements :
 |---|---|
 | Offre fournisseur **retenue** (`achats`) | crée/ferme une ligne catalogue, `source = OFFRE_RETENUE` |
 | Facture fournisseur validée | idem, `source = FACTURE` — le prix réellement payé fait foi |
-| Contrat fournisseur signé | idem sur toute la durée, `source = CONTRAT` |
+| Contrat fournisseur signé | **ouvre** les lignes déjà rattachées au contrat — cf. §T9.4bis |
+
+### T9.4bis — Contrats : deux objets métier à ne pas confondre *(décidé 2026-07-19)*
+
+`ContratFournisseur` porte `chantierId`, `montantHt`, `art187Declare`, `retenueGarantieTaux`,
+`paiementDirectMoa`. C'est un **contrat de sous-traitance à montant forfaitaire** sur un chantier —
+un engagement de dépense, pas une liste de prix.
+
+| | Contrat de sous-traitance | Contrat-cadre de prix |
+|---|---|---|
+| Nature | montant forfaitaire pour un lot, sur un chantier | « pendant 12 mois, le ciment à 1,15 DH/kg » |
+| Modélisé par | `ContratFournisseur` ✅ | — |
+| Source de prix pour le chiffrage | non | **oui** |
+
+**Décision : ne pas ajouter de lignes article à `ContratFournisseur`.** Cela fusionnerait deux
+objets métier distincts.
+
+Un contrat-cadre de prix se modélise avec l'existant : **un ensemble de
+`CatalogueFournisseurLigne`** portant `source = CONTRAT`, `sourceRefId = contratId`, et
+`validFrom` / `validTo` alignés sur la période du contrat. L'historisation et la résolution de prix
+fonctionnent alors sans code supplémentaire.
+
+Ce qui manque n'est donc pas un modèle mais un **point d'entrée** :
+
+1. Rattacher une liste de prix à un contrat — saisie ou import Excel — créant des
+   `CatalogueFournisseurLigne` avec `source = CONTRAT`, `sourceRefId`, `actif = false`.
+2. `fromContratSigne(contrat)` **n'est pas un no-op** : à la signature, il ouvre les lignes
+   rattachées.
+
+```java
+lignes = catalogue.findBySourceAndSourceRefId(CatalogueSource.CONTRAT, contrat.getId());
+→ validFrom = contrat.getDateDebut()
+→ validTo   = contrat.getDateFin()
+→ actif     = true
+```
+
+Si aucune ligne n'est rattachée, l'alimenteur ne fait rien — comportement normal, pas une lacune.
+
+Le rattachement d'une liste de prix (point 1) peut être livré séparément ; l'alimenteur (point 2)
+appartient à ce lot.
 
 C'est ce qui boucle le cycle : **acheter enrichit le référentiel, qui sert au chiffrage suivant.**
 Sans ces alimenteurs, le catalogue reste vide et le lot 4 n'a rien à proposer.
@@ -203,6 +242,9 @@ Ne pas coder de logique de change ad hoc : passer par `currency`.
 - [ ] Un nouveau prix ferme le précédent au lieu de l'écraser
 - [ ] Retenir une offre dans `achats` crée automatiquement une ligne catalogue
 - [ ] Valider une facture fournisseur met à jour le catalogue
+- [ ] Signer un contrat ouvre les lignes catalogue rattachées (T9.4bis) ; sans lignes rattachées,
+      aucun effet et aucune erreur
+- [ ] Aucune ligne article n'a été ajoutée à `ContratFournisseur`
 - [ ] `ResolutionPrixService` retourne la bonne source selon la hiérarchie, sur cas de test couvrant
       les 7 niveaux
 - [ ] Le paramètre `basePrixChiffrage` inverse effectivement la priorité PMP

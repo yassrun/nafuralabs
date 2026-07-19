@@ -87,10 +87,10 @@ export class ComposantFormDialogComponent {
   type = this.data.composant?.type ?? 'MATERIAU';
   unite = this.data.composant?.unite ?? '';
   quantite =
-    this.data.composant?.quantite != null
-      ? String(this.data.composant.quantite)
-      : this.data.composant?.quantiteIndicative != null
-        ? String(this.data.composant.quantiteIndicative)
+    this.data.composant?.rendement != null
+      ? String(this.data.composant.rendement)
+      : this.data.composant?.quantite != null
+        ? String(this.data.composant.quantite)
         : '';
   prixUnitaire =
     this.data.composant?.prixUnitaire != null ? String(this.data.composant.prixUnitaire) : '';
@@ -103,7 +103,7 @@ export class ComposantFormDialogComponent {
       type: this.type,
       unite: this.unite.trim() || undefined,
       quantite: q,
-      quantiteIndicative: q,
+      rendement: q,
       prixUnitaire: this.prixUnitaire !== '' ? Number(this.prixUnitaire) : undefined,
     });
   }

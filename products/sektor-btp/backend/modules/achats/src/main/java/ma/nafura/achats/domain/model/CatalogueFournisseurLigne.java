@@ -2,6 +2,7 @@ package ma.nafura.achats.domain.model;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -45,11 +46,61 @@ public class CatalogueFournisseurLigne {
     @Column(name = "actif", nullable = false)
     private Boolean actif;
 
+    @Column(name = "currency_id")
+    private UUID currencyId;
+
+    @Column(name = "valid_from", nullable = false)
+    private LocalDate validFrom;
+
+    @Column(name = "valid_to")
+    private LocalDate validTo;
+
+    @Column(name = "remise_percent", nullable = false, precision = 8, scale = 4)
+    private BigDecimal remisePercent;
+
+    @Column(name = "quantite_min", precision = 18, scale = 4)
+    private BigDecimal quantiteMin;
+
+    @Column(name = "delai_jours")
+    private Integer delaiJours;
+
+    @Column(name = "source", nullable = false, length = 20)
+    private String source;
+
+    @Column(name = "source_ref_id")
+    private UUID sourceRefId;
+
+    @Column(name = "incoterm", length = 20)
+    private String incoterm;
+
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
     @Column(name = "updated_at", nullable = false)
     private OffsetDateTime updatedAt;
+
+    /**
+     * Prix net après remise catalogue.
+     */
+    public BigDecimal prixNetHt() {
+        BigDecimal brut = prixUnitaireHt != null ? prixUnitaireHt : BigDecimal.ZERO;
+        BigDecimal remise = remisePercent != null ? remisePercent : BigDecimal.ZERO;
+        return brut.multiply(BigDecimal.ONE.subtract(remise.movePointLeft(2)));
+    }
+
+    public boolean isValidAt(LocalDate date) {
+        if (date == null) {
+            date = LocalDate.now();
+        }
+        if (validFrom != null && date.isBefore(validFrom)) {
+            return false;
+        }
+        return validTo == null || !date.isAfter(validTo);
+    }
+
+    public boolean isPerimeAt(LocalDate date) {
+        return validTo != null && date != null && validTo.isBefore(date);
+    }
 
     @PrePersist
     protected void onCreate() {
@@ -57,6 +108,15 @@ public class CatalogueFournisseurLigne {
         this.updatedAt = OffsetDateTime.now();
         if (this.actif == null) {
             this.actif = true;
+        }
+        if (this.validFrom == null) {
+            this.validFrom = LocalDate.now();
+        }
+        if (this.remisePercent == null) {
+            this.remisePercent = BigDecimal.ZERO;
+        }
+        if (this.source == null) {
+            this.source = ma.nafura.achats.domain.CatalogueSource.SAISIE_MANUELLE;
         }
     }
 

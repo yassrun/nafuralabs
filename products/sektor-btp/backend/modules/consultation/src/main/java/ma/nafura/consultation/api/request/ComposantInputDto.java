@@ -13,7 +13,7 @@ public class ComposantInputDto {
     private String designation;
 
     private String unite;
-    private BigDecimal quantiteIndicative;
+    private BigDecimal rendement;
     private BigDecimal quantite;
     private BigDecimal prixUnitaire;
     private Integer ordre;

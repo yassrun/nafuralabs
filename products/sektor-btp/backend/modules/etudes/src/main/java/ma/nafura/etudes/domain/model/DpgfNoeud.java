@@ -25,6 +25,9 @@ public class DpgfNoeud {
     public static final String TYPE_SOUS_LOT = "SOUS_LOT";
     public static final String TYPE_ARTICLE = "ARTICLE";
 
+    public static final String MODE_FOURNI = "FOURNI";
+    public static final String MODE_DECOMPOSE = "DECOMPOSE";
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -67,6 +70,16 @@ public class DpgfNoeud {
     @Column(name = "total", precision = 18, scale = 4)
     private BigDecimal total;
 
+    @Column(name = "descriptif", columnDefinition = "TEXT")
+    private String descriptif;
+
+    /** FOURNI | DECOMPOSE — non nul uniquement si type = ARTICLE. */
+    @Column(name = "mode", length = 20)
+    private String mode;
+
+    @Column(name = "prix_dpu_id")
+    private UUID prixDpuId;
+
     @Column(name = "ordre", nullable = false)
     private Integer ordre;
 
@@ -102,6 +115,9 @@ public class DpgfNoeud {
         this.updatedAt = OffsetDateTime.now();
         if (this.ordre == null) {
             this.ordre = 0;
+        }
+        if (TYPE_ARTICLE.equals(this.type) && this.mode == null) {
+            this.mode = MODE_FOURNI;
         }
     }
 

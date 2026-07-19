@@ -33,14 +33,17 @@ public class AppelOffreAchatService {
     private final AppelOffreAchatRepository repository;
     private final AppelOffreAchatSeedService seedService;
     private final BonCommandeAchatService bonCommandeAchatService;
+    private final CatalogueAlimentationService catalogueAlimentationService;
 
     public AppelOffreAchatService(
             AppelOffreAchatRepository repository,
             AppelOffreAchatSeedService seedService,
-            BonCommandeAchatService bonCommandeAchatService) {
+            BonCommandeAchatService bonCommandeAchatService,
+            CatalogueAlimentationService catalogueAlimentationService) {
         this.repository = repository;
         this.seedService = seedService;
         this.bonCommandeAchatService = bonCommandeAchatService;
+        this.catalogueAlimentationService = catalogueAlimentationService;
     }
 
     @Transactional(readOnly = true)
@@ -313,6 +316,15 @@ public class AppelOffreAchatService {
         entity.setBcGenereNumero(bc.getNumero());
         if (winning != null) {
             entity.setTotalAttribueHt(winning.getTotalHt());
+            winning.setRetenue(true);
+            if (entity.getReponses() != null) {
+                for (OffreFournisseur offre : entity.getReponses()) {
+                    if (!offre.getId().equals(winning.getId())) {
+                        offre.setRetenue(false);
+                    }
+                }
+            }
+            catalogueAlimentationService.fromOffreRetenue(winning);
         } else {
             entity.setTotalAttribueHt(bc.getTotalHt());
         }

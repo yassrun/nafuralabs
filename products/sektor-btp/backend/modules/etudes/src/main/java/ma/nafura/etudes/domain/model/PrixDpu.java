@@ -13,14 +13,20 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ma.nafura.etudes.domain.audit.AuditableEtude;
+import ma.nafura.etudes.domain.audit.EtudeAuditingListener;
 
 @Entity
 @Table(name = "prix_dpu")
+@EntityListeners(EtudeAuditingListener.class)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PrixDpu {
+public class PrixDpu implements AuditableEtude {
+
+    public static final String MODE_FOURNI = "FOURNI";
+    public static final String MODE_DECOMPOSE = "DECOMPOSE";
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -29,9 +35,16 @@ public class PrixDpu {
     @Column(name = "tenant_id", nullable = false)
     private UUID tenantId;
 
-    @Column(name = "ouvrage_id", nullable = false)
+    @Column(name = "ouvrage_id")
     @JsonIgnore
     private UUID ouvrageId;
+
+    @Column(name = "dpgf_noeud_id")
+    private UUID dpgfNoeudId;
+
+    /** Traçabilité si instancié depuis la bibliothèque. */
+    @Column(name = "source_ouvrage_id")
+    private UUID sourceOuvrageId;
 
     @Column(name = "debours_sec", nullable = false, precision = 18, scale = 4)
     @JsonProperty("deboursSec")
@@ -56,6 +69,16 @@ public class PrixDpu {
     @Column(name = "tva_taux", nullable = false, precision = 8, scale = 4)
     @JsonProperty("tvaTaux")
     private BigDecimal tvaTaux;
+
+    @Column(name = "created_by", length = 100)
+    private String createdBy;
+
+    @Column(name = "updated_by", length = 100)
+    private String updatedBy;
+
+    @Version
+    @Column(name = "version", nullable = false)
+    private Long version;
 
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
@@ -82,14 +105,11 @@ public class PrixDpu {
     protected void onCreate() {
         this.createdAt = OffsetDateTime.now();
         this.updatedAt = OffsetDateTime.now();
+        if (this.version == null) {
+            this.version = 0L;
+        }
         if (this.deboursSec == null) {
             this.deboursSec = BigDecimal.ZERO;
-        }
-        if (this.fraisGenerauxPercent == null) {
-            this.fraisGenerauxPercent = new BigDecimal("8");
-        }
-        if (this.margeBeneficiairePercent == null) {
-            this.margeBeneficiairePercent = new BigDecimal("7");
         }
         if (this.prixVenteHt == null) {
             this.prixVenteHt = BigDecimal.ZERO;
@@ -97,9 +117,7 @@ public class PrixDpu {
         if (this.prixVenteTtc == null) {
             this.prixVenteTtc = BigDecimal.ZERO;
         }
-        if (this.tvaTaux == null) {
-            this.tvaTaux = new BigDecimal("20");
-        }
+        // FG / marge / TVA : renseignés par ParametresEtudeService avant persist — pas de défauts ici
     }
 
     @PreUpdate

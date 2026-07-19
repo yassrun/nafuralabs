@@ -24,7 +24,7 @@ export interface ConsultationComposant {
   type: ComposantType;
   designation: string;
   unite?: string | null;
-  quantiteIndicative?: number | null;
+  rendement?: number | null;
   quantite?: number | null;
   prixUnitaire?: number | null;
   total?: number | null;
@@ -131,7 +131,7 @@ export interface ComposantInput {
   type?: ComposantType | string;
   designation: string;
   unite?: string;
-  quantiteIndicative?: number;
+  rendement?: number;
   quantite?: number;
   prixUnitaire?: number;
   ordre?: number;

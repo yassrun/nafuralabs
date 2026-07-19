@@ -12,14 +12,17 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ma.nafura.etudes.domain.audit.AuditableEtude;
+import ma.nafura.etudes.domain.audit.EtudeAuditingListener;
 
 @Entity
 @Table(name = "dpgf")
+@EntityListeners(EtudeAuditingListener.class)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Dpgf {
+public class Dpgf implements AuditableEtude {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -52,6 +55,16 @@ public class Dpgf {
     @JsonProperty("totalTTC")
     private BigDecimal totalTtc;
 
+    @Column(name = "created_by", length = 100)
+    private String createdBy;
+
+    @Column(name = "updated_by", length = 100)
+    private String updatedBy;
+
+    @Version
+    @Column(name = "version", nullable = false)
+    private Long version;
+
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
@@ -76,8 +89,11 @@ public class Dpgf {
     protected void onCreate() {
         this.createdAt = OffsetDateTime.now();
         this.updatedAt = OffsetDateTime.now();
+        if (this.version == null) {
+            this.version = 0L;
+        }
         if (this.tvaTaux == null) {
-            this.tvaTaux = new BigDecimal("20");
+            this.tvaTaux = BigDecimal.ZERO; // renseigné via ParametresEtudeService à la création
         }
         if (this.totalHt == null) {
             this.totalHt = BigDecimal.ZERO;

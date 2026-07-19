@@ -14,4 +14,6 @@ import org.springframework.stereotype.Repository;
 public interface CurrencyRepository extends TenantScopedRepository<Currency, UUID> {
 
     Optional<Currency> findByTenantIdAndCode(UUID tenantId, String code);
+
+    Optional<Currency> findFirstByTenantIdAndIsReferenceTrue(UUID tenantId);
 }

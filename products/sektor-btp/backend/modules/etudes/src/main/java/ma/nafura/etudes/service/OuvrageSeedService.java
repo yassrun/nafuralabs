@@ -12,6 +12,7 @@ import ma.nafura.etudes.domain.model.ComposantOuvrage;
 import ma.nafura.etudes.domain.model.Ouvrage;
 import ma.nafura.etudes.domain.model.UniteMain;
 import ma.nafura.etudes.repository.OuvrageRepository;
+import ma.nafura.etudes.service.ParametresEtudeService;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
@@ -106,10 +107,10 @@ public class OuvrageSeedService {
         BigDecimal sousTotal = composantsTotal.add(moTotal).setScale(4, RoundingMode.HALF_UP);
         BigDecimal fg = entity.getFraisGenerauxPercent() != null
                 ? entity.getFraisGenerauxPercent()
-                : new BigDecimal("8");
+                : ParametresEtudeService.DEFAULT_FRAIS_GENERAUX_PERCENT;
         BigDecimal benef = entity.getBeneficePercent() != null
                 ? entity.getBeneficePercent()
-                : new BigDecimal("7");
+                : ParametresEtudeService.DEFAULT_MARGE_PERCENT;
         BigDecimal prix = sousTotal
                 .multiply(BigDecimal.ONE.add(fg.movePointLeft(2)))
                 .multiply(BigDecimal.ONE.add(benef.movePointLeft(2)))

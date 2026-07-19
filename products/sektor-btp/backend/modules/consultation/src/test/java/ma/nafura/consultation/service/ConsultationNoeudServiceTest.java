@@ -11,8 +11,9 @@ import java.util.UUID;
 import ma.nafura.consultation.domain.model.ConsultationNoeud;
 import ma.nafura.consultation.repository.ConsultationComposantRepository;
 import ma.nafura.consultation.repository.ConsultationNoeudRepository;
-import ma.nafura.consultation.service.port.DecompositionSuggestionPort;
-import ma.nafura.consultation.service.port.DescriptifResolverPort;
+import ma.nafura.consultation.repository.ConsultationRepository;
+import ma.nafura.etudes.service.port.DecompositionSuggestionPort;
+import ma.nafura.etudes.service.port.DescriptifResolverPort;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,10 +26,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class ConsultationNoeudServiceTest {
 
     @Mock
+    private ConsultationRepository consultationRepository;
+
+    @Mock
     private ConsultationNoeudRepository noeudRepository;
 
     @Mock
     private ConsultationComposantRepository composantRepository;
+
+    @Mock
+    private ConsultationPricingCalculator pricingCalculator;
 
     @Mock
     private DescriptifResolverPort descriptifResolverPort;
@@ -44,7 +51,12 @@ class ConsultationNoeudServiceTest {
     void setUp() {
         TenantContext.setTenantId(tenantId);
         service = new ConsultationNoeudService(
-                noeudRepository, composantRepository, descriptifResolverPort, decompositionSuggestionPort);
+                consultationRepository,
+                noeudRepository,
+                composantRepository,
+                pricingCalculator,
+                descriptifResolverPort,
+                decompositionSuggestionPort);
     }
 
     @AfterEach

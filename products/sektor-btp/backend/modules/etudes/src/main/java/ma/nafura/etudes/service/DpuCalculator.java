@@ -11,8 +11,8 @@ public class DpuCalculator {
 
     private static final int MONEY_SCALE = 2;
 
-    public BigDecimal computeLineTotal(BigDecimal quantite, BigDecimal prixUnitaire) {
-        BigDecimal q = quantite != null ? quantite.max(BigDecimal.ZERO) : BigDecimal.ZERO;
+    public BigDecimal computeLineTotal(BigDecimal rendement, BigDecimal prixUnitaire) {
+        BigDecimal q = rendement != null ? rendement.max(BigDecimal.ZERO) : BigDecimal.ZERO;
         BigDecimal pu = prixUnitaire != null ? prixUnitaire.max(BigDecimal.ZERO) : BigDecimal.ZERO;
         return q.multiply(pu).setScale(MONEY_SCALE, RoundingMode.HALF_UP);
     }
@@ -25,7 +25,7 @@ public class DpuCalculator {
         for (ComposantDpu composant : composants) {
             BigDecimal total = composant.getTotal();
             if (total == null) {
-                total = computeLineTotal(composant.getQuantite(), composant.getPrixUnitaire());
+                total = computeLineTotal(composant.getRendement(), composant.getPrixUnitaire());
             }
             sum = sum.add(total);
         }
@@ -56,7 +56,7 @@ public class DpuCalculator {
             return;
         }
         for (ComposantDpu composant : composants) {
-            composant.setTotal(computeLineTotal(composant.getQuantite(), composant.getPrixUnitaire()));
+            composant.setTotal(computeLineTotal(composant.getRendement(), composant.getPrixUnitaire()));
         }
     }
 }

@@ -63,9 +63,19 @@ public class Item {
     @Column(name = "abc_class", length = 1)
     private String abcClass;
 
+    /**
+     * Prix moyen pondéré — valorisation du stock, alimenté par le module stock.
+     * Ne pas utiliser pour le chiffrage prospectif (voir {@code ResolutionPrixService}).
+     */
     @Column(name = "pmp", precision = 18, scale = 4)
     private BigDecimal pmp;
 
+    /**
+     * @deprecated Doublon dangereux avec {@link ItemPrice}. Migrer vers un
+     *     {@code ItemPrice} de type {@code ACHAT_STANDARD}. Colonne conservée
+     *     jusqu'à un changelog ultérieur de suppression.
+     */
+    @Deprecated(since = "lot-9", forRemoval = true)
     @Column(name = "prix_unitaire", precision = 18, scale = 4)
     private BigDecimal prixUnitaire;
 

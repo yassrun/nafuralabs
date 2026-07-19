@@ -26,6 +26,19 @@ La quantité du bordereau n'intervient **qu'au niveau `DpgfNoeud.total`**. Jamai
 
 ### T1.1 — Tests de non-régression du calcul de prix *(à faire en premier)*
 
+> **Adaptation 2026-07-19.** Q2 a confirmé que la formule est correcte et **ne doit pas être
+> modifiée** (R2). Le lot 1 renomme, restructure et supprime — il ne touche pas au calcul.
+>
+> Ces tests vérifient donc l'**invariant structurel** : la chaîne arithmétique tient, le déboursé
+> reste unitaire, la quantité du bordereau n'intervient qu'une fois. Les valeurs ci-dessous sont
+> **internement cohérentes mais non validées métier** — elles sont marquées comme telles dans le
+> code et seront remplacées par les valeurs réelles de l'expert métier sans réécrire les tests.
+>
+> ```java
+> // TODO(metier): valeurs d'illustration, à remplacer par le sous-détail B35 réel.
+> // La STRUCTURE du test est définitive ; seuls les nombres changeront.
+> ```
+
 Avant toute modification, figer le comportement attendu.
 
 **Fichier** : `backend/modules/etudes/src/test/java/ma/nafura/etudes/service/DpuCalculatorTest.java`

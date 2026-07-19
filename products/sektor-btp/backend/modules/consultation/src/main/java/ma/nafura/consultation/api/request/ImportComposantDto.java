@@ -9,6 +9,6 @@ public class ImportComposantDto {
     private String type;
     private String designation;
     private String unite;
-    private BigDecimal quantiteIndicative;
+    private BigDecimal rendement;
     private Integer ordre;
 }

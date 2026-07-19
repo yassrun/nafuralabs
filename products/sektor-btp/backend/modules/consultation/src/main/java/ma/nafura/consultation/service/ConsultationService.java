@@ -281,7 +281,7 @@ public class ConsultationService {
                         : ConsultationComposant.TYPE_MATERIAU)
                 .designation(dto.getDesignation() != null ? dto.getDesignation().trim() : "(composant)")
                 .unite(trimOrNull(dto.getUnite()))
-                .quantiteIndicative(dto.getQuantiteIndicative())
+                .rendement(dto.getRendement())
                 .ordre(dto.getOrdre() != null ? dto.getOrdre() : ordre)
                 .build();
         composantRepository.save(composant);

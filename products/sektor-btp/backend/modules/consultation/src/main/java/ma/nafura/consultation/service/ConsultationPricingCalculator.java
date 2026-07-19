@@ -29,7 +29,7 @@ public class ConsultationPricingCalculator {
         for (ConsultationComposant c : composants) {
             BigDecimal total = c.getTotal();
             if (total == null) {
-                BigDecimal q = c.getQuantite() != null ? c.getQuantite() : c.getQuantiteIndicative();
+                BigDecimal q = c.getQuantite() != null ? c.getQuantite() : c.getRendement();
                 total = computeLineTotal(q, c.getPrixUnitaire());
             }
             sum = sum.add(total);

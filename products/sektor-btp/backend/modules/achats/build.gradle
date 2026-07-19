@@ -3,6 +3,8 @@ plugins {
 }
 
 dependencies {
+    implementation project(':sektor:item')
+    implementation project(':sektor:currency')
     implementation project(':sektor:finance')
     implementation project(':sektor:stock')
     implementation project(':platform:core:framework')

@@ -42,6 +42,7 @@ public class FactureFournisseurService {
     private final AccountingJournalRepository journalRepository;
     private final JournalEntryService journalEntryService;
     private final ComptabiliteSeedService seedService;
+    private final CatalogueAlimentationService catalogueAlimentationService;
 
     public FactureFournisseurService(
             FactureFournisseurRepository repository,
@@ -50,7 +51,8 @@ public class FactureFournisseurService {
             MatchingThreeWayService matchingService,
             AccountingJournalRepository journalRepository,
             JournalEntryService journalEntryService,
-            ComptabiliteSeedService seedService) {
+            ComptabiliteSeedService seedService,
+            CatalogueAlimentationService catalogueAlimentationService) {
         this.repository = repository;
         this.bonCommandeService = bonCommandeService;
         this.receptionService = receptionService;
@@ -58,6 +60,7 @@ public class FactureFournisseurService {
         this.journalRepository = journalRepository;
         this.journalEntryService = journalEntryService;
         this.seedService = seedService;
+        this.catalogueAlimentationService = catalogueAlimentationService;
     }
 
     @Transactional(readOnly = true)
@@ -202,6 +205,7 @@ public class FactureFournisseurService {
         entity.setUpdatedAt(OffsetDateTime.now());
         FactureFournisseur saved = repository.save(entity);
         attachLigneFactureIds(saved);
+        catalogueAlimentationService.fromFactureValidee(saved);
         return saved;
     }
 

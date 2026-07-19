@@ -2,6 +2,7 @@ package ma.nafura.etudes.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -10,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ma.nafura.item.domain.SourcePrix;
 
 @Entity
 @Table(name = "composants_dpu")
@@ -43,8 +45,13 @@ public class ComposantDpu {
     @JsonProperty("articleOuPosteId")
     private String articleOuPosteId;
 
-    @Column(name = "quantite", nullable = false, precision = 18, scale = 4)
-    private BigDecimal quantite;
+    /**
+     * Quantité de ce composant nécessaire pour UNE unité d'ouvrage (ex. 350 kg de ciment par m³).
+     * Ce n'est PAS une quantité absolue — ne jamais multiplier par la quantité du bordereau ici.
+     */
+    @Column(name = "rendement", nullable = false, precision = 18, scale = 4)
+    @JsonProperty("rendement")
+    private BigDecimal rendement;
 
     @Column(name = "unite", nullable = false, length = 30)
     private String unite;
@@ -59,11 +66,31 @@ public class ComposantDpu {
     @Column(name = "ordre", nullable = false)
     private Integer ordre;
 
+    @Column(name = "source_prix", nullable = false, length = 20)
+    private String sourcePrix;
+
+    @Column(name = "offre_fournisseur_id")
+    private UUID offreFournisseurId;
+
+    @Column(name = "suggere_par_ia", nullable = false)
+    private Boolean suggereParIa;
+
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
     @Column(name = "updated_at", nullable = false)
     private OffsetDateTime updatedAt;
+
+    /** Alias JSON lecture (compat front) — ne pas utiliser en écriture métier. */
+    @JsonProperty("quantite")
+    public BigDecimal getQuantite() {
+        return rendement;
+    }
+
+    @JsonSetter("quantite")
+    public void setQuantite(BigDecimal quantite) {
+        this.rendement = quantite;
+    }
 
     @PrePersist
     protected void onCreate() {
@@ -71,6 +98,12 @@ public class ComposantDpu {
         this.updatedAt = OffsetDateTime.now();
         if (this.ordre == null) {
             this.ordre = 0;
+        }
+        if (this.sourcePrix == null) {
+            this.sourcePrix = SourcePrix.MANUEL;
+        }
+        if (this.suggereParIa == null) {
+            this.suggereParIa = false;
         }
     }
 

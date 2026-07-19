@@ -1,11 +1,11 @@
-package ma.nafura.consultation.service.port;
+package ma.nafura.etudes.service.port;
 
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
-import ma.nafura.consultation.api.dto.CatalogCandidateDto;
+import ma.nafura.etudes.api.dto.CatalogCandidateDto;
 import ma.nafura.item.domain.model.Item;
 import ma.nafura.item.repository.ItemRepository;
 import ma.nafura.platform.framework.context.TenantContext;
@@ -14,11 +14,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-/**
- * v1 catalog resolver: tenant-scoped substring match on item name / code.
- * Replaceable by a fuzzy/embedding resolver later (declare another
- * {@link CatalogResolverPort} bean as {@code @Primary}).
- */
 @Component
 public class ItemCatalogResolver implements CatalogResolverPort {
 

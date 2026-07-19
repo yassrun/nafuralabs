@@ -51,8 +51,11 @@ public class ConsultationComposant {
     @Column(name = "unite", length = 30)
     private String unite;
 
-    @Column(name = "quantite_indicative", precision = 18, scale = 4)
-    private BigDecimal quantiteIndicative;
+    /**
+     * Quantité de ce composant par unité d'ouvrage (rendement).
+     */
+    @Column(name = "rendement", precision = 18, scale = 4)
+    private BigDecimal rendement;
 
     @Column(name = "quantite", precision = 18, scale = 4)
     private BigDecimal quantite;

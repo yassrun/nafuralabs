@@ -157,7 +157,7 @@
                               <td>{{ comp.type }}</td>
                               <td>{{ comp.designation }}</td>
                               <td>{{ comp.unite || '—' }}</td>
-                              <td class="num">{{ comp.quantite ?? comp.quantiteIndicative ?? '—' }}</td>
+                              <td class="num">{{ comp.quantite ?? comp.rendement ?? '—' }}</td>
                               <td class="num">{{ comp.prixUnitaire ?? '—' }}</td>
                               <td class="num">{{ comp.total != null ? (comp.total | number:'1.2-2') : '—' }}</td>
                               <td>

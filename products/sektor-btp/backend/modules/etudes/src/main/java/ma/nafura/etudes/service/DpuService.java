@@ -28,14 +28,11 @@ import org.springframework.util.StringUtils;
 @Service
 public class DpuService {
 
-    private static final BigDecimal DEFAULT_FG = new BigDecimal("8");
-    private static final BigDecimal DEFAULT_MARGE = new BigDecimal("7");
-    private static final BigDecimal DEFAULT_TVA = new BigDecimal("20");
-
     private final PrixDpuRepository repository;
     private final DpuVersionRepository versionRepository;
     private final OuvrageRepository ouvrageRepository;
     private final DpuCalculator calculator;
+    private final ParametresEtudeService parametresEtudeService;
     private final ObjectMapper objectMapper;
 
     public DpuService(
@@ -43,11 +40,13 @@ public class DpuService {
             DpuVersionRepository versionRepository,
             OuvrageRepository ouvrageRepository,
             DpuCalculator calculator,
+            ParametresEtudeService parametresEtudeService,
             ObjectMapper objectMapper) {
         this.repository = repository;
         this.versionRepository = versionRepository;
         this.ouvrageRepository = ouvrageRepository;
         this.calculator = calculator;
+        this.parametresEtudeService = parametresEtudeService;
         this.objectMapper = objectMapper;
     }
 
@@ -108,10 +107,13 @@ public class DpuService {
         PrixDpu entity = PrixDpu.builder()
                 .tenantId(tenantId)
                 .ouvrageId(ouvrageId)
-                .fraisGenerauxPercent(defaultPercent(request.getFraisGenerauxPercent(), ouvrage.getFraisGenerauxPercent()))
-                .margeBeneficiairePercent(
-                        defaultPercent(request.getMargeBeneficiairePercent(), ouvrage.getBeneficePercent()))
-                .tvaTaux(defaultPercent(request.getTvaTaux(), DEFAULT_TVA))
+                .fraisGenerauxPercent(defaultPercent(
+                        request.getFraisGenerauxPercent(),
+                        defaultPercent(ouvrage.getFraisGenerauxPercent(), parametresEtudeService.fraisGenerauxPercentDefaut())))
+                .margeBeneficiairePercent(defaultPercent(
+                        request.getMargeBeneficiairePercent(),
+                        defaultPercent(ouvrage.getBeneficePercent(), parametresEtudeService.margePercentDefaut())))
+                .tvaTaux(defaultPercent(request.getTvaTaux(), parametresEtudeService.tvaTauxDefaut()))
                 .composants(new ArrayList<>())
                 .build();
 
@@ -188,14 +190,19 @@ public class DpuService {
                 .orElseGet(() -> PrixDpu.builder()
                         .tenantId(tenantId)
                         .ouvrageId(ouvrageId)
-                        .fraisGenerauxPercent(defaultPercent(null, ouvrage.getFraisGenerauxPercent()))
-                        .margeBeneficiairePercent(defaultPercent(null, ouvrage.getBeneficePercent()))
-                        .tvaTaux(DEFAULT_TVA)
+                        .fraisGenerauxPercent(defaultPercent(
+                                ouvrage.getFraisGenerauxPercent(),
+                                parametresEtudeService.fraisGenerauxPercentDefaut()))
+                        .margeBeneficiairePercent(defaultPercent(
+                                ouvrage.getBeneficePercent(), parametresEtudeService.margePercentDefaut()))
+                        .tvaTaux(parametresEtudeService.tvaTauxDefaut())
                         .composants(new ArrayList<>())
                         .build());
 
-        entity.setFraisGenerauxPercent(defaultPercent(ouvrage.getFraisGenerauxPercent(), DEFAULT_FG));
-        entity.setMargeBeneficiairePercent(defaultPercent(ouvrage.getBeneficePercent(), DEFAULT_MARGE));
+        entity.setFraisGenerauxPercent(defaultPercent(
+                ouvrage.getFraisGenerauxPercent(), parametresEtudeService.fraisGenerauxPercentDefaut()));
+        entity.setMargeBeneficiairePercent(
+                defaultPercent(ouvrage.getBeneficePercent(), parametresEtudeService.margePercentDefaut()));
 
         if (composants != null) {
             replaceComposants(entity, composants);
@@ -246,7 +253,7 @@ public class DpuService {
             ComposantDpuInputDto mo = new ComposantDpuInputDto();
             mo.setType(ComposantDpu.TYPE_MAIN_DOEUVRE);
             mo.setArticleOuPosteId(ouvrage.getId() + "-mo");
-            mo.setQuantite(uniteMain.getHeures() != null ? uniteMain.getHeures() : BigDecimal.ZERO);
+            mo.setRendement(uniteMain.getHeures() != null ? uniteMain.getHeures() : BigDecimal.ZERO);
             mo.setUnite("h");
             mo.setPrixUnitaire(uniteMain.getTauxHoraire() != null ? uniteMain.getTauxHoraire() : BigDecimal.ZERO);
             mo.setTotal(uniteMain.getTotal());
@@ -260,7 +267,7 @@ public class DpuService {
         input.setType(mapOuvrageTypeToDpu(composant.getType()));
         input.setArticleOuPosteId(
                 StringUtils.hasText(composant.getArticleId()) ? composant.getArticleId() : composant.getId().toString());
-        input.setQuantite(composant.getRendement());
+        input.setRendement(composant.getRendement());
         input.setUnite(composant.getUnite());
         input.setPrixUnitaire(composant.getPrixUnitaire());
         input.setTotal(composant.getTotal());
@@ -268,15 +275,7 @@ public class DpuService {
     }
 
     private String mapOuvrageTypeToDpu(String type) {
-        if (!StringUtils.hasText(type)) {
-            return ComposantDpu.TYPE_MATIERE;
-        }
-        return switch (type.trim().toUpperCase()) {
-            case ComposantOuvrage.TYPE_MO -> ComposantDpu.TYPE_MAIN_DOEUVRE;
-            case ComposantOuvrage.TYPE_LOCATION, ComposantOuvrage.TYPE_OUTILLAGE -> ComposantDpu.TYPE_MATERIEL;
-            case ComposantOuvrage.TYPE_SOUS_TRAITANCE -> ComposantDpu.TYPE_SOUS_TRAITANCE;
-            default -> ComposantDpu.TYPE_MATIERE;
-        };
+        return ma.nafura.item.domain.NatureComposantMapping.toDpuTypeFromOuvrage(type);
     }
 
     private void replaceComposants(PrixDpu entity, List<ComposantDpuInputDto> inputs) {
@@ -290,17 +289,22 @@ public class DpuService {
     private ComposantDpu buildComposant(PrixDpu entity, ComposantDpuInputDto input, int ordre) {
         BigDecimal total = input.getTotal() != null
                 ? input.getTotal()
-                : calculator.computeLineTotal(input.getQuantite(), input.getPrixUnitaire());
+                : calculator.computeLineTotal(input.getRendement(), input.getPrixUnitaire());
         return ComposantDpu.builder()
                 .tenantId(entity.getTenantId())
                 .prixDpu(entity)
                 .type(input.getType().trim())
                 .articleOuPosteId(input.getArticleOuPosteId().trim())
-                .quantite(input.getQuantite())
+                .rendement(input.getRendement())
                 .unite(input.getUnite().trim())
                 .prixUnitaire(input.getPrixUnitaire())
                 .total(total)
                 .ordre(ordre)
+                .sourcePrix(StringUtils.hasText(input.getSourcePrix())
+                        ? input.getSourcePrix().trim()
+                        : ma.nafura.item.domain.SourcePrix.MANUEL)
+                .offreFournisseurId(input.getOffreFournisseurId())
+                .suggereParIa(Boolean.TRUE.equals(input.getSuggereParIa()))
                 .build();
     }
 

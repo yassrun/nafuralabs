@@ -2,6 +2,8 @@ package ma.nafura.achats.api.request;
 
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.UUID;
 import lombok.Data;
 
 @Data
@@ -25,4 +27,24 @@ public class CatalogueFournisseurLigneUpdateDto {
     private String uom;
 
     private Boolean actif;
+
+    private UUID currencyId;
+
+    private LocalDate validFrom;
+
+    private LocalDate validTo;
+
+    private BigDecimal remisePercent;
+
+    private BigDecimal quantiteMin;
+
+    private Integer delaiJours;
+
+    @Size(max = 20)
+    private String source;
+
+    private UUID sourceRefId;
+
+    @Size(max = 20)
+    private String incoterm;
 }

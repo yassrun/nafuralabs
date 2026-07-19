@@ -3,6 +3,7 @@ plugins {
 }
 
 dependencies {
+    implementation project(':sektor:currency')
     implementation project(':platform:core:framework')
     implementation project(':platform:core:authorization')
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'

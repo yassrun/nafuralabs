@@ -15,8 +15,10 @@ import ma.nafura.consultation.domain.model.ConsultationNoeud;
 import ma.nafura.consultation.repository.ConsultationComposantRepository;
 import ma.nafura.consultation.repository.ConsultationNoeudRepository;
 import ma.nafura.consultation.repository.ConsultationRepository;
-import ma.nafura.consultation.service.port.DecompositionSuggestionPort;
-import ma.nafura.consultation.service.port.DescriptifResolverPort;
+import ma.nafura.etudes.api.request.ComposantDpuInputDto;
+import ma.nafura.etudes.domain.model.DpgfNoeud;
+import ma.nafura.etudes.service.port.DecompositionSuggestionPort;
+import ma.nafura.etudes.service.port.DescriptifResolverPort;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -191,7 +193,7 @@ public class ConsultationNoeudService {
         int ordre = input.getOrdre() != null
                 ? input.getOrdre()
                 : composantRepository.findByTenantIdAndNoeudIdOrderByOrdreAsc(tenantId(), noeud.getId()).size();
-        BigDecimal quantite = input.getQuantite() != null ? input.getQuantite() : input.getQuantiteIndicative();
+        BigDecimal quantite = input.getQuantite() != null ? input.getQuantite() : input.getRendement();
         BigDecimal pu = input.getPrixUnitaire();
         ConsultationComposant composant = ConsultationComposant.builder()
                 .tenantId(tenantId())
@@ -201,7 +203,7 @@ public class ConsultationNoeudService {
                         : ConsultationComposant.TYPE_MATERIAU)
                 .designation(input.getDesignation().trim())
                 .unite(trimOrNull(input.getUnite()))
-                .quantiteIndicative(input.getQuantiteIndicative() != null ? input.getQuantiteIndicative() : quantite)
+                .rendement(input.getRendement() != null ? input.getRendement() : quantite)
                 .quantite(quantite)
                 .prixUnitaire(pu)
                 .total(pricingCalculator.computeLineTotal(quantite, pu))
@@ -227,13 +229,13 @@ public class ConsultationNoeudService {
         if (input.getUnite() != null) {
             composant.setUnite(trimOrNull(input.getUnite()));
         }
-        if (input.getQuantiteIndicative() != null) {
-            composant.setQuantiteIndicative(input.getQuantiteIndicative());
+        if (input.getRendement() != null) {
+            composant.setRendement(input.getRendement());
         }
         if (input.getQuantite() != null) {
             composant.setQuantite(input.getQuantite());
-        } else if (input.getQuantiteIndicative() != null && composant.getQuantite() == null) {
-            composant.setQuantite(input.getQuantiteIndicative());
+        } else if (input.getRendement() != null && composant.getQuantite() == null) {
+            composant.setQuantite(input.getRendement());
         }
         if (input.getPrixUnitaire() != null) {
             composant.setPrixUnitaire(input.getPrixUnitaire());
@@ -261,13 +263,15 @@ public class ConsultationNoeudService {
     @Transactional(readOnly = true)
     public String suggestDescriptif(UUID noeudId) {
         ConsultationNoeud noeud = requireNoeud(noeudId);
-        return descriptifResolverPort.resolveDescriptif(noeud);
+        return descriptifResolverPort.resolveDescriptif(toDpgfBridge(noeud));
     }
 
     @Transactional(readOnly = true)
     public List<ImportComposantDto> suggestDecomposition(UUID noeudId) {
         ConsultationNoeud noeud = requireNoeud(noeudId);
-        return decompositionSuggestionPort.suggest(noeud);
+        return decompositionSuggestionPort.suggest(toDpgfBridge(noeud)).stream()
+                .map(this::toImportComposant)
+                .toList();
     }
 
     public boolean isDescriptifResolverAvailable() {
@@ -345,6 +349,28 @@ public class ConsultationNoeudService {
         return composantRepository
                 .findByIdAndTenantId(id, tenantId())
                 .orElseThrow(() -> new IllegalArgumentException("Composant not found"));
+    }
+
+    private DpgfNoeud toDpgfBridge(ConsultationNoeud noeud) {
+        return DpgfNoeud.builder()
+                .id(noeud.getId())
+                .tenantId(noeud.getTenantId())
+                .code(noeud.getCode())
+                .libelle(noeud.getLibelle())
+                .descriptif(noeud.getDescriptif())
+                .type(DpgfNoeud.TYPE_ARTICLE)
+                .unite(noeud.getUnite())
+                .quantite(noeud.getQuantite())
+                .build();
+    }
+
+    private ImportComposantDto toImportComposant(ComposantDpuInputDto input) {
+        ImportComposantDto dto = new ImportComposantDto();
+        dto.setType(input.getType());
+        dto.setDesignation(input.getArticleOuPosteId());
+        dto.setUnite(input.getUnite());
+        dto.setRendement(input.getRendement());
+        return dto;
     }
 
     private String trimOrNull(String value) {

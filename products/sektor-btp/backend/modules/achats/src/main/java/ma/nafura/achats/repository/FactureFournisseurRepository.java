@@ -10,6 +10,8 @@ public interface FactureFournisseurRepository extends JpaRepository<FactureFourn
 
     List<FactureFournisseur> findByTenantIdOrderByCreatedAtDesc(UUID tenantId);
 
+    List<FactureFournisseur> findByTenantIdOrderByDateFactureDesc(UUID tenantId);
+
     List<FactureFournisseur> findByTenantIdAndBcIdOrderByCreatedAtDesc(UUID tenantId, UUID bcId);
 
     List<FactureFournisseur> findByTenantIdAndStatusOrderByCreatedAtDesc(UUID tenantId, String status);

@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import ma.nafura.consultation.api.dto.CatalogCandidateDto;
+import ma.nafura.etudes.api.dto.CatalogCandidateDto;
 import ma.nafura.consultation.api.request.ComposantInputDto;
 import ma.nafura.consultation.api.request.CreateItemRequest;
 import ma.nafura.consultation.api.request.ImportComposantDto;

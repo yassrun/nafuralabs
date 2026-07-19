@@ -24,7 +24,8 @@ class DpgfServiceBuildTreeTest {
                 mock(DpgfNoeudRepository.class),
                 mock(MetreService.class),
                 mock(OuvrageRepository.class),
-                new DpgfAgregationService());
+                new DpgfAgregationService(),
+                mock(ParametresEtudeService.class));
     }
 
     @Test

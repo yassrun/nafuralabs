@@ -18,9 +18,13 @@ import org.springframework.util.StringUtils;
 public class ContratFournisseurService {
 
     private final ContratFournisseurRepository repository;
+    private final CatalogueAlimentationService catalogueAlimentationService;
 
-    public ContratFournisseurService(ContratFournisseurRepository repository) {
+    public ContratFournisseurService(
+            ContratFournisseurRepository repository,
+            CatalogueAlimentationService catalogueAlimentationService) {
         this.repository = repository;
+        this.catalogueAlimentationService = catalogueAlimentationService;
     }
 
     @Transactional(readOnly = true)
@@ -121,7 +125,9 @@ public class ContratFournisseurService {
         }
         entity.setStatus(ContratFournisseur.STATUS_SIGNE);
         entity.setUpdatedAt(OffsetDateTime.now());
-        return repository.save(entity);
+        ContratFournisseur saved = repository.save(entity);
+        catalogueAlimentationService.fromContratSigne(saved);
+        return saved;
     }
 
     @Transactional

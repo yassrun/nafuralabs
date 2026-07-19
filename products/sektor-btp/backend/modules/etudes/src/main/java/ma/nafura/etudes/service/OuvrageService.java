@@ -31,17 +31,20 @@ import org.springframework.util.StringUtils;
 @Service
 public class OuvrageService {
 
-    private static final BigDecimal DEFAULT_FG = new BigDecimal("8");
-    private static final BigDecimal DEFAULT_BENEFICE = new BigDecimal("7");
-
     private final OuvrageRepository repository;
     private final OuvrageSeedService seedService;
     private final DpuService dpuService;
+    private final ParametresEtudeService parametresEtudeService;
 
-    public OuvrageService(OuvrageRepository repository, OuvrageSeedService seedService, DpuService dpuService) {
+    public OuvrageService(
+            OuvrageRepository repository,
+            OuvrageSeedService seedService,
+            DpuService dpuService,
+            ParametresEtudeService parametresEtudeService) {
         this.repository = repository;
         this.seedService = seedService;
         this.dpuService = dpuService;
+        this.parametresEtudeService = parametresEtudeService;
     }
 
     @Transactional(readOnly = true)
@@ -86,8 +89,10 @@ public class OuvrageService {
                 .category(request.getCategory().trim())
                 .unite(request.getUnite().trim())
                 .uniteMain(buildUniteMain(request.getUniteMain()))
-                .fraisGenerauxPercent(defaultPercent(request.getFraisGenerauxPercent(), DEFAULT_FG))
-                .beneficePercent(defaultPercent(request.getBeneficePercent(), DEFAULT_BENEFICE))
+                .fraisGenerauxPercent(defaultPercent(
+                        request.getFraisGenerauxPercent(), parametresEtudeService.fraisGenerauxPercentDefaut()))
+                .beneficePercent(defaultPercent(
+                        request.getBeneficePercent(), parametresEtudeService.margePercentDefaut()))
                 .isActive(request.getIsActive() != null ? request.getIsActive() : true)
                 .notes(trimOrNull(request.getNotes()))
                 .composants(new ArrayList<>())
@@ -277,8 +282,9 @@ public class OuvrageService {
                 ? entity.getUniteMain().getTotal()
                 : BigDecimal.ZERO;
         BigDecimal sousTotal = composantsTotal.add(moTotal).setScale(4, RoundingMode.HALF_UP);
-        BigDecimal fg = defaultPercent(entity.getFraisGenerauxPercent(), DEFAULT_FG);
-        BigDecimal benef = defaultPercent(entity.getBeneficePercent(), DEFAULT_BENEFICE);
+        BigDecimal fg = defaultPercent(entity.getFraisGenerauxPercent(), parametresEtudeService.fraisGenerauxPercentDefaut());
+        BigDecimal benef =
+                defaultPercent(entity.getBeneficePercent(), parametresEtudeService.margePercentDefaut());
         BigDecimal prix = sousTotal
                 .multiply(BigDecimal.ONE.add(fg.movePointLeft(2)))
                 .multiply(BigDecimal.ONE.add(benef.movePointLeft(2)))

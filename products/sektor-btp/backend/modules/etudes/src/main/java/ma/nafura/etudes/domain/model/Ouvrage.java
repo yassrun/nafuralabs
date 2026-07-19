@@ -98,12 +98,7 @@ public class Ouvrage {
         if (this.isActive == null) {
             this.isActive = true;
         }
-        if (this.fraisGenerauxPercent == null) {
-            this.fraisGenerauxPercent = new BigDecimal("8");
-        }
-        if (this.beneficePercent == null) {
-            this.beneficePercent = new BigDecimal("7");
-        }
+        // FG / bénéfice : renseignés via ParametresEtudeService à la création (pas de défauts en dur ici)
         if (this.prixUnitaireHt == null) {
             this.prixUnitaireHt = BigDecimal.ZERO;
         }

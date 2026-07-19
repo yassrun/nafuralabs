@@ -24,7 +24,9 @@ export interface ConsultationComposant {
   type: ComposantType;
   designation: string;
   unite?: string | null;
-  quantiteIndicative?: number | null;
+  /** Quantité PAR UNITÉ d'ouvrage (ex. 350 kg/m³). */
+  rendement?: number | null;
+  /** @deprecated Alias JSON lecture — préférer rendement. */
   quantite?: number | null;
   prixUnitaire?: number | null;
   total?: number | null;
@@ -131,7 +133,7 @@ export interface ComposantInput {
   type?: ComposantType | string;
   designation: string;
   unite?: string;
-  quantiteIndicative?: number;
+  rendement?: number;
   quantite?: number;
   prixUnitaire?: number;
   ordre?: number;

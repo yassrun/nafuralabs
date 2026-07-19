@@ -1,13 +1,18 @@
 package ma.nafura.achats.service;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import ma.nafura.achats.api.request.CatalogueFournisseurLigneCreateDto;
 import ma.nafura.achats.api.request.CatalogueFournisseurLigneUpdateDto;
+import ma.nafura.achats.domain.CatalogueSource;
 import ma.nafura.achats.domain.model.CatalogueFournisseurLigne;
 import ma.nafura.achats.repository.CatalogueFournisseurLigneRepository;
+import ma.nafura.currency.domain.model.Currency;
+import ma.nafura.currency.service.CurrencyConversionService;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,9 +22,13 @@ import org.springframework.util.StringUtils;
 public class CatalogueFournisseurLigneService {
 
     private final CatalogueFournisseurLigneRepository repository;
+    private final CurrencyConversionService currencyConversionService;
 
-    public CatalogueFournisseurLigneService(CatalogueFournisseurLigneRepository repository) {
+    public CatalogueFournisseurLigneService(
+            CatalogueFournisseurLigneRepository repository,
+            CurrencyConversionService currencyConversionService) {
         this.repository = repository;
+        this.currencyConversionService = currencyConversionService;
     }
 
     @Transactional(readOnly = true)
@@ -38,26 +47,85 @@ public class CatalogueFournisseurLigneService {
     public CatalogueFournisseurLigne getById(UUID id) {
         return repository
                 .findByIdAndTenantId(id, tenantId())
-                .orElseThrow(() -> new IllegalArgumentException("Catalogue fournisseur ligne not found"));
+                .orElseThrow(() -> new IllegalArgumentException("achats.catalogue.ligne_introuvable"));
     }
 
     @Transactional
     public CatalogueFournisseurLigne create(CatalogueFournisseurLigneCreateDto request) {
         UUID tenantId = tenantId();
-        String fournisseurId = request.getFournisseurId().trim();
-        String articleId = request.getArticleId().trim();
-        if (repository.existsByTenantIdAndFournisseurIdAndArticleId(tenantId, fournisseurId, articleId)) {
-            throw new IllegalArgumentException("Catalogue entry already exists for this supplier and article");
-        }
+        LocalDate validFrom =
+                request.getValidFrom() != null ? request.getValidFrom() : LocalDate.now();
+        return upsertHistorise(
+                tenantId,
+                request.getFournisseurId().trim(),
+                request.getArticleId().trim(),
+                request.getDesignation().trim(),
+                request.getPrixUnitaireHt(),
+                trimOrNull(request.getRefFournisseur()),
+                trimOrNull(request.getUom()),
+                request.getCurrencyId() != null ? request.getCurrencyId() : resolvePivotCurrencyId(tenantId),
+                validFrom,
+                request.getRemisePercent() != null ? request.getRemisePercent() : BigDecimal.ZERO,
+                request.getQuantiteMin(),
+                request.getDelaiJours(),
+                StringUtils.hasText(request.getSource())
+                        ? request.getSource().trim()
+                        : CatalogueSource.SAISIE_MANUELLE,
+                request.getSourceRefId(),
+                trimOrNull(request.getIncoterm()),
+                request.getActif() != null ? request.getActif() : true);
+    }
+
+    /**
+     * Historise : ferme la ligne ouverte précédente puis crée une nouvelle ligne.
+     * Ne jamais écraser un prix.
+     */
+    @Transactional
+    public CatalogueFournisseurLigne upsertHistorise(
+            UUID tenantId,
+            String fournisseurId,
+            String articleId,
+            String designation,
+            BigDecimal prixUnitaireHt,
+            String refFournisseur,
+            String uom,
+            UUID currencyId,
+            LocalDate validFrom,
+            BigDecimal remisePercent,
+            BigDecimal quantiteMin,
+            Integer delaiJours,
+            String source,
+            UUID sourceRefId,
+            String incoterm,
+            boolean actif) {
+        LocalDate from = validFrom != null ? validFrom : LocalDate.now();
+        repository
+                .findByTenantIdAndFournisseurIdAndArticleIdAndActifTrueAndValidToIsNull(
+                        tenantId, fournisseurId, articleId)
+                .ifPresent(previous -> {
+                    previous.setValidTo(from.minusDays(1));
+                    previous.setUpdatedAt(OffsetDateTime.now());
+                    repository.save(previous);
+                });
+
         CatalogueFournisseurLigne entity = CatalogueFournisseurLigne.builder()
                 .tenantId(tenantId)
                 .fournisseurId(fournisseurId)
                 .articleId(articleId)
-                .refFournisseur(trimOrNull(request.getRefFournisseur()))
-                .designation(request.getDesignation().trim())
-                .prixUnitaireHt(request.getPrixUnitaireHt())
-                .uom(trimOrNull(request.getUom()))
-                .actif(request.getActif() != null ? request.getActif() : true)
+                .refFournisseur(refFournisseur)
+                .designation(designation)
+                .prixUnitaireHt(prixUnitaireHt)
+                .uom(uom)
+                .currencyId(currencyId != null ? currencyId : resolvePivotCurrencyId(tenantId))
+                .validFrom(from)
+                .validTo(null)
+                .remisePercent(remisePercent != null ? remisePercent : BigDecimal.ZERO)
+                .quantiteMin(quantiteMin)
+                .delaiJours(delaiJours)
+                .source(source != null ? source : CatalogueSource.SAISIE_MANUELLE)
+                .sourceRefId(sourceRefId)
+                .incoterm(incoterm)
+                .actif(actif)
                 .build();
         return repository.save(entity);
     }
@@ -65,27 +133,42 @@ public class CatalogueFournisseurLigneService {
     @Transactional
     public CatalogueFournisseurLigne update(UUID id, CatalogueFournisseurLigneUpdateDto request) {
         CatalogueFournisseurLigne entity = getById(id);
-        String nextFournisseurId = request.getFournisseurId() != null
-                ? request.getFournisseurId().trim()
-                : entity.getFournisseurId();
-        String nextArticleId = request.getArticleId() != null
-                ? request.getArticleId().trim()
-                : entity.getArticleId();
-        if (!nextFournisseurId.equals(entity.getFournisseurId())
-                || !nextArticleId.equals(entity.getArticleId())) {
-            repository
-                    .findByTenantIdAndFournisseurIdAndArticleId(tenantId(), nextFournisseurId, nextArticleId)
-                    .filter(existing -> !existing.getId().equals(entity.getId()))
-                    .ifPresent(ignored -> {
-                        throw new IllegalArgumentException(
-                                "Catalogue entry already exists for this supplier and article");
-                    });
+        // Un changement de prix crée une nouvelle version historisée plutôt qu'un écrasement
+        if (request.getPrixUnitaireHt() != null
+                && request.getPrixUnitaireHt().compareTo(entity.getPrixUnitaireHt()) != 0) {
+            return upsertHistorise(
+                    tenantId(),
+                    request.getFournisseurId() != null
+                            ? request.getFournisseurId().trim()
+                            : entity.getFournisseurId(),
+                    request.getArticleId() != null
+                            ? request.getArticleId().trim()
+                            : entity.getArticleId(),
+                    request.getDesignation() != null
+                            ? request.getDesignation().trim()
+                            : entity.getDesignation(),
+                    request.getPrixUnitaireHt(),
+                    request.getRefFournisseur() != null
+                            ? trimOrNull(request.getRefFournisseur())
+                            : entity.getRefFournisseur(),
+                    request.getUom() != null ? trimOrNull(request.getUom()) : entity.getUom(),
+                    request.getCurrencyId() != null ? request.getCurrencyId() : entity.getCurrencyId(),
+                    request.getValidFrom() != null ? request.getValidFrom() : LocalDate.now(),
+                    request.getRemisePercent() != null
+                            ? request.getRemisePercent()
+                            : entity.getRemisePercent(),
+                    request.getQuantiteMin() != null ? request.getQuantiteMin() : entity.getQuantiteMin(),
+                    request.getDelaiJours() != null ? request.getDelaiJours() : entity.getDelaiJours(),
+                    request.getSource() != null ? request.getSource() : entity.getSource(),
+                    request.getSourceRefId() != null ? request.getSourceRefId() : entity.getSourceRefId(),
+                    request.getIncoterm() != null ? trimOrNull(request.getIncoterm()) : entity.getIncoterm(),
+                    request.getActif() != null ? request.getActif() : Boolean.TRUE.equals(entity.getActif()));
         }
         if (request.getFournisseurId() != null) {
-            entity.setFournisseurId(nextFournisseurId);
+            entity.setFournisseurId(request.getFournisseurId().trim());
         }
         if (request.getArticleId() != null) {
-            entity.setArticleId(nextArticleId);
+            entity.setArticleId(request.getArticleId().trim());
         }
         if (request.getRefFournisseur() != null) {
             entity.setRefFournisseur(trimOrNull(request.getRefFournisseur()));
@@ -93,11 +176,35 @@ public class CatalogueFournisseurLigneService {
         if (request.getDesignation() != null) {
             entity.setDesignation(request.getDesignation().trim());
         }
-        if (request.getPrixUnitaireHt() != null) {
-            entity.setPrixUnitaireHt(request.getPrixUnitaireHt());
-        }
         if (request.getUom() != null) {
             entity.setUom(trimOrNull(request.getUom()));
+        }
+        if (request.getCurrencyId() != null) {
+            entity.setCurrencyId(request.getCurrencyId());
+        }
+        if (request.getValidFrom() != null) {
+            entity.setValidFrom(request.getValidFrom());
+        }
+        if (request.getValidTo() != null) {
+            entity.setValidTo(request.getValidTo());
+        }
+        if (request.getRemisePercent() != null) {
+            entity.setRemisePercent(request.getRemisePercent());
+        }
+        if (request.getQuantiteMin() != null) {
+            entity.setQuantiteMin(request.getQuantiteMin());
+        }
+        if (request.getDelaiJours() != null) {
+            entity.setDelaiJours(request.getDelaiJours());
+        }
+        if (request.getSource() != null) {
+            entity.setSource(request.getSource());
+        }
+        if (request.getSourceRefId() != null) {
+            entity.setSourceRefId(request.getSourceRefId());
+        }
+        if (request.getIncoterm() != null) {
+            entity.setIncoterm(trimOrNull(request.getIncoterm()));
         }
         if (request.getActif() != null) {
             entity.setActif(request.getActif());
@@ -112,15 +219,20 @@ public class CatalogueFournisseurLigneService {
         repository.delete(entity);
     }
 
+    private UUID resolvePivotCurrencyId(UUID tenantId) {
+        return currencyConversionService
+                .findReferenceCurrency(tenantId)
+                .map(Currency::getId)
+                .orElse(null);
+    }
+
     private List<CatalogueFournisseurLigne> loadRows(
             UUID tenantId, String fournisseurId, String articleId, Boolean actif) {
         List<CatalogueFournisseurLigne> rows;
         if (StringUtils.hasText(fournisseurId) && StringUtils.hasText(articleId)) {
-            rows = repository
-                    .findByTenantIdAndFournisseurIdAndArticleId(
-                            tenantId, fournisseurId.trim(), articleId.trim())
-                    .map(List::of)
-                    .orElse(List.of());
+            rows = repository.findByTenantIdAndArticleIdOrderByDesignationAsc(tenantId, articleId.trim()).stream()
+                    .filter(r -> fournisseurId.trim().equals(r.getFournisseurId()))
+                    .toList();
         } else if (StringUtils.hasText(fournisseurId)) {
             rows = repository.findByTenantIdAndFournisseurIdOrderByDesignationAsc(
                     tenantId, fournisseurId.trim());

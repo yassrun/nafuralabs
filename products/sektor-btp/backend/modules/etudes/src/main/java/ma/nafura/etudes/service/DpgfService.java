@@ -32,7 +32,6 @@ import org.springframework.util.StringUtils;
 @Service
 public class DpgfService {
 
-    private static final BigDecimal DEFAULT_TVA = new BigDecimal("20");
     private static final int MONEY_SCALE = 2;
 
     private final DpgfRepository repository;
@@ -40,18 +39,21 @@ public class DpgfService {
     private final MetreService metreService;
     private final OuvrageRepository ouvrageRepository;
     private final DpgfAgregationService agregationService;
+    private final ParametresEtudeService parametresEtudeService;
 
     public DpgfService(
             DpgfRepository repository,
             DpgfNoeudRepository noeudRepository,
             MetreService metreService,
             OuvrageRepository ouvrageRepository,
-            DpgfAgregationService agregationService) {
+            DpgfAgregationService agregationService,
+            ParametresEtudeService parametresEtudeService) {
         this.repository = repository;
         this.noeudRepository = noeudRepository;
         this.metreService = metreService;
         this.ouvrageRepository = ouvrageRepository;
         this.agregationService = agregationService;
+        this.parametresEtudeService = parametresEtudeService;
     }
 
     @Transactional(readOnly = true)
@@ -89,7 +91,7 @@ public class DpgfService {
             metre.setLignes(new ArrayList<>(metreService.listLignes(metreId)));
         }
         UUID tenantId = tenantId();
-        BigDecimal effectiveTva = tvaTaux != null ? tvaTaux : DEFAULT_TVA;
+        BigDecimal effectiveTva = tvaTaux != null ? tvaTaux : parametresEtudeService.tvaTauxDefaut();
 
         Dpgf entity = Dpgf.builder()
                 .tenantId(tenantId)

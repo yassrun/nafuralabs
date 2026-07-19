@@ -1,10 +1,8 @@
-package ma.nafura.consultation.api.dto;
+package ma.nafura.etudes.api.dto;
 
 import lombok.Builder;
 
-/**
- * A catalog item proposed as a match for a designation during resolution.
- */
+/** Candidat catalogue pour résolution de désignation (lot 1 T1.7). */
 @Builder
 public record CatalogCandidateDto(
         String itemId,
@@ -12,5 +10,4 @@ public record CatalogCandidateDto(
         String name,
         String unite,
         String articleType,
-        Double score) {
-}
+        Double score) {}

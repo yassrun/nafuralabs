@@ -4,6 +4,7 @@ plugins {
 
 dependencies {
     implementation project(':sektor:item')
+    implementation project(':sektor:etudes')
     implementation project(':platform:core:framework')
     implementation project(':platform:core:authorization')
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
