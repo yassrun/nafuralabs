@@ -45,6 +45,7 @@ const LUCIDE_ICON_NAME_ALIASES: Record<string, string> = {
   table: 'table-2',
   // Material icon names still used on legacy pages
   arrow_back: 'arrow-left',
+  arrow_forward: 'arrow-right',
   delete: 'trash-2',
 };
 

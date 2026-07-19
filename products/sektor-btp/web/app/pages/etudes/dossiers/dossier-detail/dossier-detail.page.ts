@@ -126,6 +126,7 @@ export class DossierDetailPage {
 
   /** Ouvre l'article fautif signalé par un gate. */
   corriger(probleme: ProblemeGate): void {
+    if (!probleme.noeudId) return;
     void this.nav.navigate(['.'], {
       relativeTo: this.route,
       queryParams: { noeudId: probleme.noeudId },

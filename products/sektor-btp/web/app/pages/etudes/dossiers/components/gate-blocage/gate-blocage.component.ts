@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { TranslateModule } from '@ngx-translate/core';
 
 import type { ProblemeGate, ResultatGate } from '@app/etudes/models';
 
@@ -10,11 +11,13 @@ import type { ProblemeGate, ResultatGate } from '@app/etudes/models';
  * mène à l'article fautif.
  *
  * Le composant n'évalue aucune règle : il rend ce que `GET /dossiers/{id}/gates` a renvoyé.
+ * Les `message` sont des clés i18n (`etudes.gate.*`) résolues côté front.
  */
 @Component({
   selector: 'app-gate-blocage',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [TranslateModule],
   templateUrl: './gate-blocage.component.html',
   styleUrl: './gate-blocage.component.scss',
 })

@@ -361,10 +361,10 @@ export type StatutDossierEtude =
   | 'CONVERTIE'
   | 'ANNULE';
 
-/** Les cinq étapes du parcours. L'index est 1-based, comme côté back. */
+/** Les cinq étapes du parcours. L'index est 1-based, comme côté back (`DossierEtude.ETAPE_*`). */
 export const ETAPES_DOSSIER_ETUDE = [
-  { etape: 1, libelle: 'Documents du marché' },
-  { etape: 2, libelle: 'Bordereau' },
+  { etape: 1, libelle: 'Bordereau' },
+  { etape: 2, libelle: 'Descriptifs' },
   { etape: 3, libelle: 'Décomposition' },
   { etape: 4, libelle: 'Consultation fournisseurs' },
   { etape: 5, libelle: 'Chiffrage' },
@@ -377,9 +377,10 @@ export const ETAPES_DOSSIER_ETUDE = [
  * cliquables au lieu d'un bouton grisé sans explication.
  */
 export interface ProblemeGate {
-  noeudId: string;
-  codeArticle?: string;
-  libelle?: string;
+  /** Absent pour les problèmes globaux (ex. bordereau vide). */
+  noeudId?: string | null;
+  codeArticle?: string | null;
+  libelle?: string | null;
   message: string;
 }
 
