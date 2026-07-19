@@ -29,6 +29,11 @@ export const ETUDES_ROUTES: Routes = [
       import('../pages/etudes/devis/devis.routes').then((m) => m.DEVIS_ROUTES),
   },
   {
+    path: 'etudes/dossiers',
+    loadChildren: () =>
+      import('../pages/etudes/dossiers/dossiers.routes').then((m) => m.DOSSIERS_ROUTES),
+  },
+  {
     path: 'etudes/appels-offres-clients',
     loadChildren: () =>
       import(

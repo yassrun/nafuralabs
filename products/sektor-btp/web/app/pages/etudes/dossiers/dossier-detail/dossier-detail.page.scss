@@ -1,0 +1,56 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.dossier__entete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.dossier__titre {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--nf-color-text-primary);
+  overflow-wrap: anywhere;
+}
+
+.dossier__statut {
+  border: 1px solid var(--nf-color-border);
+  border-radius: 999px;
+  background: var(--nf-color-bg-muted);
+  color: var(--nf-color-text-secondary);
+  padding: 2px 12px;
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+
+.dossier__etat,
+.dossier__verrou {
+  color: var(--nf-color-text-secondary);
+}
+
+.dossier__erreur {
+  border: 1px solid var(--nf-color-danger-600);
+  border-radius: 6px;
+  background: var(--nf-color-bg-subtle);
+  color: var(--nf-color-text-primary);
+  padding: 10px 14px;
+  margin: 0 0 16px;
+}
+
+.dossier__etape {
+  padding-top: 16px;
+}
+
+.dossier__etape-titre {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--nf-color-text-primary);
+}

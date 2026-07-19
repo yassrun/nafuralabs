@@ -1,0 +1,46 @@
+@if (chargement()) {
+  <p class="dossier__etat">Chargement du dossier…</p>
+} @else if (dossier()) {
+  <header class="dossier__entete">
+    <h1 class="dossier__titre">{{ dossier()?.numero }} — {{ dossier()?.objet }}</h1>
+    <span class="dossier__statut" [attr.data-statut]="dossier()?.status">
+      {{ dossier()?.status }}
+    </span>
+  </header>
+
+  @if (erreur(); as message) {
+    <p class="dossier__erreur" role="alert">{{ message }}</p>
+  }
+
+  @if (!modifiable()) {
+    <p class="dossier__verrou" role="status">
+      Ce dossier est en lecture seule à ce stade du parcours.
+    </p>
+  }
+
+  <nf-wizard-shell
+    [steps]="etapes"
+    [currentStepIndex]="indexCourant()"
+    [canProceed]="peutContinuer()"
+    backLabel="Précédent"
+    nextLabel="Suivant"
+    submitLabel="Soumettre à validation"
+    (back)="precedent()"
+    (next)="suivant()"
+    (submit)="soumettre()"
+  >
+    <app-gate-blocage [resultat]="gateCourant()" (corriger)="corriger($event)" />
+
+    <!--
+      Le contenu de chaque étape arrive avec son lot : documents et CPS au lot 3,
+      décomposition au lot 4, consultation fournisseurs au lot 5, chiffrage au lot 6.
+    -->
+    <section class="dossier__etape">
+      <h2 class="dossier__etape-titre">
+        Étape {{ etapeCourante() }} — {{ etapes[indexCourant()].label }}
+      </h2>
+    </section>
+  </nf-wizard-shell>
+} @else {
+  <p class="dossier__erreur" role="alert">{{ erreur() ?? 'Dossier introuvable.' }}</p>
+}
