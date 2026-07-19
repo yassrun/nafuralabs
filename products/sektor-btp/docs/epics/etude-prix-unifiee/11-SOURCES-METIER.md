@@ -25,7 +25,8 @@ préserve le comportement antérieur**.
 
 ## Source 1 — Classeur « LOT N°2 GROS-ŒUVRE » *(2026-07-19)*
 
-Détail estimatif + sous-détails de prix par famille d'ouvrage.
+Détail estimatif + sous-détails de prix par famille d'ouvrage. **Extrait le 2026-07-19** :
+84 ouvrages, voir plus bas.
 
 ### Retenu comme structure — générique
 
@@ -55,16 +56,62 @@ reproduit un classeur qui existe. Ce n'est la valeur par défaut de personne.
 
 ### Défauts relevés dans la source — à ne surtout pas reproduire
 
-Lire une source réelle sert aussi à voir ce qu'elle fait mal. Trois points, qui sont autant de
+Lire une source réelle sert aussi à voir ce qu'elle fait mal. Ces points sont autant de
 raisons d'être de l'outil :
 
 | Défaut du classeur | Ce que l'ERP doit faire à la place |
 |---|---|
 | Rendement journalier **en dur dans la formule** (`=SUM(...)/30`) — le changer impose d'éditer chaque formule | champ `rendementJournalier`, saisi une fois, visible |
-| Étiquette `Q éxé = 1M3/jour` **contredit** la formule qui divise par 30 — personne ne peut le voir | une seule valeur, pas d'étiquette parallèle |
+| Étiquette `Q éxé` **contredit** la formule dans **2 ouvrages sur 11** : « Production » annonce `1M3/jour` et divise par 30 ; « Fouilles en rocher » annonce `33M3/jour` et divise par 100 | une seule valeur, pas d'étiquette parallèle |
 | Code `B25C` pour « Béton dosé 350 » — B25 suggère un dosage à 250 ou une classe C25 | code catalogue contrôlé, cohérence code ↔ désignation |
+| La convention de calcul **change d'une ligne à l'autre** : `=H22*G22/100` met le diviseur dans le montant, `=G39/H39` *divise* par la quantité au lieu de multiplier | une seule sémantique : `rendement × prixUnitaire`, la base journalière étant portée par un champ |
+| Le bloc `j1f` « Poteaux charpente » est vide (`#DIV/0!`) et un composant est à prix nul — invisibles dans un tableur | gate de l'étape 3 : un article décomposé exige ≥ 1 composant à rendement > 0 |
 
 Copier la structure du classeur aurait fait hériter de ses angles morts.
+
+### Le corpus extrait — 84 ouvrages *(2026-07-19)*
+
+Les sous-détails ont été extraits mécaniquement par
+[`tools/corpus-ouvrages/`](../../../tools/corpus-ouvrages/README.md) vers
+`etudes/src/test/resources/corpus/sous-details-gros-oeuvre.json`.
+
+| | |
+|---|---|
+| Ouvrages | **84** (16 familles, 290 composants) |
+| Dont chiffrés à la journée | 11 — `rendementJournalier` de 30 à 100 |
+| Écart au recalcul | **0** au-dessus du centime |
+
+`DpuCalculatorCorpusReelTest` rejoue les 84 : chacun doit retrouver le total du classeur.
+L'écart maximal est de 0,008 DH, dû à l'arrondi au centime que le tableur ne fait pas.
+`DpuCalculatorSousDetailReelTest` garde ses 7 cas écrits à la main, plus lisibles comme
+documentation du calcul ; le corpus, lui, garantit qu'aucun cas du classeur n'est oublié.
+
+> Le décompte de **182** annoncé dans une note de passation antérieure était erroné — il comptait
+> des lignes, pas des ouvrages. Le classeur contient 84 ouvrages sous-détaillés, chacun délimité
+> par un en-tête `Code Elem` et un `Total HT`.
+
+Ce corpus reste une donnée de tenant : **ressources de test uniquement**, jamais un seed.
+
+### Arbitrage de l'expert *(2026-07-19)* — la forme fait foi, pas les chiffres
+
+Interrogé sur les contradictions relevées, l'expert répond :
+
+> « Khallih yakhod gha la forme et les formule des tableau, les chiffres devrons être actualisé »
+> — *qu'il prenne seulement la forme et les formules du tableau, les chiffres devront être
+> actualisés.* Et : « La première feuille est une feuille d'article vide sans prix. »
+
+Trois conséquences :
+
+| Point | Effet |
+|---|---|
+| **La formule fait foi, pas l'étiquette** | Confirme l'arbitrage déjà retenu à l'extraction. Les 2 contradictions `Q éxé` sont closes : c'est le diviseur de la formule qui compte. Les 84 rendements extraits sont sur la bonne base. |
+| **Les prix du classeur sont périmés** | Ils ne peuvent servir ni de tarif, ni de valeur indicative courante. Leur seul rôle reste d'être le cas de référence qui prouve le calcul. |
+| **Le `D.E.` est un bordereau modèle vide** | Feuille d'articles sans prix — utile comme structure de bordereau, pas comme source de chiffrage. |
+
+> **Effet sur le lot 4** : la bibliothèque capitalise **les rendements**, pas les prix. C'est
+> exactement ce qu'énonce D10 (« ce qui se capitalise, ce sont les rendements — stables dans le
+> temps — et un prix indicatif daté »), ici confirmé par la pratique. Les prix unitaires doivent
+> venir de `ResolutionPrixService` (lot 9), jamais d'une reprise du classeur.
 
 ### Le détail estimatif — ce qu'il a appris sur la hiérarchie
 

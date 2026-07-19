@@ -74,6 +74,7 @@ Légende : ⬜ à faire · 🟡 en cours · ✅ terminé · 🔴 bloqué
 | Q6 | Valeur des données existantes | ✅ **aucune** — suppression, pas de migration |
 | Q7 | Correspondance type SERVICE | ✅ sans objet suite à Q6 |
 | Q8 | Aléas et coefficient K | ⬜ ouverte — 🟢 hors périmètre |
+| Q16 | Étiquette `Q éxé` vs formule du classeur | ✅ **la formule fait foi** ; les chiffres sont à actualiser, la bibliothèque capitalise les rendements (D10) |
 | Q9 | FG chantier vs FG siège | ⬜ ouverte — 🟢 hors périmètre |
 | Q10 | Base de prix : marché ou PMP | ✅ **marché**, paramétrable |
 | Q11 | Ouvrage dans ouvrage | ✅ **oui**, déboursé remonté |
@@ -106,6 +107,41 @@ Légende : ⬜ à faire · 🟡 en cours · ✅ terminé · 🔴 bloqué
 
 _(à alimenter au fil des lots : date, lot, ce qui a été fait, écarts au spec, décisions prises en
 cours de route)_
+
+### 2026-07-19 — Corpus d'ouvrages extrait du classeur réel (prérequis D4)
+
+**Livré**
+- `tools/corpus-ouvrages/extract_sous_details.py` — extraction des sous-détails du classeur
+  GROS-ŒUVRE vers `etudes/src/test/resources/corpus/sous-details-gros-oeuvre.json`
+- `DpuCalculatorCorpusReelTest` — 84 tests paramétrés + 1 garde-fou de couverture du corpus
+
+**Résultat** : 84 ouvrages, 290 composants, 16 familles. **Les 84 retrouvent le total du
+classeur**, écart maximal 0,008 DH (arrondi au centime que le tableur ne fait pas). Le calcul
+est vérifié sur un sous-détail réel entier, non plus sur sept cas choisis à la main.
+
+**Point de méthode** — le rendement n'est pas dans la colonne « Qté ». Le classeur enfouit une
+partie du coefficient dans les formules (`=SUM(J3+J5)/100+J4`, `=H22*G22/100`, `=G39/H39` qui
+*divise* par la quantité). Le script évalue donc la formule du total composant par composant
+pour obtenir le coefficient réellement appliqué. Un coefficient < 1 est une production
+journalière déguisée : elle est remontée en `rendementJournalier` + `baseRendement=PAR_JOUR`,
+la base mixte que `DpuCalculator` sait traiter. Lire la colonne « Qté » aurait produit des
+rendements faux d'un facteur 30 à 100 sur 11 ouvrages.
+
+**Constats sur la source** (détail dans `11-SOURCES-METIER.md`)
+- Le décompte de **182 ouvrages** d'une note de passation était faux : 84. Corrigé.
+- L'étiquette `Q éxé` contredit la formule dans **2 ouvrages sur 11**, et non un seul.
+- Un bloc vide (`j1f`, `#DIV/0!`) et un composant à prix nul — invisibles dans un tableur,
+  bloqués par le gate de l'étape 3.
+
+**Écart au spec** : aucun. Le corpus reste en ressources de test (règle 5bis). Le chargement en
+`Ouvrage` / `ComposantOuvrage` sur un tenant est du ressort du lot 4.
+
+**Fausse alerte levée puis close** : `OuvrageSeedService` lit un `seed/ouvrages-seed.json`
+global, ce qui semblait contredire D10 et la règle 5bis. Vérification faite, **il ne s'exécute
+pour aucun tenant** : `DemoSeedRuntimeGuardAspect` intercepte les 57 `*SeedService.seedIfEmpty()`
+du dépôt et les rend inertes tant que `nafura.demo.runtime-seed-enabled` est faux — défaut jamais
+levé dans un overlay. Motif de démo commerciale assumé, présent dans 13 modules ; ne pas le
+démonter au titre de cet epic. Rien n'y a été versé.
 
 ### 2026-07-19 — Lot 8 (suppression consultation)
 

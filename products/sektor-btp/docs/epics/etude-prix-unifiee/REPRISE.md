@@ -27,15 +27,35 @@ Document de passation. Tout ce qu'il faut pour reprendre sans relire l'historiqu
 
 ## À faire, dans l'ordre conseillé
 
-### 1. Amorcer la bibliothèque depuis le classeur réel
+### 1. ✅ Corpus extrait du classeur réel *(fait le 2026-07-19)*
 
-Le classeur de l'expert (`~/Downloads/II - LOT N° 2 GROS-ŒUVRE…xlsx`) contient **182 ouvrages
-sous-détaillés** sur 16 familles. C'est le premier corpus réel, et c'est ce qui manquait pour que
-l'assistance IA ait de quoi s'appuyer (D4).
+Le classeur de l'expert contient **84 ouvrages sous-détaillés** (290 composants, 16 familles) —
+et non 182, chiffre d'une note antérieure qui comptait des lignes.
 
-Extraire → `Ouvrage` + `ComposantOuvrage` avec leurs rendements. Attention : **ce sont leurs
-valeurs**, elles entrent comme données d'un tenant, jamais comme seed global. Voir
-[`11-SOURCES-METIER.md`](11-SOURCES-METIER.md).
+Extraction mécanique par [`tools/corpus-ouvrages/`](../../../tools/corpus-ouvrages/README.md)
+vers `etudes/src/test/resources/corpus/sous-details-gros-oeuvre.json`.
+`DpuCalculatorCorpusReelTest` rejoue les 84 : **tous retrouvent le total du classeur**, écart
+maximal 0,008 DH (arrondi). Le calcul est donc vérifié sur un sous-détail réel entier, pas sur
+sept cas choisis.
+
+Le corpus est en **ressources de test**, conformément à la règle 5bis : ce sont les valeurs d'un
+tenant, elles ne deviennent ni un seed ni un défaut.
+
+**Arbitrage de l'expert, obtenu le 2026-07-19** : « qu'il prenne seulement la forme et les
+formules du tableau, les chiffres devront être actualisés ». Donc :
+
+- la **formule fait foi**, pas l'étiquette `Q éxé` — l'arbitrage retenu à l'extraction est
+  confirmé, les 2 contradictions relevées sont closes ;
+- les **prix du classeur sont périmés** et ne doivent pas être chargés dans un tenant ;
+- au **lot 4**, la bibliothèque capitalise **les rendements** ; les prix unitaires viennent de
+  `ResolutionPrixService` (lot 9). C'est D10 confirmé par la pratique.
+
+> `OuvrageSeedService` lit un `seed/ouvrages-seed.json` global — **mais il ne s'exécute pour
+> personne** : `DemoSeedRuntimeGuardAspect` neutralise les 57 `*SeedService.seedIfEmpty()` du
+> dépôt tant que `nafura.demo.runtime-seed-enabled` est faux, ce qui est le défaut et n'est activé
+> dans aucun overlay. C'est un jeu de démo commerciale, pas un défaut servi aux tenants.
+> Ne pas y verser cette source pour autant : le jour où la démo est activée, ces prix
+> deviendraient ceux du tenant de démonstration.
 
 ### 2. Lot 2 — front
 
