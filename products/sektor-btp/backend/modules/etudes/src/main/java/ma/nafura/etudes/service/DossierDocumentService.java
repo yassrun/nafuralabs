@@ -3,30 +3,37 @@ package ma.nafura.etudes.service;
 import java.util.List;
 import java.util.UUID;
 import ma.nafura.etudes.domain.model.DossierDocument;
-import ma.nafura.etudes.domain.model.CpsDocument;
 import ma.nafura.etudes.repository.DossierDocumentRepository;
 import ma.nafura.etudes.service.cps.CpsService;
 import ma.nafura.platform.framework.context.TenantContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 /**
- * Depot des pieces du marche — premiere etape du parcours.
+ * Dépôt des pièces du marché — première étape du parcours.
  *
- * <p>Le workflow demarre par la : bordereau et CPS arrivent ensemble dans la realite, ils sont
- * deposes ensemble et conserves tels quels. Le CPS est indexe dans la foulee ; le bordereau
- * sera structure a l'etape suivante.
+ * <p>Le CPS est indexé immédiatement. Un bordereau déclenche l'extraction → DPGF rattaché au
+ * dossier, pour que le gate d'étape 2 puisse s'appuyer sur de vrais articles.
  */
 @Service
 public class DossierDocumentService {
 
+    private static final Logger log = LoggerFactory.getLogger(DossierDocumentService.class);
+
     private final DossierDocumentRepository repository;
     private final CpsService cpsService;
+    private final BordereauImportService bordereauImportService;
 
-    public DossierDocumentService(DossierDocumentRepository repository, CpsService cpsService) {
+    public DossierDocumentService(
+            DossierDocumentRepository repository,
+            CpsService cpsService,
+            BordereauImportService bordereauImportService) {
         this.repository = repository;
         this.cpsService = cpsService;
+        this.bordereauImportService = bordereauImportService;
     }
 
     @Transactional(readOnly = true)
@@ -35,14 +42,19 @@ public class DossierDocumentService {
     }
 
     /**
-     * Enregistre une piece et, si elle contient un CPS, l'indexe immediatement.
+     * Enregistre une pièce ; indexe le CPS et/ou structure le bordereau selon le type.
      *
-     * @param documentId reference doc-manager vers l'original deja stocke
-     * @param contenu octets du fichier, pour l'extraction — l'original n'est pas altere
+     * @param documentId référence doc-manager vers l'original déjà stocké
+     * @param contenu octets du fichier, pour extraction — l'original n'est pas altéré
      */
     @Transactional
     public DossierDocument deposer(
-            UUID dossierEtudeId, String documentId, String nomFichier, String type, byte[] contenu) {
+            UUID dossierEtudeId,
+            String documentId,
+            String nomFichier,
+            String type,
+            byte[] contenu,
+            String mimeType) {
         UUID tenant = tenantId();
         String typeNormalise = StringUtils.hasText(type)
                 ? type.trim().toUpperCase()
@@ -59,12 +71,24 @@ public class DossierDocumentService {
                 .build());
 
         if (piece.contientCps() && contenu != null && contenu.length > 0) {
-            // L'indexation ne doit pas faire echouer le depot : un CPS illisible est conserve,
-            // seule la recherche automatique est indisponible.
             try {
                 cpsService.indexer(piece.getId(), contenu);
-            } catch (RuntimeException ignored) {
-                // statut porte par CpsDocument ; le fichier reste consultable
+            } catch (RuntimeException ex) {
+                log.warn("Indexation CPS échouée pour pièce {}: {}", piece.getId(), ex.getMessage());
+            }
+        }
+
+        if (piece.contientBordereau() && contenu != null && contenu.length > 0) {
+            try {
+                bordereauImportService.importerDepuisFichier(
+                        dossierEtudeId, contenu, nomFichier, mimeType, piece.getDocumentId());
+            } catch (RuntimeException ex) {
+                // Le dépôt reste : le gate bordereau expliquera l'absence d'articles.
+                log.warn(
+                        "Extraction bordereau échouée pour dossier {} / pièce {}: {}",
+                        dossierEtudeId,
+                        piece.getId(),
+                        ex.getMessage());
             }
         }
         return piece;

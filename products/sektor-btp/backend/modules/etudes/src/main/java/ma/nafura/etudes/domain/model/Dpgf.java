@@ -34,7 +34,7 @@ public class Dpgf implements AuditableEtude {
     @Column(name = "numero", nullable = false, length = 50)
     private String numero;
 
-    @Column(name = "metre_id", nullable = false)
+    @Column(name = "metre_id")
     @JsonIgnore
     private UUID metreId;
 

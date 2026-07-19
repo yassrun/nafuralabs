@@ -16,6 +16,8 @@ import java.util.stream.Collectors;
 import ma.nafura.etudes.api.dto.DpgfLotTotalDto;
 import ma.nafura.etudes.api.request.DpgfNoeudCreateDto;
 import ma.nafura.etudes.api.request.DpgfNoeudUpdateDto;
+import ma.nafura.etudes.api.request.ImportNoeudDto;
+import ma.nafura.etudes.api.request.ImportTreeRequest;
 import ma.nafura.etudes.domain.model.Dpgf;
 import ma.nafura.etudes.domain.model.DpgfNoeud;
 import ma.nafura.etudes.domain.model.Metre;
@@ -114,6 +116,128 @@ public class DpgfService {
         agregationService.applyHeaderTotals(saved, hierarchie);
         saved = repository.save(saved);
         return saved;
+    }
+
+    /**
+     * Crée un DPGF depuis un arbre extrait d'un bordereau (sans métré amont).
+     *
+     * <p>Les lignes sans unité / quantité positive (totaux, titres) sont ignorées — elles
+     * bloqueraient le gate bordereau sans être chiffrables.
+     */
+    @Transactional
+    public Dpgf createFromImport(ImportTreeRequest request, String projetNom, BigDecimal tvaTaux) {
+        if (request == null || request.getArbre() == null || request.getArbre().isEmpty()) {
+            throw new IllegalArgumentException("etudes.bordereau.arbre_vide");
+        }
+        UUID tenantId = tenantId();
+        BigDecimal effectiveTva = tvaTaux != null ? tvaTaux : parametresEtudeService.tvaTauxDefaut();
+
+        Dpgf entity = Dpgf.builder()
+                .tenantId(tenantId)
+                .numero(nextNumero(tenantId))
+                .metreId(null)
+                .projetNom(projetNom)
+                .tvaTaux(effectiveTva)
+                .totalHt(BigDecimal.ZERO)
+                .totalTva(BigDecimal.ZERO)
+                .totalTtc(BigDecimal.ZERO)
+                .noeuds(new ArrayList<>())
+                .build();
+        Dpgf saved = repository.save(entity);
+
+        int[] articleCount = {0};
+        int ordreRacine = 0;
+        for (ImportNoeudDto racine : request.getArbre()) {
+            persistImportNoeud(saved, null, racine, ordreRacine++, articleCount);
+        }
+        if (articleCount[0] == 0) {
+            throw new IllegalArgumentException("etudes.bordereau.aucun_article_exploitable");
+        }
+
+        recalcHeaderTotals(saved.getId());
+        attachArbre(saved);
+        return saved;
+    }
+
+    /** Remplace entièrement les nœuds d'un DPGF existant par un nouvel arbre importé. */
+    @Transactional
+    public Dpgf remplacerParImport(UUID dpgfId, ImportTreeRequest request) {
+        Dpgf dpgf = requireDpgf(dpgfId);
+        List<DpgfNoeud> existants =
+                noeudRepository.findByDpgfIdAndTenantIdOrderByOrdreAsc(dpgfId, tenantId());
+        noeudRepository.deleteAll(existants);
+        noeudRepository.flush();
+
+        int[] articleCount = {0};
+        int ordreRacine = 0;
+        for (ImportNoeudDto racine : request.getArbre()) {
+            persistImportNoeud(dpgf, null, racine, ordreRacine++, articleCount);
+        }
+        if (articleCount[0] == 0) {
+            throw new IllegalArgumentException("etudes.bordereau.aucun_article_exploitable");
+        }
+        recalcHeaderTotals(dpgfId);
+        attachArbre(dpgf);
+        return dpgf;
+    }
+
+    private void persistImportNoeud(
+            Dpgf dpgf, UUID parentId, ImportNoeudDto dto, int ordre, int[] articleCount) {
+        if (dto == null) {
+            return;
+        }
+        String type = normalizeImportType(dto.getType());
+        String libelle = StringUtils.hasText(dto.getLibelle()) ? dto.getLibelle().trim() : "Sans libellé";
+        String code = StringUtils.hasText(dto.getCode()) ? dto.getCode().trim() : String.valueOf(ordre + 1);
+
+        if (DpgfNoeud.TYPE_ARTICLE.equals(type) && !articleExploitable(dto)) {
+            return;
+        }
+
+        DpgfNoeud noeud = DpgfNoeud.builder()
+                .tenantId(dpgf.getTenantId())
+                .dpgf(dpgf)
+                .parentId(parentId)
+                .type(type)
+                .code(code)
+                .libelle(libelle)
+                .quantite(dto.getQuantite())
+                .unite(trimOrNull(dto.getUnite()))
+                .descriptif(trimOrNull(dto.getDescriptif()))
+                .mode(DpgfNoeud.TYPE_ARTICLE.equals(type) ? DpgfNoeud.MODE_FOURNI : null)
+                .ordre(dto.getOrdre() != null ? dto.getOrdre() : ordre)
+                .build();
+        DpgfNoeud saved = noeudRepository.save(noeud);
+        if (DpgfNoeud.TYPE_ARTICLE.equals(type)) {
+            articleCount[0]++;
+        }
+
+        if (dto.getEnfants() != null) {
+            int childOrdre = 0;
+            for (ImportNoeudDto enfant : dto.getEnfants()) {
+                persistImportNoeud(dpgf, saved.getId(), enfant, childOrdre++, articleCount);
+            }
+        }
+    }
+
+    private static boolean articleExploitable(ImportNoeudDto dto) {
+        if (dto.getUnite() == null || dto.getUnite().isBlank()) {
+            return false;
+        }
+        return dto.getQuantite() != null && dto.getQuantite().compareTo(BigDecimal.ZERO) > 0;
+    }
+
+    private static String normalizeImportType(String type) {
+        if (!StringUtils.hasText(type)) {
+            return DpgfNoeud.TYPE_ARTICLE;
+        }
+        String n = type.trim().toUpperCase(Locale.ROOT);
+        if (DpgfNoeud.TYPE_LOT.equals(n)
+                || DpgfNoeud.TYPE_SOUS_LOT.equals(n)
+                || DpgfNoeud.TYPE_ARTICLE.equals(n)) {
+            return n;
+        }
+        return DpgfNoeud.TYPE_ARTICLE;
     }
 
     @Transactional

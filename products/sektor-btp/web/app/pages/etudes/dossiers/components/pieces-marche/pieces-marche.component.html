@@ -1,11 +1,8 @@
-<section class="pieces" aria-label="Pièces du marché">
+<section class="pieces" [attr.aria-label]="titre()">
   <header class="pieces__entete">
     <div>
-      <h3 class="pieces__titre">Pièces du marché</h3>
-      <p class="pieces__aide">
-        Déposez le bordereau (BPU / DQE) et le CPS. Les fichiers sont conservés tels quels ;
-        la structuration en articles arrive à l'étape suivante.
-      </p>
+      <h3 class="pieces__titre">{{ titre() }}</h3>
+      <p class="pieces__aide">{{ aide() }}</p>
     </div>
   </header>
 
@@ -22,7 +19,7 @@
           [ngModel]="typeChoisi()"
           (ngModelChange)="typeChoisi.set($event)"
         >
-          @for (t of types; track t.value) {
+          @for (t of types(); track t.value) {
             <option [value]="t.value">{{ t.label }}</option>
           }
         </select>
@@ -30,7 +27,7 @@
 
       <label class="pieces__fichier">
         <span class="pieces__fichier-btn" [class.pieces__fichier-btn--busy]="envoi()">
-          {{ envoi() ? 'Envoi…' : 'Choisir un fichier' }}
+          {{ envoi() ? 'Extraction en cours…' : 'Choisir un fichier' }}
         </span>
         <input
           type="file"

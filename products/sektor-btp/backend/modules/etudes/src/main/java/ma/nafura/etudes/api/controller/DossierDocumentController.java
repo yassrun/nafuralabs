@@ -66,7 +66,12 @@ public class DossierDocumentController {
         try {
             String ref = documentId != null ? documentId : UUID.randomUUID().toString();
             DossierDocument piece = service.deposer(
-                    dossierId, ref, file.getOriginalFilename(), type, file.getBytes());
+                    dossierId,
+                    ref,
+                    file.getOriginalFilename(),
+                    type,
+                    file.getBytes(),
+                    file.getContentType());
             return ResponseEntity.status(HttpStatus.CREATED).body(piece);
         } catch (IOException ex) {
             return ResponseEntity.badRequest()

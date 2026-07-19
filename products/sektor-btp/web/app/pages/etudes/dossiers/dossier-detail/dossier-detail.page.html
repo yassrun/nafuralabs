@@ -40,12 +40,20 @@
         <app-pieces-marche
           [dossierId]="dossier()!.id"
           [modifiable]="modifiable()"
+          mode="documents"
+          (change)="rechargerGates()"
+        />
+      } @else if (etapeCourante() === 2) {
+        <app-pieces-marche
+          [dossierId]="dossier()!.id"
+          [modifiable]="modifiable()"
+          mode="bordereau"
           (change)="rechargerGates()"
         />
       } @else {
         <p class="dossier__placeholder">
           Le contenu de cette étape arrivera avec le lot correspondant
-          (descriptifs, décomposition, consultation, chiffrage).
+          (décomposition, consultation, chiffrage).
         </p>
       }
     </section>

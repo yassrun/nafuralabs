@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   effect,
   inject,
   input,
@@ -16,11 +17,13 @@ import type { DossierDocument, TypeDossierDocument } from '@app/etudes/models';
 
 import { DossierEtudeApiService } from '../../services/dossier-etude-api.service';
 
+export type PiecesMarcheMode = 'documents' | 'bordereau';
+
 /**
- * Dépôt des pièces du marché — étape Bordereau.
+ * Dépôt des pièces — étape Documents, ou re-import bordereau — étape Bordereau.
  *
- * Branche le `POST …/documents` déjà disponible côté back. La structuration du bordereau
- * (extraction → articles DPGF) arrive au lot 3 ; ici on stocke et on liste les originaux.
+ * Un fichier de type BORDEREAU / CPS_ET_BORDEREAU déclenche l'extraction côté back et crée
+ * les articles DPGF ; c'est ce qui débloque le bouton Suivant de l'étape 2.
  */
 @Component({
   selector: 'app-pieces-marche',
@@ -35,6 +38,7 @@ export class PiecesMarcheComponent {
 
   readonly dossierId = input.required<string>();
   readonly modifiable = input(true);
+  readonly mode = input<PiecesMarcheMode>('documents');
 
   /** Émis après dépôt ou suppression — le parent recharge les gates. */
   readonly change = output<void>();
@@ -44,7 +48,25 @@ export class PiecesMarcheComponent {
   readonly envoi = signal(false);
   readonly erreur = signal<string | undefined>(undefined);
   readonly typeChoisi = signal<TypeDossierDocument>('BORDEREAU');
-  readonly types = TYPES_DOSSIER_DOCUMENT;
+
+  readonly types = computed(() => {
+    if (this.mode() === 'bordereau') {
+      return TYPES_DOSSIER_DOCUMENT.filter(
+        (t) => t.value === 'BORDEREAU' || t.value === 'CPS_ET_BORDEREAU',
+      );
+    }
+    return TYPES_DOSSIER_DOCUMENT;
+  });
+
+  readonly titre = computed(() =>
+    this.mode() === 'bordereau' ? 'Importer le bordereau' : 'Pièces du marché',
+  );
+
+  readonly aide = computed(() =>
+    this.mode() === 'bordereau'
+      ? 'Déposez le fichier BPU / DQE (Excel ou PDF). L’extraction crée les articles du bordereau — ensuite vous pourrez continuer.'
+      : 'Déposez le CPS et le bordereau. Le CPS est indexé tout de suite ; le bordereau sera structuré à l’étape suivante (ou ici si vous choisissez le type Bordereau).',
+  );
 
   private readonly labelsParType = Object.fromEntries(
     TYPES_DOSSIER_DOCUMENT.map((t) => [t.value, t.label]),
@@ -53,6 +75,8 @@ export class PiecesMarcheComponent {
   constructor() {
     effect(() => {
       const id = this.dossierId();
+      const mode = this.mode();
+      this.typeChoisi.set(mode === 'bordereau' ? 'BORDEREAU' : 'CPS');
       if (id) void this.charger(id);
     });
   }
