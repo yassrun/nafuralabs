@@ -1,0 +1,27 @@
+@if (aDesProblemes()) {
+  <section
+    class="gate-blocage"
+    [class.gate-blocage--bloquant]="bloquant()"
+    [attr.role]="bloquant() ? 'alert' : 'status'"
+  >
+    <h3 class="gate-blocage__titre">
+      <span class="gate-blocage__icone" aria-hidden="true">{{ bloquant() ? '⚠' : 'ℹ' }}</span>
+      {{ titre() }}
+    </h3>
+
+    <ul class="gate-blocage__liste">
+      @for (probleme of problemes(); track probleme.noeudId) {
+        <li class="gate-blocage__ligne">
+          @if (probleme.codeArticle) {
+            <span class="gate-blocage__code">{{ probleme.codeArticle }}</span>
+          }
+          <span class="gate-blocage__libelle">{{ probleme.libelle }}</span>
+          <span class="gate-blocage__message">{{ probleme.message }}</span>
+          <button type="button" class="gate-blocage__action" (click)="corriger.emit(probleme)">
+            Corriger
+          </button>
+        </li>
+      }
+    </ul>
+  </section>
+}

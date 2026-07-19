@@ -145,12 +145,14 @@ après **chaque** édition de composant. Sur un DPGF réel (500 à 2 000 article
 
 ### T2.6 — Front : page dossier d'étude
 
-⚠️ **Écrire dans `web/app/applications/erp/`** — c'est le seul arbre réellement compilé
-(`web/tsconfig.app.json` → `include: ["app/**/*.ts"]`). `products/sektor-btp/web/app/` est du code
-mort tant que le chantier Q5 n'a pas eu lieu, malgré ce qu'affirme `docs/AGENTS.md:183`.
+**Écrire dans `products/sektor-btp/web/app/pages/etudes/dossiers/`** (alias `@app/*`).
 
-Repartir de `web/app/applications/erp/pages/etudes/consultation/consultation-detail/`, renommer en
-`pages/etudes/dossiers/`, et :
+> Cette tâche disait auparavant d'écrire dans `web/app/applications/erp/`, seul arbre alors
+> compilé. Le chantier `front-ownership` a depuis eu lieu : `web/` racine n'existe plus, Q5 est
+> close. L'instruction est caduque — pas de reprise depuis
+> `consultation/consultation-detail/`, ce module a été supprimé au lot 8.
+
+À faire :
 
 - 5 étapes dans `wizardSteps`
 - supprimer `canProceed()` — consommer `GET /gates`

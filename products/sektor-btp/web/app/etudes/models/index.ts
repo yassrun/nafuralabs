@@ -347,3 +347,90 @@ export type AppelOffreClientCreate = Omit<
   'id' | 'numero' | 'documents' | 'checklist'
 >;
 export type AppelOffreClientUpdate = Partial<AppelOffreClientCreate>;
+
+// ─── DOSSIER D'ÉTUDE (lot 2) ──────────────────────────────────────────────────
+
+export type StatutDossierEtude =
+  | 'BROUILLON'
+  | 'EN_ETUDE'
+  | 'EN_VALIDATION'
+  | 'VALIDEE'
+  | 'DEVIS_GENERE'
+  | 'GAGNE'
+  | 'PERDU'
+  | 'CONVERTIE'
+  | 'ANNULE';
+
+/** Les cinq étapes du parcours. L'index est 1-based, comme côté back. */
+export const ETAPES_DOSSIER_ETUDE = [
+  { etape: 1, libelle: 'Documents du marché' },
+  { etape: 2, libelle: 'Bordereau' },
+  { etape: 3, libelle: 'Décomposition' },
+  { etape: 4, libelle: 'Consultation fournisseurs' },
+  { etape: 5, libelle: 'Chiffrage' },
+] as const;
+
+/**
+ * Un article qui empêche de franchir une étape.
+ *
+ * Le back renvoie la liste, pas un booléen : c'est ce qui permet d'afficher des liens
+ * cliquables au lieu d'un bouton grisé sans explication.
+ */
+export interface ProblemeGate {
+  noeudId: string;
+  codeArticle?: string;
+  libelle?: string;
+  message: string;
+}
+
+export interface ResultatGate {
+  etape: number;
+  /** Les étapes 2 et 4 produisent des avertissements non bloquants. */
+  bloquant: boolean;
+  problemes: ProblemeGate[];
+}
+
+export interface DossierEtude {
+  id: string;
+  numero: string;
+  objet: string;
+  clientId?: string;
+  clientNom?: string;
+  cpsDocumentId?: string;
+  bordereauDocumentId?: string;
+  appelOffreClientId?: string;
+  dpgfId?: string;
+  currentStep: number;
+  status: StatutDossierEtude;
+  origine?: string;
+  fraisGenerauxPercentDefaut?: number;
+  margePercentDefaut?: number;
+  tvaTauxDefaut?: number;
+  margeGlobalePercent?: number;
+  devisGenereId?: string;
+  motifRefus?: string;
+  notes?: string;
+  createdBy?: string;
+  updatedBy?: string;
+  /** Verrou optimiste — à renvoyer tel quel en modification, sinon 409. */
+  version: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export type DossierEtudeCreate = Pick<DossierEtude, 'objet'> &
+  Partial<
+    Pick<
+      DossierEtude,
+      | 'numero'
+      | 'clientId'
+      | 'clientNom'
+      | 'cpsDocumentId'
+      | 'bordereauDocumentId'
+      | 'appelOffreClientId'
+      | 'origine'
+      | 'notes'
+    >
+  >;
+
+export type DossierEtudeUpdate = Partial<DossierEtudeCreate> & { version?: number };
