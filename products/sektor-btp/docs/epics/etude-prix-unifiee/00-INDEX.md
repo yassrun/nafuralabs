@@ -60,6 +60,7 @@ Marché entrant (CPS + bordereau)
 | 07 | [Chaînage aval](07-chainage-aval.md) | Devis → Chantier + Marché + budget |
 | 08 | [Migration des données](08-migration-donnees.md) | Liquibase, reprise de l'existant |
 | 10 | [Ne pas se fermer de portes](10-genericite-multitenant.md) | 6 règles **transverses** — périmètre Maroc, sans verrou de schéma |
+| 11 | [Sources métier](11-SOURCES-METIER.md) | **S'en inspirer sans les copier** — retenu / non retenu par source |
 | 99 | [Questions ouvertes](99-questions-ouvertes.md) | À trancher avec l'expert métier |
 
 > Le numéro d'un lot est un **identifiant**, pas un rang. L'ordre d'exécution est dans
@@ -108,4 +109,8 @@ Marché entrant (CPS + bordereau)
    Tant que le chantier de réconciliation (Q5) n'a pas eu lieu, **tout code front doit être écrit
    dans `web/app/applications/erp/`**, sinon il ne partira jamais en production.
 5. Toute modification SQL passe par un changelog Liquibase versionné + `release-backend`.
+5bis. **Sektor est multi-tenant.** Une pratique observée chez un tenant s'ajoute comme
+   **capacité optionnelle** (champ nullable, défaut neutre), jamais comme contrainte. Ses
+   **valeurs** restent dans les tests, jamais dans un défaut ni un seed.
+   Voir [`11-SOURCES-METIER.md`](11-SOURCES-METIER.md).
 6. Un lot = une PR. Ne pas mélanger les lots.
