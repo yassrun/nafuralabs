@@ -139,10 +139,13 @@ class ResolutionPrixServiceImplTest {
     @Test
     void basePmpInversePriorite() {
         emptyExternes();
-        when(itemPriceRepository.findEffective(any(), any(), any(), any())).thenReturn(List.of());
+        // lenient() : en base PMP la résolution s'arrête au PMP, donc TARIF et CATALOGUE ne
+        // sont jamais consultés. On les stube quand même pour documenter le scénario —
+        // un prix catalogue EXISTE (1.00) et doit être supplanté par le PMP (2.00).
+        lenient().when(itemPriceRepository.findEffective(any(), any(), any(), any())).thenReturn(List.of());
         when(itemRepository.findByIdAndTenantId(itemId, tenantId))
                 .thenReturn(Optional.of(Item.builder().id(itemId).pmp(new BigDecimal("2.00")).build()));
-        when(prixAchatExternePort.findCatalogue(eq(itemId), any()))
+        lenient().when(prixAchatExternePort.findCatalogue(eq(itemId), any()))
                 .thenReturn(Optional.of(candidat(SourcePrix.CATALOGUE, "1.00")));
         // With PMP base: CONSULTE (empty) → PMP before CATALOGUE
         when(prixAchatExternePort.findOffreRetenue(eq(itemId), any())).thenReturn(Optional.empty());
@@ -187,17 +190,19 @@ class ResolutionPrixServiceImplTest {
         assertEquals(deviseId, r.currencyId());
     }
 
+    // lenient() : la résolution court-circuite au premier niveau qui répond, donc les
+    // sources situées plus bas dans la hiérarchie ne sont pas consultées par tous les tests.
     private void emptyExternes() {
-        when(prixAchatExternePort.findOffreRetenue(eq(itemId), any())).thenReturn(Optional.empty());
-        when(prixAchatExternePort.findContrat(eq(itemId), any())).thenReturn(Optional.empty());
-        when(prixAchatExternePort.findCatalogue(eq(itemId), any())).thenReturn(Optional.empty());
-        when(prixAchatExternePort.findDerniereFacture(eq(itemId), any())).thenReturn(Optional.empty());
+        lenient().when(prixAchatExternePort.findOffreRetenue(eq(itemId), any())).thenReturn(Optional.empty());
+        lenient().when(prixAchatExternePort.findContrat(eq(itemId), any())).thenReturn(Optional.empty());
+        lenient().when(prixAchatExternePort.findCatalogue(eq(itemId), any())).thenReturn(Optional.empty());
+        lenient().when(prixAchatExternePort.findDerniereFacture(eq(itemId), any())).thenReturn(Optional.empty());
     }
 
     private void emptyExternesSaufCatalogue() {
-        when(prixAchatExternePort.findOffreRetenue(eq(itemId), any())).thenReturn(Optional.empty());
-        when(prixAchatExternePort.findContrat(eq(itemId), any())).thenReturn(Optional.empty());
-        when(prixAchatExternePort.findDerniereFacture(eq(itemId), any())).thenReturn(Optional.empty());
+        lenient().when(prixAchatExternePort.findOffreRetenue(eq(itemId), any())).thenReturn(Optional.empty());
+        lenient().when(prixAchatExternePort.findContrat(eq(itemId), any())).thenReturn(Optional.empty());
+        lenient().when(prixAchatExternePort.findDerniereFacture(eq(itemId), any())).thenReturn(Optional.empty());
     }
 
     private PrixCandidat candidat(String source, String prix) {

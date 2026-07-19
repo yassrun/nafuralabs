@@ -42,7 +42,8 @@ class CatalogueFournisseurLigneServiceHistorisationTest {
         currencyId = UUID.randomUUID();
         TenantContext.setTenantId(tenantId);
         TenantContext.setTenantEnabled(true);
-        when(currencyConversionService.findReferenceCurrency(tenantId))
+        // lenient() : la devise pivot n'est résolue que lorsque l'appelant n'en fournit pas.
+        lenient().when(currencyConversionService.findReferenceCurrency(tenantId))
                 .thenReturn(Optional.of(Currency.builder().id(currencyId).code("MAD").build()));
         when(repository.save(any())).thenAnswer(inv -> {
             CatalogueFournisseurLigne e = inv.getArgument(0);

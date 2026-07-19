@@ -1,4 +1,4 @@
-package ma.nafura.consultation.api.request;
+package ma.nafura.etudes.api.request;
 
 import java.util.ArrayList;
 import java.util.List;

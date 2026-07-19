@@ -1,9 +1,9 @@
-package ma.nafura.erp.consultation;
+package ma.nafura.erp.etudes;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
-import ma.nafura.consultation.service.port.CpsDescriptifExtractionPort;
+import ma.nafura.etudes.service.port.CpsDescriptifExtractionPort;
 import ma.nafura.platform.documents.docextractor.api.response.StatelessExtractionResponse;
 import ma.nafura.platform.documents.docextractor.service.StatelessExtractionService;
 import ma.nafura.platform.framework.context.TenantContext;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Second extraction pass (CPS / CCTP descriptifs). The bordereau pass already
- * built the poste tree; this adapter re-reads the (long, prose) CPS to pull the
+ * built the article tree; this adapter re-reads the (long, prose) CPS to pull the
  * technical descriptif of each poste.
  *
  * <p>To stay under the LLM per-call timeout on 80-90 page CPS documents, postes

@@ -1,10 +1,14 @@
-package ma.nafura.consultation.api.request;
+package ma.nafura.etudes.api.request;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
 
+/**
+ * Nœud d'import bordereau, aligné sur {@link ma.nafura.etudes.domain.model.DpgfNoeud}
+ * (types LOT / SOUS_LOT / ARTICLE — plus de POSTE consultation).
+ */
 @Data
 public class ImportNoeudDto {
 

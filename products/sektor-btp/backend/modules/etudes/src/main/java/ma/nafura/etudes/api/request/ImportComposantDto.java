@@ -1,8 +1,11 @@
-package ma.nafura.consultation.api.request;
+package ma.nafura.etudes.api.request;
 
 import java.math.BigDecimal;
 import lombok.Data;
 
+/**
+ * Composant d'import — {@code rendement} = quantité PAR UNITÉ d'ouvrage (invariant R1).
+ */
 @Data
 public class ImportComposantDto {
 

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -47,12 +48,21 @@ class OuvrageServiceTest {
     @Mock
     private DpuService dpuService;
 
+    @Mock
+    private ParametresEtudeService parametresEtudeService;
+
     @InjectMocks
     private OuvrageService service;
 
     @BeforeEach
     void setUp() {
         TenantContext.setTenantId(TENANT_ID);
+        // Repli tenant : mêmes valeurs que ParametresEtudeService.DEFAULT_* — le service
+        // n'est consulté que lorsque la requête ne fournit pas le taux.
+        lenient().when(parametresEtudeService.fraisGenerauxPercentDefaut())
+                .thenReturn(ParametresEtudeService.DEFAULT_FRAIS_GENERAUX_PERCENT);
+        lenient().when(parametresEtudeService.margePercentDefaut())
+                .thenReturn(ParametresEtudeService.DEFAULT_MARGE_PERCENT);
     }
 
     @AfterEach

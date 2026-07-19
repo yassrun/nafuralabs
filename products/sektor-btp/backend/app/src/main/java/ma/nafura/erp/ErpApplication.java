@@ -20,8 +20,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
     "ma.nafura.rh",
     "ma.nafura.hse",
     "ma.nafura.marches",
-    "ma.nafura.approbations",
-    "ma.nafura.consultation"
+    "ma.nafura.approbations"
 })
 @EnableJpaRepositories(basePackages = {
     "ma.nafura.platform",
@@ -38,8 +37,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
     "ma.nafura.rh",
     "ma.nafura.hse",
     "ma.nafura.marches",
-    "ma.nafura.approbations",
-    "ma.nafura.consultation"
+    "ma.nafura.approbations"
 })
 @EntityScan(basePackages = {
     "ma.nafura.platform",
@@ -56,8 +54,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
     "ma.nafura.rh",
     "ma.nafura.hse",
     "ma.nafura.marches",
-    "ma.nafura.approbations",
-    "ma.nafura.consultation"
+    "ma.nafura.approbations"
 })
 public class ErpApplication {
 

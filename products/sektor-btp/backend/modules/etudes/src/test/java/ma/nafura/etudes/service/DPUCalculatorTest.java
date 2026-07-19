@@ -61,17 +61,18 @@ class DPUCalculatorTest {
         assertThat(coutDeRevient).isEqualByComparingTo(new BigDecimal("794.34"));
 
         BigDecimal prixVenteHt = calculator.computePrixVenteHt(deboursSec, FG, MARGE);
-        // 735.50 × 1.08 × 1.07 = 849.8634 → 849.86 HALF_UP
-        assertThat(prixVenteHt).isEqualByComparingTo(new BigDecimal("849.86"));
+        // 735.50 × 1.08 = 794.34 ; 794.34 × 1.07 = 849.9438 → 849.94 HALF_UP
+        assertThat(prixVenteHt).isEqualByComparingTo(new BigDecimal("849.94"));
     }
 
     @Test
     void invariant_prixVenteTtc() {
         // TODO(metier): valeurs d'illustration, à remplacer par le sous-détail B35 réel.
         // La STRUCTURE du test est définitive ; seuls les nombres changeront.
-        BigDecimal prixVenteHt = new BigDecimal("849.86");
+        BigDecimal prixVenteHt = new BigDecimal("849.94");
+        // 849.94 × 1.20 = 1019.928 → 1019.93 HALF_UP
         assertThat(calculator.computePrixVenteTtc(prixVenteHt, TVA))
-                .isEqualByComparingTo(new BigDecimal("1019.83"));
+                .isEqualByComparingTo(new BigDecimal("1019.93"));
     }
 
     @Test
@@ -85,17 +86,30 @@ class DPUCalculatorTest {
 
         // La quantité bordereau n'intervient QU'ICI — jamais dans le déboursé
         BigDecimal totalLigne = calculator.computeLineTotal(QTE_BORDEREAU, prixVenteHt);
-        assertThat(totalLigne).isEqualByComparingTo(new BigDecimal("59490.20"));
+        // 70 × 849.94 = 59495.80
+        assertThat(totalLigne).isEqualByComparingTo(new BigDecimal("59495.80"));
 
-        // Garde-fou anti double multiplication (bug consultation)
-        BigDecimal doubleMultiplication = deboursSec
+        // Le déboursé est UNITAIRE : il ne dépend jamais de la quantité du bordereau.
+        assertThat(deboursSec).isEqualByComparingTo(new BigDecimal("735.50"));
+
+        // Équivalence à l'ordre d'arrondi près : la multiplication est commutative, donc
+        // (déboursé × qté) × coefs ≈ qté × (déboursé × coefs). Seul l'arrondi intermédiaire
+        // les sépare — ce n'est PAS le bug recherché.
+        BigDecimal sansArrondiIntermediaire = deboursSec
                 .multiply(QTE_BORDEREAU)
                 .multiply(BigDecimal.ONE.add(FG.movePointLeft(2)))
                 .multiply(BigDecimal.ONE.add(MARGE.movePointLeft(2)))
                 .setScale(2, RoundingMode.HALF_UP);
-        assertThat(deboursSec).isNotEqualByComparingTo(deboursSec.multiply(QTE_BORDEREAU));
-        assertThat(totalLigne).isEqualByComparingTo(doubleMultiplication);
-        assertThat(deboursSec).isEqualByComparingTo(new BigDecimal("735.50"));
+        assertThat(totalLigne.subtract(sansArrondiIntermediaire).abs())
+                .isLessThan(new BigDecimal("1.00"));
+
+        // GARDE-FOU (bug consultation) : la quantité du bordereau ne doit JAMAIS être
+        // comptée deux fois. Si le déboursé incluait déjà la quantité, on obtiendrait ceci.
+        BigDecimal doubleComptage = calculator.computeLineTotal(
+                QTE_BORDEREAU,
+                calculator.computePrixVenteHt(deboursSec.multiply(QTE_BORDEREAU), FG, MARGE));
+        assertThat(totalLigne).isNotEqualByComparingTo(doubleComptage);
+        assertThat(doubleComptage).isGreaterThan(totalLigne.multiply(new BigDecimal("50")));
     }
 
     @Test

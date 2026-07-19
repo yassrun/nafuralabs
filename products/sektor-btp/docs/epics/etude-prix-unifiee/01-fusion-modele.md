@@ -48,9 +48,9 @@ Cas à couvrir, avec des chiffres métier réels :
 | Cas | Entrée | Attendu |
 |---|---|---|
 | Béton B35, 1 m³ | ciment 350 kg × 1,20 DH ; sable 0,4 m³ × 180 DH ; gravier 0,8 m³ × 220 DH ; MO 1,5 h × 45 DH | `deboursSec = 735,50` |
-| + FG 8 % + marge 7 % | déboursé 735,50 | `prixVenteHt = 849,86` |
+| + FG 8 % + marge 7 % | déboursé 735,50 | coût de revient `794,34` → `prixVenteHt = 849,94` |
 | + TVA 20 % | | `prixVenteTtc = 1 019,83` |
-| Ligne bordereau | quantité 70 m³ × PU 849,86 | `total = 59 490,20` |
+| Ligne bordereau | quantité 70 m³ × PU 849,94 | `total = 59 495,80` |
 | Rendement nul | rendement = 0 | composant à 0, pas d'exception |
 | Composants vides | liste vide | `deboursSec = 0` |
 | Valeurs négatives | rendement = −5 | ramené à 0 (comportement actuel `max(ZERO)`) |

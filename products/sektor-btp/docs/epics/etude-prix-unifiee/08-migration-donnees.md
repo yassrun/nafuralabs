@@ -98,12 +98,12 @@ Retirer aussi la route `/etudes/consultation` de la configuration de navigation.
 
 ## Critères d'acceptation
 
-- [ ] La requête T8.1 confirme l'absence de données à valeur
-- [ ] Dump de sauvegarde réalisé et conservé hors dépôt
-- [ ] Les trois tables sont supprimées
-- [ ] Les permissions `consultation.*` sont retirées ou renommées, aucun rôle orphelin
-- [ ] `./gradlew :sektor:app:build` passe sans le module
-- [ ] L'application démarre sans erreur JPA
-- [ ] Plus aucune route `/etudes/consultation` dans la navigation
-- [ ] `grep -rn "consultation" --include=*.java backend/` ne retourne que des occurrences sans
+- [x] La requête T8.1 confirme l'absence de données à valeur
+- [x] Dump de sauvegarde réalisé et conservé hors dépôt
+- [x] Les trois tables sont supprimées
+- [x] Les permissions `consultation.*` sont retirées ou renommées, aucun rôle orphelin
+- [x] `./gradlew :sektor:app:build` passe sans le module
+- [x] L'application démarre sans erreur JPA
+- [x] Plus aucune route `/etudes/consultation` dans la navigation
+- [x] `grep -rn "consultation" --include=*.java backend/` ne retourne que des occurrences sans
       rapport (ex. l'entité `Consultation` de `marches` si elle existe)

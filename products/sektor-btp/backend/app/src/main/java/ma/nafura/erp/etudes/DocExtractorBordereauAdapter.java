@@ -1,12 +1,12 @@
-package ma.nafura.erp.consultation;
+package ma.nafura.erp.etudes;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.math.BigDecimal;
 import java.util.UUID;
-import ma.nafura.consultation.api.request.ImportNoeudDto;
-import ma.nafura.consultation.api.request.ImportTreeRequest;
-import ma.nafura.consultation.domain.model.ConsultationNoeud;
-import ma.nafura.consultation.service.port.BordereauExtractionPort;
+import ma.nafura.etudes.api.request.ImportNoeudDto;
+import ma.nafura.etudes.api.request.ImportTreeRequest;
+import ma.nafura.etudes.domain.model.DpgfNoeud;
+import ma.nafura.etudes.service.port.BordereauExtractionPort;
 import ma.nafura.platform.documents.docextractor.api.response.StatelessExtractionIssue;
 import ma.nafura.platform.documents.docextractor.api.response.StatelessExtractionResponse;
 import ma.nafura.platform.documents.docextractor.service.StatelessExtractionService;
@@ -16,10 +16,10 @@ import org.springframework.stereotype.Component;
 
 /**
  * v1 extraction adapter: turns an uploaded bordereau (PDF / spreadsheet) into a
- * draft LOT -> POSTE tree using the platform doc-extractor. The CPS itself is
+ * draft LOT -> ARTICLE tree using the platform doc-extractor. The CPS itself is
  * never fully sent here — only the (short, tabular) bordereau is extracted;
- * descriptifs remain manual until the RAG-based {@code DescriptifResolverPort}
- * ships. Presence of this bean disables the No-Op default.
+ * descriptifs remain manual until the RAG-based descriptif resolver ships.
+ * Presence of this bean disables the No-Op default.
  * Declared {@code @Primary} so it wins injection over the No-Op fallback.
  */
 @Component
@@ -107,19 +107,19 @@ public class DocExtractorBordereauAdapter implements BordereauExtractionPort {
         }
         for (JsonNode lotNode : data.get("lots")) {
             ImportNoeudDto lot = new ImportNoeudDto();
-            lot.setType(ConsultationNoeud.TYPE_LOT);
+            lot.setType(DpgfNoeud.TYPE_LOT);
             lot.setCode(text(lotNode, "code"));
             lot.setLibelle(textOrDefault(lotNode, "libelle", "Lot"));
             if (lotNode.has("postes")) {
                 for (JsonNode posteNode : lotNode.get("postes")) {
                     ImportNoeudDto poste = new ImportNoeudDto();
-                    poste.setType(ConsultationNoeud.TYPE_POSTE);
+                    poste.setType(DpgfNoeud.TYPE_ARTICLE);
                     poste.setCode(text(posteNode, "code"));
                     poste.setLibelle(textOrDefault(posteNode, "libelle", "Poste"));
                     poste.setUnite(text(posteNode, "unite"));
                     poste.setQuantite(decimal(posteNode, "quantite"));
                     poste.setDescriptif(text(posteNode, "descriptif"));
-                    poste.setMode(ConsultationNoeud.MODE_FOURNI);
+                    poste.setMode(DpgfNoeud.MODE_FOURNI);
                     lot.getEnfants().add(poste);
                 }
             }
