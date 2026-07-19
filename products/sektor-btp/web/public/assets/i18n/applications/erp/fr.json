@@ -694,6 +694,9 @@
   },
   "etudes": {
     "gate": {
+      "documents": {
+        "aucune_piece": "Déposez au moins une pièce du marché (bordereau ou CPS) avant de continuer."
+      },
       "bordereau": {
         "aucun_article": "Ajoutez au moins un article au bordereau avant de continuer.",
         "unite_manquante": "Unité manquante sur cet article.",

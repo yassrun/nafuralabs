@@ -694,6 +694,9 @@
   },
   "etudes": {
     "gate": {
+      "documents": {
+        "aucune_piece": "Upload at least one tender document (bill of quantities or specifications) before continuing."
+      },
       "bordereau": {
         "aucun_article": "Add at least one bill-of-quantities item before continuing.",
         "unite_manquante": "Unit of measure is missing on this item.",

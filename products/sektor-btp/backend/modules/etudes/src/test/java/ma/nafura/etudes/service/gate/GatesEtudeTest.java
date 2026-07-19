@@ -36,11 +36,33 @@ class GatesEtudeTest {
                 .build();
     }
 
-    // ── Étape 1 ──────────────────────────────────────────────────────────────
+    // ── Étape 1 — pièces du marché ───────────────────────────────────────────
+
+    @Test
+    void aucune_piece_deposee_est_bloquant() {
+        ResultatGate r = new GatesEtude.GateDocuments().evaluer(new ContexteGate(List.of(), 0));
+
+        assertThat(r.passe()).isFalse();
+        assertThat(r.bloquant()).isTrue();
+        assertThat(r.problemes()).singleElement()
+                .extracting(ResultatGate.ProblemeGate::message)
+                .isEqualTo("etudes.gate.documents.aucune_piece");
+    }
+
+    @Test
+    void une_piece_suffit_a_franchir_l_etape_des_documents() {
+        // Sans article : c'est précisément le cas qui rendait le parcours sans issue quand
+        // l'étape 1 réclamait un bordereau que seule l'étape 2 peut produire.
+        ResultatGate r = new GatesEtude.GateDocuments().evaluer(new ContexteGate(List.of(), 1));
+
+        assertThat(r.passe()).isTrue();
+    }
+
+    // ── Étape 2 — bordereau ──────────────────────────────────────────────────
 
     @Test
     void bordereau_vide_est_bloquant() {
-        ResultatGate r = new GatesEtude.GateBordereau().evaluer(List.of());
+        ResultatGate r = new GatesEtude.GateBordereau().evaluer(ContexteGate.deArticles(List.of()));
         assertThat(r.passe()).isFalse();
         assertThat(r.bloquant()).isTrue();
         assertThat(r.problemes()).singleElement()
@@ -55,7 +77,7 @@ class GatesEtudeTest {
                 article("1-2", null, "10", DpgfNoeud.MODE_FOURNI),
                 article("1-3", "m2", "0", DpgfNoeud.MODE_FOURNI));
 
-        ResultatGate r = new GatesEtude.GateBordereau().evaluer(articles);
+        ResultatGate r = new GatesEtude.GateBordereau().evaluer(ContexteGate.deArticles(articles));
 
         // C'est tout l'intérêt de retourner une liste : l'UI affiche des liens cliquables
         // au lieu d'un bouton grisé sans explication.
@@ -64,33 +86,19 @@ class GatesEtudeTest {
                 .containsExactly("1-2", "1-3");
     }
 
-    // ── Étape 2 — non bloquante ──────────────────────────────────────────────
-
-    @Test
-    void descriptifs_manquants_avertissent_sans_bloquer() {
-        List<DpgfNoeud> articles = List.of(article("1-1", "m3", "70", DpgfNoeud.MODE_FOURNI));
-
-        ResultatGate r = new GatesEtude.GateDescriptifs().evaluer(articles);
-
-        assertThat(r.passe()).isFalse();
-        assertThat(r.bloquant()).isFalse();
-        // On chiffre couramment sans descriptif complet, sous contrainte de délai.
-        assertThat(r.autoriseLaSuite()).isTrue();
-    }
-
     // ── Étape 3 ──────────────────────────────────────────────────────────────
 
     @Test
     void article_fourni_ne_reclame_pas_de_decomposition() {
         List<DpgfNoeud> articles = List.of(article("1-1", "m3", "70", DpgfNoeud.MODE_FOURNI));
-        ResultatGate r = new GatesEtude.GateDecomposition(prixDpuRepository).evaluer(articles);
+        ResultatGate r = new GatesEtude.GateDecomposition(prixDpuRepository).evaluer(ContexteGate.deArticles(articles));
         assertThat(r.passe()).isTrue();
     }
 
     @Test
     void article_decompose_sans_dpu_est_bloquant() {
         List<DpgfNoeud> articles = List.of(article("1-1", "m3", "70", DpgfNoeud.MODE_DECOMPOSE));
-        ResultatGate r = new GatesEtude.GateDecomposition(prixDpuRepository).evaluer(articles);
+        ResultatGate r = new GatesEtude.GateDecomposition(prixDpuRepository).evaluer(ContexteGate.deArticles(articles));
         assertThat(r.problemes()).singleElement()
                 .extracting(ResultatGate.ProblemeGate::message)
                 .isEqualTo("etudes.gate.decomposition.absente");
@@ -108,7 +116,7 @@ class GatesEtudeTest {
                 ComposantDpu.builder().rendement(BigDecimal.ZERO).build()));
         when(prixDpuRepository.findById(dpuId)).thenReturn(Optional.of(dpu));
 
-        ResultatGate r = new GatesEtude.GateDecomposition(prixDpuRepository).evaluer(List.of(a));
+        ResultatGate r = new GatesEtude.GateDecomposition(prixDpuRepository).evaluer(ContexteGate.deArticles(List.of(a)));
 
         assertThat(r.problemes()).singleElement()
                 .extracting(ResultatGate.ProblemeGate::message)
@@ -126,7 +134,7 @@ class GatesEtudeTest {
                 ComposantDpu.builder().rendement(BigDecimal.ZERO).build()));
         when(prixDpuRepository.findById(dpuId)).thenReturn(Optional.of(dpu));
 
-        assertThat(new GatesEtude.GateDecomposition(prixDpuRepository).evaluer(List.of(a)).passe())
+        assertThat(new GatesEtude.GateDecomposition(prixDpuRepository).evaluer(ContexteGate.deArticles(List.of(a))).passe())
                 .isTrue();
     }
 
@@ -142,7 +150,7 @@ class GatesEtudeTest {
         lenient().when(prixDpuRepository.findById(any())).thenReturn(Optional.of(dpu));
 
         ResultatGate r = new GatesEtude.GateConsultationFournisseurs(prixDpuRepository)
-                .evaluer(List.of(a));
+                .evaluer(ContexteGate.deArticles(List.of(a)));
 
         assertThat(r.passe()).isFalse();
         assertThat(r.autoriseLaSuite()).isTrue();
@@ -153,7 +161,7 @@ class GatesEtudeTest {
     @Test
     void chiffrage_sans_prix_de_vente_est_bloquant() {
         List<DpgfNoeud> articles = List.of(article("1-1", "m3", "70", DpgfNoeud.MODE_FOURNI));
-        ResultatGate r = new GatesEtude.GateChiffrage(prixDpuRepository).evaluer(articles);
+        ResultatGate r = new GatesEtude.GateChiffrage(prixDpuRepository).evaluer(ContexteGate.deArticles(articles));
         assertThat(r.problemes()).singleElement()
                 .extracting(ResultatGate.ProblemeGate::message)
                 .isEqualTo("etudes.gate.chiffrage.prix_absent");
@@ -163,7 +171,7 @@ class GatesEtudeTest {
     void chiffrage_complet_passe() {
         DpgfNoeud a = article("1-1", "m3", "70", DpgfNoeud.MODE_FOURNI);
         a.setPrixUnitaire(new BigDecimal("849.94"));
-        assertThat(new GatesEtude.GateChiffrage(prixDpuRepository).evaluer(List.of(a)).passe())
+        assertThat(new GatesEtude.GateChiffrage(prixDpuRepository).evaluer(ContexteGate.deArticles(List.of(a))).passe())
                 .isTrue();
     }
 }

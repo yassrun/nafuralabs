@@ -29,7 +29,30 @@ public final class GatesEtude {
         return DpgfNoeud.TYPE_ARTICLE.equals(n.getType());
     }
 
-    /** Étape 1 — le bordereau existe et ses articles sont exploitables. */
+    /**
+     * Étape 1 — les pièces du marché sont déposées.
+     *
+     * <p>Le CPS entre ici, pas à une étape dédiée : il est ensuite découpé en sections et
+     * interrogé à la demande pendant la décomposition, au moment où le descriptif sert.
+     */
+    @Component
+    public static class GateDocuments implements EtapeGate {
+        @Override
+        public int etape() {
+            return DossierEtude.ETAPE_DOCUMENTS;
+        }
+
+        @Override
+        public ResultatGate evaluer(ContexteGate contexte) {
+            if (contexte.nombreDocuments() <= 0) {
+                return new ResultatGate(etape(), true, List.of(new ProblemeGate(
+                        null, null, null, "etudes.gate.documents.aucune_piece")));
+            }
+            return ResultatGate.ok(etape());
+        }
+    }
+
+    /** Étape 2 — le bordereau existe et ses articles sont exploitables. */
     @Component
     public static class GateBordereau implements EtapeGate {
         @Override
@@ -38,7 +61,8 @@ public final class GatesEtude {
         }
 
         @Override
-        public ResultatGate evaluer(List<DpgfNoeud> articles) {
+        public ResultatGate evaluer(ContexteGate contexte) {
+            List<DpgfNoeud> articles = contexte.articles();
             if (articles.isEmpty()) {
                 return new ResultatGate(etape(), true, List.of(new ProblemeGate(
                         null, null, null, "etudes.gate.bordereau.aucun_article")));
@@ -53,32 +77,6 @@ public final class GatesEtude {
                 }
             }
             return new ResultatGate(etape(), true, pbs);
-        }
-    }
-
-    /**
-     * Étape 2 — descriptifs issus du CPS. <b>Non bloquante</b> : une étude peut être chiffrée
-     * sans descriptif complet, c'est courant sous contrainte de délai.
-     */
-    @Component
-    public static class GateDescriptifs implements EtapeGate {
-        @Override
-        public int etape() {
-            return DossierEtude.ETAPE_DESCRIPTIFS;
-        }
-
-        @Override
-        public boolean bloquant() {
-            return false;
-        }
-
-        @Override
-        public ResultatGate evaluer(List<DpgfNoeud> articles) {
-            List<ProblemeGate> pbs = articles.stream()
-                    .filter(a -> a.getDescriptif() == null || a.getDescriptif().isBlank())
-                    .map(a -> probleme(a, "etudes.gate.descriptifs.manquant"))
-                    .toList();
-            return new ResultatGate(etape(), false, pbs);
         }
     }
 
@@ -98,7 +96,8 @@ public final class GatesEtude {
         }
 
         @Override
-        public ResultatGate evaluer(List<DpgfNoeud> articles) {
+        public ResultatGate evaluer(ContexteGate contexte) {
+            List<DpgfNoeud> articles = contexte.articles();
             List<ProblemeGate> pbs = new ArrayList<>();
             for (DpgfNoeud a : articles) {
                 if (DpgfNoeud.MODE_FOURNI.equals(a.getMode())) {
@@ -149,7 +148,8 @@ public final class GatesEtude {
         }
 
         @Override
-        public ResultatGate evaluer(List<DpgfNoeud> articles) {
+        public ResultatGate evaluer(ContexteGate contexte) {
+            List<DpgfNoeud> articles = contexte.articles();
             List<ProblemeGate> pbs = new ArrayList<>();
             for (DpgfNoeud a : articles) {
                 if (a.getPrixDpuId() == null) {
@@ -185,7 +185,8 @@ public final class GatesEtude {
         }
 
         @Override
-        public ResultatGate evaluer(List<DpgfNoeud> articles) {
+        public ResultatGate evaluer(ContexteGate contexte) {
+            List<DpgfNoeud> articles = contexte.articles();
             List<ProblemeGate> pbs = new ArrayList<>();
             for (DpgfNoeud a : articles) {
                 if (a.getPrixUnitaire() == null

@@ -106,7 +106,7 @@ class GateBordereauStructureReelleTest {
 
     @Test
     void le_gate_bordereau_passe_sur_la_structure_reelle() {
-        ResultatGate r = new GatesEtude.GateBordereau().evaluer(articles(bordereauReel()));
+        ResultatGate r = new GatesEtude.GateBordereau().evaluer(ContexteGate.deArticles(articles(bordereauReel())));
 
         assertThat(r.passe()).isTrue();
     }
@@ -118,7 +118,7 @@ class GateBordereauStructureReelleTest {
         List<DpgfNoeud> forfait = List.of(
                 ligneChiffrable("a/4", "Implantation des batiments", "F", "1", null));
 
-        assertThat(new GatesEtude.GateBordereau().evaluer(forfait).passe()).isTrue();
+        assertThat(new GatesEtude.GateBordereau().evaluer(ContexteGate.deArticles(forfait)).passe()).isTrue();
     }
 
     @Test
@@ -133,7 +133,7 @@ class GateBordereauStructureReelleTest {
                 .code(null).libelle("a/ - TOTAL TERRASSEMENTS GENERAUX & DEMOLITIONS")
                 .ordre(99).build());
 
-        ResultatGate r = new GatesEtude.GateBordereau().evaluer(avecTotal);
+        ResultatGate r = new GatesEtude.GateBordereau().evaluer(ContexteGate.deArticles(avecTotal));
 
         assertThat(r.passe()).isFalse();
         assertThat(r.problemes()).singleElement()

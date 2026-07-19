@@ -15,6 +15,8 @@ import ma.nafura.etudes.domain.model.DpgfNoeud;
 import ma.nafura.etudes.domain.model.StatutDossierEtude;
 import ma.nafura.etudes.repository.DossierEtudeRepository;
 import ma.nafura.etudes.repository.DpgfNoeudRepository;
+import ma.nafura.etudes.repository.DossierDocumentRepository;
+import ma.nafura.etudes.service.gate.ContexteGate;
 import ma.nafura.etudes.service.gate.EtapeGate;
 import ma.nafura.etudes.service.gate.ResultatGate;
 import ma.nafura.platform.framework.context.TenantContext;
@@ -33,16 +35,19 @@ public class DossierEtudeService {
 
     private final DossierEtudeRepository repository;
     private final DpgfNoeudRepository noeudRepository;
+    private final DossierDocumentRepository documentRepository;
     private final ParametresEtudeService parametres;
     private final Map<Integer, EtapeGate> gatesParEtape;
 
     public DossierEtudeService(
             DossierEtudeRepository repository,
             DpgfNoeudRepository noeudRepository,
+            DossierDocumentRepository documentRepository,
             ParametresEtudeService parametres,
             List<EtapeGate> gates) {
         this.repository = repository;
         this.noeudRepository = noeudRepository;
+        this.documentRepository = documentRepository;
         this.parametres = parametres;
         this.gatesParEtape = gates.stream()
                 .collect(Collectors.toMap(EtapeGate::etape, Function.identity()));
@@ -153,33 +158,33 @@ public class DossierEtudeService {
     @Transactional(readOnly = true)
     public List<ResultatGate> evaluerGates(UUID id) {
         DossierEtude dossier = requireDossier(id);
-        List<DpgfNoeud> articles = chargerArticles(dossier);
+        ContexteGate contexte = chargerContexte(dossier);
         return gatesParEtape.values().stream()
                 .sorted(Comparator.comparingInt(EtapeGate::etape))
-                .map(g -> g.evaluer(articles))
+                .map(g -> g.evaluer(contexte))
                 .toList();
     }
 
     @Transactional
     public DossierEtude allerAEtape(UUID id, int etape) {
-        if (etape < DossierEtude.ETAPE_BORDEREAU || etape > DossierEtude.ETAPE_CHIFFRAGE) {
+        if (etape < DossierEtude.ETAPE_PREMIERE || etape > DossierEtude.ETAPE_CHIFFRAGE) {
             throw new IllegalArgumentException("etudes.dossier.etape_invalide");
         }
         DossierEtude dossier = requireModifiable(id);
         int courante = dossier.getCurrentStep() != null
                 ? dossier.getCurrentStep()
-                : DossierEtude.ETAPE_BORDEREAU;
+                : DossierEtude.ETAPE_PREMIERE;
 
         // En avant seulement : on vérifie chaque étape franchie. En arrière : libre.
         if (etape > courante) {
-            List<DpgfNoeud> articles = chargerArticles(dossier);
+            ContexteGate contexte = chargerContexte(dossier);
             for (int e = courante; e < etape; e++) {
-                assertGateFranchie(e, articles);
+                assertGateFranchie(e, contexte);
             }
         }
         dossier.setCurrentStep(etape);
         if (dossier.getStatus() == StatutDossierEtude.BROUILLON
-                && etape > DossierEtude.ETAPE_BORDEREAU) {
+                && etape > DossierEtude.ETAPE_PREMIERE) {
             dossier.setStatus(StatutDossierEtude.EN_ETUDE);
         }
         return repository.save(dossier);
@@ -188,9 +193,9 @@ public class DossierEtudeService {
     @Transactional
     public DossierEtude soumettre(UUID id) {
         DossierEtude dossier = requireModifiable(id);
-        List<DpgfNoeud> articles = chargerArticles(dossier);
-        for (int e = DossierEtude.ETAPE_BORDEREAU; e <= DossierEtude.ETAPE_CHIFFRAGE; e++) {
-            assertGateFranchie(e, articles);
+        ContexteGate contexte = chargerContexte(dossier);
+        for (int e = DossierEtude.ETAPE_PREMIERE; e <= DossierEtude.ETAPE_CHIFFRAGE; e++) {
+            assertGateFranchie(e, contexte);
         }
         return transitionner(dossier, StatutDossierEtude.EN_VALIDATION);
     }
@@ -244,15 +249,26 @@ public class DossierEtudeService {
         return repository.save(dossier);
     }
 
-    private void assertGateFranchie(int etape, List<DpgfNoeud> articles) {
+    private void assertGateFranchie(int etape, ContexteGate contexte) {
         EtapeGate gate = gatesParEtape.get(etape);
         if (gate == null) {
             return;
         }
-        ResultatGate r = gate.evaluer(articles);
+        ResultatGate r = gate.evaluer(contexte);
         if (!r.autoriseLaSuite()) {
             throw new GateNonFranchieException(r);
         }
+    }
+
+    /**
+     * Ce que les règles d'étape ont à examiner, chargé une seule fois par évaluation.
+     *
+     * <p>Les cinq gates sont évaluées ensemble : les charger séparément relirait le même
+     * bordereau cinq fois.
+     */
+    private ContexteGate chargerContexte(DossierEtude dossier) {
+        long documents = documentRepository.countByTenantIdAndDossierEtudeId(tenantId(), dossier.getId());
+        return new ContexteGate(chargerArticles(dossier), documents);
     }
 
     /** Articles à plat — aucune règle d'étape n'a besoin de la hiérarchie. */

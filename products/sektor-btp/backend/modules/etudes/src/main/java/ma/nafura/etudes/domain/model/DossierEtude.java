@@ -32,12 +32,22 @@ import ma.nafura.etudes.domain.audit.EtudeAuditingListener;
 @Builder
 public class DossierEtude implements AuditableEtude {
 
-    /** Étapes du parcours. */
-    public static final int ETAPE_BORDEREAU = 1;
-    public static final int ETAPE_DESCRIPTIFS = 2;
+    /**
+     * Étapes du parcours.
+     *
+     * <p>L'étape « Descriptifs » a été retirée le 2026-07-19 : elle appariait le CPS aux articles
+     * par code, en une passe globale, alors qu'un CPS est de la prose organisée en chapitres. Le
+     * CPS se dépose désormais dès l'étape 1 et s'interroge à la demande pendant la décomposition.
+     * Voir {@code 00-ARCHITECTURE.md} §4.
+     */
+    public static final int ETAPE_DOCUMENTS = 1;
+    public static final int ETAPE_BORDEREAU = 2;
     public static final int ETAPE_DECOMPOSITION = 3;
     public static final int ETAPE_CONSULTATION_FOURNISSEURS = 4;
     public static final int ETAPE_CHIFFRAGE = 5;
+
+    /** Première étape du parcours — point de départ de tout nouveau dossier. */
+    public static final int ETAPE_PREMIERE = ETAPE_DOCUMENTS;
 
     /** Origine du dossier : étude classique, ou marché déjà attribué (entrée B, lot 7). */
     public static final String ORIGINE_ETUDE = "ETUDE";
@@ -82,7 +92,7 @@ public class DossierEtude implements AuditableEtude {
 
     @Column(name = "current_step", nullable = false)
     @Builder.Default
-    private Integer currentStep = ETAPE_BORDEREAU;
+    private Integer currentStep = ETAPE_PREMIERE;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 30)
@@ -165,7 +175,7 @@ public class DossierEtude implements AuditableEtude {
             this.status = StatutDossierEtude.BROUILLON;
         }
         if (this.currentStep == null) {
-            this.currentStep = ETAPE_BORDEREAU;
+            this.currentStep = ETAPE_PREMIERE;
         }
         if (this.origine == null) {
             this.origine = ORIGINE_ETUDE;

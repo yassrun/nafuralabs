@@ -363,8 +363,8 @@ export type StatutDossierEtude =
 
 /** Les cinq étapes du parcours. L'index est 1-based, comme côté back (`DossierEtude.ETAPE_*`). */
 export const ETAPES_DOSSIER_ETUDE = [
-  { etape: 1, libelle: 'Bordereau' },
-  { etape: 2, libelle: 'Descriptifs' },
+  { etape: 1, libelle: 'Documents du marché' },
+  { etape: 2, libelle: 'Bordereau' },
   { etape: 3, libelle: 'Décomposition' },
   { etape: 4, libelle: 'Consultation fournisseurs' },
   { etape: 5, libelle: 'Chiffrage' },
