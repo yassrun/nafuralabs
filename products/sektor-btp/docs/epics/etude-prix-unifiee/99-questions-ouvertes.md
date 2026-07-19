@@ -5,6 +5,19 @@ génie civil / chef de projet, pas par l'agent d'implémentation.
 
 **Format** : chaque décision prise est reportée dans `00-ARCHITECTURE.md` §5, avec sa date.
 
+**Légende de statut**
+| | Sens |
+|---|---|
+| ✅ | tranchée par l'expert métier — fait autorité |
+| 🔵 | **défaut posé par REX** — raisonné depuis la pratique BTP courante, **pas validé par l'expert**. Implémenté pour ne pas bloquer, facile à reprendre. Chaque 🔵 dit ce qui le ferait basculer |
+| 🟠 🟡 | ouverte, priorité décroissante |
+| 🟢 | hors périmètre |
+
+> Le 🔵 existe à cause d'une erreur commise le 2026-07-19 : des taux « 8 % / 7 % » issus du
+> socle généré ont été propagés dans les specs et les tests comme s'ils venaient du métier.
+> Ils étaient faux d'un tiers. Un défaut raisonné est acceptable ; un défaut **présenté comme
+> une décision métier** ne l'est pas. D'où ce marquage explicite.
+
 ---
 
 ## Q1 — À quel niveau se posent les FG et la marge ? ✅ tranchée 2026-07-19
@@ -97,7 +110,7 @@ Et ça pose une question sur la bibliothèque : quand on réutilise un ouvrage t
 
 ---
 
-## Q15 — Y a-t-il une marge globale en plus des marges par article ? 🟠 lot 6
+## Q15 — Y a-t-il une marge globale en plus des marges par article ? 🔵 tranchée par défaut REX 2026-07-19
 
 **Ce qu'on sait** (expert métier, 2026-07-19) : marge **par article** en pourcentage, et
 « il se peut qu'il y ait une marge globale en plus ».
@@ -127,11 +140,25 @@ Reste à savoir laquelle des deux lectures, et une sous-question : la marge glob
 **saisie** par le chiffreur, ou **calculée** comme résultat de ses marges par article ? Si
 c'est la seconde, ce n'est pas un paramètre mais un indicateur — et le bandeau de T6.2 suffit.
 
-**Réponse** : _(à compléter)_
+**Décision par défaut (REX, à confirmer)** : la marge globale est **constatée, pas saisie**.
+
+Le raisonnement n'est pas culturel mais arithmétique : un bordereau remis au client se vérifie
+ligne à ligne. Ajouter 3 % globaux après coup impose soit de les redistribuer dans les PU — et
+ce n'était alors qu'un raccourci de saisie —, soit d'avoir un total qui ne correspond plus aux
+lignes, ce qui est refusé.
+
+La formulation de l'expert va dans ce sens : « la marge est rajoutée indépendamment **pour
+constituer le prix de vente** » décrit l'étage FG → marge → PV, pas un second multiplicateur.
+
+**Implémentation** : indicateur affiché en permanence pendant la saisie (bandeau T6.2). La
+colonne `marge_globale_percent` reste en base, nulle et inutilisée — la provision ne coûte rien
+et couvre le cas où l'expert infirmerait.
+
+**À reprendre si** l'expert décrit un vrai second taux appliqué après coup.
 
 ---
 
-## Q14 — Sur quelle base la marge varie-t-elle d'un article à l'autre ? 🟠 lot 6
+## Q14 — Sur quelle base la marge varie-t-elle d'un article à l'autre ? 🔵 contournée 2026-07-19
 
 **Acquis** : l'expert métier confirme une marge **par article**, **variable** (2026-07-19).
 Q1 est donc close, et il n'existe pas de « taux d'entreprise ».
@@ -153,7 +180,23 @@ Hypothèses courantes en BTP, à confirmer ou infirmer :
 Plusieurs peuvent coexister. Dans tous les cas, la **marge globale en temps réel** est requise
 (cf. `06-chiffrage-validation.md` T6.2) — c'est le seul garde-fou quand on module ligne à ligne.
 
-**Réponse** : _(à compléter)_
+**Contournement retenu (2026-07-19)** : la question n'est pas tranchable sans l'expert — le motif
+qui prime est une **stratégie commerciale**, propre à l'entreprise. Mais elle n'a pas besoin de
+l'être pour concevoir l'écran : les quatre motifs demandent tous les **mêmes informations**.
+
+Trois colonnes contextuelles les couvrent toutes :
+
+| Colonne | Sert à |
+|---|---|
+| Poids de la ligne dans le total HT (%) | effet de volume, déséquilibrage |
+| Provenance du prix (`sourcePrix`) + date | fiabilité du déboursé, donc du risque pris |
+| Marge globale en temps réel (bandeau) | déséquilibrage, garde-fou général |
+
+La réponse de l'expert servira à **hiérarchiser** l'affichage — mettre en avant ce qui compte
+pour lui — pas à le concevoir. **Le lot 6 n'est donc plus bloqué.**
+
+Reste utile à demander : y a-t-il un **plancher de marge** en dessous duquel une ligne doit
+alerter ?
 
 ---
 
@@ -211,7 +254,7 @@ par du code.
 
 ---
 
-## Q4 — Les FG descendent-ils dans le budget de chantier ? 🟡 lot 7
+## Q4 — Les FG descendent-ils dans le budget de chantier ? 🔵 tranchée par défaut REX 2026-07-19
 
 Le budget prévisionnel est-il en **déboursé sec** (matériaux + MO + matériel + ST) ou en **déboursé
 + FG** ?
