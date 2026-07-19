@@ -36,8 +36,35 @@ Fonctions attendues :
 
 ### T6.2 — Ergonomie des taux (Q1)
 
+> **Précision de l'expert métier, 2026-07-19** : « on met une marge **par article** dans le
+> bordereau, et **c'est variable** ». Ce n'est donc pas un taux d'entreprise assorti de
+> dérogations, mais une **décision de ligne**. Le « défaut » n'est qu'un point de départ de
+> saisie, jamais une règle.
+
 Les taux sont stockés **par article**. L'héritage n'est qu'une commodité de saisie — sur 800
 articles, une saisie unitaire est impraticable.
+
+#### Conséquence : la marge globale doit être visible pendant la saisie
+
+Si le chiffreur module la marge ligne par ligne, il pilote à l'aveugle tant qu'il ne voit pas
+l'effet cumulé. Il peut alléger trente articles sans mesurer ce que ça fait au résultat de
+l'affaire.
+
+**Exigence** : un bandeau **collant**, mis à jour à chaque modification :
+
+```
+Déboursé 1 198 450   ·   PV HT 1 402 180   ·   Marge 9,1 % (117 340 DH)
+                                                     ▲ +0,4 pt depuis l'ouverture
+```
+
+C'est d'autant plus nécessaire si la variation sert au **déséquilibrage du bordereau** —
+charger la marge sur les articles dont les quantités augmenteront à l'exécution, l'alléger sur
+ceux que le client comparera. Pratique courante, et qui n'a de sens que si l'on garde en
+permanence l'œil sur le total.
+
+**À faire préciser** (voir Q14) : sur quelle base le taux varie-t-il ? La réponse détermine ce
+que l'écran doit afficher **à côté** de la colonne marge pour aider à décider — poids de la
+ligne dans le total, incertitude sur la quantité, existence d'un prix concurrent connu.
 
 - valeurs par défaut au niveau **tenant** (`ParametresEtudeService`, lot 9)
 - surcharge au niveau **dossier d'étude** (`fraisGenerauxPercentDefaut`, `margePercentDefaut`)

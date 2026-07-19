@@ -38,6 +38,32 @@ masse, cf. T6.2) plutôt que pour une constante d'entreprise.
 
 ---
 
+## Q14 — Sur quelle base la marge varie-t-elle d'un article à l'autre ? 🟠 lot 6
+
+**Acquis** : l'expert métier confirme une marge **par article**, **variable** (2026-07-19).
+Q1 est donc close, et il n'existe pas de « taux d'entreprise ».
+
+**Ce qui reste à savoir** : ce qui *fait* varier ce taux. Ce n'est pas une curiosité — la
+réponse détermine ce que l'écran de chiffrage doit afficher **à côté** de la colonne marge pour
+que le chiffreur décide en connaissance de cause.
+
+Hypothèses courantes en BTP, à confirmer ou infirmer :
+
+| Motif de variation | Ce que l'écran devrait alors montrer |
+|---|---|
+| Positionnement concurrentiel sur les articles que le client compare | un repère de prix connu / historique sur la ligne |
+| Incertitude sur la quantité au bordereau | un indicateur de fiabilité de la quantité |
+| Effet de volume (marge plus faible sur les grosses lignes) | le **poids de la ligne** dans le total de l'affaire |
+| **Déséquilibrage** : charger les articles dont les quantités augmenteront à l'exécution | l'écart quantité bordereau ↔ quantité attendue, et la marge globale en permanence |
+| Risque technique propre à l'ouvrage | rien de plus — jugement du chiffreur |
+
+Plusieurs peuvent coexister. Dans tous les cas, la **marge globale en temps réel** est requise
+(cf. `06-chiffrage-validation.md` T6.2) — c'est le seul garde-fou quand on module ligne à ligne.
+
+**Réponse** : _(à compléter)_
+
+---
+
 ## Q2 — Marge sur coût ou sur prix de vente ? ✅ tranchée 2026-07-19
 
 **Décision** : **marge sur le coût de revient**, le coût de revient étant le déboursé sec **après
