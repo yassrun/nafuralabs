@@ -74,8 +74,8 @@ article, variable), ça enterre définitivement l'idée d'une constante d'entrep
 Écart 1,6 % — environ **160 000 DH sur une étude à 10 MDH**.
 
 La lecture A correspond à « la marge constitue le prix de vente **à partir du** coût de
-revient », et c'est ce qu'implémente `DpuCalculator`. Confirmation demandée en section H de
-[`FICHE-RENDEMENTS.md`](FICHE-RENDEMENTS.md).
+revient », et c'est ce qu'implémente `DpuCalculator`. Confirmation demandée en section 1.1 de
+[`FICHE-EXPERT-METIER.md`](FICHE-EXPERT-METIER.md).
 
 ---
 
@@ -88,7 +88,7 @@ Le cas **ensemble / forfait** est structurellement différent : pas de rendement
 l'ouvrage est un bloc. Le modèle le supporte (quantité = 1, unité = `ENS`), mais l'ergonomie de
 décomposition n'a pas de sens telle quelle.
 
-À préciser (section G1 de la fiche) : quelle part des articles, et décompose-t-on quand même en
+À préciser (section 4.2 de la fiche) : quelle part des articles, et décompose-t-on quand même en
 interne pour connaître le déboursé ?
 
 ---
@@ -106,7 +106,7 @@ différentes d'un marché à l'autre.
 
 Ça renforce l'étape 2 (descriptifs) : elle n'est pas décorative, elle conditionne l'étape 3.
 Et ça pose une question sur la bibliothèque : quand on réutilise un ouvrage type, faut-il
-**systématiquement** le reconfronter au descriptif du marché ? Voir section G2 de la fiche.
+**systématiquement** le reconfronter au descriptif du marché ? Voir section 4.3 de la fiche.
 
 ---
 
