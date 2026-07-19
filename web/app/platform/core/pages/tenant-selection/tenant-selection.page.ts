@@ -11,7 +11,7 @@ import { Router, RouterModule } from '@angular/router';
 import { AuthFacade } from '../../security/services/auth.facade';
 import { TenantContextService } from '../../tenant/tenant.context';
 import { TenantSelectorItem } from '../../tenant/tenant.types';
-import { APPLICATION_DEFAULT_ROUTE, APPLICATION_REQUIRES_TENANT } from '@applications/config/routes';
+import { applicationDefaultRoute, applicationRequiresTenant } from '../../application/application-config';
 
 @Component({
   selector: 'app-tenant-selection-page',
@@ -31,13 +31,13 @@ export class TenantSelectionPage implements OnInit {
   readonly isSuperAdmin = computed(() => this.auth.isSuperAdmin());
 
   private async navigateToApplicationShell(): Promise<void> {
-    const defaultRoute = APPLICATION_DEFAULT_ROUTE || 'feature-unavailable/unknown';
+    const defaultRoute = applicationDefaultRoute();
     const segments = defaultRoute.split('/').filter(Boolean);
     await this.router.navigate(['/', ...segments]);
   }
 
   async ngOnInit(): Promise<void> {
-    if (!APPLICATION_REQUIRES_TENANT) {
+    if (!applicationRequiresTenant()) {
       await this.navigateToApplicationShell();
       return;
     }

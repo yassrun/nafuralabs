@@ -14,7 +14,7 @@ import { LookupReferenceNavigationService } from '@lib/anatomy/services/lookup-r
 
 import { environment } from '@env';
 import { AuthFacade } from '../../security/services/auth.facade';
-import { APPLICATION_DEFAULT_ROUTE } from '@applications/config/routes';
+import { applicationDefaultRoute } from '../../application/application-config';
 
 @Component({
   selector: 'app-login-page',
@@ -232,7 +232,7 @@ export class LoginPage implements OnInit {
   readonly devTotpHint = (environment as { devInAppAuth?: { totp: string } }).devInAppAuth?.totp ?? '123456';
 
   private async navigateToApplicationShell(): Promise<void> {
-    const defaultRoute = APPLICATION_DEFAULT_ROUTE || 'feature-unavailable/unknown';
+    const defaultRoute = applicationDefaultRoute();
     const segments = defaultRoute.split('/').filter(Boolean);
     await this.router.navigate(['/', ...segments]);
   }

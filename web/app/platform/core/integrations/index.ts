@@ -14,10 +14,5 @@
  */
 
 export * from './integration.types';
-export * from './dgi-simpl-is.adapter';
-export * from './cnss-damancom.adapter';
-export * from './cnss-dat.adapter';
-export * from './efacture-dgi.adapter';
-export * from './ompic.adapter';
+export * from './audit.port';
 export * from './whatsapp.adapter';
-export * from './banques';

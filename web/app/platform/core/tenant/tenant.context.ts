@@ -21,7 +21,7 @@ import {
 import { Tenant as SecurityTenant, TenantMembership } from '../security/models/tenant.models';
 import { AuthStateStore } from '../security/state/auth.state';
 import { ApiConfigService } from '../config/api-config.service';
-import { APPLICATION_REQUIRES_TENANT } from '@applications/config/routes';
+import { applicationRequiresTenant } from '../application/application-config';
 
 /**
  * Tenant context service.
@@ -172,7 +172,7 @@ export class TenantContextService {
    * For normal users: returns their tenant memberships.
    */
   async getAllTenantsForSelection(): Promise<TenantSelectorItem[]> {
-    if (!APPLICATION_REQUIRES_TENANT) {
+    if (!applicationRequiresTenant()) {
       return [];
     }
 

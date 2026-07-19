@@ -7,11 +7,11 @@
 
 import { Injectable, Signal, signal } from '@angular/core';
 import { ApplicationKey } from './application-key';
-import { ACTIVE_APPLICATION_ID } from '@applications/config/routes';
+import { applicationConfig } from './application-config';
 
 @Injectable({ providedIn: 'root' })
 export class ApplicationContextService {
-  private readonly fallbackApplicationId = this.normalizeApplicationId(ACTIVE_APPLICATION_ID) || 'unknown';
+  private readonly fallbackApplicationId = this.normalizeApplicationId(applicationConfig().applicationId) || 'unknown';
   private readonly _applicationKey = signal<ApplicationKey>(this.fallbackApplicationId);
 
   /** Current application key */

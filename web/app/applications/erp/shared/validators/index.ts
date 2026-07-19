@@ -1,7 +1,10 @@
 /**
- * Re-export public — `app/applications/erp/shared/validators/`.
+ * Validateurs Maroc (M-MA-01) — ré-export.
  *
- * Centralise les validateurs Maroc (M-MA-01) pour réutilisation dans les
- * atoms, formulaires Angular et services de validation.
+ * L'implémentation vit désormais dans `@lib/validators` (plateforme) : les atomes du
+ * design system en dépendaient via `@applications/*`, dépendance inversée qui rendait le
+ * design system tributaire du code métier de l'ERP.
+ *
+ * Ce ré-export est conservé pour que les appelants applicatifs restent inchangés.
  */
-export * from './ma-validators';
+export * from '@lib/validators';

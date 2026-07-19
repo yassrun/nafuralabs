@@ -11,8 +11,8 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { AuthFacade } from '../../security/services/auth.facade';
 import { I18nService } from '../../i18n/i18n.service';
 import { TenantContextService } from '../../tenant/tenant.context';
-import { APPLICATION_DEFAULT_ROUTE, APPLICATION_REQUIRES_TENANT } from '@applications/config/routes';
 import { LookupReferenceNavigationService } from '@lib/anatomy/services/lookup-reference-navigation.service';
+import { applicationDefaultRoute, applicationRequiresTenant } from '../../application/application-config';
 
 @Component({
   selector: 'app-auth-callback-page',
@@ -75,7 +75,7 @@ export class AuthCallbackPage implements OnInit {
   }
 
   private async navigateToApplicationShell(): Promise<void> {
-    const defaultRoute = APPLICATION_DEFAULT_ROUTE || 'feature-unavailable/unknown';
+    const defaultRoute = applicationDefaultRoute();
     const segments = defaultRoute.split('/').filter(Boolean);
     await this.router.navigate(['/', ...segments]);
   }
@@ -107,7 +107,7 @@ export class AuthCallbackPage implements OnInit {
       if (success) {
         await this.i18n.loadRemoteLanguagePreference();
 
-        if (!APPLICATION_REQUIRES_TENANT) {
+        if (!applicationRequiresTenant()) {
           await this.navigateAfterAuth();
           return;
         }

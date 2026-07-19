@@ -22,7 +22,7 @@ import { TenantMembership } from '../models/tenant.models';
 import { TokenPair } from '../models/token.models';
 import { ApiConfigService } from '../../config/api-config.service';
 import { getPublicWebOrigin } from '../../config/public-web-origin';
-import { APPLICATION_REQUIRES_TENANT } from '@applications/config/routes';
+import { applicationRequiresTenant } from '../../application/application-config';
 
 /**
  * Auth API Service
@@ -242,7 +242,7 @@ export class AuthApiService {
    * Get user's tenant memberships from backend.
    */
   async getUserTenants(userId: string, accessToken: string): Promise<TenantMembership[]> {
-    if (!APPLICATION_REQUIRES_TENANT) {
+    if (!applicationRequiresTenant()) {
       return [];
     }
 

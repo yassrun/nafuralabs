@@ -1,13 +1,13 @@
 import { inject, signal } from '@angular/core';
 
-import { ErpAuditService } from '@applications/erp/shell/erp-audit.service';
+import { ErpAuditService } from '../../../shell/erp-audit.service';
 
 import {
   buildMockAccuse,
   nowIso,
   type IntegrationCallResult,
   type IntegrationMode,
-} from '../integration.types';
+} from '../../../../../platform/core/integrations/integration.types';
 
 import type {
   BanqueAdapter,

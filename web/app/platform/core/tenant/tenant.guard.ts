@@ -10,7 +10,7 @@ import { CanActivateFn, CanMatchFn, Router, UrlTree } from '@angular/router';
 import { TenantContextService } from './tenant.context';
 import { TenantType } from './tenant.types';
 import { AuthFacade } from '../security/services/auth.facade';
-import { APPLICATION_DEFAULT_ROUTE, APPLICATION_REQUIRES_TENANT } from '@applications/config/routes';
+import { applicationDefaultRoute, applicationRequiresTenant } from '../application/application-config';
 
 /**
  * Route data interface for tenant configuration.
@@ -37,7 +37,7 @@ export const tenantRequiredGuard: CanActivateFn = () => {
   const auth = inject(AuthFacade);
   const router = inject(Router);
 
-  if (!APPLICATION_REQUIRES_TENANT) {
+  if (!applicationRequiresTenant()) {
     return true;
   }
 
@@ -62,11 +62,11 @@ export const tenantRequiredGuard: CanActivateFn = () => {
 export const tenantSelectionGuard: CanActivateFn = () => {
   const router = inject(Router);
 
-  if (APPLICATION_REQUIRES_TENANT) {
+  if (applicationRequiresTenant()) {
     return true;
   }
 
-  const defaultRoute = APPLICATION_DEFAULT_ROUTE || 'feature-unavailable/unknown';
+  const defaultRoute = applicationDefaultRoute();
   const segments = defaultRoute.split('/').filter(Boolean);
   return router.createUrlTree(['/', ...segments]);
 };

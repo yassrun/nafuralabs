@@ -1,13 +1,13 @@
 import { Injectable, inject, signal } from '@angular/core';
 
-import { ErpAuditService } from '@applications/erp/shell/erp-audit.service';
+import { ErpAuditService } from '../../shell/erp-audit.service';
 
 import {
   nowIso,
   type IntegrationAuthConfig,
   type IntegrationCallResult,
   type IntegrationMode,
-} from './integration.types';
+} from '../../../../platform/core/integrations/integration.types';
 
 /**
  * Adaptateur OMPIC — autocomplete tiers via ICE/IF/RC (M-INT-07).

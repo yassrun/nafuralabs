@@ -2,7 +2,7 @@ import { Component, forwardRef, input, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, NG_VALIDATORS, Validator, AbstractControl, ValidationErrors } from '@angular/forms';
 
-import { isValidRib, stripNonDigits as stripNonDigitsShared } from '@applications/erp/shared/validators';
+import { isValidRib, stripNonDigits as stripNonDigitsShared } from '../../../../validators';
 
 function stripNonDigits(v: string): string { return stripNonDigitsShared(v); }
 

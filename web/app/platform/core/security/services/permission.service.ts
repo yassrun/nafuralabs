@@ -6,12 +6,12 @@
  */
 
 import { Injectable, Signal, computed, inject } from '@angular/core';
-import { APPLICATION_REQUIRES_TENANT } from '@applications/config/routes';
 
 import { AuthStateStore } from '../state/auth.state';
 import { Permission, matchesPermissionPattern } from '../models/user.models';
 import { TenantContext } from '../models/tenant.models';
 import { TenantContextService } from '../../tenant/tenant.context';
+import { applicationRequiresTenant } from '../../application/application-config';
 
 /**
  * Permission check options.
@@ -105,7 +105,7 @@ export class PermissionService {
   hasPermission(permission: Permission): boolean {
     // Non-tenant application mode: no tenant-context RBAC resolution.
     // Keep UI actions available; backend remains source of enforcement.
-    if (!APPLICATION_REQUIRES_TENANT && this.state.isAuthenticated()) {
+    if (!applicationRequiresTenant() && this.state.isAuthenticated()) {
       return true;
     }
 

@@ -1,7 +1,7 @@
 import type {
   IntegrationCallResult,
   IntegrationMode,
-} from '../integration.types';
+} from '../../../../../platform/core/integrations/integration.types';
 
 /**
  * Interface unique des banques marocaines (M-INT-04).

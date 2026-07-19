@@ -12,6 +12,25 @@ import localeFrMA from '@angular/common/locales/fr-MA';
 
 registerLocaleData(localeFr);
 registerLocaleData(localeFrMA, 'fr-MA');
+
+// Inversion de dépendance : l'application déclare sa configuration à la plateforme.
+// La plateforme ne doit jamais importer @applications/* — voir
+// products/sektor-btp/docs/epics/front-ownership/.
+// Enregistré au niveau module, donc avant tout bootstrap : main.ts importe ce fichier,
+// et la plateforme ne lit la configuration que dans des corps de fonction.
+import { registerApplicationConfig } from '@platform/core/application/application-config';
+import { INTEGRATION_AUDIT_PORT } from '@platform/core/integrations/audit.port';
+import {
+  ACTIVE_APPLICATION_ID,
+  APPLICATION_DEFAULT_ROUTE,
+  APPLICATION_REQUIRES_TENANT,
+} from '@applications/config/routes';
+
+registerApplicationConfig({
+  applicationId: ACTIVE_APPLICATION_ID,
+  defaultRoute: APPLICATION_DEFAULT_ROUTE,
+  requiresTenant: APPLICATION_REQUIRES_TENANT,
+});
 import { provideRouter, withComponentInputBinding, withPreloading, NoPreloading } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideServiceWorker } from '@angular/service-worker';
@@ -133,6 +152,11 @@ const TRANSLATION_LAYERS: TranslationLayersConfig = ACTIVE_TRANSLATION_LAYERS;
 export const appConfig: ApplicationConfig = {
   providers: [
     provideAppLucideIcons(),
+
+    // Inversion de dépendance : la plateforme déclare INTEGRATION_AUDIT_PORT, l'ERP
+    // fournit l'implémentation. Sans ce provider, whatsapp.adapter tomberait sur le
+    // repli silencieux. Voir products/sektor-btp/docs/epics/front-ownership/.
+    { provide: INTEGRATION_AUDIT_PORT, useExisting: ErpAuditService },
 
     // Locale MAD / fr-MA — dynamique : LOCALE_ID lit la préférence persistée
     // au bootstrap (cf. locale-id.factory.ts). Currency = MAD (constant Round 1).

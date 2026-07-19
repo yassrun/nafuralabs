@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 
-import { ErpAuditService } from '@applications/erp/shell/erp-audit.service';
+import { ErpAuditService } from '../../shell/erp-audit.service';
 
 import {
   buildMockAccuse,
@@ -8,7 +8,7 @@ import {
   type IntegrationAuthConfig,
   type IntegrationCallResult,
   type IntegrationMode,
-} from './integration.types';
+} from '../../../../platform/core/integrations/integration.types';
 
 /**
  * Adaptateur CNSS DAT — Déclaration accident du travail (M-INT-03).
