@@ -226,7 +226,7 @@ chantier. Mais les pratiques varient selon les entreprises.
 
 ---
 
-## Q5 — Que fait-on du doublon `web/app/applications/erp/` ? 🔴 investiguée — décision requise
+## Q5 — Que fait-on du doublon `web/app/applications/erp/` ? ✅ résolue 2026-07-19
 
 **Investigation menée le 2026-07-19. Le résultat contredit la documentation.**
 
@@ -274,7 +274,9 @@ C'est une opération de réorganisation qui ne doit pas se mélanger à du déve
 dans **`web/app/applications/erp/`**, sinon il ne sera jamais compilé. Les specs ont été corrigées
 en ce sens.
 
-**Réponse** : _(à compléter — choix de l'option)_
+**Réponse** : option A retenue et **exécutée**. Le chantier `front-ownership` est terminé :
+`web/` supprimé, Sektor possède son front sous `products/sektor-btp/web/`, la plateforme
+n'importe plus aucune application, garde-fous ESLint en place. Build AOT vérifié.
 
 ---
 
@@ -292,7 +294,7 @@ avec lui — c'était le point le plus risqué de l'epic.
 
 ---
 
-## Q7 — Correspondance du type de composant `SERVICE` ? 🟡 lot 8
+## Q7 — Correspondance du type de composant `SERVICE` ? ✅ sans objet
 
 `ConsultationComposant.SERVICE` n'a pas d'équivalent direct dans `ComposantDpu`
 (`MATIERE` / `MAIN_DOEUVRE` / `MATERIEL` / `SOUS_TRAITANCE`).
