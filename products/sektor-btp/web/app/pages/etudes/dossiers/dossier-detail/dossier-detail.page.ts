@@ -8,6 +8,7 @@ import { ETAPES_DOSSIER_ETUDE } from '@app/etudes/models';
 import type { DossierEtude, ProblemeGate, ResultatGate } from '@app/etudes/models';
 
 import { GateBlocageComponent } from '../components/gate-blocage/gate-blocage.component';
+import { PiecesMarcheComponent } from '../components/pieces-marche/pieces-marche.component';
 import { DossierEtudeApiService } from '../services/dossier-etude-api.service';
 
 /**
@@ -25,7 +26,7 @@ import { DossierEtudeApiService } from '../services/dossier-etude-api.service';
   selector: 'app-dossier-detail',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [WizardShellComponent, GateBlocageComponent],
+  imports: [WizardShellComponent, GateBlocageComponent, PiecesMarcheComponent],
   templateUrl: './dossier-detail.page.html',
   styleUrl: './dossier-detail.page.scss',
 })
@@ -132,6 +133,17 @@ export class DossierDetailPage {
       queryParams: { noeudId: probleme.noeudId },
       queryParamsHandling: 'merge',
     });
+  }
+
+  /** Après dépôt / retrait d'une pièce — le gate bordereau peut changer. */
+  async rechargerGates(): Promise<void> {
+    const dossier = this.dossier();
+    if (!dossier) return;
+    try {
+      this.gates.set(await this.api.gates(dossier.id));
+    } catch (e) {
+      this.erreur.set(this.messageErreur(e));
+    }
   }
 
   private messageErreur(e: unknown): string {

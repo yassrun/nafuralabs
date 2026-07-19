@@ -323,18 +323,6 @@
     "etudes.metres":              "Quantities",
     "etudes.devis":               "Estimates",
     "etudes.appelsOffresClients": "Client Tenders",
-    "etudes.gate.bordereau.aucun_article": "Add at least one bill-of-quantities item before continuing.",
-    "etudes.gate.bordereau.unite_manquante": "Unit of measure is missing on this item.",
-    "etudes.gate.bordereau.quantite_invalide": "Invalid quantity — it must be strictly positive.",
-    "etudes.gate.descriptifs.manquant": "CPS description is missing for this item.",
-    "etudes.gate.decomposition.absente": "Breakdown missing — attach a DPU or mark the item as supplied.",
-    "etudes.gate.decomposition.aucun_composant": "The linked DPU has no components.",
-    "etudes.gate.decomposition.rendements_nuls": "All DPU yields are zero.",
-    "etudes.gate.consultation.prix_non_consulte": "At least one component has no consulted price.",
-    "etudes.gate.chiffrage.prix_absent": "Unit selling price is missing or zero.",
-    "etudes.gate.chiffrage.taux_manquants": "Overhead or profit margin is missing on the DPU.",
-    "etudes.gate.non_franchie": "This step cannot be completed yet.",
-    "etudes.gate.corriger": "Fix",
     "marches": "Contracts & billing (public works)",
     "marches.sectionPublic": "Public contract & progress billings",
     "marches.contrats": "Contracts",
@@ -702,6 +690,32 @@
       "tenantMissing": "Tenant missing — cannot start scan",
       "failed": "Scan failed",
       "error": "Unable to scan document"
+    }
+  },
+  "etudes": {
+    "gate": {
+      "bordereau": {
+        "aucun_article": "Add at least one bill-of-quantities item before continuing.",
+        "unite_manquante": "Unit of measure is missing on this item.",
+        "quantite_invalide": "Invalid quantity — it must be strictly positive."
+      },
+      "descriptifs": {
+        "manquant": "CPS description is missing for this item."
+      },
+      "decomposition": {
+        "absente": "Breakdown missing — attach a DPU or mark the item as supplied.",
+        "aucun_composant": "The linked DPU has no components.",
+        "rendements_nuls": "All DPU yields are zero."
+      },
+      "consultation": {
+        "prix_non_consulte": "At least one component has no consulted price."
+      },
+      "chiffrage": {
+        "prix_absent": "Unit selling price is missing or zero.",
+        "taux_manquants": "Overhead or profit margin is missing on the DPU."
+      },
+      "non_franchie": "This step cannot be completed yet.",
+      "corriger": "Fix"
     }
   }
 }

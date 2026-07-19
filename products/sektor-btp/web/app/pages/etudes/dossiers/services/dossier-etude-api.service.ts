@@ -1,11 +1,14 @@
 import { Injectable } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 
 import { FeatureApiService } from '@lib/anatomy';
 import type {
+  DossierDocument,
   DossierEtude,
   DossierEtudeCreate,
   DossierEtudeUpdate,
   ResultatGate,
+  TypeDossierDocument,
 } from '@app/etudes/models';
 
 @Injectable({ providedIn: 'root' })
@@ -45,5 +48,29 @@ export class DossierEtudeApiService extends FeatureApiService<
 
   annuler(id: string): Promise<DossierEtude> {
     return this.executeTransition(id, 'annuler');
+  }
+
+  listerDocuments(dossierId: string): Promise<DossierDocument[]> {
+    return this.get<DossierDocument[]>(`${this.basePath}/${dossierId}/documents`);
+  }
+
+  deposerDocument(
+    dossierId: string,
+    file: File,
+    type: TypeDossierDocument,
+  ): Promise<DossierDocument> {
+    const form = new FormData();
+    form.append('file', file, file.name);
+    form.append('type', type);
+    return firstValueFrom(
+      this.http.post<DossierDocument>(
+        this.resolveUrl(`${this.basePath}/${dossierId}/documents`),
+        form,
+      ),
+    );
+  }
+
+  supprimerDocument(dossierId: string, documentId: string): Promise<void> {
+    return this.deleteRequest(`${this.basePath}/${dossierId}/documents/${documentId}`);
   }
 }

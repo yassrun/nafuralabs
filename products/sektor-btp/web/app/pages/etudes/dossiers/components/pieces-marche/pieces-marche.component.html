@@ -1,0 +1,64 @@
+<section class="pieces" aria-label="Pièces du marché">
+  <header class="pieces__entete">
+    <div>
+      <h3 class="pieces__titre">Pièces du marché</h3>
+      <p class="pieces__aide">
+        Déposez le bordereau (BPU / DQE) et le CPS. Les fichiers sont conservés tels quels ;
+        la structuration en articles arrive à l'étape suivante.
+      </p>
+    </div>
+  </header>
+
+  @if (erreur(); as message) {
+    <p class="pieces__erreur" role="alert">{{ message }}</p>
+  }
+
+  @if (modifiable()) {
+    <div class="pieces__depot">
+      <label class="pieces__champ">
+        <span class="pieces__label">Type de pièce</span>
+        <select
+          class="pieces__select"
+          [ngModel]="typeChoisi()"
+          (ngModelChange)="typeChoisi.set($event)"
+        >
+          @for (t of types; track t.value) {
+            <option [value]="t.value">{{ t.label }}</option>
+          }
+        </select>
+      </label>
+
+      <label class="pieces__fichier">
+        <span class="pieces__fichier-btn" [class.pieces__fichier-btn--busy]="envoi()">
+          {{ envoi() ? 'Envoi…' : 'Choisir un fichier' }}
+        </span>
+        <input
+          type="file"
+          accept=".pdf,.xlsx,.xls,.csv,.doc,.docx,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+          [disabled]="envoi()"
+          (change)="onFichierChoisi($event)"
+        />
+      </label>
+    </div>
+  }
+
+  @if (chargement()) {
+    <p class="pieces__etat">Chargement des pièces…</p>
+  } @else if (pieces().length === 0) {
+    <p class="pieces__vide">Aucune pièce déposée pour l'instant.</p>
+  } @else {
+    <ul class="pieces__liste">
+      @for (piece of pieces(); track piece.id) {
+        <li class="pieces__ligne">
+          <span class="pieces__type">{{ libelleType(piece.type) }}</span>
+          <span class="pieces__nom">{{ piece.nomFichier || piece.documentId }}</span>
+          @if (modifiable()) {
+            <nf-button variant="ghost" size="sm" (clicked)="supprimer(piece)">
+              Retirer
+            </nf-button>
+          }
+        </li>
+      }
+    </ul>
+  }
+</section>

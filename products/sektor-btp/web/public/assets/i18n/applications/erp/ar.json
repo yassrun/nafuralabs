@@ -323,18 +323,6 @@
     "etudes.metres":               "كشوف الكميات",
     "etudes.devis":                "عروض الأسعار",
     "etudes.appelsOffresClients":  "طلبات عروض الزبائن",
-    "etudes.gate.bordereau.aucun_article": "أضف بنداً واحداً على الأقل في كشف الكميات قبل المتابعة.",
-    "etudes.gate.bordereau.unite_manquante": "وحدة القياس ناقصة لهذا البند.",
-    "etudes.gate.bordereau.quantite_invalide": "الكمية غير صالحة — يجب أن تكون موجبة تماماً.",
-    "etudes.gate.descriptifs.manquant": "الوصف من دفتر الشروط ناقص لهذا البند.",
-    "etudes.gate.decomposition.absente": "التفكيك غائب — اربط DPU أو علّم البند كمُورَّد.",
-    "etudes.gate.decomposition.aucun_composant": "الـ DPU المرتبط لا يحتوي على مكونات.",
-    "etudes.gate.decomposition.rendements_nuls": "كل مردوديات الـ DPU صفرية.",
-    "etudes.gate.consultation.prix_non_consulte": "مكون واحد على الأقل بلا سعر مُستشار.",
-    "etudes.gate.chiffrage.prix_absent": "سعر البيع الوحدوي ناقص أو صفر.",
-    "etudes.gate.chiffrage.taux_manquants": "المصاريف العامة أو هامش الربح ناقصان على الـ DPU.",
-    "etudes.gate.non_franchie": "لا يمكن تجاوز هذه المرحلة بعد.",
-    "etudes.gate.corriger": "تصحيح",
     "marches": "العقود والفوترة",
     "marches.sectionPublic": "العقد العمومي والكشوف",
     "marches.contrats": "العقود / الصفقات",
@@ -693,6 +681,32 @@
       "viewJustificatif": "عرض الإثبات",
       "add": "حفظ",
       "solde": "الرصيد"
+    }
+  },
+  "etudes": {
+    "gate": {
+      "bordereau": {
+        "aucun_article": "أضف بنداً واحداً على الأقل في كشف الكميات قبل المتابعة.",
+        "unite_manquante": "وحدة القياس ناقصة لهذا البند.",
+        "quantite_invalide": "الكمية غير صالحة — يجب أن تكون موجبة تماماً."
+      },
+      "descriptifs": {
+        "manquant": "الوصف من دفتر الشروط ناقص لهذا البند."
+      },
+      "decomposition": {
+        "absente": "التفكيك غائب — اربط DPU أو علّم البند كمُورَّد.",
+        "aucun_composant": "الـ DPU المرتبط لا يحتوي على مكونات.",
+        "rendements_nuls": "كل مردوديات الـ DPU صفرية."
+      },
+      "consultation": {
+        "prix_non_consulte": "مكون واحد على الأقل بلا سعر مُستشار."
+      },
+      "chiffrage": {
+        "prix_absent": "سعر البيع الوحدوي ناقص أو صفر.",
+        "taux_manquants": "المصاريف العامة أو هامش الربح ناقصان على الـ DPU."
+      },
+      "non_franchie": "لا يمكن تجاوز هذه المرحلة بعد.",
+      "corriger": "تصحيح"
     }
   }
 }

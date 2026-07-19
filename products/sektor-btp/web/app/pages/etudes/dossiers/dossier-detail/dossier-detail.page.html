@@ -1,10 +1,10 @@
 @if (chargement()) {
   <p class="dossier__etat">Chargement du dossier…</p>
-} @else if (dossier()) {
+} @else if (dossier(); as d) {
   <header class="dossier__entete">
-    <h1 class="dossier__titre">{{ dossier()?.numero }} — {{ dossier()?.objet }}</h1>
-    <span class="dossier__statut" [attr.data-statut]="dossier()?.status">
-      {{ dossier()?.status }}
+    <h1 class="dossier__titre">{{ d.numero }} — {{ d.objet }}</h1>
+    <span class="dossier__statut" [attr.data-statut]="d.status">
+      {{ d.status }}
     </span>
   </header>
 
@@ -31,14 +31,23 @@
   >
     <app-gate-blocage [resultat]="gateCourant()" (corriger)="corriger($event)" />
 
-    <!--
-      Le contenu de chaque étape arrive avec son lot : documents et CPS au lot 3,
-      décomposition au lot 4, consultation fournisseurs au lot 5, chiffrage au lot 6.
-    -->
     <section class="dossier__etape">
       <h2 class="dossier__etape-titre">
         Étape {{ etapeCourante() }} — {{ etapes[indexCourant()].label }}
       </h2>
+
+      @if (etapeCourante() === 1) {
+        <app-pieces-marche
+          [dossierId]="d.id"
+          [modifiable]="modifiable()"
+          (change)="rechargerGates()"
+        />
+      } @else {
+        <p class="dossier__placeholder">
+          Le contenu de cette étape arrivera avec le lot correspondant
+          (descriptifs, décomposition, consultation, chiffrage).
+        </p>
+      }
     </section>
   </nf-wizard-shell>
 } @else {

@@ -435,3 +435,34 @@ export type DossierEtudeCreate = Pick<DossierEtude, 'objet'> &
   >;
 
 export type DossierEtudeUpdate = Partial<DossierEtudeCreate> & { version?: number };
+
+/** Types de pièces du marché déposables sur un dossier. */
+export type TypeDossierDocument =
+  | 'BORDEREAU'
+  | 'CPS'
+  | 'CPS_ET_BORDEREAU'
+  | 'CPT'
+  | 'PLAN'
+  | 'REGLEMENT'
+  | 'AUTRE';
+
+export const TYPES_DOSSIER_DOCUMENT: { value: TypeDossierDocument; label: string }[] = [
+  { value: 'BORDEREAU', label: 'Bordereau (BPU / DQE)' },
+  { value: 'CPS', label: 'CPS / CCTP' },
+  { value: 'CPS_ET_BORDEREAU', label: 'CPS + bordereau (même fichier)' },
+  { value: 'CPT', label: 'CPT' },
+  { value: 'PLAN', label: 'Plans' },
+  { value: 'REGLEMENT', label: 'Règlement de consultation' },
+  { value: 'AUTRE', label: 'Autre pièce' },
+];
+
+export interface DossierDocument {
+  id: string;
+  dossierEtudeId: string;
+  documentId: string;
+  nomFichier?: string;
+  type: TypeDossierDocument | string;
+  ordre: number;
+  createdBy?: string;
+  createdAt?: string;
+}
