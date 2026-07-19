@@ -227,8 +227,43 @@ def discoverSqlSources = { String scopedAppId = null ->
     return selections
 }
 
+/**
+ * Migration order for product modules, derived from the Gradle dependency graph
+ * (see products/&lt;app&gt;/backend/modules/&lt;module&gt;/build.gradle).
+ *
+ * Without an explicit rank every product module shares layerRank=50/moduleRank=500 and is
+ * tie-broken by path, i.e. alphabetically — which violates the graph: 'achats' would run
+ * before 'currency'/'finance'/'item'/'stock' it depends on, 'chantiers' before
+ * 'marches'/'rh', 'approbations' before 'chantiers'. On a fresh database that fails as
+ * soon as one module references another's tables (FK or data backfill), e.g.
+ * catalogue_fournisseur_lignes.currency_id -> currencies.
+ *
+ * One rank per topological level. Unlisted modules keep 500, so they run after these.
+ */
+def productModuleRank = [
+        // level 0 — no inter-module dependency
+        currency    : 10,
+        finance     : 10,
+        hse         : 10,
+        marches     : 10,
+        partner     : 10,
+        rh          : 10,
+        // level 1 — item -> currency
+        item        : 20,
+        // level 2 — etudes -> item ; stock -> item
+        etudes      : 30,
+        stock       : 30,
+        // level 3 — achats -> item, currency, finance, stock
+        achats      : 40,
+        // level 4 — chantiers -> marches, achats, rh
+        chantiers   : 50,
+        // level 5 — ventes -> chantiers ; approbations -> chantiers, rh
+        approbations: 60,
+        ventes      : 60,
+]
+
 def migrationSortKey = { String relativePath ->
-    def lower = relativePath.toLowerCase(Locale.ROOT)
+    def lower = relativePath.replace('\\', '/').toLowerCase(Locale.ROOT)
     def filename = relativePath.tokenize('/').last()
 
     int layerRank = 50
@@ -253,6 +288,13 @@ def migrationSortKey = { String relativePath ->
         layerRank = 35
     } else if (lower.startsWith('platform/')) {
         layerRank = 45
+    } else if (lower ==~ ~'^products/[^/]+/backend/modules/[^/]+/.*') {
+        // Topological order from the Gradle graph — see productModuleRank above.
+        def moduleMatch = (lower =~ ~'^products/[^/]+/backend/modules/([^/]+)/')
+        if (moduleMatch.find()) {
+            // getOrDefault, not Groovy's get(key, default) — the latter mutates the map.
+            moduleRank = productModuleRank.getOrDefault(moduleMatch.group(1), 500) as int
+        }
     } else if (lower.startsWith('tools/lifecycle/')) {
         layerRank = 90
     }
