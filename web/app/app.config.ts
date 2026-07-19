@@ -21,6 +21,14 @@ registerLocaleData(localeFrMA, 'fr-MA');
 import { registerApplicationConfig } from '@platform/core/application/application-config';
 import { INTEGRATION_AUDIT_PORT } from '@platform/core/integrations/audit.port';
 import {
+  ONBOARDING_WIDGETS_PORT,
+  SHELL_EXTENSIONS,
+  type OnboardingWidgetsPort,
+  type ShellExtension,
+} from '@platform/core/shell/shell-extensions';
+import { SocieteSwitcherComponent } from '@applications/erp/shell/components/societe-switcher/societe-switcher.component';
+import { ErpNotificationCenterAlertsComponent } from '@applications/erp/shell/erp-notification-center-alerts.component';
+import {
   ACTIVE_APPLICATION_ID,
   APPLICATION_DEFAULT_ROUTE,
   APPLICATION_REQUIRES_TENANT,
@@ -157,6 +165,32 @@ export const appConfig: ApplicationConfig = {
     // fournit l'implémentation. Sans ce provider, whatsapp.adapter tomberait sur le
     // repli silencieux. Voir products/sektor-btp/docs/epics/front-ownership/.
     { provide: INTEGRATION_AUDIT_PORT, useExisting: ErpAuditService },
+
+    // Emplacements du shell : la plateforme expose des slots nommés, l'ERP les remplit.
+    {
+      provide: SHELL_EXTENSIONS,
+      useValue: [
+        { slot: 'header-tenant-switcher', component: SocieteSwitcherComponent },
+        { slot: 'notification-center-alerts', component: ErpNotificationCenterAlertsComponent },
+      ] satisfies ShellExtension[],
+    },
+
+    // Widgets d'onboarding : l'ERP porte le drapeau et le chargement paresseux.
+    {
+      provide: ONBOARDING_WIDGETS_PORT,
+      useValue: {
+        load: async () => {
+          if (!environment.onboardingV2Enabled) {
+            return null;
+          }
+          const m = await import('@applications/erp/onboarding/onboarding-shell-widgets.component');
+          return {
+            inviteBanner: m.OnboardingInviteBannerWidgetComponent,
+            completenessMeter: m.OnboardingCompletenessWidgetComponent,
+          };
+        },
+      } satisfies OnboardingWidgetsPort,
+    },
 
     // Locale MAD / fr-MA — dynamique : LOCALE_ID lit la préférence persistée
     // au bootstrap (cf. locale-id.factory.ts). Currency = MAD (constant Round 1).

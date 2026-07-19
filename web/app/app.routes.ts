@@ -290,10 +290,16 @@ export const APP_ROUTES = [
         path: 'administration',
         canActivate: [authGuard],
         data: { breadcrumb: 'Administration' },
-        loadChildren: () =>
-          import('@platform/features/administration/administration.routes').then(
-            (m) => m.ADMINISTRATION_ROUTES
-          ),
+        // La plateforme fournit les routes d'administration génériques ; l'application
+        // y ajoute les siennes (société, paramètres fiscaux, démo). C'est l'application
+        // qui compose — la plateforme ne connaît pas ses pages.
+        loadChildren: async () => {
+          const [platform, app] = await Promise.all([
+            import('@platform/features/administration/administration.routes'),
+            import('@applications/erp/administration-routes'),
+          ]);
+          return [...platform.ADMINISTRATION_ROUTES, ...app.ADMINISTRATION_APP_ROUTES];
+        },
       },
       {
         path: 'admin',

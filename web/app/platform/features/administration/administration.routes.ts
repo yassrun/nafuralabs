@@ -83,28 +83,4 @@ export const ADMINISTRATION_ROUTES: Routes = [
         (m) => m.APP_SETTINGS_ROUTES
       ),
   },
-  {
-    path: 'societe',
-    loadComponent: () =>
-      import('@applications/erp/pages/administration/societe/societe.page').then(
-        (m) => m.SocietePage
-      ),
-    data: { title: 'Identité société', breadcrumb: 'Société' },
-  },
-  {
-    path: 'parametres-fiscal',
-    loadComponent: () =>
-      import('@applications/erp/pages/administration/parametres-fiscal/parametres-fiscal.page').then(
-        (m) => m.ParametresFiscalPage
-      ),
-    data: { title: 'Paramètres fiscaux', breadcrumb: 'Paramètres fiscaux' },
-  },
-  {
-    path: 'demo',
-    loadComponent: () =>
-      import('@applications/erp/pages/administration/demo-reset/demo-reset.page').then(
-        (m) => m.DemoResetPage
-      ),
-    data: { title: 'Jeu de données démo', breadcrumb: 'Démo' },
-  },
 ];
