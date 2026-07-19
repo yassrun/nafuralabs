@@ -45,51 +45,51 @@ class MatricePouvoirServiceTest {
     }
 
     @Test
-    void resolve_selectsDirecteurTravauxBelow50k() {
+    void resolve_selectsConducteurBelow50k() {
         stubBcMatrix();
 
         Optional<MatricePouvoir> row = service.resolve("BC", new BigDecimal("30000"));
+
+        assertThat(row).isPresent();
+        assertThat(row.get().getApprobateurRole()).isEqualTo(MatricePouvoirService.ROLE_CONDUCTEUR);
+    }
+
+    @Test
+    void resolve_selectsDirecteurBetween50kAnd500k() {
+        stubBcMatrix();
+
+        Optional<MatricePouvoir> row = service.resolve("BC", new BigDecimal("100000"));
 
         assertThat(row).isPresent();
         assertThat(row.get().getApprobateurRole()).isEqualTo(MatricePouvoirService.ROLE_DIRECTEUR_TRAVAUX);
     }
 
     @Test
-    void resolve_selectsDgBetween50kAnd500k() {
+    void resolve_selectsDgFrom500k() {
         stubBcMatrix();
 
-        Optional<MatricePouvoir> row = service.resolve("BC", new BigDecimal("100000"));
+        Optional<MatricePouvoir> row = service.resolve("BC", new BigDecimal("600000"));
 
         assertThat(row).isPresent();
         assertThat(row.get().getApprobateurRole()).isEqualTo(MatricePouvoirService.ROLE_DG);
     }
 
     @Test
-    void resolve_selectsComiteFrom500k() {
-        stubBcMatrix();
-
-        Optional<MatricePouvoir> row = service.resolve("BC", new BigDecimal("600000"));
-
-        assertThat(row).isPresent();
-        assertThat(row.get().getApprobateurRole()).isEqualTo(MatricePouvoirService.ROLE_COMITE);
-    }
-
-    @Test
-    void resolve_boundaryAt50kUsesDgTier() {
+    void resolve_boundaryAt50kUsesDirecteurTier() {
         stubBcMatrix();
 
         assertThat(service.resolve("BC", SEUIL_50K))
                 .map(MatricePouvoir::getApprobateurRole)
-                .contains(MatricePouvoirService.ROLE_DG);
+                .contains(MatricePouvoirService.ROLE_DIRECTEUR_TRAVAUX);
     }
 
     @Test
-    void resolve_boundaryAt500kUsesComiteTier() {
+    void resolve_boundaryAt500kUsesDgTier() {
         stubBcMatrix();
 
         assertThat(service.resolve("BC", SEUIL_500K))
                 .map(MatricePouvoir::getApprobateurRole)
-                .contains(MatricePouvoirService.ROLE_COMITE);
+                .contains(MatricePouvoirService.ROLE_DG);
     }
 
     @Test
@@ -108,7 +108,7 @@ class MatricePouvoirServiceTest {
                         .entityType("BC")
                         .seuilMin(null)
                         .seuilMax(SEUIL_50K)
-                        .approbateurRole(MatricePouvoirService.ROLE_DIRECTEUR_TRAVAUX)
+                        .approbateurRole(MatricePouvoirService.ROLE_CONDUCTEUR)
                         .label("BC < 50K MAD")
                         .ordre(1)
                         .build(),
@@ -117,7 +117,7 @@ class MatricePouvoirServiceTest {
                         .entityType("BC")
                         .seuilMin(SEUIL_50K)
                         .seuilMax(SEUIL_500K)
-                        .approbateurRole(MatricePouvoirService.ROLE_DG)
+                        .approbateurRole(MatricePouvoirService.ROLE_DIRECTEUR_TRAVAUX)
                         .label("50K – 500K MAD")
                         .ordre(2)
                         .build(),
@@ -126,7 +126,7 @@ class MatricePouvoirServiceTest {
                         .entityType("BC")
                         .seuilMin(SEUIL_500K)
                         .seuilMax(null)
-                        .approbateurRole(MatricePouvoirService.ROLE_COMITE)
+                        .approbateurRole(MatricePouvoirService.ROLE_DG)
                         .label("BC >= 500K MAD")
                         .ordre(3)
                         .build());

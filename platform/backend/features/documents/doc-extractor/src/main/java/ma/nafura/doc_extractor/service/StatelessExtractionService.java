@@ -29,7 +29,10 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class StatelessExtractionService {
 
-    private static final int TIMEOUT_SECONDS = 120;
+    /** LLM call timeout. Overridable per product; large documents (full CPS) need more than the 120s default. */
+    @org.springframework.beans.factory.annotation.Value("${nafura.doc-extractor.timeout-seconds:120}")
+    private int timeoutSeconds;
+
     private static final String SCHEMA_PROPOSAL_RESPONSE_SCHEMA = """
             {
               "type": "object",
@@ -237,7 +240,7 @@ public class StatelessExtractionService {
                 .scopeType(tenantId == null || tenantId.isBlank() ? ScopeType.GLOBAL : ScopeType.TENANT)
                 .tenantId(tenantId)
                 .build();
-        return llmService.callLlm(request, context).get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        return llmService.callLlm(request, context).get(timeoutSeconds, TimeUnit.SECONDS);
     }
 
     private JsonNode parseEmbeddedJson(JsonNode envelope, String field) throws Exception {

@@ -17,9 +17,11 @@ import org.springframework.util.StringUtils;
 public class MatricePouvoirService {
 
     public static final String ENTITY_TYPE_BC = "BC";
-    public static final String ROLE_DIRECTEUR_TRAVAUX = "DIRECTEUR_TRAVAUX";
-    public static final String ROLE_DG = "DG";
-    public static final String ROLE_COMITE = "COMITE";
+    public static final String ROLE_DIRECTEUR_TRAVAUX = "BTP_DIRECTEUR_TRAVAUX";
+    public static final String ROLE_DG = "BTP_DG";
+    public static final String ROLE_COMITE = "BTP_DG";
+    public static final String ROLE_CONDUCTEUR = "BTP_CONDUCTEUR_TRAVAUX";
+    public static final String ROLE_DAF = "BTP_DAF";
 
     private final MatricePouvoirRepository repository;
     private final MatricePouvoirSeedService seedService;

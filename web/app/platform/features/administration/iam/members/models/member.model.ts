@@ -21,6 +21,7 @@ export interface Member {
   lastActivityAt: string | null;
   createdAt: string;
   updatedAt: string;
+  invitationEmailStatus?: 'sent' | 'failed' | 'pending' | null;
 }
 
 export type MemberListItem = Pick<
@@ -34,6 +35,7 @@ export type MemberListItem = Pick<
   | 'status'
   | 'lastActivityAt'
   | 'joinedAt'
+  | 'invitationEmailStatus'
 >;
 
 export interface MemberInvite {

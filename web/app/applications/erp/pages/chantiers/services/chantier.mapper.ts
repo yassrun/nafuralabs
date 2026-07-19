@@ -117,8 +117,6 @@ export function chantierToUi(row: ApiChantier): Chantier {
     cumulSituationsHt: num(row.cumulSituationsHt),
     status: mapBackendStatusToUi(row.status),
     isActive: row.isActive ?? row.active ?? true,
-    chefChantierName: row.chefChantierName,
-    conducteurTravauxName: row.conducteurTravauxName,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };
@@ -148,8 +146,6 @@ export function chantierCreateToApi(
     tauxAvance: input.avancePercue,
     avancementPercent: input.avancementPercent ?? 0,
     status: mapUiStatusToBackend(input.status),
-    chefChantierName: input.chefChantierName,
-    conducteurTravauxName: input.conducteurTravauxName,
     active: input.isActive ?? true,
   };
 }
@@ -170,8 +166,6 @@ export function chantierUpdateToApi(input: Partial<Chantier>): Record<string, un
   if (input.cautionGarantie != null) body['tauxRg'] = input.cautionGarantie;
   if (input.avancementPercent != null) body['avancementPercent'] = input.avancementPercent;
   if (input.status != null) body['status'] = mapUiStatusToBackend(input.status);
-  if (input.chefChantierName != null) body['chefChantierName'] = input.chefChantierName;
-  if (input.conducteurTravauxName != null) body['conducteurTravauxName'] = input.conducteurTravauxName;
   if (input.isActive != null) body['active'] = input.isActive;
   return body;
 }

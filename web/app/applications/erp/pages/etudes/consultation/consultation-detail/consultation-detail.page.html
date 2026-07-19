@@ -1,0 +1,227 @@
+<nf-page-shell [scroll]="true">
+  <nf-page-header [config]="headerConfig()" (actionClick)="onHeaderAction($event)"></nf-page-header>
+
+  @if (loading()) {
+    <p class="hint">Chargement…</p>
+  } @else {
+    @if (consultation(); as c) {
+    @if (locked()) {
+      <p class="banner">
+        Consultation en statut <strong>{{ headerConfig().subtitle }}</strong> — lecture seule.
+        La validation N+1 sera disponible dans une prochaine version.
+      </p>
+    }
+
+    <nf-wizard-shell
+      [steps]="wizardSteps"
+      [currentStepIndex]="stepIndex()"
+      [canProceed]="canProceed() && !locked()"
+      backLabel="Précédent"
+      nextLabel="Suivant"
+      submitLabel="Soumettre au N+1"
+      (back)="onBack()"
+      (next)="onNext()"
+      (submit)="onSubmit()">
+      <div class="step-body">
+        @if (stepIndex() === 0) {
+          <div class="step-toolbar">
+            <p class="hint">Saisissez manuellement le bordereau : lots, sous-lots et postes.</p>
+            @if (!locked()) {
+              <nf-button variant="primary" icon="plus" iconLibrary="lucide" (clicked)="addRootLot()">
+                Ajouter un lot
+              </nf-button>
+            }
+          </div>
+
+          @if (treeNodes().length) {
+            <nf-tree-table
+              [nodes]="treeNodes()"
+              [columns]="treeColumns"
+              treeColumnKey="libelle"
+              [expandedKeys]="expandedKeys()"
+              (expandedKeysChange)="onExpandedKeysChange($event)"
+              [showDetail]="showDetailFor"
+              minWidth="52rem">
+              <ng-template #cell let-row let-column="column">
+                @if (column.key === 'type') {
+                  <nf-badge>{{ row.type }}</nf-badge>
+                } @else if (column.key === 'mode' && row.noeud.type === 'POSTE') {
+                  <span>{{ row.mode || '—' }}</span>
+                } @else if (column.key === 'libelle') {
+                  <div class="libelle-cell">
+                    <span>{{ row.libelle }}</span>
+                    @if (!locked()) {
+                      <span class="row-actions">
+                        <button type="button" class="link" (click)="editNoeud(row.noeud)">Modifier</button>
+                        @if (row.noeud.type === 'LOT') {
+                          <button type="button" class="link" (click)="addChild(row.noeud, 'SOUS_LOT')">+ Sous-lot</button>
+                          <button type="button" class="link" (click)="addChild(row.noeud, 'POSTE')">+ Poste</button>
+                        }
+                        @if (row.noeud.type === 'SOUS_LOT') {
+                          <button type="button" class="link" (click)="addChild(row.noeud, 'POSTE')">+ Poste</button>
+                        }
+                        <button type="button" class="link danger" (click)="deleteNoeud(row.noeud)">Suppr.</button>
+                      </span>
+                    }
+                  </div>
+                } @else {
+                  {{ row[column.key] }}
+                }
+              </ng-template>
+            </nf-tree-table>
+          } @else {
+            <nf-empty-state
+              icon="account_tree"
+              title="Aucun lot"
+              description="Commencez par ajouter un lot au bordereau."
+              actionLabel="Ajouter un lot"
+              (action)="addRootLot()">
+            </nf-empty-state>
+          }
+        }
+
+        @if (stepIndex() === 1) {
+          <p class="hint">
+            Pour chaque poste : décomposez en composants (MO, matériaux…) avec quantité et PU,
+            ou marquez-le « Fourni ».
+          </p>
+          @if (treeNodes().length) {
+            <nf-tree-table
+              [nodes]="treeNodes()"
+              [columns]="treeColumns"
+              treeColumnKey="libelle"
+              [expandedKeys]="expandedKeys()"
+              (expandedKeysChange)="onExpandedKeysChange($event)"
+              [showDetail]="showDetailFor"
+              minWidth="52rem">
+              <ng-template #cell let-row let-column="column">
+                @if (column.key === 'type') {
+                  <nf-badge>{{ row.type }}</nf-badge>
+                } @else if (column.key === 'mode' && row.noeud.type === 'POSTE' && !locked()) {
+                  <span class="mode-btns">
+                    <button
+                      type="button"
+                      class="chip"
+                      [class.active]="row.mode === 'FOURNI'"
+                      (click)="setMode(row.noeud, 'FOURNI')">
+                      Fourni
+                    </button>
+                    <button
+                      type="button"
+                      class="chip"
+                      [class.active]="row.mode === 'DECOMPOSE'"
+                      (click)="setMode(row.noeud, 'DECOMPOSE')">
+                      Décomposé
+                    </button>
+                  </span>
+                } @else if (column.key === 'libelle') {
+                  {{ row.libelle }}
+                } @else {
+                  {{ row[column.key] }}
+                }
+              </ng-template>
+              <ng-template #detail let-row>
+                @if (row.noeud.type === 'POSTE') {
+                  <div class="poste-detail">
+                    @if (row.noeud.descriptif) {
+                      <p class="descriptif">{{ row.noeud.descriptif }}</p>
+                    }
+                    <div class="composants-head">
+                      <strong>Composants</strong>
+                      @if (!locked() && row.mode !== 'FOURNI') {
+                        <nf-button variant="secondary" (clicked)="addComposant(row.noeud)">
+                          + Ajouter un composant
+                        </nf-button>
+                      }
+                    </div>
+                    @if (row.mode === 'FOURNI') {
+                      <p class="hint">Mode Fourni — pas de décomposition requise.</p>
+                    } @else if (!(row.noeud.composants?.length)) {
+                      <p class="hint">Aucun composant. Ajoutez les matériaux et services à consulter.</p>
+                    } @else {
+                      <table class="comp-table">
+                        <thead>
+                          <tr>
+                            <th>Type</th>
+                            <th>Désignation</th>
+                            <th>Unité</th>
+                            <th class="num">Qté</th>
+                            <th class="num">PU</th>
+                            <th class="num">Total</th>
+                            <th></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @for (comp of row.noeud.composants; track comp.id) {
+                            <tr>
+                              <td>{{ comp.type }}</td>
+                              <td>{{ comp.designation }}</td>
+                              <td>{{ comp.unite || '—' }}</td>
+                              <td class="num">{{ comp.quantite ?? comp.quantiteIndicative ?? '—' }}</td>
+                              <td class="num">{{ comp.prixUnitaire ?? '—' }}</td>
+                              <td class="num">{{ comp.total != null ? (comp.total | number:'1.2-2') : '—' }}</td>
+                              <td>
+                                @if (!locked()) {
+                                  <button type="button" class="link" (click)="editComposant(comp)">Modif.</button>
+                                  <button type="button" class="link danger" (click)="deleteComposant(comp)">Suppr.</button>
+                                }
+                              </td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    }
+                  </div>
+                }
+              </ng-template>
+            </nf-tree-table>
+          } @else {
+            <nf-empty-state
+              icon="account_tree"
+              title="Aucun poste"
+              description="Revenez à l’étape Bordereau pour ajouter des postes.">
+            </nf-empty-state>
+          }
+        }
+
+        @if (stepIndex() === 2) {
+          <p class="hint">
+            Déboursé sec = somme des composants. Prix vente HT = déboursé × (1+FG%) × (1+marge%).
+          </p>
+          @if (posteNodes().length) {
+            <nf-tree-table
+              [nodes]="posteNodes()"
+              [columns]="pricingColumns"
+              treeColumnKey="libelle"
+              minWidth="60rem">
+              <ng-template #cell let-row let-column="column">
+                @if (column.key === 'fg' && !locked()) {
+                  <input
+                    class="num-input"
+                    type="number"
+                    [ngModel]="row.fg"
+                    (change)="savePricing(row.noeud, $any($event.target).value, row.marge)" />
+                } @else if (column.key === 'marge' && !locked()) {
+                  <input
+                    class="num-input"
+                    type="number"
+                    [ngModel]="row.marge"
+                    (change)="savePricing(row.noeud, row.fg, $any($event.target).value)" />
+                } @else {
+                  {{ row[column.key] }}
+                }
+              </ng-template>
+            </nf-tree-table>
+            <div class="totals">
+              <span>Total déboursés : <strong>{{ totals().debours | number:'1.2-2' }}</strong></span>
+              <span>Total HT : <strong>{{ totals().montant | number:'1.2-2' }}</strong></span>
+            </div>
+          } @else {
+            <nf-empty-state icon="calculate" title="Aucun poste à chiffrer"></nf-empty-state>
+          }
+        }
+      </div>
+    </nf-wizard-shell>
+    }
+  }
+</nf-page-shell>

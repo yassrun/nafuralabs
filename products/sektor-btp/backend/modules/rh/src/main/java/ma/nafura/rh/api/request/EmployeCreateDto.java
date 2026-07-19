@@ -32,6 +32,8 @@ public class EmployeCreateDto {
 
     private String email;
 
+    private java.util.UUID userId;
+
     @NotBlank
     private String poste;
 

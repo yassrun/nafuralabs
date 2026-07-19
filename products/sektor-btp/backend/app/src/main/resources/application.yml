@@ -2,6 +2,11 @@ spring:
   application:
     name: erp-service
 
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
   datasource:
     url: jdbc:postgresql://${POSTGRES_HOST:localhost}:5432/${POSTGRES_DB:nafura_erp}?currentSchema=${POSTGRES_SCHEMA:public}
     username: ${POSTGRES_USER:seyrura}
@@ -36,6 +41,9 @@ server:
 nafura:
   application:
     id: erp
+  doc-extractor:
+    # Full CPS (80-90 pages) needs more than the 120s platform default.
+    timeout-seconds: ${NAFURA_DOC_EXTRACTOR_TIMEOUT_SECONDS:300}
   demo:
     runtime-seed-enabled: ${NAFURA_DEMO_RUNTIME_SEED:false}
   onboarding:
@@ -87,6 +95,9 @@ app:
     from-address: ${EMAIL_FROM_ADDRESS:noreply@nafuralabs.com}
     from-name: ${EMAIL_FROM_NAME:Nafura}
   frontend-base-url: ${APP_FRONTEND_BASE_URL:http://localhost:4200}
+  invitation:
+    token-secret: ${INVITATION_TOKEN_SECRET:change-me-in-production}
+    expiry-days: ${INVITATION_EXPIRY_DAYS:7}
   storage:
     type: ${APP_STORAGE_TYPE:s3}
     s3:

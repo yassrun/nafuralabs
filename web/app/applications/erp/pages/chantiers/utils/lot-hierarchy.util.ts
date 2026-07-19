@@ -1,4 +1,5 @@
 import type { LotChantier, PosteBudgetaire } from '@applications/erp/chantiers/models';
+import type { NfTreeNode } from '@lib/anatomy/components';
 
 export type LotHierarchyRowKind = 'lot' | 'sousLot' | 'poste';
 
@@ -67,4 +68,51 @@ export function buildLotHierarchyRows(
 
   walk(null, 0);
   return out;
+}
+
+/**
+ * Builds nested tree nodes (lots → sous-lots → postes) for the generic
+ * nf-tree-table. Mirrors buildLotHierarchyRows grouping and MAX_LOT_DEPTH.
+ */
+export function buildLotTreeNodes(
+  lots: LotChantier[],
+  postesByLotId: Record<string, PosteBudgetaire[]>,
+): NfTreeNode<LotHierarchyRow>[] {
+  const byParent = new Map<string | null, LotChantier[]>();
+  for (const lot of lots) {
+    const key = lot.parentLotId ?? null;
+    const bucket = byParent.get(key) ?? [];
+    bucket.push(lot);
+    byParent.set(key, bucket);
+  }
+
+  function posteNodes(lotId: string, depth: number): NfTreeNode<LotHierarchyRow>[] {
+    return sortByOrdreCode(postesByLotId[lotId] ?? []).map((poste) => ({
+      key: `poste-${poste.id}`,
+      data: { kind: 'poste', depth, poste },
+      leaf: true,
+    }));
+  }
+
+  function walk(parentId: string | null, depth: number): NfTreeNode<LotHierarchyRow>[] {
+    const siblings = sortByOrdreCode(byParent.get(parentId) ?? []);
+    return siblings.map((lot) => {
+      const kind: LotHierarchyRowKind = depth === 0 ? 'lot' : 'sousLot';
+      const children: NfTreeNode<LotHierarchyRow>[] = [
+        ...posteNodes(lot.id, depth + 1),
+      ];
+      if (depth < MAX_LOT_DEPTH) {
+        children.push(...walk(lot.id, depth + 1));
+      }
+      return {
+        key: `lot-${lot.id}`,
+        data: { kind, depth, lot },
+        expanded: true,
+        leaf: children.length === 0,
+        children,
+      };
+    });
+  }
+
+  return walk(null, 0);
 }

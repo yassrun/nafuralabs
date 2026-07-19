@@ -124,12 +124,24 @@
         },
         "tabs": {
           "overview": "Vue d'ensemble",
+          "equipe": "Équipe",
           "lots": "Lots",
           "phases": "Phases",
           "budget": "Budget",
           "situations": "Situations",
           "documents": "Documents",
           "photos": "Photos"
+        },
+        "equipe": {
+          "add": "Ajouter",
+          "employe": "Employé",
+          "role": "Rôle chantier",
+          "dateDebut": "Début",
+          "dateFin": "Fin",
+          "periode": "Période",
+          "emptyTitle": "Aucune affectation",
+          "emptyDesc": "Affectez des employés à ce chantier avec un rôle.",
+          "seeTab": "Gérez les affectations dans l'onglet Équipe."
         },
         "sections": {
           "equipe": "Équipe",
@@ -342,6 +354,16 @@
         "submit": "Enregistrer les modifications",
         "success": "Chantier mis à jour.",
         "failed": "Impossible d'enregistrer les modifications.",
+        "requiredHint": "Les champs marqués d’un * sont obligatoires.",
+        "viewClients": "Voir les clients",
+        "sections": {
+          "identity": "Identification",
+          "client": "Client et marché",
+          "location": "Localisation",
+          "planning": "Planning",
+          "financial": "Informations financières",
+          "team": "Équipe responsable"
+        },
         "fields": {
           "name": "Nom du chantier",
           "description": "Description",
@@ -660,14 +682,76 @@
       }
     },
     "documents": {
-      "title": "Documents chantier",
+      "title": "Centre documentaire",
+      "subtitle": "Tous les documents de vos chantiers, classés et accessibles au même endroit",
+      "loading": "Chargement des documents…",
+      "count": "{count, plural, =0 {Aucun document} =1 {1 document} other {# documents}}",
+      "folderCount": "{count, plural, =1 {1 document} other {# documents}}",
+      "views": {
+        "label": "Mode d’affichage",
+        "byChantier": "Par chantier",
+        "allDocuments": "Tous les documents"
+      },
+      "scope": {
+        "label": "Périmètre actuel",
+        "viewAll": "Voir tous les chantiers"
+      },
       "filters": {
-        "allTypes": "Tous les types"
+        "label": "Filtres documentaires",
+        "search": "Rechercher un titre ou un fichier…",
+        "allTypes": "Tous les types",
+        "allChantiers": "Tous les chantiers",
+        "allCategories": "Toutes les catégories",
+        "dateFrom": "Déposé à partir du",
+        "dateTo": "Déposé jusqu’au",
+        "uploadedBy": "Déposé par…"
+      },
+      "categories": {
+        "CONTRACTS": "Contrats",
+        "PLANS_STUDIES": "Plans et études",
+        "EXECUTION": "Exécution",
+        "PURCHASES_FINANCE": "Achats et finances",
+        "HSE_ADMIN": "HSE et administratif",
+        "OTHER": "Autres"
+      },
+      "columns": {
+        "document": "Document",
+        "chantier": "Chantier",
+        "category": "Type",
+        "size": "Taille",
+        "uploadedBy": "Déposé par",
+        "date": "Date",
+        "actions": "Actions"
+      },
+      "actions": {
+        "showAll": "Voir les {count} documents",
+        "preview": "Aperçu",
+        "rename": "Renommer",
+        "renamePrompt": "Nouveau titre du document",
+        "renamed": "Document renommé.",
+        "deleteConfirm": "Supprimer « {title} » ?",
+        "deleted": "Document supprimé."
+      },
+      "pagination": {
+        "label": "Pagination des documents",
+        "previous": "Précédent",
+        "next": "Suivant",
+        "status": "Page {page} sur {pages}"
+      },
+      "preview": {
+        "unsupported": "L’aperçu n’est pas disponible pour ce format.",
+        "unavailable": "Ce document ne possède pas de fichier consultable."
       },
       "fields": {
         "deposeLeBy": "Déposé le {date} par {user}"
       },
-      "emptyState": "Aucun document correspondant aux filtres.",
+      "emptyState": "Aucun document trouvé",
+      "emptyHint": "Modifiez les filtres ou déposez un nouveau document.",
+      "errors": {
+        "loadFailed": "Impossible de charger les documents.",
+        "updateFailed": "Impossible de modifier le document.",
+        "deleteFailed": "Impossible de supprimer le document."
+      },
       "create": {
         "cta": "Déposer un document",
         "title": "Déposer un document",

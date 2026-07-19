@@ -1,4 +1,4 @@
-import { buildLotHierarchyRows, lotDepth, MAX_LOT_DEPTH } from './lot-hierarchy.util';
+import { buildLotHierarchyRows, buildLotTreeNodes, lotDepth, MAX_LOT_DEPTH } from './lot-hierarchy.util';
 import type { LotChantier, PosteBudgetaire } from '@applications/erp/chantiers/models';
 
 describe('lot-hierarchy.util', () => {
@@ -70,5 +70,30 @@ describe('lot-hierarchy.util', () => {
     expect(lotDepth(lots[0], byId)).toBe(0);
     expect(lotDepth(lots[1], byId)).toBe(1);
     expect(lotDepth(lots[2], byId)).toBe(2);
+  });
+
+  it('builds nested tree nodes with postes as leaves', () => {
+    const lots = [lot('l1', '01', 1), lot('l2', '01-01', 2, 'l1')];
+    const postesByLotId = {
+      l1: [poste('p-root', 'l1', '01')],
+      l2: [poste('p-child', 'l2', '01')],
+    };
+
+    const nodes = buildLotTreeNodes(lots, postesByLotId);
+
+    expect(nodes.length).toBe(1);
+    const [root] = nodes;
+    expect(root.key).toBe('lot-l1');
+    expect(root.data.kind).toBe('lot');
+    expect(root.expanded).toBe(true);
+    expect(root.children?.map((child) => child.key)).toEqual(['poste-p-root', 'lot-l2']);
+
+    const sousLot = root.children?.find((child) => child.key === 'lot-l2');
+    expect(sousLot?.data.kind).toBe('sousLot');
+    expect(sousLot?.children?.map((child) => child.key)).toEqual(['poste-p-child']);
+
+    const posteNode = root.children?.find((child) => child.key === 'poste-p-root');
+    expect(posteNode?.leaf).toBe(true);
+    expect(posteNode?.data.kind).toBe('poste');
   });
 });

@@ -12,6 +12,11 @@ public interface EmployeRepository extends TenantScopedRepository<Employe, Strin
 
     Optional<Employe> findByTenantIdAndMatricule(UUID tenantId, String matricule);
 
+    Optional<Employe> findByTenantIdAndUserId(UUID tenantId, UUID userId);
+
+    List<Employe> findByTenantIdAndNomIgnoreCaseAndPrenomIgnoreCase(
+            UUID tenantId, String nom, String prenom);
+
     List<Employe> findByTenantIdOrderByNomAscPrenomAsc(UUID tenantId);
 
     List<Employe> findByTenantIdAndStatutOrderByNomAscPrenomAsc(UUID tenantId, String statut);

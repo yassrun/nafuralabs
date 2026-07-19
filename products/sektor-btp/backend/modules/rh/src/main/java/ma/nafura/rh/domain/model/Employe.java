@@ -62,6 +62,10 @@ public class Employe {
     @Column(length = 255)
     private String email;
 
+    /** Optional link to platform login identity ({@code app_user.id}). Null for resources without access. */
+    @Column(name = "user_id")
+    private UUID userId;
+
     @Column(nullable = false)
     private String poste;
 

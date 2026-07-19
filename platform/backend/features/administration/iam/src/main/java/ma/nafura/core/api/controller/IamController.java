@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ma.nafura.platform.administration.iam.api.request.tenant.*;
+import ma.nafura.platform.administration.iam.api.response.publicapi.ResendInvitationResponse;
 import ma.nafura.platform.administration.iam.api.response.tenant.*;
 import ma.nafura.platform.authorization.api.response.tenant.PermissionGroupResponse;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
@@ -211,15 +212,20 @@ public class IamController {
      */
     @PostMapping("/{tenantId}/members/{userId}/resend-invitation")
     @RequirePermission(value = "tenant.members.invite", fullPermission = true)
-    public ResponseEntity<Void> resendInvitation(
+    public ResponseEntity<ResendInvitationResponse> resendInvitation(
             @PathVariable UUID tenantId,
             @PathVariable UUID userId,
             @AuthenticationPrincipal Jwt jwt) {
         
         log.info("POST /api/tenants/{}/members/{}/resend-invitation", tenantId, userId);
         
-        iamService.resendInvitation(tenantId, userId);
-        return ResponseEntity.ok().build();
+        String status = iamService.resendInvitation(tenantId, userId);
+        TenantMemberResponse member = iamService.getMember(tenantId, userId);
+        return ResponseEntity.ok(new ResendInvitationResponse(
+            member.email(),
+            status.toLowerCase(),
+            "Invitation renvoyée avec succès."
+        ));
     }
 
     // ─────────────────────────────────────────────────────────────────────────────

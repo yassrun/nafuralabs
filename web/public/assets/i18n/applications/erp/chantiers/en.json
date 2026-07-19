@@ -124,12 +124,24 @@
         },
         "tabs": {
           "overview": "Overview",
+          "equipe": "Team",
           "lots": "Work packages",
           "phases": "Phases",
           "budget": "Budget",
           "situations": "Progress certificates",
           "documents": "Documents",
           "photos": "Photos"
+        },
+        "equipe": {
+          "add": "Add",
+          "employe": "Employee",
+          "role": "Site role",
+          "dateDebut": "Start",
+          "dateFin": "End",
+          "periode": "Period",
+          "emptyTitle": "No assignments",
+          "emptyDesc": "Assign employees to this site with a role.",
+          "seeTab": "Manage assignments in the Team tab."
         },
         "sections": {
           "equipe": "Team",
@@ -342,6 +354,16 @@
         "submit": "Save changes",
         "success": "Site updated.",
         "failed": "Could not save changes.",
+        "requiredHint": "Fields marked with * are required.",
+        "viewClients": "View customers",
+        "sections": {
+          "identity": "Identification",
+          "client": "Customer and contract",
+          "location": "Location",
+          "planning": "Schedule",
+          "financial": "Financial information",
+          "team": "Responsible team"
+        },
         "fields": {
           "name": "Site name",
           "description": "Description",
@@ -639,14 +661,76 @@
       }
     },
     "documents": {
-      "title": "Site documents",
+      "title": "Document center",
+      "subtitle": "All your site documents, organized and accessible in one place",
+      "loading": "Loading documents…",
+      "count": "{count, plural, =0 {No documents} =1 {1 document} other {# documents}}",
+      "folderCount": "{count, plural, =1 {1 document} other {# documents}}",
+      "views": {
+        "label": "Display mode",
+        "byChantier": "By site",
+        "allDocuments": "All documents"
+      },
+      "scope": {
+        "label": "Current scope",
+        "viewAll": "View all sites"
+      },
       "filters": {
-        "allTypes": "All types"
+        "label": "Document filters",
+        "search": "Search by title or filename…",
+        "allTypes": "All types",
+        "allChantiers": "All sites",
+        "allCategories": "All categories",
+        "dateFrom": "Uploaded from",
+        "dateTo": "Uploaded until",
+        "uploadedBy": "Uploaded by…"
+      },
+      "categories": {
+        "CONTRACTS": "Contracts",
+        "PLANS_STUDIES": "Plans and studies",
+        "EXECUTION": "Execution",
+        "PURCHASES_FINANCE": "Purchasing and finance",
+        "HSE_ADMIN": "HSE and administration",
+        "OTHER": "Other"
+      },
+      "columns": {
+        "document": "Document",
+        "chantier": "Site",
+        "category": "Type",
+        "size": "Size",
+        "uploadedBy": "Uploaded by",
+        "date": "Date",
+        "actions": "Actions"
+      },
+      "actions": {
+        "showAll": "View {count} documents",
+        "preview": "Preview",
+        "rename": "Rename",
+        "renamePrompt": "New document title",
+        "renamed": "Document renamed.",
+        "deleteConfirm": "Delete “{title}”?",
+        "deleted": "Document deleted."
+      },
+      "pagination": {
+        "label": "Document pagination",
+        "previous": "Previous",
+        "next": "Next",
+        "status": "Page {page} of {pages}"
+      },
+      "preview": {
+        "unsupported": "Preview is not available for this format.",
+        "unavailable": "This document has no viewable file."
       },
       "fields": {
         "deposeLeBy": "Uploaded on {date} by {user}"
       },
-      "emptyState": "No document matches the filters.",
+      "emptyState": "No documents found",
+      "emptyHint": "Change the filters or upload a new document.",
+      "errors": {
+        "loadFailed": "Could not load documents.",
+        "updateFailed": "Could not update the document.",
+        "deleteFailed": "Could not delete the document."
+      },
       "create": {
         "cta": "Upload document",
         "title": "Upload document",

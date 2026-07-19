@@ -486,8 +486,9 @@
         },
         "prerequisites": {
           "title": "Before creating a receipt, set up:",
+          "blocked": "Set up the listed prerequisites before creating or scanning a receipt.",
           "fournisseur": "At least one supplier",
-          "depot": "At least one warehouse",
+          "destination": "At least one warehouse or job site",
           "bc": "At least one purchase order"
         },
         "status": {

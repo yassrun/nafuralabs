@@ -489,6 +489,13 @@ export const ERP_NAV_CONFIG_GENERATED: SidebarNode[] = [
             route: '/etudes/devis',
             order: 30,
           },
+          {
+            id: 'etudes.consultation',
+            label: 'nav.etudes.consultation',
+            icon: 'clipboard-list',
+            route: '/etudes/consultation',
+            order: 40,
+          },
         ],
       },
       {

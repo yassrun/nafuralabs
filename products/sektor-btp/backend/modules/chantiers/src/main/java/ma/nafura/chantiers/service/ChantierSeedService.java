@@ -56,8 +56,6 @@ public class ChantierSeedService {
                                         : null)
                         .avancementPercent(new BigDecimal(node.path("avancementPercent").asText("0")))
                         .status(node.path("status").asText(Chantier.STATUS_EN_COURS))
-                        .chefChantierName(textOrNull(node, "chefChantierName"))
-                        .conducteurTravauxName(textOrNull(node, "conducteurTravauxName"))
                         .active(true)
                         .build();
                 repository.save(entity);

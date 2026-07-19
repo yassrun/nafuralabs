@@ -56,6 +56,9 @@ class ApprovalEngineServiceTest {
     private DelegationApprobationService delegationApprobationService;
 
     @Mock
+    private ma.nafura.chantiers.service.ApproverResolutionService approverResolutionService;
+
+    @Mock
     private ma.nafura.platform.framework.event.ErpNotificationPublisher erpNotificationPublisher;
 
     private ApprovalEngineService service;
@@ -65,6 +68,7 @@ class ApprovalEngineServiceTest {
     void setUp() {
         TenantContext.setTenantId(tenantId);
         lenient().when(matricePouvoirService.resolve(any(), any())).thenReturn(Optional.empty());
+        lenient().when(approverResolutionService.resolve(any(), any(), any())).thenReturn(Optional.empty());
         service = new ApprovalEngineService(
                 workflowRepository,
                 requestRepository,
@@ -74,6 +78,7 @@ class ApprovalEngineServiceTest {
                 requestSeedService,
                 matricePouvoirService,
                 delegationApprobationService,
+                approverResolutionService,
                 new com.fasterxml.jackson.databind.ObjectMapper(),
                 erpNotificationPublisher);
     }

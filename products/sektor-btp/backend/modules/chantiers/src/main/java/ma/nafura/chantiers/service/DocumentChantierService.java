@@ -2,8 +2,10 @@ package ma.nafura.chantiers.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import ma.nafura.chantiers.api.dto.DocumentChantierDto;
 import ma.nafura.chantiers.api.request.DocumentChantierCreateDto;
@@ -12,6 +14,11 @@ import ma.nafura.chantiers.domain.model.Chantier;
 import ma.nafura.chantiers.domain.model.DocumentChantier;
 import ma.nafura.chantiers.repository.DocumentChantierRepository;
 import ma.nafura.platform.framework.context.TenantContext;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -36,12 +43,54 @@ public class DocumentChantierService {
     }
 
     @Transactional(readOnly = true)
-    public List<DocumentChantierDto> listAll() {
+    public Page<DocumentChantierDto> listAll(
+            int page,
+            int size,
+            String search,
+            String chantierId,
+            List<String> types,
+            String uploadedBy,
+            LocalDate dateFrom,
+            LocalDate dateTo) {
         seedService.seedIfEmpty();
         UUID tenantId = tenantId();
-        return repository.findByTenantIdOrderByUploadedAtDescCreatedAtDesc(tenantId).stream()
-                .map(this::toDto)
-                .toList();
+        Specification<DocumentChantier> filters =
+                (root, query, cb) -> cb.equal(root.get("tenantId"), tenantId);
+        if (StringUtils.hasText(chantierId)) {
+            filters = filters.and((root, query, cb) -> cb.equal(root.get("chantierId"), chantierId.trim()));
+        }
+        if (types != null && !types.isEmpty()) {
+            List<String> normalizedTypes =
+                    types.stream().filter(StringUtils::hasText).map(String::trim).toList();
+            if (!normalizedTypes.isEmpty()) {
+                filters = filters.and((root, query, cb) -> root.get("type").in(normalizedTypes));
+            }
+        }
+        if (StringUtils.hasText(search)) {
+            String pattern = "%" + search.trim().toLowerCase(Locale.ROOT) + "%";
+            filters = filters.and((root, query, cb) -> cb.or(
+                    cb.like(cb.lower(root.get("titre")), pattern),
+                    cb.like(cb.lower(root.get("fichier")), pattern),
+                    cb.like(cb.lower(root.get("type")), pattern)));
+        }
+        if (StringUtils.hasText(uploadedBy)) {
+            String pattern = "%" + uploadedBy.trim().toLowerCase(Locale.ROOT) + "%";
+            filters = filters.and(
+                    (root, query, cb) -> cb.like(cb.lower(root.get("uploadedPar")), pattern));
+        }
+        if (dateFrom != null) {
+            filters = filters.and(
+                    (root, query, cb) -> cb.greaterThanOrEqualTo(root.get("uploadedAt"), dateFrom));
+        }
+        if (dateTo != null) {
+            filters =
+                    filters.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("uploadedAt"), dateTo));
+        }
+        Pageable pageable = PageRequest.of(
+                Math.max(0, page),
+                Math.min(Math.max(1, size), 200),
+                Sort.by(Sort.Order.desc("uploadedAt"), Sort.Order.desc("createdAt")));
+        return repository.findAll(filters, pageable).map(this::toDto);
     }
 
     @Transactional(readOnly = true)

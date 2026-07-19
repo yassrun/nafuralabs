@@ -15,14 +15,24 @@ import { firstValueFrom } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import * as XLSX from 'xlsx';
 
-import { BadgeComponent, ButtonComponent, EmptyStateComponent } from '@lib/anatomy/components';
+import {
+  BadgeComponent,
+  ButtonComponent,
+  EmptyStateComponent,
+  TreeTableComponent,
+  type NfTreeTableColumn,
+} from '@lib/anatomy/components';
 import { ToastService } from '@lib/anatomy';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
 import type { LotChantier, PosteBudgetaire } from '@applications/erp/chantiers/models';
 
 import { ChantierLotApiService } from '../../services/chantier-lot-api.service';
 import { PosteBudgetaireApiService } from '../../services/poste-budgetaire-api.service';
-import { buildLotHierarchyRows, type LotHierarchyRowKind } from '../../utils/lot-hierarchy.util';
+import {
+  buildLotTreeNodes,
+  type LotHierarchyRow,
+  type LotHierarchyRowKind,
+} from '../../utils/lot-hierarchy.util';
 import {
   LotFormDialogComponent,
   type LotFormDialogResult,
@@ -66,6 +76,7 @@ type BpdeImportStats = {
     BadgeComponent,
     EmptyStateComponent,
     MadCurrencyPipe,
+    TreeTableComponent,
   ],
   template: `
     <section class="tab-panel">
@@ -127,50 +138,53 @@ type BpdeImportStats = {
         </ul>
       </div>
 
-      @if (hierarchyRows().length) {
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>{{ 'chantiers.chantier.detail.lots.typeColumn' | translate }}</th>
-              <th>{{ 'chantiers.chantier.detail.columns.code' | translate }}</th>
-              <th>{{ 'chantiers.chantier.detail.columns.designation' | translate }}</th>
-              <th class="num">{{ 'chantiers.chantier.detail.columns.quantite' | translate }}</th>
-              <th>{{ 'chantiers.chantier.detail.columns.unite' | translate }}</th>
-              <th class="num">{{ 'chantiers.chantier.detail.columns.prixUnitaireHt' | translate }}</th>
-              <th class="num">{{ 'chantiers.chantier.detail.columns.montantHt' | translate }}</th>
-              <th class="center">{{ 'chantiers.chantier.detail.columns.avancement' | translate }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (row of hierarchyRows(); track rowTrack(row)) {
-              <tr>
-                <td>
-                  <nf-badge [variant]="typeBadgeVariant(row.kind)">{{ typeLabelKey(row.kind) | translate }}</nf-badge>
-                </td>
-                <td [style.padding-left.rem]="row.depth * 1.25">
-                  <strong>{{ rowCode(row) }}</strong>
-                </td>
-                <td>{{ rowDesignation(row) }}</td>
-                <td class="num">{{ rowQuantite(row) }}</td>
-                <td>{{ rowUnite(row) }}</td>
-                <td class="num">{{ rowPrixUnitaireValue(row) != null ? (rowPrixUnitaireValue(row)! | mad) : '—' }}</td>
-                <td class="num">{{ rowMontantValue(row) != null ? (rowMontantValue(row)! | mad) : '—' }}</td>
-                <td class="center">
-                  @if (row.kind !== 'poste') {
-                    <div class="progress-wrap">
-                      <div class="progress-bar sm">
-                        <div class="progress-fill" [style.width.%]="rowAvancement(row)"></div>
-                      </div>
-                      <span>{{ rowAvancement(row) }}%</span>
+      @if (treeNodes().length || loading()) {
+        <nf-tree-table
+          [nodes]="treeNodes()"
+          [columns]="treeColumns"
+          treeColumnKey="designation"
+          [loading]="loading()"
+          minWidth="64rem">
+          <ng-template #cell let-row let-column="column">
+            @switch (column.key) {
+              @case ('type') {
+                <nf-badge [variant]="typeBadgeVariant(row.kind)">
+                  {{ typeLabelKey(row.kind) | translate }}
+                </nf-badge>
+              }
+              @case ('code') {
+                <strong>{{ rowCode(row) }}</strong>
+              }
+              @case ('designation') {
+                {{ rowDesignation(row) }}
+              }
+              @case ('quantite') {
+                {{ rowQuantite(row) }}
+              }
+              @case ('unite') {
+                {{ rowUnite(row) }}
+              }
+              @case ('prixUnitaireHt') {
+                {{ rowPrixUnitaireValue(row) != null ? (rowPrixUnitaireValue(row)! | mad) : '—' }}
+              }
+              @case ('montantHt') {
+                {{ rowMontantValue(row) != null ? (rowMontantValue(row)! | mad) : '—' }}
+              }
+              @case ('avancement') {
+                @if (row.kind !== 'poste') {
+                  <div class="progress-wrap">
+                    <div class="progress-bar sm">
+                      <div class="progress-fill" [style.width.%]="rowAvancement(row)"></div>
                     </div>
-                  } @else {
-                    <span>—</span>
-                  }
-                </td>
-              </tr>
+                    <span>{{ rowAvancement(row) }}%</span>
+                  </div>
+                } @else {
+                  <span>—</span>
+                }
+              }
             }
-          </tbody>
-        </table>
+          </ng-template>
+        </nf-tree-table>
       } @else if (!loading()) {
         <nf-empty-state
           icon="layers"
@@ -183,14 +197,6 @@ type BpdeImportStats = {
   `,
   styles: [`
     .tab-panel__toolbar { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
-    .data-table { width: 100%; border-collapse: collapse; font-size: 0.87rem; background: var(--nf-color-surface); border: 1px solid var(--nf-color-border); border-radius: 0.75rem; overflow: hidden; }
-    .data-table th { padding: 0.7rem 1rem; background: var(--nf-color-bg-subtle); color: var(--nf-color-text-secondary); font-weight: 600; text-align: left; border-bottom: 2px solid var(--nf-color-border); white-space: nowrap; }
-    .data-table th.num { text-align: right; }
-    .data-table th.center { text-align: center; }
-    .data-table td { padding: 0.65rem 1rem; border-bottom: 1px solid var(--nf-color-bg-muted); color: var(--nf-color-text-secondary); }
-    .data-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
-    .data-table td.center { text-align: center; }
-    .data-table tbody tr:last-child td { border-bottom: none; }
     .progress-wrap { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; }
     .progress-bar { width: 100%; height: 6px; background: var(--nf-color-bg-muted); border-radius: 999px; overflow: hidden; }
     .progress-bar.sm { max-width: 80px; }
@@ -224,8 +230,19 @@ export class ChantierLotsTabComponent {
 
   readonly rootLots = computed(() => this.lots().filter((lot) => !lot.parentLotId));
 
-  readonly hierarchyRows = computed(() =>
-    buildLotHierarchyRows(this.lots(), this.postesByLotId()),
+  readonly treeColumns: NfTreeTableColumn<LotHierarchyRow>[] = [
+    { key: 'type', label: 'chantiers.chantier.detail.lots.typeColumn', width: '7rem' },
+    { key: 'designation', label: 'chantiers.chantier.detail.columns.designation', width: '22rem' },
+    { key: 'code', label: 'chantiers.chantier.detail.columns.code', width: '7rem' },
+    { key: 'quantite', label: 'chantiers.chantier.detail.columns.quantite', align: 'end', width: '6rem' },
+    { key: 'unite', label: 'chantiers.chantier.detail.columns.unite', width: '6rem' },
+    { key: 'prixUnitaireHt', label: 'chantiers.chantier.detail.columns.prixUnitaireHt', align: 'end', width: '9rem' },
+    { key: 'montantHt', label: 'chantiers.chantier.detail.columns.montantHt', align: 'end', width: '9rem' },
+    { key: 'avancement', label: 'chantiers.chantier.detail.columns.avancement', align: 'center', width: '8rem' },
+  ];
+
+  readonly treeNodes = computed(() =>
+    buildLotTreeNodes(this.lots(), this.postesByLotId()),
   );
 
   constructor() {
@@ -341,39 +358,34 @@ export class ChantierLotsTabComponent {
     }
   }
 
-  rowTrack(row: ReturnType<typeof buildLotHierarchyRows>[number]): string {
-    if (row.poste) return `poste-${row.poste.id}`;
-    return `lot-${row.lot!.id}-${row.kind}`;
-  }
-
-  rowCode(row: ReturnType<typeof buildLotHierarchyRows>[number]): string {
+  rowCode(row: LotHierarchyRow): string {
     return row.poste?.code ?? row.lot?.code ?? '—';
   }
 
-  rowDesignation(row: ReturnType<typeof buildLotHierarchyRows>[number]): string {
+  rowDesignation(row: LotHierarchyRow): string {
     return row.poste?.designation ?? row.lot?.designation ?? '—';
   }
 
-  rowQuantite(row: ReturnType<typeof buildLotHierarchyRows>[number]): string | number {
+  rowQuantite(row: LotHierarchyRow): string | number {
     const q = row.poste?.quantite ?? row.lot?.quantite;
     return q ?? '—';
   }
 
-  rowUnite(row: ReturnType<typeof buildLotHierarchyRows>[number]): string {
+  rowUnite(row: LotHierarchyRow): string {
     return row.poste?.unite ?? row.lot?.unite ?? '—';
   }
 
-  rowPrixUnitaireValue(row: ReturnType<typeof buildLotHierarchyRows>[number]): number | null {
+  rowPrixUnitaireValue(row: LotHierarchyRow): number | null {
     const pu = row.poste?.prixUnitaireHt ?? row.lot?.prixUnitaireHt;
     return pu != null ? pu : null;
   }
 
-  rowMontantValue(row: ReturnType<typeof buildLotHierarchyRows>[number]): number | null {
+  rowMontantValue(row: LotHierarchyRow): number | null {
     const m = row.poste?.montantHt ?? row.lot?.montantHt;
     return m != null ? m : null;
   }
 
-  rowAvancement(row: ReturnType<typeof buildLotHierarchyRows>[number]): number {
+  rowAvancement(row: LotHierarchyRow): number {
     return row.lot?.avancementPercent ?? 0;
   }
 

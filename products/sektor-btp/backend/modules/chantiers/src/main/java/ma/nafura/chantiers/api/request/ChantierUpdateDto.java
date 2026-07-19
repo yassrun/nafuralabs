@@ -68,18 +68,6 @@ public class ChantierUpdateDto {
 
     private String status;
 
-    private String chefChantierUserId;
-
-    private String chefChantierName;
-
-    private String conducteurTravauxUserId;
-
-    private String conducteurTravauxName;
-
-    private String ingenieurUserId;
-
-    private String ingenieurName;
-
     private String societeId;
 
     private Boolean active;

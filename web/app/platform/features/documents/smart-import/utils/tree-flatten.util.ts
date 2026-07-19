@@ -1,6 +1,7 @@
 import type { UiTreeConfig } from '../../doc-extractor/models/ui-schema.model';
 import type { FieldIssue } from '../../doc-extractor/models/extraction.model';
 import type { SmartImportRowStatus } from '../models/smart-import.model';
+import type { NfTreeNode } from '@lib/anatomy/components';
 
 export interface SmartImportTreeNode {
   /** Absolute JSON path, e.g. lots[0].sousLots[1].postes[2] */
@@ -49,6 +50,39 @@ export function flattenSmartImportTree(args: {
   });
 
   return out;
+}
+
+export function buildSmartImportTreeNodes(args: {
+  rows: Array<{ data: Record<string, unknown>; status: SmartImportRowStatus; issues: FieldIssue[] }>;
+  tree: UiTreeConfig;
+  allIssues?: FieldIssue[];
+}): NfTreeNode<SmartImportTreeNode>[] {
+  return nestSmartImportTree(flattenSmartImportTree(args));
+}
+
+export function nestSmartImportTree(
+  nodes: SmartImportTreeNode[],
+): NfTreeNode<SmartImportTreeNode>[] {
+  const roots: NfTreeNode<SmartImportTreeNode>[] = [];
+  const byPath = new Map<string, NfTreeNode<SmartImportTreeNode>>();
+
+  for (const data of nodes) {
+    const node: NfTreeNode<SmartImportTreeNode> = {
+      key: data.path,
+      data,
+      children: [],
+      expanded: true,
+      leaf: !data.expandable,
+    };
+    byPath.set(data.path, node);
+
+    const parentPath = smartImportParentPath(data.path);
+    const parent = parentPath ? byPath.get(parentPath) : undefined;
+    if (parent) parent.children!.push(node);
+    else roots.push(node);
+  }
+
+  return roots;
 }
 
 function walk(args: {
@@ -171,6 +205,11 @@ export function getRelativeValue(data: Record<string, unknown>, path: string): u
     cur = (cur as Record<string, unknown>)[part];
   }
   return cur;
+}
+
+function smartImportParentPath(path: string): string | null {
+  const parent = path.replace(/\.[^.[\]]+\[\d+\]$/, '');
+  return parent === path ? null : parent;
 }
 
 /**

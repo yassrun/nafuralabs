@@ -110,6 +110,55 @@
 }
 
 /*
+ * PrimeNG TreeTable wrapper
+ * Keeps the engine visually aligned with nf-data-table.
+ */
+.nf-tree-table__engine.p-treetable {
+  --p-treetable-header-cell-background: var(--nf-table-header-bg);
+  --p-treetable-header-cell-color: var(--nf-table-header-color);
+  --p-treetable-row-background: var(--nf-color-surface);
+  --p-treetable-row-color: var(--nf-color-text-primary);
+  --p-treetable-body-cell-border-color: var(--nf-color-border);
+  --p-treetable-row-hover-background: var(--nf-table-row-hover-bg);
+
+  .p-treetable-table { width: 100%; border-collapse: collapse; }
+
+  th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: .7rem 1rem;
+    background: var(--nf-table-header-bg);
+    color: var(--nf-table-header-color);
+    border-bottom: 2px solid var(--nf-color-border);
+    font-size: .875rem;
+    font-weight: var(--nf-table-header-font-weight);
+    text-align: start;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: .65rem 1rem;
+    color: var(--nf-color-text-secondary);
+    border-bottom: 1px solid var(--nf-color-bg-muted);
+    font-size: .875rem;
+    vertical-align: middle;
+  }
+
+  tbody tr:hover > td { background: var(--nf-table-row-hover-bg); }
+
+  .p-treetable-node-toggle-button {
+    margin-inline-end: .35rem;
+    color: var(--nf-color-text-secondary);
+  }
+
+  .p-treetable-node-toggle-button:focus-visible {
+    outline: 2px solid var(--nf-border-focus);
+    outline-offset: 2px;
+  }
+}
+
+/*
  * Listing Controls - Filter Menu Panel (Overlay)
  * Panel is rendered in CDK overlay (outside component), so width must be set globally.
  * Ensures Type/Category and dropdown arrows are not truncated.

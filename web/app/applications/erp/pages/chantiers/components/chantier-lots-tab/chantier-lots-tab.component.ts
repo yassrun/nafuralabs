@@ -12,7 +12,14 @@ import { MatDialog } from '@angular/material/dialog';
 import { firstValueFrom } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { BadgeComponent, ButtonComponent, EmptyStateComponent } from '@lib/anatomy/components';
+import {
+  BadgeComponent,
+  ButtonComponent,
+  EmptyStateComponent,
+  TreeTableComponent,
+  type NfTreeNode,
+  type NfTreeTableColumn,
+} from '@lib/anatomy/components';
 import { ConfirmDialogService, ToastService } from '@lib/anatomy';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
 import type { LotChantier, PosteBudgetaire } from '@applications/erp/chantiers/models';
@@ -27,7 +34,11 @@ import {
 
 import { ChantierLotApiService } from '../../services/chantier-lot-api.service';
 import { PosteBudgetaireApiService } from '../../services/poste-budgetaire-api.service';
-import { buildLotHierarchyRows, type LotHierarchyRowKind } from '../../utils/lot-hierarchy.util';
+import {
+  buildLotTreeNodes,
+  type LotHierarchyRow,
+  type LotHierarchyRowKind,
+} from '../../utils/lot-hierarchy.util';
 import {
   LotFormDialogComponent,
   type LotFormDialogResult,
@@ -46,6 +57,7 @@ import {
     EmptyStateComponent,
     MadCurrencyPipe,
     SmartImportTriggerComponent,
+    TreeTableComponent,
   ],
   template: `
     <section class="tab-panel">
@@ -64,85 +76,75 @@ import {
           (completed)="onMagicImportComplete($event)" />
       </div>
 
-      @if (hierarchyRows().length) {
+      @if (treeNodes().length || loading()) {
         <div class="lots-tablebar">
-          <span class="lots-count">{{ 'chantiers.chantier.detail.lots.rowsCount' | translate:{ count: hierarchyRows().length } }}</span>
+          <span class="lots-count">{{ 'chantiers.chantier.detail.lots.rowsCount' | translate:{ count: rowCount() } }}</span>
           <span class="lots-tablebar__spacer"></span>
           <button type="button" class="linklike" (click)="collapseAll()">{{ 'chantiers.chantier.detail.lots.collapseAll' | translate }}</button>
           <button type="button" class="linklike" (click)="expandAll()">{{ 'chantiers.chantier.detail.lots.expandAll' | translate }}</button>
         </div>
-        <div class="table-scroll">
-          <table class="data-table">
-          <thead>
-            <tr>
-              <th>{{ 'chantiers.chantier.detail.lots.typeColumn' | translate }}</th>
-              <th>{{ 'chantiers.chantier.detail.columns.designation' | translate }}</th>
-              <th class="code-col">{{ 'chantiers.chantier.detail.columns.code' | translate }}</th>
-              <th class="num">{{ 'chantiers.chantier.detail.columns.quantite' | translate }}</th>
-              <th>{{ 'chantiers.chantier.detail.columns.unite' | translate }}</th>
-              <th class="num">{{ 'chantiers.chantier.detail.columns.prixUnitaireHt' | translate }}</th>
-              <th class="num">{{ 'chantiers.chantier.detail.columns.montantHt' | translate }}</th>
-              <th class="center">{{ 'chantiers.chantier.detail.columns.avancement' | translate }}</th>
-              <th class="center">{{ 'chantiers.chantier.detail.lots.actionsColumn' | translate }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (row of visibleRows(); track rowTrack(row)) {
-              <tr>
-                <td>
-                  <nf-badge [variant]="typeBadgeVariant(row.kind)">{{ typeLabelKey(row.kind) | translate }}</nf-badge>
-                </td>
-                <td [style.padding-left.rem]="0.75 + row.depth * 1.1">
-                  @if (rowHasChildren(row)) {
-                    <button
-                      type="button"
-                      class="collapse-toggle"
-                      (click)="toggleCollapse(row.lot?.id)"
-                      [attr.aria-expanded]="!isCollapsed(row.lot?.id)"
-                      [attr.aria-label]="(isCollapsed(row.lot?.id) ? 'chantiers.chantier.detail.lots.expandLot' : 'chantiers.chantier.detail.lots.collapseLot') | translate">
-                      {{ isCollapsed(row.lot?.id) ? '▸' : '▾' }}
-                    </button>
-                  }
-                  <strong>{{ rowDesignation(row) }}</strong>
-                </td>
-                <td class="code-col code-muted">{{ rowCode(row) }}</td>
-                <td class="num">{{ rowQuantite(row) }}</td>
-                <td>{{ rowUnite(row) }}</td>
-                <td class="num">{{ rowPrixUnitaireValue(row) != null ? (rowPrixUnitaireValue(row)! | mad) : '—' }}</td>
-                <td class="num">{{ rowMontantValue(row) != null ? (rowMontantValue(row)! | mad) : '—' }}</td>
-                <td class="center">
-                  @if (row.kind !== 'poste') {
-                    <div class="progress-wrap">
-                      <div class="progress-bar sm">
-                        <div class="progress-fill" [style.width.%]="rowAvancement(row)"></div>
-                      </div>
-                      <span>{{ rowAvancement(row) }}%</span>
+        <nf-tree-table
+          [nodes]="treeNodes()"
+          [columns]="treeColumns"
+          treeColumnKey="designation"
+          [loading]="loading()"
+          [expandedKeys]="expandedKeys()"
+          (expandedKeysChange)="expandedKeys.set($event)"
+          minWidth="64rem">
+          <ng-template #cell let-row let-column="column">
+            @switch (column.key) {
+              @case ('type') {
+                <nf-badge [variant]="typeBadgeVariant(row.kind)">{{ typeLabelKey(row.kind) | translate }}</nf-badge>
+              }
+              @case ('designation') {
+                <strong>{{ rowDesignation(row) }}</strong>
+              }
+              @case ('code') {
+                <span class="code-muted">{{ rowCode(row) }}</span>
+              }
+              @case ('quantite') {
+                {{ rowQuantite(row) }}
+              }
+              @case ('unite') {
+                {{ rowUnite(row) }}
+              }
+              @case ('prixUnitaireHt') {
+                {{ rowPrixUnitaireValue(row) != null ? (rowPrixUnitaireValue(row)! | mad) : '—' }}
+              }
+              @case ('montantHt') {
+                {{ rowMontantValue(row) != null ? (rowMontantValue(row)! | mad) : '—' }}
+              }
+              @case ('avancement') {
+                @if (row.kind !== 'poste') {
+                  <div class="progress-wrap">
+                    <div class="progress-bar sm">
+                      <div class="progress-fill" [style.width.%]="rowAvancement(row)"></div>
                     </div>
-                  } @else {
-                    <span>—</span>
-                  }
-                </td>
-                <td class="center actions-cell">
+                    <span>{{ rowAvancement(row) }}%</span>
+                  </div>
+                } @else {
+                  <span>—</span>
+                }
+              }
+              @case ('actions') {
+                <span class="actions-cell">
                   <button type="button" class="row-action" (click)="editRow(row)"
                     [attr.title]="'chantiers.chantier.detail.lots.editAction' | translate"
                     [attr.aria-label]="'chantiers.chantier.detail.lots.editAction' | translate">✎</button>
                   <button type="button" class="row-action row-action--danger" (click)="deleteRow(row)"
                     [attr.title]="'chantiers.chantier.detail.lots.deleteAction' | translate"
                     [attr.aria-label]="'chantiers.chantier.detail.lots.deleteAction' | translate">🗑</button>
-                </td>
-              </tr>
+                </span>
+              }
             }
-          </tbody>
-          <tfoot>
-            <tr class="total-row">
-              <td colspan="6">{{ 'chantiers.chantier.detail.lots.totalLabel' | translate }}</td>
-              <td class="num">{{ totalMontantHt() | mad }}</td>
-              <td class="center">—</td>
-              <td class="center"></td>
-            </tr>
-          </tfoot>
-          </table>
-        </div>
+          </ng-template>
+          <ng-template #footer>
+            <div class="lots-total">
+              <span>{{ 'chantiers.chantier.detail.lots.totalLabel' | translate }}</span>
+              <strong>{{ totalMontantHt() | mad }}</strong>
+            </div>
+          </ng-template>
+        </nf-tree-table>
       } @else if (!loading()) {
         <nf-empty-state
           icon="layers"
@@ -155,29 +157,14 @@ import {
   `,
   styles: [`
     .tab-panel__toolbar { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
-    .table-scroll { max-height: 65vh; overflow: auto; border: 1px solid var(--nf-color-border); border-radius: 0.75rem; }
-    .data-table { width: 100%; border-collapse: collapse; font-size: 0.87rem; background: var(--nf-color-surface); }
-    .data-table thead th { position: sticky; top: 0; z-index: 2; }
-    .data-table tfoot .total-row td { position: sticky; bottom: 0; z-index: 2; }
     .lots-tablebar { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; }
     .lots-tablebar__spacer { flex: 1 1 auto; }
     .lots-count { font-size: 0.8125rem; color: var(--nf-color-text-secondary); }
     .linklike { border: none; background: transparent; color: var(--nf-color-primary-600); cursor: pointer; font-size: 0.8125rem; padding: 0; }
     .linklike:hover { text-decoration: underline; }
-    .data-table th { padding: 0.7rem 1rem; background: var(--nf-color-bg-subtle); color: var(--nf-color-text-secondary); font-weight: 600; text-align: left; border-bottom: 2px solid var(--nf-color-border); white-space: nowrap; }
-    .data-table th.num { text-align: right; }
-    .data-table th.center { text-align: center; }
-    .data-table th.code-col, .data-table td.code-col { font-size: 0.75rem; white-space: nowrap; }
-    .data-table td.code-muted { color: var(--nf-color-text-tertiary, var(--nf-color-text-secondary)); font-variant-numeric: tabular-nums; font-weight: 400; }
-    .data-table td { padding: 0.65rem 1rem; border-bottom: 1px solid var(--nf-color-bg-muted); color: var(--nf-color-text-secondary); }
-    .data-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
-    .data-table td.center { text-align: center; }
-    .data-table tbody tr:last-child td { border-bottom: none; }
-    .collapse-toggle { border: none; background: transparent; cursor: pointer; padding: 0 0.4rem 0 0; font-size: 0.8rem; line-height: 1; color: var(--nf-color-text-secondary); }
-    .collapse-toggle:hover { color: var(--nf-color-text-primary); }
-    .data-table tfoot .total-row td { padding: 0.75rem 1rem; border-top: 2px solid var(--nf-color-border); background: var(--nf-color-bg-subtle); font-weight: 700; color: var(--nf-color-text-primary); }
-    .data-table tfoot .total-row td.num { text-align: right; font-variant-numeric: tabular-nums; }
-    .data-table tfoot .total-row td.center { text-align: center; }
+    .code-muted { font-size: 0.75rem; white-space: nowrap; color: var(--nf-color-text-tertiary, var(--nf-color-text-secondary)); font-variant-numeric: tabular-nums; }
+    .lots-total { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.75rem 1rem; font-weight: 700; color: var(--nf-color-text-primary); }
+    .lots-total strong { font-variant-numeric: tabular-nums; }
     .actions-cell { white-space: nowrap; }
     .row-action { border: none; background: transparent; cursor: pointer; font-size: 0.95rem; line-height: 1; padding: 0 0.3rem; color: var(--nf-color-text-secondary); }
     .row-action:hover { color: var(--nf-color-text-primary); }
@@ -206,31 +193,29 @@ export class ChantierLotsTabComponent {
 
   readonly rootLots = computed(() => this.lots().filter((lot) => !lot.parentLotId));
 
-  /** Root lot ids that are collapsed in the table (children hidden). */
-  readonly collapsedLotIds = signal<Set<string>>(new Set());
+  readonly treeColumns: NfTreeTableColumn<LotHierarchyRow>[] = [
+    { key: 'type', label: 'chantiers.chantier.detail.lots.typeColumn', width: '7rem' },
+    { key: 'designation', label: 'chantiers.chantier.detail.columns.designation', width: '22rem' },
+    { key: 'code', label: 'chantiers.chantier.detail.columns.code', width: '7rem' },
+    { key: 'quantite', label: 'chantiers.chantier.detail.columns.quantite', align: 'end', width: '6rem' },
+    { key: 'unite', label: 'chantiers.chantier.detail.columns.unite', width: '6rem' },
+    { key: 'prixUnitaireHt', label: 'chantiers.chantier.detail.columns.prixUnitaireHt', align: 'end', width: '9rem' },
+    { key: 'montantHt', label: 'chantiers.chantier.detail.columns.montantHt', align: 'end', width: '9rem' },
+    { key: 'avancement', label: 'chantiers.chantier.detail.columns.avancement', align: 'center', width: '8rem' },
+    { key: 'actions', label: 'chantiers.chantier.detail.lots.actionsColumn', align: 'center', width: '7rem' },
+  ];
 
-  readonly hierarchyRows = computed(() =>
-    buildLotHierarchyRows(this.lots(), this.postesByLotId()),
+  readonly treeNodes = computed(() =>
+    buildLotTreeNodes(this.lots(), this.postesByLotId()),
   );
 
-  /** Rows actually rendered, honouring collapsed grouping nodes. */
-  readonly visibleRows = computed(() => {
-    const collapsed = this.collapsedLotIds();
-    const rows = this.hierarchyRows();
-    const out: typeof rows = [];
-    let hiddenBelowDepth: number | null = null;
-    for (const row of rows) {
-      if (hiddenBelowDepth != null) {
-        if (row.depth > hiddenBelowDepth) continue;
-        hiddenBelowDepth = null;
-      }
-      out.push(row);
-      if (row.kind !== 'poste' && row.lot && collapsed.has(row.lot.id)) {
-        hiddenBelowDepth = row.depth;
-      }
-    }
-    return out;
-  });
+  /** Total number of displayed rows (lots + postes), for the count label. */
+  readonly rowCount = computed(
+    () => this.lots().length + Object.values(this.postesByLotId()).reduce((sum, postes) => sum + postes.length, 0),
+  );
+
+  /** Expanded node keys (controlled). Reset to fully-expanded on each reload. */
+  readonly expandedKeys = signal<Set<string>>(new Set());
 
   /** Total marché HT = sum of every poste amount across all lots. */
   readonly totalMontantHt = computed(() => {
@@ -246,37 +231,26 @@ export class ChantierLotsTabComponent {
     return total;
   });
 
-  isCollapsed(lotId: string | undefined): boolean {
-    return lotId ? this.collapsedLotIds().has(lotId) : false;
-  }
-
-  toggleCollapse(lotId: string | undefined): void {
-    if (!lotId) return;
-    const next = new Set(this.collapsedLotIds());
-    if (next.has(lotId)) {
-      next.delete(lotId);
-    } else {
-      next.add(lotId);
-    }
-    this.collapsedLotIds.set(next);
-  }
-
   collapseAll(): void {
-    const ids = this.hierarchyRows()
-      .filter((row) => row.kind !== 'poste' && row.lot && this.rowHasChildren(row))
-      .map((row) => row.lot!.id);
-    this.collapsedLotIds.set(new Set(ids));
-  }
-
-  rowHasChildren(row: ReturnType<typeof buildLotHierarchyRows>[number]): boolean {
-    if (row.kind === 'poste' || !row.lot) return false;
-    const lotId = row.lot.id;
-    if ((this.postesByLotId()[lotId] ?? []).length > 0) return true;
-    return this.lots().some((lot) => lot.parentLotId === lotId);
+    this.expandedKeys.set(new Set());
   }
 
   expandAll(): void {
-    this.collapsedLotIds.set(new Set());
+    this.expandedKeys.set(this.collectExpandableKeys(this.treeNodes()));
+  }
+
+  private collectExpandableKeys(nodes: NfTreeNode<LotHierarchyRow>[]): Set<string> {
+    const keys = new Set<string>();
+    const walk = (list: NfTreeNode<LotHierarchyRow>[]): void => {
+      for (const node of list) {
+        if (node.children?.length) {
+          keys.add(node.key);
+          walk(node.children);
+        }
+      }
+    };
+    walk(nodes);
+    return keys;
   }
 
   constructor() {
@@ -288,6 +262,11 @@ export class ChantierLotsTabComponent {
         return;
       }
       void this.reload(id);
+    });
+
+    // Fully expand the tree whenever the underlying data is (re)loaded.
+    effect(() => {
+      this.expandedKeys.set(this.collectExpandableKeys(this.treeNodes()));
     });
   }
 
@@ -392,43 +371,38 @@ export class ChantierLotsTabComponent {
     }
   }
 
-  rowTrack(row: ReturnType<typeof buildLotHierarchyRows>[number]): string {
-    if (row.poste) return `poste-${row.poste.id}`;
-    return `lot-${row.lot!.id}-${row.kind}`;
-  }
-
-  rowCode(row: ReturnType<typeof buildLotHierarchyRows>[number]): string {
+  rowCode(row: LotHierarchyRow): string {
     return row.poste?.code ?? row.lot?.code ?? '—';
   }
 
-  rowDesignation(row: ReturnType<typeof buildLotHierarchyRows>[number]): string {
+  rowDesignation(row: LotHierarchyRow): string {
     return row.poste?.designation ?? row.lot?.designation ?? '—';
   }
 
-  rowQuantite(row: ReturnType<typeof buildLotHierarchyRows>[number]): string | number {
+  rowQuantite(row: LotHierarchyRow): string | number {
     const q = row.poste?.quantite ?? row.lot?.quantite;
     return q ?? '—';
   }
 
-  rowUnite(row: ReturnType<typeof buildLotHierarchyRows>[number]): string {
+  rowUnite(row: LotHierarchyRow): string {
     return row.poste?.unite ?? row.lot?.unite ?? '—';
   }
 
-  rowPrixUnitaireValue(row: ReturnType<typeof buildLotHierarchyRows>[number]): number | null {
+  rowPrixUnitaireValue(row: LotHierarchyRow): number | null {
     const pu = row.poste?.prixUnitaireHt ?? row.lot?.prixUnitaireHt;
     return pu != null ? pu : null;
   }
 
-  rowMontantValue(row: ReturnType<typeof buildLotHierarchyRows>[number]): number | null {
+  rowMontantValue(row: LotHierarchyRow): number | null {
     const m = row.poste?.montantHt ?? row.lot?.montantHt;
     return m != null ? m : null;
   }
 
-  rowAvancement(row: ReturnType<typeof buildLotHierarchyRows>[number]): number {
+  rowAvancement(row: LotHierarchyRow): number {
     return row.lot?.avancementPercent ?? 0;
   }
 
-  async editRow(row: ReturnType<typeof buildLotHierarchyRows>[number]): Promise<void> {
+  async editRow(row: LotHierarchyRow): Promise<void> {
     if (row.poste) {
       await this.openEditPoste(row.poste);
     } else if (row.lot) {
@@ -497,7 +471,7 @@ export class ChantierLotsTabComponent {
     }
   }
 
-  async deleteRow(row: ReturnType<typeof buildLotHierarchyRows>[number]): Promise<void> {
+  async deleteRow(row: LotHierarchyRow): Promise<void> {
     if (row.poste) {
       const confirmed = await this.confirmDialog.confirm({
         title: this.translate.instant('chantiers.chantier.detail.lots.deleteConfirmTitle'),

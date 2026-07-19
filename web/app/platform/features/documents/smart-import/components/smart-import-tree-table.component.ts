@@ -7,16 +7,22 @@ import {
   OnChanges,
   Output,
   SimpleChanges,
+  inject,
   signal,
 } from '@angular/core';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import {
+  TreeTableComponent,
+  type NfTreeNode,
+  type NfTreeTableColumn,
+} from '@lib/anatomy/components';
 
 import type { FieldIssue } from '../../doc-extractor/models/extraction.model';
 import type { UiArrayColumn, UiTreeConfig } from '../../doc-extractor/models/ui-schema.model';
 import type { SmartImportRow, SmartImportRowStatus } from '../models/smart-import.model';
 import { formatIssueMessage } from '../utils/issue-display.util';
 import {
-  flattenSmartImportTree,
+  buildSmartImportTreeNodes,
   getRelativeValue,
   type SmartImportTreeNode,
 } from '../utils/tree-flatten.util';
@@ -28,110 +34,90 @@ export interface SmartImportTreeNodeEvent {
 @Component({
   selector: 'nf-smart-import-tree-table',
   standalone: true,
-  imports: [CommonModule, TranslateModule],
+  imports: [CommonModule, TranslateModule, TreeTableComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="wrap">
       @if (title) {
         <h3>{{ title }}</h3>
       }
-      <div class="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th class="status-col">{{ 'platform.smartImport.columns.status' | translate }}</th>
-              <th class="level-col">{{ 'platform.smartImport.columns.level' | translate }}</th>
-              @for (col of columns; track col.path) {
-                <th [style.width.px]="col.widthPx ?? null">{{ col.label }}</th>
-              }
-            </tr>
-          </thead>
-          <tbody>
-            @for (node of visibleNodes(); track node.path) {
-              <tr
-                [class.invalid]="node.status === 'NEEDS_REVIEW'"
-                [class.muted]="isMuted(node.status)"
-                (dblclick)="nodeActivate.emit({ node })"
-                [attr.title]="'platform.smartImport.review.dblclickHint' | translate">
-                <td class="status-col">
-                  <span class="badge" [attr.data-status]="node.status">
-                    {{ statusKey(node.status) | translate }}
-                  </span>
-                </td>
-                <td class="level-col">
-                  <button
-                    type="button"
-                    class="tree-toggle"
-                    [style.padding-left.px]="node.depth * 16"
-                    (click)="toggle(node.path); $event.stopPropagation()"
-                    [attr.aria-expanded]="isExpanded(node.path)">
-                    @if (node.expandable) {
-                      <span class="chevron">{{ isExpanded(node.path) ? '▾' : '▸' }}</span>
-                    } @else {
-                      <span class="chevron spacer"></span>
-                    }
-                    <span class="level-badge">{{ node.levelLabel }}</span>
-                  </button>
-                </td>
-                @for (col of columns; track col.path) {
-                  <td class="cell">{{ displayValue(node.data, col.path) }}</td>
-                }
-              </tr>
-              @if (node.issues.length > 0 && node.status === 'NEEDS_REVIEW') {
-                <tr class="issues-row">
-                  <td [attr.colspan]="columns.length + 2">
-                    <ul [style.margin-left.px]="110 + node.depth * 16">
-                      @for (issue of node.issues; track issue.path + issue.kind) {
-                        <li>{{ humanIssue(issue) }}</li>
-                      }
-                    </ul>
-                  </td>
-                </tr>
-              }
+
+      <nf-tree-table
+        [nodes]="filteredTreeNodes()"
+        [columns]="treeColumns"
+        treeColumnKey="level"
+        minWidth="48rem"
+        scrollHeight="min(52vh, 560px)"
+        [expandedKeys]="expandedKeys()"
+        [rowClickable]="true"
+        [rowClass]="rowClass"
+        [rowTitle]="rowTitle"
+        [showDetail]="showDetail"
+        (expandedKeysChange)="expandedKeys.set($event)"
+        (rowDblClick)="nodeActivate.emit({ node: $event })">
+        <ng-template #cell let-node let-column="column">
+          @switch (column.key) {
+            @case ('status') {
+              <span class="badge" [attr.data-status]="node.status">
+                {{ statusKey(node.status) | translate }}
+              </span>
             }
-          </tbody>
-        </table>
-      </div>
+            @case ('level') {
+              <span class="level-badge">{{ node.levelLabel }}</span>
+            }
+            @default {
+              {{ displayValue(node.data, column.field ?? '') }}
+            }
+          }
+        </ng-template>
+
+        <ng-template #detail let-node>
+          <ul class="issues-list">
+            @for (issue of node.issues; track issue.path + issue.kind) {
+              <li>{{ humanIssue(issue) }}</li>
+            }
+          </ul>
+        </ng-template>
+      </nf-tree-table>
     </div>
   `,
   styles: [`
     .wrap { display: grid; gap: .5rem; }
     h3 { margin: 0; font-size: .95rem; }
-    .table-scroll { overflow: auto; max-height: min(52vh, 560px); border: 1px solid var(--nf-color-border); border-radius: .5rem; }
-    table { width: 100%; border-collapse: collapse; font-size: .875rem; }
-    th, td { padding: .45rem .65rem; text-align: left; border-bottom: 1px solid var(--nf-color-border); vertical-align: top; }
-    th { position: sticky; top: 0; background: var(--nf-color-bg-subtle, #f5f5f5); z-index: 1; }
-    tbody tr { cursor: pointer; }
-    tbody tr.muted { opacity: .55; }
-    tbody tr.invalid { background: color-mix(in srgb, var(--nf-color-warning-500, #f59e0b) 8%, transparent); }
-    tbody tr:hover { background: color-mix(in srgb, var(--nf-color-primary-500, #2563eb) 6%, transparent); }
-    .cell { color: var(--nf-color-text-secondary); }
-    .status-col { width: 110px; }
-    .level-col { min-width: 140px; }
-    .tree-toggle {
-      display: inline-flex; align-items: center; gap: .35rem;
-      border: 0; background: transparent; color: inherit; cursor: pointer; padding: 0; font: inherit;
-    }
-    .chevron { width: 1rem; display: inline-block; text-align: center; }
-    .chevron.spacer { visibility: hidden; }
     .level-badge {
-      font-size: .7rem; padding: .1rem .4rem; border-radius: 999px;
+      display: inline-block;
+      padding: .1rem .4rem;
+      border-radius: 999px;
       background: var(--nf-color-bg-subtle);
+      font-size: .7rem;
     }
     .badge {
-      display: inline-block; padding: .1rem .45rem; border-radius: 999px;
-      font-size: .7rem; background: var(--nf-color-bg-subtle);
+      display: inline-block;
+      padding: .1rem .45rem;
+      border-radius: 999px;
+      background: var(--nf-color-bg-subtle);
+      font-size: .7rem;
     }
     .badge[data-status='READY'] { color: var(--nf-color-success-700, #15803d); }
     .badge[data-status='NEEDS_REVIEW'] { color: var(--nf-color-warning-700, #b45309); }
     .badge[data-status='DUPLICATE'],
     .badge[data-status='IGNORED'] { color: var(--nf-color-text-secondary); }
     .badge[data-status='FAILED'] { color: var(--nf-color-danger-700, #b91c1c); }
-    .issues-row td { padding-top: 0; }
-    .issues-row ul { margin: 0 0 .45rem; padding-left: 1rem; color: var(--nf-color-danger-700, #b91c1c); font-size: .8rem; }
+    .issues-list {
+      margin: 0 0 .45rem;
+      padding-inline-start: 7rem;
+      color: var(--nf-color-danger-700, #b91c1c);
+      font-size: .8rem;
+    }
+    :host ::ng-deep .nf-smart-import-row--muted > td { opacity: .55; }
+    :host ::ng-deep .nf-smart-import-row--invalid > td {
+      background: color-mix(in srgb, var(--nf-color-warning-500, #f59e0b) 8%, transparent);
+    }
   `],
 })
 export class SmartImportTreeTableComponent implements OnChanges {
+  private readonly translate = inject(TranslateService);
+
   @Input({ required: true }) rows: SmartImportRow[] = [];
   @Input({ required: true }) tree!: UiTreeConfig;
   @Input() title = '';
@@ -139,28 +125,48 @@ export class SmartImportTreeTableComponent implements OnChanges {
   @Input() extraIssues: FieldIssue[] = [];
   @Output() readonly nodeActivate = new EventEmitter<SmartImportTreeNodeEvent>();
 
-  private readonly collapsed = signal<Set<string>>(new Set());
-  private readonly nodes = signal<SmartImportTreeNode[]>([]);
-  readonly visibleNodes = signal<SmartImportTreeNode[]>([]);
+  private knownKeys = new Set<string>();
+  readonly filteredTreeNodes = signal<NfTreeNode<SmartImportTreeNode>[]>([]);
+  readonly expandedKeys = signal<Set<string>>(new Set());
+
+  readonly rowClass = (node: SmartImportTreeNode): Record<string, boolean> => ({
+    'nf-smart-import-row--invalid': node.status === 'NEEDS_REVIEW',
+    'nf-smart-import-row--muted': this.isMuted(node.status),
+  });
+
+  readonly rowTitle = (_node: SmartImportTreeNode): string =>
+    this.translate.instant('platform.smartImport.review.dblclickHint');
+
+  readonly showDetail = (node: SmartImportTreeNode): boolean =>
+    node.status === 'NEEDS_REVIEW' && node.issues.length > 0;
 
   get columns(): UiArrayColumn[] {
     return this.tree?.columns ?? [];
   }
 
+  get treeColumns(): NfTreeTableColumn<SmartImportTreeNode>[] {
+    return [
+      {
+        key: 'status',
+        label: 'platform.smartImport.columns.status',
+        width: '110px',
+      },
+      {
+        key: 'level',
+        label: 'platform.smartImport.columns.level',
+        width: '140px',
+      },
+      ...this.columns.map((column) => ({
+        key: `field:${column.path}`,
+        label: column.label,
+        field: column.path,
+        width: column.widthPx ? `${column.widthPx}px` : undefined,
+      })),
+    ];
+  }
+
   ngOnChanges(_changes: SimpleChanges): void {
     this.rebuild();
-  }
-
-  toggle(path: string): void {
-    const next = new Set(this.collapsed());
-    if (next.has(path)) next.delete(path);
-    else next.add(path);
-    this.collapsed.set(next);
-    this.applyVisibility();
-  }
-
-  isExpanded(path: string): boolean {
-    return !this.collapsed().has(path);
   }
 
   displayValue(data: Record<string, unknown>, path: string): string {
@@ -183,60 +189,43 @@ export class SmartImportTreeTableComponent implements OnChanges {
 
   private rebuild(): void {
     if (!this.tree) {
-      this.nodes.set([]);
-      this.visibleNodes.set([]);
+      this.filteredTreeNodes.set([]);
+      this.expandedKeys.set(new Set());
+      this.knownKeys = new Set();
       return;
     }
-    const flat = flattenSmartImportTree({
+
+    const nodes = buildSmartImportTreeNodes({
       rows: this.rows,
       tree: this.tree,
       allIssues: this.extraIssues,
     });
-    this.nodes.set(flat);
-    this.applyVisibility();
-  }
-
-  private applyVisibility(): void {
-    const collapsed = this.collapsed();
-    const filter = this.filter;
-    const filteredRoots = new Set(
-      this.rows
-        .map((row, index) => ({ row, index }))
-        .filter(({ row }) => filter === 'ALL' || row.status === filter)
-        .map(({ index }) => index),
+    this.filteredTreeNodes.set(
+      nodes.filter((node) =>
+        this.filter === 'ALL' || this.rows[node.data.rootIndex]?.status === this.filter,
+      ),
     );
 
-    const hiddenAncestors = new Set<string>();
-    const visible: SmartImportTreeNode[] = [];
-    for (const node of this.nodes()) {
-      if (!filteredRoots.has(node.rootIndex)) continue;
-
-      let ancestorCollapsed = false;
-      for (const hidden of hiddenAncestors) {
-        if (node.path.startsWith(hidden + '.') || node.path.startsWith(hidden + '[')) {
-          ancestorCollapsed = true;
-          break;
-        }
-      }
-      // Also check path prefix against collapsed parent paths
-      if (!ancestorCollapsed) {
-        for (const path of collapsed) {
-          if (node.path.startsWith(path + '.') || node.path.startsWith(path + '[')) {
-            // Only hide if this node is a descendant, not the node itself
-            if (node.path !== path) {
-              ancestorCollapsed = true;
-              break;
-            }
-          }
-        }
-      }
-      if (ancestorCollapsed) continue;
-
-      visible.push(node);
-      if (collapsed.has(node.path) && node.expandable) {
-        hiddenAncestors.add(node.path);
-      }
+    const allKeys = this.collectKeys(nodes);
+    const nextExpanded = new Set(
+      [...this.expandedKeys()].filter((key) => allKeys.has(key)),
+    );
+    for (const key of allKeys) {
+      if (!this.knownKeys.has(key)) nextExpanded.add(key);
     }
-    this.visibleNodes.set(visible);
+    this.knownKeys = allKeys;
+    this.expandedKeys.set(nextExpanded);
+  }
+
+  private collectKeys(nodes: NfTreeNode<SmartImportTreeNode>[]): Set<string> {
+    const keys = new Set<string>();
+    const visit = (items: NfTreeNode<SmartImportTreeNode>[]) => {
+      for (const node of items) {
+        keys.add(node.key);
+        if (node.children) visit(node.children);
+      }
+    };
+    visit(nodes);
+    return keys;
   }
 }

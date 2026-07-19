@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { HttpParams } from '@angular/common/http';
 
 import { FeatureApiService } from '@lib/anatomy';
 import type { ListQuery, ListResponse } from '@lib/anatomy/types';
@@ -38,10 +39,14 @@ function apiToUi(row: ApiDocumentChantier): DocumentChantier {
 export class DocumentsApiService extends FeatureApiService<DocumentChantier, never, never> {
   protected override basePath = '/api/v1/chantiers';
 
-  override async getAll(_query?: ListQuery): Promise<ListResponse<DocumentChantier>> {
-    const rows = await this.get<ApiDocumentChantier[]>(`${this.basePath}/documents`);
-    const items = (rows ?? []).map(apiToUi);
-    return { items, total: items.length };
+  override async getAll(query?: ListQuery): Promise<ListResponse<DocumentChantier>> {
+    const params = new HttpParams()
+      .set('page', String(Math.max(0, Number(query?.page ?? 1) - 1)))
+      .set('size', String(Math.max(1, Number(query?.pageSize ?? 200))));
+    const response = await this.get<unknown>(`${this.basePath}/documents`, params);
+    const normalized = this.normalizeListResponse(response);
+    const items = (normalized.items as ApiDocumentChantier[]).map(apiToUi);
+    return { items, total: normalized.total ?? items.length };
   }
 
   async getByChantierId(chantierId: string): Promise<DocumentChantier[]> {

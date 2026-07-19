@@ -33,6 +33,7 @@ export * from './send-email-dialog';
 export * from './matrix-grid';
 export * from './permission-picker';
 export * from './tree-editor';
+export * from './tree-table';
 export * from './workflow-editor';
 export * from './code-editor';
 export * from './widgets';

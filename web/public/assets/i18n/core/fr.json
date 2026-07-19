@@ -677,6 +677,7 @@
       "title": "Membres",
       "invite": "Inviter un membre",
       "invite.success": "Invitation envoyee a {email}",
+      "invite.emailFailed": "Membre cree mais l'email n'a pas pu etre envoye a {email}. Utilisez Renvoyer l'invitation.",
       "invite.duplicate": "Cet email a deja ete invite",
       "invite.error": "Echec de l'envoi de l'invitation",
       "emptyTitle": "Aucun membre trouve",

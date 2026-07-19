@@ -125,24 +125,6 @@ public class Chantier implements Persistable<String> {
     @Column(nullable = false, length = 40)
     private String status;
 
-    @Column(name = "chef_chantier_user_id", length = 100)
-    private String chefChantierUserId;
-
-    @Column(name = "chef_chantier_name")
-    private String chefChantierName;
-
-    @Column(name = "conducteur_travaux_user_id", length = 100)
-    private String conducteurTravauxUserId;
-
-    @Column(name = "conducteur_travaux_name")
-    private String conducteurTravauxName;
-
-    @Column(name = "ingenieur_user_id", length = 100)
-    private String ingenieurUserId;
-
-    @Column(name = "ingenieur_name")
-    private String ingenieurName;
-
     @Column(name = "societe_id", length = 100)
     private String societeId;
 

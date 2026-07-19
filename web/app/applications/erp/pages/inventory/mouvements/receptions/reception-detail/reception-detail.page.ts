@@ -60,7 +60,13 @@ type TxLine = { totalPrice?: number; quantity: number; unitPrice?: number };
   styles: [ConfigDrivenDetailPageStyles],
 })
 export class ReceptionDetailPage extends ConfigDrivenDetailPage<InventoryTx> implements OnDestroy {
-  @ViewChild('blExtractor') private readonly blExtractor?: SmartImportTriggerComponent;
+  private blExtractor?: SmartImportTriggerComponent;
+
+  @ViewChild('blExtractor')
+  private set blExtractorComponent(value: SmartImportTriggerComponent | undefined) {
+    this.blExtractor = value;
+    queueMicrotask(() => this.tryAutoScanBl());
+  }
 
   private readonly crud = inject(ReceptionFacade);
   private readonly activatedRoute = inject(ActivatedRoute);
@@ -160,14 +166,17 @@ export class ReceptionDetailPage extends ConfigDrivenDetailPage<InventoryTx> imp
     if (!this.shouldAutoScanBl()) return;
     if (this.mode() !== 'create') return;
 
-    queueMicrotask(() => {
-      if (!this.shouldAutoScanBl()) return;
-      if (!this.blExtractor) return;
-
-      this.shouldAutoScanBl.set(false);
-      this.blExtractor.selectFile();
-    });
+    queueMicrotask(() => this.tryAutoScanBl());
   });
+
+  private tryAutoScanBl(): void {
+    if (!this.shouldAutoScanBl() || this.mode() !== 'create' || !this.blExtractor) {
+      return;
+    }
+
+    this.shouldAutoScanBl.set(false);
+    this.blExtractor.selectFile();
+  }
 
   onModeChange(mode: DeliveryMode, form: FormGroup): void {
     this.deliveryMode.set(mode);
@@ -288,8 +297,12 @@ export class ReceptionDetailPage extends ConfigDrivenDetailPage<InventoryTx> imp
             'site',
             'project',
             'destinationSite',
-          ]);
+          ]) ?? findStringByAliases(data['receiver'], ['name']);
       const chantierLocationId = this.resolveLookupId('chantiersLookup', chantierName);
+      const depotName =
+        findStringByAliases(data, ['depot', 'warehouse', 'destinationDepot']) ??
+        findStringByAliases(data['receiver'], ['name']);
+      const destLocationId = this.resolveLookupId('locationsDepot', depotName);
 
       const phase = findStringByAliases(data, ['phaseRef', 'phase']);
       const phaseRef = this.resolvePhase(phase);
@@ -325,6 +338,11 @@ export class ReceptionDetailPage extends ConfigDrivenDetailPage<InventoryTx> imp
         mappedPatch.chantierLocationId = chantierLocationId;
         mappedPatch.destLocationId = null as unknown as string;
         this.deliveryMode.set('CHANTIER_DIRECT');
+      } else if (destLocationId) {
+        mappedPatch.destLocationId = destLocationId;
+        mappedPatch.chantierLocationId = null as unknown as string;
+        mappedPatch.phaseRef = '';
+        this.deliveryMode.set('DEPOT');
       }
 
       this.applyScanPatch(mappedPatch);
@@ -380,8 +398,20 @@ export class ReceptionDetailPage extends ConfigDrivenDetailPage<InventoryTx> imp
     articleLookup: Array<{ key: string; value: string; data?: Record<string, unknown> }>,
     lineNumber: number,
   ): InventoryTx['lines'][number] | null {
-    const articleCode = findStringByAliases(line, ['articleCode', 'code', 'sku', 'itemCode']);
-    const articleName = findStringByAliases(line, ['articleName', 'name', 'designation', 'itemName']);
+    const articleCode = findStringByAliases(line, [
+      'articleCode',
+      'code',
+      'sku',
+      'itemCode',
+      'itemReference',
+    ]);
+    const articleName = findStringByAliases(line, [
+      'articleName',
+      'name',
+      'designation',
+      'itemName',
+      'itemDesignation',
+    ]);
     const article = this.resolveArticle(articleLookup, articleCode, articleName);
     if (!article) return null;
 
@@ -430,7 +460,7 @@ export class ReceptionDetailPage extends ConfigDrivenDetailPage<InventoryTx> imp
     line: Record<string, unknown>,
     article: { key: string; value: string; data?: Record<string, unknown> },
   ): string | undefined {
-    const uomIdRaw = findByAliases(line, ['uomId', 'uom', 'unitId']);
+    const uomIdRaw = findByAliases(line, ['uomId', 'unitId']);
     if (typeof uomIdRaw === 'string' && uomIdRaw.trim().length > 0) {
       return uomIdRaw.trim();
     }
@@ -446,7 +476,7 @@ export class ReceptionDetailPage extends ConfigDrivenDetailPage<InventoryTx> imp
     line: Record<string, unknown>,
     article: { key: string; value: string; data?: Record<string, unknown> },
   ): string | undefined {
-    const uomCodeRaw = findByAliases(line, ['uomCode', 'unit', 'uomLabel']);
+    const uomCodeRaw = findByAliases(line, ['uomCode', 'uom', 'unit', 'uomLabel']);
     if (typeof uomCodeRaw === 'string' && uomCodeRaw.trim().length > 0) {
       return uomCodeRaw.trim();
     }

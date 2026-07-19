@@ -25,6 +25,8 @@ public class EmployeUpdateDto {
 
     private String email;
 
+    private java.util.UUID userId;
+
     private String poste;
 
     private String departement;

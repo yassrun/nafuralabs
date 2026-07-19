@@ -9,6 +9,7 @@ import { resolveLocale } from '@lib/anatomy/pipes/_locale-resolver';
 import { DAY_KEYS_ORDERED } from '@applications/erp/shell/i18n-labels';
 import type { Chantier } from '../../../chantiers/models';
 import { ChantierApiService } from '../../chantiers/services/chantier-api.service';
+import { ChantierAffectationApiService } from '../../chantiers/services/chantier-affectation-api.service';
 import { ErpLookupService } from '@applications/erp/shared/services/erp-lookup.service';
 import type { AffectationEmploye } from '../pointage/models';
 import { PlanningApiService, type PlanningEntry } from './services/planning-api.service';
@@ -214,6 +215,7 @@ function overlapsWeek(a: AffectationEmploye, weekStart: Date, weekEnd: Date): bo
 export class PlanningEquipesPage {
   private readonly planningApi = inject(PlanningApiService);
   private readonly chantierApi = inject(ChantierApiService);
+  private readonly affectationApi = inject(ChantierAffectationApiService);
   private readonly erpLookup = inject(ErpLookupService);
   private readonly toast = inject(ToastService);
   private readonly translate = inject(TranslateService);
@@ -337,8 +339,33 @@ export class PlanningEquipesPage {
   }
 
   submitAffectation(): void {
-    this.openDialog.set(false);
-    this.toast.info('Création d\'affectation — fonctionnalité à venir.');
+    if (!this.formEmployeId || !this.formChantierId || !this.formDateDebut) {
+      this.toast.warning('Employé, chantier et date sont requis');
+      return;
+    }
+    const roleMap: Record<string, string> = {
+      'Chef de chantier': 'BTP_CHEF_CHANTIER',
+      'Conducteur de travaux': 'BTP_CONDUCTEUR_TRAVAUX',
+      'Chef d\'équipe': 'BTP_CHEF_EQUIPE',
+      Magasinier: 'BTP_MAGASINIER',
+      Pointeur: 'BTP_POINTEUR',
+      'Ouvrier qualifié': 'BTP_CHEF_EQUIPE',
+    };
+    const roleCode = roleMap[this.formRole] ?? 'BTP_CHEF_EQUIPE';
+    void this.affectationApi
+      .createAffectation(this.formChantierId, {
+        employeId: this.formEmployeId,
+        roleCode,
+        dateDebut: this.formDateDebut,
+      })
+      .then(() => {
+        this.openDialog.set(false);
+        this.toast.success('Affectation créée');
+        void this.reloadPlanning(this.weekStart(), this.filterChantierId(), this.filterEmployeId());
+      })
+      .catch((e: unknown) => {
+        this.toast.error(e instanceof Error ? e.message : 'Création d\'affectation impossible');
+      });
   }
 
   private async reloadPlanning(weekStart: Date, chantierId: string, employeId: string): Promise<void> {

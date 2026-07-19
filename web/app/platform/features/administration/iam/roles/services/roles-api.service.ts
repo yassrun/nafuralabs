@@ -17,6 +17,7 @@ interface TenantRoleApiResponse {
   isSystem: boolean;
   priority: number;
   memberCount?: number;
+  scopeType?: string;
   createdAt: string | null;
   updatedAt: string | null;
 }
@@ -118,6 +119,7 @@ export class RolesApiService extends FeatureApiService<Role, RoleCreate, RoleUpd
       isSystem: item.isSystem ?? true,
       priority: Number(item.priority ?? 0),
       memberCount: item.memberCount ?? 0,
+      scopeType: item.scopeType ?? 'ENTREPRISE',
       createdAt: item.createdAt ?? null,
       updatedAt: item.updatedAt ?? null,
     };

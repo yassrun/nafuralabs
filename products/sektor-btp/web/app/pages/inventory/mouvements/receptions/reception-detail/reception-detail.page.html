@@ -1,6 +1,13 @@
 <nf-page-shell scroll>
   <nf-page-header [config]="headerConfig"></nf-page-header>
 
+  <input
+    #blFileInput
+    class="rd__file-input"
+    type="file"
+    accept=".pdf,.png,.jpg,.jpeg,.webp"
+    (change)="onBlFileSelected($event)" />
+
   <nf-entity-detail
     #detail
     [config]="config"
@@ -11,13 +18,6 @@
     [saving]="isSaving()"
     (action)="onAction($event)"
     (transitionRequest)="handleTransition($event)">
-
-    <input
-      #blFileInput
-      class="rd__file-input"
-      type="file"
-      accept=".pdf,.png,.jpg,.jpeg,.webp"
-      (change)="onBlFileSelected($event)" />
 
     <ng-template nfField="destLocationId" let-control let-form="form">
       @if (mode() !== 'view') {

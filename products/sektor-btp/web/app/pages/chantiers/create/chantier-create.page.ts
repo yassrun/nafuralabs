@@ -104,19 +104,18 @@ function addMonthsIso(from: Date, months: number): string {
             name="cli"
             class="client-select"
             [label]="'chantiers.create.fields.client' | translate"
-            [placeholder]="onboardingMode() ? '— Je remplirai après —' : ('chantiers.create.fields.client' | translate)"
+            [placeholder]="'chantiers.create.fields.client' | translate"
             [options]="clientOptions()"
+            [required]="true"
             lookupKey="clients"
             [listShortcut]="{ label: 'chantiers.create.clientListShortcut' | translate }"
           />
-          @if (!onboardingMode()) {
-            <nf-button variant="ghost" class="client-create" (clicked)="createClientInline()">
-              {{ 'chantiers.create.clientCreateCta' | translate }}
-            </nf-button>
-          }
+          <nf-button variant="ghost" class="client-create" (clicked)="createClientInline()">
+            {{ 'chantiers.create.clientCreateCta' | translate }}
+          </nf-button>
           @if (onboardingMode() && clients().length === 0 && !hasClientListShortcut()) {
             <p class="onboarding-hint">
-              Vous pourrez gérer vos clients depuis Ventes → Clients après connexion.
+              {{ 'chantiers.create.clientRequiredHint' | translate }}
             </p>
           }
           <label>{{ 'chantiers.create.fields.marcheRef' | translate }}</label>
@@ -501,7 +500,7 @@ export class ChantierCreatePage {
       }
     }
     if (s === 1) {
-      if (!this.onboardingMode() && !this.draft.clientId) {
+      if (!this.draft.clientId) {
         this.validationMessage.set(t('chantiers.create.validation.client'));
         return false;
       }
@@ -533,8 +532,8 @@ export class ChantierCreatePage {
         name: this.draft.name,
         description: this.draft.description || undefined,
         status: this.onboardingMode() ? 'EN_COURS' : this.draft.status,
-        clientId: this.draft.clientId || undefined,
-        clientName: this.draft.clientName || (this.onboardingMode() ? 'Client à renseigner' : ''),
+        clientId: this.draft.clientId,
+        clientName: this.draft.clientName,
         marcheReference: this.draft.marcheReference || undefined,
         adresse: this.draft.adresse || undefined,
         ville: this.draft.ville,

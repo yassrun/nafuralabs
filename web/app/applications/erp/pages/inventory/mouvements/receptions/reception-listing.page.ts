@@ -11,6 +11,7 @@ import type { ListingActionEvent } from '@lib/anatomy/types';
 
 import { FournisseurApiService } from '@applications/erp/pages/achats/fournisseurs/services/fournisseur-api.service';
 import { BcApiService } from '@applications/erp/pages/achats/commandes/services/bc-api.service';
+import { ChantierApiService } from '@applications/erp/pages/chantiers/services/chantier-api.service';
 import { LocationsApiService } from '@applications/erp/pages/inventory/configuration/depots/services/location-api.service';
 
 import { buildReceptionListingConfig } from './config/listing/listing.config';
@@ -36,6 +37,7 @@ export class ReceptionListingPage extends ConfigDrivenListingPage<ReceptionListI
   private readonly translate = inject(TranslateService);
   private readonly fournisseurApi = inject(FournisseurApiService);
   private readonly locationsApi = inject(LocationsApiService);
+  private readonly chantierApi = inject(ChantierApiService);
   private readonly bcApi = inject(BcApiService);
 
   readonly facade = inject(ReceptionFacade);
@@ -55,6 +57,9 @@ export class ReceptionListingPage extends ConfigDrivenListingPage<ReceptionListI
       (event.actionId === 'new' || event.actionId === 'create' || event.actionId === 'scan_bl') &&
       !this.canCreate()
     ) {
+      this.showError(
+        this.translate.instant('inventory.mouvement.reception.prerequisites.blocked'),
+      );
       return;
     }
     await super.onAction(event);
@@ -91,9 +96,10 @@ export class ReceptionListingPage extends ConfigDrivenListingPage<ReceptionListI
     };
 
     try {
-      const [fournisseurs, depots, bonsCommande] = await Promise.all([
+      const [fournisseurs, depots, chantiers, bonsCommande] = await Promise.all([
         this.fournisseurApi.getAll({ page: 0, size: 1 }),
         this.locationsApi.getAll({ page: 0, size: 1 }),
+        this.chantierApi.getAll({ page: 0, size: 1 }),
         this.bcApi.getAll({ page: 0, size: 1 }),
       ]);
 
@@ -105,10 +111,15 @@ export class ReceptionListingPage extends ConfigDrivenListingPage<ReceptionListI
           met: (fournisseurs.total ?? fournisseurs.items?.length ?? 0) > 0,
         },
         {
-          id: 'depot',
-          label: tr('inventory.mouvement.reception.prerequisites.depot', 'Au moins un dépôt'),
-          route: '/inventory/configuration/depots/new',
-          met: (depots.total ?? depots.items?.length ?? 0) > 0,
+          id: 'destination',
+          label: tr(
+            'inventory.mouvement.reception.prerequisites.destination',
+            'Au moins un dépôt ou un chantier',
+          ),
+          route: '/chantiers/new',
+          met:
+            (depots.total ?? depots.items?.length ?? 0) > 0 ||
+            (chantiers.total ?? chantiers.items?.length ?? 0) > 0,
         },
         {
           id: 'bc',

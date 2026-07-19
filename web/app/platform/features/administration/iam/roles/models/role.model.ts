@@ -7,13 +7,15 @@ export interface Role {
   isSystem: boolean;
   priority: number;
   memberCount?: number;
+  /** CHANTIER | ENTREPRISE | BOTH */
+  scopeType?: 'CHANTIER' | 'ENTREPRISE' | 'BOTH' | string;
   createdAt: string | null;
   updatedAt: string | null;
 }
 
 export type RoleListItem = Pick<
   Role,
-  'id' | 'roleCode' | 'name' | 'description' | 'isSystem' | 'priority' | 'memberCount' | 'createdAt'
+  'id' | 'roleCode' | 'name' | 'description' | 'isSystem' | 'priority' | 'memberCount' | 'scopeType' | 'createdAt'
 >;
 
 export interface RoleCreate {

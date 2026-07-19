@@ -4,10 +4,13 @@ metadata:
   name: sektor-btp-ingress
   annotations:
     kubernetes.io/ingress.class: nginx
-    # Import magique / BL scan can wait on Gemini up to ~120s.
+    # CPS / bordereau / BL uploads — default nginx limit is 1m.
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    # Import magique / BL scan and the multi-batch CPS descriptif pass can run for
+    # several minutes (one Gemini call per poste batch), so allow a long read.
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "180"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "180"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
 spec:
   ingressClassName: nginx
   rules:

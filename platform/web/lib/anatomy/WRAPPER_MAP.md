@@ -22,6 +22,7 @@
 | **DatePicker** | ❌ None (via `nf-filter-bar`) | PrimeNG (`p-datePicker`) | ⚠️ Indirect | Refactor later | Only usable inside filter-bar today |
 | **Number Input** | ❌ None (via `nf-filter-bar`) | PrimeNG (`p-inputNumber`) | ⚠️ Indirect | Refactor later | Only usable inside filter-bar today |
 | **Table / DataGrid** | `nf-data-table` | Material (`mat-table`, `mat-sort`) | ✅ Wrapped | Keep as-is | Full-featured with selection |
+| **TreeTable** | `nf-tree-table` | PrimeNG (`p-treetable`) | ✅ Wrapped | Keep as-is | Heterogeneous hierarchical rows with projected cells/details |
 | **Paginator** | `nf-pagination` | Material (`mat-paginator`) | ✅ Wrapped | Keep as-is | 1-indexed API, styled via tokens |
 | **Badge / Tag** | `nf-badge` | Custom (no engine) | ✅ Wrapped | Keep as-is | Pure CSS with `--nf-color-*` |
 | **Drawer / Panel** | `nf-drawer` | Custom (no engine) | ✅ Wrapped | Keep as-is | Slide-in panel with backdrop |

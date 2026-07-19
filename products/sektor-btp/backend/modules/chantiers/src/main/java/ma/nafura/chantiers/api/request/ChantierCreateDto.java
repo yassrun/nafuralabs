@@ -22,6 +22,7 @@ public class ChantierCreateDto {
     @JsonAlias("type")
     private String chantierType;
 
+    @NotBlank
     private String clientId;
 
     private String clientName;
@@ -71,18 +72,6 @@ public class ChantierCreateDto {
     private BigDecimal avancementPercent;
 
     private String status;
-
-    private String chefChantierUserId;
-
-    private String chefChantierName;
-
-    private String conducteurTravauxUserId;
-
-    private String conducteurTravauxName;
-
-    private String ingenieurUserId;
-
-    private String ingenieurName;
 
     private String societeId;
 

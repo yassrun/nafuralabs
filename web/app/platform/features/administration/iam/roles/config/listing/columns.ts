@@ -35,6 +35,21 @@ export const COLUMNS: ColumnConfig[] = [
     sortable: true,
   },
   {
+    key: 'scopeType',
+    label: 'administration.roles.columns.scope',
+    field: 'scopeType',
+    type: 'badge',
+    badgeVariant: (value: unknown) =>
+      value === 'CHANTIER' ? 'warning' : value === 'BOTH' ? 'info' : 'default',
+    transform: (value: unknown) => {
+      const v = String(value ?? 'ENTREPRISE');
+      if (v === 'CHANTIER') return 'Chantier';
+      if (v === 'BOTH') return 'Chantier + Entreprise';
+      return 'Entreprise';
+    },
+    sortable: true,
+  },
+  {
     key: 'memberCount',
     label: 'administration.roles.columns.members',
     field: 'memberCount',

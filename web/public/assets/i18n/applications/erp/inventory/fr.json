@@ -486,8 +486,9 @@
         },
         "prerequisites": {
           "title": "Avant de créer une réception, configurez :",
+          "blocked": "Configurez les prérequis indiqués avant de créer ou scanner une réception.",
           "fournisseur": "Au moins un fournisseur",
-          "depot": "Au moins un dépôt",
+          "destination": "Au moins un dépôt ou un chantier",
           "bc": "Au moins un bon de commande"
         },
         "status": {

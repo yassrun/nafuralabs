@@ -1,0 +1,154 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+/* Wizard inside a scrolling page-shell: avoid flex content collapsing to 0 height. */
+:host ::ng-deep .nf-wizard-shell {
+  height: auto;
+  min-height: 0;
+}
+
+:host ::ng-deep .nf-wizard-shell__content {
+  flex: 1 1 auto;
+  min-height: 18rem;
+  overflow: visible;
+}
+
+.hint {
+  color: var(--nf-color-text-secondary, #6b7280);
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.banner {
+  margin: 0 1.25rem 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--nf-color-warning-50, #fffbeb);
+  border: 1px solid var(--nf-color-warning-200, #fde68a);
+  border-radius: 8px;
+  font-size: 0.875rem;
+}
+
+.step-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+  padding: 0.25rem 0 1rem;
+}
+
+.step-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+nf-tree-table {
+  display: block;
+  min-width: 0;
+  width: 100%;
+}
+
+.libelle-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.link {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--nf-color-primary, #2563eb);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.75rem;
+}
+
+.link.danger {
+  color: var(--nf-color-danger, #dc2626);
+}
+
+.mode-btns {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.chip {
+  border: 1px solid var(--nf-color-border, #e5e7eb);
+  background: var(--nf-color-surface, #fff);
+  border-radius: 999px;
+  padding: 0.15rem 0.55rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.chip.active {
+  background: var(--nf-color-primary, #2563eb);
+  color: #fff;
+  border-color: transparent;
+}
+
+.poste-detail {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+}
+
+.descriptif {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--nf-color-text-secondary, #6b7280);
+  white-space: pre-wrap;
+}
+
+.composants-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.comp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+.comp-table th,
+.comp-table td {
+  border-bottom: 1px solid var(--nf-color-border, #e5e7eb);
+  padding: 0.4rem 0.5rem;
+  text-align: left;
+}
+
+.comp-table .num,
+.num {
+  text-align: right;
+}
+
+.num-input {
+  width: 4.5rem;
+  padding: 0.25rem 0.4rem;
+  border: 1px solid var(--nf-color-border, #e5e7eb);
+  border-radius: 6px;
+  font: inherit;
+  text-align: right;
+}
+
+.totals {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1.5rem;
+  font-size: 0.9375rem;
+  padding: 0.5rem 0;
+}

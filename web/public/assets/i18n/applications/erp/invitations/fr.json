@@ -1,0 +1,22 @@
+{
+  "invite": {
+    "accept": {
+      "title": "Accepter l'invitation",
+      "pending": "Vérification de votre invitation…",
+      "success": "Invitation acceptée avec succès.",
+      "failed": "Ce lien d'invitation est invalide ou a expiré.",
+      "missingToken": "Lien d'invitation incomplet.",
+      "alreadyAccepted": "Vous êtes déjà membre de cette organisation.",
+      "wrongAccount": "Vous êtes connecté avec un autre compte. Déconnectez-vous puis réessayez.",
+      "loginToContinue": "Se connecter",
+      "createAccount": "Créer mon compte",
+      "activate": "Accepter l'invitation",
+      "existingAccount": "Un compte existe déjà pour cette adresse. Acceptez l'invitation puis connectez-vous.",
+      "tenantLabel": "Organisation",
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "password": "Mot de passe",
+      "passwordHint": "8 caractères minimum, une majuscule et un chiffre"
+    }
+  }
+}

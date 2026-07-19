@@ -27,9 +27,10 @@ import ma.nafura.platform.tenancy.domain.model.TenantMembership;
 import ma.nafura.platform.tenancy.repository.TenantMembershipRepository;
 import ma.nafura.platform.tenancy.repository.TenantDomainRepository;
 import ma.nafura.platform.tenancy.repository.TenantRepository;
-import ma.nafura.platform.framework.context.UserContext;
+import ma.nafura.platform.administration.iam.domain.model.TenantInvitation;
+import ma.nafura.platform.administration.iam.repository.TenantInvitationRepository;
+import ma.nafura.platform.administration.iam.service.TenantInvitationDeliveryService;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -67,14 +68,11 @@ public class IamService {
     private final TenantCustomRolePermissionRepository tenantCustomRolePermissionRepository;
     private final AppUserProvisioningService appUserProvisioningService;
     private final PermissionService permissionService;
-    private final InvitationTokenService invitationTokenService;
-    private final ApplicationContext applicationContext;
+    private final TenantInvitationRepository tenantInvitationRepository;
+    private final TenantInvitationDeliveryService tenantInvitationDeliveryService;
 
     @Value("${nafura.application.id:app}")
     private String defaultApplicationId;
-
-    @Value("${app.frontend-base-url:http://localhost:4200}")
-    private String frontendBaseUrl;
 
     // ─────────────────────────────────────────────────────────────────────────────
     // Tenant Info
@@ -250,10 +248,16 @@ public class IamService {
         membership = tenantMembershipRepository.save(membership);
         replaceTenantRoles(tenantId, user.getId(), request.roles());
 
-        sendInvitationEmailIfAvailable(tenantId, request.email(), request.roles());
+        String emailDeliveryStatus = tenantInvitationDeliveryService.createAndSendInvitation(
+            tenantId,
+            user.getId(),
+            request.email(),
+            request.roles(),
+            request.message()
+        );
 
-        log.info("Invited new member {} to tenant {}", request.email(), tenantId);
-        return toMemberResponse(user, membership, getTenantRoleCodes(tenantId, user.getId()));
+        log.info("Invited new member {} to tenant {} emailStatus={}", request.email(), tenantId, emailDeliveryStatus);
+        return toMemberResponse(user, membership, getTenantRoleCodes(tenantId, user.getId()), emailDeliveryStatus);
     }
 
     /**
@@ -305,7 +309,8 @@ public class IamService {
     /**
      * Resend invitation to a pending member.
      */
-    public void resendInvitation(UUID tenantId, UUID userId) {
+    @Transactional
+    public String resendInvitation(UUID tenantId, UUID userId) {
         TenantMembership membership = tenantMembershipRepository.findByTenantIdAndUserId(tenantId, userId)
             .filter(tm -> MEMBER_STATUS_INVITED.equalsIgnoreCase(tm.getStatus()))
             .orElseThrow(() -> new IllegalArgumentException("Pending invitation not found"));
@@ -313,36 +318,17 @@ public class IamService {
             .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         List<String> roles = getTenantRoleCodes(tenantId, user.getId());
-        sendInvitationEmailIfAvailable(tenantId, user.getEmail(), roles);
-        log.info("Resent invitation to {} in tenant {}", user.getEmail(), tenantId);
-    }
-
-    private void sendInvitationEmailIfAvailable(UUID tenantId, String email, List<String> roles) {
-        try {
-            Class<?> emailServiceClass = Class.forName(
-                "ma.nafura.platform.collaboration.notification.service.EmailService");
-            Object emailService = applicationContext.getBean(emailServiceClass);
-            Tenant tenant = tenantRepository.findById(tenantId).orElse(null);
-            String tenantName = tenant != null ? tenant.getName() : "Organization";
-            String inviteToken = invitationTokenService.generateInviteToken(tenantId, email, roles);
-            String inviteLink = frontendBaseUrl + "/invite/accept?token=" + inviteToken;
-            String inviterName = resolveInviterName();
-            emailServiceClass.getMethod(
-                "sendInvitationEmail", String.class, String.class, String.class, String.class, String.class)
-                .invoke(emailService, email, tenantName, inviteLink, inviterName, null);
-        } catch (Exception e) {
-            log.warn("Failed to send invitation email to {}: {}", email, e.getMessage());
+        String emailDeliveryStatus = tenantInvitationDeliveryService.resendInvitation(
+            tenantId,
+            user.getId(),
+            user.getEmail(),
+            roles
+        );
+        if (TenantInvitation.DELIVERY_FAILED.equals(emailDeliveryStatus)) {
+            throw new IllegalStateException("EMAIL_DELIVERY_FAILED");
         }
-    }
-
-    private String resolveInviterName() {
-        try {
-            UUID userId = UserContext.getUserIdOrNull();
-            if (userId != null) {
-                return appUserRepository.findById(userId).map(AppUser::getName).orElse(UserContext.getUserEmail());
-            }
-        } catch (Exception ignored) {}
-        return UserContext.getUserEmail() != null ? UserContext.getUserEmail() : "A team member";
+        log.info("Resent invitation to {} in tenant {}", user.getEmail(), tenantId);
+        return emailDeliveryStatus;
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
@@ -373,7 +359,8 @@ public class IamService {
                     permissions,
                     false,
                     10,
-                    count
+                    count,
+                    RoleResponse.resolveScopeType(custom.getRoleCode())
                 );
             })
             .collect(Collectors.toList());
@@ -402,7 +389,8 @@ public class IamService {
                 permissions,
                 false,
                 10,
-                memberCount
+                memberCount,
+                RoleResponse.resolveScopeType(normalizedRoleCode)
             );
         }
         return RoleResponse.fromRole(normalizedRoleCode, permissions, memberCount);
@@ -557,7 +545,7 @@ public class IamService {
         permissionService.invalidateRoleCache(normalizedCode);
         List<String> permissions = getPermissionsForTenantRole(tenantId, normalizedCode);
         return new RoleResponse(normalizedCode, role.getName(), role.getDescription() != null ? role.getDescription() : "Custom role",
-            permissions, false, 10, 0L);
+            permissions, false, 10, 0L, RoleResponse.resolveScopeType(normalizedCode));
     }
 
     /**
@@ -595,7 +583,7 @@ public class IamService {
         long memberCount = tenantUserRoleRepository.countByTenantIdAndRoleCode(tenantId, normalizedCode);
         List<String> permissions = getPermissionsForTenantRole(tenantId, normalizedCode);
         return new RoleResponse(normalizedCode, role.getName(), role.getDescription() != null ? role.getDescription() : "Custom role",
-            permissions, false, 10, memberCount);
+            permissions, false, 10, memberCount, RoleResponse.resolveScopeType(normalizedCode));
     }
 
     /**
@@ -712,6 +700,14 @@ public class IamService {
             AppUser user,
             TenantMembership membership,
             List<String> roles) {
+        return toMemberResponse(user, membership, roles, resolveInvitationEmailStatus(membership));
+    }
+
+    private TenantMemberResponse toMemberResponse(
+            AppUser user,
+            TenantMembership membership,
+            List<String> roles,
+            String invitationEmailStatus) {
         return new TenantMemberResponse(
             user.getId().toString(),
             user.getEmail(),
@@ -720,8 +716,23 @@ public class IamService {
             roles,
             membership != null && membership.getStatus() != null ? membership.getStatus().toLowerCase() : "active",
             membership != null ? formatDateTime(membership.getCreatedAt()) : formatDateTime(user.getCreatedAt()),
-            formatDateTime(user.getUpdatedAt())
+            formatDateTime(user.getUpdatedAt()),
+            invitationEmailStatus != null ? invitationEmailStatus.toLowerCase(Locale.ROOT) : null
         );
+    }
+
+    private String resolveInvitationEmailStatus(TenantMembership membership) {
+        if (membership == null || !MEMBER_STATUS_INVITED.equalsIgnoreCase(membership.getStatus())) {
+            return null;
+        }
+        return tenantInvitationRepository
+            .findFirstByTenantIdAndUserIdAndStatusOrderByCreatedAtDesc(
+                membership.getTenantId(),
+                membership.getUserId(),
+                TenantInvitation.STATUS_PENDING
+            )
+            .map(TenantInvitation::getEmailDeliveryStatus)
+            .orElse(null);
     }
 
     private List<String> getTenantRoleCodes(UUID tenantId, UUID userId) {

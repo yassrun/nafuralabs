@@ -442,6 +442,27 @@ export class AuthFacade {
   }
 
   /**
+   * After accepting a tenant invitation, refresh tenants and select the invited tenant.
+   */
+  async acceptTenantInvitation(result: {
+    tenantId: string;
+    tenantName: string;
+    tenantKey?: string;
+  }): Promise<void> {
+    const user = this.state.user();
+    const tokens = this.state.tokens();
+    if (!user || !tokens) {
+      return;
+    }
+
+    const tenants = await this.api.getUserTenants(user.id, tokens.accessToken);
+    this.state.setTenants(tenants);
+    await this.selectTenant(result.tenantId);
+    await this.tenantContextService.initialize(result.tenantId);
+    this.state.persistSession(true);
+  }
+
+  /**
    * After onboarding tenant creation, attach tenant to dev session.
    */
   async attachOnboardingTenant(

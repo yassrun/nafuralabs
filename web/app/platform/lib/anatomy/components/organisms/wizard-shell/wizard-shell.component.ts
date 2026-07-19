@@ -47,6 +47,8 @@ import type { WizardStepConfig } from './wizard-step.interface';
       </nav>
       <div class="nf-wizard-shell__content" role="region" [attr.aria-label]="currentStepLabel()">
         <ng-content select="[stepContent]"></ng-content>
+        <!-- Fallback: project unmarked children (attribute selectors can miss in some builds). -->
+        <ng-content></ng-content>
       </div>
       <div class="nf-wizard-shell__actions">
         <nf-button-list

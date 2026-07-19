@@ -71,6 +71,7 @@ public class EmployeService {
                 .ville(trimOrNull(request.getVille()))
                 .telephone(trimOrNull(request.getTelephone()))
                 .email(trimOrNull(request.getEmail()))
+                .userId(request.getUserId())
                 .poste(request.getPoste().trim())
                 .departement(trimOrNull(request.getDepartement()))
                 .categorie(request.getCategorie().trim())
@@ -123,6 +124,9 @@ public class EmployeService {
         }
         if (request.getEmail() != null) {
             entity.setEmail(trimOrNull(request.getEmail()));
+        }
+        if (request.getUserId() != null) {
+            entity.setUserId(request.getUserId());
         }
         if (request.getPoste() != null) {
             entity.setPoste(request.getPoste().trim());

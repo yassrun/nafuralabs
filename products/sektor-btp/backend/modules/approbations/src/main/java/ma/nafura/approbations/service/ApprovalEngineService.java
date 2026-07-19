@@ -25,7 +25,10 @@ import ma.nafura.approbations.domain.model.ApprovalWorkflow;
 import ma.nafura.approbations.repository.ApprovalEventRepository;
 import ma.nafura.approbations.repository.ErpApprovalRequestRepository;
 import ma.nafura.approbations.repository.ApprovalWorkflowRepository;
+import ma.nafura.chantiers.domain.ChantierRoleCodes;
+import ma.nafura.chantiers.service.ApproverResolutionService;
 import ma.nafura.platform.framework.context.TenantContext;
+import ma.nafura.platform.framework.context.UserContext;
 import ma.nafura.platform.framework.event.ErpNotificationPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,13 +40,6 @@ public class ApprovalEngineService {
     private static final List<String> OPEN_STATUSES =
             List.of(ApprovalRequest.STATUS_EN_COURS, ApprovalRequest.STATUS_EN_ATTENTE);
 
-    private static final Map<String, String> ROLE_LABELS = Map.of(
-            "CONDUCTEUR_TRAVAUX", "Karim El Idrissi",
-            "DAF", "Amal Bennani",
-            "DG", "Omar Tazi",
-            "COMPTABLE", "Service comptabilité",
-            "MANAGER", "Manager direct");
-
     private final ApprovalWorkflowRepository workflowRepository;
     private final ErpApprovalRequestRepository requestRepository;
     private final ApprovalEventRepository eventRepository;
@@ -52,6 +48,7 @@ public class ApprovalEngineService {
     private final ApprovalRequestSeedService requestSeedService;
     private final MatricePouvoirService matricePouvoirService;
     private final DelegationApprobationService delegationApprobationService;
+    private final ApproverResolutionService approverResolutionService;
     private final ObjectMapper objectMapper;
     private final ErpNotificationPublisher erpNotificationPublisher;
 
@@ -64,6 +61,7 @@ public class ApprovalEngineService {
             ApprovalRequestSeedService requestSeedService,
             MatricePouvoirService matricePouvoirService,
             DelegationApprobationService delegationApprobationService,
+            ApproverResolutionService approverResolutionService,
             ObjectMapper objectMapper,
             ErpNotificationPublisher erpNotificationPublisher) {
         this.workflowRepository = workflowRepository;
@@ -74,6 +72,7 @@ public class ApprovalEngineService {
         this.requestSeedService = requestSeedService;
         this.matricePouvoirService = matricePouvoirService;
         this.delegationApprobationService = delegationApprobationService;
+        this.approverResolutionService = approverResolutionService;
         this.objectMapper = objectMapper;
         this.erpNotificationPublisher = erpNotificationPublisher;
     }
@@ -252,6 +251,7 @@ public class ApprovalEngineService {
                 .orElseThrow(() -> new IllegalStateException("Workflow not found"));
         int stepCount = parseEtapes(workflow).size();
         String userId = resolveUserId(action);
+        assertCurrentUserMayDecide(request, workflow, userId);
         String userNom = resolveUserNom(action, userId);
 
         eventService.appendEvent(
@@ -278,6 +278,38 @@ public class ApprovalEngineService {
         return toDto(request);
     }
 
+    private void assertCurrentUserMayDecide(ApprovalRequest request, ApprovalWorkflow workflow, String actionUserId) {
+        String roleRef = effectiveRoleAtStep(workflow, request, request.getEtapeCouranteIndex());
+        LocalDate onDate = LocalDate.now();
+        Optional<ApproverResolutionService.ResolvedApprover> resolved =
+                approverResolutionService.resolve(roleRef, request.getChantierId(), onDate);
+
+        UUID expectedUserId = resolved.map(ApproverResolutionService.ResolvedApprover::getUserId).orElse(null);
+        if (expectedUserId != null) {
+            String effective = delegationApprobationService.resolveApprobateur(
+                    expectedUserId.toString(), onDate);
+            UUID caller = parseUuid(actionUserId);
+            if (caller == null) {
+                caller = UserContext.getUserIdOrNull();
+            }
+            if (caller == null || !effective.equalsIgnoreCase(caller.toString())) {
+                throw new IllegalStateException("Current user is not the resolved approver for this step");
+            }
+        }
+        // When no concrete user (entreprise role), permission check remains on the controller.
+    }
+
+    private UUID parseUuid(String value) {
+        if (!StringUtils.hasText(value) || "me".equalsIgnoreCase(value)) {
+            return UserContext.getUserIdOrNull();
+        }
+        try {
+            return UUID.fromString(value.trim());
+        } catch (IllegalArgumentException ex) {
+            return null;
+        }
+    }
+
     private ApprovalRequestDto appendAction(String requestId, ApprovalActionDto action, String eventAction) {
         ApprovalRequest request = resolveRequest(requestId);
         if (!OPEN_STATUSES.contains(request.getStatus())) {
@@ -299,17 +331,35 @@ public class ApprovalEngineService {
             ApprovalWorkflow workflow, ApprovalRequest request, List<ApprovalEvent> events) {
         List<Map<String, Object>> rawSteps = parseEtapes(workflow);
         List<ApprovalEtapeDto> result = new ArrayList<>();
-        LocalDate ref = request.getDateSoumission();
+        LocalDate ref = request.getDateSoumission() != null ? request.getDateSoumission() : LocalDate.now();
         int approveIndex = 0;
 
         for (int i = 0; i < rawSteps.size(); i++) {
             Map<String, Object> step = rawSteps.get(i);
-            String roleRef = firstRoleRef(step);
-            String roleLabel = ROLE_LABELS.getOrDefault(roleRef, roleRef);
-            if (stepHasPersonApprover(step)) {
-                roleRef = delegationApprobationService.resolveApprobateur(roleRef, request.getDateSoumission());
+            String roleRef = effectiveRoleAtStep(workflow, request, i);
+            String roleLabel = ChantierRoleCodes.label(roleRef);
+            String approbateurUserId = null;
+
+            Optional<ApproverResolutionService.ResolvedApprover> resolved =
+                    approverResolutionService.resolve(roleRef, request.getChantierId(), ref);
+            if (resolved.isPresent()) {
+                ApproverResolutionService.ResolvedApprover ra = resolved.get();
+                roleLabel = ra.getDisplayName() != null ? ra.getDisplayName() : roleLabel;
+                roleRef = ra.getRoleCode() != null ? ra.getRoleCode() : roleRef;
+                if (ra.getUserId() != null) {
+                    String effectiveUserId =
+                            delegationApprobationService.resolveApprobateur(ra.getUserId().toString(), ref);
+                    approbateurUserId = effectiveUserId;
+                    if (!effectiveUserId.equalsIgnoreCase(ra.getUserId().toString())) {
+                        roleLabel = roleLabel + " (délégué)";
+                    }
+                }
+            } else if (stepHasPersonApprover(step)) {
+                roleRef = delegationApprobationService.resolveApprobateur(firstRoleRef(step), ref);
                 roleLabel = roleRef;
+                approbateurUserId = roleRef;
             }
+
             int slaDays = workflow.getSlaJours() + i * 2;
             LocalDate dateLimite = ref.plusDays(slaDays);
 
@@ -317,9 +367,11 @@ public class ApprovalEngineService {
                     .ordre(i)
                     .approbateurRoleId(roleRef)
                     .approbateurNom(roleLabel)
+                    .approbateurUserId(approbateurUserId)
                     .dateLimite(dateLimite.toString());
 
-            Optional<ApprovalEvent> decisionEvent = findDecisionEvent(events, approveIndex, i < request.getEtapeCouranteIndex());
+            Optional<ApprovalEvent> decisionEvent =
+                    findDecisionEvent(events, approveIndex, i < request.getEtapeCouranteIndex());
             if (decisionEvent.isPresent()) {
                 ApprovalEvent ev = decisionEvent.get();
                 builder.decision(ev.getAction().equals(ApprovalEvent.ACTION_APPROUVE) ? "APPROUVE" : "REJETE");
@@ -331,6 +383,27 @@ public class ApprovalEngineService {
             result.add(builder.build());
         }
         return result;
+    }
+
+    /**
+     * Step 0 for BC may be overridden by MatricePouvoir when a matching threshold row exists.
+     */
+    private String effectiveRoleAtStep(ApprovalWorkflow workflow, ApprovalRequest request, int stepIndex) {
+        List<Map<String, Object>> steps = parseEtapes(workflow);
+        String fromWorkflow = stepIndex >= 0 && stepIndex < steps.size()
+                ? ChantierRoleCodes.normalize(firstRoleRef(steps.get(stepIndex)))
+                : null;
+        if (stepIndex == 0
+                && request.getMontantConcerne() != null
+                && StringUtils.hasText(request.getEntityType())) {
+            Optional<String> fromMatrice = matricePouvoirService
+                    .resolve(request.getEntityType(), request.getMontantConcerne())
+                    .map(row -> ChantierRoleCodes.normalize(row.getApprobateurRole()));
+            if (fromMatrice.isPresent() && steps.size() == 1) {
+                return fromMatrice.get();
+            }
+        }
+        return fromWorkflow != null ? fromWorkflow : "UNKNOWN";
     }
 
     private Optional<ApprovalEvent> findDecisionEvent(List<ApprovalEvent> events, int approveIndex, boolean completed) {
@@ -567,6 +640,6 @@ public class ApprovalEngineService {
         if (stepIndex < 0 || stepIndex >= steps.size()) {
             return null;
         }
-        return firstRoleRef(steps.get(stepIndex));
+        return ChantierRoleCodes.normalize(firstRoleRef(steps.get(stepIndex)));
     }
 }

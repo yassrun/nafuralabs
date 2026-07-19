@@ -35,7 +35,7 @@ public class MatricePouvoirSeedService {
                 .entityType(MatricePouvoirService.ENTITY_TYPE_BC)
                 .seuilMin(null)
                 .seuilMax(SEUIL_50K)
-                .approbateurRole(MatricePouvoirService.ROLE_DIRECTEUR_TRAVAUX)
+                .approbateurRole(MatricePouvoirService.ROLE_CONDUCTEUR)
                 .label("BC < 50K MAD")
                 .ordre(1)
                 .build());
@@ -44,7 +44,7 @@ public class MatricePouvoirSeedService {
                 .entityType(MatricePouvoirService.ENTITY_TYPE_BC)
                 .seuilMin(SEUIL_50K)
                 .seuilMax(SEUIL_500K)
-                .approbateurRole(MatricePouvoirService.ROLE_DG)
+                .approbateurRole(MatricePouvoirService.ROLE_DIRECTEUR_TRAVAUX)
                 .label("50K – 500K MAD")
                 .ordre(2)
                 .build());
@@ -53,7 +53,7 @@ public class MatricePouvoirSeedService {
                 .entityType(MatricePouvoirService.ENTITY_TYPE_BC)
                 .seuilMin(SEUIL_500K)
                 .seuilMax(null)
-                .approbateurRole(MatricePouvoirService.ROLE_COMITE)
+                .approbateurRole(MatricePouvoirService.ROLE_DG)
                 .label("BC >= 500K MAD")
                 .ordre(3)
                 .build());

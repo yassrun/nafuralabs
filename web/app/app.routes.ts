@@ -226,6 +226,22 @@ const ACTIVE_APP_ZONE_CONFIG = resolveApplicationZoneConfig(ACTIVE_APPLICATION_I
 export const APP_ROUTES = [
   ...ONBOARDING_V2_ROUTES,
   {
+    path: 'invite/accept',
+    loadComponent: () =>
+      import('@applications/erp/onboarding/onboarding-layout.component').then(
+        (m) => m.OnboardingLayoutComponent
+      ),
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('@applications/erp/invitations/pages/invite-accept.page').then(
+            (m) => m.InviteAcceptPage
+          ),
+      },
+    ],
+  },
+  {
     path: 'login',
     canActivate: [guestGuard],
     loadComponent: () => import('@platform/core/pages/login/login.page').then((m) => m.LoginPage),

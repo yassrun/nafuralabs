@@ -7,6 +7,8 @@ export interface Role {
   isSystem: boolean;
   priority: number;
   memberCount?: number;
+  /** CHANTIER | ENTREPRISE | BOTH */
+  scopeType?: 'CHANTIER' | 'ENTREPRISE' | 'BOTH' | string;
   createdAt: string | null;
   updatedAt: string | null;
 }

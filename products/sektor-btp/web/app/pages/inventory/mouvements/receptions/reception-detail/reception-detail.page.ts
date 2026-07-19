@@ -55,7 +55,13 @@ type TxLine = { totalPrice?: number; quantity: number; unitPrice?: number };
   styles: [ConfigDrivenDetailPageStyles],
 })
 export class ReceptionDetailPage extends ConfigDrivenDetailPage<InventoryTx> implements OnDestroy {
-  @ViewChild('blFileInput') private readonly blFileInput?: ElementRef<HTMLInputElement>;
+  private blFileInput?: ElementRef<HTMLInputElement>;
+
+  @ViewChild('blFileInput')
+  private set blFileInputElement(value: ElementRef<HTMLInputElement> | undefined) {
+    this.blFileInput = value;
+    queueMicrotask(() => this.tryAutoScanBl());
+  }
 
   private readonly crud = inject(ReceptionFacade);
   private readonly erpDocScan = inject(ErpDocScanService);
@@ -144,15 +150,18 @@ export class ReceptionDetailPage extends ConfigDrivenDetailPage<InventoryTx> imp
     if (!this.shouldAutoScanBl()) return;
     if (this.mode() !== 'create') return;
 
-    queueMicrotask(() => {
-      if (!this.shouldAutoScanBl()) return;
-      const input = this.blFileInput?.nativeElement;
-      if (!input) return;
-
-      this.shouldAutoScanBl.set(false);
-      this.onScanBlClick(input);
-    });
+    queueMicrotask(() => this.tryAutoScanBl());
   });
+
+  private tryAutoScanBl(): void {
+    const input = this.blFileInput?.nativeElement;
+    if (!this.shouldAutoScanBl() || this.mode() !== 'create' || !input) {
+      return;
+    }
+
+    this.shouldAutoScanBl.set(false);
+    this.onScanBlClick(input);
+  }
 
   onModeChange(mode: DeliveryMode, form: FormGroup): void {
     this.deliveryMode.set(mode);
@@ -279,22 +288,28 @@ export class ReceptionDetailPage extends ConfigDrivenDetailPage<InventoryTx> imp
         schemaDescription: schema.description,
         lookups: () => this.crud.lookups() as Record<string, LookupEntry[]>,
         mapper: (data, ctx) => {
-          const fournisseurName = ctx.findStringByAliases(data, [
-            'supplierName',
-            'supplier',
-            'fournisseur',
-            'vendor',
-            'vendorName',
-          ]);
+          const fournisseurName =
+            ctx.findStringByAliases(data, [
+              'supplierName',
+              'supplier',
+              'fournisseur',
+              'vendor',
+              'vendorName',
+            ]) ?? ctx.findStringByAliases(data['sender'], ['name']);
           const fournisseurId = ctx.resolveLookupId('fournisseursLookup', fournisseurName);
 
-          const chantierName = ctx.findStringByAliases(data, [
-            'chantier',
-            'site',
-            'project',
-            'destinationSite',
-          ]);
+          const chantierName =
+            ctx.findStringByAliases(data, [
+              'chantier',
+              'site',
+              'project',
+              'destinationSite',
+            ]) ?? ctx.findStringByAliases(data['receiver'], ['name']);
           const chantierLocationId = ctx.resolveLookupId('chantiersLookup', chantierName);
+          const depotName =
+            ctx.findStringByAliases(data, ['depot', 'warehouse', 'destinationDepot']) ??
+            ctx.findStringByAliases(data['receiver'], ['name']);
+          const destLocationId = ctx.resolveLookupId('locationsDepot', depotName);
 
           const phase = ctx.findStringByAliases(data, ['phaseRef', 'phase']);
           const phaseRef = this.resolvePhase(phase);
@@ -330,6 +345,11 @@ export class ReceptionDetailPage extends ConfigDrivenDetailPage<InventoryTx> imp
             mappedPatch.chantierLocationId = chantierLocationId;
             mappedPatch.destLocationId = null as unknown as string;
             this.deliveryMode.set('CHANTIER_DIRECT');
+          } else if (destLocationId) {
+            mappedPatch.destLocationId = destLocationId;
+            mappedPatch.chantierLocationId = null as unknown as string;
+            mappedPatch.phaseRef = '';
+            this.deliveryMode.set('DEPOT');
           }
 
           return mappedPatch;
@@ -392,8 +412,20 @@ export class ReceptionDetailPage extends ConfigDrivenDetailPage<InventoryTx> imp
     articleLookup: Array<{ key: string; value: string; data?: Record<string, unknown> }>,
     lineNumber: number,
   ): InventoryTx['lines'][number] | null {
-    const articleCode = findStringByAliases(line, ['articleCode', 'code', 'sku', 'itemCode']);
-    const articleName = findStringByAliases(line, ['articleName', 'name', 'designation', 'itemName']);
+    const articleCode = findStringByAliases(line, [
+      'articleCode',
+      'code',
+      'sku',
+      'itemCode',
+      'itemReference',
+    ]);
+    const articleName = findStringByAliases(line, [
+      'articleName',
+      'name',
+      'designation',
+      'itemName',
+      'itemDesignation',
+    ]);
     const article = this.resolveArticle(articleLookup, articleCode, articleName);
     if (!article) return null;
 
@@ -442,7 +474,7 @@ export class ReceptionDetailPage extends ConfigDrivenDetailPage<InventoryTx> imp
     line: Record<string, unknown>,
     article: { key: string; value: string; data?: Record<string, unknown> },
   ): string | undefined {
-    const uomIdRaw = findByAliases(line, ['uomId', 'uom', 'unitId']);
+    const uomIdRaw = findByAliases(line, ['uomId', 'unitId']);
     if (typeof uomIdRaw === 'string' && uomIdRaw.trim().length > 0) {
       return uomIdRaw.trim();
     }
@@ -458,7 +490,7 @@ export class ReceptionDetailPage extends ConfigDrivenDetailPage<InventoryTx> imp
     line: Record<string, unknown>,
     article: { key: string; value: string; data?: Record<string, unknown> },
   ): string | undefined {
-    const uomCodeRaw = findByAliases(line, ['uomCode', 'unit', 'uomLabel']);
+    const uomCodeRaw = findByAliases(line, ['uomCode', 'uom', 'unit', 'uomLabel']);
     if (typeof uomCodeRaw === 'string' && uomCodeRaw.trim().length > 0) {
       return uomCodeRaw.trim();
     }

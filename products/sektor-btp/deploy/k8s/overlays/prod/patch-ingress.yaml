@@ -5,6 +5,7 @@ metadata:
   name: sektor-btp-ingress
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
 spec:
   tls: []
   rules:

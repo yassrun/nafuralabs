@@ -192,14 +192,20 @@ export class MemberListingPage extends ConfigDrivenListingPage<MemberListItem> {
       }
 
       try {
-        await this.facade.inviteMember({
+        const invited = await this.facade.inviteMember({
           email: result.email,
           roleIds: [result.roleId],
           message: result.message,
         });
-        this.showSuccess(
-          this.i18n.instant('administration.members.invite.success', { email: result.email })
-        );
+        if (invited.invitationEmailStatus === 'failed') {
+          this.showError(
+            this.i18n.instant('administration.members.invite.emailFailed', { email: invited.email })
+          );
+        } else {
+          this.showSuccess(
+            this.i18n.instant('administration.members.invite.success', { email: invited.email })
+          );
+        }
         await this.refresh();
         return;
       } catch (error) {

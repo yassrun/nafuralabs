@@ -29,6 +29,9 @@ public record TenantMemberResponse(
     String joinedAt,
     
     /** Last activity timestamp */
-    String lastActivityAt
+    String lastActivityAt,
+
+    /** Invitation email delivery status for invited members (sent, failed, pending) */
+    String invitationEmailStatus
 ) {}
 

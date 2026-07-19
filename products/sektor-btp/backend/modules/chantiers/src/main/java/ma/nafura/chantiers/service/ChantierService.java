@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import ma.nafura.chantiers.api.dto.ChantierLookupDto;
@@ -28,14 +29,17 @@ public class ChantierService {
     private final ChantierRepository repository;
     private final ChantierSeedService seedService;
     private final ChantierProgressSyncService progressSyncService;
+    private final ChantierScopeService scopeService;
 
     public ChantierService(
             ChantierRepository repository,
             ChantierSeedService seedService,
-            ChantierProgressSyncService progressSyncService) {
+            ChantierProgressSyncService progressSyncService,
+            ChantierScopeService scopeService) {
         this.repository = repository;
         this.seedService = seedService;
         this.progressSyncService = progressSyncService;
+        this.scopeService = scopeService;
     }
 
     @Transactional(readOnly = true)
@@ -43,6 +47,11 @@ public class ChantierService {
         seedService.seedIfEmpty();
         UUID tenantId = tenantId();
         List<Chantier> rows = loadRows(tenantId, status, clientId, societeId);
+        Optional<Set<String>> allowed = scopeService.allowedChantierIdsOrUnrestricted();
+        if (allowed.isPresent()) {
+            Set<String> ids = allowed.get();
+            rows = rows.stream().filter(c -> ids.contains(c.getId())).toList();
+        }
         if (StringUtils.hasText(search)) {
             String term = search.trim().toLowerCase(Locale.ROOT);
             rows = rows.stream().filter(c -> matchesSearch(c, term)).toList();
@@ -66,11 +75,16 @@ public class ChantierService {
     public Chantier getById(String id) {
         seedService.seedIfEmpty();
         progressSyncService.syncFromAvancements(id);
-        return resolve(id).orElseThrow(() -> new IllegalArgumentException("Chantier not found"));
+        Chantier chantier = resolve(id).orElseThrow(() -> new IllegalArgumentException("Chantier not found"));
+        scopeService.assertCanAccess(chantier.getId());
+        return chantier;
     }
 
     @Transactional
     public Chantier create(ChantierCreateDto request) {
+        if (!StringUtils.hasText(request.getClientId())) {
+            throw new IllegalArgumentException("Client is required");
+        }
         UUID tenantId = tenantId();
         // Global PK: never reuse tenant-local sequences (ch-001) or client-provided ids —
         // they collide across tenants and Spring Data treats assigned ids as merge/UPDATE.
@@ -84,7 +98,7 @@ public class ChantierService {
                 .label(request.getLabel().trim())
                 .description(trimOrNull(request.getDescription()))
                 .chantierType(resolveType(request.getChantierType()))
-                .clientId(trimOrNull(request.getClientId()))
+                .clientId(request.getClientId().trim())
                 .clientName(trimOrNull(request.getClientName()))
                 .marcheNumero(trimOrNull(request.getMarcheNumero()))
                 .typeCcagT(trimOrNull(request.getTypeCcagT()))
@@ -106,12 +120,6 @@ public class ChantierService {
                 .tauxAvance(request.getTauxAvance())
                 .avancementPercent(defaultRate(request.getAvancementPercent(), BigDecimal.ZERO))
                 .status(resolveBackendStatus(request.getStatus(), Chantier.STATUS_BROUILLON))
-                .chefChantierUserId(trimOrNull(request.getChefChantierUserId()))
-                .chefChantierName(trimOrNull(request.getChefChantierName()))
-                .conducteurTravauxUserId(trimOrNull(request.getConducteurTravauxUserId()))
-                .conducteurTravauxName(trimOrNull(request.getConducteurTravauxName()))
-                .ingenieurUserId(trimOrNull(request.getIngenieurUserId()))
-                .ingenieurName(trimOrNull(request.getIngenieurName()))
                 .societeId(trimOrNull(request.getSocieteId()))
                 .active(request.getActive() == null || request.getActive())
                 .createdAt(now)
@@ -136,7 +144,10 @@ public class ChantierService {
             entity.setChantierType(resolveType(request.getChantierType()));
         }
         if (request.getClientId() != null) {
-            entity.setClientId(trimOrNull(request.getClientId()));
+            if (!StringUtils.hasText(request.getClientId())) {
+                throw new IllegalArgumentException("Client is required");
+            }
+            entity.setClientId(request.getClientId().trim());
         }
         if (request.getClientName() != null) {
             entity.setClientName(trimOrNull(request.getClientName()));
@@ -200,24 +211,6 @@ public class ChantierService {
         }
         if (request.getStatus() != null) {
             entity.setStatus(resolveBackendStatus(request.getStatus(), entity.getStatus()));
-        }
-        if (request.getChefChantierUserId() != null) {
-            entity.setChefChantierUserId(trimOrNull(request.getChefChantierUserId()));
-        }
-        if (request.getChefChantierName() != null) {
-            entity.setChefChantierName(trimOrNull(request.getChefChantierName()));
-        }
-        if (request.getConducteurTravauxUserId() != null) {
-            entity.setConducteurTravauxUserId(trimOrNull(request.getConducteurTravauxUserId()));
-        }
-        if (request.getConducteurTravauxName() != null) {
-            entity.setConducteurTravauxName(trimOrNull(request.getConducteurTravauxName()));
-        }
-        if (request.getIngenieurUserId() != null) {
-            entity.setIngenieurUserId(trimOrNull(request.getIngenieurUserId()));
-        }
-        if (request.getIngenieurName() != null) {
-            entity.setIngenieurName(trimOrNull(request.getIngenieurName()));
         }
         if (request.getSocieteId() != null) {
             entity.setSocieteId(trimOrNull(request.getSocieteId()));

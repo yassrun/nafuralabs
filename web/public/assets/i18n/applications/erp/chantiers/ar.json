@@ -124,12 +124,24 @@
         },
         "tabs": {
           "overview": "نظرة عامة",
+          "equipe": "الفريق",
           "lots": "الدفعات",
           "phases": "المراحل",
           "budget": "الميزانية",
           "situations": "الكشوف",
           "documents": "الوثائق",
           "photos": "الصور"
+        },
+        "equipe": {
+          "add": "إضافة",
+          "employe": "الموظف",
+          "role": "دور الموقع",
+          "dateDebut": "البداية",
+          "dateFin": "النهاية",
+          "periode": "الفترة",
+          "emptyTitle": "لا توجد تعيينات",
+          "emptyDesc": "عيّن موظفين لهذا الموقع مع دور.",
+          "seeTab": "أدِر التعيينات من تبويب الفريق."
         },
         "sections": {
           "equipe": "الفريق",
@@ -342,6 +354,16 @@
         "submit": "حفظ التعديلات",
         "success": "تم تحديث الورش.",
         "failed": "تعذّر حفظ التعديلات.",
+        "requiredHint": "الحقول المشار إليها بعلامة * إلزامية.",
+        "viewClients": "عرض العملاء",
+        "sections": {
+          "identity": "التعريف",
+          "client": "العميل والعقد",
+          "location": "الموقع",
+          "planning": "الجدول الزمني",
+          "financial": "المعلومات المالية",
+          "team": "الفريق المسؤول"
+        },
         "fields": {
           "name": "اسم الورش",
           "description": "الوصف",
@@ -660,14 +682,76 @@
       }
     },
     "documents": {
-      "title": "وثائق الورش",
+      "title": "مركز الوثائق",
+      "subtitle": "جميع وثائق أوراشك منظمة ومتاحة في مكان واحد",
+      "loading": "جارٍ تحميل الوثائق…",
+      "count": "{count, plural, =0 {لا توجد وثائق} =1 {وثيقة واحدة} other {# وثائق}}",
+      "folderCount": "{count, plural, =1 {وثيقة واحدة} other {# وثائق}}",
+      "views": {
+        "label": "طريقة العرض",
+        "byChantier": "حسب الورش",
+        "allDocuments": "جميع الوثائق"
+      },
+      "scope": {
+        "label": "النطاق الحالي",
+        "viewAll": "عرض جميع الأوراش"
+      },
       "filters": {
-        "allTypes": "جميع الأنواع"
+        "label": "مرشحات الوثائق",
+        "search": "البحث بالعنوان أو اسم الملف…",
+        "allTypes": "جميع الأنواع",
+        "allChantiers": "جميع الأوراش",
+        "allCategories": "جميع الفئات",
+        "dateFrom": "أودعت ابتداءً من",
+        "dateTo": "أودعت إلى غاية",
+        "uploadedBy": "أودعها…"
+      },
+      "categories": {
+        "CONTRACTS": "العقود",
+        "PLANS_STUDIES": "التصاميم والدراسات",
+        "EXECUTION": "التنفيذ",
+        "PURCHASES_FINANCE": "المشتريات والمالية",
+        "HSE_ADMIN": "السلامة والإدارة",
+        "OTHER": "أخرى"
+      },
+      "columns": {
+        "document": "الوثيقة",
+        "chantier": "الورش",
+        "category": "النوع",
+        "size": "الحجم",
+        "uploadedBy": "أودعها",
+        "date": "التاريخ",
+        "actions": "الإجراءات"
+      },
+      "actions": {
+        "showAll": "عرض {count} وثائق",
+        "preview": "معاينة",
+        "rename": "إعادة التسمية",
+        "renamePrompt": "العنوان الجديد للوثيقة",
+        "renamed": "تم تغيير اسم الوثيقة.",
+        "deleteConfirm": "حذف «{title}»؟",
+        "deleted": "تم حذف الوثيقة."
+      },
+      "pagination": {
+        "label": "ترقيم صفحات الوثائق",
+        "previous": "السابق",
+        "next": "التالي",
+        "status": "الصفحة {page} من {pages}"
+      },
+      "preview": {
+        "unsupported": "المعاينة غير متاحة لهذا التنسيق.",
+        "unavailable": "لا تتوفر لهذه الوثيقة نسخة قابلة للعرض."
       },
       "fields": {
         "deposeLeBy": "أودِع في {date} من طرف {user}"
       },
-      "emptyState": "لا توجد وثيقة مطابقة للفلاتر.",
+      "emptyState": "لم يتم العثور على وثائق",
+      "emptyHint": "غيّر المرشحات أو أودع وثيقة جديدة.",
+      "errors": {
+        "loadFailed": "تعذّر تحميل الوثائق.",
+        "updateFailed": "تعذّر تعديل الوثيقة.",
+        "deleteFailed": "تعذّر حذف الوثيقة."
+      },
       "create": {
         "cta": "إيداع وثيقة",
         "title": "إيداع وثيقة",

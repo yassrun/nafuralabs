@@ -23,6 +23,7 @@ interface TenantMemberApiResponse {
   status: string;
   joinedAt: string | null;
   lastActivityAt: string | null;
+  invitationEmailStatus?: string | null;
 }
 
 interface MemberListApiResponse {
@@ -165,7 +166,23 @@ export class MembersApiService extends FeatureApiService<
       lastActivityAt: item.lastActivityAt,
       createdAt: item.joinedAt ?? item.lastActivityAt ?? new Date().toISOString(),
       updatedAt: item.lastActivityAt ?? item.joinedAt ?? new Date().toISOString(),
+      invitationEmailStatus: this.fromInvitationEmailStatus(item.invitationEmailStatus),
     };
+  }
+
+  private fromInvitationEmailStatus(
+    status?: string | null
+  ): Member['invitationEmailStatus'] {
+    switch ((status || '').toLowerCase()) {
+      case 'sent':
+        return 'sent';
+      case 'failed':
+        return 'failed';
+      case 'pending':
+        return 'pending';
+      default:
+        return null;
+    }
   }
 
   private fromApiStatus(status: string): Member['status'] {

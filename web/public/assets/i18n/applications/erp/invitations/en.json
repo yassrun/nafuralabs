@@ -1,0 +1,22 @@
+{
+  "invite": {
+    "accept": {
+      "title": "Accept invitation",
+      "pending": "Verifying your invitation…",
+      "success": "Invitation accepted successfully.",
+      "failed": "This invitation link is invalid or has expired.",
+      "missingToken": "Incomplete invitation link.",
+      "alreadyAccepted": "You are already a member of this organization.",
+      "wrongAccount": "You are signed in with a different account. Sign out and try again.",
+      "loginToContinue": "Sign in",
+      "createAccount": "Create my account",
+      "activate": "Accept invitation",
+      "existingAccount": "An account already exists for this email. Accept the invitation, then sign in.",
+      "tenantLabel": "Organization",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "password": "Password",
+      "passwordHint": "At least 8 characters, one uppercase letter and one digit"
+    }
+  }
+}

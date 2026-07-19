@@ -6,7 +6,7 @@
       "label": "BC — montant élevé (≥ 500 k MAD HT)",
       "entityType": "BC",
       "conditionsJson": "[{\"champ\":\"montant\",\"operateur\":\">=\",\"valeur\":500000}]",
-      "etapesJson": "[{\"ordre\":0,\"type\":\"SERIE\",\"approbateurs\":[{\"type\":\"ROLE\",\"ref\":\"CONDUCTEUR_TRAVAUX\"}]},{\"ordre\":1,\"type\":\"SERIE\",\"approbateurs\":[{\"type\":\"ROLE\",\"ref\":\"DAF\"}]},{\"ordre\":2,\"type\":\"SERIE\",\"approbateurs\":[{\"type\":\"ROLE\",\"ref\":\"DG\"}]}]",
+      "etapesJson": "[{\"ordre\":0,\"type\":\"SERIE\",\"approbateurs\":[{\"type\":\"ROLE\",\"ref\":\"BTP_CONDUCTEUR_TRAVAUX\"}]},{\"ordre\":1,\"type\":\"SERIE\",\"approbateurs\":[{\"type\":\"ROLE\",\"ref\":\"BTP_DIRECTEUR_TRAVAUX\"}]},{\"ordre\":2,\"type\":\"SERIE\",\"approbateurs\":[{\"type\":\"ROLE\",\"ref\":\"BTP_DG\"}]}]",
       "slaJours": 4,
       "escaladeApresJours": 5,
       "isActive": true
@@ -17,7 +17,7 @@
       "label": "BC — standard (< 500 k MAD HT)",
       "entityType": "BC",
       "conditionsJson": "[]",
-      "etapesJson": "[{\"ordre\":0,\"type\":\"SERIE\",\"approbateurs\":[{\"type\":\"ROLE\",\"ref\":\"CONDUCTEUR_TRAVAUX\"}]}]",
+      "etapesJson": "[{\"ordre\":0,\"type\":\"SERIE\",\"approbateurs\":[{\"type\":\"ROLE\",\"ref\":\"BTP_CONDUCTEUR_TRAVAUX\"}]}]",
       "slaJours": 4,
       "escaladeApresJours": 4,
       "isActive": true
@@ -28,7 +28,7 @@
       "label": "Congés — manager chantier",
       "entityType": "CONGE",
       "conditionsJson": "[]",
-      "etapesJson": "[{\"ordre\":0,\"type\":\"SERIE\",\"approbateurs\":[{\"type\":\"ROLE\",\"ref\":\"CONDUCTEUR_TRAVAUX\"}]}]",
+      "etapesJson": "[{\"ordre\":0,\"type\":\"SERIE\",\"approbateurs\":[{\"type\":\"ROLE\",\"ref\":\"BTP_CONDUCTEUR_TRAVAUX\"}]}]",
       "slaJours": 3,
       "isActive": true
     },
@@ -38,7 +38,7 @@
       "label": "Paie mensuelle — DAF puis DG",
       "entityType": "PAIE",
       "conditionsJson": "[]",
-      "etapesJson": "[{\"ordre\":0,\"type\":\"SERIE\",\"approbateurs\":[{\"type\":\"ROLE\",\"ref\":\"DAF\"}]},{\"ordre\":1,\"type\":\"SERIE\",\"approbateurs\":[{\"type\":\"ROLE\",\"ref\":\"DG\"}]}]",
+      "etapesJson": "[{\"ordre\":0,\"type\":\"SERIE\",\"approbateurs\":[{\"type\":\"ROLE\",\"ref\":\"BTP_DAF\"}]},{\"ordre\":1,\"type\":\"SERIE\",\"approbateurs\":[{\"type\":\"ROLE\",\"ref\":\"BTP_DG\"}]}]",
       "slaJours": 2,
       "escaladeApresJours": 3,
       "isActive": true
@@ -49,7 +49,7 @@
       "label": "Virement interne — contrôle DAF",
       "entityType": "VIR",
       "conditionsJson": "[]",
-      "etapesJson": "[{\"ordre\":0,\"type\":\"SERIE\",\"approbateurs\":[{\"type\":\"ROLE\",\"ref\":\"DAF\"}]}]",
+      "etapesJson": "[{\"ordre\":0,\"type\":\"SERIE\",\"approbateurs\":[{\"type\":\"ROLE\",\"ref\":\"BTP_DAF\"}]}]",
       "slaJours": 2,
       "isActive": true
     }
