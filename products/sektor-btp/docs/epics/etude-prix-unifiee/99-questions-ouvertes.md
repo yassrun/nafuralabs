@@ -38,6 +38,40 @@ masse, cf. T6.2) plutôt que pour une constante d'entreprise.
 
 ---
 
+## Q15 — Y a-t-il une marge globale en plus des marges par article ? 🟠 lot 6
+
+**Ce qu'on sait** (expert métier, 2026-07-19) : marge **par article** en pourcentage, et
+« il se peut qu'il y ait une marge globale en plus ».
+
+**Non bloquant** pour les lots déjà livrés (9, 1, 8 n'y touchent pas). Le champ
+`marge_globale_percent` est provisionné dans `dossiers_etude` (lot 2) et laissé à `NULL` :
+la table n'existe pas encore, donc la colonne ne coûte rien aujourd'hui et serait une
+migration demain.
+
+**Ce qui reste ambigu** — « en plus » se lit de deux façons, et l'écart est matériel.
+Sur un déboursé de 1 000 000 DH, FG 8 %, marge article 7 %, marge globale 3 % :
+
+| Lecture | Calcul | Total |
+|---|---|---|
+| **A — composée** : la marge globale s'ajoute par-dessus | 1 080 000 × 1,07 × 1,03 | **1 190 268** |
+| **B — cible** : les 3 % sont la marge visée pour l'affaire, les taux article se répartissent dedans | 1 080 000 × 1,03 | **1 112 400** |
+
+**Écart : 77 868 DH.**
+
+**Ce qui est déjà tranché par la nature du livrable** : quelle que soit la lecture, la marge
+globale doit **se répercuter dans les prix unitaires**. Un bordereau remis au client est
+vérifié ligne à ligne — la somme des `PU × quantité` doit égaler le total. Une marge globale ne
+peut donc pas rester une ligne d'ajustement en pied de tableau ; elle est redistribuée sur les
+PU, et le bordereau reste cohérent.
+
+Reste à savoir laquelle des deux lectures, et une sous-question : la marge globale est-elle
+**saisie** par le chiffreur, ou **calculée** comme résultat de ses marges par article ? Si
+c'est la seconde, ce n'est pas un paramètre mais un indicateur — et le bandeau de T6.2 suffit.
+
+**Réponse** : _(à compléter)_
+
+---
+
 ## Q14 — Sur quelle base la marge varie-t-elle d'un article à l'autre ? 🟠 lot 6
 
 **Acquis** : l'expert métier confirme une marge **par article**, **variable** (2026-07-19).

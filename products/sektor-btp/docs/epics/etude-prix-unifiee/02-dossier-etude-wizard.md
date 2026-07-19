@@ -40,6 +40,11 @@ CREATE TABLE dossiers_etude (
     frais_generaux_percent_defaut NUMERIC(8,4),
     marge_percent_defaut          NUMERIC(8,4),
     tva_taux_defaut               NUMERIC(8,4),
+    -- Marge globale éventuelle appliquée par-dessus les marges par article.
+    -- Provisionnée dès maintenant : la table n'existe pas encore, donc la colonne est
+    -- gratuite aujourd'hui et serait une migration demain (cf. lot 10, règle R2).
+    -- Sémantique à confirmer — voir Q15. Laisser NULL tant que ce n'est pas tranché.
+    marge_globale_percent         NUMERIC(8,4),
     devis_genere_id             UUID,
     notes                       TEXT,
     created_by                  VARCHAR(100),
