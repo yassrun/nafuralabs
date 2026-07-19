@@ -1,5 +1,5 @@
 import type { ListingRouteConfig } from '@lib/anatomy/types';
-import type { Devise } from '@applications/erp/finance/models';
+import type { Devise } from '@app/finance/models';
 
 export const ROUTES: ListingRouteConfig<Devise> = {
   detail: (item) => ['/finance/devises', item.id],

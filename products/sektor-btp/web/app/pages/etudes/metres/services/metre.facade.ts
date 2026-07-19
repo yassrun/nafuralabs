@@ -6,7 +6,7 @@ import type {
   Metre,
   MetreCreate,
   MetreUpdate,
-} from '@applications/erp/etudes/models';
+} from '@app/etudes/models';
 
 import { MetreApiService } from './metre-api.service';
 

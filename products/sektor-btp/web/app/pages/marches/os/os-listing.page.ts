@@ -7,7 +7,7 @@ import { PageHeaderComponent, PageShellComponent } from '@lib/anatomy';
 import {
   ORDRE_SERVICE_STATUS_KEYS,
   ORDRE_SERVICE_TYPE_KEYS,
-} from '@applications/erp/shell/i18n-labels';
+} from '@app/shell/i18n-labels';
 import {
   type OrdreService,
   type OrdreServiceStatus,
@@ -23,7 +23,7 @@ const STATUS_VARIANT: Record<OrdreServiceStatus, string> = {
   CLOS: 'secondary',
 };
 
-import { SubmitApprovalButtonComponent } from '@applications/erp/pages/approbations/components/submit-approval-button/submit-approval-button.component';
+import { SubmitApprovalButtonComponent } from '@app/pages/approbations/components/submit-approval-button/submit-approval-button.component';
 
 @Component({
   selector: 'app-os-listing',

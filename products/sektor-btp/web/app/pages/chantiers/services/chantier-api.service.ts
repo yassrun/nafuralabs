@@ -3,7 +3,7 @@ import { HttpParams } from '@angular/common/http';
 
 import { FeatureApiService } from '@lib/anatomy';
 import type { ListQuery, ListResponse } from '@lib/anatomy/types';
-import type { Chantier } from '@applications/erp/chantiers/models';
+import type { Chantier } from '@app/chantiers/models';
 
 import {
   type ApiChantier,

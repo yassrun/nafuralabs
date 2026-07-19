@@ -5,12 +5,12 @@ import { Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { ButtonComponent, PageHeaderComponent, PageShellComponent, ToastService } from '@lib/anatomy/components';
-import { AnalyticsApiService, type AnalyticsBucketResponse } from '@applications/erp/pages/analytics/services/analytics-api.service';
+import { AnalyticsApiService, type AnalyticsBucketResponse } from '@app/pages/analytics/services/analytics-api.service';
 import type {
   AnalytiquePivot,
   AxeAnalytiqueType,
   CompteClasse,
-} from '@applications/erp/finance/models';
+} from '@app/finance/models';
 
 @Component({
   selector: 'app-analytique',

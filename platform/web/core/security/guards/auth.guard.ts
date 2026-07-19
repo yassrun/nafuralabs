@@ -8,6 +8,7 @@ import { inject } from '@angular/core';
 import { Router, CanActivateFn, CanMatchFn, UrlTree } from '@angular/router';
 
 import { AuthFacade } from '../services/auth.facade';
+import { redirectUnauthenticated } from './unauthenticated-redirect';
 
 /**
  * Guard that requires authentication.
@@ -30,11 +31,8 @@ export const authGuard: CanActivateFn = (): boolean | UrlTree => {
     return true;
   }
 
-  // Store intended URL for redirect after login
   const currentUrl = router.routerState.snapshot.url;
-  return router.createUrlTree(['/login'], {
-    queryParams: { returnUrl: currentUrl },
-  });
+  return redirectUnauthenticated(currentUrl);
 };
 
 /**
@@ -55,9 +53,7 @@ export const authWithTenantGuard: CanActivateFn = (): boolean | UrlTree => {
 
   if (!auth.isAuthenticated()) {
     const currentUrl = router.routerState.snapshot.url;
-    return router.createUrlTree(['/login'], {
-      queryParams: { returnUrl: currentUrl },
-    });
+    return redirectUnauthenticated(currentUrl);
   }
 
   return true;
@@ -113,7 +109,7 @@ export const superAdminGuard: CanActivateFn = (): boolean | UrlTree => {
   const router = inject(Router);
 
   if (!auth.isAuthenticated()) {
-    return router.createUrlTree(['/login']);
+    return redirectUnauthenticated();
   }
 
   if (!auth.isSuperAdmin()) {
@@ -141,7 +137,7 @@ export function roleGuard(role: string): CanActivateFn {
     const router = inject(Router);
 
     if (!auth.isAuthenticated()) {
-      return router.createUrlTree(['/login']);
+      return redirectUnauthenticated();
     }
 
     if (!auth.hasRole(role) && !auth.isSuperAdmin()) {
@@ -170,7 +166,7 @@ export function anyRoleGuard(roles: string[]): CanActivateFn {
     const router = inject(Router);
 
     if (!auth.isAuthenticated()) {
-      return router.createUrlTree(['/login']);
+      return redirectUnauthenticated();
     }
 
     if (!auth.hasAnyRole(roles) && !auth.isSuperAdmin()) {

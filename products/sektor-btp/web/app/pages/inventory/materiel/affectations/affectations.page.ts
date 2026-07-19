@@ -6,8 +6,8 @@ import { PageHeaderComponent, PageShellComponent } from '@lib/anatomy';
 import {
   MaterielAffectationApiService,
   apiToAffectationChantier,
-} from '@applications/erp/inventory/services/materiel-affectation-api.service';
-import type { AffectationChantier } from '@applications/erp/inventory/models';
+} from '@app/inventory/services/materiel-affectation-api.service';
+import type { AffectationChantier } from '@app/inventory/models';
 
 @Component({
   selector: 'app-affectations',

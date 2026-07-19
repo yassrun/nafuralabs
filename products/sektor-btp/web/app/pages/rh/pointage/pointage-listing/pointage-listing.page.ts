@@ -10,7 +10,7 @@ import { ChantierApiService } from '../../../chantiers/services/chantier-api.ser
 import { PointageApiService } from '../services/pointage-api.service';
 import type { Pointage } from '../models';
 import { MODE_CSS, MODE_EMOJI } from '../models';
-import { MODE_KEYS } from '@applications/erp/shell/i18n-labels';
+import { MODE_KEYS } from '@app/shell/i18n-labels';
 
 @Component({
   selector: 'app-pointage-listing',

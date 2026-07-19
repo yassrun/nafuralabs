@@ -5,7 +5,7 @@ import type {
   Devise,
   DeviseCreate,
   DeviseUpdate,
-} from '@applications/erp/finance/models';
+} from '@app/finance/models';
 
 import { DeviseApiService } from './devise-api.service';
 

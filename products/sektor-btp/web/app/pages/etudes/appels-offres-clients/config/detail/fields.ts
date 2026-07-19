@@ -1,5 +1,5 @@
 import type { DetailFieldConfig } from '@lib/anatomy/types';
-import type { AppelOffreClient } from '@applications/erp/etudes/models';
+import type { AppelOffreClient } from '@app/etudes/models';
 
 export const FIELDS: DetailFieldConfig<AppelOffreClient>[] = [
   {

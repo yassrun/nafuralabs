@@ -12,6 +12,9 @@
         {{ chip.labelKey | translate }}
       </nf-button>
     }
+    <nf-smart-import-trigger
+      [definition]="importDefinition"
+      (completed)="onSmartImportComplete($event)" />
   </div>
 
   <nf-entity-listing

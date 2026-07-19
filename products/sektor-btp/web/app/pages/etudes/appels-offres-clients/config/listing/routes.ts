@@ -1,5 +1,5 @@
 import type { ListingRouteConfig } from '@lib/anatomy/types';
-import type { AppelOffreClient } from '@applications/erp/etudes/models';
+import type { AppelOffreClient } from '@app/etudes/models';
 
 export const ROUTES: ListingRouteConfig<AppelOffreClient> = {
   detail: (item) => ['/etudes/appels-offres-clients', item.id],

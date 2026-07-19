@@ -1,7 +1,7 @@
 import type { TranslateService } from '@ngx-translate/core';
 
 import type { FilterFieldConfig } from '@lib/anatomy/types';
-import { INSPECTION_STATUS_KEYS, type InspectionStatus } from '@applications/erp/shell/i18n-labels';
+import { INSPECTION_STATUS_KEYS, type InspectionStatus } from '@app/shell/i18n-labels';
 
 export function buildInspectionFilters(t: TranslateService): FilterFieldConfig[] {
   const tr = (k: string) => t.instant(k);

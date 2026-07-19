@@ -5,8 +5,8 @@ import { Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { ButtonComponent, PageHeaderComponent, PageShellComponent } from '@lib/anatomy/components';
-import { JournalApiService } from '@applications/erp/finance/services/journal-api.service';
-import type { JournalSummary } from '@applications/erp/finance/models';
+import { JournalApiService } from '@app/finance/services/journal-api.service';
+import type { JournalSummary } from '@app/finance/models';
 
 interface PeriodOption {
   label: string;

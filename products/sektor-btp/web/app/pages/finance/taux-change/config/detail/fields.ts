@@ -1,7 +1,7 @@
 import type { TranslateService } from '@ngx-translate/core';
 
 import type { DetailFieldConfig } from '@lib/anatomy/types';
-import type { TauxChange } from '@applications/erp/finance/models';
+import type { TauxChange } from '@app/finance/models';
 
 export function buildTauxChangeFields(t: TranslateService): DetailFieldConfig<TauxChange>[] {
   const tr = (k: string) => t.instant(k);

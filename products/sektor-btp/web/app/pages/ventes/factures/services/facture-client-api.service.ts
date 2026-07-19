@@ -6,7 +6,7 @@ import type {
   FactureClient,
   FactureCreate,
   FactureUpdate,
-} from '@applications/erp/ventes/models';
+} from '@app/ventes/models';
 
 /** Minimal HTTP client for `/api/v1/factures-client` (Wave 2 skeleton). */
 export interface ApiFactureClient {

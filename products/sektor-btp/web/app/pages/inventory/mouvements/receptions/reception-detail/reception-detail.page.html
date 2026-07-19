@@ -1,12 +1,12 @@
 <nf-page-shell scroll>
   <nf-page-header [config]="headerConfig"></nf-page-header>
 
-  <input
-    #blFileInput
+  <nf-smart-import-trigger
+    #blExtractor
     class="rd__file-input"
-    type="file"
+    [definition]="blExtractionDefinition"
     accept=".pdf,.png,.jpg,.jpeg,.webp"
-    (change)="onBlFileSelected($event)" />
+    (completed)="onBlExtractionComplete($event)" />
 
   <nf-entity-detail
     #detail

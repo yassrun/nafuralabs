@@ -11,7 +11,7 @@ import {
 import type {
   TauxChange,
   TauxChangeCreate,
-} from '@applications/erp/finance/models';
+} from '@app/finance/models';
 
 import { TauxChangeFacade } from '../services';
 import { buildTauxChangeDetailConfig } from '../config';

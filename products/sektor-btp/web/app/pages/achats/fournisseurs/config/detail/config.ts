@@ -1,7 +1,7 @@
 import type { TranslateService } from '@ngx-translate/core';
 
 import { buildDetailConfig } from '@lib/anatomy';
-import type { Fournisseur } from '@applications/erp/achats/models';
+import type { Fournisseur } from '@app/achats/models';
 
 import { buildFournisseurFields } from './fields';
 import { ROUTES } from './routes';

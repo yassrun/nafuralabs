@@ -5,7 +5,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import {ConfigDrivenListingPage,
   ConfigDrivenListingPageImports,
   ConfigDrivenListingPageStyles, ButtonComponent} from '@lib/anatomy';
-import type { AppelOffre } from '@applications/erp/achats/models';
+import type { AppelOffre } from '@app/achats/models';
 
 import { AoFacade } from '../services';
 import { buildAoListingConfig } from '../config';

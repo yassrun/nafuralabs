@@ -8,7 +8,7 @@ import {
   signal,
 } from '@angular/core';
 
-import type { SituationDocument } from '@applications/erp/chantiers/models';
+import type { SituationDocument } from '@app/chantiers/models';
 import { DateLocalizedPipe } from '@lib/anatomy/pipes';
 import { ButtonComponent } from '@lib/anatomy';
 import { safeRandomUUID } from '@core/util/uuid';

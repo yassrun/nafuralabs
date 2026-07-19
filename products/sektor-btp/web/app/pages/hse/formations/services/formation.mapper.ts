@@ -3,7 +3,7 @@ import type {
   FormationCreate,
   FormationUpdate,
   StatutFormation,
-} from '@applications/erp/hse/models';
+} from '@app/hse/models';
 
 export interface ApiFormation {
   id: string;

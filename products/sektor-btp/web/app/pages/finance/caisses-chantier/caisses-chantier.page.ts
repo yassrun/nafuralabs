@@ -3,13 +3,13 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 
-import { CaisseApiService } from '@applications/erp/finance/services/caisse-api.service';
-import { ErpAttachmentUploadService } from '@applications/erp/shared/services/erp-attachment-upload.service';
-import { ERP_ATTACHMENT_ENTITY_TYPES } from '@applications/erp/shared/config/attachment-detail.config';
+import { CaisseApiService } from '@app/finance/services/caisse-api.service';
+import { ErpAttachmentUploadService } from '@app/shared/services/erp-attachment-upload.service';
+import { ERP_ATTACHMENT_ENTITY_TYPES } from '@app/shared/config/attachment-detail.config';
 import { PageHeaderComponent, PageShellComponent } from '@lib/anatomy';
 import { ButtonComponent } from '@lib/anatomy/components';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
-import type { CaisseChantier, MouvementCaisseChantier } from '@applications/erp/finance/models';
+import type { CaisseChantier, MouvementCaisseChantier } from '@app/finance/models';
 
 @Component({
   selector: 'app-caisses-chantier-page',

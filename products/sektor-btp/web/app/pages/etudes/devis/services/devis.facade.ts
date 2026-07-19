@@ -6,14 +6,14 @@ import type {
   Devis,
   DevisCreate,
   DevisUpdate,
-} from '@applications/erp/etudes/models';
+} from '@app/etudes/models';
 
 import { DevisApiService } from './devis-api.service';
 import { MetreApiService } from '../../metres/services/metre-api.service';
 import {
   ErpLookupService,
   partnerLookupLabel,
-} from '@applications/erp/shared/services/erp-lookup.service';
+} from '@app/shared/services/erp-lookup.service';
 
 @Injectable({ providedIn: 'root' })
 export class DevisFacade extends GridFacade<Devis, DevisCreate, DevisUpdate> {

@@ -2,13 +2,13 @@ import type { TranslateService } from '@ngx-translate/core';
 
 import { buildDetailConfig } from '@lib/anatomy';
 import type { DetailActionConfig, StatusMachineConfig } from '@lib/anatomy/types';
-import type { Incident, StatutIncident } from '@applications/erp/hse/models';
-import { INCIDENT_STATUS_KEYS } from '@applications/erp/shell/i18n-labels';
+import type { Incident, StatutIncident } from '@app/hse/models';
+import { INCIDENT_STATUS_KEYS } from '@app/shell/i18n-labels';
 import {
   DOCUMENT_ATTACHMENT_CONFIG,
   ERP_ATTACHMENT_ENTITY_TYPES,
   withAttachments,
-} from '@applications/erp/shared/config/attachment-detail.config';
+} from '@app/shared/config/attachment-detail.config';
 
 import { buildIncidentFields } from './fields';
 import { ROUTES } from './routes';

@@ -2,14 +2,15 @@ import { Injectable, inject } from '@angular/core';
 
 import { FeatureApiService } from '@lib/anatomy';
 import type { ListQuery, ListResponse } from '@lib/anatomy/types';
-import { PartnersApiService } from '@applications/erp/shared/services/partners-api.service';
-import { partnerToFournisseur } from '@applications/erp/shared/services/partner-commerce.mapper';
+import { safeRandomUUID } from '@core/util/uuid';
+import { PartnersApiService } from '@app/shared/services/partners-api.service';
+import { partnerToFournisseur } from '@app/shared/services/partner-commerce.mapper';
 import type {
   Fournisseur,
   FournisseurCreate,
   FournisseurListItem,
   FournisseurUpdate,
-} from '@applications/erp/achats/models';
+} from '@app/achats/models';
 
 interface FournisseurQuery extends ListQuery {
   categorie?: string;
@@ -23,7 +24,7 @@ function toListItem(f: Fournisseur): FournisseurListItem {
 }
 
 function newFournisseurCode(): string {
-  const suffix = crypto.randomUUID().replace(/-/g, '').slice(0, 8).toUpperCase();
+  const suffix = safeRandomUUID().replace(/-/g, '').slice(0, 8).toUpperCase();
   return `FRN-${suffix}`;
 }
 
@@ -80,6 +81,7 @@ export class FournisseurApiService extends FeatureApiService<
       email: data.contactPrincipalEmail,
       phone: data.contactPrincipalTel,
       isActive: data.isActive,
+      roles: ['FOURNISSEUR'],
     });
     return partnerToFournisseur(partner);
   }

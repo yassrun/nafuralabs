@@ -2,11 +2,11 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 
 import { GridFacade } from '@lib/anatomy';
 import type { LookupContext } from '@lib/anatomy/types';
-import { EmployeApiService } from '@applications/erp/pages/rh/employes/services/employe-api.service';
-import type { FichePaie, FichePaieCreate, FichePaieUpdate } from '@applications/erp/rh/models';
+import { EmployeApiService } from '@app/pages/rh/employes/services/employe-api.service';
+import type { FichePaie, FichePaieCreate, FichePaieUpdate } from '@app/rh/models';
 
 import { PaieApiService } from './paie-api.service';
-import { ErpAuditService } from '@applications/erp/shell/erp-audit.service';
+import { ErpAuditService } from '@app/shell/erp-audit.service';
 
 @Injectable({ providedIn: 'root' })
 export class PaieFacade extends GridFacade<FichePaie, FichePaieCreate, FichePaieUpdate> {

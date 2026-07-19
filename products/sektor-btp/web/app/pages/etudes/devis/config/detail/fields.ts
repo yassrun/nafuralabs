@@ -1,5 +1,5 @@
 import type { DetailFieldConfig } from '@lib/anatomy/types';
-import type { Devis } from '@applications/erp/etudes/models';
+import type { Devis } from '@app/etudes/models';
 
 export const FIELDS: DetailFieldConfig<Devis>[] = [
   {

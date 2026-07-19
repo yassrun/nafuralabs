@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 
-import type { TauxChange } from '@applications/erp/finance/models';
+import type { TauxChange } from '@app/finance/models';
 
 interface Series {
   label: string;

@@ -1,7 +1,7 @@
 import type { TranslateService } from '@ngx-translate/core';
 
 import { buildListingConfig } from '@lib/anatomy';
-import type { Situation } from '@applications/erp/chantiers/models';
+import type { Situation } from '@app/chantiers/models';
 
 import { buildSituationsColumns } from './columns';
 import { FILTERS } from './filters';

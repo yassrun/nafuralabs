@@ -16,8 +16,8 @@ import { gantt, type GanttStatic } from 'dhtmlx-gantt';
 
 import { PageHeaderComponent, PageShellComponent } from '@lib/anatomy';
 
-import type { AffectationChantier } from '@applications/erp/inventory/models';
-import { MaterielGmaoFacadeService } from '@applications/erp/inventory/services/materiel-gmao-facade.service';
+import type { AffectationChantier } from '@app/inventory/models';
+import { MaterielGmaoFacadeService } from '@app/inventory/services/materiel-gmao-facade.service';
 
 interface MgTask {
   id: string;

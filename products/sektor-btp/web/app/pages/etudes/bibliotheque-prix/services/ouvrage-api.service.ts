@@ -5,7 +5,7 @@ import type {
   Ouvrage,
   OuvrageCreate,
   OuvrageUpdate,
-} from '@applications/erp/etudes/models';
+} from '@app/etudes/models';
 
 @Injectable({ providedIn: 'root' })
 export class OuvrageApiService extends FeatureApiService<Ouvrage, OuvrageCreate, OuvrageUpdate> {

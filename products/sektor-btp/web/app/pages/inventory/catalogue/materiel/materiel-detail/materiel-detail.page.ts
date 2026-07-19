@@ -20,8 +20,8 @@ import { PARC_DETAIL_ROUTES } from '../config/detail/parc-routes';
 import {
   MaterielAffectationApiService,
   apiToAffectationChantier,
-} from '@applications/erp/inventory/services/materiel-affectation-api.service';
-import type { AffectationChantier } from '@applications/erp/inventory/models';
+} from '@app/inventory/services/materiel-affectation-api.service';
+import type { AffectationChantier } from '@app/inventory/models';
 
 @Component({
   selector: 'app-materiel-detail',

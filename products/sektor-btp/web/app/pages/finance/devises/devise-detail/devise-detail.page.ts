@@ -11,7 +11,7 @@ import {
 import type {
   Devise,
   DeviseCreate,
-} from '@applications/erp/finance/models';
+} from '@app/finance/models';
 
 import { DeviseFacade } from '../services';
 import { buildDeviseDetailConfig } from '../config';

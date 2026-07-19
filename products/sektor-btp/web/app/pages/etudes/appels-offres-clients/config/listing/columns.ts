@@ -4,7 +4,7 @@ import type { ColumnConfig } from '@lib/anatomy/types';
 import {
   AO_CLIENT_STATUS_KEYS,
   AO_CLIENT_TYPE_KEYS,
-} from '@applications/erp/shell/i18n-labels';
+} from '@app/shell/i18n-labels';
 import { resolveLocale } from '@lib/anatomy/pipes/_locale-resolver';
 
 const STATUS_VARIANTS: Record<string, 'success' | 'warning' | 'danger' | 'info' | 'default'> = {

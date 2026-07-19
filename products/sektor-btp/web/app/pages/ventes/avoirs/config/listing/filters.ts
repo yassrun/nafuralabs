@@ -1,7 +1,7 @@
 import type { TranslateService } from '@ngx-translate/core';
 
 import type { FilterFieldConfig } from '@lib/anatomy/types';
-import { AVOIR_STATUS_KEYS } from '@applications/erp/shell/i18n-labels';
+import { AVOIR_STATUS_KEYS } from '@app/shell/i18n-labels';
 
 export function buildAvoirFilters(t: TranslateService): FilterFieldConfig[] {
   const tr = (k: string) => t.instant(k);

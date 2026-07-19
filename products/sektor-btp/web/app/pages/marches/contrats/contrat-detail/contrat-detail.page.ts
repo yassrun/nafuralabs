@@ -15,7 +15,7 @@ import {
   FACTURE_MARCHE_STATUS_KEYS,
   CAUTION_STATUS_KEYS,
   CAUTION_TYPE_KEYS,
-} from '@applications/erp/shell/i18n-labels';
+} from '@app/shell/i18n-labels';
 import { ToastService } from '@lib/anatomy/components/services/toast.service';
 import { ContratMarcheApiService } from '../services/contrat-marche-api.service';
 import { AvenantApiService } from '../../avenants/services/avenant-api.service';

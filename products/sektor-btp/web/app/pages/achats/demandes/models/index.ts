@@ -5,4 +5,4 @@ export type {
   DemandeAchatUpdate,
   DALigne,
   DAStatus,
-} from '@applications/erp/achats/models';
+} from '@app/achats/models';

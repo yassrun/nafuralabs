@@ -1,5 +1,5 @@
 import type { ListingRouteConfig } from '@lib/anatomy/types';
-import type { Devis } from '@applications/erp/etudes/models';
+import type { Devis } from '@app/etudes/models';
 
 export const ROUTES: ListingRouteConfig<Devis> = {
   detail: (item) => ['/etudes/devis', item.id],

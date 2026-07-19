@@ -2,13 +2,13 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 
 import { GridFacade } from '@lib/anatomy';
 import type { LookupContext } from '@lib/anatomy/types';
-import { ErpLookupService, partnerLookupLabel } from '@applications/erp/shared/services/erp-lookup.service';
+import { ErpLookupService, partnerLookupLabel } from '@app/shared/services/erp-lookup.service';
 import type {
   BonCommandeClient,
   BCClientCreate,
   BCClientStatus,
   BCClientUpdate,
-} from '@applications/erp/ventes/models';
+} from '@app/ventes/models';
 
 import { BccApiService } from './bcc-api.service';
 

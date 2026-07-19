@@ -5,4 +5,4 @@ export type {
   NonConformiteUpdate,
   StatutNC,
   TypeNonConformite,
-} from '@applications/erp/hse/models';
+} from '@app/hse/models';

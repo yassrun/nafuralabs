@@ -5,7 +5,7 @@ import type {
   Metre,
   MetreCreate,
   MetreUpdate,
-} from '@applications/erp/etudes/models';
+} from '@app/etudes/models';
 
 @Injectable({ providedIn: 'root' })
 export class MetreApiService extends FeatureApiService<Metre, MetreCreate, MetreUpdate> {

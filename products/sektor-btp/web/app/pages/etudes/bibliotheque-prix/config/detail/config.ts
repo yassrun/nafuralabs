@@ -1,5 +1,5 @@
 import { buildDetailConfig } from '@lib/anatomy';
-import type { Ouvrage } from '@applications/erp/etudes/models';
+import type { Ouvrage } from '@app/etudes/models';
 
 import { FIELDS } from './fields';
 import { ROUTES } from './routes';

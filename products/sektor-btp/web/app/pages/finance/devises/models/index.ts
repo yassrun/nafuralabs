@@ -3,4 +3,4 @@ export type {
   DeviseCreate,
   DeviseListItem,
   DeviseUpdate,
-} from '@applications/erp/finance/models';
+} from '@app/finance/models';

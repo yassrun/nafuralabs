@@ -5,10 +5,10 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { ButtonComponent, PageHeaderComponent, PageShellComponent } from '@lib/anatomy/components';
-import { JournalEntryApiService } from '@applications/erp/finance/services/journal-entry-api.service';
+import { JournalEntryApiService } from '@app/finance/services/journal-entry-api.service';
 import { DateLocalizedPipe } from '@lib/anatomy/pipes';
-import { ECRITURE_ORIGINE_KEYS, ECRITURE_STATUS_KEYS } from '@applications/erp/shell/i18n-labels';
-import type { Ecriture } from '@applications/erp/finance/models';
+import { ECRITURE_ORIGINE_KEYS, ECRITURE_STATUS_KEYS } from '@app/shell/i18n-labels';
+import type { Ecriture } from '@app/finance/models';
 
 @Component({
   selector: 'app-ecritures-listing',

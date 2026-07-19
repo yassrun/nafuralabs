@@ -5,12 +5,12 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FilterResetComponent } from '@lib/anatomy/components/molecules/filter-reset/filter-reset.component';
 
 import { PageHeaderComponent, PageShellComponent, ButtonComponent } from '@lib/anatomy';
-import type { Chantier, ChantierStatus } from '@applications/erp/chantiers/models';
+import type { Chantier, ChantierStatus } from '@app/chantiers/models';
 import { ChantierApiService } from '../services/chantier-api.service';
 import {
   CHANTIER_STATUS_KEYS,
   CHANTIER_TYPE_KEYS,
-} from '@applications/erp/shell/i18n-labels';
+} from '@app/shell/i18n-labels';
 
 const STATUS_CSS: Record<ChantierStatus, string> = {
   PROSPECT: 'info',

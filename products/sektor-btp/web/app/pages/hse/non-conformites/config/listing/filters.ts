@@ -6,7 +6,7 @@ import {
   NC_TYPE_KEYS,
   type NonConformiteStatus,
   type NonConformiteType,
-} from '@applications/erp/shell/i18n-labels';
+} from '@app/shell/i18n-labels';
 
 export function buildNcFilters(t: TranslateService): FilterFieldConfig[] {
   const tr = (k: string) => t.instant(k);

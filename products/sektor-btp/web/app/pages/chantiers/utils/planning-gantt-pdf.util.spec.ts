@@ -1,4 +1,4 @@
-import type { LotChantier } from '@applications/erp/chantiers/models';
+import type { LotChantier } from '@app/chantiers/models';
 
 import { VILLA_HASSAN_GANTT_FIXTURE } from './fixtures/villa-hassan-gantt.fixture';
 import {

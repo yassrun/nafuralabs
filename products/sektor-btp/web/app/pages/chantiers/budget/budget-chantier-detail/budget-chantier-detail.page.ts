@@ -10,8 +10,8 @@ import { firstValueFrom, map } from 'rxjs';
 
 import { ButtonComponent } from '@lib/anatomy';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
-import { ErpAuditService } from '@applications/erp/shell/erp-audit.service';
-import { PrintService } from '@applications/erp/shared/services';
+import { ErpAuditService } from '@app/shell/erp-audit.service';
+import { PrintService } from '@app/shared/services';
 import { EcartCellComponent } from '../components/ecart-cell/ecart-cell.component';
 import { ConsommationProgressComponent } from '../components/consommation-progress/consommation-progress.component';
 import { ReviserBudgetDialogComponent } from '../components/reviser-budget-dialog/reviser-budget-dialog.component';

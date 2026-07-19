@@ -9,12 +9,12 @@ import {
   conditionToPaymentTermCreate,
   conditionToPaymentTermUpdate,
   paymentTermToCondition,
-} from '@applications/erp/finance/services/payment-term-finance.mapper';
+} from '@app/finance/services/payment-term-finance.mapper';
 import type {
   ConditionPaiement,
   ConditionPaiementCreate,
   ConditionPaiementUpdate,
-} from '@applications/erp/finance/models';
+} from '@app/finance/models';
 
 interface ConditionQuery extends ListQuery {
   type?: string;

@@ -9,10 +9,10 @@ import {
 } from '@lib/anatomy';
 import type { ListingActionEvent } from '@lib/anatomy/types';
 
-import { FournisseurApiService } from '@applications/erp/pages/achats/fournisseurs/services/fournisseur-api.service';
-import { BcApiService } from '@applications/erp/pages/achats/commandes/services/bc-api.service';
-import { ChantierApiService } from '@applications/erp/pages/chantiers/services/chantier-api.service';
-import { LocationsApiService } from '@applications/erp/pages/inventory/configuration/depots/services/location-api.service';
+import { FournisseurApiService } from '@app/pages/achats/fournisseurs/services/fournisseur-api.service';
+import { BcApiService } from '@app/pages/achats/commandes/services/bc-api.service';
+import { ChantierApiService } from '@app/pages/chantiers/services/chantier-api.service';
+import { LocationsApiService } from '@app/pages/inventory/configuration/depots/services/location-api.service';
 
 import { buildReceptionListingConfig } from './config/listing/listing.config';
 import { ReceptionFacade, type ReceptionListItem } from './services/reception.facade';

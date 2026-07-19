@@ -2,7 +2,7 @@ import type { TranslateService } from '@ngx-translate/core';
 
 import { buildDetailConfig } from '@lib/anatomy';
 import type { StatusMachineConfig } from '@lib/anatomy/types';
-import type { Employe, StatutEmploye } from '@applications/erp/rh/models';
+import type { Employe, StatutEmploye } from '@app/rh/models';
 
 import { buildEmployeFields } from './fields';
 import { ROUTES } from './routes';

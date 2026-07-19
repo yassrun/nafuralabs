@@ -14,14 +14,20 @@ import { LookupReferenceNavigationService } from '@lib/anatomy/services/lookup-r
 
 import { environment } from '@env';
 import { AuthFacade } from '../../security/services/auth.facade';
-import { APPLICATION_DEFAULT_ROUTE } from '@applications/config/routes';
+import { applicationDefaultRoute } from '../../application/application-config';
 
 @Component({
   selector: 'app-login-page',
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="login-container">
+    <div class="login-container" [class.login-container--redirect]="useDirectRedirect()">
+      @if (useDirectRedirect()) {
+        <div class="login-redirect">
+          <div class="spinner" aria-hidden="true"></div>
+          <p class="message">Redirection vers la connexion sécurisée…</p>
+        </div>
+      } @else {
       <div class="login-content">
         <div class="logo">
           <span class="logo-icon">N</span>
@@ -72,6 +78,7 @@ import { APPLICATION_DEFAULT_ROUTE } from '@applications/config/routes';
           }
         }
       </div>
+      }
     </div>
   `,
   styles: [`
@@ -82,6 +89,24 @@ import { APPLICATION_DEFAULT_ROUTE } from '@applications/config/routes';
       min-height: 100vh;
       background: linear-gradient(135deg, #0f766e 0%, #134e4a 100%);
       padding: 1.5rem;
+    }
+    .login-container--redirect {
+      background: #f5f5f5;
+    }
+    .login-redirect {
+      text-align: center;
+    }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      margin: 0 auto 16px;
+      border: 4px solid #e0e0e0;
+      border-top-color: #0d9488;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
     .login-content {
       width: 100%;
@@ -196,6 +221,7 @@ export class LoginPage implements OnInit {
   showRetry = false;
 
   readonly useDevWizard = signal(false);
+  readonly useDirectRedirect = signal(false);
   readonly devStep = signal<1 | 2>(1);
   readonly devError = signal<string | null>(null);
 
@@ -206,7 +232,7 @@ export class LoginPage implements OnInit {
   readonly devTotpHint = (environment as { devInAppAuth?: { totp: string } }).devInAppAuth?.totp ?? '123456';
 
   private async navigateToApplicationShell(): Promise<void> {
-    const defaultRoute = APPLICATION_DEFAULT_ROUTE || 'feature-unavailable/unknown';
+    const defaultRoute = applicationDefaultRoute();
     const segments = defaultRoute.split('/').filter(Boolean);
     await this.router.navigate(['/', ...segments]);
   }
@@ -232,6 +258,12 @@ export class LoginPage implements OnInit {
 
     if (devBypass && !eager) {
       this.useDevWizard.set(true);
+      return;
+    }
+
+    if (this.auth.usesDirectKeycloakLogin()) {
+      this.useDirectRedirect.set(true);
+      void this.auth.loginWithReturnUrl(returnUrl);
       return;
     }
 

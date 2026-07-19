@@ -8,7 +8,7 @@ import {
   ConfigDrivenListingPageStyles,
   ButtonComponent,
 } from '@lib/anatomy';
-import type { FichePaie } from '@applications/erp/rh/models';
+import type { FichePaie } from '@app/rh/models';
 
 import { PaieFacade } from '../services';
 import { buildPaieListingConfig } from '../config';

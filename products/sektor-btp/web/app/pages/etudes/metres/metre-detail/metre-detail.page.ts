@@ -15,8 +15,8 @@ import type {
   Metre,
   MetreCreate,
   MetreLigne,
-} from '@applications/erp/etudes/models';
-import { MetreTableEditorComponent } from '@applications/erp/etudes/components/metre-table-editor/metre-table-editor.component';
+} from '@app/etudes/models';
+import { MetreTableEditorComponent } from '@app/etudes/components/metre-table-editor/metre-table-editor.component';
 
 import { MetreFacade } from '../services';
 import { METRE_DETAIL_CONFIG } from '../config';

@@ -4,9 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { BankReconciliationApiService } from '@applications/erp/finance/services/bank-reconciliation-api.service';
-import { VirementApiService } from '@applications/erp/finance/services/virement-api.service';
-import type { CompteFinancier, VirementInterne } from '@applications/erp/finance/models';
+import { BankReconciliationApiService } from '@app/finance/services/bank-reconciliation-api.service';
+import { VirementApiService } from '@app/finance/services/virement-api.service';
+import type { CompteFinancier, VirementInterne } from '@app/finance/models';
 import { ButtonComponent } from '@lib/anatomy/components';
 
 @Component({

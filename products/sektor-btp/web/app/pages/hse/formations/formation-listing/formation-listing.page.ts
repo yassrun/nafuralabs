@@ -8,7 +8,7 @@ import {
   ConfigDrivenListingPageStyles,
   ButtonComponent,
 } from '@lib/anatomy';
-import type { Formation } from '@applications/erp/hse/models';
+import type { Formation } from '@app/hse/models';
 
 import { FormationFacade } from '../services';
 import { buildFormationsListingConfig } from '../config';

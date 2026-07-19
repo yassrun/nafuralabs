@@ -15,7 +15,7 @@ export interface Role {
 
 export type RoleListItem = Pick<
   Role,
-  'id' | 'roleCode' | 'name' | 'description' | 'isSystem' | 'priority' | 'memberCount' | 'createdAt'
+  'id' | 'roleCode' | 'name' | 'description' | 'isSystem' | 'priority' | 'memberCount' | 'scopeType' | 'createdAt'
 >;
 
 export interface RoleCreate {

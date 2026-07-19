@@ -1,7 +1,7 @@
 import type { TranslateService } from '@ngx-translate/core';
 
 import { buildListingConfig } from '@lib/anatomy';
-import type { Incident } from '@applications/erp/hse/models';
+import type { Incident } from '@app/hse/models';
 
 import { buildIncidentColumns } from './columns';
 import { buildIncidentFilters } from './filters';

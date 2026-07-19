@@ -1,7 +1,7 @@
 import type { TranslateService } from '@ngx-translate/core';
 
 import { buildListingConfig } from '@lib/anatomy';
-import type { OffreCommerciale } from '@applications/erp/ventes/models';
+import type { OffreCommerciale } from '@app/ventes/models';
 
 import { buildOffreColumns } from './columns';
 import { buildOffreFilters } from './filters';

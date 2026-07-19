@@ -5,7 +5,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import {ConfigDrivenListingPage,
   ConfigDrivenListingPageImports,
   ConfigDrivenListingPageStyles, ButtonComponent} from '@lib/anatomy';
-import type { DemandeAchat } from '@applications/erp/achats/models';
+import type { DemandeAchat } from '@app/achats/models';
 
 import { DemandeFacade } from '../services';
 import { buildDemandesListingConfig } from '../config';

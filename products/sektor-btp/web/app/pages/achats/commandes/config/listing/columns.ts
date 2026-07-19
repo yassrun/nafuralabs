@@ -1,7 +1,7 @@
 import type { TranslateService } from '@ngx-translate/core';
 
 import type { ColumnConfig } from '@lib/anatomy/types';
-import { BC_STATUS_KEYS } from '@applications/erp/shell/i18n-labels';
+import { BC_STATUS_KEYS } from '@app/shell/i18n-labels';
 import { resolveLocale } from '@lib/anatomy/pipes/_locale-resolver';
 
 const BC_STATUS_VARIANTS: Record<string, 'default' | 'warning' | 'success' | 'danger' | 'info'> = {

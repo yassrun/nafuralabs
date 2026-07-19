@@ -6,11 +6,11 @@ import type {
   NonConformite,
   NonConformiteCreate,
   NonConformiteUpdate,
-} from '@applications/erp/hse/models';
+} from '@app/hse/models';
 
-import { ChantierLookupService } from '@applications/erp/chantiers/services/chantier-lookup.service';
+import { ChantierLookupService } from '@app/chantiers/services/chantier-lookup.service';
 import { NcApiService } from './nc-api.service';
-import { ErpAuditService } from '@applications/erp/shell/erp-audit.service';
+import { ErpAuditService } from '@app/shell/erp-audit.service';
 
 @Injectable({ providedIn: 'root' })
 export class NcFacade extends GridFacade<NonConformite, NonConformiteCreate, NonConformiteUpdate> {

@@ -1,7 +1,7 @@
 import type { TranslateService } from '@ngx-translate/core';
 
 import type { DetailSectionConfig } from '@lib/anatomy/types';
-import type { Avoir } from '@applications/erp/ventes/models';
+import type { Avoir } from '@app/ventes/models';
 
 export function buildAvoirSections(
   t: TranslateService,

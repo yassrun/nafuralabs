@@ -1,10 +1,11 @@
-import type { Fournisseur } from '@applications/erp/achats/models';
+import type { Fournisseur } from '@app/achats/models';
 import type {
   ClientVente,
   ClientVenteCreate,
   ClientVenteType,
   ClientVenteUpdate,
-} from '@applications/erp/ventes/models';
+} from '@app/ventes/models';
+import { safeRandomUUID } from '@core/util/uuid';
 
 import type { Partner, PartnerCreate, PartnerUpdate } from './partners-api.service';
 
@@ -25,7 +26,7 @@ function parseClientType(forme?: string): ClientVenteType {
 }
 
 function newClientCode(): string {
-  const suffix = crypto.randomUUID().replace(/-/g, '').slice(0, 8).toUpperCase();
+  const suffix = safeRandomUUID().replace(/-/g, '').slice(0, 8).toUpperCase();
   return `CLI-${suffix}`;
 }
 

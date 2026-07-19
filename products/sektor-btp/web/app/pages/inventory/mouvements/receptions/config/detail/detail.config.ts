@@ -8,7 +8,7 @@ import {
   DOCUMENT_ATTACHMENT_CONFIG,
   ERP_ATTACHMENT_ENTITY_TYPES,
   withAttachments,
-} from '@applications/erp/shared/config/attachment-detail.config';
+} from '@app/shared/config/attachment-detail.config';
 
 import { buildReceptionDetailFields } from './fields';
 import { RECEPTION_DETAIL_ROUTES } from './routes';

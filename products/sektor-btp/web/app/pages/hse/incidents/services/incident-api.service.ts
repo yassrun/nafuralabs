@@ -6,7 +6,7 @@ import type {
   Incident,
   IncidentCreate,
   IncidentUpdate,
-} from '@applications/erp/hse/models';
+} from '@app/hse/models';
 
 import {
   type ApiCnssDatResult,

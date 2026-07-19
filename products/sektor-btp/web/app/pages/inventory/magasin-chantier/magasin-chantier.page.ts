@@ -8,8 +8,8 @@ import {
   MagasinChantierApiService,
   type ApiMagasinChantier,
   type ApiMagasinMouvement,
-} from '@applications/erp/inventory/services/magasin-chantier-api.service';
-import type { Location, StockBalance } from '@applications/erp/inventory/models';
+} from '@app/inventory/services/magasin-chantier-api.service';
+import type { Location, StockBalance } from '@app/inventory/models';
 
 @Component({
   selector: 'app-magasin-chantier-page',

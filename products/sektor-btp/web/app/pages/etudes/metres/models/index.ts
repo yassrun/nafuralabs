@@ -5,4 +5,4 @@ export type {
   MetreCreate,
   MetreUpdate,
   MetreStatus,
-} from '@applications/erp/etudes/models';
+} from '@app/etudes/models';

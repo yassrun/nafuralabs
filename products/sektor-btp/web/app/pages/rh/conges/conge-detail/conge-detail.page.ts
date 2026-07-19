@@ -9,8 +9,8 @@ import {
   createDetailFacadeFromCrud,
 } from '@lib/anatomy';
 import type { DetailActionEvent, StatusTransitionEvent } from '@lib/anatomy/types';
-import type { Conge, CongeCreate } from '@applications/erp/rh/models';
-import { SubmitApprovalButtonComponent } from '@applications/erp/pages/approbations/components/submit-approval-button/submit-approval-button.component';
+import type { Conge, CongeCreate } from '@app/rh/models';
+import { SubmitApprovalButtonComponent } from '@app/pages/approbations/components/submit-approval-button/submit-approval-button.component';
 
 import { CongeFacade } from '../services';
 import { buildCongeDetailConfig } from '../config';

@@ -12,17 +12,17 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { BankReconciliationApiService } from '@applications/erp/finance/services/bank-reconciliation-api.service';
-import { ContrePartieLookupService } from '@applications/erp/finance/services/contre-partie-lookup.service';
-import { ReglementApiService } from '@applications/erp/finance/services/reglement-api.service';
-import { MODE_KEYS } from '@applications/erp/shell/i18n-labels';
+import { BankReconciliationApiService } from '@app/finance/services/bank-reconciliation-api.service';
+import { ContrePartieLookupService } from '@app/finance/services/contre-partie-lookup.service';
+import { ReglementApiService } from '@app/finance/services/reglement-api.service';
+import { MODE_KEYS } from '@app/shell/i18n-labels';
 import type {
   CompteFinancier,
   ContrePartie,
   Reglement,
   ReglementStatus,
   ReglementType,
-} from '@applications/erp/finance/models';
+} from '@app/finance/models';
 import { ButtonComponent } from '@lib/anatomy/components';
 
 @Component({

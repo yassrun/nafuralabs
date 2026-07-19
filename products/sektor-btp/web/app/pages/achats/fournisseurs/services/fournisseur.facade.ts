@@ -6,7 +6,7 @@ import type {
   Fournisseur,
   FournisseurCreate,
   FournisseurUpdate,
-} from '@applications/erp/achats/models';
+} from '@app/achats/models';
 
 import { FournisseurApiService } from './fournisseur-api.service';
 

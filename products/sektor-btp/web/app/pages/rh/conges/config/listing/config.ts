@@ -1,7 +1,7 @@
 import type { TranslateService } from '@ngx-translate/core';
 
 import { buildListingConfig } from '@lib/anatomy';
-import type { Conge } from '@applications/erp/rh/models';
+import type { Conge } from '@app/rh/models';
 
 import { buildCongeColumns } from './columns';
 import { buildCongeFilters } from './filters';

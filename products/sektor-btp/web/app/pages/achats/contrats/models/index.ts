@@ -4,4 +4,4 @@ export type {
   ContratAchatCreate,
   ContratAchatUpdate,
   ContratAchatStatus,
-} from '@applications/erp/achats/models';
+} from '@app/achats/models';

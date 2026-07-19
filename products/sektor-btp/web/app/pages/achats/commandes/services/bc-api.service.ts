@@ -7,8 +7,8 @@ import type {
   BonCommandeCreate,
   BonCommandeListItem,
   BonCommandeUpdate,
-} from '@applications/erp/achats/models';
-import type { InventoryTx } from '@applications/erp/inventory/models';
+} from '@app/achats/models';
+import type { InventoryTx } from '@app/inventory/models';
 
 import {
   type ApiBonCommandeAchat,

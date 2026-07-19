@@ -7,4 +7,4 @@ export type {
   ComposantOuvrage,
   ComposantType,
   UniteMain,
-} from '@applications/erp/etudes/models';
+} from '@app/etudes/models';

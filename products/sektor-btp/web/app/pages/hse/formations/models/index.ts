@@ -4,4 +4,4 @@ export type {
   FormationListItem,
   FormationUpdate,
   StatutFormation,
-} from '@applications/erp/hse/models';
+} from '@app/hse/models';

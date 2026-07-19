@@ -5,7 +5,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { PageHeaderComponent, PageShellComponent } from '@lib/anatomy';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
-import type { FichePaie } from '@applications/erp/rh/models';
+import type { FichePaie } from '@app/rh/models';
 import { PaieApiService } from '../services/paie-api.service';
 
 @Component({

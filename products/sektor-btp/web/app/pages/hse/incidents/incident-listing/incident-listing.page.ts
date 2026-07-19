@@ -8,7 +8,7 @@ import {
   ConfigDrivenListingPageStyles,
   ButtonComponent,
 } from '@lib/anatomy';
-import type { Incident } from '@applications/erp/hse/models';
+import type { Incident } from '@app/hse/models';
 
 import { IncidentFacade } from '../services';
 import { buildIncidentsListingConfig } from '../config';

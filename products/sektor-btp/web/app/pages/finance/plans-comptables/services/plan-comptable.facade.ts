@@ -1,7 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 
-import { ChartOfAccountApiService } from '@applications/erp/finance/services/chart-of-account-api.service';
-import { JournalApiService } from '@applications/erp/finance/services/journal-api.service';
+import { ChartOfAccountApiService } from '@app/finance/services/chart-of-account-api.service';
+import { JournalApiService } from '@app/finance/services/journal-api.service';
 import type {
   Compte,
   CompteCreate,
@@ -9,7 +9,7 @@ import type {
   Journal,
   JournalCreate,
   JournalUpdate,
-} from '@applications/erp/finance/models';
+} from '@app/finance/models';
 
 @Injectable({ providedIn: 'root' })
 export class PlanComptableFacade {

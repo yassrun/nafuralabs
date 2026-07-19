@@ -2,8 +2,8 @@ import type { TranslateService } from '@ngx-translate/core';
 
 import { buildDetailConfig } from '@lib/anatomy';
 import type { StatusMachineConfig } from '@lib/anatomy/types';
-import type { Formation, StatutFormation } from '@applications/erp/hse/models';
-import { FORMATION_STATUS_KEYS } from '@applications/erp/shell/i18n-labels';
+import type { Formation, StatutFormation } from '@app/hse/models';
+import { FORMATION_STATUS_KEYS } from '@app/shell/i18n-labels';
 
 import { buildFormationFields } from './fields';
 import { ROUTES } from './routes';

@@ -8,7 +8,6 @@
 import { Injectable, Signal, computed, inject, effect } from '@angular/core';
 import { Router } from '@angular/router';
 import { environment } from '@env';
-import { APPLICATION_REQUIRES_TENANT } from '@applications/config/routes';
 
 import { AuthStateStore } from '../state/auth.state';
 import { AuthApiService } from './auth-api.service';
@@ -25,6 +24,8 @@ import { User, UserProfile } from '../models/user.models';
 import { TenantMembership, TenantContext } from '../models/tenant.models';
 import { TokenPair } from '../models/token.models';
 import { SystemRoles } from '../models/user.models';
+import { POST_AUTH_REDIRECT_STORAGE_KEY } from '@lib/anatomy/services/lookup-reference-navigation.service';
+import { applicationRequiresTenant } from '../../application/application-config';
 
 /**
  * Auth Facade
@@ -229,7 +230,7 @@ export class AuthFacade {
       );
 
       // Only tenant-enabled apps should resolve tenant memberships/context
-      if (APPLICATION_REQUIRES_TENANT) {
+      if (applicationRequiresTenant()) {
         const tenants = await this.api.getUserTenants(
           result.user.id,
           result.tokens.accessToken
@@ -262,6 +263,24 @@ export class AuthFacade {
     } finally {
       this.state.setLoading(false);
     }
+  }
+
+  /**
+   * Staging rollout: skip the in-app /login splash and redirect straight to Keycloak.
+   */
+  usesDirectKeycloakLogin(): boolean {
+    return (environment as { directKeycloakLogin?: boolean }).directKeycloakLogin === true;
+  }
+
+  /**
+   * Remember intended route, then start OAuth (or dev login flow).
+   */
+  async loginWithReturnUrl(returnUrl?: string | null): Promise<void> {
+    const trimmed = returnUrl?.trim();
+    if (trimmed?.startsWith('/')) {
+      sessionStorage.setItem(POST_AUTH_REDIRECT_STORAGE_KEY, trimmed);
+    }
+    await this.login();
   }
 
   /**
@@ -303,7 +322,7 @@ export class AuthFacade {
       );
 
       // Only tenant-enabled apps should resolve tenant memberships/context
-      if (APPLICATION_REQUIRES_TENANT) {
+      if (applicationRequiresTenant()) {
         const tenants = await this.api.getUserTenants(
           response.user.id,
           response.tokens.accessToken
@@ -340,19 +359,21 @@ export class AuthFacade {
    * Logout and clear session.
    * Redirects to Keycloak logout to invalidate SSO session.
    */
-  async logout(redirectTo: string = '/login'): Promise<void> {
+  async logout(redirectTo?: string): Promise<void> {
     const tokens = this.state.tokens();
+    const fallbackRedirect = this.usesDirectKeycloakLogin() ? '/' : '/login';
+    const target = redirectTo ?? fallbackRedirect;
 
     this.cancelTokenRefresh();
     this.state.clear();
     this.state.clearPersistedTenant();
 
     if (environment.devAuthBypass) {
-      await this.router.navigateByUrl(redirectTo);
+      await this.router.navigateByUrl(target);
       return;
     }
 
-    // Redirect to Keycloak logout (will redirect back to login page)
+    // Redirect to Keycloak logout (will redirect back to app root or /login)
     await this.api.logout(tokens?.refreshToken);
   }
 
@@ -418,6 +439,27 @@ export class AuthFacade {
     if (result.accessToken) {
       this.applyBackendOnboardingTokens(user, result.accessToken, result.expiresIn ?? 900);
     }
+  }
+
+  /**
+   * After accepting a tenant invitation, refresh tenants and select the invited tenant.
+   */
+  async acceptTenantInvitation(result: {
+    tenantId: string;
+    tenantName: string;
+    tenantKey?: string;
+  }): Promise<void> {
+    const user = this.state.user();
+    const tokens = this.state.tokens();
+    if (!user || !tokens) {
+      return;
+    }
+
+    const tenants = await this.api.getUserTenants(user.id, tokens.accessToken);
+    this.state.setTenants(tenants);
+    await this.selectTenant(result.tenantId);
+    await this.tenantContextService.initialize(result.tenantId);
+    this.state.persistSession(true);
   }
 
   /**
@@ -518,7 +560,7 @@ export class AuthFacade {
       const membership = this.buildOnboardingOwnerMembership(tenantId, tenantId);
       this.state.setTenants([membership]);
       this.state.selectTenant(tenantId, membership);
-      if (APPLICATION_REQUIRES_TENANT) {
+      if (applicationRequiresTenant()) {
         await this.tenantContextService.initialize(tenantId);
       }
     } else {
@@ -534,7 +576,7 @@ export class AuthFacade {
       const user = await this.api.getCurrentUser(session.tokens.accessToken);
       this.state.setAuthenticatedFromToken(session.tokens, user);
 
-      if (APPLICATION_REQUIRES_TENANT) {
+      if (applicationRequiresTenant()) {
         const tenants = await this.api.getUserTenants(user.id, session.tokens.accessToken);
         this.state.setTenants(tenants);
 
@@ -934,7 +976,7 @@ export class AuthFacade {
     }
     this.state.setAuthenticatedFromToken(session.tokens, user);
     this.state.setTenants([membership]);
-    if (APPLICATION_REQUIRES_TENANT) {
+    if (applicationRequiresTenant()) {
       const tid = session.tenantId ?? membership.tenant.id;
       if (tid) {
         await this.tenantContextService.initialize(tid);
@@ -960,7 +1002,7 @@ export class AuthFacade {
     this.state.setAuthenticatedFromToken(tokens, user);
     this.state.setTenants([membership]);
 
-    if (APPLICATION_REQUIRES_TENANT) {
+    if (applicationRequiresTenant()) {
       await this.tenantContextService.initialize(membership.tenant.id);
     }
 

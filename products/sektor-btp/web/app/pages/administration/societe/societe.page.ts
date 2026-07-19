@@ -8,7 +8,7 @@ import { IceInputComponent } from '@lib/anatomy/components/atoms/ice-input/ice-i
 import { RibInputComponent } from '@lib/anatomy/components/atoms/rib-input/rib-input.component';
 import { PhoneMaInputComponent } from '@lib/anatomy/components/atoms/phone-ma-input/phone-ma-input.component';
 
-import { ETABLISSEMENT_TYPE_KEYS, FORME_JURIDIQUE_KEYS } from '@applications/erp/shell/i18n-labels';
+import { ETABLISSEMENT_TYPE_KEYS, FORME_JURIDIQUE_KEYS } from '@app/shell/i18n-labels';
 import { SocieteService } from '../../../shell/societe.service';
 import { BANQUES_MA } from '../../../shared/data';
 import {

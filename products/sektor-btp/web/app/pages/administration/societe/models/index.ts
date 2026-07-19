@@ -37,7 +37,7 @@ export interface Etablissement {
   isActive: boolean;
 }
 
-// @i18n-exempt — @deprecated Phase 1.2 — see ETABLISSEMENT_TYPE_KEYS in @applications/erp/shell/i18n-labels.
+// @i18n-exempt — @deprecated Phase 1.2 — see ETABLISSEMENT_TYPE_KEYS in @app/shell/i18n-labels.
 export const ETABLISSEMENT_TYPE_LABELS: Record<EtablissementType, string> = {
   SIEGE: 'Siège',
   FILIALE: 'Filiale',
@@ -45,7 +45,7 @@ export const ETABLISSEMENT_TYPE_LABELS: Record<EtablissementType, string> = {
   CHANTIER_BASE: 'Base chantier',
 };
 
-// @i18n-exempt — @deprecated Phase 1.2 — see FORME_JURIDIQUE_KEYS in @applications/erp/shell/i18n-labels.
+// @i18n-exempt — @deprecated Phase 1.2 — see FORME_JURIDIQUE_KEYS in @app/shell/i18n-labels.
 export const FORME_JURIDIQUE_LABELS: Record<SocieteFormeJuridique, string> = {
   SARL: 'SARL',
   SA: 'SA',

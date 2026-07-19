@@ -5,7 +5,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { TranslateModule } from '@ngx-translate/core';
 
-import { ErpNotificationCenterAlertsComponent } from '@applications/erp/shell/erp-notification-center-alerts.component';
+import { NgComponentOutlet } from '@angular/common';
+import { SHELL_EXTENSIONS } from '@platform/core/shell/shell-extensions';
 import { NOTIFICATION_BELL_ADAPTER } from '@platform/features/collaboration/notification/notification-bell.adapter';
 import {
   NOTIFICATION_RANGE_OPTIONS,
@@ -25,7 +26,7 @@ import { ConfirmDialogService } from '@lib/anatomy';
     FormsModule,
     TranslateModule,
     NotificationItemComponent,
-    ErpNotificationCenterAlertsComponent,
+    NgComponentOutlet,
   ],
   template: `
     <section class="notification-center">
@@ -40,7 +41,9 @@ import { ConfirmDialogService } from '@lib/anatomy';
       </header>
 
       @if (hasErpAlerts()) {
-        <app-erp-notification-center-alerts />
+        @for (ext of alertExtensions(); track ext.component) {
+          <ng-container *ngComponentOutlet="ext.component" />
+        }
       }
 
       <div class="notification-center__layout">
@@ -189,6 +192,12 @@ export class NotificationCenterPage implements OnInit {
   private readonly confirmDialog = inject(ConfirmDialogService);
 
   readonly hasErpAlerts = computed(() => this.bellAdapter?.mode === 'erp-alerts');
+
+  /** Emplacement 'notification-center-alerts' — rempli par l'application, vide sinon. */
+  private readonly shellExtensions = inject(SHELL_EXTENSIONS, { optional: true });
+  readonly alertExtensions = computed(() =>
+    (this.shellExtensions ?? []).filter((e) => e.slot === 'notification-center-alerts'),
+  );
   readonly totalPending = computed(
     () => this.facade.unreadCount() + (this.bellAdapter?.count() ?? 0),
   );

@@ -5,7 +5,7 @@ import type {
   AppelOffreClient,
   AppelOffreClientCreate,
   AppelOffreClientUpdate,
-} from '@applications/erp/etudes/models';
+} from '@app/etudes/models';
 
 @Injectable({ providedIn: 'root' })
 export class AOCApiService extends FeatureApiService<

@@ -83,7 +83,7 @@ export interface ApprovalSubmitInput {
   urgence?: 'NORMALE' | 'HAUTE' | 'CRITIQUE';
 }
 
-// @i18n-exempt — @deprecated Phase 1.2 — see APPROVAL_ENTITY_TYPE_KEYS in @applications/erp/shell/i18n-labels.
+// @i18n-exempt — @deprecated Phase 1.2 — see APPROVAL_ENTITY_TYPE_KEYS in @app/shell/i18n-labels.
 export const ENTITY_TYPE_LABELS: Record<ApprovalEntityType, string> = {
   DA: "Demande d'achat",
   AO: "Appel d'offres (attribution)",

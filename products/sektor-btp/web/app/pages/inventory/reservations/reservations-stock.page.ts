@@ -4,8 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 
-import { ReservationStockService } from '@applications/erp/inventory/services/reservation-stock.service';
-import type { ReservationStock } from '@applications/erp/inventory/models';
+import { ReservationStockService } from '@app/inventory/services/reservation-stock.service';
+import type { ReservationStock } from '@app/inventory/models';
 
 import { ButtonComponent } from '@lib/anatomy';
 
@@ -129,7 +129,7 @@ import { ButtonComponent } from '@lib/anatomy';
 export class ReservationsStockPage implements OnInit {
   readonly svc = inject(ReservationStockService);
 
-  readonly rows = signal<import('@applications/erp/inventory/models').ReservationStock[]>([]);
+  readonly rows = signal<import('@app/inventory/models').ReservationStock[]>([]);
   readonly loading = signal(false);
 
   draft: {

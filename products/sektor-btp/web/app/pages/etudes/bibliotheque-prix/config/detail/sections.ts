@@ -1,5 +1,5 @@
 import type { DetailSectionConfig } from '@lib/anatomy/types';
-import type { Ouvrage } from '@applications/erp/etudes/models';
+import type { Ouvrage } from '@app/etudes/models';
 
 export const SECTIONS: DetailSectionConfig<Ouvrage>[] = [
   {

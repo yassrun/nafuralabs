@@ -2,7 +2,7 @@ import { Injectable, LOCALE_ID, computed, inject, signal } from '@angular/core';
 
 import { GridFacade } from '@lib/anatomy';
 import type { LookupContext } from '@lib/anatomy/types';
-import { ErpLookupService, partnerLookupLabel } from '@applications/erp/shared/services/erp-lookup.service';
+import { ErpLookupService, partnerLookupLabel } from '@app/shared/services/erp-lookup.service';
 import type {
   FactureClient,
   LotChantier,
@@ -10,9 +10,9 @@ import type {
   SituationCreate,
   SituationStatus,
   SituationUpdate,
-} from '@applications/erp/chantiers/models';
-import { ErpAuditService, AuditAction } from '@applications/erp/shell/erp-audit.service';
-import { ChantierLotApiService } from '@applications/erp/pages/chantiers/services/chantier-lot-api.service';
+} from '@app/chantiers/models';
+import { ErpAuditService, AuditAction } from '@app/shell/erp-audit.service';
+import { ChantierLotApiService } from '@app/pages/chantiers/services/chantier-lot-api.service';
 
 import { SituationApiService } from './situation-api.service';
 

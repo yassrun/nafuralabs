@@ -11,4 +11,4 @@ export type {
   JournalListItem,
   JournalType,
   JournalUpdate,
-} from '@applications/erp/finance/models';
+} from '@app/finance/models';

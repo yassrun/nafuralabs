@@ -7,10 +7,10 @@ import type {
   EmployeCreate,
   EmployeUpdate,
   StatutEmploye,
-} from '@applications/erp/rh/models';
+} from '@app/rh/models';
 
 import { EmployeApiService } from './employe-api.service';
-import { ErpAuditService } from '@applications/erp/shell/erp-audit.service';
+import { ErpAuditService } from '@app/shell/erp-audit.service';
 
 @Injectable({ providedIn: 'root' })
 export class EmployeFacade extends GridFacade<Employe, EmployeCreate, EmployeUpdate> {

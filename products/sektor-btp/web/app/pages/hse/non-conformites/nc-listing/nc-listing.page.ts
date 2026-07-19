@@ -8,7 +8,7 @@ import {
   ConfigDrivenListingPageStyles,
   ButtonComponent,
 } from '@lib/anatomy';
-import type { NonConformite } from '@applications/erp/hse/models';
+import type { NonConformite } from '@app/hse/models';
 
 import { NcFacade } from '../services';
 import { buildNcListingConfig } from '../config';

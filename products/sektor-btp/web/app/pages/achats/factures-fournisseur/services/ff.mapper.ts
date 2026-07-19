@@ -1,11 +1,11 @@
-import type { Partner } from '@applications/erp/shared/services/partners-api.service';
-import type { ComptaFournisseur } from '@applications/erp/finance/models';
+import type { Partner } from '@app/shared/services/partners-api.service';
+import type { ComptaFournisseur } from '@app/finance/models';
 import type {
   FactureFournisseur,
   FactureFournCreate,
   FactureFournLigne,
   FactureFournUpdate,
-} from '@applications/erp/finance/models';
+} from '@app/finance/models';
 
 export interface ApiFactureFournisseur {
   id: string;

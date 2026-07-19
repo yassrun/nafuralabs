@@ -5,15 +5,15 @@ import { Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { ButtonComponent, PageHeaderComponent, PageShellComponent, ToastService } from '@lib/anatomy/components';
-import { BalanceApiService } from '@applications/erp/finance/services/balance-api.service';
-import { ChantierApiService } from '@applications/erp/pages/chantiers/services/chantier-api.service';
+import { BalanceApiService } from '@app/finance/services/balance-api.service';
+import { ChantierApiService } from '@app/pages/chantiers/services/chantier-api.service';
 import type {
   AxeAnalytique,
   BalanceLigne,
   BalanceTotaux,
   BalanceVue,
   CompteClasse,
-} from '@applications/erp/finance/models';
+} from '@app/finance/models';
 
 @Component({
   selector: 'app-balance',

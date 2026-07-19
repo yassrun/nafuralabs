@@ -22,6 +22,7 @@ import { ETABLISSEMENT_TYPE_LABELS } from '../../../pages/administration/societe
  * - Emits `(change)` whenever the user changes the active société or établissement.
  */
 import { ButtonComponent } from '@lib/anatomy';
+import { ThemeService } from '@platform/core/theme';
 
 @Component({
   selector: 'app-societe-switcher',
@@ -247,6 +248,7 @@ import { ButtonComponent } from '@lib/anatomy';
 })
 export class SocieteSwitcherComponent {
   private readonly societeService = inject(SocieteService);
+  private readonly themeService = inject(ThemeService);
   private readonly hostRef = inject(ElementRef);
 
   @Output() readonly change = new EventEmitter<{ societeId: string; etablissementId: string | null }>();
@@ -326,9 +328,49 @@ export class SocieteSwitcherComponent {
   }
 
   private emit(): void {
+    this.applyThemeForCurrentSociete();
     this.change.emit({
       societeId: this.currentSocieteId(),
       etablissementId: this.currentEtabId(),
     });
+  }
+
+  /**
+   * Applique le thème de la société active.
+   *
+   * Rapatrié depuis `platform-app-shell.component.ts` : ce code portait des identifiants
+   * de démo ERP en dur (`soc-somacom-*`) et n'avait donc rien à faire dans la plateforme.
+   * Le composant est rendu dans l'emplacement `header-tenant-switcher` et pilote le thème
+   * lui-même — la dépendance application -> plateforme est dans le bon sens.
+   */
+  private applyThemeForCurrentSociete(): void {
+    const demoPrimaryBySociete: Record<string, string> = {
+      'soc-somacom-btp': '#0d9488',
+      'soc-somacom-tp': '#1d4ed8',
+      'soc-somacom-logistique': '#7c3aed',
+    };
+    const id = this.currentSocieteId();
+    const b = this.themeService.branding();
+    const fallback = b?.primaryColor && /^#/.test(b.primaryColor) ? b.primaryColor : null;
+    this.themeService.applyPrimaryColor(demoPrimaryBySociete[id] ?? fallback);
+
+    const soc = this.societeService.currentSociete();
+    if (soc) {
+      this.themeService.applyDocumentChrome({
+        logoUrl: b?.logoUrl ?? null,
+        faviconUrl: b?.faviconUrl ?? null,
+        primaryColor: demoPrimaryBySociete[id] ?? b?.primaryColor ?? null,
+        tenantDisplayName: soc.raisonSociale,
+      });
+    } else if (b) {
+      this.themeService.applyDocumentChrome({
+        logoUrl: b.logoUrl ?? null,
+        faviconUrl: b.faviconUrl ?? null,
+        primaryColor: demoPrimaryBySociete[id] ?? b.primaryColor ?? null,
+        tenantDisplayName: b.tenantDisplayName ?? null,
+      });
+    } else {
+      this.themeService.applyDocumentChrome(null);
+    }
   }
 }

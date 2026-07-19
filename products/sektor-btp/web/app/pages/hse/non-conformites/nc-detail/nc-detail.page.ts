@@ -9,7 +9,7 @@ import {
   createDetailFacadeFromCrud,
 } from '@lib/anatomy';
 import type { DetailActionEvent } from '@lib/anatomy/types';
-import type { NonConformite, NonConformiteCreate } from '@applications/erp/hse/models';
+import type { NonConformite, NonConformiteCreate } from '@app/hse/models';
 
 import { NcFacade } from '../services';
 import { buildNcDetailConfig } from '../config';

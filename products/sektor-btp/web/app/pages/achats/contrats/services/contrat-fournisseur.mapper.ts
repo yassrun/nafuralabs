@@ -3,7 +3,7 @@ import type {
   ContratAchatCreate,
   ContratAchatListItem,
   ContratAchatUpdate,
-} from '@applications/erp/achats/models';
+} from '@app/achats/models';
 
 const UI_TYPE_DEFAULT = 'CADRE' as const;
 

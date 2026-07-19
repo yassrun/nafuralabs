@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import type { FactureClient } from '@applications/erp/ventes/models';
+import type { FactureClient } from '@app/ventes/models';
 import type { NiveauRelance, SuiviRecouvrement } from '../models';
 
 function daysBetween(fromIso: string, toIso: string): number {

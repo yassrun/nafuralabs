@@ -14,7 +14,7 @@ import type {
   ConditionPaiement,
   ConditionPaiementCreate,
   EcheancePaiement,
-} from '@applications/erp/finance/models';
+} from '@app/finance/models';
 
 import { ConditionPaiementFacade } from '../services';
 import { buildConditionPaiementDetailConfig } from '../config';

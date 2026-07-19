@@ -9,9 +9,9 @@ import { map } from 'rxjs';
 import { PageHeaderComponent, PageShellComponent, ConfirmDialogService } from '@lib/anatomy';
 import { ButtonComponent } from '@lib/anatomy/components';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
-import { SubmitApprovalButtonComponent } from '@applications/erp/pages/approbations/components/submit-approval-button/submit-approval-button.component';
-import { ErpAuditService } from '@applications/erp/shell/erp-audit.service';
-import { AVENANT_STATUS_KEYS, AVENANT_TYPE_KEYS } from '@applications/erp/shell/i18n-labels';
+import { SubmitApprovalButtonComponent } from '@app/pages/approbations/components/submit-approval-button/submit-approval-button.component';
+import { ErpAuditService } from '@app/shell/erp-audit.service';
+import { AVENANT_STATUS_KEYS, AVENANT_TYPE_KEYS } from '@app/shell/i18n-labels';
 import {
   type Avenant,
   type AvenantStatus,

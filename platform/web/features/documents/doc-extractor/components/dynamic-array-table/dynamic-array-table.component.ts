@@ -14,6 +14,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { JsonSchema, JsonSchemaArray, JsonSchemaObject } from '../../models/json-schema.model';
 import { UiArrayColumn } from '../../models/ui-schema.model';
+import type { FieldIssue } from '../../models/extraction.model';
 import { AnyFormGroup, JsonSchemaFormBuilder } from '../../utils/json-schema-form-builder';
 
 @Component({
@@ -43,6 +44,8 @@ export class DynamicArrayTableComponent {
   @Input({ required: true }) arraySchema!: JsonSchemaArray;
   @Input({ required: true }) columns!: UiArrayColumn[];
   @Input() readonly = false;
+  @Input() lockStructure = false;
+  @Input() issues: FieldIssue[] = [];
 
   @ViewChild(MatTable) private readonly table?: MatTable<AbstractControl>;
 
@@ -54,7 +57,9 @@ export class DynamicArrayTableComponent {
   }
 
   get displayedColumns(): string[] {
-    return [...this.columns.map(c => c.path), 'actions'];
+    return this.lockStructure
+      ? this.columns.map(c => c.path)
+      : [...this.columns.map(c => c.path), 'actions'];
   }
 
   get rows(): AbstractControl[] {
@@ -101,18 +106,10 @@ export class DynamicArrayTableComponent {
     return row as FormGroup as AnyFormGroup;
   }
 
-  rowErrorCount(row: AbstractControl): number {
-    if (!(row instanceof FormGroup)) return row.invalid ? 1 : 0;
-    return Object.values(row.controls).reduce(
-      (count, control) => count + this.controlErrorCount(control),
-      0
-    );
-  }
-
   addRow(): void {
     const item = this.itemSchema();
     if (!item) return;
-    if (this.readonly) return;
+    if (this.readonly || this.lockStructure) return;
 
     const row = JsonSchemaFormBuilder.buildGroupForObjectSchema(item);
     this.formArray.push(row);
@@ -120,7 +117,7 @@ export class DynamicArrayTableComponent {
   }
 
   removeRow(index: number): void {
-    if (this.readonly) return;
+    if (this.readonly || this.lockStructure) return;
     this.formArray.removeAt(index);
     this.table?.renderRows();
   }
@@ -145,20 +142,10 @@ export class DynamicArrayTableComponent {
     return 'Invalid value';
   }
 
-  private controlErrorCount(control: AbstractControl): number {
-    let count = control.errors ? Object.keys(control.errors).length : 0;
-    if (control instanceof FormGroup) {
-      count += Object.values(control.controls).reduce(
-        (nested, child) => nested + this.controlErrorCount(child),
-        0
-      );
-    } else if (control instanceof FormArray) {
-      count += control.controls.reduce(
-        (nested, child) => nested + this.controlErrorCount(child),
-        0
-      );
-    }
-    return count;
+  issueFor(rowIndex: number, path: string): string | null {
+    return this.issues.find(
+      (issue) => issue.rowIndex === rowIndex && issue.path.split('.').pop() === path,
+    )?.message ?? null;
   }
 }
 

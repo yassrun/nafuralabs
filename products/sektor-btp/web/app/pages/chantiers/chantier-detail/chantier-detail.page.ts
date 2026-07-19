@@ -12,10 +12,11 @@ import { AttachmentListComponent } from '@platform/features/collaboration/doc-ma
 import {
   DOCUMENT_ATTACHMENT_CONFIG,
   ERP_ATTACHMENT_ENTITY_TYPES,
-} from '@applications/erp/shared/config/attachment-detail.config';
+} from '@app/shared/config/attachment-detail.config';
 import { PhotoChantierGalleryComponent } from '../components/photo-chantier-gallery/photo-chantier-gallery.component';
 import { ChantierLotsTabComponent } from '../components/chantier-lots-tab/chantier-lots-tab.component';
 import { ChantierPhasesTabComponent } from '../components/chantier-phases-tab/chantier-phases-tab.component';
+import { ChantierEquipeTabComponent } from '../components/chantier-equipe-tab/chantier-equipe-tab.component';
 import type { BadgeVariant } from '@lib/anatomy/types';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
 
@@ -26,19 +27,19 @@ import { ChantierLotApiService } from '../services/chantier-lot-api.service';
 import {
   CHANTIER_STATUS_KEYS,
   CHANTIER_TYPE_KEYS,
-} from '@applications/erp/shell/i18n-labels';
+} from '@app/shell/i18n-labels';
 import { ContratMarcheApiService } from '../../marches/contrats/services/contrat-marche-api.service';
 import type { Marche } from '../../marches/models';
 import {
   SituationGenerationService,
   type SituationDraftBrouillon,
 } from '../../marches/services/situation-generation.service';
-import { ErpAuditService } from '@applications/erp/shell/erp-audit.service';
+import { ErpAuditService } from '@app/shell/erp-audit.service';
 import { AuthFacade } from '@core/security/services/auth.facade';
 import type { RecordAttachmentDto } from '@platform/features/collaboration/doc-manager/services/attachment-api.service';
 import { DocumentsApiService } from '../documents/services/documents-api.service';
 
-type DetailTab = 'overview' | 'lots' | 'phases' | 'budget' | 'situations' | 'documents' | 'photos';
+type DetailTab = 'overview' | 'lots' | 'phases' | 'budget' | 'situations' | 'documents' | 'photos' | 'equipe';
 
 const STATUS_VARIANT: Record<ChantierStatus, BadgeVariant> = {
   PROSPECT: 'info',
@@ -54,7 +55,7 @@ const STATUS_VARIANT: Record<ChantierStatus, BadgeVariant> = {
   selector: 'app-chantier-detail',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterLink, PageShellComponent, PageHeaderComponent, BadgeComponent, ButtonComponent, EmptyStateComponent, MadCurrencyPipe, TranslateModule, AttachmentListComponent, PhotoChantierGalleryComponent, ChantierLotsTabComponent, ChantierPhasesTabComponent],
+  imports: [CommonModule, RouterLink, PageShellComponent, PageHeaderComponent, BadgeComponent, ButtonComponent, EmptyStateComponent, MadCurrencyPipe, TranslateModule, AttachmentListComponent, PhotoChantierGalleryComponent, ChantierLotsTabComponent, ChantierPhasesTabComponent, ChantierEquipeTabComponent],
   template: `
     <nf-page-shell [scroll]="true">
       @if (chantier(); as c) {
@@ -114,18 +115,15 @@ const STATUS_VARIANT: Record<ChantierStatus, BadgeVariant> = {
             <div class="info-grid">
               <article class="info-card">
                 <h3>{{ 'chantiers.chantier.detail.sections.equipe' | translate }}</h3>
-                <dl>
-                  <dt>{{ 'chantiers.common.fields.client' | translate }}</dt><dd>{{ c.clientName ?? '—' }}</dd>
-                  <dt>{{ 'chantiers.chantier.detail.labels.chefChantier' | translate }}</dt><dd>{{ c.chefChantierName ?? '—' }}</dd>
-                  <dt>{{ 'chantiers.chantier.detail.labels.conducteurTravaux' | translate }}</dt><dd>{{ c.conducteurTravauxName ?? '—' }}</dd>
-                  @if (c.ingenieurName) {
-                    <dt>{{ 'chantiers.chantier.detail.labels.ingenieur' | translate }}</dt><dd>{{ c.ingenieurName }}</dd>
-                  }
-                </dl>
+                <p class="muted">{{ 'chantiers.chantier.detail.equipe.seeTab' | translate }}</p>
+                <nf-button variant="ghost" size="sm" type="button" (click)="setTab('equipe')">
+                  {{ 'chantiers.chantier.detail.tabs.equipe' | translate }}
+                </nf-button>
               </article>
               <article class="info-card">
                 <h3>{{ 'chantiers.chantier.detail.sections.calendrier' | translate }}</h3>
                 <dl>
+                  <dt>{{ 'chantiers.common.fields.client' | translate }}</dt><dd>{{ c.clientName ?? '—' }}</dd>
                   <dt>{{ 'chantiers.chantier.detail.labels.ordreService' | translate }}</dt><dd>{{ (c.dateOrdreService ?? c.dateDebut) | date:'dd/MM/yyyy' }}</dd>
                   <dt>{{ 'chantiers.chantier.detail.labels.debut' | translate }}</dt><dd>{{ c.dateDebut | date:'dd/MM/yyyy' }}</dd>
                   <dt>{{ 'chantiers.chantier.detail.labels.finPrevue' | translate }}</dt><dd>{{ c.dateFinPrevue | date:'dd/MM/yyyy' }}</dd>
@@ -263,6 +261,12 @@ const STATUS_VARIANT: Record<ChantierStatus, BadgeVariant> = {
           </section>
         }
 
+        @if (activeTab() === 'equipe') {
+          <section class="tab-panel">
+            <app-chantier-equipe-tab [chantierId]="c.id" />
+          </section>
+        }
+
         <div class="actions">
           <nf-button variant="secondary" icon="arrow-left" iconLibrary="lucide" (clicked)="goBack()">{{ 'chantiers.common.actions.backToList' | translate }}</nf-button>
           <nf-button variant="secondary" icon="pencil" iconLibrary="lucide" (clicked)="editChantier()">{{ 'chantiers.chantier.detail.actions.edit' | translate }}</nf-button>
@@ -314,31 +318,10 @@ const STATUS_VARIANT: Record<ChantierStatus, BadgeVariant> = {
     .kpi__value--lg { font-size: 1.5rem; }
 
     .tabs { display: flex; gap: 0; border-bottom: 2px solid var(--nf-color-border); margin-bottom: 1.25rem; overflow-x: auto; }
-    .tab {
-      padding: 0.65rem 1.1rem;
-      background: none;
-      border: none;
-      border-bottom: 2px solid transparent;
-      margin-bottom: -2px;
-      font: inherit;
-      font-size: 0.88rem;
-      font-weight: 500;
-      color: var(--nf-color-text-secondary);
-      cursor: pointer;
-      white-space: nowrap;
-      transition: color 120ms, border-color 120ms, background-color 120ms;
-    }
+    .tab { padding: 0.65rem 1.1rem; background: none; border: none; border-bottom: 2px solid transparent; margin-bottom: -2px; font-size: 0.88rem; font-weight: 500; color: var(--nf-color-text-secondary); cursor: pointer; white-space: nowrap; transition: color 120ms, border-color 120ms; }
     .tab:hover { color: var(--nf-text-primary, var(--nf-color-text-primary)); }
-    .tab--active {
-      color: var(--nf-color-primary-700);
-      border-bottom-color: var(--nf-color-primary-700);
-      font-weight: 700;
-    }
-    .tab:focus-visible {
-      outline: 2px solid var(--nf-color-primary-500);
-      outline-offset: 2px;
-      border-radius: 4px;
-    }
+    .tab:focus-visible { outline: 2px solid var(--nf-color-primary-600); outline-offset: -2px; border-radius: 0.25rem; }
+    .tab--active { color: var(--nf-color-primary-700); border-bottom-color: var(--nf-color-primary-700); font-weight: 600; }
 
     .tab-panel { padding-bottom: 1.5rem; }
     .tab-panel__toolbar { display: flex; justify-content: flex-end; margin-bottom: 0.75rem; }
@@ -432,6 +415,7 @@ export class ChantierDetailPage {
 
   readonly tabs = computed(() => ([
     { id: 'overview' as DetailTab, label: this.translate.instant('chantiers.chantier.detail.tabs.overview') },
+    { id: 'equipe' as DetailTab, label: this.translate.instant('chantiers.chantier.detail.tabs.equipe') },
     { id: 'lots' as DetailTab, label: this.translate.instant('chantiers.chantier.detail.tabs.lots') },
     { id: 'phases' as DetailTab, label: this.translate.instant('chantiers.chantier.detail.tabs.phases') },
     { id: 'budget' as DetailTab, label: this.translate.instant('chantiers.chantier.detail.tabs.budget') },

@@ -25,7 +25,7 @@
               </tr>
             </thead>
             <tbody>
-              @for (l of lignesValue(item()); track l.id) {
+              @for (l of lignesValue(item()); track l.id || $index) {
                 <tr>
                   <td>{{ l.designation }}</td>
                   <td class="num">{{ l.totalHt | mad:2 }}</td>
@@ -36,6 +36,19 @@
         }
       </div>
     </ng-template>
+
+    @if (mode() === 'edit' || mode() === 'create') {
+      <ng-container slot="footer">
+        <erp-doc-scan-button
+          domainKey="finance"
+          docTypeKey="CUSTOMER_CREDIT_NOTE"
+          permission="ventes.avoir.scan"
+          labelKey="ventes.avoir.scan.button"
+          (extracted)="onScanAvoir($event)"
+          (scanError)="onScanError($event)">
+        </erp-doc-scan-button>
+      </ng-container>
+    }
 
   </nf-entity-detail>
 

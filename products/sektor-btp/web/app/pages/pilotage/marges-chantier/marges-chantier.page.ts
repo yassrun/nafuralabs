@@ -12,8 +12,8 @@ import {
   PilotageChantierMargesService,
   type PilotageChantierMargeRow,
 } from '../services/pilotage-chantier-marges.service';
-import { CHANTIER_STATUS_KEYS } from '@applications/erp/shell/i18n-labels';
-import { ErpAuditService } from '../../../shell/erp-audit.service';
+import { CHANTIER_STATUS_KEYS } from '@app/shell/i18n-labels';
+import { ErpAuditService } from '@app/shell/erp-audit.service';
 
 @Component({
   selector: 'app-marges-chantier',

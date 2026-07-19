@@ -3,8 +3,8 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 
-import { LettrageApiService } from '@applications/erp/finance/services/lettrage-api.service';
-import { LettrageService } from '@applications/erp/finance/services/lettrage.service';
+import { LettrageApiService } from '@app/finance/services/lettrage-api.service';
+import { LettrageService } from '@app/finance/services/lettrage.service';
 import { PageHeaderComponent, PageShellComponent } from '@lib/anatomy';
 import { ButtonComponent } from '@lib/anatomy/components';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
@@ -12,7 +12,7 @@ import type {
   Lettrage,
   LettrageCandidateLigne,
   LettrageLigneKey,
-} from '@applications/erp/finance/models';
+} from '@app/finance/models';
 
 @Component({
   selector: 'app-lettrage-page',

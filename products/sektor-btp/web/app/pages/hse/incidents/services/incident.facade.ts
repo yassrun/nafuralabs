@@ -6,11 +6,11 @@ import type {
   Incident,
   IncidentCreate,
   IncidentUpdate,
-} from '@applications/erp/hse/models';
+} from '@app/hse/models';
 
-import { ChantierLookupService } from '@applications/erp/chantiers/services/chantier-lookup.service';
+import { ChantierLookupService } from '@app/chantiers/services/chantier-lookup.service';
 import { IncidentApiService } from './incident-api.service';
-import { ErpAuditService } from '@applications/erp/shell/erp-audit.service';
+import { ErpAuditService } from '@app/shell/erp-audit.service';
 
 @Injectable({ providedIn: 'root' })
 export class IncidentFacade extends GridFacade<Incident, IncidentCreate, IncidentUpdate> {

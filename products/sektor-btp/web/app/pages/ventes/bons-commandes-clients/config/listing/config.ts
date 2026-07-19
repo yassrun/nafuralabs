@@ -1,5 +1,5 @@
 import { buildListingConfig } from '@lib/anatomy';
-import type { BonCommandeClient } from '@applications/erp/ventes/models';
+import type { BonCommandeClient } from '@app/ventes/models';
 
 import { COLUMNS } from './columns';
 import { FILTERS } from './filters';

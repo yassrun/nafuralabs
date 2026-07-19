@@ -7,13 +7,13 @@ import { PageHeaderComponent, PageShellComponent, ButtonComponent } from '@lib/a
 import { EmptyStateComponent } from '@lib/anatomy/components';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
 import { ExportService } from '@lib/anatomy/services/export.service';
-import { FACTURE_MARCHE_STATUS_KEYS } from '@applications/erp/shell/i18n-labels';
+import { FACTURE_MARCHE_STATUS_KEYS } from '@app/shell/i18n-labels';
 import { ToastService } from '@lib/anatomy/components/services/toast.service';
 import { FactureMarcheApiService } from '../services/facture-marche-api.service';
 import { ContratMarcheApiService } from '../../contrats/services/contrat-marche-api.service';
 import { FactureMarChePrintComponent } from '../print/facture-marche-print.component';
 import { FACTURE_STATUS_VARIANT, type FactureMarche, type FactureMarcheStatus, type Marche } from '../../models';
-import { AutoJournalService } from '@applications/erp/shell/auto-journal.service';
+import { AutoJournalService } from '@app/shell/auto-journal.service';
 
 @Component({
   selector: 'app-facture-marche-detail',

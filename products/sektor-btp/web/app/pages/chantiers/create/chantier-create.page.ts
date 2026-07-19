@@ -25,12 +25,13 @@ import {
   ToastService,
 } from '@lib/anatomy';
 
-import type { Chantier, ChantierStatus } from '@applications/erp/chantiers/models';
-import { ErpLookupService } from '@applications/erp/shared/services/erp-lookup.service';
-import { ErpAuditService } from '@applications/erp/shell/erp-audit.service';
-import { ClientApiService } from '@applications/erp/pages/ventes/clients/services/client-api.service';
-import { DevisApiService } from '@applications/erp/pages/etudes/devis/services/devis-api.service';
+import type { Chantier, ChantierStatus } from '@app/chantiers/models';
+import { ErpLookupService } from '@app/shared/services/erp-lookup.service';
+import { ErpAuditService } from '@app/shell/erp-audit.service';
+import { ClientApiService } from '@app/pages/ventes/clients/services/client-api.service';
+import { DevisApiService } from '@app/pages/etudes/devis/services/devis-api.service';
 import { ChantierApiService } from '../services/chantier-api.service';
+import { ChantierAffectationApiService } from '../services/chantier-affectation-api.service';
 
 interface CreateClientOption {
   id: string;
@@ -176,20 +177,30 @@ function addMonthsIso(from: Date, months: number): string {
         </section>
       }
 
-      <!-- Étape 5 : équipe -->
+      <!-- Étape 5 : équipe (affectations titulaires) -->
       @if (step() === 4) {
         <section class="panel">
           <label for="cc-chef">{{ 'chantiers.create.fields.chef' | translate }}</label>
-          <input id="cc-chef" type="text" [(ngModel)]="draft.chefChantierName" name="chef" class="fld" list="emps" />
-          <label for="cc-cond">{{ 'chantiers.create.fields.conducteur' | translate }}</label>
-          <input id="cc-cond" type="text" [(ngModel)]="draft.conducteurTravauxName" name="cond" class="fld" list="emps" />
-          <datalist id="emps">
+          <select id="cc-chef" [(ngModel)]="draft.chefEmployeId" name="chef" class="fld">
+            <option value="">—</option>
             @for (e of employees(); track e.id) {
-              <option [value]="e.name">{{ e.matricule }}</option>
+              <option [value]="e.id">{{ e.name }} ({{ e.matricule }})</option>
             }
-          </datalist>
+          </select>
+          <label for="cc-cond">{{ 'chantiers.create.fields.conducteur' | translate }}</label>
+          <select id="cc-cond" [(ngModel)]="draft.conducteurEmployeId" name="cond" class="fld">
+            <option value="">—</option>
+            @for (e of employees(); track e.id) {
+              <option [value]="e.id">{{ e.name }} ({{ e.matricule }})</option>
+            }
+          </select>
           <label>{{ 'chantiers.create.fields.ingenieur' | translate }}</label>
-          <input type="text" [(ngModel)]="draft.ingenieurName" name="ing" class="fld" list="emps" />
+          <select [(ngModel)]="draft.ingenieurEmployeId" name="ing" class="fld">
+            <option value="">—</option>
+            @for (e of employees(); track e.id) {
+              <option [value]="e.id">{{ e.name }} ({{ e.matricule }})</option>
+            }
+          </select>
           <label class="chk"><input type="checkbox" [(ngModel)]="draft.cautionsSoumission" name="c1" />{{ 'chantiers.create.fields.cautionSoumission' | translate }}</label>
           <label class="chk"><input type="checkbox" [(ngModel)]="draft.cautionsBonneFin" name="c2" />{{ 'chantiers.create.fields.cautionBonneFin' | translate }}</label>
           <label class="chk"><input type="checkbox" [(ngModel)]="draft.cautionsRestitutionAvance" name="c3" />{{ 'chantiers.create.fields.cautionRestitution' | translate }}</label>
@@ -237,6 +248,7 @@ export class ChantierCreatePage {
   private readonly route = inject(ActivatedRoute);
   private readonly erpLookup = inject(ErpLookupService);
   private readonly chantierApi = inject(ChantierApiService);
+  private readonly affectationApi = inject(ChantierAffectationApiService);
   private readonly devisApi = inject(DevisApiService);
   private readonly clientApi = inject(ClientApiService);
   private readonly audit = inject(ErpAuditService);
@@ -299,9 +311,9 @@ export class ChantierCreatePage {
     retenueGarantiePercent: 7,
     retenueSourceActive: false,
     avancePercent: 10,
-    chefChantierName: '',
-    conducteurTravauxName: '',
-    ingenieurName: '',
+    chefEmployeId: '',
+    conducteurEmployeId: '',
+    ingenieurEmployeId: '',
     cautionsSoumission: true,
     cautionsBonneFin: true,
     cautionsRestitutionAvance: false,
@@ -518,7 +530,7 @@ export class ChantierCreatePage {
       }
     }
     if (s === 4 && !this.onboardingMode()) {
-      if (!this.draft.chefChantierName.trim() || !this.draft.conducteurTravauxName.trim()) {
+      if (!this.draft.chefEmployeId.trim() || !this.draft.conducteurEmployeId.trim()) {
         this.validationMessage.set(t('chantiers.create.validation.team'));
         return false;
       }
@@ -545,11 +557,10 @@ export class ChantierCreatePage {
         tvaTaux: this.draft.tvaTaux,
         cautionGarantie: this.draft.retenueGarantiePercent,
         avancePercue: this.draft.avancePercent,
-        chefChantierName: this.draft.chefChantierName,
-        conducteurTravauxName: this.draft.conducteurTravauxName,
         type: 'BATIMENT',
       })
-      .then((created) => {
+      .then(async (created) => {
+        await this.createTitulaireAffectations(created.id);
         this.audit.log('CREATE', 'chantier', created.id, created.code, created.name);
         if (this.onboardingMode()) {
           this.created.emit({ name: created.name, id: created.id });
@@ -563,5 +574,40 @@ export class ChantierCreatePage {
       .catch(() => {
         this.toast.error(this.translate.instant('chantiers.create.createFailed'));
       });
+  }
+
+  private async createTitulaireAffectations(chantierId: string): Promise<void> {
+    const today = new Date().toISOString().slice(0, 10);
+    const jobs: Promise<unknown>[] = [];
+    if (this.draft.chefEmployeId) {
+      jobs.push(
+        this.affectationApi.createAffectation(chantierId, {
+          employeId: this.draft.chefEmployeId,
+          roleCode: 'BTP_CHEF_CHANTIER',
+          dateDebut: today,
+        }),
+      );
+    }
+    if (this.draft.conducteurEmployeId) {
+      jobs.push(
+        this.affectationApi.createAffectation(chantierId, {
+          employeId: this.draft.conducteurEmployeId,
+          roleCode: 'BTP_CONDUCTEUR_TRAVAUX',
+          dateDebut: today,
+        }),
+      );
+    }
+    if (this.draft.ingenieurEmployeId) {
+      jobs.push(
+        this.affectationApi.createAffectation(chantierId, {
+          employeId: this.draft.ingenieurEmployeId,
+          roleCode: 'BTP_INGENIEUR',
+          dateDebut: today,
+        }),
+      );
+    }
+    if (jobs.length) {
+      await Promise.allSettled(jobs);
+    }
   }
 }

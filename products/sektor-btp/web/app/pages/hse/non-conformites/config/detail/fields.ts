@@ -1,7 +1,7 @@
 import type { TranslateService } from '@ngx-translate/core';
 
 import type { DetailFieldConfig } from '@lib/anatomy/types';
-import { NC_TYPE_KEYS, type NonConformiteType } from '@applications/erp/shell/i18n-labels';
+import { NC_TYPE_KEYS, type NonConformiteType } from '@app/shell/i18n-labels';
 
 export function buildNcFields(t: TranslateService): DetailFieldConfig[] {
   const tr = (k: string) => t.instant(k);

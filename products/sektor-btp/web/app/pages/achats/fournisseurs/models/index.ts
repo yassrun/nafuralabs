@@ -3,4 +3,4 @@ export type {
   FournisseurListItem,
   FournisseurCreate,
   FournisseurUpdate,
-} from '@applications/erp/achats/models';
+} from '@app/achats/models';

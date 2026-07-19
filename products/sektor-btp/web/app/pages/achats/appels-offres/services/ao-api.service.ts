@@ -9,7 +9,7 @@ import type {
   AppelOffreListItem,
   AppelOffreUpdate,
   ScoringAO,
-} from '@applications/erp/achats/models';
+} from '@app/achats/models';
 
 import { bcToUi, type ApiBonCommandeAchat } from '../../commandes/services/bon-commande-achat.mapper';
 import {
@@ -19,7 +19,7 @@ import {
   aoToUi,
   aoUpdateToApi,
 } from './appel-offre-achat.mapper';
-import type { BonCommande } from '@applications/erp/achats/models';
+import type { BonCommande } from '@app/achats/models';
 
 interface ApiAppelOffreAttribuerResult {
   ao: ApiAppelOffreAchat;

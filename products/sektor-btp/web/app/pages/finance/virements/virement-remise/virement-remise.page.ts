@@ -2,15 +2,15 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
-import { FfApiService } from '@applications/erp/pages/achats/factures-fournisseur/services/ff-api.service';
-import { VirementApiService } from '@applications/erp/finance/services/virement-api.service';
+import { FfApiService } from '@app/pages/achats/factures-fournisseur/services/ff-api.service';
+import { VirementApiService } from '@app/finance/services/virement-api.service';
 import { PageHeaderComponent, PageShellComponent } from '@lib/anatomy';
 import { ButtonComponent } from '@lib/anatomy/components';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
 import type {
   BanqueVirementXmlFormat,
   VirementFournisseurRemiseLine,
-} from '@applications/erp/finance/models';
+} from '@app/finance/models';
 
 @Component({
   selector: 'app-virement-remise-page',

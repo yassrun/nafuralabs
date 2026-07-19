@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 
-import { ApprovalEngineService } from '@applications/erp/approbations/services/approval-engine.service';
+import { ApprovalEngineService } from '@app/approbations/services/approval-engine.service';
 
 import type { ApprovalEntityType, ApprovalEtape } from '../models';
 

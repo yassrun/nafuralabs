@@ -5,7 +5,7 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { TranslateModule } from '@ngx-translate/core';
 
 import { BadgeComponent, ButtonComponent } from '@lib/anatomy/components';
-import type { LotChantier } from '@applications/erp/chantiers/models';
+import type { LotChantier } from '@app/chantiers/models';
 
 import { buildPhaseCode, type ParsedPlanningTask } from '../../utils/planning-gantt-pdf.util';
 

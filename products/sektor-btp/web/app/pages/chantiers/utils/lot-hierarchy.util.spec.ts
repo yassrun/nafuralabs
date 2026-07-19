@@ -1,6 +1,5 @@
-import type { LotChantier, PosteBudgetaire } from '@applications/erp/chantiers/models';
-
-import { buildLotHierarchyRows, buildLotTreeNodes } from './lot-hierarchy.util';
+import { buildLotHierarchyRows, buildLotTreeNodes, lotDepth, MAX_LOT_DEPTH } from './lot-hierarchy.util';
+import type { LotChantier, PosteBudgetaire } from '@app/chantiers/models';
 
 describe('lot-hierarchy.util', () => {
   const lot = (
@@ -10,69 +9,91 @@ describe('lot-hierarchy.util', () => {
     parentLotId?: string,
   ): LotChantier => ({
     id,
-    chantierId: 'chantier-1',
+    chantierId: 'ch-1',
     code,
     designation: code,
-    ordre,
     parentLotId,
     avancementPercent: 0,
+    ordre,
   });
 
-  const poste = (
-    id: string,
-    lotId: string,
-    code: string,
-    ordre: number,
-  ): PosteBudgetaire => ({
+  const poste = (id: string, lotId: string, code: string): PosteBudgetaire => ({
     id,
     lotId,
     code,
     designation: code,
-    ordre,
+    ordre: 1,
   });
 
-  it('builds a recursive heterogeneous tree sorted by ordre and code', () => {
+  it('builds four display levels: L1 → L2 → L3 → poste', () => {
     const lots = [
-      lot('root-b', 'L02', 2),
-      lot('child', 'L01.01', 1, 'root-a'),
-      lot('grandchild', 'L01.01.01', 1, 'child'),
-      lot('root-a', 'L01', 1),
+      lot('l1', '01', 1),
+      lot('l2', '01-01', 2, 'l1'),
+      lot('l3', '01-01-01', 3, 'l2'),
     ];
-    const postes = {
-      'root-a': [
-        poste('p2', 'root-a', 'P02', 2),
-        poste('p1', 'root-a', 'P01', 1),
-      ],
-      grandchild: [poste('p3', 'grandchild', 'P03', 1)],
+    const postesByLotId = {
+      l3: [poste('p1', 'l3', '01')],
     };
 
-    const nodes = buildLotTreeNodes(lots, postes);
+    const rows = buildLotHierarchyRows(lots, postesByLotId);
 
-    expect(nodes.map((node) => node.key)).toEqual(['lot-root-a', 'lot-root-b']);
-    expect(nodes[0].children?.map((node) => node.key)).toEqual([
-      'poste-p1',
-      'poste-p2',
-      'lot-child',
+    expect(rows.map((row) => [row.kind, row.depth, row.lot?.id ?? row.poste?.id])).toEqual([
+      ['lot', 0, 'l1'],
+      ['sousLot', 1, 'l2'],
+      ['sousLot', 2, 'l3'],
+      ['poste', 3, 'p1'],
     ]);
-    expect(nodes[0].children?.[2].children?.[0].key).toBe('lot-grandchild');
-    expect(nodes[0].children?.[2].children?.[0].children?.[0].key).toBe('poste-p3');
-    expect(nodes[0].children?.[2].children?.[0].data.kind).toBe('sousLot');
+    expect(MAX_LOT_DEPTH).toBe(2);
   });
 
-  it('keeps the flat compatibility view recursive', () => {
-    const rows = buildLotHierarchyRows(
-      [
-        lot('root', 'L01', 1),
-        lot('child', 'L01.01', 1, 'root'),
-        lot('grandchild', 'L01.01.01', 1, 'child'),
-      ],
-      {},
-    );
+  it('attaches postes to any lot depth', () => {
+    const lots = [lot('l1', '01', 1), lot('l2', '01-01', 2, 'l1')];
+    const postesByLotId = {
+      l1: [poste('p-root', 'l1', '01')],
+      l2: [poste('p-child', 'l2', '01')],
+    };
 
-    expect(rows.map(({ kind, depth }) => `${kind}:${depth}`)).toEqual([
-      'lot:0',
-      'sousLot:1',
-      'sousLot:2',
+    const rows = buildLotHierarchyRows(lots, postesByLotId);
+
+    expect(rows).toEqual([
+      jasmine.objectContaining({ kind: 'lot', depth: 0, lot: jasmine.objectContaining({ id: 'l1' }) }),
+      jasmine.objectContaining({ kind: 'poste', depth: 1, poste: jasmine.objectContaining({ id: 'p-root' }) }),
+      jasmine.objectContaining({ kind: 'sousLot', depth: 1, lot: jasmine.objectContaining({ id: 'l2' }) }),
+      jasmine.objectContaining({ kind: 'poste', depth: 2, poste: jasmine.objectContaining({ id: 'p-child' }) }),
     ]);
+  });
+
+  it('computes lot depth from parent chain', () => {
+    const lots = [lot('l1', '01', 1), lot('l2', '01-01', 2, 'l1'), lot('l3', '01-01-01', 3, 'l2')];
+    const byId = new Map(lots.map((item) => [item.id, item]));
+
+    expect(lotDepth(lots[0], byId)).toBe(0);
+    expect(lotDepth(lots[1], byId)).toBe(1);
+    expect(lotDepth(lots[2], byId)).toBe(2);
+  });
+
+  it('builds nested tree nodes with postes as leaves', () => {
+    const lots = [lot('l1', '01', 1), lot('l2', '01-01', 2, 'l1')];
+    const postesByLotId = {
+      l1: [poste('p-root', 'l1', '01')],
+      l2: [poste('p-child', 'l2', '01')],
+    };
+
+    const nodes = buildLotTreeNodes(lots, postesByLotId);
+
+    expect(nodes.length).toBe(1);
+    const [root] = nodes;
+    expect(root.key).toBe('lot-l1');
+    expect(root.data.kind).toBe('lot');
+    expect(root.expanded).toBe(true);
+    expect(root.children?.map((child) => child.key)).toEqual(['poste-p-root', 'lot-l2']);
+
+    const sousLot = root.children?.find((child) => child.key === 'lot-l2');
+    expect(sousLot?.data.kind).toBe('sousLot');
+    expect(sousLot?.children?.map((child) => child.key)).toEqual(['poste-p-child']);
+
+    const posteNode = root.children?.find((child) => child.key === 'poste-p-root');
+    expect(posteNode?.leaf).toBe(true);
+    expect(posteNode?.data.kind).toBe('poste');
   });
 });

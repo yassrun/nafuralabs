@@ -4,7 +4,7 @@ import type {
   BonCommandeCreate,
   BonCommandeListItem,
   BonCommandeUpdate,
-} from '@applications/erp/achats/models';
+} from '@app/achats/models';
 
 export interface ApiBonCommandeAchatLigne {
   id: string;

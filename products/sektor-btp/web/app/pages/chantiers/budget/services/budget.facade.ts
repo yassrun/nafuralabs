@@ -7,7 +7,7 @@ import {
   type ChantierBudget,
   type ChantierBudgetStatus,
 } from '../models';
-import { ErpAuditService } from '@applications/erp/shell/erp-audit.service';
+import { ErpAuditService } from '@app/shell/erp-audit.service';
 import { ChantierApiService } from '../../services/chantier-api.service';
 
 import {

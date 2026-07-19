@@ -4,8 +4,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { PageHeaderComponent, PageShellComponent, ButtonComponent } from '@lib/anatomy';
 import { ExportService, type ExportColumn } from '@lib/anatomy/services/export.service';
-import { ErpAuditService } from '@applications/erp/shell/erp-audit.service';
-import { PrintService } from '@applications/erp/shared/services';
+import { ErpAuditService } from '@app/shell/erp-audit.service';
+import { PrintService } from '@app/shared/services';
 import type { RegistreLegalEntry, RegistreLegalKind } from '../models';
 import { RegistreLegalApiService } from './services/registre-legal-api.service';
 

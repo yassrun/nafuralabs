@@ -5,8 +5,8 @@ import { PlanningApiService } from '../../planning-equipes/services/planning-api
 import { PointageApiService } from './pointage-api.service';
 import { PointageBatchApiService } from './pointage-batch-api.service';
 import { PointagePhotoIdbService } from './pointage-photo-idb.service';
-import { ErpAttachmentUploadService } from '@applications/erp/shared/services/erp-attachment-upload.service';
-import { ERP_ATTACHMENT_ENTITY_TYPES } from '@applications/erp/shared/config/attachment-detail.config';
+import { ErpAttachmentUploadService } from '@app/shared/services/erp-attachment-upload.service';
+import { ERP_ATTACHMENT_ENTITY_TYPES } from '@app/shared/config/attachment-detail.config';
 
 const STORAGE_KEY = 'nafura-erp-pointages-v2';
 const LAST_SYNC_KEY = 'nafura-erp-pointages-last-sync';

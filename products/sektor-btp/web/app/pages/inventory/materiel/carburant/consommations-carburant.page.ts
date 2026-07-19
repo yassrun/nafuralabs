@@ -5,8 +5,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { PageHeaderComponent, PageShellComponent } from '@lib/anatomy';
 
-import type { PleinCarburant } from '@applications/erp/inventory/models';
-import { MaterielGmaoFacadeService } from '@applications/erp/inventory/services/materiel-gmao-facade.service';
+import type { PleinCarburant } from '@app/inventory/models';
+import { MaterielGmaoFacadeService } from '@app/inventory/services/materiel-gmao-facade.service';
 
 @Component({
   selector: 'app-consommations-carburant',

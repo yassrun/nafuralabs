@@ -7,7 +7,7 @@ import {
   articleUpdateToItem,
   itemToArticle,
   type ItemApiRow,
-} from '@applications/erp/inventory/services/item-article.mapper';
+} from '@app/inventory/services/item-article.mapper';
 import { ItemsApiService } from '../../items/services/item-api.service';
 
 import type { Article, ArticleCreate, ArticleQuery, ArticleUpdate } from '../models';

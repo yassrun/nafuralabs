@@ -5,8 +5,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { ButtonComponent, PageHeaderComponent, PageShellComponent } from '@lib/anatomy';
 
-import type { PointageEngin } from '@applications/erp/inventory/models';
-import { MaterielGmaoFacadeService } from '@applications/erp/inventory/services/materiel-gmao-facade.service';
+import type { PointageEngin } from '@app/inventory/models';
+import { MaterielGmaoFacadeService } from '@app/inventory/services/materiel-gmao-facade.service';
 
 @Component({
   selector: 'app-pointage-engin',

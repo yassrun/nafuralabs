@@ -4,4 +4,4 @@ export type {
   TauxChangeListItem,
   TauxChangeSource,
   TauxChangeUpdate,
-} from '@applications/erp/finance/models';
+} from '@app/finance/models';

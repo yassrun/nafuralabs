@@ -9,4 +9,4 @@ export type {
   LotChantier,
   FactureClient,
   FactureClientStatus,
-} from '@applications/erp/chantiers/models';
+} from '@app/chantiers/models';

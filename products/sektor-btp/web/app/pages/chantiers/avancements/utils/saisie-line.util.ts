@@ -1,4 +1,4 @@
-import type { PosteBudgetaire } from '@applications/erp/chantiers/models';
+import type { PosteBudgetaire } from '@app/chantiers/models';
 import type { AvancementListItem, LotChantier, PosteSaisieContext, SaisieLineDefinition } from '../models';
 
 export function saisieLineKey(kind: 'poste' | 'lot', id: string): string {

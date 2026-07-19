@@ -7,9 +7,9 @@ import type {
   DemandeAchat,
   DemandeAchatCreate,
   DemandeAchatUpdate,
-} from '@applications/erp/achats/models';
-import { PartnersApiService } from '@applications/erp/shared/services/partners-api.service';
-import { ErpAuditService, AuditAction } from '@applications/erp/shell/erp-audit.service';
+} from '@app/achats/models';
+import { PartnersApiService } from '@app/shared/services/partners-api.service';
+import { ErpAuditService, AuditAction } from '@app/shell/erp-audit.service';
 
 import { DemandeApiService } from './demande-api.service';
 

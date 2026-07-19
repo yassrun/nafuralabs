@@ -1,7 +1,7 @@
 import type { TranslateService } from '@ngx-translate/core';
 
 import type { ColumnConfig } from '@lib/anatomy/types';
-import { METRE_STATUS_KEYS } from '@applications/erp/shell/i18n-labels';
+import { METRE_STATUS_KEYS } from '@app/shell/i18n-labels';
 import { resolveLocale } from '@lib/anatomy/pipes/_locale-resolver';
 
 function translateOrEmpty(t: TranslateService, key: string): string {

@@ -4,7 +4,7 @@ import { TranslateModule } from '@ngx-translate/core';
 
 import { PageHeaderComponent, PageShellComponent } from '@lib/anatomy';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
-import { DGD_STATUS_KEYS } from '@applications/erp/shell/i18n-labels';
+import { DGD_STATUS_KEYS } from '@app/shell/i18n-labels';
 import { type DGD, type DgdStatus } from '../models';
 import { ToastService } from '@lib/anatomy/components/services/toast.service';
 import { DgdApiService } from './services/dgd-api.service';

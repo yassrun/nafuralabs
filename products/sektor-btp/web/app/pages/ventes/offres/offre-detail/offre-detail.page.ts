@@ -10,7 +10,7 @@ import {
   createDetailFacadeFromCrud,
 } from '@lib/anatomy';
 import type { DetailActionEvent, StatusTransitionEvent } from '@lib/anatomy/types';
-import type { OffreCommerciale, OffreCreate, OffreStatus } from '@applications/erp/ventes/models';
+import type { OffreCommerciale, OffreCreate, OffreStatus } from '@app/ventes/models';
 
 import { OffreFacade } from '../services';
 import { buildOffreDetailConfig } from '../config';

@@ -7,8 +7,8 @@ import { FilterResetComponent } from '@lib/anatomy/components/molecules/filter-r
 import { ButtonComponent, PageHeaderComponent, PageShellComponent, ToastService } from '@lib/anatomy';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
 import { AuthFacade } from '@core/security/services/auth.facade';
-import { JOURNAL_EVENT_TYPE_KEYS } from '@applications/erp/shell/i18n-labels';
-import type { Chantier } from '@applications/erp/chantiers/models';
+import { JOURNAL_EVENT_TYPE_KEYS } from '@app/shell/i18n-labels';
+import type { Chantier } from '@app/chantiers/models';
 import { ChantierApiService } from '../services/chantier-api.service';
 import { JournalChantierApiService } from '../services/journal-chantier-api.service';
 

@@ -1,4 +1,4 @@
-import { Component, ElementRef, LOCALE_ID, OnDestroy, ViewChild, computed, effect, inject, signal, untracked } from '@angular/core';
+import { Component, LOCALE_ID, OnDestroy, ViewChild, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { ActivatedRoute } from '@angular/router';
@@ -20,16 +20,20 @@ import type { DetailActionEvent, StatusTransitionEvent } from '@lib/anatomy/type
 
 import type { InventoryTx } from '../../../../../inventory/models';
 import { ReceptionLinesEditorComponent } from '../../../../../inventory/components/reception-lines-editor/reception-lines-editor.component';
-import { ErpDocScanService } from '@applications/erp/shared/services/erp-doc-scan.service';
-import { RECEPTION_BL_EXTRACTION_SCHEMA } from '@applications/erp/shared/extraction-schemas';
+import { RECEPTION_BL_EXTRACTION_SCHEMA } from '@app/shared/extraction-schemas';
 import {
   extractLines as extractRawLines,
   findByAliases,
   findStringByAliases,
+  normalizeDate,
   normalizeText,
   toNumber,
-} from '@applications/erp/shared/utils/extraction-json.utils';
-import type { LookupEntry } from '@applications/erp/shared/models/doc-scan.types';
+} from '@app/shared/utils/extraction-json.utils';
+import {
+  SmartImportTriggerComponent,
+  type ExtractionDefinition,
+  type ReviewedExtraction,
+} from '@platform/features/documents/smart-import';
 import { buildReceptionDetailConfig } from '../config/detail/detail.config';
 import { ReceptionFacade } from '../services/reception.facade';
 
@@ -49,22 +53,22 @@ type TxLine = { totalPrice?: number; quantity: number; unitPrice?: number };
     IconComponent,
     ReactiveFormsModule,
     TranslateModule,
+    SmartImportTriggerComponent,
   ],
   templateUrl: './reception-detail.page.html',
   styleUrls: ['./reception-detail.page.scss'],
   styles: [ConfigDrivenDetailPageStyles],
 })
 export class ReceptionDetailPage extends ConfigDrivenDetailPage<InventoryTx> implements OnDestroy {
-  private blFileInput?: ElementRef<HTMLInputElement>;
+  private blExtractor?: SmartImportTriggerComponent;
 
-  @ViewChild('blFileInput')
-  private set blFileInputElement(value: ElementRef<HTMLInputElement> | undefined) {
-    this.blFileInput = value;
+  @ViewChild('blExtractor')
+  private set blExtractorComponent(value: SmartImportTriggerComponent | undefined) {
+    this.blExtractor = value;
     queueMicrotask(() => this.tryAutoScanBl());
   }
 
   private readonly crud = inject(ReceptionFacade);
-  private readonly erpDocScan = inject(ErpDocScanService);
   private readonly activatedRoute = inject(ActivatedRoute);
   private readonly translate = inject(TranslateService);
 
@@ -99,8 +103,20 @@ export class ReceptionDetailPage extends ConfigDrivenDetailPage<InventoryTx> imp
   }
 
   readonly deliveryMode = signal<DeliveryMode>('DEPOT');
-  readonly isExtracting = signal(false);
   readonly shouldAutoScanBl = signal(this.activatedRoute.snapshot.queryParamMap.get('scanBl') === '1');
+  readonly blExtractionDefinition: ExtractionDefinition = {
+    key: 'reception-bl',
+    name: RECEPTION_BL_EXTRACTION_SCHEMA.name,
+    description: RECEPTION_BL_EXTRACTION_SCHEMA.description,
+    dataSchema: RECEPTION_BL_EXTRACTION_SCHEMA.dataSchema,
+    presentationSchema: RECEPTION_BL_EXTRACTION_SCHEMA.presentationSchema,
+    instructions: RECEPTION_BL_EXTRACTION_SCHEMA.instructions,
+    arrayPath: RECEPTION_BL_EXTRACTION_SCHEMA.arrayPath!,
+    config: {
+      acceptedExtensions: ['.pdf', '.png', '.jpg', '.jpeg', '.webp'],
+      acceptedMimeTypes: ['application/pdf', 'image/png', 'image/jpeg', 'image/webp'],
+    },
+  };
 
   readonly depotLookups = computed(() => this.getTypedLookup<{ key: string; value: string }>('locationsDepot'));
 
@@ -154,13 +170,12 @@ export class ReceptionDetailPage extends ConfigDrivenDetailPage<InventoryTx> imp
   });
 
   private tryAutoScanBl(): void {
-    const input = this.blFileInput?.nativeElement;
-    if (!this.shouldAutoScanBl() || this.mode() !== 'create' || !input) {
+    if (!this.shouldAutoScanBl() || this.mode() !== 'create' || !this.blExtractor) {
       return;
     }
 
     this.shouldAutoScanBl.set(false);
-    this.onScanBlClick(input);
+    this.blExtractor.selectFile();
   }
 
   onModeChange(mode: DeliveryMode, form: FormGroup): void {
@@ -253,68 +268,46 @@ export class ReceptionDetailPage extends ConfigDrivenDetailPage<InventoryTx> imp
     }
 
     if (event.actionId === 'scan_bl') {
-      const input = this.blFileInput?.nativeElement;
-      if (!input) {
+      if (!this.blExtractor) {
         this.showError(this.translate.instant('inventory.mouvement.common.scanBlOpen'));
         return;
       }
-      this.onScanBlClick(input);
+      this.blExtractor.selectFile();
       return;
     }
 
     await super.handleCustomAction(event);
   }
 
-  onScanBlClick(fileInput: HTMLInputElement): void {
-    if (this.isExtracting()) return;
-    fileInput.value = '';
-    fileInput.click();
-  }
-
-  async onBlFileSelected(event: Event): Promise<void> {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.item(0);
-    if (!file) return;
-
-    this.isExtracting.set(true);
+  onBlExtractionComplete(result: ReviewedExtraction): void {
     try {
-      const schema = RECEPTION_BL_EXTRACTION_SCHEMA;
-      const patch = await this.erpDocScan.scanAndMap<InventoryTx>({
-        file,
-        dataSchema: schema.dataSchema,
-        presentationSchema: schema.presentationSchema,
-        instructions: schema.instructions,
-        schemaName: schema.name,
-        schemaDescription: schema.description,
-        lookups: () => this.crud.lookups() as Record<string, LookupEntry[]>,
-        mapper: (data, ctx) => {
-          const fournisseurName =
-            ctx.findStringByAliases(data, [
-              'supplierName',
-              'supplier',
-              'fournisseur',
-              'vendor',
-              'vendorName',
-            ]) ?? ctx.findStringByAliases(data['sender'], ['name']);
-          const fournisseurId = ctx.resolveLookupId('fournisseursLookup', fournisseurName);
+      const data = result.data;
+      const fournisseurName =
+        findStringByAliases(data, [
+          'supplierName',
+          'supplier',
+          'fournisseur',
+          'vendor',
+          'vendorName',
+        ]) ?? findStringByAliases(data['sender'], ['name']);
+      const fournisseurId = this.resolveLookupId('fournisseursLookup', fournisseurName);
 
-          const chantierName =
-            ctx.findStringByAliases(data, [
-              'chantier',
-              'site',
-              'project',
-              'destinationSite',
-            ]) ?? ctx.findStringByAliases(data['receiver'], ['name']);
-          const chantierLocationId = ctx.resolveLookupId('chantiersLookup', chantierName);
-          const depotName =
-            ctx.findStringByAliases(data, ['depot', 'warehouse', 'destinationDepot']) ??
-            ctx.findStringByAliases(data['receiver'], ['name']);
-          const destLocationId = ctx.resolveLookupId('locationsDepot', depotName);
+      const chantierName = findStringByAliases(data, [
+            'chantier',
+            'site',
+            'project',
+            'destinationSite',
+          ]) ?? findStringByAliases(data['receiver'], ['name']);
+      const chantierLocationId = this.resolveLookupId('chantiersLookup', chantierName);
+      const depotName =
+        findStringByAliases(data, ['depot', 'warehouse', 'destinationDepot']) ??
+        findStringByAliases(data['receiver'], ['name']);
+      const destLocationId = this.resolveLookupId('locationsDepot', depotName);
 
-          const phase = ctx.findStringByAliases(data, ['phaseRef', 'phase']);
-          const phaseRef = this.resolvePhase(phase);
+      const phase = findStringByAliases(data, ['phaseRef', 'phase']);
+      const phaseRef = this.resolvePhase(phase);
 
-          const reference = ctx.findStringByAliases(data, [
+      const reference = findStringByAliases(data, [
             'blReference',
             'transferReference',
             'reference',
@@ -323,55 +316,39 @@ export class ReceptionDetailPage extends ConfigDrivenDetailPage<InventoryTx> imp
             'number',
           ]);
 
-          const txDateRaw = ctx.findStringByAliases(data, [
+      const txDateRaw = findStringByAliases(data, [
             'txDate',
             'documentDate',
             'date',
             'blDate',
             'deliveryDate',
           ]);
-          const txDate = ctx.normalizeDate(txDateRaw);
+      const txDate = normalizeDate(txDateRaw);
 
-          const lines = this.extractLines(data);
+      const lines = this.extractLines(data);
 
-          const mappedPatch: Partial<InventoryTx> = {};
-          if (fournisseurId) mappedPatch.fournisseurId = fournisseurId;
-          if (reference) mappedPatch.reference = reference;
-          if (txDate) mappedPatch.txDate = txDate;
-          if (phaseRef) mappedPatch.phaseRef = phaseRef;
-          if (lines.length > 0) mappedPatch.lines = lines;
+      const mappedPatch: Partial<InventoryTx> = {};
+      if (fournisseurId) mappedPatch.fournisseurId = fournisseurId;
+      if (reference) mappedPatch.reference = reference;
+      if (txDate) mappedPatch.txDate = txDate;
+      if (phaseRef) mappedPatch.phaseRef = phaseRef;
+      if (lines.length > 0) mappedPatch.lines = lines;
 
-          if (chantierLocationId) {
-            mappedPatch.chantierLocationId = chantierLocationId;
-            mappedPatch.destLocationId = null as unknown as string;
-            this.deliveryMode.set('CHANTIER_DIRECT');
-          } else if (destLocationId) {
-            mappedPatch.destLocationId = destLocationId;
-            mappedPatch.chantierLocationId = null as unknown as string;
-            mappedPatch.phaseRef = '';
-            this.deliveryMode.set('DEPOT');
-          }
+      if (chantierLocationId) {
+        mappedPatch.chantierLocationId = chantierLocationId;
+        mappedPatch.destLocationId = null as unknown as string;
+        this.deliveryMode.set('CHANTIER_DIRECT');
+      } else if (destLocationId) {
+        mappedPatch.destLocationId = destLocationId;
+        mappedPatch.chantierLocationId = null as unknown as string;
+        mappedPatch.phaseRef = '';
+        this.deliveryMode.set('DEPOT');
+      }
 
-          return mappedPatch;
-        },
-      });
-
-      this.applyScanPatch(patch);
+      this.applyScanPatch(mappedPatch);
       this.showSuccess(this.translate.instant('inventory.mouvement.common.scanBlSuccess'));
-    } catch (err) {
-      const message = (err as Error).message;
-      if (message === 'ERP_DOC_SCAN_TENANT_MISSING') {
-        this.showError(this.translate.instant('inventory.mouvement.common.tenantMissing'));
-        return;
-      }
-      if (message === 'ERP_DOC_SCAN_FAILED') {
-        this.showError(this.translate.instant('inventory.mouvement.common.scanBlFailed'));
-        return;
-      }
+    } catch {
       this.showError(this.translate.instant('inventory.mouvement.common.scanBlImpossible'));
-    } finally {
-      input.value = '';
-      this.isExtracting.set(false);
     }
   }
 
@@ -391,6 +368,15 @@ export class ReceptionDetailPage extends ConfigDrivenDetailPage<InventoryTx> imp
     const entries = this.phaseLookups();
     const normalized = normalizeText(phase);
     return entries.find((entry) => normalizeText(entry.value).includes(normalized))?.key;
+  }
+
+  private resolveLookupId(lookupKey: string, label?: string): string | undefined {
+    if (!label) return undefined;
+    const normalized = normalizeText(label);
+    return this.getTypedLookup<{ key: string; value: string }>(lookupKey).find((entry) => {
+      const entryLabel = normalizeText(entry.value);
+      return entryLabel.includes(normalized) || normalized.includes(entryLabel);
+    })?.key;
   }
 
   private extractLines(data: Record<string, unknown>): InventoryTx['lines'] {

@@ -4,7 +4,7 @@ import type {
   BCClientCreate,
   BCClientLigne,
   BCClientUpdate,
-} from '@applications/erp/ventes/models';
+} from '@app/ventes/models';
 
 export interface ApiBccLigne {
   id: string;

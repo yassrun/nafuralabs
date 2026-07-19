@@ -19,13 +19,11 @@ interface AgentActionResponseDto {
   error?: string | null;
 }
 
-interface AssistantTurnResponseDto {
-  intent?: string;
-  summary?: string | null;
-  blocks?: Array<{ type: string; title?: string; content?: string; data?: Record<string, unknown> }>;
-  links?: Array<{ label: string; route: string; icon?: string; autoNavigate?: boolean }>;
+interface AgentProposeResponseDto {
+  assistantMessage?: {
+    content?: string | null;
+  } | null;
   actions?: AgentActionResponseDto[] | null;
-  assistantMessage?: { content?: string | null } | null;
 }
 
 export interface AssistantProposeResponse {
@@ -44,7 +42,7 @@ export class AiAssistantApiService {
     const url = this.resolveUrl('/api/ai/conversations');
     const response = await firstValueFrom(
       this.http.post<ConversationSessionResponse>(url, {
-        mode: 'ASSISTANT',
+        mode: 'AGENT',
       })
     );
     return response.id;
@@ -55,27 +53,17 @@ export class AiAssistantApiService {
     message: string
   ): Promise<AssistantProposeResponse> {
     const url = this.resolveUrl(
-      `/api/ai/conversations/${conversationId}/turn`
+      `/api/ai/conversations/${conversationId}/agent/propose`
     );
     const response = await firstValueFrom(
-      this.http.post<AssistantTurnResponseDto>(url, { content: message })
+      this.http.post<AgentProposeResponseDto>(url, { content: message })
     );
 
     return {
-      response: response.summary ?? response.assistantMessage?.content ?? '',
+      response: response.assistantMessage?.content ?? '',
       actions: (response.actions ?? []).map((action) => this.toChatAction(action)),
-      data: (response.blocks ?? [])
-        .filter((block) => block.type === 'KPI' || block.type === 'LIST')
-        .map((block) => ({
-          title: block.title ?? 'Result',
-          type: block.type === 'KPI' ? 'kpi' as const : 'list' as const,
-          data: block.data ?? { value: block.content },
-        })),
-      links: (response.links ?? []).map((link) => ({
-        label: link.label,
-        route: link.route,
-        icon: link.icon,
-      })),
+      data: [],
+      links: [],
     };
   }
 

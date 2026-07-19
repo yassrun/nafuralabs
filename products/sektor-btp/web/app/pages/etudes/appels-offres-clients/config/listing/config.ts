@@ -1,7 +1,7 @@
 import type { TranslateService } from '@ngx-translate/core';
 
 import { buildListingConfig } from '@lib/anatomy';
-import type { AppelOffreClient } from '@applications/erp/etudes/models';
+import type { AppelOffreClient } from '@app/etudes/models';
 
 import { buildAocColumns } from './columns';
 import { FILTERS } from './filters';

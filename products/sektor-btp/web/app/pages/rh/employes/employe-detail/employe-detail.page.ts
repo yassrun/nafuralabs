@@ -9,7 +9,7 @@ import {
   createDetailFacadeFromCrud,
 } from '@lib/anatomy';
 import type { DetailActionEvent } from '@lib/anatomy/types';
-import type { Employe, EmployeCreate, StatutEmploye } from '@applications/erp/rh/models';
+import type { Employe, EmployeCreate, StatutEmploye } from '@app/rh/models';
 
 import { EmployeFacade } from '../services';
 import { buildEmployeDetailConfig } from '../config';

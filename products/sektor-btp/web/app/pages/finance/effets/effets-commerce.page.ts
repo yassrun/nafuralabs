@@ -3,11 +3,11 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { ActivatedRoute } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 
-import { EffetCommerceApiService } from '@applications/erp/finance/services/effet-commerce-api.service';
+import { EffetCommerceApiService } from '@app/finance/services/effet-commerce-api.service';
 import { PageHeaderComponent, PageShellComponent } from '@lib/anatomy';
 import { ButtonComponent } from '@lib/anatomy/components';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
-import type { EffetCommerce, EffetCommerceStatus } from '@applications/erp/finance/models';
+import type { EffetCommerce, EffetCommerceStatus } from '@app/finance/models';
 
 @Component({
   selector: 'app-effets-commerce-page',

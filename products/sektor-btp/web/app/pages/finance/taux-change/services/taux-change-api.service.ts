@@ -4,7 +4,7 @@ import { HttpParams } from '@angular/common/http';
 import { FeatureApiService } from '@lib/anatomy';
 import type { ListQuery, ListResponse } from '@lib/anatomy/types';
 
-import { ErpLookupService } from '@applications/erp/shared/services/erp-lookup.service';
+import { ErpLookupService } from '@app/shared/services/erp-lookup.service';
 import type { ExchangeRate } from '../../configuration/exchange-rates/models';
 import {
   type ApiCurrencyRow,
@@ -12,12 +12,12 @@ import {
   exchangeRateToTauxChange,
   tauxChangeToExchangeRateCreate,
   tauxChangeToExchangeRateUpdate,
-} from '@applications/erp/finance/services/currency-finance.mapper';
+} from '@app/finance/services/currency-finance.mapper';
 import type {
   TauxChange,
   TauxChangeCreate,
   TauxChangeUpdate,
-} from '@applications/erp/finance/models';
+} from '@app/finance/models';
 
 interface TauxQuery extends ListQuery {
   deviseDeCode?: string;

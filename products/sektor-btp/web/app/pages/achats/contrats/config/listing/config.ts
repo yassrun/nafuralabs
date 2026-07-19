@@ -1,7 +1,7 @@
 import type { TranslateService } from '@ngx-translate/core';
 
 import { buildListingConfig } from '@lib/anatomy';
-import type { ContratAchat } from '@applications/erp/achats/models';
+import type { ContratAchat } from '@app/achats/models';
 
 import { buildContratColumns } from './columns';
 import { buildContratFilters } from './filters';

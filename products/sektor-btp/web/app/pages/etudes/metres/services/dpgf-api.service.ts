@@ -3,7 +3,7 @@ import { HttpParams } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
 import { FeatureApiService } from '@lib/anatomy';
-import type { DPGF } from '@applications/erp/etudes/models';
+import type { DPGF } from '@app/etudes/models';
 
 export interface DpgfLotTotal {
   code: string;

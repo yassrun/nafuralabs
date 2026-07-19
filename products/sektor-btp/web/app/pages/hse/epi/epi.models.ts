@@ -1,4 +1,4 @@
-import { EPI_CATEGORIE_KEYS, EPI_STATUS_KEYS } from '@applications/erp/shell/i18n-labels';
+import { EPI_CATEGORIE_KEYS, EPI_STATUS_KEYS } from '@app/shell/i18n-labels';
 
 export type EpiStatus = 'OK' | 'A_RENOUVELER' | 'EXPIRE' | 'PERDU';
 export type EpiCategorie = 'TETE' | 'YEUX' | 'PIEDS' | 'MAINS' | 'CORPS' | 'RESPIRATION' | 'AUDITION' | 'CHUTE';

@@ -2,7 +2,7 @@ import type { TranslateService } from '@ngx-translate/core';
 
 import { buildDetailConfig } from '@lib/anatomy';
 import type { DetailFieldConfig } from '@lib/anatomy/types';
-import type { InventoryTx } from '@applications/erp/inventory/models';
+import type { InventoryTx } from '@app/inventory/models';
 
 function buildFields(t: TranslateService): DetailFieldConfig<InventoryTx>[] {
   const tr = (k: string) => t.instant(k);

@@ -1,7 +1,7 @@
 import type { TranslateService } from '@ngx-translate/core';
 
 import { buildListingConfig } from '@lib/anatomy';
-import type { Metre } from '@applications/erp/etudes/models';
+import type { Metre } from '@app/etudes/models';
 
 import { buildMetreColumns } from './columns';
 import { FILTERS } from './filters';

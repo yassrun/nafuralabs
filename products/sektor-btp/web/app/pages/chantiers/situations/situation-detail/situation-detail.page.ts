@@ -30,7 +30,7 @@ import type {
   SituationCreate,
   SituationLigne,
   LotChantier,
-} from '@applications/erp/chantiers/models';
+} from '@app/chantiers/models';
 
 import { SituationFacade } from '../services';
 import { SITUATION_DETAIL_CONFIG } from '../config';
@@ -41,7 +41,7 @@ import {
 } from './components/decompte-card/decompte-card.component';
 import { DecomptePrintComponent } from '../components/decompte-print/decompte-print.component';
 
-import { SubmitApprovalButtonComponent } from '@applications/erp/pages/approbations/components/submit-approval-button/submit-approval-button.component';
+import { SubmitApprovalButtonComponent } from '@app/pages/approbations/components/submit-approval-button/submit-approval-button.component';
 
 import { safeRandomUUID } from '@core/util/uuid';
 

@@ -4,15 +4,15 @@ import { firstValueFrom } from 'rxjs';
 
 import { FeatureApiService } from '@lib/anatomy';
 import type { ListQuery, ListResponse } from '@lib/anatomy/types';
-import type { Chantier } from '@applications/erp/chantiers/models';
-import { ChantierApiService } from '@applications/erp/pages/chantiers/services/chantier-api.service';
+import type { Chantier } from '@app/chantiers/models';
+import { ChantierApiService } from '@app/pages/chantiers/services/chantier-api.service';
 import type {
   FactureClient,
   Situation,
   SituationCreate,
   SituationListItem,
   SituationUpdate,
-} from '@applications/erp/chantiers/models';
+} from '@app/chantiers/models';
 
 interface ApiFactureSummary {
   id: string;

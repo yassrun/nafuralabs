@@ -7,7 +7,7 @@ import {
   ConfigDrivenListingPageStyles,
 } from '@lib/anatomy';
 
-import type { Devis } from '@applications/erp/etudes/models';
+import type { Devis } from '@app/etudes/models';
 
 import { DevisFacade } from '../services';
 import { buildDevisListingConfig } from '../config';

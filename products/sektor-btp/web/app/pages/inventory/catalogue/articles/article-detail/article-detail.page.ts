@@ -7,8 +7,8 @@ import {ConfigDrivenDetailPage,
   createDetailFacadeFromCrud, ButtonComponent} from '@lib/anatomy';
 import type { DetailActionEvent } from '@lib/anatomy/types';
 
-import { ReservationStockService } from '@applications/erp/inventory/services/reservation-stock.service';
-import { StockLabelPrintService } from '@applications/erp/inventory/services/stock-label-print.service';
+import { ReservationStockService } from '@app/inventory/services/reservation-stock.service';
+import { StockLabelPrintService } from '@app/inventory/services/stock-label-print.service';
 
 import { ArticlesFacade } from '../services';
 import type { Article, ArticleCreate } from '../models';

@@ -44,7 +44,7 @@ describe('saisie-line.util', () => {
       }],
     });
 
-    expect(lines).toHaveLength(1);
+    expect(lines.length).toBe(1);
     expect(lines[0].kind).toBe('poste');
     expect(lines[0].key).toBe(saisieLineKey('poste', 'poste-1'));
   });
@@ -59,7 +59,7 @@ describe('saisie-line.util', () => {
       montantHt: 5000,
     };
     const lines = buildSaisieLineDefinitions([flatLot], {});
-    expect(lines).toHaveLength(1);
+    expect(lines.length).toBe(1);
     expect(lines[0].kind).toBe('lot');
   });
 

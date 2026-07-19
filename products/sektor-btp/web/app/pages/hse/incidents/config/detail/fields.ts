@@ -1,7 +1,7 @@
 import type { TranslateService } from '@ngx-translate/core';
 
 import type { DetailFieldConfig } from '@lib/anatomy/types';
-import { GRAVITE_KEYS, INCIDENT_TYPE_KEYS, type IncidentGravite, type IncidentType } from '@applications/erp/shell/i18n-labels';
+import { GRAVITE_KEYS, INCIDENT_TYPE_KEYS, type IncidentGravite, type IncidentType } from '@app/shell/i18n-labels';
 
 export function buildIncidentFields(t: TranslateService): DetailFieldConfig[] {
   const tr = (k: string) => t.instant(k);

@@ -1,5 +1,5 @@
 import type { DetailFieldConfig } from '@lib/anatomy/types';
-import type { Metre } from '@applications/erp/etudes/models';
+import type { Metre } from '@app/etudes/models';
 
 export const FIELDS: DetailFieldConfig<Metre>[] = [
   {

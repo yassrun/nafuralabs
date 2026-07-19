@@ -6,4 +6,4 @@ export type {
   TypeContrat,
   StatutEmploye,
   CategorieEmploye,
-} from '@applications/erp/rh/models';
+} from '@app/rh/models';

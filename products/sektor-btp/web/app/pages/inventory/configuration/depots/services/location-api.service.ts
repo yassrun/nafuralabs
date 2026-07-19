@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 
 import { FeatureApiService } from '@lib/anatomy';
 import type { ListQuery, ListResponse } from '@lib/anatomy/types';
-import type { Location } from '@applications/erp/inventory/models';
+import type { Location } from '@app/inventory/models';
 
 export type LocationCreate = Omit<Location, 'id'>;
 export type LocationUpdate = Partial<LocationCreate>;

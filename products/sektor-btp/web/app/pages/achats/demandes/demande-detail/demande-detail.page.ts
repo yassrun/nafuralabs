@@ -9,8 +9,8 @@ import {
   createDetailFacadeFromCrud,
 } from '@lib/anatomy';
 import type { DetailActionEvent } from '@lib/anatomy/types';
-import type { DAStatus, DemandeAchat, DemandeAchatCreate } from '@applications/erp/achats/models';
-import { SubmitApprovalButtonComponent } from '@applications/erp/pages/approbations/components/submit-approval-button/submit-approval-button.component';
+import type { DAStatus, DemandeAchat, DemandeAchatCreate } from '@app/achats/models';
+import { SubmitApprovalButtonComponent } from '@app/pages/approbations/components/submit-approval-button/submit-approval-button.component';
 
 import { DemandeFacade } from '../services';
 import { buildDemandeDetailConfig } from '../config';

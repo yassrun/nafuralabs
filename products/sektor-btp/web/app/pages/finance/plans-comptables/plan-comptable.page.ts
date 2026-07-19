@@ -11,13 +11,13 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ConfigDrivenListingPageImports, ConfirmDialogService } from '@lib/anatomy';
 import { ButtonComponent } from '@lib/anatomy/components';
 
-import { CompteTreePickerComponent } from '@applications/erp/finance/components/compte-tree-picker/compte-tree-picker.component';
+import { CompteTreePickerComponent } from '@app/finance/components/compte-tree-picker/compte-tree-picker.component';
 import type {
   Compte,
   CompteCreate,
   Journal,
   JournalCreate,
-} from '@applications/erp/finance/models';
+} from '@app/finance/models';
 
 import { CompteEditDrawerComponent } from './components/compte-edit-drawer/compte-edit-drawer.component';
 import { JournalConfigComponent } from './components/journal-config/journal-config.component';

@@ -5,7 +5,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import {ConfigDrivenListingPage,
   ConfigDrivenListingPageImports,
   ConfigDrivenListingPageStyles, ButtonComponent} from '@lib/anatomy';
-import type { BonCommande } from '@applications/erp/achats/models';
+import type { BonCommande } from '@app/achats/models';
 
 import { BcFacade } from '../services';
 import { buildBcListingConfig } from '../config';

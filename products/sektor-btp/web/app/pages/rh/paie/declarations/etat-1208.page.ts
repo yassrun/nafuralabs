@@ -5,12 +5,12 @@ import * as XLSX from 'xlsx';
 
 import {PageHeaderComponent, PageShellComponent, ButtonComponent } from '@lib/anatomy';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
-import type { ComptaFournisseur } from '@applications/erp/finance/models';
-import type { FactureFournisseur } from '@applications/erp/finance/models';
+import type { ComptaFournisseur } from '@app/finance/models';
+import type { FactureFournisseur } from '@app/finance/models';
 import { FfApiService } from '../../../achats/factures-fournisseur/services/ff-api.service';
-import { PartnersApiService } from '@applications/erp/shared/services/partners-api.service';
+import { PartnersApiService } from '@app/shared/services/partners-api.service';
 import { partnerToComptaFournisseur } from '../../../achats/factures-fournisseur/services/ff.mapper';
-import { ErpAuditService } from '@applications/erp/shell/erp-audit.service';
+import { ErpAuditService } from '@app/shell/erp-audit.service';
 
 const COMPANY = {
   nom: 'Nafura BTP SARL',

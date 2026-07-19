@@ -5,7 +5,7 @@ import type {
   IncidentUpdate,
   StatutIncident,
   TypeIncident,
-} from '@applications/erp/hse/models';
+} from '@app/hse/models';
 
 export interface ApiIncident {
   id: string;

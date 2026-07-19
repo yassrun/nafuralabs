@@ -1,7 +1,7 @@
 import type { TranslateService } from '@ngx-translate/core';
 
 import { buildListingConfig } from '@lib/anatomy';
-import type { BonCommande } from '@applications/erp/achats/models';
+import type { BonCommande } from '@app/achats/models';
 
 import { buildBcColumns } from './columns';
 import { buildBcFilters } from './filters';

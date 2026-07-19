@@ -1,5 +1,5 @@
 import { buildDetailConfig } from '@lib/anatomy';
-import type { Metre } from '@applications/erp/etudes/models';
+import type { Metre } from '@app/etudes/models';
 
 import { FIELDS } from './fields';
 import { ROUTES } from './routes';

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
-import type { BonCommande } from '@applications/erp/achats/models';
+import type { BonCommande } from '@app/achats/models';
 
 const COMPANY = {
   nom: 'Nafura BTP SARL',

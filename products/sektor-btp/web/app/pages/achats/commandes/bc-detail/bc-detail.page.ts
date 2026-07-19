@@ -11,18 +11,18 @@ import {
   createDetailFacadeFromCrud,
 } from '@lib/anatomy';
 import type { DetailActionEvent, LookupItem } from '@lib/anatomy/types';
-import type { BCStatus, BonCommande, BonCommandeCreate, MatchingReception, BCLigne } from '@applications/erp/achats/models';
-import { MatchingService } from '@applications/erp/achats/services/matching.service';
-import type { Location } from '@applications/erp/inventory/models';
-import { ErpLookupService } from '@applications/erp/shared/services/erp-lookup.service';
-import { SubmitApprovalButtonComponent } from '@applications/erp/pages/approbations/components/submit-approval-button/submit-approval-button.component';
-import { DocScanButtonComponent } from '@applications/erp/shared/components/doc-scan-button/doc-scan-button.component';
+import type { BCStatus, BonCommande, BonCommandeCreate, MatchingReception, BCLigne } from '@app/achats/models';
+import { MatchingService } from '@app/achats/services/matching.service';
+import type { Location } from '@app/inventory/models';
+import { ErpLookupService } from '@app/shared/services/erp-lookup.service';
+import { SubmitApprovalButtonComponent } from '@app/pages/approbations/components/submit-approval-button/submit-approval-button.component';
+import { DocScanButtonComponent } from '@app/shared/components/doc-scan-button/doc-scan-button.component';
 import {
   findStringByAliases,
   normalizeDate,
   toNumber,
   extractLines,
-} from '@applications/erp/shared/utils/extraction-json.utils';
+} from '@app/shared/utils/extraction-json.utils';
 
 import { BcFacade, type ApiReceptionAchat } from '../services';
 import { buildBcDetailConfig } from '../config';

@@ -4,4 +4,4 @@ export type {
   FichePaieCreate,
   FichePaieUpdate,
   StatutPaie,
-} from '@applications/erp/rh/models';
+} from '@app/rh/models';

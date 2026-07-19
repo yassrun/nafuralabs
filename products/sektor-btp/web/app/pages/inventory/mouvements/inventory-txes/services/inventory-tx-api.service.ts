@@ -7,8 +7,8 @@ import { Injectable } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
 
 import { FeatureApiService, type ListResponse } from '@lib/anatomy';
-import type { InventoryTxWithLinesBody, InventoryTxWithLinesUpdateBody } from '@applications/erp/inventory/services/inventory-tx-api.types';
-import type { ApiInventoryTxDetail } from '@applications/erp/inventory/services/inventory-tx.mapper';
+import type { InventoryTxWithLinesBody, InventoryTxWithLinesUpdateBody } from '@app/inventory/services/inventory-tx-api.types';
+import type { ApiInventoryTxDetail } from '@app/inventory/services/inventory-tx.mapper';
 import type { InventoryTx, InventoryTxCreate, InventoryTxUpdate } from '../models';
 
 @Injectable({ providedIn: 'root' })

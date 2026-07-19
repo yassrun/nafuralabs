@@ -6,7 +6,7 @@ import { FilterResetComponent } from '@lib/anatomy/components/molecules/filter-r
 
 import { PageHeaderComponent, PageShellComponent } from '@lib/anatomy';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
-import { AVENANT_STATUS_KEYS, AVENANT_TYPE_KEYS } from '@applications/erp/shell/i18n-labels';
+import { AVENANT_STATUS_KEYS, AVENANT_TYPE_KEYS } from '@app/shell/i18n-labels';
 import { ToastService } from '@lib/anatomy/components/services/toast.service';
 import { AvenantApiService } from '../services/avenant-api.service';
 import { type Avenant, type AvenantStatus } from '../../models';

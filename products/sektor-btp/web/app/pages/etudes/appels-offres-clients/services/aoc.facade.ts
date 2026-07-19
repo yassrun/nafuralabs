@@ -6,7 +6,7 @@ import type {
   AppelOffreClient,
   AppelOffreClientCreate,
   AppelOffreClientUpdate,
-} from '@applications/erp/etudes/models';
+} from '@app/etudes/models';
 
 import { AOCApiService } from './aoc-api.service';
 import { DevisApiService } from '../../devis/services/devis-api.service';

@@ -6,7 +6,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import {PageHeaderComponent, PageShellComponent, ToastService, ButtonComponent, ConfirmDialogService} from '@lib/anatomy';
 import type { PageHeaderConfig } from '@lib/anatomy/components';
-import type { AppelOffre, ScoringAO } from '@applications/erp/achats/models';
+import type { AppelOffre, ScoringAO } from '@app/achats/models';
 
 import { AoApiService, AoFacade } from '../services';
 

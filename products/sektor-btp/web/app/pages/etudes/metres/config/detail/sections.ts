@@ -1,5 +1,5 @@
 import type { DetailSectionConfig } from '@lib/anatomy/types';
-import type { Metre } from '@applications/erp/etudes/models';
+import type { Metre } from '@app/etudes/models';
 
 export const SECTIONS: DetailSectionConfig<Metre>[] = [
   {

@@ -1,4 +1,4 @@
-import type { LotChantier } from '@applications/erp/chantiers/models';
+import type { LotChantier } from '@app/chantiers/models';
 
 import {
   enrichPlanningTasksWithLots,

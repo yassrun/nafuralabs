@@ -7,7 +7,7 @@ import type {
   ContratAchatCreate,
   ContratAchatListItem,
   ContratAchatUpdate,
-} from '@applications/erp/achats/models';
+} from '@app/achats/models';
 
 import {
   type ApiContratFournisseur,

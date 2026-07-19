@@ -6,7 +6,7 @@ import { FilterResetComponent } from '@lib/anatomy/components/molecules/filter-r
 
 import { ButtonComponent, PageHeaderComponent, PageShellComponent } from '@lib/anatomy';
 import { AttachementApiService } from '../attachement-api.service';
-import { ATTACHEMENT_STATUS_KEYS } from '@applications/erp/shell/i18n-labels';
+import { ATTACHEMENT_STATUS_KEYS } from '@app/shell/i18n-labels';
 import {
   type Attachement,
   type AttachementStatus,

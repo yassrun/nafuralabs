@@ -2,18 +2,18 @@ import { Injectable, inject } from '@angular/core';
 
 import { FeatureApiService } from '@lib/anatomy';
 import type { ListQuery, ListResponse } from '@lib/anatomy/types';
-import { PartnersApiService } from '@applications/erp/shared/services/partners-api.service';
+import { PartnersApiService } from '@app/shared/services/partners-api.service';
 import {
   clientVenteToPartnerCreate,
   clientVenteToPartnerUpdate,
   partnerToClientVente,
-} from '@applications/erp/shared/services/partner-commerce.mapper';
+} from '@app/shared/services/partner-commerce.mapper';
 import type {
   ClientVente,
   ClientVenteCreate,
   ClientVenteListItem,
   ClientVenteUpdate,
-} from '@applications/erp/ventes/models';
+} from '@app/ventes/models';
 
 interface ClientQuery extends ListQuery {
   type?: string;

@@ -2,13 +2,13 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 
-import { FactureApiService } from '@applications/erp/pages/ventes/factures/services/facture-api.service';
-import { RecouvrementService } from '@applications/erp/finance/services/recouvrement.service';
-import { ErpAuditService } from '@applications/erp/shell/erp-audit.service';
+import { FactureApiService } from '@app/pages/ventes/factures/services/facture-api.service';
+import { RecouvrementService } from '@app/finance/services/recouvrement.service';
+import { ErpAuditService } from '@app/shell/erp-audit.service';
 import { PageHeaderComponent, PageShellComponent } from '@lib/anatomy';
 import { ButtonComponent } from '@lib/anatomy/components';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
-import type { SuiviRecouvrement } from '@applications/erp/finance/models';
+import type { SuiviRecouvrement } from '@app/finance/models';
 
 @Component({
   selector: 'app-recouvrement-page',

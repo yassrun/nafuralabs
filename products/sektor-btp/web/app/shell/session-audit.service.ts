@@ -51,7 +51,7 @@ export interface ActiveSession {
   terminatedBy?: string;
 }
 
-// @i18n-exempt — @deprecated Phase 1.2 — see FAILURE_REASON_KEYS in @applications/erp/shell/i18n-labels.
+// @i18n-exempt — @deprecated Phase 1.2 — see FAILURE_REASON_KEYS in @app/shell/i18n-labels.
 export const FAILURE_REASON_LABELS: Record<FailureReason, string> = {
   BAD_PASSWORD: 'Mot de passe erroné',
   USER_NOT_FOUND: 'Utilisateur inconnu',
@@ -61,7 +61,7 @@ export const FAILURE_REASON_LABELS: Record<FailureReason, string> = {
   EXPIRED_TOKEN: 'Token expiré',
 };
 
-// @i18n-exempt — @deprecated Phase 1.2 — see OUTCOME_KEYS in @applications/erp/shell/i18n-labels.
+// @i18n-exempt — @deprecated Phase 1.2 — see OUTCOME_KEYS in @app/shell/i18n-labels.
 export const OUTCOME_LABELS: Record<LoginOutcome, string> = {
   SUCCESS: 'Succès',
   FAILED: 'Échec',

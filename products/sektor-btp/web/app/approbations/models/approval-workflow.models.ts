@@ -1,4 +1,4 @@
-import type { ApprovalEntityType } from '@applications/erp/pages/approbations/models';
+import type { ApprovalEntityType } from '@app/pages/approbations/models';
 
 /**
  * Matrice workflow (Task 12 M-APR-01) — définitions seedées, sélection par type + conditions.

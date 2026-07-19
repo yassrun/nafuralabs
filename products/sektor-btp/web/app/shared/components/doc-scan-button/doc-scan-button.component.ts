@@ -22,6 +22,12 @@ import type { UiSchema } from '@platform/features/documents/doc-extractor/models
 
 import { ErpDocScanService } from '../../services/erp-doc-scan.service';
 
+/**
+ * Reusable scan-document button.
+ *
+ * Prefer providing `dataSchema` from the hosting screen. `domainKey`/`docTypeKey`
+ * remain as a legacy bridge for screens that still load from the catalog.
+ */
 @Component({
   selector: 'erp-doc-scan-button',
   standalone: true,
@@ -57,17 +63,20 @@ import { ErpDocScanService } from '../../services/erp-doc-scan.service';
 export class DocScanButtonComponent {
   @ViewChild('fileInput') private readonly fileInput?: ElementRef<HTMLInputElement>;
 
+  /** Preferred: screen-owned schema. */
   @Input() dataSchema: JsonSchemaRoot | null = null;
   @Input() presentationSchema: UiSchema | null = null;
   @Input() instructions = '';
   @Input() schemaName = '';
 
+  /** Legacy catalog bridge when dataSchema is not provided. */
   @Input() domainKey = '';
   @Input() docTypeKey = '';
 
   @Input() labelKey = 'common.scan.button';
   @Input() accept = '.pdf,.png,.jpg,.jpeg,.webp';
   @Input() disabled = false;
+  /** When set, the button is hidden unless the user has this permission. */
   @Input() permission = '';
 
   @Output() readonly extracted = new EventEmitter<Record<string, unknown>>();
@@ -165,6 +174,9 @@ export class DocScanButtonComponent {
     }
     if (message === 'ERP_DOC_SCAN_FAILED') {
       return 'common.scan.failed';
+    }
+    if (message === 'ERP_DOC_SCAN_SCHEMA_REQUIRED') {
+      return 'common.scan.error';
     }
     return 'common.scan.error';
   }

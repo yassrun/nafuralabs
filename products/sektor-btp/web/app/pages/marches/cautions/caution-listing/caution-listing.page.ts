@@ -5,7 +5,7 @@ import { TranslateModule } from '@ngx-translate/core';
 
 import { PageHeaderComponent, PageShellComponent } from '@lib/anatomy';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
-import { CAUTION_STATUS_KEYS, CAUTION_TYPE_KEYS } from '@applications/erp/shell/i18n-labels';
+import { CAUTION_STATUS_KEYS, CAUTION_TYPE_KEYS } from '@app/shell/i18n-labels';
 import { ToastService } from '@lib/anatomy/components/services/toast.service';
 import { CautionApiService } from '../services/caution-api.service';
 import { type CautionBancaire, type CautionStatus, type CautionType } from '../../models';

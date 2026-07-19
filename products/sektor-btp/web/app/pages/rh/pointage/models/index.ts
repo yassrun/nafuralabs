@@ -29,7 +29,7 @@ export interface Pointage {
   signatureDataUrl?: string;
 }
 
-// @i18n-exempt — @deprecated Phase 1.2 — see MODE_KEYS in @applications/erp/shell/i18n-labels.
+// @i18n-exempt — @deprecated Phase 1.2 — see MODE_KEYS in @app/shell/i18n-labels.
 export const MODE_LABELS: Record<PointageMode, string> = {
   PRESENT: 'Présent',
   ABSENT: 'Absent',

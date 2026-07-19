@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import type { FactureClient } from '@applications/erp/ventes/models';
+import type { FactureClient } from '@app/ventes/models';
 
 export interface EfacturePayload {
   hashEfacture: string;

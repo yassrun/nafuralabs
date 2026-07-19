@@ -1,7 +1,7 @@
 import type { TranslateService } from '@ngx-translate/core';
 
 import { buildListingConfig } from '@lib/anatomy';
-import type { FichePaie } from '@applications/erp/rh/models';
+import type { FichePaie } from '@app/rh/models';
 
 import { buildPaieColumns } from './columns';
 import { buildPaieFilters } from './filters';

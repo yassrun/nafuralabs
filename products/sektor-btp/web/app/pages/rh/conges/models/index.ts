@@ -5,4 +5,4 @@ export type {
   CongeUpdate,
   TypeConge,
   StatutConge,
-} from '@applications/erp/rh/models';
+} from '@app/rh/models';

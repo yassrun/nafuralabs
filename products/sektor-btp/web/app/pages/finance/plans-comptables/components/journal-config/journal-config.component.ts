@@ -10,7 +10,7 @@ import {
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 
-import { JOURNAL_TYPE_KEYS } from '@applications/erp/shell/i18n-labels';
+import { JOURNAL_TYPE_KEYS } from '@app/shell/i18n-labels';
 import type { Journal, JournalCreate, JournalType } from '../../models';
 import { ButtonComponent } from '@lib/anatomy/components';
 

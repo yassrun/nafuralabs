@@ -1,6 +1,6 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 
-import { ErpAuditService } from '@applications/erp/shell/erp-audit.service';
+import { ErpAuditService } from '@app/shell/erp-audit.service';
 
 /**
  * Service d'import / suivi des indices BTP01..xx publiés mensuellement

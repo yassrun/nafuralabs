@@ -2,15 +2,15 @@ import { Injectable, LOCALE_ID, computed, inject, signal } from '@angular/core';
 
 import { GridFacade } from '@lib/anatomy';
 import type { LookupContext } from '@lib/anatomy/types';
-import { BankReconciliationApiService } from '@applications/erp/finance/services/bank-reconciliation-api.service';
-import { ErpLookupService, partnerLookupLabel } from '@applications/erp/shared/services/erp-lookup.service';
+import { BankReconciliationApiService } from '@app/finance/services/bank-reconciliation-api.service';
+import { ErpLookupService, partnerLookupLabel } from '@app/shared/services/erp-lookup.service';
 import type {
   Encaissement,
   FactureClient,
   FactureCreate,
   FactureUpdate,
-} from '@applications/erp/ventes/models';
-import { ErpAuditService } from '@applications/erp/shell/erp-audit.service';
+} from '@app/ventes/models';
+import { ErpAuditService } from '@app/shell/erp-audit.service';
 
 import { FactureApiService } from './facture-api.service';
 

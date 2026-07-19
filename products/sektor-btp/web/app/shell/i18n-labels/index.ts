@@ -7,7 +7,7 @@
  * Usage:
  *
  *   ```ts
- *   import { FACTURE_STATUS_KEYS } from '@applications/erp/shell/i18n-labels';
+ *   import { FACTURE_STATUS_KEYS } from '@app/shell/i18n-labels';
  *   // Template: {{ FACTURE_STATUS_KEYS[status] | translate }}
  *   // TS:      translateService.instant(FACTURE_STATUS_KEYS[status])
  *   ```

@@ -4,7 +4,7 @@ import type {
   NonConformiteUpdate,
   StatutNC,
   TypeNonConformite,
-} from '@applications/erp/hse/models';
+} from '@app/hse/models';
 
 export interface ApiNonConformite {
   id: string;

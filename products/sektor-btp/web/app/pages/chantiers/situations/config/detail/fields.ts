@@ -1,5 +1,5 @@
 import type { DetailFieldConfig } from '@lib/anatomy/types';
-import type { Situation } from '@applications/erp/chantiers/models';
+import type { Situation } from '@app/chantiers/models';
 
 export const FIELDS: DetailFieldConfig<Situation>[] = [
   // ─── En-tête ──────────────────────────────────────────────

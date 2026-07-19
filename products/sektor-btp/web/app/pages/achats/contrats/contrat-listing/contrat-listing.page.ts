@@ -3,7 +3,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import {ConfigDrivenListingPage, ConfigDrivenListingPageImports, ConfigDrivenListingPageStyles, ButtonComponent} from '@lib/anatomy';
-import type { ContratAchat } from '@applications/erp/achats/models';
+import type { ContratAchat } from '@app/achats/models';
 
 import { ContratFacade } from '../services';
 import { buildContratsListingConfig } from '../config';

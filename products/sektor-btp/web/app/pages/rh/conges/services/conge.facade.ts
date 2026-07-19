@@ -2,9 +2,9 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 
 import { GridFacade } from '@lib/anatomy';
 import type { LookupContext } from '@lib/anatomy/types';
-import { EmployeApiService } from '@applications/erp/pages/rh/employes/services/employe-api.service';
-import type { Conge, CongeCreate, CongeUpdate } from '@applications/erp/rh/models';
-import { ErpAuditService } from '@applications/erp/shell/erp-audit.service';
+import { EmployeApiService } from '@app/pages/rh/employes/services/employe-api.service';
+import type { Conge, CongeCreate, CongeUpdate } from '@app/rh/models';
+import { ErpAuditService } from '@app/shell/erp-audit.service';
 
 import { CongeApiService } from './conge-api.service';
 

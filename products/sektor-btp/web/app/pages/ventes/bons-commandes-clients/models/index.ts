@@ -5,4 +5,4 @@ export type {
   BCClientUpdate,
   BCClientStatus,
   BCClientLigne,
-} from '@applications/erp/ventes/models';
+} from '@app/ventes/models';

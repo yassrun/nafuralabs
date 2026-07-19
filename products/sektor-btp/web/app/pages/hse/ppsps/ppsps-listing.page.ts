@@ -6,13 +6,13 @@ import { PageHeaderComponent, PageShellComponent, ToastService, ButtonComponent 
 import { ExportButtonComponent, type ExportEvent } from '@lib/anatomy/components/molecules/export-button/export-button.component';
 import { FilterResetComponent } from '@lib/anatomy/components/molecules/filter-reset/filter-reset.component';
 import { AttachmentListComponent } from '@platform/features/collaboration/doc-manager/components/attachment-list.component';
-import { ErpAuditService } from '@applications/erp/shell/erp-audit.service';
-import { PPSPS_STATUS_KEYS } from '@applications/erp/shell/i18n-labels';
-import { ChantierApiService } from '@applications/erp/pages/chantiers/services/chantier-api.service';
+import { ErpAuditService } from '@app/shell/erp-audit.service';
+import { PPSPS_STATUS_KEYS } from '@app/shell/i18n-labels';
+import { ChantierApiService } from '@app/pages/chantiers/services/chantier-api.service';
 import {
   DOCUMENT_ATTACHMENT_CONFIG,
   ERP_ATTACHMENT_ENTITY_TYPES,
-} from '@applications/erp/shared/config/attachment-detail.config';
+} from '@app/shared/config/attachment-detail.config';
 import type { Ppsps, PpspsSection, PpspsStatus } from '../models';
 import { PpspsApiService } from './services/ppsps-api.service';
 

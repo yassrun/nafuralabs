@@ -14,12 +14,12 @@ import type {
   OrdreTravail,
   PlanMaintenance,
   PleinCarburant,
-} from '@applications/erp/inventory/models';
-import { MaterielGmaoFacadeService } from '@applications/erp/inventory/services/materiel-gmao-facade.service';
+} from '@app/inventory/models';
+import { MaterielGmaoFacadeService } from '@app/inventory/services/materiel-gmao-facade.service';
 import {
   MaterielAffectationApiService,
   apiToAffectationChantier,
-} from '@applications/erp/inventory/services/materiel-affectation-api.service';
+} from '@app/inventory/services/materiel-affectation-api.service';
 import { MaterielApiService } from '../../catalogue/materiel/services/materiel-api.service';
 
 export interface EnginFicheVm {

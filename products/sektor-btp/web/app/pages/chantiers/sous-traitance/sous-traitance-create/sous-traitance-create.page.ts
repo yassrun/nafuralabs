@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { ButtonComponent, PageHeaderComponent, PageShellComponent, ToastService } from '@lib/anatomy';
-import type { Chantier } from '@applications/erp/chantiers/models';
+import type { Chantier } from '@app/chantiers/models';
 import { ChantierApiService } from '../../services/chantier-api.service';
 import { SousTraitanceApiService } from '../services/sous-traitance-api.service';
 

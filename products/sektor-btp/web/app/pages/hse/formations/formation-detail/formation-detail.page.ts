@@ -9,7 +9,7 @@ import {
   createDetailFacadeFromCrud,
 } from '@lib/anatomy';
 import type { StatusTransitionEvent } from '@lib/anatomy/types';
-import type { Formation, FormationCreate } from '@applications/erp/hse/models';
+import type { Formation, FormationCreate } from '@app/hse/models';
 
 import { FormationFacade } from '../services';
 import { buildFormationDetailConfig } from '../config';

@@ -8,7 +8,7 @@ import {
   type IncidentGravite,
   type IncidentStatus,
   type IncidentType,
-} from '@applications/erp/shell/i18n-labels';
+} from '@app/shell/i18n-labels';
 
 export function buildIncidentFilters(t: TranslateService): FilterFieldConfig[] {
   const tr = (k: string) => t.instant(k);

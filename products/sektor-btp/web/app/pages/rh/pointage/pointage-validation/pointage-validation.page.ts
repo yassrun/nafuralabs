@@ -7,7 +7,7 @@ import {PageHeaderComponent, PageShellComponent, ButtonComponent } from '@lib/an
 import type { Chantier } from '../../../../chantiers/models';
 import { ChantierApiService } from '../../../chantiers/services/chantier-api.service';
 import { PointageApiService } from '../services/pointage-api.service';
-import { MODE_KEYS } from '@applications/erp/shell/i18n-labels';
+import { MODE_KEYS } from '@app/shell/i18n-labels';
 import { MODE_CSS, type Pointage } from '../models';
 
 @Component({

@@ -7,7 +7,7 @@ import { map } from 'rxjs/operators';
 
 import { FilterResetComponent } from '@lib/anatomy/components/molecules/filter-reset/filter-reset.component';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
-import { EPI_STATUS_KEYS } from '@applications/erp/shell/i18n-labels';
+import { EPI_STATUS_KEYS } from '@app/shell/i18n-labels';
 
 import { EpiApiService } from './services/epi-api.service';
 import {

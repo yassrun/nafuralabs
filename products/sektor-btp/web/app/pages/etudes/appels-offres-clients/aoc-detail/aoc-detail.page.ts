@@ -12,7 +12,7 @@ import type { DetailActionEvent } from '@lib/anatomy/types';
 import type {
   AppelOffreClient,
   AppelOffreClientCreate,
-} from '@applications/erp/etudes/models';
+} from '@app/etudes/models';
 
 import { AOCFacade } from '../services';
 import { AOC_DETAIL_CONFIG } from '../config';

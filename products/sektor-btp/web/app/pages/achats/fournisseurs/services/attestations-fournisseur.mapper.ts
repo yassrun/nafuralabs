@@ -6,7 +6,7 @@ import type {
   AttestationFournisseurUpdate,
   AttestationTypeStatus,
   PartnerAttestationsStatus,
-} from '@applications/erp/achats/models';
+} from '@app/achats/models';
 
 export interface ApiAttestationFournisseur {
   id: string;

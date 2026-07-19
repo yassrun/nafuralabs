@@ -33,7 +33,8 @@ platform/          SDK partagé (auth, tenancy, UI shell) — aucun métier
 products/<app>/    Code + deploy K8s par produit
 infra/k8s/         Infra partagée (postgres, keycloak, vault…) — overlays par ENV
 marketing/         Sites vitrine (MBS, corporate)
-web/               Workspace Angular Sektor (build entrypoint)
+products/<app>/web/  Workspace Angular du produit (autonome : angular.json + package.json)
+platform/web/      Bibliotheques front partagees (core, lib, features) - consomme par chemins tsconfig
 toolchain/ops/     nlops.sh — CLI deploy
 ```
 
@@ -56,7 +57,7 @@ toolchain/ops/     nlops.sh — CLI deploy
 
 | Paths modifiés | Action staging |
 |----------------|----------------|
-| `products/sektor-btp/**`, `platform/**`, `web/**` | `release-app sektor-btp` |
+| `products/sektor-btp/**`, `platform/**` | `release-app sektor-btp` |
 | `infra/k8s/**` | `infra-up` puis vérifier apps |
 | `marketing/products/mbs-studio/**` | `deploy mbs-studio` |
 | `marketing/corporate/**` | `deploy corporate` |
@@ -94,26 +95,29 @@ Layali / Beauty : `products/*/mobile/` — hors K8s pour l’instant.
 
 Gradle Sektor : `:sektor:app`, `:sektor:<module>`.
 
-⚠️ **Frontend — le code vivant est `web/app/`, pas `platform/web/` ni `products/sektor-btp/web/app/`.**
+**Frontend — Sektor possede son front, la plateforme n'en depend jamais.**
 
-Ce que le build compile réellement (`web/angular.json` → `web/tsconfig.app.json` →
-`include: ["app/**/*.ts"]`) :
+```
+platform/web/               core/ lib/ features/  — ZERO import applicatif
+products/sektor-btp/web/    angular.json, package.json, src/, app/
+package.json (racine)       manifeste de workspaces npm — hisse node_modules
+```
 
-| Alias | Cible réelle | État |
-|-------|--------------|------|
-| `@core/*`, `@lib/*`, `@platform/*` | `web/app/platform/` | ✅ compilé |
-| `@applications/*` | `web/app/applications/erp/` | ✅ compilé |
-| `@features/*`, `@services/*` | `platform/web/features/` | ❌ **0 import — mort** |
-| — | `products/sektor-btp/web/app/` | ❌ **mort** (hors glob) |
+| Alias | Cible |
+|-------|-------|
+| `@core/*`, `@lib/*`, `@platform/*`, `@features/*` | `platform/web/` |
+| `@app/*` | `products/sektor-btp/web/app/` |
 
-Les deux répertoires longtemps documentés comme sources canoniques sont du **code mort**, et
-ont divergé de l'arbre vivant. Écrire dedans = code jamais déployé.
+**Direction de dependance : application -> plateforme, jamais l'inverse.** La plateforme
+declare ce dont elle a besoin (`core/application/application-config.ts`,
+`core/integrations/audit.port.ts`, `core/shell/shell-extensions.ts`) et l'application le
+fournit au demarrage. Regle ESLint dans `products/sektor-btp/web/.eslintrc.json`.
 
-**Chantier de réconciliation en cours** :
-[`products/sektor-btp/docs/epics/front-ownership/`](../products/sektor-btp/docs/epics/front-ownership/00-REVUE-ARCHI.md).
-Cible : Sektor possède son front sous `products/sektor-btp/web/`, dépendance à sens unique
-application → plateforme, `web/` disparaît. **Jusqu'à la phase 3 de ce chantier, tout code front
-s'écrit dans `web/app/`.**
+`node_modules` est hisse a la racine par les workspaces npm : `platform/web/` vit hors du
+repertoire produit, donc la resolution Node doit pouvoir remonter jusqu'a lui.
+`platform/web/package.json` declare ses dependances reelles en `peerDependencies`.
+
+Historique du chantier : [`products/sektor-btp/docs/epics/front-ownership/`](../products/sektor-btp/docs/epics/front-ownership/00-REVUE-ARCHI.md).
 
 ---
 
@@ -141,7 +145,7 @@ Hosts Windows (admin) : `powershell -ExecutionPolicy Bypass -File toolchain/ops/
 | MBS | `mbs.nafuralabs.com` |
 | Usage Ops | `usage-ops.nafuralabs.com` |
 
-Config front : `web/src/environments/environment.staging.ts` / `environment.prod.ts`.
+Config front : `products/sektor-btp/web/src/environments/environment.staging.ts` / `environment.prod.ts`.
 
 ---
 
@@ -200,8 +204,7 @@ Arbre de décision complet : [toolchain/ops/AGENTS.md](../toolchain/ops/AGENTS.m
 | Deploy backend sans `migrate` après changement SQL | CrashLoop |
 | Métier BTP dans `platform/` | Architecture |
 | Overlay K8s `dev` | Seulement staging + prod |
-| Écrire du front dans `platform/web/` ou `products/sektor-btp/web/app/` | **Arbres morts, gelés** — non compilés. Source vivante = `web/app/` jusqu'à la fin du chantier `front-ownership` |
-| Importer `@applications/*` depuis `web/app/platform/` | Dépendance inversée — la plateforme ne doit jamais dépendre d'une application (23 occurrences à résorber) |
+| Importer une application depuis `platform/web/` | Dependance inversee — interdite par ESLint. Passer par un jeton d'injection ou un emplacement de shell |
 | Hostnames `*.nafura.local` en staging cluster | Remplacés par `*.nafuralabs.staging` (dev local `ng serve` peut garder `.local`) |
 
 ---

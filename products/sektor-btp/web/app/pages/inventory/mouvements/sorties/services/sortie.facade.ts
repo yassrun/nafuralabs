@@ -13,7 +13,7 @@ import {
 import type { ApiInventoryTxRow } from '../../../../../inventory/services/inventory-tx.mapper';
 import { MotifsApiService } from '../../../../../inventory/services/motifs-api.service';
 import { ReservationStockService } from '../../../../../inventory/services/reservation-stock.service';
-import { BudgetFacade } from '@applications/erp/pages/chantiers/budget/services';
+import { BudgetFacade } from '@app/pages/chantiers/budget/services';
 import { InventoryTxesFacade } from '../../inventory-txes/services/inventory-tx.facade';
 
 export interface SortieListItem extends InventoryTx {

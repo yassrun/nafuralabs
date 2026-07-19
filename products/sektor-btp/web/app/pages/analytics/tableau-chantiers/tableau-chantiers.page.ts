@@ -6,8 +6,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { PageShellComponent, PageHeaderComponent, StatCardComponent, ChartComponent } from '@lib/anatomy';
 import type { ChartData } from '@lib/anatomy';
 import { ButtonComponent } from '@lib/anatomy/components';
-import { ChantierApiService } from '@applications/erp/pages/chantiers/services/chantier-api.service';
-import { SituationApiService } from '@applications/erp/pages/chantiers/situations/services/situation-api.service';
+import { ChantierApiService } from '@app/pages/chantiers/services/chantier-api.service';
+import { SituationApiService } from '@app/pages/chantiers/situations/services/situation-api.service';
 
 import { AnalyticsApiService } from '../services/analytics-api.service';
 import {

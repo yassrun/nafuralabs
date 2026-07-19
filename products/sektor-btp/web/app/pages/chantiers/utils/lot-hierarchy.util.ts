@@ -1,7 +1,10 @@
-import type { LotChantier, PosteBudgetaire } from '@applications/erp/chantiers/models';
+import type { LotChantier, PosteBudgetaire } from '@app/chantiers/models';
 import type { NfTreeNode } from '@lib/anatomy/components';
 
 export type LotHierarchyRowKind = 'lot' | 'sousLot' | 'poste';
+
+/** Max depth for grouping lots (0 = root … 2 = sous-sous-lot). */
+export const MAX_LOT_DEPTH = 2;
 
 export interface LotHierarchyRow {
   kind: LotHierarchyRowKind;
@@ -10,8 +13,29 @@ export interface LotHierarchyRow {
   poste?: PosteBudgetaire;
 }
 
-export function sortByOrdreCode<T extends { ordre: number; code: string }>(rows: T[]): T[] {
+function sortByOrdreCode<T extends { ordre: number; code: string }>(rows: T[]): T[] {
   return [...rows].sort((a, b) => a.ordre - b.ordre || a.code.localeCompare(b.code));
+}
+
+function appendPostes(
+  out: LotHierarchyRow[],
+  postes: PosteBudgetaire[],
+  depth: number,
+): void {
+  for (const poste of sortByOrdreCode(postes)) {
+    out.push({ kind: 'poste', depth, poste });
+  }
+}
+
+export function lotDepth(lot: LotChantier, lotsById: Map<string, LotChantier>): number {
+  let depth = 0;
+  let currentParentId = lot.parentLotId ?? null;
+  while (currentParentId) {
+    depth += 1;
+    if (depth > MAX_LOT_DEPTH) break;
+    currentParentId = lotsById.get(currentParentId)?.parentLotId ?? null;
+  }
+  return depth;
 }
 
 export function buildLotHierarchyRows(
@@ -19,64 +43,76 @@ export function buildLotHierarchyRows(
   postesByLotId: Record<string, PosteBudgetaire[]>,
 ): LotHierarchyRow[] {
   const out: LotHierarchyRow[] = [];
-  const childrenByParent = groupLotsByParent(lots);
-
-  const appendLot = (lot: LotChantier, depth: number): void => {
-    out.push({ kind: depth === 0 ? 'lot' : 'sousLot', depth, lot });
-    for (const poste of sortByOrdreCode(postesByLotId[lot.id] ?? [])) {
-      out.push({ kind: 'poste', depth: depth + 1, poste });
-    }
-    for (const child of childrenByParent.get(lot.id) ?? []) {
-      appendLot(child, depth + 1);
-    }
-  };
-
-  for (const root of childrenByParent.get(null) ?? []) {
-    appendLot(root, 0);
+  const byParent = new Map<string | null, LotChantier[]>();
+  for (const lot of lots) {
+    const key = lot.parentLotId ?? null;
+    const bucket = byParent.get(key) ?? [];
+    bucket.push(lot);
+    byParent.set(key, bucket);
+  }
+  for (const [, bucket] of byParent) {
+    sortByOrdreCode(bucket);
   }
 
+  function walk(parentId: string | null, depth: number): void {
+    const siblings = byParent.get(parentId) ?? [];
+    for (const lot of siblings) {
+      const kind: LotHierarchyRowKind = depth === 0 ? 'lot' : 'sousLot';
+      out.push({ kind, depth, lot });
+      appendPostes(out, postesByLotId[lot.id] ?? [], depth + 1);
+      if (depth < MAX_LOT_DEPTH) {
+        walk(lot.id, depth + 1);
+      }
+    }
+  }
+
+  walk(null, 0);
   return out;
 }
 
+/**
+ * Builds nested tree nodes (lots → sous-lots → postes) for the generic
+ * nf-tree-table. Mirrors buildLotHierarchyRows grouping and MAX_LOT_DEPTH.
+ */
 export function buildLotTreeNodes(
   lots: LotChantier[],
   postesByLotId: Record<string, PosteBudgetaire[]>,
 ): NfTreeNode<LotHierarchyRow>[] {
-  const childrenByParent = groupLotsByParent(lots);
-
-  const buildLotNode = (lot: LotChantier, depth: number): NfTreeNode<LotHierarchyRow> => {
-    const posteNodes: NfTreeNode<LotHierarchyRow>[] =
-      sortByOrdreCode(postesByLotId[lot.id] ?? []).map((poste) => ({
-        key: `poste-${poste.id}`,
-        data: { kind: 'poste', depth: depth + 1, poste },
-        leaf: true,
-      }));
-    const childLotNodes = (childrenByParent.get(lot.id) ?? [])
-      .map((child) => buildLotNode(child, depth + 1));
-    const children = [...posteNodes, ...childLotNodes];
-
-    return {
-      key: `lot-${lot.id}`,
-      data: { kind: depth === 0 ? 'lot' : 'sousLot', depth, lot },
-      children,
-      expanded: true,
-      leaf: children.length === 0,
-    };
-  };
-
-  return (childrenByParent.get(null) ?? []).map((root) => buildLotNode(root, 0));
-}
-
-function groupLotsByParent(lots: LotChantier[]): Map<string | null, LotChantier[]> {
-  const grouped = new Map<string | null, LotChantier[]>();
+  const byParent = new Map<string | null, LotChantier[]>();
   for (const lot of lots) {
-    const parentId = lot.parentLotId ?? null;
-    const children = grouped.get(parentId) ?? [];
-    children.push(lot);
-    grouped.set(parentId, children);
+    const key = lot.parentLotId ?? null;
+    const bucket = byParent.get(key) ?? [];
+    bucket.push(lot);
+    byParent.set(key, bucket);
   }
-  for (const [parentId, children] of grouped) {
-    grouped.set(parentId, sortByOrdreCode(children));
+
+  function posteNodes(lotId: string, depth: number): NfTreeNode<LotHierarchyRow>[] {
+    return sortByOrdreCode(postesByLotId[lotId] ?? []).map((poste) => ({
+      key: `poste-${poste.id}`,
+      data: { kind: 'poste', depth, poste },
+      leaf: true,
+    }));
   }
-  return grouped;
+
+  function walk(parentId: string | null, depth: number): NfTreeNode<LotHierarchyRow>[] {
+    const siblings = sortByOrdreCode(byParent.get(parentId) ?? []);
+    return siblings.map((lot) => {
+      const kind: LotHierarchyRowKind = depth === 0 ? 'lot' : 'sousLot';
+      const children: NfTreeNode<LotHierarchyRow>[] = [
+        ...posteNodes(lot.id, depth + 1),
+      ];
+      if (depth < MAX_LOT_DEPTH) {
+        children.push(...walk(lot.id, depth + 1));
+      }
+      return {
+        key: `lot-${lot.id}`,
+        data: { kind, depth, lot },
+        expanded: true,
+        leaf: children.length === 0,
+        children,
+      };
+    });
+  }
+
+  return walk(null, 0);
 }

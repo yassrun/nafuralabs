@@ -6,9 +6,9 @@ import type {
   OffreCommerciale,
   OffreCreate,
   OffreUpdate,
-} from '@applications/erp/ventes/models';
+} from '@app/ventes/models';
 
-import type { BonCommandeClient } from '@applications/erp/ventes/models';
+import type { BonCommandeClient } from '@app/ventes/models';
 
 import { bccToUi } from '../../bons-commandes-clients/services/bcc.mapper';
 import {

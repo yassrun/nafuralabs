@@ -4,9 +4,9 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import {PageHeaderComponent, PageShellComponent, ButtonComponent } from '@lib/anatomy';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
-import type { FichePaie } from '@applications/erp/rh/models';
+import type { FichePaie } from '@app/rh/models';
 import { PaieApiService } from '../services/paie-api.service';
-import { ErpAuditService } from '@applications/erp/shell/erp-audit.service';
+import { ErpAuditService } from '@app/shell/erp-audit.service';
 
 const COMPANY = {
   nom: 'Nafura BTP SARL',

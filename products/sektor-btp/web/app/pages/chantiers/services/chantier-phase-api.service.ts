@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 import { FeatureApiService } from '@lib/anatomy';
-import type { PhaseChantier, PhaseChantierStatus } from '@applications/erp/chantiers/models';
+import type { PhaseChantier, PhaseChantierStatus } from '@app/chantiers/models';
 
 interface ApiChantierPhase {
   id: string;

@@ -1,4 +1,4 @@
-import type { LocationType } from '@applications/erp/inventory/models';
+import type { LocationType } from '@app/inventory/models';
 
 export interface FamilleValorisation {
   familleId: string;

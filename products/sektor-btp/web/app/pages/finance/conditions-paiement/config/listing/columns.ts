@@ -1,7 +1,7 @@
 import type { TranslateService } from '@ngx-translate/core';
 
 import type { ColumnConfig } from '@lib/anatomy/types';
-import { CONDITION_PAIEMENT_TYPE_KEYS } from '@applications/erp/shell/i18n-labels';
+import { CONDITION_PAIEMENT_TYPE_KEYS } from '@app/shell/i18n-labels';
 
 function translateOrFallback(t: TranslateService, key: string, value: unknown): string {
   if (!key) return String(value ?? '');

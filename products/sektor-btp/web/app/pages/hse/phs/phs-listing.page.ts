@@ -3,8 +3,8 @@ import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } 
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import {PageHeaderComponent, PageShellComponent, ButtonComponent } from '@lib/anatomy';
-import { ErpAuditService } from '@applications/erp/shell/erp-audit.service';
-import { PPSPS_STATUS_KEYS } from '@applications/erp/shell/i18n-labels';
+import { ErpAuditService } from '@app/shell/erp-audit.service';
+import { PPSPS_STATUS_KEYS } from '@app/shell/i18n-labels';
 
 import { PhsApiService } from './services/phs-api.service';
 import type { PhsDocument, PpspsSection } from '../models';

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 import { FeatureApiService } from '@lib/anatomy';
-import type { HseKpiResponse } from '@applications/erp/pages/hse/tableau-bord-hse/services/hse-kpi-api.service';
+import type { HseKpiResponse } from '@app/pages/hse/tableau-bord-hse/services/hse-kpi-api.service';
 
 export interface ChantiersKpiResponse {
   nbActifs: number;

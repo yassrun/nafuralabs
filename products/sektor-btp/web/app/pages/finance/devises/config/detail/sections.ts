@@ -1,7 +1,7 @@
 import type { TranslateService } from '@ngx-translate/core';
 
 import type { DetailSectionConfig } from '@lib/anatomy/types';
-import type { Devise } from '@applications/erp/finance/models';
+import type { Devise } from '@app/finance/models';
 
 export function buildDeviseSections(t: TranslateService): DetailSectionConfig<Devise>[] {
   const tr = (k: string) => t.instant(k);

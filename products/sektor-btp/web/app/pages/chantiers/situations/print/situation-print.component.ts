@@ -2,7 +2,7 @@ import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
-import type { Situation } from '@applications/erp/chantiers/models';
+import type { Situation } from '@app/chantiers/models';
 
 const COMPANY = {
   nom: 'Nafura BTP SARL',

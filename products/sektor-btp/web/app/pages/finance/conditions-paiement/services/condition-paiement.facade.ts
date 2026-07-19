@@ -6,7 +6,7 @@ import type {
   ConditionPaiement,
   ConditionPaiementCreate,
   ConditionPaiementUpdate,
-} from '@applications/erp/finance/models';
+} from '@app/finance/models';
 
 import { ConditionPaiementApiService } from './condition-paiement-api.service';
 

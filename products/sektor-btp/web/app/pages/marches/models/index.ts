@@ -232,7 +232,7 @@ export interface CautionBancaire {
 // ── Label maps ─────────────────────────────────────────────────────────────
 //
 // Phase 1.2 (i18n roadmap, agent B2): every label map below is **deprecated**
-// — use the corresponding `*_KEYS` map from `@applications/erp/shell/i18n-labels`
+// — use the corresponding `*_KEYS` map from `@app/shell/i18n-labels`
 // consumed via `{{ KEYS[value] | translate }}` in templates or
 // `translateService.instant(KEYS[value])` in TS. The FR strings are kept until
 // Wave C migrates each usage. Lint exemption via `@i18n-exempt` markers.

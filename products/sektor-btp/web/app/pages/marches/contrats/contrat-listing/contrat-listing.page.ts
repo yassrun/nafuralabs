@@ -7,12 +7,12 @@ import { ButtonComponent, PageHeaderComponent, PageShellComponent } from '@lib/a
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
 import { ExportButtonComponent, type ExportEvent } from '@lib/anatomy/components/molecules/export-button/export-button.component';
 import { FilterResetComponent } from '@lib/anatomy/components/molecules/filter-reset/filter-reset.component';
-import { ErpAuditService } from '@applications/erp/shell/erp-audit.service';
+import { ErpAuditService } from '@app/shell/erp-audit.service';
 import {
   MARCHE_STATUS_KEYS,
   MARCHE_TYPE_KEYS,
   MARCHE_NATURE_KEYS,
-} from '@applications/erp/shell/i18n-labels';
+} from '@app/shell/i18n-labels';
 import { ToastService } from '@lib/anatomy/components/services/toast.service';
 import { ContratMarcheApiService } from '../services/contrat-marche-api.service';
 import {

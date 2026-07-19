@@ -4,7 +4,7 @@ import type {
   OffreCreate,
   OffreLigne,
   OffreUpdate,
-} from '@applications/erp/ventes/models';
+} from '@app/ventes/models';
 
 import type { ApiBcc } from '../../bons-commandes-clients/services/bcc.mapper';
 

@@ -25,8 +25,8 @@ import {
   type CautionBancaireDialogResult,
   type LiberationDialogData,
   type LiberationDialogResult,
-} from '@applications/erp/ventes/components';
-import type { RetenueGarantieListItem } from '@applications/erp/ventes/models';
+} from '@app/ventes/components';
+import type { RetenueGarantieListItem } from '@app/ventes/models';
 
 import { RetenuesGarantieFacade } from './retenues-garantie.facade';
 

@@ -5,4 +5,4 @@ export type {
   BonCommandeUpdate,
   BCLigne,
   BCStatus,
-} from '@applications/erp/achats/models';
+} from '@app/achats/models';

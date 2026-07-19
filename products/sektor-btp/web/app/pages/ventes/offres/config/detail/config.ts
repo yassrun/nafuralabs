@@ -2,12 +2,12 @@ import type { TranslateService } from '@ngx-translate/core';
 
 import { buildDetailConfig } from '@lib/anatomy';
 import type { StatusMachineConfig } from '@lib/anatomy/types';
-import type { OffreCommerciale, OffreStatus } from '@applications/erp/ventes/models';
+import type { OffreCommerciale, OffreStatus } from '@app/ventes/models';
 import {
   DOCUMENT_ATTACHMENT_CONFIG,
   ERP_ATTACHMENT_ENTITY_TYPES,
   withAttachments,
-} from '@applications/erp/shared/config/attachment-detail.config';
+} from '@app/shared/config/attachment-detail.config';
 
 import { buildOffreFields } from './fields';
 import { ROUTES } from './routes';

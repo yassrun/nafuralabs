@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 import { AttachmentApiService } from '@platform/features/collaboration/doc-manager/services/attachment-api.service';
-import type { ErpAttachmentEntityType } from '@applications/erp/shared/config/attachment-detail.config';
+import type { ErpAttachmentEntityType } from '@app/shared/config/attachment-detail.config';
 
 /** Upload helpers for ERP features that store MinIO keys in legacy URL fields. */
 @Injectable({ providedIn: 'root' })

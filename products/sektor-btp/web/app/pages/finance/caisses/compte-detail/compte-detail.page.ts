@@ -3,10 +3,10 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 
-import { BankReconciliationApiService } from '@applications/erp/finance/services/bank-reconciliation-api.service';
-import { CaisseApiService } from '@applications/erp/finance/services/caisse-api.service';
-import { SoldeIndicatorComponent } from '@applications/erp/finance/components';
-import type { CompteFinancier } from '@applications/erp/finance/models';
+import { BankReconciliationApiService } from '@app/finance/services/bank-reconciliation-api.service';
+import { CaisseApiService } from '@app/finance/services/caisse-api.service';
+import { SoldeIndicatorComponent } from '@app/finance/components';
+import type { CompteFinancier } from '@app/finance/models';
 import { NumberLocalizedPipe } from '@lib/anatomy/pipes';
 import { ButtonComponent } from '@lib/anatomy/components';
 

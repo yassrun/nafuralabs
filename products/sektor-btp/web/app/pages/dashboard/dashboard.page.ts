@@ -12,11 +12,11 @@ import {
   PageShellComponent,
 } from '@lib/anatomy';
 
-import { BudgetFacade } from '@applications/erp/pages/chantiers/budget/services';
-import { ChantierApiService } from '@applications/erp/pages/chantiers/services/chantier-api.service';
-import { DemandeApiService } from '@applications/erp/pages/achats/demandes/services/demande-api.service';
-import { NcApiService } from '@applications/erp/pages/hse/non-conformites/services/nc-api.service';
-import { CongeApiService } from '@applications/erp/pages/rh/conges/services/conge-api.service';
+import { BudgetFacade } from '@app/pages/chantiers/budget/services';
+import { ChantierApiService } from '@app/pages/chantiers/services/chantier-api.service';
+import { DemandeApiService } from '@app/pages/achats/demandes/services/demande-api.service';
+import { NcApiService } from '@app/pages/hse/non-conformites/services/nc-api.service';
+import { CongeApiService } from '@app/pages/rh/conges/services/conge-api.service';
 
 import {
   DashboardLayoutService,

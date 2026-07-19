@@ -10,12 +10,12 @@ import {
   createDetailFacadeFromCrud,
 } from '@lib/anatomy';
 import type { DetailActionEvent } from '@lib/anatomy/types';
-import type { AOStatus, AppelOffre, AppelOffreCreate } from '@applications/erp/achats/models';
+import type { AOStatus, AppelOffre, AppelOffreCreate } from '@app/achats/models';
 
 import { AoFacade } from '../services';
 import { buildAoDetailConfig } from '../config';
 
-import { SubmitApprovalButtonComponent } from '@applications/erp/pages/approbations/components/submit-approval-button/submit-approval-button.component';
+import { SubmitApprovalButtonComponent } from '@app/pages/approbations/components/submit-approval-button/submit-approval-button.component';
 
 @Component({
   selector: 'app-ao-detail',

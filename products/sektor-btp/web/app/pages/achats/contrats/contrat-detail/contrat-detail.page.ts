@@ -4,8 +4,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { ConfigDrivenDetailPage, ConfigDrivenDetailPageImports, ConfigDrivenDetailPageStyles, createDetailFacadeFromCrud } from '@lib/anatomy';
 import type { DetailActionEvent } from '@lib/anatomy/types';
-import type { ContratAchat, ContratAchatCreate, ContratAchatStatus } from '@applications/erp/achats/models';
-import { SubmitApprovalButtonComponent } from '@applications/erp/pages/approbations/components/submit-approval-button/submit-approval-button.component';
+import type { ContratAchat, ContratAchatCreate, ContratAchatStatus } from '@app/achats/models';
+import { SubmitApprovalButtonComponent } from '@app/pages/approbations/components/submit-approval-button/submit-approval-button.component';
 import { ContratFacade } from '../services';
 import { buildContratDetailConfig } from '../config';
 

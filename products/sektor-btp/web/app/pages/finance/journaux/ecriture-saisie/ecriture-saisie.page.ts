@@ -5,10 +5,10 @@ import { Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { ButtonComponent, PageHeaderComponent, PageShellComponent, ToastService } from '@lib/anatomy/components';
-import { ChartOfAccountApiService } from '@applications/erp/finance/services/chart-of-account-api.service';
-import { JournalApiService } from '@applications/erp/finance/services/journal-api.service';
-import { JournalEntryApiService } from '@applications/erp/finance/services/journal-entry-api.service';
-import type { Compte, Journal, LigneEcriture } from '@applications/erp/finance/models';
+import { ChartOfAccountApiService } from '@app/finance/services/chart-of-account-api.service';
+import { JournalApiService } from '@app/finance/services/journal-api.service';
+import { JournalEntryApiService } from '@app/finance/services/journal-entry-api.service';
+import type { Compte, Journal, LigneEcriture } from '@app/finance/models';
 
 interface SaisieLigne {
   ordre: number;

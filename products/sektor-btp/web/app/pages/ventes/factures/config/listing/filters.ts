@@ -4,7 +4,7 @@ import type { FilterFieldConfig } from '@lib/anatomy/types';
 import {
   FACTURE_STATUS_KEYS,
   FACTURE_TYPE_KEYS,
-} from '@applications/erp/shell/i18n-labels';
+} from '@app/shell/i18n-labels';
 
 const PAIEMENT_MODES: ReadonlyArray<{ value: string; key: string }> = [
   { value: 'VIREMENT', key: 'ventes.modePaiement.virement' },

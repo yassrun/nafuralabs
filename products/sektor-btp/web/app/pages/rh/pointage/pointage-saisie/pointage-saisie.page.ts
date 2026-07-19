@@ -15,7 +15,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { PageHeaderComponent, PageShellComponent, TooltipDirective, ButtonComponent } from '@lib/anatomy';
 import type { Chantier } from '../../../../chantiers/models';
 import { ChantierApiService } from '../../../chantiers/services/chantier-api.service';
-import { MODE_KEYS } from '@applications/erp/shell/i18n-labels';
+import { MODE_KEYS } from '@app/shell/i18n-labels';
 import { MODE_EMOJI, MODE_CSS, type PointageMode, type PointageSignatureMode } from '../models';
 import { PointageSaisieService } from '../services/pointage-saisie.service';
 import { PointagePhotoIdbService } from '../services/pointage-photo-idb.service';

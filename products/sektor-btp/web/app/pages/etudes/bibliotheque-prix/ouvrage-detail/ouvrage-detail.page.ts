@@ -16,9 +16,9 @@ import type {
   Ouvrage,
   OuvrageCreate,
   UniteMain,
-} from '@applications/erp/etudes/models';
-import { ComposantsEditorComponent } from '@applications/erp/etudes/components/composants-editor/composants-editor.component';
-import { DpuEditorComponent } from '@applications/erp/etudes/components/dpu-editor/dpu-editor.component';
+} from '@app/etudes/models';
+import { ComposantsEditorComponent } from '@app/etudes/components/composants-editor/composants-editor.component';
+import { DpuEditorComponent } from '@app/etudes/components/dpu-editor/dpu-editor.component';
 
 import { DpuApiService, OuvrageFacade } from '../services';
 import { OUVRAGE_DETAIL_CONFIG } from '../config';

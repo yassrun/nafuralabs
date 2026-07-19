@@ -7,7 +7,7 @@ import {
   ConfigDrivenListingPageStyles,
 } from '@lib/anatomy';
 
-import type { FactureClient } from '@applications/erp/ventes/models';
+import type { FactureClient } from '@app/ventes/models';
 
 import { FactureFacade } from '../services';
 import { buildFactureListingConfig } from '../config';

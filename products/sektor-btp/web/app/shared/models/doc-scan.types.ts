@@ -26,6 +26,7 @@ export interface DocScanSchemaArgs {
   dataSchema: JsonSchemaRoot;
   presentationSchema?: UiSchema;
   instructions?: string;
+  /** Name shown in optional review UI. */
   schemaName?: string;
   schemaDescription?: string;
 }
@@ -39,6 +40,7 @@ export interface ScanAndMapArgs<T> extends DocScanSchemaArgs {
 
 export interface DocScanReviewPayload {
   data: Record<string, unknown>;
+  /** Synthetic definition for review dialogs that still expect DocTypeDefinition shape. */
   definition: DocTypeDefinition;
   validation?: ExtractionValidation;
   requestId?: string;

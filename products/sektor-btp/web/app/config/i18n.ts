@@ -67,6 +67,7 @@ export const APPLICATION_TRANSLATION_LAYERS: Record<string, TranslationLayersCon
       { moduleId: 'erp.hse', path: 'applications/erp/hse', optional: true },
       { moduleId: 'erp.shared', path: 'applications/erp/shared', optional: true },
       { moduleId: 'erp.onboarding', path: 'applications/erp/onboarding', optional: true },
+      { moduleId: 'erp.invitations', path: 'applications/erp/invitations', optional: true },
     ],
 
     extras: [

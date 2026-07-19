@@ -1,11 +1,11 @@
 import { buildDetailConfig } from '@lib/anatomy';
 import type { StatusMachineConfig } from '@lib/anatomy/types';
-import type { Devis, DevisStatus } from '@applications/erp/etudes/models';
+import type { Devis, DevisStatus } from '@app/etudes/models';
 import {
   DOCUMENT_ATTACHMENT_CONFIG,
   ERP_ATTACHMENT_ENTITY_TYPES,
   withAttachments,
-} from '@applications/erp/shared/config/attachment-detail.config';
+} from '@app/shared/config/attachment-detail.config';
 
 import { FIELDS } from './fields';
 import { ROUTES } from './routes';

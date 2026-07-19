@@ -5,7 +5,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 
 import { PageHeaderComponent } from '@lib/anatomy';
 
-import { MaterielGmaoFacadeService } from '@applications/erp/inventory/services/materiel-gmao-facade.service';
+import { MaterielGmaoFacadeService } from '@app/inventory/services/materiel-gmao-facade.service';
 
 @Component({
   selector: 'app-etats-contradictoires',

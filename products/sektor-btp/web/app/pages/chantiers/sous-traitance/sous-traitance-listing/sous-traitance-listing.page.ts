@@ -15,7 +15,7 @@ import {
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
 import { SousTraitanceApiService } from '../services/sous-traitance-api.service';
 import type { ContratSousTraitance, ContratSousTraitanceStatus } from '../models';
-import { SOUS_TRAITANCE_STATUS_KEYS } from '@applications/erp/shell/i18n-labels';
+import { SOUS_TRAITANCE_STATUS_KEYS } from '@app/shell/i18n-labels';
 
 const STATUS_CSS: Record<ContratSousTraitanceStatus, string> = {
   BROUILLON: 'badge--secondary',

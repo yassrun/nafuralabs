@@ -3,18 +3,18 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 
-import { BankReconciliationApiService } from '@applications/erp/finance/services/bank-reconciliation-api.service';
-import { CaisseApiService } from '@applications/erp/finance/services/caisse-api.service';
+import { BankReconciliationApiService } from '@app/finance/services/bank-reconciliation-api.service';
+import { CaisseApiService } from '@app/finance/services/caisse-api.service';
 import {
   CompteFinancierCardComponent,
   SoldeIndicatorComponent,
-} from '@applications/erp/finance/components';
+} from '@app/finance/components';
 import { ButtonComponent } from '@lib/anatomy/components';
 import { NumberLocalizedPipe } from '@lib/anatomy/pipes';
 import type {
   CompteFinancier,
   CompteFinancierStats,
-} from '@applications/erp/finance/models';
+} from '@app/finance/models';
 
 @Component({
   selector: 'app-caisses-listing',

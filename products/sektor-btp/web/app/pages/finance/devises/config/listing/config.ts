@@ -1,7 +1,7 @@
 import type { TranslateService } from '@ngx-translate/core';
 
 import { buildListingConfig } from '@lib/anatomy';
-import type { Devise } from '@applications/erp/finance/models';
+import type { Devise } from '@app/finance/models';
 
 import { buildDeviseColumns } from './columns';
 import { buildDeviseFilters } from './filters';

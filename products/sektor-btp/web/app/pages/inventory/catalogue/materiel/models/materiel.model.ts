@@ -2,7 +2,7 @@
  * Matériel Model — Catalogue des engins et matériels de la flotte
  */
 
-import type { MaterielStatus } from '@applications/erp/inventory/models';
+import type { MaterielStatus } from '@app/inventory/models';
 
 export interface Materiel {
   id: string;

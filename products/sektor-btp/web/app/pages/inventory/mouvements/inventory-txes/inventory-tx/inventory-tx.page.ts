@@ -9,8 +9,8 @@ import {
 } from '@lib/anatomy';
 import { FieldTemplateDirective } from '@lib/anatomy/components/organisms/entity-detail';
 import type { DetailActionEvent, DetailPageMode } from '@lib/anatomy/types';
-import type { InventoryTx } from '@applications/erp/inventory/models';
-import { PerteLinesEditorComponent } from '@applications/erp/inventory/components/perte-lines-editor/perte-lines-editor.component';
+import type { InventoryTx } from '@app/inventory/models';
+import { PerteLinesEditorComponent } from '@app/inventory/components/perte-lines-editor/perte-lines-editor.component';
 
 import { INVENTORY_TX_LISTING_CONFIG } from '../config/listing';
 import { buildInventoryTxDetailConfig } from '../config/detail/detail.config';

@@ -1,7 +1,7 @@
 import type { TranslateService } from '@ngx-translate/core';
 
 import { buildListingConfig } from '@lib/anatomy';
-import type { NonConformite } from '@applications/erp/hse/models';
+import type { NonConformite } from '@app/hse/models';
 
 import { buildNcColumns } from './columns';
 import { buildNcFilters } from './filters';

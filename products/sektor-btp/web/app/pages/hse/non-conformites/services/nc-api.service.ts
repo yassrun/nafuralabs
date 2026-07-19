@@ -6,7 +6,7 @@ import type {
   NonConformite,
   NonConformiteCreate,
   NonConformiteUpdate,
-} from '@applications/erp/hse/models';
+} from '@app/hse/models';
 
 import {
   type ApiCapaAction,

@@ -38,6 +38,7 @@ import {
   AssistantBlock,
   AssistantLink,
 } from '../../features/ai/ai-conversation/services/conversation-api.service';
+import { ONBOARDING_WIDGETS_PORT, SHELL_EXTENSIONS } from './shell-extensions';
 import { AssistantBlockRendererComponent } from '../../features/ai/ai-conversation/components/assistant-block-renderer.component';
 import {
   DEFAULT_PLATFORM_APP_SHELL_OPTIONS,
@@ -51,9 +52,7 @@ import { OnboardingService } from '../onboarding/onboarding.service';
 import { ApiConfigService } from '../config/api-config.service';
 import { AppSettingsApiService } from '../../features/app-settings/models';
 import { ApprovalsFacade } from '../../features/approvals/services/approvals-facade.service';
-import { SocieteSwitcherComponent } from '@applications/erp/shell/components/societe-switcher/societe-switcher.component';
 import { environment } from '@env';
-import { SocieteService } from '@applications/erp/shell/societe.service';
 import { TooltipDirective } from '../../lib/anatomy/components/atoms/tooltip/tooltip.directive';
 
 type UiMessageRole = 'user' | 'assistant' | 'system' | 'tool';
@@ -93,7 +92,7 @@ const LUCIDE_ICON_ALIASES: Record<string, string> = {
 @Component({
   selector: 'app-platform-shell',
   standalone: true,
-  imports: [CommonModule, NgComponentOutlet, RouterModule, LucideAngularModule, LanguageSelectorComponent, AvatarComponent, NotificationBellComponent, CommandPaletteComponent, ChatPanelComponent, ShortcutsHelpComponent, OnboardingTourComponent, SocieteSwitcherComponent, TooltipDirective, AssistantBlockRendererComponent],
+  imports: [CommonModule, NgComponentOutlet, RouterModule, LucideAngularModule, LanguageSelectorComponent, AvatarComponent, NotificationBellComponent, CommandPaletteComponent, ChatPanelComponent, ShortcutsHelpComponent, OnboardingTourComponent, TooltipDirective, AssistantBlockRendererComponent],
   template: `
     <div
       class="naf-shell"
@@ -138,7 +137,9 @@ const LUCIDE_ICON_ALIASES: Record<string, string> = {
         </div>
 
         <div class="naf-shell__topbar-right">
-          <app-societe-switcher (change)="onSocieteSwitcherChange()" />
+          @for (ext of headerExtensions(); track ext.component) {
+            <ng-container *ngComponentOutlet="ext.component" />
+          }
           @if (onboardingMeterWidget()) {
             <ng-container *ngComponentOutlet="onboardingMeterWidget()!" />
           }
@@ -1693,7 +1694,12 @@ export class PlatformAppShellComponent implements OnInit {
   private readonly apiConfig = inject(ApiConfigService);
   private readonly appSettingsApi = inject(AppSettingsApiService);
   readonly approvalsFacade = inject(ApprovalsFacade);
-  private readonly societeService = inject(SocieteService, { optional: true });
+  /** Emplacement 'header-tenant-switcher' — rempli par l'application, vide sinon. */
+  private readonly shellExtensions = inject(SHELL_EXTENSIONS, { optional: true });
+  private readonly onboardingWidgetsPort = inject(ONBOARDING_WIDGETS_PORT, { optional: true });
+  readonly headerExtensions = computed(() =>
+    (this.shellExtensions ?? []).filter((e) => e.slot === 'header-tenant-switcher'),
+  );
   private readonly shortcuts = inject(ShortcutsService);
   readonly onboarding = inject(OnboardingService);
   private loadVersion = 0;
@@ -1839,10 +1845,16 @@ export class PlatformAppShellComponent implements OnInit {
   readonly userEmail = computed(() => this.auth.user()?.email || '');
 
   constructor() {
-    if (environment.onboardingV2Enabled) {
-      void import('@applications/erp/onboarding/onboarding-shell-widgets.component').then((m) => {
-        this.onboardingInviteWidget.set(m.OnboardingInviteBannerWidgetComponent);
-        this.onboardingMeterWidget.set(m.OnboardingCompletenessWidgetComponent);
+    // Widgets d'onboarding fournis par l'application via ONBOARDING_WIDGETS_PORT.
+    // Le drapeau environment.onboardingV2Enabled et le chargement paresseux sont portes
+    // par l'implementation applicative — la plateforme ne connait pas ces composants.
+    if (this.onboardingWidgetsPort) {
+      void this.onboardingWidgetsPort.load().then((widgets) => {
+        if (!widgets) {
+          return;
+        }
+        this.onboardingInviteWidget.set(widgets.inviteBanner);
+        this.onboardingMeterWidget.set(widgets.completenessMeter);
         this.cdr.markForCheck();
       });
     }
@@ -1999,41 +2011,6 @@ export class PlatformAppShellComponent implements OnInit {
    * service state ; we only re-trigger CD so any branding/title bound on the
    * current société picks up the change immediately.
    */
-  onSocieteSwitcherChange(): void {
-    const svc = this.societeService;
-    if (!svc) {
-      return;
-    }
-    const demoPrimaryBySociete: Record<string, string> = {
-      'soc-somacom-btp': '#0d9488',
-      'soc-somacom-tp': '#1d4ed8',
-      'soc-somacom-logistique': '#7c3aed',
-    };
-    const id = svc.currentSocieteId();
-    const b = this.themeService.branding();
-    const fallback = b?.primaryColor && /^#/.test(b.primaryColor) ? b.primaryColor : null;
-    this.themeService.applyPrimaryColor(demoPrimaryBySociete[id] ?? fallback);
-    const soc = svc.currentSociete();
-    if (soc) {
-      const merged: TenantBranding = {
-        logoUrl: b?.logoUrl ?? null,
-        faviconUrl: b?.faviconUrl ?? null,
-        primaryColor: demoPrimaryBySociete[id] ?? b?.primaryColor ?? null,
-        tenantDisplayName: soc.raisonSociale,
-      };
-      this.themeService.applyDocumentChrome(merged);
-    } else if (b) {
-      this.themeService.applyDocumentChrome({
-        logoUrl: b.logoUrl ?? null,
-        faviconUrl: b.faviconUrl ?? null,
-        primaryColor: demoPrimaryBySociete[id] ?? b.primaryColor ?? null,
-        tenantDisplayName: b.tenantDisplayName ?? null,
-      });
-    } else {
-      this.themeService.applyDocumentChrome(null);
-    }
-    this.cdr.markForCheck();
-  }
 
   toggleDomain(domainId: string): void {
     this.expandedDomains.update((set) => {

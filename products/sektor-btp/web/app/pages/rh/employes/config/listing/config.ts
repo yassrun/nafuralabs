@@ -1,7 +1,7 @@
 import type { TranslateService } from '@ngx-translate/core';
 
 import { buildListingConfig } from '@lib/anatomy';
-import type { Employe } from '@applications/erp/rh/models';
+import type { Employe } from '@app/rh/models';
 
 import { buildEmployeColumns } from './columns';
 import { buildEmployeFilters } from './filters';

@@ -1,5 +1,5 @@
 import type { DetailRouteConfig } from '@lib/anatomy/types';
-import type { FactureClient } from '@applications/erp/ventes/models';
+import type { FactureClient } from '@app/ventes/models';
 
 export const ROUTES: DetailRouteConfig<FactureClient> = {
   list: ['/ventes/factures'],

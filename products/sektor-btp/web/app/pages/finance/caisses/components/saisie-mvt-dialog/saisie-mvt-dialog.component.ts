@@ -4,16 +4,16 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { CaisseApiService } from '@applications/erp/finance/services/caisse-api.service';
-import { ErpAttachmentUploadService } from '@applications/erp/shared/services/erp-attachment-upload.service';
-import { ERP_ATTACHMENT_ENTITY_TYPES } from '@applications/erp/shared/config/attachment-detail.config';
-import { TreasuryJournalEntryService } from '@applications/erp/finance/services/treasury-journal-entry.service';
+import { CaisseApiService } from '@app/finance/services/caisse-api.service';
+import { ErpAttachmentUploadService } from '@app/shared/services/erp-attachment-upload.service';
+import { ERP_ATTACHMENT_ENTITY_TYPES } from '@app/shared/config/attachment-detail.config';
+import { TreasuryJournalEntryService } from '@app/finance/services/treasury-journal-entry.service';
 import type {
   CompteFinancier,
   ModePaiement,
   MouvementTresorerie,
   MouvementTresorerieType,
-} from '@applications/erp/finance/models';
+} from '@app/finance/models';
 import { ButtonComponent } from '@lib/anatomy/components';
 
 interface TypeOption {

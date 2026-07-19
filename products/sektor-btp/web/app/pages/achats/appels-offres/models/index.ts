@@ -7,4 +7,4 @@ export type {
   AOReponse,
   AOReponseLigne,
   AOStatus,
-} from '@applications/erp/achats/models';
+} from '@app/achats/models';

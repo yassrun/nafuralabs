@@ -5,8 +5,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { PageHeaderComponent, PageShellComponent } from '@lib/anatomy';
 import { ExportButtonComponent, type ExportEvent } from '@lib/anatomy/components/molecules/export-button/export-button.component';
 import { FilterResetComponent } from '@lib/anatomy/components/molecules/filter-reset/filter-reset.component';
-import { ErpAuditService } from '@applications/erp/shell/erp-audit.service';
-import { APTITUDE_KEYS, TYPE_VISITE_KEYS } from '@applications/erp/shell/i18n-labels';
+import { ErpAuditService } from '@app/shell/erp-audit.service';
+import { APTITUDE_KEYS, TYPE_VISITE_KEYS } from '@app/shell/i18n-labels';
 import type { AptitudeVisite, TypeVisite, VisiteMedicale } from '../models';
 import { VisiteMedicaleApiService } from './services/visite-medicale-api.service';
 

@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 
-import type { PhaseChantier } from '@applications/erp/chantiers/models';
+import type { PhaseChantier } from '@app/chantiers/models';
 
 import type { VisiteMedicale } from '../models';
 import { VisiteMedicaleApiService } from '../visites-medicales/services/visite-medicale-api.service';

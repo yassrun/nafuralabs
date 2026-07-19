@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 
-import { StockBalanceEnrichmentService } from '@applications/erp/inventory/services/stock-balance-enrichment.service';
-import type { StockBalance, LocationType } from '@applications/erp/inventory/models';
+import { StockBalanceEnrichmentService } from '@app/inventory/services/stock-balance-enrichment.service';
+import type { StockBalance, LocationType } from '@app/inventory/models';
 import type {
   ValorisationSnapshot,
   ValorisationKpis,

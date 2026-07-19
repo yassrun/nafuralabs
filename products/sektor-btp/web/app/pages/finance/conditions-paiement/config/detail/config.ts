@@ -1,7 +1,7 @@
 import type { TranslateService } from '@ngx-translate/core';
 
 import { buildDetailConfig } from '@lib/anatomy';
-import type { ConditionPaiement } from '@applications/erp/finance/models';
+import type { ConditionPaiement } from '@app/finance/models';
 
 import { buildConditionPaiementFields } from './fields';
 import { ROUTES } from './routes';

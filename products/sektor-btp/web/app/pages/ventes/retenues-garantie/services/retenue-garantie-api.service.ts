@@ -4,7 +4,7 @@ import { FeatureApiService } from '@lib/anatomy';
 import type {
   RetenueGarantie,
   RetenueGarantieStatus,
-} from '@applications/erp/ventes/models';
+} from '@app/ventes/models';
 
 /** Backend row from `/api/v1/retenues-garantie`. */
 export interface ApiRetenueGarantie {

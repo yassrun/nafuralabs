@@ -8,4 +8,4 @@ export type {
   AOClientDocument,
   AOClientDocumentCategory,
   AOClientChecklistItem,
-} from '@applications/erp/etudes/models';
+} from '@app/etudes/models';

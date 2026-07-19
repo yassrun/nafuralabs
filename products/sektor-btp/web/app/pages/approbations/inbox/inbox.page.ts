@@ -17,9 +17,9 @@ import { ButtonComponent, PageHeaderComponent, PageShellComponent, ConfirmDialog
 import { ToastService } from '@lib/anatomy/components/services/toast.service';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
 import { resolveLocale } from '@lib/anatomy/pipes/_locale-resolver';
-import { ApprovalEngineService } from '@applications/erp/approbations/services/approval-engine.service';
-import { ChantierDrilldownService } from '@applications/erp/shell/chantier-drilldown.service';
-import { APPROVAL_ENTITY_TYPE_KEYS } from '@applications/erp/shell/i18n-labels';
+import { ApprovalEngineService } from '@app/approbations/services/approval-engine.service';
+import { ChantierDrilldownService } from '@app/shell/chantier-drilldown.service';
+import { APPROVAL_ENTITY_TYPE_KEYS } from '@app/shell/i18n-labels';
 import { ApprobationsApiService } from '../services/approbations-api.service';
 import { approvalEntityRoute } from '../approval-entity-route.util';
 import { type ApprovalRequest, type ApprovalEntityType } from '../models';

@@ -25,8 +25,8 @@ import type {
   Fournisseur,
   FournisseurCreate,
   PartnerAttestationsStatus,
-} from '@applications/erp/achats/models';
-import { PartnersApiService, type Partner } from '@applications/erp/shared/services/partners-api.service';
+} from '@app/achats/models';
+import { PartnersApiService, type Partner } from '@app/shared/services/partners-api.service';
 
 import {
   AttestationsFournisseurApiService,

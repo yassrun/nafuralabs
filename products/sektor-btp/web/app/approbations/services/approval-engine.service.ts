@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
-import type { ApprovalEntityType } from '@applications/erp/pages/approbations/models';
-import type { ApprovalEtape } from '@applications/erp/pages/approbations/models';
+import type { ApprovalEntityType } from '@app/pages/approbations/models';
+import type { ApprovalEtape } from '@app/pages/approbations/models';
 
 import type { ApprovalWorkflow, WorkflowSelectionContext } from '../models/approval-workflow.models';
 import {

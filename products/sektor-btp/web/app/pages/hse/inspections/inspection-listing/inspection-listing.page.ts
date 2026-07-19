@@ -8,7 +8,7 @@ import {
   ConfigDrivenListingPageStyles,
   ButtonComponent,
 } from '@lib/anatomy';
-import type { Inspection } from '@applications/erp/hse/models';
+import type { Inspection } from '@app/hse/models';
 
 import { InspectionFacade } from '../services';
 import { buildInspectionsListingConfig } from '../config';

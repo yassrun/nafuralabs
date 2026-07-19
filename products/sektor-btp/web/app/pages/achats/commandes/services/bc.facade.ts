@@ -7,9 +7,9 @@ import type {
   BonCommande,
   BonCommandeCreate,
   BonCommandeUpdate,
-} from '@applications/erp/achats/models';
-import { PartnersApiService } from '@applications/erp/shared/services/partners-api.service';
-import { ErpAuditService } from '@applications/erp/shell/erp-audit.service';
+} from '@app/achats/models';
+import { PartnersApiService } from '@app/shared/services/partners-api.service';
+import { ErpAuditService } from '@app/shell/erp-audit.service';
 
 import {
   BcApiService,

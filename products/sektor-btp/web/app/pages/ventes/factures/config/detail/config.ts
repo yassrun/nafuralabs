@@ -2,16 +2,16 @@ import type { TranslateService } from '@ngx-translate/core';
 
 import { buildDetailConfig } from '@lib/anatomy';
 import type { StatusMachineConfig } from '@lib/anatomy/types';
-import { FACTURE_STATUS_KEYS } from '@applications/erp/shell/i18n-labels';
+import { FACTURE_STATUS_KEYS } from '@app/shell/i18n-labels';
 import type {
   FactureClient,
   FactureStatus,
-} from '@applications/erp/ventes/models';
+} from '@app/ventes/models';
 import {
   DOCUMENT_ATTACHMENT_CONFIG,
   ERP_ATTACHMENT_ENTITY_TYPES,
   withAttachments,
-} from '@applications/erp/shared/config/attachment-detail.config';
+} from '@app/shared/config/attachment-detail.config';
 
 import { buildFactureFields } from './fields';
 import { ROUTES } from './routes';

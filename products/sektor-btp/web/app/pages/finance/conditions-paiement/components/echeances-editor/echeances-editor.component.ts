@@ -11,7 +11,7 @@ import {
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 
-import type { EcheancePaiement } from '@applications/erp/finance/models';
+import type { EcheancePaiement } from '@app/finance/models';
 import { ButtonComponent } from '@lib/anatomy/components';
 
 

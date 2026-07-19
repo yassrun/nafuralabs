@@ -1,7 +1,7 @@
 import type { TranslateService } from '@ngx-translate/core';
 
 import type { DetailFieldConfig } from '@lib/anatomy/types';
-import type { Avoir } from '@applications/erp/ventes/models';
+import type { Avoir } from '@app/ventes/models';
 
 export function buildAvoirFields(t: TranslateService): DetailFieldConfig<Avoir>[] {
   const tr = (k: string) => t.instant(k);

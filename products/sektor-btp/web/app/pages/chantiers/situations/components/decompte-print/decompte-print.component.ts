@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 
-import type { Situation } from '@applications/erp/chantiers/models';
+import type { Situation } from '@app/chantiers/models';
 
 @Component({
   selector: 'app-decompte-print',

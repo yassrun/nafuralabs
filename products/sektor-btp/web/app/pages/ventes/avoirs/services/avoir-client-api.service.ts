@@ -7,7 +7,7 @@ import type {
   AvoirCreate,
   AvoirListItem,
   AvoirUpdate,
-} from '@applications/erp/ventes/models';
+} from '@app/ventes/models';
 
 function toListItem(a: Avoir): AvoirListItem {
   return {

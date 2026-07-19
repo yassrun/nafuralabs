@@ -1,4 +1,4 @@
-import type { Formation, Incident, Inspection, NonConformite } from '@applications/erp/hse/models';
+import type { Formation, Incident, Inspection, NonConformite } from '@app/hse/models';
 
 import type { HseKpiResponse } from './services/hse-kpi-api.service';
 

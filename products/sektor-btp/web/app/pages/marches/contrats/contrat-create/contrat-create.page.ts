@@ -5,11 +5,11 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { ButtonComponent, PageHeaderComponent, PageShellComponent, ToastService } from '@lib/anatomy';
-import type { Chantier } from '@applications/erp/chantiers/models';
+import type { Chantier } from '@app/chantiers/models';
 import {
   MARCHE_NATURE_KEYS,
   MARCHE_TYPE_KEYS,
-} from '@applications/erp/shell/i18n-labels';
+} from '@app/shell/i18n-labels';
 import { ChantierApiService } from '../../../chantiers/services/chantier-api.service';
 import { ContratMarcheApiService } from '../services/contrat-marche-api.service';
 import type { MarcheNature, MarcheType } from '../../models';

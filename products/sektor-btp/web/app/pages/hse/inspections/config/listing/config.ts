@@ -1,7 +1,7 @@
 import type { TranslateService } from '@ngx-translate/core';
 
 import { buildListingConfig } from '@lib/anatomy';
-import type { Inspection } from '@applications/erp/hse/models';
+import type { Inspection } from '@app/hse/models';
 
 import { buildInspectionColumns } from './columns';
 import { buildInspectionFilters } from './filters';

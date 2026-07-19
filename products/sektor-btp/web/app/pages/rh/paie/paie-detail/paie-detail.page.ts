@@ -10,15 +10,15 @@ import {
 } from '@lib/anatomy';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
 import type { DetailActionEvent } from '@lib/anatomy/types';
-import type { FichePaie, FichePaieCreate } from '@applications/erp/rh/models';
+import type { FichePaie, FichePaieCreate } from '@app/rh/models';
 
 import { PaieFacade } from '../services';
 import { buildPaieDetailConfig } from '../config';
 import { ButtonComponent } from '@lib/anatomy/components/atoms/button/button.component';
 import { ExportService } from '@lib/anatomy/services/export.service';
-import { ErpAuditService } from '@applications/erp/shell/erp-audit.service';
+import { ErpAuditService } from '@app/shell/erp-audit.service';
 
-import { SubmitApprovalButtonComponent } from '@applications/erp/pages/approbations/components/submit-approval-button/submit-approval-button.component';
+import { SubmitApprovalButtonComponent } from '@app/pages/approbations/components/submit-approval-button/submit-approval-button.component';
 
 @Component({
   selector: 'app-paie-detail',

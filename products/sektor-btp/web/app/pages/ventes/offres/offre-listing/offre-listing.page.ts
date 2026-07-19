@@ -5,7 +5,7 @@ import { TranslateService } from '@ngx-translate/core';
 import {ConfigDrivenListingPage,
   ConfigDrivenListingPageImports,
   ConfigDrivenListingPageStyles, ButtonComponent} from '@lib/anatomy';
-import type { OffreCommerciale } from '@applications/erp/ventes/models';
+import type { OffreCommerciale } from '@app/ventes/models';
 
 import { OffreFacade } from '../services';
 import { buildOffreListingConfig } from '../config';

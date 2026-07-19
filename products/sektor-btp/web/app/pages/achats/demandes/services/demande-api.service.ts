@@ -8,7 +8,7 @@ import type {
   DemandeAchatCreate,
   DemandeAchatListItem,
   DemandeAchatUpdate,
-} from '@applications/erp/achats/models';
+} from '@app/achats/models';
 
 import {
   type ApiDemandeAchat,

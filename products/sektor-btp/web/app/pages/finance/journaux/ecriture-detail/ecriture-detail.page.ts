@@ -4,11 +4,11 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { ButtonComponent, PageHeaderComponent, PageShellComponent, ToastService } from '@lib/anatomy/components';
-import { JournalApiService } from '@applications/erp/finance/services/journal-api.service';
-import { JournalEntryApiService } from '@applications/erp/finance/services/journal-entry-api.service';
-import { PrintService } from '@applications/erp/shared/services';
-import type { Ecriture } from '@applications/erp/finance/models';
-import { ECRITURE_STATUS_KEYS, ECRITURE_ORIGINE_KEYS } from '@applications/erp/shell/i18n-labels';
+import { JournalApiService } from '@app/finance/services/journal-api.service';
+import { JournalEntryApiService } from '@app/finance/services/journal-entry-api.service';
+import { PrintService } from '@app/shared/services';
+import type { Ecriture } from '@app/finance/models';
+import { ECRITURE_STATUS_KEYS, ECRITURE_ORIGINE_KEYS } from '@app/shell/i18n-labels';
 
 const ORIGINE_ROUTES: Record<string, (id: string) => unknown[]> = {
   AUTO_FACTURE_FOURN: (id) => ['/finance/factures-fournisseurs', id],

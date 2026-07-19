@@ -1,5 +1,5 @@
 import type { ListingRouteConfig } from '@lib/anatomy/types';
-import type { Metre } from '@applications/erp/etudes/models';
+import type { Metre } from '@app/etudes/models';
 
 export const ROUTES: ListingRouteConfig<Metre> = {
   detail: (item) => ['/etudes/metres', item.id],

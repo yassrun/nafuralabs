@@ -1,7 +1,7 @@
 import type { TranslateService } from '@ngx-translate/core';
 
 import { buildListingConfig } from '@lib/anatomy';
-import type { Formation } from '@applications/erp/hse/models';
+import type { Formation } from '@app/hse/models';
 
 import { buildFormationColumns } from './columns';
 import { buildFormationFilters } from './filters';

@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 
 import { IndicesBtpImportService } from './indices-btp-import.service';
-import { FormuleRevisionKService } from '@applications/erp/pages/marches/services/formule-revision-k.service';
-import type { FormuleRevisionK } from '@applications/erp/pages/marches/models';
+import { FormuleRevisionKService } from '@app/pages/marches/services/formule-revision-k.service';
+import type { FormuleRevisionK } from '@app/pages/marches/models';
 
 describe('IndicesBtpImportService', () => {
   let svc: IndicesBtpImportService;

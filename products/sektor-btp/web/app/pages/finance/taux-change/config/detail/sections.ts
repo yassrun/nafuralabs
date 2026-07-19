@@ -1,7 +1,7 @@
 import type { TranslateService } from '@ngx-translate/core';
 
 import type { DetailSectionConfig } from '@lib/anatomy/types';
-import type { TauxChange } from '@applications/erp/finance/models';
+import type { TauxChange } from '@app/finance/models';
 
 export function buildTauxChangeSections(t: TranslateService): DetailSectionConfig<TauxChange>[] {
   const tr = (k: string) => t.instant(k);

@@ -23,9 +23,9 @@ import {
   ToastService,
 } from '@lib/anatomy';
 
-import type { Chantier, ChantierStatus } from '@applications/erp/chantiers/models';
-import { ErpLookupService } from '@applications/erp/shared/services/erp-lookup.service';
-import { ErpAuditService } from '@applications/erp/shell/erp-audit.service';
+import type { Chantier, ChantierStatus } from '@app/chantiers/models';
+import { ErpLookupService } from '@app/shared/services/erp-lookup.service';
+import { ErpAuditService } from '@app/shell/erp-audit.service';
 import { ChantierApiService } from '../services/chantier-api.service';
 
 interface ClientOption {
@@ -167,16 +167,7 @@ interface ClientOption {
 
           <section class="form-section" aria-labelledby="team-heading">
             <h2 id="team-heading">{{ 'chantiers.chantier.edit.sections.team' | translate }}</h2>
-            <div class="field-grid">
-              <div class="field">
-                <label for="ce-chef">{{ 'chantiers.chantier.edit.fields.chef' | translate }} <span class="required" aria-hidden="true">*</span></label>
-                <input id="ce-chef" type="text" [(ngModel)]="draft.chefChantierName" name="chef" class="fld" required />
-              </div>
-              <div class="field">
-                <label for="ce-cond">{{ 'chantiers.chantier.edit.fields.conducteur' | translate }} <span class="required" aria-hidden="true">*</span></label>
-                <input id="ce-cond" type="text" [(ngModel)]="draft.conducteurTravauxName" name="cond" class="fld" required />
-              </div>
-            </div>
+            <p class="required-hint">{{ 'chantiers.chantier.detail.equipe.seeTab' | translate }}</p>
           </section>
 
           <div class="nav-actions">
@@ -260,8 +251,6 @@ export class ChantierEditPage {
     budgetHt: 0,
     tvaTaux: 20,
     cautionGarantie: 7,
-    chefChantierName: '',
-    conducteurTravauxName: '',
   };
 
   readonly statusOptions: { v: ChantierStatus; labelKey: string }[] = [
@@ -337,8 +326,6 @@ export class ChantierEditPage {
     this.draft.budgetHt = c.budgetHt;
     this.draft.tvaTaux = c.tvaTaux;
     this.draft.cautionGarantie = c.cautionGarantie ?? 7;
-    this.draft.chefChantierName = c.chefChantierName ?? '';
-    this.draft.conducteurTravauxName = c.conducteurTravauxName ?? '';
   }
 
   onClientChange(id: string): void {
@@ -375,8 +362,6 @@ export class ChantierEditPage {
         budgetHt: this.draft.budgetHt,
         tvaTaux: this.draft.tvaTaux,
         cautionGarantie: this.draft.cautionGarantie,
-        chefChantierName: this.draft.chefChantierName,
-        conducteurTravauxName: this.draft.conducteurTravauxName,
       })
       .then((updated) => {
         this.audit.log('UPDATE', 'chantier', updated.id, updated.code, updated.name);
@@ -405,10 +390,6 @@ export class ChantierEditPage {
     }
     if (!this.draft.budgetHt || this.draft.budgetHt <= 0) {
       this.validationMessage.set(t('chantiers.chantier.edit.validation.budget'));
-      return false;
-    }
-    if (!this.draft.chefChantierName.trim() || !this.draft.conducteurTravauxName.trim()) {
-      this.validationMessage.set(t('chantiers.chantier.edit.validation.team'));
       return false;
     }
     this.validationMessage.set(null);

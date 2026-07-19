@@ -2,14 +2,14 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 
 import { GridFacade } from '@lib/anatomy';
 import type { LookupContext } from '@lib/anatomy/types';
-import { ErpLookupService, partnerLookupLabel } from '@applications/erp/shared/services/erp-lookup.service';
+import { ErpLookupService, partnerLookupLabel } from '@app/shared/services/erp-lookup.service';
 import type {
   BonCommandeClient,
   OffreCommerciale,
   OffreCreate,
   OffreStatus,
   OffreUpdate,
-} from '@applications/erp/ventes/models';
+} from '@app/ventes/models';
 
 import { OffreApiService } from './offre-api.service';
 

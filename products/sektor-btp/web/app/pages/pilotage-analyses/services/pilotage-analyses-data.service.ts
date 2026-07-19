@@ -1,14 +1,14 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 
-import type { BalanceLigne, BalanceTotaux } from '@applications/erp/finance/models';
-import { BalanceApiService } from '@applications/erp/finance/services/balance-api.service';
-import type { Chantier } from '@applications/erp/chantiers/models';
-import { ChantierApiService } from '@applications/erp/pages/chantiers/services/chantier-api.service';
-import { AnalyticsApiService } from '@applications/erp/pages/analytics/services/analytics-api.service';
+import type { BalanceLigne, BalanceTotaux } from '@app/finance/models';
+import { BalanceApiService } from '@app/finance/services/balance-api.service';
+import type { Chantier } from '@app/chantiers/models';
+import { ChantierApiService } from '@app/pages/chantiers/services/chantier-api.service';
+import { AnalyticsApiService } from '@app/pages/analytics/services/analytics-api.service';
 import {
   DashboardKpiApiService,
   type DashboardAllKpis,
-} from '@applications/erp/pages/dashboard/services/dashboard-kpi-api.service';
+} from '@app/pages/dashboard/services/dashboard-kpi-api.service';
 
 import {
   PilotageChantierMargesService,

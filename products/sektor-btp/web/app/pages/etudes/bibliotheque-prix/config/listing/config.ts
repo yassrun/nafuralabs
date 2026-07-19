@@ -1,7 +1,7 @@
 import type { TranslateService } from '@ngx-translate/core';
 
 import { buildListingConfig } from '@lib/anatomy';
-import type { Ouvrage } from '@applications/erp/etudes/models';
+import type { Ouvrage } from '@app/etudes/models';
 
 import { buildOuvrageColumns } from './columns';
 import { FILTERS } from './filters';

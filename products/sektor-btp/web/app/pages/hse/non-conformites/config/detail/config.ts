@@ -2,8 +2,8 @@ import type { TranslateService } from '@ngx-translate/core';
 
 import { buildDetailConfig } from '@lib/anatomy';
 import type { StatusMachineConfig } from '@lib/anatomy/types';
-import type { NonConformite, StatutNC } from '@applications/erp/hse/models';
-import { NC_STATUS_KEYS } from '@applications/erp/shell/i18n-labels';
+import type { NonConformite, StatutNC } from '@app/hse/models';
+import { NC_STATUS_KEYS } from '@app/shell/i18n-labels';
 
 import { buildNcFields } from './fields';
 import { ROUTES } from './routes';

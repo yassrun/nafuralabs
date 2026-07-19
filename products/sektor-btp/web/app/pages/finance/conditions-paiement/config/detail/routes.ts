@@ -1,5 +1,5 @@
 import type { DetailRouteConfig } from '@lib/anatomy/types';
-import type { ConditionPaiement } from '@applications/erp/finance/models';
+import type { ConditionPaiement } from '@app/finance/models';
 
 export const ROUTES: DetailRouteConfig<ConditionPaiement> = {
   list: ['/finance/conditions-paiement'],

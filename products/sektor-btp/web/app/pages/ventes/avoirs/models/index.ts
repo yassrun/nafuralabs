@@ -5,4 +5,4 @@ export type {
   AvoirListItem,
   AvoirStatus,
   AvoirUpdate,
-} from '@applications/erp/ventes/models';
+} from '@app/ventes/models';

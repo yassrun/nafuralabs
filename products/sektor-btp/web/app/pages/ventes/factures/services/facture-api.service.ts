@@ -9,7 +9,7 @@ import type {
   FactureClientListItem,
   FactureCreate,
   FactureUpdate,
-} from '@applications/erp/ventes/models';
+} from '@app/ventes/models';
 
 interface FactureQuery extends ListQuery {
   status?: string;

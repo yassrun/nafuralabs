@@ -4,11 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 
-import { BankReconciliationApiService } from '@applications/erp/finance/services/bank-reconciliation-api.service';
-import { VirementApiService } from '@applications/erp/finance/services/virement-api.service';
-import type { CompteFinancier, VirementInterne, VirementInterneStatus } from '@applications/erp/finance/models';
+import { BankReconciliationApiService } from '@app/finance/services/bank-reconciliation-api.service';
+import { VirementApiService } from '@app/finance/services/virement-api.service';
+import type { CompteFinancier, VirementInterne, VirementInterneStatus } from '@app/finance/models';
 
-import { SubmitApprovalButtonComponent } from '@applications/erp/pages/approbations/components/submit-approval-button/submit-approval-button.component';
+import { SubmitApprovalButtonComponent } from '@app/pages/approbations/components/submit-approval-button/submit-approval-button.component';
 import { ButtonComponent } from '@lib/anatomy/components';
 import { ConfirmDialogService } from '@lib/anatomy';
 

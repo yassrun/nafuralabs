@@ -6,7 +6,7 @@ import type {
   Formation,
   FormationCreate,
   FormationUpdate,
-} from '@applications/erp/hse/models';
+} from '@app/hse/models';
 
 import { FormationApiService } from './formation-api.service';
 

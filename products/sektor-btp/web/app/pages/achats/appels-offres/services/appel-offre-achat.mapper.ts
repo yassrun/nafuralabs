@@ -6,7 +6,7 @@ import type {
   AppelOffreCreate,
   AppelOffreListItem,
   AppelOffreUpdate,
-} from '@applications/erp/achats/models';
+} from '@app/achats/models';
 
 export interface ApiAppelOffreLigne {
   id: string;

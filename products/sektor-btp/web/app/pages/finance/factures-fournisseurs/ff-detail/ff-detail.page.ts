@@ -11,33 +11,33 @@ import { AttachmentListComponent } from '@platform/features/collaboration/doc-ma
 import {
   DOCUMENT_ATTACHMENT_CONFIG,
   ERP_ATTACHMENT_ENTITY_TYPES,
-} from '@applications/erp/shared/config/attachment-detail.config';
+} from '@app/shared/config/attachment-detail.config';
 import { DateLocalizedPipe } from '@lib/anatomy/pipes';
-import { SubmitApprovalButtonComponent } from '@applications/erp/pages/approbations/components/submit-approval-button/submit-approval-button.component';
-import type { ComptaFournisseur } from '@applications/erp/finance/models';
-import { ChartOfAccountApiService } from '@applications/erp/finance/services/chart-of-account-api.service';
-import { FiscalSettingsService } from '@applications/erp/shell/fiscal-settings.service';
-import { TvaAutoliquidationService } from '@applications/erp/finance/services/tva-autoliquidation.service';
-import { FF_STATUS_KEYS } from '@applications/erp/shell/i18n-labels';
-import type { MatchingReception } from '@applications/erp/achats/models';
-import { MatchingService } from '@applications/erp/achats/services/matching.service';
-import { FfApiService } from '@applications/erp/pages/achats/factures-fournisseur/services/ff-api.service';
-import { partnerToComptaFournisseur } from '@applications/erp/pages/achats/factures-fournisseur/services/ff.mapper';
-import { PartnersApiService } from '@applications/erp/shared/services/partners-api.service';
-import { DocScanButtonComponent } from '@applications/erp/shared/components/doc-scan-button/doc-scan-button.component';
+import { SubmitApprovalButtonComponent } from '@app/pages/approbations/components/submit-approval-button/submit-approval-button.component';
+import type { ComptaFournisseur } from '@app/finance/models';
+import { ChartOfAccountApiService } from '@app/finance/services/chart-of-account-api.service';
+import { FiscalSettingsService } from '@app/shell/fiscal-settings.service';
+import { TvaAutoliquidationService } from '@app/finance/services/tva-autoliquidation.service';
+import { FF_STATUS_KEYS } from '@app/shell/i18n-labels';
+import type { MatchingReception } from '@app/achats/models';
+import { MatchingService } from '@app/achats/services/matching.service';
+import { FfApiService } from '@app/pages/achats/factures-fournisseur/services/ff-api.service';
+import { partnerToComptaFournisseur } from '@app/pages/achats/factures-fournisseur/services/ff.mapper';
+import { PartnersApiService } from '@app/shared/services/partners-api.service';
+import { DocScanButtonComponent } from '@app/shared/components/doc-scan-button/doc-scan-button.component';
 import {
   findStringByAliases,
   normalizeDate,
   toNumber,
   extractLines,
-} from '@applications/erp/shared/utils/extraction-json.utils';
+} from '@app/shared/utils/extraction-json.utils';
 import type {
   Compte,
   FactureFournisseur,
   FactureFournLigne,
   FactureFournStatus,
   FactureFournUpdate,
-} from '@applications/erp/finance/models';
+} from '@app/finance/models';
 
 interface DraftLigne {
   designation: string;

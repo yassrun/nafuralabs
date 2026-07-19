@@ -2,10 +2,10 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 
 import type { LookupContext } from '@lib/anatomy/types';
-import type { Article, InventoryTx, TxType } from '@applications/erp/inventory/models';
-import { ArticleCatalogService } from '@applications/erp/inventory/services/article-catalog.service';
-import { InventoryLookupsService } from '@applications/erp/inventory/services/inventory-lookups.service';
-import { InventoryMovementApiService } from '@applications/erp/inventory/services/inventory-movement-api.service';
+import type { Article, InventoryTx, TxType } from '@app/inventory/models';
+import { ArticleCatalogService } from '@app/inventory/services/article-catalog.service';
+import { InventoryLookupsService } from '@app/inventory/services/inventory-lookups.service';
+import { InventoryMovementApiService } from '@app/inventory/services/inventory-movement-api.service';
 
 const TX_TYPES: TxType[] = ['RECEPTION', 'SORTIE', 'TRANSFERT', 'RETOUR', 'PERTE', 'INVENTAIRE'];
 

@@ -11,7 +11,7 @@ import {
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 
-import type { SituationLigne } from '@applications/erp/chantiers/models';
+import type { SituationLigne } from '@app/chantiers/models';
 
 @Component({
   selector: 'app-lots-saisie-table',

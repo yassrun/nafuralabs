@@ -7,8 +7,8 @@ import { map } from 'rxjs/operators';
 import { PageHeaderComponent } from '@lib/anatomy';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
 
-import type { ContratLocation } from '@applications/erp/inventory/models';
-import { MaterielGmaoFacadeService } from '@applications/erp/inventory/services/materiel-gmao-facade.service';
+import type { ContratLocation } from '@app/inventory/models';
+import { MaterielGmaoFacadeService } from '@app/inventory/services/materiel-gmao-facade.service';
 
 export type ContratAvecJours = ContratLocation & { _jours: number };
 

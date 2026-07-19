@@ -2,7 +2,7 @@ import type {
   Inspection,
   InspectionCreate,
   InspectionUpdate,
-} from '@applications/erp/hse/models';
+} from '@app/hse/models';
 
 export interface ApiInspection {
   id: string;

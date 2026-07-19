@@ -3,7 +3,7 @@ import { firstValueFrom } from 'rxjs';
 
 import { TenantContextService } from '@platform/core/tenant/tenant.context';
 import { ExtractionService } from '@platform/features/documents/doc-extractor/services/extraction.service';
-import type { DocTypeDefinition } from '@platform/features/documents/doc-extractor/models/doc-type-definition.model';
+import { toReviewDefinition } from '../extraction-schemas/extraction-schema.types';
 
 import type {
   DocScanLookupContext,
@@ -21,22 +21,6 @@ import {
   normalizeText,
   toNumber,
 } from '../utils/extraction-json.utils';
-
-function toReviewDefinition(args: DocScanSchemaArgs): DocTypeDefinition {
-  return {
-    id: `local-${args.schemaName ?? 'scan'}`,
-    domainKey: 'local',
-    docTypeKey: 'local',
-    version: 1,
-    name: args.schemaName ?? 'Document scan',
-    description: args.schemaDescription,
-    status: 'PUBLISHED',
-    origin: 'TENANT',
-    jsonSchema: args.dataSchema,
-    uiSchema: args.presentationSchema ?? { sections: [] },
-    promptTemplate: args.instructions,
-  };
-}
 
 @Injectable({ providedIn: 'root' })
 export class ErpDocScanService {
@@ -68,6 +52,7 @@ export class ErpDocScanService {
     if (response.outcome === 'REJECTED' || response.outcome === 'TECHNICAL_FAILURE') {
       throw new Error(response.issues[0]?.code ?? 'ERP_DOC_SCAN_FAILED');
     }
+
     if (response.outcome !== 'COMPLETED' && response.outcome !== 'REVIEW_REQUIRED') {
       throw new Error('ERP_DOC_SCAN_FAILED');
     }
@@ -76,20 +61,30 @@ export class ErpDocScanService {
       ? {
           state: response.validation.state,
           issues: response.validation.issues,
-          importPolicy: (response.validation.importPolicy === 'STRICT' ? 'STRICT' : 'PARTIAL') as
-            | 'STRICT'
-            | 'PARTIAL',
+          importPolicy: (response.validation.importPolicy === 'STRICT' ? 'STRICT' : 'PARTIAL') as 'STRICT' | 'PARTIAL',
         }
       : undefined;
 
+    const definition = toReviewDefinition({
+      name: args.schemaName ?? 'Document scan',
+      description: args.schemaDescription,
+      dataSchema: args.dataSchema,
+      presentationSchema: args.presentationSchema ?? { sections: [] },
+      instructions: args.instructions,
+    });
+
     return {
       data: extractObject(response.data),
-      definition: toReviewDefinition(args),
+      definition,
       validation,
       requestId: response.requestId,
     };
   }
 
+  /**
+   * @deprecated New reviewed flows must use SmartImportTriggerComponent and
+   * consume ReviewedExtraction in the owning screen.
+   */
   async scanAndMap<T>(args: ScanAndMapArgs<T>): Promise<Partial<T>> {
     const extractedResult = await this.extractForReview(args);
     const extracted = args.review

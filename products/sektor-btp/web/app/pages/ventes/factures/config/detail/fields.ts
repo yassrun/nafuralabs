@@ -1,10 +1,10 @@
 import type { TranslateService } from '@ngx-translate/core';
 
 import type { DetailFieldConfig } from '@lib/anatomy/types';
-import type { FactureClient } from '@applications/erp/ventes/models';
+import type { FactureClient } from '@app/ventes/models';
 import {
   FACTURE_TYPE_KEYS,
-} from '@applications/erp/shell/i18n-labels';
+} from '@app/shell/i18n-labels';
 
 const PAIEMENT_MODES = [
   { value: 'VIREMENT', key: 'ventes.modePaiement.virement' },

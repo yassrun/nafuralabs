@@ -2,7 +2,7 @@ import type {
   CatalogueFournisseurLigne,
   CatalogueFournisseurLigneCreate,
   CatalogueFournisseurLigneUpdate,
-} from '@applications/erp/achats/models';
+} from '@app/achats/models';
 
 export interface ApiCatalogueFournisseurLigne {
   id: string;

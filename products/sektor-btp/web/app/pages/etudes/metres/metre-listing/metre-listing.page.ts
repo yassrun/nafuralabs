@@ -7,7 +7,7 @@ import {
   ConfigDrivenListingPageStyles,
 } from '@lib/anatomy';
 
-import type { Metre } from '@applications/erp/etudes/models';
+import type { Metre } from '@app/etudes/models';
 
 import { MetreFacade } from '../services';
 import { buildMetreListingConfig } from '../config';

@@ -9,8 +9,8 @@ import {
   currencyToDevise,
   deviseToCurrencyCreate,
   deviseToCurrencyUpdate,
-} from '@applications/erp/finance/services/currency-finance.mapper';
-import type { Devise, DeviseCreate, DeviseUpdate } from '@applications/erp/finance/models';
+} from '@app/finance/services/currency-finance.mapper';
+import type { Devise, DeviseCreate, DeviseUpdate } from '@app/finance/models';
 
 interface DeviseQuery extends ListQuery {
   isActive?: boolean | string;

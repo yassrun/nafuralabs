@@ -6,7 +6,7 @@ import { FilterResetComponent } from '@lib/anatomy/components/molecules/filter-r
 
 import { PageHeaderComponent, PageShellComponent } from '@lib/anatomy';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
-import { FACTURE_MARCHE_STATUS_KEYS } from '@applications/erp/shell/i18n-labels';
+import { FACTURE_MARCHE_STATUS_KEYS } from '@app/shell/i18n-labels';
 import { ToastService } from '@lib/anatomy/components/services/toast.service';
 import { FactureMarcheApiService } from '../services/facture-marche-api.service';
 import { FACTURE_STATUS_VARIANT, type FactureMarche, type FactureMarcheStatus } from '../../models';

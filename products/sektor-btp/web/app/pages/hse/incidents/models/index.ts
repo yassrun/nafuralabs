@@ -5,4 +5,4 @@ export type {
   IncidentListItem,
   IncidentUpdate,
   StatutIncident,
-} from '@applications/erp/hse/models';
+} from '@app/hse/models';

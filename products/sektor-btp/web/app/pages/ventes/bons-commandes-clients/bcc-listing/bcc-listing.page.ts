@@ -4,7 +4,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import {ConfigDrivenListingPage,
   ConfigDrivenListingPageImports,
   ConfigDrivenListingPageStyles, ButtonComponent} from '@lib/anatomy';
-import type { BonCommandeClient } from '@applications/erp/ventes/models';
+import type { BonCommandeClient } from '@app/ventes/models';
 
 import { BccFacade } from '../services';
 import { BCC_LISTING_CONFIG } from '../config';

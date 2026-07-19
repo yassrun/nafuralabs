@@ -3,8 +3,8 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import type {
   RetenueGarantie,
   RetenueGarantieListItem,
-} from '@applications/erp/ventes/models';
-import { ErpAuditService } from '@applications/erp/shell/erp-audit.service';
+} from '@app/ventes/models';
+import { ErpAuditService } from '@app/shell/erp-audit.service';
 
 import { RetenueGarantieApiService } from './services/retenue-garantie-api.service';
 import { RetenueGarantieCalculService } from './services/retenue-garantie-calcul.service';

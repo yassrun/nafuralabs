@@ -6,7 +6,7 @@ import type {
   Ouvrage,
   OuvrageCreate,
   OuvrageUpdate,
-} from '@applications/erp/etudes/models';
+} from '@app/etudes/models';
 
 import { OuvrageApiService } from './ouvrage-api.service';
 

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 import { FeatureApiService } from '@lib/anatomy';
-import type { PosteBudgetaire } from '@applications/erp/chantiers/models';
+import type { PosteBudgetaire } from '@app/chantiers/models';
 
 interface ApiPosteBudgetaire {
   id: string;
@@ -54,5 +54,22 @@ export class PosteBudgetaireApiService extends FeatureApiService<
       ordre: data.ordre,
     });
     return posteToUi(row);
+  }
+
+  async updatePoste(posteId: string, data: Partial<PosteBudgetaire>): Promise<PosteBudgetaire> {
+    const row = await this.put<ApiPosteBudgetaire>(`/api/v1/postes-budgetaires/${posteId}`, {
+      code: data.code,
+      designation: data.designation,
+      unite: data.unite,
+      quantite: data.quantite,
+      prixUnitaireHt: data.prixUnitaireHt,
+      montantHt: data.montantHt,
+      ordre: data.ordre,
+    });
+    return posteToUi(row);
+  }
+
+  async deletePoste(posteId: string): Promise<void> {
+    await this.deleteRequest(`/api/v1/postes-budgetaires/${posteId}`);
   }
 }

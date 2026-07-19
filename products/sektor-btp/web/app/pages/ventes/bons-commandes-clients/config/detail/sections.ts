@@ -15,4 +15,11 @@ export const SECTIONS: DetailSectionConfig[] = [
     fields: ['tvaTaux', 'notes'],
     columns: 2,
   },
+  {
+    id: 'lignes',
+    title: 'Lignes',
+    icon: 'list',
+    fields: ['lignes'],
+    columns: 1,
+  },
 ];

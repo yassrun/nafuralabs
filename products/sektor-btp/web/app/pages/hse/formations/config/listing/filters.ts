@@ -1,7 +1,7 @@
 import type { TranslateService } from '@ngx-translate/core';
 
 import type { FilterFieldConfig } from '@lib/anatomy/types';
-import { FORMATION_STATUS_KEYS, type FormationStatus } from '@applications/erp/shell/i18n-labels';
+import { FORMATION_STATUS_KEYS, type FormationStatus } from '@app/shell/i18n-labels';
 
 export function buildFormationFilters(t: TranslateService): FilterFieldConfig[] {
   const tr = (k: string) => t.instant(k);

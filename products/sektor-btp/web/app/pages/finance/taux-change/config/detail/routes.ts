@@ -1,5 +1,5 @@
 import type { DetailRouteConfig } from '@lib/anatomy/types';
-import type { TauxChange } from '@applications/erp/finance/models';
+import type { TauxChange } from '@app/finance/models';
 
 export const ROUTES: DetailRouteConfig<TauxChange> = {
   list: ['/finance/taux-change'],

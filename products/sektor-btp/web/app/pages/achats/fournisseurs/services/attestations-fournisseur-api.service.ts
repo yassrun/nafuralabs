@@ -7,7 +7,7 @@ import type {
   AttestationFournisseurCreate,
   AttestationFournisseurUpdate,
   PartnerAttestationsStatus,
-} from '@applications/erp/achats/models';
+} from '@app/achats/models';
 
 import {
   type ApiAttestationFournisseur,

@@ -3,7 +3,7 @@ import { TranslateService } from '@ngx-translate/core';
 
 import { GridFacade } from '@lib/anatomy';
 import type { LookupContext } from '@lib/anatomy/types';
-import { ErpAuditService } from '@applications/erp/shell/erp-audit.service';
+import { ErpAuditService } from '@app/shell/erp-audit.service';
 
 import { AvancementApiService } from './avancement-api.service';
 import { AvancementContextService } from './avancement-context.service';

@@ -6,9 +6,9 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { ButtonComponent, PageHeaderComponent, PageShellComponent } from '@lib/anatomy/components';
 import { DateLocalizedPipe } from '@lib/anatomy/pipes';
-import { FfApiService } from '@applications/erp/pages/achats/factures-fournisseur/services/ff-api.service';
-import { FF_STATUS_KEYS } from '@applications/erp/shell/i18n-labels';
-import type { FactureFournisseur, FactureFournStatus } from '@applications/erp/finance/models';
+import { FfApiService } from '@app/pages/achats/factures-fournisseur/services/ff-api.service';
+import { FF_STATUS_KEYS } from '@app/shell/i18n-labels';
+import type { FactureFournisseur, FactureFournStatus } from '@app/finance/models';
 function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
 }

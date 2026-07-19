@@ -2,9 +2,9 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 
 import { GridFacade } from '@lib/anatomy';
 import type { LookupContext } from '@lib/anatomy/types';
-import type { ContratAchat, ContratAchatCreate, ContratAchatStatus, ContratAchatUpdate } from '@applications/erp/achats/models';
-import { PartnersApiService } from '@applications/erp/shared/services/partners-api.service';
-import { ErpAuditService, AuditAction } from '@applications/erp/shell/erp-audit.service';
+import type { ContratAchat, ContratAchatCreate, ContratAchatStatus, ContratAchatUpdate } from '@app/achats/models';
+import { PartnersApiService } from '@app/shared/services/partners-api.service';
+import { ErpAuditService, AuditAction } from '@app/shell/erp-audit.service';
 
 import { ContratApiService } from './contrat-api.service';
 

@@ -37,7 +37,7 @@ import { StatusChipComponent } from '../../../../../lib/design-system';
 import { DocTypeService } from '../../services/doc-type.service';
 import { ExtractionService } from '../../services/extraction.service';
 import { DocTypeDefinition, DocTypeListItem, DocTypesByDomain } from '../../models/doc-type-definition.model';
-import { ExtractedRecord, ExtractionDraft, ExtractionStatus, StandardRecordFilters, RecordSearchRequest } from '../../models/extraction.model';
+import { ExtractedRecord, ExtractionDraft, ExtractionStatus, ExtractionValidation, StandardRecordFilters, RecordSearchRequest } from '../../models/extraction.model';
 import { ColumnResolver, ResolvedColumn } from '../../utils/column-resolver';
 import { DynamicRecordDialogComponent, DynamicRecordDialogResult } from '../../components/dynamic-record-dialog/dynamic-record-dialog.component';
 import { ExportResultDialogComponent, ExportResultData } from '../../components/export-result-dialog/export-result-dialog.component';
@@ -366,7 +366,15 @@ export class ExtractionWorkspacePage implements OnInit {
           status: 'draft',
         };
 
-        this.openRecordDialog('create', draft, undefined, false);
+        const initialValidation = response.validation
+          ? {
+              state: response.validation.state,
+              issues: response.validation.issues,
+              importPolicy: (response.validation.importPolicy === 'STRICT' ? 'STRICT' : 'PARTIAL') as 'PARTIAL' | 'STRICT',
+            }
+          : undefined;
+
+        this.openRecordDialog('create', draft, undefined, false, initialValidation);
       },
       error: (err) => {
         this.uploading.set(false);
@@ -376,7 +384,8 @@ export class ExtractionWorkspacePage implements OnInit {
   }
 
   private handleExactDuplicate(response: ExtractionResponse): void {
-    const dedup = response.dedup.exactDuplicate;
+    const dedup = response.dedup?.exactDuplicate;
+    if (!dedup) return;
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
@@ -407,7 +416,8 @@ export class ExtractionWorkspacePage implements OnInit {
   }
 
   private handleNearDuplicate(response: ExtractionResponse): void {
-    const dedup = response.dedup.nearDuplicate;
+    const dedup = response.dedup?.nearDuplicate;
+    if (!dedup) return;
     const distanceInfo = dedup.distance !== null ? ` (Distance: ${dedup.distance})` : '';
     
     const snackBarRef = this.snackBar.open(
@@ -626,7 +636,8 @@ export class ExtractionWorkspacePage implements OnInit {
     mode: 'create' | 'edit',
     draft?: ExtractionDraft,
     record?: ExtractedRecord,
-    persistOnValidate = true
+    persistOnValidate = true,
+    initialValidation?: ExtractionValidation
   ): void {
     const def = this.definition();
     if (!def) return;
@@ -643,6 +654,7 @@ export class ExtractionWorkspacePage implements OnInit {
         draft,
         record,
         persistOnValidate,
+        initialValidation,
       },
       panelClass: 'editor-dialog-panel',
       position: { top: '2vh' },

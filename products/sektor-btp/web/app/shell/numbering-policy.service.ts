@@ -49,7 +49,7 @@ export const NUMBERING_DOC_TYPES: readonly NumberingDocType[] = [
   'CONTRAT_SOUS_TRAITANCE',
 ];
 
-// @i18n-exempt — @deprecated Phase 1.2 — see NUMBERING_DOC_TYPE_KEYS in @applications/erp/shell/i18n-labels.
+// @i18n-exempt — @deprecated Phase 1.2 — see NUMBERING_DOC_TYPE_KEYS in @app/shell/i18n-labels.
 export const NUMBERING_DOC_TYPE_LABELS: Record<NumberingDocType, string> = {
   DEVIS: 'Devis',
   BON_COMMANDE_ACHAT: 'Bon de commande (achat)',

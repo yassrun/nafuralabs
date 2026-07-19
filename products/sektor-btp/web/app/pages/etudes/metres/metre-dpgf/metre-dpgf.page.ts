@@ -15,10 +15,10 @@ import { ButtonComponent, PageHeaderComponent, PageShellComponent } from '@lib/a
 import { ToastService } from '@lib/anatomy';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
 
-import type { DPGF, Metre, NoeudDPGF } from '@applications/erp/etudes/models';
+import type { DPGF, Metre, NoeudDPGF } from '@app/etudes/models';
 import { DpgfApiService } from '../services';
 import { MetreFacade } from '../services';
-import { PrintService } from '@applications/erp/shared/services';
+import { PrintService } from '@app/shared/services';
 
 interface FlatDpgfRow {
   depth: number;

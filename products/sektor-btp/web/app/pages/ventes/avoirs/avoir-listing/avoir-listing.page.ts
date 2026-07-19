@@ -7,7 +7,7 @@ import {
   ConfigDrivenListingPageStyles,
 } from '@lib/anatomy';
 
-import type { Avoir } from '@applications/erp/ventes/models';
+import type { Avoir } from '@app/ventes/models';
 
 import { AvoirFacade } from '../services';
 import { buildAvoirListingConfig } from '../config';

@@ -7,8 +7,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { PageHeaderComponent, PageShellComponent } from '@lib/anatomy';
 
-import { MaterielGmaoFacadeService } from '@applications/erp/inventory/services/materiel-gmao-facade.service';
-import type { OrdreTravail } from '@applications/erp/inventory/models/materiel-gmao.models';
+import { MaterielGmaoFacadeService } from '@app/inventory/services/materiel-gmao-facade.service';
+import type { OrdreTravail } from '@app/inventory/models/materiel-gmao.models';
 
 @Component({
   selector: 'app-historique-ot',

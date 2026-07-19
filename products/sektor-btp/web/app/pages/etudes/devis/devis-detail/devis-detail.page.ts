@@ -15,11 +15,11 @@ import type {
   Devis,
   DevisCreate,
   DevisLigne,
-} from '@applications/erp/etudes/models';
-import { DpgfEditorComponent } from '@applications/erp/etudes/components/dpgf-editor/dpgf-editor.component';
+} from '@app/etudes/models';
+import { DpgfEditorComponent } from '@app/etudes/components/dpgf-editor/dpgf-editor.component';
 import { ButtonComponent } from '@lib/anatomy/components/atoms/button/button.component';
 import { ExportService } from '@lib/anatomy/services/export.service';
-import { ErpAuditService } from '@applications/erp/shell/erp-audit.service';
+import { ErpAuditService } from '@app/shell/erp-audit.service';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
 
 import { DevisFacade } from '../services';

@@ -4,7 +4,7 @@ import { RouterLink } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 
 import { PageHeaderComponent, PageShellComponent } from '@lib/anatomy';
-import { BirdPyramidHseComponent } from '@applications/erp/pages/dashboard/widgets/bird-pyramid-hse.component';
+import { BirdPyramidHseComponent } from '@app/pages/dashboard/widgets/bird-pyramid-hse.component';
 import { IncidentApiService } from '../incidents/services/incident-api.service';
 import { NcApiService } from '../non-conformites/services/nc-api.service';
 import { InspectionApiService } from '../inspections/services/inspection-api.service';

@@ -24,17 +24,17 @@ import type {
   FactureCreate,
   FactureLigne,
   Encaissement,
-} from '@applications/erp/ventes/models';
+} from '@app/ventes/models';
 import {
   EncaissementFormDialogComponent,
   FacturePrintComponent,
   type EncaissementDialogData,
   type EncaissementDialogResult,
-} from '@applications/erp/ventes/components';
+} from '@app/ventes/components';
 
 import { FactureFacade } from '../services';
 import { buildFactureDetailConfig } from '../config';
-import { PrintService } from '@applications/erp/shared/services';
+import { PrintService } from '@app/shared/services';
 
 const MODE_PAIEMENT_KEYS: Record<string, string> = {
   VIREMENT: 'ventes.modePaiement.virement',

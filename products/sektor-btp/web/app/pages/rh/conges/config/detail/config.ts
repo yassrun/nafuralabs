@@ -2,12 +2,12 @@ import type { TranslateService } from '@ngx-translate/core';
 
 import { buildDetailConfig } from '@lib/anatomy';
 import type { StatusMachineConfig } from '@lib/anatomy/types';
-import type { Conge, StatutConge } from '@applications/erp/rh/models';
+import type { Conge, StatutConge } from '@app/rh/models';
 import {
   DOCUMENT_ATTACHMENT_CONFIG,
   ERP_ATTACHMENT_ENTITY_TYPES,
   withAttachments,
-} from '@applications/erp/shared/config/attachment-detail.config';
+} from '@app/shared/config/attachment-detail.config';
 
 import { buildCongeFields } from './fields';
 import { ROUTES } from './routes';

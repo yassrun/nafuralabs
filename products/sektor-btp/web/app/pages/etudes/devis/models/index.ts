@@ -7,4 +7,4 @@ export type {
   DevisDocument,
   DevisCreate,
   DevisUpdate,
-} from '@applications/erp/etudes/models';
+} from '@app/etudes/models';

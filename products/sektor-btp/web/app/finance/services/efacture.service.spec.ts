@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 
 import { EfactureService } from './efacture.service';
-import type { FactureClient } from '@applications/erp/ventes/models';
+import type { FactureClient } from '@app/ventes/models';
 
 describe('EfactureService', () => {
   let svc: EfactureService;

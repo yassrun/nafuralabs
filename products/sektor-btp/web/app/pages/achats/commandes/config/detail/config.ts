@@ -2,13 +2,13 @@ import type { TranslateService } from '@ngx-translate/core';
 
 import { buildDetailConfig } from '@lib/anatomy';
 import type { StatusMachineConfig } from '@lib/anatomy/types';
-import type { BCStatus, BonCommande } from '@applications/erp/achats/models';
-import { BC_STATUS_KEYS } from '@applications/erp/shell/i18n-labels';
+import type { BCStatus, BonCommande } from '@app/achats/models';
+import { BC_STATUS_KEYS } from '@app/shell/i18n-labels';
 import {
   DOCUMENT_ATTACHMENT_CONFIG,
   ERP_ATTACHMENT_ENTITY_TYPES,
   withAttachments,
-} from '@applications/erp/shared/config/attachment-detail.config';
+} from '@app/shared/config/attachment-detail.config';
 
 import { buildBcFields } from './fields';
 import { ROUTES } from './routes';

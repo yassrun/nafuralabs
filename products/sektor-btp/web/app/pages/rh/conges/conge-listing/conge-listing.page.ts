@@ -8,7 +8,7 @@ import {
   ConfigDrivenListingPageStyles,
   ButtonComponent,
 } from '@lib/anatomy';
-import type { Conge } from '@applications/erp/rh/models';
+import type { Conge } from '@app/rh/models';
 
 import { CongeFacade } from '../services';
 import { buildCongesListingConfig } from '../config';

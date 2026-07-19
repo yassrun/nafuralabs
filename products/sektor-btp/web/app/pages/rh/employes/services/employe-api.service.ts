@@ -7,7 +7,7 @@ import type {
   EmployeCreate,
   EmployeListItem,
   EmployeUpdate,
-} from '@applications/erp/rh/models';
+} from '@app/rh/models';
 
 interface EmployeQuery extends ListQuery {
   statut?: string;

@@ -8,7 +8,7 @@ import type {
   DevisCreate,
   DevisUpdate,
   DevisVersion,
-} from '@applications/erp/etudes/models';
+} from '@app/etudes/models';
 
 @Injectable({ providedIn: 'root' })
 export class DevisApiService extends FeatureApiService<Devis, DevisCreate, DevisUpdate> {

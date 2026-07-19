@@ -166,11 +166,16 @@ export const APPROVAL_WORKFLOW_SEEDS: ApprovalWorkflow[] = [
   },
 ];
 
-/** Résolution rôle → libellé démo (Task 13 branchera RBAC réel). */
+/** Résolution rôle → libellé (fallback si l'API n'a pas encore résolu la personne). */
 export const APPROBateur_ROLE_LABELS: Record<string, { roleId: string; nom: string }> = {
-  CONDUCTEUR_TRAVAUX: { roleId: 'CONDUCTEUR_TRAVAUX', nom: 'Karim El Idrissi' },
-  DAF: { roleId: 'DAF', nom: 'Amal Bennani' },
-  DG: { roleId: 'DG', nom: 'Omar Tazi' },
+  BTP_CONDUCTEUR_TRAVAUX: { roleId: 'BTP_CONDUCTEUR_TRAVAUX', nom: 'Conducteur de travaux' },
+  BTP_DIRECTEUR_TRAVAUX: { roleId: 'BTP_DIRECTEUR_TRAVAUX', nom: 'Directeur travaux' },
+  BTP_CHEF_CHANTIER: { roleId: 'BTP_CHEF_CHANTIER', nom: 'Chef de chantier' },
+  BTP_DAF: { roleId: 'BTP_DAF', nom: 'DAF' },
+  BTP_DG: { roleId: 'BTP_DG', nom: 'Direction générale' },
+  CONDUCTEUR_TRAVAUX: { roleId: 'BTP_CONDUCTEUR_TRAVAUX', nom: 'Conducteur de travaux' },
+  DAF: { roleId: 'BTP_DAF', nom: 'DAF' },
+  DG: { roleId: 'BTP_DG', nom: 'Direction générale' },
   COMPTABLE: { roleId: 'COMPTABLE', nom: 'Service comptabilité' },
   MANAGER: { roleId: 'MANAGER', nom: 'Manager direct' },
 };

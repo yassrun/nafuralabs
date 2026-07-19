@@ -6,7 +6,7 @@
 import { Injectable, inject } from '@angular/core';
 import { GridFacade } from '@lib/anatomy';
 import { InventoryTxesApiService } from './inventory-tx-api.service';
-import { StockBudgetSyncService } from '@applications/erp/shell/stock-budget-sync.service';
+import { StockBudgetSyncService } from '@app/shell/stock-budget-sync.service';
 import type { InventoryTx, InventoryTxCreate, InventoryTxUpdate } from '../models';
 
 /**

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 
 import { FeatureApiService } from '@lib/anatomy';
 import type { ListQuery, ListResponse } from '@lib/anatomy/types';
-import type { FichePaie, FichePaieCreate, FichePaieUpdate } from '@applications/erp/rh/models';
+import type { FichePaie, FichePaieCreate, FichePaieUpdate } from '@app/rh/models';
 
 interface PaieQuery extends ListQuery {
   status?: string;

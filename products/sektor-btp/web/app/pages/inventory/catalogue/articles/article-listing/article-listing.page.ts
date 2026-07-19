@@ -7,6 +7,14 @@ import {
   ConfigDrivenListingPageStyles,
 } from '@lib/anatomy';
 import type { ListingActionEvent } from '@lib/anatomy/types';
+import {
+  SmartImportTriggerComponent,
+  type ReviewedExtraction,
+} from '@platform/features/documents/smart-import';
+import {
+  ARTICLE_IMPORT_DEFINITION,
+  ArticleImportService,
+} from '@app/shared/smart-import/handlers/article-import.handler';
 
 import { ArticlesFacade } from '../services';
 import type { ArticleListItem } from '../models';
@@ -15,7 +23,7 @@ import { buildArticleListingConfig } from '../config';
 @Component({
   selector: 'app-article-listing',
   standalone: true,
-  imports: [...ConfigDrivenListingPageImports],
+  imports: [SmartImportTriggerComponent, ...ConfigDrivenListingPageImports],
   templateUrl: './article-listing.page.html',
   styleUrls: ['./article-listing.page.scss'],
   styles: [ConfigDrivenListingPageStyles],
@@ -23,8 +31,15 @@ import { buildArticleListingConfig } from '../config';
 export class ArticleListingPage extends ConfigDrivenListingPage<ArticleListItem> {
   readonly facade = inject(ArticlesFacade);
   private readonly translate = inject(TranslateService);
+  private readonly importer = inject(ArticleImportService);
+  readonly importDefinition = ARTICLE_IMPORT_DEFINITION;
   readonly config = buildArticleListingConfig(this.translate);
   readonly headerTitle = this.translate.instant('inventory.catalogue.article.headerTitle');
+
+  async onSmartImportComplete(result: ReviewedExtraction): Promise<void> {
+    await this.importer.import(result.data);
+    this.listingComponent?.refresh();
+  }
 
   protected override async handleCustomAction(
     event: ListingActionEvent<ArticleListItem>

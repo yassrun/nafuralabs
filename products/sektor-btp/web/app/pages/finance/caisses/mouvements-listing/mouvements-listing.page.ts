@@ -4,20 +4,20 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { BankReconciliationApiService } from '@applications/erp/finance/services/bank-reconciliation-api.service';
-import { CaisseApiService } from '@applications/erp/finance/services/caisse-api.service';
-import type { MouvementTresorerieType } from '@applications/erp/finance/models';
+import { BankReconciliationApiService } from '@app/finance/services/bank-reconciliation-api.service';
+import { CaisseApiService } from '@app/finance/services/caisse-api.service';
+import type { MouvementTresorerieType } from '@app/finance/models';
 import {
   MouvementRowComponent,
   SoldeIndicatorComponent,
-} from '@applications/erp/finance/components';
+} from '@app/finance/components';
 import { ButtonComponent } from '@lib/anatomy/components';
 import { NumberLocalizedPipe } from '@lib/anatomy/pipes';
 import type {
   CompteFinancier,
   MouvementCaisseChantier,
   MouvementTresorerie,
-} from '@applications/erp/finance/models';
+} from '@app/finance/models';
 
 import { SaisieMvtDialogComponent } from '../components/saisie-mvt-dialog/saisie-mvt-dialog.component';
 

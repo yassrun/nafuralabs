@@ -1,4 +1,4 @@
-import type { ArticleType } from '@applications/erp/inventory/models';
+import type { ArticleType } from '@app/inventory/models';
 
 export interface Article {
   id: string;

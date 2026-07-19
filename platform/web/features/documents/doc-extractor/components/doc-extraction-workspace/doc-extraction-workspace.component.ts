@@ -543,6 +543,13 @@ export class DocExtractionWorkspaceComponent {
           mode: 'create',
           draft,
           persistOnValidate: false,
+          initialValidation: response.validation
+            ? {
+                state: response.validation.state,
+                issues: response.validation.issues,
+                importPolicy: response.validation.importPolicy === 'STRICT' ? 'STRICT' : 'PARTIAL',
+              }
+            : undefined,
         });
       },
       error: (err: unknown) => {
@@ -553,7 +560,8 @@ export class DocExtractionWorkspaceComponent {
   }
 
   private handleExactDuplicate(response: ExtractionResponse): void {
-    const dedup = response.dedup.exactDuplicate;
+    const dedup = response.dedup?.exactDuplicate;
+    if (!dedup) return;
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
@@ -581,7 +589,8 @@ export class DocExtractionWorkspaceComponent {
   }
 
   private handleNearDuplicate(response: ExtractionResponse): void {
-    const dedup = response.dedup.nearDuplicate;
+    const dedup = response.dedup?.nearDuplicate;
+    if (!dedup) return;
     const distanceInfo = dedup.distance !== null ? ` (Distance: ${dedup.distance})` : '';
     
     const snackBarRef = this.snackBar.open(

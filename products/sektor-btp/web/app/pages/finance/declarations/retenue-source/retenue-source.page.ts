@@ -3,11 +3,11 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 
-import { FactureApiService } from '@applications/erp/pages/ventes/factures/services/facture-api.service';
+import { FactureApiService } from '@app/pages/ventes/factures/services/facture-api.service';
 import { PageHeaderComponent, PageShellComponent } from '@lib/anatomy';
 import { ButtonComponent } from '@lib/anatomy/components';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
-import type { FactureClient } from '@applications/erp/ventes/models';
+import type { FactureClient } from '@app/ventes/models';
 
 @Component({
   selector: 'app-retenue-source-page',

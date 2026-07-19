@@ -9,11 +9,11 @@ import {
   createDetailFacadeFromCrud,
 } from '@lib/anatomy';
 import type { DetailActionEvent } from '@lib/anatomy/types';
-import type { Incident, IncidentCreate } from '@applications/erp/hse/models';
+import type { Incident, IncidentCreate } from '@app/hse/models';
 
 import { IncidentFacade } from '../services';
 import { IncidentApiService } from '../services/incident-api.service';
-import { IncidentService } from '@applications/erp/hse/services/incident.service';
+import { IncidentService } from '@app/hse/services/incident.service';
 import { buildIncidentDetailConfig } from '../config';
 
 @Component({

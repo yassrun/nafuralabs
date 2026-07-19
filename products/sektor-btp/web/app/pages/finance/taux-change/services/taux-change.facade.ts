@@ -7,7 +7,7 @@ import type {
   TauxChange,
   TauxChangeCreate,
   TauxChangeUpdate,
-} from '@applications/erp/finance/models';
+} from '@app/finance/models';
 
 import { DeviseApiService } from '../../devises/services/devise-api.service';
 import { TauxChangeApiService } from './taux-change-api.service';

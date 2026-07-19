@@ -5,20 +5,20 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 
-import { BankReconciliationApiService } from '@applications/erp/finance/services/bank-reconciliation-api.service';
-import { TreasuryJournalEntryService } from '@applications/erp/finance/services/treasury-journal-entry.service';
+import { BankReconciliationApiService } from '@app/finance/services/bank-reconciliation-api.service';
+import { TreasuryJournalEntryService } from '@app/finance/services/treasury-journal-entry.service';
 import {
   RapprochementMatcherComponent,
   ReleveImportDialogComponent,
   SoldeIndicatorComponent,
-} from '@applications/erp/finance/components';
+} from '@app/finance/components';
 import type {
   CompteFinancier,
   MouvementTresorerie,
   Rapprochement,
   RapprochementLigneReleve,
   RapprochementStatus,
-} from '@applications/erp/finance/models';
+} from '@app/finance/models';
 import { ButtonComponent } from '@lib/anatomy/components';
 import { ConfirmDialogService } from '@lib/anatomy';
 

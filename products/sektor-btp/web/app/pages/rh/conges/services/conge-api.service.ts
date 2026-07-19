@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 
 import { FeatureApiService } from '@lib/anatomy';
 import type { ListQuery, ListResponse } from '@lib/anatomy/types';
-import type { Conge, CongeCreate, CongeUpdate } from '@applications/erp/rh/models';
+import type { Conge, CongeCreate, CongeUpdate } from '@app/rh/models';
 
 interface CongeQuery extends ListQuery {
   status?: string;

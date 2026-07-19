@@ -3,11 +3,11 @@ import { ChangeDetectionStrategy, Component, computed, inject, LOCALE_ID, signal
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
-import { ImputationPickerComponent } from '@applications/erp/finance/components';
-import { BankReconciliationApiService } from '@applications/erp/finance/services/bank-reconciliation-api.service';
-import { ContrePartieLookupService } from '@applications/erp/finance/services/contre-partie-lookup.service';
-import { FacturesOuvertesService } from '@applications/erp/finance/services/factures-ouvertes.service';
-import { ReglementApiService } from '@applications/erp/finance/services/reglement-api.service';
+import { ImputationPickerComponent } from '@app/finance/components';
+import { BankReconciliationApiService } from '@app/finance/services/bank-reconciliation-api.service';
+import { ContrePartieLookupService } from '@app/finance/services/contre-partie-lookup.service';
+import { FacturesOuvertesService } from '@app/finance/services/factures-ouvertes.service';
+import { ReglementApiService } from '@app/finance/services/reglement-api.service';
 import type {
   CompteFinancier,
   ContrePartie,
@@ -16,7 +16,7 @@ import type {
   Reglement,
   ReglementImputation,
   ReglementType,
-} from '@applications/erp/finance/models';
+} from '@app/finance/models';
 import { ButtonComponent } from '@lib/anatomy/components';
 import { ConfirmDialogService } from '@lib/anatomy';
 

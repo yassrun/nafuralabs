@@ -2,12 +2,12 @@ import { Injectable } from '@angular/core';
 
 import { FeatureApiService } from '@lib/anatomy';
 import type { ListQuery } from '@lib/anatomy/types';
-import type { MatchingReception, MatchingTolerance } from '@applications/erp/achats/models/matching.models';
+import type { MatchingReception, MatchingTolerance } from '@app/achats/models/matching.models';
 import type {
   FactureFournisseur,
   FactureFournCreate,
   FactureFournUpdate,
-} from '@applications/erp/finance/models';
+} from '@app/finance/models';
 
 import {
   type ApiFactureFournisseur,

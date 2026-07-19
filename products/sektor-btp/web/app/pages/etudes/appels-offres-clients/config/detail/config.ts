@@ -1,6 +1,6 @@
 import { buildDetailConfig } from '@lib/anatomy';
 import type { StatusMachineConfig } from '@lib/anatomy/types';
-import type { AppelOffreClient, AOClientStatus } from '@applications/erp/etudes/models';
+import type { AppelOffreClient, AOClientStatus } from '@app/etudes/models';
 
 import { FIELDS } from './fields';
 import { ROUTES } from './routes';

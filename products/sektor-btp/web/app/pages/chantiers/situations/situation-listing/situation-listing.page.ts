@@ -10,7 +10,7 @@ import {
   ConfigDrivenListingPageStyles,
 } from '@lib/anatomy';
 
-import type { Situation } from '@applications/erp/chantiers/models';
+import type { Situation } from '@app/chantiers/models';
 
 import { SituationFacade } from '../services';
 import { buildSituationsListingConfig } from '../config';

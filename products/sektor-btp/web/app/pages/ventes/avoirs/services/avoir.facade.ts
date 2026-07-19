@@ -2,16 +2,16 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 
 import { GridFacade } from '@lib/anatomy';
 import type { LookupContext } from '@lib/anatomy/types';
-import { PartnersApiService } from '@applications/erp/shared/services/partners-api.service';
+import { PartnersApiService } from '@app/shared/services/partners-api.service';
 import type {
   Avoir,
   AvoirCreate,
   AvoirStatus,
   AvoirUpdate,
-} from '@applications/erp/ventes/models';
+} from '@app/ventes/models';
 
 import { AvoirClientApiService } from './avoir-client-api.service';
-import { FactureClientApiService } from '@applications/erp/pages/ventes/factures/services/facture-client-api.service';
+import { FactureClientApiService } from '@app/pages/ventes/factures/services/facture-client-api.service';
 
 @Injectable({ providedIn: 'root' })
 export class AvoirFacade extends GridFacade<Avoir, AvoirCreate, AvoirUpdate> {

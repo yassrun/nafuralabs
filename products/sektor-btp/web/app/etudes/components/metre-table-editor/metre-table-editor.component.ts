@@ -12,7 +12,7 @@ import {
 import { FormsModule } from '@angular/forms';
 
 import type { MetreLigne, Ouvrage } from '../../models';
-import { OuvrageApiService } from '@applications/erp/pages/etudes/bibliotheque-prix/services/ouvrage-api.service';
+import { OuvrageApiService } from '@app/pages/etudes/bibliotheque-prix/services/ouvrage-api.service';
 
 interface OuvrageOption {
   id: string;

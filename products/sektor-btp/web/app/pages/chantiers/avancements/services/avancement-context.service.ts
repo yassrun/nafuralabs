@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 
 import { AuthFacade } from '@platform/core/security/services/auth.facade';
-import type { LotChantier as ApiLotChantier, PosteBudgetaire } from '@applications/erp/chantiers/models';
+import type { LotChantier as ApiLotChantier, PosteBudgetaire } from '@app/chantiers/models';
 import { ChantierApiService } from '../../services/chantier-api.service';
 import { ChantierLotApiService } from '../../services/chantier-lot-api.service';
 import { PosteBudgetaireApiService } from '../../services/poste-budgetaire-api.service';
@@ -16,7 +16,7 @@ import type {
   LotStatus,
   SaisieLineDefinition,
 } from '../models';
-import type { Chantier } from '@applications/erp/chantiers/models';
+import type { Chantier } from '@app/chantiers/models';
 import { buildSaisieLineDefinitions } from '../utils/saisie-line.util';
 
 function mapChantierStatus(status: Chantier['status']): ChantierStatus {

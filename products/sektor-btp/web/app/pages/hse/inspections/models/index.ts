@@ -4,4 +4,4 @@ export type {
   InspectionListItem,
   InspectionUpdate,
   StatutInspection,
-} from '@applications/erp/hse/models';
+} from '@app/hse/models';

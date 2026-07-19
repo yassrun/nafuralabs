@@ -7,7 +7,7 @@ import {
   ConfigDrivenListingPageStyles,
 } from '@lib/anatomy';
 
-import type { ConditionPaiement } from '@applications/erp/finance/models';
+import type { ConditionPaiement } from '@app/finance/models';
 
 import { ConditionPaiementFacade } from '../services';
 import { buildConditionPaiementListingConfig } from '../config';

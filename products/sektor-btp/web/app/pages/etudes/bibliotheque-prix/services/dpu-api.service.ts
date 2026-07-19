@@ -7,7 +7,7 @@ import type {
   ComposantDPU,
   DpuHistoriqueEntry,
   PrixDPU,
-} from '@applications/erp/etudes/models';
+} from '@app/etudes/models';
 
 @Injectable({ providedIn: 'root' })
 export class DpuApiService extends FeatureApiService<PrixDPU> {

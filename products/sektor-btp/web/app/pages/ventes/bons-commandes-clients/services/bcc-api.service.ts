@@ -7,7 +7,7 @@ import type {
   BonCommandeClientListItem,
   BCClientCreate,
   BCClientUpdate,
-} from '@applications/erp/ventes/models';
+} from '@app/ventes/models';
 
 import {
   type ApiBcc,

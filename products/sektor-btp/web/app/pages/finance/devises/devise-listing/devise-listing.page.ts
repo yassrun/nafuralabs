@@ -7,7 +7,7 @@ import {
   ConfigDrivenListingPageStyles,
 } from '@lib/anatomy';
 
-import type { Devise } from '@applications/erp/finance/models';
+import type { Devise } from '@app/finance/models';
 
 import { DeviseFacade } from '../services';
 import { buildDeviseListingConfig } from '../config';

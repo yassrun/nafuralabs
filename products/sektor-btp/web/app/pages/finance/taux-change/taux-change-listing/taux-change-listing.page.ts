@@ -10,8 +10,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { ButtonComponent, ConfigDrivenListingPage, ConfigDrivenListingPageImports, ConfigDrivenListingPageStyles } from '@lib/anatomy';
 
-import { TauxChangeConverterComponent } from '@applications/erp/finance/components/taux-change-converter/taux-change-converter.component';
-import type { TauxChange } from '@applications/erp/finance/models';
+import { TauxChangeConverterComponent } from '@app/finance/components/taux-change-converter/taux-change-converter.component';
+import type { TauxChange } from '@app/finance/models';
 
 import { TauxChangeFacade } from '../services';
 import { buildTauxChangeListingConfig } from '../config';

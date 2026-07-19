@@ -6,7 +6,7 @@ import type {
   Avoir,
   AvoirCreate,
   AvoirUpdate,
-} from '@applications/erp/ventes/models';
+} from '@app/ventes/models';
 
 interface AvoirQuery extends ListQuery {
   status?: string;

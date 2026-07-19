@@ -1,7 +1,7 @@
 import type { ColumnConfig } from '@lib/anatomy/types';
-// Phase 1.2: centralised keys at `@applications/erp/shell/i18n-labels` → BCC_STATUS_KEYS.
+// Phase 1.2: centralised keys at `@app/shell/i18n-labels` → BCC_STATUS_KEYS.
 
-// @i18n-exempt — @deprecated Phase 1.2 — see BCC_STATUS_KEYS in @applications/erp/shell/i18n-labels.
+// @i18n-exempt — @deprecated Phase 1.2 — see BCC_STATUS_KEYS in @app/shell/i18n-labels.
 const BCC_STATUS_LABELS: Record<string, string> = {
   RECU: 'Reçu', EN_COURS: 'En cours', PARTIELLEMENT_FACTURE: 'Part. facturé',
   FACTURE: 'Facturé', CLOTURE: 'Clôturé', ANNULE: 'Annulé',

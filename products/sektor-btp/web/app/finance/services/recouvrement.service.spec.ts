@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 
 import { RecouvrementService } from './recouvrement.service';
-import type { FactureClient } from '@applications/erp/ventes/models';
+import type { FactureClient } from '@app/ventes/models';
 
 describe('RecouvrementService', () => {
   let svc: RecouvrementService;

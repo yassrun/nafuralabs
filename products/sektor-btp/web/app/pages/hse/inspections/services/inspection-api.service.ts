@@ -6,7 +6,7 @@ import type {
   Inspection,
   InspectionCreate,
   InspectionUpdate,
-} from '@applications/erp/hse/models';
+} from '@app/hse/models';
 
 import {
   type ApiInspection,

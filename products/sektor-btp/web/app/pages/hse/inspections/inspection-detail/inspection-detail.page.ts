@@ -9,7 +9,7 @@ import {
   createDetailFacadeFromCrud,
 } from '@lib/anatomy';
 import type { DetailActionEvent } from '@lib/anatomy/types';
-import type { Inspection, InspectionCreate } from '@applications/erp/hse/models';
+import type { Inspection, InspectionCreate } from '@app/hse/models';
 
 import { InspectionFacade } from '../services';
 import { buildInspectionDetailConfig } from '../config';

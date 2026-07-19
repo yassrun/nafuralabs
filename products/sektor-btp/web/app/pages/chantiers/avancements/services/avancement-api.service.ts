@@ -5,7 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import { FeatureApiService } from '@lib/anatomy';
 import type { ListQuery, ListResponse } from '@lib/anatomy/types';
 import { AttachmentApiService } from '@platform/features/collaboration/doc-manager/services/attachment-api.service';
-import { ERP_ATTACHMENT_ENTITY_TYPES } from '@applications/erp/shared/config/attachment-detail.config';
+import { ERP_ATTACHMENT_ENTITY_TYPES } from '@app/shared/config/attachment-detail.config';
 
 import { ChantierApiService } from '../../services/chantier-api.service';
 

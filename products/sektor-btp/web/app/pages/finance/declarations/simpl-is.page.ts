@@ -7,7 +7,7 @@ import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
 import { ExportService } from '@lib/anatomy/services/export.service';
 import type { FactureMarche } from '../../marches/models';
 import { FactureMarcheApiService } from '../../marches/factures/services/facture-marche-api.service';
-import { ErpAuditService } from '@applications/erp/shell/erp-audit.service';
+import { ErpAuditService } from '@app/shell/erp-audit.service';
 
 const COMPANY = {
   nom: 'Nafura BTP SARL', ice: '002345678901234',

@@ -1,3 +1,14 @@
 <nf-page-shell>
-  <nf-entity-listing [config]="config" [facade]="facade" (action)="onAction($event)"></nf-entity-listing>
+  <div class="chips-row" style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
+    <nf-smart-import-trigger
+      [definition]="importDefinition"
+      (completed)="onSmartImportComplete($event)" />
+  </div>
+
+  <nf-entity-listing
+    #listing
+    [config]="config"
+    [facade]="facade"
+    (action)="onAction($event)">
+  </nf-entity-listing>
 </nf-page-shell>

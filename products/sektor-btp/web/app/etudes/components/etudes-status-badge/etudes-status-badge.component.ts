@@ -6,7 +6,7 @@ import {
   AO_CLIENT_STATUS_KEYS,
   DEVIS_STATUS_KEYS,
   METRE_STATUS_KEYS,
-} from '@applications/erp/shell/i18n-labels';
+} from '@app/shell/i18n-labels';
 
 import type {
   AOClientStatus,
