@@ -139,3 +139,34 @@
   color: var(--nf-color-text-primary);
   font-size: 0.875rem;
 }
+
+.pieces__voies {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.pieces__voie {
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 6px;
+  border: 1px solid var(--nf-color-border);
+  background: var(--nf-color-bg);
+  color: var(--nf-color-text-secondary);
+  font-size: 0.875rem;
+  cursor: pointer;
+
+  &--active {
+    border-color: var(--nf-color-primary-500);
+    background: var(--nf-color-primary-500);
+    color: #fff;
+  }
+}
+
+.pieces__aide--suite {
+  margin-top: 12px;
+}
+
+.pieces__actions {
+  margin-top: 12px;
+}

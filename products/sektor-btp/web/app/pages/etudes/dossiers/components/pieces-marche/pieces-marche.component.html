@@ -10,52 +10,128 @@
     <p class="pieces__erreur" role="alert">{{ message }}</p>
   }
 
-  @if (modifiable()) {
-    <div class="pieces__depot">
-      <label class="pieces__champ">
-        <span class="pieces__label">Type de pièce</span>
-        <select
-          class="pieces__select"
-          [ngModel]="typeChoisi()"
-          (ngModelChange)="typeChoisi.set($event)"
-        >
-          @for (t of types(); track t.value) {
-            <option [value]="t.value">{{ t.label }}</option>
-          }
-        </select>
-      </label>
+  @if (mode() === 'documents') {
+    @if (modifiable()) {
+      <div class="pieces__depot">
+        <label class="pieces__champ">
+          <span class="pieces__label">Type de pièce</span>
+          <select
+            class="pieces__select"
+            [ngModel]="typeChoisi()"
+            (ngModelChange)="typeChoisi.set($event)"
+          >
+            @for (t of types(); track t.value) {
+              <option [value]="t.value">{{ t.label }}</option>
+            }
+          </select>
+        </label>
 
-      <label class="pieces__fichier">
-        <span class="pieces__fichier-btn" [class.pieces__fichier-btn--busy]="envoi()">
-          {{ envoi() ? 'Extraction en cours…' : 'Choisir un fichier' }}
-        </span>
-        <input
-          type="file"
-          accept=".pdf,.xlsx,.xls,.csv,.doc,.docx,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-          [disabled]="envoi()"
-          (change)="onFichierChoisi($event)"
-        />
-      </label>
-    </div>
-  }
+        <label class="pieces__fichier">
+          <span class="pieces__fichier-btn" [class.pieces__fichier-btn--busy]="envoi()">
+            {{ envoi() ? 'Envoi…' : 'Choisir un fichier' }}
+          </span>
+          <input
+            type="file"
+            accept=".pdf,.xlsx,.xls,.csv,.doc,.docx,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            [disabled]="envoi()"
+            (change)="onFichierChoisi($event)"
+          />
+        </label>
+      </div>
+    }
 
-  @if (chargement()) {
-    <p class="pieces__etat">Chargement des pièces…</p>
-  } @else if (pieces().length === 0) {
-    <p class="pieces__vide">Aucune pièce déposée pour l'instant.</p>
+    @if (chargement()) {
+      <p class="pieces__etat">Chargement des pièces…</p>
+    } @else if (pieces().length === 0) {
+      <p class="pieces__vide">Aucune pièce déposée pour l'instant.</p>
+    } @else {
+      <ul class="pieces__liste">
+        @for (piece of pieces(); track piece.id) {
+          <li class="pieces__ligne">
+            <span class="pieces__type">{{ libelleType(piece.type) }}</span>
+            <span class="pieces__nom">{{ piece.nomFichier || piece.documentId }}</span>
+            @if (modifiable()) {
+              <nf-button variant="ghost" size="sm" (clicked)="supprimer(piece)">
+                Retirer
+              </nf-button>
+            }
+          </li>
+        }
+      </ul>
+    }
   } @else {
-    <ul class="pieces__liste">
-      @for (piece of pieces(); track piece.id) {
-        <li class="pieces__ligne">
-          <span class="pieces__type">{{ libelleType(piece.type) }}</span>
-          <span class="pieces__nom">{{ piece.nomFichier || piece.documentId }}</span>
-          @if (modifiable()) {
-            <nf-button variant="ghost" size="sm" (clicked)="supprimer(piece)">
-              Retirer
-            </nf-button>
+    <div class="pieces__voies" role="group" aria-label="Mode de construction">
+      <button
+        type="button"
+        class="pieces__voie"
+        [class.pieces__voie--active]="voie() === 'auto'"
+        (click)="voie.set('auto')"
+      >
+        Automatique
+      </button>
+      <button
+        type="button"
+        class="pieces__voie"
+        [class.pieces__voie--active]="voie() === 'manuel'"
+        (click)="voie.set('manuel')"
+      >
+        Manuel
+      </button>
+    </div>
+
+    @if (voie() === 'auto') {
+      <p class="pieces__aide pieces__aide--suite">
+        On extrait le BDP déjà stocké à l’étape Documents (pas besoin de re-uploader).
+      </p>
+
+      @if (chargement()) {
+        <p class="pieces__etat">Chargement…</p>
+      } @else if (piecesBordereau().length === 0) {
+        <p class="pieces__vide">
+          Aucun BDP trouvé. Revenez à « Documents du marché » et déposez le bordereau
+          (type Bordereau ou CPS + bordereau).
+        </p>
+      } @else {
+        <ul class="pieces__liste">
+          @for (piece of piecesBordereau(); track piece.id) {
+            <li class="pieces__ligne">
+              <span class="pieces__type">{{ libelleType(piece.type) }}</span>
+              <span class="pieces__nom">{{ piece.nomFichier || piece.documentId }}</span>
+              @if (modifiable()) {
+                <nf-button
+                  variant="primary"
+                  size="sm"
+                  [disabled]="extraction()"
+                  (clicked)="extraire(piece)"
+                >
+                  {{ extraction() ? 'Extraction…' : 'Extraire' }}
+                </nf-button>
+              }
+            </li>
           }
-        </li>
+        </ul>
       }
-    </ul>
+    } @else {
+      <p class="pieces__aide pieces__aide--suite">
+        Construisez lots et articles à la main. Chaque article doit avoir une unité et une
+        quantité &gt; 0.
+      </p>
+      @if (!dpgfEffectif() && modifiable()) {
+        <div class="pieces__actions">
+          <nf-button variant="primary" [disabled]="initManuel()" (clicked)="demarrerManuel()">
+            {{ initManuel() ? 'Préparation…' : 'Créer l’arbre vide' }}
+          </nf-button>
+        </div>
+      }
+    }
+
+    @if (dpgfEffectif(); as id) {
+      <app-bordereau-arbre
+        [dpgfId]="id"
+        [modifiable]="modifiable()"
+        [editionStructure]="voie() === 'manuel'"
+        (change)="change.emit()"
+      />
+    }
   }
 </section>

@@ -1,8 +1,11 @@
 package ma.nafura.etudes.service;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
+import ma.nafura.etudes.api.request.ImportNoeudDto;
 import ma.nafura.etudes.api.request.ImportTreeRequest;
+import ma.nafura.etudes.domain.model.DossierDocument;
 import ma.nafura.etudes.domain.model.DossierEtude;
 import ma.nafura.etudes.domain.model.Dpgf;
 import ma.nafura.etudes.repository.DossierEtudeRepository;
@@ -13,10 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 /**
- * Structure le bordereau d'un dossier à partir d'un fichier déposé.
+ * Étape 2 — construction du bordereau.
  *
- * <p>v1 : premier import (ou remplacement intégral). Le diff non destructif du lot 3 viendra
- * ensuite — ici l'objectif est que le gate étape 2 puisse passer après un dépôt.
+ * <p>Mode auto : prévisualisation (sans persistance) puis validation explicite. Mode manuel :
+ * DPGF vide + édition nœuds.
  */
 @Service
 public class BordereauImportService {
@@ -24,36 +27,107 @@ public class BordereauImportService {
     private final BordereauExtractionPort extractionPort;
     private final DpgfService dpgfService;
     private final DossierEtudeRepository dossierRepository;
+    private final DossierDocumentService documentService;
     private final ParametresEtudeService parametres;
 
     public BordereauImportService(
             BordereauExtractionPort extractionPort,
             DpgfService dpgfService,
             DossierEtudeRepository dossierRepository,
+            DossierDocumentService documentService,
             ParametresEtudeService parametres) {
         this.extractionPort = extractionPort;
         this.dpgfService = dpgfService;
         this.dossierRepository = dossierRepository;
+        this.documentService = documentService;
         this.parametres = parametres;
     }
 
+    /**
+     * Extraction LLM sans persistance — pour revue utilisateur avant validation.
+     */
+    @Transactional(readOnly = true)
+    public ImportTreeRequest previsualiserDepuisPiece(UUID dossierId, UUID pieceId) {
+        return extraireArbre(dossierId, pieceId).arbre();
+    }
+
+    /**
+     * Persiste un arbre déjà revu (remplace le DPGF existant du dossier si présent).
+     *
+     * @param pieceId optionnel — pour mémoriser le document source
+     */
     @Transactional
-    public Dpgf importerDepuisFichier(
-            UUID dossierId, byte[] contenu, String nomFichier, String mimeType, String documentId) {
+    public Dpgf validerImport(UUID dossierId, ImportTreeRequest arbre, UUID pieceId) {
+        DossierEtude dossier = requireDossier(dossierId);
+        String documentId = null;
+        if (pieceId != null) {
+            DossierDocument piece = documentService.lister(dossierId).stream()
+                    .filter(p -> p.getId().equals(pieceId))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("etudes.document.introuvable"));
+            documentId = piece.getDocumentId();
+        }
+        return rattacherArbre(dossier, arbre, documentId);
+    }
+
+    /**
+     * Extraction + persistance immédiate (compat). Préférer prévisualiser → valider.
+     */
+    @Transactional
+    public Dpgf extraireDepuisPiece(UUID dossierId, UUID pieceId) {
+        ExtractionBrute brute = extraireArbre(dossierId, pieceId);
+        return rattacherArbre(brute.dossier(), brute.arbre(), brute.piece().getDocumentId());
+    }
+
+    @Transactional
+    public Dpgf extraireDepuisDocumentsStockes(UUID dossierId) {
+        List<DossierDocument> bordereaux = documentService.listerBordereaux(dossierId);
+        if (bordereaux.isEmpty()) {
+            throw new IllegalArgumentException("etudes.bordereau.aucune_piece_stockee");
+        }
+        return extraireDepuisPiece(dossierId, bordereaux.get(0).getId());
+    }
+
+    @Transactional
+    public Dpgf assurerBordereauManuel(UUID dossierId) {
+        DossierEtude dossier = requireDossier(dossierId);
+        if (dossier.getDpgfId() != null) {
+            return dpgfService.getArbre(dossier.getDpgfId());
+        }
+        BigDecimal tva = dossier.getTvaTauxDefaut() != null
+                ? dossier.getTvaTauxDefaut()
+                : parametres.tvaTauxDefaut();
+        Dpgf dpgf = dpgfService.createEmpty(dossier.getObjet(), tva);
+        dossier.setDpgfId(dpgf.getId());
+        dossierRepository.save(dossier);
+        return dpgf;
+    }
+
+    private ExtractionBrute extraireArbre(UUID dossierId, UUID pieceId) {
         if (!extractionPort.isAvailable()) {
             throw new IllegalStateException("etudes.bordereau.extraction_indisponible");
         }
-        if (contenu == null || contenu.length == 0) {
-            throw new IllegalArgumentException("etudes.bordereau.fichier_vide");
+
+        DossierEtude dossier = requireDossier(dossierId);
+        DossierDocument piece = documentService.lister(dossierId).stream()
+                .filter(p -> p.getId().equals(pieceId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("etudes.document.introuvable"));
+
+        if (!piece.contientBordereau()) {
+            throw new IllegalArgumentException("etudes.bordereau.piece_sans_bordereau");
         }
 
-        DossierEtude dossier = dossierRepository
-                .findByIdAndTenantId(dossierId, tenantId())
-                .orElseThrow(() -> new IllegalArgumentException("etudes.dossier.introuvable"));
+        byte[] contenu = documentService.chargerContenu(piece);
+        String mime = guessMime(piece.getNomFichier());
+        ImportTreeRequest arbre = extractionPort.extract(contenu, piece.getNomFichier(), mime);
+        if (arbre == null || arbre.getArbre() == null || arbre.getArbre().isEmpty()) {
+            throw new IllegalArgumentException("etudes.bordereau.arbre_vide");
+        }
+        return new ExtractionBrute(dossier, piece, arbre);
+    }
 
-        String mime = StringUtils.hasText(mimeType) ? mimeType : guessMime(nomFichier);
-        ImportTreeRequest arbre = extractionPort.extract(contenu, nomFichier, mime);
-
+    private Dpgf rattacherArbre(DossierEtude dossier, ImportTreeRequest arbre, String documentId) {
         BigDecimal tva = dossier.getTvaTauxDefaut() != null
                 ? dossier.getTvaTauxDefaut()
                 : parametres.tvaTauxDefaut();
@@ -71,6 +145,31 @@ public class BordereauImportService {
         }
         dossierRepository.save(dossier);
         return dpgf;
+    }
+
+    private DossierEtude requireDossier(UUID dossierId) {
+        return dossierRepository
+                .findByIdAndTenantId(dossierId, tenantId())
+                .orElseThrow(() -> new IllegalArgumentException("etudes.dossier.introuvable"));
+    }
+
+    /** Compte les nœuds ARTICLE (aperçu UI) — y compris sans unité/qté. */
+    public static int compterArticles(List<ImportNoeudDto> noeuds) {
+        if (noeuds == null) {
+            return 0;
+        }
+        int n = 0;
+        for (ImportNoeudDto noeud : noeuds) {
+            if (noeud == null) {
+                continue;
+            }
+            String type = noeud.getType() != null ? noeud.getType().trim().toUpperCase() : "ARTICLE";
+            if ("ARTICLE".equals(type)) {
+                n++;
+            }
+            n += compterArticles(noeud.getEnfants());
+        }
+        return n;
     }
 
     private static String guessMime(String nomFichier) {
@@ -96,4 +195,6 @@ public class BordereauImportService {
     private static UUID tenantId() {
         return TenantContext.getTenantId();
     }
+
+    private record ExtractionBrute(DossierEtude dossier, DossierDocument piece, ImportTreeRequest arbre) {}
 }

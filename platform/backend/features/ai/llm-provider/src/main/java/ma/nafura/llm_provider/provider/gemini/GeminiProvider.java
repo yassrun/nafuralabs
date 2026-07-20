@@ -160,12 +160,15 @@ public class GeminiProvider implements AiProvider {
             // Gemini: function calling + responseMimeType=application/json is unsupported.
             if (!hasTools && request.getResponseFormat() == LlmResponseFormat.JSON) {
                 generationConfig.put("responseMimeType", "application/json");
+                // Bordereaux can be hundreds of postes — default maxOutputTokens truncates.
+                generationConfig.put("maxOutputTokens", 65536);
             }
             if (!hasTools && request.getResponseSchema() != null && !request.getResponseSchema().isEmpty()) {
                 generationConfig.put(
                         "responseSchema",
                         sanitizeGeminiParameters(objectMapper.readTree(request.getResponseSchema()))
                 );
+                generationConfig.putIfAbsent("maxOutputTokens", 65536);
             }
             if (!generationConfig.isEmpty()) {
                 geminiRequest.put("generationConfig", generationConfig);

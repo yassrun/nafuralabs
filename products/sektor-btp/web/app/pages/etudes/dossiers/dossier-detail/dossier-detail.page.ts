@@ -135,15 +135,25 @@ export class DossierDetailPage {
     });
   }
 
-  /** Après dépôt / retrait d'une pièce — le gate bordereau peut changer. */
-  async rechargerGates(): Promise<void> {
+  /** Après dépôt / extraction / édition d'arbre — dossier (dpgfId) + gates. */
+  async rechargerApresPieces(): Promise<void> {
     const dossier = this.dossier();
     if (!dossier) return;
     try {
-      this.gates.set(await this.api.gates(dossier.id));
+      const [maj, gates] = await Promise.all([
+        this.api.getById(dossier.id),
+        this.api.gates(dossier.id),
+      ]);
+      this.dossier.set(maj);
+      this.gates.set(gates);
     } catch (e) {
       this.erreur.set(this.messageErreur(e));
     }
+  }
+
+  /** @deprecated use rechargerApresPieces */
+  async rechargerGates(): Promise<void> {
+    await this.rechargerApresPieces();
   }
 
   private messageErreur(e: unknown): string {

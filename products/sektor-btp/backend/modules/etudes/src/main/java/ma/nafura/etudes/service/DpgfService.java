@@ -118,6 +118,27 @@ public class DpgfService {
         return saved;
     }
 
+    /** DPGF vide rattaché au dossier (mode manuel étape 2). */
+    @Transactional
+    public Dpgf createEmpty(String projetNom, BigDecimal tvaTaux) {
+        UUID tenantId = tenantId();
+        BigDecimal effectiveTva = tvaTaux != null ? tvaTaux : parametresEtudeService.tvaTauxDefaut();
+        Dpgf entity = Dpgf.builder()
+                .tenantId(tenantId)
+                .numero(nextNumero(tenantId))
+                .metreId(null)
+                .projetNom(projetNom)
+                .tvaTaux(effectiveTva)
+                .totalHt(BigDecimal.ZERO)
+                .totalTva(BigDecimal.ZERO)
+                .totalTtc(BigDecimal.ZERO)
+                .noeuds(new ArrayList<>())
+                .build();
+        Dpgf saved = repository.save(entity);
+        attachArbre(saved);
+        return saved;
+    }
+
     /**
      * Crée un DPGF depuis un arbre extrait d'un bordereau (sans métré amont).
      *
@@ -271,6 +292,7 @@ public class DpgfService {
                 .unite(trimOrNull(request.getUnite()))
                 .prixUnitaire(request.getPrixUnitaire())
                 .total(computeArticleTotal(type, request.getQuantite(), request.getPrixUnitaire(), request.getTotal()))
+                .mode(DpgfNoeud.TYPE_ARTICLE.equals(type) ? DpgfNoeud.MODE_FOURNI : null)
                 .ordre(request.getOrdre() != null ? request.getOrdre() : nextOrdre(dpgfId, parentId, tenantId))
                 .build();
 

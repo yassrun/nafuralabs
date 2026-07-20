@@ -128,10 +128,11 @@ ai:
     api-key: ${AI_GEMINI_API_KEY:}
     base-url: ${AI_GEMINI_BASE_URL:https://generativelanguage.googleapis.com}
     model: ${AI_GEMINI_MODEL:gemini-2.5-flash}
-  # Doc extraction (Import magique / BL scan) routinely exceeds the global 30s default.
+  # Bordereau/CPS PDF extraction is one large Gemini call; 120s caused EOF mid-stream.
+  # Keep >= nafura.doc-extractor.timeout-seconds (and under ingress 600s).
   execution:
-    timeout-ms: ${AI_EXECUTION_TIMEOUT_MS:120000}
-    max-retries: ${AI_EXECUTION_MAX_RETRIES:1}
+    timeout-ms: ${AI_EXECUTION_TIMEOUT_MS:300000}
+    max-retries: ${AI_EXECUTION_MAX_RETRIES:2}
 
 logging:
   level:

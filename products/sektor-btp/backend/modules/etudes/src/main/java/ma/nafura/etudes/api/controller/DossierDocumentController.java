@@ -1,13 +1,15 @@
 package ma.nafura.etudes.api.controller;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import ma.nafura.etudes.api.request.ImportTreeRequest;
 import ma.nafura.etudes.domain.model.CpsSection;
 import ma.nafura.etudes.domain.model.DossierDocument;
+import ma.nafura.etudes.domain.model.Dpgf;
 import ma.nafura.etudes.domain.model.DpgfNoeud;
 import ma.nafura.etudes.repository.DpgfNoeudRepository;
+import ma.nafura.etudes.service.BordereauImportService;
 import ma.nafura.etudes.service.DossierDocumentService;
 import ma.nafura.etudes.service.cps.CpsService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
@@ -19,11 +21,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * Pieces du marche et interrogation du CPS.
+ * Pièces du marché (étape 1) et interrogation CPS.
  *
- * <p>Le parcours demarre par le depot des documents. Le CPS devient ensuite une ressource
- * interrogeable pendant toute la decomposition, au lieu d'une passe globale d'appariement par
- * code — fragile, parce qu'un CPS est de la prose organisee par chapitres.
+ * <p>Le dépôt ne fait que stocker. L'extraction bordereau est un endpoint dédié (étape 2).
  */
 @RestController
 @RequestMapping("/api/v1/etudes/dossiers/{dossierId}/documents")
@@ -31,14 +31,17 @@ import org.springframework.web.multipart.MultipartFile;
 public class DossierDocumentController {
 
     private final DossierDocumentService service;
+    private final BordereauImportService bordereauImportService;
     private final CpsService cpsService;
     private final DpgfNoeudRepository noeudRepository;
 
     public DossierDocumentController(
             DossierDocumentService service,
+            BordereauImportService bordereauImportService,
             CpsService cpsService,
             DpgfNoeudRepository noeudRepository) {
         this.service = service;
+        this.bordereauImportService = bordereauImportService;
         this.cpsService = cpsService;
         this.noeudRepository = noeudRepository;
     }
@@ -49,33 +52,105 @@ public class DossierDocumentController {
         return ResponseEntity.ok(service.lister(dossierId));
     }
 
-    /**
-     * Depose une piece du marche.
-     *
-     * <p>Aucun format n'est refuse : le CPS vient du maitre d'ouvrage, l'utilisateur ne choisit
-     * pas. Un scan est conserve et consultable ; seule son indexation automatique est
-     * indisponible, ce que le statut renvoye indique.
-     */
     @PostMapping(consumes = "multipart/form-data")
     @RequirePermission("etude.update")
     public ResponseEntity<?> deposer(
             @PathVariable UUID dossierId,
             @RequestParam("file") MultipartFile file,
-            @RequestParam("type") String type,
-            @RequestParam(value = "documentId", required = false) String documentId) {
+            @RequestParam("type") String type) {
         try {
-            String ref = documentId != null ? documentId : UUID.randomUUID().toString();
-            DossierDocument piece = service.deposer(
-                    dossierId,
-                    ref,
-                    file.getOriginalFilename(),
-                    type,
-                    file.getBytes(),
-                    file.getContentType());
+            DossierDocument piece = service.deposer(dossierId, file, type);
             return ResponseEntity.status(HttpStatus.CREATED).body(piece);
-        } catch (IOException ex) {
+        } catch (IllegalArgumentException ex) {
             return ResponseEntity.badRequest()
-                    .body(Map.of("code", "etudes.document.lecture_impossible"));
+                    .body(Map.of("code", ex.getMessage() != null ? ex.getMessage() : "etudes.document.erreur"));
+        }
+    }
+
+    /**
+     * Étape 2 mode auto — prévisualisation sans persistance (revue utilisateur).
+     */
+    @PostMapping("/{pieceId}/previsualiser-bordereau")
+    @RequirePermission("etude.update")
+    public ResponseEntity<?> previsualiserBordereau(
+            @PathVariable UUID dossierId, @PathVariable UUID pieceId) {
+        try {
+            ImportTreeRequest arbre = bordereauImportService.previsualiserDepuisPiece(dossierId, pieceId);
+            return ResponseEntity.ok(Map.of(
+                    "arbre", arbre.getArbre(),
+                    "articleCount", BordereauImportService.compterArticles(arbre.getArbre()),
+                    "pieceId", pieceId.toString()));
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("code", ex.getMessage() != null ? ex.getMessage() : "etudes.bordereau.erreur"));
+        }
+    }
+
+    /**
+     * Valide un arbre prévisualisé et le rattache au dossier (remplace le DPGF existant).
+     */
+    @PostMapping("/valider-bordereau")
+    @RequirePermission("etude.update")
+    public ResponseEntity<?> validerBordereau(
+            @PathVariable UUID dossierId,
+            @RequestBody ImportTreeRequest body,
+            @RequestParam(required = false) UUID pieceId) {
+        try {
+            Dpgf dpgf = bordereauImportService.validerImport(dossierId, body, pieceId);
+            return ResponseEntity.ok(Map.of(
+                    "dpgfId", dpgf.getId().toString(),
+                    "numero", dpgf.getNumero()));
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("code", ex.getMessage() != null ? ex.getMessage() : "etudes.bordereau.erreur"));
+        }
+    }
+
+    /**
+     * Extraction + persistance immédiate (compat). Préférer prévisualiser → valider.
+     */
+    @PostMapping("/{pieceId}/extraire-bordereau")
+    @RequirePermission("etude.update")
+    public ResponseEntity<?> extraireBordereau(
+            @PathVariable UUID dossierId, @PathVariable UUID pieceId) {
+        try {
+            Dpgf dpgf = bordereauImportService.extraireDepuisPiece(dossierId, pieceId);
+            return ResponseEntity.ok(Map.of(
+                    "dpgfId", dpgf.getId().toString(),
+                    "numero", dpgf.getNumero()));
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("code", ex.getMessage() != null ? ex.getMessage() : "etudes.bordereau.erreur"));
+        }
+    }
+
+    /** Raccourci : première pièce bordereau du dossier. */
+    @PostMapping("/extraire-bordereau")
+    @RequirePermission("etude.update")
+    public ResponseEntity<?> extraireBordereauAuto(@PathVariable UUID dossierId) {
+        try {
+            Dpgf dpgf = bordereauImportService.extraireDepuisDocumentsStockes(dossierId);
+            return ResponseEntity.ok(Map.of(
+                    "dpgfId", dpgf.getId().toString(),
+                    "numero", dpgf.getNumero()));
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("code", ex.getMessage() != null ? ex.getMessage() : "etudes.bordereau.erreur"));
+        }
+    }
+
+    /** Étape 2 mode manuel : crée un DPGF vide rattaché au dossier si besoin. */
+    @PostMapping("/init-bordereau-manuel")
+    @RequirePermission("etude.update")
+    public ResponseEntity<?> initBordereauManuel(@PathVariable UUID dossierId) {
+        try {
+            Dpgf dpgf = bordereauImportService.assurerBordereauManuel(dossierId);
+            return ResponseEntity.ok(Map.of(
+                    "dpgfId", dpgf.getId().toString(),
+                    "numero", dpgf.getNumero()));
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("code", ex.getMessage() != null ? ex.getMessage() : "etudes.bordereau.erreur"));
         }
     }
 
@@ -87,7 +162,6 @@ public class DossierDocumentController {
         return ResponseEntity.noContent().build();
     }
 
-    /** Sections du CPS, dans l'ordre du document — pour la consultation directe. */
     @GetMapping("/cps/{cpsDocumentId}/sections")
     @RequirePermission("etude.read")
     public ResponseEntity<List<CpsSection>> sections(
@@ -95,12 +169,6 @@ public class DossierDocumentController {
         return ResponseEntity.ok(cpsService.sections(cpsDocumentId));
     }
 
-    /**
-     * Sections pertinentes pour un article donne.
-     *
-     * <p>Recherche plein texte Postgres : <b>aucun token LLM consomme</b>. C'est ce que le
-     * chiffreur consulte pendant la decomposition.
-     */
     @GetMapping("/cps/{cpsDocumentId}/recherche")
     @RequirePermission("etude.read")
     public ResponseEntity<?> rechercher(
@@ -117,14 +185,6 @@ public class DossierDocumentController {
         return ResponseEntity.ok(cpsService.rechercherPourArticle(cpsDocumentId, article, limite));
     }
 
-    /**
-     * Descriptif propose par le modele, a partir des seules sections retenues.
-     *
-     * <p>204 si aucun port IA n'est cable ou si les sections ne permettent pas de conclure — le
-     * parcours reste utilisable, le chiffreur lit les sections et redige lui-meme.
-     *
-     * <p>La proposition n'est jamais persistee ici : elle est retournee, l'utilisateur valide.
-     */
     @PostMapping("/cps/{cpsDocumentId}/descriptif-propose")
     @RequirePermission("etude.update")
     public ResponseEntity<?> proposerDescriptif(

@@ -1,0 +1,108 @@
+<section class="arbre" aria-label="Arbre du bordereau">
+  <header class="arbre__entete">
+    <h4 class="arbre__titre">
+      Arbre du bordereau
+      @if (!chargement()) {
+        <span class="arbre__compte">{{ compteArticles() }} article{{ compteArticles() === 1 ? '' : 's' }}</span>
+      }
+    </h4>
+    <div class="arbre__actions">
+      <button type="button" class="arbre__link" (click)="expandAll()">Tout déplier</button>
+      <button type="button" class="arbre__link" (click)="collapseAll()">Tout replier</button>
+      @if (modifiable() && selectionCount() > 0) {
+        <nf-button variant="secondary" size="sm" (clicked)="supprimerSelection()">
+          Supprimer ({{ selectionCount() }})
+        </nf-button>
+      }
+      @if (modifiable() && editionStructure()) {
+        <nf-button variant="secondary" size="sm" (clicked)="ajouterLot()">Ajouter un lot</nf-button>
+      }
+    </div>
+  </header>
+
+  @if (erreur(); as message) {
+    <p class="arbre__erreur" role="alert">{{ message }}</p>
+  }
+
+  <div class="arbre__table">
+    <nf-tree-table
+      [nodes]="nodes()"
+      [columns]="columns()"
+      treeColumnKey="libelle"
+      [loading]="chargement()"
+      [expandedKeys]="expandedKeys()"
+      (expandedKeysChange)="expandedKeys.set($event)"
+      minWidth="60rem"
+      scrollHeight="520px"
+      emptyMessage="Aucun lot / article"
+    >
+      <ng-template #cell let-row let-column="column">
+        @switch (column.key) {
+          @case ('select') {
+            <input
+              type="checkbox"
+              class="arbre__check"
+              [checked]="isSelected(row.key)"
+              (change)="toggleSelect(row.key, $any($event.target).checked)"
+              [attr.aria-label]="'Sélectionner ' + row.code"
+            />
+          }
+          @case ('type') {
+            <span class="arbre__badge">{{ row.type }}</span>
+          }
+          @case ('code') {
+            <span class="arbre__code">{{ row.code }}</span>
+          }
+          @case ('libelle') {
+            <span class="arbre__libelle">{{ row.libelle }}</span>
+          }
+          @case ('unite') {
+            @if (modifiable() && row.type === 'ARTICLE') {
+              <select
+                class="arbre__select"
+                [ngModel]="row.unite ?? ''"
+                (ngModelChange)="onUniteChange(row, $event)"
+                aria-label="Unité"
+              >
+                <option value="">—</option>
+                @for (u of optionsFor(row); track u.code) {
+                  <option [value]="u.code">{{ u.code }}</option>
+                }
+              </select>
+            } @else {
+              {{ row.unite || '—' }}
+            }
+          }
+          @case ('quantite') {
+            @if (modifiable() && row.type === 'ARTICLE') {
+              <input
+                class="arbre__input arbre__input--qty"
+                type="text"
+                inputmode="decimal"
+                [ngModel]="row.quantite ?? ''"
+                (ngModelChange)="row.quantite = $event === '' ? null : +$event"
+                (change)="sauverArticle(row)"
+                placeholder="Qté"
+                aria-label="Quantité"
+              />
+            } @else {
+              {{ row.quantite ?? '—' }}
+            }
+          }
+          @case ('actions') {
+            @if (editionStructure()) {
+              <span class="arbre__row-actions">
+                @if (row.type === 'LOT' || row.type === 'SOUS_LOT') {
+                  <nf-button variant="ghost" size="sm" (clicked)="ajouterArticle(row)">
+                    + Article
+                  </nf-button>
+                }
+                <nf-button variant="ghost" size="sm" (clicked)="supprimer(row)">Retirer</nf-button>
+              </span>
+            }
+          }
+        }
+      </ng-template>
+    </nf-tree-table>
+  </div>
+</section>

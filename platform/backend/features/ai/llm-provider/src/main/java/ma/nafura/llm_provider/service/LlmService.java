@@ -214,7 +214,8 @@ public class LlmService {
             || message.contains("503")
             || message.contains("504")
             || message.contains("connection reset")
-            || message.contains("temporarily unavailable");
+            || message.contains("temporarily unavailable")
+            || isTransientConnectionDrop(message);
     }
 
     private boolean isTimeout(Throwable cause) {
@@ -227,9 +228,22 @@ public class LlmService {
             if (name.contains("TimeoutException") || name.contains("ReadTimeout")) {
                 return true;
             }
+            String message = current.getMessage();
+            if (message != null && isTransientConnectionDrop(message.toLowerCase())) {
+                return true;
+            }
             current = current.getCause();
         }
         return false;
+    }
+
+    /** Gemini/proxy often closes the body mid-response on long PDF extractions. */
+    private static boolean isTransientConnectionDrop(String lowerMessage) {
+        return lowerMessage.contains("eof")
+            || lowerMessage.contains("premature")
+            || lowerMessage.contains("connection closed")
+            || lowerMessage.contains("broken pipe")
+            || lowerMessage.contains("stream reset");
     }
 
     private String describeFailure(Throwable cause) {

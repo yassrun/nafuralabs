@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { HttpParams } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
 import { FeatureApiService } from '@lib/anatomy';
@@ -10,6 +11,7 @@ import type {
   ResultatGate,
   TypeDossierDocument,
 } from '@app/etudes/models';
+import type { ImportNoeudPreview } from '../utils/bordereau-tree.util';
 
 @Injectable({ providedIn: 'root' })
 export class DossierEtudeApiService extends FeatureApiService<
@@ -66,6 +68,57 @@ export class DossierEtudeApiService extends FeatureApiService<
       this.http.post<DossierDocument>(
         this.resolveUrl(`${this.basePath}/${dossierId}/documents`),
         form,
+      ),
+    );
+  }
+
+  /** Prévisualisation LLM sans persistance. */
+  previsualiserBordereau(
+    dossierId: string,
+    pieceId: string,
+  ): Promise<{ arbre: ImportNoeudPreview[]; articleCount: number; pieceId: string }> {
+    return firstValueFrom(
+      this.http.post<{ arbre: ImportNoeudPreview[]; articleCount: number; pieceId: string }>(
+        this.resolveUrl(
+          `${this.basePath}/${dossierId}/documents/${pieceId}/previsualiser-bordereau`,
+        ),
+        {},
+      ),
+    );
+  }
+
+  /** Persiste l'arbre validé dans le dialogue. */
+  validerBordereau(
+    dossierId: string,
+    arbre: ImportNoeudPreview[],
+    pieceId?: string,
+  ): Promise<{ dpgfId: string; numero: string }> {
+    const params = pieceId ? new HttpParams().set('pieceId', pieceId) : undefined;
+    return firstValueFrom(
+      this.http.post<{ dpgfId: string; numero: string }>(
+        this.resolveUrl(`${this.basePath}/${dossierId}/documents/valider-bordereau`),
+        { arbre },
+        params ? { params } : {},
+      ),
+    );
+  }
+
+  /** Étape 2 mode auto — extraction + persistance immédiate (compat). */
+  extraireBordereau(dossierId: string, pieceId?: string): Promise<{ dpgfId: string; numero: string }> {
+    const path = pieceId
+      ? `${this.basePath}/${dossierId}/documents/${pieceId}/extraire-bordereau`
+      : `${this.basePath}/${dossierId}/documents/extraire-bordereau`;
+    return firstValueFrom(
+      this.http.post<{ dpgfId: string; numero: string }>(this.resolveUrl(path), {}),
+    );
+  }
+
+  /** Étape 2 mode manuel — DPGF vide rattaché au dossier. */
+  initBordereauManuel(dossierId: string): Promise<{ dpgfId: string; numero: string }> {
+    return firstValueFrom(
+      this.http.post<{ dpgfId: string; numero: string }>(
+        this.resolveUrl(`${this.basePath}/${dossierId}/documents/init-bordereau-manuel`),
+        {},
       ),
     );
   }

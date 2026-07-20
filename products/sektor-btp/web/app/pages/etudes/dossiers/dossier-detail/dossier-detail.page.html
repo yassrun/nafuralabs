@@ -41,14 +41,15 @@
           [dossierId]="dossier()!.id"
           [modifiable]="modifiable()"
           mode="documents"
-          (change)="rechargerGates()"
+          (change)="rechargerApresPieces()"
         />
       } @else if (etapeCourante() === 2) {
         <app-pieces-marche
           [dossierId]="dossier()!.id"
+          [dpgfId]="dossier()?.dpgfId"
           [modifiable]="modifiable()"
           mode="bordereau"
-          (change)="rechargerGates()"
+          (change)="rechargerApresPieces()"
         />
       } @else {
         <p class="dossier__placeholder">

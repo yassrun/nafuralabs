@@ -1,0 +1,121 @@
+:host {
+  display: block;
+}
+
+.arbre {
+  margin-top: 20px;
+  border: 1px solid var(--nf-color-border);
+  border-radius: 8px;
+  background: var(--nf-color-bg);
+  padding: 12px 14px;
+}
+
+.arbre__entete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.arbre__titre {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.arbre__compte {
+  font-weight: 500;
+  font-size: 0.75rem;
+  color: var(--nf-color-text-secondary);
+}
+
+.arbre__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.arbre__link {
+  border: 0;
+  background: transparent;
+  color: var(--nf-color-primary-600, #0b6e7a);
+  cursor: pointer;
+  font-size: 0.8125rem;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.arbre__erreur {
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--nf-color-danger-600);
+  border-radius: 6px;
+  font-size: 0.8125rem;
+}
+
+.arbre__table {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.arbre__badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--nf-color-text-secondary);
+}
+
+.arbre__code {
+  font-family: ui-monospace, monospace;
+  font-size: 0.75rem;
+  color: var(--nf-color-text-secondary);
+}
+
+.arbre__libelle {
+  overflow-wrap: anywhere;
+}
+
+.arbre__input {
+  width: 4.5rem;
+  height: 30px;
+  border: 1px solid var(--nf-color-border);
+  border-radius: 4px;
+  padding: 0 6px;
+  background: var(--nf-color-bg-subtle);
+}
+
+.arbre__input--qty {
+  width: 5rem;
+}
+
+.arbre__select {
+  min-width: 5.5rem;
+  max-width: 8rem;
+  height: 30px;
+  border: 1px solid var(--nf-color-border);
+  border-radius: 4px;
+  padding: 0 4px;
+  background: var(--nf-color-bg-subtle);
+  font-size: 0.75rem;
+}
+
+.arbre__check {
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+}
+
+.arbre__row-actions {
+  display: inline-flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}

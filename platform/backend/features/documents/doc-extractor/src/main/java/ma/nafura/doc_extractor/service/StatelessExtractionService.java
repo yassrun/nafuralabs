@@ -14,6 +14,7 @@ import ma.nafura.platform.documents.docextractor.api.response.StatelessExtractio
 import ma.nafura.platform.documents.docextractor.api.response.StatelessExtractionResponse;
 import ma.nafura.platform.documents.docextractor.api.response.ValidationState;
 import ma.nafura.platform.documents.docextractor.service.util.JsonDataCleaner;
+import ma.nafura.platform.documents.docextractor.service.util.PdfTextExtractor;
 import ma.nafura.platform.documents.docextractor.service.util.SpreadsheetTextExtractor;
 import org.springframework.stereotype.Service;
 
@@ -219,6 +220,16 @@ public class StatelessExtractionService {
             return request;
         }
 
+        // Text-layer PDFs (typical BDP): send text — faster and avoids TLS EOF on inline PDF.
+        if (PdfTextExtractor.isPdfMime(mimeType, fileName)) {
+            String pdfText = PdfTextExtractor.tryPromptText(fileBytes, fileName);
+            if (pdfText != null) {
+                request.setPrompt(pdfText);
+                request.setMediaContents(List.of());
+                return request;
+            }
+        }
+
         LlmRequest.MediaContent media = new LlmRequest.MediaContent();
         media.setContentBase64(Base64.getEncoder().encodeToString(fileBytes));
         media.setMimeType(mimeType);
@@ -294,8 +305,15 @@ public class StatelessExtractionService {
                 return true;
             }
             String message = current.getMessage();
-            if (message != null && message.toLowerCase().contains("timed out")) {
-                return true;
+            if (message != null) {
+                String lower = message.toLowerCase();
+                if (lower.contains("timed out")
+                        || lower.contains("eof")
+                        || lower.contains("premature")
+                        || lower.contains("connection closed")
+                        || lower.contains("broken pipe")) {
+                    return true;
+                }
             }
             current = current.getCause();
         }
@@ -311,6 +329,8 @@ public class StatelessExtractionService {
                 || message.contains("429")
                 || message.contains("503")
                 || message.contains("504")
-                || message.contains("connection reset");
+                || message.contains("connection reset")
+                || message.contains("eof")
+                || message.contains("premature");
     }
 }
