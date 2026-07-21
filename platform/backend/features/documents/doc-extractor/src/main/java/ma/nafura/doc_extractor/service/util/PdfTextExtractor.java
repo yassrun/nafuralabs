@@ -38,9 +38,18 @@ public final class PdfTextExtractor {
      * @return prompt text if the PDF has a usable text layer; otherwise {@code null}
      */
     public static String tryPromptText(byte[] bytes, String fileName) {
+        return tryPromptText(bytes, fileName, MAX_CHARS);
+    }
+
+    /**
+     * @param maxChars max characters kept after header (callers of light passes can lower this)
+     * @return prompt text if the PDF has a usable text layer; otherwise {@code null}
+     */
+    public static String tryPromptText(byte[] bytes, String fileName, int maxChars) {
         if (bytes == null || bytes.length == 0) {
             return null;
         }
+        int limit = maxChars > 0 ? maxChars : MAX_CHARS;
         String label = (fileName == null || fileName.isBlank()) ? "document.pdf" : fileName;
         try (PDDocument document = Loader.loadPDF(bytes)) {
             PDFTextStripper stripper = new PDFTextStripper();
@@ -64,17 +73,17 @@ public final class PdfTextExtractor {
                     .append(document.getNumberOfPages())
                     .append(" pages)\n\n")
                     .append(text);
-            return truncate(out.toString());
+            return truncate(out.toString(), limit);
         } catch (Exception e) {
             log.warn("PDF text extraction failed for {}: {} — keep binary path", label, e.getMessage());
             return null;
         }
     }
 
-    private static String truncate(String value) {
-        if (value.length() <= MAX_CHARS) {
+    private static String truncate(String value, int maxChars) {
+        if (value.length() <= maxChars) {
             return value;
         }
-        return value.substring(0, MAX_CHARS) + "\n... (truncated)";
+        return value.substring(0, maxChars) + "\n... (truncated)";
     }
 }

@@ -9,7 +9,8 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
+import { firstValueFrom } from 'rxjs';
 
 import {
   ButtonComponent,
@@ -17,6 +18,7 @@ import {
   type NfTreeNode,
   type NfTreeTableColumn,
 } from '@lib/anatomy/components';
+import { ConfirmDialogService } from '@lib/anatomy';
 
 import { UnitOfMeasuresApiService } from '@app/pages/inventory/configuration/unit-of-measures/services/unit-of-measure-api.service';
 
@@ -27,57 +29,57 @@ import {
   noeudsDpgfToTreeNodes,
   type BordereauTreeRow,
 } from '../../utils/bordereau-tree.util';
+import { mapToReferentialCode, toUniteOptions, type UniteOption } from '../../utils/unite-options.util';
 import {
-  mapToReferentialCode,
-  toUniteOptions,
-  uniteOptionsForValue,
-  type UniteOption,
-} from '../../utils/unite-options.util';
+  BordereauNoeudDialogComponent,
+  childTypesFor,
+  defaultChildType,
+  siblingTypesFor,
+  type BordereauNoeudDialogResult,
+  type BordereauNoeudType,
+} from '../bordereau-noeud-dialog/bordereau-noeud-dialog.component';
 
 /**
- * Arbre DPGF persisté — nf-tree-table + unités référentiel + multi-sélection.
+ * Arbre DPGF persisté — lecture seule + Actions en popup (aligné chantier).
  */
 @Component({
   selector: 'app-bordereau-arbre',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, ButtonComponent, TreeTableComponent],
+  imports: [CommonModule, ButtonComponent, TreeTableComponent],
   templateUrl: './bordereau-arbre.component.html',
   styleUrl: './bordereau-arbre.component.scss',
 })
 export class BordereauArbreComponent {
   private readonly dpgfApi = inject(DpgfApiService);
   private readonly uomApi = inject(UnitOfMeasuresApiService);
+  private readonly dialog = inject(MatDialog);
+  private readonly confirmDialog = inject(ConfirmDialogService);
 
   readonly dpgfId = input.required<string>();
   readonly modifiable = input(true);
+  /** Conservé pour compatibilité template parent — Actions toujours visibles si modifiable. */
   readonly editionStructure = input(false);
 
   readonly change = output<void>();
 
   readonly nodes = signal<NfTreeNode<BordereauTreeRow>[]>([]);
   readonly expandedKeys = signal<Set<string>>(new Set());
-  readonly selectedKeys = signal<Set<string>>(new Set());
   readonly uniteOptions = signal<UniteOption[]>([]);
   readonly chargement = signal(false);
   readonly erreur = signal<string | undefined>(undefined);
   readonly compteArticles = computed(() => countArticlesInNodes(this.nodes()));
-  readonly selectionCount = computed(() => this.selectedKeys().size);
 
   readonly columns = computed<NfTreeTableColumn<BordereauTreeRow>[]>(() => {
-    const cols: NfTreeTableColumn<BordereauTreeRow>[] = [];
-    if (this.modifiable()) {
-      cols.push({ key: 'select', label: ' ', width: '2.75rem', align: 'center' });
-    }
-    cols.push(
+    const cols: NfTreeTableColumn<BordereauTreeRow>[] = [
       { key: 'type', label: 'Type', width: '5.5rem' },
       { key: 'code', label: 'Code', width: '7rem' },
       { key: 'libelle', label: 'Libellé' },
-      { key: 'unite', label: 'Unité', width: '9rem', align: 'center' },
+      { key: 'unite', label: 'Unité', width: '5.5rem', align: 'center' },
       { key: 'quantite', label: 'Quantité', width: '7rem', align: 'end' },
-    );
-    if (this.modifiable() && this.editionStructure()) {
-      cols.push({ key: 'actions', label: ' ', width: '8rem', align: 'end' });
+    ];
+    if (this.modifiable()) {
+      cols.push({ key: 'actions', label: 'Actions', width: '8.5rem', align: 'center' });
     }
     return cols;
   });
@@ -90,45 +92,21 @@ export class BordereauArbreComponent {
     });
   }
 
-  isSelected(key: string): boolean {
-    return this.selectedKeys().has(key);
-  }
-
-  toggleSelect(key: string, checked: boolean): void {
-    const next = new Set(this.selectedKeys());
-    if (checked) next.add(key);
-    else next.delete(key);
-    this.selectedKeys.set(next);
-  }
-
-  toggleSelectAll(checked: boolean): void {
-    if (!checked) {
-      this.selectedKeys.set(new Set());
-      return;
-    }
-    const keys = new Set<string>();
-    const walk = (list: NfTreeNode<BordereauTreeRow>[]) => {
-      for (const n of list) {
-        keys.add(n.key);
-        if (n.children?.length) walk(n.children);
-      }
-    };
-    walk(this.nodes());
-    this.selectedKeys.set(keys);
-  }
-
-  optionsFor(row: BordereauTreeRow): UniteOption[] {
-    return uniteOptionsForValue(this.uniteOptions(), row.unite);
-  }
-
   async ajouterLot(): Promise<void> {
     if (!this.modifiable()) return;
-    const n = this.nodes().length + 1;
+    const result = await this.openNoeudDialog({
+      mode: 'create',
+      placement: 'root',
+      allowedTypes: ['LOT'],
+      defaultType: 'LOT',
+      initial: { type: 'LOT', code: String(this.nodes().length + 1), libelle: '' },
+    });
+    if (!result) return;
     try {
       await this.dpgfApi.addNoeud(this.dpgfId(), {
-        type: 'LOT',
-        code: String(n),
-        libelle: `Lot ${n}`,
+        type: result.type,
+        code: result.code,
+        libelle: result.libelle,
       });
       await this.charger(this.dpgfId());
       this.change.emit();
@@ -137,40 +115,100 @@ export class BordereauArbreComponent {
     }
   }
 
-  async ajouterArticle(row: BordereauTreeRow): Promise<void> {
+  async modifier(row: BordereauTreeRow): Promise<void> {
     if (!this.modifiable() || !row.id) return;
-    const defaultUnite = this.uniteOptions()[0]?.code ?? 'U';
+    const type = (row.type as BordereauNoeudType) || 'ARTICLE';
+    const result = await this.openNoeudDialog({
+      mode: 'edit',
+      placement: 'sibling',
+      allowedTypes: [type],
+      defaultType: type,
+      initial: {
+        type,
+        code: row.code,
+        libelle: row.libelle,
+        unite: row.unite,
+        quantite: row.quantite,
+      },
+    });
+    if (!result) return;
+    try {
+      await this.dpgfApi.updateNoeud(row.id, {
+        code: result.code,
+        libelle: result.libelle,
+        unite: result.type === 'ARTICLE' ? result.unite ?? null : null,
+        quantite: result.type === 'ARTICLE' ? result.quantite ?? null : null,
+      });
+      await this.charger(this.dpgfId());
+      this.change.emit();
+    } catch (e) {
+      this.erreur.set(this.msg(e));
+    }
+  }
+
+  async ajouterEnfant(row: BordereauTreeRow): Promise<void> {
+    if (!this.modifiable() || !row.id) return;
+    const allowed = childTypesFor(row.type);
+    if (allowed.length === 0) return;
+    const def = defaultChildType(row.type);
+    const result = await this.openNoeudDialog({
+      mode: 'create',
+      placement: 'child',
+      allowedTypes: allowed,
+      defaultType: def,
+      initial: {
+        type: def,
+        code: `${row.code}-1`,
+        libelle: '',
+        unite: this.uniteOptions()[0]?.code ?? 'U',
+        quantite: 1,
+      },
+    });
+    if (!result) return;
     try {
       await this.dpgfApi.addNoeud(this.dpgfId(), {
         parentId: row.id,
-        type: 'ARTICLE',
-        code: `${row.code}-1`,
-        libelle: 'Nouvel article',
-        unite: defaultUnite,
-        quantite: 1,
+        type: result.type,
+        code: result.code,
+        libelle: result.libelle,
+        unite: result.unite,
+        quantite: result.quantite,
       });
       await this.charger(this.dpgfId());
+      this.expandedKeys.update((keys) => new Set([...keys, row.key]));
       this.change.emit();
     } catch (e) {
       this.erreur.set(this.msg(e));
     }
   }
 
-  async onUniteChange(row: BordereauTreeRow, code: string): Promise<void> {
-    row.unite = code || null;
-    await this.sauverArticle(row);
-  }
-
-  async sauverArticle(row: BordereauTreeRow): Promise<void> {
-    if (!this.modifiable() || row.type !== 'ARTICLE' || !row.id) return;
-    const mapped = mapToReferentialCode(row.unite, this.uniteOptions());
-    row.unite = mapped;
+  async ajouterMemeNiveau(row: BordereauTreeRow): Promise<void> {
+    if (!this.modifiable()) return;
+    const allowed = siblingTypesFor(row.type);
+    const result = await this.openNoeudDialog({
+      mode: 'create',
+      placement: 'sibling',
+      allowedTypes: allowed,
+      defaultType: (row.type as BordereauNoeudType) || 'ARTICLE',
+      initial: {
+        type: row.type,
+        code: `${row.code}-bis`,
+        libelle: '',
+        unite: this.uniteOptions()[0]?.code ?? 'U',
+        quantite: 1,
+      },
+    });
+    if (!result) return;
     try {
-      await this.dpgfApi.updateNoeud(row.id, {
-        unite: mapped,
-        quantite:
-          row.quantite == null || Number.isNaN(Number(row.quantite)) ? null : Number(row.quantite),
+      await this.dpgfApi.addNoeud(this.dpgfId(), {
+        parentId: row.parentId ?? null,
+        type: result.type,
+        code: result.code,
+        libelle: result.libelle,
+        unite: result.unite,
+        quantite: result.quantite,
       });
+      await this.charger(this.dpgfId());
       this.change.emit();
     } catch (e) {
       this.erreur.set(this.msg(e));
@@ -179,47 +217,15 @@ export class BordereauArbreComponent {
 
   async supprimer(row: BordereauTreeRow): Promise<void> {
     if (!this.modifiable() || !row.id) return;
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'Supprimer le nœud',
+      message: `Supprimer « ${row.code} — ${row.libelle} » et ses éventuels enfants ?`,
+      variant: 'danger',
+      confirmLabel: 'Supprimer',
+    });
+    if (!confirmed) return;
     try {
       await this.dpgfApi.deleteNoeud(row.id);
-      await this.charger(this.dpgfId());
-      this.change.emit();
-    } catch (e) {
-      this.erreur.set(this.msg(e));
-    }
-  }
-
-  async supprimerSelection(): Promise<void> {
-    if (!this.modifiable() || this.selectedKeys().size === 0) return;
-    const keyToId = new Map<string, string>();
-    const walk = (list: NfTreeNode<BordereauTreeRow>[]) => {
-      for (const n of list) {
-        if (n.data.id) keyToId.set(n.key, n.data.id);
-        if (n.children?.length) walk(n.children);
-      }
-    };
-    walk(this.nodes());
-
-    const ids = [...this.selectedKeys()]
-      .map((k) => keyToId.get(k))
-      .filter((id): id is string => !!id);
-
-    // Supprimer feuilles d'abord : trier par profondeur décroissante via parcours
-    const depthById = new Map<string, number>();
-    const walkDepth = (list: NfTreeNode<BordereauTreeRow>[], depth: number) => {
-      for (const n of list) {
-        if (n.data.id) depthById.set(n.data.id, depth);
-        if (n.children?.length) walkDepth(n.children, depth + 1);
-      }
-    };
-    walkDepth(this.nodes(), 0);
-    ids.sort((a, b) => (depthById.get(b) ?? 0) - (depthById.get(a) ?? 0));
-
-    this.erreur.set(undefined);
-    try {
-      for (const id of ids) {
-        await this.dpgfApi.deleteNoeud(id);
-      }
-      this.selectedKeys.set(new Set());
       await this.charger(this.dpgfId());
       this.change.emit();
     } catch (e) {
@@ -245,6 +251,29 @@ export class BordereauArbreComponent {
     this.expandedKeys.set(new Set());
   }
 
+  private async openNoeudDialog(partial: {
+    mode: 'create' | 'edit';
+    placement: 'root' | 'child' | 'sibling';
+    allowedTypes: BordereauNoeudType[];
+    defaultType: BordereauNoeudType;
+    initial?: {
+      type?: string;
+      code?: string;
+      libelle?: string;
+      unite?: string | null;
+      quantite?: number | null;
+    };
+  }): Promise<BordereauNoeudDialogResult | null> {
+    const ref = this.dialog.open(BordereauNoeudDialogComponent, {
+      width: '28rem',
+      data: {
+        ...partial,
+        uniteOptions: this.uniteOptions(),
+      },
+    });
+    return (await firstValueFrom(ref.afterClosed())) ?? null;
+  }
+
   private async chargerUnites(): Promise<void> {
     try {
       const page = await this.uomApi.getAll({ page: 0, pageSize: 500, sortBy: 'code' });
@@ -260,7 +289,6 @@ export class BordereauArbreComponent {
     try {
       const dpgf = await this.dpgfApi.getArbre(dpgfId);
       const nodes = noeudsDpgfToTreeNodes(dpgf.hierarchie ?? []);
-      // Map unités affichées vers codes référentiel
       const opts = this.uniteOptions();
       const remap = (list: NfTreeNode<BordereauTreeRow>[]) => {
         for (const n of list) {
@@ -273,7 +301,6 @@ export class BordereauArbreComponent {
       remap(nodes);
       this.nodes.set(nodes);
       this.expandedKeys.set(collectExpandKeys(nodes, 0));
-      this.selectedKeys.set(new Set());
     } catch (e) {
       this.erreur.set(this.msg(e));
       this.nodes.set([]);

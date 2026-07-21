@@ -43,6 +43,7 @@ nafura:
     id: erp
   doc-extractor:
     # Full CPS (80-90 pages) needs more than the 120s platform default.
+    # Bordereau uses a lighter schema + smaller prompt; CPS descriptifs still need this headroom.
     timeout-seconds: ${NAFURA_DOC_EXTRACTOR_TIMEOUT_SECONDS:300}
   demo:
     runtime-seed-enabled: ${NAFURA_DEMO_RUNTIME_SEED:false}

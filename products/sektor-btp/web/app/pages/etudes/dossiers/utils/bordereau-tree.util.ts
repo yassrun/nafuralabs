@@ -5,6 +5,8 @@ import type { NoeudDPGF } from '@app/etudes/models';
 export interface BordereauTreeRow {
   key: string;
   id?: string;
+  /** Parent persisté (arbre DPGF) — pour add sibling / child via API. */
+  parentId?: string | null;
   type: string;
   code: string;
   libelle: string;
@@ -22,16 +24,23 @@ export interface ImportNoeudPreview {
   enfants?: ImportNoeudPreview[];
 }
 
-export function noeudsDpgfToTreeNodes(noeuds: NoeudDPGF[], depth = 0): NfTreeNode<BordereauTreeRow>[] {
+export function noeudsDpgfToTreeNodes(
+  noeuds: NoeudDPGF[],
+  depth = 0,
+  parentId: string | null = null,
+): NfTreeNode<BordereauTreeRow>[] {
   return (noeuds ?? []).map((n, i) => {
     const key = n.id || `n-${depth}-${i}-${n.code}`;
-    const children = n.enfants?.length ? noeudsDpgfToTreeNodes(n.enfants, depth + 1) : undefined;
+    const children = n.enfants?.length
+      ? noeudsDpgfToTreeNodes(n.enfants, depth + 1, n.id)
+      : undefined;
     return {
       key,
       leaf: !children?.length,
       data: {
         key,
         id: n.id,
+        parentId,
         type: n.type,
         code: n.code,
         libelle: n.libelle,

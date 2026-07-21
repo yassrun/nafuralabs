@@ -9,12 +9,7 @@
     <div class="arbre__actions">
       <button type="button" class="arbre__link" (click)="expandAll()">Tout déplier</button>
       <button type="button" class="arbre__link" (click)="collapseAll()">Tout replier</button>
-      @if (modifiable() && selectionCount() > 0) {
-        <nf-button variant="secondary" size="sm" (clicked)="supprimerSelection()">
-          Supprimer ({{ selectionCount() }})
-        </nf-button>
-      }
-      @if (modifiable() && editionStructure()) {
+      @if (modifiable()) {
         <nf-button variant="secondary" size="sm" (clicked)="ajouterLot()">Ajouter un lot</nf-button>
       }
     </div>
@@ -38,15 +33,6 @@
     >
       <ng-template #cell let-row let-column="column">
         @switch (column.key) {
-          @case ('select') {
-            <input
-              type="checkbox"
-              class="arbre__check"
-              [checked]="isSelected(row.key)"
-              (change)="toggleSelect(row.key, $any($event.target).checked)"
-              [attr.aria-label]="'Sélectionner ' + row.code"
-            />
-          }
           @case ('type') {
             <span class="arbre__badge">{{ row.type }}</span>
           }
@@ -57,49 +43,52 @@
             <span class="arbre__libelle">{{ row.libelle }}</span>
           }
           @case ('unite') {
-            @if (modifiable() && row.type === 'ARTICLE') {
-              <select
-                class="arbre__select"
-                [ngModel]="row.unite ?? ''"
-                (ngModelChange)="onUniteChange(row, $event)"
-                aria-label="Unité"
-              >
-                <option value="">—</option>
-                @for (u of optionsFor(row); track u.code) {
-                  <option [value]="u.code">{{ u.code }}</option>
-                }
-              </select>
-            } @else {
-              {{ row.unite || '—' }}
-            }
+            {{ row.type === 'ARTICLE' ? row.unite || '—' : '—' }}
           }
           @case ('quantite') {
-            @if (modifiable() && row.type === 'ARTICLE') {
-              <input
-                class="arbre__input arbre__input--qty"
-                type="text"
-                inputmode="decimal"
-                [ngModel]="row.quantite ?? ''"
-                (ngModelChange)="row.quantite = $event === '' ? null : +$event"
-                (change)="sauverArticle(row)"
-                placeholder="Qté"
-                aria-label="Quantité"
-              />
-            } @else {
-              {{ row.quantite ?? '—' }}
-            }
+            {{ row.type === 'ARTICLE' ? (row.quantite ?? '—') : '—' }}
           }
           @case ('actions') {
-            @if (editionStructure()) {
-              <span class="arbre__row-actions">
-                @if (row.type === 'LOT' || row.type === 'SOUS_LOT') {
-                  <nf-button variant="ghost" size="sm" (clicked)="ajouterArticle(row)">
-                    + Article
-                  </nf-button>
-                }
-                <nf-button variant="ghost" size="sm" (clicked)="supprimer(row)">Retirer</nf-button>
-              </span>
-            }
+            <span class="arbre__row-actions">
+              <button
+                type="button"
+                class="arbre__action"
+                title="Modifier"
+                aria-label="Modifier"
+                (click)="modifier(row)"
+              >
+                ✎
+              </button>
+              @if (row.type !== 'ARTICLE') {
+                <button
+                  type="button"
+                  class="arbre__action"
+                  title="Ajouter un enfant"
+                  aria-label="Ajouter un enfant"
+                  (click)="ajouterEnfant(row)"
+                >
+                  +↓
+                </button>
+              }
+              <button
+                type="button"
+                class="arbre__action"
+                title="Ajouter au même niveau"
+                aria-label="Ajouter au même niveau"
+                (click)="ajouterMemeNiveau(row)"
+              >
+                +↔
+              </button>
+              <button
+                type="button"
+                class="arbre__action arbre__action--danger"
+                title="Supprimer"
+                aria-label="Supprimer"
+                (click)="supprimer(row)"
+              >
+                🗑
+              </button>
+            </span>
           }
         }
       </ng-template>

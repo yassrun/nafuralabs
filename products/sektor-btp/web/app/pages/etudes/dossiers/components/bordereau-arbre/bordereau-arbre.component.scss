@@ -83,39 +83,27 @@
   overflow-wrap: anywhere;
 }
 
-.arbre__input {
-  width: 4.5rem;
-  height: 30px;
-  border: 1px solid var(--nf-color-border);
-  border-radius: 4px;
-  padding: 0 6px;
-  background: var(--nf-color-bg-subtle);
-}
-
-.arbre__input--qty {
-  width: 5rem;
-}
-
-.arbre__select {
-  min-width: 5.5rem;
-  max-width: 8rem;
-  height: 30px;
-  border: 1px solid var(--nf-color-border);
-  border-radius: 4px;
-  padding: 0 4px;
-  background: var(--nf-color-bg-subtle);
-  font-size: 0.75rem;
-}
-
-.arbre__check {
-  width: 1rem;
-  height: 1rem;
-  cursor: pointer;
-}
-
 .arbre__row-actions {
   display: inline-flex;
-  gap: 4px;
-  flex-wrap: wrap;
-  justify-content: flex-end;
+  gap: 0.15rem;
+  white-space: nowrap;
+  justify-content: center;
+}
+
+.arbre__action {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1;
+  padding: 0.15rem 0.3rem;
+  color: var(--nf-color-text-secondary);
+}
+
+.arbre__action:hover {
+  color: var(--nf-color-text-primary);
+}
+
+.arbre__action--danger:hover {
+  color: var(--nf-color-danger-600, #c0392b);
 }

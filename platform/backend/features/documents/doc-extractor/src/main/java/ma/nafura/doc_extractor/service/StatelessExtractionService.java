@@ -58,6 +58,23 @@ public class StatelessExtractionService {
             String instructions,
             String tenantId
     ) {
+        return process(fileBytes, fileName, mimeType, inlineSchema, presentationSchema, instructions, tenantId, null);
+    }
+
+    /**
+     * @param maxPromptChars optional cap on PDF text prompt size (null = platform default).
+     *                       Light passes (e.g. bordereau) should pass a lower value than full CPS.
+     */
+    public StatelessExtractionResponse process(
+            byte[] fileBytes,
+            String fileName,
+            String mimeType,
+            String inlineSchema,
+            String presentationSchema,
+            String instructions,
+            String tenantId,
+            Integer maxPromptChars
+    ) {
         if (inlineSchema == null || inlineSchema.isBlank()) {
             return failure(
                     "REQUEST",
@@ -67,7 +84,15 @@ public class StatelessExtractionService {
             );
         }
         try {
-            return extract(fileBytes, fileName, mimeType, inlineSchema, presentationSchema, instructions, tenantId);
+            return extract(
+                    fileBytes,
+                    fileName,
+                    mimeType,
+                    inlineSchema,
+                    presentationSchema,
+                    instructions,
+                    tenantId,
+                    maxPromptChars);
         } catch (java.util.concurrent.TimeoutException e) {
             return failure("LLM", "EXTRACTION_TIMEOUT", "Extraction timed out.", true);
         } catch (InterruptedException e) {
@@ -146,7 +171,8 @@ public class StatelessExtractionService {
             String inlineSchema,
             String presentationSchema,
             String instructions,
-            String tenantId
+            String tenantId,
+            Integer maxPromptChars
     ) throws Exception {
         JsonNode schema = objectMapper.readTree(inlineSchema);
         if (!schema.isObject() || !"object".equals(schema.path("type").asText())) {
@@ -163,7 +189,7 @@ public class StatelessExtractionService {
             }
         }
 
-        LlmRequest request = baseRequest(fileBytes, fileName, mimeType);
+        LlmRequest request = baseRequest(fileBytes, fileName, mimeType, maxPromptChars);
         request.setSystemInstruction("""
                 Extract only information observable in the supplied document.
                 Return JSON matching the response schema exactly. Never invent values.
@@ -211,6 +237,11 @@ public class StatelessExtractionService {
     }
 
     private LlmRequest baseRequest(byte[] fileBytes, String fileName, String mimeType) {
+        return baseRequest(fileBytes, fileName, mimeType, null);
+    }
+
+    private LlmRequest baseRequest(
+            byte[] fileBytes, String fileName, String mimeType, Integer maxPromptChars) {
         LlmRequest request = new LlmRequest();
         request.setMetadata(Map.of("fileName", fileName == null ? "document" : fileName));
 
@@ -222,7 +253,9 @@ public class StatelessExtractionService {
 
         // Text-layer PDFs (typical BDP): send text — faster and avoids TLS EOF on inline PDF.
         if (PdfTextExtractor.isPdfMime(mimeType, fileName)) {
-            String pdfText = PdfTextExtractor.tryPromptText(fileBytes, fileName);
+            String pdfText = maxPromptChars != null && maxPromptChars > 0
+                    ? PdfTextExtractor.tryPromptText(fileBytes, fileName, maxPromptChars)
+                    : PdfTextExtractor.tryPromptText(fileBytes, fileName);
             if (pdfText != null) {
                 request.setPrompt(pdfText);
                 request.setMediaContents(List.of());

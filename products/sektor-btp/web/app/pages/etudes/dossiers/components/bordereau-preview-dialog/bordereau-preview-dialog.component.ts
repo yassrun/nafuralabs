@@ -6,8 +6,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 
 import {
   ButtonComponent,
@@ -15,6 +14,8 @@ import {
   type NfTreeNode,
   type NfTreeTableColumn,
 } from '@lib/anatomy/components';
+import { ConfirmDialogService } from '@lib/anatomy';
+import { firstValueFrom } from 'rxjs';
 
 import { UnitOfMeasuresApiService } from '@app/pages/inventory/configuration/unit-of-measures/services/unit-of-measure-api.service';
 
@@ -25,12 +26,15 @@ import {
   type BordereauTreeRow,
   type ImportNoeudPreview,
 } from '../../utils/bordereau-tree.util';
+import { mapToReferentialCode, toUniteOptions, type UniteOption } from '../../utils/unite-options.util';
 import {
-  mapToReferentialCode,
-  toUniteOptions,
-  uniteOptionsForValue,
-  type UniteOption,
-} from '../../utils/unite-options.util';
+  BordereauNoeudDialogComponent,
+  childTypesFor,
+  defaultChildType,
+  siblingTypesFor,
+  type BordereauNoeudDialogResult,
+  type BordereauNoeudType,
+} from '../bordereau-noeud-dialog/bordereau-noeud-dialog.component';
 
 export interface BordereauPreviewDialogData {
   arbre: ImportNoeudPreview[];
@@ -49,7 +53,7 @@ export interface BordereauPreviewDialogResult {
   selector: 'app-bordereau-preview-dialog',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, MatDialogModule, ButtonComponent, TreeTableComponent],
+  imports: [CommonModule, MatDialogModule, ButtonComponent, TreeTableComponent],
   template: `
     <div class="preview">
       <header class="preview__header">
@@ -61,7 +65,7 @@ export interface BordereauPreviewDialogResult {
               depuis <strong>{{ data.fileName }}</strong>
             }
             — {{ articleCount() }} article{{ articleCount() === 1 ? '' : 's' }}.
-            Ajustez les unités (référentiel) ou retirez des lignes avant validation.
+            Modifiez la structure via la colonne Actions avant validation.
           </p>
         </div>
         <nf-button variant="ghost" (clicked)="fermer()">Fermer</nf-button>
@@ -70,11 +74,10 @@ export interface BordereauPreviewDialogResult {
       <div class="preview__toolbar">
         <button type="button" class="preview__link" (click)="expandAll()">Tout déplier</button>
         <button type="button" class="preview__link" (click)="collapseAll()">Tout replier</button>
-        @if (selectionCount() > 0) {
-          <nf-button variant="secondary" size="sm" (clicked)="retirerSelection()">
-            Retirer ({{ selectionCount() }})
-          </nf-button>
-        }
+        <span class="preview__toolbar-spacer"></span>
+        <nf-button variant="secondary" size="sm" (clicked)="ajouterLotRacine()">
+          Ajouter un lot
+        </nf-button>
       </div>
 
       <div class="preview__table">
@@ -90,14 +93,6 @@ export interface BordereauPreviewDialogResult {
         >
           <ng-template #cell let-row let-column="column">
             @switch (column.key) {
-              @case ('select') {
-                <input
-                  type="checkbox"
-                  class="preview__check"
-                  [checked]="isSelected(row.key)"
-                  (change)="toggleSelect(row.key, $any($event.target).checked)"
-                />
-              }
               @case ('type') {
                 <span class="preview__badge">{{ row.type }}</span>
               }
@@ -108,23 +103,52 @@ export interface BordereauPreviewDialogResult {
                 <span class="preview__libelle">{{ row.libelle }}</span>
               }
               @case ('unite') {
-                @if (row.type === 'ARTICLE') {
-                  <select
-                    class="preview__select"
-                    [ngModel]="row.unite ?? ''"
-                    (ngModelChange)="onUniteChange(row.key, $event)"
-                  >
-                    <option value="">—</option>
-                    @for (u of optionsFor(row); track u.code) {
-                      <option [value]="u.code">{{ u.code }}</option>
-                    }
-                  </select>
-                } @else {
-                  —
-                }
+                {{ row.type === 'ARTICLE' ? row.unite || '—' : '—' }}
               }
               @case ('quantite') {
-                {{ row.quantite ?? '—' }}
+                {{ row.type === 'ARTICLE' ? (row.quantite ?? '—') : '—' }}
+              }
+              @case ('actions') {
+                <span class="preview__row-actions">
+                  <button
+                    type="button"
+                    class="preview__action"
+                    title="Modifier"
+                    aria-label="Modifier"
+                    (click)="modifier(row)"
+                  >
+                    ✎
+                  </button>
+                  @if (row.type !== 'ARTICLE') {
+                    <button
+                      type="button"
+                      class="preview__action"
+                      title="Ajouter un enfant"
+                      aria-label="Ajouter un enfant"
+                      (click)="ajouterEnfant(row)"
+                    >
+                      +↓
+                    </button>
+                  }
+                  <button
+                    type="button"
+                    class="preview__action"
+                    title="Ajouter au même niveau"
+                    aria-label="Ajouter au même niveau"
+                    (click)="ajouterMemeNiveau(row)"
+                  >
+                    +↔
+                  </button>
+                  <button
+                    type="button"
+                    class="preview__action preview__action--danger"
+                    title="Supprimer"
+                    aria-label="Supprimer"
+                    (click)="supprimer(row)"
+                  >
+                    🗑
+                  </button>
+                </span>
               }
             }
           </ng-template>
@@ -154,14 +178,25 @@ export interface BordereauPreviewDialogResult {
       gap: 12px;
       align-items: flex-start;
     }
-    .preview__titre { margin: 0 0 4px; font-size: 1.125rem; }
+    .preview__titre {
+      margin: 0 0 4px;
+      font-size: 1.125rem;
+    }
     .preview__aide {
       margin: 0;
       font-size: 0.875rem;
       color: var(--nf-color-text-secondary);
       max-width: 48rem;
     }
-    .preview__toolbar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .preview__toolbar {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .preview__toolbar-spacer {
+      flex: 1 1 auto;
+    }
     .preview__link {
       border: 0;
       background: transparent;
@@ -197,16 +232,29 @@ export interface BordereauPreviewDialogResult {
       font-size: 0.75rem;
       color: var(--nf-color-text-secondary);
     }
-    .preview__libelle { overflow-wrap: anywhere; }
-    .preview__select {
-      min-width: 5.5rem;
-      height: 30px;
-      border: 1px solid var(--nf-color-border);
-      border-radius: 4px;
-      font-size: 0.75rem;
-      background: var(--nf-color-bg-subtle);
+    .preview__libelle {
+      overflow-wrap: anywhere;
     }
-    .preview__check { width: 1rem; height: 1rem; cursor: pointer; }
+    .preview__row-actions {
+      display: inline-flex;
+      gap: 0.15rem;
+      white-space: nowrap;
+    }
+    .preview__action {
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 0.9rem;
+      line-height: 1;
+      padding: 0.15rem 0.3rem;
+      color: var(--nf-color-text-secondary);
+    }
+    .preview__action:hover {
+      color: var(--nf-color-text-primary);
+    }
+    .preview__action--danger:hover {
+      color: var(--nf-color-danger-600, #c0392b);
+    }
   `,
 })
 export class BordereauPreviewDialogComponent {
@@ -214,24 +262,24 @@ export class BordereauPreviewDialogComponent {
   private readonly ref = inject(
     MatDialogRef<BordereauPreviewDialogComponent, BordereauPreviewDialogResult | undefined>,
   );
+  private readonly dialog = inject(MatDialog);
+  private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly uomApi = inject(UnitOfMeasuresApiService);
 
   readonly columns: NfTreeTableColumn<BordereauTreeRow>[] = [
-    { key: 'select', label: ' ', width: '2.75rem', align: 'center' },
     { key: 'type', label: 'Type', width: '5.5rem' },
     { key: 'code', label: 'Code', width: '7rem' },
     { key: 'libelle', label: 'Libellé' },
-    { key: 'unite', label: 'Unité', width: '9rem', align: 'center' },
+    { key: 'unite', label: 'Unité', width: '5.5rem', align: 'center' },
     { key: 'quantite', label: 'Quantité', width: '6rem', align: 'end' },
+    { key: 'actions', label: 'Actions', width: '8.5rem', align: 'center' },
   ];
 
   readonly arbre = signal<ImportNoeudPreview[]>([]);
   readonly nodes = signal<NfTreeNode<BordereauTreeRow>[]>([]);
   readonly expandedKeys = signal<Set<string>>(new Set());
-  readonly selectedKeys = signal<Set<string>>(new Set());
   readonly uniteOptions = signal<UniteOption[]>([]);
   readonly articleCount = computed(() => countArticlesInNodes(this.nodes()));
-  readonly selectionCount = computed(() => this.selectedKeys().size);
 
   constructor() {
     this.arbre.set(structuredClone(this.data.arbre ?? []));
@@ -249,41 +297,126 @@ export class BordereauPreviewDialogComponent {
     this.refreshNodes();
   }
 
-  optionsFor(row: BordereauTreeRow): UniteOption[] {
-    return uniteOptionsForValue(this.uniteOptions(), row.unite);
+  async ajouterLotRacine(): Promise<void> {
+    const result = await this.openNoeudDialog({
+      mode: 'create',
+      placement: 'root',
+      allowedTypes: ['LOT'],
+      defaultType: 'LOT',
+      initial: { type: 'LOT', code: String(this.arbre().length + 1), libelle: '' },
+    });
+    if (!result) return;
+    const root = structuredClone(this.arbre());
+    root.push(this.toNoeud(result));
+    this.arbre.set(root);
+    this.refreshNodes();
   }
 
-  isSelected(key: string): boolean {
-    return this.selectedKeys().has(key);
-  }
-
-  toggleSelect(key: string, checked: boolean): void {
-    const next = new Set(this.selectedKeys());
-    if (checked) next.add(key);
-    else next.delete(key);
-    this.selectedKeys.set(next);
-  }
-
-  onUniteChange(nodeKey: string, code: string): void {
-    const path = this.keyToPath(nodeKey);
+  async modifier(row: BordereauTreeRow): Promise<void> {
+    const path = this.keyToPath(row.key);
     if (!path) return;
     const noeud = this.getNoeudAt(path);
     if (!noeud) return;
-    noeud.unite = code || null;
+    const type = (noeud.type ?? 'ARTICLE').toUpperCase() as BordereauNoeudType;
+    const result = await this.openNoeudDialog({
+      mode: 'edit',
+      placement: 'sibling',
+      allowedTypes: [type],
+      defaultType: type,
+      initial: {
+        type,
+        code: noeud.code ?? '',
+        libelle: noeud.libelle ?? '',
+        unite: noeud.unite,
+        quantite: noeud.quantite,
+      },
+    });
+    if (!result) return;
+    const root = structuredClone(this.arbre());
+    const target = this.getNoeudAtOn(root, path);
+    if (!target) return;
+    target.type = result.type;
+    target.code = result.code;
+    target.libelle = result.libelle;
+    target.unite = result.type === 'ARTICLE' ? result.unite : null;
+    target.quantite = result.type === 'ARTICLE' ? result.quantite : null;
+    this.arbre.set(root);
     this.refreshNodes(false);
   }
 
-  retirerSelection(): void {
-    const keys = [...this.selectedKeys()];
-    // Remove deepest first
-    keys
-      .map((k) => ({ k, depth: (k.match(/\//g) ?? []).length }))
-      .sort((a, b) => b.depth - a.depth)
-      .forEach(({ k }) => {
-        const path = this.keyToPath(k);
-        if (path) this.removeAt(path);
-      });
-    this.selectedKeys.set(new Set());
+  async ajouterEnfant(row: BordereauTreeRow): Promise<void> {
+    const path = this.keyToPath(row.key);
+    if (!path) return;
+    const allowed = childTypesFor(row.type);
+    if (allowed.length === 0) return;
+    const result = await this.openNoeudDialog({
+      mode: 'create',
+      placement: 'child',
+      allowedTypes: allowed,
+      defaultType: defaultChildType(row.type),
+      initial: {
+        type: defaultChildType(row.type),
+        code: `${row.code}-1`,
+        libelle: '',
+        unite: this.uniteOptions()[0]?.code ?? 'U',
+        quantite: 1,
+      },
+    });
+    if (!result) return;
+    const root = structuredClone(this.arbre());
+    const parent = this.getNoeudAtOn(root, path);
+    if (!parent) return;
+    if (!parent.enfants) parent.enfants = [];
+    parent.enfants.push(this.toNoeud(result));
+    this.arbre.set(root);
+    this.refreshNodes(false);
+    this.expandedKeys.update((keys) => new Set([...keys, row.key]));
+  }
+
+  async ajouterMemeNiveau(row: BordereauTreeRow): Promise<void> {
+    const path = this.keyToPath(row.key);
+    if (!path) return;
+    const allowed = siblingTypesFor(row.type);
+    const siblingType = (row.type as BordereauNoeudType) || 'ARTICLE';
+    const result = await this.openNoeudDialog({
+      mode: 'create',
+      placement: 'sibling',
+      allowedTypes: allowed,
+      defaultType: siblingType,
+      initial: {
+        type: siblingType,
+        code: `${row.code}-bis`,
+        libelle: '',
+        unite: this.uniteOptions()[0]?.code ?? 'U',
+        quantite: 1,
+      },
+    });
+    if (!result) return;
+    const root = structuredClone(this.arbre());
+    if (path.length === 1) {
+      root.splice(path[0] + 1, 0, this.toNoeud(result));
+    } else {
+      const parentPath = path.slice(0, -1);
+      const parent = this.getNoeudAtOn(root, parentPath);
+      if (!parent) return;
+      if (!parent.enfants) parent.enfants = [];
+      parent.enfants.splice(path[path.length - 1] + 1, 0, this.toNoeud(result));
+    }
+    this.arbre.set(root);
+    this.refreshNodes(false);
+  }
+
+  async supprimer(row: BordereauTreeRow): Promise<void> {
+    const path = this.keyToPath(row.key);
+    if (!path) return;
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'Supprimer le nœud',
+      message: `Supprimer « ${row.code} — ${row.libelle} » et ses éventuels enfants ?`,
+      variant: 'danger',
+      confirmLabel: 'Supprimer',
+    });
+    if (!confirmed) return;
+    this.removeAt(path);
     this.refreshNodes();
   }
 
@@ -315,6 +448,40 @@ export class BordereauPreviewDialogComponent {
       arbre: this.arbre(),
       pieceId: this.data.pieceId,
     });
+  }
+
+  private async openNoeudDialog(partial: {
+    mode: 'create' | 'edit';
+    placement: 'root' | 'child' | 'sibling';
+    allowedTypes: BordereauNoeudType[];
+    defaultType: BordereauNoeudType;
+    initial?: {
+      type?: string;
+      code?: string;
+      libelle?: string;
+      unite?: string | null;
+      quantite?: number | null;
+    };
+  }): Promise<BordereauNoeudDialogResult | null> {
+    const ref = this.dialog.open(BordereauNoeudDialogComponent, {
+      width: '28rem',
+      data: {
+        ...partial,
+        uniteOptions: this.uniteOptions(),
+      },
+    });
+    return (await firstValueFrom(ref.afterClosed())) ?? null;
+  }
+
+  private toNoeud(result: BordereauNoeudDialogResult): ImportNoeudPreview {
+    return {
+      type: result.type,
+      code: result.code,
+      libelle: result.libelle,
+      unite: result.type === 'ARTICLE' ? result.unite : null,
+      quantite: result.type === 'ARTICLE' ? result.quantite : null,
+      enfants: [],
+    };
   }
 
   private remapArbreUnites(): void {
@@ -352,7 +519,11 @@ export class BordereauPreviewDialogComponent {
   }
 
   private getNoeudAt(path: number[]): ImportNoeudPreview | null {
-    let list = this.arbre();
+    return this.getNoeudAtOn(this.arbre(), path);
+  }
+
+  private getNoeudAtOn(root: ImportNoeudPreview[], path: number[]): ImportNoeudPreview | null {
+    let list = root;
     let node: ImportNoeudPreview | null = null;
     for (const idx of path) {
       node = list[idx] ?? null;
