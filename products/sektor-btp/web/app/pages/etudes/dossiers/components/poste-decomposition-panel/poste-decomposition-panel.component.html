@@ -1,0 +1,218 @@
+@if (!poste()) {
+  <section class="poste poste--empty" aria-label="Aucun poste sélectionné">
+    <h3>Sélectionnez un poste</h3>
+    <p>
+      Choisissez un article dans le bordereau pour saisir un prix fourni ou sa décomposition. Les
+      lots et sous-lots ne sont pas directement chiffrables.
+    </p>
+  </section>
+} @else {
+  <section class="poste" aria-label="Décomposition du poste">
+    <header class="poste__entete">
+      <div class="poste__identite">
+        <button
+          type="button"
+          class="poste__back"
+          (click)="closeMobile.emit()"
+          aria-label="Retour au bordereau"
+        >
+          ← Bordereau
+        </button>
+        <div class="poste__badges">
+          <p class="poste__code">{{ poste()!.code }}</p>
+          @if (estFourni() && !estDecompose()) {
+            <span class="mode-badge">Prix fourni</span>
+          } @else if (estDecompose()) {
+            <span class="mode-badge mode-badge--decompo">Décomposé</span>
+          }
+        </div>
+        <h3 class="poste__titre">{{ poste()!.libelle }}</h3>
+        <p class="poste__meta">
+          <span>{{ poste()!.unite || '—' }}</span>
+          <span aria-hidden="true">·</span>
+          <span>Qté {{ poste()!.quantite ?? '—' }}</span>
+        </p>
+      </div>
+      <div class="poste__statut" aria-live="polite">
+        @if (sauvegarde()) {
+          Enregistrement…
+        } @else if (statut() === 'saved') {
+          Enregistré
+        }
+      </div>
+    </header>
+
+    @if (erreur(); as message) {
+      <p class="poste__erreur" role="alert">{{ message }}</p>
+    }
+
+    @if (chargement()) {
+      <p class="poste__etat">Chargement…</p>
+    } @else {
+      <div class="poste__section">
+        <div class="poste__section-head">
+          <h4>Chiffrage</h4>
+          @if (modifiable()) {
+            <div class="poste__section-actions">
+              <nf-button variant="secondary" size="sm" (clicked)="saisirPrixFourni()">
+                Prix fourni
+              </nf-button>
+              <nf-button variant="secondary" size="sm" (clicked)="ajouterSousDetail()">
+                Sous-détail
+              </nf-button>
+            </div>
+          }
+        </div>
+
+        @if (!estDecompose() && !estFourni()) {
+          <div class="poste__vide">
+            <p>Aucun prix pour ce poste</p>
+            <p>
+              Saisissez un prix de vente directement, ou construisez le prix via des sous-détails
+              (matières, main-d’œuvre, matériel…).
+            </p>
+            @if (modifiable()) {
+              <div class="poste__vide-actions">
+                <nf-button variant="primary" size="sm" (clicked)="saisirPrixFourni()">
+                  Saisir un prix de vente
+                </nf-button>
+                <nf-button variant="secondary" size="sm" (clicked)="ajouterSousDetail()">
+                  Ajouter un sous-détail
+                </nf-button>
+              </div>
+            }
+          </div>
+        } @else if (estFourni() && !estDecompose()) {
+          <div class="poste__fourni">
+            <p>Ce poste est vendu à un prix unitaire fixé, sans décomposition.</p>
+            @if (modifiable()) {
+              <nf-button variant="secondary" size="sm" (clicked)="saisirPrixFourni()">
+                Modifier le prix
+              </nf-button>
+            }
+          </div>
+        } @else {
+          <div class="poste__table-wrap">
+            <table class="poste__table">
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Désignation</th>
+                  <th class="num">Qté</th>
+                  <th>Unité</th>
+                  <th class="num">PU</th>
+                  <th class="num">Total</th>
+                  @if (modifiable()) {
+                    <th class="actions">Actions</th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of composants(); track row.id) {
+                  <tr>
+                    <td><span class="badge">{{ typeLabel(row.type) }}</span></td>
+                    <td>{{ row.articleOuPosteId }}</td>
+                    <td class="num">{{ row.quantite | number: '1.2-4' }}</td>
+                    <td>{{ row.unite }}</td>
+                    <td class="num">{{ row.prixUnitaire | number: '1.2-2' }}</td>
+                    <td class="num">{{ row.total | number: '1.2-2' }}</td>
+                    @if (modifiable()) {
+                      <td class="actions">
+                        <button type="button" class="link" (click)="modifierSousDetail(row)">
+                          Modifier
+                        </button>
+                        <button type="button" class="link" (click)="dupliquerSousDetail(row)">
+                          Dupliquer
+                        </button>
+                        <button
+                          type="button"
+                          class="link link--danger"
+                          (click)="supprimerSousDetail(row)"
+                        >
+                          Supprimer
+                        </button>
+                      </td>
+                    }
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <ul class="poste__cards" aria-label="Sous-détails">
+            @for (row of composants(); track row.id) {
+              <li class="card">
+                <div class="card__top">
+                  <span class="badge">{{ typeLabel(row.type) }}</span>
+                  <strong>{{ row.articleOuPosteId }}</strong>
+                </div>
+                <p class="card__meta">
+                  {{ row.quantite | number: '1.2-4' }} {{ row.unite }} ×
+                  {{ row.prixUnitaire | number: '1.2-2' }}
+                </p>
+                <p class="card__total">{{ row.total | number: '1.2-2' }} MAD</p>
+                @if (modifiable()) {
+                  <div class="card__actions">
+                    <button type="button" class="link" (click)="modifierSousDetail(row)">
+                      Modifier
+                    </button>
+                    <button type="button" class="link" (click)="dupliquerSousDetail(row)">
+                      Dupliquer
+                    </button>
+                    <button
+                      type="button"
+                      class="link link--danger"
+                      (click)="supprimerSousDetail(row)"
+                    >
+                      Supprimer
+                    </button>
+                  </div>
+                }
+              </li>
+            }
+          </ul>
+        }
+      </div>
+
+      <aside class="poste__synthese" aria-label="Synthèse du prix">
+        <div class="poste__section-head">
+          <h4>Synthèse du prix</h4>
+          @if (modifiable() && estDecompose()) {
+            <nf-button variant="secondary" size="sm" (clicked)="ouvrirChiffrage()">
+              Modifier FG / marge
+            </nf-button>
+          }
+          @if (modifiable() && estFourni() && !estDecompose()) {
+            <nf-button variant="secondary" size="sm" (clicked)="saisirPrixFourni()">
+              Modifier le prix
+            </nf-button>
+          }
+        </div>
+        <dl>
+          @if (estDecompose()) {
+            <div>
+              <dt>Déboursé sec</dt>
+              <dd>{{ deboursSec() | mad }}</dd>
+            </div>
+            <div>
+              <dt>Frais généraux ({{ fgPct() | number: '1.0-2' }} %)</dt>
+              <dd>{{ fgAmount() | mad }}</dd>
+            </div>
+            <div>
+              <dt>Marge ({{ margePct() | number: '1.0-2' }} %)</dt>
+              <dd>{{ margeAmount() | mad }}</dd>
+            </div>
+          }
+          <div class="total">
+            <dt>Prix unitaire HT</dt>
+            <dd>{{ prixVenteHt() | mad }}</dd>
+          </div>
+          <div>
+            <dt>Total ligne HT</dt>
+            <dd>{{ totalLigne() | mad }}</dd>
+          </div>
+        </dl>
+      </aside>
+    }
+  </section>
+}

@@ -21,35 +21,50 @@
 
   <div class="arbre__table">
     <nf-tree-table
-      [nodes]="nodes()"
+      [nodes]="filteredNodes()"
       [columns]="columns()"
       treeColumnKey="libelle"
       [loading]="chargement()"
       [expandedKeys]="expandedKeys()"
       (expandedKeysChange)="expandedKeys.set($event)"
-      minWidth="60rem"
-      scrollHeight="520px"
+      [rowClickable]="selectionEnabled()"
+      [rowClass]="rowClass"
+      [rowTitle]="rowTitle"
+      (rowClick)="onRowClick($event)"
+      minWidth="42rem"
+      scrollHeight="min(62vh, 36rem)"
       emptyMessage="Aucun lot / article"
     >
       <ng-template #cell let-row let-column="column">
         @switch (column.key) {
           @case ('type') {
-            <span class="arbre__badge">{{ row.type }}</span>
+            <span class="arbre__badge">{{ typeCourt(row.type) }}</span>
           }
           @case ('code') {
             <span class="arbre__code">{{ row.code }}</span>
           }
           @case ('libelle') {
-            <span class="arbre__libelle">{{ row.libelle }}</span>
+            <span class="arbre__libelle" [attr.title]="row.libelle">{{ softLabel(row.libelle) }}</span>
           }
           @case ('unite') {
-            {{ row.type === 'ARTICLE' ? row.unite || '—' : '—' }}
+            <span class="arbre__num">{{ row.type === 'ARTICLE' ? row.unite || '—' : '' }}</span>
           }
           @case ('quantite') {
-            {{ row.type === 'ARTICLE' ? (row.quantite ?? '—') : '—' }}
+            <span class="arbre__num">{{
+              row.type === 'ARTICLE' ? (row.quantite != null ? (row.quantite | number: '1.0-2') : '—') : ''
+            }}</span>
+          }
+          @case ('pu') {
+            <span class="arbre__num">{{
+              row.type === 'ARTICLE'
+                ? row.prixUnitaire != null
+                  ? (row.prixUnitaire | number: '1.2-2')
+                  : '—'
+                : ''
+            }}</span>
           }
           @case ('actions') {
-            <span class="arbre__row-actions">
+            <span class="arbre__row-actions" (click)="stop($event)">
               <button
                 type="button"
                 class="arbre__action"
@@ -67,7 +82,7 @@
                   aria-label="Ajouter un enfant"
                   (click)="ajouterEnfant(row)"
                 >
-                  +↓
+                  +
                 </button>
               }
               <button
@@ -77,7 +92,7 @@
                 aria-label="Ajouter au même niveau"
                 (click)="ajouterMemeNiveau(row)"
               >
-                +↔
+                ⇄
               </button>
               <button
                 type="button"
@@ -86,7 +101,7 @@
                 aria-label="Supprimer"
                 (click)="supprimer(row)"
               >
-                🗑
+                ×
               </button>
             </span>
           }

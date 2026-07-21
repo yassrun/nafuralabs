@@ -51,10 +51,26 @@
           mode="bordereau"
           (change)="rechargerApresPieces()"
         />
+      } @else if (etapeCourante() === 3) {
+        @if (dossier()?.dpgfId; as dpgfId) {
+          <app-decomposition-workspace
+            [dpgfId]="dpgfId"
+            [modifiable]="modifiable()"
+            [fgDefaut]="dossier()?.fraisGenerauxPercentDefaut ?? 10"
+            [margeDefaut]="dossier()?.margePercentDefaut ?? 17.5"
+            [tvaDefaut]="dossier()?.tvaTauxDefaut ?? 20"
+            [focusNoeudId]="focusNoeudId()"
+            (change)="rechargerApresPieces()"
+          />
+        } @else {
+          <p class="dossier__placeholder">
+            Créez d’abord le bordereau à l’étape précédente pour décomposer les postes.
+          </p>
+        }
       } @else {
         <p class="dossier__placeholder">
           Le contenu de cette étape arrivera avec le lot correspondant
-          (décomposition, consultation, chiffrage).
+          (consultation, chiffrage).
         </p>
       }
     </section>

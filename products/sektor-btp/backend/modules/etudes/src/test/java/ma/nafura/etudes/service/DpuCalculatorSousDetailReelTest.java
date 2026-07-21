@@ -141,11 +141,11 @@ class DpuCalculatorSousDetailReelTest {
     @Test
     void prix_de_vente_du_beton_en_fondation_avec_les_taux_de_l_entreprise() {
         // Deboursé reel 966, FG 11,5 % et marge 17,5 % (milieux des fourchettes 10-13 et 15-20
-        // donnees par l'expert). La formule elle-meme reste inchangee (R2).
+        // donnees par l'expert). Formule additive : 966 × (1 + 0,115 + 0,175).
         BigDecimal pv = calculator.computePrixVenteHt(
                 new BigDecimal("966"), new BigDecimal("11.5"), new BigDecimal("17.5"));
 
-        // 966 x 1,115 = 1077,09 ; x 1,175 = 1265,58
-        assertThat(pv).isEqualByComparingTo(new BigDecimal("1265.58"));
+        // 966 × 1,29 = 1246,14
+        assertThat(pv).isEqualByComparingTo(new BigDecimal("1246.14"));
     }
 }

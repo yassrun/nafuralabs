@@ -31,9 +31,9 @@ public class ParametresEtudeService {
     /**
      * Marge bénéficiaire — repli, milieu de la fourchette métier.
      *
-     * L'expert métier indique <b>15 à 20 %</b>, appliquée « <b>sur le prix de revient</b> »
-     * (2026-07-19) — donc sur déboursé + FG, ce que fait déjà
-     * {@link DpuCalculator#computePrixVenteHt}. Formule confirmée, aucun changement requis.
+     * L'expert métier indique <b>15 à 20 %</b>. La formule retenue pour l'étude est additive :
+     * {@code prixVente = déboursé × (1 + FG% + marge%)} — voir
+     * {@link DpuCalculator#computePrixVenteHt}.
      *
      * Fourchette large et assumée : la marge est une décision commerciale par article.
      * Comme les FG, ce repli est surchargeable à trois niveaux.

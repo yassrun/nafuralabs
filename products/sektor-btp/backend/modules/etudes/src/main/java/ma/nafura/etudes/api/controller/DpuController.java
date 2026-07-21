@@ -36,8 +36,10 @@ public class DpuController {
 
     @GetMapping
     @RequirePermission("etudes.read")
-    public ResponseEntity<List<PrixDpu>> list(@RequestParam(required = false) UUID ouvrageId) {
-        return ResponseEntity.ok(service.list(ouvrageId));
+    public ResponseEntity<List<PrixDpu>> list(
+            @RequestParam(required = false) UUID ouvrageId,
+            @RequestParam(required = false) UUID dpgfNoeudId) {
+        return ResponseEntity.ok(service.list(ouvrageId, dpgfNoeudId));
     }
 
     @GetMapping("/{id}")

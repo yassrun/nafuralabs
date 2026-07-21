@@ -48,6 +48,8 @@ export class DpgfApiService extends FeatureApiService<DPGF> {
       libelle: string;
       quantite: number | null;
       unite: string | null;
+      prixUnitaire: number | null;
+      mode: 'FOURNI' | 'DECOMPOSE';
     }>,
   ): Promise<NoeudDPGF> {
     return firstValueFrom(

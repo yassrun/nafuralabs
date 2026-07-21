@@ -3,34 +3,35 @@
 }
 
 .arbre {
-  margin-top: 20px;
-  border: 1px solid var(--nf-color-border);
-  border-radius: 8px;
-  background: var(--nf-color-bg);
-  padding: 12px 14px;
+  margin-top: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
 }
 
 .arbre__entete {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 10px;
+  gap: 0.75rem;
+  margin-bottom: 0.65rem;
   flex-wrap: wrap;
 }
 
 .arbre__titre {
   margin: 0;
-  font-size: 0.875rem;
-  font-weight: 600;
+  font-size: 0.8125rem;
+  font-weight: 650;
   display: flex;
   align-items: baseline;
-  gap: 10px;
+  gap: 0.55rem;
+  color: var(--nf-color-text-primary);
 }
 
 .arbre__compte {
   font-weight: 500;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: var(--nf-color-text-secondary);
 }
 
@@ -38,7 +39,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: 0.65rem;
 }
 
 .arbre__link {
@@ -46,64 +47,149 @@
   background: transparent;
   color: var(--nf-color-primary-600, #0b6e7a);
   cursor: pointer;
-  font-size: 0.8125rem;
-  text-decoration: underline;
+  font-size: 0.75rem;
+  text-decoration: none;
   padding: 0;
 }
 
+.arbre__link:hover {
+  text-decoration: underline;
+}
+
 .arbre__erreur {
-  margin: 0 0 8px;
-  padding: 8px 10px;
+  margin: 0 0 0.5rem;
+  padding: 0.5rem 0.65rem;
   border: 1px solid var(--nf-color-danger-600);
   border-radius: 6px;
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
 }
 
 .arbre__table {
-  overflow-x: auto;
-  overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
+  overflow: hidden;
 }
 
 .arbre__badge {
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
+  font-size: 0.62rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
   color: var(--nf-color-text-secondary);
 }
 
 .arbre__code {
-  font-family: ui-monospace, monospace;
-  font-size: 0.75rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.72rem;
   color: var(--nf-color-text-secondary);
+  white-space: nowrap;
 }
 
 .arbre__libelle {
-  overflow-wrap: anywhere;
+  display: block;
+  max-width: 28rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.78rem;
+  line-height: 1.25;
+  font-weight: 450;
+  color: var(--nf-color-text-primary);
+}
+
+.arbre__row--lot .arbre__libelle,
+.arbre__row--sous_lot .arbre__libelle {
+  font-weight: 600;
+}
+
+.arbre__num {
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--nf-color-text-secondary);
 }
 
 .arbre__row-actions {
   display: inline-flex;
-  gap: 0.15rem;
+  gap: 0.1rem;
   white-space: nowrap;
-  justify-content: center;
+  justify-content: flex-end;
+  opacity: 0.35;
+}
+
+:host ::ng-deep tr:hover .arbre__row-actions,
+:host ::ng-deep .arbre__row--selected .arbre__row-actions {
+  opacity: 1;
 }
 
 .arbre__action {
   border: none;
   background: transparent;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.68rem;
   line-height: 1;
-  padding: 0.15rem 0.3rem;
+  padding: 0.2rem 0.28rem;
   color: var(--nf-color-text-secondary);
+  border-radius: 4px;
 }
 
 .arbre__action:hover {
   color: var(--nf-color-text-primary);
+  background: var(--nf-color-bg-subtle);
 }
 
 .arbre__action--danger:hover {
   color: var(--nf-color-danger-600, #c0392b);
+}
+
+/* Look « sandbox » : lignes fines, typo compacte, pas de bruit */
+:host ::ng-deep {
+  .nf-tree-table__scroll {
+    border: 1px solid var(--nf-color-border);
+    border-radius: 8px;
+    background: var(--nf-color-surface, #fff);
+  }
+
+  .p-treetable {
+    font-size: 0.78rem;
+  }
+
+  .p-treetable .p-treetable-thead > tr > th {
+    padding: 0.45rem 0.55rem;
+    font-size: 0.68rem;
+    font-weight: 650;
+    letter-spacing: 0.01em;
+    color: var(--nf-color-text-primary);
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--nf-color-border);
+    white-space: nowrap;
+  }
+
+  .p-treetable .p-treetable-tbody > tr > td {
+    padding: 0.32rem 0.55rem;
+    border: 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--nf-color-border) 70%, transparent);
+    vertical-align: middle;
+    background: transparent;
+  }
+
+  .p-treetable .p-treetable-tbody > tr:last-child > td {
+    border-bottom: 0;
+  }
+
+  .p-treetable .p-treetable-tbody > tr:hover > td {
+    background: color-mix(in srgb, var(--nf-color-bg-subtle) 80%, transparent);
+  }
+
+  .p-treetable-toggler {
+    width: 1.35rem !important;
+    height: 1.35rem !important;
+    margin-right: 0.15rem;
+  }
+
+  .arbre__row--selected > td {
+    background: color-mix(in srgb, var(--nf-color-primary-600, #0b6e7a) 8%, transparent) !important;
+  }
+
+  .arbre__row--article {
+    cursor: pointer;
+  }
 }

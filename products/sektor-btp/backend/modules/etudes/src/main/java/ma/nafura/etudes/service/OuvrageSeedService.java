@@ -112,8 +112,7 @@ public class OuvrageSeedService {
                 ? entity.getBeneficePercent()
                 : ParametresEtudeService.DEFAULT_MARGE_PERCENT;
         BigDecimal prix = sousTotal
-                .multiply(BigDecimal.ONE.add(fg.movePointLeft(2)))
-                .multiply(BigDecimal.ONE.add(benef.movePointLeft(2)))
+                .multiply(BigDecimal.ONE.add(fg.movePointLeft(2)).add(benef.movePointLeft(2)))
                 .setScale(2, RoundingMode.HALF_UP);
         entity.setSousTotalDebourse(sousTotal);
         entity.setPrixUnitaireHt(prix);

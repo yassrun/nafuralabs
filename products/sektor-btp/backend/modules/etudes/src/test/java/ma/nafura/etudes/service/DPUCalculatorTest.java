@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Verrouille l'invariant structurel de la chaîne de prix (lot 1 T1.1).
- * Ne pas modifier DpuCalculator.computePrixVenteHt — formule validée métier (R2).
+ * Formule : prixVenteHt = déboursé × (1 + FG% + marge%).
  */
 class DPUCalculatorTest {
 
@@ -82,18 +82,18 @@ class DPUCalculatorTest {
         assertThat(coutDeRevient).isEqualByComparingTo(new BigDecimal("1054.57"));
 
         BigDecimal prixVenteHt = calculator.computePrixVenteHt(deboursSec, FG, MARGE);
-        // 945.80 x 1.115 = 1054.5670 -> 1054.57 ; x 1.175 = 1239.1197 -> 1239.12
-        assertThat(prixVenteHt).isEqualByComparingTo(new BigDecimal("1239.12"));
+        // 945.80 × (1 + 0.115 + 0.175) = 945.80 × 1.29 = 1220.082 → 1220.08
+        assertThat(prixVenteHt).isEqualByComparingTo(new BigDecimal("1220.08"));
     }
 
     @Test
     void invariant_prixVenteTtc() {
         // TODO(metier): valeurs d'illustration, à remplacer par le sous-détail B35 réel.
         // La STRUCTURE du test est définitive ; seuls les nombres changeront.
-        BigDecimal prixVenteHt = new BigDecimal("1239.12");
-        // 1239.12 x 1.20 = 1486.944 -> 1486.94 HALF_UP
+        BigDecimal prixVenteHt = new BigDecimal("1220.08");
+        // 1220.08 x 1.20 = 1464.096 → 1464.10 HALF_UP
         assertThat(calculator.computePrixVenteTtc(prixVenteHt, TVA))
-                .isEqualByComparingTo(new BigDecimal("1486.94"));
+                .isEqualByComparingTo(new BigDecimal("1464.10"));
     }
 
     @Test
@@ -107,8 +107,8 @@ class DPUCalculatorTest {
 
         // La quantité bordereau n'intervient QU'ICI — jamais dans le déboursé
         BigDecimal totalLigne = calculator.computeLineTotal(QTE_BORDEREAU, prixVenteHt);
-        // 70 x 1239.12 = 86738.40
-        assertThat(totalLigne).isEqualByComparingTo(new BigDecimal("86738.40"));
+        // 70 × 1220.08 = 85405.60
+        assertThat(totalLigne).isEqualByComparingTo(new BigDecimal("85405.60"));
 
         // Le déboursé est UNITAIRE : il ne dépend jamais de la quantité du bordereau.
         assertThat(deboursSec).isEqualByComparingTo(new BigDecimal("945.80"));
@@ -118,8 +118,7 @@ class DPUCalculatorTest {
         // les sépare — ce n'est PAS le bug recherché.
         BigDecimal sansArrondiIntermediaire = deboursSec
                 .multiply(QTE_BORDEREAU)
-                .multiply(BigDecimal.ONE.add(FG.movePointLeft(2)))
-                .multiply(BigDecimal.ONE.add(MARGE.movePointLeft(2)))
+                .multiply(BigDecimal.ONE.add(FG.movePointLeft(2)).add(MARGE.movePointLeft(2)))
                 .setScale(2, RoundingMode.HALF_UP);
         assertThat(totalLigne.subtract(sansArrondiIntermediaire).abs())
                 .isLessThan(new BigDecimal("1.00"));
@@ -171,7 +170,7 @@ class DPUCalculatorTest {
     @Test
     void computePrixVenteHtAppliesFgAndMarge() {
         assertThat(calculator.computePrixVenteHt(new BigDecimal("1000"), new BigDecimal("8"), new BigDecimal("7")))
-                .isEqualByComparingTo(new BigDecimal("1155.60"));
+                .isEqualByComparingTo(new BigDecimal("1150.00"));
         assertThat(calculator.computePrixVenteHt(BigDecimal.ZERO, new BigDecimal("10"), new BigDecimal("10")))
                 .isEqualByComparingTo(BigDecimal.ZERO);
     }

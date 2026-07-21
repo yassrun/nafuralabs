@@ -1,16 +1,19 @@
 package ma.nafura.etudes.api.request;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.UUID;
 import lombok.Data;
 
+/**
+ * Création d'un DPU — exactement l'un de {@code ouvrageId} (bibliothèque) ou
+ * {@code dpgfNoeudId} (poste de bordereau) doit être renseigné.
+ */
 @Data
 public class PrixDpuCreateDto {
 
-    @NotNull
     private UUID ouvrageId;
+
+    private UUID dpgfNoeudId;
 
     private BigDecimal fraisGenerauxPercent;
 

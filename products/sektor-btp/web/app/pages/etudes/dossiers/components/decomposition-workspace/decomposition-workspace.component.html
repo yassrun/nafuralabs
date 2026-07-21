@@ -1,0 +1,41 @@
+<section
+  class="workspace"
+  [class.workspace--detail]="mobileDetailOpen()"
+  aria-label="Décomposition du bordereau"
+>
+  <div class="workspace__master">
+    <label class="workspace__search">
+      <span class="sr-only">Rechercher un poste</span>
+      <input
+        type="search"
+        placeholder="Rechercher un poste…"
+        [ngModel]="search()"
+        (ngModelChange)="search.set($event)"
+      />
+    </label>
+
+    <app-bordereau-arbre
+      [dpgfId]="dpgfId()"
+      [modifiable]="modifiable()"
+      [selectionEnabled]="true"
+      [selectedKey]="selectedKey()"
+      [focusNoeudId]="focusNoeudId()"
+      [searchQuery]="search()"
+      [reloadToken]="treeReloadToken()"
+      (posteSelect)="onSelectPoste($event)"
+      (change)="onTreeChange()"
+    />
+  </div>
+
+  <div class="workspace__detail">
+    <app-poste-decomposition-panel
+      [poste]="selectedPoste()"
+      [modifiable]="modifiable()"
+      [fgDefaut]="fgDefaut()"
+      [margeDefaut]="margeDefaut()"
+      [tvaDefaut]="tvaDefaut()"
+      (change)="onPosteChange()"
+      (closeMobile)="closeMobileDetail()"
+    />
+  </div>
+</section>

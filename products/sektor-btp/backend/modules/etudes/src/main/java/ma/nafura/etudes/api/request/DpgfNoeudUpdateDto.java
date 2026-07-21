@@ -15,4 +15,6 @@ public class DpgfNoeudUpdateDto {
     private BigDecimal prixUnitaire;
     private BigDecimal total;
     private Integer ordre;
+    /** FOURNI | DECOMPOSE — articles uniquement. */
+    private String mode;
 }

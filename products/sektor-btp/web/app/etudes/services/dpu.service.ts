@@ -11,14 +11,14 @@ import type {
 @Injectable({ providedIn: 'root' })
 export class DpuService {
   /**
-   * Prix vente HT = déboursé sec × (1 + FG%) × (1 + marge%), arrondi centimes.
-   * Réf. spec Round 2 — cohérent avec les seeds `buildOuvrage`.
+   * Prix vente HT = déboursé sec × (1 + FG% + marge%), arrondi centimes.
+   * Formule additive appliquée une seule fois au sommet du poste.
    */
   computePrixVenteHt(deboursSec: number, fraisGenerauxPercent: number, margePercent: number): number {
     const d = Math.max(0, deboursSec);
     const fg = Math.max(0, fraisGenerauxPercent);
     const mg = Math.max(0, margePercent);
-    return Math.round(d * (1 + fg / 100) * (1 + mg / 100) * 100) / 100;
+    return Math.round(d * (1 + fg / 100 + mg / 100) * 100) / 100;
   }
 
   computeDeboursSec(composants: ComposantDPU[]): number {

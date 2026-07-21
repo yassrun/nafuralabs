@@ -329,6 +329,13 @@ public class DpgfService {
         if (request.getPrixUnitaire() != null) {
             noeud.setPrixUnitaire(request.getPrixUnitaire());
         }
+        if (request.getMode() != null && DpgfNoeud.TYPE_ARTICLE.equals(noeud.getType())) {
+            String mode = request.getMode().trim().toUpperCase(Locale.ROOT);
+            if (!DpgfNoeud.MODE_FOURNI.equals(mode) && !DpgfNoeud.MODE_DECOMPOSE.equals(mode)) {
+                throw new IllegalArgumentException("Invalid mode: " + request.getMode());
+            }
+            noeud.setMode(mode);
+        }
         if (request.getOrdre() != null) {
             noeud.setOrdre(request.getOrdre());
         }

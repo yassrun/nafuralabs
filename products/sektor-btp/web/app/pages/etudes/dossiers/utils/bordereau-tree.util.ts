@@ -12,6 +12,10 @@ export interface BordereauTreeRow {
   libelle: string;
   unite?: string | null;
   quantite?: number | null;
+  prixUnitaire?: number | null;
+  total?: number | null;
+  mode?: string | null;
+  prixDpuId?: string | null;
   depth: number;
 }
 
@@ -46,6 +50,10 @@ export function noeudsDpgfToTreeNodes(
         libelle: n.libelle,
         unite: n.unite,
         quantite: n.quantite,
+        prixUnitaire: n.prixUnitaire,
+        total: n.total,
+        mode: n.mode,
+        prixDpuId: n.prixDpuId,
         depth,
       },
       children,

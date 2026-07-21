@@ -12,5 +12,7 @@ public interface PrixDpuRepository extends JpaRepository<PrixDpu, UUID> {
 
     Optional<PrixDpu> findByOuvrageIdAndTenantId(UUID ouvrageId, UUID tenantId);
 
+    Optional<PrixDpu> findByDpgfNoeudIdAndTenantId(UUID dpgfNoeudId, UUID tenantId);
+
     List<PrixDpu> findByTenantIdAndOuvrageIdOrderByUpdatedAtDesc(UUID tenantId, UUID ouvrageId);
 }

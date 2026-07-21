@@ -57,8 +57,11 @@ export interface DpuHistoriqueEntry {
 }
 
 export interface PrixDPU {
-  articleId: string;
-  unite: string;
+  id?: string;
+  articleId?: string;
+  dpgfNoeudId?: string;
+  ouvrageId?: string;
+  unite?: string;
   composants: ComposantDPU[];
   deboursSec: number;
   fraisGenerauxPercent: number;
@@ -66,9 +69,12 @@ export interface PrixDPU {
   prixVenteHT: number;
   prixVenteTTC: number;
   tvaTaux: number;
+  version?: number;
+  updatedAt?: string;
 }
 
 export type NoeudDPGFType = 'LOT' | 'SOUS_LOT' | 'ARTICLE';
+export type NoeudDPGFMode = 'FOURNI' | 'DECOMPOSE';
 
 export interface NoeudDPGF {
   id: string;
@@ -82,6 +88,9 @@ export interface NoeudDPGF {
   unite?: string;
   prixUnitaire?: number;
   total?: number;
+  mode?: NoeudDPGFMode | null;
+  prixDpuId?: string | null;
+  descriptif?: string | null;
 }
 
 export interface DPGF {

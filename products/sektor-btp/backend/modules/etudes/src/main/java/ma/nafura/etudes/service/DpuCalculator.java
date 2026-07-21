@@ -83,16 +83,20 @@ public class DpuCalculator {
         return sum.setScale(MONEY_SCALE, RoundingMode.HALF_UP);
     }
 
+    /**
+     * Prix de vente HT = déboursé × (1 + FG% + marge%), appliqué une seule fois au sommet du poste.
+     *
+     * <p>Les taux ne sont jamais portés par un sous-détail. Formule additive validée pour le
+     * parcours d'étude manuel : {@code total = debourse × (1 + fg/100 + marge/100)}.
+     */
     public BigDecimal computePrixVenteHt(
             BigDecimal deboursSec, BigDecimal fraisGenerauxPercent, BigDecimal margeBeneficiairePercent) {
         BigDecimal debourse = deboursSec != null ? deboursSec.max(BigDecimal.ZERO) : BigDecimal.ZERO;
         BigDecimal fg = fraisGenerauxPercent != null ? fraisGenerauxPercent.max(BigDecimal.ZERO) : BigDecimal.ZERO;
         BigDecimal marge =
                 margeBeneficiairePercent != null ? margeBeneficiairePercent.max(BigDecimal.ZERO) : BigDecimal.ZERO;
-        return debourse
-                .multiply(BigDecimal.ONE.add(fg.movePointLeft(2)))
-                .multiply(BigDecimal.ONE.add(marge.movePointLeft(2)))
-                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+        BigDecimal coef = BigDecimal.ONE.add(fg.movePointLeft(2)).add(marge.movePointLeft(2));
+        return debourse.multiply(coef).setScale(MONEY_SCALE, RoundingMode.HALF_UP);
     }
 
     public BigDecimal computePrixVenteTtc(BigDecimal prixVenteHt, BigDecimal tvaTaux) {

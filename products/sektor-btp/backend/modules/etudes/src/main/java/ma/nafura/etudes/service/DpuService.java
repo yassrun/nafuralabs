@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -13,10 +14,14 @@ import ma.nafura.etudes.api.request.PrixDpuCreateDto;
 import ma.nafura.etudes.api.request.PrixDpuUpdateDto;
 import ma.nafura.etudes.domain.model.ComposantDpu;
 import ma.nafura.etudes.domain.model.ComposantOuvrage;
+import ma.nafura.etudes.domain.model.Dpgf;
+import ma.nafura.etudes.domain.model.DpgfNoeud;
 import ma.nafura.etudes.domain.model.DpuVersion;
 import ma.nafura.etudes.domain.model.Ouvrage;
 import ma.nafura.etudes.domain.model.PrixDpu;
 import ma.nafura.etudes.domain.model.UniteMain;
+import ma.nafura.etudes.repository.DpgfNoeudRepository;
+import ma.nafura.etudes.repository.DpgfRepository;
 import ma.nafura.etudes.repository.DpuVersionRepository;
 import ma.nafura.etudes.repository.OuvrageRepository;
 import ma.nafura.etudes.repository.PrixDpuRepository;
@@ -28,9 +33,14 @@ import org.springframework.util.StringUtils;
 @Service
 public class DpuService {
 
+    private static final int MONEY_SCALE = 2;
+
     private final PrixDpuRepository repository;
     private final DpuVersionRepository versionRepository;
     private final OuvrageRepository ouvrageRepository;
+    private final DpgfNoeudRepository noeudRepository;
+    private final DpgfRepository dpgfRepository;
+    private final DpgfAgregationService agregationService;
     private final DpuCalculator calculator;
     private final ParametresEtudeService parametresEtudeService;
     private final ObjectMapper objectMapper;
@@ -39,20 +49,33 @@ public class DpuService {
             PrixDpuRepository repository,
             DpuVersionRepository versionRepository,
             OuvrageRepository ouvrageRepository,
+            DpgfNoeudRepository noeudRepository,
+            DpgfRepository dpgfRepository,
+            DpgfAgregationService agregationService,
             DpuCalculator calculator,
             ParametresEtudeService parametresEtudeService,
             ObjectMapper objectMapper) {
         this.repository = repository;
         this.versionRepository = versionRepository;
         this.ouvrageRepository = ouvrageRepository;
+        this.noeudRepository = noeudRepository;
+        this.dpgfRepository = dpgfRepository;
+        this.agregationService = agregationService;
         this.calculator = calculator;
         this.parametresEtudeService = parametresEtudeService;
         this.objectMapper = objectMapper;
     }
 
     @Transactional(readOnly = true)
-    public List<PrixDpu> list(UUID ouvrageId) {
+    public List<PrixDpu> list(UUID ouvrageId, UUID dpgfNoeudId) {
         UUID tenantId = tenantId();
+        if (dpgfNoeudId != null) {
+            return repository
+                    .findByDpgfNoeudIdAndTenantId(dpgfNoeudId, tenantId)
+                    .map(this::enrichResponse)
+                    .map(List::of)
+                    .orElseGet(List::of);
+        }
         if (ouvrageId != null) {
             return repository.findByTenantIdAndOuvrageIdOrderByUpdatedAtDesc(tenantId, ouvrageId).stream()
                     .map(this::enrichResponse)
@@ -78,6 +101,14 @@ public class DpuService {
     }
 
     @Transactional(readOnly = true)
+    public PrixDpu findByDpgfNoeudId(UUID dpgfNoeudId) {
+        return repository
+                .findByDpgfNoeudIdAndTenantId(dpgfNoeudId, tenantId())
+                .map(this::enrichResponse)
+                .orElse(null);
+    }
+
+    @Transactional(readOnly = true)
     public List<ComposantDpu> getComposants(UUID prixDpuId) {
         PrixDpu entity = requirePrixDpu(prixDpuId);
         attachComposantLinks(entity);
@@ -96,31 +127,15 @@ public class DpuService {
 
     @Transactional
     public PrixDpu create(PrixDpuCreateDto request) {
-        UUID tenantId = tenantId();
-        UUID ouvrageId = request.getOuvrageId();
-        requireOuvrage(ouvrageId, tenantId);
-        if (repository.findByOuvrageIdAndTenantId(ouvrageId, tenantId).isPresent()) {
-            throw new IllegalArgumentException("DPU already exists for ouvrage");
+        boolean hasOuvrage = request.getOuvrageId() != null;
+        boolean hasNoeud = request.getDpgfNoeudId() != null;
+        if (hasOuvrage == hasNoeud) {
+            throw new IllegalArgumentException("Exactly one of ouvrageId or dpgfNoeudId is required");
         }
-
-        Ouvrage ouvrage = requireOuvrage(ouvrageId, tenantId);
-        PrixDpu entity = PrixDpu.builder()
-                .tenantId(tenantId)
-                .ouvrageId(ouvrageId)
-                .fraisGenerauxPercent(defaultPercent(
-                        request.getFraisGenerauxPercent(),
-                        defaultPercent(ouvrage.getFraisGenerauxPercent(), parametresEtudeService.fraisGenerauxPercentDefaut())))
-                .margeBeneficiairePercent(defaultPercent(
-                        request.getMargeBeneficiairePercent(),
-                        defaultPercent(ouvrage.getBeneficePercent(), parametresEtudeService.margePercentDefaut())))
-                .tvaTaux(defaultPercent(request.getTvaTaux(), parametresEtudeService.tvaTauxDefaut()))
-                .composants(new ArrayList<>())
-                .build();
-
-        importFromOuvrageDetail(entity, ouvrage);
-        applyTotals(entity);
-        PrixDpu saved = repository.save(entity);
-        return enrichResponse(saved);
+        if (hasNoeud) {
+            return createForNoeud(request);
+        }
+        return createForOuvrage(request);
     }
 
     @Transactional
@@ -139,7 +154,9 @@ public class DpuService {
             replaceComposants(entity, request.getComposants());
         }
         applyTotals(entity);
-        return enrichResponse(repository.save(entity));
+        PrixDpu saved = repository.save(entity);
+        syncNoeudFromPrixDpu(saved);
+        return enrichResponse(saved);
     }
 
     @Transactional
@@ -148,7 +165,8 @@ public class DpuService {
         ComposantDpu line = buildComposant(entity, input, entity.getComposants().size());
         entity.getComposants().add(line);
         applyTotals(entity);
-        repository.save(entity);
+        PrixDpu saved = repository.save(entity);
+        syncNoeudFromPrixDpu(saved);
         return line;
     }
 
@@ -157,7 +175,9 @@ public class DpuService {
         PrixDpu entity = requirePrixDpu(id);
         calculator.recomputeLineTotals(entity.getComposants());
         applyTotals(entity);
-        return enrichResponse(repository.save(entity));
+        PrixDpu saved = repository.save(entity);
+        syncNoeudFromPrixDpu(saved);
+        return enrichResponse(saved);
     }
 
     @Transactional
@@ -167,6 +187,7 @@ public class DpuService {
         calculator.recomputeLineTotals(entity.getComposants());
         applyTotals(entity);
         repository.save(entity);
+        syncNoeudFromPrixDpu(entity);
 
         String snapshotJson = writeSnapshot(entity.getComposants());
         DpuVersion version = DpuVersion.builder()
@@ -230,13 +251,126 @@ public class DpuService {
                         .toList());
     }
 
+    private PrixDpu createForOuvrage(PrixDpuCreateDto request) {
+        UUID tenantId = tenantId();
+        UUID ouvrageId = request.getOuvrageId();
+        requireOuvrage(ouvrageId, tenantId);
+        if (repository.findByOuvrageIdAndTenantId(ouvrageId, tenantId).isPresent()) {
+            throw new IllegalArgumentException("DPU already exists for ouvrage");
+        }
+
+        Ouvrage ouvrage = requireOuvrage(ouvrageId, tenantId);
+        PrixDpu entity = PrixDpu.builder()
+                .tenantId(tenantId)
+                .ouvrageId(ouvrageId)
+                .fraisGenerauxPercent(defaultPercent(
+                        request.getFraisGenerauxPercent(),
+                        defaultPercent(ouvrage.getFraisGenerauxPercent(), parametresEtudeService.fraisGenerauxPercentDefaut())))
+                .margeBeneficiairePercent(defaultPercent(
+                        request.getMargeBeneficiairePercent(),
+                        defaultPercent(ouvrage.getBeneficePercent(), parametresEtudeService.margePercentDefaut())))
+                .tvaTaux(defaultPercent(request.getTvaTaux(), parametresEtudeService.tvaTauxDefaut()))
+                .composants(new ArrayList<>())
+                .build();
+
+        importFromOuvrageDetail(entity, ouvrage);
+        applyTotals(entity);
+        return enrichResponse(repository.save(entity));
+    }
+
+    private PrixDpu createForNoeud(PrixDpuCreateDto request) {
+        UUID tenantId = tenantId();
+        UUID noeudId = request.getDpgfNoeudId();
+        DpgfNoeud noeud = requireArticleNoeud(noeudId, tenantId);
+        if (repository.findByDpgfNoeudIdAndTenantId(noeudId, tenantId).isPresent()) {
+            throw new IllegalArgumentException("DPU already exists for DPGF noeud");
+        }
+
+        PrixDpu entity = PrixDpu.builder()
+                .tenantId(tenantId)
+                .dpgfNoeudId(noeudId)
+                .fraisGenerauxPercent(defaultPercent(
+                        request.getFraisGenerauxPercent(), parametresEtudeService.fraisGenerauxPercentDefaut()))
+                .margeBeneficiairePercent(defaultPercent(
+                        request.getMargeBeneficiairePercent(), parametresEtudeService.margePercentDefaut()))
+                .tvaTaux(defaultPercent(request.getTvaTaux(), parametresEtudeService.tvaTauxDefaut()))
+                .composants(new ArrayList<>())
+                .build();
+
+        applyTotals(entity);
+        PrixDpu saved = repository.save(entity);
+        syncNoeudFromPrixDpu(saved);
+        return enrichResponse(saved);
+    }
+
+    private void syncNoeudFromPrixDpu(PrixDpu entity) {
+        if (entity.getDpgfNoeudId() == null) {
+            return;
+        }
+        UUID tenantId = entity.getTenantId();
+        DpgfNoeud noeud = noeudRepository
+                .findByIdAndTenantId(entity.getDpgfNoeudId(), tenantId)
+                .orElse(null);
+        if (noeud == null || !DpgfNoeud.TYPE_ARTICLE.equals(noeud.getType())) {
+            return;
+        }
+
+        BigDecimal pu = entity.getPrixVenteHt() != null ? entity.getPrixVenteHt() : BigDecimal.ZERO;
+        noeud.setPrixUnitaire(pu);
+        noeud.setPrixDpuId(entity.getId());
+        noeud.setMode(DpgfNoeud.MODE_DECOMPOSE);
+        if (noeud.getQuantite() != null) {
+            noeud.setTotal(noeud.getQuantite().multiply(pu).setScale(MONEY_SCALE, RoundingMode.HALF_UP));
+        } else {
+            noeud.setTotal(pu);
+        }
+        noeudRepository.save(noeud);
+
+        UUID dpgfId = noeud.getDpgf() != null ? noeud.getDpgf().getId() : null;
+        if (dpgfId == null) {
+            return;
+        }
+        Dpgf dpgf = dpgfRepository.findByIdAndTenantId(dpgfId, tenantId).orElse(null);
+        if (dpgf == null) {
+            return;
+        }
+        List<DpgfNoeud> flat = noeudRepository.findByDpgfIdAndTenantIdOrderByOrdreAsc(dpgfId, tenantId);
+        List<DpgfNoeud> hierarchie = buildFlatTree(flat);
+        agregationService.applyHeaderTotals(dpgf, hierarchie);
+        dpgfRepository.save(dpgf);
+    }
+
+    /** Minimal tree rebuild for header aggregation (same shape as DpgfService.buildTree). */
+    private List<DpgfNoeud> buildFlatTree(List<DpgfNoeud> flat) {
+        java.util.Map<UUID, DpgfNoeud> byId = new java.util.LinkedHashMap<>();
+        for (DpgfNoeud n : flat) {
+            n.setEnfants(new ArrayList<>());
+            byId.put(n.getId(), n);
+        }
+        List<DpgfNoeud> roots = new ArrayList<>();
+        for (DpgfNoeud n : flat) {
+            if (n.getParentId() != null && byId.containsKey(n.getParentId())) {
+                byId.get(n.getParentId()).getEnfants().add(n);
+            } else {
+                roots.add(n);
+            }
+        }
+        return roots;
+    }
+
     private PrixDpu enrichResponse(PrixDpu entity) {
         attachComposantLinks(entity);
-        Ouvrage ouvrage = ouvrageRepository
-                .findByIdAndTenantId(entity.getOuvrageId(), entity.getTenantId())
-                .orElse(null);
-        if (ouvrage != null) {
-            entity.setUnite(ouvrage.getUnite());
+        if (entity.getOuvrageId() != null) {
+            Ouvrage ouvrage = ouvrageRepository
+                    .findByIdAndTenantId(entity.getOuvrageId(), entity.getTenantId())
+                    .orElse(null);
+            if (ouvrage != null) {
+                entity.setUnite(ouvrage.getUnite());
+            }
+        } else if (entity.getDpgfNoeudId() != null) {
+            noeudRepository
+                    .findByIdAndTenantId(entity.getDpgfNoeudId(), entity.getTenantId())
+                    .ifPresent(noeud -> entity.setUnite(noeud.getUnite()));
         }
         return entity;
     }
@@ -364,6 +498,16 @@ public class DpuService {
         return ouvrageRepository
                 .findByIdAndTenantId(ouvrageId, tenantId)
                 .orElseThrow(() -> new IllegalArgumentException("Ouvrage not found"));
+    }
+
+    private DpgfNoeud requireArticleNoeud(UUID noeudId, UUID tenantId) {
+        DpgfNoeud noeud = noeudRepository
+                .findByIdAndTenantId(noeudId, tenantId)
+                .orElseThrow(() -> new IllegalArgumentException("DPGF noeud not found"));
+        if (!DpgfNoeud.TYPE_ARTICLE.equals(noeud.getType())) {
+            throw new IllegalArgumentException("DPU can only be attached to an ARTICLE noeud");
+        }
+        return noeud;
     }
 
     private BigDecimal defaultPercent(BigDecimal value, BigDecimal fallback) {

@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
+import { map } from 'rxjs';
 
 import { WizardShellComponent } from '@lib/anatomy';
 import type { WizardStepConfig } from '@lib/anatomy';
@@ -7,6 +9,7 @@ import type { WizardStepConfig } from '@lib/anatomy';
 import { ETAPES_DOSSIER_ETUDE } from '@app/etudes/models';
 import type { DossierEtude, ProblemeGate, ResultatGate } from '@app/etudes/models';
 
+import { DecompositionWorkspaceComponent } from '../components/decomposition-workspace/decomposition-workspace.component';
 import { GateBlocageComponent } from '../components/gate-blocage/gate-blocage.component';
 import { PiecesMarcheComponent } from '../components/pieces-marche/pieces-marche.component';
 import { DossierEtudeApiService } from '../services/dossier-etude-api.service';
@@ -26,7 +29,12 @@ import { DossierEtudeApiService } from '../services/dossier-etude-api.service';
   selector: 'app-dossier-detail',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [WizardShellComponent, GateBlocageComponent, PiecesMarcheComponent],
+  imports: [
+    WizardShellComponent,
+    GateBlocageComponent,
+    PiecesMarcheComponent,
+    DecompositionWorkspaceComponent,
+  ],
   templateUrl: './dossier-detail.page.html',
   styleUrl: './dossier-detail.page.scss',
 })
@@ -39,6 +47,10 @@ export class DossierDetailPage {
   readonly gates = signal<ResultatGate[]>([]);
   readonly chargement = signal(true);
   readonly erreur = signal<string | undefined>(undefined);
+  readonly focusNoeudId = toSignal(
+    this.route.queryParamMap.pipe(map((params) => params.get('noeudId'))),
+    { initialValue: this.route.snapshot.queryParamMap.get('noeudId') },
+  );
 
   readonly etapes: WizardStepConfig[] = ETAPES_DOSSIER_ETUDE.map((e) => ({
     id: String(e.etape),
@@ -125,9 +137,20 @@ export class DossierDetailPage {
     }
   }
 
-  /** Ouvre l'article fautif signalé par un gate. */
+  /** Ouvre l'article fautif signalé par un gate — étape Décomposition + focus. */
   corriger(probleme: ProblemeGate): void {
     if (!probleme.noeudId) return;
+    const dossier = this.dossier();
+    if (dossier && dossier.currentStep !== 3) {
+      void this.changerEtape(3).then(() => {
+        void this.nav.navigate(['.'], {
+          relativeTo: this.route,
+          queryParams: { noeudId: probleme.noeudId },
+          queryParamsHandling: 'merge',
+        });
+      });
+      return;
+    }
     void this.nav.navigate(['.'], {
       relativeTo: this.route,
       queryParams: { noeudId: probleme.noeudId },
