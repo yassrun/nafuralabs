@@ -2,13 +2,18 @@ package ma.nafura.erp.etudes;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import ma.nafura.etudes.api.request.ImportNoeudDto;
 import ma.nafura.etudes.api.request.ImportTreeRequest;
 import ma.nafura.etudes.domain.model.DpgfNoeud;
+import ma.nafura.etudes.service.bordereau.BordereauHybridAssembler;
+import ma.nafura.etudes.service.bordereau.BordereauParseResult;
+import ma.nafura.etudes.service.bordereau.PdfBordereauLayoutParser;
 import ma.nafura.etudes.service.port.BordereauExtractionPort;
 import ma.nafura.item.domain.model.UnitOfMeasure;
 import ma.nafura.item.repository.UnitOfMeasureRepository;
@@ -18,6 +23,8 @@ import ma.nafura.platform.documents.docextractor.service.StatelessExtractionServ
 import ma.nafura.platform.framework.context.TenantContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
@@ -25,10 +32,9 @@ import org.springframework.stereotype.Component;
  * Extraction adapter: turns an uploaded bordereau (PDF / spreadsheet) into a
  * draft LOT → SOUS_LOT → ARTICLE tree using the platform doc-extractor.
  *
- * <p>Schéma volontairement limité à 2 niveaux de regroupement (lot → sous-lot →
- * postes) pour garder l'appel LLM rapide — contrairement à l'import lots chantier
- * (3 niveaux) qui est trop lourd pour cette passe. Les unités sont normalisées
- * vers le référentiel {@code unit_of_measure}.
+ * <p>When {@code nafura.etudes.bordereau.hybrid-enabled=true}, PDFs with a usable
+ * text layer are parsed locally (geometry + columns) then classified by a compact
+ * LLM call. Spreadsheets and low-quality PDFs keep the legacy full-document path.
  */
 @Component
 @Primary
@@ -41,6 +47,9 @@ public class DocExtractorBordereauAdapter implements BordereauExtractionPort {
      * Keeps latency down while covering typical BPU/DQE length.
      */
     private static final int BORDEREAU_MAX_PROMPT_CHARS = 60_000;
+
+    /** Compact classifier prompt — candidates only, not the full PDF. */
+    private static final int HYBRID_MAX_PROMPT_CHARS = 80_000;
 
     private static final String POSTE_SCHEMA = """
             {
@@ -102,14 +111,70 @@ public class DocExtractorBordereauAdapter implements BordereauExtractionPort {
             }
             """.formatted(SOUS_LOT_SCHEMA, POSTE_SCHEMA);
 
+    private static final String HYBRID_CLASSIFY_SCHEMA = """
+            {
+              "type": "object",
+              "properties": {
+                "lots": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "code": { "type": "string" },
+                      "libelle": { "type": "string" },
+                      "children": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "code": { "type": "string" },
+                            "libelle": { "type": "string" },
+                            "articleRowIds": {
+                              "type": "array",
+                              "items": { "type": "string" }
+                            }
+                          },
+                          "required": ["libelle", "articleRowIds"]
+                        }
+                      },
+                      "articleRowIds": {
+                        "type": "array",
+                        "items": { "type": "string" }
+                      }
+                    },
+                    "required": ["libelle"]
+                  }
+                }
+              },
+              "required": ["lots"]
+            }
+            """;
+
     private final StatelessExtractionService extractionService;
     private final UnitOfMeasureRepository unitOfMeasureRepository;
+    private final PdfBordereauLayoutParser layoutParser;
+    private final BordereauHybridAssembler hybridAssembler;
+    private final boolean hybridEnabled;
 
+    @Autowired
     public DocExtractorBordereauAdapter(
             StatelessExtractionService extractionService,
-            UnitOfMeasureRepository unitOfMeasureRepository) {
+            UnitOfMeasureRepository unitOfMeasureRepository,
+            PdfBordereauLayoutParser layoutParser,
+            BordereauHybridAssembler hybridAssembler,
+            @Value("${nafura.etudes.bordereau.hybrid-enabled:false}") boolean hybridEnabled) {
         this.extractionService = extractionService;
         this.unitOfMeasureRepository = unitOfMeasureRepository;
+        this.layoutParser = layoutParser;
+        this.hybridAssembler = hybridAssembler;
+        this.hybridEnabled = hybridEnabled;
+    }
+
+    /** Test helper — hybrid disabled, no layout deps required for mapToTree tests. */
+    DocExtractorBordereauAdapter(
+            StatelessExtractionService extractionService,
+            UnitOfMeasureRepository unitOfMeasureRepository) {
+        this(extractionService, unitOfMeasureRepository, null, null, false);
     }
 
     @Override
@@ -119,10 +184,108 @@ public class DocExtractorBordereauAdapter implements BordereauExtractionPort {
 
     @Override
     public ImportTreeRequest extract(byte[] fileBytes, String fileName, String mimeType) {
-        UUID tenantId = TenantContext.getTenantId();
+        UUID tenantId = TenantContext.getTenantIdOrNull();
         List<String> codes = loadActiveUnitCodes(tenantId);
-        String instructions = buildInstructions(codes);
         long started = System.nanoTime();
+
+        if (hybridEnabled && isPdf(mimeType, fileName) && layoutParser != null && hybridAssembler != null) {
+            HybridAttempt hybrid = tryHybrid(fileBytes, fileName, tenantId, codes);
+            if (hybrid.tree() != null) {
+                long elapsedMs = (System.nanoTime() - started) / 1_000_000L;
+                log.info(
+                        "Bordereau extraction finished in {} ms (mode=hybrid, file={}, lots={}, articles={}, "
+                                + "parseMs={}, classifyMs={}, candidates={}, priced={}, pages={}/{})",
+                        elapsedMs,
+                        fileName,
+                        hybrid.lots(),
+                        hybrid.articles(),
+                        hybrid.parseMs(),
+                        hybrid.classifyMs(),
+                        hybrid.candidates(),
+                        hybrid.priced(),
+                        hybrid.coveredPages(),
+                        hybrid.pageCount());
+                return hybrid.tree();
+            }
+            log.info(
+                    "Bordereau hybrid skipped → legacy (file={}, reason={})",
+                    fileName,
+                    hybrid.fallbackReason());
+        }
+
+        return extractLegacy(fileBytes, fileName, mimeType, tenantId, codes, started);
+    }
+
+    private HybridAttempt tryHybrid(
+            byte[] fileBytes, String fileName, UUID tenantId, List<String> unitCodes) {
+        long parseStart = System.nanoTime();
+        BordereauParseResult parse = layoutParser.parse(fileBytes);
+        long parseMs = (System.nanoTime() - parseStart) / 1_000_000L;
+
+        if (!parse.usableForHybrid()) {
+            return HybridAttempt.fallback(
+                    parse.rejectReason() != null ? parse.rejectReason() : "not_usable",
+                    parseMs);
+        }
+
+        int candidates = parse.articleCandidates().size();
+        long priced = parse.articleCandidates().stream().filter(r -> r.hasPricing()).count();
+
+        long classifyStart = System.nanoTime();
+        try {
+            String prompt = hybridAssembler.buildClassifierPrompt(parse);
+            StatelessExtractionResponse response = extractionService.process(
+                    prompt.getBytes(StandardCharsets.UTF_8),
+                    fileName != null ? fileName + ".candidates.txt" : "bordereau.candidates.txt",
+                    "text/plain",
+                    HYBRID_CLASSIFY_SCHEMA,
+                    null,
+                    hybridClassifyInstructions(),
+                    tenantId != null ? tenantId.toString() : null,
+                    HYBRID_MAX_PROMPT_CHARS);
+            long classifyMs = (System.nanoTime() - classifyStart) / 1_000_000L;
+
+            if (response.outcome() == StatelessExtractionResponse.Outcome.REJECTED
+                    || response.outcome() == StatelessExtractionResponse.Outcome.TECHNICAL_FAILURE) {
+                return HybridAttempt.fallback(
+                        "classify_" + firstIssue(response), parseMs, classifyMs);
+            }
+
+            ImportTreeRequest tree = hybridAssembler.assemble(parse, response.data());
+            if (tree.getArbre() == null || tree.getArbre().isEmpty()) {
+                return HybridAttempt.fallback("empty_tree_after_assemble", parseMs, classifyMs);
+            }
+            normalizeUnites(tree, unitCodes);
+            int articles = countArticles(tree.getArbre());
+            if (articles == 0) {
+                return HybridAttempt.fallback("zero_articles", parseMs, classifyMs);
+            }
+            return new HybridAttempt(
+                    tree,
+                    null,
+                    parseMs,
+                    classifyMs,
+                    candidates,
+                    (int) priced,
+                    parse.pagesWithCandidates().size(),
+                    parse.pageCount(),
+                    tree.getArbre().size(),
+                    articles);
+        } catch (RuntimeException ex) {
+            long classifyMs = (System.nanoTime() - classifyStart) / 1_000_000L;
+            log.warn("Bordereau hybrid classify failed: {}", ex.getMessage());
+            return HybridAttempt.fallback("classify_exception: " + ex.getMessage(), parseMs, classifyMs);
+        }
+    }
+
+    private ImportTreeRequest extractLegacy(
+            byte[] fileBytes,
+            String fileName,
+            String mimeType,
+            UUID tenantId,
+            List<String> codes,
+            long startedNanos) {
+        String instructions = buildInstructions(codes);
 
         StatelessExtractionResponse response = extractionService.process(
                 fileBytes,
@@ -140,11 +303,11 @@ public class DocExtractorBordereauAdapter implements BordereauExtractionPort {
         }
         ImportTreeRequest tree = mapToTree(response.data());
         normalizeUnites(tree, codes);
-        long elapsedMs = (System.nanoTime() - started) / 1_000_000L;
+        long elapsedMs = (System.nanoTime() - startedNanos) / 1_000_000L;
         int lots = tree.getArbre() != null ? tree.getArbre().size() : 0;
         int articles = countArticles(tree.getArbre());
         log.info(
-                "Bordereau extraction finished in {} ms (file={}, outcome={}, lots={}, articles={})",
+                "Bordereau extraction finished in {} ms (mode=legacy, file={}, outcome={}, lots={}, articles={})",
                 elapsedMs,
                 fileName,
                 response.outcome(),
@@ -153,8 +316,27 @@ public class DocExtractorBordereauAdapter implements BordereauExtractionPort {
         return tree;
     }
 
+    private static String hybridClassifyInstructions() {
+        return """
+                Tu classifies des lignes de bordereau BTP déjà extraites localement.
+                Retourne uniquement la hiérarchie lots → sous-lots (children) et les
+                articleRowIds (identifiants fournis, ex. r12). N'invente aucun code,
+                libellé, unité ou quantité d'article. Utilise les GROUPES détectés
+                comme indices ; tu peux renommer/fusionner les lots. Chaque article
+                doit apparaître au plus une fois. Les articles non rattachés seront
+                récupérés automatiquement — privilégie une affectation correcte.
+                """;
+    }
+
+    private static boolean isPdf(String mimeType, String fileName) {
+        if (mimeType != null && mimeType.toLowerCase(Locale.ROOT).contains("pdf")) {
+            return true;
+        }
+        return fileName != null && fileName.toLowerCase(Locale.ROOT).endsWith(".pdf");
+    }
+
     private List<String> loadActiveUnitCodes(UUID tenantId) {
-        if (tenantId == null) {
+        if (tenantId == null || unitOfMeasureRepository == null) {
             return List.of();
         }
         return unitOfMeasureRepository.findAll().stream()
@@ -322,5 +504,26 @@ public class DocExtractorBordereauAdapter implements BordereauExtractionPort {
         }
         StatelessExtractionIssue issue = response.issues().get(0);
         return issue.code() + " — " + issue.message();
+    }
+
+    private record HybridAttempt(
+            ImportTreeRequest tree,
+            String fallbackReason,
+            long parseMs,
+            long classifyMs,
+            int candidates,
+            int priced,
+            int coveredPages,
+            int pageCount,
+            int lots,
+            int articles) {
+
+        static HybridAttempt fallback(String reason, long parseMs) {
+            return fallback(reason, parseMs, 0L);
+        }
+
+        static HybridAttempt fallback(String reason, long parseMs, long classifyMs) {
+            return new HybridAttempt(null, reason, parseMs, classifyMs, 0, 0, 0, 0, 0, 0);
+        }
     }
 }

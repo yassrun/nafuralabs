@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   effect,
   inject,
   input,
@@ -9,8 +10,15 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { TranslateModule } from '@ngx-translate/core';
+
+import { ConfirmDialogService } from '@lib/anatomy';
+
+import type { ResultatGate } from '@app/etudes/models';
 
 import type { BordereauTreeRow } from '../../utils/bordereau-tree.util';
+import { DpuApiService } from '../../../bibliotheque-prix/services/dpu-api.service';
+import { DpgfApiService } from '../../../metres/services/dpgf-api.service';
 import { BordereauArbreComponent } from '../bordereau-arbre/bordereau-arbre.component';
 import { PosteDecompositionPanelComponent } from '../poste-decomposition-panel/poste-decomposition-panel.component';
 
@@ -21,6 +29,7 @@ import { PosteDecompositionPanelComponent } from '../poste-decomposition-panel/p
   imports: [
     CommonModule,
     FormsModule,
+    TranslateModule,
     BordereauArbreComponent,
     PosteDecompositionPanelComponent,
   ],
@@ -28,35 +37,87 @@ import { PosteDecompositionPanelComponent } from '../poste-decomposition-panel/p
   styleUrl: './decomposition-workspace.component.scss',
 })
 export class DecompositionWorkspaceComponent {
+  private readonly dpgfApi = inject(DpgfApiService);
+  private readonly dpuApi = inject(DpuApiService);
+  private readonly confirmDialog = inject(ConfirmDialogService);
+
   readonly dpgfId = input.required<string>();
   readonly modifiable = input(true);
   readonly fgDefaut = input(10);
   readonly margeDefaut = input(17.5);
   readonly tvaDefaut = input(20);
   readonly focusNoeudId = input<string | null>(null);
+  /** Gate fusionnée (décomposition + consultation) pour afficher la couverture. */
+  readonly consultationGate = input<ResultatGate | undefined>(undefined);
 
   readonly change = output<void>();
+  readonly dirtyChange = output<boolean>();
 
   readonly selectedPoste = signal<BordereauTreeRow | null>(null);
   readonly selectedKey = signal<string | null>(null);
   readonly mobileDetailOpen = signal(false);
   readonly search = signal('');
   readonly treeReloadToken = signal(0);
+  readonly filtreAlertes = signal(false);
+  readonly totalComposants = signal(0);
+  readonly consultes = signal(0);
+  readonly articlesAlerteIds = signal<string[]>([]);
+  readonly posteDirty = signal(false);
+
+  readonly nonConsultes = computed(() =>
+    Math.max(0, this.totalComposants() - this.consultes()),
+  );
+
+  readonly alertesConsultation = computed(() => {
+    const gate = this.consultationGate();
+    if (!gate) return [];
+    return gate.problemes.filter((p) => p.etape === 4);
+  });
+
+  readonly filterArticleIds = computed(() => {
+    if (!this.filtreAlertes()) return null;
+    const fromCouverture = this.articlesAlerteIds();
+    if (fromCouverture.length) return fromCouverture;
+    const fromGate = this.alertesConsultation()
+      .map((a) => a.noeudId)
+      .filter((id): id is string => !!id);
+    return fromGate.length ? fromGate : [];
+  });
 
   constructor() {
     effect(() => {
       const focusId = this.focusNoeudId();
       if (focusId) {
-        // Selection is applied once the tree emits a matching row via focus request.
         this.mobileDetailOpen.set(true);
       }
     });
+    effect(() => {
+      const id = this.dpgfId();
+      const token = this.treeReloadToken();
+      if (id) void this.refreshCouverture(id, token);
+    });
   }
 
-  onSelectPoste(row: BordereauTreeRow | null): void {
-    this.selectedPoste.set(row);
-    this.selectedKey.set(row?.key ?? null);
-    if (row) this.mobileDetailOpen.set(true);
+  async onSelectPoste(row: BordereauTreeRow | null): Promise<void> {
+    if (this.posteDirty()) {
+      const ok = await this.confirmDialog.confirm({
+        title: 'Modifications non enregistrées',
+        message: 'Des modifications non enregistrées seront perdues. Continuer ?',
+        variant: 'danger',
+        confirmLabel: 'Continuer',
+      });
+      if (!ok) return;
+    }
+    this.applySelect(row);
+  }
+
+  onPosteDirty(dirty: boolean): void {
+    this.posteDirty.set(dirty);
+    this.dirtyChange.emit(dirty);
+  }
+
+  onBeforeSelectRequest(): void {
+    // reserved for future panel-driven navigation
   }
 
   closeMobileDetail(): void {
@@ -65,10 +126,85 @@ export class DecompositionWorkspaceComponent {
 
   onTreeChange(): void {
     this.change.emit();
+    this.treeReloadToken.update((n) => n + 1);
   }
 
   onPosteChange(): void {
+    this.posteDirty.set(false);
+    this.dirtyChange.emit(false);
     this.treeReloadToken.update((n) => n + 1);
     this.change.emit();
+  }
+
+  /** Appelé par le parent avant de quitter l'étape. */
+  async confirmerQuitterSiDirty(): Promise<boolean> {
+    if (!this.posteDirty()) return true;
+    return this.confirmDialog.confirm({
+      title: 'Modifications non enregistrées',
+      message:
+        'Enregistrez le poste courant ou abandonnez les modifications avant de continuer.',
+      variant: 'danger',
+      confirmLabel: 'Abandonner et continuer',
+    });
+  }
+
+  private applySelect(row: BordereauTreeRow | null): void {
+    this.selectedPoste.set(row);
+    this.selectedKey.set(row?.key ?? null);
+    if (row) this.mobileDetailOpen.set(true);
+  }
+
+  private async refreshCouverture(dpgfId: string, _token: number): Promise<void> {
+    try {
+      const arbre = await this.dpgfApi.getArbre(dpgfId);
+      const articles = this.collectArticles(arbre.hierarchie ?? []);
+      let total = 0;
+      let consultes = 0;
+      const alerteIds: string[] = [];
+      const batchSize = 8;
+      for (let i = 0; i < articles.length; i += batchSize) {
+        const batch = articles.slice(i, i + batchSize);
+        await Promise.all(
+          batch.map(async (id) => {
+            try {
+              const list = await this.dpuApi.listByNoeud(id);
+              let hasNonConsulte = false;
+              for (const c of list[0]?.composants ?? []) {
+                total += 1;
+                if (c.sourcePrix === 'CONSULTE') {
+                  consultes += 1;
+                } else {
+                  hasNonConsulte = true;
+                }
+              }
+              if (hasNonConsulte) alerteIds.push(id);
+            } catch {
+              /* ignore */
+            }
+          }),
+        );
+      }
+      this.totalComposants.set(total);
+      this.consultes.set(consultes);
+      this.articlesAlerteIds.set(alerteIds);
+    } catch {
+      this.totalComposants.set(0);
+      this.consultes.set(0);
+      this.articlesAlerteIds.set([]);
+    }
+  }
+
+  private collectArticles(
+    nodes: { id?: string; type?: string; enfants?: unknown[] }[],
+  ): string[] {
+    const ids: string[] = [];
+    const walk = (list: typeof nodes) => {
+      for (const n of list) {
+        if (n.type === 'ARTICLE' && n.id) ids.push(n.id);
+        if (Array.isArray(n.enfants)) walk(n.enfants as typeof nodes);
+      }
+    };
+    walk(nodes);
+    return ids;
   }
 }

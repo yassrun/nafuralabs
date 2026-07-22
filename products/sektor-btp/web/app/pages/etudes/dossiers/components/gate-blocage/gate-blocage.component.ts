@@ -31,14 +31,14 @@ export class GateBlocageComponent {
 
   readonly aDesProblemes = computed(() => this.problemes().length > 0);
 
-  /** Bloquant ou simple avertissement — les étapes 2 et 4 n'empêchent pas de continuer. */
+  /** Bloquant ou simple avertissement — seule l'étape consultation (4) est non bloquante. */
   readonly bloquant = computed(() => this.resultat()?.bloquant === true);
 
   readonly titre = computed(() => {
     const n = this.problemes().length;
-    const articles = `${n} article${n > 1 ? 's' : ''}`;
+    const points = `${n} point${n > 1 ? 's' : ''}`;
     return this.bloquant()
-      ? `${articles} ${n > 1 ? 'empêchent' : 'empêche'} de continuer`
-      : `${articles} à vérifier — vous pouvez continuer`;
+      ? `${points} ${n > 1 ? 'empêchent' : 'empêche'} de continuer`
+      : `${points} à vérifier — vous pouvez continuer`;
   });
 }

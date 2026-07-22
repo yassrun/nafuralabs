@@ -1,80 +1,94 @@
 @if (chargement()) {
   <p class="dossier__etat">Chargement du dossier…</p>
 } @else if (dossier()) {
-  <header class="dossier__entete">
-    <h1 class="dossier__titre">{{ dossier()?.numero }} — {{ dossier()?.objet }}</h1>
-    <span class="dossier__statut" [attr.data-statut]="dossier()?.status">
-      {{ dossier()?.status }}
-    </span>
-  </header>
+  <div class="dossier">
+    <header class="dossier__entete">
+      <h1 class="dossier__titre">{{ dossier()?.numero }} — {{ dossier()?.objet }}</h1>
+      <span class="dossier__statut" [attr.data-statut]="dossier()?.status">
+        {{ statutLabel() }}
+      </span>
+    </header>
 
-  @if (erreur(); as message) {
-    <p class="dossier__erreur" role="alert">{{ message }}</p>
-  }
+    @if (erreur(); as message) {
+      <p class="dossier__erreur" role="alert">{{ message }}</p>
+    }
 
-  @if (!modifiable()) {
-    <p class="dossier__verrou" role="status">
-      Ce dossier est en lecture seule à ce stade du parcours.
-    </p>
-  }
+    @if (!modifiable()) {
+      <p class="dossier__verrou" role="status" [attr.data-statut]="dossier()?.status">
+        {{ messageVerrou() }}
+      </p>
+    }
 
-  <nf-wizard-shell
-    [steps]="etapes"
-    [currentStepIndex]="indexCourant()"
-    [canProceed]="peutContinuer()"
-    backLabel="Précédent"
-    nextLabel="Suivant"
-    submitLabel="Soumettre à validation"
-    (back)="precedent()"
-    (next)="suivant()"
-    (submit)="soumettre()"
-  >
-    <app-gate-blocage [resultat]="gateCourant()" (corriger)="corriger($event)" />
+    <nf-wizard-shell
+      class="dossier__wizard"
+      [steps]="etapes"
+      [currentStepIndex]="indexCourant()"
+      [canProceed]="modifiable() ? peutContinuer() : true"
+      [backLabel]="backLabel()"
+      [nextLabel]="nextLabel()"
+      submitLabel="Soumettre à validation"
+      [showSubmit]="peutSoumettre()"
+      (back)="precedent()"
+      (next)="suivant()"
+      (submit)="soumettre()"
+    >
+      <app-gate-blocage [resultat]="gateCourant()" (corriger)="corriger($event)" />
 
-    <section class="dossier__etape">
-      <h2 class="dossier__etape-titre">
-        Étape {{ etapeCourante() }} — {{ etapes[indexCourant()].label }}
-      </h2>
+      @if (blocageHint(); as hint) {
+        <p class="dossier__blocage-hint" role="status">{{ hint }}</p>
+      }
 
-      @if (etapeCourante() === 1) {
-        <app-pieces-marche
-          [dossierId]="dossier()!.id"
-          [modifiable]="modifiable()"
-          mode="documents"
-          (change)="rechargerApresPieces()"
-        />
-      } @else if (etapeCourante() === 2) {
-        <app-pieces-marche
-          [dossierId]="dossier()!.id"
-          [dpgfId]="dossier()?.dpgfId"
-          [modifiable]="modifiable()"
-          mode="bordereau"
-          (change)="rechargerApresPieces()"
-        />
-      } @else if (etapeCourante() === 3) {
-        @if (dossier()?.dpgfId; as dpgfId) {
-          <app-decomposition-workspace
-            [dpgfId]="dpgfId"
+      <section class="dossier__etape">
+        <h2 class="dossier__etape-titre">
+          Étape {{ etapeUi() }} — {{ etapes[indexCourant()].label }}
+        </h2>
+
+        @if (etapeUi() === 1) {
+          <app-pieces-marche
+            [dossierId]="dossier()!.id"
             [modifiable]="modifiable()"
-            [fgDefaut]="dossier()?.fraisGenerauxPercentDefaut ?? 10"
-            [margeDefaut]="dossier()?.margePercentDefaut ?? 17.5"
-            [tvaDefaut]="dossier()?.tvaTauxDefaut ?? 20"
-            [focusNoeudId]="focusNoeudId()"
+            mode="documents"
             (change)="rechargerApresPieces()"
           />
+        } @else if (etapeUi() === 2) {
+          <app-pieces-marche
+            [dossierId]="dossier()!.id"
+            [dpgfId]="dossier()?.dpgfId"
+            [bordereauDocumentId]="dossier()?.bordereauDocumentId"
+            [modifiable]="modifiable()"
+            mode="bordereau"
+            (change)="rechargerApresPieces()"
+          />
+        } @else if (etapeUi() === 3) {
+          @if (dossier()?.dpgfId; as dpgfId) {
+            <app-decomposition-workspace
+              [dpgfId]="dpgfId"
+              [modifiable]="modifiable()"
+              [fgDefaut]="dossier()?.fraisGenerauxPercentDefaut ?? 10"
+              [margeDefaut]="dossier()?.margePercentDefaut ?? 17.5"
+              [tvaDefaut]="dossier()?.tvaTauxDefaut ?? 20"
+              [focusNoeudId]="focusNoeudId()"
+              [consultationGate]="gateCourant()"
+              (change)="rechargerApresPieces()"
+              (dirtyChange)="onPosteDirty($event)"
+            />
+          } @else {
+            <p class="dossier__placeholder">
+              Créez d’abord le bordereau à l’étape précédente pour décomposer les postes.
+            </p>
+          }
         } @else {
-          <p class="dossier__placeholder">
-            Créez d’abord le bordereau à l’étape précédente pour décomposer les postes.
-          </p>
+          <app-synthese-validation-panel
+            [dossier]="dossier()!"
+            [gates]="gates()"
+            [modifiable]="modifiable()"
+            (corriger)="corriger($event)"
+            (change)="rechargerApresPieces()"
+          />
         }
-      } @else {
-        <p class="dossier__placeholder">
-          Le contenu de cette étape arrivera avec le lot correspondant
-          (consultation, chiffrage).
-        </p>
-      }
-    </section>
-  </nf-wizard-shell>
+      </section>
+    </nf-wizard-shell>
+  </div>
 } @else {
   <p class="dossier__erreur" role="alert">{{ erreur() ?? 'Dossier introuvable.' }}</p>
 }

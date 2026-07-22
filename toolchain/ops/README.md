@@ -4,8 +4,24 @@ CLI deploy : infra partagée (1× par cluster) + produits (indépendants).
 
 | Audience | Document |
 |----------|----------|
-| **Agents IA (ops)** | **[AGENTS.md](AGENTS.md)** — arbre de décision, recettes, troubleshooting |
+| **Agents IA (ops)** | **[AGENTS.md](AGENTS.md)** — cycle de vie, recettes, troubleshooting |
 | Monorepo / git / envs | [docs/AGENTS.md](../../docs/AGENTS.md) |
+
+## Cycle de vie (vocabulaire canonique)
+
+| Commande | Effet |
+|----------|-------|
+| **`make dev-up SCOPE=front\|back\|full`** | Process **locaux** (ng serve / bootRun) → infra **staging** — **sans** rebuild image |
+| **`make stg-up SCOPE=front\|back\|full`** | Build images + **deploy pods** staging |
+| **`make prod-up SCOPE=front\|back\|full`** | Build + push + **deploy pods** prod (`REGISTRY_PASS` requis) |
+
+```bash
+make dev-up  SCOPE=full APP=sektor-btp          # itérer
+make stg-up  SCOPE=full APP=sektor-btp          # valider staging
+REGISTRY_PASS=*** make prod-up SCOPE=full APP=sektor-btp   # prod
+```
+
+Itérer → `dev-up` · Valider → `stg-up` · Promouvoir → `prod-up`.
 
 ## Environnements
 
@@ -16,15 +32,16 @@ CLI deploy : infra partagée (1× par cluster) + produits (indépendants).
 
 `demo` (GKE) : **deprecated** — ne plus utiliser.
 
-## Commandes (résumé)
+## Commandes bas niveau (résumé)
 
 | Commande | Effet |
 |----------|-------|
 | `bootstrap-env` | Infra + vault-init + **vault-seed** + wait services |
 | `vault-seed` | Applique `secrets/nafura.secrets` → Vault pour `ENV` |
 | `onboard-app <app>` | provision-db → migrate → deploy |
-| `release-app <app>` | migrate → deploy-backend → deploy-frontend |
-| `release-backend <app>` | migrate → deploy-backend |
+| `release-app <app>` | migrate → deploy-backend → deploy-frontend (= `stg-up`/`prod-up` `SCOPE=full`) |
+| `release-backend <app>` | migrate → deploy-backend (= `SCOPE=back`) |
+| `release-frontend <app>` | deploy-frontend (= `SCOPE=front`) |
 | `infra-up` | Apply overlay infra |
 | `preflight` | Diagnostic cluster / images |
 
@@ -41,17 +58,22 @@ KUBE_CONTEXT=docker-desktop ENV=staging bash toolchain/ops/nlops.sh bootstrap-en
 BUILD_IMAGES=true KUBE_CONTEXT=docker-desktop ENV=staging bash toolchain/ops/nlops.sh onboard-app sektor-btp
 ```
 
-### Staging — release quotidienne
+### Staging — validation pods
 
 ```bash
-BUILD_IMAGES=true KUBE_CONTEXT=docker-desktop ENV=staging bash toolchain/ops/nlops.sh release-app sektor-btp
+make stg-up SCOPE=full APP=sektor-btp
 ```
 
-### Prod — release Sektor
+### Staging — itération locale (sans image)
 
 ```bash
-BUILD_IMAGES=true PUSH_IMAGES=true KUBE_CONTEXT=nafura-vps-prod ENV=prod REGISTRY_PASS=*** \
-  bash toolchain/ops/nlops.sh release-app sektor-btp
+make dev-up SCOPE=full APP=sektor-btp
+```
+
+### Prod — Sektor
+
+```bash
+REGISTRY_PASS=*** make prod-up SCOPE=full APP=sektor-btp
 ```
 
 URLs prod : `sektor.nafuralabs.com`, `api.sektor.nafuralabs.com`, `iam.nafuralabs.com`
@@ -70,7 +92,9 @@ Windows (admin) : `powershell -ExecutionPolicy Bypass -File toolchain/ops/add-st
 
 ```bash
 make help
-make release-app APP=sektor-btp ENV=staging BUILD_IMAGES=true KUBE_CONTEXT=docker-desktop
+make stg-up SCOPE=full APP=sektor-btp
+make prod-up SCOPE=full APP=sektor-btp REGISTRY_PASS=***
+make dev-up SCOPE=front APP=sektor-btp
 ```
 
 Détail complet : [AGENTS.md](AGENTS.md).

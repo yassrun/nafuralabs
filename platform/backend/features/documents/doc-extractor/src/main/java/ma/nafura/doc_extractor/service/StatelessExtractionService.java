@@ -251,6 +251,13 @@ public class StatelessExtractionService {
             return request;
         }
 
+        // Plain text payloads (e.g. CPS sections already retrieved) — never wrap as binary.
+        if (mimeType != null && mimeType.toLowerCase(java.util.Locale.ROOT).startsWith("text/")) {
+            request.setPrompt(new String(fileBytes, java.nio.charset.StandardCharsets.UTF_8));
+            request.setMediaContents(List.of());
+            return request;
+        }
+
         // Text-layer PDFs (typical BDP): send text — faster and avoids TLS EOF on inline PDF.
         if (PdfTextExtractor.isPdfMime(mimeType, fileName)) {
             String pdfText = maxPromptChars != null && maxPromptChars > 0

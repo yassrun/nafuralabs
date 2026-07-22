@@ -9,7 +9,10 @@ import {
   output,
   signal,
 } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { firstValueFrom } from 'rxjs';
 
 import {
@@ -24,10 +27,16 @@ import { UnitOfMeasuresApiService } from '@app/pages/inventory/configuration/uni
 
 import { DpgfApiService } from '../../../metres/services/dpgf-api.service';
 import {
+  applyTreeRollupTotals,
   collectExpandKeys,
   countArticlesInNodes,
+  countExploitableInNodes,
+  getImportNoeudAt,
+  importArbreToTreeNodes,
+  importKeyToPath,
   noeudsDpgfToTreeNodes,
   type BordereauTreeRow,
+  type ImportNoeudPreview,
 } from '../../utils/bordereau-tree.util';
 import { mapToReferentialCode, toUniteOptions, type UniteOption } from '../../utils/unite-options.util';
 import {
@@ -40,14 +49,21 @@ import {
 } from '../bordereau-noeud-dialog/bordereau-noeud-dialog.component';
 
 /**
- * Arbre DPGF — lecture + Actions en popup.
+ * Arbre DPGF — lecture / édition structurelle, ou brouillon d'import inline.
  * En mode sélection (étape Décomposition), le clic sur un ARTICLE ouvre le panneau détail.
  */
 @Component({
   selector: 'app-bordereau-arbre',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, ButtonComponent, TreeTableComponent],
+  imports: [
+    CommonModule,
+    ButtonComponent,
+    TreeTableComponent,
+    MatButtonModule,
+    MatIconModule,
+    MatTooltipModule,
+  ],
   templateUrl: './bordereau-arbre.component.html',
   styleUrl: './bordereau-arbre.component.scss',
 })
@@ -57,9 +73,14 @@ export class BordereauArbreComponent {
   private readonly dialog = inject(MatDialog);
   private readonly confirmDialog = inject(ConfirmDialogService);
 
-  readonly dpgfId = input.required<string>();
+  /** Requis hors mode brouillon. */
+  readonly dpgfId = input<string | undefined>(undefined);
+  /** Brouillon d'extraction — édité en mémoire, sans dpgfId. */
+  readonly draftArbre = input<ImportNoeudPreview[] | null>(null);
+  /** Incrémente pour recharger un nouveau brouillon (nouvelle extraction). */
+  readonly draftToken = input(0);
   readonly modifiable = input(true);
-  /** Conservé pour compatibilité template parent — Actions toujours visibles si modifiable. */
+  /** Édition structurelle (lots/articles) — mode manuel ou brouillon. */
   readonly editionStructure = input(false);
   readonly selectionEnabled = input(false);
   readonly selectedKey = input<string | null>(null);
@@ -67,49 +88,87 @@ export class BordereauArbreComponent {
   readonly searchQuery = input('');
   /** Incrémente pour forcer un rechargement (ex. après chiffrage d’un poste). */
   readonly reloadToken = input(0);
+  /** Filtre articles avec composants non consultés (ids). */
+  readonly filterArticleIds = input<string[] | null>(null);
 
   readonly change = output<void>();
   readonly posteSelect = output<BordereauTreeRow | null>();
+  readonly draftChange = output<ImportNoeudPreview[]>();
 
   readonly nodes = signal<NfTreeNode<BordereauTreeRow>[]>([]);
+  readonly draftLocal = signal<ImportNoeudPreview[]>([]);
   readonly expandedKeys = signal<Set<string>>(new Set());
   readonly uniteOptions = signal<UniteOption[]>([]);
   readonly chargement = signal(false);
   readonly erreur = signal<string | undefined>(undefined);
+
+  readonly isDraft = computed(() => this.draftArbre() != null);
+
   readonly compteArticles = computed(() => countArticlesInNodes(this.nodes()));
+  readonly compteExploitables = computed(() => countExploitableInNodes(this.nodes()));
+  readonly compteIgnores = computed(() =>
+    Math.max(0, this.compteArticles() - this.compteExploitables()),
+  );
 
   readonly filteredNodes = computed(() => {
+    let list = this.nodes();
+    const ids = this.filterArticleIds();
+    if (ids?.length) {
+      const allowed = new Set(ids);
+      list = filterTreeByArticleIds(list, allowed);
+    }
     const q = this.searchQuery().trim().toLowerCase();
-    if (!q) return this.nodes();
-    return filterTree(this.nodes(), q);
+    if (!q) return list;
+    return filterTree(list, q);
   });
 
   readonly columns = computed<NfTreeTableColumn<BordereauTreeRow>[]>(() => {
+    const selection = this.selectionEnabled();
     const cols: NfTreeTableColumn<BordereauTreeRow>[] = [
-      { key: 'type', label: 'Type', width: '5.5rem' },
-      { key: 'code', label: 'Code', width: '7rem' },
+      { key: 'type', label: 'Type', width: selection ? '4.5rem' : '5.5rem' },
+      { key: 'code', label: 'Code', width: selection ? '5.5rem' : '7rem' },
       { key: 'libelle', label: 'Libellé' },
-      { key: 'unite', label: 'Unité', width: '5.5rem', align: 'center' },
-      { key: 'quantite', label: 'Quantité', width: '7rem', align: 'end' },
     ];
-    if (this.selectionEnabled()) {
-      cols.push({ key: 'pu', label: 'PU HT', width: '6.5rem', align: 'end' });
+    if (!selection) {
+      cols.push(
+        { key: 'unite', label: 'Unité', width: '5.5rem', align: 'center' },
+        { key: 'quantite', label: 'Quantité', width: '7rem', align: 'end' },
+        { key: 'total', label: 'Total HT', width: '7rem', align: 'end' },
+      );
+    } else {
+      cols.push(
+        { key: 'pu', label: 'PU HT', width: '5.5rem', align: 'end' },
+        { key: 'total', label: 'Total HT', width: '7rem', align: 'end' },
+      );
     }
-    if (this.modifiable()) {
-      cols.push({ key: 'actions', label: 'Actions', width: '9.5rem', align: 'center' });
+    if (this.showStructureActions()) {
+      cols.push({ key: 'actions', label: 'Actions', width: '10.5rem', align: 'center' });
     }
     return cols;
   });
+
+  readonly tableMinWidth = computed(() => (this.selectionEnabled() ? '28rem' : '42rem'));
+  readonly showStructureActions = computed(
+    () => this.modifiable() && !this.selectionEnabled() && (this.isDraft() || this.editionStructure()),
+  );
 
   readonly rowClass = (row: BordereauTreeRow): string => {
     const classes = [`arbre__row--${(row.type || '').toLowerCase()}`];
     if (this.selectedKey() && row.key === this.selectedKey()) {
       classes.push('arbre__row--selected');
     }
+    if (row.nonExploitable) {
+      classes.push('arbre__row--warn');
+    }
     return classes.join(' ');
   };
 
-  readonly rowTitle = (row: BordereauTreeRow): string | null => row.libelle || null;
+  readonly rowTitle = (row: BordereauTreeRow): string | null => {
+    if (row.nonExploitable) {
+      return `${row.libelle} — article non exploitable (unité et quantité > 0 requises)`;
+    }
+    return row.libelle || null;
+  };
 
   typeCourt(type: string | undefined): string {
     switch ((type ?? '').toUpperCase()) {
@@ -124,30 +183,34 @@ export class BordereauArbreComponent {
     }
   }
 
-  /** Adoucit les libellés TOUT EN MAJUSCULES pour alléger la lecture. */
-  softLabel(value: string | undefined): string {
-    const text = (value ?? '').trim();
-    if (!text) return '';
-    const letters = text.replace(/[^A-Za-zÀ-ÿ]/g, '');
-    if (letters.length < 4) return text;
-    const upper = letters.replace(/[^A-ZÀ-Ÿ]/g, '').length;
-    if (upper / letters.length < 0.7) return text;
-    return text
-      .toLocaleLowerCase('fr-FR')
-      .replace(/(^|[\s\-_/])([\p{L}])/gu, (_, sep: string, ch: string) => sep + ch.toLocaleUpperCase('fr-FR'));
-  }
+  private lastDraftToken = -1;
 
   constructor() {
     void this.chargerUnites();
     effect(() => {
+      const draft = this.draftArbre();
+      const token = this.draftToken();
+      if (draft != null) {
+        // Reseed seulement sur nouvelle extraction (token), pas sur chaque edit locale.
+        if (token !== this.lastDraftToken) {
+          this.lastDraftToken = token;
+          this.draftLocal.set(structuredClone(draft));
+          this.refreshDraftNodes(true);
+        }
+        return;
+      }
+      this.lastDraftToken = -1;
       const id = this.dpgfId();
       this.reloadToken();
       if (id) void this.charger(id);
+      else {
+        this.nodes.set([]);
+      }
     });
     effect(() => {
       const focusId = this.focusNoeudId();
       const nodes = this.nodes();
-      if (!focusId || !nodes.length) return;
+      if (!focusId || !nodes.length || this.isDraft()) return;
       const match = findRowById(nodes, focusId);
       if (!match) return;
       this.expandedKeys.set(expandAncestors(nodes, match.key));
@@ -158,7 +221,7 @@ export class BordereauArbreComponent {
     effect(() => {
       const key = this.selectedKey();
       const nodes = this.nodes();
-      if (!key || !nodes.length) return;
+      if (!key || !nodes.length || this.isDraft()) return;
       const match = findRowByKey(nodes, key);
       if (match?.type === 'ARTICLE') {
         this.posteSelect.emit(match);
@@ -176,22 +239,32 @@ export class BordereauArbreComponent {
   }
 
   async ajouterLot(): Promise<void> {
-    if (!this.modifiable()) return;
+    if (!this.showStructureActions()) return;
     const result = await this.openNoeudDialog({
       mode: 'create',
       placement: 'root',
       allowedTypes: ['LOT'],
       defaultType: 'LOT',
-      initial: { type: 'LOT', code: String(this.nodes().length + 1), libelle: '' },
+      initial: {
+        type: 'LOT',
+        code: String((this.isDraft() ? this.draftLocal() : this.nodes()).length + 1),
+        libelle: '',
+      },
     });
     if (!result) return;
+    if (this.isDraft()) {
+      const root = structuredClone(this.draftLocal());
+      root.push(this.toImportNoeud(result));
+      this.commitDraft(root);
+      return;
+    }
     try {
-      await this.dpgfApi.addNoeud(this.dpgfId(), {
+      await this.dpgfApi.addNoeud(this.dpgfId()!, {
         type: result.type,
         code: result.code,
         libelle: result.libelle,
       });
-      await this.charger(this.dpgfId());
+      await this.charger(this.dpgfId()!);
       this.change.emit();
     } catch (e) {
       this.erreur.set(this.msg(e));
@@ -199,7 +272,39 @@ export class BordereauArbreComponent {
   }
 
   async modifier(row: BordereauTreeRow): Promise<void> {
-    if (!this.modifiable() || !row.id) return;
+    if (!this.showStructureActions()) return;
+    if (this.isDraft()) {
+      const path = importKeyToPath(row.key);
+      if (!path) return;
+      const noeud = getImportNoeudAt(this.draftLocal(), path);
+      if (!noeud) return;
+      const type = (noeud.type ?? 'ARTICLE').toUpperCase() as BordereauNoeudType;
+      const result = await this.openNoeudDialog({
+        mode: 'edit',
+        placement: 'sibling',
+        allowedTypes: [type],
+        defaultType: type,
+        initial: {
+          type,
+          code: noeud.code ?? '',
+          libelle: noeud.libelle ?? '',
+          unite: noeud.unite,
+          quantite: noeud.quantite,
+        },
+      });
+      if (!result) return;
+      const root = structuredClone(this.draftLocal());
+      const target = getImportNoeudAt(root, path);
+      if (!target) return;
+      target.type = result.type;
+      target.code = result.code;
+      target.libelle = result.libelle;
+      target.unite = result.type === 'ARTICLE' ? result.unite : null;
+      target.quantite = result.type === 'ARTICLE' ? result.quantite : null;
+      this.commitDraft(root, false);
+      return;
+    }
+    if (!row.id) return;
     const type = (row.type as BordereauNoeudType) || 'ARTICLE';
     const result = await this.openNoeudDialog({
       mode: 'edit',
@@ -222,7 +327,7 @@ export class BordereauArbreComponent {
         unite: result.type === 'ARTICLE' ? result.unite ?? null : null,
         quantite: result.type === 'ARTICLE' ? result.quantite ?? null : null,
       });
-      await this.charger(this.dpgfId());
+      await this.charger(this.dpgfId()!);
       this.change.emit();
     } catch (e) {
       this.erreur.set(this.msg(e));
@@ -230,7 +335,7 @@ export class BordereauArbreComponent {
   }
 
   async ajouterEnfant(row: BordereauTreeRow): Promise<void> {
-    if (!this.modifiable() || !row.id) return;
+    if (!this.showStructureActions()) return;
     const allowed = childTypesFor(row.type);
     if (allowed.length === 0) return;
     const def = defaultChildType(row.type);
@@ -248,8 +353,21 @@ export class BordereauArbreComponent {
       },
     });
     if (!result) return;
+    if (this.isDraft()) {
+      const path = importKeyToPath(row.key);
+      if (!path) return;
+      const root = structuredClone(this.draftLocal());
+      const parent = getImportNoeudAt(root, path);
+      if (!parent) return;
+      if (!parent.enfants) parent.enfants = [];
+      parent.enfants.push(this.toImportNoeud(result));
+      this.commitDraft(root, false);
+      this.expandedKeys.update((keys) => new Set([...keys, row.key]));
+      return;
+    }
+    if (!row.id) return;
     try {
-      await this.dpgfApi.addNoeud(this.dpgfId(), {
+      await this.dpgfApi.addNoeud(this.dpgfId()!, {
         parentId: row.id,
         type: result.type,
         code: result.code,
@@ -257,7 +375,7 @@ export class BordereauArbreComponent {
         unite: result.unite,
         quantite: result.quantite,
       });
-      await this.charger(this.dpgfId());
+      await this.charger(this.dpgfId()!);
       this.expandedKeys.update((keys) => new Set([...keys, row.key]));
       this.change.emit();
     } catch (e) {
@@ -266,7 +384,7 @@ export class BordereauArbreComponent {
   }
 
   async ajouterMemeNiveau(row: BordereauTreeRow): Promise<void> {
-    if (!this.modifiable()) return;
+    if (!this.showStructureActions()) return;
     const allowed = siblingTypesFor(row.type);
     const result = await this.openNoeudDialog({
       mode: 'create',
@@ -282,8 +400,23 @@ export class BordereauArbreComponent {
       },
     });
     if (!result) return;
+    if (this.isDraft()) {
+      const path = importKeyToPath(row.key);
+      if (!path) return;
+      const root = structuredClone(this.draftLocal());
+      if (path.length === 1) {
+        root.splice(path[0] + 1, 0, this.toImportNoeud(result));
+      } else {
+        const parent = getImportNoeudAt(root, path.slice(0, -1));
+        if (!parent) return;
+        if (!parent.enfants) parent.enfants = [];
+        parent.enfants.splice(path[path.length - 1] + 1, 0, this.toImportNoeud(result));
+      }
+      this.commitDraft(root, false);
+      return;
+    }
     try {
-      await this.dpgfApi.addNoeud(this.dpgfId(), {
+      await this.dpgfApi.addNoeud(this.dpgfId()!, {
         parentId: row.parentId ?? null,
         type: result.type,
         code: result.code,
@@ -291,7 +424,7 @@ export class BordereauArbreComponent {
         unite: result.unite,
         quantite: result.quantite,
       });
-      await this.charger(this.dpgfId());
+      await this.charger(this.dpgfId()!);
       this.change.emit();
     } catch (e) {
       this.erreur.set(this.msg(e));
@@ -299,7 +432,7 @@ export class BordereauArbreComponent {
   }
 
   async supprimer(row: BordereauTreeRow): Promise<void> {
-    if (!this.modifiable() || !row.id) return;
+    if (!this.showStructureActions()) return;
     const confirmed = await this.confirmDialog.confirm({
       title: 'Supprimer le nœud',
       message: `Supprimer « ${row.code} — ${row.libelle} » et ses éventuels enfants ?`,
@@ -307,10 +440,25 @@ export class BordereauArbreComponent {
       confirmLabel: 'Supprimer',
     });
     if (!confirmed) return;
+    if (this.isDraft()) {
+      const path = importKeyToPath(row.key);
+      if (!path) return;
+      const root = structuredClone(this.draftLocal());
+      if (path.length === 1) {
+        root.splice(path[0], 1);
+      } else {
+        const parent = getImportNoeudAt(root, path.slice(0, -1));
+        if (!parent?.enfants) return;
+        parent.enfants.splice(path[path.length - 1], 1);
+      }
+      this.commitDraft(root);
+      return;
+    }
+    if (!row.id) return;
     try {
       await this.dpgfApi.deleteNoeud(row.id);
       if (this.selectedKey() === row.key) this.posteSelect.emit(null);
-      await this.charger(this.dpgfId());
+      await this.charger(this.dpgfId()!);
       this.change.emit();
     } catch (e) {
       this.erreur.set(this.msg(e));
@@ -339,6 +487,46 @@ export class BordereauArbreComponent {
     event.stopPropagation();
   }
 
+  private commitDraft(root: ImportNoeudPreview[], resetExpand = true): void {
+    this.draftLocal.set(root);
+    this.refreshDraftNodes(resetExpand);
+    this.draftChange.emit(root);
+  }
+
+  private refreshDraftNodes(resetExpand = true): void {
+    this.remapDraftUnites();
+    const nodes = importArbreToTreeNodes(this.draftLocal());
+    this.nodes.set(nodes);
+    if (resetExpand) {
+      this.expandedKeys.set(collectExpandKeys(nodes, 0));
+    }
+  }
+
+  private remapDraftUnites(): void {
+    const opts = this.uniteOptions();
+    const walk = (list: ImportNoeudPreview[]) => {
+      for (const n of list) {
+        const type = (n.type ?? 'ARTICLE').toUpperCase();
+        if (type === 'ARTICLE') {
+          n.unite = mapToReferentialCode(n.unite, opts);
+        }
+        if (n.enfants?.length) walk(n.enfants);
+      }
+    };
+    walk(this.draftLocal());
+  }
+
+  private toImportNoeud(result: BordereauNoeudDialogResult): ImportNoeudPreview {
+    return {
+      type: result.type,
+      code: result.code,
+      libelle: result.libelle,
+      unite: result.type === 'ARTICLE' ? result.unite : null,
+      quantite: result.type === 'ARTICLE' ? result.quantite : null,
+      enfants: [],
+    };
+  }
+
   private async openNoeudDialog(partial: {
     mode: 'create' | 'edit';
     placement: 'root' | 'child' | 'sibling';
@@ -354,6 +542,8 @@ export class BordereauArbreComponent {
   }): Promise<BordereauNoeudDialogResult | null> {
     const ref = this.dialog.open(BordereauNoeudDialogComponent, {
       width: '28rem',
+      autoFocus: 'first-tabbable',
+      restoreFocus: true,
       data: {
         ...partial,
         uniteOptions: this.uniteOptions(),
@@ -387,6 +577,7 @@ export class BordereauArbreComponent {
         }
       };
       remap(nodes);
+      applyTreeRollupTotals(nodes);
       const previous = this.expandedKeys();
       this.nodes.set(nodes);
       if (previous.size > 0) {
@@ -425,6 +616,28 @@ function filterTree(
     const children = node.children?.length ? filterTree(node.children, query) : [];
     const hay = `${node.data.code} ${node.data.libelle}`.toLowerCase();
     if (hay.includes(query) || children.length) {
+      out.push({
+        ...node,
+        children: children.length ? children : undefined,
+        leaf: !children.length,
+      });
+    }
+  }
+  return out;
+}
+
+function filterTreeByArticleIds(
+  nodes: NfTreeNode<BordereauTreeRow>[],
+  allowed: Set<string>,
+): NfTreeNode<BordereauTreeRow>[] {
+  const out: NfTreeNode<BordereauTreeRow>[] = [];
+  for (const node of nodes) {
+    const children = node.children?.length
+      ? filterTreeByArticleIds(node.children, allowed)
+      : [];
+    const keepArticle =
+      node.data.type === 'ARTICLE' && node.data.id != null && allowed.has(node.data.id);
+    if (keepArticle || children.length) {
       out.push({
         ...node,
         children: children.length ? children : undefined,

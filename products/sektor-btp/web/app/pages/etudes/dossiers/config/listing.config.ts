@@ -3,6 +3,8 @@ import type { BadgeVariant, ColumnConfig, ListingRouteConfig } from '@lib/anatom
 import { ETAPES_DOSSIER_ETUDE } from '@app/etudes/models';
 import type { DossierEtude } from '@app/etudes/models';
 
+import { backendToUiEtape, libelleUiEtape } from '../utils/dossier-etape.util';
+
 export const DOSSIER_ROUTES: ListingRouteConfig<DossierEtude> = {
   detail: (item) => ['/etudes/dossiers', item.id],
   create: ['/etudes/dossiers/new'],
@@ -22,11 +24,17 @@ const STATUT_VARIANTS: Record<string, BadgeVariant> = {
   ANNULE: 'default',
 };
 
-// `as const` sur ETAPES_DOSSIER_ETUDE fige les numéros en littéraux 1|2|3|4|5 ; la table de
-// correspondance, elle, doit accepter n'importe quel entier venu du serveur.
-const LIBELLE_ETAPE = new Map<number, string>(
-  ETAPES_DOSSIER_ETUDE.map((e) => [e.etape, e.libelle]),
-);
+const STATUT_LABELS: Record<string, string> = {
+  BROUILLON: 'Brouillon',
+  EN_ETUDE: 'En étude',
+  EN_VALIDATION: 'En validation',
+  VALIDEE: 'Validée',
+  DEVIS_GENERE: 'Devis généré',
+  GAGNE: 'Gagné',
+  PERDU: 'Perdu',
+  CONVERTIE: 'Convertie',
+  ANNULE: 'Annulé',
+};
 
 function buildColumns(): ColumnConfig[] {
   return [
@@ -39,12 +47,12 @@ function buildColumns(): ColumnConfig[] {
       field: 'currentStep',
       type: 'text',
       sortable: true,
-      width: '200px',
-      // « 3/5 — Décomposition » se lit d'un coup d'œil ; un numéro seul ne dit rien.
+      width: '220px',
       transform: (value: unknown) => {
-        const etape = Number(value);
-        const libelle = LIBELLE_ETAPE.get(etape);
-        return libelle ? `${etape}/${ETAPES_DOSSIER_ETUDE.length} — ${libelle}` : String(value ?? '');
+        const backend = Number(value);
+        if (!Number.isFinite(backend)) return String(value ?? '');
+        const ui = backendToUiEtape(backend);
+        return `${ui}/${ETAPES_DOSSIER_ETUDE.length} — ${libelleUiEtape(backend)}`;
       },
     },
     {
@@ -55,6 +63,7 @@ function buildColumns(): ColumnConfig[] {
       sortable: true,
       width: '150px',
       badgeVariant: (value: unknown) => STATUT_VARIANTS[String(value)] ?? 'default',
+      transform: (value: unknown) => STATUT_LABELS[String(value)] ?? String(value ?? ''),
     },
     {
       key: 'updatedAt',

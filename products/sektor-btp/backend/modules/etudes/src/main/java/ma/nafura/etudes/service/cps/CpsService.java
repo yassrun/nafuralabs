@@ -87,6 +87,7 @@ public class CpsService {
         cps.setQualiteSource(extraction.qualiteSource());
         cps.setMessageExtraction(extraction.message());
         cps.setExtraitLe(OffsetDateTime.now());
+        cps.setStatutExtraction(CpsDocument.STATUT_EN_COURS);
 
         if (!extraction.exploitable()) {
             // Le fichier reste stocke et consultable ; seule l'indexation est indisponible.

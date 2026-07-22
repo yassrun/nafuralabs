@@ -21,9 +21,9 @@ import org.springframework.web.multipart.MultipartFile;
 /**
  * Dépôt des pièces du marché — étape 1 du parcours.
  *
- * <p>Étape 1 = stockage seul (BDP + CPS). Aucune extraction ici : l'arbre bordereau se
- * construit à l'étape 2 (manuel ou auto depuis le fichier déjà stocké), les descriptifs à
- * l'étape 3.
+ * <p>Étape 1 = stockage seul (BDP + CPS). Aucune extraction synchrone ici : l'indexation
+ * CPS est enqueued en job async au dépôt (contrôleur), l'arbre bordereau se construit à
+ * l'étape 2 (manuel ou job async), les descriptifs à la demande pendant la décomposition.
  */
 @Service
 public class DossierDocumentService {

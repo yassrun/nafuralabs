@@ -37,6 +37,9 @@ export type DpuComposantType =
   | 'MATERIEL'
   | 'SOUS_TRAITANCE';
 
+/** Origine du prix d’un composant DPU (aligné sur `SourcePrix` backend). */
+export type SourcePrixComposant = 'MANUEL' | 'CATALOGUE' | 'CONSULTE' | 'BIBLIOTHEQUE' | string;
+
 export interface ComposantDPU {
   id: string;
   type: DpuComposantType;
@@ -45,6 +48,9 @@ export interface ComposantDPU {
   unite: string;
   prixUnitaire: number;
   total: number;
+  /** MANUEL par défaut ; CONSULTE quand un prix offre/catalogue a été appliqué. */
+  sourcePrix?: SourcePrixComposant | null;
+  offreFournisseurId?: string | null;
 }
 
 export interface DpuHistoriqueEntry {
@@ -87,6 +93,9 @@ export interface NoeudDPGF {
   quantite?: number;
   unite?: string;
   prixUnitaire?: number;
+  prixFourniBase?: number | null;
+  fraisGenerauxPercent?: number | null;
+  margePercent?: number | null;
   total?: number;
   mode?: NoeudDPGFMode | null;
   prixDpuId?: string | null;
@@ -370,13 +379,15 @@ export type StatutDossierEtude =
   | 'CONVERTIE'
   | 'ANNULE';
 
-/** Les cinq étapes du parcours. L'index est 1-based, comme côté back (`DossierEtude.ETAPE_*`). */
+/**
+ * Étapes métier affichées dans le wizard (4).
+ * Les numéros backend restent 1..5 ; voir `dossier-etape.util.ts` pour le mapping.
+ */
 export const ETAPES_DOSSIER_ETUDE = [
   { etape: 1, libelle: 'Documents du marché' },
   { etape: 2, libelle: 'Bordereau' },
-  { etape: 3, libelle: 'Décomposition' },
-  { etape: 4, libelle: 'Consultation fournisseurs' },
-  { etape: 5, libelle: 'Chiffrage' },
+  { etape: 3, libelle: 'Décomposition et consultations' },
+  { etape: 4, libelle: 'Synthèse et validation' },
 ] as const;
 
 /**
@@ -391,11 +402,13 @@ export interface ProblemeGate {
   codeArticle?: string | null;
   libelle?: string | null;
   message: string;
+  /** Étape backend d’origine (utile quand plusieurs gates sont fusionnées en UI). */
+  etape?: number | null;
 }
 
 export interface ResultatGate {
   etape: number;
-  /** Les étapes 2 et 4 produisent des avertissements non bloquants. */
+  /** Gate consultation (backend 4) non bloquante ; bordereau et chiffrage bloquent. */
   bloquant: boolean;
   problemes: ProblemeGate[];
 }

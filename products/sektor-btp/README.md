@@ -20,7 +20,15 @@ sektor-btp/
 cd web && npm run build:staging   # ou build:prod pour prod
 ```
 
-## Deploy
+## Cycle de vie
+
+```bash
+make dev-up  SCOPE=front|back|full APP=sektor-btp   # locaux → infra staging (sans image)
+make stg-up  SCOPE=front|back|full APP=sektor-btp   # build + pods staging
+REGISTRY_PASS=*** make prod-up SCOPE=full APP=sektor-btp   # après OK staging
+```
+
+## Deploy (bas niveau)
 
 ```bash
 # 1× infra sur nouveau cluster staging
@@ -29,7 +37,7 @@ KUBE_CONTEXT=docker-desktop ENV=staging bash toolchain/ops/nlops.sh bootstrap-en
 # 1× premier onboard
 BUILD_IMAGES=true KUBE_CONTEXT=docker-desktop ENV=staging bash toolchain/ops/nlops.sh onboard-app sektor-btp
 
-# Release quotidienne
+# = make stg-up SCOPE=full
 BUILD_IMAGES=true KUBE_CONTEXT=docker-desktop ENV=staging bash toolchain/ops/nlops.sh release-app sektor-btp
 ```
 

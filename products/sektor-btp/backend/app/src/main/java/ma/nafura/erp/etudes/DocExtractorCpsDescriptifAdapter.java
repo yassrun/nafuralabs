@@ -13,9 +13,11 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 /**
- * Second extraction pass (CPS / CCTP descriptifs). The bordereau pass already
- * built the article tree; this adapter re-reads the (long, prose) CPS to pull the
- * technical descriptif of each poste.
+ * Second extraction pass (CPS / CCTP descriptifs) — legacy full-file batch.
+ *
+ * <p><b>Deprecated for the Études wizard.</b> Prefer {@link DocExtractorDescriptifCpsAdapter}
+ * which runs on Postgres-ranked sections only. This adapter remains available for bulk
+ * offline experiments but should not be wired into the interactive dossier parcours.
  *
  * <p>To stay under the LLM per-call timeout on 80-90 page CPS documents, postes
  * are processed in small batches: each call asks only for the descriptifs of the
@@ -24,6 +26,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Primary
+@Deprecated
 public class DocExtractorCpsDescriptifAdapter implements CpsDescriptifExtractionPort {
 
     private static final Logger log = LoggerFactory.getLogger(DocExtractorCpsDescriptifAdapter.class);

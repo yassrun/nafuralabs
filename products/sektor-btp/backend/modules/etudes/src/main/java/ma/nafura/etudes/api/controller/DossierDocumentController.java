@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import ma.nafura.etudes.api.request.ImportTreeRequest;
+import ma.nafura.etudes.api.response.ExtractionJobDto;
 import ma.nafura.etudes.domain.model.CpsSection;
 import ma.nafura.etudes.domain.model.DossierDocument;
 import ma.nafura.etudes.domain.model.Dpgf;
@@ -12,6 +13,7 @@ import ma.nafura.etudes.repository.DpgfNoeudRepository;
 import ma.nafura.etudes.service.BordereauImportService;
 import ma.nafura.etudes.service.DossierDocumentService;
 import ma.nafura.etudes.service.cps.CpsService;
+import ma.nafura.etudes.service.extraction.DocumentExtractionJobService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;
 import ma.nafura.platform.framework.context.TenantContext;
@@ -21,9 +23,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * Pièces du marché (étape 1) et interrogation CPS.
+ * Pièces du marché (étape 1), jobs d'extraction asynchrones et interrogation CPS.
  *
- * <p>Le dépôt ne fait que stocker. L'extraction bordereau est un endpoint dédié (étape 2).
+ * <p>Le dépôt reste rapide. L'indexation CPS est enqueued automatiquement. L'extraction
+ * bordereau est un job explicite (étape 2) dont le résultat est un brouillon à valider.
  */
 @RestController
 @RequestMapping("/api/v1/etudes/dossiers/{dossierId}/documents")
@@ -33,16 +36,19 @@ public class DossierDocumentController {
     private final DossierDocumentService service;
     private final BordereauImportService bordereauImportService;
     private final CpsService cpsService;
+    private final DocumentExtractionJobService extractionJobService;
     private final DpgfNoeudRepository noeudRepository;
 
     public DossierDocumentController(
             DossierDocumentService service,
             BordereauImportService bordereauImportService,
             CpsService cpsService,
+            DocumentExtractionJobService extractionJobService,
             DpgfNoeudRepository noeudRepository) {
         this.service = service;
         this.bordereauImportService = bordereauImportService;
         this.cpsService = cpsService;
+        this.extractionJobService = extractionJobService;
         this.noeudRepository = noeudRepository;
     }
 
@@ -60,6 +66,9 @@ public class DossierDocumentController {
             @RequestParam("type") String type) {
         try {
             DossierDocument piece = service.deposer(dossierId, file, type);
+            if (piece.contientCps()) {
+                extractionJobService.enqueueCpsIndex(dossierId, piece.getId());
+            }
             return ResponseEntity.status(HttpStatus.CREATED).body(piece);
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.badRequest()
@@ -68,7 +77,52 @@ public class DossierDocumentController {
     }
 
     /**
-     * Étape 2 mode auto — prévisualisation sans persistance (revue utilisateur).
+     * Démarre l'extraction bordereau en job asynchrone (brouillon, sans persistance DPGF).
+     */
+    @PostMapping("/{pieceId}/extraire-bordereau-async")
+    @RequirePermission("etude.update")
+    public ResponseEntity<?> demarrerExtractionBordereau(
+            @PathVariable UUID dossierId, @PathVariable UUID pieceId) {
+        try {
+            ExtractionJobDto job = extractionJobService.enqueueBordereau(dossierId, pieceId);
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(job);
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("code", ex.getMessage() != null ? ex.getMessage() : "etudes.bordereau.erreur"));
+        }
+    }
+
+    @GetMapping("/extraction-jobs/{jobId}")
+    @RequirePermission("etude.read")
+    public ResponseEntity<?> statutJob(@PathVariable UUID dossierId, @PathVariable UUID jobId) {
+        try {
+            return ResponseEntity.ok(extractionJobService.get(dossierId, jobId));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("code", ex.getMessage() != null ? ex.getMessage() : "etudes.extraction.erreur"));
+        }
+    }
+
+    @GetMapping("/extraction-jobs")
+    @RequirePermission("etude.read")
+    public ResponseEntity<List<ExtractionJobDto>> listerJobs(@PathVariable UUID dossierId) {
+        return ResponseEntity.ok(extractionJobService.lister(dossierId));
+    }
+
+    @PostMapping("/extraction-jobs/{jobId}/relancer")
+    @RequirePermission("etude.update")
+    public ResponseEntity<?> relancerJob(@PathVariable UUID dossierId, @PathVariable UUID jobId) {
+        try {
+            return ResponseEntity.status(HttpStatus.ACCEPTED)
+                    .body(extractionJobService.relancer(dossierId, jobId));
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("code", ex.getMessage() != null ? ex.getMessage() : "etudes.extraction.erreur"));
+        }
+    }
+
+    /**
+     * Étape 2 mode auto — prévisualisation synchrone (compat). Préférer le job async.
      */
     @PostMapping("/{pieceId}/previsualiser-bordereau")
     @RequirePermission("etude.update")
@@ -96,10 +150,13 @@ public class DossierDocumentController {
             @RequestBody ImportTreeRequest body,
             @RequestParam(required = false) UUID pieceId) {
         try {
-            Dpgf dpgf = bordereauImportService.validerImport(dossierId, body, pieceId);
-            return ResponseEntity.ok(Map.of(
-                    "dpgfId", dpgf.getId().toString(),
-                    "numero", dpgf.getNumero()));
+            var result = bordereauImportService.validerImport(dossierId, body, pieceId);
+            Map<String, Object> payload = new java.util.LinkedHashMap<>();
+            payload.put("dpgfId", result.dpgfId().toString());
+            payload.put("numero", result.numero());
+            payload.put("articlesAcceptes", result.articlesAcceptes());
+            payload.put("articlesIgnores", result.articlesIgnores());
+            return ResponseEntity.ok(payload);
         } catch (IllegalArgumentException | IllegalStateException ex) {
             return ResponseEntity.badRequest()
                     .body(Map.of("code", ex.getMessage() != null ? ex.getMessage() : "etudes.bordereau.erreur"));
@@ -107,7 +164,7 @@ public class DossierDocumentController {
     }
 
     /**
-     * Extraction + persistance immédiate (compat). Préférer prévisualiser → valider.
+     * Extraction + persistance immédiate (compat). Préférer async → valider.
      */
     @PostMapping("/{pieceId}/extraire-bordereau")
     @RequirePermission("etude.update")

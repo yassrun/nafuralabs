@@ -15,10 +15,18 @@ import ma.nafura.etudes.domain.model.DpgfNoeud;
  * @param articles articles du bordereau, déjà extraits de l'arbre — aucune règle n'a besoin de
  *     la hiérarchie, et ça évite que chacune la reparcoure
  * @param nombreDocuments pièces déposées sur le dossier
+ * @param hasBordereau au moins une pièce de type bordereau (ou CPS+bordereau)
+ * @param hasCps au moins une pièce de type CPS (ou CPS+bordereau)
  */
-public record ContexteGate(List<DpgfNoeud> articles, long nombreDocuments) {
+public record ContexteGate(
+        List<DpgfNoeud> articles, long nombreDocuments, boolean hasBordereau, boolean hasCps) {
 
     public static ContexteGate deArticles(List<DpgfNoeud> articles) {
-        return new ContexteGate(articles, 0L);
+        return new ContexteGate(articles, 0L, false, false);
+    }
+
+    public static ContexteGate documents(boolean hasBordereau, boolean hasCps) {
+        long n = (hasBordereau ? 1 : 0) + (hasCps ? 1 : 0);
+        return new ContexteGate(List.of(), n, hasBordereau, hasCps);
     }
 }

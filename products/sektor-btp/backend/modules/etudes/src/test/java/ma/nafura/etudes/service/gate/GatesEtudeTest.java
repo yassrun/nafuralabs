@@ -39,21 +39,40 @@ class GatesEtudeTest {
     // ── Étape 1 — pièces du marché ───────────────────────────────────────────
 
     @Test
-    void aucune_piece_deposee_est_bloquant() {
-        ResultatGate r = new GatesEtude.GateDocuments().evaluer(new ContexteGate(List.of(), 0));
+    void sans_bdp_ni_cps_est_bloquant() {
+        ResultatGate r = new GatesEtude.GateDocuments().evaluer(ContexteGate.documents(false, false));
 
         assertThat(r.passe()).isFalse();
         assertThat(r.bloquant()).isTrue();
-        assertThat(r.problemes()).singleElement()
-                .extracting(ResultatGate.ProblemeGate::message)
-                .isEqualTo("etudes.gate.documents.aucune_piece");
+        assertThat(r.problemes()).extracting(ResultatGate.ProblemeGate::message)
+                .containsExactly(
+                        "etudes.gate.documents.bordereau_manquant",
+                        "etudes.gate.documents.cps_manquant");
     }
 
     @Test
-    void une_piece_suffit_a_franchir_l_etape_des_documents() {
-        // Sans article : c'est précisément le cas qui rendait le parcours sans issue quand
-        // l'étape 1 réclamait un bordereau que seule l'étape 2 peut produire.
-        ResultatGate r = new GatesEtude.GateDocuments().evaluer(new ContexteGate(List.of(), 1));
+    void bordereau_seul_ne_suffit_pas() {
+        ResultatGate r = new GatesEtude.GateDocuments().evaluer(ContexteGate.documents(true, false));
+
+        assertThat(r.passe()).isFalse();
+        assertThat(r.problemes()).singleElement()
+                .extracting(ResultatGate.ProblemeGate::message)
+                .isEqualTo("etudes.gate.documents.cps_manquant");
+    }
+
+    @Test
+    void cps_seul_ne_suffit_pas() {
+        ResultatGate r = new GatesEtude.GateDocuments().evaluer(ContexteGate.documents(false, true));
+
+        assertThat(r.passe()).isFalse();
+        assertThat(r.problemes()).singleElement()
+                .extracting(ResultatGate.ProblemeGate::message)
+                .isEqualTo("etudes.gate.documents.bordereau_manquant");
+    }
+
+    @Test
+    void bdp_et_cps_franchissent_l_etape_documents() {
+        ResultatGate r = new GatesEtude.GateDocuments().evaluer(ContexteGate.documents(true, true));
 
         assertThat(r.passe()).isTrue();
     }
@@ -153,6 +172,25 @@ class GatesEtudeTest {
                 .evaluer(ContexteGate.deArticles(List.of(a)));
 
         assertThat(r.passe()).isFalse();
+        assertThat(r.autoriseLaSuite()).isTrue();
+    }
+
+    @Test
+    void prix_consultes_franchissent_la_gate_consultation_sans_bloquer_le_parcours() {
+        UUID dpuId = UUID.randomUUID();
+        DpgfNoeud a = article("1-1", "m3", "70", DpgfNoeud.MODE_DECOMPOSE);
+        a.setPrixDpuId(dpuId);
+        PrixDpu dpu = PrixDpu.builder().id(dpuId).build();
+        dpu.setComposants(List.of(ComposantDpu.builder().sourcePrix("CONSULTE").build()));
+        lenient().when(prixDpuRepository.findById(any())).thenReturn(Optional.of(dpu));
+
+        ResultatGate r = new GatesEtude.GateConsultationFournisseurs(prixDpuRepository)
+                .evaluer(ContexteGate.deArticles(List.of(a)));
+
+        assertThat(r.passe()).isTrue();
+        assertThat(r.bloquant()).isFalse();
+        // La consultation reste non bloquante même si des prix manuels subsistent ailleurs :
+        // le chiffrage (étape 5) reste le seul verrou de soumission.
         assertThat(r.autoriseLaSuite()).isTrue();
     }
 

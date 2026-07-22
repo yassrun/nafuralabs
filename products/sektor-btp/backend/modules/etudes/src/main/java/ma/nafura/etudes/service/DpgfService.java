@@ -146,7 +146,7 @@ public class DpgfService {
      * bloqueraient le gate bordereau sans être chiffrables.
      */
     @Transactional
-    public Dpgf createFromImport(ImportTreeRequest request, String projetNom, BigDecimal tvaTaux) {
+    public ImportResult createFromImport(ImportTreeRequest request, String projetNom, BigDecimal tvaTaux) {
         if (request == null || request.getArbre() == null || request.getArbre().isEmpty()) {
             throw new IllegalArgumentException("etudes.bordereau.arbre_vide");
         }
@@ -166,44 +166,44 @@ public class DpgfService {
                 .build();
         Dpgf saved = repository.save(entity);
 
-        int[] articleCount = {0};
+        ImportPersistStats stats = new ImportPersistStats();
         int ordreRacine = 0;
         for (ImportNoeudDto racine : request.getArbre()) {
-            persistImportNoeud(saved, null, racine, ordreRacine++, articleCount);
+            persistImportNoeud(saved, null, racine, ordreRacine++, stats);
         }
-        if (articleCount[0] == 0) {
+        if (stats.articlesAcceptes == 0) {
             throw new IllegalArgumentException("etudes.bordereau.aucun_article_exploitable");
         }
 
         recalcHeaderTotals(saved.getId());
         attachArbre(saved);
-        return saved;
+        return new ImportResult(saved, stats.articlesAcceptes, stats.articlesIgnores);
     }
 
     /** Remplace entièrement les nœuds d'un DPGF existant par un nouvel arbre importé. */
     @Transactional
-    public Dpgf remplacerParImport(UUID dpgfId, ImportTreeRequest request) {
+    public ImportResult remplacerParImport(UUID dpgfId, ImportTreeRequest request) {
         Dpgf dpgf = requireDpgf(dpgfId);
         List<DpgfNoeud> existants =
                 noeudRepository.findByDpgfIdAndTenantIdOrderByOrdreAsc(dpgfId, tenantId());
         noeudRepository.deleteAll(existants);
         noeudRepository.flush();
 
-        int[] articleCount = {0};
+        ImportPersistStats stats = new ImportPersistStats();
         int ordreRacine = 0;
         for (ImportNoeudDto racine : request.getArbre()) {
-            persistImportNoeud(dpgf, null, racine, ordreRacine++, articleCount);
+            persistImportNoeud(dpgf, null, racine, ordreRacine++, stats);
         }
-        if (articleCount[0] == 0) {
+        if (stats.articlesAcceptes == 0) {
             throw new IllegalArgumentException("etudes.bordereau.aucun_article_exploitable");
         }
         recalcHeaderTotals(dpgfId);
         attachArbre(dpgf);
-        return dpgf;
+        return new ImportResult(dpgf, stats.articlesAcceptes, stats.articlesIgnores);
     }
 
     private void persistImportNoeud(
-            Dpgf dpgf, UUID parentId, ImportNoeudDto dto, int ordre, int[] articleCount) {
+            Dpgf dpgf, UUID parentId, ImportNoeudDto dto, int ordre, ImportPersistStats stats) {
         if (dto == null) {
             return;
         }
@@ -212,6 +212,8 @@ public class DpgfService {
         String code = StringUtils.hasText(dto.getCode()) ? dto.getCode().trim() : String.valueOf(ordre + 1);
 
         if (DpgfNoeud.TYPE_ARTICLE.equals(type) && !articleExploitable(dto)) {
+            stats.articlesIgnores++;
+            // Les enfants d'un article non exploitable ne sont pas attendus ; on les ignore aussi.
             return;
         }
 
@@ -230,23 +232,36 @@ public class DpgfService {
                 .build();
         DpgfNoeud saved = noeudRepository.save(noeud);
         if (DpgfNoeud.TYPE_ARTICLE.equals(type)) {
-            articleCount[0]++;
+            stats.articlesAcceptes++;
         }
 
         if (dto.getEnfants() != null) {
             int childOrdre = 0;
             for (ImportNoeudDto enfant : dto.getEnfants()) {
-                persistImportNoeud(dpgf, saved.getId(), enfant, childOrdre++, articleCount);
+                persistImportNoeud(dpgf, saved.getId(), enfant, childOrdre++, stats);
             }
         }
     }
 
-    private static boolean articleExploitable(ImportNoeudDto dto) {
+    /** Même règle que le gate bordereau / l'UI d'extraction. */
+    public static boolean articleExploitable(ImportNoeudDto dto) {
+        if (dto == null) {
+            return false;
+        }
         if (dto.getUnite() == null || dto.getUnite().isBlank()) {
             return false;
         }
         return dto.getQuantite() != null && dto.getQuantite().compareTo(BigDecimal.ZERO) > 0;
     }
+
+    /** Compteurs d'import pendant la persistance. */
+    public static final class ImportPersistStats {
+        public int articlesAcceptes;
+        public int articlesIgnores;
+    }
+
+    /** Résultat d'un import (création ou remplacement). */
+    public record ImportResult(Dpgf dpgf, int articlesAcceptes, int articlesIgnores) {}
 
     private static String normalizeImportType(String type) {
         if (!StringUtils.hasText(type)) {
@@ -291,7 +306,11 @@ public class DpgfService {
                 .quantite(request.getQuantite())
                 .unite(trimOrNull(request.getUnite()))
                 .prixUnitaire(request.getPrixUnitaire())
+                .prixFourniBase(request.getPrixFourniBase())
+                .fraisGenerauxPercent(request.getFraisGenerauxPercent())
+                .margePercent(request.getMargePercent())
                 .total(computeArticleTotal(type, request.getQuantite(), request.getPrixUnitaire(), request.getTotal()))
+                .descriptif(trimOrNull(request.getDescriptif()))
                 .mode(DpgfNoeud.TYPE_ARTICLE.equals(type) ? DpgfNoeud.MODE_FOURNI : null)
                 .ordre(request.getOrdre() != null ? request.getOrdre() : nextOrdre(dpgfId, parentId, tenantId))
                 .build();
@@ -329,6 +348,18 @@ public class DpgfService {
         if (request.getPrixUnitaire() != null) {
             noeud.setPrixUnitaire(request.getPrixUnitaire());
         }
+        if (request.getPrixFourniBase() != null) {
+            noeud.setPrixFourniBase(request.getPrixFourniBase());
+        }
+        if (request.getFraisGenerauxPercent() != null) {
+            noeud.setFraisGenerauxPercent(request.getFraisGenerauxPercent());
+        }
+        if (request.getMargePercent() != null) {
+            noeud.setMargePercent(request.getMargePercent());
+        }
+        if (request.getDescriptif() != null) {
+            noeud.setDescriptif(trimOrNull(request.getDescriptif()));
+        }
         if (request.getMode() != null && DpgfNoeud.TYPE_ARTICLE.equals(noeud.getType())) {
             String mode = request.getMode().trim().toUpperCase(Locale.ROOT);
             if (!DpgfNoeud.MODE_FOURNI.equals(mode) && !DpgfNoeud.MODE_DECOMPOSE.equals(mode)) {
@@ -342,8 +373,9 @@ public class DpgfService {
         if (request.getTotal() != null) {
             noeud.setTotal(request.getTotal());
         } else if (DpgfNoeud.TYPE_ARTICLE.equals(noeud.getType())) {
+            // Recalcule toujours le total article : l'ancienne valeur n'est pas un total explicite.
             noeud.setTotal(computeArticleTotal(
-                    noeud.getType(), noeud.getQuantite(), noeud.getPrixUnitaire(), noeud.getTotal()));
+                    noeud.getType(), noeud.getQuantite(), noeud.getPrixUnitaire(), null));
         }
 
         DpgfNoeud saved = noeudRepository.save(noeud);

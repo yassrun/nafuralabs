@@ -32,8 +32,8 @@ public final class GatesEtude {
     /**
      * Étape 1 — les pièces du marché sont déposées.
      *
-     * <p>Le CPS entre ici, pas à une étape dédiée : il est ensuite découpé en sections et
-     * interrogé à la demande pendant la décomposition, au moment où le descriptif sert.
+     * <p>Le CPS et le BDP entrent ici tous les deux : le CPS est ensuite découpé en sections et
+     * interrogé à la demande pendant la décomposition ; le BDP alimente l'arbre à l'étape 2.
      */
     @Component
     public static class GateDocuments implements EtapeGate {
@@ -44,11 +44,18 @@ public final class GatesEtude {
 
         @Override
         public ResultatGate evaluer(ContexteGate contexte) {
-            if (contexte.nombreDocuments() <= 0) {
-                return new ResultatGate(etape(), true, List.of(new ProblemeGate(
-                        null, null, null, "etudes.gate.documents.aucune_piece")));
+            List<ProblemeGate> pbs = new ArrayList<>();
+            if (!contexte.hasBordereau()) {
+                pbs.add(new ProblemeGate(
+                        null, null, null, "etudes.gate.documents.bordereau_manquant"));
             }
-            return ResultatGate.ok(etape());
+            if (!contexte.hasCps()) {
+                pbs.add(new ProblemeGate(null, null, null, "etudes.gate.documents.cps_manquant"));
+            }
+            if (pbs.isEmpty()) {
+                return ResultatGate.ok(etape());
+            }
+            return new ResultatGate(etape(), true, pbs);
         }
     }
 

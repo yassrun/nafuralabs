@@ -24,6 +24,10 @@ public class DpgfNoeudCreateDto {
     private BigDecimal quantite;
     private String unite;
     private BigDecimal prixUnitaire;
+    private BigDecimal prixFourniBase;
+    private BigDecimal fraisGenerauxPercent;
+    private BigDecimal margePercent;
     private BigDecimal total;
+    private String descriptif;
     private Integer ordre;
 }

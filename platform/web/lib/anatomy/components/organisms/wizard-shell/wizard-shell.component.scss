@@ -1,5 +1,5 @@
 /**
- * Wizard Shell — Stepper + content + actions
+ * Wizard Shell — Stepper + content + sticky actions
  */
 
 .nf-wizard-shell {
@@ -13,6 +13,7 @@
   flex-shrink: 0;
   padding: var(--nf-space-3, 12px) 0;
   border-bottom: 1px solid var(--nf-color-border, #e5e7eb);
+  background: var(--nf-color-surface, #fff);
 }
 
 .nf-wizard-shell__steps {
@@ -22,6 +23,7 @@
   margin: 0;
   padding: 0;
   list-style: none;
+  flex-wrap: wrap;
 }
 
 .nf-wizard-shell__step {
@@ -82,18 +84,39 @@
   min-height: 0;
   overflow: auto;
   padding: var(--nf-space-4, 16px) 0;
+  /* Leave room so sticky footer never covers the last lines of content. */
+  padding-bottom: calc(var(--nf-space-4, 16px) + 4.5rem);
 }
 
 .nf-wizard-shell__actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 20;
   flex-shrink: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: var(--nf-space-4, 16px);
-  padding-top: var(--nf-space-4, 16px);
+  padding: var(--nf-space-3, 12px) 0;
+  padding-bottom: calc(var(--nf-space-3, 12px) + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid var(--nf-color-border, #e5e7eb);
+  background: var(--nf-color-surface, #fff);
 }
 
 .nf-wizard-shell__actions nf-button-list:last-child {
   margin-left: auto;
+}
+
+@media (max-width: 640px) {
+  .nf-wizard-shell__step-label {
+    display: none;
+  }
+
+  .nf-wizard-shell__step--current .nf-wizard-shell__step-label {
+    display: inline;
+  }
+
+  .nf-wizard-shell__actions {
+    flex-wrap: wrap;
+  }
 }

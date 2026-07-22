@@ -23,6 +23,7 @@ dist/
 !.env.example
 secrets/nafura.secrets
 secrets/*.local
+secrets/dev-staging-local.env
 !secrets/README.md
 
 # OS

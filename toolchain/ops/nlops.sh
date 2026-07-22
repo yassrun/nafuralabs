@@ -140,19 +140,29 @@ Workflows:
   release-backend  <app-id>   migrate ? deploy-backend
   release-frontend <app-id>   deploy-frontend only
 
+Cycle de vie (préférer Make) :
+  make dev-up  SCOPE=front|back|full   # process locaux → infra staging
+  make stg-up  SCOPE=front|back|full   # build + pods staging
+  make prod-up SCOPE=front|back|full   # build + push + pods prod
+
+  nlops.sh dev-up <app-id> <front|back|full>   Check Mode B recipe (local → staging infra)
+
 Flags (env vars):
   KUBE_CONTEXT=<name>       kubectl context (e.g. nafura-vps-prod, docker-desktop)
   BUILD_IMAGES=true          With release-app, build images first
   PUSH_IMAGES=true           With release-app, push to REGISTRY
   RESET_DB=true              With reset-app, drop and recreate database
+  REGISTRY_PASS=…            Required for prod push / make prod-up
 
 Examples ? new Docker Desktop cluster:
   ENV=staging $0 clean-env
   ENV=staging $0 bootstrap-env
   BUILD_IMAGES=true ENV=staging $0 onboard-app sektor-btp
 
-Examples ? daily release (infra already up):
-  BUILD_IMAGES=true ENV=staging $0 release-app sektor-btp
+Examples ? daily cycle:
+  make stg-up SCOPE=full APP=sektor-btp
+  make dev-up SCOPE=front APP=sektor-btp
+  REGISTRY_PASS=*** make prod-up SCOPE=full APP=sektor-btp
 
 Examples ? OVH VPS prod (marketing vitrine):
   BUILD_IMAGES=true PUSH_IMAGES=true KUBE_CONTEXT=nafura-vps-prod ENV=prod REGISTRY_PASS=*** $0 build-push mbs-studio
@@ -911,6 +921,27 @@ release_app() {
   echo "Release complete for $app_id."
 }
 
+# Mode B — process locaux pointant sur l'infra staging (pas de rebuild image).
+dev_up() {
+  local app_id="${1:-sektor-btp}"
+  local scope="${2:-full}"
+  case "$scope" in
+    front|back|full) ;;
+    *)
+      echo "ERROR: scope must be front|back|full (got: $scope)" >&2
+      exit 1
+      ;;
+  esac
+
+  require_env
+  if [[ "$ENV" != "staging" ]]; then
+    echo "ERROR: dev-up only supports ENV=staging (got: $ENV)" >&2
+    exit 1
+  fi
+
+  bash "$ROOT/toolchain/ops/dev-staging-local.sh" "$app_id" "$scope"
+}
+
 case "${1:-}" in
   bootstrap-env) bootstrap_env ;;
   vault-seed) require_env; vault_seed_from_local ;;
@@ -934,6 +965,15 @@ case "${1:-}" in
   release-app) release_app "${2:?app id required}" ;;
   release-backend) release_backend "${2:?app id required}" ;;
   release-frontend) release_frontend "${2:?app id required}" ;;
+  dev-up)
+    ENV="${ENV:-staging}"
+    require_env
+    if [[ "$ENV" != "staging" ]]; then
+      echo "ERROR: dev-up only supports ENV=staging (got: $ENV)" >&2
+      exit 1
+    fi
+    dev_up "${2:-sektor-btp}" "${3:-full}"
+    ;;
   -h|--help|help) usage ;;
   *)
     usage >&2

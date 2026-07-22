@@ -85,6 +85,9 @@ export class WizardShellComponent {
     /** Submit button label (required) */
     submitLabel = input.required<string>();
 
+    /** Whether to show the submit button on the last step (default true). */
+    showSubmit = input<boolean>(true);
+
     /** Back button icon */
     backIcon = input<string>('arrow_back');
 
@@ -131,13 +134,15 @@ export class WizardShellComponent {
   rightActions = computed(() => {
     const actions: { id: string; label: string; icon?: string; variant?: 'primary' | 'secondary'; disabled?: boolean }[] = [];
     if (this.isLastStep()) {
-      actions.push({
-        id: 'submit',
-        label: this.submitLabel(),
-        icon: this.submitIcon(),
-        variant: 'primary',
-        disabled: !this.canProceed(),
-      });
+      if (this.showSubmit()) {
+        actions.push({
+          id: 'submit',
+          label: this.submitLabel(),
+          icon: this.submitIcon(),
+          variant: 'primary',
+          disabled: !this.canProceed(),
+        });
+      }
     } else {
       actions.push({
         id: 'next',

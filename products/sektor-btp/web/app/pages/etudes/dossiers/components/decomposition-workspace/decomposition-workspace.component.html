@@ -4,6 +4,43 @@
   aria-label="Décomposition du bordereau"
 >
   <div class="workspace__master">
+    <div class="workspace__couverture" role="status">
+      <div class="workspace__couverture-main">
+        <strong>{{ consultes() }}</strong>
+        <span>/ {{ totalComposants() }} composants consultés</span>
+        @if (nonConsultes() > 0) {
+          <span class="workspace__warn">{{ nonConsultes() }} à vérifier</span>
+        }
+      </div>
+      <label class="workspace__filtre">
+        <input
+          type="checkbox"
+          [ngModel]="filtreAlertes()"
+          (ngModelChange)="filtreAlertes.set($event)"
+          [disabled]="nonConsultes() === 0 && alertesConsultation().length === 0"
+        />
+        Afficher les alertes
+        @if (filtreAlertes()) {
+          <span class="workspace__filtre-count">
+            ({{ filterArticleIds()?.length ?? 0 }})
+          </span>
+        }
+      </label>
+    </div>
+
+    @if (filtreAlertes() && alertesConsultation().length > 0) {
+      <ul class="workspace__alertes">
+        @for (a of alertesConsultation(); track a.noeudId ?? a.message) {
+          <li>
+            @if (a.codeArticle) {
+              <span class="code">{{ a.codeArticle }}</span>
+            }
+            <span>{{ a.message | translate }}</span>
+          </li>
+        }
+      </ul>
+    }
+
     <label class="workspace__search">
       <span class="sr-only">Rechercher un poste</span>
       <input
@@ -22,6 +59,7 @@
       [focusNoeudId]="focusNoeudId()"
       [searchQuery]="search()"
       [reloadToken]="treeReloadToken()"
+      [filterArticleIds]="filterArticleIds()"
       (posteSelect)="onSelectPoste($event)"
       (change)="onTreeChange()"
     />
@@ -36,6 +74,8 @@
       [tvaDefaut]="tvaDefaut()"
       (change)="onPosteChange()"
       (closeMobile)="closeMobileDetail()"
+      (dirtyChange)="onPosteDirty($event)"
+      (beforeSelectRequest)="onBeforeSelectRequest()"
     />
   </div>
 </section>

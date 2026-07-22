@@ -1,16 +1,18 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, inject, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 
-import { ButtonComponent, NfInputComponent } from '@lib/anatomy';
+import { ButtonComponent } from '@lib/anatomy';
 
 export interface PrixFourniDialogData {
   code: string;
   libelle: string;
   unite?: string | null;
   quantite?: number | null;
-  prixUnitaire?: number | null;
+  prixFourniBase?: number | null;
+  fraisGenerauxPercent: number;
+  margePercent: number;
 }
 
 export interface PrixFourniDialogResult {
@@ -20,11 +22,11 @@ export interface PrixFourniDialogResult {
 @Component({
   selector: 'app-prix-fourni-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatDialogModule, ButtonComponent, NfInputComponent],
+  imports: [CommonModule, FormsModule, MatDialogModule, ButtonComponent],
   template: `
     <div class="dialog-shell">
       <header>
-        <h2>Prix de vente du poste</h2>
+        <h2>Coût fourni du poste</h2>
         <nf-button variant="ghost" (clicked)="close()" aria-label="Fermer">✕</nf-button>
       </header>
 
@@ -32,26 +34,43 @@ export interface PrixFourniDialogResult {
         <strong>{{ data.code }}</strong> — {{ data.libelle }}
       </p>
       <p class="hint">
-        Saisissez un prix unitaire HT sans décomposition. Les frais généraux et la marge ne
-        s’appliquent pas dans ce mode.
+        Saisissez le coût unitaire fourni. Les frais généraux et la marge sont ensuite appliqués
+        pour calculer le prix de vente HT.
       </p>
 
-      <nf-input
-        label="Prix unitaire HT (MAD) *"
-        type="number"
-        [ngModel]="prix()"
-        (ngModelChange)="prix.set($event)"
-        required
-      />
+      <label class="field">
+        <span>Coût unitaire fourni (MAD) *</span>
+        <input
+          #prixInput
+          name="prix"
+          type="number"
+          step="any"
+          min="0"
+          [(ngModel)]="prix"
+          required
+        />
+      </label>
 
       <dl class="preview" aria-live="polite">
         <div>
-          <dt>Quantité</dt>
-          <dd>{{ data.quantite ?? '—' }} {{ data.unite || '' }}</dd>
+          <dt>Coût fourni</dt>
+          <dd>{{ coutFourni | number: '1.2-2' }} MAD</dd>
+        </div>
+        <div>
+          <dt>Frais généraux ({{ data.fraisGenerauxPercent | number: '1.0-2' }} %)</dt>
+          <dd>{{ fraisGeneraux | number: '1.2-2' }} MAD</dd>
+        </div>
+        <div>
+          <dt>Marge ({{ data.margePercent | number: '1.0-2' }} %)</dt>
+          <dd>{{ marge | number: '1.2-2' }} MAD</dd>
+        </div>
+        <div>
+          <dt>Prix de vente unitaire HT</dt>
+          <dd>{{ prixVenteHt | number: '1.2-2' }} MAD</dd>
         </div>
         <div class="preview__total">
           <dt>Total ligne HT</dt>
-          <dd>{{ totalLigne() | number: '1.2-2' }} MAD</dd>
+          <dd>{{ totalLigne | number: '1.2-2' }} MAD</dd>
         </div>
       </dl>
 
@@ -67,6 +86,7 @@ export interface PrixFourniDialogResult {
       gap: 1rem;
       padding: 1.25rem;
       min-width: min(28rem, 92vw);
+      background: var(--nf-color-surface, #fff);
     }
     header {
       display: flex;
@@ -87,6 +107,24 @@ export interface PrixFourniDialogResult {
       margin: 0;
       font-size: 0.8125rem;
       color: var(--nf-color-text-secondary);
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      font-size: 0.875rem;
+    }
+    .field input {
+      padding: 0.625rem 0.75rem;
+      border: 1px solid var(--nf-color-border, #d1d5db);
+      border-radius: 8px;
+      font: inherit;
+      background: var(--nf-color-surface, #fff);
+    }
+    .field input:focus {
+      outline: none;
+      border-color: var(--nf-color-primary-600, #0b6e7a);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--nf-color-primary-600, #0b6e7a) 18%, transparent);
     }
     .preview {
       margin: 0;
@@ -122,33 +160,53 @@ export interface PrixFourniDialogResult {
     }
   `,
 })
-export class PrixFourniDialogComponent {
+export class PrixFourniDialogComponent implements AfterViewInit {
   private readonly dialogRef = inject(
     MatDialogRef<PrixFourniDialogComponent, PrixFourniDialogResult | null>,
   );
   readonly data = inject<PrixFourniDialogData>(MAT_DIALOG_DATA);
+  private readonly prixInput = viewChild<ElementRef<HTMLInputElement>>('prixInput');
 
-  readonly prix = signal(
-    this.data.prixUnitaire != null && this.data.prixUnitaire > 0
-      ? String(this.data.prixUnitaire)
-      : '',
-  );
+  prix =
+    this.data.prixFourniBase != null && this.data.prixFourniBase > 0
+      ? String(this.data.prixFourniBase)
+      : '';
 
-  readonly totalLigne = computed(() => {
-    const pu = this.parseNumber(this.prix());
+  ngAfterViewInit(): void {
+    queueMicrotask(() => this.prixInput()?.nativeElement?.focus());
+  }
+
+  get coutFourni(): number {
+    const value = this.parseNumber(this.prix);
+    return Number.isFinite(value) ? Math.max(0, value) : 0;
+  }
+
+  get fraisGeneraux(): number {
+    return Math.round(this.coutFourni * (Math.max(0, this.data.fraisGenerauxPercent) / 100) * 100) / 100;
+  }
+
+  get marge(): number {
+    return Math.round(this.coutFourni * (Math.max(0, this.data.margePercent) / 100) * 100) / 100;
+  }
+
+  get prixVenteHt(): number {
+    return Math.round((this.coutFourni + this.fraisGeneraux + this.marge) * 100) / 100;
+  }
+
+  get totalLigne(): number {
     const q = Number(this.data.quantite ?? 0);
-    if (!Number.isFinite(pu) || !Number.isFinite(q)) return 0;
-    return Math.round(Math.max(0, pu) * Math.max(0, q) * 100) / 100;
-  });
+    if (!Number.isFinite(q)) return 0;
+    return Math.round(this.prixVenteHt * Math.max(0, q) * 100) / 100;
+  }
 
   canSave(): boolean {
-    const pu = this.parseNumber(this.prix());
+    const pu = this.parseNumber(this.prix);
     return Number.isFinite(pu) && pu > 0;
   }
 
   save(): void {
     if (!this.canSave()) return;
-    this.dialogRef.close({ prixUnitaire: this.parseNumber(this.prix()) });
+    this.dialogRef.close({ prixUnitaire: this.parseNumber(this.prix) });
   }
 
   close(): void {

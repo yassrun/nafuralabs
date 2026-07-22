@@ -17,6 +17,8 @@ export type ComposantDpuWrite = {
   unite: string;
   prixUnitaire: number;
   total?: number;
+  sourcePrix?: string | null;
+  offreFournisseurId?: string | null;
 };
 
 export type PrixDpuUpdateBody = {

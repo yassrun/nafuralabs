@@ -166,28 +166,81 @@ Config front : `products/sektor-btp/web/src/environments/environment.staging.ts`
 
 ---
 
+## Cycle de vie — vocabulaire canonique
+
+Trois verbes, un scope (`front` | `back` | `full`). **Pas de branche Git par env.**
+
+| Commande | Effet | Rebuild image Docker ? | Où ça tourne |
+|----------|-------|------------------------|--------------|
+| **`dev-up`** `front\|back\|full` | Lance le process **local** (ng serve / bootRun) branché sur l’**infra staging** (Postgres, Keycloak, MinIO) | **Non** | Machine locale + infra `*.nafuralabs.staging` |
+| **`stg-up`** `front\|back\|full` | **Build images + deploy pods** staging | **Oui** | Cluster Docker Desktop (`sektor-staging`) |
+| **`prod-up`** `front\|back\|full` | **Build + push registry + deploy pods** prod | **Oui** | OVH VPS (`sektor-prod`) |
+
+| Scope | `dev-up` | `stg-up` / `prod-up` |
+|-------|----------|----------------------|
+| `front` | `ng serve` local (API/IAM staging ou back local) | Image + rollout `sektor-btp-web` |
+| `back` | `bootRun` local → DB/IAM/MinIO staging | Migrate + image + rollout `sektor-btp-backend` |
+| `full` | front **et** back locaux (Mode B) | migrate + backend + frontend |
+
+### Makefile (racine)
+
+```bash
+# Itération quotidienne (sans image) — Mode B
+make dev-up SCOPE=front APP=sektor-btp
+make dev-up SCOPE=back  APP=sektor-btp
+make dev-up SCOPE=full  APP=sektor-btp
+
+# Validation staging (comme en prod, pods K8s)
+make stg-up SCOPE=front APP=sektor-btp
+make stg-up SCOPE=back  APP=sektor-btp
+make stg-up SCOPE=full  APP=sektor-btp
+
+# Promotion prod (après OK staging)
+REGISTRY_PASS=*** make prod-up SCOPE=full APP=sektor-btp
+REGISTRY_PASS=*** make prod-up SCOPE=front APP=sektor-btp
+REGISTRY_PASS=*** make prod-up SCOPE=back  APP=sektor-btp
+```
+
+### Règle agents / humains
+
+1. **Itérer** → `dev-up` (pas de `stg-up` à chaque fix UI).
+2. **Valider staging** → `stg-up` une fois (images + ingress + migrations).
+3. **Prod** → seulement après OK staging → `prod-up`.
+
+Alias bas niveau (toujours valides) : `release-frontend` / `release-backend` / `release-app` avec `ENV` + `BUILD_IMAGES`.
+
+Détail ops : [toolchain/ops/AGENTS.md](../toolchain/ops/AGENTS.md#cycle-de-vie--dev-up--stg-up--prod-up).
+
+---
+
 ## Ops — commandes essentielles
 
 Toujours depuis la **racine du repo** :
 
 ```bash
+# Préféré (cycle de vie)
+make stg-up SCOPE=full APP=sektor-btp
+make prod-up SCOPE=full APP=sektor-btp REGISTRY_PASS=***
+make dev-up SCOPE=full APP=sektor-btp
+
+# Équivalent bas niveau
 KUBE_CONTEXT=<ctx> ENV=<env> bash toolchain/ops/nlops.sh <commande> [app]
 ```
 
 | Intent | Commande |
 |--------|----------|
+| Itération locale → infra staging | `make dev-up SCOPE=front\|back\|full` |
+| Deploy pods staging | `make stg-up SCOPE=front\|back\|full` |
+| Deploy pods prod | `make prod-up SCOPE=front\|back\|full` (+ `REGISTRY_PASS`) |
 | Diagnostic | `preflight` |
 | Nouveau cluster | `secrets/nafura.secrets` → `clean-env` → `bootstrap-env` → `onboard-app <app>` |
 | Re-seed Vault (fichier local) | `vault-seed` |
-| Release complète | `release-app <app>` (+ `BUILD_IMAGES=true`) |
-| Backend + SQL | `release-backend <app>` |
-| Frontend seul | `release-frontend <app>` |
 | Infra seule | `infra-up` |
-| Prod + images | `BUILD_IMAGES=true PUSH_IMAGES=true REGISTRY_PASS=… release-app <app>` |
 
-Staging Sektor (quotidien) :
+Équivalents bas niveau staging :
 
 ```bash
+# = make stg-up SCOPE=full
 BUILD_IMAGES=true KUBE_CONTEXT=docker-desktop ENV=staging bash toolchain/ops/nlops.sh release-app sektor-btp
 ```
 
@@ -219,12 +272,13 @@ Arbre de décision complet : [toolchain/ops/AGENTS.md](../toolchain/ops/AGENTS.m
 
 ## Checklist post-merge (agent)
 
-- [ ] Changement SQL → `migrate` / `release-backend`, pas `deploy` seul
-- [ ] Changement `environment.*.ts` ou ingress → rebuild image web
+- [ ] Changement SQL → `stg-up SCOPE=back` (ou `migrate` / `release-backend`), pas `deploy` seul
+- [ ] Changement `environment.*.ts` ou ingress → `stg-up SCOPE=front` (ou `full`)
 - [ ] Changement `infra/k8s` → `infra-up` + rollout keycloak si hostname IAM
-- [ ] Staging validé avant `ENV=prod`
+- [ ] **Staging validé** (`stg-up` + tests manuels) **avant** `prod-up`
+- [ ] Itération UI/API : préférer `dev-up`, pas un `stg-up` à chaque commit
 - [ ] `preflight` + `kubectl get pods -n <ns>` après deploy
 
 ---
 
-*Dernière mise à jour : 2026-07 — monorepo, OVH VPS prod, hostnames `*.nafuralabs.staging`.*
+*Dernière mise à jour : 2026-07 — cycle `dev-up` / `stg-up` / `prod-up`, monorepo, OVH VPS prod.*

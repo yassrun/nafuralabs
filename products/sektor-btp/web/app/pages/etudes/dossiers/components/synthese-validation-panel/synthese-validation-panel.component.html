@@ -1,0 +1,114 @@
+<section class="synthese" aria-label="Synthèse et validation du chiffrage">
+  <p class="synthese__aide">
+    @if (modifiable()) {
+      Contrôlez les totaux et la couverture des consultations, puis soumettez le dossier.
+    } @else if (statut() === 'EN_VALIDATION') {
+      Chiffrage transmis — en attente de validation. Les montants ci-dessous sont figés.
+    } @else {
+      Synthèse en consultation seule.
+    }
+  </p>
+
+  @if (erreur(); as message) {
+    <p class="synthese__erreur" role="alert">{{ message }}</p>
+  }
+
+  @if (chargement()) {
+    <p class="synthese__etat">Chargement de la synthèse…</p>
+  } @else {
+    <div class="synthese__grid">
+      <article class="synthese__card">
+        <h4>Totaux par lot</h4>
+        @if (totaux().length === 0) {
+          <p class="synthese__vide">Aucun lot chiffré pour l’instant.</p>
+        } @else {
+          <table class="synthese__table">
+            <thead>
+              <tr>
+                <th scope="col">Lot</th>
+                <th scope="col">Libellé</th>
+                <th class="num" scope="col">Total HT</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (lot of totaux(); track lot.code) {
+                <tr>
+                  <td>{{ lot.code }}</td>
+                  <td>{{ lot.libelle }}</td>
+                  <td class="num">{{ lot.total | mad }}</td>
+                </tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr>
+                <th colspan="2" scope="row">Total HT</th>
+                <td class="num">{{ totalHt() | mad }}</td>
+              </tr>
+            </tfoot>
+          </table>
+        }
+      </article>
+
+      <article class="synthese__card">
+        <h4>Consultations fournisseurs</h4>
+        <p class="synthese__couverture">
+          <strong>{{ composantsConsultes() }}</strong> / {{ composantsTotal() }} composants
+          consultés
+          <span class="synthese__pct">({{ couverturePct() }} %)</span>
+        </p>
+        @if (gateConsultation(); as gate) {
+          @if (gate.problemes.length > 0) {
+            <p class="synthese__warn" role="status">
+              @if (modifiable()) {
+                Avertissement : certains prix restent manuels — vous pouvez tout de même soumettre.
+              } @else {
+                Certains prix étaient manuels au moment de la soumission.
+              }
+            </p>
+            <ul class="synthese__liste">
+              @for (p of gate.problemes; track p.noeudId ?? p.message) {
+                <li>
+                  @if (p.codeArticle) {
+                    <span class="code">{{ p.codeArticle }}</span>
+                  }
+                  <span>{{ p.message | translate }}</span>
+                  @if (modifiable() && p.noeudId) {
+                    <button
+                      type="button"
+                      class="link"
+                      (click)="corrigerConsultation(p)"
+                    >
+                      Corriger
+                    </button>
+                  }
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="synthese__ok">Tous les composants décomposés ont un prix consulté.</p>
+          }
+        } @else {
+          <p class="synthese__vide">Aucune alerte de consultation.</p>
+        }
+      </article>
+    </div>
+
+    @if (modifiable()) {
+      <app-gate-blocage [resultat]="problemesFinaux()" (corriger)="corriger.emit($event)" />
+    }
+
+    @if (statut() === 'EN_VALIDATION') {
+      <p class="synthese__status synthese__status--attente" role="status">
+        En attente de validation.
+      </p>
+    } @else if (statut() === 'VALIDEE' || statut() === 'DEVIS_GENERE') {
+      <p class="synthese__status synthese__status--valide" role="status">
+        Dossier validé.
+      </p>
+    } @else if (pretASoumettre()) {
+      <p class="synthese__ok synthese__ok--final" role="status">
+        Le chiffrage est prêt. Utilisez « Soumettre à validation » en bas de page.
+      </p>
+    }
+  }
+</section>

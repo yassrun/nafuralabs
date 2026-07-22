@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, inject, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 
-import { ButtonComponent, NfInputComponent } from '@lib/anatomy';
+import { ButtonComponent } from '@lib/anatomy';
 
 import { DpuService } from '@app/etudes/services/dpu.service';
 
@@ -21,7 +21,7 @@ export interface PosteChiffrageDialogResult {
 @Component({
   selector: 'app-poste-chiffrage-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatDialogModule, ButtonComponent, NfInputComponent],
+  imports: [CommonModule, FormsModule, MatDialogModule, ButtonComponent],
   template: `
     <div class="dialog-shell">
       <header>
@@ -35,20 +35,14 @@ export interface PosteChiffrageDialogResult {
       </p>
 
       <div class="grid-2">
-        <nf-input
-          label="Frais généraux (%) *"
-          type="number"
-          [ngModel]="fg()"
-          (ngModelChange)="fg.set($event)"
-          required
-        />
-        <nf-input
-          label="Marge (%) *"
-          type="number"
-          [ngModel]="marge()"
-          (ngModelChange)="marge.set($event)"
-          required
-        />
+        <label class="field">
+          <span>Frais généraux (%) *</span>
+          <input #fgInput name="fg" type="number" step="any" min="0" [(ngModel)]="fg" required />
+        </label>
+        <label class="field">
+          <span>Marge (%) *</span>
+          <input name="marge" type="number" step="any" min="0" [(ngModel)]="marge" required />
+        </label>
       </div>
 
       <dl class="preview" aria-live="polite">
@@ -58,15 +52,15 @@ export interface PosteChiffrageDialogResult {
         </div>
         <div>
           <dt>FG</dt>
-          <dd>{{ fgAmount() | number: '1.2-2' }} MAD</dd>
+          <dd>{{ fgAmount | number: '1.2-2' }} MAD</dd>
         </div>
         <div>
           <dt>Marge</dt>
-          <dd>{{ margeAmount() | number: '1.2-2' }} MAD</dd>
+          <dd>{{ margeAmount | number: '1.2-2' }} MAD</dd>
         </div>
         <div class="preview__total">
           <dt>Prix de vente HT</dt>
-          <dd>{{ prixVente() | number: '1.2-2' }} MAD</dd>
+          <dd>{{ prixVente | number: '1.2-2' }} MAD</dd>
         </div>
       </dl>
 
@@ -82,6 +76,7 @@ export interface PosteChiffrageDialogResult {
       gap: 1rem;
       padding: 1.25rem;
       min-width: min(28rem, 92vw);
+      background: var(--nf-color-surface, #fff);
     }
     header {
       display: flex;
@@ -102,6 +97,24 @@ export interface PosteChiffrageDialogResult {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 0.75rem;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      font-size: 0.875rem;
+    }
+    .field input {
+      padding: 0.625rem 0.75rem;
+      border: 1px solid var(--nf-color-border, #d1d5db);
+      border-radius: 8px;
+      font: inherit;
+      background: var(--nf-color-surface, #fff);
+    }
+    .field input:focus {
+      outline: none;
+      border-color: var(--nf-color-primary-600, #0b6e7a);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--nf-color-primary-600, #0b6e7a) 18%, transparent);
     }
     .preview {
       margin: 0;
@@ -138,43 +151,48 @@ export interface PosteChiffrageDialogResult {
     }
   `,
 })
-export class PosteChiffrageDialogComponent {
+export class PosteChiffrageDialogComponent implements AfterViewInit {
   private readonly dialogRef = inject(
     MatDialogRef<PosteChiffrageDialogComponent, PosteChiffrageDialogResult | null>,
   );
   private readonly dpuMath = inject(DpuService);
   readonly data = inject<PosteChiffrageDialogData>(MAT_DIALOG_DATA);
+  private readonly fgInput = viewChild<ElementRef<HTMLInputElement>>('fgInput');
 
-  readonly fg = signal(String(this.data.fraisGenerauxPercent ?? 0));
-  readonly marge = signal(String(this.data.margePercent ?? 0));
+  fg = String(this.data.fraisGenerauxPercent ?? 0);
+  marge = String(this.data.margePercent ?? 0);
 
-  readonly prixVente = computed(() =>
-    this.dpuMath.computePrixVenteHt(
+  ngAfterViewInit(): void {
+    queueMicrotask(() => this.fgInput()?.nativeElement?.focus());
+  }
+
+  get prixVente(): number {
+    return this.dpuMath.computePrixVenteHt(
       this.data.deboursSec,
-      this.parseNumber(this.fg()),
-      this.parseNumber(this.marge()),
-    ),
-  );
+      this.parseNumber(this.fg),
+      this.parseNumber(this.marge),
+    );
+  }
 
-  readonly fgAmount = computed(() =>
-    Math.round(this.data.deboursSec * (this.parseNumber(this.fg()) / 100) * 100) / 100,
-  );
+  get fgAmount(): number {
+    return Math.round(this.data.deboursSec * (this.parseNumber(this.fg) / 100) * 100) / 100;
+  }
 
-  readonly margeAmount = computed(() =>
-    Math.round(this.data.deboursSec * (this.parseNumber(this.marge()) / 100) * 100) / 100,
-  );
+  get margeAmount(): number {
+    return Math.round(this.data.deboursSec * (this.parseNumber(this.marge) / 100) * 100) / 100;
+  }
 
   canSave(): boolean {
-    const fg = this.parseNumber(this.fg());
-    const mg = this.parseNumber(this.marge());
+    const fg = this.parseNumber(this.fg);
+    const mg = this.parseNumber(this.marge);
     return Number.isFinite(fg) && fg >= 0 && Number.isFinite(mg) && mg >= 0;
   }
 
   save(): void {
     if (!this.canSave()) return;
     this.dialogRef.close({
-      fraisGenerauxPercent: this.parseNumber(this.fg()),
-      margePercent: this.parseNumber(this.marge()),
+      fraisGenerauxPercent: this.parseNumber(this.fg),
+      margePercent: this.parseNumber(this.marge),
     });
   }
 

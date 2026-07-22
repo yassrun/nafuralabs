@@ -3,13 +3,36 @@
     <h4 class="arbre__titre">
       Arbre du bordereau
       @if (!chargement()) {
-        <span class="arbre__compte">{{ compteArticles() }} article{{ compteArticles() === 1 ? '' : 's' }}</span>
+        <span class="arbre__compte">
+          {{ compteExploitables() }} article{{ compteExploitables() === 1 ? '' : 's' }}
+          @if (compteIgnores() > 0) {
+            <span class="arbre__compte-warn"> · {{ compteIgnores() }} à corriger</span>
+          }
+        </span>
       }
     </h4>
     <div class="arbre__actions">
-      <button type="button" class="arbre__link" (click)="expandAll()">Tout déplier</button>
-      <button type="button" class="arbre__link" (click)="collapseAll()">Tout replier</button>
-      @if (modifiable()) {
+      <button
+        type="button"
+        mat-icon-button
+        class="arbre__icon-btn"
+        matTooltip="Tout déplier"
+        aria-label="Tout déplier"
+        (click)="expandAll()"
+      >
+        <mat-icon>unfold_more</mat-icon>
+      </button>
+      <button
+        type="button"
+        mat-icon-button
+        class="arbre__icon-btn"
+        matTooltip="Tout replier"
+        aria-label="Tout replier"
+        (click)="collapseAll()"
+      >
+        <mat-icon>unfold_less</mat-icon>
+      </button>
+      @if (showStructureActions()) {
         <nf-button variant="secondary" size="sm" (clicked)="ajouterLot()">Ajouter un lot</nf-button>
       }
     </div>
@@ -31,8 +54,8 @@
       [rowClass]="rowClass"
       [rowTitle]="rowTitle"
       (rowClick)="onRowClick($event)"
-      minWidth="42rem"
-      scrollHeight="min(62vh, 36rem)"
+      [minWidth]="tableMinWidth()"
+      scrollHeight="520px"
       emptyMessage="Aucun lot / article"
     >
       <ng-template #cell let-row let-column="column">
@@ -44,7 +67,12 @@
             <span class="arbre__code">{{ row.code }}</span>
           }
           @case ('libelle') {
-            <span class="arbre__libelle" [attr.title]="row.libelle">{{ softLabel(row.libelle) }}</span>
+            <span class="arbre__libelle" [attr.title]="rowTitle(row)">
+              {{ row.libelle }}
+              @if (row.nonExploitable) {
+                <span class="arbre__warn-tag">incomplet</span>
+              }
+            </span>
           }
           @case ('unite') {
             <span class="arbre__num">{{ row.type === 'ARTICLE' ? row.unite || '—' : '' }}</span>
@@ -63,45 +91,54 @@
                 : ''
             }}</span>
           }
+          @case ('total') {
+            <strong class="arbre__num">{{
+              row.total != null ? (row.total | number: '1.2-2') : '—'
+            }}</strong>
+          }
           @case ('actions') {
             <span class="arbre__row-actions" (click)="stop($event)">
               <button
                 type="button"
-                class="arbre__action"
-                title="Modifier"
+                mat-icon-button
+                class="arbre__icon-btn"
+                matTooltip="Modifier"
                 aria-label="Modifier"
                 (click)="modifier(row)"
               >
-                ✎
+                <mat-icon>edit</mat-icon>
               </button>
               @if (row.type !== 'ARTICLE') {
                 <button
                   type="button"
-                  class="arbre__action"
-                  title="Ajouter un enfant"
+                  mat-icon-button
+                  class="arbre__icon-btn"
+                  matTooltip="Ajouter un enfant"
                   aria-label="Ajouter un enfant"
                   (click)="ajouterEnfant(row)"
                 >
-                  +
+                  <mat-icon>subdirectory_arrow_right</mat-icon>
                 </button>
               }
               <button
                 type="button"
-                class="arbre__action"
-                title="Ajouter au même niveau"
+                mat-icon-button
+                class="arbre__icon-btn"
+                matTooltip="Ajouter au même niveau"
                 aria-label="Ajouter au même niveau"
                 (click)="ajouterMemeNiveau(row)"
               >
-                ⇄
+                <mat-icon>add</mat-icon>
               </button>
               <button
                 type="button"
-                class="arbre__action arbre__action--danger"
-                title="Supprimer"
+                mat-icon-button
+                class="arbre__icon-btn arbre__icon-btn--danger"
+                matTooltip="Supprimer"
                 aria-label="Supprimer"
                 (click)="supprimer(row)"
               >
-                ×
+                <mat-icon>delete</mat-icon>
               </button>
             </span>
           }

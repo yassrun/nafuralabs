@@ -80,6 +80,66 @@ public final class PdfTextExtractor {
         }
     }
 
+    /**
+     * Extract text for a page range (1-based, inclusive). Useful for chunked bordereau passes.
+     *
+     * @return prompt text if usable; otherwise {@code null}
+     */
+    public static String tryPromptTextPages(
+            byte[] bytes, String fileName, int startPage, int endPage, int maxChars) {
+        if (bytes == null || bytes.length == 0 || startPage < 1 || endPage < startPage) {
+            return null;
+        }
+        int limit = maxChars > 0 ? maxChars : MAX_CHARS;
+        String label = (fileName == null || fileName.isBlank()) ? "document.pdf" : fileName;
+        try (PDDocument document = Loader.loadPDF(bytes)) {
+            int pages = document.getNumberOfPages();
+            if (pages == 0) {
+                return null;
+            }
+            int from = Math.min(startPage, pages);
+            int to = Math.min(endPage, pages);
+            PDFTextStripper stripper = new PDFTextStripper();
+            stripper.setSortByPosition(true);
+            stripper.setStartPage(from);
+            stripper.setEndPage(to);
+            String raw = stripper.getText(document);
+            if (raw == null) {
+                return null;
+            }
+            String text = raw.replace('\u0000', ' ').trim();
+            if (text.length() < MIN_USEFUL_CHARS) {
+                log.debug(
+                        "PDF {} pages {}-{} have little text ({} chars)",
+                        label,
+                        from,
+                        to,
+                        text.length());
+                return null;
+            }
+            StringBuilder out = new StringBuilder(text.length() + 96);
+            out.append("PDF file: ")
+                    .append(label)
+                    .append(" (pages ")
+                    .append(from)
+                    .append('-')
+                    .append(to)
+                    .append(" of ")
+                    .append(pages)
+                    .append(")\n\n")
+                    .append(text);
+            return truncate(out.toString(), limit);
+        } catch (Exception e) {
+            log.warn(
+                    "PDF page-range extraction failed for {} ({}-{}): {}",
+                    label,
+                    startPage,
+                    endPage,
+                    e.getMessage());
+            return null;
+        }
+    }
+
     private static String truncate(String value, int maxChars) {
         if (value.length() <= maxChars) {
             return value;

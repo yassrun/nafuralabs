@@ -67,6 +67,16 @@ public class DpgfNoeud {
     @Column(name = "prix_unitaire", precision = 18, scale = 4)
     private BigDecimal prixUnitaire;
 
+    /** Coût unitaire saisi en mode FOURNI, avant frais généraux et marge. */
+    @Column(name = "prix_fourni_base", precision = 18, scale = 4)
+    private BigDecimal prixFourniBase;
+
+    @Column(name = "frais_generaux_percent", precision = 8, scale = 4)
+    private BigDecimal fraisGenerauxPercent;
+
+    @Column(name = "marge_percent", precision = 8, scale = 4)
+    private BigDecimal margePercent;
+
     @Column(name = "total", precision = 18, scale = 4)
     private BigDecimal total;
 

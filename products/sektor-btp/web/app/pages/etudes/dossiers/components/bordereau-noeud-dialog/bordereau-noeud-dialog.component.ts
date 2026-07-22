@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 
-import { ButtonComponent, NfInputComponent } from '@lib/anatomy';
+import { ButtonComponent } from '@lib/anatomy';
 
 import type { UniteOption } from '../../utils/unite-options.util';
 
@@ -38,59 +38,52 @@ export interface BordereauNoeudDialogResult {
 @Component({
   selector: 'app-bordereau-noeud-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatDialogModule, ButtonComponent, NfInputComponent],
+  imports: [CommonModule, FormsModule, MatDialogModule, ButtonComponent],
   template: `
     <div class="dialog-shell">
       <header>
-        <h2>{{ title() }}</h2>
+        <h2>{{ title }}</h2>
         <nf-button variant="ghost" (clicked)="close()" aria-label="Fermer">✕</nf-button>
       </header>
 
       @if (data.mode === 'create' && data.allowedTypes.length > 1) {
         <label class="field">
           <span>Type *</span>
-          <select [ngModel]="type()" (ngModelChange)="onTypeChange($event)">
+          <select name="type" [(ngModel)]="type">
             @for (t of data.allowedTypes; track t) {
-              <option [value]="t">{{ typeLabel(t) }}</option>
+              <option [ngValue]="t">{{ typeLabel(t) }}</option>
             }
           </select>
         </label>
       } @else {
-        <p class="type-badge">{{ typeLabel(type()) }}</p>
+        <p class="type-badge">{{ typeLabel(type) }}</p>
       }
 
-      <nf-input
-        label="Code *"
-        [ngModel]="code()"
-        (ngModelChange)="code.set($event)"
-        required
-      />
+      <label class="field">
+        <span>Code *</span>
+        <input name="code" type="text" [(ngModel)]="code" autocomplete="off" required />
+      </label>
 
-      <nf-input
-        label="Libellé *"
-        [ngModel]="libelle()"
-        (ngModelChange)="libelle.set($event)"
-        required
-      />
+      <label class="field">
+        <span>Libellé *</span>
+        <input name="libelle" type="text" [(ngModel)]="libelle" autocomplete="off" required />
+      </label>
 
-      @if (type() === 'ARTICLE') {
+      @if (type === 'ARTICLE') {
         <div class="grid-2">
           <label class="field">
             <span>Unité *</span>
-            <select [ngModel]="unite()" (ngModelChange)="unite.set($event)">
+            <select name="unite" [(ngModel)]="unite">
               <option value="">—</option>
               @for (u of data.uniteOptions; track u.code) {
-                <option [value]="u.code">{{ u.code }}</option>
+                <option [ngValue]="u.code">{{ u.code }}</option>
               }
             </select>
           </label>
-          <nf-input
-            label="Quantité *"
-            type="number"
-            [ngModel]="quantite()"
-            (ngModelChange)="quantite.set($event)"
-            required
-          />
+          <label class="field">
+            <span>Quantité *</span>
+            <input name="quantite" type="number" step="any" min="0" [(ngModel)]="quantite" required />
+          </label>
         </div>
       } @else {
         <p class="hint">Nœud de regroupement — sans unité ni quantité.</p>
@@ -110,6 +103,7 @@ export interface BordereauNoeudDialogResult {
       gap: 1rem;
       padding: 1.25rem;
       min-width: min(28rem, 92vw);
+      background: var(--nf-color-surface, #fff);
     }
     header {
       display: flex;
@@ -127,12 +121,20 @@ export interface BordereauNoeudDialogResult {
       gap: 0.35rem;
       font-size: 0.875rem;
     }
+    .field input,
     .field select {
       padding: 0.625rem 0.75rem;
       border: 1px solid var(--nf-color-border, var(--nf-border-default));
       border-radius: 8px;
       font: inherit;
-      background: var(--nf-color-bg-subtle, var(--nf-color-surface));
+      background: var(--nf-color-surface, #fff);
+      color: var(--nf-color-text-primary, #1a1a1a);
+    }
+    .field input:focus,
+    .field select:focus {
+      outline: none;
+      border-color: var(--nf-color-primary-600, #0b6e7a);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--nf-color-primary-600, #0b6e7a) 18%, transparent);
     }
     .grid-2 {
       display: grid;
@@ -166,17 +168,14 @@ export class BordereauNoeudDialogComponent {
   );
   readonly data = inject<BordereauNoeudDialogData>(MAT_DIALOG_DATA);
 
-  readonly type = signal<BordereauNoeudType>(
-    (this.data.initial?.type?.toUpperCase() as BordereauNoeudType) ?? this.data.defaultType,
-  );
-  readonly code = signal(this.data.initial?.code ?? '');
-  readonly libelle = signal(this.data.initial?.libelle ?? '');
-  readonly unite = signal(this.data.initial?.unite ?? '');
-  readonly quantite = signal(
-    this.data.initial?.quantite != null ? String(this.data.initial.quantite) : '',
-  );
+  type: BordereauNoeudType =
+    (this.data.initial?.type?.toUpperCase() as BordereauNoeudType) ?? this.data.defaultType;
+  code = this.data.initial?.code ?? '';
+  libelle = this.data.initial?.libelle ?? '';
+  unite = this.data.initial?.unite ?? '';
+  quantite = this.data.initial?.quantite != null ? String(this.data.initial.quantite) : '';
 
-  readonly title = computed(() => {
+  get title(): string {
     if (this.data.mode === 'edit') return 'Modifier le nœud';
     switch (this.data.placement) {
       case 'child':
@@ -186,7 +185,7 @@ export class BordereauNoeudDialogComponent {
       default:
         return 'Ajouter un lot';
     }
-  });
+  }
 
   typeLabel(t: BordereauNoeudType): string {
     switch (t) {
@@ -199,15 +198,11 @@ export class BordereauNoeudDialogComponent {
     }
   }
 
-  onTypeChange(value: string): void {
-    this.type.set(value as BordereauNoeudType);
-  }
-
   canSave(): boolean {
-    if (!this.code().trim() || !this.libelle().trim()) return false;
-    if (this.type() === 'ARTICLE') {
-      if (!this.unite().trim()) return false;
-      const q = this.parseNumber(this.quantite());
+    if (!this.code.trim() || !this.libelle.trim()) return false;
+    if (this.type === 'ARTICLE') {
+      if (!this.unite.trim()) return false;
+      const q = this.parseNumber(this.quantite);
       if (!Number.isFinite(q) || q <= 0) return false;
     }
     return true;
@@ -215,13 +210,13 @@ export class BordereauNoeudDialogComponent {
 
   save(): void {
     if (!this.canSave()) return;
-    const isArticle = this.type() === 'ARTICLE';
+    const isArticle = this.type === 'ARTICLE';
     this.dialogRef.close({
-      type: this.type(),
-      code: this.code().trim(),
-      libelle: this.libelle().trim(),
-      unite: isArticle ? this.unite().trim() : null,
-      quantite: isArticle ? this.parseNumber(this.quantite()) : null,
+      type: this.type,
+      code: this.code.trim(),
+      libelle: this.libelle.trim(),
+      unite: isArticle ? this.unite.trim() : null,
+      quantite: isArticle ? this.parseNumber(this.quantite) : null,
     });
   }
 

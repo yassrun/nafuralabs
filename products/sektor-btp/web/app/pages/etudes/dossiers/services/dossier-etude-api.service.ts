@@ -13,6 +13,40 @@ import type {
 } from '@app/etudes/models';
 import type { ImportNoeudPreview } from '../utils/bordereau-tree.util';
 
+export interface ExtractionJobDto {
+  id: string;
+  dossierEtudeId: string;
+  dossierDocumentId: string;
+  jobType: 'BORDEREAU_EXTRACT' | 'CPS_INDEX' | string;
+  status: 'QUEUED' | 'RUNNING' | 'SUCCEEDED' | 'FAILED' | 'CANCELLED' | string;
+  progressPercent: number;
+  progressStep?: string | null;
+  result?: {
+    arbre?: ImportNoeudPreview[];
+    articleCount?: number;
+    pieceId?: string;
+    fileName?: string;
+    outcome?: string;
+    cpsDocumentId?: string;
+    statutExtraction?: string;
+    nbSections?: number;
+  } | null;
+  errorCode?: string | null;
+  errorMessage?: string | null;
+  attemptCount: number;
+  maxAttempts: number;
+  createdAt?: string;
+  startedAt?: string | null;
+  finishedAt?: string | null;
+}
+
+export interface ValiderBordereauResult {
+  dpgfId: string;
+  numero: string;
+  articlesAcceptes: number;
+  articlesIgnores: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class DossierEtudeApiService extends FeatureApiService<
   DossierEtude,
@@ -72,7 +106,39 @@ export class DossierEtudeApiService extends FeatureApiService<
     );
   }
 
-  /** Prévisualisation LLM sans persistance. */
+  /** Démarre l'extraction bordereau en job asynchrone (202 Accepted). */
+  demarrerExtractionBordereau(
+    dossierId: string,
+    pieceId: string,
+  ): Promise<ExtractionJobDto> {
+    return firstValueFrom(
+      this.http.post<ExtractionJobDto>(
+        this.resolveUrl(
+          `${this.basePath}/${dossierId}/documents/${pieceId}/extraire-bordereau-async`,
+        ),
+        {},
+      ),
+    );
+  }
+
+  statutExtractionJob(dossierId: string, jobId: string): Promise<ExtractionJobDto> {
+    return this.get<ExtractionJobDto>(
+      `${this.basePath}/${dossierId}/documents/extraction-jobs/${jobId}`,
+    );
+  }
+
+  relancerExtractionJob(dossierId: string, jobId: string): Promise<ExtractionJobDto> {
+    return firstValueFrom(
+      this.http.post<ExtractionJobDto>(
+        this.resolveUrl(
+          `${this.basePath}/${dossierId}/documents/extraction-jobs/${jobId}/relancer`,
+        ),
+        {},
+      ),
+    );
+  }
+
+  /** Prévisualisation LLM synchrone (compat). Préférer demarrerExtractionBordereau. */
   previsualiserBordereau(
     dossierId: string,
     pieceId: string,
@@ -87,15 +153,15 @@ export class DossierEtudeApiService extends FeatureApiService<
     );
   }
 
-  /** Persiste l'arbre validé dans le dialogue. */
+  /** Persiste l'arbre revu inline (remplace le DPGF existant). */
   validerBordereau(
     dossierId: string,
     arbre: ImportNoeudPreview[],
     pieceId?: string,
-  ): Promise<{ dpgfId: string; numero: string }> {
+  ): Promise<ValiderBordereauResult> {
     const params = pieceId ? new HttpParams().set('pieceId', pieceId) : undefined;
     return firstValueFrom(
-      this.http.post<{ dpgfId: string; numero: string }>(
+      this.http.post<ValiderBordereauResult>(
         this.resolveUrl(`${this.basePath}/${dossierId}/documents/valider-bordereau`),
         { arbre },
         params ? { params } : {},

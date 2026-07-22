@@ -13,7 +13,11 @@ public class DpgfNoeudUpdateDto {
     private BigDecimal quantite;
     private String unite;
     private BigDecimal prixUnitaire;
+    private BigDecimal prixFourniBase;
+    private BigDecimal fraisGenerauxPercent;
+    private BigDecimal margePercent;
     private BigDecimal total;
+    private String descriptif;
     private Integer ordre;
     /** FOURNI | DECOMPOSE — articles uniquement. */
     private String mode;

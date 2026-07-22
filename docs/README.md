@@ -52,15 +52,20 @@ Hosts staging local : [toolchain/ops/README.md](../toolchain/ops/README.md#hostn
 ## Démarrage rapide
 
 ```bash
-# Staging — release Sektor
+# Cycle de vie (préféré)
+make stg-up SCOPE=full APP=sektor-btp              # build + pods staging
+make dev-up SCOPE=front APP=sektor-btp             # front local → infra staging
+REGISTRY_PASS=*** make prod-up SCOPE=full APP=sektor-btp   # après OK staging
+
+# Équivalent bas niveau staging
 BUILD_IMAGES=true KUBE_CONTEXT=docker-desktop ENV=staging \
   bash toolchain/ops/nlops.sh release-app sektor-btp
 ```
 
 ```powershell
-# Build local
+# Build local (hors cycle pods)
 .\gradlew.bat :sektor:app:bootJar
-cd web && npm run build:staging
+cd products\sektor-btp\web && npm run build:staging
 ```
 
 ---

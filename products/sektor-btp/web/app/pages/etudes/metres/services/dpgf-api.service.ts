@@ -49,6 +49,10 @@ export class DpgfApiService extends FeatureApiService<DPGF> {
       quantite: number | null;
       unite: string | null;
       prixUnitaire: number | null;
+      prixFourniBase: number | null;
+      fraisGenerauxPercent: number | null;
+      margePercent: number | null;
+      descriptif: string | null;
       mode: 'FOURNI' | 'DECOMPOSE';
     }>,
   ): Promise<NoeudDPGF> {

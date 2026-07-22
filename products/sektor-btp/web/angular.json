@@ -79,6 +79,17 @@
                 }
               ]
             },
+            "staging-local": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.staging-local.ts"
+                }
+              ]
+            },
             "dev": {
               "budgets": [
                 {
@@ -157,6 +168,10 @@
             },
             "local-backend": {
               "buildTarget": "project-fountain:build:local-backend",
+              "proxyConfig": "proxy.conf.json"
+            },
+            "staging-local": {
+              "buildTarget": "project-fountain:build:staging-local",
               "proxyConfig": "proxy.conf.json"
             }
           },

@@ -10,6 +10,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import ma.nafura.etudes.api.request.DossierEtudeCreateDto;
 import ma.nafura.etudes.api.request.DossierEtudeUpdateDto;
+import ma.nafura.etudes.domain.model.DossierDocument;
 import ma.nafura.etudes.domain.model.DossierEtude;
 import ma.nafura.etudes.domain.model.DpgfNoeud;
 import ma.nafura.etudes.domain.model.StatutDossierEtude;
@@ -267,8 +268,11 @@ public class DossierEtudeService {
      * bordereau cinq fois.
      */
     private ContexteGate chargerContexte(DossierEtude dossier) {
-        long documents = documentRepository.countByTenantIdAndDossierEtudeId(tenantId(), dossier.getId());
-        return new ContexteGate(chargerArticles(dossier), documents);
+        var pieces = documentRepository.findByTenantIdAndDossierEtudeIdOrderByOrdreAsc(
+                tenantId(), dossier.getId());
+        boolean hasBordereau = pieces.stream().anyMatch(DossierDocument::contientBordereau);
+        boolean hasCps = pieces.stream().anyMatch(DossierDocument::contientCps);
+        return new ContexteGate(chargerArticles(dossier), pieces.size(), hasBordereau, hasCps);
     }
 
     /** Articles à plat — aucune règle d'étape n'a besoin de la hiérarchie. */

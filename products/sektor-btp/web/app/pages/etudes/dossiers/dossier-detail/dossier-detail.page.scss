@@ -1,6 +1,16 @@
 :host {
   display: block;
   height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.dossier {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .dossier__entete {
@@ -9,7 +19,8 @@
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
+  flex-shrink: 0;
 }
 
 .dossier__titre {
@@ -28,11 +39,40 @@
   padding: 2px 12px;
   font-size: 0.8125rem;
   white-space: nowrap;
+
+  &[data-statut='EN_VALIDATION'] {
+    color: var(--nf-color-warning-700, #92400e);
+    border-color: color-mix(in srgb, var(--nf-color-warning-600, #d97706) 45%, transparent);
+    background: color-mix(in srgb, var(--nf-color-warning-600, #d97706) 12%, transparent);
+  }
+
+  &[data-statut='VALIDEE'],
+  &[data-statut='DEVIS_GENERE'] {
+    color: var(--nf-color-success, #059669);
+    border-color: color-mix(in srgb, var(--nf-color-success, #059669) 40%, transparent);
+    background: color-mix(in srgb, var(--nf-color-success, #059669) 10%, transparent);
+  }
 }
 
-.dossier__etat,
-.dossier__verrou {
+.dossier__etat {
   color: var(--nf-color-text-secondary);
+}
+
+.dossier__verrou {
+  margin: 0 0 12px;
+  padding: 0.65rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: var(--nf-color-text-secondary);
+  background: var(--nf-color-bg-subtle);
+  border: 1px solid var(--nf-color-border);
+  flex-shrink: 0;
+
+  &[data-statut='EN_VALIDATION'] {
+    color: var(--nf-color-warning-700, #92400e);
+    border-color: color-mix(in srgb, var(--nf-color-warning-600, #d97706) 35%, transparent);
+    background: color-mix(in srgb, var(--nf-color-warning-600, #d97706) 10%, transparent);
+  }
 }
 
 .dossier__erreur {
@@ -41,15 +81,29 @@
   background: var(--nf-color-bg-subtle);
   color: var(--nf-color-text-primary);
   padding: 10px 14px;
-  margin: 0 0 16px;
+  margin: 0 0 12px;
+  flex-shrink: 0;
+}
+
+.dossier__blocage-hint {
+  margin: 0 0 8px;
+  font-size: 0.8125rem;
+  color: var(--nf-color-danger-600, #c0392b);
+}
+
+.dossier__wizard {
+  flex: 1 1 0;
+  min-height: 0;
+  display: block;
 }
 
 .dossier__etape {
-  padding-top: 16px;
+  padding-top: 8px;
+  min-height: 0;
 }
 
 .dossier__etape-titre {
-  margin: 0;
+  margin: 0 0 8px;
   font-size: 1rem;
   font-weight: 600;
   color: var(--nf-color-text-primary);

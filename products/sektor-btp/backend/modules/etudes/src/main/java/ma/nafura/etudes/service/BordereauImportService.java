@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 import ma.nafura.etudes.api.request.ImportNoeudDto;
 import ma.nafura.etudes.api.request.ImportTreeRequest;
+import ma.nafura.etudes.api.response.BordereauValidationResult;
 import ma.nafura.etudes.domain.model.DossierDocument;
 import ma.nafura.etudes.domain.model.DossierEtude;
 import ma.nafura.etudes.domain.model.Dpgf;
@@ -57,7 +58,7 @@ public class BordereauImportService {
      * @param pieceId optionnel — pour mémoriser le document source
      */
     @Transactional
-    public Dpgf validerImport(UUID dossierId, ImportTreeRequest arbre, UUID pieceId) {
+    public BordereauValidationResult validerImport(UUID dossierId, ImportTreeRequest arbre, UUID pieceId) {
         DossierEtude dossier = requireDossier(dossierId);
         String documentId = null;
         if (pieceId != null) {
@@ -76,7 +77,9 @@ public class BordereauImportService {
     @Transactional
     public Dpgf extraireDepuisPiece(UUID dossierId, UUID pieceId) {
         ExtractionBrute brute = extraireArbre(dossierId, pieceId);
-        return rattacherArbre(brute.dossier(), brute.arbre(), brute.piece().getDocumentId());
+        BordereauValidationResult result =
+                rattacherArbre(brute.dossier(), brute.arbre(), brute.piece().getDocumentId());
+        return dpgfService.getArbre(result.dpgfId());
     }
 
     @Transactional
@@ -127,24 +130,29 @@ public class BordereauImportService {
         return new ExtractionBrute(dossier, piece, arbre);
     }
 
-    private Dpgf rattacherArbre(DossierEtude dossier, ImportTreeRequest arbre, String documentId) {
+    private BordereauValidationResult rattacherArbre(
+            DossierEtude dossier, ImportTreeRequest arbre, String documentId) {
         BigDecimal tva = dossier.getTvaTauxDefaut() != null
                 ? dossier.getTvaTauxDefaut()
                 : parametres.tvaTauxDefaut();
 
-        Dpgf dpgf;
+        DpgfService.ImportResult imported;
         if (dossier.getDpgfId() == null) {
-            dpgf = dpgfService.createFromImport(arbre, dossier.getObjet(), tva);
-            dossier.setDpgfId(dpgf.getId());
+            imported = dpgfService.createFromImport(arbre, dossier.getObjet(), tva);
+            dossier.setDpgfId(imported.dpgf().getId());
         } else {
-            dpgf = dpgfService.remplacerParImport(dossier.getDpgfId(), arbre);
+            imported = dpgfService.remplacerParImport(dossier.getDpgfId(), arbre);
         }
 
         if (StringUtils.hasText(documentId)) {
             dossier.setBordereauDocumentId(documentId);
         }
         dossierRepository.save(dossier);
-        return dpgf;
+        return new BordereauValidationResult(
+                imported.dpgf().getId(),
+                imported.dpgf().getNumero(),
+                imported.articlesAcceptes(),
+                imported.articlesIgnores());
     }
 
     private DossierEtude requireDossier(UUID dossierId) {
