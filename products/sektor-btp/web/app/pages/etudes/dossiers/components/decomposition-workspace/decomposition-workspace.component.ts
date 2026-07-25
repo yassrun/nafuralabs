@@ -42,6 +42,9 @@ export class DecompositionWorkspaceComponent {
   private readonly confirmDialog = inject(ConfirmDialogService);
 
   readonly dpgfId = input.required<string>();
+  readonly dossierId = input.required<string>();
+  /** Absent tant que le CPS n’est pas indexé — masque alors « Proposer depuis le CPS ». */
+  readonly cpsDocumentId = input<string | null>(null);
   readonly modifiable = input(true);
   readonly fgDefaut = input(10);
   readonly margeDefaut = input(17.5);
@@ -99,14 +102,23 @@ export class DecompositionWorkspaceComponent {
   }
 
   async onSelectPoste(row: BordereauTreeRow | null): Promise<void> {
+    const current = this.selectedPoste();
+    // Même poste : pas de rechargement ni de dialogue dirty.
+    if (row && current && (row.key === current.key || (row.id && row.id === current.id))) {
+      return;
+    }
     if (this.posteDirty()) {
       const ok = await this.confirmDialog.confirm({
         title: 'Modifications non enregistrées',
-        message: 'Des modifications non enregistrées seront perdues. Continuer ?',
+        message:
+          'Vous avez des modifications non enregistrées sur ce poste. Les abandonner pour changer de sélection ?',
         variant: 'danger',
-        confirmLabel: 'Continuer',
+        confirmLabel: 'Abandonner',
+        cancelLabel: 'Rester sur le poste',
       });
       if (!ok) return;
+      this.posteDirty.set(false);
+      this.dirtyChange.emit(false);
     }
     this.applySelect(row);
   }
@@ -142,9 +154,10 @@ export class DecompositionWorkspaceComponent {
     return this.confirmDialog.confirm({
       title: 'Modifications non enregistrées',
       message:
-        'Enregistrez le poste courant ou abandonnez les modifications avant de continuer.',
+        'Vous avez des modifications non enregistrées sur ce poste. Enregistrez-les ou abandonnez-les avant de continuer.',
       variant: 'danger',
       confirmLabel: 'Abandonner et continuer',
+      cancelLabel: 'Rester sur le poste',
     });
   }
 

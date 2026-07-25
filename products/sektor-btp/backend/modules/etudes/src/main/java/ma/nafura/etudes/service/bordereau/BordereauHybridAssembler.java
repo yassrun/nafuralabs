@@ -37,7 +37,7 @@ public class BordereauHybridAssembler {
         Set<String> assigned = new HashSet<>();
         for (JsonNode lotNode : classification.get("lots")) {
             ImportNoeudDto lot = mapGroup(lotNode, DpgfNoeud.TYPE_LOT, "Lot", byId, assigned);
-            if (lot != null) {
+            if (lot != null && !PdfBordereauLayoutParser.isMarketTitleNoise(lot.getLibelle())) {
                 tree.getArbre().add(lot);
             }
         }
@@ -65,22 +65,206 @@ public class BordereauHybridAssembler {
     }
 
     /**
-     * Reconstruction locale sans LLM : groupes détectés + articles rattachés par ordre/page.
+     * Reconstruction locale sans LLM.
+     *
+     * <p>Stratégie (DQE marocain typique) :
+     * <ol>
+     *   <li>Collecte les libellés « SOUS LOT N° X » / « LOT X » (ignore les titres marché).</li>
+     *   <li>Attache chaque article/section au lot dont le numéro correspond au préfixe de code
+     *       (1-1-1 → lot 1, 3.2.1 → lot 3) — résiste au désordre de lecture PDF où les en-têtes
+     *       SOUS LOT arrivent après les articles.</li>
+     *   <li>Fallback séquentiel si aucun préfixe exploitable.</li>
+     * </ol>
      */
     public ImportTreeRequest assembleLocalOnly(BordereauParseResult parse) {
+        ImportTreeRequest byCode = assembleByCodePrefix(parse);
+        if (byCode.getArbre().size() >= 2
+                && countArticlesDeep(byCode.getArbre()) >= Math.max(3, parse.articleCandidates().size() / 2)) {
+            return byCode;
+        }
+        return assembleSequential(parse);
+    }
+
+    private ImportTreeRequest assembleByCodePrefix(BordereauParseResult parse) {
+        Map<String, ImportNoeudDto> lotsByKey = new LinkedHashMap<>();
+        Map<String, String> lotLabels = new LinkedHashMap<>();
+
+        for (BordereauRowCandidate row : parse.rows()) {
+            if (PdfBordereauLayoutParser.isMarketTitleNoise(row.libelle())) {
+                continue;
+            }
+            if (row.kind() == BordereauRowCandidate.Kind.SOUS_LOT
+                    || row.kind() == BordereauRowCandidate.Kind.LOT) {
+                String key = extractLotKey(row);
+                if (key == null) {
+                    continue;
+                }
+                rememberLotLabel(lotLabels, key, row.libelle());
+                lotsByKey.computeIfAbsent(key, k -> newGroup(DpgfNoeud.TYPE_LOT, k, lotLabels.get(k)));
+                lotsByKey.get(key).setLibelle(lotLabels.get(key));
+            } else if (row.kind() == BordereauRowCandidate.Kind.SECTION && isTopLevelSection(row.code())) {
+                // "1 - TERRASSEMENT" when SOUS LOT header was missed in reading order.
+                String key = leadingLotKey(row.code());
+                if (key != null) {
+                    rememberLotLabel(lotLabels, key, row.libelle());
+                    lotsByKey.computeIfAbsent(key, k -> newGroup(DpgfNoeud.TYPE_LOT, k, lotLabels.get(k)));
+                    lotsByKey.get(key).setLibelle(lotLabels.get(key));
+                }
+            }
+        }
+
+        // Ensure lots exist for article prefixes even without SOUS LOT headers.
+        for (BordereauRowCandidate row : parse.articleCandidates()) {
+            String key = leadingLotKey(row.code());
+            if (key != null && isPlausibleLotKey(key)) {
+                lotsByKey.computeIfAbsent(
+                        key, k -> newGroup(DpgfNoeud.TYPE_LOT, k, lotLabels.getOrDefault(k, "Lot " + k)));
+            }
+        }
+
+        Map<String, ImportNoeudDto> sectionByKey = new LinkedHashMap<>();
+        for (BordereauRowCandidate row : parse.rows()) {
+            if (row.kind() != BordereauRowCandidate.Kind.SECTION) {
+                continue;
+            }
+            if (PdfBordereauLayoutParser.isMarketTitleNoise(row.libelle())) {
+                continue;
+            }
+            if (isTopLevelSection(row.code())) {
+                continue; // already used as lot label
+            }
+            String lotKey = leadingLotKey(row.code());
+            if (lotKey == null || !lotsByKey.containsKey(lotKey)) {
+                continue;
+            }
+            String sectionKey = compactCode(row.code());
+            if (sectionKey == null || sectionByKey.containsKey(sectionKey)) {
+                continue;
+            }
+            ImportNoeudDto section = newGroup(DpgfNoeud.TYPE_SOUS_LOT, row);
+            lotsByKey.get(lotKey).getEnfants().add(section);
+            sectionByKey.put(sectionKey, section);
+        }
+
+        for (BordereauRowCandidate row : parse.articleCandidates()) {
+            if (PdfBordereauLayoutParser.isMarketTitleNoise(row.libelle())) {
+                continue;
+            }
+            ImportNoeudDto article = toArticle(row);
+            String lotKey = leadingLotKey(row.code());
+            if (lotKey != null && !isPlausibleLotKey(lotKey)) {
+                lotKey = null;
+            }
+            ImportNoeudDto lot = lotKey != null ? lotsByKey.get(lotKey) : null;
+            if (lot == null) {
+                lot = lotsByKey.computeIfAbsent("_", k -> newGroup(DpgfNoeud.TYPE_LOT, null, "A classer"));
+            }
+            String sectionKey = sectionKeyForArticle(row.code());
+            ImportNoeudDto section = sectionKey != null ? sectionByKey.get(sectionKey) : null;
+            if (section != null && lot.getEnfants().contains(section)) {
+                section.getEnfants().add(article);
+            } else {
+                lot.getEnfants().add(article);
+            }
+        }
+
+        // Drop empty / spurious lots, sort by numeric code.
+        List<Map.Entry<String, ImportNoeudDto>> ordered = new ArrayList<>(lotsByKey.entrySet());
+        ordered.sort((a, b) -> {
+            if ("_".equals(a.getKey())) {
+                return 1;
+            }
+            if ("_".equals(b.getKey())) {
+                return -1;
+            }
+            try {
+                return Integer.compare(Integer.parseInt(a.getKey()), Integer.parseInt(b.getKey()));
+            } catch (NumberFormatException ex) {
+                return a.getKey().compareTo(b.getKey());
+            }
+        });
+
+        ImportTreeRequest tree = new ImportTreeRequest();
+        for (Map.Entry<String, ImportNoeudDto> e : ordered) {
+            ImportNoeudDto lot = e.getValue();
+            int articles = countArticlesDeep(List.of(lot));
+            if (articles == 0) {
+                continue;
+            }
+            // Spurious prefix (e.g. qty misread as code 120) with no real label.
+            if (!"_".equals(e.getKey())
+                    && !isPlausibleLotKey(e.getKey())
+                    && (lot.getLibelle() == null || lot.getLibelle().startsWith("Lot "))) {
+                continue;
+            }
+            if (lotLabels.containsKey(e.getKey())) {
+                lot.setLibelle(lotLabels.get(e.getKey()));
+            }
+            tree.getArbre().add(lot);
+        }
+        return tree;
+    }
+
+    private static void rememberLotLabel(Map<String, String> lotLabels, String key, String libelle) {
+        if (!StringUtils.hasText(libelle) || !isPlausibleLotKey(key)) {
+            return;
+        }
+        String label = libelle.trim();
+        String existing = lotLabels.get(key);
+        if (existing == null || label.length() > existing.length()) {
+            lotLabels.put(key, label);
+        }
+    }
+
+    private static boolean isPlausibleLotKey(String key) {
+        if (key == null || key.isBlank()) {
+            return false;
+        }
+        try {
+            int n = Integer.parseInt(key);
+            return n >= 1 && n <= 30;
+        } catch (NumberFormatException ex) {
+            return false;
+        }
+    }
+
+    private static boolean isTopLevelSection(String code) {
+        String compact = compactCode(code);
+        if (compact == null) {
+            return false;
+        }
+        // "1", "01", "2" — not "1-1" / "3.2"
+        return compact.matches("0*\\d{1,2}");
+    }
+
+    private ImportTreeRequest assembleSequential(BordereauParseResult parse) {
         ImportTreeRequest tree = new ImportTreeRequest();
         ImportNoeudDto currentLot = null;
         ImportNoeudDto currentSousLot = null;
 
         for (BordereauRowCandidate row : parse.rows()) {
             if (row.kind() == BordereauRowCandidate.Kind.LOT) {
+                if (PdfBordereauLayoutParser.isMarketTitleNoise(row.libelle())) {
+                    continue;
+                }
                 currentLot = newGroup(DpgfNoeud.TYPE_LOT, row);
                 tree.getArbre().add(currentLot);
                 currentSousLot = null;
                 continue;
             }
-            if (row.kind() == BordereauRowCandidate.Kind.SOUS_LOT
-                    || row.kind() == BordereauRowCandidate.Kind.SECTION) {
+            if (row.kind() == BordereauRowCandidate.Kind.SOUS_LOT) {
+                if (PdfBordereauLayoutParser.isMarketTitleNoise(row.libelle())) {
+                    continue;
+                }
+                currentLot = newGroup(DpgfNoeud.TYPE_LOT, row);
+                tree.getArbre().add(currentLot);
+                currentSousLot = null;
+                continue;
+            }
+            if (row.kind() == BordereauRowCandidate.Kind.SECTION) {
+                if (PdfBordereauLayoutParser.isMarketTitleNoise(row.libelle())) {
+                    continue;
+                }
                 if (currentLot == null) {
                     currentLot = newGroup(DpgfNoeud.TYPE_LOT, "1", "Lot 1");
                     tree.getArbre().add(currentLot);
@@ -90,6 +274,9 @@ public class BordereauHybridAssembler {
                 continue;
             }
             if (!row.looksLikeArticle()) {
+                continue;
+            }
+            if (PdfBordereauLayoutParser.isMarketTitleNoise(row.libelle())) {
                 continue;
             }
             ImportNoeudDto article = toArticle(row);
@@ -108,6 +295,70 @@ public class BordereauHybridAssembler {
             tree.getArbre().addAll(flatFallback(parse));
         }
         return tree;
+    }
+
+    private static String extractLotKey(BordereauRowCandidate row) {
+        String fromCode = leadingLotKey(row.code());
+        if (fromCode != null) {
+            return fromCode;
+        }
+        String lib = row.libelle() == null ? "" : row.libelle();
+        java.util.regex.Matcher m = java.util.regex.Pattern
+                .compile("(?:SOUS\\s*)?LOT\\s*N?[°ºo]?\\s*(\\d+)", java.util.regex.Pattern.CASE_INSENSITIVE)
+                .matcher(lib);
+        if (m.find()) {
+            return String.valueOf(Integer.parseInt(m.group(1)));
+        }
+        return null;
+    }
+
+    private static String leadingLotKey(String code) {
+        if (code == null || code.isBlank()) {
+            return null;
+        }
+        String compact = compactCode(code);
+        if (compact == null) {
+            return null;
+        }
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile("^0*(\\d+)").matcher(compact);
+        if (!m.find()) {
+            return null;
+        }
+        return String.valueOf(Integer.parseInt(m.group(1)));
+    }
+
+    /** Section key for article "1-1-3" → "1-1" ; "3.2.1" → "3.2". */
+    private static String sectionKeyForArticle(String code) {
+        String compact = compactCode(code);
+        if (compact == null) {
+            return null;
+        }
+        String[] parts = compact.split("[.\\-]");
+        if (parts.length < 2) {
+            return null;
+        }
+        return parts[0] + (compact.contains(".") ? "." : "-") + parts[1];
+    }
+
+    private static String compactCode(String code) {
+        if (code == null || code.isBlank()) {
+            return null;
+        }
+        return code.trim().replaceAll("\\s+", "");
+    }
+
+    private static int countArticlesDeep(List<ImportNoeudDto> nodes) {
+        if (nodes == null) {
+            return 0;
+        }
+        int n = 0;
+        for (ImportNoeudDto node : nodes) {
+            if (DpgfNoeud.TYPE_ARTICLE.equalsIgnoreCase(node.getType())) {
+                n++;
+            }
+            n += countArticlesDeep(node.getEnfants());
+        }
+        return n;
     }
 
     private List<ImportNoeudDto> flatFallback(BordereauParseResult parse) {

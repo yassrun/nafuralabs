@@ -64,7 +64,14 @@ public class SecurityConfig {
             
             // Disable CSRF for API
             .csrf(csrf -> csrf.disable())
-            
+
+            // HSTS is an edge concern, not an app concern. Prod terminates TLS at the ingress
+            // and adds HSTS there; http-only envs (staging / staging-local) must never emit it.
+            // Spring's default HSTS carries includeSubDomains, which would pin the whole
+            // *.nafuralabs.staging domain to https and break the http-only OAuth flow.
+            .headers(headers -> headers
+                .httpStrictTransportSecurity(hsts -> hsts.disable()))
+
             // Stateless session
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))

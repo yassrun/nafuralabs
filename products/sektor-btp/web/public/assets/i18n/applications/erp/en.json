@@ -717,10 +717,16 @@
       },
       "chiffrage": {
         "prix_absent": "Unit selling price is missing or zero.",
-        "taux_manquants": "Overhead or profit margin is missing on the DPU."
+        "taux_manquants": "Overhead or profit margin is missing on the DPU.",
+        "client_manquant": "Select a Partner client before submitting the estimate."
       },
       "non_franchie": "This step cannot be completed yet.",
       "corriger": "Fix"
+    },
+    "client": {
+      "id_invalide": "Invalid client identifier.",
+      "introuvable": "Client not found in the Partner directory.",
+      "role_invalide": "This partner does not have the Client role."
     }
   }
 }

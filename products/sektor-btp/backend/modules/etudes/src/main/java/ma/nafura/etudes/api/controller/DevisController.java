@@ -67,8 +67,10 @@ public class DevisController {
 
     @PostMapping("/from-dpgf")
     @RequirePermission("etudes.create")
-    public ResponseEntity<Devis> createFromDpgf(@RequestParam UUID dpgfId) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.createFromDpgf(dpgfId));
+    public ResponseEntity<Devis> createFromDpgf(
+            @RequestParam UUID dpgfId, @RequestParam String clientId) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(service.createFromDpgf(dpgfId, null, clientId, null));
     }
 
     @PutMapping("/{id}")

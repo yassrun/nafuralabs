@@ -65,7 +65,15 @@ export function prevBackendEtape(uiStep: number): number | null {
 export function backendGateEtapesForUi(uiStep: number): number[] {
   if (uiStep === 1) return [BACKEND_ETAPE.DOCUMENTS];
   if (uiStep === 2) return [BACKEND_ETAPE.BORDEREAU];
-  if (uiStep === 3) return [BACKEND_ETAPE.DECOMPOSITION, BACKEND_ETAPE.CONSULTATION];
+  // Décomposition : structure + alertes consultation + prix de vente sur tous les postes
+  // (gate chiffrage) — requis pour « Voir la synthèse ».
+  if (uiStep === 3) {
+    return [
+      BACKEND_ETAPE.DECOMPOSITION,
+      BACKEND_ETAPE.CONSULTATION,
+      BACKEND_ETAPE.CHIFFRAGE,
+    ];
+  }
   return [BACKEND_ETAPE.CHIFFRAGE];
 }
 

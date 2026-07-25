@@ -12,7 +12,8 @@ export type ApprovalEntityType =
   | 'OS'
   | 'FACTURE_CLIENT'
   | 'NOTE_FRAIS'
-  | 'CONTRAT_ST';
+  | 'CONTRAT_ST'
+  | 'ETUDE_PRIX';
 
 export type ApprovalStatus = 'EN_ATTENTE' | 'APPROUVE' | 'REJETE' | 'EXPIRE';
 export type ApprovalDecision = 'APPROUVE' | 'REJETE' | 'DELEGUE' | 'ESCALADE';
@@ -98,6 +99,7 @@ export const ENTITY_TYPE_LABELS: Record<ApprovalEntityType, string> = {
   FACTURE_CLIENT: 'Facture client',
   NOTE_FRAIS: 'Note de frais',
   CONTRAT_ST: 'Contrat sous-traitance',
+  ETUDE_PRIX: "Étude de prix",
 };
 
 export const ENTITY_TYPE_ICONS: Record<ApprovalEntityType, string> = {
@@ -114,4 +116,5 @@ export const ENTITY_TYPE_ICONS: Record<ApprovalEntityType, string> = {
   FACTURE_CLIENT: 'file-text',
   NOTE_FRAIS: 'banknote',
   CONTRAT_ST: 'handshake',
+  ETUDE_PRIX: 'calculator',
 };

@@ -1,0 +1,26 @@
+# ingress-nginx controller config for HTTP-only clusters (staging / staging-local / demo).
+#
+# Why: ingress-nginx defaults to hsts=true, hsts-max-age=31536000, hsts-include-subdomains=true.
+# On the :443 listener (served with the controller's default self-signed cert) nginx then adds
+#   Strict-Transport-Security: max-age=31536000; includeSubDomains
+# to every response. Because of includeSubDomains, a single accidental https hit on ANY
+# *.nafuralabs.staging host pins the whole domain to https in the browser. Keycloak then sees
+# X-Forwarded-Proto: https and flips the OIDC issuer to https, breaking the http-only OAuth flow
+# (auth/callback -> "Authentication failed").
+#
+# HSTS is a controller-global setting (no per-Ingress annotation exists for it), so it must be
+# disabled here. This is applied by `nlops.sh infra_up` for every env except prod.
+# Prod terminates real TLS and intentionally keeps HSTS (see prod ingress-tls overlays).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ingress-nginx-controller
+  namespace: ingress-nginx
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+data:
+  allow-snippet-annotations: "true"
+  annotations-risk-level: "Critical"
+  hsts: "false"
+  hsts-include-subdomains: "false"

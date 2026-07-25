@@ -16,6 +16,8 @@ public class DossierEtudeCreateDto {
     @Size(max = 50)
     private String numero;
 
+    /** Partner UUID (rôle CLIENT) — obligatoire dès la création. */
+    @NotBlank
     @Size(max = 100)
     private String clientId;
 

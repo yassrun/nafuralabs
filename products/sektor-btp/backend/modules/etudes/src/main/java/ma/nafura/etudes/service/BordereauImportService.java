@@ -56,10 +56,21 @@ public class BordereauImportService {
      * Persiste un arbre déjà revu (remplace le DPGF existant du dossier si présent).
      *
      * @param pieceId optionnel — pour mémoriser le document source
+     * @param confirmReplace obligatoire à {@code true} si un DPGF existe déjà (remplacement destructif)
      */
     @Transactional
-    public BordereauValidationResult validerImport(UUID dossierId, ImportTreeRequest arbre, UUID pieceId) {
+    public BordereauValidationResult validerImport(
+            UUID dossierId, ImportTreeRequest arbre, UUID pieceId, boolean confirmReplace) {
         DossierEtude dossier = requireDossier(dossierId);
+        if (!dossier.getStatus().estModifiable()) {
+            throw new IllegalStateException("etudes.dossier.verrouille");
+        }
+        if (dossier.getDpgfId() != null && !confirmReplace) {
+            throw new IllegalStateException("etudes.bordereau.remplacement_non_confirme");
+        }
+        if (dossier.isStructureVerrouillee() && dossier.getDpgfId() != null) {
+            throw new IllegalStateException("etudes.bordereau.structure_verrouillee");
+        }
         String documentId = null;
         if (pieceId != null) {
             DossierDocument piece = documentService.lister(dossierId).stream()
@@ -68,7 +79,21 @@ public class BordereauImportService {
                     .orElseThrow(() -> new IllegalArgumentException("etudes.document.introuvable"));
             documentId = piece.getDocumentId();
         }
-        return rattacherArbre(dossier, arbre, documentId);
+        boolean remplacement = dossier.getDpgfId() != null;
+        BordereauValidationResult result = rattacherArbre(dossier, arbre, documentId);
+        if (remplacement) {
+            int rev = dossier.getBordereauRevision() != null ? dossier.getBordereauRevision() : 1;
+            dossier.setBordereauRevision(rev + 1);
+            dossierRepository.save(dossier);
+        }
+        return result;
+    }
+
+    /** Compat — exige confirmation si un bordereau existe déjà. */
+    @Transactional
+    public BordereauValidationResult validerImport(UUID dossierId, ImportTreeRequest arbre, UUID pieceId) {
+        DossierEtude dossier = requireDossier(dossierId);
+        return validerImport(dossierId, arbre, pieceId, dossier.getDpgfId() == null);
     }
 
     /**

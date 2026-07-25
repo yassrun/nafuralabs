@@ -10,6 +10,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -116,6 +117,21 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 correlationId(request));
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler({PayloadTooLargeException.class, MaxUploadSizeExceededException.class})
+    public ResponseEntity<ApiError> handlePayloadTooLarge(
+            Exception ex,
+            HttpServletRequest request) {
+        log.warn("Payload too large: {}", ex.getMessage());
+        ApiError error = ApiError.simple(
+                "PAYLOAD_TOO_LARGE",
+                "error.payloadTooLarge",
+                ex.getMessage() != null && !ex.getMessage().isBlank()
+                        ? ex.getMessage()
+                        : "Uploaded file exceeds the maximum allowed size",
+                correlationId(request));
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(error);
     }
 
     @ExceptionHandler(Exception.class)

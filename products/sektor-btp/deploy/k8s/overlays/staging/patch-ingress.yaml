@@ -7,6 +7,10 @@ metadata:
     nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
     nginx.ingress.kubernetes.io/hsts: "false"
     nginx.ingress.kubernetes.io/hsts-max-age: "0"
+    # Strip any HSTS emitted by the backend upstream (Spring Security) so an accidental
+    # https hit never pins *.nafuralabs.staging to https (http-only staging).
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      proxy_hide_header Strict-Transport-Security;
     nginx.ingress.kubernetes.io/proxy-body-size: "50m"
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "600"

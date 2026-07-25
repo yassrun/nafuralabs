@@ -1,6 +1,7 @@
 package ma.nafura.platform.collaboration.docmanager.storage;
 
 import ma.nafura.platform.collaboration.docmanager.config.MinioProperties;
+import ma.nafura.platform.framework.api.error.PayloadTooLargeException;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.GetObjectArgs;
@@ -43,8 +44,14 @@ public class MinioDocumentStorage implements DocumentStorage {
             
             log.info("Uploaded document {} to storage key: {}", documentId, storageKey);
             return storageKey;
+        } catch (PayloadTooLargeException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Failed to upload document {}: {}", documentId, e.getMessage(), e);
+            if (isPayloadTooLarge(e)) {
+                throw new PayloadTooLargeException(
+                        "Uploaded file exceeds the storage size limit", e);
+            }
             throw new StorageException("Failed to upload document", e);
         }
     }
@@ -111,6 +118,20 @@ public class MinioDocumentStorage implements DocumentStorage {
             documentId.toString(), 
             fileName
         );
+    }
+
+    /** True when nginx/MinIO (or similar) rejected the body as too large (HTTP 413). */
+    static boolean isPayloadTooLarge(Throwable throwable) {
+        for (Throwable t = throwable; t != null; t = t.getCause()) {
+            String message = t.getMessage();
+            if (message == null) {
+                continue;
+            }
+            if (message.contains("413") || message.contains("Request Entity Too Large")) {
+                return true;
+            }
+        }
+        return false;
     }
     
     public static class StorageException extends RuntimeException {

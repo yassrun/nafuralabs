@@ -5,7 +5,7 @@ import ma.nafura.platform.collaboration.docmanager.domain.enums.DocumentType;
 import ma.nafura.platform.collaboration.docmanager.domain.model.Document;
 import ma.nafura.platform.collaboration.docmanager.repository.DocumentRepository;
 import ma.nafura.platform.collaboration.docmanager.storage.DocumentStorage;
-import ma.nafura.platform.collaboration.docmanager.storage.MinioDocumentStorage;
+import ma.nafura.platform.framework.api.error.PayloadTooLargeException;
 import ma.nafura.platform.framework.service.crud.CrudException;
 import ma.nafura.platform.framework.service.crud.CrudNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +45,8 @@ public class DocumentService {
                 occurredAt,
                 uploadedByUserId
             );
+        } catch (PayloadTooLargeException | DocumentServiceException e) {
+            throw e;
         } catch (Exception e) {
             throw new DocumentServiceException("Failed to upload document", e);
         }
@@ -85,6 +87,8 @@ public class DocumentService {
                     new ByteArrayInputStream(fileBytes), 
                     contentType
                 );
+            } catch (PayloadTooLargeException e) {
+                throw e;
             } catch (Exception e) {
                 log.error("Failed to upload document {} to MinIO: {}", documentId, e.getMessage(), e);
                 throw new DocumentServiceException("Failed to upload document to storage", e);
@@ -126,8 +130,8 @@ public class DocumentService {
             log.info("Document {} uploaded successfully for tenant {}", saved.getId(), tenantId);
             
             return saved;
-        } catch (DocumentServiceException e) {
-            // Re-throw service exceptions
+        } catch (PayloadTooLargeException | DocumentServiceException e) {
+            // Re-throw typed exceptions (do not wrap as generic DocumentServiceException)
             throw e;
         } catch (Exception e) {
             log.error("Failed to upload document for tenant {}: {}", tenantId, e.getMessage(), e);

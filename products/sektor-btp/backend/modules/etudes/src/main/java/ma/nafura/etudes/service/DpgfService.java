@@ -23,6 +23,7 @@ import ma.nafura.etudes.domain.model.DpgfNoeud;
 import ma.nafura.etudes.domain.model.Metre;
 import ma.nafura.etudes.domain.model.MetreLigne;
 import ma.nafura.etudes.domain.model.Ouvrage;
+import ma.nafura.etudes.repository.DossierEtudeRepository;
 import ma.nafura.etudes.repository.DpgfNoeudRepository;
 import ma.nafura.etudes.repository.DpgfRepository;
 import ma.nafura.etudes.repository.OuvrageRepository;
@@ -38,6 +39,7 @@ public class DpgfService {
 
     private final DpgfRepository repository;
     private final DpgfNoeudRepository noeudRepository;
+    private final DossierEtudeRepository dossierEtudeRepository;
     private final MetreService metreService;
     private final OuvrageRepository ouvrageRepository;
     private final DpgfAgregationService agregationService;
@@ -46,12 +48,14 @@ public class DpgfService {
     public DpgfService(
             DpgfRepository repository,
             DpgfNoeudRepository noeudRepository,
+            DossierEtudeRepository dossierEtudeRepository,
             MetreService metreService,
             OuvrageRepository ouvrageRepository,
             DpgfAgregationService agregationService,
             ParametresEtudeService parametresEtudeService) {
         this.repository = repository;
         this.noeudRepository = noeudRepository;
+        this.dossierEtudeRepository = dossierEtudeRepository;
         this.metreService = metreService;
         this.ouvrageRepository = ouvrageRepository;
         this.agregationService = agregationService;
@@ -183,6 +187,7 @@ public class DpgfService {
     /** Remplace entièrement les nœuds d'un DPGF existant par un nouvel arbre importé. */
     @Transactional
     public ImportResult remplacerParImport(UUID dpgfId, ImportTreeRequest request) {
+        assertStructureEditable(dpgfId);
         Dpgf dpgf = requireDpgf(dpgfId);
         List<DpgfNoeud> existants =
                 noeudRepository.findByDpgfIdAndTenantIdOrderByOrdreAsc(dpgfId, tenantId());
@@ -278,6 +283,7 @@ public class DpgfService {
 
     @Transactional
     public DpgfNoeud addNoeud(UUID dpgfId, DpgfNoeudCreateDto request) {
+        assertStructureEditable(dpgfId);
         Dpgf dpgf = requireDpgf(dpgfId);
         UUID tenantId = tenantId();
         UUID parentId = parseUuidOrNull(request.getParentId());
@@ -326,6 +332,19 @@ public class DpgfService {
         DpgfNoeud noeud = noeudRepository
                 .findByIdAndTenantId(noeudId, tenantId)
                 .orElseThrow(() -> new IllegalArgumentException("DPGF noeud not found"));
+
+        boolean structureChange = request.getCode() != null
+                || request.getLibelle() != null
+                || request.getQuantite() != null
+                || request.getUnite() != null
+                || request.getOrdre() != null
+                || request.getArticleId() != null
+                || request.getMetreLigneId() != null;
+        if (structureChange) {
+            assertStructureEditable(noeud.getDpgf().getId());
+        } else {
+            assertDossierEditable(noeud.getDpgf().getId());
+        }
 
         if (request.getCode() != null) {
             noeud.setCode(request.getCode().trim());
@@ -390,9 +409,31 @@ public class DpgfService {
                 .findByIdAndTenantId(noeudId, tenantId)
                 .orElseThrow(() -> new IllegalArgumentException("DPGF noeud not found"));
         UUID dpgfId = noeud.getDpgf().getId();
+        assertStructureEditable(dpgfId);
         deleteDescendants(noeudId, tenantId);
         noeudRepository.delete(noeud);
         recalcHeaderTotals(dpgfId);
+    }
+
+    /** Structure figée dès l'entrée en décomposition / chiffrage. */
+    private void assertStructureEditable(UUID dpgfId) {
+        dossierEtudeRepository
+                .findByTenantIdAndDpgfId(tenantId(), dpgfId)
+                .ifPresent(dossier -> {
+                    if (dossier.isStructureVerrouillee()) {
+                        throw new IllegalStateException("etudes.bordereau.structure_verrouillee");
+                    }
+                });
+    }
+
+    private void assertDossierEditable(UUID dpgfId) {
+        dossierEtudeRepository
+                .findByTenantIdAndDpgfId(tenantId(), dpgfId)
+                .ifPresent(dossier -> {
+                    if (!dossier.isModifiable()) {
+                        throw new IllegalStateException("etudes.dossier.verrouille");
+                    }
+                });
     }
 
     private void deleteDescendants(UUID parentId, UUID tenantId) {

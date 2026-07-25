@@ -18,9 +18,11 @@ import ma.nafura.etudes.api.dto.ConvertToChantierResultDto;
 import ma.nafura.etudes.domain.model.Devis;
 import ma.nafura.etudes.domain.model.DevisLigne;
 import ma.nafura.etudes.domain.model.DevisVersion;
+import ma.nafura.etudes.domain.model.DossierEtude;
 import ma.nafura.etudes.domain.model.Dpgf;
 import ma.nafura.etudes.repository.DevisRepository;
 import ma.nafura.etudes.repository.DevisVersionRepository;
+import ma.nafura.etudes.service.port.EtudeClientPort;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,18 +38,21 @@ public class DevisService {
     private final DevisSeedService seedService;
     private final DpgfService dpgfService;
     private final DevisGenerationService generationService;
+    private final EtudeClientPort clientPort;
 
     public DevisService(
             DevisRepository repository,
             DevisVersionRepository versionRepository,
             DevisSeedService seedService,
             DpgfService dpgfService,
-            DevisGenerationService generationService) {
+            DevisGenerationService generationService,
+            EtudeClientPort clientPort) {
         this.repository = repository;
         this.versionRepository = versionRepository;
         this.seedService = seedService;
         this.dpgfService = dpgfService;
         this.generationService = generationService;
+        this.clientPort = clientPort;
     }
 
     @Transactional(readOnly = true)
@@ -97,12 +102,13 @@ public class DevisService {
     @Transactional
     public Devis create(DevisCreateDto request) {
         UUID tenantId = tenantId();
+        EtudeClientPort.ClientSnapshot client = clientPort.requireClientRole(request.getClientId());
         Devis entity = Devis.builder()
                 .tenantId(tenantId)
                 .numero(nextNumero(tenantId))
                 .version(1)
-                .clientId(request.getClientId().trim())
-                .clientName(trimOrNull(request.getClientName()))
+                .clientId(client.id().toString())
+                .clientName(client.raisonSociale())
                 .contactClient(trimOrNull(request.getContactClient()))
                 .objet(request.getObjet().trim())
                 .ville(trimOrNull(request.getVille()))
@@ -128,6 +134,29 @@ public class DevisService {
 
     @Transactional
     public Devis createFromDpgf(UUID dpgfId) {
+        throw new IllegalArgumentException("etudes.gate.chiffrage.client_manquant");
+    }
+
+    /** Génération depuis un dossier d'étude validé — lie devis ↔ dossier. */
+    @Transactional
+    public Devis createFromDossier(DossierEtude dossier) {
+        if (dossier.getDpgfId() == null) {
+            throw new IllegalArgumentException("etudes.dossier.devis_sans_dpgf");
+        }
+        EtudeClientPort.ClientSnapshot client = clientPort.requireClientRole(dossier.getClientId());
+        return createFromDpgf(
+                dossier.getDpgfId(),
+                dossier.getId(),
+                client.id().toString(),
+                client.raisonSociale());
+    }
+
+    @Transactional
+    public Devis createFromDpgf(
+            UUID dpgfId, UUID dossierEtudeId, String clientId, String clientName) {
+        EtudeClientPort.ClientSnapshot client = clientPort.requireClientRole(clientId);
+        String resolvedName =
+                StringUtils.hasText(clientName) ? clientName.trim() : client.raisonSociale();
         Dpgf dpgf = dpgfService.getById(dpgfId);
         UUID tenantId = tenantId();
         LocalDate today = LocalDate.now();
@@ -136,13 +165,16 @@ public class DevisService {
                 .tenantId(tenantId)
                 .numero(nextNumero(tenantId))
                 .version(1)
-                .clientId("cli-default")
-                .objet("Chiffrage — "
-                        + (StringUtils.hasText(dpgf.getProjetNom()) ? dpgf.getProjetNom() : dpgf.getNumero()))
+                .clientId(client.id().toString())
+                .clientName(resolvedName)
+                .objet(StringUtils.hasText(dpgf.getProjetNom())
+                        ? dpgf.getProjetNom()
+                        : ("Chiffrage — " + dpgf.getNumero()))
                 .dateEmission(today)
                 .dateValidite(today.plusMonths(2))
                 .metreId(dpgf.getMetreId())
                 .dpgfId(dpgf.getId())
+                .dossierEtudeId(dossierEtudeId)
                 .bibliothequeReference("DPGF " + dpgf.getNumero())
                 .conditionsPaiement("Selon marché / CCAG-T — conditions type")
                 .delaiExecutionJours(180)
@@ -167,10 +199,10 @@ public class DevisService {
         UUID tenantId = tenantId();
 
         if (request.getClientId() != null) {
-            entity.setClientId(request.getClientId().trim());
-        }
-        if (request.getClientName() != null) {
-            entity.setClientName(trimOrNull(request.getClientName()));
+            EtudeClientPort.ClientSnapshot client =
+                    clientPort.requireClientRole(request.getClientId());
+            entity.setClientId(client.id().toString());
+            entity.setClientName(client.raisonSociale());
         }
         if (request.getContactClient() != null) {
             entity.setContactClient(trimOrNull(request.getContactClient()));

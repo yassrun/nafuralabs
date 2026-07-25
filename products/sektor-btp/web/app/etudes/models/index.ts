@@ -432,6 +432,11 @@ export interface DossierEtude {
   margeGlobalePercent?: number;
   devisGenereId?: string;
   motifRefus?: string;
+  bordereauRevision?: number;
+  validationEtape?: 'N1' | 'N2' | string | null;
+  approvalRequestId?: string | null;
+  structureVerrouillee?: boolean;
+  modifiable?: boolean;
   notes?: string;
   createdBy?: string;
   updatedBy?: string;

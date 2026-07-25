@@ -23,6 +23,7 @@ import {
   PageHeaderComponent,
   PageShellComponent,
   ToastService,
+  VilleMaSelectComponent,
 } from '@lib/anatomy';
 
 import type { Chantier, ChantierStatus } from '@app/chantiers/models';
@@ -61,6 +62,7 @@ function addMonthsIso(from: Date, months: number): string {
     PageHeaderComponent,
     ButtonComponent,
     NfSelectComponent,
+    VilleMaSelectComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -140,8 +142,13 @@ function addMonthsIso(from: Date, months: number): string {
         <section class="panel">
           <label>{{ 'chantiers.create.fields.adresse' | translate }}</label>
           <input type="text" [(ngModel)]="draft.adresse" name="adr" class="fld" />
-          <label for="cc-ville">{{ 'chantiers.create.fields.ville' | translate }}</label>
-          <input id="cc-ville" type="text" [(ngModel)]="draft.ville" name="ville" class="fld" />
+          <nf-ville-ma-select
+            id="cc-ville"
+            [label]="'chantiers.create.fields.ville' | translate"
+            [required]="true"
+            [(ngModel)]="draft.ville"
+            name="ville"
+          />
           <div class="row2">
             <div>
               <label>{{ 'chantiers.create.fields.lat' | translate }}</label>

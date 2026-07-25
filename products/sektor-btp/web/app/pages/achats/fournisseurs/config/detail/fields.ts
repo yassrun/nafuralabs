@@ -1,6 +1,7 @@
 import type { TranslateService } from '@ngx-translate/core';
 
 import type { DetailFieldConfig } from '@lib/anatomy/types';
+import { villeSelectOptions } from '@lib/referentiels/geo-ma';
 
 const CATEGORIES_OPTIONS = [
   'Aciers', 'Ronds à béton', 'Ciment', 'Cimentiers', 'Coffrage', 'Matériaux',
@@ -19,7 +20,7 @@ export function buildFournisseurFields(t: TranslateService): DetailFieldConfig[]
     { key: 'rc', label: tr('achats.fournisseur.form.fields.rc'), type: 'text' },
     { key: 'patente', label: tr('achats.fournisseur.form.fields.patente'), type: 'text' },
     { key: 'adresse', label: tr('achats.fournisseur.form.fields.adresse'), type: 'text' },
-    { key: 'ville', label: tr('achats.fournisseur.form.fields.ville'), type: 'text' },
+    { key: 'ville', label: tr('achats.fournisseur.form.fields.ville'), type: 'select', options: villeSelectOptions() },
     { key: 'pays', label: tr('achats.fournisseur.form.fields.pays'), type: 'text', defaultValue: 'MA' },
     { key: 'contactPrincipalNom', label: tr('achats.fournisseur.form.fields.contactNom'), type: 'text' },
     { key: 'contactPrincipalTel', label: tr('achats.fournisseur.form.fields.contactTel'), type: 'phone-ma' },

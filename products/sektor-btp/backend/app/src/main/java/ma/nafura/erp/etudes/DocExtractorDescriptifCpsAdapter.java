@@ -82,11 +82,28 @@ public class DocExtractorDescriptifCpsAdapter implements DescriptifCpsPort {
 
         if (response.outcome() == StatelessExtractionResponse.Outcome.REJECTED
                 || response.outcome() == StatelessExtractionResponse.Outcome.TECHNICAL_FAILURE) {
-            log.warn("Descriptif CPS proposal failed: {}", response.outcome());
-            return Optional.empty();
+            log.warn("Descriptif CPS proposal failed: {} — fallback section CPS brute", response.outcome());
+            return fallbackSection(sections);
         }
 
-        return parse(response.data(), sections);
+        Optional<DescriptifPropose> parsed = parse(response.data(), sections);
+        return parsed.isPresent() ? parsed : fallbackSection(sections);
+    }
+
+    /**
+     * Sans LLM exploitable : propose le contenu de la meilleure section Postgres
+     * (déjà classée par pertinence). Suffit pour remonter B25/B35, dosages, etc.
+     */
+    private static Optional<DescriptifPropose> fallbackSection(List<CpsSection> sections) {
+        CpsSection best = sections.get(0);
+        if (!StringUtils.hasText(best.getContenu())) {
+            return Optional.empty();
+        }
+        String texte = best.getContenu().trim();
+        if (StringUtils.hasText(best.reference())) {
+            texte = best.reference() + "\n" + texte;
+        }
+        return Optional.of(new DescriptifPropose(texte, best.getId(), 0.55));
     }
 
     private static String buildPrompt(DpgfNoeud article, List<CpsSection> sections) {

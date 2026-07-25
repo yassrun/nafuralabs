@@ -717,10 +717,16 @@
       },
       "chiffrage": {
         "prix_absent": "Prix unitaire de vente manquant ou nul.",
-        "taux_manquants": "Frais généraux ou marge bénéficiaire manquants sur le DPU."
+        "taux_manquants": "Frais généraux ou marge bénéficiaire manquants sur le DPU.",
+        "client_manquant": "Sélectionnez un client Partner avant de soumettre le chiffrage."
       },
       "non_franchie": "Cette étape ne peut pas encore être franchie.",
       "corriger": "Corriger"
+    },
+    "client": {
+      "id_invalide": "Identifiant client invalide.",
+      "introuvable": "Client introuvable dans le référentiel Partner.",
+      "role_invalide": "Ce partenaire n'a pas le rôle Client."
     }
   }
 }

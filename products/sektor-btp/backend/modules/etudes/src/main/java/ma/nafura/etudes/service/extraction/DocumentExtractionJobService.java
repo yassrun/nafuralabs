@@ -262,6 +262,7 @@ public class DocumentExtractionJobService {
         updateProgress(job.getId(), workerId, 40, "extracting");
         String mime = guessMime(piece.getNomFichier());
         ImportTreeRequest arbre = bordereauExtractionPort.extract(contenu, piece.getNomFichier(), mime);
+        var diagnostics = bordereauExtractionPort.consumeDiagnostics();
         if (arbre == null || arbre.getArbre() == null || arbre.getArbre().isEmpty()) {
             fail(job.getId(), "ARBRE_VIDE", "etudes.bordereau.arbre_vide", false);
             return;
@@ -274,6 +275,9 @@ public class DocumentExtractionJobService {
         result.put("pieceId", piece.getId().toString());
         result.put("fileName", piece.getNomFichier());
         result.put("outcome", "REVIEW_REQUIRED");
+        if (diagnostics != null) {
+            result.putAll(diagnostics.toMap());
+        }
         succeed(job.getId(), result);
     }
 

@@ -15,5 +15,6 @@ export * from './skeleton';
 export * from './input';
 export * from './select';
 export * from './textarea';
+export * from './ville-ma-select';
 export * from './hijri-toggle';
 export * from './arabic-numerals-toggle';

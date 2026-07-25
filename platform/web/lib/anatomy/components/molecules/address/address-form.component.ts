@@ -27,6 +27,8 @@ import {
 import { NfInputComponent } from '../../atoms/input';
 import { NfSelectComponent, NfSelectOption } from '../../atoms/select';
 import { NfTextareaComponent } from '../../atoms/textarea';
+import { VilleMaSelectComponent } from '../../atoms/ville-ma-select';
+import { REGIONS_MA } from '../../../../referentiels/geo-ma';
 
 interface AddressFormControls {
   line1: string;
@@ -60,7 +62,7 @@ interface AddressFormControls {
 @Component({
   selector: 'nf-address-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, NfInputComponent, NfSelectComponent, NfTextareaComponent],
+  imports: [CommonModule, ReactiveFormsModule, NfInputComponent, NfSelectComponent, NfTextareaComponent, VilleMaSelectComponent],
   templateUrl: './address-form.component.html',
   styleUrl: './address-form.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -353,6 +355,19 @@ export class NfAddressFormComponent implements OnInit, OnDestroy {
       value: option.code,
       label: option.labelKey,
     }));
+  }
+
+  /**
+   * Whether the address is Moroccan — city and region are then backed by
+   * the geo-ma referential (selects) instead of free text.
+   */
+  isMorocco(): boolean {
+    return this.addressForm?.get('countryCode')?.value === 'MA';
+  }
+
+  /** Region options (value = official French name) for Moroccan addresses. */
+  getRegionMaSelectOptions(): NfSelectOption[] {
+    return REGIONS_MA.map((r) => ({ value: r.nom, label: r.nom }));
   }
 }
 

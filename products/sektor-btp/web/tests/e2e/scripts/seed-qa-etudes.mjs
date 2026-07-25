@@ -493,7 +493,7 @@ function collectArticleNodes(hierarchie, acc = []) {
   return acc;
 }
 
-async function findDevis(request, session) {
+async function findDevis(request, session, clientId) {
   const list = await apiJson(request, session, 'GET', `/api/v1/etudes/devis?search=${encodeURIComponent(QA.devisObjet)}`);
   if (!list.ok) return null;
   const items = Array.isArray(list.body) ? list.body : [];
@@ -501,7 +501,9 @@ async function findDevis(request, session) {
     items.find(
       (d) =>
         d.objet === QA.devisObjet &&
-        (d.clientId === QA.partnerCode || d.clientName?.includes('Rabat')),
+        (d.clientId === clientId ||
+          d.clientId === QA.partnerCode ||
+          d.clientName?.includes('Rabat')),
     ) ?? null
   );
 }
@@ -561,9 +563,9 @@ function buildDevisLignes(ouvrageIds) {
 }
 
 async function ensureDevis(request, session, clientId, metre, dpgf, ouvrageIds, log) {
-  let devis = await findDevis(request, session);
+  let devis = await findDevis(request, session, clientId);
   const payload = {
-    clientId: QA.partnerCode,
+    clientId: clientId,
     clientName: QA.partnerName,
     contactClient: 'Direction des Marchés Publics',
     objet: QA.devisObjet,

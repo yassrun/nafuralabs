@@ -336,6 +336,23 @@ infra_up() {
   require_env
   echo "Applying infra overlay: $ENV ? namespace $(infra_namespace_for_env "$ENV")"
   kustomize_build "$ROOT/infra/k8s/overlays/infra/$ENV" | KUBECTL apply -f -
+  apply_ingress_nginx_hsts_policy
+}
+
+# HTTP-only clusters (staging / staging-local / demo) must not emit HSTS: the ingress-nginx
+# default (max-age=31536000; includeSubDomains) pins *.nafuralabs.staging to https in the
+# browser and breaks the http-only Keycloak OAuth flow. Prod keeps HSTS (real TLS).
+apply_ingress_nginx_hsts_policy() {
+  if [[ "$ENV" == "prod" ]]; then
+    return 0
+  fi
+  if KUBECTL get namespace ingress-nginx >/dev/null 2>&1; then
+    echo "Disabling ingress-nginx HSTS (http-only env: $ENV)..."
+    KUBECTL apply -f "$ROOT/infra/k8s/ingress-nginx/hsts-off-configmap.yaml" || \
+      echo "WARN: could not apply ingress-nginx HSTS policy" >&2
+  else
+    echo "WARN: ingress-nginx namespace not found ? skipping HSTS policy" >&2
+  fi
 }
 
 run_vault_init() {

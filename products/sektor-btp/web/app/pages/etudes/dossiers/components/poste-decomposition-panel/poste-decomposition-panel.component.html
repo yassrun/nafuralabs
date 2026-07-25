@@ -28,12 +28,14 @@
             </span>
           }
         </div>
-        <h3 class="poste__titre">{{ poste()!.libelle }}</h3>
-        <p class="poste__meta">
-          <span>{{ poste()!.unite || '—' }}</span>
-          <span aria-hidden="true">·</span>
-          <span>Qté {{ poste()!.quantite ?? '—' }}</span>
-        </p>
+        <div class="poste__titre-block">
+          <h3 class="poste__titre">{{ poste()!.libelle }}</h3>
+          <p class="poste__meta">
+            <span>{{ poste()!.unite || '—' }}</span>
+            <span aria-hidden="true">·</span>
+            <span>Qté {{ poste()!.quantite ?? '—' }}</span>
+          </p>
+        </div>
       </div>
       <div class="poste__header-actions">
         <div class="poste__statut" aria-live="polite">
@@ -65,6 +67,34 @@
     <section class="poste__commentaire" aria-labelledby="commentaire-poste-title">
       <div class="poste__section-head">
         <h4 id="commentaire-poste-title">Commentaire de l’article</h4>
+        <div class="poste__section-actions">
+          @if (peutProposerCps()) {
+            <nf-button
+              variant="ghost"
+              size="sm"
+              icon="sparkles"
+              [loading]="propositionCps()"
+              [disabled]="chargement() || sauvegarde() || propositionCps() || extractionComposants()"
+              tooltip="Affiche le descriptif technique du CPS pour cet article"
+              (clicked)="proposerDepuisCps()"
+            >
+              Voir le descriptif CPS
+            </nf-button>
+          }
+          @if (modifiable() && dossierId()) {
+            <nf-button
+              variant="secondary"
+              size="sm"
+              icon="sparkles"
+              [loading]="extractionComposants()"
+              [disabled]="chargement() || sauvegarde() || propositionCps() || extractionComposants()"
+              tooltip="Détecte les composants catalogue consultables à partir du CPS"
+              (clicked)="extraireComposants()"
+            >
+              Extraire les composants
+            </nf-button>
+          }
+        </div>
       </div>
       <textarea
         rows="3"

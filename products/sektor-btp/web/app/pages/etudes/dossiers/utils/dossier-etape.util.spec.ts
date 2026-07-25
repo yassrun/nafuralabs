@@ -29,8 +29,8 @@ describe('dossier-etape.util', () => {
     expect(prevBackendEtape(1)).toBeNull();
   });
 
-  it('regroupe les gates décomposition + consultation sur l’étape UI 3', () => {
-    expect(backendGateEtapesForUi(3)).toEqual([3, 4]);
+  it('regroupe décomposition + consultation + chiffrage sur l’étape UI 3', () => {
+    expect(backendGateEtapesForUi(3)).toEqual([3, 4, 5]);
     expect(backendGateEtapesForUi(4)).toEqual([5]);
   });
 

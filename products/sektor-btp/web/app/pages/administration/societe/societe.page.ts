@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { ButtonComponent, PageHeaderComponent, PageShellComponent } from '@lib/anatomy';
+import { ButtonComponent, PageHeaderComponent, PageShellComponent, VilleMaSelectComponent } from '@lib/anatomy';
 import { IceInputComponent } from '@lib/anatomy/components/atoms/ice-input/ice-input.component';
 import { RibInputComponent } from '@lib/anatomy/components/atoms/rib-input/rib-input.component';
 import { PhoneMaInputComponent } from '@lib/anatomy/components/atoms/phone-ma-input/phone-ma-input.component';
@@ -89,7 +89,7 @@ function saveExtras(societeId: string, extras: SocieteExtras): void {
   selector: 'app-societe',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, TranslateModule, PageShellComponent, PageHeaderComponent, IceInputComponent, RibInputComponent, PhoneMaInputComponent, ButtonComponent],
+  imports: [CommonModule, FormsModule, TranslateModule, PageShellComponent, PageHeaderComponent, IceInputComponent, RibInputComponent, PhoneMaInputComponent, ButtonComponent, VilleMaSelectComponent],
   template: `
     <nf-page-shell scroll>
       <nf-page-header [config]="headerConfig"></nf-page-header>
@@ -223,8 +223,12 @@ function saveExtras(societeId: string, extras: SocieteExtras): void {
                 <input type="number" [(ngModel)]="extras.moisClotureExercice" name="moisCloture" min="1" max="12" step="1" />
               </div>
               <div class="field">
-                <label>{{ 'admin.societe.extras.fields.villeSiege' | translate }}</label>
-                <input type="text" [(ngModel)]="extras.villeSiegeAffichee" name="villeSiege" />
+                <nf-ville-ma-select
+                  id="societe-ville-siege"
+                  [label]="'admin.societe.extras.fields.villeSiege' | translate"
+                  [(ngModel)]="extras.villeSiegeAffichee"
+                  name="villeSiege"
+                />
               </div>
               <div class="field">
                 <label>{{ 'admin.societe.extras.fields.paysSiege' | translate }}</label>

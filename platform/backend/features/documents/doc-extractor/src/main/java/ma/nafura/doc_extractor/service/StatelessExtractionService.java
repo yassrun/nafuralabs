@@ -75,6 +75,34 @@ public class StatelessExtractionService {
             String tenantId,
             Integer maxPromptChars
     ) {
+        return process(
+                fileBytes,
+                fileName,
+                mimeType,
+                inlineSchema,
+                presentationSchema,
+                instructions,
+                tenantId,
+                maxPromptChars,
+                false);
+    }
+
+    /**
+     * @param maxPromptChars optional cap on PDF text prompt size (null = platform default).
+     * @param forceMedia when true, skip text-layer extraction and send binary/image media
+     *                   (needed for scanned PDFs that still expose a tiny OCR text layer).
+     */
+    public StatelessExtractionResponse process(
+            byte[] fileBytes,
+            String fileName,
+            String mimeType,
+            String inlineSchema,
+            String presentationSchema,
+            String instructions,
+            String tenantId,
+            Integer maxPromptChars,
+            boolean forceMedia
+    ) {
         if (inlineSchema == null || inlineSchema.isBlank()) {
             return failure(
                     "REQUEST",
@@ -92,7 +120,8 @@ public class StatelessExtractionService {
                     presentationSchema,
                     instructions,
                     tenantId,
-                    maxPromptChars);
+                    maxPromptChars,
+                    forceMedia);
         } catch (java.util.concurrent.TimeoutException e) {
             return failure("LLM", "EXTRACTION_TIMEOUT", "Extraction timed out.", true);
         } catch (InterruptedException e) {
@@ -172,7 +201,8 @@ public class StatelessExtractionService {
             String presentationSchema,
             String instructions,
             String tenantId,
-            Integer maxPromptChars
+            Integer maxPromptChars,
+            boolean forceMedia
     ) throws Exception {
         JsonNode schema = objectMapper.readTree(inlineSchema);
         if (!schema.isObject() || !"object".equals(schema.path("type").asText())) {
@@ -189,7 +219,7 @@ public class StatelessExtractionService {
             }
         }
 
-        LlmRequest request = baseRequest(fileBytes, fileName, mimeType, maxPromptChars);
+        LlmRequest request = baseRequest(fileBytes, fileName, mimeType, maxPromptChars, forceMedia);
         request.setSystemInstruction("""
                 Extract only information observable in the supplied document.
                 Return JSON matching the response schema exactly. Never invent values.
@@ -237,11 +267,20 @@ public class StatelessExtractionService {
     }
 
     private LlmRequest baseRequest(byte[] fileBytes, String fileName, String mimeType) {
-        return baseRequest(fileBytes, fileName, mimeType, null);
+        return baseRequest(fileBytes, fileName, mimeType, null, false);
     }
 
     private LlmRequest baseRequest(
             byte[] fileBytes, String fileName, String mimeType, Integer maxPromptChars) {
+        return baseRequest(fileBytes, fileName, mimeType, maxPromptChars, false);
+    }
+
+    private LlmRequest baseRequest(
+            byte[] fileBytes,
+            String fileName,
+            String mimeType,
+            Integer maxPromptChars,
+            boolean forceMedia) {
         LlmRequest request = new LlmRequest();
         request.setMetadata(Map.of("fileName", fileName == null ? "document" : fileName));
 
@@ -259,7 +298,8 @@ public class StatelessExtractionService {
         }
 
         // Text-layer PDFs (typical BDP): send text — faster and avoids TLS EOF on inline PDF.
-        if (PdfTextExtractor.isPdfMime(mimeType, fileName)) {
+        // forceMedia skips this for scanned docs with a misleading thin text layer.
+        if (!forceMedia && PdfTextExtractor.isPdfMime(mimeType, fileName)) {
             String pdfText = maxPromptChars != null && maxPromptChars > 0
                     ? PdfTextExtractor.tryPromptText(fileBytes, fileName, maxPromptChars)
                     : PdfTextExtractor.tryPromptText(fileBytes, fileName);

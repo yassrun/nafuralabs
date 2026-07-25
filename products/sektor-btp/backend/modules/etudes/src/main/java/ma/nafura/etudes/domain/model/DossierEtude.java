@@ -53,6 +53,10 @@ public class DossierEtude implements AuditableEtude {
     public static final String ORIGINE_ETUDE = "ETUDE";
     public static final String ORIGINE_MARCHE_EXISTANT = "MARCHE_EXISTANT";
 
+    /** Étape d'approbation interne pendant {@link StatutDossierEtude#EN_VALIDATION}. */
+    public static final String VALIDATION_N1 = "N1";
+    public static final String VALIDATION_N2 = "N2";
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -134,6 +138,18 @@ public class DossierEtude implements AuditableEtude {
     @Column(name = "motif_refus", length = 1000)
     private String motifRefus;
 
+    /** Incrémenté à chaque réouverture / remplacement destructif du bordereau. */
+    @Column(name = "bordereau_revision", nullable = false)
+    @Builder.Default
+    private Integer bordereauRevision = 1;
+
+    /** {@link #VALIDATION_N1} ou {@link #VALIDATION_N2} tant que le dossier est en validation. */
+    @Column(name = "validation_etape", length = 10)
+    private String validationEtape;
+
+    @Column(name = "approval_request_id", length = 100)
+    private String approvalRequestId;
+
     @Column(name = "notes")
     private String notes;
 
@@ -164,6 +180,16 @@ public class DossierEtude implements AuditableEtude {
     @JsonProperty("modifiable")
     public boolean isModifiable() {
         return status != null && status.estModifiable();
+    }
+
+    /**
+     * Structure du bordereau figée dès l'entrée en décomposition / chiffrage.
+     * Les prix restent éditables tant que le dossier est modifiable.
+     */
+    @JsonProperty("structureVerrouillee")
+    public boolean isStructureVerrouillee() {
+        int step = currentStep != null ? currentStep : ETAPE_PREMIERE;
+        return step > ETAPE_BORDEREAU || (status != null && !status.estModifiable());
     }
 
     @PrePersist

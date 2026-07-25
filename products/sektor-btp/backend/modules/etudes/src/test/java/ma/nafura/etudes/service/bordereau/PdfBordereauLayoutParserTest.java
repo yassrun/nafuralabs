@@ -83,6 +83,49 @@ class PdfBordereauLayoutParserTest {
         assertThat(PdfBordereauLayoutParser.normalizeUnit("E")).isEqualTo("ENS");
     }
 
+    @Test
+    void isMarketTitleNoise_catchesTruncatedBannerWithEmbeddedLot() {
+        assertThat(PdfBordereauLayoutParser.isMarketTitleNoise(
+                "TRAVAUX DE CONSTRUCTION DE LA PLATEFORME AGROALIMENTAIRE"))
+                .isTrue();
+        assertThat(PdfBordereauLayoutParser.isMarketTitleNoise(
+                "YOUSOUFIA RABAT-LOT- AMENAGEMENTS DES ENTREPOTS, CONSTRUCTION DE CHAMBRES FROIDES"))
+                .isTrue();
+        assertThat(PdfBordereauLayoutParser.isMarketTitleNoise(
+                "SOUS LOT N° 1: TERRASSEMENT-GROS OEUVRE"))
+                .isFalse();
+        assertThat(PdfBordereauLayoutParser.isMarketTitleNoise("LOT N° 2 : CHARPENTE"))
+                .isFalse();
+    }
+
+    @Test
+    void parse_multiPage_reusesColumnGeometryAndIgnoresRepeatedMarketTitle() throws Exception {
+        byte[] pdf = multiPageBordereauPdf();
+        BordereauParseResult result = parser.parse(pdf);
+
+        assertThat(result.quality()).isEqualTo(BordereauParseResult.Quality.USABLE);
+        assertThat(result.pageCount()).isEqualTo(2);
+        assertThat(result.articleCandidates()).hasSizeGreaterThanOrEqualTo(4);
+        assertThat(result.articleCandidates())
+                .noneMatch(a -> a.libelle() != null
+                        && a.libelle().toUpperCase().contains("PLATEFORME AGRO"));
+        assertThat(result.articleCandidates())
+                .anyMatch(a -> "1-1-1".equals(a.code()))
+                .anyMatch(a -> "2-1-1".equals(a.code()));
+    }
+
+    @Test
+    void parse_splitUnitQtyLines_attachesToPendingArticle() throws Exception {
+        byte[] pdf = splitUnitQtyPdf();
+        BordereauParseResult result = parser.parse(pdf);
+        assertThat(result.articleCandidates())
+                .anySatisfy(a -> {
+                    assertThat(a.code()).isEqualTo("1-1-1");
+                    assertThat(a.unite()).isEqualTo("M3");
+                    assertThat(a.quantite()).isEqualByComparingTo(new BigDecimal("10"));
+                });
+    }
+
     /**
      * Synthetic BDP-like page: headers + irregular codes + FR quantities on aligned columns.
      */
@@ -106,6 +149,62 @@ class PdfBordereauLayoutParserTest {
                 writeRow(cs, font, y, "1-2-2", "CANALISATION PVC DIAMETRE 160 MM", "ML", "5 600,00");
                 y -= 28;
                 writeRow(cs, font, y, "2-1-1", "ISOLATION THERMIQUE DES PAROIS", "M2", "200,00");
+            }
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            doc.save(out);
+            return out.toByteArray();
+        }
+    }
+
+    private static byte[] multiPageBordereauPdf() throws Exception {
+        try (PDDocument doc = new PDDocument()) {
+            PDType1Font font = new PDType1Font(Standard14Fonts.FontName.HELVETICA);
+            for (int p = 0; p < 2; p++) {
+                PDPage page = new PDPage(PDRectangle.A4);
+                doc.addPage(page);
+                try (PDPageContentStream cs = new PDPageContentStream(doc, page)) {
+                    float y = 780;
+                    writeRow(cs, font, y, null,
+                            "TRAVAUX DE CONSTRUCTION DE LA PLATEFORME AGROALIMENTAIRE",
+                            null, null);
+                    y -= 28;
+                    writeRow(cs, font, y, "N", "DESIGNATION DES OUVRAGES", "UNITE", "QUANTITE");
+                    y -= 30;
+                    if (p == 0) {
+                        writeRow(cs, font, y, null, "SOUS LOT N 1: TERRASSEMENT", null, null);
+                        y -= 28;
+                        writeRow(cs, font, y, "1-1-1", "FOUILLES EN PUITS", "M3", "10,00");
+                        y -= 28;
+                        writeRow(cs, font, y, "1-1-2", "REMBLAI", "M3", "5,00");
+                    } else {
+                        writeRow(cs, font, y, null, "SOUS LOT N 2: CHARPENTE", null, null);
+                        y -= 28;
+                        writeRow(cs, font, y, "2-1-1", "STRUCTURE METALLIQUE", "KG", "100,00");
+                        y -= 28;
+                        writeRow(cs, font, y, "2-1-2", "PANNEAUX SANDWICH", "M2", "50,00");
+                    }
+                }
+            }
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            doc.save(out);
+            return out.toByteArray();
+        }
+    }
+
+    private static byte[] splitUnitQtyPdf() throws Exception {
+        try (PDDocument doc = new PDDocument()) {
+            PDPage page = new PDPage(PDRectangle.A4);
+            doc.addPage(page);
+            PDType1Font font = new PDType1Font(Standard14Fonts.FontName.HELVETICA);
+            try (PDPageContentStream cs = new PDPageContentStream(doc, page)) {
+                float y = 780;
+                writeRow(cs, font, y, "N", "DESIGNATION DES OUVRAGES", "UNITE", "QUANTITE");
+                y -= 30;
+                writeRow(cs, font, y, "1-1-1", "FOUILLES EN PUITS ET TRANCHEES", null, null);
+                y -= 18;
+                writeAt(cs, font, 10, 100, y, "LE METRE CUBE");
+                y -= 18;
+                writeRow(cs, font, y, null, null, "M3", "10,00");
             }
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             doc.save(out);

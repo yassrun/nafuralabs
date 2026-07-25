@@ -5,5 +5,7 @@
  * jours fériés) pour les Tasks 13 (admin) et 17 (spécificités MA).
  */
 export * from './banques-ma';
-export * from './regions-ma';
 export * from './jours-feries-ma';
+// Référentiel géographique (régions / provinces / villes) — désormais
+// porté par la plateforme, réexporté ici pour préserver le point d'import.
+export * from '@lib/referentiels/geo-ma';

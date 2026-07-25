@@ -61,6 +61,8 @@ export class PiecesMarcheComponent {
   readonly dpgfId = input<string | undefined>(undefined);
   /** Document source déjà rattaché — sert à déduire le mode initial. */
   readonly bordereauDocumentId = input<string | undefined>(undefined);
+  /** Structure figée (chiffrage démarré) — empêche édition / réimport. */
+  readonly structureVerrouillee = input(false);
 
   readonly change = output<void>();
 
@@ -151,9 +153,13 @@ export class PiecesMarcheComponent {
     () => !!this.dpgfEffectif() && !this.enRevue() && this.mode() === 'bordereau',
   );
 
-  /** Édition structurelle seulement en mode manuel (pas pendant auto). */
+  /** Édition structurelle seulement en mode manuel et structure non figée. */
   readonly editionStructure = computed(
-    () => this.voie() === 'manuel' && !this.enRevue() && !this.extractionEnCours(),
+    () =>
+      this.voie() === 'manuel' &&
+      !this.enRevue() &&
+      !this.extractionEnCours() &&
+      !this.structureVerrouillee(),
   );
 
   private readonly labelsParType = Object.fromEntries(
@@ -337,6 +343,25 @@ export class PiecesMarcheComponent {
       return;
     }
 
+    if (this.structureVerrouillee()) {
+      this.erreur.set(
+        'La structure est figée. Réouvrez le bordereau depuis l’entête pour remplacer l’arbre.',
+      );
+      return;
+    }
+
+    const hasExisting = !!(this.dpgfIdLocal() || this.dpgfId());
+    if (hasExisting) {
+      const ok = await this.confirmDialog.confirm({
+        title: 'Remplacer le bordereau existant',
+        message:
+          'L’arbre actuel et le chiffrage associé seront supprimés, puis remplacés par l’extraction. Cette action est irréversible.',
+        variant: 'danger',
+        confirmLabel: 'Remplacer',
+      });
+      if (!ok) return;
+    }
+
     this.phase.set('saving');
     this.erreur.set(undefined);
     try {
@@ -344,6 +369,7 @@ export class PiecesMarcheComponent {
         this.dossierId(),
         arbre,
         piece.id,
+        hasExisting,
       );
       this.dpgfIdLocal.set(saved.dpgfId);
       this.resetExtractionState();
@@ -502,6 +528,9 @@ export class PiecesMarcheComponent {
     const err = e as { status?: number; error?: { message?: string; code?: string } };
     if (err?.status === 403) {
       return "Vous n'avez pas la permission de déposer des pièces.";
+    }
+    if (err?.status === 413 || err?.error?.code === 'PAYLOAD_TOO_LARGE') {
+      return 'Fichier trop volumineux — utilisez un PDF de moins de 50 Mo.';
     }
     const code = err?.error?.code ?? err?.error?.message;
     if (code === 'etudes.bordereau.aucune_piece_stockee') {

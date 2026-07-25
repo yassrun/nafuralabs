@@ -4,12 +4,15 @@ import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import ma.nafura.etudes.api.dto.DecompositionProposeDto;
+import ma.nafura.etudes.api.dto.DossierEtudeSyntheseDto;
 import ma.nafura.etudes.api.request.DossierEtudeCreateDto;
 import ma.nafura.etudes.api.request.DossierEtudeUpdateDto;
 import ma.nafura.etudes.api.request.EtapeRequest;
 import ma.nafura.etudes.api.request.RefusRequest;
 import ma.nafura.etudes.domain.model.DossierEtude;
 import ma.nafura.etudes.domain.model.StatutDossierEtude;
+import ma.nafura.etudes.service.DecompositionProposeService;
 import ma.nafura.etudes.service.DossierEtudeService;
 import ma.nafura.etudes.service.DossierEtudeService.GateNonFranchieException;
 import ma.nafura.etudes.service.gate.ResultatGate;
@@ -26,9 +29,12 @@ import org.springframework.web.bind.annotation.*;
 public class DossierEtudeController {
 
     private final DossierEtudeService service;
+    private final DecompositionProposeService decompositionProposeService;
 
-    public DossierEtudeController(DossierEtudeService service) {
+    public DossierEtudeController(
+            DossierEtudeService service, DecompositionProposeService decompositionProposeService) {
         this.service = service;
+        this.decompositionProposeService = decompositionProposeService;
     }
 
     @GetMapping
@@ -76,6 +82,12 @@ public class DossierEtudeController {
         return ResponseEntity.ok(service.evaluerGates(id));
     }
 
+    @GetMapping("/{id}/synthese")
+    @RequirePermission("etude.read")
+    public ResponseEntity<DossierEtudeSyntheseDto> synthese(@PathVariable UUID id) {
+        return ResponseEntity.ok(service.synthese(id));
+    }
+
     @PutMapping("/{id}/etape")
     @RequirePermission("etude.update")
     public ResponseEntity<DossierEtude> allerAEtape(
@@ -105,10 +117,42 @@ public class DossierEtudeController {
         return ResponseEntity.ok(service.refuser(id, body.getMotif()));
     }
 
+    @PostMapping("/{id}/reouvrir-bordereau")
+    @RequirePermission("etude.update")
+    public ResponseEntity<DossierEtude> reouvrirBordereau(@PathVariable UUID id) {
+        return ResponseEntity.ok(service.reouvrirBordereau(id));
+    }
+
+    @PostMapping("/{id}/generer-devis")
+    @RequirePermission("etude.submit")
+    public ResponseEntity<DossierEtude> genererDevis(@PathVariable UUID id) {
+        return ResponseEntity.ok(service.genererDevis(id));
+    }
+
     @PostMapping("/{id}/annuler")
     @RequirePermission("etude.update")
     public ResponseEntity<DossierEtude> annuler(@PathVariable UUID id) {
         return ResponseEntity.ok(service.annuler(id));
+    }
+
+    /**
+     * Propose une décomposition brouillon à partir du CPS / libellé (Gemini + catalogue).
+     * Jamais persistée — le front affiche une revue avant ajout.
+     */
+    @PostMapping("/{id}/articles/{articleId}/decomposition-propose")
+    @RequirePermission("etude.update")
+    public ResponseEntity<?> proposerDecomposition(
+            @PathVariable UUID id,
+            @PathVariable UUID articleId,
+            @RequestParam(required = false) UUID cpsDocumentId) {
+        try {
+            return decompositionProposeService
+                    .proposer(id, articleId, cpsDocumentId)
+                    .<ResponseEntity<?>>map(ResponseEntity::ok)
+                    .orElseGet(() -> ResponseEntity.noContent().build());
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(Map.of("code", ex.getMessage()));
+        }
     }
 
     /**

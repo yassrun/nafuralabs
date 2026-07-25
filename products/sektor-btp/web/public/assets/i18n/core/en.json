@@ -1826,7 +1826,8 @@
       "os": "Service order",
       "facture_client": "Customer invoice",
       "note_frais": "Expense report",
-      "contrat_st": "Subcontracting contract"
+      "contrat_st": "Subcontracting contract",
+      "etude_prix": "Price study"
     },
     "avoir": {
       "status": {

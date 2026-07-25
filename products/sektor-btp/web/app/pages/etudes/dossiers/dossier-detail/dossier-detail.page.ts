@@ -16,10 +16,15 @@ import type { WizardStepConfig } from '@lib/anatomy';
 import type { DossierEtude, ProblemeGate, ResultatGate } from '@app/etudes/models';
 
 import { DecompositionWorkspaceComponent } from '../components/decomposition-workspace/decomposition-workspace.component';
+import { DossierSummaryHeaderComponent } from '../components/dossier-summary-header/dossier-summary-header.component';
 import { GateBlocageComponent } from '../components/gate-blocage/gate-blocage.component';
 import { PiecesMarcheComponent } from '../components/pieces-marche/pieces-marche.component';
 import { SyntheseValidationPanelComponent } from '../components/synthese-validation-panel/synthese-validation-panel.component';
-import { DossierEtudeApiService } from '../services/dossier-etude-api.service';
+import {
+  DossierEtudeApiService,
+  type DossierEtudeSynthese,
+} from '../services/dossier-etude-api.service';
+import type { ClientPartnerSelection } from '@app/shared/components/client-partner-select/client-partner-select.component';
 import {
   backendGateEtapesForUi,
   backendToUiEtape,
@@ -29,18 +34,7 @@ import {
   uiEtapePourGate,
   uiToBackendEtape,
 } from '../utils/dossier-etape.util';
-
-const STATUT_LABELS: Record<string, string> = {
-  BROUILLON: 'Brouillon',
-  EN_ETUDE: 'En étude',
-  EN_VALIDATION: 'En validation',
-  VALIDEE: 'Validée',
-  DEVIS_GENERE: 'Devis généré',
-  GAGNE: 'Gagné',
-  PERDU: 'Perdu',
-  CONVERTIE: 'Convertie',
-  ANNULE: 'Annulé',
-};
+import { labelStatutDossier } from '../utils/dossier-status.util';
 
 /**
  * Parcours d'étude en quatre étapes métier (backend 1..5 projeté).
@@ -58,6 +52,7 @@ const STATUT_LABELS: Record<string, string> = {
     PiecesMarcheComponent,
     DecompositionWorkspaceComponent,
     SyntheseValidationPanelComponent,
+    DossierSummaryHeaderComponent,
   ],
   templateUrl: './dossier-detail.page.html',
   styleUrl: './dossier-detail.page.scss',
@@ -70,10 +65,12 @@ export class DossierDetailPage {
   private readonly decomposition = viewChild(DecompositionWorkspaceComponent);
 
   readonly dossier = signal<DossierEtude | undefined>(undefined);
+  readonly synthese = signal<DossierEtudeSynthese | undefined>(undefined);
   readonly gates = signal<ResultatGate[]>([]);
   readonly chargement = signal(true);
   readonly erreur = signal<string | undefined>(undefined);
   readonly posteDirty = signal(false);
+  readonly clientSaving = signal(false);
   /** Navigation locale en lecture seule (le backend refuse `allerAEtape`). */
   readonly etapeUiLecture = signal<number | undefined>(undefined);
   readonly focusNoeudId = toSignal(
@@ -98,16 +95,23 @@ export class DossierDetailPage {
   });
   readonly indexCourant = computed(() => this.etapeUi() - 1);
 
-  /** Gates fusionnées pour l'étape UI courante (ex. 3+4 sur Décomposition). */
+  /** Gates fusionnées pour l'étape UI courante (ex. 3+4+5 sur Décomposition). */
   readonly gateCourant = computed((): ResultatGate | undefined => {
     const ui = this.etapeUi();
     const etapes = backendGateEtapesForUi(ui);
     const relevant = this.gates().filter((g) => etapes.includes(g.etape));
     if (relevant.length === 0) return undefined;
 
-    const problemes: ProblemeGate[] = relevant.flatMap((g) =>
-      g.problemes.map((p) => ({ ...p, etape: g.etape })),
-    );
+    const seen = new Set<string>();
+    const problemes: ProblemeGate[] = [];
+    for (const g of relevant) {
+      for (const p of g.problemes) {
+        const key = `${p.noeudId ?? ''}|${p.message ?? ''}|${p.codeArticle ?? ''}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        problemes.push({ ...p, etape: g.etape });
+      }
+    }
     const bloquant = relevant.some((g) => g.bloquant && g.problemes.length > 0);
     return {
       etape: uiToBackendEtape(ui),
@@ -127,10 +131,7 @@ export class DossierDetailPage {
     return statut === 'BROUILLON' || statut === 'EN_ETUDE';
   });
 
-  readonly statutLabel = computed(() => {
-    const s = this.dossier()?.status;
-    return s ? (STATUT_LABELS[s] ?? s) : '';
-  });
+  readonly statutLabel = computed(() => labelStatutDossier(this.dossier()?.status));
 
   /** CTA « Soumettre » uniquement tant que le dossier reste éditable. */
   readonly peutSoumettre = computed(() => this.modifiable());
@@ -158,15 +159,13 @@ export class DossierDetailPage {
 
   readonly backLabel = computed(() => 'Précédent');
 
+  /** Hint complémentaire — les gates s’affichent déjà en une ligne compacte. */
   readonly blocageHint = computed(() => {
     if (!this.modifiable()) return undefined;
     if (this.posteDirty() && this.etapeUi() === 3) {
       return 'Enregistrez le poste courant avant de continuer';
     }
-    if (this.peutContinuer()) return undefined;
-    const n = this.gateCourant()?.problemes.length ?? 0;
-    if (n === 0) return undefined;
-    return `${n} point${n > 1 ? 's' : ''} à corriger avant de continuer`;
+    return undefined;
   });
 
   onPosteDirty(dirty: boolean): void {
@@ -187,9 +186,14 @@ export class DossierDetailPage {
     this.chargement.set(true);
     this.erreur.set(undefined);
     try {
-      const [dossier, gates] = await Promise.all([this.api.getById(id), this.api.gates(id)]);
+      const [dossier, gates, synthese] = await Promise.all([
+        this.api.getById(id),
+        this.api.gates(id),
+        this.api.synthese(id),
+      ]);
       this.dossier.set(dossier);
       this.gates.set(gates);
+      this.synthese.set(synthese);
     } catch (e) {
       this.erreur.set(this.messageErreur(e));
     } finally {
@@ -245,10 +249,34 @@ export class DossierDetailPage {
     try {
       const maj = await this.api.allerAEtape(dossier.id, etape);
       this.dossier.set(maj);
-      this.gates.set(await this.api.gates(dossier.id));
+      await this.refreshSynthese(dossier.id);
       this.posteDirty.set(false);
     } catch (e) {
       this.appliquerErreurTransition(e);
+    }
+  }
+
+  async onClientChange(sel: ClientPartnerSelection): Promise<void> {
+    const dossier = this.dossier();
+    if (!dossier || !this.modifiable() || this.clientSaving()) return;
+    const currentId = dossier.clientId ?? null;
+    const nextId = sel.clientId;
+    if (currentId === nextId) return;
+
+    this.clientSaving.set(true);
+    this.erreur.set(undefined);
+    try {
+      const maj = await this.api.update(dossier.id, {
+        clientId: nextId ?? '',
+        version: dossier.version,
+      });
+      this.dossier.set(maj);
+      await this.refreshSynthese(dossier.id);
+    } catch (e) {
+      this.erreur.set(this.messageErreur(e));
+      await this.refreshSynthese(dossier.id);
+    } finally {
+      this.clientSaving.set(false);
     }
   }
 
@@ -258,8 +286,71 @@ export class DossierDetailPage {
     this.erreur.set(undefined);
     try {
       this.dossier.set(await this.api.soumettre(dossier.id));
-      this.gates.set(await this.api.gates(dossier.id));
+      await this.refreshSynthese(dossier.id);
       this.etapeUiLecture.set(4);
+    } catch (e) {
+      this.appliquerErreurTransition(e);
+    }
+  }
+
+  async onHeaderAction(action: string): Promise<void> {
+    const dossier = this.dossier();
+    if (!dossier) return;
+    this.erreur.set(undefined);
+    try {
+      switch (action) {
+        case 'SOUMETTRE_STRUCTURE':
+          await this.changerEtape(3);
+          break;
+        case 'SOUMETTRE_CHIFFRAGE':
+          await this.soumettre();
+          break;
+        case 'VALIDER_N1':
+        case 'VALIDER_N2':
+          this.dossier.set(await this.api.valider(dossier.id));
+          await this.refreshSynthese(dossier.id);
+          this.etapeUiLecture.set(4);
+          break;
+        case 'REFUSER': {
+          const motif = window.prompt('Motif du refus (obligatoire) :');
+          if (!motif?.trim()) return;
+          this.dossier.set(await this.api.refuser(dossier.id, motif.trim()));
+          await this.refreshSynthese(dossier.id);
+          break;
+        }
+        case 'REOUVRIR_BORDEREAU': {
+          const ok = await this.confirmDialog.confirm({
+            title: 'Réouvrir le bordereau',
+            message:
+              'La structure redevient éditable. Les prix existants restent en base mais devront être revus.',
+            variant: 'danger',
+            confirmLabel: 'Réouvrir',
+          });
+          if (!ok) return;
+          this.dossier.set(await this.api.reouvrirBordereau(dossier.id));
+          await this.refreshSynthese(dossier.id);
+          break;
+        }
+        case 'GENERER_DEVIS':
+          this.dossier.set(await this.api.genererDevis(dossier.id));
+          await this.refreshSynthese(dossier.id);
+          break;
+        case 'VOIR_DEVIS': {
+          const devisId = this.synthese()?.devisGenereId ?? dossier.devisGenereId;
+          if (devisId) {
+            void this.nav.navigate(['/etudes/devis', devisId]);
+          }
+          break;
+        }
+        case 'CORRIGER_BORDEREAU':
+          await this.changerEtape(2);
+          break;
+        case 'CORRIGER_CHIFFRAGE':
+          await this.changerEtape(3);
+          break;
+        default:
+          break;
+      }
     } catch (e) {
       this.appliquerErreurTransition(e);
     }
@@ -267,6 +358,15 @@ export class DossierDetailPage {
 
   /** Ouvre l'article fautif — étape UI selon la gate d'origine. */
   corriger(probleme: ProblemeGate): void {
+    if (
+      probleme.message === 'etudes.gate.chiffrage.client_manquant' ||
+      probleme.message === 'etudes.client.introuvable' ||
+      probleme.message === 'etudes.client.role_invalide'
+    ) {
+      // Le sélecteur client est dans l'entête — on reste sur l'étape courante.
+      document.getElementById('dossier-header-client')?.focus();
+      return;
+    }
     const gateEtape = probleme.etape ?? this.gateCourant()?.etape ?? 3;
     const uiCible = uiEtapePourGate(gateEtape);
     const backendCible = uiToBackendEtape(uiCible);
@@ -292,15 +392,23 @@ export class DossierDetailPage {
     const dossier = this.dossier();
     if (!dossier) return;
     try {
-      const [maj, gates] = await Promise.all([
+      const [maj, gates, synthese] = await Promise.all([
         this.api.getById(dossier.id),
         this.api.gates(dossier.id),
+        this.api.synthese(dossier.id),
       ]);
       this.dossier.set(maj);
       this.gates.set(gates);
+      this.synthese.set(synthese);
     } catch (e) {
       this.erreur.set(this.messageErreur(e));
     }
+  }
+
+  private async refreshSynthese(id: string): Promise<void> {
+    const [gates, synthese] = await Promise.all([this.api.gates(id), this.api.synthese(id)]);
+    this.gates.set(gates);
+    this.synthese.set(synthese);
   }
 
   /** @deprecated use rechargerApresPieces */
@@ -340,6 +448,13 @@ export class DossierDetailPage {
     }
     if (err?.status === 403) {
       return "Vous n'avez pas la permission nécessaire pour cette action.";
+    }
+    const code = err?.error?.code;
+    if (code === 'etudes.bordereau.remplacement_non_confirme') {
+      return 'Confirmez le remplacement du bordereau existant (structure et chiffrage seront effacés).';
+    }
+    if (code === 'etudes.bordereau.structure_verrouillee') {
+      return 'La structure est figée. Réouvrez le bordereau pour modifier lots et postes.';
     }
     return err?.error?.message ?? err?.error?.code ?? 'Une erreur est survenue.';
   }

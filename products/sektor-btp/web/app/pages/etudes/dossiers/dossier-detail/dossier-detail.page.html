@@ -2,12 +2,22 @@
   <p class="dossier__etat">Chargement du dossier…</p>
 } @else if (dossier()) {
   <div class="dossier">
-    <header class="dossier__entete">
-      <h1 class="dossier__titre">{{ dossier()?.numero }} — {{ dossier()?.objet }}</h1>
-      <span class="dossier__statut" [attr.data-statut]="dossier()?.status">
-        {{ statutLabel() }}
-      </span>
-    </header>
+    @if (synthese(); as syn) {
+      <app-dossier-summary-header
+        [synthese]="syn"
+        [modifiable]="modifiable()"
+        [clientSaving]="clientSaving()"
+        (action)="onHeaderAction($event)"
+        (clientChange)="onClientChange($event)"
+      />
+    } @else {
+      <header class="dossier__entete">
+        <h1 class="dossier__titre">{{ dossier()?.numero }} — {{ dossier()?.objet }}</h1>
+        <span class="dossier__statut" [attr.data-statut]="dossier()?.status">
+          {{ statutLabel() }}
+        </span>
+      </header>
+    }
 
     @if (erreur(); as message) {
       <p class="dossier__erreur" role="alert">{{ message }}</p>
@@ -26,7 +36,7 @@
       [canProceed]="modifiable() ? peutContinuer() : true"
       [backLabel]="backLabel()"
       [nextLabel]="nextLabel()"
-      submitLabel="Soumettre à validation"
+      submitLabel="Soumettre le chiffrage"
       [showSubmit]="peutSoumettre()"
       (back)="precedent()"
       (next)="suivant()"
@@ -39,10 +49,6 @@
       }
 
       <section class="dossier__etape">
-        <h2 class="dossier__etape-titre">
-          Étape {{ etapeUi() }} — {{ etapes[indexCourant()].label }}
-        </h2>
-
         @if (etapeUi() === 1) {
           <app-pieces-marche
             [dossierId]="dossier()!.id"
@@ -56,6 +62,7 @@
             [dpgfId]="dossier()?.dpgfId"
             [bordereauDocumentId]="dossier()?.bordereauDocumentId"
             [modifiable]="modifiable()"
+            [structureVerrouillee]="synthese()?.structureVerrouillee ?? false"
             mode="bordereau"
             (change)="rechargerApresPieces()"
           />
@@ -63,6 +70,8 @@
           @if (dossier()?.dpgfId; as dpgfId) {
             <app-decomposition-workspace
               [dpgfId]="dpgfId"
+              [dossierId]="dossier()!.id"
+              [cpsDocumentId]="dossier()?.cpsDocumentId ?? null"
               [modifiable]="modifiable()"
               [fgDefaut]="dossier()?.fraisGenerauxPercentDefaut ?? 10"
               [margeDefaut]="dossier()?.margePercentDefaut ?? 17.5"

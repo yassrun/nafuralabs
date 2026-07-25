@@ -6,27 +6,49 @@ import ma.nafura.etudes.domain.model.DpgfNoeud;
 /**
  * Ce sur quoi une règle d'étape se prononce.
  *
- * <p>Les quatre règles portant sur le chiffrage n'ont besoin que des articles à plat. L'étape 1
- * — dépôt des pièces du marché — se prononce sur les documents, qui existent avant tout article.
- * Passer une liste d'articles seule rendait cette étape inexprimable : c'est ce qui a conduit à
- * lui donner par erreur la règle du bordereau, et donc à exiger des articles que seule l'étape
- * suivante peut créer.
- *
- * @param articles articles du bordereau, déjà extraits de l'arbre — aucune règle n'a besoin de
- *     la hiérarchie, et ça évite que chacune la reparcoure
+ * @param articles articles du bordereau, déjà filtrés
+ * @param noeuds tous les nœuds (lots / sous-lots / articles) pour les contrôles structurels
  * @param nombreDocuments pièces déposées sur le dossier
  * @param hasBordereau au moins une pièce de type bordereau (ou CPS+bordereau)
  * @param hasCps au moins une pièce de type CPS (ou CPS+bordereau)
+ * @param hasClientId un clientId est renseigné sur le dossier
+ * @param clientValide le clientId résout un Partner CLIENT du tenant
  */
 public record ContexteGate(
-        List<DpgfNoeud> articles, long nombreDocuments, boolean hasBordereau, boolean hasCps) {
+        List<DpgfNoeud> articles,
+        List<DpgfNoeud> noeuds,
+        long nombreDocuments,
+        boolean hasBordereau,
+        boolean hasCps,
+        boolean hasClientId,
+        boolean clientValide) {
 
+    /** Factories de tests : client considéré valide pour ne pas polluer les autres gates. */
     public static ContexteGate deArticles(List<DpgfNoeud> articles) {
-        return new ContexteGate(articles, 0L, false, false);
+        return new ContexteGate(articles, articles, 0L, false, false, true, true);
+    }
+
+    public static ContexteGate deNoeuds(List<DpgfNoeud> noeuds) {
+        List<DpgfNoeud> articles = noeuds.stream()
+                .filter(n -> DpgfNoeud.TYPE_ARTICLE.equals(n.getType()))
+                .toList();
+        return new ContexteGate(articles, noeuds, 0L, false, false, true, true);
     }
 
     public static ContexteGate documents(boolean hasBordereau, boolean hasCps) {
         long n = (hasBordereau ? 1 : 0) + (hasCps ? 1 : 0);
-        return new ContexteGate(List.of(), n, hasBordereau, hasCps);
+        return new ContexteGate(List.of(), List.of(), n, hasBordereau, hasCps, true, true);
+    }
+
+    public static ContexteGate avecClient(
+            ContexteGate base, boolean hasClientId, boolean clientValide) {
+        return new ContexteGate(
+                base.articles(),
+                base.noeuds(),
+                base.nombreDocuments(),
+                base.hasBordereau(),
+                base.hasCps(),
+                hasClientId,
+                clientValide);
     }
 }

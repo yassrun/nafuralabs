@@ -1,39 +1,18 @@
 import { buildListingConfig } from '@lib/anatomy';
-import type { BadgeVariant, ColumnConfig, ListingRouteConfig } from '@lib/anatomy/types';
+import type { ColumnConfig, ListingRouteConfig } from '@lib/anatomy/types';
 import { ETAPES_DOSSIER_ETUDE } from '@app/etudes/models';
 import type { DossierEtude } from '@app/etudes/models';
 
 import { backendToUiEtape, libelleUiEtape } from '../utils/dossier-etape.util';
+import {
+  DOSSIER_STATUT_LABELS,
+  DOSSIER_STATUT_VARIANTS,
+} from '../utils/dossier-status.util';
 
 export const DOSSIER_ROUTES: ListingRouteConfig<DossierEtude> = {
   detail: (item) => ['/etudes/dossiers', item.id],
   create: ['/etudes/dossiers/new'],
   list: ['/etudes/dossiers'],
-};
-
-/** Vert quand c'est acquis, orange quand ça demande une action, rouge quand c'est perdu. */
-const STATUT_VARIANTS: Record<string, BadgeVariant> = {
-  BROUILLON: 'default',
-  EN_ETUDE: 'warning',
-  EN_VALIDATION: 'info',
-  VALIDEE: 'success',
-  DEVIS_GENERE: 'info',
-  GAGNE: 'success',
-  PERDU: 'danger',
-  CONVERTIE: 'success',
-  ANNULE: 'default',
-};
-
-const STATUT_LABELS: Record<string, string> = {
-  BROUILLON: 'Brouillon',
-  EN_ETUDE: 'En étude',
-  EN_VALIDATION: 'En validation',
-  VALIDEE: 'Validée',
-  DEVIS_GENERE: 'Devis généré',
-  GAGNE: 'Gagné',
-  PERDU: 'Perdu',
-  CONVERTIE: 'Convertie',
-  ANNULE: 'Annulé',
 };
 
 function buildColumns(): ColumnConfig[] {
@@ -62,8 +41,9 @@ function buildColumns(): ColumnConfig[] {
       type: 'badge',
       sortable: true,
       width: '150px',
-      badgeVariant: (value: unknown) => STATUT_VARIANTS[String(value)] ?? 'default',
-      transform: (value: unknown) => STATUT_LABELS[String(value)] ?? String(value ?? ''),
+      badgeVariant: (value: unknown) => DOSSIER_STATUT_VARIANTS[String(value)] ?? 'default',
+      transform: (value: unknown) =>
+        DOSSIER_STATUT_LABELS[String(value)] ?? String(value ?? ''),
     },
     {
       key: 'updatedAt',

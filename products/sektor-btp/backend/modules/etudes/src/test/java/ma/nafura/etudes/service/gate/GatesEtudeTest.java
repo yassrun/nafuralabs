@@ -105,13 +105,67 @@ class GatesEtudeTest {
                 .containsExactly("1-2", "1-3");
     }
 
+    @Test
+    void lot_sans_article_et_code_duplique_sont_bloquants() {
+        UUID lotId = UUID.randomUUID();
+        DpgfNoeud lot = DpgfNoeud.builder()
+                .id(lotId)
+                .type(DpgfNoeud.TYPE_LOT)
+                .code("L1")
+                .libelle("Lot vide")
+                .ordre(0)
+                .build();
+        DpgfNoeud a1 = article("X", "u", "1", DpgfNoeud.MODE_FOURNI);
+        DpgfNoeud a2 = article("X", "u", "2", DpgfNoeud.MODE_FOURNI);
+        a1.setParentId(UUID.randomUUID());
+        a2.setParentId(a1.getParentId());
+
+        ResultatGate r = new GatesEtude.GateBordereau()
+                .evaluer(ContexteGate.deNoeuds(List.of(lot, a1, a2)));
+
+        assertThat(r.passe()).isFalse();
+        assertThat(r.problemes()).extracting(ResultatGate.ProblemeGate::message)
+                .contains("etudes.gate.bordereau.lot_vide", "etudes.gate.bordereau.code_duplique");
+    }
+
+    @Test
+    void lot_racine_avec_article_ne_provoque_pas_de_npe() {
+        UUID lotId = UUID.randomUUID();
+        DpgfNoeud lot = DpgfNoeud.builder()
+                .id(lotId)
+                .type(DpgfNoeud.TYPE_LOT)
+                .code("L1")
+                .libelle("Lot rempli")
+                .ordre(0)
+                .build();
+        DpgfNoeud a = article("1-1", "m3", "10", DpgfNoeud.MODE_FOURNI);
+        a.setParentId(lotId);
+
+        ResultatGate r = new GatesEtude.GateBordereau()
+                .evaluer(ContexteGate.deNoeuds(List.of(lot, a)));
+
+        assertThat(r.passe()).isTrue();
+    }
+
     // ── Étape 3 ──────────────────────────────────────────────────────────────
 
     @Test
-    void article_fourni_ne_reclame_pas_de_decomposition() {
-        List<DpgfNoeud> articles = List.of(article("1-1", "m3", "70", DpgfNoeud.MODE_FOURNI));
-        ResultatGate r = new GatesEtude.GateDecomposition(prixDpuRepository).evaluer(ContexteGate.deArticles(articles));
+    void article_fourni_avec_prix_ne_reclame_pas_de_decomposition() {
+        DpgfNoeud a = article("1-1", "m3", "70", DpgfNoeud.MODE_FOURNI);
+        a.setPrixUnitaire(new BigDecimal("120.00"));
+        ResultatGate r = new GatesEtude.GateDecomposition(prixDpuRepository)
+                .evaluer(ContexteGate.deArticles(List.of(a)));
         assertThat(r.passe()).isTrue();
+    }
+
+    @Test
+    void article_fourni_sans_prix_est_bloquant() {
+        List<DpgfNoeud> articles = List.of(article("1-1", "m3", "70", DpgfNoeud.MODE_FOURNI));
+        ResultatGate r = new GatesEtude.GateDecomposition(prixDpuRepository)
+                .evaluer(ContexteGate.deArticles(articles));
+        assertThat(r.problemes()).singleElement()
+                .extracting(ResultatGate.ProblemeGate::message)
+                .isEqualTo("etudes.gate.chiffrage.prix_absent");
     }
 
     @Test
@@ -143,10 +197,29 @@ class GatesEtudeTest {
     }
 
     @Test
-    void decomposition_avec_un_rendement_utile_passe() {
+    void decomposition_avec_rendement_utile_mais_sans_prix_est_bloquante() {
         UUID dpuId = UUID.randomUUID();
         DpgfNoeud a = article("1-1", "m3", "70", DpgfNoeud.MODE_DECOMPOSE);
         a.setPrixDpuId(dpuId);
+        PrixDpu dpu = PrixDpu.builder().id(dpuId).build();
+        dpu.setComposants(List.of(
+                ComposantDpu.builder().rendement(new BigDecimal("350")).build()));
+        when(prixDpuRepository.findById(dpuId)).thenReturn(Optional.of(dpu));
+
+        ResultatGate r = new GatesEtude.GateDecomposition(prixDpuRepository)
+                .evaluer(ContexteGate.deArticles(List.of(a)));
+
+        assertThat(r.problemes()).singleElement()
+                .extracting(ResultatGate.ProblemeGate::message)
+                .isEqualTo("etudes.gate.chiffrage.prix_absent");
+    }
+
+    @Test
+    void decomposition_avec_un_rendement_utile_et_prix_passe() {
+        UUID dpuId = UUID.randomUUID();
+        DpgfNoeud a = article("1-1", "m3", "70", DpgfNoeud.MODE_DECOMPOSE);
+        a.setPrixDpuId(dpuId);
+        a.setPrixUnitaire(new BigDecimal("849.94"));
         PrixDpu dpu = PrixDpu.builder().id(dpuId).build();
         dpu.setComposants(List.of(
                 ComposantDpu.builder().rendement(new BigDecimal("350")).build(),
@@ -211,5 +284,29 @@ class GatesEtudeTest {
         a.setPrixUnitaire(new BigDecimal("849.94"));
         assertThat(new GatesEtude.GateChiffrage(prixDpuRepository).evaluer(ContexteGate.deArticles(List.of(a))).passe())
                 .isTrue();
+    }
+
+    @Test
+    void chiffrage_sans_client_est_bloquant() {
+        DpgfNoeud a = article("1-1", "m3", "70", DpgfNoeud.MODE_FOURNI);
+        a.setPrixUnitaire(new BigDecimal("100"));
+        ResultatGate r = new GatesEtude.GateChiffrage(prixDpuRepository)
+                .evaluer(ContexteGate.avecClient(ContexteGate.deArticles(List.of(a)), false, false));
+
+        assertThat(r.passe()).isFalse();
+        assertThat(r.problemes()).extracting(ResultatGate.ProblemeGate::message)
+                .contains("etudes.gate.chiffrage.client_manquant");
+    }
+
+    @Test
+    void chiffrage_client_invalide_est_bloquant() {
+        DpgfNoeud a = article("1-1", "m3", "70", DpgfNoeud.MODE_FOURNI);
+        a.setPrixUnitaire(new BigDecimal("100"));
+        ResultatGate r = new GatesEtude.GateChiffrage(prixDpuRepository)
+                .evaluer(ContexteGate.avecClient(ContexteGate.deArticles(List.of(a)), true, false));
+
+        assertThat(r.passe()).isFalse();
+        assertThat(r.problemes()).extracting(ResultatGate.ProblemeGate::message)
+                .contains("etudes.client.introuvable");
     }
 }

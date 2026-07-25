@@ -148,9 +148,10 @@ public class DossierDocumentController {
     public ResponseEntity<?> validerBordereau(
             @PathVariable UUID dossierId,
             @RequestBody ImportTreeRequest body,
-            @RequestParam(required = false) UUID pieceId) {
+            @RequestParam(required = false) UUID pieceId,
+            @RequestParam(defaultValue = "false") boolean confirmReplace) {
         try {
-            var result = bordereauImportService.validerImport(dossierId, body, pieceId);
+            var result = bordereauImportService.validerImport(dossierId, body, pieceId, confirmReplace);
             Map<String, Object> payload = new java.util.LinkedHashMap<>();
             payload.put("dpgfId", result.dpgfId().toString());
             payload.put("numero", result.numero());

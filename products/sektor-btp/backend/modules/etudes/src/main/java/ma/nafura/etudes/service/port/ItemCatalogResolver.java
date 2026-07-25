@@ -32,6 +32,7 @@ public class ItemCatalogResolver implements CatalogResolverPort {
         Specification<Item> spec = (root, query, cb) -> {
             List<Predicate> preds = new ArrayList<>();
             preds.add(cb.equal(root.get("tenantId"), tenantId));
+            preds.add(cb.or(cb.isTrue(root.get("isActive")), cb.isNull(root.get("isActive"))));
             if (StringUtils.hasText(term)) {
                 String like = "%" + term + "%";
                 preds.add(cb.or(

@@ -21,6 +21,7 @@ import {
   PageHeaderComponent,
   PageShellComponent,
   ToastService,
+  VilleMaSelectComponent,
 } from '@lib/anatomy';
 
 import type { Chantier, ChantierStatus } from '@app/chantiers/models';
@@ -46,6 +47,7 @@ interface ClientOption {
     ButtonComponent,
     EmptyStateComponent,
     NfSelectComponent,
+    VilleMaSelectComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -127,8 +129,13 @@ interface ClientOption {
                 <input id="ce-address" type="text" [(ngModel)]="draft.adresse" name="adr" class="fld" />
               </div>
               <div class="field">
-                <label for="ce-ville">{{ 'chantiers.common.fields.ville' | translate }} <span class="required" aria-hidden="true">*</span></label>
-                <input id="ce-ville" type="text" [(ngModel)]="draft.ville" name="ville" class="fld" required />
+                <nf-ville-ma-select
+                  id="ce-ville"
+                  [label]="'chantiers.common.fields.ville' | translate"
+                  [required]="true"
+                  [(ngModel)]="draft.ville"
+                  name="ville"
+                />
               </div>
             </div>
           </section>

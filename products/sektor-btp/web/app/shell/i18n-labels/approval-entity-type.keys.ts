@@ -21,4 +21,5 @@ export const APPROVAL_ENTITY_TYPE_KEYS: Record<ApprovalEntityType, string> = {
   FACTURE_CLIENT: 'enum.approval_entity_type.facture_client',
   NOTE_FRAIS:     'enum.approval_entity_type.note_frais',
   CONTRAT_ST:     'enum.approval_entity_type.contrat_st',
+  ETUDE_PRIX:     'enum.approval_entity_type.etude_prix',
 };

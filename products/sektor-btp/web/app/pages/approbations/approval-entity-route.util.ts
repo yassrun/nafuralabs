@@ -27,6 +27,8 @@ export function approvalEntityRoute(type: ApprovalEntityType, entityId: string):
       return ['/finance/virements', entityId];
     case 'OS':
       return ['/marches/os'];
+    case 'ETUDE_PRIX':
+      return ['/etudes/dossiers', entityId];
     case 'NOTE_FRAIS':
     default:
       return null;

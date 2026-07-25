@@ -6,13 +6,25 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ma.nafura.etudes.api.request.ImportNoeudDto;
 import ma.nafura.etudes.api.request.ImportTreeRequest;
 import ma.nafura.etudes.domain.model.DpgfNoeud;
+import ma.nafura.etudes.service.bordereau.BordereauCandidateMerger;
+import ma.nafura.etudes.service.bordereau.BordereauHybridAssembler;
+import ma.nafura.etudes.service.bordereau.PdfBordereauLayoutParser;
+import ma.nafura.etudes.service.bordereau.PdfPageChunker;
 import org.junit.jupiter.api.Test;
 
 class DocExtractorBordereauAdapterMapToTreeTest {
 
     private final ObjectMapper mapper = new ObjectMapper();
-    private final DocExtractorBordereauAdapter adapter =
-            new DocExtractorBordereauAdapter(null, null);
+    private final AdaptiveBordereauExtractionOrchestrator orchestrator =
+            new AdaptiveBordereauExtractionOrchestrator(
+                    null,
+                    null,
+                    new PdfBordereauLayoutParser(),
+                    new BordereauHybridAssembler(),
+                    new BordereauCandidateMerger(),
+                    new PdfPageChunker(),
+                    new TabularBordereauParser(),
+                    "legacy");
 
     @Test
     void mapToTree_preservesNestedSousLotsAndArticles() throws Exception {
@@ -53,7 +65,7 @@ class DocExtractorBordereauAdapterMapToTreeTest {
                 }
                 """);
 
-        ImportTreeRequest tree = adapter.mapToTree(data);
+        ImportTreeRequest tree = orchestrator.mapToTree(data);
 
         assertThat(tree.getArbre()).hasSize(1);
         ImportNoeudDto lot = tree.getArbre().get(0);
@@ -91,7 +103,7 @@ class DocExtractorBordereauAdapterMapToTreeTest {
                 }
                 """);
 
-        ImportTreeRequest tree = adapter.mapToTree(data);
+        ImportTreeRequest tree = orchestrator.mapToTree(data);
         ImportNoeudDto lot = tree.getArbre().get(0);
         assertThat(lot.getEnfants()).hasSize(1);
         assertThat(lot.getEnfants().get(0).getType()).isEqualTo(DpgfNoeud.TYPE_ARTICLE);

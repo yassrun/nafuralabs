@@ -4,6 +4,8 @@ import type { UnitOfMeasure } from '@app/pages/inventory/configuration/unit-of-m
 export interface UniteOption {
   code: string;
   label: string;
+  /** UUID référentiel — utile pour créer un Item catalogue. */
+  id?: string;
 }
 
 /** Normalise pour comparaison (M3, m³, m3 → m3). */
@@ -51,6 +53,7 @@ export function toUniteOptions(units: UnitOfMeasure[]): UniteOption[] {
   const fromApi = units
     .filter((u) => u.isActive !== false && u.code?.trim())
     .map((u) => ({
+      id: u.id,
       code: u.code.trim(),
       label: u.name?.trim() ? `${u.code.trim()} — ${u.name.trim()}` : u.code.trim(),
     }));

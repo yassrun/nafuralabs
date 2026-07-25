@@ -47,6 +47,73 @@ export interface ValiderBordereauResult {
   articlesIgnores: number;
 }
 
+/** Suggestion Gemini depuis les sections CPS (jamais persistée automatiquement). */
+export interface DescriptifPropose {
+  texte: string;
+  sectionSourceId?: string | null;
+  confiance: number;
+}
+
+export interface DecompositionComposantMatched {
+  type: string;
+  itemId: string;
+  code?: string;
+  name: string;
+  unite: string;
+  rendement: number;
+  prixUnitaire: number;
+  sourcePrix: string;
+  confiance?: number;
+  suggereParIa?: boolean;
+}
+
+export interface DecompositionComposantMissing {
+  type: string;
+  designation: string;
+  unite: string;
+  rendement: number;
+  confiance?: number;
+  raison?: string;
+}
+
+/** Suggestion de décomposition (matched catalogue + missing à créer). */
+export interface DecompositionPropose {
+  matched: DecompositionComposantMatched[];
+  missing: DecompositionComposantMissing[];
+  confiance?: number;
+}
+
+/** Synthèse agrégée pour l'entête du dossier. */
+export interface DossierEtudeSynthese {
+  id: string;
+  numero: string;
+  objet: string;
+  clientId?: string | null;
+  clientNom?: string | null;
+  appelOffreClientId?: string | null;
+  status: string;
+  currentStep: number;
+  phase: string;
+  validationEtape?: string | null;
+  bordereauRevision: number;
+  structureVerrouillee: boolean;
+  modifiable: boolean;
+  nombreArticles: number;
+  anomaliesBloquantes: number;
+  totalHt: number;
+  devisGenereId?: string | null;
+  devisNumero?: string | null;
+  approvalRequestId?: string | null;
+  prochainApprobateurRole?: string | null;
+  prochainApprobateurNom?: string | null;
+  motifRefus?: string | null;
+  createdBy?: string | null;
+  updatedBy?: string | null;
+  updatedAt?: string | null;
+  gates: ResultatGate[];
+  actionPrincipale: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class DossierEtudeApiService extends FeatureApiService<
   DossierEtude,
@@ -84,6 +151,18 @@ export class DossierEtudeApiService extends FeatureApiService<
 
   annuler(id: string): Promise<DossierEtude> {
     return this.executeTransition(id, 'annuler');
+  }
+
+  synthese(id: string): Promise<DossierEtudeSynthese> {
+    return this.get<DossierEtudeSynthese>(`${this.basePath}/${id}/synthese`);
+  }
+
+  reouvrirBordereau(id: string): Promise<DossierEtude> {
+    return this.executeTransition(id, 'reouvrir-bordereau');
+  }
+
+  genererDevis(id: string): Promise<DossierEtude> {
+    return this.executeTransition(id, 'generer-devis');
   }
 
   listerDocuments(dossierId: string): Promise<DossierDocument[]> {
@@ -153,18 +232,22 @@ export class DossierEtudeApiService extends FeatureApiService<
     );
   }
 
-  /** Persiste l'arbre revu inline (remplace le DPGF existant). */
+  /** Persiste l'arbre revu inline (remplace le DPGF existant si confirmReplace). */
   validerBordereau(
     dossierId: string,
     arbre: ImportNoeudPreview[],
     pieceId?: string,
+    confirmReplace = false,
   ): Promise<ValiderBordereauResult> {
-    const params = pieceId ? new HttpParams().set('pieceId', pieceId) : undefined;
+    let params = new HttpParams().set('confirmReplace', String(confirmReplace));
+    if (pieceId) {
+      params = params.set('pieceId', pieceId);
+    }
     return firstValueFrom(
       this.http.post<ValiderBordereauResult>(
         this.resolveUrl(`${this.basePath}/${dossierId}/documents/valider-bordereau`),
         { arbre },
-        params ? { params } : {},
+        { params },
       ),
     );
   }
@@ -191,5 +274,50 @@ export class DossierEtudeApiService extends FeatureApiService<
 
   supprimerDocument(dossierId: string, documentId: string): Promise<void> {
     return this.deleteRequest(`${this.basePath}/${dossierId}/documents/${documentId}`);
+  }
+
+  /**
+   * Propose un descriptif technique pour un article à partir du CPS indexé (Gemini).
+   * Retourne `null` si aucune section pertinente (HTTP 204).
+   */
+  proposerDescriptif(
+    dossierId: string,
+    cpsDocumentId: string,
+    articleId: string,
+  ): Promise<DescriptifPropose | null> {
+    const params = new HttpParams().set('articleId', articleId);
+    return firstValueFrom(
+      this.http.post<DescriptifPropose | null>(
+        this.resolveUrl(
+          `${this.basePath}/${dossierId}/documents/cps/${cpsDocumentId}/descriptif-propose`,
+        ),
+        {},
+        { params },
+      ),
+    );
+  }
+
+  /**
+   * Propose une décomposition brouillon (catalogue + absents). Jamais persistée.
+   * Retourne `null` si aucun besoin exploitable (HTTP 204).
+   */
+  proposerDecomposition(
+    dossierId: string,
+    articleId: string,
+    cpsDocumentId?: string | null,
+  ): Promise<DecompositionPropose | null> {
+    let params = new HttpParams();
+    if (cpsDocumentId) {
+      params = params.set('cpsDocumentId', cpsDocumentId);
+    }
+    return firstValueFrom(
+      this.http.post<DecompositionPropose | null>(
+        this.resolveUrl(
+          `${this.basePath}/${dossierId}/articles/${articleId}/decomposition-propose`,
+        ),
+        {},
+        { params },
+      ),
+    );
   }
 }

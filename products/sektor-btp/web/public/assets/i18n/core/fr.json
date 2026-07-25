@@ -1827,7 +1827,8 @@
       "os": "Ordre de service",
       "facture_client": "Facture client",
       "note_frais": "Note de frais",
-      "contrat_st": "Contrat sous-traitance"
+      "contrat_st": "Contrat sous-traitance",
+      "etude_prix": "Étude de prix"
     },
     "avoir": {
       "status": {

@@ -7,8 +7,9 @@
 .poste {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.15rem;
   min-height: 100%;
+  padding: 0.15rem 0.1rem 0.5rem;
 }
 
 .poste--empty {
@@ -43,12 +44,28 @@
   z-index: 2;
   display: flex;
   justify-content: space-between;
-  gap: 1rem;
-  align-items: start;
-  padding: 0.85rem 1rem;
+  gap: 1.5rem;
+  align-items: flex-start;
+  padding: 1.35rem 1.4rem;
   border: 1px solid var(--nf-color-border);
   border-radius: 12px;
   background: var(--nf-color-surface, #fff);
+}
+
+.poste__identite {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.poste__titre-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+  padding-top: 0.15rem;
 }
 
 .poste__back {
@@ -58,7 +75,7 @@
   color: var(--nf-color-primary-600, #0b6e7a);
   font-size: 0.8125rem;
   padding: 0;
-  margin-bottom: 0.35rem;
+  margin: 0;
   cursor: pointer;
   text-decoration: underline;
 
@@ -72,19 +89,23 @@
 .poste__code {
   margin: 0;
   font-family: ui-monospace, monospace;
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
   color: var(--nf-color-text-secondary);
+  letter-spacing: 0.02em;
 }
 
 .poste__titre {
-  margin: 0.15rem 0 0;
-  font-size: 1.05rem;
+  margin: 0;
+  font-size: 1.2rem;
   font-weight: 650;
+  line-height: 1.45;
   overflow-wrap: anywhere;
+  color: var(--nf-color-text-primary);
 }
 
 .poste__meta {
-  margin: 0.35rem 0 0;
+  margin: 0;
   display: flex;
   gap: 0.4rem;
   flex-wrap: wrap;
@@ -100,10 +121,13 @@
 
 .poste__header-actions {
   display: flex;
-  align-items: center;
-  justify-content: end;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-start;
   flex-wrap: wrap;
   gap: 0.5rem;
+  flex-shrink: 0;
+  padding-top: 0.1rem;
 }
 
 .poste__erreur {
@@ -126,7 +150,7 @@
   border: 1px solid var(--nf-color-border);
   border-radius: 12px;
   background: var(--nf-color-bg);
-  padding: 0.9rem 1rem;
+  padding: 1.15rem 1.25rem;
 }
 
 .poste__commentaire {
@@ -160,13 +184,14 @@
   justify-content: space-between;
   align-items: center;
   gap: 0.75rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: 1rem;
   flex-wrap: wrap;
 
   h4 {
     margin: 0;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     font-weight: 650;
+    line-height: 1.35;
   }
 }
 

@@ -1,4 +1,5 @@
 import type { DetailFieldConfig } from '@lib/anatomy/types';
+import { villeSelectOptions } from '@lib/referentiels/geo-ma';
 
 export const FIELDS: DetailFieldConfig[] = [
   // Section 1: Identification
@@ -23,7 +24,7 @@ export const FIELDS: DetailFieldConfig[] = [
 
   // Section 2: Coordonnées
   { key: 'adresse', label: 'Adresse', type: 'text' },
-  { key: 'ville', label: 'Ville *', type: 'text', required: true },
+  { key: 'ville', label: 'Ville *', type: 'select', required: true, options: villeSelectOptions() },
   { key: 'codePostal', label: 'Code postal', type: 'text' },
   { key: 'telephone', label: 'Téléphone', type: 'phone-ma' },
   { key: 'email', label: 'Email', type: 'text' },

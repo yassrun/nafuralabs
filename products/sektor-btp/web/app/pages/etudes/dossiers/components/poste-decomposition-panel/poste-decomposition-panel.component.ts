@@ -16,7 +16,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { firstValueFrom } from 'rxjs';
 
-import { ButtonComponent, ConfirmDialogService } from '@lib/anatomy';
+import { ButtonComponent, ConfirmDialogService, ToastService } from '@lib/anatomy';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
 import { safeRandomUUID } from '@core/util/uuid';
 
@@ -25,6 +25,8 @@ import { DpuService } from '@app/etudes/services/dpu.service';
 import { DpuApiService } from '@app/pages/etudes/bibliotheque-prix/services/dpu-api.service';
 import { UnitOfMeasuresApiService } from '@app/pages/inventory/configuration/unit-of-measures/services/unit-of-measure-api.service';
 import { DpgfApiService } from '../../../metres/services/dpgf-api.service';
+import { DossierEtudeApiService } from '../../services/dossier-etude-api.service';
+import type { DecompositionComposantMatched } from '../../services/dossier-etude-api.service';
 
 import type { BordereauTreeRow } from '../../utils/bordereau-tree.util';
 import {
@@ -34,6 +36,11 @@ import {
 } from '../../utils/poste-chiffrage-mode.util';
 import { buildComposantDirtyKey } from '../../utils/poste-dirty.util';
 import { toUniteOptions, type UniteOption } from '../../utils/unite-options.util';
+import { CpsDescriptifDialogComponent } from '../cps-descriptif-dialog/cps-descriptif-dialog.component';
+import {
+  DecompositionSuggestionDialogComponent,
+  type DecompositionSuggestionDialogResult,
+} from '../decomposition-suggestion-dialog/decomposition-suggestion-dialog.component';
 import {
   PosteChiffrageDialogComponent,
   type PosteChiffrageDialogResult,
@@ -81,11 +88,16 @@ export class PosteDecompositionPanelComponent {
   private readonly dpuApi = inject(DpuApiService);
   private readonly dpuMath = inject(DpuService);
   private readonly dpgfApi = inject(DpgfApiService);
+  private readonly dossierApi = inject(DossierEtudeApiService);
   private readonly uomApi = inject(UnitOfMeasuresApiService);
   private readonly dialog = inject(MatDialog);
   private readonly confirmDialog = inject(ConfirmDialogService);
+  private readonly toast = inject(ToastService);
 
   readonly poste = input<BordereauTreeRow | null>(null);
+  readonly dossierId = input<string | null>(null);
+  /** Présent uniquement si le CPS a été indexé — sinon le bouton magique est masqué. */
+  readonly cpsDocumentId = input<string | null>(null);
   readonly modifiable = input(true);
   readonly fgDefaut = input(10);
   readonly margeDefaut = input(17.5);
@@ -110,6 +122,8 @@ export class PosteDecompositionPanelComponent {
   readonly uniteOptions = signal<UniteOption[]>([]);
   readonly chargement = signal(false);
   readonly sauvegarde = signal(false);
+  readonly propositionCps = signal(false);
+  readonly extractionComposants = signal(false);
   readonly erreur = signal<string | undefined>(undefined);
   readonly statut = signal<'idle' | 'saved'>('idle');
 
@@ -124,6 +138,9 @@ export class PosteDecompositionPanelComponent {
   readonly estFourni = computed(() => this.modeLocal() === 'FOURNI');
   readonly estDecompose = computed(() => this.modeLocal() === 'DECOMPOSE');
   readonly sansMode = computed(() => this.modeLocal() == null);
+  readonly peutProposerCps = computed(
+    () => !!this.dossierId() && !!this.cpsDocumentId() && this.modifiable(),
+  );
 
   readonly commentDirty = computed(
     () => this.commentaire().trim() !== this.commentInitial().trim(),
@@ -195,6 +212,8 @@ export class PosteDecompositionPanelComponent {
             prixUnitaire: poste.prixUnitaire,
           }),
         );
+        this.propositionCps.set(false);
+        this.extractionComposants.set(false);
         void this.chargerDpu(poste.id);
       } else {
         this.loadSeq++;
@@ -210,6 +229,8 @@ export class PosteDecompositionPanelComponent {
         this.modeLocal.set(null);
         this.erreur.set(undefined);
         this.chargement.set(false);
+        this.propositionCps.set(false);
+        this.extractionComposants.set(false);
         this.statut.set('idle');
         this.captureDpuInitial();
       }
@@ -227,6 +248,127 @@ export class PosteDecompositionPanelComponent {
 
   onCommentaireChange(value: string): void {
     this.commentaire.set(value);
+  }
+
+  async proposerDepuisCps(): Promise<void> {
+    if (!this.peutProposerCps() || this.propositionCps() || this.sauvegarde()) return;
+    const poste = this.poste();
+    const dossierId = this.dossierId();
+    const cpsDocumentId = this.cpsDocumentId();
+    if (!poste?.id || !dossierId || !cpsDocumentId) return;
+
+    this.propositionCps.set(true);
+    this.erreur.set(undefined);
+    try {
+      const propose = await this.dossierApi.proposerDescriptif(
+        dossierId,
+        cpsDocumentId,
+        poste.id,
+      );
+      const texte = propose?.texte?.trim() ?? '';
+      if (!texte) {
+        this.toast.info('Aucune section CPS pertinente pour cet article.');
+        return;
+      }
+
+      this.dialog.open(CpsDescriptifDialogComponent, {
+        width: 'min(42rem, 94vw)',
+        autoFocus: false,
+        restoreFocus: true,
+        data: {
+          code: poste.code ?? '',
+          libelle: poste.libelle ?? '',
+          texte,
+          confiance: propose?.confiance,
+          sectionSourceId: propose?.sectionSourceId,
+        },
+      });
+    } catch (e) {
+      this.erreur.set(
+        this.msg(e, 'Impossible de proposer un descriptif depuis le CPS.'),
+      );
+    } finally {
+      this.propositionCps.set(false);
+    }
+  }
+
+  async extraireComposants(): Promise<void> {
+    if (!this.modifiable() || this.extractionComposants() || this.sauvegarde()) return;
+    const poste = this.poste();
+    const dossierId = this.dossierId();
+    if (!poste?.id || !dossierId) return;
+
+    this.extractionComposants.set(true);
+    this.erreur.set(undefined);
+    try {
+      const propose = await this.dossierApi.proposerDecomposition(
+        dossierId,
+        poste.id,
+        this.cpsDocumentId(),
+      );
+      if (!propose || (!(propose.matched?.length) && !(propose.missing?.length))) {
+        this.toast.info('Aucun composant détecté pour cet article.');
+        return;
+      }
+
+      const ref = this.dialog.open(DecompositionSuggestionDialogComponent, {
+        width: 'min(40rem, 94vw)',
+        autoFocus: false,
+        restoreFocus: true,
+        data: {
+          code: poste.code ?? '',
+          libelle: poste.libelle ?? '',
+          propose,
+          uniteOptions: this.uniteOptions(),
+        },
+      });
+      const result = (await firstValueFrom(
+        ref.afterClosed(),
+      )) as DecompositionSuggestionDialogResult | null;
+      if (!result?.selected?.length) return;
+
+      await this.appliquerSuggestions(result.selected);
+    } catch (e) {
+      this.erreur.set(this.msg(e, 'Impossible d’extraire les composants.'));
+    } finally {
+      this.extractionComposants.set(false);
+    }
+  }
+
+  private async appliquerSuggestions(rows: DecompositionComposantMatched[]): Promise<void> {
+    if (!rows.length) return;
+    if (!this.estDecompose()) {
+      const ok = await this.passerEnDecomposition({ skipConfirm: true });
+      if (!ok) return;
+    }
+    const existing = this.composants();
+    const existingIds = new Set(existing.map((c) => c.articleOuPosteId));
+    const added: ComposantDPU[] = [];
+    for (const row of rows) {
+      if (existingIds.has(row.itemId)) continue;
+      const quantite = Number(row.rendement ?? 1);
+      const prixUnitaire = Number(row.prixUnitaire ?? 0);
+      added.push({
+        id: safeRandomUUID(),
+        type: (row.type as ComposantDPU['type']) || 'MATIERE',
+        articleOuPosteId: row.itemId,
+        quantite,
+        unite: row.unite || this.poste()?.unite || 'U',
+        prixUnitaire,
+        total: Math.round(Math.max(0, quantite) * Math.max(0, prixUnitaire) * 100) / 100,
+        sourcePrix: (row.sourcePrix as SourcePrixComposant) || 'TARIF',
+        offreFournisseurId: null,
+      });
+    }
+    if (!added.length) {
+      this.toast.info('Ces composants sont déjà présents dans la décomposition.');
+      return;
+    }
+    this.composantsBrouillon.set(this.dpuMath.recomputeTotals([...existing, ...added]));
+    this.markDpuDirty();
+    this.toast.success(
+      `${added.length} composant${added.length > 1 ? 's' : ''} ajouté${added.length > 1 ? 's' : ''} — enregistrez le poste.`,
+    );
   }
 
   async saisirPrixFourni(): Promise<void> {
@@ -454,7 +596,13 @@ export class PosteDecompositionPanelComponent {
   }
 
   private canMutate(): boolean {
-    return this.modifiable() && !this.chargement() && !this.sauvegarde();
+    return (
+      this.modifiable() &&
+      !this.chargement() &&
+      !this.sauvegarde() &&
+      !this.propositionCps() &&
+      !this.extractionComposants()
+    );
   }
 
   private markSaved(): void {
@@ -618,8 +766,8 @@ export class PosteDecompositionPanelComponent {
     }
   }
 
-  private msg(e: unknown): string {
+  private msg(e: unknown, fallback = 'Impossible d’enregistrer la décomposition.'): string {
     const err = e as { error?: { message?: string; code?: string } };
-    return err?.error?.message ?? err?.error?.code ?? 'Impossible d’enregistrer la décomposition.';
+    return err?.error?.message ?? err?.error?.code ?? fallback;
   }
 }

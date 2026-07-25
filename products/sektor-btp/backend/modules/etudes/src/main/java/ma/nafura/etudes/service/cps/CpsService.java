@@ -135,7 +135,19 @@ public class CpsService {
         if (requete.isBlank()) {
             return List.of();
         }
-        return sectionRepository.rechercher(tenantId(), cpsDocumentId, requete, limite);
+        List<CpsSection> hits = sectionRepository.rechercher(tenantId(), cpsDocumentId, requete, limite);
+        if (!hits.isEmpty()) {
+            return hits;
+        }
+        // Fallback : le code bordereau (ex. 1-1-3) peut encore diverger du CPS après normalisation.
+        // On retente sur le libellé seul — c'est le rappel le plus fiable.
+        String libelleSeul = article != null && StringUtils.hasText(article.getLibelle())
+                ? article.getLibelle().trim()
+                : "";
+        if (libelleSeul.isBlank() || libelleSeul.equals(requete)) {
+            return hits;
+        }
+        return sectionRepository.rechercher(tenantId(), cpsDocumentId, libelleSeul, limite);
     }
 
     /**
@@ -163,16 +175,31 @@ public class CpsService {
         return sectionRepository.findByTenantIdAndCpsDocumentIdOrderByOrdreAsc(tenantId(), cpsDocumentId);
     }
 
-    /** Visible pour les tests : la forme de la requete conditionne la qualite du rappel. */
+    /**
+     * Visible pour les tests : la forme de la requete conditionne la qualite du rappel.
+     *
+     * <p>Les codes bordereau utilisent souvent des tirets ({@code 1-1-3}) alors que le CPS
+     * numerote avec des points ({@code 1.1.3}). {@code websearch_to_tsquery} traite
+     * {@code 1-1-3} comme une phrase ({@code '1' <-> '-1' <-> '-3'}) qui ne matche jamais —
+     * d'ou zero section trouvee alors que le libelle seul retrouve bien le passage.
+     */
     static String construireRequete(DpgfNoeud article) {
         StringBuilder sb = new StringBuilder();
         if (article != null && StringUtils.hasText(article.getCode())) {
-            sb.append(article.getCode()).append(' ');
+            sb.append(normaliserCodePourRecherche(article.getCode())).append(' ');
         }
         if (article != null && StringUtils.hasText(article.getLibelle())) {
             sb.append(article.getLibelle());
         }
         return sb.toString().trim();
+    }
+
+    /** Aligne la numerotation bordereau sur celle du CPS pour le tsquery. */
+    static String normaliserCodePourRecherche(String code) {
+        if (!StringUtils.hasText(code)) {
+            return "";
+        }
+        return code.trim().replace('-', '.');
     }
 
     private static UUID tenantId() {

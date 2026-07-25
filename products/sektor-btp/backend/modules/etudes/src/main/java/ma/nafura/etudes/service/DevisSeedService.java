@@ -1,5 +1,7 @@
 package ma.nafura.etudes.service;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.InputStream;
@@ -8,6 +10,8 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import ma.nafura.etudes.domain.model.Devis;
@@ -22,6 +26,7 @@ import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 @Service
 public class DevisSeedService {
@@ -33,6 +38,9 @@ public class DevisSeedService {
     private final OuvrageRepository ouvrageRepository;
     private final MetreSeedService metreSeedService;
     private final ObjectMapper objectMapper;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public DevisSeedService(
             DevisRepository repository,
@@ -67,12 +75,14 @@ public class DevisSeedService {
     }
 
     private Devis buildDevis(JsonNode node, UUID tenantId) {
+        String rawClientId = node.get("clientId").asText();
+        ResolvedClient client = resolvePartnerClient(tenantId, rawClientId, textOrNull(node, "clientName"));
         Devis entity = Devis.builder()
                 .tenantId(tenantId)
                 .numero(node.get("numero").asText())
                 .version(1)
-                .clientId(node.get("clientId").asText())
-                .clientName(textOrNull(node, "clientName"))
+                .clientId(client.id())
+                .clientName(client.name())
                 .contactClient(textOrNull(node, "contactClient"))
                 .objet(node.get("objet").asText())
                 .ville(textOrNull(node, "ville"))
@@ -181,6 +191,44 @@ public class DevisSeedService {
         entity.setTotalTva(totalTva);
         entity.setTotalTtc(totalTtc);
     }
+
+    /**
+     * Résout un code legacy ({@code cli-001} / {@code CLI-001}) vers le UUID Partner
+     * sans dépendre du module partner (requête SQL directe).
+     */
+    private ResolvedClient resolvePartnerClient(UUID tenantId, String rawId, String fallbackName) {
+        String raw = StringUtils.hasText(rawId) ? rawId.trim() : null;
+        if (raw == null) {
+            throw new IllegalStateException("devis seed: clientId manquant");
+        }
+        try {
+            UUID id = UUID.fromString(raw);
+            return new ResolvedClient(id.toString(), fallbackName);
+        } catch (IllegalArgumentException ignored) {
+            // continue — code métier
+        }
+        @SuppressWarnings("unchecked")
+        List<Object[]> rows = entityManager
+                .createNativeQuery(
+                        """
+                        SELECT p.id::text, p.raison_sociale
+                        FROM partners p
+                        WHERE p.tenant_id = :tenantId
+                          AND lower(p.code) = lower(:code)
+                        LIMIT 1
+                        """)
+                .setParameter("tenantId", tenantId)
+                .setParameter("code", raw)
+                .getResultList();
+        if (rows.isEmpty()) {
+            // Dernier recours : garder le code (migration 010 pourra backfiller plus tard)
+            return new ResolvedClient(raw.toLowerCase(Locale.ROOT), fallbackName);
+        }
+        Object[] row = rows.get(0);
+        return new ResolvedClient(String.valueOf(row[0]), String.valueOf(row[1]));
+    }
+
+    private record ResolvedClient(String id, String name) {}
 
     private static BigDecimal decimalOrNull(JsonNode node, String field) {
         return node.hasNonNull(field) ? new BigDecimal(node.get(field).asText()) : null;

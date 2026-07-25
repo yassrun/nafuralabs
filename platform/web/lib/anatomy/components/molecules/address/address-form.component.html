@@ -23,9 +23,16 @@
 
   <!-- City and Postal Code Row -->
   <div class="nf-field-row">
-    <!-- City -->
+    <!-- City — referential-backed select for Moroccan addresses -->
+    <nf-ville-ma-select
+      *ngIf="isFieldVisible('city') && isMorocco()"
+      formControlName="city"
+      [label]="'Address.City'"
+      [required]="isFieldRequired('city')"
+      [error]="getErrorKey('city')">
+    </nf-ville-ma-select>
     <nf-input
-      *ngIf="isFieldVisible('city')"
+      *ngIf="isFieldVisible('city') && !isMorocco()"
       formControlName="city"
       [label]="'Address.City'"
       [placeholder]="'Address.Placeholder.City'"
@@ -46,9 +53,18 @@
     </nf-input>
   </div>
 
-  <!-- Region -->
+  <!-- Region — 12 official regions for Moroccan addresses -->
+  <nf-select
+    *ngIf="isFieldVisible('region') && isMorocco()"
+    formControlName="region"
+    [label]="'Address.Region'"
+    [placeholder]="'Address.Placeholder.Region'"
+    [options]="getRegionMaSelectOptions()"
+    [required]="isFieldRequired('region')"
+    [error]="getErrorKey('region')">
+  </nf-select>
   <nf-input
-    *ngIf="isFieldVisible('region')"
+    *ngIf="isFieldVisible('region') && !isMorocco()"
     formControlName="region"
     [label]="'Address.Region'"
     [placeholder]="'Address.Placeholder.Region'"

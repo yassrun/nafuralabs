@@ -1,6 +1,7 @@
 import type { TranslateService } from '@ngx-translate/core';
 
 import type { DetailFieldConfig } from '@lib/anatomy/types';
+import { villeSelectOptions } from '@lib/referentiels/geo-ma';
 
 export function buildEmployeFields(t: TranslateService): DetailFieldConfig[] {
   const tr = (k: string) => t.instant(k);
@@ -13,7 +14,7 @@ export function buildEmployeFields(t: TranslateService): DetailFieldConfig[] {
     { key: 'telephone', label: tr('rh.employe.fields.telephone'), type: 'phone-ma' },
     { key: 'email', label: tr('rh.employe.fields.email'), type: 'text' },
     { key: 'adresse', label: tr('rh.employe.fields.adresse'), type: 'text' },
-    { key: 'ville', label: tr('rh.employe.fields.ville'), type: 'text' },
+    { key: 'ville', label: tr('rh.employe.fields.ville'), type: 'select', options: villeSelectOptions() },
     { key: 'matricule', label: tr('rh.employe.fields.matricule'), type: 'text', readonly: true },
     {
       key: 'typeContrat', label: tr('rh.employe.fieldsRequired.typeContrat'), type: 'select', required: true,

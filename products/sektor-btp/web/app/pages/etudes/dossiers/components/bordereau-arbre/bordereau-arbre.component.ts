@@ -28,7 +28,6 @@ import { UnitOfMeasuresApiService } from '@app/pages/inventory/configuration/uni
 import { DpgfApiService } from '../../../metres/services/dpgf-api.service';
 import {
   applyTreeRollupTotals,
-  collectExpandKeys,
   countArticlesInNodes,
   countExploitableInNodes,
   getImportNoeudAt,
@@ -50,7 +49,8 @@ import {
 
 /**
  * Arbre DPGF — lecture / édition structurelle, ou brouillon d'import inline.
- * En mode sélection (étape Décomposition), le clic sur un ARTICLE ouvre le panneau détail.
+ * En mode sélection (étape Décomposition), seul un clic ARTICLE change le poste
+ * affiché à droite ; lots / sous-lots ne font que naviguer l’arbre.
  */
 @Component({
   selector: 'app-bordereau-arbre',
@@ -128,18 +128,16 @@ export class BordereauArbreComponent {
       { key: 'type', label: 'Type', width: selection ? '4.5rem' : '5.5rem' },
       { key: 'code', label: 'Code', width: selection ? '5.5rem' : '7rem' },
       { key: 'libelle', label: 'Libellé' },
+      { key: 'unite', label: 'Unité', width: '5rem', align: 'center' },
+      { key: 'quantite', label: 'Qté', width: '5.5rem', align: 'end' },
     ];
-    if (!selection) {
-      cols.push(
-        { key: 'unite', label: 'Unité', width: '5.5rem', align: 'center' },
-        { key: 'quantite', label: 'Quantité', width: '7rem', align: 'end' },
-        { key: 'total', label: 'Total HT', width: '7rem', align: 'end' },
-      );
-    } else {
+    if (selection) {
       cols.push(
         { key: 'pu', label: 'PU HT', width: '5.5rem', align: 'end' },
-        { key: 'total', label: 'Total HT', width: '7rem', align: 'end' },
+        { key: 'total', label: 'Total HT', width: '6.5rem', align: 'end' },
       );
+    } else {
+      cols.push({ key: 'total', label: 'Total HT', width: '7rem', align: 'end' });
     }
     if (this.showStructureActions()) {
       cols.push({ key: 'actions', label: 'Actions', width: '10.5rem', align: 'center' });
@@ -147,7 +145,7 @@ export class BordereauArbreComponent {
     return cols;
   });
 
-  readonly tableMinWidth = computed(() => (this.selectionEnabled() ? '28rem' : '42rem'));
+  readonly tableMinWidth = computed(() => (this.selectionEnabled() ? '36rem' : '42rem'));
   readonly showStructureActions = computed(
     () => this.modifiable() && !this.selectionEnabled() && (this.isDraft() || this.editionStructure()),
   );
@@ -231,10 +229,9 @@ export class BordereauArbreComponent {
 
   onRowClick(row: BordereauTreeRow): void {
     if (!this.selectionEnabled()) return;
-    if (row.type !== 'ARTICLE') {
-      this.posteSelect.emit(null);
-      return;
-    }
+    // Lots / sous-lots : navigation seule — on ne désélectionne le poste
+    // que lors du choix d’un autre ARTICLE.
+    if (row.type !== 'ARTICLE') return;
     this.posteSelect.emit(row);
   }
 
@@ -498,7 +495,8 @@ export class BordereauArbreComponent {
     const nodes = importArbreToTreeNodes(this.draftLocal());
     this.nodes.set(nodes);
     if (resetExpand) {
-      this.expandedKeys.set(collectExpandKeys(nodes, 0));
+      // Collapsed by default — user expands via chevrons / expand-all.
+      this.expandedKeys.set(new Set());
     }
   }
 
@@ -589,9 +587,10 @@ export class BordereauArbreComponent {
           }
         };
         walk(nodes);
-        this.expandedKeys.set(valid.size ? valid : collectExpandKeys(nodes, 0));
+        this.expandedKeys.set(valid);
       } else {
-        this.expandedKeys.set(collectExpandKeys(nodes, 0));
+        // Collapsed by default (lots only).
+        this.expandedKeys.set(new Set());
       }
     } catch (e) {
       this.erreur.set(this.msg(e));

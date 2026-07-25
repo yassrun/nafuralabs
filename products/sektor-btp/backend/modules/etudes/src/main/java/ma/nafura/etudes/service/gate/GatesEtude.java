@@ -2,7 +2,13 @@ package ma.nafura.etudes.service.gate;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import ma.nafura.etudes.domain.model.ComposantDpu;
 import ma.nafura.etudes.domain.model.DossierEtude;
 import ma.nafura.etudes.domain.model.DpgfNoeud;
@@ -27,6 +33,12 @@ public final class GatesEtude {
 
     private static boolean estArticle(DpgfNoeud n) {
         return DpgfNoeud.TYPE_ARTICLE.equals(n.getType());
+    }
+
+    /** Prix unitaire de vente strictement positif — condition pour franchir la décomposition. */
+    private static boolean aPrixVente(DpgfNoeud n) {
+        return n.getPrixUnitaire() != null
+                && n.getPrixUnitaire().compareTo(BigDecimal.ZERO) > 0;
     }
 
     /**
@@ -83,11 +95,73 @@ public final class GatesEtude {
                     pbs.add(probleme(a, "etudes.gate.bordereau.quantite_invalide"));
                 }
             }
+            pbs.addAll(lotsSansArticle(contexte.noeuds()));
+            pbs.addAll(codesArticlesDupliques(articles));
             return new ResultatGate(etape(), true, pbs);
+        }
+
+        /** Lot / sous-lot sans aucun article descendant. */
+        private static List<ProblemeGate> lotsSansArticle(List<DpgfNoeud> noeuds) {
+            if (noeuds == null || noeuds.isEmpty()) {
+                return List.of();
+            }
+            Map<UUID, DpgfNoeud> byId = new HashMap<>();
+            for (DpgfNoeud n : noeuds) {
+                if (n.getId() != null) {
+                    byId.put(n.getId(), n);
+                }
+            }
+            Set<UUID> parentsAvecArticle = new HashSet<>();
+            for (DpgfNoeud a : noeuds) {
+                if (!DpgfNoeud.TYPE_ARTICLE.equals(a.getType())) {
+                    continue;
+                }
+                UUID p = a.getParentId();
+                while (p != null) {
+                    if (!parentsAvecArticle.add(p)) {
+                        break;
+                    }
+                    DpgfNoeud parent = byId.get(p);
+                    p = parent != null ? parent.getParentId() : null;
+                }
+            }
+            List<ProblemeGate> pbs = new ArrayList<>();
+            for (DpgfNoeud n : noeuds) {
+                if (!DpgfNoeud.TYPE_LOT.equals(n.getType())
+                        && !DpgfNoeud.TYPE_SOUS_LOT.equals(n.getType())) {
+                    continue;
+                }
+                if (!parentsAvecArticle.contains(n.getId())) {
+                    pbs.add(probleme(n, "etudes.gate.bordereau.lot_vide"));
+                }
+            }
+            return pbs;
+        }
+
+        private static List<ProblemeGate> codesArticlesDupliques(List<DpgfNoeud> articles) {
+            Map<String, List<DpgfNoeud>> byCode = new HashMap<>();
+            for (DpgfNoeud a : articles) {
+                if (a.getCode() == null || a.getCode().isBlank()) {
+                    continue;
+                }
+                String key = a.getCode().trim().toUpperCase(Locale.ROOT);
+                byCode.computeIfAbsent(key, k -> new ArrayList<>()).add(a);
+            }
+            List<ProblemeGate> pbs = new ArrayList<>();
+            for (List<DpgfNoeud> group : byCode.values()) {
+                if (group.size() < 2) {
+                    continue;
+                }
+                for (DpgfNoeud a : group) {
+                    pbs.add(probleme(a, "etudes.gate.bordereau.code_duplique"));
+                }
+            }
+            return pbs;
         }
     }
 
-    /** Étape 3 — chaque article est FOURNI, ou DECOMPOSE avec au moins un composant utile. */
+    /** Étape 3 — chaque article est FOURNI avec un PU > 0, ou DECOMPOSE
+     * avec composants utiles et un prix de vente posé. */
     @Component
     public static class GateDecomposition implements EtapeGate {
 
@@ -108,6 +182,9 @@ public final class GatesEtude {
             List<ProblemeGate> pbs = new ArrayList<>();
             for (DpgfNoeud a : articles) {
                 if (DpgfNoeud.MODE_FOURNI.equals(a.getMode())) {
+                    if (!aPrixVente(a)) {
+                        pbs.add(probleme(a, "etudes.gate.chiffrage.prix_absent"));
+                    }
                     continue;
                 }
                 if (a.getPrixDpuId() == null) {
@@ -124,6 +201,10 @@ public final class GatesEtude {
                         .anyMatch(r -> r != null && r.compareTo(BigDecimal.ZERO) > 0);
                 if (!rendementUtile) {
                     pbs.add(probleme(a, "etudes.gate.decomposition.rendements_nuls"));
+                    continue;
+                }
+                if (!aPrixVente(a)) {
+                    pbs.add(probleme(a, "etudes.gate.chiffrage.prix_absent"));
                 }
             }
             return new ResultatGate(etape(), true, pbs);
@@ -195,6 +276,11 @@ public final class GatesEtude {
         public ResultatGate evaluer(ContexteGate contexte) {
             List<DpgfNoeud> articles = contexte.articles();
             List<ProblemeGate> pbs = new ArrayList<>();
+            if (!contexte.hasClientId()) {
+                pbs.add(new ProblemeGate(null, null, null, "etudes.gate.chiffrage.client_manquant"));
+            } else if (!contexte.clientValide()) {
+                pbs.add(new ProblemeGate(null, null, null, "etudes.client.introuvable"));
+            }
             for (DpgfNoeud a : articles) {
                 if (a.getPrixUnitaire() == null
                         || a.getPrixUnitaire().compareTo(BigDecimal.ZERO) <= 0) {

@@ -74,10 +74,46 @@ class BordereauHybridAssemblerTest {
     }
 
     @Test
-    void assembleLocalOnly_buildsTreeFromDetectedGroups() {
+    void assembleLocalOnly_promotesSousLotToRootLotByCodePrefix() {
         ImportTreeRequest tree = assembler.assembleLocalOnly(sampleParse());
-        assertThat(tree.getArbre()).isNotEmpty();
+        assertThat(tree.getArbre()).hasSize(1);
+        assertThat(tree.getArbre().get(0).getType()).isEqualTo(DpgfNoeud.TYPE_LOT);
+        assertThat(tree.getArbre().get(0).getLibelle()).containsIgnoringCase("SOUS LOT");
         assertThat(countArticles(tree.getArbre())).isEqualTo(2);
+        // No market title as root
+        assertThat(tree.getArbre().get(0).getLibelle()).doesNotContain("PLATEFORME");
+    }
+
+    @Test
+    void assembleLocalOnly_splitsMultipleSousLotsByCodePrefix() {
+        List<BordereauRowCandidate> rows = List.of(
+                new BordereauRowCandidate(
+                        "g1", 1, 0, null, "SOUS LOT N° 1: TERRASSEMENT", null, null,
+                        BordereauRowCandidate.Kind.SOUS_LOT, 0.9, "sl1"),
+                new BordereauRowCandidate(
+                        "r0", 1, 1, "1-1-1", "FOUILLES", "M3", new BigDecimal("10"),
+                        BordereauRowCandidate.Kind.ARTICLE, 0.9, "a"),
+                new BordereauRowCandidate(
+                        "g2", 2, 2, null, "SOUS LOT N° 2: CHARPENTE", null, null,
+                        BordereauRowCandidate.Kind.SOUS_LOT, 0.9, "sl2"),
+                new BordereauRowCandidate(
+                        "r1", 2, 3, "2.2.1", "STRUCTURE", "KG", new BigDecimal("100"),
+                        BordereauRowCandidate.Kind.ARTICLE, 0.9, "b"),
+                new BordereauRowCandidate(
+                        "noise", 1, 4, null,
+                        "TRAVAUX DE CONSTRUCTION DE LA PLATEFORME AGRO RABAT-LOT-AMENAGEMENTS",
+                        null, null, BordereauRowCandidate.Kind.LOT, 0.5, "noise"));
+        BordereauParseResult parse = new BordereauParseResult(
+                2, 400, rows, Set.of(1, 2), BordereauParseResult.Quality.USABLE, null);
+
+        ImportTreeRequest tree = assembler.assembleLocalOnly(parse);
+        assertThat(tree.getArbre()).hasSize(2);
+        assertThat(tree.getArbre())
+                .noneMatch(n -> n.getLibelle() != null && n.getLibelle().contains("PLATEFORME"));
+        assertThat(tree.getArbre().get(0).getLibelle()).contains("TERRASSEMENT");
+        assertThat(tree.getArbre().get(1).getLibelle()).contains("CHARPENTE");
+        assertThat(countArticles(tree.getArbre().get(0).getEnfants())).isEqualTo(1);
+        assertThat(countArticles(tree.getArbre().get(1).getEnfants())).isEqualTo(1);
     }
 
     @Test

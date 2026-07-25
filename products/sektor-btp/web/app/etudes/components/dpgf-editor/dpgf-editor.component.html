@@ -1,12 +1,12 @@
 <div class="dpgf" [class.dpgf--readonly]="readonly">
   <div class="dpgf__toolbar">
-    <nf-button type="button" class="dpgf__btn" [disabled]="readonly" (clicked)="addChapitre()" variant="secondary">
+    <nf-button type="button" [disabled]="readonly" (clicked)="addChapitre()" variant="primary" size="sm">
       + Chapitre
     </nf-button>
-    <nf-button type="button" class="dpgf__btn dpgf__btn--ghost" [disabled]="readonly" (clicked)="addOuvrage()" variant="ghost">
+    <nf-button type="button" [disabled]="readonly" (clicked)="addOuvrage()" variant="ghost" size="sm">
       + Ouvrage
     </nf-button>
-    <nf-button type="button" class="dpgf__btn dpgf__btn--ghost" [disabled]="readonly" (clicked)="addTexte()" variant="ghost">
+    <nf-button type="button" [disabled]="readonly" (clicked)="addTexte()" variant="ghost" size="sm">
       + Texte
     </nf-button>
     <span class="dpgf__hint">DPGF — Décomposition prix global et forfaitaire</span>

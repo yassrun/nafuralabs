@@ -6,9 +6,11 @@ import java.math.RoundingMode;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -50,11 +52,18 @@ public class PdfBordereauLayoutParser {
             "^(LE|LA|L['’]|LES)\\s+.+$", Pattern.CASE_INSENSITIVE);
     private static final Pattern SOUS_LOT = Pattern.compile(
             "SOUS\\s*LOT", Pattern.CASE_INSENSITIVE);
-    private static final Pattern LOT = Pattern.compile(
-            "\\bLOT\\b", Pattern.CASE_INSENSITIVE);
+    /** Explicit lot header only — not market titles embedding the word LOT. */
+    private static final Pattern LOT_HEADER = Pattern.compile(
+            "^(?:LOT\\s*N?[°ºo]?\\s*\\d|LOT\\s*[:\\-–]|LOT\\s+\\d)",
+            Pattern.CASE_INSENSITIVE);
     private static final Pattern HEADER_NOISE = Pattern.compile(
             "(BORDEREAU\\s+DES\\s+PRIX|DESIGNATION\\s+DES|MONTANT\\s+TOTAL|PRIX\\s+UNITAIRE|"
                     + "DETAIL\\s+ESTIMATIF|QUANTITE|N[°ºo]|UNITE)",
+            Pattern.CASE_INSENSITIVE);
+    private static final Pattern MARKET_TITLE = Pattern.compile(
+            "(TRAVAUX\\s+DE\\s+CONSTRUCTION|PLATEFORME\\s+AGRO|CHAMBRES?\\s+FROID|"
+                    + "ISOLATION\\s+FRIGOR|AMENAGEMENTS?\\s+DES\\s+ENTREPOT|"
+                    + "YOUSSOUFIA|AL\\s+YOUSSOUFIA)",
             Pattern.CASE_INSENSITIVE);
 
     public BordereauParseResult parse(byte[] pdfBytes) {
@@ -87,8 +96,8 @@ public class PdfBordereauLayoutParser {
             }
 
             List<Line> lines = clusterLines(tokens);
-            ColumnBands bands = detectColumns(lines);
-            List<BordereauRowCandidate> rows = extractCandidates(lines, bands, pages);
+            Map<Integer, ColumnBands> bandsByPage = detectColumnsByPage(lines);
+            List<BordereauRowCandidate> rows = extractCandidates(lines, bandsByPage, pages);
             Set<Integer> covered = new HashSet<>();
             for (BordereauRowCandidate row : rows) {
                 if (row.looksLikeArticle()) {
@@ -165,11 +174,38 @@ public class PdfBordereauLayoutParser {
         return Math.max(2.5, h * 0.55);
     }
 
+    private Map<Integer, ColumnBands> detectColumnsByPage(List<Line> lines) {
+        Map<Integer, List<Line>> byPage = new HashMap<>();
+        for (Line line : lines) {
+            byPage.computeIfAbsent(line.page, k -> new ArrayList<>()).add(line);
+        }
+        Map<Integer, ColumnBands> bandsByPage = new HashMap<>();
+        ColumnBands fallback = defaultBands();
+        ColumnBands lastGood = fallback;
+        List<Integer> pages = new ArrayList<>(byPage.keySet());
+        pages.sort(Integer::compareTo);
+        for (Integer page : pages) {
+            ColumnBands detected = detectColumns(byPage.get(page));
+            if (detected.fromHeaders) {
+                lastGood = detected;
+                bandsByPage.put(page, detected);
+            } else {
+                // Reuse last header-derived geometry — layouts usually stable across pages.
+                bandsByPage.put(page, lastGood);
+            }
+        }
+        if (bandsByPage.isEmpty()) {
+            bandsByPage.put(1, fallback);
+        }
+        return bandsByPage;
+    }
+
     private ColumnBands detectColumns(List<Line> lines) {
         Double codeX = null;
         Double unitX = null;
         Double qtyX = null;
         Double designationX = null;
+        boolean fromHeaders = false;
 
         for (Line line : lines) {
             String folded = fold(line.text);
@@ -182,24 +218,30 @@ public class PdfBordereauLayoutParser {
                         // Prefer header line containing N° alone-ish
                         if (folded.contains("DESIGNATION") || folded.equals("N") || folded.startsWith("N")) {
                             codeX = (double) token.x;
+                            fromHeaders = true;
                         }
                     }
                 }
                 if (tf.equals("UNITE")) {
                     unitX = (double) token.x;
+                    fromHeaders = true;
                 }
                 if (tf.equals("QUANTITE") || tf.equals("QTE")) {
                     qtyX = (double) token.x;
+                    fromHeaders = true;
                 }
                 if (tf.equals("DESIGNATION")) {
                     designationX = (double) token.x;
+                    fromHeaders = true;
                 }
             }
             if (folded.equals("UNITE")) {
                 unitX = (double) line.tokens.get(0).x;
+                fromHeaders = true;
             }
             if (folded.equals("QUANTITE") || folded.equals("QTE")) {
                 qtyX = (double) line.tokens.get(0).x;
+                fromHeaders = true;
             }
         }
 
@@ -220,11 +262,16 @@ public class PdfBordereauLayoutParser {
         double unitStart = unitX - 18;
         double qtyStart = qtyX - 18;
         double codeEnd = Math.min(designationX + 10, unitStart - 40);
-        return new ColumnBands(codeX - 5, codeEnd, designationX - 5, unitStart, qtyStart);
+        return new ColumnBands(
+                codeX - 5, codeEnd, designationX - 5, unitStart, qtyStart, fromHeaders);
+    }
+
+    private static ColumnBands defaultBands() {
+        return new ColumnBands(35, 80, 65, 282, 342, false);
     }
 
     private List<BordereauRowCandidate> extractCandidates(
-            List<Line> lines, ColumnBands bands, int pageCount) {
+            List<Line> lines, Map<Integer, ColumnBands> bandsByPage, int pageCount) {
         List<BordereauRowCandidate> rows = new ArrayList<>();
         int order = 0;
         PendingArticle pending = null;
@@ -239,6 +286,7 @@ public class PdfBordereauLayoutParser {
                 continue;
             }
 
+            ColumnBands bands = bandsByPage.getOrDefault(line.page, defaultBands());
             ColumnSlice slice = slice(line, bands);
 
             // Pure unit / qty lines (no code, no designation) attach to pending article.
@@ -285,6 +333,8 @@ public class PdfBordereauLayoutParser {
                         null,
                         groupKind,
                         0.75,
+                        text,
+                        BordereauRowCandidate.ExtractionMethod.PDFBOX,
                         text));
                 continue;
             }
@@ -322,6 +372,8 @@ public class PdfBordereauLayoutParser {
                                 null,
                                 BordereauRowCandidate.Kind.SECTION,
                                 0.65,
+                                text,
+                                BordereauRowCandidate.ExtractionMethod.PDFBOX,
                                 text));
                         continue;
                     }
@@ -406,6 +458,8 @@ public class PdfBordereauLayoutParser {
                                 ? BordereauRowCandidate.Kind.ARTICLE
                                 : BordereauRowCandidate.Kind.AMBIGUOUS,
                         0.55,
+                        text,
+                        BordereauRowCandidate.ExtractionMethod.PDFBOX,
                         text));
             }
         }
@@ -415,7 +469,8 @@ public class PdfBordereauLayoutParser {
         }
 
         // Post-pass: absorb nearby unit/qty that may have been orphaned between articles.
-        return refineCandidates(rows, lines, bands);
+        ColumnBands anyBands = bandsByPage.values().stream().findFirst().orElse(defaultBands());
+        return refineCandidates(rows, lines, anyBands);
     }
 
     private List<BordereauRowCandidate> refineCandidates(
@@ -461,7 +516,9 @@ public class PdfBordereauLayoutParser {
                     row.quantite(),
                     kind,
                     confidence,
-                    row.rawText()));
+                    row.rawText(),
+                    row.method() != null ? row.method() : BordereauRowCandidate.ExtractionMethod.PDFBOX,
+                    row.sourceRef() != null ? row.sourceRef() : row.rawText()));
         }
         return out;
     }
@@ -562,10 +619,15 @@ public class PdfBordereauLayoutParser {
         if (containsUnitOrQtyToken(text)) {
             return null;
         }
+        if (isMarketTitleNoise(text)) {
+            return null;
+        }
         if (SOUS_LOT.matcher(up).find()) {
             return BordereauRowCandidate.Kind.SOUS_LOT;
         }
-        if (LOT.matcher(up).find() && !up.contains("SOUS") && slice.x0 > 80) {
+        // Only explicit "LOT N° 1" / "LOT 1 :" headers — never long titles containing "LOT".
+        String trimmed = text.trim();
+        if (LOT_HEADER.matcher(trimmed).find() && trimmed.length() < 80) {
             return BordereauRowCandidate.Kind.LOT;
         }
         return null;
@@ -652,10 +714,30 @@ public class PdfBordereauLayoutParser {
             }
             return true;
         }
-        if (up.startsWith("TRAVAUX DE CONSTRUCTION") || up.contains("PLATEFORME AGRO")) {
+        if (isMarketTitleNoise(text)) {
             return true;
         }
         if (up.contains("TOTAL EN DHS") || up.contains("TOTAL TRAVAUX")) {
+            return true;
+        }
+        return false;
+    }
+
+    /** Repeated DQE market banner / project title — never a LOT/ARTICLE. */
+    public static boolean isMarketTitleNoise(String text) {
+        if (text == null || text.isBlank()) {
+            return false;
+        }
+        String up = text.toUpperCase(Locale.ROOT).trim();
+        if (SOUS_LOT.matcher(up).find()) {
+            return false;
+        }
+        if (MARKET_TITLE.matcher(up).find()) {
+            return true;
+        }
+        // Truncated banner fragments embedding "LOT" inside a long amenagement title.
+        if (up.contains("LOT") && !up.contains("SOUS") && up.length() > 60
+                && (up.contains("ENTREPOT") || up.contains("AMENAGEMENT") || up.contains("RABAT"))) {
             return true;
         }
         return false;
@@ -775,7 +857,7 @@ public class PdfBordereauLayoutParser {
         return text.trim();
     }
 
-    static String normalizeUnit(String raw) {
+    public static String normalizeUnit(String raw) {
         if (raw == null || raw.isBlank()) {
             return null;
         }
@@ -797,7 +879,7 @@ public class PdfBordereauLayoutParser {
         };
     }
 
-    static BigDecimal parseQty(String raw) {
+    public static BigDecimal parseQty(String raw) {
         if (raw == null || raw.isBlank()) {
             return null;
         }
@@ -891,7 +973,8 @@ public class PdfBordereauLayoutParser {
             double codeEnd,
             double designationStart,
             double unitStart,
-            double qtyStart) {}
+            double qtyStart,
+            boolean fromHeaders) {}
 
     private record ColumnSlice(
             double x0,
@@ -939,6 +1022,8 @@ public class PdfBordereauLayoutParser {
             }
             return new BordereauRowCandidate(
                     id, page, order, code, lib, unite, quantite, kind, confidence,
+                    (code != null ? code + " " : "") + (lib != null ? lib : ""),
+                    BordereauRowCandidate.ExtractionMethod.PDFBOX,
                     (code != null ? code + " " : "") + (lib != null ? lib : ""));
         }
 

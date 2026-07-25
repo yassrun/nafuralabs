@@ -3,14 +3,24 @@
 }
 
 .gate-blocage {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.55rem;
+  margin: 0 0 0.65rem;
+  padding: 0.55rem 0.85rem;
   border: 1px solid var(--nf-color-border);
-  border-left-width: 4px;
+  border-left-width: 3px;
   border-radius: 6px;
   background: var(--nf-color-bg-subtle);
-  padding: 12px 16px;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: var(--nf-color-text-secondary);
 
   &--bloquant {
     border-left-color: var(--nf-color-danger-600);
+    color: var(--nf-color-danger-700, #9b1c1c);
+    background: color-mix(in srgb, var(--nf-color-danger-600) 6%, transparent);
   }
 
   &:not(&--bloquant) {
@@ -18,74 +28,18 @@
   }
 }
 
-.gate-blocage__titre {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0 0 8px;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  color: var(--nf-color-text-primary);
+.gate-blocage__icone {
+  flex-shrink: 0;
+  font-size: 0.875rem;
 }
 
-.gate-blocage__liste {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.gate-blocage__ligne {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) minmax(0, 1.5fr) auto;
-  align-items: baseline;
-  gap: 12px;
-  padding: 6px 0;
-  border-top: 1px solid var(--nf-color-border);
-
-  &:first-child {
-    border-top: none;
-  }
-
-  // Sur petit écran la grille en colonnes devient illisible : on empile.
-  @media (max-width: 720px) {
-    grid-template-columns: minmax(0, 1fr) auto;
-    row-gap: 2px;
-  }
-}
-
-.gate-blocage__code {
-  font-family: ui-monospace, monospace;
-  font-size: 0.8125rem;
-  color: var(--nf-color-text-secondary);
+.gate-blocage__count {
+  color: inherit;
+  font-weight: 650;
   white-space: nowrap;
 }
 
-.gate-blocage__libelle {
-  color: var(--nf-color-text-primary);
+.gate-blocage__msg {
+  min-width: 0;
   overflow-wrap: anywhere;
-}
-
-.gate-blocage__message {
-  color: var(--nf-color-text-secondary);
-  font-size: 0.875rem;
-  overflow-wrap: anywhere;
-}
-
-.gate-blocage__action {
-  justify-self: end;
-  border: 1px solid var(--nf-color-primary-500);
-  border-radius: 4px;
-  background: transparent;
-  color: var(--nf-color-primary-700);
-  padding: 2px 12px;
-  font-size: 0.875rem;
-  cursor: pointer;
-
-  &:hover,
-  &:focus-visible {
-    background: var(--nf-color-primary-50);
-  }
 }

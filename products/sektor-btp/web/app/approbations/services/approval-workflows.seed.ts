@@ -164,6 +164,19 @@ export const APPROVAL_WORKFLOW_SEEDS: ApprovalWorkflow[] = [
     delaiSLAJours: 3,
     actif: true,
   },
+  {
+    id: 'wf-etude-prix',
+    nom: 'Étude de prix — N+1 Directeur travaux puis N+2 DG',
+    entityType: 'ETUDE_PRIX',
+    conditions: [],
+    etapes: [
+      st(0, 'SERIE', [role('BTP_DIRECTEUR_TRAVAUX')]),
+      st(1, 'SERIE', [role('BTP_DG')]),
+    ],
+    delaiSLAJours: 3,
+    escaladeApresJ: 5,
+    actif: true,
+  },
 ];
 
 /** Résolution rôle → libellé (fallback si l'API n'a pas encore résolu la personne). */

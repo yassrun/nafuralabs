@@ -10,28 +10,6 @@
     flex-wrap: wrap;
   }
 
-  &__btn {
-    background: var(--nf-color-primary-600);
-    color: white;
-    border: none;
-    padding: 6px 14px;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    &--ghost {
-      background: white;
-      color: var(--nf-color-text-secondary);
-      border: 1px solid var(--nf-color-border);
-    }
-  }
-
   &__hint {
     font-size: 12px;
     color: var(--nf-color-text-secondary);
@@ -203,7 +181,6 @@
 
   &--readonly {
     .dpgf__input,
-    .dpgf__btn,
     .dpgf__btn-icon {
       pointer-events: none;
     }

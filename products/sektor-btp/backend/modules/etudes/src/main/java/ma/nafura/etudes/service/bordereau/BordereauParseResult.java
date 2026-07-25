@@ -39,6 +39,21 @@ public record BordereauParseResult(
         return quality == Quality.USABLE && !articleCandidates().isEmpty();
     }
 
+    public BordereauParseResult withRows(List<BordereauRowCandidate> newRows) {
+        Set<Integer> pages = new java.util.LinkedHashSet<>();
+        for (BordereauRowCandidate row : newRows) {
+            if (row.looksLikeArticle()) {
+                pages.add(row.page());
+            }
+        }
+        Quality q = quality;
+        if (!newRows.isEmpty() && q != Quality.FAILED && !pages.isEmpty()) {
+            q = Quality.USABLE;
+        }
+        return new BordereauParseResult(
+                pageCount, textDensityPerPage, List.copyOf(newRows), Set.copyOf(pages), q, rejectReason);
+    }
+
     public static BordereauParseResult failed(String reason) {
         return new BordereauParseResult(0, 0, List.of(), Set.of(), Quality.FAILED, reason);
     }

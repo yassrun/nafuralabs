@@ -15,8 +15,8 @@ export class DevisApiService extends FeatureApiService<Devis, DevisCreate, Devis
   protected override basePath = '/api/v1/etudes/devis';
   protected override searchFields = ['numero', 'objet', 'clientName'];
 
-  async createFromDpgf(dpgfId: string): Promise<Devis> {
-    const params = new HttpParams().set('dpgfId', dpgfId);
+  async createFromDpgf(dpgfId: string, clientId: string): Promise<Devis> {
+    const params = new HttpParams().set('dpgfId', dpgfId).set('clientId', clientId);
     return firstValueFrom(
       this.http.post<Devis>(this.resolveUrl(`${this.basePath}/from-dpgf`), {}, { params }),
     );

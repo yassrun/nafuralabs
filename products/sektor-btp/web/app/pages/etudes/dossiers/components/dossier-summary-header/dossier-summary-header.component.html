@@ -1,0 +1,102 @@
+@if (synthese(); as s) {
+  <header class="dsh">
+    <div class="dsh__top">
+      <div class="dsh__identity">
+        <div class="dsh__title-row">
+          <h1 class="dsh__titre">{{ s.numero }} — {{ s.objet }}</h1>
+          <div class="dsh__badges">
+            <span class="dsh__pill" [attr.data-variant]="statutVariant()">{{ statutLabel() }}</span>
+            <span class="dsh__pill dsh__pill--phase">{{ phaseLabel() }}</span>
+            @if (s.structureVerrouillee) {
+              <span class="dsh__pill dsh__pill--lock">Structure figée</span>
+            }
+            @if (clientMissing()) {
+              <span class="dsh__pill dsh__pill--warn">Client manquant</span>
+            }
+          </div>
+        </div>
+        <div class="dsh__meta">
+          @if (modifiable()) {
+            <div class="dsh__client-edit">
+              <app-client-partner-select
+                controlId="dossier-header-client"
+                label="Client *"
+                placeholder="Sélectionner un client Partner"
+                [required]="true"
+                [disabled]="clientSaving()"
+                [clientId]="s.clientId ?? null"
+                [clientNom]="s.clientNom ?? null"
+                (selectionChange)="onClientSelection($event)"
+              />
+            </div>
+          } @else if (s.clientId && s.clientNom) {
+            <a class="dsh__client-link" [routerLink]="['/ventes/clients', s.clientId]">
+              {{ s.clientNom }}
+            </a>
+            <span class="dsh__sep" aria-hidden="true">·</span>
+          } @else if (s.clientNom) {
+            <span>{{ s.clientNom }}</span>
+            <span class="dsh__sep" aria-hidden="true">·</span>
+          } @else {
+            <span class="dsh__client-missing">Client non renseigné</span>
+            <span class="dsh__sep" aria-hidden="true">·</span>
+          }
+          <span>Rév. {{ s.bordereauRevision }}</span>
+          @if (s.updatedAt) {
+            <span class="dsh__sep" aria-hidden="true">·</span>
+            <span>Maj {{ s.updatedAt | date: 'short' }}</span>
+          }
+          @if (s.devisNumero) {
+            <span class="dsh__sep" aria-hidden="true">·</span>
+            <span>Devis {{ s.devisNumero }}</span>
+          }
+          @if (s.prochainApprobateurNom || s.prochainApprobateurRole) {
+            <span class="dsh__sep" aria-hidden="true">·</span>
+            <span>{{ s.prochainApprobateurNom || s.prochainApprobateurRole }}</span>
+          }
+        </div>
+      </div>
+
+      <div class="dsh__aside">
+        <div class="dsh__kpis">
+          <div class="dsh__kpi">
+            <span class="dsh__kpi-label">Total HT</span>
+            <span class="dsh__kpi-value">{{ s.totalHt | mad }}</span>
+          </div>
+          <div class="dsh__kpi">
+            <span class="dsh__kpi-label">Postes</span>
+            <span class="dsh__kpi-value">{{ s.nombreArticles }}</span>
+          </div>
+          <div class="dsh__kpi" [class.dsh__kpi--warn]="s.anomaliesBloquantes > 0">
+            <span class="dsh__kpi-label">Anomalies</span>
+            <span class="dsh__kpi-value">{{ s.anomaliesBloquantes }}</span>
+          </div>
+        </div>
+
+        @if (showReouvrir() || showRefuser() || showCta()) {
+          <div class="dsh__actions">
+            @if (showReouvrir()) {
+              <button type="button" class="dsh__btn dsh__btn--ghost" (click)="emitAction('REOUVRIR_BORDEREAU')">
+                Réouvrir le bordereau
+              </button>
+            }
+            @if (showRefuser()) {
+              <button type="button" class="dsh__btn dsh__btn--ghost" (click)="emitAction('REFUSER')">
+                Refuser
+              </button>
+            }
+            @if (showCta()) {
+              <button type="button" class="dsh__btn dsh__btn--primary" (click)="emitAction()">
+                {{ ctaLabel() }}
+              </button>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    @if (s.motifRefus) {
+      <p class="dsh__refus" role="status">Refus : {{ s.motifRefus }}</p>
+    }
+  </header>
+}

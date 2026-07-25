@@ -51,6 +51,20 @@ class DpgfAgregationServiceTest {
     }
 
     @Test
+    void totauxByLotInclutArticlesDirectementSousLeLot() {
+        DpgfNoeud art1 = article("5.1", new BigDecimal("6000000"));
+        DpgfNoeud art2 = article("5.2", new BigDecimal("4149000"));
+        DpgfNoeud lot = container(DpgfNoeud.TYPE_LOT, "5", "FAUX PLAFONDS", art1, art2);
+
+        List<DpgfLotTotalDto> totaux = service.totauxByLot(List.of(lot));
+
+        assertThat(totaux).singleElement().satisfies(row -> {
+            assertThat(row.code()).isEqualTo("5");
+            assertThat(row.total()).isEqualByComparingTo(new BigDecimal("10149000.00"));
+        });
+    }
+
+    @Test
     void sumArticlesIgnoresNonArticleNodeTotals() {
         DpgfNoeud art = article("01.01.001", new BigDecimal("50"));
         DpgfNoeud sousLot = container(DpgfNoeud.TYPE_SOUS_LOT, "01.01", "SL", art);

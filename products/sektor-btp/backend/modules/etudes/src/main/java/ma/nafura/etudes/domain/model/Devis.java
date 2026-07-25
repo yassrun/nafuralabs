@@ -75,6 +75,10 @@ public class Devis {
     @JsonIgnore
     private UUID dpgfId;
 
+    @Column(name = "dossier_etude_id")
+    @JsonIgnore
+    private UUID dossierEtudeId;
+
     @Column(name = "bibliotheque_reference", length = 255)
     private String bibliothequeReference;
 
@@ -141,6 +145,11 @@ public class Devis {
     @JsonProperty("dpgfId")
     public String getDpgfIdJson() {
         return dpgfId != null ? dpgfId.toString() : null;
+    }
+
+    @JsonProperty("dossierEtudeId")
+    public String getDossierEtudeIdJson() {
+        return dossierEtudeId != null ? dossierEtudeId.toString() : null;
     }
 
     @JsonProperty("nbLignes")

@@ -45,9 +45,10 @@ nafura:
     extraction:
       poll-ms: ${NAFURA_ETUDES_EXTRACTION_POLL_MS:2000}
     bordereau:
-      # Hybrid = local PDF geometry parse + compact LLM classification.
-      # Off by default; enable for trials via NAFURA_ETUDES_BORDEREAU_HYBRID=true.
-      hybrid-enabled: ${NAFURA_ETUDES_BORDEREAU_HYBRID:false}
+      # adaptive = local parse + targeted LLM; legacy = one-shot; shadow = adaptive + compare legacy
+      strategy: ${NAFURA_ETUDES_BORDEREAU_STRATEGY:adaptive}
+      # Deprecated: use strategy. Kept for backward-compat scripts (true → adaptive).
+      hybrid-enabled: ${NAFURA_ETUDES_BORDEREAU_HYBRID:true}
   doc-extractor:
     # Full CPS (80-90 pages) needs more than the 120s platform default.
     # Bordereau uses a lighter schema + smaller prompt; CPS descriptifs still need this headroom.

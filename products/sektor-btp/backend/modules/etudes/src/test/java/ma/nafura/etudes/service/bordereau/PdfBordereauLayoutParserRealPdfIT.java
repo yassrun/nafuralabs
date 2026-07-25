@@ -66,5 +66,14 @@ class PdfBordereauLayoutParserRealPdfIT {
         assertThat(articles).anyMatch(a -> "1-1-1".equals(a.code()));
         assertThat(articles).anyMatch(a -> a.code() != null && a.code().startsWith("3."));
         assertThat(articles).anyMatch(a -> a.code() != null && a.code().startsWith("9."));
+
+        // Never collapse to market title as the only empty lot.
+        assertThat(localTree.getArbre())
+                .noneMatch(lot -> lot.getLibelle() != null
+                        && lot.getLibelle().toUpperCase().contains("PLATEFORME AGRO")
+                        && (lot.getEnfants() == null || lot.getEnfants().isEmpty()));
+        assertThat(articles)
+                .noneMatch(a -> a.libelle() != null
+                        && a.libelle().toUpperCase().contains("PLATEFORME AGRO"));
     }
 }

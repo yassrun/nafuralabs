@@ -52,6 +52,17 @@
       "etapesJson": "[{\"ordre\":0,\"type\":\"SERIE\",\"approbateurs\":[{\"type\":\"ROLE\",\"ref\":\"BTP_DAF\"}]}]",
       "slaJours": 2,
       "isActive": true
+    },
+    {
+      "id": "wf-etude-prix",
+      "code": "ETUDE-PRIX",
+      "label": "Étude de prix — N+1 Directeur travaux puis N+2 DG",
+      "entityType": "ETUDE_PRIX",
+      "conditionsJson": "[]",
+      "etapesJson": "[{\"ordre\":0,\"type\":\"SERIE\",\"approbateurs\":[{\"type\":\"ROLE\",\"ref\":\"BTP_DIRECTEUR_TRAVAUX\"}]},{\"ordre\":1,\"type\":\"SERIE\",\"approbateurs\":[{\"type\":\"ROLE\",\"ref\":\"BTP_DG\"}]}]",
+      "slaJours": 3,
+      "escaladeApresJours": 5,
+      "isActive": true
     }
   ]
 }

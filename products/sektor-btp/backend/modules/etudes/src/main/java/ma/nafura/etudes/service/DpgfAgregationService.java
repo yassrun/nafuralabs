@@ -33,20 +33,9 @@ public class DpgfAgregationService {
             if (!DpgfNoeud.TYPE_LOT.equals(lot.getType())) {
                 continue;
             }
-            BigDecimal lotTotal = BigDecimal.ZERO;
-            List<DpgfNoeud> sousLots = lot.getEnfants() != null ? lot.getEnfants() : List.of();
-            for (DpgfNoeud sousLot : sousLots) {
-                List<DpgfNoeud> articles = sousLot.getEnfants() != null ? sousLot.getEnfants() : List.of();
-                for (DpgfNoeud article : articles) {
-                    if (DpgfNoeud.TYPE_ARTICLE.equals(article.getType()) && article.getTotal() != null) {
-                        lotTotal = lotTotal.add(article.getTotal());
-                    }
-                }
-            }
-            rows.add(new DpgfLotTotalDto(
-                    lot.getCode(),
-                    lot.getLibelle(),
-                    lotTotal.setScale(MONEY_SCALE, RoundingMode.HALF_UP)));
+            // Somme récursive : articles directs sous le lot, sous-lots, ou niveaux plus profonds.
+            BigDecimal lotTotal = sumNode(lot).setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+            rows.add(new DpgfLotTotalDto(lot.getCode(), lot.getLibelle(), lotTotal));
         }
         return rows;
     }
