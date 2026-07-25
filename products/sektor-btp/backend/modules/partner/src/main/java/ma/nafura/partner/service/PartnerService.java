@@ -23,30 +23,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class PartnerService extends PartnerServiceBase {
 
     private final PartnerRoleRepository roleRepository;
-    private final PartnerSeedService seedService;
 
     public PartnerService(
-            PartnerRepository repository,
-            PartnerMapper mapper,
-            PartnerRoleRepository roleRepository,
-            PartnerSeedService seedService) {
+            PartnerRepository repository, PartnerMapper mapper, PartnerRoleRepository roleRepository) {
         super(repository, mapper);
         this.roleRepository = roleRepository;
-        this.seedService = seedService;
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<Partner> listPage(int page, int size) {
-        seedService.seedIfEmpty();
-        return super.listPage(page, size);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<Partner> listPage(int page, int size, Sort sort) {
-        seedService.seedIfEmpty();
-        return super.listPage(page, size, sort);
     }
 
     @Override
