@@ -75,10 +75,5 @@ CREATE TABLE IF NOT EXISTS cps_sections (
 CREATE INDEX IF NOT EXISTS cps_sections_tsv_idx ON cps_sections USING GIN (contenu_tsv);
 CREATE INDEX IF NOT EXISTS cps_sections_doc_idx ON cps_sections (tenant_id, cps_document_id, ordre);
 
--- ── Tracabilite du descriptif ───────────────────────────────────────────────
--- Le chiffreur doit pouvoir remonter a la source dans le CPS. C'est aussi ce qui rend une
--- suggestion IA acceptable : elle propose, la source est visible, l'humain juge.
-ALTER TABLE dpgf_noeuds
-    ADD COLUMN IF NOT EXISTS descriptif_source            VARCHAR(20),
-    ADD COLUMN IF NOT EXISTS descriptif_source_section_id UUID,
-    ADD COLUMN IF NOT EXISTS descriptif_suggere_par_ia    BOOLEAN NOT NULL DEFAULT FALSE;
+-- La tracabilite du descriptif (dpgf_noeuds.descriptif_source*) est portee par
+-- v1.0/003_create_dpgf.sql.

@@ -1,6 +1,8 @@
 CREATE TABLE IF NOT EXISTS employes (
     id                          VARCHAR(100) PRIMARY KEY,
     tenant_id                   UUID NOT NULL,
+    -- Nullable: ouvriers may have no platform login identity (app_user).
+    user_id                     UUID,
     matricule                   VARCHAR(50) NOT NULL,
     nom                         VARCHAR(120) NOT NULL,
     prenom                      VARCHAR(120) NOT NULL,
@@ -36,3 +38,5 @@ CREATE TABLE IF NOT EXISTS employes (
 CREATE INDEX IF NOT EXISTS idx_employes_tenant_statut ON employes(tenant_id, statut);
 CREATE INDEX IF NOT EXISTS idx_employes_tenant_categorie ON employes(tenant_id, categorie);
 CREATE INDEX IF NOT EXISTS idx_employes_tenant_type_contrat ON employes(tenant_id, type_contrat);
+CREATE INDEX IF NOT EXISTS idx_employes_tenant_user_id ON employes(tenant_id, user_id)
+    WHERE user_id IS NOT NULL;

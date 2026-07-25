@@ -27,6 +27,8 @@ CREATE TABLE IF NOT EXISTS notifications (
     channel      VARCHAR(30) NOT NULL,
     entity_type VARCHAR(80),
     entity_id   UUID,
+    source      VARCHAR(30),
+    action_url  VARCHAR(300),
     is_read     BOOLEAN,
     read_at     TIMESTAMPTZ,
     sent_at     TIMESTAMPTZ NOT NULL,

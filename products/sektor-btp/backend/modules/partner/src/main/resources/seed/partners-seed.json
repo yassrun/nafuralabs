@@ -1,0 +1,69 @@
+{
+  "partners": [
+    {
+      "code": "CLI-001",
+      "raisonSociale": "OCP Promotion SA",
+      "ice": "001234567890123",
+      "roles": ["CLIENT"]
+    },
+    {
+      "code": "CLI-002",
+      "raisonSociale": "ADM (Autoroutes du Maroc)",
+      "ice": "000987654321098",
+      "roles": ["CLIENT"]
+    },
+    {
+      "code": "CLI-004",
+      "raisonSociale": "Ministère Éducation Nationale",
+      "roles": ["CLIENT"]
+    },
+    {
+      "code": "CLI-005",
+      "raisonSociale": "Commune Mohammedia",
+      "roles": ["CLIENT"]
+    },
+    {
+      "code": "CLI-006",
+      "raisonSociale": "Atlas Hospitality",
+      "ice": "003456789012345",
+      "roles": ["CLIENT"]
+    },
+    {
+      "code": "F-001",
+      "raisonSociale": "Sonasid",
+      "ice": "001239745000082",
+      "registreCommerce": "RC-7823",
+      "patente": "PT-45621",
+      "roles": ["FOURNISSEUR", "CLIENT"]
+    },
+    {
+      "code": "F-002",
+      "raisonSociale": "Ciments du Maroc – Agence Casa",
+      "ice": "002847593000087",
+      "registreCommerce": "RC-12041",
+      "patente": "PT-78901",
+      "roles": ["FOURNISSEUR"]
+    },
+    {
+      "code": "F-003",
+      "raisonSociale": "COFA – Coffrage & Acier",
+      "ice": "003715829000043",
+      "registreCommerce": "RC-33091",
+      "roles": ["FOURNISSEUR"]
+    },
+    {
+      "code": "F-004",
+      "raisonSociale": "Maghreb Aggregats",
+      "ice": "004582917000061",
+      "registreCommerce": "RC-45671",
+      "roles": ["FOURNISSEUR"]
+    },
+    {
+      "code": "F-005",
+      "raisonSociale": "Engins Pro Location",
+      "ice": "005923741000079",
+      "registreCommerce": "RC-58901",
+      "roles": ["FOURNISSEUR"]
+    }
+  ]
+}

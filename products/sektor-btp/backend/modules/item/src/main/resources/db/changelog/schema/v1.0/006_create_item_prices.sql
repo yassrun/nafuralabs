@@ -18,3 +18,5 @@ CREATE TABLE IF NOT EXISTS item_prices (
 CREATE INDEX IF NOT EXISTS idx_item_prices_tenant ON item_prices(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_item_prices_item_id ON item_prices(tenant_id, item_id);
 CREATE INDEX IF NOT EXISTS idx_item_prices_currency_id ON item_prices(tenant_id, currency_id);
+CREATE INDEX IF NOT EXISTS idx_item_prices_lookup
+    ON item_prices (tenant_id, item_id, price_type, effective_from DESC);

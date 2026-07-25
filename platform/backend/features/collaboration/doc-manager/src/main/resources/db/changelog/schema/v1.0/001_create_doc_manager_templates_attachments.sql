@@ -30,6 +30,11 @@ CREATE TABLE IF NOT EXISTS document_templates (
     template_body TEXT,
     is_default    BOOLEAN,
     is_active     BOOLEAN,
+    is_system     BOOLEAN NOT NULL DEFAULT false,
+    paper_size    VARCHAR(20),
+    orientation   VARCHAR(20),
+    margins_css   VARCHAR(80),
+    metadata      TEXT,
     created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at    TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -40,7 +45,8 @@ CREATE TABLE IF NOT EXISTS record_attachments (
     id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id    UUID NOT NULL,
     entity_type  VARCHAR(80) NOT NULL,
-    entity_id    UUID NOT NULL,
+    -- Polymorphic: ERP entities use business codes (ch-001, sit-001), not UUIDs.
+    entity_id    VARCHAR(100) NOT NULL,
     file_name    VARCHAR(255) NOT NULL,
     file_url     VARCHAR(1000) NOT NULL,
     mime_type    VARCHAR(120),

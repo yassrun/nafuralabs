@@ -19,11 +19,16 @@ CREATE TABLE IF NOT EXISTS dossiers_etude (
 
     -- Contenu, délégué au DPGF
     dpgf_id                       UUID REFERENCES dpgf(id) ON DELETE SET NULL,
+    bordereau_revision            INTEGER NOT NULL DEFAULT 1,
 
-    -- Parcours
+    -- Parcours. L'étape 1 est « Documents du marché ».
     current_step                  INT NOT NULL DEFAULT 1,
     status                        VARCHAR(30) NOT NULL DEFAULT 'BROUILLON',
     origine                       VARCHAR(30) NOT NULL DEFAULT 'ETUDE',
+
+    -- Approbation N+1 / N+2
+    validation_etape              VARCHAR(10),
+    approval_request_id           VARCHAR(100),
 
     -- Valeurs de départ appliquées aux PrixDpu créés dans ce dossier.
     -- Ce ne sont PAS des règles : l'expert métier pose une marge par article, variable.
@@ -62,3 +67,7 @@ CREATE INDEX IF NOT EXISTS dossiers_etude_tenant_status_idx
 
 CREATE INDEX IF NOT EXISTS dossiers_etude_dpgf_idx
     ON dossiers_etude (tenant_id, dpgf_id);
+
+CREATE INDEX IF NOT EXISTS idx_dossiers_etude_approval_request
+    ON dossiers_etude (tenant_id, approval_request_id)
+    WHERE approval_request_id IS NOT NULL;

@@ -10,6 +10,10 @@ CREATE TABLE IF NOT EXISTS numbering_sequences (
     current_number BIGINT NOT NULL,
     increment_by   INTEGER NOT NULL DEFAULT 1,
     pad_length     INTEGER NOT NULL DEFAULT 6,
+    separator      VARCHAR(5),
+    reset_policy   VARCHAR(20),
+    year_format    VARCHAR(10),
+    last_reset_at  TIMESTAMPTZ,
     created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
 );

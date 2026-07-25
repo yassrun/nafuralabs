@@ -27,12 +27,7 @@ CREATE TABLE IF NOT EXISTS chantiers (
     taux_avance                 NUMERIC(8, 4),
     avancement_percent          NUMERIC(8, 4) NOT NULL DEFAULT 0,
     status                      VARCHAR(40) NOT NULL DEFAULT 'BROUILLON',
-    chef_chantier_user_id       VARCHAR(100),
-    chef_chantier_name          VARCHAR(255),
-    conducteur_travaux_user_id  VARCHAR(100),
-    conducteur_travaux_name     VARCHAR(255),
-    ingenieur_user_id           VARCHAR(100),
-    ingenieur_name              VARCHAR(255),
+    -- Responsabilités (chef de chantier, conducteur, ingénieur) : voir chantier_affectation.
     societe_id                  VARCHAR(100),
     is_active                   BOOLEAN NOT NULL DEFAULT true,
     created_at                  TIMESTAMPTZ NOT NULL DEFAULT now(),

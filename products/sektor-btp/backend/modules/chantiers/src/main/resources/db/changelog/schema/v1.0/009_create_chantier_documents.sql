@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS documents_chantier (
     type            VARCHAR(30) NOT NULL,
     titre           VARCHAR(500) NOT NULL,
     fichier         VARCHAR(500) NOT NULL,
+    storage_key     VARCHAR(1000),
     taille          BIGINT NOT NULL DEFAULT 0,
     uploaded_at     DATE NOT NULL,
     uploaded_par    VARCHAR(200) NOT NULL,

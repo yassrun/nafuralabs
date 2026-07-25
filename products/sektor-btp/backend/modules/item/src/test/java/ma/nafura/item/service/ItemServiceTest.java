@@ -28,6 +28,9 @@ class ItemServiceTest {
     @Mock
     private ItemMapper mapper;
 
+    @Mock
+    private ItemSeedService seedService;
+
     @InjectMocks
     private ItemService service;
 

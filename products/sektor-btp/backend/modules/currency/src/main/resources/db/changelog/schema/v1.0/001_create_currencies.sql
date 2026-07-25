@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS currencies (
     name           VARCHAR(100) NOT NULL,
     symbol         VARCHAR(10),
     decimal_places INTEGER NOT NULL DEFAULT 2,
+    is_reference   BOOLEAN NOT NULL DEFAULT false,
     is_active      BOOLEAN DEFAULT true,
     created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -16,3 +17,5 @@ CREATE TABLE IF NOT EXISTS currencies (
 CREATE INDEX IF NOT EXISTS idx_currencies_tenant ON currencies(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_currencies_code ON currencies(tenant_id, code);
 CREATE UNIQUE INDEX IF NOT EXISTS uq_currencies_code_tenant ON currencies(tenant_id, code);
+CREATE INDEX IF NOT EXISTS idx_currencies_reference ON currencies(tenant_id, is_reference)
+    WHERE is_reference = true;

@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS devis (
     date_validite           DATE NOT NULL,
     metre_id                UUID REFERENCES metrees(id) ON DELETE SET NULL,
     dpgf_id                 UUID REFERENCES dpgf(id) ON DELETE SET NULL,
+    -- Dossier d'étude d'origine. Pas de FK : dossiers_etude est créé en v1.1.
+    dossier_etude_id        UUID,
     bibliotheque_reference  VARCHAR(255),
     conditions_paiement     VARCHAR(500) NOT NULL,
     delai_execution_jours   INTEGER,
@@ -37,6 +39,10 @@ CREATE INDEX IF NOT EXISTS idx_devis_tenant_client
 
 CREATE INDEX IF NOT EXISTS idx_devis_tenant_dpgf
     ON devis(tenant_id, dpgf_id);
+
+CREATE INDEX IF NOT EXISTS idx_devis_dossier_etude
+    ON devis (tenant_id, dossier_etude_id)
+    WHERE dossier_etude_id IS NOT NULL;
 
 CREATE TABLE IF NOT EXISTS devis_lignes (
     id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),

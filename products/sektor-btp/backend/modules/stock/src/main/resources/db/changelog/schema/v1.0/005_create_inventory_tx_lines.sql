@@ -8,6 +8,8 @@ CREATE TABLE IF NOT EXISTS inventory_tx_lines (
     line_number    INTEGER NOT NULL,
     item_id        UUID NOT NULL,
     quantity       NUMERIC(18,4) NOT NULL,
+    theoretical_qty NUMERIC(18,4),
+    counted_qty    NUMERIC(18,4),
     unit_price     NUMERIC(18,4),
     total_price    NUMERIC(18,4),
     notes          TEXT,

@@ -11,6 +11,11 @@ CREATE TABLE IF NOT EXISTS extracted_record (
     doc_type_version INT NOT NULL,
     doc_type_definition_id UUID,
     stored_document_id UUID,
+    sha256 VARCHAR(64) NOT NULL,
+    phash BIGINT,
+    source_file_name VARCHAR(512),
+    source_mime_type VARCHAR(255),
+    source_file_size_bytes BIGINT,
     data_json JSONB NOT NULL,
     status VARCHAR(20) NOT NULL DEFAULT 'validated',
     workflow_status VARCHAR(20) NOT NULL DEFAULT 'DRAFT',
@@ -32,6 +37,19 @@ BEGIN
     ) THEN
         ALTER TABLE extracted_record
             ADD CONSTRAINT unique_extracted_record_id UNIQUE (record_id);
+    END IF;
+END $$;
+
+-- Deduplication: same file content cannot be ingested twice for a tenant
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM pg_constraint
+        WHERE conname = 'unique_tenant_sha256'
+    ) THEN
+        ALTER TABLE extracted_record
+            ADD CONSTRAINT unique_tenant_sha256 UNIQUE (tenant_id, sha256);
     END IF;
 END $$;
 

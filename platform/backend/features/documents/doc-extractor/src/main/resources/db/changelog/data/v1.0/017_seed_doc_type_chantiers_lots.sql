@@ -1,5 +1,5 @@
 -- Liquibase: doc-extractor data v1.0
--- CHANTIERS: Lots bulk import (Excel/CSV/PDF bordereau list)
+-- CHANTIERS: import hiérarchique des lots (bordereau BPDE : lots > sous-lots > postes)
 INSERT INTO doc_type_definition (
   id,
   domain_key,
@@ -22,25 +22,24 @@ INSERT INTO doc_type_definition (
   'chantiers',
   'LOTS',
   1,
-  'Import lots chantier',
-  'Bulk import of chantier lot rows from Excel, CSV or PDF bordereaux with heterogeneous column layouts.',
-  'You are a document extraction assistant. Extract chantier lot rows from the uploaded file.
+  'Import lots chantier (hiérarchique)',
+  'Import nested chantier structure: parent lots, optional sous-lots, and postes (articles) with quantities — BPDE-style bordereaux.',
+  'You are a document extraction assistant for construction bill of quantities (BPDE / bordereau des prix).
 Return ONLY valid JSON matching the provided JSON Schema.
 
-CRITICAL INSTRUCTIONS:
-- Output a single JSON object with a "lots" array.
-- Map any column headers (Code, Lot, Désignation, Quantité, Unité, Prix unitaire, PU HT, etc.) to schema fields.
-- Use null when a field is not present — do NOT invent values.
-- code and designation are required per row; skip rows without both.
-- Prefer root lot lines when a hierarchy is present (ignore nested postes / sous-détail unless clearly coded as lots).
-- Parse numbers with either "." or "," as decimal separator.
+HIERARCHY (critical):
+- "lots" = root / parent lots (e.g. headers "LOT 1 : Terrassement").
+- Each lot may contain "sousLots" (section lines without unit) and/or "postes" (articles).
+- "postes" = sellable articles with unit (and usually qty / unit price). Codes often look like "1.2".
+- Do NOT flatten articles into the top-level lots array.
+- Do NOT invent codes, quantities, or prices. Use null when absent.
 
-Field mapping hints:
-- code: Code, Lot, N°, Réf
-- designation: Désignation, Description, Libellé, Intitulé
-- quantite: Quantité, Qté, Quantity
-- unite: Unité, UoM, Unit
-- prixUnitaireHt: Prix unitaire HT, PU HT, Prix unitaire, Unit price',
+Field mapping:
+- Lot header: "LOT N : label" → code LNN (or provided code) + designation
+- Sous-lot: designation (and optional code), no unit
+- Poste/article: code, designation, unite, quantite, prixUnitaireHt
+
+Parse numbers with "." or "," decimal separators.',
   '{
     "type": "object",
     "required": ["lots"],
@@ -52,11 +51,50 @@ Field mapping hints:
           "type": "object",
           "required": ["code", "designation"],
           "properties": {
-            "code": { "type": ["string", "null"], "title": "Code" },
-            "designation": { "type": ["string", "null"], "title": "Désignation" },
-            "quantite": { "type": ["number", "null"], "title": "Quantité" },
-            "unite": { "type": ["string", "null"], "title": "Unité" },
-            "prixUnitaireHt": { "type": ["number", "null"], "title": "Prix unitaire HT" }
+            "code": { "type": ["string", "null"], "title": "Code lot" },
+            "designation": { "type": ["string", "null"], "title": "Désignation lot" },
+            "sousLots": {
+              "type": "array",
+              "title": "Sous-lots",
+              "items": {
+                "type": "object",
+                "required": ["designation"],
+                "properties": {
+                  "code": { "type": ["string", "null"], "title": "Code sous-lot" },
+                  "designation": { "type": ["string", "null"], "title": "Désignation sous-lot" },
+                  "postes": {
+                    "type": "array",
+                    "title": "Postes / articles",
+                    "items": {
+                      "type": "object",
+                      "required": ["code", "designation"],
+                      "properties": {
+                        "code": { "type": ["string", "null"], "title": "Code article" },
+                        "designation": { "type": ["string", "null"], "title": "Désignation article" },
+                        "unite": { "type": ["string", "null"], "title": "Unité" },
+                        "quantite": { "type": ["number", "null"], "title": "Quantité" },
+                        "prixUnitaireHt": { "type": ["number", "null"], "title": "PU HT" }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "postes": {
+              "type": "array",
+              "title": "Postes / articles",
+              "items": {
+                "type": "object",
+                "required": ["code", "designation"],
+                "properties": {
+                  "code": { "type": ["string", "null"], "title": "Code article" },
+                  "designation": { "type": ["string", "null"], "title": "Désignation article" },
+                  "unite": { "type": ["string", "null"], "title": "Unité" },
+                  "quantite": { "type": ["number", "null"], "title": "Quantité" },
+                  "prixUnitaireHt": { "type": ["number", "null"], "title": "PU HT" }
+                }
+              }
+            }
           }
         }
       }
@@ -70,15 +108,17 @@ Field mapping hints:
     "arrays": [
       {
         "path": "lots",
-        "title": "Lots",
+        "title": "Lots parents",
         "columns": [
-          { "path": "code", "label": "Code", "widthPx": 120 },
-          { "path": "designation", "label": "Désignation" },
-          { "path": "quantite", "label": "Quantité", "widthPx": 100 },
-          { "path": "unite", "label": "Unité", "widthPx": 80 },
-          { "path": "prixUnitaireHt", "label": "PU HT", "widthPx": 110 }
+          { "path": "code", "label": "Code lot", "widthPx": 120 },
+          { "path": "designation", "label": "Désignation lot" }
         ]
       }
+    ],
+    "hierarchyHint": [
+      { "level": "lot", "label": "Lot parent", "fields": ["code", "designation"] },
+      { "level": "sousLot", "label": "Sous-lot", "fields": ["code", "designation"] },
+      { "level": "poste", "label": "Poste / article", "fields": ["code", "designation", "unite", "quantite", "prixUnitaireHt"] }
     ]
   }'::jsonb,
   NULL,

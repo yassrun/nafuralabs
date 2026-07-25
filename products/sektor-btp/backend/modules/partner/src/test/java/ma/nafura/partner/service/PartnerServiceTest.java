@@ -35,6 +35,9 @@ class PartnerServiceTest {
     @Mock
     private PartnerRoleRepository roleRepository;
 
+    @Mock
+    private PartnerSeedService seedService;
+
     @InjectMocks
     private PartnerService service;
 

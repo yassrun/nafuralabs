@@ -12,6 +12,9 @@ CREATE TABLE IF NOT EXISTS ouvrages (
     mo_total                NUMERIC(18, 4) NOT NULL DEFAULT 0,
     frais_generaux_percent  NUMERIC(8, 4) NOT NULL DEFAULT 8,
     benefice_percent        NUMERIC(8, 4) NOT NULL DEFAULT 7,
+    -- Production journalière de l'ouvrage, dans son unité (30 m3/jour) : sert à ramener
+    -- les composants chiffrés à la journée vers un coût unitaire.
+    rendement_journalier    NUMERIC(18, 4),
     is_active               BOOLEAN NOT NULL DEFAULT TRUE,
     notes                   TEXT,
     derniere_maj            DATE NOT NULL DEFAULT CURRENT_DATE,
@@ -35,6 +38,7 @@ CREATE TABLE IF NOT EXISTS composants_ouvrage (
     designation         VARCHAR(500) NOT NULL,
     unite               VARCHAR(30) NOT NULL,
     rendement           NUMERIC(18, 4) NOT NULL DEFAULT 0,
+    base_rendement      VARCHAR(20),
     prix_unitaire       NUMERIC(18, 4) NOT NULL DEFAULT 0,
     total               NUMERIC(18, 4) NOT NULL DEFAULT 0,
     created_at          TIMESTAMPTZ NOT NULL DEFAULT now(),

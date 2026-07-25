@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS factures_fournisseur (
     reste_a_regler          NUMERIC(18, 4) NOT NULL DEFAULT 0,
     status                  VARCHAR(30) NOT NULL DEFAULT 'BROUILLON',
     matching_status         VARCHAR(30),
+    journal_entry_id        UUID,
     notes                   TEXT,
     motif_litige            TEXT,
     created_at              TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -35,6 +36,10 @@ CREATE INDEX IF NOT EXISTS idx_factures_fournisseur_tenant_bc
 
 CREATE INDEX IF NOT EXISTS idx_factures_fournisseur_tenant_status
     ON factures_fournisseur(tenant_id, status);
+
+CREATE INDEX IF NOT EXISTS idx_factures_fournisseur_journal_entry
+    ON factures_fournisseur(tenant_id, journal_entry_id)
+    WHERE journal_entry_id IS NOT NULL;
 
 CREATE TABLE IF NOT EXISTS factures_fournisseur_lignes (
     id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),

@@ -4,6 +4,8 @@
 -- =============================================================================
 CREATE TABLE IF NOT EXISTS doc_type_definition (
     id UUID PRIMARY KEY,
+    tenant_id UUID,
+    origin VARCHAR(20) NOT NULL DEFAULT 'SYSTEM',
     domain_key VARCHAR(80) NOT NULL,
     doc_type_key VARCHAR(80) NOT NULL,
     version INT NOT NULL,
@@ -49,7 +51,11 @@ ON doc_type_definition(domain_key, doc_type_key)
 WHERE status = 'DRAFT';
 CREATE INDEX IF NOT EXISTS idx_doc_type_def_version_list 
 ON doc_type_definition(domain_key, doc_type_key, version DESC, status);
+CREATE INDEX IF NOT EXISTS idx_doc_type_def_origin ON doc_type_definition(origin);
+CREATE INDEX IF NOT EXISTS idx_doc_type_def_tenant_id ON doc_type_definition(tenant_id);
 
 -- Comments
 COMMENT ON COLUMN doc_type_definition.status IS 'Version status: DRAFT (editable), PUBLISHED (immutable, active), DEPRECATED (immutable, inactive)';
 COMMENT ON COLUMN doc_type_definition.builder_state IS 'Canonical builder state JSON for drafts, used to generate jsonSchema and uiSchema';
+COMMENT ON COLUMN doc_type_definition.origin IS 'SYSTEM = Doxura-provided (read-only), TENANT = user-created (editable)';
+COMMENT ON COLUMN doc_type_definition.tenant_id IS 'NULL for SYSTEM types (visible to all), UUID for TENANT types (scoped to tenant)';

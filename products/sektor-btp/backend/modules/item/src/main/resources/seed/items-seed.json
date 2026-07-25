@@ -1,0 +1,46 @@
+{
+  "items": [
+    {
+      "code": "MAT-CIM",
+      "name": "Ciment CPJ 45",
+      "description": "Ciment Portland composé 45",
+      "itemCategoryCode": "GROS_OEUVRE",
+      "itemTypeCode": "MATERIAU",
+      "unitOfMeasureCode": "T",
+      "articleType": "MATIERE",
+      "prixUnitaire": "950.0000",
+      "pmp": "952.0000",
+      "stockMin": "150.0000",
+      "stockMax": "500.0000",
+      "delaiReapproJours": 5
+    },
+    {
+      "code": "MAT-FER",
+      "name": "Fer à béton HA12",
+      "description": "Armature acier haute adhérence Ø12",
+      "itemCategoryCode": "GROS_OEUVRE",
+      "itemTypeCode": "MATERIAU",
+      "unitOfMeasureCode": "T",
+      "articleType": "MATIERE",
+      "prixUnitaire": "7800.0000",
+      "pmp": "7820.0000",
+      "stockMin": "50.0000",
+      "stockMax": "200.0000",
+      "delaiReapproJours": 14
+    },
+    {
+      "code": "MAT-SAB",
+      "name": "Sable fin",
+      "description": "Sable fin pour mortier et enduit",
+      "itemCategoryCode": "VRD",
+      "itemTypeCode": "MATERIAU",
+      "unitOfMeasureCode": "M3",
+      "articleType": "MATIERE",
+      "prixUnitaire": "220.0000",
+      "pmp": "218.0000",
+      "stockMin": "80.0000",
+      "stockMax": "400.0000",
+      "delaiReapproJours": 3
+    }
+  ]
+}
