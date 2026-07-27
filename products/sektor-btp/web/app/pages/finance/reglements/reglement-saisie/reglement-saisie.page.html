@@ -53,14 +53,12 @@
       </label>
       <label class="rs__field">
         <span>{{ 'finance.reglement.form.fields.modePaiement' | translate }} *</span>
-        <select [ngModel]="modePaiement()" (ngModelChange)="modePaiement.set($event)" [disabled]="isReadonly()">
-          <option value="VIREMENT">{{ 'enum.mode.VIREMENT' | translate }}</option>
-          <option value="CHEQUE">{{ 'enum.mode.CHEQUE' | translate }}</option>
-          <option value="EFFET">{{ 'enum.mode.EFFET' | translate }}</option>
-          <option value="ESPECES">{{ 'enum.mode.ESPECES' | translate }}</option>
-          <option value="COMPENSATION">{{ 'enum.mode.COMPENSATION' | translate }}</option>
-          <option value="CARTE">{{ 'enum.mode.CARTE' | translate }}</option>
-        </select>
+        <nf-select
+          [options]="modePaiementOptions()"
+          [ngModel]="modePaiement()"
+          (ngModelChange)="onModePaiementChange($event)"
+          [disabled]="isReadonly()"
+        />
       </label>
       <label class="rs__field">
         <span>{{ 'finance.reglement.form.fields.reference' | translate }}</span>
@@ -91,31 +89,21 @@
         <span>{{ (type() === 'CLIENT' ? 'finance.recouvrement.headers.client'
               : type() === 'FOURNISSEUR' ? 'finance.factureFournisseur.form.fields.fournisseur'
               : 'finance.ecriture.form.fields.tiers') | translate }} *</span>
-        <select
+        <nf-select
+          [options]="contrePartieOptions()"
           [ngModel]="contrePartieId()"
           (ngModelChange)="setContrePartie($event)"
           [disabled]="isReadonly() || !isCreate"
-        >
-          <option value="">{{ 'finance.factureFournisseur.form.fields.fournisseurPlaceholder' | translate }}</option>
-          @for (cp of contreParties(); track cp.id) {
-            <option [value]="cp.id">{{ cp.name }}</option>
-          }
-        </select>
+        />
       </label>
       <label class="rs__field">
         <span>{{ 'finance.reglement.form.fields.compteEmetteur' | translate }} *</span>
-        <select
+        <nf-select
+          [options]="compteFinancierOptions()"
           [ngModel]="compteFinancierId()"
           (ngModelChange)="compteFinancierId.set($event)"
           [disabled]="isReadonly()"
-        >
-          <option value="">{{ 'finance.factureFournisseur.form.fields.fournisseurPlaceholder' | translate }}</option>
-          @for (c of comptes(); track c.id) {
-            @if (c.isActive) {
-              <option [value]="c.id">{{ c.libelle }}</option>
-            }
-          }
-        </select>
+        />
       </label>
     </div>
   </section>

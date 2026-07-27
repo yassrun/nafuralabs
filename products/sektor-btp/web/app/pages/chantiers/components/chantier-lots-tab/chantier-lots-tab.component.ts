@@ -80,8 +80,8 @@ import {
         <div class="lots-tablebar">
           <span class="lots-count">{{ 'chantiers.chantier.detail.lots.rowsCount' | translate:{ count: rowCount() } }}</span>
           <span class="lots-tablebar__spacer"></span>
-          <button type="button" class="linklike" (click)="collapseAll()">{{ 'chantiers.chantier.detail.lots.collapseAll' | translate }}</button>
-          <button type="button" class="linklike" (click)="expandAll()">{{ 'chantiers.chantier.detail.lots.expandAll' | translate }}</button>
+          <nf-button variant="ghost" size="sm" (clicked)="collapseAll()">{{ 'chantiers.chantier.detail.lots.collapseAll' | translate }}</nf-button>
+          <nf-button variant="ghost" size="sm" (clicked)="expandAll()">{{ 'chantiers.chantier.detail.lots.expandAll' | translate }}</nf-button>
         </div>
         <nf-tree-table
           [nodes]="treeNodes()"
@@ -128,12 +128,24 @@ import {
               }
               @case ('actions') {
                 <span class="actions-cell">
-                  <button type="button" class="row-action" (click)="editRow(row)"
+                  <nf-button
+                    variant="ghost"
+                    size="sm"
+                    icon="pencil"
+                    iconLibrary="lucide"
+                    (clicked)="editRow(row)"
                     [attr.title]="'chantiers.chantier.detail.lots.editAction' | translate"
-                    [attr.aria-label]="'chantiers.chantier.detail.lots.editAction' | translate">✎</button>
-                  <button type="button" class="row-action row-action--danger" (click)="deleteRow(row)"
+                    [attr.aria-label]="'chantiers.chantier.detail.lots.editAction' | translate"
+                  ></nf-button>
+                  <nf-button
+                    variant="danger"
+                    size="sm"
+                    icon="trash-2"
+                    iconLibrary="lucide"
+                    (clicked)="deleteRow(row)"
                     [attr.title]="'chantiers.chantier.detail.lots.deleteAction' | translate"
-                    [attr.aria-label]="'chantiers.chantier.detail.lots.deleteAction' | translate">🗑</button>
+                    [attr.aria-label]="'chantiers.chantier.detail.lots.deleteAction' | translate"
+                  ></nf-button>
                 </span>
               }
             }
@@ -160,15 +172,10 @@ import {
     .lots-tablebar { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; }
     .lots-tablebar__spacer { flex: 1 1 auto; }
     .lots-count { font-size: 0.8125rem; color: var(--nf-color-text-secondary); }
-    .linklike { border: none; background: transparent; color: var(--nf-color-primary-600); cursor: pointer; font-size: 0.8125rem; padding: 0; }
-    .linklike:hover { text-decoration: underline; }
     .code-muted { font-size: 0.75rem; white-space: nowrap; color: var(--nf-color-text-tertiary, var(--nf-color-text-secondary)); font-variant-numeric: tabular-nums; }
     .lots-total { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.75rem 1rem; font-weight: 700; color: var(--nf-color-text-primary); }
     .lots-total strong { font-variant-numeric: tabular-nums; }
-    .actions-cell { white-space: nowrap; }
-    .row-action { border: none; background: transparent; cursor: pointer; font-size: 0.95rem; line-height: 1; padding: 0 0.3rem; color: var(--nf-color-text-secondary); }
-    .row-action:hover { color: var(--nf-color-text-primary); }
-    .row-action--danger:hover { color: var(--nf-color-danger-600, #c0392b); }
+    .actions-cell { display: inline-flex; gap: 0.15rem; white-space: nowrap; }
     .progress-wrap { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; }
     .progress-bar { width: 100%; height: 6px; background: var(--nf-color-bg-muted); border-radius: 999px; overflow: hidden; }
     .progress-bar.sm { max-width: 80px; }

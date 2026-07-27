@@ -13,6 +13,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import {
+  ActionBarComponent,
   ButtonComponent,
   ConfirmDialogService,
   NfSelectComponent,
@@ -58,6 +59,7 @@ function addMonthsIso(from: Date, months: number): string {
     PageShellComponent,
     PageHeaderComponent,
     ButtonComponent,
+    ActionBarComponent,
     NfSelectComponent,
     VilleMaSelectComponent,
   ],
@@ -85,12 +87,13 @@ function addMonthsIso(from: Date, months: number): string {
           <input id="cc-name" type="text" [(ngModel)]="draft.name" name="name" class="fld" />
           <label for="cc-desc">{{ 'chantiers.create.fields.description' | translate }}</label>
           <textarea id="cc-desc" [(ngModel)]="draft.description" name="desc" rows="3" class="fld"></textarea>
-          <label for="cc-st">{{ 'chantiers.create.fields.status' | translate }}</label>
-          <select id="cc-st" [(ngModel)]="draft.status" name="st" class="fld">
-            @for (opt of statusOptions; track opt.v) {
-              <option [ngValue]="opt.v">{{ opt.labelKey | translate }}</option>
-            }
-          </select>
+          <nf-select
+            id="cc-st"
+            name="st"
+            [(ngModel)]="draft.status"
+            [label]="'chantiers.create.fields.status' | translate"
+            [options]="statusSelectOptions()"
+          />
         </section>
       }
 
@@ -115,11 +118,12 @@ function addMonthsIso(from: Date, months: number): string {
           </nf-button>
           <label>{{ 'chantiers.create.fields.marcheRef' | translate }}</label>
           <input type="text" [(ngModel)]="draft.marcheReference" name="mref" class="fld" />
-          <label>{{ 'chantiers.create.fields.marcheType' | translate }}</label>
-          <select [(ngModel)]="draft.marcheType" name="mtyp" class="fld">
-            <option value="prive">{{ 'chantiers.create.fields.marcheTypePrive' | translate }}</option>
-            <option value="public_ccag">{{ 'chantiers.create.fields.marcheTypePublic' | translate }}</option>
-          </select>
+          <nf-select
+            name="mtyp"
+            [(ngModel)]="draft.marcheType"
+            [label]="'chantiers.create.fields.marcheType' | translate"
+            [options]="marcheTypeOptions()"
+          />
           <label>{{ 'chantiers.create.fields.moa' | translate }}</label>
           <input type="text" [(ngModel)]="draft.moa" name="moa" class="fld" />
           <label>{{ 'chantiers.create.fields.moe' | translate }}</label>
@@ -179,34 +183,35 @@ function addMonthsIso(from: Date, months: number): string {
       <!-- Étape 5 : équipe (affectations titulaires) -->
       @if (step() === 4) {
         <section class="panel">
-          <label for="cc-chef">{{ 'chantiers.create.fields.chef' | translate }}</label>
-          <select id="cc-chef" [(ngModel)]="draft.chefEmployeId" name="chef" class="fld">
-            <option value="">—</option>
-            @for (e of employees(); track e.id) {
-              <option [value]="e.id">{{ e.name }} ({{ e.matricule }})</option>
-            }
-          </select>
-          <label for="cc-cond">{{ 'chantiers.create.fields.conducteur' | translate }}</label>
-          <select id="cc-cond" [(ngModel)]="draft.conducteurEmployeId" name="cond" class="fld">
-            <option value="">—</option>
-            @for (e of employees(); track e.id) {
-              <option [value]="e.id">{{ e.name }} ({{ e.matricule }})</option>
-            }
-          </select>
-          <label>{{ 'chantiers.create.fields.ingenieur' | translate }}</label>
-          <select [(ngModel)]="draft.ingenieurEmployeId" name="ing" class="fld">
-            <option value="">—</option>
-            @for (e of employees(); track e.id) {
-              <option [value]="e.id">{{ e.name }} ({{ e.matricule }})</option>
-            }
-          </select>
+          <nf-select
+            id="cc-chef"
+            name="chef"
+            [(ngModel)]="draft.chefEmployeId"
+            [label]="'chantiers.create.fields.chef' | translate"
+            [options]="employeeSelectOptions()"
+            [required]="true"
+          />
+          <nf-select
+            id="cc-cond"
+            name="cond"
+            [(ngModel)]="draft.conducteurEmployeId"
+            [label]="'chantiers.create.fields.conducteur' | translate"
+            [options]="employeeSelectOptions()"
+            [required]="true"
+          />
+          <nf-select
+            name="ing"
+            [(ngModel)]="draft.ingenieurEmployeId"
+            [label]="'chantiers.create.fields.ingenieur' | translate"
+            [options]="employeeSelectOptions()"
+          />
           <label class="chk"><input type="checkbox" [(ngModel)]="draft.cautionsSoumission" name="c1" />{{ 'chantiers.create.fields.cautionSoumission' | translate }}</label>
           <label class="chk"><input type="checkbox" [(ngModel)]="draft.cautionsBonneFin" name="c2" />{{ 'chantiers.create.fields.cautionBonneFin' | translate }}</label>
           <label class="chk"><input type="checkbox" [(ngModel)]="draft.cautionsRestitutionAvance" name="c3" />{{ 'chantiers.create.fields.cautionRestitution' | translate }}</label>
         </section>
       }
 
-      <div class="nav-actions">
+      <nf-action-bar align="right" class="nav-actions">
         @if (step() > 0) {
           <nf-button variant="secondary" (clicked)="prev()">{{ 'chantiers.create.prev' | translate }}</nf-button>
         }
@@ -217,7 +222,7 @@ function addMonthsIso(from: Date, months: number): string {
           <nf-button variant="secondary" (clicked)="saveDraft()">{{ 'chantiers.create.draft' | translate }}</nf-button>
           <nf-button variant="primary" (clicked)="submit()" data-testid="chantier-create-submit">{{ 'chantiers.create.submit' | translate }}</nf-button>
         }
-      </div>
+      </nf-action-bar>
     </nf-page-shell>
   `,
   styles: [`
@@ -235,7 +240,7 @@ function addMonthsIso(from: Date, months: number): string {
     .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
     .chk { display: flex; align-items: center; gap: 0.5rem; font-weight: 500; margin-top: 0.5rem; }
     .err { color: var(--nf-color-danger-700); font-size: 0.88rem; margin: 0 0 0.75rem; }
-    .nav-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; padding-top: 0.5rem; border-top: 1px solid var(--nf-color-bg-muted); }
+    .nav-actions { margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid var(--nf-color-bg-muted); }
   `],
 })
 export class ChantierCreatePage {
@@ -309,11 +314,24 @@ export class ChantierCreatePage {
     cautionsRestitutionAvance: false,
   };
 
-  readonly statusOptions: { v: ChantierStatus; labelKey: string }[] = [
-    { v: 'PROSPECT', labelKey: 'chantiers.status.prospect' },
-    { v: 'EN_COURS', labelKey: 'chantiers.status.enCours' },
-    { v: 'SUSPENDU', labelKey: 'chantiers.status.suspendu' },
-  ];
+  readonly statusSelectOptions = computed<NfSelectOption[]>(() => [
+    { value: 'PROSPECT', label: this.translate.instant('chantiers.status.prospect') },
+    { value: 'EN_COURS', label: this.translate.instant('chantiers.status.enCours') },
+    { value: 'SUSPENDU', label: this.translate.instant('chantiers.status.suspendu') },
+  ]);
+
+  readonly marcheTypeOptions = computed<NfSelectOption[]>(() => [
+    { value: 'prive', label: this.translate.instant('chantiers.create.fields.marcheTypePrive') },
+    { value: 'public_ccag', label: this.translate.instant('chantiers.create.fields.marcheTypePublic') },
+  ]);
+
+  readonly employeeSelectOptions = computed<NfSelectOption[]>(() => [
+    { value: '', label: '—' },
+    ...this._employees().map((e) => ({
+      value: e.id,
+      label: `${e.name} (${e.matricule})`,
+    })),
+  ]);
 
   readonly nextCodePreview = computed(() => {
     const year = new Date().getFullYear();

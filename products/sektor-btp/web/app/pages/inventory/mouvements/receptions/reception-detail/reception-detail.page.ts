@@ -1,11 +1,11 @@
 import { Component, LOCALE_ID, OnDestroy, ViewChild, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 
 import {
+  ButtonComponent,
   ConfigDrivenDetailPage,
   ConfigDrivenDetailPageImports,
   ConfigDrivenDetailPageStyles,
@@ -47,7 +47,7 @@ type TxLine = { totalPrice?: number; quantity: number; unitPrice?: number };
     ...ConfigDrivenDetailPageImports,
     FieldTemplateDirective,
     ReceptionLinesEditorComponent,
-    MatButtonToggleModule,
+    ButtonComponent,
     NfSelectComponent,
     NfInputComponent,
     IconComponent,

@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, ElementRef, inject, viewChild } from '@angular/core';
+import { AfterViewInit, Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 
-import { ButtonComponent } from '@lib/anatomy';
+import { ButtonComponent, NfInputComponent } from '@lib/anatomy';
 
 import { DpuService } from '@app/etudes/services/dpu.service';
 
@@ -21,7 +21,7 @@ export interface PosteChiffrageDialogResult {
 @Component({
   selector: 'app-poste-chiffrage-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatDialogModule, ButtonComponent],
+  imports: [CommonModule, FormsModule, MatDialogModule, ButtonComponent, NfInputComponent],
   template: `
     <div class="dialog-shell">
       <header>
@@ -35,14 +35,21 @@ export interface PosteChiffrageDialogResult {
       </p>
 
       <div class="grid-2">
-        <label class="field">
-          <span>Frais généraux (%) *</span>
-          <input #fgInput name="fg" type="number" step="any" min="0" [(ngModel)]="fg" required />
-        </label>
-        <label class="field">
-          <span>Marge (%) *</span>
-          <input name="marge" type="number" step="any" min="0" [(ngModel)]="marge" required />
-        </label>
+        <nf-input
+          id="poste-chiffrage-fg"
+          label="Frais généraux (%)"
+          name="fg"
+          type="number"
+          [(ngModel)]="fg"
+          [required]="true"
+        />
+        <nf-input
+          label="Marge (%)"
+          name="marge"
+          type="number"
+          [(ngModel)]="marge"
+          [required]="true"
+        />
       </div>
 
       <dl class="preview" aria-live="polite">
@@ -98,24 +105,6 @@ export interface PosteChiffrageDialogResult {
       grid-template-columns: 1fr 1fr;
       gap: 0.75rem;
     }
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 0.35rem;
-      font-size: 0.875rem;
-    }
-    .field input {
-      padding: 0.625rem 0.75rem;
-      border: 1px solid var(--nf-color-border, #d1d5db);
-      border-radius: 8px;
-      font: inherit;
-      background: var(--nf-color-surface, #fff);
-    }
-    .field input:focus {
-      outline: none;
-      border-color: var(--nf-color-primary-600, #0b6e7a);
-      box-shadow: 0 0 0 3px color-mix(in srgb, var(--nf-color-primary-600, #0b6e7a) 18%, transparent);
-    }
     .preview {
       margin: 0;
       display: grid;
@@ -157,13 +146,12 @@ export class PosteChiffrageDialogComponent implements AfterViewInit {
   );
   private readonly dpuMath = inject(DpuService);
   readonly data = inject<PosteChiffrageDialogData>(MAT_DIALOG_DATA);
-  private readonly fgInput = viewChild<ElementRef<HTMLInputElement>>('fgInput');
 
   fg = String(this.data.fraisGenerauxPercent ?? 0);
   marge = String(this.data.margePercent ?? 0);
 
   ngAfterViewInit(): void {
-    queueMicrotask(() => this.fgInput()?.nativeElement?.focus());
+    queueMicrotask(() => document.getElementById('poste-chiffrage-fg')?.focus());
   }
 
   get prixVente(): number {

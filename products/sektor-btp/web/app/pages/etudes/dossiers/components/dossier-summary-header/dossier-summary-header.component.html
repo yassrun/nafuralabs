@@ -74,23 +74,23 @@
         </div>
 
         @if (showReouvrir() || showRefuser() || showCta()) {
-          <div class="dsh__actions">
+          <nf-action-bar class="dsh__actions" align="right" spacing="sm">
             @if (showReouvrir()) {
-              <button type="button" class="dsh__btn dsh__btn--ghost" (click)="emitAction('REOUVRIR_BORDEREAU')">
+              <nf-button variant="ghost" size="sm" (clicked)="emitAction('REOUVRIR_BORDEREAU')">
                 Réouvrir le bordereau
-              </button>
+              </nf-button>
             }
             @if (showRefuser()) {
-              <button type="button" class="dsh__btn dsh__btn--ghost" (click)="emitAction('REFUSER')">
+              <nf-button variant="ghost" size="sm" (clicked)="emitAction('REFUSER')">
                 Refuser
-              </button>
+              </nf-button>
             }
             @if (showCta()) {
-              <button type="button" class="dsh__btn dsh__btn--primary" (click)="emitAction()">
+              <nf-button variant="primary" size="sm" (clicked)="emitAction()">
                 {{ ctaLabel() }}
-              </button>
+              </nf-button>
             }
-          </div>
+          </nf-action-bar>
         }
       </div>
     </div>

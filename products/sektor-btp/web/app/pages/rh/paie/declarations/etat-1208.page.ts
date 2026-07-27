@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import * as XLSX from 'xlsx';
 
-import {PageHeaderComponent, PageShellComponent, ButtonComponent } from '@lib/anatomy';
+import {PageHeaderComponent, PageShellComponent, ButtonComponent, NfSelectComponent, type NfSelectOption } from '@lib/anatomy';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
 import type { ComptaFournisseur } from '@app/finance/models';
 import type { FactureFournisseur } from '@app/finance/models';
@@ -63,17 +64,19 @@ function deriveIf(fournisseur: ComptaFournisseur): string {
   selector: 'app-etat-1208',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, TranslateModule, PageShellComponent, PageHeaderComponent, MadCurrencyPipe, ButtonComponent],
+  imports: [CommonModule, FormsModule, TranslateModule, PageShellComponent, PageHeaderComponent, MadCurrencyPipe, ButtonComponent, NfSelectComponent],
   template: `
     <nf-page-shell scroll>
       <nf-page-header [config]="headerConfig()"></nf-page-header>
 
       <div class="controls">
-        <label class="ctrl-label">{{ 'rh.paie.declarations.common.exerciseLabel' | translate }}
-          <select [value]="annee()" (change)="annee.set(+$any($event.target).value)">
-            @for (y of anneesDisponibles; track y) { <option [value]="y">{{ y }}</option> }
-          </select>
-        </label>
+        <nf-select
+          name="annee"
+          [label]="'rh.paie.declarations.common.exerciseLabel' | translate"
+          [options]="anneeSelectOptions"
+          [ngModel]="anneeStr()"
+          (ngModelChange)="onAnneeChange($event)"
+        />
         <label class="ctrl-label">{{ 'rh.paie.declarations.etat1208.filterIce' | translate }}
           <input
             type="search"
@@ -169,7 +172,7 @@ function deriveIf(fournisseur: ComptaFournisseur): string {
     :host { display: block; height: 100%; }
     .controls { display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; }
     .ctrl-label { font-size: 13px; display: flex; align-items: center; gap: 8px; }
-    .ctrl-label select, .ctrl-label .search {
+    .ctrl-label .search {
       padding: 7px 10px; border: 1px solid var(--nf-color-border); border-radius: 6px; font-size: 13px; background: var(--nf-color-surface);
     }
     .search { min-width: 200px; }
@@ -214,8 +217,17 @@ export class Etat1208Page {
 
   readonly company = COMPANY;
   readonly anneesDisponibles = [2025, 2026];
+  readonly anneeSelectOptions: NfSelectOption[] = this.anneesDisponibles.map((y) => ({
+    value: String(y),
+    label: String(y),
+  }));
   readonly annee = signal(2026);
+  readonly anneeStr = computed(() => String(this.annee()));
   readonly filtreIce = signal('');
+
+  onAnneeChange(value: string): void {
+    this.annee.set(+value);
+  }
 
   readonly headerConfig = computed(() => ({
     title: this.translate.instant('rh.paie.declarations.etat1208.title'),

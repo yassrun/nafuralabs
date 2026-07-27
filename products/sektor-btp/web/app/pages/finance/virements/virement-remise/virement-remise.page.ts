@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { FfApiService } from '@app/pages/achats/factures-fournisseur/services/ff-api.service';
 import { VirementApiService } from '@app/finance/services/virement-api.service';
-import { PageHeaderComponent, PageShellComponent } from '@lib/anatomy';
+import { PageHeaderComponent, PageShellComponent, NfSelectComponent, type NfSelectOption } from '@lib/anatomy';
 import { ButtonComponent } from '@lib/anatomy/components';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
 import type {
@@ -15,7 +15,16 @@ import type {
 @Component({
   selector: 'app-virement-remise-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslateModule, PageShellComponent, PageHeaderComponent, ButtonComponent, MadCurrencyPipe],
+  imports: [
+    CommonModule,
+    FormsModule,
+    TranslateModule,
+    PageShellComponent,
+    PageHeaderComponent,
+    ButtonComponent,
+    MadCurrencyPipe,
+    NfSelectComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './virement-remise.page.html',
   styleUrl: '../../_finance-r2.shared.scss',
@@ -30,6 +39,18 @@ export class VirementRemisePage {
   protected readonly out = signal<string>('');
   protected readonly remiseId = signal<string | null>(null);
   protected readonly busy = signal(false);
+
+  readonly formatOptions: NfSelectOption[] = [
+    { value: 'SEPA', label: 'SEPA' },
+    { value: 'AWB', label: 'AWB' },
+    { value: 'BMCE', label: 'BMCE' },
+    { value: 'CIH', label: 'CIH' },
+    { value: 'BP', label: 'BP' },
+  ];
+
+  onFormatChange(v: string): void {
+    this.format.set(v as BanqueVirementXmlFormat);
+  }
 
   constructor() {
     void this.loadLines();

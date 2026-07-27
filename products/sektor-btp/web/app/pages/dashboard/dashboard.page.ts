@@ -1,7 +1,6 @@
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { MatButtonToggleChange, MatButtonToggleModule } from '@angular/material/button-toggle';
 import { RouterModule } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
@@ -37,7 +36,6 @@ import { TopChantiersAlerteComponent } from './widgets/top-chantiers-alerte.comp
     CommonModule,
     DragDropModule,
     MadCurrencyPipe,
-    MatButtonToggleModule,
     IconComponent,
     RouterModule,
     TranslateModule,
@@ -62,6 +60,12 @@ import { TopChantiersAlerteComponent } from './widgets/top-chantiers-alerte.comp
       align-items: center;
       gap: 12px 16px;
       margin-bottom: 16px;
+    }
+    .dashboard-toolbar__personas {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      align-items: center;
     }
     .dashboard-toolbar__hint {
       font-size: 0.8125rem;
@@ -282,11 +286,8 @@ export class DashboardPage implements OnInit {
     }
   }
 
-  onPersonaChange(ev: MatButtonToggleChange): void {
-    const v = ev.value as DashboardPersona | undefined;
-    if (v === 'dg' || v === 'conducteur' || v === 'comptable') {
-      this.layout.setPersona(v);
-    }
+  onPersonaChange(persona: DashboardPersona): void {
+    this.layout.setPersona(persona);
   }
 
   onDrop(event: CdkDragDrop<DashboardWidgetId[]>): void {

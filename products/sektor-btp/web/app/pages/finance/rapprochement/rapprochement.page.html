@@ -21,14 +21,12 @@
     <div class="rp__params-row">
       <label class="rp__field">
         <span>{{ 'finance.common.filters.compte' | translate }} *</span>
-        <select [ngModel]="compteId()" (ngModelChange)="compteId.set($event); onParamsChange()" [disabled]="!!id">
-          <option value="">{{ 'finance.rapprochement.selectAccount' | translate }}</option>
-          @for (c of comptes(); track c.id) {
-            @if (c.type === 'BANQUE') {
-              <option [value]="c.id">{{ c.libelle }} ({{ c.compteCgncCode }})</option>
-            }
-          }
-        </select>
+        <nf-select
+          [options]="compteOptions()"
+          [ngModel]="compteId()"
+          (ngModelChange)="compteId.set($event); onParamsChange()"
+          [disabled]="!!id"
+        />
       </label>
       <label class="rp__field">
         <span>{{ 'finance.common.filters.from' | translate }} *</span>

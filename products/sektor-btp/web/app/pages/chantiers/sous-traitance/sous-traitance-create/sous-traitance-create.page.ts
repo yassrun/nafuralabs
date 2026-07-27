@@ -1,10 +1,10 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { ButtonComponent, PageHeaderComponent, PageShellComponent, ToastService } from '@lib/anatomy';
+import { ActionBarComponent, ButtonComponent, PageHeaderComponent, PageShellComponent, ToastService, NfSelectComponent, type NfSelectOption } from '@lib/anatomy';
 import type { Chantier } from '@app/chantiers/models';
 import { ChantierApiService } from '../../services/chantier-api.service';
 import { SousTraitanceApiService } from '../services/sous-traitance-api.service';
@@ -29,6 +29,8 @@ function addMonthsIso(from: string, months: number): string {
     PageShellComponent,
     PageHeaderComponent,
     ButtonComponent,
+    ActionBarComponent,
+    NfSelectComponent,
     TranslateModule,
   ],
   template: `
@@ -36,13 +38,14 @@ function addMonthsIso(from: string, months: number): string {
       <nf-page-header [config]="headerConfig"></nf-page-header>
 
       <div class="panel">
-        <label>{{ 'chantiers.sousTraitance.create.fields.chantier' | translate }}</label>
-        <select class="fld" [(ngModel)]="draft.chantierId" name="chantierId" required>
-          <option value="">{{ 'chantiers.sousTraitance.create.fields.chantierPlaceholder' | translate }}</option>
-          @for (c of chantiers(); track c.id) {
-            <option [value]="c.id">{{ c.code }} — {{ c.name }}</option>
-          }
-        </select>
+        <nf-select
+          name="chantierId"
+          [label]="'chantiers.sousTraitance.create.fields.chantier' | translate"
+          [placeholder]="'chantiers.sousTraitance.create.fields.chantierPlaceholder' | translate"
+          [options]="chantierOptions()"
+          [(ngModel)]="draft.chantierId"
+          [required]="true"
+        />
 
         <label>{{ 'chantiers.sousTraitance.create.fields.sousTraitant' | translate }}</label>
         <input class="fld" type="text" [(ngModel)]="draft.sousTraitantNom" name="sousTraitantNom" required />
@@ -64,14 +67,14 @@ function addMonthsIso(from: string, months: number): string {
           </div>
         </div>
 
-        <div class="actions">
+        <nf-action-bar align="right" class="actions">
           <nf-button variant="secondary" (clicked)="cancel()">
             {{ 'chantiers.common.actions.cancel' | translate }}
           </nf-button>
           <nf-button variant="primary" [disabled]="saving()" (clicked)="submit()">
             {{ 'chantiers.sousTraitance.create.submit' | translate }}
           </nf-button>
-        </div>
+        </nf-action-bar>
       </div>
     </nf-page-shell>
   `,
@@ -84,7 +87,7 @@ function addMonthsIso(from: string, months: number): string {
     label { font-size: 0.8rem; font-weight: 600; color: var(--nf-color-text-secondary); }
     .fld { width: 100%; padding: 7px 10px; border: 1px solid var(--nf-color-border); border-radius: 6px; font-size: 13px; }
     .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 0.75rem; }
+    .actions { margin-top: 0.75rem; }
   `],
 })
 export class SousTraitanceCreatePage implements OnInit {
@@ -96,6 +99,14 @@ export class SousTraitanceCreatePage implements OnInit {
 
   readonly chantiers = signal<Chantier[]>([]);
   readonly saving = signal(false);
+
+  readonly chantierOptions = computed<NfSelectOption[]>(() => [
+    { value: '', label: this.translate.instant('chantiers.sousTraitance.create.fields.chantierPlaceholder') },
+    ...this.chantiers().map((c) => ({
+      value: c.id,
+      label: `${c.code} — ${c.name}`,
+    })),
+  ]);
 
   draft = {
     chantierId: '',

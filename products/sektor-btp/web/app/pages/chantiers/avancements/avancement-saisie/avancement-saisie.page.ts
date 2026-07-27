@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { ButtonComponent, EmptyStateComponent } from '@lib/anatomy/components';
+import { ButtonComponent, EmptyStateComponent, NfSelectComponent, type NfSelectOption } from '@lib/anatomy/components';
 import { ConfirmDialogService, ToastService } from '@lib/anatomy';
 import { AvancementFacade } from '../services';
 import { LotSaisieCardComponent } from './components/lot-saisie-card/lot-saisie-card.component';
@@ -12,7 +12,7 @@ import { LotSaisieCardComponent } from './components/lot-saisie-card/lot-saisie-
 @Component({
   selector: 'app-avancement-saisie',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, TranslateModule, ButtonComponent, EmptyStateComponent, LotSaisieCardComponent],
+  imports: [CommonModule, FormsModule, RouterLink, TranslateModule, ButtonComponent, EmptyStateComponent, LotSaisieCardComponent, NfSelectComponent],
   templateUrl: './avancement-saisie.page.html',
   styleUrls: ['./avancement-saisie.page.scss'],
 })
@@ -36,6 +36,29 @@ export class AvancementSaisiePage {
   readonly formTitle = computed(() => this.isEditing()
     ? this.translate.instant('chantiers.avancement.editTitle')
     : this.translate.instant('chantiers.avancement.title'));
+
+  readonly chantierOptions = computed<NfSelectOption[]>(() =>
+    this.chantiers().map((c) => ({
+      value: c.id,
+      label: `${c.code} - ${c.name}`,
+    })),
+  );
+
+  readonly additionalLineOptions = computed<NfSelectOption[]>(() => [
+    { value: '', label: this.translate.instant('chantiers.avancement.fields.pickAdditionalLine') },
+    ...this.additionalLines().map((line) => ({
+      value: line.key,
+      label: line.poste
+        ? `${line.poste.code} — ${line.poste.designation}`
+        : `${line.lot.code} — ${line.lot.designation}`,
+    })),
+  ]);
+
+  onAddLine(key: string): void {
+    if (key) {
+      this.facade.addLine(key);
+    }
+  }
 
   constructor() {
     const chantierId = this.route.snapshot.paramMap.get('chantierId');

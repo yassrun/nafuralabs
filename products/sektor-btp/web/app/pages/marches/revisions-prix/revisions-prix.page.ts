@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 
-import { PageHeaderComponent, PageShellComponent } from '@lib/anatomy';
+import { NfSelectComponent, PageHeaderComponent, PageShellComponent, type NfSelectOption } from '@lib/anatomy';
 import { ToastService } from '@lib/anatomy/components/services/toast.service';
 import { FormuleRevisionKService } from '../services/formule-revision-k.service';
 import { RevisionPrixApiService } from './services/revision-prix-api.service';
@@ -20,7 +21,7 @@ interface IndiceBT {
   selector: 'app-revisions-prix',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, PageShellComponent, PageHeaderComponent, TranslateModule],
+  imports: [CommonModule, FormsModule, PageShellComponent, PageHeaderComponent, TranslateModule, NfSelectComponent],
   template: `
     <nf-page-shell scroll>
       <nf-page-header [config]="{
@@ -63,9 +64,11 @@ interface IndiceBT {
         <h2 class="section-title">{{ 'marches.revisionsPrix.coefK.title' | translate }}</h2>
         <div class="toolbar">
           <label>{{ 'marches.revisionsPrix.coefK.labelMois' | translate }}
-            <select [value]="moisCalcul()" (change)="moisCalcul.set($any($event.target).value)">
-              @for (m of moisDisponibles(); track m) { <option [value]="m">{{ m }}</option> }
-            </select>
+            <nf-select
+              [options]="moisOptions()"
+              [ngModel]="moisCalcul()"
+              (ngModelChange)="moisCalcul.set($event)"
+            />
           </label>
         </div>
 
@@ -160,6 +163,10 @@ export class RevisionsPrixPage implements OnInit {
     const months = [...new Set(this.indices().map(i => i.mois))].sort();
     return months.length > 0 ? months : ['2026-01', '2026-02', '2026-03', '2026-04'];
   });
+
+  moisOptions(): NfSelectOption[] {
+    return this.moisDisponibles().map((m) => ({ value: m, label: m }));
+  }
 
   ngOnInit(): void {
     void Promise.all([this.loadIndicesFromApi(), this.loadMarches()]);

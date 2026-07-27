@@ -5,7 +5,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 
-import { PageHeaderComponent, PageShellComponent, ToastService, ConfirmDialogService } from '@lib/anatomy';
+import { PageHeaderComponent, PageShellComponent, ToastService, ConfirmDialogService, NfSelectComponent, type NfSelectOption } from '@lib/anatomy';
 import { ButtonComponent } from '@lib/anatomy/components';
 import { AttachmentListComponent } from '@platform/features/collaboration/doc-manager/components/attachment-list.component';
 import {
@@ -66,6 +66,7 @@ type ComptaFournisseurAlias = ComptaFournisseur;
     ButtonComponent,
     AttachmentListComponent,
     DocScanButtonComponent,
+    NfSelectComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -151,12 +152,12 @@ type ComptaFournisseurAlias = ComptaFournisseur;
           <div class="grid">
             <label>
               <span>{{ 'finance.factureFournisseur.form.fields.fournisseur' | translate }} *</span>
-              <select [ngModel]="fournisseurId()" (ngModelChange)="onFournisseur($event)" [disabled]="!editable()">
-                <option value="">{{ 'finance.factureFournisseur.form.fields.fournisseurPlaceholder' | translate }}</option>
-                @for (f of fournisseurs(); track f.id) {
-                  <option [value]="f.id">{{ f.code }} — {{ f.name }}{{ f.nonResidentMaroc ? ' ' + t('finance.factureFournisseur.hints.fournisseurNonMaroc') : '' }}</option>
-                }
-              </select>
+              <nf-select
+                [options]="fournisseurOptions()"
+                [ngModel]="fournisseurId()"
+                (ngModelChange)="onFournisseur($event)"
+                [disabled]="!editable()"
+              />
             </label>
             <label>
               <span>{{ 'finance.factureFournisseur.form.fields.numeroFournisseur' | translate }} *</span>
@@ -634,6 +635,20 @@ export class FfDetailPage implements OnInit {
 
   t(key: string): string {
     return this.translate.instant(key);
+  }
+
+  fournisseurOptions(): NfSelectOption[] {
+    const nrHint = this.t('finance.factureFournisseur.hints.fournisseurNonMaroc');
+    return [
+      {
+        value: '',
+        label: this.t('finance.factureFournisseur.form.fields.fournisseurPlaceholder'),
+      },
+      ...this.fournisseurs().map((f) => ({
+        value: f.id,
+        label: `${f.code} — ${f.name}${f.nonResidentMaroc ? ` ${nrHint}` : ''}`,
+      })),
+    ];
   }
 
   onFournisseur(id: string): void {

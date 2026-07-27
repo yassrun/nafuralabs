@@ -70,20 +70,6 @@
 
 .poste__back {
   display: none;
-  border: 0;
-  background: transparent;
-  color: var(--nf-color-primary-600, #0b6e7a);
-  font-size: 0.8125rem;
-  padding: 0;
-  margin: 0;
-  cursor: pointer;
-  text-decoration: underline;
-
-  &:focus-visible {
-    outline: 2px solid var(--nf-color-primary-600, #0b6e7a);
-    outline-offset: 2px;
-    border-radius: 2px;
-  }
 }
 
 .poste__code {
@@ -385,56 +371,11 @@
   color: var(--nf-color-text-secondary);
 }
 
-.link {
-  border: 0;
-  background: transparent;
-  color: var(--nf-color-primary-600, #0b6e7a);
-  cursor: pointer;
-  font-size: 0.75rem;
-  padding: 0.15rem 0.25rem;
-  text-decoration: underline;
-  border-radius: 2px;
-
-  &:focus-visible {
-    outline: 2px solid var(--nf-color-primary-600, #0b6e7a);
-    outline-offset: 2px;
-  }
-}
-
 .poste__row-actions {
   display: inline-flex;
   align-items: center;
   gap: 0.1rem;
   white-space: nowrap;
-}
-
-.poste__icon-btn {
-  width: 1.85rem;
-  height: 1.85rem;
-  padding: 0;
-  line-height: 1;
-
-  mat-icon {
-    font-size: 1.05rem;
-    width: 1.05rem;
-    height: 1.05rem;
-    color: var(--nf-color-text-secondary);
-  }
-
-  &:hover mat-icon,
-  &:focus-visible mat-icon {
-    color: var(--nf-color-text-primary);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--nf-color-primary-600, #0b6e7a);
-    outline-offset: 1px;
-  }
-}
-
-.poste__icon-btn--danger:hover mat-icon,
-.poste__icon-btn--danger:focus-visible mat-icon {
-  color: var(--nf-color-danger-600, #c0392b);
 }
 
 .sr-only {
@@ -512,7 +453,7 @@
 
 @media (max-width: 960px) {
   .poste__back {
-    display: inline-block;
+    display: inline-flex;
   }
 
   .poste__table-wrap {

@@ -4,7 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { ButtonComponent, PageHeaderComponent, PageShellComponent, ToastService } from '@lib/anatomy/components';
+import {
+  ButtonComponent,
+  NfSelectComponent,
+  type NfSelectOption,
+  PageHeaderComponent,
+  PageShellComponent,
+  ToastService,
+} from '@lib/anatomy/components';
 import { BalanceApiService } from '@app/finance/services/balance-api.service';
 import { ChantierApiService } from '@app/pages/chantiers/services/chantier-api.service';
 import type {
@@ -18,7 +25,15 @@ import type {
 @Component({
   selector: 'app-balance',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslateModule, PageShellComponent, PageHeaderComponent, ButtonComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    TranslateModule,
+    PageShellComponent,
+    PageHeaderComponent,
+    ButtonComponent,
+    NfSelectComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <nf-page-shell scroll>
@@ -44,21 +59,19 @@ import type {
         </label>
         <label>
           <span>{{ 'finance.balance.filters.classe' | translate }}</span>
-          <select [ngModel]="filterClasse()" (ngModelChange)="onClasseChange($event)">
-            <option [ngValue]="null">{{ 'finance.common.labels.all' | translate }}</option>
-            @for (c of [1, 2, 3, 4, 5, 6, 7]; track c) {
-              <option [value]="c">{{ ('finance.planComptable.cgnc.classe' + c) | translate }}</option>
-            }
-          </select>
+          <nf-select
+            [options]="classeOptions()"
+            [ngModel]="filterClasse() == null ? '' : String(filterClasse())"
+            (ngModelChange)="onClasseChange($event)"
+          />
         </label>
         <label>
           <span>{{ 'finance.analytique.filters.axe' | translate }}</span>
-          <select [ngModel]="filterAxe()" (ngModelChange)="filterAxe.set($event); refresh()">
-            <option value="">{{ 'finance.common.labels.all' | translate }}</option>
-            @for (a of axes(); track a.id) {
-              <option [value]="a.id">{{ a.libelle }}</option>
-            }
-          </select>
+          <nf-select
+            [options]="axeOptions()"
+            [ngModel]="filterAxe()"
+            (ngModelChange)="filterAxe.set($event); refresh()"
+          />
         </label>
 
         <div class="vue-toggle">
@@ -197,6 +210,19 @@ export class BalancePage {
     return Math.abs((t.reportsDebit + t.mouvementsDebit) - (t.reportsCredit + t.mouvementsCredit)) < 0.5;
   });
 
+  readonly classeOptions = computed<NfSelectOption[]>(() => [
+    { value: '', label: this.translate.instant('finance.common.labels.all') },
+    ...([1, 2, 3, 4, 5, 6, 7] as const).map((c) => ({
+      value: String(c),
+      label: this.translate.instant(`finance.planComptable.cgnc.classe${c}`),
+    })),
+  ]);
+
+  readonly axeOptions = computed<NfSelectOption[]>(() => [
+    { value: '', label: this.translate.instant('finance.common.labels.all') },
+    ...this.axes().map((a) => ({ value: a.id, label: a.libelle })),
+  ]);
+
   constructor() {
     void this.loadChantierAxes();
     this.refresh();
@@ -223,9 +249,9 @@ export class BalancePage {
     this.refresh();
   }
 
-  onClasseChange(value: string | number | null): void {
-    const parsed = value === null || value === '' ? null : Number(value);
-    this.filterClasse.set(Number.isNaN(parsed) ? null : (parsed as CompteClasse | null));
+  onClasseChange(value: string): void {
+    const parsed = value === '' ? null : Number(value);
+    this.filterClasse.set(parsed === null || Number.isNaN(parsed) ? null : (parsed as CompteClasse));
     this.refresh();
   }
 

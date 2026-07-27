@@ -312,9 +312,21 @@ export class DossierDetailPage {
           this.etapeUiLecture.set(4);
           break;
         case 'REFUSER': {
-          const motif = window.prompt('Motif du refus (obligatoire) :');
-          if (!motif?.trim()) return;
-          this.dossier.set(await this.api.refuser(dossier.id, motif.trim()));
+          const values = await this.confirmDialog.prompt({
+            title: 'Refuser le dossier',
+            fields: [
+              {
+                key: 'motif',
+                label: 'Motif du refus',
+                required: true,
+              },
+            ],
+            confirmLabel: 'Refuser',
+            cancelLabel: 'Annuler',
+          });
+          const motif = values?.['motif']?.trim();
+          if (!motif) return;
+          this.dossier.set(await this.api.refuser(dossier.id, motif));
           await this.refreshSynthese(dossier.id);
           break;
         }

@@ -18,34 +18,49 @@
 | Accent | **Jaune hi-vis `#F2D544`** → token `--nf-color-accent-400` (usage parcimonieux) |
 | Texte sur jaune | **Encre `#131415`** (`--nf-color-accent-contrast`) — jamais de blanc |
 | Police UI | Plus Jakarta Sans (existante) ; Space Grotesk réservé au logo |
-| Source de vérité couleur | `app/applications/erp/styles/brand-sektor.scss` |
+| Source de vérité couleur | `products/sektor-btp/web/app/styles/brand-sektor.scss` |
 
 Le rebrand **centralisé** est déjà fait (tokens, titre, favicon, assets `/assets/branding/sektor-*.svg`). Ce qui reste est **distribué** dans les features.
 
 ---
 
-## 1. Les 4 règles d'or (constitution UI)
+## 1. Les 5 règles d'or (constitution UI)
 
 1. **Composant avant HTML.** Tout élément d'UI doit passer par un atome/molécule/organisme `nf-` s'il existe. Pas de `<button>`, `<input>`, `mat-form-field` bruts dans les features.
 2. **Token avant valeur en dur.** Aucune couleur hexadécimale dans les features. Toujours une variable `--nf-color-*`. Idem espacements (`--nf-space-*`) et typo (`--nf-text-*`).
 3. **Un seul système d'icônes.** `nf-icon` (lucide) partout. Plus de `mat-icon`, FontAwesome ou primeicons dans les features.
 4. **Zéro chaîne en dur.** Tout texte visible passe par i18n (`ngx-translate`). Les lints i18n existants font foi.
+5. **Placement des actions selon le type d’écran** (voir §1.1). Ne pas inventer une position ad hoc.
+
+### 1.1 Placement des actions (haut vs bas)
+
+| Type d’écran | Où vont les actions | Composant |
+|---|---|---|
+| **Listing** | **Haut** — CTA création / export | `nf-page-header` (`primaryAction` / slot `[actions]`) |
+| **Détail / workspace** | **Haut** — CTA workflow (valider, refuser, avancer) | `nf-page-header` ou bandeau summary (ex. `dossier-summary-header`) |
+| **Formulaire create/edit court** | **Bas** du form — Annuler + Enregistrer | `nf-action-bar align="right"` |
+| **Formulaire long / scroll** | **Bas sticky** | `nf-action-bar` sticky |
+| **Dialog / modal** | **Footer** uniquement | footer `nf-modal` / dialog anatomy — pas de CTA primaire flottant dans le body |
+| **Filtres** | Sous le header, **jamais** mélangés au CTA primaire | `nf-filter-bar` / `nf-select` |
+
+**Ordre dans une barre** : ghost/secondary → primary (primary **toujours à droite**). Danger isolé (pas collé au primary sans séparation).
 
 ---
 
-## 2. Dette — baseline initiale vs état actuel
+## 2. Dette — baseline
 
-> ✅ **STATUT (mis à jour 2026-06-17) : la passe d'homogénisation de masse est FAITE.** Mesuré sur `app/applications/erp` :
+> ⚠️ **STATUT (mis à jour 2026-07-27)** : la passe de masse de juin 2026 a **régressé**. Mesure sur `products/sektor-btp/web/app` :
 
-| Symptôme | Baseline initiale | Actuel | Reste à faire |
-|---|---:|---:|---|
-| Lignes avec couleur hex en dur | ~2 950 | **31** | rien — ce sont des définitions de tokens, des fallbacks `var(--x, #hex)` (pattern correct) et un template email HSE |
-| Balises `<button>` brutes | 336 | **4** | rien — les 4 sont un `mat-menu` légitime (`mat-menu-item` exige `<button>`) |
-| `mat-form-field` bruts | 35 | **0** | ✔ terminé |
-| `mat-select` bruts | 13 | **0** | ✔ terminé |
-| `mat-icon` bruts | 33 | **0** | ✔ terminé |
+| Symptôme | Baseline initiale (pré-juin) | Juin 2026 (claim) | **Actuel 2026-07-27** | Reste à faire |
+|---|---:|---:|---:|---|
+| Couleurs hex en dur (hors tokens / fallbacks) | ~2 950 | ~31 | hotspot **études/dossiers** + shell notifs | tokens `--nf-*` |
+| Balises `<button>` brutes | 336 | 4 | **~57** / 15 fichiers | → `nf-button` |
+| `<select>` natifs | — | 0 `mat-select` | **~132** / 73 fichiers | → `nf-select` |
+| `mat-icon` bruts | 33 | 0 | **~16** (études) | → `nf-icon` |
+| `MatDialog` (UI interne) | — | — | **~54** / 20 fichiers | footer `nf-button` ; migration `nf-modal` plus tard |
 
-> La fondation est saine : `nf-page-shell` / `nf-page-header` adoptés partout, aucun `p-*` PrimeNG brut dans les features. Les WP ci-dessous restent comme **référence/garde-fou** pour le code futur, pas comme backlog actif.
+**Priorité vague 1** : `pages/etudes/dossiers/**` + `pages/chantiers/documents/**`.  
+**Vagues suivantes** : Finance selects → Chantiers create/edit/gantt → RH/HSE filtres → ventes/shell/dashboard.
 
 ### Bugs de rendu corrigés (audit live 2026-06-17)
 - **Box parasite du compteur complétude** : `completeness-meter.component.ts` utilisait `<nf-button variant="secondary">` (bordure cobalt 1px). Corrigé en `variant="ghost" size="sm"`. Règle : un indicateur cliquable mais non-bouton = variante `ghost`, jamais `secondary`/`stroked`.
@@ -57,20 +72,21 @@ Le rebrand **centralisé** est déjà fait (tokens, titre, favicon, assets `/ass
 
 | Si tu vois… | Remplace par | Notes |
 |---|---|---|
-| `<button mat-button>` / `<button>` | `<nf-button>` | variants: `primary` `secondary` `ghost` `danger`; input `[loading]`, `[icon]` |
+| `<button mat-button>` / `<button>` | `<nf-button>` | variants: `primary` `secondary` `ghost` `danger`; input `[loading]`, `[icon]` ; event `(clicked)` |
 | `<input>` / `mat-form-field` + `matInput` | `<nf-input>` | ou directive `[nfField]` sur control existant |
-| `<mat-select>` | `<nf-select>` | options via `[options]` |
+| `<select>` / `<mat-select>` | `<nf-select>` | options via `[options]` |
 | `<mat-icon>fav</mat-icon>` | `<nf-icon name="…">` | noms lucide |
 | montant / argent | `<nf-money-input>` / `--nf-color-amount-*` | MAD |
 | téléphone / ICE / RIB | `<nf-phone-ma-input>` `<nf-ice-input>` `<nf-rib-input>` | métier Maroc |
 | badge / statut | `<nf-badge>` / `<nf-status-badge>` | mappe les tokens `--nf-status-*` |
 | carte stat | `<nf-stat-card>` / `<nf-kpi-strip>` | |
 | tableau | `<nf-data-table>` / `<nf-entity-listing>` | |
-| modale / dialog | `<nf-modal>` / `<nf-confirm-dialog>` | |
+| modale / dialog | `<nf-modal>` / `<nf-confirm-dialog>` / `ConfirmDialogService` | |
 | toast / alerte | `<nf-toast>` / `<nf-alert>` | |
 | état vide / chargement / erreur | `<nf-empty-state>` `<nf-loading-state>` `<nf-error-state>` | |
+| barre d’actions form | `<nf-action-bar align="right">` | bas de formulaire |
 
-Référentiel complet : `app/platform/lib/anatomy/components/COMPONENTS.md`.
+Référentiel complet : `platform/web/lib/anatomy/components/COMPONENTS.md`.
 
 ---
 
@@ -83,64 +99,42 @@ Référentiel complet : `app/platform/lib/anatomy/components/COMPONENTS.md`.
 - Lancer l'app, vérifier : tuile sidebar « S », boutons primaires, liens, focus, barres de progression = cobalt ; titre onglet = « Nafura Sektor » ; favicon = glyphe.
 - **Détection** des bleus en dur qui ne suivront PAS le token (à corriger en WP4) :
   ```bash
-  grep -rEn "#2563eb|#1d4ed8|#3b82f6|#1e40af|#1e3a8a|#93c5fd" app/applications/erp
+  rg -n "#2563eb|#1d4ed8|#3b82f6|#1e40af|#1e3a8a|#93c5fd" products/sektor-btp/web/app
   ```
 - **DoD** : aucune zone « bleue » résiduelle à côté du cobalt sur les écrans clés (dashboard, listing chantiers, détail chantier).
 
-### WP2 — Migration des boutons (336 → `nf-button`)
+### WP2 — Migration des boutons → `nf-button`
 - **Détection** :
   ```bash
-  grep -rEn "<button" app/applications/erp/pages/<feature> --include=*.html --include=*.ts
+  rg -n "<button" products/sektor-btp/web/app/pages/<feature> -g '*.html' -g '*.ts'
   ```
 - **Règles de transformation** :
   - Action principale → `<nf-button variant="primary">`
   - Action secondaire → `variant="secondary"`
   - Action discrète (icône, lien) → `variant="ghost"`
   - Suppression/destructif → `variant="danger"`
-  - `(click)` conservé ; spinner → `[loading]` au lieu d'un `*ngIf` manuel ; icône → `[icon]="'plus'"`.
-- **Exemple** :
-  ```html
-  <!-- AVANT -->
-  <button class="btn btn-primary" (click)="save()"><mat-icon>save</mat-icon> Enregistrer</button>
-  <!-- APRÈS -->
-  <nf-button variant="primary" icon="save" (click)="save()">{{ 'common.save' | translate }}</nf-button>
-  ```
-- **DoD** : `grep -c "<button" <feature>` = 0 (hors la définition de l'atome lui-même) ; aucune régression de comportement ; labels i18n.
+  - `(click)` → `(clicked)` ; spinner → `[loading]` ; icône → `icon="plus"` + `iconLibrary="lucide"` si besoin.
+  - Respecter le **placement** §1.1 (listing/détail en haut, form en bas).
+- **DoD** : `rg -c "<button" <feature>` = 0 (hors mat-menu-item légitime) ; labels i18n ; placement conforme.
 
-### WP3 — Champs de formulaire (`mat-form-field`/`mat-select` → `nf-input`/`nf-select`)
-- **Détection** : `grep -rEn "mat-form-field|mat-select|matInput" app/applications/erp/pages/<feature>`
-- **Règles** : remplacer le couple `mat-form-field`+`matInput` par `<nf-input>` (label, hint, error en inputs) ; `mat-select` → `<nf-select [options]>`. Conserver la liaison `formControlName`.
-- **Garde-fou** : valider l'intégration `ReactiveForms` (validators, états `touched/dirty`, `nf-form-error-summary`).
-- **DoD** : 0 `mat-form-field`/`mat-select` dans la feature ; formulaires testés (submit + erreurs).
+### WP3 — Champs de formulaire (`<select>` / inputs → `nf-input`/`nf-select`)
+- **Détection** : `rg -n "<select\b|mat-form-field|mat-select|matInput" products/sektor-btp/web/app/pages/<feature>`
+- **Règles** : `<select>` → `<nf-select [options]>` ; inputs texte form → `<nf-input>`. Conserver la liaison forms.
+- **Exception** : grilles denses (DPGF / mètres) — inputs natifs tolérés jusqu’à un atome grille dédié.
+- **DoD** : 0 `<select>` dans la feature (hors exception documentée) ; formulaires testés.
 
-### WP4 — Couleurs en dur → tokens (le gros morceau : ~2 950)
-- **Détection** : `grep -rEn "#[0-9a-fA-F]{3,6}\b" app/applications/erp/pages/<feature> --include=*.html --include=*.scss --include=*.ts`
-- **Table de correspondance** (hex Tailwind fréquents → token sémantique) :
-
-  | Hex en dur | Token cible |
-  |---|---|
-  | `#2563eb` `#1d4ed8` `#3b82f6` | `--nf-color-primary-600/700/500` |
-  | `#93c5fd` `#dbeafe` `#eff6ff` | `--nf-color-primary-300/100/50` |
-  | `#0f172a` `#1e293b` | `--nf-text-primary` |
-  | `#475569` `#64748b` | `--nf-color-text-secondary` |
-  | `#94a3b8` `#cbd5e1` | `--nf-color-text-muted` / `--nf-color-border` |
-  | `#e2e8f0` `#f1f5f9` | `--nf-color-border` / `--nf-color-bg-muted` |
-  | `#f8fafc` `#ffffff` | `--nf-color-bg-subtle` / `--nf-color-surface` |
-  | `#16a34a` `#15803d` | `--nf-color-success-600/700` |
-  | `#dc2626` `#b91c1c` | `--nf-color-danger-600/700` |
-  | `#f59e0b` `#d97706` | `--nf-color-warning-500/600` |
-  | statut chantier | `--nf-color-chantier-*` (déjà défini) |
-- **Principe** : préférer le **token sémantique** (text/border/surface) au token de teinte brut. En cas de doute, choisir le rôle, pas la couleur.
-- **DoD** : 0 hex dans la feature ; `npm run lint:no-hardcoded-string` ne régresse pas (idéalement baisse le ratchet).
+### WP4 — Couleurs en dur → tokens
+- **Détection** : `rg -n "#[0-9a-fA-F]{3,6}\b" products/sektor-btp/web/app/pages/<feature>`
+- Préférer le **token sémantique** (text/border/surface) au token de teinte brut.
+- **DoD** : 0 hex injustifié dans la feature.
 
 ### WP5 — Unifier les icônes (`mat-icon` → `nf-icon`)
-- **Détection** : `grep -rEn "<mat-icon" app/applications/erp/pages/<feature>`
-- **Règle** : `<mat-icon>name</mat-icon>` → `<nf-icon name="<lucide-equivalent>">`. Table de correspondance Material→lucide à maintenir dans `nf-icon` (ex. `save`→`save`, `delete`→`trash-2`, `edit`→`pencil`, `add`→`plus`, `more_vert`→`more-vertical`).
-- **DoD** : 0 `mat-icon` dans la feature ; icônes visuellement équivalentes.
+- **Détection** : `rg -n "<mat-icon" products/sektor-btp/web/app/pages/<feature>`
+- **Règle** : Material → lucide (`edit`→`pencil`, `delete`→`trash-2`, `add`→`plus`, `content_copy`→`copy`, etc.).
+- **DoD** : 0 `mat-icon` dans la feature.
 
 ### WP6 — Styles inline & espacements
-- **Détection** : `grep -rEn "style=\"" app/applications/erp/pages/<feature> --include=*.html`
-- **Règle** : déplacer vers la feuille de style du composant en utilisant `--nf-space-*` ; supprimer les `style="color:…"` (→ tokens).
+- **Détection** : `rg -n 'style="' products/sektor-btp/web/app/pages/<feature> -g '*.html'`
 - **DoD** : 0 `style="…"` lié à couleur/espacement.
 
 ---
@@ -156,34 +150,36 @@ npm run e2e:a11y                   # accessibilité (axe) sur pages critiques
 ```
 - Storybook : si un atome/molécule est modifié, mettre à jour son *story* et `npm run build-storybook`.
 - **Contraste** : tout texte sur cobalt = blanc (OK) ; tout texte sur jaune hi-vis = encre `#131415` (jamais blanc).
+- **Placement** : listing CTA haut ; form save bas ; detail workflow haut ; dialog footer.
 
 ---
 
 ## 6. Garde-fous (ne PAS faire)
 
-- ❌ Ne pas modifier `app/platform/lib/anatomy/**` (la lib) pour « contourner » — corriger le site d'appel, pas l'atome. Exception : ajouter un variant manquant, avec story + revue.
+- ❌ Ne pas modifier `platform/web/lib/anatomy/**` (la lib) pour « contourner » — corriger le site d'appel, pas l'atome. Exception : ajouter un variant manquant, avec story + revue.
 - ❌ Ne pas réintroduire de couleur en dur « juste pour ce cas ».
 - ❌ Ne pas toucher au sous-domaine ni à `environment.prod.ts` (`sektor.nafuralabs.com` reste).
 - ❌ Ne pas mettre de jaune hi-vis en aplat de fond large, ni sous du texte blanc.
-- ❌ Ne pas mélanger plusieurs WP dans une même PR.
+- ❌ Ne pas mélanger plusieurs WP dans une même PR (sauf vague inventaire documentée, ex. `homog/etudes-documents`).
 - ⚠️ Garder le jaune marque **distinct** du `warning` (ambre `#f59e0b`) : le jaune = accent de marque, l'ambre = avertissement.
 
 ---
 
 ## 7. Protocole agent (boucle d'exécution)
 
-1. Choisir **une** feature non traitée dans `app/applications/erp/pages/` (tenir un tableau d'avancement en tête de PR).
-2. Pour cette feature, exécuter WP2 → WP3 → WP5 → WP4 → WP6 (boutons et champs d'abord, couleurs ensuite).
+1. Choisir **une** feature non traitée dans `products/sektor-btp/web/app/pages/` (tenir un tableau d'avancement en tête de PR).
+2. Pour cette feature, exécuter WP2 → WP3 → WP5 → WP4 → WP6 (boutons et champs d'abord, couleurs ensuite) **en appliquant §1.1**.
 3. Faire passer **toutes** les gates §5.
 4. PR `homog/<feature>` avec : avant/après (captures), commandes de détection retournant 0, gates vertes.
 5. Passer à la feature suivante.
 
-**Ordre de priorité des features** (impact visuel décroissant) : `dashboard` → `chantiers` (listing + détail) → `marches`/facturation → `achats` → `stock` → `administration` → le reste.
+**Ordre de priorité (vague 1+)** : `etudes/dossiers` → `chantiers/documents` → `finance` (selects) → `chantiers` create/edit → `rh`/`hse` → reste.
 
 ---
 
 ## 8. Definition of Done global
 
-- `grep -rEn "<button|mat-form-field|mat-select|mat-icon|#[0-9a-fA-F]{6}" app/applications/erp` → **0** (hors lib anatomy).
+- `rg -n "<button\b|<select\b|mat-form-field|mat-select|mat-icon" products/sektor-btp/web/app/pages` → **0** (hors exceptions documentées : mat-menu-item, grilles denses).
 - Toutes les gates §5 vertes sur `main`.
+- Placement conforme §1.1 sur les écrans clés.
 - Captures dashboard + détail chantier : 100 % cobalt/jaune, plus aucun bleu Tailwind résiduel.

@@ -3,17 +3,15 @@ import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
 import { Component, LOCALE_ID, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatChipsModule } from '@angular/material/chips';
 
 import {
   PageShellComponent,
   PageHeaderComponent,
   ButtonComponent,
   IconComponent,
+  NfSelectComponent,
+  type NfSelectOption,
 } from '@lib/anatomy';
 
 import {
@@ -47,11 +45,8 @@ interface QuickChip {
     PageHeaderComponent,
     ButtonComponent,
     IconComponent,
-    MatButtonModule,
-    MatIconModule,
-    MatMenuModule,
+    NfSelectComponent,
     MatTooltipModule,
-    MatChipsModule,
     FactureStatusBadgeComponent,
     RetenueSummaryCardComponent,
   ],
@@ -73,6 +68,14 @@ export class RetenuesGarantiePage implements OnInit {
 
   readonly searchTerm = signal('');
   readonly activeStatus = signal<string | null>(null);
+
+  readonly statusSelectOptions: NfSelectOption[] = [
+    { value: '', label: 'Tous statuts' },
+    { value: 'EN_COURS', label: 'En cours' },
+    { value: 'LIBERATION_DEMANDEE', label: 'Libération demandée' },
+    { value: 'LIBEREE', label: 'Libérée' },
+    { value: 'CONTESTEE', label: 'Contestée' },
+  ];
 
   readonly chips = computed<QuickChip[]>(() => {
     const filters = this.facade.filters();
@@ -109,6 +112,11 @@ export class RetenuesGarantiePage implements OnInit {
     }
     return Array.from(seen, ([id, name]) => ({ id, name }));
   });
+
+  readonly clientSelectOptions = computed<NfSelectOption[]>(() => [
+    { value: '', label: 'Tous les clients' },
+    ...this.clientOptions().map((c) => ({ value: c.id, label: c.name })),
+  ]);
 
   ngOnInit(): void {
     void this.facade.load();

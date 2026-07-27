@@ -2,20 +2,20 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, LOCALE_ID, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { BankReconciliationApiService } from '@app/finance/services/bank-reconciliation-api.service';
 import { VirementApiService } from '@app/finance/services/virement-api.service';
 import type { CompteFinancier, VirementInterne, VirementInterneStatus } from '@app/finance/models';
 
 import { SubmitApprovalButtonComponent } from '@app/pages/approbations/components/submit-approval-button/submit-approval-button.component';
-import { ButtonComponent } from '@lib/anatomy/components';
+import { ButtonComponent, NfSelectComponent, type NfSelectOption } from '@lib/anatomy/components';
 import { ConfirmDialogService } from '@lib/anatomy';
 
 @Component({
   selector: 'app-virement-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslateModule, SubmitApprovalButtonComponent, ButtonComponent],
+  imports: [CommonModule, FormsModule, TranslateModule, SubmitApprovalButtonComponent, ButtonComponent, NfSelectComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './virement-detail.page.html',
   styleUrl: './virement-detail.page.scss',
@@ -27,6 +27,7 @@ export class VirementDetailPage {
   private readonly router = inject(Router);
   private readonly locale = inject(LOCALE_ID);
   private readonly confirmDialog = inject(ConfirmDialogService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly comptes = signal<CompteFinancier[]>([]);
   protected readonly existing = signal<VirementInterne | undefined>(undefined);
@@ -185,5 +186,31 @@ export class VirementDetailPage {
 
   format(v: number): string {
     return v.toLocaleString(this.locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  compteSourceOptions(): NfSelectOption[] {
+    const mad = this.translate.instant('finance.common.currency.mad');
+    const placeholder = this.translate.instant('finance.factureFournisseur.form.fields.fournisseurPlaceholder');
+    return [
+      { value: '', label: placeholder },
+      ...this.comptes()
+        .filter((c) => c.isActive)
+        .map((c) => ({
+          value: c.id,
+          label: `${c.libelle} (${this.format(c.soldeActuel)} ${mad})`,
+        })),
+    ];
+  }
+
+  compteDestOptions(): NfSelectOption[] {
+    const mad = this.translate.instant('finance.common.currency.mad');
+    const placeholder = this.translate.instant('finance.factureFournisseur.form.fields.fournisseurPlaceholder');
+    return [
+      { value: '', label: placeholder },
+      ...this.comptesDest().map((c) => ({
+        value: c.id,
+        label: `${c.libelle} (${this.format(c.soldeActuel)} ${mad})`,
+      })),
+    ];
   }
 }

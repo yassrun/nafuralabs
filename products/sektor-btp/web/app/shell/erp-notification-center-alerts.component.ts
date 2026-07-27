@@ -2,6 +2,8 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 
+import { ButtonComponent } from '@lib/anatomy';
+
 import type { ErpAlert } from './erp-notifications.service';
 import { ErpNotificationsService } from './erp-notifications.service';
 
@@ -17,7 +19,7 @@ const TYPE_ICON: Record<string, string> = {
 @Component({
   selector: 'app-erp-notification-center-alerts',
   standalone: true,
-  imports: [CommonModule, TranslateModule],
+  imports: [CommonModule, TranslateModule, ButtonComponent],
   template: `
     <section class="erp-center-alerts">
       <header class="erp-center-alerts__header">
@@ -34,22 +36,29 @@ const TYPE_ICON: Record<string, string> = {
               class="erp-center-alerts__item"
               [class.erp-center-alerts__item--haute]="alert.urgence === 'HAUTE'"
             >
-              <button type="button" class="erp-center-alerts__btn" (click)="open(alert)">
+              <nf-button
+                type="button"
+                class="erp-center-alerts__btn"
+                variant="ghost"
+                (clicked)="open(alert)"
+              >
                 <span class="erp-center-alerts__icon">{{ typeIcon(alert.type) }}</span>
                 <span class="erp-center-alerts__body">
                   <strong>{{ alert.titre }}</strong>
                   <span>{{ alert.detail }}</span>
                   <time>{{ alert.date }}</time>
                 </span>
-              </button>
-              <button
+              </nf-button>
+              <nf-button
                 type="button"
                 class="erp-center-alerts__dismiss"
+                variant="ghost"
+                size="sm"
                 [attr.aria-label]="'shared.alerts.dismiss' | translate"
-                (click)="dismiss($event, alert)"
+                (clicked)="dismiss($event, alert)"
               >
                 {{ 'shared.alerts.dismiss' | translate }}
-              </button>
+              </nf-button>
             </li>
           }
         </ul>
@@ -106,18 +115,34 @@ const TYPE_ICON: Record<string, string> = {
       border-inline-start: 4px solid var(--nf-color-danger-600, #dc2626);
     }
     .erp-center-alerts__btn {
-      display: flex;
-      gap: 0.75rem;
       flex: 1;
       min-width: 0;
+    }
+    .erp-center-alerts__btn ::ng-deep button {
+      display: flex;
+      align-items: flex-start;
+      justify-content: flex-start;
+      gap: 0.75rem;
+      width: 100%;
+      height: auto;
+      min-height: 0;
       padding: 0.75rem;
       border: none;
+      border-radius: 0;
       background: transparent;
-      cursor: pointer;
       text-align: start;
       font: inherit;
+      white-space: normal;
     }
-    .erp-center-alerts__btn:hover { background: var(--nf-surface-hover, #f9fafb); }
+    .erp-center-alerts__btn ::ng-deep .nf-button__content {
+      display: flex;
+      gap: 0.75rem;
+      width: 100%;
+      min-width: 0;
+    }
+    .erp-center-alerts__btn ::ng-deep button:hover:not(:disabled) {
+      background: var(--nf-surface-hover, #f9fafb);
+    }
     .erp-center-alerts__icon { font-size: 1.25rem; flex-shrink: 0; }
     .erp-center-alerts__body {
       display: grid;
@@ -145,17 +170,6 @@ const TYPE_ICON: Record<string, string> = {
       flex-shrink: 0;
       align-self: center;
       margin-inline-end: 0.75rem;
-      padding: 4px 10px;
-      border: 1px solid var(--nf-border-default, #e5e7eb);
-      border-radius: 6px;
-      background: transparent;
-      cursor: pointer;
-      font-size: 0.75rem;
-      color: var(--nf-text-secondary, #6b7280);
-    }
-    .erp-center-alerts__dismiss:hover {
-      background: var(--nf-surface-hover, #f9fafb);
-      color: var(--nf-text-primary, #111827);
     }
   `],
 })

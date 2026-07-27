@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { ButtonComponent, PageHeaderComponent, PageShellComponent, ToastService } from '@lib/anatomy';
+import { ButtonComponent, NfSelectComponent, PageHeaderComponent, PageShellComponent, ToastService, type NfSelectOption } from '@lib/anatomy';
 import type { Chantier } from '@app/chantiers/models';
 import {
   MARCHE_NATURE_KEYS,
@@ -28,6 +28,7 @@ function todayIso(): string {
     PageShellComponent,
     PageHeaderComponent,
     ButtonComponent,
+    NfSelectComponent,
     TranslateModule,
   ],
   template: `
@@ -35,19 +36,15 @@ function todayIso(): string {
       <nf-page-header [config]="headerConfig"></nf-page-header>
 
       <div class="panel">
-        <label>{{ 'marches.contrat.create.fields.chantier' | translate }}</label>
-        <select
-          class="fld"
-          [(ngModel)]="draft.chantierId"
+        <nf-select
           name="chantierId"
-          required
+          [label]="'marches.contrat.create.fields.chantier' | translate"
+          [placeholder]="'marches.contrat.create.fields.chantierPlaceholder' | translate"
+          [options]="chantierSelectOptions()"
+          [(ngModel)]="draft.chantierId"
+          [required]="true"
           (ngModelChange)="onChantierChange($event)"
-        >
-          <option value="">{{ 'marches.contrat.create.fields.chantierPlaceholder' | translate }}</option>
-          @for (c of chantiers(); track c.id) {
-            <option [value]="c.id">{{ c.code }} — {{ c.name }}</option>
-          }
-        </select>
+        />
 
         @if (draft.clientNom) {
           <label>{{ 'marches.contrat.create.fields.client' | translate }}</label>
@@ -61,22 +58,20 @@ function todayIso(): string {
         <input class="fld" type="text" [(ngModel)]="draft.intitule" name="intitule" required />
 
         <div class="row">
-          <div>
-            <label>{{ 'marches.contrat.create.fields.type' | translate }}</label>
-            <select class="fld" [(ngModel)]="draft.type" name="type" required>
-              @for (t of typeOptions; track t) {
-                <option [value]="t">{{ MARCHE_TYPE_KEYS[t] | translate }}</option>
-              }
-            </select>
-          </div>
-          <div>
-            <label>{{ 'marches.contrat.create.fields.nature' | translate }}</label>
-            <select class="fld" [(ngModel)]="draft.nature" name="nature" required>
-              @for (n of natureOptions; track n) {
-                <option [value]="n">{{ MARCHE_NATURE_KEYS[n] | translate }}</option>
-              }
-            </select>
-          </div>
+          <nf-select
+            name="type"
+            [label]="'marches.contrat.create.fields.type' | translate"
+            [options]="typeSelectOptions()"
+            [(ngModel)]="draft.type"
+            [required]="true"
+          />
+          <nf-select
+            name="nature"
+            [label]="'marches.contrat.create.fields.nature' | translate"
+            [options]="natureSelectOptions()"
+            [(ngModel)]="draft.nature"
+            [required]="true"
+          />
         </div>
 
         <label>{{ 'marches.contrat.create.fields.montantInitialHt' | translate }}</label>
@@ -163,6 +158,30 @@ export class ContratCreatePage implements OnInit {
       { label: this.translate.instant('marches.contrat.create.breadcrumb') },
     ],
   };
+
+  chantierSelectOptions(): NfSelectOption[] {
+    return [
+      { value: '', label: this.translate.instant('marches.contrat.create.fields.chantierPlaceholder') },
+      ...this.chantiers().map((c) => ({
+        value: c.id,
+        label: `${c.code} — ${c.name}`,
+      })),
+    ];
+  }
+
+  typeSelectOptions(): NfSelectOption[] {
+    return this.typeOptions.map((t) => ({
+      value: t,
+      label: this.translate.instant(MARCHE_TYPE_KEYS[t]),
+    }));
+  }
+
+  natureSelectOptions(): NfSelectOption[] {
+    return this.natureOptions.map((n) => ({
+      value: n,
+      label: this.translate.instant(MARCHE_NATURE_KEYS[n]),
+    }));
+  }
 
   ngOnInit(): void {
     const chantierIdParam = this.route.snapshot.queryParamMap.get('chantierId') ?? '';

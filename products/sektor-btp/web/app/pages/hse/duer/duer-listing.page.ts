@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } 
 import { FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { PageHeaderComponent, PageShellComponent, ToastService, ButtonComponent } from '@lib/anatomy';
+import { PageHeaderComponent, PageShellComponent, ToastService, ButtonComponent, NfSelectComponent, type NfSelectOption } from '@lib/anatomy';
 import { ExportButtonComponent, type ExportEvent } from '@lib/anatomy/components/molecules/export-button/export-button.component';
 import { FilterResetComponent } from '@lib/anatomy/components/molecules/filter-reset/filter-reset.component';
 import { AttachmentListComponent } from '@platform/features/collaboration/doc-manager/components/attachment-list.component';
@@ -37,6 +37,7 @@ const STATUS_CSS: Record<DuerStatus, string> = {
     FilterResetComponent,
     ButtonComponent,
     AttachmentListComponent,
+    NfSelectComponent,
   ],
   template: `
     <nf-page-shell scroll>
@@ -53,14 +54,20 @@ const STATUS_CSS: Record<DuerStatus, string> = {
       <div class="toolbar">
         <input class="search" type="search" [placeholder]="'hse.duer.search' | translate"
           [value]="search()" (input)="search.set($any($event.target).value)" />
-        <select [value]="filterChantier()" (change)="filterChantier.set($any($event.target).value)">
-          <option value="">{{ 'hse.common.messages.tousLesChantiers' | translate }}</option>
-          @for (c of chantierOptions(); track c) { <option [value]="c">{{ c }}</option> }
-        </select>
-        <select [value]="filterStatus()" (change)="filterStatus.set($any($event.target).value)">
-          <option value="">{{ 'hse.common.messages.tousLesStatuts' | translate }}</option>
-          @for (s of statusEntries(); track s[0]) { <option [value]="s[0]">{{ s[1] }}</option> }
-        </select>
+        <nf-select
+          name="filterChantier"
+          [placeholder]="'hse.common.messages.tousLesChantiers' | translate"
+          [options]="chantierFilterOptions()"
+          [ngModel]="filterChantier()"
+          (ngModelChange)="filterChantier.set($event)"
+        />
+        <nf-select
+          name="filterStatus"
+          [placeholder]="'hse.common.messages.tousLesStatuts' | translate"
+          [options]="statusFilterOptions()"
+          [ngModel]="filterStatus()"
+          (ngModelChange)="onFilterStatus($event)"
+        />
         <span class="count">{{ 'hse.duer.count' | translate: { n: filtered().length } }}</span>
         <nf-filter-reset [active]="hasFilter()" (reset)="resetFilters()"></nf-filter-reset>
         <nf-export-button [data]="filtered()" [columns]="exportCols()" filename="duer"
@@ -115,14 +122,14 @@ const STATUS_CSS: Record<DuerStatus, string> = {
             <h2>{{ 'hse.duer.modal.title' | translate }}</h2>
             <p class="hint">{{ 'hse.duer.modal.hint' | translate }}</p>
             <div class="form">
-              <label>{{ 'hse.duer.modal.chantier' | translate }}
-                <select [value]="formChantier()" (change)="formChantier.set($any($event.target).value)">
-                  <option value="">{{ 'hse.common.placeholders.selectionner' | translate }}</option>
-                  @for (c of chantiersDisponibles(); track c.code) {
-                    <option [value]="c.code">{{ c.code }} · {{ c.name }}</option>
-                  }
-                </select>
-              </label>
+              <nf-select
+                name="formChantier"
+                [label]="'hse.duer.modal.chantier' | translate"
+                [placeholder]="'hse.common.placeholders.selectionner' | translate"
+                [options]="formChantierOptions()"
+                [ngModel]="formChantier()"
+                (ngModelChange)="formChantier.set($event)"
+              />
               <label>{{ 'hse.duer.modal.auteur' | translate }}
                 <input type="text" [value]="formAuteur()" (input)="formAuteur.set($any($event.target).value)" [placeholder]="'hse.common.placeholders.nomPrenom' | translate" />
               </label>
@@ -153,14 +160,20 @@ const STATUS_CSS: Record<DuerStatus, string> = {
                     <tr>
                       <td>{{ row.libelle }}</td>
                       <td>
-                        <select [ngModel]="row.probabilite" (ngModelChange)="patchMatrice(row.id, 'probabilite', $event)">
-                          @for (n of echelle; track n) { <option [ngValue]="n">{{ n }}</option> }
-                        </select>
+                        <nf-select
+                          [name]="'prob-' + row.id"
+                          [options]="echelleOptions"
+                          [ngModel]="'' + row.probabilite"
+                          (ngModelChange)="patchMatrice(row.id, 'probabilite', +$event)"
+                        />
                       </td>
                       <td>
-                        <select [ngModel]="row.gravite" (ngModelChange)="patchMatrice(row.id, 'gravite', $event)">
-                          @for (n of echelle; track n) { <option [ngValue]="n">{{ n }}</option> }
-                        </select>
+                        <nf-select
+                          [name]="'grav-' + row.id"
+                          [options]="echelleOptions"
+                          [ngModel]="'' + row.gravite"
+                          (ngModelChange)="patchMatrice(row.id, 'gravite', +$event)"
+                        />
                       </td>
                       <td class="num">{{ score(row) }}</td>
                     </tr>
@@ -198,7 +211,6 @@ const STATUS_CSS: Record<DuerStatus, string> = {
     :host { display: block; height: 100%; }
     .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
     .search { flex: 1; min-width: 180px; max-width: 280px; padding: 7px 12px; border: 1px solid var(--nf-color-border); border-radius: 6px; font-size: 13px; }
-    select { padding: 7px 10px; border: 1px solid var(--nf-color-border); border-radius: 6px; font-size: 13px; background: var(--nf-color-surface); }
     .count { font-size: 13px; color: var(--nf-color-text-secondary); }
     .table-wrap { background: var(--nf-color-surface); border: 1px solid var(--nf-color-border); border-radius: 8px; overflow: auto; max-height: calc(100vh - 320px); }
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -223,7 +235,7 @@ const STATUS_CSS: Record<DuerStatus, string> = {
     .modal .hint { margin: 0 0 1rem; font-size: 12.5px; color: var(--nf-color-text-secondary); }
     .form { display: flex; flex-direction: column; gap: 0.75rem; }
     .form label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--nf-color-text-secondary); font-weight: 500; }
-    .form input, .form select { padding: 8px 10px; border: 1px solid var(--nf-color-border); border-radius: 6px; font-size: 13px; background: var(--nf-color-surface); }
+    .form input { padding: 8px 10px; border: 1px solid var(--nf-color-border); border-radius: 6px; font-size: 13px; background: var(--nf-color-surface); }
     .modal-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem; }
     .modal--wide { max-width: 720px; }
     .table-scroll { max-height: 50vh; overflow: auto; margin-bottom: 0.5rem; }
@@ -297,6 +309,38 @@ export class DuerListingPage implements OnInit {
   readonly showDocuments = signal(false);
   readonly documentsDuer = signal<Duer | null>(null);
   readonly echelle = [1, 2, 3, 4] as const;
+  readonly echelleOptions: NfSelectOption[] = this.echelle.map((n) => ({
+    value: String(n),
+    label: String(n),
+  }));
+
+  chantierFilterOptions(): NfSelectOption[] {
+    return [
+      { value: '', label: this.translate.instant('hse.common.messages.tousLesChantiers') },
+      ...this.chantierOptions().map((c) => ({ value: c, label: c })),
+    ];
+  }
+
+  statusFilterOptions(): NfSelectOption[] {
+    return [
+      { value: '', label: this.translate.instant('hse.common.messages.tousLesStatuts') },
+      ...this.statusEntries().map(([value, label]) => ({ value, label })),
+    ];
+  }
+
+  formChantierOptions(): NfSelectOption[] {
+    return [
+      { value: '', label: this.translate.instant('hse.common.placeholders.selectionner') },
+      ...this.chantiersDisponibles().map((c) => ({
+        value: c.code,
+        label: `${c.code} · ${c.name}`,
+      })),
+    ];
+  }
+
+  onFilterStatus(value: string): void {
+    this.filterStatus.set((value || '') as DuerStatus | '');
+  }
 
   resetFilters(): void {
     this.search.set('');

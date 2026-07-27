@@ -23,12 +23,12 @@ import type {
   ReglementStatus,
   ReglementType,
 } from '@app/finance/models';
-import { ButtonComponent } from '@lib/anatomy/components';
+import { ButtonComponent, NfSelectComponent, type NfSelectOption } from '@lib/anatomy/components';
 
 @Component({
   selector: 'app-reglement-listing',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslateModule, ButtonComponent],
+  imports: [CommonModule, FormsModule, TranslateModule, ButtonComponent, NfSelectComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './reglement-listing.page.html',
   styleUrl: './reglement-listing.page.scss',
@@ -219,5 +219,54 @@ export class ReglementListingPage implements OnInit {
 
   statusVariant(s: ReglementStatus): string {
     return s === 'VALIDE' ? 'success' : s === 'BROUILLON' ? 'warning' : 'default';
+  }
+
+  typeOptions(): NfSelectOption[] {
+    return [
+      { value: '', label: this.translate.instant('finance.common.filters.allTypes') },
+      { value: 'CLIENT', label: this.translate.instant('finance.recouvrement.headers.client') },
+      {
+        value: 'FOURNISSEUR',
+        label: this.translate.instant('finance.factureFournisseur.form.fields.fournisseur'),
+      },
+      { value: 'EMPLOYE', label: this.translate.instant('finance.ecriture.form.fields.tiers') },
+    ];
+  }
+
+  modeOptions(): NfSelectOption[] {
+    return [
+      { value: '', label: this.translate.instant('finance.reglement.list.filters.modePaiement') },
+      { value: 'VIREMENT', label: this.translate.instant('enum.mode.VIREMENT') },
+      { value: 'CHEQUE', label: this.translate.instant('enum.mode.CHEQUE') },
+      { value: 'EFFET', label: this.translate.instant('enum.mode.EFFET') },
+      { value: 'ESPECES', label: this.translate.instant('enum.mode.ESPECES') },
+      { value: 'COMPENSATION', label: this.translate.instant('enum.mode.COMPENSATION') },
+    ];
+  }
+
+  statusOptions(): NfSelectOption[] {
+    return [
+      { value: '', label: this.translate.instant('finance.common.filters.allStatuses') },
+      { value: 'BROUILLON', label: this.translate.instant('finance.declarations.status.BROUILLON') },
+      { value: 'VALIDE', label: this.translate.instant('finance.common.toasts.validated') },
+      { value: 'ANNULE', label: this.translate.instant('finance.common.toasts.cancelled') },
+    ];
+  }
+
+  compteOptions(): NfSelectOption[] {
+    return [
+      { value: '', label: this.translate.instant('finance.common.filters.compte') },
+      ...this.comptes().map((c) => ({ value: c.id, label: c.libelle })),
+    ];
+  }
+
+  contrePartieOptions(): NfSelectOption[] {
+    return [
+      { value: '', label: 'Contrepartie : toutes' },
+      ...this.contrePartiesForFilter().map((cp) => ({
+        value: cp.id,
+        label: this.contrePartieFilterLabel(cp),
+      })),
+    ];
   }
 }

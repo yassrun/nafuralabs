@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { LettrageApiService } from '@app/finance/services/lettrage-api.service';
 import { LettrageService } from '@app/finance/services/lettrage.service';
-import { PageHeaderComponent, PageShellComponent } from '@lib/anatomy';
+import { PageHeaderComponent, PageShellComponent, NfSelectComponent, type NfSelectOption } from '@lib/anatomy';
 import { ButtonComponent } from '@lib/anatomy/components';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
 import type {
@@ -25,6 +25,7 @@ import type {
     PageHeaderComponent,
     ButtonComponent,
     MadCurrencyPipe,
+    NfSelectComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './lettrage.page.html',
@@ -33,6 +34,7 @@ import type {
 export class LettragePage {
   private readonly lettrageApi = inject(LettrageApiService);
   private readonly lettrage = inject(LettrageService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly compteRadical = signal<'3421' | '4411'>('3421');
   protected readonly candidats = signal<LettrageCandidateLigne[]>([]);
@@ -44,6 +46,19 @@ export class LettragePage {
   protected readonly err = signal<string | null>(null);
 
   readonly totals = signal(this.lettrage.computeTotals([]));
+
+  compteOptions(): NfSelectOption[] {
+    return [
+      {
+        value: '3421',
+        label: `3421 — ${this.translate.instant('financeRound2.lettrage.clients')}`,
+      },
+      {
+        value: '4411',
+        label: `4411 — ${this.translate.instant('financeRound2.lettrage.fournisseurs')}`,
+      },
+    ];
+  }
 
   constructor() {
     void this.reload();
@@ -68,8 +83,8 @@ export class LettragePage {
     }
   }
 
-  onCompteChange(v: '3421' | '4411'): void {
-    this.compteRadical.set(v);
+  onCompteChange(v: string): void {
+    this.compteRadical.set(v as '3421' | '4411');
     void this.reload();
   }
 

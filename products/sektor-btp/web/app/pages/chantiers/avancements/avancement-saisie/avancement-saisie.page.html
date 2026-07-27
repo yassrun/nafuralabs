@@ -23,17 +23,13 @@
   <div class="saisie-page__layout">
     <main class="saisie-page__main">
       <section class="saisie-page__meta">
-        <label>
-          <span>{{ 'chantiers.avancement.saisie.chantierRequired' | translate }}</span>
-          <select
-            [ngModel]="facade.selectedChantierId()"
-            (ngModelChange)="facade.selectChantier($event)"
-            [disabled]="isEditing()">
-            @for (chantier of chantiers(); track chantier.id) {
-              <option [ngValue]="chantier.id">{{ chantier.code }} - {{ chantier.name }}</option>
-            }
-          </select>
-        </label>
+        <nf-select
+          [label]="'chantiers.avancement.saisie.chantierRequired' | translate"
+          [options]="chantierOptions()"
+          [ngModel]="facade.selectedChantierId()"
+          (ngModelChange)="facade.selectChantier($event)"
+          [disabled]="isEditing()"
+        />
 
         <label>
           <span>{{ 'chantiers.avancement.fields.dateRequired' | translate }}</span>
@@ -60,17 +56,13 @@
         }
 
         @if (additionalLines().length > 0) {
-          <label class="saisie-page__add-lot">
-            <span>{{ 'chantiers.avancement.fields.addLine' | translate }}</span>
-            <select (ngModelChange)="$event && facade.addLine($event)" [ngModel]="null">
-              <option [ngValue]="null">{{ 'chantiers.avancement.fields.pickAdditionalLine' | translate }}</option>
-              @for (line of additionalLines(); track line.key) {
-                <option [ngValue]="line.key">
-                  {{ line.poste ? line.poste.code + ' — ' + line.poste.designation : line.lot.code + ' — ' + line.lot.designation }}
-                </option>
-              }
-            </select>
-          </label>
+          <nf-select
+            class="saisie-page__add-lot"
+            [label]="'chantiers.avancement.fields.addLine' | translate"
+            [options]="additionalLineOptions()"
+            [ngModel]="''"
+            (ngModelChange)="onAddLine($event)"
+          />
         }
       </section>
     </main>

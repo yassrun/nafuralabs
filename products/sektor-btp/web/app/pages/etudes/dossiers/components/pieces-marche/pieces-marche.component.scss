@@ -43,27 +43,6 @@
   font-size: 0.8125rem;
 }
 
-.pieces__icon-btn {
-  width: 2rem;
-  height: 2rem;
-
-  mat-icon {
-    font-size: 1.125rem;
-    width: 1.125rem;
-    height: 1.125rem;
-    color: var(--nf-color-text-secondary);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--nf-color-primary-600, #0b6e7a);
-    outline-offset: 1px;
-  }
-}
-
-.pieces__icon-btn--danger:hover mat-icon {
-  color: var(--nf-color-danger-600, #c0392b);
-}
-
 .pieces__progress {
   margin-top: 16px;
 }
@@ -223,7 +202,7 @@
   cursor: pointer;
   text-align: center;
 
-  mat-icon {
+  nf-icon {
     color: var(--nf-color-primary-500, #0b6e7a);
     margin-bottom: 4px;
   }
@@ -343,23 +322,6 @@
   display: flex;
   gap: 8px;
   margin-top: 16px;
-}
-
-.pieces__voie {
-  height: 36px;
-  padding: 0 14px;
-  border-radius: 6px;
-  border: 1px solid var(--nf-color-border);
-  background: var(--nf-color-bg);
-  color: var(--nf-color-text-secondary);
-  font-size: 0.875rem;
-  cursor: pointer;
-
-  &--active {
-    border-color: var(--nf-color-primary-500);
-    background: var(--nf-color-primary-500);
-    color: #fff;
-  }
 }
 
 .pieces__aide--suite {

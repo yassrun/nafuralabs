@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FilterResetComponent } from '@lib/anatomy/components/molecules/filter-reset/filter-reset.component';
 
-import { ButtonComponent, PageHeaderComponent, PageShellComponent } from '@lib/anatomy';
+import { ButtonComponent, PageHeaderComponent, PageShellComponent, NfSelectComponent, type NfSelectOption } from '@lib/anatomy';
 import { AttachementApiService } from '../attachement-api.service';
 import { ATTACHEMENT_STATUS_KEYS } from '@app/shell/i18n-labels';
 import {
@@ -30,7 +31,7 @@ const STATUS_CSS: Record<string, string> = {
   selector: 'app-attachement-listing',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterLink, PageShellComponent, PageHeaderComponent, FilterResetComponent, ButtonComponent, TranslateModule],
+  imports: [CommonModule, FormsModule, RouterLink, PageShellComponent, PageHeaderComponent, FilterResetComponent, ButtonComponent, NfSelectComponent, TranslateModule],
   template: `
     <nf-page-shell scroll>
       <nf-page-header [config]="pageHeaderConfig"></nf-page-header>
@@ -39,10 +40,12 @@ const STATUS_CSS: Record<string, string> = {
         <input class="search" type="search"
           [placeholder]="'chantiers.attachement.list.searchPlaceholder' | translate"
           [value]="search()" (input)="search.set($any($event.target).value)" />
-        <select [value]="filterStatus()" (change)="filterStatus.set($any($event.target).value)">
-          <option value="">{{ 'chantiers.attachement.list.allStatuses' | translate }}</option>
-          @for (s of statusEntries(); track s[0]) { <option [value]="s[0]">{{ s[1] }}</option> }
-        </select>
+        <nf-select
+          [options]="statusFilterOptions()"
+          [ngModel]="filterStatus()"
+          (ngModelChange)="filterStatus.set($event)"
+          [placeholder]="'chantiers.attachement.list.allStatuses' | translate"
+        />
         <span class="count">{{ filtered().length <= 1 ? filtered().length + ' attachement' : filtered().length + ' attachements' }}</span>
         <nf-filter-reset [active]="hasFilter()" (reset)="resetFilters()"></nf-filter-reset>
         <nf-button variant="primary" icon="plus" iconLibrary="lucide" (clicked)="goToSaisie()">{{ 'chantiers.attachement.list.saisieCta' | translate }}</nf-button>
@@ -100,7 +103,6 @@ const STATUS_CSS: Record<string, string> = {
     :host { display: block; height: 100%; }
     .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; }
     .search { flex: 1; min-width: 180px; max-width: 280px; padding: 7px 12px; border: 1px solid var(--nf-color-border); border-radius: 6px; font-size: 13px; }
-    select { padding: 7px 10px; border: 1px solid var(--nf-color-border); border-radius: 6px; font-size: 13px; background: var(--nf-color-surface); }
     .count { font-size: 13px; color: var(--nf-color-text-secondary); }
     .sig { font-size: 11px; font-weight: 600; color: var(--nf-color-primary-700); }
     .att-list { display: flex; flex-direction: column; gap: 0.875rem; }
@@ -156,6 +158,11 @@ export class AttachementListingPage implements OnInit {
       return [status, resolved === key ? String(status) : resolved];
     });
   });
+
+  readonly statusFilterOptions = computed<NfSelectOption[]>(() => [
+    { value: '', label: this.translate.instant('chantiers.attachement.list.allStatuses') },
+    ...this.statusEntries().map(([value, label]) => ({ value, label })),
+  ]);
 
   ngOnInit(): void {
     void this.load();

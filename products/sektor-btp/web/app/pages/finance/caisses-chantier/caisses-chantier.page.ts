@@ -1,12 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, LOCALE_ID, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 
 import { CaisseApiService } from '@app/finance/services/caisse-api.service';
 import { ErpAttachmentUploadService } from '@app/shared/services/erp-attachment-upload.service';
 import { ERP_ATTACHMENT_ENTITY_TYPES } from '@app/shared/config/attachment-detail.config';
-import { PageHeaderComponent, PageShellComponent } from '@lib/anatomy';
+import { PageHeaderComponent, PageShellComponent, NfSelectComponent, type NfSelectOption } from '@lib/anatomy';
 import { ButtonComponent } from '@lib/anatomy/components';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
 import type { CaisseChantier, MouvementCaisseChantier } from '@app/finance/models';
@@ -14,7 +14,16 @@ import type { CaisseChantier, MouvementCaisseChantier } from '@app/finance/model
 @Component({
   selector: 'app-caisses-chantier-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslateModule, PageShellComponent, PageHeaderComponent, ButtonComponent, MadCurrencyPipe],
+  imports: [
+    CommonModule,
+    FormsModule,
+    TranslateModule,
+    PageShellComponent,
+    PageHeaderComponent,
+    ButtonComponent,
+    MadCurrencyPipe,
+    NfSelectComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './caisses-chantier.page.html',
   styleUrl: '../_finance-r2.shared.scss',
@@ -22,6 +31,7 @@ import type { CaisseChantier, MouvementCaisseChantier } from '@app/finance/model
 export class CaissesChantierPage {
   private readonly api = inject(CaisseApiService);
   private readonly attachmentUpload = inject(ErpAttachmentUploadService);
+  private readonly locale = inject(LOCALE_ID);
 
   protected readonly caisses = signal<CaisseChantier[]>([]);
   protected readonly caisseId = signal('');
@@ -119,5 +129,21 @@ export class CaissesChantierPage {
     if (url) {
       window.open(url, '_blank', 'noopener,noreferrer');
     }
+  }
+
+  caisseOptions(): NfSelectOption[] {
+    return this.caisses().map((c) => ({
+      value: c.id,
+      label: `${c.chantierLabel} (${c.soldeActuel.toLocaleString(this.locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })})`,
+    }));
+  }
+
+  readonly formTypeOptions: NfSelectOption[] = [
+    { value: 'DEPENSE', label: 'DEPENSE' },
+    { value: 'AVANCE_RECUE', label: 'AVANCE_RECUE' },
+  ];
+
+  onFormTypeChange(v: string): void {
+    this.formType.set(v as 'DEPENSE' | 'AVANCE_RECUE');
   }
 }

@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import {PageHeaderComponent, PageShellComponent, ButtonComponent } from '@lib/anatomy';
+import {PageHeaderComponent, PageShellComponent, ButtonComponent, NfSelectComponent, type NfSelectOption } from '@lib/anatomy';
 import type { Chantier } from '../../../../chantiers/models';
 import { ChantierApiService } from '../../../chantiers/services/chantier-api.service';
 import { PointageApiService } from '../services/pointage-api.service';
@@ -14,7 +15,7 @@ import { MODE_CSS, type Pointage } from '../models';
   selector: 'app-pointage-validation',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, TranslateModule, RouterLink, PageShellComponent, PageHeaderComponent, ButtonComponent],
+  imports: [CommonModule, FormsModule, TranslateModule, RouterLink, PageShellComponent, PageHeaderComponent, ButtonComponent, NfSelectComponent],
   template: `
     <nf-page-shell scroll>
       <nf-page-header [config]="pageHeaderConfig()"></nf-page-header>
@@ -23,12 +24,13 @@ import { MODE_CSS, type Pointage } from '../models';
         <label>{{ 'rh.pointage.validation.controls.date' | translate }}
           <input type="date" class="ctrl" [value]="date()" (change)="date.set($any($event.target).value)" />
         </label>
-        <select class="ctrl" [value]="chantierId()" (change)="chantierId.set($any($event.target).value)">
-          <option value="">{{ 'rh.pointage.validation.controls.tousChantiers' | translate }}</option>
-          @for (c of chantiers(); track c.id) {
-            <option [value]="c.id">{{ c.code }}</option>
-          }
-        </select>
+        <nf-select
+          name="chantierId"
+          [placeholder]="'rh.pointage.validation.controls.tousChantiers' | translate"
+          [options]="chantierSelectOptions()"
+          [ngModel]="chantierId()"
+          (ngModelChange)="chantierId.set($event)"
+        />
         <a class="link" routerLink="/rh/pointage">{{ 'rh.pointage.validation.controls.linkListing' | translate }}</a>
       </div>
 
@@ -129,6 +131,13 @@ export class PointageValidationPage {
   readonly chantierId = signal('');
 
   readonly chantiers = computed(() => this.chantiersList());
+
+  chantierSelectOptions(): NfSelectOption[] {
+    return [
+      { value: '', label: this.translate.instant('rh.pointage.validation.controls.tousChantiers') },
+      ...this.chantiers().map((c) => ({ value: c.id, label: c.code })),
+    ];
+  }
 
   constructor() {
     void this.chantierApi.getAll().then(({ items }) => {

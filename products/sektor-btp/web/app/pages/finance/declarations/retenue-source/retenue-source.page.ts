@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 
 import { FactureApiService } from '@app/pages/ventes/factures/services/facture-api.service';
-import { PageHeaderComponent, PageShellComponent } from '@lib/anatomy';
+import { PageHeaderComponent, PageShellComponent, NfSelectComponent, type NfSelectOption } from '@lib/anatomy';
 import { ButtonComponent } from '@lib/anatomy/components';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
 import type { FactureClient } from '@app/ventes/models';
@@ -12,7 +12,16 @@ import type { FactureClient } from '@app/ventes/models';
 @Component({
   selector: 'app-retenue-source-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslateModule, PageShellComponent, PageHeaderComponent, ButtonComponent, MadCurrencyPipe],
+  imports: [
+    CommonModule,
+    FormsModule,
+    TranslateModule,
+    PageShellComponent,
+    PageHeaderComponent,
+    ButtonComponent,
+    MadCurrencyPipe,
+    NfSelectComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './retenue-source.page.html',
   styleUrl: '../../_finance-r2.shared.scss',
@@ -22,6 +31,15 @@ export class RetenueSourcePage {
 
   protected readonly trimestre = signal<'T1-2026' | 'T2-2026'>('T1-2026');
   protected readonly factures = signal<FactureClient[]>([]);
+
+  readonly trimestreOptions: NfSelectOption[] = [
+    { value: 'T1-2026', label: 'T1 2026' },
+    { value: 'T2-2026', label: 'T2 2026' },
+  ];
+
+  onTrimestreChange(v: string): void {
+    this.trimestre.set(v as 'T1-2026' | 'T2-2026');
+  }
 
   readonly lignes = computed(() =>
     this.factures().filter((f) => f.marchePublic && f.retenueSourceMontantMad),

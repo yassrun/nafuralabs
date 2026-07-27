@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FilterResetComponent } from '@lib/anatomy/components/molecules/filter-reset/filter-reset.component';
 
-import { PageHeaderComponent, PageShellComponent } from '@lib/anatomy';
+import { NfSelectComponent, PageHeaderComponent, PageShellComponent, type NfSelectOption } from '@lib/anatomy';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
 import { FACTURE_MARCHE_STATUS_KEYS } from '@app/shell/i18n-labels';
 import { ToastService } from '@lib/anatomy/components/services/toast.service';
@@ -15,7 +16,7 @@ import { FACTURE_STATUS_VARIANT, type FactureMarche, type FactureMarcheStatus } 
   selector: 'app-facture-marche-listing',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterLink, PageShellComponent, PageHeaderComponent, MadCurrencyPipe, FilterResetComponent, TranslateModule],
+  imports: [CommonModule, FormsModule, RouterLink, PageShellComponent, PageHeaderComponent, MadCurrencyPipe, FilterResetComponent, TranslateModule, NfSelectComponent],
   template: `
     <nf-page-shell scroll>
       <nf-page-header [config]="{
@@ -33,10 +34,12 @@ import { FACTURE_STATUS_VARIANT, type FactureMarche, type FactureMarcheStatus } 
       <div class="toolbar">
         <input class="search" type="search" [attr.placeholder]="'marches.factureMarche.listing.search.placeholder' | translate"
           [value]="search()" (input)="search.set($any($event.target).value)" />
-        <select [value]="filterStatus()" (change)="filterStatus.set($any($event.target).value)">
-          <option value="">{{ 'marches.common.filters.allStatuses' | translate }}</option>
-          @for (s of statusOptions; track s) { <option [value]="s">{{ FACTURE_MARCHE_STATUS_KEYS[s] | translate }}</option> }
-        </select>
+        <nf-select
+          name="filterStatus"
+          [options]="statusSelectOptions()"
+          [ngModel]="filterStatus()"
+          (ngModelChange)="filterStatus.set($any($event))"
+        />
         <span class="count">{{ 'marches.factureMarche.listing.count' | translate:{ count: filtered().length } }}</span>
         <nf-filter-reset [active]="hasFilter()" (reset)="resetFilters()"></nf-filter-reset>
       </div>
@@ -86,7 +89,6 @@ import { FACTURE_STATUS_VARIANT, type FactureMarche, type FactureMarcheStatus } 
     .kpi strong.danger { color: var(--nf-color-danger-600); }
     .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
     .search { flex: 1; min-width: 180px; max-width: 280px; padding: 7px 12px; border: 1px solid var(--nf-color-border); border-radius: 6px; font-size: 13px; }
-    select { padding: 7px 10px; border: 1px solid var(--nf-color-border); border-radius: 6px; font-size: 13px; background: var(--nf-color-surface); }
     .count { font-size: 13px; color: var(--nf-color-text-secondary); }
     .table-wrap { background: var(--nf-color-surface); border: 1px solid var(--nf-color-border); border-radius: 8px; overflow: auto; max-height: calc(100vh - 380px); }
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -117,6 +119,7 @@ import { FACTURE_STATUS_VARIANT, type FactureMarche, type FactureMarcheStatus } 
 export class FactureMarcheListingPage implements OnInit {
   private readonly api = inject(FactureMarcheApiService);
   private readonly toast = inject(ToastService);
+  private readonly translate = inject(TranslateService);
 
   readonly FACTURE_MARCHE_STATUS_KEYS = FACTURE_MARCHE_STATUS_KEYS;
 
@@ -125,6 +128,16 @@ export class FactureMarcheListingPage implements OnInit {
   readonly filterStatus = signal<FactureMarcheStatus | ''>('');
   readonly statusOptions = Object.keys(FACTURE_MARCHE_STATUS_KEYS) as FactureMarcheStatus[];
   readonly today = new Date('2026-05-09');
+
+  statusSelectOptions(): NfSelectOption[] {
+    return [
+      { value: '', label: this.translate.instant('marches.common.filters.allStatuses') },
+      ...this.statusOptions.map((s) => ({
+        value: s,
+        label: this.translate.instant(FACTURE_MARCHE_STATUS_KEYS[s]),
+      })),
+    ];
+  }
 
   ngOnInit(): void {
     void this.loadFactures();

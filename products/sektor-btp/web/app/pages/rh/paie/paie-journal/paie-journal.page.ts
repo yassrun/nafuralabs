@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { PageHeaderComponent, PageShellComponent } from '@lib/anatomy';
+import { PageHeaderComponent, PageShellComponent, NfSelectComponent, type NfSelectOption } from '@lib/anatomy';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
 import type { FichePaie } from '@app/rh/models';
 import { PaieApiService } from '../services/paie-api.service';
@@ -12,19 +13,19 @@ import { PaieApiService } from '../services/paie-api.service';
   selector: 'app-paie-journal',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, TranslateModule, PageShellComponent, PageHeaderComponent, MadCurrencyPipe, RouterLink],
+  imports: [CommonModule, FormsModule, TranslateModule, PageShellComponent, PageHeaderComponent, MadCurrencyPipe, RouterLink, NfSelectComponent],
   template: `
     <nf-page-shell scroll>
       <nf-page-header [config]="headerConfig()"></nf-page-header>
 
       <div class="toolbar">
-        <label>{{ 'rh.paie.journal.monthLabel' | translate }}
-          <select [value]="mois()" (change)="onMois($event)">
-            @for (m of moisOptions(); track m) {
-              <option [value]="m">{{ m }}</option>
-            }
-          </select>
-        </label>
+        <nf-select
+          name="mois"
+          [label]="'rh.paie.journal.monthLabel' | translate"
+          [options]="moisSelectOptions()"
+          [ngModel]="mois()"
+          (ngModelChange)="mois.set($event)"
+        />
         <a routerLink="/rh/paie" class="link-back">{{ 'rh.paie.journal.linkBack' | translate }}</a>
       </div>
 
@@ -71,8 +72,6 @@ import { PaieApiService } from '../services/paie-api.service';
   styles: [`
     :host { display: block; height: 100%; }
     .toolbar { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
-    .toolbar label { font-size: 13px; display: flex; align-items: center; gap: 8px; }
-    .toolbar select { padding: 6px 10px; border-radius: 6px; border: 1px solid var(--nf-color-border); }
     .link-back { font-size: 13px; color: var(--nf-color-primary-700); text-decoration: none; font-weight: 600; }
     .kpis { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-bottom: 1rem; }
     .kpi { background: var(--nf-color-bg-subtle); border: 1px solid var(--nf-color-border); border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; }
@@ -116,6 +115,10 @@ export class PaieJournalPage {
     return fromData.length ? fromData : ['2026-04', '2026-05'];
   });
 
+  moisSelectOptions(): NfSelectOption[] {
+    return this.moisOptions().map((m) => ({ value: m, label: m }));
+  }
+
   readonly fichesMois = computed(() =>
     this.paieRows().filter((p) => p.mois === this.mois()).sort((a, b) => a.numero.localeCompare(b.numero)),
   );
@@ -139,10 +142,5 @@ export class PaieJournalPage {
       const latest = [...new Set(rows.map((r) => r.mois))].sort().reverse()[0];
       if (latest) this.mois.set(latest);
     }
-  }
-
-  onMois(ev: Event): void {
-    const v = (ev.target as HTMLSelectElement).value;
-    this.mois.set(v);
   }
 }

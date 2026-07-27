@@ -136,17 +136,6 @@
   margin-right: 0.35rem;
 }
 
-.link {
-  border: 0;
-  background: transparent;
-  color: var(--nf-color-primary-600, #0b6e7a);
-  cursor: pointer;
-  font-size: 0.75rem;
-  text-decoration: underline;
-  margin-left: 0.35rem;
-  padding: 0;
-}
-
 @media (max-width: 960px) {
   .synthese__grid {
     grid-template-columns: 1fr;

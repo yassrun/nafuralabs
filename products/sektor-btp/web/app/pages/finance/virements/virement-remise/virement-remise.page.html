@@ -10,13 +10,11 @@
     <div class="f8__toolbar">
       <label class="f8__lbl">
         <span>{{ 'financeRound2.virementRemise.banque' | translate }}</span>
-        <select [ngModel]="format()" (ngModelChange)="format.set($event)">
-          <option value="SEPA">SEPA</option>
-          <option value="AWB">AWB</option>
-          <option value="BMCE">BMCE</option>
-          <option value="CIH">CIH</option>
-          <option value="BP">BP</option>
-        </select>
+        <nf-select
+          [options]="formatOptions"
+          [ngModel]="format()"
+          (ngModelChange)="onFormatChange($event)"
+        />
       </label>
       <label class="f8__lbl">
         <span>{{ 'financeRound2.virementRemise.date' | translate }}</span>

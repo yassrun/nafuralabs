@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { ButtonComponent, PageHeaderComponent, PageShellComponent } from '@lib/anatomy/components';
+import { ButtonComponent, NfSelectComponent, PageHeaderComponent, PageShellComponent, type NfSelectOption } from '@lib/anatomy/components';
 import { JournalEntryApiService } from '@app/finance/services/journal-entry-api.service';
 import { DateLocalizedPipe } from '@lib/anatomy/pipes';
 import { ECRITURE_ORIGINE_KEYS, ECRITURE_STATUS_KEYS } from '@app/shell/i18n-labels';
@@ -13,7 +13,7 @@ import type { Ecriture } from '@app/finance/models';
 @Component({
   selector: 'app-ecritures-listing',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, TranslateModule, DateLocalizedPipe, PageShellComponent, PageHeaderComponent, ButtonComponent],
+  imports: [CommonModule, FormsModule, RouterLink, TranslateModule, DateLocalizedPipe, PageShellComponent, PageHeaderComponent, ButtonComponent, NfSelectComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <nf-page-shell scroll>
@@ -36,21 +36,16 @@ import type { Ecriture } from '@app/finance/models';
           [attr.placeholder]="'finance.common.filters.searchPlaceholder' | translate"
           [ngModel]="search()"
           (ngModelChange)="search.set($event)" />
-        <label>
-          <select [ngModel]="filterStatus()" (ngModelChange)="filterStatus.set($event)">
-            <option value="">{{ 'finance.common.filters.allStatuses' | translate }}</option>
-            <option value="BROUILLON">{{ ECRITURE_STATUS_KEYS.BROUILLON | translate }}</option>
-            <option value="VALIDEE">{{ ECRITURE_STATUS_KEYS.VALIDEE | translate }}</option>
-            <option value="CLOTUREE">{{ ECRITURE_STATUS_KEYS.CLOTUREE | translate }}</option>
-          </select>
-        </label>
-        <label>
-          <select [ngModel]="filterOrigine()" (ngModelChange)="filterOrigine.set($event)">
-            <option value="">{{ 'finance.common.filters.allStatuses' | translate }}</option>
-            <option value="MANUELLE">{{ ECRITURE_ORIGINE_KEYS.MANUELLE | translate }}</option>
-            <option value="AUTO">{{ 'finance.ecriture.form.fields.origine' | translate }}</option>
-          </select>
-        </label>
+        <nf-select
+          [options]="statusOptions()"
+          [ngModel]="filterStatus()"
+          (ngModelChange)="filterStatus.set($event)"
+        />
+        <nf-select
+          [options]="origineOptions()"
+          [ngModel]="filterOrigine()"
+          (ngModelChange)="filterOrigine.set($event)"
+        />
         <div class="chips">
           <nf-button variant="ghost" [active]="chip() === 'BROUILLON'" (clicked)="toggleChip('BROUILLON')">
             {{ ECRITURE_STATUS_KEYS.BROUILLON | translate }}
@@ -128,9 +123,6 @@ import type { Ecriture } from '@app/finance/models';
     .search {
       flex: 1; min-width: 280px; padding: 8px 12px; border: 1px solid var(--nf-color-primary-200);
       border-radius: 6px; font-size: 13px;
-    }
-    .filters select {
-      padding: 8px 10px; border: 1px solid var(--nf-color-primary-200); border-radius: 6px; background: white; font-size: 13px;
     }
     .chips { display: flex; gap: 6px; }
     .chips button {
@@ -265,5 +257,22 @@ export class EcrituresListingPage {
   formatDate(s?: string): string {
     if (!s) return this.translate.instant('finance.common.dash');
     return new Date(s).toLocaleDateString(this.locale);
+  }
+
+  statusOptions(): NfSelectOption[] {
+    return [
+      { value: '', label: this.translate.instant('finance.common.filters.allStatuses') },
+      { value: 'BROUILLON', label: this.translate.instant(ECRITURE_STATUS_KEYS.BROUILLON) },
+      { value: 'VALIDEE', label: this.translate.instant(ECRITURE_STATUS_KEYS.VALIDEE) },
+      { value: 'CLOTUREE', label: this.translate.instant(ECRITURE_STATUS_KEYS.CLOTUREE) },
+    ];
+  }
+
+  origineOptions(): NfSelectOption[] {
+    return [
+      { value: '', label: this.translate.instant('finance.common.filters.allStatuses') },
+      { value: 'MANUELLE', label: this.translate.instant(ECRITURE_ORIGINE_KEYS.MANUELLE) },
+      { value: 'AUTO', label: this.translate.instant('finance.ecriture.form.fields.origine') },
+    ];
   }
 }

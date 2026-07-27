@@ -1,11 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { map } from 'rxjs/operators';
 
 import { FilterResetComponent } from '@lib/anatomy/components/molecules/filter-reset/filter-reset.component';
+import { NfSelectComponent, type NfSelectOption } from '@lib/anatomy';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
 import { EPI_STATUS_KEYS } from '@app/shell/i18n-labels';
 
@@ -24,7 +26,7 @@ import {
   selector: 'app-epi-volet',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, TranslateModule, MadCurrencyPipe, FilterResetComponent],
+  imports: [CommonModule, FormsModule, TranslateModule, MadCurrencyPipe, FilterResetComponent, NfSelectComponent],
   template: `
       @if (aRenouveler() > 0 || expires() > 0) {
         <div class="alertes-bar">
@@ -40,10 +42,13 @@ import {
       <div class="toolbar">
         <input class="search" type="search" [placeholder]="'hse.epi.search' | translate"
           [value]="search()" (input)="search.set($any($event.target).value)" />
-        <select [value]="filterStatus()" (change)="filterStatus.set($any($event.target).value)">
-          <option value="">{{ 'hse.common.messages.tousLesStatuts' | translate }}</option>
-          @for (s of statusEntries(); track s[0]) { <option [value]="s[0]">{{ s[1] }}</option> }
-        </select>
+        <nf-select
+          name="filterStatus"
+          [placeholder]="'hse.common.messages.tousLesStatuts' | translate"
+          [options]="statusFilterOptions()"
+          [ngModel]="filterStatus()"
+          (ngModelChange)="onFilterStatus($event)"
+        />
         <span class="count">{{ 'hse.epi.count' | translate: { n: filtered().length } }}</span>
         @if (volet() !== 'reference') {
           <span class="cout">{{ 'hse.epi.coutFiltre' | translate: { amount: (totalCout() | mad) } }}</span>
@@ -124,7 +129,6 @@ import {
     .alerte--warning { background: var(--nf-color-warning-100); color: var(--nf-color-warning-700); }
     .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
     .search { flex: 1; min-width: 180px; max-width: 280px; padding: 7px 12px; border: 1px solid var(--nf-color-border); border-radius: 6px; font-size: 13px; }
-    select { padding: 7px 10px; border: 1px solid var(--nf-color-border); border-radius: 6px; font-size: 13px; background: var(--nf-color-surface); }
     .count, .cout { font-size: 13px; color: var(--nf-color-text-secondary); }
     .table-wrap { background: var(--nf-color-surface); border: 1px solid var(--nf-color-border); border-radius: 8px; overflow: auto; max-height: calc(100vh - 420px); }
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -179,6 +183,17 @@ export class EpiVoletPage {
   readonly statusEntries = computed<[EpiStatus, string][]>(() =>
     (Object.keys(EPI_STATUS_KEYS) as EpiStatus[]).map((s) => [s, this.translate.instant(EPI_STATUS_KEYS[s])]),
   );
+
+  statusFilterOptions(): NfSelectOption[] {
+    return [
+      { value: '', label: this.translate.instant('hse.common.messages.tousLesStatuts') },
+      ...this.statusEntries().map(([value, label]) => ({ value, label })),
+    ];
+  }
+
+  onFilterStatus(value: string): void {
+    this.filterStatus.set((value || '') as EpiStatus | '');
+  }
 
   readonly voletHintKey = computed(() => {
     switch (this.volet()) {

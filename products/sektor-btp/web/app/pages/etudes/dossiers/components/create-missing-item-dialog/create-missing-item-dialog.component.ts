@@ -3,7 +3,12 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 
-import { ButtonComponent } from '@lib/anatomy';
+import {
+  ButtonComponent,
+  NfInputComponent,
+  NfSelectComponent,
+  type NfSelectOption,
+} from '@lib/anatomy';
 
 import type { DpuComposantType } from '@app/etudes/models';
 import { ItemsApiService } from '@app/pages/inventory/catalogue/items/services/item-api.service';
@@ -27,7 +32,7 @@ export interface CreateMissingItemDialogResult {
   sourcePrix: string;
 }
 
-const TYPES: { value: DpuComposantType; label: string }[] = [
+const TYPES: NfSelectOption[] = [
   { value: 'MATIERE', label: 'Matière' },
   { value: 'MAIN_DOEUVRE', label: 'Main-d’œuvre' },
   { value: 'MATERIEL', label: 'Matériel' },
@@ -37,7 +42,14 @@ const TYPES: { value: DpuComposantType; label: string }[] = [
 @Component({
   selector: 'app-create-missing-item-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatDialogModule, ButtonComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatDialogModule,
+    ButtonComponent,
+    NfSelectComponent,
+    NfInputComponent,
+  ],
   template: `
     <div class="dialog-shell">
       <header>
@@ -45,34 +57,32 @@ const TYPES: { value: DpuComposantType; label: string }[] = [
         <nf-button variant="ghost" (clicked)="close()" aria-label="Fermer">✕</nf-button>
       </header>
 
-      <label class="field">
-        <span>Désignation *</span>
-        <input name="name" type="text" [(ngModel)]="name" required />
-      </label>
+      <nf-input label="Désignation" name="name" [(ngModel)]="name" [required]="true" />
 
       <div class="grid-2">
-        <label class="field">
-          <span>Type *</span>
-          <select name="type" [(ngModel)]="type">
-            @for (t of types; track t.value) {
-              <option [ngValue]="t.value">{{ t.label }}</option>
-            }
-          </select>
-        </label>
-        <label class="field">
-          <span>Unité *</span>
-          <select name="unite" [(ngModel)]="unite">
-            @for (u of data.uniteOptions; track u.code) {
-              <option [ngValue]="u.code">{{ u.code }}</option>
-            }
-          </select>
-        </label>
+        <nf-select
+          label="Type"
+          name="type"
+          [options]="types"
+          [(ngModel)]="type"
+          [required]="true"
+        />
+        <nf-select
+          label="Unité"
+          name="unite"
+          [options]="uniteSelectOptions"
+          [(ngModel)]="unite"
+          [required]="true"
+        />
       </div>
 
-      <label class="field">
-        <span>Prix unitaire (tarif) *</span>
-        <input name="prix" type="number" min="0" step="any" [(ngModel)]="prixUnitaire" required />
-      </label>
+      <nf-input
+        label="Prix unitaire (tarif)"
+        name="prix"
+        type="number"
+        [(ngModel)]="prixUnitaire"
+        [required]="true"
+      />
 
       @if (erreur()) {
         <p class="error" role="alert">{{ erreur() }}</p>
@@ -109,20 +119,6 @@ const TYPES: { value: DpuComposantType; label: string }[] = [
       margin: 0;
       font-size: 1.125rem;
     }
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 0.35rem;
-      font-size: 0.875rem;
-    }
-    .field input,
-    .field select {
-      padding: 0.625rem 0.75rem;
-      border: 1px solid var(--nf-color-border, #d1d5db);
-      border-radius: 8px;
-      font: inherit;
-      background: var(--nf-color-surface, #fff);
-    }
     .grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -149,12 +145,16 @@ export class CreateMissingItemDialogComponent {
   private readonly pricesApi = inject(ItemPricesApiService);
 
   readonly types = TYPES;
+  readonly uniteSelectOptions: NfSelectOption[] = this.data.uniteOptions.map((u) => ({
+    value: u.code,
+    label: u.code,
+  }));
   readonly saving = signal(false);
   readonly erreur = signal<string | undefined>(undefined);
 
   name = this.data.designation;
-  type: DpuComposantType = (TYPES.find((t) => t.value === this.data.type)?.value ??
-    'MATIERE') as DpuComposantType;
+  type: string =
+    TYPES.find((t) => t.value === this.data.type)?.value ?? 'MATIERE';
   unite =
     this.data.unite ||
     this.data.uniteOptions[0]?.code ||
@@ -172,10 +172,11 @@ export class CreateMissingItemDialogComponent {
     this.erreur.set(undefined);
     const prix = Number.parseFloat(String(this.prixUnitaire).replace(',', '.'));
     const uom = this.data.uniteOptions.find((u) => u.code === this.unite);
+    const articleType = this.type as DpuComposantType;
     try {
       const item = await this.itemsApi.create({
         name: this.name.trim(),
-        articleType: this.type,
+        articleType,
         isActive: true,
         unitOfMeasureId: uom?.id,
         code: undefined,
@@ -191,7 +192,7 @@ export class CreateMissingItemDialogComponent {
         itemId: item.id,
         code: item.code,
         name: item.name,
-        type: this.type,
+        type: articleType,
         unite: this.unite,
         prixUnitaire: prix,
         sourcePrix: 'TARIF',

@@ -8,6 +8,8 @@ import {
   ConfigDrivenListingPage,
   ConfigDrivenListingPageImports,
   ConfigDrivenListingPageStyles,
+  NfSelectComponent,
+  type NfSelectOption,
 } from '@lib/anatomy';
 
 import type { Situation } from '@app/chantiers/models';
@@ -32,7 +34,7 @@ interface QuickFilterChip {
 @Component({
   selector: 'app-situation-listing',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonComponent, ...ConfigDrivenListingPageImports],
+  imports: [CommonModule, FormsModule, ButtonComponent, NfSelectComponent, ...ConfigDrivenListingPageImports],
   templateUrl: './situation-listing.page.html',
   styleUrls: ['./situation-listing.page.scss'],
   styles: [ConfigDrivenListingPageStyles],
@@ -59,6 +61,11 @@ export class SituationListingPage extends ConfigDrivenListingPage<Situation> {
   readonly chantierOptions = computed(
     () => (this.facade.lookups()?.['chantiers'] ?? []) as { key: string; value: string }[],
   );
+
+  readonly chantierSelectOptions = computed<NfSelectOption[]>(() => [
+    { value: '', label: 'Tous les chantiers' },
+    ...this.chantierOptions().map((opt) => ({ value: String(opt.key), label: opt.value })),
+  ]);
 
   selectChip(id: QuickFilter): void {
     this.quickFilter.set(id);

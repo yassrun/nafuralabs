@@ -1,9 +1,16 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { ButtonComponent, PageHeaderComponent, PageShellComponent } from '@lib/anatomy';
+import {
+  ButtonComponent,
+  NfSelectComponent,
+  PageHeaderComponent,
+  PageShellComponent,
+  type NfSelectOption,
+} from '@lib/anatomy';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
 import { ExportButtonComponent, type ExportEvent } from '@lib/anatomy/components/molecules/export-button/export-button.component';
 import { FilterResetComponent } from '@lib/anatomy/components/molecules/filter-reset/filter-reset.component';
@@ -25,7 +32,19 @@ import {
   selector: 'app-contrat-listing',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterLink, PageShellComponent, PageHeaderComponent, ButtonComponent, MadCurrencyPipe, ExportButtonComponent, FilterResetComponent, TranslateModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterLink,
+    PageShellComponent,
+    PageHeaderComponent,
+    ButtonComponent,
+    NfSelectComponent,
+    MadCurrencyPipe,
+    ExportButtonComponent,
+    FilterResetComponent,
+    TranslateModule,
+  ],
   template: `
     <nf-page-shell scroll>
       <nf-page-header [config]="{
@@ -37,12 +56,11 @@ import {
       <div class="toolbar">
         <input class="search" type="search" [attr.placeholder]="'marches.contrat.listing.search.placeholder' | translate"
           [value]="search()" (input)="search.set($any($event.target).value)" />
-        <select [value]="filterStatus()" (change)="filterStatus.set($any($event.target).value)">
-          <option value="">{{ 'marches.common.filters.allStatuses' | translate }}</option>
-          @for (s of statusOptions; track s) {
-            <option [value]="s">{{ MARCHE_STATUS_KEYS[s] | translate }}</option>
-          }
-        </select>
+        <nf-select
+          [options]="statusFilterOptions()"
+          [ngModel]="filterStatus()"
+          (ngModelChange)="filterStatus.set($event)"
+        />
         <span class="count">{{ 'marches.contrat.listing.count' | translate:{ count: filtered().length } }}</span>
         <nf-filter-reset [active]="hasFilter()" (reset)="resetFilters()"></nf-filter-reset>
         <nf-export-button [data]="filtered()" [columns]="exportColumns" [filename]="'marches.contrat.listing.exportFilename' | translate" (exported)="onExported($event)"></nf-export-button>
@@ -181,6 +199,16 @@ export class ContratListingPage implements OnInit {
   readonly filterStatus = signal<MarcheStatus | ''>('');
 
   readonly statusOptions = Object.keys(MARCHE_STATUS_KEYS) as MarcheStatus[];
+
+  statusFilterOptions(): NfSelectOption[] {
+    return [
+      { value: '', label: this.translate.instant('marches.common.filters.allStatuses') },
+      ...this.statusOptions.map((s) => ({
+        value: s,
+        label: this.translate.instant(MARCHE_STATUS_KEYS[s]),
+      })),
+    ];
+  }
 
   readonly filtered = computed(() => {
     const q = this.search().toLowerCase().trim();

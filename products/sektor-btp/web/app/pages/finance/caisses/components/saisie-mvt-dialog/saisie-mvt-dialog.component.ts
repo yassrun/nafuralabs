@@ -14,7 +14,7 @@ import type {
   MouvementTresorerie,
   MouvementTresorerieType,
 } from '@app/finance/models';
-import { ButtonComponent } from '@lib/anatomy/components';
+import { ButtonComponent, NfSelectComponent, type NfSelectOption } from '@lib/anatomy/components';
 
 interface TypeOption {
   value: MouvementTresorerieType;
@@ -27,7 +27,7 @@ interface TypeOption {
 @Component({
   selector: 'app-saisie-mvt-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslateModule, ButtonComponent],
+  imports: [CommonModule, FormsModule, TranslateModule, ButtonComponent, NfSelectComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="smv__backdrop" (click)="cancel.emit()"></div>
@@ -64,13 +64,11 @@ interface TypeOption {
               </label>
               <label class="smv__field">
                 <span>{{ 'finance.mouvement.dialog.mode' | translate }} *</span>
-                <select [ngModel]="modePaiement()" (ngModelChange)="modePaiement.set($event)">
-                  <option value="VIREMENT">{{ 'finance.mouvement.modes.VIREMENT' | translate }}</option>
-                  <option value="CHEQUE">{{ 'finance.mouvement.modes.CHEQUE' | translate }}</option>
-                  <option value="ESPECES">{{ 'finance.mouvement.modes.ESPECES' | translate }}</option>
-                  <option value="CARTE">{{ 'finance.mouvement.modes.CARTE' | translate }}</option>
-                  <option value="EFFET">{{ 'finance.mouvement.modes.EFFET' | translate }}</option>
-                </select>
+                <nf-select
+                  [options]="modePaiementOptions()"
+                  [ngModel]="modePaiement()"
+                  (ngModelChange)="onModePaiementChange($event)"
+                />
               </label>
               <label class="smv__field">
                 <span>{{ 'finance.mouvement.form.fields.reference' | translate }}</span>
@@ -564,5 +562,16 @@ export class SaisieMvtDialogComponent {
       ' ' +
       this.translate.instant('finance.common.currency.mad')
     );
+  }
+
+  modePaiementOptions(): NfSelectOption[] {
+    return (['VIREMENT', 'CHEQUE', 'ESPECES', 'CARTE', 'EFFET'] as const).map((m) => ({
+      value: m,
+      label: this.translate.instant(`finance.mouvement.modes.${m}`),
+    }));
+  }
+
+  onModePaiementChange(v: string): void {
+    this.modePaiement.set(v as ModePaiement);
   }
 }

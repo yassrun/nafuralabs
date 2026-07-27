@@ -4,7 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { ButtonComponent, PageHeaderComponent, PageShellComponent, ToastService } from '@lib/anatomy/components';
+import {
+  ButtonComponent,
+  NfSelectComponent,
+  type NfSelectOption,
+  PageHeaderComponent,
+  PageShellComponent,
+  ToastService,
+} from '@lib/anatomy/components';
 import { ChartOfAccountApiService } from '@app/finance/services/chart-of-account-api.service';
 import { JournalApiService } from '@app/finance/services/journal-api.service';
 import { JournalEntryApiService } from '@app/finance/services/journal-entry-api.service';
@@ -23,7 +30,15 @@ interface SaisieLigne {
 @Component({
   selector: 'app-ecriture-saisie',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslateModule, PageShellComponent, PageHeaderComponent, ButtonComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    TranslateModule,
+    PageShellComponent,
+    PageHeaderComponent,
+    ButtonComponent,
+    NfSelectComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <nf-page-shell scroll>
@@ -33,12 +48,12 @@ interface SaisieLigne {
       <section class="form-grid">
         <label>
           <span>{{ 'finance.ecriture.form.fields.journal' | translate }} *</span>
-          <select [ngModel]="journalCode()" (ngModelChange)="journalCode.set($event)" required>
-            <option value="">{{ 'finance.ecriture.saisie.selectPlaceholder' | translate }}</option>
-            @for (j of journaux(); track j.id) {
-              <option [value]="j.code">{{ j.code }} — {{ j.libelle }}</option>
-            }
-          </select>
+          <nf-select
+            [options]="journalOptions()"
+            [ngModel]="journalCode()"
+            (ngModelChange)="journalCode.set($event)"
+            [required]="true"
+          />
         </label>
         <label>
           <span>{{ 'finance.ecriture.form.fields.date' | translate }} *</span>
@@ -254,6 +269,16 @@ export class EcritureSaisiePage {
           .sort((a, b) => a.code.localeCompare(b.code)),
       ),
     );
+  }
+
+  journalOptions(): NfSelectOption[] {
+    return [
+      { value: '', label: this.translate.instant('finance.ecriture.saisie.selectPlaceholder') },
+      ...this.journaux().map((j) => ({
+        value: j.code,
+        label: `${j.code} — ${j.libelle}`,
+      })),
+    ];
   }
 
   addLigne(): void {

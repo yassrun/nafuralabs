@@ -7,6 +7,7 @@ Monorepo Nafura — platform, produits, infra.
 | Priorité | Document |
 |----------|----------|
 | **Agents IA** | **[docs/AGENTS.md](docs/AGENTS.md)** — référence canonique |
+| **Cockpit** | **[docs/cockpit/](docs/cockpit/)** — active-week + backlog (Nafura Labs master) |
 | Ops K8s | [toolchain/ops/AGENTS.md](toolchain/ops/AGENTS.md) |
 | Vue humaine | [docs/README.md](docs/README.md) |
 

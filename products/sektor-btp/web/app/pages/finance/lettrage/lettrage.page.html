@@ -14,10 +14,11 @@
     <div class="f8__toolbar">
       <label class="f8__lbl">
         <span>{{ 'financeRound2.lettrage.compte' | translate }}</span>
-        <select [ngModel]="compteRadical()" (ngModelChange)="onCompteChange($event)">
-          <option value="3421">3421 — {{ 'financeRound2.lettrage.clients' | translate }}</option>
-          <option value="4411">4411 — {{ 'financeRound2.lettrage.fournisseurs' | translate }}</option>
-        </select>
+        <nf-select
+          [options]="compteOptions()"
+          [ngModel]="compteRadical()"
+          (ngModelChange)="onCompteChange($event)"
+        />
       </label>
       <label class="f8__lbl">
         <span>{{ 'financeRound2.lettrage.tolerance' | translate }}</span>

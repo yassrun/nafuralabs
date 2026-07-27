@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ChangeDetectionStrategy, Component, LOCALE_ID, computed, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FilterResetComponent } from '@lib/anatomy/components/molecules/filter-reset/filter-reset.component';
 
-import { PageHeaderComponent, PageShellComponent, ButtonComponent } from '@lib/anatomy';
+import { PageHeaderComponent, PageShellComponent, ButtonComponent, NfSelectComponent, type NfSelectOption } from '@lib/anatomy';
 import type { Chantier, ChantierStatus } from '@app/chantiers/models';
 import { ChantierApiService } from '../services/chantier-api.service';
 import {
@@ -25,7 +26,7 @@ const STATUS_CSS: Record<ChantierStatus, string> = {
 @Component({
   selector: 'app-chantiers-listing',
   standalone: true,
-  imports: [CommonModule, PageShellComponent, PageHeaderComponent, FilterResetComponent, ButtonComponent, TranslateModule],
+  imports: [CommonModule, FormsModule, PageShellComponent, PageHeaderComponent, FilterResetComponent, ButtonComponent, NfSelectComponent, TranslateModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <nf-page-shell scroll>
@@ -38,12 +39,12 @@ const STATUS_CSS: Record<ChantierStatus, string> = {
           [placeholder]="'chantiers.chantier.list.searchPlaceholder' | translate"
           [value]="search()"
           (input)="search.set($any($event.target).value)" />
-        <select [value]="filterStatus()" (change)="filterStatus.set($any($event.target).value)">
-          <option value="">{{ 'chantiers.common.filters.allStatuses' | translate }}</option>
-          @for (s of allStatuses; track s) {
-            <option [value]="s">{{ statusLabel(s) }}</option>
-          }
-        </select>
+        <nf-select
+          [options]="statusFilterOptions()"
+          [ngModel]="filterStatus()"
+          (ngModelChange)="filterStatus.set($event)"
+          [placeholder]="'chantiers.common.filters.allStatuses' | translate"
+        />
         <span class="count">{{ countLabel() }}</span>
         <nf-filter-reset [active]="hasFilter()" (reset)="resetFilters()"></nf-filter-reset>
         <nf-button variant="secondary" class="toolbar__planning" (clicked)="router.navigate(['/chantiers/planning'])">
@@ -127,10 +128,6 @@ const STATUS_CSS: Record<ChantierStatus, string> = {
       flex: 1; min-width: 180px; max-width: 280px;
       padding: 7px 12px; border: 1px solid var(--nf-color-border); border-radius: 6px; font-size: 13px;
     }
-    select {
-      padding: 7px 10px; border: 1px solid var(--nf-color-border); border-radius: 6px;
-      font-size: 13px; background: var(--nf-color-surface); cursor: pointer;
-    }
     .count { font-size: 13px; color: var(--nf-color-text-secondary); }
     .toolbar__planning { margin-left: auto; }
 
@@ -189,6 +186,11 @@ export class ChantiersListingPage {
   readonly allStatuses: ChantierStatus[] = [
     'EN_COURS', 'PROSPECT', 'SUSPENDU', 'TERMINE', 'RECEPTIONNE', 'CLOTURE', 'ANNULE',
   ];
+
+  readonly statusFilterOptions = computed<NfSelectOption[]>(() => [
+    { value: '', label: this.translate.instant('chantiers.common.filters.allStatuses') },
+    ...this.allStatuses.map((s) => ({ value: s, label: this.statusLabel(s) })),
+  ]);
 
   readonly search = signal('');
   readonly filterStatus = signal<ChantierStatus | ''>('');

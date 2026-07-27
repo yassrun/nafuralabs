@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { ButtonComponent, PageHeaderComponent, PageShellComponent } from '@lib/anatomy/components';
+import { ButtonComponent, NfSelectComponent, PageHeaderComponent, PageShellComponent, type NfSelectOption } from '@lib/anatomy/components';
 import { DateLocalizedPipe } from '@lib/anatomy/pipes';
 import { FfApiService } from '@app/pages/achats/factures-fournisseur/services/ff-api.service';
 import { FF_STATUS_KEYS } from '@app/shell/i18n-labels';
@@ -25,6 +25,7 @@ function todayIso(): string {
     PageShellComponent,
     PageHeaderComponent,
     ButtonComponent,
+    NfSelectComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -47,16 +48,11 @@ function todayIso(): string {
           [attr.placeholder]="'finance.common.filters.searchPlaceholder' | translate"
           [ngModel]="search()"
           (ngModelChange)="search.set($event)" />
-        <label>
-          <select [ngModel]="filterStatus()" (ngModelChange)="filterStatus.set($event)">
-            <option value="">{{ 'finance.common.filters.allStatuses' | translate }}</option>
-            <option value="BROUILLON">{{ FF_STATUS_KEYS.BROUILLON | translate }}</option>
-            <option value="VALIDEE">{{ FF_STATUS_KEYS.VALIDEE | translate }}</option>
-            <option value="PARTIELLEMENT_PAYEE">{{ FF_STATUS_KEYS.PARTIELLEMENT_PAYEE | translate }}</option>
-            <option value="PAYEE">{{ FF_STATUS_KEYS.PAYEE | translate }}</option>
-            <option value="EN_LITIGE">{{ FF_STATUS_KEYS.EN_LITIGE | translate }}</option>
-          </select>
-        </label>
+        <nf-select
+          [options]="statusOptions()"
+          [ngModel]="filterStatus()"
+          (ngModelChange)="filterStatus.set($event)"
+        />
         <div class="chips">
           <nf-button variant="ghost" [active]="chip() === 'A_VALIDER'" (clicked)="toggleChip('A_VALIDER')">{{ 'finance.common.actions.validate' | translate }}</nf-button>
           <nf-button variant="ghost" [active]="chip() === 'A_PAYER'" (clicked)="toggleChip('A_PAYER')">{{ FF_STATUS_KEYS.PAYEE | translate }}</nf-button>
@@ -136,7 +132,6 @@ function todayIso(): string {
     :host { display: block; height: 100%; }
     .filters { display: flex; gap: 12px; align-items: center; margin: 8px 0 16px; flex-wrap: wrap; }
     .search { flex: 1; min-width: 280px; padding: 8px 12px; border: 1px solid var(--nf-color-primary-200); border-radius: 6px; font-size: 13px; }
-    .filters select { padding: 8px 10px; border: 1px solid var(--nf-color-primary-200); border-radius: 6px; background: white; font-size: 13px; }
     .chips { display: flex; gap: 6px; flex-wrap: wrap; }
     .chips button {
       padding: 6px 12px; border: 1px solid var(--nf-color-primary-200); background: white; border-radius: 999px;
@@ -257,5 +252,19 @@ export class FfListingPage {
 
   fmt(n: number): string {
     return this.formatter.format(Math.round(n));
+  }
+
+  statusOptions(): NfSelectOption[] {
+    return [
+      { value: '', label: this.translate.instant('finance.common.filters.allStatuses') },
+      { value: 'BROUILLON', label: this.translate.instant(FF_STATUS_KEYS.BROUILLON) },
+      { value: 'VALIDEE', label: this.translate.instant(FF_STATUS_KEYS.VALIDEE) },
+      {
+        value: 'PARTIELLEMENT_PAYEE',
+        label: this.translate.instant(FF_STATUS_KEYS.PARTIELLEMENT_PAYEE),
+      },
+      { value: 'PAYEE', label: this.translate.instant(FF_STATUS_KEYS.PAYEE) },
+      { value: 'EN_LITIGE', label: this.translate.instant(FF_STATUS_KEYS.EN_LITIGE) },
+    ];
   }
 }

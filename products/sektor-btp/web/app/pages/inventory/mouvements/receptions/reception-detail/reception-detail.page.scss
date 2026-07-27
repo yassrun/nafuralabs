@@ -13,6 +13,9 @@
 }
 
 .rd__mode-group {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
   width: 100%;
 }
 

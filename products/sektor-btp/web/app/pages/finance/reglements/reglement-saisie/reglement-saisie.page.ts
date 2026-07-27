@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, LOCALE_ID, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ImputationPickerComponent } from '@app/finance/components';
 import { BankReconciliationApiService } from '@app/finance/services/bank-reconciliation-api.service';
 import { ContrePartieLookupService } from '@app/finance/services/contre-partie-lookup.service';
@@ -17,13 +17,20 @@ import type {
   ReglementImputation,
   ReglementType,
 } from '@app/finance/models';
-import { ButtonComponent } from '@lib/anatomy/components';
+import { ButtonComponent, NfSelectComponent, type NfSelectOption } from '@lib/anatomy/components';
 import { ConfirmDialogService } from '@lib/anatomy';
 
 @Component({
   selector: 'app-reglement-saisie',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslateModule, ImputationPickerComponent, ButtonComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    TranslateModule,
+    ImputationPickerComponent,
+    ButtonComponent,
+    NfSelectComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './reglement-saisie.page.html',
   styleUrl: './reglement-saisie.page.scss',
@@ -37,6 +44,7 @@ export class ReglementSaisiePage {
   private readonly router = inject(Router);
   private readonly locale = inject(LOCALE_ID);
   private readonly confirmDialog = inject(ConfirmDialogService);
+  private readonly translate = inject(TranslateService);
 
   readonly comptes = signal<CompteFinancier[]>([]);
 
@@ -252,5 +260,38 @@ export class ReglementSaisiePage {
 
   format(v: number): string {
     return v.toLocaleString(this.locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  modePaiementOptions(): NfSelectOption[] {
+    return (['VIREMENT', 'CHEQUE', 'EFFET', 'ESPECES', 'COMPENSATION', 'CARTE'] as const).map((m) => ({
+      value: m,
+      label: this.translate.instant(`enum.mode.${m}`),
+    }));
+  }
+
+  onModePaiementChange(v: string): void {
+    this.modePaiement.set(v as ModePaiement);
+  }
+
+  contrePartieOptions(): NfSelectOption[] {
+    return [
+      {
+        value: '',
+        label: this.translate.instant('finance.factureFournisseur.form.fields.fournisseurPlaceholder'),
+      },
+      ...this.contreParties().map((cp) => ({ value: cp.id, label: cp.name })),
+    ];
+  }
+
+  compteFinancierOptions(): NfSelectOption[] {
+    return [
+      {
+        value: '',
+        label: this.translate.instant('finance.factureFournisseur.form.fields.fournisseurPlaceholder'),
+      },
+      ...this.comptes()
+        .filter((c) => c.isActive)
+        .map((c) => ({ value: c.id, label: c.libelle })),
+    ];
   }
 }

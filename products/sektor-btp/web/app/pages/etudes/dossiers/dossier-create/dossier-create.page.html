@@ -1,48 +1,40 @@
-<section class="creer">
-  <h1 class="creer__titre">Nouveau dossier d'étude</h1>
-  <p class="creer__aide">
-    Un dossier porte un marché entrant : ses pièces (CPS, bordereau), son chiffrage et son devis.
-    L'objet et le client suffisent à démarrer — le reste se renseigne étape par étape.
-  </p>
+<nf-page-shell scroll>
+  <nf-page-header [config]="headerConfig"></nf-page-header>
 
   @if (erreur(); as message) {
     <p class="creer__erreur" role="alert">{{ message }}</p>
   }
 
   <form class="creer__form" (ngSubmit)="creer()">
-    <label class="creer__champ">
-      <span class="creer__label">Objet <span aria-hidden="true">*</span></span>
-      <input
-        name="objet"
-        required
-        autofocus
-        placeholder="Construction d'un ensemble résidentiel — lot gros œuvre"
-        [ngModel]="objet()"
-        (ngModelChange)="objet.set($event)"
-      />
-    </label>
+    <nf-input
+      name="objet"
+      label="Objet"
+      [required]="true"
+      placeholder="Construction d'un ensemble résidentiel — lot gros œuvre"
+      [ngModel]="objet()"
+      (ngModelChange)="objet.set($event)"
+    />
 
-    <div class="creer__champ">
-      <app-client-partner-select
-        controlId="dossier-create-client"
-        label="Client *"
-        placeholder="Sélectionner un client Partner"
-        [required]="true"
-        [clientId]="clientId()"
-        [clientNom]="clientNom()"
-        (selectionChange)="onClientSelection($event)"
-      />
-    </div>
+    <app-client-partner-select
+      controlId="dossier-create-client"
+      label="Client *"
+      placeholder="Sélectionner un client Partner"
+      [required]="true"
+      [clientId]="clientId()"
+      [clientNom]="clientNom()"
+      (selectionChange)="onClientSelection($event)"
+    />
 
-    <div class="creer__actions">
-      <button type="button" class="creer__bouton" (click)="annuler()">Annuler</button>
-      <button
-        type="submit"
-        class="creer__bouton creer__bouton--principal"
+    <nf-action-bar align="right">
+      <nf-button variant="secondary" (clicked)="annuler()">Annuler</nf-button>
+      <nf-button
+        variant="primary"
+        [loading]="enCours()"
         [disabled]="!objet().trim() || !clientId() || enCours()"
+        (clicked)="creer()"
       >
-        {{ enCours() ? 'Création…' : 'Créer et commencer' }}
-      </button>
-    </div>
+        Créer et commencer
+      </nf-button>
+    </nf-action-bar>
   </form>
-</section>
+</nf-page-shell>

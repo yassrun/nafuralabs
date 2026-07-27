@@ -83,12 +83,14 @@
 }
 
 .rgp__select {
-  border: 1px solid var(--nf-color-border);
-  border-radius: 8px;
-  padding: 6px 10px;
-  background: var(--nf-color-surface);
-  font-size: 13px;
   min-width: 180px;
+}
+
+.row-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.15rem;
+  align-items: center;
 }
 
 .rgp__tablewrap {
@@ -132,8 +134,8 @@
 
 .rgp__table td.actions,
 .rgp__table th.actions {
-  width: 56px;
-  text-align: center;
+  text-align: right;
+  white-space: normal;
 }
 
 .rgp__chantier strong {

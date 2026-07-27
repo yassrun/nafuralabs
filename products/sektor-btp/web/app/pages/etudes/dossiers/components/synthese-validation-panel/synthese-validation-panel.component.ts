@@ -10,6 +10,7 @@ import {
   signal,
 } from '@angular/core';
 
+import { ButtonComponent } from '@lib/anatomy';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
 import { TranslateModule } from '@ngx-translate/core';
 
@@ -23,7 +24,7 @@ import { GateBlocageComponent } from '../gate-blocage/gate-blocage.component';
   selector: 'app-synthese-validation-panel',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, MadCurrencyPipe, TranslateModule, GateBlocageComponent],
+  imports: [CommonModule, MadCurrencyPipe, TranslateModule, GateBlocageComponent, ButtonComponent],
   templateUrl: './synthese-validation-panel.component.html',
   styleUrl: './synthese-validation-panel.component.scss',
 })

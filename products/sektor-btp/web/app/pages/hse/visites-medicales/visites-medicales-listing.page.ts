@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { PageHeaderComponent, PageShellComponent } from '@lib/anatomy';
+import { PageHeaderComponent, PageShellComponent, NfSelectComponent, type NfSelectOption } from '@lib/anatomy';
 import { ExportButtonComponent, type ExportEvent } from '@lib/anatomy/components/molecules/export-button/export-button.component';
 import { FilterResetComponent } from '@lib/anatomy/components/molecules/filter-reset/filter-reset.component';
 import { ErpAuditService } from '@app/shell/erp-audit.service';
@@ -29,11 +30,13 @@ function daysUntil(date: string): number {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
+    FormsModule,
     TranslateModule,
     PageShellComponent,
     PageHeaderComponent,
     ExportButtonComponent,
     FilterResetComponent,
+    NfSelectComponent,
   ],
   template: `
     <nf-page-shell scroll>
@@ -62,14 +65,20 @@ function daysUntil(date: string): number {
       <div class="toolbar">
         <input class="search" type="search" [placeholder]="'hse.visiteMedicale.search' | translate"
           [value]="search()" (input)="search.set($any($event.target).value)" />
-        <select [value]="filterType()" (change)="filterType.set($any($event.target).value)">
-          <option value="">{{ 'hse.visiteMedicale.toolbar.tousLesTypes' | translate }}</option>
-          @for (t of typeEntries(); track t[0]) { <option [value]="t[0]">{{ t[1] }}</option> }
-        </select>
-        <select [value]="filterAptitude()" (change)="filterAptitude.set($any($event.target).value)">
-          <option value="">{{ 'hse.visiteMedicale.toolbar.toutesAptitudes' | translate }}</option>
-          @for (a of aptitudeEntries(); track a[0]) { <option [value]="a[0]">{{ a[1] }}</option> }
-        </select>
+        <nf-select
+          name="filterType"
+          [placeholder]="'hse.visiteMedicale.toolbar.tousLesTypes' | translate"
+          [options]="typeFilterOptions()"
+          [ngModel]="filterType()"
+          (ngModelChange)="onFilterType($event)"
+        />
+        <nf-select
+          name="filterAptitude"
+          [placeholder]="'hse.visiteMedicale.toolbar.toutesAptitudes' | translate"
+          [options]="aptitudeFilterOptions()"
+          [ngModel]="filterAptitude()"
+          (ngModelChange)="onFilterAptitude($event)"
+        />
         <label class="alerte-toggle">
           <input type="checkbox" [checked]="filterAlerte()" (change)="filterAlerte.set($any($event.target).checked)" />
           {{ 'hse.visiteMedicale.toolbar.alerteEcheance' | translate }}
@@ -131,7 +140,6 @@ function daysUntil(date: string): number {
     .alerte--warning { background: var(--nf-color-warning-100); color: var(--nf-color-warning-700); }
     .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
     .search { flex: 1; min-width: 180px; max-width: 280px; padding: 7px 12px; border: 1px solid var(--nf-color-border); border-radius: 6px; font-size: 13px; }
-    select { padding: 7px 10px; border: 1px solid var(--nf-color-border); border-radius: 6px; font-size: 13px; background: var(--nf-color-surface); }
     .alerte-toggle { display: flex; align-items: center; gap: 5px; font-size: 12.5px; color: var(--nf-color-text-secondary); cursor: pointer; }
     .count { font-size: 13px; color: var(--nf-color-text-secondary); }
     .table-wrap { background: var(--nf-color-surface); border: 1px solid var(--nf-color-border); border-radius: 8px; overflow: auto; max-height: calc(100vh - 360px); }
@@ -178,6 +186,28 @@ export class VisitesMedicalesListingPage {
   readonly aptitudeEntries = computed<[AptitudeVisite, string][]>(() =>
     (Object.keys(APTITUDE_KEYS) as AptitudeVisite[]).map((s) => [s, this.translate.instant(APTITUDE_KEYS[s])]),
   );
+
+  typeFilterOptions(): NfSelectOption[] {
+    return [
+      { value: '', label: this.translate.instant('hse.visiteMedicale.toolbar.tousLesTypes') },
+      ...this.typeEntries().map(([value, label]) => ({ value, label })),
+    ];
+  }
+
+  aptitudeFilterOptions(): NfSelectOption[] {
+    return [
+      { value: '', label: this.translate.instant('hse.visiteMedicale.toolbar.toutesAptitudes') },
+      ...this.aptitudeEntries().map(([value, label]) => ({ value, label })),
+    ];
+  }
+
+  onFilterType(value: string): void {
+    this.filterType.set((value || '') as TypeVisite | '');
+  }
+
+  onFilterAptitude(value: string): void {
+    this.filterAptitude.set((value || '') as AptitudeVisite | '');
+  }
 
   constructor() {
     void this.loadVisites();

@@ -32,24 +32,24 @@
       (ngModelChange)="filterText.set($event)"
       class="vil__search"
     />
-    <select [ngModel]="filterStatus()" (ngModelChange)="filterStatus.set($event)" class="vil__select">
-      <option value="">{{ 'finance.common.filters.allStatuses' | translate }}</option>
-      <option value="BROUILLON">{{ 'finance.declarations.status.BROUILLON' | translate }}</option>
-      <option value="VALIDE">{{ 'finance.common.toasts.validated' | translate }}</option>
-      <option value="ANNULE">{{ 'finance.common.toasts.cancelled' | translate }}</option>
-    </select>
-    <select [ngModel]="filterSource()" (ngModelChange)="filterSource.set($event)" class="vil__select">
-      <option value="">{{ 'finance.virement.form.fields.compteEmetteur' | translate }}</option>
-      @for (c of comptes(); track c.id) {
-        <option [value]="c.id">{{ c.libelle }}</option>
-      }
-    </select>
-    <select [ngModel]="filterDest()" (ngModelChange)="filterDest.set($event)" class="vil__select">
-      <option value="">{{ 'finance.virement.form.fields.beneficiaire' | translate }}</option>
-      @for (c of comptes(); track c.id) {
-        <option [value]="c.id">{{ c.libelle }}</option>
-      }
-    </select>
+    <nf-select
+      class="vil__select"
+      [options]="statusOptions()"
+      [ngModel]="filterStatus()"
+      (ngModelChange)="filterStatus.set($event)"
+    />
+    <nf-select
+      class="vil__select"
+      [options]="sourceOptions()"
+      [ngModel]="filterSource()"
+      (ngModelChange)="filterSource.set($event)"
+    />
+    <nf-select
+      class="vil__select"
+      [options]="destOptions()"
+      [ngModel]="filterDest()"
+      (ngModelChange)="filterDest.set($event)"
+    />
     <input
       type="date"
       [ngModel]="filterFrom()"

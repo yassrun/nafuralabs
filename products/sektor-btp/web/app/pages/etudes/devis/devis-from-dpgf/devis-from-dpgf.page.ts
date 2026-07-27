@@ -5,7 +5,12 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 
-import { PageShellComponent } from '@lib/anatomy';
+import {
+  ActionBarComponent,
+  ButtonComponent,
+  PageHeaderComponent,
+  PageShellComponent,
+} from '@lib/anatomy';
 
 import {
   ClientPartnerSelectComponent,
@@ -22,13 +27,16 @@ import { DevisApiService } from '../services/devis-api.service';
     FormsModule,
     TranslateModule,
     PageShellComponent,
+    PageHeaderComponent,
+    ActionBarComponent,
+    ButtonComponent,
     ClientPartnerSelectComponent,
   ],
   template: `
     <nf-page-shell scroll>
+      <nf-page-header [config]="headerConfig"></nf-page-header>
+
       <section class="from-dpgf">
-        <h1>Générer un devis depuis le DPGF</h1>
-        <p>Sélectionnez le client Partner avant de créer le devis.</p>
         @if (erreur(); as msg) {
           <p class="from-dpgf__err" role="alert">{{ msg }}</p>
         }
@@ -40,17 +48,17 @@ import { DevisApiService } from '../services/devis-api.service';
           [clientNom]="clientNom()"
           (selectionChange)="onClient($event)"
         />
-        <div class="from-dpgf__actions">
-          <button type="button" class="btn" (click)="annuler()">Annuler</button>
-          <button
-            type="button"
-            class="btn btn--primary"
+        <nf-action-bar align="right">
+          <nf-button variant="secondary" (clicked)="annuler()">Annuler</nf-button>
+          <nf-button
+            variant="primary"
+            [loading]="enCours()"
             [disabled]="!clientId() || enCours()"
-            (click)="generer()"
+            (clicked)="generer()"
           >
-            {{ enCours() ? 'Génération…' : 'Créer le devis' }}
-          </button>
-        </div>
+            Créer le devis
+          </nf-button>
+        </nf-action-bar>
       </section>
     </nf-page-shell>
   `,
@@ -66,27 +74,6 @@ import { DevisApiService } from '../services/devis-api.service';
       .from-dpgf__err {
         color: var(--nf-color-danger-700, #b91c1c);
       }
-      .from-dpgf__actions {
-        display: flex;
-        gap: 12px;
-        justify-content: flex-end;
-      }
-      .btn {
-        border: 1px solid var(--nf-color-border);
-        border-radius: 6px;
-        background: transparent;
-        padding: 8px 16px;
-        cursor: pointer;
-      }
-      .btn--primary {
-        border-color: var(--nf-color-primary-600);
-        background: var(--nf-color-primary-600);
-        color: #fff;
-      }
-      .btn:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
     `,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -96,6 +83,11 @@ export class DevisFromDpgfPage {
   private readonly router = inject(Router);
   private readonly devisApi = inject(DevisApiService);
   private readonly destroyRef = inject(DestroyRef);
+
+  readonly headerConfig = {
+    title: 'Générer un devis depuis le DPGF',
+    subtitle: 'Sélectionnez le client Partner avant de créer le devis.',
+  };
 
   private dpgfId: string | null = null;
   readonly clientId = signal<string | null>(null);

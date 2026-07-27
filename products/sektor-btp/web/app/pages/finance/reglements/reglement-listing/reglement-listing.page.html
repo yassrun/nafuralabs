@@ -56,42 +56,36 @@
       (ngModelChange)="filterText.set($event)"
       class="rl__search"
     />
-    <select [ngModel]="filterType()" (ngModelChange)="filterType.set($event)" class="rl__select">
-      <option value="">{{ 'finance.common.filters.allTypes' | translate }}</option>
-      <option value="CLIENT">{{ 'finance.recouvrement.headers.client' | translate }}</option>
-      <option value="FOURNISSEUR">{{ 'finance.factureFournisseur.form.fields.fournisseur' | translate }}</option>
-      <option value="EMPLOYE">{{ 'finance.ecriture.form.fields.tiers' | translate }}</option>
-    </select>
-    <select [ngModel]="filterMode()" (ngModelChange)="filterMode.set($event)" class="rl__select">
-      <option value="">{{ 'finance.reglement.list.filters.modePaiement' | translate }}</option>
-      <option value="VIREMENT">{{ 'enum.mode.VIREMENT' | translate }}</option>
-      <option value="CHEQUE">{{ 'enum.mode.CHEQUE' | translate }}</option>
-      <option value="EFFET">{{ 'enum.mode.EFFET' | translate }}</option>
-      <option value="ESPECES">{{ 'enum.mode.ESPECES' | translate }}</option>
-      <option value="COMPENSATION">{{ 'enum.mode.COMPENSATION' | translate }}</option>
-    </select>
-    <select [ngModel]="filterStatus()" (ngModelChange)="filterStatus.set($event)" class="rl__select">
-      <option value="">{{ 'finance.common.filters.allStatuses' | translate }}</option>
-      <option value="BROUILLON">{{ 'finance.declarations.status.BROUILLON' | translate }}</option>
-      <option value="VALIDE">{{ 'finance.common.toasts.validated' | translate }}</option>
-      <option value="ANNULE">{{ 'finance.common.toasts.cancelled' | translate }}</option>
-    </select>
-    <select [ngModel]="filterCompte()" (ngModelChange)="filterCompte.set($event)" class="rl__select">
-      <option value="">{{ 'finance.common.filters.compte' | translate }}</option>
-      @for (c of comptes(); track c.id) {
-        <option [value]="c.id">{{ c.libelle }}</option>
-      }
-    </select>
-    <select
+    <nf-select
+      class="rl__select"
+      [options]="typeOptions()"
+      [ngModel]="filterType()"
+      (ngModelChange)="filterType.set($event)"
+    />
+    <nf-select
+      class="rl__select"
+      [options]="modeOptions()"
+      [ngModel]="filterMode()"
+      (ngModelChange)="filterMode.set($event)"
+    />
+    <nf-select
+      class="rl__select"
+      [options]="statusOptions()"
+      [ngModel]="filterStatus()"
+      (ngModelChange)="filterStatus.set($event)"
+    />
+    <nf-select
+      class="rl__select"
+      [options]="compteOptions()"
+      [ngModel]="filterCompte()"
+      (ngModelChange)="filterCompte.set($event)"
+    />
+    <nf-select
+      class="rl__select"
+      [options]="contrePartieOptions()"
       [ngModel]="filterContrePartie()"
       (ngModelChange)="filterContrePartie.set($event)"
-      class="rl__select"
-    >
-      <option value="">Contrepartie : toutes</option>
-      @for (cp of contrePartiesForFilter(); track cp.id) {
-        <option [value]="cp.id">{{ contrePartieFilterLabel(cp) }}</option>
-      }
-    </select>
+    />
     <input
       type="date"
       [ngModel]="filterFrom()"

@@ -11,7 +11,7 @@ import {
   MouvementRowComponent,
   SoldeIndicatorComponent,
 } from '@app/finance/components';
-import { ButtonComponent } from '@lib/anatomy/components';
+import { ButtonComponent, NfSelectComponent, type NfSelectOption } from '@lib/anatomy/components';
 import { NumberLocalizedPipe } from '@lib/anatomy/pipes';
 import type {
   CompteFinancier,
@@ -33,6 +33,7 @@ import { SaisieMvtDialogComponent } from '../components/saisie-mvt-dialog/saisie
     SaisieMvtDialogComponent,
     NumberLocalizedPipe,
     ButtonComponent,
+    NfSelectComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './mouvements-listing.page.html',
@@ -274,5 +275,33 @@ export class MouvementsListingPage {
     } finally {
       this.validatingCaisseId.set(null);
     }
+  }
+
+  typeOptions(): NfSelectOption[] {
+    const types = [
+      'REGLEMENT_CLIENT',
+      'REGLEMENT_FOURN',
+      'PAIEMENT_PAIE',
+      'VIREMENT_INTERNE',
+      'FRAIS_BANCAIRES',
+      'COMMISSIONS',
+      'AUTRE_RECETTE',
+      'AUTRE_DEPENSE',
+    ] as const;
+    return [
+      { value: '', label: this.translate.instant('finance.common.filters.allTypes') },
+      ...types.map((t) => ({
+        value: t,
+        label: this.translate.instant(`finance.mouvement.types.${t}`),
+      })),
+    ];
+  }
+
+  rapprocheOptions(): NfSelectOption[] {
+    return [
+      { value: 'all', label: this.translate.instant('finance.mouvement.filters.rapproche.all') },
+      { value: 'yes', label: this.translate.instant('finance.mouvement.filters.rapproche.yes') },
+      { value: 'no', label: this.translate.instant('finance.mouvement.filters.rapproche.no') },
+    ];
   }
 }

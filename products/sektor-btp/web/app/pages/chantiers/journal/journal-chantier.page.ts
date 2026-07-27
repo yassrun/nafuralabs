@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FilterResetComponent } from '@lib/anatomy/components/molecules/filter-reset/filter-reset.component';
 
-import { ButtonComponent, PageHeaderComponent, PageShellComponent, ToastService } from '@lib/anatomy';
+import { ButtonComponent, PageHeaderComponent, PageShellComponent, ToastService, NfSelectComponent, ActionBarComponent, type NfSelectOption } from '@lib/anatomy';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
 import { AuthFacade } from '@core/security/services/auth.facade';
 import { JOURNAL_EVENT_TYPE_KEYS } from '@app/shell/i18n-labels';
@@ -81,6 +81,8 @@ function todayIso(): string {
     MadCurrencyPipe,
     FilterResetComponent,
     ButtonComponent,
+    ActionBarComponent,
+    NfSelectComponent,
     TranslateModule,
   ],
   template: `
@@ -90,10 +92,12 @@ function todayIso(): string {
       <div class="toolbar">
         <input class="search" type="search" placeholder="Chantier, titre, type…"
           [value]="search()" (input)="search.set($any($event.target).value)" />
-        <select [value]="filterType()" (change)="filterType.set($any($event.target).value)">
-          <option value="">{{ 'chantiers.journal.filters.allTypes' | translate }}</option>
-          @for (t of typeEntries(); track t[0]) { <option [value]="t[0]">{{ t[1] }}</option> }
-        </select>
+        <nf-select
+          [options]="typeFilterOptions()"
+          [ngModel]="filterType()"
+          (ngModelChange)="filterType.set($event)"
+          [placeholder]="'chantiers.journal.filters.allTypes' | translate"
+        />
         <span class="count">{{ entries().length <= 1 ? entries().length + ' événement' : entries().length + ' événements' }}</span>
         <nf-filter-reset [active]="hasFilter()" (reset)="resetFilters()"></nf-filter-reset>
         <nf-button variant="primary" iconLibrary="lucide" icon="plus" (clicked)="openCreateForm()">
@@ -104,31 +108,32 @@ function todayIso(): string {
       @if (showCreateForm()) {
         <div class="create-panel">
           <h3>{{ 'chantiers.journal.create.title' | translate }}</h3>
-          <label>{{ 'chantiers.journal.create.fields.chantier' | translate }}</label>
-          <select class="fld" [(ngModel)]="createDraft.chantierId" name="chantierId" required>
-            <option value="">{{ 'chantiers.journal.create.fields.chantierPlaceholder' | translate }}</option>
-            @for (c of chantiers(); track c.id) {
-              <option [value]="c.id">{{ c.code }} — {{ c.name }}</option>
-            }
-          </select>
-          <label>{{ 'chantiers.journal.create.fields.type' | translate }}</label>
-          <select class="fld" [(ngModel)]="createDraft.type" name="type">
-            @for (t of typeEntries(); track t[0]) {
-              <option [value]="t[0]">{{ t[1] }}</option>
-            }
-          </select>
+          <nf-select
+            name="chantierId"
+            [label]="'chantiers.journal.create.fields.chantier' | translate"
+            [placeholder]="'chantiers.journal.create.fields.chantierPlaceholder' | translate"
+            [options]="chantierSelectOptions()"
+            [(ngModel)]="createDraft.chantierId"
+            [required]="true"
+          />
+          <nf-select
+            name="type"
+            [label]="'chantiers.journal.create.fields.type' | translate"
+            [options]="typeCreateOptions()"
+            [(ngModel)]="createDraft.type"
+          />
           <label>{{ 'chantiers.journal.create.fields.date' | translate }}</label>
           <input class="fld" type="date" [(ngModel)]="createDraft.date" name="date" required />
           <label>{{ 'chantiers.journal.create.fields.contenu' | translate }}</label>
           <textarea class="fld" [(ngModel)]="createDraft.contenu" name="contenu" rows="3" required></textarea>
-          <div class="create-actions">
+          <nf-action-bar align="right" class="create-actions">
             <nf-button variant="secondary" (clicked)="closeCreateForm()">
               {{ 'chantiers.common.actions.cancel' | translate }}
             </nf-button>
             <nf-button variant="primary" [disabled]="creating()" (clicked)="submitCreate()">
               {{ 'chantiers.journal.create.submit' | translate }}
             </nf-button>
-          </div>
+          </nf-action-bar>
         </div>
       }
 
@@ -175,7 +180,6 @@ function todayIso(): string {
     :host { display: block; height: 100%; }
     .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; }
     .search { flex: 1; min-width: 180px; max-width: 280px; padding: 7px 12px; border: 1px solid var(--nf-color-border); border-radius: 6px; font-size: 13px; }
-    select { padding: 7px 10px; border: 1px solid var(--nf-color-border); border-radius: 6px; font-size: 13px; background: var(--nf-color-surface); }
     .count { font-size: 13px; color: var(--nf-color-text-secondary); }
     .create-panel {
       background: var(--nf-color-surface); border: 1px solid var(--nf-color-border); border-radius: 0.75rem;
@@ -184,7 +188,7 @@ function todayIso(): string {
     .create-panel h3 { margin: 0 0 0.25rem; font-size: 0.95rem; color: var(--nf-text-primary); }
     .create-panel label { font-size: 0.8rem; font-weight: 600; color: var(--nf-color-text-secondary); }
     .fld { width: 100%; padding: 7px 10px; border: 1px solid var(--nf-color-border); border-radius: 6px; font-size: 13px; }
-    .create-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 0.5rem; }
+    .create-actions { margin-top: 0.5rem; }
     .loading { color: var(--nf-color-text-secondary); padding: 2rem; text-align: center; }
     .timeline { display: flex; flex-direction: column; gap: 0.75rem; }
     .event-card { display: flex; gap: 0.875rem; background: var(--nf-color-surface); border: 1px solid var(--nf-color-border); border-radius: 0.875rem; padding: 1rem 1.25rem; border-left: 4px solid var(--nf-color-border); }
@@ -328,6 +332,23 @@ export class JournalChantierPage implements OnInit {
     const types: JournalEventType[] = ['VISITE_MOA', 'INTEMPERIE', 'LIVRAISON', 'INCIDENT', 'ORDRE_SERVICE', 'REUNION', 'CONSTAT', 'AUTRE'];
     return types.map((t) => [t, this.trEnum(t)]);
   });
+
+  readonly typeFilterOptions = computed<NfSelectOption[]>(() => [
+    { value: '', label: this.translate.instant('chantiers.journal.filters.allTypes') },
+    ...this.typeEntries().map(([value, label]) => ({ value, label })),
+  ]);
+
+  readonly typeCreateOptions = computed<NfSelectOption[]>(() =>
+    this.typeEntries().map(([value, label]) => ({ value, label })),
+  );
+
+  readonly chantierSelectOptions = computed<NfSelectOption[]>(() => [
+    { value: '', label: this.translate.instant('chantiers.journal.create.fields.chantierPlaceholder') },
+    ...this.chantiers().map((c) => ({
+      value: c.id,
+      label: `${c.code} — ${c.name}`,
+    })),
+  ]);
 
   readonly entries = computed(() => {
     const q = this.search().toLowerCase().trim();

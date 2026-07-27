@@ -10,11 +10,11 @@
     <div class="f8__toolbar">
       <label class="f8__lbl">
         <span>{{ 'financeRound2.caissesChantier.caisse' | translate }}</span>
-        <select [ngModel]="caisseId()" (ngModelChange)="pickCaisse($event)">
-          @for (c of caisses(); track c.id) {
-            <option [value]="c.id">{{ c.chantierLabel }} ({{ c.soldeActuel | mad:2 }})</option>
-          }
-        </select>
+        <nf-select
+          [options]="caisseOptions()"
+          [ngModel]="caisseId()"
+          (ngModelChange)="pickCaisse($event)"
+        />
       </label>
     </div>
 
@@ -41,9 +41,9 @@
               <td>{{ m.description }}</td>
               <td>
                 @if (m.photoTicketUrl) {
-                  <button type="button" class="f8__link" (click)="openJustificatif(m.photoTicketUrl)">
+                  <nf-button variant="ghost" size="sm" (clicked)="openJustificatif(m.photoTicketUrl)">
                     {{ 'financeRound2.caissesChantier.viewJustificatif' | translate }}
-                  </button>
+                  </nf-button>
                 }
               </td>
               <td>{{ m.status }}</td>
@@ -63,10 +63,11 @@
     <section class="f8__card">
       <h2 class="f8__h">{{ 'financeRound2.caissesChantier.saisie' | translate }}</h2>
       <div class="f8__toolbar">
-        <select [ngModel]="formType()" (ngModelChange)="formType.set($event)">
-          <option value="DEPENSE">DEPENSE</option>
-          <option value="AVANCE_RECUE">AVANCE_RECUE</option>
-        </select>
+        <nf-select
+          [options]="formTypeOptions"
+          [ngModel]="formType()"
+          (ngModelChange)="onFormTypeChange($event)"
+        />
         <input type="number" [ngModel]="formMontant()" (ngModelChange)="formMontant.set(+$event || 0)" />
         <input
           type="text"

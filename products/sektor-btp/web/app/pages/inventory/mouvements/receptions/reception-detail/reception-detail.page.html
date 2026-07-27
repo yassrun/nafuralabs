@@ -22,19 +22,26 @@
     <ng-template nfField="destLocationId" let-control let-form="form">
       @if (mode() !== 'view') {
         <div class="rd__mode-wrap">
-          <mat-button-toggle-group
-            class="rd__mode-group"
-            [value]="deliveryMode()"
-            (change)="onModeChange($event.value, form)">
-            <mat-button-toggle value="DEPOT">
+          <div class="rd__mode-group" role="group">
+            <nf-button
+              variant="ghost"
+              size="sm"
+              [active]="deliveryMode() === 'DEPOT'"
+              (clicked)="onModeChange('DEPOT', form)"
+            >
               <nf-icon name="warehouse"></nf-icon>
               {{ 'inventory.mouvement.reception.deliveryMode.toDepot' | translate }}
-            </mat-button-toggle>
-            <mat-button-toggle value="CHANTIER_DIRECT">
+            </nf-button>
+            <nf-button
+              variant="ghost"
+              size="sm"
+              [active]="deliveryMode() === 'CHANTIER_DIRECT'"
+              (clicked)="onModeChange('CHANTIER_DIRECT', form)"
+            >
               <nf-icon name="construction"></nf-icon>
               {{ 'inventory.mouvement.reception.deliveryMode.toChantier' | translate }}
-            </mat-button-toggle>
-          </mat-button-toggle-group>
+            </nf-button>
+          </div>
         </div>
       }
       @if (deliveryMode() === 'DEPOT') {

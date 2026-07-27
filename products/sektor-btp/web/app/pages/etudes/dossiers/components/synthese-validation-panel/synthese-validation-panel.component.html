@@ -73,13 +73,13 @@
                   }
                   <span>{{ p.message | translate }}</span>
                   @if (modifiable() && p.noeudId) {
-                    <button
-                      type="button"
-                      class="link"
-                      (click)="corrigerConsultation(p)"
+                    <nf-button
+                      variant="ghost"
+                      size="sm"
+                      (clicked)="corrigerConsultation(p)"
                     >
                       Corriger
-                    </button>
+                    </nf-button>
                   }
                 </li>
               }

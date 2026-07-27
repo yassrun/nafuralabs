@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 
+import { ButtonComponent } from '@lib/anatomy';
 import { NotificationBellCloseService } from '@platform/features/collaboration/notification/services/notification-bell-close.service';
 
 import type { ErpAlert } from './erp-notifications.service';
@@ -21,7 +22,7 @@ const TYPE_ICON: Record<string, string> = {
 @Component({
   selector: 'app-erp-notification-bell-list',
   standalone: true,
-  imports: [CommonModule, TranslateModule],
+  imports: [CommonModule, TranslateModule, ButtonComponent],
   template: `
     <div class="erp-bell-list">
       @if (svc.alerts().length === 0) {
@@ -33,7 +34,12 @@ const TYPE_ICON: Record<string, string> = {
               class="erp-bell-list__li"
               [class.erp-bell-list__li--haute]="alert.urgence === 'HAUTE'"
             >
-              <button type="button" class="erp-bell-list__item" (click)="open(alert)">
+              <nf-button
+                type="button"
+                class="erp-bell-list__item"
+                variant="ghost"
+                (clicked)="open(alert)"
+              >
                 <span class="erp-bell-list__icon" aria-hidden="true">{{ typeIcon(alert.type) }}</span>
                 <span class="erp-bell-list__body">
                   <span class="erp-bell-list__title">{{ alert.titre }}</span>
@@ -42,15 +48,17 @@ const TYPE_ICON: Record<string, string> = {
                 @if (alert.urgence === 'HAUTE') {
                   <span class="erp-bell-list__dot" aria-hidden="true"></span>
                 }
-              </button>
-              <button
+              </nf-button>
+              <nf-button
                 type="button"
                 class="erp-bell-list__dismiss"
+                variant="ghost"
+                size="sm"
                 [attr.aria-label]="'shared.alerts.dismiss' | translate"
-                (click)="dismiss($event, alert)"
+                (clicked)="dismiss($event, alert)"
               >
                 ×
-              </button>
+              </nf-button>
             </li>
           }
         </ul>
@@ -71,20 +79,36 @@ const TYPE_ICON: Record<string, string> = {
     .erp-bell-list__li:last-child { border-bottom: none; }
     .erp-bell-list__li--haute { border-inline-start: 3px solid var(--nf-color-danger-600, #dc2626); }
     .erp-bell-list__item {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.65rem;
       flex: 1;
       min-width: 0;
+    }
+    .erp-bell-list__item ::ng-deep button {
+      display: flex;
+      align-items: flex-start;
+      justify-content: flex-start;
+      gap: 0.65rem;
+      width: 100%;
+      height: auto;
+      min-height: 0;
       padding: 10px 12px;
       border: none;
+      border-radius: 0;
       background: transparent;
-      cursor: pointer;
       text-align: start;
       font: inherit;
       color: inherit;
+      white-space: normal;
     }
-    .erp-bell-list__item:hover { background: var(--nf-surface-hover, #f3f4f6); }
+    .erp-bell-list__item ::ng-deep .nf-button__content {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.65rem;
+      width: 100%;
+      min-width: 0;
+    }
+    .erp-bell-list__item ::ng-deep button:hover:not(:disabled) {
+      background: var(--nf-surface-hover, #f3f4f6);
+    }
     .erp-bell-list__icon { flex-shrink: 0; font-size: 1.1rem; line-height: 1.3; }
     .erp-bell-list__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
     .erp-bell-list__title {
@@ -112,15 +136,25 @@ const TYPE_ICON: Record<string, string> = {
     }
     .erp-bell-list__dismiss {
       flex-shrink: 0;
+      align-self: stretch;
+    }
+    .erp-bell-list__dismiss ::ng-deep button {
       width: 32px;
+      min-width: 32px;
+      height: 100%;
+      min-height: 100%;
+      padding: 0;
       border: none;
+      border-radius: 0;
       background: transparent;
       color: var(--nf-text-muted, #9ca3af);
-      cursor: pointer;
       font-size: 1.25rem;
       line-height: 1;
     }
-    .erp-bell-list__dismiss:hover { color: var(--nf-text-primary, #111827); background: var(--nf-surface-hover, #f3f4f6); }
+    .erp-bell-list__dismiss ::ng-deep button:hover:not(:disabled) {
+      color: var(--nf-text-primary, #111827);
+      background: var(--nf-surface-hover, #f3f4f6);
+    }
   `],
 })
 export class ErpNotificationBellListComponent {

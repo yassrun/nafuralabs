@@ -13,7 +13,7 @@ import { FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import type { Compte, CompteClasse, CompteType } from '../../models';
-import { ButtonComponent } from '@lib/anatomy/components';
+import { ButtonComponent, NfSelectComponent, type NfSelectOption } from '@lib/anatomy/components';
 
 
 const TYPES: CompteType[] = [
@@ -56,7 +56,7 @@ const EMPTY: DrawerForm = {
 @Component({
   selector: 'app-compte-edit-drawer',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslateModule, ButtonComponent],
+  imports: [CommonModule, FormsModule, TranslateModule, ButtonComponent, NfSelectComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (open()) {
@@ -93,13 +93,11 @@ const EMPTY: DrawerForm = {
             </label>
             <label class="dr__field">
               <span>{{ 'finance.planComptable.form.fields.classe' | translate }}</span>
-              <select
-                [ngModel]="form().classe"
-                (ngModelChange)="patch({ classe: $event })">
-                @for (c of classes; track c) {
-                  <option [ngValue]="c">{{ c }}</option>
-                }
-              </select>
+              <nf-select
+                [options]="classeOptions"
+                [ngModel]="String(form().classe)"
+                (ngModelChange)="onClasseChange($event)"
+              />
             </label>
           </div>
 
@@ -115,13 +113,11 @@ const EMPTY: DrawerForm = {
           <div class="dr__row dr__row--two">
             <label class="dr__field">
               <span>{{ 'finance.planComptable.drawer.typeComptable' | translate }}</span>
-              <select
+              <nf-select
+                [options]="typeOptions()"
                 [ngModel]="form().type"
-                (ngModelChange)="patch({ type: $event })">
-                @for (t of types; track t) {
-                  <option [ngValue]="t">{{ typeLabel(t) }}</option>
-                }
-              </select>
+                (ngModelChange)="onTypeChange($event)"
+              />
             </label>
             <label class="dr__field">
               <span>{{ 'finance.planComptable.form.fields.parent' | translate }}</span>
@@ -382,6 +378,10 @@ export class CompteEditDrawerComponent {
 
   readonly types = TYPES;
   readonly classes = CLASSES;
+  readonly classeOptions: NfSelectOption[] = CLASSES.map((c) => ({
+    value: String(c),
+    label: String(c),
+  }));
 
   private readonly _open = signal<boolean>(false);
   private readonly _current = signal<Compte | null>(null);
@@ -434,6 +434,21 @@ export class CompteEditDrawerComponent {
 
   patch(p: Partial<DrawerForm>): void {
     this._form.set({ ...this._form(), ...p });
+  }
+
+  typeOptions(): NfSelectOption[] {
+    return this.types.map((t) => ({ value: t, label: this.typeLabel(t) }));
+  }
+
+  onClasseChange(value: string): void {
+    const parsed = Number(value);
+    if (!Number.isNaN(parsed)) {
+      this.patch({ classe: parsed as CompteClasse });
+    }
+  }
+
+  onTypeChange(value: string): void {
+    this.patch({ type: value as CompteType });
   }
 
   typeLabel(t: CompteType): string {

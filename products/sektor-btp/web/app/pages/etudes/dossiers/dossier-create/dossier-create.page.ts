@@ -3,6 +3,14 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import {
+  ActionBarComponent,
+  ButtonComponent,
+  NfInputComponent,
+  PageHeaderComponent,
+  PageShellComponent,
+} from '@lib/anatomy';
+
+import {
   ClientPartnerSelectComponent,
   type ClientPartnerSelection,
 } from '@app/shared/components/client-partner-select/client-partner-select.component';
@@ -13,18 +21,33 @@ import { DossierEtudeApiService } from '../services/dossier-etude-api.service';
  * Création d'un dossier d'étude.
  *
  * <p>Objet + client Partner (rôle CLIENT) sont obligatoires dès la création.
+ * Actions form en bas (nf-action-bar) — règle placement §1.1.
  */
 @Component({
   selector: 'app-dossier-create',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, ClientPartnerSelectComponent],
+  imports: [
+    FormsModule,
+    ClientPartnerSelectComponent,
+    PageShellComponent,
+    PageHeaderComponent,
+    NfInputComponent,
+    ActionBarComponent,
+    ButtonComponent,
+  ],
   templateUrl: './dossier-create.page.html',
   styleUrl: './dossier-create.page.scss',
 })
 export class DossierCreatePage {
   private readonly api = inject(DossierEtudeApiService);
   private readonly nav = inject(Router);
+
+  readonly headerConfig = {
+    title: "Nouveau dossier d'étude",
+    subtitle:
+      'Un dossier porte un marché entrant : pièces, chiffrage et devis. Objet et client suffisent pour démarrer.',
+  };
 
   readonly objet = signal('');
   readonly clientId = signal<string | null>(null);

@@ -5,6 +5,7 @@
 | Besoin | Document |
 |--------|----------|
 | Ops K8s (deploy, migrate, reset, troubleshooting) | [toolchain/ops/AGENTS.md](../toolchain/ops/AGENTS.md) |
+| **Priorités fondateur (Nafura Labs master)** | **[cockpit/](cockpit/)** — lire `active-week.md` avant toute proposition hors ops |
 | Imports Gradle / TypeScript | [PLATFORM_IMPORTS.md](PLATFORM_IMPORTS.md) |
 | Table migration `nf/nafura` → chemins actuels | [ARCHITECTURE_MIGRATION.md](ARCHITECTURE_MIGRATION.md) |
 | Secrets Vault | [VAULT_SECRETS.md](VAULT_SECRETS.md) |

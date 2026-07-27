@@ -4,7 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { ButtonComponent, PageHeaderComponent, PageShellComponent, ToastService } from '@lib/anatomy/components';
+import {
+  ButtonComponent,
+  NfSelectComponent,
+  type NfSelectOption,
+  PageHeaderComponent,
+  PageShellComponent,
+  ToastService,
+} from '@lib/anatomy/components';
 import { AnalyticsApiService, type AnalyticsBucketResponse } from '@app/pages/analytics/services/analytics-api.service';
 import type {
   AnalytiquePivot,
@@ -15,7 +22,15 @@ import type {
 @Component({
   selector: 'app-analytique',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslateModule, PageShellComponent, PageHeaderComponent, ButtonComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    TranslateModule,
+    PageShellComponent,
+    PageHeaderComponent,
+    ButtonComponent,
+    NfSelectComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <nf-page-shell scroll>
@@ -25,11 +40,11 @@ import type {
       <section class="filters">
         <label>
           <span>{{ 'finance.analytique.fields.axe' | translate }}</span>
-          <select [ngModel]="axeType()" (ngModelChange)="axeType.set($event); refresh()">
-            <option value="CHANTIER">{{ 'finance.analytique.axeTypes.CHANTIER' | translate }}</option>
-            <option value="DEPARTEMENT">{{ 'finance.analytique.axeTypes.DEPARTEMENT' | translate }}</option>
-            <option value="ACTIVITE">{{ 'finance.analytique.axeTypes.ACTIVITE' | translate }}</option>
-          </select>
+          <nf-select
+            [options]="axeTypeOptions"
+            [ngModel]="axeType()"
+            (ngModelChange)="onAxeType($event)"
+          />
         </label>
         <label>
           <span>{{ 'finance.common.filters.from' | translate }}</span>
@@ -41,11 +56,11 @@ import type {
         </label>
         <label>
           <span>{{ 'finance.analytique.fields.comptes' | translate }}</span>
-          <select [ngModel]="classes()" (ngModelChange)="onClasses($event)">
-            <option value="6,7">{{ 'finance.analytique.compteSets.both' | translate }}</option>
-            <option value="6">{{ 'finance.analytique.compteSets.charges' | translate }}</option>
-            <option value="7">{{ 'finance.analytique.compteSets.produits' | translate }}</option>
-          </select>
+          <nf-select
+            [options]="classesOptions"
+            [ngModel]="classes()"
+            (ngModelChange)="onClasses($event)"
+          />
         </label>
         <label>
           <span>{{ 'finance.common.actions.search' | translate }}</span>
@@ -164,6 +179,18 @@ export class AnalytiquePage {
   readonly classes = signal<string>('6,7');
   readonly search = signal<string>('');
 
+  readonly axeTypeOptions: NfSelectOption[] = [
+    { value: 'CHANTIER', label: this.translate.instant('finance.analytique.axeTypes.CHANTIER') },
+    { value: 'DEPARTEMENT', label: this.translate.instant('finance.analytique.axeTypes.DEPARTEMENT') },
+    { value: 'ACTIVITE', label: this.translate.instant('finance.analytique.axeTypes.ACTIVITE') },
+  ];
+
+  readonly classesOptions: NfSelectOption[] = [
+    { value: '6,7', label: this.translate.instant('finance.analytique.compteSets.both') },
+    { value: '6', label: this.translate.instant('finance.analytique.compteSets.charges') },
+    { value: '7', label: this.translate.instant('finance.analytique.compteSets.produits') },
+  ];
+
   readonly pivot = signal<AnalytiquePivot | null>(null);
   readonly loading = signal(true);
 
@@ -198,6 +225,11 @@ export class AnalytiquePage {
         this.pivot.set({ axes: [], comptes: [], margeParAxe: {} });
         this.loading.set(false);
       });
+  }
+
+  onAxeType(v: string): void {
+    this.axeType.set(v as AxeAnalytiqueType);
+    this.refresh();
   }
 
   onClasses(v: string): void {

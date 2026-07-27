@@ -41,20 +41,19 @@
 
             @if (piece) {
               <div class="pieces__zone-fichier">
-                <mat-icon class="pieces__zone-icone" aria-hidden="true">description</mat-icon>
+                <nf-icon class="pieces__zone-icone" name="description" aria-hidden="true"></nf-icon>
                 <span class="pieces__nom">{{ piece.nomFichier || piece.documentId }}</span>
                 @if (modifiable()) {
-                  <button
-                    type="button"
-                    mat-icon-button
-                    class="pieces__icon-btn pieces__icon-btn--danger"
-                    matTooltip="Retirer"
+                  <nf-button
+                    variant="danger"
+                    size="sm"
+                    icon="trash-2"
+                    iconLibrary="lucide"
+                    tooltip="Retirer"
                     aria-label="Retirer le document"
                     [disabled]="!!envoiSlot()"
-                    (click)="supprimer(piece)"
-                  >
-                    <mat-icon>delete</mat-icon>
-                  </button>
+                    (clicked)="supprimer(piece)"
+                  ></nf-button>
                 }
               </div>
               @if (modifiable()) {
@@ -70,7 +69,7 @@
               }
             } @else if (modifiable()) {
               <label class="pieces__zone-drop">
-                <mat-icon aria-hidden="true">upload_file</mat-icon>
+                <nf-icon name="upload_file" aria-hidden="true"></nf-icon>
                 <span class="pieces__zone-drop-main">
                   {{ busy ? 'Envoi…' : 'Glissez-déposez le fichier ici' }}
                 </span>
@@ -97,16 +96,15 @@
               <span class="pieces__type">{{ libelleType(piece.type) }}</span>
               <span class="pieces__nom">{{ piece.nomFichier || piece.documentId }}</span>
               @if (modifiable()) {
-                <button
-                  type="button"
-                  mat-icon-button
-                  class="pieces__icon-btn pieces__icon-btn--danger"
-                  matTooltip="Retirer"
+                <nf-button
+                  variant="danger"
+                  size="sm"
+                  icon="trash-2"
+                  iconLibrary="lucide"
+                  tooltip="Retirer"
                   aria-label="Retirer le document"
-                  (click)="supprimer(piece)"
-                >
-                  <mat-icon>delete</mat-icon>
-                </button>
+                  (clicked)="supprimer(piece)"
+                ></nf-button>
               }
             </li>
           }
@@ -115,24 +113,22 @@
     }
   } @else {
     <div class="pieces__voies" role="group" aria-label="Mode de construction">
-      <button
-        type="button"
-        class="pieces__voie"
-        [class.pieces__voie--active]="voie() === 'auto'"
+      <nf-button
+        [variant]="voie() === 'auto' ? 'primary' : 'secondary'"
+        size="sm"
         [disabled]="extractionEnCours() || phase() === 'saving'"
-        (click)="setVoie('auto')"
+        (clicked)="setVoie('auto')"
       >
         Automatique
-      </button>
-      <button
-        type="button"
-        class="pieces__voie"
-        [class.pieces__voie--active]="voie() === 'manuel'"
+      </nf-button>
+      <nf-button
+        [variant]="voie() === 'manuel' ? 'primary' : 'secondary'"
+        size="sm"
         [disabled]="extractionEnCours() || phase() === 'saving'"
-        (click)="setVoie('manuel')"
+        (clicked)="setVoie('manuel')"
       >
         Manuel
-      </button>
+      </nf-button>
     </div>
 
     @if (voie() === 'auto') {

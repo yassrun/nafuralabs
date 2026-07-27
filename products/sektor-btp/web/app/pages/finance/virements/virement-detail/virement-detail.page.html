@@ -57,18 +57,12 @@
     <div class="vd__compte-block">
       <div class="vd__compte-card">
         <span class="vd__compte-label">{{ 'finance.virement.form.fields.compteEmetteur' | translate }}</span>
-        <select
+        <nf-select
+          [options]="compteSourceOptions()"
           [ngModel]="compteSourceId()"
           (ngModelChange)="compteSourceId.set($event)"
           [disabled]="!!existing() && existing()!.status === 'VALIDE'"
-        >
-          <option value="">{{ 'finance.factureFournisseur.form.fields.fournisseurPlaceholder' | translate }}</option>
-          @for (c of comptes(); track c.id) {
-            @if (c.isActive) {
-              <option [value]="c.id">{{ c.libelle }} ({{ format(c.soldeActuel) }} {{ 'finance.common.currency.mad' | translate }})</option>
-            }
-          }
-        </select>
+        />
         @if (compteSource(); as c) {
           <div class="vd__compte-info">
             <div>{{ 'finance.compte.list.columns.soldeComptable' | translate }} : <strong>{{ format(c.soldeActuel) }} {{ 'finance.common.currency.mad' | translate }}</strong></div>
@@ -85,16 +79,12 @@
 
       <div class="vd__compte-card">
         <span class="vd__compte-label">{{ 'finance.virement.form.fields.beneficiaire' | translate }}</span>
-        <select
+        <nf-select
+          [options]="compteDestOptions()"
           [ngModel]="compteDestId()"
           (ngModelChange)="compteDestId.set($event)"
           [disabled]="!!existing() && existing()!.status === 'VALIDE'"
-        >
-          <option value="">{{ 'finance.factureFournisseur.form.fields.fournisseurPlaceholder' | translate }}</option>
-          @for (c of comptesDest(); track c.id) {
-            <option [value]="c.id">{{ c.libelle }} ({{ format(c.soldeActuel) }} {{ 'finance.common.currency.mad' | translate }})</option>
-          }
-        </select>
+        />
         @if (compteDest(); as c) {
           <div class="vd__compte-info">
             <div>{{ 'finance.compte.list.columns.soldeComptable' | translate }} : <strong>{{ format(c.soldeActuel) }} {{ 'finance.common.currency.mad' | translate }}</strong></div>

@@ -10,10 +10,11 @@
     <div class="f8__toolbar">
       <label class="f8__lbl">
         <span>{{ 'financeRound2.retenueSource.trim' | translate }}</span>
-        <select [ngModel]="trimestre()" (ngModelChange)="trimestre.set($event)">
-          <option value="T1-2026">T1 2026</option>
-          <option value="T2-2026">T2 2026</option>
-        </select>
+        <nf-select
+          [options]="trimestreOptions"
+          [ngModel]="trimestre()"
+          (ngModelChange)="onTrimestreChange($event)"
+        />
       </label>
       <nf-button variant="primary" class="f8__btn f8__btn--primary" (clicked)="exportXml()">
         {{ 'financeRound2.retenueSource.export' | translate }}

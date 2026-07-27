@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import {PageHeaderComponent, PageShellComponent, ButtonComponent } from '@lib/anatomy';
+import {PageHeaderComponent, PageShellComponent, ButtonComponent, NfSelectComponent, type NfSelectOption } from '@lib/anatomy';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
 import type { FichePaie } from '@app/rh/models';
 import { PaieApiService } from '../services/paie-api.service';
@@ -19,18 +20,20 @@ const COMPANY = {
   selector: 'app-damancom',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, TranslateModule, PageShellComponent, PageHeaderComponent, MadCurrencyPipe, ButtonComponent],
+  imports: [CommonModule, FormsModule, TranslateModule, PageShellComponent, PageHeaderComponent, MadCurrencyPipe, ButtonComponent, NfSelectComponent],
   template: `
     <nf-page-shell scroll>
       <nf-page-header [config]="headerConfig()"></nf-page-header>
 
       <!-- Sélection mois -->
       <div class="controls">
-        <label class="ctrl-label">{{ 'rh.paie.declarations.common.moisLabel' | translate }}
-          <select [value]="mois()" (change)="mois.set($any($event.target).value)">
-            @for (m of moisDisponibles; track m) { <option [value]="m">{{ m }}</option> }
-          </select>
-        </label>
+        <nf-select
+          name="mois"
+          [label]="'rh.paie.declarations.common.moisLabel' | translate"
+          [options]="moisSelectOptions"
+          [ngModel]="mois()"
+          (ngModelChange)="mois.set($event)"
+        />
         <nf-button variant="secondary" (clicked)="exportXml()">{{ 'rh.paie.declarations.damancom.exportXmlBtn' | translate }}</nf-button>
         <nf-button variant="secondary" (clicked)="exportCsv()">{{ 'rh.paie.declarations.damancom.exportCsvBtn' | translate }}</nf-button>
       </div>
@@ -126,8 +129,6 @@ const COMPANY = {
   styles: [`
     :host { display: block; height: 100%; }
     .controls { display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; }
-    .ctrl-label { font-size: 13px; display: flex; align-items: center; gap: 8px; }
-    .ctrl-label select { padding: 7px 10px; border: 1px solid var(--nf-color-border); border-radius: 6px; font-size: 13px; background: var(--nf-color-surface); }
     .btn-export { padding: 7px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; }
     .btn-export { background: var(--nf-color-primary-700); color: var(--nf-color-primary-contrast); }
     .btn-export:hover { background: var(--nf-color-primary-700); }
@@ -160,6 +161,7 @@ export class DamancomPage {
 
   readonly company = COMPANY;
   readonly moisDisponibles = ['2026-03', '2026-04', '2026-05'];
+  readonly moisSelectOptions: NfSelectOption[] = this.moisDisponibles.map((m) => ({ value: m, label: m }));
   readonly mois = signal('2026-05');
   readonly paieRows = signal<FichePaie[]>([]);
 

@@ -2,16 +2,18 @@ import { CommonModule, PercentPipe } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
+import { NfSelectComponent, type NfSelectOption } from '@lib/anatomy/components';
 import { ConsommationProgressComponent } from '../components/consommation-progress/consommation-progress.component';
 import { BudgetFacade } from '../services';
+import type { BudgetFilters } from '../models';
 
 @Component({
   selector: 'app-budget-chantier-listing',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, MadCurrencyPipe, PercentPipe, ConsommationProgressComponent, TranslateModule],
+  imports: [CommonModule, FormsModule, RouterLink, MadCurrencyPipe, PercentPipe, ConsommationProgressComponent, TranslateModule, NfSelectComponent],
   template: `
     <section class="budget-page">
       <header class="budget-hero">
@@ -41,20 +43,17 @@ import { BudgetFacade } from '../services';
         <label><input type="checkbox" [ngModel]="statusEnabled('SUSPENDU')" (ngModelChange)="facade.toggleStatus('SUSPENDU', $event)" /> Suspendu</label>
         <label><input type="checkbox" [ngModel]="statusEnabled('TERMINE')" (ngModelChange)="facade.toggleStatus('TERMINE', $event)" /> Terminé</label>
 
-        <select [ngModel]="facade.filters().consommationRange" (ngModelChange)="facade.setFilters({ consommationRange: $event })">
-          <option value="TOUS">{{ 'chantiers.budget.list.filters.toutesConsommations' | translate }}</option>
-          <option value="LOW">&lt; 70%</option>
-          <option value="MID">70% - 90%</option>
-          <option value="HIGH">90% - 100%</option>
-          <option value="OVER">&gt; 100%</option>
-        </select>
+        <nf-select
+          [options]="consommationOptions"
+          [ngModel]="facade.filters().consommationRange"
+          (ngModelChange)="setConsommation($event)"
+        />
 
-        <select [ngModel]="facade.filters().margeRange" (ngModelChange)="facade.setFilters({ margeRange: $event })">
-          <option value="TOUS">{{ 'chantiers.budget.list.filters.toutesMarges' | translate }}</option>
-          <option value="NEGATIVE">Marge négative</option>
-          <option value="LOW">Marge &lt; 8%</option>
-          <option value="HEALTHY">Marge saine</option>
-        </select>
+        <nf-select
+          [options]="margeOptions"
+          [ngModel]="facade.filters().margeRange"
+          (ngModelChange)="setMarge($event)"
+        />
 
         <label><input type="checkbox" [ngModel]="facade.filters().enAlerte" (ngModelChange)="facade.setFilters({ enAlerte: $event })" /> {{ 'chantiers.budget.list.filters.enAlerte' | translate }}</label>
       </section>
@@ -114,7 +113,6 @@ import { BudgetFacade } from '../services';
     .budget-kpis strong { display: block; margin-top: 0.35rem; font-size: 1.15rem; }
     .budget-filters { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; padding: 1rem 1.25rem; border-radius: 1rem; background: var(--nf-color-bg-muted); }
     .budget-filters label { display: inline-flex; gap: 0.45rem; align-items: center; font-weight: 600; color: var(--nf-color-text-secondary); }
-    .budget-filters select { border: 1px solid var(--nf-color-border); background: var(--nf-color-surface); border-radius: 999px; padding: 0.5rem 0.85rem; }
     .budget-table-wrap { overflow: auto; border-radius: 1rem; background: var(--nf-color-surface); border: 1px solid var(--nf-color-border); }
     .budget-table { width: 100%; border-collapse: collapse; min-width: 56rem; }
     .budget-table th, .budget-table td { padding: 0.9rem 1rem; border-bottom: 1px solid var(--nf-color-border); text-align: left; }
@@ -135,7 +133,31 @@ import { BudgetFacade } from '../services';
 export class BudgetChantierListingPage implements OnInit {
   readonly facade = inject(BudgetFacade);
   private readonly route = inject(ActivatedRoute);
+  private readonly translate = inject(TranslateService);
   readonly statusEnabled = (status: 'EN_COURS' | 'TERMINE' | 'SUSPENDU') => this.facade.filters().statuses.includes(status);
+
+  readonly consommationOptions: NfSelectOption[] = [
+    { value: 'TOUS', label: this.translate.instant('chantiers.budget.list.filters.toutesConsommations') },
+    { value: 'LOW', label: '< 70%' },
+    { value: 'MID', label: '70% - 90%' },
+    { value: 'HIGH', label: '90% - 100%' },
+    { value: 'OVER', label: '> 100%' },
+  ];
+
+  readonly margeOptions: NfSelectOption[] = [
+    { value: 'TOUS', label: this.translate.instant('chantiers.budget.list.filters.toutesMarges') },
+    { value: 'NEGATIVE', label: 'Marge négative' },
+    { value: 'LOW', label: 'Marge < 8%' },
+    { value: 'HEALTHY', label: 'Marge saine' },
+  ];
+
+  setConsommation(value: string): void {
+    this.facade.setFilters({ consommationRange: value as BudgetFilters['consommationRange'] });
+  }
+
+  setMarge(value: string): void {
+    this.facade.setFilters({ margeRange: value as BudgetFilters['margeRange'] });
+  }
 
   ngOnInit(): void {
     const chantierId = this.route.snapshot.queryParamMap.get('chantierId');

@@ -3,15 +3,13 @@
 
   <div class="situations-toolbar">
     @if (chantierOptions().length > 0) {
-      <select
+      <nf-select
         class="chantier-select"
+        [options]="chantierSelectOptions()"
         [ngModel]="selectedChantier()"
-        (ngModelChange)="onChantierChange($event)">
-        <option value="">Tous les chantiers</option>
-        @for (opt of chantierOptions(); track opt.key) {
-          <option [value]="opt.key">{{ opt.value }}</option>
-        }
-      </select>
+        (ngModelChange)="onChantierChange($event)"
+        placeholder="Tous les chantiers"
+      />
     }
   </div>
 

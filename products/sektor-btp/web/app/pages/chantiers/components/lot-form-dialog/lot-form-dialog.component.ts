@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 
-import { ButtonComponent, NfInputComponent } from '@lib/anatomy';
+import { ButtonComponent, NfInputComponent, NfSelectComponent, type NfSelectOption } from '@lib/anatomy';
 import type { LotChantier } from '@app/chantiers/models';
 import { BPU_UNITS } from '../../constants/bpu-units';
 import { lotDepth, MAX_LOT_DEPTH } from '../../utils/lot-hierarchy.util';
@@ -41,7 +41,7 @@ export interface LotFormDialogResult {
 @Component({
   selector: 'app-lot-form-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatDialogModule, TranslateModule, ButtonComponent, NfInputComponent],
+  imports: [CommonModule, FormsModule, MatDialogModule, TranslateModule, ButtonComponent, NfInputComponent, NfSelectComponent],
   template: `
     <div class="dialog-shell">
       <header>
@@ -50,27 +50,23 @@ export interface LotFormDialogResult {
       </header>
 
       @if (data.mode === 'sousLot' && !data.isEdit) {
-        <label class="field">
-          <span>{{ 'chantiers.chantier.detail.lots.formParentLot' | translate }} *</span>
-          <select [ngModel]="parentLotId()" (ngModelChange)="parentLotId.set($event)">
-            <option value="">{{ 'chantiers.chantier.detail.lots.formParentLotPlaceholder' | translate }}</option>
-            @for (lot of parentCandidates(); track lot.id) {
-              <option [value]="lot.id">{{ lotLabel(lot) }}</option>
-            }
-          </select>
-        </label>
+        <nf-select
+          [label]="('chantiers.chantier.detail.lots.formParentLot' | translate) + ' *'"
+          [placeholder]="'chantiers.chantier.detail.lots.formParentLotPlaceholder' | translate"
+          [options]="parentLotOptions()"
+          [ngModel]="parentLotId()"
+          (ngModelChange)="parentLotId.set($event)"
+        />
       }
 
       @if (data.mode === 'poste' && !data.isEdit) {
-        <label class="field">
-          <span>{{ 'chantiers.chantier.detail.lots.formTargetLot' | translate }} *</span>
-          <select [ngModel]="targetLotId()" (ngModelChange)="targetLotId.set($event)">
-            <option value="">{{ 'chantiers.chantier.detail.lots.formTargetLotPlaceholder' | translate }}</option>
-            @for (lot of allLots(); track lot.id) {
-              <option [value]="lot.id">{{ lotLabel(lot) }}</option>
-            }
-          </select>
-        </label>
+        <nf-select
+          [label]="('chantiers.chantier.detail.lots.formTargetLot' | translate) + ' *'"
+          [placeholder]="'chantiers.chantier.detail.lots.formTargetLotPlaceholder' | translate"
+          [options]="targetLotOptions()"
+          [ngModel]="targetLotId()"
+          (ngModelChange)="targetLotId.set($event)"
+        />
       }
 
       @if (data.isEdit && code()) {
@@ -99,14 +95,12 @@ export interface LotFormDialogResult {
             required>
           </nf-input>
 
-          <label class="field">
-            <span>{{ 'chantiers.chantier.detail.lots.formUnite' | translate }} *</span>
-            <select [ngModel]="unite()" (ngModelChange)="unite.set($event)">
-              @for (unit of units; track unit) {
-                <option [value]="unit">{{ unit }}</option>
-              }
-            </select>
-          </label>
+          <nf-select
+            [label]="('chantiers.chantier.detail.lots.formUnite' | translate) + ' *'"
+            [options]="uniteOptions"
+            [ngModel]="unite()"
+            (ngModelChange)="unite.set($event)"
+          />
         </div>
 
         <nf-input
@@ -132,11 +126,6 @@ export interface LotFormDialogResult {
     .dialog-shell { display: grid; gap: 1rem; padding: 1.25rem; min-width: min(32rem, 92vw); }
     header { display: flex; justify-content: space-between; gap: 1rem; align-items: start; }
     header h2 { margin: 0; font-size: 1.125rem; color: var(--nf-text-primary); }
-    .field { display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.875rem; }
-    .field select {
-      padding: 0.625rem 0.75rem; border: 1px solid var(--nf-border-default);
-      border-radius: 8px; font: inherit; background: var(--nf-color-surface);
-    }
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
     .form-hint { margin: 0; font-size: 0.8125rem; color: var(--nf-text-secondary, var(--nf-color-text-secondary)); }
     footer { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 0.25rem; }
@@ -147,6 +136,7 @@ export class LotFormDialogComponent {
   readonly data = inject<LotFormDialogData>(MAT_DIALOG_DATA);
 
   readonly units = BPU_UNITS;
+  readonly uniteOptions: NfSelectOption[] = BPU_UNITS.map((unit) => ({ value: unit, label: unit }));
 
   readonly code = signal(this.data.initial?.code ?? '');
   readonly designation = signal(this.data.initial?.designation ?? '');
@@ -175,6 +165,16 @@ export class LotFormDialogComponent {
   readonly allLots = computed(() =>
     [...this.data.lots].sort((a, b) => a.ordre - b.ordre || a.code.localeCompare(b.code)),
   );
+
+  readonly parentLotOptions = computed<NfSelectOption[]>(() => [
+    { value: '', label: '—' },
+    ...this.parentCandidates().map((lot) => ({ value: lot.id, label: this.lotLabel(lot) })),
+  ]);
+
+  readonly targetLotOptions = computed<NfSelectOption[]>(() => [
+    { value: '', label: '—' },
+    ...this.allLots().map((lot) => ({ value: lot.id, label: this.lotLabel(lot) })),
+  ]);
 
   readonly titleKey = computed(() => {
     if (this.data.isEdit) {

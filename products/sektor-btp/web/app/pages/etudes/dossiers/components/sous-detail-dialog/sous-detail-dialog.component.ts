@@ -1,9 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, ElementRef, inject, viewChild } from '@angular/core';
+import { AfterViewInit, Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 
-import { ButtonComponent } from '@lib/anatomy';
+import {
+  ButtonComponent,
+  NfInputComponent,
+  NfSelectComponent,
+  type NfSelectOption,
+} from '@lib/anatomy';
 
 import type { DpuComposantType } from '@app/etudes/models';
 import type { UniteOption } from '../../utils/unite-options.util';
@@ -35,14 +40,14 @@ export interface SousDetailDialogResult {
   offreFournisseurId?: string | null;
 }
 
-const SOURCES: { value: string; label: string }[] = [
+const SOURCES: NfSelectOption[] = [
   { value: 'MANUEL', label: 'Manuel' },
   { value: 'CONSULTE', label: 'Consulté (offre / catalogue)' },
   { value: 'CATALOGUE', label: 'Catalogue fournisseur' },
   { value: 'BIBLIOTHEQUE', label: 'Bibliothèque de prix' },
 ];
 
-const TYPES: { value: DpuComposantType; label: string }[] = [
+const TYPES: NfSelectOption[] = [
   { value: 'MATIERE', label: 'Matière' },
   { value: 'MAIN_DOEUVRE', label: 'Main-d’œuvre' },
   { value: 'MATERIEL', label: 'Matériel' },
@@ -52,7 +57,14 @@ const TYPES: { value: DpuComposantType; label: string }[] = [
 @Component({
   selector: 'app-sous-detail-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatDialogModule, ButtonComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatDialogModule,
+    ButtonComponent,
+    NfSelectComponent,
+    NfInputComponent,
+  ],
   template: `
     <div class="dialog-shell">
       <header>
@@ -60,63 +72,54 @@ const TYPES: { value: DpuComposantType; label: string }[] = [
         <nf-button variant="ghost" (clicked)="close()" aria-label="Fermer">✕</nf-button>
       </header>
 
-      <label class="field">
-        <span>Type *</span>
-        <select name="type" [(ngModel)]="type">
-          @for (t of types; track t.value) {
-            <option [ngValue]="t.value">{{ t.label }}</option>
-          }
-        </select>
-      </label>
+      <nf-select
+        label="Type"
+        name="type"
+        [options]="types"
+        [(ngModel)]="type"
+        [required]="true"
+      />
 
-      <label class="field">
-        <span>Désignation *</span>
-        <input
-          #designationInput
-          name="designation"
-          type="text"
-          [(ngModel)]="designation"
-          autocomplete="off"
-          required
-          placeholder="Ex. Béton C25/30"
-        />
-      </label>
+      <nf-input
+        id="sous-detail-designation"
+        label="Désignation"
+        name="designation"
+        [(ngModel)]="designation"
+        autocomplete="off"
+        [required]="true"
+        placeholder="Ex. Béton C25/30"
+      />
 
       <div class="grid-3">
-        <label class="field">
-          <span>Unité *</span>
-          <select name="unite" [(ngModel)]="unite">
-            <option value="">—</option>
-            @for (u of data.uniteOptions; track u.code) {
-              <option [ngValue]="u.code">{{ u.code }}</option>
-            }
-          </select>
-        </label>
-        <label class="field">
-          <span>Quantité *</span>
-          <input name="quantite" type="number" step="any" min="0" [(ngModel)]="quantite" required />
-        </label>
-        <label class="field">
-          <span>Prix unitaire *</span>
-          <input
-            name="prixUnitaire"
-            type="number"
-            step="any"
-            min="0"
-            [(ngModel)]="prixUnitaire"
-            required
-          />
-        </label>
+        <nf-select
+          label="Unité"
+          name="unite"
+          [options]="uniteSelectOptions"
+          [(ngModel)]="unite"
+          [required]="true"
+        />
+        <nf-input
+          label="Quantité"
+          name="quantite"
+          type="number"
+          [(ngModel)]="quantite"
+          [required]="true"
+        />
+        <nf-input
+          label="Prix unitaire"
+          name="prixUnitaire"
+          type="number"
+          [(ngModel)]="prixUnitaire"
+          [required]="true"
+        />
       </div>
 
-      <label class="field">
-        <span>Source du prix</span>
-        <select name="sourcePrix" [(ngModel)]="sourcePrix">
-          @for (s of sources; track s.value) {
-            <option [ngValue]="s.value">{{ s.label }}</option>
-          }
-        </select>
-      </label>
+      <nf-select
+        label="Source du prix"
+        name="sourcePrix"
+        [options]="sources"
+        [(ngModel)]="sourcePrix"
+      />
 
       <p class="total" aria-live="polite">
         Montant
@@ -148,27 +151,6 @@ const TYPES: { value: DpuComposantType; label: string }[] = [
     header h2 {
       margin: 0;
       font-size: 1.125rem;
-    }
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 0.35rem;
-      font-size: 0.875rem;
-    }
-    .field input,
-    .field select {
-      padding: 0.625rem 0.75rem;
-      border: 1px solid var(--nf-color-border, #d1d5db);
-      border-radius: 8px;
-      font: inherit;
-      background: var(--nf-color-surface, #fff);
-      color: var(--nf-color-text-primary, #1a1a1a);
-    }
-    .field input:focus,
-    .field select:focus {
-      outline: none;
-      border-color: var(--nf-color-primary-600, #0b6e7a);
-      box-shadow: 0 0 0 3px color-mix(in srgb, var(--nf-color-primary-600, #0b6e7a) 18%, transparent);
     }
     .grid-3 {
       display: grid;
@@ -203,11 +185,15 @@ export class SousDetailDialogComponent implements AfterViewInit {
     MatDialogRef<SousDetailDialogComponent, SousDetailDialogResult | null>,
   );
   readonly data = inject<SousDetailDialogData>(MAT_DIALOG_DATA);
-  private readonly designationInput = viewChild<ElementRef<HTMLInputElement>>('designationInput');
 
   readonly types = TYPES;
   readonly sources = SOURCES;
-  type: DpuComposantType = this.data.initial?.type ?? 'MATIERE';
+  readonly uniteSelectOptions: NfSelectOption[] = [
+    { value: '', label: '—' },
+    ...this.data.uniteOptions.map((u) => ({ value: u.code, label: u.code })),
+  ];
+
+  type: string = this.data.initial?.type ?? 'MATIERE';
   designation = this.data.initial?.designation ?? '';
   unite = this.data.initial?.unite ?? this.data.uniteOptions[0]?.code ?? '';
   quantite = this.data.initial?.quantite != null ? String(this.data.initial.quantite) : '1';
@@ -222,8 +208,8 @@ export class SousDetailDialogComponent implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    // Focus natif (évite les pièges CVA / autoFocus Material sur le select).
-    queueMicrotask(() => this.designationInput()?.nativeElement?.focus());
+    // Focus désignation (évite les pièges CVA / autoFocus Material sur le select).
+    queueMicrotask(() => document.getElementById('sous-detail-designation')?.focus());
   }
 
   get montant(): number {
@@ -243,7 +229,7 @@ export class SousDetailDialogComponent implements AfterViewInit {
   save(): void {
     if (!this.canSave()) return;
     this.dialogRef.close({
-      type: this.type,
+      type: this.type as DpuComposantType,
       designation: this.designation.trim(),
       unite: this.unite.trim(),
       quantite: this.parseNumber(this.quantite),

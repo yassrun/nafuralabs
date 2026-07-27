@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FilterResetComponent } from '@lib/anatomy/components/molecules/filter-reset/filter-reset.component';
 
-import { PageHeaderComponent, PageShellComponent } from '@lib/anatomy';
+import { PageHeaderComponent, PageShellComponent, NfSelectComponent, type NfSelectOption } from '@lib/anatomy';
 import type { Chantier } from '../../../../chantiers/models';
 import { ChantierApiService } from '../../../chantiers/services/chantier-api.service';
 import { PointageApiService } from '../services/pointage-api.service';
@@ -16,18 +17,19 @@ import { MODE_KEYS } from '@app/shell/i18n-labels';
   selector: 'app-pointage-listing',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, TranslateModule, RouterLink, PageShellComponent, PageHeaderComponent, FilterResetComponent],
+  imports: [CommonModule, FormsModule, TranslateModule, RouterLink, PageShellComponent, PageHeaderComponent, FilterResetComponent, NfSelectComponent],
   template: `
     <nf-page-shell scroll>
       <nf-page-header [config]="headerConfig()"></nf-page-header>
 
       <div class="controls">
-        <select [value]="chantierId()" (change)="chantierId.set($any($event.target).value)">
-          <option value="">{{ 'rh.pointage.listing.controls.tousChantiers' | translate }}</option>
-          @for (c of chantiers(); track c.id) {
-            <option [value]="c.id">{{ c.code }} — {{ c.name }}</option>
-          }
-        </select>
+        <nf-select
+          name="chantierId"
+          [placeholder]="'rh.pointage.listing.controls.tousChantiers' | translate"
+          [options]="chantierSelectOptions()"
+          [ngModel]="chantierId()"
+          (ngModelChange)="chantierId.set($event)"
+        />
         <input type="month" [value]="mois()" (change)="mois.set($any($event.target).value)" />
         <nf-filter-reset [active]="hasFilter()" (reset)="resetFilters()"></nf-filter-reset>
         <span class="count">{{ 'rh.pointage.listing.controls.lignesCount' | translate: { count: rows().length } }}</span>
@@ -70,7 +72,7 @@ import { MODE_KEYS } from '@app/shell/i18n-labels';
     :host { display: block; height: 100%; }
 
     .controls { display: flex; gap: 10px; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; }
-    .controls select, .controls input { padding: 7px 12px; border: 1px solid var(--nf-color-border); border-radius: 6px; font-size: 13px; background: var(--nf-color-surface); }
+    .controls input { padding: 7px 12px; border: 1px solid var(--nf-color-border); border-radius: 6px; font-size: 13px; background: var(--nf-color-surface); }
     .count { font-size: 13px; color: var(--nf-color-text-secondary); }
     .btn-saisie { margin-left: auto; padding: 7px 14px; background: var(--nf-color-primary-500); color: var(--nf-color-primary-contrast); border-radius: 6px; font-size: 13px; font-weight: 600; text-decoration: none; }
     .btn-saisie:hover { background: var(--nf-color-primary-600); }
@@ -125,6 +127,16 @@ export class PointageListingPage {
   }));
 
   readonly chantiers = computed(() => this.chantiersList());
+
+  chantierSelectOptions(): NfSelectOption[] {
+    return [
+      { value: '', label: this.translate.instant('rh.pointage.listing.controls.tousChantiers') },
+      ...this.chantiers().map((c) => ({
+        value: c.id,
+        label: `${c.code} — ${c.name}`,
+      })),
+    ];
+  }
 
   constructor() {
     void this.chantierApi.getAll().then(({ items }) => {

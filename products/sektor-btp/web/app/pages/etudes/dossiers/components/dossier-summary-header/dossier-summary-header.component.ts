@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
+import { ActionBarComponent, ButtonComponent } from '@lib/anatomy';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
 
 import {
@@ -26,7 +27,14 @@ import {
   selector: 'app-dossier-summary-header',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterLink, MadCurrencyPipe, ClientPartnerSelectComponent],
+  imports: [
+    CommonModule,
+    RouterLink,
+    MadCurrencyPipe,
+    ClientPartnerSelectComponent,
+    ActionBarComponent,
+    ButtonComponent,
+  ],
   templateUrl: './dossier-summary-header.component.html',
   styleUrl: './dossier-summary-header.component.scss',
 })

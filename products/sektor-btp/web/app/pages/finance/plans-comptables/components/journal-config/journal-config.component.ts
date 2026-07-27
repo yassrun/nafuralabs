@@ -5,14 +5,15 @@ import {
   EventEmitter,
   Input,
   Output,
+  inject,
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { JOURNAL_TYPE_KEYS } from '@app/shell/i18n-labels';
 import type { Journal, JournalCreate, JournalType } from '../../models';
-import { ButtonComponent } from '@lib/anatomy/components';
+import { ButtonComponent, NfSelectComponent, type NfSelectOption } from '@lib/anatomy/components';
 
 
 const ALL_TYPES: JournalType[] = [
@@ -27,7 +28,7 @@ const ALL_TYPES: JournalType[] = [
 @Component({
   selector: 'app-journal-config',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslateModule, ButtonComponent],
+  imports: [CommonModule, FormsModule, TranslateModule, ButtonComponent, NfSelectComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="jr">
@@ -60,11 +61,7 @@ const ALL_TYPES: JournalType[] = [
                   <input type="text" [(ngModel)]="draft.libelle" />
                 </td>
                 <td>
-                  <select [(ngModel)]="draft.type">
-                    @for (t of types; track t) {
-                      <option [ngValue]="t">{{ typeLabel(t) | translate }}</option>
-                    }
-                  </select>
+                  <nf-select [options]="typeOptions()" [(ngModel)]="draft.type" />
                 </td>
                 <td>
                   <input
@@ -129,11 +126,7 @@ const ALL_TYPES: JournalType[] = [
                 <input type="text" [(ngModel)]="draft.libelle" />
               </td>
               <td>
-                <select [(ngModel)]="draft.type">
-                  @for (t of types; track t) {
-                    <option [ngValue]="t">{{ typeLabel(t) | translate }}</option>
-                  }
-                </select>
+                <nf-select [options]="typeOptions()" [(ngModel)]="draft.type" />
               </td>
               <td>
                 <input
@@ -290,6 +283,8 @@ const ALL_TYPES: JournalType[] = [
   ],
 })
 export class JournalConfigComponent {
+  private readonly translate = inject(TranslateService);
+
   @Input() journaux: Journal[] = [];
 
   readonly types = ALL_TYPES;
@@ -314,6 +309,13 @@ export class JournalConfigComponent {
 
   typeLabel(t: JournalType): string {
     return JOURNAL_TYPE_KEYS[t] ?? t;
+  }
+
+  typeOptions(): NfSelectOption[] {
+    return this.types.map((t) => ({
+      value: t,
+      label: this.translate.instant(this.typeLabel(t)),
+    }));
   }
 
   openCreate(): void {

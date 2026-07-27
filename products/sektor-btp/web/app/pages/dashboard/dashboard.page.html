@@ -21,15 +21,32 @@
     }
 
     <div class="dashboard-toolbar">
-      <mat-button-toggle-group
-        [value]="layout.currentPersona()"
-        (change)="onPersonaChange($event)"
-        aria-label="Dashboard layout persona"
-      >
-        <mat-button-toggle value="dg">{{ 'dashboard.layout.personaDg' | translate }}</mat-button-toggle>
-        <mat-button-toggle value="conducteur">{{ 'dashboard.layout.personaConducteur' | translate }}</mat-button-toggle>
-        <mat-button-toggle value="comptable">{{ 'dashboard.layout.personaComptable' | translate }}</mat-button-toggle>
-      </mat-button-toggle-group>
+      <div class="dashboard-toolbar__personas" role="group" aria-label="Dashboard layout persona">
+        <nf-button
+          variant="ghost"
+          size="sm"
+          [active]="layout.currentPersona() === 'dg'"
+          (clicked)="onPersonaChange('dg')"
+        >
+          {{ 'dashboard.layout.personaDg' | translate }}
+        </nf-button>
+        <nf-button
+          variant="ghost"
+          size="sm"
+          [active]="layout.currentPersona() === 'conducteur'"
+          (clicked)="onPersonaChange('conducteur')"
+        >
+          {{ 'dashboard.layout.personaConducteur' | translate }}
+        </nf-button>
+        <nf-button
+          variant="ghost"
+          size="sm"
+          [active]="layout.currentPersona() === 'comptable'"
+          (clicked)="onPersonaChange('comptable')"
+        >
+          {{ 'dashboard.layout.personaComptable' | translate }}
+        </nf-button>
+      </div>
       <nf-button variant="secondary" icon="refresh-cw" (clicked)="onResetLayout()">
         {{ 'dashboard.layout.reset' | translate }}
       </nf-button>

@@ -10,10 +10,7 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { firstValueFrom } from 'rxjs';
 
 import { ButtonComponent, ConfirmDialogService, ToastService } from '@lib/anatomy';
@@ -72,15 +69,7 @@ const SOURCE_LABELS: Record<string, string> = {
   selector: 'app-poste-decomposition-panel',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    CommonModule,
-    FormsModule,
-    ButtonComponent,
-    MadCurrencyPipe,
-    MatButtonModule,
-    MatIconModule,
-    MatTooltipModule,
-  ],
+  imports: [CommonModule, FormsModule, ButtonComponent, MadCurrencyPipe],
   templateUrl: './poste-decomposition-panel.component.html',
   styleUrl: './poste-decomposition-panel.component.scss',
 })

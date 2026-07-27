@@ -1,8 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { ButtonComponent, PageHeaderComponent, PageShellComponent } from '@lib/anatomy/components';
+import {
+  ButtonComponent,
+  NfSelectComponent,
+  type NfSelectOption,
+  PageHeaderComponent,
+  PageShellComponent,
+} from '@lib/anatomy/components';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
 import { ExportService } from '@lib/anatomy/services/export.service';
 import type { FactureMarche } from '../../marches/models';
@@ -18,16 +25,27 @@ const COMPANY = {
   selector: 'app-simpl-is',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, TranslateModule, PageShellComponent, PageHeaderComponent, MadCurrencyPipe, ButtonComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    TranslateModule,
+    PageShellComponent,
+    PageHeaderComponent,
+    MadCurrencyPipe,
+    ButtonComponent,
+    NfSelectComponent,
+  ],
   template: `
     <nf-page-shell scroll>
       <nf-page-header [config]="headerConfig"></nf-page-header>
 
       <div class="controls">
         <label class="ctrl-label">{{ 'finance.declarations.simplIs.monthLabel' | translate }}
-          <select [value]="mois()" (change)="mois.set($any($event.target).value)">
-            @for (m of moisDispo; track m) { <option [value]="m">{{ m }}</option> }
-          </select>
+          <nf-select
+            [options]="moisOptions"
+            [ngModel]="mois()"
+            (ngModelChange)="mois.set($event)"
+          />
         </label>
         <nf-button variant="primary" class="btn-export" (clicked)="exportXml()">{{ 'finance.declarations.simplIs.exportXml' | translate }}</nf-button>
         <nf-button variant="primary" class="btn-xls" (clicked)="exportAnnexeXlsx()">{{ 'finance.declarations.simplIs.exportXlsx' | translate }}</nf-button>
@@ -133,6 +151,7 @@ export class SimplIsPage implements OnInit {
   readonly company = COMPANY;
   readonly moisDispo = ['2026-03', '2026-04', '2026-05'];
   readonly mois = signal('2026-05');
+  readonly moisOptions: NfSelectOption[] = this.moisDispo.map((m) => ({ value: m, label: m }));
   private readonly facturesSig = signal<FactureMarche[]>([]);
 
   ngOnInit(): void {

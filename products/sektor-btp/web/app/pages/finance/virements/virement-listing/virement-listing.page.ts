@@ -7,12 +7,12 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { BankReconciliationApiService } from '@app/finance/services/bank-reconciliation-api.service';
 import { VirementApiService } from '@app/finance/services/virement-api.service';
 import type { CompteFinancier, VirementInterne } from '@app/finance/models';
-import { ButtonComponent } from '@lib/anatomy/components';
+import { ButtonComponent, NfSelectComponent, type NfSelectOption } from '@lib/anatomy/components';
 
 @Component({
   selector: 'app-virement-listing',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslateModule, ButtonComponent],
+  imports: [CommonModule, FormsModule, TranslateModule, ButtonComponent, NfSelectComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './virement-listing.page.html',
   styleUrl: './virement-listing.page.scss',
@@ -110,5 +110,28 @@ export class VirementListingPage {
           ? 'finance.declarations.status.BROUILLON'
           : 'finance.common.toasts.cancelled';
     return this.translate.instant(key);
+  }
+
+  statusOptions(): NfSelectOption[] {
+    return [
+      { value: '', label: this.translate.instant('finance.common.filters.allStatuses') },
+      { value: 'BROUILLON', label: this.translate.instant('finance.declarations.status.BROUILLON') },
+      { value: 'VALIDE', label: this.translate.instant('finance.common.toasts.validated') },
+      { value: 'ANNULE', label: this.translate.instant('finance.common.toasts.cancelled') },
+    ];
+  }
+
+  sourceOptions(): NfSelectOption[] {
+    return [
+      { value: '', label: this.translate.instant('finance.virement.form.fields.compteEmetteur') },
+      ...this.comptes().map((c) => ({ value: c.id, label: c.libelle })),
+    ];
+  }
+
+  destOptions(): NfSelectOption[] {
+    return [
+      { value: '', label: this.translate.instant('finance.virement.form.fields.beneficiaire') },
+      ...this.comptes().map((c) => ({ value: c.id, label: c.libelle })),
+    ];
   }
 }

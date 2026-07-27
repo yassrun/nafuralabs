@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { ButtonComponent, PageHeaderComponent, PageShellComponent } from '@lib/anatomy/components';
+import { ButtonComponent, NfSelectComponent, PageHeaderComponent, PageShellComponent, type NfSelectOption } from '@lib/anatomy/components';
 import { JournalApiService } from '@app/finance/services/journal-api.service';
 import type { JournalSummary } from '@app/finance/models';
 
@@ -37,7 +37,7 @@ function buildPeriodOptions(locale: string): PeriodOption[] {
 @Component({
   selector: 'app-journal-listing',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslateModule, PageShellComponent, PageHeaderComponent, ButtonComponent],
+  imports: [CommonModule, FormsModule, TranslateModule, PageShellComponent, PageHeaderComponent, ButtonComponent, NfSelectComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <nf-page-shell scroll>
@@ -47,23 +47,19 @@ function buildPeriodOptions(locale: string): PeriodOption[] {
       <section class="filters">
         <label class="filter">
           <span>{{ 'finance.journal.list.filters.period' | translate }}</span>
-          <select [ngModel]="periodIdx()" (ngModelChange)="onPeriod($event)">
-            @for (p of periods; track p.start; let i = $index) {
-              <option [ngValue]="i">{{ p.label }}</option>
-            }
-          </select>
+          <nf-select
+            [options]="periodSelectOptions()"
+            [ngModel]="periodIdxAsString()"
+            (ngModelChange)="onPeriod($event)"
+          />
         </label>
         <label class="filter">
           <span>{{ 'finance.journal.list.filters.type' | translate }}</span>
-          <select [ngModel]="filterType()" (ngModelChange)="filterType.set($event)">
-            <option value="">{{ 'finance.common.filters.all' | translate }}</option>
-            <option value="VENTE">{{ 'finance.journal.types.vente' | translate }}</option>
-            <option value="ACHAT">{{ 'finance.journal.types.achat' | translate }}</option>
-            <option value="BANQUE">{{ 'finance.journal.types.banque' | translate }}</option>
-            <option value="CAISSE">{{ 'finance.journal.types.caisse' | translate }}</option>
-            <option value="OPERATIONS_DIVERSES">{{ 'finance.journal.types.operationsDiverses' | translate }}</option>
-            <option value="NOUVEAUX">{{ 'finance.journal.types.nouveaux' | translate }}</option>
-          </select>
+          <nf-select
+            [options]="typeOptions()"
+            [ngModel]="filterType()"
+            (ngModelChange)="filterType.set($event)"
+          />
         </label>
         <nf-button variant="primary" class="btn-primary" (clicked)="onNouvelle()">{{ 'finance.ecriture.actions.create' | translate }}</nf-button>
       </section>
@@ -124,7 +120,6 @@ function buildPeriodOptions(locale: string): PeriodOption[] {
     :host { display: block; height: 100%; }
     .filters { display: flex; align-items: end; gap: 16px; margin: 8px 0 16px; flex-wrap: wrap; }
     .filter { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--nf-color-text-secondary); }
-    .filter select { padding: 6px 10px; border: 1px solid var(--nf-color-primary-200); border-radius: 6px; background: white; min-width: 160px; }
     .btn-primary {
       padding: 8px 14px; background: var(--nf-color-primary-700); color: white; border: none; border-radius: 6px;
       cursor: pointer; font-weight: 600; margin-left: auto;
@@ -190,8 +185,32 @@ export class JournalListingPage {
     this.refresh();
   }
 
-  onPeriod(idx: number): void {
-    this.periodIdx.set(idx);
+  periodIdxAsString(): string {
+    return String(this.periodIdx());
+  }
+
+  periodSelectOptions(): NfSelectOption[] {
+    return this.periods.map((p, i) => ({ value: String(i), label: p.label }));
+  }
+
+  typeOptions(): NfSelectOption[] {
+    return [
+      { value: '', label: this.translate.instant('finance.common.filters.all') },
+      { value: 'VENTE', label: this.translate.instant('finance.journal.types.vente') },
+      { value: 'ACHAT', label: this.translate.instant('finance.journal.types.achat') },
+      { value: 'BANQUE', label: this.translate.instant('finance.journal.types.banque') },
+      { value: 'CAISSE', label: this.translate.instant('finance.journal.types.caisse') },
+      {
+        value: 'OPERATIONS_DIVERSES',
+        label: this.translate.instant('finance.journal.types.operationsDiverses'),
+      },
+      { value: 'NOUVEAUX', label: this.translate.instant('finance.journal.types.nouveaux') },
+    ];
+  }
+
+  onPeriod(idx: string | number): void {
+    const parsed = typeof idx === 'number' ? idx : Number(idx);
+    this.periodIdx.set(Number.isFinite(parsed) ? parsed : 0);
     this.refresh();
   }
 

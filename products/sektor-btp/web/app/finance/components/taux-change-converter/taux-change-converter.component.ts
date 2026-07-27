@@ -5,11 +5,12 @@ import { TranslateModule } from '@ngx-translate/core';
 
 import type { Devise, TauxChange } from '../../models';
 import { DeviseFlagComponent } from '../devise-flag/devise-flag.component';
+import { NfSelectComponent, type NfSelectOption } from '@lib/anatomy/components';
 
 @Component({
   selector: 'app-taux-change-converter',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslateModule, DeviseFlagComponent],
+  imports: [CommonModule, FormsModule, TranslateModule, DeviseFlagComponent, NfSelectComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="conv">
@@ -25,19 +26,19 @@ import { DeviseFlagComponent } from '../devise-flag/devise-flag.component';
         </div>
         <div class="conv__col">
           <label>{{ 'finance.tauxChange.converter.from' | translate }}</label>
-          <select [ngModel]="fromCode()" (ngModelChange)="fromCode.set($event)">
-            @for (d of devises(); track d.id) {
-              <option [value]="d.code">{{ d.code }} — {{ d.libelle }}</option>
-            }
-          </select>
+          <nf-select
+            [options]="deviseOptions()"
+            [ngModel]="fromCode()"
+            (ngModelChange)="fromCode.set($event)"
+          />
         </div>
         <div class="conv__col">
           <label>{{ 'finance.tauxChange.converter.to' | translate }}</label>
-          <select [ngModel]="toCode()" (ngModelChange)="toCode.set($event)">
-            @for (d of devises(); track d.id) {
-              <option [value]="d.code">{{ d.code }} — {{ d.libelle }}</option>
-            }
-          </select>
+          <nf-select
+            [options]="deviseOptions()"
+            [ngModel]="toCode()"
+            (ngModelChange)="toCode.set($event)"
+          />
         </div>
       </div>
 
@@ -168,6 +169,13 @@ export class TauxChangeConverterComponent {
       if (!this.fromCode()) this.fromCode.set(this.defaultFrom());
       if (!this.toCode()) this.toCode.set(this.defaultTo());
     });
+  }
+
+  deviseOptions(): NfSelectOption[] {
+    return this.devises().map((d) => ({
+      value: d.code,
+      label: `${d.code} — ${d.libelle}`,
+    }));
   }
 
   formatAmount(value: number, code: string): string {

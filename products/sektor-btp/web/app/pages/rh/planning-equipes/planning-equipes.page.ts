@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import {PageHeaderComponent, PageShellComponent, ToastService, ButtonComponent } from '@lib/anatomy';
+import {PageHeaderComponent, PageShellComponent, ToastService, ButtonComponent, NfSelectComponent, type NfSelectOption } from '@lib/anatomy';
 import { resolveLocale } from '@lib/anatomy/pipes/_locale-resolver';
 import { DAY_KEYS_ORDERED } from '@app/shell/i18n-labels';
 import type { Chantier } from '../../../chantiers/models';
@@ -50,28 +50,26 @@ function overlapsWeek(a: AffectationEmploye, weekStart: Date, weekEnd: Date): bo
   selector: 'app-planning-equipes',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, TranslateModule, RouterLink, PageShellComponent, PageHeaderComponent, ButtonComponent],
+  imports: [CommonModule, FormsModule, TranslateModule, RouterLink, PageShellComponent, PageHeaderComponent, ButtonComponent, NfSelectComponent],
   template: `
     <nf-page-shell scroll>
       <nf-page-header [config]="headerConfig()"></nf-page-header>
 
       <div class="filters">
-        <label>{{ 'rh.planning.filters.chantier' | translate }}
-          <select class="ctrl" [value]="filterChantierId()" (change)="onFilterChantier($any($event.target).value)">
-            <option value="">{{ 'rh.common.actions.all' | translate }}</option>
-            @for (c of chantiers(); track c.id) {
-              <option [value]="c.id">{{ c.code }}</option>
-            }
-          </select>
-        </label>
-        <label>{{ 'rh.planning.filters.employe' | translate }}
-          <select class="ctrl" [value]="filterEmployeId()" (change)="onFilterEmploye($any($event.target).value)">
-            <option value="">{{ 'rh.common.actions.all' | translate }}</option>
-            @for (e of employeOptions(); track e.id) {
-              <option [value]="e.id">{{ e.nom }}</option>
-            }
-          </select>
-        </label>
+        <nf-select
+          name="filterChantier"
+          [label]="'rh.planning.filters.chantier' | translate"
+          [options]="chantierFilterOptions()"
+          [ngModel]="filterChantierId()"
+          (ngModelChange)="onFilterChantier($event)"
+        />
+        <nf-select
+          name="filterEmploye"
+          [label]="'rh.planning.filters.employe' | translate"
+          [options]="employeFilterOptions()"
+          [ngModel]="filterEmployeId()"
+          (ngModelChange)="onFilterEmploye($event)"
+        />
         <nf-button variant="primary" (clicked)="openDialog.set(true)">{{ 'rh.planning.filters.btnNew' | translate }}</nf-button>
       </div>
 
@@ -143,20 +141,18 @@ function overlapsWeek(a: AffectationEmploye, weekStart: Date, weekEnd: Date): bo
       <div class="dialog-backdrop" (click)="openDialog.set(false)"></div>
       <div class="dialog" role="dialog" aria-modal="true">
         <h3>{{ 'rh.planning.dialog.title' | translate }}</h3>
-        <label>{{ 'rh.planning.dialog.employe' | translate }}
-          <select class="ctrl" [(ngModel)]="formEmployeId">
-            @for (e of employeOptions(); track e.id) {
-              <option [value]="e.id">{{ e.nom }}</option>
-            }
-          </select>
-        </label>
-        <label>{{ 'rh.planning.dialog.chantier' | translate }}
-          <select class="ctrl" [(ngModel)]="formChantierId">
-            @for (c of chantiers(); track c.id) {
-              <option [value]="c.id">{{ c.code }}</option>
-            }
-          </select>
-        </label>
+        <nf-select
+          name="formEmploye"
+          [label]="'rh.planning.dialog.employe' | translate"
+          [options]="employeFormOptions()"
+          [(ngModel)]="formEmployeId"
+        />
+        <nf-select
+          name="formChantier"
+          [label]="'rh.planning.dialog.chantier' | translate"
+          [options]="chantierFormOptions()"
+          [(ngModel)]="formChantierId"
+        />
         <label>{{ 'rh.planning.dialog.dateDebut' | translate }}
           <input class="ctrl" type="date" [(ngModel)]="formDateDebut" />
         </label>
@@ -249,6 +245,28 @@ export class PlanningEquipesPage {
   readonly chantiers = computed(() => this.chantiersList());
 
   readonly employeOptions = computed(() => this.employeOptionsList());
+
+  chantierFilterOptions(): NfSelectOption[] {
+    return [
+      { value: '', label: this.translate.instant('rh.common.actions.all') },
+      ...this.chantiers().map((c) => ({ value: c.id, label: c.code })),
+    ];
+  }
+
+  employeFilterOptions(): NfSelectOption[] {
+    return [
+      { value: '', label: this.translate.instant('rh.common.actions.all') },
+      ...this.employeOptions().map((e) => ({ value: e.id, label: e.nom })),
+    ];
+  }
+
+  employeFormOptions(): NfSelectOption[] {
+    return this.employeOptions().map((e) => ({ value: e.id, label: e.nom }));
+  }
+
+  chantierFormOptions(): NfSelectOption[] {
+    return this.chantiers().map((c) => ({ value: c.id, label: c.code }));
+  }
 
   constructor() {
     void Promise.all([

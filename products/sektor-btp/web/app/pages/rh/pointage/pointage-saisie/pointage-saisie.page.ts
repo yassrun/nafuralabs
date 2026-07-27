@@ -12,7 +12,7 @@ import {
 import { FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { PageHeaderComponent, PageShellComponent, TooltipDirective, ButtonComponent } from '@lib/anatomy';
+import { PageHeaderComponent, PageShellComponent, TooltipDirective, ButtonComponent, NfSelectComponent, type NfSelectOption } from '@lib/anatomy';
 import type { Chantier } from '../../../../chantiers/models';
 import { ChantierApiService } from '../../../chantiers/services/chantier-api.service';
 import { MODE_KEYS } from '@app/shell/i18n-labels';
@@ -42,7 +42,7 @@ function newBatchId(): string {
   selector: 'app-pointage-saisie',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, TranslateModule, PageShellComponent, PageHeaderComponent, TooltipDirective, ButtonComponent],
+  imports: [CommonModule, FormsModule, TranslateModule, PageShellComponent, PageHeaderComponent, TooltipDirective, ButtonComponent, NfSelectComponent],
   template: `
     <nf-page-shell scroll>
       <nf-page-header [config]="headerConfig()"></nf-page-header>
@@ -75,13 +75,15 @@ function newBatchId(): string {
 
       <div class="controls">
         <div class="control-group">
-          <label class="ctrl-label" for="pointage-chantier">{{ 'rh.common.filters.chantier' | translate }}</label>
-          <select id="pointage-chantier" class="ctrl-select" [value]="chantierId()" (change)="onChantierChange($any($event.target).value)">
-            <option value="">{{ 'rh.pointage.saisie.modes.selectChantier' | translate }}</option>
-            @for (c of chantiers(); track c.id) {
-              <option [value]="c.id">{{ c.code }} — {{ c.name }}</option>
-            }
-          </select>
+          <nf-select
+            id="pointage-chantier"
+            name="pointageChantier"
+            [label]="'rh.common.filters.chantier' | translate"
+            [placeholder]="'rh.pointage.saisie.modes.selectChantier' | translate"
+            [options]="chantierSelectOptions()"
+            [ngModel]="chantierId()"
+            (ngModelChange)="onChantierChange($event)"
+          />
         </div>
         <div class="control-group">
           <label class="ctrl-label" for="pointage-date">{{ 'rh.pointage.validation.controls.date' | translate }}</label>
@@ -278,7 +280,8 @@ function newBatchId(): string {
     .controls { display: flex; gap: 0.875rem; align-items: flex-end; flex-wrap: wrap; margin-bottom: 1rem; }
     .control-group { display: flex; flex-direction: column; gap: 4px; }
     .ctrl-label { font-size: 11px; font-weight: 600; color: var(--nf-color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
-    .ctrl-select, .ctrl-input { padding: 8px 12px; border: 1px solid var(--nf-color-border); border-radius: 6px; font-size: 14px; min-width: 220px; background: var(--nf-color-surface); }
+    .ctrl-input { padding: 8px 12px; border: 1px solid var(--nf-color-border); border-radius: 6px; font-size: 14px; min-width: 220px; background: var(--nf-color-surface); }
+    .control-group nf-select { min-width: 220px; }
     .btn-geoloc { padding: 8px 14px; border: 1px solid var(--nf-color-border); border-radius: 6px; font-size: 13px; background: var(--nf-color-surface); cursor: pointer; }
     .btn-geoloc:hover { background: var(--nf-color-bg-subtle); }
     .geoloc-badge { background: var(--nf-color-success-100); color: var(--nf-color-success-700); padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; }
@@ -426,6 +429,16 @@ export class PointageSaisiePage {
   }
 
   readonly chantiers = computed(() => this.chantiersList());
+
+  chantierSelectOptions(): NfSelectOption[] {
+    return [
+      { value: '', label: this.translate.instant('rh.pointage.saisie.modes.selectChantier') },
+      ...this.chantiers().map((c) => ({
+        value: c.id,
+        label: `${c.code} — ${c.name}`,
+      })),
+    ];
+  }
 
   readonly selectedChantier = computed(() =>
     this.chantiers().find(c => c.id === this.chantierId()),

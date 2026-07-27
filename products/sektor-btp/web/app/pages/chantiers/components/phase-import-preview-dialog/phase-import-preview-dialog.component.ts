@@ -2,9 +2,9 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { BadgeComponent, ButtonComponent } from '@lib/anatomy/components';
+import { BadgeComponent, ButtonComponent, NfSelectComponent, type NfSelectOption } from '@lib/anatomy/components';
 import type { LotChantier } from '@app/chantiers/models';
 
 import { buildPhaseCode, type ParsedPlanningTask } from '../../utils/planning-gantt-pdf.util';
@@ -26,7 +26,7 @@ export interface PhaseImportPreviewDialogResult {
 @Component({
   selector: 'app-phase-import-preview-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatDialogModule, TranslateModule, ButtonComponent, BadgeComponent],
+  imports: [CommonModule, FormsModule, MatDialogModule, TranslateModule, ButtonComponent, BadgeComponent, NfSelectComponent],
   template: `
     <div class="dialog-shell">
       <header>
@@ -64,12 +64,11 @@ export interface PhaseImportPreviewDialogResult {
                 <td class="date">{{ row.dateDebut | date:'dd/MM/yy' }}</td>
                 <td class="date">{{ row.dateFin | date:'dd/MM/yy' }}</td>
                 <td>
-                  <select [ngModel]="row.lotId ?? ''" (ngModelChange)="setLotId(row.numero, $event)">
-                    <option value="">{{ 'chantiers.chantier.detail.phases.importPreviewNoLot' | translate }}</option>
-                    @for (lot of data.lots; track lot.id) {
-                      <option [value]="lot.id">{{ lot.code }} — {{ lot.designation }}</option>
-                    }
-                  </select>
+                  <nf-select
+                    [options]="lotOptions"
+                    [ngModel]="row.lotId ?? ''"
+                    (ngModelChange)="setLotId(row.numero, $event)"
+                  />
                 </td>
                 <td>
                   @if (row.isPaymentMilestone) {
@@ -103,7 +102,6 @@ export interface PhaseImportPreviewDialogResult {
     .data-table th { text-align: left; background: var(--nf-color-bg-muted); position: sticky; top: 0; z-index: 1; }
     .check-col { width: 2.5rem; text-align: center; }
     .date { white-space: nowrap; }
-    select { width: 100%; min-width: 9rem; }
     .row--payment { opacity: 0.75; }
     footer { justify-content: flex-end; }
   `],
@@ -111,6 +109,15 @@ export interface PhaseImportPreviewDialogResult {
 export class PhaseImportPreviewDialogComponent {
   readonly data = inject<PhaseImportPreviewDialogData>(MAT_DIALOG_DATA);
   private readonly dialogRef = inject(MatDialogRef<PhaseImportPreviewDialogComponent, PhaseImportPreviewDialogResult | undefined>);
+  private readonly translate = inject(TranslateService);
+
+  readonly lotOptions: NfSelectOption[] = [
+    { value: '', label: this.translate.instant('chantiers.chantier.detail.phases.importPreviewNoLot') },
+    ...this.data.lots.map((lot) => ({
+      value: lot.id,
+      label: `${lot.code} — ${lot.designation}`,
+    })),
+  ];
 
   readonly rows = signal<PhaseImportPreviewRow[]>(
     this.data.tasks.map((task) => ({

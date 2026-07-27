@@ -64,26 +64,18 @@
         (ngModelChange)="filterText.set($event)"
         class="ml__search"
       />
-      <select [ngModel]="filterType()" (ngModelChange)="filterType.set($event)" class="ml__select">
-        <option value="">{{ 'finance.common.filters.allTypes' | translate }}</option>
-        <option value="REGLEMENT_CLIENT">{{ 'finance.mouvement.types.REGLEMENT_CLIENT' | translate }}</option>
-        <option value="REGLEMENT_FOURN">{{ 'finance.mouvement.types.REGLEMENT_FOURN' | translate }}</option>
-        <option value="PAIEMENT_PAIE">{{ 'finance.mouvement.types.PAIEMENT_PAIE' | translate }}</option>
-        <option value="VIREMENT_INTERNE">{{ 'finance.mouvement.types.VIREMENT_INTERNE' | translate }}</option>
-        <option value="FRAIS_BANCAIRES">{{ 'finance.mouvement.types.FRAIS_BANCAIRES' | translate }}</option>
-        <option value="COMMISSIONS">{{ 'finance.mouvement.types.COMMISSIONS' | translate }}</option>
-        <option value="AUTRE_RECETTE">{{ 'finance.mouvement.types.AUTRE_RECETTE' | translate }}</option>
-        <option value="AUTRE_DEPENSE">{{ 'finance.mouvement.types.AUTRE_DEPENSE' | translate }}</option>
-      </select>
-      <select
+      <nf-select
+        class="ml__select"
+        [options]="typeOptions()"
+        [ngModel]="filterType()"
+        (ngModelChange)="filterType.set($event)"
+      />
+      <nf-select
+        class="ml__select"
+        [options]="rapprocheOptions()"
         [ngModel]="filterRapproche()"
         (ngModelChange)="filterRapproche.set($event)"
-        class="ml__select"
-      >
-        <option value="all">{{ 'finance.mouvement.filters.rapproche.all' | translate }}</option>
-        <option value="yes">{{ 'finance.mouvement.filters.rapproche.yes' | translate }}</option>
-        <option value="no">{{ 'finance.mouvement.filters.rapproche.no' | translate }}</option>
-      </select>
+      />
       <input
         type="date"
         [ngModel]="filterFrom()"

@@ -12,26 +12,24 @@
       }
     </h4>
     <div class="arbre__actions">
-      <button
-        type="button"
-        mat-icon-button
-        class="arbre__icon-btn"
-        matTooltip="Tout déplier"
+      <nf-button
+        variant="ghost"
+        size="sm"
+        icon="chevron-down"
+        iconLibrary="lucide"
+        tooltip="Tout déplier"
         aria-label="Tout déplier"
-        (click)="expandAll()"
-      >
-        <mat-icon>unfold_more</mat-icon>
-      </button>
-      <button
-        type="button"
-        mat-icon-button
-        class="arbre__icon-btn"
-        matTooltip="Tout replier"
+        (clicked)="expandAll()"
+      ></nf-button>
+      <nf-button
+        variant="ghost"
+        size="sm"
+        icon="list"
+        iconLibrary="lucide"
+        tooltip="Tout replier"
         aria-label="Tout replier"
-        (click)="collapseAll()"
-      >
-        <mat-icon>unfold_less</mat-icon>
-      </button>
+        (clicked)="collapseAll()"
+      ></nf-button>
       @if (showStructureActions()) {
         <nf-button variant="secondary" size="sm" (clicked)="ajouterLot()">Ajouter un lot</nf-button>
       }
@@ -98,48 +96,44 @@
           }
           @case ('actions') {
             <span class="arbre__row-actions" (click)="stop($event)">
-              <button
-                type="button"
-                mat-icon-button
-                class="arbre__icon-btn"
-                matTooltip="Modifier"
+              <nf-button
+                variant="ghost"
+                size="sm"
+                icon="pencil"
+                iconLibrary="lucide"
+                tooltip="Modifier"
                 aria-label="Modifier"
-                (click)="modifier(row)"
-              >
-                <mat-icon>edit</mat-icon>
-              </button>
+                (clicked)="modifier(row)"
+              ></nf-button>
               @if (row.type !== 'ARTICLE') {
-                <button
-                  type="button"
-                  mat-icon-button
-                  class="arbre__icon-btn"
-                  matTooltip="Ajouter un enfant"
+                <nf-button
+                  variant="ghost"
+                  size="sm"
+                  icon="git-branch"
+                  iconLibrary="lucide"
+                  tooltip="Ajouter un enfant"
                   aria-label="Ajouter un enfant"
-                  (click)="ajouterEnfant(row)"
-                >
-                  <mat-icon>subdirectory_arrow_right</mat-icon>
-                </button>
+                  (clicked)="ajouterEnfant(row)"
+                ></nf-button>
               }
-              <button
-                type="button"
-                mat-icon-button
-                class="arbre__icon-btn"
-                matTooltip="Ajouter au même niveau"
+              <nf-button
+                variant="ghost"
+                size="sm"
+                icon="plus"
+                iconLibrary="lucide"
+                tooltip="Ajouter au même niveau"
                 aria-label="Ajouter au même niveau"
-                (click)="ajouterMemeNiveau(row)"
-              >
-                <mat-icon>add</mat-icon>
-              </button>
-              <button
-                type="button"
-                mat-icon-button
-                class="arbre__icon-btn arbre__icon-btn--danger"
-                matTooltip="Supprimer"
+                (clicked)="ajouterMemeNiveau(row)"
+              ></nf-button>
+              <nf-button
+                variant="danger"
+                size="sm"
+                icon="trash-2"
+                iconLibrary="lucide"
+                tooltip="Supprimer"
                 aria-label="Supprimer"
-                (click)="supprimer(row)"
-              >
-                <mat-icon>delete</mat-icon>
-              </button>
+                (clicked)="supprimer(row)"
+              ></nf-button>
             </span>
           }
         }

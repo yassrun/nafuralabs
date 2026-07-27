@@ -9,10 +9,7 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { firstValueFrom } from 'rxjs';
 
 import {
@@ -60,9 +57,6 @@ import {
     CommonModule,
     ButtonComponent,
     TreeTableComponent,
-    MatButtonModule,
-    MatIconModule,
-    MatTooltipModule,
   ],
   templateUrl: './bordereau-arbre.component.html',
   styleUrl: './bordereau-arbre.component.scss',

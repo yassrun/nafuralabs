@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   effect,
   inject,
   input,
@@ -10,7 +11,7 @@ import {
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 
-import { ButtonComponent, EmptyStateComponent } from '@lib/anatomy/components';
+import { ButtonComponent, EmptyStateComponent, NfSelectComponent, ActionBarComponent, type NfSelectOption } from '@lib/anatomy/components';
 import { ToastService } from '@lib/anatomy';
 import { ErpLookupService } from '@app/shared/services/erp-lookup.service';
 
@@ -33,35 +34,32 @@ const ROLE_LABELS: Record<string, string> = {
   selector: 'app-chantier-equipe-tab',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, TranslateModule, ButtonComponent, EmptyStateComponent],
+  imports: [CommonModule, FormsModule, TranslateModule, ButtonComponent, EmptyStateComponent, NfSelectComponent, ActionBarComponent],
   template: `
     <section class="equipe">
       <header class="equipe__header">
         <h3>{{ 'chantiers.chantier.detail.tabs.equipe' | translate }}</h3>
-        <nf-button variant="primary" size="sm" (click)="showForm.set(true)">
+        <nf-button variant="primary" size="sm" (clicked)="showForm.set(true)">
           {{ 'chantiers.chantier.detail.equipe.add' | translate }}
         </nf-button>
       </header>
 
       @if (showForm()) {
         <form class="equipe__form" (ngSubmit)="submit()">
-          <label>
-            <span>{{ 'chantiers.chantier.detail.equipe.employe' | translate }}</span>
-            <select [(ngModel)]="draft.employeId" name="employeId" required>
-              <option value="">—</option>
-              @for (e of employees(); track e.id) {
-                <option [value]="e.id">{{ e.name }} ({{ e.matricule }})</option>
-              }
-            </select>
-          </label>
-          <label>
-            <span>{{ 'chantiers.chantier.detail.equipe.role' | translate }}</span>
-            <select [(ngModel)]="draft.roleCode" name="roleCode" required>
-              @for (r of roles(); track r) {
-                <option [value]="r">{{ roleLabel(r) }}</option>
-              }
-            </select>
-          </label>
+          <nf-select
+            name="employeId"
+            [label]="'chantiers.chantier.detail.equipe.employe' | translate"
+            [options]="employeeOptions()"
+            [(ngModel)]="draft.employeId"
+            [required]="true"
+          />
+          <nf-select
+            name="roleCode"
+            [label]="'chantiers.chantier.detail.equipe.role' | translate"
+            [options]="roleOptions()"
+            [(ngModel)]="draft.roleCode"
+            [required]="true"
+          />
           <label>
             <span>{{ 'chantiers.chantier.detail.equipe.dateDebut' | translate }}</span>
             <input type="date" [(ngModel)]="draft.dateDebut" name="dateDebut" required />
@@ -70,14 +68,14 @@ const ROLE_LABELS: Record<string, string> = {
             <span>{{ 'chantiers.chantier.detail.equipe.dateFin' | translate }}</span>
             <input type="date" [(ngModel)]="draft.dateFin" name="dateFin" />
           </label>
-          <div class="equipe__actions">
-            <nf-button type="button" variant="ghost" size="sm" (click)="showForm.set(false)">
+          <nf-action-bar align="right" class="equipe__actions">
+            <nf-button type="button" variant="ghost" size="sm" (clicked)="showForm.set(false)">
               {{ 'common.cancel' | translate }}
             </nf-button>
             <nf-button type="submit" variant="primary" size="sm" [disabled]="saving()">
               {{ 'common.save' | translate }}
             </nf-button>
-          </div>
+          </nf-action-bar>
         </form>
       }
 
@@ -110,7 +108,7 @@ const ROLE_LABELS: Record<string, string> = {
                 <td>{{ row.roleLabel ?? roleLabel(row.roleCode) }}</td>
                 <td>{{ row.dateDebut }}{{ row.dateFin ? ' → ' + row.dateFin : '' }}</td>
                 <td>
-                  <nf-button variant="ghost" size="sm" (click)="remove(row)">
+                  <nf-button variant="ghost" size="sm" (clicked)="remove(row)">
                     {{ 'common.remove' | translate }}
                   </nf-button>
                 </td>
@@ -129,8 +127,8 @@ const ROLE_LABELS: Record<string, string> = {
       gap: 0.75rem; padding: 1rem; border: 1px solid var(--nf-border, #e5e7eb); border-radius: 8px;
     }
     .equipe__form label { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.85rem; }
-    .equipe__form select, .equipe__form input { padding: 0.4rem 0.5rem; }
-    .equipe__actions { display: flex; gap: 0.5rem; align-items: end; }
+    .equipe__form input { padding: 0.4rem 0.5rem; }
+    .equipe__actions { grid-column: 1 / -1; }
     .equipe__table { width: 100%; border-collapse: collapse; }
     .equipe__table th, .equipe__table td { text-align: left; padding: 0.5rem; border-bottom: 1px solid var(--nf-border, #e5e7eb); }
     .muted { color: var(--nf-muted, #6b7280); font-size: 0.85rem; }
@@ -149,6 +147,18 @@ export class ChantierEquipeTabComponent {
   readonly loading = signal(false);
   readonly saving = signal(false);
   readonly showForm = signal(false);
+
+  readonly employeeOptions = computed<NfSelectOption[]>(() => [
+    { value: '', label: '—' },
+    ...this.employees().map((e) => ({
+      value: e.id,
+      label: `${e.name} (${e.matricule})`,
+    })),
+  ]);
+
+  readonly roleOptions = computed<NfSelectOption[]>(() =>
+    this.roles().map((r) => ({ value: r, label: this.roleLabel(r) })),
+  );
 
   draft = {
     employeId: '',

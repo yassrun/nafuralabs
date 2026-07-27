@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   ChangeDetectionStrategy,
@@ -13,7 +14,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { ButtonComponent, PageHeaderComponent, PageShellComponent, ConfirmDialogService } from '@lib/anatomy';
+import { ButtonComponent, NfSelectComponent, PageHeaderComponent, PageShellComponent, ConfirmDialogService, type NfSelectOption } from '@lib/anatomy';
 import { ToastService } from '@lib/anatomy/components/services/toast.service';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
 import { resolveLocale } from '@lib/anatomy/pipes/_locale-resolver';
@@ -42,7 +43,7 @@ const URGENCE_RANK: Record<string, number> = { CRITIQUE: 3, HAUTE: 2, NORMALE: 1
   selector: 'app-approbations-inbox',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, TranslateModule, PageShellComponent, PageHeaderComponent, MadCurrencyPipe, ButtonComponent],
+  imports: [CommonModule, FormsModule, TranslateModule, PageShellComponent, PageHeaderComponent, MadCurrencyPipe, ButtonComponent, NfSelectComponent],
   template: `
     <nf-page-shell scroll>
       <nf-page-header [config]="headerConfig()"></nf-page-header>
@@ -58,20 +59,24 @@ const URGENCE_RANK: Record<string, number> = { CRITIQUE: 3, HAUTE: 2, NORMALE: 1
       </nav>
 
       <div class="filters">
-        <select [value]="filterType()" (change)="filterType.set($any($event.target).value)">
-          <option value="">{{ 'dashboard.approbations.filters.allTypes' | translate }}</option>
-          @for (e of entityTypes; track e) { <option [value]="e">{{ entityTypeKey(e) | translate }}</option> }
-        </select>
-        <select [value]="filterSociete()" (change)="filterSociete.set($any($event.target).value)">
-          <option value="">{{ 'dashboard.approbations.filters.allSocietes' | translate }}</option>
-          @for (s of societeOptions; track s[0]) { <option [value]="s[0]">{{ s[1] | translate }}</option> }
-        </select>
-        <select [value]="filterUrgence()" (change)="filterUrgence.set($any($event.target).value)">
-          <option value="">{{ 'dashboard.approbations.filters.allUrgences' | translate }}</option>
-          <option value="CRITIQUE">{{ 'dashboard.approbations.urgence.critique' | translate }}</option>
-          <option value="HAUTE">{{ 'dashboard.approbations.urgence.haute' | translate }}</option>
-          <option value="NORMALE">{{ 'dashboard.approbations.urgence.normale' | translate }}</option>
-        </select>
+        <nf-select
+          name="filterType"
+          [options]="typeSelectOptions()"
+          [ngModel]="filterType()"
+          (ngModelChange)="filterType.set($any($event))"
+        />
+        <nf-select
+          name="filterSociete"
+          [options]="societeSelectOptions()"
+          [ngModel]="filterSociete()"
+          (ngModelChange)="filterSociete.set($event)"
+        />
+        <nf-select
+          name="filterUrgence"
+          [options]="urgenceSelectOptions()"
+          [ngModel]="filterUrgence()"
+          (ngModelChange)="filterUrgence.set($any($event))"
+        />
       </div>
 
       <div class="requests-list">
@@ -186,7 +191,6 @@ const URGENCE_RANK: Record<string, number> = { CRITIQUE: 3, HAUTE: 2, NORMALE: 1
     .badge-count { background: var(--nf-color-danger-600); color: white; font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 9999px; min-width: 18px; text-align: center; }
 
     .filters { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 1rem; }
-    .filters select { padding: 6px 10px; border: 1px solid var(--nf-color-border); border-radius: 6px; font-size: 13px; background: white; }
 
     .requests-list { display: flex; flex-direction: column; gap: 0.75rem; }
 
@@ -278,6 +282,35 @@ export class ApprobationsInboxPage {
     ['soc-nafura', 'dashboard.approbations.societes.nafura'],
     ['soc-subsidiary', 'dashboard.approbations.societes.subsidiary'],
   ];
+
+  typeSelectOptions(): NfSelectOption[] {
+    return [
+      { value: '', label: this.translate.instant('dashboard.approbations.filters.allTypes') },
+      ...this.entityTypes.map((e) => ({
+        value: e,
+        label: this.translate.instant(this.entityTypeKey(e)),
+      })),
+    ];
+  }
+
+  societeSelectOptions(): NfSelectOption[] {
+    return [
+      { value: '', label: this.translate.instant('dashboard.approbations.filters.allSocietes') },
+      ...this.societeOptions.map(([id, key]) => ({
+        value: id,
+        label: this.translate.instant(key),
+      })),
+    ];
+  }
+
+  urgenceSelectOptions(): NfSelectOption[] {
+    return [
+      { value: '', label: this.translate.instant('dashboard.approbations.filters.allUrgences') },
+      { value: 'CRITIQUE', label: this.translate.instant('dashboard.approbations.urgence.critique') },
+      { value: 'HAUTE', label: this.translate.instant('dashboard.approbations.urgence.haute') },
+      { value: 'NORMALE', label: this.translate.instant('dashboard.approbations.urgence.normale') },
+    ];
+  }
 
   readonly countEnAttente = this.service.countEnAttente;
 

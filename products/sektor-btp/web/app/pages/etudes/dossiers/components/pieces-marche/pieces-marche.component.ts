@@ -8,11 +8,7 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
-
-import { ButtonComponent, ConfirmDialogService } from '@lib/anatomy';
+import { ButtonComponent, ConfirmDialogService, IconComponent } from '@lib/anatomy';
 
 import { TYPES_DOSSIER_DOCUMENT } from '@app/etudes/models';
 import type { DossierDocument } from '@app/etudes/models';
@@ -41,13 +37,7 @@ export type DocumentSlot = 'BORDEREAU' | 'CPS';
   selector: 'app-pieces-marche',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    ButtonComponent,
-    BordereauArbreComponent,
-    MatButtonModule,
-    MatIconModule,
-    MatTooltipModule,
-  ],
+  imports: [ButtonComponent, IconComponent, BordereauArbreComponent],
   templateUrl: './pieces-marche.component.html',
   styleUrl: './pieces-marche.component.scss',
 })

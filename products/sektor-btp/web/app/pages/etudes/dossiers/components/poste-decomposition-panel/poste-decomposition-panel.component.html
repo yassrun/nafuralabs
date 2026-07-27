@@ -10,14 +10,15 @@
   <section class="poste" aria-label="Décomposition du poste">
     <header class="poste__entete">
       <div class="poste__identite">
-        <button
-          type="button"
+        <nf-button
           class="poste__back"
-          (click)="closeMobile.emit()"
+          variant="ghost"
+          size="sm"
+          (clicked)="closeMobile.emit()"
           aria-label="Retour au bordereau"
         >
           ← Bordereau
-        </button>
+        </nf-button>
         <div class="poste__badges">
           <p class="poste__code">{{ poste()!.code }}</p>
           @if (estFourni()) {
@@ -236,45 +237,42 @@
                       <td class="actions">
                         <span class="poste__row-actions">
                           @if (row.sourcePrix !== 'CONSULTE') {
-                            <button
-                              type="button"
-                              class="link"
-                              (click)="marquerConsulte(row)"
+                            <nf-button
+                              variant="ghost"
+                              size="sm"
+                              (clicked)="marquerConsulte(row)"
                               [attr.aria-label]="'Marquer consulté ' + row.articleOuPosteId"
                             >
                               Consulté
-                            </button>
+                            </nf-button>
                           }
-                          <button
-                            type="button"
-                            mat-icon-button
-                            class="poste__icon-btn"
-                            matTooltip="Modifier"
+                          <nf-button
+                            variant="ghost"
+                            size="sm"
+                            icon="pencil"
+                            iconLibrary="lucide"
+                            tooltip="Modifier"
                             [attr.aria-label]="'Modifier ' + row.articleOuPosteId"
-                            (click)="modifierSousDetail(row)"
-                          >
-                            <mat-icon>edit</mat-icon>
-                          </button>
-                          <button
-                            type="button"
-                            mat-icon-button
-                            class="poste__icon-btn"
-                            matTooltip="Dupliquer"
+                            (clicked)="modifierSousDetail(row)"
+                          ></nf-button>
+                          <nf-button
+                            variant="ghost"
+                            size="sm"
+                            icon="copy"
+                            iconLibrary="lucide"
+                            tooltip="Dupliquer"
                             [attr.aria-label]="'Dupliquer ' + row.articleOuPosteId"
-                            (click)="dupliquerSousDetail(row)"
-                          >
-                            <mat-icon>content_copy</mat-icon>
-                          </button>
-                          <button
-                            type="button"
-                            mat-icon-button
-                            class="poste__icon-btn poste__icon-btn--danger"
-                            matTooltip="Supprimer"
+                            (clicked)="dupliquerSousDetail(row)"
+                          ></nf-button>
+                          <nf-button
+                            variant="danger"
+                            size="sm"
+                            icon="trash-2"
+                            iconLibrary="lucide"
+                            tooltip="Supprimer"
                             [attr.aria-label]="'Supprimer ' + row.articleOuPosteId"
-                            (click)="supprimerSousDetail(row)"
-                          >
-                            <mat-icon>delete</mat-icon>
-                          </button>
+                            (clicked)="supprimerSousDetail(row)"
+                          ></nf-button>
                         </span>
                       </td>
                     }
@@ -305,40 +303,37 @@
                 @if (modifiable()) {
                   <div class="card__actions">
                     @if (row.sourcePrix !== 'CONSULTE') {
-                      <button type="button" class="link" (click)="marquerConsulte(row)">
+                      <nf-button variant="ghost" size="sm" (clicked)="marquerConsulte(row)">
                         Consulté
-                      </button>
+                      </nf-button>
                     }
-                    <button
-                      type="button"
-                      mat-icon-button
-                      class="poste__icon-btn"
-                      matTooltip="Modifier"
+                    <nf-button
+                      variant="ghost"
+                      size="sm"
+                      icon="pencil"
+                      iconLibrary="lucide"
+                      tooltip="Modifier"
                       aria-label="Modifier"
-                      (click)="modifierSousDetail(row)"
-                    >
-                      <mat-icon>edit</mat-icon>
-                    </button>
-                    <button
-                      type="button"
-                      mat-icon-button
-                      class="poste__icon-btn"
-                      matTooltip="Dupliquer"
+                      (clicked)="modifierSousDetail(row)"
+                    ></nf-button>
+                    <nf-button
+                      variant="ghost"
+                      size="sm"
+                      icon="copy"
+                      iconLibrary="lucide"
+                      tooltip="Dupliquer"
                       aria-label="Dupliquer"
-                      (click)="dupliquerSousDetail(row)"
-                    >
-                      <mat-icon>content_copy</mat-icon>
-                    </button>
-                    <button
-                      type="button"
-                      mat-icon-button
-                      class="poste__icon-btn poste__icon-btn--danger"
-                      matTooltip="Supprimer"
+                      (clicked)="dupliquerSousDetail(row)"
+                    ></nf-button>
+                    <nf-button
+                      variant="danger"
+                      size="sm"
+                      icon="trash-2"
+                      iconLibrary="lucide"
+                      tooltip="Supprimer"
                       aria-label="Supprimer"
-                      (click)="supprimerSousDetail(row)"
-                    >
-                      <mat-icon>delete</mat-icon>
-                    </button>
+                      (clicked)="supprimerSousDetail(row)"
+                    ></nf-button>
                   </div>
                 }
               </li>

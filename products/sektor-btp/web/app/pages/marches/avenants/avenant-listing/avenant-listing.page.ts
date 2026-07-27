@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
-import { TranslateModule } from '@ngx-translate/core';
+import { FormsModule } from '@angular/forms';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FilterResetComponent } from '@lib/anatomy/components/molecules/filter-reset/filter-reset.component';
 
-import { PageHeaderComponent, PageShellComponent } from '@lib/anatomy';
+import { NfSelectComponent, PageHeaderComponent, PageShellComponent, type NfSelectOption } from '@lib/anatomy';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
 import { AVENANT_STATUS_KEYS, AVENANT_TYPE_KEYS } from '@app/shell/i18n-labels';
 import { ToastService } from '@lib/anatomy/components/services/toast.service';
@@ -19,7 +20,17 @@ const STATUS_VARIANT: Record<AvenantStatus, string> = {
   selector: 'app-avenant-listing',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterLink, PageShellComponent, PageHeaderComponent, MadCurrencyPipe, FilterResetComponent, TranslateModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterLink,
+    PageShellComponent,
+    PageHeaderComponent,
+    MadCurrencyPipe,
+    FilterResetComponent,
+    TranslateModule,
+    NfSelectComponent,
+  ],
   template: `
     <nf-page-shell scroll>
       <nf-page-header [config]="{
@@ -31,10 +42,11 @@ const STATUS_VARIANT: Record<AvenantStatus, string> = {
       <div class="toolbar">
         <input class="search" type="search" [attr.placeholder]="'marches.avenant.listing.search.placeholder' | translate"
           [value]="search()" (input)="search.set($any($event.target).value)" />
-        <select [value]="filterStatus()" (change)="filterStatus.set($any($event.target).value)">
-          <option value="">{{ 'marches.common.filters.allStatuses' | translate }}</option>
-          @for (s of statusOptions; track s) { <option [value]="s">{{ AVENANT_STATUS_KEYS[s] | translate }}</option> }
-        </select>
+        <nf-select
+          [options]="statusFilterOptions()"
+          [ngModel]="filterStatus()"
+          (ngModelChange)="filterStatus.set($event)"
+        />
         <span class="count">{{ 'marches.avenant.listing.count' | translate:{ count: filtered().length } }}</span>
         <nf-filter-reset [active]="hasFilter()" (reset)="resetFilters()"></nf-filter-reset>
       </div>
@@ -105,6 +117,7 @@ const STATUS_VARIANT: Record<AvenantStatus, string> = {
 export class AvenantListingPage implements OnInit {
   private readonly api = inject(AvenantApiService);
   private readonly toast = inject(ToastService);
+  private readonly translate = inject(TranslateService);
 
   readonly AVENANT_STATUS_KEYS = AVENANT_STATUS_KEYS;
   readonly AVENANT_TYPE_KEYS = AVENANT_TYPE_KEYS;
@@ -114,6 +127,16 @@ export class AvenantListingPage implements OnInit {
   readonly search = signal('');
   readonly filterStatus = signal<AvenantStatus | ''>('');
   readonly statusOptions = Object.keys(AVENANT_STATUS_KEYS) as AvenantStatus[];
+
+  statusFilterOptions(): NfSelectOption[] {
+    return [
+      { value: '', label: this.translate.instant('marches.common.filters.allStatuses') },
+      ...this.statusOptions.map((s) => ({
+        value: s,
+        label: this.translate.instant(AVENANT_STATUS_KEYS[s]),
+      })),
+    ];
+  }
 
   ngOnInit(): void {
     void this.loadAvenants();

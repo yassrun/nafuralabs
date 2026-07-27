@@ -26,25 +26,22 @@
             [ngModel]="searchTerm()"
             (ngModelChange)="onSearchChange($event)" />
         </div>
-        <select
+        <nf-select
           class="rgp__select"
+          name="clientFilter"
+          [placeholder]="'Tous les clients'"
+          [options]="clientSelectOptions()"
           [ngModel]="facade.filters().clientId ?? ''"
-          (ngModelChange)="onClientChange($event || null)">
-          <option value="">Tous les clients</option>
-          @for (c of clientOptions(); track c.id) {
-            <option [value]="c.id">{{ c.name }}</option>
-          }
-        </select>
-        <select
+          (ngModelChange)="onClientChange($event || null)"
+        />
+        <nf-select
           class="rgp__select"
+          name="statusFilter"
+          [placeholder]="'Tous statuts'"
+          [options]="statusSelectOptions"
           [ngModel]="activeStatus() ?? ''"
-          (ngModelChange)="onStatusChange($event || null)">
-          <option value="">Tous statuts</option>
-          <option value="EN_COURS">En cours</option>
-          <option value="LIBERATION_DEMANDEE">Libération demandée</option>
-          <option value="LIBEREE">Libérée</option>
-          <option value="CONTESTEE">Contestée</option>
-        </select>
+          (ngModelChange)="onStatusChange($event || null)"
+        />
         <nf-button
           variant="secondary"
           icon="filter-x"
@@ -114,20 +111,29 @@
                   <app-facture-status-badge [status]="r.status"></app-facture-status-badge>
                 </td>
                 <td class="actions">
-                  <button mat-icon-button type="button" [matMenuTriggerFor]="rowMenu" aria-label="Actions">
-                    <nf-icon name="more-vertical"></nf-icon>
-                  </button>
-                  <mat-menu #rowMenu="matMenu">
-                    <button mat-menu-item type="button" [disabled]="!canDemanderLiberation(r)" (click)="openDemanderLiberation(r)">
+                  <div class="row-actions">
+                    <nf-button
+                      variant="ghost"
+                      size="sm"
+                      [disabled]="!canDemanderLiberation(r)"
+                      (clicked)="openDemanderLiberation(r)">
                       Demander libération
-                    </button>
-                    <button mat-menu-item type="button" [disabled]="!canMarquerLiberee(r)" (click)="openMarquerLiberee(r)">
+                    </nf-button>
+                    <nf-button
+                      variant="secondary"
+                      size="sm"
+                      [disabled]="!canMarquerLiberee(r)"
+                      (clicked)="openMarquerLiberee(r)">
                       Marquer libérée
-                    </button>
-                    <button mat-menu-item type="button" [disabled]="!canRemplacerCaution(r)" (click)="openRemplacerCaution(r)">
+                    </nf-button>
+                    <nf-button
+                      variant="ghost"
+                      size="sm"
+                      [disabled]="!canRemplacerCaution(r)"
+                      (clicked)="openRemplacerCaution(r)">
                       Remplacer par caution bancaire
-                    </button>
-                  </mat-menu>
+                    </nf-button>
+                  </div>
                 </td>
               </tr>
             }

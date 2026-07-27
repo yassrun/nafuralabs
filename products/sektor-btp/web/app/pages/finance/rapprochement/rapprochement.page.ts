@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, LOCALE_ID, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 
 import { BankReconciliationApiService } from '@app/finance/services/bank-reconciliation-api.service';
@@ -19,7 +19,7 @@ import type {
   RapprochementLigneReleve,
   RapprochementStatus,
 } from '@app/finance/models';
-import { ButtonComponent } from '@lib/anatomy/components';
+import { ButtonComponent, NfSelectComponent, type NfSelectOption } from '@lib/anatomy/components';
 import { ConfirmDialogService } from '@lib/anatomy';
 
 interface MatchPair {
@@ -38,6 +38,7 @@ interface MatchPair {
     ReleveImportDialogComponent,
     SoldeIndicatorComponent,
     ButtonComponent,
+    NfSelectComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './rapprochement.page.html',
@@ -50,6 +51,7 @@ export class RapprochementPage {
   private readonly router = inject(Router);
   private readonly locale = inject(LOCALE_ID);
   private readonly confirmDialog = inject(ConfirmDialogService);
+  private readonly translate = inject(TranslateService);
 
   readonly id = this.route.snapshot.paramMap.get('id');
 
@@ -347,5 +349,17 @@ export class RapprochementPage {
 
   statusVariant(s: RapprochementStatus): string {
     return s === 'VALIDE' ? 'success' : s === 'ANOMALIE' ? 'danger' : 'warning';
+  }
+
+  compteOptions(): NfSelectOption[] {
+    return [
+      { value: '', label: this.translate.instant('finance.rapprochement.selectAccount') },
+      ...this.comptes()
+        .filter((c) => c.type === 'BANQUE')
+        .map((c) => ({
+          value: c.id,
+          label: `${c.libelle} (${c.compteCgncCode})`,
+        })),
+    ];
   }
 }

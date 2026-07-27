@@ -97,15 +97,18 @@ const STATUS_VARIANT: Record<ChantierStatus, BadgeVariant> = {
         <!-- Tabs -->
         <nav class="tabs" role="tablist">
           @for (tab of tabs(); track tab.id) {
-            <button
+            <nf-button
               type="button"
               class="tab"
+              variant="ghost"
+              size="sm"
               role="tab"
+              [active]="activeTab() === tab.id"
               [class.tab--active]="activeTab() === tab.id"
               [attr.aria-selected]="activeTab() === tab.id"
-              (click)="setTab(tab.id)">
+              (clicked)="setTab(tab.id)">
               {{ tab.label }}
-            </button>
+            </nf-button>
           }
         </nav>
 
@@ -116,7 +119,7 @@ const STATUS_VARIANT: Record<ChantierStatus, BadgeVariant> = {
               <article class="info-card">
                 <h3>{{ 'chantiers.chantier.detail.sections.equipe' | translate }}</h3>
                 <p class="muted">{{ 'chantiers.chantier.detail.equipe.seeTab' | translate }}</p>
-                <nf-button variant="ghost" size="sm" type="button" (click)="setTab('equipe')">
+                <nf-button variant="ghost" size="sm" type="button" (clicked)="setTab('equipe')">
                   {{ 'chantiers.chantier.detail.tabs.equipe' | translate }}
                 </nf-button>
               </article>
@@ -318,10 +321,8 @@ const STATUS_VARIANT: Record<ChantierStatus, BadgeVariant> = {
     .kpi__value--lg { font-size: 1.5rem; }
 
     .tabs { display: flex; gap: 0; border-bottom: 2px solid var(--nf-color-border); margin-bottom: 1.25rem; overflow-x: auto; }
-    .tab { padding: 0.65rem 1.1rem; background: none; border: none; border-bottom: 2px solid transparent; margin-bottom: -2px; font-size: 0.88rem; font-weight: 500; color: var(--nf-color-text-secondary); cursor: pointer; white-space: nowrap; transition: color 120ms, border-color 120ms; }
-    .tab:hover { color: var(--nf-text-primary, var(--nf-color-text-primary)); }
-    .tab:focus-visible { outline: 2px solid var(--nf-color-primary-600); outline-offset: -2px; border-radius: 0.25rem; }
-    .tab--active { color: var(--nf-color-primary-700); border-bottom-color: var(--nf-color-primary-700); font-weight: 600; }
+    .tab { border-radius: 0; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+    .tab--active { border-bottom-color: var(--nf-color-primary-700); }
 
     .tab-panel { padding-bottom: 1.5rem; }
     .tab-panel__toolbar { display: flex; justify-content: flex-end; margin-bottom: 0.75rem; }

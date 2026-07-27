@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 
-import { ButtonComponent, PageHeaderComponent, PageShellComponent } from '@lib/anatomy';
+import { ActionBarComponent, ButtonComponent, PageHeaderComponent, PageShellComponent, NfSelectComponent, type NfSelectOption } from '@lib/anatomy';
 import type { Chantier } from '../../../../chantiers/models';
 import { ChantierApiService } from '../../services/chantier-api.service';
 import { AttachementApiService } from '../attachement-api.service';
@@ -14,7 +14,7 @@ import type { AttachementLigne, MeteoCode } from '../attachement.models';
   selector: 'app-attachement-saisie',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, RouterLink, PageShellComponent, PageHeaderComponent, ButtonComponent, TranslateModule],
+  imports: [CommonModule, FormsModule, RouterLink, PageShellComponent, PageHeaderComponent, ButtonComponent, ActionBarComponent, NfSelectComponent, TranslateModule],
   template: `
     <nf-page-shell scroll>
       <nf-page-header [config]="pageHeaderConfig"></nf-page-header>
@@ -24,24 +24,21 @@ import type { AttachementLigne, MeteoCode } from '../attachement.models';
       </div>
 
       <div class="form-grid">
-        <label>Chantier
-          <select class="ctrl" [value]="chantierId()" (change)="chantierId.set($any($event.target).value)">
-            @for (c of chantiers(); track c.id) {
-              <option [value]="c.id">{{ c.code }} — {{ c.name }}</option>
-            }
-          </select>
-        </label>
+        <nf-select
+          [label]="'Chantier'"
+          [options]="chantierOptions()"
+          [ngModel]="chantierId()"
+          (ngModelChange)="chantierId.set($event)"
+        />
         <label>Date
           <input class="ctrl" type="date" [value]="date()" (change)="date.set($any($event.target).value)" />
         </label>
-        <label>Météo
-          <select class="ctrl" [value]="meteo()" (change)="meteo.set($any($event.target).value)">
-            <option value="SOLEIL">{{ 'chantiers.attachement.saisie.meteoEnsoleille' | translate }}</option>
-            <option value="NUAGEUX">Nuageux</option>
-            <option value="PLUIE">Pluie</option>
-            <option value="VENT">Vent fort</option>
-          </select>
-        </label>
+        <nf-select
+          [label]="'Météo'"
+          [options]="meteoOptions()"
+          [ngModel]="meteo()"
+          (ngModelChange)="meteo.set($event)"
+        />
         <label>Temp. (°C)
           <input class="ctrl" type="number" [value]="temperature()" (input)="temperature.set(+$any($event.target).value)" />
         </label>
@@ -74,11 +71,11 @@ import type { AttachementLigne, MeteoCode } from '../attachement.models';
         <nf-button variant="ghost" class="btn-clear" (clicked)="clearSignature()">Effacer signature</nf-button>
       </div>
 
-      <div class="actions">
+      <nf-action-bar align="right" class="actions">
         <nf-button variant="primary" [loading]="saving()" [disabled]="saving()" (clicked)="save()">
           {{ saving() ? 'Enregistrement…' : 'Enregistrer brouillon' }}
         </nf-button>
-      </div>
+      </nf-action-bar>
     </nf-page-shell>
   `,
   styles: [`
@@ -121,6 +118,20 @@ export class AttachementSaisiePage {
   private readonly chantiersList = signal<Chantier[]>([]);
 
   readonly chantiers = computed(() => this.chantiersList());
+
+  readonly chantierOptions = computed<NfSelectOption[]>(() =>
+    this.chantiersList().map((c) => ({
+      value: c.id,
+      label: `${c.code} — ${c.name}`,
+    })),
+  );
+
+  readonly meteoOptions = computed<NfSelectOption[]>(() => [
+    { value: 'SOLEIL', label: 'Ensoleillé' },
+    { value: 'NUAGEUX', label: 'Nuageux' },
+    { value: 'PLUIE', label: 'Pluie' },
+    { value: 'VENT', label: 'Vent fort' },
+  ]);
 
   readonly chantierId = signal('');
   readonly date = signal(new Date().toISOString().slice(0, 10));

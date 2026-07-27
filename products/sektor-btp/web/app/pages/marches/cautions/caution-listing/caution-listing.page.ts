@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { PageHeaderComponent, PageShellComponent } from '@lib/anatomy';
+import { NfSelectComponent, PageHeaderComponent, PageShellComponent, type NfSelectOption } from '@lib/anatomy';
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
 import { CAUTION_STATUS_KEYS, CAUTION_TYPE_KEYS } from '@app/shell/i18n-labels';
 import { ToastService } from '@lib/anatomy/components/services/toast.service';
@@ -18,7 +19,7 @@ const STATUS_VARIANT: Record<CautionStatus, string> = {
   selector: 'app-caution-listing',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterLink, PageShellComponent, PageHeaderComponent, MadCurrencyPipe, TranslateModule],
+  imports: [CommonModule, FormsModule, RouterLink, PageShellComponent, PageHeaderComponent, MadCurrencyPipe, TranslateModule, NfSelectComponent],
   template: `
     <nf-page-shell scroll>
       <nf-page-header [config]="{
@@ -60,10 +61,12 @@ const STATUS_VARIANT: Record<CautionStatus, string> = {
       <div class="toolbar">
         <input class="search" type="search" [attr.placeholder]="'marches.caution.listing.search.placeholder' | translate"
           [value]="search()" (input)="search.set($any($event.target).value)" />
-        <select [value]="filterType()" (change)="filterType.set($any($event.target).value)">
-          <option value="">{{ 'marches.common.filters.allTypes' | translate }}</option>
-          @for (t of typeOptions; track t) { <option [value]="t">{{ CAUTION_TYPE_KEYS[t] | translate }}</option> }
-        </select>
+        <nf-select
+          name="filterType"
+          [options]="typeSelectOptions()"
+          [ngModel]="filterType()"
+          (ngModelChange)="filterType.set($any($event))"
+        />
         <span class="count">{{ 'marches.caution.listing.count' | translate:{ count: filtered().length } }}</span>
         @if (alertes() > 0) {
           <span class="alert-chip">{{ 'marches.caution.listing.alert' | translate:{ count: alertes() } }}</span>
@@ -130,7 +133,6 @@ const STATUS_VARIANT: Record<CautionStatus, string> = {
     .board__code { font-weight: 600; color: var(--nf-color-warning-700); }
     .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
     .search { flex: 1; min-width: 180px; max-width: 280px; padding: 7px 12px; border: 1px solid var(--nf-color-border); border-radius: 6px; font-size: 13px; }
-    select { padding: 7px 10px; border: 1px solid var(--nf-color-border); border-radius: 6px; font-size: 13px; background: var(--nf-color-surface); }
     .count { font-size: 13px; color: var(--nf-color-text-secondary); }
     .alert-chip { background: var(--nf-color-warning-100); color: var(--nf-color-warning-700); border: 1px solid var(--nf-color-warning-200); padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
     .table-wrap { background: var(--nf-color-surface); border: 1px solid var(--nf-color-border); border-radius: 8px; overflow: auto; max-height: calc(100vh - 300px); }
@@ -155,6 +157,7 @@ const STATUS_VARIANT: Record<CautionStatus, string> = {
 export class CautionListingPage implements OnInit {
   private readonly api = inject(CautionApiService);
   private readonly toast = inject(ToastService);
+  private readonly translate = inject(TranslateService);
 
   readonly CAUTION_STATUS_KEYS = CAUTION_STATUS_KEYS;
   readonly CAUTION_TYPE_KEYS = CAUTION_TYPE_KEYS;
@@ -164,6 +167,16 @@ export class CautionListingPage implements OnInit {
   readonly search = signal('');
   readonly filterType = signal<CautionType | ''>('');
   readonly typeOptions = Object.keys(CAUTION_TYPE_KEYS) as CautionType[];
+
+  typeSelectOptions(): NfSelectOption[] {
+    return [
+      { value: '', label: this.translate.instant('marches.common.filters.allTypes') },
+      ...this.typeOptions.map((t) => ({
+        value: t,
+        label: this.translate.instant(CAUTION_TYPE_KEYS[t]),
+      })),
+    ];
+  }
 
   ngOnInit(): void {
     void this.loadCautions();

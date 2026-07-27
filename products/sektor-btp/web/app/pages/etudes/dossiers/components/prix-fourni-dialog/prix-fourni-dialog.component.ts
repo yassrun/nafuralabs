@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, ElementRef, inject, viewChild } from '@angular/core';
+import { AfterViewInit, Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 
-import { ButtonComponent } from '@lib/anatomy';
+import { ButtonComponent, NfInputComponent } from '@lib/anatomy';
 
 export interface PrixFourniDialogData {
   code: string;
@@ -22,7 +22,7 @@ export interface PrixFourniDialogResult {
 @Component({
   selector: 'app-prix-fourni-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatDialogModule, ButtonComponent],
+  imports: [CommonModule, FormsModule, MatDialogModule, ButtonComponent, NfInputComponent],
   template: `
     <div class="dialog-shell">
       <header>
@@ -38,18 +38,14 @@ export interface PrixFourniDialogResult {
         pour calculer le prix de vente HT.
       </p>
 
-      <label class="field">
-        <span>Coût unitaire fourni (MAD) *</span>
-        <input
-          #prixInput
-          name="prix"
-          type="number"
-          step="any"
-          min="0"
-          [(ngModel)]="prix"
-          required
-        />
-      </label>
+      <nf-input
+        id="prix-fourni-input"
+        label="Coût unitaire fourni (MAD)"
+        name="prix"
+        type="number"
+        [(ngModel)]="prix"
+        [required]="true"
+      />
 
       <dl class="preview" aria-live="polite">
         <div>
@@ -108,24 +104,6 @@ export interface PrixFourniDialogResult {
       font-size: 0.8125rem;
       color: var(--nf-color-text-secondary);
     }
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 0.35rem;
-      font-size: 0.875rem;
-    }
-    .field input {
-      padding: 0.625rem 0.75rem;
-      border: 1px solid var(--nf-color-border, #d1d5db);
-      border-radius: 8px;
-      font: inherit;
-      background: var(--nf-color-surface, #fff);
-    }
-    .field input:focus {
-      outline: none;
-      border-color: var(--nf-color-primary-600, #0b6e7a);
-      box-shadow: 0 0 0 3px color-mix(in srgb, var(--nf-color-primary-600, #0b6e7a) 18%, transparent);
-    }
     .preview {
       margin: 0;
       display: grid;
@@ -165,7 +143,6 @@ export class PrixFourniDialogComponent implements AfterViewInit {
     MatDialogRef<PrixFourniDialogComponent, PrixFourniDialogResult | null>,
   );
   readonly data = inject<PrixFourniDialogData>(MAT_DIALOG_DATA);
-  private readonly prixInput = viewChild<ElementRef<HTMLInputElement>>('prixInput');
 
   prix =
     this.data.prixFourniBase != null && this.data.prixFourniBase > 0
@@ -173,7 +150,7 @@ export class PrixFourniDialogComponent implements AfterViewInit {
       : '';
 
   ngAfterViewInit(): void {
-    queueMicrotask(() => this.prixInput()?.nativeElement?.focus());
+    queueMicrotask(() => document.getElementById('prix-fourni-input')?.focus());
   }
 
   get coutFourni(): number {
