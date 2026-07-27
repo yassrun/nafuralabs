@@ -192,3 +192,54 @@ body::after {
 body.is-dragging-card .project-card:active {
   z-index: 50;
 }
+
+/* Hero “Click to draw:” — loops right → left forever */
+@keyframes click-to-draw-in {
+  0% {
+    opacity: 0;
+    transform: translateX(1.4rem);
+  }
+  18% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  72% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-0.6rem);
+  }
+}
+
+.click-to-draw-hint {
+  opacity: 0;
+  animation: click-to-draw-in 2.8s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+
+/* Hide forever after the first stroke */
+html[data-has-drawn] .click-to-draw-hint {
+  opacity: 0 !important;
+  animation: none;
+  transform: translateX(-0.6rem);
+  visibility: hidden;
+  transition:
+    opacity 0.45s ease,
+    transform 0.45s ease,
+    visibility 0s linear 0.45s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .click-to-draw-hint {
+    opacity: 1;
+    animation: none;
+    transform: none;
+  }
+
+  html[data-has-drawn] .click-to-draw-hint {
+    opacity: 0 !important;
+    visibility: hidden;
+  }
+}

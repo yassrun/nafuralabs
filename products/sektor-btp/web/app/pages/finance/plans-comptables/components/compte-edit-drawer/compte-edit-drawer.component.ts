@@ -95,7 +95,7 @@ const EMPTY: DrawerForm = {
               <span>{{ 'finance.planComptable.form.fields.classe' | translate }}</span>
               <nf-select
                 [options]="classeOptions"
-                [ngModel]="String(form().classe)"
+                [ngModel]="'' + form().classe"
                 (ngModelChange)="onClasseChange($event)"
               />
             </label>

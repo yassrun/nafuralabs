@@ -55,7 +55,22 @@ export function useProjectMagnet({
             const radius =
               Math.max(rect.width, rect.height) * MAGNET_RADIUS_FACTOR;
 
-            if (dist > 0 && dist < radius) {
+            // Cursor is on the card: kill magnet (circle shrinks instead).
+            const inside =
+              e.clientX >= rect.left &&
+              e.clientX <= rect.right &&
+              e.clientY >= rect.top &&
+              e.clientY <= rect.bottom;
+
+            if (inside) {
+              gsap.to(inner, {
+                x: 0,
+                y: 0,
+                duration: 0.35,
+                ease: "power3.out",
+                overwrite: true,
+              });
+            } else if (dist > 0 && dist < radius) {
               const t = 1 - dist / radius;
               const pull = t * t * MAGNET_MAX_PULL;
               const tx = (dx / dist) * pull;

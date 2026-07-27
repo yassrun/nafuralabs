@@ -158,4 +158,10 @@ describe('OnboardingFlowPage', () => {
     const lastSave = api.saveState.calls.mostRecent().args[0];
     expect(lastSave.currentStep).toBe(5);
   });
+
+  it('navigates to the data reprise step from the ready screen', () => {
+    const page = createPage();
+    page.goReprise();
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/onboarding/reprise');
+  });
 });

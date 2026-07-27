@@ -4,11 +4,19 @@
       "title": "Créer votre compte Sektor",
       "subtitle": "L'ERP construction pensé pour les entreprises marocaines du BTP.",
       "email": "Email professionnel",
+      "emailRequired": "Indiquez votre email professionnel.",
+      "emailInvalid": "Indiquez une adresse email valide (ex. nom@entreprise.ma).",
       "password": "Mot de passe",
       "passwordHint": "8 caractères minimum, une majuscule et un chiffre",
+      "passwordRequired": "Indiquez un mot de passe.",
+      "passwordInvalid": "Le mot de passe doit contenir au moins 8 caractères, une majuscule et un chiffre.",
       "passwordOk": "Mot de passe valide",
       "firstName": "Prénom",
+      "firstNameRequired": "Indiquez votre prénom.",
+      "firstNameMin": "Le prénom doit contenir au moins 2 caractères.",
       "lastName": "Nom",
+      "lastNameRequired": "Indiquez votre nom.",
+      "lastNameMin": "Le nom doit contenir au moins 2 caractères.",
       "locale": "Langue",
       "submit": "Créer mon compte",
       "submitting": "Création…",
@@ -60,7 +68,9 @@
       "readyTitle": "{company} est prêt sur Sektor",
       "readySubtitle": "Votre ERP est configuré selon votre profil. Vous pouvez commencer dès maintenant.",
       "preparedTitle": "Ce que Sektor a préparé",
-      "completeLaterHint": "ICE, coordonnées, banque et équipe se complètent à tout moment depuis l'administration.",
+      "completeLaterHint": "Clients, fournisseurs et employés s'importent facilement avec l'import magique — ou se complètent plus tard depuis l'administration.",
+      "goReprise": "Importer mes données (magique)",
+      "skipReprise": "Passer et accéder au tableau de bord",
       "goDashboard": "Accéder au tableau de bord",
       "errorIce": "L'ICE doit contenir exactement 15 chiffres (ou rester vide).",
       "errorCompany": "Indiquez le nom de votre entreprise.",
@@ -107,6 +117,8 @@
     "invite": {
       "title": "Invitez vos collègues pour exploiter Sektor à fond",
       "emails": "Emails (séparés par virgule ou ligne)",
+      "emailsRequired": "Indiquez au moins une adresse email.",
+      "emailsInvalid": "Une ou plusieurs adresses email sont invalides.",
       "role": "Rôle par défaut",
       "send": "Envoyer les invitations",
       "dismiss": "Plus tard",
@@ -117,6 +129,36 @@
       "tooltipTitle": "Configuration de l'entreprise",
       "panelTitle": "Finaliser mon entreprise",
       "loadDemo": "Charger des données de démo →"
+    },
+    "reprise": {
+      "eyebrow": "Import magique",
+      "stepLabel": "Reprise {current}/{total}",
+      "magicHint": "Déposez un fichier Excel, CSV ou PDF — Sektor extrait les lignes, vous relisez, puis on crée. Aucune saisie ligne à ligne.",
+      "skipStep": "Passer cette étape",
+      "skipAll": "Tout passer → tableau de bord",
+      "laterHint": "Vous pourrez toujours importer depuis Clients, Fournisseurs ou Employés.",
+      "result": "{created} {entity} ajouté(s), {duplicates} doublon(s) ignoré(s).",
+      "errorImport": "Impossible d'enregistrer les données extraites. Réessayez ou passez cette étape.",
+      "errorExtract": "Impossible d'extraire ce fichier. Vérifiez le format ou passez cette étape.",
+      "entities": {
+        "clients": "client(s)",
+        "fournisseurs": "fournisseur(s)",
+        "employes": "employé(s)"
+      },
+      "steps": {
+        "clients": {
+          "title": "Reprenez vos clients",
+          "help": "Votre fichier clients, ou un export de votre logiciel de facturation — même incomplet."
+        },
+        "fournisseurs": {
+          "title": "Reprenez vos fournisseurs",
+          "help": "La liste de vos fournisseurs habituels — ICE, contact et conditions de paiement si vous les avez."
+        },
+        "employes": {
+          "title": "Reprenez votre équipe",
+          "help": "Votre registre du personnel ou un export paie : nom, prénom, CIN, poste, contrat."
+        }
+      }
     }
   }
 }

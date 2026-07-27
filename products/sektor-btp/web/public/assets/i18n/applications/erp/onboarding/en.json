@@ -4,11 +4,19 @@
       "title": "Create your Sektor account",
       "subtitle": "The construction ERP built for Moroccan BTP companies.",
       "email": "Work email",
+      "emailRequired": "Enter your work email.",
+      "emailInvalid": "Enter a valid email address (e.g. name@company.ma).",
       "password": "Password",
       "passwordHint": "At least 8 characters, one uppercase letter and one digit",
+      "passwordRequired": "Enter a password.",
+      "passwordInvalid": "Password must be at least 8 characters with one uppercase letter and one digit.",
       "passwordOk": "Password looks good",
       "firstName": "First name",
+      "firstNameRequired": "Enter your first name.",
+      "firstNameMin": "First name must be at least 2 characters.",
       "lastName": "Last name",
+      "lastNameRequired": "Enter your last name.",
+      "lastNameMin": "Last name must be at least 2 characters.",
       "locale": "Language",
       "submit": "Create my account",
       "submitting": "Creating…",
@@ -60,7 +68,9 @@
       "readyTitle": "{company} is ready on Sektor",
       "readySubtitle": "Your ERP is configured for your profile. You can start right away.",
       "preparedTitle": "What Sektor prepared",
-      "completeLaterHint": "ICE, contact details, bank and team can be completed anytime from administration.",
+      "completeLaterHint": "Clients, suppliers and employees import easily with magic import — or anytime later from administration.",
+      "goReprise": "Import my data (magic)",
+      "skipReprise": "Skip and go to dashboard",
       "goDashboard": "Go to dashboard",
       "errorIce": "ICE must be exactly 15 digits (or left empty).",
       "errorCompany": "Enter your company name.",
@@ -89,6 +99,8 @@
     "invite": {
       "title": "Invite colleagues to get the most from Sektor",
       "emails": "Emails (comma or line separated)",
+      "emailsRequired": "Enter at least one email address.",
+      "emailsInvalid": "One or more email addresses are invalid.",
       "role": "Default role",
       "send": "Send invitations",
       "dismiss": "Later",
@@ -99,6 +111,36 @@
       "tooltipTitle": "Company setup progress",
       "panelTitle": "Finish setting up my company",
       "loadDemo": "Load demo data →"
+    },
+    "reprise": {
+      "eyebrow": "Magic import",
+      "stepLabel": "Import {current}/{total}",
+      "magicHint": "Drop an Excel, CSV or PDF file — Sektor extracts the rows, you review, then we create them. No line-by-line entry.",
+      "skipStep": "Skip this step",
+      "skipAll": "Skip all → dashboard",
+      "laterHint": "You can always import later from Clients, Suppliers or Employees.",
+      "result": "{created} {entity} added, {duplicates} duplicate(s) skipped.",
+      "errorImport": "Could not save the extracted data. Retry or skip this step.",
+      "errorExtract": "Could not extract this file. Check the format or skip this step.",
+      "entities": {
+        "clients": "client(s)",
+        "fournisseurs": "supplier(s)",
+        "employes": "employee(s)"
+      },
+      "steps": {
+        "clients": {
+          "title": "Bring in your clients",
+          "help": "Your client file, or an export from your billing software — even if incomplete."
+        },
+        "fournisseurs": {
+          "title": "Bring in your suppliers",
+          "help": "Your usual suppliers list — ICE, contact and payment terms if you have them."
+        },
+        "employes": {
+          "title": "Bring in your team",
+          "help": "Your staff register or payroll export: name, ID, role, contract."
+        }
+      }
     }
   }
 }

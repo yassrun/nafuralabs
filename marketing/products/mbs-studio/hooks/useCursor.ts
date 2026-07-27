@@ -91,9 +91,11 @@ export function useCursor({ enabled, layoutScale = 1 }: UseCursorOptions) {
     void loadGsap().then((gsap) => {
       const el = cursorRef.current;
       if (!el) return;
+      // Over projects the circle shrinks; pencil stays at 1.
+      const scale = next === "circle" ? 0.55 : 1;
       gsap.to(el, {
-        scale: 1,
-        duration: 0.25,
+        scale,
+        duration: 0.28,
         ease: "power2.out",
       });
     });

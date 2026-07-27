@@ -1,47 +1,115 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  inject,
+  signal,
+} from '@angular/core';
+import {
+  AbstractControl,
+  FormBuilder,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators,
+} from '@angular/forms';
 import { Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map, startWith } from 'rxjs';
 
 import { AuthFacade } from '@core/security/services/auth.facade';
-
 import { ButtonComponent } from '@lib/anatomy';
+
+function passwordPolicyValidator(control: AbstractControl): ValidationErrors | null {
+  const value = String(control.value ?? '');
+  if (!value) {
+    return null;
+  }
+  const ok = value.length >= 8 && /[A-Z]/.test(value) && /\d/.test(value);
+  return ok ? null : { passwordPolicy: true };
+}
 
 @Component({
   selector: 'naf-signup-page',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, TranslateModule, ButtonComponent],
+  imports: [CommonModule, ReactiveFormsModule, TranslateModule, ButtonComponent],
   template: `
     <section class="signup-card" aria-labelledby="signup-title">
       <h1 id="signup-title">{{ 'onboarding.signup.title' | translate }}</h1>
       <p class="signup-card__sub">{{ 'onboarding.signup.subtitle' | translate }}</p>
 
-      <form (ngSubmit)="submit()" class="signup-form">
+      <form [formGroup]="form" (ngSubmit)="submit()" class="signup-form" novalidate>
         <fieldset class="signup-form__fields" [disabled]="submitting()">
           <label>
             <span>{{ 'onboarding.signup.email' | translate }}</span>
-            <input type="email" autocomplete="email" required [(ngModel)]="email" name="email" />
+            <input
+              type="email"
+              autocomplete="email"
+              formControlName="email"
+              [attr.aria-invalid]="showError('email')"
+              [attr.aria-describedby]="showError('email') ? 'signup-email-error' : null" />
+            @if (showError('email')) {
+              <small id="signup-email-error" class="signup-form__error" role="alert">
+                {{ emailErrorKey() | translate }}
+              </small>
+            }
           </label>
+
           <label>
             <span>{{ 'onboarding.signup.password' | translate }}</span>
-            <input type="password" autocomplete="new-password" required [(ngModel)]="password" name="password" />
-            <small [class.signup-form__hint-ok]="passwordValid()">
-              {{ (passwordValid() ? 'onboarding.signup.passwordOk' : 'onboarding.signup.passwordHint') | translate }}
+            <input
+              type="password"
+              autocomplete="new-password"
+              formControlName="password"
+              [attr.aria-invalid]="showError('password')"
+              [attr.aria-describedby]="passwordDescribedBy()" />
+            <small
+              id="signup-password-hint"
+              [class.signup-form__hint-ok]="passwordOk()"
+              [class.signup-form__error]="showError('password')">
+              @if (showError('password')) {
+                {{ passwordErrorKey() | translate }}
+              } @else {
+                {{ (passwordOk() ? 'onboarding.signup.passwordOk' : 'onboarding.signup.passwordHint') | translate }}
+              }
             </small>
           </label>
+
           <label>
             <span>{{ 'onboarding.signup.firstName' | translate }}</span>
-            <input type="text" required [(ngModel)]="firstName" name="firstName" />
+            <input
+              type="text"
+              autocomplete="given-name"
+              formControlName="firstName"
+              [attr.aria-invalid]="showError('firstName')"
+              [attr.aria-describedby]="showError('firstName') ? 'signup-firstName-error' : null" />
+            @if (showError('firstName')) {
+              <small id="signup-firstName-error" class="signup-form__error" role="alert">
+                {{ nameErrorKey('firstName') | translate }}
+              </small>
+            }
           </label>
+
           <label>
             <span>{{ 'onboarding.signup.lastName' | translate }}</span>
-            <input type="text" required [(ngModel)]="lastName" name="lastName" />
+            <input
+              type="text"
+              autocomplete="family-name"
+              formControlName="lastName"
+              [attr.aria-invalid]="showError('lastName')"
+              [attr.aria-describedby]="showError('lastName') ? 'signup-lastName-error' : null" />
+            @if (showError('lastName')) {
+              <small id="signup-lastName-error" class="signup-form__error" role="alert">
+                {{ nameErrorKey('lastName') | translate }}
+              </small>
+            }
           </label>
+
           <label>
             <span>{{ 'onboarding.signup.locale' | translate }}</span>
-            <select [(ngModel)]="locale" name="locale" (ngModelChange)="onLocaleChange($event)">
+            <select formControlName="locale">
               <option value="fr">Français</option>
               <option value="en">English</option>
               <option value="ar">العربية</option>
@@ -56,7 +124,11 @@ import { ButtonComponent } from '@lib/anatomy';
           <p class="signup-error" role="alert">{{ error() }}</p>
         }
 
-        <nf-button type="submit" [fullWidth]="true" [disabled]="submitting()" variant="primary">
+        <nf-button
+          type="submit"
+          [fullWidth]="true"
+          [disabled]="!canSubmit()"
+          variant="primary">
           @if (submitting()) {
             <span class="signup-spinner" aria-hidden="true"></span>
           }
@@ -98,8 +170,13 @@ import { ButtonComponent } from '@lib/anatomy';
       outline-offset: 1px;
       border-color: var(--nf-color-primary-400);
     }
-    .signup-form small { color: var(--nf-text-muted); }
+    .signup-form input[aria-invalid='true'],
+    .signup-form select[aria-invalid='true'] {
+      border-color: var(--nf-color-danger-500, #dc2626);
+    }
+    .signup-form small { color: var(--nf-text-muted); font-weight: 400; }
     .signup-form__hint-ok { color: var(--nf-color-success-700) !important; }
+    .signup-form__error { color: var(--nf-color-danger-700) !important; }
     .signup-error { color: var(--nf-color-danger-700); font-size: 0.875rem; }
     .signup-info { color: var(--nf-color-success-700); font-size: 0.875rem; }
     .signup-wait { margin: 0; font-size: 0.8125rem; color: var(--nf-text-muted); text-align: center; }
@@ -118,54 +195,119 @@ export class SignupPage {
   private readonly auth = inject(AuthFacade);
   private readonly router = inject(Router);
   private readonly translate = inject(TranslateService);
+  private readonly fb = inject(FormBuilder);
+  private readonly host = inject(ElementRef<HTMLElement>);
 
-  email = '';
-  password = '';
-  firstName = '';
-  lastName = '';
-  locale: 'fr' | 'en' | 'ar' = 'fr';
+  readonly form = this.fb.nonNullable.group({
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required, passwordPolicyValidator]],
+    firstName: ['', [Validators.required, Validators.minLength(2)]],
+    lastName: ['', [Validators.required, Validators.minLength(2)]],
+    locale: this.fb.nonNullable.control<'fr' | 'en' | 'ar'>('fr', Validators.required),
+  });
+
+  private readonly formValid = toSignal(
+    this.form.statusChanges.pipe(
+      startWith(this.form.status),
+      map((status) => status === 'VALID'),
+    ),
+    { initialValue: this.form.valid },
+  );
 
   readonly submitting = signal(false);
   readonly error = signal<string | null>(null);
   readonly info = signal<string | null>(null);
+  /** Forces re-eval of showError after markAllAsTouched. */
+  readonly touchedTick = signal(0);
 
-  passwordValid(): boolean {
-    return this.password.length >= 8 && /[A-Z]/.test(this.password) && /\d/.test(this.password);
+  constructor() {
+    this.form.controls.locale.valueChanges.subscribe((locale) => {
+      this.translate.use(locale);
+    });
   }
 
-  onLocaleChange(locale: 'fr' | 'en' | 'ar'): void {
-    this.translate.use(locale);
+  canSubmit(): boolean {
+    return this.formValid() === true && !this.submitting();
+  }
+
+  showError(controlName: 'email' | 'password' | 'firstName' | 'lastName'): boolean {
+    this.touchedTick();
+    const control = this.form.controls[controlName];
+    return control.invalid && (control.touched || control.dirty);
+  }
+
+  passwordOk(): boolean {
+    return this.form.controls.password.valid && !!this.form.controls.password.value;
+  }
+
+  passwordDescribedBy(): string {
+    return 'signup-password-hint';
+  }
+
+  emailErrorKey(): string {
+    const errors = this.form.controls.email.errors;
+    if (errors?.['required']) {
+      return 'onboarding.signup.emailRequired';
+    }
+    return 'onboarding.signup.emailInvalid';
+  }
+
+  passwordErrorKey(): string {
+    const errors = this.form.controls.password.errors;
+    if (errors?.['required']) {
+      return 'onboarding.signup.passwordRequired';
+    }
+    return 'onboarding.signup.passwordInvalid';
+  }
+
+  nameErrorKey(controlName: 'firstName' | 'lastName'): string {
+    const errors = this.form.controls[controlName].errors;
+    if (errors?.['required']) {
+      return controlName === 'firstName'
+        ? 'onboarding.signup.firstNameRequired'
+        : 'onboarding.signup.lastNameRequired';
+    }
+    return controlName === 'firstName'
+      ? 'onboarding.signup.firstNameMin'
+      : 'onboarding.signup.lastNameMin';
   }
 
   async submit(): Promise<void> {
     this.error.set(null);
     this.info.set(null);
-    if (!this.passwordValid()) {
-      this.error.set(this.translate.instant('onboarding.signup.passwordHint'));
+    this.form.markAllAsTouched();
+    this.touchedTick.update((n) => n + 1);
+
+    if (this.form.invalid) {
+      this.focusFirstInvalid();
       return;
     }
+
+    const { email, password, firstName, lastName, locale } = this.form.getRawValue();
     this.submitting.set(true);
     const result = await this.auth.register({
-      email: this.email.trim(),
-      password: this.password,
-      firstName: this.firstName.trim(),
-      lastName: this.lastName.trim(),
-      preferredLocale: this.locale,
+      email: email.trim(),
+      password,
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      preferredLocale: locale,
     });
     this.submitting.set(false);
+
     if (!result.success) {
       if (result.message?.includes('EMAIL_ALREADY')) {
         this.error.set(
-          `${this.translate.instant('onboarding.signup.errorEmailTaken')} ${this.translate.instant('onboarding.signup.errorEmailResumeHint')}`
+          `${this.translate.instant('onboarding.signup.errorEmailTaken')} ${this.translate.instant('onboarding.signup.errorEmailResumeHint')}`,
         );
       } else {
         this.error.set(this.translate.instant('onboarding.signup.errorGeneric'));
       }
       return;
     }
+
     if (result.emailVerificationRequired) {
       await this.router.navigate(['/signup/check-email'], {
-        queryParams: { email: this.email.trim() },
+        queryParams: { email: email.trim() },
       });
       return;
     }
@@ -180,5 +322,18 @@ export class SignupPage {
       this.info.set(this.translate.instant('onboarding.signup.createSuccess'));
     }
     await this.router.navigateByUrl('/onboarding');
+  }
+
+  private focusFirstInvalid(): void {
+    const order = ['email', 'password', 'firstName', 'lastName'] as const;
+    for (const name of order) {
+      if (this.form.controls[name].invalid) {
+        const el = this.host.nativeElement.querySelector(
+          `[formControlName="${name}"]`,
+        ) as HTMLElement | null;
+        el?.focus();
+        return;
+      }
+    }
   }
 }

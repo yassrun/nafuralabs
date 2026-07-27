@@ -74,6 +74,9 @@ export default function CustomCursor() {
   if (!enabled) return null;
 
   const showCustom = ready && mode !== "hidden" && !modalOpen;
+  const circleSize = Math.round(72 * layoutScale);
+  // Blend on the transformed root so difference samples the page (not an isolated child).
+  const invertActive = mode === "circle";
 
   return (
     <>
@@ -86,15 +89,19 @@ export default function CustomCursor() {
       <div
         ref={cursorRef}
         className={`pointer-events-none fixed top-0 left-0 z-[200] will-change-transform ${showCustom ? "opacity-100" : "opacity-0"}`}
+        style={
+          invertActive
+            ? { mixBlendMode: "difference" }
+            : { mixBlendMode: "normal" }
+        }
         aria-hidden
       >
         {mode === "circle" ? (
           <div
             className="rounded-full bg-white"
             style={{
-              width: Math.round(72 * layoutScale),
-              height: Math.round(72 * layoutScale),
-              mixBlendMode: "difference",
+              width: circleSize,
+              height: circleSize,
               marginLeft: pencil.size / 2 - pencil.tipOffset.x,
               marginTop: pencil.size / 2 - pencil.tipOffset.y,
             }}

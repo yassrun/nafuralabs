@@ -21,10 +21,10 @@ export const DRAW_IGNORE_SELECTOR = [
 /** Pencil palette — red, green, yellow, blue only (no black). */
 export const DRAW_COLORS = ["#FEED00", "#015CA4", "#FD2E00", "#52B702"];
 
-/** Match pencil weight to hero hand-drawn stroke (~0.36% of scaled headline width). */
+/** Match pencil weight to hero hand-drawn stroke (~0.42% of scaled headline width). */
 export function getPencilLineWidth(layoutScale = 1) {
   const headlineWidth = HERO_HEADLINE.width * layoutScale;
-  return Math.max(2, Math.min(4.5, headlineWidth * 0.0036));
+  return Math.max(2.5, Math.min(6, headlineWidth * 0.0042));
 }
 
 interface UseDrawingOptions {
@@ -43,6 +43,7 @@ export function useDrawing({
   const lastPoint = useRef<{ x: number; y: number } | null>(null);
   const colorIndex = useRef(0);
   const strokeColor = useRef(DRAW_COLORS[0]);
+  const hasDrawn = useRef(false);
 
   const resizeCanvas = useCallback(() => {
     const canvas = canvasRef.current;
@@ -115,8 +116,8 @@ export function useDrawing({
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
 
-      // Mid weight between the old *1.6 (too heavy) and bare width (too thin).
-      const size = getPencilLineWidth(layoutScale) * 1.25;
+      // Slightly heavier marker (client feedback: brush a bit thicker).
+      const size = getPencilLineWidth(layoutScale) * 1.45;
       const color = strokeColor.current;
 
       if (!lastPoint.current) {
@@ -157,6 +158,10 @@ export function useDrawing({
       lastPoint.current = null;
       pickNextColor();
       drawLine(e.clientX, e.clientY);
+      if (!hasDrawn.current) {
+        hasDrawn.current = true;
+        document.documentElement.setAttribute("data-has-drawn", "");
+      }
     };
 
     const onPointerMove = (e: PointerEvent) => {

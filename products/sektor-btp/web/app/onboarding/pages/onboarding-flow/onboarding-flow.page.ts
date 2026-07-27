@@ -57,7 +57,15 @@ const TOTAL_STEPS = 5;
                 type="text"
                 maxlength="200"
                 [(ngModel)]="companyInput"
+                (blur)="markStep0Touched()"
+                [attr.aria-invalid]="showCompanyError()"
+                [attr.aria-describedby]="showCompanyError() ? 'flow-company-error' : null"
                 [attr.placeholder]="'onboarding.flow.companyPlaceholder' | translate" />
+              @if (showCompanyError()) {
+                <small id="flow-company-error" class="flow__field-error" role="alert">
+                  {{ 'onboarding.flow.errorCompany' | translate }}
+                </small>
+              }
             </label>
             <label class="flow__field">
               <span>{{ 'onboarding.flow.iceOptional' | translate }}</span>
@@ -66,10 +74,19 @@ const TOTAL_STEPS = 5;
                 maxlength="15"
                 inputmode="numeric"
                 [(ngModel)]="ice"
+                (blur)="markStep0Touched()"
+                [attr.aria-invalid]="showIceError()"
+                [attr.aria-describedby]="showIceError() ? 'flow-ice-error' : 'flow-ice-hint'"
                 [attr.placeholder]="'onboarding.flow.icePlaceholder' | translate" />
-              <small class="flow__hint" [class.flow__hint--invalid]="ice.length > 0 && ice.length !== 15">
-                {{ 'onboarding.flow.iceHint' | translate }}
-              </small>
+              @if (showIceError()) {
+                <small id="flow-ice-error" class="flow__field-error" role="alert">
+                  {{ 'onboarding.flow.errorIce' | translate }}
+                </small>
+              } @else {
+                <small id="flow-ice-hint" class="flow__hint">
+                  {{ 'onboarding.flow.iceHint' | translate }}
+                </small>
+              }
             </label>
           </div>
         } @else {
@@ -143,9 +160,14 @@ const TOTAL_STEPS = 5;
 
           <p class="flow__done-hint">{{ 'onboarding.flow.completeLaterHint' | translate }}</p>
 
-          <nf-button type="button" variant="primary" (clicked)="goDashboard()">
-            {{ 'onboarding.flow.goDashboard' | translate }}
-          </nf-button>
+          <div class="flow__done-actions">
+            <nf-button type="button" variant="primary" (clicked)="goReprise()">
+              {{ 'onboarding.flow.goReprise' | translate }}
+            </nf-button>
+            <nf-button type="button" variant="ghost" (clicked)="goDashboard()">
+              {{ 'onboarding.flow.skipReprise' | translate }}
+            </nf-button>
+          </div>
         </div>
       }
     </section>
@@ -208,7 +230,10 @@ const TOTAL_STEPS = 5;
       border-color: var(--nf-color-primary-400);
     }
     .flow__hint { font-size: 0.78rem; font-weight: 400; color: var(--nf-text-muted); }
-    .flow__hint--invalid { color: var(--nf-color-warning-700); }
+    .flow__field-error { font-size: 0.78rem; font-weight: 400; color: var(--nf-color-danger-700); }
+    .flow__field input[aria-invalid='true'] {
+      border-color: var(--nf-color-danger-500, #dc2626);
+    }
     .flow__choices { display: flex; flex-wrap: wrap; gap: 0.5rem; }
     .flow__choices ::ng-deep button { border-radius: 999px; }
     .flow__optional-hint { margin: 0.75rem 0 0; font-size: 0.78rem; color: var(--nf-text-muted); }
@@ -264,6 +289,12 @@ const TOTAL_STEPS = 5;
     .flow__prepared li { display: flex; gap: 0.5rem; align-items: baseline; }
     .flow__prepared-check { color: var(--nf-color-success-600); font-weight: 700; flex-shrink: 0; }
     .flow__done-hint { margin: 0 0 1.25rem; font-size: 0.8125rem; color: var(--nf-text-muted); }
+    .flow__done-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.55rem;
+    }
   `],
 })
 export class OnboardingFlowPage implements OnInit {
@@ -287,6 +318,9 @@ export class OnboardingFlowPage implements OnInit {
   taille = '';
   marches = '';
   compta = '';
+
+  /** Affiche les erreurs champ après blur ou tentative de submit (étape 0). */
+  readonly step0Touched = signal(false);
 
   tenantId = signal<string | null>(null);
   companyName = signal('');
@@ -360,6 +394,18 @@ export class OnboardingFlowPage implements OnInit {
     return true;
   }
 
+  markStep0Touched(): void {
+    this.step0Touched.set(true);
+  }
+
+  showCompanyError(): boolean {
+    return this.step0Touched() && this.companyInput.trim().length < 2;
+  }
+
+  showIceError(): boolean {
+    return this.step0Touched() && this.ice.length > 0 && !/^\d{15}$/.test(this.ice);
+  }
+
   back(): void {
     if (this.step() > 1) {
       this.error.set(null);
@@ -372,8 +418,11 @@ export class OnboardingFlowPage implements OnInit {
     if (this.busy()) {
       return;
     }
+    if (this.step() === 0) {
+      this.step0Touched.set(true);
+    }
     if (!this.canAdvance()) {
-      this.error.set(this.validationMessage());
+      this.error.set(null);
       return;
     }
 
@@ -411,18 +460,6 @@ export class OnboardingFlowPage implements OnInit {
       return;
     }
     await this.applyPreset();
-  }
-
-  private validationMessage(): string {
-    if (this.step() === 0) {
-      if (this.companyInput.trim().length < 2) {
-        return this.i18n.instant('onboarding.flow.errorCompany');
-      }
-      if (this.ice.length > 0 && !/^\d{15}$/.test(this.ice)) {
-        return this.i18n.instant('onboarding.flow.errorIce');
-      }
-    }
-    return this.i18n.instant('onboarding.flow.errorGeneric');
   }
 
   private async createTenant(): Promise<boolean> {
@@ -559,7 +596,32 @@ export class OnboardingFlowPage implements OnInit {
     }
   }
 
-  goDashboard(): void {
+  goReprise(): void {
+    void this.router.navigateByUrl('/onboarding/reprise');
+  }
+
+  async goDashboard(): Promise<void> {
+    await this.markRepriseSkipped();
     void this.router.navigateByUrl('/dashboard');
+  }
+
+  /** Skip depuis l'écran « prêt » : marque la reprise terminée pour ne pas y renvoyer. */
+  private async markRepriseSkipped(): Promise<void> {
+    try {
+      const state = await this.api.getState();
+      const answers = { ...(state.answers ?? {}) };
+      answers['reprise'] = {
+        etape: 2,
+        passees: ['clients', 'fournisseurs', 'employes'],
+        terminee: true,
+      };
+      await this.api.saveState({
+        currentStep: Math.max(state.currentStep, TOTAL_STEPS),
+        tenantId: this.tenantId() ?? state.tenantId,
+        answers,
+      });
+    } catch {
+      // navigation still proceeds
+    }
   }
 }

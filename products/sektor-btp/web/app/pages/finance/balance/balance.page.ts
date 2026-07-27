@@ -61,7 +61,7 @@ import type {
           <span>{{ 'finance.balance.filters.classe' | translate }}</span>
           <nf-select
             [options]="classeOptions()"
-            [ngModel]="filterClasse() == null ? '' : String(filterClasse())"
+            [ngModel]="filterClasse() == null ? '' : '' + filterClasse()"
             (ngModelChange)="onClasseChange($event)"
           />
         </label>

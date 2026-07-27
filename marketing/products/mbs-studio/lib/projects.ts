@@ -18,64 +18,56 @@ export interface Project {
  */
 export const PROJECTS: Project[] = [
   {
-    slug: "brand-refresh",
-    title: "Brand Refresh",
-    image: "https://placehold.co/506x633/1a1a1a/ffffff?text=Project+1",
+    slug: "alchimies-photographiques",
+    title: "Alchimies Photographiques",
+    image: "/projects/01-alchimies-photographiques.jpg",
     size: "large",
     x: 48,
     y: 0,
   },
   {
-    slug: "founders-launch",
-    title: "Founders Launch",
-    image: "https://placehold.co/409x512/2a2a2a/ffffff?text=Project+2",
+    slug: "mik-made-in-korea",
+    title: "MIK — Made in Korea",
+    image: "/projects/02-mik-made-in-korea.jpg",
     size: "medium",
     // 48 + 506 + 80
     x: 634,
     y: 168,
   },
   {
-    slug: "storytelling-campaign",
-    title: "Storytelling Campaign",
-    image: "https://placehold.co/290x363/333333/ffffff?text=Project+3",
+    slug: "la-cantine-family",
+    title: "La Cantine Family",
+    image: "/projects/03-la-cantine-family.jpg",
     size: "small",
     // 634 + 409 + 80
     x: 1123,
     y: 48,
   },
   {
-    slug: "visual-identity",
-    title: "Visual Identity",
-    image: "https://placehold.co/409x512/2a2a2a/ffffff?text=Project+4",
+    slug: "a-casa-portuguesa",
+    title: "A Casa Portuguesa",
+    image: "/projects/04-a-casa-portuguesa.jpg",
     size: "medium",
     x: 88,
     y: 920,
   },
   {
-    slug: "content-system",
-    title: "Content System",
-    image: "https://placehold.co/506x633/1a1a1a/ffffff?text=Project+5",
+    slug: "the-burger-joint",
+    title: "The Burger Joint",
+    image: "/projects/05-the-burger-joint.jpg",
     size: "large",
     // 88 + 409 + 80
     x: 577,
     y: 1100,
   },
   {
-    slug: "packaging",
-    title: "Packaging",
-    image: "https://placehold.co/290x363/333333/ffffff?text=Project+6",
+    slug: "oh-my-bun",
+    title: "Oh My Bun!",
+    image: "/projects/06-oh-my-bun.jpg",
     size: "small",
     // 577 + 506 + 80
     x: 1163,
     y: 1480,
-  },
-  {
-    slug: "digital-experience",
-    title: "Digital Experience",
-    image: "https://placehold.co/409x512/2a2a2a/ffffff?text=Project+7",
-    size: "medium",
-    x: 180,
-    y: 2180,
   },
 ];
 

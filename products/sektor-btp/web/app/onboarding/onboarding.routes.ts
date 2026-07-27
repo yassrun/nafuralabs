@@ -38,6 +38,13 @@ export const ONBOARDING_V2_ROUTES: Routes = [
         loadComponent: () =>
           import('./pages/onboarding-flow/onboarding-flow.page').then((m) => m.OnboardingFlowPage),
       },
+      {
+        path: 'reprise',
+        loadComponent: () =>
+          import('./pages/onboarding-reprise/onboarding-reprise.page').then(
+            (m) => m.OnboardingReprisePage,
+          ),
+      },
     ],
   },
 ];
