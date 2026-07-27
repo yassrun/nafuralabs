@@ -26,12 +26,19 @@ import { OnboardingApiService } from '../../services/onboarding-api.service';
   `,
   styles: [`
     .verify-card {
-      max-width: 420px; margin: 0 auto; padding: 1.5rem;
-      background: var(--nf-color-surface); border-radius: 12px;
-      box-shadow: 0 4px 24px rgba(0,0,0,.06);
+      max-width: 440px; margin: 0 auto; padding: clamp(1.5rem, 4vw, 2.5rem);
+      background: var(--nf-color-surface); border-radius: 16px;
+      box-shadow: 0 6px 32px rgba(10, 24, 64, 0.08);
+      text-align: center;
+    }
+    .verify-card h1 {
+      margin: 0 0 0.75rem;
+      font-size: clamp(1.25rem, 3vw, 1.5rem);
+      font-weight: 700;
     }
     .verify-error { color: var(--nf-color-danger-700); }
     .verify-ok { color: var(--nf-color-success-700); }
+    a { display: inline-block; margin-top: 1rem; color: var(--nf-color-primary-600); }
   `],
 })
 export class SignupVerifyPage implements OnInit {

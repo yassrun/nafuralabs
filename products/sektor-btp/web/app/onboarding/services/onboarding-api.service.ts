@@ -24,7 +24,8 @@ export interface SignupResult {
 
 export interface CreateTenantPayload {
   companyName: string;
-  ice: string;
+  /** Facultatif — 15 chiffres si renseigné. */
+  ice?: string;
   legalForm?: string;
 }
 
@@ -38,7 +39,8 @@ export interface CreateTenantResult {
 
 export interface SocietePreset {
   nom: string;
-  ice: string;
+  /** Facultatif — complété plus tard via l'administration si absent. */
+  ice?: string | null;
   forme?: string;
 }
 

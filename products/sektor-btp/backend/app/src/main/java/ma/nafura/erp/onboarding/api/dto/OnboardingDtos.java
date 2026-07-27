@@ -57,12 +57,16 @@ public final class OnboardingDtos {
         String forme
     ) {}
 
+    /**
+     * Profil métier facultatif : les champs vides ou absents sont remplacés
+     * par les recommandations Sektor côté backend (voir OnboardingAgentParserService).
+     */
     public record ApplyPresetRequest(
         @NotNull SocietePresetDto societe,
-        @NotBlank String secteur,
-        @NotBlank String taille,
-        @NotBlank String marches,
-        @NotBlank String compta,
+        String secteur,
+        String taille,
+        String marches,
+        String compta,
         boolean forceReset
     ) {}
 

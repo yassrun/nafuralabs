@@ -10,16 +10,11 @@ import { RouterOutlet } from '@angular/router';
     <div class="onb-layout">
       <header class="onb-layout__brand">
         <img
-          class="onb-layout__mark"
-          src="/assets/branding/sektor-icon.svg"
-          alt=""
-          width="56"
-          height="56"
-          aria-hidden="true" />
-        <div class="onb-layout__lockup">
-          <span class="onb-layout__name">Sektor</span>
-          <span class="onb-layout__byline">by nafuralabs</span>
-        </div>
+          class="onb-layout__logo"
+          src="/assets/branding/sektor-logo-horizontal.svg"
+          alt="Sektor — ERP Construction"
+          width="230"
+          height="60" />
       </header>
       <main class="onb-layout__main">
         <router-outlet />
@@ -30,60 +25,37 @@ import { RouterOutlet } from '@angular/router';
     :host {
       display: block;
       min-height: 100dvh;
-      background: var(--nf-surface-muted, #f3f4f6);
+      background:
+        radial-gradient(1100px 520px at 50% -220px, var(--nf-color-primary-100, #dce2f6) 0%, transparent 68%),
+        var(--nf-surface-muted, #f3f4f6);
+      border-top: 4px solid var(--nf-color-accent-400, #f2d544);
+      box-sizing: border-box;
     }
 
     .onb-layout {
-      min-height: 100dvh;
+      min-height: calc(100dvh - 4px);
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: clamp(1.5rem, 4vw, 2.75rem) 1.25rem 2rem;
+      padding: clamp(1.5rem, 4vw, 3rem) 1.25rem 2.5rem;
       box-sizing: border-box;
     }
 
     .onb-layout__brand {
       display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1rem;
-      margin-bottom: clamp(1.5rem, 3vw, 2rem);
-      text-align: center;
-    }
-
-    .onb-layout__mark {
-      display: block;
-      width: 56px;
-      height: 56px;
-      flex-shrink: 0;
-    }
-
-    .onb-layout__lockup {
-      display: inline-flex;
-      align-items: baseline;
-      gap: 0.4rem;
-      flex-wrap: wrap;
       justify-content: center;
+      margin-bottom: clamp(1.5rem, 3.5vw, 2.5rem);
     }
 
-    .onb-layout__name {
-      font-size: clamp(1.5rem, 4vw, 1.75rem);
-      font-weight: 700;
-      letter-spacing: -0.03em;
-      line-height: 1.1;
-      color: var(--nf-color-primary-700, #1b3fae);
-    }
-
-    .onb-layout__byline {
-      font-size: 0.8125rem;
-      font-weight: 400;
-      color: var(--nf-text-muted, #6b7280);
-      letter-spacing: 0.01em;
+    .onb-layout__logo {
+      display: block;
+      width: clamp(180px, 30vw, 230px);
+      height: auto;
     }
 
     .onb-layout__main {
       width: 100%;
-      max-width: 1200px;
+      max-width: 1100px;
     }
   `],
 })

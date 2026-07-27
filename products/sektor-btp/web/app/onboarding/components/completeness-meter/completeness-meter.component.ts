@@ -13,7 +13,6 @@ const SECTION_ROUTES: Record<string, string> = {
   chart: '/finance/plans-comptables',
   numbering: '/administration/numbering-sequences',
   articles: '/inventory/catalogue/articles',
-  chantier: '/chantiers/new',
   team: '/administration/members',
 };
 

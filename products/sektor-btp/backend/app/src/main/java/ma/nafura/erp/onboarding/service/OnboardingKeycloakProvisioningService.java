@@ -2,6 +2,8 @@ package ma.nafura.erp.onboarding.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.net.URI;
+import java.net.http.HttpClient;
+import java.time.Duration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -12,6 +14,8 @@ import ma.nafura.erp.onboarding.api.dto.OnboardingDtos.SignupRequest;
 import ma.nafura.erp.onboarding.config.OnboardingProperties;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -26,6 +30,20 @@ public class OnboardingKeycloakProvisioningService {
 
     private static final String MASTER_REALM = "master";
     private static final String ADMIN_CLI = "admin-cli";
+
+    private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(5);
+    private static final Duration READ_TIMEOUT = Duration.ofSeconds(15);
+
+    /**
+     * Shared HTTP/1.1 client. The default JDK HttpClient negotiates HTTP/2 (h2c) on
+     * cleartext URLs, which some ingress controllers mishandle — the request then hangs
+     * ~60s before failing. Pinning HTTP/1.1 + explicit timeouts keeps Keycloak
+     * provisioning fast and predictable.
+     */
+    private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
+        .version(HttpClient.Version.HTTP_1_1)
+        .connectTimeout(CONNECT_TIMEOUT)
+        .build();
 
     private final OnboardingProperties properties;
 
@@ -176,8 +194,15 @@ public class OnboardingKeycloakProvisioningService {
         String token = obtainAdminToken(baseUrl);
         return RestClient.builder()
             .baseUrl(baseUrl)
+            .requestFactory(requestFactory())
             .defaultHeader("Authorization", "Bearer " + token)
             .build();
+    }
+
+    private static ClientHttpRequestFactory requestFactory() {
+        JdkClientHttpRequestFactory factory = new JdkClientHttpRequestFactory(HTTP_CLIENT);
+        factory.setReadTimeout(READ_TIMEOUT);
+        return factory;
     }
 
     private String obtainAdminToken(String baseUrl) {
@@ -187,7 +212,9 @@ public class OnboardingKeycloakProvisioningService {
         form.add("username", resolveAdminUsername());
         form.add("password", resolveAdminPassword());
 
-        JsonNode response = RestClient.create()
+        JsonNode response = RestClient.builder()
+            .requestFactory(requestFactory())
+            .build()
             .post()
             .uri(baseUrl + "/realms/" + MASTER_REALM + "/protocol/openid-connect/token")
             .contentType(MediaType.APPLICATION_FORM_URLENCODED)

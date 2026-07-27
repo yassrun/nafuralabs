@@ -54,11 +54,14 @@ public class TenantPresetOrchestratorService {
     private final ItemRepository itemRepository;
     private final IamService iamService;
     private final TenantReferenceDataSeedService referenceDataSeedService;
+    private final OnboardingAgentParserService agentParserService;
     private final ObjectMapper objectMapper;
 
     @Transactional
-    public ApplyPresetResponse applyPreset(UUID tenantId, ApplyPresetRequest request) {
+    public ApplyPresetResponse applyPreset(UUID tenantId, ApplyPresetRequest rawRequest) {
         long started = System.currentTimeMillis();
+        // Defaults centralisés : profil incomplet → recommandations Sektor.
+        ApplyPresetRequest request = agentParserService.normalize(rawRequest);
         Tenant tenant = tenantRepository.findById(tenantId)
             .orElseThrow(() -> new IllegalArgumentException("Tenant not found"));
 
@@ -141,7 +144,10 @@ public class TenantPresetOrchestratorService {
         tenant.setName(request.societe().nom());
         tenant.setOwnerEmail(tenant.getOwnerEmail());
         tenantRepository.save(tenant);
-        upsertSetting(tenant.getId(), "onboarding.societe.ice", request.societe().ice());
+        String ice = request.societe().ice();
+        if (ice != null && !ice.isBlank()) {
+            upsertSetting(tenant.getId(), "onboarding.societe.ice", ice);
+        }
         upsertSetting(tenant.getId(), "onboarding.societe.forme", request.societe().forme() != null ? request.societe().forme() : "SARL");
         upsertSetting(tenant.getId(), "onboarding.societe.nom", request.societe().nom());
     }

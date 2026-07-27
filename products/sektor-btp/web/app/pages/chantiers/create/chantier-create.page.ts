@@ -6,15 +6,12 @@ import {
   HostListener,
   computed,
   inject,
-  input,
-  output,
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { AuthFacade } from '@core/security/services/auth.facade';
 import {
   ButtonComponent,
   ConfirmDialogService,
@@ -116,11 +113,6 @@ function addMonthsIso(from: Date, months: number): string {
           <nf-button variant="ghost" class="client-create" (clicked)="createClientInline()">
             {{ 'chantiers.create.clientCreateCta' | translate }}
           </nf-button>
-          @if (onboardingMode() && clients().length === 0 && !hasClientListShortcut()) {
-            <p class="onboarding-hint">
-              {{ 'chantiers.create.clientRequiredHint' | translate }}
-            </p>
-          }
           <label>{{ 'chantiers.create.fields.marcheRef' | translate }}</label>
           <input type="text" [(ngModel)]="draft.marcheReference" name="mref" class="fld" />
           <label>{{ 'chantiers.create.fields.marcheType' | translate }}</label>
@@ -240,7 +232,6 @@ function addMonthsIso(from: Date, months: number): string {
     .fld { padding: 8px 10px; border: 1px solid var(--nf-color-border); border-radius: 6px; font-size: 0.9rem; }
     .client-select { display: block; }
     .client-create { align-self: flex-start; margin-top: -0.15rem; }
-    .onboarding-hint { font-size: 0.8rem; color: var(--nf-color-text-secondary); margin: 0.25rem 0 0; line-height: 1.4; }
     .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
     .chk { display: flex; align-items: center; gap: 0.5rem; font-weight: 500; margin-top: 0.5rem; }
     .err { color: var(--nf-color-danger-700); font-size: 0.88rem; margin: 0 0 0.75rem; }
@@ -248,9 +239,6 @@ function addMonthsIso(from: Date, months: number): string {
   `],
 })
 export class ChantierCreatePage {
-  readonly onboardingMode = input(false);
-  readonly created = output<{ name: string; id: string }>();
-
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly erpLookup = inject(ErpLookupService);
@@ -260,7 +248,6 @@ export class ChantierCreatePage {
   private readonly clientApi = inject(ClientApiService);
   private readonly audit = inject(ErpAuditService);
   private readonly translate = inject(TranslateService);
-  private readonly auth = inject(AuthFacade);
   private readonly toast = inject(ToastService);
   private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly cdr = inject(ChangeDetectorRef);
@@ -291,10 +278,6 @@ export class ChantierCreatePage {
     }
     return opts;
   });
-
-  hasClientListShortcut(): boolean {
-    return this.auth.hasLookupCreateAccess();
-  }
 
   readonly draft = {
     name: '',
@@ -536,7 +519,7 @@ export class ChantierCreatePage {
         return false;
       }
     }
-    if (s === 4 && !this.onboardingMode()) {
+    if (s === 4) {
       if (!this.draft.chefEmployeId.trim() || !this.draft.conducteurEmployeId.trim()) {
         this.validationMessage.set(t('chantiers.create.validation.team'));
         return false;
@@ -550,7 +533,7 @@ export class ChantierCreatePage {
       .create({
         name: this.draft.name,
         description: this.draft.description || undefined,
-        status: this.onboardingMode() ? 'EN_COURS' : this.draft.status,
+        status: this.draft.status,
         clientId: this.draft.clientId,
         clientName: this.draft.clientName,
         marcheReference: this.draft.marcheReference || undefined,
@@ -569,10 +552,6 @@ export class ChantierCreatePage {
       .then(async (created) => {
         await this.createTitulaireAffectations(created.id);
         this.audit.log('CREATE', 'chantier', created.id, created.code, created.name);
-        if (this.onboardingMode()) {
-          this.created.emit({ name: created.name, id: created.id });
-          return;
-        }
         this.toast.success(
           this.translate.instant('chantiers.create.createSuccess', { code: created.code, name: created.name }),
         );

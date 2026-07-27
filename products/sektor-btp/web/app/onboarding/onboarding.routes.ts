@@ -38,13 +38,6 @@ export const ONBOARDING_V2_ROUTES: Routes = [
         loadComponent: () =>
           import('./pages/onboarding-flow/onboarding-flow.page').then((m) => m.OnboardingFlowPage),
       },
-      {
-        path: 'chantier',
-        loadComponent: () =>
-          import('./pages/onboarding-chantier/onboarding-chantier.page').then(
-            (m) => m.OnboardingChantierPage
-          ),
-      },
     ],
   },
 ];

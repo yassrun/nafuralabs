@@ -12,6 +12,15 @@ import ma.nafura.erp.onboarding.api.dto.OnboardingDtos.SocietePresetDto;
 @Service
 public class OnboardingAgentParserService {
 
+    /** ICE placeholder historique — traité comme « non renseigné ». */
+    public static final String PLACEHOLDER_ICE = "000000000000000";
+
+    public static final String DEFAULT_SECTEUR = "BATIMENT";
+    public static final String DEFAULT_TAILLE = "M";
+    public static final String DEFAULT_MARCHES = "MIXTE";
+    public static final String DEFAULT_COMPTA = "INTERNE";
+    public static final String DEFAULT_FORME = "SARL";
+
     private static final Pattern ICE_PATTERN = Pattern.compile("\\b(\\d{15})\\b");
 
     public AgentParseResponse parseQuestion1(String userMessage, Map<String, Object> context) {
@@ -35,17 +44,58 @@ public class OnboardingAgentParserService {
         Map<String, Object> societeMap = (Map<String, Object>) answers.getOrDefault("societe", Map.of());
         SocietePresetDto societe = new SocietePresetDto(
             stringVal(societeMap.get("nom"), "Ma société"),
-            stringVal(societeMap.get("ice"), "000000000000000"),
-            stringVal(societeMap.get("forme"), "SARL")
+            normalizeIce(stringVal(societeMap.get("ice"), null)),
+            stringVal(societeMap.get("forme"), DEFAULT_FORME)
         );
         return new ApplyPresetRequest(
             societe,
-            normalizeSecteur(stringVal(answers.get("secteur"), "BATIMENT")),
-            normalizeTaille(stringVal(answers.get("taille"), "M")),
-            normalizeMarches(stringVal(answers.get("marches"), "MIXTE")),
-            normalizeCompta(stringVal(answers.get("compta"), "INTERNE")),
+            normalizeSecteur(stringVal(answers.get("secteur"), DEFAULT_SECTEUR)),
+            normalizeTaille(stringVal(answers.get("taille"), DEFAULT_TAILLE)),
+            normalizeMarches(stringVal(answers.get("marches"), DEFAULT_MARCHES)),
+            normalizeCompta(stringVal(answers.get("compta"), DEFAULT_COMPTA)),
             false
         );
+    }
+
+    /**
+     * Source de vérité des defaults : remplace les champs vides du profil par les
+     * recommandations Sektor et neutralise l'ICE placeholder. Idempotent.
+     */
+    public ApplyPresetRequest normalize(ApplyPresetRequest request) {
+        SocietePresetDto societe = request.societe();
+        SocietePresetDto normalizedSociete = new SocietePresetDto(
+            societe.nom(),
+            normalizeIce(societe.ice()),
+            isBlank(societe.forme()) ? DEFAULT_FORME : societe.forme()
+        );
+        return new ApplyPresetRequest(
+            normalizedSociete,
+            normalizeSecteur(orDefault(request.secteur(), DEFAULT_SECTEUR)),
+            normalizeTaille(orDefault(request.taille(), DEFAULT_TAILLE)),
+            normalizeMarches(orDefault(request.marches(), DEFAULT_MARCHES)),
+            normalizeCompta(orDefault(request.compta(), DEFAULT_COMPTA)),
+            request.forceReset()
+        );
+    }
+
+    /** ICE réel (15 chiffres) ou null — le placeholder et les valeurs invalides sont écartés. */
+    public static String normalizeIce(String ice) {
+        if (ice == null) {
+            return null;
+        }
+        String digits = ice.replaceAll("\\D", "");
+        if (digits.length() != 15 || PLACEHOLDER_ICE.equals(digits)) {
+            return null;
+        }
+        return digits;
+    }
+
+    private static boolean isBlank(String value) {
+        return value == null || value.isBlank();
+    }
+
+    private static String orDefault(String value, String fallback) {
+        return isBlank(value) ? fallback : value;
     }
 
     private static boolean hasPresetContext(Map<String, Object> context) {
@@ -59,11 +109,11 @@ public class OnboardingAgentParserService {
         String forme
     ) {
         return new ApplyPresetRequest(
-            new SocietePresetDto(nom, ice, forme),
-            normalizeSecteur(stringVal(context.get("secteur"), "BATIMENT")),
-            normalizeTaille(stringVal(context.get("taille"), "M")),
-            normalizeMarches(stringVal(context.get("marches"), "MIXTE")),
-            normalizeCompta(stringVal(context.get("compta"), "INTERNE")),
+            new SocietePresetDto(nom, normalizeIce(ice), forme),
+            normalizeSecteur(stringVal(context.get("secteur"), DEFAULT_SECTEUR)),
+            normalizeTaille(stringVal(context.get("taille"), DEFAULT_TAILLE)),
+            normalizeMarches(stringVal(context.get("marches"), DEFAULT_MARCHES)),
+            normalizeCompta(stringVal(context.get("compta"), DEFAULT_COMPTA)),
             false
         );
     }
@@ -73,11 +123,11 @@ public class OnboardingAgentParserService {
         if (matcher.find()) {
             return matcher.group(1);
         }
-        return "000000000000000";
+        return null;
     }
 
     private static String extractCompanyName(String text, String ice) {
-        String cleaned = text.replace(ice, "").trim();
+        String cleaned = (ice == null ? text : text.replace(ice, "")).trim();
         cleaned = cleaned.replaceAll("(?i)\\b(ice|sarl|sa|sarla[u]?|société|societe)\\b", "").trim();
         cleaned = cleaned.replaceAll("[-–—,:;]+", " ").trim();
         if (cleaned.isBlank()) {
