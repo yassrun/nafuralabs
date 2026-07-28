@@ -76,7 +76,7 @@ export const <ENTITY>_ROUTES: Routes = [
 
 Si le module est **nouveau** (chantiers, achats, ventes, finance, rh, hse, etudes, analytics, dashboard, materiel) :
 
-1. Créer `web/app/applications/erp/<module>/<module>.routes.ts` (hand-written, suit `inventory.routes.ts`).
+1. Créer `web/app/applications/erp/<module>/<module>.routes.ts` (hand-written, suit `stock.routes.ts`).
 2. L'importer dans `erp.routes.generated.ts` avec `...<MODULE>_ROUTES`.
 
 > **Note** : `erp.routes.generated.ts` est généré, mais on injecte les routes custom via spread (déjà fait pour inventory). Si re-génération, vérifier que le spread est conservé (sinon ajouter un `extras-erp-routes.ts` non généré).
@@ -259,4 +259,4 @@ Exemples : `chantiers.chantier.read`, `achats.bonCommande.valider`, `finance.fac
 - Fetch direct dans `ngOnInit` (passer par la facade signal-based).
 - Routes en dur dans le code (toujours via `ROUTES` config).
 - Re-générer `erp-nav.generated.ts` manuellement (généré depuis NAF spec).
-- Modifier `erp.routes.generated.ts` pour ajouter du custom (utiliser le spread pattern de `inventory.routes.ts`).
+- Modifier `erp.routes.generated.ts` pour ajouter du custom (utiliser le spread pattern de `stock.routes.ts`).

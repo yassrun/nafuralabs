@@ -16,7 +16,7 @@ Module Stock complet permettant de gérer **béton, fer, ciment, agrégats** sur
 
 ```
 app/applications/erp/pages/inventory/                          # base existante (70% complet)
-app/applications/erp/inventory/inventory.routes.ts             # routing module
+app/applications/erp/inventory/stock.routes.ts             # routing module
 app/applications/erp/inventory/mock/                           # mock service
 docs/specs/erp-frontend-agents/04-stock-refinement.md          # spec existante détaillée
 ```
@@ -331,7 +331,7 @@ export const STOCK_ROUTES: Routes = [
 ];
 ```
 
-**Et dans** : `app/applications/erp/inventory/inventory.routes.ts` (ou créer `stock.routes.ts` parent) — wirer dans le routeur principal ERP.
+**Et dans** : `app/applications/erp/inventory/stock.routes.ts` (ou créer `stock.routes.ts` parent) — wirer dans le routeur principal ERP.
 
 ---
 

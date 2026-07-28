@@ -332,12 +332,12 @@ export interface AuditEntry {
 ```ts
 export const ADMINISTRATION_ROUTES: Routes = [
   { path: 'administration', pathMatch: 'full', redirectTo: 'administration/members' },
-  { path: 'administration/members', loadChildren: () => import('../pages/administration/members/members.routes').then(m => m.MEMBERS_ROUTES) },
-  { path: 'administration/roles', loadChildren: () => import('../pages/administration/roles/roles.routes').then(m => m.ROLES_ROUTES) },
-  { path: 'administration/companies', loadChildren: () => import('../pages/administration/companies/companies.routes').then(m => m.COMPANIES_ROUTES) },
-  { path: 'administration/parametres', loadChildren: () => import('../pages/administration/parametres/parametres.routes').then(m => m.PARAMETRES_ROUTES) },
-  { path: 'administration/domain-activation', loadComponent: () => import('../pages/administration/domain-activation/domain-activation.page').then(m => m.DomainActivationPage) },
-  { path: 'administration/audit-log', loadComponent: () => import('../pages/administration/audit-log/audit-log.page').then(m => m.AuditLogPage) },
+  { path: 'administration/members', loadChildren: () => import('../features/administration/pages/members/members.routes').then(m => m.MEMBERS_ROUTES) },
+  { path: 'administration/roles', loadChildren: () => import('../features/administration/pages/roles/roles.routes').then(m => m.ROLES_ROUTES) },
+  { path: 'administration/companies', loadChildren: () => import('../features/administration/pages/companies/companies.routes').then(m => m.COMPANIES_ROUTES) },
+  { path: 'administration/parametres', loadChildren: () => import('../features/administration/pages/parametres/parametres.routes').then(m => m.PARAMETRES_ROUTES) },
+  { path: 'administration/domain-activation', loadComponent: () => import('../features/administration/pages/domain-activation/domain-activation.page').then(m => m.DomainActivationPage) },
+  { path: 'administration/audit-log', loadComponent: () => import('../features/administration/pages/audit-log/audit-log.page').then(m => m.AuditLogPage) },
 ];
 ```
 

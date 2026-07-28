@@ -338,7 +338,7 @@ Différé.
 
 ```ts
 export const ADMIN_ROUTES: Routes = [
-  { path: 'admin', loadComponent: () => import('../pages/administration/hub/admin-hub.page').then(m => m.AdminHubPage) },
+  { path: 'admin', loadComponent: () => import('../features/administration/pages/hub/admin-hub.page').then(m => m.AdminHubPage) },
   { path: 'admin/utilisateurs', /* … */ },
   { path: 'admin/roles', /* … */ },
   { path: 'admin/societes', /* … */ },

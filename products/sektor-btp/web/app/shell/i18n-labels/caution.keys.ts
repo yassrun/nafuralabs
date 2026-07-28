@@ -5,7 +5,7 @@
  *   web/app/applications/erp/pages/marches/models/index.ts → CAUTION_TYPE_LABELS, CAUTION_STATUS_LABELS
  */
 
-import type { CautionStatus, CautionType } from '../../pages/marches/models';
+import type { CautionStatus, CautionType } from '@app/features/marches/pages/models';
 
 export const CAUTION_TYPE_KEYS: Record<CautionType, string> = {
   PROVISOIRE:         'enum.caution.type.provisoire',

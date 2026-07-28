@@ -391,12 +391,12 @@ export class TimbreFiscalService {
 ```ts
 export const MARCHES_ROUTES: Routes = [
   { path: 'marches', pathMatch: 'full', redirectTo: 'marches/contrats' },
-  { path: 'marches/contrats', loadChildren: () => import('../pages/marches/contrats/contrats.routes').then(m => m.CONTRATS_ROUTES) },
-  { path: 'marches/avenants', loadChildren: () => import('../pages/marches/avenants/avenants.routes').then(m => m.AVENANTS_ROUTES) },
-  { path: 'marches/factures', loadChildren: () => import('../pages/marches/factures/factures.routes').then(m => m.FACTURES_MARCHES_ROUTES) },
-  { path: 'marches/cautions', loadChildren: () => import('../pages/marches/cautions/cautions.routes').then(m => m.CAUTIONS_ROUTES) },
-  { path: 'marches/penalites', loadComponent: () => import('../pages/marches/penalites/penalites-listing/penalites-listing.page').then(m => m.PenalitesListingPage) },
-  { path: 'marches/revisions-prix', loadChildren: () => import('../pages/marches/revisions-prix/revisions.routes').then(m => m.REVISIONS_ROUTES) },
+  { path: 'marches/contrats', loadChildren: () => import('../features/marches/pages/contrats/contrats.routes').then(m => m.CONTRATS_ROUTES) },
+  { path: 'marches/avenants', loadChildren: () => import('../features/marches/pages/avenants/avenants.routes').then(m => m.AVENANTS_ROUTES) },
+  { path: 'marches/factures', loadChildren: () => import('../features/marches/pages/factures/factures.routes').then(m => m.FACTURES_MARCHES_ROUTES) },
+  { path: 'marches/cautions', loadChildren: () => import('../features/marches/pages/cautions/cautions.routes').then(m => m.CAUTIONS_ROUTES) },
+  { path: 'marches/penalites', loadComponent: () => import('../features/marches/pages/penalites/penalites-listing/penalites-listing.page').then(m => m.PenalitesListingPage) },
+  { path: 'marches/revisions-prix', loadChildren: () => import('../features/marches/pages/revisions-prix/revisions.routes').then(m => m.REVISIONS_ROUTES) },
 ];
 ```
 

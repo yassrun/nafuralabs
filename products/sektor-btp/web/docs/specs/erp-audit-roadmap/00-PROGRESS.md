@@ -34,7 +34,7 @@ Dernière mise à jour : **2026-05-13** (audit R01 §01–02 : accents Planning/
 
 | Task | Description | Statut | Évidence / Reste à faire |
 |---|---|---|---|
-| 3.1 | Breadcrumb global routing-driven | ✅ | **2026-05-13 (R02)** : `route-breadcrumb.util.ts` (`buildRouteBreadcrumbs`), export `@lib/anatomy` ; `config-driven-listing-page` / `config-driven-detail-page` consomment les segments route ; `data.breadcrumb` sur routes **Administration** (`app.routes.ts`), **inventaire** (`inventory.routes.ts` + enfants réceptions/transferts/retours/inventaires/pertes-chutes), **chantiers** (avancements, budget). |
+| 3.1 | Breadcrumb global routing-driven | ✅ | **2026-05-13 (R02)** : `route-breadcrumb.util.ts` (`buildRouteBreadcrumbs`), export `@lib/anatomy` ; `config-driven-listing-page` / `config-driven-detail-page` consomment les segments route ; `data.breadcrumb` sur routes **Administration** (`app.routes.ts`), **inventaire** (`stock.routes.ts` + enfants réceptions/transferts/retours/inventaires/pertes-chutes), **chantiers** (avancements, budget). |
 | 3.2 | Command palette Ctrl+K | ✅ | `command-palette.component.ts` |
 | 3.3 | Notifications panel | ✅ | `notification-bell.component.ts` |
 | 3.4 | Toggle langue + AR/RTL | ✅ | **2026-05-13 (R02)** : `supportedLanguages` inclut `ar` ; packs `public/assets/i18n/core/ar.json` + `applications/erp/ar.json` ; sélecteur de langue (`language-selector.component.ts`) ; `LocaleService` applique déjà `dir` sur `<html>` ; overrides `[dir='rtl']` dans `src/styles.scss` (header, `nf-data-table`, toolbar listing, listing-controls). |

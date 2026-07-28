@@ -5,7 +5,7 @@
  *   web/app/applications/erp/pages/marches/models/index.ts → MARCHE_STATUS_LABELS
  */
 
-import type { MarcheStatus } from '../../pages/marches/models';
+import type { MarcheStatus } from '@app/features/marches/pages/models';
 
 export const MARCHE_STATUS_KEYS: Record<MarcheStatus, string> = {
   BROUILLON:            'enum.marche.status.brouillon',

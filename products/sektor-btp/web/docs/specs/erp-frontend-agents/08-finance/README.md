@@ -49,16 +49,16 @@ finance.config.devise|tauxChange|conditionsPaiement|planComptable.*
 ```ts
 // applications/erp/finance/finance.routes.ts
 export const FINANCE_ROUTES: Routes = [
-  { path: 'finance/journaux', loadChildren: () => import('../pages/finance/journaux/journaux.routes').then(m => m.JOURNAUX_ROUTES) },
-  { path: 'finance/balance', loadComponent: () => import('../pages/finance/balance/balance.page').then(m => m.BalancePage) },
-  { path: 'finance/analytique', loadComponent: () => import('../pages/finance/analytique/analytique.page').then(m => m.AnalytiquePage) },
-  { path: 'finance/factures-fournisseurs', loadChildren: () => import('../pages/finance/factures-fournisseurs/ff.routes').then(m => m.FF_ROUTES) },
-  { path: 'finance/caisses', loadChildren: () => import('../pages/finance/caisses/caisses.routes').then(m => m.CAISSES_ROUTES) },
-  { path: 'finance/virements', loadChildren: () => import('../pages/finance/virements/virements.routes').then(m => m.VIREMENTS_ROUTES) },
-  { path: 'finance/reglements', loadChildren: () => import('../pages/finance/reglements/reglements.routes').then(m => m.REGLEMENTS_ROUTES) },
-  { path: 'finance/rapprochement', loadComponent: () => import('../pages/finance/rapprochement/rapprochement.page').then(m => m.RapprochementPage) },
-  { path: 'finance/conditions-paiement', loadChildren: () => import('../pages/finance/conditions-paiement/conditions-paiement.routes').then(m => m.CONDITIONS_PAIEMENT_ROUTES) },
-  { path: 'finance/plans-comptables', loadChildren: () => import('../pages/finance/plans-comptables/plan-comptable.routes').then(m => m.PLAN_COMPTABLE_ROUTES) },
+  { path: 'finance/journaux', loadChildren: () => import('../features/finance/pages/journaux/journaux.routes').then(m => m.JOURNAUX_ROUTES) },
+  { path: 'finance/balance', loadComponent: () => import('../features/finance/pages/balance/balance.page').then(m => m.BalancePage) },
+  { path: 'finance/analytique', loadComponent: () => import('../features/finance/pages/analytique/analytique.page').then(m => m.AnalytiquePage) },
+  { path: 'finance/factures-fournisseurs', loadChildren: () => import('../features/finance/pages/factures-fournisseurs/ff.routes').then(m => m.FF_ROUTES) },
+  { path: 'finance/caisses', loadChildren: () => import('../features/finance/pages/caisses/caisses.routes').then(m => m.CAISSES_ROUTES) },
+  { path: 'finance/virements', loadChildren: () => import('../features/finance/pages/virements/virements.routes').then(m => m.VIREMENTS_ROUTES) },
+  { path: 'finance/reglements', loadChildren: () => import('../features/finance/pages/reglements/reglements.routes').then(m => m.REGLEMENTS_ROUTES) },
+  { path: 'finance/rapprochement', loadComponent: () => import('../features/finance/pages/rapprochement/rapprochement.page').then(m => m.RapprochementPage) },
+  { path: 'finance/conditions-paiement', loadChildren: () => import('../features/finance/pages/conditions-paiement/conditions-paiement.routes').then(m => m.CONDITIONS_PAIEMENT_ROUTES) },
+  { path: 'finance/plans-comptables', loadChildren: () => import('../features/finance/pages/plans-comptables/plan-comptable.routes').then(m => m.PLAN_COMPTABLE_ROUTES) },
   // /finance/devises et /finance/taux-change déjà branchés via erp.routes.generated.ts
 ];
 ```

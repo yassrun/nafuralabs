@@ -2,10 +2,10 @@ import { Injectable, LOCALE_ID, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 
-import { ApprobationsApiService } from '../pages/approbations/services/approbations-api.service';
-import { CautionApiService } from '../pages/marches/cautions/services/caution-api.service';
-import { FactureMarcheApiService } from '../pages/marches/factures/services/facture-marche-api.service';
-import { FormationApiService } from '../pages/hse/formations/services/formation-api.service';
+import { ApprobationsApiService } from '@app/features/approbations/pages/services/approbations-api.service';
+import { CautionApiService } from '@app/features/marches/pages/cautions/services/caution-api.service';
+import { FactureMarcheApiService } from '@app/features/marches/pages/factures/services/facture-marche-api.service';
+import { FormationApiService } from '@app/features/hse/pages/formations/services/formation-api.service';
 
 import { ErpAlertDismissalApiService } from './erp-alert-dismissal-api.service';
 

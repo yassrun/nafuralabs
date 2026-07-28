@@ -5,7 +5,7 @@
  *   web/app/applications/erp/pages/marches/models/index.ts → DGD_STATUS_LABELS
  */
 
-import type { DgdStatus } from '../../pages/marches/models';
+import type { DgdStatus } from '@app/features/marches/pages/models';
 
 export const DGD_STATUS_KEYS: Record<DgdStatus, string> = {
   BROUILLON:   'enum.dgd.status.brouillon',

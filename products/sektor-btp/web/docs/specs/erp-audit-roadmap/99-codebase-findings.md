@@ -147,7 +147,7 @@ grep -rn "CH-2025\|PROJ-2024" app/applications/erp/
 - ✅ `chantiers.routes.ts` (planning, avancements, situations, budget, listing, detail)
 - ✅ `achats.routes.ts` (5 entités)
 - ✅ `ventes.routes.ts` (6 entités)
-- ✅ `inventory.routes.ts` (catalogue, configuration, mouvements, suivi)
+- ✅ `stock.routes.ts` (catalogue, configuration, mouvements, suivi)
 - ✅ `etudes.routes.ts` (4 entités)
 - ✅ `finance.routes.ts` (12 routes wired en S1)
 - ✅ `rh.routes.ts` (3 entités)

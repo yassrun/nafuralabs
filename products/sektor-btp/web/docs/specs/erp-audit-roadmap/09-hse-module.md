@@ -285,16 +285,16 @@ export interface VisiteMedicale {
 
 ```ts
 export const HSE_ROUTES: Routes = [
-  { path: 'hse', pathMatch: 'full', loadComponent: () => import('../pages/hse/tableau-bord-hse/tableau-bord-hse.page').then(m => m.TableauBordHsePage) },
-  { path: 'hse/incidents', loadChildren: () => import('../pages/hse/incidents/incidents.routes').then(m => m.INCIDENTS_ROUTES) },
-  { path: 'hse/non-conformites', loadChildren: () => import('../pages/hse/non-conformites/nc.routes').then(m => m.NC_ROUTES) },
-  { path: 'hse/inspections', loadChildren: () => import('../pages/hse/inspections/inspections.routes').then(m => m.INSPECTIONS_ROUTES) },
-  { path: 'hse/formations', loadChildren: () => import('../pages/hse/formations/formations.routes').then(m => m.FORMATIONS_ROUTES) },
-  { path: 'hse/epi', loadChildren: () => import('../pages/hse/epi/epi.routes').then(m => m.EPI_ROUTES) },
-  { path: 'hse/duer', loadChildren: () => import('../pages/hse/duer/duer.routes').then(m => m.DUER_ROUTES) },
-  { path: 'hse/ppsps', loadChildren: () => import('../pages/hse/ppsps/ppsps.routes').then(m => m.PPSPS_ROUTES) },
-  { path: 'hse/visites-medicales', loadComponent: () => import('../pages/hse/visites-medicales/visites-medicales.page').then(m => m.VisitesMedicalesPage) },
-  { path: 'hse/registres', loadChildren: () => import('../pages/hse/registres/registres.routes').then(m => m.REGISTRES_ROUTES) },
+  { path: 'hse', pathMatch: 'full', loadComponent: () => import('../features/hse/pages/tableau-bord-hse/tableau-bord-hse.page').then(m => m.TableauBordHsePage) },
+  { path: 'hse/incidents', loadChildren: () => import('../features/hse/pages/incidents/incidents.routes').then(m => m.INCIDENTS_ROUTES) },
+  { path: 'hse/non-conformites', loadChildren: () => import('../features/hse/pages/non-conformites/nc.routes').then(m => m.NC_ROUTES) },
+  { path: 'hse/inspections', loadChildren: () => import('../features/hse/pages/inspections/inspections.routes').then(m => m.INSPECTIONS_ROUTES) },
+  { path: 'hse/formations', loadChildren: () => import('../features/hse/pages/formations/formations.routes').then(m => m.FORMATIONS_ROUTES) },
+  { path: 'hse/epi', loadChildren: () => import('../features/hse/pages/epi/epi.routes').then(m => m.EPI_ROUTES) },
+  { path: 'hse/duer', loadChildren: () => import('../features/hse/pages/duer/duer.routes').then(m => m.DUER_ROUTES) },
+  { path: 'hse/ppsps', loadChildren: () => import('../features/hse/pages/ppsps/ppsps.routes').then(m => m.PPSPS_ROUTES) },
+  { path: 'hse/visites-medicales', loadComponent: () => import('../features/hse/pages/visites-medicales/visites-medicales.page').then(m => m.VisitesMedicalesPage) },
+  { path: 'hse/registres', loadChildren: () => import('../features/hse/pages/registres/registres.routes').then(m => m.REGISTRES_ROUTES) },
 ];
 ```
 

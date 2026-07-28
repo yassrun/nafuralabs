@@ -5,7 +5,7 @@
  *   web/app/applications/erp/pages/marches/models/index.ts → AVENANT_TYPE_LABELS, AVENANT_STATUS_LABELS
  */
 
-import type { AvenantStatus, AvenantType } from '../../pages/marches/models';
+import type { AvenantStatus, AvenantType } from '@app/features/marches/pages/models';
 
 export const AVENANT_TYPE_KEYS: Record<AvenantType, string> = {
   TVX_SUPPLEMENTAIRES:  'enum.avenant.type.tvx_supplementaires',

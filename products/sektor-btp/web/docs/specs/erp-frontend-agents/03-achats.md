@@ -191,11 +191,11 @@ export interface Fournisseur {
 ```ts
 // applications/erp/achats/achats.routes.ts
 export const ACHATS_ROUTES: Routes = [
-  { path: 'achats/demandes',       loadChildren: () => import('../pages/achats/demandes/demandes.routes').then(m => m.DEMANDES_ROUTES) },
-  { path: 'achats/appels-offres',  loadChildren: () => import('../pages/achats/appels-offres/ao.routes').then(m => m.AO_ROUTES) },
-  { path: 'achats/commandes',      loadChildren: () => import('../pages/achats/commandes/bc.routes').then(m => m.BC_ROUTES) },
-  { path: 'achats/contrats',       loadChildren: () => import('../pages/achats/contrats/contrat.routes').then(m => m.CONTRAT_ROUTES) },
-  { path: 'achats/fournisseurs',   loadChildren: () => import('../pages/achats/fournisseurs/fournisseur.routes').then(m => m.FOURNISSEUR_ROUTES) },
+  { path: 'achats/demandes',       loadChildren: () => import('../features/achats/pages/demandes/demandes.routes').then(m => m.DEMANDES_ROUTES) },
+  { path: 'achats/appels-offres',  loadChildren: () => import('../features/achats/pages/appels-offres/ao.routes').then(m => m.AO_ROUTES) },
+  { path: 'achats/commandes',      loadChildren: () => import('../features/achats/pages/commandes/bc.routes').then(m => m.BC_ROUTES) },
+  { path: 'achats/contrats',       loadChildren: () => import('../features/achats/pages/contrats/contrat.routes').then(m => m.CONTRAT_ROUTES) },
+  { path: 'achats/fournisseurs',   loadChildren: () => import('../features/achats/pages/fournisseurs/fournisseur.routes').then(m => m.FOURNISSEUR_ROUTES) },
 ];
 ```
 

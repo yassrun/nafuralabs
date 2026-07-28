@@ -5,7 +5,7 @@
  *   web/app/applications/erp/pages/rh/pointage/models/index.ts → MODE_LABELS
  */
 
-import type { PointageMode } from '../../pages/rh/pointage/models';
+import type { PointageMode } from '@app/features/rh/pages/pointage/models';
 
 export const MODE_KEYS: Record<PointageMode, string> = {
   PRESENT:   'enum.pointage_mode.present',

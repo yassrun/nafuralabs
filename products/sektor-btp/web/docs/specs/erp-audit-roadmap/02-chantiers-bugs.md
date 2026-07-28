@@ -55,7 +55,7 @@ app/applications/erp/shell/erp-nav.generated.ts (lignes 91, 107)                
 {
   path: 'chantiers/:id',
   loadComponent: () =>
-    import('../pages/chantiers/chantier-detail/chantier-detail.page').then(
+    import('../features/chantiers/pages/chantier-detail/chantier-detail.page').then(
       (m) => m.ChantierDetailPage,
     ),
   data: { title: 'Chantier', breadcrumb: 'Détail' },
@@ -183,14 +183,14 @@ export interface DocumentChantier {
 {
   path: 'chantiers/sous-traitance',
   loadChildren: () =>
-    import('../pages/chantiers/sous-traitance/sous-traitance.routes').then(
+    import('../features/chantiers/pages/sous-traitance/sous-traitance.routes').then(
       (m) => m.SOUS_TRAITANCE_ROUTES,
     ),
 },
 {
   path: 'chantiers/documents',
   loadChildren: () =>
-    import('../pages/chantiers/documents/documents.routes').then(
+    import('../features/chantiers/pages/documents/documents.routes').then(
       (m) => m.CHANTIER_DOCUMENTS_ROUTES,
     ),
 },

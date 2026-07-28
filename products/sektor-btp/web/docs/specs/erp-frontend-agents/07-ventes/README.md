@@ -40,13 +40,13 @@ ventes.client.read|create|update|delete
 ```ts
 // applications/erp/ventes/ventes.routes.ts
 export const VENTES_ROUTES: Routes = [
-  { path: 'ventes/offres', loadChildren: () => import('../pages/ventes/offres/offres.routes').then(m => m.OFFRES_ROUTES) },
-  { path: 'ventes/commandes', loadChildren: () => import('../pages/ventes/commandes/cmd-clients.routes').then(m => m.CMD_CLIENTS_ROUTES) },
-  { path: 'ventes/situations', loadChildren: () => import('../pages/chantiers/situations/situations.routes').then(m => m.SITUATIONS_ROUTES) },  // proxy
-  { path: 'ventes/factures', loadChildren: () => import('../pages/ventes/factures/factures.routes').then(m => m.FACTURES_ROUTES) },
-  { path: 'ventes/avoirs', loadChildren: () => import('../pages/ventes/avoirs/avoirs.routes').then(m => m.AVOIRS_ROUTES) },
-  { path: 'ventes/retenues-garantie', loadComponent: () => import('../pages/ventes/retenues-garantie/retenues-garantie.page').then(m => m.RetenuesGarantiePage) },
-  { path: 'ventes/clients', loadChildren: () => import('../pages/ventes/clients/clients.routes').then(m => m.CLIENTS_ROUTES) },
+  { path: 'ventes/offres', loadChildren: () => import('../features/ventes/pages/offres/offres.routes').then(m => m.OFFRES_ROUTES) },
+  { path: 'ventes/commandes', loadChildren: () => import('../features/ventes/pages/commandes/cmd-clients.routes').then(m => m.CMD_CLIENTS_ROUTES) },
+  { path: 'ventes/situations', loadChildren: () => import('../features/chantiers/pages/situations/situations.routes').then(m => m.SITUATIONS_ROUTES) },  // proxy
+  { path: 'ventes/factures', loadChildren: () => import('../features/ventes/pages/factures/factures.routes').then(m => m.FACTURES_ROUTES) },
+  { path: 'ventes/avoirs', loadChildren: () => import('../features/ventes/pages/avoirs/avoirs.routes').then(m => m.AVOIRS_ROUTES) },
+  { path: 'ventes/retenues-garantie', loadComponent: () => import('../features/ventes/pages/retenues-garantie/retenues-garantie.page').then(m => m.RetenuesGarantiePage) },
+  { path: 'ventes/clients', loadChildren: () => import('../features/ventes/pages/clients/clients.routes').then(m => m.CLIENTS_ROUTES) },
 ];
 ```
 

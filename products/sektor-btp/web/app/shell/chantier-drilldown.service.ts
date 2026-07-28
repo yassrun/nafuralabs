@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 
 import { ToastService } from '@lib/anatomy/components/services/toast.service';
 
-import { ChantierApiService } from '../pages/chantiers/services/chantier-api.service';
+import { ChantierApiService } from '@app/features/chantiers/pages/services/chantier-api.service';
 
 function normalizeLegacyChantierId(raw: string): string {
   const t = raw.trim();

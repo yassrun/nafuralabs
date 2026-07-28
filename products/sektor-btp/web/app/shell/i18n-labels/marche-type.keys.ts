@@ -5,7 +5,7 @@
  *   web/app/applications/erp/pages/marches/models/index.ts → MARCHE_TYPE_LABELS
  */
 
-import type { MarcheType } from '../../pages/marches/models';
+import type { MarcheType } from '@app/features/marches/pages/models';
 
 export const MARCHE_TYPE_KEYS: Record<MarcheType, string> = {
   FORFAIT: 'enum.marche.type.forfait',

@@ -11,7 +11,7 @@
  */
 
 import { Injectable, inject } from '@angular/core';
-import { BudgetFacade } from '@app/pages/chantiers/budget/services';
+import { BudgetFacade } from '@app/features/chantiers/pages/budget/services';
 
 /**
  * Heuristic mapping article code prefix → budget rubrique (fallback V1).

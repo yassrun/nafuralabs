@@ -5,7 +5,7 @@
  *   web/app/applications/erp/pages/approbations/models/index.ts → ENTITY_TYPE_LABELS
  */
 
-import type { ApprovalEntityType } from '../../pages/approbations/models';
+import type { ApprovalEntityType } from '@app/features/approbations/pages/models';
 
 export const APPROVAL_ENTITY_TYPE_KEYS: Record<ApprovalEntityType, string> = {
   DA:             'enum.approval_entity_type.da',

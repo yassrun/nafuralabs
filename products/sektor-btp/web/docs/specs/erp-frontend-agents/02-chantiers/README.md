@@ -238,13 +238,13 @@ chantiers.document.read|upload|delete
 import { Routes } from '@angular/router';
 
 export const CHANTIERS_ROUTES: Routes = [
-  { path: 'chantiers', loadChildren: () => import('../pages/chantiers/liste/chantiers.routes').then(m => m.CHANTIERS_LISTE_ROUTES) },
-  { path: 'chantiers/planning', loadComponent: () => import('../pages/chantiers/planning/chantiers-planning.page').then(m => m.ChantiersPlanningPage) },
-  { path: 'chantiers/avancements', loadComponent: () => import('../pages/chantiers/avancements/avancements.page').then(m => m.AvancementsPage) },
-  { path: 'chantiers/situations', loadChildren: () => import('../pages/chantiers/situations/situations.routes').then(m => m.SITUATIONS_ROUTES) },
-  { path: 'chantiers/budget', loadComponent: () => import('../pages/chantiers/budget/budget-chantier.page').then(m => m.BudgetChantierPage) },
-  { path: 'chantiers/sous-traitance', loadChildren: () => import('../pages/chantiers/sous-traitance/sous-traitance.routes').then(m => m.SOUS_TRAITANCE_ROUTES) },
-  { path: 'chantiers/documents', loadComponent: () => import('../pages/chantiers/documents/documents-chantier.page').then(m => m.DocumentsChantierPage) },
+  { path: 'chantiers', loadChildren: () => import('../features/chantiers/pages/liste/chantiers.routes').then(m => m.CHANTIERS_LISTE_ROUTES) },
+  { path: 'chantiers/planning', loadComponent: () => import('../features/chantiers/pages/planning/chantiers-planning.page').then(m => m.ChantiersPlanningPage) },
+  { path: 'chantiers/avancements', loadComponent: () => import('../features/chantiers/pages/avancements/avancements.page').then(m => m.AvancementsPage) },
+  { path: 'chantiers/situations', loadChildren: () => import('../features/chantiers/pages/situations/situations.routes').then(m => m.SITUATIONS_ROUTES) },
+  { path: 'chantiers/budget', loadComponent: () => import('../features/chantiers/pages/budget/budget-chantier.page').then(m => m.BudgetChantierPage) },
+  { path: 'chantiers/sous-traitance', loadChildren: () => import('../features/chantiers/pages/sous-traitance/sous-traitance.routes').then(m => m.SOUS_TRAITANCE_ROUTES) },
+  { path: 'chantiers/documents', loadComponent: () => import('../features/chantiers/pages/documents/documents-chantier.page').then(m => m.DocumentsChantierPage) },
 ];
 ```
 

@@ -13,7 +13,7 @@
 import { Routes } from '@angular/router';
 
 import { tenantRequiredGuard, tenantSelectionGuard } from '@platform/core/tenant/tenant.guard';
-import { onboardingCompleteGuard } from '@app/onboarding/guards/onboarding-complete.guard';
+import { onboardingCompleteGuard } from '@app/features/onboarding/guards/onboarding-complete.guard';
 import { authGuard, guestGuard } from '@platform/core/security/guards/auth.guard';
 import {
   ACTIVE_APPLICATION_SHELL_LOADER,
@@ -21,7 +21,7 @@ import {
   APPLICATION_ROUTES,
   ACTIVE_APPLICATION_ID,
 } from '@app/config/routes';
-import { ONBOARDING_V2_ROUTES } from '@app/onboarding/onboarding.routes';
+import { ONBOARDING_V2_ROUTES } from '@app/features/onboarding/onboarding.routes';
 import { APP_SHELL_CONFIGS } from '@app/config/shell.config';
 import {
   resolveApplicationNavigation,
@@ -228,14 +228,14 @@ export const APP_ROUTES = [
   {
     path: 'invite/accept',
     loadComponent: () =>
-      import('@app/onboarding/onboarding-layout.component').then(
+      import('@app/features/onboarding/onboarding-layout.component').then(
         (m) => m.OnboardingLayoutComponent
       ),
     children: [
       {
         path: '',
         loadComponent: () =>
-          import('@app/invitations/pages/invite-accept.page').then(
+          import('@app/features/invitations/pages/invite-accept.page').then(
             (m) => m.InviteAcceptPage
           ),
       },
@@ -306,7 +306,7 @@ export const APP_ROUTES = [
         canActivate: [authGuard],
         data: { breadcrumb: 'Administration' },
         loadComponent: () =>
-          import('@app/pages/administration/hub/admin-hub.page').then(
+          import('@app/features/administration/pages/hub/admin-hub.page').then(
             (m) => m.AdminHubPage
           ),
       },

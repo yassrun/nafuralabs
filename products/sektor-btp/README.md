@@ -7,10 +7,11 @@ Deploy : [toolchain/ops/AGENTS.md](../../toolchain/ops/AGENTS.md).
 
 ```
 sektor-btp/
-├── backend/app/          # :sektor:app
-├── backend/modules/      # :sektor:<domaine>
-├── web/app/              # UI (@applications/*)
-└── deploy/k8s/overlays/  # staging | prod
+├── backend/app/              # :sektor:app (boot)
+├── backend/modules/          # :sektor:<domaine> (+ onboarding, ai, search)
+├── web/app/features/         # UI métier (@app/features/*)
+├── web/app/{shell,shared,config,routes}/
+└── deploy/k8s/overlays/      # staging | prod
 ```
 
 ## Build

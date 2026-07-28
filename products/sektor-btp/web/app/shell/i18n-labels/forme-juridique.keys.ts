@@ -8,7 +8,7 @@
  * but SARLAU and AUTOENTREPRENEUR are translated.
  */
 
-import type { SocieteFormeJuridique } from '../../pages/administration/societe/models';
+import type { SocieteFormeJuridique } from '@app/features/administration/pages/societe/models';
 
 export const FORME_JURIDIQUE_KEYS: Record<SocieteFormeJuridique, string> = {
   SARL:   'enum.forme_juridique.sarl',

@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 
-import { BudgetFacade } from '@app/pages/chantiers/budget/services';
+import { BudgetFacade } from '@app/features/chantiers/pages/budget/services';
 import { StockBudgetSyncService } from './stock-budget-sync.service';
 
 describe('StockBudgetSyncService', () => {

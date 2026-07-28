@@ -1,0 +1,8 @@
+plugins {
+    id 'java-library'
+}
+
+dependencies {
+    implementation project(':platform:core:framework')
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+}

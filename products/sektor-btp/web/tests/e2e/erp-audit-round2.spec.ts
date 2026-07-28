@@ -132,7 +132,7 @@ test.describe.serial('ERP audit round 2', () => {
   test('QA-ERP-041 receptions prerequisites banner', async ({ browser }) => {
     const { context, page } = await openAuthenticatedPage(browser);
     try {
-      await page.goto('/inventory/mouvements/receptions', { waitUntil: 'domcontentloaded' });
+      await page.goto('/stock/mouvements/receptions', { waitUntil: 'domcontentloaded' });
       await page.waitForTimeout(1500);
       const prereq = page.locator('.reception-prereq').first();
       const visible = await prereq.isVisible().catch(() => false);
@@ -195,7 +195,7 @@ test.describe.serial('ERP audit round 2', () => {
   test('QA-ERP-050 session stable on ventes after navigation', async ({ browser }) => {
     const { context, page } = await openAuthenticatedPage(browser);
     try {
-      const routes = ['/chantiers', '/achats/fournisseurs', '/inventory/mouvements/receptions', '/ventes/clients', '/finance/journaux', '/rh/employes'];
+      const routes = ['/chantiers', '/achats/fournisseurs', '/stock/mouvements/receptions', '/ventes/clients', '/finance/journaux', '/rh/employes'];
       for (const route of routes) {
         await page.goto(route, { waitUntil: 'domcontentloaded', timeout: 30000 });
         await page.waitForTimeout(400);

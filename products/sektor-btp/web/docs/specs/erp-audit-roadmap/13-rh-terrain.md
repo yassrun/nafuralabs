@@ -281,11 +281,11 @@ ng add @angular/pwa
 ```ts
 {
   path: 'rh/pointage',
-  loadChildren: () => import('../pages/rh/pointage/pointage.routes').then(m => m.POINTAGE_ROUTES),
+  loadChildren: () => import('../features/rh/pages/pointage/pointage.routes').then(m => m.POINTAGE_ROUTES),
 },
 {
   path: 'rh/planning-equipes',
-  loadComponent: () => import('../pages/rh/planning-equipes/planning-equipes.page').then(m => m.PlanningEquipesPage),
+  loadComponent: () => import('../features/rh/pages/planning-equipes/planning-equipes.page').then(m => m.PlanningEquipesPage),
 },
 ```
 
@@ -294,11 +294,11 @@ ng add @angular/pwa
 ```ts
 {
   path: 'chantiers/attachements',
-  loadChildren: () => import('../pages/chantiers/attachements/attachements.routes').then(m => m.ATTACHEMENTS_ROUTES),
+  loadChildren: () => import('../features/chantiers/pages/attachements/attachements.routes').then(m => m.ATTACHEMENTS_ROUTES),
 },
 {
   path: 'chantiers/journal',
-  loadComponent: () => import('../pages/chantiers/journal/journal.page').then(m => m.JournalPage),
+  loadComponent: () => import('../features/chantiers/pages/journal/journal.page').then(m => m.JournalPage),
 },
 ```
 

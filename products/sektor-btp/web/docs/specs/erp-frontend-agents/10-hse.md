@@ -230,10 +230,10 @@ export interface ParticipantFormation {
 ```ts
 // applications/erp/hse/hse.routes.ts
 export const HSE_ROUTES: Routes = [
-  { path: 'hse/incidents', loadChildren: () => import('../pages/hse/incidents/incidents.routes').then(m => m.INCIDENTS_ROUTES) },
-  { path: 'hse/non-conformites', loadChildren: () => import('../pages/hse/non-conformites/nc.routes').then(m => m.NC_ROUTES) },
-  { path: 'hse/inspections', loadChildren: () => import('../pages/hse/inspections/inspections.routes').then(m => m.INSPECTIONS_ROUTES) },
-  { path: 'hse/formations', loadChildren: () => import('../pages/hse/formations/formations.routes').then(m => m.FORMATIONS_ROUTES) },
+  { path: 'hse/incidents', loadChildren: () => import('../features/hse/pages/incidents/incidents.routes').then(m => m.INCIDENTS_ROUTES) },
+  { path: 'hse/non-conformites', loadChildren: () => import('../features/hse/pages/non-conformites/nc.routes').then(m => m.NC_ROUTES) },
+  { path: 'hse/inspections', loadChildren: () => import('../features/hse/pages/inspections/inspections.routes').then(m => m.INSPECTIONS_ROUTES) },
+  { path: 'hse/formations', loadChildren: () => import('../features/hse/pages/formations/formations.routes').then(m => m.FORMATIONS_ROUTES) },
 ];
 ```
 

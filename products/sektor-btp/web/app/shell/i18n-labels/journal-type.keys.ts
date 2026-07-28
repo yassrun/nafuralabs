@@ -5,7 +5,7 @@
  *   web/app/applications/erp/pages/finance/plans-comptables/components/journal-config/journal-config.component.ts → TYPE_LABELS
  */
 
-import type { JournalType } from '../../finance/models';
+import type { JournalType } from '@app/features/finance/models';
 
 export const JOURNAL_TYPE_KEYS: Record<JournalType, string> = {
   VENTE:               'enum.journal.type.vente',

@@ -6,7 +6,7 @@
  *   - web/app/applications/erp/pages/finance/factures-fournisseurs/ff-detail/ff-detail.page.ts
  */
 
-import type { FactureFournStatus } from '../../finance/models';
+import type { FactureFournStatus } from '@app/features/finance/models';
 
 export const FF_STATUS_KEYS: Record<FactureFournStatus, string> = {
   BROUILLON:           'enum.ff.status.brouillon',

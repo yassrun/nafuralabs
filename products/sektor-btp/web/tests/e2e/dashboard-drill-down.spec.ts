@@ -7,7 +7,7 @@ const KPI_DRILLS: { testId: string; path: string; search?: string }[] = [
   { testId: 'dashboard-kpi-chantiers-en-cours', path: '/chantiers', search: 'status=EN_COURS' },
   { testId: 'dashboard-kpi-avancement-moyen', path: '/chantiers', search: 'sortBy=avancement' },
   { testId: 'dashboard-kpi-surconso-matiere', path: '/chantiers/budget' },
-  { testId: 'dashboard-kpi-lots-peremption', path: '/inventory/suivi/etat-stock' },
+  { testId: 'dashboard-kpi-lots-peremption', path: '/stock/suivi/etat-stock' },
   { testId: 'dashboard-kpi-ca-facture', path: '/ventes/factures' },
   { testId: 'dashboard-kpi-factures-retard', path: '/ventes/factures', search: 'filter=overdue' },
   { testId: 'dashboard-kpi-commandes', path: '/achats/commandes', search: 'status=EN_COURS' },

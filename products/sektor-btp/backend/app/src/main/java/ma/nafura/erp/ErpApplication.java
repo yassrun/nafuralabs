@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @SpringBootApplication(scanBasePackages = {
     "ma.nafura.platform",
     "ma.nafura.erp",
+    "ma.nafura.sektor",
     "ma.nafura.item",
     "ma.nafura.stock",
     "ma.nafura.currency",
@@ -25,6 +26,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @EnableJpaRepositories(basePackages = {
     "ma.nafura.platform",
     "ma.nafura.erp",
+    "ma.nafura.sektor",
     "ma.nafura.item",
     "ma.nafura.stock",
     "ma.nafura.currency",
@@ -42,6 +44,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @EntityScan(basePackages = {
     "ma.nafura.platform",
     "ma.nafura.erp",
+    "ma.nafura.sektor",
     "ma.nafura.item",
     "ma.nafura.stock",
     "ma.nafura.currency",
@@ -56,6 +59,9 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
     "ma.nafura.marches",
     "ma.nafura.approbations"
 })
+@org.springframework.boot.context.properties.EnableConfigurationProperties(
+    ma.nafura.erp.config.DemoSeedProperties.class
+)
 public class ErpApplication {
 
     public static void main(String[] args) {

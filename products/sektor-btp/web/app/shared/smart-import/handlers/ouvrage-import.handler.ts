@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 
-import type { CategoryOuvrage, OuvrageCreate } from '@app/etudes/models';
-import { OuvrageApiService } from '@app/pages/etudes/bibliotheque-prix/services/ouvrage-api.service';
+import type { CategoryOuvrage, OuvrageCreate } from '@app/features/etudes/models';
+import { OuvrageApiService } from '@app/features/etudes/pages/bibliotheque-prix/services/ouvrage-api.service';
 import type { ExtractionDefinition } from '@platform/features/documents/smart-import';
 import { normalizeText } from '../../utils/extraction-json.utils';
 

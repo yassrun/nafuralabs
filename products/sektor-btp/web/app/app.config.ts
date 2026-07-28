@@ -183,7 +183,7 @@ export const appConfig: ApplicationConfig = {
           if (!environment.onboardingV2Enabled) {
             return null;
           }
-          const m = await import('@app/onboarding/onboarding-shell-widgets.component');
+          const m = await import('@app/features/onboarding/onboarding-shell-widgets.component');
           return {
             inviteBanner: m.OnboardingInviteBannerWidgetComponent,
             completenessMeter: m.OnboardingCompletenessWidgetComponent,

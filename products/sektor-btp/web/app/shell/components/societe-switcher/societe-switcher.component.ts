@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 
 import { SocieteService } from '../../societe.service';
-import { ETABLISSEMENT_TYPE_LABELS } from '../../../pages/administration/societe/models';
+import { ETABLISSEMENT_TYPE_LABELS } from '@app/features/administration/pages/societe/models';
 
 /**
  * Header dropdown to switch between sociétés / établissements (Task 8.3).

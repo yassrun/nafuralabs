@@ -4,7 +4,7 @@
  */
 
 import { GeneratedZoneConfig, SidebarNode } from '@platform/core/navigation/sidebar.types';
-import { ERP_NAV_CONFIG_GENERATED, ERP_ZONE_CONFIG_GENERATED } from '../shell/erp-nav.generated';
+import { ERP_NAV_CONFIG_GENERATED, ERP_ZONE_CONFIG_GENERATED } from '@app/shell/erp-nav.generated';
 
 export const APPLICATION_NAVIGATION_BY_ID: Record<string, SidebarNode[]> = {
   erp: [...ERP_NAV_CONFIG_GENERATED],

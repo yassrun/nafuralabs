@@ -5,7 +5,7 @@
  *   web/app/applications/erp/pages/marches/models/index.ts → MARCHE_NATURE_LABELS
  */
 
-import type { MarcheNature } from '../../pages/marches/models';
+import type { MarcheNature } from '@app/features/marches/pages/models';
 
 export const MARCHE_NATURE_KEYS: Record<MarcheNature, string> = {
   PUBLIC:              'enum.marche.nature.public',

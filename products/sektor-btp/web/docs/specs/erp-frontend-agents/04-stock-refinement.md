@@ -1,7 +1,7 @@
 # Agent — Stock & Inventory · Refinement
 
 > **Objet** : combler les gaps du module inventory (déjà ~70%) et durcir l'UX. **PAS** de refonte. Re-lire les briefs existants `pages/inventory/mouvements/receptions/AGENT_*.md` avant de commencer.
-> **Routes** : `/inventory/*` (déjà branchées via `inventory.routes.ts`)
+> **Routes** : `/inventory/*` (déjà branchées via `stock.routes.ts`)
 > **Permission** : `inventory.<entity>.*` (déjà en place)
 
 ## 0. Pré-requis

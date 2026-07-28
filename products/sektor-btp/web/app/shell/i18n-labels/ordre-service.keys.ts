@@ -5,7 +5,7 @@
  *   web/app/applications/erp/pages/marches/models/index.ts → ORDRE_SERVICE_TYPE_LABELS, ORDRE_SERVICE_STATUS_LABELS
  */
 
-import type { OrdreServiceStatus, OrdreServiceType } from '../../pages/marches/models';
+import type { OrdreServiceStatus, OrdreServiceType } from '@app/features/marches/pages/models';
 
 export const ORDRE_SERVICE_TYPE_KEYS: Record<OrdreServiceType, string> = {
   COMMENCEMENT:  'enum.ordre_service.type.commencement',

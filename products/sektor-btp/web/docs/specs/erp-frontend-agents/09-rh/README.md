@@ -36,11 +36,11 @@ rh.bulletin.read|generer|envoyer
 ```ts
 // applications/erp/rh/rh.routes.ts
 export const RH_ROUTES: Routes = [
-  { path: 'rh/employes', loadChildren: () => import('../pages/rh/employes/employes.routes').then(m => m.EMPLOYES_ROUTES) },
-  { path: 'rh/pointage', loadComponent: () => import('../pages/rh/pointage/pointage.page').then(m => m.PointagePage) },
-  { path: 'rh/planning-equipes', loadComponent: () => import('../pages/rh/planning-equipes/planning-equipes.page').then(m => m.PlanningEquipesPage) },
-  { path: 'rh/conges', loadChildren: () => import('../pages/rh/conges/conges.routes').then(m => m.CONGES_ROUTES) },
-  { path: 'rh/paie', loadChildren: () => import('../pages/rh/paie/paie.routes').then(m => m.PAIE_ROUTES) },
+  { path: 'rh/employes', loadChildren: () => import('../features/rh/pages/employes/employes.routes').then(m => m.EMPLOYES_ROUTES) },
+  { path: 'rh/pointage', loadComponent: () => import('../features/rh/pages/pointage/pointage.page').then(m => m.PointagePage) },
+  { path: 'rh/planning-equipes', loadComponent: () => import('../features/rh/pages/planning-equipes/planning-equipes.page').then(m => m.PlanningEquipesPage) },
+  { path: 'rh/conges', loadChildren: () => import('../features/rh/pages/conges/conges.routes').then(m => m.CONGES_ROUTES) },
+  { path: 'rh/paie', loadChildren: () => import('../features/rh/pages/paie/paie.routes').then(m => m.PAIE_ROUTES) },
 ];
 ```
 

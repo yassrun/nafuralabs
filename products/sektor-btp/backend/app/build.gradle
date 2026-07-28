@@ -48,6 +48,9 @@ dependencies {
     implementation project(':sektor:hse')
     implementation project(':sektor:marches')
     implementation project(':sektor:approbations')
+    implementation project(':sektor:onboarding')
+    implementation project(':sektor:ai')
+    implementation project(':sektor:search')
 
     // Spring Boot (always)
     implementation 'org.springframework.boot:spring-boot-starter-web'

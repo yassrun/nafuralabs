@@ -4,7 +4,7 @@ const LISTINGS = [
   { entityKey: 'fournisseur', path: '/achats/fournisseurs' },
   { entityKey: 'client', path: '/ventes/clients' },
   { entityKey: 'employe', path: '/rh/employes' },
-  { entityKey: 'article', path: '/inventory/catalogue/articles' },
+  { entityKey: 'article', path: '/stock/catalogue/articles' },
   { entityKey: 'ouvrage', path: '/etudes/bibliotheque-prix' },
 ] as const;
 

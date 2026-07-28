@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 
-import type { EmployeCreate, TypeContrat } from '@app/rh/models';
-import { EmployeApiService } from '@app/pages/rh/employes/services/employe-api.service';
+import type { EmployeCreate, TypeContrat } from '@app/features/rh/models';
+import { EmployeApiService } from '@app/features/rh/pages/employes/services/employe-api.service';
 import type { ExtractionDefinition } from '@platform/features/documents/smart-import';
 import { normalizeText } from '../../utils/extraction-json.utils';
 

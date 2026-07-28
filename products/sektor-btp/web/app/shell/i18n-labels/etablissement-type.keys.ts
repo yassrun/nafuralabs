@@ -5,7 +5,7 @@
  *   web/app/applications/erp/pages/administration/societe/models/index.ts → ETABLISSEMENT_TYPE_LABELS
  */
 
-import type { EtablissementType } from '../../pages/administration/societe/models';
+import type { EtablissementType } from '@app/features/administration/pages/societe/models';
 
 export const ETABLISSEMENT_TYPE_KEYS: Record<EtablissementType, string> = {
   SIEGE:          'enum.etablissement_type.siege',

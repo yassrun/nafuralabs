@@ -48,7 +48,8 @@ project(":sektor:app").projectDir = file("products/sektor-btp/backend/app")
 
 listOf(
     "item", "stock", "currency", "finance", "partner", "achats", "ventes",
-    "chantiers", "etudes", "rh", "hse", "marches", "approbations"
+    "chantiers", "etudes", "rh", "hse", "marches", "approbations",
+    "onboarding", "ai", "search"
 ).forEach { includeSektorModule(it) }
 
 // ── Venue Catalog ───────────────────────────────────────────────────────────

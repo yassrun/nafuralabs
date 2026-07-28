@@ -5,7 +5,7 @@
  *   web/app/applications/erp/finance/components/mouvement-row/mouvement-row.component.ts → TYPE_LABELS
  */
 
-import type { MouvementTresorerieType } from '../../finance/models';
+import type { MouvementTresorerieType } from '@app/features/finance/models';
 
 export const MOUVEMENT_TRESORERIE_TYPE_KEYS: Record<MouvementTresorerieType, string> = {
   REGLEMENT_CLIENT:  'enum.mouvement_tresorerie.type.reglement_client',

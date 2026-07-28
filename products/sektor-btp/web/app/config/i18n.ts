@@ -75,7 +75,7 @@ export const APPLICATION_TRANSLATION_LAYERS: Record<string, TranslationLayersCon
       { moduleId: 'extras.financial', path: 'financial', optional: true },
       { moduleId: 'extras.fiscal', path: 'fiscal', optional: true },
       { moduleId: 'extras.geo', path: 'geo', optional: true },
-      { moduleId: 'extras.inventory', path: 'inventory', optional: true },
+      { moduleId: 'extras.inventory', path: 'stock', optional: true },
       { moduleId: 'extras.item', path: 'item', optional: true },
       { moduleId: 'extras.measurement', path: 'measurement', optional: true },
       { moduleId: 'extras.partner', path: 'partner', optional: true },

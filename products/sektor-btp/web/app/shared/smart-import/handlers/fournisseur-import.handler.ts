@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 
-import type { FournisseurCreate } from '@app/achats/models';
-import { FournisseurApiService } from '@app/pages/achats/fournisseurs/services/fournisseur-api.service';
+import type { FournisseurCreate } from '@app/features/achats/models';
+import { FournisseurApiService } from '@app/features/achats/pages/fournisseurs/services/fournisseur-api.service';
 import type { ExtractionDefinition } from '@platform/features/documents/smart-import';
 import { normalizeText } from '../../utils/extraction-json.utils';
 

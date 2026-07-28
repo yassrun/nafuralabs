@@ -274,9 +274,9 @@ async submitForApproval(bcId: string): Promise<void> {
 ```ts
 export const PILOTAGE_ROUTES: Routes = [
   { path: 'pilotage', pathMatch: 'full', redirectTo: 'pilotage/marges-chantier' },
-  { path: 'pilotage/marges-chantier', loadComponent: () => import('../pages/pilotage/marges-chantier/marges-chantier.page').then(m => m.MargesChantierPage) },
-  { path: 'pilotage/cash-flow', loadComponent: () => import('../pages/pilotage/cash-flow/cash-flow.page').then(m => m.CashFlowPage) },
-  { path: 'pilotage/marge-consolidee', loadComponent: () => import('../pages/pilotage/marge-consolidee/marge-consolidee.page').then(m => m.MargeConsolideePage) },
+  { path: 'pilotage/marges-chantier', loadComponent: () => import('../features/pilotage/pages/marges-chantier/marges-chantier.page').then(m => m.MargesChantierPage) },
+  { path: 'pilotage/cash-flow', loadComponent: () => import('../features/pilotage/pages/cash-flow/cash-flow.page').then(m => m.CashFlowPage) },
+  { path: 'pilotage/marge-consolidee', loadComponent: () => import('../features/pilotage/pages/marge-consolidee/marge-consolidee.page').then(m => m.MargeConsolideePage) },
 ];
 ```
 
@@ -284,10 +284,10 @@ export const PILOTAGE_ROUTES: Routes = [
 
 ```ts
 export const APPROBATIONS_ROUTES: Routes = [
-  { path: 'approbations', pathMatch: 'full', loadComponent: () => import('../pages/approbations/inbox/inbox.page').then(m => m.ApprobationsInboxPage) },
-  { path: 'approbations/historique', loadComponent: () => import('../pages/approbations/historique/historique.page').then(m => m.ApprobationsHistoriquePage) },
-  { path: 'approbations/regles', loadComponent: () => import('../pages/approbations/regles/regles.page').then(m => m.ApprobationsReglesPage) },  // admin only
-  { path: 'approbations/:id', loadComponent: () => import('../pages/approbations/detail/approbation-detail.page').then(m => m.ApprobationDetailPage) },
+  { path: 'approbations', pathMatch: 'full', loadComponent: () => import('../features/approbations/pages/inbox/inbox.page').then(m => m.ApprobationsInboxPage) },
+  { path: 'approbations/historique', loadComponent: () => import('../features/approbations/pages/historique/historique.page').then(m => m.ApprobationsHistoriquePage) },
+  { path: 'approbations/regles', loadComponent: () => import('../features/approbations/pages/regles/regles.page').then(m => m.ApprobationsReglesPage) },  // admin only
+  { path: 'approbations/:id', loadComponent: () => import('../features/approbations/pages/detail/approbation-detail.page').then(m => m.ApprobationDetailPage) },
 ];
 ```
 

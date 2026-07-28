@@ -1,10 +1,10 @@
-import type { Fournisseur } from '@app/achats/models';
+import type { Fournisseur } from '@app/features/achats/models';
 import type {
   ClientVente,
   ClientVenteCreate,
   ClientVenteType,
   ClientVenteUpdate,
-} from '@app/ventes/models';
+} from '@app/features/ventes/models';
 import { safeRandomUUID } from '@core/util/uuid';
 
 import type { Partner, PartnerCreate, PartnerUpdate } from './partners-api.service';

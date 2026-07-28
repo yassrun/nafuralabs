@@ -5,7 +5,7 @@ import { AuthFacade } from '@core/security/services/auth.facade';
 import {
   Etablissement,
   Societe,
-} from '../pages/administration/societe/models';
+} from '@app/features/administration/pages/societe/models';
 
 /**
  * Singleton multi-tenancy state (Task 8.3).

@@ -24,11 +24,11 @@ Le module analytics propose 5 dashboards thématiques distincts du dashboard d'a
 
 ```ts
 export const ANALYTICS_ROUTES: Routes = [
-  { path: 'analytics/chantiers', loadComponent: () => import('../pages/analytics/chantiers/analytics-chantiers.page').then(m => m.AnalyticsChantiersPage) },
-  { path: 'analytics/financier', loadComponent: () => import('../pages/analytics/financier/analytics-financier.page').then(m => m.AnalyticsFinancierPage) },
-  { path: 'analytics/stock', loadComponent: () => import('../pages/analytics/stock/analytics-stock.page').then(m => m.AnalyticsStockPage) },
-  { path: 'analytics/achats', loadComponent: () => import('../pages/analytics/achats/analytics-achats.page').then(m => m.AnalyticsAchatsPage) },
-  { path: 'analytics/rh', loadComponent: () => import('../pages/analytics/rh/analytics-rh.page').then(m => m.AnalyticsRhPage) },
+  { path: 'analytics/chantiers', loadComponent: () => import('../features/analytics/pages/chantiers/analytics-chantiers.page').then(m => m.AnalyticsChantiersPage) },
+  { path: 'analytics/financier', loadComponent: () => import('../features/analytics/pages/financier/analytics-financier.page').then(m => m.AnalyticsFinancierPage) },
+  { path: 'analytics/stock', loadComponent: () => import('../features/analytics/pages/stock/analytics-stock.page').then(m => m.AnalyticsStockPage) },
+  { path: 'analytics/achats', loadComponent: () => import('../features/analytics/pages/achats/analytics-achats.page').then(m => m.AnalyticsAchatsPage) },
+  { path: 'analytics/rh', loadComponent: () => import('../features/analytics/pages/rh/analytics-rh.page').then(m => m.AnalyticsRhPage) },
 ];
 ```
 

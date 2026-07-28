@@ -5,7 +5,7 @@
  *   web/app/applications/erp/pages/chantiers/documents/models/index.ts → DOCUMENT_TYPE_LABELS
  */
 
-import type { DocumentChantierType } from '../../pages/chantiers/documents/models';
+import type { DocumentChantierType } from '@app/features/chantiers/pages/documents/models';
 
 export const DOCUMENT_CHANTIER_TYPE_KEYS: Record<DocumentChantierType, string> = {
   MARCHE:               'enum.document_chantier.type.marche',

@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import {
   ChantierLotApiService,
   type ChantierLotTreeResponse,
-} from '@app/pages/chantiers/services/chantier-lot-api.service';
+} from '@app/features/chantiers/pages/services/chantier-lot-api.service';
 import {
   LOT_CHANTIER_IMPORT_DEFINITION,
   LotChantierImportService,

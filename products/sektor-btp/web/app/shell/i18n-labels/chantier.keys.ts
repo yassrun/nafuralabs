@@ -6,7 +6,7 @@
  *   - web/app/applications/erp/pages/chantiers/chantier-detail/chantier-detail.page.ts
  */
 
-import type { ChantierStatus } from '../../chantiers/models';
+import type { ChantierStatus } from '@app/features/chantiers/models';
 
 export const CHANTIER_STATUS_KEYS: Record<ChantierStatus, string> = {
   PROSPECT:    'enum.chantier.status.prospect',

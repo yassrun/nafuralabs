@@ -95,7 +95,7 @@ Un brief est livré quand :
 - `@lib/anatomy` — `ConfigDrivenListingPage`, `ConfigDrivenDetailPage`, `buildListingConfig`, `buildDetailConfig`, `GridFacade`, types.
 - Composants partagés : `web/app/applications/erp/inventory/components/` (réutilisables).
 - Modèles partagés inventory : `web/app/applications/erp/inventory/models/index.ts`.
-- Routes ERP : `web/app/applications/erp/routes/erp.routes.generated.ts` (généré) + `inventory.routes.ts` (custom hand-written, modèle à suivre pour les modules non générés).
+- Routes ERP : `web/app/applications/erp/routes/erp.routes.generated.ts` (généré) + `stock.routes.ts` (custom hand-written, modèle à suivre pour les modules non générés).
 - Nav source : `web/app/applications/erp/shell/erp-nav.generated.ts`.
 
 ## Convention de nommage

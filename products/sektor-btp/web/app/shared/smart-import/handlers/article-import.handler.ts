@@ -1,10 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 
-import type { ArticleType } from '@app/inventory/models';
-import type { ArticleCreate } from '@app/pages/inventory/catalogue/articles/models';
-import { ArticlesApiService } from '@app/pages/inventory/catalogue/articles/services/article-api.service';
-import { ItemCategoriesApiService } from '@app/pages/inventory/configuration/item-categories/services/item-category-api.service';
-import { UnitOfMeasuresApiService } from '@app/pages/inventory/configuration/unit-of-measures/services/unit-of-measure-api.service';
+import type { ArticleType } from '@app/features/stock/models';
+import type { ArticleCreate } from '@app/features/stock/pages/catalogue/articles/models';
+import { ArticlesApiService } from '@app/features/stock/pages/catalogue/articles/services/article-api.service';
+import { ItemCategoriesApiService } from '@app/features/stock/pages/configuration/item-categories/services/item-category-api.service';
+import { UnitOfMeasuresApiService } from '@app/features/stock/pages/configuration/unit-of-measures/services/unit-of-measure-api.service';
 import type { ExtractionDefinition } from '@platform/features/documents/smart-import';
 import { normalizeText, toNumber } from '../../utils/extraction-json.utils';
 

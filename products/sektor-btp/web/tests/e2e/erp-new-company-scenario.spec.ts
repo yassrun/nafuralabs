@@ -86,7 +86,7 @@ test.describe.serial('ERP new-company scenario', () => {
       record('C1-chantier', chantier.ok ? 'pass' : 'fail', `POST chantiers → ${chantier.status}`);
       expect(chantier.ok, JSON.stringify(chantier.body)).toBe(true);
 
-      await page.goto('/inventory/mouvements/receptions', { waitUntil: 'networkidle' });
+      await page.goto('/stock/mouvements/receptions', { waitUntil: 'networkidle' });
       await page.waitForTimeout(1500);
       const prereq = page.locator('.reception-prereq');
       const prereqVisible = await prereq.isVisible().catch(() => false);

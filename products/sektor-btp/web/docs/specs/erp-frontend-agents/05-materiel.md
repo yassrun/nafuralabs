@@ -93,7 +93,7 @@ export const MATERIEL_ROUTES: Routes = [
 ];
 ```
 
-> **Note** : ces routes existent partiellement dans `inventory.routes.ts` actuel — à **migrer** dans le nouveau module `applications/erp/materiel/` pour cohérence.
+> **Note** : ces routes existent partiellement dans `stock.routes.ts` actuel — à **migrer** dans le nouveau module `applications/erp/materiel/` pour cohérence.
 
 ## 4. `/materiel/parc` — Parc matériel
 
@@ -298,6 +298,6 @@ applications/erp/pages/materiel/
 - [ ] Calculs TCO et conso L/100 ou L/h corrects.
 - [ ] Affectations détectent les conflits.
 - [ ] Mock seed riche et cohérent (engins crédibles BTP Maroc).
-- [ ] `materiel.routes.ts` injecté dans erp.routes.generated.ts (et anciennes routes inventory matériel retirées de `inventory.routes.ts` pour éviter les doublons).
+- [ ] `materiel.routes.ts` injecté dans erp.routes.generated.ts (et anciennes routes inventory matériel retirées de `stock.routes.ts` pour éviter les doublons).
 - [ ] Permissions par entité.
 - [ ] Performance : calendrier maintenance avec 50+ events rendu < 500ms.

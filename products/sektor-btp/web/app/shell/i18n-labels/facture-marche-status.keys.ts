@@ -7,7 +7,7 @@
  * billing lifecycle is different (envoyée MOA / acceptée / contestée).
  */
 
-import type { FactureMarcheStatus } from '../../pages/marches/models';
+import type { FactureMarcheStatus } from '@app/features/marches/pages/models';
 
 export const FACTURE_MARCHE_STATUS_KEYS: Record<FactureMarcheStatus, string> = {
   BROUILLON:     'enum.facture_marche.status.brouillon',
