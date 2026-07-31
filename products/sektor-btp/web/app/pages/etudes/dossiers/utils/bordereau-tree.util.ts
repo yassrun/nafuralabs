@@ -17,6 +17,8 @@ export interface BordereauTreeRow {
   fraisGenerauxPercent?: number | null;
   margePercent?: number | null;
   total?: number | null;
+  /** Nombre d'articles descendants (lots / sous-lots) — phase structure. */
+  nombrePostes?: number | null;
   descriptif?: string | null;
   mode?: string | null;
   prixDpuId?: string | null;
@@ -124,6 +126,20 @@ export function applyTreeRollupTotals(nodes: NfTreeNode<BordereauTreeRow>[]): vo
     return node.data.total;
   };
   nodes.forEach(sumNode);
+}
+
+/** Compte les articles descendants par lot / sous-lot (phase structure, hors prix). */
+export function applyTreeRollupPostes(nodes: NfTreeNode<BordereauTreeRow>[]): void {
+  const countNode = (node: NfTreeNode<BordereauTreeRow>): number => {
+    if (node.data.type === 'ARTICLE') {
+      node.data.nombrePostes = null;
+      return 1;
+    }
+    const n = (node.children ?? []).reduce((sum, child) => sum + countNode(child), 0);
+    node.data.nombrePostes = n;
+    return n;
+  };
+  nodes.forEach(countNode);
 }
 
 export function importArbreToTreeNodes(

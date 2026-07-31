@@ -15,6 +15,7 @@ import { TranslateModule } from '@ngx-translate/core';
 
 import type { DossierEtude, ProblemeGate, ResultatGate } from '@app/etudes/models';
 
+import { resolvePosteChiffrageMode } from '../../utils/poste-chiffrage-mode.util';
 import { DpgfApiService, type DpgfLotTotal } from '../../../metres/services/dpgf-api.service';
 import { DpuApiService } from '../../../bibliotheque-prix/services/dpu-api.service';
 import { GateBlocageComponent } from '../gate-blocage/gate-blocage.component';
@@ -89,7 +90,7 @@ export class SyntheseValidationPanelComponent {
       ]);
       this.totaux.set(lots ?? []);
 
-      const articles = this.collectArticles(arbre.hierarchie ?? []);
+      const articles = this.collectArticlesDecomposes(arbre.hierarchie ?? []);
       let total = 0;
       let consultes = 0;
       await Promise.all(
@@ -116,13 +117,25 @@ export class SyntheseValidationPanelComponent {
     }
   }
 
-  private collectArticles(
-    nodes: { id?: string; type?: string; enfants?: unknown[] }[],
+  private collectArticlesDecomposes(
+    nodes: {
+      id?: string;
+      type?: string;
+      mode?: string | null;
+      prixUnitaire?: number | null;
+      enfants?: unknown[];
+    }[],
   ): string[] {
     const ids: string[] = [];
     const walk = (list: typeof nodes) => {
       for (const n of list) {
-        if (n.type === 'ARTICLE' && n.id) ids.push(n.id);
+        if (n.type === 'ARTICLE' && n.id) {
+          const mode = resolvePosteChiffrageMode({
+            mode: n.mode,
+            prixUnitaire: n.prixUnitaire,
+          });
+          if (mode !== 'FOURNI') ids.push(n.id);
+        }
         if (Array.isArray(n.enfants)) walk(n.enfants as typeof nodes);
       }
     };

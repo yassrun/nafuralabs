@@ -1,6 +1,7 @@
 import type { NfTreeNode } from '@lib/anatomy/components';
 
 import {
+  applyTreeRollupPostes,
   applyTreeRollupTotals,
   countExploitableArticles,
   countExploitableInNodes,
@@ -36,6 +37,34 @@ describe('applyTreeRollupTotals', () => {
 
     expect(sousLot.data.total).toBe(150);
     expect(lot.data.total).toBe(150);
+  });
+});
+
+describe('applyTreeRollupPostes', () => {
+  it('compte les articles descendants par lot / sous-lot', () => {
+    const article = (key: string): NfTreeNode<BordereauTreeRow> => ({
+      key,
+      leaf: true,
+      data: { key, type: 'ARTICLE', code: key, libelle: key, depth: 2 },
+    });
+    const sousLot: NfTreeNode<BordereauTreeRow> = {
+      key: 'sl',
+      leaf: false,
+      data: { key: 'sl', type: 'SOUS_LOT', code: '1.1', libelle: 'Sous-lot', depth: 1 },
+      children: [article('a1'), article('a2'), article('a3')],
+    };
+    const lot: NfTreeNode<BordereauTreeRow> = {
+      key: 'lot',
+      leaf: false,
+      data: { key: 'lot', type: 'LOT', code: '1', libelle: 'Lot', depth: 0 },
+      children: [sousLot, article('a4')],
+    };
+
+    applyTreeRollupPostes([lot]);
+
+    expect(sousLot.data.nombrePostes).toBe(3);
+    expect(lot.data.nombrePostes).toBe(4);
+    expect(sousLot.children![0].data.nombrePostes).toBeNull();
   });
 });
 

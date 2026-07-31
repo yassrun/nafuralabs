@@ -687,10 +687,11 @@ public class AdaptiveBordereauExtractionOrchestrator {
 
     private static String chunkRepairInstructions(int startPage, int endPage) {
         return """
-                Extrais les lignes de prix du bordereau BTP (pages %d-%d).
+                Extrais la structure du bordereau BTP (pages %d-%d).
                 Retourne groups (lots/sous-lots/sections) et articles avec code, libellé,
                 unité et quantité lorsqu'ils sont visibles. N'invente aucune valeur.
-                Ignore les totaux, récaps et en-têtes répétés du marché.
+                Ignore PU, montants, totaux, récaps et en-têtes répétés du marché —
+                seuls code / libellé / unité / quantité comptent à cette étape.
                 """.formatted(startPage, endPage);
     }
 
@@ -724,8 +725,9 @@ public class AdaptiveBordereauExtractionOrchestrator {
                 Ce document est un bordereau de prix BTP (ou la partie « bordereau / détail
                 estimatif » d'un dossier de consultation).
 
-                PRIORITÉ ABSOLUE — les postes (articles chiffrables) :
-                - Extrais TOUTES les lignes de prix avec code, libellé, unité et quantité.
+                PRIORITÉ ABSOLUE — les postes (articles structurels) :
+                - Extrais TOUTES les lignes de postes avec code, libellé, unité et quantité.
+                - IGNORE les prix unitaires, montants HT et totaux : ils seront chiffrés plus tard.
                 - Un résultat avec seulement des en-têtes de lots / sous-lots et 0 postes
                   est INACCEPTABLE.
                 - Si le document est long, privilégie la complétude des postes plutôt que

@@ -85,6 +85,11 @@ export class DossierSummaryHeaderComponent {
     return a === 'VALIDER_N1' || a === 'VALIDER_N2';
   });
 
+  readonly showCreerChantier = computed(() => {
+    const s = this.synthese();
+    return s.status === 'DEVIS_GENERE' && !!s.devisGenereId;
+  });
+
   onClientSelection(sel: ClientPartnerSelection): void {
     this.clientChange.emit(sel);
   }

@@ -27,6 +27,7 @@ import { UnitOfMeasuresApiService } from '@app/pages/inventory/configuration/uni
 
 import { DpgfApiService } from '../../../metres/services/dpgf-api.service';
 import {
+  applyTreeRollupPostes,
   applyTreeRollupTotals,
   countArticlesInNodes,
   countExploitableInNodes,
@@ -132,12 +133,14 @@ export class BordereauArbreComponent {
       { key: 'quantite', label: 'Qté', width: '5.5rem', align: 'end' },
     ];
     if (selection) {
+      // Phase décomposition / chiffrage — les montants ont un sens.
       cols.push(
         { key: 'pu', label: 'PU HT', width: '5.5rem', align: 'end' },
         { key: 'total', label: 'Total HT', width: '6.5rem', align: 'end' },
       );
     } else {
-      cols.push({ key: 'total', label: 'Total HT', width: '7rem', align: 'end' });
+      // Phase bordereau (structure) — pas de prix, seulement le volume de postes.
+      cols.push({ key: 'postes', label: 'Postes', width: '5.5rem', align: 'end' });
     }
     if (this.showStructureActions()) {
       cols.push({ key: 'actions', label: 'Actions', width: '10.5rem', align: 'center' });
@@ -493,6 +496,7 @@ export class BordereauArbreComponent {
   private refreshDraftNodes(resetExpand = true): void {
     this.remapDraftUnites();
     const nodes = importArbreToTreeNodes(this.draftLocal());
+    applyTreeRollupPostes(nodes);
     this.nodes.set(nodes);
     if (resetExpand) {
       // Collapsed by default — user expands via chevrons / expand-all.
@@ -576,6 +580,7 @@ export class BordereauArbreComponent {
       };
       remap(nodes);
       applyTreeRollupTotals(nodes);
+      applyTreeRollupPostes(nodes);
       const previous = this.expandedKeys();
       this.nodes.set(nodes);
       if (previous.size > 0) {

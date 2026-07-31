@@ -466,6 +466,13 @@
   border-color: color-mix(in srgb, var(--nf-color-success, #059669) 40%, transparent);
 }
 
+.source-badge--ia {
+  margin-left: 0.35rem;
+  color: var(--nf-color-primary-700, #1d4ed8);
+  border-color: color-mix(in srgb, var(--nf-color-primary-600, #2563eb) 40%, transparent);
+  background: color-mix(in srgb, var(--nf-color-primary-600, #2563eb) 10%, transparent);
+}
+
 .poste__synthese {
   position: sticky;
   bottom: 0;

@@ -17,6 +17,7 @@ import { ConfirmDialogService } from '@lib/anatomy';
 import type { ResultatGate } from '@app/etudes/models';
 
 import type { BordereauTreeRow } from '../../utils/bordereau-tree.util';
+import { resolvePosteChiffrageMode } from '../../utils/poste-chiffrage-mode.util';
 import { DpuApiService } from '../../../bibliotheque-prix/services/dpu-api.service';
 import { DpgfApiService } from '../../../metres/services/dpgf-api.service';
 import { BordereauArbreComponent } from '../bordereau-arbre/bordereau-arbre.component';
@@ -170,7 +171,8 @@ export class DecompositionWorkspaceComponent {
   private async refreshCouverture(dpgfId: string, _token: number): Promise<void> {
     try {
       const arbre = await this.dpgfApi.getArbre(dpgfId);
-      const articles = this.collectArticles(arbre.hierarchie ?? []);
+      // Uniquement les articles décomposés : en prix fourni la décomp. est un brouillon.
+      const articles = this.collectArticlesDecomposes(arbre.hierarchie ?? []);
       let total = 0;
       let consultes = 0;
       const alerteIds: string[] = [];
@@ -207,13 +209,26 @@ export class DecompositionWorkspaceComponent {
     }
   }
 
-  private collectArticles(
-    nodes: { id?: string; type?: string; enfants?: unknown[] }[],
+  /** Articles dont le mode actif n’est pas prix fourni (consultation pertinente). */
+  private collectArticlesDecomposes(
+    nodes: {
+      id?: string;
+      type?: string;
+      mode?: string | null;
+      prixUnitaire?: number | null;
+      enfants?: unknown[];
+    }[],
   ): string[] {
     const ids: string[] = [];
     const walk = (list: typeof nodes) => {
       for (const n of list) {
-        if (n.type === 'ARTICLE' && n.id) ids.push(n.id);
+        if (n.type === 'ARTICLE' && n.id) {
+          const mode = resolvePosteChiffrageMode({
+            mode: n.mode,
+            prixUnitaire: n.prixUnitaire,
+          });
+          if (mode !== 'FOURNI') ids.push(n.id);
+        }
         if (Array.isArray(n.enfants)) walk(n.enfants as typeof nodes);
       }
     };

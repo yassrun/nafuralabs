@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, ViewEncapsulation, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { firstValueFrom } from 'rxjs';
@@ -14,6 +14,7 @@ import type {
 import {
   CreateMissingItemDialogComponent,
   type CreateMissingItemDialogResult,
+  type CreateMissingItemMode,
 } from '../create-missing-item-dialog/create-missing-item-dialog.component';
 
 export interface DecompositionSuggestionDialogData {
@@ -25,78 +26,92 @@ export interface DecompositionSuggestionDialogData {
 
 export interface DecompositionSuggestionDialogResult {
   selected: DecompositionComposantMatched[];
+  regenerate?: boolean;
 }
 
 @Component({
   selector: 'app-decomposition-suggestion-dialog',
   standalone: true,
   imports: [CommonModule, FormsModule, MatDialogModule, ButtonComponent],
+  encapsulation: ViewEncapsulation.None,
   template: `
-    <div class="dialog-shell">
-      <header>
+    <div class="decomp-suggest">
+      <header class="decomp-suggest__header">
         <div>
           <h2>Composants proposés — {{ data.code || '—' }}</h2>
-          <p class="meta">{{ data.libelle }}</p>
+          <p class="decomp-suggest__meta">{{ data.libelle }}</p>
         </div>
-        <nf-button variant="ghost" (clicked)="close()" aria-label="Fermer">✕</nf-button>
+        <div class="decomp-suggest__header-actions">
+          <nf-button variant="ghost" size="sm" (clicked)="regenerate()">
+            Actualiser IA
+          </nf-button>
+          <nf-button variant="ghost" (clicked)="close()" aria-label="Fermer">✕</nf-button>
+        </div>
       </header>
 
-      @if (matched().length === 0 && missing().length === 0) {
-        <p class="empty">Aucun composant exploitable détecté pour ce poste.</p>
-      }
+      <div class="decomp-suggest__body">
+        @if (matched().length === 0 && missing().length === 0) {
+          <p class="decomp-suggest__empty">Aucun composant exploitable détecté pour ce poste.</p>
+        }
 
-      @if (matched().length > 0) {
-        <section aria-labelledby="matched-title">
-          <h3 id="matched-title">Catalogue (consultables)</h3>
-          <ul class="list">
-            @for (row of matched(); track row.itemId + row.name; let i = $index) {
-              <li>
-                <label class="row">
-                  <input
-                    type="checkbox"
-                    [ngModel]="selected()[i]"
-                    (ngModelChange)="toggle(i, $event)"
-                  />
-                  <span class="main">
-                    <strong>{{ row.name }}</strong>
-                    <span class="sub">
-                      {{ row.type }} · {{ row.rendement | number: '1.2-4' }}
-                      {{ row.unite }} · {{ row.prixUnitaire | number: '1.2-2' }} MAD
-                      ({{ row.sourcePrix }})
+        @if (matched().length > 0) {
+          <section aria-labelledby="matched-title">
+            <h3 id="matched-title">Catalogue (consultables)</h3>
+            <ul class="decomp-suggest__list">
+              @for (row of matched(); track trackMatched($index, row); let i = $index) {
+                <li>
+                  <label class="decomp-suggest__matched">
+                    <input
+                      type="checkbox"
+                      [ngModel]="selected()[i]"
+                      (ngModelChange)="toggle(i, $event)"
+                    />
+                    <span class="decomp-suggest__info">
+                      <strong>{{ row.name }}</strong>
+                      <span class="decomp-suggest__sub">
+                        {{ row.type }} · {{ row.rendement | number: '1.2-4' }}
+                        {{ row.unite }} · {{ row.prixUnitaire | number: '1.2-2' }} MAD
+                        ({{ row.sourcePrix }})
+                      </span>
                     </span>
-                  </span>
-                </label>
-              </li>
-            }
-          </ul>
-        </section>
-      }
+                  </label>
+                </li>
+              }
+            </ul>
+          </section>
+        }
 
-      @if (missing().length > 0) {
-        <section aria-labelledby="missing-title">
-          <h3 id="missing-title">Absents du catalogue</h3>
-          <p class="hint">
-            Créez l’article et renseignez un prix avant de pouvoir l’ajouter à la décomposition.
-          </p>
-          <ul class="list">
-            @for (row of missing(); track row.designation + $index; let i = $index) {
-              <li class="missing-row">
-                <span class="main">
-                  <strong>{{ row.designation }}</strong>
-                  <span class="sub">
-                    {{ row.type }} · {{ row.rendement | number: '1.2-4' }} {{ row.unite }}
-                  </span>
-                </span>
-                <nf-button variant="secondary" size="sm" (clicked)="creerManquant(i)">
-                  Créer dans le catalogue
-                </nf-button>
-              </li>
-            }
-          </ul>
-        </section>
-      }
+        @if (missing().length > 0) {
+          <section aria-labelledby="missing-title">
+            <h3 id="missing-title">Absents du catalogue</h3>
+            <p class="decomp-suggest__hint">
+              Ajoutez le composant au poste (manuel) ou créez-le dans le catalogue avec un tarif.
+            </p>
+            <ul class="decomp-suggest__list">
+              @for (row of missing(); track row.designation + $index; let i = $index) {
+                <li class="decomp-suggest__card">
+                  <div class="decomp-suggest__info">
+                    <strong>{{ row.designation }}</strong>
+                    <span class="decomp-suggest__sub">
+                      {{ row.type }} · {{ row.rendement | number: '1.2-4' }} {{ row.unite }}
+                    </span>
+                  </div>
+                  <div class="decomp-suggest__actions">
+                    <nf-button variant="secondary" size="sm" (clicked)="ajouterAuPoste(i)">
+                      Ajouter au poste
+                    </nf-button>
+                    <nf-button variant="ghost" size="sm" (clicked)="creerCatalogue(i)">
+                      Créer dans le catalogue
+                    </nf-button>
+                  </div>
+                </li>
+              }
+            </ul>
+          </section>
+        }
+      </div>
 
-      <footer>
+      <footer class="decomp-suggest__footer">
         <nf-button variant="secondary" (clicked)="close()">Annuler</nf-button>
         <nf-button
           variant="primary"
@@ -109,44 +124,62 @@ export interface DecompositionSuggestionDialogResult {
     </div>
   `,
   styles: `
-    .dialog-shell {
+    .decomp-suggest {
       display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
       gap: 1rem;
       padding: 1.25rem;
       min-width: min(40rem, 94vw);
       max-width: 46rem;
+      max-height: min(85vh, 44rem);
       background: var(--nf-color-surface, #fff);
+      box-sizing: border-box;
     }
-    header {
+    .decomp-suggest__header {
       display: flex;
       justify-content: space-between;
       gap: 1rem;
       align-items: start;
     }
-    header h2 {
+    .decomp-suggest__header h2 {
       margin: 0;
       font-size: 1.125rem;
     }
-    .meta,
-    .hint,
-    .empty {
+    .decomp-suggest__header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      flex-shrink: 0;
+    }
+    .decomp-suggest__meta,
+    .decomp-suggest__hint,
+    .decomp-suggest__empty {
       margin: 0.35rem 0 0;
       color: var(--nf-color-text-secondary, #6b7280);
       font-size: 0.875rem;
     }
-    h3 {
+    .decomp-suggest__body {
+      overflow: auto;
+      min-height: 0;
+      display: grid;
+      gap: 1rem;
+      padding-right: 0.25rem;
+    }
+    .decomp-suggest__body h3 {
       margin: 0 0 0.5rem;
       font-size: 0.9rem;
     }
-    .list {
+    .decomp-suggest__list {
       list-style: none;
       margin: 0;
       padding: 0;
-      display: grid;
-      gap: 0.5rem;
+      display: block;
     }
-    .row,
-    .missing-row {
+    .decomp-suggest__list > li {
+      display: block;
+      margin: 0 0 0.5rem;
+    }
+    .decomp-suggest__matched {
       display: flex;
       gap: 0.75rem;
       align-items: flex-start;
@@ -154,21 +187,40 @@ export interface DecompositionSuggestionDialogResult {
       border: 1px solid var(--nf-color-border, #d1d5db);
       border-radius: 8px;
     }
-    .missing-row {
-      justify-content: space-between;
-      align-items: center;
+    /* Toujours 2 rangées : infos puis actions — jamais côte à côte */
+    .decomp-suggest__card {
+      display: block;
+      padding: 0.7rem 0.8rem;
+      border: 1px solid var(--nf-color-border, #d1d5db);
+      border-radius: 8px;
+      box-sizing: border-box;
     }
-    .main {
-      display: flex;
-      flex-direction: column;
-      gap: 0.2rem;
-      min-width: 0;
+    .decomp-suggest__info {
+      display: block;
+      width: 100%;
     }
-    .sub {
+    .decomp-suggest__info strong {
+      display: block;
+      font-weight: 600;
+    }
+    .decomp-suggest__sub {
+      display: block;
+      margin-top: 0.2rem;
       font-size: 0.8rem;
       color: var(--nf-color-text-secondary, #6b7280);
     }
-    footer {
+    .decomp-suggest__actions {
+      display: block;
+      width: 100%;
+      margin-top: 0.65rem;
+    }
+    .decomp-suggest__actions nf-button {
+      display: inline-flex;
+      margin-right: 0.4rem;
+      margin-bottom: 0.25rem;
+      vertical-align: middle;
+    }
+    .decomp-suggest__footer {
       display: flex;
       justify-content: flex-end;
       gap: 0.75rem;
@@ -193,13 +245,25 @@ export class DecompositionSuggestionDialogComponent {
     return this.selected().filter(Boolean).length;
   }
 
+  trackMatched(index: number, row: DecompositionComposantMatched): string {
+    return `${row.itemId ?? 'manual'}:${row.name}:${index}`;
+  }
+
   toggle(index: number, value: boolean): void {
     const next = [...this.selected()];
     next[index] = value;
     this.selected.set(next);
   }
 
-  async creerManquant(index: number): Promise<void> {
+  async ajouterAuPoste(index: number): Promise<void> {
+    await this.resoudreManquant(index, 'poste');
+  }
+
+  async creerCatalogue(index: number): Promise<void> {
+    await this.resoudreManquant(index, 'catalogue');
+  }
+
+  private async resoudreManquant(index: number, mode: CreateMissingItemMode): Promise<void> {
     const row = this.missing()[index];
     if (!row) return;
     const ref = this.dialog.open(CreateMissingItemDialogComponent, {
@@ -212,6 +276,7 @@ export class DecompositionSuggestionDialogComponent {
         unite: row.unite,
         rendement: row.rendement,
         uniteOptions: this.data.uniteOptions,
+        mode,
       },
     });
     const created = (await firstValueFrom(ref.afterClosed())) as CreateMissingItemDialogResult | null;
@@ -219,7 +284,7 @@ export class DecompositionSuggestionDialogComponent {
 
     const added: DecompositionComposantMatched = {
       type: created.type,
-      itemId: created.itemId,
+      itemId: created.itemId ?? '',
       code: created.code,
       name: created.name,
       unite: created.unite,
@@ -238,6 +303,10 @@ export class DecompositionSuggestionDialogComponent {
     const selected = this.matched().filter((_, i) => this.selected()[i]);
     if (!selected.length) return;
     this.dialogRef.close({ selected });
+  }
+
+  regenerate(): void {
+    this.dialogRef.close({ selected: [], regenerate: true });
   }
 
   close(): void {

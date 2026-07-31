@@ -13,10 +13,13 @@ export interface PrixFourniDialogData {
   prixFourniBase?: number | null;
   fraisGenerauxPercent: number;
   margePercent: number;
+  /** Pré-coche si le poste appliquait déjà FG/MG. */
+  appliquerFgMarge?: boolean;
 }
 
 export interface PrixFourniDialogResult {
   prixUnitaire: number;
+  appliquerFgMarge: boolean;
 }
 
 @Component({
@@ -34,8 +37,12 @@ export interface PrixFourniDialogResult {
         <strong>{{ data.code }}</strong> — {{ data.libelle }}
       </p>
       <p class="hint">
-        Saisissez le coût unitaire fourni. Les frais généraux et la marge sont ensuite appliqués
-        pour calculer le prix de vente HT.
+        Saisissez le coût unitaire fourni.
+        @if (appliquerFgMarge) {
+          Les frais généraux et la marge sont appliqués pour calculer le prix de vente HT.
+        } @else {
+          Sans FG/MG, le prix de vente HT est égal au coût fourni.
+        }
       </p>
 
       <label class="field">
@@ -51,19 +58,27 @@ export interface PrixFourniDialogResult {
         />
       </label>
 
+      <label class="fg-toggle">
+        <input type="checkbox" [(ngModel)]="appliquerFgMarge" name="appliquerFgMarge" />
+        Appliquer les frais généraux ({{ data.fraisGenerauxPercent | number: '1.0-2' }} %)
+        et la marge ({{ data.margePercent | number: '1.0-2' }} %)
+      </label>
+
       <dl class="preview" aria-live="polite">
         <div>
           <dt>Coût fourni</dt>
           <dd>{{ coutFourni | number: '1.2-2' }} MAD</dd>
         </div>
-        <div>
-          <dt>Frais généraux ({{ data.fraisGenerauxPercent | number: '1.0-2' }} %)</dt>
-          <dd>{{ fraisGeneraux | number: '1.2-2' }} MAD</dd>
-        </div>
-        <div>
-          <dt>Marge ({{ data.margePercent | number: '1.0-2' }} %)</dt>
-          <dd>{{ marge | number: '1.2-2' }} MAD</dd>
-        </div>
+        @if (appliquerFgMarge) {
+          <div>
+            <dt>Frais généraux ({{ data.fraisGenerauxPercent | number: '1.0-2' }} %)</dt>
+            <dd>{{ fraisGeneraux | number: '1.2-2' }} MAD</dd>
+          </div>
+          <div>
+            <dt>Marge ({{ data.margePercent | number: '1.0-2' }} %)</dt>
+            <dd>{{ marge | number: '1.2-2' }} MAD</dd>
+          </div>
+        }
         <div>
           <dt>Prix de vente unitaire HT</dt>
           <dd>{{ prixVenteHt | number: '1.2-2' }} MAD</dd>
@@ -126,6 +141,18 @@ export interface PrixFourniDialogResult {
       border-color: var(--nf-color-primary-600, #0b6e7a);
       box-shadow: 0 0 0 3px color-mix(in srgb, var(--nf-color-primary-600, #0b6e7a) 18%, transparent);
     }
+    .fg-toggle {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      margin: 0;
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+    .fg-toggle input {
+      margin-top: 0.2rem;
+      flex-shrink: 0;
+    }
     .preview {
       margin: 0;
       display: grid;
@@ -172,6 +199,8 @@ export class PrixFourniDialogComponent implements AfterViewInit {
       ? String(this.data.prixFourniBase)
       : '';
 
+  appliquerFgMarge = !!this.data.appliquerFgMarge;
+
   ngAfterViewInit(): void {
     queueMicrotask(() => this.prixInput()?.nativeElement?.focus());
   }
@@ -181,12 +210,20 @@ export class PrixFourniDialogComponent implements AfterViewInit {
     return Number.isFinite(value) ? Math.max(0, value) : 0;
   }
 
+  get fgPct(): number {
+    return this.appliquerFgMarge ? Math.max(0, this.data.fraisGenerauxPercent) : 0;
+  }
+
+  get margePct(): number {
+    return this.appliquerFgMarge ? Math.max(0, this.data.margePercent) : 0;
+  }
+
   get fraisGeneraux(): number {
-    return Math.round(this.coutFourni * (Math.max(0, this.data.fraisGenerauxPercent) / 100) * 100) / 100;
+    return Math.round(this.coutFourni * (this.fgPct / 100) * 100) / 100;
   }
 
   get marge(): number {
-    return Math.round(this.coutFourni * (Math.max(0, this.data.margePercent) / 100) * 100) / 100;
+    return Math.round(this.coutFourni * (this.margePct / 100) * 100) / 100;
   }
 
   get prixVenteHt(): number {
@@ -206,7 +243,10 @@ export class PrixFourniDialogComponent implements AfterViewInit {
 
   save(): void {
     if (!this.canSave()) return;
-    this.dialogRef.close({ prixUnitaire: this.parseNumber(this.prix) });
+    this.dialogRef.close({
+      prixUnitaire: this.parseNumber(this.prix),
+      appliquerFgMarge: this.appliquerFgMarge,
+    });
   }
 
   close(): void {

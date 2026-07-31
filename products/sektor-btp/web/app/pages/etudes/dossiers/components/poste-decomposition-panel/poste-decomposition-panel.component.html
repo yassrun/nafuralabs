@@ -219,7 +219,12 @@
                 @for (row of composants(); track row.id) {
                   <tr>
                     <td><span class="badge">{{ typeLabel(row.type) }}</span></td>
-                    <td>{{ row.articleOuPosteId }}</td>
+                    <td>
+                      {{ libelleComposant(row) }}
+                      @if (estSuggereParIa(row)) {
+                        <span class="source-badge source-badge--ia">IA</span>
+                      }
+                    </td>
                     <td>
                       <span
                         class="source-badge"
@@ -235,12 +240,21 @@
                     @if (modifiable()) {
                       <td class="actions">
                         <span class="poste__row-actions">
+                          @if (estSuggereParIa(row) && !estComposantCatalogue(row)) {
+                            <nf-button
+                              variant="ghost"
+                              size="sm"
+                              (clicked)="ajouterComposantAuCatalogue(row)"
+                            >
+                              Catalogue
+                            </nf-button>
+                          }
                           @if (row.sourcePrix !== 'CONSULTE') {
                             <button
                               type="button"
                               class="link"
                               (click)="marquerConsulte(row)"
-                              [attr.aria-label]="'Marquer consulté ' + row.articleOuPosteId"
+                              [attr.aria-label]="'Marquer consulté ' + libelleComposant(row)"
                             >
                               Consulté
                             </button>
@@ -250,7 +264,7 @@
                             mat-icon-button
                             class="poste__icon-btn"
                             matTooltip="Modifier"
-                            [attr.aria-label]="'Modifier ' + row.articleOuPosteId"
+                            [attr.aria-label]="'Modifier ' + libelleComposant(row)"
                             (click)="modifierSousDetail(row)"
                           >
                             <mat-icon>edit</mat-icon>
@@ -260,7 +274,7 @@
                             mat-icon-button
                             class="poste__icon-btn"
                             matTooltip="Dupliquer"
-                            [attr.aria-label]="'Dupliquer ' + row.articleOuPosteId"
+                            [attr.aria-label]="'Dupliquer ' + libelleComposant(row)"
                             (click)="dupliquerSousDetail(row)"
                           >
                             <mat-icon>content_copy</mat-icon>
@@ -270,7 +284,7 @@
                             mat-icon-button
                             class="poste__icon-btn poste__icon-btn--danger"
                             matTooltip="Supprimer"
-                            [attr.aria-label]="'Supprimer ' + row.articleOuPosteId"
+                            [attr.aria-label]="'Supprimer ' + libelleComposant(row)"
                             (click)="supprimerSousDetail(row)"
                           >
                             <mat-icon>delete</mat-icon>
@@ -295,7 +309,10 @@
                   >
                     {{ sourceLabel(row.sourcePrix) }}
                   </span>
-                  <strong>{{ row.articleOuPosteId }}</strong>
+                  <strong>{{ libelleComposant(row) }}</strong>
+                  @if (estSuggereParIa(row)) {
+                    <span class="source-badge source-badge--ia">IA</span>
+                  }
                 </div>
                 <p class="card__meta">
                   {{ row.quantite | number: '1.2-4' }} {{ row.unite }} ×
@@ -304,6 +321,15 @@
                 <p class="card__total">{{ row.total | number: '1.2-2' }} MAD</p>
                 @if (modifiable()) {
                   <div class="card__actions">
+                    @if (estSuggereParIa(row) && !estComposantCatalogue(row)) {
+                      <nf-button
+                        variant="ghost"
+                        size="sm"
+                        (clicked)="ajouterComposantAuCatalogue(row)"
+                      >
+                        Catalogue
+                      </nf-button>
+                    }
                     @if (row.sourcePrix !== 'CONSULTE') {
                       <button type="button" class="link" (click)="marquerConsulte(row)">
                         Consulté

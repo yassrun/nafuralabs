@@ -56,7 +56,8 @@ export interface DescriptifPropose {
 
 export interface DecompositionComposantMatched {
   type: string;
-  itemId: string;
+  /** Vide / absent pour un composant manuel (hors catalogue). */
+  itemId?: string;
   code?: string;
   name: string;
   unite: string;

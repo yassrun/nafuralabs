@@ -249,6 +249,22 @@ class GatesEtudeTest {
     }
 
     @Test
+    void articles_en_prix_fourni_sont_ignores_par_la_gate_consultation() {
+        UUID dpuId = UUID.randomUUID();
+        DpgfNoeud a = article("1-1", "m3", "70", DpgfNoeud.MODE_FOURNI);
+        a.setPrixDpuId(dpuId);
+        PrixDpu dpu = PrixDpu.builder().id(dpuId).build();
+        dpu.setComposants(List.of(ComposantDpu.builder().sourcePrix("MANUEL").build()));
+        lenient().when(prixDpuRepository.findById(any())).thenReturn(Optional.of(dpu));
+
+        ResultatGate r = new GatesEtude.GateConsultationFournisseurs(prixDpuRepository)
+                .evaluer(ContexteGate.deArticles(List.of(a)));
+
+        assertThat(r.passe()).isTrue();
+        assertThat(r.problemes()).isEmpty();
+    }
+
+    @Test
     void prix_consultes_franchissent_la_gate_consultation_sans_bloquer_le_parcours() {
         UUID dpuId = UUID.randomUUID();
         DpgfNoeud a = article("1-1", "m3", "70", DpgfNoeud.MODE_DECOMPOSE);
@@ -284,6 +300,22 @@ class GatesEtudeTest {
         a.setPrixUnitaire(new BigDecimal("849.94"));
         assertThat(new GatesEtude.GateChiffrage(prixDpuRepository).evaluer(ContexteGate.deArticles(List.of(a))).passe())
                 .isTrue();
+    }
+
+    @Test
+    void chiffrage_fourni_avec_dpu_brouillon_sans_taux_n_est_pas_bloque() {
+        UUID dpuId = UUID.randomUUID();
+        DpgfNoeud a = article("1-1", "m3", "70", DpgfNoeud.MODE_FOURNI);
+        a.setPrixUnitaire(new BigDecimal("100"));
+        a.setPrixDpuId(dpuId);
+        PrixDpu dpu = PrixDpu.builder().id(dpuId).build(); // FG/MG null
+        lenient().when(prixDpuRepository.findById(dpuId)).thenReturn(Optional.of(dpu));
+
+        ResultatGate r = new GatesEtude.GateChiffrage(prixDpuRepository)
+                .evaluer(ContexteGate.avecClient(ContexteGate.deArticles(List.of(a)), true, true));
+
+        assertThat(r.passe()).isTrue();
+        assertThat(r.problemes()).isEmpty();
     }
 
     @Test

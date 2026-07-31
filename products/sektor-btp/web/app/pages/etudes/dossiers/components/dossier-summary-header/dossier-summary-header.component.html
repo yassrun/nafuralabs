@@ -73,7 +73,7 @@
           </div>
         </div>
 
-        @if (showReouvrir() || showRefuser() || showCta()) {
+        @if (showReouvrir() || showRefuser() || showCreerChantier() || showCta()) {
           <div class="dsh__actions">
             @if (showReouvrir()) {
               <button type="button" class="dsh__btn dsh__btn--ghost" (click)="emitAction('REOUVRIR_BORDEREAU')">
@@ -83,6 +83,11 @@
             @if (showRefuser()) {
               <button type="button" class="dsh__btn dsh__btn--ghost" (click)="emitAction('REFUSER')">
                 Refuser
+              </button>
+            }
+            @if (showCreerChantier()) {
+              <button type="button" class="dsh__btn dsh__btn--ghost" (click)="emitAction('CREER_CHANTIER')">
+                Créer le chantier
               </button>
             }
             @if (showCta()) {

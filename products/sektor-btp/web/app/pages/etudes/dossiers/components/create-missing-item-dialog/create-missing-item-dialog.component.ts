@@ -8,6 +8,10 @@ import { ButtonComponent } from '@lib/anatomy';
 import type { DpuComposantType } from '@app/etudes/models';
 import { ItemsApiService } from '@app/pages/inventory/catalogue/items/services/item-api.service';
 import { ItemPricesApiService } from '@app/pages/inventory/catalogue/item-prices/services/item-price-api.service';
+import type { ItemPriceCreate } from '@app/pages/inventory/catalogue/item-prices/models';
+import { CurrenciesApiService } from '@app/pages/finance/configuration/currencies/services/currency-api.service';
+
+export type CreateMissingItemMode = 'catalogue' | 'poste';
 
 export interface CreateMissingItemDialogData {
   designation: string;
@@ -15,10 +19,12 @@ export interface CreateMissingItemDialogData {
   unite: string;
   rendement: number;
   uniteOptions: { code: string; id?: string }[];
+  /** catalogue = créer item + tarif ; poste = composant manuel uniquement. */
+  mode?: CreateMissingItemMode;
 }
 
 export interface CreateMissingItemDialogResult {
-  itemId: string;
+  itemId?: string;
   code?: string;
   name: string;
   type: DpuComposantType;
@@ -41,7 +47,7 @@ const TYPES: { value: DpuComposantType; label: string }[] = [
   template: `
     <div class="dialog-shell">
       <header>
-        <h2>Créer dans le catalogue</h2>
+        <h2>{{ isCatalogue() ? 'Créer dans le catalogue' : 'Ajouter au poste' }}</h2>
         <nf-button variant="ghost" (clicked)="close()" aria-label="Fermer">✕</nf-button>
       </header>
 
@@ -70,7 +76,7 @@ const TYPES: { value: DpuComposantType; label: string }[] = [
       </div>
 
       <label class="field">
-        <span>Prix unitaire (tarif) *</span>
+        <span>{{ isCatalogue() ? 'Prix unitaire (tarif)' : 'Prix unitaire' }} *</span>
         <input name="prix" type="number" min="0" step="any" [(ngModel)]="prixUnitaire" required />
       </label>
 
@@ -86,7 +92,7 @@ const TYPES: { value: DpuComposantType; label: string }[] = [
           [disabled]="!canSave() || saving()"
           (clicked)="save()"
         >
-          Créer et tarifer
+          {{ isCatalogue() ? 'Créer et tarifer' : 'Ajouter au poste' }}
         </nf-button>
       </footer>
     </div>
@@ -147,6 +153,7 @@ export class CreateMissingItemDialogComponent {
   readonly data = inject<CreateMissingItemDialogData>(MAT_DIALOG_DATA);
   private readonly itemsApi = inject(ItemsApiService);
   private readonly pricesApi = inject(ItemPricesApiService);
+  private readonly currenciesApi = inject(CurrenciesApiService);
 
   readonly types = TYPES;
   readonly saving = signal(false);
@@ -161,6 +168,10 @@ export class CreateMissingItemDialogComponent {
     'U';
   prixUnitaire = '0';
 
+  isCatalogue(): boolean {
+    return (this.data.mode ?? 'catalogue') === 'catalogue';
+  }
+
   canSave(): boolean {
     const p = Number.parseFloat(String(this.prixUnitaire).replace(',', '.'));
     return !!this.name.trim() && !!this.unite.trim() && Number.isFinite(p) && p >= 0;
@@ -171,6 +182,19 @@ export class CreateMissingItemDialogComponent {
     this.saving.set(true);
     this.erreur.set(undefined);
     const prix = Number.parseFloat(String(this.prixUnitaire).replace(',', '.'));
+
+    if (!this.isCatalogue()) {
+      this.dialogRef.close({
+        name: this.name.trim(),
+        type: this.type,
+        unite: this.unite,
+        prixUnitaire: prix,
+        sourcePrix: 'MANUEL',
+      });
+      this.saving.set(false);
+      return;
+    }
+
     const uom = this.data.uniteOptions.find((u) => u.code === this.unite);
     try {
       const item = await this.itemsApi.create({
@@ -181,12 +205,15 @@ export class CreateMissingItemDialogComponent {
         code: undefined,
       });
       const today = new Date().toISOString().slice(0, 10);
-      await this.pricesApi.create({
+      const currencyId = await this.resolveReferenceCurrencyId();
+      const payload: ItemPriceCreate = {
         itemId: item.id,
         priceType: 'ACHAT_STANDARD',
+        currencyId,
         unitPrice: prix,
         effectiveFrom: today,
-      } as Parameters<ItemPricesApiService['create']>[0]);
+      };
+      await this.pricesApi.create(payload);
       this.dialogRef.close({
         itemId: item.id,
         code: item.code,
@@ -204,6 +231,19 @@ export class CreateMissingItemDialogComponent {
     } finally {
       this.saving.set(false);
     }
+  }
+
+  private async resolveReferenceCurrencyId(): Promise<string> {
+    const page = await this.currenciesApi.getAll({ page: 0, pageSize: 100 });
+    const items = page.items as Array<{ id: string; code?: string; isReference?: boolean }>;
+    const ref =
+      items.find((c) => c.isReference === true)
+      ?? items.find((c) => (c.code ?? '').toUpperCase() === 'MAD')
+      ?? items[0];
+    if (!ref?.id) {
+      throw { error: { message: 'Aucune devise de référence trouvée.' } };
+    }
+    return ref.id;
   }
 
   close(): void {

@@ -107,6 +107,11 @@ public class ApprovalRequest {
 
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = OffsetDateTime.now();
+        OffsetDateTime now = OffsetDateTime.now();
+        // Répare les anciennes demandes créées avant que created_at soit obligatoire.
+        if (createdAt == null) {
+            createdAt = now;
+        }
+        updatedAt = now;
     }
 }

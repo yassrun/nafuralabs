@@ -182,7 +182,18 @@ export class NfSelectComponent implements ControlValueAccessor, OnChanges, OnIni
     } else {
       this.displayOptions.set(opts);
     }
-    this.cdr.markForCheck();
+    // Recreating <option> nodes resets the native <select> to the placeholder.
+    // Re-assert the bound value on the next microtask so the selection sticks.
+    if (current) {
+      queueMicrotask(() => {
+        if (this.value() !== current) return;
+        this.value.set('');
+        this.value.set(current);
+        this.cdr.markForCheck();
+      });
+    } else {
+      this.cdr.markForCheck();
+    }
   }
 }
 

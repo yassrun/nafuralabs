@@ -232,6 +232,11 @@ public class DpgfService {
                 .quantite(dto.getQuantite())
                 .unite(trimOrNull(dto.getUnite()))
                 .descriptif(trimOrNull(dto.getDescriptif()))
+                // Structure only — ignore any prices from the source bordereau.
+                // Pricing belongs to décomposition / chiffrage.
+                .prixUnitaire(null)
+                .prixFourniBase(null)
+                .total(null)
                 .mode(DpgfNoeud.TYPE_ARTICLE.equals(type) ? DpgfNoeud.MODE_FOURNI : null)
                 .ordre(dto.getOrdre() != null ? dto.getOrdre() : ordre)
                 .build();

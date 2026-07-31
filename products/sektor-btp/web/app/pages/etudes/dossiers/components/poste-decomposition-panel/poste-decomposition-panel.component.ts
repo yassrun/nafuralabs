@@ -27,6 +27,7 @@ import { UnitOfMeasuresApiService } from '@app/pages/inventory/configuration/uni
 import { DpgfApiService } from '../../../metres/services/dpgf-api.service';
 import { DossierEtudeApiService } from '../../services/dossier-etude-api.service';
 import type { DecompositionComposantMatched } from '../../services/dossier-etude-api.service';
+import { DecompositionProposeCache } from '../../services/decomposition-propose.cache';
 
 import type { BordereauTreeRow } from '../../utils/bordereau-tree.util';
 import {
@@ -38,9 +39,9 @@ import { buildComposantDirtyKey } from '../../utils/poste-dirty.util';
 import { toUniteOptions, type UniteOption } from '../../utils/unite-options.util';
 import { CpsDescriptifDialogComponent } from '../cps-descriptif-dialog/cps-descriptif-dialog.component';
 import {
-  DecompositionSuggestionDialogComponent,
-  type DecompositionSuggestionDialogResult,
-} from '../decomposition-suggestion-dialog/decomposition-suggestion-dialog.component';
+  CreateMissingItemDialogComponent,
+  type CreateMissingItemDialogResult,
+} from '../create-missing-item-dialog/create-missing-item-dialog.component';
 import {
   PosteChiffrageDialogComponent,
   type PosteChiffrageDialogResult,
@@ -89,6 +90,7 @@ export class PosteDecompositionPanelComponent {
   private readonly dpuMath = inject(DpuService);
   private readonly dpgfApi = inject(DpgfApiService);
   private readonly dossierApi = inject(DossierEtudeApiService);
+  private readonly proposeCache = inject(DecompositionProposeCache);
   private readonly uomApi = inject(UnitOfMeasuresApiService);
   private readonly dialog = inject(MatDialog);
   private readonly confirmDialog = inject(ConfirmDialogService);
@@ -124,6 +126,8 @@ export class PosteDecompositionPanelComponent {
   readonly sauvegarde = signal(false);
   readonly propositionCps = signal(false);
   readonly extractionComposants = signal(false);
+  readonly composantsIaIds = signal<Set<string>>(new Set());
+  readonly composantsLabels = signal<Map<string, string>>(new Map());
   readonly erreur = signal<string | undefined>(undefined);
   readonly statut = signal<'idle' | 'saved'>('idle');
 
@@ -204,6 +208,8 @@ export class PosteDecompositionPanelComponent {
         this.commentaire.set(comment);
         this.commentInitial.set(comment);
         this.composantsBrouillon.set([]);
+        this.composantsIaIds.set(new Set());
+        this.composantsLabels.set(new Map());
         this.fgDecomposeBrouillon.set(null);
         this.margeDecomposeBrouillon.set(null);
         this.modeLocal.set(
@@ -224,6 +230,8 @@ export class PosteDecompositionPanelComponent {
         this.commentaire.set('');
         this.commentInitial.set('');
         this.composantsBrouillon.set([]);
+        this.composantsIaIds.set(new Set());
+        this.composantsLabels.set(new Map());
         this.fgDecomposeBrouillon.set(null);
         this.margeDecomposeBrouillon.set(null);
         this.modeLocal.set(null);
@@ -297,37 +305,37 @@ export class PosteDecompositionPanelComponent {
     const poste = this.poste();
     const dossierId = this.dossierId();
     if (!poste?.id || !dossierId) return;
+    const articleId = poste.id;
 
     this.extractionComposants.set(true);
     this.erreur.set(undefined);
     try {
-      const propose = await this.dossierApi.proposerDecomposition(
-        dossierId,
-        poste.id,
-        this.cpsDocumentId(),
-      );
+      const cpsId = this.cpsDocumentId();
+      const loader = () =>
+        this.dossierApi.proposerDecomposition(dossierId, articleId, cpsId);
+      const propose = await this.proposeCache.getOrLoad(dossierId, articleId, cpsId, loader);
       if (!propose || (!(propose.matched?.length) && !(propose.missing?.length))) {
         this.toast.info('Aucun composant détecté pour cet article.');
         return;
       }
 
-      const ref = this.dialog.open(DecompositionSuggestionDialogComponent, {
-        width: 'min(40rem, 94vw)',
-        autoFocus: false,
-        restoreFocus: true,
-        data: {
-          code: poste.code ?? '',
-          libelle: poste.libelle ?? '',
-          propose,
-          uniteOptions: this.uniteOptions(),
-        },
-      });
-      const result = (await firstValueFrom(
-        ref.afterClosed(),
-      )) as DecompositionSuggestionDialogResult | null;
-      if (!result?.selected?.length) return;
-
-      await this.appliquerSuggestions(result.selected);
+      const suggestions: DecompositionComposantMatched[] = [
+        ...(propose.matched ?? []),
+        ...(propose.missing ?? []).map((row) => ({
+          type: row.type,
+          name: row.designation,
+          unite: row.unite,
+          rendement: row.rendement,
+          prixUnitaire: 0,
+          sourcePrix: 'MANUEL',
+          confiance: row.confiance,
+          suggereParIa: true,
+        })),
+      ];
+      // L'application des suggestions passe le poste en mode DECOMPOSE.
+      // Ne pas laisser le verrou "extraction en cours" bloquer cette mutation interne.
+      this.extractionComposants.set(false);
+      await this.appliquerSuggestions(suggestions, true);
     } catch (e) {
       this.erreur.set(this.msg(e, 'Impossible d’extraire les composants.'));
     } finally {
@@ -335,40 +343,113 @@ export class PosteDecompositionPanelComponent {
     }
   }
 
-  private async appliquerSuggestions(rows: DecompositionComposantMatched[]): Promise<void> {
+  private async appliquerSuggestions(
+    rows: DecompositionComposantMatched[],
+    depuisIa = false,
+  ): Promise<void> {
     if (!rows.length) return;
     if (!this.estDecompose()) {
       const ok = await this.passerEnDecomposition({ skipConfirm: true });
       if (!ok) return;
     }
     const existing = this.composants();
-    const existingIds = new Set(existing.map((c) => c.articleOuPosteId));
+    const existingKeys = new Set(
+      existing.map((c) => String(c.articleOuPosteId ?? '').trim().toLowerCase()).filter(Boolean),
+    );
     const added: ComposantDPU[] = [];
+    const iaIds = new Set(this.composantsIaIds());
+    const labels = new Map(this.composantsLabels());
     for (const row of rows) {
-      if (existingIds.has(row.itemId)) continue;
+      const key = (row.itemId || row.name || '').trim();
+      if (!key) continue;
+      if (existingKeys.has(key.toLowerCase())) continue;
       const quantite = Number(row.rendement ?? 1);
       const prixUnitaire = Number(row.prixUnitaire ?? 0);
+      const id = safeRandomUUID();
       added.push({
-        id: safeRandomUUID(),
+        id,
         type: (row.type as ComposantDPU['type']) || 'MATIERE',
-        articleOuPosteId: row.itemId,
+        articleOuPosteId: key,
         quantite,
         unite: row.unite || this.poste()?.unite || 'U',
         prixUnitaire,
         total: Math.round(Math.max(0, quantite) * Math.max(0, prixUnitaire) * 100) / 100,
-        sourcePrix: (row.sourcePrix as SourcePrixComposant) || 'TARIF',
+        sourcePrix: (row.sourcePrix as SourcePrixComposant) || (row.itemId ? 'TARIF' : 'MANUEL'),
         offreFournisseurId: null,
       });
+      if (depuisIa || row.suggereParIa) iaIds.add(id);
+      labels.set(id, row.name || key);
+      existingKeys.add(key.toLowerCase());
     }
     if (!added.length) {
       this.toast.info('Ces composants sont déjà présents dans la décomposition.');
       return;
     }
     this.composantsBrouillon.set(this.dpuMath.recomputeTotals([...existing, ...added]));
+    this.composantsIaIds.set(iaIds);
+    this.composantsLabels.set(labels);
     this.markDpuDirty();
     this.toast.success(
       `${added.length} composant${added.length > 1 ? 's' : ''} ajouté${added.length > 1 ? 's' : ''} — enregistrez le poste.`,
     );
+  }
+
+  estSuggereParIa(row: ComposantDPU): boolean {
+    return this.composantsIaIds().has(row.id);
+  }
+
+  libelleComposant(row: ComposantDPU): string {
+    return this.composantsLabels().get(row.id) ?? row.articleOuPosteId;
+  }
+
+  estComposantCatalogue(row: ComposantDPU): boolean {
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+      .test(row.articleOuPosteId);
+  }
+
+  async ajouterComposantAuCatalogue(row: ComposantDPU): Promise<void> {
+    if (!this.canMutate() || this.estComposantCatalogue(row)) return;
+    const ref = this.dialog.open(CreateMissingItemDialogComponent, {
+      width: '28rem',
+      autoFocus: false,
+      restoreFocus: true,
+      data: {
+        designation: row.articleOuPosteId,
+        type: row.type,
+        unite: row.unite,
+        rendement: row.quantite,
+        uniteOptions: this.uniteOptions(),
+        mode: 'catalogue',
+      },
+    });
+    const result = (await firstValueFrom(
+      ref.afterClosed(),
+    )) as CreateMissingItemDialogResult | null;
+    if (!result?.itemId) return;
+
+    this.composantsBrouillon.set(
+      this.dpuMath.recomputeTotals(
+        this.composants().map((component) =>
+          component.id === row.id
+            ? {
+                ...component,
+                articleOuPosteId: result.itemId!,
+                type: result.type,
+                unite: result.unite,
+                prixUnitaire: result.prixUnitaire,
+                sourcePrix: result.sourcePrix,
+              }
+            : component,
+        ),
+      ),
+    );
+    this.composantsLabels.update((current) => {
+      const next = new Map(current);
+      next.set(row.id, result.name);
+      return next;
+    });
+    this.markDpuDirty();
+    this.toast.success('Composant créé dans le catalogue et lié au poste.');
   }
 
   async saisirPrixFourni(): Promise<void> {
@@ -387,6 +468,11 @@ export class PosteDecompositionPanelComponent {
       if (!confirmed) return;
     }
 
+    const fgRate =
+      (this.fgFourniLocal() ?? 0) > 0 ? this.fgPct() : this.fgDefaut();
+    const margeRate =
+      (this.margeFourniLocal() ?? 0) > 0 ? this.margePct() : this.margeDefaut();
+
     const ref = this.dialog.open(PrixFourniDialogComponent, {
       width: '28rem',
       autoFocus: false,
@@ -397,16 +483,23 @@ export class PosteDecompositionPanelComponent {
         unite: poste.unite,
         quantite: poste.quantite,
         prixFourniBase: this.prixFourni(),
-        fraisGenerauxPercent: this.fgPct(),
-        margePercent: this.margePct(),
+        fraisGenerauxPercent: fgRate,
+        margePercent: margeRate,
+        appliquerFgMarge:
+          (this.fgFourniLocal() ?? 0) > 0 || (this.margeFourniLocal() ?? 0) > 0,
       },
     });
     const result = (await firstValueFrom(ref.afterClosed())) as PrixFourniDialogResult | null;
     if (!result) return;
 
     this.prixFourni.set(result.prixUnitaire);
-    this.fgFourniLocal.set(this.fgPct());
-    this.margeFourniLocal.set(this.margePct());
+    if (result.appliquerFgMarge) {
+      this.fgFourniLocal.set(fgRate);
+      this.margeFourniLocal.set(margeRate);
+    } else {
+      this.fgFourniLocal.set(0);
+      this.margeFourniLocal.set(0);
+    }
     this.modeLocal.set('FOURNI');
     this.markDpuDirty();
   }

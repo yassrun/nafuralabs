@@ -18,11 +18,12 @@
       (focus)="onFocus()"
       (blur)="onBlur()"
     >
-      <option value="" *ngIf="placeholder">{{ placeholder }}</option>
+      <option value="" *ngIf="placeholder" [disabled]="!!value()">{{ placeholder }}</option>
       <option
         *ngFor="let option of displayOptions()"
         [value]="option.value"
         [disabled]="option.disabled || false"
+        [selected]="option.value === value()"
       >
         {{ option.label }}
       </option>

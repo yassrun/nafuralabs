@@ -82,6 +82,15 @@
               row.type === 'ARTICLE' ? (row.quantite != null ? (row.quantite | number: '1.0-2') : '—') : ''
             }}</span>
           }
+          @case ('postes') {
+            <span class="arbre__num">{{
+              row.type === 'ARTICLE'
+                ? ''
+                : row.nombrePostes != null
+                  ? row.nombrePostes
+                  : '—'
+            }}</span>
+          }
           @case ('pu') {
             <span class="arbre__num">{{
               row.type === 'ARTICLE'

@@ -13,7 +13,7 @@
     [placeholder]="placeholder || ''"
     [disabled]="disabled"
     [required]="required"
-    [maxLength]="maxlength"
+    [attr.maxlength]="maxlength ?? null"
     [autocomplete]="autocomplete || 'off'"
     [attr.aria-invalid]="shouldShowError()"
     [attr.aria-required]="required"

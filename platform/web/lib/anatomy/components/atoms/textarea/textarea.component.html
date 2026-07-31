@@ -13,7 +13,7 @@
     [disabled]="disabled"
     [required]="required"
     [rows]="rows"
-    [maxLength]="maxlength"
+    [attr.maxlength]="maxlength ?? null"
     [attr.aria-invalid]="shouldShowError()"
     [attr.aria-required]="required"
     [attr.aria-describedby]="shouldShowError() ? id + '-error' : null"

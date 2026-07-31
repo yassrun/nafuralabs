@@ -240,6 +240,11 @@ public final class GatesEtude {
             List<DpgfNoeud> articles = contexte.articles();
             List<ProblemeGate> pbs = new ArrayList<>();
             for (DpgfNoeud a : articles) {
+                // Prix fourni : la décomposition (éventuelle) est un brouillon inactif —
+                // la consultation fournisseurs ne s'applique qu'aux articles décomposés.
+                if (DpgfNoeud.MODE_FOURNI.equals(a.getMode())) {
+                    continue;
+                }
                 if (a.getPrixDpuId() == null) {
                     continue;
                 }
@@ -285,6 +290,11 @@ public final class GatesEtude {
                 if (a.getPrixUnitaire() == null
                         || a.getPrixUnitaire().compareTo(BigDecimal.ZERO) <= 0) {
                     pbs.add(probleme(a, "etudes.gate.chiffrage.prix_absent"));
+                    continue;
+                }
+                // Prix fourni : FG/MG vivent sur le nœud (optionnels). Le DPU lié n'est
+                // qu'un brouillon — ne pas exiger ses taux.
+                if (DpgfNoeud.MODE_FOURNI.equals(a.getMode())) {
                     continue;
                 }
                 if (a.getPrixDpuId() == null) {

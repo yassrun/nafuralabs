@@ -75,6 +75,13 @@ public class ApprovalWorkflow {
 
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = OffsetDateTime.now();
+        OffsetDateTime now = OffsetDateTime.now();
+        // Répare aussi les lignes historiques créées avant que created_at soit obligatoire.
+        // Sans cela, le simple chargement/mise à jour du workflow ETUDE_PRIX fait échouer
+        // la soumission sur la contrainte NOT NULL.
+        if (createdAt == null) {
+            createdAt = now;
+        }
+        updatedAt = now;
     }
 }

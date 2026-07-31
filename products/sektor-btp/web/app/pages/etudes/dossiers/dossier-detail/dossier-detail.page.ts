@@ -24,7 +24,6 @@ import {
   DossierEtudeApiService,
   type DossierEtudeSynthese,
 } from '../services/dossier-etude-api.service';
-import type { ClientPartnerSelection } from '@app/shared/components/client-partner-select/client-partner-select.component';
 import {
   backendGateEtapesForUi,
   backendToUiEtape,
@@ -70,7 +69,6 @@ export class DossierDetailPage {
   readonly chargement = signal(true);
   readonly erreur = signal<string | undefined>(undefined);
   readonly posteDirty = signal(false);
-  readonly clientSaving = signal(false);
   /** Navigation locale en lecture seule (le backend refuse `allerAEtape`). */
   readonly etapeUiLecture = signal<number | undefined>(undefined);
   readonly focusNoeudId = toSignal(
@@ -256,30 +254,6 @@ export class DossierDetailPage {
     }
   }
 
-  async onClientChange(sel: ClientPartnerSelection): Promise<void> {
-    const dossier = this.dossier();
-    if (!dossier || !this.modifiable() || this.clientSaving()) return;
-    const currentId = dossier.clientId ?? null;
-    const nextId = sel.clientId;
-    if (currentId === nextId) return;
-
-    this.clientSaving.set(true);
-    this.erreur.set(undefined);
-    try {
-      const maj = await this.api.update(dossier.id, {
-        clientId: nextId ?? '',
-        version: dossier.version,
-      });
-      this.dossier.set(maj);
-      await this.refreshSynthese(dossier.id);
-    } catch (e) {
-      this.erreur.set(this.messageErreur(e));
-      await this.refreshSynthese(dossier.id);
-    } finally {
-      this.clientSaving.set(false);
-    }
-  }
-
   async soumettre(): Promise<void> {
     const dossier = this.dossier();
     if (!dossier || !this.modifiable()) return;
@@ -339,6 +313,15 @@ export class DossierDetailPage {
           const devisId = this.synthese()?.devisGenereId ?? dossier.devisGenereId;
           if (devisId) {
             void this.nav.navigate(['/etudes/devis', devisId]);
+          }
+          break;
+        }
+        case 'CREER_CHANTIER': {
+          const devisId = this.synthese()?.devisGenereId ?? dossier.devisGenereId;
+          if (devisId) {
+            void this.nav.navigate(['/chantiers/new'], {
+              queryParams: { devisId },
+            });
           }
           break;
         }

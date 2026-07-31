@@ -6,9 +6,7 @@
       <app-dossier-summary-header
         [synthese]="syn"
         [modifiable]="modifiable()"
-        [clientSaving]="clientSaving()"
         (action)="onHeaderAction($event)"
-        (clientChange)="onClientChange($event)"
       />
     } @else {
       <header class="dossier__entete">
