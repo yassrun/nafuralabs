@@ -28,6 +28,7 @@ import { TenantContextService } from '../../../../../core/tenant/tenant.context'
 import { DocTypeService } from '../../services/doc-type.service';
 import { DocTypeListItem, DocTypesByDomain, DomainListItem } from '../../models/doc-type-definition.model';
 import { FlipIconRtlDirective } from '../../../../../lib/anatomy/directives';
+import { humanizeDomainKey } from '../../utils/domain-label.util';
 
 interface RecentDocType {
   domainKey: string;
@@ -292,13 +293,7 @@ export class ExtractionEntryPage {
   }
 
   private getDomainLabel(domainKey: string): string {
-    const labelMap: Record<string, string> = {
-      'finance': 'Accounting & Finance',
-      'btp': 'Construction / BTP',
-      'logistic': 'Logistics',
-      'inventory': 'Inventory',
-    };
-    return labelMap[domainKey] || domainKey.charAt(0).toUpperCase() + domainKey.slice(1);
+    return humanizeDomainKey(domainKey);
   }
 
   private getDomainMetadata(domainKey: string): { description: string; icon: string; color: string } {
@@ -313,11 +308,6 @@ export class ExtractionEntryPage {
         icon: 'account_balance',
         color: '#4caf50',
       },
-      'btp': {
-        description: 'Construction documents, building permits, site reports.',
-        icon: 'construction',
-        color: '#ff9800',
-      },
       'inventory': {
         description: 'Stock management, warehouse documents.',
         icon: 'inventory_2',
@@ -326,7 +316,7 @@ export class ExtractionEntryPage {
     };
 
     return metadataMap[domainKey] || {
-      description: `Documents related to ${domainKey}.`,
+      description: `Documents related to ${humanizeDomainKey(domainKey)}.`,
       icon: 'folder',
       color: '#757575',
     };

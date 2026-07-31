@@ -1,12 +1,7 @@
 # Platform Features
 
-Reusable platform feature modules shared across applications.
+Reusable **platform** feature modules (IAM UI, collaboration, doc-extractor engine, AI shell, approvals, notifications, configuration).
 
-Structure:
-- `foundation/*`: shared foundational business capabilities (`geo`, `measurement`, `financial`).
-- `business/*`: core business capabilities (`item`, `inventory`, `partner`).
-- `administration/*`: control-plane capabilities (`tenant-admin`, `subscription`).
-- `configuration/*`: configuration capabilities (`settings`, `sysconfig`).
+**Not here:** product métier (chantiers, stock, achats, …). Own that under `products/<app-id>/web/app/features/`.
 
-Application-specific composition (pages/routes/facades) must remain under:
-- `web/app/applications/<app-id>/...`
+Application composition (routes, facades, domain pages): `products/<app-id>/web/app/`.

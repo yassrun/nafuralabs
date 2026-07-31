@@ -20,7 +20,7 @@ public class DefaultAssistantPromptProvider implements AssistantPromptProvider {
         - tenant_id is injected automatically — never filter tenant_id yourself.
         - Prefer COUNT(*) for totals; list key columns for listings.
         - Use ILIKE for case-insensitive text search.
-        - "chantiers actifs / en cours" means status = 'EN_COURS' (optionally is_active = true). Never filter with ACTIVE, ACTIF, or English status synonyms.
+        - Prefer status values from the schema/hints; do not invent synonyms for domain statuses.
         """;
 
     private static final String ACTION_PLANNER = """

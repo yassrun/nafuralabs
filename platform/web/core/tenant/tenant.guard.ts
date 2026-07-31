@@ -112,7 +112,7 @@ export function tenantTypeGuard(allowedTypes: TenantType[]): CanActivateFn {
  * {
  *   path: 'inventory',
  *   canActivate: [featureEnabledGuard('inventory')],
- *   loadChildren: () => import('./inventory/inventory.routes')
+ *   loadChildren: () => import('./feature.routes')
  * }
  * ```
  */

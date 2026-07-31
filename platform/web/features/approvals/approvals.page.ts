@@ -12,7 +12,7 @@ import { TabsComponent, TabItem } from '@lib/anatomy/components/molecules/tabs';
 import type { ApprovalRequestDto } from '@platform/features/collaboration/workflow/services/workflow-api.service';
 import { ApprovalsFacade } from './services/approvals-facade.service';
 import { ApprovalCommentDialogComponent } from './components/approval-comment-dialog.component';
-import { getEntityDetailRoute } from './config/entity-type-routes.config';
+import { getEntityDetailRoute, ENTITY_TYPE_ROUTE_PREFIX } from './config/entity-type-routes.config';
 
 @Component({
   selector: 'app-approvals-page',
@@ -218,6 +218,7 @@ export class ApprovalsPage implements OnInit {
   private readonly toast = inject(ToastService);
   private readonly translate = inject(TranslateService);
   private readonly router = inject(Router);
+  private readonly entityTypeRoutes = inject(ENTITY_TYPE_ROUTE_PREFIX);
 
   readonly activeTab = signal<'pending' | 'history'>('pending');
 
@@ -252,7 +253,7 @@ export class ApprovalsPage implements OnInit {
   }
 
   entityLink(row: ApprovalRequestDto): string[] {
-    return getEntityDetailRoute(row.entityType, row.entityId);
+    return getEntityDetailRoute(row.entityType, row.entityId, this.entityTypeRoutes);
   }
 
   relativeTime(iso: string): string {

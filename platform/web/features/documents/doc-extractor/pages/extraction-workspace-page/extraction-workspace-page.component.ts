@@ -39,6 +39,7 @@ import { ExtractionService } from '../../services/extraction.service';
 import { DocTypeDefinition, DocTypeListItem, DocTypesByDomain } from '../../models/doc-type-definition.model';
 import { ExtractedRecord, ExtractionDraft, ExtractionStatus, ExtractionValidation, StandardRecordFilters, RecordSearchRequest } from '../../models/extraction.model';
 import { ColumnResolver, ResolvedColumn } from '../../utils/column-resolver';
+import { humanizeDomainKey } from '../../utils/domain-label.util';
 import { DynamicRecordDialogComponent, DynamicRecordDialogResult } from '../../components/dynamic-record-dialog/dynamic-record-dialog.component';
 import { ExportResultDialogComponent, ExportResultData } from '../../components/export-result-dialog/export-result-dialog.component';
 import { RecordDatatableComponent, RecordTableAction } from '../../components/record-datatable/record-datatable.component';
@@ -623,13 +624,7 @@ export class ExtractionWorkspacePage implements OnInit {
 
 
   getDomainLabel(domainKey: string): string {
-    const labelMap: Record<string, string> = {
-      'finance': 'Accounting & Finance',
-      'btp': 'Construction / BTP',
-      'logistic': 'Logistics',
-      'inventory': 'Inventory',
-    };
-    return labelMap[domainKey] || domainKey.charAt(0).toUpperCase() + domainKey.slice(1);
+    return humanizeDomainKey(domainKey);
   }
 
   private openRecordDialog(

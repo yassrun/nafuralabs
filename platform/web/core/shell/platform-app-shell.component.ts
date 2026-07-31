@@ -39,6 +39,7 @@ import {
   AssistantLink,
 } from '../../features/ai/ai-conversation/services/conversation-api.service';
 import { ONBOARDING_WIDGETS_PORT, SHELL_EXTENSIONS } from './shell-extensions';
+import { PRODUCT_AI_DOMAIN_BY_SEGMENT } from '../application/product-shell.tokens';
 import { AssistantBlockRendererComponent } from '../../features/ai/ai-conversation/components/assistant-block-renderer.component';
 import {
   DEFAULT_PLATFORM_APP_SHELL_OPTIONS,
@@ -114,7 +115,7 @@ const LUCIDE_ICON_ALIASES: Record<string, string> = {
           </button>
 
           <div class="naf-shell__app-identity">
-            <!-- Brand lockup lives in the sidebar only; topbar shows page context to avoid duplicating "Nafura Sektor". -->
+            <!-- Brand lockup lives in the sidebar only; topbar shows page context. -->
             <span
               class="naf-shell__page-title"
               *ngIf="resolvedShellOptions().topbar.showPageTitle && currentPageLabel() !== applicationTitle()">
@@ -1697,6 +1698,7 @@ export class PlatformAppShellComponent implements OnInit {
   /** Emplacement 'header-tenant-switcher' — rempli par l'application, vide sinon. */
   private readonly shellExtensions = inject(SHELL_EXTENSIONS, { optional: true });
   private readonly onboardingWidgetsPort = inject(ONBOARDING_WIDGETS_PORT, { optional: true });
+  private readonly aiDomainBySegment = inject(PRODUCT_AI_DOMAIN_BY_SEGMENT);
   readonly headerExtensions = computed(() =>
     (this.shellExtensions ?? []).filter((e) => e.slot === 'header-tenant-switcher'),
   );
@@ -2336,18 +2338,7 @@ export class PlatformAppShellComponent implements OnInit {
   private resolveConversationDomainKey(): string | undefined {
     const path = this.currentUrl().split('?')[0].replace(/^\/+/, '');
     const segment = path.split('/')[0]?.toLowerCase();
-    const domainBySegment: Record<string, string> = {
-      chantiers: 'chantiers',
-      achats: 'achats',
-      ventes: 'ventes',
-      finance: 'finance',
-      inventory: 'stock',
-      hse: 'hse',
-      rh: 'rh',
-      etudes: 'etudes',
-      marches: 'marches',
-    };
-    return segment ? domainBySegment[segment] : undefined;
+    return segment ? this.aiDomainBySegment[segment] : undefined;
   }
 
   translateLabel(label: string | undefined): string {

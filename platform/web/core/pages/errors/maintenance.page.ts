@@ -11,7 +11,7 @@ import { CommonModule } from '@angular/common';
         <div class="maint-icon">🔧</div>
         <h1 class="maint-title">Maintenance en cours</h1>
         <p class="maint-body">
-          Nafura ERP est temporairement indisponible pour maintenance planifiée.
+          L'application est temporairement indisponible pour maintenance planifiée.
           Nous revenons très bientôt — merci de votre patience.
         </p>
         <div class="maint-eta">

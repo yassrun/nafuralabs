@@ -3,9 +3,9 @@ package ma.nafura.platform.documents.docextractor.domain.model.catalog;
 import java.util.List;
 
 /**
- * Canonical domain catalog (V1) for Doc-Extractor.
- * <p>
- * This is intentionally code-only (no DB table) to keep seeds/UI filters aligned without schema changes.
+ * Generic domain catalog for Doc-Extractor UI filters.
+ * Product-specific domains (btp, chantiers, achats, …) are seeded as values on
+ * document types by the product Liquibase data — not hard-coded here.
  */
 public final class DomainCatalog {
 
@@ -14,21 +14,13 @@ public final class DomainCatalog {
     public record Domain(String key, String label) {}
 
     /**
-     * V1 supported domains (canonical keys).
-     * - finance: Accounting & Finance
-     * - btp: Construction / BTP
-     * - logistic: Logistics
-     * - inventory: Inventory
+     * Baseline cross-product domains. Additional keys appear from seeded doc types.
      */
     public static List<Domain> v1() {
         return List.of(
                 new Domain("finance", "Accounting & Finance"),
-                new Domain("btp", "Construction / BTP"),
-                new Domain("achats", "Purchasing / Achats"),
                 new Domain("logistic", "Logistics"),
-                new Domain("inventory", "Inventory"),
-                new Domain("chantiers", "Construction sites")
+                new Domain("inventory", "Inventory")
         );
     }
 }
-

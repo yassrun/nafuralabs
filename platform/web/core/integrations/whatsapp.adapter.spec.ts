@@ -1,17 +1,39 @@
 import { TestBed } from '@angular/core/testing';
 
+import { PRODUCT_WHATSAPP_TEMPLATES } from '../application/product-shell.tokens';
 import { WhatsAppNotificationAdapter } from './whatsapp.adapter';
+
+const TEST_TEMPLATES = {
+  APPROBATION_DEMANDE: {
+    category: 'UTILITY' as const,
+    bodyFr:
+      'Bonjour {{nom}}, une demande d approbation {{type}} {{reference}} pour {{montant}} MAD attend votre validation.',
+    requiredVars: ['nom', 'type', 'reference', 'montant'],
+  },
+  RELANCE_FACTURE_J15: {
+    category: 'UTILITY' as const,
+    bodyFr: 'Facture {{reference}}',
+    requiredVars: ['client', 'reference', 'montant', 'echeance'],
+  },
+  POINTAGE_RAPPEL: {
+    category: 'UTILITY' as const,
+    bodyFr: 'Pointage {{date}} avant {{deadline}}',
+    requiredVars: ['date', 'deadline'],
+  },
+};
 
 describe('WhatsAppNotificationAdapter', () => {
   let svc: WhatsAppNotificationAdapter;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({
+      providers: [{ provide: PRODUCT_WHATSAPP_TEMPLATES, useValue: TEST_TEMPLATES }],
+    });
     svc = TestBed.inject(WhatsAppNotificationAdapter);
   });
 
-  it('liste 8 templates pré-validés', () => {
-    expect(svc.listTemplates().length).toBe(8);
+  it('liste les templates fournis par le produit', () => {
+    expect(svc.listTemplates().length).toBe(3);
   });
 
   it('validate retourne erreurs si variables manquantes', () => {

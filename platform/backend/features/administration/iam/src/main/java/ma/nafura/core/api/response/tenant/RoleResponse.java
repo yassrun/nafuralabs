@@ -5,32 +5,19 @@ import java.util.Locale;
 
 /**
  * Role response DTO for tenant membership.
- * Represents a user's role within a tenant.
+ * Product-specific roles fall through to the generic custom-role branch;
+ * display metadata should come from seed / DB when available.
  */
 public record RoleResponse(
-    /** Unique role identifier (e.g., "OWNER", "ADMIN", "MEMBER") */
     String id,
-
-    /** Human-readable role name */
     String name,
-
-    /** Role description */
     String description,
-
-    /** Permissions granted by this role */
     List<String> permissions,
-
-    /** Is this a system-defined role (non-editable) */
     boolean isSystem,
-
-    /** Role priority (higher = more privileged) */
     int priority,
-
-    /** Number of members assigned to this role */
     long memberCount,
-
     /**
-     * Scope family: CHANTIER (affectable per site), ENTREPRISE (tenant-wide), BOTH.
+     * Scope family: SITE / ENTREPRISE / BOTH (product may use CHANTIER as SITE synonym in seeds).
      */
     String scopeType
 ) {
@@ -108,36 +95,9 @@ public record RoleResponse(
                 memberCount,
                 scope
             );
-            case "BTP_DG" -> new RoleResponse(
-                "BTP_DG", "Direction générale", "BTP — Direction générale",
-                permissions, true, 95, memberCount, scope);
-            case "BTP_DAF" -> new RoleResponse(
-                "BTP_DAF", "DAF", "BTP — Direction administrative et financière",
-                permissions, true, 90, memberCount, scope);
-            case "BTP_DIRECTEUR_TRAVAUX" -> new RoleResponse(
-                "BTP_DIRECTEUR_TRAVAUX", "Directeur travaux", "BTP — Directeur travaux (multi-chantiers)",
-                permissions, true, 75, memberCount, scope);
-            case "BTP_CONDUCTEUR_TRAVAUX" -> new RoleResponse(
-                "BTP_CONDUCTEUR_TRAVAUX", "Conducteur de travaux", "BTP — Conducteur de travaux",
-                permissions, true, 70, memberCount, scope);
-            case "BTP_CHEF_CHANTIER" -> new RoleResponse(
-                "BTP_CHEF_CHANTIER", "Chef de chantier", "BTP — Chef de chantier",
-                permissions, true, 55, memberCount, scope);
-            case "BTP_CHEF_EQUIPE" -> new RoleResponse(
-                "BTP_CHEF_EQUIPE", "Chef d'équipe", "BTP — Chef d'équipe",
-                permissions, true, 45, memberCount, scope);
-            case "BTP_MAGASINIER" -> new RoleResponse(
-                "BTP_MAGASINIER", "Magasinier", "BTP — Magasinier",
-                permissions, true, 35, memberCount, scope);
-            case "BTP_POINTEUR" -> new RoleResponse(
-                "BTP_POINTEUR", "Pointeur", "BTP — Pointeur",
-                permissions, true, 30, memberCount, scope);
-            case "BTP_INGENIEUR" -> new RoleResponse(
-                "BTP_INGENIEUR", "Ingénieur", "BTP — Ingénieur chantier",
-                permissions, true, 50, memberCount, scope);
             default -> new RoleResponse(
                 code,
-                role,
+                humanize(code),
                 "Custom role",
                 permissions,
                 false,
@@ -152,12 +112,11 @@ public record RoleResponse(
         if (roleCode == null) {
             return "ENTREPRISE";
         }
-        return switch (roleCode.toUpperCase(Locale.ROOT)) {
-            case "BTP_CONDUCTEUR_TRAVAUX", "BTP_CHEF_CHANTIER", "BTP_CHEF_EQUIPE", "BTP_INGENIEUR"
-                    -> "CHANTIER";
-            case "BTP_DIRECTEUR_TRAVAUX", "BTP_MAGASINIER", "BTP_POINTEUR"
-                    -> "BOTH";
-            default -> "ENTREPRISE";
-        };
+        // Product-specific scopes live in seed metadata; platform defaults to tenant-wide.
+        return "ENTREPRISE";
+    }
+
+    private static String humanize(String code) {
+        return code.replace('_', ' ').toLowerCase(Locale.ROOT);
     }
 }

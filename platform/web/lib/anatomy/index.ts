@@ -35,7 +35,7 @@ export * from './types';
 
 export { buildRouteBreadcrumbs } from './utils/route-breadcrumb.util';
 
-export { CHANTIER_ROW_NAVIGATOR } from './tokens/chantier-row-navigator.token';
+export { ENTITY_ROW_NAVIGATOR, CHANTIER_ROW_NAVIGATOR } from './tokens/entity-row-navigator.token';
 export { LOOKUP_LIST_ROUTES } from './tokens/lookup-list-routes.token';
 export { LOOKUP_CREATE_ROUTES } from './tokens/lookup-create-routes.token';
 export {

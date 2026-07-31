@@ -18,6 +18,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 
 import { DocTypeListItem, DocTypesByDomain } from '../../models/doc-type-definition.model';
+import { humanizeDomainKey } from '../../utils/domain-label.util';
 
 export interface DocumentTypePickerData {
   docTypesByDomain: DocTypesByDomain;
@@ -74,13 +75,7 @@ export class DocumentTypePickerComponent {
    * Get domain label for display.
    */
   getDomainLabel(domainKey: string): string {
-    const labelMap: Record<string, string> = {
-      'finance': 'Accounting & Finance',
-      'btp': 'Construction / BTP',
-      'logistic': 'Logistics',
-      'inventory': 'Inventory',
-    };
-    return labelMap[domainKey] || domainKey.charAt(0).toUpperCase() + domainKey.slice(1);
+    return humanizeDomainKey(domainKey);
   }
 
   /**
@@ -90,7 +85,6 @@ export class DocumentTypePickerComponent {
     const iconMap: Record<string, string> = {
       'logistic': 'local_shipping',
       'finance': 'account_balance',
-      'btp': 'construction',
       'inventory': 'inventory_2',
     };
     return iconMap[domainKey] || 'folder';

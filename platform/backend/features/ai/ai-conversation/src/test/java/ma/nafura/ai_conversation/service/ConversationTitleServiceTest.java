@@ -40,7 +40,7 @@ class ConversationTitleServiceTest {
     @Test
     void sanitizeTitle_stripsQuotesAndTruncates() {
         String longTitle = "A".repeat(300);
-        assertEquals("Budget chantiers actifs", ConversationTitleService.sanitizeTitle("\"Budget chantiers actifs\""));
+        assertEquals("Budget items actifs", ConversationTitleService.sanitizeTitle("\"Budget items actifs\""));
         assertEquals(255, ConversationTitleService.sanitizeTitle(longTitle).length());
     }
 
@@ -63,18 +63,18 @@ class ConversationTitleServiceTest {
         session.setId(UUID.randomUUID());
 
         when(llmService.callLlm(any(), any())).thenReturn(CompletableFuture.completedFuture(
-            responseWithContent("Chantiers actifs au Maroc")
+            responseWithContent("Items actifs au Maroc")
         ));
         when(sessionRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         ConversationSession result = service.maybeGenerateTitle(
             session,
-            "Combien de chantiers actifs ?",
+            "Combien d'items actifs ?",
             "Il y en a 1.",
             LlmCallContext.builder().idempotencyKey("conv:msg").build()
         );
 
-        assertEquals("Chantiers actifs au Maroc", result.getTitle());
+        assertEquals("Items actifs au Maroc", result.getTitle());
         verify(sessionRepository).save(session);
     }
 

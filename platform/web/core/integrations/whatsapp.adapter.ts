@@ -1,5 +1,9 @@
 import { Injectable, inject, signal } from '@angular/core';
 
+import {
+  PRODUCT_WHATSAPP_TEMPLATES,
+  type WhatsAppTemplateDef,
+} from '../application/product-shell.tokens';
 import { INTEGRATION_AUDIT_PORT } from './audit.port';
 
 import {
@@ -11,93 +15,17 @@ import {
   type NotificationChannelAdapter,
 } from './integration.types';
 
+export type { WhatsAppTemplateDef };
+
 /**
- * Adaptateur WhatsApp Business — notifications (M-INT-09).
- *
- * Différenciateur fort sur le marché MA (usage WhatsApp First).
- * Provider Meta Cloud API ou tiers (Twilio, MessageBird).
- *
- * Cas d'usage :
- *  - Approbation à valider (§12 M-APR-07)
- *  - Alerte incident HSE (§10)
- *  - Relance facture en retard (§08 M-FIN-02)
- *  - Notification livraison BC
+ * Adaptateur WhatsApp Business — notifications.
+ * Templates métier fournis par le produit via `PRODUCT_WHATSAPP_TEMPLATES`.
  */
-
-/** Templates messages validés Meta. */
-export type WhatsAppTemplateKey =
-  | 'APPROBATION_DEMANDE'
-  | 'APPROBATION_RAPPEL'
-  | 'INCIDENT_HSE_AT'
-  | 'RELANCE_FACTURE_J15'
-  | 'RELANCE_FACTURE_J30'
-  | 'RELANCE_FACTURE_J45'
-  | 'LIVRAISON_BC'
-  | 'POINTAGE_RAPPEL';
-
-interface TemplateDef {
-  /** Catégorie Meta. */
-  category: 'UTILITY' | 'AUTHENTICATION' | 'MARKETING';
-  /** Modèle FR (variables `{{key}}`). */
-  bodyFr: string;
-  /** Variables attendues (lowerCamel). */
-  requiredVars: string[];
-}
-
-const TEMPLATES: Record<WhatsAppTemplateKey, TemplateDef> = {
-  APPROBATION_DEMANDE: {
-    category: 'UTILITY',
-    bodyFr:
-      'Bonjour {{nom}}, une demande d approbation {{type}} {{reference}} pour {{montant}} MAD attend votre validation.',
-    requiredVars: ['nom', 'type', 'reference', 'montant'],
-  },
-  APPROBATION_RAPPEL: {
-    category: 'UTILITY',
-    bodyFr:
-      'Rappel : la demande {{reference}} est en attente de votre validation depuis {{joursOuverture}} jour(s).',
-    requiredVars: ['reference', 'joursOuverture'],
-  },
-  INCIDENT_HSE_AT: {
-    category: 'UTILITY',
-    bodyFr:
-      'Alerte HSE : accident du travail {{reference}} déclaré sur le chantier {{chantier}}. Déclaration CNSS DAT à effectuer avant {{deadline}}.',
-    requiredVars: ['reference', 'chantier', 'deadline'],
-  },
-  RELANCE_FACTURE_J15: {
-    category: 'UTILITY',
-    bodyFr:
-      'Bonjour {{client}}, votre facture {{reference}} de {{montant}} MAD est arrivée à échéance le {{echeance}}. Merci de procéder au règlement.',
-    requiredVars: ['client', 'reference', 'montant', 'echeance'],
-  },
-  RELANCE_FACTURE_J30: {
-    category: 'UTILITY',
-    bodyFr:
-      'Bonjour {{client}}, votre facture {{reference}} ({{montant}} MAD) reste impayée depuis 30 jours. Merci de régulariser sous huitaine.',
-    requiredVars: ['client', 'reference', 'montant'],
-  },
-  RELANCE_FACTURE_J45: {
-    category: 'UTILITY',
-    bodyFr:
-      'Bonjour {{client}}, votre facture {{reference}} ({{montant}} MAD) est en retard de 45 jours. Une mise en demeure va vous être adressée.',
-    requiredVars: ['client', 'reference', 'montant'],
-  },
-  LIVRAISON_BC: {
-    category: 'UTILITY',
-    bodyFr:
-      'Bonjour, la commande {{reference}} sera livrée le {{dateLivraison}} sur le chantier {{chantier}}.',
-    requiredVars: ['reference', 'dateLivraison', 'chantier'],
-  },
-  POINTAGE_RAPPEL: {
-    category: 'UTILITY',
-    bodyFr:
-      'Rappel pointage : merci de saisir votre pointage du {{date}} avant {{deadline}}.',
-    requiredVars: ['date', 'deadline'],
-  },
-};
 
 @Injectable({ providedIn: 'root' })
 export class WhatsAppNotificationAdapter implements NotificationChannelAdapter {
   private readonly audit = inject(INTEGRATION_AUDIT_PORT);
+  private readonly templates = inject(PRODUCT_WHATSAPP_TEMPLATES);
 
   readonly mode = signal<IntegrationMode>('MOCK');
   readonly auth = signal<IntegrationAuthConfig>({
@@ -109,38 +37,29 @@ export class WhatsAppNotificationAdapter implements NotificationChannelAdapter {
     if (auth) this.auth.set(auth);
   }
 
-  /** Liste les templates disponibles (pour UI admin). */
-  listTemplates(): Array<{ key: WhatsAppTemplateKey; def: TemplateDef }> {
-    return (Object.keys(TEMPLATES) as WhatsAppTemplateKey[]).map((k) => ({ key: k, def: TEMPLATES[k] }));
+  listTemplates(): Array<{ key: string; def: WhatsAppTemplateDef }> {
+    return Object.keys(this.templates).map((k) => ({ key: k, def: this.templates[k] }));
   }
 
-  /** Validation : toutes les variables requises présentes. */
-  validate(template: WhatsAppTemplateKey, variables: Record<string, string>): string[] {
-    const def = TEMPLATES[template];
+  validate(template: string, variables: Record<string, string>): string[] {
+    const def = this.templates[template];
     if (!def) return [`Template inconnu : ${template}`];
     const missing = def.requiredVars.filter((v) => !variables[v] || variables[v].trim() === '');
     return missing.length === 0 ? [] : missing.map((m) => `Variable manquante : ${m}`);
   }
 
-  /** Construit le message final FR (interpolation `{{var}}`). */
-  renderMessage(template: WhatsAppTemplateKey, variables: Record<string, string>): string {
-    const def = TEMPLATES[template];
+  renderMessage(template: string, variables: Record<string, string>): string {
+    const def = this.templates[template];
     if (!def) return '';
     return def.bodyFr.replace(/\{\{(\w+)\}\}/g, (_, key) => variables[key] ?? `{{${key}}}`);
   }
 
-  /**
-   * Envoi unitaire — implémente `NotificationChannelAdapter`.
-   * MOCK : log audit + accusé local.
-   * PROD : POST Meta Cloud API (à brancher).
-   */
   async envoyerNotification(
     destinataire: string,
     template: string,
     variables: Record<string, string>,
   ): Promise<IntegrationCallResult> {
-    const key = template as WhatsAppTemplateKey;
-    const errors = this.validate(key, variables);
+    const errors = this.validate(template, variables);
     if (errors.length > 0) {
       return {
         status: 'ECHEC',
@@ -159,7 +78,7 @@ export class WhatsAppNotificationAdapter implements NotificationChannelAdapter {
       };
     }
     await delay(60);
-    const body = this.renderMessage(key, variables);
+    const body = this.renderMessage(template, variables);
     const ticket = buildMockAccuse('WA');
     this.audit.log(
       'EXPORT',

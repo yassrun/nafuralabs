@@ -21,7 +21,7 @@ class AssistantBlockComposerTest {
                 .payload(Map.of(
                         "count", 12L,
                         "metric", "Articles en stock",
-                        "route", "/inventory/stock"
+                        "route", "/catalog/items"
                 ))
                 .build();
 

@@ -30,7 +30,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { CHANTIER_ROW_NAVIGATOR } from '../../tokens/chantier-row-navigator.token';
+import { ENTITY_ROW_NAVIGATOR } from '../../tokens/entity-row-navigator.token';
 import { ToastService } from './toast.service';
 import { ConfirmDialogService } from './confirm-dialog.service';
 import type {
@@ -76,7 +76,7 @@ export class ListingActionHandler {
   private readonly toast = inject(ToastService);
   private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly translate = inject(TranslateService);
-  private readonly chantierRowNavigator = inject(CHANTIER_ROW_NAVIGATOR, { optional: true });
+  private readonly entityRowNavigator = inject(ENTITY_ROW_NAVIGATOR, { optional: true });
 
   /**
    * Handle a listing action event.
@@ -162,9 +162,10 @@ export class ListingActionHandler {
           if (onSuccess) await onSuccess();
           return true;
 
-        case 'openChantier':
-          if (event.item && this.chantierRowNavigator) {
-            return this.chantierRowNavigator(event.item);
+        case 'openEntity':
+        case 'openChantier': // @deprecated — use openEntity
+          if (event.item && this.entityRowNavigator) {
+            return this.entityRowNavigator(event.item);
           }
           return false;
 

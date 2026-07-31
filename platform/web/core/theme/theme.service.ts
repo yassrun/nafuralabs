@@ -7,6 +7,8 @@ import { Injectable, inject, signal } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { DOCUMENT } from '@angular/common';
 
+import { PRODUCT_DISPLAY_NAME } from '../application/product-shell.tokens';
+
 const DEFAULT_PRIMARY = '#1b3fae';
 
 /** Minimal branding shape used by shell and settings (same as API). */
@@ -141,6 +143,7 @@ export function contrastText(hex: string): string {
 export class ThemeService {
   private readonly title = inject(Title);
   private readonly document = inject(DOCUMENT);
+  private readonly productDisplayName = inject(PRODUCT_DISPLAY_NAME);
 
   readonly defaultPrimary = DEFAULT_PRIMARY;
 
@@ -160,7 +163,7 @@ export class ThemeService {
    * Met à jour l’onglet du navigateur et le favicon (Task 15.1).
    */
   applyDocumentChrome(b: TenantBranding | null): void {
-    const base = 'Sektor';
+    const base = this.productDisplayName;
     const name = b?.tenantDisplayName?.trim();
     this.title.setTitle(name ? `${base} — ${name}` : base);
     const link = this.document.querySelector<HTMLLinkElement>('link[rel="icon"]');

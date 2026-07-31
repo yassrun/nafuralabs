@@ -33,6 +33,7 @@ import { ExtractedRecord, ExtractionDraft, ExtractionStatus, StandardRecordFilte
 import { DocTypeService } from '../../services/doc-type.service';
 import { ExtractionService } from '../../services/extraction.service';
 import { ColumnResolver, ResolvedColumn } from '../../utils/column-resolver';
+import { humanizeDomainKey } from '../../utils/domain-label.util';
 import { DynamicRecordDialogComponent, DynamicRecordDialogResult } from '../dynamic-record-dialog/dynamic-record-dialog.component';
 import { ExportResultDialogComponent, ExportResultData } from '../export-result-dialog/export-result-dialog.component';
 import { TenantContextService } from '../../../../../core/tenant/tenant.context';
@@ -107,18 +108,11 @@ export class DocExtractionWorkspaceComponent {
     const byDomain = this.docTypesByDomain();
     if (!byDomain) return [];
     
-    // Map domain keys to labels (matching DomainCatalog.v1())
-    const domainLabelMap: Record<string, string> = {
-      'finance': 'Accounting & Finance',
-      'btp': 'Construction / BTP',
-      'logistic': 'Logistics',
-      'inventory': 'Inventory',
-    };
-
+    // Map domain keys to labels
     return Object.keys(byDomain.domains)
       .map(domainKey => ({
         domainKey,
-        label: domainLabelMap[domainKey] || domainKey.charAt(0).toUpperCase() + domainKey.slice(1),
+        label: humanizeDomainKey(domainKey),
       }))
       .sort((a, b) => a.label.localeCompare(b.label));
   });

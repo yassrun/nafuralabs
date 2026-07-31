@@ -21,6 +21,6 @@ class IntentRouterTest {
 
     @Test
     void classifyActionIntentForCreateRequest() {
-        assertEquals(IntentType.ACTION, router.classify("Creer le fournisseur ACME").getIntent());
+        assertEquals(IntentType.ACTION, router.classify("Creer le contact ACME").getIntent());
     }
 }

@@ -70,7 +70,7 @@ public class ConversationService {
         - tenant_id is injected automatically — never filter tenant_id yourself.
         - Prefer COUNT(*) for totals; list key columns (code, label, status) for listings.
         - Use ILIKE for case-insensitive text search.
-        - "chantiers actifs / en cours" means status = 'EN_COURS' (and optionally is_active = true). Never filter status with ACTIVE, ACTIF, or English synonyms.
+        - Prefer status values from the schema/hints; do not invent synonyms for domain statuses.
         """;
 
     private final ConversationSessionRepository sessionRepository;

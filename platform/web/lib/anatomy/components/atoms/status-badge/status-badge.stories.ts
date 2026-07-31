@@ -7,13 +7,13 @@ const meta: Meta<StatusBadgeComponent> = {
   component: StatusBadgeComponent,
   tags: ['autodocs'],
   args: {
-    entityType: 'BC',
-    status: 'BROUILLON',
+    entityType: 'ORDER',
+    status: 'DRAFT',
   },
   argTypes: {
     entityType: {
       control: 'select',
-      options: ['BC', 'CHANTIER', 'MARCHE', 'FACTURE', 'APPROBATION'],
+      options: ['ORDER', 'SITE', 'CONTRACT', 'INVOICE', 'APPROVAL'],
     },
     status: {
       control: 'text',
@@ -25,23 +25,23 @@ export default meta;
 
 type Story = StoryObj<StatusBadgeComponent>;
 
-export const PurchaseDraft: Story = {
+export const Draft: Story = {
   args: {
-    entityType: 'BC',
-    status: 'BROUILLON',
+    entityType: 'ORDER',
+    status: 'DRAFT',
   },
 };
 
-export const PurchaseApproved: Story = {
+export const Approved: Story = {
   args: {
-    entityType: 'BC',
-    status: 'APPROUVE',
+    entityType: 'ORDER',
+    status: 'APPROVED',
   },
 };
 
-export const ActiveChantier: Story = {
+export const ActiveSite: Story = {
   args: {
-    entityType: 'CHANTIER',
-    status: 'EN_COURS',
+    entityType: 'SITE',
+    status: 'IN_PROGRESS',
   },
 };

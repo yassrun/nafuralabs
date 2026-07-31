@@ -11,7 +11,10 @@ Migration legacy : [ARCHITECTURE_MIGRATION.md](ARCHITECTURE_MIGRATION.md).
 | Platform backend | `platform/backend/` | Gradle `project("...")` |
 | Platform frontend | `platform/web/` | TypeScript `paths` (`@platform/*`) |
 | Métier partagé (plus tard) | `shared/business/<name>/` | Gradle `project(...)` — seulement au 2ᵉ consommateur |
-| Métier produit | `products/<app>/backend/modules/` | Gradle interne au produit |
+| Métier produit | `products/<app>/backend/modules/` + `products/<app>/web/app/features/` | Gradle / `@app/*` |
+
+**Interdit dans `platform/` :** catalogues métier (rôles BTP, status ERP, tours shell, seeds doc-types produit, prompts SQL produit).  
+Le produit injecte ce contenu via tokens DI (`PRODUCT_*`, `STATUS_MAPPING_CATALOG`, …) ou Liquibase sous `products/<app>/`.
 
 Pas de Maven Central / npm registry pour la platform en dev : tout compile **dans un seul multi-projet Gradle** et **un workspace Angular par app** (ou un workspace racine multi-projets).
 

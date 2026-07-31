@@ -141,7 +141,7 @@ export const routePermissionGuard: CanActivateFn = (
  * {
  *   path: 'inventory',
  *   canActivate: [featureGuard('inventory')],
- *   loadChildren: () => import('./inventory.routes')
+ *   loadChildren: () => import('./feature.routes')
  * }
  * ```
  */

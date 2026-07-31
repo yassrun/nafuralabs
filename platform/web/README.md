@@ -1,17 +1,13 @@
 # Frontend Platform
 
-Technical, cross-application frontend modules live here.
+Technical, cross-application frontend modules. **No product métier** (ERP/BTP) — that lives under `products/<app>/`.
 
-Canonical subfolders:
-- `lib`: reusable UI/design system primitives.
-- `core`: platform runtime, security, tenancy, navigation, i18n, layout, and shared infrastructure.
-- `features`: reusable platform feature modules grouped by capability family:
-  - `collaboration`: notification, doc-manager, audit, comment, workflow, tagging
-  - `documents`: doc-extractor
-  - `ai`: llm-provider, ai-conversation, ai-agent-runtime
-  - `foundation`: shared foundational capabilities (`geo`, `measurement`, `financial`)
-  - `business`: operational business capabilities (`item`, `inventory`, `partner`)
-  - `administration`: control-plane capabilities (`tenant-admin`, `subscription`)
-  - `configuration`: configuration capabilities (`settings`, `sysconfig`)
+| Folder | Role |
+|--------|------|
+| `lib/` | Design system / anatomy primitives (`@lib/*`) |
+| `core/` | Runtime: security, tenancy, navigation, i18n, layouts, shell chrome (`@core/*`) |
+| `features/` | Reusable platform capabilities (`@features/*`): administration, collaboration, documents engine, AI UI, approvals, notifications, configuration, app-settings, user-settings |
 
-Business features are now owned under `web/app/platform/features`.
+Product UI (Sektor, etc.): `products/<app-id>/web/app/`.
+
+Dependency rule: **application → platform only** (never the reverse). See [docs/AGENTS.md](../../docs/AGENTS.md) and [docs/PLATFORM_IMPORTS.md](../../docs/PLATFORM_IMPORTS.md).

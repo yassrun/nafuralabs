@@ -10,16 +10,16 @@ import { Pipe, PipeTransform } from '@angular/core';
  *
  * @example
  * // ❌ Legacy (do not introduce new usages)
- * {{ count | pluralFr:'chantier' }}
+ * {{ count | pluralFr:'item' }}
  *
  * // ✅ ICU MessageFormat — JSON (FR):
- * //   "chantiers.list.count": "{count, plural, =0 {Aucun chantier} one {1 chantier} other {# chantiers}}"
+ * //   "entities.list.count": "{count, plural, =0 {Aucun élément} one {1 élément} other {# éléments}}"
  * // ✅ ICU MessageFormat — JSON (EN):
- * //   "chantiers.list.count": "{count, plural, =0 {No site} one {1 site} other {# sites}}"
+ * //   "entities.list.count": "{count, plural, =0 {No item} one {1 item} other {# items}}"
  * // ✅ HTML
- * {{ 'chantiers.list.count' | translate:{ count: items.length } }}
+ * {{ 'entities.list.count' | translate:{ count: items.length } }}
  * // ✅ TS
- * this.translate.instant('chantiers.list.count', { count: items.length });
+ * this.translate.instant('entities.list.count', { count: items.length });
  *
  * The pipe is preserved (no breaking removal) but flagged: no new usage should
  * appear in this codebase. `npm run i18n:check` and the ICU spec guard the

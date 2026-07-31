@@ -1,22 +1,20 @@
-/**
- * Maps entityType to detail route prefix (without id).
- * Used to build "View entity" links from approvals dashboard.
- * Add entries per application entity types.
- */
-export const ENTITY_TYPE_ROUTE_PREFIX: Record<string, string> = {
-  item: '/directory/operations/items',
-  'item-type': '/directory/configuration/item-types',
-  'item-category': '/directory/configuration/item-categories',
-  location: '/directory/operations/locations',
-  'inventory-tx': '/inventory/transactions/inventory-txs',
-  'stock-balance': '/inventory/transactions/stock-balances',
-  currency: '/finance/configuration/currencies',
-  'exchange-rate': '/finance/configuration/exchange-rates',
-  'payment-term': '/finance/configuration/payment-terms',
-};
+import { InjectionToken } from '@angular/core';
 
-export function getEntityDetailRoute(entityType: string, entityId: string): string[] {
-  const prefix = ENTITY_TYPE_ROUTE_PREFIX[entityType];
+/**
+ * Maps entityType → detail route prefix (without id).
+ * Empty in platform; products provide their maps via DI.
+ */
+export const ENTITY_TYPE_ROUTE_PREFIX = new InjectionToken<Record<string, string>>(
+  'ENTITY_TYPE_ROUTE_PREFIX',
+  { providedIn: 'root', factory: () => ({}) },
+);
+
+export function getEntityDetailRoute(
+  entityType: string,
+  entityId: string,
+  routePrefixByType: Record<string, string>,
+): string[] {
+  const prefix = routePrefixByType[entityType];
   if (prefix) {
     return [prefix, entityId];
   }

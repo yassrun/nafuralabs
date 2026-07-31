@@ -101,7 +101,7 @@ import {
 } from '@platform/features/collaboration/notification/notification-bell.adapter';
 import { NotificationStreamService } from '@platform/features/collaboration/notification/services/notification-stream.service';
 import { NotificationUnreadService } from '@platform/features/collaboration/notification/services/notification-unread.service';
-import { CHANTIER_ROW_NAVIGATOR } from '@platform/lib/anatomy/tokens/chantier-row-navigator.token';
+import { ENTITY_ROW_NAVIGATOR } from '@platform/lib/anatomy/tokens/entity-row-navigator.token';
 import { LOOKUP_LIST_ROUTES } from '@platform/lib/anatomy/tokens/lookup-list-routes.token';
 import { ERP_LOOKUP_LIST_ROUTES } from '@app/shared/config/erp-lookup-list-routes';
 import { environment } from '../src/environments/environment';
@@ -112,6 +112,7 @@ import {
 } from '@platform/lib/anatomy/tokens/listing-export-audit.token';
 import { ErpAuditService } from '@app/shell/erp-audit.service';
 import { provideAppLucideIcons } from '@platform/core/icons/app-lucide-icons';
+import { SEKTOR_PRODUCT_SHELL_PROVIDERS } from '@app/config/sektor-shell.providers';
 
 /**
  * Factory function for APP_INITIALIZER.
@@ -160,6 +161,7 @@ const TRANSLATION_LAYERS: TranslationLayersConfig = ACTIVE_TRANSLATION_LAYERS;
 export const appConfig: ApplicationConfig = {
   providers: [
     provideAppLucideIcons(),
+    ...SEKTOR_PRODUCT_SHELL_PROVIDERS,
 
     // Inversion de dépendance : la plateforme déclare INTEGRATION_AUDIT_PORT, l'ERP
     // fournit l'implémentation. Sans ce provider, whatsapp.adapter tomberait sur le
@@ -299,7 +301,7 @@ export const appConfig: ApplicationConfig = {
     },
 
     {
-      provide: CHANTIER_ROW_NAVIGATOR,
+      provide: ENTITY_ROW_NAVIGATOR,
       useFactory: (drill: ChantierDrilldownService) => (row: unknown) => drill.tryNavigateFromRow(row),
       deps: [ChantierDrilldownService],
     },

@@ -27,6 +27,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { TenantContextService } from '../../../../../core/tenant/tenant.context';
 import { DocTypeService } from '../../services/doc-type.service';
 import { DocTypeOrigin } from '../../models/doc-type-definition.model';
+import { humanizeDomainKey } from '../../utils/domain-label.util';
 
 interface DocTypeItem {
   id: string;
@@ -128,16 +129,10 @@ export class DocTypesPage {
       domainMap.get(dt.domainKey)!.push(dt);
     }
 
-    // Sort domains by predefined order
-    const domainOrder = ['logistic', 'finance', 'inventory', 'btp'];
-    const sortedDomains = Array.from(domainMap.keys()).sort((a, b) => {
-      const indexA = domainOrder.indexOf(a);
-      const indexB = domainOrder.indexOf(b);
-      if (indexA === -1 && indexB === -1) return a.localeCompare(b);
-      if (indexA === -1) return 1;
-      if (indexB === -1) return -1;
-      return indexA - indexB;
-    });
+    // Sort domains alphabetically by humanized label
+    const sortedDomains = Array.from(domainMap.keys()).sort((a, b) =>
+      humanizeDomainKey(a).localeCompare(humanizeDomainKey(b))
+    );
 
     for (const domainKey of sortedDomains) {
       groups.push({
@@ -156,14 +151,16 @@ export class DocTypesPage {
     { value: 'TENANT', label: 'Custom' },
   ];
 
-  // Domain options
-  readonly domainOptions = [
-    { value: '', label: 'All Domains' },
-    { value: 'logistic', label: 'Logistics' },
-    { value: 'finance', label: 'Accounting & Finance' },
-    { value: 'btp', label: 'Construction / BTP' },
-    { value: 'inventory', label: 'Inventory' },
-  ];
+  // Domain options derived from loaded doc types
+  readonly domainOptions = computed(() => {
+    const keys = [...new Set(this.docTypes().map((dt) => dt.domainKey))].sort((a, b) =>
+      humanizeDomainKey(a).localeCompare(humanizeDomainKey(b))
+    );
+    return [
+      { value: '', label: 'All Domains' },
+      ...keys.map((value) => ({ value, label: humanizeDomainKey(value) })),
+    ];
+  });
 
   constructor() {
     // Sync FormControl values to signals for reactivity
@@ -295,20 +292,13 @@ export class DocTypesPage {
   }
 
   getDomainLabel(domainKey: string): string {
-    const labelMap: Record<string, string> = {
-      'finance': 'Finance',
-      'btp': 'BTP',
-      'logistic': 'Logistics',
-      'inventory': 'Inventory',
-    };
-    return labelMap[domainKey] || domainKey;
+    return humanizeDomainKey(domainKey);
   }
 
   getDomainIcon(domainKey: string): string {
     const iconMap: Record<string, string> = {
       'logistic': 'local_shipping',
       'finance': 'account_balance',
-      'btp': 'construction',
       'inventory': 'inventory_2',
     };
     return iconMap[domainKey] || 'folder';
@@ -318,7 +308,6 @@ export class DocTypesPage {
     const colorMap: Record<string, string> = {
       'logistic': '#3f51b5',
       'finance': '#4caf50',
-      'btp': '#ff9800',
       'inventory': '#9c27b0',
     };
     return colorMap[domainKey] || '#757575';

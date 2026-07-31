@@ -1,15 +1,11 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BadgeComponent } from '../badge/badge.component';
-import { resolveStatus } from './status-mapping';
+import { STATUS_MAPPING_CATALOG, resolveStatus } from './status-mapping';
 
 /**
- * StatusBadge — centralized entity-aware status badge.
- * Resolves label, variant, and tooltip from the central status mapping.
- *
- * @example
- * <nf-status-badge entityType="BC" [status]="bc.status"></nf-status-badge>
- * <nf-status-badge entityType="CHANTIER" [status]="chantier.status"></nf-status-badge>
+ * StatusBadge — entity-aware status badge.
+ * Resolves label/variant/tooltip from product STATUS_MAPPING_CATALOG.
  */
 @Component({
   selector: 'nf-status-badge',
@@ -22,8 +18,12 @@ import { resolveStatus } from './status-mapping';
   `,
 })
 export class StatusBadgeComponent {
+  private readonly catalog = inject(STATUS_MAPPING_CATALOG);
+
   readonly entityType = input.required<string>();
   readonly status = input.required<string>();
 
-  readonly def = computed(() => resolveStatus(this.entityType(), this.status()));
+  readonly def = computed(() =>
+    resolveStatus(this.entityType(), this.status(), this.catalog),
+  );
 }

@@ -381,7 +381,7 @@ public class GeminiProvider implements AiProvider {
         NormalizedLlmRequest request
     ) {
         String content = request.getMode() == null || request.getMode().name().equals("ASK")
-            ? buildDevAskFallback(request)
+            ? buildDevAskFallback()
             : "{\"summary\":\"Mode démo : configurez AI_GEMINI_API_KEY pour activer l'agent.\",\"actions\":[]}";
 
         TokenUsage usage = new TokenUsage(0L, 0L, 0L, true);
@@ -409,90 +409,12 @@ public class GeminiProvider implements AiProvider {
         );
     }
 
-    private String buildDevAskFallback(NormalizedLlmRequest request) {
-        String userText = extractLatestUserText(request);
-        String lower = userText == null ? "" : userText.toLowerCase(Locale.ROOT);
-
-        if (containsAny(lower, "demande", "achat", "da ")) {
-            return """
-                Les demandes d'achat sont dans **Achats & Sous-traitance → Demandes d'achat** (`/achats/demandes`).
-
-                Vous pouvez filtrer par statut (à approuver, urgentes, mes demandes) et créer une nouvelle demande via **Nouveau**.
-
-                _Mode démo : ajoutez une clé Gemini dans Vault (`secret/nafura/staging/platform/integrations/ai/gemini`, champ `api_key`) pour des réponses IA complètes._
-                """.trim();
-        }
-        if (containsAny(lower, "chantier", "site", "ouvrage")) {
-            return """
-                Les chantiers sont accessibles via **Opérations → Chantiers** (`/chantiers`).
-
-                Depuis un chantier vous gérez lots, documents, avancements, situations et journal.
-
-                _Mode démo : configurez `AI_GEMINI_API_KEY` pour des analyses métier avancées._
-                """.trim();
-        }
-        if (containsAny(lower, "dashboard", "tableau", "kpi", "pilotage")) {
-            return """
-                Le tableau de bord direction est sur **`/dashboard`** (onglets Direction, Conducteur travaux, Comptabilité).
-
-                Les widgets KPI se mettent à jour avec l'activité seedée sur le tenant.
-
-                _Mode démo : clé Gemini requise pour interprétations personnalisées._
-                """.trim();
-        }
-        if (containsAny(lower, "bon de commande", "commande", "bc ")) {
-            return """
-                Les bons de commande fournisseurs : **Achats → Bons de commande** (`/achats/commandes`).
-
-                _Mode démo actif — configurez `gemini_api_key` dans Vault pour l'assistant complet._
-                """.trim();
-        }
-        if (containsAny(lower, "notification", "alerte")) {
-            return """
-                Les notifications ERP sont dans la cloche en haut à droite et sur **`/notifications`**.
-
-                Les alertes métier (approbations, congés, situations) apparaissent lors des actions workflow.
-
-                _Mode démo : réponses IA riches disponibles après configuration Gemini._
-                """.trim();
-        }
-
+    private String buildDevAskFallback() {
         return """
-            Bonjour ! Je suis l'assistant ERP en **mode démo** (clé Gemini non configurée).
+            Bonjour ! L'assistant est en **mode démo** (clé Gemini non configurée).
 
-            Je peux quand même vous orienter — essayez par exemple :
-            • « Où sont les demandes d'achat ? »
-            • « Montre-moi les chantiers »
-            • « Tableau de bord »
-
-            Pour activer l'IA complète : renseignez `api_key` dans Vault (`secret/nafura/staging/platform/integrations/ai/gemini`) puis redémarrez `erp-backend`.
+            Configurez `AI_GEMINI_API_KEY` (ou `api_key` dans Vault sous `secret/nafura/.../integrations/ai/gemini`) puis redémarrez le backend pour activer les réponses IA complètes basées sur le schéma et les outils.
             """.trim();
-    }
-
-    private static boolean containsAny(String text, String... needles) {
-        for (String needle : needles) {
-            if (text.contains(needle)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static String extractLatestUserText(NormalizedLlmRequest request) {
-        if (request.getPrompt() != null && !request.getPrompt().isBlank()) {
-            return request.getPrompt().trim();
-        }
-        List<ConversationTurn> history = request.getConversationHistory();
-        if (history == null || history.isEmpty()) {
-            return null;
-        }
-        for (int i = history.size() - 1; i >= 0; i--) {
-            ConversationTurn turn = history.get(i);
-            if (turn.getRole() == ConversationTurn.Role.USER && turn.getContent() != null && !turn.getContent().isBlank()) {
-                return turn.getContent().trim();
-            }
-        }
-        return null;
     }
 }
 

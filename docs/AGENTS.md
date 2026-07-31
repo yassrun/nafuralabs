@@ -265,8 +265,9 @@ Arbre de décision complet : [toolchain/ops/AGENTS.md](../toolchain/ops/AGENTS.m
 
 ## Dette connue
 
-- Shell platform historiquement couplé à Sektor — ownership front migrée sous `products/sektor-btp/web/app/` (`features/`, plus `@applications/*`).
-- Docs historiques `web/docs/` : chemins `app/applications/erp` → lire `products/sektor-btp/web/app/features/`.
+- Purge métier platform (2026-07) : catalogues shell/status/WhatsApp/seeds doc-extractor externalisés vers Sektor via DI ; stubs `features/business` + `foundation` supprimés ; token `ENTITY_ROW_NAVIGATOR` (alias déprécié `CHANTIER_ROW_NAVIGATOR`).
+- Grey-zone conservée : `geo-ma`, `ma-validators` (locale MA).
+- Builds locaux : Gradle wrapper zip souvent bloqué (proxy/McAfee) ; `npm install` peut échouer sur Playwright — utiliser `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1`.
 - CI/CD automatisé : à implémenter (build PR → deploy staging → deploy prod manuel).
 
 ---

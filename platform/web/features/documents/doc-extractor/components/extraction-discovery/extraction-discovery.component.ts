@@ -8,6 +8,7 @@ import { TranslateModule } from '@ngx-translate/core';
 
 import { DocTypeListItem, DocTypesByDomain, DomainListItem } from '../../models/doc-type-definition.model';
 import { FlipIconRtlDirective } from '../../../../../lib/anatomy/directives';
+import { humanizeDomainKey } from '../../utils/domain-label.util';
 
 export interface DiscoveryDomainCard {
   id: string;
@@ -99,11 +100,6 @@ export class ExtractionDiscoveryComponent {
         icon: 'account_balance',
         color: '#4caf50',
       },
-      'btp': {
-        description: 'Construction documents, building permits, site reports.',
-        icon: 'construction',
-        color: '#ff9800',
-      },
       'inventory': {
         description: 'Stock management, warehouse documents.',
         icon: 'inventory_2',
@@ -112,7 +108,7 @@ export class ExtractionDiscoveryComponent {
     };
 
     return metadataMap[domainKey] || {
-      description: `Documents related to ${domainKey}.`,
+      description: `Documents related to ${humanizeDomainKey(domainKey)}.`,
       icon: 'folder',
       color: '#757575',
     };

@@ -18,12 +18,12 @@ class ReferenceConversationFlowTest {
     }
 
     @Test
-    void openChantierIsNavigateIntent() {
-        assertEquals(IntentType.NAVIGATE, router.classify("Ouvre le chantier CH-001").getIntent());
+    void openEntityIsNavigateIntent() {
+        assertEquals(IntentType.NAVIGATE, router.classify("Ouvre l'entité ENT-001").getIntent());
     }
 
     @Test
     void createSupplierIsActionIntent() {
-        assertEquals(IntentType.ACTION, router.classify("Creer le fournisseur ACME").getIntent());
+        assertEquals(IntentType.ACTION, router.classify("Creer le contact ACME").getIntent());
     }
 }

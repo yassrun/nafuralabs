@@ -14,7 +14,7 @@ public class TableSchema {
     private String description;
     /** core = always in prompt; extended = included when domain matches */
     private String category;
-    /** French / business terms mapped to this table (chantier, projet, site, …) */
+    /** Business terms mapped to this table (aliases for LLM grounding) */
     private List<String> aliases;
     /** Short SQL hints or status values for the model */
     private List<String> hints;

@@ -2,9 +2,9 @@
  * Référentiel des villes marocaines — chefs-lieux de province / préfecture
  * et principales communes urbaines (~115 villes).
  *
- * Le **nom canonique** (`nom`) est la clé métier stockée dans les colonnes
- * `ville` existantes (chantiers, clients, employés…) : aucun code n'est
- * persisté, la région / province se dérivent du référentiel à la lecture.
+ * Le **nom canonique** (`nom`) est la clé stockée dans les colonnes
+ * `ville` existantes : aucun code n'est persisté ; région / province
+ * se dérivent du référentiel à la lecture.
  *
  * `code` est un slug stable en kebab-case, utile pour le reporting et les
  * échanges (exports, API futures).

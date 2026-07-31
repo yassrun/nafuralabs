@@ -23,6 +23,7 @@ import { SidebarRegistry } from '../../navigation/sidebar.registry';
 import { SidebarNode } from '../../navigation/sidebar.types';
 import { PermissionService } from '../../security/services/permission.service';
 import { CommandPaletteService } from './command-palette.service';
+import { PRODUCT_PALETTE_ACTIONS } from '../../application/product-shell.tokens';
 
 interface PaletteDisplayItem {
   id: string;
@@ -59,48 +60,7 @@ const STATIC_PAGES: SearchResult[] = [
   },
 ];
 
-const STATIC_PALETTE_ACTIONS: SearchResult[] = [
-  {
-    id: 'action:chantier-new',
-    label: 'core.search.actions.newChantier',
-    icon: 'file',
-    route: '/chantiers/new',
-    category: 'actions',
-    breadcrumb: '',
-  },
-  {
-    id: 'action:bc-new',
-    label: 'core.search.actions.newBc',
-    icon: 'file',
-    route: '/achats/commandes/new',
-    category: 'actions',
-    breadcrumb: '',
-  },
-  {
-    id: 'action:da-new',
-    label: 'core.search.actions.newDa',
-    icon: 'file',
-    route: '/achats/demandes/new',
-    category: 'actions',
-    breadcrumb: '',
-  },
-  {
-    id: 'action:employe-new',
-    label: 'core.search.actions.newEmploye',
-    icon: 'file',
-    route: '/rh/employes/new',
-    category: 'actions',
-    breadcrumb: '',
-  },
-  {
-    id: 'action:facture-vente-new',
-    label: 'core.search.actions.newFactureVente',
-    icon: 'file',
-    route: '/ventes/factures/new',
-    category: 'actions',
-    breadcrumb: '',
-  },
-];
+/** Product-specific create actions come from PRODUCT_PALETTE_ACTIONS. */
 
 @Component({
   selector: 'nf-command-palette',
@@ -281,6 +241,7 @@ export class CommandPaletteComponent {
   private readonly globalSearchApi = inject(GlobalSearchApiService);
   private readonly recentItems = inject(RecentItemsService);
   private readonly translateSvc = inject(TranslateService);
+  private readonly productPaletteActions = inject(PRODUCT_PALETTE_ACTIONS);
 
   private readonly recordsQuery$ = new Subject<string>();
 
@@ -324,7 +285,7 @@ export class CommandPaletteComponent {
 
   readonly paletteActionResults = computed(() => {
     const q = this.query().trim().toLowerCase();
-    return STATIC_PALETTE_ACTIONS.filter((item) => !q || this.matchesSearchItem(item, q));
+    return this.productPaletteActions.filter((item) => !q || this.matchesSearchItem(item, q));
   });
 
   readonly displayItems = computed<PaletteDisplayItem[]>(() => {

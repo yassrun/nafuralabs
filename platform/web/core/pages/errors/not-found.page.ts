@@ -1,15 +1,14 @@
 /**
  * Not Found (404) Page
  *
- * Page brandée affichée quand la route ne correspond à aucune définition.
- * Inclut une suggestion de retour vers les zones les plus fréquentées de l'ERP
- * (dashboard, chantiers, marchés, achats, finance).
+ * Suggestions and footer come from PRODUCT_NOT_FOUND_CONFIG (product DI).
  */
 
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { Location } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
+
+import { PRODUCT_NOT_FOUND_CONFIG } from '../../application/product-shell.tokens';
 
 @Component({
   selector: 'app-not-found-page',
@@ -44,21 +43,20 @@ import { Router, RouterModule } from '@angular/router';
           </a>
         </div>
 
-        <nav class="nf-404__suggestions" aria-label="Raccourcis ERP">
-          <h2>Vous cherchiez peut-être :</h2>
-          <ul>
-            <li><a routerLink="/chantiers">Chantiers</a></li>
-            <li><a routerLink="/marches">Marchés &amp; Facturation</a></li>
-            <li><a routerLink="/achats">Achats</a></li>
-            <li><a routerLink="/finance">Finance</a></li>
-            <li><a routerLink="/inventory">Stock &amp; Matériel</a></li>
-            <li><a routerLink="/rh">RH &amp; Paie</a></li>
-          </ul>
-        </nav>
+        @if (config.suggestions.length) {
+          <nav class="nf-404__suggestions" aria-label="Suggestions">
+            <h2>Vous cherchiez peut-être :</h2>
+            <ul>
+              @for (s of config.suggestions; track s.route) {
+                <li><a [routerLink]="s.route">{{ s.label }}</a></li>
+              }
+            </ul>
+          </nav>
+        }
       </section>
 
       <footer class="nf-404__footer">
-        <p>Nafura ERP · BTP Maroc</p>
+        <p>{{ config.footer }}</p>
       </footer>
     </main>
   `,
@@ -246,6 +244,7 @@ import { Router, RouterModule } from '@angular/router';
 export class NotFoundPage {
   private readonly location = inject(Location);
   private readonly router = inject(Router);
+  readonly config = inject(PRODUCT_NOT_FOUND_CONFIG);
 
   currentPath(): string {
     return this.router.url || this.location.path() || '/';

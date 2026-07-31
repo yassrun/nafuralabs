@@ -40,11 +40,11 @@ export const COLUMNS: ColumnConfig[] = [
     field: 'scopeType',
     type: 'badge',
     badgeVariant: (value: unknown) =>
-      value === 'CHANTIER' ? 'warning' : value === 'BOTH' ? 'info' : 'default',
+      value === 'CHANTIER' || value === 'SITE' ? 'warning' : value === 'BOTH' ? 'info' : 'default',
     transform: (value: unknown) => {
       const v = String(value ?? 'ENTREPRISE');
-      if (v === 'CHANTIER') return 'Chantier';
-      if (v === 'BOTH') return 'Chantier + Entreprise';
+      if (v === 'CHANTIER' || v === 'SITE') return 'Site';
+      if (v === 'BOTH') return 'Site + Entreprise';
       return 'Entreprise';
     },
     sortable: true,
