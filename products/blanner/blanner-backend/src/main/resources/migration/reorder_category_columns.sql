@@ -1,0 +1,16 @@
+-- Migration: Reorder columns in categories table
+-- Note: PostgreSQL doesn't support direct column reordering
+-- Column order doesn't affect functionality, only display in database viewers
+-- 
+-- Since you're using ddl-auto: create, the table will be automatically
+-- recreated with the new column order matching the entity field order.
+--
+-- If you need to manually reorder without recreating (e.g., with ddl-auto: update),
+-- you would need to:
+-- 1. Create a new table with desired column order
+-- 2. Copy data
+-- 3. Drop old table
+-- 4. Rename new table
+--
+-- However, with ddl-auto: create, this is handled automatically by Hibernate.
+

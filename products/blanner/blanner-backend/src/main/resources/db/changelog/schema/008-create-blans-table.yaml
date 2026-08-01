@@ -1,0 +1,111 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-blans-table
+      author: blanner
+      changes:
+        - createTable:
+            tableName: blans
+            schemaName: public
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: creator_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: category_id
+                  type: VARCHAR(36)
+              - column:
+                  name: blan_location_id
+                  type: UUID
+              - column:
+                  name: blan_time_id
+                  type: UUID
+              - column:
+                  name: group_size
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: gender_pref
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: mood
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: bill_policy
+                  type: VARCHAR(50)
+              - column:
+                  name: visibility
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: approval_required
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+              - column:
+                  name: max_participants
+                  type: INTEGER
+              - column:
+                  name: custom_description
+                  type: TEXT
+              - column:
+                  name: status
+                  type: VARCHAR(50)
+                  defaultValue: ACTIVE
+              - column:
+                  name: like_count
+                  type: INTEGER
+                  defaultValueNumeric: 0
+              - column:
+                  name: comment_count
+                  type: INTEGER
+                  defaultValueNumeric: 0
+              - column:
+                  name: join_count
+                  type: INTEGER
+                  defaultValueNumeric: 0
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+        - addForeignKeyConstraint:
+            baseTableName: blans
+            baseColumnNames: creator_id
+            constraintName: fk_blans_creator
+            referencedTableName: users
+            referencedColumnNames: id
+        - addForeignKeyConstraint:
+            baseTableName: blans
+            baseColumnNames: category_id
+            constraintName: fk_blans_category
+            referencedTableName: categories
+            referencedColumnNames: id
+        - addForeignKeyConstraint:
+            baseTableName: blans
+            baseColumnNames: blan_location_id
+            constraintName: fk_blans_location
+            referencedTableName: blan_locations
+            referencedColumnNames: id
+        - addForeignKeyConstraint:
+            baseTableName: blans
+            baseColumnNames: blan_time_id
+            constraintName: fk_blans_time
+            referencedTableName: blan_times
+            referencedColumnNames: id
+

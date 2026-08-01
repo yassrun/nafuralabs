@@ -1,0 +1,74 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-users-table
+      author: blanner
+      changes:
+        - createTable:
+            tableName: users
+            schemaName: public
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: username
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: email
+                  type: VARCHAR(255)
+                  constraints:
+                    unique: true
+              - column:
+                  name: phone
+                  type: VARCHAR(255)
+                  constraints:
+                    unique: true
+              - column:
+                  name: phone_verified
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+              - column:
+                  name: bio
+                  type: TEXT
+              - column:
+                  name: photo_url
+                  type: VARCHAR(255)
+              - column:
+                  name: avatar_url
+                  type: VARCHAR(255)
+              - column:
+                  name: gender
+                  type: VARCHAR(50)
+              - column:
+                  name: birthdate
+                  type: DATE
+              - column:
+                  name: city
+                  type: VARCHAR(255)
+              - column:
+                  name: interests
+                  type: TEXT
+              - column:
+                  name: verified_flag
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+

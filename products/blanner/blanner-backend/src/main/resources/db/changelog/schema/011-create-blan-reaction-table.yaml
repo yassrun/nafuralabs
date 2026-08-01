@@ -1,0 +1,57 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-blan-reaction-table
+      author: blanner
+      changes:
+        - createTable:
+            tableName: blan_reaction
+            schemaName: public
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: blan_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: type
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+        - addUniqueConstraint:
+            tableName: blan_reaction
+            columnNames: user_id, blan_id, type
+            constraintName: uk_blan_reaction_user_blan_type
+        - addForeignKeyConstraint:
+            baseTableName: blan_reaction
+            baseColumnNames: user_id
+            constraintName: fk_blan_reaction_user
+            referencedTableName: users
+            referencedColumnNames: id
+            onDelete: CASCADE
+        - addForeignKeyConstraint:
+            baseTableName: blan_reaction
+            baseColumnNames: blan_id
+            constraintName: fk_blan_reaction_blan
+            referencedTableName: blans
+            referencedColumnNames: id
+            onDelete: CASCADE
+
