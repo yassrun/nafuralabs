@@ -77,6 +77,25 @@ class GatesEtudeTest {
         assertThat(r.passe()).isTrue();
     }
 
+    @Test
+    void piece_obligatoire_non_liee_bloque() {
+        var piece = ma.nafura.etudes.domain.model.DossierPieceAttendue.builder()
+                .id(UUID.randomUUID())
+                .type("REGLEMENT")
+                .libelle("Règlement")
+                .obligatoire(true)
+                .source("IA")
+                .build();
+        ResultatGate r = new GatesEtude.GateDocuments()
+                .evaluer(ContexteGate.documents(true, true, List.of(piece)));
+
+        assertThat(r.passe()).isFalse();
+        assertThat(r.problemes()).singleElement()
+                .extracting(ResultatGate.ProblemeGate::message)
+                .isEqualTo("etudes.gate.documents.piece_obligatoire_manquante");
+        assertThat(r.problemes().get(0).noeudId()).isEqualTo(piece.getId());
+    }
+
     // ── Étape 2 — bordereau ──────────────────────────────────────────────────
 
     @Test

@@ -1,10 +1,10 @@
 package ma.nafura.etudes.domain.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -86,6 +86,16 @@ public class DossierEtude implements AuditableEtude {
 
     @Column(name = "appel_offre_client_id")
     private UUID appelOffreClientId;
+
+    /** Enrichissement listing — type AO lié (non persisté). */
+    @Transient
+    @JsonProperty("aoType")
+    private String aoType;
+
+    /** Enrichissement listing — date limite dépôt AOC (non persisté). */
+    @Transient
+    @JsonProperty("aoDateLimiteDepot")
+    private java.time.LocalDate aoDateLimiteDepot;
 
     // ── Contenu, délégué au DPGF ─────────────────────────────────────────────
 

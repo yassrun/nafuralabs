@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
@@ -10,9 +10,7 @@ import {
 import { DossierEtudeApiService } from '../services/dossier-etude-api.service';
 
 /**
- * Création d'un dossier d'étude.
- *
- * <p>Objet + client Partner (rôle CLIENT) sont obligatoires dès la création.
+ * Création unifiée dossier d'étude + appel d'offres client (S5).
  */
 @Component({
   selector: 'app-dossier-create',
@@ -29,8 +27,26 @@ export class DossierCreatePage {
   readonly objet = signal('');
   readonly clientId = signal<string | null>(null);
   readonly clientNom = signal<string | null>(null);
+  readonly dateLimiteDepot = signal('');
+  readonly aoReference = signal('');
+  readonly aoType = signal<'PUBLIC' | 'PRIVE'>('PUBLIC');
+  readonly ville = signal('');
+  readonly dateOuverturePlis = signal('');
+  readonly delaiExecutionJours = signal<number | null>(null);
+  readonly estimationMoaHt = signal<number | null>(null);
+  readonly cautionProvisoire = signal<number | null>(null);
+  readonly cautionDefinitive = signal<number | null>(null);
+
   readonly enCours = signal(false);
   readonly erreur = signal<string | undefined>(undefined);
+
+  readonly peutCreer = computed(
+    () =>
+      !!this.objet().trim() &&
+      !!this.clientId() &&
+      !!this.dateLimiteDepot() &&
+      !this.enCours(),
+  );
 
   onClientSelection(sel: ClientPartnerSelection): void {
     this.clientId.set(sel.clientId);
@@ -38,25 +54,32 @@ export class DossierCreatePage {
   }
 
   async creer(): Promise<void> {
-    const objet = this.objet().trim();
-    const clientId = this.clientId();
-    if (!objet || !clientId || this.enCours()) return;
+    if (!this.peutCreer()) return;
 
     this.enCours.set(true);
     this.erreur.set(undefined);
     try {
       const dossier = await this.api.create({
-        objet,
-        clientId,
+        objet: this.objet().trim(),
+        clientId: this.clientId()!,
         clientNom: this.clientNom() ?? undefined,
+        dateLimiteDepot: this.dateLimiteDepot(),
+        aoReference: this.aoReference().trim() || undefined,
+        aoType: this.aoType(),
+        ville: this.ville().trim() || undefined,
+        dateOuverturePlis: this.dateOuverturePlis() || undefined,
+        delaiExecutionJours: this.delaiExecutionJours() ?? undefined,
+        estimationMoaHt: this.estimationMoaHt() ?? undefined,
+        cautionProvisoire: this.cautionProvisoire() ?? undefined,
+        cautionDefinitive: this.cautionDefinitive() ?? undefined,
       });
       await this.nav.navigate(['/etudes/dossiers', dossier.id]);
     } catch (e) {
-      const err = e as { status?: number; error?: { message?: string } };
+      const err = e as { status?: number; error?: { message?: string; code?: string } };
       this.erreur.set(
         err?.status === 403
           ? "Vous n'avez pas la permission de créer un dossier d'étude."
-          : (err?.error?.message ?? 'La création a échoué.'),
+          : (err?.error?.message ?? err?.error?.code ?? 'La création a échoué.'),
       );
       this.enCours.set(false);
     }

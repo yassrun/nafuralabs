@@ -4,7 +4,8 @@
 > Hors session = RH, print, stock (gardés pour ne pas les perdre).
 >
 > **UX :** méthode principale = Cursor Canvas wireframes — voir [`docs/ux/METHODE-CANVAS-WIREFRAMES.md`](docs/ux/METHODE-CANVAS-WIREFRAMES.md).  
-> Chiffrage S1 validé sur canvas `etude-decompo-wireframe` → **impl drawer en cours / livrée**.
+> Chiffrage S1 validé sur canvas `etude-decompo-wireframe` → livré.  
+> S5 wireframe : canvas `etude-ao-unify-wireframe` (nav → create → pièces ; étude hors scope).
 
 ---
 

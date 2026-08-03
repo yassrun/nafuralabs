@@ -64,6 +64,23 @@ public final class GatesEtude {
             if (!contexte.hasCps()) {
                 pbs.add(new ProblemeGate(null, null, null, "etudes.gate.documents.cps_manquant"));
             }
+            if (contexte.piecesAttendues() != null) {
+                for (var piece : contexte.piecesAttendues()) {
+                    if (!Boolean.TRUE.equals(piece.getObligatoire()) || piece.estLiee()) {
+                        continue;
+                    }
+                    // BDP/CPS déjà couverts ci-dessus
+                    String type = piece.getType();
+                    if ("BORDEREAU".equals(type) || "CPS".equals(type)) {
+                        continue;
+                    }
+                    pbs.add(new ProblemeGate(
+                            piece.getId(),
+                            type,
+                            piece.getLibelle(),
+                            "etudes.gate.documents.piece_obligatoire_manquante"));
+                }
+            }
             if (pbs.isEmpty()) {
                 return ResultatGate.ok(etape());
             }

@@ -316,9 +316,9 @@
     "materiel.pointage":    "Pointage heures engins",
     "materiel.controles":   "Contrôles réglementaires",
     "etudes": "Études & Soumissions",
-    "etudes.chiffrage":            "Chiffrage & métrés",
+    "etudes.chiffrage":            "Études & AO",
     "etudes.soumissions":          "Soumissions & opportunités",
-    "etudes.dossiers":             "Dossiers d'étude",
+    "etudes.dossiers":             "Études / appels d'offres",
     "etudes.bibliotheque":         "Bibliothèque de prix",
     "etudes.metres":               "Métrés & Quantitatifs",
     "etudes.devis":                "Devis",
@@ -697,7 +697,8 @@
       "documents": {
         "aucune_piece": "Déposez au moins une pièce du marché (bordereau ou CPS) avant de continuer.",
         "bordereau_manquant": "Déposez le bordereau des prix (BDP) avant de continuer.",
-        "cps_manquant": "Déposez le CPS / CCTP avant de continuer."
+        "cps_manquant": "Déposez le CPS / CCTP avant de continuer.",
+        "piece_obligatoire_manquante": "Pièce obligatoire manquante — déposez le document attendu."
       },
       "bordereau": {
         "aucun_article": "Ajoutez au moins un article au bordereau avant de continuer.",

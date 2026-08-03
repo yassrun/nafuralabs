@@ -11,9 +11,11 @@ import ma.nafura.etudes.api.request.DossierEtudeCreateDto;
 import ma.nafura.etudes.api.request.DossierEtudeUpdateDto;
 import ma.nafura.etudes.domain.model.DossierEtude;
 import ma.nafura.etudes.domain.model.StatutDossierEtude;
+import ma.nafura.etudes.repository.AppelOffreClientRepository;
 import ma.nafura.etudes.repository.DevisRepository;
 import ma.nafura.etudes.repository.DossierDocumentRepository;
 import ma.nafura.etudes.repository.DossierEtudeRepository;
+import ma.nafura.etudes.repository.DossierPieceAttendueRepository;
 import ma.nafura.etudes.repository.DpgfNoeudRepository;
 import ma.nafura.etudes.service.port.EtudeApprovalPort;
 import ma.nafura.etudes.service.port.EtudeClientPort;
@@ -55,6 +57,18 @@ class DossierEtudeServiceClientTest {
     @Mock
     private DevisService devisService;
 
+    @Mock
+    private AppelOffreClientService aocService;
+
+    @Mock
+    private AppelOffreClientRepository aocRepository;
+
+    @Mock
+    private DossierPieceAttendueService pieceAttendueService;
+
+    @Mock
+    private DossierPieceAttendueRepository pieceAttendueRepository;
+
     private DossierEtudeService service;
 
     @BeforeEach
@@ -78,6 +92,10 @@ class DossierEtudeServiceClientTest {
                 approvalPort,
                 clientPort,
                 devisService,
+                aocService,
+                aocRepository,
+                pieceAttendueService,
+                pieceAttendueRepository,
                 java.util.List.of());
     }
 
@@ -103,7 +121,13 @@ class DossierEtudeServiceClientTest {
     void create_avecClient_normaliseDepuisPort() {
         when(repository.existsByTenantIdAndNumero(any(), any())).thenReturn(false);
         when(repository.countByTenantId(TENANT)).thenReturn(0L);
-        when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(repository.save(any())).thenAnswer(inv -> {
+            DossierEtude d = inv.getArgument(0);
+            if (d.getId() == null) {
+                d.setId(UUID.randomUUID());
+            }
+            return d;
+        });
         when(clientPort.requireClientRole(CLIENT.toString()))
                 .thenReturn(new EtudeClientPort.ClientSnapshot(CLIENT, "CLI-001", "OCP SA"));
 

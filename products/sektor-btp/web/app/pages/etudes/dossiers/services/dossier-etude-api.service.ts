@@ -8,6 +8,8 @@ import type {
   DossierEtude,
   DossierEtudeCreate,
   DossierEtudeUpdate,
+  DossierPieceAttendue,
+  MarchePropose,
   ResultatGate,
   TypeDossierDocument,
 } from '@app/etudes/models';
@@ -295,6 +297,96 @@ export class DossierEtudeApiService extends FeatureApiService<
         {},
         { params },
       ),
+    );
+  }
+
+  /** Bookmark legacy AOC → dossier lié (404 → null). */
+  async findByAppelOffreClientId(appelOffreClientId: string): Promise<DossierEtude | null> {
+    try {
+      return await this.get<DossierEtude>(
+        this.basePath,
+        new HttpParams().set('appelOffreClientId', appelOffreClientId),
+      );
+    } catch (e) {
+      const err = e as { status?: number };
+      if (err?.status === 404) return null;
+      throw e;
+    }
+  }
+
+  listerPiecesAttendues(dossierId: string): Promise<DossierPieceAttendue[]> {
+    return this.get<DossierPieceAttendue[]>(`${this.basePath}/${dossierId}/pieces-attendues`);
+  }
+
+  creerPieceAttendue(
+    dossierId: string,
+    body: { type: string; libelle: string; obligatoire?: boolean },
+  ): Promise<DossierPieceAttendue> {
+    return this.post<DossierPieceAttendue>(`${this.basePath}/${dossierId}/pieces-attendues`, body);
+  }
+
+  updatePieceAttendue(
+    dossierId: string,
+    pieceId: string,
+    body: { libelle?: string; obligatoire?: boolean },
+  ): Promise<DossierPieceAttendue> {
+    return firstValueFrom(
+      this.http.patch<DossierPieceAttendue>(
+        this.resolveUrl(`${this.basePath}/${dossierId}/pieces-attendues/${pieceId}`),
+        body,
+      ),
+    );
+  }
+
+  supprimerPieceAttendue(dossierId: string, pieceId: string): Promise<void> {
+    return this.deleteRequest(`${this.basePath}/${dossierId}/pieces-attendues/${pieceId}`);
+  }
+
+  lierPieceAttendue(
+    dossierId: string,
+    pieceId: string,
+    dossierDocumentId: string,
+  ): Promise<DossierPieceAttendue> {
+    return this.post<DossierPieceAttendue>(
+      `${this.basePath}/${dossierId}/pieces-attendues/${pieceId}/lier`,
+      { dossierDocumentId },
+    );
+  }
+
+  /**
+   * Métadonnées + checklist depuis CPS indexé. `null` si 204 (fallback manuel).
+   * `cpsDocumentId` = id de la pièce DossierDocument CPS.
+   */
+  async proposerMarche(
+    dossierId: string,
+    cpsDocumentId: string,
+  ): Promise<MarchePropose | null> {
+    try {
+      return await firstValueFrom(
+        this.http.post<MarchePropose>(
+          this.resolveUrl(
+            `${this.basePath}/${dossierId}/documents/cps/${cpsDocumentId}/proposer-marche`,
+          ),
+          {},
+        ),
+      );
+    } catch (e) {
+      const err = e as { status?: number };
+      if (err?.status === 204) return null;
+      throw e;
+    }
+  }
+
+  appliquerPropositionMarche(
+    dossierId: string,
+    body: {
+      metadonnees?: MarchePropose['metadonnees'];
+      piecesAttendues?: MarchePropose['piecesAttendues'];
+    },
+  ): Promise<DossierEtude> {
+    return this.post<DossierEtude>(
+      `${this.basePath}/${dossierId}/pieces-attendues/appliquer-proposition`,
+      body,
     );
   }
 

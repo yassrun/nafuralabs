@@ -19,6 +19,8 @@ public interface DossierEtudeRepository extends JpaRepository<DossierEtude, UUID
 
     Optional<DossierEtude> findByTenantIdAndDpgfId(UUID tenantId, UUID dpgfId);
 
+    Optional<DossierEtude> findByTenantIdAndAppelOffreClientId(UUID tenantId, UUID appelOffreClientId);
+
     boolean existsByTenantIdAndNumero(UUID tenantId, String numero);
 
     long countByTenantId(UUID tenantId);

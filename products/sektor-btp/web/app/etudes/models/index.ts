@@ -422,6 +422,9 @@ export interface DossierEtude {
   cpsDocumentId?: string;
   bordereauDocumentId?: string;
   appelOffreClientId?: string;
+  /** Enrichissement listing (AOC lié). */
+  aoType?: string | null;
+  aoDateLimiteDepot?: string | null;
   dpgfId?: string;
   currentStep: number;
   status: StatutDossierEtude;
@@ -459,7 +462,18 @@ export type DossierEtudeCreate = Pick<DossierEtude, 'objet'> &
       | 'origine'
       | 'notes'
     >
-  >;
+  > & {
+    aoReference?: string;
+    aoType?: 'PUBLIC' | 'PRIVE' | string;
+    dateLimiteDepot?: string;
+    dateOuverturePlis?: string;
+    ville?: string;
+    delaiExecutionJours?: number;
+    estimationMoaHt?: number;
+    cautionProvisoire?: number;
+    cautionDefinitive?: number;
+    cautionRetenueGarantie?: number;
+  };
 
 export type DossierEtudeUpdate = Partial<DossierEtudeCreate> & { version?: number };
 
@@ -492,4 +506,41 @@ export interface DossierDocument {
   ordre: number;
   createdBy?: string;
   createdAt?: string;
+}
+
+export type SourcePieceAttendue = 'IA' | 'MANUEL';
+
+export interface DossierPieceAttendue {
+  id: string;
+  dossierEtudeId: string;
+  type: string;
+  libelle: string;
+  obligatoire: boolean;
+  source: SourcePieceAttendue | string;
+  dossierDocumentId?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface MarcheProposeMetadonnees {
+  objet?: string | null;
+  type?: string | null;
+  dateLimiteDepot?: string | null;
+  donneurOrdre?: string | null;
+  ville?: string | null;
+  reference?: string | null;
+  delaiExecutionJours?: number | null;
+  estimationMoaHt?: number | null;
+}
+
+export interface MarcheProposePiece {
+  type: string;
+  libelle: string;
+  obligatoire: boolean;
+}
+
+export interface MarchePropose {
+  metadonnees?: MarcheProposeMetadonnees | null;
+  piecesAttendues: MarcheProposePiece[];
+  confiance?: number | null;
 }

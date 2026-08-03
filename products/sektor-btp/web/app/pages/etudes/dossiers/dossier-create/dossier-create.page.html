@@ -1,8 +1,8 @@
 <section class="creer">
-  <h1 class="creer__titre">Nouveau dossier d'étude</h1>
+  <h1 class="creer__titre">Nouvelle étude / appel d'offres</h1>
   <p class="creer__aide">
-    Un dossier porte un marché entrant : ses pièces (CPS, bordereau), son chiffrage et son devis.
-    L'objet et le client suffisent à démarrer — le reste se renseigne étape par étape.
+    Un seul formulaire crée le dossier d'étude et l'appel d'offres lié. Ensuite : dépôt des
+    pièces du marché (BDP, CPS, etc.).
   </p>
 
   @if (erreur(); as message) {
@@ -10,36 +10,146 @@
   }
 
   <form class="creer__form" (ngSubmit)="creer()">
-    <label class="creer__champ">
-      <span class="creer__label">Objet <span aria-hidden="true">*</span></span>
-      <input
-        name="objet"
-        required
-        autofocus
-        placeholder="Construction d'un ensemble résidentiel — lot gros œuvre"
-        [ngModel]="objet()"
-        (ngModelChange)="objet.set($event)"
-      />
-    </label>
+    <fieldset class="creer__groupe">
+      <legend class="creer__legend">Marché</legend>
 
-    <div class="creer__champ">
-      <app-client-partner-select
-        controlId="dossier-create-client"
-        label="Client *"
-        placeholder="Sélectionner un client Partner"
-        [required]="true"
-        [clientId]="clientId()"
-        [clientNom]="clientNom()"
-        (selectionChange)="onClientSelection($event)"
-      />
-    </div>
+      <label class="creer__champ">
+        <span class="creer__label">Objet <span aria-hidden="true">*</span></span>
+        <input
+          name="objet"
+          required
+          autofocus
+          placeholder="Construction d'un ensemble résidentiel — lot gros œuvre"
+          [ngModel]="objet()"
+          (ngModelChange)="objet.set($event)"
+        />
+      </label>
+
+      <div class="creer__champ">
+        <app-client-partner-select
+          controlId="dossier-create-client"
+          label="Client / MOA *"
+          placeholder="Sélectionner un client Partner"
+          [required]="true"
+          [clientId]="clientId()"
+          [clientNom]="clientNom()"
+          (selectionChange)="onClientSelection($event)"
+        />
+      </div>
+
+      <label class="creer__champ">
+        <span class="creer__label">Date limite de dépôt <span aria-hidden="true">*</span></span>
+        <input
+          type="date"
+          name="dateLimiteDepot"
+          required
+          [ngModel]="dateLimiteDepot()"
+          (ngModelChange)="dateLimiteDepot.set($event)"
+        />
+      </label>
+    </fieldset>
+
+    <fieldset class="creer__groupe">
+      <legend class="creer__legend">Appel d'offres</legend>
+
+      <div class="creer__grille">
+        <label class="creer__champ">
+          <span class="creer__label">Référence <span class="creer__optionnel">(optionnel)</span></span>
+          <input
+            name="aoReference"
+            placeholder="AO-2026-014"
+            [ngModel]="aoReference()"
+            (ngModelChange)="aoReference.set($event)"
+          />
+        </label>
+
+        <label class="creer__champ">
+          <span class="creer__label">Type</span>
+          <select
+            name="aoType"
+            [ngModel]="aoType()"
+            (ngModelChange)="aoType.set($event)"
+          >
+            <option value="PUBLIC">Public</option>
+            <option value="PRIVE">Privé</option>
+          </select>
+        </label>
+
+        <label class="creer__champ">
+          <span class="creer__label">Ville</span>
+          <input
+            name="ville"
+            placeholder="Casablanca"
+            [ngModel]="ville()"
+            (ngModelChange)="ville.set($event)"
+          />
+        </label>
+
+        <label class="creer__champ">
+          <span class="creer__label">Ouverture des plis</span>
+          <input
+            type="date"
+            name="dateOuverturePlis"
+            [ngModel]="dateOuverturePlis()"
+            (ngModelChange)="dateOuverturePlis.set($event)"
+          />
+        </label>
+
+        <label class="creer__champ">
+          <span class="creer__label">Délai d'exécution (jours)</span>
+          <input
+            type="number"
+            name="delai"
+            min="1"
+            [ngModel]="delaiExecutionJours()"
+            (ngModelChange)="delaiExecutionJours.set($event === '' || $event == null ? null : +$event)"
+          />
+        </label>
+
+        <label class="creer__champ">
+          <span class="creer__label">Estimation MOA HT</span>
+          <input
+            type="number"
+            name="estimation"
+            min="0"
+            step="0.01"
+            [ngModel]="estimationMoaHt()"
+            (ngModelChange)="estimationMoaHt.set($event === '' || $event == null ? null : +$event)"
+          />
+        </label>
+
+        <label class="creer__champ">
+          <span class="creer__label">Caution provisoire</span>
+          <input
+            type="number"
+            name="cautionProv"
+            min="0"
+            step="0.01"
+            [ngModel]="cautionProvisoire()"
+            (ngModelChange)="cautionProvisoire.set($event === '' || $event == null ? null : +$event)"
+          />
+        </label>
+
+        <label class="creer__champ">
+          <span class="creer__label">Caution définitive</span>
+          <input
+            type="number"
+            name="cautionDef"
+            min="0"
+            step="0.01"
+            [ngModel]="cautionDefinitive()"
+            (ngModelChange)="cautionDefinitive.set($event === '' || $event == null ? null : +$event)"
+          />
+        </label>
+      </div>
+    </fieldset>
 
     <div class="creer__actions">
       <button type="button" class="creer__bouton" (click)="annuler()">Annuler</button>
       <button
         type="submit"
         class="creer__bouton creer__bouton--principal"
-        [disabled]="!objet().trim() || !clientId() || enCours()"
+        [disabled]="!peutCreer()"
       >
         {{ enCours() ? 'Création…' : 'Créer et commencer' }}
       </button>

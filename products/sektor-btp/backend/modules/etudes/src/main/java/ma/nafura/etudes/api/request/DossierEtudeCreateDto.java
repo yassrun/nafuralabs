@@ -2,6 +2,8 @@ package ma.nafura.etudes.api.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.UUID;
 import lombok.Data;
 
@@ -37,4 +39,31 @@ public class DossierEtudeCreateDto {
     private String origine;
 
     private String notes;
+
+    // ── AO unifié (S5) — si dateLimiteDepot présent → crée aussi un AOC lié ──
+
+    /** Référence AO (générée si absente lors de la création AOC). */
+    @Size(max = 100)
+    private String aoReference;
+
+    /** PUBLIC / PRIVE — défaut PUBLIC. */
+    @Size(max = 20)
+    private String aoType;
+
+    private LocalDate dateLimiteDepot;
+
+    private LocalDate dateOuverturePlis;
+
+    @Size(max = 255)
+    private String ville;
+
+    private Integer delaiExecutionJours;
+
+    private BigDecimal estimationMoaHt;
+
+    private BigDecimal cautionProvisoire;
+
+    private BigDecimal cautionDefinitive;
+
+    private BigDecimal cautionRetenueGarantie;
 }

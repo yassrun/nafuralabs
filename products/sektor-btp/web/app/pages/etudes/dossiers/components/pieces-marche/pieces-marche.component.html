@@ -14,30 +14,67 @@
   }
 
   @if (mode() === 'documents') {
+    @if (proposition(); as prop) {
+      <aside class="pieces__prop" role="region" aria-label="Propositions CPS">
+        <div class="pieces__prop-body">
+          <strong>Propositions depuis le CPS</strong>
+          <p>
+            {{ prop.piecesAttendues.length }} pièce(s) suggérée(s)
+            @if (prop.metadonnees?.objet) {
+              — objet : {{ prop.metadonnees!.objet }}
+            }
+            @if (prop.confiance != null) {
+              <span class="pieces__prop-conf">(confiance {{ confiancePct(prop.confiance) }} %)</span>
+            }
+          </p>
+        </div>
+        <div class="pieces__prop-actions">
+          <button type="button" class="pieces__btn" [disabled]="propositionBusy()" (click)="discardProposition()">
+            Ignorer
+          </button>
+          <button
+            type="button"
+            class="pieces__btn pieces__btn--primary"
+            [disabled]="propositionBusy()"
+            (click)="applyProposition()"
+          >
+            {{ propositionBusy() ? 'Application…' : 'Appliquer' }}
+          </button>
+        </div>
+      </aside>
+    }
+
     @if (chargement()) {
       <p class="pieces__etat">Chargement des pièces…</p>
     } @else {
-      <div class="pieces__zones" role="group" aria-label="Dépôt BDP et CPS">
-        @for (slot of slots; track slot.type) {
-          @let piece = slot.type === 'BORDEREAU' ? pieceBordereau() : pieceCps();
-          @let busy = envoiSlot() === slot.type;
-          @let over = dragOverSlot() === slot.type;
+      <div class="pieces__zones" role="group" aria-label="Pièces attendues">
+        @for (slot of slotsAttendus(); track slot.id) {
+          @let piece = documentPourSlot(slot);
+          @let busy = envoiSlot() === slot.id;
+          @let over = dragOverSlot() === slot.id;
           <div
             class="pieces__zone"
             [class.pieces__zone--filled]="!!piece"
             [class.pieces__zone--over]="over"
             [class.pieces__zone--busy]="busy"
-            [class.pieces__zone--required]="!piece"
-            (dragover)="onDragOver($event, slot.type)"
-            (dragleave)="onDragLeave($event, slot.type)"
-            (drop)="onDrop($event, slot.type)"
+            [class.pieces__zone--required]="slot.obligatoire && !piece"
+            (dragover)="onDragOver($event, slot.id)"
+            (dragleave)="onDragLeave($event, slot.id)"
+            (drop)="onDrop($event, slot)"
           >
             <div class="pieces__zone-head">
-              <span class="pieces__zone-badge">{{ slot.badge }}</span>
-              <span class="pieces__zone-req" aria-hidden="true">Obligatoire</span>
+              <span class="pieces__zone-badge">{{ badgeSlot(slot) }}</span>
+              @if (slot.obligatoire) {
+                <span class="pieces__zone-req" aria-hidden="true">Obligatoire</span>
+              } @else {
+                <span class="pieces__zone-opt">Optionnel</span>
+              }
+              @if (slot.source === 'IA') {
+                <span class="pieces__zone-ia">IA</span>
+              }
             </div>
-            <h4 class="pieces__zone-titre">{{ slot.titre }}</h4>
-            <p class="pieces__zone-aide">{{ slot.aide }}</p>
+            <h4 class="pieces__zone-titre">{{ slot.libelle }}</h4>
+            <p class="pieces__zone-aide">{{ libelleType(slot.type) }}</p>
 
             @if (piece) {
               <div class="pieces__zone-fichier">
@@ -64,7 +101,7 @@
                     type="file"
                     [accept]="acceptFiles"
                     [disabled]="!!envoiSlot()"
-                    (change)="onFichierChoisi($event, slot.type)"
+                    (change)="onFichierChoisi($event, slot)"
                   />
                 </label>
               }
@@ -79,38 +116,76 @@
                   type="file"
                   [accept]="acceptFiles"
                   [disabled]="!!envoiSlot()"
-                  (change)="onFichierChoisi($event, slot.type)"
+                  (change)="onFichierChoisi($event, slot)"
                 />
               </label>
             } @else {
               <p class="pieces__vide">Non déposé</p>
             }
+
+            @if (modifiable() && slot.type !== 'BORDEREAU' && slot.type !== 'CPS') {
+              <div class="pieces__zone-meta">
+                <button type="button" class="pieces__link" (click)="basculerObligatoire(slot)">
+                  {{ slot.obligatoire ? 'Rendre optionnel' : 'Rendre obligatoire' }}
+                </button>
+                <button type="button" class="pieces__link pieces__link--danger" (click)="retirerSlot(slot)">
+                  Retirer le slot
+                </button>
+              </div>
+            }
           </div>
         }
       </div>
 
-      @if (piecesAutres().length > 0) {
-        <h4 class="pieces__autres-titre">Autres pièces</h4>
-        <ul class="pieces__liste">
-          @for (piece of piecesAutres(); track piece.id) {
-            <li class="pieces__ligne">
-              <span class="pieces__type">{{ libelleType(piece.type) }}</span>
-              <span class="pieces__nom">{{ piece.nomFichier || piece.documentId }}</span>
-              @if (modifiable()) {
+      @if (modifiable()) {
+        <div class="pieces__ajout">
+          @if (!ajoutOuvert()) {
+            <button type="button" class="pieces__btn" (click)="ajoutOuvert.set(true)">
+              Ajouter une pièce
+            </button>
+          } @else {
+            <div class="pieces__ajout-form">
+              <label>
+                <span>Type</span>
+                <select [ngModel]="ajoutType()" (ngModelChange)="ajoutType.set($event)">
+                  @for (t of typesAjout; track t.value) {
+                    <option [value]="t.value">{{ t.label }}</option>
+                  }
+                  <option value="CAUTION">Caution</option>
+                  <option value="ATTESTATION">Attestation</option>
+                </select>
+              </label>
+              <label>
+                <span>Libellé</span>
+                <input
+                  type="text"
+                  [ngModel]="ajoutLibelle()"
+                  (ngModelChange)="ajoutLibelle.set($event)"
+                  placeholder="Ex. Règlement de consultation"
+                />
+              </label>
+              <label class="pieces__ajout-check">
+                <input
+                  type="checkbox"
+                  [ngModel]="ajoutObligatoire()"
+                  (ngModelChange)="ajoutObligatoire.set($event)"
+                />
+                Obligatoire
+              </label>
+              <div class="pieces__ajout-actions">
+                <button type="button" class="pieces__btn" (click)="ajoutOuvert.set(false)">Annuler</button>
                 <button
                   type="button"
-                  mat-icon-button
-                  class="pieces__icon-btn pieces__icon-btn--danger"
-                  matTooltip="Retirer"
-                  aria-label="Retirer le document"
-                  (click)="supprimer(piece)"
+                  class="pieces__btn pieces__btn--primary"
+                  [disabled]="propositionBusy()"
+                  (click)="ajouterPiece()"
                 >
-                  <mat-icon>delete</mat-icon>
+                  Ajouter
                 </button>
-              }
-            </li>
+              </div>
+            </div>
           }
-        </ul>
+        </div>
       }
     }
   } @else {

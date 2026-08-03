@@ -22,5 +22,5 @@ import { buildDossierListingConfig } from '../config/listing.config';
 export class DossierListingPage extends ConfigDrivenListingPage<DossierEtude> {
   readonly facade = inject(DossierEtudeFacade);
   readonly config = buildDossierListingConfig();
-  readonly headerTitle = "Dossiers d'étude";
+  readonly headerTitle = "Études / appels d'offres";
 }

@@ -18,15 +18,45 @@ export const DOSSIER_ROUTES: ListingRouteConfig<DossierEtude> = {
 function buildColumns(): ColumnConfig[] {
   return [
     { key: 'numero', label: 'N°', field: 'numero', type: 'text', sortable: true, width: '120px' },
-    { key: 'objet', label: 'Objet', field: 'objet', type: 'text', sortable: true },
-    { key: 'clientNom', label: 'Client', field: 'clientNom', type: 'text', sortable: true },
+    {
+      key: 'objet',
+      label: 'Objet',
+      field: 'objet',
+      type: 'text',
+      sortable: true,
+      width: '280px',
+      // S4 — largeur fixe + ellipsis via CSS listing (cellule tronquée).
+      cssClass: 'dossier-col-objet',
+    },
+    { key: 'clientNom', label: 'Client', field: 'clientNom', type: 'text', sortable: true, width: '160px' },
+    {
+      key: 'aoType',
+      label: 'Type AO',
+      field: 'aoType',
+      type: 'text',
+      sortable: true,
+      width: '100px',
+      transform: (value: unknown) => {
+        if (value === 'PUBLIC') return 'Public';
+        if (value === 'PRIVE') return 'Privé';
+        return value ? String(value) : '—';
+      },
+    },
+    {
+      key: 'aoDateLimiteDepot',
+      label: 'Limite dépôt',
+      field: 'aoDateLimiteDepot',
+      type: 'date',
+      sortable: true,
+      width: '130px',
+    },
     {
       key: 'currentStep',
       label: 'Étape',
       field: 'currentStep',
       type: 'text',
       sortable: true,
-      width: '220px',
+      width: '200px',
       transform: (value: unknown) => {
         const backend = Number(value);
         if (!Number.isFinite(backend)) return String(value ?? '');
@@ -40,7 +70,7 @@ function buildColumns(): ColumnConfig[] {
       field: 'status',
       type: 'badge',
       sortable: true,
-      width: '150px',
+      width: '140px',
       badgeVariant: (value: unknown) => DOSSIER_STATUT_VARIANTS[String(value)] ?? 'default',
       transform: (value: unknown) =>
         DOSSIER_STATUT_LABELS[String(value)] ?? String(value ?? ''),
@@ -51,7 +81,7 @@ function buildColumns(): ColumnConfig[] {
       field: 'updatedAt',
       type: 'date',
       sortable: true,
-      width: '140px',
+      width: '130px',
     },
   ];
 }
@@ -59,8 +89,8 @@ function buildColumns(): ColumnConfig[] {
 export function buildDossierListingConfig() {
   return buildListingConfig<DossierEtude>(
     {
-      entityName: "Dossier d'étude",
-      entityNamePlural: "Dossiers d'étude",
+      entityName: "Étude / AO",
+      entityNamePlural: "Études / appels d'offres",
       columns: buildColumns(),
       routes: DOSSIER_ROUTES,
       permissionPrefix: 'etude',
@@ -78,10 +108,10 @@ export function buildDossierListingConfig() {
       },
       emptyState: {
         icon: 'calculate',
-        title: "Aucun dossier d'étude",
+        title: "Aucune étude / appel d'offres",
         message:
-          "Un dossier d'étude porte un marché entrant : ses pièces (CPS, bordereau), son chiffrage et son devis.",
-        actionLabel: 'Nouveau dossier',
+          "Créez un dossier pour un marché entrant : pièces (CPS, bordereau), chiffrage et devis.",
+        actionLabel: 'Nouvelle étude',
         actionId: 'create',
       },
     },

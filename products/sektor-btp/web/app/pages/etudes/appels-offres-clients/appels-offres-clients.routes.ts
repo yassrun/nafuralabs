@@ -1,20 +1,23 @@
 import { Routes } from '@angular/router';
 
+/**
+ * Legacy AOC routes — S5 : redirect vers le parcours dossier unifié.
+ */
 export const APPELS_OFFRES_CLIENTS_ROUTES: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    loadComponent: () => import('./aoc-listing').then((m) => m.AOCListingPage),
-    data: { title: "Appels d'offres clients", breadcrumb: "Appels d'offres clients" },
+    redirectTo: '/etudes/dossiers',
   },
   {
     path: 'new',
-    loadComponent: () => import('./aoc-detail').then((m) => m.AOCDetailPage),
-    data: { title: 'Nouveau AO', breadcrumb: 'Nouveau' },
+    pathMatch: 'full',
+    redirectTo: '/etudes/dossiers/new',
   },
   {
     path: ':id',
-    loadComponent: () => import('./aoc-detail').then((m) => m.AOCDetailPage),
-    data: { title: 'Détail AO', breadcrumb: 'Détail' },
+    loadComponent: () =>
+      import('./aoc-to-dossier-redirect.page').then((m) => m.AocToDossierRedirectPage),
+    data: { title: 'Redirection AO', breadcrumb: 'AO' },
   },
 ];

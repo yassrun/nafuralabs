@@ -469,8 +469,7 @@ export const ERP_NAV_CONFIG_GENERATED: SidebarNode[] = [
         order: 10,
         children: [
           {
-            // Point d'entrée du parcours d'étude : c'est ici que le CPS et le bordereau
-            // sont déposés, puis chiffrés étape par étape.
+            // Parcours unifié Étude / AO : dépôt pièces, bordereau, chiffrage.
             id: 'etudes.dossiers',
             label: 'nav.etudes.dossiers',
             icon: 'clipboard-list',
@@ -497,21 +496,6 @@ export const ERP_NAV_CONFIG_GENERATED: SidebarNode[] = [
             icon: 'file-text',
             route: '/etudes/devis',
             order: 30,
-          },
-        ],
-      },
-      {
-        id: 'etudes.soumissions',
-        label: 'nav.etudes.soumissions',
-        icon: 'megaphone',
-        order: 40,
-        children: [
-          {
-            id: 'etudes.appelsOffresClients',
-            label: 'nav.etudes.appelsOffresClients',
-            icon: 'megaphone',
-            route: '/etudes/appels-offres-clients',
-            order: 10,
           },
         ],
       },

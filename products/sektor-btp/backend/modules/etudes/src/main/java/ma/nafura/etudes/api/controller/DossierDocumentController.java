@@ -259,4 +259,18 @@ public class DossierDocumentController {
                 .<ResponseEntity<?>>map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.noContent().build());
     }
+
+    /**
+     * Métadonnées marché + checklist pièces depuis le CPS indexé (reviewable).
+     * {@code cpsDocumentId} = id de la pièce {@link DossierDocument} de type CPS.
+     */
+    @PostMapping("/cps/{cpsDocumentId}/proposer-marche")
+    @RequirePermission("etude.update")
+    public ResponseEntity<?> proposerMarche(
+            @PathVariable UUID dossierId, @PathVariable UUID cpsDocumentId) {
+        return cpsService
+                .proposerMarche(cpsDocumentId)
+                .<ResponseEntity<?>>map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.noContent().build());
+    }
 }

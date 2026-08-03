@@ -4,7 +4,7 @@
 }
 
 .creer {
-  max-width: 640px;
+  max-width: 760px;
   margin: 0 auto;
   padding: 32px 24px;
 }
@@ -34,7 +34,38 @@
 .creer__form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 24px;
+}
+
+.creer__groupe {
+  margin: 0;
+  padding: 0;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.creer__legend {
+  padding: 0;
+  margin: 0 0 4px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--nf-color-text-secondary);
+}
+
+.creer__grille {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 640px) {
+  .creer__grille {
+    grid-template-columns: 1fr;
+  }
 }
 
 .creer__champ {
@@ -54,7 +85,8 @@
   color: var(--nf-color-text-muted);
 }
 
-.creer__champ input {
+.creer__champ input,
+.creer__champ select {
   border: 1px solid var(--nf-color-border);
   border-radius: 6px;
   background: var(--nf-color-surface);

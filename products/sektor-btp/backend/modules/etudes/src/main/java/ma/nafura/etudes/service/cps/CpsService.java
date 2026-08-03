@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import ma.nafura.etudes.api.dto.MarcheProposeDto;
 import ma.nafura.etudes.domain.model.CpsDocument;
 import ma.nafura.etudes.domain.model.CpsSection;
 import ma.nafura.etudes.domain.model.DossierDocument;
@@ -41,6 +42,7 @@ public class CpsService {
     private final ExtracteurTextePdf extracteur;
     private final CpsSectionneur sectionneur;
     private final DescriptifCpsPort descriptifPort;
+    private final MarcheProposePort marcheProposePort;
 
     public CpsService(
             DossierDocumentRepository dossierDocumentRepository,
@@ -48,13 +50,15 @@ public class CpsService {
             CpsSectionRepository sectionRepository,
             ExtracteurTextePdf extracteur,
             CpsSectionneur sectionneur,
-            DescriptifCpsPort descriptifPort) {
+            DescriptifCpsPort descriptifPort,
+            MarcheProposePort marcheProposePort) {
         this.dossierDocumentRepository = dossierDocumentRepository;
         this.cpsDocumentRepository = cpsDocumentRepository;
         this.sectionRepository = sectionRepository;
         this.extracteur = extracteur;
         this.sectionneur = sectionneur;
         this.descriptifPort = descriptifPort;
+        this.marcheProposePort = marcheProposePort;
     }
 
     /**
@@ -168,6 +172,32 @@ public class CpsService {
             return Optional.empty();
         }
         return descriptifPort.proposer(article, candidates);
+    }
+
+    /**
+     * Propose métadonnées + checklist pièces après index CPS.
+     *
+     * <p>Vide (→ 204) si le port est indisponible ou si les sections ne permettent pas de
+     * conclure — l'UI bascule alors en parcours manuel.
+     */
+    @Transactional(readOnly = true)
+    public Optional<MarcheProposeDto> proposerMarche(UUID dossierDocumentId) {
+        if (!marcheProposePort.isAvailable()) {
+            return Optional.empty();
+        }
+        UUID tenant = tenantId();
+        CpsDocument cps = cpsDocumentRepository
+                .findByTenantIdAndDossierDocumentId(tenant, dossierDocumentId)
+                .orElse(null);
+        if (cps == null || cps.getId() == null) {
+            return Optional.empty();
+        }
+        List<CpsSection> sections =
+                sectionRepository.findByTenantIdAndCpsDocumentIdOrderByOrdreAsc(tenant, cps.getId());
+        if (sections.isEmpty()) {
+            return Optional.empty();
+        }
+        return marcheProposePort.proposer(sections);
     }
 
     @Transactional(readOnly = true)

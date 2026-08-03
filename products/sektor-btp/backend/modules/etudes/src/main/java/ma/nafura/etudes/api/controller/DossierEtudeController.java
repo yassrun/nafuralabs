@@ -39,8 +39,16 @@ public class DossierEtudeController {
 
     @GetMapping
     @RequirePermission("etude.read")
-    public ResponseEntity<List<DossierEtude>> list(
-            @RequestParam(required = false) StatutDossierEtude status) {
+    public ResponseEntity<?> list(
+            @RequestParam(required = false) StatutDossierEtude status,
+            @RequestParam(required = false) UUID appelOffreClientId) {
+        if (appelOffreClientId != null) {
+            try {
+                return ResponseEntity.ok(service.findByAppelOffreClientId(appelOffreClientId));
+            } catch (IllegalArgumentException ex) {
+                return ResponseEntity.notFound().build();
+            }
+        }
         return ResponseEntity.ok(service.list(status));
     }
 

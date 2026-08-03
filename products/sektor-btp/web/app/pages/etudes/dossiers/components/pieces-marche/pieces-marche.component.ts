@@ -8,6 +8,7 @@ import {
   output,
   signal,
 } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -15,7 +16,12 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { ButtonComponent, ConfirmDialogService } from '@lib/anatomy';
 
 import { TYPES_DOSSIER_DOCUMENT } from '@app/etudes/models';
-import type { DossierDocument } from '@app/etudes/models';
+import type {
+  DossierDocument,
+  DossierPieceAttendue,
+  MarchePropose,
+  TypeDossierDocument,
+} from '@app/etudes/models';
 
 import { BordereauArbreComponent } from '../bordereau-arbre/bordereau-arbre.component';
 import {
@@ -31,10 +37,9 @@ import {
 
 export type PiecesMarcheMode = 'documents' | 'bordereau';
 export type ExtractionPhase = 'idle' | 'running' | 'review' | 'saving' | 'error';
-export type DocumentSlot = 'BORDEREAU' | 'CPS';
 
 /**
- * Étape 1 — dépôt BDP/CPS sans extraction.
+ * Étape 1 — slots dynamiques (pièces attendues) + dépôt.
  * Étape 2 — choix manuel / auto pour construire l'arbre bordereau.
  */
 @Component({
@@ -44,6 +49,7 @@ export type DocumentSlot = 'BORDEREAU' | 'CPS';
   imports: [
     ButtonComponent,
     BordereauArbreComponent,
+    FormsModule,
     MatButtonModule,
     MatIconModule,
     MatTooltipModule,
@@ -69,30 +75,15 @@ export class PiecesMarcheComponent {
   readonly acceptFiles =
     '.pdf,.xlsx,.xls,.csv,.doc,.docx,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
-  readonly slots: {
-    type: DocumentSlot;
-    badge: string;
-    titre: string;
-    aide: string;
-  }[] = [
-    {
-      type: 'BORDEREAU',
-      badge: 'BDP',
-      titre: 'Bordereau des prix',
-      aide: 'BPU / DQE — source de l’arbre à l’étape suivante.',
-    },
-    {
-      type: 'CPS',
-      badge: 'CPS',
-      titre: 'Cahier des clauses',
-      aide: 'CPS / CCTP — descriptifs utilisés en décomposition.',
-    },
-  ];
+  readonly typesAjout = TYPES_DOSSIER_DOCUMENT.filter(
+    (t) => t.value !== 'CPS_ET_BORDEREAU',
+  );
 
   readonly pieces = signal<DossierDocument[]>([]);
+  readonly slotsAttendus = signal<DossierPieceAttendue[]>([]);
   readonly chargement = signal(false);
-  readonly envoiSlot = signal<DocumentSlot | null>(null);
-  readonly dragOverSlot = signal<DocumentSlot | null>(null);
+  readonly envoiSlot = signal<string | null>(null);
+  readonly dragOverSlot = signal<string | null>(null);
   readonly initManuel = signal(false);
   readonly erreur = signal<string | undefined>(undefined);
   readonly info = signal<string | undefined>(undefined);
@@ -108,6 +99,13 @@ export class PiecesMarcheComponent {
   readonly progressPercent = signal(0);
   readonly progressStep = signal<string | null>(null);
 
+  readonly proposition = signal<MarchePropose | null>(null);
+  readonly propositionBusy = signal(false);
+  readonly ajoutOuvert = signal(false);
+  readonly ajoutType = signal<string>('REGLEMENT');
+  readonly ajoutLibelle = signal('');
+  readonly ajoutObligatoire = signal(true);
+
   readonly dpgfEffectif = computed(() => this.dpgfIdLocal() ?? this.dpgfId());
 
   readonly pieceBordereau = computed(() =>
@@ -118,15 +116,15 @@ export class PiecesMarcheComponent {
     this.pieces().find((p) => p.type === 'CPS' || p.type === 'CPS_ET_BORDEREAU'),
   );
 
-  readonly piecesAutres = computed(() =>
-    this.pieces().filter(
-      (p) => p.type !== 'BORDEREAU' && p.type !== 'CPS' && p.type !== 'CPS_ET_BORDEREAU',
-    ),
-  );
-
   readonly piecesBordereau = computed(() =>
     this.pieces().filter((p) => p.type === 'BORDEREAU' || p.type === 'CPS_ET_BORDEREAU'),
   );
+
+  readonly documentParId = computed(() => {
+    const map = new Map<string, DossierDocument>();
+    for (const p of this.pieces()) map.set(p.id, p);
+    return map;
+  });
 
   readonly titre = computed(() =>
     this.mode() === 'bordereau' ? 'Bordereau' : 'Pièces du marché',
@@ -135,7 +133,7 @@ export class PiecesMarcheComponent {
   readonly aide = computed(() =>
     this.mode() === 'bordereau'
       ? 'Construisez l’arbre du bordereau : extraction automatique depuis le BDP déjà déposé, ou saisie manuelle.'
-      : 'Déposez le BDP et le CPS — les deux sont obligatoires pour continuer. Aucune extraction à cette étape.',
+      : 'Déposez chaque pièce attendue. BDP et CPS sont obligatoires ; d’autres slots peuvent venir du CPS (à valider) ou être ajoutés manuellement.',
   );
 
   readonly enRevue = computed(() => this.phase() === 'review' || this.phase() === 'saving');
@@ -166,6 +164,8 @@ export class PiecesMarcheComponent {
     TYPES_DOSSIER_DOCUMENT.map((t) => [t.value, t.label]),
   ) as Record<string, string>;
 
+  private proposeTentePour = '';
+
   constructor() {
     effect(() => {
       const id = this.dossierId();
@@ -192,6 +192,25 @@ export class PiecesMarcheComponent {
     return this.labelsParType[type] ?? type;
   }
 
+  confiancePct(c: number): number {
+    return Math.round(c * 100);
+  }
+
+  badgeSlot(slot: DossierPieceAttendue): string {
+    if (slot.type === 'BORDEREAU') return 'BDP';
+    if (slot.type === 'CPS') return 'CPS';
+    return slot.type.slice(0, 6);
+  }
+
+  documentPourSlot(slot: DossierPieceAttendue): DossierDocument | undefined {
+    if (slot.dossierDocumentId) {
+      return this.documentParId().get(slot.dossierDocumentId);
+    }
+    if (slot.type === 'BORDEREAU') return this.pieceBordereau();
+    if (slot.type === 'CPS') return this.pieceCps();
+    return this.pieces().find((p) => p.type === slot.type);
+  }
+
   async setVoie(next: 'auto' | 'manuel'): Promise<void> {
     if (next === this.voie()) return;
     if (this.enRevue() || this.extractionEnCours()) {
@@ -210,20 +229,20 @@ export class PiecesMarcheComponent {
     this.info.set(undefined);
   }
 
-  onDragOver(event: DragEvent, slot: DocumentSlot): void {
+  onDragOver(event: DragEvent, slotKey: string): void {
     if (!this.modifiable() || this.envoiSlot()) return;
     event.preventDefault();
     event.stopPropagation();
-    this.dragOverSlot.set(slot);
+    this.dragOverSlot.set(slotKey);
   }
 
-  onDragLeave(event: DragEvent, slot: DocumentSlot): void {
+  onDragLeave(event: DragEvent, slotKey: string): void {
     event.preventDefault();
     event.stopPropagation();
-    if (this.dragOverSlot() === slot) this.dragOverSlot.set(null);
+    if (this.dragOverSlot() === slotKey) this.dragOverSlot.set(null);
   }
 
-  async onDrop(event: DragEvent, slot: DocumentSlot): Promise<void> {
+  async onDrop(event: DragEvent, slot: DossierPieceAttendue): Promise<void> {
     event.preventDefault();
     event.stopPropagation();
     this.dragOverSlot.set(null);
@@ -231,17 +250,17 @@ export class PiecesMarcheComponent {
     if (file) await this.deposer(file, slot);
   }
 
-  async onFichierChoisi(event: Event, slot: DocumentSlot): Promise<void> {
+  async onFichierChoisi(event: Event, slot: DossierPieceAttendue): Promise<void> {
     const inputEl = event.target as HTMLInputElement | null;
     const file = inputEl?.files?.[0];
     if (file) await this.deposer(file, slot);
     if (inputEl) inputEl.value = '';
   }
 
-  private async deposer(file: File, slot: DocumentSlot): Promise<void> {
+  private async deposer(file: File, slot: DossierPieceAttendue): Promise<void> {
     if (!this.modifiable() || this.envoiSlot()) return;
 
-    const existante = slot === 'BORDEREAU' ? this.pieceBordereau() : this.pieceCps();
+    const existante = this.documentPourSlot(slot);
     if (existante) {
       const ok = await this.confirmDialog.confirm({
         title: 'Remplacer le fichier',
@@ -252,21 +271,143 @@ export class PiecesMarcheComponent {
       if (!ok) return;
     }
 
-    this.envoiSlot.set(slot);
+    this.envoiSlot.set(slot.id);
     this.erreur.set(undefined);
     try {
       if (existante) {
         await this.api.supprimerDocument(this.dossierId(), existante.id);
-        // Si CPS_ET_BORDEREAU couvrait les deux zones, l'autre slot se vide aussi —
-        // l'utilisateur devra redéposer la pièce manquante.
       }
-      await this.api.deposerDocument(this.dossierId(), file, slot);
+      const typeDepot = (slot.type === 'BORDEREAU' || slot.type === 'CPS'
+        ? slot.type
+        : slot.type) as TypeDossierDocument;
+      const doc = await this.api.deposerDocument(this.dossierId(), file, typeDepot);
+      if (slot.id && doc?.id) {
+        try {
+          await this.api.lierPieceAttendue(this.dossierId(), slot.id, doc.id);
+        } catch {
+          /* liaison auto côté back au dépôt */
+        }
+      }
+      await this.charger(this.dossierId());
+      this.change.emit();
+      if (slot.type === 'CPS' || typeDepot === 'CPS') {
+        void this.essayerPropositionApresCps();
+      }
+    } catch (e) {
+      this.erreur.set(this.messageErreur(e));
+    } finally {
+      this.envoiSlot.set(null);
+    }
+  }
+
+  async ajouterPiece(): Promise<void> {
+    const type = this.ajoutType().trim().toUpperCase();
+    const libelle = this.ajoutLibelle().trim() || this.libelleType(type);
+    if (!type || this.propositionBusy()) return;
+    this.propositionBusy.set(true);
+    this.erreur.set(undefined);
+    try {
+      await this.api.creerPieceAttendue(this.dossierId(), {
+        type,
+        libelle,
+        obligatoire: this.ajoutObligatoire(),
+      });
+      this.ajoutOuvert.set(false);
+      this.ajoutLibelle.set('');
       await this.charger(this.dossierId());
       this.change.emit();
     } catch (e) {
       this.erreur.set(this.messageErreur(e));
     } finally {
-      this.envoiSlot.set(null);
+      this.propositionBusy.set(false);
+    }
+  }
+
+  async basculerObligatoire(slot: DossierPieceAttendue): Promise<void> {
+    if (!this.modifiable() || slot.type === 'BORDEREAU' || slot.type === 'CPS') return;
+    try {
+      await this.api.updatePieceAttendue(this.dossierId(), slot.id, {
+        obligatoire: !slot.obligatoire,
+      });
+      await this.charger(this.dossierId());
+      this.change.emit();
+    } catch (e) {
+      this.erreur.set(this.messageErreur(e));
+    }
+  }
+
+  async retirerSlot(slot: DossierPieceAttendue): Promise<void> {
+    if (!this.modifiable() || slot.type === 'BORDEREAU' || slot.type === 'CPS') return;
+    const ok = await this.confirmDialog.confirm({
+      title: 'Retirer la pièce attendue',
+      message: `Retirer « ${slot.libelle} » de la checklist ?`,
+      variant: 'danger',
+      confirmLabel: 'Retirer',
+    });
+    if (!ok) return;
+    try {
+      await this.api.supprimerPieceAttendue(this.dossierId(), slot.id);
+      await this.charger(this.dossierId());
+      this.change.emit();
+    } catch (e) {
+      this.erreur.set(this.messageErreur(e));
+    }
+  }
+
+  discardProposition(): void {
+    this.proposition.set(null);
+  }
+
+  async applyProposition(): Promise<void> {
+    const prop = this.proposition();
+    if (!prop || this.propositionBusy()) return;
+    this.propositionBusy.set(true);
+    this.erreur.set(undefined);
+    try {
+      await this.api.appliquerPropositionMarche(this.dossierId(), {
+        metadonnees: prop.metadonnees ?? undefined,
+        piecesAttendues: prop.piecesAttendues,
+      });
+      this.proposition.set(null);
+      this.info.set('Propositions CPS appliquées — vérifiez les slots et les métadonnées.');
+      await this.charger(this.dossierId());
+      this.change.emit();
+    } catch (e) {
+      this.erreur.set(this.messageErreur(e));
+    } finally {
+      this.propositionBusy.set(false);
+    }
+  }
+
+  private async essayerPropositionApresCps(): Promise<void> {
+    const cps = this.pieceCps();
+    if (!cps?.id || this.proposition()) return;
+    // Index CPS async : quelques tentatives espacées.
+    for (const delay of [1500, 3000, 5000]) {
+      await this.sleep(delay);
+      try {
+        const prop = await this.api.proposerMarche(this.dossierId(), cps.id);
+        if (prop?.piecesAttendues?.length) {
+          this.proposition.set(prop);
+          return;
+        }
+      } catch {
+        /* retry */
+      }
+    }
+  }
+
+  private async tenterPropositionSiCps(): Promise<void> {
+    const cps = this.pieceCps();
+    if (!cps?.id || this.proposition() || this.proposeTentePour === cps.id) return;
+    this.proposeTentePour = cps.id;
+    try {
+      const prop = await this.api.proposerMarche(this.dossierId(), cps.id);
+      if (prop?.piecesAttendues?.length) {
+        this.proposition.set(prop);
+      }
+    } catch {
+      /* fallback manuel silencieux */
     }
   }
 
@@ -516,7 +657,15 @@ export class PiecesMarcheComponent {
   private async charger(dossierId: string): Promise<void> {
     this.chargement.set(true);
     try {
-      this.pieces.set(await this.api.listerDocuments(dossierId));
+      const [docs, slots] = await Promise.all([
+        this.api.listerDocuments(dossierId),
+        this.api.listerPiecesAttendues(dossierId),
+      ]);
+      this.pieces.set(docs);
+      this.slotsAttendus.set(slots);
+      if (this.mode() === 'documents') {
+        void this.tenterPropositionSiCps();
+      }
     } catch (e) {
       this.erreur.set(this.messageErreur(e));
     } finally {

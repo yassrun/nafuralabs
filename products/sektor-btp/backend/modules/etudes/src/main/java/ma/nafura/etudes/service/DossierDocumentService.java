@@ -13,6 +13,7 @@ import ma.nafura.platform.collaboration.docmanager.service.DocumentService;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -32,11 +33,15 @@ public class DossierDocumentService {
 
     private final DossierDocumentRepository repository;
     private final DocumentService documentService;
+    private final DossierPieceAttendueService pieceAttendueService;
 
     public DossierDocumentService(
-            DossierDocumentRepository repository, DocumentService documentService) {
+            DossierDocumentRepository repository,
+            DocumentService documentService,
+            @Lazy DossierPieceAttendueService pieceAttendueService) {
         this.repository = repository;
         this.documentService = documentService;
+        this.pieceAttendueService = pieceAttendueService;
     }
 
     @Transactional(readOnly = true)
@@ -76,7 +81,7 @@ public class DossierDocumentService {
                 null);
 
         int ordre = (int) repository.countByTenantIdAndDossierEtudeId(tenant, dossierEtudeId);
-        return repository.save(DossierDocument.builder()
+        DossierDocument saved = repository.save(DossierDocument.builder()
                 .tenantId(tenant)
                 .dossierEtudeId(dossierEtudeId)
                 .documentId(stored.getId().toString())
@@ -84,6 +89,8 @@ public class DossierDocumentService {
                 .type(typeNormalise)
                 .ordre(ordre)
                 .build());
+        pieceAttendueService.lierApresDepot(saved);
+        return saved;
     }
 
     /** Relit les octets de l'original stocké (pour extraction étape 2 / 3). */
@@ -105,6 +112,7 @@ public class DossierDocumentService {
         DossierDocument piece = repository
                 .findByIdAndTenantId(documentId, tenantId())
                 .orElseThrow(() -> new IllegalArgumentException("etudes.document.introuvable"));
+        pieceAttendueService.detacherDocument(piece.getId());
         repository.delete(piece);
     }
 

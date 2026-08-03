@@ -2,22 +2,30 @@ package ma.nafura.etudes.service;
 
 import java.math.BigDecimal;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import ma.nafura.etudes.api.dto.DossierEtudeSyntheseDto;
+import ma.nafura.etudes.api.request.AppelOffreClientCreateDto;
 import ma.nafura.etudes.api.request.DossierEtudeCreateDto;
 import ma.nafura.etudes.api.request.DossierEtudeUpdateDto;
+import ma.nafura.etudes.domain.model.AppelOffreClient;
 import ma.nafura.etudes.domain.model.Devis;
 import ma.nafura.etudes.domain.model.DossierDocument;
 import ma.nafura.etudes.domain.model.DossierEtude;
+import ma.nafura.etudes.domain.model.DossierPieceAttendue;
 import ma.nafura.etudes.domain.model.DpgfNoeud;
 import ma.nafura.etudes.domain.model.StatutDossierEtude;
+import ma.nafura.etudes.repository.AppelOffreClientRepository;
 import ma.nafura.etudes.repository.DevisRepository;
 import ma.nafura.etudes.repository.DossierDocumentRepository;
 import ma.nafura.etudes.repository.DossierEtudeRepository;
+import ma.nafura.etudes.repository.DossierPieceAttendueRepository;
 import ma.nafura.etudes.repository.DpgfNoeudRepository;
 import ma.nafura.etudes.service.gate.ContexteGate;
 import ma.nafura.etudes.service.gate.EtapeGate;
@@ -47,6 +55,10 @@ public class DossierEtudeService {
     private final EtudeApprovalPort approvalPort;
     private final EtudeClientPort clientPort;
     private final DevisService devisService;
+    private final AppelOffreClientService aocService;
+    private final AppelOffreClientRepository aocRepository;
+    private final DossierPieceAttendueService pieceAttendueService;
+    private final DossierPieceAttendueRepository pieceAttendueRepository;
     private final Map<Integer, EtapeGate> gatesParEtape;
 
     public DossierEtudeService(
@@ -58,6 +70,10 @@ public class DossierEtudeService {
             EtudeApprovalPort approvalPort,
             EtudeClientPort clientPort,
             @Lazy DevisService devisService,
+            @Lazy AppelOffreClientService aocService,
+            AppelOffreClientRepository aocRepository,
+            @Lazy DossierPieceAttendueService pieceAttendueService,
+            DossierPieceAttendueRepository pieceAttendueRepository,
             List<EtapeGate> gates) {
         this.repository = repository;
         this.noeudRepository = noeudRepository;
@@ -67,6 +83,10 @@ public class DossierEtudeService {
         this.approvalPort = approvalPort;
         this.clientPort = clientPort;
         this.devisService = devisService;
+        this.aocService = aocService;
+        this.aocRepository = aocRepository;
+        this.pieceAttendueService = pieceAttendueService;
+        this.pieceAttendueRepository = pieceAttendueRepository;
         this.gatesParEtape = gates.stream()
                 .collect(Collectors.toMap(EtapeGate::etape, Function.identity()));
     }
@@ -76,9 +96,19 @@ public class DossierEtudeService {
     @Transactional(readOnly = true)
     public List<DossierEtude> list(StatutDossierEtude status) {
         UUID tenant = tenantId();
-        return status == null
+        List<DossierEtude> dossiers = status == null
                 ? repository.findByTenantIdOrderByCreatedAtDesc(tenant)
                 : repository.findByTenantIdAndStatusOrderByCreatedAtDesc(tenant, status);
+        enrichirAoListing(dossiers);
+        return dossiers;
+    }
+
+    /** Bookmark legacy AOC → dossier lié. */
+    @Transactional(readOnly = true)
+    public DossierEtude findByAppelOffreClientId(UUID appelOffreClientId) {
+        return repository
+                .findByTenantIdAndAppelOffreClientId(tenantId(), appelOffreClientId)
+                .orElseThrow(() -> new IllegalArgumentException("etudes.dossier.introuvable"));
     }
 
     /** En-tête seul — l'arbre se charge à part, il peut compter des milliers de nœuds. */
@@ -98,25 +128,34 @@ public class DossierEtudeService {
         if (repository.existsByTenantIdAndNumero(tenant, numero)) {
             throw new IllegalArgumentException("etudes.dossier.numero_existe");
         }
+
+        EtudeClientPort.ClientSnapshot client = clientPort.requireClientRole(dto.getClientId());
+
+        UUID aocId = dto.getAppelOffreClientId();
+        if (aocId == null && dto.getDateLimiteDepot() != null) {
+            aocId = creerAocLie(dto, client).getId();
+        }
+
         DossierEtude dossier = DossierEtude.builder()
                 .tenantId(tenant)
                 .numero(numero)
                 .objet(dto.getObjet().trim())
                 .cpsDocumentId(trimOrNull(dto.getCpsDocumentId()))
                 .bordereauDocumentId(trimOrNull(dto.getBordereauDocumentId()))
-                .appelOffreClientId(dto.getAppelOffreClientId())
+                .appelOffreClientId(aocId)
                 .origine(StringUtils.hasText(dto.getOrigine())
                         ? dto.getOrigine().trim().toUpperCase()
                         : DossierEtude.ORIGINE_ETUDE)
-                // Valeurs de départ, pas des règles : l'expert métier pose une marge par
-                // article, variable (Q14). L'utilisateur les surchargera librement.
                 .fraisGenerauxPercentDefaut(parametres.fraisGenerauxPercentDefaut())
                 .margePercentDefaut(parametres.margePercentDefaut())
                 .tvaTauxDefaut(parametres.tvaTauxDefaut())
                 .notes(trimOrNull(dto.getNotes()))
                 .build();
-        appliquerClient(dossier, dto.getClientId());
-        return repository.save(dossier);
+        dossier.setClientId(client.id().toString());
+        dossier.setClientNom(client.raisonSociale());
+        DossierEtude saved = repository.save(dossier);
+        pieceAttendueService.seedMinimalSiAbsent(saved.getId());
+        return saved;
     }
 
     @Transactional
@@ -425,6 +464,9 @@ public class DossierEtudeService {
                 tenantId(), dossier.getId());
         boolean hasBordereau = pieces.stream().anyMatch(DossierDocument::contientBordereau);
         boolean hasCps = pieces.stream().anyMatch(DossierDocument::contientCps);
+        List<DossierPieceAttendue> piecesAttendues =
+                pieceAttendueRepository.findByTenantIdAndDossierEtudeIdOrderByCreatedAtAsc(
+                        tenantId(), dossier.getId());
         List<DpgfNoeud> noeuds = chargerNoeuds(dossier);
         List<DpgfNoeud> articles = noeuds.stream()
                 .filter(n -> DpgfNoeud.TYPE_ARTICLE.equals(n.getType()))
@@ -439,7 +481,64 @@ public class DossierEtudeService {
             }
         }
         return new ContexteGate(
-                articles, noeuds, pieces.size(), hasBordereau, hasCps, hasClientId, clientValide);
+                articles,
+                noeuds,
+                pieces.size(),
+                hasBordereau,
+                hasCps,
+                piecesAttendues,
+                hasClientId,
+                clientValide);
+    }
+
+    private AppelOffreClient creerAocLie(
+            DossierEtudeCreateDto dto, EtudeClientPort.ClientSnapshot client) {
+        AppelOffreClientCreateDto aoc = new AppelOffreClientCreateDto();
+        String ref = StringUtils.hasText(dto.getAoReference())
+                ? dto.getAoReference().trim()
+                : "AO-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(Locale.ROOT);
+        aoc.setReference(ref);
+        aoc.setObjet(dto.getObjet().trim());
+        aoc.setDonneurOrdre(client.raisonSociale());
+        aoc.setType(StringUtils.hasText(dto.getAoType())
+                ? dto.getAoType().trim().toUpperCase(Locale.ROOT)
+                : AppelOffreClient.TYPE_PUBLIC);
+        aoc.setDateLimiteDepot(dto.getDateLimiteDepot());
+        aoc.setDateOuverturePlis(dto.getDateOuverturePlis());
+        aoc.setVille(trimOrNull(dto.getVille()));
+        aoc.setDelaiExecutionJours(dto.getDelaiExecutionJours());
+        aoc.setEstimationMoaHt(dto.getEstimationMoaHt());
+        aoc.setCautionProvisoire(dto.getCautionProvisoire());
+        aoc.setCautionDefinitive(dto.getCautionDefinitive());
+        aoc.setCautionRetenueGarantie(dto.getCautionRetenueGarantie());
+        aoc.setStatus(AppelOffreClient.STATUS_A_ETUDIER);
+        return aocService.create(aoc);
+    }
+
+    private void enrichirAoListing(List<DossierEtude> dossiers) {
+        List<UUID> aocIds = dossiers.stream()
+                .map(DossierEtude::getAppelOffreClientId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+        if (aocIds.isEmpty()) {
+            return;
+        }
+        Map<UUID, AppelOffreClient> byId = new HashMap<>();
+        for (UUID id : aocIds) {
+            aocRepository.findByIdAndTenantId(id, tenantId()).ifPresent(a -> byId.put(id, a));
+        }
+        for (DossierEtude d : dossiers) {
+            if (d.getAppelOffreClientId() == null) {
+                continue;
+            }
+            AppelOffreClient aoc = byId.get(d.getAppelOffreClientId());
+            if (aoc == null) {
+                continue;
+            }
+            d.setAoType(aoc.getType());
+            d.setAoDateLimiteDepot(aoc.getDateLimiteDepot());
+        }
     }
 
     /**

@@ -316,9 +316,9 @@
     "materiel.pointage":     "Equipment hours",
     "materiel.controles":    "Regulatory inspections",
     "etudes": "Estimating & Bids",
-    "etudes.chiffrage":            "Costing & quantities",
+    "etudes.chiffrage":            "Studies & Bids",
     "etudes.soumissions":          "Bids & opportunities",
-    "etudes.dossiers":            "Study Files",
+    "etudes.dossiers":            "Studies / client tenders",
     "etudes.bibliotheque":        "Price Library",
     "etudes.metres":              "Quantities",
     "etudes.devis":               "Estimates",
@@ -697,7 +697,8 @@
       "documents": {
         "aucune_piece": "Upload at least one tender document (bill of quantities or specifications) before continuing.",
         "bordereau_manquant": "Upload the bill of quantities (BDP) before continuing.",
-        "cps_manquant": "Upload the specifications (CPS / CCTP) before continuing."
+        "cps_manquant": "Upload the specifications (CPS / CCTP) before continuing.",
+        "piece_obligatoire_manquante": "Required document missing — upload the expected file."
       },
       "bordereau": {
         "aucun_article": "Add at least one bill-of-quantities item before continuing.",

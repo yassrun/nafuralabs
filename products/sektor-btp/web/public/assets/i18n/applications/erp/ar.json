@@ -316,9 +316,9 @@
     "materiel.pointage":    "إحصاء ساعات المعدات",
     "materiel.controles":   "الفحوصات التنظيمية",
     "etudes": "الدراسات والعروض",
-    "etudes.chiffrage":            "التسعير وكشوف الكميات",
+    "etudes.chiffrage":            "الدراسات والمناقصات",
     "etudes.soumissions":          "العروض والفرص",
-    "etudes.dossiers":             "ملفات الدراسة",
+    "etudes.dossiers":             "دراسات / مناقصات العملاء",
     "etudes.bibliotheque":         "مكتبة الأسعار",
     "etudes.metres":               "كشوف الكميات",
     "etudes.devis":                "عروض الأسعار",
@@ -688,7 +688,8 @@
       "documents": {
         "aucune_piece": "أرفق وثيقة واحدة على الأقل من وثائق الصفقة قبل المتابعة.",
         "bordereau_manquant": "أرفق كشف الأسعار (BDP) قبل المتابعة.",
-        "cps_manquant": "أرفق دفتر الشروط الخاصة (CPS) قبل المتابعة."
+        "cps_manquant": "أرفق دفتر الشروط الخاصة (CPS) قبل المتابعة.",
+        "piece_obligatoire_manquante": "وثيقة إلزامية ناقصة — أرفق الملف المطلوب."
       },
       "bordereau": {
         "aucun_article": "أضف بنداً واحداً على الأقل في كشف الكميات قبل المتابعة.",

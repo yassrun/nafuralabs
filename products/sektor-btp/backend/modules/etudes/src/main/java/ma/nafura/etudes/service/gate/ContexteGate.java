@@ -1,6 +1,7 @@
 package ma.nafura.etudes.service.gate;
 
 import java.util.List;
+import ma.nafura.etudes.domain.model.DossierPieceAttendue;
 import ma.nafura.etudes.domain.model.DpgfNoeud;
 
 /**
@@ -11,6 +12,7 @@ import ma.nafura.etudes.domain.model.DpgfNoeud;
  * @param nombreDocuments pièces déposées sur le dossier
  * @param hasBordereau au moins une pièce de type bordereau (ou CPS+bordereau)
  * @param hasCps au moins une pièce de type CPS (ou CPS+bordereau)
+ * @param piecesAttendues checklist des pièces attendues (peut être vide sur dossiers legacy)
  * @param hasClientId un clientId est renseigné sur le dossier
  * @param clientValide le clientId résout un Partner CLIENT du tenant
  */
@@ -20,24 +22,39 @@ public record ContexteGate(
         long nombreDocuments,
         boolean hasBordereau,
         boolean hasCps,
+        List<DossierPieceAttendue> piecesAttendues,
         boolean hasClientId,
         boolean clientValide) {
 
     /** Factories de tests : client considéré valide pour ne pas polluer les autres gates. */
     public static ContexteGate deArticles(List<DpgfNoeud> articles) {
-        return new ContexteGate(articles, articles, 0L, false, false, true, true);
+        return new ContexteGate(articles, articles, 0L, false, false, List.of(), true, true);
     }
 
     public static ContexteGate deNoeuds(List<DpgfNoeud> noeuds) {
         List<DpgfNoeud> articles = noeuds.stream()
                 .filter(n -> DpgfNoeud.TYPE_ARTICLE.equals(n.getType()))
                 .toList();
-        return new ContexteGate(articles, noeuds, 0L, false, false, true, true);
+        return new ContexteGate(articles, noeuds, 0L, false, false, List.of(), true, true);
     }
 
     public static ContexteGate documents(boolean hasBordereau, boolean hasCps) {
         long n = (hasBordereau ? 1 : 0) + (hasCps ? 1 : 0);
-        return new ContexteGate(List.of(), List.of(), n, hasBordereau, hasCps, true, true);
+        return new ContexteGate(List.of(), List.of(), n, hasBordereau, hasCps, List.of(), true, true);
+    }
+
+    public static ContexteGate documents(
+            boolean hasBordereau, boolean hasCps, List<DossierPieceAttendue> piecesAttendues) {
+        long n = (hasBordereau ? 1 : 0) + (hasCps ? 1 : 0);
+        return new ContexteGate(
+                List.of(),
+                List.of(),
+                n,
+                hasBordereau,
+                hasCps,
+                piecesAttendues != null ? piecesAttendues : List.of(),
+                true,
+                true);
     }
 
     public static ContexteGate avecClient(
@@ -48,6 +65,7 @@ public record ContexteGate(
                 base.nombreDocuments(),
                 base.hasBordereau(),
                 base.hasCps(),
+                base.piecesAttendues(),
                 hasClientId,
                 clientValide);
     }
