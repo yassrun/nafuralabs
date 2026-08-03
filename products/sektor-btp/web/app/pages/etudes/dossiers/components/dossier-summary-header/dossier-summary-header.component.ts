@@ -34,6 +34,8 @@ export class DossierSummaryHeaderComponent {
   readonly synthese = input.required<DossierEtudeSynthese>();
   readonly modifiable = input(false);
   readonly clientSaving = input(false);
+  /** True when the dossier has a linked DPGF (bordereau printable). */
+  readonly hasDpgf = input(false);
 
   readonly action = output<string>();
   readonly clientChange = output<ClientPartnerSelection>();
@@ -89,6 +91,9 @@ export class DossierSummaryHeaderComponent {
     const s = this.synthese();
     return s.status === 'DEVIS_GENERE' && !!s.devisGenereId;
   });
+
+  readonly showPrintBordereau = computed(() => this.hasDpgf());
+  readonly showPrintSynthese = computed(() => true);
 
   onClientSelection(sel: ClientPartnerSelection): void {
     this.clientChange.emit(sel);

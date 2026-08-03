@@ -18,4 +18,11 @@ public interface EntityDataProvider {
      * @return map of flattened or nested properties; empty if not found or not supported
      */
     Map<String, Object> getEntityData(String entityType, UUID entityId);
+
+    /**
+     * Sample entity map for admin PDF preview. Empty = fall back to platform defaults.
+     */
+    default Map<String, Object> getSampleEntityData(String entityType) {
+        return Map.of();
+    }
 }

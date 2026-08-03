@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8"/>
+  <title>Synthèse étude</title>
+  <style>
+    body { font-family: Helvetica, Arial, sans-serif; font-size: 10pt; color: #1a1a1a; margin: 0; }
+    .hdr { margin-bottom: 14px; border-bottom: 2px solid #222; padding-bottom: 8px; }
+    .hdr h1 { font-size: 14pt; margin: 0 0 4px 0; }
+    .muted { color: #555; font-size: 9pt; }
+    .kpis { width: 100%; margin-bottom: 16px; }
+    .kpis td { width: 25%; padding: 8px; border: 1px solid #ddd; background: #fafafa; }
+    .kpis .lbl { display: block; font-size: 8pt; color: #666; }
+    .kpis .val { font-size: 12pt; font-weight: bold; }
+    table.lines { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    table.lines th, table.lines td { border: 1px solid #ccc; padding: 5px 6px; }
+    table.lines th { background: #f3f3f3; text-align: left; }
+    .num { text-align: right; }
+    h2 { font-size: 11pt; margin: 18px 0 6px; }
+    ul.anomalies { margin: 6px 0; padding-left: 18px; font-size: 9pt; }
+  </style>
+</head>
+<body>
+  <div class="hdr">
+    <div class="muted" th:text="${tenant.name}">Société</div>
+    <h1>Synthèse d'étude — <span th:text="${entity.numero}">ETU-001</span></h1>
+    <div class="muted">
+      <span th:text="${entity.objet}">Objet</span>
+      · Client : <span th:text="${entity.client.name}">—</span>
+      · Phase : <span th:text="${entity.phase}">—</span>
+      · Statut : <span th:text="${entity.status}">—</span>
+    </div>
+  </div>
+
+  <table class="kpis">
+    <tr>
+      <td><span class="lbl">Total HT</span><span class="val" th:text="${entity.totalHt}">0</span></td>
+      <td><span class="lbl">Articles</span><span class="val" th:text="${entity.nombreArticles}">0</span></td>
+      <td><span class="lbl">Anomalies bloquantes</span><span class="val" th:text="${entity.anomaliesBloquantes}">0</span></td>
+      <td><span class="lbl">Rév. bordereau</span><span class="val" th:text="${entity.bordereauRevision}">1</span></td>
+    </tr>
+  </table>
+
+  <h2>Totaux par lot</h2>
+  <table class="lines">
+    <thead>
+      <tr>
+        <th>Lot</th>
+        <th>Libellé</th>
+        <th class="num">Total HT</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr th:each="lot : ${entity.lots}">
+        <td th:text="${lot.code}">—</td>
+        <td th:text="${lot.libelle}">—</td>
+        <td class="num" th:text="${lot.total}">0</td>
+      </tr>
+      <tr th:if="${#lists.isEmpty(entity.lots)}">
+        <td colspan="3" class="muted">Aucun lot chiffré</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Contrôles (gates)</h2>
+  <div th:each="g : ${entity.gates}">
+    <p>
+      Étape <strong th:text="${g.etape}">1</strong>
+      — <span th:if="${g.passe}">OK</span>
+      <span th:unless="${g.passe}">
+        <span th:text="${g.nbProblemes}">0</span> problème(s)
+        <span th:if="${g.bloquant}">(bloquant)</span>
+      </span>
+    </p>
+    <ul class="anomalies" th:if="${!g.passe}">
+      <li th:each="p : ${g.problemes}">
+        <span th:if="${p.codeArticle}" th:text="${p.codeArticle} + ' — '"></span>
+        <span th:text="${p.message}">message</span>
+      </li>
+    </ul>
+  </div>
+
+  <p class="muted" th:if="${entity.devisNumero}">
+    Devis généré : <span th:text="${entity.devisNumero}"></span>
+  </p>
+</body>
+</html>

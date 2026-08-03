@@ -10,7 +10,11 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { map } from 'rxjs';
 
-import { ConfirmDialogService, WizardShellComponent } from '@lib/anatomy';
+import {
+  ConfirmDialogService,
+  PrintDialogService,
+  WizardShellComponent,
+} from '@lib/anatomy';
 import type { WizardStepConfig } from '@lib/anatomy';
 
 import type { DossierEtude, ProblemeGate, ResultatGate } from '@app/etudes/models';
@@ -61,6 +65,7 @@ export class DossierDetailPage {
   private readonly route = inject(ActivatedRoute);
   private readonly nav = inject(Router);
   private readonly confirmDialog = inject(ConfirmDialogService);
+  private readonly printDialog = inject(PrintDialogService);
   private readonly decomposition = viewChild(DecompositionWorkspaceComponent);
 
   readonly dossier = signal<DossierEtude | undefined>(undefined);
@@ -273,6 +278,24 @@ export class DossierDetailPage {
     this.erreur.set(undefined);
     try {
       switch (action) {
+        case 'IMPRIMER_BORDEREAU':
+          if (!dossier.dpgfId) {
+            this.erreur.set('Aucun bordereau (DPGF) lié à ce dossier.');
+            return;
+          }
+          await this.printDialog.open(
+            'dossier_etude_bordereau',
+            dossier.id,
+            dossier.numero,
+          );
+          break;
+        case 'IMPRIMER_SYNTHESE':
+          await this.printDialog.open(
+            'dossier_etude_synthese',
+            dossier.id,
+            dossier.numero,
+          );
+          break;
         case 'SOUMETTRE_STRUCTURE':
           await this.changerEtape(3);
           break;

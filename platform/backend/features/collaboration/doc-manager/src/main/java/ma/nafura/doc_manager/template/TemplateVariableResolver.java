@@ -84,12 +84,17 @@ public class TemplateVariableResolver {
     }
 
     private Map<String, Object> generateSampleEntityData(String entityType) {
+        if (entityDataProvider != null) {
+            Map<String, Object> sample = entityDataProvider.getSampleEntityData(entityType);
+            if (sample != null && !sample.isEmpty()) {
+                return sample;
+            }
+        }
         Map<String, Object> sample = new HashMap<>();
         sample.put("code", "SAMPLE-001");
         sample.put("id", UUID.randomUUID().toString());
         sample.put("amount", "1500.00");
         sample.put("date", LocalDate.now().toString());
-        // Nested sample for common patterns
         Map<String, Object> customer = new HashMap<>();
         customer.put("name", "Sample Customer");
         customer.put("address", "123 Sample St");

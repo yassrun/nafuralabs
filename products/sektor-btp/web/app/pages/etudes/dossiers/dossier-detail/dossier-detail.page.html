@@ -6,6 +6,7 @@
       <app-dossier-summary-header
         [synthese]="syn"
         [modifiable]="modifiable()"
+        [hasDpgf]="!!dossier()?.dpgfId"
         (action)="onHeaderAction($event)"
       />
     } @else {

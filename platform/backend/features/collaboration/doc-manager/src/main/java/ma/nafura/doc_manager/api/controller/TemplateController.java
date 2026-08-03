@@ -40,6 +40,12 @@ public class TemplateController {
         return ResponseEntity.ok(templateService.list(entityType, pageable));
     }
 
+    @GetMapping("/entity-types")
+    @RequirePermission(value = "administration.templates.read", fullPermission = true)
+    public ResponseEntity<java.util.Map<String, java.util.List<String>>> entityTypes() {
+        return ResponseEntity.ok(java.util.Map.of("entityTypes", variableCatalogService.listEntityTypes()));
+    }
+
     @GetMapping("/variables/{entityType}")
     @RequirePermission(value = "administration.templates.read", fullPermission = true)
     public ResponseEntity<TemplateVariableCatalogResponse> getVariables(@PathVariable String entityType) {

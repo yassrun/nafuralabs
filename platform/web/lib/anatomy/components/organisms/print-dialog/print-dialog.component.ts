@@ -114,7 +114,9 @@ export class PrintDialogComponent implements OnInit, OnDestroy {
         this.selectedTemplateId.set(null);
       }
     } catch (err) {
-      this.previewError.set('Failed to load templates');
+      this.previewError.set(
+        'Impossible de charger les modèles d’impression. Vérifiez vos droits ou créez un template.',
+      );
     } finally {
       this.templatesLoading.set(false);
       this.cdr.markForCheck();
@@ -148,7 +150,9 @@ export class PrintDialogComponent implements OnInit, OnDestroy {
       this.previewObjectUrl = url;
       this.previewBlobUrl.set(url);
     } catch (err) {
-      this.previewError.set('Failed to generate preview');
+      this.previewError.set(
+        'Échec de la génération PDF. Vérifiez le template ou les données de la fiche.',
+      );
     } finally {
       this.previewLoading.set(false);
       this.cdr.markForCheck();

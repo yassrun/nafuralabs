@@ -1,7 +1,7 @@
 # Backlog 31 — raffiné (session étude)
 
 > Source brute raffinée. Focus session = **parcours étude unifié** (AO + dossier + chiffrage).
-> Hors session = RH, print, stock (gardés pour ne pas les perdre).
+> Hors session = RH, stock (gardés pour ne pas les perdre).
 >
 > **UX :** méthode principale = Cursor Canvas wireframes — voir [`docs/ux/METHODE-CANVAS-WIREFRAMES.md`](docs/ux/METHODE-CANVAS-WIREFRAMES.md).  
 > Chiffrage S1 validé sur canvas `etude-decompo-wireframe` → livré.  
@@ -105,7 +105,7 @@ Le lien `dossier.appelOffreClientId` existe déjà côté modèle, mais l’UX r
 | ID | Item | Note |
 |----|------|------|
 | E5 | Raffinement import auto BDP | Suite tests |
-| E6 | Templates print | Devis / bordereau / synthèse |
+| E6 | Templates print | **Vague 1 livrée** (devis / bordereau / synthèse PDF serveur). Suite : facture/décompte/BC/DGD, migration `*-print` Angular, WYSIWYG |
 | E8b | Mentions / threads commentaires | Follow-up S2 |
 | E9 | Qualité extraction CPS multi-marchés | Améliorer couverture S5 |
 
@@ -130,6 +130,7 @@ Le lien `dossier.appelOffreClientId` existe déjà côté modèle, mais l’UX r
 3. **S2** fil commentaires dans la modale ✅
 4. **S3** FG/MG prix fourni ✅
 5. **S4** colonne Objet listing ✅
+6. **E6** templates print vague 1 ✅ (devis / bordereau / synthèse)
 
 > Si S5 trop large pour une session : découper en **S5a** (nav + un seul create flow) puis **S5b** (checklist CPS + gates), sans perdre l’intention « un seul menu ».
 
@@ -138,6 +139,6 @@ Le lien `dossier.appelOffreClientId` existe déjà côté modèle, mais l’UX r
 ## Hors scope explicite cette session
 
 - Threads / @mentions / réactions
-- Templates print, raffinement BDP
+- Raffinement BDP (E5) ; print vagues suivantes (E6 suite)
 - AO achat (fournisseurs)
 - Tout le pan RH / matériel / sous-traitance

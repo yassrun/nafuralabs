@@ -6,12 +6,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface DocumentTemplateRepository extends TenantScopedRepository<DocumentTemplate, UUID> {
 
     Page<DocumentTemplate> findByTenantIdAndEntityType(UUID tenantId, String entityType, Pageable pageable);
+
+    Optional<DocumentTemplate> findByTenantIdAndCode(UUID tenantId, String code);
+
+    boolean existsByTenantIdAndCode(UUID tenantId, String code);
 }
 
 

@@ -4,7 +4,10 @@ import ma.nafura.platform.collaboration.docmanager.api.response.TemplateVariable
 import ma.nafura.platform.collaboration.docmanager.api.response.TemplateVariableDescriptor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Builds the variable catalog for the template editor (available placeholders per entity type).
@@ -12,15 +15,14 @@ import java.util.List;
 @Service
 public class TemplateVariableCatalogService {
 
+    private final List<TemplateVariableCatalogContributor> contributors;
+
+    public TemplateVariableCatalogService(List<TemplateVariableCatalogContributor> contributors) {
+        this.contributors = contributors != null ? contributors : List.of();
+    }
+
     public TemplateVariableCatalogResponse getCatalog(String entityType) {
-        List<TemplateVariableDescriptor> entity = List.of(
-                desc("entity.code", "Code", "string", "INV-001"),
-                desc("entity.id", "Id", "string", null),
-                desc("entity.amount", "Amount", "number", "1500.00"),
-                desc("entity.date", "Date", "date", null),
-                desc("entity.customer.name", "Customer Name", "string", "Acme Corp"),
-                desc("entity.customer.address", "Customer Address", "string", null)
-        );
+        List<TemplateVariableDescriptor> entity = resolveEntityVariables(entityType);
         List<TemplateVariableDescriptor> tenant = List.of(
                 desc("tenant.name", "Organization Name", "string", null),
                 desc("tenant.key", "Tenant Key", "string", null),
@@ -39,7 +41,44 @@ public class TemplateVariableCatalogService {
                 .build();
     }
 
-    private static TemplateVariableDescriptor desc(String path, String label, String type, String example) {
+    /** Distinct entity types known to contributors (for admin filters). */
+    public List<String> listEntityTypes() {
+        Set<String> types = new LinkedHashSet<>();
+        for (TemplateVariableCatalogContributor c : contributors) {
+            types.addAll(c.supportedEntityTypes());
+        }
+        if (types.isEmpty()) {
+            types.addAll(List.of("invoice", "quote", "receipt", "order"));
+        }
+        return new ArrayList<>(types);
+    }
+
+    private List<TemplateVariableDescriptor> resolveEntityVariables(String entityType) {
+        if (entityType != null && !entityType.isBlank()) {
+            for (TemplateVariableCatalogContributor c : contributors) {
+                if (c.supportedEntityTypes().contains(entityType)) {
+                    List<TemplateVariableDescriptor> vars = c.entityVariables(entityType);
+                    if (vars != null && !vars.isEmpty()) {
+                        return vars;
+                    }
+                }
+            }
+        }
+        return defaultEntityVariables();
+    }
+
+    private static List<TemplateVariableDescriptor> defaultEntityVariables() {
+        return List.of(
+                desc("entity.code", "Code", "string", "INV-001"),
+                desc("entity.id", "Id", "string", null),
+                desc("entity.amount", "Amount", "number", "1500.00"),
+                desc("entity.date", "Date", "date", null),
+                desc("entity.customer.name", "Customer Name", "string", "Acme Corp"),
+                desc("entity.customer.address", "Customer Address", "string", null)
+        );
+    }
+
+    public static TemplateVariableDescriptor desc(String path, String label, String type, String example) {
         return TemplateVariableDescriptor.builder()
                 .path(path)
                 .label(label)

@@ -455,10 +455,12 @@ export abstract class ConfigDrivenDetailPage<TItem>
     if (!id || !entityType) return;
 
     const item = this.item();
-    const entityCode =
-      item != null && typeof item === 'object' && 'code' in item
-        ? String((item as { code: unknown }).code)
-        : undefined;
+    let entityCode: string | undefined;
+    if (item != null && typeof item === 'object') {
+      const rec = item as Record<string, unknown>;
+      if (rec['code'] != null) entityCode = String(rec['code']);
+      else if (rec['numero'] != null) entityCode = String(rec['numero']);
+    }
 
     await this.printDialog.open(entityType, id, entityCode);
   }

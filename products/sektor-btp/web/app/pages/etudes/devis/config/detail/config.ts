@@ -111,6 +111,8 @@ export const DEVIS_DETAIL_CONFIG = buildDetailConfig<Devis>(
     sections: SECTIONS,
     statusMachineInActionsBar: true,
     statusMachinePosition: 'right',
+    entityTypeForPrint: 'devis',
+    features: { print: true },
     actions: {
       appendActions: [
         {
@@ -123,16 +125,6 @@ export const DEVIS_DETAIL_CONFIG = buildDetailConfig<Devis>(
           order: 70,
           showInModes: ['edit', 'view'],
           permission: 'etudes.devis.update',
-        },
-        {
-          id: 'print_pdf',
-          label: 'Émettre PDF',
-          icon: 'printer',
-          scope: 'edit+view',
-          variant: 'stroked',
-          position: 'left',
-          order: 50,
-          showInModes: ['edit', 'view'],
         },
         {
           id: 'convert_chantier',

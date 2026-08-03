@@ -40,12 +40,21 @@ export class PrintTemplateApiService {
   /**
    * List templates filtered by entity type.
    * GET /api/v1/platform/templates?entityType=invoice
+   * Backend returns a Spring Page; unwrap {@code content}.
    */
   listByEntityType(entityType: string): Promise<DocumentTemplateDto[]> {
-    const params = new HttpParams().set('entityType', entityType);
+    const params = new HttpParams()
+      .set('entityType', entityType)
+      .set('size', '100');
     return firstValueFrom(
-      this.http.get<DocumentTemplateDto[]>(this.url(BASE), { params })
-    );
+      this.http.get<DocumentTemplateDto[] | { content?: DocumentTemplateDto[] }>(
+        this.url(BASE),
+        { params },
+      ),
+    ).then((res) => {
+      if (Array.isArray(res)) return res;
+      return res?.content ?? [];
+    });
   }
 
   /**

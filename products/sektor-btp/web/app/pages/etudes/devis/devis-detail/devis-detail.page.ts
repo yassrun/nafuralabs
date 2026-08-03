@@ -7,6 +7,7 @@ import {
   ConfigDrivenDetailPageImports,
   ConfigDrivenDetailPageStyles,
   createDetailFacadeFromCrud,
+  PrintDialogService,
 } from '@lib/anatomy';
 import { FieldTemplateDirective } from '@lib/anatomy/components/organisms/entity-detail';
 import type { DetailActionEvent } from '@lib/anatomy/types';
@@ -44,6 +45,7 @@ export class DevisDetailPage extends ConfigDrivenDetailPage<Devis> {
   private readonly nav = inject(Router);
   private readonly exportService = inject(ExportService);
   private readonly audit = inject(ErpAuditService);
+  private readonly printDialogService = inject(PrintDialogService);
 
   readonly facade = createDetailFacadeFromCrud<Devis, DevisCreate>({
     crud: this.crud,
@@ -72,11 +74,17 @@ export class DevisDetailPage extends ConfigDrivenDetailPage<Devis> {
     (control as FormControl).markAsDirty();
   }
 
-  printDevis(): void {
+  /** Header « Imprimer » : PDF serveur via templates, fallback print navigateur. */
+  async printDevis(): Promise<void> {
     const d = this.item();
     if (!d) return;
-    this.exportService.printPage();
-    this.audit.log('PRINT', 'DEVIS', d.id, d.numero, `V${d.version}`);
+    try {
+      await this.printDialogService.open('devis', d.id, d.numero);
+      this.audit.log('PRINT', 'DEVIS', d.id, d.numero, `V${d.version}`);
+    } catch {
+      this.exportService.printPage();
+      this.audit.log('PRINT', 'DEVIS', d.id, d.numero, `V${d.version} (fallback)`);
+    }
   }
 
   protected override async handleCustomAction(
@@ -95,11 +103,6 @@ export class DevisDetailPage extends ConfigDrivenDetailPage<Devis> {
       const modifications = result['modifications'] ?? '';
       const created = await this.crud.newVersion(item.id, modifications);
       this.nav.navigate(['/etudes/devis', created.id]);
-      return;
-    }
-
-    if (event.actionId === 'print_pdf' && item) {
-      window.print();
       return;
     }
 

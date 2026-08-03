@@ -4,25 +4,32 @@ import ma.nafura.platform.collaboration.docmanager.api.request.DocumentTemplateC
 import ma.nafura.platform.collaboration.docmanager.api.request.DocumentTemplateUpdateRequest;
 import ma.nafura.platform.collaboration.docmanager.domain.model.DocumentTemplate;
 import ma.nafura.platform.collaboration.docmanager.repository.DocumentTemplateRepository;
+import ma.nafura.platform.collaboration.docmanager.template.DocumentTemplateBootstrap;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
 public class DocumentTemplateService {
 
     private final DocumentTemplateRepository repository;
+    private final List<DocumentTemplateBootstrap> bootstraps;
 
-    public DocumentTemplateService(DocumentTemplateRepository repository) {
+    public DocumentTemplateService(
+            DocumentTemplateRepository repository,
+            List<DocumentTemplateBootstrap> bootstraps) {
         this.repository = repository;
+        this.bootstraps = bootstraps != null ? bootstraps : List.of();
     }
 
     public Page<DocumentTemplate> list(String entityType, Pageable pageable) {
         UUID tenantId = TenantContext.getTenantId();
+        ensureDefaults(tenantId);
         if (entityType != null && !entityType.isBlank()) {
             return repository.findByTenantIdAndEntityType(tenantId, entityType, pageable);
         }
@@ -82,5 +89,11 @@ public class DocumentTemplateService {
             throw new IllegalArgumentException("System templates cannot be deleted");
         }
         repository.delete(t);
+    }
+
+    private void ensureDefaults(UUID tenantId) {
+        for (DocumentTemplateBootstrap bootstrap : bootstraps) {
+            bootstrap.ensureDefaults(tenantId);
+        }
     }
 }
