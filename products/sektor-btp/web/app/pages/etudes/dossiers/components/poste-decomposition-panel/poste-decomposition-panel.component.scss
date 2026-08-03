@@ -230,7 +230,7 @@
 .poste__fourni {
   display: grid;
   gap: 0.75rem;
-  justify-items: start;
+  justify-items: stretch;
   padding: 0.35rem 0 0.15rem;
 
   p {
@@ -238,6 +238,45 @@
     font-size: 0.875rem;
     color: var(--nf-color-text-secondary);
     line-height: 1.45;
+  }
+}
+
+.poste__fourni-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 0.8fr 0.8fr;
+  gap: 0.65rem;
+}
+
+.poste__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.8125rem;
+  color: var(--nf-color-text-secondary);
+
+  input {
+    padding: 0.55rem 0.65rem;
+    border: 1px solid var(--nf-color-border);
+    border-radius: 8px;
+    font: inherit;
+    font-size: 0.875rem;
+    color: var(--nf-color-text-primary);
+    background: var(--nf-color-surface, #fff);
+  }
+
+  input:focus-visible {
+    outline: 2px solid var(--nf-color-primary-600, #0b6e7a);
+    outline-offset: 2px;
+  }
+
+  input:disabled {
+    background: var(--nf-color-bg-subtle);
+  }
+}
+
+@media (max-width: 640px) {
+  .poste__fourni-grid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -259,6 +298,10 @@
 .poste__fourni-hint {
   font-size: 0.8125rem !important;
   max-width: 36rem;
+}
+
+.poste--embedded {
+  padding: 0;
 }
 
 .poste__vide {

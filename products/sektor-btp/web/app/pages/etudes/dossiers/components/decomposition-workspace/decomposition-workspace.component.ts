@@ -10,7 +10,9 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { MatDialog, type MatDialogRef } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
+import { firstValueFrom } from 'rxjs';
 
 import { ConfirmDialogService } from '@lib/anatomy';
 
@@ -21,19 +23,17 @@ import { resolvePosteChiffrageMode } from '../../utils/poste-chiffrage-mode.util
 import { DpuApiService } from '../../../bibliotheque-prix/services/dpu-api.service';
 import { DpgfApiService } from '../../../metres/services/dpgf-api.service';
 import { BordereauArbreComponent } from '../bordereau-arbre/bordereau-arbre.component';
-import { PosteDecompositionPanelComponent } from '../poste-decomposition-panel/poste-decomposition-panel.component';
+import {
+  PosteChiffrageDrawerComponent,
+  type PosteChiffrageDrawerData,
+  type PosteChiffrageDrawerResult,
+} from '../poste-chiffrage-drawer/poste-chiffrage-drawer.component';
 
 @Component({
   selector: 'app-decomposition-workspace',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    CommonModule,
-    FormsModule,
-    TranslateModule,
-    BordereauArbreComponent,
-    PosteDecompositionPanelComponent,
-  ],
+  imports: [CommonModule, FormsModule, TranslateModule, BordereauArbreComponent],
   templateUrl: './decomposition-workspace.component.html',
   styleUrl: './decomposition-workspace.component.scss',
 })
@@ -41,6 +41,7 @@ export class DecompositionWorkspaceComponent {
   private readonly dpgfApi = inject(DpgfApiService);
   private readonly dpuApi = inject(DpuApiService);
   private readonly confirmDialog = inject(ConfirmDialogService);
+  private readonly dialog = inject(MatDialog);
 
   readonly dpgfId = input.required<string>();
   readonly dossierId = input.required<string>();
@@ -57,16 +58,20 @@ export class DecompositionWorkspaceComponent {
   readonly change = output<void>();
   readonly dirtyChange = output<boolean>();
 
-  readonly selectedPoste = signal<BordereauTreeRow | null>(null);
   readonly selectedKey = signal<string | null>(null);
-  readonly mobileDetailOpen = signal(false);
   readonly search = signal('');
   readonly treeReloadToken = signal(0);
   readonly filtreAlertes = signal(false);
   readonly totalComposants = signal(0);
   readonly consultes = signal(0);
   readonly articlesAlerteIds = signal<string[]>([]);
-  readonly posteDirty = signal(false);
+  readonly drawerDirty = signal(false);
+
+  private drawerRef: MatDialogRef<
+    PosteChiffrageDrawerComponent,
+    PosteChiffrageDrawerResult | null
+  > | null = null;
+  private openingKey: string | null = null;
 
   readonly nonConsultes = computed(() =>
     Math.max(0, this.totalComposants() - this.consultes()),
@@ -90,12 +95,6 @@ export class DecompositionWorkspaceComponent {
 
   constructor() {
     effect(() => {
-      const focusId = this.focusNoeudId();
-      if (focusId) {
-        this.mobileDetailOpen.set(true);
-      }
-    });
-    effect(() => {
       const id = this.dpgfId();
       const token = this.treeReloadToken();
       if (id) void this.refreshCouverture(id, token);
@@ -103,56 +102,41 @@ export class DecompositionWorkspaceComponent {
   }
 
   async onSelectPoste(row: BordereauTreeRow | null): Promise<void> {
-    const current = this.selectedPoste();
-    // Même poste : pas de rechargement ni de dialogue dirty.
-    if (row && current && (row.key === current.key || (row.id && row.id === current.id))) {
+    if (!row || row.type !== 'ARTICLE' || !row.id) return;
+
+    const currentKey = this.selectedKey();
+    if (this.drawerRef && (row.key === currentKey || this.openingKey === row.key)) {
       return;
     }
-    if (this.posteDirty()) {
-      const ok = await this.confirmDialog.confirm({
-        title: 'Modifications non enregistrées',
-        message:
-          'Vous avez des modifications non enregistrées sur ce poste. Les abandonner pour changer de sélection ?',
-        variant: 'danger',
-        confirmLabel: 'Abandonner',
-        cancelLabel: 'Rester sur le poste',
-      });
-      if (!ok) return;
-      this.posteDirty.set(false);
+
+    if (this.drawerRef) {
+      const instance = this.drawerRef.componentInstance;
+      if (instance?.isDirty()) {
+        const ok = await this.confirmDialog.confirm({
+          title: 'Modifications non enregistrées',
+          message:
+            'Vous avez des modifications non enregistrées sur ce poste. Les abandonner pour ouvrir un autre article ?',
+          variant: 'danger',
+          confirmLabel: 'Abandonner',
+          cancelLabel: 'Rester sur le poste',
+        });
+        if (!ok) return;
+      }
+      this.drawerRef.close({ saved: false });
+      this.drawerRef = null;
+      this.drawerDirty.set(false);
       this.dirtyChange.emit(false);
     }
-    this.applySelect(row);
-  }
 
-  onPosteDirty(dirty: boolean): void {
-    this.posteDirty.set(dirty);
-    this.dirtyChange.emit(dirty);
-  }
-
-  onBeforeSelectRequest(): void {
-    // reserved for future panel-driven navigation
-  }
-
-  closeMobileDetail(): void {
-    this.mobileDetailOpen.set(false);
-  }
-
-  onTreeChange(): void {
-    this.change.emit();
-    this.treeReloadToken.update((n) => n + 1);
-  }
-
-  onPosteChange(): void {
-    this.posteDirty.set(false);
-    this.dirtyChange.emit(false);
-    this.treeReloadToken.update((n) => n + 1);
-    this.change.emit();
+    await this.openDrawer(row);
   }
 
   /** Appelé par le parent avant de quitter l'étape. */
   async confirmerQuitterSiDirty(): Promise<boolean> {
-    if (!this.posteDirty()) return true;
-    return this.confirmDialog.confirm({
+    if (!this.drawerDirty() && !this.drawerRef?.componentInstance?.isDirty()) {
+      return true;
+    }
+    const ok = await this.confirmDialog.confirm({
       title: 'Modifications non enregistrées',
       message:
         'Vous avez des modifications non enregistrées sur ce poste. Enregistrez-les ou abandonnez-les avant de continuer.',
@@ -160,12 +144,73 @@ export class DecompositionWorkspaceComponent {
       confirmLabel: 'Abandonner et continuer',
       cancelLabel: 'Rester sur le poste',
     });
+    if (ok && this.drawerRef) {
+      this.drawerRef.close({ saved: false });
+      this.drawerRef = null;
+      this.drawerDirty.set(false);
+      this.dirtyChange.emit(false);
+    }
+    return ok;
   }
 
-  private applySelect(row: BordereauTreeRow | null): void {
-    this.selectedPoste.set(row);
-    this.selectedKey.set(row?.key ?? null);
-    if (row) this.mobileDetailOpen.set(true);
+  onTreeChange(): void {
+    this.change.emit();
+    this.treeReloadToken.update((n) => n + 1);
+  }
+
+  private async openDrawer(row: BordereauTreeRow): Promise<void> {
+    this.openingKey = row.key;
+    this.selectedKey.set(row.key);
+
+    const data: PosteChiffrageDrawerData = {
+      poste: row,
+      dossierId: this.dossierId(),
+      cpsDocumentId: this.cpsDocumentId(),
+      modifiable: this.modifiable(),
+      fgDefaut: this.fgDefaut(),
+      margeDefaut: this.margeDefaut(),
+      tvaDefaut: this.tvaDefaut(),
+      onDirtyChange: (dirty) => {
+        this.drawerDirty.set(dirty);
+        this.dirtyChange.emit(dirty);
+      },
+    };
+
+    const ref = this.dialog.open<
+      PosteChiffrageDrawerComponent,
+      PosteChiffrageDrawerData,
+      PosteChiffrageDrawerResult | null
+    >(PosteChiffrageDrawerComponent, {
+      panelClass: 'poste-chiffrage-drawer-panel',
+      width: 'min(720px, 100vw)',
+      maxWidth: '100vw',
+      height: '100vh',
+      maxHeight: '100vh',
+      position: { right: '0', top: '0' },
+      autoFocus: 'first-tabbable',
+      restoreFocus: true,
+      disableClose: true,
+      data,
+    });
+
+    this.drawerRef = ref;
+
+    try {
+      const result = await firstValueFrom(ref.afterClosed());
+      this.drawerRef = null;
+      this.openingKey = null;
+      this.drawerDirty.set(false);
+      this.dirtyChange.emit(false);
+      if (result?.saved) {
+        this.treeReloadToken.update((n) => n + 1);
+        this.change.emit();
+      }
+    } catch {
+      this.drawerRef = null;
+      this.openingKey = null;
+      this.drawerDirty.set(false);
+      this.dirtyChange.emit(false);
+    }
   }
 
   private async refreshCouverture(dpgfId: string, _token: number): Promise<void> {

@@ -5,23 +5,17 @@
 }
 
 .workspace {
-  display: grid;
-  grid-template-columns: minmax(22rem, 1.15fr) minmax(20rem, 1fr);
-  gap: 1rem;
-  align-items: stretch;
+  display: block;
   min-height: min(62vh, 40rem);
-  max-height: min(70vh, 48rem);
+  max-height: min(78vh, 56rem);
 }
 
-.workspace__master,
-.workspace__detail {
+.workspace__master {
   min-width: 0;
   min-height: 0;
   overflow: auto;
-}
-
-.workspace__detail {
-  padding: 0.15rem 0.25rem 0.35rem 0.1rem;
+  height: 100%;
+  max-height: inherit;
 }
 
 .workspace__couverture {
@@ -117,20 +111,7 @@
 
 @media (max-width: 960px) {
   .workspace {
-    grid-template-columns: 1fr;
     max-height: none;
     min-height: 0;
-  }
-
-  .workspace__detail {
-    display: none;
-  }
-
-  .workspace--detail .workspace__master {
-    display: none;
-  }
-
-  .workspace--detail .workspace__detail {
-    display: block;
   }
 }

@@ -1,8 +1,4 @@
-<section
-  class="workspace"
-  [class.workspace--detail]="mobileDetailOpen()"
-  aria-label="Décomposition du bordereau"
->
+<section class="workspace" aria-label="Décomposition du bordereau">
   <div class="workspace__master">
     <div class="workspace__couverture" role="status">
       <div class="workspace__couverture-main">
@@ -62,22 +58,6 @@
       [filterArticleIds]="filterArticleIds()"
       (posteSelect)="onSelectPoste($event)"
       (change)="onTreeChange()"
-    />
-  </div>
-
-  <div class="workspace__detail">
-    <app-poste-decomposition-panel
-      [poste]="selectedPoste()"
-      [dossierId]="dossierId()"
-      [cpsDocumentId]="cpsDocumentId()"
-      [modifiable]="modifiable()"
-      [fgDefaut]="fgDefaut()"
-      [margeDefaut]="margeDefaut()"
-      [tvaDefaut]="tvaDefaut()"
-      (change)="onPosteChange()"
-      (closeMobile)="closeMobileDetail()"
-      (dirtyChange)="onPosteDirty($event)"
-      (beforeSelectRequest)="onBeforeSelectRequest()"
     />
   </div>
 </section>

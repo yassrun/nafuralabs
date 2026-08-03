@@ -1,6 +1,9 @@
 /** Mode de chiffrage actif d’un article du bordereau. */
 export type PosteChiffrageMode = 'FOURNI' | 'DECOMPOSE' | null;
 
+/** Mode affiché en UI : null → Décomposé (défaut produit). */
+export type PosteChiffrageModeUi = 'FOURNI' | 'DECOMPOSE';
+
 /**
  * Résout le mode actif à partir du nœud DPGF.
  * Un prix unitaire > 0 sans mode explicite est traité comme prix fourni.
@@ -13,6 +16,11 @@ export function resolvePosteChiffrageMode(opts: {
   if (opts.mode === 'FOURNI' || opts.mode === 'DECOMPOSE') return opts.mode;
   if ((opts.prixUnitaire ?? 0) > 0) return 'FOURNI';
   return null;
+}
+
+/** Mode UI : sans mode persisté, on affiche / édite en décomposition. */
+export function modeUi(mode: PosteChiffrageMode): PosteChiffrageModeUi {
+  return mode ?? 'DECOMPOSE';
 }
 
 /** Prix unitaire HT affiché selon le mode actif. */

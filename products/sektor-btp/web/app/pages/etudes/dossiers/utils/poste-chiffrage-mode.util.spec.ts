@@ -1,4 +1,4 @@
-import { prixVenteHtActif, resolvePosteChiffrageMode } from './poste-chiffrage-mode.util';
+import { modeUi, prixVenteHtActif, resolvePosteChiffrageMode } from './poste-chiffrage-mode.util';
 
 describe('poste-chiffrage-mode.util', () => {
   describe('resolvePosteChiffrageMode', () => {
@@ -19,6 +19,17 @@ describe('poste-chiffrage-mode.util', () => {
     it('reste sans mode si aucun prix ni mode', () => {
       expect(resolvePosteChiffrageMode({ mode: null, prixUnitaire: 0 })).toBeNull();
       expect(resolvePosteChiffrageMode({})).toBeNull();
+    });
+  });
+
+  describe('modeUi', () => {
+    it('affiche DECOMPOSE par défaut quand mode null', () => {
+      expect(modeUi(null)).toBe('DECOMPOSE');
+    });
+
+    it('conserve FOURNI et DECOMPOSE', () => {
+      expect(modeUi('FOURNI')).toBe('FOURNI');
+      expect(modeUi('DECOMPOSE')).toBe('DECOMPOSE');
     });
   });
 

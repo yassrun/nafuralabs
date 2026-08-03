@@ -1,0 +1,85 @@
+<div class="poste-drawer" role="dialog" aria-labelledby="poste-drawer-title">
+  <header class="poste-drawer__header">
+    <div class="poste-drawer__identite">
+      <div class="poste-drawer__badges">
+        <span class="poste-drawer__code">{{ data.poste.code }}</span>
+        @if (dirty()) {
+          <span class="poste-drawer__pill poste-drawer__pill--warn">Non enregistré</span>
+        } @else if (savedOnce()) {
+          <span class="poste-drawer__pill poste-drawer__pill--ok">Enregistré</span>
+        }
+      </div>
+      <h2 id="poste-drawer-title" class="poste-drawer__titre">{{ data.poste.libelle }}</h2>
+      <p class="poste-drawer__meta">
+        <span>{{ data.poste.unite || '—' }}</span>
+        <span aria-hidden="true">·</span>
+        <span>Qté {{ data.poste.quantite ?? '—' }}</span>
+      </p>
+    </div>
+    <nf-button variant="ghost" size="sm" (clicked)="requestClose()" aria-label="Fermer">
+      ✕ Fermer
+    </nf-button>
+  </header>
+
+  <div class="poste-drawer__mode" role="group" aria-label="Mode de chiffrage">
+    <button
+      type="button"
+      class="poste-drawer__toggle"
+      [class.poste-drawer__toggle--active]="modeUi() === 'DECOMPOSE'"
+      [disabled]="!data.modifiable"
+      (click)="setMode('DECOMPOSE')"
+    >
+      Décomposé
+    </button>
+    <button
+      type="button"
+      class="poste-drawer__toggle"
+      [class.poste-drawer__toggle--active]="modeUi() === 'FOURNI'"
+      [disabled]="!data.modifiable"
+      (click)="setMode('FOURNI')"
+    >
+      Prix fourni
+    </button>
+  </div>
+
+  <div class="poste-drawer__body">
+    <app-poste-decomposition-panel
+      [poste]="data.poste"
+      [dossierId]="data.dossierId"
+      [cpsDocumentId]="data.cpsDocumentId"
+      [modifiable]="data.modifiable"
+      [fgDefaut]="data.fgDefaut"
+      [margeDefaut]="data.margeDefaut"
+      [tvaDefaut]="data.tvaDefaut"
+      [embedded]="true"
+      (dirtyChange)="onDirty($event)"
+      (modeUiChange)="onModeUi($event)"
+      (change)="onPanelChange()"
+    />
+  </div>
+
+  <footer class="poste-drawer__footer">
+    <span class="poste-drawer__footer-status">
+      @if (panel()?.sauvegarde()) {
+        Enregistrement…
+      } @else if (dirty()) {
+        Modifications non enregistrées
+      } @else {
+        Tout est à jour
+      }
+    </span>
+    <div class="poste-drawer__footer-actions">
+      <nf-button variant="secondary" size="sm" (clicked)="requestClose()">Fermer</nf-button>
+      @if (data.modifiable) {
+        <nf-button
+          variant="primary"
+          size="sm"
+          [disabled]="!dirty() || !!panel()?.sauvegarde()"
+          (clicked)="save()"
+        >
+          Enregistrer le poste
+        </nf-button>
+      }
+    </div>
+  </footer>
+</div>

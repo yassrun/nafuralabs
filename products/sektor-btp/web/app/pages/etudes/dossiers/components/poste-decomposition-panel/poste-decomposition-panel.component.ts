@@ -31,9 +31,11 @@ import { DecompositionProposeCache } from '../../services/decomposition-propose.
 
 import type { BordereauTreeRow } from '../../utils/bordereau-tree.util';
 import {
+  modeUi,
   prixVenteHtActif,
   resolvePosteChiffrageMode,
   type PosteChiffrageMode,
+  type PosteChiffrageModeUi,
 } from '../../utils/poste-chiffrage-mode.util';
 import { buildComposantDirtyKey } from '../../utils/poste-dirty.util';
 import { toUniteOptions, type UniteOption } from '../../utils/unite-options.util';
@@ -46,10 +48,6 @@ import {
   PosteChiffrageDialogComponent,
   type PosteChiffrageDialogResult,
 } from '../poste-chiffrage-dialog/poste-chiffrage-dialog.component';
-import {
-  PrixFourniDialogComponent,
-  type PrixFourniDialogResult,
-} from '../prix-fourni-dialog/prix-fourni-dialog.component';
 import {
   SousDetailDialogComponent,
   type SousDetailDialogResult,
@@ -104,11 +102,12 @@ export class PosteDecompositionPanelComponent {
   readonly fgDefaut = input(10);
   readonly margeDefaut = input(17.5);
   readonly tvaDefaut = input(20);
+  /** true dans le drawer : chrome identité / save géré par le shell. */
+  readonly embedded = input(false);
 
   readonly change = output<void>();
-  readonly closeMobile = output<void>();
   readonly dirtyChange = output<boolean>();
-  readonly beforeSelectRequest = output<void>();
+  readonly modeUiChange = output<PosteChiffrageModeUi>();
 
   readonly dpu = signal<PrixDPU | null>(null);
   /** En mode FOURNI, ce signal contient le coût de base avant FG et marge. */
@@ -139,9 +138,10 @@ export class PosteDecompositionPanelComponent {
 
   readonly composants = computed(() => this.composantsBrouillon());
   readonly hasComposants = computed(() => this.composants().length > 0);
-  readonly estFourni = computed(() => this.modeLocal() === 'FOURNI');
-  readonly estDecompose = computed(() => this.modeLocal() === 'DECOMPOSE');
-  readonly sansMode = computed(() => this.modeLocal() == null);
+  /** Mode affiché : null persisté → Décomposé (défaut UX). */
+  readonly modeUiActif = computed(() => modeUi(this.modeLocal()));
+  readonly estFourni = computed(() => this.modeUiActif() === 'FOURNI');
+  readonly estDecompose = computed(() => this.modeUiActif() === 'DECOMPOSE');
   readonly peutProposerCps = computed(
     () => !!this.dossierId() && !!this.cpsDocumentId() && this.modifiable(),
   );
@@ -193,6 +193,9 @@ export class PosteDecompositionPanelComponent {
     void this.chargerUnites();
     effect(() => {
       this.dirtyChange.emit(this.modificationsEnAttente());
+    });
+    effect(() => {
+      this.modeUiChange.emit(this.modeUiActif());
     });
     effect(() => {
       const poste = this.poste();
@@ -256,6 +259,40 @@ export class PosteDecompositionPanelComponent {
 
   onCommentaireChange(value: string): void {
     this.commentaire.set(value);
+  }
+
+  onPrixFourniChange(raw: string | number): void {
+    if (!this.canMutate() || !this.estFourni()) return;
+    const value = typeof raw === 'number' ? raw : Number.parseFloat(String(raw).replace(',', '.'));
+    this.prixFourni.set(Number.isFinite(value) ? Math.max(0, value) : 0);
+    this.modeLocal.set('FOURNI');
+    this.markDpuDirty();
+  }
+
+  onFgFourniChange(raw: string | number): void {
+    if (!this.canMutate() || !this.estFourni()) return;
+    const value = typeof raw === 'number' ? raw : Number.parseFloat(String(raw).replace(',', '.'));
+    this.fgFourniLocal.set(Number.isFinite(value) ? Math.max(0, value) : 0);
+    this.modeLocal.set('FOURNI');
+    this.markDpuDirty();
+  }
+
+  onMargeFourniChange(raw: string | number): void {
+    if (!this.canMutate() || !this.estFourni()) return;
+    const value = typeof raw === 'number' ? raw : Number.parseFloat(String(raw).replace(',', '.'));
+    this.margeFourniLocal.set(Number.isFinite(value) ? Math.max(0, value) : 0);
+    this.modeLocal.set('FOURNI');
+    this.markDpuDirty();
+  }
+
+  /** Switch mode depuis le toggle drawer (confirm si dirty / changement significatif). */
+  async setModeUi(target: PosteChiffrageModeUi): Promise<boolean> {
+    if (!this.canMutate()) return false;
+    if (this.modeUiActif() === target) return true;
+    if (target === 'FOURNI') {
+      return this.passerEnPrixFourni();
+    }
+    return this.passerEnDecomposition();
   }
 
   async proposerDepuisCps(): Promise<void> {
@@ -452,10 +489,10 @@ export class PosteDecompositionPanelComponent {
     this.toast.success('Composant créé dans le catalogue et lié au poste.');
   }
 
-  async saisirPrixFourni(): Promise<void> {
-    if (!this.canMutate()) return;
+  private async passerEnPrixFourni(): Promise<boolean> {
+    if (!this.canMutate()) return false;
     const poste = this.poste();
-    if (!poste?.id) return;
+    if (!poste?.id) return false;
 
     if (this.estDecompose() && this.hasComposants()) {
       const confirmed = await this.confirmDialog.confirm({
@@ -465,43 +502,17 @@ export class PosteDecompositionPanelComponent {
         variant: 'danger',
         confirmLabel: 'Continuer',
       });
-      if (!confirmed) return;
+      if (!confirmed) return false;
     }
 
-    const fgRate =
-      (this.fgFourniLocal() ?? 0) > 0 ? this.fgPct() : this.fgDefaut();
-    const margeRate =
-      (this.margeFourniLocal() ?? 0) > 0 ? this.margePct() : this.margeDefaut();
-
-    const ref = this.dialog.open(PrixFourniDialogComponent, {
-      width: '28rem',
-      autoFocus: false,
-      restoreFocus: true,
-      data: {
-        code: poste.code,
-        libelle: poste.libelle,
-        unite: poste.unite,
-        quantite: poste.quantite,
-        prixFourniBase: this.prixFourni(),
-        fraisGenerauxPercent: fgRate,
-        margePercent: margeRate,
-        appliquerFgMarge:
-          (this.fgFourniLocal() ?? 0) > 0 || (this.margeFourniLocal() ?? 0) > 0,
-      },
-    });
-    const result = (await firstValueFrom(ref.afterClosed())) as PrixFourniDialogResult | null;
-    if (!result) return;
-
-    this.prixFourni.set(result.prixUnitaire);
-    if (result.appliquerFgMarge) {
-      this.fgFourniLocal.set(fgRate);
-      this.margeFourniLocal.set(margeRate);
-    } else {
-      this.fgFourniLocal.set(0);
-      this.margeFourniLocal.set(0);
+    if (this.prixFourni() == null) {
+      this.prixFourni.set(poste.prixFourniBase ?? poste.prixUnitaire ?? 0);
     }
+    if (this.fgFourniLocal() == null) this.fgFourniLocal.set(this.fgDefaut());
+    if (this.margeFourniLocal() == null) this.margeFourniLocal.set(this.margeDefaut());
     this.modeLocal.set('FOURNI');
     this.markDpuDirty();
+    return true;
   }
 
   async ajouterSousDetail(): Promise<void> {
@@ -614,7 +625,7 @@ export class PosteDecompositionPanelComponent {
   }
 
   async ouvrirChiffrage(): Promise<void> {
-    if (!this.canMutate() || this.sansMode()) return;
+    if (!this.canMutate() || !this.estDecompose()) return;
     const ref = this.dialog.open(PosteChiffrageDialogComponent, {
       width: '28rem',
       autoFocus: false,
@@ -645,6 +656,7 @@ export class PosteDecompositionPanelComponent {
     this.erreur.set(undefined);
     try {
       if (this.estDecompose()) {
+        this.modeLocal.set('DECOMPOSE');
         const dpu = await this.assurerDpu();
         if (!dpu?.id) return;
         const updated = await this.dpuApi.update(dpu.id, {
@@ -663,7 +675,10 @@ export class PosteDecompositionPanelComponent {
           })),
         });
         this.applyDpu(updated);
-        await this.dpgfApi.updateNoeud(poste.id, { descriptif: this.commentaire().trim() });
+        await this.dpgfApi.updateNoeud(poste.id, {
+          descriptif: this.commentaire().trim(),
+          mode: 'DECOMPOSE',
+        });
       } else if (this.estFourni()) {
         await this.dpgfApi.updateNoeud(poste.id, {
           prixUnitaire: this.prixVenteHt(),
