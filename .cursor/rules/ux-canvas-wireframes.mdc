@@ -14,12 +14,13 @@ alwaysApply: true
 
 ## Comment
 
-1. Canvas dans `~/.cursor/projects/<workspace>/canvases/<feature>-wireframe.canvas.tsx`
-2. Vues navigables (`useCanvasState`) = états réels du flux (tree, modal, modes…)
-3. Afficher **cycle de vie**, dirty, gates, AI + **fallback manuel**
-4. Décisions UX listées dans le canvas (pas seulement le dessin)
-5. **Valider avec l’utilisateur** → puis plan d’impl → code
-6. Figé dans le backlog / ticket (réf. canvas + décisions)
+1. Canvas live (preview IDE) : `~/.cursor/projects/<workspace>/canvases/<feature>-wireframe.canvas.tsx`
+2. **Versionner** une copie dans le produit, ex. `products/sektor-btp/docs/ux/wireframes/<feature>-wireframe.canvas.tsx` (même nom). Sync avant commit — voir `docs/ux/wireframes/README.md`.
+3. Vues navigables (`useCanvasState`) = états réels du flux (tree, modal, modes…)
+4. Afficher **cycle de vie**, dirty, gates, AI + **fallback manuel**
+5. Décisions UX listées dans le canvas (pas seulement le dessin)
+6. **Valider avec l’utilisateur** → puis plan d’impl → code
+7. Figé dans le backlog / ticket (réf. canvas repo + décisions)
 
 ## Contenu attendu
 
@@ -30,10 +31,12 @@ alwaysApply: true
 
 ## Référence validée
 
-`etude-decompo-wireframe.canvas.tsx` — tree → drawer, toggle mode, footer Enregistrer.
+`etude-decompo-wireframe.canvas.tsx` — tree → drawer, toggle mode, footer Enregistrer  
+(Git : `products/sektor-btp/docs/ux/wireframes/`).
 
 ## Interdit
 
 - Partir en code UI majeur sans wireframe canvas validé
 - Remplacer cette méthode par Figma comme source de vérité
 - Wireframe « joli » sans états métier / sans fallback manuel
+- Laisser un canvas **uniquement** hors repo après validation (toujours sync Git)

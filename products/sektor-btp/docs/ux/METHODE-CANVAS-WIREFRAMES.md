@@ -13,9 +13,20 @@ Itérer le **vrai flux ERP** (états, dirty, gates, AI + manuel) à côté du ch
 Besoin UX → Canvas wireframe (états navigables)
          → Revue / itération avec le produit
          → Validation explicite
+         → Sync vers docs/ux/wireframes (Git)
          → Plan d’impl
          → Code
 ```
+
+## Versionnement (important)
+
+Cursor n’affiche la preview live que depuis  
+`~/.cursor/projects/<workspace>/canvases/*.canvas.tsx` (hors repo).
+
+**Source de vérité Git :** [`wireframes/`](wireframes/) — copier le `.canvas.tsx` ici avant commit.  
+Détail du sync : [`wireframes/README.md`](wireframes/README.md).
+
+Ne pas versionner les `*.canvas.data.json` (état local de navigation).
 
 ## Règles de contenu
 
@@ -28,7 +39,7 @@ Besoin UX → Canvas wireframe (états navigables)
 
 ## Référence canonique
 
-Canvas validé : **etude-decompo-wireframe** (chiffrage étude — tree → drawer, toggle Décomposé / Prix fourni, footer Enregistrer).
+Canvas validé : **etude-decompo-wireframe** (chiffrage étude — tree → drawer, toggle Décomposé / Prix fourni, footer Enregistrer) — versionné dans [`wireframes/etude-decompo-wireframe.canvas.tsx`](wireframes/etude-decompo-wireframe.canvas.tsx).
 
 ## Agents
 
