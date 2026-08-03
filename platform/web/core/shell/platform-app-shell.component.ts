@@ -114,7 +114,7 @@ const LUCIDE_ICON_ALIASES: Record<string, string> = {
           </button>
 
           <div class="naf-shell__app-identity">
-            <!-- Brand lockup lives in the sidebar only; topbar shows page context to avoid duplicating "Nafura Sektor". -->
+            <!-- Brand lockup lives in the sidebar only; topbar shows page context. -->
             <span
               class="naf-shell__page-title"
               *ngIf="resolvedShellOptions().topbar.showPageTitle && currentPageLabel() !== applicationTitle()">
@@ -2332,22 +2332,9 @@ export class PlatformAppShellComponent implements OnInit {
     return normalized.startsWith('/') ? normalized : `/${normalized}`;
   }
 
-  /** Maps current URL to AI schema domain for focused, token-efficient prompts. */
+  /** Maps current URL to AI schema domain for focused prompts. Product apps may override via conversation context. */
   private resolveConversationDomainKey(): string | undefined {
-    const path = this.currentUrl().split('?')[0].replace(/^\/+/, '');
-    const segment = path.split('/')[0]?.toLowerCase();
-    const domainBySegment: Record<string, string> = {
-      chantiers: 'chantiers',
-      achats: 'achats',
-      ventes: 'ventes',
-      finance: 'finance',
-      inventory: 'stock',
-      hse: 'hse',
-      rh: 'rh',
-      etudes: 'etudes',
-      marches: 'marches',
-    };
-    return segment ? domainBySegment[segment] : undefined;
+    return undefined;
   }
 
   translateLabel(label: string | undefined): string {

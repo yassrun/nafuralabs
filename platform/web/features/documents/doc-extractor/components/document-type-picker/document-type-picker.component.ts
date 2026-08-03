@@ -74,26 +74,11 @@ export class DocumentTypePickerComponent {
    * Get domain label for display.
    */
   getDomainLabel(domainKey: string): string {
-    const labelMap: Record<string, string> = {
-      'finance': 'Accounting & Finance',
-      'btp': 'Construction / BTP',
-      'logistic': 'Logistics',
-      'inventory': 'Inventory',
-    };
-    return labelMap[domainKey] || domainKey.charAt(0).toUpperCase() + domainKey.slice(1);
+    return domainKey.charAt(0).toUpperCase() + domainKey.slice(1);
   }
 
-  /**
-   * Get domain icon.
-   */
-  getDomainIcon(domainKey: string): string {
-    const iconMap: Record<string, string> = {
-      'logistic': 'local_shipping',
-      'finance': 'account_balance',
-      'btp': 'construction',
-      'inventory': 'inventory_2',
-    };
-    return iconMap[domainKey] || 'folder';
+  getDomainIcon(_domainKey: string): string {
+    return 'folder';
   }
 
   /**

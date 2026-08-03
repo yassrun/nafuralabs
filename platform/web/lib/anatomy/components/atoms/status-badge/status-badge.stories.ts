@@ -1,19 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/angular';
-
 import { StatusBadgeComponent } from './status-badge.component';
 
 const meta: Meta<StatusBadgeComponent> = {
-  title: 'Anatomy/Atoms/Status Badge',
+  title: 'Anatomy/Atoms/StatusBadge',
   component: StatusBadgeComponent,
   tags: ['autodocs'],
-  args: {
-    entityType: 'BC',
-    status: 'BROUILLON',
-  },
   argTypes: {
     entityType: {
       control: 'select',
-      options: ['BC', 'CHANTIER', 'MARCHE', 'FACTURE', 'APPROBATION'],
+      options: ['APPROBATION'],
     },
     status: {
       control: 'text',
@@ -22,26 +17,18 @@ const meta: Meta<StatusBadgeComponent> = {
 };
 
 export default meta;
-
 type Story = StoryObj<StatusBadgeComponent>;
 
-export const PurchaseDraft: Story = {
+export const PendingApproval: Story = {
   args: {
-    entityType: 'BC',
-    status: 'BROUILLON',
+    entityType: 'APPROBATION',
+    status: 'EN_ATTENTE',
   },
 };
 
-export const PurchaseApproved: Story = {
+export const Approved: Story = {
   args: {
-    entityType: 'BC',
+    entityType: 'APPROBATION',
     status: 'APPROUVE',
-  },
-};
-
-export const ActiveChantier: Story = {
-  args: {
-    entityType: 'CHANTIER',
-    status: 'EN_COURS',
   },
 };

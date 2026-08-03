@@ -1,10 +1,11 @@
-﻿package ma.nafura.venuecatalog.place.domain;
+package ma.nafura.venuecatalog.place.domain;
 
+/**
+ * Coarse parent category. Fine formats live in {@code venueTypes[]}.
+ * v1 product buckets: social venues (dining + nightlife) vs beauty.
+ */
 public enum PrimaryCategory {
-    NIGHTLIFE_VENUE,
-    SOCIAL_DINING,
-    SALON,
-    SPA,
-    BARBERSHOP,
+    SOCIAL_VENUE,
+    BEAUTY,
     OTHER
 }

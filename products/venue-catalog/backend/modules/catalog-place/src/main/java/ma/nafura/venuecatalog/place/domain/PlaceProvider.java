@@ -1,4 +1,4 @@
-﻿package ma.nafura.venuecatalog.place.domain;
+package ma.nafura.venuecatalog.place.domain;
 
 public enum PlaceProvider {
     GOOGLE_PLACES,

@@ -8,11 +8,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Prefer plain text for text-layer PDFs (typical BDP/DQE). Avoids large Gemini
+ * Prefer plain text for text-layer PDFs. Avoids large Gemini
  * {@code inlineData} payloads that are slow and prone to TLS EOF mid-response.
  * Scanned/empty PDFs fall back to binary upload.
  *
- * <p>Uses PDFBox 3 ({@link Loader}) — {@code sektor:etudes} already depends on 3.0.3.
+ * <p>Uses PDFBox 3 ({@link Loader}).
  */
 public final class PdfTextExtractor {
 
@@ -81,7 +81,7 @@ public final class PdfTextExtractor {
     }
 
     /**
-     * Extract text for a page range (1-based, inclusive). Useful for chunked bordereau passes.
+     * Extract text for a page range (1-based, inclusive). Useful for chunked multi-page passes.
      *
      * @return prompt text if usable; otherwise {@code null}
      */

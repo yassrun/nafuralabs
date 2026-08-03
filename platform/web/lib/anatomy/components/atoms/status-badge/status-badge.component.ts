@@ -8,8 +8,7 @@ import { resolveStatus } from './status-mapping';
  * Resolves label, variant, and tooltip from the central status mapping.
  *
  * @example
- * <nf-status-badge entityType="BC" [status]="bc.status"></nf-status-badge>
- * <nf-status-badge entityType="CHANTIER" [status]="chantier.status"></nf-status-badge>
+ * <nf-status-badge entityType="APPROBATION" [status]="req.status"></nf-status-badge>
  */
 @Component({
   selector: 'nf-status-badge',

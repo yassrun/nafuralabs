@@ -19,7 +19,8 @@ secret/nafura/{env}/
 └── apps/
     └── {app-id}/
         ├── database             # name, schema, user, pass, ai_user, ai_user_password
-        └── object-storage       # endpoint, bucket, user, password
+        ├── object-storage       # endpoint, bucket, user, password
+        └── integrations         # app-specific (e.g. blanner: google_places_api_key)
 ```
 
 ## Who reads what
@@ -30,6 +31,7 @@ secret/nafura/{env}/
 | keycloak pod | `platform/iam/keycloak` |
 | minio pod | `platform/storage/minio` |
 | `{app}-backend` | `apps/{app}/*`, `platform/integrations/email/brevo`, `platform/integrations/ai/gemini`, `platform/iam/keycloak`, `platform/security/invitation`, `platform/iam/clients/{app}` |
+| `blanner-backend` | `apps/blanner/database`, `apps/blanner/integrations` (Places key) |
 
 ## Bootstrap
 
@@ -63,6 +65,34 @@ kubectl -n sektor-prod rollout restart deploy/sektor-btp-backend
 
 ```bash
 vault kv put secret/nafura/prod/platform/integrations/ai/gemini api_key="..."
+```
+
+### Venue Catalog app secrets
+
+```bash
+vault kv put secret/nafura/staging/apps/venue-catalog/database \
+  name=nafura_venue_catalog schema=public user=nafura pass=nafura
+vault kv put secret/nafura/staging/apps/venue-catalog/object-storage \
+  endpoint=http://minio.nafura-infra-staging.svc:9000 bucket=venue-catalog-media \
+  user=minioadmin password=minioadmin
+vault kv put secret/nafura/staging/apps/venue-catalog/integrations \
+  google_places_api_key="..."
+```
+
+Le service account K8s utilise une policy et un role dedies :
+
+```hcl
+path "secret/data/nafura/staging/apps/venue-catalog/*" {
+  capabilities = ["read"]
+}
+```
+
+```bash
+vault policy write venue-catalog-backend venue-catalog-backend.hcl
+vault write auth/kubernetes/role/venue-catalog-backend \
+  bound_service_account_names=venue-catalog-backend \
+  bound_service_account_namespaces=venue-catalog-staging \
+  policies=venue-catalog-backend ttl=24h
 ```
 
 Path in UI: **Secrets → secret → nafura → prod → platform → integrations → email → brevo**

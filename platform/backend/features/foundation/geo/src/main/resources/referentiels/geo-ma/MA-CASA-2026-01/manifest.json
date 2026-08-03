@@ -1,0 +1,74 @@
+{
+  "version": "MA-CASA-2026-01",
+  "cityCode": "casablanca",
+  "cityLabel": "Casablanca",
+  "effectiveFrom": "2026-01-01",
+  "provenance": "NAFURA_CURATED",
+  "notes": "Operational Nafura zones for venue catalog enrichment. Not official administrative boundaries.",
+  "districts": [
+    {
+      "code": "MAARIF",
+      "label": "Maârif",
+      "geometryFile": "maarif.geojson",
+      "sha256": "b28d0c34a23389f39af6d209ae658720a4a27a768e71c7a7d0a601203b22ec68",
+      "aliases": [
+        "maarif",
+        "maârif",
+        "maarif centre",
+        "boulevard zerktouni",
+        "bd zerktouni"
+      ],
+      "provenance": "NAFURA_CURATED"
+    },
+    {
+      "code": "GAUTHIER",
+      "label": "Gauthier",
+      "geometryFile": "gauthier.geojson",
+      "sha256": "83d943ac972e0779018e5a1b86cec982ea3a7d7d5b50f897fe25ff1a687eb8fd",
+      "aliases": [
+        "gauthier",
+        "quartier gauthier",
+        "palmier"
+      ],
+      "provenance": "NAFURA_CURATED"
+    },
+    {
+      "code": "RACINE",
+      "label": "Racine",
+      "geometryFile": "racine.geojson",
+      "sha256": "2fd01fa1e5d1279916f9dfef37b36095df045ca36dac5275a8f8bde0bbf7acb2",
+      "aliases": [
+        "racine",
+        "quartier racine",
+        "boulevard d'anfa racine"
+      ],
+      "provenance": "NAFURA_CURATED"
+    },
+    {
+      "code": "ANFA_AIN_DIAB",
+      "label": "Anfa / Aïn Diab",
+      "geometryFile": "anfa_ain_diab.geojson",
+      "sha256": "f67ea9821312296c5462f8b0b3dd44421693f659809832a43e8a710d5407297e",
+      "aliases": [
+        "anfa",
+        "ain diab",
+        "aïn diab",
+        "corniche",
+        "boulevard de la corniche"
+      ],
+      "provenance": "NAFURA_CURATED"
+    },
+    {
+      "code": "BOURGOGNE",
+      "label": "Bourgogne",
+      "geometryFile": "bourgogne.geojson",
+      "sha256": "d82641a69535066d0913217b43b861faf1f9c974e476084acea5d19975bd8d7c",
+      "aliases": [
+        "bourgogne",
+        "quartier bourgogne",
+        "californie casa"
+      ],
+      "provenance": "NAFURA_CURATED"
+    }
+  ]
+}

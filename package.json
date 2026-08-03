@@ -4,6 +4,7 @@
   "description": "Manifeste de workspaces npm. Ne porte aucune dépendance propre : il n'existe que pour hisser node_modules à la racine, afin que platform/web (consommé par chemins tsconfig) puisse résoudre ses dépendances.",
   "workspaces": [
     "platform/web",
-    "products/sektor-btp/web"
+    "products/sektor-btp/web",
+    "products/venue-catalog/web"
   ]
 }

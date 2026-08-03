@@ -88,6 +88,7 @@ Pas d’overlay K8s `dev`. Env `demo` (GKE) : **deprecated**.
 | `venue-catalog` | `venue-catalog-${ENV}` | `nafura_venue_catalog` | Flyway startup | `products/venue-catalog/deploy/k8s/overlays/${ENV}` |
 | `build-intelligence` | `build-intelligence-${ENV}` | `nafura_build_intelligence` | Liquibase Job | `products/build-intelligence/deploy/k8s/overlays/${ENV}` |
 | `usage-ops` | `usage-ops-${ENV}` | `nafura_usage_ops` | Liquibase Job | `products/usage-ops/deploy/k8s/overlays/${ENV}` |
+| `blanner` | `blanner-${ENV}` | `nafura_blanner` | Liquibase startup | `products/blanner/deploy/k8s/overlays/${ENV}` |
 | `mbs-studio` | `nafura-vitrine-${ENV}` | — | — | `marketing/products/mbs-studio/deploy/k8s/overlays/${ENV}` |
 | `corporate` | `nafura-vitrine-${ENV}` | — | — | `marketing/corporate/deploy/k8s/overlays/${ENV}` |
 
@@ -132,6 +133,9 @@ Historique du chantier : [`products/sektor-btp/docs/epics/front-ownership/`](../
 | IAM | `iam.nafuralabs.staging` |
 | MBS | `mbs.nafuralabs.staging` |
 | Usage Ops | `usage-ops.nafuralabs.staging` |
+| Blanner API | `api.blanner.nafuralabs.staging` |
+| Venue Catalog API | `api.venue-catalog.nafuralabs.staging` |
+| Venue Catalog UI | `catalog.nafuralabs.staging` |
 | Minio / S3 / Vault | `minio`, `s3`, `vault`.nafuralabs.staging |
 
 Hosts Windows (admin) : `powershell -ExecutionPolicy Bypass -File toolchain/ops/add-staging-hosts.ps1`
@@ -144,6 +148,9 @@ Hosts Windows (admin) : `powershell -ExecutionPolicy Bypass -File toolchain/ops/
 | IAM | `iam.nafuralabs.com` |
 | MBS | `mbs.nafuralabs.com` |
 | Usage Ops | `usage-ops.nafuralabs.com` |
+| Blanner API | `api.blanner.nafuralabs.com` |
+| Venue Catalog API | `api.venue-catalog.nafuralabs.com` |
+| Venue Catalog UI | `catalog.nafuralabs.com` |
 
 Config front : `products/sektor-btp/web/src/environments/environment.staging.ts` / `environment.prod.ts`.
 

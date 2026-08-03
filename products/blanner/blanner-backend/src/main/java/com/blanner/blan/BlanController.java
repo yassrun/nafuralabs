@@ -23,7 +23,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/blans")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 @Tag(name = "Blans", description = "Blan management endpoints")
 public class BlanController {
     

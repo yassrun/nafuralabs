@@ -160,7 +160,7 @@ export class ThemeService {
    * Met à jour l’onglet du navigateur et le favicon (Task 15.1).
    */
   applyDocumentChrome(b: TenantBranding | null): void {
-    const base = 'Sektor';
+    const base = 'Nafura';
     const name = b?.tenantDisplayName?.trim();
     this.title.setTitle(name ? `${base} — ${name}` : base);
     const link = this.document.querySelector<HTMLLinkElement>('link[rel="icon"]');

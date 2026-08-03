@@ -45,7 +45,13 @@ public class GooglePlacesAdapter implements PlaceProviderPort {
     @Override
     public PlaceSearchResult searchNearby(PlaceSearchQueries.NearbySearchQuery query) {
         return client.searchNearby(
-                new NearbySearchRequest(query.lat(), query.lng(), query.radiusMeters(), query.maxResults()),
+                new NearbySearchRequest(
+                        query.lat(),
+                        query.lng(),
+                        query.radiusMeters(),
+                        query.maxResults(),
+                        query.includedTypes()
+                ),
                 properties.getFieldMasks().getSearch()
         );
     }

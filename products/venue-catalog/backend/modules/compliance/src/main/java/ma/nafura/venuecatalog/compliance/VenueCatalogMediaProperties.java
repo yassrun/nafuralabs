@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "venue-catalog.media")
 public class VenueCatalogMediaProperties {
 
-    private int maxPhotosPerPlace = 5;
+    private int maxPhotosPerPlace = 3;
     private int fetchMaxWidthPx = 1600;
     private int cacheTtlDays = 30;
 

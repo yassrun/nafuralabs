@@ -37,6 +37,10 @@
       {
         "name": "PLATFORM_ADMIN",
         "description": "Platform administrator - manage applications and tenants"
+      },
+      {
+        "name": "CATALOG_OPERATOR",
+        "description": "Venue catalog operator - import, review and approve places"
       }
     ]
   },
@@ -266,6 +270,41 @@
         "https://usage-ops.nafuralabs.com",
         "http://localhost:8087",
         "http://127.0.0.1:18080",
+        "+"
+      ],
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false
+    },
+    {
+      "clientId": "venue-catalog-web",
+      "name": "Venue Catalog Web",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "redirectUris": [
+        "http://catalog.nafuralabs.staging/*",
+        "http://catalog.nafuralabs.staging/auth/callback",
+        "https://catalog.nafuralabs.staging/*",
+        "https://catalog.nafuralabs.staging/auth/callback",
+        "http://catalog.nafuralabs.com/*",
+        "http://catalog.nafuralabs.com/auth/callback",
+        "https://catalog.nafuralabs.com/*",
+        "https://catalog.nafuralabs.com/auth/callback",
+        "http://127.0.0.1:4210/*",
+        "http://127.0.0.1:4210/auth/callback",
+        "http://localhost:4210/*",
+        "http://localhost:4210/auth/callback",
+        "http://localhost:4200/*",
+        "http://localhost:4200/auth/callback"
+      ],
+      "webOrigins": [
+        "http://catalog.nafuralabs.staging",
+        "https://catalog.nafuralabs.staging",
+        "http://catalog.nafuralabs.com",
+        "https://catalog.nafuralabs.com",
+        "http://127.0.0.1:4210",
+        "http://localhost:4210",
+        "http://localhost:4200",
         "+"
       ],
       "standardFlowEnabled": true,

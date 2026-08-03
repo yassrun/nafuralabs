@@ -1,32 +1,25 @@
 package ma.nafura.venuecatalog.compliance;
 
-import io.minio.GetPresignedObjectUrlArgs;
-import io.minio.MinioClient;
-import io.minio.PutObjectArgs;
-import io.minio.RemoveObjectArgs;
-import io.minio.http.Method;
-import org.springframework.beans.factory.annotation.Qualifier;
+import ma.nafura.platform.collaboration.docmanager.storage.ObjectStorage;
 import org.springframework.stereotype.Service;
 
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.time.Duration;
 import java.util.HexFormat;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 @Service
 public class VenueCatalogMediaStorageService {
 
-    private final MinioClient minioClient;
+    private final ObjectStorage objectStorage;
     private final VenueCatalogStorageProperties storageProperties;
 
     public VenueCatalogMediaStorageService(
-            @Qualifier("venueCatalogMinioClient") MinioClient minioClient,
+            ObjectStorage objectStorage,
             VenueCatalogStorageProperties storageProperties
     ) {
-        this.minioClient = minioClient;
+        this.objectStorage = objectStorage;
         this.storageProperties = storageProperties;
     }
 
@@ -34,31 +27,25 @@ public class VenueCatalogMediaStorageService {
         String checksum = sha256Prefix(content);
         String storageKey = "google/" + catalogPlaceId + "/" + checksum + ".jpg";
         try {
-            minioClient.putObject(
-                    PutObjectArgs.builder()
-                            .bucket(storageProperties.getBucket())
-                            .object(storageKey)
-                            .stream(new ByteArrayInputStream(content), content.length, -1)
-                            .contentType("image/jpeg")
-                            .userMetadata(metadata)
-                            .build()
-            );
+            objectStorage.ensureBucket(storageProperties.getBucket());
+            objectStorage.put(
+                    storageProperties.getBucket(),
+                    storageKey,
+                    content,
+                    "image/jpeg",
+                    metadata);
             return new StoredObject(storageKey, "sha256:" + checksum);
         } catch (Exception e) {
-            throw new MediaStorageException("Failed to store media in MinIO", e);
+            throw new MediaStorageException("Failed to store catalog media", e);
         }
     }
 
     public String signedUrl(String storageKey) {
         try {
-            return minioClient.getPresignedObjectUrl(
-                    GetPresignedObjectUrlArgs.builder()
-                            .method(Method.GET)
-                            .bucket(storageProperties.getBucket())
-                            .object(storageKey)
-                            .expiry(storageProperties.getPublicReadSignedUrlTtlMinutes(), TimeUnit.MINUTES)
-                            .build()
-            );
+            return objectStorage.presignGet(
+                    storageProperties.getBucket(),
+                    storageKey,
+                    Duration.ofMinutes(storageProperties.getPublicReadSignedUrlTtlMinutes()));
         } catch (Exception e) {
             throw new MediaStorageException("Failed to sign media URL", e);
         }
@@ -66,12 +53,7 @@ public class VenueCatalogMediaStorageService {
 
     public void delete(String storageKey) {
         try {
-            minioClient.removeObject(
-                    RemoveObjectArgs.builder()
-                            .bucket(storageProperties.getBucket())
-                            .object(storageKey)
-                            .build()
-            );
+            objectStorage.delete(storageProperties.getBucket(), storageKey);
         } catch (Exception e) {
             throw new MediaStorageException("Failed to delete media object", e);
         }

@@ -5,7 +5,10 @@ $marker = '# Nafura staging (nlops)'
 $line = '127.0.0.1 sektor.nafuralabs.staging api.sektor.nafuralabs.staging mbs.nafuralabs.staging zenith.nafuralabs.staging iam.nafuralabs.staging minio.nafuralabs.staging s3.nafuralabs.staging vault.nafuralabs.staging'
 $extra = @(
   '127.0.0.1 build-intelligence.nafuralabs.staging',
-  '127.0.0.1 usage-ops.nafuralabs.staging'
+  '127.0.0.1 usage-ops.nafuralabs.staging',
+  '127.0.0.1 api.blanner.nafuralabs.staging',
+  '127.0.0.1 api.venue-catalog.nafuralabs.staging',
+  '127.0.0.1 catalog.nafuralabs.staging'
 )
 
 $content = Get-Content $hostsPath -Raw -ErrorAction Stop

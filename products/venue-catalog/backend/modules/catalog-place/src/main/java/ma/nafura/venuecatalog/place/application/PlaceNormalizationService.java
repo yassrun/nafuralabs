@@ -24,21 +24,83 @@ import java.util.Map;
 public class PlaceNormalizationService {
 
     private static final Map<String, PrimaryCategory> GOOGLE_TYPE_CATEGORY = Map.ofEntries(
-            Map.entry("night_club", PrimaryCategory.NIGHTLIFE_VENUE),
-            Map.entry("bar", PrimaryCategory.NIGHTLIFE_VENUE),
-            Map.entry("restaurant", PrimaryCategory.SOCIAL_DINING),
-            Map.entry("cafe", PrimaryCategory.SOCIAL_DINING),
-            Map.entry("beauty_salon", PrimaryCategory.SALON),
-            Map.entry("hair_care", PrimaryCategory.SALON),
-            Map.entry("barber_shop", PrimaryCategory.BARBERSHOP),
-            Map.entry("spa", PrimaryCategory.SPA)
+            Map.entry("night_club", PrimaryCategory.SOCIAL_VENUE),
+            Map.entry("bar", PrimaryCategory.SOCIAL_VENUE),
+            Map.entry("restaurant", PrimaryCategory.SOCIAL_VENUE),
+            Map.entry("cafe", PrimaryCategory.SOCIAL_VENUE),
+            Map.entry("meal_takeaway", PrimaryCategory.SOCIAL_VENUE),
+            Map.entry("meal_delivery", PrimaryCategory.SOCIAL_VENUE),
+            Map.entry("beauty_salon", PrimaryCategory.BEAUTY),
+            Map.entry("hair_care", PrimaryCategory.BEAUTY),
+            Map.entry("barber_shop", PrimaryCategory.BEAUTY),
+            Map.entry("spa", PrimaryCategory.BEAUTY)
     );
+
+    public static final String NAME_DISTRICT_SEPARATOR = " · ";
 
     public String normalizeName(String name) {
         if (name == null) {
             return "";
         }
         return name.trim().toLowerCase(Locale.ROOT).replaceAll("\\s+", " ");
+    }
+
+    /**
+     * Idempotent display name: {@code Brand · District}.
+     * Strips a previous managed suffix and a trailing city label before appending district.
+     */
+    public String cleanCanonicalName(String rawName, String districtLabel, CityCode cityCode) {
+        String base = stripManagedDistrictSuffix(rawName);
+        base = stripCitySuffix(base, cityCode);
+        base = base.replaceAll("\\s+", " ").trim();
+        if (base.isBlank()) {
+            base = rawName == null || rawName.isBlank() ? "Unknown" : rawName.trim();
+        }
+        String district = districtLabel == null ? "" : districtLabel.trim().replaceAll("\\s+", " ");
+        if (district.isBlank() || base.equalsIgnoreCase(district)) {
+            return base;
+        }
+        return base + NAME_DISTRICT_SEPARATOR + district;
+    }
+
+    public String stripManagedDistrictSuffix(String name) {
+        if (name == null || name.isBlank()) {
+            return "";
+        }
+        String trimmed = name.trim();
+        int idx = trimmed.lastIndexOf(NAME_DISTRICT_SEPARATOR);
+        if (idx > 0) {
+            return trimmed.substring(0, idx).trim();
+        }
+        return trimmed;
+    }
+
+    private String stripCitySuffix(String name, CityCode cityCode) {
+        if (name == null || name.isBlank()) {
+            return "";
+        }
+        String result = name.trim();
+        for (String alias : cityAliases(cityCode)) {
+            // trailing " Casablanca" / ", Casablanca" / " - Casablanca"
+            String pattern = "(?i)[\\s,\\-–—]+" + java.util.regex.Pattern.quote(alias) + "\\s*$";
+            result = result.replaceAll(pattern, "").trim();
+        }
+        return result;
+    }
+
+    private static List<String> cityAliases(CityCode cityCode) {
+        if (cityCode == null) {
+            return List.of();
+        }
+        return switch (cityCode) {
+            case CASABLANCA -> List.of("Casablanca", "Casa", "Dar-el-Beida", "Dar el Beida");
+            case RABAT -> List.of("Rabat");
+            case MARRAKECH -> List.of("Marrakech", "Marrakesh");
+            case TANGIER -> List.of("Tangier", "Tanger");
+            case FES -> List.of("Fes", "Fès", "Fez");
+            case AGADIR -> List.of("Agadir");
+            case OTHER -> List.of();
+        };
     }
 
     public PlaceModels.Geo roundGeo(PlaceModels.Geo geo, int decimals) {

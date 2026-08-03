@@ -59,48 +59,8 @@ const STATIC_PAGES: SearchResult[] = [
   },
 ];
 
-const STATIC_PALETTE_ACTIONS: SearchResult[] = [
-  {
-    id: 'action:chantier-new',
-    label: 'core.search.actions.newChantier',
-    icon: 'file',
-    route: '/chantiers/new',
-    category: 'actions',
-    breadcrumb: '',
-  },
-  {
-    id: 'action:bc-new',
-    label: 'core.search.actions.newBc',
-    icon: 'file',
-    route: '/achats/commandes/new',
-    category: 'actions',
-    breadcrumb: '',
-  },
-  {
-    id: 'action:da-new',
-    label: 'core.search.actions.newDa',
-    icon: 'file',
-    route: '/achats/demandes/new',
-    category: 'actions',
-    breadcrumb: '',
-  },
-  {
-    id: 'action:employe-new',
-    label: 'core.search.actions.newEmploye',
-    icon: 'file',
-    route: '/rh/employes/new',
-    category: 'actions',
-    breadcrumb: '',
-  },
-  {
-    id: 'action:facture-vente-new',
-    label: 'core.search.actions.newFactureVente',
-    icon: 'file',
-    route: '/ventes/factures/new',
-    category: 'actions',
-    breadcrumb: '',
-  },
-];
+/** Product apps contribute create-actions via sidebar / search APIs — none are hard-coded here. */
+const STATIC_PALETTE_ACTIONS: SearchResult[] = [];
 
 @Component({
   selector: 'nf-command-palette',

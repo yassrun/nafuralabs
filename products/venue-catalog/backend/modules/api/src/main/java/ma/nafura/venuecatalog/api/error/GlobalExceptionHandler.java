@@ -15,7 +15,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Map;
 
-@RestControllerAdvice
+@RestControllerAdvice(name = "venueCatalogExceptionHandler")
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(JobValidationException.class)

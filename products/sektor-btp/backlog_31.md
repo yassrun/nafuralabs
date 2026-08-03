@@ -1,0 +1,13 @@
+- Raffinement de l'import auto du BDP (test )
+- review the master slave dans etude
+- varier le pourcentage du fg et mg dans le prix fourni
+- sur la dttable de letude on doit avoir un fixed size pr le champ objet pr pouvoir voir les status et autre colonne
+- review the UX of the commentaire oon the post
+- les template du print
+- deduire les pieces du marché depuis le cps et forcer leur jointure  
+- mixer apelll doffre avec etude
+- FIXER LES BUGS EMPLOYé
+- sous traitance
+- gestion material
+- revue sceen employé
+-pointage

@@ -22,7 +22,8 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource))
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(authz -> authz
-                // Allow all requests for testing (no authentication)
+                // TODO: replace with JWT/OTP — identity must not come from userId query params
+                .requestMatchers("/actuator/health", "/actuator/health/**", "/actuator/info").permitAll()
                 .anyRequest().permitAll()
             );
 

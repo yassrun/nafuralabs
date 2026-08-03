@@ -4,12 +4,13 @@ plugins {
 
 dependencies {
     implementation project(':platform:core:framework')
-    implementation project(':platform:core:authorization')
-    implementation project(':platform:core:identity')
     implementation project(':platform:integrations:google-places')
     implementation project(':platform:core:job-runner')
     implementation project(':platform:features:collaboration:doc-manager')
+    implementation project(':platform:features:foundation:geo')
+    implementation project(':platform:features:ai:llm-provider')
     implementation project(':venue-catalog:api')
+    implementation project(':venue-catalog:catalog-enrichment')
 
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'

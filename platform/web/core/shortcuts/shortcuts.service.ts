@@ -7,30 +7,14 @@ export interface ShortcutDef {
   category: 'Navigation' | 'Actions' | 'Interface';
 }
 
+/** Platform-owned shortcuts only. Product navigation shortcuts belong to the host app. */
 export const SHORTCUTS: ShortcutDef[] = [
   { keys: 'Ctrl+K / ⌘K / Ctrl+⇧P / Alt+K', description: 'Command palette (alternatives if the browser captures Ctrl+K)', category: 'Interface' },
   { keys: '?', description: 'Toggle assistant IA', category: 'Interface' },
   { keys: 'Ctrl+/', description: 'Aide raccourcis clavier', category: 'Interface' },
-  { keys: 'g c', description: 'Aller aux Chantiers', category: 'Navigation' },
-  { keys: 'g a', description: 'Aller aux Achats', category: 'Navigation' },
-  { keys: 'g f', description: 'Aller à la Finance', category: 'Navigation' },
-  { keys: 'g p', description: 'Aller au Pilotage', category: 'Navigation' },
-  { keys: 'g r', description: 'Aller aux RH', category: 'Navigation' },
-  { keys: 'g h', description: 'Aller au HSE', category: 'Navigation' },
-  { keys: 'g m', description: 'Aller aux Marchés', category: 'Navigation' },
   { keys: 'Esc', description: 'Fermer modal / drawer', category: 'Actions' },
   { keys: 'Ctrl+S', description: 'Sauvegarder formulaire', category: 'Actions' },
 ];
-
-const GOTO_MAP: Record<string, string> = {
-  c: '/chantiers',
-  a: '/achats',
-  f: '/finance',
-  p: '/pilotage',
-  r: '/rh',
-  h: '/hse/tableau-bord',
-  m: '/marches',
-};
 
 @Injectable({ providedIn: 'root' })
 export class ShortcutsService {
@@ -38,7 +22,15 @@ export class ShortcutsService {
   private gMode = false;
   private gTimer: ReturnType<typeof setTimeout> | null = null;
 
+  /** Product may register goto keys → routes via setGotoMap(). */
+  private gotoMap: Record<string, string> = {};
+
   readonly shortcuts = SHORTCUTS;
+
+  /** Register product navigation shortcuts (goto map). Replaces any previous map. */
+  setGotoMap(map: Record<string, string>): void {
+    this.gotoMap = { ...map };
+  }
 
   /**
    * Call from the shell's @HostListener('document:keydown').
@@ -91,10 +83,10 @@ export class ShortcutsService {
       return true;
     }
 
-    // g <key> → goto
+    // g <key> → goto (product-registered map)
     if (this.gMode) {
       this.clearGMode();
-      const route = GOTO_MAP[event.key.toLowerCase()];
+      const route = this.gotoMap[event.key.toLowerCase()];
       if (route) {
         void this.router.navigate([route]);
         return true;

@@ -1,11 +1,15 @@
 spring:
   application:
     name: venue-catalog-service
+  autoconfigure:
+    exclude:
+      - ma.nafura.platform.authorization.security.config.NafuraSecurityAutoConfiguration
+      - ma.nafura.platform.authorization.security.config.NafuraTenantSecurityAutoConfiguration
 
   datasource:
-    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:5432/${POSTGRES_DB:nafura_venue_catalog}
-    username: ${POSTGRES_USER:seyrura}
-    password: ${POSTGRES_PASSWORD:seyrura}
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:nafura_venue_catalog}
+    username: ${POSTGRES_USER:nafura}
+    password: ${POSTGRES_PASSWORD:nafura}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -45,22 +49,34 @@ management:
 venue-catalog:
   timezone: Africa/Casablanca
   dev-jwt:
-    enabled: true
+    enabled: ${VENUE_CATALOG_DEV_JWT_ENABLED:true}
     secret: ${VENUE_CATALOG_DEV_JWT_SECRET:venue-catalog-local-jwt-secret-32-chars-min}
   dedupe:
     geo-round-decimals: 4
     confidence-review-threshold: 0.85
   media:
-    max-photos-per-place: 5
+    max-photos-per-place: 3
     fetch-max-width-px: 1600
     cache-ttl-days: 30
   jobs:
     idempotency-ttl-hours: 24
     inter-request-delay-ms: 2000
+  enrichment:
+    shadow-mode: true
+    prompt-version: venue-enrich-v1
+    batch-size: 30
+    keep-threshold: 75
+    review-threshold: 45
+
+ai:
+  provider: ${AI_PROVIDER:gemini}
+  gemini:
+    api-key: ${AI_GEMINI_API_KEY:}
+    model: ${AI_GEMINI_MODEL:gemini-2.5-flash}
 
 nafura:
   storage:
-    bucket: venue-catalog-media
+    bucket: ${VENUE_CATALOG_MEDIA_BUCKET:venue-catalog-media}
     public-read-signed-url-ttl-minutes: 60
   google-places:
     api-key: ${GOOGLE_PLACES_API_KEY:}
@@ -83,5 +99,13 @@ app:
       endpoint: ${DOCUMENTS_MINIO_ENDPOINT:http://localhost:9000}
       access-key: ${MINIO_ROOT_USER:minioadmin}
       secret-key: ${MINIO_ROOT_PASSWORD:minioadmin}
-      bucket: ${DOCUMENTS_MINIO_BUCKET:venue-catalog-media}
+      bucket: ${DOCUMENTS_MINIO_BUCKET:${VENUE_CATALOG_MEDIA_BUCKET:venue-catalog-media}}
       region: us-east-1
+
+documents:
+  minio:
+    endpoint: ${DOCUMENTS_MINIO_ENDPOINT:http://localhost:9000}
+    access-key: ${MINIO_ROOT_USER:minioadmin}
+    secret-key: ${MINIO_ROOT_PASSWORD:minioadmin}
+    bucket: ${DOCUMENTS_MINIO_BUCKET:${VENUE_CATALOG_MEDIA_BUCKET:venue-catalog-media}}
+    secure: false

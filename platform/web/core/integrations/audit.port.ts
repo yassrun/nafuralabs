@@ -3,13 +3,8 @@ import { InjectionToken } from '@angular/core';
 /**
  * Port d'audit pour les adaptateurs d'intégration — appartient à la PLATEFORME.
  *
- * Les adaptateurs importaient `ErpAuditService` depuis `@applications/*`, ce qui rendait
- * la plateforme tributaire de l'ERP Sektor. La plateforme déclare désormais ce dont elle a
- * besoin ; l'application fournit l'implémentation au démarrage. Voir
- * `products/sektor-btp/docs/epics/front-ownership/`.
- *
- * La signature reproduit exactement celle de `ErpAuditService.log()` : aucun changement de
- * comportement, seulement le sens de la dépendance.
+ * La plateforme déclare ce dont elle a besoin ; l'application hôte fournit
+ * l'implémentation au démarrage (inversion de dépendance).
  */
 export interface IntegrationAuditPort {
   log(

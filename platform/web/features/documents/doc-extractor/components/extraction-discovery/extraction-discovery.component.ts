@@ -88,30 +88,7 @@ export class ExtractionDiscoveryComponent {
   }
 
   private getDomainMetadata(domainKey: string): { description: string; icon: string; color: string } {
-    const metadataMap: Record<string, { description: string; icon: string; color: string }> = {
-      'logistic': {
-        description: 'Delivery notes, transport docs, stock flows.',
-        icon: 'local_shipping',
-        color: '#3f51b5',
-      },
-      'finance': {
-        description: 'Invoices, receipts, bank statements.',
-        icon: 'account_balance',
-        color: '#4caf50',
-      },
-      'btp': {
-        description: 'Construction documents, building permits, site reports.',
-        icon: 'construction',
-        color: '#ff9800',
-      },
-      'inventory': {
-        description: 'Stock management, warehouse documents.',
-        icon: 'inventory_2',
-        color: '#9c27b0',
-      },
-    };
-
-    return metadataMap[domainKey] || {
+    return {
       description: `Documents related to ${domainKey}.`,
       icon: 'folder',
       color: '#757575',

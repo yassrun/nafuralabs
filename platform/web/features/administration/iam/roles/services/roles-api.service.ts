@@ -119,7 +119,7 @@ export class RolesApiService extends FeatureApiService<Role, RoleCreate, RoleUpd
       isSystem: item.isSystem ?? true,
       priority: Number(item.priority ?? 0),
       memberCount: item.memberCount ?? 0,
-      scopeType: item.scopeType ?? 'ENTREPRISE',
+      scopeType: item.scopeType ?? 'TENANT',
       createdAt: item.createdAt ?? null,
       updatedAt: item.updatedAt ?? null,
     };

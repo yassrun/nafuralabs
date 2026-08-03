@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/participations")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 @Tag(name = "Participations", description = "Participation management endpoints")
 public class ParticipationController {
 

@@ -2,9 +2,7 @@
  * Contrat de configuration applicative — appartient à la PLATEFORME.
  *
  * Inversion de dépendance : la plateforme définit ce dont elle a besoin, l'application
- * le fournit au démarrage. Avant cette bascule, dix fichiers de `core/` importaient
- * `@applications/config/routes`, ce qui rendait la plateforme incompilable sans l'ERP
- * Sektor. Voir `products/sektor-btp/docs/epics/front-ownership/`.
+ * le fournit au démarrage. Voir docs front-ownership du produit hôte.
  *
  * Pourquoi un registre de module et non un `InjectionToken` : ces valeurs sont des
  * constantes calculées une fois depuis le hostname, et elles sont lues depuis des gardes

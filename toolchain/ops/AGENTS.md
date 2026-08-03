@@ -93,6 +93,7 @@ Public (ingress TLS) : `registry.nafuralabs.com`
 | `venue-catalog` | — | `venue-catalog-${ENV}` | `nafura_venue_catalog` | Flyway (au startup backend) | `products/venue-catalog/deploy/k8s/overlays/${ENV}` |
 | `build-intelligence` | — | `build-intelligence-${ENV}` | `nafura_build_intelligence` | Liquibase (Job K8s) | `products/build-intelligence/deploy/k8s/overlays/${ENV}` |
 | `usage-ops` | — | `usage-ops-${ENV}` | `nafura_usage_ops` | Liquibase (Job K8s) | `products/usage-ops/deploy/k8s/overlays/${ENV}` |
+| `blanner` | — | `blanner-${ENV}` | `nafura_blanner` | Liquibase (startup backend) | `products/blanner/deploy/k8s/overlays/${ENV}` |
 | `mbs-studio` | — | `nafura-vitrine-${ENV}` | — (vitrine) | — | `marketing/products/mbs-studio/deploy/k8s/overlays/${ENV}` |
 | `zenith` | — | `nafura-vitrine-${ENV}` | — (vitrine) | — | `marketing/products/zenith/deploy/k8s/overlays/${ENV}` |
 | `corporate` | — | `nafura-vitrine-${ENV}` | — (vitrine) | — | `marketing/corporate/deploy/k8s/overlays/${ENV}` |
@@ -180,6 +181,10 @@ Images Sektor produites :
 - `sektor-btp-web:${ENV}`
 - `nafura-keycloak:${ENV}`
 - `nafura-lifecycle:${ENV}`
+
+Image Venue Catalog produite :
+- staging : `venue-catalog-backend:staging`, `venue-catalog-web:staging`
+- prod : `54.36.183.106:30500/nafura/venue-catalog-backend:prod`, `…/venue-catalog-web:prod`
 
 ### Base de données
 
@@ -296,6 +301,17 @@ bash toolchain/ops/dev-staging-local.sh stop
 ```
 
 URLs : `http://127.0.0.1:4200` · API `http://localhost:8082` · IAM `http://iam.nafuralabs.staging`
+
+Venue Catalog (Mode B — backend local + console Angular, infra staging) :
+
+```bash
+make dev-up SCOPE=full APP=venue-catalog
+set -a; source secrets/dev-staging-local.env; set +a
+./gradlew.bat :venue-catalog:app:bootRun
+# autre terminal :
+cd products/venue-catalog/web && npm start
+# Web: http://127.0.0.1:4210  · API: http://localhost:8085[/actuator/health]
+```
 
 ### C — Backend seulement (changement API + migrations)
 

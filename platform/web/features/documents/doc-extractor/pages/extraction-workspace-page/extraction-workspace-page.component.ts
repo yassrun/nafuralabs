@@ -623,13 +623,7 @@ export class ExtractionWorkspacePage implements OnInit {
 
 
   getDomainLabel(domainKey: string): string {
-    const labelMap: Record<string, string> = {
-      'finance': 'Accounting & Finance',
-      'btp': 'Construction / BTP',
-      'logistic': 'Logistics',
-      'inventory': 'Inventory',
-    };
-    return labelMap[domainKey] || domainKey.charAt(0).toUpperCase() + domainKey.slice(1);
+    return domainKey.charAt(0).toUpperCase() + domainKey.slice(1);
   }
 
   private openRecordDialog(

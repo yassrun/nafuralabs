@@ -128,16 +128,8 @@ export class DocTypesPage {
       domainMap.get(dt.domainKey)!.push(dt);
     }
 
-    // Sort domains by predefined order
-    const domainOrder = ['logistic', 'finance', 'inventory', 'btp'];
-    const sortedDomains = Array.from(domainMap.keys()).sort((a, b) => {
-      const indexA = domainOrder.indexOf(a);
-      const indexB = domainOrder.indexOf(b);
-      if (indexA === -1 && indexB === -1) return a.localeCompare(b);
-      if (indexA === -1) return 1;
-      if (indexB === -1) return -1;
-      return indexA - indexB;
-    });
+    // Alphabetical — product domains are not hard-coded in platform
+    const sortedDomains = Array.from(domainMap.keys()).sort((a, b) => a.localeCompare(b));
 
     for (const domainKey of sortedDomains) {
       groups.push({
@@ -156,14 +148,17 @@ export class DocTypesPage {
     { value: 'TENANT', label: 'Custom' },
   ];
 
-  // Domain options
-  readonly domainOptions = [
-    { value: '', label: 'All Domains' },
-    { value: 'logistic', label: 'Logistics' },
-    { value: 'finance', label: 'Accounting & Finance' },
-    { value: 'btp', label: 'Construction / BTP' },
-    { value: 'inventory', label: 'Inventory' },
-  ];
+  // Domain filter options derived at runtime from loaded doc types (see domainsFromTypes)
+  readonly domainOptions = computed(() => {
+    const keys = new Set(this.docTypes().map((d) => d.domainKey));
+    return [
+      { value: '', label: 'All Domains' },
+      ...Array.from(keys).sort().map((k) => ({
+        value: k,
+        label: k.charAt(0).toUpperCase() + k.slice(1),
+      })),
+    ];
+  });
 
   constructor() {
     // Sync FormControl values to signals for reactivity
@@ -295,33 +290,15 @@ export class DocTypesPage {
   }
 
   getDomainLabel(domainKey: string): string {
-    const labelMap: Record<string, string> = {
-      'finance': 'Finance',
-      'btp': 'BTP',
-      'logistic': 'Logistics',
-      'inventory': 'Inventory',
-    };
-    return labelMap[domainKey] || domainKey;
+    return domainKey.charAt(0).toUpperCase() + domainKey.slice(1);
   }
 
-  getDomainIcon(domainKey: string): string {
-    const iconMap: Record<string, string> = {
-      'logistic': 'local_shipping',
-      'finance': 'account_balance',
-      'btp': 'construction',
-      'inventory': 'inventory_2',
-    };
-    return iconMap[domainKey] || 'folder';
+  getDomainIcon(_domainKey: string): string {
+    return 'folder';
   }
 
-  getDomainColor(domainKey: string): string {
-    const colorMap: Record<string, string> = {
-      'logistic': '#3f51b5',
-      'finance': '#4caf50',
-      'btp': '#ff9800',
-      'inventory': '#9c27b0',
-    };
-    return colorMap[domainKey] || '#757575';
+  getDomainColor(_domainKey: string): string {
+    return '#757575';
   }
 
   formatDate(date: Date): string {

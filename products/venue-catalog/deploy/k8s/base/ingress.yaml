@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: venue-catalog
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: api.venue-catalog.nafura.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: venue-catalog-backend
+                port:
+                  number: 8085
+    - host: catalog.nafura.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: venue-catalog-web
+                port:
+                  number: 80

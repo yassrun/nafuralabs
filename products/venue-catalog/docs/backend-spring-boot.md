@@ -106,7 +106,7 @@ venue-catalog:
     geo-round-decimals: 4
     confidence-review-threshold: 0.85
   media:
-    max-photos-per-place: 5
+    max-photos-per-place: 3
     fetch-max-width-px: 1600
   jobs:
     idempotency-ttl-hours: 24

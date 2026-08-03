@@ -83,6 +83,30 @@ bucket=nafura-documents
 user=minioadmin
 password=minioadmin
 
+[staging/apps/blanner/database]
+name=nafura_blanner
+schema=public
+user=nafura
+pass=nafura
+
+[staging/apps/blanner/integrations]
+google_places_api_key=
+
+[staging/apps/venue-catalog/database]
+name=nafura_venue_catalog
+schema=public
+user=nafura
+pass=nafura
+
+[staging/apps/venue-catalog/object-storage]
+endpoint=http://minio.nafura-infra-staging.svc:9000
+bucket=venue-catalog-media
+user=minioadmin
+password=minioadmin
+
+[staging/apps/venue-catalog/integrations]
+google_places_api_key=
+
 [prod/platform/data/postgres]
 username=nafura
 password=CHANGEME
@@ -91,4 +115,6 @@ port=5432
 database_keycloak=keycloak
 
 # … mêmes sections prod avec mots de passe forts et endpoints nafura-infra-prod
+# Blanner prod: [prod/apps/blanner/database] + [prod/apps/blanner/integrations]
+# Venue Catalog prod: [prod/apps/venue-catalog/database], object-storage, integrations
 ```

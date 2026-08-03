@@ -67,9 +67,12 @@ Declencheurs :
 | providerPhotoRef | string | ref opaque Google (`places/.../photos/...`) — interne |
 | contentChecksum | string | sha256 du fichier |
 | expiresAt | datetime | TTL cache |
-| sortOrder | int | 0 = couverture |
+| sortOrder | int | 0 = couverture (photo listing) |
 | status | enum | `ACTIVE`, `EXPIRED`, `PURGED` |
 | createdAt | datetime | |
+
+Changer la couverture : `POST /api/v1/catalog/places/:id/media/:mediaId/primary` (reordonne `sortOrder`).
+Le listing expose `primaryPhotoUrl` = premier media `ACTIVE` trie par `sortOrder`.
 
 ### DTO API public (`media[]` sur CatalogPlace)
 

@@ -2,8 +2,8 @@
  * Not Found (404) Page
  *
  * Page brandée affichée quand la route ne correspond à aucune définition.
- * Inclut une suggestion de retour vers les zones les plus fréquentées de l'ERP
- * (dashboard, chantiers, marchés, achats, finance).
+ * Inclut une suggestion de retour vers les zones plateforme
+ * (dashboard, paramètres, notifications).
  */
 
 import { CommonModule } from '@angular/common';
@@ -44,21 +44,19 @@ import { Router, RouterModule } from '@angular/router';
           </a>
         </div>
 
-        <nav class="nf-404__suggestions" aria-label="Raccourcis ERP">
+        <nav class="nf-404__suggestions" aria-label="Raccourcis">
           <h2>Vous cherchiez peut-être :</h2>
           <ul>
-            <li><a routerLink="/chantiers">Chantiers</a></li>
-            <li><a routerLink="/marches">Marchés &amp; Facturation</a></li>
-            <li><a routerLink="/achats">Achats</a></li>
-            <li><a routerLink="/finance">Finance</a></li>
-            <li><a routerLink="/inventory">Stock &amp; Matériel</a></li>
-            <li><a routerLink="/rh">RH &amp; Paie</a></li>
+            <li><a routerLink="/">Tableau de bord</a></li>
+            <li><a routerLink="/administration/settings">Paramètres</a></li>
+            <li><a routerLink="/user-settings">Mes préférences</a></li>
+            <li><a routerLink="/notifications">Notifications</a></li>
           </ul>
         </nav>
       </section>
 
       <footer class="nf-404__footer">
-        <p>Nafura ERP · BTP Maroc</p>
+        <p>Nafura</p>
       </footer>
     </main>
   `,

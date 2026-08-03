@@ -18,8 +18,8 @@ class ReferenceConversationFlowTest {
     }
 
     @Test
-    void openChantierIsNavigateIntent() {
-        assertEquals(IntentType.NAVIGATE, router.classify("Ouvre le chantier CH-001").getIntent());
+    void openResourceIsNavigateIntent() {
+        assertEquals(IntentType.NAVIGATE, router.classify("Ouvre la ressource REF-001").getIntent());
     }
 
     @Test

@@ -25,7 +25,7 @@ Ressource canonique des lieux collectes depuis Google Places ou d'autres sources
 | status | string enum | oui | `DRAFT`, `ENRICHED`, `REVIEWED`, `REJECTED`, `ARCHIVED` |
 | countryCode | string | oui | ISO-3166-1 alpha-2, V1 `MA` |
 | cityCode | string | oui | enum normalise `CASABLANCA`, `RABAT`, `MARRAKECH`, `TANGIER`, `FES`, `AGADIR`, `OTHER` |
-| primaryCategory | string | oui | `NIGHTLIFE_VENUE`, `SOCIAL_DINING`, `SALON`, `SPA`, `BARBERSHOP`, `OTHER` |
+| primaryCategory | string | oui | `SOCIAL_VENUE`, `BEAUTY`, `OTHER` |
 | providerTypes | string[] | non | types Google Places ou equivalents source |
 | address | object | oui | `{ line1, district, postalCode, cityLabel, countryCode }` |
 | geo | object | oui | `{ lat, lng }` WGS84 |
@@ -79,7 +79,17 @@ Contraintes :
   | `provider` | string | `GOOGLE_PLACES`, `MANUAL`, `CSV_PARTNER` |
   | `needsReview` | boolean | seulement les fiches a revue manuelle |
   | `unmappedAppId` | string | lieux sans mapping publie pour une app |
-  | `cursor`, `size` | | pagination |
+  | `sort` | string | tri serveur `field,dir` — allowlist : `updatedAt` (defaut `desc`), `canonicalName`, `status`, `cityCode`, `primaryCategory`, `venueType`, `aiDecision`, `layaliScore` |
+  | `page`, `size` | | pagination offset |
+  | `cursor` | | pagination (legacy) |
+- Champs summary utiles listing :
+  | Champ | Notes |
+  |---|---|
+  | `primaryPhotoUrl` | URL signee MinIO de la couverture (`sortOrder` minimal / 0) |
+  | `primaryPhotoAttribution` | attribution Google a afficher |
+  | `districtCode`, `venueTypes[]`, `venueType` (primaire = premier), `aiDecision`, `layaliScore`, `enrichmentStatus` | enrichissement |
+  | filtre `venueTypes` (répétable) / legacy `venueType` | match **any** type |
+  | filtre `activities` (répétable) / legacy `activity` | match **any** activité |
 - Reponse 200 :
   ```json
   {
@@ -89,12 +99,11 @@ Contraintes :
         "canonicalName": "Sky 28 Casablanca",
         "status": "ENRICHED",
         "cityCode": "CASABLANCA",
-        "primaryCategory": "NIGHTLIFE_VENUE",
+        "primaryCategory": "SOCIAL_VENUE",
         "address": { "line1": "Twin Center, Bd Zerktouni", "district": "Maarif", "cityLabel": "Casablanca", "countryCode": "MA" },
         "quality": { "completenessScore": 0.88, "freshnessScore": 0.92, "confidenceScore": 0.81, "manualReviewRequired": true, "duplicateCandidateIds": [] },
-        "projectionSummary": [
-          { "appId": "layali", "targetResource": "venue", "mappingId": "map-101", "status": "READY" }
-        ],
+        "primaryPhotoUrl": "https://minio.example/signed/...",
+        "primaryPhotoAttribution": "Photo by …",
         "updatedAt": "2026-06-16T10:00:00+01:00"
       }
     ],
@@ -110,6 +119,38 @@ Contraintes :
 - Reponse 200 : fiche complete canonique avec `sourceRecords` et `media`.
 - Erreurs : 404.
 
+### POST /api/v1/catalog/places/:id/media/:mediaId/primary
+
+- Auth : required.
+- Roles : PLATFORM_ADMIN, CATALOG_OPERATOR.
+- Body vide.
+- Effet : le media devient la couverture (`sortOrder = 0`) ; les autres medias `ACTIVE` sont reindexes `1..n`.
+- Reponse 200 : fiche detaillee (media reordonnes).
+- Erreurs : 404 (lieu ou media inconnu).
+
+### GET /api/v1/catalog/places/meta/taxonomy
+
+- Auth : required.
+- Reponse : `{ "categories": ["SOCIAL_VENUE","BEAUTY"], "venueTypes": [...], "venueTypesByCategory": { "SOCIAL_VENUE": [...], "BEAUTY": [...] }, "activities": [...] }`
+
+### PATCH /api/v1/catalog/places/:id/enrichment
+
+- Auth : required.
+- Roles : PLATFORM_ADMIN, CATALOG_OPERATOR.
+- Body (partiel) :
+  ```json
+  {
+    "venueTypes": ["CAFE", "RESTAURANT"],
+    "activities": ["COFFEE_TEA", "DINE"],
+    "servesAlcohol": false,
+    "verdict": "KEEP"
+  }
+  ```
+- `venueTypes` : array non vide, **premier = type principal**. Legacy `venueType` (string) encore accepté.
+- Resto-bar : cocher `RESTAURANT` + `BAR` (le type composite `RESTO_BAR` est retire).
+- Effet : override manuel, recalcul scores app, sync `attributes.servesAlcohol` si fourni.
+- Reponse 200 : fiche detaillee (`enrichment.venueTypes`, `enrichment.venueType`).
+
 ### PATCH /api/v1/catalog/places/:id
 
 - Auth : required.
@@ -123,18 +164,51 @@ Contraintes :
 
 - Auth : required.
 - Roles : PLATFORM_ADMIN, CATALOG_OPERATOR.
-- Body vide ou `{ "note": "verified against provider details" }`.
-- Effet : `ENRICHED|DRAFT -> REVIEWED` si `quality.completenessScore >= 0.7` et pas de doublon bloqueur.
-- Reponse 200 : `{ "status": "REVIEWED" }`.
-- Erreurs : 409 `projection_not_ready`, 422.
+- Body vide.
+- Effet : statut `REVIEWED`.
+- Reponse 200 : fiche detaillee mise a jour.
+- Erreurs : 404.
+
+### POST /api/v1/catalog/places/:id/reject
+
+- Auth : required.
+- Roles : PLATFORM_ADMIN, CATALOG_OPERATOR.
+- Body vide.
+- Effet : statut `REJECTED`.
+- Reponse 200 : fiche detaillee mise a jour.
+
+### POST /api/v1/catalog/places/bulk-approve
+
+- Auth : required.
+- Roles : PLATFORM_ADMIN, CATALOG_OPERATOR.
+- Body : `{ "placeIds": ["<uuid>", "..."] }`.
+- Effet atomique : statut `REVIEWED` pour toutes les fiches.
+- Reponse 200 : `{ "placeIds": ["<uuid>"], "status": "REVIEWED" }`.
+- Erreurs : 404 si au moins une fiche est absente.
+
+### POST /api/v1/catalog/places/maintenance/normalize-names
+
+- Auth : required.
+- Roles : PLATFORM_ADMIN, CATALOG_OPERATOR.
+- Body : `{ "dryRun": true, "cityCode": "CASABLANCA?", "primaryCategory": "SOCIAL_VENUE?" }` (`dryRun` defaut `true`).
+- Effet : parcours les lieux (hors `ARCHIVED`), reecrit `canonicalName` en `Marque · Quartier` (idempotent ; retire aussi un suffixe ville type `Casablanca`).
+- Reponse 200 : `{ "scanned", "updated", "skippedNoDistrict", "unchanged", "dryRun", "samples": [{ "id", "before", "after" }] }`.
+
+### PATCH /api/v1/catalog/places/:id/district
+
+- Auth : required.
+- Roles : PLATFORM_ADMIN, CATALOG_OPERATOR.
+- Body : `{ "districtCode": "MEDINA" }` (codes du referentiel geo courant, ex. `MA-CASA-2026-02`).
+- Effet : ecrase la resolution geo avec `method=MANUAL` (sticky au re-enrichissement), met a jour `address.district` et `canonicalName` (`Marque · Quartier`).
+- Reponse 200 : fiche detaillee.
 
 ### POST /api/v1/catalog/places/:id/archive
 
 - Auth : required.
-- Roles : PLATFORM_ADMIN.
-- Body : `{ "reason": "duplicate_of:00000000-0000-0000-0000-000000000102" }`.
-- Effet : `ARCHIVED`, les mappings non publies sont bloques.
-- Reponse 200.
+- Roles : PLATFORM_ADMIN, CATALOG_OPERATOR.
+- Body vide.
+- Effet : statut `ARCHIVED`.
+- Reponse 200 : fiche detaillee mise a jour.
 
 ## Erreurs communes
 
@@ -156,7 +230,7 @@ Contraintes :
     "status": "ENRICHED",
     "countryCode": "MA",
     "cityCode": "CASABLANCA",
-    "primaryCategory": "NIGHTLIFE_VENUE",
+    "primaryCategory": "SOCIAL_VENUE",
     "providerTypes": ["bar", "restaurant", "night_club"],
     "address": {
       "line1": "Twin Center, Boulevard Zerktouni",

@@ -39,14 +39,8 @@ export const COLUMNS: ColumnConfig[] = [
     label: 'administration.roles.columns.scope',
     field: 'scopeType',
     type: 'badge',
-    badgeVariant: (value: unknown) =>
-      value === 'CHANTIER' ? 'warning' : value === 'BOTH' ? 'info' : 'default',
-    transform: (value: unknown) => {
-      const v = String(value ?? 'ENTREPRISE');
-      if (v === 'CHANTIER') return 'Chantier';
-      if (v === 'BOTH') return 'Chantier + Entreprise';
-      return 'Entreprise';
-    },
+    badgeVariant: () => 'default',
+    transform: (value: unknown) => String(value ?? 'TENANT'),
     sortable: true,
   },
   {

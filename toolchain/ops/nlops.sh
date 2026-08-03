@@ -172,7 +172,7 @@ Examples ? OVH VPS prod (marketing vitrine):
   BUILD_IMAGES=true PUSH_IMAGES=true KUBE_CONTEXT=nafura-vps-prod ENV=prod REGISTRY_PASS=*** $0 build-push zenith
   KUBE_CONTEXT=nafura-vps-prod ENV=prod $0 deploy zenith
 
-Supported apps: sektor-btp (alias erp), venue-catalog, build-intelligence, usage-ops, mbs-studio, corporate, zenith
+Supported apps: sektor-btp (alias erp), venue-catalog, build-intelligence, usage-ops, blanner, mbs-studio, corporate, zenith
 EOF
 }
 
@@ -192,6 +192,7 @@ db_name_for_app() {
     venue-catalog) echo "nafura_venue_catalog" ;;
     build-intelligence) echo "nafura_build_intelligence" ;;
     usage-ops) echo "nafura_usage_ops" ;;
+    blanner) echo "nafura_blanner" ;;
     *) echo "nafura_${1//-/_}" ;;
   esac
 }
@@ -206,6 +207,7 @@ gradle_app_id_for() {
 migration_engine_for() {
   case "$1" in
     venue-catalog) echo "flyway" ;;
+    blanner) echo "liquibase-startup" ;;
     *) echo "liquibase" ;;
   esac
 }
@@ -628,6 +630,41 @@ build_usage_ops_images() {
   echo "Build complete."
 }
 
+build_blanner_images() {
+  local tag
+  tag="$(image_tag_for_env)"
+  local backend_img
+  backend_img="$(image_ref blanner-backend "$tag")"
+
+  echo "Building backend -> $backend_img"
+  (cd "$ROOT" && "$GRADLEW" :blanner:app:bootJar --no-daemon)
+  docker build -t "$backend_img" -f "$ROOT/products/blanner/Dockerfile.jar" \
+    "$ROOT/products/blanner/blanner-backend/build/libs"
+
+  echo "Build complete (backend only — Flutter is Mode B / store, not a K8s web image)."
+}
+
+build_venue_catalog_images() {
+  local tag
+  tag="$(image_tag_for_env)"
+  local backend_img web_img
+  backend_img="$(image_ref venue-catalog-backend "$tag")"
+  web_img="$(image_ref venue-catalog-web "$tag")"
+
+  echo "Building backend -> $backend_img"
+  docker build -t "$backend_img" -f "$ROOT/products/venue-catalog/Dockerfile" "$ROOT"
+
+  echo "Building web (Angular)…"
+  case "$ENV" in
+    staging) (cd "$ROOT/products/venue-catalog/web" && npm run build:staging) ;;
+    *) (cd "$ROOT/products/venue-catalog/web" && npm run build:prod) ;;
+  esac
+  echo "Building web image -> $web_img"
+  docker build -t "$web_img" -f "$ROOT/products/venue-catalog/Dockerfile.web" "$ROOT"
+
+  echo "Build complete (backend + web)."
+}
+
 build_vitrine_images() {
   local app_id="$1"
   local tag web_img app_root
@@ -648,6 +685,8 @@ build_images() {
     sektor-btp|erp) build_sektor_images ;;
     build-intelligence) build_build_intelligence_images ;;
     usage-ops) build_usage_ops_images ;;
+    blanner) build_blanner_images ;;
+    venue-catalog) build_venue_catalog_images ;;
     mbs-studio|corporate|zenith) build_vitrine_images "$app_id" ;;
     *)
       echo "ERROR: build-images not implemented for $app_id" >&2
@@ -686,6 +725,13 @@ push_images() {
       docker push "$(image_ref usage-ops-backend "$tag")"
       docker push "$(image_ref usage-ops-web "$tag")"
       docker push "$(image_ref nafura-lifecycle "$tag")"
+      ;;
+    blanner)
+      docker push "$(image_ref blanner-backend "$tag")"
+      ;;
+    venue-catalog)
+      docker push "$(image_ref venue-catalog-backend "$tag")"
+      docker push "$(image_ref venue-catalog-web "$tag")"
       ;;
     mbs-studio|corporate|zenith)
       docker push "$(image_ref "${app_id}-web" "$tag")"
@@ -749,8 +795,8 @@ run_lifecycle_job() {
     pull_policy="Always"
   fi
 
-  if [[ "$engine" == "flyway" ]]; then
-    echo "Flyway app ? migrations run on backend startup."
+  if [[ "$engine" == "flyway" || "$engine" == "liquibase-startup" ]]; then
+    echo "Migrations for $gradle_app_id run on backend startup ($engine) — skip lifecycle Job."
     return 0
   fi
 

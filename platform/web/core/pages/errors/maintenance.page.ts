@@ -11,7 +11,7 @@ import { CommonModule } from '@angular/common';
         <div class="maint-icon">🔧</div>
         <h1 class="maint-title">Maintenance en cours</h1>
         <p class="maint-body">
-          Nafura ERP est temporairement indisponible pour maintenance planifiée.
+          Nafura est temporairement indisponible pour maintenance planifiée.
           Nous revenons très bientôt — merci de votre patience.
         </p>
         <div class="maint-eta">
@@ -20,7 +20,7 @@ import { CommonModule } from '@angular/common';
         </div>
         <button class="btn-retry" (click)="retry()">🔄 Vérifier la disponibilité</button>
         <p class="maint-contact">
-          En cas d'urgence : <a href="mailto:support&#64;nafura-btp.ma">support&#64;nafura-btp.ma</a>
+          En cas d'urgence : <a href="mailto:support&#64;nafura.ma">support&#64;nafura.ma</a>
         </p>
       </div>
     </div>

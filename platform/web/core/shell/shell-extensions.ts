@@ -4,14 +4,9 @@ import { Routes } from '@angular/router';
 /**
  * Points d'extension du shell — appartiennent à la PLATEFORME.
  *
- * Le shell importait directement des composants de l'ERP (`SocieteSwitcherComponent`,
- * `ErpNotificationCenterAlertsComponent`, widgets d'onboarding) et les routes
- * d'administration chargeaient en dur des pages `@applications/*`. La plateforme déclare
- * désormais des emplacements nommés ; l'application y enregistre ce qu'elle veut y voir.
- * Voir `products/sektor-btp/docs/epics/front-ownership/`.
- *
- * Un emplacement sans extension enregistrée ne rend rien — la plateforme reste
- * fonctionnelle seule.
+ * La plateforme déclare des emplacements nommés ; l'application hôte y enregistre
+ * ce qu'elle veut y voir. Un emplacement sans extension ne rend rien — la plateforme
+ * reste fonctionnelle seule.
  */
 export type ShellSlot =
   /** En-tête, à gauche du sélecteur de langue (ex. sélecteur de société). */
@@ -51,9 +46,7 @@ export const ONBOARDING_WIDGETS_PORT = new InjectionToken<OnboardingWidgetsPort>
 
 /**
  * Routes contribuées par l'application à une zone de la plateforme.
- *
- * `administration.routes.ts` chargeait en dur des pages de l'ERP (société, paramètres
- * fiscaux, réinitialisation de démo). Elle fusionne désormais ce que l'application déclare.
+ * La plateforme fusionne ce que l'application déclare via APP_ROUTE_CONTRIBUTIONS.
  */
 export type RouteZone = 'administration';
 

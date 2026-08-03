@@ -30,7 +30,7 @@ public record RoleResponse(
     long memberCount,
 
     /**
-     * Scope family: CHANTIER (affectable per site), ENTREPRISE (tenant-wide), BOTH.
+     * Scope family for UI: TENANT (tenant-wide). Products may override via role metadata later.
      */
     String scopeType
 ) {
@@ -108,33 +108,6 @@ public record RoleResponse(
                 memberCount,
                 scope
             );
-            case "BTP_DG" -> new RoleResponse(
-                "BTP_DG", "Direction générale", "BTP — Direction générale",
-                permissions, true, 95, memberCount, scope);
-            case "BTP_DAF" -> new RoleResponse(
-                "BTP_DAF", "DAF", "BTP — Direction administrative et financière",
-                permissions, true, 90, memberCount, scope);
-            case "BTP_DIRECTEUR_TRAVAUX" -> new RoleResponse(
-                "BTP_DIRECTEUR_TRAVAUX", "Directeur travaux", "BTP — Directeur travaux (multi-chantiers)",
-                permissions, true, 75, memberCount, scope);
-            case "BTP_CONDUCTEUR_TRAVAUX" -> new RoleResponse(
-                "BTP_CONDUCTEUR_TRAVAUX", "Conducteur de travaux", "BTP — Conducteur de travaux",
-                permissions, true, 70, memberCount, scope);
-            case "BTP_CHEF_CHANTIER" -> new RoleResponse(
-                "BTP_CHEF_CHANTIER", "Chef de chantier", "BTP — Chef de chantier",
-                permissions, true, 55, memberCount, scope);
-            case "BTP_CHEF_EQUIPE" -> new RoleResponse(
-                "BTP_CHEF_EQUIPE", "Chef d'équipe", "BTP — Chef d'équipe",
-                permissions, true, 45, memberCount, scope);
-            case "BTP_MAGASINIER" -> new RoleResponse(
-                "BTP_MAGASINIER", "Magasinier", "BTP — Magasinier",
-                permissions, true, 35, memberCount, scope);
-            case "BTP_POINTEUR" -> new RoleResponse(
-                "BTP_POINTEUR", "Pointeur", "BTP — Pointeur",
-                permissions, true, 30, memberCount, scope);
-            case "BTP_INGENIEUR" -> new RoleResponse(
-                "BTP_INGENIEUR", "Ingénieur", "BTP — Ingénieur chantier",
-                permissions, true, 50, memberCount, scope);
             default -> new RoleResponse(
                 code,
                 role,
@@ -149,15 +122,6 @@ public record RoleResponse(
     }
 
     public static String resolveScopeType(String roleCode) {
-        if (roleCode == null) {
-            return "ENTREPRISE";
-        }
-        return switch (roleCode.toUpperCase(Locale.ROOT)) {
-            case "BTP_CONDUCTEUR_TRAVAUX", "BTP_CHEF_CHANTIER", "BTP_CHEF_EQUIPE", "BTP_INGENIEUR"
-                    -> "CHANTIER";
-            case "BTP_DIRECTEUR_TRAVAUX", "BTP_MAGASINIER", "BTP_POINTEUR"
-                    -> "BOTH";
-            default -> "ENTREPRISE";
-        };
+        return "TENANT";
     }
 }

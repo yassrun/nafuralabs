@@ -8,8 +8,9 @@ import io.minio.GetObjectArgs;
 import io.minio.RemoveObjectArgs;
 import io.minio.StatObjectArgs;
 import io.minio.errors.MinioException;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
@@ -19,11 +20,19 @@ import java.util.UUID;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
+@ConditionalOnProperty(name = "documents.minio.endpoint")
 public class MinioDocumentStorage implements DocumentStorage {
     
     private final MinioClient minioClient;
     private final MinioProperties minioProperties;
+
+    public MinioDocumentStorage(
+            @Qualifier("minioClient") MinioClient minioClient,
+            MinioProperties minioProperties
+    ) {
+        this.minioClient = minioClient;
+        this.minioProperties = minioProperties;
+    }
     
     private static final DateTimeFormatter YEAR_FORMATTER = DateTimeFormatter.ofPattern("yyyy");
     private static final DateTimeFormatter MONTH_FORMATTER = DateTimeFormatter.ofPattern("MM");

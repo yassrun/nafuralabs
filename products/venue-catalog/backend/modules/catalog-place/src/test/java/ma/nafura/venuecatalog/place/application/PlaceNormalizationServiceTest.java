@@ -30,7 +30,7 @@ class PlaceNormalizationServiceTest {
     @Test
     void mapCategoryUsesGooglePrimaryType() {
         PrimaryCategory category = service.mapCategory(List.of("bar", "restaurant"), "night_club", null);
-        assertEquals(PrimaryCategory.NIGHTLIFE_VENUE, category);
+        assertEquals(PrimaryCategory.SOCIAL_VENUE, category);
     }
 
     @Test
@@ -52,11 +52,40 @@ class PlaceNormalizationServiceTest {
                 new PlaceModels.Address("line", null, null, CityCode.CASABLANCA.name(), "MA"),
                 new PlaceModels.Geo(33.5, -7.6),
                 new PlaceModels.Contact("+212600000000", "https://example.com", null),
-                PrimaryCategory.NIGHTLIFE_VENUE,
+                PrimaryCategory.SOCIAL_VENUE,
                 List.of(),
                 0.85
         );
         assertFalse(quality.manualReviewRequired());
         assertTrue(quality.completenessScore() >= 0.7);
+    }
+
+    @Test
+    void cleanCanonicalNameAppendsDistrict() {
+        assertEquals(
+                "McDonald's · Maârif",
+                service.cleanCanonicalName("McDonald's", "Maârif", CityCode.CASABLANCA)
+        );
+    }
+
+    @Test
+    void cleanCanonicalNameStripsCityThenAppendsDistrict() {
+        assertEquals(
+                "McDonald's · Maârif",
+                service.cleanCanonicalName("McDonald's Casablanca", "Maârif", CityCode.CASABLANCA)
+        );
+    }
+
+    @Test
+    void cleanCanonicalNameIsIdempotent() {
+        String once = service.cleanCanonicalName("KFC · Ain Diab", "Ain Diab", CityCode.CASABLANCA);
+        String twice = service.cleanCanonicalName(once, "Ain Diab", CityCode.CASABLANCA);
+        assertEquals("KFC · Ain Diab", once);
+        assertEquals(once, twice);
+    }
+
+    @Test
+    void cleanCanonicalNameWithoutDistrictKeepsBase() {
+        assertEquals("Snack Amine", service.cleanCanonicalName("Snack Amine Casablanca", null, CityCode.CASABLANCA));
     }
 }

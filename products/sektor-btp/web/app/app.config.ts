@@ -26,8 +26,15 @@ import {
   type OnboardingWidgetsPort,
   type ShellExtension,
 } from '@platform/core/shell/shell-extensions';
+import { OnboardingService } from '@platform/core/onboarding/onboarding.service';
+import { ShortcutsService } from '@platform/core/shortcuts/shortcuts.service';
 import { SocieteSwitcherComponent } from '@app/shell/components/societe-switcher/societe-switcher.component';
 import { ErpNotificationCenterAlertsComponent } from '@app/shell/erp-notification-center-alerts.component';
+import {
+  SEKTOR_GOTO_SHORTCUTS,
+  SEKTOR_ONBOARDING_TOURS,
+  SEKTOR_ROUTE_TOUR_MAP,
+} from '@app/shell/sektor-platform-extensions';
 import {
   ACTIVE_APPLICATION_ID,
   APPLICATION_DEFAULT_ROUTE,
@@ -39,6 +46,15 @@ registerApplicationConfig({
   defaultRoute: APPLICATION_DEFAULT_ROUTE,
   requiresTenant: APPLICATION_REQUIRES_TENANT,
 });
+
+function registerSektorPlatformExtensions(): () => void {
+  return () => {
+    const shortcuts = inject(ShortcutsService);
+    const onboarding = inject(OnboardingService);
+    shortcuts.setGotoMap(SEKTOR_GOTO_SHORTCUTS);
+    onboarding.setTours(SEKTOR_ONBOARDING_TOURS, SEKTOR_ROUTE_TOUR_MAP);
+  };
+}
 import { provideRouter, withComponentInputBinding, withPreloading, NoPreloading } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideServiceWorker } from '@angular/service-worker';
@@ -160,6 +176,12 @@ const TRANSLATION_LAYERS: TranslationLayersConfig = ACTIVE_TRANSLATION_LAYERS;
 export const appConfig: ApplicationConfig = {
   providers: [
     provideAppLucideIcons(),
+
+    {
+      provide: APP_INITIALIZER,
+      multi: true,
+      useFactory: registerSektorPlatformExtensions,
+    },
 
     // Inversion de dépendance : la plateforme déclare INTEGRATION_AUDIT_PORT, l'ERP
     // fournit l'implémentation. Sans ce provider, whatsapp.adapter tomberait sur le

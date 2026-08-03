@@ -59,6 +59,7 @@ Jobs asynchrones d'import et de refresh provider. Cette ressource encapsule les 
   ```
 - Variantes : `mode=NEARBY` avec `{ "lat": 33.58, "lng": -7.63, "radiusMeters": 3000 }`.
 - Options media : `options.refreshMedia` defaut `true` sur creation ; declenche l'etape job `SYNC_MEDIA` (voir [media-pipeline.md](../media-pipeline.md)).
+- Options existants : `options.refreshExisting` defaut **`false`**. Si `false`, les Google `place_id` deja presents en `catalog_place_source_record` sont **skip** (pas de Details ni Photos). Si `true`, re-fetch Details + upsert.
 - Reponse 202 :
   ```json
   {

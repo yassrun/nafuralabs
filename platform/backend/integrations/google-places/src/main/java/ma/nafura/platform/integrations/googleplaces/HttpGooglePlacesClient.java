@@ -59,9 +59,10 @@ public class HttpGooglePlacesClient implements GooglePlacesClient {
     public PlaceSearchResult searchNearby(NearbySearchRequest request, String fieldMask) {
         ObjectNode body = objectMapper.createObjectNode();
         ArrayNode types = body.putArray("includedTypes");
-        types.add("restaurant");
-        types.add("bar");
-        types.add("night_club");
+        List<String> included = request.includedTypes() == null || request.includedTypes().isEmpty()
+                ? List.of("restaurant", "bar", "night_club")
+                : request.includedTypes();
+        included.forEach(types::add);
         ObjectNode circle = body.putObject("locationRestriction").putObject("circle");
         ObjectNode center = circle.putObject("center");
         center.put("latitude", request.latitude());
@@ -83,21 +84,41 @@ public class HttpGooglePlacesClient implements GooglePlacesClient {
 
     @Override
     public byte[] fetchPlacePhoto(String photoResourceName, int maxWidthPx) {
-        String resource = photoResourceName.startsWith("places/") ? photoResourceName : photoResourceName;
+        String resource = photoResourceName.startsWith("places/")
+                ? photoResourceName
+                : photoResourceName;
         int attempts = 0;
         long backoff = properties.getInitialBackoffMs();
         while (true) {
             attempts++;
             try {
-                return restClient.get()
-                        .uri(uriBuilder -> uriBuilder
-                                .path("/{photo}/media")
-                                .queryParam("maxWidthPx", maxWidthPx)
-                                .build(resource))
-                        .header("X-Goog-FieldMask", "photoUri")
+                // Path contains slashes; build absolute URI so segments are not over-encoded.
+                // skipHttpRedirect=true returns JSON { photoUri } instead of HTTP 302.
+                java.net.URI mediaUri = java.net.URI.create(
+                        trimTrailingSlash(properties.getBaseUrl())
+                                + "/" + resource
+                                + "/media?maxWidthPx=" + maxWidthPx
+                                + "&skipHttpRedirect=true");
+                JsonNode response = restClient.get()
+                        .uri(mediaUri)
                         .header("X-Goog-Api-Key", properties.getApiKey())
                         .retrieve()
+                        .body(JsonNode.class);
+                String photoUri = response != null ? response.path("photoUri").asText(null) : null;
+                if (photoUri == null || photoUri.isBlank()) {
+                    throw new GooglePlacesException("Place photo URI missing from Google response", 502, true);
+                }
+                byte[] content = RestClient.create()
+                        .get()
+                        .uri(java.net.URI.create(photoUri))
+                        .retrieve()
                         .body(byte[].class);
+                if (content == null || content.length == 0) {
+                    throw new GooglePlacesException("Empty place photo payload", 502, true);
+                }
+                return content;
+            } catch (GooglePlacesException ex) {
+                throw ex;
             } catch (RestClientResponseException ex) {
                 if (attempts >= properties.getMaxRetries() || !isRetryable(ex.getStatusCode().value())) {
                     throw toException(ex);
@@ -108,6 +129,13 @@ public class HttpGooglePlacesClient implements GooglePlacesClient {
                 throw new GooglePlacesException("Failed to fetch place photo", ex);
             }
         }
+    }
+
+    private static String trimTrailingSlash(String value) {
+        if (value == null || value.isEmpty()) {
+            return "";
+        }
+        return value.endsWith("/") ? value.substring(0, value.length() - 1) : value;
     }
 
     private JsonNode postWithRetry(String path, ObjectNode body, String fieldMask) {

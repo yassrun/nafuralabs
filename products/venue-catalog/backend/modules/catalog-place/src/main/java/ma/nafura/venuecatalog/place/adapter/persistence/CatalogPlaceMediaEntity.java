@@ -40,16 +40,16 @@ public class CatalogPlaceMediaEntity {
     private Integer width;
     private Integer height;
 
-    @Column(name = "attribution_text", nullable = false)
+    @Column(name = "attribution_text", nullable = false, columnDefinition = "text")
     private String attributionText;
 
-    @Column(name = "author_name")
+    @Column(name = "author_name", columnDefinition = "text")
     private String authorName;
 
     @Column(nullable = false)
     private boolean reusable;
 
-    @Column(name = "provider_photo_ref")
+    @Column(name = "provider_photo_ref", columnDefinition = "text")
     private String providerPhotoRef;
 
     @Column(name = "content_checksum")

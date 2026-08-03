@@ -12,6 +12,10 @@ public final class CatalogDtos {
 
     public record PlaceListResponse(List<PlaceSummaryDto> items, PageDto page) {}
 
+    public record BulkPlaceIdsRequest(List<UUID> placeIds) {}
+
+    public record BulkStatusResponse(List<UUID> placeIds, String status) {}
+
     public record PlaceSummaryDto(
             UUID id,
             String canonicalName,
@@ -20,6 +24,15 @@ public final class CatalogDtos {
             String primaryCategory,
             Map<String, Object> address,
             Map<String, Object> quality,
+            String districtCode,
+            String districtLabel,
+            List<String> venueTypes,
+            String venueType,
+            String aiDecision,
+            Double layaliScore,
+            String enrichmentStatus,
+            String primaryPhotoUrl,
+            String primaryPhotoAttribution,
             String updatedAt
     ) {}
 
@@ -40,6 +53,7 @@ public final class CatalogDtos {
             List<MediaDto> media,
             List<SourceRecordDto> sourceRecords,
             Map<String, Object> quality,
+            Map<String, Object> enrichment,
             String createdAt,
             String updatedAt
     ) {}
@@ -76,6 +90,7 @@ public final class CatalogDtos {
             Map<String, Object> result,
             Map<String, Object> progress,
             Map<String, Object> error,
+            List<Map<String, Object>> steps,
             String requestedBy,
             String startedAt,
             String finishedAt,
@@ -96,5 +111,67 @@ public final class CatalogDtos {
             Boolean refreshHours
     ) {}
 
-    public record ErrorResponse(String error, String message, List<Map<String, String>> details, String traceId) {}
+    public record EnrichmentJobRequest(
+            List<UUID> catalogPlaceIds,
+            Map<String, Object> query,
+            Map<String, Object> options
+    ) {}
+
+    public record RetryJobRequest(String resumeFromStep) {}
+
+    /** Manual taxonomy patch. Prefer {@code venueTypes}; legacy {@code venueType} still accepted. */
+    public record ManualTaxonomyRequest(
+            List<String> venueTypes,
+            String venueType,
+            List<String> settings,
+            List<String> offers,
+            List<String> experiences,
+            List<String> suitableFor,
+            List<String> musicStyles,
+            List<String> cuisines,
+            Boolean servesAlcohol,
+            String verdict
+    ) {
+        public List<String> resolvedVenueTypes() {
+            if (venueTypes != null && !venueTypes.isEmpty()) {
+                return venueTypes;
+            }
+            if (venueType != null && !venueType.isBlank()) {
+                return List.of(venueType.trim());
+            }
+            return null;
+        }
+    }
+
+    public record TaxonomyMetaResponse(
+            List<String> categories,
+            List<String> venueTypes,
+            Map<String, List<String>> venueTypesByCategory,
+            List<String> settings,
+            List<String> offers,
+            List<String> experiences,
+            List<String> suitableFor,
+            List<String> activities
+    ) {}
+
+    public record NormalizeNamesRequest(
+            Boolean dryRun,
+            String cityCode,
+            String primaryCategory
+    ) {}
+
+    public record NormalizeNamesSampleDto(UUID id, String before, String after) {}
+
+    public record NormalizeNamesResponse(
+            int scanned,
+            int updated,
+            int skippedNoDistrict,
+            int unchanged,
+            boolean dryRun,
+            List<NormalizeNamesSampleDto> samples
+    ) {}
+
+    public record ManualDistrictRequest(String districtCode) {}
+
+    public record ErrorResponse(String error, String message, List<?> details, String traceId) {}
 }

@@ -10,8 +10,8 @@ describe('WhatsAppNotificationAdapter', () => {
     svc = TestBed.inject(WhatsAppNotificationAdapter);
   });
 
-  it('liste 8 templates pré-validés', () => {
-    expect(svc.listTemplates().length).toBe(8);
+  it('liste les templates plateforme', () => {
+    expect(svc.listTemplates().length).toBe(3);
   });
 
   it('validate retourne erreurs si variables manquantes', () => {
@@ -44,9 +44,8 @@ describe('WhatsAppNotificationAdapter', () => {
   });
 
   it('envoyerNotification retourne ECHEC validation si variable manquante', async () => {
-    const res = await svc.envoyerNotification('+212600000000', 'RELANCE_FACTURE_J15', {
-      client: 'ACME',
-      reference: 'FM-001',
+    const res = await svc.envoyerNotification('+212600000000', 'NOTIFICATION_GENERALE', {
+      nom: 'Karim',
     });
     expect(res.status).toBe('ECHEC');
     expect(res.errorCode).toBe('WHATSAPP-VALIDATION');
@@ -54,9 +53,9 @@ describe('WhatsAppNotificationAdapter', () => {
 
   it('mode PROD renvoie EN_ATTENTE tant que non branché', async () => {
     svc.setMode('PROD');
-    const res = await svc.envoyerNotification('+212600000000', 'POINTAGE_RAPPEL', {
-      date: '2026-05-13',
-      deadline: '20:00',
+    const res = await svc.envoyerNotification('+212600000000', 'NOTIFICATION_GENERALE', {
+      nom: 'Karim',
+      message: 'Test',
     });
     expect(res.status).toBe('EN_ATTENTE');
   });

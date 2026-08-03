@@ -63,7 +63,7 @@ public class StatelessExtractionService {
 
     /**
      * @param maxPromptChars optional cap on PDF text prompt size (null = platform default).
-     *                       Light passes (e.g. bordereau) should pass a lower value than full CPS.
+     *                       Light passes should pass a lower value than full-document extraction.
      */
     public StatelessExtractionResponse process(
             byte[] fileBytes,

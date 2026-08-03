@@ -28,7 +28,7 @@
 
     <mat-form-field appearance="outline" class="filter-field">
       <mat-select [formControl]="domainFilter" placeholder="Domain">
-        @for (option of domainOptions; track option.value) {
+        @for (option of domainOptions(); track option.value) {
           <mat-option [value]="option.value">{{ option.label }}</mat-option>
         }
       </mat-select>

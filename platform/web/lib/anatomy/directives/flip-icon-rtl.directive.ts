@@ -15,7 +15,7 @@ import { Directive, ElementRef, OnDestroy, inject } from '@angular/core';
  * `MutationObserver` so a runtime language switch (FR ↔ AR) reflects
  * immediately without a page reload.
  *
- * Round 2 Phase 2 sub-B — squelette RTL Nafura ERP.
+ * Round 2 Phase 2 sub-B — squelette RTL Nafura.
  *
  * @example
  * <mat-icon appFlipIconRtl>chevron_right</mat-icon>

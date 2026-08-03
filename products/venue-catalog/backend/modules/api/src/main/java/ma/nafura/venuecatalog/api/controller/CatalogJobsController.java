@@ -5,8 +5,11 @@ import ma.nafura.venuecatalog.api.dto.CatalogDtos;
 import ma.nafura.venuecatalog.api.mapper.CatalogDtoMapper;
 import ma.nafura.venuecatalog.api.security.CatalogReadAccess;
 import ma.nafura.venuecatalog.api.security.CatalogWriteAccess;
+import ma.nafura.venuecatalog.enrichment.application.VenueEnrichmentPipelineService;
+import ma.nafura.venuecatalog.enrichment.domain.EnrichmentStepType;
 import ma.nafura.venuecatalog.job.adapter.persistence.CatalogJobEntity;
 import ma.nafura.venuecatalog.job.application.CatalogJobService;
+import ma.nafura.venuecatalog.job.application.JobValidationException;
 import ma.nafura.venuecatalog.job.domain.CatalogJobProvider;
 import ma.nafura.venuecatalog.job.domain.CatalogJobType;
 import ma.nafura.platform.jobrunner.JobStatus;
@@ -35,10 +38,16 @@ public class CatalogJobsController {
 
     private final CatalogJobService jobService;
     private final CatalogDtoMapper mapper;
+    private final VenueEnrichmentPipelineService enrichmentPipelineService;
 
-    public CatalogJobsController(CatalogJobService jobService, CatalogDtoMapper mapper) {
+    public CatalogJobsController(
+            CatalogJobService jobService,
+            CatalogDtoMapper mapper,
+            VenueEnrichmentPipelineService enrichmentPipelineService
+    ) {
         this.jobService = jobService;
         this.mapper = mapper;
+        this.enrichmentPipelineService = enrichmentPipelineService;
     }
 
     @PostMapping("/google-places-search")
@@ -73,6 +82,42 @@ public class CatalogJobsController {
                 .body(new CatalogDtos.JobAcceptedResponse(job.getId(), job.getStatus().name()));
     }
 
+    @PostMapping("/venue-enrichment")
+    @CatalogWriteAccess
+    public ResponseEntity<CatalogDtos.JobAcceptedResponse> startEnrichmentJob(
+            @Valid @RequestBody CatalogDtos.EnrichmentJobRequest request,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        CatalogJobEntity job = jobService.enqueueEnrichmentJob(
+                mapper.toJobRequest(request),
+                subject(jwt),
+                idempotencyKey
+        );
+        return ResponseEntity.status(HttpStatus.ACCEPTED)
+                .body(new CatalogDtos.JobAcceptedResponse(job.getId(), job.getStatus().name()));
+    }
+
+    @PostMapping("/{id}/retry")
+    @CatalogWriteAccess
+    public ResponseEntity<CatalogDtos.JobAcceptedResponse> retryJob(
+            @PathVariable UUID id,
+            @RequestBody(required = false) CatalogDtos.RetryJobRequest request,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        try {
+            EnrichmentStepType resumeFrom = null;
+            if (request != null && request.resumeFromStep() != null && !request.resumeFromStep().isBlank()) {
+                resumeFrom = EnrichmentStepType.valueOf(request.resumeFromStep());
+            }
+            CatalogJobEntity job = jobService.retryJob(id, resumeFrom, subject(jwt));
+            return ResponseEntity.status(HttpStatus.ACCEPTED)
+                    .body(new CatalogDtos.JobAcceptedResponse(job.getId(), job.getStatus().name()));
+        } catch (JobValidationException | IllegalArgumentException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage(), ex);
+        }
+    }
+
     @GetMapping
     @CatalogReadAccess
     public CatalogDtos.JobListResponse listJobs(
@@ -93,7 +138,7 @@ public class CatalogJobsController {
     public CatalogDtos.JobDetailDto getJob(@PathVariable UUID id) {
         CatalogJobEntity job = jobService.getJob(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "not_found"));
-        return mapper.toJob(job);
+        return mapper.toJob(job, enrichmentPipelineService.listSteps(id));
     }
 
     private static String subject(Jwt jwt) {

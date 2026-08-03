@@ -39,6 +39,7 @@ includePlatform(":platform:features:collaboration:tagging")
 includePlatform(":platform:features:collaboration:workflow")
 includePlatform(":platform:features:collaboration:webhook")
 includePlatform(":platform:features:documents:doc-extractor")
+includePlatform(":platform:features:foundation:geo")
 includePlatform(":platform:integrations:google-places")
 includePlatform(":platform:core:job-runner")
 
@@ -61,7 +62,7 @@ fun includeVenueCatalogModule(name: String) {
 include(":venue-catalog:app")
 project(":venue-catalog:app").projectDir = file("products/venue-catalog/backend/app")
 
-listOf("api", "source-adapter", "catalog-place", "catalog-job", "compliance").forEach {
+listOf("api", "source-adapter", "catalog-place", "catalog-job", "catalog-enrichment", "compliance").forEach {
     includeVenueCatalogModule(it)
 }
 
@@ -96,6 +97,10 @@ include(":usage-ops:app")
 project(":usage-ops:app").projectDir = file("products/usage-ops/backend/app")
 
 listOf("api", "federation", "quotas", "alerts").forEach { includeUsageOpsModule(it) }
+
+// ── Blanner ─────────────────────────────────────────────────────────────────
+include(":blanner:app")
+project(":blanner:app").projectDir = file("products/blanner/blanner-backend")
 
 // ── Tools ───────────────────────────────────────────────────────────────────
 include(":tools:lifecycle")

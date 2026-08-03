@@ -21,7 +21,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/places")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 @Tag(name = "Places", description = "Google Places API integration endpoints")
 public class PlacesController {
     

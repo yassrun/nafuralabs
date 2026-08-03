@@ -7,8 +7,8 @@ export interface Role {
   isSystem: boolean;
   priority: number;
   memberCount?: number;
-  /** CHANTIER | ENTREPRISE | BOTH */
-  scopeType?: 'CHANTIER' | 'ENTREPRISE' | 'BOTH' | string;
+  /** Scope family for UI (platform default: TENANT). */
+  scopeType?: string;
   createdAt: string | null;
   updatedAt: string | null;
 }

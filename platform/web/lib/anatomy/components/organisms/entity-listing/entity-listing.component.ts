@@ -682,7 +682,7 @@ export class EntityListingComponent<TItem = unknown> implements OnDestroy {
       return;
     }
     const routes = this.config().routes;
-    // M-TRA-02: config `selectionMode: 'none'` → single click opens detail (achats, RH, HSE…).
+    // M-TRA-02: config `selectionMode: 'none'` → single click opens detail.
     if (this.config().features.selectionMode === 'none' && routes?.detail) {
       void this.router.navigate(routes.detail(item));
       return;

@@ -1,0 +1,37 @@
+{
+  "type": "Feature",
+  "properties": {
+    "code": "BOURGOGNE",
+    "label": "Bourgogne",
+    "cityCode": "casablanca",
+    "provenance": "NAFURA_CURATED",
+    "version": "MA-CASA-2026-01"
+  },
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [
+          -7.655,
+          33.558
+        ],
+        [
+          -7.625,
+          33.558
+        ],
+        [
+          -7.625,
+          33.5785
+        ],
+        [
+          -7.655,
+          33.5785
+        ],
+        [
+          -7.655,
+          33.558
+        ]
+      ]
+    ]
+  }
+}

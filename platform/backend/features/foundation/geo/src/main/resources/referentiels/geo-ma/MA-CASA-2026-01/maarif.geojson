@@ -1,0 +1,37 @@
+{
+  "type": "Feature",
+  "properties": {
+    "code": "MAARIF",
+    "label": "Maârif",
+    "cityCode": "casablanca",
+    "provenance": "NAFURA_CURATED",
+    "version": "MA-CASA-2026-01"
+  },
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [
+          -7.642,
+          33.578
+        ],
+        [
+          -7.618,
+          33.578
+        ],
+        [
+          -7.618,
+          33.597
+        ],
+        [
+          -7.642,
+          33.597
+        ],
+        [
+          -7.642,
+          33.578
+        ]
+      ]
+    ]
+  }
+}

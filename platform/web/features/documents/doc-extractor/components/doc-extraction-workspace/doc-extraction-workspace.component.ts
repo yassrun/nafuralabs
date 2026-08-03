@@ -107,18 +107,11 @@ export class DocExtractionWorkspaceComponent {
     const byDomain = this.docTypesByDomain();
     if (!byDomain) return [];
     
-    // Map domain keys to labels (matching DomainCatalog.v1())
-    const domainLabelMap: Record<string, string> = {
-      'finance': 'Accounting & Finance',
-      'btp': 'Construction / BTP',
-      'logistic': 'Logistics',
-      'inventory': 'Inventory',
-    };
-
+    // Domains come from seeded / registered doc types — no product catalog in platform.
     return Object.keys(byDomain.domains)
       .map(domainKey => ({
         domainKey,
-        label: domainLabelMap[domainKey] || domainKey.charAt(0).toUpperCase() + domainKey.slice(1),
+        label: domainKey.charAt(0).toUpperCase() + domainKey.slice(1),
       }))
       .sort((a, b) => a.label.localeCompare(b.label));
   });
