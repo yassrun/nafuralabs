@@ -56,6 +56,24 @@
       (modeUiChange)="onModeUi($event)"
       (change)="onPanelChange()"
     />
+
+    <section class="poste-drawer__comments" aria-label="Commentaires d'équipe">
+      <nf-comment-thread-panel
+        [entityType]="commentEntityType"
+        [entityId]="data.poste.id"
+        [readonly]="!data.modifiable"
+        [title]="'etudes.poste.comments.title' | translate"
+        [placeholder]="'etudes.poste.comments.placeholder' | translate"
+        [emptyLabel]="'etudes.poste.comments.empty' | translate"
+        [loadingLabel]="'etudes.poste.comments.loading' | translate"
+        [addLabel]="'etudes.poste.comments.add' | translate"
+        [editLabel]="'etudes.poste.comments.edit' | translate"
+        [deleteLabel]="'etudes.poste.comments.delete' | translate"
+        [saveLabel]="'etudes.poste.comments.save' | translate"
+        [cancelLabel]="'etudes.poste.comments.cancel' | translate"
+        [editedLabel]="'etudes.poste.comments.edited' | translate"
+      />
+    </section>
   </div>
 
   <footer class="poste-drawer__footer">

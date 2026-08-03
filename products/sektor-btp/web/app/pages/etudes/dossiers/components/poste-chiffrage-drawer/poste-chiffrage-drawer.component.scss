@@ -130,6 +130,12 @@
   padding: 0.75rem 1rem 1rem;
 }
 
+.poste-drawer__comments {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--nf-color-border);
+}
+
 .poste-drawer__footer {
   display: flex;
   justify-content: space-between;

@@ -10,6 +10,8 @@ import {
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 
 import { ButtonComponent, ConfirmDialogService } from '@lib/anatomy';
+import { CommentThreadPanelComponent } from '@platform/features/collaboration/comment';
+import { TranslateModule } from '@ngx-translate/core';
 
 import type { BordereauTreeRow } from '../../utils/bordereau-tree.util';
 import {
@@ -39,7 +41,14 @@ export interface PosteChiffrageDrawerResult {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, MatDialogModule, ButtonComponent, PosteDecompositionPanelComponent],
+  imports: [
+    CommonModule,
+    MatDialogModule,
+    ButtonComponent,
+    PosteDecompositionPanelComponent,
+    CommentThreadPanelComponent,
+    TranslateModule,
+  ],
   templateUrl: './poste-chiffrage-drawer.component.html',
   styleUrl: './poste-chiffrage-drawer.component.scss',
 })
@@ -61,6 +70,9 @@ export class PosteChiffrageDrawerComponent {
       }),
     ),
   );
+
+  /** Fil social platform — polymorphe sur le nœud DPGF. */
+  readonly commentEntityType = 'dpgf_noeud';
 
   onDirty(dirty: boolean): void {
     this.dirty.set(dirty);

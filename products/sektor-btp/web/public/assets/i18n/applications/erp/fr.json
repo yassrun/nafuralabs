@@ -693,6 +693,20 @@
     }
   },
   "etudes": {
+    "poste": {
+      "comments": {
+        "title": "Commentaires d'équipe",
+        "placeholder": "Écrire un commentaire…",
+        "empty": "Aucun commentaire pour l’instant.",
+        "loading": "Chargement des commentaires…",
+        "add": "Publier",
+        "edit": "Modifier",
+        "delete": "Supprimer",
+        "save": "Enregistrer",
+        "cancel": "Annuler",
+        "edited": "modifié"
+      }
+    },
     "gate": {
       "documents": {
         "aucune_piece": "Déposez au moins une pièce du marché (bordereau ou CPS) avant de continuer.",

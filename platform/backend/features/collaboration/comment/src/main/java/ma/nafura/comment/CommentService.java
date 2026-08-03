@@ -17,6 +17,9 @@ public interface CommentService {
 
     List<RecordComment> listReplies(UUID parentCommentId);
 
+    /** Met à jour le corps — auteur uniquement. */
+    RecordComment update(UUID commentId, String text);
+
+    /** Supprime — auteur uniquement. */
     void delete(UUID commentId);
 }
-

@@ -57,6 +57,12 @@ public class CommentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(comment);
     }
 
+    @PatchMapping("/{id}")
+    public ResponseEntity<RecordComment> update(
+            @PathVariable UUID id, @Valid @RequestBody UpdateCommentRequest request) {
+        return ResponseEntity.ok(commentService.update(id, request.getText()));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         commentService.delete(id);
@@ -75,6 +81,11 @@ public class CommentController {
         @NotBlank private String entityType;
         @NotNull private UUID entityId;
         @NotNull private UUID parentCommentId;
+        @NotBlank private String text;
+    }
+
+    @lombok.Data
+    public static class UpdateCommentRequest {
         @NotBlank private String text;
     }
 }

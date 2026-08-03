@@ -10,10 +10,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -27,10 +33,7 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     public RecordComment add(String entityType, UUID entityId, String text) {
         UUID tenantId = TenantContext.getTenantId();
-        String author = UserContext.getUserEmail();
-        if (author == null || author.isBlank()) {
-            author = "system";
-        }
+        String author = currentAuthor();
         RecordComment comment = RecordComment.builder()
                 .tenantId(tenantId)
                 .entityType(entityType)
@@ -51,10 +54,7 @@ public class CommentServiceImpl implements CommentService {
         RecordComment parent = commentRepository.findByIdAndTenantId(parentCommentId, TenantContext.getTenantId())
                 .orElseThrow(() -> new CrudNotFoundException("Comment not found: " + parentCommentId));
         UUID tenantId = TenantContext.getTenantId();
-        String author = UserContext.getUserEmail();
-        if (author == null || author.isBlank()) {
-            author = "system";
-        }
+        String author = currentAuthor();
         RecordComment reply = RecordComment.builder()
                 .tenantId(tenantId)
                 .entityType(entityType)
@@ -86,10 +86,53 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
+    public RecordComment update(UUID commentId, String text) {
+        RecordComment comment = requireComment(commentId);
+        assertAuthor(comment);
+        if (!StringUtils.hasText(text)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Comment body is required");
+        }
+        comment.setBody(text.trim());
+        comment.setEditedAt(OffsetDateTime.now());
+        return commentRepository.save(comment);
+    }
+
+    @Override
+    @Transactional
     public void delete(UUID commentId) {
-        RecordComment comment = commentRepository.findByIdAndTenantId(commentId, TenantContext.getTenantId())
-                .orElseThrow(() -> new CrudNotFoundException("Comment not found: " + commentId));
+        RecordComment comment = requireComment(commentId);
+        assertAuthor(comment);
         commentRepository.delete(comment);
+    }
+
+    private RecordComment requireComment(UUID commentId) {
+        return commentRepository.findByIdAndTenantId(commentId, TenantContext.getTenantId())
+                .orElseThrow(() -> new CrudNotFoundException("Comment not found: " + commentId));
+    }
+
+    private void assertAuthor(RecordComment comment) {
+        String me = currentAuthor();
+        if (!sameAuthor(comment.getAuthor(), me)) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN, "Only the author can modify this comment");
+        }
+    }
+
+    static boolean sameAuthor(String stored, String current) {
+        if (stored == null || current == null) {
+            return false;
+        }
+        return Objects.equals(
+                stored.trim().toLowerCase(Locale.ROOT),
+                current.trim().toLowerCase(Locale.ROOT));
+    }
+
+    private static String currentAuthor() {
+        String author = UserContext.getUserEmail();
+        if (author == null || author.isBlank()) {
+            return "system";
+        }
+        return author.trim();
     }
 
     private void publishCommentEvent(RecordComment comment, String body) {
@@ -107,5 +150,3 @@ public class CommentServiceImpl implements CommentService {
         );
     }
 }
-
-

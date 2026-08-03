@@ -64,6 +64,10 @@ export class CommentApiService {
     });
   }
 
+  updateComment(id: string, text: string): Observable<RecordCommentDto> {
+    return this.http.patch<RecordCommentDto>(this.url(`${BASE}/${id}`), { text });
+  }
+
   deleteComment(id: string): Observable<void> {
     return this.http.delete<void>(this.url(`${BASE}/${id}`));
   }

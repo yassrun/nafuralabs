@@ -29,25 +29,17 @@ S’applique à **S5** (et déjà à l’esprit BDP auto / descriptif CPS / extr
 
 ---
 
-### S2 — P0 · Commentaires poste type réseau social
-**Constat**  
-Aujourd’hui : un seul `textarea` branché sur `descriptif` du nœud DPGF (= note technique plate, pas un fil).
-
-**Cible**  
-Fil de commentaires collaboratif sur le poste (style social) :
-- liste chronologique (auteur, date, corps)
-- ajout inline (composer)
-- édition / suppression de ses propres commentaires (si droits)
-- (V1) pas de threads/réponses imbriqués ni @mentions — follow-up
-- distinguer **descriptif technique** (CPS / métier) vs **commentaires d’équipe** (nouveau modèle)
+### S2 — P0 · Commentaires poste type réseau social ✅
+**Statut** : livré — fil platform `entityType=dpgf_noeud` dans le drawer chiffrage (descriptif technique inchangé).
 
 **Décision modèle**  
-- Nouveau endpoint sous dossier/poste (ex. `…/noeuds/{id}/commentaires`).
-- `descriptif` reste le texte technique ; le composer social ne l’écrase pas.
+- Platform ` /api/v1/platform/collaboration/comments` (polymorphe).  
+- `descriptif` reste le texte technique ; le fil social ne l’écrase pas.
 
 **Acceptation**  
-- 2 users voient le fil à jour après refresh (ou poll léger V1).
-- UI dans la modale chiffrage (S1).
+- 2 users voient le fil à jour après refresh / réouverture drawer.  
+- Edit / delete auteur seulement.  
+- UI dans le drawer chiffrage (S1).
 
 ---
 
@@ -133,11 +125,11 @@ Le lien `dossier.appelOffreClientId` existe déjà côté modèle, mais l’UX r
 
 ## Ordre d’exécution session
 
-1. **S5** unifier AO + étude + pièces CPS *(cadre parcours — à poser tôt)*
-2. **S1** modal chiffrage
-3. **S2** fil commentaires dans la modale
-4. **S3** FG/MG prix fourni
-5. **S4** colonne Objet listing *(quick win parallèle possible dès le début)*
+1. **S5** unifier AO + étude + pièces CPS ✅
+2. **S1** modal chiffrage ✅
+3. **S2** fil commentaires dans la modale ✅
+4. **S3** FG/MG prix fourni ✅
+5. **S4** colonne Objet listing ✅
 
 > Si S5 trop large pour une session : découper en **S5a** (nav + un seul create flow) puis **S5b** (checklist CPS + gates), sans perdre l’intention « un seul menu ».
 

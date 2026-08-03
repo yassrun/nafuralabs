@@ -693,6 +693,20 @@
     }
   },
   "etudes": {
+    "poste": {
+      "comments": {
+        "title": "Team comments",
+        "placeholder": "Write a comment…",
+        "empty": "No comments yet.",
+        "loading": "Loading comments…",
+        "add": "Post",
+        "edit": "Edit",
+        "delete": "Delete",
+        "save": "Save",
+        "cancel": "Cancel",
+        "edited": "edited"
+      }
+    },
     "gate": {
       "documents": {
         "aucune_piece": "Upload at least one tender document (bill of quantities or specifications) before continuing.",
