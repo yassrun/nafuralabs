@@ -73,6 +73,7 @@ export class PosteChiffrageDrawerComponent {
 
   /** Fil social platform — polymorphe sur le nœud DPGF. */
   readonly commentEntityType = 'dpgf_noeud';
+  readonly commentEntityId = this.data.poste.id ?? '';
 
   onDirty(dirty: boolean): void {
     this.dirty.set(dirty);

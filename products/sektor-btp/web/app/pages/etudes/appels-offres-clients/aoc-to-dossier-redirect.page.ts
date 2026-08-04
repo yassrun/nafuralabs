@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { DossierEtudeApiService } from '../../dossiers/services/dossier-etude-api.service';
+import { DossierEtudeApiService } from '../dossiers/services/dossier-etude-api.service';
 
 /**
  * Bookmark legacy `/etudes/appels-offres-clients/:id` → dossier lié, sinon listing.

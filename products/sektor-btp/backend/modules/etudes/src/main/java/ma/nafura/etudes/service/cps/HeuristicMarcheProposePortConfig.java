@@ -28,7 +28,7 @@ public class HeuristicMarcheProposePortConfig {
     private static final Pattern OBJET = Pattern.compile(
             "(?i)(?:objet\\s+(?:du\\s+)?(?:marché|marche)|intitulé)\\s*[:：]\\s*(.{10,200})");
     private static final Pattern VILLE = Pattern.compile(
-            "(?i)(?:ville|lieu\\s+d['’]?exécution|commune)\\s*[:：]\\s*([A-Za-zÀ-ÿ\\-\\s]{2,60})");
+            "(?i)(?:ville|lieu\\s+d['’]?exécution|commune)\\s*[:：]\\s*([\\p{L}\\-\\s]{2,60})");
     private static final Pattern REFERENCE = Pattern.compile(
             "(?i)(?:référence|reference|n[°o]\\s*(?:ao|marché|marche))\\s*[:：]\\s*([\\w\\-/.]{3,40})");
 
