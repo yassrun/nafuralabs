@@ -928,6 +928,80 @@
       "loading": "Chargement des domaines...",
       "error": "Echec du chargement des domaines.",
       "toggleError": "Echec de la mise a jour de l'activation du domaine."
+    },
+    "documentSettings": {
+      "title": "Personnalisation des documents",
+      "save": "Enregistrer",
+      "saveSuccess": "Personnalisation enregistrée.",
+      "saveError": "Impossible d'enregistrer la personnalisation.",
+      "reset": "Réinitialiser",
+      "resetTitle": "Réinitialiser la personnalisation",
+      "resetMessage": "Les réglages reviendront aux valeurs par défaut. Continuer ?",
+      "previewOn": "Aperçu sur",
+      "previewEmpty": "Aucun modèle disponible pour ce type de document.",
+      "tabs": {
+        "header": "En-tête",
+        "footer": "Pied de page",
+        "lines": "Tableau de lignes",
+        "page": "Page"
+      },
+      "header": {
+        "layout": "Disposition",
+        "layouts": {
+          "LOGO_LEFT": "Logo à gauche",
+          "LOGO_CENTER": "Logo centré",
+          "LOGO_RIGHT": "Logo à droite"
+        },
+        "showLogo": "Afficher le logo",
+        "logoHint": "Le logo se téléverse dans Paramètres → Branding.",
+        "fields": "Informations affichées dans l'en-tête"
+      },
+      "footer": {
+        "text": "Texte du pied de page",
+        "textHint": "Texte libre. Utilisez « Insérer » pour ajouter une donnée de votre société.",
+        "insert": "Insérer une donnée :",
+        "value": "Donnée",
+        "insertAction": "Insérer",
+        "showLegal": "Afficher les identifiants légaux (ICE, RC, IF, patente, CNSS)",
+        "showPageNumber": "Afficher le numéro de page"
+      },
+      "lines": {
+        "columns": "Colonnes affichées",
+        "showTva": "Afficher la TVA",
+        "showRemise": "Afficher la remise"
+      },
+      "page": {
+        "marginTop": "Marge haut",
+        "marginRight": "Marge droite",
+        "marginBottom": "Marge bas",
+        "marginLeft": "Marge gauche"
+      },
+      "appearance": {
+        "font": "Police",
+        "accent": "Couleur d'accent"
+      },
+      "fields": {
+        "formeJuridique": "Forme juridique",
+        "capital": "Capital social",
+        "adresse": "Adresse",
+        "ville": "Ville",
+        "telephone": "Téléphone",
+        "email": "E-mail",
+        "siteWeb": "Site web",
+        "ice": "ICE",
+        "identifiantFiscal": "Identifiant fiscal (IF)",
+        "rc": "Registre de commerce (RC)",
+        "patente": "Patente",
+        "cnss": "CNSS"
+      },
+      "columns": {
+        "code": "Code",
+        "designation": "Désignation",
+        "unite": "Unité",
+        "quantite": "Quantité",
+        "prixUnitaire": "Prix unitaire",
+        "montantHt": "Montant HT"
+      }
     }
   },
   "scheduling": {

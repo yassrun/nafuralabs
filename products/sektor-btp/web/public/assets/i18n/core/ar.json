@@ -942,6 +942,80 @@
       "loading": "جاري تحميل المجالات...",
       "error": "فشل تحميل المجالات.",
       "toggleError": "فشل تحديث تفعيل المجال."
+    },
+    "documentSettings": {
+      "title": "تخصيص المستندات",
+      "save": "حفظ",
+      "saveSuccess": "تم حفظ التخصيص.",
+      "saveError": "تعذّر حفظ التخصيص.",
+      "reset": "إعادة تعيين",
+      "resetTitle": "إعادة تعيين التخصيص",
+      "resetMessage": "ستعود الإعدادات إلى قيمها الافتراضية. هل تريد المتابعة؟",
+      "previewOn": "معاينة على",
+      "previewEmpty": "لا يوجد نموذج متاح لهذا النوع من المستندات.",
+      "tabs": {
+        "header": "الترويسة",
+        "footer": "التذييل",
+        "lines": "جدول البنود",
+        "page": "الصفحة"
+      },
+      "header": {
+        "layout": "التخطيط",
+        "layouts": {
+          "LOGO_LEFT": "الشعار يميناً",
+          "LOGO_CENTER": "الشعار في الوسط",
+          "LOGO_RIGHT": "الشعار يساراً"
+        },
+        "showLogo": "إظهار الشعار",
+        "logoHint": "يُرفع الشعار من الإعدادات ← الهوية البصرية.",
+        "fields": "المعلومات المعروضة في الترويسة"
+      },
+      "footer": {
+        "text": "نص التذييل",
+        "textHint": "نص حر. استخدم «إدراج» لإضافة معلومة من معلومات شركتك.",
+        "insert": "إدراج معلومة:",
+        "value": "المعلومة",
+        "insertAction": "إدراج",
+        "showLegal": "إظهار المعرّفات القانونية (ICE، RC، IF، الباتينتا، CNSS)",
+        "showPageNumber": "إظهار رقم الصفحة"
+      },
+      "lines": {
+        "columns": "الأعمدة المعروضة",
+        "showTva": "إظهار الضريبة",
+        "showRemise": "إظهار الخصم"
+      },
+      "page": {
+        "marginTop": "الهامش العلوي",
+        "marginRight": "الهامش الأيمن",
+        "marginBottom": "الهامش السفلي",
+        "marginLeft": "الهامش الأيسر"
+      },
+      "appearance": {
+        "font": "الخط",
+        "accent": "لون التمييز"
+      },
+      "fields": {
+        "formeJuridique": "الشكل القانوني",
+        "capital": "رأس المال",
+        "adresse": "العنوان",
+        "ville": "المدينة",
+        "telephone": "الهاتف",
+        "email": "البريد الإلكتروني",
+        "siteWeb": "الموقع الإلكتروني",
+        "ice": "ICE",
+        "identifiantFiscal": "المعرّف الضريبي (IF)",
+        "rc": "السجل التجاري (RC)",
+        "patente": "الباتينتا",
+        "cnss": "CNSS"
+      },
+      "columns": {
+        "code": "الرمز",
+        "designation": "البيان",
+        "unite": "الوحدة",
+        "quantite": "الكمية",
+        "prixUnitaire": "سعر الوحدة",
+        "montantHt": "المبلغ دون ضريبة"
+      }
     }
   },
   "scheduling": {

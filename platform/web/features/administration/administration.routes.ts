@@ -29,6 +29,13 @@ export const ADMINISTRATION_ROUTES: Routes = [
       import('./audit/audit.routes').then((m) => m.AUDIT_ROUTES),
   },
   {
+    path: 'document-settings',
+    loadChildren: () =>
+      import('./document-settings/document-settings.routes').then(
+        (m) => m.DOCUMENT_SETTINGS_ROUTES
+      ),
+  },
+  {
     path: 'templates',
     loadChildren: () =>
       import('./templates/templates.routes').then((m) => m.TEMPLATES_ROUTES),

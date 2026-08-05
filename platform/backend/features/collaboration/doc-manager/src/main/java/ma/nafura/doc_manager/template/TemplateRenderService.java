@@ -69,10 +69,22 @@ public class TemplateRenderService {
      * @param entityId when set, real data for that record; otherwise sample data
      */
     public String renderDraftHtml(String templateBody, String entityType, UUID entityId) {
+        return renderDraftHtml(templateBody, entityType, entityId, Map.of());
+    }
+
+    /**
+     * @param fragmentOverrides fragments to use instead of the stored ones, so the customisation
+     *                          screen can preview settings that are not saved yet
+     */
+    public String renderDraftHtml(
+            String templateBody,
+            String entityType,
+            UUID entityId,
+            Map<String, String> fragmentOverrides) {
         Map<String, Object> variables = entityId != null
                 ? variableResolver.resolve(entityType, entityId)
                 : variableResolver.resolveForPreview(entityType);
-        return processTemplate(templateBody, variables);
+        return processTemplate(templateBody, variables, fragmentOverrides);
     }
 
     /** Variables that would be exposed to a template of this type, for diagnostics and tests. */
@@ -104,18 +116,28 @@ public class TemplateRenderService {
      * body with those fragments available as ready-made HTML.
      */
     String processTemplate(String templateBody, Map<String, Object> variables) {
+        return processTemplate(templateBody, variables, Map.of());
+    }
+
+    String processTemplate(
+            String templateBody, Map<String, Object> variables, Map<String, String> fragmentOverrides) {
         if (templateBody == null || templateBody.isBlank()) {
             throw new TemplateRenderException("Template body is empty");
         }
-        Map<String, String> fragments = renderFragments(variables);
+        Map<String, String> fragments = renderFragments(variables, fragmentOverrides);
         Map<String, Object> withFragments = new LinkedHashMap<>(variables);
         withFragments.put("fragments", fragments);
         return process(templateBody, withFragments);
     }
 
-    private Map<String, String> renderFragments(Map<String, Object> variables) {
+    private Map<String, String> renderFragments(
+            Map<String, Object> variables, Map<String, String> overrides) {
         Map<String, String> rendered = new LinkedHashMap<>();
-        fragmentService.bodiesForCurrentTenant().forEach((code, body) -> {
+        Map<String, String> sources = new LinkedHashMap<>(fragmentService.bodiesForCurrentTenant());
+        if (overrides != null) {
+            sources.putAll(overrides);
+        }
+        sources.forEach((code, body) -> {
             if (body == null || body.isBlank()) {
                 rendered.put(code, "");
                 return;

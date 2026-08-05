@@ -927,6 +927,80 @@
       "loading": "Loading domains...",
       "error": "Failed to load domains.",
       "toggleError": "Failed to update domain activation."
+    },
+    "documentSettings": {
+      "title": "Document customisation",
+      "save": "Save",
+      "saveSuccess": "Customisation saved.",
+      "saveError": "Could not save the customisation.",
+      "reset": "Reset",
+      "resetTitle": "Reset customisation",
+      "resetMessage": "Settings will return to their defaults. Continue?",
+      "previewOn": "Preview on",
+      "previewEmpty": "No template available for this document type.",
+      "tabs": {
+        "header": "Header",
+        "footer": "Footer",
+        "lines": "Line table",
+        "page": "Page"
+      },
+      "header": {
+        "layout": "Layout",
+        "layouts": {
+          "LOGO_LEFT": "Logo left",
+          "LOGO_CENTER": "Logo centred",
+          "LOGO_RIGHT": "Logo right"
+        },
+        "showLogo": "Show the logo",
+        "logoHint": "Upload the logo under Settings → Branding.",
+        "fields": "Details shown in the header"
+      },
+      "footer": {
+        "text": "Footer text",
+        "textHint": "Free text. Use \"Insert\" to add one of your company details.",
+        "insert": "Insert a value:",
+        "value": "Value",
+        "insertAction": "Insert",
+        "showLegal": "Show legal identifiers (ICE, RC, IF, patente, CNSS)",
+        "showPageNumber": "Show the page number"
+      },
+      "lines": {
+        "columns": "Columns shown",
+        "showTva": "Show VAT",
+        "showRemise": "Show discount"
+      },
+      "page": {
+        "marginTop": "Top margin",
+        "marginRight": "Right margin",
+        "marginBottom": "Bottom margin",
+        "marginLeft": "Left margin"
+      },
+      "appearance": {
+        "font": "Font",
+        "accent": "Accent colour"
+      },
+      "fields": {
+        "formeJuridique": "Legal form",
+        "capital": "Share capital",
+        "adresse": "Address",
+        "ville": "City",
+        "telephone": "Phone",
+        "email": "Email",
+        "siteWeb": "Website",
+        "ice": "ICE",
+        "identifiantFiscal": "Tax ID (IF)",
+        "rc": "Trade register (RC)",
+        "patente": "Patente",
+        "cnss": "CNSS"
+      },
+      "columns": {
+        "code": "Code",
+        "designation": "Description",
+        "unite": "Unit",
+        "quantite": "Quantity",
+        "prixUnitaire": "Unit price",
+        "montantHt": "Amount excl. VAT"
+      }
     }
   },
   "scheduling": {

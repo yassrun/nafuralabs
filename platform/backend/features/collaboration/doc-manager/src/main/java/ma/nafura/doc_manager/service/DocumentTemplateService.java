@@ -40,6 +40,21 @@ public class DocumentTemplateService {
         return repository.findByTenantId(tenantId, pageable);
     }
 
+    /**
+     * Template used when printing a record of this type: the one flagged default, else the first
+     * available. Null when the type has none.
+     */
+    public DocumentTemplate findDefaultForEntityType(String entityType) {
+        UUID tenantId = TenantContext.getTenantId();
+        ensureDefaults(tenantId);
+        List<DocumentTemplate> candidates =
+                repository.findByTenantIdAndEntityType(tenantId, entityType, Pageable.unpaged()).getContent();
+        return candidates.stream()
+                .filter(t -> Boolean.TRUE.equals(t.getIsDefault()))
+                .findFirst()
+                .orElseGet(() -> candidates.isEmpty() ? null : candidates.get(0));
+    }
+
     public DocumentTemplate get(UUID id) {
         return repository.findByIdAndTenantId(id, TenantContext.getTenantId())
                 .orElseThrow(() -> new IllegalArgumentException("Template not found: " + id));

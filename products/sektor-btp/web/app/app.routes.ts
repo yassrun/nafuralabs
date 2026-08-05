@@ -81,6 +81,15 @@ function buildAdministrationNode(): SidebarNode | null {
     });
   }
   if (sections.templates?.enabled !== false) {
+    // Customisation comes first: it is what a customer uses. The template editor below is for
+    // support and for authoring the system templates.
+    children.push({
+      id: 'administration.documentSettings',
+      label: 'administration.documentSettings.title',
+      icon: 'sliders',
+      route: '/administration/document-settings',
+      order: 35.5,
+    });
     children.push({
       id: 'administration.templates',
       label: 'administration.navigation.templates',
