@@ -23,6 +23,11 @@ export const onboardingCompleteGuard: CanActivateFn = async () => {
     return true;
   }
 
+  // Cursor QA Mode B: onboarding JWT is intentional — never force /onboarding wizard.
+  if ((environment as { cursorAuthAutoLogin?: boolean }).cursorAuthAutoLogin) {
+    return true;
+  }
+
   const accessToken = auth.accessToken();
   if (!accessToken || !tokenService.isBackendOnboardingToken(accessToken)) {
     return true;

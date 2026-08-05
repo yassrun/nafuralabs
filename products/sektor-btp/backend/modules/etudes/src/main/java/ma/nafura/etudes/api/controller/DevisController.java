@@ -4,8 +4,10 @@ import jakarta.validation.Valid;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import ma.nafura.etudes.api.request.DevisCreateDto;
+import ma.nafura.etudes.api.request.DevisLoseRequest;
 import ma.nafura.etudes.api.request.DevisUpdateDto;
 import ma.nafura.etudes.api.dto.ConvertToChantierResultDto;
 import ma.nafura.etudes.api.request.DevisVersionCreateDto;
@@ -100,16 +102,38 @@ public class DevisController {
         return ResponseEntity.ok(service.createVersion(id, modifications));
     }
 
-    @PostMapping("/{id}/submit")
+    /** Alias machine FE {@code emit}. */
+    @PostMapping({"/{id}/submit", "/{id}/emit"})
     @RequirePermission("etudes.update")
     public ResponseEntity<Devis> submit(@PathVariable UUID id) {
         return ResponseEntity.ok(service.submit(id));
     }
 
-    @PostMapping("/{id}/marquer-gagne")
+    @PostMapping("/{id}/negotiate")
     @RequirePermission("etudes.update")
-    public ResponseEntity<Devis> marquerGagne(@PathVariable UUID id) {
-        return ResponseEntity.ok(service.marquerGagne(id));
+    public ResponseEntity<Devis> negotiate(@PathVariable UUID id) {
+        return ResponseEntity.ok(service.negotiate(id));
+    }
+
+    @PostMapping({"/{id}/approve", "/{id}/marquer-gagne"})
+    @RequirePermission("etudes.update")
+    public ResponseEntity<Devis> approve(@PathVariable UUID id) {
+        return ResponseEntity.ok(service.approve(id));
+    }
+
+    @PostMapping("/{id}/lose")
+    @RequirePermission("etudes.update")
+    public ResponseEntity<Devis> lose(
+            @PathVariable UUID id, @RequestBody(required = false) DevisLoseRequest body) {
+        String motif = body != null ? body.resolvedMotif() : null;
+        return ResponseEntity.ok(service.lose(id, motif));
+    }
+
+    @PostMapping("/{id}/cancel")
+    @RequirePermission("etudes.update")
+    public ResponseEntity<Devis> cancel(
+            @PathVariable UUID id, @RequestBody(required = false) Map<String, String> body) {
+        return ResponseEntity.ok(service.cancel(id));
     }
 
     @PostMapping("/{id}/convert-to-chantier")

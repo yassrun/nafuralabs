@@ -77,6 +77,7 @@ public class SecurityProperties {
          */
         private List<String> allowedOriginPatterns = new ArrayList<>(Arrays.asList(
                 "http://localhost:*",
+                "http://127.0.0.1:*",
                 "http://*.nafura.local",
                 "https://*.nafura.local",
                 "http://*.nafuralabs.staging",

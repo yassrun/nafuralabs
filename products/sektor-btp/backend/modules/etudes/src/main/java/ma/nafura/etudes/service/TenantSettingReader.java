@@ -1,18 +1,38 @@
 package ma.nafura.etudes.service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 /**
- * Lecture optionnelle des paramètres tenant. No-op tant que app-settings n'est pas branché
- * sur le module etudes (évite une dépendance circulaire / lourde). Les valeurs viennent alors
- * des constantes de {@link ParametresEtudeService}.
+ * Lecture des paramètres tenant ({@code tenant_setting}) pour le chiffrage / validation.
+ * Accès JDBC volontaire — évite une dépendance module vers app-settings.
  */
 @Component
 public class TenantSettingReader {
 
+    private final JdbcTemplate jdbcTemplate;
+
+    public TenantSettingReader(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
     public Optional<String> findValue(UUID tenantId, String settingKey) {
-        return Optional.empty();
+        if (tenantId == null || !StringUtils.hasText(settingKey)) {
+            return Optional.empty();
+        }
+        List<String> values = jdbcTemplate.query(
+                """
+                SELECT value FROM tenant_setting
+                WHERE tenant_id = ? AND setting_key = ?
+                LIMIT 1
+                """,
+                (rs, rowNum) -> rs.getString(1),
+                tenantId,
+                settingKey.trim());
+        return values.stream().filter(StringUtils::hasText).findFirst();
     }
 }

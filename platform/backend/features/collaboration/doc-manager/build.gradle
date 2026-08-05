@@ -6,6 +6,8 @@ dependencies {
     api project(':platform:core:framework')
     implementation project(':platform:core:authorization')
     implementation project(':platform:core:tenancy')
+    // Optional branding logo for print variables (tenant.logo as data URI)
+    implementation project(':platform:features:app-settings')
 
     // Utilisation de 'api' pour exposer ces dépendances aux modules dépendants
     api 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -14,7 +16,8 @@ dependencies {
     
     // Template rendering (06a print templates)
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-    implementation 'com.openhtmltopdf:openhtmltopdf-pdfbox:1.0.10'
+    // PDFBox 3-compatible fork (Boot manages pdfbox 3.x; danfickle 1.0.10 is PDFBox 2-only)
+    implementation 'io.github.openhtmltopdf:openhtmltopdf-pdfbox:1.1.65'
     
     // Database
     implementation 'org.postgresql:postgresql'

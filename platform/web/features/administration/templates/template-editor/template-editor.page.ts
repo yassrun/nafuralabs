@@ -1,24 +1,31 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit, signal, viewChild, computed } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal, viewChild, computed, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { firstValueFrom } from 'rxjs';
 
 import { CodeEditorComponent, PageHeaderComponent, PageShellComponent } from '@lib/anatomy';
 import { ToastService } from '@lib/anatomy';
 
 import type { PrintTemplate, TemplateVariable } from '../models';
 import { TemplatesApiService, TemplatesFacade } from '../services';
+import {
+  CreateTemplateDialogComponent,
+  type CreateTemplateDialogData,
+} from '../components/create-template-dialog.component';
 import { TemplateVariablesSidebarComponent } from '../components';
 
 const PAPER_SIZES = ['A4', 'Letter', 'Legal'];
-const ORIENTATIONS = ['Portrait', 'Landscape'];
+const ORIENTATIONS = ['portrait', 'landscape'];
 
 @Component({
   selector: 'app-template-editor-page',
@@ -28,6 +35,7 @@ const ORIENTATIONS = ['Portrait', 'Landscape'];
     ReactiveFormsModule,
     TranslateModule,
     MatButtonModule,
+    MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
@@ -42,6 +50,18 @@ const ORIENTATIONS = ['Portrait', 'Landscape'];
       <nf-page-header [config]="headerConfig()"></nf-page-header>
 
       <div class="template-editor">
+        @if (isSystem()) {
+          <div class="template-editor__banner" role="status">
+            <div>
+              <strong>{{ 'administration.templates.editor.system' | translate }}</strong>
+              <p>{{ 'administration.templates.editor.systemHint' | translate }}</p>
+            </div>
+            <button mat-flat-button color="primary" type="button" (click)="cloneCurrent()">
+              {{ 'administration.templates.clone' | translate }}
+            </button>
+          </div>
+        }
+
         <div class="template-editor__main">
           <div class="template-editor__form">
             <form [formGroup]="form" class="template-editor__meta">
@@ -51,7 +71,7 @@ const ORIENTATIONS = ['Portrait', 'Landscape'];
               </mat-form-field>
               <mat-form-field appearance="outline">
                 <mat-label>{{ 'administration.templates.fields.entityType' | translate }}</mat-label>
-                <mat-select formControlName="entityType" [disabled]="isSystem()">
+                <mat-select formControlName="entityType">
                   @for (et of entityTypes(); track et) {
                     <mat-option [value]="et">{{ et }}</mat-option>
                   }
@@ -98,6 +118,9 @@ const ORIENTATIONS = ['Portrait', 'Landscape'];
                   </mat-select>
                 </mat-form-field>
               </div>
+              <p class="template-editor__logo-hint">
+                {{ 'administration.templates.editor.logoHint' | translate }}
+              </p>
               <div class="template-editor__actions">
                 @if (!isSystem()) {
                   <button mat-flat-button color="primary" (click)="save()" [disabled]="form.invalid || saving()">
@@ -134,6 +157,27 @@ const ORIENTATIONS = ['Portrait', 'Landscape'];
   styles: [
     `
       .template-editor { padding: 0 1rem 1rem; }
+      .template-editor__banner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        padding: 12px 16px;
+        border: 1px solid var(--nf-border-default);
+        border-radius: 8px;
+        background: var(--nf-surface-subtle, #f6f6f6);
+      }
+      .template-editor__banner p {
+        margin: 4px 0 0;
+        font-size: 0.875rem;
+        color: var(--nf-text-muted);
+      }
+      .template-editor__logo-hint {
+        margin: 0.5rem 0 0;
+        font-size: 0.8125rem;
+        color: var(--nf-text-muted);
+      }
       .template-editor__main {
         display: grid;
         grid-template-columns: 1fr 400px;
@@ -171,7 +215,7 @@ const ORIENTATIONS = ['Portrait', 'Landscape'];
     `,
   ],
 })
-export class TemplateEditorPage implements OnInit {
+export class TemplateEditorPage implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
@@ -180,6 +224,8 @@ export class TemplateEditorPage implements OnInit {
   private readonly toast = inject(ToastService);
   private readonly i18n = inject(TranslateService);
   private readonly sanitizer = inject(DomSanitizer);
+  private readonly dialog = inject(MatDialog);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly codeEditor = viewChild<CodeEditorComponent>('codeEditor');
 
@@ -188,6 +234,8 @@ export class TemplateEditorPage implements OnInit {
   readonly saving = signal(false);
   readonly previewLoading = signal(false);
   readonly previewUrl = signal<string | null>(null);
+  private objectUrl: string | null = null;
+
   readonly safePreviewUrl = computed<SafeResourceUrl | null>(() => {
     const url = this.previewUrl();
     return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
@@ -200,7 +248,7 @@ export class TemplateEditorPage implements OnInit {
     name: ['', [Validators.required, Validators.maxLength(200)]],
     entityType: ['', Validators.required],
     paperSize: ['A4'],
-    orientation: ['Portrait'],
+    orientation: ['portrait'],
     marginTop: [20],
     marginRight: [20],
     marginBottom: [20],
@@ -222,8 +270,17 @@ export class TemplateEditorPage implements OnInit {
     };
   });
 
-  async ngOnInit(): Promise<void> {
-    const id = this.route.snapshot.paramMap.get('id');
+  ngOnDestroy(): void {
+    this.revokePreviewUrl();
+  }
+
+  ngOnInit(): void {
+    this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
+      void this.loadTemplate(params.get('id'));
+    });
+  }
+
+  private async loadTemplate(id: string | null): Promise<void> {
     if (!id || id === 'new') {
       await this.router.navigate(['/administration/templates']);
       return;
@@ -238,17 +295,49 @@ export class TemplateEditorPage implements OnInit {
       name: template.name,
       entityType: template.entityType,
       paperSize: template.paperSize ?? 'A4',
-      orientation: template.orientation ?? 'Portrait',
+      orientation: (template.orientation ?? 'portrait').toLowerCase(),
     });
+    // Re-enable controls that may stay disabled after visiting a system template
+    if (template.isSystem) {
+      this.form.controls.name.disable({ emitEvent: false });
+      this.form.controls.entityType.disable({ emitEvent: false });
+      this.form.controls.paperSize.disable({ emitEvent: false });
+      this.form.controls.orientation.disable({ emitEvent: false });
+    } else {
+      this.form.controls.name.enable({ emitEvent: false });
+      this.form.controls.entityType.enable({ emitEvent: false });
+      this.form.controls.paperSize.enable({ emitEvent: false });
+      this.form.controls.orientation.enable({ emitEvent: false });
+    }
     this.templateBody.set(template.templateBody ?? '');
-    this.entityTypes.set(await this.api.getEntityTypes());
-    const varsRes = await this.api.getVariables(template.entityType).catch(() => ({ variables: [] }));
-    this.variables.set(varsRes.variables ?? []);
-    this.previewUrl.set(this.api.getPreviewUrl(id));
+    const types = await this.api.getEntityTypes();
+    if (template.entityType && !types.includes(template.entityType)) {
+      this.entityTypes.set([template.entityType, ...types]);
+    } else {
+      this.entityTypes.set(types);
+    }
+    this.variables.set(await this.loadVariables(template.entityType));
+    await this.refreshPreview();
   }
 
   onInsertSnippet(snippet: string): void {
     this.codeEditor()?.insertAtCursor(snippet);
+  }
+
+  async cloneCurrent(): Promise<void> {
+    const current = this.facade.current();
+    if (!current) return;
+    const dialogRef = this.dialog.open(CreateTemplateDialogComponent, {
+      width: '420px',
+      data: { cloneFrom: current } satisfies CreateTemplateDialogData,
+    });
+    const created = (await firstValueFrom(dialogRef.afterClosed())) as PrintTemplate | undefined;
+    if (created?.id) {
+      this.toast.success(
+        this.i18n.instant('administration.templates.cloneSuccess', { name: created.name })
+      );
+      await this.router.navigate(['/administration/templates', created.id]);
+    }
   }
 
   async save(): Promise<void> {
@@ -265,7 +354,7 @@ export class TemplateEditorPage implements OnInit {
         orientation: this.form.controls.orientation.value,
       });
       this.toast.success(this.i18n.instant('administration.templates.saveSuccess'));
-      this.previewUrl.set(this.api.getPreviewUrl(current.id));
+      await this.refreshPreview();
     } catch {
       this.toast.error(this.i18n.instant('administration.templates.saveError'));
     } finally {
@@ -273,12 +362,69 @@ export class TemplateEditorPage implements OnInit {
     }
   }
 
-  refreshPreview(): void {
+  async refreshPreview(): Promise<void> {
     const current = this.facade.current();
     if (!current) return;
-    this.previewUrl.set(null);
     this.previewLoading.set(true);
-    this.previewUrl.set(this.api.getPreviewUrl(current.id));
-    this.previewLoading.set(false);
+    this.revokePreviewUrl();
+    this.previewUrl.set(null);
+    try {
+      const blob = await this.api.getPreviewBlob(current.id);
+      this.objectUrl = URL.createObjectURL(blob);
+      this.previewUrl.set(this.objectUrl);
+    } catch {
+      this.previewUrl.set(null);
+      this.toast.error(this.i18n.instant('administration.templates.editor.previewError'));
+    } finally {
+      this.previewLoading.set(false);
+    }
   }
+
+  private async loadVariables(entityType: string): Promise<TemplateVariable[]> {
+    try {
+      const res = await this.api.getVariables(entityType);
+      return flattenCatalog(res);
+    } catch {
+      return [];
+    }
+  }
+
+  private revokePreviewUrl(): void {
+    if (this.objectUrl) {
+      URL.revokeObjectURL(this.objectUrl);
+      this.objectUrl = null;
+    }
+  }
+}
+
+/** Backend returns { entity, tenant, system }; UI expects a flat TemplateVariable[]. */
+function flattenCatalog(res: unknown): TemplateVariable[] {
+  if (!res || typeof res !== 'object') return [];
+  const r = res as Record<string, unknown>;
+  if (Array.isArray(r['variables'])) {
+    return r['variables'] as TemplateVariable[];
+  }
+  const out: TemplateVariable[] = [];
+  for (const group of ['entity', 'tenant', 'system'] as const) {
+    const list = r[group];
+    if (!Array.isArray(list)) continue;
+    for (const item of list) {
+      if (!item || typeof item !== 'object') continue;
+      const v = item as Record<string, unknown>;
+      const path = typeof v['path'] === 'string' ? v['path'] : '';
+      if (!path) continue;
+      out.push({
+        path,
+        label: typeof v['label'] === 'string' ? v['label'] : undefined,
+        sampleValue:
+          typeof v['example'] === 'string'
+            ? v['example']
+            : typeof v['sampleValue'] === 'string'
+              ? v['sampleValue']
+              : undefined,
+        group,
+      });
+    }
+  }
+  return out;
 }

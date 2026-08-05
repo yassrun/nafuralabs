@@ -250,9 +250,11 @@ export interface DevisLigne {
 
 export interface DevisVersion {
   id: string;
-  devisId: string;
+  devisId?: string;
   version: number;
-  date: string;
+  /** API historique. */
+  snapshotDate?: string;
+  date?: string;
   totalHt: number;
   modifications: string;
   url?: string;
@@ -270,12 +272,15 @@ export interface Devis {
   clientId: string;
   clientName?: string;
   contactClient?: string;
+  /** UUID PartnerContact — référentiel. */
+  contactClientId?: string | null;
   objet: string;
   ville?: string;
   dateEmission: string;
   dateValidite: string;
   metreId?: string;
   dpgfId?: string;
+  dossierEtudeId?: string | null;
   bibliothequeReference?: string;
   conditionsPaiement: string;
   delaiExecutionJours?: number;
@@ -288,6 +293,8 @@ export interface Devis {
   motifRefus?: string;
   chantierGenereId?: string;
   notes?: string;
+  /** Backend: true seulement en BROUILLON. */
+  modifiable?: boolean;
   lignes: DevisLigne[];
   documents?: DevisDocument[];
   historiqueVersions: DevisVersion[];

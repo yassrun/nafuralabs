@@ -15,6 +15,9 @@ public class DevisUpdateDto {
 
     private String contactClient;
 
+    /** UUID PartnerContact — prioritaire sur {@link #contactClient} pour denorm. */
+    private String contactClientId;
+
     private String objet;
 
     private String ville;

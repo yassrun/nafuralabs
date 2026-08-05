@@ -41,6 +41,11 @@ server:
 nafura:
   application:
     id: erp
+  # Local Mode B / Cursor QA only — keep false on staging & prod pods.
+  dev:
+    cursor-auth-enabled: ${NAFURA_DEV_CURSOR_AUTH_ENABLED:false}
+    cursor-auth-email: ${NAFURA_DEV_CURSOR_AUTH_EMAIL:cursor.qa@nafuralabs.local}
+    cursor-auth-tenant-id: ${NAFURA_DEV_CURSOR_AUTH_TENANT_ID:}
   etudes:
     extraction:
       poll-ms: ${NAFURA_ETUDES_EXTRACTION_POLL_MS:2000}

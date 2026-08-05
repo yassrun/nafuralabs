@@ -1,12 +1,15 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 
 import { GridFacade } from '@lib/anatomy';
-import type { LookupContext } from '@lib/anatomy/types';
+import type { LookupContext, LookupItem } from '@lib/anatomy/types';
 import type {
   Devis,
   DevisCreate,
   DevisUpdate,
 } from '@app/etudes/models';
+import { ApiConfigService } from '@platform/core/config/api-config.service';
 
 import { DevisApiService } from './devis-api.service';
 import { MetreApiService } from '../../metres/services/metre-api.service';
@@ -20,6 +23,8 @@ export class DevisFacade extends GridFacade<Devis, DevisCreate, DevisUpdate> {
   protected override api = inject(DevisApiService);
   private readonly metreApi = inject(MetreApiService);
   private readonly erpLookup = inject(ErpLookupService);
+  private readonly http = inject(HttpClient);
+  private readonly apiConfig = inject(ApiConfigService);
 
   private readonly lookupsSignal = signal<LookupContext>({});
   override readonly lookups = computed(() => this.lookupsSignal());
@@ -31,15 +36,11 @@ export class DevisFacade extends GridFacade<Devis, DevisCreate, DevisUpdate> {
       this.metreApi.getAll({ page: 0, pageSize: 500 }),
       this.erpLookup.partnersByRole('CLIENT'),
     ]);
-    const clientMap = new Map<string, { key: string; value: string }>();
+    const clientMap = new Map<string, LookupItem>();
     for (const p of partners) {
       const label = partnerLookupLabel(p);
       const id = String(p.key);
       clientMap.set(id, { key: id, value: label });
-      const code = (p.data as Record<string, unknown> | undefined)?.['code'];
-      if (typeof code === 'string' && code.trim()) {
-        clientMap.set(code.trim(), { key: code.trim(), value: label });
-      }
     }
     for (const d of devis) {
       if (!d.clientId || clientMap.has(d.clientId)) continue;
@@ -54,7 +55,67 @@ export class DevisFacade extends GridFacade<Devis, DevisCreate, DevisUpdate> {
         key: m.id,
         value: `${m.numero} — ${m.projetNom}`,
       })),
+      partnerContacts: this.lookupsSignal()['partnerContacts'] ?? [],
     });
+  }
+
+  /** Charge les contacts Partner pour le client courant (référentiel contactClientId). */
+  async loadPartnerContacts(clientId: string | null | undefined): Promise<void> {
+    const base = { ...this.lookupsSignal() };
+    if (!clientId) {
+      this.lookupsSignal.set({ ...base, partnerContacts: [] });
+      return;
+    }
+    try {
+      const url = `${this.apiConfig.getApiBaseUrl().replace(/\/+$/, '')}/api/v1/partners/${clientId}/contacts`;
+      const contacts = await firstValueFrom(
+        this.http.get<Array<{ id: string; nom: string; fonction?: string; isPrimary?: boolean }>>(url),
+      );
+      const items: LookupItem[] = (contacts ?? []).map((c) => ({
+        key: c.id,
+        value: c.fonction ? `${c.nom} - ${c.fonction}` : c.nom,
+      }));
+      this.lookupsSignal.set({ ...base, partnerContacts: items });
+    } catch {
+      this.lookupsSignal.set({ ...base, partnerContacts: [] });
+    }
+  }
+
+  /** Garantit une entrée clients pour le devis courant (évite select vide en view). */
+  ensureClientLookup(devis: Devis): void {
+    if (!devis.clientId) return;
+    const base = { ...this.lookupsSignal() };
+    const clients = [...(base['clients'] ?? [])];
+    if (!clients.some((c) => c.key === devis.clientId)) {
+      clients.push({
+        key: devis.clientId,
+        value: devis.clientName
+          ? `${devis.clientName}`
+          : devis.clientId,
+      });
+      this.lookupsSignal.set({ ...base, clients });
+    }
+  }
+
+  ensureContactLookup(contactId: string, label: string): void {
+    const base = { ...this.lookupsSignal() };
+    const contacts = [...(base['partnerContacts'] ?? [])];
+    if (!contacts.some((c) => c.key === contactId)) {
+      contacts.push({ key: contactId, value: label });
+      this.lookupsSignal.set({ ...base, partnerContacts: contacts });
+    }
+  }
+
+  async executeTransition(
+    id: string,
+    endpoint: string,
+    payload?: Record<string, unknown>,
+  ): Promise<Devis> {
+    if (endpoint === 'lose') {
+      const motif = String(payload?.['note'] ?? payload?.['motif'] ?? '');
+      return this.api.lose(id, motif);
+    }
+    return this.api.executeTransition<Devis>(id, endpoint, payload);
   }
 
   async emit(id: string): Promise<Devis> {
@@ -66,14 +127,18 @@ export class DevisFacade extends GridFacade<Devis, DevisCreate, DevisUpdate> {
   }
 
   async approve(id: string): Promise<Devis> {
-    return this.api.marquerGagne(id);
+    return this.api.approve(id);
   }
 
   async lose(id: string, motif: string): Promise<Devis> {
-    return this.api.update(id, { status: 'PERDU', motifRefus: motif });
+    return this.api.lose(id, motif);
   }
 
   async cancel(id: string): Promise<Devis> {
-    return this.api.update(id, { status: 'ANNULE' });
+    return this.api.cancel(id);
+  }
+
+  async negotiate(id: string): Promise<Devis> {
+    return this.api.negotiate(id);
   }
 }

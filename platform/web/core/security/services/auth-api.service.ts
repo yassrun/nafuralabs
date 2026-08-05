@@ -234,6 +234,42 @@ export class AuthApiService {
     }
   }
 
+  /**
+   * Local Mode B / Cursor QA — mint HS256 session (backend flag-gated).
+   */
+  async createCursorSession(): Promise<{
+    accessToken: string;
+    expiresIn: number;
+    userId: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    tenantId: string;
+    tenantName: string;
+    tenantSlug: string;
+  }> {
+    try {
+      return await firstValueFrom(
+        this.http.post<{
+          accessToken: string;
+          expiresIn: number;
+          userId: string;
+          email: string;
+          firstName: string;
+          lastName: string;
+          tenantId: string;
+          tenantName: string;
+          tenantSlug: string;
+        }>(`${this.apiBaseUrl}/api/public/dev/cursor-session`, {})
+      );
+    } catch (error: any) {
+      throw this.createError(
+        'invalid_credentials',
+        error?.message || 'Cursor QA session unavailable (is NAFURA_DEV_CURSOR_AUTH_ENABLED set?)'
+      );
+    }
+  }
+
   // ─────────────────────────────────────────────────────────────────────────────
   // Tenant APIs (call backend)
   // ─────────────────────────────────────────────────────────────────────────────

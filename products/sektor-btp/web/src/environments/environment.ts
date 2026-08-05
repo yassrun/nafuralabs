@@ -22,6 +22,7 @@ export const environment = {
   onboardingV2Enabled: true,
   /** When true, unauthenticated routes skip /login and open Keycloak directly. */
   directKeycloakLogin: false,
+  cursorAuthAutoLogin: false,
 
   devAuthUser: {
     id: 'dev-user',

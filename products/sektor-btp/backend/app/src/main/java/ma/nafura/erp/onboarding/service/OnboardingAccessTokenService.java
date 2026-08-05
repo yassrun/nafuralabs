@@ -26,6 +26,17 @@ public class OnboardingAccessTokenService {
     }
 
     public IssuedToken issue(UUID userId, String email, UUID tenantId) {
+        return issue(userId, email, tenantId, null, null, false);
+    }
+
+    public IssuedToken issue(
+        UUID userId,
+        String email,
+        UUID tenantId,
+        String givenName,
+        String familyName,
+        boolean superAdmin
+    ) {
         Instant now = Instant.now();
         long hours = Math.max(1, onboardingProperties.getAccessTokenExpiryHours());
         Instant expiresAt = now.plus(hours, ChronoUnit.HOURS);
@@ -37,6 +48,16 @@ public class OnboardingAccessTokenService {
             .expiresAt(expiresAt);
         if (tenantId != null) {
             claims.claim("tid", tenantId.toString());
+        }
+        if (givenName != null && !givenName.isBlank()) {
+            claims.claim("given_name", givenName);
+        }
+        if (familyName != null && !familyName.isBlank()) {
+            claims.claim("family_name", familyName);
+        }
+        if (superAdmin) {
+            claims.claim("super_admin", true);
+            claims.claim("sa", true);
         }
         JwtClaimsSet built = claims.build();
 

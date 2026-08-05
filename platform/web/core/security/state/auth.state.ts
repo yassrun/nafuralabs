@@ -236,7 +236,7 @@ export class AuthStateStore {
       status: 'active',
       emailVerified: true,
       mfaEnabled: false,
-      isSuperAdmin: payload.sa || false,
+      isSuperAdmin: payload.sa || payload.super_admin || false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       lastLoginAt: null,

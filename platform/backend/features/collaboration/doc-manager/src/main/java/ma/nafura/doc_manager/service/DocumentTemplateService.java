@@ -44,22 +44,55 @@ public class DocumentTemplateService {
     @Transactional
     public DocumentTemplate create(DocumentTemplateCreateRequest request) {
         UUID tenantId = TenantContext.getTenantId();
+        DocumentTemplate source = null;
+        if (request.getCloneFromId() != null) {
+            source = repository
+                    .findByIdAndTenantId(request.getCloneFromId(), tenantId)
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "Clone source template not found: " + request.getCloneFromId()));
+        }
+
+        String body = request.getTemplateBody();
+        if ((body == null || body.isBlank()) && source != null) {
+            body = source.getTemplateBody();
+        }
+        if (body == null || body.isBlank()) {
+            body = "<div></div>";
+        }
+
         DocumentTemplate t = DocumentTemplate.builder()
                 .tenantId(tenantId)
                 .code(request.getCode())
                 .name(request.getName())
-                .entityType(request.getEntityType())
-                .format(request.getFormat() != null ? request.getFormat() : "pdf")
-                .templateBody(request.getTemplateBody())
+                .entityType(
+                        request.getEntityType() != null && !request.getEntityType().isBlank()
+                                ? request.getEntityType()
+                                : (source != null ? source.getEntityType() : request.getEntityType()))
+                .format(request.getFormat() != null && !request.getFormat().isBlank()
+                        ? request.getFormat()
+                        : (source != null && source.getFormat() != null ? source.getFormat() : "pdf"))
+                .templateBody(body)
                 .isSystem(false)
-                .paperSize(request.getPaperSize())
-                .orientation(request.getOrientation())
-                .marginsCss(request.getMarginsCss())
-                .metadata(request.getMetadata())
-                .isDefault(request.getIsDefault())
+                .paperSize(firstNonBlank(request.getPaperSize(), source != null ? source.getPaperSize() : null, "A4"))
+                .orientation(firstNonBlank(
+                        request.getOrientation(), source != null ? source.getOrientation() : null, "portrait"))
+                .marginsCss(firstNonBlank(
+                        request.getMarginsCss(), source != null ? source.getMarginsCss() : null, null))
+                .metadata(firstNonBlank(request.getMetadata(), source != null ? source.getMetadata() : null, null))
+                .isDefault(request.getIsDefault() != null ? request.getIsDefault() : false)
                 .isActive(request.getIsActive() != null ? request.getIsActive() : true)
                 .build();
         return repository.save(t);
+    }
+
+    private static String firstNonBlank(String primary, String fallback, String defaultValue) {
+        if (primary != null && !primary.isBlank()) {
+            return primary;
+        }
+        if (fallback != null && !fallback.isBlank()) {
+            return fallback;
+        }
+        return defaultValue;
     }
 
     @Transactional

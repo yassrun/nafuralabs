@@ -34,7 +34,24 @@ export class DevisApiService extends FeatureApiService<Devis, DevisCreate, Devis
     return this.executeTransition<Devis>(id, 'submit');
   }
 
+  async negotiate(id: string): Promise<Devis> {
+    return this.executeTransition<Devis>(id, 'negotiate');
+  }
+
+  async approve(id: string): Promise<Devis> {
+    return this.executeTransition<Devis>(id, 'approve');
+  }
+
+  async lose(id: string, motif: string): Promise<Devis> {
+    return this.post<Devis>(`${this.basePath}/${id}/lose`, { motif, note: motif });
+  }
+
+  async cancel(id: string): Promise<Devis> {
+    return this.executeTransition<Devis>(id, 'cancel');
+  }
+
+  /** @deprecated use approve */
   async marquerGagne(id: string): Promise<Devis> {
-    return this.executeTransition<Devis>(id, 'marquer-gagne');
+    return this.approve(id);
   }
 }

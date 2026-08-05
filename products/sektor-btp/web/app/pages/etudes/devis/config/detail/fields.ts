@@ -1,5 +1,6 @@
 import type { DetailFieldConfig } from '@lib/anatomy/types';
 import type { Devis } from '@app/etudes/models';
+import { villeSelectOptions } from '@lib/referentiels/geo-ma';
 
 export const FIELDS: DetailFieldConfig<Devis>[] = [
   {
@@ -28,10 +29,13 @@ export const FIELDS: DetailFieldConfig<Devis>[] = [
     searchable: true,
   },
   {
-    key: 'contactClient',
+    key: 'contactClientId',
     label: 'Contact client',
-    type: 'text',
+    type: 'select',
     width: 'md',
+    lookupKey: 'partnerContacts',
+    clearable: true,
+    searchable: true,
   },
   {
     key: 'objet',
@@ -43,8 +47,35 @@ export const FIELDS: DetailFieldConfig<Devis>[] = [
   {
     key: 'ville',
     label: 'Ville',
-    type: 'text',
+    type: 'select',
     width: 'md',
+    options: villeSelectOptions(),
+    clearable: true,
+    searchable: true,
+  },
+  {
+    key: 'dossierEtudeId',
+    label: 'Dossier d\'étude',
+    type: 'text',
+    readonly: true,
+    width: 'md',
+    visible: (form) => !!form.dossierEtudeId,
+  },
+  {
+    key: 'dpgfId',
+    label: 'DPGF source',
+    type: 'text',
+    readonly: true,
+    width: 'md',
+    visible: (form) => !!form.dpgfId,
+  },
+  {
+    key: 'bibliothequeReference',
+    label: 'Réf. bibliothèque',
+    type: 'text',
+    readonly: true,
+    width: 'md',
+    visible: (form) => !!form.bibliothequeReference,
   },
   {
     key: 'dateEmission',
@@ -67,6 +98,7 @@ export const FIELDS: DetailFieldConfig<Devis>[] = [
     width: 'md',
     lookupKey: 'metres',
     clearable: true,
+    visible: (form) => !!form.metreId,
   },
   {
     key: 'conditionsPaiement',

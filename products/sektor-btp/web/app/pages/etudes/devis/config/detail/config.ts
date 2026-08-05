@@ -27,7 +27,7 @@ export const DEVIS_STATUS_MACHINE: StatusMachineConfig<DevisStatus> = {
       from: 'BROUILLON',
       to: 'EMIS',
       action: 'emit',
-      endpoint: 'emit',
+      endpoint: 'submit',
       label: 'Émettre',
       icon: 'send',
       variant: 'primary',
@@ -114,6 +114,18 @@ export const DEVIS_DETAIL_CONFIG = buildDetailConfig<Devis>(
     entityTypeForPrint: 'devis',
     features: { print: true },
     actions: {
+      overrideActions: {
+        delete: {
+          visible: (ctx) => (ctx.item as Devis | undefined)?.status === 'BROUILLON',
+        },
+        duplicate: {
+          visible: (ctx) => (ctx.item as Devis | undefined)?.status === 'BROUILLON',
+        },
+        save: {
+          visible: (ctx) =>
+            ctx.mode === 'create' || (ctx.item as Devis | undefined)?.status === 'BROUILLON',
+        },
+      },
       appendActions: [
         {
           id: 'new_version',
@@ -125,6 +137,10 @@ export const DEVIS_DETAIL_CONFIG = buildDetailConfig<Devis>(
           order: 70,
           showInModes: ['edit', 'view'],
           permission: 'etudes.devis.update',
+          visible: (ctx) => {
+            const s = (ctx.item as Devis | undefined)?.status;
+            return !!s && s !== 'BROUILLON' && s !== 'ANNULE' && s !== 'PERDU' && s !== 'EXPIRE';
+          },
         },
         {
           id: 'convert_chantier',

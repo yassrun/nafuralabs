@@ -1,11 +1,12 @@
 package ma.nafura.platform.collaboration.docmanager.api.request;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -22,7 +23,7 @@ public class DocumentTemplateCreateRequest {
     @NotBlank
     private String entityType;
 
-    @NotBlank
+    /** Defaults to {@code pdf} when omitted. */
     private String format;
 
     private String templateBody;
@@ -32,4 +33,7 @@ public class DocumentTemplateCreateRequest {
     private String metadata;
     private Boolean isDefault;
     private Boolean isActive;
+
+    /** When set, copy body / page settings from this template (same tenant). */
+    private UUID cloneFromId;
 }

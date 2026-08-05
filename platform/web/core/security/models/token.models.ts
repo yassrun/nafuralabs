@@ -60,6 +60,9 @@ export interface AccessTokenPayload {
   /** Is super admin */
   sa?: boolean;
 
+  /** Backend onboarding / Cursor JWT claim (alias of sa). */
+  super_admin?: boolean;
+
   /**
    * @deprecated Permissions removed from token to reduce size.
    * Load permissions from TenantContext instead.

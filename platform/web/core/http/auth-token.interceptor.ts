@@ -6,28 +6,16 @@
  */
 
 import { HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
 import { AuthFacade } from '../security/services/auth.facade';
 import { AuthStateStore } from '../security/state/auth.state';
 
-let authFacadeRef: AuthFacade | undefined;
-let authStateRef: AuthStateStore | undefined;
-
-/** Bound at bootstrap (APP_INITIALIZER) so inject() is not required per HTTP request. */
+/** @deprecated No-op kept for call sites; interceptor resolves deps via inject(). */
 export function bindAuthTokenInterceptorDeps(
-  authFacade: AuthFacade,
-  authState: AuthStateStore,
+  _authFacade: AuthFacade,
+  _authState: AuthStateStore,
 ): void {
-  authFacadeRef = authFacade;
-  authStateRef = authState;
-}
-
-function resolveAccessToken(): string | null {
-  if (!authFacadeRef || !authStateRef) return null;
-  return (
-    authFacadeRef.accessToken() ??
-    authStateRef.loadPersistedSession()?.tokens.accessToken ??
-    null
-  );
+  // Intentionally empty — module-level refs broke under chunk duplication (Bearer missing → 401).
 }
 
 const isExternalAuthRequest = (url: string): boolean =>
@@ -48,15 +36,21 @@ export const authTokenInterceptor: HttpInterceptorFn = (req, next) => {
     return next(req);
   }
 
-  const accessToken = resolveAccessToken();
+  const authFacade = inject(AuthFacade);
+  const authState = inject(AuthStateStore);
+  const accessToken =
+    authFacade.accessToken() ??
+    authState.loadPersistedSession()?.tokens.accessToken ??
+    null;
 
   if (accessToken) {
-    const clonedReq = req.clone({
-      setHeaders: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-    return next(clonedReq);
+    return next(
+      req.clone({
+        setHeaders: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }),
+    );
   }
 
   return next(req);

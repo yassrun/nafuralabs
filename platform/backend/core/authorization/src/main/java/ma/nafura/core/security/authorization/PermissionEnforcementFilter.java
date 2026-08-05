@@ -51,9 +51,10 @@ public class PermissionEnforcementFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
         
+        HandlerMethod handlerMethod;
         try {
             // Find the handler for this request
-            HandlerMethod handlerMethod = findHandlerMethod(request);
+            handlerMethod = findHandlerMethod(request);
             
             if (handlerMethod == null) {
                 // No handler found - let Spring handle it (404)
@@ -108,9 +109,9 @@ public class PermissionEnforcementFilter extends OncePerRequestFilter {
             }
             
             log.debug("Permission granted: {}", requiredPermission);
-            filterChain.doFilter(request, response);
-            
         } catch (Exception e) {
+            // Only mask failures while resolving/checking permission — never wrap
+            // controller/downstream errors as "Permission enforcement failed".
             log.error("Error in permission enforcement filter, denying request", e);
             if (!response.isCommitted()) {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -119,7 +120,10 @@ public class PermissionEnforcementFilter extends OncePerRequestFilter {
                         "{\"error\":\"Internal Server Error\",\"message\":\"Permission enforcement failed\",\"status\":500}"
                 );
             }
+            return;
         }
+
+        filterChain.doFilter(request, response);
     }
     
     /**

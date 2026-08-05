@@ -55,6 +55,10 @@ public class Devis {
     @Column(name = "contact_client", length = 255)
     private String contactClient;
 
+    /** Référentiel PartnerContact ; {@link #contactClient} denormalise le libellé pour print. */
+    @Column(name = "contact_client_id")
+    private UUID contactClientId;
+
     @Column(name = "objet", nullable = false, length = 500)
     private String objet;
 
@@ -150,6 +154,16 @@ public class Devis {
     @JsonProperty("dossierEtudeId")
     public String getDossierEtudeIdJson() {
         return dossierEtudeId != null ? dossierEtudeId.toString() : null;
+    }
+
+    @JsonProperty("contactClientId")
+    public String getContactClientIdJson() {
+        return contactClientId != null ? contactClientId.toString() : null;
+    }
+
+    @JsonProperty("modifiable")
+    public boolean isModifiableJson() {
+        return STATUS_BROUILLON.equals(status);
     }
 
     @JsonProperty("nbLignes")

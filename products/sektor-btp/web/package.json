@@ -7,6 +7,7 @@
     "start": "ng serve",
     "start:erp": "ng serve --configuration=local-backend --port 4200",
     "start:erp:staging-local": "ng serve --configuration=staging-local --host 127.0.0.1 --port 4200",
+    "start:erp:cursor": "ng serve --configuration=cursor --host 127.0.0.1 --port 4200",
     "start:e2e": "ng serve --host 127.0.0.1 --port 4200 --proxy-config proxy.conf.json",
     "build": "ng build",
     "build:dev": "ng build --configuration development",

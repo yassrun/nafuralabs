@@ -1,5 +1,7 @@
 package ma.nafura.platform.collaboration.docmanager.template;
 
+import ma.nafura.platform.appsettings.domain.model.TenantAsset;
+import ma.nafura.platform.appsettings.repository.TenantAssetRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.platform.framework.context.UserContext;
 import ma.nafura.platform.tenancy.domain.model.Tenant;
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -21,12 +24,16 @@ import java.util.UUID;
 public class TemplateVariableResolver {
 
     private final TenantRepository tenantRepository;
+    private final TenantAssetRepository tenantAssetRepository;
 
     @Autowired(required = false)
     private EntityDataProvider entityDataProvider;
 
-    public TemplateVariableResolver(TenantRepository tenantRepository) {
+    public TemplateVariableResolver(
+            TenantRepository tenantRepository,
+            @Autowired(required = false) TenantAssetRepository tenantAssetRepository) {
         this.tenantRepository = tenantRepository;
+        this.tenantAssetRepository = tenantAssetRepository;
     }
 
     /**
@@ -74,13 +81,36 @@ public class TemplateVariableResolver {
                 Tenant ten = t.get();
                 tenant.put("name", ten.getName());
                 tenant.put("key", ten.getKey());
-                tenant.put("logo", "");   // optional: from app-settings / TenantAsset
+                tenant.put("logo", resolveLogoDataUri(tenantId));
                 tenant.put("address", ""); // optional: from settings
             }
         } catch (Exception ignored) {
             // no tenant context or tenant not found
         }
         return tenant;
+    }
+
+    /**
+     * Embed logo as data URI so OpenHTMLToPDF can render without HTTP auth.
+     * Source: Administration → Paramètres → Branding logo upload.
+     */
+    private String resolveLogoDataUri(UUID tenantId) {
+        if (tenantAssetRepository == null || tenantId == null) {
+            return "";
+        }
+        try {
+            Optional<TenantAsset> asset = tenantAssetRepository.findByTenantIdAndAssetType(tenantId, "logo");
+            if (asset.isEmpty() || asset.get().getData() == null || asset.get().getData().length == 0) {
+                return "";
+            }
+            TenantAsset a = asset.get();
+            String ct = a.getContentType() != null && !a.getContentType().isBlank()
+                    ? a.getContentType()
+                    : "image/png";
+            return "data:" + ct + ";base64," + Base64.getEncoder().encodeToString(a.getData());
+        } catch (Exception ignored) {
+            return "";
+        }
     }
 
     private Map<String, Object> generateSampleEntityData(String entityType) {

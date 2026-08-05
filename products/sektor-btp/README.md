@@ -28,6 +28,20 @@ make stg-up  SCOPE=front|back|full APP=sektor-btp   # build + pods staging
 REGISTRY_PASS=*** make prod-up SCOPE=full APP=sektor-btp   # après OK staging
 ```
 
+### Mode B + Cursor QA (skip Keycloak)
+
+Pour QA locale sans IAM (user seed `cursor.qa@nafuralabs.local`) :
+
+```bash
+ENV=staging KUBE_CONTEXT=docker-desktop bash toolchain/ops/nlops.sh dev-up sektor-btp full
+set -a; source secrets/dev-staging-local.env; set +a   # inclut NAFURA_DEV_CURSOR_AUTH_ENABLED=true
+./gradlew.bat :sektor:app:bootRun
+cd products/sektor-btp/web && npm run start:erp:cursor
+# → http://127.0.0.1:4200 auto-login (pas de Keycloak)
+```
+
+Le flag `NAFURA_DEV_CURSOR_AUTH_ENABLED` ne doit **jamais** être activé sur les pods staging/prod.
+
 ## Deploy (bas niveau)
 
 ```bash

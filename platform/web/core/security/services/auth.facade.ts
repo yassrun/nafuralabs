@@ -160,6 +160,20 @@ export class AuthFacade {
     this.state.setStatus('checking');
     this.state.setLoading(true);
 
+    // Local Cursor QA: HS256 session from backend (no Keycloak).
+    if ((environment as { cursorAuthAutoLogin?: boolean }).cursorAuthAutoLogin) {
+      try {
+        await this.bootstrapCursorAuth();
+      } catch (err) {
+        console.error('[AuthFacade] Cursor QA auto-login failed', err);
+        this.state.clear();
+        this.state.setStatus('unauthenticated');
+      } finally {
+        this.state.setLoading(false);
+      }
+      return;
+    }
+
     // Dev-only: bypass Keycloak entirely or restore persisted mock session.
     if (environment.devAuthBypass) {
       try {
@@ -272,6 +286,11 @@ export class AuthFacade {
     return (environment as { directKeycloakLogin?: boolean }).directKeycloakLogin === true;
   }
 
+  /** Mode B Cursor QA: auto HS256 session, never show SSO splash. */
+  usesCursorAuthAutoLogin(): boolean {
+    return (environment as { cursorAuthAutoLogin?: boolean }).cursorAuthAutoLogin === true;
+  }
+
   /**
    * Remember intended route, then start OAuth (or dev login flow).
    */
@@ -288,6 +307,13 @@ export class AuthFacade {
    * This replaces the credential-based login.
    */
   async login(): Promise<void> {
+    if (this.usesCursorAuthAutoLogin()) {
+      await this.bootstrapCursorAuth();
+      if (this.isAuthenticated()) {
+        await this.router.navigateByUrl('/');
+      }
+      return;
+    }
     if (environment.devAuthBypass) {
       if (this.isDevEagerBootstrap()) {
         await this.bypassLoginForDev();
@@ -502,6 +528,84 @@ export class AuthFacade {
     }
   }
 
+  /**
+   * Mode B Cursor QA: restore valid onboarding JWT or mint a new cursor session.
+   */
+  private async bootstrapCursorAuth(): Promise<void> {
+    const session = this.state.loadPersistedSession();
+    if (session?.tokens?.accessToken) {
+      const accessToken = session.tokens.accessToken;
+      if (
+        !this.tokenService.isMockToken(accessToken) &&
+        this.tokenService.isBackendOnboardingToken(accessToken)
+      ) {
+        const payload = this.tokenService.decodeAccessToken(accessToken);
+        if (payload && !this.tokenService.isExpired(payload.exp)) {
+          await this.restorePersistedOnboardingSession(session);
+          return;
+        }
+      }
+    }
+
+    const res = await this.api.createCursorSession();
+    const nowIso = new Date().toISOString();
+    const user: User = {
+      id: res.userId,
+      email: res.email,
+      profile: {
+        firstName: res.firstName,
+        lastName: res.lastName,
+        displayName: `${res.firstName} ${res.lastName}`.trim() || res.email,
+      },
+      status: 'active',
+      emailVerified: true,
+      mfaEnabled: false,
+      isSuperAdmin: true,
+      createdAt: nowIso,
+      updatedAt: nowIso,
+      lastLoginAt: nowIso,
+    };
+    const membership: TenantMembership = {
+      tenant: {
+        id: res.tenantId,
+        name: res.tenantName,
+        slug: res.tenantSlug,
+        status: 'active',
+        enabledFeatures: [],
+        enabledModules: [],
+        features: {},
+        createdAt: nowIso,
+        updatedAt: nowIso,
+      },
+      roles: [
+        {
+          id: SystemRoles.SUPER_ADMIN,
+          name: 'Super Admin',
+          description: 'Cursor QA',
+          permissions: ['*'],
+          isSystem: true,
+          priority: 100,
+        },
+      ],
+      permissions: ['*'],
+      isDefault: true,
+      status: 'active',
+      joinedAt: nowIso,
+    };
+    this.applyBackendOnboardingTokens(user, res.accessToken, res.expiresIn, membership, res.tenantId);
+
+    if (applicationRequiresTenant()) {
+      const tenants = await this.api.getUserTenants(user.id, res.accessToken);
+      if (tenants.length > 0) {
+        this.state.setTenants(tenants);
+        const match = tenants.find((t) => t.tenant.id === res.tenantId) ?? tenants[0];
+        this.state.selectTenant(match.tenant.id, match);
+        await this.tenantContextService.initialize(match.tenant.id);
+        this.state.persistSession(true);
+      }
+    }
+  }
+
   private applyBackendOnboardingTokens(
     user: User,
     accessToken: string,
@@ -547,7 +651,7 @@ export class AuthFacade {
       status: 'active',
       emailVerified: true,
       mfaEnabled: false,
-      isSuperAdmin: payload.sa ?? false,
+      isSuperAdmin: payload.sa ?? payload.super_admin ?? false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       lastLoginAt: new Date().toISOString(),

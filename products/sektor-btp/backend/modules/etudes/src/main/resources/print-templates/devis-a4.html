@@ -23,6 +23,8 @@
 <body>
   <div class="hdr">
     <div>
+      <img th:if="${tenant.logo}" th:src="${tenant.logo}" alt=""
+           style="max-height:48px;max-width:160px;margin-bottom:6px;display:block"/>
       <div th:text="${tenant.name}">Société</div>
       <div class="muted" th:if="${tenant.address}" th:text="${tenant.address}"></div>
     </div>

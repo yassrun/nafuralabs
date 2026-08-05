@@ -90,6 +90,17 @@
                 }
               ]
             },
+            "cursor": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.cursor.ts"
+                }
+              ]
+            },
             "dev": {
               "budgets": [
                 {
@@ -172,6 +183,10 @@
             },
             "staging-local": {
               "buildTarget": "project-fountain:build:staging-local",
+              "proxyConfig": "proxy.conf.json"
+            },
+            "cursor": {
+              "buildTarget": "project-fountain:build:cursor",
               "proxyConfig": "proxy.conf.json"
             }
           },

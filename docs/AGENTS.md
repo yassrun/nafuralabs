@@ -6,6 +6,7 @@
 |--------|----------|
 | Ops K8s (deploy, migrate, reset, troubleshooting) | [toolchain/ops/AGENTS.md](../toolchain/ops/AGENTS.md) |
 | **UX / wireframes (méthode principale)** | [products/sektor-btp/docs/ux/METHODE-CANVAS-WIREFRAMES.md](../products/sektor-btp/docs/ux/METHODE-CANVAS-WIREFRAMES.md) |
+| **Tasks / backlog / balayage (PM markdown)** | [Markdown Project Management Framework.md](Markdown%20Project%20Management%20Framework.md) |
 | Imports Gradle / TypeScript | [PLATFORM_IMPORTS.md](PLATFORM_IMPORTS.md) |
 | Table migration `nf/nafura` → chemins actuels | [ARCHITECTURE_MIGRATION.md](ARCHITECTURE_MIGRATION.md) |
 | Secrets Vault | [VAULT_SECRETS.md](VAULT_SECRETS.md) |

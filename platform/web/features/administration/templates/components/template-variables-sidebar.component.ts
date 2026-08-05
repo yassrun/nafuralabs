@@ -147,7 +147,10 @@ export class TemplateVariablesSidebarComponent {
   }
 
   insertVariable(v: TemplateVariable): void {
-    const snippet = `th:text="\${${v.path}}"`;
+    const snippet =
+      v.path.endsWith('.logo') || v.path.includes('logo')
+        ? `th:src="\${${v.path}}"`
+        : `th:text="\${${v.path}}"`;
     this.insertSnippet.emit(snippet);
   }
 }

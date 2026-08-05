@@ -6,7 +6,17 @@ export const SECTIONS: DetailSectionConfig<Devis>[] = [
     id: 'identite',
     title: 'En-tête',
     icon: 'tag',
-    fields: ['numero', 'version', 'clientId', 'contactClient', 'objet', 'ville'],
+    fields: [
+      'numero',
+      'version',
+      'clientId',
+      'contactClientId',
+      'objet',
+      'ville',
+      'dossierEtudeId',
+      'dpgfId',
+      'bibliothequeReference',
+    ],
     columns: 2,
   },
   {

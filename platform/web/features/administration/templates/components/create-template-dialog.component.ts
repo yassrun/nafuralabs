@@ -10,7 +10,9 @@ import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/materia
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+
+import { ToastService } from '@lib/anatomy';
 
 import type { PrintTemplate, PrintTemplateCreate } from '../models';
 import { TemplatesApiService } from '../services/templates-api.service';
@@ -90,6 +92,8 @@ export interface CreateTemplateDialogData {
 export class CreateTemplateDialogComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly api = inject(TemplatesApiService);
+  private readonly toast = inject(ToastService);
+  private readonly i18n = inject(TranslateService);
   private readonly dialogRef = inject(MatDialogRef<CreateTemplateDialogComponent>);
   readonly data = inject<CreateTemplateDialogData | undefined>(MAT_DIALOG_DATA, { optional: true });
 
@@ -106,9 +110,10 @@ export class CreateTemplateDialogComponent implements OnInit {
     this.entityTypes = await this.api.getEntityTypes();
     const clone = this.data?.cloneFrom;
     if (clone) {
+      const suffix = Date.now().toString(36).slice(-4);
       this.form.patchValue({
         name: `${clone.name} (Copy)`,
-        code: `${clone.code}-copy`,
+        code: `${clone.code}-copy-${suffix}`.slice(0, 60),
         entityType: clone.entityType,
       });
       if (this.entityTypes.length > 0 && !this.entityTypes.includes(clone.entityType)) {
@@ -126,8 +131,11 @@ export class CreateTemplateDialogComponent implements OnInit {
       name: this.form.controls.name.value,
       code: this.form.controls.code.value,
       entityType: this.form.controls.entityType.value,
+      format: 'pdf',
       templateBody: clone ? '' : '<div></div>',
       cloneFromId: clone?.id,
+      paperSize: clone?.paperSize ?? 'A4',
+      orientation: (clone?.orientation ?? 'portrait').toLowerCase(),
     };
     this.saving.set(true);
     try {
@@ -135,6 +143,13 @@ export class CreateTemplateDialogComponent implements OnInit {
       this.dialogRef.close(created);
     } catch {
       this.saving.set(false);
+      this.toast.error(
+        this.i18n.instant(
+          clone
+            ? 'administration.templates.cloneError'
+            : 'administration.templates.createError'
+        )
+      );
     }
   }
 }

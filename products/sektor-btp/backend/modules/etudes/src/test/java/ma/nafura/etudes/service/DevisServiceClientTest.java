@@ -11,6 +11,7 @@ import java.util.UUID;
 import ma.nafura.etudes.domain.model.Devis;
 import ma.nafura.etudes.domain.model.DossierEtude;
 import ma.nafura.etudes.domain.model.Dpgf;
+import ma.nafura.etudes.repository.AppelOffreClientRepository;
 import ma.nafura.etudes.repository.DevisRepository;
 import ma.nafura.etudes.repository.DevisVersionRepository;
 import ma.nafura.etudes.service.port.EtudeClientPort;
@@ -21,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 @ExtendWith(MockitoExtension.class)
 class DevisServiceClientTest {
@@ -47,13 +49,26 @@ class DevisServiceClientTest {
     @Mock
     private EtudeClientPort clientPort;
 
+    @Mock
+    private AppelOffreClientRepository aocRepository;
+
+    @Mock
+    private JdbcTemplate jdbcTemplate;
+
     private DevisService service;
 
     @BeforeEach
     void setUp() {
         TenantContext.setTenantId(TENANT);
         service = new DevisService(
-                repository, versionRepository, seedService, dpgfService, generationService, clientPort);
+                repository,
+                versionRepository,
+                seedService,
+                dpgfService,
+                generationService,
+                clientPort,
+                aocRepository,
+                jdbcTemplate);
     }
 
     @AfterEach
@@ -95,6 +110,9 @@ class DevisServiceClientTest {
         when(generationService.toDevisLignes(any(), any(), any())).thenReturn(new ArrayList<>());
         when(repository.countByTenantIdAndNumeroStartingWith(any(), any())).thenReturn(0L);
         when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(jdbcTemplate.query(any(String.class), any(org.springframework.jdbc.core.RowMapper.class), any(), any()))
+                .thenReturn(java.util.List.of());
+        when(aocRepository.findByIdAndTenantId(any(), any())).thenReturn(java.util.Optional.empty());
 
         Devis devis = service.createFromDossier(dossier);
 

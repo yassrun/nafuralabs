@@ -13,6 +13,12 @@ export function redirectUnauthenticated(returnUrl?: string | null): false | UrlT
   const auth = inject(AuthFacade);
   const router = inject(Router);
 
+  // Cursor QA: never show /login SSO splash — retry session mint.
+  if (auth.usesCursorAuthAutoLogin()) {
+    void auth.loginWithReturnUrl(returnUrl ?? undefined);
+    return false;
+  }
+
   if (auth.usesDirectKeycloakLogin()) {
     void auth.loginWithReturnUrl(returnUrl ?? undefined);
     return false;

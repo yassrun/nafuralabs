@@ -261,9 +261,14 @@ export class LoginPage implements OnInit {
       return;
     }
 
-    if (this.auth.usesDirectKeycloakLogin()) {
+    // Cursor QA / direct Keycloak: spinner only — never the SSO splash card.
+    if (this.auth.usesCursorAuthAutoLogin() || this.auth.usesDirectKeycloakLogin()) {
       this.useDirectRedirect.set(true);
-      void this.auth.loginWithReturnUrl(returnUrl);
+      void this.auth.loginWithReturnUrl(returnUrl).then(() => {
+        if (this.auth.isAuthenticated()) {
+          void this.navigateToApplicationShell();
+        }
+      });
       return;
     }
 

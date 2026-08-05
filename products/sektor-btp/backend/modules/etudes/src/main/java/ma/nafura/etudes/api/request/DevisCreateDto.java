@@ -19,6 +19,8 @@ public class DevisCreateDto {
 
     private String contactClient;
 
+    private String contactClientId;
+
     @NotBlank
     private String objet;
 

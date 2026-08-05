@@ -54,10 +54,17 @@ public class EtudesDocumentTemplateBootstrap implements DocumentTemplateBootstra
     }
 
     private void seed(UUID tenantId, String code, String name, String entityType, String resource) {
-        if (repository.existsByTenantIdAndCode(tenantId, code)) {
+        String body = loadResource(resource);
+        var existing = repository.findByTenantIdAndCode(tenantId, code);
+        if (existing.isPresent()) {
+            DocumentTemplate t = existing.get();
+            if (Boolean.TRUE.equals(t.getIsSystem()) && body != null && !body.equals(t.getTemplateBody())) {
+                t.setTemplateBody(body);
+                repository.save(t);
+                log.info("Refreshed system print template {} for tenant {}", code, tenantId);
+            }
             return;
         }
-        String body = loadResource(resource);
         DocumentTemplate t = DocumentTemplate.builder()
                 .tenantId(tenantId)
                 .code(code)

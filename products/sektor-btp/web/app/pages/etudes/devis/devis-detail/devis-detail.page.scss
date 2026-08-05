@@ -7,6 +7,30 @@
   display: none;
 }
 
+.devis-versions {
+  margin: 1rem 1.25rem 2rem;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--nf-color-border-subtle, #e5e7eb);
+}
+
+.devis-versions h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.devis-versions ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.8125rem;
+  color: var(--nf-color-text-secondary, #6b7280);
+}
+
+.devis-versions .mod {
+  display: block;
+  color: var(--nf-color-text-primary, #111);
+}
+
 @media print {
   .devis-screen {
     display: none !important;

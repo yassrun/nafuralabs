@@ -36,3 +36,4 @@ Copy-Item "products\sektor-btp\docs\ux\wireframes\chantier-create-wireframe.canv
 | `etude-ao-unify-wireframe.canvas.tsx` | Unification AO + étude + pièces |
 | `etude-data-lifecycle.canvas.tsx` | Cycle de vie données étude |
 | `chantier-create-wireframe.canvas.tsx` | Wizard marché + chantier (chaînage aval) |
+| `devis-detail-wireframe.canvas.tsx` | Fiche devis — états BROUILLON/EMIS/PERDU/version |

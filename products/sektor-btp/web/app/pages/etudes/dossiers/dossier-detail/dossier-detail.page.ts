@@ -448,20 +448,25 @@ export class DossierDetailPage {
   }
 
   private messageErreur(e: unknown): string {
-    const err = e as { status?: number; error?: { message?: string; code?: string } };
+    const err = e as {
+      status?: number;
+      message?: string;
+      error?: { message?: string; code?: string } | string;
+    };
     if (err?.status === 409) {
       return "Ce dossier a été modifié entre-temps par quelqu'un d'autre. Rechargez la page avant de reprendre — vos modifications n'ont pas été enregistrées.";
     }
     if (err?.status === 403) {
       return "Vous n'avez pas la permission nécessaire pour cette action.";
     }
-    const code = err?.error?.code;
+    const code = typeof err?.error === 'object' ? err?.error?.code : undefined;
     if (code === 'etudes.bordereau.remplacement_non_confirme') {
       return 'Confirmez le remplacement du bordereau existant (structure et chiffrage seront effacés).';
     }
     if (code === 'etudes.bordereau.structure_verrouillee') {
       return 'La structure est figée. Réouvrez le bordereau pour modifier lots et postes.';
     }
-    return err?.error?.message ?? err?.error?.code ?? 'Une erreur est survenue.';
+    const apiMsg = typeof err?.error === 'object' ? err?.error?.message : typeof err?.error === 'string' ? err.error : undefined;
+    return apiMsg ?? code ?? err?.message ?? 'Une erreur est survenue.';
   }
 }

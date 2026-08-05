@@ -26,6 +26,7 @@ export interface PrintTemplateCreate {
   code: string;
   entityType: string;
   templateBody: string;
+  format?: string;
   paperSize?: string;
   orientation?: string;
   marginsCss?: string;
