@@ -1,0 +1,26 @@
+id	status	priority	context	assignee	estimate	due	parent	feature	title
+MBS-01	todo	P1	nafura	me	4h			Homepage — traiter les remarques client (nouvelle version)
+OPS-01	todo	P1	nafura	me	6h			Configurer Zimbra + migrer ykarkafi@nafuralabs.com depuis Google Workspace
+ERP-18	todo	P0	nafura	me				classification-article	Feature — Refonte classification article
+ERP-19	todo	P0	nafura	me	2h		ERP-18	classification-article	Classification — décisions ouvertes §7 (bloque Lot 1)
+ERP-20	todo	P0	nafura	me	8h		ERP-18	classification-article	Classification — Lot 1 Nature enum
+ERP-21	todo	P1	nafura	me	6h		ERP-18	classification-article	Classification — Lot 2 Suppression item_types
+ERP-22	todo	P1	nafura	me	6h		ERP-18	classification-article	Classification — Lot 3 Familles en arbre
+ERP-23	todo	P1	nafura	me	8h		ERP-18	classification-article	Classification — Lot 4 Front aligné
+ERP-24	todo	P1	nafura	me	6h		ERP-18	classification-article	Classification — Lot 5 Rattachement matériel
+ERP-02	todo	P1	nafura	me	8h			Raffiner stock (lot 2)
+ERP-03	todo	P1	nafura	me	10h			Raffiner achats (lot 3)
+ERP-04	todo	P2	nafura	me	8h			Raffiner RH (lot 4)
+ERP-05	todo	P2	nafura	me	6h			Raffiner sous-traitance (lot 5)
+ERP-06	todo	P2	nafura	me	4h			Chantier minimal — fiche pivot (lot 6)
+ERP-07	todo	P3	nafura	me	10h			Planification chantier (lot 7 — dernier)
+ERP-16	todo	P1	nafura	me				chiffrage-drawer	Feature — Drawer chiffrage poste
+ERP-11	todo	P1	nafura	me	4h		ERP-16	chiffrage-drawer	Raffiner descriptif technique manuel (chiffrage poste)
+ERP-12	todo	P1	nafura	me	2h		ERP-16	chiffrage-drawer	Ouverture popup chiffrage poste — double-clic
+ERP-13	todo	P1	nafura	me	3h		ERP-16	chiffrage-drawer	Bug — référentiel unité chiffrage (mode décomposé)
+ERP-14	todo	P1	nafura	me	2h		ERP-16	chiffrage-drawer	Bug affichage — commentaires superposés au tableau (décomposé)
+ERP-17	todo	P1	nafura	me				etude-parcours	Feature — Parcours étude
+ERP-08	todo	P1	nafura	me	6h		ERP-17	etude-parcours	Nouvelle version d'étude depuis étude terminée (corrections)
+ERP-09	todo	P1	nafura	me	3h		ERP-17	etude-parcours	Revoir les infos d'en-tête de l'étude (chiffrage)
+ERP-10	todo	P1	nafura	me	8h		ERP-17	etude-parcours	Création étude/AO — ordre & mix import CPS → manuel
+ERP-15	todo	P1	nafura	me	3h		ERP-17	etude-parcours	Règle — ne pas modifier le lien (structure figée)

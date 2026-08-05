@@ -90,12 +90,13 @@ Quand l’humain capture ou demande une tâche :
 Pas un “Friday close”. Fréquence libre. Enchaîne :
 
 1. Balayer `inbox.md` — fait/abandonné → supprimer ; survivants → tâches structurées (`assignee` + `estimate` obligatoires).
-2. Sprint non `done` → semaine suivante ou backlog (+ compteur report).
-3. Recaler le plan capacité (26h, **uniquement** `assignee: me`).
-4. Prototypes : `kill_by` dépassé → promote ou graveyard.
-5. Archiver `done` > 30 jours.
-6. Régénérer toutes les vues.
-7. Proposer un commit git du type `balayage 2026-W<n>`.
+2. **Grouper / merger (features)** — voir §2.1. Proposer : mini-tâches même feature → `parent:` ; doublons → merge dans une seule tâche (`dropped` les autres, journal append « mergé dans ID »). **Jamais renommer un ID.**
+3. Sprint non `done` → semaine suivante ou backlog (+ compteur report).
+4. Recaler le plan capacité (26h, **uniquement** `assignee: me`, **hors** `kind: feature`).
+5. Prototypes : `kill_by` dépassé → promote ou graveyard.
+6. Archiver `done` > 30 jours.
+7. Régénérer toutes les vues.
+8. Proposer un commit git du type `balayage 2026-W<n>`.
 
 ---
 
@@ -160,18 +161,23 @@ id: MBS-07
 status: todo
 context: nafura
 assignee: me              # me | agent — default me if omitted at capture; required at promote/add
-estimate: 4h              # REQUIRED on structured tasks (me AND agent). Never omit after promotion.
+estimate: 4h              # REQUIRED on kind:task (me AND agent). Never omit after promotion.
 ```
+
+Exception : `kind: feature` (parapluie) → **pas** d’`estimate` (exclu capacité / WIP). Voir §2.1.
 
 Inbox lines have **none** of these except informal `@tags`.
 Estimate is set at **balayage** / `t add`, never at raw capture.
 
 Every view MUST still render if only `id` / `status` / `context` exist (legacy / mid-migrate).
-New writes via `t` MUST set `assignee` + `estimate`.
+New writes via `t` MUST set `assignee` + `estimate` (sauf feature).
 
 ### Optional
 
 ```yaml
+kind: task                # task (défaut) | feature
+parent: ERP-16            # ID d’un kind:feature — max 1 niveau (pas de grand-parent)
+feature: chiffrage-drawer # slug kebab — regroupement soft (INDEX / vues)
 priority: P1              # P0 | P1 | P2 | P3
 due: 2026-08-03           # ISO 8601 only
 sprint: 2026-W32          # ISO week. Absent = not committed this week
@@ -187,6 +193,7 @@ status     todo | doing | blocked | done | dropped
 priority   P0 | P1 | P2 | P3
 context    nafura | saham | personal
 assignee   me | agent
+kind       task | feature
 type       product | project | prototype | ops | personal
 ```
 
@@ -210,6 +217,41 @@ Every stored derived field is a field that becomes wrong.
 A prototype without a `question` and a `kill_by` date must not be created.
 When `kill_by` passes, the balayage forces a decision: promote to product,
 or move to `prototypes/graveyard/`.
+
+### 2.1 Features — grouper / merger (sans casser les IDs)
+
+Capturer vite produit des **mini-tâches** du même sujet. On ne renumérote jamais ;
+on **groupe** ou on **merge**.
+
+| Action | Quand | Comment |
+|--------|-------|---------|
+| **Grouper** | Plusieurs tâches = même feature, encore utiles séparément | Créer un parapluie `kind: feature` ; enfants avec `parent: <ID>` + même `feature:` slug |
+| **Merger** | Doublons / quasi-même AC | Garder **une** tâche ; y reporter les AC manquantes ; les autres → `dropped` + journal `mergé dans X` |
+| **Laisser plat** | Tâche isolée | Pas de `parent` — OK |
+
+Règles :
+
+1. **Max 2 niveaux** : `feature` → `task`. Pas de feature sous feature. (Équivalent `ERP-31` / `ERP-31.2`.)
+2. **`kind: feature`** = libellé + liste des enfants dans le corps. Pas d’estimate, hors capacité 26h, hors WIP×3, pas une ligne “à faire” dans NOW (les enfants oui).
+3. **À la capture** : si 2+ items inbox parlent du même écran / même flux → **une** tâche feature-slice, pas 5 fichiers. Split seulement si >1 jour ou assignee différent.
+4. **Au balayage** : l’agent **propose** group/merge ; l’humain confirme. Pas de merge silencieux.
+5. IDs **immuables** — grouper ≠ renommer `ERP-11` en `ERP-16.1`.
+
+Exemple Sektor (études) :
+
+```
+ERP-16  kind:feature  feature:chiffrage-drawer
+  ├ ERP-11  descriptif technique manuel
+  ├ ERP-12  double-clic popup
+  ├ ERP-13  bug unité
+  └ ERP-14  bug overlay commentaires
+
+ERP-17  kind:feature  feature:etude-parcours
+  ├ ERP-08  nouvelle version / corrections
+  ├ ERP-09  en-tête chiffrage
+  ├ ERP-10  create · mix CPS
+  └ ERP-15  ne pas modifier le lien
+```
 
 ---
 
@@ -291,8 +333,10 @@ SAH-14	doing	P0	saham	me	2h	2026-08-01	Revue archi event-driven
 ```
 
 Columns, tab-separated:
-`id  status  priority  context  assignee  estimate  due  title`
+`id  status  priority  context  assignee  estimate  due  parent  feature  title`
 Empty field = empty column, never a placeholder.
+`kind: feature` rows have empty `estimate`. `parent` empty on roots / umbrellas
+(umbrella may repeat its own id in parent for sort, or leave empty — generator choice).
 
 **Agent read protocol — mandatory:**
 
@@ -403,7 +447,7 @@ Hard rules:
   estimé 21h → réel 24h        multiplicateur perso 1.14
 ```
 
-Capacity hours in WEEK = **`assignee: me` only**.
+Capacity hours in WEEK = **`assignee: me` only**, excluding `kind: feature`.
 Agent estimates are visible on tasks / INDEX but do **not** consume the 26h budget.
 
 The **personal multiplier** is the highest-value number in the system.
@@ -451,8 +495,8 @@ agent hours            —           tracked on tasks, outside the 26h budget
 
 Rules the generator / CLI enforces:
 
-- **WIP limit: max 3 tasks `doing` with `assignee: me`.**
-  Agent `doing` tasks do **not** count toward this limit.
+- **WIP limit: max 3 tasks `doing` with `assignee: me` and `kind` ≠ `feature`.**
+  Agent `doing` tasks and feature umbrellas do **not** count toward this limit.
   Also: max 2 projects with any **human** task `doing`.
   If a 4th human task moves to `doing`, `t do` refuses and names which one to
   push back.
@@ -521,10 +565,12 @@ Recommended (not mandatory): once per week + git commit
 12. If asked to add a field, first check it isn't derivable. Default answer
     is no.
 13. **Capture → inbox.** Promote only at balayage or explicit `t add`.
-14. **Structured task ⇒ `assignee` + `estimate` required** (both actors).
+14. **Structured `kind:task` ⇒ `assignee` + `estimate` required.** `kind:feature` : pas d’estimate.
 15. **One `tasks/` folder per project.** Do not dump all tasks in one directory.
 16. **New backlog folder** only with human OK (real engagement: client, product, contract, proto).
-17. Capacity / WIP math ignores `assignee: agent` for the 26h and the max-3 human WIP.
+17. Capacity / WIP math ignores `assignee: agent` and `kind: feature` for the 26h and the max-3 human WIP.
+18. **Group/merge via `kind: feature` + `parent:` / balayage** — never renumber IDs to fake hierarchy.
+19. At capture: same screen/flow → prefer one task (or attach to existing feature), not five micro-files.
 
 ---
 
@@ -556,5 +602,6 @@ schema.
 | Vue all-tasks | `INDEX.tsv` + NOW/WEEK — **pas** de Kanban global |
 | Rituel de rangement | **Balayage** (`t sweep`), **à la demande** |
 | Acteurs | `assignee: me \| agent` seulement |
-| Estimation | **Obligatoire** sur toute tâche structurée (me et agent) |
-| Capacité 26h / WIP×3 | **`assignee: me` uniquement** |
+| Estimation | **Obligatoire** sur `kind:task` (me et agent) ; pas sur `kind:feature` |
+| Capacité 26h / WIP×3 | **`assignee: me` uniquement** (+ hors `kind: feature`) |
+| Groupement | `kind: feature` + `parent:` / `feature:` slug ; merge au balayage ; IDs immuables |
