@@ -18,7 +18,9 @@ import ma.nafura.platform.collaboration.docmanager.template.SampleRecord;
 import ma.nafura.platform.collaboration.docmanager.template.TemplateRenderException;
 import ma.nafura.platform.collaboration.docmanager.template.TemplateRenderService;
 import ma.nafura.platform.collaboration.docmanager.template.TemplateVariableCatalogService;
+import ma.nafura.platform.framework.context.UserContext;
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -38,6 +40,13 @@ import java.util.UUID;
 public class TemplateController {
 
     private static final int SAMPLE_RECORD_LIMIT = 20;
+
+    /**
+     * Editing a raw template body is an internal operation, not a customer feature: the body is
+     * evaluated server-side, so it is gated behind its own permission. Tenant administrators keep
+     * read access and the customisation screen, which never produces markup.
+     */
+    private static final String EDIT_BODY_PERMISSION = "administration.templates.editBody";
 
     private final DocumentTemplateService templateService;
     private final TemplateRenderService renderService;
@@ -101,7 +110,22 @@ public class TemplateController {
     public ResponseEntity<DocumentTemplate> update(
             @PathVariable UUID id,
             @Valid @RequestBody DocumentTemplateUpdateRequest request) {
+        requireBodyEditPermission(request.getTemplateBody());
         return ResponseEntity.ok(templateService.update(id, request));
+    }
+
+    /**
+     * Metadata changes (name, default flag, page setup) stay open to tenant administrators;
+     * supplying a body requires the internal permission.
+     */
+    private void requireBodyEditPermission(String templateBody) {
+        if (templateBody == null) {
+            return;
+        }
+        if (!UserContext.hasPermission(EDIT_BODY_PERMISSION)) {
+            throw new AccessDeniedException(
+                    "Modifier le corps d'un modèle requiert la permission " + EDIT_BODY_PERMISSION);
+        }
     }
 
     @DeleteMapping("/{id}")

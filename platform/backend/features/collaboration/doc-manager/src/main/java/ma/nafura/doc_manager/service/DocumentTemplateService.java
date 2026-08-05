@@ -6,6 +6,7 @@ import ma.nafura.platform.collaboration.docmanager.domain.model.DocumentTemplate
 import ma.nafura.platform.collaboration.docmanager.repository.DocumentTemplateRepository;
 import ma.nafura.platform.collaboration.docmanager.template.DocumentFragmentService;
 import ma.nafura.platform.collaboration.docmanager.template.DocumentTemplateBootstrap;
+import ma.nafura.platform.collaboration.docmanager.template.TemplateBodyValidator;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -78,6 +79,7 @@ public class DocumentTemplateService {
         if (body == null || body.isBlank()) {
             body = "<div></div>";
         }
+        TemplateBodyValidator.validate(body);
 
         DocumentTemplate t = DocumentTemplate.builder()
                 .tenantId(tenantId)
@@ -124,7 +126,10 @@ public class DocumentTemplateService {
         if (request.getName() != null) t.setName(request.getName());
         if (request.getEntityType() != null) t.setEntityType(request.getEntityType());
         if (request.getFormat() != null) t.setFormat(request.getFormat());
-        if (request.getTemplateBody() != null) t.setTemplateBody(request.getTemplateBody());
+        if (request.getTemplateBody() != null) {
+            TemplateBodyValidator.validate(request.getTemplateBody());
+            t.setTemplateBody(request.getTemplateBody());
+        }
         if (request.getPaperSize() != null) t.setPaperSize(request.getPaperSize());
         if (request.getOrientation() != null) t.setOrientation(request.getOrientation());
         if (request.getMarginsCss() != null) t.setMarginsCss(request.getMarginsCss());

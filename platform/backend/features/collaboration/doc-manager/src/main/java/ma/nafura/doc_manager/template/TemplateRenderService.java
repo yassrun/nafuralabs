@@ -124,6 +124,9 @@ public class TemplateRenderService {
         if (templateBody == null || templateBody.isBlank()) {
             throw new TemplateRenderException("Template body is empty");
         }
+        // Checked again at render time, not only on save: a body could predate the validator or
+        // have been written straight to the database.
+        TemplateBodyValidator.validate(templateBody);
         Map<String, String> fragments = renderFragments(variables, fragmentOverrides);
         Map<String, Object> withFragments = new LinkedHashMap<>(variables);
         withFragments.put("fragments", fragments);
