@@ -11,7 +11,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import {ConfigDrivenDetailPage,
   ConfigDrivenDetailPageImports,
   ConfigDrivenDetailPageStyles,
-  createDetailFacadeFromCrud, ButtonComponent} from '@lib/anatomy';
+  createDetailFacadeFromCrud, ButtonComponent, PrintDialogService} from '@lib/anatomy';
 import { FieldTemplateDirective } from '@lib/anatomy/components/organisms/entity-detail';
 import { DateLocalizedPipe } from '@lib/anatomy/pipes';
 import type {
@@ -69,6 +69,7 @@ export class FactureDetailPage extends ConfigDrivenDetailPage<FactureClient> {
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
   private readonly printService = inject(PrintService);
+  private readonly printDialogService = inject(PrintDialogService);
 
   readonly facade = createDetailFacadeFromCrud<FactureClient, FactureCreate>({
     crud: this.crud,
@@ -116,7 +117,13 @@ export class FactureDetailPage extends ConfigDrivenDetailPage<FactureClient> {
     }
 
     if (event.actionId === 'print_facture' && item) {
-      this.printService.printFacture();
+      // Server-rendered PDF from the invoice template, so the document carries the tenant's
+      // letterhead and legal mentions. Browser print stays as a fallback.
+      try {
+        await this.printDialogService.open('facture_client', item.id, item.numero);
+      } catch {
+        this.printService.printFacture();
+      }
       return;
     }
 

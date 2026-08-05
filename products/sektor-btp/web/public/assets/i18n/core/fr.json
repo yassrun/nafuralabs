@@ -590,7 +590,8 @@
       "entityTypes": {
         "devis": "Devis",
         "dossier_etude_bordereau": "Bordereau d'étude",
-        "dossier_etude_synthese": "Synthèse d'étude"
+        "dossier_etude_synthese": "Synthèse d'étude",
+        "facture_client": "Facture client"
       }
     },
     "emailTemplates": {

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8"/>
+  <title>Facture</title>
+  <style>
+    body { font-family: Helvetica, Arial, sans-serif; font-size: 10pt; color: #1a1a1a; margin: 0; }
+    .hdr { display: flex; justify-content: space-between; margin-bottom: 18px; border-bottom: 2px solid #222; padding-bottom: 10px; }
+    .hdr h1 { font-size: 16pt; margin: 0 0 4px 0; }
+    .muted { color: #555; font-size: 9pt; }
+    .parties { width: 100%; margin-bottom: 16px; }
+    .parties td { vertical-align: top; width: 50%; padding-right: 12px; }
+    table.lines { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    table.lines th, table.lines td { border: 1px solid #ccc; padding: 5px 6px; }
+    table.lines th { background: #f3f3f3; text-align: left; font-size: 9pt; }
+    .num { text-align: right; white-space: nowrap; }
+    .totaux { margin-top: 14px; width: 320px; margin-left: auto; }
+    .totaux td { padding: 3px 6px; }
+    .totaux .grand { font-weight: bold; font-size: 11pt; border-top: 1px solid #222; }
+    .lettres { margin-top: 12px; font-size: 9pt; }
+    .pied { margin-top: 24px; font-size: 8pt; color: #666; }
+  </style>
+</head>
+<body>
+  <div class="hdr">
+    <!-- Shared letterhead: edited once in Administration → Personnalisation des documents. -->
+    <div th:utext="${fragments.HEADER_DEFAULT}"></div>
+    <div style="text-align:right">
+      <h1>Facture <span th:text="${entity.numero}">FAC-001</span></h1>
+      <div class="muted">Émise le <span th:text="${entity.dateEmission}">—</span></div>
+      <div class="muted" th:if="${entity.dateEcheance}">
+        Échéance le <span th:text="${entity.dateEcheance}">—</span>
+      </div>
+      <div class="muted" th:if="${entity.chantierCode}">
+        Chantier <span th:text="${entity.chantierCode}">—</span>
+      </div>
+    </div>
+  </div>
+
+  <table class="parties">
+    <tr>
+      <td>
+        <strong>Client</strong><br/>
+        <span th:text="${entity.client.name}">—</span><br/>
+        <span class="muted" th:if="${document?.client?.ice}">
+          ICE <span th:text="${document.client.ice}"></span>
+        </span>
+      </td>
+      <td th:if="${entity.notes}">
+        <strong>Objet</strong><br/>
+        <span th:text="${entity.notes}"></span>
+      </td>
+    </tr>
+  </table>
+
+  <table class="lines">
+    <thead>
+      <tr>
+        <th>Désignation</th>
+        <th>Unité</th>
+        <th class="num">Qté</th>
+        <th class="num">PU HT</th>
+        <th class="num">Total HT</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr th:each="l : ${entity.lignes}">
+        <td th:text="${l.designation}"></td>
+        <td th:text="${l.unite}"></td>
+        <td class="num" th:text="${l.quantite}"></td>
+        <td class="num" th:text="${l.prixUnitaireHt}"></td>
+        <td class="num" th:text="${l.totalHt}"></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="totaux">
+    <tr>
+      <td>Total HT</td>
+      <td class="num" th:text="${entity.totalHt}">0</td>
+    </tr>
+    <tr th:if="${entity.retenueGarantieMontant}">
+      <td>Retenue de garantie (<span th:text="${entity.retenueGarantieTaux}">7</span> %)</td>
+      <td class="num" th:text="'- ' + ${entity.retenueGarantieMontant}">0</td>
+    </tr>
+    <tr th:if="${entity.resorptionAvanceMontant}">
+      <td>Résorption d'avance</td>
+      <td class="num" th:text="'- ' + ${entity.resorptionAvanceMontant}">0</td>
+    </tr>
+    <tr th:if="${entity.netAPayerHt}">
+      <td>Net à payer HT</td>
+      <td class="num" th:text="${entity.netAPayerHt}">0</td>
+    </tr>
+    <tr>
+      <td>TVA (<span th:text="${entity.tvaTaux}">20</span> %)</td>
+      <td class="num" th:text="${entity.totalTva}">0</td>
+    </tr>
+    <tr th:if="${entity.rasMontant}">
+      <td>Retenue à la source (<span th:text="${entity.rasTaux}">0</span> %)</td>
+      <td class="num" th:text="'- ' + ${entity.rasMontant}">0</td>
+    </tr>
+    <tr class="grand">
+      <td>Net à payer TTC</td>
+      <td class="num" th:text="${entity.netAPayerTtc}">0</td>
+    </tr>
+  </table>
+
+  <!-- Legally required on an invoice; computed server-side, never by the template. -->
+  <div class="lettres" th:if="${document?.totaux?.enLettres}">
+    Arrêtée la présente facture à la somme de
+    <strong th:text="${document.totaux.enLettres}"></strong>.
+  </div>
+
+  <div class="pied" th:if="${entity.modePaiement}">
+    <strong>Mode de paiement :</strong>
+    <span th:text="${entity.modePaiement}"></span>
+  </div>
+
+  <!-- Shared legal footer (ICE, RC, IF, patente, CNSS). -->
+  <div class="pied" th:utext="${fragments.FOOTER_DEFAULT}"></div>
+</body>
+</html>

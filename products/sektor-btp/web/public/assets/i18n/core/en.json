@@ -590,7 +590,8 @@
       "entityTypes": {
         "devis": "Quote",
         "dossier_etude_bordereau": "Study bill of quantities",
-        "dossier_etude_synthese": "Study summary"
+        "dossier_etude_synthese": "Study summary",
+        "facture_client": "Client invoice"
       }
     },
     "emailTemplates": {

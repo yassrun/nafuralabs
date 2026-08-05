@@ -5,6 +5,8 @@ plugins {
 dependencies {
     implementation project(':platform:core:framework')
     implementation project(':platform:core:authorization')
+    // Print templates for client invoices (see ma.nafura.ventes.print).
+    implementation project(':platform:features:collaboration:doc-manager')
     implementation project(':sektor:chantiers')
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'

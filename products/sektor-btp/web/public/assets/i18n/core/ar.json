@@ -605,7 +605,8 @@
       "entityTypes": {
         "devis": "عرض سعر",
         "dossier_etude_bordereau": "جدول الكميات",
-        "dossier_etude_synthese": "ملخص الدراسة"
+        "dossier_etude_synthese": "ملخص الدراسة",
+        "facture_client": "فاتورة زبون"
       }
     },
     "emailTemplates": {
