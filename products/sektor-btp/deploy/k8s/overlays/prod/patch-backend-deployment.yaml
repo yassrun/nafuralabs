@@ -48,6 +48,8 @@ spec:
           env:
             - name: POSTGRES_HOST
               value: postgres.nafura-infra-prod.svc
+            - name: NAFURA_GOTENBERG_URL
+              value: http://gotenberg.nafura-infra-prod.svc:3000
             - name: KEYCLOAK_JWK_SET_URI
               value: http://keycloak.nafura-infra-prod.svc:8080/realms/iam-portal/protocol/openid-connect/certs
             - name: KEYCLOAK_ADMIN_URL

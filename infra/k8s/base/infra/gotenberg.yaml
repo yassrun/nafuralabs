@@ -1,14 +1,16 @@
-# Gotenberg — headless Chromium used to render document PDFs.
+# Gotenberg — shared document rendering (headless Chromium)
 #
-# Deliberately ClusterIP and never exposed through the Ingress: it converts arbitrary HTML on
-# request. The backend also refuses any document referencing a remote URL before sending it here
-# (see HtmlOutboundGuard), so a template cannot be used to reach internal services.
+# Shared like postgres/redis/minio: every product that prints documents converts HTML through
+# it, so the browser preview and the printed PDF come from one engine.
+#
+# Never exposed through the Ingress: it converts arbitrary HTML on request. Callers reach it at
+# http://gotenberg.<infra-ns>.svc:3000, and the backend refuses any document referencing a
+# remote URL before sending it (see HtmlOutboundGuard).
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: gotenberg
-  labels:
-    app: gotenberg
 spec:
   replicas: 1
   selector:
@@ -28,10 +30,8 @@ spec:
           args:
             - "gotenberg"
             # Do NOT set --chromium-deny-list=".*": it also matches the file:// URL Gotenberg
-            # writes to its own temp directory to render the page, so every conversion fails
-            # with 403. The shipped default already denies file:// outside that directory.
-            # Outbound references are refused earlier anyway, by HtmlOutboundGuard, before the
-            # document is sent here.
+            # writes to its own temp directory to render the page, so every conversion answers
+            # 403. The shipped default already denies file:// outside that directory.
             - "--chromium-disable-javascript=true"
             - "--api-timeout=30s"
           ports:
@@ -61,13 +61,10 @@ apiVersion: v1
 kind: Service
 metadata:
   name: gotenberg
-  labels:
-    app: gotenberg
 spec:
-  type: ClusterIP
-  selector:
-    app: gotenberg
   ports:
     - name: http
       port: 3000
       targetPort: http
+  selector:
+    app: gotenberg

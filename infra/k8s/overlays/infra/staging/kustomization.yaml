@@ -10,6 +10,7 @@ resources:
   - ../../../base/infra/service-accounts.yaml
   - ../../../base/infra/postgres.yaml
   - ../../../base/infra/redis.yaml
+  - ../../../base/infra/gotenberg.yaml
   - ../../../base/infra/keycloak.yaml
   - ../../../base/infra/minio.yaml
   - ../../../base/infra/minio-init-job.yaml

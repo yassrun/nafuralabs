@@ -114,7 +114,7 @@ Cluster / infra (once per env, or after clean-env):
   bootstrap-env              Infra + vault-init + seed secrets + wait core services
   vault-seed                 Apply secrets/nafura.secrets to Vault for ENV
   infra-up                   Apply infra overlay only
-  infra-wait                 Wait for postgres/redis/minio/keycloak
+  infra-wait                 Wait for postgres/redis/minio/keycloak/gotenberg
   preflight                  Check injector, namespaces, optional images
 
 Images (local tags on staging, private registry on prod/demo):
@@ -385,6 +385,10 @@ infra_wait() {
   wait_rollout "$infra_ns" deployment/postgres 300s
   wait_rollout "$infra_ns" deployment/redis 120s || true
   wait_rollout "$infra_ns" deployment/minio 300s
+  # Document rendering: not required to boot an app, only to print.
+  wait_rollout "$infra_ns" deployment/gotenberg 180s || {
+    echo "WARN: gotenberg not ready ? PDF rendering will answer 503" >&2
+  }
   wait_rollout "$infra_ns" deployment/keycloak 300s || {
     echo "WARN: keycloak not ready ? check: kubectl get pods -n $infra_ns" >&2
   }
