@@ -22,12 +22,9 @@
 </head>
 <body>
   <div class="hdr">
-    <div>
-      <img th:if="${tenant.logo}" th:src="${tenant.logo}" alt=""
-           style="max-height:48px;max-width:160px;margin-bottom:6px;display:block"/>
-      <div th:text="${tenant.name}">Société</div>
-      <div class="muted" th:if="${tenant.address}" th:text="${tenant.address}"></div>
-    </div>
+    <!-- Shared letterhead: edited once in Administration, reflected on every document.
+         Do not inline the company block here again. -->
+    <div th:utext="${fragments.HEADER_DEFAULT}"></div>
     <div style="text-align:right">
       <h1>Devis <span th:text="${entity.numero}">DEV-001</span></h1>
       <div class="muted">Version <span th:text="${entity.version}">1</span></div>
@@ -93,5 +90,8 @@
     <strong>Conditions de paiement :</strong>
     <span th:text="${entity.conditionsPaiement}"></span>
   </div>
+
+  <!-- Shared legal footer (ICE, RC, IF, patente, CNSS). -->
+  <div class="pied" th:utext="${fragments.FOOTER_DEFAULT}"></div>
 </body>
 </html>

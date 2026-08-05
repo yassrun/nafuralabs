@@ -7,29 +7,38 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+import org.thymeleaf.exceptions.TemplateProcessingException;
 
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
 /**
  * Renders document templates with entity/tenant/system variables to HTML then PDF.
+ *
+ * <p>Shared header and footer are rendered first and injected as HTML strings, so a template
+ * pulls them in with {@code th:utext="${fragments.HEADER_DEFAULT}"} and the letterhead lives in
+ * one place.
  */
 @Service
 public class TemplateRenderService {
 
     private final DocumentTemplateRepository templateRepository;
     private final TemplateVariableResolver variableResolver;
+    private final DocumentFragmentService fragmentService;
     private final PdfGenerationService pdfService;
     private final TemplateEngine stringTemplateEngine;
 
     public TemplateRenderService(
             DocumentTemplateRepository templateRepository,
             TemplateVariableResolver variableResolver,
+            DocumentFragmentService fragmentService,
             PdfGenerationService pdfService,
             @Qualifier("stringTemplateEngine") TemplateEngine stringTemplateEngine) {
         this.templateRepository = templateRepository;
         this.variableResolver = variableResolver;
+        this.fragmentService = fragmentService;
         this.pdfService = pdfService;
         this.stringTemplateEngine = stringTemplateEngine;
     }
@@ -39,13 +48,9 @@ public class TemplateRenderService {
      */
     public byte[] render(UUID templateId, String entityType, UUID entityId) {
         DocumentTemplate template = getTemplateForTenant(templateId);
-        Map<String, Object> variables = variableResolver.resolve(entityType, entityId);
-        String html = processTemplate(template.getTemplateBody(), variables);
-        return pdfService.htmlToPdf(
-                html,
-                template.getPaperSize(),
-                template.getOrientation(),
-                template.getMarginsCss());
+        String type = entityType != null ? entityType : template.getEntityType();
+        Map<String, Object> variables = variableResolver.resolve(type, entityId);
+        return toPdf(template, processTemplate(template.getTemplateBody(), variables));
     }
 
     /**
@@ -54,7 +59,33 @@ public class TemplateRenderService {
     public byte[] renderPreview(UUID templateId) {
         DocumentTemplate template = getTemplateForTenant(templateId);
         Map<String, Object> variables = variableResolver.resolveForPreview(template.getEntityType());
-        String html = processTemplate(template.getTemplateBody(), variables);
+        return toPdf(template, processTemplate(template.getTemplateBody(), variables));
+    }
+
+    /**
+     * Render an unsaved body. This is what makes the editor usable: previewing the draft rather
+     * than the stored version.
+     *
+     * @param entityId when set, real data for that record; otherwise sample data
+     */
+    public String renderDraftHtml(String templateBody, String entityType, UUID entityId) {
+        Map<String, Object> variables = entityId != null
+                ? variableResolver.resolve(entityType, entityId)
+                : variableResolver.resolveForPreview(entityType);
+        return processTemplate(templateBody, variables);
+    }
+
+    /** Variables that would be exposed to a template of this type, for diagnostics and tests. */
+    public Map<String, Object> previewVariables(String entityType) {
+        return variableResolver.resolveForPreview(entityType);
+    }
+
+    /** Turn already-rendered HTML into a PDF with the given page setup. */
+    public byte[] htmlToPdf(String html, String paperSize, String orientation, String marginsCss) {
+        return pdfService.htmlToPdf(html, paperSize, orientation, marginsCss);
+    }
+
+    private byte[] toPdf(DocumentTemplate template, String html) {
         return pdfService.htmlToPdf(
                 html,
                 template.getPaperSize(),
@@ -68,12 +99,47 @@ public class TemplateRenderService {
                 .orElseThrow(() -> new TemplateRenderException("Template not found: " + templateId));
     }
 
-    private String processTemplate(String templateBody, Map<String, Object> variables) {
+    /**
+     * Two passes: the shared fragments first (they see the same variables), then the template
+     * body with those fragments available as ready-made HTML.
+     */
+    String processTemplate(String templateBody, Map<String, Object> variables) {
         if (templateBody == null || templateBody.isBlank()) {
             throw new TemplateRenderException("Template body is empty");
         }
+        Map<String, String> fragments = renderFragments(variables);
+        Map<String, Object> withFragments = new LinkedHashMap<>(variables);
+        withFragments.put("fragments", fragments);
+        return process(templateBody, withFragments);
+    }
+
+    private Map<String, String> renderFragments(Map<String, Object> variables) {
+        Map<String, String> rendered = new LinkedHashMap<>();
+        fragmentService.bodiesForCurrentTenant().forEach((code, body) -> {
+            if (body == null || body.isBlank()) {
+                rendered.put(code, "");
+                return;
+            }
+            try {
+                rendered.put(code, process(body, variables));
+            } catch (TemplateRenderException e) {
+                // A broken shared fragment must not take down every document: the block is
+                // dropped and the failure surfaces in the editor when that fragment is edited.
+                rendered.put(code, "");
+            }
+        });
+        return rendered;
+    }
+
+    private String process(String body, Map<String, Object> variables) {
         Context context = new Context(Locale.getDefault());
         variables.forEach(context::setVariable);
-        return stringTemplateEngine.process(templateBody, context);
+        try {
+            return stringTemplateEngine.process(body, context);
+        } catch (TemplateProcessingException e) {
+            throw TemplateRenderException.from(e);
+        } catch (RuntimeException e) {
+            throw new TemplateRenderException(e.getMessage(), e);
+        }
     }
 }

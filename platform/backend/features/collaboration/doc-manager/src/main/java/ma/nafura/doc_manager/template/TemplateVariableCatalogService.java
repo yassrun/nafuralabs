@@ -5,9 +5,9 @@ import ma.nafura.platform.collaboration.docmanager.api.response.TemplateVariable
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 /**
  * Builds the variable catalog for the template editor (available placeholders per entity type).
@@ -16,66 +16,93 @@ import java.util.Set;
 public class TemplateVariableCatalogService {
 
     private final List<TemplateVariableCatalogContributor> contributors;
+    private final TemplateVariableResolver variableResolver;
 
-    public TemplateVariableCatalogService(List<TemplateVariableCatalogContributor> contributors) {
+    public TemplateVariableCatalogService(
+            List<TemplateVariableCatalogContributor> contributors,
+            TemplateVariableResolver variableResolver) {
         this.contributors = contributors != null ? contributors : List.of();
+        this.variableResolver = variableResolver;
     }
 
     public TemplateVariableCatalogResponse getCatalog(String entityType) {
-        List<TemplateVariableDescriptor> entity = resolveEntityVariables(entityType);
-        List<TemplateVariableDescriptor> tenant = List.of(
-                desc("tenant.name", "Organization Name", "string", null),
-                desc("tenant.key", "Tenant Key", "string", null),
-                desc("tenant.logo", "Logo URL", "image", null),
-                desc("tenant.address", "Address", "string", null)
-        );
-        List<TemplateVariableDescriptor> system = List.of(
-                desc("today", "Today's Date", "date", null),
-                desc("now", "Current Date/Time", "datetime", null),
-                desc("currentUser", "Current User", "string", null)
-        );
+        List<TemplateVariableDescriptor> entity = new ArrayList<>(resolveEntityVariables(entityType));
+        entity.addAll(documentVariables());
         return TemplateVariableCatalogResponse.builder()
                 .entity(entity)
-                .tenant(tenant)
-                .system(system)
+                // tenant.* comes from the identity providers that actually fill it, so the
+                // sidebar can never advertise a variable that resolves to nothing.
+                .tenant(variableResolver.describeTenantVariables())
+                .system(systemVariables())
                 .build();
     }
 
-    /** Distinct entity types known to contributors (for admin filters). */
-    public List<String> listEntityTypes() {
-        Set<String> types = new LinkedHashSet<>();
+    /**
+     * Printable types declared by product modules. No fallback: an empty registry means no
+     * module declared one, and the UI must say so rather than offer types that resolve to
+     * nothing.
+     */
+    public List<PrintEntityTypeDescriptor> listEntityTypeDescriptors() {
+        Map<String, PrintEntityTypeDescriptor> byCode = new LinkedHashMap<>();
         for (TemplateVariableCatalogContributor c : contributors) {
-            types.addAll(c.supportedEntityTypes());
+            for (PrintEntityTypeDescriptor descriptor : c.entityTypeDescriptors()) {
+                byCode.putIfAbsent(descriptor.code(), descriptor);
+            }
         }
-        if (types.isEmpty()) {
-            types.addAll(List.of("invoice", "quote", "receipt", "order"));
-        }
-        return new ArrayList<>(types);
+        return List.copyOf(byCode.values());
+    }
+
+    /** Codes only, for callers that do not need labels. */
+    public List<String> listEntityTypes() {
+        return listEntityTypeDescriptors().stream().map(PrintEntityTypeDescriptor::code).toList();
     }
 
     private List<TemplateVariableDescriptor> resolveEntityVariables(String entityType) {
-        if (entityType != null && !entityType.isBlank()) {
-            for (TemplateVariableCatalogContributor c : contributors) {
-                if (c.supportedEntityTypes().contains(entityType)) {
-                    List<TemplateVariableDescriptor> vars = c.entityVariables(entityType);
-                    if (vars != null && !vars.isEmpty()) {
-                        return vars;
-                    }
-                }
+        if (entityType == null || entityType.isBlank()) {
+            return List.of();
+        }
+        for (TemplateVariableCatalogContributor c : contributors) {
+            if (!c.supportedEntityTypes().contains(entityType)) {
+                continue;
+            }
+            List<TemplateVariableDescriptor> vars = c.entityVariables(entityType);
+            if (vars != null && !vars.isEmpty()) {
+                return vars;
             }
         }
-        return defaultEntityVariables();
+        return List.of();
     }
 
-    private static List<TemplateVariableDescriptor> defaultEntityVariables() {
+    /**
+     * The normalised {@code document.*} contract, identical for every type — this is what
+     * shared header, footer and line-table fragments are written against.
+     */
+    private static List<TemplateVariableDescriptor> documentVariables() {
         return List.of(
-                desc("entity.code", "Code", "string", "INV-001"),
-                desc("entity.id", "Id", "string", null),
-                desc("entity.amount", "Amount", "number", "1500.00"),
-                desc("entity.date", "Date", "date", null),
-                desc("entity.customer.name", "Customer Name", "string", "Acme Corp"),
-                desc("entity.customer.address", "Customer Address", "string", null)
-        );
+                desc("document.libelleType", "Type de document", "string", "Facture"),
+                desc("document.numero", "Numéro", "string", "FAC-2026-001"),
+                desc("document.date", "Date", "date", null),
+                desc("document.dateEcheance", "Échéance", "date", null),
+                desc("document.reference", "Référence", "string", null),
+                desc("document.objet", "Objet", "string", null),
+                desc("document.client.raisonSociale", "Client — raison sociale", "string", null),
+                desc("document.client.ice", "Client — ICE", "string", null),
+                desc("document.client.adresse", "Client — adresse", "string", null),
+                desc("document.client.ville", "Client — ville", "string", null),
+                desc("document.lignes", "Lignes (liste)", "list", null),
+                desc("document.totaux.ht", "Total HT", "number", null),
+                desc("document.totaux.tva", "Total TVA", "number", null),
+                desc("document.totaux.ttc", "Total TTC", "number", null),
+                desc("document.totaux.tauxTva", "Taux TVA", "number", "20"),
+                desc("document.totaux.enLettres", "Total en lettres", "string", null),
+                desc("document.mentions", "Mentions", "string", null));
+    }
+
+    private static List<TemplateVariableDescriptor> systemVariables() {
+        return List.of(
+                desc("today", "Date du jour", "date", null),
+                desc("now", "Date et heure", "datetime", null),
+                desc("currentUser", "Utilisateur courant", "string", null));
     }
 
     public static TemplateVariableDescriptor desc(String path, String label, String type, String example) {

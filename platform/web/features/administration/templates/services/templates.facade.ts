@@ -90,7 +90,7 @@ export class TemplatesFacade {
       this.api.getEntityTypes().catch(() => []),
     ]);
     this._lookups.set({
-      entityTypes: entityTypes.map((et) => ({ key: et, value: et })),
+      entityTypes: entityTypes.map((et) => ({ key: et.code, value: et.labelKey })),
     });
   }
 }

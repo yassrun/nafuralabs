@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import ma.nafura.etudes.api.dto.DossierEtudeSyntheseDto;
 import ma.nafura.etudes.api.dto.DpgfLotTotalDto;
@@ -20,7 +21,9 @@ import ma.nafura.etudes.service.DevisService;
 import ma.nafura.etudes.service.DossierEtudeService;
 import ma.nafura.etudes.service.DpgfService;
 import ma.nafura.etudes.service.gate.ResultatGate;
+import ma.nafura.platform.collaboration.docmanager.template.AmountInWords;
 import ma.nafura.platform.collaboration.docmanager.template.EntityDataProvider;
+import ma.nafura.platform.collaboration.docmanager.template.PrintDocument;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Component;
 
@@ -47,6 +50,13 @@ public class EtudesEntityDataProvider implements EntityDataProvider {
     }
 
     @Override
+    public boolean supports(String entityType) {
+        return EtudesPrintEntityTypes.DEVIS.equals(entityType)
+                || EtudesPrintEntityTypes.DOSSIER_BORDEREAU.equals(entityType)
+                || EtudesPrintEntityTypes.DOSSIER_SYNTHESE.equals(entityType);
+    }
+
+    @Override
     public Map<String, Object> getEntityData(String entityType, UUID entityId) {
         if (entityType == null || entityId == null) {
             return Map.of();
@@ -70,6 +80,102 @@ public class EtudesEntityDataProvider implements EntityDataProvider {
             case EtudesPrintEntityTypes.DOSSIER_SYNTHESE -> sampleSynthese();
             default -> Map.of();
         };
+    }
+
+    @Override
+    public Optional<PrintDocument> getDocument(String entityType, UUID entityId) {
+        if (!EtudesPrintEntityTypes.DEVIS.equals(entityType) || entityId == null) {
+            // Bordereau and synthèse are study internals, not counterparty documents:
+            // they have no client block and no legal totals to normalise.
+            return Optional.empty();
+        }
+        return Optional.of(toPrintDocument(devisService.getById(entityId)));
+    }
+
+    @Override
+    public Optional<PrintDocument> getSampleDocument(String entityType) {
+        if (!EtudesPrintEntityTypes.DEVIS.equals(entityType)) {
+            return Optional.empty();
+        }
+        return Optional.of(sampleDevisDocument());
+    }
+
+    private static PrintDocument toPrintDocument(Devis devis) {
+        List<PrintDocument.Line> lignes = new ArrayList<>();
+        if (devis.getLignes() != null) {
+            for (DevisLigne l : devis.getLignes()) {
+                lignes.add(new PrintDocument.Line(
+                        l.getCode(),
+                        l.getDesignation(),
+                        l.getUnite(),
+                        l.getQuantite(),
+                        l.getPrixUnitaireHt(),
+                        l.getTotalHt(),
+                        devis.getTvaTaux()));
+            }
+        }
+        return PrintDocument.builder()
+                .type(EtudesPrintEntityTypes.DEVIS)
+                .libelleType("Devis")
+                .numero(devis.getNumero())
+                .date(devis.getDateEmission())
+                .dateEcheance(devis.getDateValidite())
+                .objet(devis.getObjet())
+                .statut(devis.getStatus() != null ? devis.getStatus().toString() : null)
+                .version(devis.getVersion())
+                .client(new PrintDocument.Party(
+                        devis.getClientName(),
+                        null,
+                        null,
+                        devis.getVille(),
+                        devis.getContactClient(),
+                        null,
+                        null))
+                .lignes(lignes)
+                .totaux(totals(
+                        devis.getTotalHt(), devis.getTotalTva(), devis.getTotalTtc(), devis.getTvaTaux()))
+                .mentions(devis.getConditionsPaiement())
+                .build();
+    }
+
+    private static PrintDocument.Totals totals(
+            BigDecimal ht, BigDecimal tva, BigDecimal ttc, BigDecimal taux) {
+        return new PrintDocument.Totals(ht, tva, ttc, taux, null, AmountInWords.spellDirhams(ttc));
+    }
+
+    private static PrintDocument sampleDevisDocument() {
+        return PrintDocument.builder()
+                .type(EtudesPrintEntityTypes.DEVIS)
+                .libelleType("Devis")
+                .numero("DEV-SAMPLE")
+                .date(LocalDate.now())
+                .dateEcheance(LocalDate.now().plusDays(30))
+                .objet("Travaux de second œuvre — échantillon")
+                .statut("BROUILLON")
+                .version(1)
+                .client(new PrintDocument.Party(
+                        "Client Exemple SA",
+                        "001234567000089",
+                        "12 rue Exemple",
+                        "Casablanca",
+                        "M. Exemple",
+                        null,
+                        null))
+                .lignes(List.of(new PrintDocument.Line(
+                        "01.01",
+                        "Article exemple",
+                        "m²",
+                        new BigDecimal("100"),
+                        new BigDecimal("1000"),
+                        new BigDecimal("100000"),
+                        new BigDecimal("20"))))
+                .totaux(totals(
+                        new BigDecimal("100000.00"),
+                        new BigDecimal("20000.00"),
+                        new BigDecimal("120000.00"),
+                        new BigDecimal("20")))
+                .mentions("30 % à la commande, solde à réception")
+                .build();
     }
 
     private Map<String, Object> mapDevis(UUID id) {

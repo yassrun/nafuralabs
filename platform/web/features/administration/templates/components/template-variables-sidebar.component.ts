@@ -1,7 +1,38 @@
 import { CommonModule } from '@angular/common';
-import { Component, input, output, signal } from '@angular/core';
+import { Component, computed, input, output, signal } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
-import type { TemplateVariable } from '../models';
+import type { TemplateVariable, TemplateVariableGroup } from '../models';
+
+const GROUP_ORDER: TemplateVariableGroup[] = ['entity', 'tenant', 'system'];
+
+interface VariableGroupView {
+  key: TemplateVariableGroup;
+  labelKey: string;
+  items: TemplateVariable[];
+}
+
+/**
+ * Builds the HTML to insert for a variable. Always a complete element so the result stays
+ * valid wherever the caret is; the value kind decides the shape.
+ */
+export function buildVariableSnippet(v: TemplateVariable): string {
+  const expr = `\${${v.path}}`;
+  const type = (v.type ?? '').toLowerCase();
+  if (type === 'image' || v.path.toLowerCase().includes('logo')) {
+    return `<img th:src="${expr}" alt=""/>`;
+  }
+  if (type === 'date') {
+    return `<span th:text="\${#temporals.format(${v.path}, 'dd/MM/yyyy')}">${
+      v.example ?? '01/01/2026'
+    }</span>`;
+  }
+  if (type === 'datetime') {
+    return `<span th:text="\${#temporals.format(${v.path}, 'dd/MM/yyyy HH:mm')}">${
+      v.example ?? '01/01/2026 09:00'
+    }</span>`;
+  }
+  return `<span th:text="${expr}">${v.example ?? v.label ?? v.path}</span>`;
+}
 
 @Component({
   selector: 'app-template-variables-sidebar',
@@ -13,15 +44,16 @@ import type { TemplateVariable } from '../models';
       @if (variables().length === 0) {
         <p class="variables-sidebar__empty">{{ 'administration.templates.editor.variablesEmpty' | translate }}</p>
       } @else {
-        @for (group of groupedVariables(); track group.name) {
+        @for (group of groupedVariables(); track group.key) {
           <div class="variables-sidebar__group">
             <button
               type="button"
               class="variables-sidebar__group-header"
-              (click)="toggleGroup(group.name)">
-              {{ group.name }}
+              [attr.aria-expanded]="expanded()[group.key] !== false"
+              (click)="toggleGroup(group.key)">
+              {{ group.labelKey | translate }}
             </button>
-            @if (expanded()[group.name] !== false) {
+            @if (expanded()[group.key] !== false) {
               <ul class="variables-sidebar__list">
                 @for (v of group.items; track v.path) {
                   <li>
@@ -29,9 +61,10 @@ import type { TemplateVariable } from '../models';
                       type="button"
                       class="variables-sidebar__var"
                       (click)="insertVariable(v)">
-                      <span class="variables-sidebar__var-path">{{ v.path }}</span>
-                      @if (v.sampleValue !== undefined) {
-                        <span class="variables-sidebar__var-sample">{{ v.sampleValue }}</span>
+                      <span class="variables-sidebar__var-path">{{ v.label || v.path }}</span>
+                      <span class="variables-sidebar__var-sample">{{ v.path }}</span>
+                      @if (v.example) {
+                        <span class="variables-sidebar__var-sample">{{ v.example }}</span>
                       }
                     </button>
                   </li>
@@ -109,6 +142,7 @@ import type { TemplateVariable } from '../models';
         color: var(--nf-text-muted, #666);
         font-size: 0.7rem;
         margin-top: 2px;
+        overflow-wrap: anywhere;
       }
     `,
   ],
@@ -118,39 +152,41 @@ export class TemplateVariablesSidebarComponent {
   /** Emits snippet to insert at cursor (e.g. th:text="${entity.code}"). */
   readonly insertSnippet = output<string>();
 
-  private expandedState: Record<string, boolean> = { entity: true, tenant: true, system: true };
+  /** Keyed by group key ('entity'…), never by display label. */
+  private expandedState: Record<TemplateVariableGroup, boolean> = {
+    entity: true,
+    tenant: true,
+    system: true,
+  };
   readonly expanded = signal<Record<string, boolean>>({ ...this.expandedState });
 
-  groupedVariables = (): { name: string; items: TemplateVariable[] }[] => {
-    const vars = this.variables();
-    const groups: Record<string, TemplateVariable[]> = {
+  readonly groupedVariables = computed<VariableGroupView[]>(() => {
+    const groups: Record<TemplateVariableGroup, TemplateVariable[]> = {
       entity: [],
       tenant: [],
       system: [],
     };
-    for (const v of vars) {
-      if (groups[v.group]) groups[v.group].push(v);
+    for (const v of this.variables()) {
+      groups[v.group]?.push(v);
     }
-    const labels: Record<string, string> = {
-      entity: 'Entity',
-      tenant: 'Tenant',
-      system: 'System',
-    };
-    return Object.entries(groups)
-      .filter(([, items]) => items.length > 0)
-      .map(([name, items]) => ({ name: labels[name] ?? name, items }));
-  };
+    return GROUP_ORDER.filter((key) => groups[key].length > 0).map((key) => ({
+      key,
+      labelKey: `administration.templates.editor.variableGroups.${key}`,
+      items: groups[key],
+    }));
+  });
 
-  toggleGroup(name: string): void {
-    this.expandedState[name] = !this.expandedState[name];
+  toggleGroup(key: TemplateVariableGroup): void {
+    this.expandedState[key] = !this.expandedState[key];
     this.expanded.set({ ...this.expandedState });
   }
 
+
+  /**
+   * Emits a self-contained HTML element, never a bare Thymeleaf attribute: an attribute
+   * dropped at the caret lands outside any tag and produces invalid markup.
+   */
   insertVariable(v: TemplateVariable): void {
-    const snippet =
-      v.path.endsWith('.logo') || v.path.includes('logo')
-        ? `th:src="\${${v.path}}"`
-        : `th:text="\${${v.path}}"`;
-    this.insertSnippet.emit(snippet);
+    this.insertSnippet.emit(buildVariableSnippet(v));
   }
 }

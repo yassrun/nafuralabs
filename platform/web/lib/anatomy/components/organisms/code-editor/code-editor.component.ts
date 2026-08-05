@@ -10,12 +10,13 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="nf-code-editor" [class.nf-code-editor--disabled]="disabled()">
+    <div class="nf-code-editor" [class.nf-code-editor--readonly]="disabled()">
       <textarea
         #textarea
         class="nf-code-editor__input"
         [value]="value()"
-        [disabled]="disabled()"
+        [readonly]="disabled()"
+        [attr.aria-readonly]="disabled() ? 'true' : null"
         [placeholder]="placeholder()"
         [attr.rows]="rows()"
         (input)="onInput($event)"
@@ -32,11 +33,11 @@ import { CommonModule } from '@angular/common';
         border: 1px solid var(--nf-border-default, #e0e0e0);
         border-radius: 6px;
         overflow: hidden;
-        background: var(--nf-surface-code, #1e1e1e);
+        background: var(--nf-surface-code, #f9fafb);
       }
-      .nf-code-editor--disabled {
-        opacity: 0.7;
-        pointer-events: none;
+      /* Read-only: still selectable and copyable (system templates must be readable). */
+      .nf-code-editor--readonly {
+        background: var(--nf-surface-hover, #f3f4f6);
       }
       .nf-code-editor__input {
         display: block;
@@ -49,12 +50,16 @@ import { CommonModule } from '@angular/common';
         font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
         font-size: 13px;
         line-height: 1.5;
-        color: var(--nf-text-primary, #d4d4d4);
+        /* Paired with --nf-surface-code; never use --nf-text-primary here. */
+        color: var(--nf-text-code, #111827);
         background: transparent;
         box-sizing: border-box;
       }
+      .nf-code-editor__input:read-only {
+        cursor: default;
+      }
       .nf-code-editor__input::placeholder {
-        color: var(--nf-text-muted, #6b6b6b);
+        color: var(--nf-text-code-muted, #6b7280);
       }
       .nf-code-editor__input:focus {
         outline: none;
@@ -85,6 +90,7 @@ export class CodeEditorComponent {
   }
 
   onTab(event: KeyboardEvent): void {
+    if (this.disabled()) return;
     event.preventDefault();
     const el = this.textarea()?.nativeElement;
     if (!el) return;
@@ -98,8 +104,27 @@ export class CodeEditorComponent {
     this.valueChange.emit(newVal);
   }
 
-  /** Insert text at cursor (e.g. from variable sidebar). */
+  /**
+   * Place the caret at the start of a 1-based line and scroll it into view.
+   * Used to jump to the line reported by a template render error.
+   */
+  revealLine(line: number): void {
+    const el = this.textarea()?.nativeElement;
+    if (!el || line < 1) return;
+    const lines = el.value.split('\n');
+    const target = Math.min(line, lines.length);
+    const offset = lines.slice(0, target - 1).reduce((sum, l) => sum + l.length + 1, 0);
+    el.focus();
+    el.selectionStart = offset;
+    el.selectionEnd = offset + (lines[target - 1]?.length ?? 0);
+    // Approximate scroll: line height is fixed by the monospace style above.
+    const lineHeight = el.scrollHeight / Math.max(lines.length, 1);
+    el.scrollTop = Math.max(0, (target - 3) * lineHeight);
+  }
+
+  /** Insert text at cursor (e.g. from variable sidebar). No-op when read-only. */
   insertAtCursor(text: string): void {
+    if (this.disabled()) return;
     const el = this.textarea()?.nativeElement;
     if (!el) return;
     const start = el.selectionStart;

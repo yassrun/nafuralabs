@@ -29,6 +29,10 @@ subprojects {
 
     tasks.withType<JavaCompile>().configureEach {
         options.compilerArgs.add("-parameters")
+        // Without this, javac falls back to the platform charset (cp1252 on Windows) and
+        // accented literals in sources are mangled at compile time — visible as mojibake
+        // in generated PDFs (e.g. "Ã©chantillon" instead of "échantillon").
+        options.encoding = "UTF-8"
     }
 
     extensions.configure<DependencyManagementExtension> {

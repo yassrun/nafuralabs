@@ -9,13 +9,29 @@ import { firstValueFrom } from 'rxjs';
 import type { ListQuery, ListResponse } from '@lib/anatomy/types';
 import { ApiConfigService } from '../../../../core/config/api-config.service';
 import type {
+  PrintEntityType,
   PrintTemplate,
   PrintTemplateCreate,
   PrintTemplateUpdate,
-  TemplateVariablesResponse,
+  SampleRecord,
+  TemplateVariable,
+  TemplateVariableCatalogResponse,
+  TemplateVariableDescriptor,
+  TemplateVariableGroup,
 } from '../models';
 
 const BASE = '/api/v1/platform/templates';
+
+/** Body of POST /templates/preview — an unsaved template rendered without persisting. */
+export interface TemplatePreviewRequest {
+  templateBody: string;
+  entityType: string;
+  paperSize?: string;
+  orientation?: string;
+  marginsCss?: string;
+  /** When set, render with this record's real data instead of the sample. */
+  sampleEntityId?: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class TemplatesApiService {
@@ -86,21 +102,65 @@ export class TemplatesApiService {
     );
   }
 
-  async getVariables(entityType: string): Promise<TemplateVariablesResponse> {
+  /**
+   * Variable catalog for an entity type, flattened to a single list.
+   * The backend groups descriptors by scope (entity / tenant / system); `group` is carried
+   * over so the sidebar can section them.
+   */
+  async getVariables(entityType: string): Promise<TemplateVariable[]> {
+    const res = await firstValueFrom(
+      this.http.get<TemplateVariableCatalogResponse>(
+        this.url(`${BASE}/variables/${encodeURIComponent(entityType)}`)
+      )
+    );
+    const groups: TemplateVariableGroup[] = ['entity', 'tenant', 'system'];
+    return groups.flatMap((group) => {
+      const descriptors: TemplateVariableDescriptor[] = res?.[group] ?? [];
+      return descriptors
+        .filter((d) => !!d?.path)
+        .map((d) => ({ path: d.path, label: d.label, type: d.type, example: d.example, group }));
+    });
+  }
+
+  /**
+   * Entity types that support templates (for filters and create).
+   * No hardcoded fallback: an empty registry means no module declared a printable type,
+   * and the UI must say so rather than offer types that resolve to nothing.
+   */
+  async getEntityTypes(): Promise<PrintEntityType[]> {
+    const res = await firstValueFrom(
+      this.http.get<{ entityTypes: PrintEntityType[] }>(this.url(`${BASE}/entity-types`))
+    );
+    return res?.entityTypes ?? [];
+  }
+
+  /**
+   * Render an unsaved body. This is what makes the editor usable: the preview reflects what is
+   * being typed, not the stored version.
+   */
+  async previewDraftHtml(request: TemplatePreviewRequest): Promise<string> {
     return firstValueFrom(
-      this.http.get<TemplateVariablesResponse>(this.url(`${BASE}/variables/${encodeURIComponent(entityType)}`))
+      this.http.post(this.url(`${BASE}/preview`), { ...request, format: 'html' }, {
+        responseType: 'text',
+      })
     );
   }
 
-  /** Entity types that support templates (for filters and create). */
-  async getEntityTypes(): Promise<string[]> {
-    try {
-      const res = await firstValueFrom(
-        this.http.get<{ entityTypes: string[] }>(this.url(`${BASE}/entity-types`))
-      );
-      return res?.entityTypes ?? [];
-    } catch {
-      return ['Invoice', 'Quote', 'Receipt', 'Order'];
-    }
+  /** Same draft, rendered to PDF. Never called automatically — it costs a full render. */
+  async previewDraftPdf(request: TemplatePreviewRequest): Promise<Blob> {
+    return firstValueFrom(
+      this.http.post(this.url(`${BASE}/preview`), { ...request, format: 'pdf' }, {
+        responseType: 'blob',
+      })
+    );
+  }
+
+  /** Real records for the "preview with" picker; empty when the module offers none. */
+  async searchSampleRecords(entityType: string, q = ''): Promise<SampleRecord[]> {
+    const params = new HttpParams().set('entityType', entityType).set('q', q);
+    const res = await firstValueFrom(
+      this.http.get<{ records: SampleRecord[] }>(this.url(`${BASE}/sample-records`), { params })
+    );
+    return res?.records ?? [];
   }
 }

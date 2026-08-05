@@ -58,8 +58,18 @@ public class EtudesDocumentTemplateBootstrap implements DocumentTemplateBootstra
         var existing = repository.findByTenantIdAndCode(tenantId, code);
         if (existing.isPresent()) {
             DocumentTemplate t = existing.get();
-            if (Boolean.TRUE.equals(t.getIsSystem()) && body != null && !body.equals(t.getTemplateBody())) {
-                t.setTemplateBody(body);
+            if (!Boolean.TRUE.equals(t.getIsSystem())) {
+                return;
+            }
+            boolean bodyChanged = body != null && !body.equals(t.getTemplateBody());
+            // The name is refreshed too: templates seeded before the UTF-8 compile fix carry a
+            // mangled name in the database ("Bordereau Ã©tude A4") that no body update would heal.
+            boolean nameChanged = !name.equals(t.getName());
+            if (bodyChanged || nameChanged) {
+                if (bodyChanged) {
+                    t.setTemplateBody(body);
+                }
+                t.setName(name);
                 repository.save(t);
                 log.info("Refreshed system print template {} for tenant {}", code, tenantId);
             }

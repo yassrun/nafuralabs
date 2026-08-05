@@ -6,10 +6,16 @@ import ma.nafura.platform.authorization.security.authorization.RequirePermission
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;
 import ma.nafura.platform.collaboration.docmanager.api.request.DocumentTemplateCreateRequest;
 import ma.nafura.platform.collaboration.docmanager.api.request.DocumentTemplateUpdateRequest;
+import ma.nafura.platform.collaboration.docmanager.api.request.TemplatePreviewRequest;
 import ma.nafura.platform.collaboration.docmanager.api.request.TemplateRenderRequest;
+import ma.nafura.platform.collaboration.docmanager.api.response.TemplateRenderError;
 import ma.nafura.platform.collaboration.docmanager.api.response.TemplateVariableCatalogResponse;
 import ma.nafura.platform.collaboration.docmanager.domain.model.DocumentTemplate;
 import ma.nafura.platform.collaboration.docmanager.service.DocumentTemplateService;
+import ma.nafura.platform.collaboration.docmanager.template.EntityDataProvider;
+import ma.nafura.platform.collaboration.docmanager.template.PrintEntityTypeDescriptor;
+import ma.nafura.platform.collaboration.docmanager.template.SampleRecord;
+import ma.nafura.platform.collaboration.docmanager.template.TemplateRenderException;
 import ma.nafura.platform.collaboration.docmanager.template.TemplateRenderService;
 import ma.nafura.platform.collaboration.docmanager.template.TemplateVariableCatalogService;
 import org.springframework.data.domain.Page;
@@ -20,6 +26,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -28,9 +37,12 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class TemplateController {
 
+    private static final int SAMPLE_RECORD_LIMIT = 20;
+
     private final DocumentTemplateService templateService;
     private final TemplateRenderService renderService;
     private final TemplateVariableCatalogService variableCatalogService;
+    private final List<EntityDataProvider> entityDataProviders;
 
     @GetMapping
     @RequirePermission(value = "administration.templates.read", fullPermission = true)
@@ -40,16 +52,35 @@ public class TemplateController {
         return ResponseEntity.ok(templateService.list(entityType, pageable));
     }
 
+    /**
+     * Printable types declared by product modules, with a translatable label. No fallback list:
+     * an empty result means no module declared one.
+     */
     @GetMapping("/entity-types")
     @RequirePermission(value = "administration.templates.read", fullPermission = true)
-    public ResponseEntity<java.util.Map<String, java.util.List<String>>> entityTypes() {
-        return ResponseEntity.ok(java.util.Map.of("entityTypes", variableCatalogService.listEntityTypes()));
+    public ResponseEntity<Map<String, List<PrintEntityTypeDescriptor>>> entityTypes() {
+        return ResponseEntity.ok(
+                Map.of("entityTypes", variableCatalogService.listEntityTypeDescriptors()));
     }
 
     @GetMapping("/variables/{entityType}")
     @RequirePermission(value = "administration.templates.read", fullPermission = true)
     public ResponseEntity<TemplateVariableCatalogResponse> getVariables(@PathVariable String entityType) {
         return ResponseEntity.ok(variableCatalogService.getCatalog(entityType));
+    }
+
+    /** Real records offered in the editor's "preview with" picker. */
+    @GetMapping("/sample-records")
+    @RequirePermission(value = "administration.templates.read", fullPermission = true)
+    public ResponseEntity<Map<String, List<SampleRecord>>> sampleRecords(
+            @RequestParam String entityType,
+            @RequestParam(required = false, defaultValue = "") String q) {
+        List<SampleRecord> records = entityDataProviders.stream()
+                .filter(p -> p.supports(entityType))
+                .findFirst()
+                .map(p -> p.searchRecords(entityType, q, SAMPLE_RECORD_LIMIT))
+                .orElse(List.of());
+        return ResponseEntity.ok(Map.of("records", records));
     }
 
     @PostMapping
@@ -100,5 +131,35 @@ public class TemplateController {
                 .contentType(MediaType.APPLICATION_PDF)
                 .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"preview.pdf\"")
                 .body(pdf);
+    }
+
+    /**
+     * Render an unsaved body. Persists nothing; a template mistake answers 400 with the position
+     * so the editor can point at the line, and only an infrastructure failure answers 500.
+     */
+    @PostMapping("/preview")
+    @RequirePermission(value = "administration.templates.read", fullPermission = true)
+    public ResponseEntity<?> previewDraft(@Valid @RequestBody TemplatePreviewRequest request) {
+        try {
+            String html = renderService.renderDraftHtml(
+                    request.getTemplateBody(), request.getEntityType(), request.getSampleEntityId());
+            if (!request.wantsPdf()) {
+                return ResponseEntity.ok()
+                        .contentType(new MediaType(MediaType.TEXT_HTML, StandardCharsets.UTF_8))
+                        .body(html);
+            }
+            byte[] pdf = renderService.htmlToPdf(
+                    html, request.getPaperSize(), request.getOrientation(), request.getMarginsCss());
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"preview.pdf\"")
+                    .body(pdf);
+        } catch (TemplateRenderException e) {
+            TemplateRenderError error = TemplateRenderError.from(e);
+            HttpStatus status = e.getPhase() == TemplateRenderException.Phase.PDF
+                    ? HttpStatus.SERVICE_UNAVAILABLE
+                    : HttpStatus.BAD_REQUEST;
+            return ResponseEntity.status(status).body(error);
+        }
     }
 }

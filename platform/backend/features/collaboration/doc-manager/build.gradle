@@ -16,8 +16,8 @@ dependencies {
     
     // Template rendering (06a print templates)
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-    // PDFBox 3-compatible fork (Boot manages pdfbox 3.x; danfickle 1.0.10 is PDFBox 2-only)
-    implementation 'io.github.openhtmltopdf:openhtmltopdf-pdfbox:1.1.65'
+    // PDF rendering is delegated to Gotenberg (headless Chromium) over HTTP, so the browser
+    // preview and the printed PDF share one engine. No in-process PDF library.
     
     // Database
     implementation 'org.postgresql:postgresql'

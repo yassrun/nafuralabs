@@ -5,6 +5,7 @@ import static ma.nafura.platform.collaboration.docmanager.template.TemplateVaria
 import java.util.List;
 import java.util.Set;
 import ma.nafura.platform.collaboration.docmanager.api.response.TemplateVariableDescriptor;
+import ma.nafura.platform.collaboration.docmanager.template.PrintEntityTypeDescriptor;
 import ma.nafura.platform.collaboration.docmanager.template.TemplateVariableCatalogContributor;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +18,31 @@ public class EtudesTemplateVariableCatalogContributor implements TemplateVariabl
                 EtudesPrintEntityTypes.DEVIS,
                 EtudesPrintEntityTypes.DOSSIER_BORDEREAU,
                 EtudesPrintEntityTypes.DOSSIER_SYNTHESE);
+    }
+
+    @Override
+    public String moduleName() {
+        return "etudes";
+    }
+
+    @Override
+    public List<PrintEntityTypeDescriptor> entityTypeDescriptors() {
+        return List.of(
+                new PrintEntityTypeDescriptor(
+                        EtudesPrintEntityTypes.DEVIS,
+                        "administration.templates.entityTypes.devis",
+                        "etudes",
+                        true),
+                new PrintEntityTypeDescriptor(
+                        EtudesPrintEntityTypes.DOSSIER_BORDEREAU,
+                        "administration.templates.entityTypes.dossier_etude_bordereau",
+                        "etudes",
+                        true),
+                new PrintEntityTypeDescriptor(
+                        EtudesPrintEntityTypes.DOSSIER_SYNTHESE,
+                        "administration.templates.entityTypes.dossier_etude_synthese",
+                        "etudes",
+                        true));
     }
 
     @Override

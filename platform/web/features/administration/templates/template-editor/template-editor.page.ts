@@ -1,5 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnDestroy, OnInit, signal, viewChild, computed, DestroyRef } from '@angular/core';
+import {
+  Component,
+  HostListener,
+  inject,
+  OnDestroy,
+  OnInit,
+  signal,
+  viewChild,
+  computed,
+  DestroyRef,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
@@ -15,8 +25,14 @@ import { firstValueFrom } from 'rxjs';
 
 import { CodeEditorComponent, PageHeaderComponent, PageShellComponent } from '@lib/anatomy';
 import { ToastService } from '@lib/anatomy';
+import type { CanComponentDeactivate } from '@core/guards/unsaved-changes.guard';
 
-import type { PrintTemplate, TemplateVariable } from '../models';
+import type {
+  PrintEntityType,
+  PrintTemplate,
+  TemplateRenderError,
+  TemplateVariable,
+} from '../models';
 import { TemplatesApiService, TemplatesFacade } from '../services';
 import {
   CreateTemplateDialogComponent,
@@ -26,6 +42,8 @@ import { TemplateVariablesSidebarComponent } from '../components';
 
 const PAPER_SIZES = ['A4', 'Letter', 'Legal'];
 const ORIENTATIONS = ['portrait', 'landscape'];
+/** Long enough to not render on every keystroke, short enough to feel live. */
+const PREVIEW_DEBOUNCE_MS = 400;
 
 @Component({
   selector: 'app-template-editor-page',
@@ -72,12 +90,33 @@ const ORIENTATIONS = ['portrait', 'landscape'];
               <mat-form-field appearance="outline">
                 <mat-label>{{ 'administration.templates.fields.entityType' | translate }}</mat-label>
                 <mat-select formControlName="entityType">
-                  @for (et of entityTypes(); track et) {
-                    <mat-option [value]="et">{{ et }}</mat-option>
+                  @for (et of entityTypes(); track et.code) {
+                    <mat-option [value]="et.code">{{ et.labelKey | translate }}</mat-option>
                   }
                 </mat-select>
+                @if (entityTypes().length === 0) {
+                  <mat-hint>{{ 'administration.templates.editor.noEntityTypes' | translate }}</mat-hint>
+                }
               </mat-form-field>
             </form>
+
+            @if (isDirty()) {
+              <p class="template-editor__dirty" role="status">
+                {{ 'administration.templates.editor.unsavedChanges' | translate }}
+              </p>
+            }
+
+            @if (renderError(); as err) {
+              <div class="template-editor__error" role="alert">
+                <strong>{{ 'administration.templates.editor.renderError' | translate }}</strong>
+                <p>{{ err.message }}</p>
+                @if (err.line) {
+                  <button type="button" class="template-editor__error-line" (click)="goToLine(err.line!)">
+                    {{ 'administration.templates.editor.goToLine' | translate: { line: err.line } }}
+                  </button>
+                }
+              </div>
+            }
 
             <div class="template-editor__editor-row">
               <div class="template-editor__editor-wrap">
@@ -87,10 +126,10 @@ const ORIENTATIONS = ['portrait', 'landscape'];
                   [disabled]="isSystem()"
                   [rows]="18"
                   placeholder="<div>HTML + Thymeleaf...</div>"
-                  (valueChange)="templateBody.set($event)">
+                  (valueChange)="onBodyChange($event)">
                 </nf-code-editor>
               </div>
-              <div class="template-editor__variables">
+              <div class="template-editor__variables" [attr.aria-busy]="variablesLoading()">
                 <app-template-variables-sidebar
                   [variables]="variables()"
                   (insertSnippet)="onInsertSnippet($event)">
@@ -127,8 +166,8 @@ const ORIENTATIONS = ['portrait', 'landscape'];
                     {{ 'administration.templates.editor.save' | translate }}
                   </button>
                 }
-                <button mat-button (click)="refreshPreview()" [disabled]="previewLoading()">
-                  {{ 'administration.templates.editor.preview' | translate }}
+                <button mat-button (click)="previewPdf()" [disabled]="previewLoading()">
+                  {{ 'administration.templates.editor.previewPdf' | translate }}
                 </button>
               </div>
             </div>
@@ -137,15 +176,26 @@ const ORIENTATIONS = ['portrait', 'landscape'];
           <div class="template-editor__preview">
             <div class="template-editor__preview-header">
               <span>{{ 'administration.templates.editor.preview' | translate }}</span>
+              @if (previewLoading()) {
+                <span class="template-editor__preview-status">
+                  {{ 'administration.templates.editor.previewLoading' | translate }}
+                </span>
+              }
             </div>
             @if (safePreviewUrl()) {
               <iframe
                 [src]="safePreviewUrl()"
                 class="template-editor__preview-frame"
-                title="PDF Preview">
+                title="PDF">
               </iframe>
-            } @else if (previewLoading()) {
-              <p class="template-editor__preview-loading">{{ 'Loading...' | translate }}</p>
+            } @else if (previewHtml()) {
+              <!-- Draft preview: sandboxed without allow-scripts. Rendered markup is data. -->
+              <iframe
+                [srcdoc]="previewHtml()"
+                sandbox="allow-same-origin"
+                class="template-editor__preview-frame"
+                [title]="'administration.templates.editor.preview' | translate">
+              </iframe>
             } @else {
               <p class="template-editor__preview-empty">{{ 'administration.templates.editor.previewEmpty' | translate }}</p>
             }
@@ -177,6 +227,11 @@ const ORIENTATIONS = ['portrait', 'landscape'];
         margin: 0.5rem 0 0;
         font-size: 0.8125rem;
         color: var(--nf-text-muted);
+      }
+      .template-editor__dirty {
+        margin: 0;
+        font-size: 0.8125rem;
+        color: var(--nf-warning, #b45309);
       }
       .template-editor__main {
         display: grid;
@@ -215,7 +270,7 @@ const ORIENTATIONS = ['portrait', 'landscape'];
     `,
   ],
 })
-export class TemplateEditorPage implements OnInit, OnDestroy {
+export class TemplateEditorPage implements OnInit, OnDestroy, CanComponentDeactivate {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
@@ -231,10 +286,29 @@ export class TemplateEditorPage implements OnInit, OnDestroy {
 
   readonly templateBody = signal('');
   readonly variables = signal<TemplateVariable[]>([]);
+  readonly variablesLoading = signal(false);
   readonly saving = signal(false);
   readonly previewLoading = signal(false);
   readonly previewUrl = signal<string | null>(null);
   private objectUrl: string | null = null;
+
+  /** Last saved/loaded state; `isDirty` is measured against it. */
+  private readonly baseline = signal<EditorSnapshot | null>(null);
+  /** Mirrors the form so dirtiness can be computed (form values are not signals). */
+  private readonly formSnapshot = signal<Partial<EditorSnapshot>>({});
+
+  readonly isDirty = computed(() => {
+    const base = this.baseline();
+    if (!base || this.isSystem()) return false;
+    const current = { ...this.formSnapshot(), templateBody: this.templateBody() };
+    return (
+      current.name !== base.name ||
+      current.entityType !== base.entityType ||
+      current.paperSize !== base.paperSize ||
+      current.orientation !== base.orientation ||
+      current.templateBody !== base.templateBody
+    );
+  });
 
   readonly safePreviewUrl = computed<SafeResourceUrl | null>(() => {
     const url = this.previewUrl();
@@ -242,7 +316,15 @@ export class TemplateEditorPage implements OnInit, OnDestroy {
   });
 
   readonly isSystem = computed(() => (this.facade.current()?.isSystem ?? false));
-  readonly entityTypes = signal<string[]>([]);
+  readonly entityTypes = signal<PrintEntityType[]>([]);
+
+  /** Live HTML preview of the draft; the PDF is only produced on demand. */
+  readonly previewHtml = signal<string>('');
+  readonly renderError = signal<TemplateRenderError | null>(null);
+  /** null = sample data; set = preview against that real record. */
+  readonly sampleEntityId = signal<string | null>(null);
+  private previewTimer: ReturnType<typeof setTimeout> | null = null;
+  private previewAbort: AbortController | null = null;
 
   readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(200)]],
@@ -272,12 +354,39 @@ export class TemplateEditorPage implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.revokePreviewUrl();
+    if (this.previewTimer) clearTimeout(this.previewTimer);
+    this.previewAbort?.abort();
   }
 
   ngOnInit(): void {
     this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
       void this.loadTemplate(params.get('id'));
     });
+
+    this.form.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.formSnapshot.set(this.form.getRawValue());
+    });
+
+    // The variable catalog is per entity type: reload it whenever the type changes,
+    // otherwise the sidebar keeps advertising variables that no longer resolve.
+    this.form.controls.entityType.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((entityType) => {
+        void this.reloadVariables(entityType);
+      });
+  }
+
+  /** Used by `unsavedChangesGuard` on the route. */
+  hasUnsavedChanges(): boolean {
+    return this.isDirty();
+  }
+
+  @HostListener('window:keydown', ['$event'])
+  onKeydown(event: KeyboardEvent): void {
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') {
+      event.preventDefault();
+      if (!this.isSystem() && !this.saving()) void this.save();
+    }
   }
 
   private async loadTemplate(id: string | null): Promise<void> {
@@ -291,12 +400,17 @@ export class TemplateEditorPage implements OnInit, OnDestroy {
       await this.router.navigate(['/administration/templates']);
       return;
     }
-    this.form.patchValue({
-      name: template.name,
-      entityType: template.entityType,
-      paperSize: template.paperSize ?? 'A4',
-      orientation: (template.orientation ?? 'portrait').toLowerCase(),
-    });
+    // Silent patch: the catalog is loaded explicitly below, and the baseline is taken from
+    // getRawValue(), so firing valueChanges here would only duplicate the request.
+    this.form.patchValue(
+      {
+        name: template.name,
+        entityType: template.entityType,
+        paperSize: template.paperSize ?? 'A4',
+        orientation: (template.orientation ?? 'portrait').toLowerCase(),
+      },
+      { emitEvent: false }
+    );
     // Re-enable controls that may stay disabled after visiting a system template
     if (template.isSystem) {
       this.form.controls.name.disable({ emitEvent: false });
@@ -310,14 +424,52 @@ export class TemplateEditorPage implements OnInit, OnDestroy {
       this.form.controls.orientation.enable({ emitEvent: false });
     }
     this.templateBody.set(template.templateBody ?? '');
-    const types = await this.api.getEntityTypes();
-    if (template.entityType && !types.includes(template.entityType)) {
-      this.entityTypes.set([template.entityType, ...types]);
-    } else {
-      this.entityTypes.set(types);
-    }
-    this.variables.set(await this.loadVariables(template.entityType));
+    const types = await this.api.getEntityTypes().catch((): PrintEntityType[] => []);
+    // A template may carry a type whose module is no longer installed: keep it selectable
+    // so opening the template does not silently rewrite its type.
+    const known = types.some((t) => t.code === template.entityType);
+    this.entityTypes.set(
+      template.entityType && !known
+        ? [orphanEntityType(template.entityType), ...types]
+        : types
+    );
+    this.markPristine();
+    await this.reloadVariables(template.entityType);
     await this.refreshPreview();
+  }
+
+
+  /** Snapshot the current state as "saved", so `isDirty` reads false until the next edit. */
+  private markPristine(): void {
+    const raw = this.form.getRawValue();
+    this.formSnapshot.set(raw);
+    this.baseline.set({
+      name: raw.name,
+      entityType: raw.entityType,
+      paperSize: raw.paperSize,
+      orientation: raw.orientation,
+      templateBody: this.templateBody(),
+    });
+  }
+
+  private async reloadVariables(entityType: string | null | undefined): Promise<void> {
+    if (!entityType) {
+      this.variables.set([]);
+      return;
+    }
+    this.variablesLoading.set(true);
+    try {
+      this.variables.set(await this.api.getVariables(entityType));
+    } catch {
+      this.variables.set([]);
+    } finally {
+      this.variablesLoading.set(false);
+    }
+  }
+
+  onBodyChange(value: string): void {
+    this.templateBody.set(value);
+    this.schedulePreview();
   }
 
   onInsertSnippet(snippet: string): void {
@@ -353,6 +505,7 @@ export class TemplateEditorPage implements OnInit, OnDestroy {
         paperSize: this.form.controls.paperSize.value,
         orientation: this.form.controls.orientation.value,
       });
+      this.markPristine();
       this.toast.success(this.i18n.instant('administration.templates.saveSuccess'));
       await this.refreshPreview();
     } catch {
@@ -362,31 +515,76 @@ export class TemplateEditorPage implements OnInit, OnDestroy {
     }
   }
 
+  /** Debounced live preview of the draft. Never renders a PDF: that is on demand only. */
+  private schedulePreview(): void {
+    if (this.previewTimer) clearTimeout(this.previewTimer);
+    this.previewTimer = setTimeout(() => void this.refreshPreview(), PREVIEW_DEBOUNCE_MS);
+  }
+
   async refreshPreview(): Promise<void> {
-    const current = this.facade.current();
-    if (!current) return;
+    const body = this.templateBody();
+    const entityType = this.form.controls.entityType.value;
+    if (!body.trim() || !entityType) {
+      this.previewHtml.set('');
+      return;
+    }
+    // Drop the render still in flight: only the latest keystroke matters.
+    this.previewAbort?.abort();
+    this.previewAbort = new AbortController();
+
     this.previewLoading.set(true);
     this.revokePreviewUrl();
     this.previewUrl.set(null);
     try {
-      const blob = await this.api.getPreviewBlob(current.id);
+      const html = await this.api.previewDraftHtml({
+        templateBody: body,
+        entityType,
+        sampleEntityId: this.sampleEntityId() ?? undefined,
+      });
+      this.previewHtml.set(html);
+      this.renderError.set(null);
+    } catch (error) {
+      this.renderError.set(toRenderError(error));
+    } finally {
+      this.previewLoading.set(false);
+    }
+  }
+
+  /** Full-fidelity render, explicit only: it costs a Chromium conversion. */
+  async previewPdf(): Promise<void> {
+    const body = this.templateBody();
+    const entityType = this.form.controls.entityType.value;
+    if (!body.trim() || !entityType) return;
+    this.previewLoading.set(true);
+    try {
+      const blob = await this.api.previewDraftPdf({
+        templateBody: body,
+        entityType,
+        paperSize: this.form.controls.paperSize.value,
+        orientation: this.form.controls.orientation.value,
+        marginsCss: this.marginsCss(),
+        sampleEntityId: this.sampleEntityId() ?? undefined,
+      });
+      this.revokePreviewUrl();
       this.objectUrl = URL.createObjectURL(blob);
       this.previewUrl.set(this.objectUrl);
-    } catch {
-      this.previewUrl.set(null);
+      this.renderError.set(null);
+    } catch (error) {
+      this.renderError.set(toRenderError(error));
       this.toast.error(this.i18n.instant('administration.templates.editor.previewError'));
     } finally {
       this.previewLoading.set(false);
     }
   }
 
-  private async loadVariables(entityType: string): Promise<TemplateVariable[]> {
-    try {
-      const res = await this.api.getVariables(entityType);
-      return flattenCatalog(res);
-    } catch {
-      return [];
-    }
+  /** Places the caret on the line the backend pointed at. */
+  goToLine(line: number): void {
+    this.codeEditor()?.revealLine(line);
+  }
+
+  private marginsCss(): string {
+    const v = this.form.getRawValue();
+    return `${v.marginTop}mm ${v.marginRight}mm ${v.marginBottom}mm ${v.marginLeft}mm`;
   }
 
   private revokePreviewUrl(): void {
@@ -397,34 +595,35 @@ export class TemplateEditorPage implements OnInit, OnDestroy {
   }
 }
 
-/** Backend returns { entity, tenant, system }; UI expects a flat TemplateVariable[]. */
-function flattenCatalog(res: unknown): TemplateVariable[] {
-  if (!res || typeof res !== 'object') return [];
-  const r = res as Record<string, unknown>;
-  if (Array.isArray(r['variables'])) {
-    return r['variables'] as TemplateVariable[];
+/**
+ * A type no module declares any more. Shown with its raw code — there is no label to translate,
+ * and hiding it would silently change the template's type on the next save.
+ */
+function orphanEntityType(code: string): PrintEntityType {
+  return { code, labelKey: code, module: '', supportsRealPreview: false };
+}
+
+/** Unwrap the backend's TemplateRenderError, falling back to a generic message. */
+function toRenderError(error: unknown): TemplateRenderError {
+  const body = (error as { error?: unknown })?.error;
+  if (body && typeof body === 'object' && 'message' in body) {
+    return body as TemplateRenderError;
   }
-  const out: TemplateVariable[] = [];
-  for (const group of ['entity', 'tenant', 'system'] as const) {
-    const list = r[group];
-    if (!Array.isArray(list)) continue;
-    for (const item of list) {
-      if (!item || typeof item !== 'object') continue;
-      const v = item as Record<string, unknown>;
-      const path = typeof v['path'] === 'string' ? v['path'] : '';
-      if (!path) continue;
-      out.push({
-        path,
-        label: typeof v['label'] === 'string' ? v['label'] : undefined,
-        sampleValue:
-          typeof v['example'] === 'string'
-            ? v['example']
-            : typeof v['sampleValue'] === 'string'
-              ? v['sampleValue']
-              : undefined,
-        group,
-      });
+  if (typeof body === 'string') {
+    try {
+      return JSON.parse(body) as TemplateRenderError;
+    } catch {
+      return { message: body, phase: 'PARSE' };
     }
   }
-  return out;
+  return { message: String((error as Error)?.message ?? error), phase: 'PARSE' };
+}
+
+/** Editor state compared to detect unsaved changes. */
+interface EditorSnapshot {
+  name: string;
+  entityType: string;
+  paperSize: string;
+  orientation: string;
+  templateBody: string;
 }

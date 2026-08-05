@@ -1,0 +1,71 @@
+# Gotenberg — headless Chromium used to render document PDFs.
+#
+# Deliberately ClusterIP and never exposed through the Ingress: it converts arbitrary HTML on
+# request. The backend also refuses any document referencing a remote URL before sending it here
+# (see HtmlOutboundGuard), so a template cannot be used to reach internal services.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gotenberg
+  labels:
+    app: gotenberg
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gotenberg
+  template:
+    metadata:
+      labels:
+        app: gotenberg
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+      containers:
+        - name: gotenberg
+          image: gotenberg/gotenberg:8
+          args:
+            # No API route beyond Chromium HTML conversion, and no outbound fetches from the
+            # rendered page.
+            - "gotenberg"
+            - "--chromium-deny-list=.*"
+            - "--chromium-disable-javascript=true"
+            - "--api-timeout=30s"
+          ports:
+            - name: http
+              containerPort: 3000
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gotenberg
+  labels:
+    app: gotenberg
+spec:
+  type: ClusterIP
+  selector:
+    app: gotenberg
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http

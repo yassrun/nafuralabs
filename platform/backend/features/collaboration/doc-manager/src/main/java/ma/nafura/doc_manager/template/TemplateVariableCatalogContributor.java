@@ -16,4 +16,20 @@ public interface TemplateVariableCatalogContributor {
 
     /** Entity.* placeholders for the given type; empty if unsupported. */
     List<TemplateVariableDescriptor> entityVariables(String entityType);
+
+    /**
+     * Display metadata for the declared types. Override to give the admin UI a translatable
+     * label; the default derives a conventional key so existing contributors keep working.
+     */
+    default List<PrintEntityTypeDescriptor> entityTypeDescriptors() {
+        return supportedEntityTypes().stream()
+                .map(code -> PrintEntityTypeDescriptor.of(
+                        code, "administration.templates.entityTypes." + code, moduleName()))
+                .toList();
+    }
+
+    /** Owning module, used only in startup diagnostics. */
+    default String moduleName() {
+        return getClass().getSimpleName();
+    }
 }

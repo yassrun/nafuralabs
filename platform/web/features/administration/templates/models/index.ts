@@ -1,7 +1,12 @@
 export type {
+  PrintEntityType,
   PrintTemplate,
   PrintTemplateCreate,
   PrintTemplateUpdate,
+  SampleRecord,
+  TemplateRenderError,
   TemplateVariable,
-  TemplateVariablesResponse,
+  TemplateVariableCatalogResponse,
+  TemplateVariableDescriptor,
+  TemplateVariableGroup,
 } from './print-template.model';

@@ -1,18 +1,16 @@
 package ma.nafura.platform.collaboration.docmanager.template;
 
-import ma.nafura.platform.appsettings.domain.model.TenantAsset;
-import ma.nafura.platform.appsettings.repository.TenantAssetRepository;
+import ma.nafura.platform.collaboration.docmanager.api.response.TemplateVariableDescriptor;
 import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.platform.framework.context.UserContext;
-import ma.nafura.platform.tenancy.domain.model.Tenant;
-import ma.nafura.platform.tenancy.repository.TenantRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.util.Base64;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -23,31 +21,39 @@ import java.util.UUID;
 @Service
 public class TemplateVariableResolver {
 
-    private final TenantRepository tenantRepository;
-    private final TenantAssetRepository tenantAssetRepository;
-
-    @Autowired(required = false)
-    private EntityDataProvider entityDataProvider;
+    /** One provider per product module; resolved by {@link EntityDataProvider#supports(String)}. */
+    private final List<EntityDataProvider> entityDataProviders;
+    /** Merged lowest-order-first to build {@code tenant.*}. */
+    private final List<TenantIdentityProvider> identityProviders;
 
     public TemplateVariableResolver(
-            TenantRepository tenantRepository,
-            @Autowired(required = false) TenantAssetRepository tenantAssetRepository) {
-        this.tenantRepository = tenantRepository;
-        this.tenantAssetRepository = tenantAssetRepository;
+            List<EntityDataProvider> entityDataProviders,
+            List<TenantIdentityProvider> identityProviders) {
+        this.entityDataProviders = entityDataProviders != null ? entityDataProviders : List.of();
+        this.identityProviders = identityProviders != null ? identityProviders : List.of();
+    }
+
+    /** First provider declaring support for the type, or empty when none does. */
+    Optional<EntityDataProvider> providerFor(String entityType) {
+        if (entityType == null || entityType.isBlank()) {
+            return Optional.empty();
+        }
+        return entityDataProviders.stream()
+                .filter(p -> p.supports(entityType))
+                .findFirst();
     }
 
     /**
-     * Build the full variable map for Thymeleaf: entity, tenant, today, now, currentUser.
+     * Build the full variable map for Thymeleaf: entity, document, tenant, today, now, currentUser.
      */
     public Map<String, Object> resolve(String entityType, UUID entityId) {
-        Map<String, Object> vars = new HashMap<>();
-
+        Map<String, Object> vars = commonVariables();
         vars.put("entity", fetchEntityData(entityType, entityId));
-        vars.put("tenant", fetchTenantData());
-        vars.put("today", LocalDate.now());
-        vars.put("now", OffsetDateTime.now());
-        vars.put("currentUser", UserContext.getUserEmail() != null ? UserContext.getUserEmail() : "");
-
+        vars.put(
+                "document",
+                providerFor(entityType)
+                        .flatMap(p -> p.getDocument(entityType, entityId))
+                        .orElse(null));
         return vars;
     }
 
@@ -55,8 +61,16 @@ public class TemplateVariableResolver {
      * Build variable map for preview (sample entity data, real tenant/system).
      */
     public Map<String, Object> resolveForPreview(String entityType) {
-        Map<String, Object> vars = new HashMap<>();
+        Map<String, Object> vars = commonVariables();
         vars.put("entity", generateSampleEntityData(entityType));
+        vars.put(
+                "document",
+                providerFor(entityType).flatMap(p -> p.getSampleDocument(entityType)).orElse(null));
+        return vars;
+    }
+
+    private Map<String, Object> commonVariables() {
+        Map<String, Object> vars = new HashMap<>();
         vars.put("tenant", fetchTenantData());
         vars.put("today", LocalDate.now());
         vars.put("now", OffsetDateTime.now());
@@ -65,60 +79,76 @@ public class TemplateVariableResolver {
     }
 
     private Map<String, Object> fetchEntityData(String entityType, UUID entityId) {
-        if (entityDataProvider == null) {
-            return new HashMap<>();
-        }
-        Map<String, Object> data = entityDataProvider.getEntityData(entityType, entityId);
-        return data != null ? data : new HashMap<>();
+        // Optional.map already drops a null result, so a missing or empty provider both
+        // fall through to an empty map.
+        return providerFor(entityType)
+                .map(p -> p.getEntityData(entityType, entityId))
+                .<Map<String, Object>>map(HashMap::new)
+                .orElseGet(HashMap::new);
     }
 
+    /**
+     * Merge every identity provider, lowest {@code order()} first. A product provider that
+     * knows the legal identity wins; the platform default only fills what is still missing,
+     * so {@code tenant.logo} keeps working even when a product supplies the rest.
+     */
     private Map<String, Object> fetchTenantData() {
-        Map<String, Object> tenant = new HashMap<>();
+        Map<String, Object> tenant = new LinkedHashMap<>();
+        UUID tenantId;
         try {
-            UUID tenantId = TenantContext.getTenantId();
-            Optional<Tenant> t = tenantRepository.findById(tenantId);
-            if (t.isPresent()) {
-                Tenant ten = t.get();
-                tenant.put("name", ten.getName());
-                tenant.put("key", ten.getKey());
-                tenant.put("logo", resolveLogoDataUri(tenantId));
-                tenant.put("address", ""); // optional: from settings
-            }
+            tenantId = TenantContext.getTenantId();
         } catch (Exception ignored) {
-            // no tenant context or tenant not found
+            return tenant;
+        }
+        if (tenantId == null) {
+            return tenant;
+        }
+        for (TenantIdentityProvider provider : orderedIdentityProviders()) {
+            try {
+                Map<String, Object> identity = provider.identity(tenantId);
+                if (identity == null) {
+                    continue;
+                }
+                identity.forEach((key, value) -> {
+                    Object existing = tenant.get(key);
+                    if (existing == null || String.valueOf(existing).isBlank()) {
+                        tenant.put(key, value);
+                    }
+                });
+            } catch (Exception ignored) {
+                // a failing provider must not break document rendering
+            }
         }
         return tenant;
     }
 
-    /**
-     * Embed logo as data URI so OpenHTMLToPDF can render without HTTP auth.
-     * Source: Administration → Paramètres → Branding logo upload.
-     */
-    private String resolveLogoDataUri(UUID tenantId) {
-        if (tenantAssetRepository == null || tenantId == null) {
-            return "";
-        }
-        try {
-            Optional<TenantAsset> asset = tenantAssetRepository.findByTenantIdAndAssetType(tenantId, "logo");
-            if (asset.isEmpty() || asset.get().getData() == null || asset.get().getData().length == 0) {
-                return "";
+    private List<TenantIdentityProvider> orderedIdentityProviders() {
+        return identityProviders.stream()
+                .sorted(Comparator.comparingInt(TenantIdentityProvider::order))
+                .toList();
+    }
+
+    /** Catalog entries for {@code tenant.*}, derived from the same providers that fill them. */
+    public List<TemplateVariableDescriptor> describeTenantVariables() {
+        Map<String, TemplateVariableDescriptor> byPath = new LinkedHashMap<>();
+        for (TenantIdentityProvider provider : orderedIdentityProviders()) {
+            List<TemplateVariableDescriptor> described = provider.describe();
+            if (described == null) {
+                continue;
             }
-            TenantAsset a = asset.get();
-            String ct = a.getContentType() != null && !a.getContentType().isBlank()
-                    ? a.getContentType()
-                    : "image/png";
-            return "data:" + ct + ";base64," + Base64.getEncoder().encodeToString(a.getData());
-        } catch (Exception ignored) {
-            return "";
+            for (TemplateVariableDescriptor d : described) {
+                byPath.putIfAbsent(d.getPath(), d);
+            }
         }
+        return List.copyOf(byPath.values());
     }
 
     private Map<String, Object> generateSampleEntityData(String entityType) {
-        if (entityDataProvider != null) {
-            Map<String, Object> sample = entityDataProvider.getSampleEntityData(entityType);
-            if (sample != null && !sample.isEmpty()) {
-                return sample;
-            }
+        Optional<Map<String, Object>> fromProvider = providerFor(entityType)
+                .map(p -> p.getSampleEntityData(entityType))
+                .filter(s -> s != null && !s.isEmpty());
+        if (fromProvider.isPresent()) {
+            return fromProvider.get();
         }
         Map<String, Object> sample = new HashMap<>();
         sample.put("code", "SAMPLE-001");

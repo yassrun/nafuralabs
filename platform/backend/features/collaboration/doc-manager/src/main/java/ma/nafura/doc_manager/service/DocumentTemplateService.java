@@ -4,6 +4,7 @@ import ma.nafura.platform.collaboration.docmanager.api.request.DocumentTemplateC
 import ma.nafura.platform.collaboration.docmanager.api.request.DocumentTemplateUpdateRequest;
 import ma.nafura.platform.collaboration.docmanager.domain.model.DocumentTemplate;
 import ma.nafura.platform.collaboration.docmanager.repository.DocumentTemplateRepository;
+import ma.nafura.platform.collaboration.docmanager.template.DocumentFragmentService;
 import ma.nafura.platform.collaboration.docmanager.template.DocumentTemplateBootstrap;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.data.domain.Page;
@@ -19,12 +20,15 @@ public class DocumentTemplateService {
 
     private final DocumentTemplateRepository repository;
     private final List<DocumentTemplateBootstrap> bootstraps;
+    private final DocumentFragmentService fragmentService;
 
     public DocumentTemplateService(
             DocumentTemplateRepository repository,
-            List<DocumentTemplateBootstrap> bootstraps) {
+            List<DocumentTemplateBootstrap> bootstraps,
+            DocumentFragmentService fragmentService) {
         this.repository = repository;
         this.bootstraps = bootstraps != null ? bootstraps : List.of();
+        this.fragmentService = fragmentService;
     }
 
     public Page<DocumentTemplate> list(String entityType, Pageable pageable) {
@@ -125,6 +129,8 @@ public class DocumentTemplateService {
     }
 
     private void ensureDefaults(UUID tenantId) {
+        // Shared header/footer first: seeded templates reference them.
+        fragmentService.ensureDefaults(tenantId);
         for (DocumentTemplateBootstrap bootstrap : bootstraps) {
             bootstrap.ensureDefaults(tenantId);
         }

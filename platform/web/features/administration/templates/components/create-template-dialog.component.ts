@@ -107,7 +107,10 @@ export class CreateTemplateDialogComponent implements OnInit {
   saving = signal(false);
 
   async ngOnInit(): Promise<void> {
-    this.entityTypes = await this.api.getEntityTypes();
+    this.entityTypes = await this.api
+      .getEntityTypes()
+      .then((types) => types.map((t) => t.code))
+      .catch((): string[] => []);
     const clone = this.data?.cloneFrom;
     if (clone) {
       const suffix = Date.now().toString(36).slice(-4);

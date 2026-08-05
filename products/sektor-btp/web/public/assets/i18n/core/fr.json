@@ -530,7 +530,18 @@
         "save": "Enregistrer le modèle",
         "system": "Modèle système (lecture seule)",
         "systemHint": "Dupliquez-le pour éditer l'HTML (logo, en-tête, tableaux…). Le logo vient aussi de Administration → Paramètres → Branding.",
-        "logoHint": "Logo : uploadez-le dans Paramètres → Branding. Dans le HTML, utilisez <img th:src=\"${tenant.logo}\" />."
+        "logoHint": "Logo : uploadez-le dans Paramètres → Branding. Dans le HTML, utilisez <img th:src=\"${tenant.logo}\" />.",
+        "unsavedChanges": "Modifications non enregistrées.",
+        "noEntityTypes": "Aucun type de document déclaré par les modules installés.",
+        "variableGroups": {
+          "entity": "Document",
+          "tenant": "Société",
+          "system": "Système"
+        },
+        "previewLoading": "Génération…",
+        "previewPdf": "Aperçu PDF",
+        "renderError": "Erreur de rendu",
+        "goToLine": "Aller à la ligne {line}"
       },
       "paperSize": "Format",
       "orientation": "Orientation",
@@ -575,6 +586,11 @@
         "confirmMessage": "Supprimer « {name} » ? Cette action est irréversible.",
         "success": "Modèle supprimé.",
         "inUse": "Ce modèle est utilisé et ne peut pas être supprimé."
+      },
+      "entityTypes": {
+        "devis": "Devis",
+        "dossier_etude_bordereau": "Bordereau d'étude",
+        "dossier_etude_synthese": "Synthèse d'étude"
       }
     },
     "emailTemplates": {

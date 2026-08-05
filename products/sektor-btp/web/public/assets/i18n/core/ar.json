@@ -547,7 +547,18 @@
         "system": "نموذج النظام (للقراءة فقط)",
         "downloadHtml": "تحميل HTML",
         "openInBrowser": "فتح في المتصفح",
-        "mockHint": "وضع العرض: التعديلات محفوظة محلياً (localStorage). استخدم « فتح في المتصفح » ثم Ctrl+P لإنتاج PDF."
+        "mockHint": "وضع العرض: التعديلات محفوظة محلياً (localStorage). استخدم « فتح في المتصفح » ثم Ctrl+P لإنتاج PDF.",
+        "unsavedChanges": "تغييرات غير محفوظة.",
+        "noEntityTypes": "لا يوجد نوع مستند معلن من الوحدات المثبتة.",
+        "variableGroups": {
+          "entity": "المستند",
+          "tenant": "الشركة",
+          "system": "النظام"
+        },
+        "previewLoading": "جارٍ التوليد…",
+        "previewPdf": "معاينة PDF",
+        "renderError": "خطأ في العرض",
+        "goToLine": "الانتقال إلى السطر {line}"
       },
       "paperSize": "الحجم",
       "orientation": "الاتجاه",
@@ -590,6 +601,11 @@
         "confirmMessage": "حذف « {name} »؟ هذا الإجراء لا يمكن التراجع عنه.",
         "success": "تم حذف النموذج.",
         "inUse": "هذا النموذج قيد الاستخدام ولا يمكن حذفه."
+      },
+      "entityTypes": {
+        "devis": "عرض سعر",
+        "dossier_etude_bordereau": "جدول الكميات",
+        "dossier_etude_synthese": "ملخص الدراسة"
       }
     },
     "emailTemplates": {
