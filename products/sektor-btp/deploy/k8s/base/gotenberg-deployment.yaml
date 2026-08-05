@@ -26,10 +26,12 @@ spec:
         - name: gotenberg
           image: gotenberg/gotenberg:8
           args:
-            # No API route beyond Chromium HTML conversion, and no outbound fetches from the
-            # rendered page.
             - "gotenberg"
-            - "--chromium-deny-list=.*"
+            # Do NOT set --chromium-deny-list=".*": it also matches the file:// URL Gotenberg
+            # writes to its own temp directory to render the page, so every conversion fails
+            # with 403. The shipped default already denies file:// outside that directory.
+            # Outbound references are refused earlier anyway, by HtmlOutboundGuard, before the
+            # document is sent here.
             - "--chromium-disable-javascript=true"
             - "--api-timeout=30s"
           ports:
