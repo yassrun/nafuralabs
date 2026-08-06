@@ -19,6 +19,9 @@
     .totaux .grand { font-weight: bold; font-size: 11pt; border-top: 1px solid #222; }
     .lettres { margin-top: 12px; font-size: 9pt; }
     .pied { margin-top: 24px; font-size: 8pt; color: #666; }
+    table.lines thead { display: table-header-group; }
+    table.lines tr { break-inside: avoid; }
+    .totaux, .lettres { break-inside: avoid; }
   </style>
 </head>
 <body>
@@ -27,9 +30,9 @@
     <div th:utext="${fragments.HEADER_DEFAULT}"></div>
     <div style="text-align:right">
       <h1>Facture <span th:text="${entity.numero}">FAC-001</span></h1>
-      <div class="muted">Émise le <span th:text="${entity.dateEmission}">—</span></div>
+      <div class="muted">Émise le <span th:text="${#temporals.format(entity.dateEmission, 'dd/MM/yyyy')}">—</span></div>
       <div class="muted" th:if="${entity.dateEcheance}">
-        Échéance le <span th:text="${entity.dateEcheance}">—</span>
+        Échéance le <span th:text="${#temporals.format(entity.dateEcheance, 'dd/MM/yyyy')}">—</span>
       </div>
       <div class="muted" th:if="${entity.chantierCode}">
         Chantier <span th:text="${entity.chantierCode}">—</span>
@@ -67,9 +70,9 @@
       <tr th:each="l : ${entity.lignes}">
         <td th:text="${l.designation}"></td>
         <td th:text="${l.unite}"></td>
-        <td class="num" th:text="${l.quantite}"></td>
-        <td class="num" th:text="${l.prixUnitaireHt}"></td>
-        <td class="num" th:text="${l.totalHt}"></td>
+        <td class="num" th:text="${#numbers.formatDecimal(l.quantite, 1, 'WHITESPACE', 2, 'COMMA')}"></td>
+        <td class="num" th:text="${#numbers.formatDecimal(l.prixUnitaireHt, 1, 'WHITESPACE', 2, 'COMMA')}"></td>
+        <td class="num" th:text="${#numbers.formatDecimal(l.totalHt, 1, 'WHITESPACE', 2, 'COMMA')}"></td>
       </tr>
     </tbody>
   </table>
@@ -77,31 +80,31 @@
   <table class="totaux">
     <tr>
       <td>Total HT</td>
-      <td class="num" th:text="${entity.totalHt}">0</td>
+      <td class="num" th:text="${#numbers.formatDecimal(entity.totalHt, 1, 'WHITESPACE', 2, 'COMMA')}">0</td>
     </tr>
     <tr th:if="${entity.retenueGarantieMontant}">
-      <td>Retenue de garantie (<span th:text="${entity.retenueGarantieTaux}">7</span> %)</td>
-      <td class="num" th:text="'- ' + ${entity.retenueGarantieMontant}">0</td>
+      <td>Retenue de garantie (<span th:text="${#numbers.formatDecimal(entity.retenueGarantieTaux, 1, 0)}">7</span> %)</td>
+      <td class="num" th:text="'- ' + ${#numbers.formatDecimal(entity.retenueGarantieMontant, 1, 'WHITESPACE', 2, 'COMMA')}">0</td>
     </tr>
     <tr th:if="${entity.resorptionAvanceMontant}">
       <td>Résorption d'avance</td>
-      <td class="num" th:text="'- ' + ${entity.resorptionAvanceMontant}">0</td>
+      <td class="num" th:text="'- ' + ${#numbers.formatDecimal(entity.resorptionAvanceMontant, 1, 'WHITESPACE', 2, 'COMMA')}">0</td>
     </tr>
     <tr th:if="${entity.netAPayerHt}">
       <td>Net à payer HT</td>
-      <td class="num" th:text="${entity.netAPayerHt}">0</td>
+      <td class="num" th:text="${#numbers.formatDecimal(entity.netAPayerHt, 1, 'WHITESPACE', 2, 'COMMA')}">0</td>
     </tr>
     <tr>
-      <td>TVA (<span th:text="${entity.tvaTaux}">20</span> %)</td>
-      <td class="num" th:text="${entity.totalTva}">0</td>
+      <td>TVA (<span th:text="${#numbers.formatDecimal(entity.tvaTaux, 1, 0)}">20</span> %)</td>
+      <td class="num" th:text="${#numbers.formatDecimal(entity.totalTva, 1, 'WHITESPACE', 2, 'COMMA')}">0</td>
     </tr>
     <tr th:if="${entity.rasMontant}">
-      <td>Retenue à la source (<span th:text="${entity.rasTaux}">0</span> %)</td>
-      <td class="num" th:text="'- ' + ${entity.rasMontant}">0</td>
+      <td>Retenue à la source (<span th:text="${#numbers.formatDecimal(entity.rasTaux, 1, 0)}">0</span> %)</td>
+      <td class="num" th:text="'- ' + ${#numbers.formatDecimal(entity.rasMontant, 1, 'WHITESPACE', 2, 'COMMA')}">0</td>
     </tr>
     <tr class="grand">
       <td>Net à payer TTC</td>
-      <td class="num" th:text="${entity.netAPayerTtc}">0</td>
+      <td class="num" th:text="${#numbers.formatDecimal(entity.netAPayerTtc, 1, 'WHITESPACE', 2, 'COMMA')}">0</td>
     </tr>
   </table>
 

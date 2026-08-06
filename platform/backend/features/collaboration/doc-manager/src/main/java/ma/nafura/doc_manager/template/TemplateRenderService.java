@@ -2,6 +2,7 @@ package ma.nafura.platform.collaboration.docmanager.template;
 
 import ma.nafura.platform.collaboration.docmanager.domain.model.DocumentTemplate;
 import ma.nafura.platform.collaboration.docmanager.repository.DocumentTemplateRepository;
+import ma.nafura.platform.collaboration.docmanager.service.DocumentSettingsService;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ public class TemplateRenderService {
     private final DocumentTemplateRepository templateRepository;
     private final TemplateVariableResolver variableResolver;
     private final DocumentFragmentService fragmentService;
+    private final DocumentSettingsService settingsService;
     private final PdfGenerationService pdfService;
     private final TemplateEngine stringTemplateEngine;
 
@@ -34,11 +36,13 @@ public class TemplateRenderService {
             DocumentTemplateRepository templateRepository,
             TemplateVariableResolver variableResolver,
             DocumentFragmentService fragmentService,
+            DocumentSettingsService settingsService,
             PdfGenerationService pdfService,
             @Qualifier("stringTemplateEngine") TemplateEngine stringTemplateEngine) {
         this.templateRepository = templateRepository;
         this.variableResolver = variableResolver;
         this.fragmentService = fragmentService;
+        this.settingsService = settingsService;
         this.pdfService = pdfService;
         this.stringTemplateEngine = stringTemplateEngine;
     }
@@ -92,17 +96,31 @@ public class TemplateRenderService {
         return variableResolver.resolveForPreview(entityType);
     }
 
-    /** Turn already-rendered HTML into a PDF with the given page setup. */
-    public byte[] htmlToPdf(String html, String paperSize, String orientation, String marginsCss) {
-        return pdfService.htmlToPdf(html, paperSize, orientation, marginsCss);
+    /** Turn already-rendered HTML into a PDF, with the tenant's running page footer. */
+    public byte[] htmlToPdf(
+            String html, String entityType, String paperSize, String orientation, String marginsCss) {
+        return pdfService.htmlToPdf(
+                html, null, pageFooterHtml(entityType), paperSize, orientation, marginsCss);
     }
 
     private byte[] toPdf(DocumentTemplate template, String html) {
         return pdfService.htmlToPdf(
                 html,
+                null,
+                pageFooterHtml(template.getEntityType()),
                 template.getPaperSize(),
                 template.getOrientation(),
                 template.getMarginsCss());
+    }
+
+    /** Page numbering, per the tenant's document settings. Null when they turned it off. */
+    String pageFooterHtml(String entityType) {
+        try {
+            return settingsService.buildPageFooterHtml(settingsService.get(entityType));
+        } catch (Exception e) {
+            // Numbering is cosmetic: never fail a document over it.
+            return null;
+        }
     }
 
     private DocumentTemplate getTemplateForTenant(UUID templateId) {

@@ -58,6 +58,27 @@ public class PdfGenerationService {
      * @return PDF bytes
      */
     public byte[] htmlToPdf(String html, String paperSize, String orientation, String marginsCss) {
+        return htmlToPdf(html, null, null, paperSize, orientation, marginsCss);
+    }
+
+    /**
+     * Render with a running header and footer repeated on every page.
+     *
+     * <p>They travel as separate parts, not as elements of the document: Chromium repeats only
+     * what the print pipeline is given as header/footer templates, which is also the only place
+     * where {@code <span class="pageNumber">} and {@code totalPages} resolve. A footer left inside
+     * the body would print once, at the end of the last page.
+     *
+     * @param headerHtml repeated at the top of every page; null for none
+     * @param footerHtml repeated at the bottom of every page; null for none
+     */
+    public byte[] htmlToPdf(
+            String html,
+            String headerHtml,
+            String footerHtml,
+            String paperSize,
+            String orientation,
+            String marginsCss) {
         String size = paperSize != null && !paperSize.isBlank() ? paperSize : DEFAULT_PAPER_SIZE;
         String orient = orientation != null && !orientation.isBlank() ? orientation : DEFAULT_ORIENTATION;
         String margins = marginsCss != null && !marginsCss.isBlank() ? marginsCss : DEFAULT_MARGINS;
@@ -77,10 +98,21 @@ public class PdfGenerationService {
         }
 
         MultiValueMap<String, Object> form = new LinkedMultiValueMap<>();
-        form.add("files", namedHtml(document));
+        form.add("files", namedHtml(document, "index.html"));
         // Page geometry is driven by the injected @page rule.
         form.add("preferCssPageSize", "true");
         form.add("printBackground", "true");
+
+        if (headerHtml != null && !headerHtml.isBlank()) {
+            String header = wrapRunningPart(headerHtml);
+            HtmlOutboundGuard.requireSelfContained(header);
+            form.add("files", namedHtml(header, "header.html"));
+        }
+        if (footerHtml != null && !footerHtml.isBlank()) {
+            String footer = wrapRunningPart(footerHtml);
+            HtmlOutboundGuard.requireSelfContained(footer);
+            form.add("files", namedHtml(footer, "footer.html"));
+        }
 
         try {
             byte[] pdf = restClient
@@ -106,18 +138,33 @@ public class PdfGenerationService {
         }
     }
 
-    /** Gotenberg keys the conversion on a part literally named index.html. */
-    private static HttpEntity<Resource> namedHtml(String document) {
+    /** Gotenberg dispatches on the part filename: index.html, header.html, footer.html. */
+    private static HttpEntity<Resource> namedHtml(String document, String filename) {
         ByteArrayResource resource =
                 new ByteArrayResource(document.getBytes(StandardCharsets.UTF_8)) {
                     @Override
                     public String getFilename() {
-                        return "index.html";
+                        return filename;
                     }
                 };
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.TEXT_HTML);
         return new HttpEntity<>(resource, headers);
+    }
+
+    /**
+     * Running parts are rendered in their own context: they inherit nothing from the document,
+     * and Chromium defaults them to a size no one can read. The base style is therefore inlined
+     * here rather than left to whoever writes the fragment.
+     */
+    private static String wrapRunningPart(String innerHtml) {
+        return "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"/><style>"
+                + "body { margin: 0; font-family: Helvetica, Arial, sans-serif;"
+                + " font-size: 8pt; color: #666; -webkit-print-color-adjust: exact; }"
+                + " .nf-running { width: 100%; padding: 0 12mm; box-sizing: border-box; }"
+                + "</style></head><body><div class=\"nf-running\">"
+                + innerHtml
+                + "</div></body></html>";
     }
 
     String wrapWithPageStyle(String html, String paperSize, String orientation, String margins) {

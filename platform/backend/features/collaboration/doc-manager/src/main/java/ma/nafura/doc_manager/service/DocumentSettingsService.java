@@ -185,13 +185,24 @@ public class DocumentSettingsService {
                     .append(legalSpan("cnss", " — CNSS "))
                     .append("</div>");
         }
-        if (footer.showPageNumber()) {
-            // Rendered by the PDF engine through CSS counters; hidden in the HTML preview.
-            sb.append("<div class=\"nf-doc-page-number\">Page <span class=\"nf-page\"></span>")
-                    .append(" / <span class=\"nf-pages\"></span></div>");
-        }
         sb.append("</div>");
         return sb.toString();
+    }
+
+    /**
+     * The footer repeated on every printed page. Separate from {@link #buildFooterHtml}: page
+     * counters only resolve in the part Gotenberg passes to Chromium as the footer template, so
+     * a page number placed in the document body would print once, at the very end.
+     *
+     * @return null when the tenant turned page numbering off
+     */
+    public String buildPageFooterHtml(DocumentSettingsPayload payload) {
+        if (!payload.footer().showPageNumber()) {
+            return null;
+        }
+        // pageNumber / totalPages are filled by Chromium's print pipeline.
+        return "<div style=\"text-align:center\">Page <span class=\"pageNumber\"></span>"
+                + " / <span class=\"totalPages\"></span></div>";
     }
 
     private static String legalSpan(String field, String prefix) {

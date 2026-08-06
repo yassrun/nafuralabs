@@ -17,7 +17,12 @@
     .totaux { margin-top: 14px; width: 280px; margin-left: auto; }
     .totaux td { padding: 3px 6px; }
     .totaux .grand { font-weight: bold; font-size: 11pt; border-top: 1px solid #222; }
+    .lettres { margin-top: 12px; font-size: 9pt; }
     .pied { margin-top: 24px; font-size: 8pt; color: #666; }
+    /* Keep a line and its price on the same page, and repeat column titles after a break. */
+    table.lines thead { display: table-header-group; }
+    table.lines tr { break-inside: avoid; }
+    .totaux, .lettres { break-inside: avoid; }
   </style>
 </head>
 <body>
@@ -28,8 +33,10 @@
     <div style="text-align:right">
       <h1>Devis <span th:text="${entity.numero}">DEV-001</span></h1>
       <div class="muted">Version <span th:text="${entity.version}">1</span></div>
-      <div class="muted">Émis le <span th:text="${entity.dateEmission}">—</span>
-        · Valable jusqu'au <span th:text="${entity.dateValidite}">—</span></div>
+      <div class="muted">Émis le
+        <span th:text="${#temporals.format(entity.dateEmission, 'dd/MM/yyyy')}">—</span>
+        · Valable jusqu'au
+        <span th:text="${#temporals.format(entity.dateValidite, 'dd/MM/yyyy')}">—</span></div>
     </div>
   </div>
 
@@ -63,10 +70,10 @@
       <tr th:each="l : ${entity.lignes}">
         <td th:text="${l.code}">—</td>
         <td th:text="${l.designation}">—</td>
-        <td class="num" th:text="${l.quantite}">—</td>
+        <td class="num" th:text="${#numbers.formatDecimal(l.quantite, 1, 'WHITESPACE', 2, 'COMMA')}">—</td>
         <td th:text="${l.unite}">—</td>
-        <td class="num" th:text="${l.prixUnitaireHt}">—</td>
-        <td class="num" th:text="${l.totalHt}">—</td>
+        <td class="num" th:text="${#numbers.formatDecimal(l.prixUnitaireHt, 1, 'WHITESPACE', 2, 'COMMA')}">—</td>
+        <td class="num" th:text="${#numbers.formatDecimal(l.totalHt, 1, 'WHITESPACE', 2, 'COMMA')}">—</td>
       </tr>
     </tbody>
   </table>
@@ -74,17 +81,22 @@
   <table class="totaux">
     <tr>
       <td>Total HT</td>
-      <td class="num" th:text="${entity.totalHt}">0</td>
+      <td class="num" th:text="${#numbers.formatDecimal(entity.totalHt, 1, 'WHITESPACE', 2, 'COMMA')} + ' MAD'">0,00 MAD</td>
     </tr>
     <tr>
-      <td>TVA (<span th:text="${entity.tvaTaux}">20</span> %)</td>
-      <td class="num" th:text="${entity.totalTva}">0</td>
+      <td>TVA (<span th:text="${#numbers.formatDecimal(entity.tvaTaux, 1, 0)}">20</span> %)</td>
+      <td class="num" th:text="${#numbers.formatDecimal(entity.totalTva, 1, 'WHITESPACE', 2, 'COMMA')} + ' MAD'">0,00 MAD</td>
     </tr>
     <tr class="grand">
       <td>Total TTC</td>
-      <td class="num" th:text="${entity.totalTtc}">0</td>
+      <td class="num" th:text="${#numbers.formatDecimal(entity.totalTtc, 1, 'WHITESPACE', 2, 'COMMA')} + ' MAD'">0,00 MAD</td>
     </tr>
   </table>
+
+  <div class="lettres" th:if="${document?.totaux?.enLettres}">
+    Arrêté le présent devis à la somme de
+    <strong th:text="${document.totaux.enLettres}"></strong>.
+  </div>
 
   <div class="pied" th:if="${entity.conditionsPaiement}">
     <strong>Conditions de paiement :</strong>

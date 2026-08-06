@@ -187,8 +187,10 @@ public class EtudesEntityDataProvider implements EntityDataProvider {
         m.put("version", devis.getVersion());
         m.put("objet", devis.getObjet());
         m.put("ville", devis.getVille());
-        m.put("dateEmission", devis.getDateEmission() != null ? devis.getDateEmission().toString() : null);
-        m.put("dateValidite", devis.getDateValidite() != null ? devis.getDateValidite().toString() : null);
+        // Kept as LocalDate, not a string: templates format them with #temporals, and an ISO
+        // string would print as 2026-08-05 on a customer-facing document.
+        m.put("dateEmission", devis.getDateEmission());
+        m.put("dateValidite", devis.getDateValidite());
         m.put("status", devis.getStatus());
         m.put("conditionsPaiement", devis.getConditionsPaiement());
         m.put("delaiExecutionJours", devis.getDelaiExecutionJours());
@@ -354,8 +356,9 @@ public class EtudesEntityDataProvider implements EntityDataProvider {
         m.put("version", 1);
         m.put("objet", "Travaux de second œuvre — échantillon");
         m.put("ville", "Casablanca");
-        m.put("dateEmission", LocalDate.now().toString());
-        m.put("dateValidite", LocalDate.now().plusDays(30).toString());
+        // Same shape as real data, so the preview exercises the template's date formatting.
+        m.put("dateEmission", LocalDate.now());
+        m.put("dateValidite", LocalDate.now().plusDays(30));
         m.put("status", "BROUILLON");
         m.put("conditionsPaiement", "30% à la commande, solde à réception");
         m.put("delaiExecutionJours", 60);

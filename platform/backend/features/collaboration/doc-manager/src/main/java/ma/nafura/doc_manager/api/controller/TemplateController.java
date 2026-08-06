@@ -173,7 +173,11 @@ public class TemplateController {
                         .body(html);
             }
             byte[] pdf = renderService.htmlToPdf(
-                    html, request.getPaperSize(), request.getOrientation(), request.getMarginsCss());
+                    html,
+                    request.getEntityType(),
+                    request.getPaperSize(),
+                    request.getOrientation(),
+                    request.getMarginsCss());
             return ResponseEntity.ok()
                     .contentType(MediaType.APPLICATION_PDF)
                     .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"preview.pdf\"")
