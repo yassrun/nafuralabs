@@ -1,15 +1,22 @@
 id	status	priority	context	assignee	gate	kind	sprint	parent	feature	title
-ERP-29	todo	P1	nafura	either	me	task		ERP-26	rh-pointage-raffinement	RH — Lot 2 Validation contrôle et produit
-ERP-12	todo	P1	nafura	me	none	task		ERP-16	chiffrage-drawer	Ouverture popup chiffrage poste — double-clic
-ERP-14	todo	P1	nafura	me	none	task		ERP-16	chiffrage-drawer	Bug affichage — commentaires superposés au tableau
-ERP-11	todo	P1	nafura	me	none	task		ERP-16	chiffrage-drawer	Raffiner descriptif technique manuel (chiffrage poste)
-ERP-13	todo	P1	nafura	me	none	task		ERP-16	chiffrage-drawer	Bug — référentiel unité chiffrage (mode décomposé)
-ERP-08	todo	P1	nafura	me	me	task		ERP-17	etude-parcours	Nouvelle version d'étude depuis étude terminée
-ERP-09	todo	P1	nafura	me	me	task		ERP-17	etude-parcours	Revoir les infos d'en-tête de l'étude (chiffrage)
-ERP-10	todo	P1	nafura	me	me	task		ERP-17	etude-parcours	Création étude/AO — ordre & mix import CPS → manuel
-ERP-15	todo	P1	nafura	me	me	task		ERP-17	etude-parcours	Règle — ne pas modifier le lien (structure figée)
-MBS-01	todo	P1	nafura	me	me	task			Homepage — traiter les remarques client
-OPS-01	todo	P1	nafura	me	me	task			Configurer Zimbra + migrer ykarkafi@nafuralabs.com
-ERP-30	todo	P2	nafura	either	me	task		ERP-26	rh-pointage-raffinement	RH — Lot 3 Paie juste et paramétrée
-ERP-31	todo	P2	nafura	agent	none	task		ERP-26	rh-pointage-raffinement	RH — Lot 4 Coût remonte au chantier
-ERP-32	todo	P2	nafura	agent	none	task		ERP-26	rh-pointage-raffinement	RH — Lot 5 Intégrité et nettoyage
+MBS-01	todo	P1	nafura	me	me	task				Homepage — traiter les remarques client (nouv…
+OPS-01	todo	P1	nafura	me	me	task				Configurer Zimbra + migrer ykarkafi@nafuralab…
+ERP-03	todo	P1	nafura	either	me	feature			achats-raffinement	Raffinement achats (lot 3)
+ERP-16	todo	P1	nafura	me		feature			chiffrage-drawer	Drawer chiffrage poste
+ERP-11	todo	P1	nafura	me	none	task		ERP-16	chiffrage-drawer	Raffiner le mode de fonctionnement du descrip…
+ERP-12	todo	P1	nafura	me	none	task		ERP-16	chiffrage-drawer	Ouverture du popup chiffrage poste — double-clic
+ERP-13	todo	P1	nafura	me	none	task		ERP-16	chiffrage-drawer	Bug — référentiel unité dans le chiffrage pos…
+ERP-14	todo	P1	nafura	me	none	task		ERP-16	chiffrage-drawer	Bug affichage — commentaires d'équipe superpo…
+ERP-17	todo	P1	nafura	me		feature			etude-parcours	Parcours étude (création, version, en-tête, s…
+ERP-08	todo	P1	nafura	me	me	task		ERP-17	etude-parcours	Nouvelle version d'étude depuis une étude ter…
+ERP-09	todo	P1	nafura	me	me	task		ERP-17	etude-parcours	Revoir les infos d'en-tête de l'étude (chiffr…
+ERP-10	todo	P1	nafura	me	me	task		ERP-17	etude-parcours	Création étude / AO — ordre & mix import CPS …
+ERP-15	todo	P1	nafura	me	me	task		ERP-17	etude-parcours	Règle métier — ne pas modifier le lien (struc…
+ERP-26	todo	P1	nafura	me		feature			rh-pointage-raffinement	Raffinement RH / pointage
+ERP-29	todo	P1	nafura	either	me	task		ERP-26	rh-pointage-raffinement	RH / pointage — Lot 2 · Validation contrôle e…
+ERP-06	todo	P2	nafura	either	me	feature			chantier-minimal	Chantier minimal — fiche pivot (lot 6)
+ERP-30	todo	P2	nafura	either	me	task		ERP-26	rh-pointage-raffinement	RH / pointage — Lot 3 · Paie juste et paramétrée
+ERP-31	todo	P2	nafura	agent	none	task		ERP-26	rh-pointage-raffinement	RH / pointage — Lot 4 · Coût remonte au chantier
+ERP-32	todo	P2	nafura	agent	none	task		ERP-26	rh-pointage-raffinement	RH / pointage — Lot 5 · Intégrité et nettoyage
+ERP-05	todo	P2	nafura	either	me	feature			sous-traitance-raffinement	Raffinement sous-traitance (lot 5)
+ERP-07	todo	P3	nafura	either	me	feature			planification-chantier	Planification chantier (lot 7 — dernier)

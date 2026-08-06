@@ -58,10 +58,11 @@ If a proposed change makes any of these slower, reject it.
 | `…/<projet>/tasks/` | **Backlog par projet** — stockage live (non-done) |
 | `backlog_archive/` | **Archive globale** des `done` (conserve `sprint:`) |
 | `INDEX.tsv` | Vue all-tasks live (générée) — point d’entrée agent |
+| `BACKLOG.md` | Vue humaine live (générée) — par projet, clusters feature |
 | `SPRINT.md` | Vue sprint courant (générée) — id ISO week + dates lun→dim dérivées |
 | `PORTFOLIO.md` | Santé projets (générée) |
 
-Pas de board Kanban global. **INDEX** = backlog live trié. **SPRINT** = engagement de la semaine.
+Pas de board Kanban global. **INDEX** = backlog live trié (agents). **BACKLOG** = même live, lisible humain. **SPRINT** = engagement de la semaine.
 `NOW.md` / capacité 26h / daily : **retirés**.
 
 ### Pipeline d’actions (ordre canonique)
@@ -98,9 +99,10 @@ pm/
   SCHEMA.md                 # enum reference (generated from §2)
   inbox.md                  # raw capture
   INDEX.tsv                 # GENERATED — live backlog (+ sprintés non archivés)
+  BACKLOG.md                # GENERATED — human live backlog by project
   SPRINT.md                 # GENERATED — current ISO week + date range
   PORTFOLIO.md              # GENERATED — project health
-  t                         # CLI (single write path)
+  regen.mjs / t.mjs         # CLI regen (+ future mutate path)
 
   backlog_archive/          # GLOBAL — done tasks (keep sprint:). Flat or mirror path OK.
                             # Prefer mirror: backlog_archive/nafura/products/sektor-btp/…
@@ -366,25 +368,28 @@ Never grep the whole `tasks/` tree as first move.
 When `pm/t` exists, human and agent write through it. Until then, apply the same semantics by editing files + regenerating views.
 
 ```bash
-t capture "texte" [@tags…]          # append inbox (or edit inbox.md)
-t promote <inbox-ref|text> …        # → task/feature/spec file
-t commit <ID> [--sprint 2026-W32]   # set sprint:
-t progress <ID> <status> ["note"]   # check-progress transition + journal
-t archive <ID>                      # done → backlog_archive (usually auto after done)
-t delete <ID>                       # abandon — hard delete
-t sprint                            # print SPRINT.md (week + date range)
-t index                             # print / regen INDEX.tsv
-t sweep                             # balayage
+node pm/t.mjs index                 # regen INDEX.tsv + SPRINT.md + BACKLOG.md
+node pm/regen.mjs                   # same regen (direct)
+# Windows: pm\t.cmd index
+
+t capture "texte" [@tags…]          # append inbox (or edit inbox.md) — planned
+t promote <inbox-ref|text> …        # → task/feature/spec file — planned
+t commit <ID> [--sprint 2026-W32]   # set sprint: — planned
+t progress <ID> <status> ["note"]   # check-progress transition + journal — planned
+t archive <ID>                      # done → backlog_archive — planned
+t delete <ID>                       # abandon — hard delete — planned
+t sprint                            # print SPRINT.md — planned
+t sweep                             # balayage — planned
 ```
 
-Every mutating command MUST regenerate `INDEX.tsv` and `SPRINT.md` before returning.
+Every mutating command MUST regenerate `INDEX.tsv`, `SPRINT.md`, and `BACKLOG.md` before returning.
 
 ---
 
 ## 7. Generated views
 
 Design for **raw terminal**, 72 columns, fixed-width, no emoji except `PORTFOLIO.md`.
-40 lines max per operational view.
+40 lines max per **operational** view (`SPRINT.md`). `BACKLOG.md` may exceed (overview).
 
 Status glyphs:
 
@@ -408,6 +413,28 @@ Status glyphs:
 
 Header **must** show ISO week **and** derived Monday→Sunday dates.
 
+### BACKLOG.md
+
+Human overview of **all live** (non-archived) tasks, grouped by project folder.
+Feature clusters stay together (umbrella then children). Generated only — never hand-edit.
+
+```markdown
+# BACKLOG (généré — ne pas éditer)
+
+## sektor-btp
+\`\`\`
+· ERP-16  feature  Drawer chiffrage poste
+  · ERP-12  todo     Ouverture popup chiffrage…
+· ERP-03  feature  Raffinement achats (lot 3)
+\`\`\`
+
+## mbs-website
+\`\`\`
+· MBS-01  todo     Homepage — remarques client
+\`\`\`
+```
+
+Blocs code = une ligne par tâche (preview MD ne fusionne pas).
 ### PORTFOLIO.md
 
 Project health only (tables + emoji allowed). One row per project — not a task board.
@@ -446,7 +473,7 @@ Choisir dans le backlog (promoted) ce qui entre dans `2026-Wn`.
 | Status `dropped` | Hard delete |
 | Daily standup / `NOW.md` | Check progress à deux |
 | Friday-only close | Balayage on demand |
-| Kanban global | `INDEX.tsv` + `SPRINT.md` |
+| Kanban global | `INDEX.tsv` + `BACKLOG.md` + `SPRINT.md` |
 | Work Nafura hors ticket sprint | Interdit |
 | Epics > 2 levels | `feature` → `spec`\|`task` |
 
@@ -454,8 +481,8 @@ Choisir dans le backlog (promoted) ce qui entre dans `2026-Wn`.
 
 ## 10. Agent rules — non-negotiable
 
-1. **Read `INDEX.tsv` / `SPRINT.md` before anything else** (when `pm/` exists).
-2. **Never hand-edit generated views** (`INDEX.tsv`, `SPRINT.md`, `PORTFOLIO.md`) except via regen semantics.
+1. **Read `INDEX.tsv` / `SPRINT.md` before anything else** (when `pm/` exists). Humain : `BACKLOG.md` OK pour scan.
+2. **Never hand-edit generated views** (`INDEX.tsv`, `BACKLOG.md`, `SPRINT.md`, `PORTFOLIO.md`) except via regen semantics.
 3. **Never invent an enum value.**
 4. **Never rewrite `## Journal` history.** Append only.
 5. **Never renumber or reuse an ID.**
@@ -508,5 +535,5 @@ Choisir dans le backlog (promoted) ce qui entre dans `2026-Wn`.
 | Done | → **`pm/backlog_archive/`** (global) ; **`sprint:` conservé** |
 | Abandon | **Delete partout** ; pas de `dropped` |
 | Backlog | Par projet (`…/tasks/`) |
-| Vues | `INDEX.tsv` + `SPRINT.md` (+ `PORTFOLIO.md`) |
+| Vues | `INDEX.tsv` + `BACKLOG.md` + `SPRINT.md` (+ `PORTFOLIO.md`) |
 | Groupement | `kind: feature` + `parent:` / `feature:` ; IDs immuables |
