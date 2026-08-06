@@ -38,7 +38,7 @@ public class ReceptionStockMovementService {
                 StringUtils.hasText(reception.getBlNumero()) ? reception.getBlNumero() : reception.getNumero());
         request.setNotes("Réception achat " + reception.getNumero() + " — BC " + bonCommande.getNumero());
         request.setDestLocationId(destLocationId);
-        request.setWarehouseId(destLocationId);
+        request.setLocationId(destLocationId);
         request.setBcId(bonCommande.getId());
         request.setChantierBudgetId(trimOrNull(bonCommande.getChantierId()));
         request.setFournisseurId(parseUuidOrNull(bonCommande.getFournisseurId()));

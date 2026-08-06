@@ -2,13 +2,15 @@
 id: ERP-13
 status: todo
 context: nafura
-assignee: me
-parent: ERP-16
+kind: task
 feature: chiffrage-drawer
+parent: ERP-16
 priority: P1
-estimate: 3h
+assignee: me
+gate: none
 tags: [sektor, etudes, chiffrage, bug, unite]
 ---
+
 
 # Bug — référentiel unité dans le chiffrage poste (mode décomposé)
 
@@ -24,4 +26,5 @@ tags: [sektor, etudes, chiffrage, bug, unite]
 ## Journal
 ```
 05/08 12:36  capturé · bug unité mode décomposé
+05/08 21:30  framework v2 · task schema (estimate out · gate/kind)
 ```

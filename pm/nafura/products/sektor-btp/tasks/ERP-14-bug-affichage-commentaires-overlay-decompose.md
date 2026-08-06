@@ -2,13 +2,15 @@
 id: ERP-14
 status: todo
 context: nafura
-assignee: me
-parent: ERP-16
+kind: task
 feature: chiffrage-drawer
+parent: ERP-16
 priority: P1
-estimate: 2h
+assignee: me
+gate: none
 tags: [sektor, etudes, chiffrage, bug, ui]
 ---
+
 
 # Bug affichage — commentaires d'équipe superposés au tableau (mode décomposé)
 
@@ -30,4 +32,5 @@ tags: [sektor, etudes, chiffrage, bug, ui]
 ## Journal
 ```
 05/08 12:38  capturé depuis screenshot drawer 5.2 DE-0007
+05/08 21:30  framework v2 · task schema (estimate out · gate/kind)
 ```

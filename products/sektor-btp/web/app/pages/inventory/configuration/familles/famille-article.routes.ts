@@ -7,7 +7,7 @@ export const FAMILLE_ARTICLE_ROUTES: Routes = [
       {
         path: '',
         loadComponent: () =>
-          import('./famille-listing').then((m) => m.FamilleListingPage),
+          import('./famille-tree').then((m) => m.FamilleTreePage),
         data: { title: 'inventory.routes.familles.title', breadcrumb: 'inventory.routes.familles.breadcrumb' },
       },
       {

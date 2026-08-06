@@ -2,13 +2,15 @@
 id: ERP-15
 status: todo
 context: nafura
-assignee: me
-parent: ERP-17
+kind: task
 feature: etude-parcours
+parent: ERP-17
 priority: P1
-estimate: 3h
+assignee: me
+gate: me
 tags: [sektor, etudes, chiffrage, structure, regle-metier]
 ---
+
 
 # Règle métier — ne pas modifier le lien (structure figée / correction)
 
@@ -31,4 +33,5 @@ tags: [sektor, etudes, chiffrage, structure, regle-metier]
 ## Journal
 ```
 05/08 12:39  capturé depuis écran DE-0007 Structure figée + besoin « ne pas modifier le lien »
+05/08 21:30  framework v2 · task schema (estimate out · gate/kind)
 ```

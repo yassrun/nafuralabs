@@ -11,6 +11,7 @@ export interface ApiStockReservation {
   quantity: number;
   uom?: string;
   chantierId: string;
+  locationId: string;
   dateBesoin: string;
   dateExpiration: string;
   dateCreation: string;
@@ -58,13 +59,14 @@ export function apiToReservationStock(row: ApiStockReservation): ReservationStoc
 }
 
 export function reservationStockToCreateBody(
-  input: Omit<ReservationStock, 'id' | 'dateCreation' | 'status'>,
+  input: Omit<ReservationStock, 'id' | 'dateCreation' | 'status'> & { locationId?: string },
 ): StockReservationCreateBody {
   return {
     itemId: input.articleId,
     quantity: input.qte,
     uom: input.uom,
     chantierId: input.chantierId,
+    locationId: input.locationId ?? input.chantierId,
     dateBesoin: input.dateBesoin,
     dateExpiration: input.dateExpiration,
     createdBy: input.creePar,

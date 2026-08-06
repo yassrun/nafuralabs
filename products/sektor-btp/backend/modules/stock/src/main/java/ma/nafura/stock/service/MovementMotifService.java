@@ -19,34 +19,14 @@ public class MovementMotifService
         extends JpaCrudService<UUID, MovementMotif, MovementMotifCreateDto, MovementMotifUpdateDto> {
 
     private final MovementMotifRepository movementMotifRepository;
-    private final MovementMotifSeedService seedService;
 
-    public MovementMotifService(
-            MovementMotifRepository repository,
-            MovementMotifMapper mapper,
-            MovementMotifSeedService seedService) {
+    public MovementMotifService(MovementMotifRepository repository, MovementMotifMapper mapper) {
         super(repository, mapper);
         this.movementMotifRepository = repository;
-        this.seedService = seedService;
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<MovementMotif> listPage(int page, int size) {
-        seedService.seedIfEmpty();
-        return super.listPage(page, size);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<MovementMotif> listPage(int page, int size, Sort sort) {
-        seedService.seedIfEmpty();
-        return super.listPage(page, size, sort);
     }
 
     @Transactional(readOnly = true)
     public List<MovementMotif> listAll(String txType) {
-        seedService.seedIfEmpty();
         UUID tenantId = TenantContext.getTenantId();
         if (StringUtils.hasText(txType)) {
             return movementMotifRepository.findByTenantIdAndTxTypeAndIsActiveTrueOrderByCodeAsc(
@@ -63,5 +43,4 @@ public class MovementMotifService
         }
         return super.create(request);
     }
-
 }

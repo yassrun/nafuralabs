@@ -156,8 +156,8 @@ public class DecompositionProposeService {
                     || !SOURCES_CONSULTABLES.contains(prix.sourcePrix())) {
                 continue;
             }
-            String dpuType = StringUtils.hasText(candidate.articleType())
-                    ? NatureComposantMapping.toDpuTypeFromArticleType(candidate.articleType())
+            String dpuType = StringUtils.hasText(candidate.nature())
+                    ? NatureComposantMapping.toDpuTypeFromNature(candidate.nature())
                     : type;
             String resolvedUnite = StringUtils.hasText(candidate.unite()) ? candidate.unite() : unite;
             return Optional.of(ComposantMatchedDto.builder()

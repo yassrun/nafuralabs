@@ -25,7 +25,8 @@ CRITICAL INSTRUCTIONS:
           properties: {
             code: { type: ['string', 'null'], title: 'Code' },
             name: { type: ['string', 'null'], title: 'Nom' },
-            articleType: { type: ['string', 'null'], title: 'Type' },
+            nature: { type: ['string', 'null'], title: 'Nature' },
+            articleType: { type: ['string', 'null'], title: 'Type (legacy)' },
             uomCode: { type: ['string', 'null'], title: 'Unité' },
             familleName: { type: ['string', 'null'], title: 'Famille' },
             prixUnitaire: { type: ['number', 'null'], title: 'Prix unitaire' },

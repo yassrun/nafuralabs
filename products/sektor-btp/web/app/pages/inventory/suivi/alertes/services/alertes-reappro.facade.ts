@@ -68,30 +68,40 @@ export class AlertesReapproFacade {
 
   private async computeAlerts(): Promise<StockAlert[]> {
     const balances = await this.stockEnrichment.loadEnrichedBalances();
-    const alerts: StockAlert[] = [];
-
+    const byArticle = new Map<string, typeof balances>();
     for (const b of balances) {
-      const minQty = b.stockMin;
+      const list = byArticle.get(b.articleId) ?? [];
+      list.push(b);
+      byArticle.set(b.articleId, list);
+    }
+
+    const alerts: StockAlert[] = [];
+    for (const [articleId, rows] of byArticle) {
+      const sample = rows[0];
+      const minQty = sample.stockMin;
       if (minQty == null || minQty <= 0) continue;
-      const currentQty = b.availableQuantity ?? b.quantity;
+      const currentQty = rows.reduce(
+        (sum, r) => sum + (r.availableQuantity ?? r.quantity ?? 0),
+        0,
+      );
       if (currentQty >= minQty) continue;
 
       const urgency: AlertUrgency = currentQty <= 0 ? 'CRITIQUE' : 'EN_ALERTE';
       alerts.push({
-        id: `${b.articleId}::${b.locationId}`,
-        articleId: b.articleId,
-        articleCode: b.articleCode,
-        articleName: b.articleName,
-        familleId: b.familleId,
-        familleName: b.familleName,
-        locationId: b.locationId,
-        locationName: b.locationName,
-        locationType: b.locationType,
+        id: articleId,
+        articleId,
+        articleCode: sample.articleCode,
+        articleName: sample.articleName,
+        familleId: sample.familleId,
+        familleName: sample.familleName,
+        locationId: sample.locationId,
+        locationName: `${rows.length} emplacement(s)`,
+        locationType: sample.locationType,
         currentQty,
         minQty,
         shortage: minQty - currentQty,
         urgency,
-        lastReceptionDate: b.lastCountDate,
+        lastReceptionDate: sample.lastCountDate,
       });
     }
 

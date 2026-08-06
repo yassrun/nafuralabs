@@ -2,11 +2,13 @@
 id: MBS-01
 status: todo
 context: nafura
-assignee: me
+kind: task
 priority: P1
-estimate: 4h
+assignee: me
+gate: me
 tags: [frontend, homepage, client-feedback]
 ---
+
 
 # Homepage — traiter les remarques client (nouvelle version)
 
@@ -29,4 +31,5 @@ Message client (homepage v2) — « Merci beaucoup yassine ! »
 ## Journal
 ```
 05/08 10:54  capturé depuis retours client · promu MBS-01
+05/08 21:30  framework v2 · task schema (estimate out · gate/kind)
 ```

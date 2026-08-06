@@ -4,7 +4,7 @@ package ma.nafura.item.domain;
  * Point unique de correspondance entre :
  * <ul>
  *   <li>types de composant d'ouvrage (bibliothèque) — {@code MATERIAU}, {@code MO}, …</li>
- *   <li>{@link ArticleType} sur le catalogue {@code Item}</li>
+ *   <li>{@link Nature} sur le catalogue {@code Item}</li>
  *   <li>types de décomposition DPU — {@code MATIERE}, {@code MAIN_DOEUVRE}, …</li>
  * </ul>
  * Remplace le switch privé historique de {@code DpuService.mapOuvrageTypeToDpu()}.
@@ -18,11 +18,11 @@ public final class NatureComposantMapping {
     public static final String OUVRAGE_OUTILLAGE = "OUTILLAGE";
     public static final String OUVRAGE_SOUS_TRAITANCE = "SOUS_TRAITANCE";
 
-    /** Types ComposantDpu (décomposition). */
-    public static final String DPU_MATIERE = ArticleType.MATIERE;
-    public static final String DPU_MAIN_DOEUVRE = ArticleType.MAIN_DOEUVRE;
-    public static final String DPU_MATERIEL = ArticleType.MATERIEL;
-    public static final String DPU_SOUS_TRAITANCE = ArticleType.SOUS_TRAITANCE;
+    /** Types ComposantDpu (décomposition) — 4 postes. */
+    public static final String DPU_MATIERE = "MATIERE";
+    public static final String DPU_MAIN_DOEUVRE = "MAIN_DOEUVRE";
+    public static final String DPU_MATERIEL = "MATERIEL";
+    public static final String DPU_SOUS_TRAITANCE = "SOUS_TRAITANCE";
 
     private NatureComposantMapping() {}
 
@@ -42,32 +42,39 @@ public final class NatureComposantMapping {
         };
     }
 
-    /** Mappe {@link ArticleType} → type DPU. */
-    public static String toDpuTypeFromArticleType(String articleType) {
-        String normalized = ArticleType.normalize(articleType);
-        if (normalized == null) {
+    /** Mappe {@link Nature} (code stocké) → type DPU. */
+    public static String toDpuTypeFromNature(String natureCode) {
+        Nature nature = Nature.fromLegacy(natureCode);
+        if (nature == null) {
             return DPU_MATIERE;
         }
-        return switch (normalized) {
-            case ArticleType.MAIN_DOEUVRE -> DPU_MAIN_DOEUVRE;
-            case ArticleType.MATERIEL -> DPU_MATERIEL;
-            case ArticleType.SOUS_TRAITANCE -> DPU_SOUS_TRAITANCE;
-            case ArticleType.SERVICE, ArticleType.CONSOMMABLE, ArticleType.MATIERE -> DPU_MATIERE;
-            default -> DPU_MATIERE;
+        return nature.getTypeDpu();
+    }
+
+    /** @deprecated use {@link #toDpuTypeFromNature(String)} */
+    @Deprecated(since = "classification-lot1", forRemoval = true)
+    public static String toDpuTypeFromArticleType(String articleType) {
+        return toDpuTypeFromNature(articleType);
+    }
+
+    /** Mappe un type d'ouvrage bibliothèque → {@link Nature} (code). */
+    public static String toNatureFromOuvrage(String ouvrageType) {
+        if (ouvrageType == null || ouvrageType.isBlank()) {
+            return Nature.MATIERE.name();
+        }
+        return switch (ouvrageType.trim().toUpperCase()) {
+            case OUVRAGE_MO -> Nature.MAIN_DOEUVRE.name();
+            case OUVRAGE_LOCATION -> Nature.LOCATION.name();
+            case OUVRAGE_OUTILLAGE -> Nature.OUTILLAGE.name();
+            case OUVRAGE_SOUS_TRAITANCE -> Nature.SOUS_TRAITANCE.name();
+            case OUVRAGE_MATERIAU -> Nature.MATIERE.name();
+            default -> Nature.MATIERE.name();
         };
     }
 
-    /** Mappe un type d'ouvrage bibliothèque → {@link ArticleType}. */
+    /** @deprecated use {@link #toNatureFromOuvrage(String)} */
+    @Deprecated(since = "classification-lot1", forRemoval = true)
     public static String toArticleTypeFromOuvrage(String ouvrageType) {
-        if (ouvrageType == null || ouvrageType.isBlank()) {
-            return ArticleType.MATIERE;
-        }
-        return switch (ouvrageType.trim().toUpperCase()) {
-            case OUVRAGE_MO -> ArticleType.MAIN_DOEUVRE;
-            case OUVRAGE_LOCATION, OUVRAGE_OUTILLAGE -> ArticleType.MATERIEL;
-            case OUVRAGE_SOUS_TRAITANCE -> ArticleType.SOUS_TRAITANCE;
-            case OUVRAGE_MATERIAU -> ArticleType.MATIERE;
-            default -> ArticleType.MATIERE;
-        };
+        return toNatureFromOuvrage(ouvrageType);
     }
 }

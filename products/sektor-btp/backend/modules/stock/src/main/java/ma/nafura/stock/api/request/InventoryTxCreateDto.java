@@ -22,7 +22,7 @@ public class InventoryTxCreateDto {
     @Size(max = 50)
     private String txType;
 
-    private UUID warehouseId;
+    private UUID locationId;
 
     private LocalDate txDate;
 

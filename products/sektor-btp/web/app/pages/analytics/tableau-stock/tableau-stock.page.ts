@@ -41,7 +41,7 @@ import { ANALYTICS_PAGE_STYLES } from '../styles/analytics-page.styles';
           <h3 class="analytics-chart-card__title">{{ 'dashboard.analyses.stock.topArticles' | translate }}</h3>
           <ol class="analytics-list">
             @for (a of s.topArticles; track a.code) {
-              <li><a routerLink="/inventory/catalogue/items">{{ a.code }}</a> — {{ a.name }} ({{ a.qty | number:'1.0-0' }})</li>
+              <li><a routerLink="/inventory/catalogue/articles">{{ a.code }}</a> — {{ a.name }} ({{ a.qty | number:'1.0-0' }})</li>
             } @empty {
               <li>{{ 'dashboard.analyses.stock.empty' | translate }}</li>
             }

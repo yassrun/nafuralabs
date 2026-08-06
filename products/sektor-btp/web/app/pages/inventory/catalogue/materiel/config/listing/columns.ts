@@ -25,12 +25,6 @@ export function buildMaterielColumns(t: TranslateService): ColumnConfig[] {
       sortable: true,
     },
     {
-      key: 'familleName',
-      label: tr('inventory.catalogue.materiel.list.filters.famille'),
-      field: 'familleName',
-      sortable: true,
-    },
-    {
       key: 'marqueModele',
       label: tr('inventory.catalogue.materiel.list.columns.marque') + ' / ' + tr('inventory.catalogue.materiel.list.columns.modele'),
       field: 'marque',

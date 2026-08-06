@@ -60,7 +60,7 @@ export class ArticleDetailPage extends ConfigDrivenDetailPage<Article> {
   ): Promise<void> {
     const item = event.item;
 
-    if (item && (item.articleType === 'ENGIN' || item.articleType === 'OUTILLAGE')) {
+    if (item && (item.nature === 'MATERIEL' || item.nature === 'OUTILLAGE')) {
       this.router.navigate(['/inventory/catalogue/materiel']);
       return;
     }

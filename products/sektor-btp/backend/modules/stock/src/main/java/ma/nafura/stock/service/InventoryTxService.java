@@ -2,6 +2,7 @@ package ma.nafura.stock.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -12,11 +13,17 @@ import ma.nafura.stock.api.request.InventoryTxWithLinesCreateDto;
 import ma.nafura.stock.api.request.InventoryTxWithLinesUpdateDto;
 import ma.nafura.stock.domain.model.InventoryTx;
 import ma.nafura.stock.domain.model.InventoryTxLine;
+import ma.nafura.stock.domain.model.InventoryTxSequence;
+import ma.nafura.stock.domain.model.Location;
 import ma.nafura.stock.domain.model.StockBalance;
+import ma.nafura.stock.domain.model.StockMove;
 import ma.nafura.stock.mapper.InventoryTxMapper;
 import ma.nafura.stock.repository.InventoryTxLineRepository;
 import ma.nafura.stock.repository.InventoryTxRepository;
+import ma.nafura.stock.repository.InventoryTxSequenceRepository;
+import ma.nafura.stock.repository.LocationRepository;
 import ma.nafura.stock.repository.StockBalanceRepository;
+import ma.nafura.stock.repository.StockMoveRepository;
 import ma.nafura.stock.service.base.InventoryTxServiceBase;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class InventoryTxService extends InventoryTxServiceBase {
 
     private static final String INVENTORY_TX_NOT_FOUND = "Inventory transaction not found";
+    private static final String LOCATION_AJUSTEMENT = "AJUSTEMENT";
 
     public static final String STATUS_BROUILLON = "BROUILLON";
     public static final String STATUS_SOUMIS = "SOUMIS";
@@ -38,19 +46,34 @@ public class InventoryTxService extends InventoryTxServiceBase {
     private final InventoryTxRepository inventoryTxRepository;
     private final InventoryTxLineRepository lineRepository;
     private final StockBalanceRepository stockBalanceRepository;
+    private final StockMoveRepository stockMoveRepository;
     private final StockReservationService stockReservationService;
+    private final CostingMethodResolver costingMethodResolver;
+    private final ValorisationService valorisationService;
+    private final LocationRepository locationRepository;
+    private final InventoryTxSequenceRepository sequenceRepository;
 
     public InventoryTxService(
             InventoryTxRepository repository,
             InventoryTxMapper mapper,
             InventoryTxLineRepository lineRepository,
             StockBalanceRepository stockBalanceRepository,
-            StockReservationService stockReservationService) {
+            StockMoveRepository stockMoveRepository,
+            StockReservationService stockReservationService,
+            CostingMethodResolver costingMethodResolver,
+            ValorisationService valorisationService,
+            LocationRepository locationRepository,
+            InventoryTxSequenceRepository sequenceRepository) {
         super(repository, mapper);
         this.inventoryTxRepository = repository;
         this.lineRepository = lineRepository;
         this.stockBalanceRepository = stockBalanceRepository;
+        this.stockMoveRepository = stockMoveRepository;
         this.stockReservationService = stockReservationService;
+        this.costingMethodResolver = costingMethodResolver;
+        this.valorisationService = valorisationService;
+        this.locationRepository = locationRepository;
+        this.sequenceRepository = sequenceRepository;
     }
 
     @Transactional(readOnly = true)
@@ -90,7 +113,7 @@ public class InventoryTxService extends InventoryTxServiceBase {
                 .motifId(request.getMotifId())
                 .bcId(request.getBcId())
                 .build();
-        tx.setWarehouseId(resolveWarehouseId(request.getTxType(), request.getWarehouseId(), tx));
+        tx.setLocationId(resolveLocationId(request.getTxType(), request.getLocationId(), tx));
         tx = inventoryTxRepository.save(tx);
 
         List<InventoryTxLine> lines = saveLines(tenantId, tx.getId(), request.getLines());
@@ -135,10 +158,10 @@ public class InventoryTxService extends InventoryTxServiceBase {
         if (request.getBcId() != null) {
             tx.setBcId(request.getBcId());
         }
-        if (request.getWarehouseId() != null) {
-            tx.setWarehouseId(request.getWarehouseId());
+        if (request.getLocationId() != null) {
+            tx.setLocationId(request.getLocationId());
         } else {
-            tx.setWarehouseId(resolveWarehouseId(tx.getTxType(), tx.getWarehouseId(), tx));
+            tx.setLocationId(resolveLocationId(tx.getTxType(), tx.getLocationId(), tx));
         }
         tx = inventoryTxRepository.save(tx);
 
@@ -153,7 +176,7 @@ public class InventoryTxService extends InventoryTxServiceBase {
 
     @Transactional
     public InventoryTx submit(UUID id) {
-        InventoryTx tx = getById(id).orElseThrow(() -> new IllegalArgumentException("Inventory transaction not found"));
+        InventoryTx tx = getById(id).orElseThrow(() -> new IllegalArgumentException(INVENTORY_TX_NOT_FOUND));
         if (!STATUS_BROUILLON.equals(tx.getStatus())) {
             throw new IllegalStateException("Only BROUILLON transactions can be submitted");
         }
@@ -163,7 +186,7 @@ public class InventoryTxService extends InventoryTxServiceBase {
 
     @Transactional
     public InventoryTx validate(UUID id) {
-        InventoryTx tx = getById(id).orElseThrow(() -> new IllegalArgumentException("Inventory transaction not found"));
+        InventoryTx tx = getById(id).orElseThrow(() -> new IllegalArgumentException(INVENTORY_TX_NOT_FOUND));
         String status = tx.getStatus();
         if (!STATUS_BROUILLON.equals(status) && !STATUS_SOUMIS.equals(status)) {
             throw new IllegalStateException("Only BROUILLON or SOUMIS transactions can be validated");
@@ -178,23 +201,83 @@ public class InventoryTxService extends InventoryTxServiceBase {
         return inventoryTxRepository.save(tx);
     }
 
+    /**
+     * Contre-passe une transaction validée : crée une TX inverse VALIDE et des moves de reversal.
+     */
+    @Transactional
+    public InventoryTx reverse(UUID id) {
+        InventoryTx original =
+                getById(id).orElseThrow(() -> new IllegalArgumentException(INVENTORY_TX_NOT_FOUND));
+        if (!STATUS_VALIDE.equals(original.getStatus())) {
+            throw new IllegalStateException("Only VALIDE transactions can be reversed");
+        }
+        List<StockMove> originalMoves =
+                stockMoveRepository.findByTenantIdAndInventoryTxId(tenantId(), original.getId());
+        if (originalMoves.isEmpty()) {
+            throw new IllegalStateException("No stock moves found for transaction — cannot reverse");
+        }
+
+        InventoryTx reversal = InventoryTx.builder()
+                .tenantId(tenantId())
+                .txNumber(resolveTxNumber(null, original.getTxType()) + "-REV")
+                .txType(original.getTxType())
+                .txDate(LocalDate.now())
+                .reference("REV of " + original.getTxNumber())
+                .notes("Contre-passation de " + original.getTxNumber())
+                .status(STATUS_VALIDE)
+                .locationId(original.getLocationId())
+                .sourceLocationId(original.getDestLocationId())
+                .destLocationId(original.getSourceLocationId())
+                .chantierLocationId(original.getChantierLocationId())
+                .chantierBudgetId(original.getChantierBudgetId())
+                .motifId(original.getMotifId())
+                .build();
+        // Ensure unique number if -REV collides
+        if (inventoryTxRepository.existsByTenantIdAndTxNumber(tenantId(), reversal.getTxNumber())) {
+            reversal.setTxNumber(resolveTxNumber(null, original.getTxType()));
+        }
+        reversal = inventoryTxRepository.save(reversal);
+
+        for (StockMove originalMove : originalMoves) {
+            BigDecimal reverseQty = originalMove.getQuantity().negate();
+            StockMove reverseMove = StockMove.builder()
+                    .tenantId(tenantId())
+                    .inventoryTxId(reversal.getId())
+                    .inventoryTxLineId(originalMove.getInventoryTxLineId())
+                    .locationId(originalMove.getLocationId())
+                    .itemId(originalMove.getItemId())
+                    .quantity(reverseQty)
+                    .unitCost(originalMove.getUnitCost())
+                    .totalCost(originalMove.getTotalCost())
+                    .movedAt(OffsetDateTime.now())
+                    .reversalOfMoveId(originalMove.getId())
+                    .opening(false)
+                    .build();
+            stockMoveRepository.save(reverseMove);
+            applySignedQuantityToBalance(
+                    tenantId(), originalMove.getLocationId(), originalMove.getItemId(), reverseQty, null);
+        }
+        return reversal;
+    }
+
     private void consumeReservationsIfSortie(InventoryTx tx, List<InventoryTxLine> lines) {
-        if (!"SORTIE".equals(tx.getTxType()) || tx.getChantierBudgetId() == null) {
+        if (!"SORTIE".equals(tx.getTxType()) || tx.getChantierLocationId() == null) {
             return;
         }
         List<StockReservationService.ItemQuantity> consumptions = new ArrayList<>();
         for (InventoryTxLine line : lines) {
             consumptions.add(new StockReservationService.ItemQuantity(line.getItemId(), line.getQuantity()));
         }
-        stockReservationService.consumeFifo(tx.getChantierBudgetId(), consumptions);
+        stockReservationService.consumeFifo(tx.getChantierLocationId(), consumptions);
     }
 
     @Transactional
     public InventoryTx cancel(UUID id) {
-        InventoryTx tx = getById(id).orElseThrow(() -> new IllegalArgumentException("Inventory transaction not found"));
+        InventoryTx tx = getById(id).orElseThrow(() -> new IllegalArgumentException(INVENTORY_TX_NOT_FOUND));
         String status = tx.getStatus();
         if (STATUS_VALIDE.equals(status)) {
-            throw new IllegalStateException("Validated transactions cannot be cancelled");
+            throw new IllegalStateException(
+                    "Validated transactions cannot be cancelled — use reverse instead");
         }
         if (STATUS_ANNULE.equals(status)) {
             return tx;
@@ -206,7 +289,7 @@ public class InventoryTxService extends InventoryTxServiceBase {
     @Transactional
     @Override
     public void delete(UUID id) {
-        InventoryTx tx = getById(id).orElseThrow(() -> new IllegalArgumentException("Inventory transaction not found"));
+        InventoryTx tx = getById(id).orElseThrow(() -> new IllegalArgumentException(INVENTORY_TX_NOT_FOUND));
         assertEditable(tx);
         lineRepository.deleteByTenantIdAndInventoryTxId(tenantId(), id);
         super.delete(id);
@@ -217,73 +300,196 @@ public class InventoryTxService extends InventoryTxServiceBase {
         String type = tx.getTxType();
         for (InventoryTxLine line : lines) {
             switch (type) {
-                case "RECEPTION" -> addQuantity(tenantId, warehouseForDest(tx), line);
-                case "SORTIE", "PERTE" -> subtractQuantity(tenantId, warehouseForSource(tx), line);
-                case "RETOUR" -> addQuantity(tenantId, warehouseForDest(tx), line);
+                case "RECEPTION" -> addQuantity(tenantId, warehouseForDest(tx), line, tx, true);
+                case "SORTIE", "PERTE" -> subtractQuantity(tenantId, warehouseForSource(tx), line, tx);
+                case "RETOUR" -> addQuantity(tenantId, warehouseForDest(tx), line, tx, true);
                 case "TRANSFERT" -> {
-                    subtractQuantity(tenantId, warehouseForSource(tx), line);
-                    addQuantity(tenantId, warehouseForDest(tx), line);
+                    subtractQuantity(tenantId, warehouseForSource(tx), line, tx);
+                    addQuantity(tenantId, warehouseForDest(tx), line, tx, false);
                 }
-                case "INVENTAIRE" -> adjustToCountedQuantity(tenantId, warehouseForDest(tx), line, tx.getTxDate());
-                default -> { /* other types: no automatic balance change */ }
+                case "INVENTAIRE" -> adjustToCountedQuantity(tenantId, warehouseForDest(tx), line, tx);
+                default -> { /* no automatic balance change */ }
             }
         }
     }
 
-    private void addQuantity(UUID tenantId, UUID warehouseId, InventoryTxLine line) {
+    private void addQuantity(
+            UUID tenantId, UUID locationId, InventoryTxLine line, InventoryTx tx, boolean updatePmp) {
+        assertLocation(locationId);
+        BigDecimal qty = line.getQuantity() != null ? line.getQuantity() : BigDecimal.ZERO;
+
+        StockMove move = StockMove.builder()
+                .tenantId(tenantId)
+                .inventoryTxId(tx.getId())
+                .inventoryTxLineId(line.getId())
+                .locationId(locationId)
+                .itemId(line.getItemId())
+                .quantity(qty)
+                .movedAt(txMovedAt(tx))
+                .opening(false)
+                .build();
+        if (updatePmp && ("RECEPTION".equals(tx.getTxType()) || "RETOUR".equals(tx.getTxType()))) {
+            valorisationService.applyInboundCost(move, line, locationId);
+        } else {
+            valorisationService.applyOutboundCost(move, line.getItemId(), qty);
+        }
+        stockMoveRepository.save(move);
+        applySignedQuantityToBalance(tenantId, locationId, line.getItemId(), qty, null);
+    }
+
+    private void subtractQuantity(UUID tenantId, UUID locationId, InventoryTxLine line, InventoryTx tx) {
+        assertLocation(locationId);
+        BigDecimal qty = line.getQuantity() != null ? line.getQuantity() : BigDecimal.ZERO;
         StockBalance balance = stockBalanceRepository
-                .findByTenantIdAndWarehouseIdAndItemId(tenantId, warehouseId, line.getItemId())
-                .orElseGet(() -> newBalance(tenantId, warehouseId, line.getItemId()));
-        BigDecimal qty = balance.getQuantity() != null ? balance.getQuantity() : BigDecimal.ZERO;
-        balance.setQuantity(qty.add(line.getQuantity()));
-        recalcAvailable(balance);
-        stockBalanceRepository.save(balance);
+                .findByTenantIdAndLocationIdAndItemId(tenantId, locationId, line.getItemId())
+                .orElseGet(() -> newBalance(tenantId, locationId, line.getItemId()));
+        BigDecimal onHand = balance.getQuantity() != null ? balance.getQuantity() : BigDecimal.ZERO;
+        BigDecimal reserved =
+                balance.getReservedQuantity() != null ? balance.getReservedQuantity() : BigDecimal.ZERO;
+        BigDecimal available = onHand.subtract(reserved);
+        BigDecimal next = onHand.subtract(qty);
+        if (next.compareTo(BigDecimal.ZERO) < 0 || available.compareTo(qty) < 0) {
+            if (!costingMethodResolver.allowNegativeStock()) {
+                throw new InsufficientStockException(
+                        "Stock insuffisant pour l'article "
+                                + line.getItemId()
+                                + " à l'emplacement "
+                                + locationId
+                                + " (disponible="
+                                + available.max(BigDecimal.ZERO)
+                                + ", demandé="
+                                + qty
+                                + ")");
+            }
+        }
+
+        StockMove move = StockMove.builder()
+                .tenantId(tenantId)
+                .inventoryTxId(tx.getId())
+                .inventoryTxLineId(line.getId())
+                .locationId(locationId)
+                .itemId(line.getItemId())
+                .quantity(qty.negate())
+                .movedAt(txMovedAt(tx))
+                .opening(false)
+                .build();
+        valorisationService.applyOutboundCost(move, line.getItemId(), qty);
+        stockMoveRepository.save(move);
+        applySignedQuantityToBalance(tenantId, locationId, line.getItemId(), qty.negate(), null);
     }
 
     private void adjustToCountedQuantity(
-            UUID tenantId, UUID warehouseId, InventoryTxLine line, java.time.LocalDate countDate) {
+            UUID tenantId, UUID locationId, InventoryTxLine line, InventoryTx tx) {
+        assertLocation(locationId);
         BigDecimal target =
                 line.getCountedQty() != null ? line.getCountedQty() : line.getQuantity();
+        if (target == null) {
+            target = BigDecimal.ZERO;
+        }
         StockBalance balance = stockBalanceRepository
-                .findByTenantIdAndWarehouseIdAndItemId(tenantId, warehouseId, line.getItemId())
-                .orElseGet(() -> newBalance(tenantId, warehouseId, line.getItemId()));
-        balance.setQuantity(target);
+                .findByTenantIdAndLocationIdAndItemId(tenantId, locationId, line.getItemId())
+                .orElseGet(() -> newBalance(tenantId, locationId, line.getItemId()));
+        BigDecimal current = balance.getQuantity() != null ? balance.getQuantity() : BigDecimal.ZERO;
+        BigDecimal variance = target.subtract(current);
+        if (variance.signum() == 0) {
+            if (tx.getTxDate() != null) {
+                balance.setLastCountDate(tx.getTxDate());
+                stockBalanceRepository.save(balance);
+            }
+            return;
+        }
+
+        UUID adjustmentLocationId = resolveAjustementLocationId(tenantId);
+        BigDecimal unitCost = valorisationService.currentUnitCost(line.getItemId());
+        BigDecimal absVar = variance.abs();
+        BigDecimal totalCost = unitCost.multiply(absVar);
+
+        // Move on counted location (signed variance)
+        StockMove countedMove = StockMove.builder()
+                .tenantId(tenantId)
+                .inventoryTxId(tx.getId())
+                .inventoryTxLineId(line.getId())
+                .locationId(locationId)
+                .itemId(line.getItemId())
+                .quantity(variance)
+                .unitCost(unitCost)
+                .totalCost(totalCost)
+                .movedAt(txMovedAt(tx))
+                .opening(false)
+                .build();
+        stockMoveRepository.save(countedMove);
+
+        // Counter-move on AJUSTEMENT (opposite sign)
+        StockMove adjustmentMove = StockMove.builder()
+                .tenantId(tenantId)
+                .inventoryTxId(tx.getId())
+                .inventoryTxLineId(line.getId())
+                .locationId(adjustmentLocationId)
+                .itemId(line.getItemId())
+                .quantity(variance.negate())
+                .unitCost(unitCost)
+                .totalCost(totalCost)
+                .movedAt(txMovedAt(tx))
+                .opening(false)
+                .build();
+        stockMoveRepository.save(adjustmentMove);
+
+        applySignedQuantityToBalance(tenantId, locationId, line.getItemId(), variance, tx.getTxDate());
+        if (locationAffectsStock(tenantId, adjustmentLocationId)) {
+            applySignedQuantityToBalance(
+                    tenantId, adjustmentLocationId, line.getItemId(), variance.negate(), null);
+        }
+    }
+
+    private boolean locationAffectsStock(UUID tenantId, UUID locationId) {
+        return locationRepository
+                .findByIdAndTenantId(locationId, tenantId)
+                .map(loc -> Boolean.TRUE.equals(loc.getAffectsStock()))
+                .orElse(true);
+    }
+
+    private UUID resolveAjustementLocationId(UUID tenantId) {
+        return locationRepository
+                .findByTenantIdAndCode(tenantId, LOCATION_AJUSTEMENT)
+                .map(Location::getId)
+                .orElseThrow(() -> new IllegalStateException(
+                        "Emplacement AJUSTEMENT manquant — seed onboarding locations (Lot 6)"));
+    }
+
+    private void applySignedQuantityToBalance(
+            UUID tenantId, UUID locationId, UUID itemId, BigDecimal signedQty, LocalDate countDate) {
+        StockBalance balance = stockBalanceRepository
+                .findByTenantIdAndLocationIdAndItemId(tenantId, locationId, itemId)
+                .orElseGet(() -> newBalance(tenantId, locationId, itemId));
+        BigDecimal qty = balance.getQuantity() != null ? balance.getQuantity() : BigDecimal.ZERO;
+        balance.setQuantity(qty.add(signedQty));
         if (countDate != null) {
             balance.setLastCountDate(countDate);
         }
-        recalcAvailable(balance);
         stockBalanceRepository.save(balance);
     }
 
-    private void subtractQuantity(UUID tenantId, UUID warehouseId, InventoryTxLine line) {
-        StockBalance balance = stockBalanceRepository
-                .findByTenantIdAndWarehouseIdAndItemId(tenantId, warehouseId, line.getItemId())
-                .orElseGet(() -> newBalance(tenantId, warehouseId, line.getItemId()));
-        BigDecimal qty = balance.getQuantity() != null ? balance.getQuantity() : BigDecimal.ZERO;
-        BigDecimal next = qty.subtract(line.getQuantity());
-        if (next.compareTo(BigDecimal.ZERO) < 0) {
-            next = BigDecimal.ZERO;
-        }
-        balance.setQuantity(next);
-        recalcAvailable(balance);
-        stockBalanceRepository.save(balance);
-    }
-
-    private static StockBalance newBalance(UUID tenantId, UUID warehouseId, UUID itemId) {
+    private static StockBalance newBalance(UUID tenantId, UUID locationId, UUID itemId) {
         return StockBalance.builder()
                 .tenantId(tenantId)
-                .warehouseId(warehouseId)
+                .locationId(locationId)
                 .itemId(itemId)
                 .quantity(BigDecimal.ZERO)
                 .reservedQuantity(BigDecimal.ZERO)
-                .availableQuantity(BigDecimal.ZERO)
                 .build();
     }
 
-    private static void recalcAvailable(StockBalance balance) {
-        BigDecimal qty = balance.getQuantity() != null ? balance.getQuantity() : BigDecimal.ZERO;
-        BigDecimal reserved = balance.getReservedQuantity() != null ? balance.getReservedQuantity() : BigDecimal.ZERO;
-        balance.setAvailableQuantity(qty.subtract(reserved).max(BigDecimal.ZERO));
+    private static void assertLocation(UUID locationId) {
+        if (locationId == null) {
+            throw new IllegalArgumentException("locationId or source/dest location is required");
+        }
+    }
+
+    private static OffsetDateTime txMovedAt(InventoryTx tx) {
+        if (tx.getTxDate() != null) {
+            return tx.getTxDate().atStartOfDay().atOffset(OffsetDateTime.now().getOffset());
+        }
+        return OffsetDateTime.now();
     }
 
     private UUID warehouseForSource(InventoryTx tx) {
@@ -293,7 +499,7 @@ public class InventoryTxService extends InventoryTxServiceBase {
         if (tx.getChantierLocationId() != null) {
             return tx.getChantierLocationId();
         }
-        return tx.getWarehouseId();
+        return tx.getLocationId();
     }
 
     private UUID warehouseForDest(InventoryTx tx) {
@@ -303,15 +509,15 @@ public class InventoryTxService extends InventoryTxServiceBase {
         if (tx.getChantierLocationId() != null) {
             return tx.getChantierLocationId();
         }
-        return tx.getWarehouseId();
+        return tx.getLocationId();
     }
 
-    private UUID resolveWarehouseId(String txType, UUID explicit, InventoryTx tx) {
+    private UUID resolveLocationId(String txType, UUID explicit, InventoryTx tx) {
         if (explicit != null) {
             return explicit;
         }
         return switch (txType) {
-            case "RECEPTION", "RETOUR" -> warehouseForDest(tx);
+            case "RECEPTION", "RETOUR", "INVENTAIRE" -> warehouseForDest(tx);
             case "SORTIE", "PERTE", "TRANSFERT" -> warehouseForSource(tx);
             default -> {
                 if (tx.getDestLocationId() != null) {
@@ -320,7 +526,7 @@ public class InventoryTxService extends InventoryTxServiceBase {
                 if (tx.getSourceLocationId() != null) {
                     yield tx.getSourceLocationId();
                 }
-                throw new IllegalArgumentException("warehouseId or source/dest location is required");
+                throw new IllegalArgumentException("locationId or source/dest location is required");
             }
         };
     }
@@ -377,7 +583,21 @@ public class InventoryTxService extends InventoryTxServiceBase {
         if (requested != null && !requested.isBlank()) {
             return requested.trim();
         }
-        String prefix = txType != null && txType.length() >= 3 ? txType.substring(0, 3) : "TX";
-        return prefix + "-" + System.currentTimeMillis();
+        UUID tenantId = tenantId();
+        int exercice = LocalDate.now().getYear();
+        String type = txType != null ? txType : "TX";
+        InventoryTxSequence seq = sequenceRepository
+                .findByTenantIdAndTxTypeAndExercice(tenantId, type, exercice)
+                .orElseGet(() -> InventoryTxSequence.builder()
+                        .tenantId(tenantId)
+                        .txType(type)
+                        .exercice(exercice)
+                        .lastValue(0L)
+                        .build());
+        long next = seq.getLastValue() + 1;
+        seq.setLastValue(next);
+        sequenceRepository.save(seq);
+        String prefix = type.length() >= 3 ? type.substring(0, 3) : type;
+        return prefix + "-" + exercice + "-" + String.format("%04d", next);
     }
 }

@@ -3,6 +3,8 @@ package ma.nafura.item.domain.model;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -33,9 +35,6 @@ public class Item {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "item_type_id")
-    private UUID itemTypeId;
-
     @Column(name = "item_category_id")
     private UUID itemCategoryId;
 
@@ -48,8 +47,8 @@ public class Item {
     @Column(name = "is_active")
     private Boolean isActive;
 
-    @Column(name = "article_type", length = 30)
-    private String articleType;
+    @Column(name = "nature", length = 30)
+    private String nature;
 
     @Column(name = "poste_budget_id", length = 50)
     private String posteBudgetId;
@@ -93,6 +92,11 @@ public class Item {
 
     @Column(name = "updated_at", nullable = false)
     private OffsetDateTime updatedAt;
+
+    /** Lots d'usage (axe multi) — non persisté ici, table {@code item_usage_lots}. */
+    @Transient
+    @Builder.Default
+    private List<String> usageLotCodes = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {

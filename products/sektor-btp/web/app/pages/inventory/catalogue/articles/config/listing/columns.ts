@@ -2,11 +2,16 @@ import type { TranslateService } from '@ngx-translate/core';
 
 import type { ColumnConfig } from '@lib/anatomy/types';
 
-const ARTICLE_TYPE_VARIANTS: Record<string, 'default' | 'warning' | 'success' | 'info'> = {
-  MATERIAU: 'info',
+const NATURE_VARIANTS: Record<string, 'default' | 'warning' | 'success' | 'info'> = {
+  MATIERE: 'info',
   CONSOMMABLE: 'warning',
-  ENGIN: 'success',
+  CARBURANT: 'warning',
   OUTILLAGE: 'default',
+  MATERIEL: 'success',
+  LOCATION: 'success',
+  MAIN_DOEUVRE: 'info',
+  SOUS_TRAITANCE: 'default',
+  SERVICE: 'default',
 };
 
 export function buildArticleColumns(t: TranslateService): ColumnConfig[] {
@@ -36,14 +41,31 @@ export function buildArticleColumns(t: TranslateService): ColumnConfig[] {
       width: '150px',
     },
     {
-      key: 'articleType',
-      label: tr('inventory.catalogue.article.list.columns.articleType'),
-      field: 'articleType',
-      type: 'badge',
-      width: '120px',
-      badgeVariant: (value: unknown) => ARTICLE_TYPE_VARIANTS[String(value)] ?? 'default',
+      key: 'lotsUsage',
+      label: tr('inventory.catalogue.article.list.columns.lotsUsage'),
+      field: 'lotsUsage',
+      type: 'text',
+      width: '180px',
       transform: (value: unknown) => {
-        const key = `inventory.enums.articleType.${String(value)}`;
+        if (!Array.isArray(value) || value.length === 0) return '—';
+        return value
+          .map((code) => {
+            const key = `inventory.enums.usageLot.${String(code)}`;
+            const resolved = t.instant(key);
+            return resolved === key ? String(code) : resolved;
+          })
+          .join(', ');
+      },
+    },
+    {
+      key: 'nature',
+      label: tr('inventory.catalogue.article.list.columns.nature'),
+      field: 'nature',
+      type: 'badge',
+      width: '140px',
+      badgeVariant: (value: unknown) => NATURE_VARIANTS[String(value)] ?? 'default',
+      transform: (value: unknown) => {
+        const key = `inventory.enums.nature.${String(value)}`;
         const resolved = t.instant(key);
         return resolved === key ? String(value ?? '') : resolved;
       },

@@ -9,7 +9,6 @@
       "name": "الاسم",
       "description": "الوصف",
       "type": "معرّف نوع الصنف",
-      "itemType": "معرّف نوع الصنف",
       "itemCategory": "معرّف فئة الصنف",
       "unitOfMeasure": "معرّف وحدة القياس",
       "baseUnit": "الوحدة الأساسية",
@@ -22,8 +21,7 @@
     "navigation": {
       "barcodes": "الباركود",
       "items": "الأصناف",
-      "itemCategories": "فئات الأصناف",
-      "itemTypes": "أنواع الأصناف"
+      "itemCategories": "فئات الأصناف"
     },
     "barcode": {
       "title": "الباركود",
@@ -39,11 +37,6 @@
       "title": "فئات الأصناف",
       "detailTitle": "تفاصيل فئة الصنف",
       "newTitle": "فئة صنف جديدة"
-    },
-    "itemType": {
-      "title": "أنواع الأصناف",
-      "detailTitle": "تفاصيل نوع الصنف",
-      "newTitle": "نوع صنف جديد"
     }
   },
   "common": {

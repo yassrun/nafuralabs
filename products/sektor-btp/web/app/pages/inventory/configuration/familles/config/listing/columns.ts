@@ -27,6 +27,13 @@ export function buildFamilleColumns(t: TranslateService): ColumnConfig[] {
       type: 'text',
     },
     {
+      key: 'parentId',
+      label: tr('inventory.configuration.famille.list.columns.parentId'),
+      field: 'parentId',
+      type: 'text',
+      width: '160px',
+    },
+    {
       key: 'isActive',
       label: tr('inventory.configuration.famille.list.columns.isActive'),
       field: 'isActive',

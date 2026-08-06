@@ -17,9 +17,10 @@ import type {
 @Injectable({ providedIn: 'root' })
 export class StockBalancesApiService extends FeatureApiService<StockBalance, StockBalanceCreate, StockBalanceUpdate> {
   protected override basePath = '/api/v1/stock-balances';
-  protected override searchFields = ['warehouseId', 'itemId'];
+  protected override searchFields = ['locationId', 'itemId'];
 
   async listFiltered(query: {
+    locationId?: string;
     warehouseId?: string;
     itemId?: string;
     page?: number;
@@ -29,8 +30,9 @@ export class StockBalancesApiService extends FeatureApiService<StockBalance, Sto
       page: query.page ?? 0,
       pageSize: query.pageSize ?? 500,
     });
-    if (query.warehouseId) {
-      params = params.set('warehouseId', query.warehouseId);
+    const locationId = query.locationId ?? query.warehouseId;
+    if (locationId) {
+      params = params.set('locationId', locationId);
     }
     if (query.itemId) {
       params = params.set('itemId', query.itemId);

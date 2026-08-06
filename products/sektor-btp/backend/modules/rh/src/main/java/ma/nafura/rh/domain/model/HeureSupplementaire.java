@@ -60,8 +60,8 @@ public class HeureSupplementaire {
     @Column(nullable = false, length = 30)
     private String status;
 
-    @Column(name = "pointage_id", length = 100)
-    private String pointageId;
+    @Column(name = "pointage_id")
+    private UUID pointageId;
 
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;

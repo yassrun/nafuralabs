@@ -2,11 +2,13 @@
 id: OPS-01
 status: todo
 context: nafura
-assignee: me
+kind: task
 priority: P1
-estimate: 6h
+assignee: me
+gate: me
 tags: [mail, zimbra, migration, google-workspace]
 ---
+
 
 # Configurer Zimbra + migrer ykarkafi@nafuralabs.com depuis Google Workspace
 
@@ -29,4 +31,5 @@ tags: [mail, zimbra, migration, google-workspace]
 ## Journal
 ```
 05/08 11:09  capturé · promu OPS-01
+05/08 21:30  framework v2 · task schema (estimate out · gate/kind)
 ```

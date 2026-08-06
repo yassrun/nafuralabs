@@ -1,4 +1,4 @@
-import type { ArticleType } from '@app/inventory/models';
+import type { ArticleType, Nature } from '@app/inventory/models';
 
 export interface Article {
   id: string;
@@ -7,9 +7,9 @@ export interface Article {
   description?: string;
   familleId: string;
   familleName?: string;
-  typeArticleId: string;
-  typeArticleName?: string;
-  articleType: ArticleType;
+  /** Lots d'usage multi (VRD, GROS_OEUVRE, …) — axe disjoint de la famille. */
+  lotsUsage?: string[];
+  nature: Nature;
   uomId: string;
   uomCode?: string;
   prixUnitaire?: number;
@@ -40,7 +40,8 @@ export type ArticleListItem = Pick<
   | 'name'
   | 'familleId'
   | 'familleName'
-  | 'articleType'
+  | 'lotsUsage'
+  | 'nature'
   | 'uomCode'
   | 'prixUnitaire'
   | 'pmp'
@@ -52,7 +53,7 @@ export type ArticleListItem = Pick<
 
 export type ArticleCreate = Omit<
   Article,
-  'id' | 'createdAt' | 'updatedAt' | 'familleName' | 'typeArticleName' | 'uomCode' | 'stockTotal'
+  'id' | 'createdAt' | 'updatedAt' | 'familleName' | 'uomCode' | 'stockTotal'
 > & { devise?: string };
 
 export type ArticleUpdate = Partial<ArticleCreate>;
@@ -64,6 +65,7 @@ export interface ArticleQuery {
   sortBy?: string;
   sortDirection?: 'asc' | 'desc';
   familleId?: string;
-  articleType?: ArticleType;
+  nature?: ArticleType;
+  usageLot?: string;
   isActive?: boolean;
 }

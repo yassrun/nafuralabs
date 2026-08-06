@@ -25,8 +25,8 @@ public class StockBalance {
     @Column(name = "tenant_id", nullable = false)
     private UUID tenantId;
 
-    @Column(name = "warehouse_id", nullable = false)
-    private UUID warehouseId;
+    @Column(name = "location_id", nullable = false)
+    private UUID locationId;
 
     @Column(name = "item_id", nullable = false)
     private UUID itemId;
@@ -37,9 +37,6 @@ public class StockBalance {
     @Column(name = "reserved_quantity", precision = 18, scale = 4)
     private BigDecimal reservedQuantity;
 
-    @Column(name = "available_quantity", precision = 18, scale = 4)
-    private BigDecimal availableQuantity;
-
     @Column(name = "last_count_date")
     private LocalDate lastCountDate;
 
@@ -48,6 +45,13 @@ public class StockBalance {
 
     @Column(name = "updated_at", nullable = false)
     private OffsetDateTime updatedAt;
+
+    /** Derived: quantity − reserved (not persisted). */
+    public BigDecimal getAvailableQuantity() {
+        BigDecimal qty = quantity != null ? quantity : BigDecimal.ZERO;
+        BigDecimal reserved = reservedQuantity != null ? reservedQuantity : BigDecimal.ZERO;
+        return qty.subtract(reserved).max(BigDecimal.ZERO);
+    }
 
     @PrePersist
     protected void onCreate() {

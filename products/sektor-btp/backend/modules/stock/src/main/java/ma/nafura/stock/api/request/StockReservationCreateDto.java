@@ -1,7 +1,6 @@
 package ma.nafura.stock.api.request;
 
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
@@ -22,9 +21,13 @@ public class StockReservationCreateDto {
     @Size(max = 20)
     private String uom;
 
-    @NotBlank
-    @Size(max = 50)
-    private String chantierId;
+    /** Chantier location UUID. */
+    @NotNull
+    private UUID chantierId;
+
+    /** Stock location where quantity is reserved. */
+    @NotNull
+    private UUID locationId;
 
     @NotNull
     private LocalDate dateBesoin;

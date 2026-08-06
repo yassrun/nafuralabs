@@ -14,7 +14,7 @@ import lombok.Data;
 @Data
 public class StockBalanceUpdateDto {
 
-    private UUID warehouseId;
+    private UUID locationId;
 
     private UUID itemId;
 
@@ -23,9 +23,6 @@ public class StockBalanceUpdateDto {
 
     @Min(0)
     private BigDecimal reservedQuantity;
-
-    @Min(0)
-    private BigDecimal availableQuantity;
 
     private LocalDate lastCountDate;
 }

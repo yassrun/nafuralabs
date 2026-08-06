@@ -12,23 +12,19 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-/**
- * Repository for StockBalance entity.
- * Generated once — add custom queries here.
- */
 @Repository
 public interface StockBalanceRepository extends TenantScopedRepository<StockBalance, UUID> {
 
-    List<StockBalance> findByTenantIdAndWarehouseId(UUID tenantId, UUID warehouseId);
+    List<StockBalance> findByTenantIdAndLocationId(UUID tenantId, UUID locationId);
 
-    Optional<StockBalance> findByTenantIdAndWarehouseIdAndItemId(UUID tenantId, UUID warehouseId, UUID itemId);
+    Optional<StockBalance> findByTenantIdAndLocationIdAndItemId(UUID tenantId, UUID locationId, UUID itemId);
 
-    Page<StockBalance> findByTenantIdAndWarehouseId(UUID tenantId, UUID warehouseId, Pageable pageable);
+    Page<StockBalance> findByTenantIdAndLocationId(UUID tenantId, UUID locationId, Pageable pageable);
 
     Page<StockBalance> findByTenantIdAndItemId(UUID tenantId, UUID itemId, Pageable pageable);
 
-    Page<StockBalance> findByTenantIdAndWarehouseIdAndItemId(
-            UUID tenantId, UUID warehouseId, UUID itemId, Pageable pageable);
+    Page<StockBalance> findByTenantIdAndLocationIdAndItemId(
+            UUID tenantId, UUID locationId, UUID itemId, Pageable pageable);
 
     @Query(
             """

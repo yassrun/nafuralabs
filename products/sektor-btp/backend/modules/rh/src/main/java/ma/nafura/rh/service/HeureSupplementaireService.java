@@ -76,7 +76,7 @@ public class HeureSupplementaireService {
                 .tauxMajoration(tauxMajoration)
                 .montant(montant)
                 .status(resolveStatus(request.getStatus(), HeureSupplementaire.STATUS_BROUILLON))
-                .pointageId(trimOrNull(request.getPointageId()))
+                .pointageId(parseUuidOrNull(request.getPointageId()))
                 .build();
         return repository.save(entity);
     }
@@ -268,6 +268,17 @@ public class HeureSupplementaireService {
 
     private String trimOrNull(String value) {
         return StringUtils.hasText(value) ? value.trim() : null;
+    }
+
+    private static UUID parseUuidOrNull(String value) {
+        if (!StringUtils.hasText(value)) {
+            return null;
+        }
+        try {
+            return UUID.fromString(value.trim());
+        } catch (IllegalArgumentException ex) {
+            throw new IllegalArgumentException("pointageId must be a valid UUID: " + value);
+        }
     }
 
     private UUID tenantId() {

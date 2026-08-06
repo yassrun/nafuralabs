@@ -2,25 +2,31 @@
 id: ERP-03
 status: todo
 context: nafura
-assignee: me
+kind: feature
+feature: achats-raffinement
+assignee: either
+gate: me
 priority: P1
-estimate: 10h
-blocked_by: [ERP-02]
 tags: [sektor, achats, raffinement]
 ---
 
-# Raffiner achats (lot 3)
+# Feature — Raffinement achats (lot 3)
 
 > Boucle mince : DA → BC → réception → entrée stock.
-> Bloqué par ERP-02 (stock).
+> Spec / lots enfants : à découper (Promote → spec → tasks) avant Commit sprint.
+> Prérequis stock (ERP-02) livré.
 
-## Critères d'acceptation
-- [ ] DA → BC → réception bout-en-bout
-- [ ] Réception crée / alimente un mouvement stock
-- [ ] Rattachement chantier possible
-- [ ] Pas de sourcing / AO fournisseur “complet” dans cette vague
+## Cible mince
+- DA → BC → réception bout-en-bout
+- Réception crée / alimente un mouvement stock
+- Rattachement chantier possible
+- Pas de sourcing / AO fournisseur “complet” dans cette vague
+
+## Enfants
+_(aucun — découper avant engagement sprint)_
 
 ## Journal
 ```
 05/08 11:27  capturé · ordre raffinement lots ops figé
+05/08 21:25  kind:feature · pas une task atomique (framework v2)
 ```

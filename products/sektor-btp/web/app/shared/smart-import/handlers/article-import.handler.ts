@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 
-import type { ArticleType } from '@app/inventory/models';
+import type { Nature } from '@app/inventory/models';
+import { normalizeNature } from '@app/inventory/models';
 import type { ArticleCreate } from '@app/pages/inventory/catalogue/articles/models';
 import { ArticlesApiService } from '@app/pages/inventory/catalogue/articles/services/article-api.service';
 import { ItemCategoriesApiService } from '@app/pages/inventory/configuration/item-categories/services/item-category-api.service';
@@ -15,7 +16,6 @@ import {
   type ApplicationImportResult,
 } from '../services/application-import.util';
 
-const ARTICLE_TYPES: ArticleType[] = ['MATERIAU', 'CONSOMMABLE', 'ENGIN', 'OUTILLAGE'];
 const schema = ARTICLE_EXTRACTION_SCHEMA;
 const dedupeKey = (row: Record<string, unknown>): string | null => {
   const code = row['code'];
@@ -76,9 +76,8 @@ export class ArticleImportService {
         return {
           code: String(row['code'] ?? '').trim(),
           name: String(row['name'] ?? '').trim(),
-          articleType: this.parseType(row['articleType']),
+          nature: this.parseNature(row['nature'] ?? row['articleType']),
           familleId,
-          typeArticleId: '',
           uomId,
           prixUnitaire: row['prixUnitaire'] != null ? toNumber(row['prixUnitaire']) : undefined,
           stockMin: row['stockMin'] != null ? toNumber(row['stockMin']) : undefined,
@@ -90,9 +89,8 @@ export class ArticleImportService {
     );
   }
 
-  private parseType(value: unknown): ArticleType {
-    const raw = String(value ?? '').trim().toUpperCase();
-    return ARTICLE_TYPES.find((t) => t === raw) ?? 'MATERIAU';
+  private parseNature(value: unknown): Nature {
+    return normalizeNature(String(value ?? ''));
   }
 
   private async ensureLookups(): Promise<void> {

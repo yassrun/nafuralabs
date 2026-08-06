@@ -38,7 +38,7 @@ export const FIELDS: DetailFieldConfig<InventoryTxLine>[] = [
     lookupDisplayField: 'name',
     lookupValueField: 'id',
     searchable: true,
-    referenceRoute: '/inventory/catalogue/items',
+    referenceRoute: '/inventory/catalogue/articles',
   },
   {
     key: 'quantity',

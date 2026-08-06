@@ -27,7 +27,7 @@ public class StockReservationController {
     @GetMapping
     @RequirePermission("stock.stock-reservation.read")
     public ResponseEntity<List<StockReservation>> list(
-            @RequestParam(required = false) String chantierId,
+            @RequestParam(required = false) UUID chantierId,
             @RequestParam(required = false) String status) {
         return ResponseEntity.ok(service.list(chantierId, status));
     }

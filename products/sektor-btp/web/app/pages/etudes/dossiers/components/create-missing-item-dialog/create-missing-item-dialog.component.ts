@@ -6,6 +6,7 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { ButtonComponent } from '@lib/anatomy';
 
 import type { DpuComposantType } from '@app/etudes/models';
+import { NATURE_TYPE_DPU, normalizeNature, type Nature } from '@app/inventory/models';
 import { ItemsApiService } from '@app/pages/inventory/catalogue/items/services/item-api.service';
 import { ItemPricesApiService } from '@app/pages/inventory/catalogue/item-prices/services/item-price-api.service';
 import type { ItemPriceCreate } from '@app/pages/inventory/catalogue/item-prices/models';
@@ -33,11 +34,16 @@ export interface CreateMissingItemDialogResult {
   sourcePrix: string;
 }
 
-const TYPES: { value: DpuComposantType; label: string }[] = [
+const NATURE_OPTIONS: { value: Nature; label: string }[] = [
   { value: 'MATIERE', label: 'Matière' },
-  { value: 'MAIN_DOEUVRE', label: 'Main-d’œuvre' },
-  { value: 'MATERIEL', label: 'Matériel' },
+  { value: 'CONSOMMABLE', label: 'Consommable' },
+  { value: 'CARBURANT', label: 'Carburant' },
+  { value: 'OUTILLAGE', label: 'Outillage' },
+  { value: 'MATERIEL', label: 'Matériel en propre' },
+  { value: 'LOCATION', label: 'Location matériel' },
+  { value: 'MAIN_DOEUVRE', label: "Main d'œuvre" },
   { value: 'SOUS_TRAITANCE', label: 'Sous-traitance' },
+  { value: 'SERVICE', label: 'Service externe' },
 ];
 
 @Component({
@@ -58,9 +64,9 @@ const TYPES: { value: DpuComposantType; label: string }[] = [
 
       <div class="grid-2">
         <label class="field">
-          <span>Type *</span>
-          <select name="type" [(ngModel)]="type">
-            @for (t of types; track t.value) {
+          <span>Nature *</span>
+          <select name="type" [(ngModel)]="nature">
+            @for (t of natures; track t.value) {
               <option [ngValue]="t.value">{{ t.label }}</option>
             }
           </select>
@@ -155,13 +161,12 @@ export class CreateMissingItemDialogComponent {
   private readonly pricesApi = inject(ItemPricesApiService);
   private readonly currenciesApi = inject(CurrenciesApiService);
 
-  readonly types = TYPES;
+  readonly natures = NATURE_OPTIONS;
   readonly saving = signal(false);
   readonly erreur = signal<string | undefined>(undefined);
 
   name = this.data.designation;
-  type: DpuComposantType = (TYPES.find((t) => t.value === this.data.type)?.value ??
-    'MATIERE') as DpuComposantType;
+  nature: Nature = normalizeNature(this.data.type);
   unite =
     this.data.unite ||
     this.data.uniteOptions[0]?.code ||
@@ -170,6 +175,10 @@ export class CreateMissingItemDialogComponent {
 
   isCatalogue(): boolean {
     return (this.data.mode ?? 'catalogue') === 'catalogue';
+  }
+
+  private dpuType(): DpuComposantType {
+    return NATURE_TYPE_DPU[this.nature];
   }
 
   canSave(): boolean {
@@ -186,7 +195,7 @@ export class CreateMissingItemDialogComponent {
     if (!this.isCatalogue()) {
       this.dialogRef.close({
         name: this.name.trim(),
-        type: this.type,
+        type: this.dpuType(),
         unite: this.unite,
         prixUnitaire: prix,
         sourcePrix: 'MANUEL',
@@ -199,7 +208,7 @@ export class CreateMissingItemDialogComponent {
     try {
       const item = await this.itemsApi.create({
         name: this.name.trim(),
-        articleType: this.type,
+        nature: this.nature,
         isActive: true,
         unitOfMeasureId: uom?.id,
         code: undefined,
@@ -218,7 +227,7 @@ export class CreateMissingItemDialogComponent {
         itemId: item.id,
         code: item.code,
         name: item.name,
-        type: this.type,
+        type: this.dpuType(),
         unite: this.unite,
         prixUnitaire: prix,
         sourcePrix: 'TARIF',

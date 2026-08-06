@@ -6,7 +6,9 @@ export interface ApiInventoryTxRow {
   id: string;
   txNumber: string;
   txType: string;
-  warehouseId: string;
+  locationId?: string;
+  /** @deprecated use locationId */
+  warehouseId?: string;
   txDate: string;
   reference?: string;
   status?: string;
@@ -92,13 +94,13 @@ export function uiTxToWithLinesBody(tx: Partial<InventoryTx>): InventoryTxWithLi
   const destId = tx.destLocationId ?? tx.chantierLocationId;
   const sourceId = tx.sourceLocationId ?? tx.chantierLocationId;
   const txType = tx.txType ?? '';
-  let warehouseId = destId ?? sourceId;
+  let locationId = destId ?? sourceId;
   if (txType === 'SORTIE' || txType === 'PERTE') {
-    warehouseId = sourceId ?? destId;
+    locationId = sourceId ?? destId;
   } else if (txType === 'RECEPTION' || txType === 'RETOUR') {
-    warehouseId = destId ?? sourceId;
+    locationId = destId ?? sourceId;
   } else if (txType === 'TRANSFERT') {
-    warehouseId = sourceId ?? destId;
+    locationId = sourceId ?? destId;
   }
   return {
     txNumber: tx.txNumber,
@@ -106,7 +108,7 @@ export function uiTxToWithLinesBody(tx: Partial<InventoryTx>): InventoryTxWithLi
     txDate: tx.txDate,
     reference: tx.reference,
     notes: tx.notes,
-    warehouseId,
+    locationId,
     sourceLocationId: sourceId,
     destLocationId: destId,
     fournisseurId: tx.fournisseurId,

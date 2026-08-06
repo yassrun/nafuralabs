@@ -2,6 +2,8 @@ package ma.nafura.stock.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.OffsetDateTime;
+import java.time.YearMonth;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +16,7 @@ import ma.nafura.stock.domain.model.Location;
 import ma.nafura.stock.domain.model.StockBalance;
 import ma.nafura.stock.repository.LocationRepository;
 import ma.nafura.stock.repository.StockBalanceRepository;
+import ma.nafura.stock.repository.StockMoveRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,14 +28,17 @@ public class StockKpiService {
     private final StockBalanceRepository stockBalanceRepository;
     private final LocationRepository locationRepository;
     private final ItemRepository itemRepository;
+    private final StockMoveRepository stockMoveRepository;
 
     public StockKpiService(
             StockBalanceRepository stockBalanceRepository,
             LocationRepository locationRepository,
-            ItemRepository itemRepository) {
+            ItemRepository itemRepository,
+            StockMoveRepository stockMoveRepository) {
         this.stockBalanceRepository = stockBalanceRepository;
         this.locationRepository = locationRepository;
         this.itemRepository = itemRepository;
+        this.stockMoveRepository = stockMoveRepository;
     }
 
     @Transactional(readOnly = true)
@@ -52,12 +58,12 @@ public class StockKpiService {
             BigDecimal unitPrice = unitPrice(item);
             BigDecimal lineVal = balance.getQuantity().multiply(unitPrice).setScale(2, RoundingMode.HALF_UP);
             valorisationStock = valorisationStock.add(lineVal);
-            if (isChantierWarehouse(tenantId, balance.getWarehouseId())) {
+            if (isChantierLocation(tenantId, balance.getLocationId())) {
                 valoMagasinChantier = valoMagasinChantier.add(lineVal);
             }
         }
 
-        double rotation = valorisationStock.signum() > 0 ? 4.2 : 0.0;
+        double rotation = computeRotation(tenantId, valorisationStock);
 
         return StockKpiDto.builder()
                 .valorisationStock(scale2(valorisationStock))
@@ -66,12 +72,29 @@ public class StockKpiService {
                 .build();
     }
 
-    private boolean isChantierWarehouse(UUID tenantId, UUID warehouseId) {
-        if (warehouseId == null) {
+    /** sorties valorisées / stock moyen — approx stock moyen = valorisation courante. */
+    private double computeRotation(UUID tenantId, BigDecimal valorisationStock) {
+        if (valorisationStock == null || valorisationStock.signum() <= 0) {
+            return 0.0;
+        }
+        YearMonth ym = YearMonth.now();
+        OffsetDateTime from = ym.atDay(1).atStartOfDay().atOffset(OffsetDateTime.now().getOffset());
+        OffsetDateTime to = ym.plusMonths(1).atDay(1).atStartOfDay().atOffset(OffsetDateTime.now().getOffset());
+        BigDecimal outboundValue = stockMoveRepository.sumOutboundCostBetween(tenantId, from, to);
+        if (outboundValue == null || outboundValue.signum() <= 0) {
+            return 0.0;
+        }
+        return outboundValue
+                .divide(valorisationStock, 4, RoundingMode.HALF_UP)
+                .doubleValue();
+    }
+
+    private boolean isChantierLocation(UUID tenantId, UUID locationId) {
+        if (locationId == null) {
             return false;
         }
         return locationRepository
-                .findByIdAndTenantId(warehouseId, tenantId)
+                .findByIdAndTenantId(locationId, tenantId)
                 .map(loc -> LOCATION_TYPE_CHANTIER.equals(loc.getType())
                         || (loc.getCode() != null && loc.getCode().startsWith("CH-")))
                 .orElse(false);

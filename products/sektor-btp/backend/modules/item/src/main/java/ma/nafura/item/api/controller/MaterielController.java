@@ -31,9 +31,9 @@ public class MaterielController {
             @RequestParam(value = "size", defaultValue = "20") int size,
             @RequestParam(value = "search", required = false) String search,
             @RequestParam(value = "status", required = false) String status,
-            @RequestParam(value = "familleId", required = false) String familleId,
+            @RequestParam(value = "itemCategoryId", required = false) UUID itemCategoryId,
             @RequestParam(value = "sort", required = false) String sort) {
-        return ResponseEntity.ok(service.list(page, size, search, status, familleId, sort));
+        return ResponseEntity.ok(service.list(page, size, search, status, itemCategoryId, sort));
     }
 
     @GetMapping("/{id}")

@@ -380,13 +380,6 @@ export const INVENTORY_BTP_ROUTES: Routes = [
       ),
   },
   {
-    path: 'inventory/configuration/types-articles',
-    loadChildren: () =>
-      import('../pages/inventory/configuration/types-articles/type-article.routes').then(
-        (m) => m.TYPE_ARTICLE_ROUTES,
-      ),
-  },
-  {
     path: 'inventory/configuration/motifs',
     loadChildren: () =>
       import('../pages/inventory/configuration/motifs/motif-mouvement.routes').then(

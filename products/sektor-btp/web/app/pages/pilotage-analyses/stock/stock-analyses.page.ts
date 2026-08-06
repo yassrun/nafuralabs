@@ -40,7 +40,7 @@ import { PilotageAnalysesDataService } from '../services/pilotage-analyses-data.
           <h2>{{ 'dashboard.analyses.stock.topArticles' | translate }}</h2>
           <ol>
             @for (a of s.topArticles; track a.code) {
-              <li><a routerLink="/inventory/catalogue/items">{{ a.code }}</a> — {{ a.name }} ({{ a.qty | number:'1.0-0' }})</li>
+              <li><a routerLink="/inventory/catalogue/articles">{{ a.code }}</a> — {{ a.name }} ({{ a.qty | number:'1.0-0' }})</li>
             } @empty {
               <li>{{ 'dashboard.analyses.stock.empty' | translate }}</li>
             }

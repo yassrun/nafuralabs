@@ -1,6 +1,7 @@
 import type { TranslateService } from '@ngx-translate/core';
 
 import type { FilterFieldConfig } from '@lib/anatomy/types';
+import { NATURES, USAGE_LOTS } from '@app/inventory/models';
 
 export function buildArticleFilters(t: TranslateService): FilterFieldConfig[] {
   const tr = (k: string) => t.instant(k);
@@ -12,13 +13,22 @@ export function buildArticleFilters(t: TranslateService): FilterFieldConfig[] {
       lookupKey: 'familleArticle',
     },
     {
-      key: 'articleType',
-      label: tr('inventory.catalogue.article.list.filters.type'),
+      key: 'usageLot',
+      label: tr('inventory.catalogue.article.list.filters.usageLot'),
       type: 'select',
-      options: [
-        { value: 'MATERIAU', label: tr('inventory.enums.articleType.MATERIAU') },
-        { value: 'CONSOMMABLE', label: tr('inventory.enums.articleType.CONSOMMABLE') },
-      ],
+      options: USAGE_LOTS.map((code) => ({
+        value: code,
+        label: tr(`inventory.enums.usageLot.${code}`),
+      })),
+    },
+    {
+      key: 'nature',
+      label: tr('inventory.catalogue.article.list.filters.nature'),
+      type: 'select',
+      options: NATURES.map((code) => ({
+        value: code,
+        label: tr(`inventory.enums.nature.${code}`),
+      })),
     },
     {
       key: 'isActive',

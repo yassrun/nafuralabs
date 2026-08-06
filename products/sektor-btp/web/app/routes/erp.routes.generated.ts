@@ -41,14 +41,6 @@ export const ERP_ROUTES: Routes = [
     loadChildren: () => import('../pages/inventory/suivi/stock-balances/stock-balance.routes').then(m => m.STOCK_BALANCE_ROUTES),
   },
   {
-    path: 'inventory/configuration/item-types',
-    loadChildren: () => import('../pages/inventory/configuration/item-types/item-type.routes').then(m => m.ITEM_TYPE_ROUTES),
-  },
-  {
-    path: 'inventory/catalogue/items',
-    loadChildren: () => import('../pages/inventory/catalogue/items/item.routes').then(m => m.ITEM_ROUTES),
-  },
-  {
     path: 'inventory/units-of-measure',
     loadChildren: () => import('../pages/inventory/configuration/unit-of-measures/unit-of-measure.routes').then(m => m.UNIT_OF_MEASURE_ROUTES),
   },

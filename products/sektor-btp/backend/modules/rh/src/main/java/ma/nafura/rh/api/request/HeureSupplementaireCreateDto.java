@@ -25,6 +25,7 @@ public class HeureSupplementaireCreateDto {
     @Positive
     private BigDecimal heures;
 
+    /** UUID string of linked pointage, optional. */
     private String pointageId;
 
     private String status;

@@ -2,13 +2,15 @@
 id: ERP-09
 status: todo
 context: nafura
-assignee: me
-parent: ERP-17
+kind: task
 feature: etude-parcours
+parent: ERP-17
 priority: P1
-estimate: 3h
+assignee: me
+gate: me
 tags: [sektor, etudes, chiffrage, ux]
 ---
+
 
 # Revoir les infos d'en-tête de l'étude (chiffrage)
 
@@ -24,4 +26,5 @@ tags: [sektor, etudes, chiffrage, ux]
 ## Journal
 ```
 05/08 12:07  capturé · suite ERP-08 / parcours étude
+05/08 21:30  framework v2 · task schema (estimate out · gate/kind)
 ```

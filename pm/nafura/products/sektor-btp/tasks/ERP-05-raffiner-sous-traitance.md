@@ -2,23 +2,29 @@
 id: ERP-05
 status: todo
 context: nafura
-assignee: me
+kind: feature
+feature: sous-traitance-raffinement
+assignee: either
+gate: me
 priority: P2
-estimate: 6h
-blocked_by: [ERP-03]
 tags: [sektor, sous-traitance, raffinement]
 ---
 
-# Raffiner sous-traitance (lot 5)
+# Feature — Raffinement sous-traitance (lot 5)
 
 > Contrat + rattachement chantier. Après achats (partenaires / engagement).
+> Spec / lots enfants : à découper avant Commit sprint.
 
-## Critères d'acceptation
-- [ ] Contrat ST créable et listable
-- [ ] Rattachement à un chantier
-- [ ] Suivi minimal (pas décompte ST complet)
+## Cible mince
+- Contrat ST créable et listable
+- Rattachement à un chantier
+- Suivi minimal (pas décompte ST complet)
+
+## Enfants
+_(aucun — découper avant engagement sprint)_
 
 ## Journal
 ```
 05/08 11:27  capturé · ordre raffinement lots ops figé
+05/08 21:25  kind:feature · pas une task atomique (framework v2)
 ```

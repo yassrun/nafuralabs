@@ -24,8 +24,6 @@ public class ItemCreateDto {
     @Size(max = 2000)
     private String description;
 
-    private UUID itemTypeId;
-
     private UUID itemCategoryId;
 
     private UUID unitOfMeasureId;
@@ -36,7 +34,7 @@ public class ItemCreateDto {
     private Boolean isActive;
 
     @Size(max = 30)
-    private String articleType;
+    private String nature;
 
     @Size(max = 50)
     private String posteBudgetId;
@@ -57,4 +55,7 @@ public class ItemCreateDto {
     private BigDecimal stockMax;
 
     private Integer delaiReapproJours;
+
+    /** Lots d'usage multi (GROS_OEUVRE, VRD, …) — table item_usage_lots. */
+    private java.util.List<String> usageLotCodes;
 }

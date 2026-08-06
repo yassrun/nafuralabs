@@ -5,7 +5,6 @@
       "description": "مجال الأصناف",
       "items": "الأصناف",
       "itemCategories": "فئات الأصناف",
-      "itemTypes": "أنواع الأصناف",
       "unitOfMeasures": "وحدات القياس",
       "uoMCategories": "فئات القياس",
       "itemPrices": "أسعار الأصناف"
@@ -22,7 +21,6 @@
       "code": "الرمز",
       "name": "الاسم",
       "description": "الوصف",
-      "itemType": "معرّف نوع الصنف",
       "itemCategory": "معرّف فئة الصنف",
       "unitOfMeasure": "معرّف وحدة القياس",
       "sku": "SKU",

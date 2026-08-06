@@ -193,9 +193,16 @@
     "enums": {
       "articleType": {
         "MATERIAU": "مادة",
-        "CONSOMMABLE": "مادة استهلاكية",
-        "ENGIN": "آلية",
-        "OUTILLAGE": "أدوات"
+        "CONSOMMABLE": "مستهلك",
+        "ENGIN": "معدات مملوكة",
+        "OUTILLAGE": "عدة",
+        "MATIERE": "مادة",
+        "CARBURANT": "وقود",
+        "MATERIEL": "معدات مملوكة",
+        "LOCATION": "تأجير معدات",
+        "MAIN_DOEUVRE": "يد عاملة",
+        "SOUS_TRAITANCE": "مقاولة من الباطن",
+        "SERVICE": "خدمة خارجية"
       },
       "locationType": {
         "DEPOT": "مستودع",
@@ -275,6 +282,24 @@
         "CASSE": "كسر",
         "DETERIORATION": "تلف",
         "AUTRE": "أخرى"
+      },
+      "nature": {
+        "MATIERE": "مادة",
+        "CONSOMMABLE": "مستهلك",
+        "CARBURANT": "وقود",
+        "OUTILLAGE": "عدة",
+        "MATERIEL": "معدات مملوكة",
+        "LOCATION": "تأجير معدات",
+        "MAIN_DOEUVRE": "يد عاملة",
+        "SOUS_TRAITANCE": "مقاولة من الباطن",
+        "SERVICE": "خدمة خارجية"
+      },
+      "usageLot": {
+        "GROS_OEUVRE": "أشغال كبرى",
+        "VRD": "طرق وشبكات",
+        "FINITIONS": "تشطيبات",
+        "SECOND_OEUVRE": "أشغال ثانوية",
+        "TECHNIQUE": "حزم تقنية"
       }
     },
     "catalogue": {
@@ -309,6 +334,7 @@
           "name": "التسمية",
           "description": "الوصف",
           "familleId": "العائلة",
+          "lotsUsage": "حزم الاستخدام",
           "articleType": "نوع الصنف",
           "uomId": "وحدة القياس",
           "uomSecondaireId": "الوحدة الثانوية (مثلاً كيس)",
@@ -323,16 +349,18 @@
           "stockMin": "الحد الأدنى للمخزون",
           "stockMax": "الحد الأقصى للمخزون",
           "posteBudgetId": "بند الميزانية (المُنجَز)",
-          "posteBudgetHint": "أولوية على الإسناد الافتراضي صنف → بند",
+          "posteBudgetHint": "مملوء مسبقاً من الطبيعة — قابل للتعديل",
           "isPerissable": "قابل للتلف",
           "isSerialise": "متابعة بالرقم التسلسلي",
-          "isActive": "نشط"
+          "isActive": "نشط",
+          "nature": "الطبيعة"
         },
         "list": {
           "columns": {
             "code": "الرمز",
             "name": "التسمية",
             "familleName": "العائلة",
+            "lotsUsage": "حزم الاستخدام",
             "articleType": "النوع",
             "uomCode": "الوحدة",
             "prixUnitaire": "سعر الكات. (MAD)",
@@ -340,12 +368,15 @@
             "delaiReapproJours": "إعادة التموين (يوم)",
             "posteBudgetId": "بند الميزانية",
             "stockTotal": "إجمالي المخزون",
-            "isActive": "نشط"
+            "isActive": "نشط",
+            "nature": "الطبيعة"
           },
           "filters": {
             "famille": "العائلة",
+            "usageLot": "حزمة الاستخدام",
             "type": "النوع",
-            "isActive": "نشط"
+            "isActive": "نشط",
+            "nature": "الطبيعة"
           }
         },
         "sections": {
@@ -690,33 +721,27 @@
         }
       },
       "tx": {
-        "title": "حركات المخزون",
-        "titleNew": "حركة جديدة",
-        "titleDetail": "تفاصيل الحركة",
-        "headerTitle": "حركات المخزون",
-        "entityName": "حركة مخزون",
-        "selectHint": "اختر حركة من القائمة أو أنشئ حركة جديدة.",
-        "saveSuccess": "تم حفظ الحركة {number}",
-        "saveError": "فشل حفظ الحركة",
-        "deleteTitle": "حذف الحركة",
-        "deleteMessage": "حذف مسودة هذه الحركة؟ لا يمكن التراجع عن هذا الإجراء.",
-        "deleteSuccess": "تم حذف الحركة",
-        "errors": {
-          "cannotModifyValidated": "لا يمكن تعديل حركة مصدّقة",
-          "cannotDeleteValidated": "لا يمكن حذف حركة مصدّقة"
-        },
-        "fields": {
-          "txType": "نوع الحركة",
-          "txDate": "التاريخ",
-          "sourceLocationId": "الموقع المصدر",
-          "destLocationId": "موقع الوجهة",
-          "reference": "المرجع",
-          "notes": "ملاحظات",
-          "lines": "الأسطر"
-        },
-        "sections": {
-          "header": "الترويسة",
-          "lines": "أسطر الأصناف"
+        "title": "الحركات (عرض خام)",
+        "entityName": "حركة",
+        "entityNamePlural": "الحركات",
+        "headerTitle": "جميع الحركات",
+        "headerTitleDetail": "تفاصيل الحركة",
+        "list": {
+          "columns": {
+            "txNumber": "الرقم",
+            "txType": "النوع",
+            "txDate": "التاريخ",
+            "sourceLocationName": "المصدر",
+            "destLocationName": "الوجهة",
+            "status": "الحالة",
+            "nbLines": "الأسطر"
+          },
+          "filters": {
+            "txType": "نوع الحركة",
+            "status": "الحالة",
+            "from": "من",
+            "to": "إلى"
+          }
         }
       },
       "retour": {
@@ -909,30 +934,6 @@
           }
         }
       },
-      "tx": {
-        "title": "الحركات (عرض خام)",
-        "entityName": "حركة",
-        "entityNamePlural": "الحركات",
-        "headerTitle": "جميع الحركات",
-        "headerTitleDetail": "تفاصيل الحركة",
-        "list": {
-          "columns": {
-            "txNumber": "الرقم",
-            "txType": "النوع",
-            "txDate": "التاريخ",
-            "sourceLocationName": "المصدر",
-            "destLocationName": "الوجهة",
-            "status": "الحالة",
-            "nbLines": "الأسطر"
-          },
-          "filters": {
-            "txType": "نوع الحركة",
-            "status": "الحالة",
-            "from": "من",
-            "to": "إلى"
-          }
-        }
-      },
       "txLines": {
         "title": "أسطر الحركة",
         "entityName": "سطر",
@@ -1050,7 +1051,9 @@
           "code": "الرمز",
           "name": "التسمية",
           "description": "الوصف",
-          "isActive": "نشط"
+          "isActive": "نشط",
+          "parentId": "العائلة الأم",
+          "parentNone": "— جذر —"
         },
         "sections": {
           "identification": "التعريف",
@@ -1061,48 +1064,37 @@
             "code": "الرمز",
             "name": "التسمية",
             "description": "الوصف",
-            "isActive": "نشط"
+            "isActive": "نشط",
+            "parentId": "الأب"
           },
           "filters": {
             "code": "الرمز",
             "name": "التسمية",
             "isActive": "نشط"
           }
-        }
-      },
-      "typeArticle": {
-        "entityName": "نوع الصنف",
-        "entityNamePlural": "أنواع الأصناف",
-        "headerTitle": "أنواع الأصناف",
-        "headerTitleNew": "نوع جديد",
-        "headerTitleDetail": "تفاصيل النوع",
-        "permissionPrefix": "inventory.typeArticle",
-        "saveSuccess": "تم حفظ نوع الصنف «{name}» بنجاح",
-        "deleteConfirm": {
-          "title": "حذف نوع الصنف",
-          "message": "هل تريد فعلاً حذف النوع «{name}»؟"
         },
-        "fields": {
-          "code": "الرمز",
-          "name": "التسمية",
-          "articleType": "العائلة (MATERIAU/CONSOMMABLE/ENGIN/OUTILLAGE)",
-          "isActive": "نشط"
+        "loading": "جاري تحميل العائلات…",
+        "tree": {
+          "title": "الشجرة",
+          "empty": "لا توجد عائلات",
+          "addRoot": "إضافة جذر",
+          "addChild": "إضافة عائلة فرعية",
+          "expandAll": "توسيع الكل",
+          "collapseAll": "طي الكل"
         },
-        "sections": {
-          "identification": "التعريف",
-          "statut": "الحالة"
+        "detail": {
+          "title": "تفاصيل العائلة",
+          "empty": "حدد عائلة في الشجرة",
+          "openForm": "النموذج الكامل"
         },
-        "list": {
-          "columns": {
-            "code": "الرمز",
-            "name": "التسمية",
-            "articleType": "عائلة الصنف",
-            "isActive": "نشط"
-          },
-          "filters": {
-            "articleType": "عائلة الصنف",
-            "isActive": "نشط"
-          }
+        "add": {
+          "title": "عائلة جديدة",
+          "confirm": "إنشاء"
+        },
+        "deleteBlocked": {
+          "title": "تعذر الحذف",
+          "message": "هذه العائلة لديها فروع. احذفها أو انقلها أولاً.",
+          "confirm": "حسناً"
         }
       },
       "motif": {
@@ -1282,11 +1274,6 @@
           "message": "تحتوي هذه الفئة على فئات فرعية. احذفها أو أعد تعيينها أولًا.",
           "confirm": "حسنًا"
         }
-      },
-      "itemType": {
-        "headerTitle": "أنواع الأصناف (قديم)",
-        "headerTitleNew": "نوع جديد",
-        "headerTitleDetail": "تفاصيل النوع"
       },
       "unitOfMeasure": {
         "headerTitle": "وحدات القياس (قديم)",

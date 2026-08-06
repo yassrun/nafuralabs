@@ -1,12 +1,15 @@
 import { Injectable, inject } from '@angular/core';
 
 import type { Article, ArticleType } from '../models';
+import { isStockableNature } from '../models';
 import { ErpLookupService } from '../../shared/services/erp-lookup.service';
 import { itemToArticle, type ItemApiRow } from './item-article.mapper';
 
 export interface ArticleCatalogQuery {
-  articleType?: ArticleType;
+  nature?: ArticleType;
   activeOnly?: boolean;
+  /** Default true — only stockable natures (mouvements). */
+  stockableOnly?: boolean;
 }
 
 /**
@@ -20,12 +23,15 @@ export class ArticleCatalogService {
     const rows = await this.erpLookup.items();
     let articles = rows.map((row) => itemToArticle(row.data as unknown as ItemApiRow));
 
-    if (query.articleType) {
-      articles = articles.filter((a) => a.articleType === query.articleType);
+    if (query.nature) {
+      articles = articles.filter((a) => a.nature === query.nature);
     }
     if (query.activeOnly !== false) {
       articles = articles.filter((a) => a.isActive);
     }
-    return articles.filter((a) => a.articleType === 'MATERIAU' || a.articleType === 'CONSOMMABLE');
+    if (query.stockableOnly !== false) {
+      articles = articles.filter((a) => isStockableNature(a.nature));
+    }
+    return articles;
   }
 }

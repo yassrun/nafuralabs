@@ -9,7 +9,7 @@ export function buildFamilleSections(t: TranslateService): DetailSectionConfig<F
     {
       id: 'general',
       title: tr('inventory.configuration.famille.sections.identification'),
-      fields: ['code', 'name', 'description', 'isActive'],
+      fields: ['code', 'name', 'description', 'parentId', 'isActive'],
       columns: 2,
     },
   ];

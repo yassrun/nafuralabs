@@ -22,8 +22,6 @@ public class ItemUpdateDto {
     @Size(max = 2000)
     private String description;
 
-    private UUID itemTypeId;
-
     private UUID itemCategoryId;
 
     private UUID unitOfMeasureId;
@@ -34,7 +32,7 @@ public class ItemUpdateDto {
     private Boolean isActive;
 
     @Size(max = 30)
-    private String articleType;
+    private String nature;
 
     @Size(max = 50)
     private String posteBudgetId;
@@ -55,4 +53,7 @@ public class ItemUpdateDto {
     private BigDecimal stockMax;
 
     private Integer delaiReapproJours;
+
+    /** When non-null, replaces the full set of usage lots. Null = leave unchanged. */
+    private java.util.List<String> usageLotCodes;
 }

@@ -8,6 +8,7 @@ import type {
   Location,
   MotifMouvement,
 } from '../../../../../inventory/models';
+import { isStockableNature } from '../../../../../inventory/models';
 import { ArticleCatalogService } from '../../../../../inventory/services/article-catalog.service';
 import { InventoryLookupsService } from '../../../../../inventory/services/inventory-lookups.service';
 import { InventoryMovementApiService } from '../../../../../inventory/services/inventory-movement-api.service';
@@ -56,7 +57,7 @@ export class TransfertFacade implements CrudStyleFacade<InventoryTx, Partial<Inv
     const allLocations = locations.filter((l) => l.isActive);
     const chantierLocations = allLocations.filter((l) => l.type === 'CHANTIER');
     const matCons = articles.filter(
-      (a) => a.articleType === 'MATERIAU' || a.articleType === 'CONSOMMABLE',
+      (a) => isStockableNature(a.nature),
     );
 
     this.lookupsSignal.set({

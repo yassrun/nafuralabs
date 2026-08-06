@@ -17,6 +17,7 @@ export interface InventoryTxWithLinesBody {
   reference?: string;
   notes?: string;
   warehouseId?: string;
+  locationId?: string;
   sourceLocationId?: string;
   destLocationId?: string;
   fournisseurId?: string;

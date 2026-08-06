@@ -1,6 +1,6 @@
 # Refonte de la classification article
 
-**Statut** : spécifié, non implémenté
+**Statut** : **terminé** Lots 1–5 + **ERP-25** lots d’usage multi (ADR §7.4) · migrate staging 05/08
 **Périmètre** : `products/sektor-btp/backend/modules/item/`,
 `products/sektor-btp/backend/app/src/main/java/ma/nafura/erp/onboarding/`,
 `products/sektor-btp/web/app/pages/inventory/`, `products/sektor-btp/web/app/inventory/`
@@ -88,7 +88,7 @@ fiche article.
 | `LOCATION` | Location matériel | non | non | `H` | `LOCATION_MATERIEL` | `MATERIEL` |
 | `MAIN_DOEUVRE` | Main d'œuvre | non | non | `H` | `MO` | `MAIN_DOEUVRE` |
 | `SOUS_TRAITANCE` | Sous-traitance | non | non | `LOT` | `SOUS_TRAITANCE` | `SOUS_TRAITANCE` |
-| `SERVICE` | Service externe | non | non | `U` | `FRAIS_GENERAUX` | *voir §7* |
+| `SERVICE` | Service externe | non | non | `U` | `FRAIS_GENERAUX` | `SOUS_TRAITANCE` |
 
 Justification des quatre natures nouvelles :
 
@@ -102,7 +102,7 @@ Justification des quatre natures nouvelles :
   `MATERIEL`, l'information est perdue au chiffrage.
 - `MAIN_DOEUVRE` — existe côté back, absente côté front. C'est le trou qui empêche le déboursé sec.
 
-### 3.2 Les familles — 25 racines, 30 sous-familles
+### 3.2 Les familles — 25 racines, 35 sous-familles (60 au total)
 
 | Racine | Libellé | Sous-familles |
 |---|---|---|
@@ -219,23 +219,25 @@ web/public/assets/validation/item-type.validation.json
 - Colonne `items.item_type_id` : la **conserver** jusqu'au Lot 5 (migration des données), la
   supprimer ensuite par changelog.
 
-**Fin de lot** : plus aucune occurrence de `ItemType`, `itemTypeId`, `typeArticle` hors migration.
+**Fin de lot** : plus aucune occurrence de `ItemType` / `typeArticle` (écrans + API).  
+`items.item_type_id` / `Item.itemTypeId` **conservés** jusqu'au Lot 5.
 
 ### Lot 3 — Familles en arbre
 
 - `backend/app/src/main/resources/onboarding/reference-data.json` → remplacer le bloc
-  `itemCategories` par les 55 entrées de §3.2, chacune avec un `parentCode` optionnel ; supprimer le
-  bloc `itemTypes` ; corriger les unités selon §3.3.
+  `itemCategories` par les **60** entrées de §3.2, chacune avec un `parentCode` optionnel ;
+  corriger les unités selon §3.3.
+  (`itemTypes` déjà retiré en Lot 2.)
 - `backend/app/src/main/java/ma/nafura/erp/onboarding/service/TenantReferenceDataSeedService.java` :
-  - supprimer `seedItemTypes()` (ligne 111) et l'appel ligne 55 ;
   - `seedItemCategories()` en deux passes — insérer d'abord les entrées sans `parentCode`, puis
     résoudre `parentCode` → `parentId` via une map code → id, exactement comme
     `categoryIdsByCode()` le fait déjà pour les unités de mesure.
+  (`seedItemTypes` déjà retiré en Lot 2.)
 - L'idempotence est déjà assurée par `existsItemCategory()` : rejouer l'onboarding n'écrase rien.
 - Écran Familles (`pages/inventory/configuration/familles/`) : afficher l'arbre, permettre de choisir
   un parent à la création.
 
-**Fin de lot** : un tenant fraîchement seedé a 55 familles dont 30 rattachées à un parent.
+**Fin de lot** : un tenant fraîchement seedé a **60** familles dont **35** rattachées à un parent.
 
 ### Lot 4 — Front aligné
 
@@ -303,11 +305,11 @@ Les 4 types seedés se traduisent ainsi :
 | `MATERIAU` | `MATIERE` |
 | `CONSOMMABLE` | `CONSOMMABLE` |
 | `EQUIPEMENT` | `MATERIEL` |
-| `PRESTATION` | **ambigu — reprise manuelle** |
+| `PRESTATION` | `SOUS_TRAITANCE` (défaut) — voir ADR §7.2 |
 
-`PRESTATION` est décrit « Prestations et sous-traitance » dans le seed : deux natures qui n'ont ni le
-même poste budget ni le même type DPU. Les articles concernés doivent être repris un par un. Ils sont
-peu nombreux aujourd'hui, ils ne le seront plus dans six mois.
+`PRESTATION` est décrit « Prestations et sous-traitance » dans le seed. Inventaire staging
+2026-08-05 : **0** article lié. Défaut migration = `SOUS_TRAITANCE` ; checklist manuelle si des
+lignes apparaissent avant Lot 2 (ADR).
 
 En cas de contradiction entre `article_type` et `item_type_id` sur un même article, `article_type`
 fait foi — c'est lui que consomme le chiffrage.
@@ -330,18 +332,15 @@ telle quelle. Décision : conserver les 4 anciennes en inactif, réaffecter les 
 
 ---
 
-## 7. Questions ouvertes — à trancher avant le Lot 1
+## 7. Questions ouvertes — tranchées (ERP-19)
 
-**7.1 — Où tombe `SERVICE` dans le DPU ?**
-`NatureComposantMapping:55` mappe aujourd'hui `SERVICE` vers `DPU_MATIERE`. Un transport ou un
-contrôle technique compté en « matière » dans un déboursé, c'est faux. Deux options : le rabattre sur
-`SOUS_TRAITANCE`, ou ajouter un cinquième poste au DPU. La seconde est plus juste mais touche le
-module `etudes`.
+Détail : [`01-ADR-decisions-ouvertes.md`](./01-ADR-decisions-ouvertes.md).
 
-**7.2 — Que deviennent les articles de type `PRESTATION` ?**
-Voir §5.2. Nécessite de regarder les articles réels sur staging.
+**7.1 — `SERVICE` dans le DPU** → `DPU_SOUS_TRAITANCE` (budget reste `FRAIS_GENERAUX`). Pas de 5ᵉ
+poste DPU pour Lot 1 ; revisiter au chainage aval si besoin de colonnes distinctes.
 
-**7.3 — Comment les fichiers SQL sont-ils appliqués ?**
-`application.yml:18` est en `ddl-auto: validate`, et je n'ai trouvé ni master changelog Liquibase ni
-configuration Flyway dans le dépôt. Confirmer le mécanisme avant d'écrire les migrations des lots 1,
-2 et 5.
+**7.2 — Articles `PRESTATION`** → défaut nature `SOUS_TRAITANCE` si `article_type` absent ;
+`article_type` gagne en conflit. Staging aujourd'hui : 0 ligne à reprendre.
+
+**7.3 — Migrations SQL** → Liquibase Job K8s (`:tools:lifecycle:collectMigrations`), SQL sous
+`modules/*/…/db/changelog/`. Pas de Flyway/Liquibase Spring sur sektor.

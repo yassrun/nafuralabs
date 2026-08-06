@@ -4,7 +4,101 @@ import type { Emplacement } from './emplacement.model';
 
 /** Dépôt / entrepôt / chantier / transit — vocabulaire BTP (spec §05). */
 export type LocationType = 'DEPOT' | 'CHANTIER' | 'ENTREPOT' | 'TRANSIT' | 'VIRTUEL';
-export type ArticleType = 'MATERIAU' | 'CONSOMMABLE' | 'ENGIN' | 'OUTILLAGE';
+
+/** Nature d'article — alignée sur l'enum back `ma.nafura.item.domain.Nature`. */
+export type Nature =
+  | 'MATIERE'
+  | 'CONSOMMABLE'
+  | 'CARBURANT'
+  | 'OUTILLAGE'
+  | 'MATERIEL'
+  | 'LOCATION'
+  | 'MAIN_DOEUVRE'
+  | 'SOUS_TRAITANCE'
+  | 'SERVICE';
+
+/** @deprecated Prefer {@link Nature} */
+export type ArticleType = Nature;
+
+export const NATURES: readonly Nature[] = [
+  'MATIERE',
+  'CONSOMMABLE',
+  'CARBURANT',
+  'OUTILLAGE',
+  'MATERIEL',
+  'LOCATION',
+  'MAIN_DOEUVRE',
+  'SOUS_TRAITANCE',
+  'SERVICE',
+] as const;
+
+/** Natures stockables (mouvements magasin). */
+export const STOCKABLE_NATURES: ReadonlySet<Nature> = new Set([
+  'MATIERE',
+  'CONSOMMABLE',
+  'CARBURANT',
+  'OUTILLAGE',
+]);
+
+export const NATURE_POSTE_BUDGET: Record<Nature, string> = {
+  MATIERE: 'MATERIAUX',
+  CONSOMMABLE: 'MATERIAUX',
+  CARBURANT: 'CARBURANT',
+  OUTILLAGE: 'MATERIEL',
+  MATERIEL: 'MATERIEL',
+  LOCATION: 'LOCATION_MATERIEL',
+  MAIN_DOEUVRE: 'MO',
+  SOUS_TRAITANCE: 'SOUS_TRAITANCE',
+  SERVICE: 'FRAIS_GENERAUX',
+};
+
+export const NATURE_TYPE_DPU: Record<Nature, 'MATIERE' | 'MAIN_DOEUVRE' | 'MATERIEL' | 'SOUS_TRAITANCE'> =
+  {
+    MATIERE: 'MATIERE',
+    CONSOMMABLE: 'MATIERE',
+    CARBURANT: 'MATIERE',
+    OUTILLAGE: 'MATERIEL',
+    MATERIEL: 'MATERIEL',
+    LOCATION: 'MATERIEL',
+    MAIN_DOEUVRE: 'MAIN_DOEUVRE',
+    SOUS_TRAITANCE: 'SOUS_TRAITANCE',
+    SERVICE: 'SOUS_TRAITANCE',
+  };
+
+export function isStockableNature(value: string | null | undefined): boolean {
+  return !!value && STOCKABLE_NATURES.has(value as Nature);
+}
+
+/** Normalize API / legacy values (`MATERIAU`, `ENGIN`, …). */
+export function normalizeNature(value: string | null | undefined): Nature {
+  if (!value || !value.trim()) {
+    return 'MATIERE';
+  }
+  const v = value.trim().toUpperCase();
+  if (v === 'MATERIAU') return 'MATIERE';
+  if (v === 'ENGIN') return 'MATERIEL';
+  if ((NATURES as readonly string[]).includes(v)) {
+    return v as Nature;
+  }
+  return 'MATIERE';
+}
+
+/** Lots d'usage chantier — enum back `ma.nafura.item.domain.UsageLot` (multi par article). */
+export type UsageLot =
+  | 'GROS_OEUVRE'
+  | 'VRD'
+  | 'FINITIONS'
+  | 'SECOND_OEUVRE'
+  | 'TECHNIQUE';
+
+export const USAGE_LOTS: readonly UsageLot[] = [
+  'GROS_OEUVRE',
+  'VRD',
+  'FINITIONS',
+  'SECOND_OEUVRE',
+  'TECHNIQUE',
+] as const;
+
 export type TxType = 'RECEPTION' | 'TRANSFERT' | 'RETOUR' | 'INVENTAIRE' | 'PERTE' | 'SORTIE';
 export type MaterielStatus = 'DISPONIBLE' | 'AFFECTE' | 'MAINTENANCE' | 'HORS_SERVICE';
 export type LocationExterneStatus = 'EN_COURS' | 'TERMINEE' | 'ANNULEE';
@@ -31,14 +125,6 @@ export interface FamilleArticle {
   code: string;
   name: string;
   description?: string;
-  isActive: boolean;
-}
-
-export interface TypeArticle {
-  id: string;
-  code: string;
-  name: string;
-  articleType: ArticleType;
   isActive: boolean;
 }
 
@@ -120,11 +206,11 @@ export interface Article {
   description?: string;
   familleId: string;
   familleName?: string;
-  typeArticleId: string;
-  typeArticleName?: string;
+  /** Lots d’usage chantier (0..N) — axe séparé de la famille d’appro. */
+  lotsUsage?: string[];
   uomId: string;
   uomCode?: string;
-  articleType: ArticleType;
+  nature: ArticleType;
   stockMin?: number;
   stockMax?: number;
   prixUnitaire?: number;
@@ -155,8 +241,8 @@ export interface CatalogueMateriel {
   code: string;
   name: string;
   description?: string;
+  itemId?: string;
   familleId?: string;
-  familleName?: string;
   marque?: string;
   modele?: string;
   numeroSerie: string;

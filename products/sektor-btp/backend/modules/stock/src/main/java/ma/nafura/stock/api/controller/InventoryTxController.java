@@ -79,6 +79,12 @@ public class InventoryTxController extends InventoryTxControllerBase {
         return ResponseEntity.ok(inventoryTxService.cancel(id));
     }
 
+    @PostMapping("/{id}/reverse")
+    @RequirePermission("stock.inventory-tx.update")
+    public ResponseEntity<InventoryTx> reverse(@PathVariable UUID id) {
+        return ResponseEntity.ok(inventoryTxService.reverse(id));
+    }
+
     private Sort parseSort(String sort) {
         String[] parts = sort.split(",");
         if (parts.length == 2) {

@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import ma.nafura.platform.framework.context.TenantContext;
@@ -27,25 +26,23 @@ import org.springframework.util.StringUtils;
 @Service
 public class PointageBatchService {
 
-    private static final Map<String, String> CHANTIER_CODES = Map.of(
-            "ch-001", "CH-2025-001",
-            "ch-002", "CH-2025-002",
-            "ch-003", "CH-2025-003");
-
     private final PointageBatchRepository batchRepository;
     private final PointageRepository pointageRepository;
     private final EmployeRepository employeRepository;
     private final PointageSeedService seedService;
+    private final ChantierCodeReader chantierCodeReader;
 
     public PointageBatchService(
             PointageBatchRepository batchRepository,
             PointageRepository pointageRepository,
             EmployeRepository employeRepository,
-            PointageSeedService seedService) {
+            PointageSeedService seedService,
+            ChantierCodeReader chantierCodeReader) {
         this.batchRepository = batchRepository;
         this.pointageRepository = pointageRepository;
         this.employeRepository = employeRepository;
         this.seedService = seedService;
+        this.chantierCodeReader = chantierCodeReader;
     }
 
     @Transactional(readOnly = true)
@@ -53,49 +50,75 @@ public class PointageBatchService {
         seedService.seedIfEmpty();
         return batchRepository.findByTenantIdAndClientId(tenantId(), clientId)
                 .map(batch -> PointageBatchConflictDto.builder()
-                        .message("Pointage batch already exists for clientId")
+                        .message("Un lot de pointage existe déjà pour ce clientId")
                         .clientId(clientId.toString())
-                        .existingBatchId(batch.getId())
+                        .existingBatchId(batch.getId().toString())
                         .build());
     }
 
     @Transactional
     public PointageBatchDto create(PointageBatchCreateDto request) {
         UUID tenantId = tenantId();
-        Optional<PointageBatchConflictDto> conflict = conflictForClientId(request.getClientId());
-        if (conflict.isPresent()) {
-            throw new PointageBatchDuplicateException(conflict.get());
+        String chantierId = request.getChantierId().trim();
+        LocalDate datePointage = request.getDatePointage();
+
+        if (request.getClientId() != null) {
+            Optional<PointageBatchConflictDto> clientConflict = conflictForClientId(request.getClientId());
+            if (clientConflict.isPresent()) {
+                throw new PointageBatchDuplicateException(clientConflict.get());
+            }
         }
 
-        String batchId = nextBatchId(tenantId, request.getDatePointage(), request.getChantierId());
+        Optional<PointageBatch> existingBatch =
+                batchRepository.findByTenantIdAndChantierIdAndDatePointage(tenantId, chantierId, datePointage);
+        if (existingBatch.isPresent()) {
+            throw new PointageBatchDuplicateException(PointageBatchConflictDto.builder()
+                    .message("Un lot de pointage existe déjà pour ce chantier à cette date")
+                    .chantierId(chantierId)
+                    .datePointage(datePointage.toString())
+                    .existingBatchId(existingBatch.get().getId().toString())
+                    .build());
+        }
+
+        for (PointageInputDto input : request.getPointages()) {
+            String employeId = input.getEmployeId().trim();
+            LocalDate date = input.getDate();
+            Optional<Pointage> existing = pointageRepository.findByTenantIdAndEmployeIdAndDateAndChantierId(
+                    tenantId, employeId, date, chantierId);
+            if (existing.isPresent()) {
+                throw new PointageBatchDuplicateException(PointageBatchConflictDto.builder()
+                        .message("Un pointage existe déjà pour cet employé sur ce chantier à cette date")
+                        .employeId(employeId)
+                        .chantierId(chantierId)
+                        .datePointage(date.toString())
+                        .existingPointageId(existing.get().getId().toString())
+                        .build());
+            }
+        }
+
         String batchStatus = resolveBatchStatus(request.getStatus(), PointageBatch.STATUS_BROUILLON);
 
         PointageBatch batch = PointageBatch.builder()
-                .id(batchId)
                 .tenantId(tenantId)
                 .clientId(request.getClientId())
                 .chefEmployeId(request.getChefEmployeId().trim())
-                .chantierId(request.getChantierId().trim())
-                .datePointage(request.getDatePointage())
+                .chantierId(chantierId)
+                .datePointage(datePointage)
                 .gpsLat(request.getGpsLat())
                 .gpsLng(request.getGpsLng())
                 .signatureUrl(trimOrNull(request.getSignatureUrl()))
                 .photoUrl(trimOrNull(request.getPhotoUrl()))
                 .status(batchStatus)
                 .build();
-        batchRepository.save(batch);
+        batch = batchRepository.save(batch);
 
         List<Pointage> savedPointages = new ArrayList<>();
         for (PointageInputDto input : request.getPointages()) {
-            String pointageId = StringUtils.hasText(input.getId())
-                    ? input.getId().trim()
-                    : defaultPointageId(input.getDate(), input.getEmployeId());
             Pointage pointage = Pointage.builder()
-                    .id(pointageId)
                     .tenantId(tenantId)
-                    .batchId(batchId)
+                    .batchId(batch.getId())
                     .employeId(input.getEmployeId().trim())
-                    .chantierId(request.getChantierId().trim())
+                    .chantierId(chantierId)
                     .date(input.getDate())
                     .mode(resolveMode(input.getMode()))
                     .heureArrivee(trimOrNull(input.getHeureArrivee()))
@@ -112,7 +135,7 @@ public class PointageBatchService {
     }
 
     @Transactional
-    public PointageBatchDto valider(String batchId) {
+    public PointageBatchDto valider(UUID batchId) {
         seedService.seedIfEmpty();
         UUID tenantId = tenantId();
         PointageBatch batch = batchRepository
@@ -133,7 +156,7 @@ public class PointageBatchService {
 
     private PointageBatchDto toDto(PointageBatch batch, List<Pointage> pointages) {
         return PointageBatchDto.builder()
-                .id(batch.getId())
+                .id(batch.getId().toString())
                 .clientId(batch.getClientId() != null ? batch.getClientId().toString() : null)
                 .chefEmployeId(batch.getChefEmployeId())
                 .chantierId(batch.getChantierId())
@@ -154,10 +177,10 @@ public class PointageBatchService {
                 .orElse(null);
         String employeNom = employe != null ? employe.getPrenom() + " " + employe.getNom() : pointage.getEmployeId();
         return PointageDto.builder()
-                .id(pointage.getId())
+                .id(pointage.getId().toString())
                 .date(pointage.getDate().toString())
                 .chantierId(pointage.getChantierId())
-                .chantierCode(CHANTIER_CODES.getOrDefault(pointage.getChantierId(), pointage.getChantierId()))
+                .chantierCode(chantierCodeReader.resolveCode(pointage.getTenantId(), pointage.getChantierId()))
                 .employeId(pointage.getEmployeId())
                 .employeNom(employeNom)
                 .mode(pointage.getMode())
@@ -166,25 +189,9 @@ public class PointageBatchService {
                 .heuresNormales(pointage.getHeuresNormales())
                 .heuresSup(pointage.getHeuresSup())
                 .status(pointage.getStatus())
-                .journeeBatchId(pointage.getBatchId())
+                .journeeBatchId(pointage.getBatchId().toString())
                 .posteBudgetaireId(pointage.getPosteBudgetaireId())
                 .build();
-    }
-
-    private String nextBatchId(UUID tenantId, LocalDate date, String chantierId) {
-        String prefix = "pb-" + date + "-" + chantierId;
-        int suffix = 0;
-        for (PointageBatch batch : batchRepository.findByTenantIdAndChantierIdAndDatePointageOrderByCreatedAtDesc(
-                tenantId, chantierId, date)) {
-            if (batch.getId().equals(prefix) || batch.getId().startsWith(prefix + "-")) {
-                suffix++;
-            }
-        }
-        return suffix == 0 ? prefix : prefix + "-" + suffix;
-    }
-
-    private static String defaultPointageId(LocalDate date, String employeId) {
-        return "pt-" + date + "-" + employeId;
     }
 
     private static String resolveBatchStatus(String requested, String fallback) {

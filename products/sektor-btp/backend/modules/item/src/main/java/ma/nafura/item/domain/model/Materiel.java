@@ -33,11 +33,12 @@ public class Materiel {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "famille_id", length = 50)
-    private String familleId;
+    /** Article catalogue de nature {@code MATERIEL} représentant l'engin. */
+    @Column(name = "item_id")
+    private UUID itemId;
 
-    @Column(name = "famille_name", length = 100)
-    private String familleName;
+    @Column(name = "item_category_id")
+    private UUID itemCategoryId;
 
     @Column(name = "marque", length = 100)
     private String marque;

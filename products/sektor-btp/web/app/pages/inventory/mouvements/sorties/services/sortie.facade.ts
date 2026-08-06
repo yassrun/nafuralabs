@@ -3,6 +3,7 @@ import { TranslateService } from '@ngx-translate/core';
 import type { CrudStyleFacade } from '@lib/anatomy';
 import type { ListResponse, LookupContext } from '@lib/anatomy/types';
 import type { Article, InventoryTx, Location, MotifMouvement } from '../../../../../inventory/models';
+import { isStockableNature } from '../../../../../inventory/models';
 import { ArticleCatalogService } from '../../../../../inventory/services/article-catalog.service';
 import { InventoryLookupsService } from '../../../../../inventory/services/inventory-lookups.service';
 import { InventoryMovementApiService } from '../../../../../inventory/services/inventory-movement-api.service';
@@ -58,7 +59,7 @@ export class SortieFacade implements CrudStyleFacade<InventoryTx, Partial<Invent
     this.articlesCache = articles;
     const sources = locations.filter((l) => l.isActive !== false);
     const matCons = articles.filter(
-      (a) => a.articleType === 'MATERIAU' || a.articleType === 'CONSOMMABLE',
+      (a) => isStockableNature(a.nature),
     );
     const budgets = this.budgetFacade.budgets();
     this.lookupsSignal.set({

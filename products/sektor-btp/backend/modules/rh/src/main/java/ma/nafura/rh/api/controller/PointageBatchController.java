@@ -1,6 +1,7 @@
 package ma.nafura.rh.api.controller;
 
 import jakarta.validation.Valid;
+import java.util.UUID;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;
 import ma.nafura.rh.api.dto.PointageBatchConflictDto;
@@ -36,7 +37,7 @@ public class PointageBatchController {
 
     @PostMapping("/{id}/valider")
     @RequirePermission("rh.pointage.update")
-    public ResponseEntity<PointageBatchDto> valider(@PathVariable String id) {
+    public ResponseEntity<PointageBatchDto> valider(@PathVariable UUID id) {
         return ResponseEntity.ok(service.valider(id));
     }
 

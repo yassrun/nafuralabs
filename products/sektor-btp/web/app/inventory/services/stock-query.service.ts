@@ -7,14 +7,14 @@ import type { StockBalance } from '../models';
 /** Full list query for stock snapshots (filters applied client-side where needed). */
 const STOCK_LIST_QUERY = { page: 0, pageSize: 5000 } as const;
 
-export function mapStockBalanceApiToUi(api: ApiStockBalance): StockBalance {
+export function mapStockBalanceApiToUi(api: ApiStockBalance & { locationId?: string; warehouseId?: string }): StockBalance {
   const reserved = api.reservedQuantity ?? 0;
   const available =
     api.availableQuantity !== undefined ? api.availableQuantity : Math.max(api.quantity - reserved, 0);
   return {
     id: api.id,
     articleId: api.itemId,
-    locationId: api.warehouseId,
+    locationId: api.locationId ?? api.warehouseId ?? '',
     quantity: api.quantity,
     reservedQuantity: reserved,
     availableQuantity: available,
@@ -24,7 +24,7 @@ export function mapStockBalanceApiToUi(api: ApiStockBalance): StockBalance {
 
 /**
  * Cached stock balances from {@link StockBalancesApiService}, with API field mapping:
- * `warehouseId` → `locationId`, `itemId` → `articleId`.
+ * `locationId` (ex-warehouseId) → UI locationId, `itemId` → `articleId`.
  */
 @Injectable({ providedIn: 'root' })
 export class StockQueryService {
@@ -42,7 +42,7 @@ export class StockQueryService {
 
   /** Loads balances for one location/warehouse from the API (no cache required). */
   async getBalancesByLocation(locationId: string): Promise<StockBalance[]> {
-    const res = await this.api.listFiltered({ warehouseId: locationId, pageSize: 500 });
+    const res = await this.api.listFiltered({ locationId, pageSize: 500 });
     return res.items.map(mapStockBalanceApiToUi);
   }
 

@@ -14,4 +14,8 @@ public class PointageBatchConflictDto {
     private String message;
     private String clientId;
     private String existingBatchId;
+    private String chantierId;
+    private String datePointage;
+    private String employeId;
+    private String existingPointageId;
 }

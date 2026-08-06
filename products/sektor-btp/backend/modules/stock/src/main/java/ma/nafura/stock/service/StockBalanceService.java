@@ -26,20 +26,20 @@ public class StockBalanceService extends StockBalanceServiceBase {
 
     /** Filter list by warehouse and/or item; prefers Spring Page queries when paging (tenant-scoped). */
     @Transactional(readOnly = true)
-    public Page<StockBalance> listFiltered(UUID warehouseId, UUID itemId, int page, int size) {
-        return listFiltered(warehouseId, itemId, page, size, null);
+    public Page<StockBalance> listFiltered(UUID locationId, UUID itemId, int page, int size) {
+        return listFiltered(locationId, itemId, page, size, null);
     }
 
     @Transactional(readOnly = true)
-    public Page<StockBalance> listFiltered(UUID warehouseId, UUID itemId, int page, int size, Sort sort) {
+    public Page<StockBalance> listFiltered(UUID locationId, UUID itemId, int page, int size, Sort sort) {
         UUID tenantId = tenantId();
         Pageable pageable = sort != null ? PageRequest.of(page, size, sort) : PageRequest.of(page, size);
-        if (warehouseId != null && itemId != null) {
-            return stockBalanceRepository.findByTenantIdAndWarehouseIdAndItemId(
-                    tenantId, warehouseId, itemId, pageable);
+        if (locationId != null && itemId != null) {
+            return stockBalanceRepository.findByTenantIdAndLocationIdAndItemId(
+                    tenantId, locationId, itemId, pageable);
         }
-        if (warehouseId != null) {
-            return stockBalanceRepository.findByTenantIdAndWarehouseId(tenantId, warehouseId, pageable);
+        if (locationId != null) {
+            return stockBalanceRepository.findByTenantIdAndLocationId(tenantId, locationId, pageable);
         }
         return stockBalanceRepository.findByTenantIdAndItemId(tenantId, itemId, pageable);
     }

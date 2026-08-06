@@ -5,7 +5,6 @@
       "description": "Item Domain",
       "items": "Items",
       "itemCategories": "Item Categories",
-      "itemTypes": "Item Types",
       "unitOfMeasures": "Unit Of Measures",
       "uoMCategories": "Uo MCategories",
       "itemPrices": "Item Prices"
@@ -22,7 +21,6 @@
       "code": "Code",
       "name": "Name",
       "description": "Description",
-      "itemType": "Item Type Id",
       "itemCategory": "Item Category Id",
       "unitOfMeasure": "Unit Of Measure Id",
       "sku": "Sku",

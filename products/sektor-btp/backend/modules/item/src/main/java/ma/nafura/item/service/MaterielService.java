@@ -4,8 +4,11 @@ import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import ma.nafura.item.api.request.ItemCreateDto;
 import ma.nafura.item.api.request.MaterielCreateDto;
 import ma.nafura.item.api.request.MaterielUpdateDto;
+import ma.nafura.item.domain.Nature;
+import ma.nafura.item.domain.model.Item;
 import ma.nafura.item.domain.model.Materiel;
 import ma.nafura.item.repository.MaterielRepository;
 import ma.nafura.platform.framework.context.TenantContext;
@@ -22,13 +25,16 @@ import org.springframework.util.StringUtils;
 public class MaterielService {
 
     private final MaterielRepository repository;
+    private final ItemService itemService;
 
-    public MaterielService(MaterielRepository repository) {
+    public MaterielService(MaterielRepository repository, ItemService itemService) {
         this.repository = repository;
+        this.itemService = itemService;
     }
 
     @Transactional(readOnly = true)
-    public Page<Materiel> list(int page, int size, String search, String status, String familleId, String sort) {
+    public Page<Materiel> list(
+            int page, int size, String search, String status, UUID itemCategoryId, String sort) {
         UUID tenantId = tenantId();
         Specification<Materiel> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
@@ -36,8 +42,8 @@ public class MaterielService {
             if (StringUtils.hasText(status)) {
                 predicates.add(cb.equal(cb.upper(root.get("status")), status.trim().toUpperCase()));
             }
-            if (StringUtils.hasText(familleId)) {
-                predicates.add(cb.equal(root.get("familleId"), familleId.trim()));
+            if (itemCategoryId != null) {
+                predicates.add(cb.equal(root.get("itemCategoryId"), itemCategoryId));
             }
             if (StringUtils.hasText(search)) {
                 String term = "%" + search.trim().toLowerCase() + "%";
@@ -64,16 +70,23 @@ public class MaterielService {
     @Transactional
     public Materiel create(MaterielCreateDto request) {
         UUID tenantId = tenantId();
-        if (repository.existsByTenantIdAndCode(tenantId, request.getCode().trim())) {
+        String code = request.getCode().trim();
+        if (repository.existsByTenantIdAndCode(tenantId, code)) {
             throw new IllegalArgumentException("Materiel code already exists");
         }
+
+        Item linkedItem = resolveOrCreateLinkedItem(request, code);
+
         Materiel entity = Materiel.builder()
                 .tenantId(tenantId)
-                .code(request.getCode().trim())
+                .code(code)
                 .name(request.getName().trim())
                 .description(request.getDescription())
-                .familleId(request.getFamilleId())
-                .familleName(request.getFamilleName())
+                .itemId(linkedItem.getId())
+                .itemCategoryId(
+                        request.getItemCategoryId() != null
+                                ? request.getItemCategoryId()
+                                : linkedItem.getItemCategoryId())
                 .marque(request.getMarque())
                 .modele(request.getModele())
                 .numeroSerie(request.getNumeroSerie().trim())
@@ -102,11 +115,11 @@ public class MaterielService {
         if (request.getDescription() != null) {
             entity.setDescription(request.getDescription());
         }
-        if (request.getFamilleId() != null) {
-            entity.setFamilleId(request.getFamilleId());
+        if (request.getItemId() != null) {
+            entity.setItemId(requireMaterielItem(request.getItemId()).getId());
         }
-        if (request.getFamilleName() != null) {
-            entity.setFamilleName(request.getFamilleName());
+        if (request.getItemCategoryId() != null) {
+            entity.setItemCategoryId(request.getItemCategoryId());
         }
         if (request.getMarque() != null) {
             entity.setMarque(request.getMarque());
@@ -151,6 +164,30 @@ public class MaterielService {
     public void delete(UUID id) {
         Materiel entity = getById(id);
         repository.delete(entity);
+    }
+
+    private Item resolveOrCreateLinkedItem(MaterielCreateDto request, String code) {
+        if (request.getItemId() != null) {
+            return requireMaterielItem(request.getItemId());
+        }
+        ItemCreateDto itemDto = new ItemCreateDto();
+        itemDto.setCode(code);
+        itemDto.setName(request.getName().trim());
+        itemDto.setDescription(request.getDescription());
+        itemDto.setItemCategoryId(request.getItemCategoryId());
+        itemDto.setNature(Nature.MATERIEL.name());
+        itemDto.setIsActive(request.getIsActive() != null ? request.getIsActive() : Boolean.TRUE);
+        return itemService.create(itemDto);
+    }
+
+    private Item requireMaterielItem(UUID itemId) {
+        Item item = itemService
+                .getById(itemId)
+                .orElseThrow(() -> new IllegalArgumentException("Linked item not found"));
+        if (Nature.fromLegacy(item.getNature()) != Nature.MATERIEL) {
+            throw new IllegalArgumentException("Linked item must have nature MATERIEL");
+        }
+        return item;
     }
 
     private static Sort parseSort(String sort) {

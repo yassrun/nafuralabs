@@ -11,12 +11,12 @@ import org.springframework.stereotype.Repository;
 public interface StockReservationRepository extends TenantScopedRepository<StockReservation, UUID> {
 
     List<StockReservation> findByTenantIdAndChantierIdAndStatusOrderByDateCreationAsc(
-            UUID tenantId, String chantierId, String status);
+            UUID tenantId, UUID chantierId, String status);
 
     List<StockReservation> findByTenantIdAndStatusOrderByDateCreationDesc(UUID tenantId, String status);
 
     List<StockReservation> findByTenantIdAndItemIdAndChantierIdAndStatusOrderByDateCreationAsc(
-            UUID tenantId, UUID itemId, String chantierId, String status);
+            UUID tenantId, UUID itemId, UUID chantierId, String status);
 
     List<StockReservation> findByTenantIdAndStatusAndDateExpirationBefore(
             UUID tenantId, String status, LocalDate date);

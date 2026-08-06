@@ -2,13 +2,15 @@
 id: ERP-11
 status: todo
 context: nafura
-assignee: me
-parent: ERP-16
+kind: task
 feature: chiffrage-drawer
+parent: ERP-16
 priority: P1
-estimate: 4h
+assignee: me
+gate: none
 tags: [sektor, etudes, chiffrage, descriptif, ux]
 ---
+
 
 # Raffiner le mode de fonctionnement du descriptif technique (manuel) — chiffrage poste
 
@@ -25,4 +27,5 @@ tags: [sektor, etudes, chiffrage, descriptif, ux]
 ## Journal
 ```
 05/08 12:33  capturé · descriptif technique manuel chiffrage poste
+05/08 21:30  framework v2 · task schema (estimate out · gate/kind)
 ```

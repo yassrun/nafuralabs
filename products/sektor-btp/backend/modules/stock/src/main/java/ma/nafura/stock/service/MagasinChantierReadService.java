@@ -66,7 +66,7 @@ public class MagasinChantierReadService {
         Location depot = resolved.depot();
 
         List<StockBalance> balances =
-                stockBalanceRepository.findByTenantIdAndWarehouseId(tenantId, depot.getId());
+                stockBalanceRepository.findByTenantIdAndLocationId(tenantId, depot.getId());
         Map<UUID, Item> itemsById = loadItems(tenantId, balances);
 
         List<MagasinStockArticleDto> stockArticles = new ArrayList<>();
@@ -129,7 +129,7 @@ public class MagasinChantierReadService {
                 tenantId, key, PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "txDate", "createdAt")));
         if (!hint.isEmpty()) {
             InventoryTx tx = hint.getContent().get(0);
-            UUID locationId = firstNonNull(tx.getChantierLocationId(), tx.getDestLocationId(), tx.getWarehouseId());
+            UUID locationId = firstNonNull(tx.getChantierLocationId(), tx.getDestLocationId(), tx.getLocationId());
             if (locationId != null) {
                 Optional<Location> fromTx = locationRepository
                         .findByIdAndTenantId(locationId, tenantId)

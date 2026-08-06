@@ -4,6 +4,7 @@ import type { LookupContext } from '@lib/anatomy/types';
 
 import { ErpLookupService } from '../../shared/services/erp-lookup.service';
 import { itemToArticle, type ItemApiRow } from './item-article.mapper';
+import { isStockableNature } from '../models';
 import type { Location } from '../models';
 
 /**
@@ -30,7 +31,7 @@ export class InventoryLookupsService {
 
     const articles = itemRows
       .map((row) => itemToArticle(row.data as unknown as ItemApiRow))
-      .filter((a) => a.isActive && (a.articleType === 'MATERIAU' || a.articleType === 'CONSOMMABLE'));
+      .filter((a) => a.isActive && isStockableNature(a.nature));
 
     return {
       locationsDepot: locationsDepot.map((l) => ({ key: l.key, value: l.value })),

@@ -3,6 +3,7 @@ package ma.nafura.rh.api.controller;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;
 import ma.nafura.rh.api.dto.PointageDto;
@@ -50,7 +51,7 @@ public class PointageController {
 
     @PutMapping("/{id}")
     @RequirePermission("rh.pointage.update")
-    public ResponseEntity<PointageDto> update(@PathVariable String id, @Valid @RequestBody PointageUpdateDto body) {
+    public ResponseEntity<PointageDto> update(@PathVariable UUID id, @Valid @RequestBody PointageUpdateDto body) {
         return ResponseEntity.ok(service.update(id, body));
     }
 }

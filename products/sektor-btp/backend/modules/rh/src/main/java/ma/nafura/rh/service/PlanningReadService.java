@@ -26,11 +26,6 @@ import org.springframework.util.StringUtils;
 @Service
 public class PlanningReadService {
 
-    private static final Map<String, String> CHANTIER_CODES = Map.of(
-            "ch-001", "CH-2025-001",
-            "ch-002", "CH-2025-002",
-            "ch-003", "CH-2025-003");
-
     private static final Set<String> CONGE_STATUSES = Set.of(Conge.STATUS_APPROUVE, Conge.STATUS_EN_COURS);
 
     private final PointageRepository pointageRepository;
@@ -38,18 +33,21 @@ public class PlanningReadService {
     private final EmployeRepository employeRepository;
     private final PointageSeedService pointageSeedService;
     private final CongeSeedService congeSeedService;
+    private final ChantierCodeReader chantierCodeReader;
 
     public PlanningReadService(
             PointageRepository pointageRepository,
             CongeRepository congeRepository,
             EmployeRepository employeRepository,
             PointageSeedService pointageSeedService,
-            CongeSeedService congeSeedService) {
+            CongeSeedService congeSeedService,
+            ChantierCodeReader chantierCodeReader) {
         this.pointageRepository = pointageRepository;
         this.congeRepository = congeRepository;
         this.employeRepository = employeRepository;
         this.pointageSeedService = pointageSeedService;
         this.congeSeedService = congeSeedService;
+        this.chantierCodeReader = chantierCodeReader;
     }
 
     @Transactional(readOnly = true)
@@ -193,7 +191,7 @@ public class PlanningReadService {
                 .employeNom(resolveEmployeNom(pointage.getEmployeId(), null, tenantId))
                 .dateJour(pointage.getDate().toString())
                 .chantierId(pointage.getChantierId())
-                .chantierCode(chantierCode(pointage.getChantierId()))
+                .chantierCode(chantierCodeReader.resolveCode(tenantId, pointage.getChantierId()))
                 .pointageHeures(hours)
                 .mode(pointage.getMode())
                 .build();
@@ -213,10 +211,6 @@ public class PlanningReadService {
         return employeId + "|" + date + "|" + (chantierId != null ? chantierId : "");
     }
 
-    private static String chantierCode(String chantierId) {
-        return CHANTIER_CODES.getOrDefault(chantierId, chantierId);
-    }
-
     private static String normalizeFilter(String value) {
         return StringUtils.hasText(value) ? value.trim() : null;
     }
@@ -225,7 +219,7 @@ public class PlanningReadService {
         return TenantContext.getTenantId();
     }
 
-    private static final class AffectationAccumulator {
+    private final class AffectationAccumulator {
         private final String employeId;
         private final String chantierId;
         private final String chantierCode;
@@ -235,7 +229,7 @@ public class PlanningReadService {
         private AffectationAccumulator(Pointage seed) {
             employeId = seed.getEmployeId();
             chantierId = seed.getChantierId();
-            chantierCode = chantierCode(chantierId);
+            chantierCode = chantierCodeReader.resolveCode(seed.getTenantId(), chantierId);
             minDate = seed.getDate();
             maxDate = seed.getDate();
         }

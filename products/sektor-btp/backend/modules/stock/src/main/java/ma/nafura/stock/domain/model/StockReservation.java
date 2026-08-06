@@ -34,8 +34,12 @@ public class StockReservation {
     @Column(name = "uom", length = 20)
     private String uom;
 
-    @Column(name = "chantier_id", nullable = false, length = 50)
-    private String chantierId;
+    /** Chantier location id (UUID), aligned with inventory_txs.chantier_location_id. */
+    @Column(name = "chantier_id", nullable = false)
+    private UUID chantierId;
+
+    @Column(name = "location_id", nullable = false)
+    private UUID locationId;
 
     @Column(name = "date_besoin", nullable = false)
     private LocalDate dateBesoin;

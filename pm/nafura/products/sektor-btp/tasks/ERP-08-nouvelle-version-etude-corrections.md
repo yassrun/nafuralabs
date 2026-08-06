@@ -2,13 +2,15 @@
 id: ERP-08
 status: todo
 context: nafura
-assignee: me
-parent: ERP-17
+kind: task
 feature: etude-parcours
+parent: ERP-17
 priority: P1
-estimate: 6h
+assignee: me
+gate: me
 tags: [sektor, etudes, devis, versioning]
 ---
+
 
 # Nouvelle version d'étude depuis une étude terminée (devis généré) — corrections
 
@@ -26,4 +28,5 @@ tags: [sektor, etudes, devis, versioning]
 ## Journal
 ```
 05/08 11:59  capturé depuis besoin produit (corrections post-devis)
+05/08 21:30  framework v2 · task schema (estimate out · gate/kind)
 ```

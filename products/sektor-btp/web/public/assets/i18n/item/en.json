@@ -11,8 +11,7 @@
     "navigation": {
       "items": "Items",
       "barcodes": "Barcodes",
-      "itemCategories": "Item Categories",
-      "itemTypes": "Item Types"
+      "itemCategories": "Item Categories"
     },
     "item": {
       "title": "Items",
@@ -23,7 +22,6 @@
         "name": "name",
         "description": "description",
         "type": "type",
-        "itemTypeId": "item Type Id",
         "itemCategoryId": "item Category Id",
         "unitOfMeasureId": "unit Of Measure Id",
         "baseUnit": "base Unit",
@@ -52,18 +50,6 @@
       "newTitle": "New Item Category",
       "fields": {
         "parentId": "parent Id",
-        "code": "code",
-        "name": "name",
-        "description": "description",
-        "isActive": "is Active"
-      },
-      "sections": {}
-    },
-    "itemType": {
-      "title": "Item Types",
-      "detailTitle": "Item Type Details",
-      "newTitle": "New Item Type",
-      "fields": {
         "code": "code",
         "name": "name",
         "description": "description",

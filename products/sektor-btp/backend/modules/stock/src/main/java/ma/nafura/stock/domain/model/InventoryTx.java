@@ -30,8 +30,8 @@ public class InventoryTx {
     @Column(name = "tx_type", nullable = false, length = 50)
     private String txType;
 
-    @Column(name = "warehouse_id", nullable = false)
-    private UUID warehouseId;
+    @Column(name = "location_id", nullable = false)
+    private UUID locationId;
 
     @Column(name = "source_location_id")
     private UUID sourceLocationId;

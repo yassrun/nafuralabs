@@ -1,8 +1,6 @@
 package ma.nafura.stock.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -29,9 +27,6 @@ class MovementMotifServiceTest {
 
     @Mock
     private MovementMotifMapper mapper;
-
-    @Mock
-    private MovementMotifSeedService seedService;
 
     @InjectMocks
     private MovementMotifService service;
@@ -61,7 +56,6 @@ class MovementMotifServiceTest {
 
         List<MovementMotif> result = service.listAll("SORTIE");
 
-        verify(seedService).seedIfEmpty();
         assertThat(result).hasSize(1);
         assertThat(result.getFirst().getCode()).isEqualTo("CONSO_CHANTIER");
     }

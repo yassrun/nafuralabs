@@ -62,7 +62,7 @@ public class HeureSupplementaireSeedService {
                         .tauxMajoration(tauxMajoration)
                         .montant(montant)
                         .status(node.path("status").asText(HeureSupplementaire.STATUS_BROUILLON))
-                        .pointageId(textOrNull(node, "pointageId"))
+                        .pointageId(null)
                         .build();
                 repository.save(entity);
             }

@@ -9,7 +9,7 @@ export function buildArticleSections(t: TranslateService): DetailSectionConfig<A
     {
       id: 'identification',
       title: tr('inventory.catalogue.article.sections.identification'),
-      fields: ['code', 'name', 'description', 'familleId', 'articleType'],
+      fields: ['code', 'name', 'description', 'familleId', 'lotsUsage', 'nature'],
       columns: 2,
     },
     {

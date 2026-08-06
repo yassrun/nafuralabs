@@ -9,8 +9,10 @@ export interface Materiel {
   code: string;
   name: string;
   description?: string;
+  /** Linked catalogue item (nature MATERIEL). */
+  itemId?: string;
+  /** Famille = item_categories (API: itemCategoryId). */
   familleId?: string;
-  familleName?: string;
   marque?: string;
   modele?: string;
   numeroSerie: string;
@@ -32,8 +34,8 @@ export type MaterielListItem = Pick<
   | 'id'
   | 'code'
   | 'name'
+  | 'itemId'
   | 'familleId'
-  | 'familleName'
   | 'marque'
   | 'modele'
   | 'numeroSerie'

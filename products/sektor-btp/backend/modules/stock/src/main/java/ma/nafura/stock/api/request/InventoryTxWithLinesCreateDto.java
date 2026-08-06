@@ -27,7 +27,7 @@ public class InventoryTxWithLinesCreateDto {
     @Size(max = 2000)
     private String notes;
 
-    private UUID warehouseId;
+    private UUID locationId;
     private UUID sourceLocationId;
     private UUID destLocationId;
     private UUID fournisseurId;

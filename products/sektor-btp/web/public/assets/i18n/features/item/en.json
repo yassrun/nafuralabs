@@ -9,7 +9,6 @@
       "name": "name",
       "description": "description",
       "type": "item Type Id",
-      "itemType": "item Type Id",
       "itemCategory": "item Category Id",
       "unitOfMeasure": "unit Of Measure Id",
       "baseUnit": "base Unit",
@@ -22,8 +21,7 @@
     "navigation": {
       "barcodes": "Barcodes",
       "items": "Items",
-      "itemCategories": "Item Categories",
-      "itemTypes": "Item Types"
+      "itemCategories": "Item Categories"
     },
     "barcode": {
       "title": "Barcodes",
@@ -39,11 +37,6 @@
       "title": "Item Categories",
       "detailTitle": "Item Category Details",
       "newTitle": "New Item Category"
-    },
-    "itemType": {
-      "title": "Item Types",
-      "detailTitle": "Item Type Details",
-      "newTitle": "New Item Type"
     }
   },
   "common": {

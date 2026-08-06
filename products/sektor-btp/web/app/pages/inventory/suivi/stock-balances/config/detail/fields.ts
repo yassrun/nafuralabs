@@ -30,7 +30,7 @@ export const FIELDS: DetailFieldConfig<StockBalance>[] = [
     lookupDisplayField: 'name',
     lookupValueField: 'id',
     searchable: true,
-    referenceRoute: '/inventory/catalogue/items',
+    referenceRoute: '/inventory/catalogue/articles',
   },
   {
     key: 'quantity',

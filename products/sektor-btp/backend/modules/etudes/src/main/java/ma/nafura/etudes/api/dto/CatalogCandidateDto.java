@@ -9,5 +9,5 @@ public record CatalogCandidateDto(
         String code,
         String name,
         String unite,
-        String articleType,
+        String nature,
         Double score) {}

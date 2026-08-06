@@ -44,9 +44,7 @@ public class PointageSeedService {
         try (InputStream in = new ClassPathResource("seed/pointages-seed.json").getInputStream()) {
             JsonNode root = objectMapper.readTree(in);
             for (JsonNode batchNode : root.get("batches")) {
-                String batchId = batchNode.get("id").asText();
                 PointageBatch batch = PointageBatch.builder()
-                        .id(batchId)
                         .tenantId(tenantId)
                         .clientId(UUID.fromString(batchNode.get("clientId").asText()))
                         .chefEmployeId(batchNode.get("chefEmployeId").asText())
@@ -54,13 +52,12 @@ public class PointageSeedService {
                         .datePointage(LocalDate.parse(batchNode.get("datePointage").asText()))
                         .status(batchNode.path("status").asText(PointageBatch.STATUS_BROUILLON))
                         .build();
-                batchRepository.save(batch);
+                batch = batchRepository.save(batch);
 
                 for (JsonNode ptNode : batchNode.get("pointages")) {
                     Pointage pointage = Pointage.builder()
-                            .id(ptNode.get("id").asText())
                             .tenantId(tenantId)
-                            .batchId(batchId)
+                            .batchId(batch.getId())
                             .employeId(ptNode.get("employeId").asText())
                             .chantierId(batchNode.get("chantierId").asText())
                             .date(LocalDate.parse(ptNode.get("date").asText()))

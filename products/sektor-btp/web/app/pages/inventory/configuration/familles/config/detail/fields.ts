@@ -31,6 +31,17 @@ export function buildFamilleFields(t: TranslateService): DetailFieldConfig<Famil
       validators: [{ type: 'maxLength', value: 500 }],
     },
     {
+      key: 'parentId',
+      label: tr('inventory.configuration.famille.fields.parentId'),
+      type: 'select',
+      width: 'md',
+      lookupKey: 'itemCategories',
+      lookupDisplayField: 'name',
+      lookupValueField: 'id',
+      searchable: true,
+      clearable: true,
+    },
+    {
       key: 'isActive',
       label: tr('inventory.configuration.famille.fields.isActive'),
       type: 'toggle',

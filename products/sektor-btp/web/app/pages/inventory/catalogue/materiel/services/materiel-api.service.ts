@@ -16,8 +16,8 @@ export interface ApiMateriel {
   code: string;
   name: string;
   description?: string;
-  familleId?: string;
-  familleName?: string;
+  itemId?: string;
+  itemCategoryId?: string;
   marque?: string;
   modele?: string;
   numeroSerie: string;
@@ -52,7 +52,7 @@ export class MaterielApiService extends FeatureApiService<Materiel, MaterielCrea
       params = params.set('status', q.status);
     }
     if (q.familleId) {
-      params = params.set('familleId', q.familleId);
+      params = params.set('itemCategoryId', q.familleId);
     }
     if (q.sortBy) {
       const dir = q.sortDirection === 'desc' ? 'desc' : 'asc';
@@ -73,12 +73,12 @@ export class MaterielApiService extends FeatureApiService<Materiel, MaterielCrea
   }
 
   override async create(data: MaterielCreate): Promise<Materiel> {
-    const row = await this.post<ApiMateriel>(this.basePath, materielToCreateBody(data));
+    const row = await this.post<ApiMateriel>(this.basePath, materielToApiBody(data));
     return apiToMateriel(row);
   }
 
   override async update(id: string | number, data: MaterielUpdate): Promise<Materiel> {
-    const row = await this.put<ApiMateriel>(`${this.basePath}/${id}`, data);
+    const row = await this.put<ApiMateriel>(`${this.basePath}/${id}`, materielToApiBody(data));
     return apiToMateriel(row);
   }
 }
@@ -89,8 +89,8 @@ export function apiToMateriel(row: ApiMateriel): Materiel {
     code: row.code,
     name: row.name,
     description: row.description,
-    familleId: row.familleId,
-    familleName: row.familleName,
+    itemId: row.itemId,
+    familleId: row.itemCategoryId,
     marque: row.marque,
     modele: row.modele,
     numeroSerie: row.numeroSerie,
@@ -108,6 +108,10 @@ export function apiToMateriel(row: ApiMateriel): Materiel {
   };
 }
 
-function materielToCreateBody(data: MaterielCreate): Record<string, unknown> {
-  return { ...data };
+function materielToApiBody(data: MaterielCreate | MaterielUpdate): Record<string, unknown> {
+  const { familleId, ...rest } = data;
+  return {
+    ...rest,
+    ...(familleId !== undefined ? { itemCategoryId: familleId } : {}),
+  };
 }

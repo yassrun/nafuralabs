@@ -47,7 +47,7 @@ public class ItemCatalogResolver implements CatalogResolverPort {
                         .itemId(item.getId().toString())
                         .code(item.getCode())
                         .name(item.getName())
-                        .articleType(item.getArticleType())
+                        .nature(item.getNature())
                         .score(score(term, item))
                         .build())
                 .toList();

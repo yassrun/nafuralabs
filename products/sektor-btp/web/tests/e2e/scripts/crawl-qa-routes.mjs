@@ -41,7 +41,7 @@ const ROUTES = [
   { path: '/inventory/suivi/alertes', module: '03-stock' },
   { path: '/inventory/catalogue/articles', module: '03-stock' },
   { path: '/inventory/configuration/familles', module: '03-stock' },
-  { path: '/inventory/configuration/types-articles', module: '03-stock' },
+  { path: '/inventory/configuration/familles', module: '03-stock' },
   { path: '/inventory/configuration/uom', module: '03-stock' },
   { path: '/inventory/configuration/depots', module: '03-stock' },
   { path: '/inventory/configuration/motifs', module: '03-stock' },

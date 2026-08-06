@@ -11,16 +11,16 @@ import lombok.extern.slf4j.Slf4j;
 import ma.nafura.currency.domain.model.Currency;
 import ma.nafura.currency.repository.CurrencyRepository;
 import ma.nafura.item.domain.model.ItemCategory;
-import ma.nafura.item.domain.model.ItemType;
 import ma.nafura.item.domain.model.UoMCategory;
 import ma.nafura.item.domain.model.UnitOfMeasure;
 import ma.nafura.item.repository.ItemCategoryRepository;
-import ma.nafura.item.repository.ItemTypeRepository;
 import ma.nafura.item.repository.UoMCategoryRepository;
 import ma.nafura.item.repository.UnitOfMeasureRepository;
 import ma.nafura.stock.domain.model.CostingMethod;
+import ma.nafura.stock.domain.model.Location;
 import ma.nafura.stock.domain.model.MovementMotif;
 import ma.nafura.stock.repository.CostingMethodRepository;
+import ma.nafura.stock.repository.LocationRepository;
 import ma.nafura.stock.repository.MovementMotifRepository;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
@@ -39,10 +39,10 @@ public class TenantReferenceDataSeedService {
 
     private final UoMCategoryRepository uomCategoryRepository;
     private final UnitOfMeasureRepository unitOfMeasureRepository;
-    private final ItemTypeRepository itemTypeRepository;
     private final ItemCategoryRepository itemCategoryRepository;
     private final CostingMethodRepository costingMethodRepository;
     private final MovementMotifRepository movementMotifRepository;
+    private final LocationRepository locationRepository;
     private final CurrencyRepository currencyRepository;
     private final ObjectMapper objectMapper;
 
@@ -52,9 +52,9 @@ public class TenantReferenceDataSeedService {
         seedUomCategories(tenantId, root.get("uomCategories"));
         Map<String, UUID> categoryIds = categoryIdsByCode(tenantId);
         seedUnitsOfMeasure(tenantId, root.get("unitsOfMeasure"), categoryIds);
-        seedItemTypes(tenantId, root.get("itemTypes"));
         seedItemCategories(tenantId, root.get("itemCategories"));
         seedCostingMethods(tenantId, root.get("costingMethods"));
+        seedLocations(tenantId, root.get("locations"));
         seedMovementMotifs(tenantId, root.get("movementMotifs"));
         seedCurrencies(tenantId, root.get("currencies"));
         log.info("Reference master data seeded for tenant={}", tenantId);
@@ -108,32 +108,29 @@ public class TenantReferenceDataSeedService {
         }
     }
 
-    private void seedItemTypes(UUID tenantId, JsonNode nodes) {
-        if (nodes == null || !nodes.isArray()) {
-            return;
-        }
-        for (JsonNode node : nodes) {
-            String code = text(node, "code");
-            if (code == null || existsItemType(tenantId, code)) {
-                continue;
-            }
-            itemTypeRepository.save(ItemType.builder()
-                .tenantId(tenantId)
-                .code(code)
-                .name(text(node, "name"))
-                .description(text(node, "description"))
-                .isActive(true)
-                .build());
-        }
-    }
-
     private void seedItemCategories(UUID tenantId, JsonNode nodes) {
         if (nodes == null || !nodes.isArray()) {
             return;
         }
+        // Pass 1 — insert missing categories without parent (roots first, then orphans).
         for (JsonNode node : nodes) {
             String code = text(node, "code");
-            if (code == null || existsItemCategory(tenantId, code)) {
+            if (code == null) {
+                continue;
+            }
+            if (existsItemCategory(tenantId, code)) {
+                // Legacy EPI kept inactive by §5.3 — reactivate as taxonomy root.
+                if ("EPI".equalsIgnoreCase(code)) {
+                    itemCategoryRepository.findByTenantId(tenantId).stream()
+                        .filter(row -> code.equalsIgnoreCase(row.getCode()))
+                        .findFirst()
+                        .ifPresent(row -> {
+                            row.setName(text(node, "name"));
+                            row.setDescription(text(node, "description"));
+                            row.setIsActive(true);
+                            itemCategoryRepository.save(row);
+                        });
+                }
                 continue;
             }
             itemCategoryRepository.save(ItemCategory.builder()
@@ -144,6 +141,37 @@ public class TenantReferenceDataSeedService {
                 .isActive(true)
                 .build());
         }
+        // Pass 2 — resolve parentCode → parentId (idempotent for existing rows).
+        Map<String, UUID> idsByCode = itemCategoryIdsByCode(tenantId);
+        for (JsonNode node : nodes) {
+            String code = text(node, "code");
+            String parentCode = text(node, "parentCode");
+            if (code == null || parentCode == null) {
+                continue;
+            }
+            UUID id = idsByCode.get(code.toUpperCase());
+            UUID parentId = idsByCode.get(parentCode.toUpperCase());
+            if (id == null || parentId == null) {
+                continue;
+            }
+            itemCategoryRepository.findByIdAndTenantId(id, tenantId).ifPresent(row -> {
+                if (parentId.equals(row.getParentId())) {
+                    return;
+                }
+                row.setParentId(parentId);
+                itemCategoryRepository.save(row);
+            });
+        }
+    }
+
+    private Map<String, UUID> itemCategoryIdsByCode(UUID tenantId) {
+        Map<String, UUID> map = new HashMap<>();
+        for (ItemCategory category : itemCategoryRepository.findByTenantId(tenantId)) {
+            if (category.getCode() != null) {
+                map.put(category.getCode().toUpperCase(), category.getId());
+            }
+        }
+        return map;
     }
 
     private void seedCostingMethods(UUID tenantId, JsonNode nodes) {
@@ -182,6 +210,26 @@ public class TenantReferenceDataSeedService {
                 .name(text(node, "name"))
                 .txType(text(node, "txType"))
                 .isActive(true)
+                .build());
+        }
+    }
+
+    private void seedLocations(UUID tenantId, JsonNode nodes) {
+        if (nodes == null || !nodes.isArray()) {
+            return;
+        }
+        for (JsonNode node : nodes) {
+            String code = text(node, "code");
+            if (code == null || existsLocation(tenantId, code)) {
+                continue;
+            }
+            locationRepository.save(Location.builder()
+                .tenantId(tenantId)
+                .code(code)
+                .name(text(node, "name"))
+                .type(text(node, "type", "DEPOT"))
+                .isPhysical(node.path("isPhysical").asBoolean(true))
+                .affectsStock(node.path("affectsStock").asBoolean(true))
                 .build());
         }
     }
@@ -227,11 +275,6 @@ public class TenantReferenceDataSeedService {
             .anyMatch(row -> code.equalsIgnoreCase(row.getCode()));
     }
 
-    private boolean existsItemType(UUID tenantId, String code) {
-        return itemTypeRepository.findByTenantId(tenantId).stream()
-            .anyMatch(row -> code.equalsIgnoreCase(row.getCode()));
-    }
-
     private boolean existsItemCategory(UUID tenantId, String code) {
         return itemCategoryRepository.findByTenantId(tenantId).stream()
             .anyMatch(row -> code.equalsIgnoreCase(row.getCode()));
@@ -245,6 +288,10 @@ public class TenantReferenceDataSeedService {
     private boolean existsMovementMotif(UUID tenantId, String code) {
         return movementMotifRepository.findByTenantId(tenantId).stream()
             .anyMatch(row -> code.equalsIgnoreCase(row.getCode()));
+    }
+
+    private boolean existsLocation(UUID tenantId, String code) {
+        return locationRepository.findByTenantIdAndCode(tenantId, code).isPresent();
     }
 
     private boolean existsCurrency(UUID tenantId, String code) {

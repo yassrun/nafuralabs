@@ -2,13 +2,15 @@
 id: ERP-10
 status: todo
 context: nafura
-assignee: me
-parent: ERP-17
+kind: task
 feature: etude-parcours
+parent: ERP-17
 priority: P1
-estimate: 8h
+assignee: me
+gate: me
 tags: [sektor, etudes, cps, import, ai-first]
 ---
+
 
 # Création étude / AO — ordre & mix import CPS → préremplissage → manuel
 
@@ -35,4 +37,5 @@ Champs concernés (à mapper CPS ↔ formulaire) :
 ## Journal
 ```
 05/08 12:18  capturé depuis écran /etudes/dossiers/new + besoin mix CPS
+05/08 21:30  framework v2 · task schema (estimate out · gate/kind)
 ```

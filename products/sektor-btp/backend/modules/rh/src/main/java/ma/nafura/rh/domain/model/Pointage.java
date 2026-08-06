@@ -2,8 +2,11 @@ package ma.nafura.rh.domain.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -34,14 +37,14 @@ public class Pointage {
     public static final String MODE_AUTRE = "AUTRE";
 
     @Id
-    @Column(length = 100)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column(name = "tenant_id", nullable = false)
     private UUID tenantId;
 
-    @Column(name = "batch_id", nullable = false, length = 100)
-    private String batchId;
+    @Column(name = "batch_id", nullable = false)
+    private UUID batchId;
 
     @Column(name = "employe_id", nullable = false, length = 100)
     private String employeId;
@@ -73,13 +76,26 @@ public class Pointage {
     @Column(name = "poste_budgetaire_id", length = 100)
     private String posteBudgetaireId;
 
+    @Column(name = "validated_by", length = 100)
+    private String validatedBy;
+
+    @Column(name = "validated_at")
+    private OffsetDateTime validatedAt;
+
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
+    @Column(name = "updated_at", nullable = false)
+    private OffsetDateTime updatedAt;
+
     @PrePersist
     protected void onCreate() {
+        OffsetDateTime now = OffsetDateTime.now();
         if (createdAt == null) {
-            createdAt = OffsetDateTime.now();
+            createdAt = now;
+        }
+        if (updatedAt == null) {
+            updatedAt = now;
         }
         if (heuresNormales == null) {
             heuresNormales = BigDecimal.ZERO;
@@ -90,5 +106,10 @@ public class Pointage {
         if (status == null || status.isBlank()) {
             status = STATUS_BROUILLON;
         }
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = OffsetDateTime.now();
     }
 }

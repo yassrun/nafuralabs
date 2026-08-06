@@ -11,12 +11,15 @@ import ma.nafura.rh.api.dto.PointageDto;
 import ma.nafura.rh.api.request.PointageUpdateDto;
 import ma.nafura.rh.domain.model.Pointage;
 import ma.nafura.rh.repository.PointageRepository;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 @Service
 public class PointageService {
+
+    private static final int DEFAULT_PAGE_SIZE = 100;
 
     private final PointageRepository repository;
     private final PointageBatchService batchService;
@@ -53,12 +56,13 @@ public class PointageService {
                             tenantId, normalizedChantier, from, from)
                     : repository.findByTenantIdAndDateBetweenOrderByDateAscEmployeIdAsc(tenantId, from, from);
         } else {
-            LocalDate defaultFrom = LocalDate.of(2026, 1, 1);
-            LocalDate defaultTo = LocalDate.of(2099, 12, 31);
+            PageRequest page = PageRequest.of(0, DEFAULT_PAGE_SIZE);
             rows = normalizedChantier != null
-                    ? repository.findByTenantIdAndChantierIdAndDateBetweenOrderByDateAscEmployeIdAsc(
-                            tenantId, normalizedChantier, defaultFrom, defaultTo)
-                    : repository.findByTenantIdAndDateBetweenOrderByDateAscEmployeIdAsc(tenantId, defaultFrom, defaultTo);
+                    ? repository
+                            .findByTenantIdAndChantierIdOrderByDateDescEmployeIdAsc(
+                                    tenantId, normalizedChantier, page)
+                            .getContent()
+                    : repository.findByTenantIdOrderByDateDescEmployeIdAsc(tenantId, page).getContent();
         }
         return rows.stream().map(batchService::toPointageDto).toList();
     }
@@ -80,7 +84,7 @@ public class PointageService {
     }
 
     @Transactional
-    public PointageDto update(String id, PointageUpdateDto request) {
+    public PointageDto update(UUID id, PointageUpdateDto request) {
         seedService.seedIfEmpty();
         Pointage entity = repository
                 .findByIdAndTenantId(id, tenantId())
@@ -117,8 +121,8 @@ public class PointageService {
         if (!StringUtils.hasText(chantierId)) {
             throw new IllegalArgumentException("chantierId is required");
         }
-        LocalDate effectiveFrom = from != null ? from : LocalDate.of(2026, 1, 1);
         LocalDate effectiveTo = to != null ? to : LocalDate.now();
+        LocalDate effectiveFrom = from != null ? from : effectiveTo.minusDays(90);
 
         List<Pointage> rows = repository.findByTenantIdAndChantierIdAndDateBetweenOrderByDateAscEmployeIdAsc(
                 tenantId(), chantierId.trim(), effectiveFrom, effectiveTo);

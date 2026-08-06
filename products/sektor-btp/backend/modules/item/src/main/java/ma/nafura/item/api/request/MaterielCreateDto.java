@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.UUID;
 import lombok.Data;
 
 @Data
@@ -19,11 +20,10 @@ public class MaterielCreateDto {
 
     private String description;
 
-    @Size(max = 50)
-    private String familleId;
+    /** Optional: link an existing catalogue item (must be nature MATERIEL). */
+    private UUID itemId;
 
-    @Size(max = 100)
-    private String familleName;
+    private UUID itemCategoryId;
 
     @Size(max = 100)
     private String marque;

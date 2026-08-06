@@ -8,6 +8,7 @@ import {
   itemToArticle,
   type ItemApiRow,
 } from '@app/inventory/services/item-article.mapper';
+import { NATURE_POSTE_BUDGET, type Nature } from '@app/inventory/models';
 import { ItemsApiService } from '../../items/services/item-api.service';
 
 import type { Article, ArticleCreate, ArticleQuery, ArticleUpdate } from '../models';
@@ -37,18 +38,17 @@ export class ArticlesApiService extends FeatureApiService<Article, ArticleCreate
     if (q.familleId) {
       items = items.filter((a) => a.familleId === q.familleId);
     }
-    if (q.articleType) {
-      items = items.filter((a) => a.articleType === q.articleType);
+    if (q.usageLot) {
+      items = items.filter((a) => (a.lotsUsage ?? []).includes(q.usageLot!));
+    }
+    if (q.nature) {
+      items = items.filter((a) => a.nature === q.nature);
     }
     if (q.isActive !== undefined) {
       items = items.filter((a) => a.isActive === q.isActive);
     }
 
-    items = items.filter(
-      (a) => a.articleType === 'MATERIAU' || a.articleType === 'CONSOMMABLE'
-    );
-
-    return { items, total: res.total };
+    return { items, total: items.length };
   }
 
   override async getById(id: string | number): Promise<Article> {
@@ -57,7 +57,11 @@ export class ArticlesApiService extends FeatureApiService<Article, ArticleCreate
   }
 
   override async create(data: ArticleCreate): Promise<Article> {
-    const item = (await this.itemsApi.create(articleCreateToItem(data))) as ItemApiRow;
+    const payload = { ...data };
+    if (!payload.posteBudgetId && payload.nature) {
+      payload.posteBudgetId = NATURE_POSTE_BUDGET[payload.nature as Nature];
+    }
+    const item = (await this.itemsApi.create(articleCreateToItem(payload))) as ItemApiRow;
     return { ...itemToArticle(item), devise: data.devise ?? 'MAD' };
   }
 

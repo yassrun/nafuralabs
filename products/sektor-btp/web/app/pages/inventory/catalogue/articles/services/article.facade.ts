@@ -7,6 +7,7 @@ import { UnitOfMeasuresApiService } from '../../../configuration/unit-of-measure
 import type { ItemCategory } from '../../../configuration/item-categories/models';
 import type { UnitOfMeasure } from '../../../configuration/unit-of-measures/models';
 import { StockQueryService } from '../../../../../inventory/services/stock-query.service';
+import { NatureApiService } from '../../../../../inventory/services/nature-api.service';
 import { ArticlesApiService } from './article-api.service';
 import type { Article, ArticleCreate, ArticleUpdate } from '../models';
 
@@ -15,6 +16,7 @@ export class ArticlesFacade extends GridFacade<Article, ArticleCreate, ArticleUp
   protected override api = inject(ArticlesApiService);
   private readonly categoriesApi = inject(ItemCategoriesApiService);
   private readonly uomApi = inject(UnitOfMeasuresApiService);
+  private readonly naturesApi = inject(NatureApiService);
   private readonly stockQuery = inject(StockQueryService);
 
   private readonly lookupsSignal = signal<LookupContext>({});
@@ -31,9 +33,10 @@ export class ArticlesFacade extends GridFacade<Article, ArticleCreate, ArticleUp
   }
 
   override async ensureLookups(): Promise<void> {
-    const [categories, uoms] = await Promise.all([
+    const [categories, uoms, natures] = await Promise.all([
       this.categoriesApi.getAll({ page: 0, pageSize: 200 }),
       this.uomApi.getAll({ page: 0, pageSize: 200 }),
+      this.naturesApi.list(),
     ]);
     this.lookupsSignal.set({
       familleArticle: (categories.items as ItemCategory[]).map((c) => ({
@@ -43,6 +46,15 @@ export class ArticlesFacade extends GridFacade<Article, ArticleCreate, ArticleUp
       unitOfMeasure: (uoms.items as UnitOfMeasure[])
         .filter((u) => u.isActive !== false)
         .map((u) => ({ key: u.id, value: `${u.code ?? ''} — ${u.name}`.trim() })),
+      articleNatures: natures.map((n) => ({
+        key: n.code,
+        value: n.libelle,
+        data: {
+          posteBudgetDefaut: n.posteBudgetDefaut,
+          stockable: n.stockable,
+          typeDpu: n.typeDpu,
+        },
+      })),
     });
   }
 }

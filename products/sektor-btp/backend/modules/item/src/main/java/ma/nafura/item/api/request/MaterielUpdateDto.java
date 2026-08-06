@@ -2,6 +2,7 @@ package ma.nafura.item.api.request;
 
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.UUID;
 import lombok.Data;
 
 @Data
@@ -15,11 +16,9 @@ public class MaterielUpdateDto {
 
     private String description;
 
-    @Size(max = 50)
-    private String familleId;
+    private UUID itemId;
 
-    @Size(max = 100)
-    private String familleName;
+    private UUID itemCategoryId;
 
     @Size(max = 100)
     private String marque;

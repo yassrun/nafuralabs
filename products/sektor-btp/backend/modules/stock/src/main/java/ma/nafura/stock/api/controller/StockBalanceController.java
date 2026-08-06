@@ -26,24 +26,24 @@ public class StockBalanceController extends StockBalanceControllerBase {
         super(service);
     }
 
-    @GetMapping(params = {"warehouseId", "itemId"})
+    @GetMapping(params = {"locationId", "itemId"})
     @RequirePermission("stock.stock-balance.read")
     public ResponseEntity<Page<StockBalance>> listByWarehouseAndItem(
-            @RequestParam UUID warehouseId,
+            @RequestParam UUID locationId,
             @RequestParam UUID itemId,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "20") int size) {
-        return ResponseEntity.ok(service.listFiltered(warehouseId, itemId, page, size));
+        return ResponseEntity.ok(service.listFiltered(locationId, itemId, page, size));
     }
 
-    @GetMapping(params = "warehouseId")
+    @GetMapping(params = "locationId")
     @RequirePermission("stock.stock-balance.read")
     public ResponseEntity<Page<StockBalance>> listByWarehouse(
-            @RequestParam UUID warehouseId,
+            @RequestParam UUID locationId,
             @RequestParam(value = "itemId", required = false) UUID itemId,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "20") int size) {
-        return ResponseEntity.ok(service.listFiltered(warehouseId, itemId, page, size));
+        return ResponseEntity.ok(service.listFiltered(locationId, itemId, page, size));
     }
 
     @GetMapping(params = "itemId")

@@ -317,13 +317,6 @@ export const ERP_NAV_CONFIG_GENERATED: SidebarNode[] = [
             order: 20,
           },
           {
-            id: 'stock.catalogue.types',
-            label: 'nav.stock.types',
-            icon: 'tag',
-            route: '/inventory/configuration/types-articles',
-            order: 30,
-          },
-          {
             id: 'stock.catalogue.uom',
             label: 'nav.stock.uom',
             icon: 'ruler',

@@ -194,8 +194,15 @@
       "articleType": {
         "MATERIAU": "Material",
         "CONSOMMABLE": "Consumable",
-        "ENGIN": "Machinery",
-        "OUTILLAGE": "Tooling"
+        "ENGIN": "Owned equipment",
+        "OUTILLAGE": "Tools",
+        "MATIERE": "Material",
+        "CARBURANT": "Fuel",
+        "MATERIEL": "Owned equipment",
+        "LOCATION": "Equipment rental",
+        "MAIN_DOEUVRE": "Labor",
+        "SOUS_TRAITANCE": "Subcontracting",
+        "SERVICE": "External service"
       },
       "locationType": {
         "DEPOT": "Warehouse",
@@ -275,6 +282,24 @@
         "CASSE": "Breakage",
         "DETERIORATION": "Deterioration",
         "AUTRE": "Other"
+      },
+      "nature": {
+        "MATIERE": "Material",
+        "CONSOMMABLE": "Consumable",
+        "CARBURANT": "Fuel",
+        "OUTILLAGE": "Tools",
+        "MATERIEL": "Owned equipment",
+        "LOCATION": "Equipment rental",
+        "MAIN_DOEUVRE": "Labor",
+        "SOUS_TRAITANCE": "Subcontracting",
+        "SERVICE": "External service"
+      },
+      "usageLot": {
+        "GROS_OEUVRE": "Structural works",
+        "VRD": "Civil works / utilities",
+        "FINITIONS": "Finishes",
+        "SECOND_OEUVRE": "Secondary works",
+        "TECHNIQUE": "Technical packages"
       }
     },
     "catalogue": {
@@ -309,6 +334,7 @@
           "name": "Designation",
           "description": "Description",
           "familleId": "Family",
+          "lotsUsage": "Usage packages",
           "articleType": "Item type",
           "uomId": "Unit of measure",
           "uomSecondaireId": "Secondary unit (e.g. bag)",
@@ -323,16 +349,18 @@
           "stockMin": "Minimum stock",
           "stockMax": "Maximum stock",
           "posteBudgetId": "Budget heading (actuals)",
-          "posteBudgetHint": "Overrides the item → heading heuristic",
+          "posteBudgetHint": "Prefill from nature — editable override",
           "isPerissable": "Perishable",
           "isSerialise": "Serial number tracked",
-          "isActive": "Active"
+          "isActive": "Active",
+          "nature": "Nature"
         },
         "list": {
           "columns": {
             "code": "Code",
             "name": "Designation",
             "familleName": "Family",
+            "lotsUsage": "Usage packages",
             "articleType": "Type",
             "uomCode": "Unit",
             "prixUnitaire": "Cat. price (MAD)",
@@ -340,12 +368,15 @@
             "delaiReapproJours": "Lead (d)",
             "posteBudgetId": "Budget heading",
             "stockTotal": "Total stock",
-            "isActive": "Active"
+            "isActive": "Active",
+            "nature": "Nature"
           },
           "filters": {
             "famille": "Family",
+            "usageLot": "Usage package",
             "type": "Type",
-            "isActive": "Active"
+            "isActive": "Active",
+            "nature": "Nature"
           }
         },
         "sections": {
@@ -690,33 +721,27 @@
         }
       },
       "tx": {
-        "title": "Stock movements",
-        "titleNew": "New movement",
-        "titleDetail": "Movement detail",
-        "headerTitle": "Stock movements",
-        "entityName": "Stock movement",
-        "selectHint": "Select a movement from the list or create a new one.",
-        "saveSuccess": "Movement {number} saved",
-        "saveError": "Failed to save movement",
-        "deleteTitle": "Delete movement",
-        "deleteMessage": "Delete this draft movement? This cannot be undone.",
-        "deleteSuccess": "Movement deleted",
-        "errors": {
-          "cannotModifyValidated": "Cannot modify a validated movement",
-          "cannotDeleteValidated": "Cannot delete a validated movement"
-        },
-        "fields": {
-          "txType": "Movement type",
-          "txDate": "Date",
-          "sourceLocationId": "Source location",
-          "destLocationId": "Destination location",
-          "reference": "Reference",
-          "notes": "Notes",
-          "lines": "Lines"
-        },
-        "sections": {
-          "header": "Header",
-          "lines": "Item lines"
+        "title": "Inventory transactions",
+        "entityName": "Movement",
+        "entityNamePlural": "Movements",
+        "headerTitle": "All movements",
+        "headerTitleDetail": "Movement details",
+        "list": {
+          "columns": {
+            "txNumber": "#",
+            "txType": "Type",
+            "txDate": "Date",
+            "sourceLocationName": "Source",
+            "destLocationName": "Destination",
+            "status": "Status",
+            "nbLines": "Lines"
+          },
+          "filters": {
+            "txType": "Movement type",
+            "status": "Status",
+            "from": "From",
+            "to": "To"
+          }
         }
       },
       "retour": {
@@ -909,30 +934,6 @@
           }
         }
       },
-      "tx": {
-        "title": "Inventory transactions",
-        "entityName": "Movement",
-        "entityNamePlural": "Movements",
-        "headerTitle": "All movements",
-        "headerTitleDetail": "Movement details",
-        "list": {
-          "columns": {
-            "txNumber": "#",
-            "txType": "Type",
-            "txDate": "Date",
-            "sourceLocationName": "Source",
-            "destLocationName": "Destination",
-            "status": "Status",
-            "nbLines": "Lines"
-          },
-          "filters": {
-            "txType": "Movement type",
-            "status": "Status",
-            "from": "From",
-            "to": "To"
-          }
-        }
-      },
       "txLines": {
         "title": "Movement lines",
         "entityName": "Line",
@@ -1050,7 +1051,9 @@
           "code": "Code",
           "name": "Label",
           "description": "Description",
-          "isActive": "Active"
+          "isActive": "Active",
+          "parentId": "Parent family",
+          "parentNone": "— Root —"
         },
         "sections": {
           "identification": "Identification",
@@ -1061,48 +1064,37 @@
             "code": "Code",
             "name": "Label",
             "description": "Description",
-            "isActive": "Active"
+            "isActive": "Active",
+            "parentId": "Parent"
           },
           "filters": {
             "code": "Code",
             "name": "Label",
             "isActive": "Active"
           }
-        }
-      },
-      "typeArticle": {
-        "entityName": "Item type",
-        "entityNamePlural": "Item types",
-        "headerTitle": "Item types",
-        "headerTitleNew": "New type",
-        "headerTitleDetail": "Type details",
-        "permissionPrefix": "inventory.typeArticle",
-        "saveSuccess": "Item type \"{name}\" saved successfully",
-        "deleteConfirm": {
-          "title": "Delete item type",
-          "message": "Do you really want to delete the type \"{name}\"?"
         },
-        "fields": {
-          "code": "Code",
-          "name": "Label",
-          "articleType": "Family (MATERIAU/CONSOMMABLE/ENGIN/OUTILLAGE)",
-          "isActive": "Active"
+        "loading": "Loading families…",
+        "tree": {
+          "title": "Tree",
+          "empty": "No families",
+          "addRoot": "Add root",
+          "addChild": "Add sub-family",
+          "expandAll": "Expand all",
+          "collapseAll": "Collapse all"
         },
-        "sections": {
-          "identification": "Identification",
-          "statut": "Status"
+        "detail": {
+          "title": "Family detail",
+          "empty": "Select a family in the tree",
+          "openForm": "Full form"
         },
-        "list": {
-          "columns": {
-            "code": "Code",
-            "name": "Label",
-            "articleType": "Item family",
-            "isActive": "Active"
-          },
-          "filters": {
-            "articleType": "Item family",
-            "isActive": "Active"
-          }
+        "add": {
+          "title": "New family",
+          "confirm": "Create"
+        },
+        "deleteBlocked": {
+          "title": "Cannot delete",
+          "message": "This family has children. Remove or move them first.",
+          "confirm": "OK"
         }
       },
       "motif": {
@@ -1282,11 +1274,6 @@
           "message": "This category has child categories. Remove or reassign them first.",
           "confirm": "OK"
         }
-      },
-      "itemType": {
-        "headerTitle": "Item types (legacy)",
-        "headerTitleNew": "New type",
-        "headerTitleDetail": "Type details"
       },
       "unitOfMeasure": {
         "headerTitle": "Units of measure (legacy)",

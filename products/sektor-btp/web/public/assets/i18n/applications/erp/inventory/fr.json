@@ -192,10 +192,17 @@
     },
     "enums": {
       "articleType": {
-        "MATERIAU": "Matériau",
+        "MATERIAU": "Matière",
         "CONSOMMABLE": "Consommable",
-        "ENGIN": "Engin",
-        "OUTILLAGE": "Outillage"
+        "ENGIN": "Matériel en propre",
+        "OUTILLAGE": "Outillage",
+        "MATIERE": "Matière",
+        "CARBURANT": "Carburant",
+        "MATERIEL": "Matériel en propre",
+        "LOCATION": "Location matériel",
+        "MAIN_DOEUVRE": "Main d'œuvre",
+        "SOUS_TRAITANCE": "Sous-traitance",
+        "SERVICE": "Service externe"
       },
       "locationType": {
         "DEPOT": "Dépôt",
@@ -275,6 +282,24 @@
         "CASSE": "Casse",
         "DETERIORATION": "Détérioration",
         "AUTRE": "Autre"
+      },
+      "nature": {
+        "MATIERE": "Matière",
+        "CONSOMMABLE": "Consommable",
+        "CARBURANT": "Carburant",
+        "OUTILLAGE": "Outillage",
+        "MATERIEL": "Matériel en propre",
+        "LOCATION": "Location matériel",
+        "MAIN_DOEUVRE": "Main d'œuvre",
+        "SOUS_TRAITANCE": "Sous-traitance",
+        "SERVICE": "Service externe"
+      },
+      "usageLot": {
+        "GROS_OEUVRE": "Gros œuvre",
+        "VRD": "VRD",
+        "FINITIONS": "Finitions",
+        "SECOND_OEUVRE": "Second œuvre",
+        "TECHNIQUE": "Lots techniques"
       }
     },
     "catalogue": {
@@ -309,6 +334,7 @@
           "name": "Désignation",
           "description": "Description",
           "familleId": "Famille",
+          "lotsUsage": "Lots d'usage",
           "articleType": "Type d'article",
           "uomId": "Unité de mesure",
           "uomSecondaireId": "Unité secondaire (ex. sac)",
@@ -323,16 +349,18 @@
           "stockMin": "Stock minimum",
           "stockMax": "Stock maximum",
           "posteBudgetId": "Rubrique budget (réalisé)",
-          "posteBudgetHint": "Prime sur l'heuristique article → rubrique",
+          "posteBudgetHint": "Prérempli depuis la nature — modifiable en dérogation",
           "isPerissable": "Périssable",
           "isSerialise": "Suivi n° série",
-          "isActive": "Actif"
+          "isActive": "Actif",
+          "nature": "Nature"
         },
         "list": {
           "columns": {
             "code": "Code",
             "name": "Désignation",
             "familleName": "Famille",
+            "lotsUsage": "Lots d'usage",
             "articleType": "Type",
             "uomCode": "Unité",
             "prixUnitaire": "Prix cat. (MAD)",
@@ -340,12 +368,15 @@
             "delaiReapproJours": "Réappro (j)",
             "posteBudgetId": "Rubrique budget",
             "stockTotal": "Stock total",
-            "isActive": "Actif"
+            "isActive": "Actif",
+            "nature": "Nature"
           },
           "filters": {
             "famille": "Famille",
+            "usageLot": "Lot d'usage",
             "type": "Type",
-            "isActive": "Actif"
+            "isActive": "Actif",
+            "nature": "Nature"
           }
         },
         "sections": {
@@ -690,33 +721,27 @@
         }
       },
       "tx": {
-        "title": "Mouvements de stock",
-        "titleNew": "Nouveau mouvement",
-        "titleDetail": "Détail mouvement",
-        "headerTitle": "Mouvements de stock",
-        "entityName": "Mouvement de stock",
-        "selectHint": "Sélectionnez un mouvement dans la liste ou créez-en un nouveau.",
-        "saveSuccess": "Mouvement {number} enregistré",
-        "saveError": "Échec de l'enregistrement du mouvement",
-        "deleteTitle": "Supprimer le mouvement",
-        "deleteMessage": "Supprimer ce mouvement brouillon ? Cette action est irréversible.",
-        "deleteSuccess": "Mouvement supprimé",
-        "errors": {
-          "cannotModifyValidated": "Impossible de modifier un mouvement validé",
-          "cannotDeleteValidated": "Impossible de supprimer un mouvement validé"
-        },
-        "fields": {
-          "txType": "Type de mouvement",
-          "txDate": "Date",
-          "sourceLocationId": "Emplacement source",
-          "destLocationId": "Emplacement destination",
-          "reference": "Référence",
-          "notes": "Notes",
-          "lines": "Lignes"
-        },
-        "sections": {
-          "header": "En-tête",
-          "lines": "Lignes d'articles"
+        "title": "Mouvements (vue brute)",
+        "entityName": "Mouvement",
+        "entityNamePlural": "Mouvements",
+        "headerTitle": "Tous les mouvements",
+        "headerTitleDetail": "Détail mouvement",
+        "list": {
+          "columns": {
+            "txNumber": "N°",
+            "txType": "Type",
+            "txDate": "Date",
+            "sourceLocationName": "Source",
+            "destLocationName": "Destination",
+            "status": "Statut",
+            "nbLines": "Lignes"
+          },
+          "filters": {
+            "txType": "Type mouvement",
+            "status": "Statut",
+            "from": "Du",
+            "to": "Au"
+          }
         }
       },
       "retour": {
@@ -909,30 +934,6 @@
           }
         }
       },
-      "tx": {
-        "title": "Mouvements (vue brute)",
-        "entityName": "Mouvement",
-        "entityNamePlural": "Mouvements",
-        "headerTitle": "Tous les mouvements",
-        "headerTitleDetail": "Détail mouvement",
-        "list": {
-          "columns": {
-            "txNumber": "N°",
-            "txType": "Type",
-            "txDate": "Date",
-            "sourceLocationName": "Source",
-            "destLocationName": "Destination",
-            "status": "Statut",
-            "nbLines": "Lignes"
-          },
-          "filters": {
-            "txType": "Type mouvement",
-            "status": "Statut",
-            "from": "Du",
-            "to": "Au"
-          }
-        }
-      },
       "txLines": {
         "title": "Lignes de mouvement",
         "entityName": "Ligne",
@@ -1050,7 +1051,9 @@
           "code": "Code",
           "name": "Libellé",
           "description": "Description",
-          "isActive": "Actif"
+          "isActive": "Actif",
+          "parentId": "Famille parente",
+          "parentNone": "— Racine —"
         },
         "sections": {
           "identification": "Identification",
@@ -1061,48 +1064,37 @@
             "code": "Code",
             "name": "Libellé",
             "description": "Description",
-            "isActive": "Actif"
+            "isActive": "Actif",
+            "parentId": "Parent"
           },
           "filters": {
             "code": "Code",
             "name": "Libellé",
             "isActive": "Actif"
           }
-        }
-      },
-      "typeArticle": {
-        "entityName": "Type d'article",
-        "entityNamePlural": "Types d'articles",
-        "headerTitle": "Types d'articles",
-        "headerTitleNew": "Nouveau type",
-        "headerTitleDetail": "Détail type",
-        "permissionPrefix": "inventory.typeArticle",
-        "saveSuccess": "Type d'article « {name} » enregistré avec succès",
-        "deleteConfirm": {
-          "title": "Supprimer le type d'article",
-          "message": "Voulez-vous vraiment supprimer le type « {name} » ?"
         },
-        "fields": {
-          "code": "Code",
-          "name": "Libellé",
-          "articleType": "Famille (MATERIAU/CONSOMMABLE/ENGIN/OUTILLAGE)",
-          "isActive": "Actif"
+        "loading": "Chargement des familles…",
+        "tree": {
+          "title": "Arborescence",
+          "empty": "Aucune famille",
+          "addRoot": "Ajouter une racine",
+          "addChild": "Ajouter une sous-famille",
+          "expandAll": "Tout déplier",
+          "collapseAll": "Tout replier"
         },
-        "sections": {
-          "identification": "Identification",
-          "statut": "Statut"
+        "detail": {
+          "title": "Détail famille",
+          "empty": "Sélectionnez une famille dans l'arbre",
+          "openForm": "Formulaire complet"
         },
-        "list": {
-          "columns": {
-            "code": "Code",
-            "name": "Libellé",
-            "articleType": "Famille article",
-            "isActive": "Actif"
-          },
-          "filters": {
-            "articleType": "Famille article",
-            "isActive": "Actif"
-          }
+        "add": {
+          "title": "Nouvelle famille",
+          "confirm": "Créer"
+        },
+        "deleteBlocked": {
+          "title": "Suppression impossible",
+          "message": "Cette famille a des sous-familles. Supprimez-les ou déplacez-les d'abord.",
+          "confirm": "Compris"
         }
       },
       "motif": {
@@ -1282,11 +1274,6 @@
           "message": "Cette catégorie contient des sous-catégories. Supprimez ou déplacez-les d'abord.",
           "confirm": "Compris"
         }
-      },
-      "itemType": {
-        "headerTitle": "Types d'articles (legacy)",
-        "headerTitleNew": "Nouveau type",
-        "headerTitleDetail": "Détail type"
       },
       "unitOfMeasure": {
         "headerTitle": "Unités de mesure (legacy)",

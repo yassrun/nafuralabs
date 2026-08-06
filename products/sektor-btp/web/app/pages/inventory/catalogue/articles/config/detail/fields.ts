@@ -1,6 +1,7 @@
 import type { TranslateService } from '@ngx-translate/core';
 
 import type { DetailFieldConfig } from '@lib/anatomy/types';
+import { NATURES, USAGE_LOTS } from '@app/inventory/models';
 import type { Article } from '../../models';
 
 export function buildArticleFields(t: TranslateService): DetailFieldConfig<Article>[] {
@@ -38,17 +39,28 @@ export function buildArticleFields(t: TranslateService): DetailFieldConfig<Artic
       width: 'md',
     },
     {
-      key: 'articleType',
-      label: tr('inventory.catalogue.article.fields.articleType'),
+      key: 'lotsUsage',
+      label: tr('inventory.catalogue.article.fields.lotsUsage'),
+      type: 'multi-select',
+      width: 'lg',
+      options: USAGE_LOTS.map((code) => ({
+        value: code,
+        label: tr(`inventory.enums.usageLot.${code}`),
+      })),
+    },
+    {
+      key: 'nature',
+      label: tr('inventory.catalogue.article.fields.nature'),
       type: 'select',
       required: true,
       width: 'md',
-      options: [
-        { value: 'MATERIAU', label: tr('inventory.enums.articleType.MATERIAU') },
-        { value: 'CONSOMMABLE', label: tr('inventory.enums.articleType.CONSOMMABLE') },
-        { value: 'ENGIN', label: tr('inventory.enums.articleType.ENGIN') },
-        { value: 'OUTILLAGE', label: tr('inventory.enums.articleType.OUTILLAGE') },
-      ],
+      lookupKey: 'articleNatures',
+      lookupValueField: 'key',
+      lookupDisplayField: 'value',
+      options: NATURES.map((code) => ({
+        value: code,
+        label: tr(`inventory.enums.nature.${code}`),
+      })),
     },
     {
       key: 'uomId',

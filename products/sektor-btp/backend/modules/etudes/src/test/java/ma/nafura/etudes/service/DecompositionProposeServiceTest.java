@@ -76,7 +76,7 @@ class DecompositionProposeServiceTest {
                         .itemId(itemId.toString())
                         .code("BET-B35")
                         .name("Beton B35")
-                        .articleType("MATIERE")
+                        .nature("MATIERE")
                         .score(0.9)
                         .build()));
         when(catalogResolver.resolve(eq("Coffrage special XY"), eq("MATIERE"), anyInt()))

@@ -1,6 +1,5 @@
 /**
- * Item Model — Auto-generated from item.entity.json
- * Do NOT edit fields here. Edit the .entity.json and regenerate.
+ * Item Model — HTTP shape for /api/v1/items.
  */
 
 export interface Item {
@@ -8,12 +7,11 @@ export interface Item {
   code?: string;
   name: string;
   description?: string;
-  itemTypeId?: string;
   itemCategoryId?: string;
   unitOfMeasureId?: string;
   sku?: string;
   isActive?: boolean;
-  articleType?: string;
+  nature?: string;
   posteBudgetId?: string;
   defaultLocationId?: string;
   isPerissable?: boolean;
@@ -23,12 +21,14 @@ export interface Item {
   stockMin?: number;
   stockMax?: number;
   delaiReapproJours?: number;
+  usageLotCodes?: string[];
   createdAt: string;
   updatedAt: string;
 }
 
-export type ItemListItem = Pick<Item,
-  'id' | 'code' | 'name' | 'itemTypeId' | 'sku' | 'isActive' | 'createdAt' | 'updatedAt'
+export type ItemListItem = Pick<
+  Item,
+  'id' | 'code' | 'name' | 'sku' | 'isActive' | 'createdAt' | 'updatedAt'
 >;
 
 export type ItemCreate = Omit<Item, 'id' | 'createdAt' | 'updatedAt'>;
@@ -43,7 +43,6 @@ export interface ItemQuery {
   sortDirection?: 'asc' | 'desc';
   code?: string;
   name?: string;
-  itemTypeId?: string;
   itemCategoryId?: string;
   sku?: string;
 }

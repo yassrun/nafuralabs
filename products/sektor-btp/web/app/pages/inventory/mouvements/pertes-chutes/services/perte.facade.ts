@@ -3,6 +3,7 @@ import { TranslateService } from '@ngx-translate/core';
 import type { CrudStyleFacade } from '@lib/anatomy';
 import type { ListResponse, LookupContext } from '@lib/anatomy/types';
 import type { InventoryTx, InventoryTxLine, Location, MotifMouvement } from '../../../../../inventory/models';
+import { isStockableNature } from '../../../../../inventory/models';
 import { ArticleCatalogService } from '../../../../../inventory/services/article-catalog.service';
 import { InventoryLookupsService } from '../../../../../inventory/services/inventory-lookups.service';
 import { InventoryMovementApiService } from '../../../../../inventory/services/inventory-movement-api.service';
@@ -55,7 +56,7 @@ export class PerteFacade implements CrudStyleFacade<InventoryTx, Partial<Invento
     this.motifsCache = motifs;
     const chantiers = locations.filter((l) => l.type === 'CHANTIER');
     const matCons = articles.filter(
-      (a) => a.articleType === 'MATERIAU' || a.articleType === 'CONSOMMABLE',
+      (a) => isStockableNature(a.nature),
     );
     this.lookupsSignal.set({
       chantierLocations: chantiers.map((l) => ({

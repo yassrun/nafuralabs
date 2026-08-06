@@ -1,12 +1,15 @@
 import type { Article, ArticleType } from '../models';
+import { normalizeNature } from '../models';
 import type {
   ArticleCreate,
   ArticleUpdate,
 } from '../../pages/inventory/catalogue/articles/models';
 import type { Item, ItemCreate, ItemUpdate } from '../../pages/inventory/catalogue/items/models';
 
-/** Backend item row with optional BTP columns from migration 007. */
+/** Backend item row with optional BTP columns. */
 export type ItemApiRow = Item & {
+  nature?: string;
+  /** @deprecated Lot 1 renamed to nature — kept for transitional reads */
   articleType?: string;
   posteBudgetId?: string;
   defaultLocationId?: string;
@@ -17,18 +20,20 @@ export type ItemApiRow = Item & {
   stockMin?: number;
   stockMax?: number;
   delaiReapproJours?: number;
+  usageLotCodes?: string[];
 };
 
 export function itemToArticle(item: ItemApiRow): Article {
+  const nature = normalizeNature(item.nature ?? item.articleType) as ArticleType;
   return {
     id: item.id,
     code: item.code ?? '',
     name: item.name,
     description: item.description,
     familleId: item.itemCategoryId ?? '',
-    typeArticleId: item.itemTypeId ?? '',
+    lotsUsage: item.usageLotCodes ?? [],
     uomId: item.unitOfMeasureId ?? '',
-    articleType: (item.articleType as ArticleType) ?? 'MATERIAU',
+    nature,
     stockMin: item.stockMin,
     stockMax: item.stockMax,
     prixUnitaire: item.prixUnitaire,
@@ -45,11 +50,10 @@ export function articleCreateToItem(data: ArticleCreate): ItemCreate {
     code: data.code,
     name: data.name,
     description: data.description,
-    itemTypeId: data.typeArticleId,
     itemCategoryId: data.familleId,
     unitOfMeasureId: data.uomId,
     isActive: data.isActive,
-    articleType: data.articleType,
+    nature: data.nature,
     posteBudgetId: data.posteBudgetId,
     isPerissable: data.isPerissable,
     pmp: data.pmp,
@@ -57,6 +61,7 @@ export function articleCreateToItem(data: ArticleCreate): ItemCreate {
     stockMin: data.stockMin,
     stockMax: data.stockMax,
     delaiReapproJours: data.delaiReapproJours,
+    usageLotCodes: data.lotsUsage ?? [],
   } as ItemCreate;
 }
 
@@ -65,11 +70,10 @@ export function articleUpdateToItem(data: ArticleUpdate): ItemUpdate {
   if (data.code !== undefined) patch.code = data.code;
   if (data.name !== undefined) patch.name = data.name;
   if (data.description !== undefined) patch.description = data.description;
-  if (data.typeArticleId !== undefined) patch.itemTypeId = data.typeArticleId;
   if (data.familleId !== undefined) patch.itemCategoryId = data.familleId;
   if (data.uomId !== undefined) patch.unitOfMeasureId = data.uomId;
   if (data.isActive !== undefined) patch.isActive = data.isActive;
-  if (data.articleType !== undefined) (patch as ItemCreate).articleType = data.articleType;
+  if (data.nature !== undefined) (patch as ItemCreate).nature = data.nature;
   if (data.posteBudgetId !== undefined) (patch as ItemCreate).posteBudgetId = data.posteBudgetId;
   if (data.isPerissable !== undefined) (patch as ItemCreate).isPerissable = data.isPerissable;
   if (data.pmp !== undefined) (patch as ItemCreate).pmp = data.pmp;
@@ -78,6 +82,9 @@ export function articleUpdateToItem(data: ArticleUpdate): ItemUpdate {
   if (data.stockMax !== undefined) (patch as ItemCreate).stockMax = data.stockMax;
   if (data.delaiReapproJours !== undefined) {
     (patch as ItemCreate).delaiReapproJours = data.delaiReapproJours;
+  }
+  if (data.lotsUsage !== undefined) {
+    (patch as ItemCreate).usageLotCodes = data.lotsUsage;
   }
   return patch;
 }

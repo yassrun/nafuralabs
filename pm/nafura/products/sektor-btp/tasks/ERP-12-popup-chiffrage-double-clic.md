@@ -2,13 +2,15 @@
 id: ERP-12
 status: todo
 context: nafura
-assignee: me
-parent: ERP-16
+kind: task
 feature: chiffrage-drawer
+parent: ERP-16
 priority: P1
-estimate: 2h
+assignee: me
+gate: none
 tags: [sektor, etudes, chiffrage, ux]
 ---
+
 
 # Ouverture du popup chiffrage poste — double-clic
 
@@ -24,4 +26,5 @@ tags: [sektor, etudes, chiffrage, ux]
 ## Journal
 ```
 05/08 12:34  capturé · ouverture popup chiffrage = double-clic
+05/08 21:30  framework v2 · task schema (estimate out · gate/kind)
 ```

@@ -83,11 +83,11 @@ class MagasinChantierReadServiceTest {
 
         StockBalance balance = StockBalance.builder()
                 .tenantId(TENANT_ID)
-                .warehouseId(DEPOT_ID)
+                .locationId(DEPOT_ID)
                 .itemId(ITEM_ID)
                 .quantity(new BigDecimal("12"))
                 .build();
-        when(stockBalanceRepository.findByTenantIdAndWarehouseId(TENANT_ID, DEPOT_ID))
+        when(stockBalanceRepository.findByTenantIdAndLocationId(TENANT_ID, DEPOT_ID))
                 .thenReturn(List.of(balance));
 
         Item item = Item.builder()
@@ -106,7 +106,7 @@ class MagasinChantierReadServiceTest {
                 .txType("RECEPTION")
                 .txDate(LocalDate.of(2026, 5, 1))
                 .status("VALIDE")
-                .warehouseId(DEPOT_ID)
+                .locationId(DEPOT_ID)
                 .build();
         when(inventoryTxRepository.findRecentForMagasin(eq(TENANT_ID), eq(DEPOT_ID), eq("ch-001"), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of(tx)));

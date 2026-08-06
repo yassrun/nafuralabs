@@ -7,6 +7,7 @@ export interface FamilleArticleConfig {
   code: string;
   name: string;
   description?: string;
+  parentId?: string;
   isActive: boolean;
 }
 
