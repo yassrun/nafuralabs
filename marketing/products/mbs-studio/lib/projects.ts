@@ -4,6 +4,8 @@ export interface Project {
   slug: string;
   title: string;
   image: string;
+  /** Second photo on hover (Figma pair) */
+  imageHover: string;
   size: ProjectSize;
   /** Position on Figma 1728px canvas (px) */
   x: number;
@@ -11,71 +13,82 @@ export interface Project {
 }
 
 /**
- * Figma HOME PAGE → SCROLL — coords at 1728px frame width.
+ * Figma HOME PAGE → SCROLL @ 1728px frame width.
  *
- * Neighbor gutters ~80px (the thin strips marked in Figma review).
- * Staggered Y. No overlaps. Outer margin ~48px.
+ * Visual order (top → bottom):
+ *   ENCORE (large, top-left)
+ *   Oh My Bun (medium, top-right)
+ *   Mik (medium, center)
+ *   Porto (medium, mid-right)
+ *   LOF (medium, mid-left)
+ *   Trash (medium, bottom-right)
+ *   Alchimies (medium, bottom-left)
+ *
+ * Coords measured from Figma screenshot, scaled to 1728.
  */
 export const PROJECTS: Project[] = [
   {
-    slug: "brand-refresh",
-    title: "Brand Refresh",
-    image: "https://placehold.co/506x633/1a1a1a/ffffff?text=Project+1",
+    slug: "encore",
+    title: "ENCORE",
+    image: "/projects/encore.jpg",
+    imageHover: "/projects/encore-hover.jpg",
     size: "large",
     x: 48,
     y: 0,
   },
   {
-    slug: "founders-launch",
-    title: "Founders Launch",
-    image: "https://placehold.co/409x512/2a2a2a/ffffff?text=Project+2",
+    slug: "oh-my-bun",
+    title: "Oh My Bun",
+    image: "/projects/oh-my-bun.jpg",
+    imageHover: "/projects/oh-my-bun-hover.jpg",
     size: "medium",
-    // 48 + 506 + 80
-    x: 634,
-    y: 168,
+    x: 1220,
+    y: 80,
   },
   {
-    slug: "storytelling-campaign",
-    title: "Storytelling Campaign",
-    image: "https://placehold.co/290x363/333333/ffffff?text=Project+3",
-    size: "small",
-    // 634 + 409 + 80
-    x: 1123,
-    y: 48,
-  },
-  {
-    slug: "visual-identity",
-    title: "Visual Identity",
-    image: "https://placehold.co/409x512/2a2a2a/ffffff?text=Project+4",
+    slug: "mik",
+    title: "Mik",
+    image: "/projects/mik.jpg",
+    imageHover: "/projects/mik-hover.jpg",
     size: "medium",
-    x: 88,
-    y: 920,
+    x: 560,
+    y: 520,
   },
   {
-    slug: "content-system",
-    title: "Content System",
-    image: "https://placehold.co/506x633/1a1a1a/ffffff?text=Project+5",
-    size: "large",
-    // 88 + 409 + 80
-    x: 577,
-    y: 1100,
-  },
-  {
-    slug: "packaging",
-    title: "Packaging",
-    image: "https://placehold.co/290x363/333333/ffffff?text=Project+6",
-    size: "small",
-    // 577 + 506 + 80
-    x: 1163,
-    y: 1480,
-  },
-  {
-    slug: "digital-experience",
-    title: "Digital Experience",
-    image: "https://placehold.co/409x512/2a2a2a/ffffff?text=Project+7",
+    slug: "porto",
+    title: "Porto",
+    image: "/projects/porto.jpg",
+    imageHover: "/projects/porto-hover.jpg",
     size: "medium",
-    x: 180,
-    y: 2180,
+    x: 1220,
+    y: 900,
+  },
+  {
+    slug: "lof",
+    title: "LOF",
+    image: "/projects/lof.jpg",
+    imageHover: "/projects/lof-hover.jpg",
+    size: "medium",
+    x: 100,
+    y: 1180,
+  },
+  {
+    slug: "trash",
+    title: "Trash",
+    image: "/projects/trash.jpg",
+    imageHover: "/projects/trash-hover.jpg",
+    size: "medium",
+    x: 1100,
+    y: 1580,
+  },
+  {
+    slug: "alchimies",
+    title: "Alchimies",
+    image: "/projects/alchimies.jpg",
+    imageHover: "/projects/alchimies-hover.jpg",
+    size: "medium",
+    x: 260,
+    y: 1880,
   },
 ];
 

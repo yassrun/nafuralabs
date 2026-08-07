@@ -25,14 +25,10 @@
 - · `ERP-05` feature — Raffinement sous-traitance (lot 5)
 - · `ERP-07` feature — Planification chantier (lot 7 — dernier)
 
-## mbs-website
-
-- · `MBS-01` todo — Homepage — traiter les remarques client (nouv…
-
 ## ops
 
 - · `OPS-01` todo — Configurer Zimbra + migrer ykarkafi@nafuralab…
 
 ---
 
-**21 live · 3 projets**
+**20 live · 2 projets**

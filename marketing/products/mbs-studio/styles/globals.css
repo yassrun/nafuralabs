@@ -192,3 +192,68 @@ body::after {
 body.is-dragging-card .project-card:active {
   z-index: 50;
 }
+
+/* Hero “CLICK TO DRAW !” — loops right → left until first stroke */
+@keyframes click-to-draw-in {
+  0% {
+    opacity: 0;
+    transform: translateX(1.4rem);
+  }
+  18% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  72% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-0.6rem);
+  }
+}
+
+.click-to-draw-hint {
+  opacity: 0;
+  animation: click-to-draw-in 2.8s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+  transition:
+    opacity 0.45s ease,
+    transform 0.45s ease;
+}
+
+/* Keep "!" same size as the label — Instrument Sans can render it like ":" */
+.click-to-draw-mark {
+  display: inline;
+  margin-left: 0.2em;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 1em;
+  font-weight: inherit;
+  font-style: normal;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+html[data-has-drawn] .click-to-draw-hint {
+  opacity: 0 !important;
+  animation: none;
+  transform: translateX(-0.6rem);
+  visibility: hidden;
+  transition:
+    opacity 0.45s ease,
+    transform 0.45s ease,
+    visibility 0s linear 0.45s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .click-to-draw-hint {
+    opacity: 1;
+    animation: none;
+    transform: none;
+  }
+
+  html[data-has-drawn] .click-to-draw-hint {
+    opacity: 0 !important;
+    visibility: hidden;
+  }
+}
+

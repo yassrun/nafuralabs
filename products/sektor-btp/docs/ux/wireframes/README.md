@@ -37,3 +37,4 @@ Copy-Item "products\sektor-btp\docs\ux\wireframes\chantier-create-wireframe.canv
 | `etude-data-lifecycle.canvas.tsx` | Cycle de vie données étude |
 | `chantier-create-wireframe.canvas.tsx` | Wizard marché + chantier (chaînage aval) |
 | `devis-detail-wireframe.canvas.tsx` | Fiche devis — états BROUILLON/EMIS/PERDU/version |
+| `articles-fiche-wireframe.canvas.tsx` | Catalogue articles — nature/famille/lots (contrat V1) — **à valider** |

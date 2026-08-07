@@ -7,10 +7,13 @@ export const HEADER_LOGO = {
   alt: "Mr. Big Stuff",
 };
 
-/** Footer lockup — white ink for dark footer. */
+/**
+ * Footer lockup — white wordmark + “BRAND INTELLIGENCE” (Figma).
+ * Display ~half previous size; height aligns with 2 contact lines.
+ */
 export const FOOTER_LOGO = {
-  src: "/logo-full-white.png",
-  width: 200,
-  height: 61,
-  alt: "Mr. Big Stuff",
+  src: "/logo-footer-brand.png",
+  width: 168,
+  height: 66,
+  alt: "Mr. Big Stuff — Brand Intelligence",
 };

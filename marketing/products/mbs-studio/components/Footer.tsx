@@ -13,7 +13,7 @@ export default function Footer() {
             alt={FOOTER_LOGO.alt}
             width={FOOTER_LOGO.width}
             height={FOOTER_LOGO.height}
-            className="block h-[56px] w-auto max-w-[min(70vw,260px)] object-contain object-left sm:h-[64px] lg:h-[72px]"
+            className="block h-[40px] w-auto max-w-[min(58vw,168px)] object-contain object-left sm:h-[44px] lg:h-[48px]"
             draggable={false}
           />
         </Link>

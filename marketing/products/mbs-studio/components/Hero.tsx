@@ -9,6 +9,17 @@ export default function Hero() {
   return (
     <section className="sticky top-0 z-0 min-h-screen w-full bg-transparent">
       <div className="relative min-h-screen w-full">
+        {/* Desktop draw hint — loops right → left until first stroke */}
+        <p
+          className="click-to-draw-hint pointer-events-none absolute top-[calc(var(--header-h)+clamp(12px,2vh,28px))] right-[var(--layout-gutter)] z-[1] hidden m-0 p-0 text-[11px] leading-none font-normal tracking-[0.06em] text-black uppercase sm:text-[12px] md:block md:text-[13px]"
+          aria-hidden
+        >
+          CLICK TO DRAW
+          <span className="click-to-draw-mark" aria-hidden>
+            !
+          </span>
+        </p>
+
         {/* Hand-drawn headline — single static image, truly centered in viewport */}
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-[var(--layout-gutter)]">
           <Image

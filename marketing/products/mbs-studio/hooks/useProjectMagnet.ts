@@ -3,8 +3,8 @@
 import { useEffect, type RefObject } from "react";
 import { loadGsap } from "@/lib/gsap";
 
-const MAGNET_RADIUS_FACTOR = 0.95;
-const MAGNET_MAX_PULL = 22;
+const MAGNET_RADIUS_FACTOR = 0.7;
+const MAGNET_MAX_PULL = 8;
 
 interface UseProjectMagnetOptions {
   containerRef: RefObject<HTMLElement | null>;

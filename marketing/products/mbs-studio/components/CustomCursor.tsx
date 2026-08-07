@@ -8,6 +8,9 @@ import { useLayoutScale } from "@/hooks/useLayoutScale";
 import { useMounted } from "@/hooks/useMounted";
 import { NATIVE_CURSOR_SELECTOR } from "@/lib/cursorZones";
 
+/** Invert-circle on project cards — Figma ~110px @ 1728 frame (slightly larger than prior 72). */
+const CIRCLE_SIZE_FIGMA = 110;
+
 function useModalOpen() {
   const [open, setOpen] = useState(false);
 
@@ -54,7 +57,7 @@ export default function CustomCursor() {
     const onOver = (e: MouseEvent) => {
       const target = e.target;
       if (!(target instanceof Element)) return;
-      // Cards: circle cursor (draw is disabled, drag uses the circle).
+      // Cards: invert circle (draw off).
       if (target.closest("[data-project-card]")) {
         setCursorMode("circle");
         return;
@@ -74,6 +77,12 @@ export default function CustomCursor() {
   if (!enabled) return null;
 
   const showCustom = ready && mode !== "hidden" && !modalOpen;
+  const circleSize = Math.round(CIRCLE_SIZE_FIGMA * layoutScale);
+  // Cursor wrapper is parked at mouse − pencil tipOffset; recenter circle on tip.
+  const circleMargin = {
+    marginLeft: pencil.tipOffset.x - circleSize / 2,
+    marginTop: pencil.tipOffset.y - circleSize / 2,
+  };
 
   return (
     <>
@@ -86,17 +95,18 @@ export default function CustomCursor() {
       <div
         ref={cursorRef}
         className={`pointer-events-none fixed top-0 left-0 z-[200] will-change-transform ${showCustom ? "opacity-100" : "opacity-0"}`}
+        style={
+          mode === "circle" ? { mixBlendMode: "difference" } : undefined
+        }
         aria-hidden
       >
         {mode === "circle" ? (
           <div
             className="rounded-full bg-white"
             style={{
-              width: Math.round(72 * layoutScale),
-              height: Math.round(72 * layoutScale),
-              mixBlendMode: "difference",
-              marginLeft: pencil.size / 2 - pencil.tipOffset.x,
-              marginTop: pencil.size / 2 - pencil.tipOffset.y,
+              width: circleSize,
+              height: circleSize,
+              ...circleMargin,
             }}
           />
         ) : mode === "pencil" ? (

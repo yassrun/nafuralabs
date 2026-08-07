@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { RefObject } from "react";
+import { useState } from "react";
 import { useDraggable } from "@/hooks/useDraggable";
 import { useIsDesktop } from "@/hooks/useIsDesktop";
 import { PROJECTS_DRAG_BOTTOM_RESERVE } from "@/lib/projects";
@@ -24,6 +25,7 @@ export default function ProjectCard({
   layoutScale = 1,
 }: ProjectCardProps) {
   const isDesktop = useIsDesktop();
+  const [hovered, setHovered] = useState(false);
   const base = PROJECT_SIZES[project.size];
   const width = scalePx(base.width, layoutScale);
   const height = scalePx(base.height, layoutScale);
@@ -38,27 +40,50 @@ export default function ProjectCard({
     bottomReserve: scalePx(PROJECTS_DRAG_BOTTOM_RESERVE, layoutScale),
   });
 
-  const image = (
-    <Image
-      src={project.image}
-      alt={project.title}
-      fill
-      className="pointer-events-none object-cover select-none"
-      sizes={`${width}px`}
-      unoptimized
-      draggable={false}
-    />
+  const showHover = hovered;
+
+  const images = (
+    <>
+      <Image
+        src={project.image}
+        alt={project.title}
+        fill
+        className="pointer-events-none object-cover select-none transition-opacity duration-250 ease-out"
+        style={{ opacity: showHover ? 0 : 1 }}
+        sizes={`${width}px`}
+        unoptimized
+        draggable={false}
+        priority={project.slug === "encore"}
+      />
+      <Image
+        src={project.imageHover}
+        alt=""
+        fill
+        className="pointer-events-none object-cover select-none transition-opacity duration-250 ease-out"
+        style={{ opacity: showHover ? 1 : 0 }}
+        sizes={`${width}px`}
+        unoptimized
+        draggable={false}
+        aria-hidden
+      />
+    </>
   );
+
+  const hoverProps = {
+    onPointerEnter: () => setHovered(true),
+    onPointerLeave: () => setHovered(false),
+  };
 
   if (layout === "stack") {
     return (
       <Link
         href={href}
-        className="relative block w-full overflow-hidden bg-neutral-200"
+        className="relative block w-full overflow-hidden bg-transparent"
         style={{ aspectRatio: `${base.width} / ${base.height}` }}
         data-project-card
+        {...hoverProps}
       >
-        {image}
+        {images}
       </Link>
     );
   }
@@ -74,14 +99,17 @@ export default function ProjectCard({
     <div
       ref={cardRef}
       data-project-card
-      className="project-card absolute touch-none select-none"
+      className="project-card absolute overflow-hidden touch-none select-none"
       style={{ ...style, backfaceVisibility: "hidden" }}
+      {...hoverProps}
     >
       <div
         data-magnet-layer
-        className="relative h-full w-full overflow-hidden bg-neutral-200 shadow-sm will-change-transform"
+        className="absolute inset-[-8%] will-change-transform"
       >
-        <div className="pointer-events-none relative h-full w-full">{image}</div>
+        <div className="pointer-events-none relative h-full w-full">
+          {images}
+        </div>
       </div>
     </div>
   );

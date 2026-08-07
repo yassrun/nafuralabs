@@ -3,7 +3,6 @@
   (aucune tâche commitée — Commit = poser `sprint: 2026-W32`)
 
   tasks P1 prêtes (hors features) :
-  · MBS-01   Homepage — traiter les remarques  [me]      gate:me
   · OPS-01   Configurer Zimbra + migrer ykark  [me]      gate:me
   · ERP-11   Raffiner le mode de fonctionneme  [me]      gate:none
   · ERP-12   Ouverture du popup chiffrage pos  [me]      gate:none

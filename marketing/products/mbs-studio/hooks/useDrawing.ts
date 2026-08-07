@@ -43,6 +43,7 @@ export function useDrawing({
   const lastPoint = useRef<{ x: number; y: number } | null>(null);
   const colorIndex = useRef(0);
   const strokeColor = useRef(DRAW_COLORS[0]);
+  const hasDrawn = useRef(false);
 
   const resizeCanvas = useCallback(() => {
     const canvas = canvasRef.current;
@@ -157,6 +158,10 @@ export function useDrawing({
       lastPoint.current = null;
       pickNextColor();
       drawLine(e.clientX, e.clientY);
+      if (!hasDrawn.current) {
+        hasDrawn.current = true;
+        document.documentElement.setAttribute("data-has-drawn", "");
+      }
     };
 
     const onPointerMove = (e: PointerEvent) => {
