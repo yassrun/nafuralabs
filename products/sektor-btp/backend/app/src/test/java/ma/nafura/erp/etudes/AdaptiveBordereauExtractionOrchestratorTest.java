@@ -206,6 +206,128 @@ class AdaptiveBordereauExtractionOrchestratorTest {
                 anyString(), any(), anyInt(), anyBoolean());
     }
 
+    @Test
+    void extract_visionStrategy_usesForceMediaPerPage() throws Exception {
+        AdaptiveBordereauExtractionOrchestrator vision = new AdaptiveBordereauExtractionOrchestrator(
+                extractionService,
+                unitOfMeasureRepository,
+                layoutParser,
+                assembler,
+                merger,
+                pageChunker,
+                tabularParser,
+                "vision");
+
+        when(layoutParser.parse(any())).thenReturn(usableParseWithGroups());
+        when(extractionService.process(
+                        any(), anyString(), eq("application/pdf"), anyString(), isNull(),
+                        anyString(), any(), anyInt(), eq(true)))
+                .thenReturn(new StatelessExtractionResponse(
+                        StatelessExtractionResponse.Outcome.COMPLETED,
+                        mapper.readTree("""
+                                {
+                                  "groups": [{"code":"1","libelle":"TERRASSEMENT","kind":"LOT"}],
+                                  "articles": [
+                                    {"code":"1-1-1","libelle":"FOUILLES EN PUITS","unite":"M3","quantite":10,"page":1},
+                                    {"code":"1-1-2","libelle":"EVACUATION","unite":"M3","quantite":10,"page":1},
+                                    {"code":"1-1-3","libelle":"BETON ARME","unite":"M3","quantite":70,"page":1},
+                                    {"code":"1-1-4","libelle":"ARMATURES","unite":"KG","quantite":500,"page":1},
+                                    {"code":"1-1-5","libelle":"SCELLEMENTS","unite":"U","quantite":40,"page":1},
+                                    {"code":"1-1-6","libelle":"REGARDS","unite":"U","quantite":5,"page":1},
+                                    {"code":"1-1-7","libelle":"CANALISATION","unite":"ML","quantite":40,"page":1},
+                                    {"code":"1-1-8","libelle":"DALLAGE","unite":"M2","quantite":100,"page":1}
+                                  ]
+                                }
+                                """),
+                        null, null, null, List.of(),
+                        null, null, null, null, null));
+
+        // Minimal valid PDF bytes so PdfPageChunker can open a page subset — use layout pageCount=1
+        // via usableParseWithGroups; chunker still needs real PDF. Stub empty → chunks empty → fallback.
+        // Prefer mocking chunker path by providing a tiny PDF via layout pageCount and
+        // accepting fallback-local when chunks fail: force a non-empty chunk by using real PDF bytes.
+        byte[] pdf = minimalOnePagePdf();
+        when(layoutParser.parse(any())).thenReturn(usableParseWithGroups().withRows(List.of(
+                new BordereauRowCandidate(
+                        "r0", 1, 0, "1-1-1", "FOUILLES", "M3", new BigDecimal("10"),
+                        BordereauRowCandidate.Kind.ARTICLE, 0.9, "r0"),
+                new BordereauRowCandidate(
+                        "g1", 1, 1, "1", "TERRASSEMENT", null, null,
+                        BordereauRowCandidate.Kind.LOT, 0.8, "g1"))));
+
+        ImportTreeRequest tree = vision.extract(pdf, "bdp.pdf", "application/pdf");
+
+        assertThat(AdaptiveBordereauExtractionOrchestrator.countArticles(tree.getArbre()))
+                .isGreaterThanOrEqualTo(1);
+        assertThat(vision.consumeDiagnostics().path()).contains("vision");
+        verify(extractionService).process(
+                any(), anyString(), eq("application/pdf"), anyString(), isNull(),
+                anyString(), any(), anyInt(), eq(true));
+    }
+
+    private static byte[] minimalOnePagePdf() {
+        // Minimal valid 1-page PDF (no PDFBox on :sektor:app test classpath).
+        String pdf = "%PDF-1.4\n"
+                + "1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n"
+                + "2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n"
+                + "3 0 obj<</Type/Page/MediaBox[0 0 612 792]/Parent 2 0 R>>endobj\n"
+                + "xref\n0 4\n"
+                + "0000000000 65535 f \n"
+                + "0000000009 00000 n \n"
+                + "0000000052 00000 n \n"
+                + "0000000101 00000 n \n"
+                + "trailer<</Size 4/Root 1 0 R>>\n"
+                + "startxref\n178\n%%EOF\n";
+        return pdf.getBytes(java.nio.charset.StandardCharsets.US_ASCII);
+    }
+
+    @Test
+    void extract_dirtyTextLayer_escalatesToVision() throws Exception {
+        // Many articles, zero LOT → should escalate even in adaptive mode
+        List<BordereauRowCandidate> rows = new java.util.ArrayList<>();
+        for (int i = 0; i < 25; i++) {
+            rows.add(new BordereauRowCandidate(
+                    "r" + i, 1, i, "1-" + i, "DANS TERRAIN FRAGMENT " + i, "M3", new BigDecimal("1"),
+                    BordereauRowCandidate.Kind.ARTICLE, 0.7, "r" + i));
+        }
+        BordereauParseResult dirty = new BordereauParseResult(
+                1, 100, rows, Set.of(1), BordereauParseResult.Quality.USABLE, null);
+
+        when(tabularParser.supports(any(), any())).thenReturn(false);
+        when(layoutParser.parse(any())).thenReturn(dirty);
+        when(extractionService.process(
+                        any(), anyString(), eq("application/pdf"), anyString(), isNull(),
+                        anyString(), any(), anyInt(), eq(true)))
+                .thenReturn(new StatelessExtractionResponse(
+                        StatelessExtractionResponse.Outcome.COMPLETED,
+                        mapper.readTree("""
+                                {
+                                  "groups": [{"code":"1","libelle":"LOT 1 TERRASSEMENT","kind":"LOT"}],
+                                  "articles": [
+                                    {"code":"1-1","libelle":"FOUILLES EN PUITS","unite":"M3","quantite":12,"page":1},
+                                    {"code":"1-2","libelle":"EVACUATION DEBLAIS","unite":"M3","quantite":10,"page":1},
+                                    {"code":"1-3","libelle":"BETON ARME","unite":"M3","quantite":70,"page":1},
+                                    {"code":"1-4","libelle":"ARMATURES ACIER","unite":"KG","quantite":500,"page":1},
+                                    {"code":"1-5","libelle":"SCELLEMENTS","unite":"U","quantite":40,"page":1},
+                                    {"code":"1-6","libelle":"REGARDS BETON","unite":"U","quantite":5,"page":1},
+                                    {"code":"1-7","libelle":"CANALISATION PVC","unite":"ML","quantite":40,"page":1},
+                                    {"code":"1-8","libelle":"DALLAGE BETON","unite":"M2","quantite":100,"page":1}
+                                  ]
+                                }
+                                """),
+                        null, null, null, List.of(),
+                        null, null, null, null, null));
+
+        byte[] pdf = minimalOnePagePdf();
+        ImportTreeRequest tree = adaptive.extract(pdf, "dirty.pdf", "application/pdf");
+
+        assertThat(tree.getArbre()).isNotEmpty();
+        assertThat(adaptive.consumeDiagnostics().path()).contains("adaptive-vision");
+        verify(extractionService).process(
+                any(), anyString(), eq("application/pdf"), anyString(), isNull(),
+                anyString(), any(), anyInt(), eq(true));
+    }
+
     private static BordereauParseResult usableParse() {
         List<BordereauRowCandidate> rows = List.of(
                 new BordereauRowCandidate(

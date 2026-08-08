@@ -189,6 +189,9 @@ public class DossierPieceAttendueService {
         if (StringUtils.hasText(meta.getObjet())) {
             dossier.setObjet(meta.getObjet().trim());
         }
+        if (StringUtils.hasText(meta.getDonneurOrdre()) && !StringUtils.hasText(dossier.getClientId())) {
+            dossier.setClientNom(meta.getDonneurOrdre().trim());
+        }
         AppelOffreClient aoc = null;
         if (dossier.getAppelOffreClientId() != null) {
             aoc = aocRepository
@@ -224,6 +227,15 @@ public class DossierPieceAttendueService {
         }
         if (meta.getEstimationMoaHt() != null) {
             aoc.setEstimationMoaHt(meta.getEstimationMoaHt());
+        }
+        if (meta.getDateOuverturePlis() != null) {
+            aoc.setDateOuverturePlis(meta.getDateOuverturePlis());
+        }
+        if (meta.getCautionProvisoire() != null) {
+            aoc.setCautionProvisoire(meta.getCautionProvisoire());
+        }
+        if (meta.getCautionDefinitive() != null) {
+            aoc.setCautionDefinitive(meta.getCautionDefinitive());
         }
         aocRepository.save(aoc);
     }

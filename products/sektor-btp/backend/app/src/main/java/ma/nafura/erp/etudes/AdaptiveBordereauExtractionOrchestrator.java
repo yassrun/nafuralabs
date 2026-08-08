@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -35,8 +36,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
- * Pipeline adaptatif : parse local d'abord, LLM ciblé sur pages faibles, classification
- * hiérarchique par IDs, rejet explicite des arbres à 0 articles.
+ * Pipeline adaptatif : parse local d'abord ; si couche texte sale / scan → vision page/page
+ * (forceMedia) ; classification hiérarchique locale préférée ; rejet des arbres à 0 articles.
  */
 @Component
 public class AdaptiveBordereauExtractionOrchestrator {
@@ -45,8 +46,12 @@ public class AdaptiveBordereauExtractionOrchestrator {
 
     private static final int BORDEREAU_MAX_PROMPT_CHARS = 60_000;
     private static final int HYBRID_MAX_PROMPT_CHARS = 80_000;
+    /** Repair ciblé (pages faibles) : petits paquets. */
     private static final int CHUNK_MAX_PAGES = 3;
+    /** Vision-first : 1 page = 1 appel (source de vérité visuelle). */
+    private static final int VISION_PAGES_PER_CHUNK = 1;
     private static final int MAX_PARALLEL_CHUNKS = 2;
+    private static final int VISION_MIN_ARTICLES_TO_TRUST = 8;
 
     private static final String POSTE_SCHEMA = """
             {
@@ -228,6 +233,11 @@ public class AdaptiveBordereauExtractionOrchestrator {
             return extractLegacy(fileBytes, fileName, mimeType, tenantId, unitCodes, started, "legacy");
         }
 
+        if ("vision".equals(strategy) && isPdf(mimeType, fileName)) {
+            return extractVisionFirst(
+                    fileBytes, fileName, mimeType, tenantId, unitCodes, started, "vision");
+        }
+
         ImportTreeRequest adaptive = extractAdaptive(fileBytes, fileName, mimeType, tenantId, unitCodes, started);
 
         if ("shadow".equals(strategy)) {
@@ -273,6 +283,16 @@ public class AdaptiveBordereauExtractionOrchestrator {
         BordereauParseResult parse = layoutParser.parse(fileBytes);
         long parseMs = (System.nanoTime() - parseStart) / 1_000_000L;
 
+        // Couche texte utilisable mais sale (libellés coupés / pas de LOT) → vision page/page.
+        if (parse.usableForHybrid() && shouldEscalateToVision(parse)) {
+            log.info(
+                    "Bordereau adaptive → vision-first (file={}, articles={}, reason=dirty_text_layer)",
+                    fileName,
+                    parse.articleCandidates().size());
+            return extractVisionFirst(
+                    fileBytes, fileName, mimeType, tenantId, unitCodes, startedNanos, "adaptive-vision");
+        }
+
         if (parse.usableForHybrid()) {
             SetWeakRepair repair = repairWeakPages(fileBytes, fileName, parse, tenantId);
             BordereauParseResult merged = candidateMerger.merge(parse, repair.extras());
@@ -294,22 +314,8 @@ public class AdaptiveBordereauExtractionOrchestrator {
                 && ("low_text_density".equals(parse.rejectReason())
                         || "no_text_layer".equals(parse.rejectReason())
                         || "too_few_article_candidates".equals(parse.rejectReason()))) {
-            SetWeakRepair vision = repairWithVision(fileBytes, fileName, parse, tenantId);
-            if (!vision.extras().isEmpty()) {
-                BordereauParseResult seeded = parse.withRows(vision.extras());
-                BordereauParseResult merged = candidateMerger.dedupe(seeded);
-                return finalizeFromParse(
-                        merged,
-                        fileName,
-                        tenantId,
-                        unitCodes,
-                        parseMs,
-                        0,
-                        vision.repairMs(),
-                        vision.repairedChunks(),
-                        "vision-chunks",
-                        startedNanos);
-            }
+            return extractVisionFirst(
+                    fileBytes, fileName, mimeType, tenantId, unitCodes, startedNanos, "vision-chunks");
         }
 
         log.info(
@@ -450,19 +456,140 @@ public class AdaptiveBordereauExtractionOrchestrator {
         return runChunkRepairs(chunks, fileName, tenantId, false);
     }
 
-    private SetWeakRepair repairWithVision(
-            byte[] fileBytes, String fileName, BordereauParseResult parse, UUID tenantId) {
-        int pages = Math.max(parse.pageCount(), 1);
-        List<Integer> all = new ArrayList<>();
+    /**
+     * Vision-first : une image/page (forceMedia), sans réutiliser le texte PDFBox sale.
+     * Fallback PDFBox local ou legacy si la vision ne sort presque rien.
+     */
+    private ImportTreeRequest extractVisionFirst(
+            byte[] fileBytes,
+            String fileName,
+            String mimeType,
+            UUID tenantId,
+            List<String> unitCodes,
+            long startedNanos,
+            String pathPrefix) {
+
+        long parseStart = System.nanoTime();
+        BordereauParseResult layoutHint = layoutParser.parse(fileBytes);
+        long parseMs = (System.nanoTime() - parseStart) / 1_000_000L;
+
+        int pages = Math.max(layoutHint.pageCount(), 1);
+        List<Integer> allPages = new ArrayList<>(pages);
         for (int p = 1; p <= pages; p++) {
-            all.add(p);
+            allPages.add(p);
         }
-        // Cap vision cost: first 9 pages max for initial pass
-        if (all.size() > 9) {
-            all = all.subList(0, 9);
+        List<PdfPageChunker.PageChunk> chunks =
+                pageChunker.chunksForPages(fileBytes, allPages, VISION_PAGES_PER_CHUNK);
+        log.info(
+                "Bordereau vision-first starting (file={}, pages={}, chunks={}, path={})",
+                fileName,
+                pages,
+                chunks.size(),
+                pathPrefix);
+
+        SetWeakRepair vision = runChunkRepairs(chunks, fileName, tenantId, true);
+        long visionArticles = vision.extras().stream()
+                .filter(BordereauRowCandidate::looksLikeArticle)
+                .count();
+
+        if (visionArticles < VISION_MIN_ARTICLES_TO_TRUST) {
+            log.warn(
+                    "Bordereau vision-first weak (file={}, visionArticles={}) — falling back",
+                    fileName,
+                    visionArticles);
+            if (layoutHint.usableForHybrid()) {
+                BordereauParseResult merged = vision.extras().isEmpty()
+                        ? layoutHint
+                        : candidateMerger.merge(layoutHint, vision.extras());
+                return finalizeFromParse(
+                        merged,
+                        fileName,
+                        tenantId,
+                        unitCodes,
+                        parseMs,
+                        0,
+                        vision.repairMs(),
+                        vision.repairedChunks(),
+                        pathPrefix + "+fallback-local",
+                        startedNanos);
+            }
+            return extractLegacy(
+                    fileBytes,
+                    fileName,
+                    mimeType,
+                    tenantId,
+                    unitCodes,
+                    startedNanos,
+                    pathPrefix + "+fallback-legacy");
         }
-        List<PdfPageChunker.PageChunk> chunks = pageChunker.chunksForPages(fileBytes, all, CHUNK_MAX_PAGES);
-        return runChunkRepairs(chunks, fileName, tenantId, true);
+
+        // Vision articles + groups, but keep PDFBox structure headers (LOT/SECTION titles
+        // like « TERRASSEMENT - GROS-ŒUVRE ») — the text layer is bad for rows, good for chapters.
+        List<BordereauRowCandidate> combined = new ArrayList<>();
+        for (BordereauRowCandidate row : layoutHint.rows()) {
+            if (row.kind() == BordereauRowCandidate.Kind.LOT
+                    || row.kind() == BordereauRowCandidate.Kind.SOUS_LOT
+                    || row.kind() == BordereauRowCandidate.Kind.SECTION) {
+                combined.add(row);
+            }
+        }
+        combined.addAll(vision.extras());
+        BordereauParseResult seeded = layoutHint.withRows(combined);
+        BordereauParseResult merged = candidateMerger.dedupe(seeded);
+        return finalizeFromParse(
+                merged,
+                fileName,
+                tenantId,
+                unitCodes,
+                parseMs,
+                0,
+                vision.repairMs(),
+                vision.repairedChunks(),
+                pathPrefix + "+pages",
+                startedNanos);
+    }
+
+    /**
+     * PDFBox a sorti assez d'articles mais la géométrie est sale (typique BDP multi-colonnes).
+     */
+    private static boolean shouldEscalateToVision(BordereauParseResult parse) {
+        int articles = parse.articleCandidates().size();
+        if (articles < 20) {
+            return false;
+        }
+        long lots = parse.rows().stream()
+                .filter(r -> r.kind() == BordereauRowCandidate.Kind.LOT)
+                .count();
+        // Beaucoup d'articles, aucun LOT clair → tables mal lues.
+        if (lots == 0) {
+            return true;
+        }
+        return truncatedLibelleRatio(parse) >= 0.25;
+    }
+
+    private static double truncatedLibelleRatio(BordereauParseResult parse) {
+        List<BordereauRowCandidate> articles = parse.articleCandidates();
+        if (articles.isEmpty()) {
+            return 0;
+        }
+        long truncated = 0;
+        for (BordereauRowCandidate a : articles) {
+            String lib = a.libelle() == null ? "" : a.libelle().trim();
+            if (lib.length() < 18 || startsLikeFragment(lib)) {
+                truncated++;
+            }
+        }
+        return truncated / (double) articles.size();
+    }
+
+    private static boolean startsLikeFragment(String libelle) {
+        String first = libelle.split("\\s+")[0].toUpperCase(Locale.ROOT);
+        return Set.of(
+                        "DE", "DES", "DU", "LA", "LE", "LES", "ET", "OU", "EN", "DANS", "POUR",
+                        "Y", "AUX", "AU", "SUR", "AVEC", "SANS", "COMPRIS", "Y/C", "MM", "CM",
+                        "TRANCHEERS", "PUBLIQUES", "GALVANISÉE", "GALVANISEE", "PRINCIPAL",
+                        "SUPPLEMENTAIRE", "MÉTALIQUE", "METALLIQUE")
+                .contains(first);
     }
 
     private SetWeakRepair runChunkRepairs(
@@ -687,11 +814,12 @@ public class AdaptiveBordereauExtractionOrchestrator {
 
     private static String chunkRepairInstructions(int startPage, int endPage) {
         return """
-                Extrais la structure du bordereau BTP (pages %d-%d).
-                Retourne groups (lots/sous-lots/sections) et articles avec code, libellé,
-                unité et quantité lorsqu'ils sont visibles. N'invente aucune valeur.
-                Ignore PU, montants, totaux, récaps et en-têtes répétés du marché —
-                seuls code / libellé / unité / quantité comptent à cette étape.
+                Tu lis l'IMAGE des pages %d-%d d'un bordereau de prix BTP (tableau).
+                Extrais TOUTES les lignes visibles : groups (LOT / SOUS_LOT / SECTION) et articles.
+                Pour chaque article : code, libellé COMPLET (pas tronqué), unité, quantité, page.
+                N'invente aucune valeur. Ignore PU, montants, totaux et en-têtes marché répétés.
+                Le titre long du marché n'est PAS un lot.
+                kind des groups : LOT | SOUS_LOT | SECTION.
                 """.formatted(startPage, endPage);
     }
 

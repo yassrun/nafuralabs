@@ -76,6 +76,13 @@ public class DossierEtude implements AuditableEtude {
     @Column(name = "client_nom", length = 255)
     private String clientNom;
 
+    /** User IAM (UUID) avec rôle BTP_INGENIEUR — chargé d'étude obligatoire. */
+    @Column(name = "charge_etude_user_id", length = 100)
+    private String chargeEtudeUserId;
+
+    @Column(name = "charge_etude_nom", length = 255)
+    private String chargeEtudeNom;
+
     // ── Sources documentaires ────────────────────────────────────────────────
 
     @Column(name = "cps_document_id", length = 100)

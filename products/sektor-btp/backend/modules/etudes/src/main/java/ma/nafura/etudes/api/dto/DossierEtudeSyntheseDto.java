@@ -21,6 +21,8 @@ public class DossierEtudeSyntheseDto {
     String objet;
     String clientId;
     String clientNom;
+    String chargeEtudeUserId;
+    String chargeEtudeNom;
     UUID appelOffreClientId;
     StatutDossierEtude status;
     int currentStep;

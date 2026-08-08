@@ -27,4 +27,6 @@ tags: [sektor, etudes, chiffrage, ux]
 ```
 05/08 12:07  capturé · suite ERP-08 / parcours étude
 05/08 21:30  framework v2 · task schema (estimate out · gate/kind)
+07/08 16:56  lot clair · client lecture seule (plus de dropdown en-tête) · Chargé d'étude = createdBy (display name / vrai champ = suite)
+07/08 17:50  décision · chargé d'étude = user BTP_INGENIEUR (requis à la création) · dropdown ingénieurs · auto-fill si créateur a le rôle sinon N+1 assigne · champ charge_etude_* + GET /etudes/ingenieurs · en-tête affiche chargeEtudeNom
 ```

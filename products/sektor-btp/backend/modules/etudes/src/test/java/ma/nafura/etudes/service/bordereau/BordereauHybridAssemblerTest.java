@@ -117,6 +117,62 @@ class BordereauHybridAssemblerTest {
     }
 
     @Test
+    void assembleLocalOnly_doesNotLetSubsectionRenameLot() {
+        List<BordereauRowCandidate> rows = List.of(
+                new BordereauRowCandidate(
+                        "g0", 1, 0, "1", "TERRASSEMENT - GROS-ŒUVRE", null, null,
+                        BordereauRowCandidate.Kind.SECTION, 0.9, "lot1"),
+                new BordereauRowCandidate(
+                        "g1", 1, 1, "1-1", "TRAVAUX EN TERRASSEMENTS ET FONDATION", null, null,
+                        BordereauRowCandidate.Kind.SECTION, 0.8, "s1"),
+                new BordereauRowCandidate(
+                        "g5", 2, 2, "1-05", "MAÇONNERIES ET CLOISONNEMENTS", null, null,
+                        BordereauRowCandidate.Kind.SOUS_LOT, 0.8, "s5"),
+                new BordereauRowCandidate(
+                        "r0", 1, 3, "1-1-1", "FOUILLES", "M3", new BigDecimal("10"),
+                        BordereauRowCandidate.Kind.ARTICLE, 0.9, "a"));
+        BordereauParseResult parse = new BordereauParseResult(
+                2, 400, rows, Set.of(1, 2), BordereauParseResult.Quality.USABLE, null);
+
+        ImportTreeRequest tree = assembler.assembleLocalOnly(parse);
+        assertThat(tree.getArbre()).hasSize(1);
+        assertThat(tree.getArbre().get(0).getLibelle()).containsIgnoringCase("TERRASSEMENT");
+        assertThat(tree.getArbre().get(0).getLibelle()).containsIgnoringCase("GROS");
+        assertThat(tree.getArbre().get(0).getLibelle()).doesNotContain("MAÇONNERIES");
+    }
+
+    @Test
+    void assembleLocalOnly_doesNotLetAccessorySectionRenameLot() {
+        List<BordereauRowCandidate> rows = List.of(
+                new BordereauRowCandidate(
+                        "g0", 1, 0, "1", "TERRASSEMENT - GROS-ŒUVRE", null, null,
+                        BordereauRowCandidate.Kind.SECTION, 0.9, "lot1"),
+                new BordereauRowCandidate(
+                        "gBad", 9, 1, "1", "PORTE SAVON LIQUIDE", null, null,
+                        BordereauRowCandidate.Kind.SECTION, 0.5, "bad"),
+                new BordereauRowCandidate(
+                        "g5", 2, 2, "1-05", "MAÇONNERIES ET CLOISONNEMENTS", null, null,
+                        BordereauRowCandidate.Kind.SOUS_LOT, 0.8, "s5"),
+                new BordereauRowCandidate(
+                        "r0", 1, 3, "1-1-1", "FOUILLES", "M3", new BigDecimal("10"),
+                        BordereauRowCandidate.Kind.ARTICLE, 0.9, "a"),
+                new BordereauRowCandidate(
+                        "r1", 1, 4, "1-1-2", "REMBLAI", "M3", new BigDecimal("5"),
+                        BordereauRowCandidate.Kind.ARTICLE, 0.9, "b"),
+                new BordereauRowCandidate(
+                        "r2", 1, 5, "1-5-1", "MUR", "M2", new BigDecimal("50"),
+                        BordereauRowCandidate.Kind.ARTICLE, 0.9, "c"));
+        BordereauParseResult parse = new BordereauParseResult(
+                9, 400, rows, Set.of(1, 2, 9), BordereauParseResult.Quality.USABLE, null);
+
+        ImportTreeRequest tree = assembler.assembleLocalOnly(parse);
+        assertThat(tree.getArbre().get(0).getLibelle()).containsIgnoringCase("TERRASSEMENT");
+        assertThat(tree.getArbre().get(0).getLibelle()).containsIgnoringCase("GROS");
+        assertThat(tree.getArbre().get(0).getLibelle()).doesNotContain("SAVON");
+        assertThat(tree.getArbre().get(0).getLibelle()).doesNotContain("MAÇONNERIES");
+    }
+
+    @Test
     void buildClassifierPrompt_listsRowIds() {
         String prompt = assembler.buildClassifierPrompt(sampleParse());
         assertThat(prompt).contains("r0").contains("r1").contains("GROUPES").contains("ARTICLES");

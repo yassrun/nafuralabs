@@ -59,6 +59,7 @@ public class DossierEtudeService {
     private final AppelOffreClientRepository aocRepository;
     private final DossierPieceAttendueService pieceAttendueService;
     private final DossierPieceAttendueRepository pieceAttendueRepository;
+    private final ChargeEtudeService chargeEtudeService;
     private final Map<Integer, EtapeGate> gatesParEtape;
 
     public DossierEtudeService(
@@ -74,6 +75,7 @@ public class DossierEtudeService {
             AppelOffreClientRepository aocRepository,
             @Lazy DossierPieceAttendueService pieceAttendueService,
             DossierPieceAttendueRepository pieceAttendueRepository,
+            ChargeEtudeService chargeEtudeService,
             List<EtapeGate> gates) {
         this.repository = repository;
         this.noeudRepository = noeudRepository;
@@ -87,6 +89,7 @@ public class DossierEtudeService {
         this.aocRepository = aocRepository;
         this.pieceAttendueService = pieceAttendueService;
         this.pieceAttendueRepository = pieceAttendueRepository;
+        this.chargeEtudeService = chargeEtudeService;
         this.gatesParEtape = gates.stream()
                 .collect(Collectors.toMap(EtapeGate::etape, Function.identity()));
     }
@@ -129,11 +132,13 @@ public class DossierEtudeService {
             throw new IllegalArgumentException("etudes.dossier.numero_existe");
         }
 
-        EtudeClientPort.ClientSnapshot client = clientPort.requireClientRole(dto.getClientId());
+        ResolvedMoa moa = resolveMoa(dto.getClientId(), dto.getClientNom());
+        String chargeNom = chargeEtudeService.requireIngenieur(
+                dto.getChargeEtudeUserId(), dto.getChargeEtudeNom());
 
         UUID aocId = dto.getAppelOffreClientId();
         if (aocId == null && dto.getDateLimiteDepot() != null) {
-            aocId = creerAocLie(dto, client).getId();
+            aocId = creerAocLie(dto, moa.nom()).getId();
         }
 
         DossierEtude dossier = DossierEtude.builder()
@@ -151,8 +156,10 @@ public class DossierEtudeService {
                 .tvaTauxDefaut(parametres.tvaTauxDefaut())
                 .notes(trimOrNull(dto.getNotes()))
                 .build();
-        dossier.setClientId(client.id().toString());
-        dossier.setClientNom(client.raisonSociale());
+        dossier.setClientId(moa.clientId());
+        dossier.setClientNom(moa.nom());
+        dossier.setChargeEtudeUserId(dto.getChargeEtudeUserId().trim());
+        dossier.setChargeEtudeNom(chargeNom);
         DossierEtude saved = repository.save(dossier);
         pieceAttendueService.seedMinimalSiAbsent(saved.getId());
         return saved;
@@ -164,8 +171,14 @@ public class DossierEtudeService {
         if (StringUtils.hasText(dto.getObjet())) {
             dossier.setObjet(dto.getObjet().trim());
         }
-        if (dto.getClientId() != null) {
-            appliquerClient(dossier, dto.getClientId());
+        if (dto.getClientId() != null || dto.getClientNom() != null) {
+            appliquerMoa(dossier, dto.getClientId(), dto.getClientNom());
+        }
+        if (dto.getChargeEtudeUserId() != null) {
+            String chargeNom = chargeEtudeService.requireIngenieur(
+                    dto.getChargeEtudeUserId(), dto.getChargeEtudeNom());
+            dossier.setChargeEtudeUserId(dto.getChargeEtudeUserId().trim());
+            dossier.setChargeEtudeNom(chargeNom);
         }
         if (dto.getCpsDocumentId() != null) {
             dossier.setCpsDocumentId(trimOrNull(dto.getCpsDocumentId()));
@@ -187,6 +200,26 @@ public class DossierEtudeService {
         }
         if (dto.getNotes() != null) {
             dossier.setNotes(trimOrNull(dto.getNotes()));
+        }
+        if (dossier.getAppelOffreClientId() == null && dto.getDateLimiteDepot() != null) {
+            DossierEtudeCreateDto aocSeed = new DossierEtudeCreateDto();
+            aocSeed.setObjet(dossier.getObjet());
+            aocSeed.setAoReference(dto.getAoReference());
+            aocSeed.setAoType(dto.getAoType());
+            aocSeed.setDateLimiteDepot(dto.getDateLimiteDepot());
+            aocSeed.setDateOuverturePlis(dto.getDateOuverturePlis());
+            aocSeed.setVille(dto.getVille());
+            aocSeed.setDelaiExecutionJours(dto.getDelaiExecutionJours());
+            aocSeed.setEstimationMoaHt(dto.getEstimationMoaHt());
+            aocSeed.setCautionProvisoire(dto.getCautionProvisoire());
+            aocSeed.setCautionDefinitive(dto.getCautionDefinitive());
+            aocSeed.setCautionRetenueGarantie(dto.getCautionRetenueGarantie());
+            String donneur = StringUtils.hasText(dossier.getClientNom())
+                    ? dossier.getClientNom()
+                    : "MOA à préciser";
+            dossier.setAppelOffreClientId(creerAocLie(aocSeed, donneur).getId());
+        } else if (dossier.getAppelOffreClientId() != null) {
+            enrichirAocExistant(dossier, dto);
         }
         return repository.save(dossier);
     }
@@ -399,6 +432,8 @@ public class DossierEtudeService {
                 .objet(dossier.getObjet())
                 .clientId(dossier.getClientId())
                 .clientNom(dossier.getClientNom())
+                .chargeEtudeUserId(dossier.getChargeEtudeUserId())
+                .chargeEtudeNom(dossier.getChargeEtudeNom())
                 .appelOffreClientId(dossier.getAppelOffreClientId())
                 .status(dossier.getStatus())
                 .currentStep(dossier.getCurrentStep() != null ? dossier.getCurrentStep() : 1)
@@ -491,15 +526,14 @@ public class DossierEtudeService {
                 clientValide);
     }
 
-    private AppelOffreClient creerAocLie(
-            DossierEtudeCreateDto dto, EtudeClientPort.ClientSnapshot client) {
+    private AppelOffreClient creerAocLie(DossierEtudeCreateDto dto, String donneurOrdre) {
         AppelOffreClientCreateDto aoc = new AppelOffreClientCreateDto();
         String ref = StringUtils.hasText(dto.getAoReference())
                 ? dto.getAoReference().trim()
                 : "AO-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(Locale.ROOT);
         aoc.setReference(ref);
         aoc.setObjet(dto.getObjet().trim());
-        aoc.setDonneurOrdre(client.raisonSociale());
+        aoc.setDonneurOrdre(StringUtils.hasText(donneurOrdre) ? donneurOrdre.trim() : "MOA à préciser");
         aoc.setType(StringUtils.hasText(dto.getAoType())
                 ? dto.getAoType().trim().toUpperCase(Locale.ROOT)
                 : AppelOffreClient.TYPE_PUBLIC);
@@ -513,6 +547,68 @@ public class DossierEtudeService {
         aoc.setCautionRetenueGarantie(dto.getCautionRetenueGarantie());
         aoc.setStatus(AppelOffreClient.STATUS_A_ETUDIER);
         return aocService.create(aoc);
+    }
+
+    private void enrichirAocExistant(DossierEtude dossier, DossierEtudeUpdateDto dto) {
+        AppelOffreClient aoc = aocRepository
+                .findByIdAndTenantId(dossier.getAppelOffreClientId(), tenantId())
+                .orElse(null);
+        if (aoc == null) {
+            return;
+        }
+        boolean dirty = false;
+        if (StringUtils.hasText(dto.getObjet())) {
+            aoc.setObjet(dto.getObjet().trim());
+            dirty = true;
+        }
+        if (StringUtils.hasText(dto.getAoReference())) {
+            aoc.setReference(dto.getAoReference().trim());
+            dirty = true;
+        }
+        if (StringUtils.hasText(dto.getAoType())) {
+            aoc.setType(dto.getAoType().trim().toUpperCase(Locale.ROOT));
+            dirty = true;
+        }
+        if (dto.getDateLimiteDepot() != null) {
+            aoc.setDateLimiteDepot(dto.getDateLimiteDepot());
+            dirty = true;
+        }
+        if (dto.getDateOuverturePlis() != null) {
+            aoc.setDateOuverturePlis(dto.getDateOuverturePlis());
+            dirty = true;
+        }
+        if (dto.getVille() != null) {
+            aoc.setVille(trimOrNull(dto.getVille()));
+            dirty = true;
+        }
+        if (dto.getDelaiExecutionJours() != null) {
+            aoc.setDelaiExecutionJours(dto.getDelaiExecutionJours());
+            dirty = true;
+        }
+        if (dto.getEstimationMoaHt() != null) {
+            aoc.setEstimationMoaHt(dto.getEstimationMoaHt());
+            dirty = true;
+        }
+        if (dto.getCautionProvisoire() != null) {
+            aoc.setCautionProvisoire(dto.getCautionProvisoire());
+            dirty = true;
+        }
+        if (dto.getCautionDefinitive() != null) {
+            aoc.setCautionDefinitive(dto.getCautionDefinitive());
+            dirty = true;
+        }
+        if (dto.getCautionRetenueGarantie() != null) {
+            aoc.setCautionRetenueGarantie(dto.getCautionRetenueGarantie());
+            dirty = true;
+        }
+        if (StringUtils.hasText(dossier.getClientNom())
+                && !dossier.getClientNom().equals(aoc.getDonneurOrdre())) {
+            aoc.setDonneurOrdre(dossier.getClientNom());
+            dirty = true;
+        }
+        if (dirty) {
+            aocRepository.save(aoc);
+        }
     }
 
     private void enrichirAoListing(List<DossierEtude> dossiers) {
@@ -542,16 +638,28 @@ public class DossierEtudeService {
     }
 
     /**
-     * Normalise le client depuis le référentiel Partner.
+     * Partner optionnel ; sinon MOA texte libre (CPS / saisie).
      *
-     * <p>Le nom libre envoyé par le front est ignoré : on persiste uniquement le snapshot
-     * canonique (UUID + raison sociale). Le client est obligatoire — une valeur vide est refusée.
+     * <p>Le client Partner n'est exigé qu'à la conclusion (devis / marché).
      */
-    private void appliquerClient(DossierEtude dossier, String rawClientId) {
-        EtudeClientPort.ClientSnapshot client = clientPort.requireClientRole(rawClientId);
-        dossier.setClientId(client.id().toString());
-        dossier.setClientNom(client.raisonSociale());
+    private void appliquerMoa(DossierEtude dossier, String rawClientId, String rawNom) {
+        ResolvedMoa moa = resolveMoa(rawClientId, rawNom);
+        dossier.setClientId(moa.clientId());
+        dossier.setClientNom(moa.nom());
     }
+
+    private ResolvedMoa resolveMoa(String rawClientId, String rawNom) {
+        if (StringUtils.hasText(rawClientId)) {
+            EtudeClientPort.ClientSnapshot client = clientPort.requireClientRole(rawClientId);
+            return new ResolvedMoa(client.id().toString(), client.raisonSociale());
+        }
+        if (StringUtils.hasText(rawNom)) {
+            return new ResolvedMoa(null, rawNom.trim());
+        }
+        throw new IllegalArgumentException("etudes.moa.requis");
+    }
+
+    private record ResolvedMoa(String clientId, String nom) {}
 
     private List<DpgfNoeud> chargerNoeuds(DossierEtude dossier) {
         if (dossier.getDpgfId() == null) {

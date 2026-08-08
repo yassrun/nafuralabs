@@ -64,7 +64,7 @@
             <span class="arbre__badge">{{ typeCourt(row.type) }}</span>
           }
           @case ('code') {
-            <span class="arbre__code">{{ row.code }}</span>
+            <span class="arbre__code" [attr.title]="row.code || null">{{ row.code }}</span>
           }
           @case ('libelle') {
             <span class="arbre__libelle" [attr.title]="rowTitle(row)">

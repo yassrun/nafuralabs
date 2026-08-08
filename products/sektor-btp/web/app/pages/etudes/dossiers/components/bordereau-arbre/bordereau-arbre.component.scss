@@ -75,6 +75,10 @@
 }
 
 .arbre__code {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 0.72rem;
   color: var(--nf-color-text-secondary);
@@ -175,6 +179,12 @@
     border-bottom: 1px solid color-mix(in srgb, var(--nf-color-border) 65%, transparent);
     vertical-align: middle;
     background: transparent;
+  }
+
+  .p-treetable .p-treetable-thead > tr > th.arbre__col-code,
+  .p-treetable .p-treetable-tbody > tr > td.arbre__col-code {
+    overflow: hidden;
+    max-width: 7rem;
   }
 
   .p-treetable .p-treetable-tbody > tr:hover > td {

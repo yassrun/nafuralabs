@@ -127,7 +127,7 @@ export class BordereauArbreComponent {
     const selection = this.selectionEnabled();
     const cols: NfTreeTableColumn<BordereauTreeRow>[] = [
       { key: 'type', label: 'Type', width: selection ? '4.5rem' : '5.5rem' },
-      { key: 'code', label: 'Code', width: selection ? '5.5rem' : '7rem' },
+      { key: 'code', label: 'Code', width: selection ? '5.5rem' : '7rem', cssClass: 'arbre__col-code' },
       { key: 'libelle', label: 'Libellé' },
       { key: 'unite', label: 'Unité', width: '5rem', align: 'center' },
       { key: 'quantite', label: 'Qté', width: '5.5rem', align: 'end' },

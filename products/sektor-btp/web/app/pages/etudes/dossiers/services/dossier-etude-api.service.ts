@@ -93,6 +93,8 @@ export interface DossierEtudeSynthese {
   objet: string;
   clientId?: string | null;
   clientNom?: string | null;
+  chargeEtudeUserId?: string | null;
+  chargeEtudeNom?: string | null;
   appelOffreClientId?: string | null;
   status: string;
   currentStep: number;
@@ -115,6 +117,12 @@ export interface DossierEtudeSynthese {
   updatedAt?: string | null;
   gates: ResultatGate[];
   actionPrincipale: string;
+}
+
+export interface ChargeEtudeCandidat {
+  userId: string;
+  email: string;
+  displayName: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -158,6 +166,11 @@ export class DossierEtudeApiService extends FeatureApiService<
 
   synthese(id: string): Promise<DossierEtudeSynthese> {
     return this.get<DossierEtudeSynthese>(`${this.basePath}/${id}/synthese`);
+  }
+
+  /** Users tenant avec rôle BTP_INGENIEUR — candidats chargé d'étude. */
+  listIngenieurs(): Promise<ChargeEtudeCandidat[]> {
+    return this.get<ChargeEtudeCandidat[]>('/api/v1/etudes/ingenieurs');
   }
 
   reouvrirBordereau(id: string): Promise<DossierEtude> {
@@ -206,6 +219,12 @@ export class DossierEtudeApiService extends FeatureApiService<
   statutExtractionJob(dossierId: string, jobId: string): Promise<ExtractionJobDto> {
     return this.get<ExtractionJobDto>(
       `${this.basePath}/${dossierId}/documents/extraction-jobs/${jobId}`,
+    );
+  }
+
+  listExtractionJobs(dossierId: string): Promise<ExtractionJobDto[]> {
+    return this.get<ExtractionJobDto[]>(
+      `${this.basePath}/${dossierId}/documents/extraction-jobs`,
     );
   }
 

@@ -69,6 +69,9 @@ class DossierEtudeServiceClientTest {
     @Mock
     private DossierPieceAttendueRepository pieceAttendueRepository;
 
+    @Mock
+    private ChargeEtudeService chargeEtudeService;
+
     private DossierEtudeService service;
 
     @BeforeEach
@@ -83,6 +86,12 @@ class DossierEtudeServiceClientTest {
         org.mockito.Mockito.lenient()
                 .when(parametres.tvaTauxDefaut())
                 .thenReturn(new java.math.BigDecimal("20"));
+        org.mockito.Mockito.lenient()
+                .when(chargeEtudeService.requireIngenieur(any(), any()))
+                .thenAnswer(inv -> {
+                    String nom = inv.getArgument(1);
+                    return nom != null && !nom.isBlank() ? nom.trim() : "Ingénieur test";
+                });
         service = new DossierEtudeService(
                 repository,
                 noeudRepository,
@@ -96,6 +105,7 @@ class DossierEtudeServiceClientTest {
                 aocRepository,
                 pieceAttendueService,
                 pieceAttendueRepository,
+                chargeEtudeService,
                 java.util.List.of());
     }
 
@@ -105,16 +115,39 @@ class DossierEtudeServiceClientTest {
     }
 
     @Test
-    void create_sansClient_refuse() {
-        when(clientPort.requireClientRole(null))
-                .thenThrow(new IllegalArgumentException("etudes.gate.chiffrage.client_manquant"));
-
+    void create_sansMoa_refuse() {
         DossierEtudeCreateDto dto = new DossierEtudeCreateDto();
-        dto.setObjet("Étude sans client");
+        dto.setObjet("Étude sans MOA");
+        dto.setChargeEtudeUserId("cccccccc-cccc-cccc-cccc-cccccccccccc");
 
         assertThatThrownBy(() -> service.create(dto))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("etudes.gate.chiffrage.client_manquant");
+                .hasMessage("etudes.moa.requis");
+    }
+
+    @Test
+    void create_avecMoaTexte_sansPartner() {
+        when(repository.existsByTenantIdAndNumero(any(), any())).thenReturn(false);
+        when(repository.countByTenantId(TENANT)).thenReturn(0L);
+        when(repository.save(any())).thenAnswer(inv -> {
+            DossierEtude d = inv.getArgument(0);
+            if (d.getId() == null) {
+                d.setId(UUID.randomUUID());
+            }
+            return d;
+        });
+
+        DossierEtudeCreateDto dto = new DossierEtudeCreateDto();
+        dto.setObjet("Étude MOA texte");
+        dto.setClientNom("Commune de Casablanca");
+        dto.setChargeEtudeUserId("cccccccc-cccc-cccc-cccc-cccccccccccc");
+        dto.setChargeEtudeNom("Ingé Demo");
+
+        DossierEtude created = service.create(dto);
+
+        assertThat(created.getClientId()).isNull();
+        assertThat(created.getClientNom()).isEqualTo("Commune de Casablanca");
+        assertThat(created.getChargeEtudeNom()).isEqualTo("Ingé Demo");
     }
 
     @Test
@@ -135,15 +168,19 @@ class DossierEtudeServiceClientTest {
         dto.setObjet("Étude avec client");
         dto.setClientId(CLIENT.toString());
         dto.setClientNom("Nom forgé par le front");
+        dto.setChargeEtudeUserId("cccccccc-cccc-cccc-cccc-cccccccccccc");
+        dto.setChargeEtudeNom("Ingé Demo");
 
         DossierEtude created = service.create(dto);
 
         assertThat(created.getClientId()).isEqualTo(CLIENT.toString());
         assertThat(created.getClientNom()).isEqualTo("OCP SA");
+        assertThat(created.getChargeEtudeUserId()).isEqualTo("cccccccc-cccc-cccc-cccc-cccccccccccc");
+        assertThat(created.getChargeEtudeNom()).isEqualTo("Ingé Demo");
     }
 
     @Test
-    void update_effaceClient_refuse() {
+    void update_moaTexte_sansPartner() {
         DossierEtude dossier = DossierEtude.builder()
                 .id(UUID.randomUUID())
                 .tenantId(TENANT)
@@ -154,27 +191,27 @@ class DossierEtudeServiceClientTest {
                 .clientNom("OCP SA")
                 .build();
         when(repository.findByIdAndTenantId(dossier.getId(), TENANT)).thenReturn(Optional.of(dossier));
-        when(clientPort.requireClientRole(""))
-                .thenThrow(new IllegalArgumentException("etudes.gate.chiffrage.client_manquant"));
+        when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         DossierEtudeUpdateDto dto = new DossierEtudeUpdateDto();
         dto.setClientId("");
+        dto.setClientNom("Commune de Rabat");
 
-        assertThatThrownBy(() -> service.update(dossier.getId(), dto))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("etudes.gate.chiffrage.client_manquant");
+        DossierEtude updated = service.update(dossier.getId(), dto);
+
+        assertThat(updated.getClientId()).isNull();
+        assertThat(updated.getClientNom()).isEqualTo("Commune de Rabat");
     }
 
     @Test
     void create_clientInvalide_refuse() {
-        when(repository.existsByTenantIdAndNumero(any(), any())).thenReturn(false);
-        when(repository.countByTenantId(TENANT)).thenReturn(0L);
         when(clientPort.requireClientRole("not-a-uuid"))
                 .thenThrow(new IllegalArgumentException("etudes.client.id_invalide"));
 
         DossierEtudeCreateDto dto = new DossierEtudeCreateDto();
         dto.setObjet("Étude");
         dto.setClientId("not-a-uuid");
+        dto.setChargeEtudeUserId("cccccccc-cccc-cccc-cccc-cccccccccccc");
 
         assertThatThrownBy(() -> service.create(dto))
                 .isInstanceOf(IllegalArgumentException.class)

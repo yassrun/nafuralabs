@@ -23,5 +23,8 @@ public class MarcheProposeApplyDto {
         private String reference;
         private Integer delaiExecutionJours;
         private BigDecimal estimationMoaHt;
+        private LocalDate dateOuverturePlis;
+        private BigDecimal cautionProvisoire;
+        private BigDecimal cautionDefinitive;
     }
 }

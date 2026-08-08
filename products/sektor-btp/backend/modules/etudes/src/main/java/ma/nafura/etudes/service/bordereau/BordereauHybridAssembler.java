@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import ma.nafura.etudes.api.request.ImportNoeudDto;
@@ -78,8 +79,14 @@ public class BordereauHybridAssembler {
      */
     public ImportTreeRequest assembleLocalOnly(BordereauParseResult parse) {
         ImportTreeRequest byCode = assembleByCodePrefix(parse);
-        if (byCode.getArbre().size() >= 2
-                && countArticlesDeep(byCode.getArbre()) >= Math.max(3, parse.articleCandidates().size() / 2)) {
+        int byCodeArticles = countArticlesDeep(byCode.getArbre());
+        int expected = parse.articleCandidates().size();
+        boolean enoughArticles = byCodeArticles >= Math.max(1, (expected + 1) / 2);
+        boolean multiLot = byCode.getArbre().size() >= 2;
+        boolean singleNamedLot = byCode.getArbre().size() == 1
+                && byCode.getArbre().get(0).getLibelle() != null
+                && !byCode.getArbre().get(0).getLibelle().startsWith("Lot ");
+        if (enoughArticles && (multiLot || singleNamedLot || byCodeArticles >= 3)) {
             return byCode;
         }
         return assembleSequential(parse);
@@ -93,20 +100,41 @@ public class BordereauHybridAssembler {
             if (PdfBordereauLayoutParser.isMarketTitleNoise(row.libelle())) {
                 continue;
             }
-            if (row.kind() == BordereauRowCandidate.Kind.SOUS_LOT
-                    || row.kind() == BordereauRowCandidate.Kind.LOT) {
+            if (row.kind() == BordereauRowCandidate.Kind.LOT) {
                 String key = extractLotKey(row);
-                if (key == null) {
+                if (key == null || !isPlausibleLotKey(key)) {
                     continue;
                 }
-                rememberLotLabel(lotLabels, key, row.libelle());
+                rememberLotLabel(lotLabels, key, row.libelle(), 250);
                 lotsByKey.computeIfAbsent(key, k -> newGroup(DpgfNoeud.TYPE_LOT, k, lotLabels.get(k)));
                 lotsByKey.get(key).setLibelle(lotLabels.get(key));
+            } else if (row.kind() == BordereauRowCandidate.Kind.SOUS_LOT) {
+                // Chapter "SOUS LOT N° X : TITLE" names the lot.
+                // Subsection codes like 1-05 « MAÇONNERIES » must NOT rename lot 1.
+                String keyFromLibelle = lotKeyFromSousLotLibelle(row.libelle());
+                if (keyFromLibelle != null && isPlausibleLotKey(keyFromLibelle)) {
+                    rememberLotLabel(
+                            lotLabels, keyFromLibelle, chapterTitleFromSousLot(row.libelle()), 300);
+                    lotsByKey.computeIfAbsent(
+                            keyFromLibelle,
+                            k -> newGroup(DpgfNoeud.TYPE_LOT, k, lotLabels.get(k)));
+                    lotsByKey.get(keyFromLibelle).setLibelle(lotLabels.get(keyFromLibelle));
+                } else {
+                    String key = leadingLotKey(row.code());
+                    if (key != null && isPlausibleLotKey(key)) {
+                        lotsByKey.computeIfAbsent(
+                                key, k -> newGroup(DpgfNoeud.TYPE_LOT, k, lotLabels.getOrDefault(k, "Lot " + k)));
+                    }
+                }
             } else if (row.kind() == BordereauRowCandidate.Kind.SECTION && isTopLevelSection(row.code())) {
                 // "1 - TERRASSEMENT" when SOUS LOT header was missed in reading order.
+                // Ignore false positives like code=1 « PORTE SAVON LIQUIDE » (page accessories).
+                if (!looksLikeLotChapterTitle(row.libelle())) {
+                    continue;
+                }
                 String key = leadingLotKey(row.code());
-                if (key != null) {
-                    rememberLotLabel(lotLabels, key, row.libelle());
+                if (key != null && isPlausibleLotKey(key)) {
+                    rememberLotLabel(lotLabels, key, row.libelle(), 200);
                     lotsByKey.computeIfAbsent(key, k -> newGroup(DpgfNoeud.TYPE_LOT, k, lotLabels.get(k)));
                     lotsByKey.get(key).setLibelle(lotLabels.get(key));
                 }
@@ -205,15 +233,121 @@ public class BordereauHybridAssembler {
         return tree;
     }
 
-    private static void rememberLotLabel(Map<String, String> lotLabels, String key, String libelle) {
+    private static void rememberLotLabel(
+            Map<String, String> lotLabels, String key, String libelle, int baseScore) {
         if (!StringUtils.hasText(libelle) || !isPlausibleLotKey(key)) {
             return;
         }
         String label = libelle.trim();
         String existing = lotLabels.get(key);
-        if (existing == null || label.length() > existing.length()) {
+        if (existing == null) {
+            lotLabels.put(key, label);
+            return;
+        }
+        int newScore = lotLabelScore(label) + baseScore;
+        int oldScore = lotLabelScore(existing); // intrinsic only — don't forget chapter bonuses
+        if (newScore > oldScore) {
             lotLabels.put(key, label);
         }
+    }
+
+    /**
+     * Prefers chapter titles (SOUS LOT / TERRASSEMENT-GROS ŒUVRE) over subsection names
+     * (MAÇONNERIES, ENDUITS…) that share the same lot prefix.
+     */
+    private static int lotLabelScore(String label) {
+        if (label == null || label.isBlank()) {
+            return Integer.MIN_VALUE;
+        }
+        String u = label.toUpperCase(Locale.ROOT);
+        int score = 0;
+        if (u.contains("SOUS LOT") || u.matches(".*\\bLOT\\s*N?[°ºO]?\\s*\\d+.*")) {
+            score += 80;
+        }
+        if (u.contains("TERRASSEMENT")
+                || u.contains("GROS OEUVRE")
+                || u.contains("GROS-OEUVRE")
+                || u.contains("GROS ŒUVRE")
+                || u.contains("GROS-ŒUVRE")) {
+            score += 100;
+        }
+        if (u.contains("ELECTRIC")
+                || u.contains("CHARPENTE")
+                || u.contains("PLOMBERIE")
+                || u.contains("PEINTURE")
+                || u.contains("MENUISERIE")
+                || u.contains("FAUX PLAFOND")
+                || u.contains("FLUIDE")) {
+            score += 40;
+        }
+        // Typical subsections of gros œuvre — never promote as lot title.
+        if (u.contains("MAÇONNER")
+                || u.contains("MACONNER")
+                || u.contains("CLOISON")
+                || u.contains("ENDUIT")
+                || u.contains("DALLAGE")
+                || u.contains("REGARD")
+                || u.contains("FONDATION")
+                || u.contains("DIVERS")
+                || u.startsWith("PORTE ")
+                || u.contains("SAVON")
+                || u.contains("PAPIER")) {
+            score -= 80;
+        }
+        score += Math.min(label.length(), 40);
+        return score;
+    }
+
+    private static boolean looksLikeLotChapterTitle(String libelle) {
+        if (libelle == null || libelle.isBlank()) {
+            return false;
+        }
+        String u = libelle.toUpperCase(Locale.ROOT);
+        if (u.startsWith("PORTE ")
+                || u.contains("SAVON")
+                || u.contains("PAPIER")
+                || u.contains("ROBINET")
+                || u.contains("MIROIR")) {
+            return false;
+        }
+        if (u.contains("TERRASSEMENT")
+                || u.contains("GROS")
+                || u.contains("ELECTRIC")
+                || u.contains("CHARPENTE")
+                || u.contains("PLOMBERIE")
+                || u.contains("PEINTURE")
+                || u.contains("MENUISERIE")
+                || u.contains("FAUX PLAFOND")
+                || u.contains("FLUIDE")
+                || u.contains("FRIGORIF")
+                || u.contains("SOUS LOT")
+                || u.matches(".*\\bLOT\\s*\\d+.*")) {
+            return true;
+        }
+        return libelle.trim().length() >= 15;
+    }
+
+    private static String lotKeyFromSousLotLibelle(String libelle) {
+        if (libelle == null || libelle.isBlank()) {
+            return null;
+        }
+        java.util.regex.Matcher m = java.util.regex.Pattern
+                .compile("(?:SOUS\\s*)?LOT\\s*N?[°ºo]?\\s*(\\d+)", java.util.regex.Pattern.CASE_INSENSITIVE)
+                .matcher(libelle);
+        if (m.find()) {
+            return String.valueOf(Integer.parseInt(m.group(1)));
+        }
+        return null;
+    }
+
+    private static String chapterTitleFromSousLot(String libelle) {
+        if (libelle == null) {
+            return null;
+        }
+        String cleaned = libelle
+                .replaceAll("(?i)^\\s*SOUS\\s*LOT\\s*N?[°ºo]?\\s*\\d+\\s*[:.\\-–—]?\\s*", "")
+                .trim();
+        return cleaned.isEmpty() ? libelle.trim() : cleaned;
     }
 
     private static boolean isPlausibleLotKey(String key) {
@@ -256,13 +390,36 @@ public class BordereauHybridAssembler {
                 if (PdfBordereauLayoutParser.isMarketTitleNoise(row.libelle())) {
                     continue;
                 }
-                currentLot = newGroup(DpgfNoeud.TYPE_LOT, row);
-                tree.getArbre().add(currentLot);
-                currentSousLot = null;
+                String chapterKey = lotKeyFromSousLotLibelle(row.libelle());
+                if (chapterKey != null) {
+                    // « SOUS LOT N° X : TITLE » → lot racine
+                    currentLot = newGroup(
+                            DpgfNoeud.TYPE_LOT,
+                            chapterKey,
+                            chapterTitleFromSousLot(row.libelle()));
+                    tree.getArbre().add(currentLot);
+                    currentSousLot = null;
+                } else {
+                    // Sous-section (ex. 1-05 MAÇONNERIES) → enfant, pas racine
+                    if (currentLot == null) {
+                        currentLot = newGroup(DpgfNoeud.TYPE_LOT, "1", "Lot 1");
+                        tree.getArbre().add(currentLot);
+                    }
+                    currentSousLot = newGroup(DpgfNoeud.TYPE_SOUS_LOT, row);
+                    currentLot.getEnfants().add(currentSousLot);
+                }
                 continue;
             }
             if (row.kind() == BordereauRowCandidate.Kind.SECTION) {
                 if (PdfBordereauLayoutParser.isMarketTitleNoise(row.libelle())) {
+                    continue;
+                }
+                if (isTopLevelSection(row.code()) && currentLot == null
+                        && looksLikeLotChapterTitle(row.libelle())) {
+                    // « 1 - TERRASSEMENT - GROS-ŒUVRE » devient le lot racine
+                    currentLot = newGroup(DpgfNoeud.TYPE_LOT, row);
+                    tree.getArbre().add(currentLot);
+                    currentSousLot = null;
                     continue;
                 }
                 if (currentLot == null) {

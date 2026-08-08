@@ -11,36 +11,25 @@
               <span class="dsh__pill dsh__pill--lock">Structure figée</span>
             }
             @if (clientMissing()) {
-              <span class="dsh__pill dsh__pill--warn">Client manquant</span>
+              <span class="dsh__pill dsh__pill--warn">Partner non lié</span>
             }
           </div>
         </div>
         <div class="dsh__meta">
-          @if (modifiable()) {
-            <div class="dsh__client-edit">
-              <app-client-partner-select
-                controlId="dossier-header-client"
-                label="Client *"
-                placeholder="Sélectionner un client Partner"
-                [required]="true"
-                [disabled]="clientSaving()"
-                [clientId]="s.clientId ?? null"
-                [clientNom]="s.clientNom ?? null"
-                (selectionChange)="onClientSelection($event)"
-              />
-            </div>
-          } @else if (s.clientId && s.clientNom) {
+          @if (s.clientId && s.clientNom) {
             <a class="dsh__client-link" [routerLink]="['/ventes/clients', s.clientId]">
               {{ s.clientNom }}
             </a>
-            <span class="dsh__sep" aria-hidden="true">·</span>
           } @else if (s.clientNom) {
             <span>{{ s.clientNom }}</span>
-            <span class="dsh__sep" aria-hidden="true">·</span>
           } @else {
             <span class="dsh__client-missing">Client non renseigné</span>
-            <span class="dsh__sep" aria-hidden="true">·</span>
           }
+          @if (s.chargeEtudeNom || s.chargeEtudeUserId) {
+            <span class="dsh__sep" aria-hidden="true">·</span>
+            <span>Chargé d’étude {{ s.chargeEtudeNom || s.chargeEtudeUserId }}</span>
+          }
+          <span class="dsh__sep" aria-hidden="true">·</span>
           <span>Rév. {{ s.bordereauRevision }}</span>
           @if (s.updatedAt) {
             <span class="dsh__sep" aria-hidden="true">·</span>

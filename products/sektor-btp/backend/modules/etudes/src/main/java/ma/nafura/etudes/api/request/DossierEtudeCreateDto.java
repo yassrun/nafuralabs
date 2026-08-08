@@ -18,13 +18,21 @@ public class DossierEtudeCreateDto {
     @Size(max = 50)
     private String numero;
 
-    /** Partner UUID (rôle CLIENT) — obligatoire dès la création. */
-    @NotBlank
+    /** Partner UUID (rôle CLIENT) — optionnel jusqu'à conclusion du marché. */
     @Size(max = 100)
     private String clientId;
 
+    /** Nom MOA libre (CPS / saisie) — requis si pas de clientId Partner. */
     @Size(max = 255)
     private String clientNom;
+
+    /** User IAM (UUID) — rôle BTP_INGENIEUR requis. */
+    @NotBlank
+    @Size(max = 100)
+    private String chargeEtudeUserId;
+
+    @Size(max = 255)
+    private String chargeEtudeNom;
 
     @Size(max = 100)
     private String cpsDocumentId;

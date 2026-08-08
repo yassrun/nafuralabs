@@ -10,11 +10,6 @@ import { RouterLink } from '@angular/router';
 
 import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
 
-import {
-  ClientPartnerSelectComponent,
-  type ClientPartnerSelection,
-} from '@app/shared/components/client-partner-select/client-partner-select.component';
-
 import type { DossierEtudeSynthese } from '../../services/dossier-etude-api.service';
 import {
   DOSSIER_STATUT_VARIANTS,
@@ -26,19 +21,16 @@ import {
   selector: 'app-dossier-summary-header',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterLink, MadCurrencyPipe, ClientPartnerSelectComponent],
+  imports: [CommonModule, RouterLink, MadCurrencyPipe],
   templateUrl: './dossier-summary-header.component.html',
   styleUrl: './dossier-summary-header.component.scss',
 })
 export class DossierSummaryHeaderComponent {
   readonly synthese = input.required<DossierEtudeSynthese>();
-  readonly modifiable = input(false);
-  readonly clientSaving = input(false);
   /** True when the dossier has a linked DPGF (bordereau printable). */
   readonly hasDpgf = input(false);
 
   readonly action = output<string>();
-  readonly clientChange = output<ClientPartnerSelection>();
 
   readonly statutLabel = computed(() => labelStatutDossier(this.synthese().status));
   readonly phaseLabel = computed(() => labelPhase(this.synthese().phase));
@@ -46,9 +38,7 @@ export class DossierSummaryHeaderComponent {
     () => DOSSIER_STATUT_VARIANTS[this.synthese().status] ?? 'default',
   );
 
-  readonly clientMissing = computed(
-    () => this.modifiable() && !this.synthese().clientId,
-  );
+  readonly clientMissing = computed(() => !this.synthese().clientId);
 
   readonly ctaLabel = computed(() => {
     switch (this.synthese().actionPrincipale) {
@@ -94,10 +84,6 @@ export class DossierSummaryHeaderComponent {
 
   readonly showPrintBordereau = computed(() => this.hasDpgf());
   readonly showPrintSynthese = computed(() => true);
-
-  onClientSelection(sel: ClientPartnerSelection): void {
-    this.clientChange.emit(sel);
-  }
 
   emitAction(code?: string): void {
     const action = code ?? this.synthese().actionPrincipale;

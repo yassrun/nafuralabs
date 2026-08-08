@@ -56,6 +56,19 @@ VALUES (
 ON CONFLICT (tenant_id, user_id, role_code) DO UPDATE SET
     updated_at = NOW();
 
+-- Also BTP_INGENIEUR so Cursor QA apparaît dans le picker « chargé d'étude »
+INSERT INTO tenant_user_role (id, tenant_id, user_id, role_code, created_at, updated_at)
+VALUES (
+    'c0a50100-c015-4000-a000-000000000005',
+    'ab78763b-6aa9-684f-b979-7aa8506450f8',
+    'c0a50100-c015-4000-a000-000000000001',
+    'BTP_INGENIEUR',
+    NOW(),
+    NOW()
+)
+ON CONFLICT (tenant_id, user_id, role_code) DO UPDATE SET
+    updated_at = NOW();
+
 -- Cursor QA is a single-user local loop: allow author to approve own études.
 INSERT INTO tenant_setting (id, tenant_id, setting_key, value)
 VALUES (

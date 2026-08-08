@@ -1,8 +1,8 @@
 <section class="creer">
   <h1 class="creer__titre">Nouvelle étude / appel d'offres</h1>
   <p class="creer__aide">
-    Un seul formulaire crée le dossier d'étude et l'appel d'offres lié. Ensuite : dépôt des
-    pièces du marché (BDP, CPS, etc.).
+    Importez le CPS pour préremplir (IA) — chaque suggestion se valide champ par champ. Le MOA
+    reste un texte libre ; le client Partner se crée à la conclusion du marché.
   </p>
 
   @if (erreur(); as message) {
@@ -10,11 +10,65 @@
   }
 
   <form class="creer__form" (ngSubmit)="creer()">
+    <div
+      class="creer__cps"
+      [attr.data-phase]="cpsPhase()"
+    >
+      <div class="creer__cps-head">
+        <div>
+          <span class="creer__label">Importer le CPS <span class="creer__optionnel">(optionnel)</span></span>
+          <p class="creer__hint">
+            @switch (cpsPhase()) {
+              @case ('idle') { PDF CPS / CCTP — propositions IA ensuite }
+              @case ('uploading') { Dépôt du fichier… }
+              @case ('indexing') { Indexation et extraction… }
+              @case ('ready') { {{ cpsFileName() }} — propositions prêtes }
+              @case ('partial') { {{ cpsFileName() }} — extraction partielle, continuez en manuel }
+              @case ('error') { Échec import — saisie manuelle possible }
+            }
+          </p>
+        </div>
+        <label class="creer__cps-btn">
+          Parcourir
+          <input
+            type="file"
+            accept=".pdf,application/pdf"
+            hidden
+            [disabled]="cpsPhase() === 'uploading' || cpsPhase() === 'indexing' || enCours()"
+            (change)="onCpsFile($event)"
+          />
+        </label>
+      </div>
+      @if (iaConfiance(); as conf) {
+        <span class="creer__ia-global">IA · {{ (conf * 100) | number: '1.0-0' }}%</span>
+      }
+      @if (hasPendingIa()) {
+        <div class="creer__cps-actions">
+          <button type="button" class="creer__bouton" (click)="accepterTout()">Tout accepter</button>
+          <button type="button" class="creer__bouton" (click)="ignorerTout()">Tout ignorer</button>
+        </div>
+      }
+    </div>
+
     <fieldset class="creer__groupe">
       <legend class="creer__legend">Marché</legend>
 
-      <label class="creer__champ">
-        <span class="creer__label">Objet <span aria-hidden="true">*</span></span>
+      <label class="creer__champ" [attr.data-ia]="iaStatus('objet')">
+        <span class="creer__label-row">
+          <span class="creer__label">Objet <span aria-hidden="true">*</span></span>
+          @if (iaPending('objet')) {
+            <span class="creer__ia-badge">IA</span>
+            <span class="creer__ia-actions">
+              <button type="button" class="creer__ia-ok" (click)="accepter('objet')">Accepter</button>
+              <button type="button" class="creer__ia-no" (click)="ignorer('objet')">Ignorer</button>
+            </span>
+          } @else if (iaStatus('objet') === 'accepted') {
+            <span class="creer__ia-badge creer__ia-badge--ok">accepté</span>
+          }
+        </span>
+        @if (iaPending('objet')) {
+          <p class="creer__ia-hint">Proposition : {{ iaValue('objet') }}</p>
+        }
         <input
           name="objet"
           required
@@ -25,20 +79,69 @@
         />
       </label>
 
-      <div class="creer__champ">
-        <app-client-partner-select
-          controlId="dossier-create-client"
-          label="Client / MOA *"
-          placeholder="Sélectionner un client Partner"
-          [required]="true"
-          [clientId]="clientId()"
-          [clientNom]="clientNom()"
-          (selectionChange)="onClientSelection($event)"
+      <label class="creer__champ" [attr.data-ia]="iaStatus('clientNom')">
+        <span class="creer__label-row">
+          <span class="creer__label">MOA (texte) <span aria-hidden="true">*</span></span>
+          @if (iaPending('clientNom')) {
+            <span class="creer__ia-badge">IA</span>
+            <span class="creer__ia-actions">
+              <button type="button" class="creer__ia-ok" (click)="accepter('clientNom')">Accepter</button>
+              <button type="button" class="creer__ia-no" (click)="ignorer('clientNom')">Ignorer</button>
+            </span>
+          } @else if (iaStatus('clientNom') === 'accepted') {
+            <span class="creer__ia-badge creer__ia-badge--ok">accepté</span>
+          }
+        </span>
+        @if (iaPending('clientNom')) {
+          <p class="creer__ia-hint">Proposition : {{ iaValue('clientNom') }}</p>
+        }
+        <input
+          name="clientNom"
+          required
+          placeholder="Commune de Casablanca"
+          [ngModel]="clientNom()"
+          (ngModelChange)="clientNom.set($event)"
         />
-      </div>
+        <span class="creer__hint">Pas de Partner ici — création client à la conclusion du marché.</span>
+      </label>
 
       <label class="creer__champ">
-        <span class="creer__label">Date limite de dépôt <span aria-hidden="true">*</span></span>
+        <span class="creer__label">Chargé d’étude <span aria-hidden="true">*</span></span>
+        <select
+          name="chargeEtude"
+          required
+          [ngModel]="chargeEtudeUserId()"
+          (ngModelChange)="chargeEtudeUserId.set($event || null)"
+        >
+          <option [ngValue]="null" disabled>Sélectionner un ingénieur (BTP_INGENIEUR)</option>
+          @for (ing of ingenieurs(); track ing.userId) {
+            <option [ngValue]="ing.userId">{{ ing.displayName }} — {{ ing.email }}</option>
+          }
+        </select>
+        @if (ingenieurs().length === 0) {
+          <span class="creer__hint">
+            Aucun utilisateur avec le rôle Ingénieur. Affectez le rôle BTP_INGENIEUR dans
+            Administration → Membres.
+          </span>
+        }
+      </label>
+
+      <label class="creer__champ" [attr.data-ia]="iaStatus('dateLimiteDepot')">
+        <span class="creer__label-row">
+          <span class="creer__label">Date limite de dépôt <span aria-hidden="true">*</span></span>
+          @if (iaPending('dateLimiteDepot')) {
+            <span class="creer__ia-badge">IA</span>
+            <span class="creer__ia-actions">
+              <button type="button" class="creer__ia-ok" (click)="accepter('dateLimiteDepot')">Accepter</button>
+              <button type="button" class="creer__ia-no" (click)="ignorer('dateLimiteDepot')">Ignorer</button>
+            </span>
+          } @else if (iaStatus('dateLimiteDepot') === 'accepted') {
+            <span class="creer__ia-badge creer__ia-badge--ok">accepté</span>
+          }
+        </span>
+        @if (iaPending('dateLimiteDepot')) {
+          <p class="creer__ia-hint">Proposition : {{ iaValue('dateLimiteDepot') }}</p>
+        }
         <input
           type="date"
           name="dateLimiteDepot"
@@ -53,8 +156,22 @@
       <legend class="creer__legend">Appel d'offres</legend>
 
       <div class="creer__grille">
-        <label class="creer__champ">
-          <span class="creer__label">Référence <span class="creer__optionnel">(optionnel)</span></span>
+        <label class="creer__champ" [attr.data-ia]="iaStatus('aoReference')">
+          <span class="creer__label-row">
+            <span class="creer__label">Référence <span class="creer__optionnel">(optionnel)</span></span>
+            @if (iaPending('aoReference')) {
+              <span class="creer__ia-badge">IA</span>
+              <span class="creer__ia-actions">
+                <button type="button" class="creer__ia-ok" (click)="accepter('aoReference')">Accepter</button>
+                <button type="button" class="creer__ia-no" (click)="ignorer('aoReference')">Ignorer</button>
+              </span>
+            } @else if (iaStatus('aoReference') === 'accepted') {
+              <span class="creer__ia-badge creer__ia-badge--ok">accepté</span>
+            }
+          </span>
+          @if (iaPending('aoReference')) {
+            <p class="creer__ia-hint">Proposition : {{ iaValue('aoReference') }}</p>
+          }
           <input
             name="aoReference"
             placeholder="AO-2026-014"
@@ -63,8 +180,22 @@
           />
         </label>
 
-        <label class="creer__champ">
-          <span class="creer__label">Type</span>
+        <label class="creer__champ" [attr.data-ia]="iaStatus('aoType')">
+          <span class="creer__label-row">
+            <span class="creer__label">Type</span>
+            @if (iaPending('aoType')) {
+              <span class="creer__ia-badge">IA</span>
+              <span class="creer__ia-actions">
+                <button type="button" class="creer__ia-ok" (click)="accepter('aoType')">Accepter</button>
+                <button type="button" class="creer__ia-no" (click)="ignorer('aoType')">Ignorer</button>
+              </span>
+            } @else if (iaStatus('aoType') === 'accepted') {
+              <span class="creer__ia-badge creer__ia-badge--ok">accepté</span>
+            }
+          </span>
+          @if (iaPending('aoType')) {
+            <p class="creer__ia-hint">Proposition : {{ iaValue('aoType') }}</p>
+          }
           <select
             name="aoType"
             [ngModel]="aoType()"
@@ -75,8 +206,22 @@
           </select>
         </label>
 
-        <label class="creer__champ">
-          <span class="creer__label">Ville</span>
+        <label class="creer__champ" [attr.data-ia]="iaStatus('ville')">
+          <span class="creer__label-row">
+            <span class="creer__label">Ville</span>
+            @if (iaPending('ville')) {
+              <span class="creer__ia-badge">IA</span>
+              <span class="creer__ia-actions">
+                <button type="button" class="creer__ia-ok" (click)="accepter('ville')">Accepter</button>
+                <button type="button" class="creer__ia-no" (click)="ignorer('ville')">Ignorer</button>
+              </span>
+            } @else if (iaStatus('ville') === 'accepted') {
+              <span class="creer__ia-badge creer__ia-badge--ok">accepté</span>
+            }
+          </span>
+          @if (iaPending('ville')) {
+            <p class="creer__ia-hint">Proposition : {{ iaValue('ville') }}</p>
+          }
           <input
             name="ville"
             placeholder="Casablanca"
@@ -85,8 +230,22 @@
           />
         </label>
 
-        <label class="creer__champ">
-          <span class="creer__label">Ouverture des plis</span>
+        <label class="creer__champ" [attr.data-ia]="iaStatus('dateOuverturePlis')">
+          <span class="creer__label-row">
+            <span class="creer__label">Ouverture des plis</span>
+            @if (iaPending('dateOuverturePlis')) {
+              <span class="creer__ia-badge">IA</span>
+              <span class="creer__ia-actions">
+                <button type="button" class="creer__ia-ok" (click)="accepter('dateOuverturePlis')">Accepter</button>
+                <button type="button" class="creer__ia-no" (click)="ignorer('dateOuverturePlis')">Ignorer</button>
+              </span>
+            } @else if (iaStatus('dateOuverturePlis') === 'accepted') {
+              <span class="creer__ia-badge creer__ia-badge--ok">accepté</span>
+            }
+          </span>
+          @if (iaPending('dateOuverturePlis')) {
+            <p class="creer__ia-hint">Proposition : {{ iaValue('dateOuverturePlis') }}</p>
+          }
           <input
             type="date"
             name="dateOuverturePlis"
@@ -95,8 +254,22 @@
           />
         </label>
 
-        <label class="creer__champ">
-          <span class="creer__label">Délai d'exécution (jours)</span>
+        <label class="creer__champ" [attr.data-ia]="iaStatus('delaiExecutionJours')">
+          <span class="creer__label-row">
+            <span class="creer__label">Délai d'exécution (jours)</span>
+            @if (iaPending('delaiExecutionJours')) {
+              <span class="creer__ia-badge">IA</span>
+              <span class="creer__ia-actions">
+                <button type="button" class="creer__ia-ok" (click)="accepter('delaiExecutionJours')">Accepter</button>
+                <button type="button" class="creer__ia-no" (click)="ignorer('delaiExecutionJours')">Ignorer</button>
+              </span>
+            } @else if (iaStatus('delaiExecutionJours') === 'accepted') {
+              <span class="creer__ia-badge creer__ia-badge--ok">accepté</span>
+            }
+          </span>
+          @if (iaPending('delaiExecutionJours')) {
+            <p class="creer__ia-hint">Proposition : {{ iaValue('delaiExecutionJours') }}</p>
+          }
           <input
             type="number"
             name="delai"
@@ -106,8 +279,22 @@
           />
         </label>
 
-        <label class="creer__champ">
-          <span class="creer__label">Estimation MOA HT</span>
+        <label class="creer__champ" [attr.data-ia]="iaStatus('estimationMoaHt')">
+          <span class="creer__label-row">
+            <span class="creer__label">Estimation MOA HT</span>
+            @if (iaPending('estimationMoaHt')) {
+              <span class="creer__ia-badge">IA</span>
+              <span class="creer__ia-actions">
+                <button type="button" class="creer__ia-ok" (click)="accepter('estimationMoaHt')">Accepter</button>
+                <button type="button" class="creer__ia-no" (click)="ignorer('estimationMoaHt')">Ignorer</button>
+              </span>
+            } @else if (iaStatus('estimationMoaHt') === 'accepted') {
+              <span class="creer__ia-badge creer__ia-badge--ok">accepté</span>
+            }
+          </span>
+          @if (iaPending('estimationMoaHt')) {
+            <p class="creer__ia-hint">Proposition : {{ iaValue('estimationMoaHt') }}</p>
+          }
           <input
             type="number"
             name="estimation"
@@ -118,8 +305,22 @@
           />
         </label>
 
-        <label class="creer__champ">
-          <span class="creer__label">Caution provisoire</span>
+        <label class="creer__champ" [attr.data-ia]="iaStatus('cautionProvisoire')">
+          <span class="creer__label-row">
+            <span class="creer__label">Caution provisoire</span>
+            @if (iaPending('cautionProvisoire')) {
+              <span class="creer__ia-badge">IA</span>
+              <span class="creer__ia-actions">
+                <button type="button" class="creer__ia-ok" (click)="accepter('cautionProvisoire')">Accepter</button>
+                <button type="button" class="creer__ia-no" (click)="ignorer('cautionProvisoire')">Ignorer</button>
+              </span>
+            } @else if (iaStatus('cautionProvisoire') === 'accepted') {
+              <span class="creer__ia-badge creer__ia-badge--ok">accepté</span>
+            }
+          </span>
+          @if (iaPending('cautionProvisoire')) {
+            <p class="creer__ia-hint">Proposition : {{ iaValue('cautionProvisoire') }} %</p>
+          }
           <input
             type="number"
             name="cautionProv"
@@ -130,8 +331,22 @@
           />
         </label>
 
-        <label class="creer__champ">
-          <span class="creer__label">Caution définitive</span>
+        <label class="creer__champ" [attr.data-ia]="iaStatus('cautionDefinitive')">
+          <span class="creer__label-row">
+            <span class="creer__label">Caution définitive</span>
+            @if (iaPending('cautionDefinitive')) {
+              <span class="creer__ia-badge">IA</span>
+              <span class="creer__ia-actions">
+                <button type="button" class="creer__ia-ok" (click)="accepter('cautionDefinitive')">Accepter</button>
+                <button type="button" class="creer__ia-no" (click)="ignorer('cautionDefinitive')">Ignorer</button>
+              </span>
+            } @else if (iaStatus('cautionDefinitive') === 'accepted') {
+              <span class="creer__ia-badge creer__ia-badge--ok">accepté</span>
+            }
+          </span>
+          @if (iaPending('cautionDefinitive')) {
+            <p class="creer__ia-hint">Proposition : {{ iaValue('cautionDefinitive') }} %</p>
+          }
           <input
             type="number"
             name="cautionDef"
@@ -151,7 +366,7 @@
         class="creer__bouton creer__bouton--principal"
         [disabled]="!peutCreer()"
       >
-        {{ enCours() ? 'Création…' : 'Créer et commencer' }}
+        {{ enCours() ? 'Enregistrement…' : 'Créer et commencer' }}
       </button>
     </div>
   </form>

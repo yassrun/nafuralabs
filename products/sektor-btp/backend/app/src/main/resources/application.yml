@@ -57,7 +57,8 @@ nafura:
     extraction:
       poll-ms: ${NAFURA_ETUDES_EXTRACTION_POLL_MS:2000}
     bordereau:
-      # adaptive = local parse + targeted LLM; legacy = one-shot; shadow = adaptive + compare legacy
+      # adaptive = local + escalate vision si texte sale ; vision = page/page forceMedia ;
+      # legacy = one-shot ; shadow = adaptive + compare legacy
       strategy: ${NAFURA_ETUDES_BORDEREAU_STRATEGY:adaptive}
       # Deprecated: use strategy. Kept for backward-compat scripts (true → adaptive).
       hybrid-enabled: ${NAFURA_ETUDES_BORDEREAU_HYBRID:true}

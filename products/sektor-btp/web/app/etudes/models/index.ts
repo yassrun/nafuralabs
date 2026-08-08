@@ -426,6 +426,9 @@ export interface DossierEtude {
   objet: string;
   clientId?: string;
   clientNom?: string;
+  /** User IAM (UUID) — rôle BTP_INGENIEUR. */
+  chargeEtudeUserId?: string;
+  chargeEtudeNom?: string;
   cpsDocumentId?: string;
   bordereauDocumentId?: string;
   appelOffreClientId?: string;
@@ -463,6 +466,8 @@ export type DossierEtudeCreate = Pick<DossierEtude, 'objet'> &
       | 'numero'
       | 'clientId'
       | 'clientNom'
+      | 'chargeEtudeUserId'
+      | 'chargeEtudeNom'
       | 'cpsDocumentId'
       | 'bordereauDocumentId'
       | 'appelOffreClientId'
@@ -538,6 +543,9 @@ export interface MarcheProposeMetadonnees {
   reference?: string | null;
   delaiExecutionJours?: number | null;
   estimationMoaHt?: number | null;
+  dateOuverturePlis?: string | null;
+  cautionProvisoire?: number | null;
+  cautionDefinitive?: number | null;
 }
 
 export interface MarcheProposePiece {

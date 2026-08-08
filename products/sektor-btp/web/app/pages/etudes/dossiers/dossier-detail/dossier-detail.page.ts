@@ -369,8 +369,7 @@ export class DossierDetailPage {
       probleme.message === 'etudes.client.introuvable' ||
       probleme.message === 'etudes.client.role_invalide'
     ) {
-      // Le sélecteur client est dans l'entête — on reste sur l'étape courante.
-      document.getElementById('dossier-header-client')?.focus();
+      // Client en lecture seule dans l'entête — le corriger hors parcours détail.
       return;
     }
     const gateEtape = probleme.etape ?? this.gateCourant()?.etape ?? 3;
