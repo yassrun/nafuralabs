@@ -738,7 +738,7 @@
       "chiffrage": {
         "prix_absent": "Prix unitaire de vente manquant ou nul.",
         "taux_manquants": "Frais généraux ou marge bénéficiaire manquants sur le DPU.",
-        "client_manquant": "Sélectionnez un client Partner avant de soumettre le chiffrage."
+        "client_manquant": "Sélectionnez un client Partner avant de générer le devis."
       },
       "non_franchie": "Cette étape ne peut pas encore être franchie.",
       "corriger": "Corriger"

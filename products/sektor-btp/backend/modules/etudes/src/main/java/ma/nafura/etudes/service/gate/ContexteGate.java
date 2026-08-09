@@ -13,8 +13,8 @@ import ma.nafura.etudes.domain.model.DpgfNoeud;
  * @param hasBordereau au moins une pièce de type bordereau (ou CPS+bordereau)
  * @param hasCps au moins une pièce de type CPS (ou CPS+bordereau)
  * @param piecesAttendues checklist des pièces attendues (peut être vide sur dossiers legacy)
- * @param hasClientId un clientId est renseigné sur le dossier
- * @param clientValide le clientId résout un Partner CLIENT du tenant
+ * @param hasClientId un clientId est renseigné sur le dossier (info ; Partner exigé au devis)
+ * @param clientValide le clientId résout un Partner CLIENT du tenant (info ; Partner exigé au devis)
  */
 public record ContexteGate(
         List<DpgfNoeud> articles,

@@ -362,14 +362,6 @@ export class DossierDetailPage {
 
   /** Ouvre l'article fautif — étape UI selon la gate d'origine. */
   corriger(probleme: ProblemeGate): void {
-    if (
-      probleme.message === 'etudes.gate.chiffrage.client_manquant' ||
-      probleme.message === 'etudes.client.introuvable' ||
-      probleme.message === 'etudes.client.role_invalide'
-    ) {
-      // Client en lecture seule dans l'entête — le corriger hors parcours détail.
-      return;
-    }
     const gateEtape = probleme.etape ?? this.gateCourant()?.etape ?? 3;
     const uiCible = uiEtapePourGate(gateEtape);
     const backendCible = uiToBackendEtape(uiCible);

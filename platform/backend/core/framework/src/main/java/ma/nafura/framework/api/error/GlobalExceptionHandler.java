@@ -11,6 +11,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -117,6 +118,37 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 correlationId(request));
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    /**
+     * Preserve explicit HTTP statuses (e.g. conversation 404/403). Without this,
+     * {@link #handleUnhandled} would collapse them into a generic 500.
+     */
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ApiError> handleResponseStatus(
+            ResponseStatusException ex,
+            HttpServletRequest request) {
+        HttpStatus status = HttpStatus.resolve(ex.getStatusCode().value());
+        if (status == null) {
+            status = HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+        String code = switch (status) {
+            case NOT_FOUND -> "NOT_FOUND";
+            case FORBIDDEN -> "FORBIDDEN";
+            case BAD_REQUEST -> "BAD_REQUEST";
+            case CONFLICT -> "CONFLICT";
+            case PRECONDITION_FAILED -> "PRECONDITION_FAILED";
+            default -> "HTTP_" + status.value();
+        };
+        String message = ex.getReason() != null && !ex.getReason().isBlank()
+                ? ex.getReason()
+                : status.getReasonPhrase();
+        ApiError error = ApiError.simple(
+                code,
+                "error." + status.value(),
+                message,
+                correlationId(request));
+        return ResponseEntity.status(status).body(error);
     }
 
     @ExceptionHandler({PayloadTooLargeException.class, MaxUploadSizeExceededException.class})

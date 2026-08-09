@@ -338,26 +338,25 @@ class GatesEtudeTest {
     }
 
     @Test
-    void chiffrage_sans_client_est_bloquant() {
+    void chiffrage_sans_partner_n_est_pas_bloque() {
+        // MOA texte libre OK pendant l'étude — Partner exigé à la génération devis.
         DpgfNoeud a = article("1-1", "m3", "70", DpgfNoeud.MODE_FOURNI);
         a.setPrixUnitaire(new BigDecimal("100"));
         ResultatGate r = new GatesEtude.GateChiffrage(prixDpuRepository)
                 .evaluer(ContexteGate.avecClient(ContexteGate.deArticles(List.of(a)), false, false));
 
-        assertThat(r.passe()).isFalse();
-        assertThat(r.problemes()).extracting(ResultatGate.ProblemeGate::message)
-                .contains("etudes.gate.chiffrage.client_manquant");
+        assertThat(r.passe()).isTrue();
+        assertThat(r.problemes()).isEmpty();
     }
 
     @Test
-    void chiffrage_client_invalide_est_bloquant() {
+    void chiffrage_client_invalide_n_est_pas_bloque_ici() {
         DpgfNoeud a = article("1-1", "m3", "70", DpgfNoeud.MODE_FOURNI);
         a.setPrixUnitaire(new BigDecimal("100"));
         ResultatGate r = new GatesEtude.GateChiffrage(prixDpuRepository)
                 .evaluer(ContexteGate.avecClient(ContexteGate.deArticles(List.of(a)), true, false));
 
-        assertThat(r.passe()).isFalse();
-        assertThat(r.problemes()).extracting(ResultatGate.ProblemeGate::message)
-                .contains("etudes.client.introuvable");
+        assertThat(r.passe()).isTrue();
+        assertThat(r.problemes()).isEmpty();
     }
 }

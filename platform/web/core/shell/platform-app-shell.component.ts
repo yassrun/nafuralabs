@@ -2365,7 +2365,7 @@ export class PlatformAppShellComponent implements OnInit {
     });
   }
 
-  private async refreshConversation(mode: ConversationMode): Promise<void> {
+  private async refreshConversation(mode: ConversationMode, allowStaleRecovery = true): Promise<void> {
     const applicationId = this.applicationId();
     const conversationId = await this.ensureConversationSession(mode);
     if (!conversationId) return;
@@ -2386,12 +2386,18 @@ export class PlatformAppShellComponent implements OnInit {
       this.agentActions.set(actions);
     } catch (error) {
       if (version !== this.loadVersion) return;
-      if (error instanceof HttpErrorResponse && (error.status === 404 || error.status === 403)) {
+      // Stale localStorage session: 404/403 after ownership check, or legacy 500
+      // when ResponseStatusException was swallowed by the global handler.
+      if (
+        allowStaleRecovery &&
+        error instanceof HttpErrorResponse &&
+        (error.status === 404 || error.status === 403 || error.status === 500)
+      ) {
         this.conversationSessionIds.update((current) => ({ ...current, [mode]: null }));
         this.storeSessionId(mode, null);
         const recreated = await this.ensureConversationSession(mode, true);
         if (recreated) {
-          await this.refreshConversation(mode);
+          await this.refreshConversation(mode, false);
           return;
         }
       }

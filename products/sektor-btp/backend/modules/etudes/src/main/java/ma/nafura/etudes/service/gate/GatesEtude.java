@@ -279,7 +279,12 @@ public final class GatesEtude {
         }
     }
 
-    /** Étape 5 — chiffrage complet : taux renseignés et prix de vente établi. */
+    /**
+     * Étape 5 — chiffrage complet : taux renseignés et prix de vente établi.
+     *
+     * <p>Le Partner CLIENT n'est pas exigé ici (MOA texte libre autorisé pendant l'étude).
+     * Il est contrôlé à la génération du devis ({@code DevisService#createFromDossier}).
+     */
     @Component
     public static class GateChiffrage implements EtapeGate {
 
@@ -298,11 +303,6 @@ public final class GatesEtude {
         public ResultatGate evaluer(ContexteGate contexte) {
             List<DpgfNoeud> articles = contexte.articles();
             List<ProblemeGate> pbs = new ArrayList<>();
-            if (!contexte.hasClientId()) {
-                pbs.add(new ProblemeGate(null, null, null, "etudes.gate.chiffrage.client_manquant"));
-            } else if (!contexte.clientValide()) {
-                pbs.add(new ProblemeGate(null, null, null, "etudes.client.introuvable"));
-            }
             for (DpgfNoeud a : articles) {
                 if (a.getPrixUnitaire() == null
                         || a.getPrixUnitaire().compareTo(BigDecimal.ZERO) <= 0) {
