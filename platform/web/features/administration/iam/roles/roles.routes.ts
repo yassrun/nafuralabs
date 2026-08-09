@@ -8,7 +8,7 @@ export const ROLES_ROUTES: Routes = [
     loadComponent: () => import('./role-listing').then((m) => m.RoleListingPage),
     canActivate: [routePermissionGuard],
     data: {
-      permissions: ['administration.role.read'],
+      permissionsAny: ['administration.role.read', 'tenant.roles.read'],
       title: 'Roles',
     },
   },
@@ -17,7 +17,7 @@ export const ROLES_ROUTES: Routes = [
     loadComponent: () => import('./role-detail').then((m) => m.RoleDetailPage),
     canActivate: [routePermissionGuard],
     data: {
-      permissions: ['administration.role.create'],
+      permissionsAny: ['administration.role.create', 'tenant.roles.write'],
       title: 'New Role',
     },
   },
@@ -26,7 +26,7 @@ export const ROLES_ROUTES: Routes = [
     loadComponent: () => import('./role-detail').then((m) => m.RoleDetailPage),
     canActivate: [routePermissionGuard],
     data: {
-      permissions: ['administration.role.read'],
+      permissionsAny: ['administration.role.read', 'tenant.roles.read'],
       title: 'Role Details',
     },
   },

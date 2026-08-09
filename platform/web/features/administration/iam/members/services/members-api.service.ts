@@ -5,7 +5,7 @@ import { FeatureApiService } from '@lib/anatomy';
 import type { ListQuery, ListResponse } from '@lib/anatomy/types';
 import { TenantContextService } from '@core/tenant/tenant.context';
 
-import type { Member, MemberInvite, MemberUpdate } from '../models';
+import type { Member, MemberInvite, MemberRole, MemberUpdate } from '../models';
 
 interface TenantMemberRoleApiResponse {
   id: string;
@@ -13,17 +13,46 @@ interface TenantMemberRoleApiResponse {
   isSystem?: boolean;
 }
 
+/** Backend TenantMemberResponse.roles is List<String> (role codes). */
+type TenantMemberRolePayload = string | TenantMemberRoleApiResponse;
+
 interface TenantMemberApiResponse {
   userId: string;
   email: string;
   firstName: string | null;
   lastName: string | null;
   displayName: string | null;
-  roles: TenantMemberRoleApiResponse[];
+  roles: TenantMemberRolePayload[];
   status: string;
   joinedAt: string | null;
   lastActivityAt: string | null;
   invitationEmailStatus?: string | null;
+}
+
+const SYSTEM_ROLE_CODES = new Set([
+  'SUPER_ADMIN',
+  'OWNER',
+  'ADMIN',
+  'MANAGER',
+  'MEMBER',
+  'VIEWER',
+]);
+
+function toMemberRole(role: TenantMemberRolePayload): MemberRole {
+  if (typeof role === 'string') {
+    const id = role.trim().toUpperCase();
+    return {
+      id,
+      name: id,
+      isSystem: SYSTEM_ROLE_CODES.has(id),
+    };
+  }
+  const id = String(role.id ?? '').trim().toUpperCase();
+  return {
+    id,
+    name: role.name?.trim() || id,
+    isSystem: role.isSystem ?? SYSTEM_ROLE_CODES.has(id),
+  };
 }
 
 interface MemberListApiResponse {
@@ -151,6 +180,9 @@ export class MembersApiService extends FeatureApiService<
     const lastName = item.lastName ?? '';
     const displayName = item.displayName ?? (`${firstName} ${lastName}`.trim() || item.email);
     const status = this.fromApiStatus(item.status);
+    const roles = (item.roles ?? [])
+      .map((role) => toMemberRole(role))
+      .filter((role) => role.id.length > 0);
 
     return {
       id: item.userId,
@@ -159,8 +191,8 @@ export class MembersApiService extends FeatureApiService<
       lastName,
       displayName,
       status,
-      roles: item.roles ?? [],
-      roleIds: (item.roles ?? []).map((role) => role.id),
+      roles,
+      roleIds: roles.map((role) => role.id),
       invitedAt: status === 'invited' ? item.joinedAt : null,
       joinedAt: item.joinedAt,
       lastActivityAt: item.lastActivityAt,

@@ -19,9 +19,13 @@ import {
   resolvePosteChiffrageMode,
   type PosteChiffrageModeUi,
 } from '../../utils/poste-chiffrage-mode.util';
-import { PosteDecompositionPanelComponent } from '../poste-decomposition-panel/poste-decomposition-panel.component';
+import {
+  PosteDecompositionPanelComponent,
+  type PosteSaveSnapshot,
+} from '../poste-decomposition-panel/poste-decomposition-panel.component';
 
 export interface PosteChiffrageDrawerData {
+  /** Copie de travail — jamais la référence live de l’arbre. */
   poste: BordereauTreeRow;
   dossierId: string;
   cpsDocumentId: string | null;
@@ -34,6 +38,8 @@ export interface PosteChiffrageDrawerData {
 
 export interface PosteChiffrageDrawerResult {
   saved: boolean;
+  /** Présent uniquement si saved — pour patcher la tree à la fermeture. */
+  snapshot?: PosteSaveSnapshot;
 }
 
 @Component({
@@ -61,19 +67,23 @@ export class PosteChiffrageDrawerComponent {
 
   readonly panel = viewChild(PosteDecompositionPanelComponent);
   readonly dirty = signal(false);
-  readonly savedOnce = signal(false);
+  readonly closing = signal(false);
+
+  /** Copie isolée : toute édition reste dans le drawer jusqu’à Enregistrer et fermer. */
+  readonly posteDraft = signal<BordereauTreeRow>(structuredClone(this.data.poste));
+
   readonly modeUi = signal<PosteChiffrageModeUi>(
     modeUi(
       resolvePosteChiffrageMode({
-        mode: this.data.poste.mode,
-        prixUnitaire: this.data.poste.prixUnitaire,
+        mode: this.posteDraft().mode,
+        prixUnitaire: this.posteDraft().prixUnitaire,
       }),
     ),
   );
 
   /** Fil social platform — polymorphe sur le nœud DPGF. */
   readonly commentEntityType = 'dpgf_noeud';
-  readonly commentEntityId = this.data.poste.id ?? '';
+  readonly commentEntityId = this.posteDraft().id ?? '';
 
   onDirty(dirty: boolean): void {
     this.dirty.set(dirty);
@@ -84,23 +94,41 @@ export class PosteChiffrageDrawerComponent {
     this.modeUi.set(mode);
   }
 
-  onPanelChange(): void {
-    this.savedOnce.set(true);
-    this.dirty.set(false);
-  }
-
   async setMode(mode: PosteChiffrageModeUi): Promise<void> {
     if (this.modeUi() === mode) return;
     await this.panel()?.setModeUi(mode);
   }
 
-  async save(): Promise<void> {
+  /**
+   * CTA unique : persiste la copie, ferme, et renvoie le snapshot pour la tree.
+   * Sans save → `{ saved: false }` → tree intacte.
+   */
+  async saveAndClose(): Promise<void> {
+    if (this.closing()) return;
     const panel = this.panel();
-    if (!panel) return;
-    await panel.sauvegarderPoste();
+    if (!panel) {
+      this.dialogRef.close({ saved: false });
+      return;
+    }
+    if (!this.dirty()) {
+      this.dialogRef.close({ saved: false });
+      return;
+    }
+    this.closing.set(true);
+    try {
+      const snapshot = await panel.sauvegarderPoste();
+      if (!snapshot) return;
+      this.dirty.set(false);
+      this.data.onDirtyChange?.(false);
+      this.dialogRef.close({ saved: true, snapshot });
+    } finally {
+      this.closing.set(false);
+    }
   }
 
+  /** Abandon (✕) — tree non touchée. */
   async requestClose(): Promise<void> {
+    if (this.closing()) return;
     if (this.dirty()) {
       const ok = await this.confirmDialog.confirm({
         title: 'Modifications non enregistrées',
@@ -112,7 +140,7 @@ export class PosteChiffrageDrawerComponent {
       });
       if (!ok) return;
     }
-    this.dialogRef.close({ saved: this.savedOnce() });
+    this.dialogRef.close({ saved: false });
   }
 
   /** Appelé par le workspace avant de quitter l’étape. */

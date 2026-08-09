@@ -162,14 +162,12 @@ export class DossierDetailPage {
 
   readonly backLabel = computed(() => 'Précédent');
 
-  /** Hint complémentaire — les gates s’affichent déjà en une ligne compacte. */
-  readonly blocageHint = computed(() => {
-    if (!this.modifiable()) return undefined;
-    if (this.posteDirty() && this.etapeUi() === 3) {
-      return 'Enregistrez le poste courant avant de continuer';
-    }
-    return undefined;
-  });
+  /**
+   * Hint complémentaire — les gates s’affichent déjà en une ligne compacte.
+   * Ne jamais afficher le dirty poste ici : ça décale l’arbre à chaque frappe dans le drawer.
+   * Le dirty est géré par confirm à la navigation (suivant / quitter).
+   */
+  readonly blocageHint = computed(() => undefined);
 
   onPosteDirty(dirty: boolean): void {
     this.posteDirty.set(dirty);

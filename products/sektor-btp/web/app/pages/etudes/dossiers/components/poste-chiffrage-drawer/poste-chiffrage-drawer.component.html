@@ -2,22 +2,26 @@
   <header class="poste-drawer__header">
     <div class="poste-drawer__identite">
       <div class="poste-drawer__badges">
-        <span class="poste-drawer__code">{{ data.poste.code }}</span>
+        <span class="poste-drawer__code">{{ posteDraft().code }}</span>
         @if (dirty()) {
           <span class="poste-drawer__pill poste-drawer__pill--warn">Non enregistré</span>
-        } @else if (savedOnce()) {
-          <span class="poste-drawer__pill poste-drawer__pill--ok">Enregistré</span>
         }
       </div>
-      <h2 id="poste-drawer-title" class="poste-drawer__titre">{{ data.poste.libelle }}</h2>
+      <h2 id="poste-drawer-title" class="poste-drawer__titre">{{ posteDraft().libelle }}</h2>
       <p class="poste-drawer__meta">
-        <span>{{ data.poste.unite || '—' }}</span>
+        <span>{{ posteDraft().unite || '—' }}</span>
         <span aria-hidden="true">·</span>
-        <span>Qté {{ data.poste.quantite ?? '—' }}</span>
+        <span>Qté {{ posteDraft().quantite ?? '—' }}</span>
       </p>
     </div>
-    <nf-button variant="ghost" size="sm" (clicked)="requestClose()" aria-label="Fermer">
-      ✕ Fermer
+    <nf-button
+      variant="ghost"
+      size="sm"
+      [disabled]="closing() || !!panel()?.sauvegarde()"
+      (clicked)="requestClose()"
+      aria-label="Fermer sans enregistrer"
+    >
+      ✕
     </nf-button>
   </header>
 
@@ -26,7 +30,7 @@
       type="button"
       class="poste-drawer__toggle"
       [class.poste-drawer__toggle--active]="modeUi() === 'DECOMPOSE'"
-      [disabled]="!data.modifiable"
+      [disabled]="!data.modifiable || closing()"
       (click)="setMode('DECOMPOSE')"
     >
       Décomposé
@@ -35,7 +39,7 @@
       type="button"
       class="poste-drawer__toggle"
       [class.poste-drawer__toggle--active]="modeUi() === 'FOURNI'"
-      [disabled]="!data.modifiable"
+      [disabled]="!data.modifiable || closing()"
       (click)="setMode('FOURNI')"
     >
       Prix fourni
@@ -44,7 +48,7 @@
 
   <div class="poste-drawer__body">
     <app-poste-decomposition-panel
-      [poste]="data.poste"
+      [poste]="posteDraft()"
       [dossierId]="data.dossierId"
       [cpsDocumentId]="data.cpsDocumentId"
       [modifiable]="data.modifiable"
@@ -54,7 +58,6 @@
       [embedded]="true"
       (dirtyChange)="onDirty($event)"
       (modeUiChange)="onModeUi($event)"
-      (change)="onPanelChange()"
     />
 
     <section class="poste-drawer__comments" aria-label="Commentaires d'équipe">
@@ -78,7 +81,7 @@
 
   <footer class="poste-drawer__footer">
     <span class="poste-drawer__footer-status">
-      @if (panel()?.sauvegarde()) {
+      @if (closing() || panel()?.sauvegarde()) {
         Enregistrement…
       } @else if (dirty()) {
         Modifications non enregistrées
@@ -87,16 +90,17 @@
       }
     </span>
     <div class="poste-drawer__footer-actions">
-      <nf-button variant="secondary" size="sm" (clicked)="requestClose()">Fermer</nf-button>
       @if (data.modifiable) {
         <nf-button
           variant="primary"
           size="sm"
-          [disabled]="!dirty() || !!panel()?.sauvegarde()"
-          (clicked)="save()"
+          [disabled]="!dirty() || closing() || !!panel()?.sauvegarde()"
+          (clicked)="saveAndClose()"
         >
-          Enregistrer le poste
+          Enregistrer et fermer
         </nf-button>
+      } @else {
+        <nf-button variant="secondary" size="sm" (clicked)="requestClose()">Fermer</nf-button>
       }
     </div>
   </footer>

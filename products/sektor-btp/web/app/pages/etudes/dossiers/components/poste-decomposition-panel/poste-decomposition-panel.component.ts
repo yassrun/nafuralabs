@@ -9,6 +9,7 @@ import {
   input,
   output,
   signal,
+  untracked,
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
@@ -66,6 +67,18 @@ const SOURCE_LABELS: Record<string, string> = {
   CONSULTE: 'Consulté',
   BIBLIOTHEQUE: 'Bibliothèque',
 };
+
+/** Snapshot renvoyé après save — pour patcher l’arbre immédiatement à la fermeture. */
+export interface PosteSaveSnapshot {
+  noeudId: string;
+  prixUnitaire: number | null;
+  total: number | null;
+  mode: string | null;
+  prixFourniBase?: number | null;
+  fraisGenerauxPercent?: number | null;
+  margePercent?: number | null;
+  descriptif?: string | null;
+}
 
 @Component({
   selector: 'app-poste-decomposition-panel',
@@ -135,6 +148,8 @@ export class PosteDecompositionPanelComponent {
   private readonly dpuDirty = signal(false);
   private loadSeq = 0;
   private savedTimer: ReturnType<typeof setTimeout> | undefined;
+  /** Poste déjà chargé — évite de réinitialiser le brouillon sur un simple re-render. */
+  private loadedPosteId: string | null = null;
 
   readonly composants = computed(() => this.composantsBrouillon());
   readonly hasComposants = computed(() => this.composants().length > 0);
@@ -199,53 +214,67 @@ export class PosteDecompositionPanelComponent {
     });
     effect(() => {
       const poste = this.poste();
-      if (this.savedTimer) {
-        clearTimeout(this.savedTimer);
-        this.savedTimer = undefined;
-      }
-      if (poste?.id && poste.type === 'ARTICLE') {
-        this.prixFourni.set(poste.prixFourniBase ?? poste.prixUnitaire ?? null);
-        this.fgFourniLocal.set(poste.fraisGenerauxPercent ?? null);
-        this.margeFourniLocal.set(poste.margePercent ?? null);
-        const comment = poste.descriptif ?? '';
-        this.commentaire.set(comment);
-        this.commentInitial.set(comment);
-        this.composantsBrouillon.set([]);
-        this.composantsIaIds.set(new Set());
-        this.composantsLabels.set(new Map());
-        this.fgDecomposeBrouillon.set(null);
-        this.margeDecomposeBrouillon.set(null);
-        this.modeLocal.set(
-          resolvePosteChiffrageMode({
-            mode: poste.mode,
-            prixUnitaire: poste.prixUnitaire,
-          }),
-        );
-        this.propositionCps.set(false);
-        this.extractionComposants.set(false);
-        void this.chargerDpu(poste.id);
-      } else {
-        this.loadSeq++;
-        this.dpu.set(null);
-        this.prixFourni.set(null);
-        this.fgFourniLocal.set(null);
-        this.margeFourniLocal.set(null);
-        this.commentaire.set('');
-        this.commentInitial.set('');
-        this.composantsBrouillon.set([]);
-        this.composantsIaIds.set(new Set());
-        this.composantsLabels.set(new Map());
-        this.fgDecomposeBrouillon.set(null);
-        this.margeDecomposeBrouillon.set(null);
-        this.modeLocal.set(null);
-        this.erreur.set(undefined);
-        this.chargement.set(false);
-        this.propositionCps.set(false);
-        this.extractionComposants.set(false);
-        this.statut.set('idle');
-        this.captureDpuInitial();
-      }
+      // `untracked` obligatoire : `chargerDpu()` traverse les intercepteurs HTTP,
+      // qui lisent des signaux globaux (token, tenant). Sans ça l’effet s’y abonne
+      // et se relance au moindre refresh ailleurs dans la page — écrasant le
+      // brouillon en cours d’édition et remettant le dirty à false.
+      untracked(() => this.chargerPoste(poste));
     });
+  }
+
+  /** (Re)initialise le brouillon pour un poste — une seule fois par poste. */
+  private chargerPoste(poste: BordereauTreeRow | null): void {
+    const posteId = poste?.type === 'ARTICLE' ? (poste.id ?? null) : null;
+    // Même poste déjà chargé : ne jamais réécraser l’édition en cours.
+    if (posteId !== null && posteId === this.loadedPosteId) return;
+    this.loadedPosteId = posteId;
+
+    if (this.savedTimer) {
+      clearTimeout(this.savedTimer);
+      this.savedTimer = undefined;
+    }
+    if (poste && posteId) {
+      this.prixFourni.set(poste.prixFourniBase ?? poste.prixUnitaire ?? null);
+      this.fgFourniLocal.set(poste.fraisGenerauxPercent ?? null);
+      this.margeFourniLocal.set(poste.margePercent ?? null);
+      const comment = poste.descriptif ?? '';
+      this.commentaire.set(comment);
+      this.commentInitial.set(comment);
+      this.composantsBrouillon.set([]);
+      this.composantsIaIds.set(new Set());
+      this.composantsLabels.set(new Map());
+      this.fgDecomposeBrouillon.set(null);
+      this.margeDecomposeBrouillon.set(null);
+      this.modeLocal.set(
+        resolvePosteChiffrageMode({
+          mode: poste.mode,
+          prixUnitaire: poste.prixUnitaire,
+        }),
+      );
+      this.propositionCps.set(false);
+      this.extractionComposants.set(false);
+      void this.chargerDpu(posteId);
+    } else {
+      this.loadSeq++;
+      this.dpu.set(null);
+      this.prixFourni.set(null);
+      this.fgFourniLocal.set(null);
+      this.margeFourniLocal.set(null);
+      this.commentaire.set('');
+      this.commentInitial.set('');
+      this.composantsBrouillon.set([]);
+      this.composantsIaIds.set(new Set());
+      this.composantsLabels.set(new Map());
+      this.fgDecomposeBrouillon.set(null);
+      this.margeDecomposeBrouillon.set(null);
+      this.modeLocal.set(null);
+      this.erreur.set(undefined);
+      this.chargement.set(false);
+      this.propositionCps.set(false);
+      this.extractionComposants.set(false);
+      this.statut.set('idle');
+      this.captureDpuInitial();
+    }
   }
 
   typeLabel(type: ComposantDPU['type']): string {
@@ -648,17 +677,55 @@ export class PosteDecompositionPanelComponent {
     this.markDpuDirty();
   }
 
-  async sauvegarderPoste(): Promise<void> {
-    if (!this.canMutate() || !this.modificationsEnAttente()) return;
+  /**
+   * Persiste le poste.
+   * @returns snapshot serveur pour rafraîchir l’arbre sans attendre un reload partiel.
+   */
+  async sauvegarderPoste(): Promise<PosteSaveSnapshot | null> {
+    if (!this.modificationsEnAttente()) {
+      const poste = this.poste();
+      if (!poste?.id) return null;
+      return {
+        noeudId: poste.id,
+        prixUnitaire: this.prixVenteHt(),
+        total: this.totalLigne(),
+        mode: this.estFourni() ? 'FOURNI' : this.estDecompose() ? 'DECOMPOSE' : (poste.mode ?? null),
+        prixFourniBase: this.prixFourni(),
+        fraisGenerauxPercent: this.fgPct(),
+        margePercent: this.margePct(),
+        descriptif: this.commentaire().trim(),
+      };
+    }
+    if (!this.canMutate()) {
+      this.erreur.set(
+        this.chargement()
+          ? 'Chargement du poste en cours — réessayez dans un instant.'
+          : 'Enregistrement impossible pour le moment.',
+      );
+      return null;
+    }
     const poste = this.poste();
-    if (!poste?.id) return;
+    if (!poste?.id) return null;
     this.sauvegarde.set(true);
     this.erreur.set(undefined);
     try {
+      let savedNoeud: {
+        prixUnitaire?: number | null;
+        total?: number | null;
+        mode?: string | null;
+        prixFourniBase?: number | null;
+        fraisGenerauxPercent?: number | null;
+        margePercent?: number | null;
+        descriptif?: string | null;
+      } | null = null;
+
       if (this.estDecompose()) {
         this.modeLocal.set('DECOMPOSE');
         const dpu = await this.assurerDpu();
-        if (!dpu?.id) return;
+        if (!dpu?.id) {
+          this.erreur.set('Impossible de créer la décomposition du poste.');
+          return null;
+        }
         const updated = await this.dpuApi.update(dpu.id, {
           fraisGenerauxPercent: this.fgPct(),
           margeBeneficiairePercent: this.margePct(),
@@ -675,12 +742,15 @@ export class PosteDecompositionPanelComponent {
           })),
         });
         this.applyDpu(updated);
-        await this.dpgfApi.updateNoeud(poste.id, {
+        savedNoeud = await this.dpgfApi.updateNoeud(poste.id, {
+          prixUnitaire: this.prixVenteHt(),
+          fraisGenerauxPercent: this.fgPct(),
+          margePercent: this.margePct(),
           descriptif: this.commentaire().trim(),
           mode: 'DECOMPOSE',
         });
       } else if (this.estFourni()) {
-        await this.dpgfApi.updateNoeud(poste.id, {
+        savedNoeud = await this.dpgfApi.updateNoeud(poste.id, {
           prixUnitaire: this.prixVenteHt(),
           prixFourniBase: this.prixFourni() ?? 0,
           fraisGenerauxPercent: this.fgPct(),
@@ -689,15 +759,28 @@ export class PosteDecompositionPanelComponent {
           mode: 'FOURNI',
         });
       } else {
-        await this.dpgfApi.updateNoeud(poste.id, { descriptif: this.commentaire().trim() });
+        savedNoeud = await this.dpgfApi.updateNoeud(poste.id, {
+          descriptif: this.commentaire().trim(),
+        });
       }
       const trimmed = this.commentaire().trim();
       this.commentaire.set(trimmed);
       this.commentInitial.set(trimmed);
       this.captureDpuInitial();
       this.markSaved();
+      return {
+        noeudId: poste.id,
+        prixUnitaire: savedNoeud?.prixUnitaire ?? this.prixVenteHt(),
+        total: savedNoeud?.total ?? this.totalLigne(),
+        mode: savedNoeud?.mode ?? (this.estFourni() ? 'FOURNI' : 'DECOMPOSE'),
+        prixFourniBase: savedNoeud?.prixFourniBase ?? this.prixFourni(),
+        fraisGenerauxPercent: savedNoeud?.fraisGenerauxPercent ?? this.fgPct(),
+        margePercent: savedNoeud?.margePercent ?? this.margePct(),
+        descriptif: trimmed,
+      };
     } catch (e) {
       this.erreur.set(this.msg(e));
+      return null;
     } finally {
       this.sauvegarde.set(false);
     }

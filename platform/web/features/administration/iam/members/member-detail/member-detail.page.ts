@@ -1,5 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { AuthFacade } from '@core/security/services/auth.facade';
 import { PermissionService } from '@core/security/services/permission.service';
 
 import {
@@ -378,6 +379,7 @@ export class MemberDetailPage extends ConfigDrivenDetailPage<Member> {
   private readonly crud = inject(MembersFacade);
   private readonly i18n = inject(TranslateService);
   private readonly permissionService = inject(PermissionService);
+  private readonly auth = inject(AuthFacade);
 
   readonly emailCopied = signal(false);
   readonly isEditingRoles = signal(false);
@@ -506,7 +508,10 @@ export class MemberDetailPage extends ConfigDrivenDetailPage<Member> {
   }
 
   canWrite(): boolean {
-    return this.permissionService.hasPermission('administration.members.write');
+    return (
+      this.permissionService.hasPermission('administration.members.write') ||
+      this.permissionService.hasPermission('tenant.members.write')
+    );
   }
 
   memberDisplayName(member: Member): string {
@@ -631,6 +636,17 @@ export class MemberDetailPage extends ConfigDrivenDetailPage<Member> {
   }
 
   isSystemRole(roleId: string): boolean {
+    const normalized = String(roleId ?? '').trim().toUpperCase();
+    if (
+      normalized === 'SUPER_ADMIN' ||
+      normalized === 'OWNER' ||
+      normalized === 'ADMIN' ||
+      normalized === 'MANAGER' ||
+      normalized === 'MEMBER' ||
+      normalized === 'VIEWER'
+    ) {
+      return true;
+    }
     const role = this.item()?.roles?.find((entry) => entry.id === roleId);
     return Boolean(role?.isSystem);
   }
@@ -655,10 +671,22 @@ export class MemberDetailPage extends ConfigDrivenDetailPage<Member> {
       return;
     }
 
+    const roles = this.draftRoleIds()
+      .map((roleId) => String(roleId ?? '').trim().toUpperCase())
+      .filter((roleId) => roleId.length > 0);
+
+    if (roles.length === 0) {
+      this.showError(this.i18n.instant('administration.members.detail.roles.saveError'));
+      return;
+    }
+
     this.isSaving.set(true);
     try {
-      await this.crud.updateItem(id, { roles: this.draftRoleIds() });
+      await this.crud.updateItem(id, { roles });
       await this.loadItem(id);
+      if (this.auth.user()?.id === String(id)) {
+        await this.auth.refreshTenantMemberships();
+      }
       this.isEditingRoles.set(false);
       this.showSuccess(this.i18n.instant('administration.members.detail.roles.saved'));
     } catch (error) {

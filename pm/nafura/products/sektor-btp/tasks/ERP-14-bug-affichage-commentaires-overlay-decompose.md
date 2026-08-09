@@ -33,4 +33,5 @@ tags: [sektor, etudes, chiffrage, bug, ui]
 ```
 05/08 12:38  capturé depuis screenshot drawer 5.2 DE-0007
 05/08 21:30  framework v2 · task schema (estimate out · gate/kind)
+08/08 18:25  fix layout drawer · panel height:auto + comments hors flux sticky
 ```

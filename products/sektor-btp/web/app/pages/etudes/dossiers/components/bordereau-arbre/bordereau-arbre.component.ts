@@ -8,6 +8,7 @@ import {
   input,
   output,
   signal,
+  untracked,
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
@@ -50,8 +51,8 @@ import {
 
 /**
  * Arbre DPGF — lecture / édition structurelle, ou brouillon d'import inline.
- * En mode sélection (étape Décomposition), seul un clic ARTICLE change le poste
- * affiché à droite ; lots / sous-lots ne font que naviguer l’arbre.
+ * En mode sélection (étape Décomposition), double-clic ARTICLE ouvre le drawer
+ * de chiffrage ; lots / sous-lots ne font que naviguer l’arbre.
  */
 @Component({
   selector: 'app-bordereau-arbre',
@@ -102,6 +103,8 @@ export class BordereauArbreComponent {
   readonly uniteOptions = signal<UniteOption[]>([]);
   readonly chargement = signal(false);
   readonly erreur = signal<string | undefined>(undefined);
+  /** Force remount nf-tree-table (PrimeNG garde sinon d’anciens PU en cache). */
+  readonly tableEpoch = signal(0);
 
   readonly isDraft = computed(() => this.draftArbre() != null);
 
@@ -168,6 +171,9 @@ export class BordereauArbreComponent {
     if (row.nonExploitable) {
       return `${row.libelle} — article non exploitable (unité et quantité > 0 requises)`;
     }
+    if (this.selectionEnabled() && row.type === 'ARTICLE') {
+      return `${row.libelle} — double-clic pour ouvrir le chiffrage`;
+    }
     return row.libelle || null;
   };
 
@@ -185,55 +191,99 @@ export class BordereauArbreComponent {
   }
 
   private lastDraftToken = -1;
+  private lastEmittedFocusId: string | null = null;
 
   constructor() {
     void this.chargerUnites();
     effect(() => {
       const draft = this.draftArbre();
-      const token = this.draftToken();
-      if (draft != null) {
-        // Reseed seulement sur nouvelle extraction (token), pas sur chaque edit locale.
-        if (token !== this.lastDraftToken) {
-          this.lastDraftToken = token;
-          this.draftLocal.set(structuredClone(draft));
-          this.refreshDraftNodes(true);
-        }
-        return;
-      }
-      this.lastDraftToken = -1;
+      const draftToken = this.draftToken();
       const id = this.dpgfId();
-      this.reloadToken();
-      if (id) void this.charger(id);
-      else {
-        this.nodes.set([]);
-      }
+      const token = this.reloadToken();
+      // `untracked` : `charger()` passe par les intercepteurs HTTP, qui lisent des
+      // signaux globaux (token / tenant). Sans ça l’arbre se recharge en boucle.
+      untracked(() => {
+        if (draft != null) {
+          // Reseed seulement sur nouvelle extraction (token), pas sur chaque edit locale.
+          if (draftToken !== this.lastDraftToken) {
+            this.lastDraftToken = draftToken;
+            this.draftLocal.set(structuredClone(draft));
+            this.refreshDraftNodes(true);
+          }
+          return;
+        }
+        this.lastDraftToken = -1;
+        if (id) {
+          // Rechargement silencieux si on a déjà des nœuds (évite le flash pendant/après le drawer).
+          void this.charger(id, { silent: token > 0 && this.nodes().length > 0 });
+        } else {
+          this.nodes.set([]);
+        }
+      });
     });
     effect(() => {
       const focusId = this.focusNoeudId();
       const nodes = this.nodes();
-      if (!focusId || !nodes.length || this.isDraft()) return;
-      const match = findRowById(nodes, focusId);
-      if (!match) return;
-      this.expandedKeys.set(expandAncestors(nodes, match.key));
-      if (match.type === 'ARTICLE') {
-        this.posteSelect.emit(match);
-      }
-    });
-    effect(() => {
-      const key = this.selectedKey();
-      const nodes = this.nodes();
-      if (!key || !nodes.length || this.isDraft()) return;
-      const match = findRowByKey(nodes, key);
-      if (match?.type === 'ARTICLE') {
-        this.posteSelect.emit(match);
-      }
+      untracked(() => {
+        if (!focusId) {
+          this.lastEmittedFocusId = null;
+          return;
+        }
+        if (!nodes.length || this.isDraft()) return;
+        if (focusId === this.lastEmittedFocusId) return;
+        const match = findRowById(nodes, focusId);
+        if (!match) return;
+        this.expandedKeys.set(expandAncestors(nodes, match.key));
+        if (match.type === 'ARTICLE') {
+          this.lastEmittedFocusId = focusId;
+          this.posteSelect.emit(match);
+        }
+      });
     });
   }
 
-  onRowClick(row: BordereauTreeRow): void {
+  /**
+   * Applique le snapshot renvoyé par le drawer après « Enregistrer et fermer ».
+   * Sans cet appel, la tree reste intacte (copie isolée dans le modal).
+   */
+  applyPosteSnapshot(snap: {
+    noeudId: string;
+    prixUnitaire: number | null;
+    total: number | null;
+    mode: string | null;
+    prixFourniBase?: number | null;
+    fraisGenerauxPercent?: number | null;
+    margePercent?: number | null;
+    descriptif?: string | null;
+  }): void {
+    const next = structuredClone(this.nodes());
+    const walk = (list: NfTreeNode<BordereauTreeRow>[]): boolean => {
+      for (const n of list) {
+        if (n.data.id === snap.noeudId) {
+          n.data.prixUnitaire = snap.prixUnitaire;
+          n.data.total = snap.total;
+          n.data.mode = snap.mode;
+          if (snap.prixFourniBase !== undefined) n.data.prixFourniBase = snap.prixFourniBase;
+          if (snap.fraisGenerauxPercent !== undefined) {
+            n.data.fraisGenerauxPercent = snap.fraisGenerauxPercent;
+          }
+          if (snap.margePercent !== undefined) n.data.margePercent = snap.margePercent;
+          if (snap.descriptif !== undefined) n.data.descriptif = snap.descriptif;
+          return true;
+        }
+        if (n.children?.length && walk(n.children)) return true;
+      }
+      return false;
+    };
+    if (!walk(next)) return;
+    applyTreeRollupTotals(next);
+    this.nodes.set(next);
+    this.tableEpoch.update((e) => e + 1);
+  }
+
+  onRowDblClick(row: BordereauTreeRow): void {
     if (!this.selectionEnabled()) return;
-    // Lots / sous-lots : navigation seule — on ne désélectionne le poste
-    // que lors du choix d’un autre ARTICLE.
+    // Lots / sous-lots : navigation seule — ouverture chiffrage = double-clic ARTICLE.
     if (row.type !== 'ARTICLE') return;
     this.posteSelect.emit(row);
   }
@@ -563,17 +613,20 @@ export class BordereauArbreComponent {
     }
   }
 
-  private async charger(dpgfId: string): Promise<void> {
-    this.chargement.set(true);
+  private async charger(
+    dpgfId: string,
+    opts: { silent?: boolean } = {},
+  ): Promise<void> {
+    if (!opts.silent) this.chargement.set(true);
     this.erreur.set(undefined);
     try {
       const dpgf = await this.dpgfApi.getArbre(dpgfId);
       const nodes = noeudsDpgfToTreeNodes(dpgf.hierarchie ?? []);
-      const opts = this.uniteOptions();
+      const optsUnite = this.uniteOptions();
       const remap = (list: NfTreeNode<BordereauTreeRow>[]) => {
         for (const n of list) {
           if (n.data.type === 'ARTICLE') {
-            n.data.unite = mapToReferentialCode(n.data.unite, opts);
+            n.data.unite = mapToReferentialCode(n.data.unite, optsUnite);
           }
           if (n.children?.length) remap(n.children);
         }
@@ -583,6 +636,7 @@ export class BordereauArbreComponent {
       applyTreeRollupPostes(nodes);
       const previous = this.expandedKeys();
       this.nodes.set(nodes);
+      this.tableEpoch.update((e) => e + 1);
       if (previous.size > 0) {
         const valid = new Set<string>();
         const walk = (list: NfTreeNode<BordereauTreeRow>[]) => {
@@ -601,7 +655,7 @@ export class BordereauArbreComponent {
       this.erreur.set(this.msg(e));
       this.nodes.set([]);
     } finally {
-      this.chargement.set(false);
+      if (!opts.silent) this.chargement.set(false);
     }
   }
 
@@ -660,20 +714,6 @@ function findRowById(
     if (node.data.id === id) return node.data;
     if (node.children?.length) {
       const found = findRowById(node.children, id);
-      if (found) return found;
-    }
-  }
-  return null;
-}
-
-function findRowByKey(
-  nodes: NfTreeNode<BordereauTreeRow>[],
-  key: string,
-): BordereauTreeRow | null {
-  for (const node of nodes) {
-    if (node.key === key) return node.data;
-    if (node.children?.length) {
-      const found = findRowByKey(node.children, key);
       if (found) return found;
     }
   }

@@ -346,7 +346,7 @@ function ModalChrome({
               </Text>
             </Stack>
             <Button variant="ghost" onClick={onClose}>
-              ✕ Fermer
+              ✕
             </Button>
           </div>
           <Row gap={8} align="center" justify="space-between">
@@ -371,14 +371,9 @@ function ModalChrome({
           <Text size="small" tone="tertiary">
             {dirty ? "Modifications non enregistrées" : "Tout est à jour"}
           </Text>
-          <Row gap={8}>
-            <Button variant="secondary" onClick={onClose}>
-              Fermer
-            </Button>
-            <Button variant="primary" disabled={!dirty}>
-              Enregistrer le poste
-            </Button>
-          </Row>
+          <Button variant="primary" disabled={!dirty} onClick={onClose}>
+            Enregistrer et fermer
+          </Button>
         </div>
       </div>
     </div>
@@ -694,6 +689,13 @@ function GridNotes() {
         </Text>
         <Text>
           <Text as="span" weight="semibold">
+            Ouverture chiffrage = double-clic ARTICLE.{" "}
+          </Text>
+          Simple clic = navigation / expand seule — évite les ouvertures
+          accidentelles.
+        </Text>
+        <Text>
+          <Text as="span" weight="semibold">
             Pas d’écran « choix mode ».{" "}
           </Text>
           Défaut = Décomposé. Toggle header Décomposé | Prix fourni.
@@ -702,8 +704,9 @@ function GridNotes() {
           <Text as="span" weight="semibold">
             Modal = drawer large (~720px){" "}
           </Text>
-          ancré à droite. Header = identité + toggle + Fermer ; footer sticky =
-          Enregistrer.
+          ancré à droite. Header = identité + toggle + ✕ abandon ; footer sticky
+          = un seul CTA « Enregistrer et fermer ». Tree / PU rafraîchis seulement
+          après fermeture réussie (pas pendant la saisie).
         </Text>
         <Text>
           <Text as="span" weight="semibold">
@@ -723,6 +726,14 @@ function GridNotes() {
             AI-first / manuel.{" "}
           </Text>
           Extraire / Voir CPS optionnels ; + Composant toujours là.
+        </Text>
+        <Text>
+          <Text as="span" weight="semibold">
+            Copie isolée.{" "}
+          </Text>
+          Le drawer travaille sur une copie du poste. Tree intacte pendant la
+          saisie / à l’abandon. « Enregistrer et fermer » commit la copie →
+          patch PU/total sur la tree.
         </Text>
         <Text>
           <Text as="span" weight="semibold">
@@ -748,8 +759,8 @@ export default function EtudeDecompoWireframe() {
       <Stack gap={6}>
         <H1>Wireframe — Chiffrage étude</H1>
         <Text tone="secondary">
-          Tree plein écran → clic article → modal (défaut Décomposé, toggle
-          mode). Remplace le master-slave actuel.
+          Tree plein écran → double-clic article → modal (défaut Décomposé, toggle
+          mode). Remplace le master-slave actuel. Simple clic = navigation seule.
         </Text>
       </Stack>
 
@@ -773,13 +784,14 @@ export default function EtudeDecompoWireframe() {
 
       <Callout tone="info" title="Cycle de vie modal">
         Open → mode Décomposé par défaut → toggle header pour Prix fourni →
-        Enregistrer (footer) / Fermer → destroy. Plus d’étape « choix mode ».
+        Enregistrer et fermer (footer) → destroy + refresh tree. ✕ = abandon
+        (confirm si dirty). Plus d’étape « choix mode ».
       </Callout>
 
       <FrameShell
         title={
           view === "tree"
-            ? "arbre seul — clic article ouvre la modal"
+            ? "arbre seul — double-clic article ouvre la modal"
             : `arbre en fond · modal · mode ${mode === "decompo" ? "Décomposé" : "Prix fourni"}`
         }
       >

@@ -43,6 +43,7 @@
   }
 
   <div class="arbre__table">
+    @for (epoch of [tableEpoch()]; track epoch) {
     <nf-tree-table
       [nodes]="filteredNodes()"
       [columns]="columns()"
@@ -53,7 +54,7 @@
       [rowClickable]="selectionEnabled()"
       [rowClass]="rowClass"
       [rowTitle]="rowTitle"
-      (rowClick)="onRowClick($event)"
+      (rowDblClick)="onRowDblClick($event)"
       [minWidth]="tableMinWidth()"
       scrollHeight="520px"
       emptyMessage="Aucun lot / article"
@@ -154,5 +155,6 @@
         }
       </ng-template>
     </nf-tree-table>
+    }
   </div>
 </section>

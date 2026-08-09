@@ -9,7 +9,7 @@ export const MEMBERS_ROUTES: Routes = [
       import('./member-listing').then((m) => m.MemberListingPage),
     canActivate: [routePermissionGuard],
     data: {
-      permissions: ['administration.members.read'],
+      permissionsAny: ['administration.members.read', 'tenant.members.read'],
       title: 'Members',
     },
   },
@@ -19,7 +19,7 @@ export const MEMBERS_ROUTES: Routes = [
       import('./member-detail').then((m) => m.MemberDetailPage),
     canActivate: [routePermissionGuard],
     data: {
-      permissions: ['administration.members.write'],
+      permissionsAny: ['administration.members.write', 'tenant.members.write'],
       title: 'Invite Member',
     },
   },
@@ -29,7 +29,7 @@ export const MEMBERS_ROUTES: Routes = [
       import('./member-detail').then((m) => m.MemberDetailPage),
     canActivate: [routePermissionGuard],
     data: {
-      permissions: ['administration.members.read'],
+      permissionsAny: ['administration.members.read', 'tenant.members.read'],
       title: 'Member Details',
     },
   },

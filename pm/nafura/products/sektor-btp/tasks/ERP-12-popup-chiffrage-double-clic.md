@@ -27,4 +27,6 @@ tags: [sektor, etudes, chiffrage, ux]
 ```
 05/08 12:34  capturé · ouverture popup chiffrage = double-clic
 05/08 21:30  framework v2 · task schema (estimate out · gate/kind)
+08/08 18:10  code · rowDblClick + tooltip ; wireframe sync
+08/08 18:25  fix · plus de réouverture auto après save/ferme (effet selectedKey)
 ```

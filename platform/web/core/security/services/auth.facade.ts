@@ -757,6 +757,37 @@ export class AuthFacade {
   // ─────────────────────────────────────────────────────────────────────────────
 
   /**
+   * Reload tenant memberships + permissions from the backend.
+   * Call after changing the current user's roles so admin screens stay authorized.
+   */
+  async refreshTenantMemberships(): Promise<void> {
+    const user = this.state.user();
+    const tokens = this.state.tokens();
+    if (!user || !tokens || !applicationRequiresTenant()) {
+      return;
+    }
+
+    const tenants = await this.api.getUserTenants(user.id, tokens.accessToken);
+    this.state.setTenants(tenants);
+
+    const tenantId =
+      this.state.currentTenantId() ??
+      this.state.loadPersistedTenant() ??
+      tenants[0]?.tenant.id ??
+      null;
+
+    if (!tenantId) {
+      return;
+    }
+
+    if (tenants.some((t) => t.tenant.id === tenantId)) {
+      this.state.selectTenant(tenantId);
+    }
+    await this.tenantContextService.initialize(tenantId);
+    this.state.persistTenantSelection(tenantId);
+  }
+
+  /**
    * Select a tenant.
    * For normal users: switches tenant and re-issues token.
    * For super admin: just initializes tenant context (no token re-issue needed).

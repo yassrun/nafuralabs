@@ -58,7 +58,14 @@ export function toUniteOptions(units: UnitOfMeasure[]): UniteOption[] {
       label: u.name?.trim() ? `${u.code.trim()} — ${u.name.trim()}` : u.code.trim(),
     }));
   if (fromApi.length > 0) {
-    return fromApi.sort((a, b) => a.code.localeCompare(b.code, 'fr'));
+    // Le référentiel contient des doublons de code (M2/m2, EA/ea…) : on n’en garde qu’un,
+    // sinon chaque liste d’unités affiche deux fois la même entrée.
+    const parCode = new Map<string, UniteOption>();
+    for (const option of fromApi) {
+      const key = foldUnite(option.code);
+      if (!parCode.has(key)) parCode.set(key, option);
+    }
+    return [...parCode.values()].sort((a, b) => a.code.localeCompare(b.code, 'fr'));
   }
   return BPU_UNITS.map((code) => ({
     code: code.toUpperCase() === code ? code : code,

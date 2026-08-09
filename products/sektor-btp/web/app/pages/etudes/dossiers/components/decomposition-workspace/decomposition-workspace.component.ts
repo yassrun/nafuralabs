@@ -8,6 +8,8 @@ import {
   input,
   output,
   signal,
+  untracked,
+  viewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialog, type MatDialogRef } from '@angular/material/dialog';
@@ -67,6 +69,8 @@ export class DecompositionWorkspaceComponent {
   readonly articlesAlerteIds = signal<string[]>([]);
   readonly drawerDirty = signal(false);
 
+  private readonly arbre = viewChild(BordereauArbreComponent);
+
   private drawerRef: MatDialogRef<
     PosteChiffrageDrawerComponent,
     PosteChiffrageDrawerResult | null
@@ -97,7 +101,9 @@ export class DecompositionWorkspaceComponent {
     effect(() => {
       const id = this.dpgfId();
       const token = this.treeReloadToken();
-      if (id) void this.refreshCouverture(id, token);
+      // `untracked` : `refreshCouverture()` fait des appels HTTP dont les
+      // intercepteurs lisent des signaux globaux — sinon l’effet se relance seul.
+      if (id) untracked(() => void this.refreshCouverture(id, token));
     });
   }
 
@@ -162,8 +168,9 @@ export class DecompositionWorkspaceComponent {
     this.openingKey = row.key;
     this.selectedKey.set(row.key);
 
+    // Copie isolée : le drawer ne mutera jamais la ligne live de l’arbre.
     const data: PosteChiffrageDrawerData = {
-      poste: row,
+      poste: structuredClone(row),
       dossierId: this.dossierId(),
       cpsDocumentId: this.cpsDocumentId(),
       modifiable: this.modifiable(),
@@ -199,15 +206,19 @@ export class DecompositionWorkspaceComponent {
       const result = await firstValueFrom(ref.afterClosed());
       this.drawerRef = null;
       this.openingKey = null;
+      this.selectedKey.set(null);
       this.drawerDirty.set(false);
       this.dirtyChange.emit(false);
-      if (result?.saved) {
+      // Tree touchée uniquement si enregistrement réussi.
+      if (result?.saved && result.snapshot) {
+        this.arbre()?.applyPosteSnapshot(result.snapshot);
         this.treeReloadToken.update((n) => n + 1);
         this.change.emit();
       }
     } catch {
       this.drawerRef = null;
       this.openingKey = null;
+      this.selectedKey.set(null);
       this.drawerDirty.set(false);
       this.dirtyChange.emit(false);
     }
