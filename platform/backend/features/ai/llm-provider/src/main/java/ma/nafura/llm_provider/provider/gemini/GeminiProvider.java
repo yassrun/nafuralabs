@@ -52,9 +52,24 @@ public class GeminiProvider implements AiProvider {
         }
 
         return buildGeminiRequest(request)
-            .flatMap(geminiRequest -> callGeminiApi(geminiRequest))
-            .map(response -> mapToLlmResponse(response, requestId, context, request))
+            .flatMap(geminiRequest -> callGeminiApi(geminiRequest, effectiveModel(context)))
+            .map(response -> mapToLlmResponse(response, requestId, context, request, effectiveModel(context)))
             .toFuture();
+    }
+
+    private String effectiveModel(LlmCallContext context) {
+        if (context != null && context.getModelOverride() != null && !context.getModelOverride().isBlank()) {
+            return context.getModelOverride().trim();
+        }
+        return model;
+    }
+
+    public String getDefaultModel() {
+        return model;
+    }
+
+    public boolean hasApiKey() {
+        return apiKey != null && !apiKey.isBlank();
     }
 
     private Mono<Map<String, Object>> buildGeminiRequest(NormalizedLlmRequest request) {
@@ -178,9 +193,9 @@ public class GeminiProvider implements AiProvider {
         });
     }
 
-    private Mono<JsonNode> callGeminiApi(Map<String, Object> requestBody) {
+    private Mono<JsonNode> callGeminiApi(Map<String, Object> requestBody, String effectiveModel) {
         String url = String.format("%s/v1beta/models/%s:generateContent",
-            baseUrl, model);
+            baseUrl, effectiveModel);
 
         return webClient.post()
             .uri(url)
@@ -208,7 +223,8 @@ public class GeminiProvider implements AiProvider {
         JsonNode response,
         String requestId,
         LlmCallContext context,
-        NormalizedLlmRequest request
+        NormalizedLlmRequest request,
+        String effectiveModel
     ) {
         try {
             JsonNode candidates = response.path("candidates");
@@ -265,7 +281,7 @@ public class GeminiProvider implements AiProvider {
                 requestId,
                 context != null ? context.getTenantId() : null,
                 "gemini",
-                model,
+                effectiveModel,
                 textContent,
                 usage,
                 null,

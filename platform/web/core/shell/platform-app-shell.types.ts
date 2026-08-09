@@ -82,6 +82,7 @@ export interface AdministrationSectionConfig {
   scheduledJobs?: { enabled: boolean };
   webhooks?: { enabled: boolean };
   apiKeys?: { enabled: boolean };
+  aiProviders?: { enabled: boolean };
   numberingSequences?: { enabled: boolean };
   subscriptions?: { enabled: boolean };
 }
@@ -164,6 +165,7 @@ export const DEFAULT_APP_SHELL_CONFIG: Omit<AppShellConfig, 'applicationId' | 'a
         scheduledJobs: { enabled: true },
         webhooks: { enabled: true },
         apiKeys: { enabled: true },
+        aiProviders: { enabled: true },
         numberingSequences: { enabled: true },
         subscriptions: { enabled: true },
       },

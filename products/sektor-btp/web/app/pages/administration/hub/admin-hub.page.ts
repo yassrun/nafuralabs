@@ -62,6 +62,11 @@ const ADMIN_HUB_SECTIONS: readonly {
     descriptionKey: 'administration.hub.descriptions.apiKeys',
   },
   {
+    route: '/administration/ai-providers',
+    labelKey: 'administration.navigation.aiProviders',
+    descriptionKey: 'administration.hub.descriptions.aiProviders',
+  },
+  {
     route: '/administration/numbering-sequences',
     labelKey: 'administration.navigation.numberingSequences',
     descriptionKey: 'administration.hub.descriptions.numberingSequences',

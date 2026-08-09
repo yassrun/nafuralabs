@@ -143,6 +143,15 @@ function buildAdministrationNode(): SidebarNode | null {
       order: 37.4,
     });
   }
+  if (sections.aiProviders?.enabled !== false) {
+    children.push({
+      id: 'administration.aiProviders',
+      label: 'administration.navigation.aiProviders',
+      icon: 'sparkles',
+      route: '/administration/ai-providers',
+      order: 37.45,
+    });
+  }
   if (sections.numberingSequences?.enabled !== false) {
     children.push({
       id: 'administration.numberingSequences',

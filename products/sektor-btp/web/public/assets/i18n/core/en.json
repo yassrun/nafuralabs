@@ -252,6 +252,7 @@
       "scheduledJobs": "Scheduled Jobs",
       "webhooks": "Webhooks",
       "apiKeys": "API Keys",
+      "aiProviders": "AI providers",
       "numberingSequences": "Numbering Sequences",
       "auditLog": "ERP audit log",
       "societe": "Company identity",
@@ -275,6 +276,7 @@
         "scheduledJobs": "Scheduled jobs and monitoring",
         "webhooks": "Outbound HTTP integrations",
         "apiKeys": "API keys and programmatic access",
+        "aiProviders": "Choose the LLM provider and model (Gemini, DeepSeek…)",
         "numberingSequences": "Document prefixes and sequences",
         "subscriptions": "Subscriptions and SaaS capacity",
         "settings": "General application options",
@@ -466,6 +468,19 @@
         "status": "Status",
         "actions": "Actions"
       }
+    },
+    "aiProviders": {
+      "title": "AI providers",
+      "subtitle": "Choose the LLM provider and model used by conversations and agents",
+      "hint": "API keys stay in environment / Vault — here you only pick the active provider and model for this tenant.",
+      "loading": "Loading providers…",
+      "active": "Active",
+      "keyOk": "Key OK",
+      "keyMissing": "Key missing",
+      "model": "Model",
+      "save": "Save",
+      "saved": "AI provider updated",
+      "error": "Unable to load or save AI providers"
     },
     "numberingSequences": {
       "title": "Numbering Sequences",

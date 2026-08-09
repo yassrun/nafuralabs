@@ -70,6 +70,16 @@ export const ADMINISTRATION_ROUTES: Routes = [
       import('./api-keys/api-keys.routes').then((m) => m.API_KEYS_ROUTES),
   },
   {
+    path: 'ai-provider',
+    redirectTo: 'ai-providers',
+    pathMatch: 'full',
+  },
+  {
+    path: 'ai-providers',
+    loadChildren: () =>
+      import('./ai-providers/ai-providers.routes').then((m) => m.AI_PROVIDERS_ROUTES),
+  },
+  {
     path: 'numbering-sequences',
     loadChildren: () =>
       import('./numbering-sequences/numbering-sequences.routes').then(

@@ -26,6 +26,11 @@ secrets/*.local
 secrets/dev-staging-local.env
 !secrets/README.md
 
+# Local API key scratch files (never commit)
+*_api_key.txt
+deepseek_api_key.txt
+gemini_api_key.txt
+
 # OS
 .DS_Store
 Thumbs.db

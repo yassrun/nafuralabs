@@ -150,6 +150,10 @@ ai:
     api-key: ${AI_GEMINI_API_KEY:}
     base-url: ${AI_GEMINI_BASE_URL:https://generativelanguage.googleapis.com}
     model: ${AI_GEMINI_MODEL:gemini-2.5-flash}
+  deepseek:
+    api-key: ${AI_DEEPSEEK_API_KEY:}
+    base-url: ${AI_DEEPSEEK_BASE_URL:https://api.deepseek.com}
+    model: ${AI_DEEPSEEK_MODEL:deepseek-v4-flash}
   # Bordereau/CPS PDF extraction is one large Gemini call; 120s caused EOF mid-stream.
   # Keep >= nafura.doc-extractor.timeout-seconds (and under ingress 600s).
   execution:

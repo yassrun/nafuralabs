@@ -30,5 +30,8 @@ public class LlmCallContext {
     private ScopeType scopeType = ScopeType.TENANT;
 
     private String idempotencyKey;
+
+    /** Runtime override from tenant AI preference (optional). */
+    private String modelOverride;
 }
 

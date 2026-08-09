@@ -252,6 +252,7 @@
       "scheduledJobs": "Tâches planifiées",
       "webhooks": "Webhooks",
       "apiKeys": "Clés API",
+      "aiProviders": "Providers AI",
       "numberingSequences": "Séquences de numérotation",
       "auditLog": "Journal d'audit ERP",
       "societe": "Identité société",
@@ -275,6 +276,7 @@
         "scheduledJobs": "Tâches planifiées et surveillance",
         "webhooks": "Intégrations sortantes HTTP",
         "apiKeys": "Clés d'API et accès programmatique",
+        "aiProviders": "Choisir le provider LLM et le modèle (Gemini, DeepSeek…)",
         "numberingSequences": "Préfixes et séquences documentaires",
         "subscriptions": "Abonnements et capacités SaaS",
         "settings": "Options générales de l'application",
@@ -466,6 +468,19 @@
         "status": "Statut",
         "actions": "Actions"
       }
+    },
+    "aiProviders": {
+      "title": "Providers AI",
+      "subtitle": "Choisir le provider LLM et le modèle utilisés par les conversations et agents",
+      "hint": "Les clés API restent dans l'environnement / Vault — ici vous choisissez uniquement le provider et le modèle actifs pour ce tenant.",
+      "loading": "Chargement des providers…",
+      "active": "Actif",
+      "keyOk": "Clé OK",
+      "keyMissing": "Clé manquante",
+      "model": "Modèle",
+      "save": "Enregistrer",
+      "saved": "Provider AI mis à jour",
+      "error": "Impossible de charger ou d'enregistrer les providers AI"
     },
     "numberingSequences": {
       "title": "Séquences de numérotation",
