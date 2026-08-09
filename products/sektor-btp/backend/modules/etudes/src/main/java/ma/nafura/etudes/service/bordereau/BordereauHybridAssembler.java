@@ -606,10 +606,11 @@ public class BordereauHybridAssembler {
     /** Compact prompt payload for the LLM classifier. */
     public String buildClassifierPrompt(BordereauParseResult parse) {
         StringBuilder sb = new StringBuilder();
-        sb.append("Candidats extraits localement d'un bordereau BTP (")
+        sb.append("Candidats extraits d'un bordereau BTP (")
                 .append(parse.pageCount())
                 .append(" pages).\n");
-        sb.append("Assigne chaque article à un lot / sous-lot. N'invente aucune valeur article.\n\n");
+        sb.append("Assigne chaque article à un lot / sous-lot. N'invente aucune valeur article.\n");
+        sb.append("Conserve les libellés fournis tels quels (déjà complets).\n\n");
 
         sb.append("GROUPES détectés :\n");
         for (BordereauRowCandidate g : parse.groupingCandidates()) {

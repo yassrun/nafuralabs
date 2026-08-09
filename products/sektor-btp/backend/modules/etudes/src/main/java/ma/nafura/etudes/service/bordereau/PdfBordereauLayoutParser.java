@@ -755,14 +755,7 @@ public class PdfBordereauLayoutParser {
             if (t == null || t.isBlank()) {
                 continue;
             }
-            if (token.x < bands.codeEnd && token.x <= bands.designationStart + 25) {
-                // Left band: code if looks numeric-ish, else designation
-                if (looksLikeCodeToken(t) || token.x < bands.designationStart) {
-                    append(code, t);
-                } else {
-                    append(designation, t);
-                }
-            } else if (token.x >= bands.unitStart && token.x < bands.qtyStart) {
+            if (token.x >= bands.unitStart && token.x < bands.qtyStart) {
                 append(unit, t);
             } else if (token.x >= bands.qtyStart) {
                 // Stop before montant/prix if clearly to the right of qty band
@@ -770,6 +763,10 @@ public class PdfBordereauLayoutParser {
                     continue;
                 }
                 append(qty, t);
+            } else if (token.x < bands.codeEnd && looksLikeCodeToken(t)) {
+                // Strict: only real codes in the N° band — never swallow designation words
+                // like « FOUILLES » that sit slightly left of the DESIGNATION header.
+                append(code, t);
             } else {
                 append(designation, t);
             }

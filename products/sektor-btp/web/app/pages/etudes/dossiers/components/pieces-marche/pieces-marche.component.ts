@@ -581,27 +581,41 @@ export class PiecesMarcheComponent {
     this.info.set(undefined);
   }
 
-  /** Polling avec backoff jusqu'à terminal (SUCCEEDED / FAILED / CANCELLED). */
+  /** Polling jusqu'à terminal (SUCCEEDED / FAILED / CANCELLED). Vision multi-pages = long. */
   private async attendreJob(dossierId: string, jobId: string): Promise<ExtractionJobDto> {
-    const delays = [800, 1200, 2000, 3000, 4000, 5000];
-    let delayIdx = 0;
-    const deadline = Date.now() + 6 * 60_000;
+    const deadline = Date.now() + 20 * 60_000;
     let job = await this.api.statutExtractionJob(dossierId, jobId);
     this.jobCourant.set(job);
     this.progressPercent.set(job.progressPercent ?? 0);
-    this.progressStep.set(job.progressStep ?? null);
+    this.progressStep.set(this.libelleProgress(job.progressStep));
     while (!this.estTerminal(job.status) && Date.now() < deadline) {
-      await this.sleep(delays[Math.min(delayIdx, delays.length - 1)]);
-      delayIdx += 1;
+      // Poll rapide pour refléter le % page/page pendant la vision.
+      await this.sleep(job.status === 'RUNNING' ? 900 : 1200);
       job = await this.api.statutExtractionJob(dossierId, jobId);
       this.jobCourant.set(job);
       this.progressPercent.set(job.progressPercent ?? 0);
-      this.progressStep.set(job.progressStep ?? null);
+      this.progressStep.set(this.libelleProgress(job.progressStep));
     }
     if (!this.estTerminal(job.status)) {
       throw new Error('EXTRACTION_TIMEOUT');
     }
     return job;
+  }
+
+  private libelleProgress(step: string | null | undefined): string | null {
+    if (!step) return null;
+    const legacy: Record<string, string> = {
+      queued: 'Mise en file…',
+      loading: 'Chargement du document…',
+      extracting: 'Extraction…',
+      mapping: 'Assemblage…',
+      indexing: 'Indexation…',
+      linking: 'Liaison…',
+      done: 'Terminé',
+      failed: 'Échec',
+      retry_scheduled: 'Nouvelle tentative…',
+    };
+    return legacy[step] ?? step;
   }
 
   private estTerminal(status: string): boolean {
@@ -674,7 +688,23 @@ export class PiecesMarcheComponent {
   }
 
   private messageErreur(e: unknown): string {
-    const err = e as { status?: number; error?: { message?: string; code?: string } };
+    const err = e as {
+      status?: number;
+      message?: string;
+      name?: string;
+      error?: { message?: string; code?: string };
+    };
+    // Backend coupé / CORS / network (souvent pendant vision longue).
+    if (
+      err?.status === 0 ||
+      err?.name === 'HttpErrorResponse' && (err.status === undefined || err.status === 0) ||
+      (typeof err?.message === 'string' &&
+        (err.message.includes('Unknown Error') ||
+          err.message.includes('Http failure') ||
+          err.message.includes('Failed to fetch')))
+    ) {
+      return 'Connexion au serveur perdue — vérifiez que l’API tourne, puis Relancer.';
+    }
     if (err?.status === 403) {
       return "Vous n'avez pas la permission de déposer des pièces.";
     }

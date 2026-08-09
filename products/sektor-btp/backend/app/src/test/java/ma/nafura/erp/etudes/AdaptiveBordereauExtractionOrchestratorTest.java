@@ -79,26 +79,58 @@ class AdaptiveBordereauExtractionOrchestratorTest {
     }
 
     @Test
-    void extract_adaptiveHighConfidence_usesLocalHierarchyWithoutLlm() {
+    void extract_adaptivePdf_usesVisionThenClassify() throws Exception {
         when(tabularParser.supports(any(), any())).thenReturn(false);
         when(layoutParser.parse(any())).thenReturn(usableParseWithGroups());
+        when(extractionService.process(
+                        any(), anyString(), eq("application/pdf"), anyString(), isNull(),
+                        anyString(), any(), anyInt(), eq(true)))
+                .thenReturn(new StatelessExtractionResponse(
+                        StatelessExtractionResponse.Outcome.COMPLETED,
+                        mapper.readTree("""
+                                {
+                                  "groups": [{"code":"1","libelle":"TERRASSEMENT","kind":"LOT"}],
+                                  "articles": [
+                                    {"code":"1-1-1","libelle":"FOUILLES EN PUITS ET EN TRANCHEES","unite":"M3","quantite":10,"page":1},
+                                    {"code":"1-1-2","libelle":"EVACUATION AUX DECHARGES","unite":"M3","quantite":10,"page":1},
+                                    {"code":"1-1-3","libelle":"BETON ARME","unite":"M3","quantite":70,"page":1},
+                                    {"code":"1-1-4","libelle":"ARMATURES","unite":"KG","quantite":500,"page":1},
+                                    {"code":"1-1-5","libelle":"SCELLEMENTS","unite":"U","quantite":40,"page":1},
+                                    {"code":"1-1-6","libelle":"REGARDS","unite":"U","quantite":5,"page":1},
+                                    {"code":"1-1-7","libelle":"CANALISATION","unite":"ML","quantite":40,"page":1},
+                                    {"code":"1-1-8","libelle":"DALLAGE","unite":"M2","quantite":100,"page":1}
+                                  ]
+                                }
+                                """),
+                        null, null, null, List.of(),
+                        null, null, null, null, null));
+        when(extractionService.process(
+                        any(), anyString(), eq("text/plain"), anyString(), isNull(),
+                        anyString(), any(), anyInt()))
+                .thenReturn(new StatelessExtractionResponse(
+                        StatelessExtractionResponse.Outcome.REJECTED,
+                        null, null, null, null, List.of(),
+                        null, null, null, null, null));
 
-        ImportTreeRequest tree = adaptive.extract(
-                new byte[] {1, 2, 3}, "bdp.pdf", "application/pdf");
+        byte[] pdf = minimalOnePagePdf();
+        ImportTreeRequest tree = adaptive.extract(pdf, "bdp.pdf", "application/pdf");
 
         assertThat(tree.getArbre()).isNotEmpty();
         assertThat(AdaptiveBordereauExtractionOrchestrator.countArticles(tree.getArbre()))
-                .isEqualTo(3);
-        verify(extractionService, never()).process(
-                any(), anyString(), anyString(), anyString(), isNull(),
-                anyString(), any(), anyInt());
-        assertThat(adaptive.consumeDiagnostics().path()).contains("local-hierarchy");
+                .isGreaterThanOrEqualTo(8);
+        String joined = flattenLibelles(tree);
+        assertThat(joined.toUpperCase()).contains("FOUILLES EN PUITS");
+        assertThat(adaptive.consumeDiagnostics().path()).contains("adaptive-vision");
+        verify(extractionService).process(
+                any(), anyString(), eq("application/pdf"), anyString(), isNull(),
+                anyString(), any(), anyInt(), eq(true));
     }
 
     @Test
     void extract_adaptiveNeedsClassify_callsClassifierNotFullPdf() throws Exception {
-        when(tabularParser.supports(any(), any())).thenReturn(false);
-        when(layoutParser.parse(any())).thenReturn(usableParse());
+        // Non-PDF / tableur path still uses local parse + classify without vision.
+        when(tabularParser.supports(any(), any())).thenReturn(true);
+        when(tabularParser.parse(any(), any(), any())).thenReturn(usableParse());
         when(extractionService.process(
                         any(), anyString(), eq("text/plain"), anyString(), isNull(),
                         anyString(), any(), anyInt()))
@@ -116,7 +148,8 @@ class AdaptiveBordereauExtractionOrchestratorTest {
                         null, null, null, null, null));
 
         ImportTreeRequest tree = adaptive.extract(
-                new byte[] {1, 2, 3}, "bdp.pdf", "application/pdf");
+                new byte[] {1, 2, 3}, "bdp.xlsx",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 
         assertThat(tree.getArbre()).hasSize(2);
         assertThat(tree.getArbre().get(0).getLibelle()).isEqualTo("Lot 1");
@@ -129,6 +162,9 @@ class AdaptiveBordereauExtractionOrchestratorTest {
         verify(extractionService).process(
                 any(), anyString(), eq("text/plain"), anyString(), isNull(),
                 anyString(), any(), anyInt());
+        verify(extractionService, never()).process(
+                any(), anyString(), anyString(), anyString(), isNull(),
+                anyString(), any(), anyInt(), anyBoolean());
     }
 
     @Test
@@ -136,6 +172,14 @@ class AdaptiveBordereauExtractionOrchestratorTest {
         when(tabularParser.supports(any(), any())).thenReturn(false);
         when(layoutParser.parse(any())).thenReturn(BordereauParseResult.insufficient(
                 2, 10, List.of(), "corrupt_layout"));
+        // Vision chunks empty or weak → legacy whole-doc
+        when(extractionService.process(
+                        any(), anyString(), eq("application/pdf"), anyString(), isNull(),
+                        anyString(), any(), anyInt(), eq(true)))
+                .thenReturn(new StatelessExtractionResponse(
+                        StatelessExtractionResponse.Outcome.TECHNICAL_FAILURE,
+                        null, null, null, null, List.of(),
+                        null, null, null, null, null));
         when(extractionService.process(
                         any(), anyString(), eq("application/pdf"), anyString(), isNull(),
                         anyString(), any(), anyInt()))
@@ -157,8 +201,8 @@ class AdaptiveBordereauExtractionOrchestratorTest {
                         null, null, null, List.of(),
                         null, null, null, null, null));
 
-        ImportTreeRequest tree = adaptive.extract(
-                new byte[] {1, 2, 3}, "scan.pdf", "application/pdf");
+        byte[] pdf = minimalOnePagePdf();
+        ImportTreeRequest tree = adaptive.extract(pdf, "scan.pdf", "application/pdf");
 
         assertThat(tree.getArbre()).hasSize(1);
         assertThat(tree.getArbre().get(0).getLibelle()).isEqualTo("Legacy Lot");
@@ -241,6 +285,13 @@ class AdaptiveBordereauExtractionOrchestratorTest {
                                 """),
                         null, null, null, List.of(),
                         null, null, null, null, null));
+        when(extractionService.process(
+                        any(), anyString(), eq("text/plain"), anyString(), isNull(),
+                        anyString(), any(), anyInt()))
+                .thenReturn(new StatelessExtractionResponse(
+                        StatelessExtractionResponse.Outcome.REJECTED,
+                        null, null, null, null, List.of(),
+                        null, null, null, null, null));
 
         // Minimal valid PDF bytes so PdfPageChunker can open a page subset — use layout pageCount=1
         // via usableParseWithGroups; chunker still needs real PDF. Stub empty → chunks empty → fallback.
@@ -283,7 +334,7 @@ class AdaptiveBordereauExtractionOrchestratorTest {
 
     @Test
     void extract_dirtyTextLayer_escalatesToVision() throws Exception {
-        // Many articles, zero LOT → should escalate even in adaptive mode
+        // Adaptive PDF always vision; ensure full libellés win over truncated PDFBox fragments.
         List<BordereauRowCandidate> rows = new java.util.ArrayList<>();
         for (int i = 0; i < 25; i++) {
             rows.add(new BordereauRowCandidate(
@@ -317,15 +368,42 @@ class AdaptiveBordereauExtractionOrchestratorTest {
                                 """),
                         null, null, null, List.of(),
                         null, null, null, null, null));
+        when(extractionService.process(
+                        any(), anyString(), eq("text/plain"), anyString(), isNull(),
+                        anyString(), any(), anyInt()))
+                .thenReturn(new StatelessExtractionResponse(
+                        StatelessExtractionResponse.Outcome.REJECTED,
+                        null, null, null, null, List.of(),
+                        null, null, null, null, null));
 
         byte[] pdf = minimalOnePagePdf();
         ImportTreeRequest tree = adaptive.extract(pdf, "dirty.pdf", "application/pdf");
 
         assertThat(tree.getArbre()).isNotEmpty();
+        assertThat(flattenLibelles(tree).toUpperCase()).contains("FOUILLES EN PUITS");
         assertThat(adaptive.consumeDiagnostics().path()).contains("adaptive-vision");
         verify(extractionService).process(
                 any(), anyString(), eq("application/pdf"), anyString(), isNull(),
                 anyString(), any(), anyInt(), eq(true));
+    }
+
+    private static String flattenLibelles(ImportTreeRequest tree) {
+        StringBuilder sb = new StringBuilder();
+        flattenLibelles(tree.getArbre(), sb);
+        return sb.toString();
+    }
+
+    private static void flattenLibelles(
+            List<ma.nafura.etudes.api.request.ImportNoeudDto> nodes, StringBuilder sb) {
+        if (nodes == null) {
+            return;
+        }
+        for (ma.nafura.etudes.api.request.ImportNoeudDto n : nodes) {
+            if (n.getLibelle() != null) {
+                sb.append(' ').append(n.getLibelle());
+            }
+            flattenLibelles(n.getEnfants(), sb);
+        }
     }
 
     private static BordereauParseResult usableParse() {

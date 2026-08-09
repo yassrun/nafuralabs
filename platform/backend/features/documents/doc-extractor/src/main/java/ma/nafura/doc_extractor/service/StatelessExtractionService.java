@@ -298,25 +298,35 @@ public class StatelessExtractionService {
         }
 
         // Text-layer PDFs (typical BDP): send text — faster and avoids TLS EOF on inline PDF.
-        // forceMedia skips this for scanned docs with a misleading thin text layer.
-        if (!forceMedia && PdfTextExtractor.isPdfMime(mimeType, fileName)) {
+        // Even with forceMedia, ALWAYS attach extractable text when present: DeepSeek (and other
+        // text-only OpenAI-compat providers) ignore mediaContents, so forceMedia-only requests
+        // hang on empty prompts. Multimodal providers still receive the binary below.
+        if (PdfTextExtractor.isPdfMime(mimeType, fileName)) {
             String pdfText = maxPromptChars != null && maxPromptChars > 0
                     ? PdfTextExtractor.tryPromptText(fileBytes, fileName, maxPromptChars)
                     : PdfTextExtractor.tryPromptText(fileBytes, fileName);
-            if (pdfText != null) {
+            if (pdfText != null && !pdfText.isBlank()) {
                 request.setPrompt(pdfText);
-                request.setMediaContents(List.of());
-                return request;
+                if (!forceMedia) {
+                    request.setMediaContents(List.of());
+                    return request;
+                }
+            } else if (!forceMedia) {
+                // No text layer — fall through to binary media.
+            } else {
+                // forceMedia + no text: binary only (multimodal providers).
             }
         }
 
-        LlmRequest.MediaContent media = new LlmRequest.MediaContent();
-        media.setContentBase64(Base64.getEncoder().encodeToString(fileBytes));
-        media.setMimeType(mimeType);
-        media.setType(mimeType != null && mimeType.startsWith("image/")
-                ? LlmRequest.MediaType.IMAGE
-                : LlmRequest.MediaType.DOCUMENT);
-        request.setMediaContents(List.of(media));
+        if (fileBytes != null && fileBytes.length > 0) {
+            LlmRequest.MediaContent media = new LlmRequest.MediaContent();
+            media.setContentBase64(Base64.getEncoder().encodeToString(fileBytes));
+            media.setMimeType(mimeType);
+            media.setType(mimeType != null && mimeType.startsWith("image/")
+                    ? LlmRequest.MediaType.IMAGE
+                    : LlmRequest.MediaType.DOCUMENT);
+            request.setMediaContents(List.of(media));
+        }
         return request;
     }
 

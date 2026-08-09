@@ -40,7 +40,7 @@ public class DocumentExtractionJob {
     public static final String STATUS_FAILED = "FAILED";
     public static final String STATUS_CANCELLED = "CANCELLED";
 
-    public static final String EXTRACTOR_VERSION = "etudes-2.2.2";
+    public static final String EXTRACTOR_VERSION = "etudes-2.3.0-vision-assemble";
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

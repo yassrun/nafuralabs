@@ -43,7 +43,7 @@ public class DocumentExtractionJobService {
 
     private static final Logger log = LoggerFactory.getLogger(DocumentExtractionJobService.class);
 
-    private static final Duration LEASE_TTL = Duration.ofMinutes(10);
+    private static final Duration LEASE_TTL = Duration.ofMinutes(20);
     private static final Duration RETRY_BASE = Duration.ofSeconds(15);
 
     private final DocumentExtractionJobRepository jobRepository;
@@ -238,7 +238,7 @@ public class DocumentExtractionJobService {
 
     private void executeClaimed(DocumentExtractionJob job, String workerId) {
         try {
-            updateProgress(job.getId(), workerId, 20, "loading");
+            updateProgress(job.getId(), workerId, 5, "Chargement du document…");
             DossierDocument piece = dossierDocumentRepository
                     .findByIdAndTenantId(job.getDossierDocumentId(), job.getTenantId())
                     .orElseThrow(() -> new IllegalArgumentException("etudes.document.introuvable"));
@@ -259,15 +259,20 @@ public class DocumentExtractionJobService {
 
     private void runBordereau(
             DocumentExtractionJob job, DossierDocument piece, byte[] contenu, String workerId) {
-        updateProgress(job.getId(), workerId, 40, "extracting");
+        updateProgress(job.getId(), workerId, 5, "Préparation…");
         String mime = guessMime(piece.getNomFichier());
-        ImportTreeRequest arbre = bordereauExtractionPort.extract(contenu, piece.getNomFichier(), mime);
+        UUID jobId = job.getId();
+        ImportTreeRequest arbre = bordereauExtractionPort.extract(
+                contenu,
+                piece.getNomFichier(),
+                mime,
+                (percent, step) -> updateProgress(jobId, workerId, percent, step));
         var diagnostics = bordereauExtractionPort.consumeDiagnostics();
         if (arbre == null || arbre.getArbre() == null || arbre.getArbre().isEmpty()) {
             fail(job.getId(), "ARBRE_VIDE", "etudes.bordereau.arbre_vide", false);
             return;
         }
-        updateProgress(job.getId(), workerId, 85, "mapping");
+        updateProgress(job.getId(), workerId, 97, "Préparation de la revue…");
         int articles = BordereauImportService.compterArticles(arbre.getArbre());
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("arbre", objectMapper.convertValue(arbre.getArbre(), new TypeReference<List<Map<String, Object>>>() {}));
@@ -324,8 +329,15 @@ public class DocumentExtractionJobService {
             if (job == null || !DocumentExtractionJob.STATUS_RUNNING.equals(job.getStatus())) {
                 return;
             }
-            job.setProgressPercent(percent);
-            job.setProgressStep(step);
+            int clamped = Math.max(0, Math.min(99, percent));
+            // Never regress the bar (parallel page completions can arrive out of order).
+            int current = job.getProgressPercent() != null ? job.getProgressPercent() : 0;
+            if (clamped >= current) {
+                job.setProgressPercent(clamped);
+            }
+            if (step != null && !step.isBlank()) {
+                job.setProgressStep(step);
+            }
             jobRepository.save(job);
             jobRepository.renewLease(jobId, workerId, OffsetDateTime.now().plus(LEASE_TTL));
         });

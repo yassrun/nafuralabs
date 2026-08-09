@@ -15,6 +15,15 @@ public interface BordereauExtractionPort {
     ImportTreeRequest extract(byte[] fileBytes, String fileName, String mimeType);
 
     /**
+     * Same as {@link #extract(byte[], String, String)} with live progress for the UI
+     * (e.g. vision page N / total).
+     */
+    default ImportTreeRequest extract(
+            byte[] fileBytes, String fileName, String mimeType, ExtractionProgress progress) {
+        return extract(fileBytes, fileName, mimeType);
+    }
+
+    /**
      * Diagnostics of the last {@link #extract} call (optional, for job result_json).
      */
     default BordereauExtractionDiagnostics consumeDiagnostics() {

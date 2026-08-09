@@ -8,10 +8,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import ma.nafura.etudes.api.request.ImportNoeudDto;
 import ma.nafura.etudes.api.request.ImportTreeRequest;
@@ -24,6 +20,7 @@ import ma.nafura.etudes.service.bordereau.BordereauQualityReport;
 import ma.nafura.etudes.service.bordereau.BordereauRowCandidate;
 import ma.nafura.etudes.service.bordereau.PdfBordereauLayoutParser;
 import ma.nafura.etudes.service.bordereau.PdfPageChunker;
+import ma.nafura.etudes.service.port.ExtractionProgress;
 import ma.nafura.item.domain.model.UnitOfMeasure;
 import ma.nafura.item.repository.UnitOfMeasureRepository;
 import ma.nafura.platform.documents.docextractor.api.response.StatelessExtractionIssue;
@@ -36,8 +33,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
- * Pipeline adaptatif : parse local d'abord ; si couche texte sale / scan → vision page/page
- * (forceMedia) ; classification hiérarchique locale préférée ; rejet des arbres à 0 articles.
+ * Pipeline adaptatif :
+ * <ul>
+ *   <li>Excel/CSV → parse tabulaire déterministe</li>
+ *   <li>PDF → vision page/page (forceMedia), puis assemblage IA final</li>
+ *   <li>fallback PDFBox / legacy si vision trop faible</li>
+ * </ul>
  */
 @Component
 public class AdaptiveBordereauExtractionOrchestrator {
@@ -48,9 +49,8 @@ public class AdaptiveBordereauExtractionOrchestrator {
     private static final int HYBRID_MAX_PROMPT_CHARS = 80_000;
     /** Repair ciblé (pages faibles) : petits paquets. */
     private static final int CHUNK_MAX_PAGES = 3;
-    /** Vision-first : 1 page = 1 appel (source de vérité visuelle). */
+    /** Vision-first : 1 page = 1 appel (source de vérité visuelle / texte). */
     private static final int VISION_PAGES_PER_CHUNK = 1;
-    private static final int MAX_PARALLEL_CHUNKS = 2;
     private static final int VISION_MIN_ARTICLES_TO_TRUST = 8;
 
     private static final String POSTE_SCHEMA = """
@@ -225,20 +225,29 @@ public class AdaptiveBordereauExtractionOrchestrator {
     }
 
     public ImportTreeRequest extract(byte[] fileBytes, String fileName, String mimeType) {
+        return extract(fileBytes, fileName, mimeType, ExtractionProgress.noop());
+    }
+
+    public ImportTreeRequest extract(
+            byte[] fileBytes, String fileName, String mimeType, ExtractionProgress progress) {
+        ExtractionProgress prog = progress != null ? progress : ExtractionProgress.noop();
         UUID tenantId = TenantContext.getTenantIdOrNull();
         List<String> unitCodes = loadActiveUnitCodes(tenantId);
         long started = System.nanoTime();
+        prog.report(3, "Préparation…");
 
         if ("legacy".equals(strategy)) {
+            prog.report(20, "Extraction document…");
             return extractLegacy(fileBytes, fileName, mimeType, tenantId, unitCodes, started, "legacy");
         }
 
         if ("vision".equals(strategy) && isPdf(mimeType, fileName)) {
-            return extractVisionFirst(
-                    fileBytes, fileName, mimeType, tenantId, unitCodes, started, "vision");
+            return extractVisionThenAssemble(
+                    fileBytes, fileName, mimeType, tenantId, unitCodes, started, "vision", prog);
         }
 
-        ImportTreeRequest adaptive = extractAdaptive(fileBytes, fileName, mimeType, tenantId, unitCodes, started);
+        ImportTreeRequest adaptive =
+                extractAdaptive(fileBytes, fileName, mimeType, tenantId, unitCodes, started, prog);
 
         if ("shadow".equals(strategy)) {
             try {
@@ -265,65 +274,46 @@ public class AdaptiveBordereauExtractionOrchestrator {
             String mimeType,
             UUID tenantId,
             List<String> unitCodes,
-            long startedNanos) {
+            long startedNanos,
+            ExtractionProgress progress) {
 
         if (tabularParser.supports(mimeType, fileName)) {
+            progress.report(15, "Lecture tableur…");
             long parseStart = System.nanoTime();
             BordereauParseResult parse = tabularParser.parse(fileBytes, fileName, mimeType);
             long parseMs = (System.nanoTime() - parseStart) / 1_000_000L;
+            progress.report(70, "Assemblage de l’arbre…");
             return finalizeFromParse(
-                    parse, fileName, tenantId, unitCodes, parseMs, 0, 0, 0, "table", startedNanos);
-        }
-
-        if (!isPdf(mimeType, fileName)) {
-            return extractLegacy(fileBytes, fileName, mimeType, tenantId, unitCodes, startedNanos, "legacy-non-pdf");
-        }
-
-        long parseStart = System.nanoTime();
-        BordereauParseResult parse = layoutParser.parse(fileBytes);
-        long parseMs = (System.nanoTime() - parseStart) / 1_000_000L;
-
-        // Couche texte utilisable mais sale (libellés coupés / pas de LOT) → vision page/page.
-        if (parse.usableForHybrid() && shouldEscalateToVision(parse)) {
-            log.info(
-                    "Bordereau adaptive → vision-first (file={}, articles={}, reason=dirty_text_layer)",
-                    fileName,
-                    parse.articleCandidates().size());
-            return extractVisionFirst(
-                    fileBytes, fileName, mimeType, tenantId, unitCodes, startedNanos, "adaptive-vision");
-        }
-
-        if (parse.usableForHybrid()) {
-            SetWeakRepair repair = repairWeakPages(fileBytes, fileName, parse, tenantId);
-            BordereauParseResult merged = candidateMerger.merge(parse, repair.extras());
-            return finalizeFromParse(
-                    merged,
+                    parse,
                     fileName,
                     tenantId,
                     unitCodes,
                     parseMs,
-                    repair.classifyMs(),
-                    repair.repairMs(),
-                    repair.repairedChunks(),
-                    repair.extras().isEmpty() ? "hybrid-local" : "hybrid-repaired",
-                    startedNanos);
+                    0,
+                    0,
+                    0,
+                    "table",
+                    startedNanos,
+                    false,
+                    progress);
         }
 
-        // Scan / low-text density → vision/media chunks then legacy fallback
-        if (parse.quality() == BordereauParseResult.Quality.INSUFFICIENT
-                && ("low_text_density".equals(parse.rejectReason())
-                        || "no_text_layer".equals(parse.rejectReason())
-                        || "too_few_article_candidates".equals(parse.rejectReason()))) {
-            return extractVisionFirst(
-                    fileBytes, fileName, mimeType, tenantId, unitCodes, startedNanos, "vision-chunks");
+        if (!isPdf(mimeType, fileName)) {
+            progress.report(20, "Extraction document…");
+            return extractLegacy(
+                    fileBytes, fileName, mimeType, tenantId, unitCodes, startedNanos, "legacy-non-pdf");
         }
 
-        log.info(
-                "Bordereau adaptive → legacy fallback (file={}, reason={})",
+        // PDF : vision page/page → texte complet → assemblage IA (évite libellés PDFBox tronqués).
+        return extractVisionThenAssemble(
+                fileBytes,
                 fileName,
-                parse.rejectReason());
-        return extractLegacy(
-                fileBytes, fileName, mimeType, tenantId, unitCodes, startedNanos, "legacy-fallback");
+                mimeType,
+                tenantId,
+                unitCodes,
+                startedNanos,
+                "adaptive-vision",
+                progress);
     }
 
     private ImportTreeRequest finalizeFromParse(
@@ -336,7 +326,9 @@ public class AdaptiveBordereauExtractionOrchestrator {
             long repairMs,
             int repairedChunks,
             String path,
-            long startedNanos) {
+            long startedNanos,
+            boolean forceClassify,
+            ExtractionProgress progress) {
 
         long classifyStart = System.nanoTime();
         ImportTreeRequest tree;
@@ -354,11 +346,12 @@ public class AdaptiveBordereauExtractionOrchestrator {
         if (sousLotCount >= 2 && pre.pricedRatio() >= 0.7 && pre.articleCount() >= 10) {
             localHierarchyOk = true;
         }
-        if (pre.highConfidence() || localHierarchyOk) {
+        if (!forceClassify && (pre.highConfidence() || localHierarchyOk)) {
             tree = hybridAssembler.assembleLocalOnly(parse);
             classifyMs = 0;
             path = path + "+local-hierarchy";
         } else {
+            progress.report(Math.max(88, progressFloor(path)), "Assemblage IA…");
             try {
                 String prompt = hybridAssembler.buildClassifierPrompt(parse);
                 StatelessExtractionResponse response = extractionService.process(
@@ -391,6 +384,7 @@ public class AdaptiveBordereauExtractionOrchestrator {
             }
         }
 
+        progress.report(95, "Normalisation…");
         normalizeUnites(tree, unitCodes);
         int articles = countArticles(tree.getArbre());
         if (articles == 0) {
@@ -440,7 +434,23 @@ public class AdaptiveBordereauExtractionOrchestrator {
                 classifyMs,
                 repairMs,
                 repairedChunks);
+        progress.report(98, "Finalisation…");
         return tree;
+    }
+
+    private static double truncatedLibelleRatio(BordereauParseResult parse) {
+        var articles = parse.articleCandidates();
+        if (articles.isEmpty()) {
+            return 1.0;
+        }
+        long truncated = articles.stream()
+                .filter(a -> BordereauRowCandidate.looksTruncated(a.libelle()))
+                .count();
+        return truncated / (double) articles.size();
+    }
+
+    private static int progressFloor(String path) {
+        return path != null && path.contains("vision") ? 88 : 70;
     }
 
     private SetWeakRepair repairWeakPages(
@@ -453,22 +463,24 @@ public class AdaptiveBordereauExtractionOrchestrator {
         if (chunks.isEmpty()) {
             return SetWeakRepair.empty();
         }
-        return runChunkRepairs(chunks, fileName, tenantId, false);
+        return runChunkRepairs(chunks, fileName, tenantId, false, ExtractionProgress.noop(), 0, 0);
     }
 
     /**
-     * Vision-first : une image/page (forceMedia), sans réutiliser le texte PDFBox sale.
-     * Fallback PDFBox local ou legacy si la vision ne sort presque rien.
+     * Vision page/page → candidats texte complets → assemblage IA final.
+     * Ne réutilise pas les libellés PDFBox (souvent tronqués) comme source article.
      */
-    private ImportTreeRequest extractVisionFirst(
+    private ImportTreeRequest extractVisionThenAssemble(
             byte[] fileBytes,
             String fileName,
             String mimeType,
             UUID tenantId,
             List<String> unitCodes,
             long startedNanos,
-            String pathPrefix) {
+            String pathPrefix,
+            ExtractionProgress progress) {
 
+        progress.report(5, "Analyse du PDF…");
         long parseStart = System.nanoTime();
         BordereauParseResult layoutHint = layoutParser.parse(fileBytes);
         long parseMs = (System.nanoTime() - parseStart) / 1_000_000L;
@@ -481,26 +493,89 @@ public class AdaptiveBordereauExtractionOrchestrator {
         List<PdfPageChunker.PageChunk> chunks =
                 pageChunker.chunksForPages(fileBytes, allPages, VISION_PAGES_PER_CHUNK);
         log.info(
-                "Bordereau vision-first starting (file={}, pages={}, chunks={}, path={})",
+                "Bordereau vision-then-assemble starting (file={}, pages={}, chunks={}, path={})",
                 fileName,
                 pages,
                 chunks.size(),
                 pathPrefix);
 
-        SetWeakRepair vision = runChunkRepairs(chunks, fileName, tenantId, true);
+        // Après fix géométrie : si les libellés locaux sont complets, pas besoin de 16 appels LLM.
+        if (layoutHint.usableForHybrid() && truncatedLibelleRatio(layoutHint) < 0.12) {
+            log.info(
+                    "Bordereau local text layer trusted (file={}, articles={}, truncRatio={})",
+                    fileName,
+                    layoutHint.articleCandidates().size(),
+                    String.format(Locale.ROOT, "%.2f", truncatedLibelleRatio(layoutHint)));
+            progress.report(40, "Parse local fiable…");
+            return finalizeFromParse(
+                    layoutHint,
+                    fileName,
+                    tenantId,
+                    unitCodes,
+                    parseMs,
+                    0,
+                    0,
+                    0,
+                    pathPrefix + "+local-trusted",
+                    startedNanos,
+                    false,
+                    progress);
+        }
+
+        if (chunks.isEmpty()) {
+            log.warn("Bordereau vision chunks empty (file={}) — fallback local/legacy", fileName);
+            if (layoutHint.usableForHybrid()) {
+                progress.report(40, "Fallback parse local…");
+                return finalizeFromParse(
+                        layoutHint,
+                        fileName,
+                        tenantId,
+                        unitCodes,
+                        parseMs,
+                        0,
+                        0,
+                        0,
+                        pathPrefix + "+fallback-local-empty-chunks",
+                        startedNanos,
+                        false,
+                        progress);
+            }
+            progress.report(40, "Fallback document…");
+            return extractLegacy(
+                    fileBytes,
+                    fileName,
+                    mimeType,
+                    tenantId,
+                    unitCodes,
+                    startedNanos,
+                    pathPrefix + "+fallback-legacy-empty-chunks");
+        }
+
+        // PDF à couche texte (BDP-2-17 typique) : texte page/page → LLM (DeepSeek text-only).
+        // forceMedia=true seulement si couche texte absente/insuffisante (scan).
+        boolean forceMedia = !layoutHint.usableForHybrid()
+                || layoutHint.quality() == BordereauParseResult.Quality.INSUFFICIENT;
+        progress.report(
+                8,
+                forceMedia
+                        ? "Vision page 0 / " + pages
+                        : "Lecture texte page 0 / " + pages);
+        SetWeakRepair vision = runChunkRepairs(
+                chunks, fileName, tenantId, forceMedia, progress, 10, 75);
         long visionArticles = vision.extras().stream()
                 .filter(BordereauRowCandidate::looksLikeArticle)
                 .count();
 
         if (visionArticles < VISION_MIN_ARTICLES_TO_TRUST) {
             log.warn(
-                    "Bordereau vision-first weak (file={}, visionArticles={}) — falling back",
+                    "Bordereau vision-then-assemble weak (file={}, visionArticles={}) — falling back",
                     fileName,
                     visionArticles);
             if (layoutHint.usableForHybrid()) {
                 BordereauParseResult merged = vision.extras().isEmpty()
                         ? layoutHint
                         : candidateMerger.merge(layoutHint, vision.extras());
+                progress.report(80, "Fallback parse local…");
                 return finalizeFromParse(
                         merged,
                         fileName,
@@ -511,8 +586,11 @@ public class AdaptiveBordereauExtractionOrchestrator {
                         vision.repairMs(),
                         vision.repairedChunks(),
                         pathPrefix + "+fallback-local",
-                        startedNanos);
+                        startedNanos,
+                        false,
+                        progress);
             }
+            progress.report(80, "Fallback document…");
             return extractLegacy(
                     fileBytes,
                     fileName,
@@ -523,19 +601,45 @@ public class AdaptiveBordereauExtractionOrchestrator {
                     pathPrefix + "+fallback-legacy");
         }
 
-        // Vision articles + groups, but keep PDFBox structure headers (LOT/SECTION titles
-        // like « TERRASSEMENT - GROS-ŒUVRE ») — the text layer is bad for rows, good for chapters.
-        List<BordereauRowCandidate> combined = new ArrayList<>();
-        for (BordereauRowCandidate row : layoutHint.rows()) {
-            if (row.kind() == BordereauRowCandidate.Kind.LOT
-                    || row.kind() == BordereauRowCandidate.Kind.SOUS_LOT
-                    || row.kind() == BordereauRowCandidate.Kind.SECTION) {
-                combined.add(row);
+        // Vision = source de vérité pour articles + groups. PDFBox : titres LOT/SOUS_LOT
+        // uniquement s'ils ne sont pas déjà fournis par la vision.
+        List<BordereauRowCandidate> combined = new ArrayList<>(vision.extras());
+        Set<String> visionGroupCodes = vision.extras().stream()
+                .filter(r -> r.kind() == BordereauRowCandidate.Kind.LOT
+                        || r.kind() == BordereauRowCandidate.Kind.SOUS_LOT
+                        || r.kind() == BordereauRowCandidate.Kind.SECTION)
+                .map(r -> r.code() == null ? "" : r.code().trim().toUpperCase(Locale.ROOT))
+                .filter(c -> !c.isBlank())
+                .collect(Collectors.toCollection(java.util.HashSet::new));
+        boolean visionHasGroups = vision.extras().stream().anyMatch(r ->
+                r.kind() == BordereauRowCandidate.Kind.LOT
+                        || r.kind() == BordereauRowCandidate.Kind.SOUS_LOT
+                        || r.kind() == BordereauRowCandidate.Kind.SECTION);
+        if (!visionHasGroups || visionGroupCodes.isEmpty()) {
+            for (BordereauRowCandidate row : layoutHint.rows()) {
+                if (row.kind() == BordereauRowCandidate.Kind.LOT
+                        || row.kind() == BordereauRowCandidate.Kind.SOUS_LOT
+                        || row.kind() == BordereauRowCandidate.Kind.SECTION) {
+                    combined.add(row);
+                }
+            }
+        } else {
+            for (BordereauRowCandidate row : layoutHint.rows()) {
+                if (row.kind() != BordereauRowCandidate.Kind.LOT
+                        && row.kind() != BordereauRowCandidate.Kind.SOUS_LOT
+                        && row.kind() != BordereauRowCandidate.Kind.SECTION) {
+                    continue;
+                }
+                String code = row.code() == null ? "" : row.code().trim().toUpperCase(Locale.ROOT);
+                if (!code.isBlank() && !visionGroupCodes.contains(code)) {
+                    combined.add(row);
+                }
             }
         }
-        combined.addAll(vision.extras());
+
         BordereauParseResult seeded = layoutHint.withRows(combined);
         BordereauParseResult merged = candidateMerger.dedupe(seeded);
+        progress.report(88, "Assemblage IA…");
         return finalizeFromParse(
                 merged,
                 fileName,
@@ -546,83 +650,52 @@ public class AdaptiveBordereauExtractionOrchestrator {
                 vision.repairMs(),
                 vision.repairedChunks(),
                 pathPrefix + "+pages",
-                startedNanos);
-    }
-
-    /**
-     * PDFBox a sorti assez d'articles mais la géométrie est sale (typique BDP multi-colonnes).
-     */
-    private static boolean shouldEscalateToVision(BordereauParseResult parse) {
-        int articles = parse.articleCandidates().size();
-        if (articles < 20) {
-            return false;
-        }
-        long lots = parse.rows().stream()
-                .filter(r -> r.kind() == BordereauRowCandidate.Kind.LOT)
-                .count();
-        // Beaucoup d'articles, aucun LOT clair → tables mal lues.
-        if (lots == 0) {
-            return true;
-        }
-        return truncatedLibelleRatio(parse) >= 0.25;
-    }
-
-    private static double truncatedLibelleRatio(BordereauParseResult parse) {
-        List<BordereauRowCandidate> articles = parse.articleCandidates();
-        if (articles.isEmpty()) {
-            return 0;
-        }
-        long truncated = 0;
-        for (BordereauRowCandidate a : articles) {
-            String lib = a.libelle() == null ? "" : a.libelle().trim();
-            if (lib.length() < 18 || startsLikeFragment(lib)) {
-                truncated++;
-            }
-        }
-        return truncated / (double) articles.size();
-    }
-
-    private static boolean startsLikeFragment(String libelle) {
-        String first = libelle.split("\\s+")[0].toUpperCase(Locale.ROOT);
-        return Set.of(
-                        "DE", "DES", "DU", "LA", "LE", "LES", "ET", "OU", "EN", "DANS", "POUR",
-                        "Y", "AUX", "AU", "SUR", "AVEC", "SANS", "COMPRIS", "Y/C", "MM", "CM",
-                        "TRANCHEERS", "PUBLIQUES", "GALVANISÉE", "GALVANISEE", "PRINCIPAL",
-                        "SUPPLEMENTAIRE", "MÉTALIQUE", "METALLIQUE")
-                .contains(first);
+                startedNanos,
+                true,
+                progress);
     }
 
     private SetWeakRepair runChunkRepairs(
             List<PdfPageChunker.PageChunk> chunks,
             String fileName,
             UUID tenantId,
-            boolean forceMedia) {
+            boolean forceMedia,
+            ExtractionProgress progress,
+            int progressBase,
+            int progressSpan) {
         long repairStart = System.nanoTime();
-        ExecutorService pool = Executors.newFixedThreadPool(Math.min(MAX_PARALLEL_CHUNKS, chunks.size()));
-        try {
-            List<CompletableFuture<List<BordereauRowCandidate>>> futures = new ArrayList<>();
-            for (PdfPageChunker.PageChunk chunk : chunks) {
-                futures.add(CompletableFuture.supplyAsync(
-                        () -> repairChunk(chunk, fileName, tenantId, forceMedia), pool));
-            }
-            List<BordereauRowCandidate> extras = new ArrayList<>();
-            int repaired = 0;
-            for (CompletableFuture<List<BordereauRowCandidate>> future : futures) {
-                try {
-                    List<BordereauRowCandidate> part = future.get(120, TimeUnit.SECONDS);
-                    if (part != null && !part.isEmpty()) {
-                        extras.addAll(part);
-                        repaired++;
-                    }
-                } catch (Exception ex) {
-                    log.warn("Bordereau chunk repair failed: {}", ex.getMessage());
+        int total = Math.max(chunks.size(), 1);
+        List<BordereauRowCandidate> extras = new ArrayList<>();
+        int repaired = 0;
+        // Séquentiel : DeepSeek text-only + progress UI page/page fiable (évite file d'attente opaque).
+        for (int i = 0; i < chunks.size(); i++) {
+            PdfPageChunker.PageChunk chunk = chunks.get(i);
+            int pageNo = i + 1;
+            progress.report(
+                    progressBase + (i * progressSpan) / total,
+                    (forceMedia ? "Vision page " : "Lecture texte page ")
+                            + pageNo
+                            + " / "
+                            + total
+                            + "…");
+            try {
+                List<BordereauRowCandidate> part = repairChunk(chunk, fileName, tenantId, forceMedia);
+                if (part != null && !part.isEmpty()) {
+                    extras.addAll(part);
+                    repaired++;
                 }
+            } catch (Exception ex) {
+                log.warn("Bordereau chunk repair failed page {}: {}", pageNo, ex.getMessage());
             }
-            long repairMs = (System.nanoTime() - repairStart) / 1_000_000L;
-            return new SetWeakRepair(extras, repaired, repairMs, 0);
-        } finally {
-            pool.shutdownNow();
+            progress.report(
+                    progressBase + (pageNo * progressSpan) / total,
+                    (forceMedia ? "Vision page " : "Lecture texte page ")
+                            + pageNo
+                            + " / "
+                            + total);
         }
+        long repairMs = (System.nanoTime() - repairStart) / 1_000_000L;
+        return new SetWeakRepair(extras, repaired, repairMs, 0);
     }
 
     private List<BordereauRowCandidate> repairChunk(
@@ -814,9 +887,12 @@ public class AdaptiveBordereauExtractionOrchestrator {
 
     private static String chunkRepairInstructions(int startPage, int endPage) {
         return """
-                Tu lis l'IMAGE des pages %d-%d d'un bordereau de prix BTP (tableau).
-                Extrais TOUTES les lignes visibles : groups (LOT / SOUS_LOT / SECTION) et articles.
-                Pour chaque article : code, libellé COMPLET (pas tronqué), unité, quantité, page.
+                Tu lis le TEXTE des pages %d-%d d'un bordereau de prix BTP (tableau).
+                Extrais TOUTES les lignes : groups (LOT / SOUS_LOT / SECTION) et articles.
+                Pour chaque article : code, libellé COMPLET depuis le DÉBUT de la cellule
+                (ex. « FOUILLES EN PUITS ET EN TRANCHEES… », jamais un fragment
+                « TRANCHEERS… » / « PUBLIQUES… » / « POUR TOUS OUVRAGES »), unité, quantité, page.
+                Conserve les multi-lignes de désignation en un seul libellé.
                 N'invente aucune valeur. Ignore PU, montants, totaux et en-têtes marché répétés.
                 Le titre long du marché n'est PAS un lot.
                 kind des groups : LOT | SOUS_LOT | SECTION.

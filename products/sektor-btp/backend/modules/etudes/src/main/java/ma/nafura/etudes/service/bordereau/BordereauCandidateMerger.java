@@ -40,6 +40,7 @@ public class BordereauCandidateMerger {
         }
         Map<String, BordereauRowCandidate> byId = new LinkedHashMap<>();
         Map<String, BordereauRowCandidate> byKey = new LinkedHashMap<>();
+        Map<String, BordereauRowCandidate> byCode = new LinkedHashMap<>();
 
         List<BordereauRowCandidate> sorted = new ArrayList<>(parse.rows());
         sorted.sort(Comparator
@@ -60,15 +61,29 @@ public class BordereauCandidateMerger {
             }
             if (row.looksLikeArticle()) {
                 String key = row.dedupeKey();
+                String codeKey = codeDedupeKey(row);
+                BordereauRowCandidate existing = null;
                 if (byKey.containsKey(key)) {
-                    BordereauRowCandidate existing = byKey.get(key);
+                    existing = byKey.get(key);
+                } else if (codeKey != null && byCode.containsKey(codeKey)) {
+                    existing = byCode.get(codeKey);
+                }
+                if (existing != null) {
                     BordereauRowCandidate merged = existing.mergePreferringLocal(row);
-                    byKey.put(key, merged);
+                    byKey.remove(existing.dedupeKey());
+                    byKey.put(merged.dedupeKey(), merged);
+                    String codeKeyMerged = codeDedupeKey(merged);
+                    if (codeKeyMerged != null) {
+                        byCode.put(codeKeyMerged, merged);
+                    }
                     byId.put(existing.rowId(), merged);
                     replaceInList(out, existing.rowId(), merged);
                     continue;
                 }
                 byKey.put(key, row);
+                if (codeKey != null) {
+                    byCode.put(codeKey, row);
+                }
             }
             byId.put(row.rowId(), row);
             out.add(row);
@@ -92,6 +107,18 @@ public class BordereauCandidateMerger {
                 Set.copyOf(pages),
                 quality,
                 parse.rejectReason());
+    }
+
+    /** Same article code on same page → merge even if libellés diverge (truncated vs full). */
+    private static String codeDedupeKey(BordereauRowCandidate row) {
+        if (row == null || row.code() == null || row.code().isBlank()) {
+            return null;
+        }
+        String c = row.code().trim().toUpperCase().replaceAll("\\s+", "");
+        if (c.length() < 2) {
+            return null;
+        }
+        return row.page() + "|" + c;
     }
 
     private static void replaceInList(

@@ -31,6 +31,15 @@ public class DocExtractorBordereauAdapter implements BordereauExtractionPort {
     }
 
     @Override
+    public ImportTreeRequest extract(
+            byte[] fileBytes,
+            String fileName,
+            String mimeType,
+            ma.nafura.etudes.service.port.ExtractionProgress progress) {
+        return orchestrator.extract(fileBytes, fileName, mimeType, progress);
+    }
+
+    @Override
     public BordereauExtractionDiagnostics consumeDiagnostics() {
         return orchestrator.consumeDiagnostics();
     }

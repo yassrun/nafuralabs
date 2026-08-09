@@ -96,8 +96,10 @@ public record BordereauRowCandidate(
     }
 
     /**
-     * Fusionne deux vues du même article en préservant les valeurs déterministes.
-     * Le LLM ne peut compléter que les champs manquants.
+     * Fusionne deux vues du même article en préservant les valeurs déterministes
+     * (unité / qté), mais en préférant un libellé vision/LLM complet si le local
+     * est tronqué (typique PDF multi-colonnes : « TRANCHEERS… » au lieu de
+     * « FOUILLES EN PUITS ET EN TRANCHEES… »).
      */
     public BordereauRowCandidate mergePreferringLocal(BordereauRowCandidate other) {
         if (other == null) {
@@ -115,9 +117,7 @@ public record BordereauRowCandidate(
         if (mergedQty == null && secondary.quantite != null) {
             mergedQty = secondary.quantite;
         }
-        String mergedLibelle = (primary.libelle != null && !primary.libelle.isBlank())
-                ? primary.libelle
-                : secondary.libelle;
+        String mergedLibelle = pickBestLibelle(primary, secondary);
         String mergedCode = (primary.code != null && !primary.code.isBlank())
                 ? primary.code
                 : secondary.code;
@@ -128,6 +128,15 @@ public record BordereauRowCandidate(
         if (mergedUnite != null && mergedQty != null) {
             mergedConfidence = Math.max(mergedConfidence, 0.85);
             mergedKind = Kind.ARTICLE;
+        }
+        // Prefer vision/LLM method when its libellé won over a truncated local one.
+        ExtractionMethod mergedMethod = primary.method;
+        if (mergedLibelle != null
+                && secondary.libelle != null
+                && mergedLibelle.equals(secondary.libelle)
+                && !mergedLibelle.equals(primary.libelle)
+                && !secondary.isDeterministic()) {
+            mergedMethod = secondary.method;
         }
         return new BordereauRowCandidate(
                 primary.rowId,
@@ -140,8 +149,63 @@ public record BordereauRowCandidate(
                 mergedKind,
                 mergedConfidence,
                 primary.rawText != null ? primary.rawText : secondary.rawText,
-                primary.method,
+                mergedMethod,
                 primary.sourceRef != null ? primary.sourceRef : secondary.sourceRef);
+    }
+
+    /** Libellé tronqué / fragment de début de cellule (géométrie PDFBox). */
+    public static boolean looksTruncated(String libelle) {
+        if (libelle == null || libelle.isBlank()) {
+            return true;
+        }
+        String trimmed = libelle.trim();
+        String first = trimmed.split("\\s+")[0].toUpperCase(java.util.Locale.ROOT);
+        if (FRAGMENT_STARTERS.contains(first)) {
+            return true;
+        }
+        // Very short labels are suspicious only if they look cut mid-word / mid-phrase.
+        return trimmed.length() < 10;
+    }
+
+    private static final java.util.Set<String> FRAGMENT_STARTERS = java.util.Set.of(
+            "DE", "DES", "DU", "LA", "LE", "LES", "ET", "OU", "EN", "DANS", "POUR",
+            "Y", "AUX", "AU", "SUR", "AVEC", "SANS", "COMPRIS", "Y/C", "MM", "CM",
+            "TRANCHEERS", "TRANCHEES", "PUBLIQUES", "GALVANISÉE", "GALVANISEE", "PRINCIPAL",
+            "SUPPLEMENTAIRE", "MÉTALIQUE", "METALLIQUE", "OUVRAGES", "INFRASTRUCTURE",
+            "CARON", "REMBLAI");
+
+    private static String pickBestLibelle(BordereauRowCandidate a, BordereauRowCandidate b) {
+        String la = a.libelle;
+        String lb = b.libelle;
+        if (la == null || la.isBlank()) {
+            return lb;
+        }
+        if (lb == null || lb.isBlank()) {
+            return la;
+        }
+        boolean aTrunc = looksTruncated(la);
+        boolean bTrunc = looksTruncated(lb);
+        if (aTrunc && !bTrunc) {
+            return lb;
+        }
+        if (bTrunc && !aTrunc) {
+            return la;
+        }
+        // Same truncation status: prefer longer (vision often recovers the full cell).
+        if (lb.length() > la.length() + 8) {
+            return lb;
+        }
+        if (la.length() > lb.length() + 8) {
+            return la;
+        }
+        // Prefer non-deterministic (vision) wording when lengths are close and local looks weak.
+        if (aTrunc && b.method == ExtractionMethod.VISION) {
+            return lb;
+        }
+        if (bTrunc && a.method == ExtractionMethod.VISION) {
+            return la;
+        }
+        return la;
     }
 
     public String dedupeKey() {
