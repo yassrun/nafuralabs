@@ -41,8 +41,10 @@ public class PdfBordereauLayoutParser {
     private static final Logger log = LoggerFactory.getLogger(PdfBordereauLayoutParser.class);
 
     static final int MIN_DENSITY_PER_PAGE = 80;
-    static final int MIN_ARTICLE_CANDIDATES = 3;
-    static final double MIN_PRICED_RATIO = 0.45;
+    /** Partagés avec le chemin classeur : les deux sources jugent une lecture aux mêmes seuils. */
+    public static final int MIN_ARTICLE_CANDIDATES = 3;
+
+    public static final double MIN_PRICED_RATIO = 0.45;
 
     private static final Pattern CODE_ONLY = Pattern.compile(
             "^\\d+(?:[.\\-\\s]+\\d+[a-zA-Z]?){0,5}\\.?$", Pattern.CASE_INSENSITIVE);
@@ -202,8 +204,12 @@ public class PdfBordereauLayoutParser {
         if (articles.size() < MIN_ARTICLE_CANDIDATES) {
             return null;
         }
+        // Le taux de lignes chiffrées ne départage une lecture ratée d'un bordereau sans
+        // quantités que si la colonne quantité est absente. Quand elle est identifiée et vide,
+        // c'est le document qui est ainsi — le rejeter renverrait sur le repli géométrique, qui
+        // perd les titres de lots.
         long priced = articles.stream().filter(BordereauRowCandidate::hasPricing).count();
-        if (priced / (double) articles.size() < MIN_PRICED_RATIO) {
+        if (!columns.hasQuantite() && priced / (double) articles.size() < MIN_PRICED_RATIO) {
             return null;
         }
 

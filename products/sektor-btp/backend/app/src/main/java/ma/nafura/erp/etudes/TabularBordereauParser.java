@@ -36,6 +36,10 @@ public class TabularBordereauParser {
     private static final Pattern SOUS_LOT = Pattern.compile("SOUS\\s*LOT", Pattern.CASE_INSENSITIVE);
     private static final Pattern LOT = Pattern.compile("\\bLOT\\b", Pattern.CASE_INSENSITIVE);
 
+    /** Mêmes seuils que le chemin PDF : les deux sources doivent juger une lecture pareillement. */
+    private static final int MIN_ARTICLE_CANDIDATES = PdfBordereauLayoutParser.MIN_ARTICLE_CANDIDATES;
+    private static final double MIN_PRICED_RATIO = PdfBordereauLayoutParser.MIN_PRICED_RATIO;
+
     private final XlsxGridSource xlsxGrid = new XlsxGridSource();
 
     public boolean supports(String mimeType, String fileName) {
@@ -129,9 +133,19 @@ public class TabularBordereauParser {
         List<BordereauRowCandidate> candidates = GridBordereauAssembler.assemble(
                 gridRows, GridRowClassifier.classify(gridRows, columns), columns);
 
-        long articles = candidates.stream().filter(BordereauRowCandidate::looksLikeArticle).count();
-        if (articles < 1) {
+        List<BordereauRowCandidate> articles = candidates.stream()
+                .filter(BordereauRowCandidate::looksLikeArticle)
+                .toList();
+        if (articles.size() < MIN_ARTICLE_CANDIDATES) {
             return null;
+        }
+        // Même règle que le chemin PDF : le taux de lignes chiffrées ne juge la lecture que
+        // lorsque la colonne quantité est introuvable. Présente et vide, c'est le document.
+        if (!columns.hasQuantite()) {
+            long priced = articles.stream().filter(BordereauRowCandidate::hasPricing).count();
+            if (priced / (double) articles.size() < MIN_PRICED_RATIO) {
+                return null;
+            }
         }
 
         Set<Integer> pages = new LinkedHashSet<>();

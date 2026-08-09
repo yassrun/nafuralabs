@@ -41,6 +41,18 @@ public record ColumnMap(int code, int designation, int unite, int quantite, int 
     /** Nombre minimum de jetons pour qu'une colonne soit tenue pour la colonne code. */
     private static final int CODE_TOKEN_THRESHOLD = 5;
 
+    /**
+     * Une colonne quantité a été identifiée dans le fichier.
+     *
+     * <p>Sert à distinguer deux situations que le taux de lignes chiffrées confond : un bordereau
+     * de prix sans quantités — colonne présente, cellules vides — et une lecture ratée où les
+     * colonnes sont parties en vrac. La première est un fait sur le document et doit être
+     * acceptée ; seule la seconde justifie de rejeter la lecture.
+     */
+    public boolean hasQuantite() {
+        return quantite != ABSENT;
+    }
+
     public boolean hasCode() {
         return code != ABSENT;
     }
