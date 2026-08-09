@@ -482,7 +482,7 @@ public class AdaptiveBordereauExtractionOrchestrator {
 
         progress.report(5, "Analyse du PDF…");
         long parseStart = System.nanoTime();
-        BordereauParseResult layoutHint = layoutParser.parse(fileBytes);
+        BordereauParseResult layoutHint = layoutParser.parse(fileBytes, progress);
         long parseMs = (System.nanoTime() - parseStart) / 1_000_000L;
 
         int pages = Math.max(layoutHint.pageCount(), 1);

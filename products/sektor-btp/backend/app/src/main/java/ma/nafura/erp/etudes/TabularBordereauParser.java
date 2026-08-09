@@ -11,6 +11,11 @@ import java.util.regex.Pattern;
 import ma.nafura.etudes.service.bordereau.BordereauParseResult;
 import ma.nafura.etudes.service.bordereau.BordereauRowCandidate;
 import ma.nafura.etudes.service.bordereau.PdfBordereauLayoutParser;
+import ma.nafura.etudes.service.bordereau.grid.ColumnMap;
+import ma.nafura.etudes.service.bordereau.grid.GridBordereauAssembler;
+import ma.nafura.etudes.service.bordereau.grid.GridRow;
+import ma.nafura.etudes.service.bordereau.grid.GridRowClassifier;
+import ma.nafura.etudes.service.bordereau.grid.XlsxGridSource;
 import ma.nafura.platform.documents.docextractor.service.util.SpreadsheetTextExtractor;
 import org.springframework.stereotype.Component;
 
@@ -31,6 +36,8 @@ public class TabularBordereauParser {
     private static final Pattern SOUS_LOT = Pattern.compile("SOUS\\s*LOT", Pattern.CASE_INSENSITIVE);
     private static final Pattern LOT = Pattern.compile("\\bLOT\\b", Pattern.CASE_INSENSITIVE);
 
+    private final XlsxGridSource xlsxGrid = new XlsxGridSource();
+
     public boolean supports(String mimeType, String fileName) {
         if (SpreadsheetTextExtractor.isTabularMime(mimeType)) {
             return true;
@@ -47,6 +54,12 @@ public class TabularBordereauParser {
     public BordereauParseResult parse(byte[] bytes, String fileName, String mimeType) {
         if (bytes == null || bytes.length == 0) {
             return BordereauParseResult.failed("empty_tabular");
+        }
+        // Un classeur est déjà une grille : on le lit par colonnes avant de tenter quoi que ce
+        // soit sur le texte aplati, qui doit retrouver les colonnes par leur position.
+        BordereauParseResult grid = parseAsGrid(bytes, fileName, mimeType);
+        if (grid != null) {
+            return grid;
         }
         String text = SpreadsheetTextExtractor.toPromptText(bytes, mimeType, fileName);
         if (text == null || text.isBlank()) {
@@ -88,6 +101,50 @@ public class TabularBordereauParser {
                 Math.max(page, 1),
                 text.length() / Math.max(page, 1),
                 List.copyOf(rows),
+                Set.copyOf(pages),
+                BordereauParseResult.Quality.USABLE,
+                null);
+    }
+
+    /**
+     * Lecture par colonnes : les cellules gardent leur position, donc la quantité se lit dans la
+     * colonne quantité et non « la dernière ». Rend {@code null} quand la source n'est pas un
+     * classeur ou que la grille n'a rien donné d'exploitable, pour laisser le repli s'exécuter.
+     */
+    private BordereauParseResult parseAsGrid(byte[] bytes, String fileName, String mimeType) {
+        if (!xlsxGrid.supports(fileName, mimeType)) {
+            return null;
+        }
+        List<GridRow> gridRows;
+        try {
+            gridRows = xlsxGrid.read(bytes);
+        } catch (RuntimeException e) {
+            return null;
+        }
+        if (gridRows.isEmpty()) {
+            return null;
+        }
+
+        ColumnMap columns = ColumnMap.resolve(gridRows);
+        List<BordereauRowCandidate> candidates = GridBordereauAssembler.assemble(
+                gridRows, GridRowClassifier.classify(gridRows, columns), columns);
+
+        long articles = candidates.stream().filter(BordereauRowCandidate::looksLikeArticle).count();
+        if (articles < 1) {
+            return null;
+        }
+
+        Set<Integer> pages = new LinkedHashSet<>();
+        for (BordereauRowCandidate candidate : candidates) {
+            if (candidate.looksLikeArticle()) {
+                pages.add(candidate.page());
+            }
+        }
+        int sheets = (int) gridRows.stream().map(GridRow::page).distinct().count();
+        return new BordereauParseResult(
+                Math.max(sheets, 1),
+                gridRows.size() / Math.max(sheets, 1),
+                List.copyOf(candidates),
                 Set.copyOf(pages),
                 BordereauParseResult.Quality.USABLE,
                 null);

@@ -16,6 +16,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import ma.nafura.etudes.service.bordereau.grid.ColumnMap;
+import ma.nafura.etudes.service.port.ExtractionProgress;
+import ma.nafura.etudes.service.bordereau.grid.GridBordereauAssembler;
+import ma.nafura.etudes.service.bordereau.grid.GridRow;
+import ma.nafura.etudes.service.bordereau.grid.GridRowClassifier;
+import ma.nafura.etudes.service.bordereau.grid.PdfRuledGridSource;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.text.TextPosition;
 import org.slf4j.Logger;
@@ -66,9 +72,32 @@ public class PdfBordereauLayoutParser {
                     + "YOUSSOUFIA|AL\\s+YOUSSOUFIA)",
             Pattern.CASE_INSENSITIVE);
 
+    private final PdfRuledGridSource ruledGrid = new PdfRuledGridSource();
+
+    /** Bande de progression réservée à la lecture de la grille, entre les jalons 5 et 40. */
+    private static final int GRID_PROGRESS_FROM = 8;
+    private static final int GRID_PROGRESS_TO = 35;
+
     public BordereauParseResult parse(byte[] pdfBytes) {
+        return parse(pdfBytes, ExtractionProgress.noop());
+    }
+
+    /**
+     * @param progress informé page par page pendant la lecture de la grille — un bordereau de
+     *     plusieurs centaines de pages ne doit pas laisser la barre figée
+     */
+    public BordereauParseResult parse(byte[] pdfBytes, ExtractionProgress progress) {
+        ExtractionProgress prog = progress != null ? progress : ExtractionProgress.noop();
         if (pdfBytes == null || pdfBytes.length == 0) {
             return BordereauParseResult.failed("empty_pdf");
+        }
+        // Un bordereau imprimé depuis un tableur garde son quadrillage vectoriel : on lit alors
+        // chaque valeur dans sa cellule, ce qui évite d'inférer les colonnes à partir des
+        // positions du texte — la source des libellés tronqués. Sans quadrillage exploitable,
+        // on retombe sur l'analyse géométrique ci-dessous, inchangée.
+        BordereauParseResult fromGrid = parseRuledGrid(pdfBytes, prog);
+        if (fromGrid != null) {
+            return fromGrid;
         }
         try (PDDocument document = Loader.loadPDF(pdfBytes)) {
             int pages = document.getNumberOfPages();
@@ -138,6 +167,66 @@ public class PdfBordereauLayoutParser {
             log.warn("BDP layout parse failed: {}", ex.getMessage());
             return BordereauParseResult.failed(ex.getMessage());
         }
+    }
+
+    /**
+     * Lecture par la grille du tableau.
+     *
+     * @return {@code null} si la page ne porte pas de quadrillage exploitable, ou si le résultat
+     *     n'atteint pas les seuils de qualité — l'appelant retombe alors sur l'analyse
+     *     géométrique. Rendre {@code null} plutôt qu'un résultat médiocre laisse le choix ouvert.
+     */
+    private BordereauParseResult parseRuledGrid(byte[] pdfBytes, ExtractionProgress progress) {
+        List<GridRow> gridRows;
+        try {
+            gridRows = ruledGrid.read(pdfBytes, (done, total) -> progress.report(
+                    GRID_PROGRESS_FROM
+                            + (int) ((GRID_PROGRESS_TO - GRID_PROGRESS_FROM)
+                                    * done / (double) Math.max(total, 1)),
+                    "Lecture du tableau — page " + Math.min(done, total) + "/" + total + "…"));
+        } catch (RuntimeException ex) {
+            log.warn("Lecture de la grille impossible, repli géométrique : {}", ex.getMessage());
+            return null;
+        }
+        if (gridRows.isEmpty()) {
+            return null;
+        }
+
+        ColumnMap columns = ColumnMap.resolve(gridRows);
+        List<BordereauRowCandidate> candidates = GridBordereauAssembler.assemble(
+                gridRows, GridRowClassifier.classify(gridRows, columns), columns);
+
+        List<BordereauRowCandidate> articles = candidates.stream()
+                .filter(BordereauRowCandidate::looksLikeArticle)
+                .toList();
+        if (articles.size() < MIN_ARTICLE_CANDIDATES) {
+            return null;
+        }
+        long priced = articles.stream().filter(BordereauRowCandidate::hasPricing).count();
+        if (priced / (double) articles.size() < MIN_PRICED_RATIO) {
+            return null;
+        }
+
+        Set<Integer> covered = new HashSet<>();
+        for (BordereauRowCandidate article : articles) {
+            covered.add(article.page());
+        }
+        int pages = (int) gridRows.stream().map(GridRow::page).distinct().count();
+        int density = gridRows.stream()
+                .flatMap(r -> r.cells().stream())
+                .mapToInt(String::length)
+                .sum() / Math.max(pages, 1);
+
+        log.info("BDP grille: pages={}, lignes={}, candidats={}, articles={}, chiffrés={}",
+                pages, gridRows.size(), candidates.size(), articles.size(), priced);
+
+        return new BordereauParseResult(
+                pages,
+                density,
+                List.copyOf(candidates),
+                Set.copyOf(covered),
+                BordereauParseResult.Quality.USABLE,
+                null);
     }
 
     private List<Line> clusterLines(List<Token> tokens) {
