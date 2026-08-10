@@ -114,6 +114,8 @@ public class BudgetChantierService {
             ligne.setRealiseHt(input.realiseHt() != null ? input.realiseHt() : BigDecimal.ZERO);
             ligne.setPosteBudgetaireId(input.posteBudgetaireId());
             ligne.setOrdre(input.ordre() != null ? input.ordre() : ordre);
+            ligne.setNonFiable(Boolean.TRUE.equals(input.nonFiable()));
+            ligne.setSourceOrigine(input.sourceOrigine());
             saved.add(ligneRepository.save(ligne));
             ordre++;
         }
@@ -227,7 +229,9 @@ public class BudgetChantierService {
                     row.getEngageHt(),
                     row.getRealiseHt(),
                     trimOrNull(row.getPosteBudgetaireId()),
-                    row.getOrdre() != null ? row.getOrdre() : ordre++));
+                    row.getOrdre() != null ? row.getOrdre() : ordre++,
+                    Boolean.TRUE.equals(row.getNonFiable()),
+                    trimOrNull(row.getSourceOrigine())));
         }
         return normalized;
     }
@@ -272,5 +276,7 @@ public class BudgetChantierService {
             BigDecimal engageHt,
             BigDecimal realiseHt,
             String posteBudgetaireId,
-            Integer ordre) {}
+            Integer ordre,
+            boolean nonFiable,
+            String sourceOrigine) {}
 }

@@ -10,17 +10,19 @@ products/<app>/docs/
 ├── guides/                         # guides utilisateur / ops (plus tard)
 ├── transverse/                     # glossaire, conventions app (plus tard)
 ├── ux/
-│   └── wireframes/                 # canvas VALIDÉS (Git)
+│   ├── METHODE-CANVAS-WIREFRAMES.md
+│   └── wireframes/                 # LEGACY redirect only — SSOT = epic/ux/
 └── specs/
     └── epics/
-        ├── _archive/               # epics done
+        ├── _archive/
         └── <feature-slug>/
-            ├── 00-PLAN.md          # obligatoire
-            ├── 00-PROGRESS.md      # obligatoire
-            ├── 00-ARCHITECTURE.md  # si le modèle change
+            ├── 00-PLAN.md
+            ├── 00-PROGRESS.md
+            ├── 00-ARCHITECTURE.md
             ├── 01-ADR-….md
             ├── 02-….md …
-            └── ux/                 # WIP only
+            └── ux/                 # SSOT canvas + notes WIP
+                ├── <name>-wireframe.canvas.tsx
                 └── notes.md
 ```
 
@@ -46,7 +48,7 @@ Application (`products/<app-id>/`)
 2. **Tasks / sprint / status** uniquement dans `pm/…/tasks/`.
 3. **Progress** = `00-PROGRESS.md` (tableau de bord). Pas de `JOURNAL.md` dans l’epic.
 4. **Journal détaillé** = tickets PM (`## Journal` append-only).
-5. **UX WIP** = `epics/<slug>/ux/` ; **validé** → sync `docs/ux/wireframes/`.
+5. **UX canvas SSOT** = `epics/<slug>/ux/*.canvas.tsx` ; preview = copie `~/.cursor/…/canvases/` (pas de 2ᵉ copie sous `docs/ux/wireframes/`).
 6. Epic `done` → déplacer le dossier sous `specs/epics/_archive/`.
 
 ## Flux agent-first
@@ -57,7 +59,7 @@ Besoin → kind:feature (pm) + dossier epic
       → kind:spec tranche
       → kind:task lots
       → 00-PROGRESS à chaque check progress
-      → wireframes validés → docs/ux/wireframes/
+      → canvas dans epics/<slug>/ux/ (+ sync preview canvases/)
       → archive epic + archive pm
 ```
 
@@ -68,7 +70,7 @@ Besoin → kind:feature (pm) + dossier epic
 | `00-PLAN.md` | pourquoi, constat, cible, **ordre** des lots | status runtime, journal |
 | `00-PROGRESS.md` | lot courant, tickets, next | roman métier |
 | `01-ADR-….md` | options + décision | plan d’impl |
-| `ux/` | notes UX WIP | canvas Git validé |
+| `ux/` | **SSOT** canvas `.canvas.tsx` + notes WIP | copie preview hors repo |
 | `pm/…/tasks/` | AC, sprint, journal, status | copie intégrale du PLAN |
 
 ## Migration Sektor

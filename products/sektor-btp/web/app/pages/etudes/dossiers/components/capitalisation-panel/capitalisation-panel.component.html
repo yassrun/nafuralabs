@@ -1,0 +1,151 @@
+@if (visible() && (aTraiter() || mode() === 'done' || chargement())) {
+  <section class="capitalisation" aria-label="Versement bibliothèque">
+    <div class="capitalisation__head">
+      <div>
+        <h4>Versement bibliothèque</h4>
+        <p class="capitalisation__hint">
+          Articles décomposés → ouvrages type · après validation seulement
+        </p>
+      </div>
+      @if (resume(); as r) {
+        <span class="capitalisation__badge">
+          {{ r.nouveaux }} nouveaux · {{ r.collisions }} collisions
+        </span>
+      }
+    </div>
+
+    @if (erreur(); as msg) {
+      <p class="capitalisation__erreur" role="alert">{{ msg }}</p>
+    }
+
+    @if (chargement()) {
+      <p class="capitalisation__etat">Chargement…</p>
+    }
+
+    @if (mode() === 'offer' && aTraiter()) {
+      <div class="capitalisation__offer">
+        <p>
+          <strong>{{ candidatsActifs().length }}</strong> article(s) DECOMPOSE à
+          proposer en bibliothèque.
+        </p>
+        <div class="capitalisation__actions">
+          <nf-button variant="primary" size="sm" (clicked)="openList()">
+            Proposer le versement
+          </nf-button>
+        </div>
+      </div>
+    }
+
+    @if (mode() === 'list' && resume(); as r) {
+      <ul class="capitalisation__list">
+        @for (a of r.articles; track a.noeudId) {
+          @if (a.statut !== 'DEJA_VERSE') {
+            <li class="capitalisation__row">
+              <label class="capitalisation__check">
+                <input
+                  type="checkbox"
+                  [ngModel]="selected()[a.noeudId]"
+                  (ngModelChange)="toggle(a.noeudId, $event)"
+                />
+                <span>
+                  <strong>{{ a.codePropose }}</strong> — {{ a.designation }}
+                  <span class="capitalisation__meta">
+                    {{ a.nbComposants }} composants · {{ a.unite }}
+                  </span>
+                </span>
+              </label>
+              <div class="capitalisation__row-actions">
+                @if (a.statut === 'NOUVEAU') {
+                  <span class="capitalisation__pill capitalisation__pill--ok">Nouveau</span>
+                } @else {
+                  <span class="capitalisation__pill capitalisation__pill--warn">Code existant</span>
+                  <nf-button variant="secondary" size="sm" (clicked)="openCollision(a)">
+                    Comparer
+                  </nf-button>
+                  <select
+                    [ngModel]="decisions()[a.noeudId]"
+                    (ngModelChange)="setDecision(a.noeudId, $event)"
+                  >
+                    <option value="IGNORER">Ignorer</option>
+                    <option value="NOUVEAU_CODE">Nouveau code</option>
+                    <option value="REMPLACER">Remplacer</option>
+                  </select>
+                  @if (decisions()[a.noeudId] === 'NOUVEAU_CODE') {
+                    <input
+                      class="capitalisation__code"
+                      [ngModel]="codeOverrides()[a.noeudId] || ''"
+                      (ngModelChange)="setCodeOverride(a.noeudId, $event)"
+                      placeholder="nouveau.code"
+                    />
+                  }
+                }
+              </div>
+            </li>
+          }
+        }
+      </ul>
+      <div class="capitalisation__actions">
+        <nf-button variant="primary" size="sm" [loading]="saving()" (clicked)="verser()">
+          Verser la sélection
+        </nf-button>
+        <nf-button variant="ghost" size="sm" (clicked)="mode.set('offer')">Annuler</nf-button>
+      </div>
+    }
+
+    @if (mode() === 'collision' && collision(); as a) {
+      <div class="capitalisation__compare">
+        <p class="capitalisation__form-title">
+          Collision · {{ a.codePropose }} — {{ a.designation }}
+        </p>
+        <div class="capitalisation__cols">
+          <div>
+            <h5>Bibliothèque</h5>
+            @for (l of a.comparaisonRendements || []; track l.libelle) {
+              <p>
+                {{ l.libelle }} —
+                {{ l.rendementBiblio ?? '—' }} {{ l.unite }}
+              </p>
+            }
+          </div>
+          <div>
+            <h5>Étude</h5>
+            @for (l of a.comparaisonRendements || []; track l.libelle) {
+              <p>
+                {{ l.libelle }} —
+                {{ l.rendementEtude ?? '—' }} {{ l.unite }}
+              </p>
+            }
+          </div>
+        </div>
+        <div class="capitalisation__actions">
+          <nf-button
+            variant="secondary"
+            size="sm"
+            (clicked)="setDecision(a.noeudId, 'IGNORER'); backToList()"
+          >
+            Ignorer
+          </nf-button>
+          <nf-button
+            variant="secondary"
+            size="sm"
+            (clicked)="setDecision(a.noeudId, 'REMPLACER'); backToList()"
+          >
+            Remplacer
+          </nf-button>
+          <nf-button variant="ghost" size="sm" (clicked)="backToList()">Retour</nf-button>
+        </div>
+      </div>
+    }
+
+    @if (mode() === 'done') {
+      @if (lastResult(); as res) {
+        <p class="capitalisation__etat">
+          Versement : {{ res.crees }} créé(s), {{ res.remplaces }} remplacé(s),
+          {{ res.ignores }} ignoré(s).
+        </p>
+      } @else if (!aTraiter()) {
+        <p class="capitalisation__etat">Rien à verser — panneau à jour.</p>
+      }
+    }
+  </section>
+}

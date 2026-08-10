@@ -107,6 +107,9 @@ class DossierEtudeServiceClientTest {
                 pieceAttendueRepository,
                 chargeEtudeService,
                 org.mockito.Mockito.mock(DossierIntervenantService.class),
+                org.mockito.Mockito.mock(ma.nafura.etudes.repository.AvisExecutionRepository.class),
+                org.mockito.Mockito.mock(BudgetVentilationService.class),
+                org.mockito.Mockito.mock(ma.nafura.etudes.service.port.ChainageAvalPort.class),
                 java.util.List.of());
     }
 

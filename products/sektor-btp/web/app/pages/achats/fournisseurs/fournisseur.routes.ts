@@ -9,6 +9,17 @@ export const FOURNISSEUR_ROUTES: Routes = [
     data: { title: 'achats.routes.fournisseurListTitle', breadcrumb: 'achats.routes.fournisseurListCrumb' },
   },
   {
+    path: 'comparateur',
+    loadComponent: () =>
+      import('./comparateur/comparateur-fournisseurs.page').then(
+        (m) => m.ComparateurFournisseursPage,
+      ),
+    data: {
+      title: 'Comparateur fournisseurs',
+      breadcrumb: 'Comparateur',
+    },
+  },
+  {
     path: 'new',
     loadComponent: () =>
       import('./fournisseur-detail').then((m) => m.FournisseurDetailPage),

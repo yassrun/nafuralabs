@@ -113,9 +113,9 @@ public class AchatsPrixAchatExterneAdapter implements PrixAchatExternePort {
     @Override
     public Optional<PrixCandidat> findCatalogue(UUID itemId, ContexteResolution ctx) {
         List<CatalogueFournisseurLigne> rows =
-                catalogueRepository.findValidAt(ctx.tenantId(), itemId.toString(), ctx.dateReference());
+                catalogueRepository.findValidAt(ctx.tenantId(), itemId, ctx.dateReference());
         if (ctx.fournisseurPrefereId() != null) {
-            String pref = ctx.fournisseurPrefereId().toString();
+            UUID pref = ctx.fournisseurPrefereId();
             Optional<CatalogueFournisseurLigne> preferred = rows.stream()
                     .filter(r -> pref.equals(r.getFournisseurId()))
                     .findFirst();
@@ -182,7 +182,7 @@ public class AchatsPrixAchatExterneAdapter implements PrixAchatExternePort {
         List<PrixCandidat> out = new ArrayList<>();
         findOffreRetenue(itemId, ctx).ifPresent(out::add);
         findContrat(itemId, ctx).ifPresent(out::add);
-        catalogueRepository.findValidAt(ctx.tenantId(), itemId.toString(), ctx.dateReference()).stream()
+        catalogueRepository.findValidAt(ctx.tenantId(), itemId, ctx.dateReference()).stream()
                 .map(r -> toCandidat(r, SourcePrix.CATALOGUE, ctx.dateReference()))
                 .forEach(out::add);
         findDerniereFacture(itemId, ctx).ifPresent(out::add);
@@ -193,9 +193,9 @@ public class AchatsPrixAchatExterneAdapter implements PrixAchatExternePort {
     private Optional<PrixCandidat> pickCatalogue(
             UUID itemId, ContexteResolution ctx, String catalogueSource, String sourcePrix) {
         List<CatalogueFournisseurLigne> rows = catalogueRepository.findValidAtBySource(
-                ctx.tenantId(), itemId.toString(), catalogueSource, ctx.dateReference());
+                ctx.tenantId(), itemId, catalogueSource, ctx.dateReference());
         if (ctx.fournisseurPrefereId() != null) {
-            String pref = ctx.fournisseurPrefereId().toString();
+            UUID pref = ctx.fournisseurPrefereId();
             Optional<CatalogueFournisseurLigne> preferred = rows.stream()
                     .filter(r -> pref.equals(r.getFournisseurId()))
                     .findFirst();
@@ -218,7 +218,7 @@ public class AchatsPrixAchatExterneAdapter implements PrixAchatExternePort {
     }
 
     private static String labelPrefix(CatalogueFournisseurLigne row) {
-        return "Catalogue " + nullToEmpty(row.getFournisseurId());
+        return "Catalogue " + (row.getFournisseurId() != null ? row.getFournisseurId().toString() : "");
     }
 
     private static String nullToEmpty(String value) {

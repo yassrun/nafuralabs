@@ -1,43 +1,70 @@
-import { modeUi, prixVenteHtActif, resolvePosteChiffrageMode } from './poste-chiffrage-mode.util';
+import {
+  computeCoutRevient,
+  computePrixVenteDepuisCout,
+  deduceCoutDepuisPrixVente,
+  ecartEstimationPercent,
+  origineUi,
+  prixVenteHtActif,
+  resolveOrigineCout,
+  resolvePosteChiffrageMode,
+} from './poste-chiffrage-mode.util';
 
 describe('poste-chiffrage-mode.util', () => {
-  describe('resolvePosteChiffrageMode', () => {
-    it('respecte le mode FOURNI explicite même sans prix', () => {
-      expect(resolvePosteChiffrageMode({ mode: 'FOURNI', prixUnitaire: 0 })).toBe('FOURNI');
+  describe('resolveOrigineCout', () => {
+    it('priorise origineCout', () => {
+      expect(
+        resolveOrigineCout({ origineCout: 'FORFAIT', mode: 'FOURNI', prixUnitaire: 1 }),
+      ).toBe('FORFAIT');
     });
 
-    it('respecte le mode DECOMPOSE même avec un prix unitaire', () => {
-      expect(resolvePosteChiffrageMode({ mode: 'DECOMPOSE', prixUnitaire: 1200 })).toBe(
-        'DECOMPOSE',
-      );
+    it('mappe FOURNI legacy → ESTIME', () => {
+      expect(resolveOrigineCout({ mode: 'FOURNI', prixUnitaire: 0 })).toBe('ESTIME');
     });
 
-    it('infère FOURNI si prix > 0 sans mode', () => {
-      expect(resolvePosteChiffrageMode({ mode: null, prixUnitaire: 10 })).toBe('FOURNI');
-    });
-
-    it('reste sans mode si aucun prix ni mode', () => {
-      expect(resolvePosteChiffrageMode({ mode: null, prixUnitaire: 0 })).toBeNull();
-      expect(resolvePosteChiffrageMode({})).toBeNull();
+    it('infère ESTIME si prix > 0 sans origine', () => {
+      expect(resolveOrigineCout({ mode: null, prixUnitaire: 10 })).toBe('ESTIME');
     });
   });
 
-  describe('modeUi', () => {
-    it('affiche DECOMPOSE par défaut quand mode null', () => {
-      expect(modeUi(null)).toBe('DECOMPOSE');
+  describe('origineUi', () => {
+    it('défaut DECOMPOSE', () => {
+      expect(origineUi(null)).toBe('DECOMPOSE');
+    });
+  });
+
+  describe('resolvePosteChiffrageMode (compat)', () => {
+    it('FOURNI explicite → FOURNI', () => {
+      expect(resolvePosteChiffrageMode({ mode: 'FOURNI', prixUnitaire: 0 })).toBe('FOURNI');
     });
 
-    it('conserve FOURNI et DECOMPOSE', () => {
-      expect(modeUi('FOURNI')).toBe('FOURNI');
-      expect(modeUi('DECOMPOSE')).toBe('DECOMPOSE');
+    it('FORFAIT → FOURNI legacy', () => {
+      expect(resolvePosteChiffrageMode({ origineCout: 'FORFAIT' })).toBe('FOURNI');
+    });
+  });
+
+  describe('chaîne multiplicative', () => {
+    it('46 → 49,68 → 53,16 (FG 8 %, marge 7 %)', () => {
+      expect(computeCoutRevient(46, 8)).toBe(49.68);
+      expect(computePrixVenteDepuisCout(46, 8, 7)).toBe(53.16);
+    });
+
+    it('déduit le coût depuis un prix de vente', () => {
+      expect(deduceCoutDepuisPrixVente(1000, 8, 7)).toBe(865.33);
+      expect(computePrixVenteDepuisCout(865.33, 8, 7)).toBe(1000);
+    });
+  });
+
+  describe('ecartEstimationPercent', () => {
+    it('calcule l’écart', () => {
+      expect(ecartEstimationPercent(46, 44.2)).toBe(-3.91);
     });
   });
 
   describe('prixVenteHtActif', () => {
-    it('priorise le prix fourni en mode FOURNI même si une décomposition existe', () => {
+    it('priorise le coût/vente en ESTIME', () => {
       expect(
         prixVenteHtActif({
-          mode: 'FOURNI',
+          origine: 'ESTIME',
           prixFourni: 1212,
           prixDecompose: 980,
           prixPoste: 1212,
@@ -45,37 +72,15 @@ describe('poste-chiffrage-mode.util', () => {
       ).toBe(1212);
     });
 
-    it('utilise le prix décomposé en mode DECOMPOSE', () => {
+    it('utilise le prix décomposé en DECOMPOSE', () => {
       expect(
         prixVenteHtActif({
-          mode: 'DECOMPOSE',
+          origine: 'DECOMPOSE',
           prixFourni: 1212,
           prixDecompose: 980,
           prixPoste: 1212,
         }),
       ).toBe(980);
-    });
-
-    it('retombe sur le prix poste sans mode', () => {
-      expect(
-        prixVenteHtActif({
-          mode: null,
-          prixFourni: null,
-          prixDecompose: 500,
-          prixPoste: 42,
-        }),
-      ).toBe(42);
-    });
-
-    it('retourne 0 pour une décomposition vide', () => {
-      expect(
-        prixVenteHtActif({
-          mode: 'DECOMPOSE',
-          prixFourni: 100,
-          prixDecompose: 0,
-          prixPoste: 100,
-        }),
-      ).toBe(0);
     });
   });
 });

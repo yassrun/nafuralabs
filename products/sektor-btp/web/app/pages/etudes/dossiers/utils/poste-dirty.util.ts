@@ -20,6 +20,8 @@ export function buildComposantDirtyKey(composants: Array<{
   prixUnitaire: number;
   sourcePrix?: string | null;
   offreFournisseurId?: string | null;
+  prixLibelleSource?: string | null;
+  prixSourceRefId?: string | null;
 }>): string {
   return JSON.stringify(
     composants.map((c) => ({
@@ -34,6 +36,8 @@ export function buildComposantDirtyKey(composants: Array<{
       prixUnitaire: c.prixUnitaire,
       sourcePrix: c.sourcePrix ?? 'MANUEL',
       offreFournisseurId: c.offreFournisseurId ?? null,
+      prixLibelleSource: c.prixLibelleSource ?? null,
+      prixSourceRefId: c.prixSourceRefId ?? null,
     })),
   );
 }

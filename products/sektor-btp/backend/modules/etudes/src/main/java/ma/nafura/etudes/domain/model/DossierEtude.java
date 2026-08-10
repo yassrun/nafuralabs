@@ -152,6 +152,34 @@ public class DossierEtude implements AuditableEtude {
     @Column(name = "devis_genere_id")
     private UUID devisGenereId;
 
+    @Column(name = "date_attribution")
+    private java.time.LocalDate dateAttribution;
+
+    @Column(name = "reference_marche", length = 100)
+    private String referenceMarche;
+
+    @Column(name = "montant_attribue", precision = 18, scale = 4)
+    private BigDecimal montantAttribue;
+
+    @Column(name = "motif_perte", length = 40)
+    private String motifPerte;
+
+    @Column(name = "concurrent_retenu", length = 200)
+    private String concurrentRetenu;
+
+    @Column(name = "ecart_prix_estime", precision = 18, scale = 4)
+    private BigDecimal ecartPrixEstime;
+
+    @Column(name = "chantier_genere_id", length = 100)
+    private String chantierGenereId;
+
+    @Column(name = "marche_genere_id", length = 100)
+    private String marcheGenereId;
+
+    /** L14 — code édition catalogue utilisée (VARCHAR, pas de FK). */
+    @Column(name = "catalog_edition_code", length = 40)
+    private String catalogEditionCode;
+
     @Column(name = "motif_refus", length = 1000)
     private String motifRefus;
 

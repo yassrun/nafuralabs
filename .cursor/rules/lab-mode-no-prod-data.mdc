@@ -1,0 +1,28 @@
+---
+description: Lab mode — pas de prod données métier ; Liquibase clean ; liberté de refonte (sauf vitrines)
+alwaysApply: true
+---
+
+# Lab mode — pas encore « prod métier »
+
+**Contexte figé :** tous les produits applicatifs (Sektor, venue-catalog, blanner, layali, beauty, usage-ops, build-intelligence, platform métier…) sont encore en **lab / staging**.  
+**Exceptions prod réelles :** sites vitrine **MBS Studio** et **NafuraLabs corporate** (`marketing/`) — y aller prudemment.
+
+## Conséquences pour les agents
+
+1. **Ne pas** concevoir des migrations « soft » pour préserver des données prod métier inexistantes (pas de dual-write prolongé, pas de colonnes zombies « pour ne rien casser en prod »).
+2. **Liquibase clean** : changelogs lisibles, intention claire (create/alter/drop assumés). Préférer un schéma cible net plutôt qu’une pile de patches défensifs.
+3. **Liberté de redesign / refonte** si le modèle ou le flux est faux — OK de casser le staging lab et re-seed / reset local.
+4. **Ne pas** inventer des scripts de migration one-off « prod cutover » sauf demande explicite humaine.
+5. Ops : on déploie encore via `stg-up` / éventuellement `prod-up` lab — ça ne change **pas** le statut « pas de clients métier en prod » pour le schéma.
+
+## Toujours vrai
+
+- Job Liquibase **avant** backend sur release (`release-app`) — process ops inchangé.
+- Vitrines MBS / corporate : pas de jeux dangereux ; pas de refactor gratuit.
+
+## Interdit
+
+- Argumenter « on ne peut pas drop/rename, il y a de la prod » pour Sektor & co.
+- Empiler des migrations compat juste « au cas où ».
+- Traiter le cluster `prod` OVH comme une contrainte de schéma métier tant que ce mode lab n’est pas levé explicitement.

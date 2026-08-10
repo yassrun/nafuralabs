@@ -61,6 +61,14 @@ export interface ComposantDPU {
   /** MANUEL par défaut ; CONSULTE quand un prix offre/catalogue a été appliqué. */
   sourcePrix?: SourcePrixComposant | null;
   offreFournisseurId?: string | null;
+  /** L5 — gel PrixResolu */
+  prixSourceRefId?: string | null;
+  prixDateSource?: string | null;
+  prixCurrencyId?: string | null;
+  /** Ex. « 1,20 DH — catalogue Lafarge, 12/06/2026 » */
+  prixLibelleSource?: string | null;
+  /** L9 — exclu définitivement du rattrapage. */
+  horsReferentiel?: boolean;
 }
 
 export interface DpuHistoriqueEntry {
@@ -189,6 +197,11 @@ export interface Ouvrage {
   code: string;
   designation: string;
   category: CategoryOuvrage;
+  codeLot?: string;
+  codeFamille?: string;
+  origine?: 'SAISIE' | 'ETUDE' | 'CATALOGUE' | string;
+  sourceEtudeId?: string | null;
+  catalogCleStable?: string | null;
   unite: string;
   prixUnitaireHt: number;
   uniteMain: UniteMain;
@@ -472,6 +485,8 @@ export interface DossierEtude {
   tvaTauxDefaut?: number;
   margeGlobalePercent?: number;
   devisGenereId?: string;
+  chantierGenereId?: string;
+  marcheGenereId?: string;
   motifRefus?: string;
   bordereauRevision?: number;
   validationEtape?: 'N1' | 'N2' | string | null;

@@ -251,7 +251,9 @@ export class BordereauArbreComponent {
     prixUnitaire: number | null;
     total: number | null;
     mode: string | null;
+    origineCout?: string | null;
     prixFourniBase?: number | null;
+    coutUnitaire?: number | null;
     fraisGenerauxPercent?: number | null;
     margePercent?: number | null;
     descriptif?: string | null;
@@ -263,6 +265,8 @@ export class BordereauArbreComponent {
           n.data.prixUnitaire = snap.prixUnitaire;
           n.data.total = snap.total;
           n.data.mode = snap.mode;
+          if (snap.origineCout !== undefined) n.data.origineCout = snap.origineCout;
+          if (snap.coutUnitaire !== undefined) n.data.coutUnitaire = snap.coutUnitaire;
           if (snap.prixFourniBase !== undefined) n.data.prixFourniBase = snap.prixFourniBase;
           if (snap.fraisGenerauxPercent !== undefined) {
             n.data.fraisGenerauxPercent = snap.fraisGenerauxPercent;

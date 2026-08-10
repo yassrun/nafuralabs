@@ -325,6 +325,7 @@
     "etudes.soumissions": "Bids & opportunities",
     "etudes.dossiers": "Studies / client tenders",
     "etudes.bibliotheque": "Price Library",
+    "etudes.catalogueConsole": "Sektor catalogue console",
     "etudes.metres": "Quantities",
     "etudes.devis": "Estimates",
     "etudes.appelsOffresClients": "Client Tenders",
@@ -738,7 +739,9 @@
       "chiffrage": {
         "prix_absent": "Unit selling price is missing or zero.",
         "taux_manquants": "Overhead or profit margin is missing on the DPU.",
-        "client_manquant": "Select a Partner client before generating the quote."
+        "client_manquant": "Select a Partner client before generating the quote.",
+        "avis_ouverts": "Open execution reviews remain on this file.",
+        "avis_ecartes": "Some execution reviews were dismissed — confirm before submission."
       },
       "non_franchie": "This step cannot be completed yet.",
       "corriger": "Fix"

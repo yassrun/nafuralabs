@@ -55,6 +55,11 @@ public class ParametresEtudeService {
     public static final String KEY_SEUIL_DEUX_NIVEAUX = "etudes.seuilDeuxNiveauxApprobation";
     public static final BigDecimal DEFAULT_SEUIL_DEUX_NIVEAUX = new BigDecimal("500000");
 
+    /** L9 — mode création article depuis rattrapage : LIBRE (défaut PME) | CONTROLEE. */
+    public static final String KEY_CREATION_ARTICLE_MODE = "etudes.creationArticleMode";
+    public static final String MODE_CREATION_LIBRE = "LIBRE";
+    public static final String MODE_CREATION_CONTROLEE = "CONTROLEE";
+
     private final TenantSettingReader tenantSettingReader;
 
     public ParametresEtudeService(TenantSettingReader tenantSettingReader) {
@@ -100,6 +105,23 @@ public class ParametresEtudeService {
      */
     public BigDecimal seuilDeuxNiveauxApprobation() {
         return decimalOr(KEY_SEUIL_DEUX_NIVEAUX, DEFAULT_SEUIL_DEUX_NIVEAUX);
+    }
+
+    /**
+     * Mode de création d'article depuis le rattrapage (L9).
+     * Défaut {@link #MODE_CREATION_LIBRE} (PME).
+     */
+    public String creationArticleMode() {
+        return tenantSettingReader
+                .findValue(tenantIdOrNull(), KEY_CREATION_ARTICLE_MODE)
+                .map(String::trim)
+                .map(String::toUpperCase)
+                .filter(v -> MODE_CREATION_LIBRE.equals(v) || MODE_CREATION_CONTROLEE.equals(v))
+                .orElse(MODE_CREATION_LIBRE);
+    }
+
+    public boolean creationArticleControlee() {
+        return MODE_CREATION_CONTROLEE.equals(creationArticleMode());
     }
 
     /** Nombre de niveaux à figer à la soumission selon le montant HT. */

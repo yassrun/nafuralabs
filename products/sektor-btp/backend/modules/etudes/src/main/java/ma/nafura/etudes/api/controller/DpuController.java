@@ -79,6 +79,13 @@ public class DpuController {
         return ResponseEntity.ok(service.recompute(id));
     }
 
+    /** L5 — rafraîchit les prix gelés des composants ITEM (étude non validée). */
+    @PostMapping("/{id}/refresh-prices")
+    @RequirePermission("etudes.update")
+    public ResponseEntity<PrixDpu> refreshPrices(@PathVariable UUID id) {
+        return ResponseEntity.ok(service.refreshPrices(id));
+    }
+
     @PostMapping("/{id}/versions")
     @RequirePermission("etudes.update")
     public ResponseEntity<DpuHistoriqueEntryDto> createVersion(@PathVariable UUID id) {

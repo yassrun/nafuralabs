@@ -279,8 +279,8 @@ public final class GatesEtude {
     }
 
     /**
-     * Étape 5 — chiffrage : FG/marge partout. Les coûts estimés remontent (non bloquant via
-     * problèmes informatifs).
+     * Étape 5 — chiffrage : FG/marge partout. Coûts estimés + avis OUVERT/ECARTE sont
+     * informatifs (non bloquants). Prix / taux manquants restent bloquants.
      */
     @Component
     public static class GateChiffrage implements EtapeGate {
@@ -293,17 +293,18 @@ public final class GatesEtude {
         @Override
         public ResultatGate evaluer(ContexteGate contexte) {
             List<DpgfNoeud> articles = contexte.articles();
-            List<ProblemeGate> pbs = new ArrayList<>();
+            List<ProblemeGate> bloquants = new ArrayList<>();
+            List<ProblemeGate> infos = new ArrayList<>();
             BigDecimal montantTotal = BigDecimal.ZERO;
             BigDecimal montantEstime = BigDecimal.ZERO;
             for (DpgfNoeud a : articles) {
                 if (a.getPrixUnitaire() == null
                         || a.getPrixUnitaire().compareTo(BigDecimal.ZERO) <= 0) {
-                    pbs.add(probleme(a, "etudes.gate.chiffrage.prix_absent"));
+                    bloquants.add(probleme(a, "etudes.gate.chiffrage.prix_absent"));
                     continue;
                 }
                 if (a.getFraisGenerauxPercent() == null || a.getMargePercent() == null) {
-                    pbs.add(probleme(a, "etudes.gate.chiffrage.taux_manquants"));
+                    bloquants.add(probleme(a, "etudes.gate.chiffrage.taux_manquants"));
                 }
                 BigDecimal ligne = a.getTotal() != null
                         ? a.getTotal()
@@ -319,13 +320,23 @@ public final class GatesEtude {
             }
             if (montantTotal.compareTo(BigDecimal.ZERO) > 0
                     && montantEstime.compareTo(BigDecimal.ZERO) > 0) {
-                pbs.add(new ProblemeGate(
+                infos.add(new ProblemeGate(
                         null,
                         null,
                         null,
                         "etudes.gate.chiffrage.part_couts_estimes"));
             }
-            return new ResultatGate(etape(), true, pbs);
+            if (contexte.avisOuverts() > 0) {
+                infos.add(new ProblemeGate(
+                        null, null, null, "etudes.gate.chiffrage.avis_ouverts"));
+            }
+            if (contexte.avisEcartes() > 0) {
+                infos.add(new ProblemeGate(
+                        null, null, null, "etudes.gate.chiffrage.avis_ecartes"));
+            }
+            List<ProblemeGate> pbs = new ArrayList<>(bloquants);
+            pbs.addAll(infos);
+            return new ResultatGate(etape(), !bloquants.isEmpty(), pbs);
         }
     }
 }

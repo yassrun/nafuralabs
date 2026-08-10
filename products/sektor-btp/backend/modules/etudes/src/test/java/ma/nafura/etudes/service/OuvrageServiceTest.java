@@ -51,6 +51,12 @@ class OuvrageServiceTest {
     @Mock
     private ParametresEtudeService parametresEtudeService;
 
+    @Mock
+    private OuvrageCompositeService compositeService;
+
+    @Mock
+    private DpuCalculator calculator;
+
     @InjectMocks
     private OuvrageService service;
 
@@ -63,6 +69,41 @@ class OuvrageServiceTest {
                 .thenReturn(ParametresEtudeService.DEFAULT_FRAIS_GENERAUX_PERCENT);
         lenient().when(parametresEtudeService.margePercentDefaut())
                 .thenReturn(ParametresEtudeService.DEFAULT_MARGE_PERCENT);
+        lenient().when(compositeService.normalizeCodeLot(org.mockito.ArgumentMatchers.any()))
+                .thenAnswer(inv -> {
+                    String v = inv.getArgument(0);
+                    return v == null || v.isBlank() ? "GROS_OEUVRE" : v.trim().toUpperCase();
+                });
+        lenient().when(compositeService.normalizeCodeFamille(org.mockito.ArgumentMatchers.any()))
+                .thenAnswer(inv -> {
+                    String v = inv.getArgument(0);
+                    return v == null || v.isBlank() ? "DIVERS" : v.trim().toUpperCase();
+                });
+        lenient().when(compositeService.computeDebourse(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.anyInt()))
+                .thenAnswer(inv -> {
+                    Ouvrage o = inv.getArgument(0);
+                    BigDecimal sum = o.getComposants().stream()
+                            .map(ComposantOuvrage::getTotal)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+                    BigDecimal mo = o.getUniteMain() != null && o.getUniteMain().getTotal() != null
+                            ? o.getUniteMain().getTotal()
+                            : BigDecimal.ZERO;
+                    return sum.add(mo).setScale(2, java.math.RoundingMode.HALF_UP);
+                });
+        lenient().when(calculator.computePrixVenteHt(
+                        org.mockito.ArgumentMatchers.any(),
+                        org.mockito.ArgumentMatchers.any(),
+                        org.mockito.ArgumentMatchers.any()))
+                .thenAnswer(inv -> {
+                    BigDecimal deb = inv.getArgument(0);
+                    BigDecimal fg = inv.getArgument(1);
+                    BigDecimal marge = inv.getArgument(2);
+                    return new DpuCalculator().computePrixVenteHt(deb, fg, marge);
+                });
+        lenient().when(calculator.computeLineTotal(
+                        org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any()))
+                .thenAnswer(inv -> new DpuCalculator()
+                        .computeLineTotal(inv.getArgument(0), inv.getArgument(1)));
     }
 
     @AfterEach
@@ -195,6 +236,9 @@ class OuvrageServiceTest {
                 .code(code)
                 .designation(designation)
                 .category("TERRASSEMENT")
+                .codeLot("GROS_OEUVRE")
+                .codeFamille("TER_GEN")
+                .origine("SAISIE")
                 .unite("m³")
                 .prixUnitaireHt(new BigDecimal("100.00"))
                 .sousTotalDebourse(new BigDecimal("80.00"))
@@ -216,6 +260,8 @@ class OuvrageServiceTest {
         dto.setCode(code);
         dto.setDesignation(designation);
         dto.setCategory("TERRASSEMENT");
+        dto.setCodeLot("GROS_OEUVRE");
+        dto.setCodeFamille("TER_GEN");
         dto.setUnite("m³");
         UniteMainInputDto mo = new UniteMainInputDto();
         mo.setHeures(new BigDecimal("1"));

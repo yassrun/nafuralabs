@@ -17,16 +17,16 @@ public interface CatalogueFournisseurLigneRepository
     List<CatalogueFournisseurLigne> findByTenantIdOrderByCreatedAtDesc(UUID tenantId);
 
     List<CatalogueFournisseurLigne> findByTenantIdAndFournisseurIdOrderByDesignationAsc(
-            UUID tenantId, String fournisseurId);
+            UUID tenantId, UUID fournisseurId);
 
     List<CatalogueFournisseurLigne> findByTenantIdAndArticleIdOrderByDesignationAsc(
-            UUID tenantId, String articleId);
+            UUID tenantId, UUID articleId);
 
     List<CatalogueFournisseurLigne> findByTenantIdAndFournisseurIdAndActifTrueOrderByDesignationAsc(
-            UUID tenantId, String fournisseurId);
+            UUID tenantId, UUID fournisseurId);
 
     Optional<CatalogueFournisseurLigne> findByTenantIdAndFournisseurIdAndArticleIdAndActifTrueAndValidToIsNull(
-            UUID tenantId, String fournisseurId, String articleId);
+            UUID tenantId, UUID fournisseurId, UUID articleId);
 
     /** Lignes d'un contrat-cadre de prix ({@code source=CONTRAT}, {@code sourceRefId=contratId}). */
     List<CatalogueFournisseurLigne> findByTenantIdAndSourceAndSourceRefId(
@@ -44,7 +44,7 @@ public interface CatalogueFournisseurLigneRepository
             """)
     List<CatalogueFournisseurLigne> findValidAt(
             @Param("tenantId") UUID tenantId,
-            @Param("articleId") String articleId,
+            @Param("articleId") UUID articleId,
             @Param("date") LocalDate date);
 
     @Query(
@@ -60,7 +60,7 @@ public interface CatalogueFournisseurLigneRepository
             """)
     List<CatalogueFournisseurLigne> findValidAtBySource(
             @Param("tenantId") UUID tenantId,
-            @Param("articleId") String articleId,
+            @Param("articleId") UUID articleId,
             @Param("source") String source,
             @Param("date") LocalDate date);
 }

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -14,6 +15,7 @@ import java.util.UUID;
 import ma.nafura.etudes.domain.model.DossierEtude;
 import ma.nafura.etudes.domain.model.StatutDossierEtude;
 import ma.nafura.etudes.repository.AppelOffreClientRepository;
+import ma.nafura.etudes.repository.AvisExecutionRepository;
 import ma.nafura.etudes.repository.DevisRepository;
 import ma.nafura.etudes.repository.DossierDocumentRepository;
 import ma.nafura.etudes.repository.DossierEtudeRepository;
@@ -103,6 +105,9 @@ class DossierEtudeValidationQuatreYeuxTest {
                 pieceAttendueRepository,
                 chargeEtudeService,
                 intervenantService,
+                mock(AvisExecutionRepository.class),
+                mock(BudgetVentilationService.class),
+                mock(ma.nafura.etudes.service.port.ChainageAvalPort.class),
                 List.of());
     }
 

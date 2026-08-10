@@ -1,6 +1,7 @@
 package ma.nafura.etudes.service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -10,10 +11,15 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import ma.nafura.etudes.api.dto.DossierConversionResultDto;
 import ma.nafura.etudes.api.dto.DossierEtudeSyntheseDto;
 import ma.nafura.etudes.api.request.AppelOffreClientCreateDto;
+import ma.nafura.etudes.api.request.DossierConvertirDto;
 import ma.nafura.etudes.api.request.DossierEtudeCreateDto;
 import ma.nafura.etudes.api.request.DossierEtudeUpdateDto;
+import ma.nafura.etudes.api.request.DossierGagneDto;
+import ma.nafura.etudes.api.request.DossierPerduDto;
+import ma.nafura.etudes.domain.MotifPerte;
 import ma.nafura.etudes.domain.model.AppelOffreClient;
 import ma.nafura.etudes.domain.model.Devis;
 import ma.nafura.etudes.domain.model.DossierDocument;
@@ -22,6 +28,7 @@ import ma.nafura.etudes.domain.model.DossierPieceAttendue;
 import ma.nafura.etudes.domain.model.DpgfNoeud;
 import ma.nafura.etudes.domain.model.StatutDossierEtude;
 import ma.nafura.etudes.repository.AppelOffreClientRepository;
+import ma.nafura.etudes.repository.AvisExecutionRepository;
 import ma.nafura.etudes.repository.DevisRepository;
 import ma.nafura.etudes.repository.DossierDocumentRepository;
 import ma.nafura.etudes.repository.DossierEtudeRepository;
@@ -30,6 +37,7 @@ import ma.nafura.etudes.repository.DpgfNoeudRepository;
 import ma.nafura.etudes.service.gate.ContexteGate;
 import ma.nafura.etudes.service.gate.EtapeGate;
 import ma.nafura.etudes.service.gate.ResultatGate;
+import ma.nafura.etudes.service.port.ChainageAvalPort;
 import ma.nafura.etudes.service.port.EtudeApprovalPort;
 import ma.nafura.etudes.service.port.EtudeClientPort;
 import ma.nafura.platform.framework.context.TenantContext;
@@ -61,6 +69,9 @@ public class DossierEtudeService {
     private final DossierPieceAttendueRepository pieceAttendueRepository;
     private final ChargeEtudeService chargeEtudeService;
     private final DossierIntervenantService intervenantService;
+    private final AvisExecutionRepository avisExecutionRepository;
+    private final BudgetVentilationService budgetVentilationService;
+    private final ChainageAvalPort chainageAvalPort;
     private final Map<Integer, EtapeGate> gatesParEtape;
 
     public DossierEtudeService(
@@ -78,6 +89,9 @@ public class DossierEtudeService {
             DossierPieceAttendueRepository pieceAttendueRepository,
             ChargeEtudeService chargeEtudeService,
             DossierIntervenantService intervenantService,
+            AvisExecutionRepository avisExecutionRepository,
+            BudgetVentilationService budgetVentilationService,
+            ChainageAvalPort chainageAvalPort,
             List<EtapeGate> gates) {
         this.repository = repository;
         this.noeudRepository = noeudRepository;
@@ -93,6 +107,9 @@ public class DossierEtudeService {
         this.pieceAttendueRepository = pieceAttendueRepository;
         this.chargeEtudeService = chargeEtudeService;
         this.intervenantService = intervenantService;
+        this.avisExecutionRepository = avisExecutionRepository;
+        this.budgetVentilationService = budgetVentilationService;
+        this.chainageAvalPort = chainageAvalPort;
         this.gatesParEtape = gates.stream()
                 .collect(Collectors.toMap(EtapeGate::etape, Function.identity()));
     }
@@ -463,6 +480,8 @@ public class DossierEtudeService {
                 .totalHt(totalHt)
                 .devisGenereId(dossier.getDevisGenereId())
                 .devisNumero(devisNumero)
+                .chantierGenereId(dossier.getChantierGenereId())
+                .marcheGenereId(dossier.getMarcheGenereId())
                 .approvalRequestId(dossier.getApprovalRequestId())
                 .prochainApprobateurRole(prochainRole)
                 .prochainApprobateurNom(prochainNom)
@@ -480,6 +499,139 @@ public class DossierEtudeService {
         DossierEtude dossier = requireDossier(id);
         dossier.setValidationEtape(null);
         return transitionner(dossier, StatutDossierEtude.ANNULE);
+    }
+
+    /** L13 — affaire gagnée (DEVIS_GENERE → GAGNE). */
+    @Transactional
+    public DossierEtude gagne(UUID id, DossierGagneDto body) {
+        DossierEtude dossier = requireDossier(id);
+        if (dossier.getStatus() != StatutDossierEtude.DEVIS_GENERE) {
+            throw new IllegalStateException("etudes.dossier.gagne_hors_etat");
+        }
+        dossier.setDateAttribution(body.getDateAttribution());
+        dossier.setReferenceMarche(trimOrNull(body.getReferenceMarche()));
+        dossier.setMontantAttribue(body.getMontantAttribue());
+        return transitionner(dossier, StatutDossierEtude.GAGNE);
+    }
+
+    /** L13 — affaire perdue (DEVIS_GENERE → PERDU). */
+    @Transactional
+    public DossierEtude perdu(UUID id, DossierPerduDto body) {
+        DossierEtude dossier = requireDossier(id);
+        if (dossier.getStatus() != StatutDossierEtude.DEVIS_GENERE) {
+            throw new IllegalStateException("etudes.dossier.perdu_hors_etat");
+        }
+        MotifPerte motif = MotifPerte.parse(body.getMotif());
+        dossier.setMotifPerte(motif.name());
+        dossier.setConcurrentRetenu(trimOrNull(body.getConcurrentRetenu()));
+        dossier.setEcartPrixEstime(body.getEcartPrixEstime());
+        return transitionner(dossier, StatutDossierEtude.PERDU);
+    }
+
+    /**
+     * L13 — conversion atomique chantier + marché + budget.
+     * Guichet unique : statut GAGNE (ou MARCHE_EXISTANT déjà GAGNE).
+     */
+    @Transactional
+    public DossierConversionResultDto convertir(UUID id, DossierConvertirDto body) {
+        DossierEtude dossier = requireDossier(id);
+        if (dossier.getStatus() != StatutDossierEtude.GAGNE) {
+            throw new IllegalStateException("etudes.dossier.convertir_hors_etat");
+        }
+        if (StringUtils.hasText(dossier.getChantierGenereId())) {
+            return DossierConversionResultDto.builder()
+                    .dossierId(dossier.getId())
+                    .chantierId(dossier.getChantierGenereId())
+                    .marcheId(dossier.getMarcheGenereId())
+                    .status(dossier.getStatus().name())
+                    .build();
+        }
+        if (!StringUtils.hasText(dossier.getClientId())) {
+            throw new IllegalArgumentException("etudes.dossier.client_requis");
+        }
+
+        List<DpgfNoeud> noeuds = chargerNoeuds(dossier);
+        List<ChainageAvalPort.LotProjection> lots = projeterLots(noeuds);
+        List<ChainageAvalPort.BudgetRubrique> budget = budgetVentilationService.ventiler(noeuds);
+
+        BigDecimal montant = body.getMontantHt() != null
+                ? body.getMontantHt()
+                : (dossier.getMontantAttribue() != null
+                        ? dossier.getMontantAttribue()
+                        : totalHt(noeuds.stream()
+                                .filter(n -> DpgfNoeud.TYPE_ARTICLE.equals(n.getType()))
+                                .toList()));
+
+        String label = StringUtils.hasText(body.getChantierLabel())
+                ? body.getChantierLabel().trim()
+                : dossier.getObjet();
+        String marcheIntitule = StringUtils.hasText(body.getMarcheIntitule())
+                ? body.getMarcheIntitule().trim()
+                : label;
+        String marcheRef = StringUtils.hasText(body.getMarcheReference())
+                ? body.getMarcheReference().trim()
+                : dossier.getReferenceMarche();
+
+        ChainageAvalPort.ConversionResult result = chainageAvalPort.convert(
+                new ChainageAvalPort.ConversionCommand(
+                        dossier.getId(),
+                        dossier.getClientId(),
+                        dossier.getClientNom(),
+                        dossier.getObjet(),
+                        label,
+                        trimOrNull(body.getChantierCode()),
+                        trimOrNull(body.getChantierVille()),
+                        body.getDateDemarrage() != null
+                                ? body.getDateDemarrage()
+                                : dossier.getDateAttribution(),
+                        body.getDureeMois(),
+                        marcheIntitule,
+                        marcheRef,
+                        montant,
+                        body.getTauxTva() != null ? body.getTauxTva() : parametres.tvaTauxDefaut(),
+                        lots,
+                        budget));
+
+        dossier.setChantierGenereId(result.chantierId());
+        dossier.setMarcheGenereId(result.marcheId());
+        if (dossier.getDevisGenereId() != null) {
+            devisRepository
+                    .findByIdAndTenantId(dossier.getDevisGenereId(), tenantId())
+                    .ifPresent(d -> {
+                        d.setChantierGenereId(result.chantierId());
+                        devisRepository.save(d);
+                    });
+        }
+        DossierEtude converted = transitionner(dossier, StatutDossierEtude.CONVERTIE);
+        return DossierConversionResultDto.builder()
+                .dossierId(converted.getId())
+                .chantierId(result.chantierId())
+                .marcheId(result.marcheId())
+                .status(converted.getStatus().name())
+                .build();
+    }
+
+    private List<ChainageAvalPort.LotProjection> projeterLots(List<DpgfNoeud> noeuds) {
+        List<ChainageAvalPort.LotProjection> out = new ArrayList<>();
+        Map<UUID, String> codeById = new HashMap<>();
+        for (DpgfNoeud n : noeuds) {
+            codeById.put(n.getId(), n.getCode());
+        }
+        int ordre = 0;
+        for (DpgfNoeud n : noeuds) {
+            String parentCode = n.getParentId() != null ? codeById.get(n.getParentId()) : null;
+            out.add(new ChainageAvalPort.LotProjection(
+                    n.getCode(),
+                    n.getLibelle(),
+                    n.getType(),
+                    parentCode,
+                    n.getUnite(),
+                    n.getQuantite(),
+                    n.getPrixUnitaire(),
+                    n.getTotal(),
+                    ordre++));
+        }
+        return out;
     }
 
     // ── Interne ──────────────────────────────────────────────────────────────
@@ -530,6 +682,10 @@ public class DossierEtudeService {
                 clientValide = false;
             }
         }
+        long avisOuverts = avisExecutionRepository.countByTenantIdAndDossierEtudeIdAndStatut(
+                tenantId(), dossier.getId(), "OUVERT");
+        long avisEcartes = avisExecutionRepository.countByTenantIdAndDossierEtudeIdAndStatut(
+                tenantId(), dossier.getId(), "ECARTE");
         return new ContexteGate(
                 articles,
                 noeuds,
@@ -538,7 +694,9 @@ public class DossierEtudeService {
                 hasCps,
                 piecesAttendues,
                 hasClientId,
-                clientValide);
+                clientValide,
+                avisOuverts,
+                avisEcartes);
     }
 
     private AppelOffreClient creerAocLie(DossierEtudeCreateDto dto, String donneurOrdre) {
@@ -743,7 +901,10 @@ public class DossierEtudeService {
                             ? "VALIDER_N2"
                             : "VALIDER_N1";
             case VALIDEE -> "GENERER_DEVIS";
-            case DEVIS_GENERE -> "VOIR_DEVIS";
+            case DEVIS_GENERE -> "MARQUER_GAGNE";
+            case GAGNE -> "CONVERTIR";
+            case CONVERTIE ->
+                    StringUtils.hasText(dossier.getChantierGenereId()) ? "VOIR_CHANTIER" : "CONSULTER";
             default -> "CONSULTER";
         };
     }

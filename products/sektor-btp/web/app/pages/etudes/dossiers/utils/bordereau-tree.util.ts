@@ -23,6 +23,10 @@ export interface BordereauTreeRow {
   descriptif?: string | null;
   mode?: string | null;
   origineCout?: string | null;
+  estimationSaisieEn?: string | null;
+  coutDeduit?: boolean;
+  forfaitPartnerId?: string | null;
+  forfaitOffreId?: string | null;
   prixDpuId?: string | null;
   depth: number;
   /** ARTICLE sans unité ou quantité ≤ 0 — exclu à la persistance. */
@@ -110,6 +114,10 @@ export function noeudsDpgfToTreeNodes(
         descriptif: n.descriptif,
         mode: n.mode,
         origineCout: n.origineCout,
+        estimationSaisieEn: n.estimationSaisieEn,
+        coutDeduit: n.coutDeduit,
+        forfaitPartnerId: n.forfaitPartnerId,
+        forfaitOffreId: n.forfaitOffreId,
         prixDpuId: n.prixDpuId,
         depth,
         nonExploitable:

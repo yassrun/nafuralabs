@@ -44,5 +44,10 @@ public class BudgetChantierUpsertDto {
         private String posteBudgetaireId;
 
         private Integer ordre;
+
+        /** L13 — coût déduit / non fiable. */
+        private Boolean nonFiable;
+
+        private String sourceOrigine;
     }
 }

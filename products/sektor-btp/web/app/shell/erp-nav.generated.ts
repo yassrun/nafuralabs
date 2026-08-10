@@ -477,6 +477,13 @@ export const ERP_NAV_CONFIG_GENERATED: SidebarNode[] = [
             order: 10,
           },
           {
+            id: 'etudes.catalogueConsole',
+            label: 'nav.etudes.catalogueConsole',
+            icon: 'library',
+            route: '/catalogue',
+            order: 12,
+          },
+          {
             id: 'etudes.metres',
             label: 'nav.etudes.metres',
             icon: 'ruler',

@@ -50,8 +50,10 @@ Si aucune : « aucune — prêt à découper ».
 
 ## 6. UX
 
-- WIP : [`ux/`](./ux/)
-- Validé : `docs/ux/wireframes/<slug>-….canvas.tsx` (ou `n/a`)
+- **SSOT canvas** : [`ux/<name>-wireframe.canvas.tsx`](./ux/)
+- Notes WIP : [`ux/notes.md`](./ux/notes.md) (optionnel)
+- Preview IDE : sync copie → `~/.cursor/projects/…/canvases/` (même nom)
+- Ou `n/a` si pas d’UI
 
 ## 7. Liens PM
 

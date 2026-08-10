@@ -93,6 +93,7 @@
 
 .poste-drawer__mode {
   display: inline-flex;
+  flex-wrap: wrap;
   margin: 0.75rem 1rem 0;
   border: 1px solid var(--nf-color-border);
   border-radius: 8px;
@@ -100,6 +101,7 @@
   background: var(--nf-color-bg-subtle);
   flex-shrink: 0;
   align-self: flex-start;
+  max-width: calc(100% - 2rem);
 }
 
 .poste-drawer__toggle {
@@ -138,6 +140,11 @@
   min-height: 0;
   position: relative;
   z-index: 0;
+}
+
+.poste-drawer__avis {
+  padding: 0 1rem;
+  flex-shrink: 0;
 }
 
 .poste-drawer__comments {

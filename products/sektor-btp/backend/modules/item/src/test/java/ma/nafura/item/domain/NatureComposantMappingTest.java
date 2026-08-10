@@ -59,6 +59,16 @@ class NatureComposantMappingTest {
     }
 
     @Test
+    void toOuvrageTypeFromDpu() {
+        assertEquals(NatureComposantMapping.OUVRAGE_MO, NatureComposantMapping.toOuvrageTypeFromDpu("MAIN_DOEUVRE"));
+        assertEquals(NatureComposantMapping.OUVRAGE_LOCATION, NatureComposantMapping.toOuvrageTypeFromDpu("MATERIEL"));
+        assertEquals(
+                NatureComposantMapping.OUVRAGE_SOUS_TRAITANCE,
+                NatureComposantMapping.toOuvrageTypeFromDpu("SOUS_TRAITANCE"));
+        assertEquals(NatureComposantMapping.OUVRAGE_MATERIAU, NatureComposantMapping.toOuvrageTypeFromDpu("MATIERE"));
+    }
+
+    @Test
     void natureAttributes_matchPlan() {
         assertTrue(Nature.OUTILLAGE.isStockable());
         assertTrue(Nature.OUTILLAGE.isValorise());

@@ -1,41 +1,23 @@
-# Wireframes Canvas (Sektor BTP)
+# Wireframes — redirect
 
-Sources versionnées des Cursor Canvas UX (méthode principale — voir [`../METHODE-CANVAS-WIREFRAMES.md`](../METHODE-CANVAS-WIREFRAMES.md)).
+**Ce dossier n’est plus la source de vérité.**
 
-## Pourquoi deux emplacements
+Les canvas Git vivent avec leur feature :
 
-| Emplacement | Rôle |
-|-------------|------|
-| **Ce dossier** (`docs/ux/wireframes/`) | **Source de vérité Git** — revue, historique, PR |
-| `~/.cursor/projects/<workspace>/canvases/` | **Preview live** dans Cursor (seul chemin détecté par l’IDE) |
+`products/<app>/docs/specs/epics/<feature-slug>/ux/*.canvas.tsx`
 
-Les fichiers `*.canvas.data.json` (état UI local) **ne sont pas** versionnés.
+Méthode : [`../METHODE-CANVAS-WIREFRAMES.md`](../METHODE-CANVAS-WIREFRAMES.md)  
+Règle Cursor : `.cursor/rules/ux-canvas-wireframes.mdc`
 
-## Workflow
+## Inventaire Sektor (après migration)
 
-1. Itérer le wireframe dans Cursor (preview) → fichier sous `canvases/`.
-2. Avant commit / fin de session : **copier** le `.canvas.tsx` ici (même nom).
-3. Commit le fichier sous `docs/ux/wireframes/`.
-4. Pour reprendre sur une autre machine : copier depuis ce dossier vers `canvases/` pour rouvrir la preview.
+| Canvas | Epic |
+|--------|------|
+| `uom-conversion-wireframe.canvas.tsx` | `specs/epics/_archive/referentiel-catalogue-sektor/ux/` |
+| `articles-fiche-wireframe.canvas.tsx` | `specs/epics/_archive/articles-contrat/ux/` |
+| `etude-*-wireframe.canvas.tsx`, `devis-detail`, `chantier-create` | `specs/epics/_archive/etude-prix-unifiee/ux/` |
+| `admin-ai-providers-wireframe.canvas.tsx` | `_unassigned/` — à rattacher à un epic |
 
-```powershell
-# Depuis la racine monorepo — sync preview → repo
-Copy-Item "$env:USERPROFILE\.cursor\projects\c-nf-nafuralabs\canvases\chantier-create-wireframe.canvas.tsx" `
-  "products\sektor-btp\docs\ux\wireframes\" -Force
+## Preview
 
-# Repo → preview
-Copy-Item "products\sektor-btp\docs\ux\wireframes\chantier-create-wireframe.canvas.tsx" `
-  "$env:USERPROFILE\.cursor\projects\c-nf-nafuralabs\canvases\" -Force
-```
-
-## Inventaire
-
-| Fichier | Sujet |
-|---------|--------|
-| `etude-decompo-wireframe.canvas.tsx` | Chiffrage poste (tree → drawer) — validé |
-| `etude-ao-unify-wireframe.canvas.tsx` | Unification AO + étude + pièces |
-| `etude-data-lifecycle.canvas.tsx` | Cycle de vie données étude |
-| `chantier-create-wireframe.canvas.tsx` | Wizard marché + chantier (chaînage aval) |
-| `devis-detail-wireframe.canvas.tsx` | Fiche devis — états BROUILLON/EMIS/PERDU/version |
-| `articles-fiche-wireframe.canvas.tsx` | Catalogue articles — nature/famille/lots (contrat V1) — **à valider** |
-| `uom-conversion-wireframe.canvas.tsx` | Unités — facteur vers base, base unique, test conversion (L3) |
+Toujours sync depuis l’epic vers `~/.cursor/projects/…/canvases/` (contrainte IDE).

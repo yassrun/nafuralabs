@@ -5,14 +5,15 @@
 | Besoin | Document |
 |--------|----------|
 | Ops K8s (deploy, migrate, reset, troubleshooting) | [toolchain/ops/AGENTS.md](../toolchain/ops/AGENTS.md) |
-| **UX / wireframes (méthode principale)** | [products/sektor-btp/docs/ux/METHODE-CANVAS-WIREFRAMES.md](../products/sektor-btp/docs/ux/METHODE-CANVAS-WIREFRAMES.md) |
-| **Specs / epics (PLAN · PROGRESS)** | [specs/README.md](specs/README.md) · templates [`specs/templates/`](specs/templates/) |
+| **Specs / epics (PLAN · PROGRESS)** | [specs/README.md](specs/README.md) · templates [`specs/templates/`](specs/templates/) · règle Cursor `.cursor/rules/specs-epics.mdc` |
+| **UX / wireframes (méthode principale)** | [products/sektor-btp/docs/ux/METHODE-CANVAS-WIREFRAMES.md](../products/sektor-btp/docs/ux/METHODE-CANVAS-WIREFRAMES.md) · règle `.cursor/rules/ux-canvas-wireframes.mdc` |
 | **Tasks / backlog / sprint (PM markdown)** | [Markdown Project Management Framework.md](Markdown%20Project%20Management%20Framework.md) · copie `pm/AGENTS.md` |
 | Imports Gradle / TypeScript | [PLATFORM_IMPORTS.md](PLATFORM_IMPORTS.md) |
 | Table migration `nf/nafura` → chemins actuels | [ARCHITECTURE_MIGRATION.md](ARCHITECTURE_MIGRATION.md) |
 | Secrets Vault | [VAULT_SECRETS.md](VAULT_SECRETS.md) |
 | Fichier secrets local (bootstrap) | [secrets/README.md](../secrets/README.md) |
 | Vue humaine courte | [README.md](README.md) |
+| **Claude Code** | [`CLAUDE.md`](../CLAUDE.md) à la racine — pointe vers ce fichier + rules `.cursor/rules/` |
 
 ---
 
@@ -22,10 +23,11 @@
 2. **Environnement = cluster**, pas branche Git — `ENV=staging|prod` + `KUBE_CONTEXT`, jamais de branche `staging`/`prod`.
 3. **Ops** : toujours `toolchain/ops/nlops.sh` ou `make` — pas de `kubectl apply` ad hoc sauf debug.
 4. **Migrations** : Job Liquibase **avant** backend (`release-app`, pas `deploy` seul après changement SQL).
-5. **Métier** uniquement sous `products/<app-id>/` — jamais dans `platform/`.
-6. **Pas de codegen** JSON (`nafgen`, `nafspec`, `nafops`).
-7. **Legacy** `nf/nafura` : ne plus modifier sauf hotfix prod avant bascule.
-8. **Ne pas committer** de secrets ; fichier local `secrets/nafura.secrets` (voir [secrets/README.md](../secrets/README.md)).
+5. **Lab mode (métier)** : produits applicatifs **pas encore en prod clients** — Liquibase **clean**, liberté de refonte / reset ; **ne pas** concevoir des migrations défensives « pour ne rien casser en prod ». Exceptions prod réelles : vitrines **MBS** + **corporate**. Règle Cursor : `.cursor/rules/lab-mode-no-prod-data.mdc`.
+6. **Métier** uniquement sous `products/<app-id>/` — jamais dans `platform/`.
+7. **Pas de codegen** JSON (`nafgen`, `nafspec`, `nafops`).
+8. **Legacy** `nf/nafura` : ne plus modifier sauf hotfix prod avant bascule.
+9. **Ne pas committer** de secrets ; fichier local `secrets/nafura.secrets` (voir [secrets/README.md](../secrets/README.md)).
 
 ---
 

@@ -66,6 +66,10 @@ export interface DecompositionComposantMatched {
   rendement: number;
   prixUnitaire: number;
   sourcePrix: string;
+  prixSourceRefId?: string | null;
+  prixDateSource?: string | null;
+  prixCurrencyId?: string | null;
+  prixLibelleSource?: string | null;
   confiance?: number;
   suggereParIa?: boolean;
 }
@@ -85,6 +89,120 @@ export interface DecompositionPropose {
   missing: DecompositionComposantMissing[];
   confiance?: number;
 }
+
+/** Synthèse des coûts d'affaire (L1/L6) — projection. */
+export interface SyntheseCoutAffaire {
+  montantTotalHt: number;
+  coutTotalEtabli: number;
+  margeSurCoutsEtablis: number;
+  margePercentSurCoutsEtablis: number;
+  montantCoutsDeduits: number;
+  partCoutsNonEtablisPercent: number;
+  repartitionMontantParOrigine: Record<string, number>;
+  repartitionPercentParOrigine: Record<string, number>;
+}
+
+/** L8 — avis d'exécution. */
+export type NiveauAvisExecution = 'REALISABLE' | 'DIFFICILE' | 'IRREALISABLE';
+export type StatutAvisExecution = 'OUVERT' | 'PRIS_EN_COMPTE' | 'ECARTE';
+
+export interface AvisExecution {
+  id: string;
+  dossierEtudeId: string;
+  dpgfNoeudId: string;
+  niveau: NiveauAvisExecution;
+  commentaire?: string | null;
+  ecartPropose?: number | null;
+  auteurUserId: string;
+  auteurNom?: string | null;
+  statut: StatutAvisExecution;
+  motifTraitement?: string | null;
+  traitePar?: string | null;
+  traiteLe?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface AvisExecutionResume {
+  ouverts: number;
+  ecartes: number;
+  prisEnCompte: number;
+  total: number;
+}
+
+/** L9 — rattrapage LIBRE. */
+export interface RattrapageGroupe {
+  libelle: string;
+  libelleNormalise: string;
+  count: number;
+  composantIds: string[];
+  noeudIds?: string[];
+}
+
+export interface DemandeCreationArticle {
+  id: string;
+  libelle: string;
+  nature: string;
+  uomCode?: string | null;
+  statut: string;
+}
+
+export interface RattrapageResume {
+  totalLibres: number;
+  groupes: number;
+  creationArticleMode: 'LIBRE' | 'CONTROLEE' | string;
+  groupesDetail: RattrapageGroupe[];
+  demandesOuvertes: DemandeCreationArticle[];
+}
+
+/** L12 — versement bibliothèque après VALIDEE. */
+export interface CapitalisationRendementLigne {
+  libelle: string;
+  unite: string;
+  rendementBiblio?: number | null;
+  rendementEtude?: number | null;
+}
+
+export interface CapitalisationArticle {
+  noeudId: string;
+  prixDpuId: string;
+  codePropose: string;
+  designation: string;
+  unite: string;
+  codeLot: string;
+  codeFamille: string;
+  deboursSec?: number | null;
+  nbComposants: number;
+  statut: 'NOUVEAU' | 'COLLISION' | 'DEJA_VERSE' | string;
+  ouvrageExistantId?: string | null;
+  ouvrageExistantCode?: string | null;
+  comparaisonRendements?: CapitalisationRendementLigne[];
+}
+
+export interface CapitalisationResume {
+  totalCandidats: number;
+  nouveaux: number;
+  collisions: number;
+  dejaVerses: number;
+  dossierValide: boolean;
+  articles: CapitalisationArticle[];
+}
+
+export interface CapitalisationVersementResult {
+  crees: number;
+  remplaces: number;
+  ignores: number;
+  ouvrageIds: string[];
+}
+
+export type RattrapageCreerResult =
+  | {
+      itemId: string;
+      name: string;
+      aCompleter?: boolean;
+      composantsLies: number;
+    }
+  | DemandeCreationArticle;
 
 /** Synthèse agrégée pour l'entête du dossier. */
 export interface DossierEtudeSynthese {
@@ -108,6 +226,8 @@ export interface DossierEtudeSynthese {
   totalHt: number;
   devisGenereId?: string | null;
   devisNumero?: string | null;
+  chantierGenereId?: string | null;
+  marcheGenereId?: string | null;
   approvalRequestId?: string | null;
   prochainApprobateurRole?: string | null;
   prochainApprobateurNom?: string | null;
@@ -179,6 +299,43 @@ export class DossierEtudeApiService extends FeatureApiService<
 
   genererDevis(id: string): Promise<DossierEtude> {
     return this.executeTransition(id, 'generer-devis');
+  }
+
+  /** L13 — affaire gagnée (DEVIS_GENERE → GAGNE). */
+  marquerGagne(
+    id: string,
+    body: {
+      dateAttribution: string;
+      referenceMarche?: string | null;
+      montantAttribue?: number | null;
+    },
+  ): Promise<DossierEtude> {
+    return this.executeTransition(id, 'gagne', body);
+  }
+
+  /** L13 — affaire perdue (DEVIS_GENERE → PERDU). */
+  marquerPerdu(
+    id: string,
+    body: {
+      motif: string;
+      concurrentRetenu?: string | null;
+      ecartPrixEstime?: number | null;
+    },
+  ): Promise<DossierEtude> {
+    return this.executeTransition(id, 'perdu', body);
+  }
+
+  /** L13 — conversion atomique chantier + marché + budget. */
+  convertir(
+    id: string,
+    body: Record<string, unknown> = {},
+  ): Promise<{
+    dossierId: string;
+    chantierId: string;
+    marcheId: string;
+    status: string;
+  }> {
+    return this.executeTransition(id, 'convertir', body);
   }
 
   listerDocuments(dossierId: string): Promise<DossierDocument[]> {
@@ -429,6 +586,147 @@ export class DossierEtudeApiService extends FeatureApiService<
         ),
         {},
         { params },
+      ),
+    );
+  }
+
+  /** L5 — rafraîchit les prix gelés ITEM du dossier (étude non validée). */
+  async refreshPrices(dossierId: string): Promise<{ dpuRefreshed: number }> {
+    return firstValueFrom(
+      this.http.post<{ dpuRefreshed: number }>(
+        this.resolveUrl(`${this.basePath}/${dossierId}/refresh-prices`),
+        {},
+      ),
+    );
+  }
+
+  /** L6 — synthèse coûts / origines (étape 5). */
+  async getSyntheseCout(dossierId: string): Promise<SyntheseCoutAffaire> {
+    return firstValueFrom(
+      this.http.get<SyntheseCoutAffaire>(
+        this.resolveUrl(`${this.basePath}/${dossierId}/synthese-cout`),
+      ),
+    );
+  }
+
+  /** L8 — liste des avis (optionnellement filtrée par nœud). */
+  async listAvis(dossierId: string, noeudId?: string | null): Promise<AvisExecution[]> {
+    let params = new HttpParams();
+    if (noeudId) params = params.set('noeudId', noeudId);
+    return firstValueFrom(
+      this.http.get<AvisExecution[]>(this.resolveUrl(`${this.basePath}/${dossierId}/avis`), {
+        params,
+      }),
+    );
+  }
+
+  async getAvisResume(dossierId: string): Promise<AvisExecutionResume> {
+    return firstValueFrom(
+      this.http.get<AvisExecutionResume>(
+        this.resolveUrl(`${this.basePath}/${dossierId}/avis/resume`),
+      ),
+    );
+  }
+
+  async createAvis(
+    dossierId: string,
+    body: {
+      dpgfNoeudId: string;
+      niveau: NiveauAvisExecution;
+      commentaire?: string | null;
+      ecartPropose?: number | null;
+    },
+  ): Promise<AvisExecution> {
+    return firstValueFrom(
+      this.http.post<AvisExecution>(this.resolveUrl(`${this.basePath}/${dossierId}/avis`), body),
+    );
+  }
+
+  async traiterAvis(
+    dossierId: string,
+    avisId: string,
+    body: { statut: 'PRIS_EN_COMPTE' | 'ECARTE'; motifTraitement?: string | null },
+  ): Promise<AvisExecution> {
+    return firstValueFrom(
+      this.http.post<AvisExecution>(
+        this.resolveUrl(`${this.basePath}/${dossierId}/avis/${avisId}/traiter`),
+        body,
+      ),
+    );
+  }
+
+  /** L9 — rattrapage composants LIBRE. */
+  async getRattrapage(dossierId: string): Promise<RattrapageResume> {
+    return firstValueFrom(
+      this.http.get<RattrapageResume>(
+        this.resolveUrl(`${this.basePath}/${dossierId}/rattrapage`),
+      ),
+    );
+  }
+
+  async rattrapageIgnorer(
+    dossierId: string,
+    composantIds: string[],
+  ): Promise<{ updated: number }> {
+    return firstValueFrom(
+      this.http.post<{ updated: number }>(
+        this.resolveUrl(`${this.basePath}/${dossierId}/rattrapage/ignorer`),
+        { composantIds },
+      ),
+    );
+  }
+
+  async rattrapageRapprocher(
+    dossierId: string,
+    composantIds: string[],
+    itemId: string,
+  ): Promise<{ updated: number }> {
+    return firstValueFrom(
+      this.http.post<{ updated: number }>(
+        this.resolveUrl(`${this.basePath}/${dossierId}/rattrapage/rapprocher`),
+        { composantIds, itemId },
+      ),
+    );
+  }
+
+  async rattrapageCreer(
+    dossierId: string,
+    body: {
+      composantIds: string[];
+      libelle: string;
+      nature: string;
+      uomCode?: string | null;
+    },
+  ): Promise<RattrapageCreerResult> {
+    return firstValueFrom(
+      this.http.post<RattrapageCreerResult>(
+        this.resolveUrl(`${this.basePath}/${dossierId}/rattrapage/creer`),
+        body,
+      ),
+    );
+  }
+
+  /** L12 — capitalisation bibliothèque (après VALIDEE). */
+  async getCapitalisation(dossierId: string): Promise<CapitalisationResume> {
+    return firstValueFrom(
+      this.http.get<CapitalisationResume>(
+        this.resolveUrl(`${this.basePath}/${dossierId}/capitalisation`),
+      ),
+    );
+  }
+
+  async capitalisationVerser(
+    dossierId: string,
+    selections: Array<{
+      noeudId: string;
+      decision?: string;
+      codeOverride?: string;
+    }>,
+  ): Promise<CapitalisationVersementResult> {
+    return firstValueFrom(
+      this.http.post<CapitalisationVersementResult>(
+        this.resolveUrl(`${this.basePath}/${dossierId}/capitalisation/verser`),
+        { selections },
       ),
     );
   }

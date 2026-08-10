@@ -15,14 +15,15 @@ import { TranslateModule } from '@ngx-translate/core';
 
 import type { BordereauTreeRow } from '../../utils/bordereau-tree.util';
 import {
-  modeUi,
-  resolvePosteChiffrageMode,
-  type PosteChiffrageModeUi,
+  origineUi,
+  resolveOrigineCout,
+  type OrigineCoutUi,
 } from '../../utils/poste-chiffrage-mode.util';
 import {
   PosteDecompositionPanelComponent,
   type PosteSaveSnapshot,
 } from '../poste-decomposition-panel/poste-decomposition-panel.component';
+import { PosteAvisPanelComponent } from '../poste-avis-panel/poste-avis-panel.component';
 
 export interface PosteChiffrageDrawerData {
   /** Copie de travail — jamais la référence live de l’arbre. */
@@ -52,6 +53,7 @@ export interface PosteChiffrageDrawerResult {
     MatDialogModule,
     ButtonComponent,
     PosteDecompositionPanelComponent,
+    PosteAvisPanelComponent,
     CommentThreadPanelComponent,
     TranslateModule,
   ],
@@ -72,9 +74,10 @@ export class PosteChiffrageDrawerComponent {
   /** Copie isolée : toute édition reste dans le drawer jusqu’à Enregistrer et fermer. */
   readonly posteDraft = signal<BordereauTreeRow>(structuredClone(this.data.poste));
 
-  readonly modeUi = signal<PosteChiffrageModeUi>(
-    modeUi(
-      resolvePosteChiffrageMode({
+  readonly origine = signal<OrigineCoutUi>(
+    origineUi(
+      resolveOrigineCout({
+        origineCout: this.posteDraft().origineCout,
         mode: this.posteDraft().mode,
         prixUnitaire: this.posteDraft().prixUnitaire,
       }),
@@ -90,13 +93,13 @@ export class PosteChiffrageDrawerComponent {
     this.data.onDirtyChange?.(dirty);
   }
 
-  onModeUi(mode: PosteChiffrageModeUi): void {
-    this.modeUi.set(mode);
+  onOrigine(origine: OrigineCoutUi): void {
+    this.origine.set(origine);
   }
 
-  async setMode(mode: PosteChiffrageModeUi): Promise<void> {
-    if (this.modeUi() === mode) return;
-    await this.panel()?.setModeUi(mode);
+  async setOrigine(origine: OrigineCoutUi): Promise<void> {
+    if (this.origine() === origine) return;
+    await this.panel()?.setOrigineUi(origine);
   }
 
   /**

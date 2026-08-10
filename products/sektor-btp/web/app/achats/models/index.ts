@@ -258,8 +258,14 @@ export interface CatalogueFournisseurLigne {
   articleId: string;
   refFournisseur?: string;
   designation: string;
+  /** Prix commercial HT (tel que facturé). */
   prixUnitaireHt: number;
-  uom?: string;
+  uomId?: string;
+  conditionnementQuantite?: number | null;
+  conditionnementUomId?: string;
+  /** Prix comparable recalculé — jamais saisi. */
+  prixNormalise?: number | null;
+  uomNormaliseId?: string;
   actif: boolean;
   createdAt: string;
   updatedAt: string;

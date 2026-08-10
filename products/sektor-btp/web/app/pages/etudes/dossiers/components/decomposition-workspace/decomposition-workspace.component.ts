@@ -21,7 +21,7 @@ import { ConfirmDialogService } from '@lib/anatomy';
 import type { ResultatGate } from '@app/etudes/models';
 
 import type { BordereauTreeRow } from '../../utils/bordereau-tree.util';
-import { resolvePosteChiffrageMode } from '../../utils/poste-chiffrage-mode.util';
+import { resolveOrigineCout } from '../../utils/poste-chiffrage-mode.util';
 import { DpuApiService } from '../../../bibliotheque-prix/services/dpu-api.service';
 import { DpgfApiService } from '../../../metres/services/dpgf-api.service';
 import { BordereauArbreComponent } from '../bordereau-arbre/bordereau-arbre.component';
@@ -271,6 +271,7 @@ export class DecompositionWorkspaceComponent {
       id?: string;
       type?: string;
       mode?: string | null;
+      origineCout?: string | null;
       prixUnitaire?: number | null;
       enfants?: unknown[];
     }[],
@@ -279,11 +280,12 @@ export class DecompositionWorkspaceComponent {
     const walk = (list: typeof nodes) => {
       for (const n of list) {
         if (n.type === 'ARTICLE' && n.id) {
-          const mode = resolvePosteChiffrageMode({
+          const origine = resolveOrigineCout({
+            origineCout: n.origineCout,
             mode: n.mode,
             prixUnitaire: n.prixUnitaire,
           });
-          if (mode !== 'FOURNI') ids.push(n.id);
+          if (origine === 'DECOMPOSE') ids.push(n.id);
         }
         if (Array.isArray(n.enfants)) walk(n.enfants as typeof nodes);
       }

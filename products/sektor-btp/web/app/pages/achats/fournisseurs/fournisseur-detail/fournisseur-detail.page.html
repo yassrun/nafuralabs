@@ -172,7 +172,8 @@
               <th>Réf. fournisseur</th>
               <th>Désignation</th>
               <th class="num">Prix HT</th>
-              <th>Unité</th>
+              <th>Conditionnement</th>
+              <th class="num">Prix / base</th>
               <th>Actif</th>
               <th></th>
             </tr>
@@ -184,7 +185,16 @@
                 <td>{{ row.refFournisseur ?? '—' }}</td>
                 <td>{{ row.designation }}</td>
                 <td class="num">{{ fmtPrice(row.prixUnitaireHt) }}</td>
-                <td>{{ row.uom ?? '—' }}</td>
+                <td>
+                  @if (row.conditionnementQuantite != null) {
+                    {{ row.conditionnementQuantite }}
+                  } @else {
+                    —
+                  }
+                </td>
+                <td class="num">
+                  {{ row.prixNormalise != null ? fmtPrice(row.prixNormalise) : '—' }}
+                </td>
                 <td>
                   <span class="badge" [ngClass]="row.actif ? { 'badge--success': true } : { 'badge--muted': true }">
                     {{ row.actif ? 'Oui' : 'Non' }}
@@ -224,12 +234,31 @@
             <input id="cat-designation" [(ngModel)]="catalogueDraft.designation" />
           </div>
           <div class="field">
-            <label for="cat-prix">Prix unitaire HT</label>
+            <label for="cat-prix">Prix commercial HT</label>
             <input id="cat-prix" type="number" min="0" step="0.01" [(ngModel)]="catalogueDraft.prixUnitaireHt" />
           </div>
           <div class="field">
-            <label for="cat-uom">Unité</label>
-            <input id="cat-uom" [(ngModel)]="catalogueDraft.uom" placeholder="U, KG…" />
+            <label for="cat-uom">UOM commerciale (UUID)</label>
+            <input id="cat-uom" [(ngModel)]="catalogueDraft.uomId" placeholder="UUID unit_of_measure" />
+          </div>
+          <div class="field">
+            <label for="cat-cond-qty">Conditionnement (qtté)</label>
+            <input
+              id="cat-cond-qty"
+              type="number"
+              min="0"
+              step="any"
+              [ngModel]="catalogueDraft.conditionnementQuantite ?? ''"
+              (ngModelChange)="catalogueDraft.conditionnementQuantite = $event === '' ? null : +$event"
+            />
+          </div>
+          <div class="field">
+            <label for="cat-cond-uom">Conditionnement UOM (UUID)</label>
+            <input
+              id="cat-cond-uom"
+              [(ngModel)]="catalogueDraft.conditionnementUomId"
+              placeholder="ex. litre"
+            />
           </div>
           <div class="field field--check">
             <input id="cat-actif" type="checkbox" [(ngModel)]="catalogueDraft.actif" />

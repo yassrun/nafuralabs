@@ -1,8 +1,11 @@
-/** Origine du coût d'un article (L1 — FOURNI disparaît). */
+/** Origine du coût d'un article (L6 — remplace FOURNI | DECOMPOSE). */
 export type OrigineCoutUi = 'DECOMPOSE' | 'FORFAIT' | 'ESTIME';
 
-/** @deprecated alias legacy */
+export type EstimationSaisieEnUi = 'COUT' | 'VENTE';
+
+/** @deprecated alias legacy — préférer OrigineCoutUi */
 export type PosteChiffrageMode = 'FOURNI' | 'DECOMPOSE' | null;
+/** @deprecated alias — FOURNI = ESTIME|FORFAIT */
 export type PosteChiffrageModeUi = 'FOURNI' | 'DECOMPOSE';
 
 export function resolveOrigineCout(opts: {
@@ -16,6 +19,11 @@ export function resolveOrigineCout(opts: {
   if (opts.mode === 'FOURNI') return 'ESTIME';
   if ((opts.prixUnitaire ?? 0) > 0) return 'ESTIME';
   return null;
+}
+
+/** Origine affichée : null persisté → DECOMPOSE (défaut UX). */
+export function origineUi(origine: OrigineCoutUi | null): OrigineCoutUi {
+  return origine ?? 'DECOMPOSE';
 }
 
 /**
@@ -33,20 +41,25 @@ export function resolvePosteChiffrageMode(opts: {
   return null;
 }
 
+/** @deprecated prefer origineUi */
 export function modeUi(mode: PosteChiffrageMode): PosteChiffrageModeUi {
   return mode ?? 'DECOMPOSE';
 }
 
 export function prixVenteHtActif(opts: {
-  mode: PosteChiffrageMode;
+  mode?: PosteChiffrageMode;
+  origine?: OrigineCoutUi | null;
   prixFourni?: number | null;
   prixDecompose?: number | null;
   prixPoste?: number | null;
 }): number {
-  if (opts.mode === 'FOURNI') {
+  const origine =
+    opts.origine ??
+    (opts.mode === 'FOURNI' ? 'ESTIME' : opts.mode === 'DECOMPOSE' ? 'DECOMPOSE' : null);
+  if (origine === 'ESTIME' || origine === 'FORFAIT') {
     return Math.max(0, Number(opts.prixFourni ?? opts.prixPoste ?? 0));
   }
-  if (opts.mode === 'DECOMPOSE') {
+  if (origine === 'DECOMPOSE') {
     return Math.max(0, Number(opts.prixDecompose ?? 0));
   }
   return Math.max(0, Number(opts.prixPoste ?? opts.prixFourni ?? 0));
@@ -72,9 +85,16 @@ export function deduceCoutDepuisPrixVente(
   fgPercent: number,
   margePercent: number,
 ): number {
-  const coef = (1 + Math.max(0, fgPercent) / 100) * (1 + Math.max(0, margePercent) / 100);
+  const coef =
+    (1 + Math.max(0, fgPercent) / 100) * (1 + Math.max(0, margePercent) / 100);
   if (coef <= 0) return round2(Math.max(0, prix));
   return round2(Math.max(0, prix) / coef);
+}
+
+/** Écart % décomposition vs estimation repère (négatif = moins cher). */
+export function ecartEstimationPercent(repere: number, decompo: number): number | null {
+  if (!Number.isFinite(repere) || repere <= 0) return null;
+  return round2(((decompo - repere) / repere) * 100);
 }
 
 function round2(n: number): number {

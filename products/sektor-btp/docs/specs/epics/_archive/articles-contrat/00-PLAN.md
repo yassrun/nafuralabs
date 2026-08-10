@@ -3,7 +3,7 @@
 **Statut produit** : **non-contracté** (code existant ≠ contrat)  
 **Vague** : V1 (après V0 socle partner/UoM/devise)  
 **Périmètre** : `backend/modules/item/`, `web/app/pages/inventory/catalogue/articles/`, familles  
-**Wireframe** : [`articles-fiche-wireframe.canvas.tsx`](../../ux/wireframes/articles-fiche-wireframe.canvas.tsx) — **à valider**  
+**Wireframe** : [`ux/articles-fiche-wireframe.canvas.tsx`](./ux/articles-fiche-wireframe.canvas.tsx) — **à valider**  
 **Règles** : [`rules.md`](./rules.md)  
 **QA** : [`qa-cases.md`](./qa-cases.md)  
 **Brouillon historique** : `../classification-article/` (à miner, pas à croire)

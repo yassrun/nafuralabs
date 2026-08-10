@@ -169,6 +169,10 @@ public class DecompositionProposeService {
                     .rendement(rendement)
                     .prixUnitaire(prix.prixUnitaire())
                     .sourcePrix(prix.sourcePrix())
+                    .prixSourceRefId(prix.sourceRefId())
+                    .prixDateSource(prix.dateSource())
+                    .prixCurrencyId(prix.currencyId())
+                    .prixLibelleSource(prix.libelleSource())
                     .confiance(confiance)
                     .suggereParIa(true)
                     .build());

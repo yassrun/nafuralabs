@@ -1,0 +1,132 @@
+<section class="avis" aria-label="Avis d'exécution">
+  <div class="avis__head">
+    <h4>Avis d'exécution</h4>
+    @if (peutPoser() && modifiable()) {
+      <nf-button variant="ghost" size="sm" [disabled]="saving()" (clicked)="openForm()">
+        Poser un avis
+      </nf-button>
+    }
+  </div>
+
+  @if (erreur(); as msg) {
+    <p class="avis__erreur" role="alert">{{ msg }}</p>
+  }
+
+  @if (chargement()) {
+    <p class="avis__etat">Chargement…</p>
+  }
+
+  @if (formOpen()) {
+    <div class="avis__form">
+      <p class="avis__hint">Aucun champ de chiffrage — vous proposez un écart.</p>
+      <div class="avis__niveaux" role="group" aria-label="Niveau">
+        @for (n of (['REALISABLE', 'DIFFICILE', 'IRREALISABLE'] as const); track n) {
+          <button
+            type="button"
+            class="avis__niveau"
+            [class.avis__niveau--active]="niveau() === n"
+            (click)="niveau.set(n)"
+          >
+            {{ niveauLabels[n] }}
+          </button>
+        }
+      </div>
+      <label class="avis__field">
+        <span>Commentaire{{ niveau() !== 'REALISABLE' ? ' *' : '' }}</span>
+        <textarea
+          rows="3"
+          [ngModel]="commentaire()"
+          (ngModelChange)="commentaire.set($event)"
+        ></textarea>
+      </label>
+      <label class="avis__field">
+        <span>Écart proposé (DH / unité)</span>
+        <input
+          type="number"
+          step="any"
+          [ngModel]="ecartPropose() ?? ''"
+          (ngModelChange)="ecartPropose.set($event === '' ? null : +$event)"
+        />
+      </label>
+      <div class="avis__actions">
+        <nf-button variant="primary" size="sm" [loading]="saving()" (clicked)="envoyer()">
+          Envoyer l'avis
+        </nf-button>
+        <nf-button variant="ghost" size="sm" (clicked)="formOpen.set(false)">Annuler</nf-button>
+      </div>
+    </div>
+  }
+
+  @for (a of ouverts(); track a.id) {
+    <article class="avis__card">
+      <header>
+        <span class="avis__pill avis__pill--open">OUVERT</span>
+        <strong>{{ niveauLabels[a.niveau] }}</strong>
+        <span class="avis__meta">{{ a.auteurNom || a.auteurUserId }}</span>
+      </header>
+      @if (a.commentaire) {
+        <p>« {{ a.commentaire }} »</p>
+      }
+      @if (a.ecartPropose != null) {
+        <p class="avis__ecart">Propose : {{ a.ecartPropose | number: '1.2-2' }} DH</p>
+      }
+      @if (peutTraiter() && modifiable()) {
+        @if (ecarterId() === a.id) {
+          <label class="avis__field">
+            <span>Motif d'écart *</span>
+            <textarea
+              rows="2"
+              [ngModel]="motifEcart()"
+              (ngModelChange)="motifEcart.set($event)"
+            ></textarea>
+          </label>
+          <div class="avis__actions">
+            <nf-button variant="primary" size="sm" [loading]="saving()" (clicked)="confirmerEcart()">
+              Confirmer l'écart
+            </nf-button>
+            <nf-button variant="ghost" size="sm" (clicked)="ecarterId.set(null)">Annuler</nf-button>
+          </div>
+        } @else {
+          <div class="avis__actions">
+            <nf-button
+              variant="primary"
+              size="sm"
+              [disabled]="saving()"
+              (clicked)="prendreEnCompte(a)"
+            >
+              Prendre en compte
+            </nf-button>
+            <nf-button variant="secondary" size="sm" [disabled]="saving()" (clicked)="startEcarter(a)">
+              Écarter — motif obligatoire
+            </nf-button>
+          </div>
+        }
+      }
+    </article>
+  }
+
+  @if (!chargement() && ouverts().length === 0 && !formOpen()) {
+    <p class="avis__etat">Aucun avis ouvert sur ce poste.</p>
+  }
+
+  @if (historique().length > 0) {
+    <details class="avis__hist">
+      <summary>Historique ({{ historique().length }})</summary>
+      @for (a of historique(); track a.id) {
+        <article class="avis__card avis__card--done">
+          <header>
+            <span class="avis__pill">{{ a.statut }}</span>
+            <strong>{{ niveauLabels[a.niveau] }}</strong>
+            <span class="avis__meta">{{ a.auteurNom || a.auteurUserId }}</span>
+          </header>
+          @if (a.commentaire) {
+            <p>« {{ a.commentaire }} »</p>
+          }
+          @if (a.motifTraitement) {
+            <p class="avis__motif">Motif : {{ a.motifTraitement }}</p>
+          }
+        </article>
+      }
+    </details>
+  }
+</section>

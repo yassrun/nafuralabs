@@ -1,0 +1,40 @@
+---
+description: Specs / epics Nafura — où mettre PLAN, PROGRESS, canvas UX ; bugs dans pm/
+alwaysApply: true
+---
+
+# Specs / epics — où écrire quoi
+
+Détail + templates : `docs/specs/README.md`, `docs/specs/templates/`.  
+PM (tickets) : `pm/AGENTS.md`. Canon monorepo : `docs/AGENTS.md`.
+
+## Chemins
+
+| Livrable | Où |
+|----------|-----|
+| Epic / PLAN / ADR / PROGRESS | `products/<app>/docs/specs/epics/<feature-slug>/` |
+| **Canvas UX (SSOT Git)** | `…/epics/<feature-slug>/ux/*.canvas.tsx` |
+| Preview canvas IDE | copie `~/.cursor/projects/<workspace>/canvases/` (pas SSOT) |
+| Tickets, sprint, status, **bugs** | `pm/nafura/…/tasks/` uniquement |
+| Epic terminé | `…/epics/_archive/<slug>/` |
+
+Sektor live aujourd’hui : aucun epic métier actif sous `epics/` (dernier clos =
+`…/epics/_archive/referentiel-catalogue-sektor/`). Spec QA :
+`…/epics/qa-local-auth-seed/`.
+
+## Fichiers epic obligatoires
+
+- `00-PLAN.md` — pourquoi, constat, cible, **ordre** des lots (template)
+- `00-PROGRESS.md` — lot courant / tickets / next (pas de journal long)
+
+## Bugs
+
+- `kind: task` + `tags: [bug]` — **jamais** sous `docs/specs/`
+- 2ᵉ+ bugs même zone → parapluie `kind: feature` + `parent:` (`pm/AGENTS.md` §2.2)
+
+## Interdit
+
+- Remettre des specs sous `docs/epics/` (ancien chemin)
+- Dupliquer canvas SSOT sous `docs/ux/wireframes/`
+- Mettre status / sprint dans les docs epic
+- Créer un epic docs pour un bug

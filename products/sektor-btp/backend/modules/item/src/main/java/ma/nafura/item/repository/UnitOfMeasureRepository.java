@@ -16,6 +16,8 @@ public interface UnitOfMeasureRepository extends TenantScopedRepository<UnitOfMe
 
     Optional<UnitOfMeasure> findByTenantIdAndUomCategoryIdAndEstBaseTrue(UUID tenantId, UUID uomCategoryId);
 
+    Optional<UnitOfMeasure> findByTenantIdAndCodeIgnoreCase(UUID tenantId, String code);
+
     List<UnitOfMeasure> findByTenantIdAndUomCategoryId(UUID tenantId, UUID uomCategoryId);
 
     long countByTenantIdAndUomCategoryId(UUID tenantId, UUID uomCategoryId);

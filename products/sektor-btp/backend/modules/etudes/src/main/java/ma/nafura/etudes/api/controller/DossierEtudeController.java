@@ -5,9 +5,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import ma.nafura.etudes.api.dto.DecompositionProposeDto;
+import ma.nafura.etudes.api.dto.DossierConversionResultDto;
 import ma.nafura.etudes.api.dto.DossierEtudeSyntheseDto;
+import ma.nafura.etudes.api.request.DossierConvertirDto;
 import ma.nafura.etudes.api.request.DossierEtudeCreateDto;
 import ma.nafura.etudes.api.request.DossierEtudeUpdateDto;
+import ma.nafura.etudes.api.request.DossierGagneDto;
+import ma.nafura.etudes.api.request.DossierPerduDto;
 import ma.nafura.etudes.api.request.EtapeRequest;
 import ma.nafura.etudes.api.request.RefusRequest;
 import ma.nafura.etudes.domain.model.DossierEtude;
@@ -31,14 +35,17 @@ public class DossierEtudeController {
     private final DossierEtudeService service;
     private final DecompositionProposeService decompositionProposeService;
     private final ma.nafura.etudes.service.SyntheseCoutAffaireService syntheseCoutAffaireService;
+    private final ma.nafura.etudes.service.DpuService dpuService;
 
     public DossierEtudeController(
             DossierEtudeService service,
             DecompositionProposeService decompositionProposeService,
-            ma.nafura.etudes.service.SyntheseCoutAffaireService syntheseCoutAffaireService) {
+            ma.nafura.etudes.service.SyntheseCoutAffaireService syntheseCoutAffaireService,
+            ma.nafura.etudes.service.DpuService dpuService) {
         this.service = service;
         this.decompositionProposeService = decompositionProposeService;
         this.syntheseCoutAffaireService = syntheseCoutAffaireService;
+        this.dpuService = dpuService;
     }
 
     @GetMapping
@@ -154,6 +161,45 @@ public class DossierEtudeController {
         return ResponseEntity.ok(service.annuler(id));
     }
 
+    @PostMapping("/{id}/gagne")
+    @RequirePermission("etude.update")
+    public ResponseEntity<?> gagne(@PathVariable UUID id, @Valid @RequestBody DossierGagneDto body) {
+        try {
+            return ResponseEntity.ok(service.gagne(id, body));
+        } catch (IllegalStateException ex) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("code", ex.getMessage()));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(Map.of("code", ex.getMessage()));
+        }
+    }
+
+    @PostMapping("/{id}/perdu")
+    @RequirePermission("etude.update")
+    public ResponseEntity<?> perdu(@PathVariable UUID id, @Valid @RequestBody DossierPerduDto body) {
+        try {
+            return ResponseEntity.ok(service.perdu(id, body));
+        } catch (IllegalStateException ex) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("code", ex.getMessage()));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(Map.of("code", ex.getMessage()));
+        }
+    }
+
+    @PostMapping("/{id}/convertir")
+    @RequirePermission("etude.update")
+    public ResponseEntity<?> convertir(
+            @PathVariable UUID id, @RequestBody(required = false) DossierConvertirDto body) {
+        try {
+            DossierConvertirDto dto = body != null ? body : new DossierConvertirDto();
+            DossierConversionResultDto result = service.convertir(id, dto);
+            return ResponseEntity.ok(result);
+        } catch (IllegalStateException ex) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("code", ex.getMessage()));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(Map.of("code", ex.getMessage()));
+        }
+    }
+
     /**
      * Propose une décomposition brouillon à partir du CPS / libellé (Gemini + catalogue).
      * Jamais persistée — le front affiche une revue avant ajout.
@@ -169,6 +215,20 @@ public class DossierEtudeController {
                     .proposer(id, articleId, cpsDocumentId)
                     .<ResponseEntity<?>>map(ResponseEntity::ok)
                     .orElseGet(() -> ResponseEntity.noContent().build());
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(Map.of("code", ex.getMessage()));
+        }
+    }
+
+    /** L5 — rafraîchit les prix gelés ITEM de tous les DPU du dossier (étude non validée). */
+    @PostMapping("/{id}/refresh-prices")
+    @RequirePermission("etude.update")
+    public ResponseEntity<?> refreshPrices(@PathVariable UUID id) {
+        try {
+            int refreshed = dpuService.refreshPricesForDossier(id);
+            return ResponseEntity.ok(Map.of("dpuRefreshed", refreshed));
+        } catch (IllegalStateException ex) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("code", ex.getMessage()));
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.badRequest().body(Map.of("code", ex.getMessage()));
         }

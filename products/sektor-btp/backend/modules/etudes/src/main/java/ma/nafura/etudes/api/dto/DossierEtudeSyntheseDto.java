@@ -37,6 +37,8 @@ public class DossierEtudeSyntheseDto {
     BigDecimal totalHt;
     UUID devisGenereId;
     String devisNumero;
+    String chantierGenereId;
+    String marcheGenereId;
     String approvalRequestId;
     String prochainApprobateurRole;
     String prochainApprobateurNom;

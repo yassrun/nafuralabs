@@ -36,6 +36,9 @@ public class ItemCreateDto {
     @Size(max = 30)
     private String nature;
 
+    /** Si true, article créé allégé (L9) — à compléter. */
+    private Boolean aCompleter;
+
     @Size(max = 50)
     private String posteBudgetId;
 

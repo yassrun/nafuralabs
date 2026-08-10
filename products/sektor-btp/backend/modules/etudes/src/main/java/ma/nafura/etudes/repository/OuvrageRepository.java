@@ -14,6 +14,8 @@ public interface OuvrageRepository extends TenantScopedRepository<Ouvrage, UUID>
 
     Optional<Ouvrage> findByTenantIdAndCode(UUID tenantId, String code);
 
+    List<Ouvrage> findByTenantIdAndSourceEtudeId(UUID tenantId, UUID sourceEtudeId);
+
     boolean existsByTenantIdAndCode(UUID tenantId, String code);
 
     long countByTenantId(UUID tenantId);

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.UUID;
 import lombok.Data;
 
@@ -52,6 +53,23 @@ public class ComposantDpuInputDto {
     private String sourcePrix;
 
     private UUID offreFournisseurId;
+
+    private UUID prixSourceRefId;
+
+    private LocalDate prixDateSource;
+
+    private UUID prixCurrencyId;
+
+    private String prixLibelleSource;
+
+    /** Si true, force une nouvelle résolution même si un gel est déjà présent. */
+    private Boolean resoudrePrix;
+
+    /** L9 — exclu du rattrapage. */
+    private Boolean horsReferentiel;
+
+    /** L10 — sous-traitance : inclure FG+marge du sous-ouvrage. */
+    private Boolean inclureFraisEtMarge;
 
     private Boolean suggereParIa;
 

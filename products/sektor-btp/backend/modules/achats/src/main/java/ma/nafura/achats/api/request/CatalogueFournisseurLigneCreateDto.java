@@ -11,13 +11,11 @@ import lombok.Data;
 @Data
 public class CatalogueFournisseurLigneCreateDto {
 
-    @NotBlank
-    @Size(max = 100)
-    private String fournisseurId;
+    @NotNull
+    private UUID fournisseurId;
 
-    @NotBlank
-    @Size(max = 100)
-    private String articleId;
+    @NotNull
+    private UUID articleId;
 
     @Size(max = 100)
     private String refFournisseur;
@@ -29,8 +27,14 @@ public class CatalogueFournisseurLigneCreateDto {
     @NotNull
     private BigDecimal prixUnitaireHt;
 
-    @Size(max = 30)
-    private String uom;
+    /** Unité commerciale (optionnel). */
+    private UUID uomId;
+
+    /** Quantité dans le conditionnement (ex. 15). */
+    private BigDecimal conditionnementQuantite;
+
+    /** Unité du conditionnement (ex. L). */
+    private UUID conditionnementUomId;
 
     private Boolean actif;
 

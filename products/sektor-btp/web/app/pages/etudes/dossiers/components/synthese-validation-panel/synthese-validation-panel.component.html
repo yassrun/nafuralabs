@@ -16,6 +16,95 @@
   @if (chargement()) {
     <p class="synthese__etat">Chargement de la synthèse…</p>
   } @else {
+    @if (syntheseCout(); as sc) {
+      <article class="synthese__bandeau" aria-label="Synthèse des coûts">
+        <div class="synthese__stats">
+          <div>
+            <span class="synthese__stat-label">Montant total HT</span>
+            <strong>{{ sc.montantTotalHt | mad }}</strong>
+          </div>
+          <div>
+            <span class="synthese__stat-label">Coût établi</span>
+            <strong>{{ sc.coutTotalEtabli | mad }}</strong>
+          </div>
+          <div>
+            <span class="synthese__stat-label">Marge sur coûts établis</span>
+            <strong>
+              {{ sc.margePercentSurCoutsEtablis | number: '1.0-1' }} %
+              <span class="synthese__stat-sub">({{ sc.margeSurCoutsEtablis | mad }})</span>
+            </strong>
+          </div>
+        </div>
+
+        @if ((sc.montantCoutsDeduits ?? 0) > 0) {
+          <p class="synthese__warn" role="status">
+            Coût déduit d’un prix — non fiable :
+            {{ sc.montantCoutsDeduits | mad }}
+          </p>
+        }
+
+        @if (repartitionEntries().length > 0) {
+          <div class="synthese__repartition" aria-label="Répartition du montant">
+            <h4>Répartition du montant</h4>
+            <div class="synthese__bar" role="img" [attr.aria-label]="'Répartition origines'">
+              @for (part of repartitionEntries(); track part.key) {
+                <button
+                  type="button"
+                  class="synthese__bar-seg"
+                  [class.synthese__bar-seg--active]="filtreOrigine() === part.key"
+                  [class.synthese__bar-seg--deduit]="part.key === 'DEDUIT'"
+                  [style.flex-grow]="part.percent"
+                  [title]="part.label + ' ' + (part.percent | number: '1.0-0') + '%'"
+                  (click)="setFiltreOrigine(part.key)"
+                ></button>
+              }
+            </div>
+            <ul class="synthese__legend">
+              @for (part of repartitionEntries(); track part.key) {
+                <li>
+                  <button type="button" class="link" (click)="setFiltreOrigine(part.key)">
+                    {{ part.label }}
+                    {{ part.percent | number: '1.0-0' }} %
+                    ({{ part.montant | mad }})
+                  </button>
+                </li>
+              }
+            </ul>
+          </div>
+        }
+
+        @if ((sc.partCoutsNonEtablisPercent ?? 0) > 0) {
+          <p class="synthese__warn" role="status">
+            {{ sc.partCoutsNonEtablisPercent | number: '1.0-0' }} % du montant repose sur des
+            coûts non établis
+          </p>
+        }
+
+        @if (avisResume(); as ar) {
+          @if (ar.ouverts > 0 || ar.ecartes > 0) {
+            <p class="synthese__warn" role="status">
+              Avis d'exécution :
+              {{ ar.ouverts }} ouvert{{ ar.ouverts > 1 ? 's' : '' }} ·
+              {{ ar.ecartes }} écarté{{ ar.ecartes > 1 ? 's' : '' }}
+              — soumission autorisée
+            </p>
+          }
+        }
+      </article>
+    }
+
+    <app-rattrapage-panel
+      [dossierId]="dossier().id"
+      [modifiable]="modifiable()"
+      (change)="change.emit()"
+    />
+
+    <app-capitalisation-panel
+      [dossierId]="dossier().id"
+      [statut]="statut()"
+      (change)="change.emit()"
+    />
+
     <div class="synthese__grid">
       <article class="synthese__card">
         <h4>Totaux par lot</h4>

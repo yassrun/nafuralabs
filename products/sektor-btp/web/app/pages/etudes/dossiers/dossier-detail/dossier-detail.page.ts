@@ -337,12 +337,65 @@ export class DossierDetailPage {
           }
           break;
         }
-        case 'CREER_CHANTIER': {
-          const devisId = this.synthese()?.devisGenereId ?? dossier.devisGenereId;
-          if (devisId) {
-            void this.nav.navigate(['/chantiers/new'], {
-              queryParams: { devisId },
-            });
+        case 'MARQUER_GAGNE': {
+          const dateRaw = window.prompt(
+            "Date d'attribution (AAAA-MM-JJ) :",
+            new Date().toISOString().slice(0, 10),
+          );
+          if (!dateRaw?.trim()) return;
+          const referenceMarche = window.prompt('Référence marché (optionnel) :') ?? undefined;
+          const montantRaw = window.prompt('Montant attribué HT (optionnel) :') ?? undefined;
+          const montantAttribue =
+            montantRaw?.trim() && !Number.isNaN(Number(montantRaw))
+              ? Number(montantRaw)
+              : undefined;
+          this.dossier.set(
+            await this.api.marquerGagne(dossier.id, {
+              dateAttribution: dateRaw.trim(),
+              referenceMarche: referenceMarche?.trim() || undefined,
+              montantAttribue,
+            }),
+          );
+          await this.refreshSynthese(dossier.id);
+          break;
+        }
+        case 'MARQUER_PERDU': {
+          const motif = window.prompt(
+            'Motif (PRIX | DELAI | TECHNIQUE | ADMINISTRATIF | SANS_SUITE) :',
+            'PRIX',
+          );
+          if (!motif?.trim()) return;
+          const concurrentRetenu =
+            window.prompt('Concurrent retenu (optionnel) :') ?? undefined;
+          this.dossier.set(
+            await this.api.marquerPerdu(dossier.id, {
+              motif: motif.trim().toUpperCase(),
+              concurrentRetenu: concurrentRetenu?.trim() || undefined,
+            }),
+          );
+          await this.refreshSynthese(dossier.id);
+          break;
+        }
+        case 'CONVERTIR': {
+          const ok = await this.confirmDialog.confirm({
+            title: 'Créer chantier et marché',
+            message:
+              'Conversion atomique : chantier, marché et budget prévisionnel (déboursé). Continuer ?',
+            variant: 'default',
+            confirmLabel: 'Convertir',
+          });
+          if (!ok) return;
+          const result = await this.api.convertir(dossier.id);
+          await this.refreshSynthese(dossier.id);
+          if (result.chantierId) {
+            void this.nav.navigate(['/chantiers', result.chantierId]);
+          }
+          break;
+        }
+        case 'VOIR_CHANTIER': {
+          const chantierId = this.synthese()?.chantierGenereId;
+          if (chantierId) {
+            void this.nav.navigate(['/chantiers', chantierId]);
           }
           break;
         }

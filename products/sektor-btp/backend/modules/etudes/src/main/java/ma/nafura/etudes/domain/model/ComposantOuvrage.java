@@ -72,6 +72,14 @@ public class ComposantOuvrage {
     @Column(name = "total", nullable = false, precision = 18, scale = 4)
     private BigDecimal total;
 
+    /**
+     * L10 — sous-traitance : remonter le prix de vente du sous-ouvrage (FG+marge inclus).
+     * Défaut false = déboursé uniquement (anti marge-sur-marge).
+     */
+    @Column(name = "inclure_frais_et_marge", nullable = false)
+    @Builder.Default
+    private Boolean inclureFraisEtMarge = false;
+
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
@@ -116,6 +124,9 @@ public class ComposantOuvrage {
         this.updatedAt = OffsetDateTime.now();
         if (this.referenceType == null) {
             this.referenceType = "LIBRE";
+        }
+        if (this.inclureFraisEtMarge == null) {
+            this.inclureFraisEtMarge = false;
         }
     }
 

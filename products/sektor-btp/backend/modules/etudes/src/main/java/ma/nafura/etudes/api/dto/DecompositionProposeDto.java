@@ -1,7 +1,9 @@
 package ma.nafura.etudes.api.dto;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 import lombok.Builder;
 
 /**
@@ -23,6 +25,10 @@ public record DecompositionProposeDto(
             BigDecimal rendement,
             BigDecimal prixUnitaire,
             String sourcePrix,
+            UUID prixSourceRefId,
+            LocalDate prixDateSource,
+            UUID prixCurrencyId,
+            String prixLibelleSource,
             Double confiance,
             boolean suggereParIa) {}
 

@@ -1,0 +1,3539 @@
+{
+  "source": "Classeur « LOT N° 2 GROS-ŒUVRE — REVÊTEMENTS ÉTANCHÉITÉ — PEINTURE », transmis par l'expert métier le 2026-07-19",
+  "ouvrages": [
+    {
+      "famille": "TERRASSEMENTS GÉNÉRAUX",
+      "code": "a",
+      "designation": "Déblais en masse terrain meuble",
+      "unite": "M3",
+      "rendementJournalier": 100.0,
+      "qExecutee": "100M3/jour",
+      "totalClasseur": 27.0,
+      "composants": [
+        {
+          "code": "TRAPG",
+          "designation": "tractopelle",
+          "unite": "Jours",
+          "rendement": 1.0,
+          "prixUnitaire": 1500.0,
+          "total": 15.0,
+          "baseRendement": "PAR_JOUR"
+        },
+        {
+          "code": "G",
+          "designation": "gasoil",
+          "unite": null,
+          "rendement": 1.0,
+          "prixUnitaire": 10.0,
+          "total": 10.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "P-A",
+          "designation": "pannes et aleas",
+          "unite": "Jours",
+          "rendement": 1.0,
+          "prixUnitaire": 200.0,
+          "total": 2.0,
+          "baseRendement": "PAR_JOUR"
+        }
+      ]
+    },
+    {
+      "famille": "TERRASSEMENTS GÉNÉRAUX",
+      "code": "b",
+      "designation": "Mise en remblais avec matériaux d'apport",
+      "unite": "M3",
+      "rendementJournalier": 100.0,
+      "qExecutee": "100M3/jour",
+      "totalClasseur": 208.0,
+      "composants": [
+        {
+          "code": "TRAPG",
+          "designation": "tractopelle",
+          "unite": "Jours",
+          "rendement": 1.0,
+          "prixUnitaire": 1500.0,
+          "total": 15.0,
+          "baseRendement": "PAR_JOUR"
+        },
+        {
+          "code": "G",
+          "designation": "gasoil",
+          "unite": null,
+          "rendement": 2.0,
+          "prixUnitaire": 10.0,
+          "total": 20.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "TVE",
+          "designation": "tout venant",
+          "unite": "M3",
+          "rendement": 1.3,
+          "prixUnitaire": 120.0,
+          "total": 156.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "COMP",
+          "designation": "Compacteur",
+          "unite": "jours",
+          "rendement": 1.0,
+          "prixUnitaire": 1500.0,
+          "total": 15.0,
+          "baseRendement": "PAR_JOUR"
+        },
+        {
+          "code": "P-A",
+          "designation": "pannes et aleas",
+          "unite": "Jours",
+          "rendement": 1.0,
+          "prixUnitaire": 200.0,
+          "total": 2.0,
+          "baseRendement": "PAR_JOUR"
+        }
+      ]
+    },
+    {
+      "famille": "TERRASSEMENTS GÉNÉRAUX",
+      "code": "c",
+      "designation": "Évacuation des déblais ou mise en remblai",
+      "unite": "M3",
+      "rendementJournalier": 100.0,
+      "qExecutee": "100M3/jour",
+      "totalClasseur": 67.0,
+      "composants": [
+        {
+          "code": "TRAPG",
+          "designation": "tractopelle",
+          "unite": "Jours",
+          "rendement": 1.0,
+          "prixUnitaire": 1500.0,
+          "total": 15.0,
+          "baseRendement": "PAR_JOUR"
+        },
+        {
+          "code": "CAB",
+          "designation": "Camion",
+          "unite": "Jours",
+          "rendement": 2.0,
+          "prixUnitaire": 1000.0,
+          "total": 20.0,
+          "baseRendement": "PAR_JOUR"
+        },
+        {
+          "code": "G",
+          "designation": "gasoil",
+          "unite": null,
+          "rendement": 3.0,
+          "prixUnitaire": 10.0,
+          "total": 30.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "P-A",
+          "designation": "pannes et aleas",
+          "unite": "Jours",
+          "rendement": 1.0,
+          "prixUnitaire": 200.0,
+          "total": 2.0,
+          "baseRendement": "PAR_JOUR"
+        }
+      ]
+    },
+    {
+      "famille": "TERRASSEMENTS GÉNÉRAUX",
+      "code": "d",
+      "designation": "Implantation des bâtiments",
+      "unite": "F",
+      "rendementJournalier": null,
+      "qExecutee": "1U/jour",
+      "totalClasseur": 2310.0,
+      "composants": [
+        {
+          "code": "TOPO",
+          "designation": "topographe",
+          "unite": "Jours",
+          "rendement": 1.0,
+          "prixUnitaire": 2000.0,
+          "total": 2000.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "Jours",
+          "rendement": 2.0,
+          "prixUnitaire": 130.0,
+          "total": 260.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "PIQI",
+          "designation": "piquet d'implantation",
+          "unite": "F",
+          "rendement": 1.0,
+          "prixUnitaire": 50.0,
+          "total": 50.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "Canalisations en tubes PVC",
+      "code": "a",
+      "designation": "Ø  200",
+      "unite": "ML",
+      "rendementJournalier": 50.0,
+      "qExecutee": "50ML/jour",
+      "totalClasseur": 192.2,
+      "composants": [
+        {
+          "code": "PVC200",
+          "designation": "Ø  200",
+          "unite": "ML",
+          "rendement": 50.0,
+          "prixUnitaire": 75.0,
+          "total": 75.0,
+          "baseRendement": "PAR_JOUR"
+        },
+        {
+          "code": "G1",
+          "designation": "sable concassé",
+          "unite": "M3",
+          "rendement": 12.0,
+          "prixUnitaire": 150.0,
+          "total": 36.0,
+          "baseRendement": "PAR_JOUR"
+        },
+        {
+          "code": "COM",
+          "designation": "Compacteur",
+          "unite": "Jours",
+          "rendement": 1.0,
+          "prixUnitaire": 500.0,
+          "total": 10.0,
+          "baseRendement": "PAR_JOUR"
+        },
+        {
+          "code": "TRA",
+          "designation": "tractopelle",
+          "unite": "Jours",
+          "rendement": 2.0,
+          "prixUnitaire": 1500.0,
+          "total": 60.0,
+          "baseRendement": "PAR_JOUR"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "Jours",
+          "rendement": 2.0,
+          "prixUnitaire": 280.0,
+          "total": 11.2,
+          "baseRendement": "PAR_JOUR"
+        }
+      ]
+    },
+    {
+      "famille": "Canalisations en tubes PVC",
+      "code": "b",
+      "designation": "Ø  250",
+      "unite": "ML",
+      "rendementJournalier": 50.0,
+      "qExecutee": "50ML/jour",
+      "totalClasseur": 171.6,
+      "composants": [
+        {
+          "code": "PVC250",
+          "designation": "Ø  250",
+          "unite": "ML",
+          "rendement": 50.0,
+          "prixUnitaire": 80.0,
+          "total": 80.0,
+          "baseRendement": "PAR_JOUR"
+        },
+        {
+          "code": "G1",
+          "designation": "sable concassé",
+          "unite": "M3",
+          "rendement": 12.0,
+          "prixUnitaire": 150.0,
+          "total": 36.0,
+          "baseRendement": "PAR_JOUR"
+        },
+        {
+          "code": "COM",
+          "designation": "Compacteur",
+          "unite": "Jours",
+          "rendement": 1.0,
+          "prixUnitaire": 500.0,
+          "total": 10.0,
+          "baseRendement": "PAR_JOUR"
+        },
+        {
+          "code": "TRA",
+          "designation": "tractopelle",
+          "unite": "Jours",
+          "rendement": 1.0,
+          "prixUnitaire": 1500.0,
+          "total": 30.0,
+          "baseRendement": "PAR_JOUR"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "Jours",
+          "rendement": 6.0,
+          "prixUnitaire": 130.0,
+          "total": 15.6,
+          "baseRendement": "PAR_JOUR"
+        }
+      ]
+    },
+    {
+      "famille": "Canalisations en tubes PVC",
+      "code": "c",
+      "designation": "Ø  300",
+      "unite": "ML",
+      "rendementJournalier": 50.0,
+      "qExecutee": "50ML/jour",
+      "totalClasseur": 216.6,
+      "composants": [
+        {
+          "code": "PVC300",
+          "designation": "Ø  300",
+          "unite": "ML",
+          "rendement": 50.0,
+          "prixUnitaire": 125.0,
+          "total": 125.0,
+          "baseRendement": "PAR_JOUR"
+        },
+        {
+          "code": "G1",
+          "designation": "sable concassé",
+          "unite": "M3",
+          "rendement": 12.0,
+          "prixUnitaire": 150.0,
+          "total": 36.0,
+          "baseRendement": "PAR_JOUR"
+        },
+        {
+          "code": "COM",
+          "designation": "Compacteur",
+          "unite": "Jours",
+          "rendement": 1.0,
+          "prixUnitaire": 500.0,
+          "total": 10.0,
+          "baseRendement": "PAR_JOUR"
+        },
+        {
+          "code": "TRA",
+          "designation": "tractopelle",
+          "unite": "Jours",
+          "rendement": 1.0,
+          "prixUnitaire": 1500.0,
+          "total": 30.0,
+          "baseRendement": "PAR_JOUR"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "Jours",
+          "rendement": 6.0,
+          "prixUnitaire": 130.0,
+          "total": 15.6,
+          "baseRendement": "PAR_JOUR"
+        }
+      ]
+    },
+    {
+      "famille": "Canalisations en tubes PVC",
+      "code": "d",
+      "designation": "Ø  400",
+      "unite": "ML",
+      "rendementJournalier": 50.0,
+      "qExecutee": "50ML/jour",
+      "totalClasseur": 397.6,
+      "composants": [
+        {
+          "code": "PVC400",
+          "designation": "Ø  400",
+          "unite": "ML",
+          "rendement": 50.0,
+          "prixUnitaire": 246.0,
+          "total": 246.0,
+          "baseRendement": "PAR_JOUR"
+        },
+        {
+          "code": "G1",
+          "designation": "sable concassé",
+          "unite": "M3",
+          "rendement": 12.0,
+          "prixUnitaire": 150.0,
+          "total": 36.0,
+          "baseRendement": "PAR_JOUR"
+        },
+        {
+          "code": "COM",
+          "designation": "Compacteur",
+          "unite": "Jours",
+          "rendement": 1.0,
+          "prixUnitaire": 500.0,
+          "total": 10.0,
+          "baseRendement": "PAR_JOUR"
+        },
+        {
+          "code": "TRA",
+          "designation": "tractopelle",
+          "unite": "Jours",
+          "rendement": 3.0,
+          "prixUnitaire": 1500.0,
+          "total": 90.0,
+          "baseRendement": "PAR_JOUR"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "Jours",
+          "rendement": 6.0,
+          "prixUnitaire": 130.0,
+          "total": 15.6,
+          "baseRendement": "PAR_JOUR"
+        }
+      ]
+    },
+    {
+      "famille": "Regards pour EU-EV-EP",
+      "code": "a",
+      "designation": "Regards De 40 x 40 x 0,70h",
+      "unite": "U",
+      "rendementJournalier": null,
+      "qExecutee": "4regards/jour",
+      "totalClasseur": 484.775,
+      "composants": [
+        {
+          "code": "B25",
+          "designation": "Béton",
+          "unite": "M3",
+          "rendement": 0.3535,
+          "prixUnitaire": 650.0,
+          "total": 229.775,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "COFF",
+          "designation": "Coffrage",
+          "unite": null,
+          "rendement": 1.0,
+          "prixUnitaire": 100.0,
+          "total": 100.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "DUM",
+          "designation": "Dumper",
+          "unite": "Jours",
+          "rendement": 0.1,
+          "prixUnitaire": 500.0,
+          "total": 50.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "Jours",
+          "rendement": 1.0,
+          "prixUnitaire": 105.0,
+          "total": 105.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "Regards pour EU-EV-EP",
+      "code": "a",
+      "designation": "Regards De 50 x 50 x 1h",
+      "unite": "U",
+      "rendementJournalier": null,
+      "qExecutee": "4regards/jour",
+      "totalClasseur": 725.0000000000001,
+      "composants": [
+        {
+          "code": "B25",
+          "designation": "Béton",
+          "unite": "M3",
+          "rendement": 0.55,
+          "prixUnitaire": 700.0,
+          "total": 385.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "COFF",
+          "designation": "Coffrage",
+          "unite": null,
+          "rendement": 1.0,
+          "prixUnitaire": 150.0,
+          "total": 150.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "DUM",
+          "designation": "Dumper",
+          "unite": "Jours",
+          "rendement": 0.1,
+          "prixUnitaire": 500.0,
+          "total": 50.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "Jours",
+          "rendement": 1.0,
+          "prixUnitaire": 140.0,
+          "total": 140.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "Regards pour EU-EV-EP",
+      "code": "a",
+      "designation": "Regards De 60 x 60 x 1h",
+      "unite": "U",
+      "rendementJournalier": null,
+      "qExecutee": "4regards/jour",
+      "totalClasseur": 866.75,
+      "composants": [
+        {
+          "code": "B25",
+          "designation": "Béton",
+          "unite": "M3",
+          "rendement": 0.6525,
+          "prixUnitaire": 700.0,
+          "total": 456.75,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "COFF",
+          "designation": "Coffrage",
+          "unite": null,
+          "rendement": 1.0,
+          "prixUnitaire": 150.0,
+          "total": 150.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "DUM",
+          "designation": "Dumper",
+          "unite": "Jours",
+          "rendement": 0.1,
+          "prixUnitaire": 500.0,
+          "total": 50.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "Jours",
+          "rendement": 1.0,
+          "prixUnitaire": 210.0,
+          "total": 210.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "Regards pour EU-EV-EP",
+      "code": "a",
+      "designation": "Regards De 70 x 70 x 1,20h",
+      "unite": "U",
+      "rendementJournalier": null,
+      "qExecutee": "4regards/jour",
+      "totalClasseur": 1143.4,
+      "composants": [
+        {
+          "code": "B25",
+          "designation": "Béton",
+          "unite": "M3",
+          "rendement": 0.862,
+          "prixUnitaire": 700.0,
+          "total": 603.4,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "COFF",
+          "designation": "Coffrage",
+          "unite": null,
+          "rendement": 1.0,
+          "prixUnitaire": 200.0,
+          "total": 200.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "DUM",
+          "designation": "Dumper",
+          "unite": "Jours",
+          "rendement": 0.1,
+          "prixUnitaire": 500.0,
+          "total": 50.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "Jours",
+          "rendement": 1.0,
+          "prixUnitaire": 290.0,
+          "total": 290.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "Regards pour EU-EV-EP",
+      "code": "a",
+      "designation": "Regards De 80 x 80 x 1,50h",
+      "unite": "U",
+      "rendementJournalier": null,
+      "qExecutee": "4regards/jour",
+      "totalClasseur": 1350.25,
+      "composants": [
+        {
+          "code": "B25",
+          "designation": "Béton",
+          "unite": "M3",
+          "rendement": 1.1575,
+          "prixUnitaire": 700.0,
+          "total": 810.25,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "COFF",
+          "designation": "Coffrage",
+          "unite": null,
+          "rendement": 1.0,
+          "prixUnitaire": 200.0,
+          "total": 200.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "DUM",
+          "designation": "Dumper",
+          "unite": "Jours",
+          "rendement": 0.1,
+          "prixUnitaire": 500.0,
+          "total": 50.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "Jours",
+          "rendement": 1.0,
+          "prixUnitaire": 290.0,
+          "total": 290.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "TERRASSEMENTS FONDATIONS",
+      "code": "a",
+      "designation": "Fouilles en tuff ou grès tendre",
+      "unite": "M3",
+      "rendementJournalier": 100.0,
+      "qExecutee": "100M3/jour",
+      "totalClasseur": 27.0,
+      "composants": [
+        {
+          "code": "TRAG",
+          "designation": "tractopelle a godet",
+          "unite": "Jours",
+          "rendement": 1.0,
+          "prixUnitaire": 1500.0,
+          "total": 15.0,
+          "baseRendement": "PAR_JOUR"
+        },
+        {
+          "code": "G",
+          "designation": "gasoil",
+          "unite": null,
+          "rendement": 1.0,
+          "prixUnitaire": 10.0,
+          "total": 10.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "P-A",
+          "designation": "pannes et aleas",
+          "unite": "Jours",
+          "rendement": 1.0,
+          "prixUnitaire": 200.0,
+          "total": 2.0,
+          "baseRendement": "PAR_JOUR"
+        }
+      ]
+    },
+    {
+      "famille": "TERRASSEMENTS FONDATIONS",
+      "code": "b",
+      "designation": "Fouilles en rocher",
+      "unite": "M3",
+      "rendementJournalier": 100.0,
+      "qExecutee": "33M3/jour",
+      "totalClasseur": 77.0,
+      "composants": [
+        {
+          "code": "TRAG",
+          "designation": "tractopelle a godet",
+          "unite": "Jours",
+          "rendement": 1.0,
+          "prixUnitaire": 1500.0,
+          "total": 15.0,
+          "baseRendement": "PAR_JOUR"
+        },
+        {
+          "code": "TRAMP",
+          "designation": "tractopelle marteau piqueur",
+          "unite": null,
+          "rendement": 2.0,
+          "prixUnitaire": 1500.0,
+          "total": 30.0,
+          "baseRendement": "PAR_JOUR"
+        },
+        {
+          "code": "G",
+          "designation": "gasoil",
+          "unite": null,
+          "rendement": 3.0,
+          "prixUnitaire": 10.0,
+          "total": 30.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "P-A",
+          "designation": "pannes et aleas",
+          "unite": "Jours",
+          "rendement": 1.0,
+          "prixUnitaire": 200.0,
+          "total": 2.0,
+          "baseRendement": "PAR_JOUR"
+        }
+      ]
+    },
+    {
+      "famille": "TERRASSEMENTS FONDATIONS",
+      "code": "c/2",
+      "designation": "Remblaiement ou évacuation aux décharges publiques",
+      "unite": "M3",
+      "rendementJournalier": 100.0,
+      "qExecutee": "100M3/jour",
+      "totalClasseur": 67.0,
+      "composants": [
+        {
+          "code": "TRAG",
+          "designation": "tractopelle a godet",
+          "unite": "Jours",
+          "rendement": 1.0,
+          "prixUnitaire": 1500.0,
+          "total": 15.0,
+          "baseRendement": "PAR_JOUR"
+        },
+        {
+          "code": "CAB",
+          "designation": "camion benne",
+          "unite": null,
+          "rendement": 2.0,
+          "prixUnitaire": 1000.0,
+          "total": 20.0,
+          "baseRendement": "PAR_JOUR"
+        },
+        {
+          "code": "G",
+          "designation": "gasoil",
+          "unite": null,
+          "rendement": 3.0,
+          "prixUnitaire": 10.0,
+          "total": 30.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "P-A",
+          "designation": "pannes et aleas",
+          "unite": "Jours",
+          "rendement": 1.0,
+          "prixUnitaire": 200.0,
+          "total": 2.0,
+          "baseRendement": "PAR_JOUR"
+        }
+      ]
+    },
+    {
+      "famille": "Maconnerie en fondation",
+      "code": "d1",
+      "designation": "beton propreté",
+      "unite": "M3",
+      "rendementJournalier": null,
+      "qExecutee": "5M3/jour",
+      "totalClasseur": 729.0,
+      "composants": [
+        {
+          "code": "CM350",
+          "designation": "ciment",
+          "unite": "KG",
+          "rendement": 4.0,
+          "prixUnitaire": 60.0,
+          "total": 240.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "G1G2&T",
+          "designation": "gravier(G1+G2)+FT",
+          "unite": "KG",
+          "rendement": 0.88,
+          "prixUnitaire": 150.0,
+          "total": 132.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "sable+FT",
+          "unite": "KG",
+          "rendement": 0.44,
+          "prixUnitaire": 200.0,
+          "total": 88.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "DEP30M3/j",
+          "designation": "7M,O (pour 5M3)",
+          "unite": "M3/j",
+          "rendement": 1.0,
+          "prixUnitaire": 194.0,
+          "total": 194.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": null,
+          "designation": "conso eau et elec",
+          "unite": null,
+          "rendement": 0.5,
+          "prixUnitaire": 50.0,
+          "total": 25.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOP",
+          "designation": "coffrage",
+          "unite": "coff",
+          "rendement": 0.5,
+          "prixUnitaire": 100.0,
+          "total": 50.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "Maconnerie en fondation",
+      "code": "d2",
+      "designation": "Béton cyclopéen",
+      "unite": "M3",
+      "rendementJournalier": null,
+      "qExecutee": "5M3/jour",
+      "totalClasseur": 579.3333333333333,
+      "composants": [
+        {
+          "code": "CM350",
+          "designation": "ciment",
+          "unite": "KG",
+          "rendement": 5.0,
+          "prixUnitaire": 60.0,
+          "total": 300.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "G1G2&T",
+          "designation": "gravier(G1+G2)+FT",
+          "unite": "KG",
+          "rendement": 0.8,
+          "prixUnitaire": 110.0,
+          "total": 88.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "sable+FT",
+          "unite": "KG",
+          "rendement": 0.4,
+          "prixUnitaire": 200.0,
+          "total": 80.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "DEP30M3/j",
+          "designation": "betonniere+ conso eau et elec+2M,O +transport et divers(pour 30M3)",
+          "unite": "M3/j",
+          "rendement": 0.033333,
+          "prixUnitaire": 1300.0,
+          "total": 43.3333,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOP",
+          "designation": "M,O production       (pour 5 M3)",
+          "unite": "ouvrier",
+          "rendement": 0.2,
+          "prixUnitaire": 340.0,
+          "total": 68.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "Maconnerie en fondation",
+      "code": "d3",
+      "designation": "Forme en tout-venant compactée de 0,30",
+      "unite": "M2",
+      "rendementJournalier": null,
+      "qExecutee": "100M2/jour",
+      "totalClasseur": 42.9,
+      "composants": [
+        {
+          "code": "TVNC",
+          "designation": "tout-venant non compactée",
+          "unite": "M3",
+          "rendement": 0.36,
+          "prixUnitaire": 100.0,
+          "total": 36.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD2",
+          "designation": "ouvrier",
+          "unite": "U",
+          "rendement": 0.01,
+          "prixUnitaire": 140.0,
+          "total": 1.4,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "EN1",
+          "designation": "compacteur",
+          "unite": "U",
+          "rendement": 0.01,
+          "prixUnitaire": 500.0,
+          "total": 5.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "CEAU",
+          "designation": "consommation eau",
+          "unite": "M3",
+          "rendement": 0.01,
+          "prixUnitaire": 50.0,
+          "total": 0.5,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "Maconnerie en fondation",
+      "code": "d4",
+      "designation": "Dallage en béton armé de 0,15 avec chape incorporée et durcisseur",
+      "unite": "M2",
+      "rendementJournalier": null,
+      "qExecutee": "100M2/jour",
+      "totalClasseur": 257.84999999999997,
+      "composants": [
+        {
+          "code": "B25",
+          "designation": "Béton",
+          "unite": "M3",
+          "rendement": 0.15,
+          "prixUnitaire": 800.0,
+          "total": 120.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD2",
+          "designation": "Main d'Œuvre chape",
+          "unite": "F",
+          "rendement": 1.0,
+          "prixUnitaire": 52.0,
+          "total": 52.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "TS1",
+          "designation": "treillis T8",
+          "unite": "M2",
+          "rendement": 2.0,
+          "prixUnitaire": 41.475,
+          "total": 82.95,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "Jours",
+          "rendement": 0.01,
+          "prixUnitaire": 290.0,
+          "total": 2.9,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "Maconnerie en fondation",
+      "code": "d4'",
+      "designation": "Dallage en béton armé de 0,15 avec chape incorporée et durcisseur",
+      "unite": "M2",
+      "rendementJournalier": null,
+      "qExecutee": null,
+      "totalClasseur": 221.52,
+      "composants": [
+        {
+          "code": "B25",
+          "designation": "Béton",
+          "unite": "M3",
+          "rendement": 0.15,
+          "prixUnitaire": 800.0,
+          "total": 120.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD2",
+          "designation": "Main d'Œuvre chape",
+          "unite": "F",
+          "rendement": 1.0,
+          "prixUnitaire": 52.0,
+          "total": 52.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "TS1",
+          "designation": "treillis T8",
+          "unite": "M2",
+          "rendement": 2.0,
+          "prixUnitaire": 23.31,
+          "total": 46.62,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "Jours",
+          "rendement": 0.01,
+          "prixUnitaire": 290.0,
+          "total": 2.9,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "Maconnerie en fondation",
+      "code": "d5",
+      "designation": "Dallage en béton armé de 0,12 sans chape incorporée et durcisseur",
+      "unite": "M2",
+      "rendementJournalier": null,
+      "qExecutee": "100M2/jour",
+      "totalClasseur": 145.875,
+      "composants": [
+        {
+          "code": "B25",
+          "designation": "Béton",
+          "unite": "M3",
+          "rendement": 0.12,
+          "prixUnitaire": 800.0,
+          "total": 96.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "TS1",
+          "designation": "treillis T8",
+          "unite": "M2",
+          "rendement": 1.0,
+          "prixUnitaire": 41.475,
+          "total": 41.475,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "Jours",
+          "rendement": 0.01,
+          "prixUnitaire": 840.0,
+          "total": 8.4,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "Maconnerie en fondation",
+      "code": "d6",
+      "designation": "Dallage en béton armé de 0,15sans chape incorporée et durcisseur",
+      "unite": "M2",
+      "rendementJournalier": null,
+      "qExecutee": "100M2/jour",
+      "totalClasseur": 214.25,
+      "composants": [
+        {
+          "code": "B25",
+          "designation": "Béton",
+          "unite": "M3",
+          "rendement": 0.15,
+          "prixUnitaire": 800.0,
+          "total": 120.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "TS1",
+          "designation": "treillis T8",
+          "unite": "M2",
+          "rendement": 2.0,
+          "prixUnitaire": 41.475,
+          "total": 82.95,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "Jours",
+          "rendement": 0.01,
+          "prixUnitaire": 1130.0,
+          "total": 11.3,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "Maconnerie en fondation",
+      "code": "d7",
+      "designation": "Feuille polyane",
+      "unite": "M2",
+      "rendementJournalier": null,
+      "qExecutee": "100M2/jour",
+      "totalClasseur": 6.371428571428575,
+      "composants": [
+        {
+          "code": "FPA",
+          "designation": "Feuille polyane achat",
+          "unite": "M2",
+          "rendement": 0.157143,
+          "prixUnitaire": 24.0,
+          "total": 3.7714,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "Jours",
+          "rendement": 0.01,
+          "prixUnitaire": 260.0,
+          "total": 2.6,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "Maconnerie en fondation",
+      "code": "d8",
+      "designation": "Bordures de trottoir type T3",
+      "unite": "ML",
+      "rendementJournalier": null,
+      "qExecutee": "100M2/jour",
+      "totalClasseur": 115.70194,
+      "composants": [
+        {
+          "code": "BOR",
+          "designation": "Bordures T3",
+          "unite": "ML",
+          "rendement": 1.1,
+          "prixUnitaire": 40.0,
+          "total": 44.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "BE",
+          "designation": "Beton",
+          "unite": "M3",
+          "rendement": 0.0407,
+          "prixUnitaire": 595.0,
+          "total": 24.2165,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOR",
+          "designation": "Mortier",
+          "unite": "M3",
+          "rendement": 0.000952,
+          "prixUnitaire": 720.0,
+          "total": 0.6854,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": null,
+          "designation": "Main d'Œuvre finition",
+          "unite": "Jours",
+          "rendement": 0.03,
+          "prixUnitaire": 160.0,
+          "total": 4.8,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": null,
+          "designation": "Main d'Œuvre terassement",
+          "unite": "Jours",
+          "rendement": 0.1,
+          "prixUnitaire": 130.0,
+          "total": 13.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre pose",
+          "unite": "Jours",
+          "rendement": 0.1,
+          "prixUnitaire": 290.0,
+          "total": 29.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "Maconnerie en fondation",
+      "code": "d9",
+      "designation": "Mise à la terre",
+      "unite": "ML",
+      "rendementJournalier": null,
+      "qExecutee": "100M2/jour",
+      "totalClasseur": 214.25,
+      "composants": [
+        {
+          "code": "B25",
+          "designation": "Béton",
+          "unite": "M3",
+          "rendement": 0.15,
+          "prixUnitaire": 800.0,
+          "total": 120.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": null,
+          "designation": "treillis T8",
+          "unite": "M2",
+          "rendement": 2.0,
+          "prixUnitaire": 41.475,
+          "total": 82.95,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "Jours",
+          "rendement": 0.01,
+          "prixUnitaire": 1130.0,
+          "total": 11.3,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "Maconnerie en fondation",
+      "code": "d10",
+      "designation": "Pavés auto-bloquant",
+      "unite": "M2",
+      "rendementJournalier": null,
+      "qExecutee": "100M2/jour",
+      "totalClasseur": 201.03,
+      "composants": [
+        {
+          "code": "PAV",
+          "designation": "Pavés",
+          "unite": "M2",
+          "rendement": 1.1,
+          "prixUnitaire": 60.0,
+          "total": 66.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "TV",
+          "designation": "Tout venant",
+          "unite": "M3",
+          "rendement": 0.264,
+          "prixUnitaire": 120.0,
+          "total": 31.68,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "SC",
+          "designation": "sable concasée",
+          "unite": "Jours",
+          "rendement": 0.077,
+          "prixUnitaire": 150.0,
+          "total": 11.55,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "EAU-e",
+          "designation": "Eau+elec",
+          "unite": "M2",
+          "rendement": 1.0,
+          "prixUnitaire": 10.0,
+          "total": 10.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "SA",
+          "designation": "sable",
+          "unite": "M3",
+          "rendement": 0.011,
+          "prixUnitaire": 300.0,
+          "total": 3.3,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre(pose pavés + Tout venant)",
+          "unite": "Jours",
+          "rendement": 1.0,
+          "prixUnitaire": 41.0,
+          "total": 41.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "COM",
+          "designation": "Compacteur",
+          "unite": "Jours",
+          "rendement": 0.025,
+          "prixUnitaire": 500.0,
+          "total": 12.5,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "JCB",
+          "designation": "JCB",
+          "unite": "Jours",
+          "rendement": 0.025,
+          "prixUnitaire": 1000.0,
+          "total": 25.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "BÉTONS ARMÉS EN FONDATION",
+      "code": "a",
+      "designation": "Semelles",
+      "unite": "M3",
+      "rendementJournalier": null,
+      "qExecutee": "2M2/jour",
+      "totalClasseur": 1045.0,
+      "composants": [
+        {
+          "code": "B25",
+          "designation": "Béton",
+          "unite": "M3",
+          "rendement": 1.0,
+          "prixUnitaire": 800.0,
+          "total": 800.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "COFF",
+          "designation": "Coffrage",
+          "unite": "F",
+          "rendement": 1.0,
+          "prixUnitaire": 100.0,
+          "total": 100.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "Jours",
+          "rendement": 0.5,
+          "prixUnitaire": 290.0,
+          "total": 145.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "BÉTONS ARMÉS EN FONDATION",
+      "code": "b",
+      "designation": "Longrines ou chaînages",
+      "unite": "M3",
+      "rendementJournalier": null,
+      "qExecutee": "1M2/jour",
+      "totalClasseur": 1190.0,
+      "composants": [
+        {
+          "code": "B25",
+          "designation": "Béton",
+          "unite": "M3",
+          "rendement": 1.0,
+          "prixUnitaire": 800.0,
+          "total": 800.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "COFF",
+          "designation": "Coffrage",
+          "unite": "F",
+          "rendement": 1.0,
+          "prixUnitaire": 100.0,
+          "total": 100.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "Jours",
+          "rendement": 1.0,
+          "prixUnitaire": 290.0,
+          "total": 290.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "BÉTONS ARMÉS EN FONDATION",
+      "code": "C",
+      "designation": "Poteaux en fondation",
+      "unite": "M3",
+      "rendementJournalier": null,
+      "qExecutee": "1M2/jour",
+      "totalClasseur": 1190.0,
+      "composants": [
+        {
+          "code": "B25",
+          "designation": "Béton",
+          "unite": "M3",
+          "rendement": 1.0,
+          "prixUnitaire": 800.0,
+          "total": 800.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "COFF-M",
+          "designation": "Coffrage & Manutention",
+          "unite": "F",
+          "rendement": 1.0,
+          "prixUnitaire": 100.0,
+          "total": 100.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "Jours",
+          "rendement": 1.0,
+          "prixUnitaire": 290.0,
+          "total": 290.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "BÉTONS ARMÉS EN FONDATION",
+      "code": "d",
+      "designation": "Voile > 0,10",
+      "unite": "M3",
+      "rendementJournalier": null,
+      "qExecutee": "1M2/jour",
+      "totalClasseur": 1240.0,
+      "composants": [
+        {
+          "code": "B25",
+          "designation": "Béton",
+          "unite": "M3",
+          "rendement": 1.0,
+          "prixUnitaire": 800.0,
+          "total": 800.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "COF-M",
+          "designation": "Coffrage & Manutention",
+          "unite": "F",
+          "rendement": 1.0,
+          "prixUnitaire": 150.0,
+          "total": 150.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "Jours",
+          "rendement": 1.0,
+          "prixUnitaire": 290.0,
+          "total": 290.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "BÉTONS ARMÉS EN FONDATION",
+      "code": "d",
+      "designation": "Voile > 0,13",
+      "unite": "M3",
+      "rendementJournalier": null,
+      "qExecutee": "2M2/jour",
+      "totalClasseur": 1530.0,
+      "composants": [
+        {
+          "code": "B25",
+          "designation": "Béton",
+          "unite": "M3",
+          "rendement": 1.0,
+          "prixUnitaire": 800.0,
+          "total": 800.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "COFF-M",
+          "designation": "Coffrage & Manutention",
+          "unite": "F",
+          "rendement": 1.0,
+          "prixUnitaire": 150.0,
+          "total": 150.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "Jours",
+          "rendement": 2.0,
+          "prixUnitaire": 290.0,
+          "total": 580.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "Maconnerie en elevation",
+      "code": "f1",
+      "designation": "cloison en brique (6trous)",
+      "unite": "M2",
+      "rendementJournalier": null,
+      "qExecutee": "1M2/jour",
+      "totalClasseur": 84.58431999999999,
+      "composants": [
+        {
+          "code": "B6T",
+          "designation": "brique 6 trous",
+          "unite": "U",
+          "rendement": 27.5,
+          "prixUnitaire": 1.2,
+          "total": 33.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOR",
+          "designation": "Mortier (1m3 sable + 10sac ciment)",
+          "unite": "M3",
+          "rendement": 0.028896,
+          "prixUnitaire": 920.0,
+          "total": 26.5843,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "M2",
+          "rendement": 1.0,
+          "prixUnitaire": 25.0,
+          "total": 25.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "Maconnerie en elevation",
+      "code": "f2",
+      "designation": "Agglomérés de 0,20 d' épaisseur brute",
+      "unite": "M2",
+      "rendementJournalier": null,
+      "qExecutee": "1M2/jour",
+      "totalClasseur": 145.19,
+      "composants": [
+        {
+          "code": "AG20",
+          "designation": "Agglomérés de 0,2",
+          "unite": "U",
+          "rendement": 10.5,
+          "prixUnitaire": 7.5,
+          "total": 78.75,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOR",
+          "designation": "Mortier (1m3 sable + 7sac ciment)",
+          "unite": "M3",
+          "rendement": 0.056,
+          "prixUnitaire": 740.0,
+          "total": 41.44,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "M2",
+          "rendement": 1.0,
+          "prixUnitaire": 25.0,
+          "total": 25.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "Maconnerie en elevation",
+      "code": "f3",
+      "designation": "Double-cloison en brique 6T + 6T",
+      "unite": "M2",
+      "rendementJournalier": null,
+      "qExecutee": "1M2/jour",
+      "totalClasseur": 169.16863999999998,
+      "composants": [
+        {
+          "code": "B6T6T",
+          "designation": "brique 6 trous",
+          "unite": "U",
+          "rendement": 55.0,
+          "prixUnitaire": 1.2,
+          "total": 66.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOR",
+          "designation": "Mortier (1m3 sable + 10sac ciment)",
+          "unite": "M3",
+          "rendement": 0.057792,
+          "prixUnitaire": 920.0,
+          "total": 53.1686,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "M2",
+          "rendement": 1.0,
+          "prixUnitaire": 50.0,
+          "total": 50.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "Maconnerie en elevation",
+      "code": "f2''",
+      "designation": "Agglomérés de 0,20 d' épaisseur brute (pour mur de cloture)",
+      "unite": "M2",
+      "rendementJournalier": null,
+      "qExecutee": "1M2/jour",
+      "totalClasseur": 184.8336111111111,
+      "composants": [
+        {
+          "code": "AG20",
+          "designation": "Agglomérés de 0,2",
+          "unite": "U",
+          "rendement": 10.5,
+          "prixUnitaire": 7.5,
+          "total": 78.75,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOR",
+          "designation": "Mortier (1m3 sable + 10sac ciment)",
+          "unite": "M3",
+          "rendement": 0.056,
+          "prixUnitaire": 740.0,
+          "total": 41.44,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "RAI-CHAI 1",
+          "designation": "raidisseur et chainage",
+          "unite": "M2",
+          "rendement": 1.0,
+          "prixUnitaire": 39.6436,
+          "total": 39.6436,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "M2",
+          "rendement": 1.0,
+          "prixUnitaire": 25.0,
+          "total": 25.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "Maconnerie en elevation",
+      "code": "f2''",
+      "designation": "Agglomérés de 0,20 d' épaisseur brute (pour mur de Hangar)",
+      "unite": "M2",
+      "rendementJournalier": null,
+      "qExecutee": "1M2/jour",
+      "totalClasseur": 184.76338709677418,
+      "composants": [
+        {
+          "code": "AG20",
+          "designation": "Agglomérés de 0,2",
+          "unite": "U",
+          "rendement": 10.5,
+          "prixUnitaire": 7.5,
+          "total": 78.75,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOR",
+          "designation": "Mortier (1m3 sable + 10sac ciment)",
+          "unite": "M3",
+          "rendement": 0.056,
+          "prixUnitaire": 740.0,
+          "total": 41.44,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "RAI-CHAI 1",
+          "designation": "raidisseur et chainage",
+          "unite": "M2",
+          "rendement": 1.0,
+          "prixUnitaire": 39.5734,
+          "total": 39.5734,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "M2",
+          "rendement": 1.0,
+          "prixUnitaire": 25.0,
+          "total": 25.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "g1",
+      "code": "a",
+      "designation": "Poteaux",
+      "unite": "M3",
+      "rendementJournalier": null,
+      "qExecutee": "1M3/jour",
+      "totalClasseur": 1255.0,
+      "composants": [
+        {
+          "code": "B25",
+          "designation": "Béton",
+          "unite": "M3",
+          "rendement": 1.0,
+          "prixUnitaire": 800.0,
+          "total": 800.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "CM01",
+          "designation": "Coffrage & Manutention",
+          "unite": null,
+          "rendement": 1.0,
+          "prixUnitaire": 100.0,
+          "total": 100.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "Jours",
+          "rendement": 1.0,
+          "prixUnitaire": 290.0,
+          "total": 290.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD-D",
+          "designation": "Main d'Œuvre decofrage",
+          "unite": "Jours",
+          "rendement": 0.5,
+          "prixUnitaire": 130.0,
+          "total": 65.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "g1",
+      "code": "b",
+      "designation": "Dalles P & E",
+      "unite": "M3",
+      "rendementJournalier": null,
+      "qExecutee": "1M3/jour",
+      "totalClasseur": 1435.0,
+      "composants": [
+        {
+          "code": "B25",
+          "designation": "Béton",
+          "unite": "M3",
+          "rendement": 1.0,
+          "prixUnitaire": 800.0,
+          "total": 800.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "CM01",
+          "designation": "Coffrage & Manutention",
+          "unite": null,
+          "rendement": 1.0,
+          "prixUnitaire": 150.0,
+          "total": 150.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "Jours",
+          "rendement": 1.0,
+          "prixUnitaire": 420.0,
+          "total": 420.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD-D",
+          "designation": "Main d'Œuvre decofrage",
+          "unite": "Jours",
+          "rendement": 0.5,
+          "prixUnitaire": 130.0,
+          "total": 65.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "g1",
+      "code": "C",
+      "designation": "Poutres",
+      "unite": "M3",
+      "rendementJournalier": null,
+      "qExecutee": "1M3/jour",
+      "totalClasseur": 1435.0,
+      "composants": [
+        {
+          "code": "B25",
+          "designation": "Béton",
+          "unite": "M3",
+          "rendement": 1.0,
+          "prixUnitaire": 800.0,
+          "total": 800.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "CM01",
+          "designation": "Coffrage & Manutention",
+          "unite": null,
+          "rendement": 1.0,
+          "prixUnitaire": 150.0,
+          "total": 150.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "Jours",
+          "rendement": 1.0,
+          "prixUnitaire": 420.0,
+          "total": 420.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD-D",
+          "designation": "Main d'Œuvre decofrage",
+          "unite": "Jours",
+          "rendement": 0.5,
+          "prixUnitaire": 130.0,
+          "total": 65.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "g1",
+      "code": "d",
+      "designation": "Voile < 0,10",
+      "unite": "M3",
+      "rendementJournalier": null,
+      "qExecutee": "1M3/jour",
+      "totalClasseur": 1500.0,
+      "composants": [
+        {
+          "code": "B25",
+          "designation": "Béton",
+          "unite": "M3",
+          "rendement": 1.0,
+          "prixUnitaire": 800.0,
+          "total": 800.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "CM01",
+          "designation": "Coffrage & Manutention",
+          "unite": null,
+          "rendement": 1.0,
+          "prixUnitaire": 150.0,
+          "total": 150.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "Jours",
+          "rendement": 1.0,
+          "prixUnitaire": 420.0,
+          "total": 420.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD-D",
+          "designation": "Main d'Œuvre decofrage",
+          "unite": "Jours",
+          "rendement": 1.0,
+          "prixUnitaire": 130.0,
+          "total": 130.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "g1",
+      "code": "e",
+      "designation": "Voile > 0,10",
+      "unite": "M3",
+      "rendementJournalier": null,
+      "qExecutee": "1M3/jour",
+      "totalClasseur": 1435.0,
+      "composants": [
+        {
+          "code": "B25",
+          "designation": "Béton",
+          "unite": "M3",
+          "rendement": 1.0,
+          "prixUnitaire": 800.0,
+          "total": 800.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "CM01",
+          "designation": "Coffrage & Manutention",
+          "unite": null,
+          "rendement": 1.0,
+          "prixUnitaire": 150.0,
+          "total": 150.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "Jours",
+          "rendement": 1.0,
+          "prixUnitaire": 420.0,
+          "total": 420.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD-D",
+          "designation": "Main d'Œuvre decofrage",
+          "unite": "Jours",
+          "rendement": 0.5,
+          "prixUnitaire": 130.0,
+          "total": 65.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "g2",
+      "code": "g/2",
+      "designation": "Dallette en béton armé",
+      "unite": "M2",
+      "rendementJournalier": null,
+      "qExecutee": "1M2/jour",
+      "totalClasseur": 393.88,
+      "composants": [
+        {
+          "code": "B25",
+          "designation": "Béton",
+          "unite": "M2",
+          "rendement": 1.0,
+          "prixUnitaire": 80.0,
+          "total": 80.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "COFF",
+          "designation": "Coffrage",
+          "unite": "M2",
+          "rendement": 1.0,
+          "prixUnitaire": 50.0,
+          "total": 50.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "Jours",
+          "rendement": 0.5,
+          "prixUnitaire": 290.0,
+          "total": 145.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "ARM",
+          "designation": "Armatures",
+          "unite": "KG",
+          "rendement": 8.638,
+          "prixUnitaire": 10.0,
+          "total": 86.38,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD-D",
+          "designation": "Main d'Œuvre pour décoffrage",
+          "unite": "Jours",
+          "rendement": 0.25,
+          "prixUnitaire": 130.0,
+          "total": 32.5,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "g3",
+      "code": "b",
+      "designation": "Haute limite élastique (tor ou caron)",
+      "unite": "KG",
+      "rendementJournalier": null,
+      "qExecutee": null,
+      "totalClasseur": 11.0,
+      "composants": [
+        {
+          "code": null,
+          "designation": "Haute limite élastique (tor ou caron)",
+          "unite": "KG",
+          "rendement": 1.1,
+          "prixUnitaire": 10.0,
+          "total": 11.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "g4",
+      "code": "a",
+      "designation": "16 + 4",
+      "unite": "M2",
+      "rendementJournalier": null,
+      "qExecutee": "1M2/jour",
+      "totalClasseur": 290.0,
+      "composants": [
+        {
+          "code": "OD16",
+          "designation": "Ourdi 16",
+          "unite": "M2",
+          "rendement": 1.1,
+          "prixUnitaire": 50.0,
+          "total": 55.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "PLL1",
+          "designation": "Poutrelle",
+          "unite": "ML",
+          "rendement": 2.0,
+          "prixUnitaire": 20.0,
+          "total": 40.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "DC01",
+          "designation": "Dalle de Compression",
+          "unite": "M3",
+          "rendement": 0.075,
+          "prixUnitaire": 800.0,
+          "total": 60.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "TS01",
+          "designation": "Treilli Soudé",
+          "unite": "M2",
+          "rendement": 1.0,
+          "prixUnitaire": 10.0,
+          "total": 10.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "CME1",
+          "designation": "Coffrage & Manutention & Echafaudage",
+          "unite": "-",
+          "rendement": 1.0,
+          "prixUnitaire": 75.0,
+          "total": 75.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "Jours",
+          "rendement": 1.0,
+          "prixUnitaire": 50.0,
+          "total": 50.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "g4",
+      "code": "b",
+      "designation": "20 + 5",
+      "unite": "M2",
+      "rendementJournalier": null,
+      "qExecutee": "1M2/jour",
+      "totalClasseur": 339.0,
+      "composants": [
+        {
+          "code": "OD20",
+          "designation": "Ourdi 20",
+          "unite": "M2",
+          "rendement": 1.1,
+          "prixUnitaire": 60.0,
+          "total": 66.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "PLL1",
+          "designation": "Poutrelle",
+          "unite": "ML",
+          "rendement": 2.0,
+          "prixUnitaire": 30.0,
+          "total": 60.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "DC01",
+          "designation": "Dalle de Compression",
+          "unite": "M3",
+          "rendement": 0.085,
+          "prixUnitaire": 800.0,
+          "total": 68.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "TS01",
+          "designation": "Treilli Soudé",
+          "unite": "M2",
+          "rendement": 1.0,
+          "prixUnitaire": 10.0,
+          "total": 10.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "CME1",
+          "designation": "Coffrage & Manutention & Echafaudage",
+          "unite": "-",
+          "rendement": 1.0,
+          "prixUnitaire": 75.0,
+          "total": 75.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "Jours",
+          "rendement": 1.0,
+          "prixUnitaire": 60.0,
+          "total": 60.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "g4",
+      "code": "c",
+      "designation": "25 + 7",
+      "unite": "M2",
+      "rendementJournalier": null,
+      "qExecutee": "1M2/jour",
+      "totalClasseur": 422.6,
+      "composants": [
+        {
+          "code": "OD25",
+          "designation": "Ourdi 25",
+          "unite": "M2",
+          "rendement": 1.1,
+          "prixUnitaire": 56.0,
+          "total": 61.6,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "PLL1",
+          "designation": "Poutrelle",
+          "unite": "ML",
+          "rendement": 4.0,
+          "prixUnitaire": 35.0,
+          "total": 140.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "DC01",
+          "designation": "Dalle de Compression",
+          "unite": "M3",
+          "rendement": 0.095,
+          "prixUnitaire": 800.0,
+          "total": 76.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "TS01",
+          "designation": "Treilli Soudé",
+          "unite": "M2",
+          "rendement": 1.0,
+          "prixUnitaire": 10.0,
+          "total": 10.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "CME1",
+          "designation": "Coffrage & Manutention & Echafaudage",
+          "unite": "-",
+          "rendement": 1.0,
+          "prixUnitaire": 75.0,
+          "total": 75.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "Jours",
+          "rendement": 1.0,
+          "prixUnitaire": 60.0,
+          "total": 60.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "Enduits",
+      "code": "h1",
+      "designation": "Enduit exterieur au mortier bâtard frotassé sur murs",
+      "unite": "M2",
+      "rendementJournalier": null,
+      "qExecutee": "1M2/jour",
+      "totalClasseur": 41.84,
+      "composants": [
+        {
+          "code": "1ERC",
+          "designation": "1er couche (50kg ciment +150kg sable)",
+          "unite": "M3",
+          "rendement": 0.0165,
+          "prixUnitaire": 720.0,
+          "total": 11.88,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "2ERC",
+          "designation": "2eme couche (50kg ciment +150kg sable)",
+          "unite": "M3",
+          "rendement": 0.0055,
+          "prixUnitaire": 720.0,
+          "total": 3.96,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "M2",
+          "rendement": 1.0,
+          "prixUnitaire": 26.0,
+          "total": 26.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "Enduits",
+      "code": "h2",
+      "designation": "Enduit interieur au mortier bâtard frotassé sur murs",
+      "unite": "M2",
+      "rendementJournalier": null,
+      "qExecutee": "1M2/jour",
+      "totalClasseur": 36.84,
+      "composants": [
+        {
+          "code": "1ERC",
+          "designation": "1er couche (50kg ciment +150kg sable)",
+          "unite": "M3",
+          "rendement": 0.0165,
+          "prixUnitaire": 720.0,
+          "total": 11.88,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "2ERC",
+          "designation": "2eme couche (50kg ciment +150kg sable)",
+          "unite": "M3",
+          "rendement": 0.0055,
+          "prixUnitaire": 720.0,
+          "total": 3.96,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "M2",
+          "rendement": 1.0,
+          "prixUnitaire": 21.0,
+          "total": 21.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "Enduits",
+      "code": "h3",
+      "designation": "Dessus de nez d'appuis de baies en enduit lissé ou acrotère",
+      "unite": "M2",
+      "rendementJournalier": null,
+      "qExecutee": "30M2/jour",
+      "totalClasseur": 29.88,
+      "composants": [
+        {
+          "code": "1ERC",
+          "designation": "1er couche (50kg ciment +150kg sable)",
+          "unite": "M3",
+          "rendement": 0.0165,
+          "prixUnitaire": 720.0,
+          "total": 11.88,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "ML",
+          "rendement": 0.04,
+          "prixUnitaire": 450.0,
+          "total": 18.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "Enduits",
+      "code": "h4",
+      "designation": "Angles métalliques dans enduit",
+      "unite": "ML",
+      "rendementJournalier": null,
+      "qExecutee": "80ML/jour",
+      "totalClasseur": 11.277000000000001,
+      "composants": [
+        {
+          "code": "ANGLM",
+          "designation": "angle métalique",
+          "unite": "ML",
+          "rendement": 0.5,
+          "prixUnitaire": 9.0,
+          "total": 4.5,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "END",
+          "designation": "enduit 4cm*4cm",
+          "unite": "M3",
+          "rendement": 0.0016,
+          "prixUnitaire": 720.0,
+          "total": 1.152,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "U",
+          "rendement": 0.0125,
+          "prixUnitaire": 450.0,
+          "total": 5.625,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "Enduits",
+      "code": "h5",
+      "designation": "Plus-value pour encadrement de baie",
+      "unite": "ML",
+      "rendementJournalier": null,
+      "qExecutee": "20ML/jour",
+      "totalClasseur": 42.0,
+      "composants": [
+        {
+          "code": "2ERC",
+          "designation": "echafaudage",
+          "unite": "Jours",
+          "rendement": 0.5,
+          "prixUnitaire": 24.0,
+          "total": 12.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "U",
+          "rendement": 0.066667,
+          "prixUnitaire": 450.0,
+          "total": 30.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "Enduits",
+      "code": "h5",
+      "designation": "Plus-value pour enduits rainurés",
+      "unite": "M2",
+      "rendementJournalier": null,
+      "qExecutee": "1M2/jour",
+      "totalClasseur": 42.4,
+      "composants": [
+        {
+          "code": "ECHA",
+          "designation": "echafaudage&baget en boit",
+          "unite": "Jours",
+          "rendement": 0.1,
+          "prixUnitaire": 24.0,
+          "total": 2.4,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "F",
+          "rendement": 1.0,
+          "prixUnitaire": 40.0,
+          "total": 40.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "DIVERS  ET  ÉTANCHÉITÉ",
+      "code": "j1a",
+      "designation": "Cadres de menuiserie bois ou métal < 2 m2",
+      "unite": "U",
+      "rendementJournalier": null,
+      "qExecutee": "6U/jour",
+      "totalClasseur": 85.67460317460318,
+      "composants": [
+        {
+          "code": "GRC",
+          "designation": "graint de riz et ciment",
+          "unite": "U",
+          "rendement": 0.166667,
+          "prixUnitaire": 79.0476,
+          "total": 13.1746,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "jours",
+          "rendement": 0.25,
+          "prixUnitaire": 290.0,
+          "total": 72.5,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "DIVERS  ET  ÉTANCHÉITÉ",
+      "code": "j1b",
+      "designation": "Cadres de menuiserie bois ou métal > 2 m2",
+      "unite": "U",
+      "rendementJournalier": null,
+      "qExecutee": "4U/jour",
+      "totalClasseur": 171.34920634920636,
+      "composants": [
+        {
+          "code": "GRC",
+          "designation": "graint de riz et ciment",
+          "unite": "M3",
+          "rendement": 0.333333,
+          "prixUnitaire": 79.0476,
+          "total": 26.3492,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "jours",
+          "rendement": 0.5,
+          "prixUnitaire": 290.0,
+          "total": 145.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "DIVERS  ET  ÉTANCHÉITÉ",
+      "code": "j1c",
+      "designation": "Portails coulissants ou basculants",
+      "unite": "M2",
+      "rendementJournalier": null,
+      "qExecutee": "6M2/jour",
+      "totalClasseur": 263.7,
+      "composants": [
+        {
+          "code": "GRC",
+          "designation": "semelle pour apuis de raille",
+          "unite": "F",
+          "rendement": 0.083333,
+          "prixUnitaire": 1164.4,
+          "total": 97.0333,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "jours",
+          "rendement": 0.166667,
+          "prixUnitaire": 1000.0,
+          "total": 166.6667,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "DIVERS  ET  ÉTANCHÉITÉ",
+      "code": "j1d",
+      "designation": "Appareils sanitaires",
+      "unite": "U",
+      "rendementJournalier": null,
+      "qExecutee": "6U/jour",
+      "totalClasseur": 26.666666666666668,
+      "composants": [
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "jours",
+          "rendement": 0.166667,
+          "prixUnitaire": 160.0,
+          "total": 26.6667,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "DIVERS  ET  ÉTANCHÉITÉ",
+      "code": "j1e",
+      "designation": "Grilles de protection",
+      "unite": "M2",
+      "rendementJournalier": null,
+      "qExecutee": "4M2/jour",
+      "totalClasseur": 251.5625,
+      "composants": [
+        {
+          "code": "MOR",
+          "designation": "mortier",
+          "unite": "M3",
+          "rendement": 0.03125,
+          "prixUnitaire": 800.0,
+          "total": 25.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "jours",
+          "rendement": 0.78125,
+          "prixUnitaire": 290.0,
+          "total": 226.5625,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "DIVERS  ET  ÉTANCHÉITÉ",
+      "code": "j1g",
+      "designation": "Précadres vitrines",
+      "unite": "ML",
+      "rendementJournalier": null,
+      "qExecutee": "20ML/jour",
+      "totalClasseur": 33.7,
+      "composants": [
+        {
+          "code": "GRC",
+          "designation": "mortier",
+          "unite": "M3",
+          "rendement": 0.024,
+          "prixUnitaire": 800.0,
+          "total": 19.2,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "jours",
+          "rendement": 0.05,
+          "prixUnitaire": 290.0,
+          "total": 14.5,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "DIVERS  ET  ÉTANCHÉITÉ",
+      "code": "j2",
+      "designation": "Forme de pente et chape de lissage",
+      "unite": "M2",
+      "rendementJournalier": null,
+      "qExecutee": "1M2/jour",
+      "totalClasseur": 67.74000000000001,
+      "composants": [
+        {
+          "code": "FOR",
+          "designation": "Forme",
+          "unite": "M3",
+          "rendement": 0.077,
+          "prixUnitaire": 620.0,
+          "total": 47.74,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "M2",
+          "rendement": 1.0,
+          "prixUnitaire": 20.0,
+          "total": 20.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "DIVERS  ET  ÉTANCHÉITÉ",
+      "code": "j3",
+      "designation": "Isolation thermique et pare-vapeur",
+      "unite": "M2",
+      "rendementJournalier": null,
+      "qExecutee": "200M2/jour",
+      "totalClasseur": 97.93333333333334,
+      "composants": [
+        {
+          "code": "LIG",
+          "designation": "liege",
+          "unite": "M2",
+          "rendement": 1.0,
+          "prixUnitaire": 96.0,
+          "total": 96.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "M2",
+          "rendement": 0.006667,
+          "prixUnitaire": 290.0,
+          "total": 1.9333,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "DIVERS  ET  ÉTANCHÉITÉ",
+      "code": "j4",
+      "designation": "Revêtement d'étanchéité",
+      "unite": "M2",
+      "rendementJournalier": null,
+      "qExecutee": "1M2/jour",
+      "totalClasseur": 131.23333333333335,
+      "composants": [
+        {
+          "code": "BIT",
+          "designation": "bitume",
+          "unite": "M2",
+          "rendement": 1.1,
+          "prixUnitaire": 74.0,
+          "total": 81.4,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "POLY",
+          "designation": "polykote de 20 kg",
+          "unite": "M2",
+          "rendement": 0.016667,
+          "prixUnitaire": 170.0,
+          "total": 2.8333,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "M2",
+          "rendement": 1.0,
+          "prixUnitaire": 47.0,
+          "total": 47.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "DIVERS  ET  ÉTANCHÉITÉ",
+      "code": "j5",
+      "designation": "Reliefs d'étanchéité",
+      "unite": "ML",
+      "rendementJournalier": null,
+      "qExecutee": "2ML/jour",
+      "totalClasseur": 67.03333333333333,
+      "composants": [
+        {
+          "code": "BIT",
+          "designation": "bitume",
+          "unite": "M2",
+          "rendement": 0.55,
+          "prixUnitaire": 74.0,
+          "total": 40.7,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "POLY",
+          "designation": "polykote de 20 kg",
+          "unite": "M2",
+          "rendement": 0.016667,
+          "prixUnitaire": 170.0,
+          "total": 2.8333,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "M2",
+          "rendement": 0.5,
+          "prixUnitaire": 47.0,
+          "total": 23.5,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "DIVERS  ET  ÉTANCHÉITÉ",
+      "code": "j6a",
+      "designation": "Protection lourde Horizontale",
+      "unite": "M2",
+      "rendementJournalier": null,
+      "qExecutee": "1M2/jour",
+      "totalClasseur": 62.2,
+      "composants": [
+        {
+          "code": "FOR",
+          "designation": "Forme",
+          "unite": "M3",
+          "rendement": 0.055,
+          "prixUnitaire": 620.0,
+          "total": 34.1,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "SAB",
+          "designation": "lit de sable de 3cm",
+          "unite": "M3",
+          "rendement": 0.033,
+          "prixUnitaire": 300.0,
+          "total": 9.9,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "JB",
+          "designation": "joint en bétume",
+          "unite": "M2",
+          "rendement": 0.1,
+          "prixUnitaire": 32.0,
+          "total": 3.2,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "M2",
+          "rendement": 1.0,
+          "prixUnitaire": 15.0,
+          "total": 15.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "DIVERS  ET  ÉTANCHÉITÉ",
+      "code": "j6b",
+      "designation": "Protection lourde Reliefs",
+      "unite": "ML",
+      "rendementJournalier": null,
+      "qExecutee": "200ML/jour",
+      "totalClasseur": 37.45,
+      "composants": [
+        {
+          "code": "MOR",
+          "designation": "mortier",
+          "unite": "M2",
+          "rendement": 0.05,
+          "prixUnitaire": 720.0,
+          "total": 36.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "M2",
+          "rendement": 0.005,
+          "prixUnitaire": 290.0,
+          "total": 1.45,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "DIVERS  ET  ÉTANCHÉITÉ",
+      "code": "j7",
+      "designation": "Pose de gargouille",
+      "unite": "U",
+      "rendementJournalier": null,
+      "qExecutee": "1U/jour",
+      "totalClasseur": 150.0,
+      "composants": [
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "M2",
+          "rendement": 1.0,
+          "prixUnitaire": 150.0,
+          "total": 150.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "DIVERS  ET  ÉTANCHÉITÉ",
+      "code": "j8",
+      "designation": "Crapaudines",
+      "unite": "U",
+      "rendementJournalier": null,
+      "qExecutee": "1U/jour",
+      "totalClasseur": 20.0,
+      "composants": [
+        {
+          "code": "CRAP",
+          "designation": "Crapaudines",
+          "unite": "U",
+          "rendement": 1.0,
+          "prixUnitaire": 20.0,
+          "total": 20.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "DIVERS  ET  ÉTANCHÉITÉ",
+      "code": "j9",
+      "designation": "Étanchéité légère",
+      "unite": "M2",
+      "rendementJournalier": null,
+      "qExecutee": "1M2/jour",
+      "totalClasseur": 40.1,
+      "composants": [
+        {
+          "code": "BIT",
+          "designation": "bitume",
+          "unite": "M2",
+          "rendement": 1.1,
+          "prixUnitaire": 21.0,
+          "total": 23.1,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "M2",
+          "rendement": 1.0,
+          "prixUnitaire": 17.0,
+          "total": 17.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "DIVERS  ET  ÉTANCHÉITÉ",
+      "code": "j10",
+      "designation": "Skydôme de désenfumage 1,20 x 1,20",
+      "unite": "U",
+      "rendementJournalier": null,
+      "qExecutee": "1U/jour",
+      "totalClasseur": 11300.0,
+      "composants": [
+        {
+          "code": "SKY",
+          "designation": "Skydôme",
+          "unite": "U",
+          "rendement": 1.0,
+          "prixUnitaire": 11300.0,
+          "total": 11300.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "DIVERS  ET  ÉTANCHÉITÉ",
+      "code": "j11",
+      "designation": "Étanchéité jardinière",
+      "unite": "M2",
+      "rendementJournalier": null,
+      "qExecutee": "1M2/jour",
+      "totalClasseur": 40.1,
+      "composants": [
+        {
+          "code": "BIT",
+          "designation": "bitume",
+          "unite": "M2",
+          "rendement": 1.1,
+          "prixUnitaire": 21.0,
+          "total": 23.1,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "M2",
+          "rendement": 1.0,
+          "prixUnitaire": 17.0,
+          "total": 17.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "M A R B R E S  \"GRANIT\"",
+      "code": "i1",
+      "designation": "Sol, seuils et soubassement en granit noir absolu",
+      "unite": "M2",
+      "rendementJournalier": null,
+      "qExecutee": "1M2/jour",
+      "totalClasseur": 1273.24,
+      "composants": [
+        {
+          "code": "AG20",
+          "designation": "granit",
+          "unite": "M2",
+          "rendement": 1.0,
+          "prixUnitaire": 1100.0,
+          "total": 1100.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "FOR",
+          "designation": "Forme (1m3 sable + 2m3 sable concassé +21 sacs ciment )",
+          "unite": "M3",
+          "rendement": 0.077,
+          "prixUnitaire": 620.0,
+          "total": 47.74,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "COL",
+          "designation": "Colle",
+          "unite": "F",
+          "rendement": 1.1,
+          "prixUnitaire": 5.0,
+          "total": 5.5,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "M2",
+          "rendement": 1.0,
+          "prixUnitaire": 120.0,
+          "total": 120.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "M A R B R E S  \"GRANIT\"",
+      "code": "i2",
+      "designation": "Marches et contre-marches en granit noir absolu",
+      "unite": "ML",
+      "rendementJournalier": null,
+      "qExecutee": "1ML/jour",
+      "totalClasseur": 767.9378,
+      "composants": [
+        {
+          "code": "AG20",
+          "designation": "granit",
+          "unite": "M2",
+          "rendement": 0.62,
+          "prixUnitaire": 1000.0,
+          "total": 620.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "FOR",
+          "designation": "Forme (1m3 sable + 10sac ciment)",
+          "unite": "M3",
+          "rendement": 0.03619,
+          "prixUnitaire": 620.0,
+          "total": 22.4378,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "COL",
+          "designation": "Colle",
+          "unite": "F",
+          "rendement": 1.1,
+          "prixUnitaire": 5.0,
+          "total": 5.5,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "ML",
+          "rendement": 1.0,
+          "prixUnitaire": 120.0,
+          "total": 120.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "M A R B R E S  \"GRANIT\"",
+      "code": "i3",
+      "designation": "Revêtements paillasses en granit noir absolu",
+      "unite": "M2",
+      "rendementJournalier": null,
+      "qExecutee": "1M2/jour",
+      "totalClasseur": 1322.78,
+      "composants": [
+        {
+          "code": "AG20",
+          "designation": "granit",
+          "unite": "M2",
+          "rendement": 1.0,
+          "prixUnitaire": 1170.0,
+          "total": 1170.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "FOR",
+          "designation": "Forme (1m3 sable + 10sac ciment)",
+          "unite": "M3",
+          "rendement": 0.044,
+          "prixUnitaire": 620.0,
+          "total": 27.28,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "COL",
+          "designation": "Colle",
+          "unite": "M2",
+          "rendement": 1.1,
+          "prixUnitaire": 5.0,
+          "total": 5.5,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "M2",
+          "rendement": 1.0,
+          "prixUnitaire": 120.0,
+          "total": 120.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "M A R B R E S  \"GRANIT\"",
+      "code": "i4",
+      "designation": "Plinthe en Granit de 0,07",
+      "unite": "ML",
+      "rendementJournalier": null,
+      "qExecutee": "1ML/jour",
+      "totalClasseur": 111.80000000000001,
+      "composants": [
+        {
+          "code": "AG20",
+          "designation": "granit",
+          "unite": "M2",
+          "rendement": 0.07,
+          "prixUnitaire": 1350.0,
+          "total": 94.5,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "CIM",
+          "designation": "produit de pose (sintofer)",
+          "unite": "SAC",
+          "rendement": 0.055,
+          "prixUnitaire": 60.0,
+          "total": 3.3,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "ML",
+          "rendement": 1.0,
+          "prixUnitaire": 14.0,
+          "total": 14.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "CARRELAGE SOLS ET MURS",
+      "code": "h1",
+      "designation": "Sols en carreaux INFINITY GRAFITE GREY 60 x 60",
+      "unite": "M2",
+      "rendementJournalier": null,
+      "qExecutee": "1M2/jour",
+      "totalClasseur": 235.04000000000002,
+      "composants": [
+        {
+          "code": "CAR-INF-GRE-60x60",
+          "designation": "carreaux INFINITY GRAFITE GREY 60 x 60",
+          "unite": "M2",
+          "rendement": 1.1,
+          "prixUnitaire": 138.0,
+          "total": 151.8,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "FOR",
+          "designation": "Forme",
+          "unite": "M3",
+          "rendement": 0.077,
+          "prixUnitaire": 620.0,
+          "total": 47.74,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "COL",
+          "designation": "colle",
+          "unite": "Sac",
+          "rendement": 1.1,
+          "prixUnitaire": 5.0,
+          "total": 5.5,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "M2",
+          "rendement": 1.0,
+          "prixUnitaire": 30.0,
+          "total": 30.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "CARRELAGE SOLS ET MURS",
+      "code": "h2",
+      "designation": "Plinthes en carreaux INFINITY GRAFITE GREY",
+      "unite": "ML",
+      "rendementJournalier": null,
+      "qExecutee": "1M2/jour",
+      "totalClasseur": 28.612000000000002,
+      "composants": [
+        {
+          "code": "CAR-INF",
+          "designation": "carreaux INFINITY GRAFITE GREY",
+          "unite": "ML",
+          "rendement": 0.11,
+          "prixUnitaire": 138.0,
+          "total": 15.18,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "FOR",
+          "designation": "forme",
+          "unite": "M3",
+          "rendement": 0.0022,
+          "prixUnitaire": 1560.0,
+          "total": 3.432,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "ML",
+          "rendement": 1.0,
+          "prixUnitaire": 10.0,
+          "total": 10.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "CARRELAGE SOLS ET MURS",
+      "code": "h3",
+      "designation": "Murs en carrelage faïence BRANCO BRILHANTE 20 x 20",
+      "unite": "M2",
+      "rendementJournalier": null,
+      "qExecutee": "1M2/jour",
+      "totalClasseur": 161.34,
+      "composants": [
+        {
+          "code": "CAR-FA-BRA-BRI-20x20",
+          "designation": "carrelage faïence BRANCO BRILHANTE 20 x 20",
+          "unite": "M2",
+          "rendement": 1.1,
+          "prixUnitaire": 105.0,
+          "total": 115.5,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOR",
+          "designation": "Mortier",
+          "unite": "M3",
+          "rendement": 0.022,
+          "prixUnitaire": 720.0,
+          "total": 15.84,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "M2",
+          "rendement": 1.0,
+          "prixUnitaire": 30.0,
+          "total": 30.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "CARRELAGE SOLS ET MURS",
+      "code": "h4",
+      "designation": "Murs en carrelage faïence GRAFITE GREY 25 x 40",
+      "unite": "M2",
+      "rendementJournalier": null,
+      "qExecutee": "1M2/jour",
+      "totalClasseur": 161.34,
+      "composants": [
+        {
+          "code": "CAR-FA-GRA-GRE-25x40",
+          "designation": "carrelage faïence GRAFITE GREY 25 x 40",
+          "unite": "M2",
+          "rendement": 1.1,
+          "prixUnitaire": 105.0,
+          "total": 115.5,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOR",
+          "designation": "Mortier",
+          "unite": "M3",
+          "rendement": 0.022,
+          "prixUnitaire": 720.0,
+          "total": 15.84,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "M2",
+          "rendement": 1.0,
+          "prixUnitaire": 30.0,
+          "total": 30.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "CARRELAGE SOLS ET MURS",
+      "code": "h5",
+      "designation": "Sol grés cérame anti-dérapant CINZA 20 x 20",
+      "unite": "M2",
+      "rendementJournalier": null,
+      "qExecutee": "1M2/jour",
+      "totalClasseur": 204.24,
+      "composants": [
+        {
+          "code": "CER-ANT-DERAP-CINZA-20x20",
+          "designation": "cérame anti-dérapant CINZA 20 x 20",
+          "unite": "M2",
+          "rendement": 1.1,
+          "prixUnitaire": 110.0,
+          "total": 121.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "FOR",
+          "designation": "Forme",
+          "unite": "M3",
+          "rendement": 0.077,
+          "prixUnitaire": 620.0,
+          "total": 47.74,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "COL",
+          "designation": "colle",
+          "unite": "Sac",
+          "rendement": 1.1,
+          "prixUnitaire": 5.0,
+          "total": 5.5,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "M2",
+          "rendement": 1.0,
+          "prixUnitaire": 30.0,
+          "total": 30.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "Beton sur chantier",
+      "code": "a",
+      "designation": "Béton dosé 350",
+      "unite": "M3",
+      "rendementJournalier": null,
+      "qExecutee": "1M3/jour",
+      "totalClasseur": 596.0,
+      "composants": [
+        {
+          "code": "CI-25",
+          "designation": "Ciment",
+          "unite": "Kg",
+          "rendement": 350.0,
+          "prixUnitaire": 1.2,
+          "total": 420.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "GRA-1",
+          "designation": "Gravette",
+          "unite": "T",
+          "rendement": 0.8,
+          "prixUnitaire": 120.0,
+          "total": 96.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "SA-A",
+          "designation": "Sable",
+          "unite": "T",
+          "rendement": 0.4,
+          "prixUnitaire": 200.0,
+          "total": 80.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "Beton sur chantier",
+      "code": "b",
+      "designation": "Production",
+      "unite": "M3",
+      "rendementJournalier": 30.0,
+      "qExecutee": "1M3/jour",
+      "totalClasseur": 75.0,
+      "composants": [
+        {
+          "code": "BET-1",
+          "designation": "Bétonniere",
+          "unite": "J",
+          "rendement": 1.0,
+          "prixUnitaire": 400.0,
+          "total": 13.3333,
+          "baseRendement": "PAR_JOUR"
+        },
+        {
+          "code": "EAU-ELEC",
+          "designation": "eau+electricité",
+          "unite": "F",
+          "rendement": 1.0,
+          "prixUnitaire": 100.0,
+          "total": 3.3333,
+          "baseRendement": "PAR_JOUR"
+        },
+        {
+          "code": "TRA",
+          "designation": "Tracteur+chauffeur",
+          "unite": "J",
+          "rendement": 1.0,
+          "prixUnitaire": 1000.0,
+          "total": 33.3333,
+          "baseRendement": "PAR_JOUR"
+        },
+        {
+          "code": "MOD",
+          "designation": "Main d'Œuvre",
+          "unite": "J",
+          "rendement": 5.0,
+          "prixUnitaire": 150.0,
+          "total": 25.0,
+          "baseRendement": "PAR_JOUR"
+        }
+      ]
+    },
+    {
+      "famille": "Beton sur chantier",
+      "code": "c",
+      "designation": "coffrage",
+      "unite": "M3",
+      "rendementJournalier": null,
+      "qExecutee": "1M3/jour",
+      "totalClasseur": 245.0,
+      "composants": [
+        {
+          "code": "MOD2",
+          "designation": "Coffreur",
+          "unite": "J",
+          "rendement": 0.5,
+          "prixUnitaire": 160.0,
+          "total": 80.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MOD1",
+          "designation": "Ouvrier",
+          "unite": "J",
+          "rendement": 0.5,
+          "prixUnitaire": 130.0,
+          "total": 65.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "COFF",
+          "designation": "Coffrage",
+          "unite": "F",
+          "rendement": 2.0,
+          "prixUnitaire": 50.0,
+          "total": 100.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "Beton sur chantier",
+      "code": "A",
+      "designation": "Béton en fondation",
+      "unite": "M3",
+      "rendementJournalier": null,
+      "qExecutee": "1M3/jour",
+      "totalClasseur": 966.0,
+      "composants": [
+        {
+          "code": "B25C",
+          "designation": "Béton dosé 350",
+          "unite": "M3",
+          "rendement": 1.0,
+          "prixUnitaire": 596.0,
+          "total": 596.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "PROD",
+          "designation": "Production",
+          "unite": "M3",
+          "rendement": 1.0,
+          "prixUnitaire": 75.0,
+          "total": 75.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "COFF",
+          "designation": "Coffrage",
+          "unite": "M3",
+          "rendement": 1.0,
+          "prixUnitaire": 245.0,
+          "total": 245.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "ALEAS",
+          "designation": "Aléas",
+          "unite": "F",
+          "rendement": 1.0,
+          "prixUnitaire": 50.0,
+          "total": 50.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    },
+    {
+      "famille": "Beton sur chantier",
+      "code": "B",
+      "designation": "Béton en élevation",
+      "unite": "M3",
+      "rendementJournalier": null,
+      "qExecutee": "1M3/jour",
+      "totalClasseur": 1066.0,
+      "composants": [
+        {
+          "code": "B25C",
+          "designation": "Béton dosé 350",
+          "unite": "M3",
+          "rendement": 1.0,
+          "prixUnitaire": 596.0,
+          "total": 596.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "PROD",
+          "designation": "Production",
+          "unite": "M3",
+          "rendement": 1.0,
+          "prixUnitaire": 75.0,
+          "total": 75.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "MANU",
+          "designation": "Manutension",
+          "unite": "M3",
+          "rendement": 1.0,
+          "prixUnitaire": 100.0,
+          "total": 100.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "COFF",
+          "designation": "Coffrage",
+          "unite": "M3",
+          "rendement": 1.0,
+          "prixUnitaire": 245.0,
+          "total": 245.0,
+          "baseRendement": "PAR_UNITE"
+        },
+        {
+          "code": "ALEAS",
+          "designation": "Aléas",
+          "unite": "F",
+          "rendement": 1.0,
+          "prixUnitaire": 50.0,
+          "total": 50.0,
+          "baseRendement": "PAR_UNITE"
+        }
+      ]
+    }
+  ]
+}

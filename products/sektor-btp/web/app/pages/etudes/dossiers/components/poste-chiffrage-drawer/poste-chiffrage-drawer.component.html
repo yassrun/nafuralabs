@@ -25,24 +25,33 @@
     </nf-button>
   </header>
 
-  <div class="poste-drawer__mode" role="group" aria-label="Mode de chiffrage">
+  <div class="poste-drawer__mode" role="group" aria-label="Origine du coût">
     <button
       type="button"
       class="poste-drawer__toggle"
-      [class.poste-drawer__toggle--active]="modeUi() === 'DECOMPOSE'"
+      [class.poste-drawer__toggle--active]="origine() === 'DECOMPOSE'"
       [disabled]="!data.modifiable || closing()"
-      (click)="setMode('DECOMPOSE')"
+      (click)="setOrigine('DECOMPOSE')"
     >
-      Décomposé
+      Je décompose
     </button>
     <button
       type="button"
       class="poste-drawer__toggle"
-      [class.poste-drawer__toggle--active]="modeUi() === 'FOURNI'"
+      [class.poste-drawer__toggle--active]="origine() === 'FORFAIT'"
       [disabled]="!data.modifiable || closing()"
-      (click)="setMode('FOURNI')"
+      (click)="setOrigine('FORFAIT')"
     >
-      Prix fourni
+      Forfait
+    </button>
+    <button
+      type="button"
+      class="poste-drawer__toggle"
+      [class.poste-drawer__toggle--active]="origine() === 'ESTIME'"
+      [disabled]="!data.modifiable || closing()"
+      (click)="setOrigine('ESTIME')"
+    >
+      J’estime
     </button>
   </div>
 
@@ -57,8 +66,20 @@
       [tvaDefaut]="data.tvaDefaut"
       [embedded]="true"
       (dirtyChange)="onDirty($event)"
-      (modeUiChange)="onModeUi($event)"
+      (origineChange)="onOrigine($event)"
     />
+
+    @if (posteDraft().id && data.dossierId) {
+      <section class="poste-drawer__avis">
+        <app-poste-avis-panel
+          [dossierId]="data.dossierId"
+          [noeudId]="posteDraft().id!"
+          [modifiable]="data.modifiable"
+          [peutPoser]="true"
+          [peutTraiter]="data.modifiable"
+        />
+      </section>
+    }
 
     <section class="poste-drawer__comments" aria-label="Commentaires d'équipe">
       <nf-comment-thread-panel

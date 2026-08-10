@@ -65,6 +65,8 @@ class DpuServiceForNoeudTest {
                 parametres,
                 mock(ma.nafura.etudes.repository.DossierEtudeRepository.class),
                 mock(DossierIntervenantService.class),
+                mock(GelPrixComposantService.class),
+                new OuvrageCompositeService(mock(OuvrageRepository.class), new DpuCalculator()),
                 new ObjectMapper());
     }
 

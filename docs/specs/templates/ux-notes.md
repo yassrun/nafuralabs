@@ -1,10 +1,17 @@
-# UX WIP (epic)
+# UX — epic `<feature-slug>`
 
-Notes et décisions UX **en cours** pour cet epic.
+**Source unique des canvas** : ce dossier (`*.canvas.tsx`).
 
-- Canvas live Cursor : `~/.cursor/projects/<workspace>/canvases/…`
-- Une fois **validé** : sync vers `products/<app>/docs/ux/wireframes/<slug>-….canvas.tsx`
-- Ne pas versionner ici les `*.canvas.data.json`
+Preview Cursor : copier vers `~/.cursor/projects/<workspace>/canvases/` (même nom).  
+Après itération : recopier ici avant commit.
+
+Ne pas versionner les `*.canvas.data.json`.
+
+## Canvas
+
+| Fichier | Statut | Notes |
+|---------|--------|-------|
+| … | draft \| validated | … |
 
 ## Décisions UX
 

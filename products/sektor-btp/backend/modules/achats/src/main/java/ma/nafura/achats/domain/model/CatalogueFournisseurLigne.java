@@ -25,11 +25,11 @@ public class CatalogueFournisseurLigne {
     @Column(name = "tenant_id", nullable = false)
     private UUID tenantId;
 
-    @Column(name = "fournisseur_id", nullable = false, length = 100)
-    private String fournisseurId;
+    @Column(name = "fournisseur_id", nullable = false)
+    private UUID fournisseurId;
 
-    @Column(name = "article_id", nullable = false, length = 100)
-    private String articleId;
+    @Column(name = "article_id", nullable = false)
+    private UUID articleId;
 
     @Column(name = "ref_fournisseur", length = 100)
     private String refFournisseur;
@@ -37,11 +37,31 @@ public class CatalogueFournisseurLigne {
     @Column(name = "designation", nullable = false)
     private String designation;
 
+    /** Prix commercial HT tel que facturé (ex. 450 DH le pot). */
     @Column(name = "prix_unitaire_ht", nullable = false, precision = 18, scale = 4)
     private BigDecimal prixUnitaireHt;
 
-    @Column(name = "uom", length = 30)
-    private String uom;
+    @Column(name = "uom_id")
+    private UUID uomId;
+
+    /** Quantité dans le conditionnement commercial (ex. 15). */
+    @Column(name = "conditionnement_quantite", precision = 18, scale = 4)
+    private BigDecimal conditionnementQuantite;
+
+    /** Unité du conditionnement (ex. L). */
+    @Column(name = "conditionnement_uom_id")
+    private UUID conditionnementUomId;
+
+    /**
+     * Prix comparable recalculé, jamais saisi.
+     * Ex. : 450 / 15 L = 30 DH/L.
+     */
+    @Column(name = "prix_normalise", precision = 18, scale = 8)
+    private BigDecimal prixNormalise;
+
+    /** Unité de base de la catégorie du conditionnement. */
+    @Column(name = "uom_normalise_id")
+    private UUID uomNormaliseId;
 
     @Column(name = "actif", nullable = false)
     private Boolean actif;

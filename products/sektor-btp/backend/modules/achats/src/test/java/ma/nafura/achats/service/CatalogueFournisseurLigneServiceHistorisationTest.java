@@ -13,6 +13,7 @@ import ma.nafura.achats.domain.model.CatalogueFournisseurLigne;
 import ma.nafura.achats.repository.CatalogueFournisseurLigneRepository;
 import ma.nafura.currency.domain.model.Currency;
 import ma.nafura.currency.service.CurrencyConversionService;
+import ma.nafura.item.repository.UnitOfMeasureRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,18 +32,28 @@ class CatalogueFournisseurLigneServiceHistorisationTest {
     @Mock
     private CurrencyConversionService currencyConversionService;
 
+    @Mock
+    private PrixNormaliseCatalogueService prixNormaliseCatalogueService;
+
+    @Mock
+    private UnitOfMeasureRepository uomRepository;
+
     private CatalogueFournisseurLigneService service;
     private UUID tenantId;
     private UUID currencyId;
+    private UUID fournisseurId;
+    private UUID articleId;
 
     @BeforeEach
     void setUp() {
-        service = new CatalogueFournisseurLigneService(repository, currencyConversionService);
+        service = new CatalogueFournisseurLigneService(
+                repository, currencyConversionService, prixNormaliseCatalogueService, uomRepository);
         tenantId = UUID.randomUUID();
         currencyId = UUID.randomUUID();
+        fournisseurId = UUID.randomUUID();
+        articleId = UUID.randomUUID();
         TenantContext.setTenantId(tenantId);
         TenantContext.setTenantEnabled(true);
-        // lenient() : la devise pivot n'est résolue que lorsque l'appelant n'en fournit pas.
         lenient().when(currencyConversionService.findReferenceCurrency(tenantId))
                 .thenReturn(Optional.of(Currency.builder().id(currencyId).code("MAD").build()));
         when(repository.save(any())).thenAnswer(inv -> {
@@ -64,8 +75,8 @@ class CatalogueFournisseurLigneServiceHistorisationTest {
         CatalogueFournisseurLigne previous = CatalogueFournisseurLigne.builder()
                 .id(UUID.randomUUID())
                 .tenantId(tenantId)
-                .fournisseurId("F1")
-                .articleId("A1")
+                .fournisseurId(fournisseurId)
+                .articleId(articleId)
                 .designation("Ciment")
                 .prixUnitaireHt(new BigDecimal("100"))
                 .validFrom(LocalDate.of(2026, 1, 1))
@@ -73,18 +84,20 @@ class CatalogueFournisseurLigneServiceHistorisationTest {
                 .actif(true)
                 .build();
         when(repository.findByTenantIdAndFournisseurIdAndArticleIdAndActifTrueAndValidToIsNull(
-                        tenantId, "F1", "A1"))
+                        tenantId, fournisseurId, articleId))
                 .thenReturn(Optional.of(previous));
 
         LocalDate from = LocalDate.of(2026, 6, 12);
         service.upsertHistorise(
                 tenantId,
-                "F1",
-                "A1",
+                fournisseurId,
+                articleId,
                 "Ciment",
                 new BigDecimal("120"),
                 null,
-                "T",
+                null,
+                null,
+                null,
                 currencyId,
                 from,
                 BigDecimal.ZERO,
@@ -104,5 +117,6 @@ class CatalogueFournisseurLigneServiceHistorisationTest {
                 .orElseThrow();
         assertEquals(CatalogueSource.OFFRE_RETENUE, created.getSource());
         assertEquals(from, created.getValidFrom());
+        verify(prixNormaliseCatalogueService).apply(created);
     }
 }

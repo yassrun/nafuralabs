@@ -31,9 +31,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class OuvrageController {
 
     private final OuvrageService service;
+    private final ma.nafura.etudes.service.CorpusOuvrageSeedService corpusSeedService;
 
-    public OuvrageController(OuvrageService service) {
+    public OuvrageController(
+            OuvrageService service, ma.nafura.etudes.service.CorpusOuvrageSeedService corpusSeedService) {
         this.service = service;
+        this.corpusSeedService = corpusSeedService;
     }
 
     @GetMapping
@@ -106,6 +109,14 @@ public class OuvrageController {
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    /** L12 — charge le corpus 84 ouvrages (tenant demo / lab), idempotent. */
+    @PostMapping("/seed-corpus")
+    @RequirePermission("etudes.create")
+    public ResponseEntity<Map<String, Object>> seedCorpus() {
+        int created = corpusSeedService.seedCorpusIfAbsent();
+        return ResponseEntity.ok(Map.of("created", created));
     }
 
     @PostMapping("/import-proposal")

@@ -80,6 +80,11 @@ export const ERP_ROUTES: Routes = [
   ...HSE_ROUTES,
   ...ANALYTICS_ROUTES,
   {
+    path: 'catalogue',
+    loadChildren: () =>
+      import('../pages/catalogue/catalogue.routes').then((m) => m.CATALOGUE_ROUTES),
+  },
+  {
     path: 'dashboard',
     loadComponent: () =>
       import('../pages/dashboard/dashboard.page').then((m) => m.DashboardPage),

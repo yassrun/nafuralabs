@@ -9,11 +9,9 @@ import lombok.Data;
 @Data
 public class CatalogueFournisseurLigneUpdateDto {
 
-    @Size(max = 100)
-    private String fournisseurId;
+    private UUID fournisseurId;
 
-    @Size(max = 100)
-    private String articleId;
+    private UUID articleId;
 
     @Size(max = 100)
     private String refFournisseur;
@@ -23,8 +21,11 @@ public class CatalogueFournisseurLigneUpdateDto {
 
     private BigDecimal prixUnitaireHt;
 
-    @Size(max = 30)
-    private String uom;
+    private UUID uomId;
+
+    private BigDecimal conditionnementQuantite;
+
+    private UUID conditionnementUomId;
 
     private Boolean actif;
 

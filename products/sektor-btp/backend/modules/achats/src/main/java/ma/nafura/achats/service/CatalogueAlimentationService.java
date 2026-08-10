@@ -59,9 +59,18 @@ public class CatalogueAlimentationService {
         UUID currencyId = pivotCurrencyId(tenantId);
         LocalDate validFrom =
                 offre.getDateReponse() != null ? offre.getDateReponse() : LocalDate.now();
+        UUID fournisseurId = parseUuidOrNull(offre.getFournisseurId());
+        if (fournisseurId == null) {
+            log.warn("achats.catalogue.alimentation.offre_fournisseur_invalide offreId={}", offre.getId());
+            return;
+        }
         for (OffreFournisseurLigne ligne : offre.getLignes()) {
             AppelOffreLigne aoLigne = ligne.getAppelOffreLigne();
             if (aoLigne == null || !StringUtils.hasText(aoLigne.getArticleId())) {
+                continue;
+            }
+            UUID articleId = parseUuidOrNull(aoLigne.getArticleId());
+            if (articleId == null) {
                 continue;
             }
             String designation = StringUtils.hasText(aoLigne.getArticleName())
@@ -69,12 +78,14 @@ public class CatalogueAlimentationService {
                     : aoLigne.getArticleId();
             catalogueService.upsertHistorise(
                     tenantId,
-                    offre.getFournisseurId(),
-                    aoLigne.getArticleId().trim(),
+                    fournisseurId,
+                    articleId,
                     designation,
                     ligne.getPrixUnitaireHt(),
                     null,
-                    aoLigne.getUomCode(),
+                    catalogueService.resolveUomIdByCode(tenantId, aoLigne.getUomCode()),
+                    null,
+                    null,
                     currencyId,
                     validFrom,
                     BigDecimal.ZERO,
@@ -98,6 +109,11 @@ public class CatalogueAlimentationService {
         UUID currencyId = pivotCurrencyId(tenantId);
         LocalDate validFrom =
                 facture.getDateFacture() != null ? facture.getDateFacture() : LocalDate.now();
+        UUID fournisseurId = parseUuidOrNull(facture.getFournisseurId());
+        if (fournisseurId == null) {
+            log.warn("achats.catalogue.alimentation.facture_fournisseur_invalide factureId={}", facture.getId());
+            return;
+        }
 
         BonCommandeAchat bc = null;
         if (facture.getBcId() != null) {
@@ -112,22 +128,23 @@ public class CatalogueAlimentationService {
             if (ligne.getPrixUnitaireHt() == null) {
                 continue;
             }
-            String articleId = null;
+            String articleIdRaw = null;
             String designation = ligne.getDesignation();
-            String uom = null;
+            String uomCode = null;
             if (ligne.getBcLigneId() != null && bc != null && bc.getLignes() != null) {
                 for (BonCommandeAchatLigne bcLigne : bc.getLignes()) {
                     if (ligne.getBcLigneId().equals(bcLigne.getId())) {
-                        articleId = bcLigne.getArticleId();
+                        articleIdRaw = bcLigne.getArticleId();
                         if (StringUtils.hasText(bcLigne.getArticleName())) {
                             designation = bcLigne.getArticleName();
                         }
-                        uom = bcLigne.getUomCode();
+                        uomCode = bcLigne.getUomCode();
                         break;
                     }
                 }
             }
-            if (!StringUtils.hasText(articleId)) {
+            UUID articleId = parseUuidOrNull(articleIdRaw);
+            if (articleId == null) {
                 log.debug(
                         "achats.catalogue.alimentation.facture_ligne_sans_article factureId={} ligneId={}",
                         facture.getId(),
@@ -136,12 +153,14 @@ public class CatalogueAlimentationService {
             }
             catalogueService.upsertHistorise(
                     tenantId,
-                    facture.getFournisseurId(),
-                    articleId.trim(),
-                    designation != null ? designation : articleId,
+                    fournisseurId,
+                    articleId,
+                    designation != null ? designation : articleId.toString(),
                     ligne.getPrixUnitaireHt(),
                     null,
-                    uom,
+                    catalogueService.resolveUomIdByCode(tenantId, uomCode),
+                    null,
+                    null,
                     currencyId,
                     validFrom,
                     BigDecimal.ZERO,
@@ -188,5 +207,16 @@ public class CatalogueAlimentationService {
                 .findReferenceCurrency(tenantId)
                 .map(Currency::getId)
                 .orElse(null);
+    }
+
+    private static UUID parseUuidOrNull(String raw) {
+        if (!StringUtils.hasText(raw)) {
+            return null;
+        }
+        try {
+            return UUID.fromString(raw.trim());
+        } catch (IllegalArgumentException ex) {
+            return null;
+        }
     }
 }

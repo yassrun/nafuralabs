@@ -2,8 +2,8 @@
   <section class="poste poste--empty" aria-label="Aucun poste sélectionné">
     <h3>Sélectionnez un poste</h3>
     <p>
-      Choisissez un article dans le bordereau pour saisir un prix fourni ou sa décomposition. Les
-      lots et sous-lots ne sont pas directement chiffrables.
+      Choisissez un article dans le bordereau pour établir son coût (décomposition, forfait ou
+      estimation). Les lots et sous-lots ne sont pas directement chiffrables.
     </p>
   </section>
 } @else {
@@ -17,8 +17,10 @@
         <div class="poste__identite">
           <div class="poste__badges">
             <p class="poste__code">{{ poste()!.code }}</p>
-            @if (estFourni()) {
-              <span class="mode-badge">Prix fourni</span>
+            @if (estEstime()) {
+              <span class="mode-badge">Estimé</span>
+            } @else if (estForfait()) {
+              <span class="mode-badge">Forfait</span>
             } @else {
               <span class="mode-badge mode-badge--decompo">
                 {{ hasComposants() ? 'Décomposé' : 'Décomposition' }}
@@ -100,14 +102,34 @@
       <div class="poste__section">
         <div class="poste__section-head">
           <h4>
-            @if (estFourni()) {
-              Prix fourni
+            @if (estEstime()) {
+              Estimation
+            } @else if (estForfait()) {
+              Forfait sous-traitance
             } @else {
               Décomposition et consultations
             }
           </h4>
           @if (modifiable() && estDecompose()) {
             <div class="poste__section-actions">
+              @if (peutRafraichirPrix()) {
+                <nf-button
+                  variant="ghost"
+                  size="sm"
+                  icon="refresh"
+                  [loading]="rafraichissementPrix()"
+                  [disabled]="
+                    chargement() ||
+                    sauvegarde() ||
+                    rafraichissementPrix() ||
+                    modificationsEnAttente()
+                  "
+                  tooltip="Recalcule les prix gelés depuis le catalogue (étude non validée)"
+                  (clicked)="rafraichirPrix()"
+                >
+                  Rafraîchir les prix
+                </nf-button>
+              }
               <nf-button variant="primary" size="sm" (clicked)="ajouterSousDetail()">
                 Ajouter un composant
               </nf-button>
@@ -115,11 +137,96 @@
           }
         </div>
 
-        @if (estFourni()) {
+        @if (estEstime()) {
+          <div class="poste__fourni">
+            <div class="poste__saisie-toggle" role="group" aria-label="Je saisis">
+              <span class="poste__saisie-label">Je saisis :</span>
+              <button
+                type="button"
+                class="poste-drawer__toggle"
+                [class.poste-drawer__toggle--active]="estimationSaisieEn() === 'COUT'"
+                [disabled]="!modifiable()"
+                (click)="setEstimationSaisieEn('COUT')"
+              >
+                un coût
+              </button>
+              <button
+                type="button"
+                class="poste-drawer__toggle"
+                [class.poste-drawer__toggle--active]="estimationSaisieEn() === 'VENTE'"
+                [disabled]="!modifiable()"
+                (click)="setEstimationSaisieEn('VENTE')"
+              >
+                un prix de vente
+              </button>
+            </div>
+            <div class="poste__fourni-grid">
+              @if (estimationSaisieEn() === 'VENTE') {
+                <label class="poste__field">
+                  <span>Prix de vente HT (MAD)</span>
+                  <input
+                    type="number"
+                    step="any"
+                    min="0"
+                    [disabled]="!modifiable()"
+                    [ngModel]="venteSaisie() ?? ''"
+                    (ngModelChange)="onVenteSaisieChange($event)"
+                  />
+                </label>
+              } @else {
+                <label class="poste__field">
+                  <span>Coût unitaire (MAD)</span>
+                  <input
+                    type="number"
+                    step="any"
+                    min="0"
+                    [disabled]="!modifiable()"
+                    [ngModel]="prixFourni() ?? ''"
+                    (ngModelChange)="onPrixFourniChange($event)"
+                  />
+                </label>
+              }
+              <label class="poste__field">
+                <span>FG %</span>
+                <input
+                  type="number"
+                  step="any"
+                  min="0"
+                  [disabled]="!modifiable()"
+                  [ngModel]="fgPct()"
+                  (ngModelChange)="onFgFourniChange($event)"
+                />
+              </label>
+              <label class="poste__field">
+                <span>Marge %</span>
+                <input
+                  type="number"
+                  step="any"
+                  min="0"
+                  [disabled]="!modifiable()"
+                  [ngModel]="margePct()"
+                  (ngModelChange)="onMargeFourniChange($event)"
+                />
+              </label>
+            </div>
+            @if (coutDeduit()) {
+              <p class="poste__fourni-hint poste__fourni-hint--warn" role="status">
+                Coût déduit {{ coutUnitaireActif() | number: '1.2-2' }} MAD — exclu de la marge
+                synthèse.
+              </p>
+            }
+            @if (hasComposants()) {
+              <p class="poste__fourni-hint">
+                {{ composants().length }} composant{{ composants().length > 1 ? 's' : '' }} en
+                brouillon — basculez sur « Je décompose » pour les réactiver.
+              </p>
+            }
+          </div>
+        } @else if (estForfait()) {
           <div class="poste__fourni">
             <div class="poste__fourni-grid">
               <label class="poste__field">
-                <span>Coût unitaire fourni (MAD)</span>
+                <span>Coût forfait (MAD)</span>
                 <input
                   type="number"
                   step="any"
@@ -151,11 +258,31 @@
                   (ngModelChange)="onMargeFourniChange($event)"
                 />
               </label>
+              <label class="poste__field">
+                <span>Partenaire (UUID)</span>
+                <input
+                  type="text"
+                  [disabled]="!modifiable()"
+                  [ngModel]="forfaitPartnerId() ?? ''"
+                  (ngModelChange)="onForfaitPartnerChange($event)"
+                  placeholder="Optionnel"
+                />
+              </label>
+              <label class="poste__field">
+                <span>Offre (UUID)</span>
+                <input
+                  type="text"
+                  [disabled]="!modifiable()"
+                  [ngModel]="forfaitOffreId() ?? ''"
+                  (ngModelChange)="onForfaitOffreChange($event)"
+                  placeholder="Optionnel"
+                />
+              </label>
             </div>
             @if (hasComposants()) {
               <p class="poste__fourni-hint">
                 {{ composants().length }} composant{{ composants().length > 1 ? 's' : '' }} en
-                brouillon — basculez sur Décomposé pour les réactiver.
+                brouillon — basculez sur « Je décompose » pour les réactiver.
               </p>
             }
           </div>
@@ -210,6 +337,9 @@
                       >
                         {{ sourceLabel(row.sourcePrix) }}
                       </span>
+                      @if (prixSourceDetail(row); as gel) {
+                        <p class="poste__prix-source" [title]="gel">{{ gel }}</p>
+                      }
                     </td>
                     <td class="num">{{ row.quantite | number: '1.2-4' }}</td>
                     <td>{{ row.unite }}</td>
@@ -296,6 +426,9 @@
                   {{ row.quantite | number: '1.2-4' }} {{ row.unite }} ×
                   {{ row.prixUnitaire | number: '1.2-2' }}
                 </p>
+                @if (prixSourceDetail(row); as gel) {
+                  <p class="poste__prix-source" [title]="gel">{{ gel }}</p>
+                }
                 <p class="card__total">{{ row.total | number: '1.2-2' }} MAD</p>
                 @if (modifiable()) {
                   <div class="card__actions">
@@ -353,26 +486,33 @@
 
       <aside class="poste__synthese" aria-label="Synthèse du prix">
         <div class="poste__section-head">
-          <h4>Synthèse du prix</h4>
+          <h4>Plancher du prix</h4>
           @if (modifiable() && estDecompose() && hasComposants()) {
             <nf-button variant="secondary" size="sm" (clicked)="ouvrirChiffrage()">
               Modifier FG / marge
             </nf-button>
           }
         </div>
+        @if (ecartVsEstimation(); as ecart) {
+          <p class="poste__ecart" role="status">
+            Tu visais {{ ecart.repere | number: '1.2-2' }} — ta décomposition donne
+            {{ ecart.decompo | number: '1.2-2' }}
+            ({{ ecart.pct > 0 ? '+' : '' }}{{ ecart.pct | number: '1.1-1' }} %).
+          </p>
+        }
         <dl>
-          @if (estFourni() || (estDecompose() && hasComposants())) {
+          @if (estSaisieSimple() || (estDecompose() && hasComposants())) {
             <div>
-              <dt>{{ estFourni() ? 'Coût fourni' : 'Déboursé sec' }}</dt>
-              <dd>{{ deboursSec() | mad }}</dd>
+              <dt>Coût</dt>
+              <dd>{{ coutUnitaireActif() | mad }}</dd>
             </div>
             <div>
-              <dt>Frais généraux ({{ fgPct() | number: '1.0-2' }} %)</dt>
-              <dd>{{ fgAmount() | mad }}</dd>
+              <dt>+ frais généraux ({{ fgPct() | number: '1.0-2' }} %)</dt>
+              <dd>{{ coutRevient() | mad }}</dd>
             </div>
             <div>
-              <dt>Marge ({{ margePct() | number: '1.0-2' }} %)</dt>
-              <dd>{{ margeAmount() | mad }}</dd>
+              <dt>+ marge ({{ margePct() | number: '1.0-2' }} %)</dt>
+              <dd>{{ prixVenteHt() | mad }}</dd>
             </div>
           }
           <div class="total">

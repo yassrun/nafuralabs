@@ -59,6 +59,13 @@ public class BudgetLigne {
     @Column(nullable = false)
     private int ordre;
 
+    @Column(name = "non_fiable", nullable = false)
+    @Builder.Default
+    private Boolean nonFiable = false;
+
+    @Column(name = "source_origine", length = 30)
+    private String sourceOrigine;
+
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
@@ -83,6 +90,9 @@ public class BudgetLigne {
         }
         if (realiseHt == null) {
             realiseHt = BigDecimal.ZERO;
+        }
+        if (nonFiable == null) {
+            nonFiable = false;
         }
     }
 

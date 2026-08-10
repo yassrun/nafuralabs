@@ -3,6 +3,7 @@ package ma.nafura.etudes.api.request;
 import jakarta.validation.Valid;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 import lombok.Data;
 
 @Data
@@ -12,7 +13,19 @@ public class OuvrageUpdateDto {
 
     private String designation;
 
+    /** @deprecated préférer codeLot / codeFamille */
+    @Deprecated
     private String category;
+
+    private String codeLot;
+
+    private String codeFamille;
+
+    private String origine;
+
+    private UUID sourceEtudeId;
+
+    private String catalogCleStable;
 
     private String unite;
 

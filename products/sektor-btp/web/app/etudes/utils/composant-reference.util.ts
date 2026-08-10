@@ -8,14 +8,21 @@ export function composantLibelle(c: Pick<ComposantDPU, 'libelle' | 'articleOuPos
   return String(c.libelle ?? c.articleOuPosteId ?? '').trim();
 }
 
+/** Affichage source gelée (L5) — sinon libellé composant. */
+export function composantPrixSourceLabel(c: Pick<ComposantDPU, 'prixLibelleSource' | 'sourcePrix'>): string | null {
+  const gel = String(c.prixLibelleSource ?? '').trim();
+  if (gel) return gel;
+  if (c.sourcePrix && c.sourcePrix !== 'MANUEL') return String(c.sourcePrix);
+  return null;
+}
+
 export function estComposantItem(c: Pick<ComposantDPU, 'referenceType' | 'itemId' | 'articleOuPosteId'>): boolean {
   if (c.referenceType === 'ITEM' && c.itemId) return true;
-  // Legacy: UUID dans l'ancien champ
   if (!c.referenceType && c.articleOuPosteId && UUID_RE.test(c.articleOuPosteId)) return true;
   return false;
 }
 
-/** Normalise une ligne API (legacy ou L2) vers le contrat typé. */
+/** Normalise une ligne API (legacy ou L2/L5) vers le contrat typé. */
 export function normalizeComposantDpu(
   c: Partial<ComposantDPU> & { rendement?: number },
   fallbackId?: string,
@@ -57,6 +64,10 @@ export function normalizeComposantDpu(
     total: Number(c.total ?? 0),
     sourcePrix: c.sourcePrix ?? 'MANUEL',
     offreFournisseurId: c.offreFournisseurId ?? null,
+    prixSourceRefId: c.prixSourceRefId ?? null,
+    prixDateSource: c.prixDateSource ?? null,
+    prixCurrencyId: c.prixCurrencyId ?? null,
+    prixLibelleSource: c.prixLibelleSource ?? null,
   };
 }
 
@@ -73,6 +84,10 @@ export function toComposantDpuWrite(c: ComposantDPU): {
   total?: number;
   sourcePrix?: string | null;
   offreFournisseurId?: string | null;
+  prixSourceRefId?: string | null;
+  prixDateSource?: string | null;
+  prixCurrencyId?: string | null;
+  prixLibelleSource?: string | null;
 } {
   const n = normalizeComposantDpu(c);
   return {
@@ -88,5 +103,9 @@ export function toComposantDpuWrite(c: ComposantDPU): {
     total: n.total,
     sourcePrix: n.sourcePrix ?? 'MANUEL',
     offreFournisseurId: n.offreFournisseurId ?? null,
+    prixSourceRefId: n.prixSourceRefId ?? null,
+    prixDateSource: n.prixDateSource ?? null,
+    prixCurrencyId: n.prixCurrencyId ?? null,
+    prixLibelleSource: n.prixLibelleSource ?? null,
   };
 }

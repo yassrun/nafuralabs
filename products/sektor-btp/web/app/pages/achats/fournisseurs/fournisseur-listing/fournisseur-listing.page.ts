@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import {ConfigDrivenListingPage,
@@ -24,7 +25,13 @@ type QuickFilter = 'ALL' | 'ACTIFS' | 'INACTIFS' | 'TOP_NOTES';
   selector: 'app-fournisseur-listing',
   standalone: true,
   imports: [
-    ButtonComponent,CommonModule, TranslateModule, SmartImportTriggerComponent, ...ConfigDrivenListingPageImports],
+    ButtonComponent,
+    CommonModule,
+    RouterLink,
+    TranslateModule,
+    SmartImportTriggerComponent,
+    ...ConfigDrivenListingPageImports,
+  ],
   templateUrl: './fournisseur-listing.page.html',
   styles: [ConfigDrivenListingPageStyles],
 })

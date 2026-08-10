@@ -42,6 +42,19 @@ public final class NatureComposantMapping {
         };
     }
 
+    /** Mappe un type DPU → type composant ouvrage (bibliothèque). */
+    public static String toOuvrageTypeFromDpu(String dpuType) {
+        if (dpuType == null || dpuType.isBlank()) {
+            return OUVRAGE_MATERIAU;
+        }
+        return switch (dpuType.trim().toUpperCase()) {
+            case DPU_MAIN_DOEUVRE -> OUVRAGE_MO;
+            case DPU_MATERIEL -> OUVRAGE_LOCATION;
+            case DPU_SOUS_TRAITANCE -> OUVRAGE_SOUS_TRAITANCE;
+            default -> OUVRAGE_MATERIAU;
+        };
+    }
+
     /** Mappe {@link Nature} (code stocké) → type DPU. */
     public static String toDpuTypeFromNature(String natureCode) {
         Nature nature = Nature.fromLegacy(natureCode);

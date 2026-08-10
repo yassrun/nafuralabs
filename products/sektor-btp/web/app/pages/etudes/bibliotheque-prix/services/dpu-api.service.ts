@@ -24,6 +24,11 @@ export type ComposantDpuWrite = {
   total?: number;
   sourcePrix?: string | null;
   offreFournisseurId?: string | null;
+  prixSourceRefId?: string | null;
+  prixDateSource?: string | null;
+  prixCurrencyId?: string | null;
+  prixLibelleSource?: string | null;
+  resoudrePrix?: boolean;
 };
 
 export type PrixDpuUpdateBody = {
@@ -84,6 +89,13 @@ export class DpuApiService extends FeatureApiService<PrixDPU> {
   async recompute(id: string): Promise<PrixDPU> {
     return firstValueFrom(
       this.http.post<PrixDPU>(this.resolveUrl(`${this.basePath}/${id}/recompute`), {}),
+    );
+  }
+
+  /** L5 — rafraîchit les prix gelés ITEM (étude non validée). */
+  async refreshPrices(id: string): Promise<PrixDPU> {
+    return firstValueFrom(
+      this.http.post<PrixDPU>(this.resolveUrl(`${this.basePath}/${id}/refresh-prices`), {}),
     );
   }
 

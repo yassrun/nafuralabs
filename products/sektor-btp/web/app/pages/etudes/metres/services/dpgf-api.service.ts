@@ -57,6 +57,8 @@ export class DpgfApiService extends FeatureApiService<DPGF> {
       descriptif: string | null;
       origineCout: 'DECOMPOSE' | 'FORFAIT' | 'ESTIME';
       estimationSaisieEn?: 'COUT' | 'VENTE';
+      forfaitPartnerId?: string | null;
+      forfaitOffreId?: string | null;
       /** @deprecated */
       mode: 'FOURNI' | 'DECOMPOSE';
     }>,

@@ -19,7 +19,9 @@ import ma.nafura.item.domain.model.ItemUsageLot;
 import ma.nafura.item.mapper.ItemMapper;
 import ma.nafura.item.repository.ItemRepository;
 import ma.nafura.item.repository.ItemUsageLotRepository;
+import ma.nafura.item.repository.UnitOfMeasureRepository;
 import ma.nafura.item.service.base.ItemServiceBase;
+import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,11 +35,16 @@ import org.springframework.util.StringUtils;
 public class ItemService extends ItemServiceBase {
 
     private final ItemUsageLotRepository usageLotRepository;
+    private final UnitOfMeasureRepository unitOfMeasureRepository;
 
     public ItemService(
-            ItemRepository repository, ItemMapper mapper, ItemUsageLotRepository usageLotRepository) {
+            ItemRepository repository,
+            ItemMapper mapper,
+            ItemUsageLotRepository usageLotRepository,
+            UnitOfMeasureRepository unitOfMeasureRepository) {
         super(repository, mapper);
         this.usageLotRepository = usageLotRepository;
+        this.unitOfMeasureRepository = unitOfMeasureRepository;
     }
 
     @Override
@@ -48,7 +55,35 @@ public class ItemService extends ItemServiceBase {
         if (!StringUtils.hasText(item.getPosteBudgetId())) {
             item.setPosteBudgetId(nature.getPosteBudgetDefaut());
         }
+        if (request.getACompleter() != null) {
+            item.setACompleter(request.getACompleter());
+        }
         return item;
+    }
+
+    /**
+     * L9 — création allégée (libellé, nature, unité). Article tenant marqué « à compléter ».
+     * Pas de prix forcé.
+     */
+    @Transactional
+    public Item createAllege(String name, String natureCode, String uomCode) {
+        if (!StringUtils.hasText(name)) {
+            throw new IllegalArgumentException("item.create_allege.name_required");
+        }
+        Nature nature = Nature.fromLegacyOrDefault(natureCode, Nature.MATIERE);
+        ItemCreateDto dto = new ItemCreateDto();
+        dto.setName(name.trim());
+        dto.setNature(nature.name());
+        dto.setPosteBudgetId(nature.getPosteBudgetDefaut());
+        dto.setIsActive(true);
+        dto.setACompleter(true);
+        String codeUom = StringUtils.hasText(uomCode) ? uomCode.trim() : nature.getUomDefaut();
+        if (StringUtils.hasText(codeUom)) {
+            unitOfMeasureRepository
+                    .findByTenantIdAndCodeIgnoreCase(TenantContext.getTenantId(), codeUom)
+                    .ifPresent(uom -> dto.setUnitOfMeasureId(uom.getId()));
+        }
+        return create(dto);
     }
 
     @Override

@@ -50,6 +50,11 @@ public class Item {
     @Column(name = "nature", length = 30)
     private String nature;
 
+    /** L9 — créé via fiche allégée (libellé / nature / unité) ; à compléter par le référentiel. */
+    @Column(name = "a_completer", nullable = false)
+    @Builder.Default
+    private Boolean aCompleter = false;
+
     @Column(name = "poste_budget_id", length = 50)
     private String posteBudgetId;
 
@@ -102,6 +107,9 @@ public class Item {
     protected void onCreate() {
         this.createdAt = OffsetDateTime.now();
         this.updatedAt = OffsetDateTime.now();
+        if (this.aCompleter == null) {
+            this.aCompleter = false;
+        }
     }
 
     @PreUpdate

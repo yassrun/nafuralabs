@@ -7,6 +7,22 @@ alwaysApply: true
 
 **Avant toute implémentation UI non triviale** : produire / itérer un **Cursor Canvas** (`.canvas.tsx`), pas Figma ni mock HTML jetable.
 
+## Source unique (Git)
+
+**SSOT** = dossier UX de l’epic feature :
+
+`products/<app>/docs/specs/epics/<feature-slug>/ux/<name>-wireframe.canvas.tsx`
+
+Pas de 2ᵉ copie « validée » sous `docs/ux/wireframes/` (legacy / redirect only).
+
+## Preview Cursor (contrainte IDE)
+
+L’IDE ne charge la preview que depuis :
+
+`~/.cursor/projects/<workspace>/canvases/*.canvas.tsx`
+
+Donc : **éditer / versionner dans l’epic** ; **copier** vers `canvases/` pour la preview (même nom de fichier). Après itération : recopier vers l’epic avant commit.
+
 ## Quand
 
 - Nouvel écran, refonte UX, choix de layout, flux multi-états
@@ -14,13 +30,13 @@ alwaysApply: true
 
 ## Comment
 
-1. Canvas live (preview IDE) : `~/.cursor/projects/<workspace>/canvases/<feature>-wireframe.canvas.tsx`
-2. **Versionner** une copie dans le produit, ex. `products/sektor-btp/docs/ux/wireframes/<feature>-wireframe.canvas.tsx` (même nom). Sync avant commit — voir `docs/ux/wireframes/README.md`.
-3. Vues navigables (`useCanvasState`) = états réels du flux (tree, modal, modes…)
+1. Créer / ouvrir le canvas sous `epics/<slug>/ux/`
+2. Sync → `canvases/` pour preview live
+3. Vues navigables (`useCanvasState`) = états réels du flux
 4. Afficher **cycle de vie**, dirty, gates, AI + **fallback manuel**
-5. Décisions UX listées dans le canvas (pas seulement le dessin)
-6. **Valider avec l’utilisateur** → puis plan d’impl → code
-7. Figé dans le backlog / ticket (réf. canvas repo + décisions)
+5. Décisions UX listées dans le canvas (+ `ux/notes.md` si besoin)
+6. **Valider avec l’utilisateur** → PLAN epic §6 pointe vers le fichier `ux/*.canvas.tsx`
+7. Plan d’impl → code ; ticket PM référence le chemin epic
 
 ## Contenu attendu
 
@@ -32,11 +48,12 @@ alwaysApply: true
 ## Référence validée
 
 `etude-decompo-wireframe.canvas.tsx` — tree → drawer, toggle mode, footer Enregistrer  
-(Git : `products/sektor-btp/docs/ux/wireframes/`).
+(Git : `…/epics/_archive/etude-prix-unifiee/ux/`).
 
 ## Interdit
 
 - Partir en code UI majeur sans wireframe canvas validé
 - Remplacer cette méthode par Figma comme source de vérité
 - Wireframe « joli » sans états métier / sans fallback manuel
-- Laisser un canvas **uniquement** hors repo après validation (toujours sync Git)
+- Laisser un canvas **uniquement** sous `canvases/` après validation (toujours dans l’epic Git)
+- Dupliquer une SSOT sous `docs/ux/wireframes/`

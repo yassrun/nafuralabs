@@ -283,6 +283,7 @@ public class DevisService {
         if (request.getRemiseGlobalePercent() != null) {
             entity.setRemiseGlobalePercent(request.getRemiseGlobalePercent());
         }
+        assertRemiseVsMarge(entity);
         // Status changes must go through transition endpoints — ignore request.status.
         if (request.getNotes() != null) {
             entity.setNotes(trimOrNull(request.getNotes()));
@@ -397,19 +398,44 @@ public class DevisService {
 
     @Transactional
     public ConvertToChantierResultDto convertToChantier(UUID id) {
-        Devis entity = requireDevis(id);
-        if (!Devis.STATUS_APPROUVE.equals(entity.getStatus())) {
-            throw new IllegalStateException("Only APPROUVE devis can be converted to chantier");
+        requireDevis(id);
+        throw new IllegalStateException(
+                "etudes.devis.convert_deprecated: utiliser POST /dossiers/{id}/convertir (L13 guichet unique)");
+    }
+
+    /**
+     * L13 — remise commerciale &gt; marge du dossier = bloquant.
+     * Marge : {@code dossier.margePercentDefaut} ou paramètre tenant.
+     */
+    void assertRemiseVsMarge(Devis entity) {
+        BigDecimal remise = entity.getRemiseGlobalePercent();
+        if (remise == null || remise.signum() <= 0) {
+            return;
         }
-        if (!StringUtils.hasText(entity.getChantierGenereId())) {
-            entity.setChantierGenereId(nextChantierStubId());
-            entity = repository.save(entity);
+        BigDecimal marge = resolveMargeReference(entity);
+        if (remise.compareTo(marge) > 0) {
+            throw new IllegalArgumentException(
+                    "etudes.devis.remise_sup_marge: remise "
+                            + remise
+                            + " % > marge "
+                            + marge
+                            + " %");
         }
-        attachLigneDevisRefs(entity);
-        return ConvertToChantierResultDto.builder()
-                .chantierId(entity.getChantierGenereId())
-                .devis(entity)
-                .build();
+    }
+
+    private BigDecimal resolveMargeReference(Devis entity) {
+        if (entity.getDossierEtudeId() != null) {
+            // lazy via JDBC to avoid circular DossierEtudeService dep
+            List<BigDecimal> rows = jdbcTemplate.query(
+                    "SELECT COALESCE(marge_percent_defaut, marge_globale_percent) FROM dossiers_etude WHERE id = ? AND tenant_id = ?",
+                    (rs, i) -> rs.getBigDecimal(1),
+                    entity.getDossierEtudeId(),
+                    tenantId());
+            if (!rows.isEmpty() && rows.getFirst() != null) {
+                return rows.getFirst();
+            }
+        }
+        return BigDecimal.valueOf(7); // align ParametresEtudeService.DEFAULT_MARGE
     }
 
     private Devis applyExpiryIfNeeded(Devis entity) {

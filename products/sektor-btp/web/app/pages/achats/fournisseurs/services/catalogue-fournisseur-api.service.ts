@@ -102,4 +102,33 @@ export class CatalogueFournisseurApiService extends FeatureApiService<
     const res = await this.getAll({ page: 0, pageSize: 500, fournisseurId, articleId, actif: true });
     return res.items[0];
   }
+
+  /** L11 — comparateur fournisseurs pour un article. */
+  async comparer(articleId: string, date?: string | null): Promise<ComparateurOffre[]> {
+    let params = this.buildQueryParams({});
+    params = params.set('articleId', articleId);
+    if (date) params = params.set('date', date);
+    return this.get<ComparateurOffre[]>(`${this.basePath}/comparateur`, params);
+  }
+}
+
+export interface ComparateurOffre {
+  ligneId: string;
+  fournisseurId: string;
+  articleId: string;
+  designation: string;
+  refFournisseur?: string | null;
+  prixCommercialHt: number | string;
+  prixUnitaireHt: number | string;
+  conditionnementQuantite?: number | string | null;
+  conditionnementUomCode?: string | null;
+  conditionnementLibelle?: string | null;
+  prixNormalise?: number | string | null;
+  uomNormaliseCode?: string | null;
+  delaiJours?: number | null;
+  quantiteMin?: number | string | null;
+  validFrom?: string;
+  validTo?: string | null;
+  perime: boolean;
+  source?: string;
 }

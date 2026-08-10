@@ -60,6 +60,12 @@ export class DossierSummaryHeaderComponent {
         return 'Corriger le chiffrage';
       case 'REOUVRIR_BORDEREAU':
         return 'Réouvrir le bordereau';
+      case 'MARQUER_GAGNE':
+        return 'Marquer gagné';
+      case 'CONVERTIR':
+        return 'Créer chantier et marché';
+      case 'VOIR_CHANTIER':
+        return 'Ouvrir le chantier';
       default:
         return '';
     }
@@ -77,10 +83,8 @@ export class DossierSummaryHeaderComponent {
     return a === 'VALIDER_N1' || a === 'VALIDER_N2';
   });
 
-  readonly showCreerChantier = computed(() => {
-    const s = this.synthese();
-    return s.status === 'DEVIS_GENERE' && !!s.devisGenereId;
-  });
+  /** L13 — issue commerciale : perdu en secondaire quand devis généré. */
+  readonly showMarquerPerdu = computed(() => this.synthese().status === 'DEVIS_GENERE');
 
   readonly showPrintBordereau = computed(() => this.hasDpgf());
   readonly showPrintSynthese = computed(() => true);

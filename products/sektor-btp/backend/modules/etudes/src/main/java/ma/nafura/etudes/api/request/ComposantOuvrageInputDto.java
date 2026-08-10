@@ -47,4 +47,7 @@ public class ComposantOuvrageInputDto {
     private BigDecimal prixUnitaire;
 
     private BigDecimal total;
+
+    /** L10 — sous-traitance : inclure FG+marge du sous-ouvrage. */
+    private Boolean inclureFraisEtMarge;
 }

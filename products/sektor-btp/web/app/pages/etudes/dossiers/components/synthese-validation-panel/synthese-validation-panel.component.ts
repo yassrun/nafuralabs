@@ -15,22 +15,44 @@ import { TranslateModule } from '@ngx-translate/core';
 
 import type { DossierEtude, ProblemeGate, ResultatGate } from '@app/etudes/models';
 
-import { resolvePosteChiffrageMode } from '../../utils/poste-chiffrage-mode.util';
+import { resolveOrigineCout } from '../../utils/poste-chiffrage-mode.util';
+import {
+  DossierEtudeApiService,
+  type AvisExecutionResume,
+  type SyntheseCoutAffaire,
+} from '../../services/dossier-etude-api.service';
 import { DpgfApiService, type DpgfLotTotal } from '../../../metres/services/dpgf-api.service';
 import { DpuApiService } from '../../../bibliotheque-prix/services/dpu-api.service';
 import { GateBlocageComponent } from '../gate-blocage/gate-blocage.component';
+import { RattrapagePanelComponent } from '../rattrapage-panel/rattrapage-panel.component';
+import { CapitalisationPanelComponent } from '../capitalisation-panel/capitalisation-panel.component';
+
+const ORIGINE_LABELS: Record<string, string> = {
+  DECOMPOSE: 'décomposé',
+  FORFAIT: 'forfait',
+  ESTIME: 'estimé',
+  DEDUIT: 'coût déduit',
+};
 
 @Component({
   selector: 'app-synthese-validation-panel',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, MadCurrencyPipe, TranslateModule, GateBlocageComponent],
+  imports: [
+    CommonModule,
+    MadCurrencyPipe,
+    TranslateModule,
+    GateBlocageComponent,
+    RattrapagePanelComponent,
+    CapitalisationPanelComponent,
+  ],
   templateUrl: './synthese-validation-panel.component.html',
   styleUrl: './synthese-validation-panel.component.scss',
 })
 export class SyntheseValidationPanelComponent {
   private readonly dpgfApi = inject(DpgfApiService);
   private readonly dpuApi = inject(DpuApiService);
+  private readonly dossierApi = inject(DossierEtudeApiService);
 
   readonly dossier = input.required<DossierEtude>();
   readonly gates = input<ResultatGate[]>([]);
@@ -40,6 +62,9 @@ export class SyntheseValidationPanelComponent {
   readonly change = output<void>();
 
   readonly totaux = signal<DpgfLotTotal[]>([]);
+  readonly syntheseCout = signal<SyntheseCoutAffaire | null>(null);
+  readonly avisResume = signal<AvisExecutionResume | null>(null);
+  readonly filtreOrigine = signal<string | null>(null);
   readonly chargement = signal(false);
   readonly erreur = signal<string | undefined>(undefined);
   readonly composantsTotal = signal(0);
@@ -73,22 +98,45 @@ export class SyntheseValidationPanelComponent {
     };
   });
 
+  readonly repartitionEntries = computed(() => {
+    const s = this.syntheseCout();
+    if (!s?.repartitionPercentParOrigine) return [];
+    const order = ['DECOMPOSE', 'FORFAIT', 'ESTIME', 'DEDUIT'];
+    return order
+      .filter((k) => Number(s.repartitionPercentParOrigine[k] ?? 0) > 0)
+      .map((k) => ({
+        key: k,
+        label: ORIGINE_LABELS[k] ?? k,
+        percent: Number(s.repartitionPercentParOrigine[k] ?? 0),
+        montant: Number(s.repartitionMontantParOrigine?.[k] ?? 0),
+      }));
+  });
+
   constructor() {
     effect(() => {
       const dpgfId = this.dossier().dpgfId;
-      if (dpgfId) void this.charger(dpgfId);
+      const dossierId = this.dossier().id;
+      if (dpgfId && dossierId) void this.charger(dpgfId, dossierId);
     });
   }
 
-  private async charger(dpgfId: string): Promise<void> {
+  setFiltreOrigine(key: string | null): void {
+    this.filtreOrigine.set(this.filtreOrigine() === key ? null : key);
+  }
+
+  private async charger(dpgfId: string, dossierId: string): Promise<void> {
     this.chargement.set(true);
     this.erreur.set(undefined);
     try {
-      const [lots, arbre] = await Promise.all([
+      const [lots, arbre, synthese, avis] = await Promise.all([
         this.dpgfApi.getTotauxByLot(dpgfId),
         this.dpgfApi.getArbre(dpgfId),
+        this.dossierApi.getSyntheseCout(dossierId).catch(() => null),
+        this.dossierApi.getAvisResume(dossierId).catch(() => null),
       ]);
       this.totaux.set(lots ?? []);
+      this.syntheseCout.set(synthese);
+      this.avisResume.set(avis);
 
       const articles = this.collectArticlesDecomposes(arbre.hierarchie ?? []);
       let total = 0;
@@ -122,6 +170,7 @@ export class SyntheseValidationPanelComponent {
       id?: string;
       type?: string;
       mode?: string | null;
+      origineCout?: string | null;
       prixUnitaire?: number | null;
       enfants?: unknown[];
     }[],
@@ -130,11 +179,12 @@ export class SyntheseValidationPanelComponent {
     const walk = (list: typeof nodes) => {
       for (const n of list) {
         if (n.type === 'ARTICLE' && n.id) {
-          const mode = resolvePosteChiffrageMode({
+          const origine = resolveOrigineCout({
+            origineCout: n.origineCout,
             mode: n.mode,
             prixUnitaire: n.prixUnitaire,
           });
-          if (mode !== 'FOURNI') ids.push(n.id);
+          if (origine === 'DECOMPOSE') ids.push(n.id);
         }
         if (Array.isArray(n.enfants)) walk(n.enfants as typeof nodes);
       }

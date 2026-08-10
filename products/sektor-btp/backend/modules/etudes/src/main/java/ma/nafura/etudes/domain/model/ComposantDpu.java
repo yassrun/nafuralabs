@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -76,6 +77,22 @@ public class ComposantDpu {
     private String libelle;
 
     /**
+     * L9 — « ne sera jamais un article » (aléas, amenée/repli…).
+     * Exclu définitivement du rattrapage.
+     */
+    @Column(name = "hors_referentiel", nullable = false)
+    @Builder.Default
+    private Boolean horsReferentiel = false;
+
+    /**
+     * L10 — sous-traitance : remonter le prix de vente du sous-ouvrage (FG+marge inclus).
+     * Défaut false = déboursé uniquement (anti marge-sur-marge).
+     */
+    @Column(name = "inclure_frais_et_marge", nullable = false)
+    @Builder.Default
+    private Boolean inclureFraisEtMarge = false;
+
+    /**
      * Quantité de ce composant nécessaire pour UNE unité d'ouvrage (ex. 350 kg de ciment par m³).
      * Ce n'est PAS une quantité absolue — ne jamais multiplier par la quantité du bordereau ici.
      */
@@ -110,6 +127,20 @@ public class ComposantDpu {
 
     @Column(name = "offre_fournisseur_id")
     private UUID offreFournisseurId;
+
+    /** Snapshot gel — id de la ligne catalogue / ItemPrice / offre d'origine. */
+    @Column(name = "prix_source_ref_id")
+    private UUID prixSourceRefId;
+
+    @Column(name = "prix_date_source")
+    private LocalDate prixDateSource;
+
+    @Column(name = "prix_currency_id")
+    private UUID prixCurrencyId;
+
+    /** Ex. « Catalogue Lafarge — 12/06/2026 » — lisible même si la source a disparu. */
+    @Column(name = "prix_libelle_source", length = 500)
+    private String prixLibelleSource;
 
     @Column(name = "suggere_par_ia", nullable = false)
     private Boolean suggereParIa;
@@ -170,6 +201,12 @@ public class ComposantDpu {
         }
         if (this.referenceType == null) {
             this.referenceType = "LIBRE";
+        }
+        if (this.horsReferentiel == null) {
+            this.horsReferentiel = false;
+        }
+        if (this.inclureFraisEtMarge == null) {
+            this.inclureFraisEtMarge = false;
         }
     }
 

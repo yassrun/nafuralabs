@@ -16,12 +16,13 @@ import ma.nafura.etudes.api.request.OuvrageCreateDto;
 import ma.nafura.etudes.api.request.OuvrageUpdateDto;
 import ma.nafura.etudes.api.request.UniteMainInputDto;
 import ma.nafura.etudes.domain.ComposantReference;
+import ma.nafura.etudes.domain.OuvrageOrigine;
+import ma.nafura.etudes.domain.ReferenceType;
 import ma.nafura.etudes.domain.model.ComposantOuvrage;
 import ma.nafura.etudes.domain.model.Ouvrage;
 import ma.nafura.etudes.domain.model.UniteMain;
 import ma.nafura.etudes.repository.OuvrageRepository;
 import ma.nafura.platform.framework.context.TenantContext;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -36,16 +37,22 @@ public class OuvrageService {
     private final OuvrageSeedService seedService;
     private final DpuService dpuService;
     private final ParametresEtudeService parametresEtudeService;
+    private final OuvrageCompositeService compositeService;
+    private final DpuCalculator calculator;
 
     public OuvrageService(
             OuvrageRepository repository,
             OuvrageSeedService seedService,
             DpuService dpuService,
-            ParametresEtudeService parametresEtudeService) {
+            ParametresEtudeService parametresEtudeService,
+            OuvrageCompositeService compositeService,
+            DpuCalculator calculator) {
         this.repository = repository;
         this.seedService = seedService;
         this.dpuService = dpuService;
         this.parametresEtudeService = parametresEtudeService;
+        this.compositeService = compositeService;
+        this.calculator = calculator;
     }
 
     @Transactional(readOnly = true)
@@ -83,11 +90,18 @@ public class OuvrageService {
         if (repository.existsByTenantIdAndCode(tenantId, code)) {
             throw new IllegalArgumentException("Ouvrage code already exists");
         }
+        String codeLot = compositeService.normalizeCodeLot(request.getCodeLot());
+        String codeFamille = resolveCodeFamille(request.getCodeFamille(), request.getCategory());
         Ouvrage entity = Ouvrage.builder()
                 .tenantId(tenantId)
                 .code(code)
                 .designation(request.getDesignation().trim())
-                .category(request.getCategory().trim())
+                .codeLot(codeLot)
+                .codeFamille(codeFamille)
+                .category(codeFamille)
+                .origine(OuvrageOrigine.parse(request.getOrigine()).name())
+                .sourceEtudeId(request.getSourceEtudeId())
+                .catalogCleStable(trimOrNull(request.getCatalogCleStable()))
                 .unite(request.getUnite().trim())
                 .uniteMain(buildUniteMain(request.getUniteMain()))
                 .fraisGenerauxPercent(defaultPercent(
@@ -99,6 +113,8 @@ public class OuvrageService {
                 .composants(new ArrayList<>())
                 .build();
         applyComposants(entity, request.getComposants(), tenantId);
+        compositeService.assertAcyclic(null, collectChildOuvrageIds(entity));
+        resolveOuvrageComposantPrices(entity);
         recomputeTotals(entity);
         Ouvrage saved = repository.save(entity);
         attachComposantOuvrageIds(saved);
@@ -119,8 +135,26 @@ public class OuvrageService {
         if (request.getDesignation() != null) {
             entity.setDesignation(request.getDesignation().trim());
         }
-        if (request.getCategory() != null) {
-            entity.setCategory(request.getCategory().trim());
+        if (request.getCodeLot() != null || request.getCodeFamille() != null || request.getCategory() != null) {
+            if (request.getCodeLot() != null) {
+                entity.setCodeLot(compositeService.normalizeCodeLot(request.getCodeLot()));
+            }
+            String famille = resolveCodeFamille(
+                    request.getCodeFamille() != null ? request.getCodeFamille() : request.getCategory(),
+                    entity.getCodeFamille());
+            if (request.getCodeFamille() != null || request.getCategory() != null) {
+                entity.setCodeFamille(famille);
+                entity.setCategory(famille);
+            }
+        }
+        if (request.getOrigine() != null) {
+            entity.setOrigine(OuvrageOrigine.parse(request.getOrigine()).name());
+        }
+        if (request.getSourceEtudeId() != null) {
+            entity.setSourceEtudeId(request.getSourceEtudeId());
+        }
+        if (request.getCatalogCleStable() != null) {
+            entity.setCatalogCleStable(trimOrNull(request.getCatalogCleStable()));
         }
         if (request.getUnite() != null) {
             entity.setUnite(request.getUnite().trim());
@@ -143,6 +177,8 @@ public class OuvrageService {
         if (request.getComposants() != null) {
             entity.getComposants().clear();
             applyComposants(entity, request.getComposants(), tenantId());
+            compositeService.assertAcyclic(entity.getId(), collectChildOuvrageIds(entity));
+            resolveOuvrageComposantPrices(entity);
         }
         recomputeTotals(entity);
         entity.setDerniereMaj(LocalDate.now());
@@ -170,7 +206,9 @@ public class OuvrageService {
                         .id(row.getId().toString())
                         .code(row.getCode())
                         .label(row.getCode() + " — " + row.getDesignation())
-                        .category(row.getCategory())
+                        .category(row.getCodeFamille() != null ? row.getCodeFamille() : row.getCategory())
+                        .codeLot(row.getCodeLot())
+                        .codeFamille(row.getCodeFamille())
                         .prixUnitaireHt(row.getPrixUnitaireHt())
                         .derniereMaj(row.getDerniereMaj())
                         .build())
@@ -182,8 +220,11 @@ public class OuvrageService {
         UUID tenantId = tenantId();
         List<Ouvrage> rows = repository.findByTenantIdOrderByCodeAsc(tenantId);
         if (StringUtils.hasText(category)) {
+            String term = category.trim();
             rows = rows.stream()
-                    .filter(row -> category.trim().equalsIgnoreCase(row.getCategory()))
+                    .filter(row -> term.equalsIgnoreCase(row.getCategory())
+                            || term.equalsIgnoreCase(row.getCodeFamille())
+                            || term.equalsIgnoreCase(row.getCodeLot()))
                     .toList();
         }
         if (isActive != null) {
@@ -212,7 +253,11 @@ public class OuvrageService {
         boolean desc = "desc".equalsIgnoreCase(sortDirection);
         Comparator<Ouvrage> comparator = switch (field) {
             case "designation" -> Comparator.comparing(Ouvrage::getDesignation, String.CASE_INSENSITIVE_ORDER);
-            case "category" -> Comparator.comparing(Ouvrage::getCategory, String.CASE_INSENSITIVE_ORDER);
+            case "category" -> Comparator.comparing(
+                    o -> o.getCodeFamille() != null ? o.getCodeFamille() : o.getCategory(),
+                    String.CASE_INSENSITIVE_ORDER);
+            case "codeLot" -> Comparator.comparing(Ouvrage::getCodeLot, String.CASE_INSENSITIVE_ORDER);
+            case "codeFamille" -> Comparator.comparing(Ouvrage::getCodeFamille, String.CASE_INSENSITIVE_ORDER);
             case "prixUnitaireHt" -> Comparator.comparing(Ouvrage::getPrixUnitaireHt);
             case "derniereMaj" -> Comparator.comparing(Ouvrage::getDerniereMaj);
             case "isActive" -> Comparator.comparing(Ouvrage::getIsActive);
@@ -237,9 +282,6 @@ public class OuvrageService {
             return;
         }
         for (ComposantOuvrageInputDto input : inputs) {
-            BigDecimal total = input.getTotal() != null
-                    ? input.getTotal()
-                    : input.getRendement().multiply(input.getPrixUnitaire());
             String libelle = StringUtils.hasText(input.getLibelle())
                     ? input.getLibelle()
                     : input.getDesignation();
@@ -249,6 +291,10 @@ public class OuvrageService {
                     input.getRefOuvrageId(),
                     libelle,
                     input.getArticleId());
+            boolean inclureFgMarge = Boolean.TRUE.equals(input.getInclureFraisEtMarge());
+            BigDecimal total = input.getTotal() != null
+                    ? input.getTotal()
+                    : input.getRendement().multiply(input.getPrixUnitaire());
             entity.getComposants()
                     .add(ComposantOuvrage.builder()
                             .tenantId(tenantId)
@@ -264,8 +310,51 @@ public class OuvrageService {
                             .rendement(input.getRendement())
                             .prixUnitaire(input.getPrixUnitaire())
                             .total(total.setScale(4, RoundingMode.HALF_UP))
+                            .inclureFraisEtMarge(inclureFgMarge)
                             .build());
         }
+    }
+
+    private void resolveOuvrageComposantPrices(Ouvrage entity) {
+        if (entity.getComposants() == null) {
+            return;
+        }
+        for (ComposantOuvrage composant : entity.getComposants()) {
+            if (!ReferenceType.OUVRAGE.name().equals(composant.getReferenceType())
+                    || composant.getRefOuvrageId() == null) {
+                continue;
+            }
+            BigDecimal pu = compositeService.prixUnitaireEffectif(
+                    composant.getRefOuvrageId(),
+                    Boolean.TRUE.equals(composant.getInclureFraisEtMarge()),
+                    1);
+            composant.setPrixUnitaire(pu);
+            composant.setTotal(calculator.computeLineTotal(composant.getRendement(), pu));
+        }
+    }
+
+    private List<UUID> collectChildOuvrageIds(Ouvrage entity) {
+        List<UUID> ids = new ArrayList<>();
+        if (entity.getComposants() == null) {
+            return ids;
+        }
+        for (ComposantOuvrage composant : entity.getComposants()) {
+            if (ReferenceType.OUVRAGE.name().equals(composant.getReferenceType())
+                    && composant.getRefOuvrageId() != null) {
+                ids.add(composant.getRefOuvrageId());
+            }
+        }
+        return ids;
+    }
+
+    private String resolveCodeFamille(String preferred, String fallback) {
+        if (StringUtils.hasText(preferred)) {
+            return compositeService.normalizeCodeFamille(preferred);
+        }
+        if (StringUtils.hasText(fallback)) {
+            return compositeService.normalizeCodeFamille(fallback);
+        }
+        return compositeService.normalizeCodeFamille(null);
     }
 
     private UniteMain buildUniteMain(UniteMainInputDto input) {
@@ -287,19 +376,12 @@ public class OuvrageService {
     }
 
     private void recomputeTotals(Ouvrage entity) {
-        BigDecimal composantsTotal = entity.getComposants().stream()
-                .map(ComposantOuvrage::getTotal)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal moTotal = entity.getUniteMain() != null && entity.getUniteMain().getTotal() != null
-                ? entity.getUniteMain().getTotal()
-                : BigDecimal.ZERO;
-        BigDecimal sousTotal = composantsTotal.add(moTotal).setScale(4, RoundingMode.HALF_UP);
+        // L10 : déboursé récursif (composants OUVRAGE → déboursé enfant, FG/marge une fois au sommet)
+        BigDecimal sousTotal = compositeService.computeDebourse(entity, 0);
         BigDecimal fg = defaultPercent(entity.getFraisGenerauxPercent(), parametresEtudeService.fraisGenerauxPercentDefaut());
         BigDecimal benef =
                 defaultPercent(entity.getBeneficePercent(), parametresEtudeService.margePercentDefaut());
-        BigDecimal prix = sousTotal
-                .multiply(BigDecimal.ONE.add(fg.movePointLeft(2)).add(benef.movePointLeft(2)))
-                .setScale(2, RoundingMode.HALF_UP);
+        BigDecimal prix = calculator.computePrixVenteHt(sousTotal, fg, benef);
         entity.setSousTotalDebourse(sousTotal);
         entity.setPrixUnitaireHt(prix);
         entity.setFraisGenerauxPercent(fg);
@@ -318,7 +400,9 @@ public class OuvrageService {
     private boolean matchesSearch(Ouvrage row, String term) {
         return contains(row.getCode(), term)
                 || contains(row.getDesignation(), term)
-                || contains(row.getCategory(), term);
+                || contains(row.getCategory(), term)
+                || contains(row.getCodeLot(), term)
+                || contains(row.getCodeFamille(), term);
     }
 
     private boolean contains(String value, String term) {

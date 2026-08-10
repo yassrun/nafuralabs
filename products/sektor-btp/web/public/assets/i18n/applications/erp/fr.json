@@ -325,6 +325,7 @@
     "etudes.soumissions": "Soumissions & opportunités",
     "etudes.dossiers": "Études / appels d'offres",
     "etudes.bibliotheque": "Bibliothèque de prix",
+    "etudes.catalogueConsole": "Console catalogue Sektor",
     "etudes.metres": "Métrés & Quantitatifs",
     "etudes.devis": "Devis",
     "etudes.appelsOffresClients": "Appels d'offres clients",
@@ -728,7 +729,7 @@
         "manquant": "Descriptif CPS manquant pour cet article."
       },
       "decomposition": {
-        "absente": "Décomposition absente — rattachez un DPU ou marquez l'article comme fourni.",
+        "absente": "Coût manquant — décomposez, forfaitisez ou estimez cet article.",
         "aucun_composant": "Le DPU rattaché n'a aucun composant.",
         "rendements_nuls": "Tous les rendements du DPU sont nuls."
       },
@@ -738,7 +739,9 @@
       "chiffrage": {
         "prix_absent": "Prix unitaire de vente manquant ou nul.",
         "taux_manquants": "Frais généraux ou marge bénéficiaire manquants sur le DPU.",
-        "client_manquant": "Sélectionnez un client Partner avant de générer le devis."
+        "client_manquant": "Sélectionnez un client Partner avant de générer le devis.",
+        "avis_ouverts": "Des avis d'exécution restent ouverts sur ce dossier.",
+        "avis_ecartes": "Des avis d'exécution ont été écartés — à confirmer avant soumission."
       },
       "non_franchie": "Cette étape ne peut pas encore être franchie.",
       "corriger": "Corriger"

@@ -62,7 +62,7 @@
           </div>
         </div>
 
-        @if (showPrintBordereau() || showPrintSynthese() || showReouvrir() || showRefuser() || showCreerChantier() || showCta()) {
+        @if (showPrintBordereau() || showPrintSynthese() || showReouvrir() || showRefuser() || showMarquerPerdu() || showCta()) {
           <div class="dsh__actions">
             @if (showPrintBordereau()) {
               <button type="button" class="dsh__btn dsh__btn--ghost" (click)="emitAction('IMPRIMER_BORDEREAU')">
@@ -84,9 +84,9 @@
                 Refuser
               </button>
             }
-            @if (showCreerChantier()) {
-              <button type="button" class="dsh__btn dsh__btn--ghost" (click)="emitAction('CREER_CHANTIER')">
-                Créer le chantier
+            @if (showMarquerPerdu()) {
+              <button type="button" class="dsh__btn dsh__btn--ghost" (click)="emitAction('MARQUER_PERDU')">
+                Marquer perdu
               </button>
             }
             @if (showCta()) {

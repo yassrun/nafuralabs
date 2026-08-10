@@ -1,0 +1,180 @@
+<section class="rattrapage" aria-label="Rattrapage composants libres">
+  <div class="rattrapage__head">
+    <div>
+      <h4>Composants non rattachés</h4>
+      <p class="rattrapage__hint">
+        Groupés par libellé · suggestions catalogue (confiance) · Ignorer = hors référentiel
+      </p>
+    </div>
+    @if (resume(); as r) {
+      <span class="rattrapage__badge">{{ r.totalLibres }} · mode {{ r.creationArticleMode }}</span>
+    }
+  </div>
+
+  @if (erreur(); as msg) {
+    <p class="rattrapage__erreur" role="alert">{{ msg }}</p>
+  }
+
+  @if (chargement()) {
+    <p class="rattrapage__etat">Chargement…</p>
+  }
+
+  @if (mode() === 'list' && resume(); as r) {
+    @if (r.groupesDetail.length === 0) {
+      <p class="rattrapage__etat">Aucun composant libre à rattraper.</p>
+    } @else {
+      <ul class="rattrapage__list">
+        @for (g of r.groupesDetail; track g.libelleNormalise) {
+          <li class="rattrapage__row">
+            <div class="rattrapage__label">
+              <strong>{{ g.libelle }}</strong>
+              <span class="rattrapage__count">×{{ g.count }}</span>
+            </div>
+            @if (modifiable()) {
+              <div class="rattrapage__actions">
+                <nf-button variant="secondary" size="sm" [disabled]="saving()" (clicked)="startRapprocher(g)">
+                  Rapprocher
+                </nf-button>
+                <nf-button variant="secondary" size="sm" [disabled]="saving()" (clicked)="startCreer(g)">
+                  {{ isControlee() ? 'Demander' : 'Créer' }}
+                </nf-button>
+                <nf-button variant="ghost" size="sm" [disabled]="saving()" (clicked)="ignorer(g)">
+                  Ignorer
+                </nf-button>
+              </div>
+            }
+          </li>
+        }
+      </ul>
+    }
+
+    @if (r.demandesOuvertes.length > 0) {
+      <details class="rattrapage__demandes">
+        <summary>Demandes ouvertes ({{ r.demandesOuvertes.length }})</summary>
+        <ul>
+          @for (d of r.demandesOuvertes; track d.id) {
+            <li>{{ d.libelle }} · {{ d.nature }} · {{ d.statut }}</li>
+          }
+        </ul>
+      </details>
+    }
+  }
+
+  @if (mode() === 'rapprocher' && groupeActif(); as g) {
+    <div class="rattrapage__form">
+      <p class="rattrapage__form-title">Rapprocher · {{ g.libelle }} (×{{ g.count }})</p>
+
+      @if (candidatsChargement()) {
+        <p class="rattrapage__etat">Recherche catalogue…</p>
+      }
+
+      @if (candidatsErreur(); as msg) {
+        <p class="rattrapage__hint" role="status">{{ msg }}</p>
+      }
+
+      @if (!candidatsChargement() && candidats().length > 0) {
+        <ul class="rattrapage__candidats" aria-label="Suggestions catalogue">
+          @for (c of candidats(); track c.catalogCle) {
+            <li class="rattrapage__candidat">
+              <div class="rattrapage__candidat-main">
+                <strong>{{ c.libelle }}</strong>
+                <span class="rattrapage__meta">
+                  {{ c.methode }} · {{ confPct(c) }}
+                  @if (c.uniteCode) {
+                    · {{ c.uniteCode }}
+                  }
+                </span>
+              </div>
+              <div class="rattrapage__actions">
+                <nf-button
+                  variant="primary"
+                  size="sm"
+                  [disabled]="saving()"
+                  (clicked)="choisirCandidat(c)"
+                >
+                  Choisir
+                </nf-button>
+                @if (c.matchId) {
+                  <nf-button
+                    variant="ghost"
+                    size="sm"
+                    [disabled]="saving()"
+                    (clicked)="rejeterCandidat(c)"
+                  >
+                    Rejeter
+                  </nf-button>
+                }
+              </div>
+            </li>
+          }
+        </ul>
+      }
+
+      @if (!candidatsChargement() && !candidatsErreur() && candidats().length === 0) {
+        <p class="rattrapage__hint">Aucune suggestion catalogue — créer un article ou lier un UUID.</p>
+      }
+
+      <button
+        type="button"
+        class="rattrapage__toggle-manuel"
+        (click)="manuelOuvert.set(!manuelOuvert())"
+      >
+        {{ manuelOuvert() ? 'Masquer' : 'Lier un article existant (UUID)' }}
+      </button>
+
+      @if (manuelOuvert()) {
+        <label class="field">
+          <span>Item ID (UUID tenant)</span>
+          <input
+            [ngModel]="itemIdRapproche()"
+            (ngModelChange)="itemIdRapproche.set($event)"
+            placeholder="UUID article"
+          />
+        </label>
+        <div class="rattrapage__actions">
+          <nf-button variant="primary" size="sm" [loading]="saving()" (clicked)="confirmerRapprocher()">
+            Lier les {{ g.count }} lignes
+          </nf-button>
+        </div>
+      }
+
+      <div class="rattrapage__actions">
+        <nf-button variant="ghost" size="sm" (clicked)="cancelForm()">Annuler</nf-button>
+      </div>
+    </div>
+  }
+
+  @if (mode() === 'creer' && groupeActif(); as g) {
+    <div class="rattrapage__form">
+      <p class="rattrapage__form-title">
+        {{ isControlee() ? 'Demander la création' : 'Créer article allégé' }}
+        · {{ g.libelle }} (×{{ g.count }})
+      </p>
+      @if (isControlee()) {
+        <p class="rattrapage__hint">La saisie LIBRE est conservée jusqu&apos;à validation référentiel.</p>
+      }
+      <label class="field">
+        <span>Libellé *</span>
+        <input [ngModel]="createLibelle()" (ngModelChange)="createLibelle.set($event)" />
+      </label>
+      <label class="field">
+        <span>Nature *</span>
+        <select [ngModel]="createNature()" (ngModelChange)="createNature.set($event)">
+          @for (n of natures; track n.value) {
+            <option [ngValue]="n.value">{{ n.label }}</option>
+          }
+        </select>
+      </label>
+      <label class="field">
+        <span>Unité (code, préremplie selon nature si vide)</span>
+        <input [ngModel]="createUom()" (ngModelChange)="createUom.set($event)" placeholder="T, L, H…" />
+      </label>
+      <div class="rattrapage__actions">
+        <nf-button variant="primary" size="sm" [loading]="saving()" (clicked)="confirmerCreer()">
+          {{ isControlee() ? 'Demander la création' : 'Créer et lier ×' + g.count }}
+        </nf-button>
+        <nf-button variant="ghost" size="sm" (clicked)="cancelForm()">Annuler</nf-button>
+      </div>
+    </div>
+  }
+</section>

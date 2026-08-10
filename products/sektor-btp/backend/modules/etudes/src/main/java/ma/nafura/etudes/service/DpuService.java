@@ -28,6 +28,7 @@ import ma.nafura.etudes.repository.DpgfRepository;
 import ma.nafura.etudes.repository.DpuVersionRepository;
 import ma.nafura.etudes.repository.OuvrageRepository;
 import ma.nafura.etudes.repository.PrixDpuRepository;
+import ma.nafura.item.service.prix.PrixResolu;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,6 +49,8 @@ public class DpuService {
     private final ParametresEtudeService parametresEtudeService;
     private final DossierEtudeRepository dossierEtudeRepository;
     private final DossierIntervenantService intervenantService;
+    private final GelPrixComposantService gelPrixService;
+    private final OuvrageCompositeService compositeService;
     private final ObjectMapper objectMapper;
 
     public DpuService(
@@ -61,6 +64,8 @@ public class DpuService {
             ParametresEtudeService parametresEtudeService,
             DossierEtudeRepository dossierEtudeRepository,
             DossierIntervenantService intervenantService,
+            GelPrixComposantService gelPrixService,
+            OuvrageCompositeService compositeService,
             ObjectMapper objectMapper) {
         this.repository = repository;
         this.versionRepository = versionRepository;
@@ -72,6 +77,8 @@ public class DpuService {
         this.parametresEtudeService = parametresEtudeService;
         this.dossierEtudeRepository = dossierEtudeRepository;
         this.intervenantService = intervenantService;
+        this.gelPrixService = gelPrixService;
+        this.compositeService = compositeService;
         this.objectMapper = objectMapper;
     }
 
@@ -173,6 +180,7 @@ public class DpuService {
         PrixDpu entity = requirePrixDpu(prixDpuId);
         ComposantDpu line = buildComposant(entity, input, entity.getComposants().size());
         entity.getComposants().add(line);
+        assertOuvrageGraph(entity);
         applyTotals(entity);
         PrixDpu saved = repository.save(entity);
         syncNoeudFromPrixDpu(saved);
@@ -432,6 +440,7 @@ public class DpuService {
         input.setUnite(composant.getUnite());
         input.setPrixUnitaire(composant.getPrixUnitaire());
         input.setTotal(composant.getTotal());
+        input.setInclureFraisEtMarge(composant.getInclureFraisEtMarge());
         return input;
     }
 
@@ -445,19 +454,40 @@ public class DpuService {
         for (ComposantDpuInputDto input : inputs) {
             entity.getComposants().add(buildComposant(entity, input, ordre++));
         }
+        assertOuvrageGraph(entity);
+    }
+
+    private void assertOuvrageGraph(PrixDpu entity) {
+        List<UUID> children = new ArrayList<>();
+        for (ComposantDpu composant : entity.getComposants()) {
+            if (ReferenceType.OUVRAGE.name().equals(composant.getReferenceType())
+                    && composant.getOuvrageId() != null) {
+                children.add(composant.getOuvrageId());
+            }
+        }
+        compositeService.assertAcyclic(entity.getOuvrageId(), children);
     }
 
     private ComposantDpu buildComposant(PrixDpu entity, ComposantDpuInputDto input, int ordre) {
-        BigDecimal total = input.getTotal() != null
-                ? input.getTotal()
-                : calculator.computeLineTotal(input.getRendement(), input.getPrixUnitaire());
+        return buildComposant(entity, input, ordre, false);
+    }
+
+    private ComposantDpu buildComposant(
+            PrixDpu entity, ComposantDpuInputDto input, int ordre, boolean forceResolve) {
         ComposantReference ref = ComposantReference.resolve(
                 input.getReferenceType(),
                 input.getItemId(),
                 input.getOuvrageId(),
                 input.getLibelle(),
                 input.getArticleOuPosteId());
-        return ComposantDpu.builder()
+
+        BigDecimal prixUnitaire = input.getPrixUnitaire();
+        String sourcePrix = StringUtils.hasText(input.getSourcePrix())
+                ? input.getSourcePrix().trim()
+                : ma.nafura.item.domain.SourcePrix.MANUEL;
+        UUID offreFournisseurId = input.getOffreFournisseurId();
+
+        ComposantDpu.ComposantDpuBuilder builder = ComposantDpu.builder()
                 .tenantId(entity.getTenantId())
                 .prixDpu(entity)
                 .type(input.getType().trim())
@@ -465,20 +495,133 @@ public class DpuService {
                 .itemId(ref.itemId())
                 .ouvrageId(ref.ouvrageId())
                 .libelle(ref.libelle())
+                .horsReferentiel(Boolean.TRUE.equals(input.getHorsReferentiel()))
+                .inclureFraisEtMarge(Boolean.TRUE.equals(input.getInclureFraisEtMarge()))
                 .rendement(input.getRendement())
                 .unite(input.getUnite().trim())
-                .prixUnitaire(input.getPrixUnitaire())
-                .total(total)
                 .ordre(ordre)
-                .sourcePrix(StringUtils.hasText(input.getSourcePrix())
-                        ? input.getSourcePrix().trim()
-                        : ma.nafura.item.domain.SourcePrix.MANUEL)
-                .offreFournisseurId(input.getOffreFournisseurId())
-                .suggereParIa(Boolean.TRUE.equals(input.getSuggereParIa()))
+                .suggereParIa(Boolean.TRUE.equals(input.getSuggereParIa()));
+
+        gelPrixService.copierGelDepuisInput(builder, input);
+
+        if (ref.type() == ReferenceType.ITEM
+                && ref.itemId() != null
+                && gelPrixService.doitResoudre(input, forceResolve)) {
+            PrixResolu resolu = gelPrixService.resoudre(ref.itemId());
+            if (resolu != null && resolu.prixUnitaire() != null) {
+                gelPrixService.appliquerGel(builder, resolu);
+                prixUnitaire = resolu.prixUnitaire();
+                sourcePrix = resolu.sourcePrix();
+                if (ma.nafura.item.domain.SourcePrix.CONSULTE.equals(resolu.sourcePrix())) {
+                    offreFournisseurId = resolu.sourceRefId();
+                }
+            }
+        }
+
+        BigDecimal total = input.getTotal() != null
+                ? input.getTotal()
+                : calculator.computeLineTotal(input.getRendement(), prixUnitaire);
+        return builder
+                .prixUnitaire(prixUnitaire)
+                .total(total)
+                .sourcePrix(sourcePrix)
+                .offreFournisseurId(offreFournisseurId)
                 .build();
     }
 
+    /**
+     * Rafraîchit les prix gelés des composants ITEM d'un DPU.
+     * Refusé si le dossier lié n'est plus modifiable (étude validée).
+     */
+    @Transactional
+    public PrixDpu refreshPrices(UUID dpuId) {
+        PrixDpu entity = requirePrixDpu(dpuId);
+        assertDossierModifiablePourDpu(entity);
+        boolean changed = false;
+        for (ComposantDpu composant : entity.getComposants()) {
+            if (!GelPrixComposantService.isItem(composant.getReferenceType())
+                    || composant.getItemId() == null) {
+                continue;
+            }
+            PrixResolu resolu = gelPrixService.resoudre(composant.getItemId());
+            if (resolu == null || resolu.prixUnitaire() == null) {
+                continue;
+            }
+            gelPrixService.appliquerGel(composant, resolu);
+            changed = true;
+        }
+        if (changed) {
+            applyTotals(entity);
+            PrixDpu saved = repository.save(entity);
+            syncNoeudFromPrixDpu(saved);
+            dossierIdForDpu(saved).ifPresent(intervenantService::enregistrerReviseur);
+            return enrichResponse(saved);
+        }
+        return enrichResponse(entity);
+    }
+
+    /**
+     * Rafraîchit tous les DPU ITEM du dossier (étude non validée uniquement).
+     */
+    @Transactional
+    public int refreshPricesForDossier(UUID dossierId) {
+        var dossier = dossierEtudeRepository
+                .findByIdAndTenantId(dossierId, tenantId())
+                .orElseThrow(() -> new IllegalArgumentException("etudes.dossier.introuvable"));
+        if (!dossier.isModifiable()) {
+            throw new IllegalStateException("etudes.dossier.verrouille");
+        }
+        if (dossier.getDpgfId() == null) {
+            return 0;
+        }
+        int count = 0;
+        List<DpgfNoeud> noeuds =
+                noeudRepository.findByDpgfIdAndTenantIdOrderByOrdreAsc(dossier.getDpgfId(), tenantId());
+        for (DpgfNoeud noeud : noeuds) {
+            if (!DpgfNoeud.TYPE_ARTICLE.equals(noeud.getType())) {
+                continue;
+            }
+            var dpuOpt = repository.findByDpgfNoeudIdAndTenantId(noeud.getId(), tenantId());
+            if (dpuOpt.isEmpty()) {
+                continue;
+            }
+            refreshPrices(dpuOpt.get().getId());
+            count++;
+        }
+        intervenantService.enregistrerReviseur(dossierId);
+        return count;
+    }
+
+    private void assertDossierModifiablePourDpu(PrixDpu entity) {
+        dossierIdForDpu(entity).ifPresent(dossierId -> {
+            var dossier = dossierEtudeRepository
+                    .findByIdAndTenantId(dossierId, tenantId())
+                    .orElse(null);
+            if (dossier != null && !dossier.isModifiable()) {
+                throw new IllegalStateException("etudes.dossier.verrouille");
+            }
+        });
+    }
+
+    private java.util.Optional<UUID> dossierIdForDpu(PrixDpu entity) {
+        if (entity == null || entity.getDpgfNoeudId() == null) {
+            return java.util.Optional.empty();
+        }
+        return noeudRepository
+                .findByIdAndTenantId(entity.getDpgfNoeudId(), tenantId())
+                .flatMap(noeud -> {
+                    UUID dpgfId = noeud.getDpgf() != null ? noeud.getDpgf().getId() : null;
+                    if (dpgfId == null) {
+                        return java.util.Optional.empty();
+                    }
+                    return dossierEtudeRepository
+                            .findByTenantIdAndDpgfId(tenantId(), dpgfId)
+                            .map(d -> d.getId());
+                });
+    }
+
     private void applyTotals(PrixDpu entity) {
+        resolveOuvrageComposantPrices(entity);
         calculator.recomputeLineTotals(entity.getComposants());
         BigDecimal deboursSec = calculator.computeDeboursSec(entity.getComposants());
         BigDecimal prixVenteHt = calculator.computePrixVenteHt(
@@ -487,6 +630,25 @@ public class DpuService {
         entity.setDeboursSec(deboursSec);
         entity.setPrixVenteHt(prixVenteHt);
         entity.setPrixVenteTtc(prixVenteTtc);
+    }
+
+    /** L10 — composant OUVRAGE : prix unitaire = déboursé (ou vente si flag sous-traitance). */
+    private void resolveOuvrageComposantPrices(PrixDpu entity) {
+        if (entity.getComposants() == null) {
+            return;
+        }
+        for (ComposantDpu composant : entity.getComposants()) {
+            if (!ReferenceType.OUVRAGE.name().equals(composant.getReferenceType())
+                    || composant.getOuvrageId() == null) {
+                continue;
+            }
+            BigDecimal pu = compositeService.prixUnitaireEffectif(
+                    composant.getOuvrageId(),
+                    Boolean.TRUE.equals(composant.getInclureFraisEtMarge()),
+                    1);
+            composant.setPrixUnitaire(pu);
+            composant.setTotal(calculator.computeLineTotal(composant.getRendement(), pu));
+        }
     }
 
     private void attachComposantLinks(PrixDpu entity) {

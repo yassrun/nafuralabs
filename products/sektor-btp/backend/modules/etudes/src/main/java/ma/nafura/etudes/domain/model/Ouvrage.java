@@ -36,8 +36,30 @@ public class Ouvrage {
     @Column(name = "designation", nullable = false, length = 500)
     private String designation;
 
+    /**
+     * Legacy — synchronisé avec {@link #codeFamille}. Préférer codeLot / codeFamille (L10).
+     */
     @Column(name = "category", nullable = false, length = 30)
     private String category;
+
+    /** UsageLot — L10 / ADR PR2. */
+    @Column(name = "code_lot", nullable = false, length = 30)
+    private String codeLot;
+
+    /** Famille métier ouvrage (grille provisoire PR2). */
+    @Column(name = "code_famille", nullable = false, length = 30)
+    private String codeFamille;
+
+    /** SAISIE | ETUDE | CATALOGUE */
+    @Column(name = "origine", nullable = false, length = 20)
+    private String origine;
+
+    @Column(name = "source_etude_id")
+    private UUID sourceEtudeId;
+
+    /** Clé métier string, jamais FK catalogue (L10 / pré-L14). */
+    @Column(name = "catalog_cle_stable", length = 120)
+    private String catalogCleStable;
 
     @Column(name = "unite", nullable = false, length = 30)
     private String unite;
@@ -107,6 +129,18 @@ public class Ouvrage {
         }
         if (this.derniereMaj == null) {
             this.derniereMaj = LocalDate.now();
+        }
+        if (this.codeLot == null || this.codeLot.isBlank()) {
+            this.codeLot = "GROS_OEUVRE";
+        }
+        if (this.codeFamille == null || this.codeFamille.isBlank()) {
+            this.codeFamille = this.category != null && !this.category.isBlank() ? this.category : "DIVERS";
+        }
+        if (this.category == null || this.category.isBlank()) {
+            this.category = this.codeFamille;
+        }
+        if (this.origine == null || this.origine.isBlank()) {
+            this.origine = "SAISIE";
         }
     }
 

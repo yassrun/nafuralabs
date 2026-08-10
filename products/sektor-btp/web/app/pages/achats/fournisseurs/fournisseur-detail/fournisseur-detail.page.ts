@@ -88,7 +88,9 @@ interface CatalogueDraft {
   refFournisseur: string;
   designation: string;
   prixUnitaireHt: number;
-  uom: string;
+  uomId: string;
+  conditionnementQuantite: number | null;
+  conditionnementUomId: string;
   actif: boolean;
 }
 
@@ -102,7 +104,9 @@ function emptyCatalogueDraft(): CatalogueDraft {
     refFournisseur: '',
     designation: '',
     prixUnitaireHt: 0,
-    uom: '',
+    uomId: '',
+    conditionnementQuantite: null,
+    conditionnementUomId: '',
     actif: true,
   };
 }
@@ -470,7 +474,9 @@ export class FournisseurDetailPage extends ConfigDrivenDetailPage<Fournisseur> {
       refFournisseur: row.refFournisseur ?? '',
       designation: row.designation,
       prixUnitaireHt: row.prixUnitaireHt,
-      uom: row.uom ?? '',
+      uomId: row.uomId ?? '',
+      conditionnementQuantite: row.conditionnementQuantite ?? null,
+      conditionnementUomId: row.conditionnementUomId ?? '',
       actif: row.actif,
     };
   }
@@ -495,7 +501,9 @@ export class FournisseurDetailPage extends ConfigDrivenDetailPage<Fournisseur> {
       refFournisseur: draft.refFournisseur.trim() || undefined,
       designation: draft.designation.trim(),
       prixUnitaireHt: Number(draft.prixUnitaireHt) || 0,
-      uom: draft.uom.trim() || undefined,
+      uomId: draft.uomId.trim() || undefined,
+      conditionnementQuantite: draft.conditionnementQuantite,
+      conditionnementUomId: draft.conditionnementUomId.trim() || undefined,
       actif: draft.actif,
     };
 

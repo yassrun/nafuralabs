@@ -16,7 +16,10 @@ public class OuvrageLookupDto {
     private String id;
     private String code;
     private String label;
+    /** Legacy — = codeFamille. */
     private String category;
+    private String codeLot;
+    private String codeFamille;
     private BigDecimal prixUnitaireHt;
     private LocalDate derniereMaj;
 }

@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.UUID;
 import ma.nafura.achats.api.request.CatalogueFournisseurLigneCreateDto;
 import ma.nafura.achats.api.request.CatalogueFournisseurLigneUpdateDto;
@@ -13,6 +14,7 @@ import ma.nafura.achats.domain.model.CatalogueFournisseurLigne;
 import ma.nafura.achats.repository.CatalogueFournisseurLigneRepository;
 import ma.nafura.currency.domain.model.Currency;
 import ma.nafura.currency.service.CurrencyConversionService;
+import ma.nafura.item.repository.UnitOfMeasureRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,19 +25,26 @@ public class CatalogueFournisseurLigneService {
 
     private final CatalogueFournisseurLigneRepository repository;
     private final CurrencyConversionService currencyConversionService;
+    private final PrixNormaliseCatalogueService prixNormaliseCatalogueService;
+    private final UnitOfMeasureRepository uomRepository;
 
     public CatalogueFournisseurLigneService(
             CatalogueFournisseurLigneRepository repository,
-            CurrencyConversionService currencyConversionService) {
+            CurrencyConversionService currencyConversionService,
+            PrixNormaliseCatalogueService prixNormaliseCatalogueService,
+            UnitOfMeasureRepository uomRepository) {
         this.repository = repository;
         this.currencyConversionService = currencyConversionService;
+        this.prixNormaliseCatalogueService = prixNormaliseCatalogueService;
+        this.uomRepository = uomRepository;
     }
 
     @Transactional(readOnly = true)
     public List<CatalogueFournisseurLigne> list(
             String fournisseurId, String articleId, Boolean actif, String search) {
         UUID tenantId = tenantId();
-        List<CatalogueFournisseurLigne> rows = loadRows(tenantId, fournisseurId, articleId, actif);
+        List<CatalogueFournisseurLigne> rows = loadRows(
+                tenantId, parseUuidOrNull(fournisseurId), parseUuidOrNull(articleId), actif);
         if (StringUtils.hasText(search)) {
             String term = search.trim().toLowerCase(Locale.ROOT);
             rows = rows.stream().filter(row -> matchesSearch(row, term)).toList();
@@ -57,12 +66,14 @@ public class CatalogueFournisseurLigneService {
                 request.getValidFrom() != null ? request.getValidFrom() : LocalDate.now();
         return upsertHistorise(
                 tenantId,
-                request.getFournisseurId().trim(),
-                request.getArticleId().trim(),
+                request.getFournisseurId(),
+                request.getArticleId(),
                 request.getDesignation().trim(),
                 request.getPrixUnitaireHt(),
                 trimOrNull(request.getRefFournisseur()),
-                trimOrNull(request.getUom()),
+                request.getUomId(),
+                request.getConditionnementQuantite(),
+                request.getConditionnementUomId(),
                 request.getCurrencyId() != null ? request.getCurrencyId() : resolvePivotCurrencyId(tenantId),
                 validFrom,
                 request.getRemisePercent() != null ? request.getRemisePercent() : BigDecimal.ZERO,
@@ -78,17 +89,19 @@ public class CatalogueFournisseurLigneService {
 
     /**
      * Historise : ferme la ligne ouverte précédente puis crée une nouvelle ligne.
-     * Ne jamais écraser un prix.
+     * Ne jamais écraser un prix. Recalcule {@code prix_normalise}.
      */
     @Transactional
     public CatalogueFournisseurLigne upsertHistorise(
             UUID tenantId,
-            String fournisseurId,
-            String articleId,
+            UUID fournisseurId,
+            UUID articleId,
             String designation,
             BigDecimal prixUnitaireHt,
             String refFournisseur,
-            String uom,
+            UUID uomId,
+            BigDecimal conditionnementQuantite,
+            UUID conditionnementUomId,
             UUID currencyId,
             LocalDate validFrom,
             BigDecimal remisePercent,
@@ -115,7 +128,9 @@ public class CatalogueFournisseurLigneService {
                 .refFournisseur(refFournisseur)
                 .designation(designation)
                 .prixUnitaireHt(prixUnitaireHt)
-                .uom(uom)
+                .uomId(uomId)
+                .conditionnementQuantite(conditionnementQuantite)
+                .conditionnementUomId(conditionnementUomId)
                 .currencyId(currencyId != null ? currencyId : resolvePivotCurrencyId(tenantId))
                 .validFrom(from)
                 .validTo(null)
@@ -127,23 +142,44 @@ public class CatalogueFournisseurLigneService {
                 .incoterm(incoterm)
                 .actif(actif)
                 .build();
+        prixNormaliseCatalogueService.apply(entity);
         return repository.save(entity);
+    }
+
+    /**
+     * Résout un code UOM historique (alimentation offre/facture) vers un UUID, ou null.
+     */
+    @Transactional(readOnly = true)
+    public UUID resolveUomIdByCode(UUID tenantId, String uomCode) {
+        if (!StringUtils.hasText(uomCode) || tenantId == null) {
+            return null;
+        }
+        return uomRepository
+                .findByTenantIdAndCodeIgnoreCase(tenantId, uomCode.trim())
+                .map(u -> u.getId())
+                .orElse(null);
     }
 
     @Transactional
     public CatalogueFournisseurLigne update(UUID id, CatalogueFournisseurLigneUpdateDto request) {
         CatalogueFournisseurLigne entity = getById(id);
-        // Un changement de prix crée une nouvelle version historisée plutôt qu'un écrasement
-        if (request.getPrixUnitaireHt() != null
-                && request.getPrixUnitaireHt().compareTo(entity.getPrixUnitaireHt()) != 0) {
+        boolean prixChange = request.getPrixUnitaireHt() != null
+                && request.getPrixUnitaireHt().compareTo(entity.getPrixUnitaireHt()) != 0;
+        boolean conditionnementChange = (request.getConditionnementQuantite() != null
+                        && (entity.getConditionnementQuantite() == null
+                                || request.getConditionnementQuantite()
+                                                .compareTo(entity.getConditionnementQuantite())
+                                        != 0))
+                || (request.getConditionnementUomId() != null
+                        && !Objects.equals(request.getConditionnementUomId(), entity.getConditionnementUomId()))
+                || (request.getRemisePercent() != null
+                        && request.getRemisePercent().compareTo(entity.getRemisePercent()) != 0);
+
+        if (prixChange) {
             return upsertHistorise(
                     tenantId(),
-                    request.getFournisseurId() != null
-                            ? request.getFournisseurId().trim()
-                            : entity.getFournisseurId(),
-                    request.getArticleId() != null
-                            ? request.getArticleId().trim()
-                            : entity.getArticleId(),
+                    request.getFournisseurId() != null ? request.getFournisseurId() : entity.getFournisseurId(),
+                    request.getArticleId() != null ? request.getArticleId() : entity.getArticleId(),
                     request.getDesignation() != null
                             ? request.getDesignation().trim()
                             : entity.getDesignation(),
@@ -151,7 +187,13 @@ public class CatalogueFournisseurLigneService {
                     request.getRefFournisseur() != null
                             ? trimOrNull(request.getRefFournisseur())
                             : entity.getRefFournisseur(),
-                    request.getUom() != null ? trimOrNull(request.getUom()) : entity.getUom(),
+                    request.getUomId() != null ? request.getUomId() : entity.getUomId(),
+                    request.getConditionnementQuantite() != null
+                            ? request.getConditionnementQuantite()
+                            : entity.getConditionnementQuantite(),
+                    request.getConditionnementUomId() != null
+                            ? request.getConditionnementUomId()
+                            : entity.getConditionnementUomId(),
                     request.getCurrencyId() != null ? request.getCurrencyId() : entity.getCurrencyId(),
                     request.getValidFrom() != null ? request.getValidFrom() : LocalDate.now(),
                     request.getRemisePercent() != null
@@ -165,10 +207,10 @@ public class CatalogueFournisseurLigneService {
                     request.getActif() != null ? request.getActif() : Boolean.TRUE.equals(entity.getActif()));
         }
         if (request.getFournisseurId() != null) {
-            entity.setFournisseurId(request.getFournisseurId().trim());
+            entity.setFournisseurId(request.getFournisseurId());
         }
         if (request.getArticleId() != null) {
-            entity.setArticleId(request.getArticleId().trim());
+            entity.setArticleId(request.getArticleId());
         }
         if (request.getRefFournisseur() != null) {
             entity.setRefFournisseur(trimOrNull(request.getRefFournisseur()));
@@ -176,8 +218,14 @@ public class CatalogueFournisseurLigneService {
         if (request.getDesignation() != null) {
             entity.setDesignation(request.getDesignation().trim());
         }
-        if (request.getUom() != null) {
-            entity.setUom(trimOrNull(request.getUom()));
+        if (request.getUomId() != null) {
+            entity.setUomId(request.getUomId());
+        }
+        if (request.getConditionnementQuantite() != null) {
+            entity.setConditionnementQuantite(request.getConditionnementQuantite());
+        }
+        if (request.getConditionnementUomId() != null) {
+            entity.setConditionnementUomId(request.getConditionnementUomId());
         }
         if (request.getCurrencyId() != null) {
             entity.setCurrencyId(request.getCurrencyId());
@@ -210,6 +258,9 @@ public class CatalogueFournisseurLigneService {
             entity.setActif(request.getActif());
         }
         entity.setUpdatedAt(OffsetDateTime.now());
+        if (conditionnementChange || request.getRemisePercent() != null) {
+            prixNormaliseCatalogueService.apply(entity);
+        }
         return repository.save(entity);
     }
 
@@ -227,17 +278,16 @@ public class CatalogueFournisseurLigneService {
     }
 
     private List<CatalogueFournisseurLigne> loadRows(
-            UUID tenantId, String fournisseurId, String articleId, Boolean actif) {
+            UUID tenantId, UUID fournisseurId, UUID articleId, Boolean actif) {
         List<CatalogueFournisseurLigne> rows;
-        if (StringUtils.hasText(fournisseurId) && StringUtils.hasText(articleId)) {
-            rows = repository.findByTenantIdAndArticleIdOrderByDesignationAsc(tenantId, articleId.trim()).stream()
-                    .filter(r -> fournisseurId.trim().equals(r.getFournisseurId()))
+        if (fournisseurId != null && articleId != null) {
+            rows = repository.findByTenantIdAndArticleIdOrderByDesignationAsc(tenantId, articleId).stream()
+                    .filter(r -> fournisseurId.equals(r.getFournisseurId()))
                     .toList();
-        } else if (StringUtils.hasText(fournisseurId)) {
-            rows = repository.findByTenantIdAndFournisseurIdOrderByDesignationAsc(
-                    tenantId, fournisseurId.trim());
-        } else if (StringUtils.hasText(articleId)) {
-            rows = repository.findByTenantIdAndArticleIdOrderByDesignationAsc(tenantId, articleId.trim());
+        } else if (fournisseurId != null) {
+            rows = repository.findByTenantIdAndFournisseurIdOrderByDesignationAsc(tenantId, fournisseurId);
+        } else if (articleId != null) {
+            rows = repository.findByTenantIdAndArticleIdOrderByDesignationAsc(tenantId, articleId);
         } else {
             rows = repository.findByTenantIdOrderByCreatedAtDesc(tenantId);
         }
@@ -250,8 +300,8 @@ public class CatalogueFournisseurLigneService {
     private boolean matchesSearch(CatalogueFournisseurLigne row, String term) {
         return contains(row.getDesignation(), term)
                 || contains(row.getRefFournisseur(), term)
-                || contains(row.getFournisseurId(), term)
-                || contains(row.getArticleId(), term);
+                || contains(row.getFournisseurId() != null ? row.getFournisseurId().toString() : null, term)
+                || contains(row.getArticleId() != null ? row.getArticleId().toString() : null, term);
     }
 
     private boolean contains(String value, String term) {
@@ -263,6 +313,17 @@ public class CatalogueFournisseurLigneService {
             return null;
         }
         return value.trim();
+    }
+
+    private static UUID parseUuidOrNull(String raw) {
+        if (!StringUtils.hasText(raw)) {
+            return null;
+        }
+        try {
+            return UUID.fromString(raw.trim());
+        } catch (IllegalArgumentException ex) {
+            return null;
+        }
     }
 
     private UUID tenantId() {

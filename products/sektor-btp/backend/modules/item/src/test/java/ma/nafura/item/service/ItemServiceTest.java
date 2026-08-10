@@ -38,6 +38,9 @@ class ItemServiceTest {
     @Mock
     private ItemUsageLotRepository usageLotRepository;
 
+    @Mock
+    private ma.nafura.item.repository.UnitOfMeasureRepository unitOfMeasureRepository;
+
     @InjectMocks
     private ItemService service;
 
