@@ -1,14 +1,16 @@
 package ma.nafura.item.api.request;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 /**
  * Create DTO for UnitOfMeasure entity.
- * Auto-generated from unit-of-measure.entity.json — do not edit.
  */
 @Data
 public class UnitOfMeasureCreateDto {
@@ -24,6 +26,13 @@ public class UnitOfMeasureCreateDto {
     private UUID uomCategoryId;
 
     private String description;
+
+    @NotNull
+    @DecimalMin(value = "0", inclusive = false)
+    private BigDecimal facteurVersBase = BigDecimal.ONE;
+
+    @NotNull
+    private Boolean estBase = false;
 
     private Boolean isActive;
 }

@@ -15,7 +15,7 @@ registerLocaleData(localeFrMA, 'fr-MA');
 
 // Inversion de dépendance : l'application déclare sa configuration à la plateforme.
 // La plateforme ne doit jamais importer @app/* — voir
-// products/sektor-btp/docs/epics/front-ownership/.
+// products/sektor-btp/docs/specs/epics/_archive/front-ownership/.
 // Enregistré au niveau module, donc avant tout bootstrap : main.ts importe ce fichier,
 // et la plateforme ne lit la configuration que dans des corps de fonction.
 import { registerApplicationConfig } from '@platform/core/application/application-config';
@@ -185,7 +185,7 @@ export const appConfig: ApplicationConfig = {
 
     // Inversion de dépendance : la plateforme déclare INTEGRATION_AUDIT_PORT, l'ERP
     // fournit l'implémentation. Sans ce provider, whatsapp.adapter tomberait sur le
-    // repli silencieux. Voir products/sektor-btp/docs/epics/front-ownership/.
+    // repli silencieux. Voir products/sektor-btp/docs/specs/epics/_archive/front-ownership/.
     { provide: INTEGRATION_AUDIT_PORT, useExisting: ErpAuditService },
 
     // Emplacements du shell : la plateforme expose des slots nommés, l'ERP les remplit.

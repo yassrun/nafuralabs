@@ -9,7 +9,10 @@
       "name": "الاسم",
       "category": "معرّف فئة القياس",
       "categoryCode": "الرمز",
-      "categoryName": "الاسم"
+      "categoryName": "الاسم",
+      "facteurVersBase": "المعامل نحو الأساس",
+      "facteurVersBaseHint": "كم وحدة أساس في وحدة واحدة (مثال: 1 M3 = 1000 L)",
+      "estBase": "وحدة الأساس"
     },
     "navigation": {
       "itemUnitConversions": "تحويلات وحدات الأصناف",

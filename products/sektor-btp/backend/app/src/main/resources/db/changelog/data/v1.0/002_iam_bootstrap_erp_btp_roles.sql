@@ -87,15 +87,20 @@ ON CONFLICT (role_code, permission) DO NOTHING;
 
 -- ── Dossier d'étude ────────────────────────────────────────────────────────
 -- L'auteur SOUMET (etude.submit), le N+1 APPROUVE (etude.approve) : l'ingénieur n'a
--- délibérément pas etude.approve, et le service refuse qu'un approbateur valide une
--- étude dont il est l'auteur, sauf paramètre tenant explicite (etudes.auteurPeutValider).
+-- délibérément pas etude.approve. L4 : plus de joker etude.* — permissions énumérées.
+-- Garde-fou quatre yeux : CHARGE_ETUDE / REVISEUR via dossier_intervenant (pas seulement createdBy).
 
 INSERT INTO role_permission (id, role_code, permission, created_at) VALUES
-  ('c0a5b1d2-e3f4-4a01-9c01-000000000201', 'BTP_DIRECTEUR_TRAVAUX', 'etude.*', NOW()),
+  ('c0a5b1d2-e3f4-4a01-9c01-000000000211', 'BTP_DIRECTEUR_TRAVAUX', 'etude.read', NOW()),
+  ('c0a5b1d2-e3f4-4a01-9c01-000000000212', 'BTP_DIRECTEUR_TRAVAUX', 'etude.update', NOW()),
   ('c0a5b1d2-e3f4-4a01-9c01-000000000207', 'BTP_DIRECTEUR_TRAVAUX', 'etude.submit', NOW()),
   ('c0a5b1d2-e3f4-4a01-9c01-000000000208', 'BTP_DIRECTEUR_TRAVAUX', 'etude.approve', NOW()),
+  ('c0a5b1d2-e3f4-4a01-9c01-000000000213', 'BTP_DIRECTEUR_TRAVAUX', 'etude.avis', NOW()),
   ('c0a5b1d2-e3f4-4a01-9c01-000000000209', 'BTP_DIRECTEUR_TRAVAUX', 'etude.delete', NOW()),
-  ('c0a5b1d2-e3f4-4a01-9c01-000000000202', 'BTP_CONDUCTEUR_TRAVAUX', 'etude.*', NOW()),
+  ('c0a5b1d2-e3f4-4a01-9c01-000000000214', 'BTP_CONDUCTEUR_TRAVAUX', 'etude.read', NOW()),
+  ('c0a5b1d2-e3f4-4a01-9c01-000000000215', 'BTP_CONDUCTEUR_TRAVAUX', 'etude.avis', NOW()),
+  ('c0a5b1d2-e3f4-4a01-9c01-000000000216', 'BTP_CHEF_CHANTIER', 'etude.read', NOW()),
+  ('c0a5b1d2-e3f4-4a01-9c01-000000000217', 'BTP_CHEF_CHANTIER', 'etude.avis', NOW()),
   ('c0a5b1d2-e3f4-4a01-9c01-000000000203', 'BTP_DAF', 'etude.read', NOW()),
   ('c0a5b1d2-e3f4-4a01-9c01-000000000204', 'BTP_INGENIEUR', 'etude.read', NOW()),
   ('c0a5b1d2-e3f4-4a01-9c01-000000000205', 'BTP_INGENIEUR', 'etude.create', NOW()),

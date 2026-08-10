@@ -1148,6 +1148,9 @@
           "code": "Code",
           "name": "Label",
           "uomCategoryId": "Category",
+          "facteurVersBase": "Factor to base",
+          "facteurVersBaseHint": "How many base units in 1 unit (e.g. 1 M3 = 1000 L)",
+          "estBase": "Base unit",
           "isActive": "Active"
         },
         "sections": {
@@ -1159,12 +1162,26 @@
             "code": "Code",
             "name": "Label",
             "uomCategoryId": "Category",
+            "facteurVersBase": "Factor",
+            "estBase": "Base",
             "isActive": "Active"
           },
+          "estBaseYes": "Base",
+          "estBaseNo": "—",
           "filters": {
             "uomCategoryId": "Category",
             "isActive": "Active"
           }
+        },
+        "convert": {
+          "title": "Test a conversion",
+          "hint": "Conversion is strictly within the same category. Litres cannot convert to hours.",
+          "from": "From",
+          "to": "To",
+          "quantity": "Quantity",
+          "action": "Convert",
+          "incomplete": "Select both units and a quantity.",
+          "success": "{{fromQty}} {{fromCode}} = {{toQty}} {{toCode}}"
         }
       },
       "uomCategory": {

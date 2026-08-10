@@ -1,6 +1,5 @@
 /**
- * UnitOfMeasure Model — Auto-generated from unit-of-measure.entity.json
- * Do NOT edit fields here. Edit the .entity.json and regenerate.
+ * UnitOfMeasure Model
  */
 
 export interface UnitOfMeasure {
@@ -9,13 +8,24 @@ export interface UnitOfMeasure {
   name: string;
   uomCategoryId?: string;
   description?: string;
+  facteurVersBase: number;
+  estBase: boolean;
   isActive?: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
-export type UnitOfMeasureListItem = Pick<UnitOfMeasure,
-  'id' | 'code' | 'name' | 'uomCategoryId' | 'isActive' | 'createdAt' | 'updatedAt'
+export type UnitOfMeasureListItem = Pick<
+  UnitOfMeasure,
+  | 'id'
+  | 'code'
+  | 'name'
+  | 'uomCategoryId'
+  | 'facteurVersBase'
+  | 'estBase'
+  | 'isActive'
+  | 'createdAt'
+  | 'updatedAt'
 >;
 
 export type UnitOfMeasureCreate = Omit<UnitOfMeasure, 'id' | 'createdAt' | 'updatedAt'>;
@@ -31,4 +41,20 @@ export interface UnitOfMeasureQuery {
   code?: string;
   name?: string;
   uomCategoryId?: string;
+}
+
+export interface UomConversionRequest {
+  fromUomId: string;
+  toUomId: string;
+  quantity: number;
+}
+
+export interface UomConversionResult {
+  fromUomId: string;
+  fromCode: string;
+  toUomId: string;
+  toCode: string;
+  quantityFrom: number;
+  quantityTo: number;
+  uomCategoryId: string;
 }

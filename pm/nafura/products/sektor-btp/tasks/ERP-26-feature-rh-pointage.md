@@ -11,7 +11,7 @@ tags: [sektor, rh, pointage]
 
 # Feature — Raffinement RH / pointage
 
-> Spec : `products/sektor-btp/docs/epics/rh-pointage-raffinement/00-PLAN.md`
+> Spec : `products/sektor-btp/docs/specs/epics/_archive/rh-pointage-raffinement/00-PLAN.md`
 > Remplace / absorbe l’ancien ERP-04 (raffiner RH lot 4).
 
 ## Modèle cible

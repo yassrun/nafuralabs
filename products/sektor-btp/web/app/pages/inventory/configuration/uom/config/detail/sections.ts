@@ -9,7 +9,7 @@ export function buildUomSections(t: TranslateService): DetailSectionConfig<UomCo
     {
       id: 'general',
       title: tr('inventory.configuration.uom.sections.identification'),
-      fields: ['code', 'name', 'uomCategoryId', 'isActive'],
+      fields: ['code', 'name', 'uomCategoryId', 'facteurVersBase', 'estBase', 'isActive'],
       columns: 2,
     },
   ];

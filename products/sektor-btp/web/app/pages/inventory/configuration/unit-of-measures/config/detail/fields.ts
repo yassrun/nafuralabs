@@ -1,5 +1,5 @@
 /**
- * UnitOfMeasure Detail Fields — Auto-generated from unit-of-measure.entity.json
+ * UnitOfMeasure Detail Fields
  */
 
 import type { DetailFieldConfig } from '@lib/anatomy/types';
@@ -35,6 +35,20 @@ export const FIELDS: DetailFieldConfig<UnitOfMeasure>[] = [
     searchable: true,
     clearable: true,
     referenceRoute: '/inventory/configuration/uo-mcategories',
+  },
+  {
+    key: 'facteurVersBase',
+    label: 'measurement.fields.facteurVersBase',
+    type: 'number',
+    required: true,
+    width: 'md',
+    hint: 'measurement.fields.facteurVersBaseHint',
+  },
+  {
+    key: 'estBase',
+    label: 'measurement.fields.estBase',
+    type: 'toggle',
+    width: 'sm',
   },
   {
     key: 'description',

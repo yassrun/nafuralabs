@@ -16,7 +16,21 @@ public class ComposantDpuInputDto {
     @NotBlank
     private String type;
 
-    @NotBlank
+    /** ITEM | OUVRAGE | LIBRE — défaut LIBRE si absent + legacy articleOuPosteId. */
+    private String referenceType;
+
+    private UUID itemId;
+
+    private UUID ouvrageId;
+
+    private String libelle;
+
+    /**
+     * Legacy — mappé en LIBRE + libelle si {@link #referenceType} absent.
+     *
+     * @deprecated utiliser referenceType / itemId / ouvrageId / libelle
+     */
+    @Deprecated
     private String articleOuPosteId;
 
     /**

@@ -1148,6 +1148,9 @@
           "code": "Code",
           "name": "Libellé",
           "uomCategoryId": "Catégorie",
+          "facteurVersBase": "Facteur vers base",
+          "facteurVersBaseHint": "Combien d'unités de base dans 1 unité (ex. 1 M3 = 1000 L)",
+          "estBase": "Unité de base",
           "isActive": "Actif"
         },
         "sections": {
@@ -1159,12 +1162,26 @@
             "code": "Code",
             "name": "Libellé",
             "uomCategoryId": "Catégorie",
+            "facteurVersBase": "Facteur",
+            "estBase": "Base",
             "isActive": "Actif"
           },
+          "estBaseYes": "Base",
+          "estBaseNo": "—",
           "filters": {
             "uomCategoryId": "Catégorie",
             "isActive": "Actif"
           }
+        },
+        "convert": {
+          "title": "Tester une conversion",
+          "hint": "Conversion strictement intra-catégorie. Les litres ne se convertissent pas en heures.",
+          "from": "De",
+          "to": "Vers",
+          "quantity": "Quantité",
+          "action": "Convertir",
+          "incomplete": "Choisissez les deux unités et une quantité.",
+          "success": "{{fromQty}} {{fromCode}} = {{toQty}} {{toCode}}"
         }
       },
       "uomCategory": {

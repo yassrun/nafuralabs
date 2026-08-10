@@ -17,6 +17,7 @@ import org.springframework.util.StringUtils;
 public class MatricePouvoirService {
 
     public static final String ENTITY_TYPE_BC = "BC";
+    public static final String ENTITY_TYPE_ETUDE_PRIX = "ETUDE_PRIX";
     public static final String ROLE_DIRECTEUR_TRAVAUX = "BTP_DIRECTEUR_TRAVAUX";
     public static final String ROLE_DG = "BTP_DG";
     public static final String ROLE_COMITE = "BTP_DG";

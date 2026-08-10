@@ -88,6 +88,8 @@ public class DpuCalculator {
      *
      * <p>Les taux ne sont jamais portés par un sous-détail. Formule additive validée pour le
      * parcours d'étude manuel : {@code total = debourse × (1 + fg/100 + marge/100)}.
+     *
+     * <p><b>Ne pas modifier</b> — corpus réel 84 ouvrages (R2).
      */
     public BigDecimal computePrixVenteHt(
             BigDecimal deboursSec, BigDecimal fraisGenerauxPercent, BigDecimal margeBeneficiairePercent) {
@@ -97,6 +99,46 @@ public class DpuCalculator {
                 margeBeneficiairePercent != null ? margeBeneficiairePercent.max(BigDecimal.ZERO) : BigDecimal.ZERO;
         BigDecimal coef = BigDecimal.ONE.add(fg.movePointLeft(2)).add(marge.movePointLeft(2));
         return debourse.multiply(coef).setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+    }
+
+    /**
+     * Coût de revient = coût × (1 + FG%). Chaîne multiplicative (L1) — plancher d'affaire.
+     */
+    public BigDecimal computeCoutRevient(BigDecimal coutUnitaire, BigDecimal fraisGenerauxPercent) {
+        BigDecimal cout = coutUnitaire != null ? coutUnitaire.max(BigDecimal.ZERO) : BigDecimal.ZERO;
+        BigDecimal fg = fraisGenerauxPercent != null ? fraisGenerauxPercent.max(BigDecimal.ZERO) : BigDecimal.ZERO;
+        return cout.multiply(BigDecimal.ONE.add(fg.movePointLeft(2)))
+                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+    }
+
+    /**
+     * Prix de vente depuis coût via chaîne multiplicative : coût → revient → vente.
+     * Utilisé pour ESTIME / FORFAIT (AC L1 : 46 → 49,68 → 53,16). Distinct de
+     * {@link #computePrixVenteHt} (additif, DECOMPOSE / corpus).
+     */
+    public BigDecimal computePrixVenteDepuisCout(
+            BigDecimal coutUnitaire, BigDecimal fraisGenerauxPercent, BigDecimal margePercent) {
+        BigDecimal revient = computeCoutRevient(coutUnitaire, fraisGenerauxPercent);
+        BigDecimal marge = margePercent != null ? margePercent.max(BigDecimal.ZERO) : BigDecimal.ZERO;
+        return revient.multiply(BigDecimal.ONE.add(marge.movePointLeft(2)))
+                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+    }
+
+    /**
+     * Déduit le coût d'un prix de vente saisi : prix / ((1+FG%)×(1+marge%)).
+     */
+    public BigDecimal deduceCoutDepuisPrixVente(
+            BigDecimal prixVente, BigDecimal fraisGenerauxPercent, BigDecimal margePercent) {
+        BigDecimal prix = prixVente != null ? prixVente.max(BigDecimal.ZERO) : BigDecimal.ZERO;
+        BigDecimal fg = fraisGenerauxPercent != null ? fraisGenerauxPercent.max(BigDecimal.ZERO) : BigDecimal.ZERO;
+        BigDecimal marge = margePercent != null ? margePercent.max(BigDecimal.ZERO) : BigDecimal.ZERO;
+        BigDecimal coef = BigDecimal.ONE
+                .add(fg.movePointLeft(2))
+                .multiply(BigDecimal.ONE.add(marge.movePointLeft(2)));
+        if (coef.compareTo(BigDecimal.ZERO) <= 0) {
+            return prix.setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+        }
+        return prix.divide(coef, MONEY_SCALE, RoundingMode.HALF_UP);
     }
 
     public BigDecimal computePrixVenteTtc(BigDecimal prixVenteHt, BigDecimal tvaTaux) {

@@ -27,6 +27,8 @@
         "name": "name",
         "uomCategoryId": "ID catégorie de mesure",
         "description": "description",
+        "facteurVersBase": "Facteur vers base",
+        "estBase": "Unité de base",
         "isActive": "is Active"
       },
       "sections": {}

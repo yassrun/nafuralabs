@@ -2,16 +2,16 @@
  * Mapping entre étapes métier UI (4) et étapes techniques backend (5).
  *
  * Backend conserve 1..5 pour éviter une migration des dossiers existants.
- * UI : Documents → Bordereau → Décomposition & consultations → Synthèse.
+ * UI : Documents → Bordereau → Coût → Synthèse.
  * Correspondance : 1→1, 2→2, 3|4→3, 5→4.
  */
 
 export const ETAPES_UI_DOSSIER = [
   { ui: 1, libelle: 'Documents du marché', nextLabel: 'Continuer vers le bordereau' },
-  { ui: 2, libelle: 'Bordereau', nextLabel: 'Continuer vers la décomposition' },
+  { ui: 2, libelle: 'Bordereau', nextLabel: 'Continuer vers le coût' },
   {
     ui: 3,
-    libelle: 'Décomposition et consultations',
+    libelle: 'Coût',
     nextLabel: 'Voir la synthèse',
   },
   {

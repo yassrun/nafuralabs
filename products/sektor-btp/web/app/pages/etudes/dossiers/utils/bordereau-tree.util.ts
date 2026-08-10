@@ -14,6 +14,7 @@ export interface BordereauTreeRow {
   quantite?: number | null;
   prixUnitaire?: number | null;
   prixFourniBase?: number | null;
+  coutUnitaire?: number | null;
   fraisGenerauxPercent?: number | null;
   margePercent?: number | null;
   total?: number | null;
@@ -21,6 +22,7 @@ export interface BordereauTreeRow {
   nombrePostes?: number | null;
   descriptif?: string | null;
   mode?: string | null;
+  origineCout?: string | null;
   prixDpuId?: string | null;
   depth: number;
   /** ARTICLE sans unité ou quantité ≤ 0 — exclu à la persistance. */
@@ -100,12 +102,14 @@ export function noeudsDpgfToTreeNodes(
         unite: n.unite,
         quantite: n.quantite,
         prixUnitaire: n.prixUnitaire,
-        prixFourniBase: n.prixFourniBase,
+        prixFourniBase: n.coutUnitaire ?? n.prixFourniBase,
+        coutUnitaire: n.coutUnitaire ?? n.prixFourniBase,
         fraisGenerauxPercent: n.fraisGenerauxPercent,
         margePercent: n.margePercent,
         total: n.total,
         descriptif: n.descriptif,
         mode: n.mode,
+        origineCout: n.origineCout,
         prixDpuId: n.prixDpuId,
         depth,
         nonExploitable:

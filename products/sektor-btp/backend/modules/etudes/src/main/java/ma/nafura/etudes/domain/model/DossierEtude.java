@@ -21,7 +21,7 @@ import ma.nafura.etudes.domain.audit.EtudeAuditingListener;
  *
  * <p>C'est ce qui manquait à {@code etudes} : des briques existaient sans parcours qui les
  * relie. Le module {@code consultation} avait ce parcours mais avec un modèle de données
- * concurrent — voir {@code products/sektor-btp/docs/epics/etude-prix-unifiee/}.
+ * concurrent — voir {@code products/sektor-btp/docs/specs/epics/_archive/etude-prix-unifiee/}.
  */
 @Entity
 @Table(name = "dossiers_etude")
@@ -166,6 +166,13 @@ public class DossierEtude implements AuditableEtude {
 
     @Column(name = "approval_request_id", length = 100)
     private String approvalRequestId;
+
+    /**
+     * Nombre de niveaux d'approbation figé à la soumission (1 sous seuil, 2 au-dessus).
+     * Null hors validation / avant soumission.
+     */
+    @Column(name = "niveaux_approbation")
+    private Integer niveauxApprobation;
 
     @Column(name = "notes")
     private String notes;

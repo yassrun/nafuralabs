@@ -12,7 +12,12 @@ import type {
 export type ComposantDpuWrite = {
   id?: string;
   type: ComposantDPU['type'];
-  articleOuPosteId: string;
+  referenceType: 'ITEM' | 'OUVRAGE' | 'LIBRE';
+  itemId?: string | null;
+  ouvrageId?: string | null;
+  libelle: string;
+  /** @deprecated */
+  articleOuPosteId?: string;
   quantite: number;
   unite: string;
   prixUnitaire: number;

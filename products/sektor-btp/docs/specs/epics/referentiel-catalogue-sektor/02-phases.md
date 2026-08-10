@@ -102,9 +102,9 @@ C'est la phase la plus lourde et la plus rentable de l'epic.
 
 ### Critères d'acceptation
 
-- [ ] Aucune référence article en `VARCHAR` dans `etudes`
-- [ ] La contrainte d'exclusivité `ITEM` / `OUVRAGE` / `LIBRE` est vérifiée en base, pas
-      seulement en Java
+- [x] Aucune référence article en `VARCHAR` dans `etudes` *(L2 — composants ; hors catalogue_fournisseur / phase 4)*
+- [x] La contrainte d'exclusivité `ITEM` / `OUVRAGE` / `LIBRE` est vérifiée en base, pas
+      seulement en Java *(L2)*
 - [ ] Un composant `ITEM` reçoit son prix automatiquement, avec sa source affichée :
       « 1,20 DH — catalogue Lafarge, 12/06/2026 »
 - [ ] Les **sept** informations de `PrixResolu` sont persistées sur le composant
@@ -175,8 +175,8 @@ C'est la phase la plus lourde et la plus rentable de l'epic.
       B classé devant A
 - [ ] Le prix commercial (450 MAD le pot) reste stocké **tel quel** et affiché tel quel
 - [ ] Le prix normalisé est **recalculé**, jamais saisi
-- [ ] Convertir litres → heures **échoue explicitement**
-- [ ] Une catégorie sans unité de base est refusée à la création
+- [x] Convertir litres → heures **échoue explicitement** *(L3)*
+- [x] Une catégorie sans unité de base est refusée à la création *(L3)*
 - [ ] Aucune référence en `VARCHAR` dans `catalogue_fournisseur_lignes`
 - [ ] L'historisation existante continue de fonctionner : un nouveau prix ferme le précédent
 
@@ -328,19 +328,19 @@ tenable **avant** qu'on s'engage — aujourd'hui il décroche son téléphone, e
 
 ### Critères d'acceptation
 
-- [ ] Aucune permission `etude.*` dans le dépôt ; chaque rôle a sa liste énumérée
-- [ ] Un conducteur de travaux **ne peut plus** approuver une étude
-- [ ] Un directeur de travaux qui a modifié le chiffrage **ne peut pas** approuver ce dossier —
-      c'est le niveau au-dessus qui signe
-- [ ] Le cas « l'assistante crée, l'ingénieur chiffre » est couvert : l'ingénieur ne peut pas
-      approuver, alors que `createdBy` ne le désigne pas
-- [ ] Un utilisateur intervenu **uniquement** par un avis conserve son droit d'approbation
+- [x] Aucune permission `etude.*` dans le dépôt ; chaque rôle a sa liste énumérée *(L4)*
+- [x] Un conducteur de travaux **ne peut plus** approuver une étude *(L4)*
+- [x] Un directeur de travaux qui a modifié le chiffrage **ne peut pas** approuver ce dossier —
+      c'est le niveau au-dessus qui signe *(L4 — rôle REVISEUR)*
+- [x] Le cas « l'assistante crée, l'ingénieur chiffre » est couvert : l'ingénieur ne peut pas
+      approuver, alors que `createdBy` ne le désigne pas *(L4 — CHARGE_ETUDE)*
+- [x] Un utilisateur intervenu **uniquement** par un avis conserve son droit d'approbation *(L4 — rôle AVIS non bloquant ; CRUD avis = L8)*
 - [ ] Un avis `DIFFICILE` ou `IRREALISABLE` **sans commentaire** est refusé
 - [ ] Un avis écarté **sans motif** est refusé
 - [ ] Une étude comportant des avis ouverts ou écartés **peut être soumise** — le dossier de
       validation les affiche, sans blocage
-- [ ] `etude.avis` ne donne **aucun** droit d'écriture sur le chiffrage — vérifié par test
-- [ ] Sous le seuil configuré, un seul niveau d'approbation est demandé
+- [x] `etude.avis` ne donne **aucun** droit d'écriture sur le chiffrage — vérifié par test *(L4 — seed + controllers `etude.update`)*
+- [x] Sous le seuil configuré, un seul niveau d'approbation est demandé *(L4)*
 - [ ] Un avis reste attaché à son poste après validation de l'étude et reste lisible depuis le
       chantier (prérequis de la corrélation en phase 7)
 
@@ -348,18 +348,20 @@ tenable **avant** qu'on s'engage — aujourd'hui il décroche son téléphone, e
 
 ## Suivi
 
+> Tableau de bord runtime : [`00-PROGRESS.md`](00-PROGRESS.md).
+
 | Phase | Statut | Notes |
 |---|---|---|
 | PR1 — clause CGU | ⬜ | Hors code |
 | PR2 — codification | ⬜ | Arbitrage métier requis |
-| 1 — Coût de chaque ligne | ⬜ | Absorbe le chiffrage du lot 6 |
-| 2 — Référentiel branché | ⬜ | Absorbe la part « prix » du lot 5 |
+| 1 — Coût de chaque ligne | 🟡 | L1 backend + contrat front. L6 polish UI (sélecteur 3 origines, bandeau) reste |
+| 2 — Référentiel branché | 🟡 | L2 référence typée livré. L5 gel + L9 rattrapage restent |
 | 3 — Ouvrage composite | ⬜ | Absorbe le lot 4 |
-| 4 — Fournisseurs et unités | ⬜ | Absorbe la part « comparaison » du lot 5 |
+| 4 — Fournisseurs et unités | 🟡 | L3 unités livré (facteur, base, conversion). L7 conditionnements reste |
 | 5 — Catalogue | ⬜ | |
 | 6 — Intelligence | ⬜ | |
 | 7 — Chaînage aval | ⬜ | Reprend le lot 7, avec la ventilation des lignes non décomposées |
-| V — Validation + avis d'exécution | ⬜ | Reprend le circuit du lot 6. Indépendant |
+| V — Validation + avis d'exécution | 🟡 | L4 permissions + 4 yeux + seuil. L8 avis_execution reste |
 
 **Hors epic, à ne pas oublier** : lot 3 (import non destructif), chantier `front-ownership`.
 

@@ -15,8 +15,8 @@ Tu es l'agent d'implémentation du monorepo nafuralabs (ERP Sektor-BTP).
 
 AVANT DE COMMENCER, lis dans cet ordre :
 1. docs/AGENTS.md — conventions du monorepo (impératif)
-2. products/sektor-btp/docs/epics/etude-prix-unifiee/00-INDEX.md
-3. products/sektor-btp/docs/epics/etude-prix-unifiee/00-ARCHITECTURE.md
+2. products/sektor-btp/docs/specs/epics/etude-prix-unifiee/00-INDEX.md
+3. products/sektor-btp/docs/specs/epics/etude-prix-unifiee/00-ARCHITECTURE.md
 4. Le fichier de lot indiqué ci-dessous
 
 RÈGLES ABSOLUES
@@ -68,7 +68,7 @@ MÉTHODE
 [EN-TÊTE COMMUN]
 
 LOT : 9 — Référentiel articles et prix
-SPEC : products/sektor-btp/docs/epics/etude-prix-unifiee/09-referentiel-articles-prix.md
+SPEC : products/sektor-btp/docs/specs/epics/etude-prix-unifiee/09-referentiel-articles-prix.md
 
 C'est le premier lot de l'epic. Purement backend — aucun front, donc aucun impact du
 chantier de réorganisation front en cours.
@@ -123,7 +123,7 @@ passe.
 [EN-TÊTE COMMUN]
 
 LOT : 1 — Fusion du modèle
-SPEC : products/sektor-btp/docs/epics/etude-prix-unifiee/01-fusion-modele.md
+SPEC : products/sektor-btp/docs/specs/epics/etude-prix-unifiee/01-fusion-modele.md
 
 Lot le PLUS RISQUÉ de l'epic : il touche le calcul de prix.
 
@@ -161,7 +161,7 @@ grep -r "quantiteIndicative" ne retourne rien.
 [EN-TÊTE COMMUN]
 
 LOT : 8 — Suppression des tables consultation
-SPEC : products/sektor-btp/docs/epics/etude-prix-unifiee/08-migration-donnees.md
+SPEC : products/sektor-btp/docs/specs/epics/etude-prix-unifiee/08-migration-donnees.md
 
 Lot court. AUCUNE migration de données : le produit n'est pas en production et les
 données en base sont sans valeur (décision Q6).

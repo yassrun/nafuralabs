@@ -1,6 +1,7 @@
 package ma.nafura.etudes.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import jakarta.persistence.*;
@@ -19,6 +20,7 @@ import ma.nafura.item.domain.SourcePrix;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ComposantDpu {
 
     public static final String TYPE_MATIERE = "MATIERE";
@@ -58,9 +60,20 @@ public class ComposantDpu {
     @Column(name = "type", nullable = false, length = 30)
     private String type;
 
-    @Column(name = "article_ou_poste_id", nullable = false, length = 100)
-    @JsonProperty("articleOuPosteId")
-    private String articleOuPosteId;
+    /** ITEM | OUVRAGE | LIBRE */
+    @Column(name = "reference_type", nullable = false, length = 20)
+    private String referenceType;
+
+    @Column(name = "item_id")
+    private UUID itemId;
+
+    /** Référence typée vers un ouvrage (composite) — distinct du parent PrixDpu.ouvrage. */
+    @Column(name = "ouvrage_id")
+    private UUID ouvrageId;
+
+    /** Toujours renseigné — l'affichage ne dépend pas de la résolution catalogue. */
+    @Column(name = "libelle", nullable = false, length = 500)
+    private String libelle;
 
     /**
      * Quantité de ce composant nécessaire pour UNE unité d'ouvrage (ex. 350 kg de ciment par m³).
@@ -118,6 +131,25 @@ public class ComposantDpu {
         this.rendement = quantite;
     }
 
+    /**
+     * Compat snapshots / front legacy : {@code articleOuPosteId} → libellé LIBRE.
+     */
+    @JsonSetter("articleOuPosteId")
+    public void setArticleOuPosteIdLegacy(String articleOuPosteId) {
+        if (this.libelle == null && articleOuPosteId != null && !articleOuPosteId.isBlank()) {
+            this.libelle = articleOuPosteId.trim();
+        }
+        if (this.referenceType == null) {
+            this.referenceType = "LIBRE";
+        }
+    }
+
+    /** Alias lecture legacy pour le front en transition. */
+    @JsonProperty("articleOuPosteId")
+    public String getArticleOuPosteId() {
+        return libelle;
+    }
+
     /** Un composant sans base declaree est au rendement unitaire — le cas le plus courant. */
     public boolean estJournalier() {
         return BASE_PAR_JOUR.equals(baseRendement);
@@ -135,6 +167,9 @@ public class ComposantDpu {
         }
         if (this.suggereParIa == null) {
             this.suggereParIa = false;
+        }
+        if (this.referenceType == null) {
+            this.referenceType = "LIBRE";
         }
     }
 

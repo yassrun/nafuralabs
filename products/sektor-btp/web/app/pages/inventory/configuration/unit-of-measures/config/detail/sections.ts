@@ -1,5 +1,5 @@
 /**
- * UnitOfMeasure Detail Sections — Auto-generated from unit-of-measure.entity.json
+ * UnitOfMeasure Detail Sections
  */
 
 import type { DetailSectionConfig } from '@lib/anatomy/types';
@@ -9,7 +9,7 @@ export const SECTIONS: DetailSectionConfig<UnitOfMeasure>[] = [
   {
     id: 'general',
     title: 'common.sections.general',
-    fields: ['code', 'name', 'uomCategoryId', 'description', 'isActive'],
+    fields: ['code', 'name', 'uomCategoryId', 'facteurVersBase', 'estBase', 'description', 'isActive'],
     columns: 2,
   },
 ];

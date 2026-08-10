@@ -28,12 +28,12 @@ updated: 2026-08-05
 | 6 | Chantier minimal | ERP-06 | Fiche pivot analytique léger |
 | 7 | Planification chantier | ERP-07 | **Après** 1–5 utilisables |
 
-Spec classification : `products/sektor-btp/docs/epics/classification-article/00-PLAN.md`  
-Spec stock : `products/sektor-btp/docs/epics/stock-raffinement/00-PLAN.md`  
+Spec classification : `products/sektor-btp/docs/specs/epics/_archive/classification-article/00-PLAN.md`  
+Spec stock : `products/sektor-btp/docs/specs/epics/_archive/stock-raffinement/00-PLAN.md`  
 ADR stock : `…/stock-raffinement/01-ADR-decisions-ouvertes.md` (ERP-33 **done**)  
 Chaîne stock : ERP-33✓ → 34✓ → 35✓ → 36✓ → 37✓ → 38✓ → 39✓ 
 
-Spec RH : `products/sektor-btp/docs/epics/rh-pointage-raffinement/00-PLAN.md`  
+Spec RH : `products/sektor-btp/docs/specs/epics/_archive/rh-pointage-raffinement/00-PLAN.md`  
 ADR RH : `…/rh-pointage-raffinement/01-ADR-decisions-ouvertes.md` (ERP-27 **done**)  
 Chaîne RH : ERP-27✓ → 28✓ → 29 → (30 · 31 · 32). ERP-04 **supprimé** (mergé ERP-26).  
 ERP-01 **supprimé** (mergé ERP-18).

@@ -15,6 +15,7 @@ import ma.nafura.etudes.api.request.ComposantOuvrageInputDto;
 import ma.nafura.etudes.api.request.OuvrageCreateDto;
 import ma.nafura.etudes.api.request.OuvrageUpdateDto;
 import ma.nafura.etudes.api.request.UniteMainInputDto;
+import ma.nafura.etudes.domain.ComposantReference;
 import ma.nafura.etudes.domain.model.ComposantOuvrage;
 import ma.nafura.etudes.domain.model.Ouvrage;
 import ma.nafura.etudes.domain.model.UniteMain;
@@ -239,6 +240,15 @@ public class OuvrageService {
             BigDecimal total = input.getTotal() != null
                     ? input.getTotal()
                     : input.getRendement().multiply(input.getPrixUnitaire());
+            String libelle = StringUtils.hasText(input.getLibelle())
+                    ? input.getLibelle()
+                    : input.getDesignation();
+            ComposantReference ref = ComposantReference.resolve(
+                    input.getReferenceType(),
+                    input.getItemId(),
+                    input.getRefOuvrageId(),
+                    libelle,
+                    input.getArticleId());
             entity.getComposants()
                     .add(ComposantOuvrage.builder()
                             .tenantId(tenantId)
@@ -246,8 +256,10 @@ public class OuvrageService {
                             .type(StringUtils.hasText(input.getType())
                                     ? input.getType().trim()
                                     : ComposantOuvrage.TYPE_MATERIAU)
-                            .articleId(trimOrNull(input.getArticleId()))
-                            .designation(input.getDesignation().trim())
+                            .referenceType(ref.type().name())
+                            .itemId(ref.itemId())
+                            .refOuvrageId(ref.ouvrageId())
+                            .libelle(ref.libelle())
                             .unite(input.getUnite().trim())
                             .rendement(input.getRendement())
                             .prixUnitaire(input.getPrixUnitaire())

@@ -37,6 +37,20 @@ export function buildUomFields(t: TranslateService): DetailFieldConfig<UomConfig
       referenceRoute: '/inventory/configuration/uom-categories',
     },
     {
+      key: 'facteurVersBase',
+      label: tr('inventory.configuration.uom.fields.facteurVersBase'),
+      type: 'number',
+      required: true,
+      width: 'md',
+      hint: tr('inventory.configuration.uom.fields.facteurVersBaseHint'),
+    },
+    {
+      key: 'estBase',
+      label: tr('inventory.configuration.uom.fields.estBase'),
+      type: 'toggle',
+      width: 'sm',
+    },
+    {
       key: 'isActive',
       label: tr('inventory.configuration.uom.fields.isActive'),
       type: 'toggle',

@@ -17,10 +17,10 @@ constats qui débloquent le parallélisme :
 - **Le chantier V est autonome.** Permissions et validation, aucun lien avec le chiffrage.
 
 ```
-VAGUE 1  ─ L1 coût de ligne ──┬──────────────► L6 front chiffrage ──┐
-         ─ L2 référence typée ┼─► L5 gel prix ─┬─► L9 rattrapage    ├─► L13 aval
-         ─ L3 unités ─────────┼─► L7 condition.┤                    │
-         ─ L4 validation ─────┼─► L8 avis      │                    │
+VAGUE 1  ─ L1 coût de ligne ✅ ──┬──────────────► L6 front chiffrage ──┐
+         ─ L2 référence typée ✅ ┼─► L5 gel prix ─┬─► L9 rattrapage    ├─► L13 aval
+         ─ L3 unités ✅ ─────────┼─► L7 condition.┤                    │
+         ─ L4 validation ✅ ─────┼─► L8 avis      │                    │
                               │                └─► L10 ouvrage ─► L12 biblio ─┐
                               └─► L11 comparateur ───────────────────────────┤
                                                                               ▼
@@ -29,18 +29,20 @@ VAGUE 1  ─ L1 coût de ligne ──┬─────────────�
                                                                           L16 IA
 ```
 
+> Progress runtime : [`00-PROGRESS.md`](00-PROGRESS.md).
+
 ---
 
 ## Les vagues
 
 ### Vague 1 — quatre agents en parallèle, aucune dépendance croisée
 
-| Lot | Titre | Module | Phase |
-|---|---|---|---|
-| **L1** | Coût de ligne — modèle, calcul, garde-fous, synthèse | `etudes` | 1 |
-| **L2** | Référence typée des composants | `etudes` | 2 |
-| **L3** | Unités : facteur, unité de base, conversion | `item` | 4 |
-| **L4** | Validation à quatre yeux + permissions | `etudes`, seed IAM | V |
+| Lot | Titre | Module | Phase | Status |
+|---|---|---|---|---|
+| **L1** | Coût de ligne — modèle, calcul, garde-fous, synthèse | `etudes` | 1 | ✅ done |
+| **L2** | Référence typée des composants | `etudes` | 2 | ✅ done |
+| **L3** | Unités : facteur, unité de base, conversion | `item` | 4 | ✅ done |
+| **L4** | Validation à quatre yeux + permissions | `etudes`, seed IAM | V | ✅ done |
 
 > ⚠️ **Point de friction unique** : L1 et L4 touchent tous deux le module `etudes`. L1 travaille
 > dans `DpgfService`, `DpuCalculator`, `GatesEtude` ; L4 dans `DossierEtudeService` et le seed
@@ -49,40 +51,40 @@ VAGUE 1  ─ L1 coût de ligne ──┬─────────────�
 
 ### Vague 2
 
-| Lot | Titre | Dépend de |
-|---|---|---|
-| **L5** | Gel du prix + branchement `ResolutionPrixService` | L2 |
-| **L6** | Front du chiffrage — sélecteur d'origine, 3 lignes, synthèse | L1 |
-| **L7** | Conditionnement fournisseur + typage des références | L3 |
-| **L8** | Avis d'exécution | L4 |
+| Lot | Titre | Dépend de | Status |
+|---|---|---|---|
+| **L5** | Gel du prix + branchement `ResolutionPrixService` | L2 | ⬜ todo |
+| **L6** | Front du chiffrage — sélecteur d'origine, 3 lignes, synthèse | L1 | ⬜ todo |
+| **L7** | Conditionnement fournisseur + typage des références | L3 | ⬜ todo |
+| **L8** | Avis d'exécution | L4 | ⬜ todo |
 
 ### Vague 3
 
-| Lot | Titre | Dépend de |
-|---|---|---|
-| **L9** | Rattrapage, création d'article allégée, `hors_referentiel` | L5 |
-| **L10** | Ouvrage composite : récursion + garde anti-cycle | L2, **PR2 codification** |
-| **L11** | Comparateur fournisseurs + écran | L7 |
+| Lot | Titre | Dépend de | Status |
+|---|---|---|---|
+| **L9** | Rattrapage, création d'article allégée, `hors_referentiel` | L5 | ⬜ todo |
+| **L10** | Ouvrage composite : récursion + garde anti-cycle | L2, **PR2 codification** | ⬜ todo |
+| **L11** | Comparateur fournisseurs + écran | L7 | ⬜ todo |
 
 ### Vague 4
 
-| Lot | Titre | Dépend de |
-|---|---|---|
-| **L12** | Bibliothèque : capitalisation + chargement du corpus | L10 |
-| **L13** | Chaînage aval : devis, chantier, marché, budget | L1, L5 |
+| Lot | Titre | Dépend de | Status |
+|---|---|---|---|
+| **L12** | Bibliothèque : capitalisation + chargement du corpus | L10 | ⬜ todo |
+| **L13** | Chaînage aval : devis, chantier, marché, budget | L1, L5 | ⬜ todo |
 
 ### Vague 5 — après **PR1 (clause CGU)**
 
-| Lot | Titre | Dépend de |
-|---|---|---|
-| **L14** | Module `catalogue` : entités, éditions, gouvernance, console | L11, L12, PR1 |
-| **L15** | Rapprochement déterministe + `item_match` | L14 |
+| Lot | Titre | Dépend de | Status |
+|---|---|---|---|
+| **L14** | Module `catalogue` : entités, éditions, gouvernance, console | L11, L12, PR1 | ⬜ todo |
+| **L15** | Rapprochement déterministe + `item_match` | L14 | ⬜ todo |
 
 ### Vague 6
 
-| Lot | Titre | Dépend de |
-|---|---|---|
-| **L16** | Intelligence : ports réels, LLM en dernier recours, enrichissement | L15 |
+| Lot | Titre | Dépend de | Status |
+|---|---|---|---|
+| **L16** | Intelligence : ports réels, LLM en dernier recours, enrichissement | L15 | ⬜ todo |
 
 ---
 
@@ -95,10 +97,10 @@ Tu es l'agent d'implémentation du monorepo nafuralabs (ERP Sektor-BTP).
 
 AVANT DE COMMENCER, lis dans cet ordre :
 1. docs/AGENTS.md — conventions du monorepo (impératif)
-2. products/sektor-btp/docs/epics/referentiel-catalogue-sektor/00-INDEX.md
-3. products/sektor-btp/docs/epics/referentiel-catalogue-sektor/01-modele-cible.md
-4. products/sektor-btp/docs/epics/referentiel-catalogue-sektor/02-phases.md (ta phase)
-5. products/sektor-btp/docs/epics/referentiel-catalogue-sektor/05-ux.md (si ton lot a du front)
+2. products/sektor-btp/docs/specs/epics/referentiel-catalogue-sektor/00-INDEX.md
+3. products/sektor-btp/docs/specs/epics/referentiel-catalogue-sektor/01-modele-cible.md
+4. products/sektor-btp/docs/specs/epics/referentiel-catalogue-sektor/02-phases.md (ta phase)
+5. products/sektor-btp/docs/specs/epics/referentiel-catalogue-sektor/05-ux.md (si ton lot a du front)
 
 RÈGLES ABSOLUES
 

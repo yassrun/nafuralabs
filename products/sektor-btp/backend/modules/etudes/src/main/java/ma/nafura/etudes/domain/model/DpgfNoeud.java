@@ -12,6 +12,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ma.nafura.etudes.domain.EstimationSaisieEn;
+import ma.nafura.etudes.domain.OrigineCout;
 
 @Entity
 @Table(name = "dpgf_noeuds")
@@ -24,9 +26,6 @@ public class DpgfNoeud {
     public static final String TYPE_LOT = "LOT";
     public static final String TYPE_SOUS_LOT = "SOUS_LOT";
     public static final String TYPE_ARTICLE = "ARTICLE";
-
-    public static final String MODE_FOURNI = "FOURNI";
-    public static final String MODE_DECOMPOSE = "DECOMPOSE";
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -67,9 +66,13 @@ public class DpgfNoeud {
     @Column(name = "prix_unitaire", precision = 18, scale = 4)
     private BigDecimal prixUnitaire;
 
-    /** Coût unitaire saisi en mode FOURNI, avant frais généraux et marge. */
-    @Column(name = "prix_fourni_base", precision = 18, scale = 4)
-    private BigDecimal prixFourniBase;
+    /** Coût pour UNE unité, avant FG et marge. */
+    @Column(name = "cout_unitaire", precision = 18, scale = 4)
+    private BigDecimal coutUnitaire;
+
+    /** cout_unitaire × (1+FG%) — calculé, jamais saisi. */
+    @Column(name = "cout_revient", precision = 18, scale = 4)
+    private BigDecimal coutRevient;
 
     @Column(name = "frais_generaux_percent", precision = 8, scale = 4)
     private BigDecimal fraisGenerauxPercent;
@@ -83,9 +86,24 @@ public class DpgfNoeud {
     @Column(name = "descriptif", columnDefinition = "TEXT")
     private String descriptif;
 
-    /** FOURNI | DECOMPOSE — non nul uniquement si type = ARTICLE. */
-    @Column(name = "mode", length = 20)
-    private String mode;
+    /** DECOMPOSE | FORFAIT | ESTIME — non nul uniquement si type = ARTICLE. */
+    @Column(name = "origine_cout", length = 20)
+    private String origineCout;
+
+    /** COUT | VENTE — uniquement si origine = ESTIME. */
+    @Column(name = "estimation_saisie_en", length = 10)
+    private String estimationSaisieEn;
+
+    /** Vrai quand le coût est déduit d'un prix de vente saisi. */
+    @Column(name = "cout_deduit", nullable = false)
+    @Builder.Default
+    private Boolean coutDeduit = false;
+
+    @Column(name = "forfait_partner_id")
+    private UUID forfaitPartnerId;
+
+    @Column(name = "forfait_offre_id")
+    private UUID forfaitOffreId;
 
     @Column(name = "prix_dpu_id")
     private UUID prixDpuId;
@@ -119,6 +137,14 @@ public class DpgfNoeud {
         return prixUnitaire;
     }
 
+    public OrigineCout origineCoutEnum() {
+        return OrigineCout.from(origineCout);
+    }
+
+    public EstimationSaisieEn estimationSaisieEnEnum() {
+        return EstimationSaisieEn.from(estimationSaisieEn);
+    }
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = OffsetDateTime.now();
@@ -126,8 +152,11 @@ public class DpgfNoeud {
         if (this.ordre == null) {
             this.ordre = 0;
         }
-        if (TYPE_ARTICLE.equals(this.type) && this.mode == null) {
-            this.mode = MODE_FOURNI;
+        if (this.coutDeduit == null) {
+            this.coutDeduit = false;
+        }
+        if (TYPE_ARTICLE.equals(this.type) && this.origineCout == null) {
+            this.origineCout = OrigineCout.ESTIME.name();
         }
     }
 

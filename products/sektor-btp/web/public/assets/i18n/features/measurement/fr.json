@@ -9,7 +9,10 @@
       "name": "name",
       "category": "ID catégorie de mesure",
       "categoryCode": "code",
-      "categoryName": "name"
+      "categoryName": "name",
+      "facteurVersBase": "Facteur vers base",
+      "facteurVersBaseHint": "Combien d'unités de base dans 1 unité (ex. 1 M3 = 1000 L)",
+      "estBase": "Unité de base"
     },
     "navigation": {
       "itemUnitConversions": "Conversions d'unités article",

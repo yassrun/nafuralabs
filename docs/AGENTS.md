@@ -6,6 +6,7 @@
 |--------|----------|
 | Ops K8s (deploy, migrate, reset, troubleshooting) | [toolchain/ops/AGENTS.md](../toolchain/ops/AGENTS.md) |
 | **UX / wireframes (méthode principale)** | [products/sektor-btp/docs/ux/METHODE-CANVAS-WIREFRAMES.md](../products/sektor-btp/docs/ux/METHODE-CANVAS-WIREFRAMES.md) |
+| **Specs / epics (PLAN · PROGRESS)** | [specs/README.md](specs/README.md) · templates [`specs/templates/`](specs/templates/) |
 | **Tasks / backlog / sprint (PM markdown)** | [Markdown Project Management Framework.md](Markdown%20Project%20Management%20Framework.md) · copie `pm/AGENTS.md` |
 | Imports Gradle / TypeScript | [PLATFORM_IMPORTS.md](PLATFORM_IMPORTS.md) |
 | Table migration `nf/nafura` → chemins actuels | [ARCHITECTURE_MIGRATION.md](ARCHITECTURE_MIGRATION.md) |
@@ -120,7 +121,7 @@ fournit au demarrage. Regle ESLint dans `products/sektor-btp/web/.eslintrc.json`
 repertoire produit, donc la resolution Node doit pouvoir remonter jusqu'a lui.
 `platform/web/package.json` declare ses dependances reelles en `peerDependencies`.
 
-Historique du chantier : [`products/sektor-btp/docs/epics/front-ownership/`](../products/sektor-btp/docs/epics/front-ownership/00-REVUE-ARCHI.md).
+Historique du chantier : [`products/sektor-btp/docs/specs/epics/_archive/front-ownership/`](../products/sektor-btp/docs/specs/epics/_archive/front-ownership/00-REVUE-ARCHI.md).
 
 ---
 
@@ -166,7 +167,8 @@ Config front : `products/sektor-btp/web/src/environments/environment.staging.ts`
 | Boot app Sektor | `products/sektor-btp/backend/app/` |
 | UI ERP | `products/sektor-btp/web/app/` |
 | Auth, listing, shell UI | `platform/web/` ou `platform/backend/` |
-| Specs produit | `products/<app-id>/docs/` |
+| Specs / epics | `products/<app-id>/docs/specs/epics/<slug>/` — [convention](specs/README.md) |
+| Docs produit (guides, UX…) | `products/<app-id>/docs/` |
 | Manifests produit | `products/<app-id>/deploy/k8s/` — **pas** sous `infra/k8s/` |
 | Infra partagée | `infra/k8s/overlays/infra/${ENV}/` |
 | Nouveau produit | Copier pattern `sektor-btp` → `onboard-app` |

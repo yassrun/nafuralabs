@@ -35,12 +35,6 @@ public final class GatesEtude {
         return DpgfNoeud.TYPE_ARTICLE.equals(n.getType());
     }
 
-    /** Prix unitaire de vente strictement positif — condition pour franchir la décomposition. */
-    private static boolean aPrixVente(DpgfNoeud n) {
-        return n.getPrixUnitaire() != null
-                && n.getPrixUnitaire().compareTo(BigDecimal.ZERO) > 0;
-    }
-
     /**
      * Étape 1 — les pièces du marché sont déposées.
      *
@@ -177,8 +171,8 @@ public final class GatesEtude {
         }
     }
 
-    /** Étape 3 — chaque article est FOURNI avec un PU > 0, ou DECOMPOSE
-     * avec composants utiles et un prix de vente posé. */
+    /** Étape 3 — chaque article a une origine de coût et un coût unitaire > 0.
+     * DECOMPOSE exige en plus des composants à rendement utile. */
     @Component
     public static class GateDecomposition implements EtapeGate {
 
@@ -198,10 +192,15 @@ public final class GatesEtude {
             List<DpgfNoeud> articles = contexte.articles();
             List<ProblemeGate> pbs = new ArrayList<>();
             for (DpgfNoeud a : articles) {
-                if (DpgfNoeud.MODE_FOURNI.equals(a.getMode())) {
-                    if (!aPrixVente(a)) {
-                        pbs.add(probleme(a, "etudes.gate.chiffrage.prix_absent"));
-                    }
+                if (a.getOrigineCout() == null || a.getOrigineCout().isBlank()) {
+                    pbs.add(probleme(a, "etudes.gate.cout.origine_manquante"));
+                    continue;
+                }
+                if (a.getCoutUnitaire() == null || a.getCoutUnitaire().compareTo(BigDecimal.ZERO) <= 0) {
+                    pbs.add(probleme(a, "etudes.gate.cout.cout_unitaire_manquant"));
+                    continue;
+                }
+                if (!"DECOMPOSE".equals(a.getOrigineCout())) {
                     continue;
                 }
                 if (a.getPrixDpuId() == null) {
@@ -218,10 +217,6 @@ public final class GatesEtude {
                         .anyMatch(r -> r != null && r.compareTo(BigDecimal.ZERO) > 0);
                 if (!rendementUtile) {
                     pbs.add(probleme(a, "etudes.gate.decomposition.rendements_nuls"));
-                    continue;
-                }
-                if (!aPrixVente(a)) {
-                    pbs.add(probleme(a, "etudes.gate.chiffrage.prix_absent"));
                 }
             }
             return new ResultatGate(etape(), true, pbs);
@@ -229,9 +224,7 @@ public final class GatesEtude {
     }
 
     /**
-     * Étape 4 — consultation fournisseurs. <b>Non bloquante</b> : le taux de couverture des
-     * prix consultés remonte dans le dossier de validation, pour que l'approbateur sache sur
-     * quoi il s'engage.
+     * Étape 4 — consultation fournisseurs. <b>Non bloquante</b>. Couvre DECOMPOSE et FORFAIT.
      */
     @Component
     public static class GateConsultationFournisseurs implements EtapeGate {
@@ -257,9 +250,15 @@ public final class GatesEtude {
             List<DpgfNoeud> articles = contexte.articles();
             List<ProblemeGate> pbs = new ArrayList<>();
             for (DpgfNoeud a : articles) {
-                // Prix fourni : la décomposition (éventuelle) est un brouillon inactif —
-                // la consultation fournisseurs ne s'applique qu'aux articles décomposés.
-                if (DpgfNoeud.MODE_FOURNI.equals(a.getMode())) {
+                String origine = a.getOrigineCout();
+                if ("ESTIME".equals(origine)) {
+                    continue;
+                }
+                if ("FORFAIT".equals(origine)) {
+                    // Forfait consultable : signaler si aucun partenaire / offre
+                    if (a.getForfaitPartnerId() == null && a.getForfaitOffreId() == null) {
+                        pbs.add(probleme(a, "etudes.gate.consultation.forfait_non_rattache"));
+                    }
                     continue;
                 }
                 if (a.getPrixDpuId() == null) {
@@ -280,19 +279,11 @@ public final class GatesEtude {
     }
 
     /**
-     * Étape 5 — chiffrage complet : taux renseignés et prix de vente établi.
-     *
-     * <p>Le Partner CLIENT n'est pas exigé ici (MOA texte libre autorisé pendant l'étude).
-     * Il est contrôlé à la génération du devis ({@code DevisService#createFromDossier}).
+     * Étape 5 — chiffrage : FG/marge partout. Les coûts estimés remontent (non bloquant via
+     * problèmes informatifs).
      */
     @Component
     public static class GateChiffrage implements EtapeGate {
-
-        private final PrixDpuRepository prixDpuRepository;
-
-        public GateChiffrage(PrixDpuRepository prixDpuRepository) {
-            this.prixDpuRepository = prixDpuRepository;
-        }
 
         @Override
         public int etape() {
@@ -303,28 +294,36 @@ public final class GatesEtude {
         public ResultatGate evaluer(ContexteGate contexte) {
             List<DpgfNoeud> articles = contexte.articles();
             List<ProblemeGate> pbs = new ArrayList<>();
+            BigDecimal montantTotal = BigDecimal.ZERO;
+            BigDecimal montantEstime = BigDecimal.ZERO;
             for (DpgfNoeud a : articles) {
                 if (a.getPrixUnitaire() == null
                         || a.getPrixUnitaire().compareTo(BigDecimal.ZERO) <= 0) {
                     pbs.add(probleme(a, "etudes.gate.chiffrage.prix_absent"));
                     continue;
                 }
-                // Prix fourni : FG/MG vivent sur le nœud (optionnels). Le DPU lié n'est
-                // qu'un brouillon — ne pas exiger ses taux.
-                if (DpgfNoeud.MODE_FOURNI.equals(a.getMode())) {
-                    continue;
-                }
-                if (a.getPrixDpuId() == null) {
-                    continue;
-                }
-                PrixDpu dpu = prixDpuRepository.findById(a.getPrixDpuId()).orElse(null);
-                if (dpu == null) {
-                    continue;
-                }
-                if (dpu.getFraisGenerauxPercent() == null
-                        || dpu.getMargeBeneficiairePercent() == null) {
+                if (a.getFraisGenerauxPercent() == null || a.getMargePercent() == null) {
                     pbs.add(probleme(a, "etudes.gate.chiffrage.taux_manquants"));
                 }
+                BigDecimal ligne = a.getTotal() != null
+                        ? a.getTotal()
+                        : (a.getQuantite() != null
+                                ? a.getQuantite().multiply(a.getPrixUnitaire())
+                                : a.getPrixUnitaire());
+                if (ligne != null) {
+                    montantTotal = montantTotal.add(ligne);
+                    if ("ESTIME".equals(a.getOrigineCout()) || Boolean.TRUE.equals(a.getCoutDeduit())) {
+                        montantEstime = montantEstime.add(ligne);
+                    }
+                }
+            }
+            if (montantTotal.compareTo(BigDecimal.ZERO) > 0
+                    && montantEstime.compareTo(BigDecimal.ZERO) > 0) {
+                pbs.add(new ProblemeGate(
+                        null,
+                        null,
+                        null,
+                        "etudes.gate.chiffrage.part_couts_estimes"));
             }
             return new ResultatGate(etape(), true, pbs);
         }

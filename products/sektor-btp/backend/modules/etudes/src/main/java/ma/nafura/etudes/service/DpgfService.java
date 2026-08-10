@@ -1,4 +1,4 @@
-package ma.nafura.etudes.service;
+﻿package ma.nafura.etudes.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -18,6 +18,8 @@ import ma.nafura.etudes.api.request.DpgfNoeudCreateDto;
 import ma.nafura.etudes.api.request.DpgfNoeudUpdateDto;
 import ma.nafura.etudes.api.request.ImportNoeudDto;
 import ma.nafura.etudes.api.request.ImportTreeRequest;
+import ma.nafura.etudes.domain.EstimationSaisieEn;
+import ma.nafura.etudes.domain.OrigineCout;
 import ma.nafura.etudes.domain.model.Dpgf;
 import ma.nafura.etudes.domain.model.DpgfNoeud;
 import ma.nafura.etudes.domain.model.Metre;
@@ -44,6 +46,8 @@ public class DpgfService {
     private final OuvrageRepository ouvrageRepository;
     private final DpgfAgregationService agregationService;
     private final ParametresEtudeService parametresEtudeService;
+    private final DpuCalculator dpuCalculator;
+    private final DossierIntervenantService intervenantService;
 
     public DpgfService(
             DpgfRepository repository,
@@ -52,7 +56,9 @@ public class DpgfService {
             MetreService metreService,
             OuvrageRepository ouvrageRepository,
             DpgfAgregationService agregationService,
-            ParametresEtudeService parametresEtudeService) {
+            ParametresEtudeService parametresEtudeService,
+            DpuCalculator dpuCalculator,
+            DossierIntervenantService intervenantService) {
         this.repository = repository;
         this.noeudRepository = noeudRepository;
         this.dossierEtudeRepository = dossierEtudeRepository;
@@ -60,6 +66,8 @@ public class DpgfService {
         this.ouvrageRepository = ouvrageRepository;
         this.agregationService = agregationService;
         this.parametresEtudeService = parametresEtudeService;
+        this.dpuCalculator = dpuCalculator;
+        this.intervenantService = intervenantService;
     }
 
     @Transactional(readOnly = true)
@@ -122,7 +130,7 @@ public class DpgfService {
         return saved;
     }
 
-    /** DPGF vide rattaché au dossier (mode manuel étape 2). */
+    /** DPGF vide rattachÃ© au dossier (mode manuel Ã©tape 2). */
     @Transactional
     public Dpgf createEmpty(String projetNom, BigDecimal tvaTaux) {
         UUID tenantId = tenantId();
@@ -144,10 +152,10 @@ public class DpgfService {
     }
 
     /**
-     * Crée un DPGF depuis un arbre extrait d'un bordereau (sans métré amont).
+     * CrÃ©e un DPGF depuis un arbre extrait d'un bordereau (sans mÃ©trÃ© amont).
      *
-     * <p>Les lignes sans unité / quantité positive (totaux, titres) sont ignorées — elles
-     * bloqueraient le gate bordereau sans être chiffrables.
+     * <p>Les lignes sans unitÃ© / quantitÃ© positive (totaux, titres) sont ignorÃ©es â€” elles
+     * bloqueraient le gate bordereau sans Ãªtre chiffrables.
      */
     @Transactional
     public ImportResult createFromImport(ImportTreeRequest request, String projetNom, BigDecimal tvaTaux) {
@@ -184,7 +192,7 @@ public class DpgfService {
         return new ImportResult(saved, stats.articlesAcceptes, stats.articlesIgnores);
     }
 
-    /** Remplace entièrement les nœuds d'un DPGF existant par un nouvel arbre importé. */
+    /** Remplace entiÃ¨rement les nÅ“uds d'un DPGF existant par un nouvel arbre importÃ©. */
     @Transactional
     public ImportResult remplacerParImport(UUID dpgfId, ImportTreeRequest request) {
         assertStructureEditable(dpgfId);
@@ -213,7 +221,7 @@ public class DpgfService {
             return;
         }
         String type = normalizeImportType(dto.getType());
-        String libelle = StringUtils.hasText(dto.getLibelle()) ? dto.getLibelle().trim() : "Sans libellé";
+        String libelle = StringUtils.hasText(dto.getLibelle()) ? dto.getLibelle().trim() : "Sans libellÃ©";
         String code = StringUtils.hasText(dto.getCode()) ? dto.getCode().trim() : String.valueOf(ordre + 1);
 
         if (DpgfNoeud.TYPE_ARTICLE.equals(type) && !articleExploitable(dto)) {
@@ -232,12 +240,13 @@ public class DpgfService {
                 .quantite(dto.getQuantite())
                 .unite(trimOrNull(dto.getUnite()))
                 .descriptif(trimOrNull(dto.getDescriptif()))
-                // Structure only — ignore any prices from the source bordereau.
-                // Pricing belongs to décomposition / chiffrage.
+                // Structure only â€” ignore any prices from the source bordereau.
+                // Pricing belongs to dÃ©composition / chiffrage.
                 .prixUnitaire(null)
-                .prixFourniBase(null)
+                .coutUnitaire(null)
                 .total(null)
-                .mode(DpgfNoeud.TYPE_ARTICLE.equals(type) ? DpgfNoeud.MODE_FOURNI : null)
+                .origineCout(DpgfNoeud.TYPE_ARTICLE.equals(type) ? OrigineCout.ESTIME.name() : null)
+                .coutDeduit(false)
                 .ordre(dto.getOrdre() != null ? dto.getOrdre() : ordre)
                 .build();
         DpgfNoeud saved = noeudRepository.save(noeud);
@@ -253,7 +262,7 @@ public class DpgfService {
         }
     }
 
-    /** Même règle que le gate bordereau / l'UI d'extraction. */
+    /** MÃªme rÃ¨gle que le gate bordereau / l'UI d'extraction. */
     public static boolean articleExploitable(ImportNoeudDto dto) {
         if (dto == null) {
             return false;
@@ -270,7 +279,7 @@ public class DpgfService {
         public int articlesIgnores;
     }
 
-    /** Résultat d'un import (création ou remplacement). */
+    /** RÃ©sultat d'un import (crÃ©ation ou remplacement). */
     public record ImportResult(Dpgf dpgf, int articlesAcceptes, int articlesIgnores) {}
 
     private static String normalizeImportType(String type) {
@@ -317,14 +326,24 @@ public class DpgfService {
                 .quantite(request.getQuantite())
                 .unite(trimOrNull(request.getUnite()))
                 .prixUnitaire(request.getPrixUnitaire())
-                .prixFourniBase(request.getPrixFourniBase())
+                .coutUnitaire(request.getCoutUnitaire())
                 .fraisGenerauxPercent(request.getFraisGenerauxPercent())
                 .margePercent(request.getMargePercent())
-                .total(computeArticleTotal(type, request.getQuantite(), request.getPrixUnitaire(), request.getTotal()))
                 .descriptif(trimOrNull(request.getDescriptif()))
-                .mode(DpgfNoeud.TYPE_ARTICLE.equals(type) ? DpgfNoeud.MODE_FOURNI : null)
+                .origineCout(DpgfNoeud.TYPE_ARTICLE.equals(type)
+                        ? resolveOrigine(request.getOrigineCout(), OrigineCout.ESTIME).name()
+                        : null)
+                .estimationSaisieEn(request.getEstimationSaisieEn())
+                .forfaitPartnerId(request.getForfaitPartnerId())
+                .forfaitOffreId(request.getForfaitOffreId())
+                .coutDeduit(false)
                 .ordre(request.getOrdre() != null ? request.getOrdre() : nextOrdre(dpgfId, parentId, tenantId))
                 .build();
+
+        if (DpgfNoeud.TYPE_ARTICLE.equals(type)) {
+            applyCoutLigne(noeud, request.getPrixUnitaire());
+        }
+        noeud.setTotal(computeArticleTotal(type, noeud.getQuantite(), noeud.getPrixUnitaire(), request.getTotal()));
 
         DpgfNoeud saved = noeudRepository.save(noeud);
         recalcHeaderTotals(dpgfId);
@@ -369,12 +388,6 @@ public class DpgfService {
         if (request.getUnite() != null) {
             noeud.setUnite(trimOrNull(request.getUnite()));
         }
-        if (request.getPrixUnitaire() != null) {
-            noeud.setPrixUnitaire(request.getPrixUnitaire());
-        }
-        if (request.getPrixFourniBase() != null) {
-            noeud.setPrixFourniBase(request.getPrixFourniBase());
-        }
         if (request.getFraisGenerauxPercent() != null) {
             noeud.setFraisGenerauxPercent(request.getFraisGenerauxPercent());
         }
@@ -384,27 +397,136 @@ public class DpgfService {
         if (request.getDescriptif() != null) {
             noeud.setDescriptif(trimOrNull(request.getDescriptif()));
         }
-        if (request.getMode() != null && DpgfNoeud.TYPE_ARTICLE.equals(noeud.getType())) {
-            String mode = request.getMode().trim().toUpperCase(Locale.ROOT);
-            if (!DpgfNoeud.MODE_FOURNI.equals(mode) && !DpgfNoeud.MODE_DECOMPOSE.equals(mode)) {
-                throw new IllegalArgumentException("Invalid mode: " + request.getMode());
-            }
-            noeud.setMode(mode);
+        if (request.getForfaitPartnerId() != null) {
+            noeud.setForfaitPartnerId(request.getForfaitPartnerId());
+        }
+        if (request.getForfaitOffreId() != null) {
+            noeud.setForfaitOffreId(request.getForfaitOffreId());
+        }
+        if (request.getOrigineCout() != null && DpgfNoeud.TYPE_ARTICLE.equals(noeud.getType())) {
+            noeud.setOrigineCout(resolveOrigine(request.getOrigineCout(), null).name());
+        }
+        if (request.getEstimationSaisieEn() != null) {
+            noeud.setEstimationSaisieEn(EstimationSaisieEn.from(request.getEstimationSaisieEn()).name());
+        }
+        if (request.getCoutUnitaire() != null) {
+            noeud.setCoutUnitaire(request.getCoutUnitaire());
+        }
+        if (request.getPrixUnitaire() != null) {
+            noeud.setPrixUnitaire(request.getPrixUnitaire());
         }
         if (request.getOrdre() != null) {
             noeud.setOrdre(request.getOrdre());
         }
+
+        if (DpgfNoeud.TYPE_ARTICLE.equals(noeud.getType())) {
+            boolean touchedCout = request.getCoutUnitaire() != null
+                    || request.getPrixUnitaire() != null
+                    || request.getFraisGenerauxPercent() != null
+                    || request.getMargePercent() != null
+                    || request.getOrigineCout() != null
+                    || request.getEstimationSaisieEn() != null;
+            if (touchedCout) {
+                applyCoutLigne(noeud, request.getPrixUnitaire());
+            }
+        }
+
         if (request.getTotal() != null) {
             noeud.setTotal(request.getTotal());
         } else if (DpgfNoeud.TYPE_ARTICLE.equals(noeud.getType())) {
-            // Recalcule toujours le total article : l'ancienne valeur n'est pas un total explicite.
             noeud.setTotal(computeArticleTotal(
                     noeud.getType(), noeud.getQuantite(), noeud.getPrixUnitaire(), null));
         }
 
         DpgfNoeud saved = noeudRepository.save(noeud);
         recalcHeaderTotals(noeud.getDpgf().getId());
+        dossierEtudeRepository
+                .findByTenantIdAndDpgfId(tenantId, noeud.getDpgf().getId())
+                .ifPresent(dossier -> intervenantService.enregistrerReviseur(dossier.getId()));
         return saved;
+    }
+
+    private OrigineCout resolveOrigine(String raw, OrigineCout defaultValue) {
+        if (raw == null || raw.isBlank()) {
+            if (defaultValue == null) {
+                throw new IllegalArgumentException("etudes.cout.origine_invalide");
+            }
+            return defaultValue;
+        }
+        String n = raw.trim().toUpperCase(Locale.ROOT);
+        if ("FOURNI".equals(n)) {
+            return OrigineCout.ESTIME;
+        }
+        try {
+            return OrigineCout.valueOf(n);
+        } catch (IllegalArgumentException ex) {
+            throw new IllegalArgumentException("etudes.cout.origine_invalide");
+        }
+    }
+
+    /**
+     * Alimente cout_unitaire / cout_revient / prix_unitaire selon l'origine.
+     * ESTIME+VENTE : dÃ©duit le coÃ»t (cout_deduit=true). DECOMPOSE : ne recalcule
+     * pas le prix (le DPU le pose) â€” met Ã  jour revient si coÃ»t connu.
+     */
+    private void applyCoutLigne(DpgfNoeud noeud, BigDecimal prixSaisiHint) {
+        OrigineCout origine = noeud.origineCoutEnum();
+        if (origine == null) {
+            origine = OrigineCout.ESTIME;
+            noeud.setOrigineCout(origine.name());
+        }
+
+        BigDecimal fg = noeud.getFraisGenerauxPercent();
+        BigDecimal marge = noeud.getMargePercent();
+
+        if (origine == OrigineCout.DECOMPOSE) {
+            noeud.setCoutDeduit(false);
+            noeud.setEstimationSaisieEn(null);
+            if (noeud.getCoutUnitaire() != null) {
+                noeud.setCoutRevient(dpuCalculator.computeCoutRevient(noeud.getCoutUnitaire(), fg));
+            }
+            return;
+        }
+
+        if (origine == OrigineCout.FORFAIT) {
+            noeud.setCoutDeduit(false);
+            noeud.setEstimationSaisieEn(null);
+            BigDecimal cout = noeud.getCoutUnitaire();
+            if (cout == null) {
+                return;
+            }
+            noeud.setCoutRevient(dpuCalculator.computeCoutRevient(cout, fg));
+            noeud.setPrixUnitaire(dpuCalculator.computePrixVenteDepuisCout(cout, fg, marge));
+            return;
+        }
+
+        // ESTIME
+        EstimationSaisieEn saisie = noeud.estimationSaisieEnEnum();
+        if (saisie == null) {
+            saisie = EstimationSaisieEn.COUT;
+            noeud.setEstimationSaisieEn(saisie.name());
+        }
+
+        if (saisie == EstimationSaisieEn.VENTE) {
+            BigDecimal prix = prixSaisiHint != null ? prixSaisiHint : noeud.getPrixUnitaire();
+            if (prix == null) {
+                return;
+            }
+            BigDecimal cout = dpuCalculator.deduceCoutDepuisPrixVente(prix, fg, marge);
+            noeud.setCoutUnitaire(cout);
+            noeud.setCoutRevient(dpuCalculator.computeCoutRevient(cout, fg));
+            noeud.setPrixUnitaire(dpuCalculator.computePrixVenteDepuisCout(cout, fg, marge));
+            noeud.setCoutDeduit(true);
+            return;
+        }
+
+        BigDecimal cout = noeud.getCoutUnitaire();
+        if (cout == null) {
+            return;
+        }
+        noeud.setCoutDeduit(false);
+        noeud.setCoutRevient(dpuCalculator.computeCoutRevient(cout, fg));
+        noeud.setPrixUnitaire(dpuCalculator.computePrixVenteDepuisCout(cout, fg, marge));
     }
 
     @Transactional
@@ -420,7 +542,7 @@ public class DpgfService {
         recalcHeaderTotals(dpgfId);
     }
 
-    /** Structure figée dès l'entrée en décomposition / chiffrage. */
+    /** Structure figÃ©e dÃ¨s l'entrÃ©e en dÃ©composition / chiffrage. */
     private void assertStructureEditable(UUID dpgfId) {
         dossierEtudeRepository
                 .findByTenantIdAndDpgfId(tenantId(), dpgfId)
@@ -523,7 +645,7 @@ public class DpgfService {
                         libelle = ouv.getDesignation();
                     }
                     if (!StringUtils.hasText(libelle)) {
-                        libelle = "—";
+                        libelle = "â€”";
                     }
 
                     noeudRepository.save(DpgfNoeud.builder()

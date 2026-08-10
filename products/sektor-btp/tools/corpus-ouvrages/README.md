@@ -48,8 +48,8 @@ test et nulle part ailleurs : ni seed, ni `ParametresEtudeService`, ni valeur pa
 est d'être un cas de référence vérifiable — la preuve que le calcul est juste parce qu'il
 reproduit un classeur qui existe.
 
-Voir [`11-SOURCES-METIER.md`](../../docs/epics/etude-prix-unifiee/11-SOURCES-METIER.md) et la
-règle 5bis de [`00-INDEX.md`](../../docs/epics/etude-prix-unifiee/00-INDEX.md).
+Voir [`11-SOURCES-METIER.md`](../../docs/specs/epics/_archive/etude-prix-unifiee/11-SOURCES-METIER.md) et la
+règle 5bis de [`00-INDEX.md`](../../docs/specs/epics/_archive/etude-prix-unifiee/00-INDEX.md).
 
 ## Adapter à une nouvelle source
 

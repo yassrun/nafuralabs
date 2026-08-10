@@ -81,7 +81,7 @@ Pas de board Kanban global. **INDEX** = backlog live trié (agents). **BACKLOG**
 
 | Exemple | Tag | Promote → |
 |---------|-----|-----------|
-| fix bug import sektor | `@erp` | `nafura/products/<produit>/tasks/` — souvent `kind: task` |
+| fix bug import sektor | `@erp` | `nafura/products/<produit>/tasks/` — **`kind: task`** + `tags: [bug, …]` (voir §2.2) |
 | « raffinement module RH » / « écran employé » | `@erp` | **`kind: feature`** (epic vague, **sans** sprint tant que non commité) |
 | livrer remarques mbs | `@mbs` | `nafura/projects/mbs-website/tasks/` |
 | RDV comptable | `@ops` | `nafura/ops/tasks/` |
@@ -219,6 +219,10 @@ Never store: `progress`, `percent`, `done_count`, `days_left`, `age`,
 
 Flux typique : **feature** → **spec** → **tasks** (lots).
 
+**Spec epic (produit)** : dossier `products/<app>/docs/specs/epics/<slug>/`
+(`00-PLAN.md` + `00-PROGRESS.md`). Convention : [`docs/specs/README.md`](specs/README.md).
+Même `slug` que le champ `feature:` du ticket.
+
 ### Type-specific requirements
 
 | Type      | Extra required fields                        |
@@ -242,6 +246,34 @@ Règles :
 3. À la capture : même écran/flux → préférer une feature, pas 5 micro-fichiers.
 4. Au balayage / promote : l’agent **propose** ; l’humain confirme. Pas de merge silencieux.
 5. IDs immuables.
+
+### 2.2 Bugs — PM only, groupés par feature
+
+**Pas de `kind: bug`.** Un bug = `kind: task` + tag `bug`.  
+**Jamais** de dossier sous `products/<app>/docs/specs/epics/` pour un bug.
+
+| Cas | Traitement |
+|-----|------------|
+| 1er bug d’une zone | `kind: task`, `tags: [bug, …]` — orphelin OK |
+| 2ᵉ+ bugs même écran / flux | Parapluie `kind: feature` ; enfants `parent:` + même `feature:` |
+| Bug isolé hors feature | Task plate (pas de `parent`) |
+| Vague (« ça marche pas ») | Inbox → clarifier → puis promote |
+
+**Défauts :** `assignee: agent` · `gate: qa` · `priority: P0` si perte/corruption de donnée ou blocage flux critique, sinon `P1`–`P3`.
+
+**Contenu minimal :** titre symptôme · repro · attendu/obtenu · AC (dont « repro impossible » ou test).
+
+Exemple :
+
+```
+ERP-16  kind:feature  feature: chiffrage-drawer
+  ERP-13  kind:task  tags:[bug]  parent: ERP-16
+  ERP-14  kind:task  tags:[bug]  parent: ERP-16
+```
+
+Au balayage : l’agent **propose** de grouper les bugs répétés sous une feature ; l’humain confirme.
+
+Si un bug révèle un trou de conception → ouvrir/mettre à jour une **spec epic** produit ; le ticket de fix reste dans `pm/`.
 
 ---
 
@@ -537,3 +569,4 @@ Choisir dans le backlog (promoted) ce qui entre dans `2026-Wn`.
 | Backlog | Par projet (`…/tasks/`) |
 | Vues | `INDEX.tsv` + `BACKLOG.md` + `SPRINT.md` (+ `PORTFOLIO.md`) |
 | Groupement | `kind: feature` + `parent:` / `feature:` ; IDs immuables |
+| Bugs | `kind: task` + tag `bug` · **PM only** · grouper sous feature si répétition (§2.2) |

@@ -1,4 +1,4 @@
-package ma.nafura.etudes.service.gate;
+﻿package ma.nafura.etudes.service.gate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -12,15 +12,15 @@ import org.junit.jupiter.api.Test;
 /**
  * Structure d'un detail estimatif reel.
  *
- * <p>Source : classeur « LOT N° 2 GROS-OEUVRE », feuille D.E. — 6 chapitres, 19 sous-chapitres,
+ * <p>Source : classeur Â« LOT NÂ° 2 GROS-OEUVRE Â», feuille D.E. â€” 6 chapitres, 19 sous-chapitres,
  * 84 articles, 38 variantes, 108 lignes chiffrables.
  *
  * <p>Ce que ce document a appris : la hierarchie a <b>quatre</b> niveaux, pas trois, et la
  * profondeur varie d'une branche a l'autre. Un article comme {@code a/1 Deblais en masse} porte
  * directement sa quantite ; un article comme {@code b/1 Canalisations PVC} n'en a pas et
- * delegue a ses variantes {@code a - Ø 200}, {@code b - Ø 250}.
+ * delegue a ses variantes {@code a - Ã˜ 200}, {@code b - Ã˜ 250}.
  *
- * <p>Consequence sur le modele : <b>{@code TYPE_ARTICLE} designe un role, pas un niveau</b> —
+ * <p>Consequence sur le modele : <b>{@code TYPE_ARTICLE} designe un role, pas un niveau</b> â€”
  * celui de ligne chiffrable. Un noeud qui regroupe est LOT ou SOUS_LOT quelle que soit sa
  * profondeur. Le modele l'admet deja ({@code parentId} libre), mais l'intention doit etre
  * ecrite, sans quoi quelqu'un typera par profondeur et cassera les gates.
@@ -47,12 +47,14 @@ class GateBordereauStructureReelleTest {
                 .libelle(libelle)
                 .unite(unite)
                 .quantite(new BigDecimal(qte))
-                .mode(DpgfNoeud.MODE_FOURNI)
+                .origineCout("ESTIME")
+                .coutUnitaire(new BigDecimal("10"))
+                .coutDeduit(false)
                 .ordre(0)
                 .build();
     }
 
-    /** Reproduit la branche « I/ → a/ → a/1 » et « I/ → b/ → b/1 → variantes ». */
+    /** Reproduit la branche Â« I/ â†’ a/ â†’ a/1 Â» et Â« I/ â†’ b/ â†’ b/1 â†’ variantes Â». */
     private static List<DpgfNoeud> bordereauReel() {
         List<DpgfNoeud> tous = new ArrayList<>();
 
@@ -73,8 +75,8 @@ class GateBordereauStructureReelleTest {
         tous.add(reseau);
         DpgfNoeud canalisations = groupe("b/1", "Canalisations en tubes PVC", reseau.getId());
         tous.add(canalisations);
-        tous.add(ligneChiffrable("b/1/a", "Ø 200", "ML", "120", canalisations.getId()));
-        tous.add(ligneChiffrable("b/1/b", "Ø 250", "ML", "10", canalisations.getId()));
+        tous.add(ligneChiffrable("b/1/a", "Ã˜ 200", "ML", "120", canalisations.getId()));
+        tous.add(ligneChiffrable("b/1/b", "Ã˜ 250", "ML", "10", canalisations.getId()));
 
         return tous;
     }
@@ -87,7 +89,7 @@ class GateBordereauStructureReelleTest {
     void la_profondeur_varie_d_une_branche_a_l_autre() {
         List<DpgfNoeud> tous = bordereauReel();
 
-        // a/1 est a la profondeur 3, Ø 200 a la profondeur 4 — les deux sont des ARTICLE.
+        // a/1 est a la profondeur 3, Ã˜ 200 a la profondeur 4 â€” les deux sont des ARTICLE.
         assertThat(articles(tous)).extracting(DpgfNoeud::getCode)
                 .containsExactly("a/1", "a/2", "a/4", "b/1/a", "b/1/b");
     }
@@ -96,7 +98,7 @@ class GateBordereauStructureReelleTest {
     void un_article_qui_regroupe_des_variantes_n_est_pas_une_ligne_chiffrable() {
         List<DpgfNoeud> tous = bordereauReel();
 
-        // b/1 « Canalisations PVC » est numerote comme un article mais ne porte ni unite ni
+        // b/1 Â« Canalisations PVC Â» est numerote comme un article mais ne porte ni unite ni
         // quantite : c'est un noeud de regroupement. Le typer ARTICLE ferait echouer le gate
         // sur une ligne qui n'a jamais eu vocation a etre chiffree.
         DpgfNoeud b1 = tous.stream().filter(n -> "b/1".equals(n.getCode())).findFirst().orElseThrow();
@@ -113,7 +115,7 @@ class GateBordereauStructureReelleTest {
 
     @Test
     void le_forfait_est_une_ligne_chiffrable_valide() {
-        // « Le forfait : F 1 » — l'expert avait signale que certains articles se facturent
+        // Â« Le forfait : F 1 Â» â€” l'expert avait signale que certains articles se facturent
         // en ensemble. Quantite 1, unite F : le gate ne doit pas le rejeter.
         List<DpgfNoeud> forfait = List.of(
                 ligneChiffrable("a/4", "Implantation des batiments", "F", "1", null));
@@ -123,9 +125,9 @@ class GateBordereauStructureReelleTest {
 
     @Test
     void une_ligne_de_total_ne_doit_jamais_arriver_jusqu_au_gate() {
-        // Le detail estimatif porte des lignes « a/ - TOTAL TERRASSEMENTS... » sans unite ni
+        // Le detail estimatif porte des lignes Â« a/ - TOTAL TERRASSEMENTS... Â» sans unite ni
         // quantite. Importees comme ARTICLE, elles bloqueraient le parcours sur des lignes qui
-        // ne sont pas des ouvrages. C'est a l'import de les ecarter — ce test documente la
+        // ne sont pas des ouvrages. C'est a l'import de les ecarter â€” ce test documente la
         // consequence si on l'oublie.
         List<DpgfNoeud> avecTotal = new ArrayList<>(articles(bordereauReel()));
         avecTotal.add(DpgfNoeud.builder()

@@ -84,8 +84,8 @@
                 type="text"
                 class="dpu__input"
                 [disabled]="readonly"
-                [ngModel]="c.articleOuPosteId"
-                (ngModelChange)="patch(c.id, { articleOuPosteId: $event })"
+                [ngModel]="c.libelle || c.articleOuPosteId"
+                (ngModelChange)="patch(c.id, { libelle: $event, articleOuPosteId: $event, referenceType: 'LIBRE', itemId: null, ouvrageId: null })"
                 [ngModelOptions]="{ standalone: true }" />
             </td>
             <td>

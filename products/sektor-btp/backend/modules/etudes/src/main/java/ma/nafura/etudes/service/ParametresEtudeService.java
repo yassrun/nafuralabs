@@ -51,6 +51,9 @@ public class ParametresEtudeService {
     public static final String KEY_TVA = "etudes.tvaTauxDefaut";
     public static final String KEY_BASE_PRIX = "etudes.basePrixChiffrage";
     public static final String KEY_AUTEUR_PEUT_VALIDER = "etudes.auteurPeutValider";
+    /** Sous ce montant HT, un seul niveau d'approbation. Défaut 500 000 MAD. */
+    public static final String KEY_SEUIL_DEUX_NIVEAUX = "etudes.seuilDeuxNiveauxApprobation";
+    public static final BigDecimal DEFAULT_SEUIL_DEUX_NIVEAUX = new BigDecimal("500000");
 
     private final TenantSettingReader tenantSettingReader;
 
@@ -89,6 +92,21 @@ public class ParametresEtudeService {
                 .findValue(tenantIdOrNull(), KEY_AUTEUR_PEUT_VALIDER)
                 .map(Boolean::parseBoolean)
                 .orElse(false);
+    }
+
+    /**
+     * Seuil HT au-dessus duquel deux niveaux d'approbation sont exigés.
+     * En dessous → un seul niveau (Directeur travaux).
+     */
+    public BigDecimal seuilDeuxNiveauxApprobation() {
+        return decimalOr(KEY_SEUIL_DEUX_NIVEAUX, DEFAULT_SEUIL_DEUX_NIVEAUX);
+    }
+
+    /** Nombre de niveaux à figer à la soumission selon le montant HT. */
+    public int niveauxApprobationPour(BigDecimal montantHt) {
+        BigDecimal seuil = seuilDeuxNiveauxApprobation();
+        BigDecimal montant = montantHt != null ? montantHt : BigDecimal.ZERO;
+        return montant.compareTo(seuil) >= 0 ? 2 : 1;
     }
 
     private BigDecimal decimalOr(String key, BigDecimal fallback) {

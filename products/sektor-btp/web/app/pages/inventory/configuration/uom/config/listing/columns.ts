@@ -28,6 +28,25 @@ export function buildUomColumns(t: TranslateService): ColumnConfig[] {
       width: '180px',
     },
     {
+      key: 'facteurVersBase',
+      label: tr('inventory.configuration.uom.list.columns.facteurVersBase'),
+      field: 'facteurVersBase',
+      type: 'number',
+      width: '110px',
+    },
+    {
+      key: 'estBase',
+      label: tr('inventory.configuration.uom.list.columns.estBase'),
+      field: 'estBase',
+      type: 'badge',
+      width: '100px',
+      badgeVariant: (v: unknown) => (v ? 'success' : 'default'),
+      transform: (v: unknown) =>
+        v
+          ? tr('inventory.configuration.uom.list.estBaseYes')
+          : tr('inventory.configuration.uom.list.estBaseNo'),
+    },
+    {
       key: 'isActive',
       label: tr('inventory.configuration.uom.list.columns.isActive'),
       field: 'isActive',

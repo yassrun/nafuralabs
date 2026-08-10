@@ -56,6 +56,26 @@
         "isActive": "is Active"
       },
       "sections": {}
+    },
+    "uom": {
+      "facteur": {
+        "must_be_positive": "Factor to base must be strictly positive"
+      },
+      "base": {
+        "category_required": "A base unit must belong to a category",
+        "category_without_base": "This category has no base unit — designate one first",
+        "required_in_category": "The category must keep a base unit"
+      },
+      "conversion": {
+        "cross_category": "Not allowed: units belong to different categories",
+        "category_required": "Both units must have a category",
+        "quantity_required": "Quantity is required",
+        "from_not_found": "Source unit not found",
+        "to_not_found": "Target unit not found",
+        "uom_required": "Both units are required",
+        "facteur_invalid": "Invalid factor to base",
+        "failed": "Conversion failed"
+      }
     }
   }
 }

@@ -5,6 +5,7 @@
 | Document | Contenu |
 |----------|---------|
 | [AGENTS.md](AGENTS.md) | **Référence agents** — monorepo, git, envs, deploy, interdits |
+| [specs/README.md](specs/README.md) | **Specs / epics** — PLAN, PROGRESS, templates |
 | [toolchain/ops/AGENTS.md](../toolchain/ops/AGENTS.md) | Ops K8s détaillé (`nlops.sh`) |
 | [PLATFORM_IMPORTS.md](PLATFORM_IMPORTS.md) | Gradle + TypeScript paths |
 | [ARCHITECTURE_MIGRATION.md](ARCHITECTURE_MIGRATION.md) | Chemins `nf/nafura` → `nafuralabs` |

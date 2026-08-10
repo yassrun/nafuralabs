@@ -56,6 +56,26 @@
         "isActive": "is Active"
       },
       "sections": {}
+    },
+    "uom": {
+      "facteur": {
+        "must_be_positive": "Le facteur vers base doit être strictement positif"
+      },
+      "base": {
+        "category_required": "Une unité de base doit appartenir à une catégorie",
+        "category_without_base": "Cette catégorie n'a pas d'unité de base — désignez-en une d'abord",
+        "required_in_category": "La catégorie doit conserver une unité de base"
+      },
+      "conversion": {
+        "cross_category": "Impossible : les unités n'appartiennent pas à la même catégorie",
+        "category_required": "Les deux unités doivent avoir une catégorie",
+        "quantity_required": "La quantité est obligatoire",
+        "from_not_found": "Unité source introuvable",
+        "to_not_found": "Unité cible introuvable",
+        "uom_required": "Les deux unités sont obligatoires",
+        "facteur_invalid": "Facteur vers base invalide",
+        "failed": "La conversion a échoué"
+      }
     }
   }
 }

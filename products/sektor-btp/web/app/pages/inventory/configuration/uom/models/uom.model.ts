@@ -7,6 +7,8 @@ export interface UomConfig {
   code: string;
   name: string;
   uomCategoryId: string;
+  facteurVersBase: number;
+  estBase: boolean;
   isActive: boolean;
 }
 

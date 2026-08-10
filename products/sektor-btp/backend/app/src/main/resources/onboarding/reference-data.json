@@ -13,7 +13,12 @@
     {
       "code": "LONGUEUR",
       "name": "Longueur",
-      "description": "Longueurs et surfaces"
+      "description": "Longueurs linéaires"
+    },
+    {
+      "code": "SURFACE",
+      "name": "Surface",
+      "description": "Surfaces et aires"
     },
     {
       "code": "COMPTAGE",
@@ -28,74 +33,102 @@
   ],
   "unitsOfMeasure": [
     {
-      "code": "T",
-      "name": "Tonne",
-      "categoryCode": "MASSE"
-    },
-    {
       "code": "KG",
       "name": "Kilogramme",
-      "categoryCode": "MASSE"
+      "categoryCode": "MASSE",
+      "facteurVersBase": 1,
+      "estBase": true
+    },
+    {
+      "code": "T",
+      "name": "Tonne",
+      "categoryCode": "MASSE",
+      "facteurVersBase": 1000,
+      "estBase": false
     },
     {
       "code": "G",
       "name": "Gramme",
-      "categoryCode": "MASSE"
-    },
-    {
-      "code": "M3",
-      "name": "Mètre cube",
-      "categoryCode": "VOLUME"
+      "categoryCode": "MASSE",
+      "facteurVersBase": 0.001,
+      "estBase": false
     },
     {
       "code": "L",
       "name": "Litre",
-      "categoryCode": "VOLUME"
+      "categoryCode": "VOLUME",
+      "facteurVersBase": 1,
+      "estBase": true
+    },
+    {
+      "code": "M3",
+      "name": "Mètre cube",
+      "categoryCode": "VOLUME",
+      "facteurVersBase": 1000,
+      "estBase": false
     },
     {
       "code": "MLT",
       "name": "Millilitre",
-      "categoryCode": "VOLUME"
+      "categoryCode": "VOLUME",
+      "facteurVersBase": 0.001,
+      "estBase": false
     },
     {
       "code": "ML",
       "name": "Mètre linéaire",
-      "categoryCode": "LONGUEUR"
-    },
-    {
-      "code": "M2",
-      "name": "Mètre carré",
-      "categoryCode": "LONGUEUR"
+      "categoryCode": "LONGUEUR",
+      "facteurVersBase": 1,
+      "estBase": true
     },
     {
       "code": "CM",
       "name": "Centimètre",
-      "categoryCode": "LONGUEUR"
+      "categoryCode": "LONGUEUR",
+      "facteurVersBase": 0.01,
+      "estBase": false
+    },
+    {
+      "code": "M2",
+      "name": "Mètre carré",
+      "categoryCode": "SURFACE",
+      "facteurVersBase": 1,
+      "estBase": true
     },
     {
       "code": "U",
       "name": "Unité",
-      "categoryCode": "COMPTAGE"
+      "categoryCode": "COMPTAGE",
+      "facteurVersBase": 1,
+      "estBase": true
     },
     {
       "code": "EA",
       "name": "Pièce",
-      "categoryCode": "COMPTAGE"
+      "categoryCode": "COMPTAGE",
+      "facteurVersBase": 1,
+      "estBase": false
     },
     {
       "code": "LOT",
       "name": "Lot",
-      "categoryCode": "COMPTAGE"
+      "categoryCode": "COMPTAGE",
+      "facteurVersBase": 1,
+      "estBase": false
     },
     {
       "code": "H",
       "name": "Heure",
-      "categoryCode": "TEMPS"
+      "categoryCode": "TEMPS",
+      "facteurVersBase": 1,
+      "estBase": true
     },
     {
       "code": "J",
       "name": "Jour",
-      "categoryCode": "TEMPS"
+      "categoryCode": "TEMPS",
+      "facteurVersBase": 8,
+      "estBase": false
     }
   ],
   "itemCategories": [

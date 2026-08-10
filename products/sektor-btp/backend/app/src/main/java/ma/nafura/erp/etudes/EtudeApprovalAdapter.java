@@ -55,6 +55,8 @@ public class EtudeApprovalAdapter implements EtudeApprovalPort {
             String initiateurUserId,
             String initiateurNom) {
         workflowSeed.ensureEtudePrixWorkflow();
+        // Matrice ETUDE_PRIX pour enrichissement / documentation du seuil
+        // (sélection workflow via conditionsJson montant >= 500000).
         ApprovalRequestSubmitDto dto = new ApprovalRequestSubmitDto();
         dto.setEntityType(ENTITY_TYPE);
         dto.setEntityId(dossierId.toString());

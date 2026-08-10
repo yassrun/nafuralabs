@@ -8,6 +8,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.UUID;
+import ma.nafura.etudes.domain.ReferenceType;
 import ma.nafura.etudes.domain.model.ComposantOuvrage;
 import ma.nafura.etudes.domain.model.Ouvrage;
 import ma.nafura.etudes.domain.model.UniteMain;
@@ -64,8 +65,10 @@ public class OuvrageSeedService {
                                         .tenantId(tenantId)
                                         .ouvrage(entity)
                                         .type(comp.path("type").asText(ComposantOuvrage.TYPE_MATERIAU))
-                                        .articleId(textOrNull(comp, "articleId"))
-                                        .designation(comp.get("designation").asText())
+                                        .referenceType(ReferenceType.LIBRE.name())
+                                        .libelle(comp.hasNonNull("libelle")
+                                                ? comp.get("libelle").asText()
+                                                : comp.get("designation").asText())
                                         .unite(comp.get("unite").asText())
                                         .rendement(rendement)
                                         .prixUnitaire(prixUnitaire)

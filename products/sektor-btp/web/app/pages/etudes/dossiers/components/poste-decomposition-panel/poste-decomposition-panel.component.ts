@@ -23,6 +23,12 @@ import { safeRandomUUID } from '@core/util/uuid';
 
 import type { ComposantDPU, PrixDPU, SourcePrixComposant } from '@app/etudes/models';
 import { DpuService } from '@app/etudes/services/dpu.service';
+import {
+  composantLibelle,
+  estComposantItem,
+  normalizeComposantDpu,
+  toComposantDpuWrite,
+} from '@app/etudes/utils/composant-reference.util';
 import { DpuApiService } from '@app/pages/etudes/bibliotheque-prix/services/dpu-api.service';
 import { UnitOfMeasuresApiService } from '@app/pages/inventory/configuration/unit-of-measures/services/unit-of-measure-api.service';
 import { DpgfApiService } from '../../../metres/services/dpgf-api.service';
@@ -74,7 +80,9 @@ export interface PosteSaveSnapshot {
   prixUnitaire: number | null;
   total: number | null;
   mode: string | null;
+  origineCout?: string | null;
   prixFourniBase?: number | null;
+  coutUnitaire?: number | null;
   fraisGenerauxPercent?: number | null;
   margePercent?: number | null;
   descriptif?: string | null;
@@ -234,7 +242,7 @@ export class PosteDecompositionPanelComponent {
       this.savedTimer = undefined;
     }
     if (poste && posteId) {
-      this.prixFourni.set(poste.prixFourniBase ?? poste.prixUnitaire ?? null);
+      this.prixFourni.set(poste.coutUnitaire ?? poste.prixFourniBase ?? poste.prixUnitaire ?? null);
       this.fgFourniLocal.set(poste.fraisGenerauxPercent ?? null);
       this.margeFourniLocal.set(poste.margePercent ?? null);
       const comment = poste.descriptif ?? '';
@@ -420,7 +428,9 @@ export class PosteDecompositionPanelComponent {
     }
     const existing = this.composants();
     const existingKeys = new Set(
-      existing.map((c) => String(c.articleOuPosteId ?? '').trim().toLowerCase()).filter(Boolean),
+      existing
+        .map((c) => composantLibelle(c).toLowerCase())
+        .filter(Boolean),
     );
     const added: ComposantDPU[] = [];
     const iaIds = new Set(this.composantsIaIds());
@@ -428,14 +438,21 @@ export class PosteDecompositionPanelComponent {
     for (const row of rows) {
       const key = (row.itemId || row.name || '').trim();
       if (!key) continue;
-      if (existingKeys.has(key.toLowerCase())) continue;
+      if (existingKeys.has(key.toLowerCase()) || existingKeys.has((row.name || '').trim().toLowerCase())) {
+        continue;
+      }
       const quantite = Number(row.rendement ?? 1);
       const prixUnitaire = Number(row.prixUnitaire ?? 0);
       const id = safeRandomUUID();
+      const libelle = row.name || key;
       added.push({
         id,
         type: (row.type as ComposantDPU['type']) || 'MATIERE',
-        articleOuPosteId: key,
+        referenceType: row.itemId ? 'ITEM' : 'LIBRE',
+        itemId: row.itemId || null,
+        ouvrageId: null,
+        libelle,
+        articleOuPosteId: libelle,
         quantite,
         unite: row.unite || this.poste()?.unite || 'U',
         prixUnitaire,
@@ -444,8 +461,8 @@ export class PosteDecompositionPanelComponent {
         offreFournisseurId: null,
       });
       if (depuisIa || row.suggereParIa) iaIds.add(id);
-      labels.set(id, row.name || key);
-      existingKeys.add(key.toLowerCase());
+      labels.set(id, libelle);
+      existingKeys.add(libelle.toLowerCase());
     }
     if (!added.length) {
       this.toast.info('Ces composants sont déjà présents dans la décomposition.');
@@ -465,12 +482,11 @@ export class PosteDecompositionPanelComponent {
   }
 
   libelleComposant(row: ComposantDPU): string {
-    return this.composantsLabels().get(row.id) ?? row.articleOuPosteId;
+    return this.composantsLabels().get(row.id) ?? composantLibelle(row);
   }
 
   estComposantCatalogue(row: ComposantDPU): boolean {
-    return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-      .test(row.articleOuPosteId);
+    return estComposantItem(row);
   }
 
   async ajouterComposantAuCatalogue(row: ComposantDPU): Promise<void> {
@@ -480,7 +496,7 @@ export class PosteDecompositionPanelComponent {
       autoFocus: false,
       restoreFocus: true,
       data: {
-        designation: row.articleOuPosteId,
+        designation: composantLibelle(row),
         type: row.type,
         unite: row.unite,
         rendement: row.quantite,
@@ -499,7 +515,11 @@ export class PosteDecompositionPanelComponent {
           component.id === row.id
             ? {
                 ...component,
-                articleOuPosteId: result.itemId!,
+                referenceType: 'ITEM' as const,
+                itemId: result.itemId!,
+                ouvrageId: null,
+                libelle: composantLibelle(component),
+                articleOuPosteId: composantLibelle(component),
                 type: result.type,
                 unite: result.unite,
                 prixUnitaire: result.prixUnitaire,
@@ -535,7 +555,7 @@ export class PosteDecompositionPanelComponent {
     }
 
     if (this.prixFourni() == null) {
-      this.prixFourni.set(poste.prixFourniBase ?? poste.prixUnitaire ?? 0);
+      this.prixFourni.set(poste.coutUnitaire ?? poste.prixFourniBase ?? poste.prixUnitaire ?? 0);
     }
     if (this.fgFourniLocal() == null) this.fgFourniLocal.set(this.fgDefaut());
     if (this.margeFourniLocal() == null) this.margeFourniLocal.set(this.margeDefaut());
@@ -558,6 +578,8 @@ export class PosteDecompositionPanelComponent {
         {
           id: safeRandomUUID(),
           type: result.type,
+          referenceType: 'LIBRE',
+          libelle: result.designation,
           articleOuPosteId: result.designation,
           quantite: result.quantite,
           unite: result.unite,
@@ -606,6 +628,10 @@ export class PosteDecompositionPanelComponent {
             ? {
                 ...c,
                 type: result.type,
+                referenceType: 'LIBRE' as const,
+                itemId: null,
+                ouvrageId: null,
+                libelle: result.designation,
                 articleOuPosteId: result.designation,
                 quantite: result.quantite,
                 unite: result.unite,
@@ -644,7 +670,7 @@ export class PosteDecompositionPanelComponent {
     if (!this.canMutate() || !this.estDecompose()) return;
     const confirmed = await this.confirmDialog.confirm({
       title: 'Supprimer le composant',
-      message: `Supprimer « ${row.articleOuPosteId} » ?`,
+      message: `Supprimer « ${composantLibelle(row)} » ?`,
       variant: 'danger',
       confirmLabel: 'Supprimer',
     });
@@ -690,7 +716,9 @@ export class PosteDecompositionPanelComponent {
         prixUnitaire: this.prixVenteHt(),
         total: this.totalLigne(),
         mode: this.estFourni() ? 'FOURNI' : this.estDecompose() ? 'DECOMPOSE' : (poste.mode ?? null),
+        origineCout: this.estDecompose() ? 'DECOMPOSE' : 'ESTIME',
         prixFourniBase: this.prixFourni(),
+        coutUnitaire: this.prixFourni(),
         fraisGenerauxPercent: this.fgPct(),
         margePercent: this.margePct(),
         descriptif: this.commentaire().trim(),
@@ -729,17 +757,7 @@ export class PosteDecompositionPanelComponent {
         const updated = await this.dpuApi.update(dpu.id, {
           fraisGenerauxPercent: this.fgPct(),
           margeBeneficiairePercent: this.margePct(),
-          composants: this.composants().map((c) => ({
-            id: c.id,
-            type: c.type,
-            articleOuPosteId: c.articleOuPosteId,
-            quantite: c.quantite,
-            unite: c.unite,
-            prixUnitaire: c.prixUnitaire,
-            total: c.total,
-            sourcePrix: c.sourcePrix ?? 'MANUEL',
-            offreFournisseurId: c.offreFournisseurId ?? null,
-          })),
+          composants: this.composants().map((c) => toComposantDpuWrite(c)),
         });
         this.applyDpu(updated);
         savedNoeud = await this.dpgfApi.updateNoeud(poste.id, {
@@ -747,15 +765,19 @@ export class PosteDecompositionPanelComponent {
           fraisGenerauxPercent: this.fgPct(),
           margePercent: this.margePct(),
           descriptif: this.commentaire().trim(),
+          origineCout: 'DECOMPOSE',
           mode: 'DECOMPOSE',
         });
       } else if (this.estFourni()) {
         savedNoeud = await this.dpgfApi.updateNoeud(poste.id, {
           prixUnitaire: this.prixVenteHt(),
+          coutUnitaire: this.prixFourni() ?? 0,
           prixFourniBase: this.prixFourni() ?? 0,
           fraisGenerauxPercent: this.fgPct(),
           margePercent: this.margePct(),
           descriptif: this.commentaire().trim(),
+          origineCout: 'ESTIME',
+          estimationSaisieEn: 'COUT',
           mode: 'FOURNI',
         });
       } else {
@@ -773,7 +795,9 @@ export class PosteDecompositionPanelComponent {
         prixUnitaire: savedNoeud?.prixUnitaire ?? this.prixVenteHt(),
         total: savedNoeud?.total ?? this.totalLigne(),
         mode: savedNoeud?.mode ?? (this.estFourni() ? 'FOURNI' : 'DECOMPOSE'),
-        prixFourniBase: savedNoeud?.prixFourniBase ?? this.prixFourni(),
+        origineCout: savedNoeud?.origineCout ?? (this.estDecompose() ? 'DECOMPOSE' : 'ESTIME'),
+        prixFourniBase: savedNoeud?.coutUnitaire ?? savedNoeud?.prixFourniBase ?? this.prixFourni(),
+        coutUnitaire: savedNoeud?.coutUnitaire ?? this.prixFourni(),
         fraisGenerauxPercent: savedNoeud?.fraisGenerauxPercent ?? this.fgPct(),
         margePercent: savedNoeud?.margePercent ?? this.margePct(),
         descriptif: trimmed,
@@ -841,7 +865,7 @@ export class PosteDecompositionPanelComponent {
         initial: row
           ? {
               type: row.type,
-              designation: row.articleOuPosteId,
+              designation: composantLibelle(row),
               unite: row.unite,
               quantite: row.quantite,
               prixUnitaire: row.prixUnitaire,
@@ -929,23 +953,7 @@ export class PosteDecompositionPanelComponent {
   }
 
   private normalizeComposants(list: ComposantDPU[]): ComposantDPU[] {
-    return this.dpuMath.recomputeTotals(
-      list.map((c) => ({
-        id: c.id || safeRandomUUID(),
-        type: c.type,
-        articleOuPosteId: c.articleOuPosteId,
-        quantite: Number(
-          (c as ComposantDPU & { rendement?: number }).quantite ??
-            (c as { rendement?: number }).rendement ??
-            0,
-        ),
-        unite: c.unite,
-        prixUnitaire: Number(c.prixUnitaire ?? 0),
-        total: Number(c.total ?? 0),
-        sourcePrix: c.sourcePrix ?? 'MANUEL',
-        offreFournisseurId: c.offreFournisseurId ?? null,
-      })),
-    );
+    return this.dpuMath.recomputeTotals(list.map((c) => normalizeComposantDpu(c, safeRandomUUID())));
   }
 
   private async chargerUnites(): Promise<void> {

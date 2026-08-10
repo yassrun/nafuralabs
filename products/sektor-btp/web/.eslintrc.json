@@ -11,7 +11,7 @@
             "patterns": [
               {
                 "group": ["@app/*", "@applications/*", "**/products/**"],
-                "message": "Frontiere de dependance : la plateforme n'importe JAMAIS une application. Declarer un jeton d'injection (core/application/application-config.ts, core/integrations/audit.port.ts) ou un emplacement de shell (core/shell/shell-extensions.ts). Voir products/sektor-btp/docs/epics/front-ownership/."
+                "message": "Frontiere de dependance : la plateforme n'importe JAMAIS une application. Declarer un jeton d'injection (core/application/application-config.ts, core/integrations/audit.port.ts) ou un emplacement de shell (core/shell/shell-extensions.ts). Voir products/sektor-btp/docs/specs/epics/_archive/front-ownership/."
               }
             ]
           }

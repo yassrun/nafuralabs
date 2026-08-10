@@ -14,6 +14,8 @@ describe('DpuService', () => {
         id: '1',
         type: 'MATIERE',
         articleOuPosteId: 'a',
+        libelle: 'a',
+        referenceType: 'LIBRE',
         quantite: 2,
         unite: 'm³',
         prixUnitaire: 100,

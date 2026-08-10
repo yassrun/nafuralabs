@@ -103,9 +103,25 @@ public class TenantReferenceDataSeedService {
                 .code(code)
                 .name(text(node, "name"))
                 .uomCategoryId(categoryId)
+                .facteurVersBase(decimal(node, "facteurVersBase", java.math.BigDecimal.ONE))
+                .estBase(bool(node, "estBase", false))
                 .isActive(true)
                 .build());
         }
+    }
+
+    private java.math.BigDecimal decimal(JsonNode node, String field, java.math.BigDecimal defaultValue) {
+        if (node == null || !node.has(field) || node.get(field).isNull()) {
+            return defaultValue;
+        }
+        return node.get(field).decimalValue();
+    }
+
+    private boolean bool(JsonNode node, String field, boolean defaultValue) {
+        if (node == null || !node.has(field) || node.get(field).isNull()) {
+            return defaultValue;
+        }
+        return node.get(field).asBoolean(defaultValue);
     }
 
     private void seedItemCategories(UUID tenantId, JsonNode nodes) {

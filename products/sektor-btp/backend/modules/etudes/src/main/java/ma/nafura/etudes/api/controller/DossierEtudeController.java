@@ -30,11 +30,15 @@ public class DossierEtudeController {
 
     private final DossierEtudeService service;
     private final DecompositionProposeService decompositionProposeService;
+    private final ma.nafura.etudes.service.SyntheseCoutAffaireService syntheseCoutAffaireService;
 
     public DossierEtudeController(
-            DossierEtudeService service, DecompositionProposeService decompositionProposeService) {
+            DossierEtudeService service,
+            DecompositionProposeService decompositionProposeService,
+            ma.nafura.etudes.service.SyntheseCoutAffaireService syntheseCoutAffaireService) {
         this.service = service;
         this.decompositionProposeService = decompositionProposeService;
+        this.syntheseCoutAffaireService = syntheseCoutAffaireService;
     }
 
     @GetMapping
@@ -94,6 +98,13 @@ public class DossierEtudeController {
     @RequirePermission("etude.read")
     public ResponseEntity<DossierEtudeSyntheseDto> synthese(@PathVariable UUID id) {
         return ResponseEntity.ok(service.synthese(id));
+    }
+
+    @GetMapping("/{id}/synthese-cout")
+    @RequirePermission("etude.read")
+    public ResponseEntity<ma.nafura.etudes.api.dto.SyntheseCoutAffaireDto> syntheseCout(
+            @PathVariable UUID id) {
+        return ResponseEntity.ok(syntheseCoutAffaireService.forDossier(id));
     }
 
     @PutMapping("/{id}/etape")

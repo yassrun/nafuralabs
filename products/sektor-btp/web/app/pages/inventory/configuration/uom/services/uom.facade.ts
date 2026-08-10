@@ -1,5 +1,5 @@
 /**
- * Unit of Measure Configuration Facade — backed by `/api/v1/unit-of-measures`.
+ * Unit of Measure Configuration Facade — backed by `/api/v1/units-of-measure`.
  */
 
 import { Injectable, inject, signal, computed } from '@angular/core';
@@ -9,7 +9,13 @@ import { from, map, Observable } from 'rxjs';
 import type { ListResponse, LookupContext, PartialCrudFacade } from '@lib/anatomy/types';
 import { UnitOfMeasuresApiService } from '../../unit-of-measures/services/unit-of-measure-api.service';
 import { UoMCategoriesApiService } from '../../uo-mcategories/services/uo-mcategory-api.service';
-import type { UnitOfMeasure, UnitOfMeasureCreate, UnitOfMeasureUpdate } from '../../unit-of-measures/models';
+import type {
+  UnitOfMeasure,
+  UnitOfMeasureCreate,
+  UnitOfMeasureUpdate,
+  UomConversionRequest,
+  UomConversionResult,
+} from '../../unit-of-measures/models';
 import type { UomConfig, UomCreate, UomListItem, UomUpdate } from '../models';
 
 function toUom(dto: UnitOfMeasure): UomConfig {
@@ -18,6 +24,8 @@ function toUom(dto: UnitOfMeasure): UomConfig {
     code: dto.code,
     name: dto.name,
     uomCategoryId: dto.uomCategoryId ?? '',
+    facteurVersBase: dto.facteurVersBase ?? 1,
+    estBase: dto.estBase ?? false,
     isActive: dto.isActive ?? true,
   };
 }
@@ -27,6 +35,8 @@ function toUnitCreate(data: UomCreate): UnitOfMeasureCreate {
     code: data.code,
     name: data.name,
     uomCategoryId: data.uomCategoryId || undefined,
+    facteurVersBase: data.facteurVersBase ?? 1,
+    estBase: data.estBase ?? false,
     isActive: data.isActive,
   };
 }
@@ -88,6 +98,8 @@ export class UomFacade implements PartialCrudFacade<UomConfig, UomCreate> {
       ...(data.code !== undefined ? { code: data.code } : {}),
       ...(data.name !== undefined ? { name: data.name } : {}),
       ...(data.uomCategoryId !== undefined ? { uomCategoryId: data.uomCategoryId || undefined } : {}),
+      ...(data.facteurVersBase !== undefined ? { facteurVersBase: data.facteurVersBase } : {}),
+      ...(data.estBase !== undefined ? { estBase: data.estBase } : {}),
       ...(data.isActive !== undefined ? { isActive: data.isActive } : {}),
     };
     const dto = await this.uomApi.update(id, payload);
@@ -98,9 +110,18 @@ export class UomFacade implements PartialCrudFacade<UomConfig, UomCreate> {
     return this.uomApi.delete(id);
   }
 
+  async convert(request: UomConversionRequest): Promise<UomConversionResult> {
+    return this.uomApi.convert(request);
+  }
+
   getUomCategoriesForLookup(): Observable<{ id: string; name: string }[]> {
     return from(this.catApi.getAll({ page: 0, pageSize: 500 })).pipe(
       map((res) => res.items.map((c) => ({ id: c.id, name: `${c.code} - ${c.name}` }))),
     );
+  }
+
+  async listForConversion(): Promise<UomListItem[]> {
+    const res = await this.loadItems();
+    return res.items;
   }
 }

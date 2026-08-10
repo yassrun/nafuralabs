@@ -25,9 +25,6 @@ import ma.nafura.etudes.domain.audit.EtudeAuditingListener;
 @Builder
 public class PrixDpu implements AuditableEtude {
 
-    public static final String MODE_FOURNI = "FOURNI";
-    public static final String MODE_DECOMPOSE = "DECOMPOSE";
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;

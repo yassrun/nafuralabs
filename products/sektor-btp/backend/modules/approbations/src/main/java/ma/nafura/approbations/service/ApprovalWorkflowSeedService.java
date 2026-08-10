@@ -31,27 +31,29 @@ public class ApprovalWorkflowSeedService {
         seedAllFromClasspath(tenantId);
     }
 
-    /** Assure la présence du workflow Étude N+1/N+2 même si le tenant a déjà d'autres workflows. */
+    /** Assure les workflows Étude (1 et 2 niveaux) même si le tenant a déjà d'autres workflows. */
     @Transactional
     public void ensureEtudePrixWorkflow() {
         UUID tenantId = TenantContext.getTenantId();
-        boolean present = !repository
-                .findByTenantIdAndEntityTypeAndIsActiveTrueOrderByLabelAsc(tenantId, "ETUDE_PRIX")
-                .isEmpty();
-        if (present) {
-            return;
-        }
         try (InputStream in = new ClassPathResource("seed/approval-workflows-seed.json").getInputStream()) {
             JsonNode root = objectMapper.readTree(in);
             for (JsonNode node : root.get("workflows")) {
                 if (!"ETUDE_PRIX".equals(node.path("entityType").asText())) {
                     continue;
                 }
-                if (repository.findByIdAndTenantId(node.get("id").asText(), tenantId).isPresent()) {
-                    return;
+                String id = node.get("id").asText();
+                var existing = repository.findByIdAndTenantId(id, tenantId);
+                if (existing.isPresent()) {
+                    ApprovalWorkflow row = existing.get();
+                    // L4 : réaligner conditions / étapes si le seed a évolué (ex. seuil 500k).
+                    row.setConditionsJson(textOrNull(node, "conditionsJson"));
+                    row.setEtapesJson(node.get("etapesJson").asText());
+                    row.setLabel(node.get("label").asText());
+                    row.setIsActive(node.path("isActive").asBoolean(true));
+                    repository.save(row);
+                } else {
+                    repository.save(toEntity(node, tenantId));
                 }
-                repository.save(toEntity(node, tenantId));
-                return;
             }
         } catch (Exception ex) {
             throw new IllegalStateException("Failed to ensure ETUDE_PRIX workflow", ex);

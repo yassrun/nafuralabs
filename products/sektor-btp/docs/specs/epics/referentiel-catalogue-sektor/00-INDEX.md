@@ -1,7 +1,8 @@
 # Epic — Référentiel, coût réel et catalogue Sektor
 
 **Créé** : 2026-08-09
-**Statut** : conception — aucune ligne de code écrite
+**Statut** : doing — Vague 1 (L1–L4) livrée ; Vague 2 ouverte
+**Progress** : [`00-PROGRESS.md`](00-PROGRESS.md)
 **Contexte** : pré-production. Aucune donnée client. **Aucune reprise de données à prévoir.**
 
 ---
@@ -303,3 +304,4 @@ quatre-yeux actuel, et l'avis d'exécution. Indépendant, bloqué par rien.
 | [`03-catalogue-produit.md`](03-catalogue-produit.md) | Le catalogue comme produit : versions, gouvernance, seuil multi-tenant | Produit |
 | [`04-execution.md`](04-execution.md) | **16 lots, 6 vagues, ce qui se parallélise** + en-tête commun des prompts | Pilotage des agents |
 | [`05-ux.md`](05-ux.md) | **Les écrans, normatifs** — six règles et six maquettes | Front |
+| [`JOURNAL.md`](JOURNAL.md) | Suivi d'implémentation par lot | Implémentation |

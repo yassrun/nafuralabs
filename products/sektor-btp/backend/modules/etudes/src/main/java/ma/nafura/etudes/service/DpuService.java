@@ -12,6 +12,8 @@ import ma.nafura.etudes.api.dto.DpuHistoriqueEntryDto;
 import ma.nafura.etudes.api.request.ComposantDpuInputDto;
 import ma.nafura.etudes.api.request.PrixDpuCreateDto;
 import ma.nafura.etudes.api.request.PrixDpuUpdateDto;
+import ma.nafura.etudes.domain.ComposantReference;
+import ma.nafura.etudes.domain.ReferenceType;
 import ma.nafura.etudes.domain.model.ComposantDpu;
 import ma.nafura.etudes.domain.model.ComposantOuvrage;
 import ma.nafura.etudes.domain.model.Dpgf;
@@ -20,6 +22,7 @@ import ma.nafura.etudes.domain.model.DpuVersion;
 import ma.nafura.etudes.domain.model.Ouvrage;
 import ma.nafura.etudes.domain.model.PrixDpu;
 import ma.nafura.etudes.domain.model.UniteMain;
+import ma.nafura.etudes.repository.DossierEtudeRepository;
 import ma.nafura.etudes.repository.DpgfNoeudRepository;
 import ma.nafura.etudes.repository.DpgfRepository;
 import ma.nafura.etudes.repository.DpuVersionRepository;
@@ -43,6 +46,8 @@ public class DpuService {
     private final DpgfAgregationService agregationService;
     private final DpuCalculator calculator;
     private final ParametresEtudeService parametresEtudeService;
+    private final DossierEtudeRepository dossierEtudeRepository;
+    private final DossierIntervenantService intervenantService;
     private final ObjectMapper objectMapper;
 
     public DpuService(
@@ -54,6 +59,8 @@ public class DpuService {
             DpgfAgregationService agregationService,
             DpuCalculator calculator,
             ParametresEtudeService parametresEtudeService,
+            DossierEtudeRepository dossierEtudeRepository,
+            DossierIntervenantService intervenantService,
             ObjectMapper objectMapper) {
         this.repository = repository;
         this.versionRepository = versionRepository;
@@ -63,6 +70,8 @@ public class DpuService {
         this.agregationService = agregationService;
         this.calculator = calculator;
         this.parametresEtudeService = parametresEtudeService;
+        this.dossierEtudeRepository = dossierEtudeRepository;
+        this.intervenantService = intervenantService;
         this.objectMapper = objectMapper;
     }
 
@@ -316,9 +325,21 @@ public class DpuService {
         }
 
         BigDecimal pu = entity.getPrixVenteHt() != null ? entity.getPrixVenteHt() : BigDecimal.ZERO;
+        BigDecimal debours = entity.getDeboursSec() != null ? entity.getDeboursSec() : BigDecimal.ZERO;
+        BigDecimal fg = entity.getFraisGenerauxPercent();
         noeud.setPrixUnitaire(pu);
+        noeud.setCoutUnitaire(debours);
+        noeud.setCoutRevient(calculator.computeCoutRevient(debours, fg != null ? fg : noeud.getFraisGenerauxPercent()));
+        if (fg != null) {
+            noeud.setFraisGenerauxPercent(fg);
+        }
+        if (entity.getMargeBeneficiairePercent() != null) {
+            noeud.setMargePercent(entity.getMargeBeneficiairePercent());
+        }
         noeud.setPrixDpuId(entity.getId());
-        noeud.setMode(DpgfNoeud.MODE_DECOMPOSE);
+        noeud.setOrigineCout(ma.nafura.etudes.domain.OrigineCout.DECOMPOSE.name());
+        noeud.setCoutDeduit(false);
+        noeud.setEstimationSaisieEn(null);
         if (noeud.getQuantite() != null) {
             noeud.setTotal(noeud.getQuantite().multiply(pu).setScale(MONEY_SCALE, RoundingMode.HALF_UP));
         } else {
@@ -338,6 +359,9 @@ public class DpuService {
         List<DpgfNoeud> hierarchie = buildFlatTree(flat);
         agregationService.applyHeaderTotals(dpgf, hierarchie);
         dpgfRepository.save(dpgf);
+        dossierEtudeRepository
+                .findByTenantIdAndDpgfId(tenantId, dpgfId)
+                .ifPresent(dossier -> intervenantService.enregistrerReviseur(dossier.getId()));
     }
 
     /** Minimal tree rebuild for header aggregation (same shape as DpgfService.buildTree). */
@@ -386,7 +410,8 @@ public class DpuService {
         if (uniteMain != null) {
             ComposantDpuInputDto mo = new ComposantDpuInputDto();
             mo.setType(ComposantDpu.TYPE_MAIN_DOEUVRE);
-            mo.setArticleOuPosteId(ouvrage.getId() + "-mo");
+            mo.setReferenceType(ReferenceType.LIBRE.name());
+            mo.setLibelle("Main d'œuvre — " + ouvrage.getDesignation());
             mo.setRendement(uniteMain.getHeures() != null ? uniteMain.getHeures() : BigDecimal.ZERO);
             mo.setUnite("h");
             mo.setPrixUnitaire(uniteMain.getTauxHoraire() != null ? uniteMain.getTauxHoraire() : BigDecimal.ZERO);
@@ -399,8 +424,10 @@ public class DpuService {
     private ComposantDpuInputDto toInputFromOuvrageComposant(ComposantOuvrage composant) {
         ComposantDpuInputDto input = new ComposantDpuInputDto();
         input.setType(mapOuvrageTypeToDpu(composant.getType()));
-        input.setArticleOuPosteId(
-                StringUtils.hasText(composant.getArticleId()) ? composant.getArticleId() : composant.getId().toString());
+        input.setReferenceType(composant.getReferenceType());
+        input.setItemId(composant.getItemId());
+        input.setOuvrageId(composant.getRefOuvrageId());
+        input.setLibelle(composant.getLibelle());
         input.setRendement(composant.getRendement());
         input.setUnite(composant.getUnite());
         input.setPrixUnitaire(composant.getPrixUnitaire());
@@ -424,11 +451,20 @@ public class DpuService {
         BigDecimal total = input.getTotal() != null
                 ? input.getTotal()
                 : calculator.computeLineTotal(input.getRendement(), input.getPrixUnitaire());
+        ComposantReference ref = ComposantReference.resolve(
+                input.getReferenceType(),
+                input.getItemId(),
+                input.getOuvrageId(),
+                input.getLibelle(),
+                input.getArticleOuPosteId());
         return ComposantDpu.builder()
                 .tenantId(entity.getTenantId())
                 .prixDpu(entity)
                 .type(input.getType().trim())
-                .articleOuPosteId(input.getArticleOuPosteId().trim())
+                .referenceType(ref.type().name())
+                .itemId(ref.itemId())
+                .ouvrageId(ref.ouvrageId())
+                .libelle(ref.libelle())
                 .rendement(input.getRendement())
                 .unite(input.getUnite().trim())
                 .prixUnitaire(input.getPrixUnitaire())

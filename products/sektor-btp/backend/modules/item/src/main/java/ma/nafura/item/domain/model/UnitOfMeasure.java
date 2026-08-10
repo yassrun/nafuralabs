@@ -1,6 +1,7 @@
 package ma.nafura.item.domain.model;
 
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -35,6 +36,19 @@ public class UnitOfMeasure {
     @Column(name = "description")
     private String description;
 
+    /**
+     * Combien d'unités de base dans 1 unité de cette mesure.
+     * Ex. : 1 M3 = 1000 L → facteurVersBase = 1000 si L est la base.
+     */
+    @Column(name = "facteur_vers_base", nullable = false, precision = 18, scale = 8)
+    @Builder.Default
+    private BigDecimal facteurVersBase = BigDecimal.ONE;
+
+    /** Exactement une unité de base par (tenant, catégorie). */
+    @Column(name = "est_base", nullable = false)
+    @Builder.Default
+    private Boolean estBase = false;
+
     @Column(name = "isActive")
     private Boolean isActive;
 
@@ -48,6 +62,12 @@ public class UnitOfMeasure {
     protected void onCreate() {
         this.createdAt = OffsetDateTime.now();
         this.updatedAt = OffsetDateTime.now();
+        if (this.facteurVersBase == null) {
+            this.facteurVersBase = BigDecimal.ONE;
+        }
+        if (this.estBase == null) {
+            this.estBase = false;
+        }
     }
 
     @PreUpdate

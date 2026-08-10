@@ -1,4 +1,4 @@
-package ma.nafura.etudes.service;
+﻿package ma.nafura.etudes.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -63,6 +63,8 @@ class DpuServiceForNoeudTest {
                 agregationService,
                 new DpuCalculator(),
                 parametres,
+                mock(ma.nafura.etudes.repository.DossierEtudeRepository.class),
+                mock(DossierIntervenantService.class),
                 new ObjectMapper());
     }
 
@@ -117,7 +119,7 @@ class DpuServiceForNoeudTest {
 
         assertThat(created.getDpgfNoeudId()).isEqualTo(noeudId);
         assertThat(noeud.getPrixDpuId()).isEqualTo(created.getId());
-        assertThat(noeud.getMode()).isEqualTo(DpgfNoeud.MODE_DECOMPOSE);
+        assertThat(noeud.getOrigineCout()).isEqualTo("DECOMPOSE");
         assertThat(noeud.getPrixUnitaire()).isEqualByComparingTo(BigDecimal.ZERO);
         verify(agregationService).applyHeaderTotals(eq(dpgf), any());
     }
@@ -155,7 +157,8 @@ class DpuServiceForNoeudTest {
 
         ComposantDpuInputDto line = new ComposantDpuInputDto();
         line.setType(ComposantDpu.TYPE_MATIERE);
-        line.setArticleOuPosteId("Ciment");
+        line.setReferenceType("LIBRE");
+        line.setLibelle("Ciment");
         line.setRendement(new BigDecimal("10"));
         line.setUnite("kg");
         line.setPrixUnitaire(new BigDecimal("2"));
@@ -165,7 +168,7 @@ class DpuServiceForNoeudTest {
 
         PrixDpu saved = service.update(dpuId, update);
 
-        // déboursé 20 ; PU = 20 × (1 + 0.10 + 0.05) = 23
+        // dÃ©boursÃ© 20 ; PU = 20 Ã— (1 + 0.10 + 0.05) = 23
         assertThat(saved.getDeboursSec()).isEqualByComparingTo("20.00");
         assertThat(saved.getPrixVenteHt()).isEqualByComparingTo("23.00");
         assertThat(noeud.getPrixUnitaire()).isEqualByComparingTo("23.00");

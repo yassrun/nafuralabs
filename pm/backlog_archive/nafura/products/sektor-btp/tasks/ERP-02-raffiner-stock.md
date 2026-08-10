@@ -14,7 +14,7 @@ tags: [sektor, stock, raffinement]
 
 # Feature — Raffinement stock (grand livre → valorisation → réservations)
 
-> Spec : `products/sektor-btp/docs/epics/stock-raffinement/00-PLAN.md`
+> Spec : `products/sektor-btp/docs/specs/epics/_archive/stock-raffinement/00-PLAN.md`
 > ADR : `…/01-ADR-decisions-ouvertes.md`
 
 ## Modèle cible

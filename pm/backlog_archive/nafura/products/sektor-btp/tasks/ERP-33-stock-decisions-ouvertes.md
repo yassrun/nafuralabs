@@ -15,8 +15,8 @@ tags: [sektor, stock, decisions]
 
 # Stock — trancher les questions ouvertes (§7) avant Lot 1
 
-> Bloque ERP-34. Source : `docs/epics/stock-raffinement/00-PLAN.md` §7.
-> ADR : `docs/epics/stock-raffinement/01-ADR-decisions-ouvertes.md`
+> Bloque ERP-34. Source : `docs/specs/epics/_archive/stock-raffinement/00-PLAN.md` §7.
+> ADR : `docs/specs/epics/_archive/stock-raffinement/01-ADR-decisions-ouvertes.md`
 
 ## Critères d'acceptation
 - [x] **7.1** Pas de lots/péremption v1 — clé soldes inchangée

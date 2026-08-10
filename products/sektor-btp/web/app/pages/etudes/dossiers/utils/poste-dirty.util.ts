@@ -10,7 +10,11 @@ export function isCommentDirty(current: string, initial: string): boolean {
 export function buildComposantDirtyKey(composants: Array<{
   id: string;
   type: string;
-  articleOuPosteId: string;
+  libelle?: string;
+  articleOuPosteId?: string;
+  referenceType?: string;
+  itemId?: string | null;
+  ouvrageId?: string | null;
   quantite: number;
   unite: string;
   prixUnitaire: number;
@@ -21,7 +25,10 @@ export function buildComposantDirtyKey(composants: Array<{
     composants.map((c) => ({
       id: c.id,
       type: c.type,
-      designation: c.articleOuPosteId,
+      referenceType: c.referenceType ?? 'LIBRE',
+      itemId: c.itemId ?? null,
+      ouvrageId: c.ouvrageId ?? null,
+      libelle: c.libelle ?? c.articleOuPosteId ?? '',
       quantite: c.quantite,
       unite: c.unite,
       prixUnitaire: c.prixUnitaire,

@@ -14,7 +14,7 @@ tags: [sektor, inventory, articles, classification]
 
 # Feature — Refonte classification article (nature + famille)
 
-> Spec : `products/sektor-btp/docs/epics/classification-article/00-PLAN.md`
+> Spec : `products/sektor-btp/docs/specs/epics/_archive/classification-article/00-PLAN.md`
 > Remplace / absorbe l’ancien ERP-01 (raffiner matériel/articles).
 
 ## Modèle cible

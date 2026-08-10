@@ -58,5 +58,5 @@ Détail technique historique : miner `classification-article/00-PLAN.md` lots 1�
 ## 5. Références
 
 - ROADMAP vague V1 — articles  
-- Epic historique : `docs/epics/classification-article/`  
+- Epic historique : `docs/specs/epics/classification-article/`  
 - ADR historique : `classification-article/01-ADR-decisions-ouvertes.md` (à revalider en S0)

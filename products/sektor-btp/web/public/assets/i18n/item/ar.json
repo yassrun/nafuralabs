@@ -56,6 +56,26 @@
         "isActive": "نشط"
       },
       "sections": {}
+    },
+    "uom": {
+      "facteur": {
+        "must_be_positive": "يجب أن يكون المعامل نحو الأساس موجباً تماماً"
+      },
+      "base": {
+        "category_required": "وحدة الأساس يجب أن تنتمي إلى فئة",
+        "category_without_base": "هذه الفئة بلا وحدة أساس — عيّن واحدة أولاً",
+        "required_in_category": "يجب أن تحتفظ الفئة بوحدة أساس"
+      },
+      "conversion": {
+        "cross_category": "غير مسموح: الوحدتان من فئتين مختلفتين",
+        "category_required": "يجب أن تكون للوحدتين فئة",
+        "quantity_required": "الكمية مطلوبة",
+        "from_not_found": "وحدة المصدر غير موجودة",
+        "to_not_found": "وحدة الهدف غير موجودة",
+        "uom_required": "الوحدتان مطلوبتان",
+        "facteur_invalid": "معامل نحو الأساس غير صالح",
+        "failed": "فشل التحويل"
+      }
     }
   }
 }

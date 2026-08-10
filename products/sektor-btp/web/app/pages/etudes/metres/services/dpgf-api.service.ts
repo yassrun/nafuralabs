@@ -49,10 +49,15 @@ export class DpgfApiService extends FeatureApiService<DPGF> {
       quantite: number | null;
       unite: string | null;
       prixUnitaire: number | null;
+      coutUnitaire: number | null;
+      /** @deprecated */
       prixFourniBase: number | null;
       fraisGenerauxPercent: number | null;
       margePercent: number | null;
       descriptif: string | null;
+      origineCout: 'DECOMPOSE' | 'FORFAIT' | 'ESTIME';
+      estimationSaisieEn?: 'COUT' | 'VENTE';
+      /** @deprecated */
       mode: 'FOURNI' | 'DECOMPOSE';
     }>,
   ): Promise<NoeudDPGF> {

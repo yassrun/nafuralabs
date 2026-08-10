@@ -1121,7 +1121,8 @@ public class AdaptiveBordereauExtractionOrchestrator {
         poste.setUnite(text(posteNode, "unite"));
         poste.setQuantite(decimal(posteNode, "quantite"));
         poste.setDescriptif(text(posteNode, "descriptif"));
-        poste.setMode(DpgfNoeud.MODE_FOURNI);
+        poste.setOrigineCout(ma.nafura.etudes.domain.OrigineCout.ESTIME.name());
+        poste.setCoutDeduit(false);
         return poste;
     }
 

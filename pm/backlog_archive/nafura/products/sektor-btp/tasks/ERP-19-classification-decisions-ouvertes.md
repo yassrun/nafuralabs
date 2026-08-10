@@ -15,8 +15,8 @@ tags: [sektor, inventory, decisions]
 
 # Classification article — trancher les questions ouvertes (§7) avant Lot 1
 
-> Bloque ERP-20. Source : `docs/epics/classification-article/00-PLAN.md` §7.
-> ADR : `docs/epics/classification-article/01-ADR-decisions-ouvertes.md`
+> Bloque ERP-20. Source : `docs/specs/epics/_archive/classification-article/00-PLAN.md` §7.
+> ADR : `docs/specs/epics/_archive/classification-article/01-ADR-decisions-ouvertes.md`
 
 ## Critères d'acceptation
 - [x] **7.1** SERVICE → DPU_SOUS_TRAITANCE (budget FRAIS_GENERAUX) — pas de 5ᵉ poste Lot 1

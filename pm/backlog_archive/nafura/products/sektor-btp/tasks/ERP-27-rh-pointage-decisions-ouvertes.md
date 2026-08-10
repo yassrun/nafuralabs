@@ -15,8 +15,8 @@ tags: [sektor, rh, decisions]
 
 # RH / pointage — trancher les questions ouvertes (§7) avant Lot 1
 
-> Bloque ERP-28. Source : `docs/epics/rh-pointage-raffinement/00-PLAN.md` §7.
-> ADR : `docs/epics/rh-pointage-raffinement/01-ADR-decisions-ouvertes.md`
+> Bloque ERP-28. Source : `docs/specs/epics/_archive/rh-pointage-raffinement/00-PLAN.md` §7.
+> ADR : `docs/specs/epics/_archive/rh-pointage-raffinement/01-ADR-decisions-ouvertes.md`
 
 ## Critères d'acceptation
 - [x] **7.1** Multi-chantier / jour — oui ; unicité inclut chantier

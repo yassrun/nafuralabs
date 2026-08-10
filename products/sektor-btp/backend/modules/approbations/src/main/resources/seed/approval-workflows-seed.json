@@ -56,10 +56,21 @@
     {
       "id": "wf-etude-prix",
       "code": "ETUDE-PRIX",
-      "label": "Étude de prix — N+1 Directeur travaux puis N+2 DG",
+      "label": "Étude de prix — 2 niveaux (≥ seuil HT)",
+      "entityType": "ETUDE_PRIX",
+      "conditionsJson": "[{\"champ\":\"montant\",\"operateur\":\">=\",\"valeur\":500000}]",
+      "etapesJson": "[{\"ordre\":0,\"type\":\"SERIE\",\"approbateurs\":[{\"type\":\"ROLE\",\"ref\":\"BTP_DIRECTEUR_TRAVAUX\"}]},{\"ordre\":1,\"type\":\"SERIE\",\"approbateurs\":[{\"type\":\"ROLE\",\"ref\":\"BTP_DG\"}]}]",
+      "slaJours": 3,
+      "escaladeApresJours": 5,
+      "isActive": true
+    },
+    {
+      "id": "wf-etude-prix-leger",
+      "code": "ETUDE-PRIX-LEGER",
+      "label": "Étude de prix — 1 niveau (< seuil HT)",
       "entityType": "ETUDE_PRIX",
       "conditionsJson": "[]",
-      "etapesJson": "[{\"ordre\":0,\"type\":\"SERIE\",\"approbateurs\":[{\"type\":\"ROLE\",\"ref\":\"BTP_DIRECTEUR_TRAVAUX\"}]},{\"ordre\":1,\"type\":\"SERIE\",\"approbateurs\":[{\"type\":\"ROLE\",\"ref\":\"BTP_DG\"}]}]",
+      "etapesJson": "[{\"ordre\":0,\"type\":\"SERIE\",\"approbateurs\":[{\"type\":\"ROLE\",\"ref\":\"BTP_DIRECTEUR_TRAVAUX\"}]}]",
       "slaJours": 3,
       "escaladeApresJours": 5,
       "isActive": true

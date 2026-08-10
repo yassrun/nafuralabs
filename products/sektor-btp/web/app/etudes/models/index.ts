@@ -40,10 +40,20 @@ export type DpuComposantType =
 /** Origine du prix d’un composant DPU (aligné sur `SourcePrix` backend). */
 export type SourcePrixComposant = 'MANUEL' | 'CATALOGUE' | 'CONSULTE' | 'BIBLIOTHEQUE' | string;
 
+/** Référence typée d'un composant (L2 — ITEM | OUVRAGE | LIBRE). */
+export type ReferenceTypeComposant = 'ITEM' | 'OUVRAGE' | 'LIBRE';
+
 export interface ComposantDPU {
   id: string;
   type: DpuComposantType;
-  articleOuPosteId: string;
+  referenceType: ReferenceTypeComposant;
+  itemId?: string | null;
+  ouvrageId?: string | null;
+  libelle: string;
+  /**
+   * @deprecated alias lecture de `libelle` — ne plus écrire
+   */
+  articleOuPosteId?: string;
   quantite: number;
   unite: string;
   prixUnitaire: number;
@@ -80,7 +90,10 @@ export interface PrixDPU {
 }
 
 export type NoeudDPGFType = 'LOT' | 'SOUS_LOT' | 'ARTICLE';
+/** @deprecated use OrigineCout */
 export type NoeudDPGFMode = 'FOURNI' | 'DECOMPOSE';
+export type OrigineCout = 'DECOMPOSE' | 'FORFAIT' | 'ESTIME';
+export type EstimationSaisieEn = 'COUT' | 'VENTE';
 
 export interface NoeudDPGF {
   id: string;
@@ -93,11 +106,20 @@ export interface NoeudDPGF {
   quantite?: number;
   unite?: string;
   prixUnitaire?: number;
+  /** @deprecated use coutUnitaire */
   prixFourniBase?: number | null;
+  coutUnitaire?: number | null;
+  coutRevient?: number | null;
   fraisGenerauxPercent?: number | null;
   margePercent?: number | null;
   total?: number;
+  /** @deprecated use origineCout */
   mode?: NoeudDPGFMode | null;
+  origineCout?: OrigineCout | null;
+  estimationSaisieEn?: EstimationSaisieEn | null;
+  coutDeduit?: boolean;
+  forfaitPartnerId?: string | null;
+  forfaitOffreId?: string | null;
   prixDpuId?: string | null;
   descriptif?: string | null;
 }
@@ -142,8 +164,14 @@ export interface ComposantOuvrage {
   id: string;
   ouvrageId: string;
   type: ComposantType;
+  referenceType: ReferenceTypeComposant;
+  itemId?: string | null;
+  refOuvrageId?: string | null;
+  libelle: string;
+  /** @deprecated alias de libelle */
+  designation?: string;
+  /** @deprecated */
   articleId?: string;
-  designation: string;
   unite: string;
   rendement: number;
   prixUnitaire: number;

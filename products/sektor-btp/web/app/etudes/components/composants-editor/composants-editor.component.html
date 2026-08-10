@@ -42,8 +42,8 @@
               type="text"
               class="cmp__input"
               [disabled]="readonly"
-              [ngModel]="c.designation"
-              (ngModelChange)="patchComposant(c.id, { designation: $event })"
+              [ngModel]="c.libelle || c.designation"
+              (ngModelChange)="patchComposant(c.id, { libelle: $event, designation: $event })"
               [ngModelOptions]="{ standalone: true }" />
           </td>
           <td>

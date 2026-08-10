@@ -1148,6 +1148,9 @@
           "code": "الرمز",
           "name": "التسمية",
           "uomCategoryId": "الفئة",
+          "facteurVersBase": "المعامل نحو الأساس",
+          "facteurVersBaseHint": "كم وحدة أساس في وحدة واحدة (مثال: 1 M3 = 1000 L)",
+          "estBase": "وحدة الأساس",
           "isActive": "نشط"
         },
         "sections": {
@@ -1159,12 +1162,26 @@
             "code": "الرمز",
             "name": "التسمية",
             "uomCategoryId": "الفئة",
+            "facteurVersBase": "المعامل",
+            "estBase": "أساس",
             "isActive": "نشط"
           },
+          "estBaseYes": "أساس",
+          "estBaseNo": "—",
           "filters": {
             "uomCategoryId": "الفئة",
             "isActive": "نشط"
           }
+        },
+        "convert": {
+          "title": "اختبار التحويل",
+          "hint": "التحويل داخل نفس الفئة فقط. لا يمكن تحويل اللترات إلى ساعات.",
+          "from": "من",
+          "to": "إلى",
+          "quantity": "الكمية",
+          "action": "تحويل",
+          "incomplete": "اختر الوحدتين والكمية.",
+          "success": "{{fromQty}} {{fromCode}} = {{toQty}} {{toCode}}"
         }
       },
       "uomCategory": {

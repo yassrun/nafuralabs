@@ -106,6 +106,7 @@ class DossierEtudeServiceClientTest {
                 pieceAttendueService,
                 pieceAttendueRepository,
                 chargeEtudeService,
+                org.mockito.Mockito.mock(DossierIntervenantService.class),
                 java.util.List.of());
     }
 

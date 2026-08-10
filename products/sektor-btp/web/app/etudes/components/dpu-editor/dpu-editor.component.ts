@@ -109,6 +109,8 @@ export class DpuEditorComponent {
     const next: ComposantDPU = {
       id: crypto.randomUUID(),
       type: 'MATIERE',
+      referenceType: 'LIBRE',
+      libelle: '',
       articleOuPosteId: '',
       quantite: 1,
       unite: this._unite(),

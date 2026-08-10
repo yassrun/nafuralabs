@@ -87,7 +87,11 @@ export class DpuService {
     const fromComposants: ComposantDPU[] = composants.map((c) => ({
       id: crypto.randomUUID(),
       type: this.mapComposantOuvrageTypeToDpu(c.type),
-      articleOuPosteId: c.articleId ?? c.id,
+      referenceType: (c.referenceType as ComposantDPU['referenceType']) || 'LIBRE',
+      itemId: c.itemId ?? null,
+      ouvrageId: c.refOuvrageId ?? null,
+      libelle: c.libelle || c.designation || c.articleId || c.id,
+      articleOuPosteId: c.libelle || c.designation || c.articleId || c.id,
       quantite: c.rendement ?? 0,
       unite: c.unite,
       prixUnitaire: c.prixUnitaire ?? 0,
@@ -96,7 +100,9 @@ export class DpuService {
     const mo: ComposantDPU = {
       id: crypto.randomUUID(),
       type: 'MAIN_DOEUVRE',
-      articleOuPosteId: `${ouvrageId}-mo`,
+      referenceType: 'LIBRE',
+      libelle: `Main d'œuvre`,
+      articleOuPosteId: `Main d'œuvre`,
       quantite: uniteMain.heures ?? 0,
       unite: 'h',
       prixUnitaire: uniteMain.tauxHoraire ?? 0,

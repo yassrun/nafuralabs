@@ -4,7 +4,7 @@
  * `platform/features/administration/administration.routes.ts` chargeait ces pages en dur
  * depuis `@app/*`. La plateforme expose desormais une zone `administration` ;
  * l'application y declare ses routes. Voir
- * `products/sektor-btp/docs/epics/front-ownership/`.
+ * `products/sektor-btp/docs/specs/epics/_archive/front-ownership/`.
  */
 import { Routes } from '@angular/router';
 

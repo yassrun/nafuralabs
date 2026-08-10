@@ -56,7 +56,8 @@ class DpuCalculatorCorpusReelTest {
                 List<ComposantDpu> composants = new ArrayList<>();
                 for (JsonNode c : o.get("composants")) {
                     composants.add(ComposantDpu.builder()
-                            .articleOuPosteId(c.path("designation").asText(null))
+                            .referenceType("LIBRE")
+                            .libelle(c.path("designation").asText(null))
                             .unite(c.path("unite").asText(null))
                             .rendement(new BigDecimal(c.get("rendement").asText()))
                             .prixUnitaire(new BigDecimal(c.get("prixUnitaire").asText()))

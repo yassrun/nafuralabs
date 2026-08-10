@@ -68,7 +68,16 @@ export class ComposantsEditorComponent {
   );
 
   @Input() set composantsValue(value: ComposantOuvrage[] | null | undefined) {
-    this._composants.set(Array.isArray(value) ? [...value] : []);
+    this._composants.set(
+      Array.isArray(value)
+        ? value.map((c) => ({
+            ...c,
+            referenceType: c.referenceType ?? 'LIBRE',
+            libelle: c.libelle || c.designation || '',
+            designation: c.libelle || c.designation || '',
+          }))
+        : [],
+    );
   }
 
   @Input() set uniteMainValue(value: UniteMain | null | undefined) {
@@ -107,6 +116,8 @@ export class ComposantsEditorComponent {
       id: crypto.randomUUID(),
       ouvrageId: this._ouvrageId,
       type: 'MATERIAU',
+      referenceType: 'LIBRE',
+      libelle: 'Nouveau composant',
       designation: 'Nouveau composant',
       unite: 'U',
       rendement: 1,
@@ -131,6 +142,16 @@ export class ComposantsEditorComponent {
     const idx = list.findIndex((c) => c.id === id);
     if (idx < 0) return;
     const merged: ComposantOuvrage = { ...list[idx], ...patch };
+    if (patch.libelle !== undefined || patch.designation !== undefined) {
+      const label = (patch.libelle ?? patch.designation ?? merged.libelle ?? '').trim();
+      merged.libelle = label;
+      merged.designation = label;
+      if (!merged.referenceType || merged.referenceType === 'LIBRE') {
+        merged.referenceType = 'LIBRE';
+        merged.itemId = null;
+        merged.refOuvrageId = null;
+      }
+    }
     merged.total = Math.round((merged.rendement || 0) * (merged.prixUnitaire || 0) * 100) / 100;
     list[idx] = merged;
     this._composants.set(list);
