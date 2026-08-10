@@ -1,0 +1,2189 @@
+{
+  "source": "BDP-2-17.pdf",
+  "stem": "BDP-2-17",
+  "pipeline": "llm-reference-v2",
+  "notes": "Lots 1-9 ; 5.1/5.2 = articles (lookahead mesure) ; 6.1/7.1 ouvrent lot si absent ; variantes a/b/c.",
+  "summary": {
+    "lots": 9,
+    "sousLots": 41,
+    "articles": 186,
+    "orphelins": 0,
+    "sansQuantite": 2
+  },
+  "arbre": [
+    {
+      "type": "LOT",
+      "code": "1",
+      "libelle": "1 -TERRASSEMENT - GROS-ŒUVRE",
+      "unite": null,
+      "quantite": null,
+      "page": "p1",
+      "enfants": [
+        {
+          "type": "SOUS_LOT",
+          "code": "1.1",
+          "libelle": "1-1 - TRAVAUX EN TERRASSEMENTS ET FONDATION",
+          "unite": null,
+          "quantite": null,
+          "page": "p1",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "1-1-1",
+              "libelle": "FOUILLES EN PUITS ET EN TRANCHEERS DANS TERRAIN DE TOUTES NATURES Y COMPRIS ROCHER",
+              "unite": "M3",
+              "quantite": 10.0,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "1-1-2",
+              "libelle": "EVACUATION AUX DÉCHARGES PUBLIQUES OU MISE EN REMBLAI",
+              "unite": "M3",
+              "quantite": 10.0,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "1-1-3",
+              "libelle": "BÉTON ARME EN INFRASTRUCTURE POUR TOUS OUVRAGES",
+              "unite": "M3",
+              "quantite": 70.0,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "1-1-4",
+              "libelle": "ARMATURE EN ACIER TOR OU CARON EN INFRASTRUCTURE",
+              "unite": "KG",
+              "quantite": 5600.0,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "L'UNITÉ",
+              "unite": "U",
+              "quantite": 10700.0,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "L'UNITÉ",
+              "unite": "U",
+              "quantite": 416.0,
+              "page": "p1",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "1-2-1",
+          "libelle": "1-2-1 REGARD EN BÉTON :",
+          "unite": null,
+          "quantite": null,
+          "page": "p1",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "L'UNITÉ",
+              "unite": "U",
+              "quantite": 10.0,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "L'UNITÉ",
+              "unite": "U",
+              "quantite": 5.0,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "L'UNITÉ",
+              "unite": "U",
+              "quantite": 3.0,
+              "page": "p1",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "1-2-2",
+          "libelle": "1-2-2 CANALISATION EN PVC RIGIDE",
+          "unite": null,
+          "quantite": null,
+          "page": "p1",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "a",
+              "libelle": "CANALISATION EN PVC RIGIDE DE DIAMÈTRE 125 MM",
+              "unite": "ML",
+              "quantite": 40.0,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "b",
+              "libelle": "CANALISATION EN PVC RIGIDE DE DIAMÈTRE160 MM",
+              "unite": "ML",
+              "quantite": 50.0,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "c",
+              "libelle": "CANALISATION EN PVC RIGIDE DE DIAMÈTRE 200 MM",
+              "unite": "ML",
+              "quantite": 95.0,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "1-2-3",
+              "libelle": "CANALISATION POUR RACCORDEMENT DE BOITES DE BRANCHEMENT EN PVC S1 DIAMÉTRE 200MM Y COMPRIS TERRASSEMENTS ET LIT DE POSE",
+              "unite": "ML",
+              "quantite": 20.0,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "L'UNITÉ",
+              "unite": "U",
+              "quantite": 1.0,
+              "page": "p1",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "1.3",
+          "libelle": "1-3- DALLAGE",
+          "unite": null,
+          "quantite": null,
+          "page": "p2",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "1-3-1",
+              "libelle": "APPORT ET MISE EN PLACE DE TOUT VENANT GNA",
+              "unite": "M3",
+              "quantite": 1000.0,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "1-3-2",
+              "libelle": "DALLAGE EN BÉTON ARMÉ DE 15 CM D'ÉPAISSEUR LISSÉ À L HÉLICOPTÈRE Y COMPRIS ACIERS",
+              "unite": "M2",
+              "quantite": 4324.0,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "1-3-3",
+              "libelle": "DALLAGE STREE DE 15 CM D'ÉPAISSEUR Y COMPRIS ACIERS",
+              "unite": "M2",
+              "quantite": 320.0,
+              "page": "p2",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "1.4",
+          "libelle": "1-4- BÉTON ARMÉ EN SUPERSTRUCTURE",
+          "unite": null,
+          "quantite": null,
+          "page": "p2",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "1-4-1",
+              "libelle": "BÉTON ARME EN SUPERSTRUCTURE POUR TOUS OUVRAGES",
+              "unite": "M3",
+              "quantite": 38.0,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "1-4-2",
+              "libelle": "PLANCHER EN HOURDIS Y COMPRIS ACIERS DE16+4",
+              "unite": "M2",
+              "quantite": 78.0,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "1-4-3",
+              "libelle": "ARMATURES EN ACIER TOR OU CARON EN SUPERSTRUCTURE",
+              "unite": "KG",
+              "quantite": 4560.0,
+              "page": "p2",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "1.5",
+          "libelle": "1-5 - MAÇONNERIES ET CLOISONNEMENTS",
+          "unite": null,
+          "quantite": null,
+          "page": "p2",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "1-5-1",
+              "libelle": "MUR EN DOUBLE CLOISON",
+              "unite": "M2",
+              "quantite": 50.0,
+              "page": "p2",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "1-5-2",
+          "libelle": "1-5-2 MUR EN AGGLOS",
+          "unite": null,
+          "quantite": null,
+          "page": "p2",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "a",
+              "libelle": "MUR EN AGGLOS DE 20 CM D'ÉPAISSEUR",
+              "unite": "M2",
+              "quantite": 1640.0,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "1-5-3",
+              "libelle": "CLOISON SIMPLES EN BRIQUES CREUSES",
+              "unite": "M2",
+              "quantite": 990.0,
+              "page": "p2",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "1.6",
+          "libelle": "1-6 - ENDUITS",
+          "unite": null,
+          "quantite": null,
+          "page": "p2",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "1-6-1",
+              "libelle": "ENDUIT INTERIEUR AU MORTIER DE CIMENT SUR MURS ET PLAFONDS Y/C BAGUETTES D’ANGLE METALLIQUES",
+              "unite": "M2",
+              "quantite": 4000.0,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "1-6-2",
+              "libelle": "ENDUIT EXTERIEUR AU MORTIER DE CIMENT LISSE Y/C SOUBASSEMENTS, ENCADREMENT DES BAIES, LINTEAUX ET APPUIS",
+              "unite": "M2",
+              "quantite": 200.0,
+              "page": "p2",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "1.7",
+          "libelle": "1-7 - DIVERS",
+          "unite": null,
+          "quantite": null,
+          "page": "p2",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "1-7-1",
+              "libelle": "DALLETTE EN BETON ARME",
+              "unite": "M2",
+              "quantite": 20.0,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "1-7-2",
+              "libelle": "RENFORMIS EN BETON",
+              "unite": "M2",
+              "quantite": 8.0,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "1-7-3",
+              "libelle": "ETANCHÉITÉ LÉGERE",
+              "unite": "M2",
+              "quantite": 493.0,
+              "page": "p2",
+              "enfants": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "LOT",
+      "code": "2",
+      "libelle": "2-CHARPENTE METALLIQUE ET PANNEAUX SANDWICH",
+      "unite": null,
+      "quantite": null,
+      "page": "p4",
+      "enfants": [
+        {
+          "type": "ARTICLE",
+          "code": "2.2.1",
+          "libelle": "STRUCTURE MÉTALLIQUE GALVANISÉE Y COMPRIS PEINTURE",
+          "unite": "KG",
+          "quantite": 100350.0,
+          "page": "p4",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "L'UNITÉ",
+          "unite": "U",
+          "quantite": 4.0,
+          "page": "p4",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": "2.2.3",
+          "libelle": "RAIL SUSPENDU EN INOX Y COMPRIS CROCHETS ET FIXATIONS",
+          "unite": "ML",
+          "quantite": 140.0,
+          "page": "p4",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": "2.2.4",
+          "libelle": "GARDE CORPS METALLIQUE PASSERELLES",
+          "unite": "ML",
+          "quantite": 536.0,
+          "page": "p4",
+          "enfants": []
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "2.2.5",
+          "libelle": "2.2.5 PASSERELLE EN CAILLEBOTIS MÉTALLIQUE",
+          "unite": null,
+          "quantite": null,
+          "page": "p4",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "a",
+              "libelle": "PASSERELLE EN CAILLEBOTIS MÉTALLIQUE POUR PASSAGE",
+              "unite": "M2",
+              "quantite": 670.0,
+              "page": "p4",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "b",
+              "libelle": "PASSERELLE EN CAILLEBOTIS MÉTALLIQUE POUR EQUIPEMENTS CHEMBRES FROIDES",
+              "unite": "M2",
+              "quantite": 335.0,
+              "page": "p4",
+              "enfants": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "LOT",
+      "code": "3",
+      "libelle": "3- ELECTRICITE",
+      "unite": null,
+      "quantite": null,
+      "page": "p5",
+      "enfants": [
+        {
+          "type": "SOUS_LOT",
+          "code": "3.1",
+          "libelle": "3.1. TABLEAUX ELECTRIQUES",
+          "unite": null,
+          "quantite": null,
+          "page": "p5",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'ensemble",
+              "unite": "E",
+              "quantite": 1.0,
+              "page": "p5",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'ensemble",
+              "unite": "E",
+              "quantite": 1.0,
+              "page": "p5",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'ensemble",
+              "unite": "E",
+              "quantite": 30.0,
+              "page": "p5",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "3.2",
+          "libelle": "3.2 Coffrets de branchement",
+          "unite": null,
+          "quantite": null,
+          "page": "p5",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "L'Unité",
+              "unite": "U",
+              "quantite": 3.0,
+              "page": "p5",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "L'Unité",
+              "unite": "U",
+              "quantite": 6.0,
+              "page": "p5",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "L'Unité",
+              "unite": "U",
+              "quantite": 32.0,
+              "page": "p5",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "3.3",
+          "libelle": "3.3. CABLES ELECTRIQUES",
+          "unite": null,
+          "quantite": null,
+          "page": "p5",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "3.3.1",
+              "libelle": "CABLE 4*50+T MM²",
+              "unite": "ml",
+              "quantite": 100.0,
+              "page": "p5",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "3.3.2",
+              "libelle": "CABLE 5G35 MM²",
+              "unite": "ml",
+              "quantite": 50.0,
+              "page": "p5",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "3.3.3",
+              "libelle": "CABLE 5G25 MM²",
+              "unite": "ml",
+              "quantite": 50.0,
+              "page": "p5",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "3.3.4",
+              "libelle": "CABLE 5G10 MM²",
+              "unite": "ml",
+              "quantite": 900.0,
+              "page": "p5",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "3.3.5",
+              "libelle": "CABLE 5G6 MM²",
+              "unite": "ml",
+              "quantite": 100.0,
+              "page": "p5",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "3.3.6",
+              "libelle": "CABLE 5G4 MM²",
+              "unite": "ml",
+              "quantite": 500.0,
+              "page": "p5",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "3.3.7",
+              "libelle": "CABLE 5G2.5 MM²",
+              "unite": "ml",
+              "quantite": 500.0,
+              "page": "p5",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "3.3.8",
+              "libelle": "CABLE 3G4 MM²",
+              "unite": "ml",
+              "quantite": 450.0,
+              "page": "p5",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "3.4",
+          "libelle": "3.4- Chemins de câbles & Canalisations préfabriquées",
+          "unite": null,
+          "quantite": null,
+          "page": "p5",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "3.4.1",
+              "libelle": "CHEMIN DE CABLE CDC 60X60",
+              "unite": "ml",
+              "quantite": 200.0,
+              "page": "p5",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "3.4.2",
+              "libelle": "CHEMIN DE CABLE CDC 60X150",
+              "unite": "ml",
+              "quantite": 600.0,
+              "page": "p5",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "3.4.3",
+              "libelle": "CHEMIN DE CABLE CDC 60X200",
+              "unite": "ml",
+              "quantite": 400.0,
+              "page": "p5",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "3.5",
+          "libelle": "3.5. DISTRIBUTION ECLAIRAGE ET PRISE DE COURANT",
+          "unite": null,
+          "quantite": null,
+          "page": "p5",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "L'Unité",
+              "unite": "U",
+              "quantite": 100.0,
+              "page": "p5",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "L'Unité",
+              "unite": "U",
+              "quantite": 370.0,
+              "page": "p5",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "L'Unité",
+              "unite": "U",
+              "quantite": 86.0,
+              "page": "p5",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "L'Unité",
+              "unite": "U",
+              "quantite": null,
+              "page": "p5",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "3.6",
+          "libelle": "3.6- ATTENTES ELECTRIQUES",
+          "unite": null,
+          "quantite": null,
+          "page": "p5",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 22.0,
+              "page": "p5",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 12.0,
+              "page": "p5",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "L'Unité",
+              "unite": "U",
+              "quantite": 40.0,
+              "page": "p6",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "L'Unité",
+              "unite": "U",
+              "quantite": 28.0,
+              "page": "p6",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "L'Unité",
+              "unite": "U",
+              "quantite": 28.0,
+              "page": "p6",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "3.7.1",
+          "libelle": "3.7.1 MOSAIC DE LEGRAND",
+          "unite": null,
+          "quantite": null,
+          "page": "p6",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 60.0,
+              "page": "p6",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 12.0,
+              "page": "p6",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 8.0,
+              "page": "p6",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 10.0,
+              "page": "p6",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 30.0,
+              "page": "p6",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "3.7.2",
+          "libelle": "3.7.2 PLEXO DE LEGRAND",
+          "unite": null,
+          "quantite": null,
+          "page": "p6",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 12.0,
+              "page": "p6",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 2.0,
+              "page": "p6",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 12.0,
+              "page": "p6",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 45.0,
+              "page": "p6",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 30.0,
+              "page": "p6",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 60.0,
+              "page": "p6",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "3.7.3",
+          "libelle": "3.7.3 COFFRET DE COMMANDES CENTRALISEES",
+          "unite": null,
+          "quantite": null,
+          "page": "p6",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 1.0,
+              "page": "p6",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 1.0,
+              "page": "p6",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 1.0,
+              "page": "p6",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "3.8",
+          "libelle": "3.8. LUSTRERIE",
+          "unite": null,
+          "quantite": null,
+          "page": "p6",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 38.0,
+              "page": "p6",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 86.0,
+              "page": "p6",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 52.0,
+              "page": "p6",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 36.0,
+              "page": "p6",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 192.0,
+              "page": "p6",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 76.0,
+              "page": "p6",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 28.0,
+              "page": "p6",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "3.9",
+          "libelle": "3.9- Eclairage de sécurité",
+          "unite": null,
+          "quantite": null,
+          "page": "p6",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 5.0,
+              "page": "p6",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "CABLAGE l'unité",
+              "unite": "U",
+              "quantite": 100.0,
+              "page": "p6",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "CABLAGE l'unité",
+              "unite": "U",
+              "quantite": null,
+              "page": "p6",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "CABLAGE l'unité",
+              "unite": "U",
+              "quantite": 47.0,
+              "page": "p6",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 5.0,
+              "page": "p6",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "Ensemble",
+              "unite": "E",
+              "quantite": 1.0,
+              "page": "p6",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'ensemble",
+              "unite": "E",
+              "quantite": 1.0,
+              "page": "p7",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'ensemble",
+              "unite": "E",
+              "quantite": 1.0,
+              "page": "p7",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "3.11",
+          "libelle": "3.11- TELEPHONIE",
+          "unite": null,
+          "quantite": null,
+          "page": "p7",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'ensemble",
+              "unite": "E",
+              "quantite": 30.0,
+              "page": "p7",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "3.11.2",
+              "libelle": "CABLES FIBRE OPTIQUE",
+              "unite": "ml",
+              "quantite": 1200.0,
+              "page": "p7",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 60.0,
+              "page": "p7",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "L'ensemble",
+              "unite": "E",
+              "quantite": 1.0,
+              "page": "p7",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "3.12",
+          "libelle": "3.12. VIDEOSURVEILLANCE",
+          "unite": null,
+          "quantite": null,
+          "page": "p7",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 36.0,
+              "page": "p7",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 9.0,
+              "page": "p7",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 24.0,
+              "page": "p7",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'ensemble",
+              "unite": "E",
+              "quantite": 3.0,
+              "page": "p7",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'ensemble",
+              "unite": "E",
+              "quantite": 1.0,
+              "page": "p7",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'ensemble",
+              "unite": "E",
+              "quantite": 1.0,
+              "page": "p7",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "L'UNITÉ",
+              "unite": "U",
+              "quantite": 4.0,
+              "page": "p7",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "3.12.7",
+          "libelle": "3.12.7 POSTE DE VISUALISATION",
+          "unite": null,
+          "quantite": null,
+          "page": "p7",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 1.0,
+              "page": "p7",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 1.0,
+              "page": "p7",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "L'ensemble",
+              "unite": "E",
+              "quantite": 1.0,
+              "page": "p7",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "3.13",
+          "libelle": "3.13- DETECTION INCENDIE",
+          "unite": null,
+          "quantite": null,
+          "page": "p7",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "L'ensemble",
+              "unite": "E",
+              "quantite": 1.0,
+              "page": "p7",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 63.0,
+              "page": "p7",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 5.0,
+              "page": "p7",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 6.0,
+              "page": "p7",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 20.0,
+              "page": "p7",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 11.0,
+              "page": "p7",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 24.0,
+              "page": "p7",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 5.0,
+              "page": "p7",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "L'ensemble",
+              "unite": "E",
+              "quantite": 1.0,
+              "page": "p7",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "L'ensemble",
+              "unite": "E",
+              "quantite": 1.0,
+              "page": "p7",
+              "enfants": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "LOT",
+      "code": "4",
+      "libelle": "4 -FLUIDES",
+      "unite": null,
+      "quantite": null,
+      "page": "p8",
+      "enfants": [
+        {
+          "type": "SOUS_LOT",
+          "code": "4.1",
+          "libelle": "4.1 EVACUATION EP, EU, EV",
+          "unite": null,
+          "quantite": null,
+          "page": "p8",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "a",
+              "libelle": "Ø 40-50",
+              "unite": "ML",
+              "quantite": 240.0,
+              "page": "p8",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "b",
+              "libelle": "Ø 75",
+              "unite": "ML",
+              "quantite": 85.0,
+              "page": "p8",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "c",
+              "libelle": "Ø 100-110",
+              "unite": "ML",
+              "quantite": 320.0,
+              "page": "p8",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "4.1.2",
+          "libelle": "4.1.2 SIPHON DE SOL",
+          "unite": null,
+          "quantite": null,
+          "page": "p8",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "a",
+              "libelle": "SIPHON DE SOL EXTRA PLAT 30X30 EN INOX Y COMPRIS TRAPE DE NETTOYAGE",
+              "unite": "U",
+              "quantite": 48.0,
+              "page": "p8",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "b",
+              "libelle": "SIPHON DE SOL CARRE 20X20 EN INOX",
+              "unite": "U",
+              "quantite": 28.0,
+              "page": "p8",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "4.1.3",
+              "libelle": "CANIVEAU EN INOX Y COMPRIS TOMPON DE 20 CM DE LARGEUR",
+              "unite": "ML",
+              "quantite": 280.0,
+              "page": "p8",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "4.2.1",
+          "libelle": "4.2.1 BRANCHEMENT & EQUIPEMENT COMPTEUR D'EAU",
+          "unite": null,
+          "quantite": null,
+          "page": "p8",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "a",
+              "libelle": "Magasins",
+              "unite": "E",
+              "quantite": 40.0,
+              "page": "p8",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "b",
+              "libelle": "bloc sanitaire",
+              "unite": "E",
+              "quantite": 8.0,
+              "page": "p8",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "a",
+              "libelle": "Ø 20 x 3,4 (Ø int.13,2)",
+              "unite": "ML",
+              "quantite": 300.0,
+              "page": "p8",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "b",
+              "libelle": "Ø 25 x 4,2 (Ø int. 16,6)",
+              "unite": "ML",
+              "quantite": 1450.0,
+              "page": "p8",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "c",
+              "libelle": "Ø 32 x 5,4 (Ø int. 21,2)",
+              "unite": "ML",
+              "quantite": 120.0,
+              "page": "p8",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "4.2.3",
+          "libelle": "4.2.3 ROBINET D'ARRET",
+          "unite": null,
+          "quantite": null,
+          "page": "p8",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "a",
+              "libelle": "Ø 25",
+              "unite": "U",
+              "quantite": 48.0,
+              "page": "p8",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "b",
+              "libelle": "Ø 32",
+              "unite": "U",
+              "quantite": 2.0,
+              "page": "p8",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "4.3.1",
+          "libelle": "4.3.1 CHAUFFE EAU ELECTRIQUE",
+          "unite": null,
+          "quantite": null,
+          "page": "p8",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "a",
+              "libelle": "Capacité 100 litres",
+              "unite": "E",
+              "quantite": 6.0,
+              "page": "p8",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "b",
+              "libelle": "Capacité 50 litres",
+              "unite": "E",
+              "quantite": 6.0,
+              "page": "p8",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "4.4",
+          "libelle": "4.4 APPAREIL SANITAIRE",
+          "unite": null,
+          "quantite": null,
+          "page": "p8",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 12.0,
+              "page": "p8",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 24.0,
+              "page": "p8",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 2.0,
+              "page": "p8",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 12.0,
+              "page": "p8",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 2.0,
+              "page": "p8",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": null,
+              "quantite": 20.0,
+              "page": "p8",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 14.0,
+              "page": "p9",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 2.0,
+              "page": "p9",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "4.4.9",
+              "libelle": "MIROIRS POUR SANITAIRES",
+              "unite": "m2",
+              "quantite": 26.0,
+              "page": "p9",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 32.0,
+              "page": "p9",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "l'unité",
+              "unite": "U",
+              "quantite": 22.0,
+              "page": "p9",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "4.5",
+          "libelle": "4.5 VENTILATION",
+          "unite": null,
+          "quantite": null,
+          "page": "p9",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "a)",
+              "libelle": "DÉBIT D'AIR : 100 m3/h à 400 m3/h",
+              "unite": "E",
+              "quantite": 22.0,
+              "page": "p9",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "a)",
+              "libelle": "DÉBIT D'AIR : 30 À 90 m3/h",
+              "unite": "U",
+              "quantite": 48.0,
+              "page": "p9",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "a)",
+              "libelle": "DÉBIT D'AIR : 100 m3/h à 400 m3/h",
+              "unite": "U",
+              "quantite": 12.0,
+              "page": "p9",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "a)",
+              "libelle": "Ø 100 à 125",
+              "unite": "ML",
+              "quantite": 350.0,
+              "page": "p9",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "b)",
+              "libelle": "Ø 160 à 200",
+              "unite": "ML",
+              "quantite": 120.0,
+              "page": "p9",
+              "enfants": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "LOT",
+      "code": "5",
+      "libelle": "5- FAUX PLAFONDS",
+      "unite": null,
+      "quantite": null,
+      "page": "p10",
+      "enfants": [
+        {
+          "type": "ARTICLE",
+          "code": "5.1",
+          "libelle": "FAUX PLAFOND EN BA13 Y COMPRIS JOINTS CREUX",
+          "unite": "M2",
+          "quantite": 350.0,
+          "page": "p10",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": "5.2",
+          "libelle": "FAUX PLAFOND EN BA13 HYDROFUGE Y COMPRIS JOINTS CREUX",
+          "unite": "M2",
+          "quantite": 480.0,
+          "page": "p10",
+          "enfants": []
+        }
+      ]
+    },
+    {
+      "type": "LOT",
+      "code": "6",
+      "libelle": "6 - (section 6.1)",
+      "unite": null,
+      "quantite": null,
+      "page": "p11",
+      "enfants": [
+        {
+          "type": "SOUS_LOT",
+          "code": "6.1",
+          "libelle": "6.1 REVETEMENTS",
+          "unite": null,
+          "quantite": null,
+          "page": "p11",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "6.1.1",
+              "libelle": "REVETEMENT DE SOL EN CARREAUX TECHNIQUE GRES CERAME ANTIDERAPENT D’IMPORTATION DE 20X20X1,2 CM Y COMPRIS PLINTHES DE 15 CM",
+              "unite": "M2",
+              "quantite": 4400.0,
+              "page": "p11",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "6.1.2",
+              "libelle": "REVETEMENT DE SOL EN CARREAUX GRES CERAME D’IMPORTATION DE 30X60 CM Y COMPRIS PLINTHES",
+              "unite": "M2",
+              "quantite": 1600.0,
+              "page": "p11",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "6.1.3",
+              "libelle": "REVETEMENT DE SOL EN CARREAUX GRES CERAME ANTIDERAPENT D’IMPORTATION DE 20X20 Y COMPRIS PLINTHES DE 7 CM",
+              "unite": "M2",
+              "quantite": 1000.0,
+              "page": "p11",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "6.1.4",
+              "libelle": "REVETEMENT MURAL EN CARREAUX GRES CERAME D'IMPORTATION DE 20 x 20 CM",
+              "unite": "M2",
+              "quantite": 700.0,
+              "page": "p11",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "6.1.5",
+              "libelle": "REVETEMENT ESPACE ABLUTION EN GRANITE NOIR ABSOLU Y COMPRIS RETOURS",
+              "unite": "M2",
+              "quantite": 50.0,
+              "page": "p11",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "6.1.6",
+              "libelle": "REVETEMENT TABLETTE EN GRANIT Y COMPRIS RETOURS ET STRUCTURE",
+              "unite": "M2",
+              "quantite": 19.0,
+              "page": "p11",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "6.2",
+          "libelle": "6.2.SIGNALETIQUE",
+          "unite": null,
+          "quantite": null,
+          "page": "p11",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "L'UNITÉ",
+              "unite": "U",
+              "quantite": 10.0,
+              "page": "p11",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "L'UNITÉ",
+              "unite": "U",
+              "quantite": 10.0,
+              "page": "p11",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "L'UNITÉ",
+              "unite": "U",
+              "quantite": 12.0,
+              "page": "p11",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "L'UNITÉ",
+              "unite": "U",
+              "quantite": 12.0,
+              "page": "p11",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "L'UNITÉ",
+              "unite": "U",
+              "quantite": 30.0,
+              "page": "p11",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "L'UNITÉ",
+              "unite": "U",
+              "quantite": 6.0,
+              "page": "p11",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "L'UNITÉ",
+              "unite": "U",
+              "quantite": 7.0,
+              "page": "p12",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "L'ENSEMBLE",
+              "unite": "ENS",
+              "quantite": 1.0,
+              "page": "p12",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "L'ENSEMBLE",
+              "unite": "ENS",
+              "quantite": 1.0,
+              "page": "p12",
+              "enfants": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "LOT",
+      "code": "7",
+      "libelle": "7-MENUISERIE",
+      "unite": null,
+      "quantite": null,
+      "page": "p13",
+      "enfants": [
+        {
+          "type": "SOUS_LOT",
+          "code": "7.1",
+          "libelle": "7.1. MENUISERIE ALUMINIUM",
+          "unite": null,
+          "quantite": null,
+          "page": "p13",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "7.1.1",
+              "libelle": "ENSEMBLE MUR RIDEAU Y COMPRIS PORTES COULISSANTES",
+              "unite": "M2",
+              "quantite": 280.0,
+              "page": "p13",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "7.2.1",
+          "libelle": "7.2.1 PORTE BATTANTE EN BOIS",
+          "unite": null,
+          "quantite": null,
+          "page": "p13",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "L'UNITÉ",
+              "unite": "U",
+              "quantite": 2.0,
+              "page": "p13",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "L'UNITÉ",
+              "unite": "U",
+              "quantite": 24.0,
+              "page": "p13",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "L'UNITÉ",
+              "unite": "U",
+              "quantite": 8.0,
+              "page": "p13",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "7.2.2",
+              "libelle": "HABILLAGE MURAL EN BOIS HYDROFUGE",
+              "unite": "M2",
+              "quantite": 150.0,
+              "page": "p13",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "7.3",
+          "libelle": "7.3. MENUISERIE METALLIQUE",
+          "unite": null,
+          "quantite": null,
+          "page": "p13",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "7.3.1",
+              "libelle": "PORTE BATTANTE METALLIQUE SANITAIRE ASPECT BOIS",
+              "unite": "M2",
+              "quantite": 15.0,
+              "page": "p13",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "7.3.2",
+              "libelle": "PORTE BATTANTE METALLIQUE SANITAIRE ASPECT BOIS SANS SERRURE",
+              "unite": "M2",
+              "quantite": 15.0,
+              "page": "p13",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "7.3.3",
+              "libelle": "PORTE METALLIQUE A DEUX VANTAUX COUPE FEU 1H Y COMPRIS HUBLOS , FERMES PORTES ET BARRE ANTIPANIQUE",
+              "unite": "M2",
+              "quantite": 15.0,
+              "page": "p13",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "7.3.4",
+              "libelle": "PORTE METALLIQUE A UN VANTAIL COUPE FEU 1H Y COMPRIS HUBLOS , FERMES PORTES ET BARRE ANTIPANIQUE",
+              "unite": "M2",
+              "quantite": 40.0,
+              "page": "p13",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "7.3.5",
+              "libelle": "PORTE METALLIQUE A UN VANTAIL COUPE FEU 1H Y COMPRIS FERMES PORTES ET BARRE ANTIPANIQUE",
+              "unite": "M2",
+              "quantite": 22.0,
+              "page": "p13",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "7.3.6",
+              "libelle": "CASIERS STRATIFIES POUR VESTIAIRES",
+              "unite": "M2",
+              "quantite": 172.0,
+              "page": "p13",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "7.4",
+          "libelle": "7.4 METALLERIE",
+          "unite": null,
+          "quantite": null,
+          "page": "p13",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "7.4.1",
+              "libelle": "GARDE CORPS EN INOX",
+              "unite": "ML",
+              "quantite": 120.0,
+              "page": "p13",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "7.4.2",
+              "libelle": "BANC POUR VESTIAIRES",
+              "unite": "M2",
+              "quantite": 29.0,
+              "page": "p13",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "7.4.3",
+          "libelle": "7.4.3 ESCALIER METALLIQUE AVEC MARCHES EN CAILLEBOTIS PRESSE Y COMPRIS GARDE- CORPS EN ACIER GALVANISE",
+          "unite": null,
+          "quantite": null,
+          "page": "p13",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "L'ENSEMBLE",
+              "unite": "ENS",
+              "quantite": 4.0,
+              "page": "p14",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "L'ENSEMBLE",
+              "unite": "ENS",
+              "quantite": 2.0,
+              "page": "p14",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "L'UNITÉ",
+              "unite": "U",
+              "quantite": 30.0,
+              "page": "p14",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "7.4.5",
+              "libelle": "RAMPES METALLIQUE Y COMPRIS STRUCTURE",
+              "unite": "M2",
+              "quantite": 60.0,
+              "page": "p14",
+              "enfants": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "LOT",
+      "code": "08",
+      "libelle": "08-PEINTURE",
+      "unite": null,
+      "quantite": null,
+      "page": "p15",
+      "enfants": [
+        {
+          "type": "ARTICLE",
+          "code": "8.1.1",
+          "libelle": "PEINTURE ACRYLIQUE INTERIEURE SUR MURS, PLAFONDS ET FAUX PLAFONDS",
+          "unite": "M2",
+          "quantite": 4400.0,
+          "page": "p15",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": "8.1.2",
+          "libelle": "PEINTURE ACRYLIQUE SUR MURS ET PLAFONDS LOCAUX HUMIDES",
+          "unite": "M2",
+          "quantite": 430.0,
+          "page": "p15",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": "8.1.3",
+          "libelle": "PEINTURE ACRYLIQUE SUR MURS EXTERIEURS - FAÇADES",
+          "unite": "M2",
+          "quantite": 200.0,
+          "page": "p15",
+          "enfants": []
+        }
+      ]
+    },
+    {
+      "type": "LOT",
+      "code": "9",
+      "libelle": "9 - CHAMBRES FROIDES / EQUIPEMENTS FRIGORIFIQUES",
+      "unite": null,
+      "quantite": null,
+      "page": "p16",
+      "enfants": [
+        {
+          "type": "SOUS_LOT",
+          "code": "09.01",
+          "libelle": "09-01 - CHAMBRES FROIDES",
+          "unite": null,
+          "quantite": null,
+          "page": "p16",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "9.1.1",
+              "libelle": "PORTE COULISSANTE CHAMBRE FROIDES POSITIVE",
+              "unite": "M2",
+              "quantite": 185.0,
+              "page": "p16",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "9.1.2",
+              "libelle": "PORTE COULISSANTE CHAMBRE FROIDES POSITIVE SUR RAIL",
+              "unite": "M2",
+              "quantite": 95.0,
+              "page": "p16",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "9.1.3",
+              "libelle": "PANNEAUX SANDWICH 100 MM D'EPAISSEUR POUR PAROIS ET PLAFONDS",
+              "unite": "M2",
+              "quantite": 6522.0,
+              "page": "p16",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "9.2.1",
+          "libelle": "9.2.1 EQUIPEMENTS FRIGORIFIQUES",
+          "unite": null,
+          "quantite": null,
+          "page": "p16",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "L'ENSEMBLE",
+              "unite": "ENS",
+              "quantite": 30.0,
+              "page": "p16",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "L'ENSEMBLE",
+              "unite": "ENS",
+              "quantite": 30.0,
+              "page": "p16",
+              "enfants": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

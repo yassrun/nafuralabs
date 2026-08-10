@@ -1,0 +1,302 @@
+p1	1	merged=0 size=0.0 bold=0 fill=	PROJET : "TRAVAUX DES LOTS SECONDAIRES VILLA KENITRA					
+p1	2	merged=0 size=0.0 bold=0 fill=	BORDEREAU DES PRIX DETAILS					
+p1	3	merged=0 size=0.0 bold=0 fill=	N°	DESIGNATION	U	Q	PU	Total HT
+p1	4	merged=0 size=0.0 bold=0 fill=	LOT 1 : MENUISERIE BOIS, ALUMINIUM ET METALLIQUE					
+p1	5	merged=0 size=0.0 bold=0 fill=		MENUISERIE BOIS				
+p1	6	merged=0 size=0.0 bold=0 fill=	1.1	Portes isoplanes à un vantail ouvrant à la française 0,84/2,50	U	6,00	6.000,00	36.000,00
+p1	7	merged=0 size=0.0 bold=0 fill=	1.2	Portes isoplanes à un vantail ouvrant à la française 0,94/2,50	U	5,00	6.800,00	34.000,00
+p1	8	merged=0 size=0.0 bold=0 fill=	1.3	Portes Pleine en bois massif à un vantail ouvrant 1,54/3,00	U	1,00	24.903,00	24.903,00
+p1	9	merged=0 size=0.0 bold=0 fill=	1.4	Dressing 5,10/2,90 avec led et porte en vitre	U	1,00	60.000,00	60.000,00
+p1	10	merged=0 size=0.0 bold=0 fill=	1.5	Pld1 1,50/2,90	U	1,00	9.000,00	9.000,00
+p1	11	merged=0 size=0.0 bold=0 fill=	1.6	Pld2 1,80/2,90	U	2,00	11.000,00	22.000,00
+p1	12	merged=0 size=0.0 bold=0 fill=	1.7	Pld3 0,6/2,90	U	1,00	4.000,00	4.000,00
+p1	13	merged=0 size=0.0 bold=0 fill=		Total HT LOT MENUISERIE BOIS :				189.903,00
+p1	14	merged=0 size=0.0 bold=0 fill=	1.2	Lot Menuiserie métallique				-
+p1	15	merged=0 size=0.0 bold=0 fill=	1.2	Escalier métallique (sous-sol, RDC )	U	1,00	100.000,00	100.000,00
+p1	16	merged=0 size=0.0 bold=0 fill=	1.2	Porte métallique 1,40/1.80	U	1,00	6.000,00	6.000,00
+p1	17	merged=0 size=0.0 bold=0 fill=	1.2	Porte métallique GARAGE 2,80/1.80	U	1,00	25.000,00	25.000,00
+p1	18	merged=0 size=0.0 bold=0 fill=	1.2	Garde corps mur de clôture	ml	16,00	700,00	11.200,00
+p1	19	merged=0 size=0.0 bold=0 fill=	1.2	trappe métallique 1,00/1,00 LT	U	2,00	3.500,00	7.000,00
+p1	20	merged=0 size=0.0 bold=0 fill=	1.2	Echelle LT	U	1,00	1.500,00	1.500,00
+p1	21	merged=0 size=0.0 bold=0 fill=		Total HT LOT MENUISERIE METALLIQUE :				150.700,00
+p1	22	merged=0 size=0.0 bold=0 fill=		Total HT LOT MENUISERIE BOIS, ALUMINIUM ET METALLIQUE :				340.603,00
+p1	23	merged=0 size=0.0 bold=0 fill=	LOT 2 : Faux plafonds					
+p1	24	merged=0 size=0.0 bold=0 fill=	2.1	BA13	㎡	450,00	310,00	139.500,00
+p1	25	merged=0 size=0.0 bold=0 fill=	2.2	Join creux 20cm	ml	120,00	130,00	15.600,00
+p1	26	merged=0 size=0.0 bold=0 fill=	2.3	Join creux 5cm	ml	280,00	89,00	24.920,00
+p1	27	merged=0 size=0.0 bold=0 fill=		Total HT LOT Faux plafonds :				180.020,00
+p1	28	merged=0 size=0.0 bold=0 fill=	LOT 3 : REVETMENT SOL - MURS					
+p1	29	merged=0 size=0.0 bold=0 fill=	2.3	Revetement de sol				
+p1	30	merged=0 size=0.0 bold=0 fill=	3.1	carreaux de Grès Cérame de 120X120 cm (salon) RDC	㎡	100,00	1.000,00	100.000,00
+p1	31	merged=0 size=0.0 bold=0 fill=		carreaux de Grès Cérame de 100X100 cm (salon) sous-sol + chambre sous-sol	㎡	92,00	650,00	59.800,00
+p1	32	merged=0 size=0.0 bold=0 fill=		escalier de Grès Cérame de 100X100 cm (RDC)	㎡	29,00	650,00	18.850,00
+p1	33	merged=0 size=0.0 bold=0 fill=		escalier de Grès Cérame de 100X100 cm (sous-sol)	㎡	24,00	650,00	15.600,00
+p1	34	merged=0 size=0.0 bold=0 fill=		escalier de Grès Cérame de 100X100 cm (Etage)	㎡	14,00	650,00	9.100,00
+p1	35	merged=0 size=0.0 bold=0 fill=		escalier de Grès Cérame de 100X100 cm (cours anglaise)		22,00	450,00	9.900,00
+p1	36	merged=0 size=0.0 bold=0 fill=	3.2	Parquet semi massif effet noyer (chambre) 10 mm	㎡	60,00	1.150,00	69.000,00
+p1	37	merged=0 size=0.0 bold=0 fill=		Plinthe parquet semi massif rétro éclairer(chambre) 10 mm	ml	62,00	300,00	18.600,00
+p1	38	merged=0 size=0.0 bold=0 fill=		Parquet semi massif effet noyer (hall étage) 10 mm	㎡	19,00	1.150,00	21.850,00
+p1	39	merged=0 size=0.0 bold=0 fill=		Plinthe parquet semi massif rétro éclairer (hall étage)	ml	20,00	300,00	6.000,00
+p1	40	merged=0 size=0.0 bold=0 fill=	3.3	Carreaux de Grès Cérame de 120X60 cm ( salle de bain)	㎡	18,00	550,00	9.900,00
+p1	41	merged=0 size=0.0 bold=0 fill=	3.1	Carreaux de Grès Cérame de 120X60 cm ( salle de bain RDC)	㎡	5,00	1.000,00	5.000,00
+p1	42	merged=0 size=0.0 bold=0 fill=	3.4	Carreaux de Grès Cérame de 120X60 cm (Terrasse Chambres )	㎡	16,00	450,00	7.200,00
+p1	43	merged=0 size=0.0 bold=0 fill=	3.2	Plinthe carreaux de Grès Cérame de 120X60 cm (Terrasse Chambres )	ml	28,00	100,00	2.800,00
+p1	44	merged=0 size=0.0 bold=0 fill=	3.5	Carreaux de Grès Cérame de 120X60 cm Revétement sol cours anglaise +	㎡	73,00	450,00	32.850,00
+p1	45	merged=0 size=0.0 bold=0 fill=		Plinthe Carreaux de Grès Cérame de 120X60 cm Revétement sol salle de	ml	24,00	100,00	2.400,00
+p1	46	merged=0 size=0.0 bold=0 fill=	3.6	Revétement sol toitture	㎡	152,00	250,00	38.000,00
+p1	47	merged=0 size=0.0 bold=0 fill=	3.7	Plan de travail SDB	㎡	8,00	1.200,00	9.600,00
+p1	48	merged=0 size=0.0 bold=0 fill=		Total HT LOT revêtement sols :				436.450,00
+p1	49	merged=0 size=0.0 bold=0 fill=		Revetements Murs				
+p1	50	merged=0 size=0.0 bold=0 fill=		Carreaux de Grès Cérame de 270X120 cm REVETEMENT MURAL SDB	㎡	25,00	1.300,00	32.500,00
+p1	51	merged=0 size=0.0 bold=0 fill=	3.8	Carreaux de Grès Cérame de 120X60 cm REVETEMENT MURAL SDB	㎡	120,00	750,00	90.000,00
+p1	52	merged=0 size=0.0 bold=0 fill=		Revêtement cours anglaise	㎡	100,00	350,00	35.000,00
+p1	53	merged=0 size=0.0 bold=0 fill=		Total HT LOT revêtement murs :				157.500,00
+p1	54	merged=0 size=0.0 bold=0 fill=		Cuisine equipée				
+p1	55	merged=0 size=0.0 bold=0 fill=		CUISINE EQUIPEE	U	1,00	150.000,00	150.000,00
+p1	56	merged=0 size=0.0 bold=0 fill=		CUISINE EQUIPEE DIIORIO CUCINE import italien Plan de travail en	PM	1,00	355.000,00	
+p1	57	merged=0 size=0.0 bold=0 fill=		CUISINE EQUIPEE EGGER en caisson en latte Plan de travail en dekton	PM	1,00	265.000,00	
+p1	58	merged=0 size=0.0 bold=0 fill=		Total HT LOT Cuisine :				150.000,00
+p1	59	merged=0 size=0.0 bold=0 fill=		Total HT LOT REVETMENT				743.950,00
+p1	60	merged=0 size=0.0 bold=0 fill=	LOT 4 : LOT ELECTRICITE					
+p1	61	merged=0 size=0.0 bold=0 fill=	N°	DESIGNATION	U		PU	TOTAL
+p1	62	merged=0 size=0.0 bold=0 fill=		BRANCHEMENT ET ALIMENTATION				
+p1	63	merged=0 size=0.0 bold=0 fill=		branchement, Boite de distribution, de coupure, compteurs & canalisations extérieures, et protections.				-
+p1	64	merged=0 size=0.0 bold=0 fill=	4.1	Aménagement des niches des compteurs, branchement, Boites de distribution, de coupure, canalisations extérieures, et protections	Ens			
+p1	65	merged=0 size=0.0 bold=0 fill=	4.2	Complement prise de terre courants forts en fond de fouille	Ens			
+p1	66	merged=0 size=0.0 bold=0 fill=	4.3	Tranchée en fouille dans terrain de toute nature y/c Tube annelé double	mL			
+p1	67	merged=0 size=0.0 bold=0 fill=		Tableaux électriques				
+p1	68	merged=0 size=0.0 bold=0 fill=	4.4	Tableau de protection	U			
+p1	69	merged=0 size=0.0 bold=0 fill=	4.5	Tableau de protection Service genereaux	U			
+p1	70	merged=0 size=0.0 bold=0 fill=		Chemins de câble				
+p1	71	merged=0 size=0.0 bold=0 fill=	4.6	Chemins de câble 215 x 63mm	mL			
+p1	72	merged=0 size=0.0 bold=0 fill=	4.7	Chemins de câble 155 x 63mm	mL			
+p1	73	merged=0 size=0.0 bold=0 fill=	4.8	Chemins de câble 95 x 63mm	mL			
+p1	74	merged=0 size=0.0 bold=0 fill=		Câbles de distribution basse tension U1000 R2V Cuivre				
+p1	75	merged=0 size=0.0 bold=0 fill=	4.9	Câble U1000 R2V 4x70mm² +T	mL			
+p1	76	merged=0 size=0.0 bold=0 fill=	4.10	Câble U1000 R2V 4x25mm² +T	mL			
+p1	77	merged=0 size=0.0 bold=0 fill=	4.11	Câble U1000 R2V 4x16mm² +T	mL			
+p1	78	merged=0 size=0.0 bold=0 fill=	4.12	Câble U1000 R2V 4x10mm² +T	mL			
+p1	79	merged=0 size=0.0 bold=0 fill=	4.13	Câble U1000 R2V 3x16mm²	mL			
+p1	80	merged=0 size=0.0 bold=0 fill=		DISTRIBUTION ECLAIRAGE				
+p1	81	merged=0 size=0.0 bold=0 fill=	4.14	Foyer lumineux sur simple allumage	U			
+p1	82	merged=0 size=0.0 bold=0 fill=	4.15	Foyer lumineux sur simple allumage étanche	U			
+p1	83	merged=0 size=0.0 bold=0 fill=	4.16	Foyer lumineux sur double allumage	U			
+p1	84	merged=0 size=0.0 bold=0 fill=	4.17	Foyer lumineux va et vient	U			
+p1	85	merged=0 size=0.0 bold=0 fill=	4.18	Foyer lumineux Double va et vient	U			
+p1	86	merged=0 size=0.0 bold=0 fill=	4.19	Foyer lumineux detecteurs de mouvement 360°	U			
+p1	87	merged=0 size=0.0 bold=0 fill=	4.20	Foyer lumineux detecteurs de mouvement 180°	U			
+p1	88	merged=0 size=0.0 bold=0 fill=	4.21	Foyers lumineux complémentaires	U			
+p1	89	merged=0 size=0.0 bold=0 fill=		DISTRIBUTION PRISES DE COURANT ET ALIMENTATIONS				
+p1	90	merged=0 size=0.0 bold=0 fill=	4.22	Prise de courant 2x16A+T Normal	U			
+p1	91	merged=0 size=0.0 bold=0 fill=	4.23	Prise de courant 2x16A+T étanche	U			
+p1	92	merged=0 size=0.0 bold=0 fill=	4.24	Prise télévision y/c câble coaxial	U			
+p1	93	merged=0 size=0.0 bold=0 fill=	4.25	Prise telephonique et informatique	U			
+p1	94	merged=0 size=0.0 bold=0 fill=	4.26	Foyer pour volet roulant	U			
+p1	95	merged=0 size=0.0 bold=0 fill=	4.27	Alimentation divers (Porte automatique garage )	U			
+p1	96	merged=0 size=0.0 bold=0 fill=	4.28	Reservation pour la desserte telephonique : tubage et boites de répartition, etc.	E			
+p1	97	merged=0 size=0.0 bold=0 fill=	4.29	Câblage téléphonique	E			
+p1	98	merged=0 size=0.0 bold=0 fill=	4.30	Câblage télévision	E			
+p1	99	merged=0 size=0.0 bold=0 fill=	4.31	Alimentation de l’ascenseur avec cable 5x10mm²	E			
+p1	100	merged=0 size=0.0 bold=0 fill=	4.32	Sonnerie avec bouton	E			
+p2	1	merged=0 size=0.0 bold=0 fill=	4.33	Vidéophone	E			
+p2	2	merged=0 size=0.0 bold=0 fill=	4.34	Réseau de Câblage	E			
+p2	3	merged=0 size=0.0 bold=0 fill=	4.35	Camera de surveillance				
+p2	4	merged=0 size=0.0 bold=0 fill=	4.35	TOTAL				220.000,00
+p2	5	merged=0 size=0.0 bold=0 fill=		LUSTRERIE ET APPARIELLAGE				
+p2	6	merged=0 size=0.0 bold=0 fill=	4.36	Plafonnier LED 24W	U			
+p2	7	merged=0 size=0.0 bold=0 fill=	4.37	Spot LED 5W LED	U			
+p2	8	merged=0 size=0.0 bold=0 fill=	4.38	Spot Led encasté Etanche 5w SDB 12V	U			
+p2	9	merged=0 size=0.0 bold=0 fill=	4.39	Spot etanche LED rond 10W terrasse	U			
+p2	10	merged=0 size=0.0 bold=0 fill=	4.40	Applique murale LED	U			
+p2	11	merged=0 size=0.0 bold=0 fill=	4.41	Applique murale SDB LED	U			
+p2	12	merged=0 size=0.0 bold=0 fill=	4.42	Spot carre pour cuisine 24w	U			
+p2	13	merged=0 size=0.0 bold=0 fill=	4.43	Luminaire étanche 40W (Locaux techniques)	U			
+p2	14	merged=0 size=0.0 bold=0 fill=	4.44	Borne éclairante 24w LED	U			
+p2	15	merged=0 size=0.0 bold=0 fill=	4.45	Grille pour protection antichoc pour bloc d'éclairage de sécurité	U			
+p2	16	merged=0 size=0.0 bold=0 fill=		TOTAL				120.000,00
+p2	17	merged=0 size=0.0 bold=0 fill=		DOMOTIQUE				
+p2	18	merged=0 size=0.0 bold=0 fill=		volet roulant: fourniture installation et mise en service d'un smart Switch pour volet roulant électrique inclus un système de sécurité et google home & amazon Alexa				
+p2	19	merged=0 size=0.0 bold=0 fill=		clairage intelligent. fourniture installation et mise en service d'un smart home et google home & amazon Alexa				
+p2	20	merged=0 size=0.0 bold=0 fill=		eclairage intelligent piscine. fourniture installation et mise en service d'un smart et google home & Amazon Alexa				
+p2	21	merged=0 size=0.0 bold=0 fill=		switch intelligent pompe immergée et pompe piscine				
+p2	22	merged=0 size=0.0 bold=0 fill=		fourniture installation et mise en service d'un smart et google home & Amazon Alexa				
+p2	23	merged=0 size=0.0 bold=0 fill=		eclairage jardin Smart. fourniture installation et mise en service d'un smart et google home & Amazon Alexa				
+p2	24	merged=0 size=0.0 bold=0 fill=		garage intelligent Smart. fourniture installation et mise en service d'un smart et Switch intelligent et google Home & Amazon Alexa				
+p2	25	merged=0 size=0.0 bold=0 fill=		réseaux et conductivité. hub de contrôle centralisés: fourniture, installation configuration et mise en service d'un système domotique centralisés Local. Pour connecter et gérer tout les appareils et les contrôler via une seul interface				
+p2	26	merged=0 size=0.0 bold=0 fill=		TOTAL				150.000,00
+p2	27	merged=0 size=0.0 bold=0 fill=		ENERGIE SOLAIRE				
+p2	28	merged=0 size=0.0 bold=0 fill=		FOURNITURE ET INSLTALATION D’UNE CENTRALE				80.000,00
+p2	29	merged=0 size=0.0 bold=0 fill=		Total HT LOT ELECTRICITE :				570.000,00
+p2	30	merged=0 size=0.0 bold=0 fill=	LOT 5 : PLOMBERIE SANITAIRES					
+p2	31	merged=0 size=0.0 bold=0 fill=	N°	DESIGNATION	U		PU	TOTAL
+p2	32	merged=0 size=0.0 bold=0 fill=		CANALISATIONS DE PLOMBERIE				-
+p2	33	merged=0 size=0.0 bold=0 fill=	5.1	La branchement general et amenagement de la niche et nourrice des compteurs avec portail métallique grillagée à deux vantaux et suivant plan de détail d’architecture et normes de la REGIE DE DISTRIBUTION	Ens			
+p2	34	merged=0 size=0.0 bold=0 fill=	5.2	Regard et Equipement de branchement	Ens			
+p2	35	merged=0 size=0.0 bold=0 fill=		Tube en polyethylene haut densite PN 16				
+p2	36	merged=0 size=0.0 bold=0 fill=	5.3	Tube en polyethylene haut densite DN 63 –PN 16	ml			
+p2	37	merged=0 size=0.0 bold=0 fill=	5.4	Tube en polyethylene haut densite DN 50 –PN 16	ml			
+p2	38	merged=0 size=0.0 bold=0 fill=	5.5	Tube en polyethylene haut densite DN 40 - 32 –PN 16	ml			
+p2	39	merged=0 size=0.0 bold=0 fill=		DISTRIBUTION EN PPR PN20				
+p2	40	merged=0 size=0.0 bold=0 fill=	5.6	PPR Ø14/20	ml			
+p2	41	merged=0 size=0.0 bold=0 fill=	5.7	PPR Ø16/25	ml			
+p2	42	merged=0 size=0.0 bold=0 fill=	5.8	PPR Ø21/32	ml			
+p2	43	merged=0 size=0.0 bold=0 fill=	5.9	Robinet de Puissage	U			
+p2	44	merged=0 size=0.0 bold=0 fill=	5.10	Robinet d'arrêt	U			
+p2	45	merged=0 size=0.0 bold=0 fill=	5.11	Anti-Bélier	U			
+p2	46	merged=0 size=0.0 bold=0 fill=	5.12	Distribution en Polyethelene reticule Diamètre ø 13/16 & 16/20	ml			
+p2	47	merged=0 size=0.0 bold=0 fill=		Coffret de distribution	Ens			
+p2	48	merged=0 size=0.0 bold=0 fill=	5.13	4 Départ EF	Ens			
+p2	49	merged=0 size=0.0 bold=0 fill=	5.14	3 Départs EF - 3 Départs EC	Ens			
+p2	50	merged=0 size=0.0 bold=0 fill=	5.15	4 Départs EF - 3 Départs EC	Ens			
+p2	51	merged=0 size=0.0 bold=0 fill=	5.16	5 Départs EF - 3 Départs EC	Ens			
+p2	52	merged=0 size=0.0 bold=0 fill=	5.17	5 Départs EF - 4 Départs EC	Ens			
+p2	53	merged=0 size=0.0 bold=0 fill=	5.18	5 Départs EF - 5 Départs EC	Ens			
+p2	54	merged=0 size=0.0 bold=0 fill=	5.19	6 Départs EF - 5 Départs EC	Ens			
+p2	55	merged=0 size=0.0 bold=0 fill=		EVACUATION EN PVC				
+p2	56	merged=0 size=0.0 bold=0 fill=	5.20	PVC Ø75	ml			
+p2	57	merged=0 size=0.0 bold=0 fill=	5.21	PVC Ø100 / 110	ml			
+p2	58	merged=0 size=0.0 bold=0 fill=	5.22	PVC Ø125	ml			
+p2	59	merged=0 size=0.0 bold=0 fill=	5.23	PVC Ø160	ml			
+p2	60	merged=0 size=0.0 bold=0 fill=	5.24	PVC Ø200	ml			
+p2	61	merged=0 size=0.0 bold=0 fill=	5.25	Siphon de sol en inox	U			
+p2	62	merged=0 size=0.0 bold=0 fill=		GARGOUILLES D'EAU PLUVIALE EN TOUT DIAMETRE				
+p2	63	merged=0 size=0.0 bold=0 fill=	5.26	Ø110	U			
+p2	64	merged=0 size=0.0 bold=0 fill=	5.27	Ø125	U			
+p2	65	merged=0 size=0.0 bold=0 fill=	5.28	Equipement fosse de de relevage	Ens			
+p2	66	merged=0 size=0.0 bold=0 fill=	5.29	TOTAL				175.000,00
+p2	67	merged=0 size=0.0 bold=0 fill=		Climatisation-ventilation- chauffage				
+p2	68	merged=0 size=0.0 bold=0 fill=	5.30	Aérateur silencieurs de SDB compris cablage	U			
+p2	69	merged=0 size=0.0 bold=0 fill=	5.31	Pré-sinstallation de climatisation ( Fluide ét electricité )	U			
+p2	70	merged=0 size=0.0 bold=0 fill=	5.32	Caniveaux en béton avec grille en fonte ductile	ml			
+p2	71	merged=0 size=0.0 bold=0 fill=	5.33	Climatisation DRV RDC & étage				
+p2	72	merged=0 size=0.0 bold=0 fill=	5.34	Pompe á chaleur	U	1,00		
+p2	73	merged=0 size=0.0 bold=0 fill=	5.35	POMPE A CHALEUR HPI-S 27 TR/ET REF 7746970 MARQUE DE DIETRICH	U	1,00		
+p2	74	merged=0 size=0.0 bold=0 fill=	5.36	Unité Extérieure AWHP 27 TR-2 EH615/EM REF 7655105 MARQUE DE DIETRICH	U	1,00		
+p2	75	merged=0 size=0.0 bold=0 fill=	5.37	Unité Intérieure MIT-S 22-27/E HK115 REF 7746322 MARQUE DE DIETRICH	U	1,00		
+p2	76	merged=0 size=0.0 bold=0 fill=	5.38	PREPARATEUR SIMPLE SERPENTIN	U	1,00		
+p2	77	merged=0 size=0.0 bold=0 fill=	5.39	PLANCHER CHAUFFANT Sous-sol	U			
+p2	78	merged=0 size=0.0 bold=0 fill=	5.40	RETUBE EUROPEX DN 13 X 16 MARQUE ACOME ART 728753-C240	U			
+p2	79	merged=0 size=0.0 bold=0 fill=	5.41	DALLE NOVACOME EVOLUTION 0.75P ART 716895	U			
+p2	80	merged=0 size=0.0 bold=0 fill=	5.42	BANDE IP NON RETICULE REF 716824-R45	U			
+p2	81	merged=0 size=0.0 bold=0 fill=	5.43	CASSETTE MURALE AC 840E 850X80X530 MM REF 200132 IVAR	U			
+p2	82	merged=0 size=0.0 bold=0 fill=	5.44	KIT DE COLLECTEURS DE REGLAGE 6 SORTIES CI 595 MNRI/06 1" X EUROK T.M	U			
+p3	1	merged=0 size=0.0 bold=0 fill=	5.45	TETE ELECTROTHERMIQUE NORMALEMENT FERMEE - TE 3040 IV 501508 230 V	U			
+p3	2	merged=0 size=0.0 bold=0 fill=	5.46	CHRONO THERMOSTAT DIGITAL AC 710 CODE 580012	U			
+p3	3	merged=0 size=0.0 bold=0 fill=	5.47	HUMIDIFICATEUR STEAM ENERGY TYPE FL-120/12KW/380V REF 05004022014	U			
+p3	4	merged=0 size=0.0 bold=0 fill=	5.48	PISCINE	U	1,00		
+p3	5	merged=0 size=0.0 bold=0 fill=	5.49	POMPE SIMPLE MAGNA1 32-80 180 1x230V PN10 REF 99221235 GRUNDFOS	U			
+p3	6	merged=0 size=0.0 bold=0 fill=	5.50	ECHANGEUR A PLAQUES VIMATHERM VT04 A 31 PLAQUES	U			
+p3	7	merged=0 size=0.0 bold=0 fill=	5.51	VANNE 3 VOIES VRG131 25 AVEC MOTEUR SERIE 60 1" ESBE	U			
+p3	8	merged=0 size=0.0 bold=0 fill=	5.52	ESBE ARA661 3-POINT 230V AC 6N M120S REF 12101300	U			
+p3	9	merged=0 size=0.0 bold=0 fill=		THERMOSTAT C03A3 A GAINE 1/2" DE 10/ 90 FANTINI COSMI	U			
+p3	10	merged=0 size=0.0 bold=0 fill=	5.33	TOTAL				320.000,00
+p3	11	merged=0 size=0.0 bold=0 fill=		APPAREILS ET ACCESSOIRES SANITAIRES				
+p3	12	merged=0 size=0.0 bold=0 fill=	5.34	Cuvette de WC suspendue Square sans bride Rimless.	U	5,00	4.313,00	21.565,00
+p3	13	merged=0 size=0.0 bold=0 fill=	5.35	WC DUPLO ONE COMPACT -Bâti-support pour cuvette de WC suspendue. Réservoir double chasse. Coude d'évacuation ø 90/110 mm	U	5,00	2.763,00	13.815,00
+p3	14	merged=0 size=0.0 bold=0 fill=	5.36	Abattant double laqué en SUPRALIT® Square, frein de chute "Silencio",	U	5,00	1.579,00	7.895,00
+p3	15	merged=0 size=0.0 bold=0 fill=	5.37	PL3 ONE - Plaque de commande en acier inoxydable anti-vandalisme avec	U	5,00	994,00	4.970,00
+p3	16	merged=0 size=0.0 bold=0 fill=	5.38	Mitigeur électronique pour lavabo alimentation sur secteur (230v) RDC	U	2,00	5.954,00	11.908,00
+p3	17	merged=0 size=0.0 bold=0 fill=	5.39	Robinetterie électronique avec réglage température à l’installation alimentation sur secteur (230v)	U	5,00	3.849,00	19.245,00
+p3	18	merged=0 size=0.0 bold=0 fill=	5.40	CHAUFFE EAU ELECTRIQUE BOSCH 300L	U	1,00	5.200,00	5.200,00
+p3	19	merged=0 size=0.0 bold=0 fill=	5.41	Pomme de douche carrée orientable, en acier inoxydable.	U	4,00	2.469,00	9.876,00
+p3	20	merged=0 size=0.0 bold=0 fill=	5.42	Bras plafond pour pomme de douche.		4,00	100,00	400,00
+p3	21	merged=0 size=0.0 bold=0 fill=	5.43	Douche thermostatique mural livré avec douchette à main, flexible de 1,50 m et support mural articulé		4,00	5.087,00	20.348,00
+p3	22	merged=0 size=0.0 bold=0 fill=		TOTAL				115.222,00
+p3	23	merged=0 size=0.0 bold=0 fill=		Total HT :				725.444,00
+p3	24	merged=0 size=0.0 bold=0 fill=	LOT 6 : PEINTURE					
+p3	25	merged=0 size=0.0 bold=0 fill=	6.1	Peinture type1 glycérophtalique ASTRAL	㎡			-
+p3	26	merged=0 size=0.0 bold=0 fill=	6.2	Peinture type2 Decorative sur mur ASTRAL	㎡			-
+p3	27	merged=0 size=0.0 bold=0 fill=	6.3	Peinture type3 extérieur ASTRAL	㎡			-
+p3	28	merged=0 size=0.0 bold=0 fill=		Total HT :				140.000,00
+p3	29	merged=0 size=0.0 bold=0 fill=	LOT 7 : Lot aménagement intérieur					
+p3	31	merged=0 size=0.0 bold=0 fill=		miroiterie SDB	U	5		20.000,00
+p3	32	merged=0 size=0.0 bold=0 fill=		miroiterie Salle de sport	U	12	900,00	10.800,00
+p3	33	merged=0 size=0.0 bold=0 fill=		miroiterie bain maure	U	1	1.800,00	1.800,00
+p3	34	merged=0 size=0.0 bold=0 fill=		miroiterie Salle a manger	U	2	1.500,00	3.000,00
+p3	35	merged=0 size=0.0 bold=0 fill=		MEUBLE TV SALON EN TUBE MATALIQUE et PLACAGE NOYER sans motorisaiton , TV ROTATIF	U	1	29.500,00	29.500,00
+p3	36	merged=0 size=0.0 bold=0 fill=		COIN CAFE 1,87/0,6M EN PLACAGE NOYER ET DEKTON	U	1	22.000,00	22.000,00
+p3	37	merged=0 size=0.0 bold=0 fill=		Meuble TV Sous-sol avec cheminée etanole	U	1	37.000,00	37.000,00
+p3	38	merged=0 size=0.0 bold=0 fill=		Portique Cote salon sous-sol	U	1	28.800,00	28.800,00
+p3	39	merged=0 size=0.0 bold=0 fill=		Habillage mur Salle a manger	U	1	24.000,00	24.000,00
+p3	40	merged=0 size=0.0 bold=0 fill=		faux plafond en bois Salle a manger	U	1	24.300,00	24.300,00
+p3	41	merged=0 size=0.0 bold=0 fill=		Habillage tv Salle de sport 3,00/3,00	U	1	18.000,00	18.000,00
+p3	42	merged=0 size=0.0 bold=0 fill=		Meuble + niche SDB Sous-sol	U	1	15.000,00	15.000,00
+p3	43	merged=0 size=0.0 bold=0 fill=		Espace Repos Bain maure	U	1	12.000,00	12.000,00
+p3	44	merged=0 size=0.0 bold=0 fill=		separation hall entree et salon européen	U	1	21.000,00	21.000,00
+p3	45	merged=0 size=0.0 bold=0 fill=		cloison salon marocain en placage noyer	U	1	38.000,00	38.000,00
+p3	46	merged=0 size=0.0 bold=0 fill=		Faux plafond en bois salon marocain	U	1	28.800,00	28.800,00
+p3	47	merged=0 size=0.0 bold=0 fill=		coin salon marocain	U	1	21.500,00	21.500,00
+p3	48	merged=0 size=0.0 bold=0 fill=		Meuble TV Salon européen	U	1	25.000,00	25.000,00
+p3	49	merged=0 size=0.0 bold=0 fill=		Meuble SDB RDC	U	1	12.000,00	12.000,00
+p3	50	merged=0 size=0.0 bold=0 fill=		meuble tv chambre 2	U	1	15.000,00	15.000,00
+p3	51	merged=0 size=0.0 bold=0 fill=		bardage tête de lit chambre 2	U	1	8.000,00	8.000,00
+p3	52	merged=0 size=0.0 bold=0 fill=		meuble tv chambre 1	U	1	10.000,00	10.000,00
+p3	53	merged=0 size=0.0 bold=0 fill=		bardage tête de lit chambre 1	U	1	9.000,00	9.000,00
+p3	54	merged=0 size=0.0 bold=0 fill=		bardage tête de lit chambre 3 + console	U	1	12.000,00	12.000,00
+p3	55	merged=0 size=0.0 bold=0 fill=		console chambre 3	U	1	9.000,00	9.000,00
+p3	56	merged=0 size=0.0 bold=0 fill=		Meuble SDB chambre 3	U	1	9.000,00	9.000,00
+p3	57	merged=0 size=0.0 bold=0 fill=		Meuble SDB etage	U	1	6.000,00	6.000,00
+p3	58	merged=0 size=0.0 bold=0 fill=		habillage hall etage en bois	U	1	12.000,00	12.000,00
+p3	59	merged=0 size=0.0 bold=0 fill=		meuble tv chambre parentale	U	1	18.000,00	18.000,00
+p3	60	merged=0 size=0.0 bold=0 fill=		Meuble SDB chambre parentale	U	1	12.000,00	12.000,00
+p3	61	merged=0 size=0.0 bold=0 fill=		bardage tête de lit chambre parentale	U	1	12.000,00	12.000,00
+p3	62	merged=0 size=0.0 bold=0 fill=		moulure en pvc hall etage & salon marocain RDC	U	1	12.000,00	12.000,00
+p3	63	merged=0 size=0.0 bold=0 fill=		Total HT aménagement intérieur :				536.500,00
+p3	64	merged=0 size=0.0 bold=0 fill=		EQUIPEMENTS PISCINE				
+p3	65	merged=0 size=0.0 bold=0 fill=	LOT 8: Lot Piscine / Bain maure					
+p3	66	merged=0 size=0.0 bold=0 fill=	5.41	Matériel de filtration	Ens			
+p3	67	merged=0 size=0.0 bold=0 fill=	5.42	GROUPE ELECTROPOMPE	Ens			
+p3	68	merged=0 size=0.0 bold=0 fill=	5.43	Armoire electrique piscine	Ens			
+p3	69	merged=0 size=0.0 bold=0 fill=	5.44	Installation electrique	Ens			
+p3	70	merged=0 size=0.0 bold=0 fill=	5.45	Installation hydraulique	Ens			
+p3	71	merged=0 size=0.0 bold=0 fill=	5.46	Piéces à sceller	Ens			
+p3	72	merged=0 size=0.0 bold=0 fill=	5.47	Matériel éclairage	Ens			
+p3	73	merged=0 size=0.0 bold=0 fill=	5.48	materiel d’agrement	Ens			
+p3	74	merged=0 size=0.0 bold=0 fill=	5.49	materiel d’entretien	Ens			
+p3	75	merged=0 size=0.0 bold=0 fill=	5.50	systeme de traitement d’eau automatique	Ens			
+p3	76	merged=0 size=0.0 bold=0 fill=	5.51	Equipements de la bache	Ens			
+p3	77	merged=0 size=0.0 bold=0 fill=	5.52	Grilles de debordement	Ml			
+p3	78	merged=0 size=0.0 bold=0 fill=	5.53	systeme de levage ( Fond Mobile )				
+p3	79	merged=0 size=0.0 bold=0 fill=	5.53	TOTAL				450.000,00
+p3	80	merged=0 size=0.0 bold=0 fill=	5.54	BAIN MAURE				
+p3	81	merged=0 size=0.0 bold=0 fill=		Fourniture et pose marbre				
+p3	82	merged=0 size=0.0 bold=0 fill=		PREPARATEUR SIMPLE SERPENTIN 300L				
+p3	83	merged=0 size=0.0 bold=0 fill=		INISOL BESL 300 ER422 DE DIETRICH				
+p3	84	merged=0 size=0.0 bold=0 fill=		RESISTANCE ELECTRIQUE 3KW + THERMSOTAT ER397 POUR BSL/BESL/BLC DEDIE				
+p3	85	merged=0 size=0.0 bold=0 fill=		SOUPAPE SANITAIRE 7 BAR DIAM 3/4"				
+p4	1	merged=0 size=0.0 bold=0 fill=		GENEBRE REF 319005				
+p4	2	merged=0 size=0.0 bold=0 fill=		VASE D'EXPANSION CAL-PRO 35L 4BAR P1,5				
+p4	3	merged=0 size=0.0 bold=0 fill=		ZILMET REF 1300003500				
+p4	4	merged=0 size=0.0 bold=0 fill=		PRESCO-MANO 1/2 FX1/2F 0-4BARS TARAGE 3BARS REF 22L0210134				
+p4	5	merged=0 size=0.0 bold=0 fill=	5.55	TOTAL				90.000,00
+p4	6	merged=0 size=0.0 bold=0 fill=		Total HT Lot Piscine / Bain maure :				540.000,00
+p4	7	merged=0 size=0.0 bold=0 fill=	LOT 9 : gros oeuvres					
+p4	8	merged=0 size=0.0 bold=0 fill=	10.2	mousse polyurethane RDC & etage	U			45.000,00
+p4	9	merged=0 size=0.0 bold=0 fill=	10.3	Etanchéité légère SDB				25.000,00
+p4	10	merged=0 size=0.0 bold=0 fill=	10.4	Etanchéité terrasse et toiture avec isolation thermique				120.000,00
+p4	11	merged=0 size=0.0 bold=0 fill=	10.5	Mur de clôture ( construction + Revêtement en granit noir absolu flammé contour porte entrée et garage )	㎡	50		140.000,00
+p4	12	merged=0 size=0.0 bold=0 fill=	10.6	habillage façade extérieur	㎡	45		140.000,00
+p4	13	merged=0 size=0.0 bold=0 fill=		Total HT Suivis & Etude architecturale				470.000,00
+p4	14	merged=0 size=0.0 bold=0 fill=	LOT 10 : Suivis & Etude architecturale					
+p4	15	merged=0 size=0.0 bold=0 fill=	10.1	Honoraire plans d’exécution				30.000,00
+p4	16	merged=0 size=0.0 bold=0 fill=	10.2	Honoraire Rendu 3D				25.000,00
+p4	17	merged=0 size=0.0 bold=0 fill=	10.3	Honoraire gestion de chantier 8 mois d’exécution				72.000,00
+p4	18	merged=0 size=0.0 bold=0 fill=	10.4	Cameras de surveillance chantier				20.000,00
+p4	19	merged=0 size=0.0 bold=0 fill=	10.5	Gardiennage et sécurité				36.000,00
+p4	20	merged=0 size=0.0 bold=0 fill=	10.6	Nettoyage fin de chantier				40.000,00
+p4	21	merged=0 size=0.0 bold=0 fill=	10.7	Prise Photos et video pro fin de chantier				12.000,00
+p4	22	merged=0 size=0.0 bold=0 fill=		Total HT Suivis & Etude architecturale				235.000,00
+p4	23	merged=0 size=0.0 bold=0 fill=		Récapitulatif				
+p4	24	merged=0 size=0.0 bold=0 fill=		LOT 1 : MENUISERIE BOIS, ALUMINIUM ET METALLIQU	E			340.603,00
+p4	25	merged=0 size=0.0 bold=0 fill=		LOT 2 : Faux plafonds				180.020,00
+p4	26	merged=0 size=0.0 bold=0 fill=		LOT 3 : REVETMENT SOL - MURS				743.950,00
+p4	27	merged=0 size=0.0 bold=0 fill=		LOT 4 : LOT ELECTRICITE				570.000,00
+p4	28	merged=0 size=0.0 bold=0 fill=		LOT 5 : PLOMBERIE SANITAIRES				725.444,00
+p4	29	merged=0 size=0.0 bold=0 fill=		LOT 6 : PEINTURE				140.000,00
+p4	30	merged=0 size=0.0 bold=0 fill=		LOT 9 : Lot aménagement intérieur				536.500,00
+p4	31	merged=0 size=0.0 bold=0 fill=		LOT 10: Lot Piscine / Bain maure				540.000,00
+p4	32	merged=0 size=0.0 bold=0 fill=		LOT 9 : gros oeuvres				470.000,00
+p4	33	merged=0 size=0.0 bold=0 fill=		LOT 11 : Suivis & Etude architecturale				235.000,00
+p4	34	merged=0 size=0.0 bold=0 fill=				Total HT :		4.481.517,00
+p4	35	merged=0 size=0.0 bold=0 fill=				TVA 10%		448.151,70
+p4	36	merged=0 size=0.0 bold=0 fill=				TOTAL TTC		4.929.668,70

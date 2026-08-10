@@ -1,0 +1,1208 @@
+{
+  "source": "bdp.xlsx",
+  "stem": "bdp",
+  "pipeline": "llm-reference-v2",
+  "notes": "I/, II/ = lots (ignore reprints) ; a/, b/ = sous-lots ; a/1 + mesure ; skip récap/TVA.",
+  "summary": {
+    "lots": 2,
+    "sousLots": 21,
+    "articles": 107,
+    "orphelins": 0,
+    "sansQuantite": 0
+  },
+  "arbre": [
+    {
+      "type": "LOT",
+      "code": "I",
+      "libelle": "I/ - AMÉNAGEMENT  EXTÉRIEUR",
+      "unite": null,
+      "quantite": null,
+      "page": "Sheet1",
+      "enfants": [
+        {
+          "type": "SOUS_LOT",
+          "code": "a",
+          "libelle": "a/ - TERRASSEMENTS GÉNÉRAUX & DÉMOLITIONS",
+          "unite": null,
+          "quantite": null,
+          "page": "Sheet1",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "a/1",
+              "libelle": "Déblais en masse terrain meuble",
+              "unite": "M3",
+              "quantite": 4310.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "a/2",
+              "libelle": "Mise en remblais avec matériaux d'apport",
+              "unite": "M3",
+              "quantite": 4715.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "a/3",
+              "libelle": "Évacuation des déblais ou mise en remblai",
+              "unite": "M3",
+              "quantite": 4310.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "a/4",
+              "libelle": "Implantation des bâtiments",
+              "unite": "F",
+              "quantite": 1.0,
+              "page": "Sheet1",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "b",
+          "libelle": "b/ - RÉSEAU D'ÉVACUATION  ENTERRÉ",
+          "unite": null,
+          "quantite": null,
+          "page": "Sheet1",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "a",
+              "libelle": "Ø  200",
+              "unite": "ML",
+              "quantite": 120.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "b",
+              "libelle": "Ø  250",
+              "unite": "ML",
+              "quantite": 10.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "c",
+              "libelle": "Ø  300",
+              "unite": "ML",
+              "quantite": 384.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "d",
+              "libelle": "Ø  400",
+              "unite": "ML",
+              "quantite": 50.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "a",
+              "libelle": "De 40 x 40 x 0,70h",
+              "unite": "U",
+              "quantite": 5.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "b",
+              "libelle": "De 50 x 50 x 1,00h",
+              "unite": "U",
+              "quantite": 5.0,
+              "page": "Sheet1",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "i",
+          "libelle": "I/ - AMÉNAGEMENT  EXTÉRIEUR",
+          "unite": null,
+          "quantite": null,
+          "page": "Sheet1",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "c",
+              "libelle": "De 60 x 60 x 1,00h",
+              "unite": "U",
+              "quantite": 6.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "d",
+              "libelle": "De 70 x 70 x 1,20h",
+              "unite": "U",
+              "quantite": 1.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "e",
+              "libelle": "De 80 x 80 x 1,50h",
+              "unite": "U",
+              "quantite": 14.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "b/3",
+              "libelle": "Équipement acier galvanisé pour regards",
+              "unite": "KG",
+              "quantite": 500.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "b/4",
+              "libelle": "Caniveau de 40 x 50",
+              "unite": "ML",
+              "quantite": 8.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "b/5",
+              "libelle": "Siphon de cour en fonte",
+              "unite": "U",
+              "quantite": 5.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "b/6",
+              "libelle": "Équipement en fonte ductile",
+              "unite": "KG",
+              "quantite": 1000.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "b/7",
+              "libelle": "Débourbeurs et séparateur d'hydrocarbures",
+              "unite": "U",
+              "quantite": 1.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "b/8",
+              "libelle": "Puits perdu de 50m3 de capacité",
+              "unite": "U",
+              "quantite": 1.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "b/9",
+              "libelle": "Fosse septique de 6m3",
+              "unite": "U",
+              "quantite": 1.0,
+              "page": "Sheet1",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "c",
+          "libelle": "c/ - TERRASSEMENTS FONDATIONS",
+          "unite": null,
+          "quantite": null,
+          "page": "Sheet1",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "a",
+              "libelle": "En tuff ou grès tendre",
+              "unite": "M3",
+              "quantite": 200.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "c/2",
+              "libelle": "Remblaiement ou évacuation aux décharges",
+              "unite": "M3",
+              "quantite": 200.0,
+              "page": "Sheet1",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "d",
+          "libelle": "d/ - MAÇONNERIE EN FONDATION",
+          "unite": null,
+          "quantite": null,
+          "page": "Sheet1",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "d/1",
+              "libelle": "Béton propreté",
+              "unite": "M3",
+              "quantite": 21.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "d/2",
+              "libelle": "Béton cyclopéen",
+              "unite": "M3",
+              "quantite": 32.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "d/3",
+              "libelle": "Forme en tout-venant compactée de 0,30",
+              "unite": "M2",
+              "quantite": 8365.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "d/4",
+              "libelle": "Dallage en béton armé de 0,15 avec chape",
+              "unite": "M2",
+              "quantite": 5995.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "d/7",
+              "libelle": "Feuille polyane",
+              "unite": "M2",
+              "quantite": 698.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "d/8",
+              "libelle": "Bordures de trottoir type ville de TIZNIT",
+              "unite": "ML",
+              "quantite": 1133.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "d/9",
+              "libelle": "Mise à la terre",
+              "unite": "ML",
+              "quantite": 330.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "d/10",
+              "libelle": "Pavés auto-bloquant",
+              "unite": "M2",
+              "quantite": 920.0,
+              "page": "Sheet1",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "i",
+          "libelle": "I/ - AMÉNAGEMENT  EXTÉRIEUR",
+          "unite": null,
+          "quantite": null,
+          "page": "Sheet1",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "d/11",
+              "libelle": "Pose et répandage de gravette",
+              "unite": "M2",
+              "quantite": 1450.0,
+              "page": "Sheet1",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "e",
+          "libelle": "e/ - BÉTONS ARMÉS EN FONDATION",
+          "unite": null,
+          "quantite": null,
+          "page": "Sheet1",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "b",
+              "libelle": "Longrines ou chaînages",
+              "unite": "M3",
+              "quantite": 38.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "b",
+              "libelle": "Haute limite élastique tor ou caron",
+              "unite": "KG",
+              "quantite": 3800.0,
+              "page": "Sheet1",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "f",
+          "libelle": "f/ - MAÇONNERIE ET CLOISON",
+          "unite": null,
+          "quantite": null,
+          "page": "Sheet1",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "f/2",
+              "libelle": "Agglomérés de 0,20 d' épaisseur brute",
+              "unite": "M2",
+              "quantite": 722.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "f/3",
+              "libelle": "Double-cloison en brique 6T + 6T",
+              "unite": "M2",
+              "quantite": 53.0,
+              "page": "Sheet1",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "g",
+          "libelle": "g/ - BÉTON ARMÉ EN ÉLÉVATION",
+          "unite": null,
+          "quantite": null,
+          "page": "Sheet1",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "a",
+              "libelle": "Poteaux",
+              "unite": "M3",
+              "quantite": 18.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "b",
+              "libelle": "Haute limite élastique (tor ou caron)",
+              "unite": "KG",
+              "quantite": 2520.0,
+              "page": "Sheet1",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "h",
+          "libelle": "h/ - E N D U I T S",
+          "unite": null,
+          "quantite": null,
+          "page": "Sheet1",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "h/1",
+              "libelle": "Enduit extérieur au mortier bâtard frotassé sur murs",
+              "unite": "M2",
+              "quantite": 1650.0,
+              "page": "Sheet1",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "m",
+          "libelle": "m/ - PEINTURE",
+          "unite": null,
+          "quantite": null,
+          "page": "Sheet1",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "m/1",
+              "libelle": "Rexolite sur enduit extérieurs au M.B.",
+              "unite": "M2",
+              "quantite": 1650.0,
+              "page": "Sheet1",
+              "enfants": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "LOT",
+      "code": "II",
+      "libelle": "II/ - BÂTIMENT",
+      "unite": null,
+      "quantite": null,
+      "page": "Sheet1",
+      "enfants": [
+        {
+          "type": "SOUS_LOT",
+          "code": "c",
+          "libelle": "c/ - TERRASSEMENTS FONDATIONS",
+          "unite": null,
+          "quantite": null,
+          "page": "Sheet1",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "a",
+              "libelle": "En tuff ou grès tendre",
+              "unite": "M3",
+              "quantite": 490.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "c/2",
+              "libelle": "Remblaiement ou évacuation aux décharges",
+              "unite": "M3",
+              "quantite": 490.0,
+              "page": "Sheet1",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "d",
+          "libelle": "d/ - MAÇONNERIE EN FONDATION",
+          "unite": null,
+          "quantite": null,
+          "page": "Sheet1",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "d/1",
+              "libelle": "Béton propreté",
+              "unite": "M3",
+              "quantite": 24.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "d/2",
+              "libelle": "Béton cyclopéen",
+              "unite": "M3",
+              "quantite": 222.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "d/3",
+              "libelle": "Forme en tout-venant compactée de 0,30",
+              "unite": "M2",
+              "quantite": 1522.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "d/4",
+              "libelle": "Dallage en béton armé de 0,15 avec chape",
+              "unite": "M2",
+              "quantite": 677.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "d/5",
+              "libelle": "Dallage en béton armé de 0,12 brut sans chape",
+              "unite": "M2",
+              "quantite": 13.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "d/6",
+              "libelle": "Dallage en béton armé de 0,15 brut sans chape",
+              "unite": "M2",
+              "quantite": 832.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "d/7",
+              "libelle": "Feuille polyane",
+              "unite": "M2",
+              "quantite": 1522.0,
+              "page": "Sheet1",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "e",
+          "libelle": "e/ - BÉTONS ARMÉS EN FONDATION",
+          "unite": null,
+          "quantite": null,
+          "page": "Sheet1",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "a",
+              "libelle": "Semelles",
+              "unite": "M3",
+              "quantite": 55.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "b",
+              "libelle": "Longrines ou chaînages",
+              "unite": "M3",
+              "quantite": 50.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "c",
+              "libelle": "Poteaux",
+              "unite": "M3",
+              "quantite": 12.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "d",
+              "libelle": "Voiles > 0,10",
+              "unite": "M3",
+              "quantite": 7.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "b",
+              "libelle": "Haute limite élastique tor ou caron",
+              "unite": "KG",
+              "quantite": 12400.0,
+              "page": "Sheet1",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "f",
+          "libelle": "f/ - MAÇONNERIE ET CLOISON",
+          "unite": null,
+          "quantite": null,
+          "page": "Sheet1",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "f/1",
+              "libelle": "Cloisons en briques creuses céramiques (6 Trous)",
+              "unite": "M2",
+              "quantite": 287.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "f/2",
+              "libelle": "Agglomérés de 0,20 d' épaisseur brute",
+              "unite": "M2",
+              "quantite": 1090.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "f/3",
+              "libelle": "Double-cloison en brique 6T + 6T",
+              "unite": "M2",
+              "quantite": 446.0,
+              "page": "Sheet1",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "g",
+          "libelle": "g/ - BÉTON ARMÉ EN ÉLÉVATION",
+          "unite": null,
+          "quantite": null,
+          "page": "Sheet1",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "a",
+              "libelle": "Poteaux",
+              "unite": "M3",
+              "quantite": 20.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "b",
+              "libelle": "Dalles pleines et escaliers",
+              "unite": "M3",
+              "quantite": 42.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "c",
+              "libelle": "Poutres",
+              "unite": "M3",
+              "quantite": 78.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "d",
+              "libelle": "Voiles ≤ 0,10",
+              "unite": "M3",
+              "quantite": 13.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "e",
+              "libelle": "Voiles > 0,10",
+              "unite": "M3",
+              "quantite": 16.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "g/2",
+              "libelle": "Dallette en béton armé",
+              "unite": "M2",
+              "quantite": 5.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "b",
+              "libelle": "Haute limite élastique (tor ou caron)",
+              "unite": "KG",
+              "quantite": 23660.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "a",
+              "libelle": "16 + 4",
+              "unite": "M2",
+              "quantite": 183.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "b",
+              "libelle": "20 + 5",
+              "unite": "M2",
+              "quantite": 389.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "c",
+              "libelle": "25 + 7",
+              "unite": "M2",
+              "quantite": 247.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "g/5",
+              "libelle": "Plus-value pour poteaux circulaires",
+              "unite": "ML",
+              "quantite": 37.0,
+              "page": "Sheet1",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "h",
+          "libelle": "h/ - E N D U I T S",
+          "unite": null,
+          "quantite": null,
+          "page": "Sheet1",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "h/1",
+              "libelle": "Enduit extérieur au mortier bâtard frotassé sur murs",
+              "unite": "M2",
+              "quantite": 1610.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "h/2",
+              "libelle": "Enduit intérieur au mortier bâtard frotassé sur murs",
+              "unite": "M2",
+              "quantite": 1730.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "h/3",
+              "libelle": "Dessus de nez d'appuis de baies en enduit lissé ou",
+              "unite": "ML",
+              "quantite": 465.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "h/4",
+              "libelle": "Angles métalliques dans enduit",
+              "unite": "ML",
+              "quantite": 122.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "h/5",
+              "libelle": "Plus-value pour encadrement de baie",
+              "unite": "ML",
+              "quantite": 232.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "h/6",
+              "libelle": "Plus-value pour enduits rainurés",
+              "unite": "M2",
+              "quantite": 160.0,
+              "page": "Sheet1",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "j",
+          "libelle": "j/ - DIVERS  ET  ÉTANCHÉITÉ",
+          "unite": null,
+          "quantite": null,
+          "page": "Sheet1",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "a",
+              "libelle": "Cadres de menuiserie bois ou métal < 2 m2",
+              "unite": "U",
+              "quantite": 26.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "b",
+              "libelle": "Cadres de menuiserie bois ou métal > 2 m2",
+              "unite": "U",
+              "quantite": 48.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "c",
+              "libelle": "Portails coulissants ou basculants",
+              "unite": "M2",
+              "quantite": 50.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "d",
+              "libelle": "Appareils sanitaires",
+              "unite": "U",
+              "quantite": 17.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "e",
+              "libelle": "Grilles de protection",
+              "unite": "M2",
+              "quantite": 122.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "f",
+              "libelle": "Poteaux charpente",
+              "unite": "U",
+              "quantite": 16.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "g",
+              "libelle": "Précadres vitrines",
+              "unite": "ML",
+              "quantite": 245.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "j/2",
+              "libelle": "Forme de pente et chape de lissage",
+              "unite": "M2",
+              "quantite": 802.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "j/3",
+              "libelle": "Isolation thermique et pare-vapeur",
+              "unite": "M2",
+              "quantite": 802.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "j/4",
+              "libelle": "Revêtement d'étanchéité",
+              "unite": "M2",
+              "quantite": 802.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "j/5",
+              "libelle": "Reliefs d'étanchéité",
+              "unite": "ML",
+              "quantite": 372.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "a",
+              "libelle": "Horizontale",
+              "unite": "M2",
+              "quantite": 802.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "b",
+              "libelle": "Reliefs",
+              "unite": "ML",
+              "quantite": 372.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "j/7",
+              "libelle": "Pose de gargouille",
+              "unite": "U",
+              "quantite": 9.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "j/8",
+              "libelle": "Crapaudines",
+              "unite": "U",
+              "quantite": 9.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "j/9",
+              "libelle": "Étanchéité légère",
+              "unite": "M2",
+              "quantite": 12.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "j/10",
+              "libelle": "Skydôme de désenfumage 1,20 x 1,20",
+              "unite": "U",
+              "quantite": 4.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "j/11",
+              "libelle": "Étanchéité jardinière",
+              "unite": "M2",
+              "quantite": 157.0,
+              "page": "Sheet1",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "k",
+          "libelle": "k/ - CARRELAGE SOLS ET MURS",
+          "unite": null,
+          "quantite": null,
+          "page": "Sheet1",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "k/1",
+              "libelle": "Sols en carreaux INFINITY GRAFITE GREY",
+              "unite": "M2",
+              "quantite": 888.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "k/2",
+              "libelle": "Plinthes en carreaux INFINITY GRAFITE GREY",
+              "unite": "ML",
+              "quantite": 236.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "k/3",
+              "libelle": "Murs en carrelage faïence BRANCO BRILHANTE",
+              "unite": "M2",
+              "quantite": 542.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "k/4",
+              "libelle": "Murs en carrelage faïence GRAFITE GREY",
+              "unite": "M2",
+              "quantite": 105.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "k/5",
+              "libelle": "Sol grés cérame anti-dérapant CINZA 20 x 20",
+              "unite": "M2",
+              "quantite": 85.0,
+              "page": "Sheet1",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "l",
+          "libelle": "l/ - M A R B R E S  \"GRANIT\"",
+          "unite": null,
+          "quantite": null,
+          "page": "Sheet1",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "l/1",
+              "libelle": "Sol, seuils et soubassement en granit noir absolu",
+              "unite": "M2",
+              "quantite": 102.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "l/2",
+              "libelle": "Marches et contre-marches en granit noir absolu",
+              "unite": "ML",
+              "quantite": 47.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "l/3",
+              "libelle": "Revêtements paillasses en granit noir absolu",
+              "unite": "M2",
+              "quantite": 6.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "l/4",
+              "libelle": "Plinthe en Granit de 0,07",
+              "unite": "ML",
+              "quantite": 51.0,
+              "page": "Sheet1",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": "m",
+          "libelle": "m/ - PEINTURE",
+          "unite": null,
+          "quantite": null,
+          "page": "Sheet1",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "m/1",
+              "libelle": "Rexolite sur enduit extérieurs au M.B.",
+              "unite": "M2",
+              "quantite": 1610.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "m/2",
+              "libelle": "Peinture émulsionnée type \"Vinylastral\"",
+              "unite": "M2",
+              "quantite": 2000.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "m/3",
+              "libelle": "Peinture glycéro laquée type \"ÉMAIL CELLUC\"",
+              "unite": "M2",
+              "quantite": 33.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "m/4",
+              "libelle": "Peinture glycéro laquée type \"ÉMAIL CELLUC\"",
+              "unite": "M2",
+              "quantite": 536.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "m/5",
+              "libelle": "Peinture glycéro type \"CELLUC\" sur tuyauteries",
+              "unite": "F",
+              "quantite": 1.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "m/6",
+              "libelle": "Plinthe en peinture Epoxy",
+              "unite": "ML",
+              "quantite": 142.0,
+              "page": "Sheet1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "m/7",
+              "libelle": "Peinture Époxy sur sol béton Achroflex",
+              "unite": "M2",
+              "quantite": 676.0,
+              "page": "Sheet1",
+              "enfants": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -39,6 +39,7 @@ public final class GridBordereauAssembler {
         String pendingCode = null;
         String pendingLibelle = null;
         int order = 0;
+        String currentLotMajor = null;
 
         for (int i = 0; i < rows.size(); i++) {
             GridRow row = rows.get(i);
@@ -46,9 +47,40 @@ public final class GridBordereauAssembler {
             String designation = GridRowClassifier.designationOf(row, map);
 
             switch (kind) {
-                case LOT, SOUS_LOT -> {
+                case LOT -> {
                     pendingCode = null;
                     pendingLibelle = null;
+                    currentLotMajor = GridRowClassifier.lotMajor(designation);
+                    candidates.add(group(row, designation, kind, order++));
+                }
+                case SOUS_LOT -> {
+                    pendingCode = null;
+                    pendingLibelle = null;
+                    var asLot = GridRowClassifier.sousLotAsLot(designation);
+                    if (asLot.matches()) {
+                        String lib = asLot.group(1) + "-" + asLot.group(2).trim();
+                        currentLotMajor = asLot.group(1);
+                        candidates.add(new BordereauRowCandidate(
+                                rowId(row), pageOf(row), order++, null, lib, null, null,
+                                BordereauRowCandidate.Kind.LOT, 0.9d, lib,
+                                BordereauRowCandidate.ExtractionMethod.LOCAL, row.page()));
+                        break;
+                    }
+                    var section = GridRowClassifier.sectionMajor(designation);
+                    if (section.find()) {
+                        String major = String.valueOf(Integer.parseInt(section.group(1)));
+                        if (currentLotMajor == null || !currentLotMajor.equals(major)) {
+                            String rest = designation.replaceFirst(
+                                    "^\\s*0?\\d+\\s*[.\\-]\\s*0?\\d+\\s*[-\\u2013.]?\\s*",
+                                    "").trim();
+                            String lib = rest.isEmpty() ? major : major + " - " + rest;
+                            currentLotMajor = major;
+                            candidates.add(new BordereauRowCandidate(
+                                    rowId(row) + ":lot", pageOf(row), order++, null, lib, null, null,
+                                    BordereauRowCandidate.Kind.LOT, 0.85d, lib,
+                                    BordereauRowCandidate.ExtractionMethod.LOCAL, row.page()));
+                        }
+                    }
                     candidates.add(group(row, designation, kind, order++));
                 }
                 case HEAD -> {
@@ -165,16 +197,8 @@ public final class GridBordereauAssembler {
         if (raw == null || raw.isBlank()) {
             return null;
         }
-        String cleaned = raw.replace(" ", "")
-                .replace(" ", "")
-                .replace(" ", "")
-                .replace(",", ".");
-        try {
-            BigDecimal value = new BigDecimal(cleaned);
-            return value.signum() > 0 ? value : null;
-        } catch (NumberFormatException e) {
-            return null;
-        }
+        Double parsed = GridRowClassifier.parseNumericToken(raw);
+        return parsed == null ? null : BigDecimal.valueOf(parsed);
     }
 
     private static String rowId(GridRow row) {

@@ -56,16 +56,18 @@ class GridBordereauPipelineTest {
     }
 
     @Test
-    @DisplayName("les sept lots du marché sont retrouvés")
+    @DisplayName("les neuf lots du marché sont retrouvés (6 et 7 ouverts à la 1re section)")
     void retrouveLesLots() {
         List<String> lots = kind(BordereauRowCandidate.Kind.LOT).stream()
                 .map(BordereauRowCandidate::libelle)
                 .toList();
 
-        assertThat(lots).hasSize(7);
+        assertThat(lots).hasSize(9);
         assertThat(lots).anyMatch(l -> l.contains("TERRASSEMENT"));
         assertThat(lots).anyMatch(l -> l.contains("ELECTRICITE"));
         assertThat(lots).anyMatch(l -> l.contains("FAUX PLAFONDS"));
+        assertThat(lots).anyMatch(l -> l.contains("REVETEMENT") || l.matches("(?i).*\\b6\\b.*"));
+        assertThat(lots).anyMatch(l -> l.contains("MENUISERIE") || l.matches("(?i).*\\b7\\b.*"));
     }
 
     @Test

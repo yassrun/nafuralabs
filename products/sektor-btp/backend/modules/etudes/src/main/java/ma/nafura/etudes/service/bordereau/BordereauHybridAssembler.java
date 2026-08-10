@@ -79,8 +79,23 @@ public class BordereauHybridAssembler {
      */
     public ImportTreeRequest assembleLocalOnly(BordereauParseResult parse) {
         ImportTreeRequest byCode = assembleByCodePrefix(parse);
-        int byCodeArticles = countArticlesDeep(byCode.getArbre());
+        ImportTreeRequest sequential = assembleSequential(parse);
         int expected = parse.articleCandidates().size();
+        int byCodeArticles = countArticlesDeep(byCode.getArbre());
+        int seqArticles = countArticlesDeep(sequential.getArbre());
+        int byCodeSous = countKind(byCode.getArbre(), DpgfNoeud.TYPE_SOUS_LOT);
+        int seqSous = countKind(sequential.getArbre(), DpgfNoeud.TYPE_SOUS_LOT);
+
+        // Villa / tableurs : bandeaux SOUS_LOT sans code (« MENUISERIE BOIS »). Le rattachement
+        // par préfixe de code les ignore et plaque tous les articles sous le LOT → 1.7 puis 1.2
+        // sans parent. L'ordre documentaire les conserve.
+        boolean preferSequential = seqSous > byCodeSous
+                && seqArticles >= Math.max(1, (expected + 1) / 2)
+                && seqArticles >= (int) Math.floor(byCodeArticles * 0.9);
+        if (preferSequential) {
+            return sequential;
+        }
+
         boolean enoughArticles = byCodeArticles >= Math.max(1, (expected + 1) / 2);
         boolean multiLot = byCode.getArbre().size() >= 2;
         boolean singleNamedLot = byCode.getArbre().size() == 1
@@ -89,7 +104,24 @@ public class BordereauHybridAssembler {
         if (enoughArticles && (multiLot || singleNamedLot || byCodeArticles >= 3)) {
             return byCode;
         }
-        return assembleSequential(parse);
+        return sequential;
+    }
+
+    private static int countKind(List<ImportNoeudDto> nodes, String type) {
+        if (nodes == null) {
+            return 0;
+        }
+        int n = 0;
+        for (ImportNoeudDto node : nodes) {
+            if (node == null) {
+                continue;
+            }
+            if (type.equalsIgnoreCase(node.getType())) {
+                n++;
+            }
+            n += countKind(node.getEnfants(), type);
+        }
+        return n;
     }
 
     private ImportTreeRequest assembleByCodePrefix(BordereauParseResult parse) {

@@ -8,9 +8,13 @@ export interface UniteOption {
   id?: string;
 }
 
-/** Normalise pour comparaison (M3, m³, m3 → m3). */
+/**
+ * Normalise pour comparaison.
+ * NFKC d'abord : « ㎡ » (U+33A1) → « m2 », sinon le caractère est jeté par le filtre A-Z0-9.
+ */
 export function foldUnite(value: string): string {
   return value
+    .normalize('NFKC')
     .normalize('NFD')
     .replace(/\p{M}+/gu, '')
     .toUpperCase()
@@ -19,31 +23,48 @@ export function foldUnite(value: string): string {
     .replace(/[^A-Z0-9]/g, '');
 }
 
+/** Alias → code canonique (avant match référentiel). */
 const ALIASES: Record<string, string> = {
   M3: 'M3',
   M2: 'M2',
   ML: 'ML',
+  MLIN: 'ML',
+  METRELINEAIRE: 'ML',
   KG: 'KG',
+  KGS: 'KG',
   T: 'T',
   TO: 'T',
   TONNE: 'T',
+  TONNES: 'T',
   U: 'U',
   UN: 'U',
   UNITE: 'U',
+  UNITES: 'U',
   EA: 'EA',
   FF: 'FF',
+  F: 'FF',
   FORFAIT: 'FF',
   H: 'H',
+  HR: 'H',
   HEURE: 'H',
+  HEURES: 'H',
   J: 'J',
   JOUR: 'J',
+  JOURS: 'J',
   L: 'L',
+  LITRE: 'L',
+  LITRES: 'L',
   ENS: 'ENS',
+  E: 'ENS',
+  ENSEMBLE: 'ENS',
+  PM: 'PM',
+  POURMEMOIRE: 'PM',
 };
 
 export function mapToReferentialCode(raw: string | null | undefined, options: UniteOption[]): string | null {
   if (!raw?.trim()) return null;
   const folded = foldUnite(raw);
+  if (!folded) return raw.trim();
   const aliased = ALIASES[folded] ?? folded;
   const byFold = new Map(options.map((o) => [foldUnite(o.code), o.code]));
   return byFold.get(aliased) ?? byFold.get(folded) ?? raw.trim();
@@ -68,7 +89,7 @@ export function toUniteOptions(units: UnitOfMeasure[]): UniteOption[] {
     return [...parCode.values()].sort((a, b) => a.code.localeCompare(b.code, 'fr'));
   }
   return BPU_UNITS.map((code) => ({
-    code: code.toUpperCase() === code ? code : code,
+    code,
     label: code,
   }));
 }
@@ -79,9 +100,12 @@ export function uniteOptionsForValue(
   current: string | null | undefined,
 ): UniteOption[] {
   if (!current?.trim()) return options;
-  const folded = foldUnite(current);
+  const mapped = mapToReferentialCode(current, options);
+  const candidate = mapped ?? current.trim();
+  const folded = foldUnite(candidate);
   if (options.some((o) => foldUnite(o.code) === folded)) {
     return options;
   }
-  return [{ code: current.trim(), label: `${current.trim()} (hors référentiel)` }, ...options];
+  const code = current.trim();
+  return [{ code, label: `${code} (hors référentiel)` }, ...options];
 }

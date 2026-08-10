@@ -74,6 +74,48 @@ class BordereauHybridAssemblerTest {
     }
 
     @Test
+    void assembleLocalOnly_keepsUncodedSousLotBanners() {
+        // Villa Kenitra : LOT → « MENUISERIE BOIS » → articles → « Lot Menuiserie métallique »
+        List<BordereauRowCandidate> rows = List.of(
+                new BordereauRowCandidate(
+                        "lot1", 1, 0, "1", "LOT 1 : MENUISERIE BOIS, ALUMINIUM ET METALLIQUE",
+                        null, null, BordereauRowCandidate.Kind.LOT, 0.95, "lot"),
+                new BordereauRowCandidate(
+                        "sl1", 1, 1, null, "MENUISERIE BOIS",
+                        null, null, BordereauRowCandidate.Kind.SOUS_LOT, 0.9, "bois"),
+                new BordereauRowCandidate(
+                        "a1", 1, 2, "1.1", "Portes isoplanes", "U", new BigDecimal("6"),
+                        BordereauRowCandidate.Kind.ARTICLE, 0.95, "a1"),
+                new BordereauRowCandidate(
+                        "a7", 1, 3, "1.7", "Pld3", "U", new BigDecimal("1"),
+                        BordereauRowCandidate.Kind.ARTICLE, 0.95, "a7"),
+                new BordereauRowCandidate(
+                        "sl2", 1, 4, "1.2", "Lot Menuiserie métallique",
+                        null, null, BordereauRowCandidate.Kind.SOUS_LOT, 0.9, "metal"),
+                new BordereauRowCandidate(
+                        "am1", 1, 5, "1.2", "Escalier métallique", "U", new BigDecimal("1"),
+                        BordereauRowCandidate.Kind.ARTICLE, 0.95, "am1"));
+        BordereauParseResult parse = new BordereauParseResult(
+                1, 400, rows, Set.of(1), BordereauParseResult.Quality.USABLE, null);
+
+        ImportTreeRequest tree = assembler.assembleLocalOnly(parse);
+        assertThat(tree.getArbre()).hasSize(1);
+        ImportNoeudDto lot = tree.getArbre().get(0);
+        assertThat(lot.getLibelle()).contains("MENUISERIE");
+        assertThat(lot.getEnfants())
+                .filteredOn(n -> DpgfNoeud.TYPE_SOUS_LOT.equals(n.getType()))
+                .hasSize(2);
+        assertThat(lot.getEnfants().get(0).getLibelle()).containsIgnoringCase("BOIS");
+        assertThat(lot.getEnfants().get(0).getEnfants())
+                .extracting(ImportNoeudDto::getCode)
+                .containsExactly("1.1", "1.7");
+        assertThat(lot.getEnfants().get(1).getLibelle()).containsIgnoringCase("métallique");
+        assertThat(lot.getEnfants().get(1).getEnfants())
+                .extracting(ImportNoeudDto::getCode)
+                .containsExactly("1.2");
+    }
+
+    @Test
     void assembleLocalOnly_promotesSousLotToRootLotByCodePrefix() {
         ImportTreeRequest tree = assembler.assembleLocalOnly(sampleParse());
         assertThat(tree.getArbre()).hasSize(1);

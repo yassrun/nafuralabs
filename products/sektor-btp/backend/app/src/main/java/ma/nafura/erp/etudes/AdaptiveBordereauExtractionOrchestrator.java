@@ -335,18 +335,31 @@ public class AdaptiveBordereauExtractionOrchestrator {
         long classifyMs = classifyBudgetMs;
 
         BordereauQualityReport pre = BordereauQualityReport.evaluate(parse, 0);
+        long lotCount = parse.rows().stream()
+                .filter(r -> r.kind() == BordereauRowCandidate.Kind.LOT)
+                .count();
         long sousLotCount = parse.rows().stream()
                 .filter(r -> r.kind() == BordereauRowCandidate.Kind.SOUS_LOT)
                 .count();
+        boolean tabular = path != null && path.startsWith("table");
+        // Tableur : les quantités manquantes sont souvent un manque source (Villa ~40 %),
+        // pas un échec de lecture. Si la grille a déjà posé des LOT, on reste local —
+        // sinon l'IA invente des libellés vides → fallback UI « Lot » / « Sous-lot ».
         boolean localHierarchyOk = !parse.groupingCandidates().isEmpty()
-                && pre.pricedRatio() >= 0.8
                 && pre.articleCount() >= 3
-                && pre.weakPages().isEmpty();
+                && pre.weakPages().isEmpty()
+                && (tabular
+                        ? (lotCount >= 2 || sousLotCount >= 2 || pre.pricedRatio() >= 0.45)
+                        : pre.pricedRatio() >= 0.8);
         // Clear "SOUS LOT N° X" chapters → prefer local promotion to root lots (no LLM invent).
         if (sousLotCount >= 2 && pre.pricedRatio() >= 0.7 && pre.articleCount() >= 10) {
             localHierarchyOk = true;
         }
+        if (tabular && lotCount >= 2 && pre.articleCount() >= 10) {
+            localHierarchyOk = true;
+        }
         if (!forceClassify && (pre.highConfidence() || localHierarchyOk)) {
+            progress.report(Math.max(70, progressFloor(path)), "Assemblage local…");
             tree = hybridAssembler.assembleLocalOnly(parse);
             classifyMs = 0;
             path = path + "+local-hierarchy";
@@ -371,7 +384,7 @@ public class AdaptiveBordereauExtractionOrchestrator {
                 } else {
                     tree = hybridAssembler.assemble(parse, response.data());
                     path = path + "+classify";
-                    if (hasMarketTitleRoot(tree)) {
+                    if (hasMarketTitleRoot(tree) || hasGenericLotLabels(tree)) {
                         tree = hybridAssembler.assembleLocalOnly(parse);
                         path = path + "+sanitize-local";
                     }
@@ -1000,6 +1013,51 @@ public class AdaptiveBordereauExtractionOrchestrator {
             }
         }
         return false;
+    }
+
+    /**
+     * L'IA a parfois renvoyé la hiérarchie sans libellés → fallback mapper « Lot » / « Sous-lot ».
+     * Dans ce cas on préfère l'arbre local (libellés grille).
+     */
+    private static boolean hasGenericLotLabels(ImportTreeRequest tree) {
+        if (tree == null || tree.getArbre() == null || tree.getArbre().isEmpty()) {
+            return false;
+        }
+        int generic = 0;
+        int groups = 0;
+        for (ImportNoeudDto root : tree.getArbre()) {
+            if (root == null) {
+                continue;
+            }
+            groups++;
+            if (isGenericGroupLabel(root.getLibelle())) {
+                generic++;
+            }
+            if (root.getEnfants() != null) {
+                for (ImportNoeudDto child : root.getEnfants()) {
+                    if (child == null || DpgfNoeud.TYPE_ARTICLE.equalsIgnoreCase(child.getType())) {
+                        continue;
+                    }
+                    groups++;
+                    if (isGenericGroupLabel(child.getLibelle())) {
+                        generic++;
+                    }
+                }
+            }
+        }
+        return groups > 0 && generic * 2 >= groups;
+    }
+
+    private static boolean isGenericGroupLabel(String libelle) {
+        if (libelle == null || libelle.isBlank()) {
+            return true;
+        }
+        String t = libelle.trim();
+        return t.equalsIgnoreCase("Lot")
+                || t.equalsIgnoreCase("Sous-lot")
+                || t.equalsIgnoreCase("Sous lot")
+                || t.equalsIgnoreCase("LOT")
+                || t.equalsIgnoreCase("SOUS_LOT");
     }
 
     private void normalizeUnites(ImportTreeRequest tree, List<String> codes) {

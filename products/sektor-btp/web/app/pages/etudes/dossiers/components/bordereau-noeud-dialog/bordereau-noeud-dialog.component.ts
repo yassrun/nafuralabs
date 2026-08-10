@@ -6,6 +6,7 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { ButtonComponent } from '@lib/anatomy';
 
 import type { UniteOption } from '../../utils/unite-options.util';
+import { mapToReferentialCode, uniteOptionsForValue } from '../../utils/unite-options.util';
 
 export type BordereauNoeudType = 'LOT' | 'SOUS_LOT' | 'ARTICLE';
 export type BordereauNoeudMode = 'create' | 'edit';
@@ -75,8 +76,8 @@ export interface BordereauNoeudDialogResult {
             <span>Unité *</span>
             <select name="unite" [(ngModel)]="unite">
               <option value="">—</option>
-              @for (u of data.uniteOptions; track u.code) {
-                <option [ngValue]="u.code">{{ u.code }}</option>
+              @for (u of uniteSelectOptions; track u.code) {
+                <option [ngValue]="u.code">{{ u.label }}</option>
               }
             </select>
           </label>
@@ -172,8 +173,18 @@ export class BordereauNoeudDialogComponent {
     (this.data.initial?.type?.toUpperCase() as BordereauNoeudType) ?? this.data.defaultType;
   code = this.data.initial?.code ?? '';
   libelle = this.data.initial?.libelle ?? '';
-  unite = this.data.initial?.unite ?? '';
+  /** Code référentiel si match, sinon texte extrait (affiché via hors référentiel). */
+  unite =
+    mapToReferentialCode(this.data.initial?.unite, this.data.uniteOptions) ??
+    this.data.initial?.unite ??
+    '';
   quantite = this.data.initial?.quantite != null ? String(this.data.initial.quantite) : '';
+
+  /** Référentiel + valeur courante si hors liste (évite select vide). */
+  readonly uniteSelectOptions: UniteOption[] = uniteOptionsForValue(
+    this.data.uniteOptions,
+    this.data.initial?.unite,
+  );
 
   get title(): string {
     if (this.data.mode === 'edit') return 'Modifier le nœud';

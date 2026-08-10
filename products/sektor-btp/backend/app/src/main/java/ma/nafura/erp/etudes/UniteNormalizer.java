@@ -24,6 +24,7 @@ final class UniteNormalizer {
             Map.entry("ML", "ML"),
             Map.entry("M.L", "ML"),
             Map.entry("MLIN", "ML"),
+            Map.entry("METRELINEAIRE", "ML"),
             Map.entry("KG", "KG"),
             Map.entry("KGS", "KG"),
             Map.entry("T", "T"),
@@ -37,6 +38,7 @@ final class UniteNormalizer {
             Map.entry("UNITES", "U"),
             Map.entry("EA", "EA"),
             Map.entry("FF", "FF"),
+            Map.entry("F", "FF"),
             Map.entry("FORFAIT", "FF"),
             Map.entry("H", "H"),
             Map.entry("HR", "H"),
@@ -46,10 +48,13 @@ final class UniteNormalizer {
             Map.entry("JOUR", "J"),
             Map.entry("JOURS", "J"),
             Map.entry("ENS", "ENS"),
+            Map.entry("E", "ENS"),
             Map.entry("ENSEMBLE", "ENS"),
             Map.entry("L", "L"),
             Map.entry("LITRE", "L"),
-            Map.entry("LITRES", "L"));
+            Map.entry("LITRES", "L"),
+            Map.entry("PM", "PM"),
+            Map.entry("POURMEMOIRE", "PM"));
 
     private UniteNormalizer() {}
 
@@ -71,6 +76,9 @@ final class UniteNormalizer {
         }
 
         String folded = fold(raw);
+        if (folded.isEmpty()) {
+            return raw.trim();
+        }
         String aliased = ALIASES.getOrDefault(folded, folded);
 
         if (byFold.containsKey(aliased)) {
@@ -89,9 +97,12 @@ final class UniteNormalizer {
         return raw.trim();
     }
 
-    /** Forme comparable : majuscules, sans accents, sans espaces / ponctuation légère. */
+    /**
+     * Forme comparable : NFKC (㎡→m2), majuscules, sans accents, sans ponctuation.
+     */
     static String fold(String value) {
-        String n = Normalizer.normalize(value.trim(), Normalizer.Form.NFD)
+        String n = Normalizer.normalize(value.trim(), Normalizer.Form.NFKC);
+        n = Normalizer.normalize(n, Normalizer.Form.NFD)
                 .replaceAll("\\p{M}+", "")
                 .toUpperCase(Locale.ROOT)
                 .replace('³', '3')

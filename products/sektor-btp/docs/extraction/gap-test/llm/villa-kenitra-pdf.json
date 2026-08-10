@@ -1,0 +1,2130 @@
+{
+  "source": "BPDE Villa Kenitra.pdf",
+  "stem": "villa-kenitra-pdf",
+  "pipeline": "llm-reference-v2",
+  "notes": "10 lots Villa ; stop au Récapitulatif ; article si U/Q ou code N.N + montant ; xlsx lots=merged 14.5pt.",
+  "summary": {
+    "lots": 10,
+    "sousLots": 17,
+    "articles": 205,
+    "orphelins": 0,
+    "sansQuantite": 84
+  },
+  "arbre": [
+    {
+      "type": "LOT",
+      "code": "1",
+      "libelle": "LOT 1 : MENUISERIE BOIS, ALUMINIUM ET METALLIQUE",
+      "unite": null,
+      "quantite": null,
+      "page": "p1",
+      "enfants": [
+        {
+          "type": "SOUS_LOT",
+          "code": null,
+          "libelle": "MENUISERIE BOIS",
+          "unite": null,
+          "quantite": null,
+          "page": "p1",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "1.1",
+              "libelle": "Portes isoplanes à un vantail ouvrant à la française 0,84/2,50",
+              "unite": "U",
+              "quantite": 6.0,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "1.2",
+              "libelle": "Portes isoplanes à un vantail ouvrant à la française 0,94/2,50",
+              "unite": "U",
+              "quantite": 5.0,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "1.3",
+              "libelle": "Portes Pleine en bois massif à un vantail ouvrant 1,54/3,00",
+              "unite": "U",
+              "quantite": 1.0,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "1.4",
+              "libelle": "Dressing 5,10/2,90 avec led et porte en vitre",
+              "unite": "U",
+              "quantite": 1.0,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "1.5",
+              "libelle": "Pld1 1,50/2,90",
+              "unite": "U",
+              "quantite": 1.0,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "1.6",
+              "libelle": "Pld2 1,80/2,90",
+              "unite": "U",
+              "quantite": 2.0,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "1.7",
+              "libelle": "Pld3 0,6/2,90",
+              "unite": "U",
+              "quantite": 1.0,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "1.2",
+              "libelle": "Escalier métallique (sous-sol, RDC )",
+              "unite": "U",
+              "quantite": 1.0,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "1.2",
+              "libelle": "Porte métallique 1,40/1.80",
+              "unite": "U",
+              "quantite": 1.0,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "1.2",
+              "libelle": "Porte métallique GARAGE 2,80/1.80",
+              "unite": "U",
+              "quantite": 1.0,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "1.2",
+              "libelle": "Garde corps mur de clôture",
+              "unite": "ml",
+              "quantite": 16.0,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "1.2",
+              "libelle": "trappe métallique 1,00/1,00 LT",
+              "unite": "U",
+              "quantite": 2.0,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "1.2",
+              "libelle": "Echelle LT",
+              "unite": "U",
+              "quantite": 1.0,
+              "page": "p1",
+              "enfants": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "LOT",
+      "code": "2",
+      "libelle": "LOT 2 : Faux plafonds",
+      "unite": null,
+      "quantite": null,
+      "page": "p1",
+      "enfants": [
+        {
+          "type": "ARTICLE",
+          "code": "2.1",
+          "libelle": "BA13",
+          "unite": "m2",
+          "quantite": 450.0,
+          "page": "p1",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": "2.2",
+          "libelle": "Join creux 20cm",
+          "unite": "ml",
+          "quantite": 120.0,
+          "page": "p1",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": "2.3",
+          "libelle": "Join creux 5cm",
+          "unite": "ml",
+          "quantite": 280.0,
+          "page": "p1",
+          "enfants": []
+        }
+      ]
+    },
+    {
+      "type": "LOT",
+      "code": "3",
+      "libelle": "LOT 3 : REVETMENT SOL - MURS",
+      "unite": null,
+      "quantite": null,
+      "page": "p1",
+      "enfants": [
+        {
+          "type": "ARTICLE",
+          "code": "3.1",
+          "libelle": "carreaux de Grès Cérame de 120X120 cm (salon) RDC",
+          "unite": "m2",
+          "quantite": 100.0,
+          "page": "p1",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "carreaux de Grès Cérame de 100X100 cm (salon) sous-sol + chambre sous-sol",
+          "unite": "m2",
+          "quantite": 92.0,
+          "page": "p1",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "escalier de Grès Cérame de 100X100 cm (RDC)",
+          "unite": "m2",
+          "quantite": 29.0,
+          "page": "p1",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "escalier de Grès Cérame de 100X100 cm (sous-sol)",
+          "unite": "m2",
+          "quantite": 24.0,
+          "page": "p1",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "escalier de Grès Cérame de 100X100 cm (Etage)",
+          "unite": "m2",
+          "quantite": 14.0,
+          "page": "p1",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "escalier de Grès Cérame de 100X100 cm (cours anglaise)",
+          "unite": null,
+          "quantite": 22.0,
+          "page": "p1",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": "3.2",
+          "libelle": "Parquet semi massif effet noyer (chambre) 10 mm",
+          "unite": "m2",
+          "quantite": 60.0,
+          "page": "p1",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "Plinthe parquet semi massif rétro éclairer(chambre) 10 mm",
+          "unite": "ml",
+          "quantite": 62.0,
+          "page": "p1",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "Parquet semi massif effet noyer (hall étage) 10 mm",
+          "unite": "m2",
+          "quantite": 19.0,
+          "page": "p1",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "Plinthe parquet semi massif rétro éclairer (hall étage)",
+          "unite": "ml",
+          "quantite": 20.0,
+          "page": "p1",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": "3.3",
+          "libelle": "Carreaux de Grès Cérame de 120X60 cm ( salle de bain)",
+          "unite": "m2",
+          "quantite": 18.0,
+          "page": "p1",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": "3.1",
+          "libelle": "Carreaux de Grès Cérame de 120X60 cm ( salle de bain RDC)",
+          "unite": "m2",
+          "quantite": 5.0,
+          "page": "p1",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": "3.4",
+          "libelle": "Carreaux de Grès Cérame de 120X60 cm (Terrasse Chambres )",
+          "unite": "m2",
+          "quantite": 16.0,
+          "page": "p1",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": "3.2",
+          "libelle": "Plinthe carreaux de Grès Cérame de 120X60 cm (Terrasse Chambres )",
+          "unite": "ml",
+          "quantite": 28.0,
+          "page": "p1",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": "3.5",
+          "libelle": "Carreaux de Grès Cérame de 120X60 cm Revétement sol cours anglaise +",
+          "unite": "m2",
+          "quantite": 73.0,
+          "page": "p1",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "Plinthe Carreaux de Grès Cérame de 120X60 cm Revétement sol salle de",
+          "unite": "ml",
+          "quantite": 24.0,
+          "page": "p1",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": "3.6",
+          "libelle": "Revétement sol toitture",
+          "unite": "m2",
+          "quantite": 152.0,
+          "page": "p1",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": "3.7",
+          "libelle": "Plan de travail SDB",
+          "unite": "m2",
+          "quantite": 8.0,
+          "page": "p1",
+          "enfants": []
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": null,
+          "libelle": "Revetements Murs",
+          "unite": null,
+          "quantite": null,
+          "page": "p1",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "Carreaux de Grès Cérame de 270X120 cm REVETEMENT MURAL SDB",
+              "unite": "m2",
+              "quantite": 25.0,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "3.8",
+              "libelle": "Carreaux de Grès Cérame de 120X60 cm REVETEMENT MURAL SDB",
+              "unite": "m2",
+              "quantite": 120.0,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "Revêtement cours anglaise",
+              "unite": "m2",
+              "quantite": 100.0,
+              "page": "p1",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": null,
+          "libelle": "Cuisine equipée",
+          "unite": null,
+          "quantite": null,
+          "page": "p1",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "CUISINE EQUIPEE",
+              "unite": "U",
+              "quantite": 1.0,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "CUISINE EQUIPEE DIIORIO CUCINE import italien Plan de travail en",
+              "unite": "PM",
+              "quantite": 1.0,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "CUISINE EQUIPEE EGGER en caisson en latte Plan de travail en dekton",
+              "unite": "PM",
+              "quantite": 1.0,
+              "page": "p1",
+              "enfants": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "LOT",
+      "code": "4",
+      "libelle": "LOT 4 : LOT ELECTRICITE",
+      "unite": null,
+      "quantite": null,
+      "page": "p1",
+      "enfants": [
+        {
+          "type": "SOUS_LOT",
+          "code": null,
+          "libelle": "branchement, Boite de distribution, de coupure, compteurs & canalisations extérieures, et protections.",
+          "unite": null,
+          "quantite": null,
+          "page": "p1",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "4.1",
+              "libelle": "Aménagement des niches des compteurs, branchement, Boites de distribution, de coupure, canalisations extérieures, et protections",
+              "unite": "Ens",
+              "quantite": 1.0,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "4.2",
+              "libelle": "Complement prise de terre courants forts en fond de fouille",
+              "unite": "Ens",
+              "quantite": 1.0,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "4.3",
+              "libelle": "Tranchée en fouille dans terrain de toute nature y/c Tube annelé double",
+              "unite": "mL",
+              "quantite": null,
+              "page": "p1",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": null,
+          "libelle": "Tableaux électriques",
+          "unite": null,
+          "quantite": null,
+          "page": "p1",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "4.4",
+              "libelle": "Tableau de protection",
+              "unite": "U",
+              "quantite": null,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "4.5",
+              "libelle": "Tableau de protection Service genereaux",
+              "unite": "U",
+              "quantite": null,
+              "page": "p1",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": null,
+          "libelle": "Chemins de câble",
+          "unite": null,
+          "quantite": null,
+          "page": "p1",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "4.6",
+              "libelle": "Chemins de câble 215 x 63mm",
+              "unite": "mL",
+              "quantite": null,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "4.7",
+              "libelle": "Chemins de câble 155 x 63mm",
+              "unite": "mL",
+              "quantite": null,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "4.8",
+              "libelle": "Chemins de câble 95 x 63mm",
+              "unite": "mL",
+              "quantite": null,
+              "page": "p1",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": null,
+          "libelle": "Câbles de distribution basse tension U1000 R2V Cuivre",
+          "unite": null,
+          "quantite": null,
+          "page": "p1",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "4.9",
+              "libelle": "Câble U1000 R2V 4x70mm² +T",
+              "unite": "mL",
+              "quantite": null,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "4.10",
+              "libelle": "Câble U1000 R2V 4x25mm² +T",
+              "unite": "mL",
+              "quantite": null,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "4.11",
+              "libelle": "Câble U1000 R2V 4x16mm² +T",
+              "unite": "mL",
+              "quantite": null,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "4.12",
+              "libelle": "Câble U1000 R2V 4x10mm² +T",
+              "unite": "mL",
+              "quantite": null,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "4.13",
+              "libelle": "Câble U1000 R2V 3x16mm²",
+              "unite": "mL",
+              "quantite": null,
+              "page": "p1",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": null,
+          "libelle": "DISTRIBUTION ECLAIRAGE",
+          "unite": null,
+          "quantite": null,
+          "page": "p1",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "4.14",
+              "libelle": "Foyer lumineux sur simple allumage",
+              "unite": "U",
+              "quantite": null,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "4.15",
+              "libelle": "Foyer lumineux sur simple allumage étanche",
+              "unite": "U",
+              "quantite": null,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "4.16",
+              "libelle": "Foyer lumineux sur double allumage",
+              "unite": "U",
+              "quantite": null,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "4.17",
+              "libelle": "Foyer lumineux va et vient",
+              "unite": "U",
+              "quantite": null,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "4.18",
+              "libelle": "Foyer lumineux Double va et vient",
+              "unite": "U",
+              "quantite": null,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "4.19",
+              "libelle": "Foyer lumineux detecteurs de mouvement 360°",
+              "unite": "U",
+              "quantite": null,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "4.20",
+              "libelle": "Foyer lumineux detecteurs de mouvement 180°",
+              "unite": "U",
+              "quantite": null,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "4.21",
+              "libelle": "Foyers lumineux complémentaires",
+              "unite": "U",
+              "quantite": null,
+              "page": "p1",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": null,
+          "libelle": "DISTRIBUTION PRISES DE COURANT ET ALIMENTATIONS",
+          "unite": null,
+          "quantite": null,
+          "page": "p1",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "4.22",
+              "libelle": "Prise de courant 2x16A+T Normal",
+              "unite": "U",
+              "quantite": null,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "4.23",
+              "libelle": "Prise de courant 2x16A+T étanche",
+              "unite": "U",
+              "quantite": null,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "4.24",
+              "libelle": "Prise télévision y/c câble coaxial",
+              "unite": "U",
+              "quantite": null,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "4.25",
+              "libelle": "Prise telephonique et informatique",
+              "unite": "U",
+              "quantite": null,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "4.26",
+              "libelle": "Foyer pour volet roulant",
+              "unite": "U",
+              "quantite": null,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "4.27",
+              "libelle": "Alimentation divers (Porte automatique garage )",
+              "unite": "U",
+              "quantite": null,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "4.28",
+              "libelle": "Reservation pour la desserte telephonique : tubage et boites de répartition, etc.",
+              "unite": "E",
+              "quantite": 1.0,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "4.29",
+              "libelle": "Câblage téléphonique",
+              "unite": "E",
+              "quantite": 1.0,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "4.30",
+              "libelle": "Câblage télévision",
+              "unite": "E",
+              "quantite": 1.0,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "4.31",
+              "libelle": "Alimentation de l’ascenseur avec cable 5x10mm²",
+              "unite": "E",
+              "quantite": 1.0,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "4.32",
+              "libelle": "Sonnerie avec bouton",
+              "unite": "E",
+              "quantite": 1.0,
+              "page": "p1",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "4.33",
+              "libelle": "Vidéophone",
+              "unite": "E",
+              "quantite": 1.0,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "4.34",
+              "libelle": "Réseau de Câblage",
+              "unite": "E",
+              "quantite": 1.0,
+              "page": "p2",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": null,
+          "libelle": "LUSTRERIE ET APPARIELLAGE",
+          "unite": null,
+          "quantite": null,
+          "page": "p2",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "4.36",
+              "libelle": "Plafonnier LED 24W",
+              "unite": "U",
+              "quantite": null,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "4.37",
+              "libelle": "Spot LED 5W LED",
+              "unite": "U",
+              "quantite": null,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "4.38",
+              "libelle": "Spot Led encasté Etanche 5w SDB 12V",
+              "unite": "U",
+              "quantite": null,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "4.39",
+              "libelle": "Spot etanche LED rond 10W terrasse",
+              "unite": "U",
+              "quantite": null,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "4.40",
+              "libelle": "Applique murale LED",
+              "unite": "U",
+              "quantite": null,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "4.41",
+              "libelle": "Applique murale SDB LED",
+              "unite": "U",
+              "quantite": null,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "4.42",
+              "libelle": "Spot carre pour cuisine 24w",
+              "unite": "U",
+              "quantite": null,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "4.43",
+              "libelle": "Luminaire étanche 40W (Locaux techniques)",
+              "unite": "U",
+              "quantite": null,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "4.44",
+              "libelle": "Borne éclairante 24w LED",
+              "unite": "U",
+              "quantite": null,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "4.45",
+              "libelle": "Grille pour protection antichoc pour bloc d'éclairage de sécurité",
+              "unite": "U",
+              "quantite": null,
+              "page": "p2",
+              "enfants": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "LOT",
+      "code": "5",
+      "libelle": "LOT 5 : PLOMBERIE SANITAIRES",
+      "unite": null,
+      "quantite": null,
+      "page": "p2",
+      "enfants": [
+        {
+          "type": "SOUS_LOT",
+          "code": null,
+          "libelle": "CANALISATIONS DE PLOMBERIE",
+          "unite": null,
+          "quantite": null,
+          "page": "p2",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "5.1",
+              "libelle": "La branchement general et amenagement de la niche et nourrice des compteurs avec portail métallique grillagée à deux vantaux et suivant plan de détail d’architecture et normes de la REGIE DE DISTRIBUTION",
+              "unite": "Ens",
+              "quantite": 1.0,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.2",
+              "libelle": "Regard et Equipement de branchement",
+              "unite": "Ens",
+              "quantite": 1.0,
+              "page": "p2",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": null,
+          "libelle": "Tube en polyethylene haut densite PN 16",
+          "unite": null,
+          "quantite": null,
+          "page": "p2",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "5.3",
+              "libelle": "Tube en polyethylene haut densite DN 63 –PN 16",
+              "unite": "ml",
+              "quantite": null,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.4",
+              "libelle": "Tube en polyethylene haut densite DN 50 –PN 16",
+              "unite": "ml",
+              "quantite": null,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.5",
+              "libelle": "Tube en polyethylene haut densite DN 40 - 32 –PN 16",
+              "unite": "ml",
+              "quantite": null,
+              "page": "p2",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": null,
+          "libelle": "DISTRIBUTION EN PPR PN20",
+          "unite": null,
+          "quantite": null,
+          "page": "p2",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "5.6",
+              "libelle": "PPR Ø14/20",
+              "unite": "ml",
+              "quantite": null,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.7",
+              "libelle": "PPR Ø16/25",
+              "unite": "ml",
+              "quantite": null,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.8",
+              "libelle": "PPR Ø21/32",
+              "unite": "ml",
+              "quantite": null,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.9",
+              "libelle": "Robinet de Puissage",
+              "unite": "U",
+              "quantite": null,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.10",
+              "libelle": "Robinet d'arrêt",
+              "unite": "U",
+              "quantite": null,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.11",
+              "libelle": "Anti-Bélier",
+              "unite": "U",
+              "quantite": null,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.12",
+              "libelle": "Distribution en Polyethelene reticule Diamètre ø 13/16 & 16/20",
+              "unite": "ml",
+              "quantite": null,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "Coffret de distribution",
+              "unite": "Ens",
+              "quantite": 1.0,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.13",
+              "libelle": "4 Départ EF",
+              "unite": "Ens",
+              "quantite": 1.0,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.14",
+              "libelle": "3 Départs EF - 3 Départs EC",
+              "unite": "Ens",
+              "quantite": 1.0,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.15",
+              "libelle": "4 Départs EF - 3 Départs EC",
+              "unite": "Ens",
+              "quantite": 1.0,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.16",
+              "libelle": "5 Départs EF - 3 Départs EC",
+              "unite": "Ens",
+              "quantite": 1.0,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.17",
+              "libelle": "5 Départs EF - 4 Départs EC",
+              "unite": "Ens",
+              "quantite": 1.0,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.18",
+              "libelle": "5 Départs EF - 5 Départs EC",
+              "unite": "Ens",
+              "quantite": 1.0,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.19",
+              "libelle": "6 Départs EF - 5 Départs EC",
+              "unite": "Ens",
+              "quantite": 1.0,
+              "page": "p2",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": null,
+          "libelle": "EVACUATION EN PVC",
+          "unite": null,
+          "quantite": null,
+          "page": "p2",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "5.20",
+              "libelle": "PVC Ø75",
+              "unite": "ml",
+              "quantite": null,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.21",
+              "libelle": "PVC Ø100 / 110",
+              "unite": "ml",
+              "quantite": null,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.22",
+              "libelle": "PVC Ø125",
+              "unite": "ml",
+              "quantite": null,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.23",
+              "libelle": "PVC Ø160",
+              "unite": "ml",
+              "quantite": null,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.24",
+              "libelle": "PVC Ø200",
+              "unite": "ml",
+              "quantite": null,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.25",
+              "libelle": "Siphon de sol en inox",
+              "unite": "U",
+              "quantite": null,
+              "page": "p2",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": null,
+          "libelle": "GARGOUILLES D'EAU PLUVIALE EN TOUT DIAMETRE",
+          "unite": null,
+          "quantite": null,
+          "page": "p2",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "5.26",
+              "libelle": "Ø110",
+              "unite": "U",
+              "quantite": null,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.27",
+              "libelle": "Ø125",
+              "unite": "U",
+              "quantite": null,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.28",
+              "libelle": "Equipement fosse de de relevage",
+              "unite": "Ens",
+              "quantite": 1.0,
+              "page": "p2",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": null,
+          "libelle": "Climatisation-ventilation- chauffage",
+          "unite": null,
+          "quantite": null,
+          "page": "p2",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "5.30",
+              "libelle": "Aérateur silencieurs de SDB compris cablage",
+              "unite": "U",
+              "quantite": null,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.31",
+              "libelle": "Pré-sinstallation de climatisation ( Fluide ét electricité )",
+              "unite": "U",
+              "quantite": null,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.32",
+              "libelle": "Caniveaux en béton avec grille en fonte ductile",
+              "unite": "ml",
+              "quantite": null,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.34",
+              "libelle": "Pompe á chaleur",
+              "unite": "U",
+              "quantite": 1.0,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.35",
+              "libelle": "POMPE A CHALEUR HPI-S 27 TR/ET REF 7746970 MARQUE DE DIETRICH",
+              "unite": "U",
+              "quantite": 1.0,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.36",
+              "libelle": "Unité Extérieure AWHP 27 TR-2 EH615/EM REF 7655105 MARQUE DE DIETRICH",
+              "unite": "U",
+              "quantite": 1.0,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.37",
+              "libelle": "Unité Intérieure MIT-S 22-27/E HK115 REF 7746322 MARQUE DE DIETRICH",
+              "unite": "U",
+              "quantite": 1.0,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.38",
+              "libelle": "PREPARATEUR SIMPLE SERPENTIN",
+              "unite": "U",
+              "quantite": 1.0,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.39",
+              "libelle": "PLANCHER CHAUFFANT Sous-sol",
+              "unite": "U",
+              "quantite": null,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.40",
+              "libelle": "RETUBE EUROPEX DN 13 X 16 MARQUE ACOME ART 728753-C240",
+              "unite": "U",
+              "quantite": null,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.41",
+              "libelle": "DALLE NOVACOME EVOLUTION 0.75P ART 716895",
+              "unite": "U",
+              "quantite": null,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.42",
+              "libelle": "BANDE IP NON RETICULE REF 716824-R45",
+              "unite": "U",
+              "quantite": null,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.43",
+              "libelle": "CASSETTE MURALE AC 840E 850X80X530 MM REF 200132 IVAR",
+              "unite": "U",
+              "quantite": null,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.44",
+              "libelle": "KIT DE COLLECTEURS DE REGLAGE 6 SORTIES CI 595 MNRI/06 1\" X EUROK T.M",
+              "unite": "U",
+              "quantite": null,
+              "page": "p2",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.45",
+              "libelle": "TETE ELECTROTHERMIQUE NORMALEMENT FERMEE - TE 3040 IV 501508 230 V",
+              "unite": "U",
+              "quantite": null,
+              "page": "p3",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.46",
+              "libelle": "CHRONO THERMOSTAT DIGITAL AC 710 CODE 580012",
+              "unite": "U",
+              "quantite": null,
+              "page": "p3",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.47",
+              "libelle": "HUMIDIFICATEUR STEAM ENERGY TYPE FL-120/12KW/380V REF 05004022014",
+              "unite": "U",
+              "quantite": null,
+              "page": "p3",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.48",
+              "libelle": "PISCINE",
+              "unite": "U",
+              "quantite": 1.0,
+              "page": "p3",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.49",
+              "libelle": "POMPE SIMPLE MAGNA1 32-80 180 1x230V PN10 REF 99221235 GRUNDFOS",
+              "unite": "U",
+              "quantite": null,
+              "page": "p3",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.50",
+              "libelle": "ECHANGEUR A PLAQUES VIMATHERM VT04 A 31 PLAQUES",
+              "unite": "U",
+              "quantite": null,
+              "page": "p3",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.51",
+              "libelle": "VANNE 3 VOIES VRG131 25 AVEC MOTEUR SERIE 60 1\" ESBE",
+              "unite": "U",
+              "quantite": null,
+              "page": "p3",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.52",
+              "libelle": "ESBE ARA661 3-POINT 230V AC 6N M120S REF 12101300",
+              "unite": "U",
+              "quantite": null,
+              "page": "p3",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": null,
+              "libelle": "THERMOSTAT C03A3 A GAINE 1/2\" DE 10/ 90 FANTINI COSMI",
+              "unite": "U",
+              "quantite": null,
+              "page": "p3",
+              "enfants": []
+            }
+          ]
+        },
+        {
+          "type": "SOUS_LOT",
+          "code": null,
+          "libelle": "APPAREILS ET ACCESSOIRES SANITAIRES",
+          "unite": null,
+          "quantite": null,
+          "page": "p3",
+          "enfants": [
+            {
+              "type": "ARTICLE",
+              "code": "5.34",
+              "libelle": "Cuvette de WC suspendue Square sans bride Rimless.",
+              "unite": "U",
+              "quantite": 5.0,
+              "page": "p3",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.35",
+              "libelle": "WC DUPLO ONE COMPACT -Bâti-support pour cuvette de WC suspendue. Réservoir double chasse. Coude d'évacuation ø 90/110 mm",
+              "unite": "U",
+              "quantite": 5.0,
+              "page": "p3",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.36",
+              "libelle": "Abattant double laqué en SUPRALIT® Square, frein de chute \"Silencio\",",
+              "unite": "U",
+              "quantite": 5.0,
+              "page": "p3",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.37",
+              "libelle": "PL3 ONE - Plaque de commande en acier inoxydable anti-vandalisme avec",
+              "unite": "U",
+              "quantite": 5.0,
+              "page": "p3",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.38",
+              "libelle": "Mitigeur électronique pour lavabo alimentation sur secteur (230v) RDC",
+              "unite": "U",
+              "quantite": 2.0,
+              "page": "p3",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.39",
+              "libelle": "Robinetterie électronique avec réglage température à l’installation alimentation sur secteur (230v)",
+              "unite": "U",
+              "quantite": 5.0,
+              "page": "p3",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.40",
+              "libelle": "CHAUFFE EAU ELECTRIQUE BOSCH 300L",
+              "unite": "U",
+              "quantite": 1.0,
+              "page": "p3",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.41",
+              "libelle": "Pomme de douche carrée orientable, en acier inoxydable.",
+              "unite": "U",
+              "quantite": 4.0,
+              "page": "p3",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.42",
+              "libelle": "Bras plafond pour pomme de douche.",
+              "unite": null,
+              "quantite": 4.0,
+              "page": "p3",
+              "enfants": []
+            },
+            {
+              "type": "ARTICLE",
+              "code": "5.43",
+              "libelle": "Douche thermostatique mural livré avec douchette à main, flexible de 1,50 m et support mural articulé",
+              "unite": null,
+              "quantite": 4.0,
+              "page": "p3",
+              "enfants": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "LOT",
+      "code": "6",
+      "libelle": "LOT 6 : PEINTURE",
+      "unite": null,
+      "quantite": null,
+      "page": "p3",
+      "enfants": [
+        {
+          "type": "ARTICLE",
+          "code": "6.1",
+          "libelle": "Peinture type1 glycérophtalique ASTRAL",
+          "unite": "m2",
+          "quantite": null,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": "6.2",
+          "libelle": "Peinture type2 Decorative sur mur ASTRAL",
+          "unite": "m2",
+          "quantite": null,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": "6.3",
+          "libelle": "Peinture type3 extérieur ASTRAL",
+          "unite": "m2",
+          "quantite": null,
+          "page": "p3",
+          "enfants": []
+        }
+      ]
+    },
+    {
+      "type": "LOT",
+      "code": "7",
+      "libelle": "LOT 7 : Lot aménagement intérieur",
+      "unite": null,
+      "quantite": null,
+      "page": "p3",
+      "enfants": [
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "miroiterie SDB",
+          "unite": "U",
+          "quantite": 5.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "miroiterie Salle de sport",
+          "unite": "U",
+          "quantite": 12.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "miroiterie bain maure",
+          "unite": "U",
+          "quantite": 1.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "miroiterie Salle a manger",
+          "unite": "U",
+          "quantite": 2.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "MEUBLE TV SALON EN TUBE MATALIQUE et PLACAGE NOYER sans motorisaiton , TV ROTATIF",
+          "unite": "U",
+          "quantite": 1.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "COIN CAFE 1,87/0,6M EN PLACAGE NOYER ET DEKTON",
+          "unite": "U",
+          "quantite": 1.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "Meuble TV Sous-sol avec cheminée etanole",
+          "unite": "U",
+          "quantite": 1.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "Portique Cote salon sous-sol",
+          "unite": "U",
+          "quantite": 1.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "Habillage mur Salle a manger",
+          "unite": "U",
+          "quantite": 1.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "faux plafond en bois Salle a manger",
+          "unite": "U",
+          "quantite": 1.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "Habillage tv Salle de sport 3,00/3,00",
+          "unite": "U",
+          "quantite": 1.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "Meuble + niche SDB Sous-sol",
+          "unite": "U",
+          "quantite": 1.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "Espace Repos Bain maure",
+          "unite": "U",
+          "quantite": 1.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "separation hall entree et salon européen",
+          "unite": "U",
+          "quantite": 1.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "cloison salon marocain en placage noyer",
+          "unite": "U",
+          "quantite": 1.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "Faux plafond en bois salon marocain",
+          "unite": "U",
+          "quantite": 1.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "coin salon marocain",
+          "unite": "U",
+          "quantite": 1.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "Meuble TV Salon européen",
+          "unite": "U",
+          "quantite": 1.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "Meuble SDB RDC",
+          "unite": "U",
+          "quantite": 1.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "meuble tv chambre 2",
+          "unite": "U",
+          "quantite": 1.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "bardage tête de lit chambre 2",
+          "unite": "U",
+          "quantite": 1.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "meuble tv chambre 1",
+          "unite": "U",
+          "quantite": 1.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "bardage tête de lit chambre 1",
+          "unite": "U",
+          "quantite": 1.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "bardage tête de lit chambre 3 + console",
+          "unite": "U",
+          "quantite": 1.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "console chambre 3",
+          "unite": "U",
+          "quantite": 1.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "Meuble SDB chambre 3",
+          "unite": "U",
+          "quantite": 1.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "Meuble SDB etage",
+          "unite": "U",
+          "quantite": 1.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "habillage hall etage en bois",
+          "unite": "U",
+          "quantite": 1.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "meuble tv chambre parentale",
+          "unite": "U",
+          "quantite": 1.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "Meuble SDB chambre parentale",
+          "unite": "U",
+          "quantite": 1.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "bardage tête de lit chambre parentale",
+          "unite": "U",
+          "quantite": 1.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": null,
+          "libelle": "moulure en pvc hall etage & salon marocain RDC",
+          "unite": "U",
+          "quantite": 1.0,
+          "page": "p3",
+          "enfants": []
+        }
+      ]
+    },
+    {
+      "type": "LOT",
+      "code": "8",
+      "libelle": "LOT 8: Lot Piscine / Bain maure",
+      "unite": null,
+      "quantite": null,
+      "page": "p3",
+      "enfants": [
+        {
+          "type": "ARTICLE",
+          "code": "5.41",
+          "libelle": "Matériel de filtration",
+          "unite": "Ens",
+          "quantite": 1.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": "5.42",
+          "libelle": "GROUPE ELECTROPOMPE",
+          "unite": "Ens",
+          "quantite": 1.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": "5.43",
+          "libelle": "Armoire electrique piscine",
+          "unite": "Ens",
+          "quantite": 1.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": "5.44",
+          "libelle": "Installation electrique",
+          "unite": "Ens",
+          "quantite": 1.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": "5.45",
+          "libelle": "Installation hydraulique",
+          "unite": "Ens",
+          "quantite": 1.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": "5.46",
+          "libelle": "Piéces à sceller",
+          "unite": "Ens",
+          "quantite": 1.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": "5.47",
+          "libelle": "Matériel éclairage",
+          "unite": "Ens",
+          "quantite": 1.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": "5.48",
+          "libelle": "materiel d’agrement",
+          "unite": "Ens",
+          "quantite": 1.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": "5.49",
+          "libelle": "materiel d’entretien",
+          "unite": "Ens",
+          "quantite": 1.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": "5.50",
+          "libelle": "systeme de traitement d’eau automatique",
+          "unite": "Ens",
+          "quantite": 1.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": "5.51",
+          "libelle": "Equipements de la bache",
+          "unite": "Ens",
+          "quantite": 1.0,
+          "page": "p3",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": "5.52",
+          "libelle": "Grilles de debordement",
+          "unite": "Ml",
+          "quantite": null,
+          "page": "p3",
+          "enfants": []
+        }
+      ]
+    },
+    {
+      "type": "LOT",
+      "code": "9",
+      "libelle": "LOT 9 : gros oeuvres",
+      "unite": null,
+      "quantite": null,
+      "page": "p4",
+      "enfants": [
+        {
+          "type": "ARTICLE",
+          "code": "10.2",
+          "libelle": "mousse polyurethane RDC & etage",
+          "unite": "U",
+          "quantite": null,
+          "page": "p4",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": "10.3",
+          "libelle": "Etanchéité légère SDB",
+          "unite": null,
+          "quantite": null,
+          "page": "p4",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": "10.4",
+          "libelle": "Etanchéité terrasse et toiture avec isolation thermique",
+          "unite": null,
+          "quantite": null,
+          "page": "p4",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": "10.5",
+          "libelle": "Mur de clôture ( construction + Revêtement en granit noir absolu flammé contour porte entrée et garage )",
+          "unite": "m2",
+          "quantite": 50.0,
+          "page": "p4",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": "10.6",
+          "libelle": "habillage façade extérieur",
+          "unite": "m2",
+          "quantite": 45.0,
+          "page": "p4",
+          "enfants": []
+        }
+      ]
+    },
+    {
+      "type": "LOT",
+      "code": "10",
+      "libelle": "LOT 10 : Suivis & Etude architecturale",
+      "unite": null,
+      "quantite": null,
+      "page": "p4",
+      "enfants": [
+        {
+          "type": "ARTICLE",
+          "code": "10.1",
+          "libelle": "Honoraire plans d’exécution",
+          "unite": null,
+          "quantite": null,
+          "page": "p4",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": "10.2",
+          "libelle": "Honoraire Rendu 3D",
+          "unite": null,
+          "quantite": null,
+          "page": "p4",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": "10.3",
+          "libelle": "Honoraire gestion de chantier 8 mois d’exécution",
+          "unite": null,
+          "quantite": null,
+          "page": "p4",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": "10.4",
+          "libelle": "Cameras de surveillance chantier",
+          "unite": null,
+          "quantite": null,
+          "page": "p4",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": "10.5",
+          "libelle": "Gardiennage et sécurité",
+          "unite": null,
+          "quantite": null,
+          "page": "p4",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": "10.6",
+          "libelle": "Nettoyage fin de chantier",
+          "unite": null,
+          "quantite": null,
+          "page": "p4",
+          "enfants": []
+        },
+        {
+          "type": "ARTICLE",
+          "code": "10.7",
+          "libelle": "Prise Photos et video pro fin de chantier",
+          "unite": null,
+          "quantite": null,
+          "page": "p4",
+          "enfants": []
+        }
+      ]
+    }
+  ]
+}

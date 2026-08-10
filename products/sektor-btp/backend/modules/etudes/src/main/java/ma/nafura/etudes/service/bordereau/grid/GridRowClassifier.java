@@ -41,14 +41,15 @@ public final class GridRowClassifier {
         AMBIGUOUS
     }
 
-    private static final Pattern NUMERIC = Pattern.compile("-?[\\d\\s\\u00a0]+(?:[.,]\\d+)?");
+    private static final Pattern NUMERIC = Pattern.compile(
+            "-?[\\d\\s\\u00a0.]+(?:[.,]\\d+)?");
     private static final Pattern NOISE_START = Pattern.compile(
             "^(TOTAL|SOUS[- ]TOTAL|RECAPITULATION|R\u00c9CAPITULATION|MONTANT|ARRETE|ARR\u00caTE"
-                    + "|REPORT|A REPORTER|[_*\\-\u2013\u2014.\\s]+)$",
+                    + "|REPORT|A REPORTER|T\\.?\\s*V\\.?\\s*A\\.?|[_*\\-\u2013\u2014.\\s]+)$",
             Pattern.CASE_INSENSITIVE);
     /** « b/ - TOTAL RÉSEAU… » : TOTAL n'est pas toujours en tête de chaîne. */
     private static final Pattern TOTAL_ANYWHERE = Pattern.compile(
-            "\\b(TOTAL|TOTAUX|RECAPITULATION|R\u00c9CAPITULATION|REPORT)\\b",
+            "\\b(TOTAL|TOTAUX|RECAPITULATION|R\u00c9CAPITULATION|REPORT|T\\.?\\s*V\\.?\\s*A\\.?)\\b",
             Pattern.CASE_INSENSITIVE);
     /** « LE MÈTRE CUBE », « Le mètre cube : » — insensible à la casse, les deux existent. */
     private static final Pattern MEASURE_PHRASE = Pattern.compile(
@@ -60,6 +61,17 @@ public final class GridRowClassifier {
     private static final Pattern PREFIX =
             Pattern.compile("^\\s*(\\d+(?:[-.]\\d+)*|[a-zA-Z])\\s*[-\u2013/]\\s*(.+)$");
     private static final Pattern ROMAN = Pattern.compile("^\\s*([IVX]{1,5})\\s*[-\u2013/]");
+    /** Folio réimprimé « IV/1 », « IV/15 » — pas un lot. */
+    private static final Pattern PAGE_MARK =
+            Pattern.compile("^\\s*[IVX]{1,5}\\s*/\\s*\\d+\\s*$", Pattern.CASE_INSENSITIVE);
+    /** Code poste « 10.1 », « 1-1-1 », « a/2 » — pas une simple lettre de variante. */
+    private static final Pattern ARTICLE_CODE = Pattern.compile(
+            "^(?:[A-Za-z]?\\d+(?:[-./][\\dA-Za-z]+)+|[a-zA-Z]/\\d+)$");
+    /** Section « 6.1 REVETEMENTS » → majeur du lot éventuellement manquant. */
+    static final Pattern SECTION_MAJOR =
+            Pattern.compile("^\\s*0?(\\d+)\\s*[.\\-]\\s*0?(\\d+)\\b");
+    private static final Pattern SOUS_LOT_AS_LOT = Pattern.compile(
+            "^\\s*SOUS\\s*LOT\\s*:\\s*0?(\\d+)\\s*[-\\u2013]\\s*(.+)$", Pattern.CASE_INSENSITIVE);
 
     /** Un texte revenant au moins tant de fois est soit un bandeau, soit un titre réimprimé. */
     private static final int REPEAT_THRESHOLD = 3;
@@ -110,11 +122,16 @@ public final class GridRowClassifier {
         }
 
         // ── passe 1 : ancres ───────────────────────────────────────────────
-        int start = map.headerRow() >= 0 ? map.headerRow() + 1 : 0;
-        for (int i = 0; i < start; i++) {
-            kinds[i] = Kind.NOISE;
+        // Garder le préambule avant l'en-tête (ex. « I/ - AMÉNAGEMENT ») — ne
+        // jeter que la ligne d'en-tête elle-même.
+        int headerRow = map.headerRow();
+        if (headerRow >= 0 && headerRow < rows.size()) {
+            kinds[headerRow] = Kind.NOISE;
         }
-        for (int i = start; i < rows.size(); i++) {
+        for (int i = 0; i < rows.size(); i++) {
+            if (kinds[i] == Kind.NOISE) {
+                continue;
+            }
             GridRow row = rows.get(i);
             String designation = designationOf(row, map);
             if (designation.isEmpty()) {
@@ -124,7 +141,12 @@ public final class GridRowClassifier {
             String folded = ColumnMap.fold(designation);
             String unite = unitOf(row, map);
             String quantite = quantityOf(row, map);
+            String code = cellOf(row, map.code());
 
+            if (PAGE_MARK.matcher(designation).matches() || PAGE_MARK.matcher(code).matches()) {
+                kinds[i] = Kind.NOISE;
+                continue;
+            }
             if (folded.startsWith("DESIGNATION") || folded.startsWith("N")
                     && folded.length() <= 6 || NOISE_START.matcher(designation).matches()) {
                 kinds[i] = Kind.NOISE;
@@ -149,12 +171,15 @@ public final class GridRowClassifier {
                     continue;
                 }
             }
-            if (!unite.isEmpty() || !quantite.isEmpty()) {
-                kinds[i] = Kind.MEASURE;
-            } else if (SOUS_LOT_KEYWORD.matcher(designation).find()) {
+            // Mot-clé LOT/SOUS avant U/Q : un récap « LOT 1 … | 340603 » n'est pas un article.
+            if (SOUS_LOT_KEYWORD.matcher(designation).find()) {
                 kinds[i] = Kind.SOUS_LOT;
             } else if (LOT_KEYWORD.matcher(designation).find()) {
                 kinds[i] = Kind.LOT;
+            } else if (!unite.isEmpty() || !quantite.isEmpty()) {
+                kinds[i] = Kind.MEASURE;
+            } else if (ARTICLE_CODE.matcher(code).matches() && hasPricedAmount(row, map)) {
+                kinds[i] = Kind.MEASURE;
             }
         }
 
@@ -173,7 +198,7 @@ public final class GridRowClassifier {
         }
 
         // ── passe 3 : le reste, par proximité à la grammaire apprise ───────
-        for (int i = start; i < rows.size(); i++) {
+        for (int i = 0; i < rows.size(); i++) {
             if (kinds[i] != null) {
                 continue;
             }
@@ -191,9 +216,12 @@ public final class GridRowClassifier {
                     continue;
                 }
             }
-            if (matches(signature, learned.get(Kind.LOT))) {
+            // Sans style (PDF texte), la signature LOT colle à tout → sections devenues lots.
+            Signature lotSig = learned.get(Kind.LOT);
+            Signature sousSig = learned.get(Kind.SOUS_LOT);
+            if (lotSig != null && !lotSig.styleBlank() && matches(signature, lotSig)) {
                 kinds[i] = Kind.LOT;
-            } else if (matches(signature, learned.get(Kind.SOUS_LOT))) {
+            } else if (sousSig != null && !sousSig.styleBlank() && matches(signature, sousSig)) {
                 kinds[i] = Kind.SOUS_LOT;
             } else if (!code.isEmpty() && matches(signature, learned.get(Kind.MEASURE))) {
                 kinds[i] = Kind.HEAD;
@@ -214,7 +242,7 @@ public final class GridRowClassifier {
         // que CE document emploie, et on les ordonne. { ROMAN, LETTER } → II/ est un lot et b/
         // un sous-lot ; { NUM1, NUMN } → 3- est un lot et 3.1. un sous-lot.
         Map<Integer, String> shapes = new LinkedHashMap<>();
-        for (int i = start; i < rows.size(); i++) {
+        for (int i = 0; i < rows.size(); i++) {
             if (kinds[i] != Kind.LOT && kinds[i] != Kind.SOUS_LOT) {
                 continue;
             }
@@ -288,6 +316,14 @@ public final class GridRowClassifier {
                     row.firstFilledColumn(),
                     upper);
         }
+
+        /** PDF texte sans mise en forme : ne pas promouvoir par proximité de signature. */
+        boolean styleBlank() {
+            String f = fill() == null ? "" : fill();
+            return (f.isEmpty() || "00000000".equals(f) || "0".equals(f))
+                    && fontSize() == 0
+                    && !bold();
+        }
     }
 
     private static boolean matches(Signature signature, Signature reference) {
@@ -314,15 +350,76 @@ public final class GridRowClassifier {
 
     static String unitOf(GridRow row, ColumnMap map) {
         String value = cellOf(row, map.unite());
+        if (value.isEmpty() || "-".equals(value) || "–".equals(value) || "—".equals(value)) {
+            return "";
+        }
         return value.length() > 0 && value.length() <= 6 ? value : "";
     }
 
     static String quantityOf(GridRow row, ColumnMap map) {
         String value = cellOf(row, map.quantite());
-        if (value.isEmpty() || value.equals("-") || !NUMERIC.matcher(value).matches()) {
+        if (value.isEmpty() || value.equals("-") || value.equals("–") || value.equals("—")) {
             return "";
         }
-        return value;
+        return parseNumericToken(value) != null ? value : "";
+    }
+
+    /** True si une cellule hors code/désignation/unité porte un montant (PU / total). */
+    static boolean hasPricedAmount(GridRow row, ColumnMap map) {
+        for (int i = 0; i < row.cells().size(); i++) {
+            if (i == map.code() || i == map.designation() || i == map.unite()) {
+                continue;
+            }
+            if (parseNumericToken(row.cell(i)) != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** 350,00 / 5 600 / 45.000,00 (milliers FR). */
+    static Double parseNumericToken(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return null;
+        }
+        String s = raw.replace("\u00a0", "").replace(" ", "");
+        if (s.equals("-") || s.equals("–") || s.equals("—")) {
+            return null;
+        }
+        if (s.matches("-?\\d{1,3}(\\.\\d{3})+(,\\d+)?")) {
+            s = s.replace(".", "").replace(",", ".");
+        } else if (s.contains(",") && !s.contains(".")) {
+            s = s.replace(",", ".");
+        }
+        if (!s.matches("-?\\d+(\\.\\d+)?")) {
+            return null;
+        }
+        try {
+            double n = Double.parseDouble(s);
+            return n > 0 ? n : null;
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    static Matcher sectionMajor(String designation) {
+        return SECTION_MAJOR.matcher(designation == null ? "" : designation);
+    }
+
+    static Matcher sousLotAsLot(String designation) {
+        return SOUS_LOT_AS_LOT.matcher(designation == null ? "" : designation);
+    }
+
+    static String lotMajor(String libelle) {
+        if (libelle == null || libelle.isBlank()) {
+            return null;
+        }
+        Matcher m = Pattern.compile("^\\s*0?(\\d+)\\b").matcher(libelle);
+        if (m.find()) {
+            return String.valueOf(Integer.parseInt(m.group(1)));
+        }
+        m = Pattern.compile("\\bLOT\\s*0?(\\d+)\\b", Pattern.CASE_INSENSITIVE).matcher(libelle);
+        return m.find() ? String.valueOf(Integer.parseInt(m.group(1))) : null;
     }
 
     private static String cellOf(GridRow row, int column) {

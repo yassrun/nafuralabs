@@ -1,0 +1,562 @@
+[
+  {
+    "stem": "BDP-2-17",
+    "source": "BDP-2-17.pdf",
+    "summary": {
+      "extracteur": {
+        "lots": 9,
+        "sousLots": 47,
+        "articles": 186,
+        "orphelins": 0,
+        "sansQuantite": 2,
+        "ambigus": 0
+      },
+      "llm": {
+        "lots": 9,
+        "sousLots": 41,
+        "articles": 186,
+        "orphelins": 0,
+        "sansQuantite": 2
+      },
+      "deltaArticles": 0,
+      "deltaLots": 0
+    },
+    "lots": {
+      "extracteur": [
+        "1 -TERRASSEMENT - GROS-ŒUVRE",
+        "2-CHARPENTE METALLIQUE ET PANNEAUX SANDWICH",
+        "3- ELECTRICITE",
+        "4 -FLUIDES",
+        "5- FAUX PLAFONDS",
+        "6 - REVETEMENTS",
+        "7-MENUISERIE",
+        "08-PEINTURE",
+        "9 - CHAMBRES FROIDES / EQUIPEMENTS FRIGORIFIQUES"
+      ],
+      "llm": [
+        "1 -TERRASSEMENT - GROS-ŒUVRE",
+        "2-CHARPENTE METALLIQUE ET PANNEAUX SANDWICH",
+        "3- ELECTRICITE",
+        "4 -FLUIDES",
+        "5- FAUX PLAFONDS",
+        "6 - (section 6.1)",
+        "7-MENUISERIE",
+        "08-PEINTURE",
+        "9 - CHAMBRES FROIDES / EQUIPEMENTS FRIGORIFIQUES"
+      ],
+      "missingInExtracteur": [
+        "6 - (section 6.1)"
+      ],
+      "extraInExtracteur": [
+        "6 - REVETEMENTS"
+      ]
+    },
+    "articles": {
+      "matched": 88,
+      "missingInExtracteur": 0,
+      "extraInExtracteur": 95,
+      "qtyMismatch": 2,
+      "unitMismatch": 1,
+      "pathMismatch": 8
+    },
+    "samples": {
+      "missingInExtracteur": [],
+      "extraInExtracteur": [
+        {
+          "code": "1-1-5",
+          "libelle": "SCELLEMENTS DES ARMATURE EN ACIER",
+          "unite": "U",
+          "quantite": 10700.0,
+          "path": "LOT:1 -TERRASSEMENT - GROS-ŒUVRE > SOUS_LOT:1-1 - TRAVAUX EN TERRASSEMENTS ET FONDATION",
+          "key": "c:1-1-5|SCELLEMENTS DES ARMATURE EN ACIER"
+        },
+        {
+          "code": "1-1-6",
+          "libelle": "SCELLEMENTS CHIMIQUES",
+          "unite": "U",
+          "quantite": 416.0,
+          "path": "LOT:1 -TERRASSEMENT - GROS-ŒUVRE > SOUS_LOT:1-1 - TRAVAUX EN TERRASSEMENTS ET FONDATION",
+          "key": "c:1-1-6|SCELLEMENTS CHIMIQUES"
+        },
+        {
+          "code": "a",
+          "libelle": "DE 40 x 40 CM",
+          "unite": "U",
+          "quantite": 10.0,
+          "path": "LOT:1 -TERRASSEMENT - GROS-ŒUVRE > SOUS_LOT:REGARD EN BÉTON :",
+          "key": "c:a|DE 40 X 40 CM"
+        },
+        {
+          "code": "b",
+          "libelle": "DE 50 x 50 CM",
+          "unite": "U",
+          "quantite": 5.0,
+          "path": "LOT:1 -TERRASSEMENT - GROS-ŒUVRE > SOUS_LOT:REGARD EN BÉTON :",
+          "key": "c:b|DE 50 X 50 CM"
+        },
+        {
+          "code": "c",
+          "libelle": "DE 60 x 60 CM",
+          "unite": "U",
+          "quantite": 3.0,
+          "path": "LOT:1 -TERRASSEMENT - GROS-ŒUVRE > SOUS_LOT:REGARD EN BÉTON :",
+          "key": "c:c|DE 60 X 60 CM"
+        },
+        {
+          "code": "1-2-4",
+          "libelle": "BOITE DE BRANCHEMENT SIMPLE",
+          "unite": "U",
+          "quantite": 1.0,
+          "path": "LOT:1 -TERRASSEMENT - GROS-ŒUVRE > SOUS_LOT:CANALISATION EN PVC RIGIDE",
+          "key": "c:1-2-4|BOITE DE BRANCHEMENT SIMPLE"
+        },
+        {
+          "code": "2.2.2",
+          "libelle": "BRAS ROTATIF EN INOX Y COMPRIS MASSIF",
+          "unite": "U",
+          "quantite": 4.0,
+          "path": "LOT:2-CHARPENTE METALLIQUE ET PANNEAUX SANDWICH",
+          "key": "c:2.2.2|BRAS ROTATIF EN INOX Y COMPRIS MASSIF"
+        },
+        {
+          "code": "3.1.1.",
+          "libelle": "TABLEAU SERVICES GENERAUX TEVO/FR",
+          "unite": "E",
+          "quantite": 1.0,
+          "path": "LOT:3- ELECTRICITE > SOUS_LOT:3.1. TABLEAUX ELECTRIQUES",
+          "key": "c:3.1.1.|TABLEAU SERVICES GENERAUX TEVO/FR"
+        },
+        {
+          "code": "3.1.2.",
+          "libelle": "TABLEAU SERVICES GENERAUX TEVIA",
+          "unite": "E",
+          "quantite": 1.0,
+          "path": "LOT:3- ELECTRICITE > SOUS_LOT:3.1. TABLEAUX ELECTRIQUES",
+          "key": "c:3.1.2.|TABLEAU SERVICES GENERAUX TEVIA"
+        },
+        {
+          "code": "3.1.3.",
+          "libelle": "TABLEAU DE PROTECTION MAGASIN TEMAG",
+          "unite": "E",
+          "quantite": 30.0,
+          "path": "LOT:3- ELECTRICITE > SOUS_LOT:3.1. TABLEAUX ELECTRIQUES",
+          "key": "c:3.1.3.|TABLEAU DE PROTECTION MAGASIN TEMAG"
+        },
+        {
+          "code": "3.2.1.",
+          "libelle": "BOITE DE COUPURE",
+          "unite": "U",
+          "quantite": 3.0,
+          "path": "LOT:3- ELECTRICITE > SOUS_LOT:3.1. TABLEAUX ELECTRIQUES",
+          "key": "c:3.2.1.|BOITE DE COUPURE"
+        },
+        {
+          "code": "3.2.2.",
+          "libelle": "BOITE DE DISTRIBUTION",
+          "unite": "U",
+          "quantite": 6.0,
+          "path": "LOT:3- ELECTRICITE > SOUS_LOT:3.1. TABLEAUX ELECTRIQUES",
+          "key": "c:3.2.2.|BOITE DE DISTRIBUTION"
+        },
+        {
+          "code": "3.2.3.",
+          "libelle": "COFFRET DE COMPTEUR TRIPHASE",
+          "unite": "U",
+          "quantite": 32.0,
+          "path": "LOT:3- ELECTRICITE > SOUS_LOT:3.1. TABLEAUX ELECTRIQUES",
+          "key": "c:3.2.3.|COFFRET DE COMPTEUR TRIPHASE"
+        },
+        {
+          "code": "3.5..1",
+          "libelle": "FOYER LUMINEUX PRINCIPAL",
+          "unite": "U",
+          "quantite": 100.0,
+          "path": "LOT:3- ELECTRICITE > SOUS_LOT:3.5. DISTRIBUTION ECLAIRAGE ET PRISE DE COURANT",
+          "key": "c:3.5..1|FOYER LUMINEUX PRINCIPAL"
+        },
+        {
+          "code": "3.5..2",
+          "libelle": "FOYER LUMINEUX SUPPLEMENTAIRE",
+          "unite": "U",
+          "quantite": 370.0,
+          "path": "LOT:3- ELECTRICITE > SOUS_LOT:3.5. DISTRIBUTION ECLAIRAGE ET PRISE DE COURANT",
+          "key": "c:3.5..2|FOYER LUMINEUX SUPPLEMENTAIRE"
+        },
+        {
+          "code": "3.5..3",
+          "libelle": "FOYER PRINCIPAL DE PRISES DE COURANT",
+          "unite": "U",
+          "quantite": 86.0,
+          "path": "LOT:3- ELECTRICITE > SOUS_LOT:3.5. DISTRIBUTION ECLAIRAGE ET PRISE DE COURANT",
+          "key": "c:3.5..3|FOYER PRINCIPAL DE PRISES DE COURANT"
+        },
+        {
+          "code": "3.5..4",
+          "libelle": "FOYER PRISE DE COURANT SUPPLEMENTAIRE",
+          "unite": "U",
+          "quantite": null,
+          "path": "LOT:3- ELECTRICITE > SOUS_LOT:3.5. DISTRIBUTION ECLAIRAGE ET PRISE DE COURANT",
+          "key": "c:3.5..4|FOYER PRISE DE COURANT SUPPLEMENTAIRE"
+        },
+        {
+          "code": "3.6.1",
+          "libelle": "ALIMENTATION ELECTRIQUE 3G2.5",
+          "unite": "U",
+          "quantite": 22.0,
+          "path": "LOT:3- ELECTRICITE > SOUS_LOT:3.6- ATTENTES ELECTRIQUES",
+          "key": "c:3.6.1|ALIMENTATION ELECTRIQUE 3G2.5"
+        },
+        {
+          "code": "3.6.2",
+          "libelle": "ALIMENTATION CHAUFFE EAU",
+          "unite": "U",
+          "quantite": 12.0,
+          "path": "LOT:3- ELECTRICITE > SOUS_LOT:3.6- ATTENTES ELECTRIQUES",
+          "key": "c:3.6.2|ALIMENTATION CHAUFFE EAU"
+        },
+        {
+          "code": "3.6.3",
+          "libelle": "ALIMENTATION PORTE MOTORISÉE",
+          "unite": "U",
+          "quantite": 40.0,
+          "path": "LOT:3- ELECTRICITE > SOUS_LOT:3.6- ATTENTES ELECTRIQUES",
+          "key": "c:3.6.3|ALIMENTATION PORTE MOTORISEE"
+        },
+        {
+          "code": "3.6.4",
+          "libelle": "ALIMENTATION NIVELEUR DE QUAI",
+          "unite": "U",
+          "quantite": 28.0,
+          "path": "LOT:3- ELECTRICITE > SOUS_LOT:3.6- ATTENTES ELECTRIQUES",
+          "key": "c:3.6.4|ALIMENTATION NIVELEUR DE QUAI"
+        },
+        {
+          "code": "3.6.5",
+          "libelle": "ALIMENTATION BRAS ROTATIF",
+          "unite": "U",
+          "quantite": 28.0,
+          "path": "LOT:3- ELECTRICITE > SOUS_LOT:3.6- ATTENTES ELECTRIQUES",
+          "key": "c:3.6.5|ALIMENTATION BRAS ROTATIF"
+        },
+        {
+          "code": "3.7.1.1",
+          "libelle": "INTERRUPTEUR SIMPLE ALLUMAGE",
+          "unite": "U",
+          "quantite": 60.0,
+          "path": "LOT:3- ELECTRICITE > SOUS_LOT:MOSAIC DE LEGRAND",
+          "key": "c:3.7.1.1|INTERRUPTEUR SIMPLE ALLUMAGE"
+        },
+        {
+          "code": "3.7.1.2",
+          "libelle": "INTERRUPTEUR VA ET VIENT",
+          "unite": "U",
+          "quantite": 12.0,
+          "path": "LOT:3- ELECTRICITE > SOUS_LOT:MOSAIC DE LEGRAND",
+          "key": "c:3.7.1.2|INTERRUPTEUR VA ET VIENT"
+        },
+        {
+          "code": "3.7.1.3",
+          "libelle": "BOUTON POUSSOIR LUMINEUX",
+          "unite": "U",
+          "quantite": 8.0,
+          "path": "LOT:3- ELECTRICITE > SOUS_LOT:MOSAIC DE LEGRAND",
+          "key": "c:3.7.1.3|BOUTON POUSSOIR LUMINEUX"
+        }
+      ],
+      "qtyMismatch": [
+        {
+          "key": "l:L'UNITE",
+          "extracteur": 7.0,
+          "llm": 30.0,
+          "libelle": "L'UNITÉ"
+        },
+        {
+          "key": "l:L'ENSEMBLE",
+          "extracteur": 1.0,
+          "llm": 30.0,
+          "libelle": "L'ENSEMBLE"
+        }
+      ],
+      "unitMismatch": [
+        {
+          "key": "l:L'ENSEMBLE",
+          "extracteur": "E",
+          "llm": "ENS",
+          "libelle": "L'ENSEMBLE"
+        }
+      ],
+      "pathMismatch": [
+        {
+          "key": "l:L'UNITE",
+          "extracteur": "LOT:6 - REVETEMENTS",
+          "llm": "LOT:7-MENUISERIE",
+          "libelle": "L'UNITÉ"
+        },
+        {
+          "key": "l:L'ENSEMBLE",
+          "extracteur": "LOT:3- ELECTRICITE",
+          "llm": "LOT:9 - CHAMBRES FROIDES / EQUIPEMENTS FRIGORIFIQUES",
+          "libelle": "L'ENSEMBLE"
+        },
+        {
+          "key": "c:6.1.1|REVETEMENT DE SOL EN CARREAUX TECHNIQUE ",
+          "extracteur": "LOT:6 - REVETEMENTS",
+          "llm": "LOT:6 - (section 6.1)",
+          "libelle": "REVETEMENT DE SOL EN CARREAUX TECHNIQUE GRES CERAME ANTIDERAPENT D’IMP"
+        },
+        {
+          "key": "c:6.1.2|REVETEMENT DE SOL EN CARREAUX GRES CERAM",
+          "extracteur": "LOT:6 - REVETEMENTS",
+          "llm": "LOT:6 - (section 6.1)",
+          "libelle": "REVETEMENT DE SOL EN CARREAUX GRES CERAME D’IMPORTATION DE 30X60 CM Y "
+        },
+        {
+          "key": "c:6.1.3|REVETEMENT DE SOL EN CARREAUX GRES CERAM",
+          "extracteur": "LOT:6 - REVETEMENTS",
+          "llm": "LOT:6 - (section 6.1)",
+          "libelle": "REVETEMENT DE SOL EN CARREAUX GRES CERAME ANTIDERAPENT D’IMPORTATION D"
+        },
+        {
+          "key": "c:6.1.4|REVETEMENT MURAL EN CARREAUX GRES CERAME",
+          "extracteur": "LOT:6 - REVETEMENTS",
+          "llm": "LOT:6 - (section 6.1)",
+          "libelle": "REVETEMENT MURAL EN CARREAUX GRES CERAME D'IMPORTATION DE 20 x 20 CM"
+        },
+        {
+          "key": "c:6.1.5|REVETEMENT ESPACE ABLUTION EN GRANITE NO",
+          "extracteur": "LOT:6 - REVETEMENTS",
+          "llm": "LOT:6 - (section 6.1)",
+          "libelle": "REVETEMENT ESPACE ABLUTION EN GRANITE NOIR ABSOLU Y COMPRIS RETOURS"
+        },
+        {
+          "key": "c:6.1.6|REVETEMENT TABLETTE EN GRANIT Y COMPRIS ",
+          "extracteur": "LOT:6 - REVETEMENTS",
+          "llm": "LOT:6 - (section 6.1)",
+          "libelle": "REVETEMENT TABLETTE EN GRANIT Y COMPRIS RETOURS ET STRUCTURE"
+        }
+      ]
+    }
+  },
+  {
+    "stem": "bdp",
+    "source": "bdp.xlsx",
+    "summary": {
+      "extracteur": {
+        "lots": 2,
+        "sousLots": 18,
+        "articles": 107,
+        "orphelins": 0,
+        "sansQuantite": 0,
+        "ambigus": 7
+      },
+      "llm": {
+        "lots": 2,
+        "sousLots": 21,
+        "articles": 107,
+        "orphelins": 0,
+        "sansQuantite": 0
+      },
+      "deltaArticles": 0,
+      "deltaLots": 0
+    },
+    "lots": {
+      "extracteur": [
+        "I/ - AMÉNAGEMENT  EXTÉRIEUR",
+        "II/ - BÂTIMENT"
+      ],
+      "llm": [
+        "I/ - AMÉNAGEMENT  EXTÉRIEUR",
+        "II/ - BÂTIMENT"
+      ],
+      "missingInExtracteur": [],
+      "extraInExtracteur": []
+    },
+    "articles": {
+      "matched": 91,
+      "missingInExtracteur": 1,
+      "extraInExtracteur": 2,
+      "qtyMismatch": 1,
+      "unitMismatch": 0,
+      "pathMismatch": 1
+    },
+    "samples": {
+      "missingInExtracteur": [
+        {
+          "code": "c",
+          "libelle": "Poteaux",
+          "unite": "M3",
+          "quantite": 12.0,
+          "path": "LOT:II/ - BÂTIMENT > SOUS_LOT:e/ - BÉTONS ARMÉS EN FONDATION",
+          "key": "c:c|POTEAUX"
+        }
+      ],
+      "extraInExtracteur": [
+        {
+          "code": null,
+          "libelle": "Le mètre cube :",
+          "unite": "M3",
+          "quantite": 12.0,
+          "path": "LOT:II/ - BÂTIMENT > SOUS_LOT:e/ - BÉTONS ARMÉS EN FONDATION",
+          "key": "l:LE METRE CUBE :"
+        },
+        {
+          "code": "g/1",
+          "libelle": "Béton armé en élévation",
+          "unite": "M3",
+          "quantite": 20.0,
+          "path": "LOT:II/ - BÂTIMENT > SOUS_LOT:g/ - BÉTON ARMÉ EN ÉLÉVATION",
+          "key": "c:g/1|BETON ARME EN ELEVATION"
+        }
+      ],
+      "qtyMismatch": [
+        {
+          "key": "c:a|POTEAUX",
+          "extracteur": 18.0,
+          "llm": 20.0,
+          "libelle": "Poteaux"
+        }
+      ],
+      "unitMismatch": [],
+      "pathMismatch": [
+        {
+          "key": "c:a|POTEAUX",
+          "extracteur": "LOT:I/ - AMÉNAGEMENT  EXTÉRIEUR",
+          "llm": "LOT:II/ - BÂTIMENT",
+          "libelle": "Poteaux"
+        }
+      ]
+    }
+  },
+  {
+    "stem": "villa-kenitra-xlsx",
+    "source": "BPDE Villa Kenitra.xlsx",
+    "summary": {
+      "extracteur": {
+        "lots": 10,
+        "sousLots": 13,
+        "articles": 205,
+        "orphelins": 0,
+        "sansQuantite": 84,
+        "ambigus": 0
+      },
+      "llm": {
+        "lots": 10,
+        "sousLots": 17,
+        "articles": 205,
+        "orphelins": 0,
+        "sansQuantite": 84
+      },
+      "deltaArticles": 0,
+      "deltaLots": 0
+    },
+    "lots": {
+      "extracteur": [
+        "LOT  1 : MENUISERIE BOIS, ALUMINIUM ET METALLIQUE",
+        "LOT 2 :  Faux plafonds",
+        "LOT 3 : REVETMENT SOL - MURS",
+        "LOT 4 : LOT ELECTRICITE",
+        "LOT 5 :   PLOMBERIE SANITAIRES",
+        "LOT 6 : PEINTURE",
+        "LOT 7 : Lot aménagement intérieur",
+        "LOT 8: Lot Piscine /  Bain maure",
+        "LOT 9 : gros oeuvres",
+        "LOT 10 : Suivis & Etude architecturale"
+      ],
+      "llm": [
+        "LOT  1 : MENUISERIE BOIS, ALUMINIUM ET METALLIQUE",
+        "LOT 2 :  Faux plafonds",
+        "LOT 3 : REVETMENT SOL - MURS",
+        "LOT 4 : LOT ELECTRICITE",
+        "LOT 5 :   PLOMBERIE SANITAIRES",
+        "LOT 6 : PEINTURE",
+        "LOT 7 : Lot aménagement intérieur",
+        "LOT 8: Lot Piscine /  Bain maure",
+        "LOT 9 : gros oeuvres",
+        "LOT 10 : Suivis & Etude architecturale"
+      ],
+      "missingInExtracteur": [],
+      "extraInExtracteur": []
+    },
+    "articles": {
+      "matched": 205,
+      "missingInExtracteur": 0,
+      "extraInExtracteur": 0,
+      "qtyMismatch": 0,
+      "unitMismatch": 0,
+      "pathMismatch": 0
+    },
+    "samples": {
+      "missingInExtracteur": [],
+      "extraInExtracteur": [],
+      "qtyMismatch": [],
+      "unitMismatch": [],
+      "pathMismatch": []
+    }
+  },
+  {
+    "stem": "villa-kenitra-pdf",
+    "source": "BPDE Villa Kenitra.pdf",
+    "summary": {
+      "extracteur": {
+        "lots": 10,
+        "sousLots": 10,
+        "articles": 205,
+        "orphelins": 0,
+        "sansQuantite": 84,
+        "ambigus": 0
+      },
+      "llm": {
+        "lots": 10,
+        "sousLots": 17,
+        "articles": 205,
+        "orphelins": 0,
+        "sansQuantite": 84
+      },
+      "deltaArticles": 0,
+      "deltaLots": 0
+    },
+    "lots": {
+      "extracteur": [
+        "LOT 1 : MENUISERIE BOIS, ALUMINIUM ET METALLIQUE",
+        "LOT 2 : Faux plafonds",
+        "LOT 3 : REVETMENT SOL - MURS",
+        "LOT 4 : LOT ELECTRICITE",
+        "LOT 5 : PLOMBERIE SANITAIRES",
+        "LOT 6 : PEINTURE",
+        "LOT 7 : Lot aménagement intérieur",
+        "LOT 8: Lot Piscine / Bain maure",
+        "LOT 9 : gros oeuvres",
+        "LOT 10 : Suivis & Etude architecturale"
+      ],
+      "llm": [
+        "LOT 1 : MENUISERIE BOIS, ALUMINIUM ET METALLIQUE",
+        "LOT 2 : Faux plafonds",
+        "LOT 3 : REVETMENT SOL - MURS",
+        "LOT 4 : LOT ELECTRICITE",
+        "LOT 5 : PLOMBERIE SANITAIRES",
+        "LOT 6 : PEINTURE",
+        "LOT 7 : Lot aménagement intérieur",
+        "LOT 8: Lot Piscine / Bain maure",
+        "LOT 9 : gros oeuvres",
+        "LOT 10 : Suivis & Etude architecturale"
+      ],
+      "missingInExtracteur": [],
+      "extraInExtracteur": []
+    },
+    "articles": {
+      "matched": 205,
+      "missingInExtracteur": 0,
+      "extraInExtracteur": 0,
+      "qtyMismatch": 0,
+      "unitMismatch": 0,
+      "pathMismatch": 0
+    },
+    "samples": {
+      "missingInExtracteur": [],
+      "extraInExtracteur": [],
+      "qtyMismatch": [],
+      "unitMismatch": [],
+      "pathMismatch": []
+    }
+  }
+]
