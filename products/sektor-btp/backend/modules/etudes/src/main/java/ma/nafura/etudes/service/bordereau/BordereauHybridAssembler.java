@@ -622,7 +622,8 @@ public class BordereauHybridAssembler {
         article.setLibelle(StringUtils.hasText(row.libelle()) ? row.libelle() : "Poste");
         article.setUnite(row.unite());
         article.setQuantite(row.quantite());
-        article.setOrigineCout(ma.nafura.etudes.domain.OrigineCout.ESTIME.name());
+        // Pas d'origine tant que non chiffré (ERP-66).
+        article.setOrigineCout(null);
         article.setCoutDeduit(false);
         article.setOrdre(row.order());
         return article;

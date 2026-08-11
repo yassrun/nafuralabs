@@ -36,7 +36,7 @@ Donc : **éditer / versionner dans l’epic** ; **copier** vers `canvases/` pour
 4. Afficher **cycle de vie**, dirty, gates, AI + **fallback manuel**
 5. Décisions UX listées dans le canvas (+ `ux/notes.md` si besoin)
 6. **Valider avec l’utilisateur** → PLAN epic §6 pointe vers le fichier `ux/*.canvas.tsx`
-7. Plan d’impl → code ; ticket PM référence le chemin epic
+7. Plan d’impl → code ; ticket Raster référence le chemin epic
 
 ## Contenu attendu
 

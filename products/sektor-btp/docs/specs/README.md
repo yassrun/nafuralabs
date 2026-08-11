@@ -1,10 +1,7 @@
 # Specs Sektor BTP
 
-Epics **live** :
+Epics live + tickets sous `epics/<slug>/tasks/` (modèle Raster orchestrateur).
 
-- [`epics/qa-local-auth-seed/`](epics/qa-local-auth-seed/) — auth QA local + seed (spec only)
+Inbox : [`inbox.md`](inbox.md)
 
-Epics archivés : [`epics/_archive/`](epics/_archive/)  
-→ dernier chantier clos : [`_archive/referentiel-catalogue-sektor/`](epics/_archive/referentiel-catalogue-sektor/)
-
-Convention monorepo + templates : [`docs/specs/`](../../../../docs/specs/README.md).
+Convention monorepo : [`docs/specs/README.md`](../../../../docs/specs/README.md) · [`raster/AGENTS.md`](../../../../raster/AGENTS.md).

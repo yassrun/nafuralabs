@@ -2,7 +2,7 @@
 kind: epic-progress
 app: sektor-btp
 slug: chiffrage-assiste-cps
-pm_feature: ERP-64
+raster_feature: ERP-64
 updated: 2026-08-11
 ---
 
@@ -11,7 +11,7 @@ updated: 2026-08-11
 **Statut :** todo
 **Lot courant :** — (PLAN à valider avant découpage)
 **Ticket :** ERP-64
-**Next :** trancher Q1 (qui fait foi pour un rendement), puis découper le lot 0 en `kind: task`.
+**Next :** découper le lot 0 en `kind: task`. Plus aucune question bloquante.
 
 ## Lots
 
@@ -31,7 +31,11 @@ updated: 2026-08-11
   `catalog_composants` portent des rendements, `RapprochementDeterministeService` fait trigram +
   règles + LLM. Mais `etudes` **ne dépend pas** de `catalogue` : le chiffrage ne le lit jamais et
   réimplémente un `LIKE`. L'escalier passe donc de 2 à 3 sources de recette, et Q1 est reformulée.
-- Q1 bloquante avant le lot 3 : arbitrage rendement tenant vs rendement catalogue. Décision métier, pas technique.
+- 11/08 — **Q1 tranchée → D11** : la recette tenant calcule, l'écart avec le catalogue s'affiche.
+  Conséquence : le `catalog_ouvrage` est rapproché même quand le tenant gagne (comparateur, pas
+  seulement repli). Coût nul — rapprochement déterministe. Lot 3 débloqué.
+- 11/08 — **D12** : un seul écart au niveau du déboursé de l'ouvrage, détail par composant à la
+  demande. Q3 ne porte plus que sur deux valeurs de seuil, à lire sur l'étalon du lot 0.
 - Aucun étalon chiffré sur ce périmètre — c'est l'objet du lot 0. Ne régler aucun prompt avant.
 - Quatre bloquants constatés dans le code (B1–B4, cf. PLAN §2.2) ; B1 et B3 sont à faible diff et fort effet.
-- Frontière `import-magique` : le CPS est forme *blocs multiples* → vague 3, non planifiée. Cet epic ne monte rien en plateforme.
+- Frontière `document-reader` : le CPS est forme *blocs multiples* → vague 3, non planifiée. Cet epic ne monte rien en plateforme.

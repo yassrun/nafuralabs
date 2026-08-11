@@ -155,9 +155,7 @@ public class DpgfNoeud {
         if (this.coutDeduit == null) {
             this.coutDeduit = false;
         }
-        if (TYPE_ARTICLE.equals(this.type) && this.origineCout == null) {
-            this.origineCout = OrigineCout.ESTIME.name();
-        }
+        // origineCout reste null tant que le poste n'est pas chiffré (ERP-66).
     }
 
     @PreUpdate

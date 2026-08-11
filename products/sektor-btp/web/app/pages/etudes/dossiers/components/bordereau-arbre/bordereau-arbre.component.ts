@@ -242,13 +242,12 @@ export class BordereauArbreComponent {
     }
   }
 
-  /** Badge mode — uniquement articles en étape Coût (sélection). */
+  /** Badge mode — articles chiffrés uniquement (PU > 0), étape Coût. */
   origineBadge(row: BordereauTreeRow): { label: string; kind: OrigineCoutUi } | null {
     if (!this.selectionEnabled() || row.type !== 'ARTICLE') return null;
-    const hasOrigine =
-      !!row.origineCout || row.mode === 'DECOMPOSE' || row.mode === 'FOURNI';
     const hasPu = row.prixUnitaire != null && row.prixUnitaire > 0;
-    if (!hasOrigine && !hasPu) return null;
+    // Pas de badge tant que le poste n'a pas de prix (ERP-66).
+    if (!hasPu) return null;
     const origine = resolveOrigineCout({
       origineCout: row.origineCout,
       mode: row.mode,

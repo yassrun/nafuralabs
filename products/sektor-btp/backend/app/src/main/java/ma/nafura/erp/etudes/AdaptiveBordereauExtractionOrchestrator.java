@@ -1121,7 +1121,8 @@ public class AdaptiveBordereauExtractionOrchestrator {
         poste.setUnite(text(posteNode, "unite"));
         poste.setQuantite(decimal(posteNode, "quantite"));
         poste.setDescriptif(text(posteNode, "descriptif"));
-        poste.setOrigineCout(ma.nafura.etudes.domain.OrigineCout.ESTIME.name());
+        // Structure only — origine posée au chiffrage (ERP-66).
+        poste.setOrigineCout(null);
         poste.setCoutDeduit(false);
         return poste;
     }

@@ -34,7 +34,8 @@ la chaîne.
 ```
 poste
   ├─ RECETTE      ouvrage tenant  →  catalog_ouvrage  →  (aucune)     ← déterministe, zéro token
-  │                                                                      RapprochementDeterministeService
+  │                    │                    │                            RapprochementDeterministeService
+  │                    └─── écart ──────────┘   ← résolu même quand le tenant gagne
   └─ PARAMÈTRES   recherche CPS   tsvector + trigram, top N, zéro token
        ├─ sections trouvées
        │    └─ APPEL 1  prescriptions ancrées  {classe, dosage, ferraillage, contraintes, sectionId}
@@ -50,6 +51,11 @@ poste
 
 Les deux axes sont indépendants : d'où vient la **recette** et d'où viennent ses **paramètres**. Une
 recette catalogue ajustée par une prescription CPS est le cas nominal, pas un cas limite.
+
+**Le catalogue est résolu même quand il ne sert pas de recette** (D11). C'est ce qui permet
+l'affichage de l'écart, et ça ne coûte rien : le rapprochement est déterministe, zéro appel modèle.
+Un `catalog_ouvrage` a donc deux rôles distincts — **source de repli** quand le tenant n'a rien,
+**comparateur** quand le tenant a quelque chose.
 
 Un poste que le modèle déclare non décomposable sort en `NON_DECOMPOSABLE` — état explicite, pas une
 liste vide.
@@ -73,7 +79,7 @@ Le `chemin` sert deux fois : il est indexé en pondération `A` (une section ret
 quand le corps ne le répète pas), et il donne au prompt le contexte qui dit si le passage parle de
 fourniture, de mise en œuvre ou de contrôle.
 
-Ce contrat est **le point de raccord avec `import-magique` vague 3**. Le jour où la plateforme sait
+Ce contrat est **le point de raccord avec `document-reader` vague 3**. Le jour où la plateforme sait
 sectionner un document en blocs multiples, elle rend cette structure et `CpsSectionneur` disparaît.
 D'ici là il reste dans `etudes` : provisoire, pas définitif.
 
@@ -88,7 +94,8 @@ prescription : c'est une hypothèse, et elle est rejetée à ce niveau.
 |---|---|---|
 | `origineRecette` | `BIBLIOTHEQUE` \| `CATALOGUE` \| `MODELE` \| `AUCUNE` | d'où vient la composition |
 | `originePrescription` | `CPS` \| `AUCUNE` | d'où viennent ses paramètres — indépendant de la ligne au-dessus |
-| `editionCatalogue` | `2026.1`, si `origineRecette = CATALOGUE` | une étude doit pouvoir dire sur quelle édition elle s'est appuyée |
+| `editionCatalogue` | `2026.1`, dès qu'un `catalog_ouvrage` a été rapproché | une étude doit pouvoir dire sur quelle édition elle s'est comparée |
+| `ecartCatalogue` | `{ deboursTenant, deboursCatalogue, ecartPercent, catalogCle }` — nullable | D11 : le tenant calcule, le catalogue se voit |
 | `sectionsUtilisees[]` | id + référence | rend la proposition auditable et la section cliquable |
 | `confiance` | **calculée**, plus auto-déclarée | rang tsvector × score catalogue × origine du rendement |
 | `missing[].raison` | `item_absent` \| `item_non_tarifé` | deux gestes utilisateur différents |
@@ -103,7 +110,7 @@ la traçabilité meurt au rechargement de la page.
 Le modèle ne produit plus une désignation libre que l'on tente ensuite de rapprocher. Il **choisit
 dans une liste fermée** : on pré-filtre N candidats, on les lui donne, il renvoie un identifiant ou
 rien. Le problème de rapprochement disparaît — il n'y a plus de texte à rapprocher — et l'invention
-de désignation devient impossible. Même principe que D2 d'`import-magique` : borner ce que le modèle
+de désignation devient impossible. Même principe que D2 de `document-reader` : borner ce que le modèle
 peut dire.
 
 **Le pré-filtre n'est pas à écrire.** [`RapprochementDeterministeService`](../../../../backend/modules/catalogue/src/main/java/ma/nafura/catalogue/service/RapprochementDeterministeService.java)
@@ -114,7 +121,7 @@ traçabilité. Le `LIKE %terme%` d'`ItemCatalogResolver` en est un doublon dégr
 
 Ce qui manque n'est donc pas un algorithme mais **une dépendance de module et un port** : `etudes`
 déclare ce qu'il cherche, `catalogue` rend des candidats classés. Sens unique, comme la frontière
-d'`import-magique`.
+de `document-reader`.
 
 ---
 
@@ -164,10 +171,12 @@ Rien ne monte en `platform/` dans cet epic. Interpréter une prescription BTP es
 | **D5** | Le modèle choisit un identifiant dans une liste fermée ; il n'invente pas de désignation | Supprime le rapprochement texte, qui échoue aujourd'hui sur la moindre variante d'écriture |
 | **D5b** | Le pré-filtre réutilise `RapprochementDeterministeService` ; `etudes` gagne une dépendance vers `catalogue` et un port | Le trigram, les règles et la gouvernance sont déjà écrits. Le `LIKE` d'`ItemCatalogResolver` est un doublon né de l'absence de dépendance |
 | **D6** | La confiance est calculée, jamais auto-déclarée | Une confiance de modèle n'est pas calibrée : elle ne peut pas servir de seuil |
-| **D7** | Ici l'IA lit les données — exception assumée à D2 d'`import-magique` | Une prescription en prose n'a pas de grille contre laquelle compiler un plan. Contrepartie : sortie typée, bornée, ancrée, jamais persistée sans revue |
-| **D8** | Aucun moteur d'extraction nouveau ; `CpsSectionneur` est provisoire et son contrat écrit pour être remplacé | Ce dépôt a déjà payé deux fois la construction en spéculation. Le CPS est vague 3 d'`import-magique` |
-| **D9** | Rien n'est persisté sans revue humaine | Aligné sur D12 d'`import-magique` |
+| **D7** | Ici l'IA lit les données — exception assumée à D2 de `document-reader` | Une prescription en prose n'a pas de grille contre laquelle compiler un plan. Contrepartie : sortie typée, bornée, ancrée, jamais persistée sans revue |
+| **D8** | Aucun moteur d'extraction nouveau ; `CpsSectionneur` est provisoire et son contrat écrit pour être remplacé | Ce dépôt a déjà payé deux fois la construction en spéculation. Le CPS est vague 3 de `document-reader` |
+| **D9** | Rien n'est persisté sans revue humaine | Aligné sur D12 de `document-reader` |
 | **D10** | Aucun réglage de prompt sans étalon | Sans mesure, une amélioration de prompt est une opinion |
+| **D11** | **La recette tenant calcule ; l'écart avec le catalogue s'affiche.** Le catalogue est donc résolu même quand il ne fournit pas la recette | *(tranchée le 11/08)* Aligner par défaut sur le catalogue imposerait à une entreprise des rendements qui ne sont pas les siens ; ne rien afficher ne lui dirait jamais qu'elle est hors marché. Le chiffreur décide, informé. Coût nul : le rapprochement est déterministe |
+| **D12** | **Un seul écart, au niveau du déboursé de l'ouvrage**, au-delà d'un seuil ; le détail par composant à la demande | *(tranchée le 11/08)* Douze badges de rendement sur un poste ne se lisent pas. Une alerte qui crie au loup en discrédite mille — même raisonnement que D9 de `document-reader`. Le détail existe, il n'est pas imposé |
 
 ---
 

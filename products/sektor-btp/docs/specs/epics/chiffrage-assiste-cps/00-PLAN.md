@@ -3,7 +3,7 @@ kind: epic-plan
 app: sektor-btp
 slug: chiffrage-assiste-cps
 module: etudes
-pm_feature: ERP-64
+raster_feature: ERP-64
 status: draft
 language: fr
 ---
@@ -20,7 +20,7 @@ l'étude ne parte pas en soumission avec des hypothèses non vues.
 `…/service/DecompositionProposeService.java`, `…/service/port/`,
 `products/sektor-btp/backend/app/…/erp/etudes/DocExtractor*Adapter.java`,
 `products/sektor-btp/web/app/pages/etudes/dossiers/components/poste-decomposition-panel/`.
-**Hors scope** : le moteur d'extraction documentaire (→ [`import-magique`](../import-magique/00-PLAN.md)),
+**Hors scope** : le moteur d'extraction documentaire (→ [`document-reader`](../document-reader/00-PLAN.md)),
 l'OCR des CPS scannés, la consultation fournisseurs, le chaînage aval.
 
 ---
@@ -123,14 +123,16 @@ n'apporte pas de recette — il apporte les **paramètres** qui adaptent celle q
 
 | Niveau | Condition | Comportement | Ce que voit le chiffreur |
 |---|---|---|---|
-| 1 | ouvrage **tenant** proche | recette de l'entreprise, **zéro appel** | `Bibliothèque — <ouvrage>` |
+| 1 | ouvrage **tenant** proche | recette de l'entreprise, **zéro appel** | `Bibliothèque — <ouvrage>` + `écart catalogue : +14 %` |
 | 2 | sinon, ouvrage **catalogue Sektor** proche | recette produit, **zéro appel** | `Catalogue 2026.1 — <ouvrage>` |
 | 3 | prescription CPS trouvée | paramètre la recette retenue (classe, dosage, ferraillage) | `CPS §3.2.1` — cliquable vers la section |
 | 4 | aucune recette, aucune section | modèle sur libellé seul, confiance plafonnée | `Hypothèse — hors CPS` |
 | 5 | poste non décomposable | sortie explicite du modèle | `À chiffrer manuellement` |
 
 Un ouvrage tenant bat un ouvrage catalogue : l'entreprise connaît ses propres rendements mieux que
-le produit. Ce qui reste à trancher est la **divergence visible** entre les deux — cf. Q1.
+le produit. **Mais le catalogue est rapproché quand même, pour afficher l'écart** (D11, tranchée le
+11/08) — le tenant calcule, le catalogue se voit. Le rapprochement étant déterministe, ça ne coûte
+aucun appel.
 
 Le niveau 5 n'est aujourd'hui pas exprimable : le prompt dit « renvoie une liste vide », que le front
 affiche `Aucun composant détecté` — le même message qu'un échec technique.
@@ -138,18 +140,18 @@ affiche `Aucun composant détecté` — le même message qu'un échec technique.
 Le niveau 4 ne bloque pas la saisie. Il bloque la **validation de l'étude** tant qu'un humain ne l'a
 pas vu : c'est le seul endroit où le coût d'une hypothèse fausse se matérialise.
 
-### 3.3 Frontière avec `import-magique`
+### 3.3 Frontière avec `document-reader`
 
 Les deux epics touchent « un document + un modèle », et c'est là que le doublon se paierait.
 
-| | `import-magique` | cet epic |
+| | `document-reader` | cet epic |
 |---|---|---|
 | Objet | documents **tabulaires** — la grille est le pivot | CPS en **prose** — pas de grille |
 | Rôle du modèle | compile un plan de lecture, **ne lit jamais les données** (D2) | lit les données — exception assumée, cf. `00-ARCHITECTURE.md` D7 |
 | Sortie | json typé + carte des doutes | prescriptions ancrées + recette |
 | Étalon | 703 articles / 4 fichiers | **à construire** — lot 0 |
 
-Le CPS est classé forme *blocs multiples* → **vague 3** d'`import-magique`, c'est-à-dire non planifié.
+Le CPS est classé forme *blocs multiples* → **vague 3** de `document-reader`, c'est-à-dire non planifié.
 Conséquence directe : **cet epic ne construit aucun moteur d'extraction et ne monte rien en
 plateforme.** `CpsSectionneur` reste dans `etudes`, déclaré provisoire, et son contrat de sortie est
 écrit pour être remplacé par la plateforme le jour où la vague 3 arrive — un remplacement
@@ -163,7 +165,7 @@ Détail du modèle : [`00-ARCHITECTURE.md`](./00-ARCHITECTURE.md).
 
 | # | Lot | Intent (1 ligne) | Dépend |
 |---|-----|------------------|--------|
-| 0 | **Étalon et instrumentation** | Un jeu de postes réels décomposés par l'expert métier + les trois compteurs (sections trouvées, matched/missing, écart de rendement) | — |
+| 0 | **Étalon et instrumentation** | Un jeu de postes réels décomposés par l'expert métier + les compteurs (sections trouvées, matched/missing, écart de rendement, **distribution des écarts tenant ↔ catalogue** pour calibrer Q3) | — |
 | 1 | **Rappel CPS** | Corriger la requête (B1), donner un chemin aux sections, plafonner leur taille, garder l'indexation rejouable | 0 |
 | 2 | **Provenance et gate** | `sourceProposition` + `sectionsUtilisees[]` au DTO, `suggereParIa` persisté, badges UI, gate de validation d'étude sur les hypothèses non vues | 0 |
 | 3 | **Escalier des sources** | Brancher `etudes` sur `catalogue` ; bibliothèque tenant puis catalogue Sektor avant l'IA ; **réutiliser** `RapprochementDeterministeService` au lieu du `LIKE` maison (B3, B4) | 2 |
@@ -183,37 +185,39 @@ Décisions actées D1–D10 : [`00-ARCHITECTURE.md`](./00-ARCHITECTURE.md) §7.
 
 | # | Question | Bloque |
 |---|---|---|
-| **Q1** | Quand le rendement de l'ouvrage tenant et celui du `catalog_ouvrage` divergent : lequel gagne, et le chiffreur voit-il l'écart ? | 🔴 lot 3 |
+| ~~Q1~~ | ~~Arbitrage rendement tenant vs catalogue~~ — **tranchée le 11/08 → D11** | — |
 | Q2 | Un descriptif proposé depuis le CPS et accepté est-il **verbatim opposable** (le prompt l'impose aujourd'hui) ou reformulable ? | lot 2 |
-| Q3 | En dessous de quelle confiance n'affiche-t-on **rien** plutôt qu'une proposition faible ? | lot 3 |
+| Q3 | Les deux **valeurs** de seuil : confiance minimale pour proposer, écart minimal pour l'afficher. Granularité tranchée → D12 | lot 3 — se calibre sur l'étalon |
 | Q4 | Une décomposition validée chez un tenant peut-elle nourrir la bibliothèque d'un autre tenant ? | avant 1er client |
 
-**Q1 est bloquante** parce qu'elle n'est pas technique. Le référentiel de rendements existe déjà
-(`catalog_composants`, édition `2026.1`) : la question n'est pas de le construire mais de dire ce que
-vaut sa parole face à celle du client. Aligner par défaut sur le catalogue, c'est imposer à une
-entreprise des rendements qui ne sont pas les siens — et un rendement faux est un sous-chiffrage
-qu'elle a payé. Aligner toujours sur le tenant, c'est ne jamais lui signaler qu'il est hors marché.
-Même famille que « catalogue = produit vendable » — à trancher avec l'associé, pas en code.
+**Q1 est tranchée** : la recette tenant calcule, l'écart avec le catalogue s'affiche. Le lot 3 n'est
+plus bloqué. Détail et justification : `00-ARCHITECTURE.md` D11.
 
-Q4 est la sœur de O1 d'`import-magique` (portée du cache de plans) et de la clause CGU du catalogue :
+**Q3 ne porte plus que sur des valeurs.** La granularité est tranchée (D12 : un seul écart au niveau
+du déboursé, détail par composant à la demande). Restent deux nombres — et ce ne sont pas des
+décisions produit : ils se lisent sur l'étalon du lot 0. Un seuil choisi avant d'avoir mesuré la
+distribution des écarts serait une opinion déguisée en réglage.
+
+Q4 est la sœur de O1 de `document-reader` (portée du cache de plans) et de la clause CGU du catalogue :
 à poser avant le premier client réel, pas après.
 
 ---
 
 ## 6. UX
 
-- **SSOT canvas** : [`ux/`](./ux/) — à produire au lot 2. Deux objets à dessiner et un seul à ne pas
-  rater : le **badge de provenance** sur chaque composant, et l'écran des postes en hypothèse au
-  moment de valider l'étude.
+- **SSOT canvas** : [`ux/`](./ux/) — à produire au lot 2. Trois objets : le **badge de provenance**
+  sur chaque composant, l'**écart catalogue** — une seule ligne au niveau de l'ouvrage, dépliable
+  vers le détail par composant (D11, D12) — et l'écran des postes en hypothèse au moment de valider
+  l'étude.
 - Ne pas fusionner « proposé par l'IA » et « hors CPS » en un seul indicateur — ce sont deux
-  informations indépendantes (même raisonnement que D9 d'`import-magique` sur les deux natures de
+  informations indépendantes (même raisonnement que D9 de `document-reader` sur les deux natures de
   doutes).
 - Existant à recenser avant de dessiner : `poste-decomposition-panel`, `cps-descriptif-dialog`,
   `create-missing-item-dialog`.
 
 ---
 
-## 7. Liens PM
+## 7. Liens Raster
 
 | Rôle | Id |
 |------|-----|
@@ -229,5 +233,5 @@ Q4 est la sœur de O1 d'`import-magique` (portée du cache de plans) et de la cl
 - [x] Objectif = flux mince (provenance + escalier), pas « refonte du chiffrage »
 - [x] Lots ordonnés (0 → 5), étalon en premier
 - [x] Décisions actées et questions ouvertes liées
-- [x] Frontière avec `import-magique` écrite
+- [x] Frontière avec `document-reader` écrite
 - [x] `00-PROGRESS.md` créé en parallèle

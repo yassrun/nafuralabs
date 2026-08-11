@@ -239,12 +239,12 @@ public class DpgfService {
                 .quantite(dto.getQuantite())
                 .unite(trimOrNull(dto.getUnite()))
                 .descriptif(trimOrNull(dto.getDescriptif()))
-                // Structure only â€” ignore any prices from the source bordereau.
-                // Pricing belongs to dÃ©composition / chiffrage.
+                // Structure only — ignore prices from the source bordereau.
+                // Pricing / origine belong to chiffrage (ERP-66: no ESTIME stamp without price).
                 .prixUnitaire(null)
                 .coutUnitaire(null)
                 .total(null)
-                .origineCout(DpgfNoeud.TYPE_ARTICLE.equals(type) ? OrigineCout.ESTIME.name() : null)
+                .origineCout(null)
                 .coutDeduit(false)
                 .ordre(dto.getOrdre() != null ? dto.getOrdre() : ordre)
                 .build();
@@ -329,7 +329,7 @@ public class DpgfService {
                 .fraisGenerauxPercent(request.getFraisGenerauxPercent())
                 .margePercent(request.getMargePercent())
                 .descriptif(trimOrNull(request.getDescriptif()))
-                .origineCout(DpgfNoeud.TYPE_ARTICLE.equals(type)
+                .origineCout(DpgfNoeud.TYPE_ARTICLE.equals(type) && StringUtils.hasText(request.getOrigineCout())
                         ? resolveOrigine(request.getOrigineCout(), OrigineCout.ESTIME).name()
                         : null)
                 .estimationSaisieEn(request.getEstimationSaisieEn())

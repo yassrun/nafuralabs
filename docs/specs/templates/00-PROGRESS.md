@@ -2,25 +2,15 @@
 kind: epic-progress
 app: <app-id>
 slug: <feature-slug>
-pm_feature: null              # ERP-xx
+raster_feature: null
 updated: YYYY-MM-DD
+status: deprecated
 ---
 
-# Progress — <titre>
+# Progress — DEPRECATED
 
-**Statut :** todo | doing | blocked | review | done  
-**Lot courant :** N — \<nom\>  
-**Ticket :** ERP-xx (ou —)  
-**Next :** …
+> **Ne plus utiliser comme SSOT.**  
+> Suivi runtime = tickets dans `epics/<slug>/tasks/` (status, journal, sprint).  
+> Vues : `raster/INDEX.tsv` · `raster/SPRINT.md`.
 
-## Lots
-
-| # | Lot | Status | Ticket |
-|---|-----|--------|--------|
-| 1 | … | todo | … |
-| 2 | … | todo | … |
-
-## Notes (courtes)
-
-- Une ligne par fait utile au check progress.
-- Pas d’historique long — le journal détaillé est dans `pm/…/tasks/`.
+Conservé uniquement pour epics legacy déjà en cours — ne pas créer sur les nouvelles epics.

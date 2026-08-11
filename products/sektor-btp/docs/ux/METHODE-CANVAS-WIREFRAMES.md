@@ -46,7 +46,7 @@ Copy-Item "$env:USERPROFILE\.cursor\projects\c-nf-nafuralabs\canvases\uom-conver
 Besoin UX → canvas dans epics/<slug>/ux/
          → sync canvases/ (preview)
          → revue / validation produit
-         → PLAN §6 + ticket PM référencent le chemin epic
+         → PLAN §6 + ticket Raster référencent le chemin epic
          → plan d’impl → code
 ```
 
