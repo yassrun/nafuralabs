@@ -43,6 +43,18 @@
   color: var(--nf-text-primary, #111827);
 }
 
+.nf-wizard-shell__step--clickable {
+  cursor: pointer;
+  border-radius: 6px;
+  padding-inline: 0.15rem;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--nf-primary, #2563eb);
+    outline: none;
+  }
+}
+
 .nf-wizard-shell__step:not(:last-child)::after {
   content: '';
   width: 24px;

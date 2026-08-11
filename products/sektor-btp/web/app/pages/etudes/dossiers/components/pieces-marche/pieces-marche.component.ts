@@ -69,8 +69,13 @@ export class PiecesMarcheComponent {
   readonly bordereauDocumentId = input<string | undefined>(undefined);
   /** Structure figée (chiffrage démarré) — empêche édition / réimport. */
   readonly structureVerrouillee = input(false);
+  /** Focus nœud (gate « Voir dans l’arbre »). */
+  readonly focusNoeudId = input<string | null>(null);
+  /** Incrémente pour forcer le passage en mode Manuel (CTA gate). */
+  readonly forceVoieManuelToken = input(0);
 
   readonly change = output<void>();
+  readonly voieChange = output<'auto' | 'manuel'>();
 
   readonly acceptFiles =
     '.pdf,.xlsx,.xls,.csv,.doc,.docx,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
@@ -151,6 +156,16 @@ export class PiecesMarcheComponent {
     () => !!this.dpgfEffectif() && !this.enRevue() && this.mode() === 'bordereau',
   );
 
+  /** Fichier BDP source (1er bordereau déposé) — provenance de l’extraction. */
+  readonly sourceBordereauNom = computed(() => {
+    const piece = this.piecesBordereau()[0];
+    if (!piece) return null;
+    const nom = this.nomFichierAffiche(piece.nomFichier);
+    return nom || null;
+  });
+
+  readonly sourceBordereauPiece = computed(() => this.piecesBordereau()[0] ?? null);
+
   /** Édition structurelle seulement en mode manuel et structure non figée. */
   readonly editionStructure = computed(
     () =>
@@ -185,11 +200,29 @@ export class PiecesMarcheComponent {
         this.voie.set('auto');
       }
       this.voieInitialisee.set(true);
+      this.voieChange.emit(this.voie());
+    });
+    effect(() => {
+      const token = this.forceVoieManuelToken();
+      if (token <= 0 || this.mode() !== 'bordereau') return;
+      void this.setVoie('manuel');
     });
   }
 
   libelleType(type: string): string {
     return this.labelsParType[type] ?? type;
+  }
+
+  /** Corrige le mojibake fréquent UTF-8 lu en Latin-1 (ex. NÂ° → N°). */
+  nomFichierAffiche(nom: string | null | undefined): string {
+    if (!nom) return '';
+    if (!/Â.|Ã./.test(nom)) return nom;
+    try {
+      const bytes = Uint8Array.from(nom, (c) => c.charCodeAt(0));
+      return new TextDecoder('utf-8').decode(bytes);
+    } catch {
+      return nom;
+    }
   }
 
   confiancePct(c: number): number {
@@ -227,6 +260,7 @@ export class PiecesMarcheComponent {
     this.voie.set(next);
     this.erreur.set(undefined);
     this.info.set(undefined);
+    this.voieChange.emit(next);
   }
 
   onDragOver(event: DragEvent, slotKey: string): void {
@@ -518,7 +552,7 @@ export class PiecesMarcheComponent {
         this.info.set(
           `${saved.articlesAcceptes} article${saved.articlesAcceptes > 1 ? 's' : ''} importé${
             saved.articlesAcceptes > 1 ? 's' : ''
-          } — ${saved.articlesIgnores} ignoré${saved.articlesIgnores > 1 ? 's' : ''} (unité ou quantité manquante).`,
+          } — ${saved.articlesIgnores} ignoré${saved.articlesIgnores > 1 ? 's' : ''} (unité ou quantité manquante). Passez en manuel : les lignes concernées sont marquées dans l’arbre.`,
         );
       } else {
         this.info.set(
@@ -694,16 +728,15 @@ export class PiecesMarcheComponent {
       name?: string;
       error?: { message?: string; code?: string };
     };
-    // Backend coupé / CORS / network (souvent pendant vision longue).
+    // Backend coupé / CORS / network (status 0 seulement — pas les 4xx/5xx Angular « Http failure »).
     if (
       err?.status === 0 ||
-      err?.name === 'HttpErrorResponse' && (err.status === undefined || err.status === 0) ||
-      (typeof err?.message === 'string' &&
-        (err.message.includes('Unknown Error') ||
-          err.message.includes('Http failure') ||
-          err.message.includes('Failed to fetch')))
+      (err?.name === 'HttpErrorResponse' && (err.status === undefined || err.status === 0))
     ) {
       return 'Connexion au serveur perdue — vérifiez que l’API tourne, puis Relancer.';
+    }
+    if (err?.status != null && err.status >= 500) {
+      return 'Erreur serveur lors de l’opération — réessayez. Si ça persiste, contactez le support.';
     }
     if (err?.status === 403) {
       return "Vous n'avez pas la permission de déposer des pièces.";

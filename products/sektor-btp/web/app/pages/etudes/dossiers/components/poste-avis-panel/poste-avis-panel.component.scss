@@ -6,11 +6,21 @@
   border-top: 1px solid var(--nf-color-border);
 }
 
+.avis--embedded {
+  margin: 0;
+  padding: 0;
+  border-top: 0;
+}
+
 .avis__head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
+}
+
+.avis--embedded .avis__head {
+  justify-content: flex-end;
 }
 
 .avis__head h4 {

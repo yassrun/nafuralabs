@@ -293,14 +293,15 @@ ENV=staging KUBE_CONTEXT=docker-desktop bash toolchain/ops/nlops.sh dev-up sekto
 set -a; source secrets/dev-staging-local.env; set +a
 ./gradlew.bat :sektor:app:bootRun
 
-# Terminal 2 — frontend
-cd products/sektor-btp/web && npm run start:erp:staging-local
+# Terminal 2 — frontend (Cursor QA — auto-login qa@nafuralabs.local)
+cd products/sektor-btp/web && npm run start:erp:cursor
+# Keycloak staging-local (manuel) : npm run start:erp:staging-local
 
 # Stop port-forward
 bash toolchain/ops/dev-staging-local.sh stop
 ```
 
-URLs : `http://127.0.0.1:4200` · API `http://localhost:8082` · IAM `http://iam.nafuralabs.staging`
+URLs : `http://127.0.0.1:4200` · API `http://localhost:8082` · Cursor QA skip Keycloak
 
 Venue Catalog (Mode B — backend local + console Angular, infra staging) :
 

@@ -92,3 +92,13 @@ export function uiEtapePourGate(backendGateEtape: number): number {
   // Consultation + décomposition + articles de chiffrage se corrigent dans le workspace poste.
   return 3;
 }
+
+/**
+ * Alerte qualité globale (ex. trop d’estimés) — pas un poste incomplet.
+ * Sur l’étape Coût on les exclut du soft « N postes à chiffrer » / Anomalies ;
+ * elles restent sur Synthèse (gate chiffrage seule).
+ */
+export function estAlerteQualiteChiffrage(message: string | null | undefined): boolean {
+  const m = (message ?? '').trim();
+  return m.includes('part_couts_estimes');
+}

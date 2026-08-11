@@ -1,6 +1,12 @@
-<section class="avis" aria-label="Avis d'exécution">
+<section
+  class="avis"
+  [class.avis--embedded]="embedded()"
+  aria-label="Avis d'exécution"
+>
   <div class="avis__head">
-    <h4>Avis d'exécution</h4>
+    @if (!embedded()) {
+      <h4>Avis d'exécution</h4>
+    }
     @if (peutPoser() && modifiable()) {
       <nf-button variant="ghost" size="sm" [disabled]="saving()" (clicked)="openForm()">
         Poser un avis

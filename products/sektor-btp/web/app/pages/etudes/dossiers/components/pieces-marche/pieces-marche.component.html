@@ -1,9 +1,76 @@
-<section class="pieces" [attr.aria-label]="titre()">
-  <header class="pieces__entete">
-    <div>
+<section
+  class="pieces"
+  [class.pieces--bordereau]="mode() === 'bordereau'"
+  [class.pieces--arbre]="showPersistedTree() || enRevue()"
+  [attr.aria-label]="titre()"
+>
+  <header class="pieces__entete" [class.pieces__entete--compact]="showPersistedTree() || enRevue()">
+    <div class="pieces__entete-main">
       <h3 class="pieces__titre">{{ titre() }}</h3>
-      <p class="pieces__aide">{{ aide() }}</p>
+      @if (showPersistedTree() || enRevue()) {
+        @if (voie() === 'auto' && sourceBordereauNom()) {
+          <p class="pieces__provenance" role="status">
+            Arbre généré automatiquement depuis
+            <span
+              class="pieces__provenance-fichier"
+              [attr.title]="sourceBordereauNom()"
+            >{{ sourceBordereauNom() }}</span>
+          </p>
+        } @else if (voie() === 'manuel' && sourceBordereauNom()) {
+          <p class="pieces__provenance" role="status">
+            Édition manuelle · source
+            <span
+              class="pieces__provenance-fichier"
+              [attr.title]="sourceBordereauNom()"
+            >{{ sourceBordereauNom() }}</span>
+          </p>
+        } @else if (voie() === 'manuel') {
+          <p class="pieces__provenance" role="status">Édition manuelle de l’arbre</p>
+        }
+      } @else {
+        <p class="pieces__aide">{{ aide() }}</p>
+      }
     </div>
+    @if (mode() === 'bordereau' && (showPersistedTree() || enRevue())) {
+      <div class="pieces__toolbar">
+        <div class="pieces__voies pieces__voies--inline" role="group" aria-label="Mode de construction">
+          <button
+            type="button"
+            class="pieces__voie"
+            [class.pieces__voie--active]="voie() === 'auto'"
+            [disabled]="extractionEnCours() || phase() === 'saving'"
+            (click)="setVoie('auto')"
+          >
+            Automatique
+          </button>
+          <button
+            type="button"
+            class="pieces__voie"
+            [class.pieces__voie--active]="voie() === 'manuel'"
+            [disabled]="extractionEnCours() || phase() === 'saving'"
+            (click)="setVoie('manuel')"
+          >
+            Manuel
+          </button>
+        </div>
+        @if (voie() === 'auto' && !enRevue() && sourceBordereauPiece(); as piece) {
+          @if (modifiable()) {
+            <button
+              type="button"
+              class="pieces__toolbar-btn"
+              [disabled]="extractionEnCours()"
+              (click)="extraire(piece)"
+            >
+              {{
+                extractionEnCours() && pieceExtraction()?.id === piece.id
+                  ? 'Extraction…'
+                  : 'Ré-extraire'
+              }}
+            </button>
+          }
+        }
+      </div>
+    }
   </header>
 
   @if (erreur(); as message) {
@@ -79,7 +146,7 @@
             @if (piece) {
               <div class="pieces__zone-fichier">
                 <mat-icon class="pieces__zone-icone" aria-hidden="true">description</mat-icon>
-                <span class="pieces__nom">{{ piece.nomFichier || piece.documentId }}</span>
+                <span class="pieces__nom">{{ nomFichierAffiche(piece.nomFichier) || piece.documentId }}</span>
                 @if (modifiable()) {
                   <button
                     type="button"
@@ -189,32 +256,36 @@
       }
     }
   } @else {
-    <div class="pieces__voies" role="group" aria-label="Mode de construction">
-      <button
-        type="button"
-        class="pieces__voie"
-        [class.pieces__voie--active]="voie() === 'auto'"
-        [disabled]="extractionEnCours() || phase() === 'saving'"
-        (click)="setVoie('auto')"
-      >
-        Automatique
-      </button>
-      <button
-        type="button"
-        class="pieces__voie"
-        [class.pieces__voie--active]="voie() === 'manuel'"
-        [disabled]="extractionEnCours() || phase() === 'saving'"
-        (click)="setVoie('manuel')"
-      >
-        Manuel
-      </button>
-    </div>
+    @if (!(showPersistedTree() || enRevue())) {
+      <div class="pieces__voies" role="group" aria-label="Mode de construction">
+        <button
+          type="button"
+          class="pieces__voie"
+          [class.pieces__voie--active]="voie() === 'auto'"
+          [disabled]="extractionEnCours() || phase() === 'saving'"
+          (click)="setVoie('auto')"
+        >
+          Automatique
+        </button>
+        <button
+          type="button"
+          class="pieces__voie"
+          [class.pieces__voie--active]="voie() === 'manuel'"
+          [disabled]="extractionEnCours() || phase() === 'saving'"
+          (click)="setVoie('manuel')"
+        >
+          Manuel
+        </button>
+      </div>
+    }
 
     @if (voie() === 'auto') {
-      <p class="pieces__aide pieces__aide--suite">
-        On extrait le BDP déjà stocké à l’étape Documents (pas besoin de re-uploader). La revue se
-        fait dans le même arbre avant validation.
-      </p>
+      @if (!(showPersistedTree() || enRevue())) {
+        <p class="pieces__aide pieces__aide--suite">
+          On extrait le BDP déjà stocké à l’étape Documents (pas besoin de re-uploader). La revue se
+          fait dans le même arbre avant validation.
+        </p>
+      }
 
       @if (chargement()) {
         <p class="pieces__etat">Chargement…</p>
@@ -223,20 +294,24 @@
           Aucun BDP trouvé. Revenez à « Documents du marché » et déposez le bordereau
           (type Bordereau ou CPS + bordereau).
         </p>
-      } @else if (!enRevue()) {
+      } @else if (!enRevue() && !dpgfEffectif()) {
         <ul class="pieces__liste">
           @for (piece of piecesBordereau(); track piece.id) {
             <li class="pieces__ligne">
               <span class="pieces__type">{{ libelleType(piece.type) }}</span>
-              <span class="pieces__nom">{{ piece.nomFichier || piece.documentId }}</span>
+              <span class="pieces__nom">{{ nomFichierAffiche(piece.nomFichier) || piece.documentId }}</span>
               @if (modifiable()) {
                 <nf-button
-                  variant="primary"
+                  [variant]="'primary'"
                   size="sm"
                   [disabled]="extractionEnCours()"
                   (clicked)="extraire(piece)"
                 >
-                  {{ extractionEnCours() && pieceExtraction()?.id === piece.id ? 'Extraction…' : 'Extraire' }}
+                  {{
+                    extractionEnCours() && pieceExtraction()?.id === piece.id
+                      ? 'Extraction…'
+                      : 'Extraire'
+                  }}
                 </nf-button>
               }
             </li>
@@ -325,7 +400,7 @@
           />
         </div>
       }
-    } @else {
+    } @else if (!(showPersistedTree() || enRevue())) {
       <p class="pieces__aide pieces__aide--suite">
         Construisez lots et articles à la main. Chaque article doit avoir une unité et une
         quantité &gt; 0. L’extraction automatique est désactivée dans ce mode.
@@ -340,16 +415,12 @@
     }
 
     @if (showPersistedTree()) {
-      @if (voie() === 'auto' && dpgfEffectif()) {
-        <p class="pieces__aide pieces__aide--suite">
-          Arbre validé (lecture seule en mode automatique). Passez en manuel pour modifier la
-          structure, ou relancez une extraction pour le remplacer.
-        </p>
-      }
       <app-bordereau-arbre
         [dpgfId]="dpgfEffectif()!"
         [modifiable]="modifiable()"
         [editionStructure]="editionStructure()"
+        [focusNoeudId]="focusNoeudId()"
+        [selectedKey]="focusNoeudId()"
         (change)="change.emit()"
       />
     }

@@ -192,15 +192,14 @@ public class DpgfService {
         return new ImportResult(saved, stats.articlesAcceptes, stats.articlesIgnores);
     }
 
-    /** Remplace entiÃ¨rement les nÅ“uds d'un DPGF existant par un nouvel arbre importÃ©. */
+    /** Remplace entièrement les nœuds d'un DPGF existant par un nouvel arbre importé. */
     @Transactional
     public ImportResult remplacerParImport(UUID dpgfId, ImportTreeRequest request) {
         assertStructureEditable(dpgfId);
         Dpgf dpgf = requireDpgf(dpgfId);
-        List<DpgfNoeud> existants =
-                noeudRepository.findByDpgfIdAndTenantIdOrderByOrdreAsc(dpgfId, tenantId());
-        noeudRepository.deleteAll(existants);
-        noeudRepository.flush();
+        // Native bulk delete: parent_id ON DELETE CASCADE + JPA deleteAll(ordreAsc)
+        // would StaleStateException on already-cascaded children (ERP-65).
+        noeudRepository.deleteAllByDpgfIdAndTenantId(dpgfId, tenantId());
 
         ImportPersistStats stats = new ImportPersistStats();
         int ordreRacine = 0;

@@ -4,10 +4,12 @@ status: todo
 context: nafura
 assignee: me
 kind: feature
+gate: me
 feature: rh-pointage-raffinement
 priority: P1
 tags: [sektor, rh, pointage]
 ---
+
 
 # Feature — Raffinement RH / pointage
 
@@ -21,8 +23,8 @@ tags: [sektor, rh, pointage]
 - Coût MO remonte au chantier via `mode_imputation` (Lot 4)
 
 ## Enfants
-- ERP-27 — Décisions ouvertes §7 (bloque Lot 1)
-- ERP-28 — Lot 1 Pointage infalsifiable
+- ~~ERP-27~~ — Décisions ouvertes §7 _(archivé)_
+- ~~ERP-28~~ — Lot 1 Pointage infalsifiable _(archivé)_
 - ERP-29 — Lot 2 Validation contrôle et produit
 - ERP-30 — Lot 3 Paie juste et paramétrée
 - ERP-31 — Lot 4 Coût remonte au chantier
@@ -37,4 +39,5 @@ Lots **3–4** = chaîne paie / coût chantier — dans l’epic, après Lot 2 ;
 05/08 16:05  balayage · promu depuis 00-PLAN.md · ERP-04 mergé ici
 05/08 19:40  ERP-27 done · ADR §7 marché MA · Lot 1 (ERP-28) débloqué
 05/08 20:15  ERP-28 done · pointage UUID + UNIQUE
+11/08 10:37  balayage · gate:me · enfants 27/28 marqués archivés
 ```

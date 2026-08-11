@@ -1,6 +1,6 @@
 ---
 id: ERP-43
-status: review
+status: done
 context: nafura
 kind: task
 priority: P0
@@ -27,4 +27,5 @@ tags: [backend, auth, qa]
 ```
 10/08 20:10  démarré
 10/08 20:20  defaults + remap alias + prefer tenant key qa-local
+11/08 10:37  check progress · review → done (humain)
 ```

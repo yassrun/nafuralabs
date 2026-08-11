@@ -6,7 +6,10 @@
       <app-dossier-summary-header
         [synthese]="syn"
         [hasDpgf]="!!dossier()?.dpgfId"
+        [anomaliesEtape]="anomaliesEtapeCourante()"
+        [etapeUi]="etapeUi()"
         (action)="onHeaderAction($event)"
+        (focusAnomalies)="focusPremierProblemeGate()"
       />
     } @else {
       <header class="dossier__entete">
@@ -29,9 +32,11 @@
 
     <nf-wizard-shell
       class="dossier__wizard"
+      [class.dossier__wizard--fill]="etapeUi() === 2 || etapeUi() === 3"
       [steps]="etapes"
       [currentStepIndex]="indexCourant()"
-      [canProceed]="modifiable() ? peutContinuer() : true"
+      [canProceed]="modifiable() ? peutContinuerUi() : true"
+      [allowStepNavigation]="true"
       [backLabel]="backLabel()"
       [nextLabel]="nextLabel()"
       submitLabel="Soumettre le chiffrage"
@@ -39,8 +44,17 @@
       (back)="precedent()"
       (next)="suivant()"
       (submit)="soumettre()"
+      (stepSelect)="allerAEtapeUi($event)"
     >
-      <app-gate-blocage [resultat]="gateCourant()" (corriger)="corriger($event)" />
+      <app-gate-blocage
+        [resultat]="gateCourant()"
+        [presentation]="gatePresentation()"
+        [structureVerrouilleeAuto]="etapeUi() === 2 && structureAutoReadOnly()"
+        (corriger)="corriger($event)"
+        (passerManuel)="passerBordereauManuel()"
+        (verifier)="revealGateHard()"
+        (focusResume)="focusPremierProblemeGate()"
+      />
 
       @if (blocageHint(); as hint) {
         <p class="dossier__blocage-hint" role="status">{{ hint }}</p>
@@ -61,8 +75,11 @@
             [bordereauDocumentId]="dossier()?.bordereauDocumentId"
             [modifiable]="modifiable()"
             [structureVerrouillee]="synthese()?.structureVerrouillee ?? false"
+            [focusNoeudId]="focusNoeudId()"
+            [forceVoieManuelToken]="forceVoieManuelToken()"
             mode="bordereau"
             (change)="rechargerApresPieces()"
+            (voieChange)="onBordereauVoieChange($event)"
           />
         } @else if (etapeUi() === 3) {
           @if (dossier()?.dpgfId; as dpgfId) {

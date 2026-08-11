@@ -2,8 +2,10 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   inject,
   signal,
+  untracked,
   viewChild,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -19,9 +21,12 @@ import type { WizardStepConfig } from '@lib/anatomy';
 
 import type { DossierEtude, ProblemeGate, ResultatGate } from '@app/etudes/models';
 
+import {
+  GateBlocageComponent,
+  type GatePresentation,
+} from '../components/gate-blocage/gate-blocage.component';
 import { DecompositionWorkspaceComponent } from '../components/decomposition-workspace/decomposition-workspace.component';
 import { DossierSummaryHeaderComponent } from '../components/dossier-summary-header/dossier-summary-header.component';
-import { GateBlocageComponent } from '../components/gate-blocage/gate-blocage.component';
 import { PiecesMarcheComponent } from '../components/pieces-marche/pieces-marche.component';
 import { SyntheseValidationPanelComponent } from '../components/synthese-validation-panel/synthese-validation-panel.component';
 import {
@@ -31,6 +36,7 @@ import {
 import {
   backendGateEtapesForUi,
   backendToUiEtape,
+  estAlerteQualiteChiffrage,
   ETAPES_UI_DOSSIER,
   nextBackendEtape,
   prevBackendEtape,
@@ -80,6 +86,14 @@ export class DossierDetailPage {
     this.route.queryParamMap.pipe(map((params) => params.get('noeudId'))),
     { initialValue: this.route.snapshot.queryParamMap.get('noeudId') },
   );
+  /** Incrémente pour forcer le mode Manuel sur l’étape Bordereau. */
+  readonly forceVoieManuelToken = signal(0);
+  readonly bordereauVoie = signal<'auto' | 'manuel'>('auto');
+  /**
+   * Étape Coût : soft par défaut ; passe en hard après Continuer / Vérifier.
+   * Reset au changement d’étape ou quand plus aucun problème.
+   */
+  readonly gateHardReveal = signal(false);
 
   readonly etapes: WizardStepConfig[] = ETAPES_UI_DOSSIER.map((e) => ({
     id: String(e.ui),
@@ -98,6 +112,23 @@ export class DossierDetailPage {
   });
   readonly indexCourant = computed(() => this.etapeUi() - 1);
 
+  /** Arbre validé en mode Auto (lecture seule structure). */
+  readonly structureAutoReadOnly = computed(
+    () =>
+      this.bordereauVoie() === 'auto' &&
+      !!this.dossier()?.dpgfId &&
+      !(this.synthese()?.structureVerrouillee ?? false),
+  );
+
+  /** Anomalies bloquantes de l’étape UI courante (pas le total multi-gates). */
+  readonly anomaliesEtapeCourante = computed(() => {
+    const gate = this.gateCourant();
+    if (!gate) return 0;
+    // Soft Coût : on affiche quand même le compteur (pas « 0 » trompeur).
+    if (!gate.bloquant && this.etapeUi() !== 3) return 0;
+    return gate.problemes.length;
+  });
+
   /** Gates fusionnées pour l'étape UI courante (ex. 3+4+5 sur Décomposition). */
   readonly gateCourant = computed((): ResultatGate | undefined => {
     const ui = this.etapeUi();
@@ -109,7 +140,15 @@ export class DossierDetailPage {
     const problemes: ProblemeGate[] = [];
     for (const g of relevant) {
       for (const p of g.problemes) {
-        const key = `${p.noeudId ?? ''}|${p.message ?? ''}|${p.codeArticle ?? ''}`;
+        // Coût : l’alerte « trop estimé » n’est pas un poste manquant (→ Synthèse).
+        if (ui === 3 && estAlerteQualiteChiffrage(p.message)) {
+          continue;
+        }
+        // Un nœud = une ligne (évite cout_unitaire + prix_absent en double).
+        const key =
+          p.noeudId != null && String(p.noeudId).length > 0
+            ? `n:${p.noeudId}`
+            : `m:${p.message ?? ''}|${p.codeArticle ?? ''}|${p.libelle ?? ''}`;
         if (seen.has(key)) continue;
         seen.add(key);
         problemes.push({ ...p, etape: g.etape });
@@ -123,10 +162,34 @@ export class DossierDetailPage {
     };
   });
 
+  /** Soft / hard / ok — ton d’affichage UI (backend inchangé). */
+  readonly gatePresentation = computed((): GatePresentation => {
+    const ui = this.etapeUi();
+    const gate = this.gateCourant();
+    const n = gate?.problemes.length ?? 0;
+    if (ui === 3) {
+      if (n === 0) return 'ok';
+      return this.gateHardReveal() ? 'hard' : 'soft';
+    }
+    if (n === 0) return 'hidden';
+    return gate?.bloquant ? 'hard' : 'soft';
+  });
+
   readonly peutContinuer = computed(() => {
     const gate = this.gateCourant();
     if (!gate) return true;
     return !gate.bloquant || gate.problemes.length === 0;
+  });
+
+  /**
+   * Soft Coût : Continuer reste cliquable pour révéler le hard.
+   * Hard / autres étapes : suit la vérité gate.
+   */
+  readonly peutContinuerUi = computed(() => {
+    if (!this.modifiable()) return true;
+    if (this.etapeUi() === 3 && this.gatePresentation() === 'soft') return true;
+    if (this.etapeUi() === 3 && this.gatePresentation() === 'ok') return true;
+    return this.peutContinuer();
   });
 
   readonly modifiable = computed(() => {
@@ -136,8 +199,8 @@ export class DossierDetailPage {
 
   readonly statutLabel = computed(() => labelStatutDossier(this.dossier()?.status));
 
-  /** CTA « Soumettre » uniquement tant que le dossier reste éditable. */
-  readonly peutSoumettre = computed(() => this.modifiable());
+  /** CTA « Soumettre » : footer wizard (dernier step) + header — seulement à la Synthèse. */
+  readonly peutSoumettre = computed(() => this.modifiable() && this.etapeUi() === 4);
 
   readonly messageVerrou = computed(() => {
     const statut = this.dossier()?.status;
@@ -174,6 +237,15 @@ export class DossierDetailPage {
   }
 
   constructor() {
+    effect(() => {
+      this.etapeUi();
+      untracked(() => this.gateHardReveal.set(false));
+    });
+    effect(() => {
+      const n = this.gateCourant()?.problemes.length ?? 0;
+      if (n === 0) untracked(() => this.gateHardReveal.set(false));
+    });
+
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       void this.charger(id);
@@ -208,10 +280,21 @@ export class DossierDetailPage {
       if (ui < 4) this.etapeUiLecture.set(ui + 1);
       return;
     }
+    // Coût soft → Continuer révèle le hard sans naviguer.
+    if (this.etapeUi() === 3 && !this.peutContinuer()) {
+      this.gateHardReveal.set(true);
+      return;
+    }
     const cible = nextBackendEtape(this.etapeUi());
     if (cible == null) return;
     if (!(await this.confirmerSiPosteDirty())) return;
+    this.gateHardReveal.set(false);
     await this.changerEtape(cible);
+  }
+
+  /** CTA soft « Vérifier le chiffrage » → bannière hard. */
+  revealGateHard(): void {
+    this.gateHardReveal.set(true);
   }
 
   async precedent(): Promise<void> {
@@ -224,6 +307,20 @@ export class DossierDetailPage {
     if (cible == null) return;
     if (!(await this.confirmerSiPosteDirty())) return;
     await this.changerEtape(cible);
+  }
+
+  /** Stepper cliquable — index 0-based vers une étape UI déjà atteinte. */
+  async allerAEtapeUi(index: number): Promise<void> {
+    const ui = index + 1;
+    if (ui < 1 || ui > 4 || ui === this.etapeUi()) return;
+    if (!(await this.confirmerSiPosteDirty())) return;
+    if (!this.modifiable()) {
+      this.etapeUiLecture.set(ui);
+      return;
+    }
+    const maxUi = backendToUiEtape(this.etapeBackend());
+    if (ui > maxUi) return;
+    await this.changerEtape(uiToBackendEtape(ui));
   }
 
   private async confirmerSiPosteDirty(): Promise<boolean> {
@@ -296,6 +393,9 @@ export class DossierDetailPage {
           break;
         case 'SOUMETTRE_STRUCTURE':
           await this.changerEtape(3);
+          break;
+        case 'VOIR_SYNTHESE':
+          await this.allerAEtapeUi(3);
           break;
         case 'SOUMETTRE_CHIFFRAGE':
           await this.soumettre();
@@ -434,6 +534,26 @@ export class DossierDetailPage {
       return;
     }
     goFocus();
+  }
+
+  passerBordereauManuel(): void {
+    this.forceVoieManuelToken.update((n) => n + 1);
+    this.bordereauVoie.set('manuel');
+  }
+
+  onBordereauVoieChange(voie: 'auto' | 'manuel'): void {
+    this.bordereauVoie.set(voie);
+  }
+
+  focusPremierProblemeGate(): void {
+    const first = this.gateCourant()?.problemes.find((p) => !!p.noeudId);
+    if (first) {
+      this.corriger(first);
+      return;
+    }
+    if (this.structureAutoReadOnly()) {
+      this.passerBordereauManuel();
+    }
   }
 
   async rechargerApresPieces(): Promise<void> {

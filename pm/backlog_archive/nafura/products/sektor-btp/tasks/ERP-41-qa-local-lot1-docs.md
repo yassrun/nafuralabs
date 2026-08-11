@@ -1,6 +1,6 @@
 ---
 id: ERP-41
-status: review
+status: done
 context: nafura
 kind: task
 priority: P1
@@ -27,4 +27,5 @@ tags: [docs, qa]
 ```
 10/08 20:10  démarré avec ERP-40
 10/08 20:20  docs + rule + README + CLAUDE à jour
+11/08 10:37  check progress · review → done (humain)
 ```

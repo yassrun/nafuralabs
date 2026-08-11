@@ -156,6 +156,10 @@ public final class GatesEtude {
                     continue;
                 }
                 String key = a.getCode().trim().toUpperCase(Locale.ROOT);
+                // Bruit OCR / marqueurs de liste (a), 1, a, b.) — pas des codes métier.
+                if (estCodeArticleTrivial(key)) {
+                    continue;
+                }
                 byCode.computeIfAbsent(key, k -> new ArrayList<>()).add(a);
             }
             List<ProblemeGate> pbs = new ArrayList<>();
@@ -168,6 +172,29 @@ public final class GatesEtude {
                 }
             }
             return pbs;
+        }
+
+        /**
+         * Codes trop courts / purement alphabétiques avec ponctuation de liste —
+         * exclus de la gate doublon (sinon BDP scannés bloquent massivement).
+         */
+        static boolean estCodeArticleTrivial(String codeUpper) {
+            if (codeUpper == null || codeUpper.isBlank()) {
+                return true;
+            }
+            String compact = codeUpper.replaceAll("[\\s.)$]", "");
+            if (compact.isEmpty()) {
+                return true;
+            }
+            // Une seule lettre (A, B) ou chiffre (1, 12) sans séparateur métier.
+            if (compact.matches("[A-Z]") || compact.matches("\\d{1,2}")) {
+                return true;
+            }
+            // Marqueurs de liste du type "A)" déjà normalisés, ou "I", "II" romains courts.
+            if (compact.matches("I{1,3}|IV|VI{0,3}|IX|X")) {
+                return true;
+            }
+            return false;
         }
     }
 

@@ -723,7 +723,13 @@
       "bordereau": {
         "aucun_article": "Ajoutez au moins un article au bordereau avant de continuer.",
         "unite_manquante": "Unité manquante sur cet article.",
-        "quantite_invalide": "Quantité invalide — elle doit être strictement positive."
+        "quantite_invalide": "Quantité invalide — elle doit être strictement positive.",
+        "code_duplique": "Code article en double — corrigez ou fusionnez les lignes.",
+        "lot_vide": "Lot ou sous-lot sans article — ajoutez des postes ou retirez le lot."
+      },
+      "cout": {
+        "origine_manquante": "Origine de coût manquante sur cet article.",
+        "cout_unitaire_manquant": "Coût unitaire manquant ou nul — décomposez, forfaitisez ou estimez."
       },
       "descriptifs": {
         "manquant": "Descriptif CPS manquant pour cet article."
@@ -734,17 +740,26 @@
         "rendements_nuls": "Tous les rendements du DPU sont nuls."
       },
       "consultation": {
-        "prix_non_consulte": "Au moins un composant n'a pas de prix consulté."
+        "prix_non_consulte": "Au moins un composant n'a pas de prix consulté.",
+        "forfait_non_rattache": "Forfait non rattaché à un prix consulté."
       },
       "chiffrage": {
         "prix_absent": "Prix unitaire de vente manquant ou nul.",
         "taux_manquants": "Frais généraux ou marge bénéficiaire manquants sur le DPU.",
         "client_manquant": "Sélectionnez un client Partner avant de générer le devis.",
         "avis_ouverts": "Des avis d'exécution restent ouverts sur ce dossier.",
-        "avis_ecartes": "Des avis d'exécution ont été écartés — à confirmer avant soumission."
+        "avis_ecartes": "Des avis d'exécution ont été écartés — à confirmer avant soumission.",
+        "part_couts_estimes": "Trop de coûts encore estimés — affinez le chiffrage avant soumission."
       },
       "non_franchie": "Cette étape ne peut pas encore être franchie.",
-      "corriger": "Corriger"
+      "corriger": "Corriger",
+      "voir_dans_arbre": "Voir dans l’arbre",
+      "passer_manuel": "Passer en manuel pour corriger",
+      "voir_tout": "Voir tout",
+      "replier": "Replier",
+      "verifier": "Vérifier le chiffrage",
+      "incomplet_cout": "chiffrage incomplet — décomposez, forfaitisez ou estimez les postes restants.",
+      "pret_synthese": "Prêt pour la synthèse — tous les postes ont un coût."
     },
     "client": {
       "id_invalide": "Identifiant client invalide.",

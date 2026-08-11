@@ -1,4 +1,4 @@
-﻿package ma.nafura.etudes.service;
+package ma.nafura.etudes.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

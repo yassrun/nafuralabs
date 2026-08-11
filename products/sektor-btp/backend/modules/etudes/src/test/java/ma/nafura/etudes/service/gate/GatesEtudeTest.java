@@ -1,4 +1,4 @@
-﻿package ma.nafura.etudes.service.gate;
+package ma.nafura.etudes.service.gate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -139,8 +139,8 @@ class GatesEtudeTest {
                 .libelle("Lot vide")
                 .ordre(0)
                 .build();
-        DpgfNoeud a1 = article("X", "u", "1", ma.nafura.etudes.domain.OrigineCout.ESTIME.name());
-        DpgfNoeud a2 = article("X", "u", "2", ma.nafura.etudes.domain.OrigineCout.ESTIME.name());
+        DpgfNoeud a1 = article("X-10", "u", "1", ma.nafura.etudes.domain.OrigineCout.ESTIME.name());
+        DpgfNoeud a2 = article("X-10", "u", "2", ma.nafura.etudes.domain.OrigineCout.ESTIME.name());
         a1.setParentId(UUID.randomUUID());
         a2.setParentId(a1.getParentId());
 
@@ -150,6 +150,28 @@ class GatesEtudeTest {
         assertThat(r.passe()).isFalse();
         assertThat(r.problemes()).extracting(ResultatGate.ProblemeGate::message)
                 .contains("etudes.gate.bordereau.lot_vide", "etudes.gate.bordereau.code_duplique");
+    }
+
+    @Test
+    void codes_triviaux_liste_ne_declenchent_pas_doublon() {
+        DpgfNoeud a1 = article("a)", "u", "1", ma.nafura.etudes.domain.OrigineCout.ESTIME.name());
+        DpgfNoeud a2 = article("a)", "u", "2", ma.nafura.etudes.domain.OrigineCout.ESTIME.name());
+        DpgfNoeud a3 = article("1", "u", "1", ma.nafura.etudes.domain.OrigineCout.ESTIME.name());
+        DpgfNoeud a4 = article("1", "u", "2", ma.nafura.etudes.domain.OrigineCout.ESTIME.name());
+        DpgfNoeud a5 = article("1-1-1", "m3", "1", ma.nafura.etudes.domain.OrigineCout.ESTIME.name());
+        DpgfNoeud a6 = article("1-1-1", "m3", "2", ma.nafura.etudes.domain.OrigineCout.ESTIME.name());
+        UUID parent = UUID.randomUUID();
+        for (DpgfNoeud a : List.of(a1, a2, a3, a4, a5, a6)) {
+            a.setParentId(parent);
+        }
+
+        ResultatGate r = new GatesEtude.GateBordereau()
+                .evaluer(ContexteGate.deArticles(List.of(a1, a2, a3, a4, a5, a6)));
+
+        assertThat(r.problemes()).extracting(ResultatGate.ProblemeGate::message)
+                .containsOnly("etudes.gate.bordereau.code_duplique");
+        assertThat(r.problemes()).extracting(ResultatGate.ProblemeGate::codeArticle)
+                .containsOnly("1-1-1", "1-1-1");
     }
 
     @Test

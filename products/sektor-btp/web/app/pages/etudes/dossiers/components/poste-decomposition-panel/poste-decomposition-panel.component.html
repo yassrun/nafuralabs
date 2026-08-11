@@ -54,46 +54,81 @@
       <p class="poste__erreur" role="alert">{{ message }}</p>
     }
 
-    <section class="poste__commentaire" aria-labelledby="descriptif-poste-title">
-      <div class="poste__section-head">
-        <h4 id="descriptif-poste-title">Descriptif technique</h4>
-        <div class="poste__section-actions">
-          @if (peutProposerCps()) {
-            <nf-button
-              variant="ghost"
-              size="sm"
-              icon="sparkles"
-              [loading]="propositionCps()"
-              [disabled]="chargement() || sauvegarde() || propositionCps() || extractionComposants()"
-              tooltip="Affiche le descriptif technique du CPS pour cet article"
-              (clicked)="proposerDepuisCps()"
-            >
-              Voir le descriptif CPS
-            </nf-button>
-          }
-          @if (modifiable() && dossierId() && estDecompose()) {
-            <nf-button
-              variant="secondary"
-              size="sm"
-              icon="sparkles"
-              [loading]="extractionComposants()"
-              [disabled]="chargement() || sauvegarde() || propositionCps() || extractionComposants()"
-              tooltip="Détecte les composants catalogue consultables à partir du CPS"
-              (clicked)="extraireComposants()"
-            >
-              Extraire les composants
-            </nf-button>
-          }
+    <section
+      class="poste__commentaire"
+      [class.poste__commentaire--secondaire]="estEstime()"
+      aria-labelledby="descriptif-poste-title"
+    >
+      @if (estEstime()) {
+        <details class="poste__descriptif-fold">
+          <summary id="descriptif-poste-title">Descriptif technique</summary>
+          <div class="poste__descriptif-fold-body">
+            <div class="poste__section-actions poste__section-actions--fold">
+              @if (peutProposerCps()) {
+                <nf-button
+                  variant="ghost"
+                  size="sm"
+                  icon="sparkles"
+                  [loading]="propositionCps()"
+                  [disabled]="chargement() || sauvegarde() || propositionCps() || extractionComposants()"
+                  tooltip="Affiche le descriptif technique du CPS pour cet article"
+                  (clicked)="proposerDepuisCps()"
+                >
+                  Voir le descriptif CPS
+                </nf-button>
+              }
+            </div>
+            <textarea
+              rows="3"
+              aria-label="Descriptif technique de l’article"
+              placeholder="Ajouter une précision technique…"
+              [readOnly]="!modifiable()"
+              [ngModel]="commentaire()"
+              (ngModelChange)="onCommentaireChange($event)"
+            ></textarea>
+          </div>
+        </details>
+      } @else {
+        <div class="poste__section-head">
+          <h4 id="descriptif-poste-title">Descriptif technique</h4>
+          <div class="poste__section-actions">
+            @if (peutProposerCps()) {
+              <nf-button
+                variant="ghost"
+                size="sm"
+                icon="sparkles"
+                [loading]="propositionCps()"
+                [disabled]="chargement() || sauvegarde() || propositionCps() || extractionComposants()"
+                tooltip="Affiche le descriptif technique du CPS pour cet article"
+                (clicked)="proposerDepuisCps()"
+              >
+                Voir le descriptif CPS
+              </nf-button>
+            }
+            @if (modifiable() && dossierId() && estDecompose()) {
+              <nf-button
+                variant="secondary"
+                size="sm"
+                icon="sparkles"
+                [loading]="extractionComposants()"
+                [disabled]="chargement() || sauvegarde() || propositionCps() || extractionComposants()"
+                tooltip="Détecte les composants catalogue consultables à partir du CPS"
+                (clicked)="extraireComposants()"
+              >
+                Extraire les composants
+              </nf-button>
+            }
+          </div>
         </div>
-      </div>
-      <textarea
-        rows="3"
-        aria-label="Descriptif technique de l’article"
-        placeholder="Ajouter une précision technique…"
-        [readOnly]="!modifiable()"
-        [ngModel]="commentaire()"
-        (ngModelChange)="onCommentaireChange($event)"
-      ></textarea>
+        <textarea
+          rows="3"
+          aria-label="Descriptif technique de l’article"
+          placeholder="Ajouter une précision technique…"
+          [readOnly]="!modifiable()"
+          [ngModel]="commentaire()"
+          (ngModelChange)="onCommentaireChange($event)"
+        ></textarea>
+      }
     </section>
 
     @if (chargement()) {
@@ -110,7 +145,7 @@
               Décomposition et consultations
             }
           </h4>
-          @if (modifiable() && estDecompose()) {
+          @if (modifiable() && estDecompose() && hasComposants()) {
             <div class="poste__section-actions">
               @if (peutRafraichirPrix()) {
                 <nf-button
@@ -139,27 +174,17 @@
 
         @if (estEstime()) {
           <div class="poste__fourni">
-            <div class="poste__saisie-toggle" role="group" aria-label="Je saisis">
-              <span class="poste__saisie-label">Je saisis :</span>
-              <button
-                type="button"
-                class="poste-drawer__toggle"
-                [class.poste-drawer__toggle--active]="estimationSaisieEn() === 'COUT'"
+            <label class="poste__field poste__field--base">
+              <span>Base de saisie</span>
+              <select
                 [disabled]="!modifiable()"
-                (click)="setEstimationSaisieEn('COUT')"
+                [ngModel]="estimationSaisieEn()"
+                (ngModelChange)="setEstimationSaisieEn($event)"
               >
-                un coût
-              </button>
-              <button
-                type="button"
-                class="poste-drawer__toggle"
-                [class.poste-drawer__toggle--active]="estimationSaisieEn() === 'VENTE'"
-                [disabled]="!modifiable()"
-                (click)="setEstimationSaisieEn('VENTE')"
-              >
-                un prix de vente
-              </button>
-            </div>
+                <option value="COUT">Coût unitaire</option>
+                <option value="VENTE">Prix de vente HT</option>
+              </select>
+            </label>
             <div class="poste__fourni-grid">
               @if (estimationSaisieEn() === 'VENTE') {
                 <label class="poste__field">
@@ -258,27 +283,32 @@
                   (ngModelChange)="onMargeFourniChange($event)"
                 />
               </label>
-              <label class="poste__field">
-                <span>Partenaire (UUID)</span>
-                <input
-                  type="text"
-                  [disabled]="!modifiable()"
-                  [ngModel]="forfaitPartnerId() ?? ''"
-                  (ngModelChange)="onForfaitPartnerChange($event)"
-                  placeholder="Optionnel"
-                />
-              </label>
-              <label class="poste__field">
-                <span>Offre (UUID)</span>
-                <input
-                  type="text"
-                  [disabled]="!modifiable()"
-                  [ngModel]="forfaitOffreId() ?? ''"
-                  (ngModelChange)="onForfaitOffreChange($event)"
-                  placeholder="Optionnel"
-                />
-              </label>
             </div>
+            <details class="poste__optionnel">
+              <summary>Liaison partenaire (optionnel)</summary>
+              <div class="poste__optionnel-body poste__fourni-grid poste__fourni-grid--2">
+                <label class="poste__field">
+                  <span>Partenaire</span>
+                  <input
+                    type="text"
+                    [disabled]="!modifiable()"
+                    [ngModel]="forfaitPartnerId() ?? ''"
+                    (ngModelChange)="onForfaitPartnerChange($event)"
+                    placeholder="Identifiant partenaire"
+                  />
+                </label>
+                <label class="poste__field">
+                  <span>Offre</span>
+                  <input
+                    type="text"
+                    [disabled]="!modifiable()"
+                    [ngModel]="forfaitOffreId() ?? ''"
+                    (ngModelChange)="onForfaitOffreChange($event)"
+                    placeholder="Identifiant offre"
+                  />
+                </label>
+              </div>
+            </details>
             @if (hasComposants()) {
               <p class="poste__fourni-hint">
                 {{ composants().length }} composant{{ composants().length > 1 ? 's' : '' }} en
@@ -288,16 +318,35 @@
           </div>
         } @else if (!hasComposants()) {
           <div class="poste__vide poste__vide--decompo">
-            <p>Aucun composant pour l’instant</p>
+            <p>Décomposez ce poste</p>
             <p>
-              Ajoutez des matières, de la main-d’œuvre, du matériel ou de la sous-traitance pour
-              construire le prix de ce poste. Marquez ensuite les prix consultés.
+              Extraire les composants depuis le CPS, ou ajoutez-les à la main (matières,
+              main-d’œuvre, matériel, sous-traitance).
             </p>
             @if (modifiable()) {
               <div class="poste__vide-actions">
-                <nf-button variant="primary" size="sm" (clicked)="ajouterSousDetail()">
-                  Ajouter un composant
-                </nf-button>
+                @if (peutProposerCps()) {
+                  <nf-button
+                    variant="primary"
+                    size="sm"
+                    icon="sparkles"
+                    [loading]="extractionComposants()"
+                    [disabled]="
+                      chargement() || sauvegarde() || propositionCps() || extractionComposants()
+                    "
+                    tooltip="Détecte les composants catalogue consultables à partir du CPS"
+                    (clicked)="extraireComposants()"
+                  >
+                    Extraire depuis le CPS
+                  </nf-button>
+                  <nf-button variant="secondary" size="sm" (clicked)="ajouterSousDetail()">
+                    Ajouter manuellement
+                  </nf-button>
+                } @else {
+                  <nf-button variant="primary" size="sm" (clicked)="ajouterSousDetail()">
+                    Ajouter un composant
+                  </nf-button>
+                }
               </div>
             }
           </div>
@@ -500,30 +549,64 @@
             ({{ ecart.pct > 0 ? '+' : '' }}{{ ecart.pct | number: '1.1-1' }} %).
           </p>
         }
-        <dl>
-          @if (estSaisieSimple() || (estDecompose() && hasComposants())) {
+        @if (!plancherPret()) {
+          <p class="poste__plancher-attente" role="status">
+            @if (estEstime() && estimationSaisieEn() === 'VENTE') {
+              Saisissez un prix de vente pour calculer le plancher.
+            } @else if (estSaisieSimple()) {
+              Saisissez un coût pour calculer le plancher.
+            } @else {
+              Ajoutez des composants pour calculer le plancher.
+            }
+          </p>
+          <dl class="poste__plancher poste__plancher--attente">
             <div>
               <dt>Coût</dt>
-              <dd>{{ coutUnitaireActif() | mad }}</dd>
+              <dd>—</dd>
             </div>
             <div>
-              <dt>+ frais généraux ({{ fgPct() | number: '1.0-2' }} %)</dt>
-              <dd>{{ coutRevient() | mad }}</dd>
+              <dt>+ frais généraux</dt>
+              <dd>—</dd>
             </div>
             <div>
-              <dt>+ marge ({{ margePct() | number: '1.0-2' }} %)</dt>
+              <dt>+ marge</dt>
+              <dd>—</dd>
+            </div>
+            <div class="total">
+              <dt>Prix unitaire HT</dt>
+              <dd>—</dd>
+            </div>
+            <div>
+              <dt>Total ligne HT</dt>
+              <dd>—</dd>
+            </div>
+          </dl>
+        } @else {
+          <dl>
+            @if (estSaisieSimple() || (estDecompose() && hasComposants())) {
+              <div>
+                <dt>Coût</dt>
+                <dd>{{ coutUnitaireActif() | mad }}</dd>
+              </div>
+              <div>
+                <dt>+ frais généraux ({{ fgPct() | number: '1.0-2' }} %)</dt>
+                <dd>{{ coutRevient() | mad }}</dd>
+              </div>
+              <div>
+                <dt>+ marge ({{ margePct() | number: '1.0-2' }} %)</dt>
+                <dd>{{ prixVenteHt() | mad }}</dd>
+              </div>
+            }
+            <div class="total">
+              <dt>Prix unitaire HT</dt>
               <dd>{{ prixVenteHt() | mad }}</dd>
             </div>
-          }
-          <div class="total">
-            <dt>Prix unitaire HT</dt>
-            <dd>{{ prixVenteHt() | mad }}</dd>
-          </div>
-          <div>
-            <dt>Total ligne HT</dt>
-            <dd>{{ totalLigne() | mad }}</dd>
-          </div>
-        </dl>
+            <div>
+              <dt>Total ligne HT</dt>
+              <dd>{{ totalLigne() | mad }}</dd>
+            </div>
+          </dl>
+        }
       </aside>
     }
   </section>

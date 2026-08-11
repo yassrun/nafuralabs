@@ -1,6 +1,6 @@
 ---
 id: ERP-45
-status: review
+status: done
 context: nafura
 kind: task
 priority: P1
@@ -25,4 +25,5 @@ tags: [ops, qa, cli]
 ```
 10/08 20:10  créé · après Lot 3
 10/08 20:20  qa-token.sh + docs
+11/08 10:37  check progress · review → done (humain)
 ```

@@ -218,10 +218,11 @@ print_recipe_sektor() {
   case "$SCOPE" in
     front)
       cat <<'EOF'
-# Front local
+# Front local (Cursor QA — auto-login qa@nafuralabs.local)
 cd products/sektor-btp/web
-npm run start:erp:staging-local
-# → http://127.0.0.1:4200  |  API http://localhost:8082  |  IAM http://iam.nafuralabs.staging
+npm run start:erp:cursor
+# → http://127.0.0.1:4200  |  API http://localhost:8082
+# Keycloak staging-local (manuel) : npm run start:erp:staging-local
 EOF
       ;;
     back)
@@ -238,14 +239,14 @@ EOF
 set -a; source "$ENV_FILE"; set +a
 ./gradlew.bat :sektor:app:bootRun
 
-# Terminal 2 — frontend
+# Terminal 2 — frontend (Cursor QA — auto-login qa@nafuralabs.local)
 cd products/sektor-btp/web
-npm run start:erp:staging-local
+npm run start:erp:cursor
 
 # URLs
 #   App:  http://127.0.0.1:4200
 #   API:  http://localhost:8082
-#   IAM:  http://iam.nafuralabs.staging
+# Keycloak staging-local (manuel) : npm run start:erp:staging-local
 EOF
       ;;
   esac

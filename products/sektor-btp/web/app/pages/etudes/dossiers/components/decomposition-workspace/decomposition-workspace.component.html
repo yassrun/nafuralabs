@@ -1,28 +1,40 @@
 <section class="workspace" aria-label="Décomposition du bordereau">
   <div class="workspace__master">
-    <div class="workspace__couverture" role="status">
-      <div class="workspace__couverture-main">
-        <strong>{{ consultes() }}</strong>
-        <span>/ {{ totalComposants() }} composants consultés</span>
-        @if (nonConsultes() > 0) {
-          <span class="workspace__warn">{{ nonConsultes() }} à vérifier</span>
+    @if (montreCouverture()) {
+      <div class="workspace__couverture" role="status">
+        <div class="workspace__couverture-main">
+          @if (aCouvertureComposants()) {
+            <strong>{{ consultes() }}</strong>
+            <span>/ {{ totalComposants() }} composants consultés</span>
+            @if (nonConsultes() > 0) {
+              <span class="workspace__warn">{{ nonConsultes() }} à vérifier</span>
+            }
+          } @else {
+            <span>
+              {{ alertesConsultation().length }} alerte{{
+                alertesConsultation().length > 1 ? 's' : ''
+              }}
+              consultation
+            </span>
+          }
+        </div>
+        @if (peutFiltrerAlertes()) {
+          <label class="workspace__filtre">
+            <input
+              type="checkbox"
+              [ngModel]="filtreAlertes()"
+              (ngModelChange)="filtreAlertes.set($event)"
+            />
+            Afficher les alertes
+            @if (filtreAlertes()) {
+              <span class="workspace__filtre-count">
+                ({{ filterArticleIds()?.length ?? 0 }})
+              </span>
+            }
+          </label>
         }
       </div>
-      <label class="workspace__filtre">
-        <input
-          type="checkbox"
-          [ngModel]="filtreAlertes()"
-          (ngModelChange)="filtreAlertes.set($event)"
-          [disabled]="nonConsultes() === 0 && alertesConsultation().length === 0"
-        />
-        Afficher les alertes
-        @if (filtreAlertes()) {
-          <span class="workspace__filtre-count">
-            ({{ filterArticleIds()?.length ?? 0 }})
-          </span>
-        }
-      </label>
-    </div>
+    }
 
     @if (filtreAlertes() && alertesConsultation().length > 0) {
       <ul class="workspace__alertes">
@@ -53,6 +65,7 @@
       [selectionEnabled]="true"
       [selectedKey]="selectedKey()"
       [focusNoeudId]="focusNoeudId()"
+      [expandArticleIds]="expandArticleIds()"
       [searchQuery]="search()"
       [reloadToken]="treeReloadToken()"
       [filterArticleIds]="filterArticleIds()"

@@ -27,6 +27,8 @@ export interface NfTreeTableColumn<T = unknown> {
   label: string;
   field?: string;
   width?: string;
+  /** Fixe la colonne à droite pendant le scroll horizontal. */
+  stickyEnd?: boolean;
   align?: 'start' | 'center' | 'end';
   cssClass?: string;
   value?: (data: T) => unknown;
@@ -92,9 +94,11 @@ type RowClassValue = string | string[] | Set<string> | Record<string, boolean>;
                 @for (column of columns; track column.key) {
                   <th
                     [style.width]="column.width"
+                    [style.right]="stickyEndOffset(column)"
                     [class]="column.cssClass ?? ''"
                     [class.nf-tree-table__cell--center]="column.align === 'center'"
-                    [class.nf-tree-table__cell--end]="column.align === 'end'">
+                    [class.nf-tree-table__cell--end]="column.align === 'end'"
+                    [class.nf-tree-table__cell--sticky-end]="!!column.stickyEnd">
                     {{ column.label | translate }}
                   </th>
                 }
@@ -112,9 +116,11 @@ type RowClassValue = string | string[] | Set<string> | Record<string, boolean>;
                 @for (column of columns; track column.key) {
                   <td
                     [style.width]="column.width"
+                    [style.right]="stickyEndOffset(column)"
                     [class]="column.cssClass ?? ''"
                     [class.nf-tree-table__cell--center]="column.align === 'center'"
-                    [class.nf-tree-table__cell--end]="column.align === 'end'">
+                    [class.nf-tree-table__cell--end]="column.align === 'end'"
+                    [class.nf-tree-table__cell--sticky-end]="!!column.stickyEnd">
                     @if (column.key === treeColumnKey()) {
                       <p-treetable-toggler [rowNode]="rowNode" />
                     }
@@ -176,12 +182,39 @@ type RowClassValue = string | string[] | Set<string> | Record<string, boolean>;
       border: 1px solid var(--nf-color-border);
       border-radius: .75rem;
     }
-    .nf-tree-table__scroll--constrained { overscroll-behavior: contain; }
+    .nf-tree-table__scroll--constrained {
+      overscroll-behavior: contain;
+      /* Un seul axe de scroll dominant : vertical. H seulement si vraiment nécessaire. */
+      overflow-x: auto;
+      overflow-y: auto;
+      box-sizing: border-box;
+    }
+    /* Parent flex avec hauteur définie (ex. bordereau fill). */
+    .nf-tree-table__scroll--constrained[style*='100%'] {
+      height: 100%;
+    }
     .nf-tree-table__row--clickable { cursor: pointer; }
     .nf-tree-table__cell--center { text-align: center; }
     .nf-tree-table__cell--end {
       text-align: end;
       font-variant-numeric: tabular-nums;
+    }
+    .nf-tree-table__cell--sticky-end {
+      position: sticky;
+      z-index: 2;
+      background: var(--nf-color-surface, #fff);
+      box-shadow: -6px 0 8px -6px color-mix(in srgb, #000 18%, transparent);
+    }
+    /* En-tête opaque au-dessus des lignes sticky qui défilent. */
+    :host ::ng-deep .p-treetable .p-treetable-thead > tr > th {
+      position: sticky;
+      top: 0;
+      z-index: 4;
+      background: var(--nf-color-surface, #fff);
+    }
+    :host ::ng-deep .p-treetable .p-treetable-thead > tr > th.nf-tree-table__cell--sticky-end {
+      z-index: 5;
+      background: var(--nf-color-surface, #fff);
     }
     .nf-tree-table__detail-row > td {
       padding-top: 0;
@@ -223,6 +256,25 @@ export class TreeTableComponent<T = unknown> {
     this.applyExpandedKeys(this.nodes(), this.expandedKeys()),
   );
 
+  /** Offsets `right` cumulés pour les colonnes stickyEnd (de la droite vers la gauche). */
+  readonly stickyEndOffsets = computed(() => {
+    const cols = this.columns();
+    const map = new Map<string, string>();
+    let acc = 0;
+    for (let i = cols.length - 1; i >= 0; i--) {
+      const col = cols[i];
+      if (!col.stickyEnd) continue;
+      map.set(col.key, `${acc}px`);
+      acc += this.parseWidthPx(col.width) || 72;
+    }
+    return map;
+  });
+
+  stickyEndOffset(column: NfTreeTableColumn<T>): string | null {
+    if (!column.stickyEnd) return null;
+    return this.stickyEndOffsets().get(column.key) ?? '0px';
+  }
+
   cellValue(data: T, column: NfTreeTableColumn<T>): unknown {
     if (column.value) return column.value(data);
     if (!column.field) return '';
@@ -254,6 +306,15 @@ export class TreeTableComponent<T = unknown> {
 
   onNodeCollapsed(event: { node?: { key?: string } }): void {
     this.updateExpandedKey(event.node?.key, false);
+  }
+
+  private parseWidthPx(width: string | undefined): number {
+    if (!width) return 0;
+    const rem = width.match(/^([\d.]+)rem$/);
+    if (rem) return Math.round(parseFloat(rem[1]) * 16);
+    const px = width.match(/^([\d.]+)px$/);
+    if (px) return Math.round(parseFloat(px[1]));
+    return 0;
   }
 
   private updateExpandedKey(key: string | undefined, expanded: boolean): void {

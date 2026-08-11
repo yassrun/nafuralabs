@@ -197,12 +197,18 @@ export class SocieteService {
   /** Maps the active IAM tenant to a single société / siège (no SOMACOM demo data). */
   bindTenantOrganization(tenantId: string, tenantName: string): void {
     const societeId = `tenant-${tenantId}`;
-    if (this._currentSocieteId() === societeId && this._societes().length === 1) {
+    const displayName = resolveTenantDisplayName(tenantName, tenantId);
+    const existing = this._societes().find((s) => s.id === societeId);
+    if (
+      this._currentSocieteId() === societeId &&
+      this._societes().length === 1 &&
+      existing?.raisonSociale === displayName
+    ) {
       return;
     }
     const societe: Societe = {
       id: societeId,
-      raisonSociale: tenantName,
+      raisonSociale: displayName,
       formeJuridique: 'SARL',
       ice: '',
       if: '',
@@ -308,3 +314,15 @@ export class SocieteService {
     }
   }
 }
+
+/** Évite d’afficher un UUID brut quand le nom tenant est manquant / mal mappé. */
+function resolveTenantDisplayName(tenantName: string, tenantId: string): string {
+  const name = (tenantName ?? '').trim();
+  if (!name || name === tenantId || UUID_RE.test(name)) {
+    return 'Organisation';
+  }
+  return name;
+}
+
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;

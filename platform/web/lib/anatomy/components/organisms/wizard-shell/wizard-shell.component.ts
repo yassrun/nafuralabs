@@ -35,7 +35,12 @@ import type { WizardStepConfig } from './wizard-step.interface';
               class="nf-wizard-shell__step"
               [class.nf-wizard-shell__step--current]="i === currentStepIndex()"
               [class.nf-wizard-shell__step--completed]="i < currentStepIndex()"
-              [attr.aria-current]="i === currentStepIndex() ? 'step' : null">
+              [class.nf-wizard-shell__step--clickable]="allowStepNavigation() && i <= currentStepIndex()"
+              [attr.aria-current]="i === currentStepIndex() ? 'step' : null"
+              [attr.role]="allowStepNavigation() && i <= currentStepIndex() ? 'button' : null"
+              [attr.tabindex]="allowStepNavigation() && i <= currentStepIndex() ? 0 : null"
+              (click)="onStepClick(i)"
+              (keydown.enter)="onStepClick(i)">
               <span class="nf-wizard-shell__step-indicator">{{ i + 1 }}</span>
               @if (step.icon) {
                 <mat-icon class="nf-wizard-shell__step-icon">{{ step.icon }}</mat-icon>
@@ -85,17 +90,20 @@ export class WizardShellComponent {
     /** Submit button label (required) */
     submitLabel = input.required<string>();
 
-    /** Whether to show the submit button on the last step (default true). */
-    showSubmit = input<boolean>(true);
+  /** Whether to show the submit button on the last step (default true). */
+  showSubmit = input<boolean>(true);
 
-    /** Back button icon */
-    backIcon = input<string>('arrow_back');
+  /** Allow clicking completed / current steps to jump (opt-in). */
+  allowStepNavigation = input<boolean>(false);
 
-    /** Next button icon */
-    nextIcon = input<string>('arrow_forward');
+  /** Back button icon */
+  backIcon = input<string>('arrow_back');
 
-    /** Submit button icon */
-    submitIcon = input<string>('check');
+  /** Next button icon */
+  nextIcon = input<string>('arrow_forward');
+
+  /** Submit button icon */
+  submitIcon = input<string>('check');
 
   /** Emitted when Back is clicked */
   back = output<void>();
@@ -105,6 +113,9 @@ export class WizardShellComponent {
 
   /** Emitted when Submit is clicked (last step) */
   submit = output<void>();
+
+  /** Emitted when a navigable step is clicked (0-based index). */
+  stepSelect = output<number>();
 
   currentStepLabel = computed(() => {
     const stepsArray = this.steps();
@@ -167,5 +178,12 @@ export class WizardShellComponent {
         this.submit.emit();
         break;
     }
+  }
+
+  onStepClick(index: number): void {
+    if (!this.allowStepNavigation()) return;
+    if (index > this.currentStepIndex()) return;
+    if (index === this.currentStepIndex()) return;
+    this.stepSelect.emit(index);
   }
 }

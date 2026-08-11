@@ -1,6 +1,6 @@
 ---
 id: ERP-44
-status: review
+status: done
 context: nafura
 kind: task
 priority: P2
@@ -25,4 +25,5 @@ tags: [qa, seed, docs]
 ```
 10/08 20:10  créé · après Lots 1–3
 10/08 20:20  02-SEED-INVENTORY.md rédigé
+11/08 10:37  check progress · review → done (humain)
 ```

@@ -258,6 +258,30 @@ export class PosteDecompositionPanelComponent {
     () => this.estEstime() && this.estimationSaisieEn() === 'VENTE',
   );
 
+  /** Coût / prix de vente réellement saisi (> 0) — évite le plancher « 0 MAD » trompeur. */
+  readonly hasCoutSaisi = computed(() => {
+    if (this.estEstime() && this.estimationSaisieEn() === 'VENTE') {
+      const v = this.venteSaisie();
+      return v != null && Number.isFinite(v) && v > 0;
+    }
+    if (this.estSaisieSimple()) {
+      const c = this.prixFourni();
+      return c != null && Number.isFinite(c) && c > 0;
+    }
+    return this.hasComposants() && this.deboursSec() > 0;
+  });
+
+  /** Invite footer drawer : saisie simple sans coût. */
+  readonly attenteSaisieCout = computed(
+    () => this.modifiable() && this.estSaisieSimple() && !this.hasCoutSaisi(),
+  );
+
+  readonly plancherPret = computed(() => {
+    if (this.estSaisieSimple()) return this.hasCoutSaisi();
+    if (this.estDecompose()) return this.hasComposants();
+    return this.hasCoutSaisi();
+  });
+
   readonly ecartVsEstimation = computed(() => {
     if (!this.estDecompose()) return null;
     const repere = this.estimationRepere();

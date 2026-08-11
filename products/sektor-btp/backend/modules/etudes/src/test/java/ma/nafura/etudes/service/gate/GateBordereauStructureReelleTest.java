@@ -1,4 +1,4 @@
-﻿package ma.nafura.etudes.service.gate;
+package ma.nafura.etudes.service.gate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

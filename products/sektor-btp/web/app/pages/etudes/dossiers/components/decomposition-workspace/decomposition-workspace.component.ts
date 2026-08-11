@@ -87,6 +87,37 @@ export class DecompositionWorkspaceComponent {
     return gate.problemes.filter((p) => p.etape === 4);
   });
 
+  /** Couverture pertinente uniquement s’il y a des composants décomposés à suivre. */
+  readonly aCouvertureComposants = computed(() => this.totalComposants() > 0);
+
+  /** Filtre utile s’il reste des non-consultés ou des alertes gate consultation. */
+  readonly peutFiltrerAlertes = computed(
+    () =>
+      this.nonConsultes() > 0 ||
+      this.alertesConsultation().length > 0 ||
+      this.articlesAlerteIds().length > 0,
+  );
+
+  /** Barre couverture : masquée si 0 composant et rien à filtrer (Estime/Forfait seuls). */
+  readonly montreCouverture = computed(
+    () => this.aCouvertureComposants() || this.peutFiltrerAlertes(),
+  );
+
+  /** Articles gate à révéler dans l’arbre (expand ciblé, max perf). */
+  readonly expandArticleIds = computed(() => {
+    const gate = this.consultationGate();
+    if (!gate) return [] as string[];
+    const ids: string[] = [];
+    const seen = new Set<string>();
+    for (const p of gate.problemes) {
+      if (!p.noeudId || seen.has(p.noeudId)) continue;
+      seen.add(p.noeudId);
+      ids.push(p.noeudId);
+      if (ids.length >= 40) break;
+    }
+    return ids;
+  });
+
   readonly filterArticleIds = computed(() => {
     if (!this.filtreAlertes()) return null;
     const fromCouverture = this.articlesAlerteIds();
@@ -104,6 +135,12 @@ export class DecompositionWorkspaceComponent {
       // `untracked` : `refreshCouverture()` fait des appels HTTP dont les
       // intercepteurs lisent des signaux globaux — sinon l’effet se relance seul.
       if (id) untracked(() => void this.refreshCouverture(id, token));
+    });
+
+    effect(() => {
+      if (!this.peutFiltrerAlertes() && this.filtreAlertes()) {
+        this.filtreAlertes.set(false);
+      }
     });
   }
 

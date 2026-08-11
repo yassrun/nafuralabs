@@ -17,7 +17,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { firstValueFrom } from 'rxjs';
 
 import {
-  ButtonComponent,
   TreeTableComponent,
   type NfTreeNode,
   type NfTreeTableColumn,
@@ -39,6 +38,7 @@ import {
   type BordereauTreeRow,
   type ImportNoeudPreview,
 } from '../../utils/bordereau-tree.util';
+import { resolveOrigineCout, type OrigineCoutUi } from '../../utils/poste-chiffrage-mode.util';
 import { mapToReferentialCode, toUniteOptions, type UniteOption } from '../../utils/unite-options.util';
 import {
   BordereauNoeudDialogComponent,
@@ -60,7 +60,6 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
-    ButtonComponent,
     TreeTableComponent,
     MatButtonModule,
     MatIconModule,
@@ -87,6 +86,11 @@ export class BordereauArbreComponent {
   readonly selectionEnabled = input(false);
   readonly selectedKey = input<string | null>(null);
   readonly focusNoeudId = input<string | null>(null);
+  /**
+   * Articles à révéler (expand ancêtres) — ex. postes gate incomplets étape Coût.
+   * Ciblé (≤40) pour éviter un expand-all coûteux sur gros bordereau.
+   */
+  readonly expandArticleIds = input<readonly string[]>([]);
   readonly searchQuery = input('');
   /** Incrémente pour forcer un rechargement (ex. après chiffrage d’un poste). */
   readonly reloadToken = input(0);
@@ -129,37 +133,85 @@ export class BordereauArbreComponent {
   readonly columns = computed<NfTreeTableColumn<BordereauTreeRow>[]>(() => {
     const selection = this.selectionEnabled();
     const cols: NfTreeTableColumn<BordereauTreeRow>[] = [
-      { key: 'type', label: 'Type', width: selection ? '4.5rem' : '5.5rem' },
-      { key: 'code', label: 'Code', width: selection ? '5.5rem' : '7rem', cssClass: 'arbre__col-code' },
-      { key: 'libelle', label: 'Libellé' },
-      { key: 'unite', label: 'Unité', width: '5rem', align: 'center' },
-      { key: 'quantite', label: 'Qté', width: '5.5rem', align: 'end' },
+      { key: 'type', label: 'Type', width: selection ? '3.75rem' : '4.25rem' },
+      { key: 'code', label: 'Code', width: selection ? '5rem' : '5.5rem', cssClass: 'arbre__col-code' },
+      { key: 'libelle', label: 'Libellé', cssClass: 'arbre__col-libelle' },
+      {
+        key: 'unite',
+        label: 'Unité',
+        width: '4.25rem',
+        align: 'center',
+        stickyEnd: true,
+        cssClass: 'arbre__col-metric',
+      },
+      {
+        key: 'quantite',
+        label: 'Qté',
+        width: '4.5rem',
+        align: 'end',
+        stickyEnd: true,
+        cssClass: 'arbre__col-metric',
+      },
     ];
     if (selection) {
-      // Phase décomposition / chiffrage — les montants ont un sens.
       cols.push(
-        { key: 'pu', label: 'PU HT', width: '5.5rem', align: 'end' },
-        { key: 'total', label: 'Total HT', width: '6.5rem', align: 'end' },
+        {
+          key: 'pu',
+          label: 'PU HT',
+          width: '5rem',
+          align: 'end',
+          stickyEnd: true,
+          cssClass: 'arbre__col-metric',
+        },
+        {
+          key: 'total',
+          label: 'Total HT',
+          width: '5.75rem',
+          align: 'end',
+          stickyEnd: true,
+          cssClass: 'arbre__col-metric',
+        },
       );
     } else {
-      // Phase bordereau (structure) — pas de prix, seulement le volume de postes.
-      cols.push({ key: 'postes', label: 'Postes', width: '5.5rem', align: 'end' });
+      cols.push({
+        key: 'postes',
+        label: 'Postes',
+        width: '4.5rem',
+        align: 'end',
+        stickyEnd: true,
+        cssClass: 'arbre__col-metric',
+      });
     }
     if (this.showStructureActions()) {
-      cols.push({ key: 'actions', label: 'Actions', width: '10.5rem', align: 'center' });
+      cols.push({
+        key: 'actions',
+        label: 'Actions',
+        width: '8.5rem',
+        align: 'center',
+        stickyEnd: true,
+        cssClass: 'arbre__col-actions',
+      });
     }
     return cols;
   });
 
-  readonly tableMinWidth = computed(() => (this.selectionEnabled() ? '36rem' : '42rem'));
+  /** Largeur fluide viewport — évite le scroll H forcé. */
+  readonly tableMinWidth = computed(() => '100%');
+  /** Remplit le parent flex (dossier fill) — un seul scroll vertical. */
+  readonly tableScrollHeight = '100%';
   readonly showStructureActions = computed(
     () => this.modifiable() && !this.selectionEnabled() && (this.isDraft() || this.editionStructure()),
   );
 
   readonly rowClass = (row: BordereauTreeRow): string => {
     const classes = [`arbre__row--${(row.type || '').toLowerCase()}`];
-    if (this.selectedKey() && row.key === this.selectedKey()) {
+    const selected = this.selectedKey();
+    if (selected && (row.key === selected || row.id === selected)) {
       classes.push('arbre__row--selected');
+    }
+    const focusId = this.focusNoeudId();
+    if (focusId && row.id === focusId) {
+      classes.push('arbre__row--focus');
     }
     if (row.nonExploitable) {
       classes.push('arbre__row--warn');
@@ -190,8 +242,31 @@ export class BordereauArbreComponent {
     }
   }
 
+  /** Badge mode — uniquement articles en étape Coût (sélection). */
+  origineBadge(row: BordereauTreeRow): { label: string; kind: OrigineCoutUi } | null {
+    if (!this.selectionEnabled() || row.type !== 'ARTICLE') return null;
+    const hasOrigine =
+      !!row.origineCout || row.mode === 'DECOMPOSE' || row.mode === 'FOURNI';
+    const hasPu = row.prixUnitaire != null && row.prixUnitaire > 0;
+    if (!hasOrigine && !hasPu) return null;
+    const origine = resolveOrigineCout({
+      origineCout: row.origineCout,
+      mode: row.mode,
+      prixUnitaire: row.prixUnitaire,
+    });
+    if (!origine) return null;
+    const label =
+      origine === 'DECOMPOSE' ? 'Décomposé' : origine === 'FORFAIT' ? 'Forfait' : 'Estimé';
+    return { label, kind: origine };
+  }
+
+  estCoutDeduit(row: BordereauTreeRow): boolean {
+    return this.selectionEnabled() && row.type === 'ARTICLE' && !!row.coutDeduit;
+  }
+
   private lastDraftToken = -1;
   private lastEmittedFocusId: string | null = null;
+  private lastExpandFingerprint = '';
 
   constructor() {
     void this.chargerUnites();
@@ -234,10 +309,43 @@ export class BordereauArbreComponent {
         const match = findRowById(nodes, focusId);
         if (!match) return;
         this.expandedKeys.set(expandAncestors(nodes, match.key));
+        this.lastEmittedFocusId = focusId;
         if (match.type === 'ARTICLE') {
-          this.lastEmittedFocusId = focusId;
           this.posteSelect.emit(match);
         }
+        // Laisse le DOM peindre l’expand puis scroll vers la ligne.
+        queueMicrotask(() => {
+          const el = document.querySelector(
+            `.arbre__row--focus, .arbre__row--selected, [data-noeud-id="${CSS.escape(focusId)}"]`,
+          );
+          el?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        });
+      });
+    });
+    effect(() => {
+      if (!this.selectionEnabled()) return;
+      const nodes = this.nodes();
+      const fromGate = this.expandArticleIds();
+      untracked(() => {
+        if (!nodes.length || this.isDraft()) return;
+        const ids =
+          fromGate.length > 0
+            ? [...fromGate]
+            : collectIncompleteArticleIds(nodes).slice(0, 40);
+        if (ids.length === 0) {
+          this.lastExpandFingerprint = '';
+          return;
+        }
+        const fp = `${ids.join(',')}|${nodes.length}`;
+        if (fp === this.lastExpandFingerprint) return;
+        this.lastExpandFingerprint = fp;
+        const keys = new Set(this.expandedKeys());
+        for (const id of ids) {
+          const match = findRowById(nodes, id);
+          if (!match) continue;
+          for (const k of expandAncestors(nodes, match.key)) keys.add(k);
+        }
+        this.expandedKeys.set(keys);
       });
     });
   }
@@ -257,6 +365,7 @@ export class BordereauArbreComponent {
     fraisGenerauxPercent?: number | null;
     margePercent?: number | null;
     descriptif?: string | null;
+    coutDeduit?: boolean;
   }): void {
     const next = structuredClone(this.nodes());
     const walk = (list: NfTreeNode<BordereauTreeRow>[]): boolean => {
@@ -273,6 +382,7 @@ export class BordereauArbreComponent {
           }
           if (snap.margePercent !== undefined) n.data.margePercent = snap.margePercent;
           if (snap.descriptif !== undefined) n.data.descriptif = snap.descriptif;
+          if (snap.coutDeduit !== undefined) n.data.coutDeduit = snap.coutDeduit;
           return true;
         }
         if (n.children?.length && walk(n.children)) return true;
@@ -722,6 +832,33 @@ function findRowById(
     }
   }
   return null;
+}
+
+/** Articles sans coût / origine — fallback expand si la gate n’a pas encore de noeudId. */
+function collectIncompleteArticleIds(nodes: NfTreeNode<BordereauTreeRow>[]): string[] {
+  const ids: string[] = [];
+  const walk = (list: NfTreeNode<BordereauTreeRow>[]) => {
+    for (const node of list) {
+      const row = node.data;
+      if (row.type === 'ARTICLE' && row.id) {
+        const cout = row.coutUnitaire;
+        const pu = row.prixUnitaire;
+        const hasCout = cout != null && cout > 0;
+        const hasPu = pu != null && pu > 0;
+        const origine = resolveOrigineCout({
+          origineCout: row.origineCout,
+          mode: row.mode,
+          prixUnitaire: row.prixUnitaire,
+        });
+        if (!origine || (!hasCout && !hasPu)) {
+          ids.push(row.id);
+        }
+      }
+      if (node.children?.length) walk(node.children);
+    }
+  };
+  walk(nodes);
+  return ids;
 }
 
 function expandAncestors(

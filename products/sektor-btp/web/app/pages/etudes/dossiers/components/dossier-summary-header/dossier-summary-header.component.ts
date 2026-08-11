@@ -29,8 +29,16 @@ export class DossierSummaryHeaderComponent {
   readonly synthese = input.required<DossierEtudeSynthese>();
   /** True when the dossier has a linked DPGF (bordereau printable). */
   readonly hasDpgf = input(false);
+  /**
+   * Anomalies de l’étape UI courante (prioritaire sur le total multi-gates backend).
+   * `undefined` = fallback `synthese.anomaliesBloquantes`.
+   */
+  readonly anomaliesEtape = input<number | undefined>(undefined);
+  /** Étape UI wizard (1–4) — évite « Soumettre » trop tôt dans le header. */
+  readonly etapeUi = input(1);
 
   readonly action = output<string>();
+  readonly focusAnomalies = output<void>();
 
   readonly statutLabel = computed(() => labelStatutDossier(this.synthese().status));
   readonly phaseLabel = computed(() => labelPhase(this.synthese().phase));
@@ -38,12 +46,40 @@ export class DossierSummaryHeaderComponent {
     () => DOSSIER_STATUT_VARIANTS[this.synthese().status] ?? 'default',
   );
 
-  readonly clientMissing = computed(() => !this.synthese().clientId);
+  /** Client vraiment absent — pas seulement un id Partner manquant si le nom est là. */
+  readonly clientMissing = computed(() => {
+    const s = this.synthese();
+    return !s.clientId && !s.clientNom?.trim();
+  });
+
+  readonly clientALier = computed(() => {
+    const s = this.synthese();
+    return !s.clientId && !!s.clientNom?.trim();
+  });
+
+  readonly anomaliesAffichees = computed(() => {
+    const etape = this.anomaliesEtape();
+    return etape !== undefined ? etape : this.synthese().anomaliesBloquantes;
+  });
+
+  /**
+   * Action header effective : sur Docs/Bordereau/Coût, « Soumettre le chiffrage »
+   * devient « Voir la synthèse » (parcours). Soumission réelle = étape 4.
+   */
+  readonly actionEffective = computed(() => {
+    const a = this.synthese().actionPrincipale;
+    if (a === 'SOUMETTRE_CHIFFRAGE' && this.etapeUi() < 4) {
+      return 'VOIR_SYNTHESE';
+    }
+    return a;
+  });
 
   readonly ctaLabel = computed(() => {
-    switch (this.synthese().actionPrincipale) {
+    switch (this.actionEffective()) {
       case 'SOUMETTRE_STRUCTURE':
         return 'Continuer vers le chiffrage';
+      case 'VOIR_SYNTHESE':
+        return 'Voir la synthèse';
       case 'SOUMETTRE_CHIFFRAGE':
         return 'Soumettre le chiffrage';
       case 'VALIDER_N1':
@@ -90,7 +126,7 @@ export class DossierSummaryHeaderComponent {
   readonly showPrintSynthese = computed(() => true);
 
   emitAction(code?: string): void {
-    const action = code ?? this.synthese().actionPrincipale;
+    const action = code ?? this.actionEffective() ?? this.synthese().actionPrincipale;
     if (action) this.action.emit(action);
   }
 }

@@ -33,7 +33,9 @@
         <mat-icon>unfold_less</mat-icon>
       </button>
       @if (showStructureActions()) {
-        <nf-button variant="secondary" size="sm" (clicked)="ajouterLot()">Ajouter un lot</nf-button>
+        <button type="button" class="arbre__add-btn" (click)="ajouterLot()">
+          Ajouter un lot
+        </button>
       }
     </div>
   </header>
@@ -56,7 +58,7 @@
       [rowTitle]="rowTitle"
       (rowDblClick)="onRowDblClick($event)"
       [minWidth]="tableMinWidth()"
-      scrollHeight="520px"
+      [scrollHeight]="tableScrollHeight"
       emptyMessage="Aucun lot / article"
     >
       <ng-template #cell let-row let-column="column">
@@ -68,10 +70,25 @@
             <span class="arbre__code" [attr.title]="row.code || null">{{ row.code }}</span>
           }
           @case ('libelle') {
-            <span class="arbre__libelle" [attr.title]="rowTitle(row)">
-              {{ row.libelle }}
+            <span class="arbre__libelle" [attr.title]="row.libelle || null">
+              <span class="arbre__libelle-text">{{ row.libelle }}</span>
               @if (row.nonExploitable) {
                 <span class="arbre__warn-tag">incomplet</span>
+              }
+              @if (origineBadge(row); as mode) {
+                <span
+                  class="arbre__mode-tag"
+                  [class.arbre__mode-tag--estime]="mode.kind === 'ESTIME'"
+                  [class.arbre__mode-tag--forfait]="mode.kind === 'FORFAIT'"
+                  [class.arbre__mode-tag--decompo]="mode.kind === 'DECOMPOSE'"
+                >
+                  {{ mode.label }}
+                </span>
+              }
+              @if (estCoutDeduit(row)) {
+                <span class="arbre__mode-tag arbre__mode-tag--deduit" title="Coût déduit d’un prix de vente">
+                  déduit
+                </span>
               }
             </span>
           }

@@ -1,5 +1,8 @@
 :host {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1 1 auto;
 }
 
 .arbre {
@@ -7,14 +10,23 @@
   border: 0;
   background: transparent;
   padding: 0;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.arbre__entete,
+.arbre__erreur {
+  flex-shrink: 0;
 }
 
 .arbre__entete {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
-  margin-bottom: 0.65rem;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
   flex-wrap: wrap;
 }
 
@@ -41,6 +53,37 @@
   gap: 0.25rem;
 }
 
+.arbre__add-btn {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 1.85rem;
+  padding: 0 0.7rem;
+  margin-left: 0.15rem;
+  border-radius: 6px;
+  border: 1px solid var(--nf-color-border);
+  background: var(--nf-color-surface, #fff);
+  color: var(--nf-color-text-secondary);
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  white-space: nowrap;
+  appearance: none;
+
+  &:hover {
+    color: var(--nf-color-text-primary);
+    border-color: color-mix(in srgb, var(--nf-color-primary-500, #0b6e7a) 45%, var(--nf-color-border));
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--nf-color-primary-600, #0b6e7a);
+    outline-offset: 1px;
+  }
+}
+
 .arbre__compte-warn {
   color: var(--nf-color-danger-600, #c0392b);
 }
@@ -54,6 +97,45 @@
   color: var(--nf-color-danger-600, #c0392b);
 }
 
+.arbre__mode-tag {
+  flex-shrink: 0;
+  margin-left: 0.35rem;
+  padding: 0.05rem 0.35rem;
+  border-radius: 999px;
+  border: 1px solid var(--nf-color-border);
+  background: var(--nf-color-bg-subtle);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--nf-color-text-secondary);
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.arbre__mode-tag--estime {
+  color: var(--nf-color-primary-700, #1d4ed8);
+  border-color: color-mix(in srgb, var(--nf-color-primary-600, #2563eb) 35%, transparent);
+  background: color-mix(in srgb, var(--nf-color-primary-600, #2563eb) 8%, transparent);
+}
+
+.arbre__mode-tag--forfait {
+  color: var(--nf-color-text-primary);
+  border-color: color-mix(in srgb, var(--nf-color-text-primary) 25%, transparent);
+}
+
+.arbre__mode-tag--decompo {
+  color: var(--nf-color-primary-600, #0b6e7a);
+  border-color: color-mix(in srgb, var(--nf-color-primary-600, #0b6e7a) 35%, transparent);
+  background: color-mix(in srgb, var(--nf-color-primary-600, #0b6e7a) 8%, transparent);
+}
+
+.arbre__mode-tag--deduit {
+  color: var(--nf-color-warning-700, #92400e);
+  border-color: color-mix(in srgb, var(--nf-color-warning-700, #92400e) 40%, transparent);
+  background: color-mix(in srgb, var(--nf-color-warning-700, #92400e) 10%, transparent);
+}
+
 .arbre__erreur {
   margin: 0 0 0.5rem;
   padding: 0.5rem 0.65rem;
@@ -63,7 +145,20 @@
 }
 
 .arbre__table {
-  overflow-x: auto;
+  min-width: 0;
+  flex: 1 1 auto;
+  min-height: 0;
+  /* Le scroll vit dans nf-tree-table — pas de 2e conteneur overflow. */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  > * {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
 }
 
 .arbre__badge {
@@ -85,13 +180,28 @@
   white-space: nowrap;
 }
 
-/* inline : rester à côté du toggler (display:block cassait le layout) */
 .arbre__libelle {
-  display: inline;
+  display: inline-flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  max-width: 100%;
+  min-width: 0;
+  vertical-align: middle;
   font-size: 0.78rem;
   line-height: 1.3;
   font-weight: 500;
   color: var(--nf-color-text-primary);
+}
+
+.arbre__libelle-text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 .arbre__row--lot .arbre__libelle,
@@ -152,25 +262,52 @@
 }
 
 :host ::ng-deep {
+  .nf-tree-table {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
   .nf-tree-table__scroll {
     border: 1px solid var(--nf-color-border);
     border-radius: 8px;
     background: var(--nf-color-surface, #fff);
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
   }
 
   .p-treetable {
     font-size: 0.78rem;
+    width: 100%;
+  }
+
+  .p-treetable table {
+    width: 100%;
+    table-layout: fixed;
   }
 
   .p-treetable .p-treetable-thead > tr > th {
+    position: sticky;
+    top: 0;
+    z-index: 4;
     padding: 0.4rem 0.5rem;
     font-size: 0.68rem;
     font-weight: 650;
     color: var(--nf-color-text-primary);
-    background: transparent;
+    /* Opaque : sinon les libellés scrollent « à travers » l’en-tête sticky. */
+    background: var(--nf-color-surface, #fff);
     border: 0;
     border-bottom: 1px solid var(--nf-color-border);
     white-space: nowrap;
+  }
+
+  .p-treetable .p-treetable-thead > tr > th.nf-tree-table__cell--sticky-end {
+    z-index: 5;
+    background: var(--nf-color-surface, #fff);
   }
 
   .p-treetable .p-treetable-tbody > tr > td {
@@ -178,17 +315,36 @@
     border: 0;
     border-bottom: 1px solid color-mix(in srgb, var(--nf-color-border) 65%, transparent);
     vertical-align: middle;
-    background: transparent;
+    background: var(--nf-color-surface, #fff);
   }
 
   .p-treetable .p-treetable-thead > tr > th.arbre__col-code,
   .p-treetable .p-treetable-tbody > tr > td.arbre__col-code {
     overflow: hidden;
-    max-width: 7rem;
+  }
+
+  .p-treetable .p-treetable-thead > tr > th.arbre__col-libelle,
+  .p-treetable .p-treetable-tbody > tr > td.arbre__col-libelle {
+    width: auto;
+    min-width: 10rem;
+    overflow: hidden;
+  }
+
+  /* Ombre sticky uniquement sur la 1re col sticky (Unité). */
+  .p-treetable .p-treetable-thead > tr > th.arbre__col-metric ~ .arbre__col-metric.nf-tree-table__cell--sticky-end,
+  .p-treetable .p-treetable-tbody > tr > td.arbre__col-metric ~ .arbre__col-metric.nf-tree-table__cell--sticky-end,
+  .p-treetable .p-treetable-thead > tr > th.arbre__col-actions.nf-tree-table__cell--sticky-end,
+  .p-treetable .p-treetable-tbody > tr > td.arbre__col-actions.nf-tree-table__cell--sticky-end {
+    box-shadow: none;
   }
 
   .p-treetable .p-treetable-tbody > tr:hover > td {
     background: color-mix(in srgb, var(--nf-color-bg-subtle) 80%, transparent);
+  }
+
+  .p-treetable .p-treetable-tbody > tr:hover > td.nf-tree-table__cell--sticky-end,
+  .p-treetable .p-treetable-tbody > tr.arbre__row--selected > td.nf-tree-table__cell--sticky-end {
+    background: color-mix(in srgb, var(--nf-color-bg-subtle) 92%, var(--nf-color-surface, #fff));
   }
 
   .p-treetable-toggler {
@@ -199,10 +355,19 @@
     height: 1.25rem !important;
     margin-right: 0.25rem;
     vertical-align: middle;
+    flex-shrink: 0;
   }
 
   .arbre__row--selected > td {
     background: color-mix(in srgb, var(--nf-color-primary-600, #0b6e7a) 8%, transparent) !important;
+  }
+
+  .arbre__row--focus > td {
+    box-shadow: inset 3px 0 0 var(--nf-color-primary-600, #0b6e7a);
+  }
+
+  .arbre__row--selected > td.nf-tree-table__cell--sticky-end {
+    background: color-mix(in srgb, var(--nf-color-primary-600, #0b6e7a) 10%, var(--nf-color-surface, #fff)) !important;
   }
 
   .arbre__row--article {

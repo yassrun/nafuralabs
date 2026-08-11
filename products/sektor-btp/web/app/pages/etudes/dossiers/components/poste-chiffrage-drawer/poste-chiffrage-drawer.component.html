@@ -69,35 +69,44 @@
       (origineChange)="onOrigine($event)"
     />
 
-    @if (posteDraft().id && data.dossierId) {
-      <section class="poste-drawer__avis">
-        <app-poste-avis-panel
-          [dossierId]="data.dossierId"
-          [noeudId]="posteDraft().id!"
-          [modifiable]="data.modifiable"
-          [peutPoser]="true"
-          [peutTraiter]="data.modifiable"
-        />
-      </section>
-    }
+    <details class="poste-drawer__fold">
+      <summary>Avis d’exécution</summary>
+      <div class="poste-drawer__fold-body">
+        @if (posteDraft().id && data.dossierId) {
+          <app-poste-avis-panel
+            [dossierId]="data.dossierId"
+            [noeudId]="posteDraft().id!"
+            [modifiable]="data.modifiable"
+            [peutPoser]="true"
+            [peutTraiter]="data.modifiable"
+            [embedded]="true"
+          />
+        } @else {
+          <p class="poste-drawer__fold-empty">Enregistrez le poste pour poser un avis.</p>
+        }
+      </div>
+    </details>
 
-    <section class="poste-drawer__comments" aria-label="Commentaires d'équipe">
-      <nf-comment-thread-panel
-        [entityType]="commentEntityType"
-        [entityId]="commentEntityId"
-        [readonly]="!data.modifiable"
-        [title]="'etudes.poste.comments.title' | translate"
-        [placeholder]="'etudes.poste.comments.placeholder' | translate"
-        [emptyLabel]="'etudes.poste.comments.empty' | translate"
-        [loadingLabel]="'etudes.poste.comments.loading' | translate"
-        [addLabel]="'etudes.poste.comments.add' | translate"
-        [editLabel]="'etudes.poste.comments.edit' | translate"
-        [deleteLabel]="'etudes.poste.comments.delete' | translate"
-        [saveLabel]="'etudes.poste.comments.save' | translate"
-        [cancelLabel]="'etudes.poste.comments.cancel' | translate"
-        [editedLabel]="'etudes.poste.comments.edited' | translate"
-      />
-    </section>
+    <details class="poste-drawer__fold">
+      <summary>Commentaires d’équipe</summary>
+      <div class="poste-drawer__fold-body">
+        <nf-comment-thread-panel
+          [entityType]="commentEntityType"
+          [entityId]="commentEntityId"
+          [readonly]="!data.modifiable"
+          [title]="'etudes.poste.comments.title' | translate"
+          [placeholder]="'etudes.poste.comments.placeholder' | translate"
+          [emptyLabel]="'etudes.poste.comments.empty' | translate"
+          [loadingLabel]="'etudes.poste.comments.loading' | translate"
+          [addLabel]="'etudes.poste.comments.add' | translate"
+          [editLabel]="'etudes.poste.comments.edit' | translate"
+          [deleteLabel]="'etudes.poste.comments.delete' | translate"
+          [saveLabel]="'etudes.poste.comments.save' | translate"
+          [cancelLabel]="'etudes.poste.comments.cancel' | translate"
+          [editedLabel]="'etudes.poste.comments.edited' | translate"
+        />
+      </div>
+    </details>
   </div>
 
   <footer class="poste-drawer__footer">
@@ -106,6 +115,8 @@
         Enregistrement…
       } @else if (dirty()) {
         Modifications non enregistrées
+      } @else if (panel()?.attenteSaisieCout()) {
+        Saisissez un coût pour enregistrer
       } @else {
         Tout est à jour
       }

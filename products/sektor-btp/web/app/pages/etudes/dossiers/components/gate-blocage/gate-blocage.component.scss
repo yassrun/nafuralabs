@@ -4,9 +4,8 @@
 
 .gate-blocage {
   display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 0.35rem 0.55rem;
+  flex-direction: column;
+  gap: 0.45rem;
   margin: 0 0 0.65rem;
   padding: 0.55rem 0.85rem;
   border: 1px solid var(--nf-color-border);
@@ -23,9 +22,28 @@
     background: color-mix(in srgb, var(--nf-color-danger-600) 6%, transparent);
   }
 
-  &:not(&--bloquant) {
+  &--soft {
+    border-left-color: var(--nf-color-primary-500, #0b6e7a);
+    color: var(--nf-color-text-secondary);
+    background: color-mix(in srgb, var(--nf-color-primary-500, #0b6e7a) 5%, transparent);
+  }
+
+  &--ok {
+    border-left-color: var(--nf-color-success, #059669);
+    color: var(--nf-color-success, #059669);
+    background: color-mix(in srgb, var(--nf-color-success, #059669) 8%, transparent);
+  }
+
+  &:not(&--bloquant):not(&--soft):not(&--ok) {
     border-left-color: var(--nf-color-warning-600);
   }
+}
+
+.gate-blocage__head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.55rem;
 }
 
 .gate-blocage__icone {
@@ -42,4 +60,62 @@
 .gate-blocage__msg {
   min-width: 0;
   overflow-wrap: anywhere;
+}
+
+.gate-blocage__cta,
+.gate-blocage__link,
+.gate-blocage__more {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--nf-color-primary-700, #1d4ed8);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  padding: 0;
+}
+
+.gate-blocage__cta {
+  margin-inline-start: auto;
+  white-space: nowrap;
+}
+
+.gate-blocage__liste {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  max-height: 12rem;
+  overflow: auto;
+}
+
+.gate-blocage__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.5rem;
+}
+
+.gate-blocage__code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+  font-weight: 650;
+  padding: 0.05rem 0.3rem;
+  border-radius: 4px;
+  background: color-mix(in srgb, currentColor 8%, transparent);
+}
+
+.gate-blocage__libelle {
+  flex: 1 1 12rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.gate-blocage__more {
+  align-self: flex-start;
+  font-weight: 550;
 }

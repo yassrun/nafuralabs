@@ -723,7 +723,13 @@
       "bordereau": {
         "aucun_article": "Add at least one bill-of-quantities item before continuing.",
         "unite_manquante": "Unit of measure is missing on this item.",
-        "quantite_invalide": "Invalid quantity — it must be strictly positive."
+        "quantite_invalide": "Invalid quantity — it must be strictly positive.",
+        "code_duplique": "Duplicate item code — fix or merge the lines.",
+        "lot_vide": "Lot or sub-lot has no items — add posts or remove the lot."
+      },
+      "cout": {
+        "origine_manquante": "Cost origin is missing on this item.",
+        "cout_unitaire_manquant": "Unit cost missing or zero — break down, lump-sum, or estimate."
       },
       "descriptifs": {
         "manquant": "CPS description is missing for this item."
@@ -734,17 +740,26 @@
         "rendements_nuls": "All DPU yields are zero."
       },
       "consultation": {
-        "prix_non_consulte": "At least one component has no consulted price."
+        "prix_non_consulte": "At least one component has no consulted price.",
+        "forfait_non_rattache": "Lump sum is not linked to a consulted price."
       },
       "chiffrage": {
         "prix_absent": "Unit selling price is missing or zero.",
         "taux_manquants": "Overhead or profit margin is missing on the DPU.",
         "client_manquant": "Select a Partner client before generating the quote.",
         "avis_ouverts": "Open execution reviews remain on this file.",
-        "avis_ecartes": "Some execution reviews were dismissed — confirm before submission."
+        "avis_ecartes": "Some execution reviews were dismissed — confirm before submission.",
+        "part_couts_estimes": "Too many costs are still estimates — refine pricing before submission."
       },
       "non_franchie": "This step cannot be completed yet.",
-      "corriger": "Fix"
+      "corriger": "Fix",
+      "voir_dans_arbre": "Show in tree",
+      "passer_manuel": "Switch to manual to fix",
+      "voir_tout": "Show all",
+      "replier": "Collapse",
+      "verifier": "Verify costing",
+      "incomplet_cout": "costing incomplete — break down, lump-sum, or estimate remaining items.",
+      "pret_synthese": "Ready for summary — every item has a cost."
     },
     "client": {
       "id_invalide": "Invalid client identifier.",

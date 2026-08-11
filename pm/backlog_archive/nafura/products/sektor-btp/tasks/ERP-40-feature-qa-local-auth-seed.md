@@ -1,6 +1,6 @@
 ---
 id: ERP-40
-status: review
+status: done
 context: nafura
 kind: feature
 priority: P1
@@ -26,4 +26,5 @@ tags: [sektor, qa, auth, onboarding]
 ## Journal
 ```
 10/08 20:10  promu depuis epic qa-local-auth-seed · sprint W33 · impl démarrée
+11/08 10:37  check progress · review → done (humain)
 ```

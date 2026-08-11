@@ -152,6 +152,17 @@
   color: var(--nf-color-danger-600, #c0392b);
 }
 
+.dsh__kpi--clickable {
+  cursor: pointer;
+  border-radius: 6px;
+  outline-offset: 2px;
+
+  &:hover,
+  &:focus-visible {
+    background: color-mix(in srgb, var(--nf-color-danger-600, #c0392b) 8%, transparent);
+  }
+}
+
 .dsh__refus {
   margin: 0;
   padding: 0.4rem 0.6rem;

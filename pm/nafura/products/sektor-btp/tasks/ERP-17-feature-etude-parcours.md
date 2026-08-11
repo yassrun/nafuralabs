@@ -4,6 +4,7 @@ status: todo
 context: nafura
 assignee: me
 kind: feature
+gate: me
 feature: etude-parcours
 priority: P1
 tags: [sektor, etudes]
@@ -12,7 +13,7 @@ tags: [sektor, etudes]
 # Feature — Parcours étude (création, version, en-tête, structure)
 
 > Parapluie : cycle de vie / shell de l’étude hors détail d’un poste.
-> Les enfants portent l’estimate et le WIP.
+> Les enfants portent le WIP.
 
 ## Enfants
 - ERP-08 — Nouvelle version depuis étude terminée (corrections)
@@ -23,4 +24,5 @@ tags: [sektor, etudes]
 ## Journal
 ```
 05/08 12:42  créé · groupement feature (proposition framework)
+11/08 10:37  balayage · gate:me (legacy)
 ```

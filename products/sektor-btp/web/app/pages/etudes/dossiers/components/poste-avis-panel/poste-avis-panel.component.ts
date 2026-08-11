@@ -43,6 +43,8 @@ export class PosteAvisPanelComponent {
   /** Peut traiter (chiffreur — etude.update). */
   readonly peutTraiter = input(true);
   readonly modifiable = input(true);
+  /** Dans le drawer : titre porté par le `<details>` parent. */
+  readonly embedded = input(false);
 
   readonly change = output<void>();
 
