@@ -1,4 +1,9 @@
--- Cursor QA user for Mode B local auth bypass (no Keycloak).
+-- DEPRECATED (epic qa-local-auth-seed): kept for DB idempotency / legacy rows only.
+-- Mode B SSOT is now tenant qa-local + qa@nafuralabs.local via QaLocalProvisioner
+-- (applyPreset / seedReferenceData) when NAFURA_DEV_CURSOR_AUTH_ENABLED=true.
+-- Do not point new docs or cursor-session at cursor.qa@nafuralabs.local.
+--
+-- Legacy: Cursor QA user on Nafura bootstrap tenant (no onboarding preset).
 -- Email: cursor.qa@nafuralabs.local — tenant Nafura bootstrap.
 
 -- User

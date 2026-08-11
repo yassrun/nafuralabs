@@ -16,6 +16,12 @@
   - · `ERP-09` todo — Revoir les infos d'en-tête de l'étude (chiffr…
   - · `ERP-10` todo — Création étude / AO — ordre & mix import CPS …
   - · `ERP-15` todo — Règle métier — ne pas modifier le lien (struc…
+- ◐ `ERP-40` feature — QA local auth + seed onboarding
+  - ◐ `ERP-42` review — QA local — Lot 2 · Provision tenant+owner + s…
+  - ◐ `ERP-43` review — QA local — Lot 3 · Auto-auth unifié → `qa@…`
+  - ◐ `ERP-41` review — QA local — Lot 1 · Contrat + docs agents
+  - ◐ `ERP-45` review — QA local — Lot 5 · CLI `qa-token`
+  - ◐ `ERP-44` review — QA local — Lot 4 · Inventaire seed outdated
 - · `ERP-26` feature — Raffinement RH / pointage
   - · `ERP-29` todo — RH / pointage — Lot 2 · Validation contrôle e…
   - · `ERP-30` todo — RH / pointage — Lot 3 · Paie juste et paramétrée
@@ -31,4 +37,4 @@
 
 ---
 
-**20 live · 2 projets**
+**26 live · 2 projets**

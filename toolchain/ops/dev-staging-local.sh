@@ -88,8 +88,10 @@ MINIO_ROOT_PASSWORD=minioadmin
 
 APP_FRONTEND_BASE_URL=http://localhost:4200
 NAFURA_ONBOARDING_SKIP_EMAIL_VERIFICATION=true
-# Cursor QA auto-login (local Mode B only — never set on K8s staging/prod)
+# QA local auto-login (Mode B only — never set on K8s staging/prod)
+# Owner qa@nafuralabs.local / tenant qa-local provisioned on boot when enabled
 NAFURA_DEV_CURSOR_AUTH_ENABLED=true
+NAFURA_DEV_CURSOR_AUTH_EMAIL=qa@nafuralabs.local
 AI_GEMINI_API_KEY=$gemini_key
 EOF
   if [[ -n "$gemini_key" ]]; then

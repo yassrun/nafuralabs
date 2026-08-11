@@ -42,5 +42,6 @@ Ces fichiers sous `.cursor/rules/` sont `alwaysApply` pour Cursor ; **Claude doi
 Sektor live :
 
 - Epic (archivé) : `products/sektor-btp/docs/specs/epics/_archive/referentiel-catalogue-sektor/`
-- Epic (spec) : `products/sektor-btp/docs/specs/epics/qa-local-auth-seed/` — auth QA unique + seed onboarding
+- Epic (actif) : `products/sektor-btp/docs/specs/epics/qa-local-auth-seed/` — auth QA unique + seed onboarding (`qa@nafuralabs.local` / `qa-local`)
+- QA Mode B : `npm run start:erp:cursor` · `eval "$(bash toolchain/ops/qa-token.sh)"` · rule `.cursor/rules/cursor-qa-browser.mdc`
 - QA manuelle / cas : `products/sektor-btp/web/docs/qa/` · e2e : `products/sektor-btp/web/tests/e2e/`

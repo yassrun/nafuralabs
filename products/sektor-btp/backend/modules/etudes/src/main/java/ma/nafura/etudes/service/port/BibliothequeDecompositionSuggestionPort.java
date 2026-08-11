@@ -44,7 +44,7 @@ public class BibliothequeDecompositionSuggestionPort implements DecompositionSug
         List<Ouvrage> ouvrages = ouvrageRepository.findByTenantIdOrderByCodeAsc(TenantContext.getTenantId());
         Ouvrage best = ouvrages.stream()
                 .filter(o -> o.getComposants() != null && !o.getComposants().isEmpty())
-                .map(o -> new Scored(o, score(q, normalize(o.getLibelle()))))
+                .map(o -> new Scored(o, score(q, normalize(o.getDesignation()))))
                 .filter(s -> s.score >= 0.45)
                 .max(Comparator.comparingDouble(s -> s.score))
                 .map(s -> s.ouvrage)

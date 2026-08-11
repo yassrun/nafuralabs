@@ -58,6 +58,7 @@ export class PosteAvisPanelComponent {
   readonly saving = signal(false);
 
   readonly niveauLabels = NIVEAU_LABELS;
+  readonly niveaux: readonly NiveauAvisExecution[] = ['REALISABLE', 'DIFFICILE', 'IRREALISABLE'];
 
   constructor() {
     effect(() => {

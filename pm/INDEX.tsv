@@ -1,4 +1,10 @@
 id	status	priority	context	assignee	gate	kind	sprint	parent	feature	title
+ERP-42	review	P0	nafura	agent	none	task	2026-W33	ERP-40	qa-local-auth-seed	QA local — Lot 2 · Provision tenant+owner + s…
+ERP-43	review	P0	nafura	agent	none	task	2026-W33	ERP-40	qa-local-auth-seed	QA local — Lot 3 · Auto-auth unifié → `qa@…`
+ERP-40	review	P1	nafura	agent	me	feature	2026-W33		qa-local-auth-seed	QA local auth + seed onboarding
+ERP-41	review	P1	nafura	agent	none	task	2026-W33	ERP-40	qa-local-auth-seed	QA local — Lot 1 · Contrat + docs agents
+ERP-45	review	P1	nafura	agent	none	task	2026-W33	ERP-40	qa-local-auth-seed	QA local — Lot 5 · CLI `qa-token`
+ERP-44	review	P2	nafura	agent	none	task	2026-W33	ERP-40	qa-local-auth-seed	QA local — Lot 4 · Inventaire seed outdated
 OPS-01	todo	P1	nafura	me	me	task				Configurer Zimbra + migrer ykarkafi@nafuralab…
 ERP-03	todo	P1	nafura	either	me	feature			achats-raffinement	Raffinement achats (lot 3)
 ERP-16	todo	P1	nafura	me		feature			chiffrage-drawer	Drawer chiffrage poste

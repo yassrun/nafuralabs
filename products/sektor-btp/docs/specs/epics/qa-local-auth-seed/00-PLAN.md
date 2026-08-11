@@ -3,8 +3,8 @@ kind: epic-plan
 app: sektor-btp
 slug: qa-local-auth-seed
 module: onboarding
-pm_feature: null
-status: draft
+pm_feature: ERP-40
+status: active
 language: fr
 ---
 
@@ -15,11 +15,11 @@ language: fr
 
 **Objectif** : remplacer le bricolage `cursor.qa` (user SQL sans preset) par un tenant+owner QA
 reproductible, auto-authentifié en `dev-up`, pour que toi et les agents voyiez **les mêmes données**.
-**Périmètre code** (impl ultérieure) : `products/sektor-btp/backend/app/…/dev/`, `…/onboarding/`,
+**Périmètre code** (impl) : `products/sektor-btp/backend/app/…/dev/`, `…/onboarding/`,
 `web/src/environments/environment.cursor.ts`, `toolchain/ops/`, seeds Liquibase / preset,
 `.cursor/rules/cursor-qa-browser.mdc`, `CLAUDE.md`.
 **Hors scope** : Keycloak passwordless ; activer quoi que ce soit sur staging/prod K8s ;
-refonte complète des checklists `web/docs/qa/` (lot seed inventory séparé) ; UI login fancy.
+refonte complète des checklists `web/docs/qa/` (Lot 4 inventaire only) ; UI login fancy.
 
 ---
 
@@ -148,9 +148,9 @@ Encore ouvertes (Lot 4+) : liste exacte des données métier à seed au-delà du
 
 | Rôle | Id |
 |------|-----|
-| Feature | *(à promouvoir)* |
+| Feature | ERP-40 |
 | Spec / ADR | ce dossier |
-| Tasks | après promote |
+| Tasks | ERP-41 … ERP-45 |
 
 ---
 

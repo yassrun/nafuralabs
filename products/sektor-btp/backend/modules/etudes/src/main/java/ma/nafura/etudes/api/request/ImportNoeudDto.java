@@ -20,6 +20,9 @@ public class ImportNoeudDto {
     private String descriptif;
     private Integer ordre;
     private String mode;
+    /** Aligné DpgfNoeud — défaut ESTIME à l'import article. */
+    private String origineCout;
+    private Boolean coutDeduit;
 
     private List<ImportNoeudDto> enfants = new ArrayList<>();
     private List<ImportComposantDto> composants = new ArrayList<>();

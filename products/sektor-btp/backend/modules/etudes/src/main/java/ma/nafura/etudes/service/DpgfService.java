@@ -1,4 +1,4 @@
-﻿package ma.nafura.etudes.service;
+package ma.nafura.etudes.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

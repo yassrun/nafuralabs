@@ -20,7 +20,7 @@
     <div class="avis__form">
       <p class="avis__hint">Aucun champ de chiffrage — vous proposez un écart.</p>
       <div class="avis__niveaux" role="group" aria-label="Niveau">
-        @for (n of (['REALISABLE', 'DIFFICILE', 'IRREALISABLE'] as const); track n) {
+        @for (n of niveaux; track n) {
           <button
             type="button"
             class="avis__niveau"

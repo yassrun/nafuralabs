@@ -55,10 +55,10 @@ public class CatalogEnrichissementService {
         String cle = LibelleAnonymizer.cleRegroupement(libelleBrut);
         String hash = tenantHash();
         String type = StringUtils.hasText(typeObjet) ? typeObjet.trim().toUpperCase(Locale.ROOT) : "ARTICLE";
-        String par = StringUtils.hasText(proposePar) ? proposePar.trim().toUpperCase(Locale.ROOT) : "REGLE";
-        if (!"REGLE".equals(par) && !"IA".equals(par) && !"MANUEL".equals(par)) {
-            par = "REGLE";
-        }
+        String parRaw = StringUtils.hasText(proposePar) ? proposePar.trim().toUpperCase(Locale.ROOT) : "REGLE";
+        final String par = ("REGLE".equals(parRaw) || "IA".equals(parRaw) || "MANUEL".equals(parRaw))
+                ? parRaw
+                : "REGLE";
 
         CatalogCandidat candidat = findByCle(cle).orElseGet(() -> {
             CatalogCandidat c = CatalogCandidat.builder()

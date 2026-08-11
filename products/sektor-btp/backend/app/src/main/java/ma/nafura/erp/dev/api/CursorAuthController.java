@@ -5,6 +5,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ma.nafura.erp.dev.config.CursorAuthProperties;
+import ma.nafura.erp.dev.config.QaLocalConstants;
 import ma.nafura.erp.onboarding.service.OnboardingAccessTokenService;
 import ma.nafura.platform.authorization.security.authorization.PublicEndpoint;
 import ma.nafura.platform.identity.domain.model.AppUser;
@@ -21,7 +22,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Local Mode B only: issue an HS256 session for the seeded Cursor QA user (no Keycloak).
+ * Local Mode B only: issue an HS256 session for the QA local owner (no Keycloak).
+ * Default principal: {@link QaLocalConstants#OWNER_EMAIL} on tenant {@code qa-local}.
  */
 @Slf4j
 @RestController
@@ -39,10 +41,10 @@ public class CursorAuthController {
     @PostMapping("/api/public/dev/cursor-session")
     @PublicEndpoint(reason = "Local Cursor QA auto-login (flag-gated)")
     public ResponseEntity<CursorSessionResponse> createSession() {
-        String email = properties.getCursorAuthEmail();
+        String email = resolveAuthEmail(properties.getCursorAuthEmail());
         AppUser user = appUserRepository.findByEmailIgnoreCase(email).orElse(null);
         if (user == null) {
-            log.warn("Cursor QA user not found: {}", email);
+            log.warn("QA local user not found: {} (is cursor-auth enabled and boot provisioner ran?)", email);
             return ResponseEntity.notFound().build();
         }
 
@@ -58,10 +60,10 @@ public class CursorAuthController {
             return ResponseEntity.notFound().build();
         }
 
-        String displayName = user.getName() != null ? user.getName().trim() : "Cursor QA";
+        String displayName = user.getName() != null ? user.getName().trim() : QaLocalConstants.OWNER_NAME;
         String[] parts = displayName.split("\\s+", 2);
-        String givenName = parts.length > 0 ? parts[0] : "Cursor";
-        String familyName = parts.length > 1 ? parts[1] : "QA";
+        String givenName = parts.length > 0 ? parts[0] : "QA";
+        String familyName = parts.length > 1 ? parts[1] : "Owner";
 
         OnboardingAccessTokenService.IssuedToken issued = accessTokenService.issue(
             user.getId(),
@@ -85,6 +87,15 @@ public class CursorAuthController {
         ));
     }
 
+    /** Prefer {@code qa@…}; remap deprecated {@code cursor.qa@…}. */
+    static String resolveAuthEmail(String configured) {
+        if (!StringUtils.hasText(configured)
+            || QaLocalConstants.DEPRECATED_CURSOR_QA_EMAIL.equalsIgnoreCase(configured.trim())) {
+            return QaLocalConstants.OWNER_EMAIL;
+        }
+        return configured.trim();
+    }
+
     private UUID resolveTenantId(UUID userId) {
         if (StringUtils.hasText(properties.getCursorAuthTenantId())) {
             try {
@@ -99,12 +110,20 @@ public class CursorAuthController {
                 return null;
             }
         }
-        List<TenantMembership> memberships = tenantMembershipRepository.findByUserId(userId);
-        return memberships.stream()
+        List<TenantMembership> memberships = tenantMembershipRepository.findByUserId(userId).stream()
             .filter(m -> "ACTIVE".equalsIgnoreCase(m.getStatus()))
-            .map(TenantMembership::getTenantId)
-            .findFirst()
-            .orElse(null);
+            .toList();
+        if (memberships.isEmpty()) {
+            return null;
+        }
+        // Prefer dedicated QA tenant when several memberships exist.
+        for (TenantMembership membership : memberships) {
+            Tenant tenant = tenantRepository.findById(membership.getTenantId()).orElse(null);
+            if (tenant != null && QaLocalConstants.TENANT_KEY.equalsIgnoreCase(tenant.getKey())) {
+                return tenant.getId();
+            }
+        }
+        return memberships.get(0).getTenantId();
     }
 
     public record CursorSessionResponse(

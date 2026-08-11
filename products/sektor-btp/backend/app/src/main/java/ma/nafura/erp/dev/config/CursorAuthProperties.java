@@ -10,7 +10,8 @@ public class CursorAuthProperties {
     /** Local Mode B only — never enable on staging/prod pods. */
     private boolean cursorAuthEnabled = false;
 
-    private String cursorAuthEmail = "cursor.qa@nafuralabs.local";
+    /** Default QA owner — see {@link QaLocalConstants#OWNER_EMAIL}. */
+    private String cursorAuthEmail = QaLocalConstants.OWNER_EMAIL;
 
     /** Optional override; empty → first ACTIVE membership for the cursor user. */
     private String cursorAuthTenantId = "";
