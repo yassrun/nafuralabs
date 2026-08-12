@@ -5,7 +5,7 @@ Tu opères dans le monorepo **nafuralabs**. Les règles sont les **mêmes** que 
 ## Lire en premier (ordre)
 
 1. [`docs/AGENTS.md`](docs/AGENTS.md) — canon monorepo (archi, deploy, où mettre le code)
-2. [`docs/specs/README.md`](docs/specs/README.md) — specs / epics (PLAN · PROGRESS · canvas UX)
+2. [`docs/specs/README.md`](docs/specs/README.md) — specs / lots (PLAN · canvas UX)
 3. [`raster/AGENTS.md`](raster/AGENTS.md) — orchestrateur backlog / sprint (tickets dans les produits)
 4. Ops K8s : [`toolchain/ops/AGENTS.md`](toolchain/ops/AGENTS.md)
 
@@ -15,7 +15,7 @@ Ces fichiers sous `.cursor/rules/` sont `alwaysApply` pour Cursor ; **Claude doi
 
 | Rule | Contenu |
 |------|---------|
-| `.cursor/rules/specs-epics.mdc` | Specs → `docs/specs/epics/<slug>/` ; canvas SSOT → `epics/<slug>/ux/` ; bugs → `raster/` |
+| `.cursor/rules/specs-epics.mdc` | Specs → `docs/specs/lots/<lot-slug>/` ; canvas SSOT → `lots/…/ux/` |
 | `.cursor/rules/ux-canvas-wireframes.mdc` | Canvas UX ; preview = copie `canvases/` ; pas Figma SSOT |
 | `.cursor/rules/cursor-qa-browser.mdc` | QA Mode B : auth Cursor, `127.0.0.1:4200`, pas Keycloak |
 | `.cursor/rules/lab-mode-no-prod-data.mdc` | Lab métier : Liquibase clean, liberté refonte ; prod réelle = vitrines MBS/corpo only |
@@ -24,14 +24,15 @@ Ces fichiers sous `.cursor/rules/` sont `alwaysApply` pour Cursor ; **Claude doi
 
 | Quoi | Où |
 |------|-----|
-| Specs / epics | `products/<app>/docs/specs/epics/<feature-slug>/` |
-| Canvas UX (Git) | `…/epics/<slug>/ux/*.canvas.tsx` |
-| Tickets / bugs | `products/<app>/docs/specs/epics/<slug>/tasks/` · Raster = INDEX/Sprint seulement |
+| Specs / lots | `products/<app>/docs/specs/lots/<lot-slug>/` |
+| Canvas UX (Git) | `…/lots/<lot-slug>/<sous-lot-slug>/ux/*.canvas.tsx` |
+| Tickets / bugs | `…/lots/…/tasks/{ID}-{slug}.md` · Raster = INDEX/Sprint seulement |
 | Métier | `products/<app>/` — jamais dans `platform/` |
 | Templates PLAN/PROGRESS | `docs/specs/templates/` |
 
 ## Interdits rapides
 
+- Recréer `docs/specs/epics/` ou `docs/specs/features/`
 - Specs sous l’ancien `docs/epics/`
 - Canvas SSOT sous `docs/ux/wireframes/`
 - Métier BTP dans `platform/`
@@ -41,7 +42,7 @@ Ces fichiers sous `.cursor/rules/` sont `alwaysApply` pour Cursor ; **Claude doi
 
 Sektor live :
 
-- Epics (actifs) : `products/sektor-btp/docs/specs/epics/document-reader/`, `…/chiffrage-assiste-cps/`
-- Epic (archivé) : `products/sektor-btp/docs/specs/epics/_archive/qa-local-auth-seed/` — auth QA unique + seed (`qa@nafuralabs.local` / `qa-local`)
+- Lots : `products/sektor-btp/docs/specs/lots/` (cadrage, etude, chantier, marche, appro, finance)
+- Archive : `…/lots/_archive/qa-local-auth-seed/` — auth QA unique + seed (`qa@nafuralabs.local` / `qa-local`)
 - QA Mode B : `npm run start:erp:cursor` · `eval "$(bash toolchain/ops/qa-token.sh)"` · rule `.cursor/rules/cursor-qa-browser.mdc`
 - QA manuelle / cas : `products/sektor-btp/web/docs/qa/` · e2e : `products/sektor-btp/web/tests/e2e/`

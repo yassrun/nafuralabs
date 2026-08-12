@@ -1,42 +1,45 @@
 ---
-description: Specs / epics — tasks dans le produit ; Raster = orchestrateur
+description: Specs / lots — tasks dans le produit ; Raster = orchestrateur
 alwaysApply: true
 ---
 
-# Specs / epics — où écrire quoi
+# Specs / lots — où écrire quoi
 
 Détail : `docs/specs/README.md` · templates `docs/specs/templates/`.  
 Raster orchestrateur : `raster/AGENTS.md`.
 
-## Chemins (canon 2026-08-11)
+## Chemins (canon 2026-08-12)
 
 | Livrable | Où |
 |----------|-----|
-| Epic PLAN / ADR / UX | `products/<app>/docs/specs/epics/<feature-slug>/` |
-| **Tickets** (feature / spec / task) | `…/epics/<feature-slug>/tasks/{ID}-{slug}.md` |
-| Inbox | `products/<app>/docs/specs/inbox.md` |
-| Triage / bugs isolés | `…/epics/_backlog/tasks/` |
+| PLAN / ADR / UX | `products/<app>/docs/specs/lots/<lot-slug>/<sous-lot-slug>/` |
+| **Tickets** (lot / sous-lot / spec / task) | `…/lots/<lot-slug>/…/tasks/{ID}-{slug}.md` |
+| Inbox | **Globale** : `raster/inbox.md` |
+| Triage | `…/lots/_backlog/tasks/` |
 | Preview canvas IDE | copie `~/.cursor/projects/<workspace>/canvases/` |
 | INDEX / Sprint / Backlog | `raster/` (**généré** — pas de stockage métier) |
 
-## Pack agent — nouvelle epic
+## Pack agent — nouveau lot
 
-1. `00-PLAN.md`
-2. `tasks/` : feature + tasks (`parent:`, `blocked_by:`)
+1. Ticket `kind: lot` sous `lots/<lot-slug>/tasks/`
+2. `tasks/` : N tasks (`parent:` = lot)
 3. `ux/` si UI
 4. Regen `node raster/t.mjs index`
+
+Sous-lot **seulement** si ≥ 2 flux indépendants (voir `raster/AGENTS.md` §0.2) — alors dossier `lots/<lot-slug>/<sous-lot-slug>/`.
 
 **Pas** de `00-PROGRESS.md` obligatoire — suivi = tickets.
 
 ## Bugs
 
-- `kind: task` + `tags: [bug]` sous feature existante ou `_backlog/`
-- Jamais un epic docs « pour un bug »
+- `kind: task` + `type: bug` (ou `feature` / `physical`) sous un **lot** (plat) ou un **sous-lot**
+- **Pas** de bug-umbrella. **Pas** de `kind: bug`
 
 ## Interdit
 
 - Stocker des tasks sous `raster/nafura/…` (legacy)
-- Dupliquer ticket epic + raster
-- Commit / impl d’une feature sans enfants task
+- Recréer `docs/specs/epics/` ou `docs/specs/features/`
+- Dupliquer ticket
+- Commit / impl d’un sous-lot sans enfants task
 - Status / sprint dans le PLAN
 - Specs sous l’ancien `docs/epics/`

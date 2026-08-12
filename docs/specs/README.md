@@ -1,13 +1,13 @@
-# Specs produit — epics Nafura
+# Specs produit — lots Nafura
 
-Convention **spec / epic** + tickets Raster.  
+Convention **lot / sous-lot / task** + tickets Raster.  
 Orchestrateur : [`raster/AGENTS.md`](../../raster/AGENTS.md) · miroir [`docs/Raster.md`](../Raster.md).
 
-## Décisions figées (2026-08-11)
+## Décisions figées (2026-08-12)
 
 | Sujet | Choix |
 |-------|--------|
-| Tickets | `products/<app>/docs/specs/epics/<slug>/tasks/` |
+| Tickets | `products/<app>/docs/specs/lots/<lot-slug>/…/tasks/` |
 | Inbox | **Globale** : `raster/inbox.md` (promote vers un projet) |
 | IDs | Préfixe **par projet** (`ERP`, `RAS`, `PER`, …) |
 | Suivi runtime | Tickets Raster uniquement — **pas** de `00-PROGRESS.md` obligatoire |
@@ -17,45 +17,51 @@ Orchestrateur : [`raster/AGENTS.md`](../../raster/AGENTS.md) · miroir [`docs/Ra
 
 ```
 products/<app>/docs/specs/
-└── epics/
-    ├── _backlog/tasks/           # triage / bugs isolés
-    ├── _archive/
-    └── <feature-slug>/
-        ├── 00-PLAN.md            # obligatoire pour une feature
-        ├── 00-ARCHITECTURE.md    # si besoin
-        ├── 01-ADR-….md
-        ├── ux/                   # wireframe si UI
-        └── tasks/
-            ├── {ID}-feature-….md
-            └── {ID}-….md         # task | spec
+└── lots/
+    ├── _backlog/tasks/              # triage orphelin
+    ├── _archive/                    # flux terminés
+    └── <lot-slug>/                  # chapitre (kind:lot)
+        ├── tasks/
+        │   └── {ID}-lot-….md
+        └── <sous-lot-slug>/         # optionnel — ≥ 2 flux indépendants
+            ├── 00-PLAN.md
+            ├── ux/
+            └── tasks/
+                ├── {ID}-sous-lot-….md
+                └── {ID}-….md        # task type: feature | bug | physical
 ```
 
 Templates : [`templates/`](templates/).
 
+**Pas** de dossier `epics/` ni `features/` — canon = `lots/` seulement.
+
 ## Briques
 
 ```
-Feature (= 1 dossier epic + 1 ticket kind:feature)
-  → Spec? (ADR)
-  → Task+ (exécutables, parent: + blocked_by:)
+Lot (= chapitre d’app, kind:lot)          # draft tant que pas de task
+  → Task+  type: feature | bug | physical  # seul item backlog / sprint
+  → Sous-lot? → Task+                      # seulement si ≥ 2 flux indépendants
 ```
 
-## Pack agent — créer une epic
+Critère sous-lot : [`raster/AGENTS.md`](../../raster/AGENTS.md) §0.2.
 
-1. `epics/<slug>/00-PLAN.md` (cible + table des tasks + `blocked_by`)
-2. `epics/<slug>/tasks/` : feature + N tasks
-3. `ux/` si UI
-4. `node raster/t.mjs index`
+## Pack agent — créer un lot
+
+1. `lots/<lot-slug>/tasks/` : ticket `kind: lot`
+2. Tasks directes (`parent:` = lot) **ou** sous-lots si ≥ 2 flux
+3. Sous-lot : `lots/<lot-slug>/<sous-lot-slug>/` + PLAN + tasks
+4. `ux/` si UI
+5. `node raster/t.mjs index`
 
 **Ne pas** créer `00-PROGRESS.md` pour le suivi (les status sont sur les tasks).
 
 ## Flux
 
 ```
-raster/inbox.md → promote → products/<app>/…/epics/<slug>/tasks
+raster/inbox.md → promote → products/<app>/docs/specs/lots/…/tasks
                 → commit sprint (tasks)
                 → check progress (tickets)
-                → archive produit
+                → archive produit (lots/_archive)
 ```
 
 ## Anti-doublon
@@ -68,5 +74,5 @@ raster/inbox.md → promote → products/<app>/…/epics/<slug>/tasks
 
 ## Legacy
 
-Ancien stockage `raster/nafura/…/tasks/` — **lecture seule / migration** ; nouvelles écritures = chemins ci-dessus.  
-Ancien `docs/epics/` Sektor → `docs/specs/epics/`.
+Ancien stockage `raster/nafura/…/tasks/` — **lecture seule / migration**.  
+Ancien `docs/specs/epics/` et `docs/specs/features/` → `docs/specs/lots/`.

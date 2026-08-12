@@ -9,9 +9,9 @@ alwaysApply: true
 
 ## Source unique (Git)
 
-**SSOT** = dossier UX de l’epic feature :
+**SSOT** = dossier UX du sous-lot (ou du lot plat) :
 
-`products/<app>/docs/specs/epics/<feature-slug>/ux/<name>-wireframe.canvas.tsx`
+`products/<app>/docs/specs/lots/<lot-slug>/<sous-lot-slug>/ux/<name>-wireframe.canvas.tsx`
 
 Pas de 2ᵉ copie « validée » sous `docs/ux/wireframes/` (legacy / redirect only).
 
@@ -21,7 +21,7 @@ L’IDE ne charge la preview que depuis :
 
 `~/.cursor/projects/<workspace>/canvases/*.canvas.tsx`
 
-Donc : **éditer / versionner dans l’epic** ; **copier** vers `canvases/` pour la preview (même nom de fichier). Après itération : recopier vers l’epic avant commit.
+Donc : **éditer / versionner dans le lot** ; **copier** vers `canvases/` pour la preview (même nom de fichier). Après itération : recopier vers le lot avant commit.
 
 ## Quand
 
@@ -30,13 +30,13 @@ Donc : **éditer / versionner dans l’epic** ; **copier** vers `canvases/` pour
 
 ## Comment
 
-1. Créer / ouvrir le canvas sous `epics/<slug>/ux/`
+1. Créer / ouvrir le canvas sous `lots/<lot-slug>/<sous-lot-slug>/ux/`
 2. Sync → `canvases/` pour preview live
 3. Vues navigables (`useCanvasState`) = états réels du flux
 4. Afficher **cycle de vie**, dirty, gates, AI + **fallback manuel**
 5. Décisions UX listées dans le canvas (+ `ux/notes.md` si besoin)
-6. **Valider avec l’utilisateur** → PLAN epic §6 pointe vers le fichier `ux/*.canvas.tsx`
-7. Plan d’impl → code ; ticket Raster référence le chemin epic
+6. **Valider avec l’utilisateur** → PLAN §6 pointe vers le fichier `ux/*.canvas.tsx`
+7. Plan d’impl → code ; ticket Raster référence le chemin lot
 
 ## Contenu attendu
 

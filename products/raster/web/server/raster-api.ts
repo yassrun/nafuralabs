@@ -11,6 +11,7 @@ export type TaskDto = {
   assignee: string;
   gate: string;
   kind: string;
+  type: string;
   sprint: string;
   parent: string;
   feature: string;
@@ -65,6 +66,27 @@ function parseBlockedBy(raw: string | undefined): string[] {
   return parseListField(raw);
 }
 
+function isHatKind(kind: string) {
+  return (
+    kind === "lot" ||
+    kind === "sous-lot" ||
+    kind === "feature" ||
+    kind === "bug-umbrella"
+  );
+}
+
+function inferWorkType(fm: Record<string, string>): string {
+  const kind = fm.kind || "task";
+  if (isHatKind(kind) || kind === "spec") return "";
+  const ty = (fm.type || "").toLowerCase();
+  if (ty === "bug" || ty === "feature" || ty === "physical") return ty;
+  if (kind === "bug") return "bug";
+  const tags = parseListField(fm.tags);
+  if (tags.some((t) => t.toLowerCase() === "bug")) return "bug";
+  if (tags.some((t) => t.toLowerCase() === "physical")) return "physical";
+  return "feature";
+}
+
 function walkTasks(dir: string, out: string[] = []) {
   if (!fs.existsSync(dir)) return out;
   for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -93,6 +115,14 @@ function loadTasks(repoRoot: string): TaskDto[] {
       path.join(products, app.name, "docs", "specs", "epics"),
       files
     );
+    walkTasks(
+      path.join(products, app.name, "docs", "specs", "features"),
+      files
+    );
+    walkTasks(
+      path.join(products, app.name, "docs", "specs", "lots"),
+      files
+    );
   }
   const tasks: TaskDto[] = [];
   for (const file of files) {
@@ -109,6 +139,7 @@ function loadTasks(repoRoot: string): TaskDto[] {
       assignee: fm.assignee || "",
       gate: fm.gate || "",
       kind: fm.kind || "task",
+      type: inferWorkType(fm),
       sprint: fm.sprint || "",
       parent: fm.parent || "",
       feature: fm.feature || "",
@@ -159,7 +190,7 @@ function writeGlobalInbox(repoRoot: string, lines: string[]) {
     "# INBOX",
     "",
     "<!-- Capture globale Raster — une ligne, @tag optionnel, pas d'ID. -->",
-    "<!-- Promote → products/<app>/docs/specs/epics/<slug>/tasks/ -->",
+    "<!-- Promote → products/<app>/docs/specs/lots/<lot>/<sous-lot?>/tasks/ -->",
     "",
     ...lines.map((l) => `- ${l}`),
     "",
@@ -244,6 +275,55 @@ function walkArchiveTasks(dir: string, out: string[] = []) {
   return out;
 }
 
+function ensureBugUmbrella(repoRoot: string, project: string): TaskDto {
+  const existing = loadTasks(repoRoot).find(
+    (t) => t.project === project && t.kind === "bug-umbrella"
+  );
+  if (existing) return existing;
+
+  const prefix = projectPrefix(project);
+  const id = nextIdForPrefix(repoRoot, prefix);
+  const dir = path.join(
+    repoRoot,
+    "products",
+    project,
+    "docs",
+    "specs",
+    "lots",
+    "_backlog",
+    "tasks"
+  );
+  fs.mkdirSync(dir, { recursive: true });
+  const rel = `products/${project}/docs/specs/lots/_backlog/tasks/${id}-bug-umbrella.md`;
+  const abs = path.join(repoRoot, rel);
+  const body = `---
+id: ${id}
+status: todo
+context: nafura
+kind: bug-umbrella
+priority: P1
+assignee: me
+gate: none
+---
+
+# Bugs
+
+> Parapluie bugs — pas exécutable seul. Enfants = \`kind: bug\`.
+
+## Critères d'acceptation
+- [ ] Les bugs live ont \`parent: ${id}\`
+
+## Journal
+\`\`\`
+${journalStamp()}  kind:bug-umbrella créé (promote)
+\`\`\`
+`;
+  fs.writeFileSync(abs, body, "utf8");
+  const created = loadTasks(repoRoot).find((t) => t.id === id);
+  if (!created) throw new Error(`failed to create bug-umbrella ${id}`);
+  return created;
+}
+
 function parseInboxTags(line: string): { title: string; tags: string[] } {
   const tags: string[] = [];
   const title = line
@@ -259,48 +339,81 @@ function parseInboxTags(line: string): { title: string; tags: string[] } {
 function promoteInboxLine(
   repoRoot: string,
   line: string,
-  project: string
+  project: string,
+  parentId: string
 ): { id: string; file: string; lines: string[]; tasks: TaskDto[] } {
   const projects = listProjects(repoRoot);
   if (!projects.includes(project)) {
     throw new Error(`unknown project: ${project}`);
+  }
+  if (!parentId?.trim()) {
+    throw new Error("pas de parent — laisser en inbox (non promu)");
   }
   const inbox = readGlobalInbox(repoRoot);
   const idx = inbox.indexOf(line);
   if (idx < 0) throw new Error("line not in inbox");
 
   const { title, tags } = parseInboxTags(line);
+  const asBug =
+    tags.some((t) => t.toLowerCase() === "bug") || /^bug\b/i.test(title);
+  const asPhysical =
+    tags.some((t) => t.toLowerCase() === "physical") ||
+    /^physical\b/i.test(title);
+  const workType = asPhysical ? "physical" : asBug ? "bug" : "feature";
+
+  const all = loadTasks(repoRoot);
+  const parent = all.find(
+    (t) => t.id === parentId && t.project === project
+  );
+  if (!parent) throw new Error(`parent ${parentId} introuvable dans ${project}`);
+  const parentIsSousLot =
+    parent.kind === "sous-lot" || parent.kind === "feature";
+  const parentIsLot = parent.kind === "lot";
+  if (!parentIsSousLot && !parentIsLot) {
+    throw new Error("promote → lot (sans sous-lots) ou sous-lot (sinon inbox)");
+  }
+  if (parentIsLot) {
+    const hasSousLots = all.some(
+      (t) =>
+        t.parent === parent.id &&
+        (t.kind === "sous-lot" || t.kind === "feature")
+    );
+    if (hasSousLots) {
+      throw new Error(
+        "ce lot a déjà des sous-lots — rattacher à un sous-lot, pas au lot"
+      );
+    }
+  }
+
   const prefix = projectPrefix(project);
   const id = nextIdForPrefix(repoRoot, prefix);
   const slug = slugify(title);
-  const dir = path.join(
-    repoRoot,
-    "products",
-    project,
-    "docs",
-    "specs",
-    "epics",
-    "_backlog",
-    "tasks"
-  );
+  const dir = path.dirname(path.join(repoRoot, parent.file));
   fs.mkdirSync(dir, { recursive: true });
-  const rel = `products/${project}/docs/specs/epics/_backlog/tasks/${id}-${slug}.md`;
+  const rel = path
+    .relative(repoRoot, path.join(dir, `${id}-${slug}.md`))
+    .replace(/\\/g, "/");
   const abs = path.join(repoRoot, rel);
   if (fs.existsSync(abs)) throw new Error(`file exists: ${rel}`);
 
-  const tagLine =
-    tags.length > 0
-      ? `tags: [${tags.join(", ")}]\n`
-      : "";
+  const nested = parent.file.match(/lots\/[^/]+\/([^/]+)\/tasks\//);
+  const legacy = parent.file.match(/(?:epics|features)\/([^/]+)\/tasks\//);
+  const fromPath = nested?.[1] || (legacy && legacy[1] !== "_backlog" ? legacy[1] : "") || "";
+  const featureSlug = parent.feature || fromPath;
+  const kind = "task";
+  const featureLine = featureSlug ? `feature: ${featureSlug}\n` : "";
+  const tagLine = tags.length > 0 ? `tags: [${tags.join(", ")}]\n` : "";
   const body = `---
 id: ${id}
 status: todo
 context: nafura
-kind: task
+kind: ${kind}
+type: ${workType}
 priority: P2
 assignee: me
 gate: none
-${tagLine}---
+parent: ${parent.id}
+${featureLine}${tagLine}---
 
 # ${title}
 
@@ -311,7 +424,7 @@ ${tagLine}---
 
 ## Journal
 \`\`\`
-${journalStamp()}  balayage · promu depuis inbox
+${journalStamp()}  balayage · promu depuis inbox → ${parent.id}
 \`\`\`
 `;
   fs.writeFileSync(abs, body, "utf8");
@@ -423,14 +536,21 @@ export function rasterApiPlugin(repoRoot?: string): Plugin {
             const body = (await readJson(req)) as {
               line?: string;
               project?: string;
+              parent?: string;
             };
             if (!body.line?.trim() || !body.project?.trim()) {
               return send(res, 400, { error: "line + project required" });
             }
+            if (!body.parent?.trim()) {
+              return send(res, 400, {
+                error: "sans sous-lot → rester inbox, non promu",
+              });
+            }
             const result = promoteInboxLine(
               root,
               body.line.trim(),
-              body.project.trim()
+              body.project.trim(),
+              body.parent.trim()
             );
             return send(res, 200, result);
           }
@@ -470,8 +590,20 @@ export function rasterApiPlugin(repoRoot?: string): Plugin {
             const tasks = loadTasks(root);
             const target = tasks.find((t) => t.id === id);
             if (!target) return send(res, 404, { error: "not found" });
+            const hat =
+              target.kind === "lot" ||
+              target.kind === "sous-lot" ||
+              target.kind === "feature";
+            const childIds = new Set(
+              hat
+                ? tasks.filter((t) => t.parent === id).map((t) => t.id)
+                : []
+            );
             const toDelete = tasks.filter(
-              (t) => t.id === id || (target.kind === "feature" && t.parent === id)
+              (t) =>
+                t.id === id ||
+                childIds.has(t.id) ||
+                (target.kind === "lot" && childIds.has(t.parent))
             );
             for (const t of toDelete) {
               const f = path.join(root, t.file);
@@ -487,12 +619,18 @@ export function rasterApiPlugin(repoRoot?: string): Plugin {
             const tasks = loadTasks(root);
             const target = tasks.find((t) => t.id === id);
             if (!target) return send(res, 404, { error: "not found" });
-            const ids = new Set<string>([id]);
-            if (target.kind === "feature") {
-              for (const t of tasks) {
-                if (t.parent === id && !t.sprint) ids.add(t.id);
-              }
+            if (
+              target.kind === "lot" ||
+              target.kind === "sous-lot" ||
+              target.kind === "feature" ||
+              target.kind === "spec" ||
+              target.kind === "bug-umbrella"
+            ) {
+              return send(res, 400, {
+                error: "seules les tasks sont sprintables (bug / feature / physical)",
+              });
             }
+            const ids = new Set<string>([id]);
             for (const tid of ids) {
               const file = findTaskFile(root, tid);
               if (!file) continue;

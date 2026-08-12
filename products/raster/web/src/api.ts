@@ -6,6 +6,7 @@ export type Task = {
   assignee: string;
   gate: string;
   kind: string;
+  type: string;
   sprint: string;
   parent: string;
   feature: string;
@@ -55,12 +56,12 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ line }),
     }),
-  promote: (line: string, project: string) =>
+  promote: (line: string, project: string, parent: string) =>
     json<{ id: string; file: string; lines: string[]; tasks: Task[] }>(
       "/api/inbox/promote",
       {
         method: "POST",
-        body: JSON.stringify({ line, project }),
+        body: JSON.stringify({ line, project, parent }),
       }
     ),
   patchTask: (id: string, body: { status?: string; sprint?: string | null }) =>

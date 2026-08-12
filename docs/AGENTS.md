@@ -169,7 +169,7 @@ Config front : `products/sektor-btp/web/src/environments/environment.staging.ts`
 | Boot app Sektor | `products/sektor-btp/backend/app/` |
 | UI ERP | `products/sektor-btp/web/app/` |
 | Auth, listing, shell UI | `platform/web/` ou `platform/backend/` |
-| Specs / epics | `products/<app-id>/docs/specs/epics/<slug>/` — [convention](specs/README.md) |
+| Specs / lots | `products/<app-id>/docs/specs/lots/<lot-slug>/` — [convention](specs/README.md) |
 | Docs produit (guides, UX…) | `products/<app-id>/docs/` |
 | Manifests produit | `products/<app-id>/deploy/k8s/` — **pas** sous `infra/k8s/` |
 | Infra partagée | `infra/k8s/overlays/infra/${ENV}/` |

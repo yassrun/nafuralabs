@@ -1,6 +1,6 @@
 # Specs Sektor BTP
 
-Epics live + tickets sous `epics/<slug>/tasks/` (modèle Raster orchestrateur).
+Lots CBS sous `lots/<lot-slug>/` (sous-lots imbriqués). Tickets dans `…/tasks/`.
 
 Inbox : [`inbox.md`](inbox.md)
 

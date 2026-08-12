@@ -40,9 +40,11 @@ export default function App() {
   }, [refresh]);
 
   const selected = useMemo(() => {
-    if (view === "inbox") return null;
     const t = tasks.find((x) => x.id === selectedId) || null;
     if (!t) return null;
+    if (view === "inbox") {
+      return isHat(t.kind) && !hatHasWork(t, tasks) ? t : null;
+    }
     if (filterProject !== ALL && t.project !== filterProject) return null;
     return t;
   }, [tasks, selectedId, filterProject, view]);
@@ -265,16 +267,23 @@ export default function App() {
               showAll={view === "sprint"}
               allCount={
                 view === "sprint"
-                  ? tasks.filter((t) => t.sprint === sprint).length
-                  : tasks.length
+                  ? tasks.filter(
+                      (t) => t.sprint === sprint && isWorkTask(t)
+                    ).length
+                  : tasks.filter((t) => isWorkTask(t)).length
               }
               counts={Object.fromEntries(
                 projects.map((p) => [
                   p,
                   view === "sprint"
-                    ? tasks.filter((t) => t.project === p && t.sprint === sprint)
-                        .length
-                    : tasks.filter((t) => t.project === p).length,
+                    ? tasks.filter(
+                        (t) =>
+                          t.project === p &&
+                          t.sprint === sprint &&
+                          isWorkTask(t)
+                      ).length
+                    : tasks.filter((t) => t.project === p && isWorkTask(t))
+                        .length,
                 ])
               )}
               onSelect={(p) => {
@@ -287,13 +296,19 @@ export default function App() {
           {view === "inbox" ? (
             <Inbox
               lines={inboxLines}
+              drafts={tasks.filter(
+                (t) => isHat(t.kind) && !hatHasWork(t, tasks)
+              )}
+              selectedId={selectedId}
               projects={projects}
+              tasks={tasks}
               busy={busy}
-              defaultProject={filterProject}
-              onPromote={async (line, project) => {
+              defaultProject={filterProject === ALL ? "sektor-btp" : filterProject}
+              onSelect={select}
+              onPromote={async (line, project, parent) => {
                 setBusy(true);
                 try {
-                  const r = await api.promote(line, project);
+                  const r = await api.promote(line, project, parent);
                   setInboxLines(r.lines);
                   setTasks(r.tasks);
                   setFilterProject(project);
@@ -333,6 +348,7 @@ export default function App() {
               tasks={tasks.filter(
                 (t) =>
                   t.sprint === sprint &&
+                  isWorkTask(t) &&
                   (filterProject === ALL || t.project === filterProject)
               )}
               sprint={sprint}
@@ -342,14 +358,23 @@ export default function App() {
           ) : null}
         </main>
         <aside className="side">
-          {view === "inbox" ? (
-            <InboxDetail count={inboxLines.length} />
+          {view === "inbox" && !selected ? (
+            <InboxDetail
+              count={inboxLines.length}
+              drafts={
+                tasks.filter((t) => isHat(t.kind) && !hatHasWork(t, tasks))
+                  .length
+              }
+            />
           ) : (
             <Detail
               task={selected}
+              allTasks={tasks}
               busy={busy}
               confirmDelete={confirmDelete}
               setConfirmDelete={setConfirmDelete}
+              onSelect={select}
+              onCommit={(id) => void onCommit(id)}
               onStatus={(s) => selected && void onStatus(selected.id, s)}
               onDelete={() => selected && void onDelete(selected.id)}
             />
@@ -408,18 +433,29 @@ function ProjectTabs({
 
 function Inbox({
   lines,
+  drafts,
+  selectedId,
   projects,
+  tasks,
   busy,
   defaultProject,
+  onSelect,
   onPromote,
 }: {
   lines: string[];
+  drafts: Task[];
+  selectedId: string | null;
   projects: string[];
+  tasks: Task[];
   busy: boolean;
   defaultProject: string;
-  onPromote: (line: string, project: string) => void | Promise<void>;
+  onSelect: (id: string) => void;
+  onPromote: (line: string, project: string, parent: string) => void | Promise<void>;
 }) {
   const [projectByLine, setProjectByLine] = useState<Record<string, string>>(
+    {}
+  );
+  const [parentByLine, setParentByLine] = useState<Record<string, string>>(
     {}
   );
 
@@ -427,14 +463,33 @@ function Inbox({
     projectByLine[line] ||
     (projects.includes(defaultProject) ? defaultProject : projects[0] || "");
 
+  const parentsFor = (line: string) => {
+    const proj = projectFor(line);
+    const inProj = tasks.filter((t) => t.project === proj);
+    const sousLots = inProj.filter(
+      (t) => t.kind === "sous-lot" || t.kind === "feature"
+    );
+    const lots = inProj.filter((t) => t.kind === "lot");
+    const lotsWithSous = new Set(
+      sousLots.map((s) => s.parent).filter(Boolean)
+    );
+    const flatLots = lots.filter((l) => !lotsWithSous.has(l.id));
+    return [...sousLots, ...flatLots].sort((a, b) =>
+      a.id.localeCompare(b.id)
+    );
+  };
+
+  const parentFor = (line: string) => parentByLine[line] || "";
+
   return (
     <section>
       <h2>Inbox</h2>
       <p className="muted">
-        Globale · {lines.length} ligne(s) · Balayage = promote → task `_backlog`
+        Globale · {lines.length} ligne(s) · {drafts.length} draft(s) ·
+        backlog = tasks seulement
       </p>
       <div className="faint" style={{ marginBottom: 10 }}>
-        raster/inbox.md → products/&lt;projet&gt;/…/epics/_backlog/tasks/
+        Balayage : rattacher à un sous-lot, ou au lot s’il n’a pas de sous-lots.
       </div>
       <div className="list-panel">
         {lines.length === 0 ? (
@@ -444,72 +499,147 @@ function Inbox({
             <thead>
               <tr>
                 <th>Ligne</th>
-                <th style={{ width: 160 }}>Projet</th>
+                <th style={{ width: 140 }}>Projet</th>
+                <th style={{ width: 220 }}>Rattacher</th>
                 <th style={{ width: 120 }} />
               </tr>
             </thead>
             <tbody>
-              {lines.map((line) => (
-                <tr key={line}>
-                  <td>{line}</td>
-                  <td>
-                    <select
-                      value={projectFor(line)}
-                      disabled={busy}
-                      onChange={(e) =>
-                        setProjectByLine((prev) => ({
-                          ...prev,
-                          [line]: e.target.value,
-                        }))
-                      }
-                    >
-                      {projects.map((p) => (
-                        <option key={p} value={p}>
-                          {p}
+              {lines.map((line) => {
+                const parents = parentsFor(line);
+                const parent = parentFor(line);
+                return (
+                  <tr key={line}>
+                    <td>{line}</td>
+                    <td>
+                      <select
+                        value={projectFor(line)}
+                        disabled={busy}
+                        onChange={(e) => {
+                          setProjectByLine((prev) => ({
+                            ...prev,
+                            [line]: e.target.value,
+                          }));
+                          setParentByLine((prev) => ({ ...prev, [line]: "" }));
+                        }}
+                      >
+                        {projects.map((p) => (
+                          <option key={p} value={p}>
+                            {p}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                    <td>
+                      <select
+                        value={parent}
+                        disabled={busy || parents.length === 0}
+                        onChange={(e) =>
+                          setParentByLine((prev) => ({
+                            ...prev,
+                            [line]: e.target.value,
+                          }))
+                        }
+                      >
+                        <option value="">
+                          {parents.length === 0
+                            ? "— aucun · rester inbox —"
+                            : "— rester inbox —"}
                         </option>
-                      ))}
-                    </select>
-                  </td>
-                  <td>
-                    <button
-                      type="button"
-                      className="btn primary"
-                      disabled={busy || !projectFor(line)}
-                      title="Créer une task dans le _backlog du projet"
-                      onClick={() => void onPromote(line, projectFor(line))}
-                    >
-                      Promouvoir
-                    </button>
-                  </td>
-                </tr>
-              ))}
+                        {parents.map((f) => (
+                          <option key={f.id} value={f.id}>
+                            {isLot(f.kind) ? "lot" : "sous-lot"} · {f.id} ·{" "}
+                            {f.title.replace(
+                              /^(Feature|Sous-lot|Lot|Bugs?)\s*[—–-]\s*/i,
+                              ""
+                            )}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                    <td>
+                      <button
+                        type="button"
+                        className="btn primary"
+                        disabled={busy || !parent}
+                        title={
+                          parent
+                            ? "Promouvoir sous ce lot / sous-lot"
+                            : "Sans rattachement → reste inbox, non promu"
+                        }
+                        onClick={() =>
+                          void onPromote(line, projectFor(line), parent)
+                        }
+                      >
+                        Promouvoir
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
+        )}
+      </div>
+      <h3 style={{ marginTop: 18 }}>Draft — lots / sous-lots sans task</h3>
+      <p className="faint" style={{ marginBottom: 8 }}>
+        Pas sprintable, pas backlog. Devient backlog dès la 1ʳᵉ task.
+      </p>
+      <div className="list-panel">
+        {drafts.length === 0 ? (
+          <div className="empty">Aucun chapeau vide</div>
+        ) : (
+          drafts
+            .slice()
+            .sort((a, b) => a.id.localeCompare(b.id))
+            .map((d) => (
+              <div
+                key={d.id}
+                className={`row ${selectedId === d.id ? "selected" : ""}`}
+              >
+                <TypeBadge type={itemType(d)} />
+                <button
+                  type="button"
+                  className={`id ${selectedId === d.id ? "active" : ""}`}
+                  onClick={() => onSelect(d.id)}
+                >
+                  {d.id}
+                </button>
+                <span className="row-title">
+                  {d.title.replace(/^(Feature|Sous-lot|Lot)\s*[—–-]\s*/i, "")}
+                </span>
+                <span className="pill">{d.project}</span>
+                <span className="pill warn">draft</span>
+              </div>
+            ))
         )}
       </div>
     </section>
   );
 }
 
-function InboxDetail({ count }: { count: number }) {
+function InboxDetail({ count, drafts }: { count: number; drafts: number }) {
   return (
     <div className="stack">
       <h2>Balayage</h2>
       <p className="muted">
-        Choisis un projet sur chaque ligne → <strong>Promouvoir</strong>. Ça crée
-        une task dans `_backlog/tasks/` (ID auto) et retire la ligne de l’inbox.
+        Ligne non spécifiée = <strong>inbox</strong>. Lot / sous-lot sans task ={" "}
+        <strong>draft</strong>. Seules les <strong>tasks</strong>{" "}
+        (feature / bug / physical) vont au Backlog et au Sprint.
       </p>
       <div className="pill info" style={{ alignSelf: "flex-start" }}>
-        {count} ligne(s)
+        {count} ligne(s) · {drafts} draft(s)
       </div>
-      <div className="faint">Ensuite : Backlog → Commit sprint</div>
+      <div className="faint">Sans rattachement → on ne les prend pas</div>
     </div>
   );
 }
 
-type ItemType = "feature" | "spec" | "task" | "bug" | "umbrella";
+type ItemType = "lot" | "sous-lot" | "spec" | "feature" | "bug" | "physical";
 
 function isBug(t: Task) {
+  if ((t.type || "").toLowerCase() === "bug") return true;
+  if (t.kind === "bug") return true;
   const tags = t.tags || [];
   if (tags.some((x) => x.toLowerCase() === "bug")) return true;
   if (/-bug-/i.test(t.file || "")) return true;
@@ -517,11 +647,49 @@ function isBug(t: Task) {
   return false;
 }
 
-function itemType(t: Task): Exclude<ItemType, "umbrella"> {
+function isLot(kind: string) {
+  return kind === "lot";
+}
+
+function isSousLot(kind: string) {
+  return kind === "sous-lot" || kind === "feature";
+}
+
+function isHat(kind: string) {
+  return isLot(kind) || isSousLot(kind);
+}
+
+function isWorkTask(t: Task) {
+  if (isHat(t.kind)) return false;
+  if (t.kind === "spec" || t.kind === "bug-umbrella") return false;
+  return true;
+}
+
+function workType(t: Task): "bug" | "feature" | "physical" {
+  const ty = (t.type || "").toLowerCase();
+  if (ty === "bug" || ty === "feature" || ty === "physical") return ty;
   if (isBug(t)) return "bug";
-  if (t.kind === "feature") return "feature";
+  const tags = t.tags || [];
+  if (tags.some((x) => x.toLowerCase() === "physical")) return "physical";
+  return "feature";
+}
+
+function hatHasWork(hat: Task, all: Task[]): boolean {
+  const kids = all.filter((t) => t.parent === hat.id);
+  if (kids.some(isWorkTask)) return true;
+  if (isLot(hat.kind)) {
+    return kids
+      .filter((k) => isSousLot(k.kind))
+      .some((sl) => hatHasWork(sl, all));
+  }
+  return false;
+}
+
+function itemType(t: Task): ItemType {
+  if (isLot(t.kind)) return "lot";
+  if (isSousLot(t.kind)) return "sous-lot";
   if (t.kind === "spec") return "spec";
-  return "task";
+  return workType(t);
 }
 
 function TypeBadge({ type }: { type: ItemType }) {
@@ -545,146 +713,151 @@ function Backlog({
   onCommit: (id: string) => void;
   busy: boolean;
 }) {
-  const features = tasks
-    .filter((t) => t.kind === "feature" && !t.parent)
+  const lots = tasks
+    .filter((t) => isLot(t.kind) && hatHasWork(t, tasks))
     .sort((a, b) => a.id.localeCompare(b.id));
-  const featureIds = new Set(features.map((f) => f.id));
-  const bugs = tasks
-    .filter((t) => t.kind !== "feature" && isBug(t))
+  const lotIds = new Set(
+    tasks.filter((t) => isLot(t.kind)).map((l) => l.id)
+  );
+  const sousLots = tasks
+    .filter((t) => isSousLot(t.kind) && hatHasWork(t, tasks))
     .sort((a, b) => a.id.localeCompare(b.id));
-  const bugIds = new Set(bugs.map((b) => b.id));
-  const underFeature = new Set(
+  const sousLotIds = new Set(
+    tasks.filter((t) => isSousLot(t.kind)).map((s) => s.id)
+  );
+  const underSousLot = new Set(
     tasks
-      .filter(
-        (t) =>
-          t.parent &&
-          featureIds.has(t.parent) &&
-          t.kind !== "feature" &&
-          !bugIds.has(t.id)
-      )
+      .filter((t) => t.parent && sousLotIds.has(t.parent) && isWorkTask(t))
       .map((t) => t.id)
+  );
+  const underLot = new Set(
+    tasks
+      .filter((t) => t.parent && lotIds.has(t.parent) && isWorkTask(t))
+      .map((t) => t.id)
+  );
+  const orphanSousLots = sousLots.filter(
+    (s) => !s.parent || !lotIds.has(s.parent)
   );
   const triage = tasks
     .filter(
       (t) =>
-        t.kind !== "feature" &&
-        !bugIds.has(t.id) &&
-        !underFeature.has(t.id) &&
-        (!t.parent || !featureIds.has(t.parent))
+        isWorkTask(t) && !underSousLot.has(t.id) && !underLot.has(t.id)
     )
     .sort((a, b) => a.id.localeCompare(b.id));
+
+  const renderSousLot = (sl: Task, depth: number) => {
+    const kids = tasks
+      .filter((t) => t.parent === sl.id && isWorkTask(t))
+      .sort((a, b) => a.id.localeCompare(b.id));
+    if (kids.length === 0) return null;
+    return (
+      <div key={sl.id} className={depth === 0 ? "tree-block" : undefined}>
+        <div
+          className={`row feature ${selectedId === sl.id ? "selected" : ""}`}
+          style={depth ? { paddingLeft: 8 + depth * 16 } : undefined}
+        >
+          <span className="tree-mark">▾</span>
+          <TypeBadge type="sous-lot" />
+          <span>{statusGlyph(sl.status)}</span>
+          <button
+            type="button"
+            className={`id ${selectedId === sl.id ? "active" : ""}`}
+            onClick={() => onSelect(sl.id)}
+          >
+            {sl.id}
+          </button>
+          <strong className="row-title">
+            {sl.title.replace(/^(Feature|Sous-lot|Lot)\s*[—–-]\s*/i, "")}
+          </strong>
+          <span className="pill">{kids.length} task(s)</span>
+        </div>
+        {kids.map((k) => (
+          <BacklogRow
+            key={k.id}
+            task={k}
+            depth={depth + 1}
+            selectedId={selectedId}
+            onSelect={onSelect}
+            onCommit={onCommit}
+            busy={busy}
+            showCommit={!k.sprint}
+          />
+        ))}
+      </div>
+    );
+  };
+
+  const liveTasks = tasks.filter(isWorkTask);
 
   return (
     <section>
       <h2>Backlog</h2>
       <p className="muted">
-        {project} · features → tasks · parapluie Bugs · Commit →{" "}
+        {project} · tasks seulement (feature / bug / physical) · Commit →{" "}
         {sprint || "sprint"}
       </p>
       <div className="list-panel backlog-tree">
-        {tasks.length === 0 ? (
-          <div className="empty">Aucune task pour ce projet</div>
+        {liveTasks.length === 0 ? (
+          <div className="empty">Aucune task — lots vides = inbox / draft</div>
         ) : null}
 
-        {features.map((feat) => {
-          const kids = tasks
-            .filter(
-              (t) =>
-                t.parent === feat.id &&
-                t.kind !== "feature" &&
-                !bugIds.has(t.id)
-            )
+        {lots.map((lot) => {
+          const sls = sousLots.filter((s) => s.parent === lot.id);
+          const direct = tasks
+            .filter((t) => t.parent === lot.id && isWorkTask(t))
             .sort((a, b) => a.id.localeCompare(b.id));
+          if (sls.length === 0 && direct.length === 0) return null;
           return (
-            <div key={feat.id} className="tree-block">
+            <div key={lot.id} className="tree-block">
               <div
-                className={`row feature ${selectedId === feat.id ? "selected" : ""}`}
+                className={`row feature umbrella ${selectedId === lot.id ? "selected" : ""}`}
               >
                 <span className="tree-mark">▾</span>
-                <TypeBadge type="feature" />
-                <span>{statusGlyph(feat.status)}</span>
+                <TypeBadge type="lot" />
+                <span>{statusGlyph(lot.status)}</span>
                 <button
                   type="button"
-                  className={`id ${selectedId === feat.id ? "active" : ""}`}
-                  onClick={() => onSelect(feat.id)}
+                  className={`id ${selectedId === lot.id ? "active" : ""}`}
+                  onClick={() => onSelect(lot.id)}
                 >
-                  {feat.id}
+                  {lot.id}
                 </button>
                 <strong className="row-title">
-                  {feat.title.replace(/^Feature\s*[—–-]\s*/i, "")}
+                  {lot.title.replace(/^Lot\s*[—–-]\s*/i, "")}
                 </strong>
-                <span className="pill">{feat.priority}</span>
-                <span className="row-actions">
-                  {feat.sprint ? (
-                    <span className="pill ok">{feat.sprint}</span>
-                  ) : (
-                    <button
-                      type="button"
-                      className="btn primary"
-                      disabled={busy}
-                      onClick={() => onCommit(feat.id)}
-                    >
-                      → Sprint
-                    </button>
-                  )}
-                </span>
+                {sls.length > 0 ? (
+                  <span className="pill">{sls.length} sous-lot(s)</span>
+                ) : (
+                  <span className="pill">{direct.length} task(s)</span>
+                )}
               </div>
-              {kids.length === 0 ? (
-                <div className="empty tree-child">
-                  Pas d’enfants — découper avant exécution
-                </div>
-              ) : (
-                kids.map((k) => (
-                  <BacklogRow
-                    key={k.id}
-                    task={k}
-                    depth={1}
-                    selectedId={selectedId}
-                    onSelect={onSelect}
-                    onCommit={onCommit}
-                    busy={busy}
-                    showCommit={false}
-                  />
-                ))
-              )}
+              {sls.map((sl) => renderSousLot(sl, 1))}
+              {direct.map((k) => (
+                <BacklogRow
+                  key={k.id}
+                  task={k}
+                  depth={1}
+                  selectedId={selectedId}
+                  onSelect={onSelect}
+                  onCommit={onCommit}
+                  busy={busy}
+                  showCommit={!k.sprint}
+                />
+              ))}
             </div>
           );
         })}
 
-        <div className="tree-block">
-          <div className="row feature umbrella">
-            <span className="tree-mark">▾</span>
-            <TypeBadge type="umbrella" />
-            <strong className="row-title">Bugs</strong>
-            <span className="row-actions">
-              <span className="pill">{bugs.length}</span>
-            </span>
-          </div>
-          {bugs.length === 0 ? (
-            <div className="empty tree-child">Aucun bug tagué</div>
-          ) : (
-            bugs.map((b) => (
-              <BacklogRow
-                key={b.id}
-                task={b}
-                depth={1}
-                selectedId={selectedId}
-                onSelect={onSelect}
-                onCommit={onCommit}
-                busy={busy}
-                showCommit
-                meta={b.parent ? `← ${b.parent}` : undefined}
-              />
-            ))
-          )}
-        </div>
+        {orphanSousLots.length > 0
+          ? orphanSousLots.map((sl) => renderSousLot(sl, 0))
+          : null}
 
         {triage.length > 0 ? (
           <div className="tree-block">
             <div className="row feature umbrella">
               <span className="tree-mark">▾</span>
-              <TypeBadge type="umbrella" />
-              <strong className="row-title">_backlog</strong>
+              <strong className="row-title">Hors CBS</strong>
+              <span className="pill">inbox à rattacher</span>
               <span className="row-actions">
                 <span className="pill">{triage.length}</span>
               </span>
@@ -707,6 +880,7 @@ function Backlog({
     </section>
   );
 }
+
 
 function BacklogRow({
   task,
@@ -852,16 +1026,22 @@ function Sprint({
 
 function Detail({
   task,
+  allTasks,
   busy,
   confirmDelete,
   setConfirmDelete,
+  onSelect,
+  onCommit,
   onStatus,
   onDelete,
 }: {
   task: Task | null;
+  allTasks: Task[];
   busy: boolean;
   confirmDelete: boolean;
   setConfirmDelete: (v: boolean) => void;
+  onSelect: (id: string) => void;
+  onCommit: (id: string) => void;
   onStatus: (status: string) => void;
   onDelete: () => void;
 }) {
@@ -869,17 +1049,175 @@ function Detail({
     return (
       <>
         <h2>Détail</h2>
-        <p className="muted">Sélectionne une task dans le tree.</p>
+        <p className="muted">Sélectionne une ligne dans le tree.</p>
       </>
     );
   }
+  if (isHat(task.kind)) {
+    return (
+      <UmbrellaDetail
+        task={task}
+        childrenTasks={allTasks
+          .filter((t) => t.parent === task.id)
+          .sort((a, b) => a.id.localeCompare(b.id))}
+        allTasks={allTasks}
+        busy={busy}
+        confirmDelete={confirmDelete}
+        setConfirmDelete={setConfirmDelete}
+        onSelect={onSelect}
+        onDelete={onDelete}
+      />
+    );
+  }
+  return (
+    <WorkItemDetail
+      task={task}
+      parent={allTasks.find((t) => t.id === task.parent) || null}
+      busy={busy}
+      confirmDelete={confirmDelete}
+      setConfirmDelete={setConfirmDelete}
+      onSelect={onSelect}
+      onCommit={onCommit}
+      onStatus={onStatus}
+      onDelete={onDelete}
+    />
+  );
+}
+
+function UmbrellaDetail({
+  task,
+  childrenTasks,
+  allTasks,
+  busy,
+  confirmDelete,
+  setConfirmDelete,
+  onSelect,
+  onDelete,
+}: {
+  task: Task;
+  childrenTasks: Task[];
+  allTasks: Task[];
+  busy: boolean;
+  confirmDelete: boolean;
+  setConfirmDelete: (v: boolean) => void;
+  onSelect: (id: string) => void;
+  onDelete: () => void;
+}) {
+  const type = itemType(task);
+  const asLot = isLot(task.kind);
+  const sousKids = childrenTasks.filter((t) => isSousLot(t.kind));
+  const taskKids = childrenTasks.filter(isWorkTask);
+  const mixedLot = asLot && sousKids.length > 0;
+  const childLabel = mixedLot ? "Sous-lots" : "Tasks";
+  const doing = taskKids.filter((t) => t.status === "doing").length;
+  const blocked = taskKids.filter((t) => t.status === "blocked").length;
+  const listedCount = mixedLot ? sousKids.length : taskKids.length;
+  const isDraft = !hatHasWork(task, allTasks);
+  return (
+    <div className="stack detail-feature">
+      <div className="detail-kicker">
+        <TypeBadge type={type} />
+        <span className="faint">
+          {isDraft ? "draft · inbox tant que pas de task" : "chapeau · pas sprintable"}
+        </span>
+      </div>
+      <h2>{task.id}</h2>
+      <div className="title">
+        {task.title.replace(/^(Feature|Sous-lot|Lot|Bugs?)\s*[—–-]\s*/i, "")}
+      </div>
+      <div className="row">
+        <span className="pill">{task.priority}</span>
+        {isDraft ? (
+          <span className="pill warn">draft</span>
+        ) : (
+          <span className="pill">structure</span>
+        )}
+      </div>
+      <div className="faint">{task.file}</div>
+
+      <div className="stats compact">
+        <div className="stat">
+          <strong>{listedCount}</strong>
+          <span>{childLabel.toLowerCase()}</span>
+        </div>
+        <div className="stat">
+          <strong>{doing}</strong>
+          <span>doing</span>
+        </div>
+        <div className="stat">
+          <strong>{blocked}</strong>
+          <span>blocked</span>
+        </div>
+      </div>
+
+      <h3>{childLabel}</h3>
+      {isDraft ? (
+        <div className="callout">
+          Pas de task — reste en inbox / draft. Backlog et Sprint = tasks
+          seulement (feature / bug / physical).
+        </div>
+      ) : (
+        <ul className="child-list">
+          {childrenTasks.map((c) => (
+            <li key={c.id}>
+              <button
+                type="button"
+                className="child-hit"
+                onClick={() => onSelect(c.id)}
+              >
+                <span>{statusGlyph(c.status)}</span>
+                <span className="id">{c.id}</span>
+                <span className="child-title">{c.title}</span>
+                <span className="pill">{c.status}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <DeleteBlock
+        id={task.id}
+        extra=" + enfants"
+        busy={busy}
+        confirmDelete={confirmDelete}
+        setConfirmDelete={setConfirmDelete}
+        onDelete={onDelete}
+      />
+    </div>
+  );
+}
+
+function WorkItemDetail({
+  task,
+  parent,
+  busy,
+  confirmDelete,
+  setConfirmDelete,
+  onSelect,
+  onCommit,
+  onStatus,
+  onDelete,
+}: {
+  task: Task;
+  parent: Task | null;
+  busy: boolean;
+  confirmDelete: boolean;
+  setConfirmDelete: (v: boolean) => void;
+  onSelect: (id: string) => void;
+  onCommit: (id: string) => void;
+  onStatus: (status: string) => void;
+  onDelete: () => void;
+}) {
   const type = itemType(task);
   return (
-    <div className="stack">
+    <div className="stack detail-task">
+      <div className="detail-kicker">
+        <TypeBadge type={type} />
+        <span className="faint">task · {type}</span>
+      </div>
       <h2>{task.id}</h2>
       <div className="title">{task.title}</div>
       <div className="row">
-        <TypeBadge type={type} />
         <span className="pill">{task.priority}</span>
         <span className="pill">[{task.assignee}]</span>
         <span className="pill">gate:{task.gate}</span>
@@ -889,6 +1227,20 @@ function Detail({
           <span className="pill">backlog</span>
         )}
       </div>
+      {parent ? (
+        <button
+          type="button"
+          className="btn ghost parent-link"
+          onClick={() => onSelect(parent.id)}
+        >
+          parent · {parent.id} · {itemType(parent)}
+        </button>
+      ) : (
+        <div className="faint">task directe · hors CBS (OK jusqu’au rattachement)</div>
+      )}
+      {task.feature ? (
+        <div className="faint">feature: {task.feature}</div>
+      ) : null}
       <div className="faint">{task.file}</div>
 
       <div className="field">
@@ -907,11 +1259,48 @@ function Detail({
         </select>
       </div>
 
+      {!task.sprint ? (
+        <button
+          type="button"
+          className="btn primary"
+          disabled={busy}
+          onClick={() => onCommit(task.id)}
+        >
+          → Sprint
+        </button>
+      ) : null}
+
+      <DeleteBlock
+        id={task.id}
+        extra=""
+        busy={busy}
+        confirmDelete={confirmDelete}
+        setConfirmDelete={setConfirmDelete}
+        onDelete={onDelete}
+      />
+    </div>
+  );
+}
+
+function DeleteBlock({
+  id,
+  extra,
+  busy,
+  confirmDelete,
+  setConfirmDelete,
+  onDelete,
+}: {
+  id: string;
+  extra: string;
+  busy: boolean;
+  confirmDelete: boolean;
+  setConfirmDelete: (v: boolean) => void;
+  onDelete: () => void;
+}) {
+  return (
+    <>
       <h3>Abandon</h3>
-      <p className="muted">
-        Delete fichier{task.kind === "feature" ? " + enfants" : ""}. Pas de
-        dropped.
-      </p>
+      <p className="muted">Delete fichier{extra}. Pas de dropped.</p>
       {!confirmDelete ? (
         <button
           type="button"
@@ -922,7 +1311,7 @@ function Detail({
         </button>
       ) : (
         <div className="callout danger stack">
-          Confirmer delete {task.id} ?
+          Confirmer delete {id} ?
           <div className="row">
             <button
               type="button"
@@ -942,6 +1331,6 @@ function Detail({
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }

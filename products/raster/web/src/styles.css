@@ -144,7 +144,7 @@ button {
 .layout {
   flex: 1;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-columns: minmax(0, 1.35fr) minmax(380px, 40%);
   gap: 0;
   min-height: 0;
   overflow: hidden;
@@ -169,11 +169,11 @@ button {
 .side {
   border-left: 1px solid var(--line);
   background: var(--bg-elev);
-  padding: 16px;
+  padding: 16px 20px;
   overflow: auto;
-  min-width: 300px;
-  width: 340px;
-  max-width: 340px;
+  min-width: 0;
+  width: auto;
+  max-width: none;
 }
 
 .project-tabs {
@@ -313,11 +313,19 @@ h3 {
   line-height: 1.2;
 }
 
-.type-feature {
-  background: #ece8fa;
-  color: #3d348b;
+.type-lot {
+  background: #e8eef8;
+  color: #1e3a5f;
+  min-width: 72px;
 }
 
+.type-sous-lot {
+  background: #ece8fa;
+  color: #3d348b;
+  min-width: 78px;
+}
+
+.type-feature,
 .type-task {
   background: var(--accent-soft);
   color: var(--accent);
@@ -328,27 +336,35 @@ h3 {
   color: var(--danger);
 }
 
+.type-physical {
+  background: #f3ead8;
+  color: #6b4f1d;
+}
+
 .type-spec {
   background: #eef1f5;
   color: var(--muted);
 }
 
-.type-umbrella {
+.type-umbrella,
+.type-bug-umbrella {
   background: #fff6d9;
   color: var(--warn);
   border: 1px dashed #d8bd6a;
+  min-width: 108px;
 }
 
 .type-row-bug {
   border-left: 3px solid var(--danger);
 }
 
+.type-row-feature,
 .type-row-task {
   border-left: 3px solid var(--accent);
 }
 
-.type-row-feature {
-  border-left: 3px solid #3d348b;
+.type-row-physical {
+  border-left: 3px solid #6b4f1d;
 }
 
 .row.child {
@@ -556,6 +572,65 @@ h3 {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.detail-kicker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stats.compact {
+  margin: 4px 0 8px;
+  gap: 12px;
+}
+
+.stats.compact .stat strong {
+  font-size: 16px;
+}
+
+.child-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.child-list li + li {
+  border-top: 1px solid var(--line);
+}
+
+.child-hit {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: #fff;
+  padding: 7px 8px;
+  font: inherit;
+}
+
+.child-hit:hover {
+  background: var(--accent-soft);
+}
+
+.child-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.parent-link {
+  align-self: flex-start;
+  padding: 4px 8px;
+  font-size: 12px;
 }
 
 .callout {

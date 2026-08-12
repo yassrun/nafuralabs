@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * Regen Raster orchestrator views from product epic tasks.
- * Walks: products/<app>/docs/specs/epics/<slug>/tasks/*.md
- * Skips: epics/_archive (done)
+ * Regen Raster orchestrator views from product lot tasks.
+ * Walks: products/<app>/docs/specs/lots/.../tasks/*.md
+ * Skips: lots/_archive (done)
  * Writes: INDEX.tsv, SPRINT.md, BACKLOG.md under raster/
  *
  *   node raster/regen.mjs
@@ -43,14 +43,10 @@ function collectTaskFiles() {
   if (!fs.existsSync(PRODUCTS_ROOT)) return files;
   for (const app of fs.readdirSync(PRODUCTS_ROOT, { withFileTypes: true })) {
     if (!app.isDirectory()) continue;
-    const epics = path.join(
-      PRODUCTS_ROOT,
-      app.name,
-      "docs",
-      "specs",
-      "epics"
-    );
-    walkEpicTasks(epics, files);
+    const specs = path.join(PRODUCTS_ROOT, app.name, "docs", "specs");
+    for (const bucket of ["lots", "features", "epics"]) {
+      walkEpicTasks(path.join(specs, bucket), files);
+    }
   }
   return files;
 }
@@ -125,6 +121,31 @@ function loadTasks() {
   return tasks;
 }
 
+function isHat(t) {
+  return (
+    t.kind === "lot" ||
+    t.kind === "sous-lot" ||
+    t.kind === "feature" ||
+    t.kind === "bug-umbrella"
+  );
+}
+
+function isWorkTask(t) {
+  if (isHat(t) || t.kind === "spec") return false;
+  return true;
+}
+
+function hatHasWork(hat, all) {
+  const kids = all.filter((t) => t.parent === hat.id);
+  if (kids.some(isWorkTask)) return true;
+  if (hat.kind === "lot") {
+    return kids
+      .filter((k) => k.kind === "sous-lot" || k.kind === "feature")
+      .some((sl) => hatHasWork(sl, all));
+  }
+  return false;
+}
+
 function sortTasks(a, b) {
   const sa = STATUS_ORDER[a.status] ?? 9;
   const sb = STATUS_ORDER[b.status] ?? 9;
@@ -163,7 +184,8 @@ function isoWeekInfo(d = new Date()) {
 }
 
 function writeIndex(tasks) {
-  const sorted = [...tasks].sort(sortTasks);
+  const live = tasks.filter(isWorkTask);
+  const sorted = [...live].sort(sortTasks);
   const header =
     "id\tstatus\tpriority\tcontext\tassignee\tgate\tkind\tsprint\tparent\tfeature\ttitle";
   const rows = sorted.map((t) =>
@@ -195,12 +217,14 @@ function padId(id) {
 
 function writeSprint(tasks) {
   const { id, label } = isoWeekInfo();
-  const committed = tasks.filter((t) => t.sprint === id).sort(sortTasks);
+  const committed = tasks
+    .filter((t) => t.sprint === id && isWorkTask(t))
+    .sort(sortTasks);
   const readyP1 = tasks
     .filter(
       (t) =>
+        isWorkTask(t) &&
         !t.sprint &&
-        t.kind !== "feature" &&
         t.priority === "P1" &&
         t.status === "todo"
     )
@@ -254,8 +278,10 @@ function writeSprint(tasks) {
 }
 
 function sortBacklogCluster(a, b) {
-  const ua = a.kind === "feature" && !a.parent ? 0 : 1;
-  const ub = b.kind === "feature" && !b.parent ? 0 : 1;
+  const rank = (t) =>
+    t.kind === "lot" ? 0 : t.kind === "sous-lot" || t.kind === "feature" ? 1 : 2;
+  const ua = rank(a);
+  const ub = rank(b);
   if (ua !== ub) return ua - ub;
   const sa = STATUS_ORDER[a.status] ?? 9;
   const sb = STATUS_ORDER[b.status] ?? 9;
@@ -267,11 +293,17 @@ function sortBacklogCluster(a, b) {
 }
 
 function clusterKey(t) {
-  return t.feature || `_${t.id}`;
+  if (t.kind === "lot") return `L:${t.id}`;
+  if (t.kind === "sous-lot" || t.kind === "feature")
+    return t.parent ? `L:${t.parent}` : `S:${t.id}`;
+  if (t.parent) return `S:${t.parent}`;
+  return `_${t.id}`;
 }
 
 function clusterPriority(list) {
-  const umbrella = list.find((t) => t.kind === "feature" && !t.parent);
+  const umbrella = list.find(
+    (t) => t.kind === "lot" || t.kind === "sous-lot" || t.kind === "feature"
+  );
   if (umbrella) return PRIORITY_ORDER[umbrella.priority] ?? 9;
   return Math.min(...list.map((t) => PRIORITY_ORDER[t.priority] ?? 9));
 }
@@ -293,7 +325,7 @@ function writeBacklog(tasks) {
   const lines = [
     "# BACKLOG (généré — ne pas éditer)",
     "",
-    "> Orchestrateur Raster. Source = `products/<app>/docs/specs/epics/**/tasks/*.md`.",
+    "> Orchestrateur Raster. Source = `products/<app>/docs/specs/lots/.../tasks/*.md`.",
     "> Regen : `node raster/regen.mjs` / `node raster/t.mjs index`.",
     "> Inbox : `products/<app>/docs/specs/inbox.md`.",
     "",
@@ -319,9 +351,23 @@ function writeBacklog(tasks) {
     for (const ck of clusterOrder) {
       const members = clusters.get(ck).sort(sortBacklogCluster);
       for (const t of members) {
+        if (isHat(t) && !hatHasWork(t, list)) continue;
+        if (t.kind === "spec") continue;
         const g = GLYPH[t.status] || "·";
-        const kindOrStatus = t.kind === "feature" ? "feature" : t.status;
-        const bullet = t.parent ? "  -" : "-";
+        const kindOrStatus =
+          t.kind === "lot" ||
+          t.kind === "sous-lot" ||
+          t.kind === "feature" ||
+          t.kind === "spec" ||
+          t.kind === "task"
+            ? t.kind
+            : t.status;
+        const bullet =
+          t.kind === "lot"
+            ? "-"
+            : t.kind === "sous-lot" || t.kind === "feature"
+              ? "  -"
+              : "    -";
         lines.push(
           `${bullet} ${g} \`${padId(t.id).trim()}\` ${kindOrStatus} — ${t.title}`
         );
