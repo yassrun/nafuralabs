@@ -1,6 +1,6 @@
 # BACKLOG (généré — ne pas éditer)
 
-> Orchestrateur Raster. Source = `products/<app>/docs/specs/lots/.../tasks/*.md`.
+> Orchestrateur. Source canon = `<app>/raster/lots/…` (peer ou `products/<app>`). Legacy = `docs/specs/lots/`.
 > Regen : `node raster/regen.mjs` / `node raster/t.mjs index`.
 > Inbox : `products/<app>/docs/specs/inbox.md`.
 
@@ -40,6 +40,10 @@
 
     - · `MBS-02` task — ajouter les remarques mbs et l'avenant de la …
 
+## nafura-platform
+
+    - · `PLT-02` task — CH-00 — Première version du cadrage
+
 ---
 
-**37 live · 5 projets**
+**38 live · 6 projets**

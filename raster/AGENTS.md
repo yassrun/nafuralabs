@@ -1,7 +1,7 @@
 # AGENTS.md — Raster (orchestrateur)
 
-> **Raster** = orchestrateur git-native (INDEX · Sprint · Backlog · CLI).  
-> **Les fichiers Task / Feature / Spec ne vivent PAS sous `raster/`** — ils vivent dans chaque **produit / projet**.  
+> **Raster** = orchestrateur (lot · sous-lot · **task**). **Pas** le framework de spec (SPEC / CH / canvas).  
+> **`<projet>/raster/`** = fichiers du projet. **`raster/` racine** = scan + INDEX / Sprint / Backlog.  
 > Sync miroir : [`docs/Raster.md`](../docs/Raster.md).
 
 **Actors :** `me` | `agent` uniquement.  
@@ -13,16 +13,17 @@
 
 | Décision | Choix |
 |----------|--------|
-| Rôle Raster | Orchestre : regen vues, owns **Sprint**, affiche backlog complet, CLI `t` |
-| Stockage tickets | **Dans le produit/projet** — jamais sous `raster/nafura/…` |
-| Chemin tasks | `products/<app>/docs/specs/lots/<lot-slug>/<sous-lot-slug?>/tasks/{ID}-{slug}.md` |
+| Rôle Raster racine | Orchestre : regen vues, owns **Sprint**, affiche backlog complet, CLI `t` |
+| Stockage tickets | **Dans le projet** sous `<projet>/raster/lots/…` — jamais sous `raster/nafura/…` (legacy) |
+| Chemin tasks (canon) | `<projet>/raster/lots/<lot-slug>/…/tasks/{ID}-{slug}.md` (peer racine ou `products/<app>`) |
+| Chemin tasks (legacy) | `products/<app>/docs/specs/lots/…` — encore indexé, à migrer |
 | Inbox | **Une globale** : `raster/inbox.md` (promote vers un projet ensuite) |
-| IDs | **Par projet** (préfixe dédié, immuable) — ex. Sektor=`ERP`, Raster=`RAS`, Personal=`PER`, Ops=`OPS` |
-| Epic docs | Même dossier : `00-PLAN.md` (+ UX / ADR si besoin) — **pas** de `00-PROGRESS.md` obligatoire (suivi = tickets) |
-| Vocabulaire | **Lot / sous-lot** = chapeaux (draft tant que pas de task) · **Task** `type:` bug \| feature \| physical · **pas** de feature/epic/bug-umbrella |
-| Tout est un projet | Personal, ops, client… = `products/<app>/` (plus de dossiers spéciaux sous `raster/`) |
+| IDs | **Par projet** (préfixe dédié, immuable) — ex. Sektor=`SEKTOR`, Platform=`PLT`, Raster=`RAS`, Personal=`PER`, Ops=`OPS` |
+| Specs | `<projet>/raster/lots/<lot>/SPEC.md` (contrat) · `CH-nn-INIT\|EVOL\|CORRECTION/` (PLAN + tasks) · `ux/*.canvas.tsx` (flux) |
+| Vocabulaire | **Lot** = dossier + SPEC · **CH** = changement · **Task** = seul item sprintable · **pas** de ticket `kind: lot` |
+| Tout projet | **DOIT** avoir `raster/` (lot → CH → task), même hors IT (ex. accounting) |
 
-**Migration :** chemins legacy `raster/nafura/…/tasks/` encore présents → à migrer ; **nouvelles écritures** = modèle ci-dessous uniquement.
+**Migration :** `docs/specs/lots` → `<projet>/raster/lots` ; `raster/nafura/…/tasks/` legacy → à migrer.
 
 ---
 
@@ -60,28 +61,28 @@ Un flux est indépendant si **les 3** sont vrais :
 
 ## 1. Où vit quoi
 
-### Produit / projet (`products/<app>/`)
+### Produit / projet
 
 ```
-products/<app>/
-  docs/specs/
+<projet>/                         # peer racine (ex. nafura-platform) ou products/<app>
+  raster/                         # SRC specs normalisée — obligatoire — pas de la doc
     lots/
-      <lot-slug>/                     # chapitre (kind:lot dans tasks/)
+      <lot-slug>/                 # chapitre (kind:lot dans tasks/)
         tasks/
-          {ID}-lot-….md               # kind: lot
-          {ID}-….md                   # kind: task  (lot plat, pas de sous-lot)
-        <sous-lot-slug>/              # optionnel — §0.2
+          {ID}-lot-….md           # kind: lot
+          {ID}-….md               # kind: task  (lot plat)
+        <sous-lot-slug>/          # optionnel — §0.2
           00-PLAN.md
           ux/…
           tasks/
-            {ID}-sous-lot-….md        # kind: sous-lot
-            {ID}-….md                 # kind: task | spec
-      _archive/                       # lots / flux terminés
-      _backlog/tasks/                 # triage orphelin
-  ROADMAP.md                          # optionnel
+            {ID}-sous-lot-….md
+            {ID}-….md
+      _archive/
+      _backlog/tasks/
+  ROADMAP.md                      # optionnel (doc produit, hors raster/)
 ```
 
-### Raster orchestrateur (`raster/` racine)
+### Raster orchestrateur (`raster/` racine monorepo)
 
 ```
 raster/
@@ -183,7 +184,8 @@ Pack agent « nouveau sous-lot » (seulement si critère §0.2) :
 
 | Projet (`products/…`) | Préfixe |
 |-----------------------|---------|
-| `sektor-btp` | `ERP` |
+| `nafura-platform` (racine) | `PLT` |
+| `sektor-btp` / `sektor` | `SEKTOR` (legacy tickets `ERP-*` encore en vie) |
 | `raster` | `RAS` |
 | `personal` | `PER` |
 | `ops` | `OPS` |

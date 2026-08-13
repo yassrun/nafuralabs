@@ -1,9 +1,14 @@
 #!/usr/bin/env node
 /**
  * Regen Raster orchestrator views from product lot tasks.
- * Walks: products/<app>/docs/specs/lots/.../tasks/*.md
- * Skips: lots/_archive (done)
- * Writes: INDEX.tsv, SPRINT.md, BACKLOG.md under raster/
+ * Walks every NafuraLabs project (IT or not):
+ *   - <projet>/raster/lots/.../tasks/*.md     (peer racine : nafura-platform, accounting, …)
+ *   - products/<app>/raster/lots/.../tasks/*.md
+ * Legacy: products/<app>/docs/specs/lots|features|epics/.../tasks/*.md
+ * Does NOT treat repo-root raster/ as a project (orchestrator only).
+ * Sync: any task file on a project appears in INDEX/BACKLOG after regen.
+ * Skips: lots/_archive
+ * Writes: INDEX.tsv, SPRINT.md, BACKLOG.md under repo-root raster/ (orchestrateur)
  *
  *   node raster/regen.mjs
  *   node raster/t.mjs index
@@ -15,6 +20,28 @@ import { fileURLToPath } from "node:url";
 const RASTER_ROOT = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(RASTER_ROOT, "..");
 const PRODUCTS_ROOT = path.join(REPO_ROOT, "products");
+
+/** Root dirs that are never peer products (even if they gain docs/specs later). */
+const ROOT_SKIP = new Set([
+  ".git",
+  ".cursor",
+  "node_modules",
+  "products",
+  "platform",
+  "raster",
+  "infra",
+  "toolchain",
+  "shared",
+  "docs",
+  "secrets",
+  "build",
+  "gradle",
+  "tmp",
+  "tools",
+  "BDP",
+  "cmd",
+  "marketing",
+]);
 
 const STATUS_ORDER = { doing: 0, review: 1, blocked: 2, todo: 3, done: 4 };
 const PRIORITY_ORDER = { P0: 0, P1: 1, P2: 2, P3: 3 };
@@ -38,15 +65,33 @@ function walkEpicTasks(dir, out = []) {
   return out;
 }
 
+function collectSpecsUnder(appRoot, files) {
+  // Canon: <app>/raster/lots (spec src normalisée — pas de la doc)
+  walkEpicTasks(path.join(appRoot, "raster", "lots"), files);
+  // Legacy: docs/specs/{lots,features,epics}
+  const specs = path.join(appRoot, "docs", "specs");
+  for (const bucket of ["lots", "features", "epics"]) {
+    walkEpicTasks(path.join(specs, bucket), files);
+  }
+}
+
 function collectTaskFiles() {
   const files = [];
-  if (!fs.existsSync(PRODUCTS_ROOT)) return files;
-  for (const app of fs.readdirSync(PRODUCTS_ROOT, { withFileTypes: true })) {
-    if (!app.isDirectory()) continue;
-    const specs = path.join(PRODUCTS_ROOT, app.name, "docs", "specs");
-    for (const bucket of ["lots", "features", "epics"]) {
-      walkEpicTasks(path.join(specs, bucket), files);
+  if (fs.existsSync(PRODUCTS_ROOT)) {
+    for (const app of fs.readdirSync(PRODUCTS_ROOT, { withFileTypes: true })) {
+      if (!app.isDirectory()) continue;
+      collectSpecsUnder(path.join(PRODUCTS_ROOT, app.name), files);
     }
+  }
+  // Peer products at repo root (ex. nafura-platform/)
+  for (const ent of fs.readdirSync(REPO_ROOT, { withFileTypes: true })) {
+    if (!ent.isDirectory()) continue;
+    if (ROOT_SKIP.has(ent.name) || ent.name.startsWith(".")) continue;
+    const appRoot = path.join(REPO_ROOT, ent.name);
+    const hasRaster = fs.existsSync(path.join(appRoot, "raster", "lots"));
+    const hasLegacy = fs.existsSync(path.join(appRoot, "docs", "specs"));
+    if (!hasRaster && !hasLegacy) continue;
+    collectSpecsUnder(appRoot, files);
   }
   return files;
 }
@@ -77,8 +122,12 @@ function parseFrontmatter(raw) {
 
 function projectFromPath(filePath) {
   const rel = path.relative(REPO_ROOT, filePath).replace(/\\/g, "/");
-  const m = rel.match(/^products\/([^/]+)\//);
-  if (m) return m[1];
+  const underProducts = rel.match(/^products\/([^/]+)\//);
+  if (underProducts) return underProducts[1];
+  const peerRaster = rel.match(/^([^/]+)\/raster\//);
+  if (peerRaster) return peerRaster[1];
+  const peerLegacy = rel.match(/^([^/]+)\/docs\/specs\//);
+  if (peerLegacy) return peerLegacy[1];
   return "misc";
 }
 
@@ -325,7 +374,7 @@ function writeBacklog(tasks) {
   const lines = [
     "# BACKLOG (généré — ne pas éditer)",
     "",
-    "> Orchestrateur Raster. Source = `products/<app>/docs/specs/lots/.../tasks/*.md`.",
+    "> Orchestrateur. Source canon = `<app>/raster/lots/…` (peer ou `products/<app>`). Legacy = `docs/specs/lots/`.",
     "> Regen : `node raster/regen.mjs` / `node raster/t.mjs index`.",
     "> Inbox : `products/<app>/docs/specs/inbox.md`.",
     "",

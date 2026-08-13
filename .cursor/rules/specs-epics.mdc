@@ -1,32 +1,37 @@
 ---
-description: Specs / lots — tasks dans le produit ; Raster = orchestrateur
+description: Specs / lots — src sous <projet>/raster/ ; orchestrateur = raster/ racine
 alwaysApply: true
 ---
 
 # Specs / lots — où écrire quoi
 
 Détail : `docs/specs/README.md` · templates `docs/specs/templates/`.  
-Raster orchestrateur : `raster/AGENTS.md`.
+Orchestrateur : `raster/AGENTS.md`.  
+Vision : `FRAMEWORK_VISION_STRUCTURE_V0.md`.
 
 ## Chemins (canon 2026-08-12)
 
 | Livrable | Où |
 |----------|-----|
-| PLAN / ADR / UX | `products/<app>/docs/specs/lots/<lot-slug>/<sous-lot-slug>/` |
-| **Tickets** (lot / sous-lot / spec / task) | `…/lots/<lot-slug>/…/tasks/{ID}-{slug}.md` |
-| Inbox | **Globale** : `raster/inbox.md` |
-| Triage | `…/lots/_backlog/tasks/` |
+| **Src specs** (PLAN / ADR / UX / CADRAGE / tickets) | `<projet>/raster/lots/<lot-slug>/…` |
+| **Tickets** | `…/raster/lots/<lot-slug>/…/tasks/{ID}-{slug}.md` |
+| Inbox | **Globale** : `raster/inbox.md` (racine monorepo) |
+| Triage | `…/raster/lots/_backlog/tasks/` |
 | Preview canvas IDE | copie `~/.cursor/projects/<workspace>/canvases/` |
-| INDEX / Sprint / Backlog | `raster/` (**généré** — pas de stockage métier) |
+| INDEX / Sprint / Backlog | `raster/` racine (**généré** — orchestrateur, pas stockage métier) |
+
+`<projet>` = peer racine (`nafura-platform/`, …) ou encore `products/<app>/` (legacy path `docs/specs/lots` encore indexé).
+
+**`raster/` projet ≠ documentation.** Guides humains hors de ce dossier.
 
 ## Pack agent — nouveau lot
 
-1. Ticket `kind: lot` sous `lots/<lot-slug>/tasks/`
+1. Ticket `kind: lot` sous `raster/lots/<lot-slug>/tasks/`
 2. `tasks/` : N tasks (`parent:` = lot)
 3. `ux/` si UI
 4. Regen `node raster/t.mjs index`
 
-Sous-lot **seulement** si ≥ 2 flux indépendants (voir `raster/AGENTS.md` §0.2) — alors dossier `lots/<lot-slug>/<sous-lot-slug>/`.
+Sous-lot **seulement** si ≥ 2 flux indépendants (voir `raster/AGENTS.md` §0.2).
 
 **Pas** de `00-PROGRESS.md` obligatoire — suivi = tickets.
 
@@ -37,7 +42,8 @@ Sous-lot **seulement** si ≥ 2 flux indépendants (voir `raster/AGENTS.md` §0.
 
 ## Interdit
 
-- Stocker des tasks sous `raster/nafura/…` (legacy)
+- Stocker des tasks sous `raster/nafura/…` (legacy orchestrateur)
+- Mettre les specs sous `docs/` pour un **nouveau** projet (canon = `<projet>/raster/`)
 - Recréer `docs/specs/epics/` ou `docs/specs/features/`
 - Dupliquer ticket
 - Commit / impl d’un sous-lot sans enfants task

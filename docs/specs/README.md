@@ -7,16 +7,18 @@ Orchestrateur : [`raster/AGENTS.md`](../../raster/AGENTS.md) · miroir [`docs/Ra
 
 | Sujet | Choix |
 |-------|--------|
-| Tickets | `products/<app>/docs/specs/lots/<lot-slug>/…/tasks/` |
+| Tickets (canon) | `<projet>/raster/lots/<lot-slug>/…/tasks/` — **src specs**, pas docs |
+| Tickets (legacy) | `products/<app>/docs/specs/lots/…` — encore indexé, à migrer |
 | Inbox | **Globale** : `raster/inbox.md` (promote vers un projet) |
-| IDs | Préfixe **par projet** (`ERP`, `RAS`, `PER`, …) |
-| Suivi runtime | Tickets Raster uniquement — **pas** de `00-PROGRESS.md` obligatoire |
-| Raster racine | Orchestrateur (INDEX / Sprint / Backlog) — **ne stocke pas** les tasks |
+| IDs | Préfixe **par projet** (`SEKTOR`, `PLT`, `RAS`, `PER`, …) |
+| Suivi runtime | Tickets uniquement — **pas** de `00-PROGRESS.md` obligatoire |
+| `raster/` racine monorepo | Orchestrateur (INDEX / Sprint / Backlog) |
+| `<projet>/raster/` | SSOT specs normalisée du projet |
 
-## Arborescence (par app)
+## Arborescence (par app — canon)
 
 ```
-products/<app>/docs/specs/
+<projet>/raster/                     # obligatoire — pas de la documentation
 └── lots/
     ├── _backlog/tasks/              # triage orphelin
     ├── _archive/                    # flux terminés
@@ -31,6 +33,8 @@ products/<app>/docs/specs/
                 └── {ID}-….md        # task type: feature | bug | physical
 ```
 
+Exemple peer racine : `nafura-platform/raster/lots/cadrage/`.  
+Legacy encore valide en lecture : `products/<app>/docs/specs/lots/`.
 Templates : [`templates/`](templates/).
 
 **Pas** de dossier `epics/` ni `features/` — canon = `lots/` seulement.
@@ -47,9 +51,9 @@ Critère sous-lot : [`raster/AGENTS.md`](../../raster/AGENTS.md) §0.2.
 
 ## Pack agent — créer un lot
 
-1. `lots/<lot-slug>/tasks/` : ticket `kind: lot`
+1. `raster/lots/<lot-slug>/tasks/` : ticket `kind: lot`
 2. Tasks directes (`parent:` = lot) **ou** sous-lots si ≥ 2 flux
-3. Sous-lot : `lots/<lot-slug>/<sous-lot-slug>/` + PLAN + tasks
+3. Sous-lot : `raster/lots/<lot-slug>/<sous-lot-slug>/` + PLAN + tasks
 4. `ux/` si UI
 5. `node raster/t.mjs index`
 
@@ -58,10 +62,10 @@ Critère sous-lot : [`raster/AGENTS.md`](../../raster/AGENTS.md) §0.2.
 ## Flux
 
 ```
-raster/inbox.md → promote → products/<app>/docs/specs/lots/…/tasks
+raster/inbox.md → promote → <projet>/raster/lots/…/tasks
                 → commit sprint (tasks)
                 → check progress (tickets)
-                → archive produit (lots/_archive)
+                → archive produit (raster/lots/_archive)
 ```
 
 ## Anti-doublon
