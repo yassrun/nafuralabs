@@ -31,6 +31,5 @@ cd web && npm run build:staging
 | Zenith | [marketing/products/zenith/](marketing/products/zenith/) |
 | Corporate | [marketing/corporate/](marketing/corporate/) |
 | Venue Catalog | [products/venue-catalog/](products/venue-catalog/) |
-| Layali / Beauty | [products/layali/](products/layali/), [products/beauty/](products/beauty/) |
 
 Legacy : `nf/nafura` — ne plus développer.

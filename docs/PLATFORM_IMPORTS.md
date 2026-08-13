@@ -179,7 +179,7 @@ shared/business/partner/     # Gradle java-library
 include(":shared:business:partner")
 project(":shared:business:partner").projectDir = file("shared/business/partner")
 
-// products/beauty/backend/app/build.gradle.kts
+// products/<app>/backend/app/build.gradle.kts
 implementation(project(":shared:business:partner"))
 ```
 

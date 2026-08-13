@@ -173,9 +173,8 @@ Hybrid (`dev-up`) : migrate **aussi** si le schéma a changé (Job staging ou é
 
 | App | Comment |
 |-----|---------|
-| Sektor, build-intelligence, usage-ops | Liquibase **Job K8s** (cible) |
+| Sektor | Liquibase **Job K8s** (cible) |
 | venue-catalog | Flyway au **startup** backend |
-| blanner | Liquibase au **startup** |
 
 Cible : **Job dédié**, pas migrate-in-process au boot (échec visible, pas de CrashLoop mélange app + SQL).
 

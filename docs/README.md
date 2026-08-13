@@ -26,7 +26,7 @@
 
 ```
 platform/           SDK (backend Gradle + web Angular)
-products/           Sektor, venue-catalog, layali, beauty…
+products/           Sektor, venue-catalog, raster, mbs-website, ops, personal
 infra/k8s/          Postgres, Keycloak, Vault, ingress
 marketing/          Sites vitrine
 web/                Workspace Angular Sektor
@@ -79,7 +79,6 @@ cd products\sektor-btp\web && npm run build:staging
 | MBS Studio | [marketing/products/mbs-studio/](../marketing/products/mbs-studio/) | vitrine |
 | Corporate | [marketing/corporate/](../marketing/corporate/) | vitrine |
 | Venue Catalog | [products/venue-catalog/](../products/venue-catalog/) | specs |
-| Layali / Beauty | [products/layali/](../products/layali/), [products/beauty/](../products/beauty/) | mobile P1 |
 
 ---
 

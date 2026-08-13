@@ -89,6 +89,24 @@ export function projectFromPath(repoRoot, filePath) {
   return "misc";
 }
 
+/**
+ * L'arbre est DANS le chemin — pas dans un champ `parent:`.
+ *   <proj>/raster-src/lots/<lot>/[<sous-lot>/]tasks/<id>.md
+ * Retourne { project, lot, souslot } — souslot vaut "" si la task est à plat.
+ */
+export function treeFromPath(repoRoot, filePath) {
+  const rel = path.relative(repoRoot, filePath).replace(/\\/g, "/");
+  const project = projectFromPath(repoRoot, filePath);
+  const m = rel.match(/raster-src\/lots\/(.+)\/tasks\/[^/]+$/);
+  if (!m) return { project, lot: "", souslot: "" };
+  const segs = m[1].split("/").filter(Boolean);
+  return {
+    project,
+    lot: segs[0] || "",
+    souslot: segs.slice(1).join("/"),
+  };
+}
+
 export function listRasterProjects(repoRoot) {
   const names = new Set();
   const products = path.join(repoRoot, "products");

@@ -20,7 +20,7 @@ secret/nafura/{env}/
     └── {app-id}/
         ├── database             # name, schema, user, pass, ai_user, ai_user_password
         ├── object-storage       # endpoint, bucket, user, password
-        └── integrations         # app-specific (e.g. blanner: google_places_api_key)
+        └── integrations         # app-specific (clés d'API tierces)
 ```
 
 ## Who reads what
@@ -31,7 +31,6 @@ secret/nafura/{env}/
 | keycloak pod | `platform/iam/keycloak` |
 | minio pod | `platform/storage/minio` |
 | `{app}-backend` | `apps/{app}/*`, `platform/integrations/email/brevo`, `platform/integrations/ai/gemini`, `platform/iam/keycloak`, `platform/security/invitation`, `platform/iam/clients/{app}` |
-| `blanner-backend` | `apps/blanner/database`, `apps/blanner/integrations` (Places key) |
 
 ## Bootstrap
 
@@ -113,3 +112,5 @@ Idempotent; old paths are kept until manually deleted.
 |--------|-----------|---------|
 | `vault-bootstrap` | `nafura-infra-{env}` | root_token + unseal_key (never commit) |
 | `nafura-registry` | app + infra ns | Docker registry pull |
+
+> **Apps sorties du dépôt** (`blanner`, `usage-ops`, `build-intelligence`, `layali`, `beauty`) : leurs chemins Vault **existent toujours** côté infra. Sortir une app du dépôt ne supprime pas ses secrets — voir Git si tu dois les retrouver.

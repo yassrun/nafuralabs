@@ -18,29 +18,34 @@
 | Rôle `raster/` | **Projet** Raster : app + moteur (regen vues, Sprint, CLI `t`) |
 | Stockage tickets | **Dans le projet** sous `<projet>/raster-src/lots/…` — jamais sous `raster/nafura/…` (legacy) |
 | Chemin tasks (canon) | `<projet>/raster-src/lots/<lot-slug>/…/tasks/{ID}-{slug}.md` |
-| Chemin tasks (legacy) | `<projet>/raster/lots/…` · `products/<app>/docs/specs/lots/…` — encore indexé |
+| Chemin tasks (legacy) | **aucun** — `docs/specs/lots` et `raster/lots` sortis du dépôt (2026-08-13) |
 | Inbox | **Une globale** : `raster/inbox.md` (dans le projet Raster) |
 | IDs | **Par projet** (préfixe dédié, immuable) — ex. Sektor=`SEKTOR`, Platform=`PLT`, Raster=`RAS`, Personal=`PER`, Ops=`OPS` |
 | Pact | `<projet>/pact/` si **app ou site** — Raster n’indexe pas les SPEC/canvas |
 | Vocabulaire | **Lot** · **sous-lot** (= CH si branché sur Pact) · **Task** = seul item sprintable |
 | Tout projet | **DOIT** avoir `raster-src/` (y compris `raster/raster-src/`), même hors IT |
 
-**Migration :** `docs/specs/lots` → `<projet>/raster-src/lots` ; `raster/nafura/…/tasks/` legacy → à migrer.
+**Plus de migration à faire :** l'ancien `docs/specs/lots` est sorti du dépôt (`Desktop/nafuralabs-archives/`). Sur un projet déjà développé, **Raster part du vide** — on ne reprend pas le passé.
 
 ---
 
 ## 0.1 Hard rules
 
-1. Travail Nafura = ticket avec `sprint: 2026-Wn` avant exécution.
-2. Status ne bouge que au **Check progress** (à deux).
+1. **Rien ne s’exécute qui ne soit dans une task. Rien n’entre en task sans passer par le promote.** Un prompt va à l’**inbox**, jamais chez un exec. Le `sprint:` est commité par l’**orchestrateur**.
+2. **Mode autonome.** Les agents posent les statuts. Tu n’interviens qu’à trois endroits : le **CADRE** (`gate: me`), une **question bloquante** (indécidable — pas une permission), le **`done-me`**. En contrepartie, la task porte un **rapport de livraison** à `done-agent` (§2) — sans lui, `done-me` est un blanc-seing.
 3. Pas d’`estimate`. Pas de `dropped` (abandon = delete).
 4. **Inbox = uniquement `raster/inbox.md`.** Chaque ligne = task draft (description). Lot / sous-lot sans Tasks : ne pas créer ; **pas** inbox.
 5. **Backlog + Sprint = Tasks seulement.** Un lot/sous-lot n’est pas sprintable. Commit = `sprint:` sur une task.
-6. `done-me` (et legacy `done`) → archive **dans le produit** — hors INDEX. `done-agent` reste live (vue **Done agent**).
-7. Toute task a un **`type:`** `spec` | `feature` | `bug` | `physical`. Feature/bug = runnable/testable. Écriture SPEC+canvas = **`spec`**, pas feature. **Pas** de bug-umbrella. **Pas** de `kind: bug`.
+6. **`done-me` → le fichier sort du dépôt.** `node raster/t.mjs sweep` le supprime et élague les dossiers vides. **Git porte l'histoire** — comme pour la SPEC. Pas d'archive. `done-agent` reste live (vue **Done agent**). *(Une archive reste à décider.)*
+   **Contrepartie :** `<projet>/raster-src/NEXT` garde la **borne haute des IDs**. Sans lui, un id supprimé serait réattribué — la règle « IDs immuables » n'aurait plus rien pour la tenir.
+7. Toute task a un **`type:`** `spec` | `feature` | `bug` | `tech` | `physical` | `qa` et un **`agent_type:`** `spec` | `exec` | `qa` (dérivé du type si absent). **`kind` n’existe plus** : lot et sous-lot sont des **dossiers**, pas des tickets (§2).
 8. Status : `todo` \| `doing` \| `blocked` \| `review` \| `done-agent` \| `done-me`. Nav : Inbox · Backlog · Sprint · **Done agent**. DOR/DOD : `raster/pact/work/SPEC.md`.
 
-### 0.2 Critère sous-lot (agents — figé)
+### 0.2 Critère sous-lot — **mode Raster seul uniquement**
+
+> **Branché Pact : ce paragraphe ne s’applique pas.** Le sous-lot **est** le CH, toujours, dès le premier. Voir [`RASTER_BLUEPRINT.md`](../RASTER_BLUEPRINT.md) § Projection.
+
+Ci-dessous : projets **sans** Pact (compta, perso, ops), où aucun Change ne porte le découpage.
 
 **Défaut : Lot → Task.** Le sous-lot n’est pas obligatoire.
 
@@ -103,30 +108,44 @@ Vit dans le **projet** `raster/` (`web/` — aujourd’hui encore `products/rast
 
 ---
 
-## 2. Schema ticket (inchangé — résumé)
+## 2. Schema ticket
+
+### Les chapeaux ne sont plus des tickets
+
+**Lot et sous-lot = des dossiers.** Aucun fichier ticket. Leur état se **dérive** :
+
+| | État | D’où |
+|--|------|------|
+| **Lot** | jamais `done` | constant — rien à stocker |
+| **Sous-lot** | `done` ⇔ **toutes** ses tasks `done` | calculé au scan |
+| Titre | slug du dossier · ou l’`Intention` de la SPEC si branché Pact | — |
+
+Un dossier sans task n’apparaît nulle part : le « sous-lot vide au cas où » devient **impossible**, plus besoin de l’interdire.
+
+**`kind` est supprimé.** Un seul axe : `type:`.
 
 ### Obligatoire
 
 ```yaml
-id: ERP-12
+id: CNG-9
 status: todo                 # todo | doing | blocked | review | done-agent | done-me
 context: nafura              # nafura | saham | personal
-kind: task                   # lot | sous-lot | spec | task
-type: feature                # spec | bug | feature | physical  (obligatoire si kind:task)
+type: feature                # spec | feature | bug | tech | physical | qa
+agent_type: exec             # spec | exec | qa   (dérivé de type si absent)
 priority: P1                 # P0 | P1 | P2 | P3
-assignee: me                 # me | agent | either
-gate: none                   # none | me | qa
+assignee: agent              # me | agent | either
+gate: none                   # none | me
 ```
 
 ### Fréquent
 
 ```yaml
 sprint: 2026-W33
-parent: ERP-16               # lot (plat) ou sous-lot
-feature: chiffrage-drawer    # = slug epic
-blocked_by: [ERP-11]
+blocked_by: [CNG-4]
 tags: [sektor, ux]
 ```
+
+**`parent:` est supprimé** — il est dans le chemin (`lots/<lot>/<CH>/tasks/…`). Un champ de moins qui peut être faux. `blocked_by:` reste : une dépendance entre tasks n’est pas positionnelle.
 
 ### Corps
 
@@ -135,23 +154,38 @@ tags: [sektor, ux]
 
 > 2 lignes max.
 
-## Critères d'acceptation
-- [ ] …
+## Étapes
+- [ ] …                      étapes de travail, PAS des critères
 
 ## Journal
 ```
 DD/MM HH:MM  append-only
 ```
+
+## Rapport de livraison       ← obligatoire à `done-agent`
+
+ce qui a changé      2 lignes — fichiers / écrans
+critères prouvés     AC-n → preuve exécutée
+décidé seul          les arbitrages pris sans toi
+écarts / dette       ce qui n'est pas fait
 ```
+
+**Le rapport n’est pas du confort.** En mode autonome tu ne valides plus **avant** : il est la seule chose qui te dit ce qui a été décidé sans toi.
+
+**Pas de section « Critères d’acceptation ».** Ils vivent dans `CH.md` (`AC-1`, `AC-2`) ; la task les **référence**. Un critère recopié est un critère qui divergera.
 
 Enums fermés — ne jamais inventer. Pas de compteurs dérivés dans le frontmatter.
 
-| kind | Sens |
-|------|------|
-| `lot` | Chapeau CBS — hors inbox ; hors backlog tant que pas de task |
-| `sous-lot` | Chapeau flux optionnel (§0.2) — hors inbox ; hors backlog tant que pas de task |
-| `spec` | ADR / décision — **pas** sprintable (`kind: spec` ≠ `type: spec`) |
-| `task` | Seule unité backlog + sprint. `type:` **spec** \| **feature** \| **bug** \| **physical** |
+| `type` | Sens | `agent_type` |
+|--------|------|--------------|
+| `spec` | écrire SPEC / CADRE / CH / canvas | `spec` |
+| `feature` | comportement nouveau | `exec` |
+| `bug` | le code rattrape une SPEC déjà juste | `exec` |
+| `tech` | refonte / perf / migration — **même** comportement | `exec` |
+| `physical` | travail **non logiciel** (appeler, signer, acheter) — hors Pact | `exec` |
+| `qa` | exécuter les preuves, verdict | `qa` |
+
+`physical` dit **quelle nature de travail**, `assignee: me` dit **qui le fait**. Une `feature` peut être `assignee: me`. Ne pas confondre les deux axes.
 
 ---
 
@@ -163,21 +197,23 @@ Enums fermés — ne jamais inventer. Pas de compteurs dérivés dans le frontma
 | 2 | **Promote / balayage** | rattacher à un **sous-lot**, ou au **lot** s’il n’a pas encore de sous-lots. Sinon rester inbox |
 | 3 | **Commit** | `sprint: 2026-Wn` sur une **Task** seulement |
 | 4 | **Check progress** | status + journal sur les tickets produit |
-| 5 | **Archive** | `done` → archive produit (hors INDEX) |
+| 5 | **Sweep** | `done-me` → **supprimé du dépôt** (`t.mjs sweep`) · `NEXT` bumpé |
 
-Pack agent « nouveau lot » (défaut plat) :
+Pack agent « nouveau CH » (**branché Pact**) :
 
-1. `raster-src/lots/<lot-slug>/tasks/` : ticket `kind: lot`
-2. Même `tasks/` : N× `kind: task` avec `parent:` = lot
-3. `ux/` si UI (sur le lot plat)
+1. Dossier `raster-src/lots/<lot-slug>/<CH-nn-TYPE-slug>/` — **nom identique au CH côté `pact/`**
+2. `tasks/` : les tasks du pack (`spec` + `feature`\|`bug`\|`tech`, + `qa`)
+3. `00-PLAN.md` **seulement si ≥ 2 tasks exec**
 4. Regen Raster (`node raster/t.mjs index`)
 
-Pack agent « nouveau sous-lot » (seulement si critère §0.2) :
+Pack agent « nouveau lot » (**Raster seul**, §0.2) :
 
-1. Dossier `raster-src/lots/<lot-slug>/<sous-lot-slug>/`
-2. `00-PLAN.md` + `tasks/` : 1× `kind: sous-lot` (`parent:` = lot) + N× `kind: task`
-3. Si le lot avait déjà des tasks directes du **même** flux : les reparenter. Si c’est un **2ᵉ** flux : créer le sous-lot + reparenter l’ancien flux aussi
+1. Dossier `raster-src/lots/<lot-slug>/tasks/` — N× tasks
+2. `LOT.md` optionnel si le slug ne suffit pas comme titre
+3. `ux/` si UI
 4. Regen Raster
+
+**Aucun ticket de chapeau** dans les deux cas : le dossier *est* le chapeau.
 
 ---
 
@@ -221,6 +257,8 @@ IDs **immuables**. Jamais renumérotés / réutilisés.
 
 | Date | Décision |
 |------|----------|
+| 2026-08-13 | Orchestrateur Raster (`nafura-orch`) · exec → `review` · spec consolide SPEC+UX · QA pose `done-agent` sur feature/bug |
+| 2026-08-13 | `type: qa` · `agent_type:` spec \| exec \| qa · QA = task dédiée (`review` / `gate: qa` legacy) |
 | 2026-08-13 | **`raster-src/`** obligatoire par projet · **`raster/`** = projet Raster · **`pact/`** si app/site |
 | 2026-08-05 | Pipeline Capture→…→Archive · pas d’estimate |
 | 2026-08-11 | Brand **Raster** · `pm/` → `raster/` |

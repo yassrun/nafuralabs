@@ -1,17 +1,34 @@
-# CH-00-INIT — contrat fichiers (raster-src)
+# CH-00-INIT — contrat fichiers
 
-**Type :** `INIT`  
-**BC :** work  
-**Raster :** sous-lot `RAS-11`
+**Type :** `EVOL` (forme `INIT` — première vérité de `work`)
+**Cible :** BC `work`
+**Qualification :** aucun contrat écrit ; les tickets vivaient sous `docs/specs/lots` sans règle de localisation.
 
-Première vérité : l’orchestrateur lit `raster-src`, pas `pact/` ; sprint = champ task ; arbre = `parent:`.
+## Pourquoi
 
-## Preuves (DoD INIT)
+Les tickets étaient dispersés et l'orchestrateur ne savait pas quoi scanner. Sans règle de localisation, aucune vue n'est fiable.
 
-1. SPEC `pact/work/SPEC.md` créée (et carte app).
-2. Canvas `ux/work-wireframe.canvas.tsx` — 3 vues + fallback manuel.
-3. e2e `raster/e2e/work/scan-raster-src.test.mjs` — scan peers `raster-src`, ignore `pact/`.
+## Aujourd'hui
 
-## Hors CH
+Rien de spécifié.
 
-Move de `products/raster/web` → `raster/web` (autre Change / MIG).
+## Attendu
+
+Un seul scan : `**/raster-src/lots/**/tasks/*.md`. `pact/` n'est jamais lu. Le sprint est un champ sur la task.
+
+## Critères d'acceptation (gelés)
+
+- **AC-1** Le scan trouve les tasks de tout projet ayant `raster-src/lots`, à la racine comme sous `products/`.
+- **AC-2** Aucun fichier sous `pact/` n'entre jamais dans le scan.
+- **AC-3** Aucun fichier sous `docs/specs/` n'entre dans le scan.
+- **AC-4** Un dossier sans `raster-src/lots` n'est pas un projet Raster.
+
+## Preuves attendues
+
+`raster/e2e/work/scan-raster-src.test.mjs` — un test par critère.
+
+## Hors périmètre
+
+Le déplacement de `products/raster/web` → `raster/web`. Autre Change.
+
+Canvas : [`../ux/work-wireframe.canvas.tsx`](../ux/work-wireframe.canvas.tsx)

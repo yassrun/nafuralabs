@@ -91,9 +91,6 @@ Pas d’overlay K8s `dev`. Env `demo` (GKE) : **deprecated**.
 |--------|-----------|-----|------------|-------------|
 | `sektor-btp` | `sektor-${ENV}` | `nafura_erp` | Liquibase Job | `products/sektor-btp/deploy/k8s/overlays/${ENV}` |
 | `venue-catalog` | `venue-catalog-${ENV}` | `nafura_venue_catalog` | Flyway startup | `products/venue-catalog/deploy/k8s/overlays/${ENV}` |
-| `build-intelligence` | `build-intelligence-${ENV}` | `nafura_build_intelligence` | Liquibase Job | `products/build-intelligence/deploy/k8s/overlays/${ENV}` |
-| `usage-ops` | `usage-ops-${ENV}` | `nafura_usage_ops` | Liquibase Job | `products/usage-ops/deploy/k8s/overlays/${ENV}` |
-| `blanner` | `blanner-${ENV}` | `nafura_blanner` | Liquibase startup | `products/blanner/deploy/k8s/overlays/${ENV}` |
 | `mbs-studio` | `nafura-vitrine-${ENV}` | — | — | `marketing/products/mbs-studio/deploy/k8s/overlays/${ENV}` |
 | `corporate` | `nafura-vitrine-${ENV}` | — | — | `marketing/corporate/deploy/k8s/overlays/${ENV}` |
 
@@ -123,7 +120,7 @@ fournit au demarrage. Regle ESLint dans `products/sektor-btp/web/.eslintrc.json`
 repertoire produit, donc la resolution Node doit pouvoir remonter jusqu'a lui.
 `platform/web/package.json` declare ses dependances reelles en `peerDependencies`.
 
-Historique du chantier : [`products/sektor-btp/docs/specs/epics/_archive/front-ownership/`](../products/sektor-btp/docs/specs/epics/_archive/front-ownership/00-REVUE-ARCHI.md).
+Historique du chantier : sorti du dépôt (`Desktop/nafuralabs-archives/`), récupérable via Git.
 
 ---
 
@@ -137,8 +134,6 @@ Historique du chantier : [`products/sektor-btp/docs/specs/epics/_archive/front-o
 | Sektor API | `api.sektor.nafuralabs.staging` |
 | IAM | `iam.nafuralabs.staging` |
 | MBS | `mbs.nafuralabs.staging` |
-| Usage Ops | `usage-ops.nafuralabs.staging` |
-| Blanner API | `api.blanner.nafuralabs.staging` |
 | Venue Catalog API | `api.venue-catalog.nafuralabs.staging` |
 | Venue Catalog UI | `catalog.nafuralabs.staging` |
 | Minio / S3 / Vault | `minio`, `s3`, `vault`.nafuralabs.staging |
@@ -152,8 +147,6 @@ Hosts Windows (admin) : `powershell -ExecutionPolicy Bypass -File toolchain/ops/
 | Sektor | `sektor.nafuralabs.com`, `api.sektor.nafuralabs.com` |
 | IAM | `iam.nafuralabs.com` |
 | MBS | `mbs.nafuralabs.com` |
-| Usage Ops | `usage-ops.nafuralabs.com` |
-| Blanner API | `api.blanner.nafuralabs.com` |
 | Venue Catalog API | `api.venue-catalog.nafuralabs.com` |
 | Venue Catalog UI | `catalog.nafuralabs.com` |
 
@@ -169,7 +162,8 @@ Config front : `products/sektor-btp/web/src/environments/environment.staging.ts`
 | Boot app Sektor | `products/sektor-btp/backend/app/` |
 | UI ERP | `products/sektor-btp/web/app/` |
 | Auth, listing, shell UI | `platform/web/` ou `platform/backend/` |
-| Specs / lots | `products/<app-id>/docs/specs/lots/<lot-slug>/` — [convention](specs/README.md) |
+| Specs (Pact) | `<projet>/pact/` — [`PACT_BLUEPRINT.md`](../PACT_BLUEPRINT.md) |
+| Travail (Raster) | `<projet>/raster-src/lots/` — [`RASTER_BLUEPRINT.md`](../RASTER_BLUEPRINT.md) |
 | Docs produit (guides, UX…) | `products/<app-id>/docs/` |
 | Manifests produit | `products/<app-id>/deploy/k8s/` — **pas** sous `infra/k8s/` |
 | Infra partagée | `infra/k8s/overlays/infra/${ENV}/` |
@@ -278,7 +272,7 @@ Arbre de décision complet : [toolchain/ops/AGENTS.md](../toolchain/ops/AGENTS.m
 ## Dette connue
 
 - Shell platform couplé à Sektor via `@applications/*` — à découpler au 2ᵉ produit front.
-- Docs historiques `web/docs/` : chemins `app/applications/erp` → lire `products/sektor-btp/web/app/`.
+- Les docs historiques `web/docs/` sont sorties du dépôt (`Desktop/nafuralabs-archives/`). Le code fait foi : `products/sektor-btp/web/app/`.
 - CI/CD automatisé : à implémenter (build PR → deploy staging → deploy prod manuel).
 
 ---

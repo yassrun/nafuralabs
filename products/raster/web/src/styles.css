@@ -346,6 +346,53 @@ h3 {
   color: var(--muted);
 }
 
+.type-qa {
+  background: #e4f4ea;
+  color: #1b6b3a;
+}
+
+.pill.agent {
+  text-transform: lowercase;
+  letter-spacing: 0.02em;
+}
+
+.launch-brief {
+  margin: 0;
+  padding: 10px 12px;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  color: var(--ink);
+}
+
+.agent-tabs {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.agent-tabs button {
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.agent-tabs button.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.type-row-qa {
+  border-left: 3px solid #1b6b3a;
+}
+
 .type-umbrella,
 .type-bug-umbrella {
   background: #fff6d9;
@@ -463,6 +510,12 @@ h3 {
   color: var(--ink);
   border-radius: var(--radius);
   padding: 7px 12px;
+}
+
+.btn.compact {
+  padding: 4px 8px;
+  font-size: 12px;
+  line-height: 1.2;
 }
 
 .btn:hover {

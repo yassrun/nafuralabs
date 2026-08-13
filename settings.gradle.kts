@@ -66,41 +66,8 @@ listOf("api", "source-adapter", "catalog-place", "catalog-job", "catalog-enrichm
     includeVenueCatalogModule(it)
 }
 
-// ── Build Intelligence ──────────────────────────────────────────────────────
-fun includeBuildIntelligenceModule(name: String) {
-    val path = ":build-intelligence:$name"
-    include(path)
-    project(path).projectDir = file("products/build-intelligence/backend/modules/$name")
-}
-
-include(":build-intelligence:app")
-project(":build-intelligence:app").projectDir = file("products/build-intelligence/backend/app")
-
-listOf(
-    "api",
-    "documents",
-    "extraction",
-    "catalog",
-    "retrieval",
-    "generation",
-    "integrations-sektor"
-).forEach { includeBuildIntelligenceModule(it) }
-
-// ── Usage Ops ───────────────────────────────────────────────────────────────
-fun includeUsageOpsModule(name: String) {
-    val path = ":usage-ops:$name"
-    include(path)
-    project(path).projectDir = file("products/usage-ops/backend/modules/$name")
-}
-
-include(":usage-ops:app")
-project(":usage-ops:app").projectDir = file("products/usage-ops/backend/app")
-
-listOf("api", "federation", "quotas", "alerts").forEach { includeUsageOpsModule(it) }
-
-// ── Blanner ─────────────────────────────────────────────────────────────────
-include(":blanner:app")
-project(":blanner:app").projectDir = file("products/blanner/blanner-backend")
+// build-intelligence · usage-ops · blanner : sortis du monorepo (2026-08-13),
+// déplacés dans Desktop/nafuralabs-archives. Récupérables via Git si besoin.
 
 // ── Tools ───────────────────────────────────────────────────────────────────
 include(":tools:lifecycle")

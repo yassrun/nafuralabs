@@ -1,13 +1,1 @@
-id	status	priority	context	assignee	gate	kind	sprint	parent	feature	title
-RAS-12	doing	P1	nafura	either	me	task	2026-W33	RAS-11	contrat-fichiers	INIT — écrire SPEC + canvas work
-RAS-13	doing	P1	nafura	either	me	task	2026-W33	RAS-11	contrat-fichiers	Walker + API — scan raster-src
-RAS-14	doing	P1	nafura	either	me	task	2026-W33	RAS-11	contrat-fichiers	e2e — scan raster-src ignore pact
-RAS-22	doing	P1	nafura	either	me	task	2026-W33	RAS-21	shell	INIT — SPEC + canvas socle
-MIG-23	todo	P1	nafura	either	me	task		MIG-20	platform-code	Code platform → nafura-platform/
-MIG-22	todo	P1	nafura	either	me	task		MIG-20	platform-ops	Ops lab → nafura-platform/ops
-MIG-21	todo	P1	nafura	either	me	task		MIG-20	platform-pact	Pact baseline nafura-platform
-MIG-32	todo	P1	nafura	either	me	task		MIG-30	sektor-move	Ops + code → sektor/
-MIG-31	todo	P1	nafura	either	me	task		MIG-30	sektor-pact	Pact + Raster → sektor/
-MIG-11	todo	P1	nafura	either	none	task		MIG-10	squelettes	Créer les dossiers canon vides
-MIG-41	todo	P2	nafura	either	me	task		MIG-40	platform-clients	Conso platform versionnée
-MIG-42	todo	P2	nafura	either	me	task		MIG-40	reste-workspace	Reste du workspace + drop products/
+id	status	priority	context	assignee	gate	type	agent_type	sprint	project	lot	souslot	title

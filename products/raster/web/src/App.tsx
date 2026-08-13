@@ -1,5 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { api, statusGlyph, type Task, type ViewId } from "./api";
+import {
+  api,
+  launchBrief,
+  orchLaunchBrief,
+  statusGlyph,
+  taskAgentType,
+  type AgentFilter,
+  type Task,
+  type ViewId,
+} from "./api";
 
 const ALL = "all";
 
@@ -12,6 +21,7 @@ export default function App() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedLine, setSelectedLine] = useState<string | null>(null);
   const [filterProject, setFilterProject] = useState("raster");
+  const [agentFilter, setAgentFilter] = useState<AgentFilter>("all");
   const [draft, setDraft] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -47,6 +57,16 @@ export default function App() {
     if (filterProject !== ALL && t.project !== filterProject) return null;
     return t;
   }, [tasks, selectedId, filterProject, view]);
+
+  const scopedTasks = useMemo(
+    () =>
+      agentFilter === "all"
+        ? tasks
+        : tasks.filter(
+            (t) => !isWorkTask(t) || taskAgentType(t) === agentFilter
+          ),
+    [tasks, agentFilter]
+  );
 
   const select = (id: string) => {
     setSelectedId(id);
@@ -237,6 +257,15 @@ export default function App() {
         >
           Capturer
         </button>
+        {view !== "inbox" ? (
+          <AgentFilterBar
+            value={agentFilter}
+            onChange={(v) => {
+              setAgentFilter(v);
+              setSelectedId(null);
+            }}
+          />
+        ) : null}
         <div className="path">
           {view === "inbox"
             ? "raster/inbox.md (global)"
@@ -270,23 +299,23 @@ export default function App() {
               showAll={view === "sprint" || view === "done-agent"}
               allCount={
                 view === "sprint"
-                  ? tasks.filter((t) => isSprintRow(t, sprint)).length
+                  ? scopedTasks.filter((t) => isSprintRow(t, sprint)).length
                   : view === "done-agent"
-                    ? tasks.filter(isDoneAgentRow).length
-                    : tasks.filter((t) => isWorkTask(t) && t.status !== "done-agent").length
+                    ? scopedTasks.filter(isDoneAgentRow).length
+                    : scopedTasks.filter((t) => isWorkTask(t) && t.status !== "done-agent").length
               }
               counts={Object.fromEntries(
                 projects.map((p) => [
                   p,
                   view === "sprint"
-                    ? tasks.filter(
+                    ? scopedTasks.filter(
                         (t) => t.project === p && isSprintRow(t, sprint)
                       ).length
                     : view === "done-agent"
-                      ? tasks.filter(
+                      ? scopedTasks.filter(
                           (t) => t.project === p && isDoneAgentRow(t)
                         ).length
-                      : tasks.filter(
+                      : scopedTasks.filter(
                           (t) =>
                             t.project === p &&
                             isWorkTask(t) &&
@@ -335,7 +364,7 @@ export default function App() {
                   ? projects[0] || "raster"
                   : filterProject
               }
-              tasks={tasks.filter((t) =>
+              tasks={scopedTasks.filter((t) =>
                 filterProject === ALL
                   ? true
                   : t.project === filterProject
@@ -353,13 +382,16 @@ export default function App() {
               empty={`Rien dans ${sprint} — commit depuis Backlog.`}
               project={filterProject === ALL ? "All" : filterProject}
               showProject={filterProject === ALL}
-              tasks={tasks.filter(
+              tasks={scopedTasks.filter(
                 (t) =>
                   isSprintRow(t, sprint) &&
                   (filterProject === ALL || t.project === filterProject)
               )}
+              allTasks={tasks}
               selectedId={selectedId}
               onSelect={select}
+              showOrch
+              busy={busy}
             />
           ) : null}
           {view === "done-agent" ? (
@@ -368,11 +400,12 @@ export default function App() {
               empty="Aucune task done-agent — l’agent passe le status ici après la vérif."
               project={filterProject === ALL ? "All" : filterProject}
               showProject={filterProject === ALL}
-              tasks={tasks.filter(
+              tasks={scopedTasks.filter(
                 (t) =>
                   isDoneAgentRow(t) &&
                   (filterProject === ALL || t.project === filterProject)
               )}
+              allTasks={tasks}
               selectedId={selectedId}
               onSelect={select}
             />
@@ -443,6 +476,38 @@ function ProjectTabs({
         >
           {p}
           <span className="n">{counts[p] ?? 0}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function AgentFilterBar({
+  value,
+  onChange,
+}: {
+  value: AgentFilter;
+  onChange: (v: AgentFilter) => void;
+}) {
+  return (
+    <div className="agent-tabs" role="tablist" aria-label="Type d'agent">
+      {(
+        [
+          ["all", "All"],
+          ["spec", "Spec"],
+          ["exec", "Exec"],
+          ["qa", "QA"],
+        ] as const
+      ).map(([id, label]) => (
+        <button
+          key={id}
+          type="button"
+          role="tab"
+          aria-selected={value === id}
+          className={value === id ? "active" : ""}
+          onClick={() => onChange(id)}
+        >
+          {label}
         </button>
       ))}
     </div>
@@ -642,7 +707,7 @@ function InboxDetail({
   );
 }
 
-type ItemType = "lot" | "sous-lot" | "spec" | "feature" | "bug" | "physical";
+type ItemType = "lot" | "sous-lot" | "spec" | "feature" | "bug" | "physical" | "qa";
 
 function isBug(t: Task) {
   if ((t.type || "").toLowerCase() === "bug") return true;
@@ -689,14 +754,21 @@ function isDoneAgentRow(t: Task) {
   return isWorkTask(t) && t.status === "done-agent";
 }
 
-function workType(t: Task): "bug" | "feature" | "physical" | "spec" {
+function workType(t: Task): "bug" | "feature" | "physical" | "spec" | "qa" {
   const ty = (t.type || "").toLowerCase();
-  if (ty === "bug" || ty === "feature" || ty === "physical" || ty === "spec")
+  if (
+    ty === "bug" ||
+    ty === "feature" ||
+    ty === "physical" ||
+    ty === "spec" ||
+    ty === "qa"
+  )
     return ty;
   if (isBug(t)) return "bug";
   const tags = t.tags || [];
   if (tags.some((x) => x.toLowerCase() === "physical")) return "physical";
   if (tags.some((x) => x.toLowerCase() === "spec")) return "spec";
+  if (tags.some((x) => x.toLowerCase() === "qa")) return "qa";
   return "feature";
 }
 
@@ -720,6 +792,60 @@ function itemType(t: Task): ItemType {
 
 function TypeBadge({ type }: { type: ItemType }) {
   return <span className={`type type-${type}`}>{type}</span>;
+}
+
+function OrchLaunchButton({
+  sousLot,
+  kids,
+  busy = false,
+  showBrief = false,
+  compact = false,
+}: {
+  sousLot: Task;
+  kids: Task[];
+  busy?: boolean;
+  showBrief?: boolean;
+  compact?: boolean;
+}) {
+  const [copied, setCopied] = useState(false);
+  const [shown, setShown] = useState<string | null>(null);
+  const onLaunch = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const brief = orchLaunchBrief(sousLot, kids);
+    setShown(brief);
+    try {
+      await navigator.clipboard.writeText(brief);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
+    }
+  };
+  const btn = (
+    <button
+      type="button"
+      className={compact ? "btn compact" : "btn primary"}
+      disabled={busy}
+      onClick={(e) => void onLaunch(e)}
+    >
+      {copied ? "Brief copié" : "Lancer orchestrateur"}
+    </button>
+  );
+  if (compact) return btn;
+  return (
+    <div className="stack" style={{ gap: 8 }}>
+      {btn}
+      {showBrief ? (
+        <p className="muted">
+          Ce sous-lot (CH Pact) · spec → exec → spec (MAJ) → qa (MAJ ou créer)
+          → done-agent.
+        </p>
+      ) : null}
+      {showBrief && shown ? (
+        <pre className="launch-brief">{shown}</pre>
+      ) : null}
+    </div>
+  );
 }
 
 function Backlog({
@@ -796,6 +922,9 @@ function Backlog({
             {sl.title.replace(/^(Feature|Sous-lot|Lot)\s*[—–-]\s*/i, "")}
           </strong>
           <span className="pill">{kids.length} task(s)</span>
+          <span className="row-actions">
+            <OrchLaunchButton sousLot={sl} kids={kids} busy={busy} compact />
+          </span>
         </div>
         {kids.map((k) => (
           <BacklogRow
@@ -820,7 +949,7 @@ function Backlog({
       <h2>Backlog</h2>
       <p className="muted">
         {project} · arbre via <code>parent:</code> · tasks seulement (
-        spec / feature / bug / physical) · Commit = <code>sprint:</code> sur la task →{" "}
+        spec / feature / bug / physical / qa) · Commit = <code>sprint:</code> sur la task →{" "}
         {sprint || "sprint"}
       </p>
       <div className="list-panel backlog-tree">
@@ -936,6 +1065,7 @@ function BacklogRow({
     >
       <span className="tree-mark faint">├</span>
       <TypeBadge type={type} />
+      <span className="pill agent">{taskAgentType(task)}</span>
       <span>{statusGlyph(task.status)}</span>
       <button
         type="button"
@@ -968,28 +1098,60 @@ function BacklogRow({
   );
 }
 
+function groupSprintBySousLot(rows: Task[], allTasks: Task[]) {
+  const order: string[] = [];
+  const buckets = new Map<string, Task[]>();
+  for (const t of rows) {
+    const key = t.parent || "_none";
+    if (!buckets.has(key)) {
+      buckets.set(key, []);
+      order.push(key);
+    }
+    buckets.get(key)!.push(t);
+  }
+  return order.map((key) => {
+    const hat =
+      key === "_none" ? undefined : allTasks.find((x) => x.id === key);
+    const sousLot = hat && isSousLot(hat.kind) ? hat : null;
+    const kids = sousLot
+      ? allTasks.filter((t) => t.parent === sousLot.id && isWorkTask(t))
+      : [];
+    return { key, sousLot, kids, rows: buckets.get(key)! };
+  });
+}
+
 function Sprint({
   heading,
   empty,
   project,
   tasks,
+  allTasks,
   selectedId,
   onSelect,
   showProject = false,
+  showOrch = false,
+  busy = false,
 }: {
   heading: string;
   empty: string;
   project: string;
   tasks: Task[];
+  allTasks: Task[];
   selectedId: string | null;
   onSelect: (id: string) => void;
   showProject?: boolean;
+  showOrch?: boolean;
+  busy?: boolean;
 }) {
   const doing = tasks.filter((t) => t.status === "doing").length;
+  const groups = groupSprintBySousLot(tasks, allTasks);
   return (
     <section>
       <h2>{heading}</h2>
-      <p className="muted">{project}</p>
+      <p className="muted">
+        {project}
+        {showOrch ? " · orchestrateur = un sous-lot Pact (CH)" : ""}
+      </p>
       <div className="stats">
         <div className="stat">
           <strong>{tasks.length}</strong>
@@ -1003,47 +1165,85 @@ function Sprint({
       {tasks.length === 0 ? (
         <div className="callout">{empty}</div>
       ) : (
-        <div className="list-panel">
-          <table className="table">
-            <thead>
-              <tr>
-                <th></th>
-                <th>Type</th>
-                <th>ID</th>
-                {showProject ? <th>Projet</th> : null}
-                <th>Titre</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {tasks.map((t) => (
-                <tr key={t.id}>
-                  <td>{statusGlyph(t.status)}</td>
-                  <td>
-                    <TypeBadge type={itemType(t)} />
-                  </td>
-                  <td>
-                    <button
-                      type="button"
-                      className={`id ${selectedId === t.id ? "active" : ""}`}
-                      onClick={() => onSelect(t.id)}
-                    >
-                      {t.id}
-                    </button>
-                  </td>
-                  {showProject ? (
-                    <td>
-                      <span className="faint">{t.project}</span>
-                    </td>
+        <div className="stack" style={{ gap: 16 }}>
+          {groups.map((g) => (
+            <div key={g.key} className="list-panel">
+              {g.sousLot ? (
+                <div className="row feature" style={{ marginBottom: 8 }}>
+                  <TypeBadge type="sous-lot" />
+                  <button
+                    type="button"
+                    className={`id ${selectedId === g.sousLot.id ? "active" : ""}`}
+                    onClick={() => onSelect(g.sousLot!.id)}
+                  >
+                    {g.sousLot.id}
+                  </button>
+                  <strong className="row-title">
+                    {g.sousLot.title.replace(
+                      /^(Feature|Sous-lot|Lot)\s*[—–-]\s*/i,
+                      ""
+                    )}
+                  </strong>
+                  {showOrch ? (
+                    <span className="row-actions">
+                      <OrchLaunchButton
+                        sousLot={g.sousLot}
+                        kids={g.kids}
+                        busy={busy}
+                        compact
+                      />
+                    </span>
                   ) : null}
-                  <td>{t.title}</td>
-                  <td>
-                    <span className="pill">{t.status}</span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                </div>
+              ) : (
+                <p className="muted">Hors sous-lot Pact</p>
+              )}
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>Type</th>
+                    <th>Agent</th>
+                    <th>ID</th>
+                    {showProject ? <th>Projet</th> : null}
+                    <th>Titre</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {g.rows.map((t) => (
+                    <tr key={t.id}>
+                      <td>{statusGlyph(t.status)}</td>
+                      <td>
+                        <TypeBadge type={itemType(t)} />
+                      </td>
+                      <td>
+                        <span className="pill agent">{taskAgentType(t)}</span>
+                      </td>
+                      <td>
+                        <button
+                          type="button"
+                          className={`id ${selectedId === t.id ? "active" : ""}`}
+                          onClick={() => onSelect(t.id)}
+                        >
+                          {t.id}
+                        </button>
+                      </td>
+                      {showProject ? (
+                        <td>
+                          <span className="faint">{t.project}</span>
+                        </td>
+                      ) : null}
+                      <td>{t.title}</td>
+                      <td>
+                        <span className="pill">{t.status}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ))}
         </div>
       )}
     </section>
@@ -1164,6 +1364,15 @@ function UmbrellaDetail({
       </div>
       <div className="faint">{task.file}</div>
 
+      {isSousLot(task.kind) ? (
+        <OrchLaunchButton
+          sousLot={task}
+          kids={taskKids}
+          busy={busy}
+          showBrief
+        />
+      ) : null}
+
       <div className="stats compact">
         <div className="stat">
           <strong>{listedCount}</strong>
@@ -1248,12 +1457,27 @@ function WorkItemDetail({
   onDelete: () => void;
 }) {
   const type = itemType(task);
+  const agent = taskAgentType(task);
+  const [copied, setCopied] = useState(false);
+  const [briefShown, setBriefShown] = useState<string | null>(null);
+  const onLaunch = async () => {
+    const brief = launchBrief(task);
+    setBriefShown(brief);
+    try {
+      await navigator.clipboard.writeText(brief);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
+    }
+  };
   return (
     <div className="stack detail-task">
       <div className="detail-kicker">
         <TypeBadge type={type} />
+        <span className="pill agent">{agent}</span>
         <span className="faint">
-          task · type:{type} · status:{task.status}
+          task · type:{type} · agent:{agent} · status:{task.status}
         </span>
       </div>
       <h2>{task.id}</h2>
@@ -1283,6 +1507,25 @@ function WorkItemDetail({
         <div className="faint">feature: {task.feature}</div>
       ) : null}
       <div className="faint">{task.file}</div>
+      {task.blocked_by?.length ? (
+        <div className="faint">blocked_by: {task.blocked_by.join(", ")}</div>
+      ) : null}
+
+      <button
+        type="button"
+        className="btn primary"
+        disabled={busy}
+        onClick={() => void onLaunch()}
+      >
+        {copied ? "Brief copié" : `Lancer agent ${agent}`}
+      </button>
+      <div className="faint">
+        Copie un brief (@nafura-{agent === "exec" ? "exec" : agent}) — coller
+        dans Cursor. Pas de spawn SDK.
+      </div>
+      {briefShown ? (
+        <pre className="launch-brief">{briefShown}</pre>
+      ) : null}
 
       <div className="field">
         <label htmlFor="status">Status</label>
@@ -1297,8 +1540,8 @@ function WorkItemDetail({
               ["todo", "todo"],
               ["doing", "doing"],
               ["blocked", "blocked"],
-              ["review", "review · QA"],
-              ["done-agent", "done-agent"],
+              ["review", "review · exec fini → spec → QA"],
+              ["done-agent", "done-agent (QA sur feature/bug)"],
               ["done-me", "done-me · archive"],
             ] as const
           ).map(([s, label]) => (
@@ -1308,14 +1551,15 @@ function WorkItemDetail({
           ))}
         </select>
         <div className="faint">
-          Agent → done-agent (vue Done agent). Toi → done-me (archive).
+          Feature/bug : exec pose review. QA seul pose done-agent. Toi →
+          done-me (archive).
         </div>
       </div>
 
       {!task.sprint ? (
         <button
           type="button"
-          className="btn primary"
+          className="btn"
           disabled={busy}
           onClick={() => onCommit(task.id)}
         >

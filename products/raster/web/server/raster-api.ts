@@ -7,6 +7,12 @@ import {
   listRasterProjects,
   projectFromPath,
 } from "../../../../raster/walk-tasks.mjs";
+import {
+  expectedAgentType,
+  inferWorkType,
+  parseListField,
+  resolveAgentType,
+} from "../../../../raster/agent-type.mjs";
 
 export type TaskDto = {
   id: string;
@@ -17,6 +23,7 @@ export type TaskDto = {
   gate: string;
   kind: string;
   type: string;
+  agent_type: string;
   sprint: string;
   parent: string;
   feature: string;
@@ -57,41 +64,8 @@ function parseFrontmatter(raw: string) {
   return fm;
 }
 
-function parseListField(raw: string | undefined): string[] {
-  if (!raw) return [];
-  const inner = raw.replace(/^\[/, "").replace(/\]$/, "").trim();
-  if (!inner) return [];
-  return inner
-    .split(",")
-    .map((s) => s.trim().replace(/^["']|["']$/g, ""))
-    .filter(Boolean);
-}
-
 function parseBlockedBy(raw: string | undefined): string[] {
   return parseListField(raw);
-}
-
-function isHatKind(kind: string) {
-  return (
-    kind === "lot" ||
-    kind === "sous-lot" ||
-    kind === "feature" ||
-    kind === "bug-umbrella"
-  );
-}
-
-function inferWorkType(fm: Record<string, string>): string {
-  const kind = fm.kind || "task";
-  if (isHatKind(kind) || kind === "spec") return "";
-  const ty = (fm.type || "").toLowerCase();
-  if (ty === "bug" || ty === "feature" || ty === "physical" || ty === "spec")
-    return ty;
-  if (kind === "bug") return "bug";
-  const tags = parseListField(fm.tags);
-  if (tags.some((t) => t.toLowerCase() === "bug")) return "bug";
-  if (tags.some((t) => t.toLowerCase() === "physical")) return "physical";
-  if (tags.some((t) => t.toLowerCase() === "spec")) return "spec";
-  return "feature";
 }
 
 function loadTasks(repoRoot: string): TaskDto[] {
@@ -102,6 +76,8 @@ function loadTasks(repoRoot: string): TaskDto[] {
     if (!fm?.id || fm.status === "done" || fm.status === "done-me") continue;
     const rel = path.relative(repoRoot, file).replace(/\\/g, "/");
     const project = projectFromPath(repoRoot, file);
+    const type = inferWorkType(fm);
+    const agent_type = resolveAgentType(type, fm.agent_type);
     tasks.push({
       id: fm.id,
       status: fm.status || "todo",
@@ -110,7 +86,8 @@ function loadTasks(repoRoot: string): TaskDto[] {
       assignee: fm.assignee || "",
       gate: fm.gate || "",
       kind: fm.kind || "task",
-      type: inferWorkType(fm),
+      type,
+      agent_type,
       sprint: fm.sprint || "",
       parent: fm.parent || "",
       feature: fm.feature || "",
@@ -245,13 +222,18 @@ function promoteInboxLine(
   const asPhysical =
     tags.some((t) => t.toLowerCase() === "physical") ||
     /^physical\b/i.test(title);
+  const asQa =
+    tags.some((t) => t.toLowerCase() === "qa") || /^qa\b/i.test(title);
   const workType = asPhysical
     ? "physical"
     : asBug
       ? "bug"
       : asSpec
         ? "spec"
-        : "feature";
+        : asQa
+          ? "qa"
+          : "feature";
+  const agentType = expectedAgentType(workType);
 
   const all = loadTasks(repoRoot);
   const parent = all.find(
@@ -301,6 +283,7 @@ status: todo
 context: nafura
 kind: ${kind}
 type: ${workType}
+agent_type: ${agentType}
 priority: P2
 assignee: me
 gate: none
@@ -519,7 +502,7 @@ export function rasterApiPlugin(repoRoot?: string): Plugin {
               target.kind === "bug-umbrella"
             ) {
               return send(res, 400, {
-                error: "seules les tasks sont sprintables (bug / feature / physical)",
+                error: "seules les tasks sont sprintables (spec / feature / bug / physical / qa)",
               });
             }
             const ids = new Set<string>([id]);

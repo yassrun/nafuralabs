@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Lab mode — pas encore « prod métier »
 
-**Contexte figé :** tous les produits applicatifs (Sektor, venue-catalog, blanner, layali, beauty, usage-ops, build-intelligence, platform métier…) sont encore en **lab / staging**.  
+**Contexte figé :** tous les produits applicatifs (Sektor, venue-catalog, platform métier…) sont encore en **lab / staging**.  
 **Exceptions prod réelles :** sites vitrine **MBS Studio** et **NafuraLabs corporate** (`marketing/`) — y aller prudemment.
 
 ## Conséquences pour les agents

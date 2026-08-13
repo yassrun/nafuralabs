@@ -14,7 +14,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { collectTaskFiles, projectFromPath } from "./walk-tasks.mjs";
+import { collectTaskFiles, treeFromPath } from "./walk-tasks.mjs";
+import { inferWorkType, resolveAgentType } from "./agent-type.mjs";
 
 const RASTER_ROOT = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(RASTER_ROOT, "..");
@@ -23,7 +24,7 @@ const STATUS_ORDER = { doing: 0, review: 1, blocked: 2, todo: 3, "done-agent": 4
 const PRIORITY_ORDER = { P0: 0, P1: 1, P2: 2, P3: 3 };
 const GLYPH = { todo: "·", doing: "▸", blocked: "✕", review: "◐", "done-agent": "✓", "done-me": "✓", done: "✓" };
 
-function parseFrontmatter(raw) {
+export function parseFrontmatter(raw) {
   if (!raw.startsWith("---\n") && !raw.startsWith("---\r\n")) return null;
   const end = raw.indexOf("\n---", 4);
   if (end < 0) return null;
@@ -64,7 +65,9 @@ function loadTasks() {
     const fm = parseFrontmatter(fs.readFileSync(file, "utf8"));
     if (!fm?.id) continue;
     if (fm.status === "done" || fm.status === "done-me") continue;
-    const project = projectFromPath(REPO_ROOT, file);
+    const { project, lot, souslot } = treeFromPath(REPO_ROOT, file);
+    const type = inferWorkType(fm);
+    const agent_type = resolveAgentType(type, fm.agent_type);
     tasks.push({
       id: fm.id,
       status: fm.status || "todo",
@@ -72,43 +75,26 @@ function loadTasks() {
       context: fm.context || "nafura",
       assignee: fm.assignee || "",
       gate: fm.gate || "",
-      kind: fm.kind || "task",
+      type,
+      agent_type,
       sprint: fm.sprint || "",
-      parent: fm.parent || "",
-      feature: fm.feature || "",
       blocked_by: fm.blocked_by || "",
       title: shortTitle(fm._title),
       titleFull: fm._title,
       project,
+      lot,
+      souslot,
       file,
     });
   }
   return tasks;
 }
 
-function isHat(t) {
-  return (
-    t.kind === "lot" ||
-    t.kind === "sous-lot" ||
-    t.kind === "feature" ||
-    t.kind === "bug-umbrella"
-  );
-}
+/** Tout fichier sous `tasks/` est une task. Les chapeaux sont des dossiers. */
 
-function isWorkTask(t) {
-  if (isHat(t) || t.kind === "spec") return false;
-  return true;
-}
-
-function hatHasWork(hat, all) {
-  const kids = all.filter((t) => t.parent === hat.id);
-  if (kids.some(isWorkTask)) return true;
-  if (hat.kind === "lot") {
-    return kids
-      .filter((k) => k.kind === "sous-lot" || k.kind === "feature")
-      .some((sl) => hatHasWork(sl, all));
-  }
-  return false;
+/** Statut dérivé d'un chapeau : ✓ ssi toutes ses tasks live sont done-agent. */
+function hatDone(list) {
+  return list.length > 0 && list.every((t) => t.status === "done-agent");
 }
 
 function sortTasks(a, b) {
@@ -118,12 +104,9 @@ function sortTasks(a, b) {
   const pa = PRIORITY_ORDER[a.priority] ?? 9;
   const pb = PRIORITY_ORDER[b.priority] ?? 9;
   if (pa !== pb) return pa - pb;
-  const fa = a.feature || a.id;
-  const fb = b.feature || b.id;
-  if (fa !== fb) return fa < fb ? -1 : 1;
-  const ua = a.kind === "feature" && !a.parent ? 0 : 1;
-  const ub = b.kind === "feature" && !b.parent ? 0 : 1;
-  if (ua !== ub) return ua - ub;
+  const ka = `${a.lot}/${a.souslot}`;
+  const kb = `${b.lot}/${b.souslot}`;
+  if (ka !== kb) return ka < kb ? -1 : 1;
   return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
 }
 
@@ -149,10 +132,9 @@ function isoWeekInfo(d = new Date()) {
 }
 
 function writeIndex(tasks) {
-  const live = tasks.filter(isWorkTask);
-  const sorted = [...live].sort(sortTasks);
+  const sorted = [...tasks].sort(sortTasks);
   const header =
-    "id\tstatus\tpriority\tcontext\tassignee\tgate\tkind\tsprint\tparent\tfeature\ttitle";
+    "id\tstatus\tpriority\tcontext\tassignee\tgate\ttype\tagent_type\tsprint\tproject\tlot\tsouslot\ttitle";
   const rows = sorted.map((t) =>
     [
       t.id,
@@ -161,10 +143,12 @@ function writeIndex(tasks) {
       t.context,
       t.assignee,
       t.gate,
-      t.kind,
+      t.type,
+      t.agent_type,
       t.sprint,
-      t.parent,
-      t.feature,
+      t.project,
+      t.lot,
+      t.souslot,
       t.title,
     ].join("\t")
   );
@@ -186,20 +170,13 @@ function writeSprint(tasks) {
     .filter(
       (t) =>
         t.sprint === id &&
-        isWorkTask(t) &&
         t.status !== "done-agent" &&
         t.status !== "done-me" &&
         t.status !== "done"
     )
     .sort(sortTasks);
   const readyP1 = tasks
-    .filter(
-      (t) =>
-        isWorkTask(t) &&
-        !t.sprint &&
-        t.priority === "P1" &&
-        t.status === "todo"
-    )
+    .filter((t) => !t.sprint && t.priority === "P1" && t.status === "todo")
     .sort(sortTasks);
 
   const lines = [`# SPRINT ${id}                         ${label}`, ""];
@@ -212,8 +189,9 @@ function writeSprint(tasks) {
       for (const t of readyP1) {
         const who = t.assignee ? `[${t.assignee}]` : "";
         const gate = t.gate ? `gate:${t.gate}` : "";
+        const agent = t.agent_type ? t.agent_type : "";
         lines.push(
-          `  ${GLYPH[t.status] || "·"} ${padId(t.id)}  ${t.title.padEnd(32).slice(0, 32)}  ${who.padEnd(8)}  ${gate}`
+          `  ${GLYPH[t.status] || "·"} ${padId(t.id)}  ${t.title.padEnd(32).slice(0, 32)}  ${who.padEnd(8)}  ${agent.padEnd(5)}  ${gate}`
         );
       }
       lines.push("");
@@ -222,8 +200,9 @@ function writeSprint(tasks) {
     for (const t of committed) {
       const who = t.assignee ? `[${t.assignee}]` : "";
       const gate = t.gate ? `gate:${t.gate}` : "";
+      const agent = t.agent_type ? t.agent_type : "";
       lines.push(
-        `${GLYPH[t.status] || "·"} ${padId(t.id)}  ${t.title.padEnd(32).slice(0, 32)}  ${t.priority}  ${who.padEnd(8)}  ${gate}`
+        `${GLYPH[t.status] || "·"} ${padId(t.id)}  ${t.title.padEnd(32).slice(0, 32)}  ${t.priority}  ${who.padEnd(8)}  ${agent.padEnd(5)}  ${gate}`
       );
     }
     lines.push("");
@@ -253,16 +232,20 @@ function byId(a, b) {
   return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
 }
 
-function backlogKind(t) {
-  if (t.kind === "lot") return "lot";
-  if (t.kind === "sous-lot" || t.kind === "feature") return "sous-lot";
-  if (t.kind === "spec") return "spec";
-  return "task";
+function taskLine(t, indent) {
+  const g = GLYPH[t.status] || "·";
+  return `${indent} ${g} \`${t.id}\` ${t.type} — ${t.title}`;
 }
 
-function backlogLine(t, indent) {
-  const g = GLYPH[t.status] || "·";
-  return `${indent} ${g} \`${padId(t.id).trim()}\` ${backlogKind(t)} — ${t.title}`;
+/** Regroupe une liste de tasks par clé, en préservant l'ordre d'apparition trié. */
+function groupBy(list, keyFn) {
+  const map = new Map();
+  for (const t of list) {
+    const k = keyFn(t);
+    if (!map.has(k)) map.set(k, []);
+    map.get(k).push(t);
+  }
+  return map;
 }
 
 function writeBacklog(tasks) {
@@ -282,85 +265,37 @@ function writeBacklog(tasks) {
   const lines = [
     "# BACKLOG (généré — ne pas éditer)",
     "",
-    "> Orchestrateur. Source canon = `<projet>/raster-src/lots/…`. Legacy = `raster/lots` · `docs/specs/lots`.",
-    "> Arbre = `parent:` (lot → sous-lot → task). Sprint = champ `sprint:` sur la **task** seulement.",
+    "> Orchestrateur. Source canon = `<projet>/raster-src/lots/…`.",
+    "> Arbre = **le chemin** (lot / sous-lot / tasks) — pas un champ `parent:`.",
+    "> Lot et sous-lot sont des **dossiers** : leur état est dérivé, jamais stocké.",
+    "> Sprint = champ `sprint:` sur la **task** seulement.",
     "> Regen : `node raster/regen.mjs` / `node raster/t.mjs index`.",
     "> Inbox : `raster/inbox.md`.",
     "",
   ];
 
   for (const proj of projectOrder) {
-    const list = byProject.get(proj);
-    const printed = new Set();
-    const lots = list
-      .filter((t) => t.kind === "lot" && hatHasWork(t, list))
-      .sort(byId);
-    const lotIds = new Set(list.filter((t) => t.kind === "lot").map((t) => t.id));
-    const sousLotIds = new Set(
-      list
-        .filter((t) => t.kind === "sous-lot" || t.kind === "feature")
-        .map((t) => t.id)
-    );
+    const list = [...byProject.get(proj)].sort(byId);
 
     lines.push(`## ${proj}`);
     lines.push("");
 
-    const emit = (t, indent) => {
-      if (t.kind === "spec") return;
-      if (isHat(t) && !hatHasWork(t, list)) return;
-      printed.add(t.id);
-      lines.push(backlogLine(t, indent));
-    };
+    const byLot = groupBy(list, (t) => t.lot);
+    for (const lot of [...byLot.keys()].sort()) {
+      const inLot = byLot.get(lot);
+      if (lot) lines.push(`- \`${lot}\` lot`);
 
-    for (const lot of lots) {
-      emit(lot, "-");
-      const sls = list
-        .filter(
-          (t) =>
-            (t.kind === "sous-lot" || t.kind === "feature") &&
-            t.parent === lot.id &&
-            hatHasWork(t, list)
-        )
-        .sort(byId);
-      for (const sl of sls) {
-        emit(sl, "  -");
-        list
-          .filter((t) => t.parent === sl.id && isWorkTask(t))
-          .sort(byId)
-          .forEach((k) => emit(k, "    -"));
+      const bySous = groupBy(inLot, (t) => t.souslot);
+      for (const sl of [...bySous.keys()].sort()) {
+        const inSous = bySous.get(sl);
+        const indent = lot ? (sl ? "    -" : "  -") : "-";
+        if (sl) {
+          const g = hatDone(inSous) ? "✓" : "·";
+          lines.push(`  - ${g} \`${sl}\` sous-lot`);
+        }
+        for (const t of inSous) lines.push(taskLine(t, indent));
       }
-      list
-        .filter((t) => t.parent === lot.id && isWorkTask(t))
-        .sort(byId)
-        .forEach((k) => emit(k, "    -"));
     }
-
-    const orphanSous = list
-      .filter(
-        (t) =>
-          (t.kind === "sous-lot" || t.kind === "feature") &&
-          hatHasWork(t, list) &&
-          (!t.parent || !lotIds.has(t.parent))
-      )
-      .sort(byId);
-    for (const sl of orphanSous) {
-      emit(sl, "-");
-      list
-        .filter((t) => t.parent === sl.id && isWorkTask(t))
-        .sort(byId)
-        .forEach((k) => emit(k, "  -"));
-    }
-
-    const orphans = list
-      .filter(
-        (t) =>
-          isWorkTask(t) &&
-          !printed.has(t.id) &&
-          (!t.parent ||
-            (!lotIds.has(t.parent) && !sousLotIds.has(t.parent)))
-      )
-      .sort(byId);
-    for (const t of orphans) emit(t, "-");
 
     lines.push("");
   }

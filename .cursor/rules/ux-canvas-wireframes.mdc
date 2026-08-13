@@ -11,7 +11,7 @@ alwaysApply: true
 
 **SSOT** = dossier UX du sous-lot (ou du lot plat) :
 
-`products/<app>/docs/specs/lots/<lot-slug>/<sous-lot-slug>/ux/<name>-wireframe.canvas.tsx`
+`<projet>/pact/<socle|bc>/ux/<name>-wireframe.canvas.tsx`
 
 Pas de 2ᵉ copie « validée » sous `docs/ux/wireframes/` (legacy / redirect only).
 

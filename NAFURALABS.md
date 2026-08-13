@@ -69,9 +69,6 @@ nafuralabs/
 │   └── web/
 │
 ├── venue-catalog/               # Pact
-├── blanner/
-├── usage-ops/
-├── build-intelligence/
 ├── mbs-studio/                  # site → Pact + ops
 ├── corporate/
 ├── zenith/
@@ -107,7 +104,7 @@ sektor/
 | `platform/` + `tools/lifecycle` + `infra/` + `toolchain/ops` | `nafura-platform/` (+ `ops/`) |
 | `products/raster/` | `raster/` (déjà le moteur à la racine — fusionner) |
 | `marketing/corporate/` | `corporate/` |
-| `products/*/docs/specs/lots/` | `<projet>/pact/` + `<projet>/raster-src/` |
+| ~~`products/*/docs/specs/lots/`~~ **sorti du dépôt** | `<projet>/pact/` + `<projet>/raster-src/` — **Raster part du vide** |
 ### Ordre de migration
 
 **Oui : `nafura-platform` → `sektor`.** Sektor consomme la platform ; l’ops lab (PG, IAM, nlops, lifecycle) **est** platform.
@@ -120,10 +117,10 @@ Ne pas mélanger dans la même tranche : **move de dossiers** vs **découplage l
 | 1 | **nafura-platform** Pact | SPEC app + socle + BC Identity / Documents… (baseline `DISCOVERED` → `INIT`) | refactor conso |
 | 2 | **nafura-platform** ops | `infra/` + `toolchain/ops` + `tools/lifecycle` → `nafura-platform/ops/` ; aliases `nlops` | casser `stg-up` |
 | 3 | **nafura-platform** code | `platform/` → `nafura-platform/` (Gradle paths). Apps **pointent encore** `project(":platform:…")` un temps | packages Maven/npm |
-| 4 | **sektor** Pact + Raster | `docs/specs/lots` → `sektor/pact` + `sektor/raster-src` (CH = sous-lots) | rewrite ERP |
+| 4 | **sektor** Pact + Raster | **pacter** puis **raster** sektor — CADRE d'abord, SPEC par BC ensuite | rewrite ERP |
 | 5 | **sektor** ops + code | `deploy/` → `sektor/ops/` ; `products/sektor-btp/` → `sektor/` | hybrid API platform |
 | 6 | Conso platform | `PLATFORM_CONSUMED` + `client-*` versionnés ; drop path aliases | tout d’un coup |
-| 7 | Reste | venue-catalog, blanner, sites, raster UI ; drop `products/` | |
+| 7 | Reste | venue-catalog, sites, raster UI ; drop `products/` | |
 
 **Interdit :** `nafuralabsv2/` · move Sektor avant que platform ait un `ops/` + un `pact/` lisibles · packages versionnés comme *premier* pas.
 

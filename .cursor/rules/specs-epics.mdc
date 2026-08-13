@@ -1,51 +1,61 @@
 ---
-description: Specs — raster-src par projet ; Pact si app/site ; moteur = projet raster/
+description: Où écrire quoi — raster-src par projet ; pact/ si app ou site ; raster/ = le projet Raster
 alwaysApply: true
 ---
 
-# Specs / lots — où écrire quoi
+# Où écrire quoi
 
-Détail : `docs/specs/README.md` · templates `docs/specs/templates/`.  
-Orchestrateur : `raster/AGENTS.md`.  
-Canon : `PACT_BLUEPRINT.md` · `RASTER_BLUEPRINT.md` · `OPS_BLUEPRINT.md` · `NAFURALABS.md`.
+Canon : `PACT_BLUEPRINT.md` · `RASTER_BLUEPRINT.md` · `raster/AGENTS.md` · `OPS_BLUEPRINT.md`.
+**Ne recopie pas ces règles — applique-les.**
 
-## Chemins (canon 2026-08-13)
+## Deux verbes
+
+- **raster** un projet = lui donner un endroit où le travail vit. Aucun prérequis.
+- **pacter** un projet = lui donner un CADRE et les SPEC de ses contextes. Seulement si c'est une app ou un site.
+
+**On raster d'abord, on pacte ensuite** : pacter est du travail, et tout travail vit dans une task.
+
+## Chemins
 
 | Livrable | Où |
 |----------|-----|
-| **Raster (obligatoire)** | `<projet>/raster-src/lots/<lot-slug>/…` |
-| **Tickets** | `…/raster-src/lots/<lot-slug>/…/tasks/{ID}-{slug}.md` |
-| **Pact (app ou site)** | `<projet>/pact/` |
-| Inbox | **Globale** : `raster/inbox.md` (projet Raster) |
-| INDEX / Sprint / Backlog | **projet** `raster/` (généré) |
+| **Tickets** (seuls fichiers Raster) | `<projet>/raster-src/lots/<lot>/[<sous-lot>/]tasks/{ID}-{slug}.md` |
+| **PLAN** (si ≥ 2 tasks exec) | `…/<sous-lot>/00-PLAN.md` — modèle : `raster/templates/00-PLAN.md` |
+| **CADRE** | `<projet>/pact/CADRE.md` |
+| **SPEC** | `<projet>/pact/<socle\|bc>/SPEC.md` |
+| **Change** | `<projet>/pact/<ctx>/CH-nn-TYPE-slug/CH.md` |
+| **Canvas UX** | `<projet>/pact/<ctx>/ux/*.canvas.tsx` |
+| **e2e** | `<projet>/e2e/` — par **projet**, jamais par BC |
+| Inbox | **globale** : `raster/inbox.md` |
+| INDEX / SPRINT / BACKLOG | `raster/` — **générés** |
 
-`raster/` = **projet** Raster (`raster/raster-src/` + moteur).  
-`<projet>` = peer racine (`sektor/`, `ops/`, …) ou encore `products/<app>/` (legacy `docs/specs/lots` encore indexé).
+`raster/` = le **projet** Raster (son `raster-src/`, son `pact/`, le moteur).
 
-## Pack agent — nouveau lot
+## Lot et sous-lot sont des **dossiers**
 
-1. Ticket `kind: lot` sous `raster-src/lots/<lot-slug>/tasks/`
-2. `tasks/` : N tasks (`parent:` = lot)
-3. `ux/` / Pact canvas si UI
-4. Regen `node raster/t.mjs index`
+Pas de ticket de chapeau. `kind` n'existe pas. `parent:` non plus — **l'arbre est le chemin**.
 
-Sous-lot **seulement** si ≥ 2 flux indépendants (voir `raster/AGENTS.md` §0.2).  
-Si branché sur Pact : sous-lot Raster = **Change**.
+- Branché Pact : `lot ← CADRE | socle | BC` · `sous-lot ← CH`, **nom identique des deux côtés**
+- Raster seul (compta, perso, ops) : lot → task ; sous-lot seulement si ≥ 2 flux indépendants (`raster/AGENTS.md` §0.2)
 
-**Pas** de `00-PROGRESS.md` obligatoire — suivi = tickets.
+## Task
 
-## Bugs
-
-- `kind: task` + `type: bug` (ou `feature` / `physical`) sous un **lot** (plat) ou un **sous-lot**
-- **Pas** de bug-umbrella. **Pas** de `kind: bug`
+`type:` `spec` | `feature` | `bug` | `tech` | `physical` | `qa` — `agent_type` dérivé.
+Les **critères d'acceptation** vivent dans `CH.md` (`AC-n`) ; la task les **référence**. Sa checklist = des **étapes de travail**.
 
 ## Interdit
 
-- Stocker des tasks sous `raster/nafura/…` (legacy)
-- Nouveau projet sans `raster-src/`
-- Mettre les specs sous `docs/` pour un **nouveau** projet
-- Recréer `docs/specs/epics/` ou `docs/specs/features/`
-- Dupliquer ticket
-- Commit / impl d’un sous-lot sans enfants task
-- Status / sprint dans le PLAN
-- Specs sous l’ancien `docs/epics/`
+- Un ticket de lot ou de sous-lot
+- `kind:` · `parent:` · une section « Critères d'acceptation » dans un ticket
+- Un projet sans `raster-src/`
+- Des specs sous `docs/` — elles vivent dans `pact/`
+- Raster qui indexe `pact/`
+- Dupliquer un ticket · statut ou sprint dans le PLAN
+
+## Avant de rendre la main
+
+```bash
+node raster/t.mjs index && node raster/t.mjs check
+```
+
+`check` sort en 1 si une règle est violée. Une erreur bloque la suite.
