@@ -1,49 +1,37 @@
 # BACKLOG (généré — ne pas éditer)
 
-> Orchestrateur. Source canon = `<app>/raster/lots/…` (peer ou `products/<app>`). Legacy = `docs/specs/lots/`.
+> Orchestrateur. Source canon = `<projet>/raster-src/lots/…`. Legacy = `raster/lots` · `docs/specs/lots`.
+> Arbre = `parent:` (lot → sous-lot → task). Sprint = champ `sprint:` sur la **task** seulement.
 > Regen : `node raster/regen.mjs` / `node raster/t.mjs index`.
-> Inbox : `products/<app>/docs/specs/inbox.md`.
+> Inbox : `raster/inbox.md`.
 
-## sektor-btp
+## nafuralabs-migration
 
-- · `ERP-70` lot — Lot — Étude
-  - · `ERP-16` sous-lot — Drawer chiffrage poste
-  - · `ERP-17` sous-lot — Parcours étude (création, version, en-tête, s…
-    - · `ERP-11` task — Raffiner le mode de fonctionnement du descrip…
-    - · `ERP-12` task — Ouverture du popup chiffrage poste — double-clic
-    - · `ERP-13` task — Bug — référentiel unité dans le chiffrage pos…
-    - · `ERP-14` task — Bug affichage — commentaires d'équipe superpo…
-    - · `ERP-08` task — Nouvelle version d'étude depuis une étude ter…
-    - · `ERP-09` task — Revoir les infos d'en-tête de l'étude (chiffr…
-    - · `ERP-10` task — Création étude / AO — ordre & mix import CPS …
-    - · `ERP-15` task — Règle métier — ne pas modifier le lien (struc…
-    - · `ERP-29` task — RH / pointage — Lot 2 · Validation contrôle e…
-    - · `ERP-30` task — RH / pointage — Lot 3 · Paie juste et paramétrée
-    - · `ERP-31` task — RH / pointage — Lot 4 · Coût remonte au chantier
-    - · `ERP-32` task — RH / pointage — Lot 5 · Intégrité et nettoyage
-- · `ERP-72` lot — Lot — Chantier
-  - · `ERP-26` sous-lot — Raffinement RH / pointage
-
-## personal
-
-    - · `PER-03` task — Chantier de documentation cadrage
-    - · `PER-04` task — Ajout du projet compta
-
-## ops
-
-    - · `OPS-01` task — Configurer Zimbra + migrer ykarkafi@nafuralab…
+- · `MIG-01` lot — Lot — Strangler workspace NafuraLabs
+  - · `MIG-10` sous-lot — Sous-lot — Tranche 0 · Squelettes
+    - · `MIG-11` task — Créer les dossiers canon vides
+  - · `MIG-20` sous-lot — Sous-lot — Tranches 1–3 · nafura-platform
+    - · `MIG-21` task — Pact baseline nafura-platform
+    - · `MIG-22` task — Ops lab → nafura-platform/ops
+    - · `MIG-23` task — Code platform → nafura-platform/
+  - · `MIG-30` sous-lot — Sous-lot — Tranches 4–5 · sektor
+    - · `MIG-31` task — Pact + Raster → sektor/
+    - · `MIG-32` task — Ops + code → sektor/
+  - · `MIG-40` sous-lot — Sous-lot — Tranches 6–7 · Conso + reste
+    - · `MIG-41` task — Conso platform versionnée
+    - · `MIG-42` task — Reste du workspace + drop products/
 
 ## raster
 
-
-## mbs-website
-
-    - · `MBS-02` task — ajouter les remarques mbs et l'avenant de la …
-
-## nafura-platform
-
-    - · `PLT-02` task — CH-00 — Première version du cadrage
+- · `RAS-10` lot — Lot — work
+  - · `RAS-11` sous-lot — Sous-lot — CH-00-INIT-contrat-fichiers
+    - ▸ `RAS-12` task — INIT — écrire SPEC + canvas work
+    - ▸ `RAS-13` task — Walker + API — scan raster-src
+    - ▸ `RAS-14` task — e2e — scan raster-src ignore pact
+- · `RAS-20` lot — Lot — socle
+  - · `RAS-21` sous-lot — Sous-lot — CH-00-INIT-shell
+    - ▸ `RAS-22` task — INIT — SPEC + canvas socle
 
 ---
 
-**38 live · 6 projets**
+**21 live · 2 projets**

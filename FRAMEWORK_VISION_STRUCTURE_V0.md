@@ -1,7 +1,8 @@
 # Vision structure — framework agentique Nafura
 
 **Statut :** brouillon de discussion  
-**Canon figé :** [`FRAMEWORK_BLUEPRINT.md`](FRAMEWORK_BLUEPRINT.md)  
+**Canon figé :** [`PACT_BLUEPRINT.md`](PACT_BLUEPRINT.md) · [`RASTER_BLUEPRINT.md`](RASTER_BLUEPRINT.md) · vision workspace [`NAFURALABS.md`](NAFURALABS.md)  
+**Brand (travail) :** **Pact** = framework · Raster = orchestrateur.  
 **Lié à :** [`FRAMEWORK_DEVELOPPEMENT_AGENTIQUE_SPEC_DRIVEN_V1.md`](FRAMEWORK_DEVELOPPEMENT_AGENTIQUE_SPEC_DRIVEN_V1.md)  
 **Date :** 2026-08-12
 
@@ -18,11 +19,11 @@
 7. Le Cadrage **n’a pas** à connaître tous les BC dès V1 — carte partielle + `TBD` OK.
 8. **Éviter** le modèle actuel : produits qui consomment la platform via SDK monorepo in-process (`project(":platform:…")` / path aliases TS couplés).
 9. **`nafura-platform` devient un produit pair**, au même niveau que Sektor et les autres apps.
-10. **Tout projet** possède un dossier **`raster/`** = **source de specs normalisée** (lots / changements / tasks) — **ce n’est pas de la documentation**.
+10. **Tout projet** possède **`raster-src/`** (lots / tasks) — **obligatoire**. **`pact/`** seulement si app ou site.
 11. Consommation platform = **hybride** : **API** + **packages versionnés** (`contracts-*` / `client-*` / `ui-*`).
 12. **Monorepo polyrepo-ready** aujourd’hui ; **1 repo git / produit = option post-découplage**, pas prérequis.
 13. Migration = **strangler à la racine** (nouveaux chemins, move produit par produit). **Pas** de dossier `nafuralabsv2/`.
-14. Orchestrateur monorepo = `raster/` **à la racine** (INDEX / Sprint / regen) — distinct du `<projet>/raster/` (src specs).
+14. **`raster/`** = **projet** Raster (`raster/raster-src/` + moteur INDEX/Sprint). Pas un orchestrateur hors projet.
 15. **SPEC = être · CH = devenir · TASK = faire.** Pas de versioning manuel (git = historique).
 16. Chaque lot a **un** artefact SSOT normalisé : `SPEC.md` (pas un `CADRAGE.md` parallèle, pas le PLAN du CH).
 17. **Défaut Lot → Task.** Sous-lot seulement si ≥ 2 flux **indépendants** (3 critères). Jamais « au cas où ». App 1-BC : pas de sous-lot tant que le test échoue.
@@ -34,25 +35,26 @@
 
 ```text
 nafuralabs/
-├── nafura-platform/              # produit pair (plus un SDK in-process)
-│   ├── raster/                   # SRC specs normalisée (obligatoire)
-│   │   └── lots/cadrage/…
-│   ├── services/platform-api/    # deployable initial (split BC plus tard)
-│   └── packages/{java,js}/       # artifacts versionnés
+├── raster/                       # projet Raster
+│   ├── raster-src/
+│   ├── pact/
+│   └── t.mjs INDEX.tsv …
+├── nafura-platform/
+│   ├── raster-src/
+│   └── pact/
 ├── sektor/
-│   └── raster/                   # idem — obligatoire par projet
-├── venue-catalogue/
-│   └── raster/
-├── raster/                       # orchestrateur monorepo (INDEX/Sprint) + futur produit Raster
+│   ├── raster-src/
+│   └── pact/
 ├── ops/
+│   └── raster-src/               # pas une app → pas de pact
 ├── compta/
 └── perso/
 ```
 
-**Règle :** `<projet>/raster/` = src specs. **SSOT d’un lot** = `SPEC.md` de ce lot. Guides humains ≠ raster.
+**Règle :** `<projet>/raster-src/` = Raster du projet. `<projet>/pact/` = Pact si app/site.
 
 **Démarrage strangler (2026-08-12) :**  
-`nafura-platform/raster/lots/cadrage/` (`PLT-*`) — legacy code reste dans `platform/` ; autres apps encore en `products/*/docs/specs/lots/` (legacy indexé).
+`nafura-platform/raster-src/` (`PLT-*`) — legacy code reste dans `platform/` ; autres apps encore en `products/*/docs/specs/lots/` (legacy indexé).
 
 ### Ordre structurel d’une app (ex. Sektor)
 
@@ -78,7 +80,7 @@ CHG Cadrage INITIALIZATION
 Un lot **DOIT** avoir exactement un fichier :
 
 ```text
-<projet>/raster/lots/<lot-slug>/
+<projet>/raster-src/lots/<lot-slug>/
 ├── SPEC.md                                    # SSOT — le lot *est* ce dossier
 ├── CH-00-INIT-<slug>/
 │   ├── 00-PLAN.md                             # crée la SPEC à la clôture
@@ -240,7 +242,8 @@ L’agent de spec peut, sans inventer :
 
 ```text
 nafura-platform/
-├── raster-src/          # Cadrage → Socle → BC
+├── raster-src/
+├── pact/
 ├── services/
 │   └── platform-api/    # 1 service au départ
 └── packages/
@@ -405,7 +408,7 @@ Open questions Sektor :
 
 - [x] Mode de consommation `nafura-platform` → **hybride API + packages**
 - [x] Migration → **strangler** (pas `nafuralabsv2/`) ; monorepo polyrepo-ready
-- [x] Tout projet a un `<projet>/raster/` = **src specs** (pas docs) — canon ; legacy `docs/specs/lots` encore indexé
+- [x] Tout projet a un `<projet>/raster-src/` — canon ; `pact/` si app/site ; legacy `docs/specs/lots` encore indexé
 - [x] Artefact SSOT = `SPEC.md` par lot ; CH/PLAN = delta ; tasks = faire
 - [x] Découpage : Lot = BC ; sous-lot = flux indépendants (CBS vs app 1-contexte)
 - [ ] Convention d’IDs (`PLT-*` ok ; `CH-00` vs `CHG-CAD-00x` ?)

@@ -2,10 +2,8 @@
 /**
  * Regen Raster orchestrator views from product lot tasks.
  * Walks every NafuraLabs project (IT or not):
- *   - <projet>/raster/lots/.../tasks/*.md     (peer racine : nafura-platform, accounting, …)
- *   - products/<app>/raster/lots/.../tasks/*.md
- * Legacy: products/<app>/docs/specs/lots|features|epics/.../tasks/*.md
- * Does NOT treat repo-root raster/ as a project (orchestrator only).
+ *   - <projet>/raster-src/lots/.../tasks/*.md   (seul scan — peers + products si raster-src)
+ * Projet Raster = raster/ (scanné via raster/raster-src/).
  * Sync: any task file on a project appears in INDEX/BACKLOG after regen.
  * Skips: lots/_archive
  * Writes: INDEX.tsv, SPRINT.md, BACKLOG.md under repo-root raster/ (orchestrateur)
@@ -16,85 +14,14 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { collectTaskFiles, projectFromPath } from "./walk-tasks.mjs";
 
 const RASTER_ROOT = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(RASTER_ROOT, "..");
-const PRODUCTS_ROOT = path.join(REPO_ROOT, "products");
 
-/** Root dirs that are never peer products (even if they gain docs/specs later). */
-const ROOT_SKIP = new Set([
-  ".git",
-  ".cursor",
-  "node_modules",
-  "products",
-  "platform",
-  "raster",
-  "infra",
-  "toolchain",
-  "shared",
-  "docs",
-  "secrets",
-  "build",
-  "gradle",
-  "tmp",
-  "tools",
-  "BDP",
-  "cmd",
-  "marketing",
-]);
-
-const STATUS_ORDER = { doing: 0, review: 1, blocked: 2, todo: 3, done: 4 };
+const STATUS_ORDER = { doing: 0, review: 1, blocked: 2, todo: 3, "done-agent": 4, "done-me": 5, done: 6 };
 const PRIORITY_ORDER = { P0: 0, P1: 1, P2: 2, P3: 3 };
-const GLYPH = { todo: "·", doing: "▸", blocked: "✕", review: "◐", done: "✓" };
-
-function walkEpicTasks(dir, out = []) {
-  if (!fs.existsSync(dir)) return out;
-  for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
-    const full = path.join(dir, ent.name);
-    if (ent.isDirectory()) {
-      if (ent.name === "_archive" || ent.name === "node_modules") continue;
-      if (ent.name === "tasks") {
-        for (const f of fs.readdirSync(full)) {
-          if (f.endsWith(".md")) out.push(path.join(full, f));
-        }
-      } else {
-        walkEpicTasks(full, out);
-      }
-    }
-  }
-  return out;
-}
-
-function collectSpecsUnder(appRoot, files) {
-  // Canon: <app>/raster/lots (spec src normalisée — pas de la doc)
-  walkEpicTasks(path.join(appRoot, "raster", "lots"), files);
-  // Legacy: docs/specs/{lots,features,epics}
-  const specs = path.join(appRoot, "docs", "specs");
-  for (const bucket of ["lots", "features", "epics"]) {
-    walkEpicTasks(path.join(specs, bucket), files);
-  }
-}
-
-function collectTaskFiles() {
-  const files = [];
-  if (fs.existsSync(PRODUCTS_ROOT)) {
-    for (const app of fs.readdirSync(PRODUCTS_ROOT, { withFileTypes: true })) {
-      if (!app.isDirectory()) continue;
-      collectSpecsUnder(path.join(PRODUCTS_ROOT, app.name), files);
-    }
-  }
-  // Peer products at repo root (ex. nafura-platform/)
-  for (const ent of fs.readdirSync(REPO_ROOT, { withFileTypes: true })) {
-    if (!ent.isDirectory()) continue;
-    if (ROOT_SKIP.has(ent.name) || ent.name.startsWith(".")) continue;
-    const appRoot = path.join(REPO_ROOT, ent.name);
-    const hasRaster = fs.existsSync(path.join(appRoot, "raster", "lots"));
-    const hasLegacy = fs.existsSync(path.join(appRoot, "docs", "specs"));
-    if (!hasRaster && !hasLegacy) continue;
-    collectSpecsUnder(appRoot, files);
-  }
-  return files;
-}
+const GLYPH = { todo: "·", doing: "▸", blocked: "✕", review: "◐", "done-agent": "✓", "done-me": "✓", done: "✓" };
 
 function parseFrontmatter(raw) {
   if (!raw.startsWith("---\n") && !raw.startsWith("---\r\n")) return null;
@@ -120,17 +47,6 @@ function parseFrontmatter(raw) {
   return fm;
 }
 
-function projectFromPath(filePath) {
-  const rel = path.relative(REPO_ROOT, filePath).replace(/\\/g, "/");
-  const underProducts = rel.match(/^products\/([^/]+)\//);
-  if (underProducts) return underProducts[1];
-  const peerRaster = rel.match(/^([^/]+)\/raster\//);
-  if (peerRaster) return peerRaster[1];
-  const peerLegacy = rel.match(/^([^/]+)\/docs\/specs\//);
-  if (peerLegacy) return peerLegacy[1];
-  return "misc";
-}
-
 function shortTitle(title) {
   let t = title
     .replace(/^Feature\s+[—–-]\s+/i, "")
@@ -142,13 +58,13 @@ function shortTitle(title) {
 }
 
 function loadTasks() {
-  const files = collectTaskFiles();
+  const files = collectTaskFiles(REPO_ROOT);
   const tasks = [];
   for (const file of files) {
     const fm = parseFrontmatter(fs.readFileSync(file, "utf8"));
     if (!fm?.id) continue;
-    if (fm.status === "done") continue; // safety if done left in live tree
-    const project = projectFromPath(file);
+    if (fm.status === "done" || fm.status === "done-me") continue;
+    const project = projectFromPath(REPO_ROOT, file);
     tasks.push({
       id: fm.id,
       status: fm.status || "todo",
@@ -267,7 +183,14 @@ function padId(id) {
 function writeSprint(tasks) {
   const { id, label } = isoWeekInfo();
   const committed = tasks
-    .filter((t) => t.sprint === id && isWorkTask(t))
+    .filter(
+      (t) =>
+        t.sprint === id &&
+        isWorkTask(t) &&
+        t.status !== "done-agent" &&
+        t.status !== "done-me" &&
+        t.status !== "done"
+    )
     .sort(sortTasks);
   const readyP1 = tasks
     .filter(
@@ -326,35 +249,20 @@ function writeSprint(tasks) {
   fs.writeFileSync(path.join(RASTER_ROOT, "SPRINT.md"), lines.join("\n"), "utf8");
 }
 
-function sortBacklogCluster(a, b) {
-  const rank = (t) =>
-    t.kind === "lot" ? 0 : t.kind === "sous-lot" || t.kind === "feature" ? 1 : 2;
-  const ua = rank(a);
-  const ub = rank(b);
-  if (ua !== ub) return ua - ub;
-  const sa = STATUS_ORDER[a.status] ?? 9;
-  const sb = STATUS_ORDER[b.status] ?? 9;
-  if (sa !== sb) return sa - sb;
-  const pa = PRIORITY_ORDER[a.priority] ?? 9;
-  const pb = PRIORITY_ORDER[b.priority] ?? 9;
-  if (pa !== pb) return pa - pb;
+function byId(a, b) {
   return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
 }
 
-function clusterKey(t) {
-  if (t.kind === "lot") return `L:${t.id}`;
-  if (t.kind === "sous-lot" || t.kind === "feature")
-    return t.parent ? `L:${t.parent}` : `S:${t.id}`;
-  if (t.parent) return `S:${t.parent}`;
-  return `_${t.id}`;
+function backlogKind(t) {
+  if (t.kind === "lot") return "lot";
+  if (t.kind === "sous-lot" || t.kind === "feature") return "sous-lot";
+  if (t.kind === "spec") return "spec";
+  return "task";
 }
 
-function clusterPriority(list) {
-  const umbrella = list.find(
-    (t) => t.kind === "lot" || t.kind === "sous-lot" || t.kind === "feature"
-  );
-  if (umbrella) return PRIORITY_ORDER[umbrella.priority] ?? 9;
-  return Math.min(...list.map((t) => PRIORITY_ORDER[t.priority] ?? 9));
+function backlogLine(t, indent) {
+  const g = GLYPH[t.status] || "·";
+  return `${indent} ${g} \`${padId(t.id).trim()}\` ${backlogKind(t)} — ${t.title}`;
 }
 
 function writeBacklog(tasks) {
@@ -374,54 +282,86 @@ function writeBacklog(tasks) {
   const lines = [
     "# BACKLOG (généré — ne pas éditer)",
     "",
-    "> Orchestrateur. Source canon = `<app>/raster/lots/…` (peer ou `products/<app>`). Legacy = `docs/specs/lots/`.",
+    "> Orchestrateur. Source canon = `<projet>/raster-src/lots/…`. Legacy = `raster/lots` · `docs/specs/lots`.",
+    "> Arbre = `parent:` (lot → sous-lot → task). Sprint = champ `sprint:` sur la **task** seulement.",
     "> Regen : `node raster/regen.mjs` / `node raster/t.mjs index`.",
-    "> Inbox : `products/<app>/docs/specs/inbox.md`.",
+    "> Inbox : `raster/inbox.md`.",
     "",
   ];
 
   for (const proj of projectOrder) {
     const list = byProject.get(proj);
-    const clusters = new Map();
-    for (const t of list) {
-      const k = clusterKey(t);
-      if (!clusters.has(k)) clusters.set(k, []);
-      clusters.get(k).push(t);
-    }
-    const clusterOrder = [...clusters.keys()].sort((a, b) => {
-      const pa = clusterPriority(clusters.get(a));
-      const pb = clusterPriority(clusters.get(b));
-      if (pa !== pb) return pa - pb;
-      return a < b ? -1 : 1;
-    });
+    const printed = new Set();
+    const lots = list
+      .filter((t) => t.kind === "lot" && hatHasWork(t, list))
+      .sort(byId);
+    const lotIds = new Set(list.filter((t) => t.kind === "lot").map((t) => t.id));
+    const sousLotIds = new Set(
+      list
+        .filter((t) => t.kind === "sous-lot" || t.kind === "feature")
+        .map((t) => t.id)
+    );
 
     lines.push(`## ${proj}`);
     lines.push("");
-    for (const ck of clusterOrder) {
-      const members = clusters.get(ck).sort(sortBacklogCluster);
-      for (const t of members) {
-        if (isHat(t) && !hatHasWork(t, list)) continue;
-        if (t.kind === "spec") continue;
-        const g = GLYPH[t.status] || "·";
-        const kindOrStatus =
-          t.kind === "lot" ||
-          t.kind === "sous-lot" ||
-          t.kind === "feature" ||
-          t.kind === "spec" ||
-          t.kind === "task"
-            ? t.kind
-            : t.status;
-        const bullet =
-          t.kind === "lot"
-            ? "-"
-            : t.kind === "sous-lot" || t.kind === "feature"
-              ? "  -"
-              : "    -";
-        lines.push(
-          `${bullet} ${g} \`${padId(t.id).trim()}\` ${kindOrStatus} — ${t.title}`
-        );
+
+    const emit = (t, indent) => {
+      if (t.kind === "spec") return;
+      if (isHat(t) && !hatHasWork(t, list)) return;
+      printed.add(t.id);
+      lines.push(backlogLine(t, indent));
+    };
+
+    for (const lot of lots) {
+      emit(lot, "-");
+      const sls = list
+        .filter(
+          (t) =>
+            (t.kind === "sous-lot" || t.kind === "feature") &&
+            t.parent === lot.id &&
+            hatHasWork(t, list)
+        )
+        .sort(byId);
+      for (const sl of sls) {
+        emit(sl, "  -");
+        list
+          .filter((t) => t.parent === sl.id && isWorkTask(t))
+          .sort(byId)
+          .forEach((k) => emit(k, "    -"));
       }
+      list
+        .filter((t) => t.parent === lot.id && isWorkTask(t))
+        .sort(byId)
+        .forEach((k) => emit(k, "    -"));
     }
+
+    const orphanSous = list
+      .filter(
+        (t) =>
+          (t.kind === "sous-lot" || t.kind === "feature") &&
+          hatHasWork(t, list) &&
+          (!t.parent || !lotIds.has(t.parent))
+      )
+      .sort(byId);
+    for (const sl of orphanSous) {
+      emit(sl, "-");
+      list
+        .filter((t) => t.parent === sl.id && isWorkTask(t))
+        .sort(byId)
+        .forEach((k) => emit(k, "  -"));
+    }
+
+    const orphans = list
+      .filter(
+        (t) =>
+          isWorkTask(t) &&
+          !printed.has(t.id) &&
+          (!t.parent ||
+            (!lotIds.has(t.parent) && !sousLotIds.has(t.parent)))
+      )
+      .sort(byId);
+    for (const t of orphans) emit(t, "-");
+
     lines.push("");
   }
 

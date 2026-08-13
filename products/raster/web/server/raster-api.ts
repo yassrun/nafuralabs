@@ -2,6 +2,11 @@ import fs from "node:fs";
 import path from "node:path";
 import type { Plugin } from "vite";
 import type { IncomingMessage, ServerResponse } from "node:http";
+import {
+  collectTaskFiles,
+  listRasterProjects,
+  projectFromPath,
+} from "../../../../raster/walk-tasks.mjs";
 
 export type TaskDto = {
   id: string;
@@ -79,58 +84,24 @@ function inferWorkType(fm: Record<string, string>): string {
   const kind = fm.kind || "task";
   if (isHatKind(kind) || kind === "spec") return "";
   const ty = (fm.type || "").toLowerCase();
-  if (ty === "bug" || ty === "feature" || ty === "physical") return ty;
+  if (ty === "bug" || ty === "feature" || ty === "physical" || ty === "spec")
+    return ty;
   if (kind === "bug") return "bug";
   const tags = parseListField(fm.tags);
   if (tags.some((t) => t.toLowerCase() === "bug")) return "bug";
   if (tags.some((t) => t.toLowerCase() === "physical")) return "physical";
+  if (tags.some((t) => t.toLowerCase() === "spec")) return "spec";
   return "feature";
 }
 
-function walkTasks(dir: string, out: string[] = []) {
-  if (!fs.existsSync(dir)) return out;
-  for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
-    const full = path.join(dir, ent.name);
-    if (ent.isDirectory()) {
-      if (ent.name === "_archive" || ent.name === "node_modules") continue;
-      if (ent.name === "tasks") {
-        for (const f of fs.readdirSync(full)) {
-          if (f.endsWith(".md")) out.push(path.join(full, f));
-        }
-      } else {
-        walkTasks(full, out);
-      }
-    }
-  }
-  return out;
-}
-
 function loadTasks(repoRoot: string): TaskDto[] {
-  const products = path.join(repoRoot, "products");
-  const files: string[] = [];
-  if (!fs.existsSync(products)) return [];
-  for (const app of fs.readdirSync(products, { withFileTypes: true })) {
-    if (!app.isDirectory()) continue;
-    walkTasks(
-      path.join(products, app.name, "docs", "specs", "epics"),
-      files
-    );
-    walkTasks(
-      path.join(products, app.name, "docs", "specs", "features"),
-      files
-    );
-    walkTasks(
-      path.join(products, app.name, "docs", "specs", "lots"),
-      files
-    );
-  }
+  const files = collectTaskFiles(repoRoot);
   const tasks: TaskDto[] = [];
   for (const file of files) {
     const fm = parseFrontmatter(fs.readFileSync(file, "utf8"));
-    if (!fm?.id || fm.status === "done") continue;
+    if (!fm?.id || fm.status === "done" || fm.status === "done-me") continue;
     const rel = path.relative(repoRoot, file).replace(/\\/g, "/");
-    const m = rel.match(/^products\/([^/]+)\//);
-    const project = m?.[1] || "misc";
+    const project = projectFromPath(repoRoot, file);
     tasks.push({
       id: fm.id,
       status: fm.status || "todo",
@@ -154,16 +125,7 @@ function loadTasks(repoRoot: string): TaskDto[] {
 }
 
 function listProjects(repoRoot: string): string[] {
-  const products = path.join(repoRoot, "products");
-  if (!fs.existsSync(products)) return [];
-  return fs
-    .readdirSync(products, { withFileTypes: true })
-    .filter((d) => d.isDirectory())
-    .map((d) => d.name)
-    .filter((name) =>
-      fs.existsSync(path.join(products, name, "docs", "specs"))
-    )
-    .sort();
+  return listRasterProjects(repoRoot);
 }
 
 function parseInboxLines(raw: string): string[] {
@@ -190,7 +152,7 @@ function writeGlobalInbox(repoRoot: string, lines: string[]) {
     "# INBOX",
     "",
     "<!-- Capture globale Raster — une ligne, @tag optionnel, pas d'ID. -->",
-    "<!-- Promote → products/<app>/docs/specs/lots/<lot>/<sous-lot?>/tasks/ -->",
+    "<!-- Promote → <projet>/raster-src/lots/<lot>/<sous-lot?>/tasks/ -->",
     "",
     ...lines.map((l) => `- ${l}`),
     "",
@@ -200,10 +162,13 @@ function writeGlobalInbox(repoRoot: string, lines: string[]) {
 
 const PROJECT_PREFIX: Record<string, string> = {
   "sektor-btp": "ERP",
+  sektor: "SEKTOR",
   raster: "RAS",
   personal: "PER",
   ops: "OPS",
   "mbs-website": "MBS",
+  "nafuralabs-migration": "MIG",
+  "nafura-platform": "PLT",
 };
 
 function projectPrefix(project: string) {
@@ -227,22 +192,7 @@ function journalStamp() {
 
 /** Max numeric id for prefix across all task files (incl. done / archive). */
 function nextIdForPrefix(repoRoot: string, prefix: string): string {
-  const products = path.join(repoRoot, "products");
-  const files: string[] = [];
-  if (fs.existsSync(products)) {
-    for (const app of fs.readdirSync(products, { withFileTypes: true })) {
-      if (!app.isDirectory()) continue;
-      walkTasks(
-        path.join(products, app.name, "docs", "specs", "epics"),
-        files
-      );
-      // also archived epic tasks
-      walkArchiveTasks(
-        path.join(products, app.name, "docs", "specs", "epics", "_archive"),
-        files
-      );
-    }
-  }
+  const files = collectTaskFiles(repoRoot, { includeArchive: true });
   let max = 0;
   const re = new RegExp(`^${prefix}-(\\d+)$`);
   for (const file of files) {
@@ -256,72 +206,6 @@ function nextIdForPrefix(repoRoot: string, prefix: string): string {
     }
   }
   return `${prefix}-${String(max + 1).padStart(2, "0")}`;
-}
-
-function walkArchiveTasks(dir: string, out: string[] = []) {
-  if (!fs.existsSync(dir)) return out;
-  for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
-    const full = path.join(dir, ent.name);
-    if (ent.isDirectory()) {
-      if (ent.name === "tasks") {
-        for (const f of fs.readdirSync(full)) {
-          if (f.endsWith(".md")) out.push(path.join(full, f));
-        }
-      } else {
-        walkArchiveTasks(full, out);
-      }
-    }
-  }
-  return out;
-}
-
-function ensureBugUmbrella(repoRoot: string, project: string): TaskDto {
-  const existing = loadTasks(repoRoot).find(
-    (t) => t.project === project && t.kind === "bug-umbrella"
-  );
-  if (existing) return existing;
-
-  const prefix = projectPrefix(project);
-  const id = nextIdForPrefix(repoRoot, prefix);
-  const dir = path.join(
-    repoRoot,
-    "products",
-    project,
-    "docs",
-    "specs",
-    "lots",
-    "_backlog",
-    "tasks"
-  );
-  fs.mkdirSync(dir, { recursive: true });
-  const rel = `products/${project}/docs/specs/lots/_backlog/tasks/${id}-bug-umbrella.md`;
-  const abs = path.join(repoRoot, rel);
-  const body = `---
-id: ${id}
-status: todo
-context: nafura
-kind: bug-umbrella
-priority: P1
-assignee: me
-gate: none
----
-
-# Bugs
-
-> Parapluie bugs — pas exécutable seul. Enfants = \`kind: bug\`.
-
-## Critères d'acceptation
-- [ ] Les bugs live ont \`parent: ${id}\`
-
-## Journal
-\`\`\`
-${journalStamp()}  kind:bug-umbrella créé (promote)
-\`\`\`
-`;
-  fs.writeFileSync(abs, body, "utf8");
-  const created = loadTasks(repoRoot).find((t) => t.id === id);
-  if (!created) throw new Error(`failed to create bug-umbrella ${id}`);
-  return created;
 }
 
 function parseInboxTags(line: string): { title: string; tags: string[] } {
@@ -356,10 +240,18 @@ function promoteInboxLine(
   const { title, tags } = parseInboxTags(line);
   const asBug =
     tags.some((t) => t.toLowerCase() === "bug") || /^bug\b/i.test(title);
+  const asSpec =
+    tags.some((t) => t.toLowerCase() === "spec") || /^spec\b/i.test(title);
   const asPhysical =
     tags.some((t) => t.toLowerCase() === "physical") ||
     /^physical\b/i.test(title);
-  const workType = asPhysical ? "physical" : asBug ? "bug" : "feature";
+  const workType = asPhysical
+    ? "physical"
+    : asBug
+      ? "bug"
+      : asSpec
+        ? "spec"
+        : "feature";
 
   const all = loadTasks(repoRoot);
   const parent = all.find(

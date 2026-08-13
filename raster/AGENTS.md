@@ -1,7 +1,9 @@
 # AGENTS.md — Raster (orchestrateur)
 
-> **Raster** = orchestrateur (lot · sous-lot · **task**). **Pas** le framework de spec (SPEC / CH / canvas).  
-> **`<projet>/raster/`** = fichiers du projet. **`raster/` racine** = scan + INDEX / Sprint / Backlog.  
+> **Raster** = **projet** (lot · sous-lot · **task**) **et** moteur (INDEX / Sprint / CLI). **Pas** Pact (SPEC / CH / canvas).  
+> **`<projet>/raster-src/`** = fichiers Raster du projet — **obligatoire**.  
+> **`raster/`** = le projet Raster (`raster/raster-src/` + `pact/` + moteur).  
+> Blueprint : [`RASTER_BLUEPRINT.md`](../RASTER_BLUEPRINT.md) · Pact : [`PACT_BLUEPRINT.md`](../PACT_BLUEPRINT.md).  
 > Sync miroir : [`docs/Raster.md`](../docs/Raster.md).
 
 **Actors :** `me` | `agent` uniquement.  
@@ -13,17 +15,17 @@
 
 | Décision | Choix |
 |----------|--------|
-| Rôle Raster racine | Orchestre : regen vues, owns **Sprint**, affiche backlog complet, CLI `t` |
-| Stockage tickets | **Dans le projet** sous `<projet>/raster/lots/…` — jamais sous `raster/nafura/…` (legacy) |
-| Chemin tasks (canon) | `<projet>/raster/lots/<lot-slug>/…/tasks/{ID}-{slug}.md` (peer racine ou `products/<app>`) |
-| Chemin tasks (legacy) | `products/<app>/docs/specs/lots/…` — encore indexé, à migrer |
-| Inbox | **Une globale** : `raster/inbox.md` (promote vers un projet ensuite) |
+| Rôle `raster/` | **Projet** Raster : app + moteur (regen vues, Sprint, CLI `t`) |
+| Stockage tickets | **Dans le projet** sous `<projet>/raster-src/lots/…` — jamais sous `raster/nafura/…` (legacy) |
+| Chemin tasks (canon) | `<projet>/raster-src/lots/<lot-slug>/…/tasks/{ID}-{slug}.md` |
+| Chemin tasks (legacy) | `<projet>/raster/lots/…` · `products/<app>/docs/specs/lots/…` — encore indexé |
+| Inbox | **Une globale** : `raster/inbox.md` (dans le projet Raster) |
 | IDs | **Par projet** (préfixe dédié, immuable) — ex. Sektor=`SEKTOR`, Platform=`PLT`, Raster=`RAS`, Personal=`PER`, Ops=`OPS` |
-| Specs | `<projet>/raster/lots/<lot>/SPEC.md` (contrat) · `CH-nn-INIT\|EVOL\|CORRECTION/` (PLAN + tasks) · `ux/*.canvas.tsx` (flux) |
-| Vocabulaire | **Lot** = dossier + SPEC · **CH** = changement · **Task** = seul item sprintable · **pas** de ticket `kind: lot` |
-| Tout projet | **DOIT** avoir `raster/` (lot → CH → task), même hors IT (ex. accounting) |
+| Pact | `<projet>/pact/` si **app ou site** — Raster n’indexe pas les SPEC/canvas |
+| Vocabulaire | **Lot** · **sous-lot** (= CH si branché sur Pact) · **Task** = seul item sprintable |
+| Tout projet | **DOIT** avoir `raster-src/` (y compris `raster/raster-src/`), même hors IT |
 
-**Migration :** `docs/specs/lots` → `<projet>/raster/lots` ; `raster/nafura/…/tasks/` legacy → à migrer.
+**Migration :** `docs/specs/lots` → `<projet>/raster-src/lots` ; `raster/nafura/…/tasks/` legacy → à migrer.
 
 ---
 
@@ -32,10 +34,11 @@
 1. Travail Nafura = ticket avec `sprint: 2026-Wn` avant exécution.
 2. Status ne bouge que au **Check progress** (à deux).
 3. Pas d’`estimate`. Pas de `dropped` (abandon = delete).
-4. **Lot / sous-lot sans Tasks = draft** (inbox), **pas** backlog. Ne pas créer de sous-lot vide « au cas où ».
+4. **Inbox = uniquement `raster/inbox.md`.** Chaque ligne = task draft (description). Lot / sous-lot sans Tasks : ne pas créer ; **pas** inbox.
 5. **Backlog + Sprint = Tasks seulement.** Un lot/sous-lot n’est pas sprintable. Commit = `sprint:` sur une task.
-6. `done` → archive **dans le produit** (garde `sprint:`) — hors INDEX live.
-7. Toute task a un **`type:`** `bug` | `feature` | `physical`. **Pas** de bug-umbrella. **Pas** de `kind: bug`.
+6. `done-me` (et legacy `done`) → archive **dans le produit** — hors INDEX. `done-agent` reste live (vue **Done agent**).
+7. Toute task a un **`type:`** `spec` | `feature` | `bug` | `physical`. Feature/bug = runnable/testable. Écriture SPEC+canvas = **`spec`**, pas feature. **Pas** de bug-umbrella. **Pas** de `kind: bug`.
+8. Status : `todo` \| `doing` \| `blocked` \| `review` \| `done-agent` \| `done-me`. Nav : Inbox · Backlog · Sprint · **Done agent**. DOR/DOD : `raster/pact/work/SPEC.md`.
 
 ### 0.2 Critère sous-lot (agents — figé)
 
@@ -64,41 +67,39 @@ Un flux est indépendant si **les 3** sont vrais :
 ### Produit / projet
 
 ```
-<projet>/                         # peer racine (ex. nafura-platform) ou products/<app>
-  raster/                         # SRC specs normalisée — obligatoire — pas de la doc
+<projet>/                         # peer (sektor, raster, ops, …)
+  raster-src/                     # OBLIGATOIRE — lots / sous-lots / tasks
     lots/
-      <lot-slug>/                 # chapitre (kind:lot dans tasks/)
+      <lot-slug>/
         tasks/
-          {ID}-lot-….md           # kind: lot
-          {ID}-….md               # kind: task  (lot plat)
-        <sous-lot-slug>/          # optionnel — §0.2
+          {ID}-….md
+        <sous-lot-slug>/          # optionnel — §0.2 ; si Pact = un CH
           00-PLAN.md
-          ux/…
           tasks/
-            {ID}-sous-lot-….md
             {ID}-….md
       _archive/
       _backlog/tasks/
-  ROADMAP.md                      # optionnel (doc produit, hors raster/)
+  pact/                           # SI app ou site
+  ROADMAP.md                      # optionnel (hors raster-src)
 ```
 
-### Raster orchestrateur (`raster/` racine monorepo)
+### Projet Raster (`raster/`)
 
 ```
 raster/
+  raster-src/         # tickets du projet Raster (RAS-*)
+  pact/               # app → oui
   AGENTS.md           # ce contrat
-  inbox.md            # capture globale (pas liée à un projet)
-  regen.mjs / t.mjs   # walk products/*/docs/specs/lots/**/tasks
-  INDEX.tsv           # GÉNÉRÉ — all live tasks
-  SPRINT.md           # GÉNÉRÉ — sprint courant (Raster owns)
-  BACKLOG.md          # GÉNÉRÉ — par projet / feature
-  PORTFOLIO.md        # GÉNÉRÉ — santé projets
-  # PAS de nafura/products/…/tasks (legacy → migrer)
+  inbox.md            # capture globale
+  regen.mjs / t.mjs
+  INDEX.tsv           # GÉNÉRÉ
+  SPRINT.md           # GÉNÉRÉ
+  BACKLOG.md          # GÉNÉRÉ
 ```
 
-### App UI (futur)
+### App UI
 
-`products/raster/` — shell UI qui consomme les vues / fichiers agrégés.
+Vit dans le **projet** `raster/` (`web/` — aujourd’hui encore `products/raster/web` en legacy).
 
 ---
 
@@ -108,10 +109,10 @@ raster/
 
 ```yaml
 id: ERP-12
-status: todo                 # todo | doing | blocked | review | done
+status: todo                 # todo | doing | blocked | review | done-agent | done-me
 context: nafura              # nafura | saham | personal
 kind: task                   # lot | sous-lot | spec | task
-type: feature                # bug | feature | physical  (obligatoire si kind:task)
+type: feature                # spec | bug | feature | physical  (obligatoire si kind:task)
 priority: P1                 # P0 | P1 | P2 | P3
 assignee: me                 # me | agent | either
 gate: none                   # none | me | qa
@@ -147,10 +148,10 @@ Enums fermés — ne jamais inventer. Pas de compteurs dérivés dans le frontma
 
 | kind | Sens |
 |------|------|
-| `lot` | Chapeau CBS — **draft** tant que pas de task (inbox, hors backlog) |
-| `sous-lot` | Chapeau flux optionnel (§0.2) — **draft** tant que pas de task |
-| `spec` | Décision / ADR — pas sprintable |
-| `task` | Seule unité backlog + sprint. `type:` **bug** \| **feature** \| **physical** |
+| `lot` | Chapeau CBS — hors inbox ; hors backlog tant que pas de task |
+| `sous-lot` | Chapeau flux optionnel (§0.2) — hors inbox ; hors backlog tant que pas de task |
+| `spec` | ADR / décision — **pas** sprintable (`kind: spec` ≠ `type: spec`) |
+| `task` | Seule unité backlog + sprint. `type:` **spec** \| **feature** \| **bug** \| **physical** |
 
 ---
 
@@ -166,14 +167,14 @@ Enums fermés — ne jamais inventer. Pas de compteurs dérivés dans le frontma
 
 Pack agent « nouveau lot » (défaut plat) :
 
-1. `lots/<lot-slug>/tasks/` : ticket `kind: lot`
+1. `raster-src/lots/<lot-slug>/tasks/` : ticket `kind: lot`
 2. Même `tasks/` : N× `kind: task` avec `parent:` = lot
 3. `ux/` si UI (sur le lot plat)
 4. Regen Raster (`node raster/t.mjs index`)
 
 Pack agent « nouveau sous-lot » (seulement si critère §0.2) :
 
-1. Dossier `lots/<lot-slug>/<sous-lot-slug>/`
+1. Dossier `raster-src/lots/<lot-slug>/<sous-lot-slug>/`
 2. `00-PLAN.md` + `tasks/` : 1× `kind: sous-lot` (`parent:` = lot) + N× `kind: task`
 3. Si le lot avait déjà des tasks directes du **même** flux : les reparenter. Si c’est un **2ᵉ** flux : créer le sous-lot + reparenter l’ancien flux aussi
 4. Regen Raster
@@ -189,6 +190,7 @@ Pack agent « nouveau sous-lot » (seulement si critère §0.2) :
 | `raster` | `RAS` |
 | `personal` | `PER` |
 | `ops` | `OPS` |
+| `nafuralabs-migration` | `MIG` |
 | client MBS… | `MBS` (ou préfixe dédié) |
 
 IDs **immuables**. Jamais renumérotés / réutilisés.
@@ -219,9 +221,11 @@ IDs **immuables**. Jamais renumérotés / réutilisés.
 
 | Date | Décision |
 |------|----------|
+| 2026-08-13 | **`raster-src/`** obligatoire par projet · **`raster/`** = projet Raster · **`pact/`** si app/site |
 | 2026-08-05 | Pipeline Capture→…→Archive · pas d’estimate |
 | 2026-08-11 | Brand **Raster** · `pm/` → `raster/` |
 | 2026-08-11 | **Orchestrateur** : tasks dans `epics/<slug>/tasks/` · IDs par projet · plus de stockage métier sous `raster/` |
 | 2026-08-12 | Inbox **globale** `raster/inbox.md` (pas liée à un projet) · filtre projet = Backlog / Sprint seulement |
 | 2026-08-12 | **`kind: bug-umbrella`** figé (comme `feature`) · enfants = `kind: bug` |
-| 2026-08-12 | Backlog/Sprint = **tasks** · hats vides = inbox/draft · `type:` bug \| feature \| physical |
+| 2026-08-13 | Inbox **uniquement** `raster/inbox.md` · ligne = task draft |
+| 2026-08-13 | `type:` spec \| feature \| bug \| physical · DOR/DOD · `done` = me · `review` = QA (feature/bug) |

@@ -13,7 +13,7 @@ function usage() {
   console.log(`usage: node raster/t.mjs <command>
 
   index     regen INDEX.tsv + SPRINT.md + BACKLOG.md
-            (walk products/* et peers racine **/docs/specs/lots/**/tasks)
+            (walk **/raster-src/lots/**/tasks — legacy raster/lots et docs/specs ; pas pact/)
 `);
 }
 

@@ -7,7 +7,7 @@
 | Ops K8s (deploy, migrate, reset, troubleshooting) | [toolchain/ops/AGENTS.md](../toolchain/ops/AGENTS.md) |
 | **Specs / epics (PLAN · PROGRESS)** | [specs/README.md](specs/README.md) · templates [`specs/templates/`](specs/templates/) · règle Cursor `.cursor/rules/specs-epics.mdc` |
 | **UX / wireframes (méthode principale)** | [products/sektor-btp/docs/ux/METHODE-CANVAS-WIREFRAMES.md](../products/sektor-btp/docs/ux/METHODE-CANVAS-WIREFRAMES.md) · règle `.cursor/rules/ux-canvas-wireframes.mdc` |
-| **Tasks / backlog / sprint (Raster)** | [Raster.md](Raster.md) · copie `raster/AGENTS.md` |
+| Tickets / backlog / sprint (Raster) | [Raster.md](Raster.md) · copie `raster/AGENTS.md` — src = `<projet>/raster-src/` |
 | Imports Gradle / TypeScript | [PLATFORM_IMPORTS.md](PLATFORM_IMPORTS.md) |
 | Table migration `nf/nafura` → chemins actuels | [ARCHITECTURE_MIGRATION.md](ARCHITECTURE_MIGRATION.md) |
 | Secrets Vault | [VAULT_SECRETS.md](VAULT_SECRETS.md) |

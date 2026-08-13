@@ -10,7 +10,8 @@ export default function App() {
   const [projects, setProjects] = useState<string[]>([]);
   const [sprint, setSprint] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [filterProject, setFilterProject] = useState("sektor-btp");
+  const [selectedLine, setSelectedLine] = useState<string | null>(null);
+  const [filterProject, setFilterProject] = useState("raster");
   const [draft, setDraft] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,9 +43,7 @@ export default function App() {
   const selected = useMemo(() => {
     const t = tasks.find((x) => x.id === selectedId) || null;
     if (!t) return null;
-    if (view === "inbox") {
-      return isHat(t.kind) && !hatHasWork(t, tasks) ? t : null;
-    }
+    if (view === "inbox") return null;
     if (filterProject !== ALL && t.project !== filterProject) return null;
     return t;
   }, [tasks, selectedId, filterProject, view]);
@@ -59,17 +58,18 @@ export default function App() {
     setConfirmDelete(false);
     if (v === "inbox") {
       setSelectedId(null);
+      setSelectedLine(null);
     }
-    if (v === "sprint") {
+    if (v === "sprint" || v === "done-agent") {
       setFilterProject(ALL);
       setSelectedId(null);
     }
     if (v === "backlog" && filterProject === ALL) {
       setFilterProject((prev) =>
         prev === ALL
-          ? projects.includes("sektor-btp")
-            ? "sektor-btp"
-            : projects[0] || "sektor-btp"
+          ? projects.includes("raster")
+            ? "raster"
+            : projects[0] || "raster"
           : prev
       );
     }
@@ -83,6 +83,7 @@ export default function App() {
       const i = await api.capture(line);
       setDraft("");
       setInboxLines(i.lines);
+      setSelectedLine(line);
       setViewSafe("inbox");
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -160,6 +161,7 @@ export default function App() {
               ["inbox", "Inbox"],
               ["backlog", "Backlog"],
               ["sprint", "Sprint"],
+              ["done-agent", "Done agent"],
             ] as const
           ).map(([id, label]) => (
             <button
@@ -196,7 +198,8 @@ export default function App() {
         {view !== "inbox" ? (
           <select
             value={
-              view === "sprint" && filterProject === ALL
+              (view === "sprint" || view === "done-agent") &&
+              filterProject === ALL
                 ? ALL
                 : filterProject === ALL
                   ? projects[0] || ""
@@ -208,7 +211,7 @@ export default function App() {
               setConfirmDelete(false);
             }}
           >
-            {view === "sprint" ? (
+            {view === "sprint" || view === "done-agent" ? (
               <option value={ALL}>All</option>
             ) : null}
             {projects.map((p) => (
@@ -220,7 +223,7 @@ export default function App() {
         ) : null}
         <input
           value={draft}
-          placeholder="Capture — une ligne, @tag optionnel…"
+          placeholder="Task draft — description, @bug @physical optionnel…"
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter") void onCapture();
@@ -258,32 +261,37 @@ export default function App() {
             <ProjectTabs
               projects={projects}
               active={
-                view === "sprint"
+                view === "sprint" || view === "done-agent"
                   ? filterProject
                   : filterProject === ALL
                     ? projects[0] || ""
                     : filterProject
               }
-              showAll={view === "sprint"}
+              showAll={view === "sprint" || view === "done-agent"}
               allCount={
                 view === "sprint"
-                  ? tasks.filter(
-                      (t) => t.sprint === sprint && isWorkTask(t)
-                    ).length
-                  : tasks.filter((t) => isWorkTask(t)).length
+                  ? tasks.filter((t) => isSprintRow(t, sprint)).length
+                  : view === "done-agent"
+                    ? tasks.filter(isDoneAgentRow).length
+                    : tasks.filter((t) => isWorkTask(t) && t.status !== "done-agent").length
               }
               counts={Object.fromEntries(
                 projects.map((p) => [
                   p,
                   view === "sprint"
                     ? tasks.filter(
-                        (t) =>
-                          t.project === p &&
-                          t.sprint === sprint &&
-                          isWorkTask(t)
+                        (t) => t.project === p && isSprintRow(t, sprint)
                       ).length
-                    : tasks.filter((t) => t.project === p && isWorkTask(t))
-                        .length,
+                    : view === "done-agent"
+                      ? tasks.filter(
+                          (t) => t.project === p && isDoneAgentRow(t)
+                        ).length
+                      : tasks.filter(
+                          (t) =>
+                            t.project === p &&
+                            isWorkTask(t) &&
+                            t.status !== "done-agent"
+                        ).length,
                 ])
               )}
               onSelect={(p) => {
@@ -296,21 +304,19 @@ export default function App() {
           {view === "inbox" ? (
             <Inbox
               lines={inboxLines}
-              drafts={tasks.filter(
-                (t) => isHat(t.kind) && !hatHasWork(t, tasks)
-              )}
-              selectedId={selectedId}
+              selectedLine={selectedLine}
               projects={projects}
               tasks={tasks}
               busy={busy}
-              defaultProject={filterProject === ALL ? "sektor-btp" : filterProject}
-              onSelect={select}
+              defaultProject={filterProject === ALL ? "raster" : filterProject}
+              onSelectLine={setSelectedLine}
               onPromote={async (line, project, parent) => {
                 setBusy(true);
                 try {
                   const r = await api.promote(line, project, parent);
                   setInboxLines(r.lines);
                   setTasks(r.tasks);
+                  setSelectedLine(null);
                   setFilterProject(project);
                   setSelectedId(r.id);
                   setViewSafe("backlog");
@@ -326,7 +332,7 @@ export default function App() {
             <Backlog
               project={
                 filterProject === ALL
-                  ? projects[0] || "sektor-btp"
+                  ? projects[0] || "raster"
                   : filterProject
               }
               tasks={tasks.filter((t) =>
@@ -343,28 +349,40 @@ export default function App() {
           ) : null}
           {view === "sprint" ? (
             <Sprint
+              heading={`Sprint ${sprint}`}
+              empty={`Rien dans ${sprint} — commit depuis Backlog.`}
               project={filterProject === ALL ? "All" : filterProject}
               showProject={filterProject === ALL}
               tasks={tasks.filter(
                 (t) =>
-                  t.sprint === sprint &&
-                  isWorkTask(t) &&
+                  isSprintRow(t, sprint) &&
                   (filterProject === ALL || t.project === filterProject)
               )}
-              sprint={sprint}
+              selectedId={selectedId}
+              onSelect={select}
+            />
+          ) : null}
+          {view === "done-agent" ? (
+            <Sprint
+              heading="Done agent"
+              empty="Aucune task done-agent — l’agent passe le status ici après la vérif."
+              project={filterProject === ALL ? "All" : filterProject}
+              showProject={filterProject === ALL}
+              tasks={tasks.filter(
+                (t) =>
+                  isDoneAgentRow(t) &&
+                  (filterProject === ALL || t.project === filterProject)
+              )}
               selectedId={selectedId}
               onSelect={select}
             />
           ) : null}
         </main>
         <aside className="side">
-          {view === "inbox" && !selected ? (
+          {view === "inbox" ? (
             <InboxDetail
               count={inboxLines.length}
-              drafts={
-                tasks.filter((t) => isHat(t.kind) && !hatHasWork(t, tasks))
-                  .length
-              }
+              line={selectedLine}
             />
           ) : (
             <Detail
@@ -431,25 +449,39 @@ function ProjectTabs({
   );
 }
 
+function draftTypeFromLine(line: string): "bug" | "feature" | "physical" | "spec" {
+  if (/(?:^|\s)@physical\b/i.test(line) || /^physical\b/i.test(line)) {
+    return "physical";
+  }
+  if (/(?:^|\s)@spec\b/i.test(line) || /^spec\b/i.test(line)) return "spec";
+  if (/(?:^|\s)@bug\b/i.test(line) || /^bug\b/i.test(line)) return "bug";
+  return "feature";
+}
+
+function draftDescription(line: string): string {
+  return line
+    .replace(/(?:^|\s)@([a-zA-Z0-9_-]+)/g, "")
+    .replace(/\s+/g, " ")
+    .trim() || line.trim();
+}
+
 function Inbox({
   lines,
-  drafts,
-  selectedId,
+  selectedLine,
   projects,
   tasks,
   busy,
   defaultProject,
-  onSelect,
+  onSelectLine,
   onPromote,
 }: {
   lines: string[];
-  drafts: Task[];
-  selectedId: string | null;
+  selectedLine: string | null;
   projects: string[];
   tasks: Task[];
   busy: boolean;
   defaultProject: string;
-  onSelect: (id: string) => void;
+  onSelectLine: (line: string) => void;
   onPromote: (line: string, project: string, parent: string) => void | Promise<void>;
 }) {
   const [projectByLine, setProjectByLine] = useState<Record<string, string>>(
@@ -485,152 +517,127 @@ function Inbox({
     <section>
       <h2>Inbox</h2>
       <p className="muted">
-        Globale · {lines.length} ligne(s) · {drafts.length} draft(s) ·
-        backlog = tasks seulement
+        Uniquement <code>raster/inbox.md</code> · {lines.length} task
+        draft(s) · pas de lot / sous-lot ici
       </p>
       <div className="faint" style={{ marginBottom: 10 }}>
-        Balayage : rattacher à un sous-lot, ou au lot s’il n’a pas de sous-lots.
+        Description = la ligne. Promote → fichier sous{" "}
+        <code>raster-src/lots/…/tasks/</code> (parent lot plat ou sous-lot).
       </div>
       <div className="list-panel">
         {lines.length === 0 ? (
-          <div className="empty">Vide — capture en haut</div>
+          <div className="empty">Vide — capturer une task draft en haut</div>
         ) : (
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Ligne</th>
-                <th style={{ width: 140 }}>Projet</th>
-                <th style={{ width: 220 }}>Rattacher</th>
-                <th style={{ width: 120 }} />
-              </tr>
-            </thead>
-            <tbody>
-              {lines.map((line) => {
-                const parents = parentsFor(line);
-                const parent = parentFor(line);
-                return (
-                  <tr key={line}>
-                    <td>{line}</td>
-                    <td>
-                      <select
-                        value={projectFor(line)}
-                        disabled={busy}
-                        onChange={(e) => {
-                          setProjectByLine((prev) => ({
-                            ...prev,
-                            [line]: e.target.value,
-                          }));
-                          setParentByLine((prev) => ({ ...prev, [line]: "" }));
-                        }}
-                      >
-                        {projects.map((p) => (
-                          <option key={p} value={p}>
-                            {p}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-                    <td>
-                      <select
-                        value={parent}
-                        disabled={busy || parents.length === 0}
-                        onChange={(e) =>
-                          setParentByLine((prev) => ({
-                            ...prev,
-                            [line]: e.target.value,
-                          }))
-                        }
-                      >
-                        <option value="">
-                          {parents.length === 0
-                            ? "— aucun · rester inbox —"
-                            : "— rester inbox —"}
-                        </option>
-                        {parents.map((f) => (
-                          <option key={f.id} value={f.id}>
-                            {isLot(f.kind) ? "lot" : "sous-lot"} · {f.id} ·{" "}
-                            {f.title.replace(
-                              /^(Feature|Sous-lot|Lot|Bugs?)\s*[—–-]\s*/i,
-                              ""
-                            )}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-                    <td>
-                      <button
-                        type="button"
-                        className="btn primary"
-                        disabled={busy || !parent}
-                        title={
-                          parent
-                            ? "Promouvoir sous ce lot / sous-lot"
-                            : "Sans rattachement → reste inbox, non promu"
-                        }
-                        onClick={() =>
-                          void onPromote(line, projectFor(line), parent)
-                        }
-                      >
-                        Promouvoir
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        )}
-      </div>
-      <h3 style={{ marginTop: 18 }}>Draft — lots / sous-lots sans task</h3>
-      <p className="faint" style={{ marginBottom: 8 }}>
-        Pas sprintable, pas backlog. Devient backlog dès la 1ʳᵉ task.
-      </p>
-      <div className="list-panel">
-        {drafts.length === 0 ? (
-          <div className="empty">Aucun chapeau vide</div>
-        ) : (
-          drafts
-            .slice()
-            .sort((a, b) => a.id.localeCompare(b.id))
-            .map((d) => (
+          lines.map((line) => {
+            const parents = parentsFor(line);
+            const parent = parentFor(line);
+            const ty = draftTypeFromLine(line);
+            return (
               <div
-                key={d.id}
-                className={`row ${selectedId === d.id ? "selected" : ""}`}
+                key={line}
+                className={`row ${selectedLine === line ? "selected" : ""}`}
+                onClick={() => onSelectLine(line)}
               >
-                <TypeBadge type={itemType(d)} />
-                <button
-                  type="button"
-                  className={`id ${selectedId === d.id ? "active" : ""}`}
-                  onClick={() => onSelect(d.id)}
-                >
-                  {d.id}
-                </button>
-                <span className="row-title">
-                  {d.title.replace(/^(Feature|Sous-lot|Lot)\s*[—–-]\s*/i, "")}
-                </span>
-                <span className="pill">{d.project}</span>
+                <TypeBadge type={ty} />
                 <span className="pill warn">draft</span>
+                <span className="row-title">{draftDescription(line)}</span>
+                <select
+                  value={projectFor(line)}
+                  disabled={busy}
+                  onClick={(e) => e.stopPropagation()}
+                  onChange={(e) => {
+                    setProjectByLine((prev) => ({
+                      ...prev,
+                      [line]: e.target.value,
+                    }));
+                    setParentByLine((prev) => ({ ...prev, [line]: "" }));
+                  }}
+                >
+                  {projects.map((p) => (
+                    <option key={p} value={p}>
+                      {p}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={parent}
+                  disabled={busy || parents.length === 0}
+                  onClick={(e) => e.stopPropagation()}
+                  onChange={(e) =>
+                    setParentByLine((prev) => ({
+                      ...prev,
+                      [line]: e.target.value,
+                    }))
+                  }
+                >
+                  <option value="">
+                    {parents.length === 0
+                      ? "— aucun · rester inbox —"
+                      : "— rester inbox —"}
+                  </option>
+                  {parents.map((f) => (
+                    <option key={f.id} value={f.id}>
+                      {isLot(f.kind) ? "lot" : "sous-lot"} · {f.id}
+                    </option>
+                  ))}
+                </select>
+                <span className="row-actions">
+                  <button
+                    type="button"
+                    className="btn primary"
+                    disabled={busy || !parent}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      void onPromote(line, projectFor(line), parent);
+                    }}
+                  >
+                    Promouvoir
+                  </button>
+                </span>
               </div>
-            ))
+            );
+          })
         )}
       </div>
     </section>
   );
 }
 
-function InboxDetail({ count, drafts }: { count: number; drafts: number }) {
+function InboxDetail({
+  count,
+  line,
+}: {
+  count: number;
+  line: string | null;
+}) {
+  if (!line) {
+    return (
+      <div className="stack">
+        <h2>Task draft</h2>
+        <p className="muted">
+          Source unique : <strong>raster/inbox.md</strong>. Pas d’ID tant que
+          non promu.
+        </p>
+        <div className="pill info" style={{ alignSelf: "flex-start" }}>
+          {count} draft(s)
+        </div>
+      </div>
+    );
+  }
+  const ty = draftTypeFromLine(line);
   return (
     <div className="stack">
-      <h2>Balayage</h2>
-      <p className="muted">
-        Ligne non spécifiée = <strong>inbox</strong>. Lot / sous-lot sans task ={" "}
-        <strong>draft</strong>. Seules les <strong>tasks</strong>{" "}
-        (feature / bug / physical) vont au Backlog et au Sprint.
-      </p>
-      <div className="pill info" style={{ alignSelf: "flex-start" }}>
-        {count} ligne(s) · {drafts} draft(s)
+      <div className="detail-kicker">
+        <TypeBadge type={ty} />
+        <span className="faint">task draft · pas d’ID</span>
       </div>
-      <div className="faint">Sans rattachement → on ne les prend pas</div>
+      <h2>Inbox</h2>
+      <div className="title">{draftDescription(line)}</div>
+      <p className="muted">Description (ligne brute)</p>
+      <div className="faint">{line}</div>
+      <div className="pill warn" style={{ alignSelf: "flex-start" }}>
+        reste dans raster/inbox.md jusqu’au promote
+      </div>
     </div>
   );
 }
@@ -665,12 +672,31 @@ function isWorkTask(t: Task) {
   return true;
 }
 
-function workType(t: Task): "bug" | "feature" | "physical" {
+function isArchivedStatus(s: string) {
+  return s === "done-me" || s === "done";
+}
+
+function isSprintRow(t: Task, week: string) {
+  return (
+    isWorkTask(t) &&
+    t.sprint === week &&
+    t.status !== "done-agent" &&
+    !isArchivedStatus(t.status)
+  );
+}
+
+function isDoneAgentRow(t: Task) {
+  return isWorkTask(t) && t.status === "done-agent";
+}
+
+function workType(t: Task): "bug" | "feature" | "physical" | "spec" {
   const ty = (t.type || "").toLowerCase();
-  if (ty === "bug" || ty === "feature" || ty === "physical") return ty;
+  if (ty === "bug" || ty === "feature" || ty === "physical" || ty === "spec")
+    return ty;
   if (isBug(t)) return "bug";
   const tags = t.tags || [];
   if (tags.some((x) => x.toLowerCase() === "physical")) return "physical";
+  if (tags.some((x) => x.toLowerCase() === "spec")) return "spec";
   return "feature";
 }
 
@@ -793,7 +819,8 @@ function Backlog({
     <section>
       <h2>Backlog</h2>
       <p className="muted">
-        {project} · tasks seulement (feature / bug / physical) · Commit →{" "}
+        {project} · arbre via <code>parent:</code> · tasks seulement (
+        spec / feature / bug / physical) · Commit = <code>sprint:</code> sur la task →{" "}
         {sprint || "sprint"}
       </p>
       <div className="list-panel backlog-tree">
@@ -920,8 +947,10 @@ function BacklogRow({
       <span className="row-title">{task.title}</span>
       {meta ? <span className="faint">{meta}</span> : null}
       <span className="row-actions">
-        {task.sprint ? (
+        {task.sprint && task.status !== "done-agent" ? (
           <span className="pill info">{task.sprint}</span>
+        ) : task.status === "done-agent" ? (
+          <span className="pill info">done-agent</span>
         ) : showCommit ? (
           <button
             type="button"
@@ -940,16 +969,18 @@ function BacklogRow({
 }
 
 function Sprint({
+  heading,
+  empty,
   project,
   tasks,
-  sprint,
   selectedId,
   onSelect,
   showProject = false,
 }: {
+  heading: string;
+  empty: string;
   project: string;
   tasks: Task[];
-  sprint: string;
   selectedId: string | null;
   onSelect: (id: string) => void;
   showProject?: boolean;
@@ -957,14 +988,12 @@ function Sprint({
   const doing = tasks.filter((t) => t.status === "doing").length;
   return (
     <section>
-      <h2>
-        Sprint {sprint}
-      </h2>
+      <h2>{heading}</h2>
       <p className="muted">{project}</p>
       <div className="stats">
         <div className="stat">
           <strong>{tasks.length}</strong>
-          <span>committed</span>
+          <span>items</span>
         </div>
         <div className="stat">
           <strong>{doing}</strong>
@@ -972,10 +1001,7 @@ function Sprint({
         </div>
       </div>
       {tasks.length === 0 ? (
-        <div className="callout">
-          Rien dans {sprint}
-          {project === "All" ? "" : ` pour ${project}`} — commit depuis Backlog.
-        </div>
+        <div className="callout">{empty}</div>
       ) : (
         <div className="list-panel">
           <table className="table">
@@ -1113,12 +1139,15 @@ function UmbrellaDetail({
   const blocked = taskKids.filter((t) => t.status === "blocked").length;
   const listedCount = mixedLot ? sousKids.length : taskKids.length;
   const isDraft = !hatHasWork(task, allTasks);
+  const inSprint = taskKids.filter((t) => Boolean(t.sprint)).length;
   return (
     <div className="stack detail-feature">
       <div className="detail-kicker">
         <TypeBadge type={type} />
         <span className="faint">
-          {isDraft ? "draft · inbox tant que pas de task" : "chapeau · pas sprintable"}
+          {isDraft
+            ? "chapeau vide · hors inbox · hors backlog"
+            : "chapeau · pas sprintable · sprint = champ sur les tasks"}
         </span>
       </div>
       <h2>{task.id}</h2>
@@ -1148,12 +1177,17 @@ function UmbrellaDetail({
           <strong>{blocked}</strong>
           <span>blocked</span>
         </div>
+        <div className="stat">
+          <strong>{inSprint}</strong>
+          <span>en sprint</span>
+        </div>
       </div>
 
       <h3>{childLabel}</h3>
       {isDraft ? (
         <div className="callout">
-          Pas de task — reste en inbox / draft. Backlog et Sprint = tasks
+          Pas de task — hors inbox (inbox = raster/inbox.md seulement) et hors
+          backlog.
           seulement (feature / bug / physical).
         </div>
       ) : (
@@ -1169,6 +1203,11 @@ function UmbrellaDetail({
                 <span className="id">{c.id}</span>
                 <span className="child-title">{c.title}</span>
                 <span className="pill">{c.status}</span>
+                {c.sprint ? (
+                  <span className="pill info">{c.sprint}</span>
+                ) : isWorkTask(c) ? (
+                  <span className="pill">backlog</span>
+                ) : null}
               </button>
             </li>
           ))}
@@ -1213,7 +1252,9 @@ function WorkItemDetail({
     <div className="stack detail-task">
       <div className="detail-kicker">
         <TypeBadge type={type} />
-        <span className="faint">task · {type}</span>
+        <span className="faint">
+          task · type:{type} · status:{task.status}
+        </span>
       </div>
       <h2>{task.id}</h2>
       <div className="title">{task.title}</div>
@@ -1251,12 +1292,24 @@ function WorkItemDetail({
           disabled={busy}
           onChange={(e) => onStatus(e.target.value)}
         >
-          {["todo", "doing", "blocked", "review", "done"].map((s) => (
+          {(
+            [
+              ["todo", "todo"],
+              ["doing", "doing"],
+              ["blocked", "blocked"],
+              ["review", "review · QA"],
+              ["done-agent", "done-agent"],
+              ["done-me", "done-me · archive"],
+            ] as const
+          ).map(([s, label]) => (
             <option key={s} value={s}>
-              {s}
+              {label}
             </option>
           ))}
         </select>
+        <div className="faint">
+          Agent → done-agent (vue Done agent). Toi → done-me (archive).
+        </div>
       </div>
 
       {!task.sprint ? (

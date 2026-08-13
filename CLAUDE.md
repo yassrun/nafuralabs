@@ -15,7 +15,7 @@ Ces fichiers sous `.cursor/rules/` sont `alwaysApply` pour Cursor ; **Claude doi
 
 | Rule | Contenu |
 |------|---------|
-| `.cursor/rules/specs-epics.mdc` | Specs → `docs/specs/lots/<lot-slug>/` ; canvas SSOT → `lots/…/ux/` |
+| `.cursor/rules/specs-epics.mdc` | `<projet>/raster-src/` ; Pact si app/site ; `raster/` = projet |
 | `.cursor/rules/ux-canvas-wireframes.mdc` | Canvas UX ; preview = copie `canvases/` ; pas Figma SSOT |
 | `.cursor/rules/cursor-qa-browser.mdc` | QA Mode B : auth Cursor, `127.0.0.1:4200`, pas Keycloak |
 | `.cursor/rules/lab-mode-no-prod-data.mdc` | Lab métier : Liquibase clean, liberté refonte ; prod réelle = vitrines MBS/corpo only |
@@ -24,7 +24,7 @@ Ces fichiers sous `.cursor/rules/` sont `alwaysApply` pour Cursor ; **Claude doi
 
 | Quoi | Où |
 |------|-----|
-| Specs / lots | `products/<app>/docs/specs/lots/<lot-slug>/` |
+| Specs / lots | `<projet>/raster-src/` (obligatoire) · `<projet>/pact/` si app/site |
 | Canvas UX (Git) | `…/lots/<lot-slug>/<sous-lot-slug>/ux/*.canvas.tsx` |
 | Tickets / bugs | `…/lots/…/tasks/{ID}-{slug}.md` · Raster = INDEX/Sprint seulement |
 | Métier | `products/<app>/` — jamais dans `platform/` |

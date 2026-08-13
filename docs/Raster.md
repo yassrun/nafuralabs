@@ -1,7 +1,6 @@
 # AGENTS.md — Raster (orchestrateur)
 
-> **Raster** = orchestrateur git-native (INDEX · Sprint · Backlog · CLI).  
-> **Les fichiers Task / Feature / Spec ne vivent PAS sous `raster/`** — ils vivent dans chaque **produit / projet**.  
+> **Raster** = projet + moteur. Tickets : **`<projet>/raster-src/`**.  
 > Canonical : [`raster/AGENTS.md`](../raster/AGENTS.md). This file is the docs mirror.
 
 **Actors :** `me` | `agent` uniquement.  

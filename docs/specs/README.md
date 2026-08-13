@@ -7,33 +7,32 @@ Orchestrateur : [`raster/AGENTS.md`](../../raster/AGENTS.md) · miroir [`docs/Ra
 
 | Sujet | Choix |
 |-------|--------|
-| Tickets (canon) | `<projet>/raster/lots/<lot-slug>/…/tasks/` — **src specs**, pas docs |
-| Tickets (legacy) | `products/<app>/docs/specs/lots/…` — encore indexé, à migrer |
-| Inbox | **Globale** : `raster/inbox.md` (promote vers un projet) |
+| Tickets (canon) | `<projet>/raster-src/lots/<lot-slug>/…/tasks/` |
+| Tickets (legacy) | `<projet>/raster/lots/` · `products/<app>/docs/specs/lots/…` |
+| Inbox | **Globale** : `raster/inbox.md` (projet Raster) |
 | IDs | Préfixe **par projet** (`SEKTOR`, `PLT`, `RAS`, `PER`, …) |
 | Suivi runtime | Tickets uniquement — **pas** de `00-PROGRESS.md` obligatoire |
-| `raster/` racine monorepo | Orchestrateur (INDEX / Sprint / Backlog) |
-| `<projet>/raster/` | SSOT specs normalisée du projet |
+| `raster/` | **Projet** Raster (moteur INDEX / Sprint / CLI + `raster-src/`) |
+| `<projet>/raster-src/` | Fichiers Raster du projet — **obligatoire** |
+| `<projet>/pact/` | Pact — **si app ou site** |
 
 ## Arborescence (par app — canon)
 
 ```
-<projet>/raster/                     # obligatoire — pas de la documentation
+<projet>/raster-src/                 # obligatoire
 └── lots/
-    ├── _backlog/tasks/              # triage orphelin
-    ├── _archive/                    # flux terminés
-    └── <lot-slug>/                  # chapitre (kind:lot)
+    ├── _backlog/tasks/
+    ├── _archive/
+    └── <lot-slug>/
         ├── tasks/
-        │   └── {ID}-lot-….md
-        └── <sous-lot-slug>/         # optionnel — ≥ 2 flux indépendants
+        │   └── {ID}-….md
+        └── <sous-lot-slug>/         # optionnel ; si Pact = un CH
             ├── 00-PLAN.md
-            ├── ux/
             └── tasks/
-                ├── {ID}-sous-lot-….md
-                └── {ID}-….md        # task type: feature | bug | physical
+                └── {ID}-….md
 ```
 
-Exemple peer racine : `nafura-platform/raster/lots/cadrage/`.  
+Exemple : `raster/raster-src/lots/…` · `sektor/raster-src/lots/…`.  
 Legacy encore valide en lecture : `products/<app>/docs/specs/lots/`.
 Templates : [`templates/`](templates/).
 
@@ -51,9 +50,9 @@ Critère sous-lot : [`raster/AGENTS.md`](../../raster/AGENTS.md) §0.2.
 
 ## Pack agent — créer un lot
 
-1. `raster/lots/<lot-slug>/tasks/` : ticket `kind: lot`
+1. `raster-src/lots/<lot-slug>/tasks/` : ticket `kind: lot`
 2. Tasks directes (`parent:` = lot) **ou** sous-lots si ≥ 2 flux
-3. Sous-lot : `raster/lots/<lot-slug>/<sous-lot-slug>/` + PLAN + tasks
+3. Sous-lot : `raster-src/lots/<lot-slug>/<sous-lot-slug>/` + PLAN + tasks
 4. `ux/` si UI
 5. `node raster/t.mjs index`
 
@@ -62,7 +61,7 @@ Critère sous-lot : [`raster/AGENTS.md`](../../raster/AGENTS.md) §0.2.
 ## Flux
 
 ```
-raster/inbox.md → promote → <projet>/raster/lots/…/tasks
+raster/inbox.md → promote → <projet>/raster-src/lots/…/tasks
                 → commit sprint (tasks)
                 → check progress (tickets)
                 → archive produit (raster/lots/_archive)

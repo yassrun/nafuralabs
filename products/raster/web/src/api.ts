@@ -17,13 +17,15 @@ export type Task = {
   file: string;
 };
 
-export type ViewId = "inbox" | "backlog" | "sprint";
+export type ViewId = "inbox" | "backlog" | "sprint" | "done-agent";
 
 const glyph: Record<string, string> = {
   todo: "·",
   doing: "▸",
   blocked: "✕",
   review: "◐",
+  "done-agent": "✓",
+  "done-me": "✓",
   done: "✓",
 };
 
