@@ -15,10 +15,11 @@
   - ✓ `PLT-41` feature — Plan, cascade, cache
   - ✓ `PLT-42` feature — Plan ↔ Definition
   - ✓ `PLT-43` feature — Carte des doutes
-  - ◐ `PLT-44` feature — Bascule vague 1 — liste puis arbre
+  - ✓ `PLT-44` feature — Bascule vague 1 — liste puis arbre
   - ✓ `PLT-45` qa — QA — Plan, cascade, cache
   - ✓ `PLT-46` qa — QA — Plan ↔ Definition
   - ✓ `PLT-47` qa — QA — Carte des doutes
+  - ✓ `PLT-48` qa — QA — Bascule vague 1
 
 ## sektor
 
@@ -41,4 +42,4 @@
 
 ---
 
-**18 live · 2 projets**
+**19 live · 2 projets**

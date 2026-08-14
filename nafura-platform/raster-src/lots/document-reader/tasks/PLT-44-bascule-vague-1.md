@@ -1,6 +1,6 @@
 ---
 id: PLT-44
-status: review
+status: done-agent
 context: nafura
 type: feature
 priority: P1
@@ -35,4 +35,14 @@ tags: [platform, documents, doc-extractor]
 14/08 21:36  preuve  learnedHierarchyNestsLeavesUnderGroupsWithoutFlattening VERT
 14/08 21:36  preuve  GridBordereauPipelineTest + orchestrator + adapter VERT
 14/08 21:36  tsk3  host attr entitykey = definition.key (e2e smart-import-platform)
+14/08 21:38  spec · constat d'écart PLT-44 : LOT.md AC-1/2/6 inchangés. Liste = plan heuristique. Arbre LEARNED générique. Bordereau non basculé sur ReadingPlan (classifieur BTP reste etudes). Pas de retour exec.
+14/08 21:50  qa · PLT-48 pass → done-agent
 ```
+
+## Rapport de livraison
+
+ce qui a changé      voir PLT-48
+critères prouvés     voir PLT-48
+décidé seul          voir PLT-48
+écarts / dette       voir PLT-48
+
