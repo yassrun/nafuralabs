@@ -1,6 +1,6 @@
 ---
 id: PLT-42
-status: review
+status: done-agent
 context: nafura
 type: feature
 priority: P1
@@ -32,4 +32,5 @@ tags: [platform, documents, doc-extractor]
 14/08 20:43  tsk2  DefinitionPlanBridge applique les défauts plats sur le ReadingPlan
 14/08 20:44  preuve  PlanCascadeTest.flatImportIsDefaultComplexCase VERT · extraction-definition-defaults.spec 2/2 VERT
 14/08 20:44  décision  handlers Sektor inchangés (arrayPath) — pas de migration
+14/08 21:07  spec · constat d'écart PLT-42 : LOT.md inchangé. arrayPath conservé = pas de migration. Bridge + readingDefaults = import plat. Dette : hints définition pas encore poussés dans le POST extract (schéma suffit vague 1). Pas de retour exec.
 ```

@@ -151,7 +151,13 @@ function issue(
   kind: FieldIssueKind,
   message: string,
 ): FieldIssue {
-  return { path, rowIndex, kind, message };
+  return {
+    path,
+    rowIndex,
+    kind,
+    message,
+    nature: kind === 'MISSING_REQUIRED' ? 'SOURCE_GAP' : 'EXTRACTION',
+  };
 }
 
 /**

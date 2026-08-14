@@ -66,6 +66,7 @@ describe('nested-validation.util', () => {
     expect(
       issues.some((i) => i.path === 'lots[0].sousLots[0].postes[0].designation'),
     ).toBeTrue();
+    expect(issues.every((i) => i.nature === 'SOURCE_GAP')).toBeTrue();
   });
 
   it('scopes issues to root index', () => {

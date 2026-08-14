@@ -1,6 +1,7 @@
 package ma.nafura.platform.documents.docextractor.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import ma.nafura.platform.documents.docextractor.api.response.DoubtNature;
 import ma.nafura.platform.documents.docextractor.api.response.ExtractionValidationDto;
 import ma.nafura.platform.documents.docextractor.api.response.FieldIssueKind;
 import ma.nafura.platform.documents.docextractor.api.response.ValidationState;
@@ -90,11 +91,21 @@ class SchemaValidatorTest {
         assertEquals(ValidationState.INCOMPLETE, result.state());
         assertEquals(1, result.issues().stream().filter(i -> i.kind() == FieldIssueKind.MISSING_REQUIRED).count());
         assertEquals(1, result.issues().get(0).rowIndex());
+        assertEquals(DoubtNature.SOURCE_GAP, result.issues().get(0).nature());
     }
 
     @Test
     void invalidWhenEmptyPayload() {
         ExtractionValidationDto result = validator.validate("", "{}", null);
         assertEquals(ValidationState.INVALID, result.state());
+        assertEquals(DoubtNature.EXTRACTION, result.issues().get(0).nature());
+    }
+
+    @Test
+    void extractionNatureWhenJsonUnreadable() {
+        ExtractionValidationDto result = validator.validate("{", "{}", null);
+        assertEquals(ValidationState.INVALID, result.state());
+        assertEquals(FieldIssueKind.TYPE_MISMATCH, result.issues().get(0).kind());
+        assertEquals(DoubtNature.EXTRACTION, result.issues().get(0).nature());
     }
 }

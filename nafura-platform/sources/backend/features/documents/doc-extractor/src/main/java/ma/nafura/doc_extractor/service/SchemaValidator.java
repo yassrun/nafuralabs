@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import ma.nafura.platform.documents.docextractor.api.response.DoubtNature;
 import ma.nafura.platform.documents.docextractor.api.response.ExtractionValidationDto;
 import ma.nafura.platform.documents.docextractor.api.response.FieldIssueDto;
 import ma.nafura.platform.documents.docextractor.api.response.FieldIssueKind;
@@ -37,7 +38,12 @@ public class SchemaValidator {
         if (extractedJson == null || extractedJson.isBlank()) {
             return new ExtractionValidationDto(
                     ValidationState.INVALID,
-                    List.of(new FieldIssueDto("", null, FieldIssueKind.MISSING_REQUIRED, "No extracted data")),
+                    List.of(new FieldIssueDto(
+                            "",
+                            null,
+                            FieldIssueKind.MISSING_REQUIRED,
+                            "No extracted data",
+                            DoubtNature.EXTRACTION)),
                     importPolicy
             );
         }

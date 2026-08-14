@@ -128,11 +128,38 @@ export type ExtractionValidationState = 'VALID' | 'INCOMPLETE' | 'INVALID';
 
 export type FieldIssueKind = 'MISSING_REQUIRED' | 'TYPE_MISMATCH' | 'FORMAT_INVALID';
 
+/** Extraction = unsure we read it. Source gap = the file does not contain it. Never fuse on screen. */
+export type DoubtNature = 'EXTRACTION' | 'SOURCE_GAP';
+
 export interface FieldIssue {
   path: string;
   rowIndex: number | null;
   kind: FieldIssueKind;
   message: string;
+  nature?: DoubtNature;
+}
+
+export function doubtNatureOf(issue: Pick<FieldIssue, 'kind' | 'nature'>): DoubtNature {
+  if (issue.nature) {
+    return issue.nature;
+  }
+  return issue.kind === 'MISSING_REQUIRED' ? 'SOURCE_GAP' : 'EXTRACTION';
+}
+
+export function partitionDoubts(issues: FieldIssue[]): {
+  extraction: FieldIssue[];
+  sourceGap: FieldIssue[];
+} {
+  const extraction: FieldIssue[] = [];
+  const sourceGap: FieldIssue[] = [];
+  for (const issue of issues) {
+    if (doubtNatureOf(issue) === 'SOURCE_GAP') {
+      sourceGap.push(issue);
+    } else {
+      extraction.push(issue);
+    }
+  }
+  return { extraction, sourceGap };
 }
 
 export interface ExtractionValidation {
