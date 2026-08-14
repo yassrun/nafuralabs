@@ -12,12 +12,13 @@ import ma.nafura.etudes.domain.dpu.ComposantDpu;
 import ma.nafura.etudes.domain.dpgf.DpgfNoeud;
 import ma.nafura.etudes.domain.dpu.PrixDpu;
 import ma.nafura.etudes.repository.PrixDpuRepository;
-import ma.nafura.etudes.service.port.ChainageAvalPort.BudgetRubrique;
+import ma.nafura.etudes.service.port.bc.ChainageAvalPort.BudgetRubrique;
 import ma.nafura.catalogue.api.CatalogNatureMapping;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import ma.nafura.etudes.service.port.bc.ChainageAvalPort;
 /**
  * L13 — ventilation budget chantier depuis le chiffrage étude.
  *

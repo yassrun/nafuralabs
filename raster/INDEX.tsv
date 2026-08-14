@@ -11,5 +11,6 @@ SEKTOR-102	done-agent	P1	nafura	agent	none	tech	exec	2026-W33	sektor	plier-archi
 SEKTOR-100	done-agent	P1	nafura	agent	none	tech	exec	2026-W33	sektor	plier-archi	etudes-catalogue	Études consomme catalogue.api seulement
 SEKTOR-101	done-agent	P1	nafura	agent	none	tech	exec	2026-W33	sektor	plier-archi	etudes-catalogue	Garde : socle sans BC, Études hors item.*
 SEKTOR-99	done-agent	P1	nafura	agent	none	tech	exec	2026-W33	sektor	plier-archi	etudes-catalogue	Catalogue publie api lookup + snapshot
+SEKTOR-105	done-agent	P1	nafura	agent	none	tech	exec	2026-W33	sektor	plier-archi	ports-adapters	Ranger ports / adapters par exécuteur
 SEKTOR-103	done-agent	P1	nafura	agent	none	tech	exec	2026-W33	sektor	plier-archi	seeders	Ranger les seeders dans `seeders/`
 SEKTOR-98	done-agent	P1	nafura	agent	none	tech	exec	2026-W33	sektor	plier-archi	socle	Socle compile sans jars BC

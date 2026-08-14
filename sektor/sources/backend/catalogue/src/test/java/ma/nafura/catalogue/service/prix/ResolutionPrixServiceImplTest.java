@@ -23,6 +23,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import ma.nafura.catalogue.service.port.bc.PrixAchatExternePort;
 @ExtendWith(MockitoExtension.class)
 class ResolutionPrixServiceImplTest {
 

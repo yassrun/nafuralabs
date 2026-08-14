@@ -39,10 +39,18 @@ Surfaces back / front / mobile = **la même app**, le **même** BC. Un module Gr
   api/            inbound — HTTP / DTOs / ce que les autres ont le droit d’appeler
   domain/         objets, états, INV / R — le BC
   services/       use-cases ; orchestrent, ne portent pas les invariants
+    port/
+      capability/ → Socle / Platform exécute (LLM, docs, notif, approbation)
+      bc/         → autre BC de l’app (cible = son `api` seulement)
   repositories/   persistance (adapter outbound DB)
-  adapters/       externes **de ce BC** (Batiprix, banque, EDI…)
+  adapters/
+    capability/   même découpe que `port/` — qui fait le travail
+    bc/
+    external/     voisin **de ce BC** (Batiprix, banque, EDI) — pas platform
   internal/       helpers privés — dates, mapping. Jamais « socle »
 ```
+
+Un port et son adapter ne vivent **pas** dans le même dossier. Même nom de sous-dossier des deux côtés (`capability` / `bc` / `external`) pour naviguer. Pas de dossier `socle/` dans un BC — `capability/` = « je consomme une capacité déclarée au socle ». Si **ce** BC exécute (propre DB, seam de test) : laisser à la racine de `port/` / `adapters/`, pas forcer un seau outbound.
 
 **Direction**
 

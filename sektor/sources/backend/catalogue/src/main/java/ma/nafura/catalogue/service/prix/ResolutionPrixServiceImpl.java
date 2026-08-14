@@ -19,6 +19,7 @@ import ma.nafura.catalogue.repository.ItemRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import ma.nafura.catalogue.service.port.bc.PrixAchatExternePort;
 @Service
 public class ResolutionPrixServiceImpl implements ResolutionPrixService {
 

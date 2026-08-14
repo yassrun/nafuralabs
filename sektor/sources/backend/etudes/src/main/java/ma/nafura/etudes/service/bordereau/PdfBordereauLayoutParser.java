@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import ma.nafura.etudes.service.bordereau.grid.ColumnMap;
-import ma.nafura.etudes.service.port.ExtractionProgress;
+import ma.nafura.etudes.service.port.capability.ExtractionProgress;
 import ma.nafura.etudes.service.bordereau.grid.GridBordereauAssembler;
 import ma.nafura.etudes.service.bordereau.grid.GridRowClassifier;
 import ma.nafura.platform.documents.docextractor.grid.GridRow;

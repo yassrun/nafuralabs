@@ -24,8 +24,8 @@ import ma.nafura.platform.configuration.sysconfig.repository.NumberingSequenceRe
 import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.platform.tenancy.domain.model.Tenant;
 import ma.nafura.platform.tenancy.repository.TenantRepository;
-import ma.nafura.sektor.socle.port.CatalogueOnboardingPort;
-import ma.nafura.sektor.socle.port.FinanceOnboardingPort;
+import ma.nafura.sektor.socle.port.bc.CatalogueOnboardingPort;
+import ma.nafura.sektor.socle.port.bc.FinanceOnboardingPort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

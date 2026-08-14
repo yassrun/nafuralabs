@@ -21,7 +21,7 @@ import ma.nafura.catalogue.repository.ItemCategoryRepository;
 import ma.nafura.catalogue.repository.ItemRepository;
 import ma.nafura.catalogue.repository.UoMCategoryRepository;
 import ma.nafura.catalogue.repository.UnitOfMeasureRepository;
-import ma.nafura.sektor.socle.port.CatalogueOnboardingPort;
+import ma.nafura.sektor.socle.port.bc.CatalogueOnboardingPort;
 import ma.nafura.catalogue.domain.stock.CostingMethod;
 import ma.nafura.catalogue.domain.stock.Location;
 import ma.nafura.catalogue.domain.stock.MovementMotif;

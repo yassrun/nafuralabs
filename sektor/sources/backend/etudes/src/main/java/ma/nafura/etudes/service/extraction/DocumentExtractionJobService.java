@@ -23,7 +23,7 @@ import ma.nafura.etudes.repository.DossierEtudeRepository;
 import ma.nafura.etudes.service.BordereauImportService;
 import ma.nafura.etudes.service.DossierDocumentService;
 import ma.nafura.etudes.service.cps.CpsService;
-import ma.nafura.etudes.service.port.BordereauExtractionPort;
+import ma.nafura.etudes.service.port.capability.BordereauExtractionPort;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
