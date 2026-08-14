@@ -254,6 +254,10 @@ public class DocumentExtractionJobService {
         } catch (Exception ex) {
             log.warn("Extraction job {} failed: {}", job.getId(), ex.getMessage());
             fail(job.getId(), "EXECUTION_ERROR", safeMessage(ex), true);
+        } catch (LinkageError ex) {
+            // NoClassDefFoundError / classloader mismatch must fail the job, not leave it RUNNING.
+            log.warn("Extraction job {} linkage error: {}", job.getId(), ex.toString());
+            fail(job.getId(), "EXECUTION_ERROR", safeMessage(ex), true);
         }
     }
 
