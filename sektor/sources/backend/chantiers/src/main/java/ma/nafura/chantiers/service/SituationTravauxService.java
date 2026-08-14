@@ -15,7 +15,7 @@ import ma.nafura.chantiers.domain.chantier.Chantier;
 import ma.nafura.chantiers.domain.chantier.ChantierLot;
 import ma.nafura.chantiers.domain.situation.SituationLigne;
 import ma.nafura.chantiers.domain.situation.SituationTravaux;
-import ma.nafura.chantiers.port.SituationToFacturePort;
+import ma.nafura.chantiers.service.port.bc.SituationToFacturePort;
 import ma.nafura.chantiers.repository.ChantierLotRepository;
 import ma.nafura.chantiers.repository.SituationLigneRepository;
 import ma.nafura.chantiers.repository.SituationTravauxRepository;

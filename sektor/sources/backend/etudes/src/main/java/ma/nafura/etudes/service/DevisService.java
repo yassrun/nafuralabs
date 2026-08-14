@@ -26,7 +26,7 @@ import ma.nafura.etudes.domain.dpgf.Dpgf;
 import ma.nafura.etudes.repository.AppelOffreClientRepository;
 import ma.nafura.etudes.repository.DevisRepository;
 import ma.nafura.etudes.repository.DevisVersionRepository;
-import ma.nafura.etudes.service.port.EtudeClientPort;
+import ma.nafura.etudes.service.port.bc.EtudeClientPort;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;

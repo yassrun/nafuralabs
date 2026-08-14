@@ -12,7 +12,7 @@ import ma.nafura.etudes.domain.dpu.ComposantDpu;
 import ma.nafura.etudes.domain.dpgf.DpgfNoeud;
 import ma.nafura.etudes.domain.dpu.PrixDpu;
 import ma.nafura.etudes.repository.PrixDpuRepository;
-import ma.nafura.etudes.service.port.ChainageAvalPort.BudgetRubrique;
+import ma.nafura.etudes.service.port.bc.ChainageAvalPort.BudgetRubrique;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +21,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import ma.nafura.etudes.service.port.bc.ChainageAvalPort;
 @ExtendWith(MockitoExtension.class)
 class BudgetVentilationServiceTest {
 

@@ -10,8 +10,8 @@ import ma.nafura.socle.onboarding.repository.TenantOnboardingMetaRepository;
 import ma.nafura.platform.appsettings.repository.TenantSettingRepository;
 import ma.nafura.platform.configuration.sysconfig.repository.NumberingSequenceRepository;
 import ma.nafura.platform.tenancy.repository.TenantMembershipRepository;
-import ma.nafura.sektor.socle.port.CatalogueOnboardingPort;
-import ma.nafura.sektor.socle.port.FinanceOnboardingPort;
+import ma.nafura.sektor.socle.port.bc.CatalogueOnboardingPort;
+import ma.nafura.sektor.socle.port.bc.FinanceOnboardingPort;
 import org.springframework.stereotype.Service;
 
 @Service

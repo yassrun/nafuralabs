@@ -10,7 +10,7 @@ import ma.nafura.etudes.domain.dossier.DossierDocument;
 import ma.nafura.etudes.domain.dossier.DossierEtude;
 import ma.nafura.etudes.domain.dpgf.Dpgf;
 import ma.nafura.etudes.repository.DossierEtudeRepository;
-import ma.nafura.etudes.service.port.BordereauExtractionPort;
+import ma.nafura.etudes.service.port.capability.BordereauExtractionPort;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

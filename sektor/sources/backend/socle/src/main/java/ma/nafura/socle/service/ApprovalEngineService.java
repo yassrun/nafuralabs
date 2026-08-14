@@ -28,7 +28,7 @@ import ma.nafura.socle.repository.ApprovalWorkflowRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.platform.framework.context.UserContext;
 import ma.nafura.platform.framework.event.ErpNotificationPublisher;
-import ma.nafura.sektor.socle.port.ApproverResolutionPort;
+import ma.nafura.sektor.socle.port.bc.ApproverResolutionPort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;

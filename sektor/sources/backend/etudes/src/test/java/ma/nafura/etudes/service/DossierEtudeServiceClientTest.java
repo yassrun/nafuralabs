@@ -17,8 +17,8 @@ import ma.nafura.etudes.repository.DossierDocumentRepository;
 import ma.nafura.etudes.repository.DossierEtudeRepository;
 import ma.nafura.etudes.repository.DossierPieceAttendueRepository;
 import ma.nafura.etudes.repository.DpgfNoeudRepository;
-import ma.nafura.etudes.service.port.EtudeApprovalPort;
-import ma.nafura.etudes.service.port.EtudeClientPort;
+import ma.nafura.etudes.service.port.capability.EtudeApprovalPort;
+import ma.nafura.etudes.service.port.bc.EtudeClientPort;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,6 +27,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import ma.nafura.etudes.service.port.bc.ChainageAvalPort;
 @ExtendWith(MockitoExtension.class)
 class DossierEtudeServiceClientTest {
 
@@ -109,7 +110,7 @@ class DossierEtudeServiceClientTest {
                 org.mockito.Mockito.mock(DossierIntervenantService.class),
                 org.mockito.Mockito.mock(ma.nafura.etudes.repository.AvisExecutionRepository.class),
                 org.mockito.Mockito.mock(BudgetVentilationService.class),
-                org.mockito.Mockito.mock(ma.nafura.etudes.service.port.ChainageAvalPort.class),
+                org.mockito.Mockito.mock(ma.nafura.etudes.service.port.bc.ChainageAvalPort.class),
                 java.util.List.of());
     }
 

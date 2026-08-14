@@ -21,8 +21,8 @@ import ma.nafura.etudes.repository.DossierDocumentRepository;
 import ma.nafura.etudes.repository.DossierEtudeRepository;
 import ma.nafura.etudes.repository.DossierPieceAttendueRepository;
 import ma.nafura.etudes.repository.DpgfNoeudRepository;
-import ma.nafura.etudes.service.port.EtudeApprovalPort;
-import ma.nafura.etudes.service.port.EtudeClientPort;
+import ma.nafura.etudes.service.port.capability.EtudeApprovalPort;
+import ma.nafura.etudes.service.port.bc.EtudeClientPort;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +31,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import ma.nafura.etudes.service.port.bc.ChainageAvalPort;
 @ExtendWith(MockitoExtension.class)
 class DossierEtudeValidationQuatreYeuxTest {
 
@@ -107,7 +108,7 @@ class DossierEtudeValidationQuatreYeuxTest {
                 intervenantService,
                 mock(AvisExecutionRepository.class),
                 mock(BudgetVentilationService.class),
-                mock(ma.nafura.etudes.service.port.ChainageAvalPort.class),
+                mock(ma.nafura.etudes.service.port.bc.ChainageAvalPort.class),
                 List.of());
     }
 

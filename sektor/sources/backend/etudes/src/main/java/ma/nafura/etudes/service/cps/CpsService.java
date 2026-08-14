@@ -20,6 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import ma.nafura.etudes.service.port.capability.DescriptifCpsPort;
+import ma.nafura.etudes.service.port.capability.MarcheProposePort;
 /**
  * Indexation d'un CPS et recherche par article.
  *

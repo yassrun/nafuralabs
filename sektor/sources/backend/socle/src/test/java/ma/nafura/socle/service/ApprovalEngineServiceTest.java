@@ -32,6 +32,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ma.nafura.socle.seeders.ApprovalRequestSeedService;
 import ma.nafura.socle.seeders.ApprovalWorkflowSeedService;
 
+import ma.nafura.sektor.socle.port.bc.ApproverResolutionPort;
 @ExtendWith(MockitoExtension.class)
 class ApprovalEngineServiceTest {
 
@@ -60,7 +61,7 @@ class ApprovalEngineServiceTest {
     private DelegationApprobationService delegationApprobationService;
 
     @Mock
-    private ma.nafura.sektor.socle.port.ApproverResolutionPort approverResolutionPort;
+    private ma.nafura.sektor.socle.port.bc.ApproverResolutionPort approverResolutionPort;
 
     @Mock
     private ma.nafura.platform.framework.event.ErpNotificationPublisher erpNotificationPublisher;

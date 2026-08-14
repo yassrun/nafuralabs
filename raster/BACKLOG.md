@@ -19,6 +19,8 @@
     - ✓ `SEKTOR-100` tech — Études consomme catalogue.api seulement
     - ✓ `SEKTOR-101` tech — Garde : socle sans BC, Études hors item.*
     - ✓ `SEKTOR-99` tech — Catalogue publie api lookup + snapshot
+  - ✓ `ports-adapters` sous-lot
+    - ✓ `SEKTOR-105` tech — Ranger ports / adapters par exécuteur
   - ✓ `seeders` sous-lot
     - ✓ `SEKTOR-103` tech — Ranger les seeders dans `seeders/`
   - ✓ `socle` sous-lot
@@ -26,4 +28,4 @@
 
 ---
 
-**8 live · 1 projets**
+**9 live · 1 projets**
