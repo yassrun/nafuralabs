@@ -1,0 +1,177 @@
+<section class="arbre" aria-label="Arbre du bordereau">
+  <header class="arbre__entete">
+    <h4 class="arbre__titre">
+      Arbre du bordereau
+      @if (!chargement()) {
+        <span class="arbre__compte">
+          {{ compteExploitables() }} article{{ compteExploitables() === 1 ? '' : 's' }}
+          @if (compteIgnores() > 0) {
+            <span class="arbre__compte-warn"> · {{ compteIgnores() }} à corriger</span>
+          }
+        </span>
+      }
+    </h4>
+    <div class="arbre__actions">
+      <button
+        type="button"
+        mat-icon-button
+        class="arbre__icon-btn"
+        matTooltip="Tout déplier"
+        aria-label="Tout déplier"
+        (click)="expandAll()"
+      >
+        <mat-icon>unfold_more</mat-icon>
+      </button>
+      <button
+        type="button"
+        mat-icon-button
+        class="arbre__icon-btn"
+        matTooltip="Tout replier"
+        aria-label="Tout replier"
+        (click)="collapseAll()"
+      >
+        <mat-icon>unfold_less</mat-icon>
+      </button>
+      @if (showStructureActions()) {
+        <button type="button" class="arbre__add-btn" (click)="ajouterLot()">
+          Ajouter un lot
+        </button>
+      }
+    </div>
+  </header>
+
+  @if (erreur(); as message) {
+    <p class="arbre__erreur" role="alert">{{ message }}</p>
+  }
+
+  <div class="arbre__table">
+    @for (epoch of [tableEpoch()]; track epoch) {
+    <nf-tree-table
+      [nodes]="filteredNodes()"
+      [columns]="columns()"
+      treeColumnKey="libelle"
+      [loading]="chargement()"
+      [expandedKeys]="expandedKeys()"
+      (expandedKeysChange)="expandedKeys.set($event)"
+      [rowClickable]="selectionEnabled()"
+      [rowClass]="rowClass"
+      [rowTitle]="rowTitle"
+      (rowDblClick)="onRowDblClick($event)"
+      [minWidth]="tableMinWidth()"
+      [scrollHeight]="tableScrollHeight"
+      emptyMessage="Aucun lot / article"
+    >
+      <ng-template #cell let-row let-column="column">
+        @switch (column.key) {
+          @case ('type') {
+            <span class="arbre__badge">{{ typeCourt(row.type) }}</span>
+          }
+          @case ('code') {
+            <span class="arbre__code" [attr.title]="row.code || null">{{ row.code }}</span>
+          }
+          @case ('libelle') {
+            <span class="arbre__libelle" [attr.title]="row.libelle || null">
+              <span class="arbre__libelle-text">{{ row.libelle }}</span>
+              @if (row.nonExploitable) {
+                <span class="arbre__warn-tag">incomplet</span>
+              }
+              @if (origineBadge(row); as mode) {
+                <span
+                  class="arbre__mode-tag"
+                  [class.arbre__mode-tag--estime]="mode.kind === 'ESTIME'"
+                  [class.arbre__mode-tag--forfait]="mode.kind === 'FORFAIT'"
+                  [class.arbre__mode-tag--decompo]="mode.kind === 'DECOMPOSE'"
+                >
+                  {{ mode.label }}
+                </span>
+              }
+              @if (estCoutDeduit(row)) {
+                <span class="arbre__mode-tag arbre__mode-tag--deduit" title="Coût déduit d’un prix de vente">
+                  déduit
+                </span>
+              }
+            </span>
+          }
+          @case ('unite') {
+            <span class="arbre__num">{{ row.type === 'ARTICLE' ? row.unite || '—' : '' }}</span>
+          }
+          @case ('quantite') {
+            <span class="arbre__num">{{
+              row.type === 'ARTICLE' ? (row.quantite != null ? (row.quantite | number: '1.0-2') : '—') : ''
+            }}</span>
+          }
+          @case ('postes') {
+            <span class="arbre__num">{{
+              row.type === 'ARTICLE'
+                ? ''
+                : row.nombrePostes != null
+                  ? row.nombrePostes
+                  : '—'
+            }}</span>
+          }
+          @case ('pu') {
+            <span class="arbre__num">{{
+              row.type === 'ARTICLE'
+                ? row.prixUnitaire != null
+                  ? (row.prixUnitaire | number: '1.2-2')
+                  : '—'
+                : ''
+            }}</span>
+          }
+          @case ('total') {
+            <strong class="arbre__num">{{
+              row.total != null ? (row.total | number: '1.2-2') : '—'
+            }}</strong>
+          }
+          @case ('actions') {
+            <span class="arbre__row-actions" (click)="stop($event)">
+              <button
+                type="button"
+                mat-icon-button
+                class="arbre__icon-btn"
+                matTooltip="Modifier"
+                aria-label="Modifier"
+                (click)="modifier(row)"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+              @if (row.type !== 'ARTICLE') {
+                <button
+                  type="button"
+                  mat-icon-button
+                  class="arbre__icon-btn"
+                  matTooltip="Ajouter un enfant"
+                  aria-label="Ajouter un enfant"
+                  (click)="ajouterEnfant(row)"
+                >
+                  <mat-icon>subdirectory_arrow_right</mat-icon>
+                </button>
+              }
+              <button
+                type="button"
+                mat-icon-button
+                class="arbre__icon-btn"
+                matTooltip="Ajouter au même niveau"
+                aria-label="Ajouter au même niveau"
+                (click)="ajouterMemeNiveau(row)"
+              >
+                <mat-icon>add</mat-icon>
+              </button>
+              <button
+                type="button"
+                mat-icon-button
+                class="arbre__icon-btn arbre__icon-btn--danger"
+                matTooltip="Supprimer"
+                aria-label="Supprimer"
+                (click)="supprimer(row)"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </span>
+          }
+        }
+      </ng-template>
+    </nf-tree-table>
+    }
+  </div>
+</section>

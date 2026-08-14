@@ -1,0 +1,59 @@
+---
+description: UX design via Cursor Canvas wireframes — méthode principale Nafura (pas Figma)
+alwaysApply: true
+---
+
+# UX — Canvas wireframes (méthode principale)
+
+**Avant toute implémentation UI non triviale** : produire / itérer un **Cursor Canvas** (`.canvas.tsx`), pas Figma ni mock HTML jetable.
+
+## Source unique (Git)
+
+**SSOT** = dossier UX du sous-lot (ou du lot plat) :
+
+`<projet>/pact/<socle|bc>/ux/<name>-wireframe.canvas.tsx`
+
+Pas de 2ᵉ copie « validée » sous `docs/ux/wireframes/` (legacy / redirect only).
+
+## Preview Cursor (contrainte IDE)
+
+L’IDE ne charge la preview que depuis :
+
+`~/.cursor/projects/<workspace>/canvases/*.canvas.tsx`
+
+Donc : **éditer / versionner dans le lot** ; **copier** vers `canvases/` pour la preview (même nom de fichier). Après itération : recopier vers le lot avant commit.
+
+## Quand
+
+- Nouvel écran, refonte UX, choix de layout, flux multi-états
+- Validation produit **avant** le plan d’impl / le code
+
+## Comment
+
+1. Créer / ouvrir le canvas sous `lots/<lot-slug>/<sous-lot-slug>/ux/`
+2. Sync → `canvases/` pour preview live
+3. Vues navigables (`useCanvasState`) = états réels du flux
+4. Afficher **cycle de vie**, dirty, gates, AI + **fallback manuel**
+5. Décisions UX listées dans le canvas (+ `ux/notes.md` si besoin)
+6. **Valider avec l’utilisateur** → PLAN §6 pointe vers le fichier `ux/*.canvas.tsx`
+7. Plan d’impl → code ; ticket Raster référence le chemin lot
+
+## Contenu attendu
+
+- Structure & hiérarchie (pas de polish pixel)
+- États vides / chargement / erreur si pertinents
+- Actions primaires au bon endroit (ex. CTA long formulaire en footer sticky)
+- Principe Nafura : **AI-first, manuel en fallback** visible dans le wireframe
+
+## Référence validée
+
+`etude-decompo-wireframe.canvas.tsx` — tree → drawer, toggle mode, footer Enregistrer  
+(Git : `…/epics/_archive/etude-prix-unifiee/ux/`).
+
+## Interdit
+
+- Partir en code UI majeur sans wireframe canvas validé
+- Remplacer cette méthode par Figma comme source de vérité
+- Wireframe « joli » sans états métier / sans fallback manuel
+- Laisser un canvas **uniquement** sous `canvases/` après validation (toujours dans l’epic Git)
+- Dupliquer une SSOT sous `docs/ux/wireframes/`

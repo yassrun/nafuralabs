@@ -1,0 +1,183 @@
+<nf-page-shell>
+  <nf-page-header [config]="headerConfig"></nf-page-header>
+
+  <section class="cat">
+    <div class="cat__toolbar">
+      <div class="cat__tabs" role="tablist">
+        <button
+          type="button"
+          class="cat__tab"
+          [class.cat__tab--active]="tab() === 'file'"
+          (click)="setTab('file')"
+        >
+          Candidats
+          <span class="cat__count">{{ candidats().length }}</span>
+        </button>
+        <button
+          type="button"
+          class="cat__tab"
+          [class.cat__tab--active]="tab() === 'editions'"
+          (click)="setTab('editions')"
+        >
+          Éditions
+        </button>
+      </div>
+      <div class="cat__actions">
+        <nf-button variant="secondary" [loading]="chargement()" (clicked)="refresh()">
+          Actualiser
+        </nf-button>
+        <nf-button variant="secondary" [loading]="chargement()" (clicked)="seedDemo()">
+          Seed demo
+        </nf-button>
+      </div>
+    </div>
+
+    <p class="cat__banner" role="note">
+      Console Sektor uniquement · aucun nom de tenant · G2 : publier seulement si seuil atteint
+    </p>
+
+    @if (erreur(); as msg) {
+      <p class="cat__erreur" role="alert">{{ msg }}</p>
+    }
+    @if (message(); as msg) {
+      <p class="cat__ok" role="status">{{ msg }}</p>
+    }
+
+    @if (tab() === 'file') {
+      <div class="cat__layout">
+        <div class="cat__list">
+          @if (chargement() && candidats().length === 0) {
+            <p class="cat__etat">Chargement…</p>
+          } @else if (candidats().length === 0) {
+            <div class="cat__vide">
+              <p>Aucun candidat éligible (seuil G2).</p>
+              <p class="cat__hint">Les sous-seuil restent en base hors console. Seed demo pour amorcer.</p>
+            </div>
+          } @else {
+            @for (c of candidats(); track c.id) {
+              <button
+                type="button"
+                class="cat__card"
+                [class.cat__card--selected]="selectedId() === c.id"
+                (click)="select(c.id)"
+              >
+                <div class="cat__card-head">
+                  <strong>{{ c.libellePropose }}</strong>
+                  @if (c.eligible) {
+                    <span class="pill pill--ok"
+                      >{{ c.nbTenantsConfirmants }} tenants · éligible</span
+                    >
+                  } @else {
+                    <span class="pill pill--warn"
+                      >{{ c.nbTenantsConfirmants }} / {{ c.seuilRequis }} · sous seuil</span
+                    >
+                  }
+                </div>
+                <p class="cat__meta">
+                  {{ c.typeObjet }} · {{ c.proposePar }}
+                  @if (c.rendementMedian != null) {
+                    · médiane {{ fmtNum(c.rendementMedian) }}
+                  }
+                </p>
+              </button>
+            }
+          }
+        </div>
+
+        <aside class="cat__detail">
+          @if (selected(); as c) {
+            <h3>{{ c.libellePropose }}</h3>
+            <p class="cat__meta">
+              {{ c.nature || '—' }} · unité {{ c.uniteCode || '—' }} · famille
+              {{ c.codeFamille || '—' }}
+            </p>
+
+            @if (exemples().length > 0) {
+              <div class="cat__box">
+                <h4>Libellés observés (anonymisés)</h4>
+                <p>{{ exemples().join(' · ') }}</p>
+              </div>
+            }
+
+            @if (c.rendementMedian != null || c.rendementMin != null) {
+              <div class="cat__box">
+                <h4>Rendements observés</h4>
+                <p>
+                  Min – max : {{ fmtNum(c.rendementMin) }} – {{ fmtNum(c.rendementMax) }}
+                </p>
+                <p>
+                  Médiane : <strong>{{ fmtNum(c.rendementMedian) }}</strong>
+                </p>
+              </div>
+            }
+
+            <div class="cat__box">
+              <h4>Provenance</h4>
+              <p>
+                Proposé par : {{ c.proposePar }}
+                @if (c.modelVersion) {
+                  · model {{ c.modelVersion }}
+                } @else {
+                  · model_version —
+                }
+              </p>
+            </div>
+
+            @if (!c.eligible) {
+              <p class="cat__warn" role="status">
+                G2 — non publiable : {{ c.nbTenantsConfirmants }} / {{ c.seuilRequis }} tenants
+                confirmants. Affiché pour transparence.
+              </p>
+            }
+
+            <div class="cat__detail-actions">
+              <nf-button
+                variant="primary"
+                [disabled]="!c.eligible || chargement()"
+                [loading]="chargement()"
+                (clicked)="publier(c)"
+              >
+                @if (c.eligible) {
+                  Publier
+                } @else {
+                  Publier (seuil {{ c.typeObjet === 'OUVRAGE' ? 'ouvrages' : 'articles' }} ≥
+                  {{ c.seuilRequis }})
+                }
+              </nf-button>
+              <nf-button variant="secondary" [loading]="chargement()" (clicked)="refuser(c)">
+                Refuser
+              </nf-button>
+            </div>
+          } @else {
+            <p class="cat__etat">Sélectionnez un candidat.</p>
+          }
+        </aside>
+      </div>
+    }
+
+    @if (tab() === 'editions') {
+      <div class="cat__editions">
+        @if (editions().length === 0) {
+          <p class="cat__etat">Aucune édition — lancez le seed demo.</p>
+        } @else {
+          @for (ed of editions(); track ed.id) {
+            <div class="cat__edition">
+              <div class="cat__card-head">
+                <strong>{{ ed.code }}</strong>
+                <span
+                  class="pill"
+                  [class.pill--ok]="ed.statut === 'PUBLIEE'"
+                  [class.pill--warn]="ed.statut === 'BROUILLON'"
+                  >{{ ed.statut }}</span
+                >
+              </div>
+              @if (ed.notes) {
+                <p class="cat__meta">{{ ed.notes }}</p>
+              }
+            </div>
+          }
+        }
+      </div>
+    }
+  </section>
+</nf-page-shell>

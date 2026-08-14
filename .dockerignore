@@ -2,10 +2,8 @@
 .github
 **/.gradle
 **/build
-!products/sektor-btp/backend/app/build/libs/*.jar
+!sektor/sources/backend/app/build/libs/*.jar
 **/node_modules
-web/dist
-!web/dist/project-fountain/**
 marketing
 docs
 *.md

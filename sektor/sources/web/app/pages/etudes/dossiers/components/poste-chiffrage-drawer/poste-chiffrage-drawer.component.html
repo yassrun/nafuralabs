@@ -1,0 +1,139 @@
+<div class="poste-drawer" role="dialog" aria-labelledby="poste-drawer-title">
+  <header class="poste-drawer__header">
+    <div class="poste-drawer__identite">
+      <div class="poste-drawer__badges">
+        <span class="poste-drawer__code">{{ posteDraft().code }}</span>
+        @if (dirty()) {
+          <span class="poste-drawer__pill poste-drawer__pill--warn">Non enregistré</span>
+        }
+      </div>
+      <h2 id="poste-drawer-title" class="poste-drawer__titre">{{ posteDraft().libelle }}</h2>
+      <p class="poste-drawer__meta">
+        <span>{{ posteDraft().unite || '—' }}</span>
+        <span aria-hidden="true">·</span>
+        <span>Qté {{ posteDraft().quantite ?? '—' }}</span>
+      </p>
+    </div>
+    <nf-button
+      variant="ghost"
+      size="sm"
+      [disabled]="closing() || !!panel()?.sauvegarde()"
+      (clicked)="requestClose()"
+      aria-label="Fermer sans enregistrer"
+    >
+      ✕
+    </nf-button>
+  </header>
+
+  <div class="poste-drawer__mode" role="group" aria-label="Origine du coût">
+    <button
+      type="button"
+      class="poste-drawer__toggle"
+      [class.poste-drawer__toggle--active]="origine() === 'DECOMPOSE'"
+      [disabled]="!data.modifiable || closing()"
+      (click)="setOrigine('DECOMPOSE')"
+    >
+      Je décompose
+    </button>
+    <button
+      type="button"
+      class="poste-drawer__toggle"
+      [class.poste-drawer__toggle--active]="origine() === 'FORFAIT'"
+      [disabled]="!data.modifiable || closing()"
+      (click)="setOrigine('FORFAIT')"
+    >
+      Forfait
+    </button>
+    <button
+      type="button"
+      class="poste-drawer__toggle"
+      [class.poste-drawer__toggle--active]="origine() === 'ESTIME'"
+      [disabled]="!data.modifiable || closing()"
+      (click)="setOrigine('ESTIME')"
+    >
+      J’estime
+    </button>
+  </div>
+
+  <div class="poste-drawer__body">
+    <app-poste-decomposition-panel
+      [poste]="posteDraft()"
+      [dossierId]="data.dossierId"
+      [cpsDocumentId]="data.cpsDocumentId"
+      [modifiable]="data.modifiable"
+      [fgDefaut]="data.fgDefaut"
+      [margeDefaut]="data.margeDefaut"
+      [tvaDefaut]="data.tvaDefaut"
+      [embedded]="true"
+      (dirtyChange)="onDirty($event)"
+      (origineChange)="onOrigine($event)"
+    />
+
+    <details class="poste-drawer__fold">
+      <summary>Avis d’exécution</summary>
+      <div class="poste-drawer__fold-body">
+        @if (posteDraft().id && data.dossierId) {
+          <app-poste-avis-panel
+            [dossierId]="data.dossierId"
+            [noeudId]="posteDraft().id!"
+            [modifiable]="data.modifiable"
+            [peutPoser]="true"
+            [peutTraiter]="data.modifiable"
+            [embedded]="true"
+          />
+        } @else {
+          <p class="poste-drawer__fold-empty">Enregistrez le poste pour poser un avis.</p>
+        }
+      </div>
+    </details>
+
+    <details class="poste-drawer__fold">
+      <summary>Commentaires d’équipe</summary>
+      <div class="poste-drawer__fold-body">
+        <nf-comment-thread-panel
+          [entityType]="commentEntityType"
+          [entityId]="commentEntityId"
+          [readonly]="!data.modifiable"
+          [title]="'etudes.poste.comments.title' | translate"
+          [placeholder]="'etudes.poste.comments.placeholder' | translate"
+          [emptyLabel]="'etudes.poste.comments.empty' | translate"
+          [loadingLabel]="'etudes.poste.comments.loading' | translate"
+          [addLabel]="'etudes.poste.comments.add' | translate"
+          [editLabel]="'etudes.poste.comments.edit' | translate"
+          [deleteLabel]="'etudes.poste.comments.delete' | translate"
+          [saveLabel]="'etudes.poste.comments.save' | translate"
+          [cancelLabel]="'etudes.poste.comments.cancel' | translate"
+          [editedLabel]="'etudes.poste.comments.edited' | translate"
+        />
+      </div>
+    </details>
+  </div>
+
+  <footer class="poste-drawer__footer">
+    <span class="poste-drawer__footer-status">
+      @if (closing() || panel()?.sauvegarde()) {
+        Enregistrement…
+      } @else if (dirty()) {
+        Modifications non enregistrées
+      } @else if (panel()?.attenteSaisieCout()) {
+        Saisissez un coût pour enregistrer
+      } @else {
+        Tout est à jour
+      }
+    </span>
+    <div class="poste-drawer__footer-actions">
+      @if (data.modifiable) {
+        <nf-button
+          variant="primary"
+          size="sm"
+          [disabled]="!dirty() || closing() || !!panel()?.sauvegarde()"
+          (clicked)="saveAndClose()"
+        >
+          Enregistrer et fermer
+        </nf-button>
+      } @else {
+        <nf-button variant="secondary" size="sm" (clicked)="requestClose()">Fermer</nf-button>
+      }
+    </div>
+  </footer>
+</div>

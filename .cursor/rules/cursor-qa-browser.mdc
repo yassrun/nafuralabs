@@ -1,0 +1,35 @@
+---
+description: Mode B Cursor QA — auth + browser pour QA locale Sektor (ne jamais omettre)
+alwaysApply: true
+---
+
+# Cursor QA / Browser (Mode B)
+
+Quand tu debugues l’UI locale (`127.0.0.1:4200`) ou l’API (`localhost:8082`) :
+
+## Auth — user QA local (pas Keycloak)
+
+- Owner / tenant : `qa@nafuralabs.local` sur tenant `qa-local` (seed onboarding à boot)
+- Flag backend : `NAFURA_DEV_CURSOR_AUTH_ENABLED=true` (via `nafura-platform/ops/secrets/dev-staging-local.env`)
+- Front QA : `cd sektor/sources/web && npm run start:erp:cursor` (`environment.cursor.ts` → `cursorAuthAutoLogin: true`)
+- Endpoint session : `POST http://localhost:8082/api/public/dev/cursor-session` → Bearer JWT HS256
+- CLI token : `eval "$(bash nafura-platform/ops/qa-token.sh)"` → `$TOKEN` + `$TENANT_ID`
+- Doc : `sektor/README.md` § Mode B + Cursor QA
+- Déprécié : `cursor.qa@nafuralabs.local` (alias remappé vers `qa@…`)
+
+## Browser MCP — ordre obligatoire
+
+1. `browser_tabs` **list** d’abord — réutiliser un onglet déjà ouvert / authentifié
+2. URL : **`http://127.0.0.1:4200`** (pas `localhost` si flaky)
+3. `browser_lock` **avant** interactions sur un onglet existant
+4. Si `chrome-error://` ou connexion morte : **ne pas boucler** — passer à l’API avec token QA
+5. Ne pas inventer un login Keycloak pour le QA agent
+
+## API sans browser
+
+```bash
+eval "$(bash nafura-platform/ops/qa-token.sh)"
+curl -s -H "Authorization: Bearer $TOKEN" -H "X-Tenant-Id: $TENANT_ID" "http://localhost:8082/api/..."
+```
+
+Ne jamais activer `NAFURA_DEV_CURSOR_AUTH_ENABLED` sur staging/prod K8s.

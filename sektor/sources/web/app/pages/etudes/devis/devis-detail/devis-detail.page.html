@@ -1,0 +1,97 @@
+<nf-page-shell scroll>
+  <nf-page-header [config]="headerConfig">
+    @if (item(); as d) {
+      <nf-button actions variant="secondary" (clicked)="printDevis()">Imprimer</nf-button>
+      @if (d.dossierEtudeId) {
+        <nf-button actions variant="tertiary" (clicked)="openDossier()">Voir dossier</nf-button>
+      }
+    }
+  </nf-page-header>
+  <div class="devis-screen">
+    <nf-entity-detail
+      #detail
+      [config]="config"
+      [mode]="mode()"
+      [item]="item()"
+      [lookups]="lookups()"
+      [loading]="isLoading()"
+      [saving]="isSaving()"
+      (action)="onAction($event)"
+      (transitionRequest)="handleTransition($event)">
+
+      <ng-template nfField="lignes" let-control>
+        <app-dpgf-editor
+          [lines]="lignesValue(item())"
+          [readonly]="mode() === 'view'"
+          (linesChange)="onLignesChange(control, $event)" />
+      </ng-template>
+
+    </nf-entity-detail>
+
+    @if (versions.length) {
+      <section class="devis-versions" aria-label="Historique des versions">
+        <h3>Historique des versions</h3>
+        <ul>
+          @for (v of versions; track v.id) {
+            <li>
+              V{{ v.version }} — {{ v.snapshotDate || v.date }}
+              @if (v.totalHt != null) {
+                · {{ v.totalHt | mad }}
+              }
+              @if (v.modifications) {
+                <span class="mod">{{ v.modifications }}</span>
+              }
+            </li>
+          }
+        </ul>
+      </section>
+    }
+  </div>
+
+  @if (item(); as dv) {
+    <article class="devis-print-doc" data-print-area="devis">
+    <header>
+      <h1>Devis {{ dv.numero }} <span class="ver">V{{ dv.version }}</span></h1>
+      <p class="meta">Émis le {{ dv.dateEmission }} · Valable jusqu'au {{ dv.dateValidite }}</p>
+    </header>
+    <section class="parties">
+      <div>
+        <strong>Client</strong><br>{{ dv.clientName ?? '—' }}
+        @if (dv.contactClient) {
+          <br>Contact : {{ dv.contactClient }}
+        }
+      </div>
+      <div>
+        <strong>Objet</strong><br>{{ dv.objet }}
+        @if (dv.ville) {
+          <br>Ville : {{ dv.ville }}
+        }
+      </div>
+    </section>
+    @if (dv.conditionsPaiement) {
+      <p class="conditions"><strong>Conditions de paiement</strong> — {{ dv.conditionsPaiement }}</p>
+    }
+    @if (dv.delaiExecutionJours != null) {
+      <p class="conditions">Délai d'exécution : {{ dv.delaiExecutionJours }} jours</p>
+    }
+    <table>
+      <thead><tr><th>Désignation</th><th class="n">Qté</th><th class="n">PU HT</th><th class="n">Total HT</th></tr></thead>
+      <tbody>
+        @for (ln of dv.lignes; track $index) {
+          <tr>
+            <td>{{ ln.designation }}</td>
+            <td class="n">{{ ln.quantite ?? '—' }}</td>
+            <td class="n">{{ ln.prixUnitaireHt | mad }}</td>
+            <td class="n">{{ ln.totalHt | mad }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    <footer class="totaux">
+      <div>Total HT <strong>{{ dv.totalHt | mad }}</strong></div>
+      <div>TVA {{ dv.tvaTaux }}% <strong>{{ dv.totalTva | mad }}</strong></div>
+      <div>Total TTC <strong>{{ dv.totalTtc | mad }}</strong></div>
+    </footer>
+    </article>
+  }
+</nf-page-shell>

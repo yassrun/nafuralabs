@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: venue-catalog-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: venue-catalog-web
+  template:
+    metadata:
+      labels:
+        app: venue-catalog-web
+    spec:
+      containers:
+        - name: venue-catalog-web
+          image: venue-catalog-web:staging
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 20

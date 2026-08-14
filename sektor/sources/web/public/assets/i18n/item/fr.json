@@ -1,0 +1,81 @@
+{
+  "zones": {
+    "inventory": "Inventaire",
+    "finance": "Finance",
+    "sales": "Ventes",
+    "procurement": "Achats",
+    "hr": "Ressources Humaines",
+    "directory": "Répertoire"
+  },
+  "item": {
+    "navigation": {
+      "items": "Articles",
+      "barcodes": "Codes-barres",
+      "itemCategories": "Item Categories"
+    },
+    "item": {
+      "title": "Items",
+      "detailTitle": "Item Details",
+      "newTitle": "New Item",
+      "fields": {
+        "code": "code",
+        "name": "name",
+        "description": "description",
+        "type": "type",
+        "itemCategoryId": "item Category Id",
+        "unitOfMeasureId": "unit Of Measure Id",
+        "baseUnit": "base Unit",
+        "sku": "sku",
+        "isActive": "is Active"
+      },
+      "sections": {
+        "classification": "classification",
+        "measurement": "measurement"
+      }
+    },
+    "barcode": {
+      "title": "Codes-barres",
+      "detailTitle": "Détails du code-barres",
+      "newTitle": "Nouveau code-barres",
+      "fields": {
+        "itemId": "item Id",
+        "value": "value",
+        "type": "type"
+      },
+      "sections": {}
+    },
+    "itemCategory": {
+      "title": "Item Categories",
+      "detailTitle": "Item Category Details",
+      "newTitle": "New Item Category",
+      "fields": {
+        "parentId": "parent Id",
+        "code": "code",
+        "name": "name",
+        "description": "description",
+        "isActive": "is Active"
+      },
+      "sections": {}
+    },
+    "uom": {
+      "facteur": {
+        "must_be_positive": "Le facteur vers base doit être strictement positif"
+      },
+      "base": {
+        "category_required": "Une unité de base doit appartenir à une catégorie",
+        "category_without_base": "Cette catégorie n'a pas d'unité de base — désignez-en une d'abord",
+        "required_in_category": "La catégorie doit conserver une unité de base"
+      },
+      "conversion": {
+        "cross_category": "Impossible : les unités n'appartiennent pas à la même catégorie",
+        "category_required": "Les deux unités doivent avoir une catégorie",
+        "quantity_required": "La quantité est obligatoire",
+        "from_not_found": "Unité source introuvable",
+        "to_not_found": "Unité cible introuvable",
+        "uom_required": "Les deux unités sont obligatoires",
+        "facteur_invalid": "Facteur vers base invalide",
+        "failed": "La conversion a échoué"
+      }
+    }
+  }
+}

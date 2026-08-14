@@ -1,0 +1,248 @@
+<a routerLink="/catalog/search" class="back">← Retour recherche</a>
+
+@if (loading()) {
+  <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+}
+
+@if (error()) {
+  <div class="empty">
+    <p>{{ error() }}</p>
+    <a mat-stroked-button routerLink="/catalog/search">Retour</a>
+  </div>
+}
+
+@if (place(); as p) {
+  <section class="review">
+    <header>
+      <div>
+        <h1>{{ p.canonicalName }}</h1>
+        <p class="meta">
+          {{ p.cityCode }} · {{ p.primaryCategory }} ·
+          <span class="status">{{ p.status }}</span>
+          @if (p.aiDecision) {
+            · IA {{ p.aiDecision }}
+          }
+        </p>
+      </div>
+      <div class="actions">
+        <button mat-flat-button color="primary" type="button" [disabled]="busy()" (click)="approve()">
+          Accepter
+        </button>
+        <button mat-stroked-button type="button" [disabled]="busy()" (click)="reject()">
+          Corriger / rejeter
+        </button>
+        <button mat-stroked-button type="button" [disabled]="busy()" (click)="reenrich()">
+          Relancer enrichissement
+        </button>
+        <button mat-stroked-button type="button" [disabled]="busy()" (click)="reenrich('AI_CLASSIFY')">
+          Relancer IA
+        </button>
+        <button mat-stroked-button color="warn" type="button" [disabled]="busy()" (click)="archive()">
+          Archiver
+        </button>
+        <button mat-flat-button color="warn" type="button" [disabled]="busy()" (click)="remove()">
+          Supprimer
+        </button>
+      </div>
+    </header>
+
+    <div class="panel media-panel">
+      <h2>Médias ({{ p.media.length || 0 }})</h2>
+      @if (!p.media.length) {
+        <p class="muted">Aucune photo</p>
+      } @else {
+        <div class="media-grid">
+          @for (m of p.media; track m.id) {
+            <figure [class.cover]="m.sortOrder === 0">
+              <img [src]="m.url" [alt]="m.attributionText || p.canonicalName" loading="lazy" />
+              <figcaption>
+                @if (m.sortOrder === 0) {
+                  <span class="cover-badge">Couverture</span>
+                }
+                <span>{{ m.attributionText || m.source }}</span>
+                @if (m.sortOrder !== 0) {
+                  <button
+                    mat-stroked-button
+                    type="button"
+                    class="set-cover"
+                    [disabled]="busy()"
+                    (click)="setPrimary(m.id)"
+                  >
+                    Définir comme principale
+                  </button>
+                }
+              </figcaption>
+            </figure>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <h2>Adresse & geo</h2>
+        <form class="taxonomy-form" [formGroup]="districtForm" (ngSubmit)="saveDistrict()">
+          <mat-form-field appearance="outline" class="full">
+            <mat-label>Quartier (Nafura)</mat-label>
+            <mat-select formControlName="districtCode">
+              <mat-option value="">—</mat-option>
+              @for (d of districtOptions(); track d.code) {
+                <mat-option [value]="d.code">{{ d.label }} ({{ d.code }})</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <p class="muted taxonomy-hint">
+            Correction manuelle sticky (méthode
+            {{ districtMethod() || '—' }}). Préservée au re-enrichissement auto.
+          </p>
+          <button mat-flat-button color="primary" type="submit" [disabled]="busy()">
+            Enregistrer quartier
+          </button>
+        </form>
+        <pre>{{ p.address | json }}</pre>
+        <pre>{{ p.geo | json }}</pre>
+        <h2>Contact</h2>
+        <pre>{{ p.contact | json }}</pre>
+
+        <h2>Horaires (open → close)</h2>
+        @if (!p.openingHours.length) {
+          <p class="muted">Aucun horaire fourni par Google pour ce lieu.</p>
+        } @else {
+          <ul class="hours">
+            @for (day of p.openingHours; track $index) {
+              <li>
+                <span class="day">{{ weekdayLabel(day['weekday']) }}</span>
+                <span class="range">{{ hourRanges(day) }}</span>
+              </li>
+            }
+          </ul>
+        }
+
+        <h2>Qualité</h2>
+        <pre>{{ p.quality | json }}</pre>
+      </div>
+
+      <div class="panel">
+        <h2>Taxonomie (édition manuelle)</h2>
+        <p class="muted taxonomy-hint">
+          Types + settings / offers / experiences / suitableFor. Premier type = principal. Scores recalculés.
+          @if (manualOverride()) {
+            <strong> Override manuel actif</strong> — préservé sauf « Relancer IA ».
+          }
+        </p>
+        <form class="taxonomy-form" [formGroup]="taxonomyForm" (ngSubmit)="saveTaxonomy()">
+          <div class="activities">
+            <span class="label">Types</span>
+            <div class="chip-row">
+              @for (t of venueTypeOptions(); track t) {
+                <button
+                  type="button"
+                  class="activity-chip"
+                  [class.selected]="isVenueTypeSelected(t)"
+                  [class.primary]="isPrimaryVenueType(t)"
+                  (click)="toggleVenueType(t)"
+                  (dblclick)="setPrimaryVenueType(t); $event.preventDefault()"
+                  [title]="isVenueTypeSelected(t) ? 'Double-clic = type principal' : 'Ajouter'"
+                >
+                  {{ t }}
+                  @if (isPrimaryVenueType(t)) {
+                    <span class="primary-mark">★</span>
+                  }
+                </button>
+              }
+            </div>
+            <p class="muted chip-hint">Clic = ajouter/retirer · double-clic = principal (★)</p>
+          </div>
+
+          <div class="activities">
+            <span class="label">Settings</span>
+            <div class="chip-row">
+              @for (s of settingOptions(); track s) {
+                <button
+                  type="button"
+                  class="activity-chip"
+                  [class.selected]="isFacetSelected('settings', s)"
+                  (click)="toggleFacet('settings', s)"
+                >
+                  {{ s }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <div class="activities">
+            <span class="label">Offers</span>
+            <div class="chip-row">
+              @for (o of offerOptions(); track o) {
+                <button
+                  type="button"
+                  class="activity-chip"
+                  [class.selected]="isFacetSelected('offers', o)"
+                  (click)="toggleFacet('offers', o)"
+                >
+                  {{ o }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <div class="activities">
+            <span class="label">Experiences</span>
+            <div class="chip-row">
+              @for (e of experienceOptions(); track e) {
+                <button
+                  type="button"
+                  class="activity-chip"
+                  [class.selected]="isFacetSelected('experiences', e)"
+                  (click)="toggleFacet('experiences', e)"
+                >
+                  {{ e }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <div class="activities">
+            <span class="label">Suitable for</span>
+            <div class="chip-row">
+              @for (s of suitableForOptions(); track s) {
+                <button
+                  type="button"
+                  class="activity-chip"
+                  [class.selected]="isFacetSelected('suitableFor', s)"
+                  (click)="toggleFacet('suitableFor', s)"
+                >
+                  {{ s }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <mat-form-field appearance="outline" class="full">
+            <mat-label>Verdict (optionnel)</mat-label>
+            <mat-select formControlName="verdict">
+              <mat-option value="">Auto (recalcul)</mat-option>
+              <mat-option value="KEEP">KEEP</mat-option>
+              <mat-option value="REVIEW">REVIEW</mat-option>
+              <mat-option value="DROP_SUGGESTED">DROP_SUGGESTED</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <button mat-flat-button color="primary" type="submit" [disabled]="busy()">
+            Enregistrer taxonomie
+          </button>
+        </form>
+
+        <h2>Enrichissement (shadow)</h2>
+        @if (!enrichment()) {
+          <p class="muted">Pas encore enrichi. Lancez « Relancer enrichissement » ou enregistrez une taxonomie.</p>
+        } @else {
+          <pre>{{ enrichment() | json }}</pre>
+        }
+
+        <h2>Sources</h2>
+        <pre>{{ p.sourceRecords | json }}</pre>
+      </div>
+    </div>
+  </section>
+}

@@ -1,0 +1,37 @@
+{
+  "type": "Feature",
+  "properties": {
+    "code": "GAUTHIER",
+    "label": "Gauthier",
+    "cityCode": "casablanca",
+    "provenance": "NAFURA_CURATED",
+    "version": "MA-CASA-2026-01"
+  },
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [
+          -7.628,
+          33.5885
+        ],
+        [
+          -7.608,
+          33.5885
+        ],
+        [
+          -7.608,
+          33.6035
+        ],
+        [
+          -7.628,
+          33.6035
+        ],
+        [
+          -7.628,
+          33.5885
+        ]
+      ]
+    ]
+  }
+}

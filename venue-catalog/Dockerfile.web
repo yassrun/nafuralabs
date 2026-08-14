@@ -1,0 +1,11 @@
+# Venue Catalog Web — image from pre-built Angular dist (monorepo root context):
+#   cd venue-catalog/sources/web && npm install && npm run build:staging
+#   docker build -t venue-catalog-web:staging -f venue-catalog/Dockerfile.web .
+
+FROM nginx:alpine
+COPY venue-catalog/sources/web/nginx.conf /etc/nginx/conf.d/default.conf
+COPY venue-catalog/sources/web/dist/web/browser /usr/share/nginx/html
+EXPOSE 80
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost/ || exit 1
+CMD ["nginx", "-g", "daemon off;"]

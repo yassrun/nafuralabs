@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: usage-ops-prod
-  labels:
-    nafura.io/app: usage-ops
-    nafura.io/env: prod

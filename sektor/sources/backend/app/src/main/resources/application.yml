@@ -1,0 +1,167 @@
+spring:
+  application:
+    name: erp-service
+
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:5432/${POSTGRES_DB:nafura_erp}?currentSchema=${POSTGRES_SCHEMA:public}
+    username: ${POSTGRES_USER:seyrura}
+    password: ${POSTGRES_PASSWORD:seyrura}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: ${POSTGRES_SCHEMA:public}
+        format_sql: true
+        show_sql: false
+    open-in-view: false
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://iam.nafura.local/realms/iam-portal}
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://iam.nafura.local/realms/iam-portal/protocol/openid-connect/certs}
+
+management:
+  tracing:
+    enabled: false
+
+server:
+  port: 8082
+
+nafura:
+  application:
+    id: erp
+  documents:
+    # Headless Chromium used for document PDFs, so the editor preview and the printed PDF
+    # go through the same engine. Internal service, never exposed through the Ingress.
+    gotenberg:
+      url: ${NAFURA_GOTENBERG_URL:http://gotenberg:3000}
+      connect-timeout: ${NAFURA_GOTENBERG_CONNECT_TIMEOUT:5s}
+      read-timeout: ${NAFURA_GOTENBERG_READ_TIMEOUT:30s}
+  # Local Mode B / Cursor QA only — keep false on staging & prod pods.
+  dev:
+    cursor-auth-enabled: ${NAFURA_DEV_CURSOR_AUTH_ENABLED:false}
+    cursor-auth-email: ${NAFURA_DEV_CURSOR_AUTH_EMAIL:qa@nafuralabs.local}
+    cursor-auth-tenant-id: ${NAFURA_DEV_CURSOR_AUTH_TENANT_ID:}
+  etudes:
+    extraction:
+      poll-ms: ${NAFURA_ETUDES_EXTRACTION_POLL_MS:2000}
+    bordereau:
+      # adaptive = local + escalate vision si texte sale ; vision = page/page forceMedia ;
+      # legacy = one-shot ; shadow = adaptive + compare legacy
+      strategy: ${NAFURA_ETUDES_BORDEREAU_STRATEGY:adaptive}
+      # Deprecated: use strategy. Kept for backward-compat scripts (true → adaptive).
+      hybrid-enabled: ${NAFURA_ETUDES_BORDEREAU_HYBRID:true}
+  doc-extractor:
+    # Full CPS (80-90 pages) needs more than the 120s platform default.
+    # Bordereau uses a lighter schema + smaller prompt; CPS descriptifs still need this headroom.
+    timeout-seconds: ${NAFURA_DOC_EXTRACTOR_TIMEOUT_SECONDS:300}
+  demo:
+    runtime-seed-enabled: ${NAFURA_DEMO_RUNTIME_SEED:false}
+  onboarding:
+    v2-enabled: ${NAFURA_ONBOARDING_V2_ENABLED:true}
+    signup-enabled: true
+    dev-signup-bypass: ${NAFURA_ONBOARDING_DEV_SIGNUP:false}
+    skip-email-verification: ${NAFURA_ONBOARDING_SKIP_EMAIL_VERIFICATION:false}
+    keycloak-provisioning-enabled: ${NAFURA_ONBOARDING_KEYCLOAK_PROVISIONING:true}
+    keycloak-admin-url: ${KEYCLOAK_ADMIN_URL:}
+    keycloak-admin-username: ${KEYCLOAK_ADMIN_USERNAME:}
+    keycloak-admin-password: ${KEYCLOAK_ADMIN_PASSWORD:}
+    keycloak-realm: ${KEYCLOAK_REALM:iam-portal}
+    keycloak-client-id: ${KEYCLOAK_CLIENT_ID:erp-web}
+    application-id: ${NAFURA_APPLICATION_ID:erp}
+    dev-jwt-secret: ${NAFURA_ONBOARDING_DEV_JWT_SECRET:nafura-local-onboarding-jwt-secret-32b-min}
+    demo-prospect-email: prospect@nafura-demo.local
+  security:
+    enabled: true
+    public-endpoints:
+      - /actuator/**
+      - /api/sync/**
+      - /api/public/**
+    user-context:
+      enabled: true
+    tenant:
+      mode: multi
+      enabled: true
+      validate-membership: true
+      allow-default-tenant-fallback: ${NAFURA_ALLOW_DEFAULT_TENANT_FALLBACK:false}
+      default-tenant-id: ${NAFURA_DEFAULT_TENANT_ID:}
+      skip-paths:
+        - /api/auth/
+        - /api/public/
+        - /api/onboarding/
+        - /actuator/
+        - /api/v1/platform/usage/
+  ai:
+    sql:
+      enabled: true
+      max-tables-in-prompt: 15
+      read-only-datasource:
+        url: jdbc:postgresql://${POSTGRES_HOST:localhost}:5432/${POSTGRES_DB:nafura_erp}?currentSchema=${POSTGRES_SCHEMA:public}
+        username: ${NAFURA_AI_SQL_READ_ONLY_DATASOURCE_USERNAME:nafura_ai_reader}
+        password: ${NAFURA_AI_SQL_READ_ONLY_DATASOURCE_PASSWORD:changeme}
+
+# Email (module notification — Brevo by default; keys in backend/.env.local or Vault)
+app:
+  email:
+    provider: ${EMAIL_PROVIDER:brevo}
+    from-address: ${EMAIL_FROM_ADDRESS:noreply@nafuralabs.com}
+    from-name: ${EMAIL_FROM_NAME:Nafura}
+  frontend-base-url: ${APP_FRONTEND_BASE_URL:http://localhost:4200}
+  invitation:
+    token-secret: ${INVITATION_TOKEN_SECRET:change-me-in-production}
+    expiry-days: ${INVITATION_EXPIRY_DAYS:7}
+  storage:
+    type: ${APP_STORAGE_TYPE:s3}
+    s3:
+      endpoint: ${DOCUMENTS_MINIO_ENDPOINT:http://localhost:9000}
+      access-key: ${MINIO_ROOT_USER:minioadmin}
+      secret-key: ${MINIO_ROOT_PASSWORD:minioadmin}
+      bucket: ${DOCUMENTS_MINIO_BUCKET:nafura-erp}
+      region: us-east-1
+    local:
+      base-path: ${APP_STORAGE_LOCAL_PATH:${java.io.tmpdir}/nafura-attachments}
+
+brevo:
+  api-key: ${BREVO_API_KEY:}
+
+# Doc-manager / MinIO (injected by nafgen when infrastructure.objectStorage.enabled)
+documents:
+  minio:
+    endpoint: ${DOCUMENTS_MINIO_ENDPOINT:http://localhost:9000}
+    accessKey: ${MINIO_ROOT_USER:minioadmin}
+    secretKey: ${MINIO_ROOT_PASSWORD:minioadmin}
+    bucket: ${DOCUMENTS_MINIO_BUCKET:nafura-erp}
+    secure: false
+
+ai:
+  provider: ${AI_PROVIDER:gemini}
+  gemini:
+    api-key: ${AI_GEMINI_API_KEY:}
+    base-url: ${AI_GEMINI_BASE_URL:https://generativelanguage.googleapis.com}
+    model: ${AI_GEMINI_MODEL:gemini-2.5-flash}
+  deepseek:
+    api-key: ${AI_DEEPSEEK_API_KEY:}
+    base-url: ${AI_DEEPSEEK_BASE_URL:https://api.deepseek.com}
+    model: ${AI_DEEPSEEK_MODEL:deepseek-v4-flash}
+  # Bordereau/CPS PDF extraction is one large Gemini call; 120s caused EOF mid-stream.
+  # Keep >= nafura.doc-extractor.timeout-seconds (and under ingress 600s).
+  execution:
+    timeout-ms: ${AI_EXECUTION_TIMEOUT_MS:300000}
+    max-retries: ${AI_EXECUTION_MAX_RETRIES:2}
+
+logging:
+  level:
+    root: INFO
+    ma.nafura.erp: DEBUG
+    org.springframework.security: DEBUG

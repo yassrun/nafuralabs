@@ -1,0 +1,10 @@
+plugins {
+    id 'java-library'
+}
+
+dependencies {
+    implementation 'ma.nafuralabs:framework:0.1.0-SNAPSHOT'
+    implementation 'ma.nafuralabs:google-places:0.1.0-SNAPSHOT'
+    implementation project(':venue-catalog:catalog-place')
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}

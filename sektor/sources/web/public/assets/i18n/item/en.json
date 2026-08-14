@@ -1,0 +1,81 @@
+{
+  "zones": {
+    "inventory": "Inventory",
+    "finance": "Finance",
+    "sales": "Sales",
+    "procurement": "Procurement",
+    "hr": "Human Resources",
+    "directory": "Directory"
+  },
+  "item": {
+    "navigation": {
+      "items": "Items",
+      "barcodes": "Barcodes",
+      "itemCategories": "Item Categories"
+    },
+    "item": {
+      "title": "Items",
+      "detailTitle": "Item Details",
+      "newTitle": "New Item",
+      "fields": {
+        "code": "code",
+        "name": "name",
+        "description": "description",
+        "type": "type",
+        "itemCategoryId": "item Category Id",
+        "unitOfMeasureId": "unit Of Measure Id",
+        "baseUnit": "base Unit",
+        "sku": "sku",
+        "isActive": "is Active"
+      },
+      "sections": {
+        "classification": "classification",
+        "measurement": "measurement"
+      }
+    },
+    "barcode": {
+      "title": "Barcodes",
+      "detailTitle": "Barcode Details",
+      "newTitle": "New Barcode",
+      "fields": {
+        "itemId": "item Id",
+        "value": "value",
+        "type": "type"
+      },
+      "sections": {}
+    },
+    "itemCategory": {
+      "title": "Item Categories",
+      "detailTitle": "Item Category Details",
+      "newTitle": "New Item Category",
+      "fields": {
+        "parentId": "parent Id",
+        "code": "code",
+        "name": "name",
+        "description": "description",
+        "isActive": "is Active"
+      },
+      "sections": {}
+    },
+    "uom": {
+      "facteur": {
+        "must_be_positive": "Factor to base must be strictly positive"
+      },
+      "base": {
+        "category_required": "A base unit must belong to a category",
+        "category_without_base": "This category has no base unit — designate one first",
+        "required_in_category": "The category must keep a base unit"
+      },
+      "conversion": {
+        "cross_category": "Not allowed: units belong to different categories",
+        "category_required": "Both units must have a category",
+        "quantity_required": "Quantity is required",
+        "from_not_found": "Source unit not found",
+        "to_not_found": "Target unit not found",
+        "uom_required": "Both units are required",
+        "facteur_invalid": "Invalid factor to base",
+        "failed": "Conversion failed"
+      }
+    }
+  }
+}

@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: venue-catalog-prod
+  labels:
+    nafura.io/app: venue-catalog
+    nafura.io/env: prod

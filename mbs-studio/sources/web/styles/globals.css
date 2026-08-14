@@ -1,0 +1,259 @@
+@import "tailwindcss";
+
+@theme {
+  --color-mbs-black: #000000;
+  --color-mbs-dark: #1e1e1e;
+  /* Warm paper base (helps grain read on screen) */
+  --color-paper: #faf8f4;
+  --font-instrument: var(--font-instrument-sans), system-ui, sans-serif;
+
+  /* Figma Multitone noise — stronger for visible grain on screen */
+  --paper-noise-opacity: 0.28;
+  --paper-noise-opacity-fine: 0.12;
+  --paper-noise-opacity-grain: 0.18;
+  --paper-noise-tile: 100px;
+  --paper-noise-tile-fine: 56px;
+  --paper-noise-tile-grain: 256px;
+
+  /* Figma prototype — tight side margins (~32–40px), full-width content */
+  --layout-max: 100%;
+  --layout-gutter: clamp(20px, 2.5vw, 40px);
+  --header-h: 71px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Base: white + very subtle depth (Figma MacBook frame #FFFFFF) */
+body {
+  position: relative;
+  min-height: 100vh;
+  background-color: var(--color-paper);
+  background-image: radial-gradient(
+    ellipse 110% 80% at 50% -10%,
+    rgb(255 255 255 / 1) 0%,
+    rgb(250 247 242 / 1) 55%,
+    rgb(245 241 235 / 1) 100%
+  );
+  color: #000000;
+  font-family: var(--font-instrument);
+  overflow-x: hidden;
+}
+
+/* Multitone noise — main grain layer */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: var(--paper-noise-opacity);
+  mix-blend-mode: soft-light;
+  background-image: url("/textures/multitone-noise.svg");
+  background-repeat: repeat;
+  background-size: var(--paper-noise-tile) var(--paper-noise-tile);
+}
+
+/* Second pass — finer density, closer to Figma composite */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: var(--paper-noise-opacity-fine);
+  mix-blend-mode: multiply;
+  background-image: url("/textures/multitone-noise.svg");
+  background-repeat: repeat;
+  background-size: var(--paper-noise-tile-fine) var(--paper-noise-tile-fine);
+}
+
+/* Third pass — paper grain texture (Figma) */
+.paper-grain-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: var(--paper-noise-opacity-grain);
+  mix-blend-mode: overlay;
+  background-image: url("/textures/paper-grain.svg");
+  background-repeat: repeat;
+  background-size: var(--paper-noise-tile-grain) var(--paper-noise-tile-grain);
+}
+
+.bg-paper {
+  background-color: transparent;
+}
+
+.bg-paper-solid {
+  background-color: var(--color-paper);
+}
+
+@media (min-width: 1024px) {
+  html[data-modal-open] body,
+  html[data-modal-open] body * {
+    cursor: auto !important;
+  }
+
+  /* Hide system cursor only on drawable empty page areas. */
+  body.has-custom-cursor,
+  body.has-custom-cursor * {
+    cursor: none !important;
+  }
+
+  /* Restore native cursors on interactive UI (links, buttons, forms, chrome). */
+  body.has-custom-cursor a,
+  body.has-custom-cursor button,
+  body.has-custom-cursor [role="button"],
+  body.has-custom-cursor header,
+  body.has-custom-cursor header *,
+  body.has-custom-cursor nav,
+  body.has-custom-cursor nav * {
+    cursor: pointer !important;
+  }
+
+  body.has-custom-cursor footer,
+  body.has-custom-cursor footer * {
+    cursor: default !important;
+  }
+
+  body.has-custom-cursor footer a,
+  body.has-custom-cursor footer button {
+    cursor: pointer !important;
+  }
+
+  body.has-custom-cursor input,
+  body.has-custom-cursor textarea,
+  body.has-custom-cursor select {
+    cursor: text !important;
+  }
+
+  body.has-custom-cursor dialog,
+  body.has-custom-cursor dialog *:not(a):not(button):not(input):not(textarea):not(select):not([role="button"]),
+  body.has-custom-cursor [data-no-draw]:not(a):not(button):not(input):not(textarea):not(select):not([role="button"]) {
+    cursor: default !important;
+  }
+
+  body.has-custom-cursor dialog a,
+  body.has-custom-cursor dialog button,
+  body.has-custom-cursor dialog [role="button"],
+  body.has-custom-cursor [data-no-draw] a,
+  body.has-custom-cursor [data-no-draw] button,
+  body.has-custom-cursor [data-no-draw] [role="button"] {
+    cursor: pointer !important;
+  }
+
+  body.has-custom-cursor dialog input,
+  body.has-custom-cursor dialog textarea,
+  body.has-custom-cursor [data-no-draw] input,
+  body.has-custom-cursor [data-no-draw] textarea {
+    cursor: text !important;
+  }
+
+  /* Project cards keep the custom circle (not native cursor). */
+  body.has-custom-cursor [data-project-card],
+  body.has-custom-cursor [data-project-card] * {
+    cursor: none !important;
+  }
+}
+
+.page-content {
+  position: relative;
+  z-index: 10;
+}
+
+.draw-canvas {
+  z-index: 2;
+}
+
+.is-dragging-card {
+  user-select: none;
+  cursor: grabbing !important;
+}
+
+.is-dragging-card,
+.is-dragging-card * {
+  cursor: grabbing !important;
+  pointer-events: none;
+}
+
+.is-dragging-card [data-project-card] {
+  pointer-events: auto;
+}
+
+.project-card {
+  z-index: 10;
+  will-change: auto;
+  contain: layout style;
+}
+
+.project-card.is-dragging,
+body.is-dragging-card .project-card:active {
+  z-index: 50;
+}
+
+/* Hero “CLICK TO DRAW !” — loops right → left until first stroke */
+@keyframes click-to-draw-in {
+  0% {
+    opacity: 0;
+    transform: translateX(1.4rem);
+  }
+  18% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  72% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-0.6rem);
+  }
+}
+
+.click-to-draw-hint {
+  opacity: 0;
+  animation: click-to-draw-in 2.8s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+  transition:
+    opacity 0.45s ease,
+    transform 0.45s ease;
+}
+
+/* Keep "!" same size as the label — Instrument Sans can render it like ":" */
+.click-to-draw-mark {
+  display: inline;
+  margin-left: 0.2em;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 1em;
+  font-weight: inherit;
+  font-style: normal;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+html[data-has-drawn] .click-to-draw-hint {
+  opacity: 0 !important;
+  animation: none;
+  transform: translateX(-0.6rem);
+  visibility: hidden;
+  transition:
+    opacity 0.45s ease,
+    transform 0.45s ease,
+    visibility 0s linear 0.45s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .click-to-draw-hint {
+    opacity: 1;
+    animation: none;
+    transform: none;
+  }
+
+  html[data-has-drawn] .click-to-draw-hint {
+    opacity: 0 !important;
+    visibility: hidden;
+  }
+}
+

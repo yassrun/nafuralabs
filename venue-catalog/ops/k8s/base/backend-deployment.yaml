@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: venue-catalog-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: venue-catalog-backend
+  template:
+    metadata:
+      labels:
+        app: venue-catalog-backend
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/role: "venue-catalog-backend"
+        vault.hashicorp.com/agent-inject-secret-app-db: "secret/data/nafura/staging/apps/venue-catalog/database"
+        vault.hashicorp.com/agent-inject-template-app-db: |
+          {{- with secret "secret/data/nafura/staging/apps/venue-catalog/database" -}}
+          export POSTGRES_DB="{{ .Data.data.name }}"
+          export POSTGRES_SCHEMA="{{ .Data.data.schema }}"
+          export POSTGRES_USER="{{ .Data.data.user }}"
+          export POSTGRES_PASSWORD="{{ .Data.data.pass }}"
+          {{- end }}
+        vault.hashicorp.com/agent-inject-secret-app-storage: "secret/data/nafura/staging/apps/venue-catalog/object-storage"
+        vault.hashicorp.com/agent-inject-template-app-storage: |
+          {{- with secret "secret/data/nafura/staging/apps/venue-catalog/object-storage" -}}
+          export DOCUMENTS_MINIO_ENDPOINT="{{ .Data.data.endpoint }}"
+          export DOCUMENTS_MINIO_BUCKET="{{ .Data.data.bucket }}"
+          export MINIO_ROOT_USER="{{ .Data.data.user }}"
+          export MINIO_ROOT_PASSWORD="{{ .Data.data.password }}"
+          {{- end }}
+        vault.hashicorp.com/agent-inject-secret-app-integrations: "secret/data/nafura/staging/apps/venue-catalog/integrations"
+        vault.hashicorp.com/agent-inject-template-app-integrations: |
+          {{- with secret "secret/data/nafura/staging/apps/venue-catalog/integrations" -}}
+          export GOOGLE_PLACES_API_KEY="{{ .Data.data.google_places_api_key }}"
+          {{- end }}
+    spec:
+      serviceAccountName: venue-catalog-backend
+      containers:
+        - name: venue-catalog-backend
+          image: venue-catalog-backend:staging
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -a
+              . /vault/secrets/app-db
+              . /vault/secrets/app-storage
+              . /vault/secrets/app-integrations
+              set +a
+              exec java -jar app.jar
+          ports:
+            - containerPort: 8085
+          env:
+            - name: SERVER_PORT
+              value: "8085"
+            - name: POSTGRES_HOST
+              value: postgres.nafura-infra.svc
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: REDIS_HOST
+              value: redis.nafura-infra.svc
+            - name: REDIS_PORT
+              value: "6379"
+            - name: DOCUMENTS_MINIO_BUCKET
+              value: venue-catalog-media
+            - name: VENUE_CATALOG_DEV_JWT_ENABLED
+              value: "false"
+            - name: KEYCLOAK_ISSUER_URI
+              value: http://iam.nafura.local/realms/iam-portal
+            - name: KEYCLOAK_JWK_SET_URI
+              value: http://keycloak.nafura-infra.svc:8080/realms/iam-portal/protocol/openid-connect/certs
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8085
+            initialDelaySeconds: 25
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8085
+            initialDelaySeconds: 50
+            periodSeconds: 20

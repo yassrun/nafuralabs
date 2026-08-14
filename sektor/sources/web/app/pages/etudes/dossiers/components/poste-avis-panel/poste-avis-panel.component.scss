@@ -1,0 +1,135 @@
+.avis {
+  display: grid;
+  gap: 0.65rem;
+  margin: 0.75rem 0;
+  padding: 0.75rem 0;
+  border-top: 1px solid var(--nf-color-border);
+}
+
+.avis--embedded {
+  margin: 0;
+  padding: 0;
+  border-top: 0;
+}
+
+.avis__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.avis--embedded .avis__head {
+  justify-content: flex-end;
+}
+
+.avis__head h4 {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.avis__erreur {
+  margin: 0;
+  padding: 0.5rem 0.65rem;
+  border-radius: 6px;
+  border: 1px solid var(--nf-color-danger-600, #dc2626);
+  font-size: 0.8rem;
+}
+
+.avis__etat,
+.avis__hint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--nf-color-text-secondary);
+}
+
+.avis__form,
+.avis__card {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid var(--nf-color-border);
+  border-radius: 8px;
+  background: var(--nf-color-bg-subtle, #f8fafc);
+}
+
+.avis__card--done {
+  opacity: 0.9;
+}
+
+.avis__niveaux {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.avis__niveau {
+  border: 1px solid var(--nf-color-border);
+  background: var(--nf-color-surface, #fff);
+  border-radius: 6px;
+  padding: 0.3rem 0.65rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.avis__niveau--active {
+  border-color: var(--nf-color-primary-600, #1b3fae);
+  font-weight: 600;
+}
+
+.avis__field {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+}
+
+.avis__field textarea,
+.avis__field input {
+  font: inherit;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--nf-color-border);
+  border-radius: 6px;
+}
+
+.avis__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.avis__pill {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  border: 1px solid var(--nf-color-border);
+}
+
+.avis__pill--open {
+  color: var(--nf-color-warning, #b45309);
+  border-color: color-mix(in srgb, var(--nf-color-warning, #b45309) 40%, transparent);
+}
+
+.avis__meta {
+  font-size: 0.75rem;
+  color: var(--nf-color-text-secondary);
+  margin-left: 0.35rem;
+}
+
+.avis__ecart,
+.avis__motif {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--nf-color-text-secondary);
+}
+
+.avis__hist {
+  font-size: 0.8rem;
+}
+
+.avis__hist summary {
+  cursor: pointer;
+  color: var(--nf-color-text-secondary);
+}

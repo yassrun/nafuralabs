@@ -1,0 +1,37 @@
+{
+  "type": "Feature",
+  "properties": {
+    "code": "ANFA_AIN_DIAB",
+    "label": "Anfa / Aïn Diab",
+    "cityCode": "casablanca",
+    "provenance": "NAFURA_CURATED",
+    "version": "MA-CASA-2026-02"
+  },
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [
+          -7.685,
+          33.575
+        ],
+        [
+          -7.655,
+          33.575
+        ],
+        [
+          -7.655,
+          33.6
+        ],
+        [
+          -7.685,
+          33.6
+        ],
+        [
+          -7.685,
+          33.575
+        ]
+      ]
+    ]
+  }
+}

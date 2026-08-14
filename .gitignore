@@ -17,10 +17,22 @@ dist/
 .angular/
 .next/
 
-# Env & secrets
+# Env & secrets — deny-by-default
 .env
 .env.*
 !.env.example
+*.env
+!*.env.example
+creds.env
+*_api_key.txt
+deepseek_api_key.txt
+gemini_api_key.txt
+
+# Canonical secrets dir (deny-by-default)
+nafura-platform/ops/secrets/*
+!nafura-platform/ops/secrets/README.md
+
+# Vault seed (legacy path until PLT-12)
 secrets/nafura.secrets
 secrets/*.local
 secrets/dev-staging-local.env

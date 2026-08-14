@@ -1,0 +1,357 @@
+<section class="layout">
+  <div class="main">
+    <header class="header">
+      <div>
+        <h1>Lieux catalogue</h1>
+        <p>
+          Liste des imports (ex. Maârif). Filtrez, ouvrez une fiche, approuvez.
+          <strong>{{ total() }}</strong> résultat(s) · page
+          <strong>{{ pageIndex() + 1 }}</strong>/<strong>{{ totalPages }}</strong>
+        </p>
+      </div>
+      <button mat-stroked-button type="button" (click)="importOpen.set(!importOpen())">
+        <mat-icon>{{ importOpen() ? 'expand_less' : 'add' }}</mat-icon>
+        {{ importOpen() ? 'Masquer import' : 'Nouvel import' }}
+      </button>
+    </header>
+
+    @if (importOpen()) {
+      <section class="card import">
+        <h2>Nouvel import Google Places</h2>
+        <form [formGroup]="importForm" class="import-grid" (ngSubmit)="startImport()">
+          <mat-form-field appearance="outline">
+            <mat-label>Mode</mat-label>
+            <mat-select formControlName="mode">
+              <mat-option value="NEARBY">NEARBY</mat-option>
+              <mat-option value="TEXT">TEXT</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          @if (importForm.value.mode === 'TEXT') {
+            <mat-form-field appearance="outline" class="span-2">
+              <mat-label>Requête</mat-label>
+              <input matInput formControlName="q" placeholder="rooftop casablanca" />
+            </mat-form-field>
+          } @else {
+            <mat-form-field appearance="outline">
+              <mat-label>Latitude</mat-label>
+              <input matInput type="number" formControlName="lat" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Longitude</mat-label>
+              <input matInput type="number" formControlName="lng" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Rayon (m)</mat-label>
+              <input matInput type="number" formControlName="radiusMeters" />
+            </mat-form-field>
+          }
+
+          <mat-form-field appearance="outline">
+            <mat-label>Ville</mat-label>
+            <mat-select formControlName="cityCode">
+              <mat-option value="CASABLANCA">CASABLANCA</mat-option>
+              <mat-option value="RABAT">RABAT</mat-option>
+              <mat-option value="MARRAKECH">MARRAKECH</mat-option>
+              <mat-option value="OTHER">OTHER</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Catégorie</mat-label>
+            <mat-select formControlName="primaryCategoryHint">
+              <mat-option value="SOCIAL_VENUE">SOCIAL_VENUE</mat-option>
+              <mat-option value="BEAUTY">BEAUTY</mat-option>
+              <mat-option value="OTHER">OTHER</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Max résultats</mat-label>
+            <input matInput type="number" formControlName="maxResults" />
+          </mat-form-field>
+
+          <div class="actions span-2">
+            <button mat-flat-button color="primary" type="submit">Lancer l'import</button>
+          </div>
+        </form>
+      </section>
+    }
+
+    <section class="card filters">
+      <div class="scope-row">
+        <mat-button-toggle-group
+          [value]="scope()"
+          (change)="setScope($event.value)"
+          aria-label="Périmètre liste"
+        >
+          <mat-button-toggle value="pending">À revoir</mat-button-toggle>
+          <mat-button-toggle value="approved">Approuvés</mat-button-toggle>
+          <mat-button-toggle value="all">Tous</mat-button-toggle>
+        </mat-button-toggle-group>
+
+        <button
+          mat-flat-button
+          color="primary"
+          type="button"
+          [disabled]="!selection.selected.length"
+          (click)="bulkApprove()"
+        >
+          Approuver ({{ selection.selected.length }})
+        </button>
+        <button
+          mat-stroked-button
+          type="button"
+          [disabled]="!selection.selected.length"
+          (click)="enrichSelected()"
+        >
+          Enrichir sélection
+        </button>
+        <button mat-stroked-button type="button" (click)="startCasaEnrichment()">
+          Backfill Casa (shadow)
+        </button>
+        <button
+          mat-stroked-button
+          type="button"
+          [disabled]="cleaningNames()"
+          (click)="normalizeNames()"
+        >
+          Nettoyer les noms
+        </button>
+      </div>
+
+      <form [formGroup]="filterForm" class="filter-row" (ngSubmit)="applyFilters()">
+        <mat-form-field appearance="outline">
+          <mat-label>Recherche nom</mat-label>
+          <input matInput formControlName="q" placeholder="McDonald, brunch…" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Ville</mat-label>
+          <mat-select formControlName="cityCode">
+            <mat-option value="">Toutes</mat-option>
+            <mat-option value="CASABLANCA">CASABLANCA</mat-option>
+            <mat-option value="RABAT">RABAT</mat-option>
+            <mat-option value="MARRAKECH">MARRAKECH</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Catégorie</mat-label>
+          <mat-select formControlName="category">
+            <mat-option value="">Toutes</mat-option>
+            <mat-option value="SOCIAL_VENUE">SOCIAL_VENUE</mat-option>
+            <mat-option value="BEAUTY">BEAUTY</mat-option>
+            <mat-option value="OTHER">OTHER</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Quartier</mat-label>
+          <mat-select formControlName="districtCode">
+            <mat-option value="">Tous</mat-option>
+            @for (d of districts(); track d.code) {
+              <mat-option [value]="d.code">{{ d.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Types venue</mat-label>
+          <mat-select formControlName="venueTypes" multiple>
+            @for (t of venueTypeOptions(); track t) {
+              <mat-option [value]="t">{{ t }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Offers / Experiences</mat-label>
+          <mat-select formControlName="activities" multiple>
+            @for (a of activityOptions(); track a) {
+              <mat-option [value]="a">{{ a }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Décision IA</mat-label>
+          <mat-select formControlName="aiDecision">
+            <mat-option value="">Toutes</mat-option>
+            <mat-option value="KEEP">KEEP</mat-option>
+            <mat-option value="REVIEW">REVIEW</mat-option>
+            <mat-option value="DROP_SUGGESTED">DROP_SUGGESTED</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Enrichissement</mat-label>
+          <mat-select formControlName="enrichmentStatus">
+            <mat-option value="">Tous</mat-option>
+            <mat-option value="NONE">NONE</mat-option>
+            <mat-option value="GEO_ONLY">GEO_ONLY</mat-option>
+            <mat-option value="ENRICHED">ENRICHED</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Score Layali min</mat-label>
+          <input matInput type="number" formControlName="minScore" placeholder="75" />
+        </mat-form-field>
+        <button mat-stroked-button type="submit">Filtrer</button>
+      </form>
+    </section>
+
+    @if (loadingPlaces()) {
+      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    }
+    @if (error()) {
+      <p class="error">{{ error() }}</p>
+    }
+
+    @if (!loadingPlaces() && !places().length) {
+      <div class="empty">
+        @if (scope() === 'pending') {
+          <p>Aucun lieu à revoir pour ces filtres.</p>
+          <p class="muted">Passez sur <em>Tous</em> ou <em>Approuvés</em>, ou lancez un import Maârif.</p>
+        } @else {
+          <p>Aucun lieu. Lancez un import NEARBY (Maârif : lat 33.586 / lng -7.632).</p>
+        }
+        <button mat-flat-button color="primary" type="button" (click)="importOpen.set(true)">
+          Nouvel import
+        </button>
+      </div>
+    } @else if (places().length) {
+      <div class="table-wrap card">
+        <table
+          mat-table
+          matSort
+          [dataSource]="places()"
+          class="places-table"
+          [matSortActive]="sortActive()"
+          [matSortDirection]="sortDirection()"
+          [matSortDisableClear]="true"
+          (matSortChange)="onSortChange($event)"
+        >
+          <ng-container matColumnDef="select">
+            <th mat-header-cell *matHeaderCellDef>
+              <mat-checkbox
+                [checked]="selection.hasValue() && selection.selected.length === places().length"
+                [indeterminate]="selection.hasValue() && selection.selected.length < places().length"
+                (change)="toggleAll(!!$event.checked)"
+              ></mat-checkbox>
+            </th>
+            <td mat-cell *matCellDef="let row">
+              <mat-checkbox
+                [checked]="selection.isSelected(row.id)"
+                (click)="$event.stopPropagation()"
+                (change)="$event.checked ? selection.select(row.id) : selection.deselect(row.id)"
+              ></mat-checkbox>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="photo">
+            <th mat-header-cell *matHeaderCellDef>Photo</th>
+            <td mat-cell *matCellDef="let row">
+              @if (row.primaryPhotoUrl) {
+                <img
+                  class="thumb"
+                  [src]="row.primaryPhotoUrl"
+                  [alt]="row.primaryPhotoAttribution || row.canonicalName"
+                  [title]="row.primaryPhotoAttribution || ''"
+                  loading="lazy"
+                />
+              } @else {
+                <span class="thumb thumb--empty" aria-hidden="true">
+                  <mat-icon>image_not_supported</mat-icon>
+                </span>
+              }
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header="canonicalName">Nom</th>
+            <td mat-cell *matCellDef="let row">
+              <a [routerLink]="['/catalog/places', row.id]" (click)="$event.stopPropagation()">
+                {{ row.canonicalName }}
+              </a>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header="status">Statut</th>
+            <td mat-cell *matCellDef="let row">
+              <span class="pill" [attr.data-status]="row.status">{{ row.status }}</span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="city">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header="cityCode">Ville</th>
+            <td mat-cell *matCellDef="let row">{{ row.cityCode }}</td>
+          </ng-container>
+          <ng-container matColumnDef="district">
+            <th mat-header-cell *matHeaderCellDef>Quartier</th>
+            <td mat-cell *matCellDef="let row">{{ districtOf(row) }}</td>
+          </ng-container>
+          <ng-container matColumnDef="venueType">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header="venueType">Type</th>
+            <td mat-cell *matCellDef="let row">{{ formatVenueTypes(row) }}</td>
+          </ng-container>
+          <ng-container matColumnDef="aiDecision">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header="aiDecision">IA</th>
+            <td mat-cell *matCellDef="let row">{{ row.aiDecision || '—' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="score">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header="layaliScore">Score</th>
+            <td mat-cell *matCellDef="let row">{{ row.layaliScore ?? '—' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="category">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header="primaryCategory">Catégorie</th>
+            <td mat-cell *matCellDef="let row">{{ row.primaryCategory }}</td>
+          </ng-container>
+          <ng-container matColumnDef="updated">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header="updatedAt">Mis à jour</th>
+            <td mat-cell *matCellDef="let row">{{ row.updatedAt | date: 'short' }}</td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr
+            mat-row
+            *matRowDef="let row; columns: displayedColumns"
+            class="clickable"
+            (click)="openPlace(row)"
+          ></tr>
+        </table>
+        <div class="pager">
+          <button
+            mat-stroked-button
+            type="button"
+            [disabled]="pageIndex() === 0 || loadingPlaces()"
+            (click)="goToPage(pageIndex() - 1)"
+          >
+            ← Précédent
+          </button>
+          <span class="pager-meta">
+            {{ rangeFrom }}–{{ rangeTo }} sur {{ total() }}
+          </span>
+          <button
+            mat-stroked-button
+            type="button"
+            [disabled]="pageIndex() >= totalPages - 1 || loadingPlaces()"
+            (click)="goToPage(pageIndex() + 1)"
+          >
+            Suivant →
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+
+  <aside class="jobs card">
+    <h2>Jobs récents</h2>
+    <p class="muted jobs-hint">Un job SUCCEEDED rafraîchit la liste automatiquement.</p>
+    @if (loadingJobs() && !jobs().length) {
+      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    }
+    <ul class="job-list">
+      @for (job of jobs(); track job.id) {
+        <li>
+          <button type="button" class="job-btn" (click)="openJob(job)">
+            <span class="job-type">{{ job.type }}</span>
+            <span class="job-status">{{ progressLabel(job) }}</span>
+            <span class="job-id">{{ job.id }}</span>
+          </button>
+        </li>
+      } @empty {
+        <li class="muted">Aucun job</li>
+      }
+    </ul>
+  </aside>
+</section>

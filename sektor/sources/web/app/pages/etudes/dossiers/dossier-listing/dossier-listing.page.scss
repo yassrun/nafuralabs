@@ -1,0 +1,14 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+/* S4 — Objet : largeur fixe + ellipsis */
+:host ::ng-deep .dossier-col-objet,
+:host ::ng-deep td.dossier-col-objet,
+:host ::ng-deep .dossier-col-objet .cell-content {
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

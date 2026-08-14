@@ -1,0 +1,106 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sektor-btp-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sektor-btp-backend
+  template:
+    metadata:
+      labels:
+        app: sektor-btp-backend
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/role: "sektor-btp-backend"
+        vault.hashicorp.com/agent-inject-secret-app-db: "secret/data/nafura/staging/apps/sektor-btp/database"
+        vault.hashicorp.com/agent-inject-template-app-db: |
+          {{- with secret "secret/data/nafura/staging/apps/sektor-btp/database" -}}
+          export POSTGRES_DB="{{ .Data.data.name }}"
+          export POSTGRES_SCHEMA="{{ .Data.data.schema }}"
+          export POSTGRES_USER="{{ .Data.data.user }}"
+          export POSTGRES_PASSWORD="{{ .Data.data.pass }}"
+          export NAFURA_AI_SQL_READ_ONLY_DATASOURCE_USERNAME="{{ .Data.data.ai_user }}"
+          export NAFURA_AI_SQL_READ_ONLY_DATASOURCE_PASSWORD="{{ .Data.data.ai_user_password }}"
+          {{- end }}
+        vault.hashicorp.com/agent-inject-secret-app-storage: "secret/data/nafura/staging/apps/sektor-btp/object-storage"
+        vault.hashicorp.com/agent-inject-template-app-storage: |
+          {{- with secret "secret/data/nafura/staging/apps/sektor-btp/object-storage" -}}
+          export DOCUMENTS_MINIO_ENDPOINT="{{ .Data.data.endpoint }}"
+          export DOCUMENTS_MINIO_BUCKET="{{ .Data.data.bucket }}"
+          export MINIO_ROOT_USER="{{ .Data.data.user }}"
+          export MINIO_ROOT_PASSWORD="{{ .Data.data.password }}"
+          {{- end }}
+        vault.hashicorp.com/agent-inject-secret-app-email-brevo: "secret/data/nafura/staging/platform/integrations/email/brevo"
+        vault.hashicorp.com/agent-inject-template-app-email-brevo: |
+          {{- with secret "secret/data/nafura/staging/platform/integrations/email/brevo" -}}
+          export BREVO_API_KEY="{{ .Data.data.api_key }}"
+          {{- end }}
+        vault.hashicorp.com/agent-inject-secret-app-ai-gemini: "secret/data/nafura/staging/platform/integrations/ai/gemini"
+        vault.hashicorp.com/agent-inject-template-app-ai-gemini: |
+          {{- with secret "secret/data/nafura/staging/platform/integrations/ai/gemini" -}}
+          export AI_GEMINI_API_KEY="{{ .Data.data.api_key }}"
+          {{- end }}
+        vault.hashicorp.com/agent-inject-secret-app-keycloak: "secret/data/nafura/staging/platform/iam/keycloak"
+        vault.hashicorp.com/agent-inject-template-app-keycloak: |
+          {{- with secret "secret/data/nafura/staging/platform/iam/keycloak" -}}
+          export KEYCLOAK_ADMIN_USERNAME="{{ .Data.data.admin_username }}"
+          export KEYCLOAK_ADMIN_PASSWORD="{{ .Data.data.admin_password }}"
+          {{- end }}
+    spec:
+      serviceAccountName: sektor-btp-backend
+      containers:
+        - name: sektor-btp-backend
+          image: sektor-btp-backend:staging
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -a
+              . /vault/secrets/app-db
+              . /vault/secrets/app-storage
+              . /vault/secrets/app-email-brevo
+              . /vault/secrets/app-ai-gemini
+              . /vault/secrets/app-keycloak
+              set +a
+              exec java -jar app.jar
+          ports:
+            - containerPort: 8082
+          env:
+            - name: POSTGRES_HOST
+              value: postgres.nafura-infra.svc
+            # Shared document renderer (headless Chromium), internal only.
+            - name: NAFURA_GOTENBERG_URL
+              value: http://gotenberg.nafura-infra.svc:3000
+            - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+              value: validate
+            - name: KEYCLOAK_ISSUER_URI
+              value: http://iam.nafura.local/realms/iam-portal
+            - name: KEYCLOAK_JWK_SET_URI
+              value: http://keycloak.nafura-infra.svc:8080/realms/iam-portal/protocol/openid-connect/certs
+            - name: APP_FRONTEND_BASE_URL
+              value: http://erp.nafura.local
+            - name: KEYCLOAK_ADMIN_URL
+              value: http://keycloak.nafura-infra.svc:8080
+            - name: NAFURA_ONBOARDING_DEV_SIGNUP
+              value: "false"
+            - name: NAFURA_ONBOARDING_SKIP_EMAIL_VERIFICATION
+              value: "false"
+            - name: NAFURA_ONBOARDING_KEYCLOAK_PROVISIONING
+              value: "true"
+            - name: EMAIL_PROVIDER
+              value: brevo
+            - name: AI_GEMINI_MODEL
+              value: gemini-2.5-flash
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8082
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8082
+            initialDelaySeconds: 45
+            periodSeconds: 20

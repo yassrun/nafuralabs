@@ -1,0 +1,117 @@
+@if (synthese(); as s) {
+  <header class="dsh">
+    <div class="dsh__top">
+      <div class="dsh__identity">
+        <div class="dsh__title-row">
+          <h1 class="dsh__titre">{{ s.numero }} — {{ s.objet }}</h1>
+          <div class="dsh__badges">
+            <span class="dsh__pill" [attr.data-variant]="statutVariant()">{{ statutLabel() }}</span>
+            <span class="dsh__pill dsh__pill--phase">{{ phaseLabel() }}</span>
+            @if (s.structureVerrouillee) {
+              <span class="dsh__pill dsh__pill--lock">Structure figée</span>
+            }
+            @if (clientMissing()) {
+              <span class="dsh__pill dsh__pill--warn">Client à renseigner</span>
+            } @else if (clientALier()) {
+              <span class="dsh__pill dsh__pill--warn">Client à lier au devis</span>
+            }
+          </div>
+        </div>
+        <div class="dsh__meta">
+          @if (s.clientId && s.clientNom) {
+            <a class="dsh__client-link" [routerLink]="['/ventes/clients', s.clientId]">
+              {{ s.clientNom }}
+            </a>
+          } @else if (s.clientNom) {
+            <span>{{ s.clientNom }}</span>
+          } @else {
+            <span class="dsh__client-missing">Client non renseigné</span>
+          }
+          @if (s.chargeEtudeNom || s.chargeEtudeUserId) {
+            <span class="dsh__sep" aria-hidden="true">·</span>
+            <span>Chargé d’étude {{ s.chargeEtudeNom || s.chargeEtudeUserId }}</span>
+          }
+          <span class="dsh__sep" aria-hidden="true">·</span>
+          <span>Rév. {{ s.bordereauRevision }}</span>
+          @if (s.updatedAt) {
+            <span class="dsh__sep" aria-hidden="true">·</span>
+            <span>Maj {{ s.updatedAt | date: 'short' }}</span>
+          }
+          @if (s.devisNumero) {
+            <span class="dsh__sep" aria-hidden="true">·</span>
+            <span>Devis {{ s.devisNumero }}</span>
+          }
+          @if (s.prochainApprobateurNom || s.prochainApprobateurRole) {
+            <span class="dsh__sep" aria-hidden="true">·</span>
+            <span>{{ s.prochainApprobateurNom || s.prochainApprobateurRole }}</span>
+          }
+        </div>
+      </div>
+
+      <div class="dsh__aside">
+        <div class="dsh__kpis">
+          <div class="dsh__kpi">
+            <span class="dsh__kpi-label">Total HT</span>
+            <span class="dsh__kpi-value">{{ s.totalHt | mad }}</span>
+          </div>
+          <div class="dsh__kpi">
+            <span class="dsh__kpi-label">Postes</span>
+            <span class="dsh__kpi-value">{{ s.nombreArticles }}</span>
+          </div>
+          <div
+            class="dsh__kpi"
+            [class.dsh__kpi--warn]="anomaliesAffichees() > 0"
+            [class.dsh__kpi--clickable]="anomaliesAffichees() > 0"
+            [attr.role]="anomaliesAffichees() > 0 ? 'button' : null"
+            [attr.tabindex]="anomaliesAffichees() > 0 ? 0 : null"
+            [attr.title]="anomaliesAffichees() > 0 ? 'Voir les anomalies de l’étape' : null"
+            (click)="anomaliesAffichees() > 0 && focusAnomalies.emit()"
+            (keydown.enter)="anomaliesAffichees() > 0 && focusAnomalies.emit()"
+          >
+            <span class="dsh__kpi-label">Anomalies étape</span>
+            <span class="dsh__kpi-value">{{ anomaliesAffichees() }}</span>
+          </div>
+        </div>
+
+        @if (showPrintBordereau() || showPrintSynthese() || showReouvrir() || showRefuser() || showMarquerPerdu() || showCta()) {
+          <div class="dsh__actions">
+            @if (showPrintBordereau()) {
+              <button type="button" class="dsh__btn dsh__btn--ghost" (click)="emitAction('IMPRIMER_BORDEREAU')">
+                Imprimer bordereau
+              </button>
+            }
+            @if (showPrintSynthese()) {
+              <button type="button" class="dsh__btn dsh__btn--ghost" (click)="emitAction('IMPRIMER_SYNTHESE')">
+                Imprimer synthèse
+              </button>
+            }
+            @if (showReouvrir()) {
+              <button type="button" class="dsh__btn dsh__btn--ghost" (click)="emitAction('REOUVRIR_BORDEREAU')">
+                Réouvrir le bordereau
+              </button>
+            }
+            @if (showRefuser()) {
+              <button type="button" class="dsh__btn dsh__btn--ghost" (click)="emitAction('REFUSER')">
+                Refuser
+              </button>
+            }
+            @if (showMarquerPerdu()) {
+              <button type="button" class="dsh__btn dsh__btn--ghost" (click)="emitAction('MARQUER_PERDU')">
+                Marquer perdu
+              </button>
+            }
+            @if (showCta()) {
+              <button type="button" class="dsh__btn dsh__btn--primary" (click)="emitAction()">
+                {{ ctaLabel() }}
+              </button>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    @if (s.motifRefus) {
+      <p class="dsh__refus" role="status">Refus : {{ s.motifRefus }}</p>
+    }
+  </header>
+}

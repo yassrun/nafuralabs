@@ -1,0 +1,75 @@
+<nf-page-shell>
+  <nf-page-header [config]="headerConfig"></nf-page-header>
+
+  <section class="comparateur">
+    <div class="comparateur__filters">
+      <label class="field">
+        <span>Article (UUID)</span>
+        <input
+          type="text"
+          [ngModel]="articleId()"
+          (ngModelChange)="articleId.set($event)"
+          placeholder="UUID item tenant"
+        />
+      </label>
+      <label class="field">
+        <span>Date de référence</span>
+        <input type="date" [ngModel]="dateRef()" (ngModelChange)="dateRef.set($event)" />
+      </label>
+      <nf-button variant="primary" [loading]="chargement()" (clicked)="comparer()">
+        Comparer
+      </nf-button>
+      <a routerLink="/achats/fournisseurs" class="link">Catalogue fournisseurs</a>
+    </div>
+
+    @if (erreur(); as msg) {
+      <p class="comparateur__erreur" role="alert">{{ msg }}</p>
+    }
+
+    @if (chargement()) {
+      <p class="comparateur__etat">Chargement…</p>
+    } @else if (searched() && offres().length === 0 && !erreur()) {
+      <div class="comparateur__vide">
+        <p>Aucune ligne catalogue active pour cet article à la date.</p>
+        <a routerLink="/achats/fournisseurs" class="link">Ouvrir catalogue fournisseurs</a>
+      </div>
+    } @else if (offres().length > 0) {
+      <p class="comparateur__hint">
+        Tri par prix comparable croissant · les deux prix toujours affichés · périmé visible
+      </p>
+      <table class="comparateur__table">
+        <thead>
+          <tr>
+            <th>Fournisseur</th>
+            <th>Conditionnement</th>
+            <th class="num">Prix commercial</th>
+            <th class="num">Prix comparable</th>
+            <th class="num">Délai</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of offres(); track row.ligneId; let i = $index) {
+            <tr [class.comparateur__row--best]="i === 0 && row.prixNormalise != null" [class.comparateur__row--perime]="row.perime">
+              <td>
+                <div class="comparateur__fourn">
+                  <strong>{{ row.designation }}</strong>
+                  <span class="meta">{{ row.fournisseurId }}</span>
+                  @if (i === 0 && row.prixNormalise != null) {
+                    <span class="pill">meilleur comparable</span>
+                  }
+                  @if (row.perime) {
+                    <span class="pill pill--warn">périmé</span>
+                  }
+                </div>
+              </td>
+              <td>{{ row.conditionnementLibelle || '—' }}</td>
+              <td class="num">{{ row.prixCommercialHt | mad }}</td>
+              <td class="num">{{ comparableLabel(row) }}</td>
+              <td class="num">{{ row.delaiJours != null ? row.delaiJours + ' j' : '—' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </section>
+</nf-page-shell>

@@ -1,0 +1,53 @@
+<nf-page-shell scroll>
+  <nf-page-header [config]="headerConfig"></nf-page-header>
+  <nf-entity-detail
+    #detail
+    [config]="config"
+    [mode]="mode()"
+    [item]="item()"
+    [lookups]="lookups()"
+    [loading]="isLoading()"
+    [saving]="isSaving()"
+    (action)="onAction($event)">
+  </nf-entity-detail>
+
+  @if (mode() !== 'create') {
+    <section class="uom-convert" aria-labelledby="uom-convert-title">
+      <h3 id="uom-convert-title">{{ 'inventory.configuration.uom.convert.title' | translate }}</h3>
+      <p class="uom-convert__hint">{{ 'inventory.configuration.uom.convert.hint' | translate }}</p>
+      <div class="uom-convert__row">
+        <div class="uom-convert__field">
+          <label for="uom-from">{{ 'inventory.configuration.uom.convert.from' | translate }}</label>
+          <select id="uom-from" [(ngModel)]="fromUomId" name="fromUomId">
+            <option value="">—</option>
+            @for (u of convertOptions(); track u.id) {
+              <option [value]="u.id">{{ u.code }} — {{ u.name }}</option>
+            }
+          </select>
+        </div>
+        <div class="uom-convert__field">
+          <label for="uom-to">{{ 'inventory.configuration.uom.convert.to' | translate }}</label>
+          <select id="uom-to" [(ngModel)]="toUomId" name="toUomId">
+            <option value="">—</option>
+            @for (u of convertOptions(); track u.id) {
+              <option [value]="u.id">{{ u.code }} — {{ u.name }}</option>
+            }
+          </select>
+        </div>
+        <div class="uom-convert__field">
+          <label for="uom-qty">{{ 'inventory.configuration.uom.convert.quantity' | translate }}</label>
+          <input id="uom-qty" type="number" [(ngModel)]="quantity" name="quantity" min="0" step="any" />
+        </div>
+        <nf-button type="button" variant="secondary" [disabled]="converting()" (clicked)="runConversion()">
+          {{ 'inventory.configuration.uom.convert.action' | translate }}
+        </nf-button>
+      </div>
+      @if (convertResult()) {
+        <p class="uom-convert__result uom-convert__result--ok">{{ convertResult() }}</p>
+      }
+      @if (convertError()) {
+        <p class="uom-convert__result uom-convert__result--err">{{ convertError() }}</p>
+      }
+    </section>
+  }
+</nf-page-shell>

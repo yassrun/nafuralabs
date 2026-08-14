@@ -1,0 +1,22 @@
+{
+  "type": "Feature",
+  "properties": {
+    "code": "MEDINA",
+    "label": "Médina / Centre-ville",
+    "cityCode": "casablanca",
+    "provenance": "NAFURA_CURATED",
+    "version": "MA-CASA-2026-02"
+  },
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [-7.625, 33.5975],
+        [-7.608, 33.5975],
+        [-7.608, 33.612],
+        [-7.625, 33.612],
+        [-7.625, 33.5975]
+      ]
+    ]
+  }
+}

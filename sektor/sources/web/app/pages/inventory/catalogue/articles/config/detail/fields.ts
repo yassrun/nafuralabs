@@ -1,0 +1,183 @@
+import type { TranslateService } from '@ngx-translate/core';
+
+import type { DetailFieldConfig } from '@lib/anatomy/types';
+import { NATURES, USAGE_LOTS } from '@app/inventory/models';
+import type { Article } from '../../models';
+
+export function buildArticleFields(t: TranslateService): DetailFieldConfig<Article>[] {
+  const tr = (k: string) => t.instant(k);
+  return [
+    {
+      key: 'code',
+      label: tr('inventory.catalogue.article.fields.code'),
+      type: 'text',
+      required: true,
+      readonlyOnEdit: true,
+      width: 'md',
+      validators: [{ type: 'maxLength', value: 20 }],
+    },
+    {
+      key: 'name',
+      label: tr('inventory.catalogue.article.fields.name'),
+      type: 'text',
+      required: true,
+      width: 'lg',
+      validators: [{ type: 'maxLength', value: 200 }],
+    },
+    {
+      key: 'description',
+      label: tr('inventory.catalogue.article.fields.description'),
+      type: 'textarea',
+      width: 'full',
+    },
+    {
+      key: 'familleId',
+      label: tr('inventory.catalogue.article.fields.familleId'),
+      type: 'select',
+      lookupKey: 'familleArticle',
+      required: true,
+      width: 'md',
+    },
+    {
+      key: 'lotsUsage',
+      label: tr('inventory.catalogue.article.fields.lotsUsage'),
+      type: 'multi-select',
+      width: 'lg',
+      options: USAGE_LOTS.map((code) => ({
+        value: code,
+        label: tr(`inventory.enums.usageLot.${code}`),
+      })),
+    },
+    {
+      key: 'nature',
+      label: tr('inventory.catalogue.article.fields.nature'),
+      type: 'select',
+      required: true,
+      width: 'md',
+      lookupKey: 'articleNatures',
+      lookupValueField: 'key',
+      lookupDisplayField: 'value',
+      options: NATURES.map((code) => ({
+        value: code,
+        label: tr(`inventory.enums.nature.${code}`),
+      })),
+    },
+    {
+      key: 'uomId',
+      label: tr('inventory.catalogue.article.fields.uomId'),
+      type: 'select',
+      lookupKey: 'unitOfMeasure',
+      required: true,
+      width: 'md',
+    },
+    {
+      key: 'prixUnitaire',
+      label: tr('inventory.catalogue.article.fields.prixUnitaire'),
+      type: 'money-ma',
+      width: 'md',
+      validators: [{ type: 'min', value: 0 }],
+    },
+    {
+      key: 'prixAchatDernier',
+      label: tr('inventory.catalogue.article.fields.prixAchatDernier'),
+      type: 'money-ma',
+      width: 'md',
+      validators: [{ type: 'min', value: 0 }],
+    },
+    {
+      key: 'pmp',
+      label: tr('inventory.catalogue.article.fields.pmp'),
+      type: 'money-ma',
+      width: 'md',
+      validators: [{ type: 'min', value: 0 }],
+      hint: tr('inventory.catalogue.article.fields.pmpHint'),
+    },
+    {
+      key: 'delaiReapproJours',
+      label: tr('inventory.catalogue.article.fields.delaiReapproJours'),
+      type: 'number',
+      width: 'sm',
+      validators: [{ type: 'min', value: 0 }],
+    },
+    {
+      key: 'uomSecondaireId',
+      label: tr('inventory.catalogue.article.fields.uomSecondaireId'),
+      type: 'select',
+      lookupKey: 'unitOfMeasure',
+      width: 'md',
+      clearable: true,
+    },
+    {
+      key: 'conversionFactor',
+      label: tr('inventory.catalogue.article.fields.conversionFactor'),
+      type: 'number',
+      width: 'sm',
+      hint: tr('inventory.catalogue.article.fields.conversionFactorHint'),
+      validators: [{ type: 'min', value: 0 }],
+    },
+    {
+      key: 'devise',
+      label: tr('inventory.catalogue.article.fields.devise'),
+      type: 'select',
+      width: 'sm',
+      defaultValue: 'MAD',
+      options: [
+        { value: 'MAD', label: tr('inventory.enums.devise.MAD') },
+        { value: 'EUR', label: tr('inventory.enums.devise.EUR') },
+        { value: 'USD', label: tr('inventory.enums.devise.USD') },
+      ],
+    },
+    {
+      key: 'stockMin',
+      label: tr('inventory.catalogue.article.fields.stockMin'),
+      type: 'number',
+      width: 'md',
+      validators: [{ type: 'min', value: 0 }],
+    },
+    {
+      key: 'stockMax',
+      label: tr('inventory.catalogue.article.fields.stockMax'),
+      type: 'number',
+      width: 'md',
+      validators: [{ type: 'min', value: 0 }],
+    },
+    {
+      key: 'posteBudgetId',
+      label: tr('inventory.catalogue.article.fields.posteBudgetId'),
+      type: 'select',
+      width: 'md',
+      clearable: true,
+      hint: tr('inventory.catalogue.article.fields.posteBudgetHint'),
+      options: [
+        { value: 'MATERIAUX', label: tr('inventory.enums.posteBudget.MATERIAUX') },
+        { value: 'MO', label: tr('inventory.enums.posteBudget.MO') },
+        { value: 'SOUS_TRAITANCE', label: tr('inventory.enums.posteBudget.SOUS_TRAITANCE') },
+        { value: 'LOCATION_MATERIEL', label: tr('inventory.enums.posteBudget.LOCATION_MATERIEL') },
+        { value: 'CARBURANT', label: tr('inventory.enums.posteBudget.CARBURANT') },
+        { value: 'FRAIS_GENERAUX', label: tr('inventory.enums.posteBudget.FRAIS_GENERAUX') },
+        { value: 'IMPREVUS', label: tr('inventory.enums.posteBudget.IMPREVUS') },
+      ],
+    },
+    {
+      key: 'isPerissable',
+      label: tr('inventory.catalogue.article.fields.isPerissable'),
+      type: 'toggle',
+      width: 'sm',
+      defaultValue: false,
+    },
+    {
+      key: 'isSerialise',
+      label: tr('inventory.catalogue.article.fields.isSerialise'),
+      type: 'toggle',
+      width: 'sm',
+      defaultValue: false,
+    },
+    {
+      key: 'isActive',
+      label: tr('inventory.catalogue.article.fields.isActive'),
+      type: 'toggle',
+      width: 'sm',
+      defaultValue: true,
+    },
+  ];
+}

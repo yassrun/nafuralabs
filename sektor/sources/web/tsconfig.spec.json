@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/spec",
+    "types": ["jasmine"]
+  },
+  "include": [
+    "src/**/*.spec.ts",
+    "src/**/*.d.ts",
+    "app/**/*.spec.ts",
+    "../../../nafura-platform/sources/web/features/administration/templates/**/*.spec.ts"
+  ]
+}
