@@ -1,0 +1,8 @@
+import type { ListingRouteConfig } from '@platform/lib/anatomy/types';
+import type { TauxChange } from '@app/finance/models';
+
+export const ROUTES: ListingRouteConfig<TauxChange> = {
+  detail: (item) => ['/finance/taux-change', item.id],
+  create: ['/finance/taux-change/new'],
+  list: ['/finance/taux-change'],
+};

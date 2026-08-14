@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
 
-import { FeatureApiService } from '@lib/anatomy';
+import { FeatureApiService } from '@platform/lib/anatomy';
 
 import {
   type ApiReglement,

@@ -14,5 +14,13 @@
     "**/*.spec.ts",
     "tests/**/*.ts",
     "playwright.config.ts"
-  ]
+  ],
+  "angularCompilerOptions": {
+    "extendedDiagnostics": {
+      "checks": {
+        "nullishCoalescingNotNullable": "suppress",
+        "optionalChainNotNullable": "suppress"
+      }
+    }
+  }
 }

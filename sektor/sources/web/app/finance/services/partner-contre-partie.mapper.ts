@@ -1,5 +1,5 @@
 import type { ContrePartie } from '../models';
-import type { Partner } from '@app/shared/services/partners-api.service';
+import type { Partner } from '@app/socle/shared/services/partners-api.service';
 
 export function partnerToContrePartie(
   partner: Partner,

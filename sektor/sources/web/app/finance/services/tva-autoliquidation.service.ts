@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 
-import { FiscalSettingsService } from '../../shell/fiscal-settings.service';
+import { FiscalSettingsService } from '../../socle/shell/fiscal-settings.service';
 
 export type TvaFacturationMode = 'NORMAL' | 'AUTOLIQUIDATION';
 

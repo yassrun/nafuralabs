@@ -17,22 +17,26 @@
     "importHelpers": true,
     "target": "ES2022",
     "module": "ES2022",
-    "lib": ["ES2022", "dom"],
     "baseUrl": ".",
+    "ignoreDeprecations": "6.0",
     "paths": {
-      // Bibliothèques partagées — la plateforme n'importe JAMAIS l'application.
-      // Garde-fou ESLint : voir .eslintrc.json.
+      // Sektor → @platform/* . @core/@lib/@features/@services : pont pour le
+      // compilation unit Angular qui charge encore nafura-platform (hors périmètre).
+      "@platform/*": ["../../../nafura-platform/sources/web/*"],
       "@core/*": ["../../../nafura-platform/sources/web/core/*"],
       "@core/security": ["../../../nafura-platform/sources/web/core/security/index.ts"],
       "@lib/*": ["../../../nafura-platform/sources/web/lib/*"],
-      "@platform/*": ["../../../nafura-platform/sources/web/*"],
       "@features/*": ["../../../nafura-platform/sources/web/features/*"],
       "@services/*": ["../../../nafura-platform/sources/web/features/*"],
 
       // Code Sektor.
       "@app/*": ["./app/*"],
 
-      "@env": ["./src/environments/environment"]
+      "@env": ["./src/environments/environment"],
+
+      // Pin Angular / i18n sur la copie Sektor (évite Signal NG19 vs NG20).
+      "@angular/*": ["./node_modules/@angular/*"],
+      "@ngx-translate/*": ["./node_modules/@ngx-translate/*"]
     }
   },
   "angularCompilerOptions": {

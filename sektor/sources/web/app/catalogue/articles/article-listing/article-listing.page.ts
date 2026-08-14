@@ -1,0 +1,53 @@
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
+
+import {
+  ConfigDrivenListingPage,
+  ConfigDrivenListingPageImports,
+  ConfigDrivenListingPageStyles,
+} from '@platform/lib/anatomy';
+import type { ListingActionEvent } from '@platform/lib/anatomy/types';
+import {
+  SmartImportTriggerComponent,
+  type ReviewedExtraction,
+} from '@platform/features/documents/smart-import';
+import {
+  ARTICLE_IMPORT_DEFINITION,
+  ArticleImportService,
+} from '@app/socle/shared/smart-import/handlers/article-import.handler';
+
+import { ArticlesFacade } from '../services';
+import type { ArticleListItem } from '../models';
+import { buildArticleListingConfig } from '../config';
+
+@Component({
+  selector: 'app-article-listing',
+  standalone: true,
+  imports: [SmartImportTriggerComponent, ...ConfigDrivenListingPageImports],
+  templateUrl: './article-listing.page.html',
+  styleUrls: ['./article-listing.page.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styles: [ConfigDrivenListingPageStyles],
+})
+export class ArticleListingPage extends ConfigDrivenListingPage<ArticleListItem> {
+  readonly facade = inject(ArticlesFacade);
+  private readonly translate = inject(TranslateService);
+  private readonly importer = inject(ArticleImportService);
+  readonly importDefinition = ARTICLE_IMPORT_DEFINITION;
+  readonly config = buildArticleListingConfig(this.translate);
+  readonly headerTitle = this.translate.instant('inventory.catalogue.article.headerTitle');
+
+  async onSmartImportComplete(result: ReviewedExtraction): Promise<void> {
+    await this.importer.import(result.data);
+    this.listingComponent?.refresh();
+  }
+
+  protected override async handleCustomAction(
+    event: ListingActionEvent<ArticleListItem>
+  ): Promise<void> {
+    switch (event.actionId) {
+      default:
+        console.log('Unhandled listing action:', event.actionId, event);
+    }
+  }
+}

@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 
-import { FfApiService } from '@app/pages/achats/factures-fournisseur/services/ff-api.service';
-import { FactureApiService } from '@app/pages/ventes/factures/services/facture-api.service';
+import { FfApiService } from '@app/achats/factures-fournisseur/services/ff-api.service';
+import { FactureApiService } from '@app/ventes/factures/services/facture-api.service';
 import type { FactureFournisseur } from '@app/finance/models';
 import type { FactureClient } from '@app/ventes/models';
 

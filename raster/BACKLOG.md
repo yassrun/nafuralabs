@@ -7,22 +7,18 @@
 > Regen : `node raster/regen.mjs` / `node raster/t.mjs index`.
 > Inbox : `raster/inbox.md`.
 
-## nafura-platform
-
-- `demenagement` lot
-  - ✓ `PLT-32` tech — Racine sans Gradle ni npm workspaces
-  - ✓ `PLT-33` tech — Makefile dans nafura-platform/ops
-  - ✓ `PLT-34` tech — Fusionner README.md dans NAFURALABS.md
-  - ✓ `PLT-35` tech — Sortir docs/ du rôle de canon
-  - ✓ `PLT-36` tech — Supprimer le mock JWT project-fountain
-  - ✓ `PLT-37` tech — Figer l'intérieur d'un projet : sources/
-  - ✓ `PLT-38` tech — Aligner les projets sur sources/
-
 ## sektor
 
-- `demenagement` lot
-  - ✓ `SEKTOR-82` tech — Renommer le projet Angular project-fountain →…
+- `monter-angular-22` lot
+  - ✓ `SEKTOR-97` tech — Angular 21 → 22
+- `plier-archi` lot
+  - ✓ `etudes-catalogue` sous-lot
+    - ✓ `SEKTOR-100` tech — Études consomme catalogue.api seulement
+    - ✓ `SEKTOR-101` tech — Garde : socle sans BC, Études hors item.*
+    - ✓ `SEKTOR-99` tech — Catalogue publie api lookup + snapshot
+  - ✓ `socle` sous-lot
+    - ✓ `SEKTOR-98` tech — Socle compile sans jars BC
 
 ---
 
-**8 live · 2 projets**
+**5 live · 1 projets**

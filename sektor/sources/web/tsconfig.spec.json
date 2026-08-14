@@ -9,5 +9,13 @@
     "src/**/*.d.ts",
     "app/**/*.spec.ts",
     "../../../nafura-platform/sources/web/features/administration/templates/**/*.spec.ts"
-  ]
+  ],
+  "angularCompilerOptions": {
+    "extendedDiagnostics": {
+      "checks": {
+        "nullishCoalescingNotNullable": "suppress",
+        "optionalChainNotNullable": "suppress"
+      }
+    }
+  }
 }

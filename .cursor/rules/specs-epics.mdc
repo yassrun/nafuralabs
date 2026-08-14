@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Où écrire quoi
 
-Canon : `PACT_BLUEPRINT.md` · `RASTER_BLUEPRINT.md` · `raster/AGENTS.md` · `OPS_BLUEPRINT.md`.
+Canon : `PACT_BLUEPRINT.md` · `RASTER_BLUEPRINT.md` · `raster/AGENTS.md` · `OPS_BLUEPRINT.md` · `ARCHI_BLUEPRINT.md`.
 **Ne recopie pas ces règles — applique-les.**
 
 ## Deux verbes

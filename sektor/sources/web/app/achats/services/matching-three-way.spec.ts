@@ -1,7 +1,7 @@
 import { computeMatchingThreeWay, DEFAULT_MATCHING_TOLERANCE } from './matching-three-way';
 import type { BonCommande } from '../models';
 import type { FactureFournisseur } from '../../finance/models';
-import type { InventoryTx } from '../../inventory/models';
+import type { InventoryTx } from '../../catalogue/models';
 
 describe('computeMatchingThreeWay', () => {
   const bc: BonCommande = {

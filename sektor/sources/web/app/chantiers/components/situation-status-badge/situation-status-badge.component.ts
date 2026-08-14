@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
 import type { SituationStatus } from '../../models';
@@ -24,7 +24,7 @@ const STATUS_VARIANT: Record<SituationStatus, 'default' | 'success' | 'warning' 
 @Component({
   selector: 'app-situation-status-badge',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <span class="ssb" [attr.data-variant]="variant()">

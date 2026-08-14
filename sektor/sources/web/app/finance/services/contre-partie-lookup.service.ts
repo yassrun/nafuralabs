@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 
-import { ErpLookupService } from '../../shared/services/erp-lookup.service';
+import { ErpLookupService } from '../../socle/shared/services/erp-lookup.service';
 import type { ContrePartie } from '../models';
 import { partnerToContrePartie } from './partner-contre-partie.mapper';
 

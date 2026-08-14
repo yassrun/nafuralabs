@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { ChangeDetectionStrategy, Component, computed, inject, input, LOCALE_ID } from '@angular/core';
 
 import type { RetenueGarantie } from '../../models';
@@ -9,7 +9,7 @@ const ONE_DAY = 1000 * 60 * 60 * 24;
 @Component({
   selector: 'app-retenue-summary-card',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <article class="rsc">

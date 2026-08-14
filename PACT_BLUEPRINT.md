@@ -2,6 +2,7 @@
 
 **Statut :** figé (2026-08-13)  
 **Pact** = comment on **spécifie et change** un logiciel. Vit **seul**. Raster peut s’y brancher : [`RASTER_BLUEPRINT.md`](RASTER_BLUEPRINT.md).  
+Code (packages, APIs, dépendances) : [`ARCHI_BLUEPRINT.md`](ARCHI_BLUEPRINT.md).  
 Spec longue : [`FRAMEWORK_DEVELOPPEMENT_AGENTIQUE_SPEC_DRIVEN_V1.md`](FRAMEWORK_DEVELOPPEMENT_AGENTIQUE_SPEC_DRIVEN_V1.md).
 
 ---
@@ -25,7 +26,7 @@ App (CADRE) → Socle + BC + BC → Change (CH)
 **CADRE = délimiter · SPEC = être · Change = devenir · Canvas = flux.**  
 Git = historique. Pas de n° de version dans la SPEC.
 
-**Hors Pact :** un *module* (Gradle, package) est du **code**. Ce n’est pas un BC, pas un change.
+**Hors Pact :** un *module* (Gradle, package) est du **code**. Ce n’est pas un BC, pas un change. Forme du code : [`ARCHI_BLUEPRINT.md`](ARCHI_BLUEPRINT.md).
 
 Dossier : **`<projet>/pact/`** — seulement si **app ou site**.  
 Ce projet a aussi **`ops/`** — [`OPS_BLUEPRINT.md`](OPS_BLUEPRINT.md).

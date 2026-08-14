@@ -1,5 +1,5 @@
-import { CommonModule } from '@angular/common';
-import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
+
+import { MadCurrencyPipe } from '@platform/lib/anatomy/pipes/mad-currency.pipe';
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
 import type { FactureClient } from '../../models';
@@ -16,7 +16,7 @@ import type { FactureClient } from '../../models';
 @Component({
   selector: 'app-facture-print',
   standalone: true,
-  imports: [CommonModule, MadCurrencyPipe],
+  imports: [MadCurrencyPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <article class="fp" data-print-area="facture">

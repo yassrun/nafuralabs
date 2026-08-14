@@ -1,7 +1,20 @@
 # INBOX
 
 <!-- Capture globale Raster — task draft : une ligne = description, @tag optionnel, pas d'ID. -->
-<!-- Promote → <projet>/raster-src/lots/<lot>/<sous-lot?>/tasks/ -->
+- SEKTOR-100 : etudes/build.gradle garde `project(':sektor:achats|chantiers|marches')` — drop hors slice Études↔Catalogue @tech
+- PLT-33 (`done-me`) blocked_by `PLT-32` id inconnu — `raster/t.mjs check` rouge hors Sektor @tech
+- venue-catalog web encore Angular 19 après SEKTOR-94…97 (platform peers 22) — monter 19→22 @tech
+- SEKTOR-95/97 : @storybook/angular 8 peer `<20` — monter Storybook 9 ou laisser `--legacy-peer-deps` @tech
+- SEKTOR-95/97 : @zxing/ngx-scanner encore ^19 sous Angular 22 @tech
+- SEKTOR-96/97 : NG21+ Signal unique symbol — 2 copies @angular incompatibles. Junction locale `nafura-platform/sources/web/node_modules/@angular` → Sektor. `npm i` platform **suit** la junction et casse le CLI Sektor — recréer la junction seulement après les installs. @tech
+- SEKTOR-97 : lucide-angular peer `13.x - 21.x` sous Angular 22 — `--legacy-peer-deps` @tech
+- SEKTOR-97 : Angular CLI 22 exige Node ≥ 22.22.3 (machine passée 22.15 → 22.23.2 via winget) @tech
+- SEKTOR-86 : tsconfig garde @core/@lib/@features/@services — platform anatomy les importe encore (drop = rewrite platform, hors lot) @tech
+- SEKTOR-85 / aligner-arbre : catalogue/configuration — 4 dossiers uom encore dupliqués (uom, unit-of-measures, uo-mcategories, uom-categories) — fusionner plus tard @tech
+- SEKTOR-92 : clash materiel — fiche dans catalogue/materiel, GMAO dans catalogue/materiel-parc — trancher un nom unique plus tard @tech
+- SEKTOR-89 : etudes/tmp/etudes-cp (142 jars classpath) étaient trackés ; git rm pour débloquer git mv etudes @tech
+- SEKTOR-88 : changelog SQL `app/src/main/resources/db/changelog/data/v1.1/002_l4_etude_permissions.sql` encore dans app/ (hors move Java etudes) @tech
+- SEKTOR-87 : `ErpApplication` ne scanne toujours pas `ma.nafura.sektor` (préexistant) @tech
 - Rotationner creds.env + deepseek_api_key.txt — poussés sur 7 branches GitHub, valides ou non à vérifier @physical
 - SEKTOR-81 : `cd sektor && ./gradlew build` compile + substitution VERT ; tests unitaires item/approbations/catalogue/etudes rouges (mockito, assertions, UUID `0000000000v1`) — jamais joués au lot 0 (OOM). Hors étapes. @bug
 - Après PLT-12, chemins `secrets/` encore cités : docs/AGENTS.md · docs/README.md · nafura-platform/ops/dev-staging-local.sh (ENV_FILE + nafura.secrets) · nafura-platform/ops/scripts/vault-seed-from-local.sh (défaut) · .cursor/rules/cursor-qa-browser.mdc · sektor/README.md · platform/backend/features/collaboration/notification/README.md @tech

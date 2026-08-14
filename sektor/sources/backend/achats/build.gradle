@@ -1,0 +1,16 @@
+plugins {
+    id 'java-library'
+}
+
+dependencies {
+    implementation project(':sektor:catalogue')
+    implementation project(':sektor:finance')
+    implementation 'ma.nafuralabs:framework:0.1.0-SNAPSHOT'
+    implementation 'ma.nafuralabs:authorization:0.1.0-SNAPSHOT'
+    implementation 'ma.nafuralabs:ai-agent-api:0.1.0-SNAPSHOT'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.postgresql:postgresql'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}

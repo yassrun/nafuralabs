@@ -1,8 +1,8 @@
-import { CommonModule } from '@angular/common';
+
 import { ChangeDetectionStrategy, Component, computed, inject, input, LOCALE_ID } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 
-import { MOUVEMENT_TRESORERIE_TYPE_KEYS } from '@app/shell/i18n-labels';
+import { MOUVEMENT_TRESORERIE_TYPE_KEYS } from '@app/socle/shell/i18n-labels';
 import type { MouvementTresorerie, MouvementTresorerieType } from '../../models';
 
 const TYPE_VARIANT: Record<MouvementTresorerieType, string> = {
@@ -19,7 +19,7 @@ const TYPE_VARIANT: Record<MouvementTresorerieType, string> = {
 @Component({
   selector: 'app-mouvement-row',
   standalone: true,
-  imports: [CommonModule, TranslateModule],
+  imports: [TranslateModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <tr class="mvr">

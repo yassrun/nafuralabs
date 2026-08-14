@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 
-import { FiscalSettingsService, FISCAL_SETTINGS_STORAGE_KEY } from '../../shell/fiscal-settings.service';
+import { FiscalSettingsService, FISCAL_SETTINGS_STORAGE_KEY } from '../../socle/shell/fiscal-settings.service';
 
 import { TvaAutoliquidationService } from './tva-autoliquidation.service';
 

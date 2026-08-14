@@ -13,7 +13,7 @@ import { FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import type { Compte, CompteTreeNode } from '../../models';
-import { ButtonComponent } from '@lib/anatomy/components';
+import { ButtonComponent } from '@platform/lib/anatomy/components';
 
 
 const CLASSE_KEYS: Record<number, string> = {

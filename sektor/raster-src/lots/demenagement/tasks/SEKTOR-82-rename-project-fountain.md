@@ -1,6 +1,7 @@
 ---
+
 id: SEKTOR-82
-status: done-agent
+status: done-me
 context: nafura
 type: tech
 priority: P2

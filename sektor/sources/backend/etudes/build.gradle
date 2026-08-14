@@ -1,0 +1,27 @@
+plugins {
+    id 'java-library'
+}
+
+dependencies {
+    implementation project(':sektor:catalogue')
+    implementation project(':sektor:achats')
+    implementation project(':sektor:chantiers')
+    implementation project(':sektor:marches')
+    implementation project(':sektor:socle')
+    implementation 'ma.nafuralabs:framework:0.1.0-SNAPSHOT'
+    implementation 'ma.nafuralabs:authorization:0.1.0-SNAPSHOT'
+    implementation 'ma.nafuralabs:doc-manager:0.1.0-SNAPSHOT'
+    implementation 'ma.nafuralabs:doc-extractor:0.1.0-SNAPSHOT'
+    // Lecture des classeurs comme grille de cellules (XlsxGridSource).
+    implementation 'org.apache.poi:poi:5.2.5'
+    implementation 'org.apache.poi:poi-ooxml:5.2.5'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.postgresql:postgresql'
+    // Lecture de PDF natifs (CPS). Le scan n'est pas traite ici : la conversion
+    // scan -> texte est prevue plus tard, cf. lot 3 T3.2.
+    implementation 'org.apache.pdfbox:pdfbox:3.0.3'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.mockito:mockito-junit-jupiter'
+}

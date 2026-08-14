@@ -12,32 +12,25 @@ export const ETUDES_ROUTES: Routes = [
     pathMatch: 'full',
   },
   {
-    path: 'etudes/bibliotheque-prix',
-    loadChildren: () =>
-      import('../pages/etudes/bibliotheque-prix/bibliotheque-prix.routes').then(
-        (m) => m.BIBLIOTHEQUE_PRIX_ROUTES,
-      ),
-  },
-  {
     path: 'etudes/metres',
     loadChildren: () =>
-      import('../pages/etudes/metres/metres.routes').then((m) => m.METRES_ROUTES),
+      import('./metres/metres.routes').then((m) => m.METRES_ROUTES),
   },
   {
     path: 'etudes/devis',
     loadChildren: () =>
-      import('../pages/etudes/devis/devis.routes').then((m) => m.DEVIS_ROUTES),
+      import('./devis/devis.routes').then((m) => m.DEVIS_ROUTES),
   },
   {
     path: 'etudes/dossiers',
     loadChildren: () =>
-      import('../pages/etudes/dossiers/dossiers.routes').then((m) => m.DOSSIERS_ROUTES),
+      import('./dossiers/dossiers.routes').then((m) => m.DOSSIERS_ROUTES),
   },
   {
     path: 'etudes/appels-offres-clients',
     loadChildren: () =>
       import(
-        '../pages/etudes/appels-offres-clients/appels-offres-clients.routes'
+        './appels-offres-clients/appels-offres-clients.routes'
       ).then((m) => m.APPELS_OFFRES_CLIENTS_ROUTES),
   },
 ];

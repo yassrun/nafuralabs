@@ -7,6 +7,7 @@ Tu opères dans le monorepo **nafuralabs**. Les règles sont les **mêmes** que 
 1. [`NAFURALABS.md`](NAFURALABS.md) — porte du workspace
 2. [`raster/AGENTS.md`](raster/AGENTS.md) — orchestrateur backlog / sprint
 3. [`nafura-platform/ops/AGENTS.md`](nafura-platform/ops/AGENTS.md) — Ops K8s
+4. [`ARCHI_BLUEPRINT.md`](ARCHI_BLUEPRINT.md) — coupe du code (socle, BC, APIs)
 
 ## Rules Cursor (mêmes contraintes — à respecter aussi)
 
@@ -28,6 +29,7 @@ Ces fichiers sous `.cursor/rules/` sont `alwaysApply` pour Cursor ; **Claude doi
 | Tickets / bugs | `…/lots/…/tasks/{ID}-{slug}.md` · Raster = INDEX/Sprint seulement |
 | Métier | peer du produit (`sektor/`, …) — jamais dans `nafura-platform/` |
 | Code qui tourne | `<projet>/sources/` (`backend/` · `web/` · …) — [`NAFURALABS.md`](NAFURALABS.md) § Intérieur |
+| Coupe du code | [`ARCHI_BLUEPRINT.md`](ARCHI_BLUEPRINT.md) |
 | Template PLAN | `raster/templates/00-PLAN.md` |
 
 ## Interdits rapides

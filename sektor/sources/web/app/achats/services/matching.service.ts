@@ -5,12 +5,12 @@ import { catchError, map, switchMap } from 'rxjs/operators';
 import type { BonCommande } from '../models';
 import type { MatchingReception, MatchingTolerance } from '../models/matching.models';
 import type { FactureFournisseur } from '../../finance/models';
-import type { InventoryTx } from '../../inventory/models';
-import { FfApiService } from '../../pages/achats/factures-fournisseur/services/ff-api.service';
+import type { InventoryTx } from '../../catalogue/models';
+import { FfApiService } from '../factures-fournisseur/services/ff-api.service';
 import {
   BcApiService,
   receptionAchatToInventoryTx,
-} from '../../pages/achats/commandes/services/bc-api.service';
+} from '../commandes/services/bc-api.service';
 
 import { computeMatchingThreeWay, DEFAULT_MATCHING_TOLERANCE } from './matching-three-way';
 

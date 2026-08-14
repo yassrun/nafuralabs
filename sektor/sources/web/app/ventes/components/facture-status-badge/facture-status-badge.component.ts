@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
 import type {
@@ -54,7 +54,7 @@ const STATUS_VARIANT: Record<
 @Component({
   selector: 'app-facture-status-badge',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <span class="fsb" [attr.data-variant]="variant()">

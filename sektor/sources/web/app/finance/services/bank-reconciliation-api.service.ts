@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
-import { FeatureApiService } from '@lib/anatomy';
+import { FeatureApiService } from '@platform/lib/anatomy';
 
 import type { CompteFinancier, MouvementTresorerie, Rapprochement } from '../models';
 import {

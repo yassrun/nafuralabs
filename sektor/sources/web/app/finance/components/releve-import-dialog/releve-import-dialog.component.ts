@@ -1,11 +1,11 @@
-import { CommonModule } from '@angular/common';
+
 import { ChangeDetectionStrategy, Component, computed, inject, LOCALE_ID, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import type { RapprochementLigneReleve } from '../../models';
 import { RapprochementOfxService } from '../../services/rapprochement-ofx.service';
-import { ButtonComponent } from '@lib/anatomy/components';
+import { ButtonComponent } from '@platform/lib/anatomy/components';
 
 
 interface ParsedRow {
@@ -102,7 +102,7 @@ function parseAmount(s: string): number {
 @Component({
   selector: 'app-releve-import-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslateModule, ButtonComponent],
+  imports: [FormsModule, TranslateModule, ButtonComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="rid">

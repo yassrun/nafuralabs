@@ -1,10 +1,10 @@
-import { CommonModule } from '@angular/common';
+
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, LOCALE_ID, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 
 import type { MouvementTresorerie, RapprochementLigneReleve } from '../../models';
-import { ButtonComponent } from '@lib/anatomy/components';
+import { ButtonComponent } from '@platform/lib/anatomy/components';
 
 
 interface MatchPair {
@@ -15,7 +15,7 @@ interface MatchPair {
 @Component({
   selector: 'app-rapprochement-matcher',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslateModule, ButtonComponent],
+  imports: [FormsModule, TranslateModule, ButtonComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="rm">

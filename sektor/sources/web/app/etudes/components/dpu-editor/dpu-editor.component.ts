@@ -14,9 +14,9 @@ import { TranslateModule } from '@ngx-translate/core';
 
 import type { ComposantDPU, ComposantOuvrage, DpuHistoriqueEntry, UniteMain } from '../../models';
 import { DpuService } from '../../services/dpu.service';
-import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
+import { MadCurrencyPipe } from '@platform/lib/anatomy/pipes/mad-currency.pipe';
 
-import { ButtonComponent } from '@lib/anatomy';
+import { ButtonComponent } from '@platform/lib/anatomy';
 @Component({
   selector: 'app-dpu-editor',
   standalone: true,

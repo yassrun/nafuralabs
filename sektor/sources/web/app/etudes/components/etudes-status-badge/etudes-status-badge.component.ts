@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 
@@ -6,7 +6,7 @@ import {
   AO_CLIENT_STATUS_KEYS,
   DEVIS_STATUS_KEYS,
   METRE_STATUS_KEYS,
-} from '@app/shell/i18n-labels';
+} from '@app/socle/shell/i18n-labels';
 
 import type {
   AOClientStatus,
@@ -41,7 +41,7 @@ const STATUS_VARIANT: Record<string, 'default' | 'success' | 'warning' | 'danger
 @Component({
   selector: 'app-etudes-status-badge',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <span class="esb" [attr.data-variant]="variant()">

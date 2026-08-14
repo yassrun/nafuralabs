@@ -2,6 +2,7 @@
 
 **Statut :** figé (2026-08-13)  
 **Raster** = comment on **orchestre le travail** (lot · sous-lot · task). Vit **seul** (compta, perso…). Peut se **brancher** sur Pact : [`PACT_BLUEPRINT.md`](PACT_BLUEPRINT.md).  
+Code : [`ARCHI_BLUEPRINT.md`](ARCHI_BLUEPRINT.md).  
 Contrat agents : [`raster/AGENTS.md`](raster/AGENTS.md).
 
 ---

@@ -30,7 +30,7 @@
                 "message": "Frontiere de dependance : la plateforme n'importe JAMAIS une application."
               },
               {
-                "group": ["@core/*", "@features/*", "@services/*", "**/nafura-platform/sources/web/core/*", "**/nafura-platform/sources/web/features/*"],
+                "group": ["@platform/core/*", "@features/*", "@services/*", "**/nafura-platform/sources/web/core/*", "**/nafura-platform/sources/web/features/*"],
                 "message": "Le design system ne depend ni du core ni des features. Deplacer le code partage dans lib/ (ex. lib/validators), ou inverser via un jeton."
               }
             ]

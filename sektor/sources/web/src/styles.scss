@@ -29,7 +29,7 @@
 @use '../../../../nafura-platform/sources/web/lib/anatomy/styles/tokens' as erp-tokens;
 
 /* Nafura Sektor — product brand override (cobalt + hi-vis yellow). Loaded last so it wins. */
-@use '../app/styles/brand-sektor' as sektor-brand;
+@use '../app/socle/styles/brand-sektor' as sektor-brand;
 
 /* ═══════════════════════════════════════════════════════════════════════════
    External Dependencies
@@ -56,33 +56,33 @@
  */
 .mat-mdc-checkbox {
   /* Checked state */
-  --mdc-checkbox-selected-checkmark-color: white;
-  --mdc-checkbox-selected-focus-icon-color: var(--nf-primary);
-  --mdc-checkbox-selected-hover-icon-color: var(--nf-primary-hover);
-  --mdc-checkbox-selected-icon-color: var(--nf-primary);
-  --mdc-checkbox-selected-pressed-icon-color: var(--nf-primary-active);
+  --mat-checkbox-selected-checkmark-color: white;
+  --mat-checkbox-selected-focus-icon-color: var(--nf-primary);
+  --mat-checkbox-selected-hover-icon-color: var(--nf-primary-hover);
+  --mat-checkbox-selected-icon-color: var(--nf-primary);
+  --mat-checkbox-selected-pressed-icon-color: var(--nf-primary-active);
   
   /* Unchecked state - VERY SUBTLE (lighter than before) */
-  --mdc-checkbox-unselected-focus-icon-color: var(--nf-color-gray-400);
-  --mdc-checkbox-unselected-hover-icon-color: var(--nf-color-gray-500);
-  --mdc-checkbox-unselected-icon-color: var(--nf-color-gray-300);
-  --mdc-checkbox-unselected-pressed-icon-color: var(--nf-color-gray-400);
+  --mat-checkbox-unselected-focus-icon-color: var(--nf-color-gray-400);
+  --mat-checkbox-unselected-hover-icon-color: var(--nf-color-gray-500);
+  --mat-checkbox-unselected-icon-color: var(--nf-color-gray-300);
+  --mat-checkbox-unselected-pressed-icon-color: var(--nf-color-gray-400);
   
   /* Focus ring (a11y) - smaller/subtler state layer */
-  --mdc-checkbox-selected-focus-state-layer-color: var(--nf-primary);
-  --mdc-checkbox-selected-hover-state-layer-color: var(--nf-primary);
-  --mdc-checkbox-selected-pressed-state-layer-color: var(--nf-primary);
-  --mdc-checkbox-unselected-focus-state-layer-color: var(--nf-color-gray-400);
-  --mdc-checkbox-unselected-hover-state-layer-color: var(--nf-color-gray-400);
-  --mdc-checkbox-unselected-pressed-state-layer-color: var(--nf-color-gray-400);
+  --mat-checkbox-selected-focus-state-layer-color: var(--nf-primary);
+  --mat-checkbox-selected-hover-state-layer-color: var(--nf-primary);
+  --mat-checkbox-selected-pressed-state-layer-color: var(--nf-primary);
+  --mat-checkbox-unselected-focus-state-layer-color: var(--nf-color-gray-400);
+  --mat-checkbox-unselected-hover-state-layer-color: var(--nf-color-gray-400);
+  --mat-checkbox-unselected-pressed-state-layer-color: var(--nf-color-gray-400);
   
   /* State layer opacity - reduced for subtlety */
-  --mdc-checkbox-selected-focus-state-layer-opacity: 0.08;
-  --mdc-checkbox-selected-hover-state-layer-opacity: 0.04;
-  --mdc-checkbox-selected-pressed-state-layer-opacity: 0.12;
-  --mdc-checkbox-unselected-focus-state-layer-opacity: 0.08;
-  --mdc-checkbox-unselected-hover-state-layer-opacity: 0.04;
-  --mdc-checkbox-unselected-pressed-state-layer-opacity: 0.08;
+  --mat-checkbox-selected-focus-state-layer-opacity: 0.08;
+  --mat-checkbox-selected-hover-state-layer-opacity: 0.04;
+  --mat-checkbox-selected-pressed-state-layer-opacity: 0.12;
+  --mat-checkbox-unselected-focus-state-layer-opacity: 0.08;
+  --mat-checkbox-unselected-hover-state-layer-opacity: 0.04;
+  --mat-checkbox-unselected-pressed-state-layer-opacity: 0.08;
 }
 
 /*
@@ -174,14 +174,14 @@
  * Consistent with checkbox styling
  */
 .mat-mdc-radio-button {
-  --mdc-radio-selected-focus-icon-color: var(--nf-primary);
-  --mdc-radio-selected-hover-icon-color: var(--nf-primary-hover);
-  --mdc-radio-selected-icon-color: var(--nf-primary);
-  --mdc-radio-selected-pressed-icon-color: var(--nf-primary-active);
-  --mdc-radio-unselected-focus-icon-color: var(--nf-border-strong);
-  --mdc-radio-unselected-hover-icon-color: var(--nf-border-strong);
-  --mdc-radio-unselected-icon-color: var(--nf-border-default);
-  --mdc-radio-unselected-pressed-icon-color: var(--nf-border-strong);
+  --mat-radio-selected-focus-icon-color: var(--nf-primary);
+  --mat-radio-selected-hover-icon-color: var(--nf-primary-hover);
+  --mat-radio-selected-icon-color: var(--nf-primary);
+  --mat-radio-selected-pressed-icon-color: var(--nf-primary-active);
+  --mat-radio-unselected-focus-icon-color: var(--nf-border-strong);
+  --mat-radio-unselected-hover-icon-color: var(--nf-border-strong);
+  --mat-radio-unselected-icon-color: var(--nf-border-default);
+  --mat-radio-unselected-pressed-icon-color: var(--nf-border-strong);
   
   /* Focus ring */
   --mat-radio-checked-ripple-color: var(--nf-primary);
@@ -192,23 +192,23 @@
  * Material Slide Toggle Override
  */
 .mat-mdc-slide-toggle {
-  --mdc-switch-selected-focus-handle-color: var(--nf-primary);
-  --mdc-switch-selected-hover-handle-color: var(--nf-primary-hover);
-  --mdc-switch-selected-handle-color: var(--nf-primary);
-  --mdc-switch-selected-pressed-handle-color: var(--nf-primary-active);
-  --mdc-switch-selected-focus-track-color: var(--nf-color-primary-200);
-  --mdc-switch-selected-hover-track-color: var(--nf-color-primary-200);
-  --mdc-switch-selected-track-color: var(--nf-color-primary-200);
-  --mdc-switch-selected-pressed-track-color: var(--nf-color-primary-300);
+  --mat-slide-toggle-selected-focus-handle-color: var(--nf-primary);
+  --mat-slide-toggle-selected-hover-handle-color: var(--nf-primary-hover);
+  --mat-slide-toggle-selected-handle-color: var(--nf-primary);
+  --mat-slide-toggle-selected-pressed-handle-color: var(--nf-primary-active);
+  --mat-slide-toggle-selected-focus-track-color: var(--nf-color-primary-200);
+  --mat-slide-toggle-selected-hover-track-color: var(--nf-color-primary-200);
+  --mat-slide-toggle-selected-track-color: var(--nf-color-primary-200);
+  --mat-slide-toggle-selected-pressed-track-color: var(--nf-color-primary-300);
   
-  --mdc-switch-unselected-focus-handle-color: var(--nf-color-gray-600);
-  --mdc-switch-unselected-hover-handle-color: var(--nf-color-gray-700);
-  --mdc-switch-unselected-handle-color: var(--nf-color-gray-500);
-  --mdc-switch-unselected-pressed-handle-color: var(--nf-color-gray-700);
-  --mdc-switch-unselected-focus-track-color: var(--nf-color-gray-300);
-  --mdc-switch-unselected-hover-track-color: var(--nf-color-gray-300);
-  --mdc-switch-unselected-track-color: var(--nf-color-gray-300);
-  --mdc-switch-unselected-pressed-track-color: var(--nf-color-gray-400);
+  --mat-slide-toggle-unselected-focus-handle-color: var(--nf-color-gray-600);
+  --mat-slide-toggle-unselected-hover-handle-color: var(--nf-color-gray-700);
+  --mat-slide-toggle-unselected-handle-color: var(--nf-color-gray-500);
+  --mat-slide-toggle-unselected-pressed-handle-color: var(--nf-color-gray-700);
+  --mat-slide-toggle-unselected-focus-track-color: var(--nf-color-gray-300);
+  --mat-slide-toggle-unselected-hover-track-color: var(--nf-color-gray-300);
+  --mat-slide-toggle-unselected-track-color: var(--nf-color-gray-300);
+  --mat-slide-toggle-unselected-pressed-track-color: var(--nf-color-gray-400);
 }
 
 /*
@@ -219,26 +219,26 @@
 html .mat-mdc-slide-toggle.mat-accent,
 html .mat-mdc-slide-toggle.mat-primary,
 html .mat-mdc-slide-toggle.mat-warn {
-  --mdc-switch-selected-focus-state-layer-color: var(--nf-primary);
-  --mdc-switch-selected-hover-state-layer-color: var(--nf-primary-hover);
-  --mdc-switch-selected-pressed-state-layer-color: var(--nf-primary-active);
+  --mat-slide-toggle-selected-focus-state-layer-color: var(--nf-primary);
+  --mat-slide-toggle-selected-hover-state-layer-color: var(--nf-primary-hover);
+  --mat-slide-toggle-selected-pressed-state-layer-color: var(--nf-primary-active);
 
-  --mdc-switch-selected-handle-color: var(--nf-primary);
-  --mdc-switch-selected-focus-handle-color: var(--nf-primary);
-  --mdc-switch-selected-hover-handle-color: var(--nf-primary-hover);
-  --mdc-switch-selected-pressed-handle-color: var(--nf-primary-active);
+  --mat-slide-toggle-selected-handle-color: var(--nf-primary);
+  --mat-slide-toggle-selected-focus-handle-color: var(--nf-primary);
+  --mat-slide-toggle-selected-hover-handle-color: var(--nf-primary-hover);
+  --mat-slide-toggle-selected-pressed-handle-color: var(--nf-primary-active);
 
-  --mdc-switch-selected-track-color: var(--nf-color-primary-200);
-  --mdc-switch-selected-focus-track-color: var(--nf-color-primary-200);
-  --mdc-switch-selected-hover-track-color: var(--nf-color-primary-200);
-  --mdc-switch-selected-pressed-track-color: var(--nf-color-primary-300);
+  --mat-slide-toggle-selected-track-color: var(--nf-color-primary-200);
+  --mat-slide-toggle-selected-focus-track-color: var(--nf-color-primary-200);
+  --mat-slide-toggle-selected-hover-track-color: var(--nf-color-primary-200);
+  --mat-slide-toggle-selected-pressed-track-color: var(--nf-color-primary-300);
 }
 
 /*
  * Material Progress Spinner Override
  */
 .mat-mdc-progress-spinner {
-  --mdc-circular-progress-active-indicator-color: var(--nf-primary);
+  --mat-progress-spinner-active-indicator-color: var(--nf-primary);
 }
 
 /*

@@ -277,11 +277,11 @@ function fixImports(content, filePath) {
   const importList = [...components].filter(Boolean).sort().join(', ');
   if (importList && (needsButton || needsIcon || needsInput || needsSelect)) {
     if (anatomyImportMatch) {
-      out = out.replace(anatomyImportMatch[0], `import { ${importList} } from '@lib/anatomy'`);
+      out = out.replace(anatomyImportMatch[0], `import { ${importList} } from '@platform/lib/anatomy'`);
     } else {
       const insertAt = out.indexOf('@Component');
       if (insertAt > 0) {
-        out = out.slice(0, insertAt) + `import { ${importList} } from '@lib/anatomy';\n\n` + out.slice(insertAt);
+        out = out.slice(0, insertAt) + `import { ${importList} } from '@platform/lib/anatomy';\n\n` + out.slice(insertAt);
       }
     }
   }

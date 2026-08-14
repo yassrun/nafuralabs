@@ -1,12 +1,12 @@
-import { CommonModule } from '@angular/common';
-import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
-import { Component, inject, signal } from '@angular/core';
+
+import { MadCurrencyPipe } from '@platform/lib/anatomy/pipes/mad-currency.pipe';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 
 import type { RetenueGarantie } from '../../models';
 
-import { ButtonComponent, NfInputComponent, NfTextareaComponent } from '@lib/anatomy';
+import { ButtonComponent, NfInputComponent, NfTextareaComponent } from '@platform/lib/anatomy';
 
 export interface LiberationDialogData {
   retenue: RetenueGarantie;
@@ -22,7 +22,7 @@ export interface LiberationDialogResult {
 @Component({
   selector: 'app-liberation-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, MadCurrencyPipe, MatDialogModule, ButtonComponent, NfInputComponent, NfTextareaComponent],
+  imports: [FormsModule, MadCurrencyPipe, MatDialogModule, ButtonComponent, NfInputComponent, NfTextareaComponent],
   template: `
     <div class="dialog-shell">
       <header>
@@ -79,6 +79,7 @@ export interface LiberationDialogResult {
       </footer>
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       .dialog-shell {

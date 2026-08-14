@@ -12,7 +12,7 @@ import { FormsModule } from '@angular/forms';
 
 import type { ComposantOuvrage, ComposantType, UniteMain } from '../../models';
 
-import { ButtonComponent } from '@lib/anatomy';
+import { ButtonComponent } from '@platform/lib/anatomy';
 @Component({
   selector: 'app-composants-editor',
   standalone: true,

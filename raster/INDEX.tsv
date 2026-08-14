@@ -1,9 +1,6 @@
 id	status	priority	context	assignee	gate	type	agent_type	sprint	project	lot	souslot	title
-PLT-37	done-agent	P0	nafura	agent	none	tech	exec	2026-W33	nafura-platform	demenagement		Figer l'intérieur d'un projet : sources/
-PLT-38	done-agent	P0	nafura	agent	none	tech	exec	2026-W33	nafura-platform	demenagement		Aligner les projets sur sources/
-PLT-32	done-agent	P1	nafura	agent	none	tech	exec	2026-W33	nafura-platform	demenagement		Racine sans Gradle ni npm workspaces
-PLT-33	done-agent	P1	nafura	agent	none	tech	exec	2026-W33	nafura-platform	demenagement		Makefile dans nafura-platform/ops
-PLT-34	done-agent	P1	nafura	agent	none	tech	exec	2026-W33	nafura-platform	demenagement		Fusionner README.md dans NAFURALABS.md
-PLT-35	done-agent	P1	nafura	agent	none	tech	exec	2026-W33	nafura-platform	demenagement		Sortir docs/ du rôle de canon
-PLT-36	done-agent	P2	nafura	agent	none	tech	exec	2026-W33	nafura-platform	demenagement		Supprimer le mock JWT project-fountain
-SEKTOR-82	done-agent	P2	nafura	agent	none	tech	exec	2026-W33	sektor	demenagement		Renommer le projet Angular project-fountain →…
+SEKTOR-97	done-agent	P1	nafura	agent	none	tech	exec	2026-W33	sektor	monter-angular-22		Angular 21 → 22
+SEKTOR-100	done-agent	P1	nafura	agent	none	tech	exec	2026-W33	sektor	plier-archi	etudes-catalogue	Études consomme catalogue.api seulement
+SEKTOR-101	done-agent	P1	nafura	agent	none	tech	exec	2026-W33	sektor	plier-archi	etudes-catalogue	Garde : socle sans BC, Études hors item.*
+SEKTOR-99	done-agent	P1	nafura	agent	none	tech	exec	2026-W33	sektor	plier-archi	etudes-catalogue	Catalogue publie api lookup + snapshot
+SEKTOR-98	done-agent	P1	nafura	agent	none	tech	exec	2026-W33	sektor	plier-archi	socle	Socle compile sans jars BC

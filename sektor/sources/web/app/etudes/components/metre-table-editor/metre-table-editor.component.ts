@@ -12,7 +12,7 @@ import {
 import { FormsModule } from '@angular/forms';
 
 import type { MetreLigne, Ouvrage } from '../../models';
-import { OuvrageApiService } from '@app/pages/etudes/bibliotheque-prix/services/ouvrage-api.service';
+import { OuvrageApiService } from '@app/catalogue/bibliotheque-prix/services/ouvrage-api.service';
 
 interface OuvrageOption {
   id: string;
@@ -38,7 +38,7 @@ function safeEval(formula: string): number {
   }
 }
 
-import { ButtonComponent } from '@lib/anatomy';
+import { ButtonComponent } from '@platform/lib/anatomy';
 @Component({
   selector: 'app-metre-table-editor',
   standalone: true,

@@ -6,7 +6,7 @@ import type {
   MatchingTolerance,
 } from '../models/matching.models';
 import type { FactureFournisseur, FactureFournLigne } from '../../finance/models';
-import type { InventoryTx } from '../../inventory/models';
+import type { InventoryTx } from '../../catalogue/models';
 
 export const DEFAULT_MATCHING_TOLERANCE: MatchingTolerance = {
   pricePct: 2,

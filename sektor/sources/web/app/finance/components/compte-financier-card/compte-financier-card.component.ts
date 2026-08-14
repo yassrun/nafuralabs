@@ -1,16 +1,16 @@
-import { CommonModule } from '@angular/common';
+
 import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import type { CompteFinancier, CompteFinancierStats } from '../../models';
 import { SoldeIndicatorComponent } from '../solde-indicator/solde-indicator.component';
-import { ButtonComponent } from '@lib/anatomy/components';
+import { ButtonComponent } from '@platform/lib/anatomy/components';
 
 
 @Component({
   selector: 'app-compte-financier-card',
   standalone: true,
-  imports: [CommonModule, TranslateModule, SoldeIndicatorComponent, ButtonComponent],
+  imports: [TranslateModule, SoldeIndicatorComponent, ButtonComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <article class="cfc" [attr.data-type]="compte().type" (click)="open.emit()">

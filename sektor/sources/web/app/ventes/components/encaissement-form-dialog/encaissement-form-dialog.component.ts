@@ -1,12 +1,12 @@
-import { CommonModule } from '@angular/common';
-import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
-import { Component, inject, LOCALE_ID, signal } from '@angular/core';
+
+import { MadCurrencyPipe } from '@platform/lib/anatomy/pipes/mad-currency.pipe';
+import { Component, inject, LOCALE_ID, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 
 import type { Encaissement, FactureClient, ModeEncaissement } from '../../models';
 
-import { ButtonComponent, IconComponent, NfInputComponent, NfSelectComponent, NfTextareaComponent } from '@lib/anatomy';
+import { ButtonComponent, IconComponent, NfInputComponent, NfSelectComponent, NfTextareaComponent } from '@platform/lib/anatomy';
 
 export interface EncaissementDialogData {
   facture: FactureClient;
@@ -31,7 +31,7 @@ const MODE_PAIEMENT_OPTIONS: { value: ModeEncaissement; label: string }[] = [
 @Component({
   selector: 'app-encaissement-form-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, MadCurrencyPipe, MatDialogModule, ButtonComponent, IconComponent, NfInputComponent, NfSelectComponent, NfTextareaComponent],
+  imports: [FormsModule, MadCurrencyPipe, MatDialogModule, ButtonComponent, IconComponent, NfInputComponent, NfSelectComponent, NfTextareaComponent],
   template: `
     <div class="dialog-shell">
       <header>
@@ -111,6 +111,7 @@ const MODE_PAIEMENT_OPTIONS: { value: ModeEncaissement; label: string }[] = [
       </footer>
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       .dialog-shell {

@@ -163,5 +163,6 @@ ai:
 logging:
   level:
     root: INFO
-    ma.nafura.erp: DEBUG
+    ma.nafura.sektor: DEBUG
+    ma.nafura.socle: DEBUG
     org.springframework.security: DEBUG

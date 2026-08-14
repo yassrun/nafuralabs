@@ -1,0 +1,118 @@
+package ma.nafura.catalogue.service;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import ma.nafura.platform.framework.context.TenantContext;
+import ma.nafura.catalogue.domain.model.StockBalance;
+import ma.nafura.catalogue.domain.model.StockReservation;
+import ma.nafura.catalogue.domain.model.StockReservationStatus;
+import ma.nafura.catalogue.repository.StockBalanceRepository;
+import ma.nafura.catalogue.repository.StockReservationRepository;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+class StockReservationServiceTest {
+
+    private static final UUID TENANT_ID = UUID.fromString("00000000-0000-4000-8000-000000000001");
+    private static final UUID ITEM_ID = UUID.fromString("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb");
+    private static final UUID CHANTIER = UUID.fromString("cccccccc-cccc-4ccc-8ccc-cccccccccccc");
+    private static final UUID LOCATION = UUID.fromString("dddddddd-dddd-4ddd-8ddd-dddddddddddd");
+
+    @Mock
+    private StockReservationRepository repository;
+
+    @Mock
+    private StockBalanceRepository stockBalanceRepository;
+
+    @InjectMocks
+    private StockReservationService service;
+
+    @BeforeEach
+    void setUp() {
+        TenantContext.setTenantId(TENANT_ID);
+        TenantContext.setTenantEnabled(true);
+        when(stockBalanceRepository.findByTenantIdAndLocationIdAndItemId(any(), any(), any()))
+                .thenReturn(Optional.of(StockBalance.builder()
+                        .tenantId(TENANT_ID)
+                        .locationId(LOCATION)
+                        .itemId(ITEM_ID)
+                        .quantity(new BigDecimal("100"))
+                        .reservedQuantity(new BigDecimal("15"))
+                        .build()));
+        when(stockBalanceRepository.save(any(StockBalance.class))).thenAnswer(inv -> inv.getArgument(0));
+    }
+
+    @AfterEach
+    void tearDown() {
+        TenantContext.clear();
+    }
+
+    @Test
+    void consumeFifoReducesOldestReservationFirst() {
+        UUID r1 = UUID.randomUUID();
+        UUID r2 = UUID.randomUUID();
+        StockReservation first = reservation(r1, new BigDecimal("5"), LocalDate.of(2026, 1, 1));
+        StockReservation second = reservation(r2, new BigDecimal("10"), LocalDate.of(2026, 2, 1));
+
+        when(repository.findByTenantIdAndStatusAndDateExpirationBefore(
+                        eq(TENANT_ID), eq(StockReservationStatus.ACTIVE), any(LocalDate.class)))
+                .thenReturn(List.of());
+        when(repository.findByTenantIdAndItemIdAndChantierIdAndStatusOrderByDateCreationAsc(
+                        TENANT_ID, ITEM_ID, CHANTIER, StockReservationStatus.ACTIVE))
+                .thenReturn(new ArrayList<>(List.of(first, second)));
+        when(repository.save(any(StockReservation.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        service.consumeFifo(CHANTIER, List.of(new StockReservationService.ItemQuantity(ITEM_ID, new BigDecimal("7"))));
+
+        ArgumentCaptor<StockReservation> captor = ArgumentCaptor.forClass(StockReservation.class);
+        verify(repository, atLeast(2)).save(captor.capture());
+        boolean consumedFirst = captor.getAllValues().stream()
+                .anyMatch(r -> r1.equals(r.getId()) && StockReservationStatus.CONSOMMEE.equals(r.getStatus()));
+        assertTrue(consumedFirst);
+    }
+
+    @Test
+    void releaseSetsAnnuleeStatus() {
+        UUID id = UUID.randomUUID();
+        StockReservation row = reservation(id, new BigDecimal("3"), LocalDate.of(2026, 1, 1));
+        when(repository.findByIdAndTenantId(id, TENANT_ID)).thenReturn(Optional.of(row));
+        when(repository.save(any(StockReservation.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        StockReservation released = service.release(id);
+
+        assertEquals(StockReservationStatus.ANNULEE, released.getStatus());
+    }
+
+    private static StockReservation reservation(UUID id, BigDecimal qty, LocalDate dateCreation) {
+        return StockReservation.builder()
+                .id(id)
+                .tenantId(TENANT_ID)
+                .itemId(ITEM_ID)
+                .quantity(qty)
+                .chantierId(CHANTIER)
+                .locationId(LOCATION)
+                .dateBesoin(LocalDate.now())
+                .dateExpiration(LocalDate.now().plusDays(30))
+                .dateCreation(dateCreation)
+                .status(StockReservationStatus.ACTIVE)
+                .build();
+    }
+}

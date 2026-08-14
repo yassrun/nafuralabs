@@ -3,7 +3,8 @@
 **Statut :** à remplir  
 **Pact :** [`PACT_BLUEPRINT.md`](PACT_BLUEPRINT.md)  
 **Raster :** [`RASTER_BLUEPRINT.md`](RASTER_BLUEPRINT.md)  
-**Ops :** [`OPS_BLUEPRINT.md`](OPS_BLUEPRINT.md)
+**Ops :** [`OPS_BLUEPRINT.md`](OPS_BLUEPRINT.md)  
+**Archi :** [`ARCHI_BLUEPRINT.md`](ARCHI_BLUEPRINT.md)
 
 Agents : [`raster/AGENTS.md`](raster/AGENTS.md) · Ops K8s : [`nafura-platform/ops/AGENTS.md`](nafura-platform/ops/AGENTS.md)
 
@@ -84,6 +85,7 @@ nafuralabs/
 ├── PACT_BLUEPRINT.md
 ├── RASTER_BLUEPRINT.md
 ├── OPS_BLUEPRINT.md
+├── ARCHI_BLUEPRINT.md
 │
 ├── raster/                      # projet Raster (Pact)
 │   ├── raster-src/

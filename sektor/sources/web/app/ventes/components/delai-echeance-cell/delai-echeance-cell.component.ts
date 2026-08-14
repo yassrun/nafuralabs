@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { ChangeDetectionStrategy, Component, LOCALE_ID, computed, inject, input } from '@angular/core';
 
 /**
@@ -12,7 +12,7 @@ import { ChangeDetectionStrategy, Component, LOCALE_ID, computed, inject, input 
 @Component({
   selector: 'app-delai-echeance-cell',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <span class="dec" [attr.data-tone]="tone()">

@@ -83,7 +83,7 @@ import { InputTextModule } from 'primeng/inputtext';
                   />
                 }
                 @case ('multiselect') {
-                  <p-multiSelect
+                  <p-multiselect
                     [options]="getOptions(filter)"
                     optionLabel="label"
                     optionValue="value"
@@ -95,7 +95,7 @@ import { InputTextModule } from 'primeng/inputtext';
                   />
                 }
                 @case ('date') {
-                  <p-datePicker
+                  <p-datepicker
                     [ngModel]="getFilterValue(filter.key)"
                     (ngModelChange)="onFilterValueChange(filter.key, $event)"
                     [placeholder]="filter.label | translate"
@@ -116,7 +116,7 @@ import { InputTextModule } from 'primeng/inputtext';
                   />
                 }
                 @case ('number') {
-                  <p-inputNumber
+                  <p-inputnumber
                     [ngModel]="getFilterValue(filter.key)"
                     (ngModelChange)="onFilterValueChange(filter.key, $event)"
                     [placeholder]="(filter.placeholder || filter.label) | translate"
@@ -125,7 +125,7 @@ import { InputTextModule } from 'primeng/inputtext';
                   />
                 }
                 @default {
-                  <p-floatLabel variant="over" styleClass="nf-filter-bar__input">
+                  <p-floatlabel variant="over" styleClass="nf-filter-bar__input">
                     <input
                       type="text"
                       pInputText
@@ -135,7 +135,7 @@ import { InputTextModule } from 'primeng/inputtext';
                       [placeholder]="(filter.placeholder || filter.label) | translate"
                     />
                     <label [for]="filter.key">{{ filter.label | translate }}</label>
-                  </p-floatLabel>
+                  </p-floatlabel>
                 }
               }
             </div>
@@ -186,9 +186,9 @@ import { InputTextModule } from 'primeng/inputtext';
 
     .nf-filter-bar__field .nf-filter-bar__input,
     .nf-filter-bar__field p-select,
-    .nf-filter-bar__field p-multiSelect,
-    .nf-filter-bar__field p-datePicker,
-    .nf-filter-bar__field p-inputNumber,
+    .nf-filter-bar__field p-multiselect,
+    .nf-filter-bar__field p-datepicker,
+    .nf-filter-bar__field p-inputnumber,
     .nf-filter-bar__field p-floatlabel {
       width: 100%;
     }

@@ -1,12 +1,12 @@
-import { CommonModule } from '@angular/common';
-import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
-import { Component, inject, signal } from '@angular/core';
+
+import { MadCurrencyPipe } from '@platform/lib/anatomy/pipes/mad-currency.pipe';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 
 import type { RetenueGarantie } from '../../models';
 
-import { ButtonComponent, NfInputComponent, NfSelectComponent } from '@lib/anatomy';
+import { ButtonComponent, NfInputComponent, NfSelectComponent } from '@platform/lib/anatomy';
 
 export interface CautionBancaireDialogData {
   retenue: RetenueGarantie;
@@ -23,7 +23,7 @@ export interface CautionBancaireDialogResult {
 @Component({
   selector: 'app-caution-bancaire-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, MadCurrencyPipe, MatDialogModule, ButtonComponent, NfInputComponent, NfSelectComponent],
+  imports: [FormsModule, MadCurrencyPipe, MatDialogModule, ButtonComponent, NfInputComponent, NfSelectComponent],
   template: `
     <div class="dialog-shell">
       <header>
@@ -75,6 +75,7 @@ export interface CautionBancaireDialogResult {
       </footer>
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       .dialog-shell {

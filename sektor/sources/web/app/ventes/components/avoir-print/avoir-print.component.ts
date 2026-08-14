@@ -1,5 +1,5 @@
-import { CommonModule } from '@angular/common';
-import { MadCurrencyPipe } from '@lib/anatomy/pipes/mad-currency.pipe';
+
+import { MadCurrencyPipe } from '@platform/lib/anatomy/pipes/mad-currency.pipe';
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 import type { Avoir } from '../../models';
@@ -12,7 +12,7 @@ import type { Avoir } from '../../models';
 @Component({
   selector: 'app-avoir-print',
   standalone: true,
-  imports: [CommonModule, MadCurrencyPipe],
+  imports: [MadCurrencyPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <article class="ap" data-print-area="avoir">

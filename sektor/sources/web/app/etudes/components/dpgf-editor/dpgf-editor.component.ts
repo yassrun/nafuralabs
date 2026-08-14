@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-import { OuvrageApiService } from '@app/pages/etudes/bibliotheque-prix/services/ouvrage-api.service';
+import { OuvrageApiService } from '@app/catalogue/bibliotheque-prix/services/ouvrage-api.service';
 import type { DevisLigne } from '../../models';
 
 interface OuvrageOption {
@@ -22,7 +22,7 @@ interface OuvrageOption {
   prixUnitaireHt: number;
 }
 
-import { ButtonComponent } from '@lib/anatomy';
+import { ButtonComponent } from '@platform/lib/anatomy';
 @Component({
   selector: 'app-dpgf-editor',
   standalone: true,

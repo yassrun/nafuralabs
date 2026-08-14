@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 
-import type { LookupContext } from '@lib/anatomy/types';
+import type { LookupContext } from '@platform/lib/anatomy/types';
 
-import { ErpLookupService } from '../../shared/services/erp-lookup.service';
+import { ErpLookupService } from '../../socle/shared/services/erp-lookup.service';
 
 @Injectable({ providedIn: 'root' })
 export class ChantierLookupService {

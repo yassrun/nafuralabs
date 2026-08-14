@@ -1,5 +1,5 @@
-import type { Currency, CurrencyCreate, CurrencyUpdate } from '../../pages/finance/configuration/currencies/models';
-import type { ExchangeRate, ExchangeRateCreate, ExchangeRateUpdate } from '../../pages/finance/configuration/exchange-rates/models';
+import type { Currency, CurrencyCreate, CurrencyUpdate } from '../configuration/currencies/models';
+import type { ExchangeRate, ExchangeRateCreate, ExchangeRateUpdate } from '../configuration/exchange-rates/models';
 import type { Devise, DeviseCreate, DeviseUpdate, TauxChange, TauxChangeCreate, TauxChangeSource, TauxChangeUpdate } from '../models';
 
 /** API row shape from `/api/v1/currencies` (includes BTP reference flag). */

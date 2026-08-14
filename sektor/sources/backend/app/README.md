@@ -1,6 +1,6 @@
 # Sektor BTP — Spring Boot application (`:sektor:app`)
 
-Boot module ERP. Domaine : `sektor/backend/modules/*`.
+Boot module ERP. Domaine : `sektor/sources/backend/<nom>`.
 
 ## Build
 

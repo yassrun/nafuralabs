@@ -9,35 +9,35 @@ export const ACHATS_ROUTES: Routes = [
   {
     path: 'achats/fournisseurs',
     loadChildren: () =>
-      import('../pages/achats/fournisseurs/fournisseur.routes').then(
+      import('./fournisseurs/fournisseur.routes').then(
         (m) => m.FOURNISSEUR_ROUTES,
       ),
   },
   {
     path: 'achats/demandes',
     loadChildren: () =>
-      import('../pages/achats/demandes/demande.routes').then(
+      import('./demandes/demande.routes').then(
         (m) => m.DEMANDE_ROUTES,
       ),
   },
   {
     path: 'achats/appels-offres',
     loadChildren: () =>
-      import('../pages/achats/appels-offres/ao.routes').then(
+      import('./appels-offres/ao.routes').then(
         (m) => m.AO_ROUTES,
       ),
   },
   {
     path: 'achats/commandes',
     loadChildren: () =>
-      import('../pages/achats/commandes/bc.routes').then(
+      import('./commandes/bc.routes').then(
         (m) => m.BC_ROUTES,
       ),
   },
   {
     path: 'achats/contrats',
     loadChildren: () =>
-      import('../pages/achats/contrats/contrat.routes').then(
+      import('./contrats/contrat.routes').then(
         (m) => m.CONTRAT_ROUTES,
       ),
   },

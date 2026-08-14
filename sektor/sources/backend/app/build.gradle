@@ -35,20 +35,16 @@ dependencies {
     implementation 'ma.nafuralabs:user-settings:0.1.0-SNAPSHOT'
 
     // Layer 3 (enabled domains)
-    implementation project(':sektor:item')
-    implementation project(':sektor:stock')
-    implementation project(':sektor:currency')
-    implementation project(':sektor:finance')
-    implementation project(':sektor:partner')
+    implementation project(':sektor:socle')
+    implementation project(':sektor:catalogue')
+    implementation project(':sektor:etudes')
+    implementation project(':sektor:chantiers')
+    implementation project(':sektor:marches')
     implementation project(':sektor:achats')
     implementation project(':sektor:ventes')
-    implementation project(':sektor:chantiers')
-    implementation project(':sektor:etudes')
+    implementation project(':sektor:finance')
     implementation project(':sektor:rh')
     implementation project(':sektor:hse')
-    implementation project(':sektor:marches')
-    implementation project(':sektor:approbations')
-    implementation project(':sektor:catalogue')
 
     // Spring Boot (always)
     implementation 'org.springframework.boot:spring-boot-starter-web'

@@ -1,0 +1,14 @@
+import { Injectable } from '@angular/core';
+
+import { FeatureApiService } from '@platform/lib/anatomy';
+import type {
+  Ouvrage,
+  OuvrageCreate,
+  OuvrageUpdate,
+} from '@app/etudes/models';
+
+@Injectable({ providedIn: 'root' })
+export class OuvrageApiService extends FeatureApiService<Ouvrage, OuvrageCreate, OuvrageUpdate> {
+  protected override basePath = '/api/v1/etudes/ouvrages';
+  protected override searchFields = ['code', 'designation'];
+}

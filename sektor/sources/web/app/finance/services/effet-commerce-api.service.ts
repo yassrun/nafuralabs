@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
 
-import { FeatureApiService } from '@lib/anatomy';
+import { FeatureApiService } from '@platform/lib/anatomy';
 
 import type { EffetCommerce, EffetCommerceStatus } from '../models';
 import { type ApiTradeEffect, effetToUi } from './effet-commerce-finance.mapper';
