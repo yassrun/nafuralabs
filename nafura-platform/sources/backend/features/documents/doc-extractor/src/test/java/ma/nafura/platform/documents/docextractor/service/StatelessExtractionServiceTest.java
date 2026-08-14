@@ -159,6 +159,44 @@ class StatelessExtractionServiceTest {
     }
 
     @Test
+    void listClientSpreadsheetUsesHeuristicPlanWithoutCallingLlm() throws Exception {
+        byte[] xlsx = xlsx(new String[][] {
+                {"Raison sociale", "ICE", "Ville"},
+                {"ACME Maroc", "001", "Rabat"}
+        });
+        String schema = """
+                {
+                  "type":"object",
+                  "required":["clients"],
+                  "properties":{
+                    "clients":{
+                      "type":"array",
+                      "items":{
+                        "type":"object",
+                        "required":["raisonSociale"],
+                        "properties":{
+                          "raisonSociale":{"type":["string","null"],"title":"Raison sociale"},
+                          "ice":{"type":["string","null"],"title":"ICE"},
+                          "ville":{"type":["string","null"],"title":"Ville"}
+                        }
+                      }
+                    }
+                  }
+                }
+                """;
+
+        StatelessExtractionResponse response = service.process(
+                xlsx, "clients.xlsx", XLSX_MIME, schema, null, null, "tenant-a");
+
+        assertThat(response.outcome()).isEqualTo(StatelessExtractionResponse.Outcome.COMPLETED);
+        assertThat(response.data().path("clients")).hasSize(1);
+        assertThat(response.data().path("clients").path(0).path("raisonSociale").asText())
+                .isEqualTo("ACME Maroc");
+        assertThat(response.requestId()).isEqualTo("plan:heuristic");
+        verifyNoInteractions(llmService);
+    }
+
+    @Test
     void gridCompileDoesNotSendRowValuesToLlm() throws Exception {
         byte[] xlsx = xlsx(new String[][] {
                 {"Libelle", "Quantite"},

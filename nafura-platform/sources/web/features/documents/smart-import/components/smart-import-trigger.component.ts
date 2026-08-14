@@ -30,6 +30,9 @@ import { SmartImportReviewDialogComponent } from './smart-import-review-dialog.c
   standalone: true,
   imports: [ButtonComponent, TranslateModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '[attr.entitykey]': 'definition.key',
+  },
   template: `
     <div class="trigger">
       <input

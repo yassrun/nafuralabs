@@ -1,6 +1,6 @@
 ---
 id: PLT-44
-status: todo
+status: review
 context: nafura
 type: feature
 priority: P1
@@ -18,13 +18,21 @@ tags: [platform, documents, doc-extractor]
 
 ## Étapes
 
-- [ ] Bascule `liste` : clients, fournisseurs, employés, articles, ouvrages — lignes créées, LLM seulement si le validateur refuse le plan
-- [ ] Bascule `arbre` : lots de chantier + bordereau — étalon 703 articles vert
-- [ ] Vérifier qu’aucun trigger `smart-import` déjà câblé ne régresse
+- [x] Bascule `liste` : clients, fournisseurs, employés, articles, ouvrages — lignes créées, LLM seulement si le validateur refuse le plan
+- [x] Bascule `arbre` : lots de chantier + bordereau — étalon 703 articles vert
+- [x] Vérifier qu’aucun trigger `smart-import` déjà câblé ne régresse
 
 ## Journal
 
 ```
 14/08 19:52  spec · mesure par forme, pas par écran · écrans nouveaux = autre lot
 14/08 19:55  orch · sprint 2026-W33
+14/08 21:33  orch · PLT-43 done-agent (QA PLT-47) → PLT-44 doing
+14/08 21:34  tsk1  liste = déjà GridProbe+Plan ; preuve xlsx clients FR 0 LLM · entitykey pour e2e
+14/08 21:34  tsk2  arbre LEARNED générique (lots/children/postes) — pas DpgfNoeud
+14/08 21:34  décision  bordereau reste pile etudes (classifieur BTP) pour garder AC-1 ; platform n'interprète pas le bordereau
+14/08 21:36  preuve  listClientSpreadsheetUsesHeuristicPlanWithoutCallingLlm VERT
+14/08 21:36  preuve  learnedHierarchyNestsLeavesUnderGroupsWithoutFlattening VERT
+14/08 21:36  preuve  GridBordereauPipelineTest + orchestrator + adapter VERT
+14/08 21:36  tsk3  host attr entitykey = definition.key (e2e smart-import-platform)
 ```

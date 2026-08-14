@@ -119,6 +119,28 @@ class PlanCascadeTest {
         assertThat(plan.arrayPaths()).containsExactly("items");
     }
 
+    @Test
+    void learnedHierarchyNestsLeavesUnderGroupsWithoutFlattening() throws Exception {
+        JsonNode schema = lotsSchema();
+        List<GridRow> rows = List.of(
+                GridRow.of("s", 1, List.of("Désignation", "Unité", "Quantité")),
+                GridRow.of("s", 2, List.of("LOT 1 Terrassement", "", "")),
+                GridRow.of("s", 3, List.of("Décapage", "m2", "10")),
+                GridRow.of("s", 4, List.of("LOT 2 Gros oeuvre", "", "")),
+                GridRow.of("s", 5, List.of("Béton", "m3", "5")));
+        ReadingPlan plan = HeuristicPlanFactory.fromGrid(rows, schema).orElseThrow();
+        assertThat(plan.hierarchy()).isEqualTo(ReadingPlan.Hierarchy.LEARNED);
+        JsonNode data = executor.execute(rows, plan);
+        assertThat(data.path("lots")).hasSize(2);
+        assertThat(data.path("lots").path(0).path("designation").asText()).contains("Terrassement");
+        assertThat(data.path("lots").path(0).path("postes")).hasSize(1);
+        assertThat(data.path("lots").path(0).path("postes").path(0).path("designation").asText())
+                .isEqualTo("Décapage");
+        assertThat(data.path("lots").path(1).path("postes").path(0).path("designation").asText())
+                .isEqualTo("Béton");
+        assertThat(data.path("lots").path(0).has("unite")).isFalse();
+    }
+
     private static ReadingPlan samplePlan() {
         return new ReadingPlan(
                 "grid",
@@ -144,6 +166,56 @@ class PlanCascadeTest {
                         "properties": {
                           "name": { "type": "string" },
                           "qty": { "type": "string" }
+                        }
+                      }
+                    }
+                  }
+                }
+                """);
+    }
+
+    private static JsonNode lotsSchema() throws Exception {
+        return JSON.readTree("""
+                {
+                  "type": "object",
+                  "properties": {
+                    "lots": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "designation": { "type": "string", "title": "Désignation lot" },
+                          "children": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "designation": { "type": "string" },
+                                "postes": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "designation": { "type": "string", "title": "Désignation" },
+                                      "unite": { "type": "string", "title": "Unité" },
+                                      "quantite": { "type": "string", "title": "Quantité" }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "postes": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "designation": { "type": "string", "title": "Désignation" },
+                                "unite": { "type": "string", "title": "Unité" },
+                                "quantite": { "type": "string", "title": "Quantité" }
+                              }
+                            }
+                          }
                         }
                       }
                     }

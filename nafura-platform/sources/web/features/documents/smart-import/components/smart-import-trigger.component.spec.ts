@@ -38,6 +38,10 @@ describe('SmartImportTriggerComponent', () => {
     fixture.detectChanges();
   });
 
+  it('exposes definition.key as entitykey for wired-screen e2e', () => {
+    expect(fixture.nativeElement.getAttribute('entitykey')).toBe('fournisseur');
+  });
+
   it('shows the sparkles trigger while idle', () => {
     expect(component.phaseLabel()).toBe('platform.smartImport.button');
     expect(component.isBusy()).toBeFalse();
