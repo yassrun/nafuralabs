@@ -3,7 +3,7 @@ package ma.nafura.chantiers.repository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import ma.nafura.chantiers.domain.model.ChantierPhase;
+import ma.nafura.chantiers.domain.chantier.ChantierPhase;
 import ma.nafura.platform.framework.repository.TenantScopedRepository;
 import org.springframework.stereotype.Repository;
 

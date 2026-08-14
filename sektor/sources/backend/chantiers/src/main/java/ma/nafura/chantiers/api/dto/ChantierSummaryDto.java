@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ma.nafura.chantiers.domain.model.Chantier;
+import ma.nafura.chantiers.domain.chantier.Chantier;
 
 @Data
 @NoArgsConstructor

@@ -6,14 +6,15 @@ import java.util.Locale;
 import java.util.UUID;
 import ma.nafura.chantiers.api.request.PosteBudgetaireCreateDto;
 import ma.nafura.chantiers.api.request.PosteBudgetaireUpdateDto;
-import ma.nafura.chantiers.domain.model.ChantierLot;
-import ma.nafura.chantiers.domain.model.PosteBudgetaire;
+import ma.nafura.chantiers.domain.chantier.ChantierLot;
+import ma.nafura.chantiers.domain.budget.PosteBudgetaire;
 import ma.nafura.chantiers.repository.ChantierLotRepository;
 import ma.nafura.chantiers.repository.PosteBudgetaireRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.chantiers.seeders.PosteBudgetaireSeedService;
 
 @Service
 public class PosteBudgetaireService {

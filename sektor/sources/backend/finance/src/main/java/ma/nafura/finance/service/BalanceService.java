@@ -10,15 +10,16 @@ import java.util.Map;
 import java.util.UUID;
 import ma.nafura.finance.api.dto.BalanceLineDto;
 import ma.nafura.finance.api.dto.BalanceResponseDto;
-import ma.nafura.finance.domain.model.ChartOfAccount;
-import ma.nafura.finance.domain.model.JournalEntry;
-import ma.nafura.finance.domain.model.JournalEntryLine;
+import ma.nafura.finance.domain.compte.ChartOfAccount;
+import ma.nafura.finance.domain.compte.JournalEntry;
+import ma.nafura.finance.domain.compte.JournalEntryLine;
 import ma.nafura.finance.repository.ChartOfAccountRepository;
 import ma.nafura.finance.repository.JournalEntryLineRepository;
 import ma.nafura.finance.repository.JournalEntryRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ma.nafura.finance.seeders.ComptabiliteSeedService;
 
 @Service
 public class BalanceService {

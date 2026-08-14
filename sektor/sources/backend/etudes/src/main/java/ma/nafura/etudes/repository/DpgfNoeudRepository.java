@@ -3,7 +3,7 @@ package ma.nafura.etudes.repository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import ma.nafura.etudes.domain.model.DpgfNoeud;
+import ma.nafura.etudes.domain.dpgf.DpgfNoeud;
 import ma.nafura.platform.framework.repository.TenantScopedRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

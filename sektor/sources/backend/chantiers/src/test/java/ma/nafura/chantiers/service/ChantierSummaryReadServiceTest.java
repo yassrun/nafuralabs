@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 import java.util.UUID;
 import ma.nafura.chantiers.api.dto.BudgetChantierDto;
 import ma.nafura.chantiers.api.dto.ChantierSummaryDto;
-import ma.nafura.chantiers.domain.model.Chantier;
+import ma.nafura.chantiers.domain.chantier.Chantier;
 import ma.nafura.chantiers.repository.ChantierLotRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.junit.jupiter.api.AfterEach;

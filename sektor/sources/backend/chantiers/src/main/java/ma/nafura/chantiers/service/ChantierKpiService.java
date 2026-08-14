@@ -6,9 +6,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import ma.nafura.chantiers.api.dto.ChantierKpiDto;
-import ma.nafura.chantiers.domain.model.BudgetChantier;
-import ma.nafura.chantiers.domain.model.BudgetLigne;
-import ma.nafura.chantiers.domain.model.Chantier;
+import ma.nafura.chantiers.domain.budget.BudgetChantier;
+import ma.nafura.chantiers.domain.budget.BudgetLigne;
+import ma.nafura.chantiers.domain.chantier.Chantier;
 import ma.nafura.chantiers.repository.BudgetChantierRepository;
 import ma.nafura.chantiers.repository.BudgetLigneRepository;
 import ma.nafura.chantiers.repository.ChantierRepository;
@@ -16,6 +16,8 @@ import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.chantiers.seeders.BudgetChantierSeedService;
+import ma.nafura.chantiers.seeders.ChantierSeedService;
 
 @Service
 public class ChantierKpiService {

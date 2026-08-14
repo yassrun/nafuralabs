@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.UUID;
 import ma.nafura.ventes.api.request.AvoirClientCreateDto;
 import ma.nafura.ventes.api.request.AvoirClientUpdateDto;
-import ma.nafura.ventes.domain.model.AvoirClient;
+import ma.nafura.ventes.domain.avoir.AvoirClient;
 import ma.nafura.ventes.service.AvoirClientService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

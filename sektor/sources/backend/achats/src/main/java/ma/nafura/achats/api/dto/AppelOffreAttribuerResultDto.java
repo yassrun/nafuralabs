@@ -4,8 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ma.nafura.achats.domain.model.AppelOffreAchat;
-import ma.nafura.achats.domain.model.BonCommandeAchat;
+import ma.nafura.achats.domain.appeloffre.AppelOffreAchat;
+import ma.nafura.achats.domain.commande.BonCommandeAchat;
 
 @Data
 @NoArgsConstructor

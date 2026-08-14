@@ -3,7 +3,7 @@ package ma.nafura.finance.repository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import ma.nafura.finance.domain.model.Lettrage;
+import ma.nafura.finance.domain.reglement.Lettrage;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface LettrageRepository extends JpaRepository<Lettrage, UUID> {

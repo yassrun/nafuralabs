@@ -7,7 +7,7 @@ import java.util.UUID;
 import ma.nafura.finance.api.dto.JournalSummaryDto;
 import ma.nafura.finance.api.request.AccountingJournalCreateDto;
 import ma.nafura.finance.api.request.AccountingJournalUpdateDto;
-import ma.nafura.finance.domain.model.AccountingJournal;
+import ma.nafura.finance.domain.compte.AccountingJournal;
 import ma.nafura.finance.service.AccountingJournalService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

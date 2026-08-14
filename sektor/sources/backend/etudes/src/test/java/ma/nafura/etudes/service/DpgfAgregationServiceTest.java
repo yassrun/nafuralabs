@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.math.BigDecimal;
 import java.util.List;
 import ma.nafura.etudes.api.dto.DpgfLotTotalDto;
-import ma.nafura.etudes.domain.model.DpgfNoeud;
+import ma.nafura.etudes.domain.dpgf.DpgfNoeud;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

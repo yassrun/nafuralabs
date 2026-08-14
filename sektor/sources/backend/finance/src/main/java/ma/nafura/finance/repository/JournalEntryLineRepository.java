@@ -2,7 +2,7 @@ package ma.nafura.finance.repository;
 
 import java.util.List;
 import java.util.UUID;
-import ma.nafura.finance.domain.model.JournalEntryLine;
+import ma.nafura.finance.domain.compte.JournalEntryLine;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface JournalEntryLineRepository extends JpaRepository<JournalEntryLine, UUID> {

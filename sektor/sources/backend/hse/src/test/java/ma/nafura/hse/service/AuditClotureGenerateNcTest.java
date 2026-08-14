@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import ma.nafura.hse.api.dto.AuditClotureResultDto;
-import ma.nafura.hse.domain.model.AuditHse;
-import ma.nafura.hse.domain.model.AuditHseLigne;
+import ma.nafura.hse.domain.audit.AuditHse;
+import ma.nafura.hse.domain.audit.AuditHseLigne;
 import ma.nafura.hse.repository.AuditHseLigneRepository;
 import ma.nafura.hse.repository.AuditHseRepository;
 import ma.nafura.platform.framework.context.TenantContext;
@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ma.nafura.hse.seeders.AuditHseSeedService;
 
 @ExtendWith(MockitoExtension.class)
 class AuditClotureGenerateNcTest {

@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.UUID;
 import ma.nafura.etudes.api.dto.CatalogCandidateDto;
 import ma.nafura.etudes.api.dto.DecompositionProposeDto;
-import ma.nafura.etudes.domain.model.DpgfNoeud;
+import ma.nafura.etudes.domain.dpgf.DpgfNoeud;
 import ma.nafura.etudes.repository.DpgfNoeudRepository;
 import ma.nafura.etudes.service.cps.CpsService;
 import ma.nafura.etudes.service.port.CatalogResolverPort;

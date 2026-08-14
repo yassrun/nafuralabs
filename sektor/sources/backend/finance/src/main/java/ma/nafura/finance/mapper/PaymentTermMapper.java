@@ -2,7 +2,7 @@ package ma.nafura.finance.mapper;
 
 import java.util.UUID;
 import ma.nafura.platform.framework.mapper.EntityMapper;
-import ma.nafura.finance.domain.model.PaymentTerm;
+import ma.nafura.finance.domain.reglement.PaymentTerm;
 import ma.nafura.finance.api.request.PaymentTermCreateDto;
 import ma.nafura.finance.api.request.PaymentTermUpdateDto;
 import org.mapstruct.Mapper;

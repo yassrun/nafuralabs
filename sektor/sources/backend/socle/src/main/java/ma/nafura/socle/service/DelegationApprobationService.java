@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.UUID;
 import ma.nafura.socle.api.request.DelegationApprobationCreateDto;
 import ma.nafura.socle.api.request.DelegationApprobationUpdateDto;
-import ma.nafura.socle.domain.model.DelegationApprobation;
+import ma.nafura.socle.domain.DelegationApprobation;
 import ma.nafura.socle.repository.DelegationApprobationRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;

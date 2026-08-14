@@ -3,7 +3,7 @@ package ma.nafura.achats.service;
 import java.util.List;
 import java.util.UUID;
 import ma.nafura.achats.api.request.PartnerAddressCreateDto;
-import ma.nafura.achats.domain.model.PartnerAddress;
+import ma.nafura.achats.domain.fournisseur.PartnerAddress;
 import ma.nafura.achats.mapper.PartnerAddressMapper;
 import ma.nafura.achats.repository.PartnerAddressRepository;
 import ma.nafura.achats.repository.PartnerRepository;

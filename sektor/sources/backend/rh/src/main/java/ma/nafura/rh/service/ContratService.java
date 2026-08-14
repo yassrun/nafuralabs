@@ -11,13 +11,14 @@ import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.rh.api.request.ContratCreateDto;
 import ma.nafura.rh.api.request.ContratSignCanvasDto;
 import ma.nafura.rh.api.request.ContratUpdateDto;
-import ma.nafura.rh.domain.model.Contrat;
-import ma.nafura.rh.domain.model.Employe;
+import ma.nafura.rh.domain.employe.Contrat;
+import ma.nafura.rh.domain.employe.Employe;
 import ma.nafura.rh.repository.ContratRepository;
 import ma.nafura.rh.repository.EmployeRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.rh.seeders.ContratHabilitationSeedService;
 
 @Service
 public class ContratService {

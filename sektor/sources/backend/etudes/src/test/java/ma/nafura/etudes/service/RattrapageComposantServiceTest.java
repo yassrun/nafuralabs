@@ -6,8 +6,8 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 import ma.nafura.etudes.api.dto.RattrapageGroupeDto;
-import ma.nafura.etudes.domain.model.ComposantDpu;
-import ma.nafura.etudes.domain.model.PrixDpu;
+import ma.nafura.etudes.domain.dpu.ComposantDpu;
+import ma.nafura.etudes.domain.dpu.PrixDpu;
 import org.junit.jupiter.api.Test;
 
 class RattrapageComposantServiceTest {

@@ -14,14 +14,16 @@ import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.rh.api.dto.PlanningAffectationDto;
 import ma.nafura.rh.api.dto.PlanningEntryDto;
 import ma.nafura.rh.api.dto.PlanningResultDto;
-import ma.nafura.rh.domain.model.Conge;
-import ma.nafura.rh.domain.model.Pointage;
+import ma.nafura.rh.domain.conge.Conge;
+import ma.nafura.rh.domain.temps.Pointage;
 import ma.nafura.rh.repository.CongeRepository;
 import ma.nafura.rh.repository.EmployeRepository;
 import ma.nafura.rh.repository.PointageRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.rh.seeders.CongeSeedService;
+import ma.nafura.rh.seeders.PointageSeedService;
 
 @Service
 public class PlanningReadService {

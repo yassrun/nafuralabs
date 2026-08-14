@@ -1,6 +1,6 @@
 package ma.nafura.catalogue.repository;
 
-import ma.nafura.catalogue.domain.model.ItemCategory;
+import ma.nafura.catalogue.domain.article.ItemCategory;
 import ma.nafura.platform.framework.repository.TenantScopedRepository;
 import org.springframework.stereotype.Repository;
 

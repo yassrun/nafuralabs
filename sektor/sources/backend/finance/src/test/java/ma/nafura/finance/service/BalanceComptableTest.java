@@ -8,9 +8,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import ma.nafura.finance.api.dto.BalanceResponseDto;
-import ma.nafura.finance.domain.model.ChartOfAccount;
-import ma.nafura.finance.domain.model.JournalEntry;
-import ma.nafura.finance.domain.model.JournalEntryLine;
+import ma.nafura.finance.domain.compte.ChartOfAccount;
+import ma.nafura.finance.domain.compte.JournalEntry;
+import ma.nafura.finance.domain.compte.JournalEntryLine;
 import ma.nafura.finance.repository.ChartOfAccountRepository;
 import ma.nafura.finance.repository.JournalEntryLineRepository;
 import ma.nafura.finance.repository.JournalEntryRepository;
@@ -22,6 +22,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ma.nafura.finance.seeders.ComptabiliteSeedService;
 
 @ExtendWith(MockitoExtension.class)
 class BalanceComptableTest {

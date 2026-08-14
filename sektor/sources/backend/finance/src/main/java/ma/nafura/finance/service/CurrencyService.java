@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.UUID;
 import ma.nafura.finance.api.request.CurrencyCreateDto;
 import ma.nafura.finance.api.request.CurrencyUpdateDto;
-import ma.nafura.finance.domain.model.Currency;
+import ma.nafura.finance.domain.devise.Currency;
 import ma.nafura.finance.mapper.CurrencyMapper;
 import ma.nafura.finance.repository.CurrencyRepository;
 import ma.nafura.finance.service.base.CurrencyServiceBase;

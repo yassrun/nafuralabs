@@ -6,7 +6,7 @@ import ma.nafura.catalogue.api.controller.base.InventoryTxControllerBase;
 import ma.nafura.catalogue.api.dto.InventoryTxDetailDto;
 import ma.nafura.catalogue.api.request.InventoryTxWithLinesCreateDto;
 import ma.nafura.catalogue.api.request.InventoryTxWithLinesUpdateDto;
-import ma.nafura.catalogue.domain.model.InventoryTx;
+import ma.nafura.catalogue.domain.stock.InventoryTx;
 import ma.nafura.catalogue.service.InventoryTxService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

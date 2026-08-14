@@ -6,7 +6,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import ma.nafura.catalogue.api.controller.base.StockBalanceControllerBase;
 import ma.nafura.catalogue.api.dto.ItemQuantityAggregateDto;
-import ma.nafura.catalogue.domain.model.StockBalance;
+import ma.nafura.catalogue.domain.stock.StockBalance;
 import ma.nafura.catalogue.service.StockBalanceService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

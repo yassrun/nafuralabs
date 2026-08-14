@@ -187,7 +187,8 @@
             },
             "cursor": {
               "buildTarget": "sektor:build:cursor",
-              "proxyConfig": "proxy.conf.json"
+              "proxyConfig": "proxy.conf.json",
+              "prebundle": false
             }
           },
           "defaultConfiguration": "development"

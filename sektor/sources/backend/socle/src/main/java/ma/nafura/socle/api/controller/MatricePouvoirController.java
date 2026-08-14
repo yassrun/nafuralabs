@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.UUID;
 import ma.nafura.socle.api.request.MatricePouvoirCreateDto;
 import ma.nafura.socle.api.request.MatricePouvoirUpdateDto;
-import ma.nafura.socle.domain.model.MatricePouvoir;
+import ma.nafura.socle.domain.MatricePouvoir;
 import ma.nafura.socle.service.MatricePouvoirService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

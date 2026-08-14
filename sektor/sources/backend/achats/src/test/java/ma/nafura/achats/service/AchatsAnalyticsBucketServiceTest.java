@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import ma.nafura.achats.api.dto.AnalyticsBucketResponseDto;
-import ma.nafura.achats.domain.model.BonCommandeAchat;
+import ma.nafura.achats.domain.commande.BonCommandeAchat;
 import ma.nafura.achats.repository.AppelOffreAchatRepository;
 import ma.nafura.achats.repository.BonCommandeAchatRepository;
 import ma.nafura.achats.repository.ContratFournisseurRepository;
@@ -20,6 +20,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ma.nafura.achats.seeders.AppelOffreAchatSeedService;
+import ma.nafura.achats.seeders.BonCommandeAchatSeedService;
+import ma.nafura.achats.seeders.ContratFournisseurSousTraitanceSeedService;
+import ma.nafura.achats.seeders.DemandeAchatSeedService;
 
 @ExtendWith(MockitoExtension.class)
 class AchatsAnalyticsBucketServiceTest {

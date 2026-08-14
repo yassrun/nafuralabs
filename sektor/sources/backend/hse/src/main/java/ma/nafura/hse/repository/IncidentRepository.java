@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import ma.nafura.hse.domain.model.Incident;
+import ma.nafura.hse.domain.incident.Incident;
 import ma.nafura.platform.framework.repository.TenantScopedRepository;
 import org.springframework.stereotype.Repository;
 

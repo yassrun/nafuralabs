@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.util.List;
-import ma.nafura.ventes.domain.model.FactureClient;
-import ma.nafura.ventes.domain.model.FactureClientLigne;
+import ma.nafura.ventes.domain.facture.FactureClient;
+import ma.nafura.ventes.domain.facture.FactureClientLigne;
 import ma.nafura.ventes.service.FactureClientTotalsCalculator.ChantierRates;
 import org.junit.jupiter.api.Test;
 

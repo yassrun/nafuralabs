@@ -2,7 +2,7 @@ package ma.nafura.catalogue.service.base;
 
 import java.util.UUID;
 import ma.nafura.platform.framework.service.crud.JpaCrudService;
-import ma.nafura.catalogue.domain.model.UoMCategory;
+import ma.nafura.catalogue.domain.article.UoMCategory;
 import ma.nafura.catalogue.api.request.UoMCategoryCreateDto;
 import ma.nafura.catalogue.api.request.UoMCategoryUpdateDto;
 import ma.nafura.catalogue.mapper.UoMCategoryMapper;

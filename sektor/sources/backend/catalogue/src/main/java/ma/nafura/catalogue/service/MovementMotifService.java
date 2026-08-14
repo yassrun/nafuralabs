@@ -7,7 +7,7 @@ import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.platform.framework.service.crud.JpaCrudService;
 import ma.nafura.catalogue.api.request.MovementMotifCreateDto;
 import ma.nafura.catalogue.api.request.MovementMotifUpdateDto;
-import ma.nafura.catalogue.domain.model.MovementMotif;
+import ma.nafura.catalogue.domain.stock.MovementMotif;
 import ma.nafura.catalogue.mapper.MovementMotifMapper;
 import ma.nafura.catalogue.repository.MovementMotifRepository;
 import org.springframework.stereotype.Service;

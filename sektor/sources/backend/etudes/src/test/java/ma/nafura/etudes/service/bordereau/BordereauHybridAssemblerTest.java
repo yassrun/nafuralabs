@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Set;
 import ma.nafura.etudes.api.request.ImportNoeudDto;
 import ma.nafura.etudes.api.request.ImportTreeRequest;
-import ma.nafura.etudes.domain.model.DpgfNoeud;
+import ma.nafura.etudes.domain.dpgf.DpgfNoeud;
 import org.junit.jupiter.api.Test;
 
 class BordereauHybridAssemblerTest {

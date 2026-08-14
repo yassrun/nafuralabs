@@ -7,7 +7,7 @@ import ma.nafura.achats.api.request.DemandeAchatApproveDto;
 import ma.nafura.achats.api.request.DemandeAchatCreateDto;
 import ma.nafura.achats.api.request.DemandeAchatRejectDto;
 import ma.nafura.achats.api.request.DemandeAchatUpdateDto;
-import ma.nafura.achats.domain.model.DemandeAchat;
+import ma.nafura.achats.domain.demande.DemandeAchat;
 import ma.nafura.achats.service.DemandeAchatService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

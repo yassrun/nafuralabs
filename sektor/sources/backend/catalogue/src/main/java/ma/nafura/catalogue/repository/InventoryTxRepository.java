@@ -2,7 +2,7 @@ package ma.nafura.catalogue.repository;
 
 import java.util.UUID;
 import ma.nafura.platform.framework.repository.TenantScopedRepository;
-import ma.nafura.catalogue.domain.model.InventoryTx;
+import ma.nafura.catalogue.domain.stock.InventoryTx;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;

@@ -3,7 +3,7 @@ package ma.nafura.etudes.api.controller;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import ma.nafura.etudes.api.request.MetreLigneUpdateDto;
-import ma.nafura.etudes.domain.model.MetreLigne;
+import ma.nafura.etudes.domain.metre.MetreLigne;
 import ma.nafura.etudes.service.MetreService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

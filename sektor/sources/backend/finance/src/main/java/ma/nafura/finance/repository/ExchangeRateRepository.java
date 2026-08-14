@@ -3,7 +3,7 @@ package ma.nafura.finance.repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
-import ma.nafura.finance.domain.model.ExchangeRate;
+import ma.nafura.finance.domain.devise.ExchangeRate;
 import ma.nafura.platform.framework.repository.TenantScopedRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

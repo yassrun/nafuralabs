@@ -9,12 +9,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import ma.nafura.hse.api.request.InspectionCreateDto;
 import ma.nafura.hse.api.request.InspectionUpdateDto;
-import ma.nafura.hse.domain.model.Inspection;
+import ma.nafura.hse.domain.inspection.Inspection;
 import ma.nafura.hse.repository.InspectionRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.hse.seeders.InspectionSeedService;
 
 @Service
 public class InspectionService {

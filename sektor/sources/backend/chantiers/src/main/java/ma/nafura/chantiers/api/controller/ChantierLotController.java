@@ -6,7 +6,7 @@ import ma.nafura.chantiers.api.dto.ChantierLotTreeResponseDto;
 import ma.nafura.chantiers.api.request.ChantierLotCreateDto;
 import ma.nafura.chantiers.api.request.ChantierLotTreeRequestDto;
 import ma.nafura.chantiers.api.request.ChantierLotUpdateDto;
-import ma.nafura.chantiers.domain.model.ChantierLot;
+import ma.nafura.chantiers.domain.chantier.ChantierLot;
 import ma.nafura.chantiers.service.ChantierLotService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

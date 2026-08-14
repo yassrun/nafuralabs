@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
-import ma.nafura.etudes.domain.model.ComposantDpu;
+import ma.nafura.etudes.domain.dpu.ComposantDpu;
 
 public record DpuHistoriqueEntryDto(
         UUID id,

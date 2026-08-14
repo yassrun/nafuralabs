@@ -3,7 +3,7 @@ package ma.nafura.etudes.service.cps;
 import java.util.List;
 import java.util.Optional;
 import ma.nafura.etudes.api.dto.MarcheProposeDto;
-import ma.nafura.etudes.domain.model.CpsSection;
+import ma.nafura.etudes.domain.cps.CpsSection;
 
 /**
  * Propose métadonnées marché + checklist pièces à partir des sections CPS indexées.

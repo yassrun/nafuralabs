@@ -3,7 +3,7 @@ package ma.nafura.marches.api.controller;
 import jakarta.validation.Valid;
 import java.util.List;
 import ma.nafura.marches.api.request.FactureMarcheCreateDto;
-import ma.nafura.marches.domain.model.FactureMarche;
+import ma.nafura.marches.domain.facture.FactureMarche;
 import ma.nafura.marches.service.FactureMarcheService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

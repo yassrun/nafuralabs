@@ -7,8 +7,8 @@ import ma.nafura.catalogue.api.CatalogPriceContext;
 import ma.nafura.catalogue.api.CatalogPriceSnapshot;
 import ma.nafura.catalogue.api.CatalogPriceSource;
 import ma.nafura.etudes.api.request.ComposantDpuInputDto;
-import ma.nafura.etudes.domain.ReferenceType;
-import ma.nafura.etudes.domain.model.ComposantDpu;
+import ma.nafura.etudes.domain.appeloffre.ReferenceType;
+import ma.nafura.etudes.domain.dpu.ComposantDpu;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 

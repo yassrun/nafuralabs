@@ -3,7 +3,7 @@ package ma.nafura.catalogue.repository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import ma.nafura.catalogue.domain.model.CatalogOuvrage;
+import ma.nafura.catalogue.domain.ouvrage.CatalogOuvrage;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CatalogOuvrageRepository extends JpaRepository<CatalogOuvrage, UUID> {

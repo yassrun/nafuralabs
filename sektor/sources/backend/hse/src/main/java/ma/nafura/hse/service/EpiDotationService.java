@@ -9,12 +9,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import ma.nafura.hse.api.request.EpiDotationCreateDto;
 import ma.nafura.hse.api.request.EpiDotationUpdateDto;
-import ma.nafura.hse.domain.model.EpiDotation;
+import ma.nafura.hse.domain.epi.EpiDotation;
 import ma.nafura.hse.repository.EpiDotationRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.hse.seeders.EpiDotationSeedService;
 
 @Service
 public class EpiDotationService {

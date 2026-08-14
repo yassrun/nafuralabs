@@ -1,7 +1,7 @@
 package ma.nafura.marches.api.controller;
 
 import java.util.List;
-import ma.nafura.marches.domain.model.DgdMarche;
+import ma.nafura.marches.domain.dgd.DgdMarche;
 import ma.nafura.marches.service.DgdMarcheService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

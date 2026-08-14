@@ -7,23 +7,24 @@ import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import ma.nafura.achats.domain.model.FactureFournisseur;
+import ma.nafura.achats.domain.facture.FactureFournisseur;
 import ma.nafura.achats.repository.FactureFournisseurRepository;
 import ma.nafura.chantiers.api.dto.CashFlowProjectionMoisDto;
-import ma.nafura.chantiers.domain.model.Chantier;
-import ma.nafura.chantiers.domain.model.SituationTravaux;
+import ma.nafura.chantiers.domain.chantier.Chantier;
+import ma.nafura.chantiers.domain.situation.SituationTravaux;
 import ma.nafura.chantiers.repository.ChantierRepository;
 import ma.nafura.chantiers.repository.SituationTravauxRepository;
-import ma.nafura.marches.domain.model.FactureMarche;
+import ma.nafura.marches.domain.facture.FactureMarche;
 import ma.nafura.marches.repository.FactureMarcheRepository;
-import ma.nafura.marches.service.FactureMarcheSeedService;
+import ma.nafura.marches.seeders.FactureMarcheSeedService;
 import ma.nafura.platform.framework.context.TenantContext;
-import ma.nafura.rh.domain.model.FichePaie;
+import ma.nafura.rh.domain.paie.FichePaie;
 import ma.nafura.rh.repository.FichePaieRepository;
-import ma.nafura.rh.service.FichePaieSeedService;
+import ma.nafura.rh.seeders.FichePaieSeedService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.chantiers.seeders.ChantierSeedService;
 
 @Service
 public class CashFlowProjectionService {

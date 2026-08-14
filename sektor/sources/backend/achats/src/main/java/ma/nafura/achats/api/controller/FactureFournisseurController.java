@@ -7,7 +7,7 @@ import ma.nafura.achats.api.dto.MatchingReceptionDto;
 import ma.nafura.achats.api.dto.MatchingToleranceDto;
 import ma.nafura.achats.api.request.FactureFournisseurCreateDto;
 import ma.nafura.achats.api.request.FactureFournisseurLitigeDto;
-import ma.nafura.achats.domain.model.FactureFournisseur;
+import ma.nafura.achats.domain.facture.FactureFournisseur;
 import ma.nafura.achats.service.FactureFournisseurService;
 import ma.nafura.achats.service.MatchingThreeWayService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;

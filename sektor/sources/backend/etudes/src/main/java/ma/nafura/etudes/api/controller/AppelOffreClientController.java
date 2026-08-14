@@ -8,7 +8,7 @@ import ma.nafura.etudes.api.dto.ConvertToChantierResultDto;
 import ma.nafura.etudes.api.request.AppelOffreClientCreateDto;
 import ma.nafura.etudes.api.request.AppelOffreClientMarquerPerduDto;
 import ma.nafura.etudes.api.request.AppelOffreClientUpdateDto;
-import ma.nafura.etudes.domain.model.AppelOffreClient;
+import ma.nafura.etudes.domain.appeloffre.AppelOffreClient;
 import ma.nafura.etudes.service.AppelOffreClientService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

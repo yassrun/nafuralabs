@@ -6,8 +6,8 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 import ma.nafura.marches.api.request.PenaliteMarcheCreateDto;
-import ma.nafura.marches.domain.model.ContratMarche;
-import ma.nafura.marches.domain.model.PenaliteMarche;
+import ma.nafura.marches.domain.contrat.ContratMarche;
+import ma.nafura.marches.domain.penalite.PenaliteMarche;
 import ma.nafura.marches.repository.ContratMarcheRepository;
 import ma.nafura.marches.repository.PenaliteMarcheRepository;
 import ma.nafura.platform.framework.context.TenantContext;
@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.marches.seeders.PenaliteMarcheSeedService;
 
 @Service
 public class PenaliteMarcheService {

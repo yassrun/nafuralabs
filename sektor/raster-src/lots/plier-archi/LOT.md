@@ -6,4 +6,8 @@ Canon : Gateway fan-out · Socle n’est pas la porte métier · un BC publie `a
 
 **Premier slice :** Socle n’importe plus les jars métier · Études consomme Catalogue via `catalogue.api` seulement. C’est le cas qui décide si le modèle tient.
 
-**Pas dans ce lot :** CADRE / SPEC · HTTP BC→BC · jar `*-api` Maven publié · replier tous les packages `api/domain/…` sur chaque BC · ChainageAval / clients ventes (inbox).
+**Slice domain-objets :** `domain.model` → `domain/<agrégat>/`. Pas sortir le JPA, pas replier `api/services/repositories`.
+
+**Slice seeders :** `*SeedService` → `<bc>/seeders/`. Garde demo dans `socle/config`.
+
+**Pas dans ce lot :** CADRE / SPEC · HTTP BC→BC · jar `*-api` Maven publié · replier tous les packages `api/domain/services/…` · ChainageAval / clients ventes (inbox).

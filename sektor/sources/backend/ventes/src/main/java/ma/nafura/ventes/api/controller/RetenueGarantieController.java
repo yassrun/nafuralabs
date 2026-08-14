@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 import ma.nafura.ventes.api.dto.RetenueGarantieSyntheseDto;
-import ma.nafura.ventes.domain.model.RetenueGarantie;
+import ma.nafura.ventes.domain.garantie.RetenueGarantie;
 import ma.nafura.ventes.service.RetenueGarantieService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

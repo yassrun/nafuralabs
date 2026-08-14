@@ -3,7 +3,7 @@ package ma.nafura.etudes.api.dto;
 import java.util.List;
 import lombok.Builder;
 import lombok.Data;
-import ma.nafura.etudes.domain.model.DemandeCreationArticle;
+import ma.nafura.etudes.domain.dossier.DemandeCreationArticle;
 
 @Data
 @Builder

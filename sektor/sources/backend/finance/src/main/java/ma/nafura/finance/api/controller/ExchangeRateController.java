@@ -2,7 +2,7 @@ package ma.nafura.finance.api.controller;
 
 import java.util.List;
 import ma.nafura.finance.api.controller.base.ExchangeRateControllerBase;
-import ma.nafura.finance.domain.model.ExchangeRate;
+import ma.nafura.finance.domain.devise.ExchangeRate;
 import ma.nafura.finance.service.ExchangeRateService;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;

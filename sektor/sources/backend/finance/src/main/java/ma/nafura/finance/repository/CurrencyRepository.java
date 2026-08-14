@@ -2,7 +2,7 @@ package ma.nafura.finance.repository;
 
 import java.util.Optional;
 import java.util.UUID;
-import ma.nafura.finance.domain.model.Currency;
+import ma.nafura.finance.domain.devise.Currency;
 import ma.nafura.platform.framework.repository.TenantScopedRepository;
 import org.springframework.stereotype.Repository;
 

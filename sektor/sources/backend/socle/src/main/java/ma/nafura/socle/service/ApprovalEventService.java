@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.UUID;
 import ma.nafura.socle.api.dto.ApprovalEventDto;
 import ma.nafura.socle.api.dto.ApprovalIntegrityResultDto;
-import ma.nafura.socle.domain.model.ApprovalEvent;
+import ma.nafura.socle.domain.ApprovalEvent;
 import ma.nafura.socle.repository.ApprovalEventRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
@@ -92,7 +92,7 @@ public class ApprovalEventService {
                 .build();
     }
 
-    static String computeHash(
+    public static String computeHash(
             String previousHash, String action, String userId, OffsetDateTime timestamp, String payload) {
         String base = (previousHash != null ? previousHash : "")
                 + action

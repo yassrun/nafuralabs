@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import ma.nafura.hse.api.request.EpiDotationCreateDto;
 import ma.nafura.hse.api.request.EpiDotationUpdateDto;
-import ma.nafura.hse.domain.model.EpiDotation;
+import ma.nafura.hse.domain.epi.EpiDotation;
 import ma.nafura.hse.service.EpiDotationService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Set;
 import ma.nafura.etudes.api.dto.AOClientChecklistItemDto;
 import ma.nafura.etudes.api.dto.AOClientDocumentDto;
-import ma.nafura.etudes.domain.model.AppelOffreClient;
+import ma.nafura.etudes.domain.appeloffre.AppelOffreClient;
 import org.springframework.stereotype.Component;
 
 @Component

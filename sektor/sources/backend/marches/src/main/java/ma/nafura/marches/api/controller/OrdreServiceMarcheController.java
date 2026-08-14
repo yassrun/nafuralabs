@@ -3,7 +3,7 @@ package ma.nafura.marches.api.controller;
 import jakarta.validation.Valid;
 import java.util.List;
 import ma.nafura.marches.api.request.OrdreServiceMarcheCreateDto;
-import ma.nafura.marches.domain.model.OrdreServiceMarche;
+import ma.nafura.marches.domain.ordreservice.OrdreServiceMarche;
 import ma.nafura.marches.service.OrdreServiceMarcheService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

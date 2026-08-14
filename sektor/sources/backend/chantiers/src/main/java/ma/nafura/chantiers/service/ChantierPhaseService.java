@@ -6,12 +6,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import ma.nafura.chantiers.api.request.ChantierPhaseCreateDto;
-import ma.nafura.chantiers.domain.model.ChantierPhase;
+import ma.nafura.chantiers.domain.chantier.ChantierPhase;
 import ma.nafura.chantiers.repository.ChantierPhaseRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.chantiers.seeders.ChantierPhaseSeedService;
 
 @Service
 public class ChantierPhaseService {

@@ -16,14 +16,15 @@ import java.util.regex.Pattern;
 import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.rh.api.dto.HeureSupplementaireSyntheseDto;
 import ma.nafura.rh.api.request.HeureSupplementaireCreateDto;
-import ma.nafura.rh.domain.model.Employe;
-import ma.nafura.rh.domain.model.HeureSupplementaire;
+import ma.nafura.rh.domain.employe.Employe;
+import ma.nafura.rh.domain.paie.HeureSupplementaire;
 import ma.nafura.rh.repository.EmployeRepository;
 import ma.nafura.rh.repository.HeureSupplementaireRepository;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.rh.seeders.HeureSupplementaireSeedService;
 
 @Service
 public class HeureSupplementaireService {
@@ -159,7 +160,7 @@ public class HeureSupplementaireService {
                 .build();
     }
 
-    static BigDecimal tauxForType(String type) {
+    public static BigDecimal tauxForType(String type) {
         return switch (type) {
             case HeureSupplementaire.TYPE_HS25 -> new BigDecimal("0.2500");
             case HeureSupplementaire.TYPE_HS50 -> new BigDecimal("0.5000");

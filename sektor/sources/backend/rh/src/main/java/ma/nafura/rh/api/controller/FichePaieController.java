@@ -3,7 +3,7 @@ package ma.nafura.rh.api.controller;
 import java.util.List;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;
-import ma.nafura.rh.domain.model.FichePaie;
+import ma.nafura.rh.domain.paie.FichePaie;
 import ma.nafura.rh.service.FichePaieService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

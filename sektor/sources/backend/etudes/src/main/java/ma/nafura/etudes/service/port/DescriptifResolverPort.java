@@ -1,6 +1,6 @@
 package ma.nafura.etudes.service.port;
 
-import ma.nafura.etudes.domain.model.DpgfNoeud;
+import ma.nafura.etudes.domain.dpgf.DpgfNoeud;
 
 /**
  * Résout le descriptif technique d'un ARTICLE depuis le CPS.

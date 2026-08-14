@@ -1,6 +1,6 @@
 package ma.nafura.finance.repository;
 
-import ma.nafura.finance.domain.model.PaymentTerm;
+import ma.nafura.finance.domain.reglement.PaymentTerm;
 import ma.nafura.platform.framework.repository.TenantScopedRepository;
 import org.springframework.stereotype.Repository;
 

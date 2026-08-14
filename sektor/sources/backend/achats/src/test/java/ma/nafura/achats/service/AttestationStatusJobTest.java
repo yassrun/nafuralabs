@@ -9,7 +9,7 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
-import ma.nafura.achats.domain.model.AttestationFournisseur;
+import ma.nafura.achats.domain.fournisseur.AttestationFournisseur;
 import ma.nafura.achats.job.AttestationFournisseurStatusJob;
 import ma.nafura.achats.repository.AttestationFournisseurRepository;
 import ma.nafura.platform.framework.context.TenantContext;

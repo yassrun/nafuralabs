@@ -5,7 +5,7 @@ import java.io.InputStream;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
-import ma.nafura.etudes.domain.model.DossierDocument;
+import ma.nafura.etudes.domain.dossier.DossierDocument;
 import ma.nafura.etudes.repository.DossierDocumentRepository;
 import ma.nafura.platform.collaboration.docmanager.domain.enums.DocumentType;
 import ma.nafura.platform.collaboration.docmanager.domain.model.Document;

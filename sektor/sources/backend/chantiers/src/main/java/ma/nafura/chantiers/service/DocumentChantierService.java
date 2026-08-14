@@ -10,8 +10,8 @@ import java.util.UUID;
 import ma.nafura.chantiers.api.dto.DocumentChantierDto;
 import ma.nafura.chantiers.api.request.DocumentChantierCreateDto;
 import ma.nafura.chantiers.api.request.DocumentChantierUpdateDto;
-import ma.nafura.chantiers.domain.model.Chantier;
-import ma.nafura.chantiers.domain.model.DocumentChantier;
+import ma.nafura.chantiers.domain.chantier.Chantier;
+import ma.nafura.chantiers.domain.chantier.DocumentChantier;
 import ma.nafura.chantiers.repository.DocumentChantierRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.data.domain.Page;
@@ -22,6 +22,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.chantiers.seeders.ChantierDocumentsSeedService;
 
 @Service
 public class DocumentChantierService {

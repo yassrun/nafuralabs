@@ -3,7 +3,7 @@ package ma.nafura.etudes.service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
-import ma.nafura.etudes.domain.model.ComposantDpu;
+import ma.nafura.etudes.domain.dpu.ComposantDpu;
 import org.springframework.stereotype.Service;
 
 @Service

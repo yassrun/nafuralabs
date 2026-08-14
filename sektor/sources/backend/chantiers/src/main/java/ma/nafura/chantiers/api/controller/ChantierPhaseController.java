@@ -3,7 +3,7 @@ package ma.nafura.chantiers.api.controller;
 import jakarta.validation.Valid;
 import java.util.List;
 import ma.nafura.chantiers.api.request.ChantierPhaseCreateDto;
-import ma.nafura.chantiers.domain.model.ChantierPhase;
+import ma.nafura.chantiers.domain.chantier.ChantierPhase;
 import ma.nafura.chantiers.service.ChantierPhaseService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

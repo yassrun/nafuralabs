@@ -8,9 +8,9 @@ import java.util.UUID;
 import ma.nafura.marches.api.request.ReceptionDefinitiveDto;
 import ma.nafura.marches.api.request.ReceptionProvisoireDto;
 import ma.nafura.marches.api.request.ReserveReceptionCreateDto;
-import ma.nafura.marches.domain.model.ContratMarche;
-import ma.nafura.marches.domain.model.ReceptionMarche;
-import ma.nafura.marches.domain.model.ReserveReception;
+import ma.nafura.marches.domain.contrat.ContratMarche;
+import ma.nafura.marches.domain.reception.ReceptionMarche;
+import ma.nafura.marches.domain.reception.ReserveReception;
 import ma.nafura.marches.repository.ContratMarcheRepository;
 import ma.nafura.marches.repository.ReceptionMarcheRepository;
 import ma.nafura.marches.repository.ReserveReceptionRepository;
@@ -19,6 +19,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.marches.seeders.ReceptionMarcheSeedService;
 
 @Service
 public class ReceptionMarcheService {

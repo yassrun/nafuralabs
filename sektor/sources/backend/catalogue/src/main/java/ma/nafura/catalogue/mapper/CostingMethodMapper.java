@@ -2,7 +2,7 @@ package ma.nafura.catalogue.mapper;
 
 import java.util.UUID;
 import ma.nafura.platform.framework.mapper.EntityMapper;
-import ma.nafura.catalogue.domain.model.CostingMethod;
+import ma.nafura.catalogue.domain.stock.CostingMethod;
 import ma.nafura.catalogue.api.request.CostingMethodCreateDto;
 import ma.nafura.catalogue.api.request.CostingMethodUpdateDto;
 import org.mapstruct.Mapper;

@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.UUID;
 import ma.nafura.chantiers.api.dto.JournalChantierDto;
 import ma.nafura.chantiers.api.request.JournalChantierCreateDto;
-import ma.nafura.chantiers.domain.model.JournalChantier;
+import ma.nafura.chantiers.domain.chantier.JournalChantier;
 import ma.nafura.chantiers.repository.JournalChantierRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;

@@ -6,7 +6,7 @@ import java.util.UUID;
 
 /**
  * Candidat de prix provenant d'une source externe (achats).
- * Le {@code sourcePrix} utilise les constantes de {@link ma.nafura.catalogue.domain.SourcePrix}.
+ * Le {@code sourcePrix} utilise les constantes de {@link ma.nafura.catalogue.domain.article.SourcePrix}.
  */
 public record PrixCandidat(
         BigDecimal prixUnitaire,

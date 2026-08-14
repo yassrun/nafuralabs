@@ -1,8 +1,8 @@
 package ma.nafura.achats.repository;
 
 import java.util.UUID;
-import ma.nafura.achats.domain.model.Partner;
-import ma.nafura.achats.domain.model.PartnerRoleType;
+import ma.nafura.achats.domain.fournisseur.Partner;
+import ma.nafura.achats.domain.fournisseur.PartnerRoleType;
 import ma.nafura.platform.framework.repository.TenantScopedRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

@@ -12,16 +12,16 @@ import ma.nafura.etudes.api.dto.DpuHistoriqueEntryDto;
 import ma.nafura.etudes.api.request.ComposantDpuInputDto;
 import ma.nafura.etudes.api.request.PrixDpuCreateDto;
 import ma.nafura.etudes.api.request.PrixDpuUpdateDto;
-import ma.nafura.etudes.domain.ComposantReference;
-import ma.nafura.etudes.domain.ReferenceType;
-import ma.nafura.etudes.domain.model.ComposantDpu;
-import ma.nafura.etudes.domain.model.ComposantOuvrage;
-import ma.nafura.etudes.domain.model.Dpgf;
-import ma.nafura.etudes.domain.model.DpgfNoeud;
-import ma.nafura.etudes.domain.model.DpuVersion;
-import ma.nafura.etudes.domain.model.Ouvrage;
-import ma.nafura.etudes.domain.model.PrixDpu;
-import ma.nafura.etudes.domain.model.UniteMain;
+import ma.nafura.etudes.domain.ouvrage.ComposantReference;
+import ma.nafura.etudes.domain.appeloffre.ReferenceType;
+import ma.nafura.etudes.domain.dpu.ComposantDpu;
+import ma.nafura.etudes.domain.ouvrage.ComposantOuvrage;
+import ma.nafura.etudes.domain.dpgf.Dpgf;
+import ma.nafura.etudes.domain.dpgf.DpgfNoeud;
+import ma.nafura.etudes.domain.dpu.DpuVersion;
+import ma.nafura.etudes.domain.ouvrage.Ouvrage;
+import ma.nafura.etudes.domain.dpu.PrixDpu;
+import ma.nafura.etudes.domain.dpu.UniteMain;
 import ma.nafura.etudes.repository.DossierEtudeRepository;
 import ma.nafura.etudes.repository.DpgfNoeudRepository;
 import ma.nafura.etudes.repository.DpgfRepository;
@@ -347,7 +347,7 @@ public class DpuService {
             noeud.setMargePercent(entity.getMargeBeneficiairePercent());
         }
         noeud.setPrixDpuId(entity.getId());
-        noeud.setOrigineCout(ma.nafura.etudes.domain.OrigineCout.DECOMPOSE.name());
+        noeud.setOrigineCout(ma.nafura.etudes.domain.dpu.OrigineCout.DECOMPOSE.name());
         noeud.setCoutDeduit(false);
         noeud.setEstimationSaisieEn(null);
         if (noeud.getQuantite() != null) {

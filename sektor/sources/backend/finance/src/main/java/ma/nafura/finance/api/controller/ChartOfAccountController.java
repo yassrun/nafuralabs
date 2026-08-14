@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.UUID;
 import ma.nafura.finance.api.request.ChartOfAccountCreateDto;
 import ma.nafura.finance.api.request.ChartOfAccountUpdateDto;
-import ma.nafura.finance.domain.model.ChartOfAccount;
+import ma.nafura.finance.domain.compte.ChartOfAccount;
 import ma.nafura.finance.service.ChartOfAccountService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

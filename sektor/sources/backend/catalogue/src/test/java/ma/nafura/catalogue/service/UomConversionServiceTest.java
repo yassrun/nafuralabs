@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
 import java.util.UUID;
 import ma.nafura.catalogue.api.dto.UomConversionResultDto;
-import ma.nafura.catalogue.domain.model.UnitOfMeasure;
+import ma.nafura.catalogue.domain.article.UnitOfMeasure;
 import org.junit.jupiter.api.Test;
 
 class UomConversionServiceTest {

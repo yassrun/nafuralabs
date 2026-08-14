@@ -4,8 +4,8 @@ import ma.nafura.platform.collaboration.docmanager.template.AmountInWords;
 import ma.nafura.platform.collaboration.docmanager.template.EntityDataProvider;
 import ma.nafura.platform.collaboration.docmanager.template.PrintDocument;
 import ma.nafura.platform.collaboration.docmanager.template.SampleRecord;
-import ma.nafura.ventes.domain.model.FactureClient;
-import ma.nafura.ventes.domain.model.FactureClientLigne;
+import ma.nafura.ventes.domain.facture.FactureClient;
+import ma.nafura.ventes.domain.facture.FactureClientLigne;
 import ma.nafura.ventes.service.FactureClientService;
 import org.springframework.stereotype.Component;
 

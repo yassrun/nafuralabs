@@ -2,7 +2,7 @@ package ma.nafura.catalogue.mapper;
 
 import java.util.UUID;
 import ma.nafura.platform.framework.mapper.EntityMapper;
-import ma.nafura.catalogue.domain.model.UoMCategory;
+import ma.nafura.catalogue.domain.article.UoMCategory;
 import ma.nafura.catalogue.api.request.UoMCategoryCreateDto;
 import ma.nafura.catalogue.api.request.UoMCategoryUpdateDto;
 import org.mapstruct.Mapper;

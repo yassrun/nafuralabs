@@ -6,7 +6,7 @@ import java.util.UUID;
 import ma.nafura.achats.api.dto.PartnerAttestationsStatusDto;
 import ma.nafura.achats.api.request.AttestationFournisseurCreateDto;
 import ma.nafura.achats.api.request.AttestationFournisseurUpdateDto;
-import ma.nafura.achats.domain.model.AttestationFournisseur;
+import ma.nafura.achats.domain.fournisseur.AttestationFournisseur;
 import ma.nafura.achats.service.AttestationFournisseurService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

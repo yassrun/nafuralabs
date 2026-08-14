@@ -10,12 +10,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import ma.nafura.hse.api.request.FormationHseCreateDto;
 import ma.nafura.hse.api.request.FormationHseUpdateDto;
-import ma.nafura.hse.domain.model.FormationHse;
+import ma.nafura.hse.domain.formation.FormationHse;
 import ma.nafura.hse.repository.FormationHseRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.hse.seeders.FormationHseSeedService;
 
 @Service
 public class FormationHseService {

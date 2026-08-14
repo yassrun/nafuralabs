@@ -2,7 +2,7 @@ package ma.nafura.marches.repository;
 
 import java.util.List;
 import java.util.UUID;
-import ma.nafura.marches.domain.model.OrdreServiceMarche;
+import ma.nafura.marches.domain.ordreservice.OrdreServiceMarche;
 import ma.nafura.platform.framework.repository.TenantScopedRepository;
 import org.springframework.stereotype.Repository;
 

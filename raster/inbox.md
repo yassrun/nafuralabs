@@ -1,12 +1,13 @@
 # INBOX
 
 <!-- Capture globale Raster — task draft : une ligne = description, @tag optionnel, pas d'ID. -->
+- Remettre le bandeau d'invitation collègues (onboarding shell) — désactivé 14/08, code conservé `invite-team-banner` @feature
 - SEKTOR-100 : etudes/build.gradle garde `project(':sektor:achats|chantiers|marches')` — drop hors slice Études↔Catalogue @tech
 - PLT-33 (`done-me`) blocked_by `PLT-32` id inconnu — `raster/t.mjs check` rouge hors Sektor @tech
 - venue-catalog web encore Angular 19 après SEKTOR-94…97 (platform peers 22) — monter 19→22 @tech
 - SEKTOR-95/97 : @storybook/angular 8 peer `<20` — monter Storybook 9 ou laisser `--legacy-peer-deps` @tech
 - SEKTOR-95/97 : @zxing/ngx-scanner encore ^19 sous Angular 22 @tech
-- SEKTOR-96/97 : NG21+ Signal unique symbol — 2 copies @angular incompatibles. Junction locale `nafura-platform/sources/web/node_modules/@angular` → Sektor. `npm i` platform **suit** la junction et casse le CLI Sektor — recréer la junction seulement après les installs. @tech
+- SEKTOR-96/97 : NG21+ Signal unique symbol — 2 copies @angular incompatibles. Junction locale `nafura-platform/sources/web/node_modules/@angular` → Sektor. `npm i` platform **suit** la junction et casse le CLI Sektor — recréer la junction seulement après les installs. `ng serve` Vite prebundle = 2e copie (NG0203 page blanche) ; workaround cursor : `prebundle: false` dans `sektor/sources/web/angular.json`. @tech
 - SEKTOR-97 : lucide-angular peer `13.x - 21.x` sous Angular 22 — `--legacy-peer-deps` @tech
 - SEKTOR-97 : Angular CLI 22 exige Node ≥ 22.22.3 (machine passée 22.15 → 22.23.2 via winget) @tech
 - SEKTOR-86 : tsconfig garde @core/@lib/@features/@services — platform anatomy les importe encore (drop = rewrite platform, hors lot) @tech

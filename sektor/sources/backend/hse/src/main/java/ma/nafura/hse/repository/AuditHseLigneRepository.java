@@ -3,7 +3,7 @@ package ma.nafura.hse.repository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import ma.nafura.hse.domain.model.AuditHseLigne;
+import ma.nafura.hse.domain.audit.AuditHseLigne;
 import ma.nafura.platform.framework.repository.TenantScopedRepository;
 import org.springframework.stereotype.Repository;
 

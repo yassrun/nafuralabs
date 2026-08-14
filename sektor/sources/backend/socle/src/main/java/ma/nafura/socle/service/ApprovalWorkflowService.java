@@ -5,12 +5,13 @@ import java.util.Locale;
 import java.util.UUID;
 import ma.nafura.socle.api.request.ApprovalWorkflowCreateDto;
 import ma.nafura.socle.api.request.ApprovalWorkflowUpdateDto;
-import ma.nafura.socle.domain.model.ApprovalWorkflow;
+import ma.nafura.socle.domain.ApprovalWorkflow;
 import ma.nafura.socle.repository.ApprovalWorkflowRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.socle.seeders.ApprovalWorkflowSeedService;
 
 @Service
 public class ApprovalWorkflowService {

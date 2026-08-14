@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import ma.nafura.socle.domain.model.MatricePouvoir;
+import ma.nafura.socle.domain.MatricePouvoir;
 import ma.nafura.socle.repository.MatricePouvoirRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.junit.jupiter.api.AfterEach;
@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ma.nafura.socle.seeders.MatricePouvoirSeedService;
 
 @ExtendWith(MockitoExtension.class)
 class MatricePouvoirServiceTest {

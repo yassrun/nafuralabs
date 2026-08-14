@@ -14,7 +14,7 @@ import java.util.Optional;
 import java.util.UUID;
 import ma.nafura.catalogue.api.request.UnitOfMeasureCreateDto;
 import ma.nafura.catalogue.api.request.UnitOfMeasureUpdateDto;
-import ma.nafura.catalogue.domain.model.UnitOfMeasure;
+import ma.nafura.catalogue.domain.article.UnitOfMeasure;
 import ma.nafura.catalogue.mapper.UnitOfMeasureMapper;
 import ma.nafura.catalogue.repository.UnitOfMeasureRepository;
 import ma.nafura.platform.framework.context.TenantContext;

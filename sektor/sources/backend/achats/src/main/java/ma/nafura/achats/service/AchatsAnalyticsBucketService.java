@@ -14,10 +14,10 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import ma.nafura.achats.api.dto.AnalyticsBucketResponseDto;
 import ma.nafura.achats.api.dto.AnalyticsBucketRowDto;
-import ma.nafura.achats.domain.model.AppelOffreAchat;
-import ma.nafura.achats.domain.model.BonCommandeAchat;
-import ma.nafura.achats.domain.model.ContratFournisseur;
-import ma.nafura.achats.domain.model.DemandeAchat;
+import ma.nafura.achats.domain.appeloffre.AppelOffreAchat;
+import ma.nafura.achats.domain.commande.BonCommandeAchat;
+import ma.nafura.achats.domain.contrat.ContratFournisseur;
+import ma.nafura.achats.domain.demande.DemandeAchat;
 import ma.nafura.achats.repository.AppelOffreAchatRepository;
 import ma.nafura.achats.repository.BonCommandeAchatRepository;
 import ma.nafura.achats.repository.ContratFournisseurRepository;
@@ -26,6 +26,10 @@ import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.achats.seeders.AppelOffreAchatSeedService;
+import ma.nafura.achats.seeders.BonCommandeAchatSeedService;
+import ma.nafura.achats.seeders.ContratFournisseurSousTraitanceSeedService;
+import ma.nafura.achats.seeders.DemandeAchatSeedService;
 
 @Service
 public class AchatsAnalyticsBucketService {

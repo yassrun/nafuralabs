@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ma.nafura.etudes.api.request.ImportNoeudDto;
 import ma.nafura.etudes.api.request.ImportTreeRequest;
-import ma.nafura.etudes.domain.model.DpgfNoeud;
+import ma.nafura.etudes.domain.dpgf.DpgfNoeud;
 import ma.nafura.etudes.service.bordereau.BordereauCandidateMerger;
 import ma.nafura.etudes.service.bordereau.BordereauHybridAssembler;
 import ma.nafura.etudes.service.bordereau.PdfBordereauLayoutParser;

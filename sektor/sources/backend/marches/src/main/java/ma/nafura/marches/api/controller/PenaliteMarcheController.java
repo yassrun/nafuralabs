@@ -3,7 +3,7 @@ package ma.nafura.marches.api.controller;
 import jakarta.validation.Valid;
 import java.util.List;
 import ma.nafura.marches.api.request.PenaliteMarcheCreateDto;
-import ma.nafura.marches.domain.model.PenaliteMarche;
+import ma.nafura.marches.domain.penalite.PenaliteMarche;
 import ma.nafura.marches.service.PenaliteMarcheService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

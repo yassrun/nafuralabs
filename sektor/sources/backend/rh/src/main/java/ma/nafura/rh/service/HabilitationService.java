@@ -10,13 +10,14 @@ import java.util.regex.Pattern;
 import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.rh.api.request.HabilitationCreateDto;
 import ma.nafura.rh.api.request.HabilitationUpdateDto;
-import ma.nafura.rh.domain.model.Employe;
-import ma.nafura.rh.domain.model.Habilitation;
+import ma.nafura.rh.domain.employe.Employe;
+import ma.nafura.rh.domain.employe.Habilitation;
 import ma.nafura.rh.repository.EmployeRepository;
 import ma.nafura.rh.repository.HabilitationRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.rh.seeders.ContratHabilitationSeedService;
 
 @Service
 public class HabilitationService {

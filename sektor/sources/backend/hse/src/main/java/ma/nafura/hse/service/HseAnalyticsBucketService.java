@@ -11,12 +11,13 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import ma.nafura.hse.api.dto.AnalyticsBucketResponseDto;
 import ma.nafura.hse.api.dto.AnalyticsBucketRowDto;
-import ma.nafura.hse.domain.model.Incident;
+import ma.nafura.hse.domain.incident.Incident;
 import ma.nafura.hse.repository.IncidentRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.hse.seeders.IncidentSeedService;
 
 @Service
 public class HseAnalyticsBucketService {

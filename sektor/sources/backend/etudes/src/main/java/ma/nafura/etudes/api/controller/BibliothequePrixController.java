@@ -1,7 +1,7 @@
 package ma.nafura.etudes.api.controller;
 
 import java.math.BigDecimal;
-import ma.nafura.etudes.domain.model.Ouvrage;
+import ma.nafura.etudes.domain.ouvrage.Ouvrage;
 import ma.nafura.etudes.service.OuvrageService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import ma.nafura.catalogue.domain.model.StockBalance;
+import ma.nafura.catalogue.domain.stock.StockBalance;
 import ma.nafura.platform.framework.repository.TenantScopedRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

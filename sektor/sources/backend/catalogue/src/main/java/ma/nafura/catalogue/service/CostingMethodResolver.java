@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import ma.nafura.platform.framework.context.TenantContext;
-import ma.nafura.catalogue.domain.model.CostingMethod;
+import ma.nafura.catalogue.domain.stock.CostingMethod;
 import ma.nafura.catalogue.repository.CostingMethodRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

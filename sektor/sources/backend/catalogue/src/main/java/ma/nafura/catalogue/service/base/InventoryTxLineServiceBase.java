@@ -2,7 +2,7 @@ package ma.nafura.catalogue.service.base;
 
 import java.util.UUID;
 import ma.nafura.platform.framework.service.crud.JpaCrudService;
-import ma.nafura.catalogue.domain.model.InventoryTxLine;
+import ma.nafura.catalogue.domain.stock.InventoryTxLine;
 import ma.nafura.catalogue.api.request.InventoryTxLineCreateDto;
 import ma.nafura.catalogue.api.request.InventoryTxLineUpdateDto;
 import ma.nafura.catalogue.mapper.InventoryTxLineMapper;

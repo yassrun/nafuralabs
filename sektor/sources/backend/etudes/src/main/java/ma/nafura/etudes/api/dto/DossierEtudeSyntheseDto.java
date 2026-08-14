@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.Builder;
 import lombok.Value;
-import ma.nafura.etudes.domain.model.StatutDossierEtude;
+import ma.nafura.etudes.domain.dossier.StatutDossierEtude;
 import ma.nafura.etudes.service.gate.ResultatGate;
 
 /**

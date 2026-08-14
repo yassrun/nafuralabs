@@ -3,8 +3,8 @@ package ma.nafura.socle.service;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
-import ma.nafura.socle.domain.model.ApprovalRequest;
-import ma.nafura.socle.domain.model.ApprovalWorkflow;
+import ma.nafura.socle.domain.ApprovalRequest;
+import ma.nafura.socle.domain.ApprovalWorkflow;
 import org.junit.jupiter.api.Test;
 
 class EscaladeApprobationServiceTest {

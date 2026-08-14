@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import ma.nafura.hse.api.request.InspectionCreateDto;
 import ma.nafura.hse.api.request.InspectionUpdateDto;
-import ma.nafura.hse.domain.model.Inspection;
+import ma.nafura.hse.domain.inspection.Inspection;
 import ma.nafura.hse.service.InspectionService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

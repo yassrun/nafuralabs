@@ -3,7 +3,7 @@ package ma.nafura.socle.repository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import ma.nafura.socle.domain.model.ApprovalRequest;
+import ma.nafura.socle.domain.ApprovalRequest;
 import ma.nafura.platform.framework.repository.TenantScopedRepository;
 import org.springframework.stereotype.Repository;
 

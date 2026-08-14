@@ -17,7 +17,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 import ma.nafura.etudes.api.request.ImportTreeRequest;
-import ma.nafura.etudes.domain.model.DpgfNoeud;
+import ma.nafura.etudes.domain.dpgf.DpgfNoeud;
 import ma.nafura.etudes.service.bordereau.BordereauCandidateMerger;
 import ma.nafura.etudes.service.bordereau.BordereauHybridAssembler;
 import ma.nafura.etudes.service.bordereau.BordereauParseResult;

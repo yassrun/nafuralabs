@@ -14,12 +14,13 @@ import java.util.regex.Pattern;
 import ma.nafura.chantiers.api.dto.ChantierLookupDto;
 import ma.nafura.chantiers.api.request.ChantierCreateDto;
 import ma.nafura.chantiers.api.request.ChantierUpdateDto;
-import ma.nafura.chantiers.domain.model.Chantier;
+import ma.nafura.chantiers.domain.chantier.Chantier;
 import ma.nafura.chantiers.repository.ChantierRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.chantiers.seeders.ChantierSeedService;
 
 @Service
 public class ChantierService {

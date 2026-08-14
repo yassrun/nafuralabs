@@ -13,15 +13,16 @@ import ma.nafura.rh.api.dto.PointageBatchDto;
 import ma.nafura.rh.api.dto.PointageDto;
 import ma.nafura.rh.api.request.PointageBatchCreateDto;
 import ma.nafura.rh.api.request.PointageInputDto;
-import ma.nafura.rh.domain.model.Employe;
-import ma.nafura.rh.domain.model.Pointage;
-import ma.nafura.rh.domain.model.PointageBatch;
+import ma.nafura.rh.domain.employe.Employe;
+import ma.nafura.rh.domain.temps.Pointage;
+import ma.nafura.rh.domain.temps.PointageBatch;
 import ma.nafura.rh.repository.EmployeRepository;
 import ma.nafura.rh.repository.PointageBatchRepository;
 import ma.nafura.rh.repository.PointageRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.rh.seeders.PointageSeedService;
 
 @Service
 public class PointageBatchService {

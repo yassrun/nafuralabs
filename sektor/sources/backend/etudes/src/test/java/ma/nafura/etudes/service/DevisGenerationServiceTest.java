@@ -5,9 +5,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
-import ma.nafura.etudes.domain.model.DevisLigne;
-import ma.nafura.etudes.domain.model.Dpgf;
-import ma.nafura.etudes.domain.model.DpgfNoeud;
+import ma.nafura.etudes.domain.devis.DevisLigne;
+import ma.nafura.etudes.domain.dpgf.Dpgf;
+import ma.nafura.etudes.domain.dpgf.DpgfNoeud;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

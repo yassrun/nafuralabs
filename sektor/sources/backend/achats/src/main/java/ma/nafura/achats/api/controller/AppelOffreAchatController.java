@@ -9,7 +9,7 @@ import ma.nafura.achats.service.AppelOffreComparatifService;
 import ma.nafura.achats.api.request.AppelOffreAttribuerDto;
 import ma.nafura.achats.api.request.AppelOffreAchatCreateDto;
 import ma.nafura.achats.api.request.AppelOffreAchatUpdateDto;
-import ma.nafura.achats.domain.model.AppelOffreAchat;
+import ma.nafura.achats.domain.appeloffre.AppelOffreAchat;
 import ma.nafura.achats.service.AppelOffreAchatService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

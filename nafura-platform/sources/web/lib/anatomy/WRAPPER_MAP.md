@@ -17,12 +17,12 @@
 | **Checkbox** | ❌ None | Material (`mat-checkbox`) | ❌ Direct | **Wrap now** | Pink accent leak; needs `nf-checkbox` or global override |
 | **Text Input** | `nf-search-input` (search only) | Material (`mat-form-field`) | ⚠️ Partial | Refactor later | General text input wrapper needed |
 | **Search Input** | `nf-search-input`, `nf-search-expandable` | Material (`mat-form-field`) | ✅ Wrapped | Keep as-is | Expandable variant available |
-| **Select** | ❌ None (via `nf-filter-bar`) | PrimeNG (`p-select`) | ⚠️ Indirect | Refactor later | Only usable inside filter-bar today |
-| **MultiSelect** | ❌ None (via `nf-filter-bar`) | PrimeNG (`p-multiSelect`) | ⚠️ Indirect | Refactor later | Only usable inside filter-bar today |
-| **DatePicker** | ❌ None (via `nf-filter-bar`) | PrimeNG (`p-datePicker`) | ⚠️ Indirect | Refactor later | Only usable inside filter-bar today |
-| **Number Input** | ❌ None (via `nf-filter-bar`) | PrimeNG (`p-inputNumber`) | ⚠️ Indirect | Refactor later | Only usable inside filter-bar today |
+| **Select** | ❌ None (via `nf-filter-bar`) | Material (`mat-select`) | ⚠️ Indirect | Refactor later | Only usable inside filter-bar today |
+| **MultiSelect** | ❌ None (via `nf-filter-bar`) | Material (`mat-select` multiple) | ⚠️ Indirect | Refactor later | Only usable inside filter-bar today |
+| **DatePicker** | ❌ None (via `nf-filter-bar`) | Material (`mat-datepicker`) | ⚠️ Indirect | Refactor later | Only usable inside filter-bar today |
+| **Number Input** | ❌ None (via `nf-filter-bar`) | Material (`matInput`) | ⚠️ Indirect | Refactor later | Only usable inside filter-bar today |
 | **Table / DataGrid** | `nf-data-table` | Material (`mat-table`, `mat-sort`) | ✅ Wrapped | Keep as-is | Full-featured with selection |
-| **TreeTable** | `nf-tree-table` | PrimeNG (`p-treetable`) | ✅ Wrapped | Keep as-is | Heterogeneous hierarchical rows with projected cells/details |
+| **TreeTable** | `nf-tree-table` | Material (`mat-table`, arbre aplati) | ✅ Wrapped | Keep as-is | Heterogeneous hierarchical rows with projected cells/details |
 | **Paginator** | `nf-pagination` | Material (`mat-paginator`) | ✅ Wrapped | Keep as-is | 1-indexed API, styled via tokens |
 | **Badge / Tag** | `nf-badge` | Custom (no engine) | ✅ Wrapped | Keep as-is | Pure CSS with `--nf-color-*` |
 | **Drawer / Panel** | `nf-drawer` | Custom (no engine) | ✅ Wrapped | Keep as-is | Slide-in panel with backdrop |
@@ -44,7 +44,7 @@
 | Category | Engine | Rationale |
 |----------|--------|-----------|
 | **Table, Sort, Paginator** | Angular Material | Best keyboard navigation, ARIA, CDK integration |
-| **Form Controls (Select, Date, Multi)** | PrimeNG | Richer features than Material forms, better UX for complex selection |
+| **Form Controls (Select, Date, Multi)** | Angular Material | Same engine as listings (`nf-filter-builder`) |
 | **Overlays (Menu, Tooltip)** | Angular Material | Mature overlay positioning via CDK |
 | **Modals, Drawers** | Custom + CDK | Full control over styling, CDK for portal management |
 | **Simple UI (Badge, Spinner, etc.)** | Custom | No engine needed; pure CSS/HTML |
@@ -67,7 +67,7 @@
 
 | File | Component | Usage | Action |
 |------|-----------|-------|--------|
-| `filter-bar.component.ts` | `p-select`, `p-multiSelect`, etc. | Filter controls | Acceptable (inside wrapper) |
+| `filter-bar.component.ts` | `mat-select`, `mat-datepicker`, etc. | Filter controls | Acceptable (inside wrapper) |
 
 **Note**: Direct usage inside `lib/anatomy/components/**` is acceptable. Direct usage in `features/**` or `pages/**` is NOT acceptable.
 
@@ -85,9 +85,9 @@
 
 | Wrapper | Engine | Notes |
 |---------|--------|-------|
-| `nf-select` | PrimeNG `p-select` | Standalone select for use outside filter-bar |
-| `nf-multiselect` | PrimeNG `p-multiSelect` | Standalone multiselect |
-| `nf-datepicker` | PrimeNG `p-datePicker` | Standalone date picker |
+| `nf-select` | Material `mat-select` | Standalone select for use outside filter-bar |
+| `nf-multiselect` | Material `mat-select` multiple | Standalone multiselect |
+| `nf-datepicker` | Material `mat-datepicker` | Standalone date picker |
 | `nf-input` | Material `mat-form-field` | General text input wrapper |
 
 ### Priority 3: Future (Nice to Have)
@@ -205,7 +205,7 @@ echo "OK: No direct engine usage in feature code"
 |----------------|-----------|--------|
 | Add a button | `<button mat-button>` | `<nf-button>` |
 | Add a checkbox | `<mat-checkbox>` | `<nf-data-table>` (selection) or global override |
-| Add a dropdown | `<p-select>` | `<nf-filter-bar>` or request `nf-select` |
+| Add a dropdown | `<mat-select>` | `<nf-filter-bar>` / `<nf-filter-builder>` or request `nf-select` |
 | Add a tooltip | `[matTooltip]` | `[nfTooltip]` |
 | Add a table | `<table mat-table>` | `<nf-data-table>` |
 | Add a modal | `<mat-dialog>` | `<nf-modal>` or `ConfirmDialogService` |
@@ -218,7 +218,7 @@ echo "OK: No direct engine usage in feature code"
 
 Three icon sets are loaded:
 1. **Material Icons** - via `MatIconModule` (primary for UI)
-2. **PrimeIcons** - via `primeicons/primeicons.css` (for PrimeNG components)
+2. **Lucide** - via `lucide-angular` (`nf-button`)
 3. **FontAwesome** - via `@fortawesome/fontawesome-free` (legacy)
 
 ### Recommendation
@@ -226,10 +226,10 @@ Three icon sets are loaded:
 | Context | Icon Set | Rationale |
 |---------|----------|-----------|
 | UI icons (buttons, menus, etc.) | Material Icons | Consistent with `mat-icon`, well-integrated |
-| PrimeNG internal icons | PrimeIcons | Required by PrimeNG components |
+| Buttons / lucide registry | Lucide | `nf-button` |
 | Legacy/specific needs | FontAwesome | Deprecate over time |
 
-**Rule**: New UI code should use Material Icons exclusively. PrimeIcons are acceptable only within PrimeNG components.
+**Rule**: New UI code should use Material Icons exclusively.
 
 ---
 
@@ -239,6 +239,6 @@ Three icon sets are loaded:
 |--------|-------|----------|
 | ✅ Fully Wrapped | 18 | `nf-button`, `nf-data-table`, `nf-badge`, `nf-drawer` |
 | ⚠️ Needs Global Override | 1 | `mat-checkbox` (pink accent) |
-| ⚠️ Indirect Only | 4 | `p-select`, `p-multiSelect`, `p-datePicker`, `p-inputNumber` |
+| ⚠️ Indirect Only | 4 | `mat-select`, `mat-datepicker` via `nf-filter-bar` |
 | ❌ Missing Standalone | 4 | `nf-select`, `nf-input`, `nf-datepicker`, `nf-checkbox` |
 

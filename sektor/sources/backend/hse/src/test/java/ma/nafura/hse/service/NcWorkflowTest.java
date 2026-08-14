@@ -13,8 +13,8 @@ import java.util.Optional;
 import java.util.UUID;
 import ma.nafura.hse.api.request.CapaActionCreateDto;
 import ma.nafura.hse.api.request.NonConformiteCreateDto;
-import ma.nafura.hse.domain.model.CapaAction;
-import ma.nafura.hse.domain.model.NonConformite;
+import ma.nafura.hse.domain.nonconformite.CapaAction;
+import ma.nafura.hse.domain.nonconformite.NonConformite;
 import ma.nafura.hse.repository.CapaActionRepository;
 import ma.nafura.hse.repository.NonConformiteRepository;
 import ma.nafura.platform.framework.context.TenantContext;
@@ -25,6 +25,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ma.nafura.hse.seeders.NonConformiteSeedService;
 
 @ExtendWith(MockitoExtension.class)
 class NcWorkflowTest {

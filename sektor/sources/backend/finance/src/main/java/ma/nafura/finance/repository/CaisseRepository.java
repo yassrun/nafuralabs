@@ -3,7 +3,7 @@ package ma.nafura.finance.repository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import ma.nafura.finance.domain.model.Caisse;
+import ma.nafura.finance.domain.caisse.Caisse;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CaisseRepository extends JpaRepository<Caisse, UUID> {

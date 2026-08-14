@@ -2,8 +2,8 @@ package ma.nafura.marches.service;
 
 import java.math.BigDecimal;
 import ma.nafura.marches.api.dto.AvenantImpactSimulationDto;
-import ma.nafura.marches.domain.model.Avenant;
-import ma.nafura.marches.domain.model.ContratMarche;
+import ma.nafura.marches.domain.contrat.Avenant;
+import ma.nafura.marches.domain.contrat.ContratMarche;
 import org.springframework.stereotype.Service;
 
 @Service

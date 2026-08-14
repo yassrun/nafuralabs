@@ -4,8 +4,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 import java.util.UUID;
-import ma.nafura.finance.domain.model.Caisse;
-import ma.nafura.finance.domain.model.CaisseMouvement;
+import ma.nafura.finance.domain.caisse.Caisse;
+import ma.nafura.finance.domain.caisse.CaisseMouvement;
 import ma.nafura.finance.repository.CaisseMouvementRepository;
 import org.springframework.stereotype.Service;
 

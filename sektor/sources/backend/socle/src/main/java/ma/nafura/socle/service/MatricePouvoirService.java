@@ -6,12 +6,13 @@ import java.util.Optional;
 import java.util.UUID;
 import ma.nafura.socle.api.request.MatricePouvoirCreateDto;
 import ma.nafura.socle.api.request.MatricePouvoirUpdateDto;
-import ma.nafura.socle.domain.model.MatricePouvoir;
+import ma.nafura.socle.domain.MatricePouvoir;
 import ma.nafura.socle.repository.MatricePouvoirRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.socle.seeders.MatricePouvoirSeedService;
 
 @Service
 public class MatricePouvoirService {

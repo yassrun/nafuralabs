@@ -14,15 +14,16 @@ import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.platform.framework.event.ErpNotificationPublisher;
 import ma.nafura.rh.api.request.CongeCreateDto;
 import ma.nafura.rh.api.request.CongeUpdateDto;
-import ma.nafura.rh.domain.model.Conge;
-import ma.nafura.rh.domain.model.CongeSolde;
-import ma.nafura.rh.domain.model.Employe;
+import ma.nafura.rh.domain.conge.Conge;
+import ma.nafura.rh.domain.conge.CongeSolde;
+import ma.nafura.rh.domain.employe.Employe;
 import ma.nafura.rh.repository.CongeRepository;
 import ma.nafura.rh.repository.CongeSoldeRepository;
 import ma.nafura.rh.repository.EmployeRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.rh.seeders.CongeSeedService;
 
 @Service
 public class CongeService {

@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
-import ma.nafura.marches.domain.model.ContratMarche;
-import ma.nafura.marches.domain.model.DgdMarche;
-import ma.nafura.marches.domain.model.FactureMarche;
+import ma.nafura.marches.domain.contrat.ContratMarche;
+import ma.nafura.marches.domain.dgd.DgdMarche;
+import ma.nafura.marches.domain.facture.FactureMarche;
 import ma.nafura.marches.repository.ContratMarcheRepository;
 import ma.nafura.marches.repository.DgdMarcheRepository;
 import ma.nafura.marches.repository.FactureMarcheRepository;
@@ -16,6 +16,7 @@ import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.marches.seeders.DgdMarcheSeedService;
 
 @Service
 public class DgdMarcheService {

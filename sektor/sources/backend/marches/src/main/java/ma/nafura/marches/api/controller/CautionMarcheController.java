@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import ma.nafura.marches.api.dto.CautionRenouvelerDto;
 import ma.nafura.marches.api.request.CautionMarcheCreateDto;
-import ma.nafura.marches.domain.model.CautionMarche;
+import ma.nafura.marches.domain.caution.CautionMarche;
 import ma.nafura.marches.service.CautionMarcheService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

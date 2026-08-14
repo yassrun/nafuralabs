@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import ma.nafura.platform.framework.repository.TenantScopedRepository;
-import ma.nafura.catalogue.domain.model.Location;
+import ma.nafura.catalogue.domain.stock.Location;
 import org.springframework.stereotype.Repository;
 
 /**

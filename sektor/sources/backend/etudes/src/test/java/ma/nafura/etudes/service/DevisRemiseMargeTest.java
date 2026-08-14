@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 
 import java.math.BigDecimal;
-import ma.nafura.etudes.domain.model.Devis;
+import ma.nafura.etudes.domain.devis.Devis;
 import ma.nafura.etudes.repository.AppelOffreClientRepository;
 import ma.nafura.etudes.repository.DevisRepository;
 import ma.nafura.etudes.repository.DevisVersionRepository;
@@ -13,6 +13,7 @@ import ma.nafura.etudes.service.port.EtudeClientPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
+import ma.nafura.etudes.seeders.DevisSeedService;
 
 class DevisRemiseMargeTest {
 

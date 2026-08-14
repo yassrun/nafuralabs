@@ -3,7 +3,7 @@ package ma.nafura.catalogue.api.controller.base;
 import java.util.UUID;
 import ma.nafura.platform.framework.api.controller.CrudController;
 import ma.nafura.platform.framework.service.crud.CrudService;
-import ma.nafura.catalogue.domain.model.ItemCategory;
+import ma.nafura.catalogue.domain.article.ItemCategory;
 import ma.nafura.catalogue.api.request.ItemCategoryCreateDto;
 import ma.nafura.catalogue.api.request.ItemCategoryUpdateDto;
 import ma.nafura.catalogue.service.ItemCategoryService;

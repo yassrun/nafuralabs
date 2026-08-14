@@ -3,7 +3,7 @@ package ma.nafura.hse.repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
-import ma.nafura.hse.domain.model.FormationHse;
+import ma.nafura.hse.domain.formation.FormationHse;
 import ma.nafura.platform.framework.repository.TenantScopedRepository;
 import org.springframework.stereotype.Repository;
 

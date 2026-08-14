@@ -2,7 +2,7 @@ package ma.nafura.achats.repository;
 
 import java.util.List;
 import java.util.UUID;
-import ma.nafura.achats.domain.model.PartnerContact;
+import ma.nafura.achats.domain.fournisseur.PartnerContact;
 import ma.nafura.platform.framework.repository.TenantScopedRepository;
 import org.springframework.stereotype.Repository;
 

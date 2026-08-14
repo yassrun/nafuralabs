@@ -14,18 +14,19 @@ import java.util.UUID;
 import ma.nafura.achats.api.request.BonCommandeAchatCreateDto;
 import ma.nafura.achats.api.request.BonCommandeAchatLigneInputDto;
 import ma.nafura.achats.api.request.BonCommandeAchatUpdateDto;
-import ma.nafura.achats.domain.model.AppelOffreAchat;
-import ma.nafura.achats.domain.model.AppelOffreLigne;
-import ma.nafura.achats.domain.model.BonCommandeAchat;
-import ma.nafura.achats.domain.model.BonCommandeAchatLigne;
-import ma.nafura.achats.domain.model.OffreFournisseur;
-import ma.nafura.achats.domain.model.OffreFournisseurLigne;
+import ma.nafura.achats.domain.appeloffre.AppelOffreAchat;
+import ma.nafura.achats.domain.appeloffre.AppelOffreLigne;
+import ma.nafura.achats.domain.commande.BonCommandeAchat;
+import ma.nafura.achats.domain.commande.BonCommandeAchatLigne;
+import ma.nafura.achats.domain.appeloffre.OffreFournisseur;
+import ma.nafura.achats.domain.appeloffre.OffreFournisseurLigne;
 import ma.nafura.achats.repository.BonCommandeAchatRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.platform.framework.event.ErpNotificationPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.achats.seeders.BonCommandeAchatSeedService;
 
 @Service
 public class BonCommandeAchatService {

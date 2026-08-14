@@ -12,9 +12,9 @@ import ma.nafura.etudes.api.request.MetreCreateDto;
 import ma.nafura.etudes.api.request.MetreLigneInputDto;
 import ma.nafura.etudes.api.request.MetreLigneUpdateDto;
 import ma.nafura.etudes.api.request.MetreUpdateDto;
-import ma.nafura.etudes.domain.model.Metre;
-import ma.nafura.etudes.domain.model.MetreLigne;
-import ma.nafura.etudes.domain.model.Ouvrage;
+import ma.nafura.etudes.domain.metre.Metre;
+import ma.nafura.etudes.domain.metre.MetreLigne;
+import ma.nafura.etudes.domain.ouvrage.Ouvrage;
 import ma.nafura.etudes.repository.MetreLigneRepository;
 import ma.nafura.etudes.repository.MetreRepository;
 import ma.nafura.etudes.repository.OuvrageRepository;
@@ -22,6 +22,7 @@ import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.etudes.seeders.MetreSeedService;
 
 @Service
 public class MetreService {

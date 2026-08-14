@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.UUID;
 import ma.nafura.achats.api.request.CatalogueFournisseurLigneCreateDto;
 import ma.nafura.achats.api.request.CatalogueFournisseurLigneUpdateDto;
-import ma.nafura.achats.domain.model.CatalogueFournisseurLigne;
+import ma.nafura.achats.domain.contrat.CatalogueFournisseurLigne;
 import ma.nafura.achats.service.CatalogueFournisseurLigneService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

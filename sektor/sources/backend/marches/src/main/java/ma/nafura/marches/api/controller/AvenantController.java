@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import ma.nafura.marches.api.dto.AvenantImpactSimulationDto;
 import ma.nafura.marches.api.request.AvenantCreateDto;
-import ma.nafura.marches.domain.model.Avenant;
+import ma.nafura.marches.domain.contrat.Avenant;
 import ma.nafura.marches.service.AvenantService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

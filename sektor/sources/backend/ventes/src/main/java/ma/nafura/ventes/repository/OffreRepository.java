@@ -3,7 +3,7 @@ package ma.nafura.ventes.repository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import ma.nafura.ventes.domain.model.Offre;
+import ma.nafura.ventes.domain.offre.Offre;
 import ma.nafura.platform.framework.repository.TenantScopedRepository;
 import org.springframework.stereotype.Repository;
 

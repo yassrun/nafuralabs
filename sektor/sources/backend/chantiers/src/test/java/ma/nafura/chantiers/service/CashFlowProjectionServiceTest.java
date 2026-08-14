@@ -12,18 +12,19 @@ import ma.nafura.achats.repository.FactureFournisseurRepository;
 import ma.nafura.chantiers.api.dto.CashFlowProjectionMoisDto;
 import ma.nafura.chantiers.repository.ChantierRepository;
 import ma.nafura.chantiers.repository.SituationTravauxRepository;
-import ma.nafura.marches.domain.model.FactureMarche;
+import ma.nafura.marches.domain.facture.FactureMarche;
 import ma.nafura.marches.repository.FactureMarcheRepository;
-import ma.nafura.marches.service.FactureMarcheSeedService;
+import ma.nafura.marches.seeders.FactureMarcheSeedService;
 import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.rh.repository.FichePaieRepository;
-import ma.nafura.rh.service.FichePaieSeedService;
+import ma.nafura.rh.seeders.FichePaieSeedService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ma.nafura.chantiers.seeders.ChantierSeedService;
 
 @ExtendWith(MockitoExtension.class)
 class CashFlowProjectionServiceTest {

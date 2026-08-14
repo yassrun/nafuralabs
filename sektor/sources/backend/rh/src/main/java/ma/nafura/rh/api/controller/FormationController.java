@@ -6,7 +6,7 @@ import ma.nafura.platform.authorization.security.authorization.RequirePermission
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;
 import ma.nafura.rh.api.request.FormationCreateDto;
 import ma.nafura.rh.api.request.FormationUpdateDto;
-import ma.nafura.rh.domain.model.Formation;
+import ma.nafura.rh.domain.formation.Formation;
 import ma.nafura.rh.service.FormationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

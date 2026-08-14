@@ -2,7 +2,7 @@ package ma.nafura.achats.api.controller;
 
 import java.util.List;
 import java.util.UUID;
-import ma.nafura.achats.domain.model.PartnerContact;
+import ma.nafura.achats.domain.fournisseur.PartnerContact;
 import ma.nafura.achats.service.PartnerContactService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

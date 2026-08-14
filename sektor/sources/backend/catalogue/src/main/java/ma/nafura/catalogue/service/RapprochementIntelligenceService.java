@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import ma.nafura.catalogue.domain.model.ItemMatch;
+import ma.nafura.catalogue.domain.article.ItemMatch;
 import ma.nafura.catalogue.repository.CatalogArticleRepository;
 import ma.nafura.catalogue.repository.ItemMatchRepository;
 import ma.nafura.catalogue.service.RapprochementDeterministeService.CandidatMatch;

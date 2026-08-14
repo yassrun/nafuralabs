@@ -11,9 +11,9 @@ import java.util.UUID;
 import ma.nafura.chantiers.api.dto.BudgetChantierDto;
 import ma.nafura.chantiers.api.dto.BudgetLigneDto;
 import ma.nafura.chantiers.api.request.BudgetChantierUpsertDto;
-import ma.nafura.chantiers.domain.model.BudgetChantier;
-import ma.nafura.chantiers.domain.model.BudgetLigne;
-import ma.nafura.chantiers.domain.model.Chantier;
+import ma.nafura.chantiers.domain.budget.BudgetChantier;
+import ma.nafura.chantiers.domain.budget.BudgetLigne;
+import ma.nafura.chantiers.domain.chantier.Chantier;
 import ma.nafura.chantiers.repository.BudgetChantierRepository;
 import ma.nafura.chantiers.repository.BudgetLigneRepository;
 import ma.nafura.platform.framework.context.TenantContext;
@@ -21,6 +21,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.chantiers.seeders.BudgetChantierSeedService;
 
 @Service
 public class BudgetChantierService {

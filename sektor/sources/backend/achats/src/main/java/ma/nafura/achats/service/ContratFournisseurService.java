@@ -7,7 +7,7 @@ import java.util.Locale;
 import java.util.UUID;
 import ma.nafura.achats.api.request.ContratFournisseurCreateDto;
 import ma.nafura.achats.api.request.ContratFournisseurUpdateDto;
-import ma.nafura.achats.domain.model.ContratFournisseur;
+import ma.nafura.achats.domain.contrat.ContratFournisseur;
 import ma.nafura.achats.repository.ContratFournisseurRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;

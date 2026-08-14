@@ -2,7 +2,7 @@ package ma.nafura.catalogue.repository;
 
 import java.util.Optional;
 import java.util.UUID;
-import ma.nafura.catalogue.domain.model.Materiel;
+import ma.nafura.catalogue.domain.materiel.Materiel;
 import ma.nafura.platform.framework.repository.TenantScopedRepository;
 import org.springframework.stereotype.Repository;
 

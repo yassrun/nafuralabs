@@ -1,8 +1,8 @@
 package ma.nafura.etudes.service.port;
 
 import java.util.List;
-import ma.nafura.etudes.domain.model.CpsSection;
-import ma.nafura.etudes.domain.model.DpgfNoeud;
+import ma.nafura.etudes.domain.cps.CpsSection;
+import ma.nafura.etudes.domain.dpgf.DpgfNoeud;
 
 /**
  * Extrait des besoins de composants structurés depuis l'article et les sections CPS.

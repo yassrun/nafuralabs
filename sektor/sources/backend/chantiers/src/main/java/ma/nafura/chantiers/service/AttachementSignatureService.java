@@ -3,7 +3,7 @@ package ma.nafura.chantiers.service;
 import ma.nafura.chantiers.api.dto.AttachementChantierDto;
 import ma.nafura.chantiers.api.dto.SignAttachementInfoDto;
 import ma.nafura.chantiers.api.request.SignSubmitDto;
-import ma.nafura.chantiers.domain.model.AttachementChantier;
+import ma.nafura.chantiers.domain.attachement.AttachementChantier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

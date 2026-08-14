@@ -20,9 +20,9 @@ import ma.nafura.etudes.api.request.ComposantOuvrageInputDto;
 import ma.nafura.etudes.api.request.OuvrageCreateDto;
 import ma.nafura.etudes.api.request.OuvrageUpdateDto;
 import ma.nafura.etudes.api.request.UniteMainInputDto;
-import ma.nafura.etudes.domain.model.ComposantOuvrage;
-import ma.nafura.etudes.domain.model.Ouvrage;
-import ma.nafura.etudes.domain.model.UniteMain;
+import ma.nafura.etudes.domain.ouvrage.ComposantOuvrage;
+import ma.nafura.etudes.domain.ouvrage.Ouvrage;
+import ma.nafura.etudes.domain.dpu.UniteMain;
 import ma.nafura.etudes.repository.OuvrageRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.junit.jupiter.api.AfterEach;
@@ -33,6 +33,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
+import ma.nafura.etudes.seeders.OuvrageSeedService;
 
 @ExtendWith(MockitoExtension.class)
 class OuvrageServiceTest {

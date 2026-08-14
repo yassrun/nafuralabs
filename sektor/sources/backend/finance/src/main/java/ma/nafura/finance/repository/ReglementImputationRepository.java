@@ -2,7 +2,7 @@ package ma.nafura.finance.repository;
 
 import java.util.List;
 import java.util.UUID;
-import ma.nafura.finance.domain.model.ReglementImputation;
+import ma.nafura.finance.domain.reglement.ReglementImputation;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ReglementImputationRepository extends JpaRepository<ReglementImputation, UUID> {

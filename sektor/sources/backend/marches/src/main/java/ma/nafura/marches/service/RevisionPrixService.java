@@ -10,9 +10,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import ma.nafura.marches.api.request.RevisionPrixCalculerDto;
-import ma.nafura.marches.domain.model.ContratMarche;
-import ma.nafura.marches.domain.model.IndiceBtp;
-import ma.nafura.marches.domain.model.RevisionPrix;
+import ma.nafura.marches.domain.contrat.ContratMarche;
+import ma.nafura.marches.domain.revision.IndiceBtp;
+import ma.nafura.marches.domain.revision.RevisionPrix;
 import ma.nafura.marches.repository.ContratMarcheRepository;
 import ma.nafura.marches.repository.IndiceBtpRepository;
 import ma.nafura.marches.repository.RevisionPrixRepository;
@@ -21,6 +21,8 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.marches.seeders.IndiceBtpSeedService;
+import ma.nafura.marches.seeders.RevisionPrixSeedService;
 
 @Service
 public class RevisionPrixService {

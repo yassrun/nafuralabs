@@ -15,7 +15,7 @@ import java.util.UUID;
 import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.rh.api.request.EmployeCreateDto;
 import ma.nafura.rh.api.request.EmployeUpdateDto;
-import ma.nafura.rh.domain.model.Employe;
+import ma.nafura.rh.domain.employe.Employe;
 import ma.nafura.rh.repository.EmployeRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,6 +25,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ma.nafura.rh.seeders.EmployeSeedService;
 
 @ExtendWith(MockitoExtension.class)
 class EmployeServiceTest {

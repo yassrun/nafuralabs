@@ -23,11 +23,11 @@
 
 ### The Rule
 
-> **Material / PrimeNG = Engine. Tomic = Skin + Composition.**
+> **Material = Engine. Tomic = Skin + Composition.**
 
 | Layer | Responsibility | Examples |
 |-------|---------------|----------|
-| **Engine** | Interaction, accessibility, keyboard nav, ARIA, overlay management | `mat-table`, `mat-menu`, `p-select`, `MatTooltip` |
+| **Engine** | Interaction, accessibility, keyboard nav, ARIA, overlay management | `mat-table`, `mat-menu`, `mat-select`, `MatTooltip` |
 | **Skin** | All visual styling: colors, spacing, typography, borders, shadows | `--nf-*` CSS tokens |
 | **Composition** | Combining primitives into higher-order patterns | `nf-data-table`, `nf-filter-bar`, `nf-page-header` |
 
@@ -37,9 +37,9 @@
 
 2. **We MAY use Angular Material primitives** for their interaction/a11y engine: focus management, keyboard navigation, ARIA attributes, overlay positioning.
 
-3. **We MAY use PrimeNG** as a data/control engine: rich form controls, data handling, selection models.
+3. **We do not use PrimeNG.** Hierarchical tables use Material (`mat-table` flattened) behind `nf-tree-table`.
 
-4. **All visuals come from Tomic tokens (`--nf-*`).** No component should render Material's or PrimeNG's default colors.
+4. **All visuals come from Tomic tokens (`--nf-*`).** No component should render Material's default colors.
 
 ---
 
@@ -58,7 +58,7 @@
 
 Every `nf-*` wrapper must:
 
-1. **Hide the engine** - Feature code never imports `MatXxxModule` or `PrimeNG` modules
+1. **Hide the engine** - Feature code never imports `MatXxxModule`
 2. **Control the API** - Expose only the inputs/outputs needed, not the full engine API
 3. **Apply Tomic tokens** - All colors, spacing, typography via `--nf-*` variables
 4. **Maintain a11y** - Preserve keyboard nav, focus rings, ARIA from the engine
@@ -92,11 +92,9 @@ lib/anatomy/components/
 
 1. **Material prebuilt themes** may be loaded for structural CSS, but visual tokens (colors, shadows) must be overridden globally.
 
-2. **PrimeNG theme presets** (e.g., Aura) are allowed for structure, but `--p-primary-*` must be bound to `--nf-primary-*`.
+2. **No component may hardcode colors.** Use `var(--nf-*)` exclusively.
 
-3. **No component may hardcode colors.** Use `var(--nf-*)` exclusively.
-
-4. **Override location**: All library overrides live in `web/src/styles.scss` or `core/styles/_components.scss`.
+3. **Override location**: All library overrides live in `web/src/styles.scss` or `core/styles/_components.scss`.
 
 ### Token Hierarchy
 
@@ -166,7 +164,7 @@ nf-* Component Styles
 | Date | Decision | Rationale |
 |------|----------|-----------|
 | 2024-01 | Use Material for table/paginator engine | Best a11y, keyboard nav, sort integration |
-| 2024-01 | Use PrimeNG for form controls (select, date) | Richer out-of-box features than Material forms |
+| 2026-08 | Drop PrimeNG; `nf-tree-table` uses Material flattened `mat-table` | Licence PrimeUI v22 ; un seul moteur Material |
 | 2024-01 | Tomic tokens as single source | Prevent theme conflicts, enable product theming |
 | 2025-01 | Document constitution | Formalize rules after inconsistency audit |
 

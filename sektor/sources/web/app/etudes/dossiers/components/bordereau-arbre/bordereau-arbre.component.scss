@@ -280,17 +280,13 @@
     max-height: 100%;
   }
 
-  .p-treetable {
+  .nf-tree-table__engine {
     font-size: 0.78rem;
-    width: 100%;
-  }
-
-  .p-treetable table {
     width: 100%;
     table-layout: fixed;
   }
 
-  .p-treetable .p-treetable-thead > tr > th {
+  .nf-tree-table__engine .mat-mdc-header-cell {
     position: sticky;
     top: 0;
     z-index: 4;
@@ -305,12 +301,12 @@
     white-space: nowrap;
   }
 
-  .p-treetable .p-treetable-thead > tr > th.nf-tree-table__cell--sticky-end {
+  .nf-tree-table__engine .mat-mdc-header-cell.nf-tree-table__cell--sticky-end {
     z-index: 5;
     background: var(--nf-color-surface, #fff);
   }
 
-  .p-treetable .p-treetable-tbody > tr > td {
+  .nf-tree-table__engine .mat-mdc-cell {
     padding: 0.28rem 0.5rem;
     border: 0;
     border-bottom: 1px solid color-mix(in srgb, var(--nf-color-border) 65%, transparent);
@@ -318,44 +314,39 @@
     background: var(--nf-color-surface, #fff);
   }
 
-  .p-treetable .p-treetable-thead > tr > th.arbre__col-code,
-  .p-treetable .p-treetable-tbody > tr > td.arbre__col-code {
+  .nf-tree-table__engine .mat-mdc-header-cell.arbre__col-code,
+  .nf-tree-table__engine .mat-mdc-cell.arbre__col-code {
     overflow: hidden;
   }
 
-  .p-treetable .p-treetable-thead > tr > th.arbre__col-libelle,
-  .p-treetable .p-treetable-tbody > tr > td.arbre__col-libelle {
+  .nf-tree-table__engine .mat-mdc-header-cell.arbre__col-libelle,
+  .nf-tree-table__engine .mat-mdc-cell.arbre__col-libelle {
     width: auto;
     min-width: 10rem;
     overflow: hidden;
   }
 
   /* Ombre sticky uniquement sur la 1re col sticky (Unité). */
-  .p-treetable .p-treetable-thead > tr > th.arbre__col-metric ~ .arbre__col-metric.nf-tree-table__cell--sticky-end,
-  .p-treetable .p-treetable-tbody > tr > td.arbre__col-metric ~ .arbre__col-metric.nf-tree-table__cell--sticky-end,
-  .p-treetable .p-treetable-thead > tr > th.arbre__col-actions.nf-tree-table__cell--sticky-end,
-  .p-treetable .p-treetable-tbody > tr > td.arbre__col-actions.nf-tree-table__cell--sticky-end {
+  .nf-tree-table__engine .mat-mdc-header-cell.arbre__col-metric ~ .arbre__col-metric.nf-tree-table__cell--sticky-end,
+  .nf-tree-table__engine .mat-mdc-cell.arbre__col-metric ~ .arbre__col-metric.nf-tree-table__cell--sticky-end,
+  .nf-tree-table__engine .mat-mdc-header-cell.arbre__col-actions.nf-tree-table__cell--sticky-end,
+  .nf-tree-table__engine .mat-mdc-cell.arbre__col-actions.nf-tree-table__cell--sticky-end {
     box-shadow: none;
   }
 
-  .p-treetable .p-treetable-tbody > tr:hover > td {
+  .nf-tree-table__engine .mat-mdc-row:hover > .mat-mdc-cell {
     background: color-mix(in srgb, var(--nf-color-bg-subtle) 80%, transparent);
   }
 
-  .p-treetable .p-treetable-tbody > tr:hover > td.nf-tree-table__cell--sticky-end,
-  .p-treetable .p-treetable-tbody > tr.arbre__row--selected > td.nf-tree-table__cell--sticky-end {
+  .nf-tree-table__engine .mat-mdc-row:hover > .mat-mdc-cell.nf-tree-table__cell--sticky-end,
+  .nf-tree-table__engine .mat-mdc-row.arbre__row--selected > .mat-mdc-cell.nf-tree-table__cell--sticky-end {
     background: color-mix(in srgb, var(--nf-color-bg-subtle) 92%, var(--nf-color-surface, #fff));
   }
 
-  .p-treetable-toggler {
-    display: inline-flex !important;
-    align-items: center;
-    justify-content: center;
-    width: 1.25rem !important;
-    height: 1.25rem !important;
-    margin-right: 0.25rem;
-    vertical-align: middle;
-    flex-shrink: 0;
+  .nf-tree-table__toggler {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex: 0 0 1.25rem;
   }
 
   .arbre__row--selected > td {

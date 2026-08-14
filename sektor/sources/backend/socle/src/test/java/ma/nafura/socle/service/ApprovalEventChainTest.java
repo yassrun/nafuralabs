@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import ma.nafura.socle.api.dto.ApprovalIntegrityResultDto;
-import ma.nafura.socle.domain.model.ApprovalEvent;
+import ma.nafura.socle.domain.ApprovalEvent;
 import ma.nafura.socle.repository.ApprovalEventRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.junit.jupiter.api.AfterEach;

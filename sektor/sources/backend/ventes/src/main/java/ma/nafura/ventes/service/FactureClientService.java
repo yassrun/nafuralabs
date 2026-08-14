@@ -10,19 +10,20 @@ import java.util.Locale;
 import java.util.UUID;
 import ma.nafura.chantiers.api.dto.SituationLigneDto;
 import ma.nafura.chantiers.api.dto.SituationTravauxDto;
-import ma.nafura.chantiers.domain.model.Chantier;
+import ma.nafura.chantiers.domain.chantier.Chantier;
 import ma.nafura.chantiers.repository.ChantierRepository;
 import ma.nafura.ventes.api.request.FactureClientCreateDto;
 import ma.nafura.ventes.api.request.FactureClientLigneInputDto;
 import ma.nafura.ventes.api.request.FactureClientUpdateDto;
-import ma.nafura.ventes.domain.model.FactureClient;
-import ma.nafura.ventes.domain.model.FactureClientLigne;
+import ma.nafura.ventes.domain.facture.FactureClient;
+import ma.nafura.ventes.domain.facture.FactureClientLigne;
 import ma.nafura.ventes.repository.FactureClientRepository;
 import ma.nafura.ventes.service.FactureClientTotalsCalculator.ChantierRates;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.ventes.seeders.FactureClientSeedService;
 
 @Service
 public class FactureClientService {

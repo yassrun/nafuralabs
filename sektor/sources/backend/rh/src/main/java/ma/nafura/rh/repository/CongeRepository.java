@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import ma.nafura.platform.framework.repository.TenantScopedRepository;
-import ma.nafura.rh.domain.model.Conge;
+import ma.nafura.rh.domain.conge.Conge;
 import org.springframework.stereotype.Repository;
 
 @Repository

@@ -5,7 +5,7 @@ import java.math.RoundingMode;
 import java.util.Objects;
 import java.util.UUID;
 import ma.nafura.catalogue.api.dto.UomConversionResultDto;
-import ma.nafura.catalogue.domain.model.UnitOfMeasure;
+import ma.nafura.catalogue.domain.article.UnitOfMeasure;
 import ma.nafura.catalogue.repository.UnitOfMeasureRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;

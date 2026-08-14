@@ -7,7 +7,7 @@ import ma.nafura.platform.authorization.security.authorization.RequirePermission
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;
 import ma.nafura.rh.api.dto.HeureSupplementaireSyntheseDto;
 import ma.nafura.rh.api.request.HeureSupplementaireCreateDto;
-import ma.nafura.rh.domain.model.HeureSupplementaire;
+import ma.nafura.rh.domain.paie.HeureSupplementaire;
 import ma.nafura.rh.service.HeureSupplementaireService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;

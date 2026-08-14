@@ -2,7 +2,7 @@ package ma.nafura.chantiers.api.controller;
 
 import jakarta.validation.Valid;
 import ma.nafura.chantiers.api.request.PosteBudgetaireUpdateDto;
-import ma.nafura.chantiers.domain.model.PosteBudgetaire;
+import ma.nafura.chantiers.domain.budget.PosteBudgetaire;
 import ma.nafura.chantiers.service.PosteBudgetaireService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

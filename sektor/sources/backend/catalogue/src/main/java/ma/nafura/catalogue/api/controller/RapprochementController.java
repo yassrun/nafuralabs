@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.UUID;
 import ma.nafura.catalogue.api.dto.RapprochementCandidatDto;
 import ma.nafura.catalogue.api.request.RapprochementSearchDto;
-import ma.nafura.catalogue.domain.model.ItemMatch;
+import ma.nafura.catalogue.domain.article.ItemMatch;
 import ma.nafura.catalogue.service.RapprochementDeterministeService.CandidatMatch;
 import ma.nafura.catalogue.service.RapprochementIntelligenceService;
 import ma.nafura.catalogue.service.RapprochementLlmMetrics;

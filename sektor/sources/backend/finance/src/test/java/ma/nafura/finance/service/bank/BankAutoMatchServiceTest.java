@@ -10,7 +10,7 @@ import java.util.Set;
 import java.util.UUID;
 import ma.nafura.finance.api.dto.BankStatementLineDto;
 import ma.nafura.finance.api.dto.MovementCandidateDto;
-import ma.nafura.finance.domain.model.BankStatementLine;
+import ma.nafura.finance.domain.banque.BankStatementLine;
 import org.junit.jupiter.api.Test;
 
 class BankAutoMatchServiceTest {

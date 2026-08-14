@@ -2,7 +2,7 @@ package ma.nafura.catalogue.service.base;
 
 import java.util.UUID;
 import ma.nafura.platform.framework.service.crud.JpaCrudService;
-import ma.nafura.catalogue.domain.model.Location;
+import ma.nafura.catalogue.domain.stock.Location;
 import ma.nafura.catalogue.api.request.LocationCreateDto;
 import ma.nafura.catalogue.api.request.LocationUpdateDto;
 import ma.nafura.catalogue.mapper.LocationMapper;

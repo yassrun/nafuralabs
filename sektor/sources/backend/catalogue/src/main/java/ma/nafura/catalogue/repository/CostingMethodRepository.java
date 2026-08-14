@@ -1,6 +1,6 @@
 package ma.nafura.catalogue.repository;
 
-import ma.nafura.catalogue.domain.model.CostingMethod;
+import ma.nafura.catalogue.domain.stock.CostingMethod;
 import ma.nafura.platform.framework.repository.TenantScopedRepository;
 import org.springframework.stereotype.Repository;
 

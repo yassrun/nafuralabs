@@ -3,7 +3,7 @@ package ma.nafura.catalogue.repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
-import ma.nafura.catalogue.domain.model.StockReservation;
+import ma.nafura.catalogue.domain.stock.StockReservation;
 import ma.nafura.platform.framework.repository.TenantScopedRepository;
 import org.springframework.stereotype.Repository;
 

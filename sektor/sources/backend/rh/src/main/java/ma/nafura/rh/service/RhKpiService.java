@@ -7,12 +7,14 @@ import java.util.List;
 import java.util.UUID;
 import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.rh.api.dto.RhKpiDto;
-import ma.nafura.rh.domain.model.Employe;
-import ma.nafura.rh.domain.model.Pointage;
+import ma.nafura.rh.domain.employe.Employe;
+import ma.nafura.rh.domain.temps.Pointage;
 import ma.nafura.rh.repository.EmployeRepository;
 import ma.nafura.rh.repository.PointageRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ma.nafura.rh.seeders.EmployeSeedService;
+import ma.nafura.rh.seeders.PointageSeedService;
 
 @Service
 public class RhKpiService {

@@ -6,12 +6,13 @@ import java.util.Locale;
 import java.util.UUID;
 import ma.nafura.hse.api.request.RegistreLegalCreateDto;
 import ma.nafura.hse.api.request.RegistreLegalUpdateDto;
-import ma.nafura.hse.domain.model.RegistreLegal;
+import ma.nafura.hse.domain.registre.RegistreLegal;
 import ma.nafura.hse.repository.RegistreLegalRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.hse.seeders.RegistreLegalSeedService;
 
 @Service
 public class RegistreLegalService {

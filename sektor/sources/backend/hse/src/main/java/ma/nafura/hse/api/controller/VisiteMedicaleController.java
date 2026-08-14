@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import ma.nafura.hse.api.request.VisiteMedicaleCreateDto;
 import ma.nafura.hse.api.request.VisiteMedicaleUpdateDto;
-import ma.nafura.hse.domain.model.VisiteMedicale;
+import ma.nafura.hse.domain.visite.VisiteMedicale;
 import ma.nafura.hse.service.VisiteMedicaleService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

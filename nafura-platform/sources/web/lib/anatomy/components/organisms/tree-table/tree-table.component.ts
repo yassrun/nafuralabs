@@ -7,9 +7,12 @@ import {
   contentChild,
   input,
   output,
+  signal,
 } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTableModule } from '@angular/material/table';
 import { TranslateModule } from '@ngx-translate/core';
-import { TreeTableModule } from 'primeng/treetable';
 
 import { SpinnerComponent } from '../../atoms/spinner';
 import { EmptyStateComponent } from '../../molecules/empty-state';
@@ -48,11 +51,20 @@ export interface NfTreeTableDetailContext<T> {
 
 type RowClassValue = string | string[] | Set<string> | Record<string, boolean>;
 
+interface NfTreeFlatRow<T> {
+  key: string;
+  data: T;
+  node: NfTreeNode<T>;
+  depth: number;
+  expandable: boolean;
+  expanded: boolean;
+}
+
 /**
  * Generic hierarchical data table.
  *
- * PrimeNG is deliberately kept behind this wrapper so feature code only
- * depends on Nafura types, templates and design tokens.
+ * Material table behind this wrapper so feature code only depends on Nafura
+ * types, templates and design tokens.
  */
 @Component({
   selector: 'nf-tree-table',
@@ -60,7 +72,9 @@ type RowClassValue = string | string[] | Set<string> | Record<string, boolean>;
   imports: [
     CommonModule,
     TranslateModule,
-    TreeTableModule,
+    MatTableModule,
+    MatButtonModule,
+    MatIconModule,
     SpinnerComponent,
     EmptyStateComponent,
   ],
@@ -82,75 +96,103 @@ type RowClassValue = string | string[] | Set<string> | Record<string, boolean>;
           class="nf-tree-table__scroll"
           [style.max-height]="scrollHeight()"
           [class.nf-tree-table__scroll--constrained]="scrollHeight()">
-          <p-treetable
-            styleClass="nf-tree-table__engine"
-            [value]="$any(engineNodes())"
-            [columns]="$any(columns())"
-            [tableStyle]="{ 'min-width': minWidth() }"
-            (onNodeExpand)="onNodeExpanded($event)"
-            (onNodeCollapse)="onNodeCollapsed($event)">
-            <ng-template #header let-columns>
-              <tr>
-                @for (column of columns; track column.key) {
-                  <th
-                    [style.width]="column.width"
-                    [style.right]="stickyEndOffset(column)"
-                    [class]="column.cssClass ?? ''"
-                    [class.nf-tree-table__cell--center]="column.align === 'center'"
-                    [class.nf-tree-table__cell--end]="column.align === 'end'"
-                    [class.nf-tree-table__cell--sticky-end]="!!column.stickyEnd">
-                    {{ column.label | translate }}
-                  </th>
-                }
-              </tr>
-            </ng-template>
-
-            <ng-template #body let-rowNode let-rowData="rowData" let-columns="columns">
-              <tr
-                [ttRow]="rowNode"
-                [ngClass]="resolveRowClass(rowData)"
-                [attr.title]="resolveRowTitle(rowData)"
-                [class.nf-tree-table__row--clickable]="rowClickable()"
-                (click)="onRowClicked(rowData)"
-                (dblclick)="rowDblClick.emit(rowData)">
-                @for (column of columns; track column.key) {
-                  <td
-                    [style.width]="column.width"
-                    [style.right]="stickyEndOffset(column)"
-                    [class]="column.cssClass ?? ''"
-                    [class.nf-tree-table__cell--center]="column.align === 'center'"
-                    [class.nf-tree-table__cell--end]="column.align === 'end'"
-                    [class.nf-tree-table__cell--sticky-end]="!!column.stickyEnd">
-                    @if (column.key === treeColumnKey()) {
-                      <p-treetable-toggler [rowNode]="rowNode" />
-                    }
-                    @if (cellTemplate(); as template) {
-                      <ng-container
-                        *ngTemplateOutlet="template; context: {
-                          $implicit: rowData,
-                          column: column,
-                          node: rowNode.node
-                        }" />
-                    } @else {
-                      {{ cellValue(rowData, column) }}
-                    }
-                  </td>
-                }
-              </tr>
-              @if (detailTemplate() && shouldShowDetail(rowData)) {
-                <tr class="nf-tree-table__detail-row">
-                  <td [attr.colspan]="columns.length">
+          <table
+            mat-table
+            [dataSource]="flatRows()"
+            [style.min-width]="minWidth()"
+            class="nf-tree-table__engine"
+            multiTemplateDataRows>
+            @for (column of columns(); track column.key) {
+              <ng-container [matColumnDef]="column.key">
+                <th
+                  mat-header-cell
+                  *matHeaderCellDef
+                  [style.width]="column.width"
+                  [style.right]="stickyEndOffset(column)"
+                  [class]="column.cssClass ?? ''"
+                  [class.nf-tree-table__cell--center]="column.align === 'center'"
+                  [class.nf-tree-table__cell--end]="column.align === 'end'"
+                  [class.nf-tree-table__cell--sticky-end]="!!column.stickyEnd">
+                  {{ column.label | translate }}
+                </th>
+                <td
+                  mat-cell
+                  *matCellDef="let row"
+                  [style.width]="column.width"
+                  [style.right]="stickyEndOffset(column)"
+                  [class]="column.cssClass ?? ''"
+                  [class.nf-tree-table__cell--center]="column.align === 'center'"
+                  [class.nf-tree-table__cell--end]="column.align === 'end'"
+                  [class.nf-tree-table__cell--sticky-end]="!!column.stickyEnd">
+                  @if (column.key === treeColumnKey()) {
+                    <span class="nf-tree-table__tree-cell" [style.padding-inline-start.px]="row.depth * 18">
+                      <button
+                        type="button"
+                        class="nf-tree-table__toggler"
+                        [class.nf-tree-table__toggler--leaf]="!row.expandable"
+                        [attr.aria-expanded]="row.expandable ? row.expanded : null"
+                        [attr.aria-label]="row.expanded ? 'Collapse' : 'Expand'"
+                        [disabled]="!row.expandable"
+                        (click)="onToggle($event, row)">
+                        @if (row.expandable) {
+                          <mat-icon>{{ row.expanded ? 'expand_more' : 'chevron_right' }}</mat-icon>
+                        }
+                      </button>
+                      @if (cellTemplate(); as template) {
+                        <ng-container
+                          *ngTemplateOutlet="template; context: {
+                            $implicit: row.data,
+                            column: column,
+                            node: row.node
+                          }" />
+                      } @else {
+                        {{ cellValue(row.data, column) }}
+                      }
+                    </span>
+                  } @else if (cellTemplate(); as template) {
                     <ng-container
-                      *ngTemplateOutlet="detailTemplate()!; context: {
-                        $implicit: rowData,
-                        node: rowNode.node,
-                        colspan: columns.length
+                      *ngTemplateOutlet="template; context: {
+                        $implicit: row.data,
+                        column: column,
+                        node: row.node
                       }" />
-                  </td>
-                </tr>
-              }
-            </ng-template>
-          </p-treetable>
+                  } @else {
+                    {{ cellValue(row.data, column) }}
+                  }
+                </td>
+              </ng-container>
+            }
+
+            <ng-container matColumnDef="expandedDetail">
+              <td
+                mat-cell
+                *matCellDef="let row"
+                [attr.colspan]="columns().length">
+                @if (detailTemplate(); as template) {
+                  <ng-container
+                    *ngTemplateOutlet="template; context: {
+                      $implicit: row.data,
+                      node: row.node,
+                      colspan: columns().length
+                    }" />
+                }
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns(); sticky: true"></tr>
+            <tr
+              mat-row
+              *matRowDef="let row; columns: displayedColumns()"
+              [ngClass]="resolveRowClass(row.data)"
+              [attr.title]="resolveRowTitle(row.data)"
+              [class.nf-tree-table__row--clickable]="rowClickable()"
+              (click)="onRowClicked(row.data)"
+              (dblclick)="rowDblClick.emit(row.data)"></tr>
+            <tr
+              mat-row
+              *matRowDef="let row; columns: ['expandedDetail']; when: isDetailRow"
+              class="nf-tree-table__detail-row"></tr>
+          </table>
           @if (footerTemplate()) {
             <div class="nf-tree-table__footer">
               <ng-container *ngTemplateOutlet="footerTemplate()!" />
@@ -184,14 +226,48 @@ type RowClassValue = string | string[] | Set<string> | Record<string, boolean>;
     }
     .nf-tree-table__scroll--constrained {
       overscroll-behavior: contain;
-      /* Un seul axe de scroll dominant : vertical. H seulement si vraiment nécessaire. */
       overflow-x: auto;
       overflow-y: auto;
       box-sizing: border-box;
     }
-    /* Parent flex avec hauteur définie (ex. bordereau fill). */
     .nf-tree-table__scroll--constrained[style*='100%'] {
       height: 100%;
+    }
+    .nf-tree-table__engine {
+      width: 100%;
+    }
+    .nf-tree-table__tree-cell {
+      display: inline-flex;
+      align-items: center;
+      min-width: 0;
+      gap: .15rem;
+    }
+    .nf-tree-table__toggler {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 28px;
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: var(--nf-color-text-secondary);
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .nf-tree-table__toggler--leaf {
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .nf-tree-table__toggler:focus-visible {
+      outline: 2px solid var(--nf-border-focus);
+      outline-offset: 2px;
+    }
+    .nf-tree-table__toggler mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
     }
     .nf-tree-table__row--clickable { cursor: pointer; }
     .nf-tree-table__cell--center { text-align: center; }
@@ -205,16 +281,14 @@ type RowClassValue = string | string[] | Set<string> | Record<string, boolean>;
       background: var(--nf-color-surface, #fff);
       box-shadow: -6px 0 8px -6px color-mix(in srgb, #000 18%, transparent);
     }
-    /* En-tête opaque au-dessus des lignes sticky qui défilent. */
-    :host ::ng-deep .p-treetable .p-treetable-thead > tr > th {
+    :host ::ng-deep .nf-tree-table__engine .mat-mdc-header-row .mat-mdc-header-cell {
       position: sticky;
       top: 0;
       z-index: 4;
       background: var(--nf-color-surface, #fff);
     }
-    :host ::ng-deep .p-treetable .p-treetable-thead > tr > th.nf-tree-table__cell--sticky-end {
+    :host ::ng-deep .nf-tree-table__engine .mat-mdc-header-cell.nf-tree-table__cell--sticky-end {
       z-index: 5;
-      background: var(--nf-color-surface, #fff);
     }
     .nf-tree-table__detail-row > td {
       padding-top: 0;
@@ -252,8 +326,15 @@ export class TreeTableComponent<T = unknown> {
   readonly rowClick = output<T>();
   readonly rowDblClick = output<T>();
 
-  readonly engineNodes = computed(() =>
-    this.applyExpandedKeys(this.nodes(), this.expandedKeys()),
+  /** Expand state when the parent does not bind `expandedKeys`. */
+  private readonly unboundExpanded = signal<Set<string> | null>(null);
+
+  readonly displayedColumns = computed(() => this.columns().map((column) => column.key));
+
+  readonly effectiveExpandedKeys = computed(() => this.expandedKeys() ?? this.unboundExpanded());
+
+  readonly flatRows = computed(() =>
+    flattenVisible(this.nodes(), this.effectiveExpandedKeys()),
   );
 
   /** Offsets `right` cumulés pour les colonnes stickyEnd (de la droite vers la gauche). */
@@ -269,6 +350,9 @@ export class TreeTableComponent<T = unknown> {
     }
     return map;
   });
+
+  readonly isDetailRow = (_index: number, row: NfTreeFlatRow<T>): boolean =>
+    !!this.detailTemplate() && this.shouldShowDetail(row.data);
 
   stickyEndOffset(column: NfTreeTableColumn<T>): string | null {
     if (!column.stickyEnd) return null;
@@ -300,12 +384,10 @@ export class TreeTableComponent<T = unknown> {
     if (this.rowClickable()) this.rowClick.emit(data);
   }
 
-  onNodeExpanded(event: { node?: { key?: string } }): void {
-    this.updateExpandedKey(event.node?.key, true);
-  }
-
-  onNodeCollapsed(event: { node?: { key?: string } }): void {
-    this.updateExpandedKey(event.node?.key, false);
+  onToggle(event: Event, row: NfTreeFlatRow<T>): void {
+    event.stopPropagation();
+    if (!row.expandable) return;
+    this.updateExpandedKey(row.key, !row.expanded);
   }
 
   private parseWidthPx(width: string | undefined): number {
@@ -317,37 +399,56 @@ export class TreeTableComponent<T = unknown> {
     return 0;
   }
 
-  private updateExpandedKey(key: string | undefined, expanded: boolean): void {
-    if (!key) return;
-    const next = new Set(this.expandedKeys() ?? this.collectExpandedKeys(this.engineNodes()));
+  private updateExpandedKey(key: string, expanded: boolean): void {
+    const current = this.effectiveExpandedKeys() ?? collectExpandedKeys(this.nodes());
+    const next = new Set(current);
     if (expanded) next.add(key);
     else next.delete(key);
-    this.expandedKeysChange.emit(next);
+    if (this.expandedKeys()) {
+      this.expandedKeysChange.emit(next);
+    } else {
+      this.unboundExpanded.set(next);
+      this.expandedKeysChange.emit(next);
+    }
   }
+}
 
-  private applyExpandedKeys(
-    nodes: NfTreeNode<T>[],
-    expandedKeys: ReadonlySet<string> | null,
-  ): NfTreeNode<T>[] {
-    if (!expandedKeys) return nodes;
-    return nodes.map((node) => ({
-      ...node,
-      expanded: expandedKeys.has(node.key),
-      children: node.children
-        ? this.applyExpandedKeys(node.children, expandedKeys)
-        : undefined,
-    }));
-  }
+function isExpandable<T>(node: NfTreeNode<T>): boolean {
+  return !node.leaf && (node.children?.length ?? 0) > 0;
+}
 
-  private collectExpandedKeys(nodes: NfTreeNode<T>[]): Set<string> {
-    const keys = new Set<string>();
-    const visit = (items: NfTreeNode<T>[]) => {
-      for (const node of items) {
-        if (node.expanded) keys.add(node.key);
-        if (node.children) visit(node.children);
-      }
-    };
-    visit(nodes);
-    return keys;
+function flattenVisible<T>(
+  nodes: NfTreeNode<T>[],
+  expandedKeys: ReadonlySet<string> | null,
+  depth = 0,
+): NfTreeFlatRow<T>[] {
+  const rows: NfTreeFlatRow<T>[] = [];
+  for (const node of nodes) {
+    const expandable = isExpandable(node);
+    const expanded = expandable && (expandedKeys ? expandedKeys.has(node.key) : !!node.expanded);
+    rows.push({
+      key: node.key,
+      data: node.data,
+      node,
+      depth,
+      expandable,
+      expanded,
+    });
+    if (expanded && node.children?.length) {
+      rows.push(...flattenVisible(node.children, expandedKeys, depth + 1));
+    }
   }
+  return rows;
+}
+
+function collectExpandedKeys<T>(nodes: NfTreeNode<T>[]): Set<string> {
+  const keys = new Set<string>();
+  const visit = (items: NfTreeNode<T>[]) => {
+    for (const node of items) {
+      if (node.expanded) keys.add(node.key);
+      if (node.children) visit(node.children);
+    }
+  };
+  visit(nodes);
+  return keys;
 }

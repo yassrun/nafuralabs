@@ -31,7 +31,8 @@ export const SHELL_EXTENSIONS = new InjectionToken<readonly ShellExtension[]>(
  * bundle et le drapeau — l'application décide quand et si elle les charge.
  */
 export interface OnboardingWidgets {
-  readonly inviteBanner: Type<unknown>;
+  /** Absent = bandeau d'invitation collègues non affiché (réactiver plus tard). */
+  readonly inviteBanner?: Type<unknown>;
   readonly completenessMeter: Type<unknown>;
 }
 

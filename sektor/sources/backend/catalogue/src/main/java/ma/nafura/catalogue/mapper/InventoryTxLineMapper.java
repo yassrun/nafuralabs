@@ -2,7 +2,7 @@ package ma.nafura.catalogue.mapper;
 
 import java.util.UUID;
 import ma.nafura.platform.framework.mapper.EntityMapper;
-import ma.nafura.catalogue.domain.model.InventoryTxLine;
+import ma.nafura.catalogue.domain.stock.InventoryTxLine;
 import ma.nafura.catalogue.api.request.InventoryTxLineCreateDto;
 import ma.nafura.catalogue.api.request.InventoryTxLineUpdateDto;
 import org.mapstruct.Mapper;

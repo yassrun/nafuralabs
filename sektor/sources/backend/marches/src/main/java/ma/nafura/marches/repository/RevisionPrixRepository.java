@@ -3,7 +3,7 @@ package ma.nafura.marches.repository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import ma.nafura.marches.domain.model.RevisionPrix;
+import ma.nafura.marches.domain.revision.RevisionPrix;
 import ma.nafura.platform.framework.repository.TenantScopedRepository;
 import org.springframework.stereotype.Repository;
 

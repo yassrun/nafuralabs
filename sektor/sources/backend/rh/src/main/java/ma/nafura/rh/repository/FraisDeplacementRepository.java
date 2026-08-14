@@ -3,7 +3,7 @@ package ma.nafura.rh.repository;
 import java.util.List;
 import java.util.UUID;
 import ma.nafura.platform.framework.repository.TenantScopedRepository;
-import ma.nafura.rh.domain.model.FraisDeplacement;
+import ma.nafura.rh.domain.frais.FraisDeplacement;
 import org.springframework.stereotype.Repository;
 
 @Repository

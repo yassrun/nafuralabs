@@ -5,7 +5,7 @@ import java.util.List;
 import ma.nafura.chantiers.api.dto.ChantierAffectationDto;
 import ma.nafura.chantiers.api.request.ChantierAffectationCreateDto;
 import ma.nafura.chantiers.api.request.ChantierAffectationUpdateDto;
-import ma.nafura.chantiers.domain.ChantierRoleCodes;
+import ma.nafura.chantiers.domain.chantier.ChantierRoleCodes;
 import ma.nafura.chantiers.service.ChantierAffectationService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

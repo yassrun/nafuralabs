@@ -13,7 +13,7 @@ import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
-import ma.nafura.catalogue.domain.model.CatalogArticle;
+import ma.nafura.catalogue.domain.ouvrage.CatalogArticle;
 import ma.nafura.catalogue.repository.CatalogArticleRepository;
 import ma.nafura.catalogue.repository.ItemMatchRepository;
 import ma.nafura.catalogue.service.RapprochementDeterministeService.CandidatMatch;

@@ -8,13 +8,14 @@ import java.util.UUID;
 import ma.nafura.ventes.api.request.AvoirClientCreateDto;
 import ma.nafura.ventes.api.request.AvoirClientLigneInputDto;
 import ma.nafura.ventes.api.request.AvoirClientUpdateDto;
-import ma.nafura.ventes.domain.model.AvoirClient;
-import ma.nafura.ventes.domain.model.AvoirClientLigne;
+import ma.nafura.ventes.domain.avoir.AvoirClient;
+import ma.nafura.ventes.domain.avoir.AvoirClientLigne;
 import ma.nafura.ventes.repository.AvoirClientRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.ventes.seeders.AvoirClientSeedService;
 
 @Service
 public class AvoirClientService {

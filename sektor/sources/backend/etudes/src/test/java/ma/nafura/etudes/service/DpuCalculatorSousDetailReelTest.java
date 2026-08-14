@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
 import java.util.List;
-import ma.nafura.etudes.domain.model.ComposantDpu;
+import ma.nafura.etudes.domain.dpu.ComposantDpu;
 import org.junit.jupiter.api.Test;
 
 /**

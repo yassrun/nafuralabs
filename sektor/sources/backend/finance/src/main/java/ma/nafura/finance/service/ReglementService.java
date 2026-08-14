@@ -13,9 +13,9 @@ import ma.nafura.finance.api.request.JournalEntryLineDto;
 import ma.nafura.finance.api.request.ReglementCreateDto;
 import ma.nafura.finance.api.request.ReglementImputationDto;
 import ma.nafura.finance.api.request.ReglementUpdateDto;
-import ma.nafura.finance.domain.model.AccountingJournal;
-import ma.nafura.finance.domain.model.Reglement;
-import ma.nafura.finance.domain.model.ReglementImputation;
+import ma.nafura.finance.domain.compte.AccountingJournal;
+import ma.nafura.finance.domain.reglement.Reglement;
+import ma.nafura.finance.domain.reglement.ReglementImputation;
 import ma.nafura.finance.repository.AccountingJournalRepository;
 import ma.nafura.finance.repository.ReglementImputationRepository;
 import ma.nafura.finance.repository.ReglementRepository;
@@ -24,6 +24,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.finance.seeders.ComptabiliteSeedService;
 
 @Service
 public class ReglementService {

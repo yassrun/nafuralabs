@@ -3,7 +3,7 @@ package ma.nafura.finance.service.virement;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import ma.nafura.finance.domain.model.VirementLine;
+import ma.nafura.finance.domain.effet.VirementLine;
 import org.springframework.stereotype.Component;
 
 @Component

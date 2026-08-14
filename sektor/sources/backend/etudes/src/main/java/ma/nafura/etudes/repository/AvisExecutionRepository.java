@@ -3,7 +3,7 @@ package ma.nafura.etudes.repository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import ma.nafura.etudes.domain.model.AvisExecution;
+import ma.nafura.etudes.domain.avis.AvisExecution;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface AvisExecutionRepository extends JpaRepository<AvisExecution, UUID> {

@@ -4,12 +4,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import ma.nafura.hse.api.request.PhsCreateDto;
-import ma.nafura.hse.domain.model.Phs;
+import ma.nafura.hse.domain.phs.Phs;
 import ma.nafura.hse.repository.PhsRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.hse.seeders.PhsSeedService;
 
 @Service
 public class PhsService {

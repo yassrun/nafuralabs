@@ -12,12 +12,13 @@ import java.util.regex.Pattern;
 import ma.nafura.hse.api.dto.CnssDatDeclarationResultDto;
 import ma.nafura.hse.api.request.IncidentCreateDto;
 import ma.nafura.hse.api.request.IncidentUpdateDto;
-import ma.nafura.hse.domain.model.Incident;
+import ma.nafura.hse.domain.incident.Incident;
 import ma.nafura.hse.repository.IncidentRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.hse.seeders.IncidentSeedService;
 
 @Service
 public class IncidentService {

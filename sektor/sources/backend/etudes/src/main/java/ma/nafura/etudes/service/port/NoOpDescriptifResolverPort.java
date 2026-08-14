@@ -11,7 +11,7 @@ public class NoOpDescriptifResolverPort implements DescriptifResolverPort {
     }
 
     @Override
-    public String resolveDescriptif(ma.nafura.etudes.domain.model.DpgfNoeud article) {
+    public String resolveDescriptif(ma.nafura.etudes.domain.dpgf.DpgfNoeud article) {
         return null;
     }
 }

@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ma.nafura.hse.domain.model.AuditHse;
+import ma.nafura.hse.domain.audit.AuditHse;
 
 @Data
 @Builder

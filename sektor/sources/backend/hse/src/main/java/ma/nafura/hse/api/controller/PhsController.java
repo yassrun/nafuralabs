@@ -3,7 +3,7 @@ package ma.nafura.hse.api.controller;
 import jakarta.validation.Valid;
 import java.util.List;
 import ma.nafura.hse.api.request.PhsCreateDto;
-import ma.nafura.hse.domain.model.Phs;
+import ma.nafura.hse.domain.phs.Phs;
 import ma.nafura.hse.service.PhsService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

@@ -4,12 +4,13 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 import ma.nafura.ventes.api.dto.RetenueGarantieSyntheseDto;
-import ma.nafura.ventes.domain.model.RetenueGarantie;
+import ma.nafura.ventes.domain.garantie.RetenueGarantie;
 import ma.nafura.ventes.repository.RetenueGarantieRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.ventes.seeders.RetenueGarantieSeedService;
 
 @Service
 public class RetenueGarantieService {

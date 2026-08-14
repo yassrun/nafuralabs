@@ -3,7 +3,7 @@ package ma.nafura.ventes.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigDecimal;
-import ma.nafura.ventes.domain.model.FactureClient;
+import ma.nafura.ventes.domain.facture.FactureClient;
 import org.junit.jupiter.api.Test;
 
 class EncaissementClientServiceTest {

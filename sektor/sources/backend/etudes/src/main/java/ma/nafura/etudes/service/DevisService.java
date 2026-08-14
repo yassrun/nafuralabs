@@ -17,12 +17,12 @@ import ma.nafura.etudes.api.request.DevisCreateDto;
 import ma.nafura.etudes.api.request.DevisLigneInputDto;
 import ma.nafura.etudes.api.request.DevisUpdateDto;
 import ma.nafura.etudes.api.dto.ConvertToChantierResultDto;
-import ma.nafura.etudes.domain.model.AppelOffreClient;
-import ma.nafura.etudes.domain.model.Devis;
-import ma.nafura.etudes.domain.model.DevisLigne;
-import ma.nafura.etudes.domain.model.DevisVersion;
-import ma.nafura.etudes.domain.model.DossierEtude;
-import ma.nafura.etudes.domain.model.Dpgf;
+import ma.nafura.etudes.domain.appeloffre.AppelOffreClient;
+import ma.nafura.etudes.domain.devis.Devis;
+import ma.nafura.etudes.domain.devis.DevisLigne;
+import ma.nafura.etudes.domain.devis.DevisVersion;
+import ma.nafura.etudes.domain.dossier.DossierEtude;
+import ma.nafura.etudes.domain.dpgf.Dpgf;
 import ma.nafura.etudes.repository.AppelOffreClientRepository;
 import ma.nafura.etudes.repository.DevisRepository;
 import ma.nafura.etudes.repository.DevisVersionRepository;
@@ -32,6 +32,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.etudes.seeders.DevisSeedService;
 
 @Service
 public class DevisService {

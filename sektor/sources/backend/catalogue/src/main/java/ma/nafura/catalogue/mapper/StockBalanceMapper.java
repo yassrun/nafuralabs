@@ -2,7 +2,7 @@ package ma.nafura.catalogue.mapper;
 
 import java.util.UUID;
 import ma.nafura.platform.framework.mapper.EntityMapper;
-import ma.nafura.catalogue.domain.model.StockBalance;
+import ma.nafura.catalogue.domain.stock.StockBalance;
 import ma.nafura.catalogue.api.request.StockBalanceCreateDto;
 import ma.nafura.catalogue.api.request.StockBalanceUpdateDto;
 import org.mapstruct.Mapper;

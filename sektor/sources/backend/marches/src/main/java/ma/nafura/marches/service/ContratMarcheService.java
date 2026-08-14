@@ -9,14 +9,15 @@ import java.util.UUID;
 import ma.nafura.marches.api.request.BpuLigneInputDto;
 import ma.nafura.marches.api.request.ContratMarcheCreateDto;
 import ma.nafura.marches.api.request.ContratMarcheUpdateDto;
-import ma.nafura.marches.domain.model.BpuLigne;
-import ma.nafura.marches.domain.model.ContratMarche;
+import ma.nafura.marches.domain.contrat.BpuLigne;
+import ma.nafura.marches.domain.contrat.ContratMarche;
 import ma.nafura.marches.repository.BpuLigneRepository;
 import ma.nafura.marches.repository.ContratMarcheRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.marches.seeders.ContratMarcheSeedService;
 
 @Service
 public class ContratMarcheService {

@@ -1,7 +1,7 @@
 package ma.nafura.marches.api.controller;
 
 import java.util.List;
-import ma.nafura.marches.domain.model.IndiceBtp;
+import ma.nafura.marches.domain.revision.IndiceBtp;
 import ma.nafura.marches.service.IndiceBtpService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

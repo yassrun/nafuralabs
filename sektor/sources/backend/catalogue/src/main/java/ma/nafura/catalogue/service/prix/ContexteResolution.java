@@ -18,7 +18,7 @@ public record ContexteResolution(
         if (dateReference == null) {
             dateReference = LocalDate.now();
         }
-        basePrixChiffrage = ma.nafura.catalogue.domain.BasePrixChiffrage.normalize(basePrixChiffrage);
+        basePrixChiffrage = ma.nafura.catalogue.domain.ouvrage.BasePrixChiffrage.normalize(basePrixChiffrage);
     }
 
     public static ContexteResolution of(UUID tenantId, LocalDate dateReference, UUID devisePivotId) {

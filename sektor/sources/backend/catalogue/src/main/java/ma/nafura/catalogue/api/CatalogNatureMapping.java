@@ -1,6 +1,6 @@
 package ma.nafura.catalogue.api;
 
-import ma.nafura.catalogue.domain.NatureComposantMapping;
+import ma.nafura.catalogue.domain.article.NatureComposantMapping;
 
 /** Mapping nature / type ouvrage / type DPU — sans exposer item.domain. */
 public final class CatalogNatureMapping {

@@ -3,7 +3,7 @@ package ma.nafura.ventes.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigDecimal;
-import ma.nafura.ventes.domain.model.RetenueGarantie;
+import ma.nafura.ventes.domain.garantie.RetenueGarantie;
 import org.junit.jupiter.api.Test;
 
 class RetenueGarantieServiceTest {

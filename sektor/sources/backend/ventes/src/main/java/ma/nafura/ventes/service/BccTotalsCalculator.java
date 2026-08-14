@@ -3,14 +3,14 @@ package ma.nafura.ventes.service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
-import ma.nafura.ventes.domain.model.BonCommandeClient;
-import ma.nafura.ventes.domain.model.BonCommandeClientLigne;
+import ma.nafura.ventes.domain.commande.BonCommandeClient;
+import ma.nafura.ventes.domain.commande.BonCommandeClientLigne;
 
-final class BccTotalsCalculator {
+public final class BccTotalsCalculator {
 
     private BccTotalsCalculator() {}
 
-    static void applyTotals(BonCommandeClient entity) {
+    public static void applyTotals(BonCommandeClient entity) {
         BigDecimal montantHt = computeMontantHt(entity.getLignes());
         BigDecimal tvaTaux = entity.getTvaTaux() != null ? entity.getTvaTaux() : new BigDecimal("20");
         BigDecimal montantTtc = montantHt.multiply(BigDecimal.ONE.add(tvaTaux.divide(new BigDecimal("100"), 8, RoundingMode.HALF_UP)))

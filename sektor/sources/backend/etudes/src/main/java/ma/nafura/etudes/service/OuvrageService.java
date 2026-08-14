@@ -15,12 +15,12 @@ import ma.nafura.etudes.api.request.ComposantOuvrageInputDto;
 import ma.nafura.etudes.api.request.OuvrageCreateDto;
 import ma.nafura.etudes.api.request.OuvrageUpdateDto;
 import ma.nafura.etudes.api.request.UniteMainInputDto;
-import ma.nafura.etudes.domain.ComposantReference;
-import ma.nafura.etudes.domain.OuvrageOrigine;
-import ma.nafura.etudes.domain.ReferenceType;
-import ma.nafura.etudes.domain.model.ComposantOuvrage;
-import ma.nafura.etudes.domain.model.Ouvrage;
-import ma.nafura.etudes.domain.model.UniteMain;
+import ma.nafura.etudes.domain.ouvrage.ComposantReference;
+import ma.nafura.etudes.domain.ouvrage.OuvrageOrigine;
+import ma.nafura.etudes.domain.appeloffre.ReferenceType;
+import ma.nafura.etudes.domain.ouvrage.ComposantOuvrage;
+import ma.nafura.etudes.domain.ouvrage.Ouvrage;
+import ma.nafura.etudes.domain.dpu.UniteMain;
 import ma.nafura.etudes.repository.OuvrageRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.data.domain.Page;
@@ -29,6 +29,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.etudes.seeders.OuvrageSeedService;
 
 @Service
 public class OuvrageService {

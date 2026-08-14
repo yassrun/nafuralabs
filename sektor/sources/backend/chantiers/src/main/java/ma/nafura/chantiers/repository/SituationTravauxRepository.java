@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import ma.nafura.chantiers.domain.model.SituationTravaux;
+import ma.nafura.chantiers.domain.situation.SituationTravaux;
 import ma.nafura.platform.framework.repository.TenantScopedRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

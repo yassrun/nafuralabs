@@ -6,7 +6,7 @@ import java.util.List;
 import lombok.Data;
 
 /**
- * Nœud d'import bordereau, aligné sur {@link ma.nafura.etudes.domain.model.DpgfNoeud}
+ * Nœud d'import bordereau, aligné sur {@link ma.nafura.etudes.domain.dpgf.DpgfNoeud}
  * (types LOT / SOUS_LOT / ARTICLE — plus de POSTE consultation).
  */
 @Data

@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import ma.nafura.hse.api.request.RegistreLegalCreateDto;
 import ma.nafura.hse.api.request.RegistreLegalUpdateDto;
-import ma.nafura.hse.domain.model.RegistreLegal;
+import ma.nafura.hse.domain.registre.RegistreLegal;
 import ma.nafura.hse.service.RegistreLegalService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

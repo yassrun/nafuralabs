@@ -59,8 +59,6 @@ import { provideRouter, withComponentInputBinding, withPreloading, NoPreloading 
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideServiceWorker } from '@angular/service-worker';
 import { provideNativeDateAdapter } from '@angular/material/core';
-import { providePrimeNG } from 'primeng/config';
-import Aura from '@primeuix/themes/aura';
 import { provideHttpClient, withInterceptors, withXhr } from '@angular/common/http';
 import {
   TranslateLoader,
@@ -207,7 +205,7 @@ export const appConfig: ApplicationConfig = {
           }
           const m = await import('@app/socle/onboarding/onboarding-shell-widgets.component');
           return {
-            inviteBanner: m.OnboardingInviteBannerWidgetComponent,
+            // Bandeau « Invitez vos collègues » volontairement non monté — à réactiver plus tard.
             completenessMeter: m.OnboardingCompletenessWidgetComponent,
           };
         },
@@ -225,12 +223,6 @@ export const appConfig: ApplicationConfig = {
     provideNativeDateAdapter(),
     // Chart.js (ng2-charts) for dashboard and reporting
     provideCharts(withDefaultRegisterables()),
-    // PrimeNG (Aura theme – used e.g. in filter-bar; Material kept elsewhere)
-    providePrimeNG({
-      theme: {
-        preset: Aura,
-      },
-    }),
     provideHttpClient(withXhr(), 
       withInterceptors([
         authTokenInterceptor,    // Add Authorization Bearer token to all requests

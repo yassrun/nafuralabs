@@ -14,9 +14,9 @@ import java.util.UUID;
 import ma.nafura.finance.api.dto.JournalEntryDetailDto;
 import ma.nafura.finance.api.dto.ReglementDetailDto;
 import ma.nafura.finance.api.request.JournalEntryCreateDto;
-import ma.nafura.finance.domain.model.AccountingJournal;
-import ma.nafura.finance.domain.model.Reglement;
-import ma.nafura.finance.domain.model.ReglementImputation;
+import ma.nafura.finance.domain.compte.AccountingJournal;
+import ma.nafura.finance.domain.reglement.Reglement;
+import ma.nafura.finance.domain.reglement.ReglementImputation;
 import ma.nafura.finance.repository.AccountingJournalRepository;
 import ma.nafura.finance.repository.ReglementImputationRepository;
 import ma.nafura.finance.repository.ReglementRepository;
@@ -29,6 +29,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ma.nafura.finance.seeders.ComptabiliteSeedService;
 
 @ExtendWith(MockitoExtension.class)
 class ReglementComptabilisationServiceTest {

@@ -3,7 +3,7 @@ package ma.nafura.achats.mapper;
 import java.util.UUID;
 import ma.nafura.achats.api.request.PartnerCreateDto;
 import ma.nafura.achats.api.request.PartnerUpdateDto;
-import ma.nafura.achats.domain.model.Partner;
+import ma.nafura.achats.domain.fournisseur.Partner;
 import ma.nafura.platform.framework.mapper.EntityMapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

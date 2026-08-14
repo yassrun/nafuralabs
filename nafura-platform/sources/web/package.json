@@ -17,7 +17,6 @@
     "lucide-angular": "^0.563.0",
     "ng2-charts": "^8.0.0",
     "ngx-translate-messageformat-compiler": "^7.2.0",
-    "primeng": "^22.0.0",
     "rxjs": "~7.8.1"
   },
   "dependencies": {
@@ -34,7 +33,6 @@
     "lucide-angular": "^0.563.0",
     "ng2-charts": "^8.0.0",
     "ngx-translate-messageformat-compiler": "^7.2.0",
-    "primeng": "^22.0.0",
     "rxjs": "~7.8.1"
   }
 }

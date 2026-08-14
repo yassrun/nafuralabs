@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.util.List;
 import lombok.Data;
-import ma.nafura.achats.domain.model.PartnerRoleType;
+import ma.nafura.achats.domain.fournisseur.PartnerRoleType;
 
 @Data
 public class PartnerCreateDto {

@@ -11,12 +11,13 @@ import ma.nafura.achats.api.dto.ContratSousTraitanceDto;
 import ma.nafura.achats.api.dto.SousTraitanceSyntheseDto;
 import ma.nafura.achats.api.request.ContratFournisseurCreateDto;
 import ma.nafura.achats.api.request.ContratSousTraitanceCreateDto;
-import ma.nafura.achats.domain.model.ContratFournisseur;
+import ma.nafura.achats.domain.contrat.ContratFournisseur;
 import ma.nafura.achats.repository.ContratFournisseurRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.achats.seeders.ContratFournisseurSousTraitanceSeedService;
 
 @Service
 public class ChantierSousTraitanceService {

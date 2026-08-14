@@ -11,13 +11,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.platform.collaboration.docmanager.template.PdfGenerationService;
-import ma.nafura.rh.domain.model.Employe;
-import ma.nafura.rh.domain.model.FichePaie;
+import ma.nafura.rh.domain.employe.Employe;
+import ma.nafura.rh.domain.paie.FichePaie;
 import ma.nafura.rh.repository.EmployeRepository;
 import ma.nafura.rh.repository.FichePaieRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.rh.seeders.FichePaieSeedService;
 
 @Service
 public class FichePaieService {

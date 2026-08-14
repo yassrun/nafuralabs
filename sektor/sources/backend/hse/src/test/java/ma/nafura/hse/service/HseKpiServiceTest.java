@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import ma.nafura.hse.api.dto.HseKpiDto;
-import ma.nafura.hse.domain.model.Incident;
+import ma.nafura.hse.domain.incident.Incident;
 import ma.nafura.hse.repository.IncidentRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.junit.jupiter.api.AfterEach;
@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ma.nafura.hse.seeders.IncidentSeedService;
 
 @ExtendWith(MockitoExtension.class)
 class HseKpiServiceTest {

@@ -6,15 +6,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import ma.nafura.chantiers.api.dto.PilotageMargeRowDto;
-import ma.nafura.chantiers.domain.model.Chantier;
+import ma.nafura.chantiers.domain.chantier.Chantier;
 import ma.nafura.chantiers.repository.ChantierRepository;
-import ma.nafura.marches.domain.model.ContratMarche;
+import ma.nafura.marches.domain.contrat.ContratMarche;
 import ma.nafura.marches.repository.ContratMarcheRepository;
-import ma.nafura.marches.service.ContratMarcheSeedService;
+import ma.nafura.marches.seeders.ContratMarcheSeedService;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.chantiers.seeders.ChantierSeedService;
 
 @Service
 public class PilotageMargeService {

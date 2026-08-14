@@ -6,12 +6,13 @@ import java.util.List;
 import java.util.UUID;
 import ma.nafura.finance.api.dto.TradeEffectDto;
 import ma.nafura.finance.api.request.TradeEffectCreateDto;
-import ma.nafura.finance.domain.model.TradeEffect;
+import ma.nafura.finance.domain.effet.TradeEffect;
 import ma.nafura.finance.repository.TradeEffectRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.finance.seeders.TradeEffectSeedService;
 
 @Service
 public class TradeEffectService {

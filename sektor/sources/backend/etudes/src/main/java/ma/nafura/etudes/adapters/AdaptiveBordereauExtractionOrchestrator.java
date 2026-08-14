@@ -11,7 +11,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import ma.nafura.etudes.api.request.ImportNoeudDto;
 import ma.nafura.etudes.api.request.ImportTreeRequest;
-import ma.nafura.etudes.domain.model.DpgfNoeud;
+import ma.nafura.etudes.domain.dpgf.DpgfNoeud;
 import ma.nafura.etudes.service.bordereau.BordereauCandidateMerger;
 import ma.nafura.etudes.service.bordereau.BordereauExtractionDiagnostics;
 import ma.nafura.etudes.service.bordereau.BordereauHybridAssembler;

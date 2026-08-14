@@ -2,7 +2,7 @@ package ma.nafura.achats.api.request;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import ma.nafura.achats.domain.model.PartnerRoleType;
+import ma.nafura.achats.domain.fournisseur.PartnerRoleType;
 
 @Data
 public class PartnerRoleAssignDto {

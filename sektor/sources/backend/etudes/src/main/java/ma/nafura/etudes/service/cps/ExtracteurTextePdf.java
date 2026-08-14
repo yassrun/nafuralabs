@@ -5,7 +5,7 @@ import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.springframework.stereotype.Component;
-import ma.nafura.etudes.domain.model.CpsDocument;
+import ma.nafura.etudes.domain.cps.CpsDocument;
 
 /**
  * Extrait le texte d'un PDF et qualifie la source.

@@ -7,7 +7,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import ma.nafura.catalogue.domain.model.CatalogPrixReference;
+import ma.nafura.catalogue.domain.ouvrage.CatalogPrixReference;
 import ma.nafura.catalogue.repository.CatalogPrixReferenceRepository;
 import ma.nafura.catalogue.service.port.TenantPrixHistoriquePort;
 import org.springframework.stereotype.Service;

@@ -5,7 +5,7 @@ import java.util.List;
 import ma.nafura.hse.api.dto.CnssDatDeclarationResultDto;
 import ma.nafura.hse.api.request.IncidentCreateDto;
 import ma.nafura.hse.api.request.IncidentUpdateDto;
-import ma.nafura.hse.domain.model.Incident;
+import ma.nafura.hse.domain.incident.Incident;
 import ma.nafura.hse.service.IncidentService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

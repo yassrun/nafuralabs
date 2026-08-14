@@ -1,8 +1,8 @@
 package ma.nafura.etudes.service.gate;
 
 import java.util.List;
-import ma.nafura.etudes.domain.model.DossierPieceAttendue;
-import ma.nafura.etudes.domain.model.DpgfNoeud;
+import ma.nafura.etudes.domain.dossier.DossierPieceAttendue;
+import ma.nafura.etudes.domain.dpgf.DpgfNoeud;
 
 /**
  * Ce sur quoi une règle d'étape se prononce.

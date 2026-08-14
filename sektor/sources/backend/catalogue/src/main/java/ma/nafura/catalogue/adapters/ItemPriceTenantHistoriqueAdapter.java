@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import ma.nafura.catalogue.service.port.TenantPrixHistoriquePort;
-import ma.nafura.catalogue.domain.model.ItemPrice;
+import ma.nafura.catalogue.domain.article.ItemPrice;
 import ma.nafura.catalogue.repository.ItemPriceRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.context.annotation.Primary;

@@ -36,12 +36,11 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
 @import '@fortawesome/fontawesome-free/css/all.css';
-@import 'primeicons/primeicons.css';
 
 /* ═══════════════════════════════════════════════════════════════════════════
    Engine Theme Overrides (Tomic Single Source of Truth)
    
-   These overrides ensure Material and PrimeNG use --nf-* tokens instead of
+   These overrides ensure Material uses --nf-* tokens instead of
    their default theme colors. See TOMIC_UI_CONSTITUTION.md.
    ═══════════════════════════════════════════════════════════════════════════ */
 
@@ -110,23 +109,11 @@
 }
 
 /*
- * PrimeNG TreeTable wrapper
+ * nf-tree-table (Material engine)
  * Keeps the engine visually aligned with nf-data-table.
  */
-.nf-tree-table__engine.p-treetable {
-  --p-treetable-header-cell-background: var(--nf-table-header-bg);
-  --p-treetable-header-cell-color: var(--nf-table-header-color);
-  --p-treetable-row-background: var(--nf-color-surface);
-  --p-treetable-row-color: var(--nf-color-text-primary);
-  --p-treetable-body-cell-border-color: var(--nf-color-border);
-  --p-treetable-row-hover-background: var(--nf-table-row-hover-bg);
-
-  .p-treetable-table { width: 100%; border-collapse: collapse; }
-
-  th {
-    position: sticky;
-    top: 0;
-    z-index: 1;
+.nf-tree-table__engine.mat-mdc-table {
+  th.mat-mdc-header-cell {
     padding: .7rem 1rem;
     background: var(--nf-table-header-bg);
     color: var(--nf-table-header-color);
@@ -137,7 +124,7 @@
     white-space: nowrap;
   }
 
-  td {
+  td.mat-mdc-cell {
     padding: .65rem 1rem;
     color: var(--nf-color-text-secondary);
     border-bottom: 1px solid var(--nf-color-bg-muted);
@@ -146,16 +133,6 @@
   }
 
   tbody tr:hover > td { background: var(--nf-table-row-hover-bg); }
-
-  .p-treetable-node-toggle-button {
-    margin-inline-end: .35rem;
-    color: var(--nf-color-text-secondary);
-  }
-
-  .p-treetable-node-toggle-button:focus-visible {
-    outline: 2px solid var(--nf-border-focus);
-    outline-offset: 2px;
-  }
 }
 
 /*
@@ -239,78 +216,6 @@ html .mat-mdc-slide-toggle.mat-warn {
  */
 .mat-mdc-progress-spinner {
   --mat-progress-spinner-active-indicator-color: var(--nf-primary);
-}
-
-/*
- * PrimeNG Theme Overrides
- * Binds Aura primary to --nf-* tokens for visual consistency
- */
-:root {
-  /* Primary colors - bind to Tomic tokens */
-  --p-primary-color: var(--nf-primary);
-  --p-primary-hover-color: var(--nf-primary-hover);
-  --p-primary-active-color: var(--nf-primary-active);
-  --p-primary-contrast-color: white;
-  
-  /* Primary color shades for various states */
-  --p-primary-50: var(--nf-color-primary-50);
-  --p-primary-100: var(--nf-color-primary-100);
-  --p-primary-200: var(--nf-color-primary-200);
-  --p-primary-300: var(--nf-color-primary-300);
-  --p-primary-400: var(--nf-color-primary-400);
-  --p-primary-500: var(--nf-color-primary-500);
-  --p-primary-600: var(--nf-color-primary-600);
-  --p-primary-700: var(--nf-color-primary-700);
-  --p-primary-800: var(--nf-color-primary-800);
-  --p-primary-900: var(--nf-color-primary-900);
-  
-  /* Surface and text colors */
-  --p-surface-0: var(--nf-color-surface);
-  --p-surface-50: var(--nf-color-gray-50);
-  --p-surface-100: var(--nf-color-gray-100);
-  --p-surface-200: var(--nf-color-gray-200);
-  --p-surface-300: var(--nf-color-gray-300);
-  --p-surface-400: var(--nf-color-gray-400);
-  --p-surface-500: var(--nf-color-gray-500);
-  --p-surface-600: var(--nf-color-gray-600);
-  --p-surface-700: var(--nf-color-gray-700);
-  --p-surface-800: var(--nf-color-gray-800);
-  --p-surface-900: var(--nf-color-gray-900);
-  
-  /* Text colors */
-  --p-text-color: var(--nf-color-text);
-  --p-text-muted-color: var(--nf-color-text-muted);
-  
-  /* Border colors */
-  --p-content-border-color: var(--nf-border-default);
-  
-  /* Focus ring */
-  --p-focus-ring-color: var(--nf-primary);
-}
-
-/*
- * PrimeNG Select/Dropdown focused state
- */
-.p-select:not(.p-disabled).p-focus,
-.p-multiselect:not(.p-disabled).p-focus,
-.p-datepicker:not(.p-disabled).p-focus,
-.p-inputnumber:not(.p-disabled).p-focus {
-  border-color: var(--nf-border-focus);
-  box-shadow: 0 0 0 2px var(--nf-color-primary-100);
-}
-
-/*
- * PrimeNG Select option hover/selected
- */
-.p-select-option:not(.p-disabled):hover,
-.p-multiselect-option:not(.p-disabled):hover {
-  background-color: var(--nf-surface-hover);
-}
-
-.p-select-option.p-highlight,
-.p-multiselect-option.p-highlight {
-  background-color: var(--nf-primary-subtle);
-  color: var(--nf-primary);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════

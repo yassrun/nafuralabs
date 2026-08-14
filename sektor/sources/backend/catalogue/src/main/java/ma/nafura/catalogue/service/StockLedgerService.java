@@ -3,7 +3,7 @@ package ma.nafura.catalogue.service;
 import java.math.BigDecimal;
 import java.util.UUID;
 import ma.nafura.platform.framework.context.TenantContext;
-import ma.nafura.catalogue.domain.model.StockBalance;
+import ma.nafura.catalogue.domain.stock.StockBalance;
 import ma.nafura.catalogue.repository.StockBalanceRepository;
 import ma.nafura.catalogue.repository.StockMoveRepository;
 import org.springframework.stereotype.Service;

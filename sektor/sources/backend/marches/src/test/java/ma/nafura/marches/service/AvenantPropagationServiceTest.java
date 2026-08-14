@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
 import ma.nafura.marches.api.dto.AvenantImpactSimulationDto;
-import ma.nafura.marches.domain.model.Avenant;
-import ma.nafura.marches.domain.model.ContratMarche;
+import ma.nafura.marches.domain.contrat.Avenant;
+import ma.nafura.marches.domain.contrat.ContratMarche;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

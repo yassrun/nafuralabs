@@ -7,7 +7,7 @@ import java.util.UUID;
 import ma.nafura.etudes.api.dto.AvisExecutionResumeDto;
 import ma.nafura.etudes.api.request.AvisExecutionCreateDto;
 import ma.nafura.etudes.api.request.AvisExecutionTraiterDto;
-import ma.nafura.etudes.domain.model.AvisExecution;
+import ma.nafura.etudes.domain.avis.AvisExecution;
 import ma.nafura.etudes.service.AvisExecutionService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

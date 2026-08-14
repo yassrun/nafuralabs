@@ -11,12 +11,13 @@ import ma.nafura.etudes.api.dto.ConvertToChantierResultDto;
 import ma.nafura.etudes.api.request.AppelOffreClientCreateDto;
 import ma.nafura.etudes.api.request.AppelOffreClientMarquerPerduDto;
 import ma.nafura.etudes.api.request.AppelOffreClientUpdateDto;
-import ma.nafura.etudes.domain.model.AppelOffreClient;
+import ma.nafura.etudes.domain.appeloffre.AppelOffreClient;
 import ma.nafura.etudes.repository.AppelOffreClientRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.etudes.seeders.AppelOffreClientSeedService;
 
 @Service
 public class AppelOffreClientService {

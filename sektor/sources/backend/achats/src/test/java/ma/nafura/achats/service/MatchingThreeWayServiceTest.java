@@ -7,12 +7,12 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import ma.nafura.achats.api.dto.MatchingReceptionDto;
-import ma.nafura.achats.domain.model.BonCommandeAchat;
-import ma.nafura.achats.domain.model.BonCommandeAchatLigne;
-import ma.nafura.achats.domain.model.FactureFournisseur;
-import ma.nafura.achats.domain.model.FactureFournisseurLigne;
-import ma.nafura.achats.domain.model.ReceptionAchat;
-import ma.nafura.achats.domain.model.ReceptionAchatLigne;
+import ma.nafura.achats.domain.commande.BonCommandeAchat;
+import ma.nafura.achats.domain.commande.BonCommandeAchatLigne;
+import ma.nafura.achats.domain.facture.FactureFournisseur;
+import ma.nafura.achats.domain.facture.FactureFournisseurLigne;
+import ma.nafura.achats.domain.reception.ReceptionAchat;
+import ma.nafura.achats.domain.reception.ReceptionAchatLigne;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

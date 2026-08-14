@@ -13,7 +13,7 @@ import ma.nafura.achats.api.dto.AttestationTypeStatusDto;
 import ma.nafura.achats.api.dto.PartnerAttestationsStatusDto;
 import ma.nafura.achats.api.request.AttestationFournisseurCreateDto;
 import ma.nafura.achats.api.request.AttestationFournisseurUpdateDto;
-import ma.nafura.achats.domain.model.AttestationFournisseur;
+import ma.nafura.achats.domain.fournisseur.AttestationFournisseur;
 import ma.nafura.achats.repository.AttestationFournisseurRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.beans.factory.annotation.Value;

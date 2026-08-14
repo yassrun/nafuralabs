@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.UUID;
 import ma.nafura.ventes.api.request.BonCommandeClientCreateDto;
 import ma.nafura.ventes.api.request.BonCommandeClientUpdateDto;
-import ma.nafura.ventes.domain.model.BonCommandeClient;
+import ma.nafura.ventes.domain.commande.BonCommandeClient;
 import ma.nafura.ventes.service.BonCommandeClientService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

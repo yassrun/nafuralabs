@@ -7,15 +7,16 @@ import ma.nafura.chantiers.api.dto.AttachementChantierDto;
 import ma.nafura.chantiers.api.dto.AttachementLigneDto;
 import ma.nafura.chantiers.api.request.AttachementChantierCreateDto;
 import ma.nafura.chantiers.api.request.AttachementLigneInputDto;
-import ma.nafura.chantiers.domain.model.AttachementChantier;
-import ma.nafura.chantiers.domain.model.AttachementLigne;
-import ma.nafura.chantiers.domain.model.Chantier;
+import ma.nafura.chantiers.domain.attachement.AttachementChantier;
+import ma.nafura.chantiers.domain.attachement.AttachementLigne;
+import ma.nafura.chantiers.domain.chantier.Chantier;
 import ma.nafura.chantiers.repository.AttachementChantierRepository;
 import ma.nafura.chantiers.repository.AttachementLigneRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.chantiers.seeders.ChantierDocumentsSeedService;
 
 @Service
 public class AttachementChantierService {

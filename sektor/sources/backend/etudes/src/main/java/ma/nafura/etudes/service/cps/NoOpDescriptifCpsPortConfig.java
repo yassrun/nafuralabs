@@ -2,8 +2,8 @@ package ma.nafura.etudes.service.cps;
 
 import java.util.List;
 import java.util.Optional;
-import ma.nafura.etudes.domain.model.CpsSection;
-import ma.nafura.etudes.domain.model.DpgfNoeud;
+import ma.nafura.etudes.domain.cps.CpsSection;
+import ma.nafura.etudes.domain.dpgf.DpgfNoeud;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Bean;

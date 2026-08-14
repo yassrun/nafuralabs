@@ -9,15 +9,16 @@ import java.util.UUID;
 import ma.nafura.ventes.api.request.BonCommandeClientCreateDto;
 import ma.nafura.ventes.api.request.BonCommandeClientLigneInputDto;
 import ma.nafura.ventes.api.request.BonCommandeClientUpdateDto;
-import ma.nafura.ventes.domain.model.BonCommandeClient;
-import ma.nafura.ventes.domain.model.BonCommandeClientLigne;
-import ma.nafura.ventes.domain.model.Offre;
-import ma.nafura.ventes.domain.model.OffreLigne;
+import ma.nafura.ventes.domain.commande.BonCommandeClient;
+import ma.nafura.ventes.domain.commande.BonCommandeClientLigne;
+import ma.nafura.ventes.domain.offre.Offre;
+import ma.nafura.ventes.domain.offre.OffreLigne;
 import ma.nafura.ventes.repository.BonCommandeClientRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.ventes.seeders.BonCommandeClientSeedService;
 
 @Service
 public class BonCommandeClientService {

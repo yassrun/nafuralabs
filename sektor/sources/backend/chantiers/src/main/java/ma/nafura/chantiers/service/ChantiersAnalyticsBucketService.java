@@ -13,14 +13,15 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import ma.nafura.chantiers.api.dto.AnalyticsBucketResponseDto;
 import ma.nafura.chantiers.api.dto.AnalyticsBucketRowDto;
-import ma.nafura.chantiers.domain.model.Chantier;
-import ma.nafura.chantiers.domain.model.SituationTravaux;
+import ma.nafura.chantiers.domain.chantier.Chantier;
+import ma.nafura.chantiers.domain.situation.SituationTravaux;
 import ma.nafura.chantiers.repository.ChantierRepository;
 import ma.nafura.chantiers.repository.SituationTravauxRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.chantiers.seeders.ChantierSeedService;
 
 @Service
 public class ChantiersAnalyticsBucketService {

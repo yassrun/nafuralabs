@@ -3,7 +3,7 @@ package ma.nafura.achats.api.controller.base;
 import java.util.UUID;
 import ma.nafura.achats.api.request.PartnerCreateDto;
 import ma.nafura.achats.api.request.PartnerUpdateDto;
-import ma.nafura.achats.domain.model.Partner;
+import ma.nafura.achats.domain.fournisseur.Partner;
 import ma.nafura.achats.service.PartnerService;
 import ma.nafura.platform.framework.api.controller.CrudController;
 import ma.nafura.platform.framework.service.crud.CrudService;

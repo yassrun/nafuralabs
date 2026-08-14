@@ -2,7 +2,7 @@ package ma.nafura.etudes.service.port;
 
 import java.util.List;
 import ma.nafura.etudes.api.request.ComposantDpuInputDto;
-import ma.nafura.etudes.domain.model.DpgfNoeud;
+import ma.nafura.etudes.domain.dpgf.DpgfNoeud;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

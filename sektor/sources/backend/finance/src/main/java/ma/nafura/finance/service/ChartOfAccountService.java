@@ -4,13 +4,14 @@ import java.util.List;
 import java.util.UUID;
 import ma.nafura.finance.api.request.ChartOfAccountCreateDto;
 import ma.nafura.finance.api.request.ChartOfAccountUpdateDto;
-import ma.nafura.finance.domain.model.ChartOfAccount;
+import ma.nafura.finance.domain.compte.ChartOfAccount;
 import ma.nafura.finance.repository.AccountingJournalRepository;
 import ma.nafura.finance.repository.ChartOfAccountRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.finance.seeders.ComptabiliteSeedService;
 
 @Service
 public class ChartOfAccountService {

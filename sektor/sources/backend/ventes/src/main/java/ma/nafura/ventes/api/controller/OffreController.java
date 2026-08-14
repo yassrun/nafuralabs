@@ -7,7 +7,7 @@ import ma.nafura.ventes.api.dto.OffreConvertResultDto;
 import ma.nafura.ventes.api.request.OffreCreateDto;
 import ma.nafura.ventes.api.request.OffreRefusDto;
 import ma.nafura.ventes.api.request.OffreUpdateDto;
-import ma.nafura.ventes.domain.model.Offre;
+import ma.nafura.ventes.domain.offre.Offre;
 import ma.nafura.ventes.service.OffreService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

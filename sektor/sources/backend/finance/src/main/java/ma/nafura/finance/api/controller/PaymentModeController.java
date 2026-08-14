@@ -3,7 +3,7 @@ package ma.nafura.finance.api.controller;
 import java.util.UUID;
 import ma.nafura.finance.api.request.PaymentModeCreateDto;
 import ma.nafura.finance.api.request.PaymentModeUpdateDto;
-import ma.nafura.finance.domain.model.PaymentMode;
+import ma.nafura.finance.domain.reglement.PaymentMode;
 import ma.nafura.finance.service.PaymentModeService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

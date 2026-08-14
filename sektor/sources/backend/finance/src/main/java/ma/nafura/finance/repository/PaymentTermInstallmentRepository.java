@@ -3,7 +3,7 @@ package ma.nafura.finance.repository;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
-import ma.nafura.finance.domain.model.PaymentTermInstallment;
+import ma.nafura.finance.domain.reglement.PaymentTermInstallment;
 import ma.nafura.platform.framework.repository.TenantScopedRepository;
 import org.springframework.stereotype.Repository;
 

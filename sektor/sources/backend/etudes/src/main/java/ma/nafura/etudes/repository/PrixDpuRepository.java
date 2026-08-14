@@ -3,7 +3,7 @@ package ma.nafura.etudes.repository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import ma.nafura.etudes.domain.model.PrixDpu;
+import ma.nafura.etudes.domain.dpu.PrixDpu;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PrixDpuRepository extends JpaRepository<PrixDpu, UUID> {

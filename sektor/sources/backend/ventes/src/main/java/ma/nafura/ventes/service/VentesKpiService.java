@@ -7,10 +7,11 @@ import java.util.List;
 import java.util.UUID;
 import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.ventes.api.dto.VentesKpiDto;
-import ma.nafura.ventes.domain.model.FactureClient;
+import ma.nafura.ventes.domain.facture.FactureClient;
 import ma.nafura.ventes.repository.FactureClientRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ma.nafura.ventes.seeders.FactureClientSeedService;
 
 @Service
 public class VentesKpiService {

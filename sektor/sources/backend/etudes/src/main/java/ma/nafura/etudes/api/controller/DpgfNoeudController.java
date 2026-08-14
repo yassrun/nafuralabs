@@ -3,7 +3,7 @@ package ma.nafura.etudes.api.controller;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import ma.nafura.etudes.api.request.DpgfNoeudUpdateDto;
-import ma.nafura.etudes.domain.model.DpgfNoeud;
+import ma.nafura.etudes.domain.dpgf.DpgfNoeud;
 import ma.nafura.etudes.service.DpgfService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

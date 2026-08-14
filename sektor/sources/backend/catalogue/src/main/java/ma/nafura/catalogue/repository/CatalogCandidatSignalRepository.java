@@ -1,7 +1,7 @@
 package ma.nafura.catalogue.repository;
 
 import java.util.UUID;
-import ma.nafura.catalogue.domain.model.CatalogCandidatSignal;
+import ma.nafura.catalogue.domain.edition.CatalogCandidatSignal;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CatalogCandidatSignalRepository extends JpaRepository<CatalogCandidatSignal, UUID> {

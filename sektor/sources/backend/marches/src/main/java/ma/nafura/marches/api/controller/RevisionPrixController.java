@@ -3,7 +3,7 @@ package ma.nafura.marches.api.controller;
 import jakarta.validation.Valid;
 import java.util.List;
 import ma.nafura.marches.api.request.RevisionPrixCalculerDto;
-import ma.nafura.marches.domain.model.RevisionPrix;
+import ma.nafura.marches.domain.revision.RevisionPrix;
 import ma.nafura.marches.service.RevisionPrixService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

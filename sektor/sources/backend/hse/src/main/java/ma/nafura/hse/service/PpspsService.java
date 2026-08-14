@@ -9,14 +9,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import ma.nafura.hse.api.request.PpspsCreateDto;
 import ma.nafura.hse.api.request.PpspsSectionCreateDto;
-import ma.nafura.hse.domain.model.Ppsps;
-import ma.nafura.hse.domain.model.PpspsSection;
+import ma.nafura.hse.domain.ppsps.Ppsps;
+import ma.nafura.hse.domain.ppsps.PpspsSection;
 import ma.nafura.hse.repository.PpspsRepository;
 import ma.nafura.hse.repository.PpspsSectionRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.hse.seeders.PpspsSeedService;
 
 @Service
 public class PpspsService {

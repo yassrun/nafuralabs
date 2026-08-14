@@ -7,7 +7,7 @@ import ma.nafura.platform.authorization.security.authorization.SecuredResource;
 import ma.nafura.rh.api.request.FraisDeplacementCreateDto;
 import ma.nafura.rh.api.request.FraisDeplacementRejectDto;
 import ma.nafura.rh.api.request.FraisDeplacementUpdateDto;
-import ma.nafura.rh.domain.model.FraisDeplacement;
+import ma.nafura.rh.domain.frais.FraisDeplacement;
 import ma.nafura.rh.service.FraisDeplacementService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

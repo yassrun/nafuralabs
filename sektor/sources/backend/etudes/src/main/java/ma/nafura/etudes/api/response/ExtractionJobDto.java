@@ -3,7 +3,7 @@ package ma.nafura.etudes.api.response;
 import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.UUID;
-import ma.nafura.etudes.domain.model.DocumentExtractionJob;
+import ma.nafura.etudes.domain.dossier.DocumentExtractionJob;
 
 /** Vue API d'un job d'extraction asynchrone. */
 public record ExtractionJobDto(

@@ -1,6 +1,6 @@
 package ma.nafura.hse.service;
 
-import ma.nafura.hse.domain.model.EpiDotation;
+import ma.nafura.hse.domain.epi.EpiDotation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

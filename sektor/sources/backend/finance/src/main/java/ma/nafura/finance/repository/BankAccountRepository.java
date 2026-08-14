@@ -3,7 +3,7 @@ package ma.nafura.finance.repository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import ma.nafura.finance.domain.model.BankAccount;
+import ma.nafura.finance.domain.banque.BankAccount;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface BankAccountRepository extends JpaRepository<BankAccount, UUID> {

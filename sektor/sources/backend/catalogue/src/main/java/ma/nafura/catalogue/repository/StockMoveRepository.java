@@ -5,7 +5,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 import ma.nafura.platform.framework.repository.TenantScopedRepository;
-import ma.nafura.catalogue.domain.model.StockMove;
+import ma.nafura.catalogue.domain.stock.StockMove;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;

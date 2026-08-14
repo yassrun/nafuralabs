@@ -177,11 +177,7 @@
   .nf-listing-toolbar__filters nf-filter-bar::ng-deep .nf-filter-bar__filters {
     align-items: center !important;
   }
-  .nf-listing-toolbar__filters nf-filter-bar::ng-deep .nf-filter-bar__field p-select,
-  .nf-listing-toolbar__filters nf-filter-bar::ng-deep .nf-filter-bar__field p-multiselect,
-  .nf-listing-toolbar__filters nf-filter-bar::ng-deep .nf-filter-bar__field p-datepicker,
-  .nf-listing-toolbar__filters nf-filter-bar::ng-deep .nf-filter-bar__field p-inputnumber,
-  .nf-listing-toolbar__filters nf-filter-bar::ng-deep .nf-filter-bar__field p-floatlabel,
+  .nf-listing-toolbar__filters nf-filter-bar::ng-deep .nf-filter-bar__field mat-form-field,
   .nf-listing-toolbar__filters nf-filter-bar::ng-deep .nf-filter-bar__filters > nf-button {
     margin: 0 !important;
   }

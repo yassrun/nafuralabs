@@ -16,8 +16,8 @@ import java.util.UUID;
 import ma.nafura.socle.api.dto.ApprovalRequestDto;
 import ma.nafura.socle.api.request.ApprovalActionDto;
 import ma.nafura.socle.api.request.ApprovalRequestSubmitDto;
-import ma.nafura.socle.domain.model.ApprovalRequest;
-import ma.nafura.socle.domain.model.ApprovalWorkflow;
+import ma.nafura.socle.domain.ApprovalRequest;
+import ma.nafura.socle.domain.ApprovalWorkflow;
 import ma.nafura.socle.repository.ApprovalEventRepository;
 import ma.nafura.socle.repository.ErpApprovalRequestRepository;
 import ma.nafura.socle.repository.ApprovalWorkflowRepository;
@@ -29,6 +29,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ma.nafura.socle.seeders.ApprovalRequestSeedService;
+import ma.nafura.socle.seeders.ApprovalWorkflowSeedService;
 
 @ExtendWith(MockitoExtension.class)
 class ApprovalEngineServiceTest {

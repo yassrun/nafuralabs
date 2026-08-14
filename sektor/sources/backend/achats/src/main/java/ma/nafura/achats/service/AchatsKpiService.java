@@ -9,13 +9,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import ma.nafura.achats.api.dto.AchatsKpiDto;
-import ma.nafura.achats.domain.model.BonCommandeAchat;
-import ma.nafura.achats.domain.model.FactureFournisseur;
+import ma.nafura.achats.domain.commande.BonCommandeAchat;
+import ma.nafura.achats.domain.facture.FactureFournisseur;
 import ma.nafura.achats.repository.BonCommandeAchatRepository;
 import ma.nafura.achats.repository.FactureFournisseurRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ma.nafura.achats.seeders.BonCommandeAchatSeedService;
 
 @Service
 public class AchatsKpiService {

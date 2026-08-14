@@ -1,9 +1,9 @@
 package ma.nafura.catalogue.service;
 
-import ma.nafura.finance.domain.model.Currency;
+import ma.nafura.finance.domain.devise.Currency;
 import ma.nafura.finance.service.CurrencyConversionService;
 import ma.nafura.catalogue.api.request.ItemPriceCreateDto;
-import ma.nafura.catalogue.domain.model.ItemPrice;
+import ma.nafura.catalogue.domain.article.ItemPrice;
 import ma.nafura.catalogue.mapper.ItemPriceMapper;
 import ma.nafura.catalogue.repository.ItemPriceRepository;
 import ma.nafura.catalogue.service.base.ItemPriceServiceBase;

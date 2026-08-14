@@ -5,9 +5,9 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import ma.nafura.etudes.domain.model.DevisLigne;
-import ma.nafura.etudes.domain.model.Dpgf;
-import ma.nafura.etudes.domain.model.DpgfNoeud;
+import ma.nafura.etudes.domain.devis.DevisLigne;
+import ma.nafura.etudes.domain.dpgf.Dpgf;
+import ma.nafura.etudes.domain.dpgf.DpgfNoeud;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 

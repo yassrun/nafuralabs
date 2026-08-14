@@ -2,7 +2,7 @@ package ma.nafura.achats.repository;
 
 import java.util.List;
 import java.util.UUID;
-import ma.nafura.achats.domain.model.ReceptionAchat;
+import ma.nafura.achats.domain.reception.ReceptionAchat;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ReceptionAchatRepository extends JpaRepository<ReceptionAchat, UUID> {

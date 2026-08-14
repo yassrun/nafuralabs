@@ -2,7 +2,7 @@ package ma.nafura.etudes.repository;
 
 import java.util.List;
 import java.util.UUID;
-import ma.nafura.etudes.domain.model.CpsSection;
+import ma.nafura.etudes.domain.cps.CpsSection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

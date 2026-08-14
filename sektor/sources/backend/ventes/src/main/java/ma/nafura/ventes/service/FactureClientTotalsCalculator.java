@@ -3,8 +3,8 @@ package ma.nafura.ventes.service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
-import ma.nafura.ventes.domain.model.FactureClient;
-import ma.nafura.ventes.domain.model.FactureClientLigne;
+import ma.nafura.ventes.domain.facture.FactureClient;
+import ma.nafura.ventes.domain.facture.FactureClientLigne;
 
 final class FactureClientTotalsCalculator {
 

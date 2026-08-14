@@ -7,7 +7,7 @@ import ma.nafura.platform.authorization.security.authorization.SecuredResource;
 import ma.nafura.rh.api.request.ContratCreateDto;
 import ma.nafura.rh.api.request.ContratSignCanvasDto;
 import ma.nafura.rh.api.request.ContratUpdateDto;
-import ma.nafura.rh.domain.model.Contrat;
+import ma.nafura.rh.domain.employe.Contrat;
 import ma.nafura.rh.service.ContratService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -6,7 +6,7 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.UUID;
 import ma.nafura.platform.framework.context.TenantContext;
-import ma.nafura.catalogue.domain.model.MovementMotif;
+import ma.nafura.catalogue.domain.stock.MovementMotif;
 import ma.nafura.catalogue.mapper.MovementMotifMapper;
 import ma.nafura.catalogue.repository.MovementMotifRepository;
 import org.junit.jupiter.api.AfterEach;

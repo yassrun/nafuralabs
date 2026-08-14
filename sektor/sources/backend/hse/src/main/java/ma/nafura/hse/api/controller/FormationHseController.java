@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import ma.nafura.hse.api.request.FormationHseCreateDto;
 import ma.nafura.hse.api.request.FormationHseUpdateDto;
-import ma.nafura.hse.domain.model.FormationHse;
+import ma.nafura.hse.domain.formation.FormationHse;
 import ma.nafura.hse.service.FormationHseService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

@@ -8,14 +8,15 @@ import java.util.Optional;
 import java.util.UUID;
 import ma.nafura.marches.api.dto.CautionRenouvelerDto;
 import ma.nafura.marches.api.request.CautionMarcheCreateDto;
-import ma.nafura.marches.domain.model.CautionMarche;
-import ma.nafura.marches.domain.model.ContratMarche;
+import ma.nafura.marches.domain.caution.CautionMarche;
+import ma.nafura.marches.domain.contrat.ContratMarche;
 import ma.nafura.marches.repository.CautionMarcheRepository;
 import ma.nafura.marches.repository.ContratMarcheRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.marches.seeders.CautionMarcheSeedService;
 
 @Service
 public class CautionMarcheService {

@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import ma.nafura.catalogue.api.dto.ItemQuantityAggregateDto;
-import ma.nafura.catalogue.domain.model.StockBalance;
+import ma.nafura.catalogue.domain.stock.StockBalance;
 import ma.nafura.catalogue.mapper.StockBalanceMapper;
 import ma.nafura.catalogue.repository.StockBalanceRepository;
 import ma.nafura.catalogue.service.base.StockBalanceServiceBase;

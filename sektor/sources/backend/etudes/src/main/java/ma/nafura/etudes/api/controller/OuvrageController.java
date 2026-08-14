@@ -7,7 +7,7 @@ import java.util.UUID;
 import ma.nafura.etudes.api.dto.OuvrageLookupDto;
 import ma.nafura.etudes.api.request.OuvrageCreateDto;
 import ma.nafura.etudes.api.request.OuvrageUpdateDto;
-import ma.nafura.etudes.domain.model.Ouvrage;
+import ma.nafura.etudes.domain.ouvrage.Ouvrage;
 import ma.nafura.etudes.service.OuvrageService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;
@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ma.nafura.etudes.seeders.CorpusOuvrageSeedService;
 
 @RestController
 @RequestMapping("/api/v1/etudes/ouvrages")
@@ -31,10 +32,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class OuvrageController {
 
     private final OuvrageService service;
-    private final ma.nafura.etudes.service.CorpusOuvrageSeedService corpusSeedService;
+    private final ma.nafura.etudes.seeders.CorpusOuvrageSeedService corpusSeedService;
 
     public OuvrageController(
-            OuvrageService service, ma.nafura.etudes.service.CorpusOuvrageSeedService corpusSeedService) {
+            OuvrageService service, ma.nafura.etudes.seeders.CorpusOuvrageSeedService corpusSeedService) {
         this.service = service;
         this.corpusSeedService = corpusSeedService;
     }

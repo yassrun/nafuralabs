@@ -6,7 +6,7 @@ import static org.mockito.Mockito.mock;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
-import ma.nafura.etudes.domain.model.DpgfNoeud;
+import ma.nafura.etudes.domain.dpgf.DpgfNoeud;
 import ma.nafura.etudes.repository.DpgfNoeudRepository;
 import ma.nafura.etudes.repository.DpgfRepository;
 import ma.nafura.etudes.repository.OuvrageRepository;

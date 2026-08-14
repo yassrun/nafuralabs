@@ -8,14 +8,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import ma.nafura.hse.api.request.DuerCreateDto;
 import ma.nafura.hse.api.request.DuerRisqueCreateDto;
-import ma.nafura.hse.domain.model.Duer;
-import ma.nafura.hse.domain.model.DuerRisque;
+import ma.nafura.hse.domain.duer.Duer;
+import ma.nafura.hse.domain.duer.DuerRisque;
 import ma.nafura.hse.repository.DuerRepository;
 import ma.nafura.hse.repository.DuerRisqueRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.hse.seeders.DuerSeedService;
 
 @Service
 public class DuerService {

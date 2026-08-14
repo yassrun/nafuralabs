@@ -8,7 +8,7 @@ import ma.nafura.platform.authorization.security.authorization.SecuredResource;
 import ma.nafura.catalogue.api.request.MaterielAffectationCloreDto;
 import ma.nafura.catalogue.api.request.MaterielAffectationCreateDto;
 import ma.nafura.catalogue.api.request.MaterielAffectationUpdateDto;
-import ma.nafura.catalogue.domain.model.MaterielAffectation;
+import ma.nafura.catalogue.domain.materiel.MaterielAffectation;
 import ma.nafura.catalogue.service.MaterielAffectationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

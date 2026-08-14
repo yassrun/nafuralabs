@@ -3,7 +3,7 @@ package ma.nafura.catalogue.repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
-import ma.nafura.catalogue.domain.model.ItemPrice;
+import ma.nafura.catalogue.domain.article.ItemPrice;
 import ma.nafura.platform.framework.repository.TenantScopedRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

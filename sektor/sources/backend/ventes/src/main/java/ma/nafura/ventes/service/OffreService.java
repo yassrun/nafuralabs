@@ -10,14 +10,15 @@ import ma.nafura.ventes.api.dto.OffreConvertResultDto;
 import ma.nafura.ventes.api.request.OffreCreateDto;
 import ma.nafura.ventes.api.request.OffreLigneInputDto;
 import ma.nafura.ventes.api.request.OffreUpdateDto;
-import ma.nafura.ventes.domain.model.BonCommandeClient;
-import ma.nafura.ventes.domain.model.Offre;
-import ma.nafura.ventes.domain.model.OffreLigne;
+import ma.nafura.ventes.domain.commande.BonCommandeClient;
+import ma.nafura.ventes.domain.offre.Offre;
+import ma.nafura.ventes.domain.offre.OffreLigne;
 import ma.nafura.ventes.repository.OffreRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.ventes.seeders.OffreSeedService;
 
 @Service
 public class OffreService {

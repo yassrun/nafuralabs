@@ -14,15 +14,18 @@ import java.util.stream.Collectors;
 import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.rh.api.dto.AnalyticsBucketResponseDto;
 import ma.nafura.rh.api.dto.AnalyticsBucketRowDto;
-import ma.nafura.rh.domain.model.Conge;
-import ma.nafura.rh.domain.model.Employe;
-import ma.nafura.rh.domain.model.FichePaie;
+import ma.nafura.rh.domain.conge.Conge;
+import ma.nafura.rh.domain.employe.Employe;
+import ma.nafura.rh.domain.paie.FichePaie;
 import ma.nafura.rh.repository.CongeRepository;
 import ma.nafura.rh.repository.EmployeRepository;
 import ma.nafura.rh.repository.FichePaieRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.rh.seeders.CongeSeedService;
+import ma.nafura.rh.seeders.EmployeSeedService;
+import ma.nafura.rh.seeders.FichePaieSeedService;
 
 @Service
 public class RhAnalyticsBucketService {

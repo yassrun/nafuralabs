@@ -10,7 +10,7 @@ import ma.nafura.platform.ai.agent.service.AgentExecutionContext;
 import ma.nafura.platform.ai.agent.service.capability.EntityReadCapability;
 import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.platform.framework.context.UserContext;
-import ma.nafura.catalogue.domain.model.StockBalance;
+import ma.nafura.catalogue.domain.stock.StockBalance;
 import ma.nafura.catalogue.repository.StockBalanceRepository;
 import org.springframework.stereotype.Component;
 

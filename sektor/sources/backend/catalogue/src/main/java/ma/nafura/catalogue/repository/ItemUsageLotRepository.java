@@ -3,7 +3,7 @@ package ma.nafura.catalogue.repository;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
-import ma.nafura.catalogue.domain.model.ItemUsageLot;
+import ma.nafura.catalogue.domain.article.ItemUsageLot;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

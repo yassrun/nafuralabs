@@ -13,14 +13,15 @@ import ma.nafura.hse.api.dto.AuditClotureResultDto;
 import ma.nafura.hse.api.dto.GeneratedNcStubDto;
 import ma.nafura.hse.api.request.AuditHseCreateDto;
 import ma.nafura.hse.api.request.AuditHseLigneCreateDto;
-import ma.nafura.hse.domain.model.AuditHse;
-import ma.nafura.hse.domain.model.AuditHseLigne;
+import ma.nafura.hse.domain.audit.AuditHse;
+import ma.nafura.hse.domain.audit.AuditHseLigne;
 import ma.nafura.hse.repository.AuditHseLigneRepository;
 import ma.nafura.hse.repository.AuditHseRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.hse.seeders.AuditHseSeedService;
 
 @Service
 public class AuditHseService {

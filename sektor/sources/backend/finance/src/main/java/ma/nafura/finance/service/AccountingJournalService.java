@@ -8,14 +8,15 @@ import java.util.UUID;
 import ma.nafura.finance.api.dto.JournalSummaryDto;
 import ma.nafura.finance.api.request.AccountingJournalCreateDto;
 import ma.nafura.finance.api.request.AccountingJournalUpdateDto;
-import ma.nafura.finance.domain.model.AccountingJournal;
-import ma.nafura.finance.domain.model.JournalEntry;
+import ma.nafura.finance.domain.compte.AccountingJournal;
+import ma.nafura.finance.domain.compte.JournalEntry;
 import ma.nafura.finance.repository.AccountingJournalRepository;
 import ma.nafura.finance.repository.JournalEntryRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.finance.seeders.ComptabiliteSeedService;
 
 @Service
 public class AccountingJournalService {

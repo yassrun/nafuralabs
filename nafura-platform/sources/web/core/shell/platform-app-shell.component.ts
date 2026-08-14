@@ -1853,7 +1853,9 @@ export class PlatformAppShellComponent implements OnInit {
         if (!widgets) {
           return;
         }
-        this.onboardingInviteWidget.set(widgets.inviteBanner);
+        if (widgets.inviteBanner) {
+          this.onboardingInviteWidget.set(widgets.inviteBanner);
+        }
         this.onboardingMeterWidget.set(widgets.completenessMeter);
         this.cdr.markForCheck();
       });

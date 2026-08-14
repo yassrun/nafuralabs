@@ -2,7 +2,7 @@ package ma.nafura.finance.mapper;
 
 import java.util.UUID;
 import ma.nafura.platform.framework.mapper.EntityMapper;
-import ma.nafura.finance.domain.model.Currency;
+import ma.nafura.finance.domain.devise.Currency;
 import ma.nafura.finance.api.request.CurrencyCreateDto;
 import ma.nafura.finance.api.request.CurrencyUpdateDto;
 import org.mapstruct.Mapper;

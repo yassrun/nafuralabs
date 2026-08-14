@@ -5,7 +5,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import ma.nafura.etudes.api.dto.DpgfLotTotalDto;
-import ma.nafura.etudes.domain.model.DpgfNoeud;
+import ma.nafura.etudes.domain.dpgf.DpgfNoeud;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -41,7 +41,7 @@ public class DpgfAgregationService {
     }
 
     public void applyHeaderTotals(
-            ma.nafura.etudes.domain.model.Dpgf dpgf, List<DpgfNoeud> hierarchie) {
+            ma.nafura.etudes.domain.dpgf.Dpgf dpgf, List<DpgfNoeud> hierarchie) {
         BigDecimal totalHt = sumArticles(hierarchie);
         BigDecimal tvaTaux = dpgf.getTvaTaux() != null ? dpgf.getTvaTaux() : new BigDecimal("20");
         BigDecimal totalTva = totalHt

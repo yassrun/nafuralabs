@@ -3,7 +3,7 @@ package ma.nafura.socle.repository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import ma.nafura.socle.domain.model.MatricePouvoir;
+import ma.nafura.socle.domain.MatricePouvoir;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface MatricePouvoirRepository extends JpaRepository<MatricePouvoir, UUID> {

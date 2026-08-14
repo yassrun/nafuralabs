@@ -13,10 +13,10 @@ import java.util.Optional;
 import java.util.UUID;
 import ma.nafura.chantiers.api.dto.SituationLigneDto;
 import ma.nafura.chantiers.api.dto.SituationTravauxDto;
-import ma.nafura.chantiers.domain.model.Chantier;
+import ma.nafura.chantiers.domain.chantier.Chantier;
 import ma.nafura.chantiers.repository.ChantierRepository;
 import ma.nafura.platform.framework.context.TenantContext;
-import ma.nafura.ventes.domain.model.FactureClient;
+import ma.nafura.ventes.domain.facture.FactureClient;
 import ma.nafura.ventes.repository.FactureClientRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,6 +26,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ma.nafura.ventes.seeders.FactureClientSeedService;
 
 @ExtendWith(MockitoExtension.class)
 class FactureClientServiceCreateFromSituationTest {

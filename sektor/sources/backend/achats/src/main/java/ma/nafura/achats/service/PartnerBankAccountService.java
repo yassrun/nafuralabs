@@ -3,7 +3,7 @@ package ma.nafura.achats.service;
 import java.util.List;
 import java.util.UUID;
 import ma.nafura.achats.api.request.PartnerBankAccountCreateDto;
-import ma.nafura.achats.domain.model.PartnerBankAccount;
+import ma.nafura.achats.domain.fournisseur.PartnerBankAccount;
 import ma.nafura.achats.mapper.PartnerBankAccountMapper;
 import ma.nafura.achats.repository.PartnerBankAccountRepository;
 import ma.nafura.achats.repository.PartnerRepository;

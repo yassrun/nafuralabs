@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import ma.nafura.platform.framework.repository.TenantScopedRepository;
-import ma.nafura.rh.domain.model.HeureSupplementaire;
+import ma.nafura.rh.domain.paie.HeureSupplementaire;
 import org.springframework.stereotype.Repository;
 
 @Repository

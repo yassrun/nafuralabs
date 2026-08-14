@@ -15,17 +15,18 @@ import ma.nafura.achats.api.request.AppelOffreAchatUpdateDto;
 import ma.nafura.achats.api.request.AppelOffreLigneInputDto;
 import ma.nafura.achats.api.request.OffreFournisseurInputDto;
 import ma.nafura.achats.api.request.OffreFournisseurLigneInputDto;
-import ma.nafura.achats.domain.model.AppelOffreAchat;
-import ma.nafura.achats.domain.model.AppelOffreLigne;
+import ma.nafura.achats.domain.appeloffre.AppelOffreAchat;
+import ma.nafura.achats.domain.appeloffre.AppelOffreLigne;
 import ma.nafura.achats.api.dto.AppelOffreAttribuerResultDto;
-import ma.nafura.achats.domain.model.BonCommandeAchat;
-import ma.nafura.achats.domain.model.OffreFournisseur;
-import ma.nafura.achats.domain.model.OffreFournisseurLigne;
+import ma.nafura.achats.domain.commande.BonCommandeAchat;
+import ma.nafura.achats.domain.appeloffre.OffreFournisseur;
+import ma.nafura.achats.domain.appeloffre.OffreFournisseurLigne;
 import ma.nafura.achats.repository.AppelOffreAchatRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.achats.seeders.AppelOffreAchatSeedService;
 
 @Service
 public class AppelOffreAchatService {

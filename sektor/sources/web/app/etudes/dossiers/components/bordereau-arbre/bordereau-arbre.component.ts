@@ -107,7 +107,7 @@ export class BordereauArbreComponent {
   readonly uniteOptions = signal<UniteOption[]>([]);
   readonly chargement = signal(false);
   readonly erreur = signal<string | undefined>(undefined);
-  /** Force remount nf-tree-table (PrimeNG garde sinon d’anciens PU en cache). */
+  /** Force remount nf-tree-table (expand state / PU stale après mutation arbre). */
   readonly tableEpoch = signal(0);
 
   readonly isDraft = computed(() => this.draftArbre() != null);

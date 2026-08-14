@@ -1,6 +1,6 @@
 package ma.nafura.catalogue.api;
 
-import ma.nafura.catalogue.domain.UsageLot;
+import ma.nafura.catalogue.domain.article.UsageLot;
 
 /** Lots d'usage publiés — Études stocke le code, ne voit pas l'enum Item. */
 public final class CatalogUsageLot {

@@ -8,9 +8,9 @@ import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.UUID;
-import ma.nafura.etudes.domain.model.Devis;
-import ma.nafura.etudes.domain.model.DossierEtude;
-import ma.nafura.etudes.domain.model.Dpgf;
+import ma.nafura.etudes.domain.devis.Devis;
+import ma.nafura.etudes.domain.dossier.DossierEtude;
+import ma.nafura.etudes.domain.dpgf.Dpgf;
 import ma.nafura.etudes.repository.AppelOffreClientRepository;
 import ma.nafura.etudes.repository.DevisRepository;
 import ma.nafura.etudes.repository.DevisVersionRepository;
@@ -23,6 +23,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.jdbc.core.JdbcTemplate;
+import ma.nafura.etudes.seeders.DevisSeedService;
 
 @ExtendWith(MockitoExtension.class)
 class DevisServiceClientTest {

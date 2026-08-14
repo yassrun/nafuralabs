@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import ma.nafura.chantiers.api.request.PosteBudgetaireCreateDto;
-import ma.nafura.chantiers.domain.model.ChantierLot;
-import ma.nafura.chantiers.domain.model.PosteBudgetaire;
+import ma.nafura.chantiers.domain.chantier.ChantierLot;
+import ma.nafura.chantiers.domain.budget.PosteBudgetaire;
 import ma.nafura.chantiers.repository.ChantierLotRepository;
 import ma.nafura.chantiers.repository.PosteBudgetaireRepository;
 import ma.nafura.platform.framework.context.TenantContext;
@@ -20,6 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ma.nafura.chantiers.seeders.PosteBudgetaireSeedService;
 
 @ExtendWith(MockitoExtension.class)
 class PosteBudgetaireServiceTest {

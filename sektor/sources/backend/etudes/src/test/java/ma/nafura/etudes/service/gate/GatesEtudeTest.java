@@ -9,9 +9,9 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import ma.nafura.etudes.domain.model.ComposantDpu;
-import ma.nafura.etudes.domain.model.DpgfNoeud;
-import ma.nafura.etudes.domain.model.PrixDpu;
+import ma.nafura.etudes.domain.dpu.ComposantDpu;
+import ma.nafura.etudes.domain.dpgf.DpgfNoeud;
+import ma.nafura.etudes.domain.dpu.PrixDpu;
 import ma.nafura.etudes.repository.PrixDpuRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -84,7 +84,7 @@ class GatesEtudeTest {
 
     @Test
     void piece_obligatoire_non_liee_bloque() {
-        var piece = ma.nafura.etudes.domain.model.DossierPieceAttendue.builder()
+        var piece = ma.nafura.etudes.domain.dossier.DossierPieceAttendue.builder()
                 .id(UUID.randomUUID())
                 .type("REGLEMENT")
                 .libelle("RÃ¨glement")
@@ -116,9 +116,9 @@ class GatesEtudeTest {
     @Test
     void bordereau_signale_chaque_article_fautif_pas_seulement_le_premier() {
         List<DpgfNoeud> articles = List.of(
-                article("1-1", "m3", "70", ma.nafura.etudes.domain.OrigineCout.ESTIME.name()),
-                article("1-2", null, "10", ma.nafura.etudes.domain.OrigineCout.ESTIME.name()),
-                article("1-3", "m2", "0", ma.nafura.etudes.domain.OrigineCout.ESTIME.name()));
+                article("1-1", "m3", "70", ma.nafura.etudes.domain.dpu.OrigineCout.ESTIME.name()),
+                article("1-2", null, "10", ma.nafura.etudes.domain.dpu.OrigineCout.ESTIME.name()),
+                article("1-3", "m2", "0", ma.nafura.etudes.domain.dpu.OrigineCout.ESTIME.name()));
 
         ResultatGate r = new GatesEtude.GateBordereau().evaluer(ContexteGate.deArticles(articles));
 
@@ -139,8 +139,8 @@ class GatesEtudeTest {
                 .libelle("Lot vide")
                 .ordre(0)
                 .build();
-        DpgfNoeud a1 = article("X-10", "u", "1", ma.nafura.etudes.domain.OrigineCout.ESTIME.name());
-        DpgfNoeud a2 = article("X-10", "u", "2", ma.nafura.etudes.domain.OrigineCout.ESTIME.name());
+        DpgfNoeud a1 = article("X-10", "u", "1", ma.nafura.etudes.domain.dpu.OrigineCout.ESTIME.name());
+        DpgfNoeud a2 = article("X-10", "u", "2", ma.nafura.etudes.domain.dpu.OrigineCout.ESTIME.name());
         a1.setParentId(UUID.randomUUID());
         a2.setParentId(a1.getParentId());
 
@@ -154,12 +154,12 @@ class GatesEtudeTest {
 
     @Test
     void codes_triviaux_liste_ne_declenchent_pas_doublon() {
-        DpgfNoeud a1 = article("a)", "u", "1", ma.nafura.etudes.domain.OrigineCout.ESTIME.name());
-        DpgfNoeud a2 = article("a)", "u", "2", ma.nafura.etudes.domain.OrigineCout.ESTIME.name());
-        DpgfNoeud a3 = article("1", "u", "1", ma.nafura.etudes.domain.OrigineCout.ESTIME.name());
-        DpgfNoeud a4 = article("1", "u", "2", ma.nafura.etudes.domain.OrigineCout.ESTIME.name());
-        DpgfNoeud a5 = article("1-1-1", "m3", "1", ma.nafura.etudes.domain.OrigineCout.ESTIME.name());
-        DpgfNoeud a6 = article("1-1-1", "m3", "2", ma.nafura.etudes.domain.OrigineCout.ESTIME.name());
+        DpgfNoeud a1 = article("a)", "u", "1", ma.nafura.etudes.domain.dpu.OrigineCout.ESTIME.name());
+        DpgfNoeud a2 = article("a)", "u", "2", ma.nafura.etudes.domain.dpu.OrigineCout.ESTIME.name());
+        DpgfNoeud a3 = article("1", "u", "1", ma.nafura.etudes.domain.dpu.OrigineCout.ESTIME.name());
+        DpgfNoeud a4 = article("1", "u", "2", ma.nafura.etudes.domain.dpu.OrigineCout.ESTIME.name());
+        DpgfNoeud a5 = article("1-1-1", "m3", "1", ma.nafura.etudes.domain.dpu.OrigineCout.ESTIME.name());
+        DpgfNoeud a6 = article("1-1-1", "m3", "2", ma.nafura.etudes.domain.dpu.OrigineCout.ESTIME.name());
         UUID parent = UUID.randomUUID();
         for (DpgfNoeud a : List.of(a1, a2, a3, a4, a5, a6)) {
             a.setParentId(parent);
@@ -184,7 +184,7 @@ class GatesEtudeTest {
                 .libelle("Lot rempli")
                 .ordre(0)
                 .build();
-        DpgfNoeud a = article("1-1", "m3", "10", ma.nafura.etudes.domain.OrigineCout.ESTIME.name());
+        DpgfNoeud a = article("1-1", "m3", "10", ma.nafura.etudes.domain.dpu.OrigineCout.ESTIME.name());
         a.setParentId(lotId);
 
         ResultatGate r = new GatesEtude.GateBordereau()
@@ -197,7 +197,7 @@ class GatesEtudeTest {
 
     @Test
     void article_fourni_avec_prix_ne_reclame_pas_de_decomposition() {
-        DpgfNoeud a = article("1-1", "m3", "70", ma.nafura.etudes.domain.OrigineCout.ESTIME.name());
+        DpgfNoeud a = article("1-1", "m3", "70", ma.nafura.etudes.domain.dpu.OrigineCout.ESTIME.name());
         a.setPrixUnitaire(new BigDecimal("120.00"));
         ResultatGate r = new GatesEtude.GateDecomposition(prixDpuRepository)
                 .evaluer(ContexteGate.deArticles(List.of(a)));
@@ -206,7 +206,7 @@ class GatesEtudeTest {
 
     @Test
     void article_fourni_sans_prix_est_bloquant() {
-        List<DpgfNoeud> articles = List.of(article("1-1", "m3", "70", ma.nafura.etudes.domain.OrigineCout.ESTIME.name()));
+        List<DpgfNoeud> articles = List.of(article("1-1", "m3", "70", ma.nafura.etudes.domain.dpu.OrigineCout.ESTIME.name()));
         ResultatGate r = new GatesEtude.GateDecomposition(prixDpuRepository)
                 .evaluer(ContexteGate.deArticles(articles));
         assertThat(r.problemes()).singleElement()
@@ -297,7 +297,7 @@ class GatesEtudeTest {
     @Test
     void articles_en_prix_fourni_sont_ignores_par_la_gate_consultation() {
         UUID dpuId = UUID.randomUUID();
-        DpgfNoeud a = article("1-1", "m3", "70", ma.nafura.etudes.domain.OrigineCout.ESTIME.name());
+        DpgfNoeud a = article("1-1", "m3", "70", ma.nafura.etudes.domain.dpu.OrigineCout.ESTIME.name());
         a.setPrixDpuId(dpuId);
         PrixDpu dpu = PrixDpu.builder().id(dpuId).build();
         dpu.setComposants(List.of(ComposantDpu.builder().sourcePrix("MANUEL").build()));
@@ -333,7 +333,7 @@ class GatesEtudeTest {
 
     @Test
     void chiffrage_sans_prix_de_vente_est_bloquant() {
-        List<DpgfNoeud> articles = List.of(article("1-1", "m3", "70", ma.nafura.etudes.domain.OrigineCout.ESTIME.name()));
+        List<DpgfNoeud> articles = List.of(article("1-1", "m3", "70", ma.nafura.etudes.domain.dpu.OrigineCout.ESTIME.name()));
         ResultatGate r = new GatesEtude.GateChiffrage().evaluer(ContexteGate.deArticles(articles));
         assertThat(r.problemes()).singleElement()
                 .extracting(ResultatGate.ProblemeGate::message)
@@ -342,7 +342,7 @@ class GatesEtudeTest {
 
     @Test
     void chiffrage_complet_passe() {
-        DpgfNoeud a = article("1-1", "m3", "70", ma.nafura.etudes.domain.OrigineCout.ESTIME.name());
+        DpgfNoeud a = article("1-1", "m3", "70", ma.nafura.etudes.domain.dpu.OrigineCout.ESTIME.name());
         a.setPrixUnitaire(new BigDecimal("849.94"));
         assertThat(new GatesEtude.GateChiffrage().evaluer(ContexteGate.deArticles(List.of(a))).passe())
                 .isTrue();
@@ -351,7 +351,7 @@ class GatesEtudeTest {
     @Test
     void chiffrage_fourni_avec_dpu_brouillon_sans_taux_n_est_pas_bloque() {
         UUID dpuId = UUID.randomUUID();
-        DpgfNoeud a = article("1-1", "m3", "70", ma.nafura.etudes.domain.OrigineCout.ESTIME.name());
+        DpgfNoeud a = article("1-1", "m3", "70", ma.nafura.etudes.domain.dpu.OrigineCout.ESTIME.name());
         a.setPrixUnitaire(new BigDecimal("100"));
         a.setPrixDpuId(dpuId);
         PrixDpu dpu = PrixDpu.builder().id(dpuId).build(); // FG/MG null
@@ -367,7 +367,7 @@ class GatesEtudeTest {
     @Test
     void chiffrage_sans_partner_n_est_pas_bloque() {
         // MOA texte libre OK pendant l'Ã©tude â€” Partner exigÃ© Ã  la gÃ©nÃ©ration devis.
-        DpgfNoeud a = article("1-1", "m3", "70", ma.nafura.etudes.domain.OrigineCout.ESTIME.name());
+        DpgfNoeud a = article("1-1", "m3", "70", ma.nafura.etudes.domain.dpu.OrigineCout.ESTIME.name());
         a.setPrixUnitaire(new BigDecimal("100"));
         ResultatGate r = new GatesEtude.GateChiffrage()
                 .evaluer(ContexteGate.avecClient(ContexteGate.deArticles(List.of(a)), false, false));
@@ -378,7 +378,7 @@ class GatesEtudeTest {
 
     @Test
     void chiffrage_client_invalide_n_est_pas_bloque_ici() {
-        DpgfNoeud a = article("1-1", "m3", "70", ma.nafura.etudes.domain.OrigineCout.ESTIME.name());
+        DpgfNoeud a = article("1-1", "m3", "70", ma.nafura.etudes.domain.dpu.OrigineCout.ESTIME.name());
         a.setPrixUnitaire(new BigDecimal("100"));
         ResultatGate r = new GatesEtude.GateChiffrage()
                 .evaluer(ContexteGate.avecClient(ContexteGate.deArticles(List.of(a)), true, false));

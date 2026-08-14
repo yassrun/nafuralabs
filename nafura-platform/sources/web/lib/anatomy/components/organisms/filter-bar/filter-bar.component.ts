@@ -1,21 +1,19 @@
 import { Component, input, output, signal, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FilterFieldConfig, LookupContext } from '../../../types';
 import { SearchInputComponent } from '../../molecules/search-input';
 import { ButtonComponent } from '../../atoms/button';
-import { SelectModule } from 'primeng/select';
-import { MultiSelectModule } from 'primeng/multiselect';
-import { DatePickerModule } from 'primeng/datepicker';
-import { InputNumberModule } from 'primeng/inputnumber';
-import { FloatLabelModule } from 'primeng/floatlabel';
-import { InputTextModule } from 'primeng/inputtext';
 
 /**
  * Filter Bar Component
  *
- * Search + filters container. Uses PrimeNG (Aura theme) for form controls.
+ * Search + filters container. Uses Material for form controls.
  *
  * @example
  * <nf-filter-bar
@@ -33,12 +31,10 @@ import { InputTextModule } from 'primeng/inputtext';
   imports: [
     CommonModule,
     FormsModule,
-    SelectModule,
-    MultiSelectModule,
-    DatePickerModule,
-    InputNumberModule,
-    FloatLabelModule,
-    InputTextModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatInputModule,
+    MatDatepickerModule,
     TranslateModule,
     SearchInputComponent,
     ButtonComponent,
@@ -71,71 +67,75 @@ import { InputTextModule } from 'primeng/inputtext';
             <div class="nf-filter-bar__field">
               @switch (filter.type) {
                 @case ('select') {
-                  <p-select
-                    [options]="getSelectOptions(filter)"
-                    optionLabel="label"
-                    optionValue="value"
-                    [ngModel]="getFilterValue(filter.key)"
-                    (ngModelChange)="onFilterValueChange(filter.key, $event)"
-                    [placeholder]="filter.label | translate"
-                    variant="outlined"
-                    styleClass="nf-filter-bar__input"
-                  />
+                  <mat-form-field appearance="outline" subscriptSizing="dynamic" class="nf-filter-bar__input">
+                    <mat-label>{{ filter.label | translate }}</mat-label>
+                    <mat-select
+                      [ngModel]="getFilterValue(filter.key)"
+                      (ngModelChange)="onFilterValueChange(filter.key, $event)">
+                      @for (opt of getSelectOptions(filter); track $index) {
+                        <mat-option [value]="opt.value">{{ opt.label | translate }}</mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
                 }
                 @case ('multiselect') {
-                  <p-multiselect
-                    [options]="getOptions(filter)"
-                    optionLabel="label"
-                    optionValue="value"
-                    [ngModel]="getFilterValue(filter.key) || []"
-                    (ngModelChange)="onFilterValueChange(filter.key, $event)"
-                    [placeholder]="filter.label | translate"
-                    variant="outlined"
-                    styleClass="nf-filter-bar__input"
-                  />
+                  <mat-form-field appearance="outline" subscriptSizing="dynamic" class="nf-filter-bar__input">
+                    <mat-label>{{ filter.label | translate }}</mat-label>
+                    <mat-select
+                      multiple
+                      [ngModel]="getFilterValue(filter.key) || []"
+                      (ngModelChange)="onFilterValueChange(filter.key, $event)">
+                      @for (opt of getOptions(filter); track opt.value) {
+                        <mat-option [value]="opt.value">{{ opt.label | translate }}</mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
                 }
                 @case ('date') {
-                  <p-datepicker
-                    [ngModel]="getFilterValue(filter.key)"
-                    (ngModelChange)="onFilterValueChange(filter.key, $event)"
-                    [placeholder]="filter.label | translate"
-                    variant="outlined"
-                    styleClass="nf-filter-bar__input"
-                  />
+                  <mat-form-field appearance="outline" subscriptSizing="dynamic" class="nf-filter-bar__input">
+                    <mat-label>{{ filter.label | translate }}</mat-label>
+                    <input
+                      matInput
+                      [matDatepicker]="picker"
+                      [ngModel]="getFilterValue(filter.key)"
+                      (ngModelChange)="onFilterValueChange(filter.key, $event)" />
+                    <mat-datepicker-toggle matIconSuffix [for]="picker" />
+                    <mat-datepicker #picker />
+                  </mat-form-field>
                 }
                 @case ('boolean') {
-                  <p-select
-                    [options]="getBooleanOptions()"
-                    optionLabel="label"
-                    optionValue="value"
-                    [ngModel]="getFilterValue(filter.key)"
-                    (ngModelChange)="onFilterValueChange(filter.key, $event)"
-                    [placeholder]="filter.label | translate"
-                    variant="outlined"
-                    styleClass="nf-filter-bar__input"
-                  />
+                  <mat-form-field appearance="outline" subscriptSizing="dynamic" class="nf-filter-bar__input">
+                    <mat-label>{{ filter.label | translate }}</mat-label>
+                    <mat-select
+                      [ngModel]="getFilterValue(filter.key)"
+                      (ngModelChange)="onFilterValueChange(filter.key, $event)">
+                      @for (opt of getBooleanOptions(); track $index) {
+                        <mat-option [value]="opt.value">{{ opt.label | translate }}</mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
                 }
                 @case ('number') {
-                  <p-inputnumber
-                    [ngModel]="getFilterValue(filter.key)"
-                    (ngModelChange)="onFilterValueChange(filter.key, $event)"
-                    [placeholder]="(filter.placeholder || filter.label) | translate"
-                    variant="outlined"
-                    styleClass="nf-filter-bar__input"
-                  />
+                  <mat-form-field appearance="outline" subscriptSizing="dynamic" class="nf-filter-bar__input">
+                    <mat-label>{{ (filter.placeholder || filter.label) | translate }}</mat-label>
+                    <input
+                      matInput
+                      type="number"
+                      [ngModel]="getFilterValue(filter.key)"
+                      (ngModelChange)="onFilterValueChange(filter.key, $event != null && $event !== '' ? +$event : null)" />
+                  </mat-form-field>
                 }
                 @default {
-                  <p-floatlabel variant="over" styleClass="nf-filter-bar__input">
+                  <mat-form-field appearance="outline" subscriptSizing="dynamic" class="nf-filter-bar__input">
+                    <mat-label>{{ filter.label | translate }}</mat-label>
                     <input
+                      matInput
                       type="text"
-                      pInputText
                       [id]="filter.key"
-                      [value]="getFilterValue(filter.key) || ''"
-                      (input)="onFilterValueChange(filter.key, $any($event.target).value)"
-                      [placeholder]="(filter.placeholder || filter.label) | translate"
-                    />
-                    <label [for]="filter.key">{{ filter.label | translate }}</label>
-                  </p-floatlabel>
+                      [ngModel]="getFilterValue(filter.key) || ''"
+                      (ngModelChange)="onFilterValueChange(filter.key, $event)"
+                      [placeholder]="(filter.placeholder || filter.label) | translate" />
+                  </mat-form-field>
                 }
               }
             </div>
@@ -185,11 +185,7 @@ import { InputTextModule } from 'primeng/inputtext';
     }
 
     .nf-filter-bar__field .nf-filter-bar__input,
-    .nf-filter-bar__field p-select,
-    .nf-filter-bar__field p-multiselect,
-    .nf-filter-bar__field p-datepicker,
-    .nf-filter-bar__field p-inputnumber,
-    .nf-filter-bar__field p-floatlabel {
+    .nf-filter-bar__field mat-form-field {
       width: 100%;
     }
 

@@ -7,8 +7,8 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 import ma.nafura.marches.api.request.OrdreServiceMarcheCreateDto;
-import ma.nafura.marches.domain.model.ContratMarche;
-import ma.nafura.marches.domain.model.OrdreServiceMarche;
+import ma.nafura.marches.domain.contrat.ContratMarche;
+import ma.nafura.marches.domain.ordreservice.OrdreServiceMarche;
 import ma.nafura.marches.repository.ContratMarcheRepository;
 import ma.nafura.marches.repository.OrdreServiceMarcheRepository;
 import ma.nafura.platform.framework.context.TenantContext;
@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.marches.seeders.OrdreServiceMarcheSeedService;
 
 @Service
 public class OrdreServiceMarcheService {

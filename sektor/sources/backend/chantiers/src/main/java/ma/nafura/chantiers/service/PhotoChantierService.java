@@ -8,8 +8,8 @@ import java.util.UUID;
 import ma.nafura.chantiers.api.dto.PhotoChantierDto;
 import ma.nafura.chantiers.api.dto.PhotoChantierUrlDto;
 import ma.nafura.chantiers.api.request.PhotoChantierCreateDto;
-import ma.nafura.chantiers.domain.model.Chantier;
-import ma.nafura.chantiers.domain.model.PhotoChantier;
+import ma.nafura.chantiers.domain.chantier.Chantier;
+import ma.nafura.chantiers.domain.chantier.PhotoChantier;
 import ma.nafura.chantiers.repository.PhotoChantierRepository;
 import ma.nafura.platform.collaboration.docmanager.attachment.AttachmentService;
 import ma.nafura.platform.collaboration.docmanager.attachment.FileStorageService;
@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import ma.nafura.chantiers.seeders.PhotoChantierSeedService;
 
 @Service
 public class PhotoChantierService {

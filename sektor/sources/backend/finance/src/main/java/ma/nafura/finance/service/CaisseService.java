@@ -6,14 +6,15 @@ import java.util.UUID;
 import ma.nafura.finance.api.dto.CaisseDto;
 import ma.nafura.finance.api.dto.CaisseMouvementDto;
 import ma.nafura.finance.api.request.CaisseMouvementCreateDto;
-import ma.nafura.finance.domain.model.Caisse;
-import ma.nafura.finance.domain.model.CaisseMouvement;
+import ma.nafura.finance.domain.caisse.Caisse;
+import ma.nafura.finance.domain.caisse.CaisseMouvement;
 import ma.nafura.finance.repository.CaisseMouvementRepository;
 import ma.nafura.finance.repository.CaisseRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.finance.seeders.CaisseSeedService;
 
 @Service
 public class CaisseService {

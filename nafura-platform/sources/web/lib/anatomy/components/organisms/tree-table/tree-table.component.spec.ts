@@ -83,11 +83,21 @@ describe('TreeTableComponent', () => {
       .not.toBeNull();
   });
 
-  it('renders the loading state', () => {
-    fixture.componentInstance.loading = true;
+  it('hides children when the parent is collapsed', () => {
+    fixture.componentInstance.nodes = [{
+      key: 'parent',
+      data: { name: 'Parent' },
+      expanded: false,
+      children: [{
+        key: 'child',
+        data: { name: 'Child' },
+        leaf: true,
+      }],
+    }];
     fixture.detectChanges();
 
-    expect((fixture.nativeElement as HTMLElement)
-      .querySelector('.nf-tree-table__loading')).not.toBeNull();
+    const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    expect(text).toContain('Parent');
+    expect(text).not.toContain('Child');
   });
 });

@@ -6,7 +6,7 @@ import ma.nafura.chantiers.api.dto.ChantierLookupDto;
 import ma.nafura.chantiers.api.dto.ChantierSummaryDto;
 import ma.nafura.chantiers.api.request.ChantierCreateDto;
 import ma.nafura.chantiers.api.request.ChantierUpdateDto;
-import ma.nafura.chantiers.domain.model.Chantier;
+import ma.nafura.chantiers.domain.chantier.Chantier;
 import ma.nafura.chantiers.service.ChantierService;
 import ma.nafura.chantiers.service.ChantierSummaryReadService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;

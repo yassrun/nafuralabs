@@ -9,12 +9,13 @@ import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.rh.api.dto.ChantierPointageSyntheseDto;
 import ma.nafura.rh.api.dto.PointageDto;
 import ma.nafura.rh.api.request.PointageUpdateDto;
-import ma.nafura.rh.domain.model.Pointage;
+import ma.nafura.rh.domain.temps.Pointage;
 import ma.nafura.rh.repository.PointageRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.rh.seeders.PointageSeedService;
 
 @Service
 public class PointageService {

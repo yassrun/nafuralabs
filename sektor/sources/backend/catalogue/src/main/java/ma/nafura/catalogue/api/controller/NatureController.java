@@ -3,7 +3,7 @@ package ma.nafura.catalogue.api.controller;
 import java.util.Arrays;
 import java.util.List;
 import ma.nafura.catalogue.api.dto.NatureDto;
-import ma.nafura.catalogue.domain.Nature;
+import ma.nafura.catalogue.domain.article.Nature;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;
 import org.springframework.http.ResponseEntity;

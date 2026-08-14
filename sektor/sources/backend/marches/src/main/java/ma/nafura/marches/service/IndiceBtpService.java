@@ -2,7 +2,7 @@ package ma.nafura.marches.service;
 
 import java.util.List;
 import java.util.UUID;
-import ma.nafura.marches.domain.model.IndiceBtp;
+import ma.nafura.marches.domain.revision.IndiceBtp;
 import ma.nafura.marches.repository.IndiceBtpRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.http.HttpStatus;
@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
+import ma.nafura.marches.seeders.IndiceBtpSeedService;
 
 @Service
 public class IndiceBtpService {

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Stream;
+import ma.nafura.etudes.domain.dossier.RoleIntervenant;
 import org.junit.jupiter.api.Test;
 
 /**

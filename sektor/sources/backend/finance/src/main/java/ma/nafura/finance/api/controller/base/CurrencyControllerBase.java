@@ -3,7 +3,7 @@ package ma.nafura.finance.api.controller.base;
 import java.util.UUID;
 import ma.nafura.platform.framework.api.controller.CrudController;
 import ma.nafura.platform.framework.service.crud.CrudService;
-import ma.nafura.finance.domain.model.Currency;
+import ma.nafura.finance.domain.devise.Currency;
 import ma.nafura.finance.api.request.CurrencyCreateDto;
 import ma.nafura.finance.api.request.CurrencyUpdateDto;
 import ma.nafura.finance.service.CurrencyService;

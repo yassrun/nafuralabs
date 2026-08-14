@@ -3,7 +3,7 @@ package ma.nafura.marches.api.controller;
 import jakarta.validation.Valid;
 import java.util.List;
 import ma.nafura.marches.api.request.ReserveReceptionCreateDto;
-import ma.nafura.marches.domain.model.ReserveReception;
+import ma.nafura.marches.domain.reception.ReserveReception;
 import ma.nafura.marches.service.ReceptionMarcheService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

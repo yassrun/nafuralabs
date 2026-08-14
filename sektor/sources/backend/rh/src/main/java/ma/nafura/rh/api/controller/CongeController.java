@@ -7,7 +7,7 @@ import ma.nafura.platform.authorization.security.authorization.SecuredResource;
 import ma.nafura.rh.api.request.CongeCreateDto;
 import ma.nafura.rh.api.request.CongeRejectDto;
 import ma.nafura.rh.api.request.CongeUpdateDto;
-import ma.nafura.rh.domain.model.Conge;
+import ma.nafura.rh.domain.conge.Conge;
 import ma.nafura.rh.service.CongeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
-import ma.nafura.finance.domain.model.VirementLine;
+import ma.nafura.finance.domain.effet.VirementLine;
 import org.junit.jupiter.api.Test;
 
 class VirementXmlGeneratorTest {

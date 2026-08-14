@@ -4,7 +4,7 @@ import java.util.UUID;
 import ma.nafura.platform.framework.mapper.EntityMapper;
 import ma.nafura.catalogue.api.request.MovementMotifCreateDto;
 import ma.nafura.catalogue.api.request.MovementMotifUpdateDto;
-import ma.nafura.catalogue.domain.model.MovementMotif;
+import ma.nafura.catalogue.domain.stock.MovementMotif;
 import org.springframework.stereotype.Component;
 
 @Component

@@ -7,14 +7,15 @@ import java.util.Optional;
 import java.util.UUID;
 import ma.nafura.marches.api.dto.AvenantImpactSimulationDto;
 import ma.nafura.marches.api.request.AvenantCreateDto;
-import ma.nafura.marches.domain.model.Avenant;
-import ma.nafura.marches.domain.model.ContratMarche;
+import ma.nafura.marches.domain.contrat.Avenant;
+import ma.nafura.marches.domain.contrat.ContratMarche;
 import ma.nafura.marches.repository.AvenantRepository;
 import ma.nafura.marches.repository.ContratMarcheRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.marches.seeders.AvenantSeedService;
 
 @Service
 public class AvenantService {

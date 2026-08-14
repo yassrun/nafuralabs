@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import java.util.UUID;
 import ma.nafura.catalogue.api.request.MaterielCreateDto;
 import ma.nafura.catalogue.api.request.MaterielUpdateDto;
-import ma.nafura.catalogue.domain.model.Materiel;
+import ma.nafura.catalogue.domain.materiel.Materiel;
 import ma.nafura.catalogue.service.MaterielService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

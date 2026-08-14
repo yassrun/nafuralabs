@@ -7,7 +7,7 @@ import ma.nafura.platform.authorization.security.authorization.RequirePermission
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;
 import ma.nafura.catalogue.api.request.StockReservationCreateDto;
 import ma.nafura.catalogue.api.request.StockReservationUpdateDto;
-import ma.nafura.catalogue.domain.model.StockReservation;
+import ma.nafura.catalogue.domain.stock.StockReservation;
 import ma.nafura.catalogue.service.StockReservationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

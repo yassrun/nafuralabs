@@ -8,7 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import ma.nafura.hse.api.request.VisiteMedicaleCreateDto;
 import ma.nafura.hse.api.request.VisiteMedicaleUpdateDto;
-import ma.nafura.hse.domain.model.VisiteMedicale;
+import ma.nafura.hse.domain.visite.VisiteMedicale;
 import ma.nafura.hse.repository.VisiteMedicaleRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.slf4j.Logger;
@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.hse.seeders.VisiteMedicaleSeedService;
 
 @Service
 public class VisiteMedicaleService {

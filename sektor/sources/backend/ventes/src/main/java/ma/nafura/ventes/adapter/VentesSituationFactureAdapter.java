@@ -3,7 +3,7 @@ package ma.nafura.ventes.adapter;
 import ma.nafura.chantiers.api.dto.SituationFactureSummaryDto;
 import ma.nafura.chantiers.api.dto.SituationTravauxDto;
 import ma.nafura.chantiers.port.SituationToFacturePort;
-import ma.nafura.ventes.domain.model.FactureClient;
+import ma.nafura.ventes.domain.facture.FactureClient;
 import ma.nafura.ventes.service.FactureClientService;
 import org.springframework.stereotype.Service;
 

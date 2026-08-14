@@ -11,13 +11,14 @@ import java.util.UUID;
 import ma.nafura.achats.api.request.DemandeAchatCreateDto;
 import ma.nafura.achats.api.request.DemandeAchatLigneInputDto;
 import ma.nafura.achats.api.request.DemandeAchatUpdateDto;
-import ma.nafura.achats.domain.model.DemandeAchat;
-import ma.nafura.achats.domain.model.DemandeAchatLigne;
+import ma.nafura.achats.domain.demande.DemandeAchat;
+import ma.nafura.achats.domain.demande.DemandeAchatLigne;
 import ma.nafura.achats.repository.DemandeAchatRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.achats.seeders.DemandeAchatSeedService;
 
 @Service
 public class DemandeAchatService {

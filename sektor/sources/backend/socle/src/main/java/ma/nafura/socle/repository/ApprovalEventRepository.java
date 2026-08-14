@@ -2,7 +2,7 @@ package ma.nafura.socle.repository;
 
 import java.util.List;
 import java.util.UUID;
-import ma.nafura.socle.domain.model.ApprovalEvent;
+import ma.nafura.socle.domain.ApprovalEvent;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

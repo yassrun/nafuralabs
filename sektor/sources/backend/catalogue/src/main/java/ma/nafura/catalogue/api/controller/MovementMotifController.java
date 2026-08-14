@@ -7,7 +7,7 @@ import ma.nafura.platform.framework.api.controller.CrudController;
 import ma.nafura.platform.framework.service.crud.CrudService;
 import ma.nafura.catalogue.api.request.MovementMotifCreateDto;
 import ma.nafura.catalogue.api.request.MovementMotifUpdateDto;
-import ma.nafura.catalogue.domain.model.MovementMotif;
+import ma.nafura.catalogue.domain.stock.MovementMotif;
 import ma.nafura.catalogue.service.MovementMotifService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

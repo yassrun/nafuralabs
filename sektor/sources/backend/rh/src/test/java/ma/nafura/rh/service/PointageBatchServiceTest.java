@@ -17,8 +17,8 @@ import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.rh.api.dto.PointageBatchDto;
 import ma.nafura.rh.api.request.PointageBatchCreateDto;
 import ma.nafura.rh.api.request.PointageInputDto;
-import ma.nafura.rh.domain.model.Pointage;
-import ma.nafura.rh.domain.model.PointageBatch;
+import ma.nafura.rh.domain.temps.Pointage;
+import ma.nafura.rh.domain.temps.PointageBatch;
 import ma.nafura.rh.repository.EmployeRepository;
 import ma.nafura.rh.repository.PointageBatchRepository;
 import ma.nafura.rh.repository.PointageRepository;
@@ -30,6 +30,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ma.nafura.rh.seeders.PointageSeedService;
 
 @ExtendWith(MockitoExtension.class)
 class PointageBatchServiceTest {

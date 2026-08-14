@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import ma.nafura.socle.api.request.ApprovalWorkflowCreateDto;
 import ma.nafura.socle.api.request.ApprovalWorkflowUpdateDto;
-import ma.nafura.socle.domain.model.ApprovalWorkflow;
+import ma.nafura.socle.domain.ApprovalWorkflow;
 import ma.nafura.socle.service.ApprovalWorkflowService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;

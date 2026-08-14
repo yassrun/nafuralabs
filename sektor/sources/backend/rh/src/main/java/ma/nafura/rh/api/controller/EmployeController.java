@@ -6,7 +6,7 @@ import ma.nafura.platform.authorization.security.authorization.RequirePermission
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;
 import ma.nafura.rh.api.request.EmployeCreateDto;
 import ma.nafura.rh.api.request.EmployeUpdateDto;
-import ma.nafura.rh.domain.model.Employe;
+import ma.nafura.rh.domain.employe.Employe;
 import ma.nafura.rh.service.EmployeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

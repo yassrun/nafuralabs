@@ -3,8 +3,8 @@ package ma.nafura.ventes.service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
-import ma.nafura.ventes.domain.model.AvoirClient;
-import ma.nafura.ventes.domain.model.AvoirClientLigne;
+import ma.nafura.ventes.domain.avoir.AvoirClient;
+import ma.nafura.ventes.domain.avoir.AvoirClientLigne;
 
 final class AvoirClientTotalsCalculator {
 

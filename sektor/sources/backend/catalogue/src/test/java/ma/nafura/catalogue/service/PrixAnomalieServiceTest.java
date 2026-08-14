@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import ma.nafura.catalogue.domain.model.CatalogPrixReference;
+import ma.nafura.catalogue.domain.ouvrage.CatalogPrixReference;
 import ma.nafura.catalogue.repository.CatalogPrixReferenceRepository;
 import ma.nafura.catalogue.service.PrixAnomalieService.AnomaliePrix;
 import ma.nafura.catalogue.service.port.TenantPrixHistoriquePort;

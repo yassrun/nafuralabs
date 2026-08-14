@@ -3,7 +3,7 @@ package ma.nafura.finance.service;
 import java.util.UUID;
 import ma.nafura.finance.api.request.PaymentModeCreateDto;
 import ma.nafura.finance.api.request.PaymentModeUpdateDto;
-import ma.nafura.finance.domain.model.PaymentMode;
+import ma.nafura.finance.domain.reglement.PaymentMode;
 import ma.nafura.finance.mapper.PaymentModeMapper;
 import ma.nafura.finance.repository.PaymentModeRepository;
 import ma.nafura.platform.framework.service.crud.JpaCrudService;

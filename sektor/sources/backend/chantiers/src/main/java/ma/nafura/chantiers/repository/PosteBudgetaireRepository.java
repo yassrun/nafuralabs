@@ -3,7 +3,7 @@ package ma.nafura.chantiers.repository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import ma.nafura.chantiers.domain.model.PosteBudgetaire;
+import ma.nafura.chantiers.domain.budget.PosteBudgetaire;
 import ma.nafura.platform.framework.repository.TenantScopedRepository;
 import org.springframework.stereotype.Repository;
 

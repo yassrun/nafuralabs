@@ -13,12 +13,13 @@ import java.util.UUID;
 import ma.nafura.hse.api.dto.HseKpiDto;
 import ma.nafura.hse.api.dto.HseKpiEvolutionMensuelleDto;
 import ma.nafura.hse.api.dto.PyramideBirdDto;
-import ma.nafura.hse.domain.model.Incident;
+import ma.nafura.hse.domain.incident.Incident;
 import ma.nafura.hse.repository.IncidentRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.hse.seeders.IncidentSeedService;
 
 @Service
 public class HseKpiService {

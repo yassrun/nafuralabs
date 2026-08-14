@@ -2,7 +2,7 @@ package ma.nafura.finance.mapper;
 
 import java.util.UUID;
 import ma.nafura.platform.framework.mapper.EntityMapper;
-import ma.nafura.finance.domain.model.ExchangeRate;
+import ma.nafura.finance.domain.devise.ExchangeRate;
 import ma.nafura.finance.api.request.ExchangeRateCreateDto;
 import ma.nafura.finance.api.request.ExchangeRateUpdateDto;
 import org.mapstruct.Mapper;

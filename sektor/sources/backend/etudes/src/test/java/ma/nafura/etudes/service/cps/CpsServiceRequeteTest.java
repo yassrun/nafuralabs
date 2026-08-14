@@ -2,7 +2,7 @@ package ma.nafura.etudes.service.cps;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import ma.nafura.etudes.domain.model.DpgfNoeud;
+import ma.nafura.etudes.domain.dpgf.DpgfNoeud;
 import org.junit.jupiter.api.Test;
 
 class CpsServiceRequeteTest {

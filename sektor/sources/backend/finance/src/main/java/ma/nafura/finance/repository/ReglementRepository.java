@@ -3,7 +3,7 @@ package ma.nafura.finance.repository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import ma.nafura.finance.domain.model.Reglement;
+import ma.nafura.finance.domain.reglement.Reglement;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 

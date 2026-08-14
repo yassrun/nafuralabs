@@ -11,13 +11,14 @@ import java.util.regex.Pattern;
 import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.rh.api.request.FraisDeplacementCreateDto;
 import ma.nafura.rh.api.request.FraisDeplacementUpdateDto;
-import ma.nafura.rh.domain.model.Employe;
-import ma.nafura.rh.domain.model.FraisDeplacement;
+import ma.nafura.rh.domain.employe.Employe;
+import ma.nafura.rh.domain.frais.FraisDeplacement;
 import ma.nafura.rh.repository.EmployeRepository;
 import ma.nafura.rh.repository.FraisDeplacementRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import ma.nafura.rh.seeders.FraisDeplacementSeedService;
 
 @Service
 public class FraisDeplacementService {

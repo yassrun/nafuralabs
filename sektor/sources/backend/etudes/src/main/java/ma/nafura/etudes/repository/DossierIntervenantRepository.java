@@ -3,7 +3,7 @@ package ma.nafura.etudes.repository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import ma.nafura.etudes.domain.model.DossierIntervenant;
+import ma.nafura.etudes.domain.dossier.DossierIntervenant;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface DossierIntervenantRepository extends JpaRepository<DossierIntervenant, UUID> {

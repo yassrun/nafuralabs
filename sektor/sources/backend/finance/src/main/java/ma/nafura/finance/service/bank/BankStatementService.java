@@ -15,11 +15,11 @@ import ma.nafura.finance.api.dto.BankStatementLineDto;
 import ma.nafura.finance.api.dto.MovementCandidateDto;
 import ma.nafura.finance.api.request.BankStatementLineMatchDto;
 import ma.nafura.finance.api.request.BankStatementSaveDto;
-import ma.nafura.finance.domain.model.BankAccount;
-import ma.nafura.finance.domain.model.BankStatement;
-import ma.nafura.finance.domain.model.BankStatementLine;
-import ma.nafura.finance.domain.model.JournalEntry;
-import ma.nafura.finance.domain.model.JournalEntryLine;
+import ma.nafura.finance.domain.banque.BankAccount;
+import ma.nafura.finance.domain.banque.BankStatement;
+import ma.nafura.finance.domain.banque.BankStatementLine;
+import ma.nafura.finance.domain.compte.JournalEntry;
+import ma.nafura.finance.domain.compte.JournalEntryLine;
 import ma.nafura.finance.repository.BankAccountRepository;
 import ma.nafura.finance.repository.BankStatementLineRepository;
 import ma.nafura.finance.repository.BankStatementRepository;
@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import ma.nafura.finance.seeders.BankAccountSeedService;
 
 @Service
 public class BankStatementService {
