@@ -7,9 +7,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import ma.nafura.catalogue.domain.article.ItemPrice;
 import ma.nafura.catalogue.domain.ouvrage.CatalogPrixReference;
 import ma.nafura.catalogue.repository.CatalogPrixReferenceRepository;
-import ma.nafura.catalogue.service.port.TenantPrixHistoriquePort;
+import ma.nafura.catalogue.repository.ItemPriceRepository;
+import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -23,12 +25,12 @@ public class PrixAnomalieService {
     public static final double SEUIL_ECART = 0.18;
 
     private final CatalogPrixReferenceRepository prixRepository;
-    private final TenantPrixHistoriquePort tenantPrixHistorique;
+    private final ItemPriceRepository itemPriceRepository;
 
     public PrixAnomalieService(
-            CatalogPrixReferenceRepository prixRepository, TenantPrixHistoriquePort tenantPrixHistorique) {
+            CatalogPrixReferenceRepository prixRepository, ItemPriceRepository itemPriceRepository) {
         this.prixRepository = prixRepository;
-        this.tenantPrixHistorique = tenantPrixHistorique;
+        this.itemPriceRepository = itemPriceRepository;
     }
 
     public record AnomaliePrix(
@@ -44,9 +46,32 @@ public class PrixAnomalieService {
         if (itemId == null || prixSaisi == null) {
             return Optional.empty();
         }
-        return tenantPrixHistorique
-                .moyenne6Mois(itemId)
+        return moyenneTenant6Mois(itemId)
                 .flatMap(moyenne -> fromMoyenne(prixSaisi, moyenne, "TENANT", "catalogue.prix.anormal_au_dessus_tenant"));
+    }
+
+    private Optional<BigDecimal> moyenneTenant6Mois(UUID itemId) {
+        UUID tenantId = TenantContext.getTenantIdOrNull();
+        if (tenantId == null) {
+            return Optional.empty();
+        }
+        LocalDate from = LocalDate.now().minusMonths(6);
+        List<ItemPrice> rows = itemPriceRepository.findSince(tenantId, itemId, from);
+        if (rows == null || rows.isEmpty()) {
+            return Optional.empty();
+        }
+        BigDecimal sum = BigDecimal.ZERO;
+        int n = 0;
+        for (ItemPrice p : rows) {
+            if (p.getUnitPrice() != null && p.getUnitPrice().signum() > 0) {
+                sum = sum.add(p.getUnitPrice());
+                n++;
+            }
+        }
+        if (n == 0) {
+            return Optional.empty();
+        }
+        return Optional.of(sum.divide(BigDecimal.valueOf(n), 4, RoundingMode.HALF_UP));
     }
 
     public Optional<AnomaliePrix> evaluer(String catalogArticleCle, BigDecimal prixSaisi) {
