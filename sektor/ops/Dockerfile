@@ -1,5 +1,5 @@
 # Sektor BTP Backend — build from nafuralabs root:
-#   docker build -t sektor-btp-backend:staging -f sektor/Dockerfile .
+#   docker build -t sektor-btp-backend:staging -f sektor/ops/Dockerfile .
 
 FROM eclipse-temurin:21-jdk AS build
 WORKDIR /app

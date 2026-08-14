@@ -568,7 +568,7 @@ build_sektor_images() {
 
   echo "Building backend ? $backend_img"
   (cd "$ROOT/sektor/sources/backend" && "$GRADLEW_SEKTOR" :sektor:app:bootJar --no-daemon)
-  docker build -t "$backend_img" -f "$ROOT/sektor/Dockerfile.jar" \
+  docker build -t "$backend_img" -f "$ROOT/sektor/ops/Dockerfile.jar" \
     "$ROOT/sektor/sources/backend/app/build/libs"
 
   echo "Building frontend ? $web_img"
@@ -576,7 +576,7 @@ build_sektor_images() {
     staging) (cd "$ROOT/sektor/sources/web" && npm run build:staging) ;;
     *) (cd "$ROOT/sektor/sources/web" && npm run build:prod) ;;
   esac
-  docker build -t "$web_img" -f "$ROOT/sektor/Dockerfile.web" "$ROOT"
+  docker build -t "$web_img" -f "$ROOT/sektor/ops/Dockerfile.web" "$ROOT"
 
   echo "Building keycloak ? $keycloak_img"
   docker build -t "$keycloak_img" -f "$ROOT/nafura-platform/ops/keycloak/Dockerfile" "$ROOT/nafura-platform/ops/keycloak"

@@ -124,7 +124,7 @@ nafuralabs/
 
 **Pas de projet « migration ».** Déplacer un projet, c'est du travail **sur ce projet** : les tasks vivent dans son propre `raster-src/`. Un programme transverse n'a pas de cible, donc pas de place dans le modèle.
 
-**Hors dépôt** — `Desktop/nafuralabs-archives/` : projets en pause (`blanner`, `layali`, `beauty`, `usage-ops`, `build-intelligence`), docs historiques, canon obsolète. Git garde tout ; le disque reste léger pour les agents.
+**Hors dépôt** — `Desktop/nafuralabs-archives/` : projets en pause (`blanner`, `layali`, `beauty`, `usage-ops`, `build-intelligence`), docs historiques (`sektor-btp-docs-specs`, `sektor-web-docs`, `sektor-docs-ux`, `sektor-docs-extraction`), canon obsolète. Git garde tout ; le disque reste léger pour les agents.
 
 ### Intérieur d’un projet Pact
 

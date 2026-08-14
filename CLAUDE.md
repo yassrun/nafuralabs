@@ -42,7 +42,7 @@ Ces fichiers sous `.cursor/rules/` sont `alwaysApply` pour Cursor ; **Claude doi
 
 Sektor live :
 
-- **Rasté** (déménagement) ; **pas encore pacté.** L'ancien `docs/specs/lots/` est sorti du dépôt (`Desktop/nafuralabs-archives/sektor-btp-docs-specs/`) — référence seulement, jamais une source.
+- **Rasté** (déménagement) ; **pas encore pacté.** Docs historiques hors dépôt : `Desktop/nafuralabs-archives/sektor-btp-docs-specs/` · `sektor-web-docs/` · `sektor-docs-extraction/` — référence seulement, jamais une source.
 - Archive : `…/lots/_archive/qa-local-auth-seed/` — auth QA unique + seed (`qa@nafuralabs.local` / `qa-local`)
 - QA Mode B : `npm run start:erp:cursor` · `eval "$(bash nafura-platform/ops/qa-token.sh)"` · rule `.cursor/rules/cursor-qa-browser.mdc`
 - e2e : `sektor/e2e/` — par **projet**, pas par BC

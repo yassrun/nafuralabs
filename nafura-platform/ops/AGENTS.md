@@ -457,8 +457,8 @@ ENV=demo bash nafura-platform/ops/nlops.sh release-app sektor-btp
 nafura-platform/ops/nlops.sh                          # CLI ops
 nafura-platform/ops/k8s/overlays/infra/{staging,prod,demo}/   # Infra K8s
 sektor/ops/k8s/overlays/        # Sektor overlays
-sektor/Dockerfile.jar              # Backend image (rapide)
-sektor/Dockerfile.web              # Frontend image
+sektor/ops/Dockerfile.jar          # Backend image (rapide)
+sektor/ops/Dockerfile.web          # Frontend image
 nafura-platform/ops/keycloak/Dockerfile                       # Keycloak custom
 nafura-platform/ops/lifecycle/                                # Liquibase collector + image
 Makefile                                        # Raccourcis make
