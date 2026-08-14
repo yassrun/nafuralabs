@@ -1,4 +1,4 @@
-package ma.nafura.etudes.service.bordereau.grid;
+package ma.nafura.platform.documents.docextractor.grid;
 
 /**
  * Mise en forme d'une ligne, dans la mesure où la source la porte.

@@ -1,5 +1,6 @@
 package ma.nafura.etudes.service.bordereau.grid;
 
+import ma.nafura.platform.documents.docextractor.grid.GridRow;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;

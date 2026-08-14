@@ -13,7 +13,9 @@ import ma.nafura.etudes.api.request.ImportNoeudDto;
 import ma.nafura.etudes.api.request.ImportTreeRequest;
 import ma.nafura.etudes.domain.dpgf.DpgfNoeud;
 import ma.nafura.etudes.service.bordereau.BordereauCandidateMerger;
+import ma.nafura.etudes.service.bordereau.BordereauExtractResult;
 import ma.nafura.etudes.service.bordereau.BordereauExtractionDiagnostics;
+import ma.nafura.etudes.service.bordereau.BordereauExtractionFailedException;
 import ma.nafura.etudes.service.bordereau.BordereauHybridAssembler;
 import ma.nafura.etudes.service.bordereau.BordereauParseResult;
 import ma.nafura.etudes.service.bordereau.BordereauQualityReport;
@@ -191,9 +193,6 @@ public class AdaptiveBordereauExtractionOrchestrator {
     private final TabularBordereauParser tabularParser;
     private final String strategy;
 
-    private volatile BordereauExtractionDiagnostics lastDiagnostics =
-            BordereauExtractionDiagnostics.empty();
-
     public AdaptiveBordereauExtractionOrchestrator(
             StatelessExtractionService extractionService,
             CatalogLookupApi catalogLookupApi,
@@ -217,17 +216,7 @@ public class AdaptiveBordereauExtractionOrchestrator {
         return strategy;
     }
 
-    public BordereauExtractionDiagnostics consumeDiagnostics() {
-        BordereauExtractionDiagnostics d = lastDiagnostics;
-        lastDiagnostics = BordereauExtractionDiagnostics.empty();
-        return d;
-    }
-
-    public ImportTreeRequest extract(byte[] fileBytes, String fileName, String mimeType) {
-        return extract(fileBytes, fileName, mimeType, ExtractionProgress.noop());
-    }
-
-    public ImportTreeRequest extract(
+    public BordereauExtractResult extractResult(
             byte[] fileBytes, String fileName, String mimeType, ExtractionProgress progress) {
         ExtractionProgress prog = progress != null ? progress : ExtractionProgress.noop();
         UUID tenantId = TenantContext.getTenantIdOrNull();
@@ -245,14 +234,14 @@ public class AdaptiveBordereauExtractionOrchestrator {
                     fileBytes, fileName, mimeType, tenantId, unitCodes, started, "vision", prog);
         }
 
-        ImportTreeRequest adaptive =
+        BordereauExtractResult adaptive =
                 extractAdaptive(fileBytes, fileName, mimeType, tenantId, unitCodes, started, prog);
 
         if ("shadow".equals(strategy)) {
             try {
                 ImportTreeRequest legacy = extractLegacySilent(
                         fileBytes, fileName, mimeType, tenantId, unitCodes);
-                int adaptiveArticles = countArticles(adaptive.getArbre());
+                int adaptiveArticles = countArticles(adaptive.tree().getArbre());
                 int legacyArticles = countArticles(legacy.getArbre());
                 log.info(
                         "Bordereau shadow compare file={} adaptiveArticles={} legacyArticles={} strategy={}",
@@ -267,7 +256,16 @@ public class AdaptiveBordereauExtractionOrchestrator {
         return adaptive;
     }
 
-    private ImportTreeRequest extractAdaptive(
+    public ImportTreeRequest extract(byte[] fileBytes, String fileName, String mimeType) {
+        return extractResult(fileBytes, fileName, mimeType, ExtractionProgress.noop()).tree();
+    }
+
+    public ImportTreeRequest extract(
+            byte[] fileBytes, String fileName, String mimeType, ExtractionProgress progress) {
+        return extractResult(fileBytes, fileName, mimeType, progress).tree();
+    }
+
+    private BordereauExtractResult extractAdaptive(
             byte[] fileBytes,
             String fileName,
             String mimeType,
@@ -315,7 +313,7 @@ public class AdaptiveBordereauExtractionOrchestrator {
                 progress);
     }
 
-    private ImportTreeRequest finalizeFromParse(
+    private BordereauExtractResult finalizeFromParse(
             BordereauParseResult parse,
             String fileName,
             UUID tenantId,
@@ -400,11 +398,10 @@ public class AdaptiveBordereauExtractionOrchestrator {
         normalizeUnites(tree, unitCodes);
         int articles = countArticles(tree.getArbre());
         if (articles == 0) {
-            lastDiagnostics = new BordereauExtractionDiagnostics(
+            throw new BordereauExtractionFailedException(
+                    "BORDEREAU_EXTRACTION_FAILED: ZERO_ARTICLES — aucun article exploitable extrait", new BordereauExtractionDiagnostics(
                     strategy, path, 0, parse.pageCount(), repairedChunks, 0, 0,
-                    List.of("zero_articles"), parseMs, classifyMs, repairMs, null);
-            throw new IllegalStateException(
-                    "BORDEREAU_EXTRACTION_FAILED: ZERO_ARTICLES — aucun article exploitable extrait");
+                    List.of("zero_articles"), parseMs, classifyMs, repairMs, null));
         }
 
         int orphans = countOrphans(tree);
@@ -417,7 +414,7 @@ public class AdaptiveBordereauExtractionOrchestrator {
                     report.warnings());
         }
 
-        lastDiagnostics = new BordereauExtractionDiagnostics(
+        BordereauExtractionDiagnostics diagnostics = new BordereauExtractionDiagnostics(
                 strategy,
                 path,
                 report.score(),
@@ -447,7 +444,7 @@ public class AdaptiveBordereauExtractionOrchestrator {
                 repairMs,
                 repairedChunks);
         progress.report(98, "Finalisation…");
-        return tree;
+        return new BordereauExtractResult(tree, diagnostics);
     }
 
     private static double truncatedLibelleRatio(BordereauParseResult parse) {
@@ -482,7 +479,7 @@ public class AdaptiveBordereauExtractionOrchestrator {
      * Vision page/page → candidats texte complets → assemblage IA final.
      * Ne réutilise pas les libellés PDFBox (souvent tronqués) comme source article.
      */
-    private ImportTreeRequest extractVisionThenAssemble(
+    private BordereauExtractResult extractVisionThenAssemble(
             byte[] fileBytes,
             String fileName,
             String mimeType,
@@ -802,7 +799,7 @@ public class AdaptiveBordereauExtractionOrchestrator {
         return rows;
     }
 
-    private ImportTreeRequest extractLegacy(
+    private BordereauExtractResult extractLegacy(
             byte[] fileBytes,
             String fileName,
             String mimeType,
@@ -823,23 +820,21 @@ public class AdaptiveBordereauExtractionOrchestrator {
 
         if (response.outcome() == StatelessExtractionResponse.Outcome.REJECTED
                 || response.outcome() == StatelessExtractionResponse.Outcome.TECHNICAL_FAILURE) {
-            lastDiagnostics = new BordereauExtractionDiagnostics(
+            throw new BordereauExtractionFailedException("BORDEREAU_EXTRACTION_FAILED: " + firstIssue(response), new BordereauExtractionDiagnostics(
                     strategy, path, 0, 0, 0, 0, 0,
-                    List.of(firstIssue(response)), 0, 0, 0, response.costUsd());
-            throw new IllegalStateException("BORDEREAU_EXTRACTION_FAILED: " + firstIssue(response));
+                    List.of(firstIssue(response)), 0, 0, 0, response.costUsd()));
         }
         ImportTreeRequest tree = mapToTree(response.data());
         normalizeUnites(tree, codes);
         int articles = countArticles(tree.getArbre());
         if (articles == 0) {
-            lastDiagnostics = new BordereauExtractionDiagnostics(
+            throw new BordereauExtractionFailedException(
+                    "BORDEREAU_EXTRACTION_FAILED: ZERO_ARTICLES — aucun article exploitable extrait", new BordereauExtractionDiagnostics(
                     strategy, path, 0, 0, 0, 0, 0,
-                    List.of("zero_articles"), 0, 0, 0, response.costUsd());
-            throw new IllegalStateException(
-                    "BORDEREAU_EXTRACTION_FAILED: ZERO_ARTICLES — aucun article exploitable extrait");
+                    List.of("zero_articles"), 0, 0, 0, response.costUsd()));
         }
         long elapsedMs = (System.nanoTime() - startedNanos) / 1_000_000L;
-        lastDiagnostics = new BordereauExtractionDiagnostics(
+        BordereauExtractionDiagnostics diagnostics = new BordereauExtractionDiagnostics(
                 strategy, path, articles > 0 ? 0.5 : 0, 0, 0, articles, articles,
                 List.of(), 0, elapsedMs, 0, response.costUsd());
         log.info(
@@ -851,7 +846,7 @@ public class AdaptiveBordereauExtractionOrchestrator {
                 response.outcome(),
                 tree.getArbre() != null ? tree.getArbre().size() : 0,
                 articles);
-        return tree;
+        return new BordereauExtractResult(tree, diagnostics);
     }
 
     private ImportTreeRequest extractLegacySilent(

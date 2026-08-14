@@ -1,6 +1,7 @@
 package ma.nafura.etudes.service.port;
 
 import ma.nafura.etudes.api.request.ImportTreeRequest;
+import ma.nafura.etudes.service.bordereau.BordereauExtractResult;
 import ma.nafura.etudes.service.bordereau.BordereauExtractionDiagnostics;
 
 /**
@@ -24,9 +25,12 @@ public interface BordereauExtractionPort {
     }
 
     /**
-     * Diagnostics of the last {@link #extract} call (optional, for job result_json).
+     * Arbre + diagnostics du même appel. Défaut : extract + diagnostics vides.
      */
-    default BordereauExtractionDiagnostics consumeDiagnostics() {
-        return BordereauExtractionDiagnostics.empty();
+    default BordereauExtractResult extractResult(
+            byte[] fileBytes, String fileName, String mimeType, ExtractionProgress progress) {
+        return new BordereauExtractResult(
+                extract(fileBytes, fileName, mimeType, progress),
+                BordereauExtractionDiagnostics.empty());
     }
 }

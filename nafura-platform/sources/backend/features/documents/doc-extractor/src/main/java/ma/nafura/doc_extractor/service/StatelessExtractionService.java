@@ -13,14 +13,22 @@ import ma.nafura.platform.documents.docextractor.api.response.ExtractionValidati
 import ma.nafura.platform.documents.docextractor.api.response.StatelessExtractionIssue;
 import ma.nafura.platform.documents.docextractor.api.response.StatelessExtractionResponse;
 import ma.nafura.platform.documents.docextractor.api.response.ValidationState;
+import ma.nafura.platform.documents.docextractor.grid.GridRow;
+import ma.nafura.platform.documents.docextractor.plan.GridPlanExecutor;
+import ma.nafura.platform.documents.docextractor.plan.GridProbe;
+import ma.nafura.platform.documents.docextractor.plan.PlanJsonParser;
+import ma.nafura.platform.documents.docextractor.plan.PlanResolver;
+import ma.nafura.platform.documents.docextractor.plan.ReadingPlan;
 import ma.nafura.platform.documents.docextractor.service.util.JsonDataCleaner;
 import ma.nafura.platform.documents.docextractor.service.util.PdfTextExtractor;
 import ma.nafura.platform.documents.docextractor.service.util.SpreadsheetTextExtractor;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -33,6 +41,50 @@ public class StatelessExtractionService {
     /** LLM call timeout. Overridable per product; large documents (full CPS) need more than the 120s default. */
     @org.springframework.beans.factory.annotation.Value("${nafura.doc-extractor.timeout-seconds:120}")
     private int timeoutSeconds;
+
+    private static final String READING_PLAN_RESPONSE_SCHEMA = """
+            {
+              "type": "object",
+              "properties": {
+                "source": { "type": "string" },
+                "anchors": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "label": { "type": "string" },
+                      "field": { "type": "string" }
+                    }
+                  }
+                },
+                "columns": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "index": { "type": "integer" },
+                      "field": { "type": "string" }
+                    },
+                    "required": ["index", "field"]
+                  }
+                },
+                "rowClasses": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": { "type": "string" },
+                      "signal": { "type": "string" }
+                    }
+                  }
+                },
+                "hierarchy": { "type": "string", "enum": ["NONE", "LEARNED"] },
+                "depivot": { "type": "string", "enum": ["RESERVED"] },
+                "arrayPaths": { "type": "array", "items": { "type": "string" } }
+              },
+              "required": ["columns", "arrayPaths"]
+            }
+            """;
 
     private static final String SCHEMA_PROPOSAL_RESPONSE_SCHEMA = """
             {
@@ -48,6 +100,9 @@ public class StatelessExtractionService {
     private final LlmService llmService;
     private final SchemaValidator schemaValidator;
     private final ObjectMapper objectMapper;
+    private final PlanResolver planResolver;
+    private final GridProbe gridProbe;
+    private final GridPlanExecutor gridPlanExecutor;
 
     public StatelessExtractionResponse process(
             byte[] fileBytes,
@@ -219,6 +274,26 @@ public class StatelessExtractionService {
             }
         }
 
+        List<GridRow> rows = gridProbe.probe(fileBytes, fileName, mimeType);
+        if (!rows.isEmpty()) {
+            Optional<PlanResolver.Resolved> resolved = planResolver.resolve(rows, schema, tenantId);
+            if (resolved.isEmpty()) {
+                resolved = compilePlan(rows, schema, tenantId, PlanResolver.Palier.IA, fileBytes, fileName, mimeType, false);
+            }
+            if (resolved.isEmpty()) {
+                resolved = compilePlan(rows, schema, tenantId, PlanResolver.Palier.VISION, fileBytes, fileName, mimeType, true);
+            }
+            if (resolved.isPresent()) {
+                JsonNode data = gridPlanExecutor.execute(rows, resolved.get().plan());
+                return validated(data, schema, presentation, inlineSchema, presentationSchema, resolved.get());
+            }
+            return failure(
+                    "PLAN",
+                    "PLAN_UNRESOLVED",
+                    "A grid was found but no reading plan was accepted. The document was not flattened for a data LLM.",
+                    false);
+        }
+
         LlmRequest request = baseRequest(fileBytes, fileName, mimeType, maxPromptChars, forceMedia);
         request.setSystemInstruction("""
                 Extract only information observable in the supplied document.
@@ -263,6 +338,117 @@ public class StatelessExtractionService {
                 llm.getModel(),
                 llm.getCostUsd(),
                 llm.getCreatedAt()
+        );
+    }
+
+    /**
+     * Paliers 3–4 : l'IA compile un plan (en-têtes + schéma), elle ne reçoit pas les lignes métier.
+     */
+    private Optional<PlanResolver.Resolved> compilePlan(
+            List<GridRow> rows,
+            JsonNode schema,
+            String tenantId,
+            PlanResolver.Palier palier,
+            byte[] fileBytes,
+            String fileName,
+            String mimeType,
+            boolean withMedia
+    ) throws InterruptedException {
+        try {
+            LlmRequest request = new LlmRequest();
+            request.setMetadata(Map.of("fileName", fileName == null ? "document" : fileName));
+            request.setPrompt(planCompilePrompt(rows, schema));
+            request.setSystemInstruction("""
+                    Compile a typed ReadingPlan for the table. Map header columns to schema fields.
+                    Never extract row values. anchors must be an empty array in wave 1.
+                    depivot must be RESERVED. hierarchy is NONE unless the schema clearly needs LEARNED.
+                    Return JSON matching the response schema exactly.
+                    """);
+            request.setResponseSchema(READING_PLAN_RESPONSE_SCHEMA);
+            if (withMedia && fileBytes != null && fileBytes.length > 0) {
+                LlmRequest.MediaContent media = new LlmRequest.MediaContent();
+                media.setContentBase64(Base64.getEncoder().encodeToString(fileBytes));
+                media.setMimeType(mimeType);
+                media.setType(mimeType != null && mimeType.startsWith("image/")
+                        ? LlmRequest.MediaType.IMAGE
+                        : LlmRequest.MediaType.DOCUMENT);
+                request.setMediaContents(List.of(media));
+            } else {
+                request.setMediaContents(List.of());
+            }
+            String action = palier == PlanResolver.Palier.VISION ? "compile-plan-vision" : "compile-plan";
+            LlmResponse llm = call(request, tenantId, action);
+            JsonNode node = objectMapper.readTree(JsonDataCleaner.cleanJsonString(llm.getContent()));
+            Optional<ReadingPlan> plan = PlanJsonParser.parse(node);
+            if (plan.isEmpty()) {
+                return Optional.empty();
+            }
+            return planResolver.accept(tenantId, rows, plan.get(), palier);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw e;
+        } catch (Exception e) {
+            return Optional.empty();
+        }
+    }
+
+    static String planCompilePrompt(List<GridRow> rows, JsonNode schema) {
+        StringBuilder prompt = new StringBuilder();
+        prompt.append("Headers (index: label). Do not include or invent row values.\n");
+        GridRow header = rows.get(0);
+        for (GridRow row : rows) {
+            long filled = row.cells().stream().filter(c -> c != null && !c.isBlank()).count();
+            if (filled >= 2) {
+                header = row;
+                break;
+            }
+        }
+        int n = Math.min(header.cells().size(), 50);
+        for (int i = 0; i < n; i++) {
+            prompt.append(i).append(": ").append(header.cell(i)).append('\n');
+        }
+        prompt.append("JSON Schema:\n").append(schema);
+        return prompt.toString();
+    }
+
+    private StatelessExtractionResponse validated(
+            JsonNode data,
+            JsonNode schema,
+            JsonNode presentation,
+            String inlineSchema,
+            String presentationSchema,
+            PlanResolver.Resolved resolved
+    ) throws Exception {
+        ExtractionValidationDto validation = schemaValidator.validate(
+                objectMapper.writeValueAsString(data),
+                inlineSchema,
+                presentationSchema
+        );
+        List<StatelessExtractionIssue> issues = validation.issues().stream()
+                .map(issue -> new StatelessExtractionIssue(
+                        "DATA",
+                        issue.kind().name(),
+                        issue.path(),
+                        issue.rowIndex(),
+                        issue.message(),
+                        false
+                ))
+                .toList();
+        StatelessExtractionResponse.Outcome outcome = validation.state() == ValidationState.VALID
+                ? StatelessExtractionResponse.Outcome.COMPLETED
+                : StatelessExtractionResponse.Outcome.REVIEW_REQUIRED;
+        return new StatelessExtractionResponse(
+                outcome,
+                data,
+                schema,
+                presentation,
+                validation,
+                issues,
+                "plan:" + resolved.palier().name().toLowerCase(),
+                "plan",
+                resolved.palier().name(),
+                0d,
+                Instant.now()
         );
     }
 

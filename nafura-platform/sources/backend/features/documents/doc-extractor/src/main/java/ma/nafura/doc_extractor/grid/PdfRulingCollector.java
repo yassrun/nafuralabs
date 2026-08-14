@@ -1,4 +1,4 @@
-package ma.nafura.etudes.service.bordereau.grid;
+package ma.nafura.platform.documents.docextractor.grid;
 
 import java.awt.geom.Point2D;
 import java.io.IOException;

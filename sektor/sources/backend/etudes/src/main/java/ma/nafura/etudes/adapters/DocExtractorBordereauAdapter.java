@@ -1,7 +1,7 @@
 package ma.nafura.etudes.adapters;
 
 import ma.nafura.etudes.api.request.ImportTreeRequest;
-import ma.nafura.etudes.service.bordereau.BordereauExtractionDiagnostics;
+import ma.nafura.etudes.service.bordereau.BordereauExtractResult;
 import ma.nafura.etudes.service.port.BordereauExtractionPort;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
@@ -40,7 +40,11 @@ public class DocExtractorBordereauAdapter implements BordereauExtractionPort {
     }
 
     @Override
-    public BordereauExtractionDiagnostics consumeDiagnostics() {
-        return orchestrator.consumeDiagnostics();
+    public BordereauExtractResult extractResult(
+            byte[] fileBytes,
+            String fileName,
+            String mimeType,
+            ma.nafura.etudes.service.port.ExtractionProgress progress) {
+        return orchestrator.extractResult(fileBytes, fileName, mimeType, progress);
     }
 }

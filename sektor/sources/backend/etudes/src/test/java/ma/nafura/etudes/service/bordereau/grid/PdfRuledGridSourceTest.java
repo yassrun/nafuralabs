@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Locale;
+import ma.nafura.platform.documents.docextractor.grid.GridRow;
+import ma.nafura.platform.documents.docextractor.grid.PdfRuledGridSource;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

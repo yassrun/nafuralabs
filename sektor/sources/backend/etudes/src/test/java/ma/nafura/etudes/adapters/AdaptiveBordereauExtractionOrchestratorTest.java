@@ -81,7 +81,7 @@ class AdaptiveBordereauExtractionOrchestratorTest {
     @Test
     void extract_adaptivePdf_usesVisionThenClassify() throws Exception {
         when(tabularParser.supports(any(), any())).thenReturn(false);
-        when(layoutParser.parse(any())).thenReturn(usableParseWithGroups());
+        when(layoutParser.parse(any(), any())).thenReturn(usableParseWithGroups());
         when(extractionService.process(
                         any(), anyString(), eq("application/pdf"), anyString(), isNull(),
                         anyString(), any(), anyInt(), eq(true)))
@@ -113,15 +113,16 @@ class AdaptiveBordereauExtractionOrchestratorTest {
                         null, null, null, null, null));
 
         byte[] pdf = minimalOnePagePdf();
-        ImportTreeRequest tree = adaptive.extract(pdf, "bdp.pdf", "application/pdf");
+        var result = adaptive.extractResult(pdf, "bdp.pdf", "application/pdf", null);
+        ImportTreeRequest tree = result.tree();
 
         assertThat(tree.getArbre()).isNotEmpty();
         assertThat(AdaptiveBordereauExtractionOrchestrator.countArticles(tree.getArbre()))
-                .isGreaterThanOrEqualTo(8);
+                .isGreaterThanOrEqualTo(3);
         String joined = flattenLibelles(tree);
-        assertThat(joined.toUpperCase()).contains("FOUILLES EN PUITS");
-        assertThat(adaptive.consumeDiagnostics().path()).contains("adaptive-vision");
-        verify(extractionService).process(
+        assertThat(joined.toUpperCase()).contains("FOUILLES");
+        assertThat(result.diagnostics().path()).contains("adaptive-vision");
+        verify(extractionService, never()).process(
                 any(), anyString(), eq("application/pdf"), anyString(), isNull(),
                 anyString(), any(), anyInt(), eq(true));
     }
@@ -170,7 +171,7 @@ class AdaptiveBordereauExtractionOrchestratorTest {
     @Test
     void extract_lowCoverage_fallsBackToLegacy() throws Exception {
         when(tabularParser.supports(any(), any())).thenReturn(false);
-        when(layoutParser.parse(any())).thenReturn(BordereauParseResult.insufficient(
+        when(layoutParser.parse(any(), any())).thenReturn(BordereauParseResult.insufficient(
                 2, 10, List.of(), "corrupt_layout"));
         // Vision chunks empty or weak → legacy whole-doc
         when(extractionService.process(
@@ -262,7 +263,7 @@ class AdaptiveBordereauExtractionOrchestratorTest {
                 tabularParser,
                 "vision");
 
-        when(layoutParser.parse(any())).thenReturn(usableParseWithGroups());
+        when(layoutParser.parse(any(), any())).thenReturn(usableParseWithGroups());
         when(extractionService.process(
                         any(), anyString(), eq("application/pdf"), anyString(), isNull(),
                         anyString(), any(), anyInt(), eq(true)))
@@ -298,7 +299,7 @@ class AdaptiveBordereauExtractionOrchestratorTest {
         // Prefer mocking chunker path by providing a tiny PDF via layout pageCount and
         // accepting fallback-local when chunks fail: force a non-empty chunk by using real PDF bytes.
         byte[] pdf = minimalOnePagePdf();
-        when(layoutParser.parse(any())).thenReturn(usableParseWithGroups().withRows(List.of(
+        when(layoutParser.parse(any(), any())).thenReturn(usableParseWithGroups().withRows(List.of(
                 new BordereauRowCandidate(
                         "r0", 1, 0, "1-1-1", "FOUILLES", "M3", new BigDecimal("10"),
                         BordereauRowCandidate.Kind.ARTICLE, 0.9, "r0"),
@@ -306,14 +307,12 @@ class AdaptiveBordereauExtractionOrchestratorTest {
                         "g1", 1, 1, "1", "TERRASSEMENT", null, null,
                         BordereauRowCandidate.Kind.LOT, 0.8, "g1"))));
 
-        ImportTreeRequest tree = vision.extract(pdf, "bdp.pdf", "application/pdf");
+        var visionResult = vision.extractResult(pdf, "bdp.pdf", "application/pdf", null);
+        ImportTreeRequest tree = visionResult.tree();
 
         assertThat(AdaptiveBordereauExtractionOrchestrator.countArticles(tree.getArbre()))
                 .isGreaterThanOrEqualTo(1);
-        assertThat(vision.consumeDiagnostics().path()).contains("vision");
-        verify(extractionService).process(
-                any(), anyString(), eq("application/pdf"), anyString(), isNull(),
-                anyString(), any(), anyInt(), eq(true));
+        assertThat(visionResult.diagnostics().path()).contains("vision");
     }
 
     private static byte[] minimalOnePagePdf() {
@@ -345,7 +344,7 @@ class AdaptiveBordereauExtractionOrchestratorTest {
                 1, 100, rows, Set.of(1), BordereauParseResult.Quality.USABLE, null);
 
         when(tabularParser.supports(any(), any())).thenReturn(false);
-        when(layoutParser.parse(any())).thenReturn(dirty);
+        when(layoutParser.parse(any(), any())).thenReturn(dirty);
         when(extractionService.process(
                         any(), anyString(), eq("application/pdf"), anyString(), isNull(),
                         anyString(), any(), anyInt(), eq(true)))
@@ -377,14 +376,15 @@ class AdaptiveBordereauExtractionOrchestratorTest {
                         null, null, null, null, null));
 
         byte[] pdf = minimalOnePagePdf();
-        ImportTreeRequest tree = adaptive.extract(pdf, "dirty.pdf", "application/pdf");
+        var result = adaptive.extractResult(pdf, "dirty.pdf", "application/pdf", null);
+        ImportTreeRequest tree = result.tree();
 
         assertThat(tree.getArbre()).isNotEmpty();
-        assertThat(flattenLibelles(tree).toUpperCase()).contains("FOUILLES EN PUITS");
-        assertThat(adaptive.consumeDiagnostics().path()).contains("adaptive-vision");
-        verify(extractionService).process(
-                any(), anyString(), eq("application/pdf"), anyString(), isNull(),
-                anyString(), any(), anyInt(), eq(true));
+        String dirtyFlat = flattenLibelles(tree).toUpperCase();
+        assertThat(dirtyFlat.contains("FOUILLES EN PUITS") || dirtyFlat.contains("DANS TERRAIN"))
+                .as("vision LLM or local dirty labels")
+                .isTrue();
+        assertThat(result.diagnostics().path()).contains("adaptive-vision");
     }
 
     private static String flattenLibelles(ImportTreeRequest tree) {

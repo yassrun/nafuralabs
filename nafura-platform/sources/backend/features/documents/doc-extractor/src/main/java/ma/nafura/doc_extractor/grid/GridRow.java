@@ -1,13 +1,13 @@
-package ma.nafura.etudes.service.bordereau.grid;
+package ma.nafura.platform.documents.docextractor.grid;
 
 import java.util.List;
 
 /**
  * Une ligne de tableau, telle qu'elle existe dans le fichier — quel que soit le contenant.
  *
- * <p>C'est le contrat commun des {@link GridSource} : un classeur, un tableau Word et un PDF
- * quadrillé produisent tous des {@code GridRow}. Tout ce qui suit dans la chaîne d'extraction
- * ne connaît que ce type, et reste donc identique d'un format à l'autre.
+ * <p>Contrat commun des sources de grille ({@link PdfRuledGridSource}, {@link XlsxGridSource}) :
+ * un classeur ou un PDF quadrillé produisent tous des {@code GridRow}. Tout ce qui suit dans
+ * la chaîne d'extraction ne connaît que ce type, et reste donc identique d'un format à l'autre.
  *
  * <p>Les cellules sont indexées par colonne logique du tableau, cellule vide comprise : c'est ce
  * qui permet de lire une valeur par sa colonne plutôt que par sa position dans le flux texte.

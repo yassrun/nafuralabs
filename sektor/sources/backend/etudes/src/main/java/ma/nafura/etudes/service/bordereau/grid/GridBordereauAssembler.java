@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import ma.nafura.etudes.service.bordereau.BordereauRowCandidate;
+import ma.nafura.platform.documents.docextractor.grid.GridRow;
 
 /**
  * Replie les lignes de la grille en articles, puis en arbre.

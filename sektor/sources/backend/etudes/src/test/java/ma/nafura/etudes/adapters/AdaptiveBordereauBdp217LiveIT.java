@@ -65,14 +65,15 @@ class AdaptiveBordereauBdp217LiveIT {
         when(tabularParser.supports(any(), any())).thenReturn(false);
 
         byte[] pdf = Files.readAllBytes(SAMPLE);
-        ImportTreeRequest tree = orchestrator.extract(pdf, "BDP-2-17.pdf", "application/pdf");
+        var result = orchestrator.extractResult(pdf, "BDP-2-17.pdf", "application/pdf", null);
+        ImportTreeRequest tree = result.tree();
 
         assertThat(AdaptiveBordereauExtractionOrchestrator.countArticles(tree.getArbre()))
                 .isGreaterThanOrEqualTo(140);
         String flat = flatten(tree);
         assertThat(flat.toUpperCase()).contains("FOUILLES EN PUITS");
         assertThat(flat.toUpperCase()).contains("EVACUATION");
-        assertThat(orchestrator.consumeDiagnostics().path()).contains("local-trusted");
+        assertThat(result.diagnostics().path()).contains("local-trusted");
 
         // Trusted local path must not call DeepSeek page/page.
         verify(extractionService, never()).process(

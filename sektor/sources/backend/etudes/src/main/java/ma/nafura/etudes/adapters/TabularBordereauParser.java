@@ -13,9 +13,9 @@ import ma.nafura.etudes.service.bordereau.BordereauRowCandidate;
 import ma.nafura.etudes.service.bordereau.PdfBordereauLayoutParser;
 import ma.nafura.etudes.service.bordereau.grid.ColumnMap;
 import ma.nafura.etudes.service.bordereau.grid.GridBordereauAssembler;
-import ma.nafura.etudes.service.bordereau.grid.GridRow;
 import ma.nafura.etudes.service.bordereau.grid.GridRowClassifier;
-import ma.nafura.etudes.service.bordereau.grid.XlsxGridSource;
+import ma.nafura.platform.documents.docextractor.grid.GridRow;
+import ma.nafura.platform.documents.docextractor.grid.XlsxGridSource;
 import ma.nafura.platform.documents.docextractor.service.util.SpreadsheetTextExtractor;
 import org.springframework.stereotype.Component;
 

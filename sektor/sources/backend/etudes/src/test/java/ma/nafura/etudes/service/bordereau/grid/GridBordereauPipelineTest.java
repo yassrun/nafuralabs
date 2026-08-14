@@ -8,6 +8,8 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Locale;
 import ma.nafura.etudes.service.bordereau.BordereauRowCandidate;
+import ma.nafura.platform.documents.docextractor.grid.GridRow;
+import ma.nafura.platform.documents.docextractor.grid.PdfRuledGridSource;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
