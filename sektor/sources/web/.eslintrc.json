@@ -1,0 +1,58 @@
+{
+  "root": true,
+  "overrides": [
+    {
+      "files": ["../../../nafura-platform/sources/web/**/*.ts"],
+      "excludedFiles": ["../../../nafura-platform/sources/web/lib/**/*.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["@app/*", "@applications/*", "**/sektor/**", "**/venue-catalog/**"],
+                "message": "Frontiere de dependance : la plateforme n'importe JAMAIS une application. Declarer un jeton d'injection (core/application/application-config.ts, core/integrations/audit.port.ts) ou un emplacement de shell (core/shell/shell-extensions.ts). Voir sektor/docs/specs/epics/_archive/front-ownership/."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["../../../nafura-platform/sources/web/lib/**/*.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["@app/*", "@applications/*", "**/sektor/**", "**/venue-catalog/**"],
+                "message": "Frontiere de dependance : la plateforme n'importe JAMAIS une application."
+              },
+              {
+                "group": ["@core/*", "@features/*", "@services/*", "**/nafura-platform/sources/web/core/*", "**/nafura-platform/sources/web/features/*"],
+                "message": "Le design system ne depend ni du core ni des features. Deplacer le code partage dans lib/ (ex. lib/validators), ou inverser via un jeton."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["../../../nafura-platform/sources/web/features/**/*.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["**/nafura-platform/sources/web/features/*/!(index)*"],
+                "message": "Import from feature barrel (index.ts) only, not from internal files."
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

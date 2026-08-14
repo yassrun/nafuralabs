@@ -29,6 +29,6 @@ Un seul scan : `**/raster-src/lots/**/tasks/*.md`. `pact/` n'est jamais lu. Le s
 
 ## Hors périmètre
 
-Le déplacement de `products/raster/web` → `raster/web`. Autre Change.
+Le déplacement de `raster/web` → `raster/web`. Autre Change.
 
 Canvas : [`../ux/work-wireframe.canvas.tsx`](../ux/work-wireframe.canvas.tsx)

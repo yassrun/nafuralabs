@@ -220,7 +220,7 @@ Changer MinIO → S3 = change **ops + BC platform**, pas un EVOL Sektor (sauf si
     └── CH-00-INIT-…/
 ```
 
-Surfaces back / front / mobile = **la même app**.  
+Surfaces back / front / mobile = **la même app** — elles vivent sous `<projet>/sources/` ([`NAFURALABS.md`](NAFURALABS.md) § Intérieur). Un seul `backend/` par projet.
 Dashboard / nav / admin = **owns du socle**.  
 Pilotage / analytics = **vues**, pas un BC.  
 Nav : 1 entrée top-level ≈ 1 BC. Sous-menus = écrans du **même** BC.
@@ -723,7 +723,11 @@ conges/
 │       └── CH-02-CORRECTION-validation-manager/
 │           └── tasks/ CNG-11 bug · CNG-12 qa
 │
-└── e2e/                                           preuves — par PROJET, jamais par BC
+├── e2e/                                           preuves — par PROJET, jamais par BC
+├── ops/
+└── sources/
+    ├── backend/                                   Gradle ici
+    └── web/
 ```
 
 **T0 — le CADRE.** `owns` demande · décision · solde. `not_owns` la paie (→ logiciel de paie), le contrat de travail (→ RH), le pointage (→ Sektor). Preuve = revue humaine.

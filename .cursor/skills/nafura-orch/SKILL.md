@@ -62,6 +62,33 @@ Tu assembles un paquet **différent par main**, et tu le **déduis du chemin de 
 - Poser `done-agent` sur une feature ou un bug (c'est le QA).
 - Lancer un exec avant que la task `spec` soit `done-agent` sur un `EVOL`.
 
+## Mode boucle — avancer un lot jusqu'au bout
+
+Une seule main à la fois, en série. **Ne lance jamais deux tâches en parallèle** : `blocked_by` exprime l'ordre, jamais l'exclusivité — deux tâches « débloquées » peuvent très bien toucher le même fichier.
+
+```text
+1. node raster/t.mjs index
+2. Lis raster/INDEX.tsv. ÉLIGIBLE =
+     status todo · sprint courant
+     · tous les blocked_by en done-agent ou done-me
+     · gate ≠ me · assignee ≠ me
+3. Aucune éligible → STOP, dis pourquoi.
+4. Prends la première : P0 avant P1, puis par id.
+5. Ouvre son fichier. Applique le skill de son agent_type.
+6. PÉRIMÈTRE = ce que ses étapes nomment.
+7. Journal daté : chaque étape, chaque décision prise seul.
+8. Statut : tech | physical seul → done-agent · feature | bug → review.
+9. node raster/t.mjs index && node raster/t.mjs check
+      check en erreur → STOP. Tu ne corriges pas le check.
+10. Retour à 1.
+```
+
+**STOP aussi** si une tâche est `gate: me` ou `assignee: me` (laisse-la, signale-la) · si tu dois passer `blocked` (journal + ligne d'inbox) · si une règle du canon te bloque (`blocked` + inbox — **tu ne réécris jamais la règle qui te bloque**).
+
+**Jamais** : poser `done-me` (c'est l'humain) · toucher un fichier hors des étapes · enchaîner sans repasser par `check`.
+
+**Mono-agent légitime quand ?** Si toutes les tâches sont `tech` ou `physical` — pas de QA obligatoire, donc rien à séparer. Dès qu'il y a une `feature` ou un `bug`, la vérification doit être une **invocation distincte**, sinon le QA relit son propre travail.
+
 ## Ce qui remonte à l'humain
 
 Seulement trois choses : le **CADRE** (`gate: me`), une **question bloquante** (indécidable, pas une permission), et le **`done-me`** final. Tout le reste tourne sans lui — d'où le rapport de livraison à l'étape 4.

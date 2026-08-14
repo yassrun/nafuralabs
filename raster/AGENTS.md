@@ -3,8 +3,7 @@
 > **Raster** = **projet** (lot · sous-lot · **task**) **et** moteur (INDEX / Sprint / CLI). **Pas** Pact (SPEC / CH / canvas).  
 > **`<projet>/raster-src/`** = fichiers Raster du projet — **obligatoire**.  
 > **`raster/`** = le projet Raster (`raster/raster-src/` + `pact/` + moteur).  
-> Blueprint : [`RASTER_BLUEPRINT.md`](../RASTER_BLUEPRINT.md) · Pact : [`PACT_BLUEPRINT.md`](../PACT_BLUEPRINT.md).  
-> Sync miroir : [`docs/Raster.md`](../docs/Raster.md).
+> Blueprint : [`RASTER_BLUEPRINT.md`](../RASTER_BLUEPRINT.md) · Pact : [`PACT_BLUEPRINT.md`](../PACT_BLUEPRINT.md).
 
 **Actors :** `me` | `agent` uniquement.  
 **Contrainte #1 :** coût d’interaction (capture &lt; 5 s · scan INDEX &lt; 2 s · check progress = dialogue à deux).
@@ -72,7 +71,7 @@ Un flux est indépendant si **les 3** sont vrais :
 ### Produit / projet
 
 ```
-<projet>/                         # peer (sektor, raster, ops, …)
+<projet>/                         # peer (sektor, raster, …)
   raster-src/                     # OBLIGATOIRE — lots / sous-lots / tasks
     lots/
       <lot-slug>/
@@ -85,6 +84,11 @@ Un flux est indépendant si **les 3** sont vrais :
       _archive/
       _backlog/tasks/
   pact/                           # SI app ou site
+  ops/                            # SI Pact
+  e2e/
+  sources/                        # runtimes — NAFURALABS.md § Intérieur
+    backend/                      # Gradle ici — un seul
+    web/
   ROADMAP.md                      # optionnel (hors raster-src)
 ```
 
@@ -94,9 +98,10 @@ Un flux est indépendant si **les 3** sont vrais :
 raster/
   raster-src/         # tickets du projet Raster (RAS-*)
   pact/               # app → oui
+  sources/web/        # UI
   AGENTS.md           # ce contrat
   inbox.md            # capture globale
-  regen.mjs / t.mjs
+  regen.mjs / t.mjs   # moteur — racine du projet, pas sources/
   INDEX.tsv           # GÉNÉRÉ
   SPRINT.md           # GÉNÉRÉ
   BACKLOG.md          # GÉNÉRÉ
@@ -104,7 +109,7 @@ raster/
 
 ### App UI
 
-Vit dans le **projet** `raster/` (`web/` — aujourd’hui encore `products/raster/web` en legacy).
+Vit dans `raster/sources/web/`. Le moteur (`t.mjs`, INDEX) reste à la racine du projet Raster.
 
 ---
 
@@ -219,7 +224,7 @@ Pack agent « nouveau lot » (**Raster seul**, §0.2) :
 
 ## 4. IDs par projet (exemples)
 
-| Projet (`products/…`) | Préfixe |
+| Projet (peer) | Préfixe |
 |-----------------------|---------|
 | `nafura-platform` (racine) | `PLT` |
 | `sektor-btp` / `sektor` | `SEKTOR` (legacy tickets `ERP-*` encore en vie) |

@@ -15,7 +15,9 @@ Pas de projet `ops/` peer. Comptage Raster-only (compta, perso) : **pas** d’`o
 <projet Pact>/
 ├── raster-src/     # obligatoire (tout projet)
 ├── pact/           # app / site
-└── ops/            # obligatoire si Pact
+├── ops/            # obligatoire si Pact
+├── e2e/
+└── sources/        # runtimes — [`NAFURALABS.md`](NAFURALABS.md) § Intérieur
 ```
 
 ---
@@ -29,7 +31,7 @@ Pas de projet `ops/` peer. Comptage Raster-only (compta, perso) : **pas** d’`o
 
 Sektor ne duplique pas Keycloak. La platform ne porte pas l’ingress `sektor.*`.
 
-Legacy : `infra/k8s` + `toolchain/ops` → `nafura-platform/ops/` ; `products/<app>/deploy/` → `<app>/ops/`.
+Legacy : `nafura-platform/ops/k8s` + `nafura-platform/ops` → `nafura-platform/ops/` ; `products/<app>/deploy/` → `<app>/ops/`.
 
 Tickets ops = Raster **du même projet** (PLT pour l’infra lab, SEKTOR pour un overlay Sektor). Ops n’a pas son propre préfixe ID.
 

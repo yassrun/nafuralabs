@@ -20,20 +20,25 @@ Contrat agents : [`raster/AGENTS.md`](raster/AGENTS.md).
 ```text
 nafuralabs/
 ├── raster/                         # projet Raster
-│   ├── raster-src/                 # lots · sous-lots · tasks
+│   ├── raster-src/
 │   ├── pact/
-│   └── ops/
+│   ├── ops/
+│   └── sources/web/                # UI — moteur (t.mjs) à la racine
 ├── nafura-platform/
 │   ├── raster-src/
 │   ├── pact/
-│   └── ops/                        # infra lab (cluster, IAM, Vault, nlops)
+│   ├── ops/                        # infra lab (cluster, IAM, Vault, nlops)
+│   └── sources/
 ├── sektor/
 │   ├── raster-src/
 │   ├── pact/
-│   └── ops/                        # overlay / images Sektor seulement
+│   ├── ops/                        # overlay / images Sektor seulement
+│   └── sources/
 └── compta/
     └── raster-src/
 ```
+
+Intérieur d'un projet (slots `sources/`) : [`NAFURALABS.md`](NAFURALABS.md) § Intérieur.
 
 ## Raster un projet
 

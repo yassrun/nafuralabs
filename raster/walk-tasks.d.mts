@@ -9,4 +9,8 @@ export function collectTaskFiles(
   opts?: { includeArchive?: boolean }
 ): string[];
 export function projectFromPath(repoRoot: string, filePath: string): string;
+export function treeFromPath(
+  repoRoot: string,
+  filePath: string
+): { project: string; lot: string; souslot: string };
 export function listRasterProjects(repoRoot: string): string[];

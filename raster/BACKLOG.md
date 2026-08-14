@@ -7,6 +7,22 @@
 > Regen : `node raster/regen.mjs` / `node raster/t.mjs index`.
 > Inbox : `raster/inbox.md`.
 
+## nafura-platform
+
+- `demenagement` lot
+  - ✓ `PLT-32` tech — Racine sans Gradle ni npm workspaces
+  - ✓ `PLT-33` tech — Makefile dans nafura-platform/ops
+  - ✓ `PLT-34` tech — Fusionner README.md dans NAFURALABS.md
+  - ✓ `PLT-35` tech — Sortir docs/ du rôle de canon
+  - ✓ `PLT-36` tech — Supprimer le mock JWT project-fountain
+  - ✓ `PLT-37` tech — Figer l'intérieur d'un projet : sources/
+  - ✓ `PLT-38` tech — Aligner les projets sur sources/
+
+## sektor
+
+- `demenagement` lot
+  - ✓ `SEKTOR-82` tech — Renommer le projet Angular project-fountain →…
+
 ---
 
-**0 live · 0 projets**
+**8 live · 2 projets**

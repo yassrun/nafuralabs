@@ -8,6 +8,7 @@
  *   node raster/check.mjs
  *   node raster/t.mjs check
  */
+import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -44,10 +45,54 @@ const CADRE_MAX_LINES = 120; // « une page »
 
 const rel = (p) => path.relative(REPO_ROOT, p).replace(/\\/g, "/");
 
+/** Exception unique — la forme, jamais une valeur. */
+export const SECRET_ALLOW = "nafura-platform/ops/secrets/README.md";
+
+/**
+ * Fichier suivi qui matche un motif secret.
+ * Motifs : `*.env` · `*_api_key.txt` · `creds*` · `*.pem` · `*.p12` · `*.jks`
+ */
+export function isTrackedSecret(relPath) {
+  const n = String(relPath || "").replace(/\\/g, "/");
+  if (n === SECRET_ALLOW) return false;
+  const base = n.split("/").pop() || n;
+  return (
+    /\.env$/.test(base) ||
+    /_api_key\.txt$/.test(base) ||
+    /^creds/.test(base) ||
+    /\.pem$/.test(base) ||
+    /\.p12$/.test(base) ||
+    /\.jks$/.test(base)
+  );
+}
+
+export function checkTrackedSecrets(trackedRelPaths, err) {
+  for (const p of trackedRelPaths) {
+    const n = String(p || "").replace(/\\/g, "/");
+    if (!n) continue;
+    if (isTrackedSecret(n)) {
+      err(
+        n,
+        "fichier secret suivi — interdit (*.env · *_api_key.txt · creds* · *.pem · *.p12 · *.jks)"
+      );
+    }
+  }
+}
+
+function gitLsFiles() {
+  const out = execFileSync("git", ["ls-files", "-z"], {
+    cwd: REPO_ROOT,
+    encoding: "buffer",
+  });
+  return out
+    .toString("utf8")
+    .split("\0")
+    .map((p) => p.replace(/\\/g, "/"))
+    .filter(Boolean);
+}
+
 function projectRoot(name) {
-  const peer = path.join(REPO_ROOT, name);
-  if (fs.existsSync(path.join(peer, "raster-src", "lots"))) return peer;
-  return path.join(REPO_ROOT, "products", name);
+  return path.join(REPO_ROOT, name);
 }
 
 function dirsIn(dir) {
@@ -176,8 +221,11 @@ function checkPact(err, warn, tasks) {
     const pact = path.join(root, "pact");
     if (!fs.existsSync(pact)) continue; // Raster seul — rien à vérifier
 
-    // P1 — CADRE
+    // Squelette : pact/ réservé, pas encore pacté — CADRE exigé seulement une fois commencé
     const cadre = path.join(pact, "CADRE.md");
+    if (!fs.existsSync(cadre) && dirsIn(pact).length === 0) continue;
+
+    // P1 — CADRE
     if (!fs.existsSync(cadre)) {
       err(rel(pact), "`CADRE.md` manquant — premier document d'une app");
     } else {
@@ -281,6 +329,7 @@ export function check() {
 
   const tasks = checkTickets(err, warn);
   checkPact(err, warn, tasks);
+  checkTrackedSecrets(gitLsFiles(), err);
 
   return { errors, warnings, tasks: tasks.length };
 }

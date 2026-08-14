@@ -31,9 +31,9 @@ Le process a fallu tuer après ~15 min (workers bloqués post-OOM). Des JAR Sekt
 
 | Cible | Build | Démarrage |
 |-------|-------|-----------|
-| **sektor web** `products/sektor-btp/web` | **VERT** `npm run build` (exit 0, dist écrit) — warnings budget JS 2.71 MB / 500 kB, NG8011, NG8102 | **VERT** `ng serve --configuration=production` → `http://127.0.0.1:4201/` HTTP 200 |
+| **sektor web** `sektor/web` | **VERT** `npm run build` (exit 0, dist écrit) — warnings budget JS 2.71 MB / 500 kB, NG8011, NG8102 | **VERT** `ng serve --configuration=production` → `http://127.0.0.1:4201/` HTTP 200 |
 | **corporate** `marketing/corporate` | **VERT** `npm ci` + `npm run build` (exit 0) — `npm audit` : 10 vulns (9 high, 1 critical), next@14.2.18 deprecated | **WARN** `next start` Ready HTTP 200 sur `:3001/fr` mais avertit : *does not work with output: standalone — use `node .next/standalone/server.js`* |
-| **mbs-studio** `marketing/products/mbs-studio` | **VERT** `npm run build` (exit 0, export `out/`) — warnings `@next/next/no-img-element` | **ROUGE** `npm start` (`next start`) : *does not work with "output: export"*. **VERT** `npx serve out` → `http://127.0.0.1:3002/` HTTP 200 |
+| **mbs-studio** `mbs-studio` | **VERT** `npm run build` (exit 0, export `out/`) — warnings `@next/next/no-img-element` | **ROUGE** `npm start` (`next start`) : *does not work with "output: export"*. **VERT** `npx serve out` → `http://127.0.0.1:3002/` HTTP 200 |
 
 ---
 
@@ -46,7 +46,7 @@ Le process a fallu tuer après ~15 min (workers bloqués post-OOM). Des JAR Sekt
 | `venue-catalog-web` `Dockerfile.web` racine | **VERT** dist + nginx.conf | **VERT** |
 | `nafura-lifecycle` `tools/lifecycle` | **VERT** `build/changelog` + `build/migrations` | **VERT** |
 | `nafura-keycloak` `infra/keycloak` | **VERT** theme + bootstrap | **VERT** |
-| `mbs-studio-web` `marketing/products/mbs-studio` | **VERT** | **VERT** |
+| `mbs-studio-web` `mbs-studio` | **VERT** | **VERT** |
 | `corporate-web` `marketing/corporate` | **VERT** | **VERT** |
 | `venue-catalog-backend` `Dockerfile` racine (`./gradlew :venue-catalog:app:bootJar` **dans** l'image) | **VERT** `COPY . .` | **non rejoué** — même Gradle, OOM attendu. Pas de `backend/app/build/libs` local. |
 
@@ -59,9 +59,9 @@ Chemins `app_deploy_dir` / infra, `ENV=staging|prod` (+ demo infra/sektor).
 | Overlay | staging | prod | demo |
 |---------|---------|------|------|
 | `infra/k8s/overlays/infra/$ENV` | **VERT** | **VERT** | **VERT** |
-| `products/sektor-btp/deploy/k8s/overlays/$ENV` | **VERT** | **VERT** | **VERT** |
-| `products/venue-catalog/deploy/k8s/overlays/$ENV` | **VERT** | **VERT** | — |
-| `marketing/products/mbs-studio/deploy/k8s/overlays/$ENV` | **VERT** | **VERT** | — |
+| `sektor/deploy/k8s/overlays/$ENV` | **VERT** | **VERT** | **VERT** |
+| `venue-catalog/deploy/k8s/overlays/$ENV` | **VERT** | **VERT** | — |
+| `mbs-studio/deploy/k8s/overlays/$ENV` | **VERT** | **VERT** | — |
 | `marketing/corporate/deploy/k8s/overlays/$ENV` | **ROUGE absent** | **VERT** | — |
 | `marketing/products/zenith/…` (encore cité `toolchain/ops/AGENTS.md`) | **ROUGE absent** (dossier sorti) | **ROUGE absent** | — |
 
@@ -71,7 +71,7 @@ Chemins `app_deploy_dir` / infra, `ENV=staging|prod` (+ demo infra/sektor).
 
 ## venue-catalog ↔ `:platform:`
 
-**Oui.** 24 `implementation project(':platform:…')` sous `products/venue-catalog/**/*.gradle` (framework, job-runner, google-places, geo, llm-provider, doc-manager).
+**Oui.** 24 `implementation project(':platform:…')` sous `venue-catalog/**/*.gradle` (framework, job-runner, google-places, geo, llm-provider, doc-manager).
 
 Sektor : **57** lignes (chiffre `SEKTOR-81`).
 
@@ -93,3 +93,53 @@ Sektor : **57** lignes (chiffre `SEKTOR-81`).
 1. Gradle : l'erreur exacte est **OOM heap**, pas un cycle de dépendances. Le « loopback connu » n'a pas pu se manifester.
 2. Image `venue-catalog-backend` non construite ici pour ne pas rejouer l'OOM dans Docker.
 3. `npm start` MBS est rouge par design (`output: export`) ; le démarrage réel est `serve out` / image nginx.
+
+---
+
+## Rejeu PLT-31 — 13/08/2026 (après déménagement)
+
+Mêmes commandes, chemins to-be. **Aucune régression** vs lot 0.
+
+### Gradle
+
+`./gradlew projects --offline` **VERT** (configure, y compris `:tools:lifecycle` → `nafura-platform/ops/lifecycle`).  
+`./gradlew build` **non rejoué** — OOM heap déjà au lot 0.
+
+### npm — build + démarrage
+
+| Cible | Build | Démarrage |
+|-------|-------|-----------|
+| **sektor web** `sektor/web` | **VERT** `npm run build` (exit 0) — mêmes WARN budget 2.71 MB, NG8011, NG8102 | **VERT** `ng serve --configuration=production` → `http://127.0.0.1:4201/` HTTP 200 |
+| **corporate** `corporate/` | **VERT** `npm run build` (exit 0) | non rejoué `next start` (WARN standalone déjà lot 0) |
+| **mbs-studio** `mbs-studio/` | **VERT** `npm run build` (exit 0, export `out/`) — mêmes WARN `@next/next/no-img-element` | `npm start` non rejoué (ROUGE by design lot 0) |
+| **venue-catalog web** `venue-catalog/web` | **VERT** `npm run build` (exit 0) — hors tableau lot 0 | — |
+
+### Docker
+
+| Image | Build |
+|-------|-------|
+| `sektor-btp-web` `-f sektor/Dockerfile.web` | **VERT** |
+| `venue-catalog-backend` dans l'image | **non rejoué** (OOM attendu, lot 0) |
+
+### Overlays kustomize
+
+| Overlay | staging | prod | demo |
+|---------|---------|------|------|
+| `nafura-platform/ops/k8s/overlays/infra/$ENV` | **VERT** | **VERT** | **VERT** |
+| `sektor/ops/k8s/overlays/$ENV` | **VERT** | **VERT** | **VERT** |
+| `venue-catalog/ops/k8s/overlays/$ENV` | **VERT** | **VERT** | — |
+| `mbs-studio/deploy/k8s/overlays/$ENV` | **VERT** | **VERT** | — |
+| `corporate/deploy/k8s/overlays/$ENV` | **ROUGE absent** | **VERT** | — |
+
+Identique au lot 0 (corporate staging toujours absent).
+
+### venue-catalog ↔ `:platform:`
+
+Toujours **24** `project(':platform:…')`. Inchangé. Toujours pour SEKTOR-81.
+
+### Raster
+
+| Commande | Résultat |
+|----------|----------|
+| `node raster/t.mjs check` | **VERT** 0 erreur · 4 warnings (`raster/pact` CH sans sous-lot) |
+| `node --test raster/e2e/…` | **VERT** 14/14 (9 scan + 5 secrets PLT-13) |

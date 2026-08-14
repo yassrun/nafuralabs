@@ -2,7 +2,7 @@
 /**
  * Regen Raster orchestrator views from product lot tasks.
  * Walks every NafuraLabs project (IT or not):
- *   - <projet>/raster-src/lots/.../tasks/*.md   (seul scan — peers + products si raster-src)
+ *   - <projet>/raster-src/lots/.../tasks/*.md   (seul scan — peers à la racine)
  * Projet Raster = raster/ (scanné via raster/raster-src/).
  * Sync: any task file on a project appears in INDEX/BACKLOG after regen.
  * Skips: lots/_archive

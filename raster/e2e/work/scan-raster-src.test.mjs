@@ -52,9 +52,9 @@ test("projectFromPath lit le projet dans le chemin", () => {
   assert.equal(
     projectFromPath(
       REPO,
-      path.join(REPO, "products/mbs/raster-src/lots/site/tasks/M-1.md")
+      path.join(REPO, "mbs-website/raster-src/lots/site/tasks/M-1.md")
     ),
-    "mbs"
+    "mbs-website"
   );
 });
 
@@ -80,22 +80,14 @@ test("un projet Raster existe ssi <projet>/raster-src/lots existe", () => {
   // chaque projet détecté a bien le dossier qui le définit
   for (const n of names) {
     const peer = path.join(REPO, n, "raster-src", "lots");
-    const under = path.join(REPO, "products", n, "raster-src", "lots");
-    assert.ok(
-      fs.existsSync(peer) || fs.existsSync(under),
-      `${n} détecté sans raster-src/lots`
-    );
+    assert.ok(fs.existsSync(peer), `${n} détecté sans raster-src/lots`);
   }
 
   // et aucun dossier ayant raster-src/lots n'est oublié
-  const roots = [REPO, path.join(REPO, "products")];
-  for (const root of roots) {
-    if (!fs.existsSync(root)) continue;
-    for (const e of fs.readdirSync(root, { withFileTypes: true })) {
-      if (!e.isDirectory() || e.name.startsWith(".")) continue;
-      if (!fs.existsSync(path.join(root, e.name, "raster-src", "lots"))) continue;
-      assert.ok(names.includes(e.name), `${e.name} a raster-src/lots mais n'est pas détecté`);
-    }
+  for (const e of fs.readdirSync(REPO, { withFileTypes: true })) {
+    if (!e.isDirectory() || e.name.startsWith(".")) continue;
+    if (!fs.existsSync(path.join(REPO, e.name, "raster-src", "lots"))) continue;
+    assert.ok(names.includes(e.name), `${e.name} a raster-src/lots mais n'est pas détecté`);
   }
 });
 

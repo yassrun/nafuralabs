@@ -4,9 +4,9 @@ Tu opères dans le monorepo **nafuralabs**. Les règles sont les **mêmes** que 
 
 ## Lire en premier (ordre)
 
-1. [`docs/AGENTS.md`](docs/AGENTS.md) — canon monorepo (archi, deploy, où mettre le code)
-3. [`raster/AGENTS.md`](raster/AGENTS.md) — orchestrateur backlog / sprint (tickets dans les produits)
-4. Ops K8s : [`toolchain/ops/AGENTS.md`](toolchain/ops/AGENTS.md)
+1. [`NAFURALABS.md`](NAFURALABS.md) — porte du workspace
+2. [`raster/AGENTS.md`](raster/AGENTS.md) — orchestrateur backlog / sprint
+3. [`nafura-platform/ops/AGENTS.md`](nafura-platform/ops/AGENTS.md) — Ops K8s
 
 ## Rules Cursor (mêmes contraintes — à respecter aussi)
 
@@ -26,7 +26,8 @@ Ces fichiers sous `.cursor/rules/` sont `alwaysApply` pour Cursor ; **Claude doi
 | Specs / lots | `<projet>/raster-src/` (obligatoire) · `<projet>/pact/` si app/site |
 | Canvas UX (Git) | `…/lots/<lot-slug>/<sous-lot-slug>/ux/*.canvas.tsx` |
 | Tickets / bugs | `…/lots/…/tasks/{ID}-{slug}.md` · Raster = INDEX/Sprint seulement |
-| Métier | `products/<app>/` — jamais dans `platform/` |
+| Métier | peer du produit (`sektor/`, …) — jamais dans `nafura-platform/` |
+| Code qui tourne | `<projet>/sources/` (`backend/` · `web/` · …) — [`NAFURALABS.md`](NAFURALABS.md) § Intérieur |
 | Template PLAN | `raster/templates/00-PLAN.md` |
 
 ## Interdits rapides
@@ -41,8 +42,8 @@ Ces fichiers sous `.cursor/rules/` sont `alwaysApply` pour Cursor ; **Claude doi
 
 Sektor live :
 
-- **Pas encore pacté ni rasté.** L'ancien `docs/specs/lots/` est sorti du dépôt (`Desktop/nafuralabs-archives/sektor-btp-docs-specs/`) — référence seulement, jamais une source.
+- **Rasté** (déménagement) ; **pas encore pacté.** L'ancien `docs/specs/lots/` est sorti du dépôt (`Desktop/nafuralabs-archives/sektor-btp-docs-specs/`) — référence seulement, jamais une source.
 - Archive : `…/lots/_archive/qa-local-auth-seed/` — auth QA unique + seed (`qa@nafuralabs.local` / `qa-local`)
-- QA Mode B : `npm run start:erp:cursor` · `eval "$(bash toolchain/ops/qa-token.sh)"` · rule `.cursor/rules/cursor-qa-browser.mdc`
-- e2e : `products/sektor-btp/web/tests/e2e/` — à déplacer vers `sektor/e2e/` (par **projet**) quand Sektor sera pacté.
+- QA Mode B : `npm run start:erp:cursor` · `eval "$(bash nafura-platform/ops/qa-token.sh)"` · rule `.cursor/rules/cursor-qa-browser.mdc`
+- e2e : `sektor/e2e/` — par **projet**, pas par BC
 - Les cas de QA manuelle sont sortis du dépôt (`Desktop/nafuralabs-archives/sektor-web-docs/qa/`) : ils redeviennent des **e2e**, pas des documents.

@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "raster",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "raster/sources/web", "run", "dev"],
+      "port": 4210
+    }
+  ]
+}

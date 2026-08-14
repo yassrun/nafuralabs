@@ -19,6 +19,14 @@ Tu ne charges rien d'autre. Un fichier touché hors de ton paquet est détectabl
 - `EVOL` : la task `spec` sœur est `done-agent`
 - `blocked_by:` — ces ids ne sont plus `todo`
 
+## Le périmètre = tes étapes
+
+> **Ce que tes étapes ne nomment pas est hors périmètre.**
+
+Un fichier à corriger à côté, une règle qui te bloque, un outil à rustiner : **une ligne d'inbox**, pas un détour. Même quand tu as raison — surtout quand tu as raison, parce que personne ne relira ton correctif.
+
+Une règle du canon qui t'empêche d'avancer → `blocked` + inbox. Tu ne réécris pas la règle qui te bloque.
+
 ## Do
 
 - Implémente **toutes les couches** nécessaires au même résultat : back, front, données, ops. Ne découpe pas par couche.

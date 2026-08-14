@@ -12,20 +12,13 @@ export const ROOT_SKIP = new Set([
   ".git",
   ".cursor",
   "node_modules",
-  "products",
-  "platform",
-  "infra",
-  "toolchain",
   "shared",
   "docs",
-  "secrets",
   "build",
   "gradle",
   "tmp",
-  "tools",
   "BDP",
   "cmd",
-  "marketing",
 ]);
 
 export function walkTaskFiles(dir, out = [], includeArchive = false) {
@@ -61,15 +54,6 @@ function collectRasterSrc(appRoot, files, includeArchive) {
 /** Live tickets. Pass includeArchive for next-id (done files still occupy IDs). */
 export function collectTaskFiles(repoRoot, { includeArchive = false } = {}) {
   const files = [];
-  const products = path.join(repoRoot, "products");
-  if (fs.existsSync(products)) {
-    for (const app of fs.readdirSync(products, { withFileTypes: true })) {
-      if (!app.isDirectory()) continue;
-      const appRoot = path.join(products, app.name);
-      if (!projectLooksLikeRaster(appRoot)) continue;
-      collectRasterSrc(appRoot, files, includeArchive);
-    }
-  }
   for (const ent of fs.readdirSync(repoRoot, { withFileTypes: true })) {
     if (!ent.isDirectory()) continue;
     if (ROOT_SKIP.has(ent.name) || ent.name.startsWith(".")) continue;
@@ -82,8 +66,6 @@ export function collectTaskFiles(repoRoot, { includeArchive = false } = {}) {
 
 export function projectFromPath(repoRoot, filePath) {
   const rel = path.relative(repoRoot, filePath).replace(/\\/g, "/");
-  const underProducts = rel.match(/^products\/([^/]+)\/raster-src\//);
-  if (underProducts) return underProducts[1];
   const peerRasterSrc = rel.match(/^([^/]+)\/raster-src\//);
   if (peerRasterSrc) return peerRasterSrc[1];
   return "misc";
@@ -109,15 +91,6 @@ export function treeFromPath(repoRoot, filePath) {
 
 export function listRasterProjects(repoRoot) {
   const names = new Set();
-  const products = path.join(repoRoot, "products");
-  if (fs.existsSync(products)) {
-    for (const app of fs.readdirSync(products, { withFileTypes: true })) {
-      if (!app.isDirectory()) continue;
-      if (projectLooksLikeRaster(path.join(products, app.name))) {
-        names.add(app.name);
-      }
-    }
-  }
   for (const ent of fs.readdirSync(repoRoot, { withFileTypes: true })) {
     if (!ent.isDirectory()) continue;
     if (ROOT_SKIP.has(ent.name) || ent.name.startsWith(".")) continue;
