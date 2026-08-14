@@ -20,12 +20,15 @@ import {
 import type { FieldIssue } from '../../doc-extractor/models/extraction.model';
 import type { UiArrayColumn, UiTreeConfig } from '../../doc-extractor/models/ui-schema.model';
 import type { SmartImportRow, SmartImportRowStatus } from '../models/smart-import.model';
-import { formatIssueMessage } from '../utils/issue-display.util';
 import {
   buildSmartImportTreeNodes,
   getRelativeValue,
   type SmartImportTreeNode,
 } from '../utils/tree-flatten.util';
+import {
+  SmartImportDoubtListsComponent,
+  type SmartImportDoubtReclassifyEvent,
+} from './smart-import-doubt-lists.component';
 
 export interface SmartImportTreeNodeEvent {
   node: SmartImportTreeNode;
@@ -34,7 +37,7 @@ export interface SmartImportTreeNodeEvent {
 @Component({
   selector: 'nf-smart-import-tree-table',
   standalone: true,
-  imports: [CommonModule, TranslateModule, TreeTableComponent],
+  imports: [CommonModule, TranslateModule, TreeTableComponent, SmartImportDoubtListsComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="wrap">
@@ -72,11 +75,10 @@ export interface SmartImportTreeNodeEvent {
         </ng-template>
 
         <ng-template #detail let-node>
-          <ul class="issues-list">
-            @for (issue of node.issues; track issue.path + issue.kind) {
-              <li>{{ humanIssue(issue) }}</li>
-            }
-          </ul>
+          <nf-smart-import-doubt-lists
+            [issues]="node.issues"
+            [columns]="columns"
+            (reclassify)="reclassify.emit($event)" />
         </ng-template>
       </nf-tree-table>
     </div>
@@ -103,11 +105,9 @@ export interface SmartImportTreeNodeEvent {
     .badge[data-status='DUPLICATE'],
     .badge[data-status='IGNORED'] { color: var(--nf-color-text-secondary); }
     .badge[data-status='FAILED'] { color: var(--nf-color-danger-700, #b91c1c); }
-    .issues-list {
-      margin: 0 0 .45rem;
+    :host ::ng-deep .nf-tree-table__detail nf-smart-import-doubt-lists {
+      display: block;
       padding-inline-start: 7rem;
-      color: var(--nf-color-danger-700, #b91c1c);
-      font-size: .8rem;
     }
     :host ::ng-deep .nf-smart-import-row--muted > td { opacity: .55; }
     :host ::ng-deep .nf-smart-import-row--invalid > td {
@@ -124,6 +124,7 @@ export class SmartImportTreeTableComponent implements OnChanges {
   @Input() filter: SmartImportRowStatus | 'ALL' = 'ALL';
   @Input() extraIssues: FieldIssue[] = [];
   @Output() readonly nodeActivate = new EventEmitter<SmartImportTreeNodeEvent>();
+  @Output() readonly reclassify = new EventEmitter<SmartImportDoubtReclassifyEvent>();
 
   private knownKeys = new Set<string>();
   readonly filteredTreeNodes = signal<NfTreeNode<SmartImportTreeNode>[]>([]);
@@ -181,10 +182,6 @@ export class SmartImportTreeTableComponent implements OnChanges {
 
   isMuted(status: SmartImportRowStatus): boolean {
     return status === 'IGNORED' || status === 'DUPLICATE';
-  }
-
-  humanIssue(issue: FieldIssue): string {
-    return formatIssueMessage(issue, { columns: this.columns });
   }
 
   private rebuild(): void {

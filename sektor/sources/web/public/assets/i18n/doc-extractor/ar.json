@@ -220,6 +220,16 @@
         "dblclickHint": "انقر مرتين للتصحيح",
         "recordHeader": "رأس المستند"
       },
+      "doubts": {
+        "extraction": "شكوك الاستخراج",
+        "sourceGap": "نواقص المصدر",
+        "extractionHint": "لسنا متأكدين من القراءة",
+        "sourceGapHint": "الملف لا يحتوي القيمة",
+        "reclassifyAsExtraction": "تصنيف كشك استخراج",
+        "reclassifyAsSourceGap": "تصنيف كنقص مصدر",
+        "bannerExtraction": "{count} شك استخراج",
+        "bannerSourceGap": "{count} نقص مصدر"
+      },
       "edit": {
         "hint": "عدّل الحقول ثم احفظ.",
         "save": "حفظ",

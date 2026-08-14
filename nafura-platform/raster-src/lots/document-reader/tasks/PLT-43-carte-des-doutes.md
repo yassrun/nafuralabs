@@ -1,6 +1,6 @@
 ---
 id: PLT-43
-status: doing
+status: review
 context: nafura
 type: feature
 priority: P1
@@ -31,4 +31,8 @@ tags: [platform, documents, doc-extractor, ux]
 14/08 21:16  tsk2  FieldIssueDto.nature + DoubtNature.fromKind ; TS partitionDoubts
 14/08 21:16  preuve  SchemaValidatorTest natures · doubt-natures.spec (4 vs 75, pas 39 %)
 14/08 21:18  décision  payload vide = EXTRACTION (on n’a rien lu), pas SOURCE_GAP
+14/08 21:26  me · canvas validé
+14/08 21:30  tsk3  split UI : nf-smart-import-doubt-lists dans data/tree/record-table ; bannière 2 compteurs ; fallback reclasse
+14/08 21:30  preuve  doubt-natures.spec summarize 4/75 sans percent · reclassify 5/74
+14/08 21:30  décision  pas de 4e table ; filtre NEEDS_REVIEW reste au grain ligne (pas un % fusionné)
 ```

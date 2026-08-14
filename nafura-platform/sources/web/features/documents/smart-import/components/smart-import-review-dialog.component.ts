@@ -10,8 +10,12 @@ import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angu
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 
-import { AlertComponent, ButtonComponent } from '@lib/anatomy';
-import type { FieldIssue } from '../../doc-extractor/models/extraction.model';
+import { ButtonComponent } from '@lib/anatomy';
+import {
+  reclassifyDoubt,
+  summarizeDoubts,
+  type FieldIssue,
+} from '../../doc-extractor/models/extraction.model';
 import type { JsonSchemaObject, JsonSchemaRoot } from '../../doc-extractor/models/json-schema.model';
 import type { UiArrayConfig, UiRootView, UiSchema } from '../../doc-extractor/models/ui-schema.model';
 import type { SmartImportRowStatus, SmartImportSession } from '../models/smart-import.model';
@@ -22,6 +26,7 @@ import {
   SmartImportDataTableComponent,
   type SmartImportDataTableRowEvent,
 } from './smart-import-data-table.component';
+import type { SmartImportDoubtReclassifyEvent } from './smart-import-doubt-lists.component';
 import {
   SmartImportEditDialogComponent,
   type SmartImportEditDialogData,
@@ -42,7 +47,6 @@ import {
     CommonModule,
     MatDialogModule,
     TranslateModule,
-    AlertComponent,
     ButtonComponent,
     SmartImportDataTableComponent,
     SmartImportTreeTableComponent,
@@ -59,11 +63,15 @@ import {
         <span class="policy">{{ session.config.importPolicy }}</span>
       </header>
 
-      @if (invalidCount() > 0) {
-        <nf-alert
-          variant="warning"
-          [title]="'platform.smartImport.review.attentionTitle' | translate"
-          [message]="'platform.smartImport.review.attentionMessage' | translate:{ count: invalidCount() }" />
+      @if (doubtSummary().extraction > 0 || doubtSummary().sourceGap > 0) {
+        <div class="doubt-banner" role="group">
+          <p data-nature="EXTRACTION">
+            {{ 'platform.smartImport.doubts.bannerExtraction' | translate:{ count: doubtSummary().extraction } }}
+          </p>
+          <p data-nature="SOURCE_GAP">
+            {{ 'platform.smartImport.doubts.bannerSourceGap' | translate:{ count: doubtSummary().sourceGap } }}
+          </p>
+        </div>
       }
 
       <nav class="filters" aria-label="Import row filters">
@@ -86,7 +94,8 @@ import {
               [rows]="session.rows"
               [tree]="treeConfig"
               [filter]="selectedFilter()"
-              (nodeActivate)="onTreeNodeActivate($event)" />
+              (nodeActivate)="onTreeNodeActivate($event)"
+              (reclassify)="onReclassify($event)" />
           }
           @case ('RECORD_TABLE') {
             <nf-smart-import-record-table
@@ -98,7 +107,8 @@ import {
               [filter]="selectedFilter()"
               [headerIssues]="headerIssues()"
               (headerActivate)="onRecordHeaderActivate($event)"
-              (rowActivate)="onDataRowActivate($event)" />
+              (rowActivate)="onDataRowActivate($event)"
+              (reclassify)="onReclassify($event)" />
           }
           @default {
             <nf-smart-import-data-table
@@ -106,7 +116,8 @@ import {
               [rows]="session.rows"
               [columns]="arrayConfig()?.columns ?? []"
               [filter]="selectedFilter()"
-              (rowActivate)="onDataRowActivate($event)" />
+              (rowActivate)="onDataRowActivate($event)"
+              (reclassify)="onReclassify($event)" />
           }
         }
       </div>
@@ -152,6 +163,14 @@ import {
       border-radius: 999px; padding: .35rem .6rem; cursor: pointer;
     }
     .filters button.active { border-color: var(--nf-color-primary-500); }
+    .doubt-banner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .75rem 1.25rem;
+    }
+    .doubt-banner p { margin: 0; font-size: .9rem; }
+    .doubt-banner [data-nature='EXTRACTION'] { color: var(--nf-color-warning-700, #b45309); }
+    .doubt-banner [data-nature='SOURCE_GAP'] { color: var(--nf-color-text-secondary); }
     .layout-host { min-height: 0; overflow: auto; }
     .footer-actions { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; justify-content: flex-end; }
     footer { align-items: center; }
@@ -217,6 +236,18 @@ export class SmartImportReviewDialogComponent {
 
   invalidCount(): number {
     return this.count('NEEDS_REVIEW');
+  }
+
+  doubtSummary(): { extraction: number; sourceGap: number } {
+    return summarizeDoubts(this.session.rows.flatMap((row) => row.issues));
+  }
+
+  onReclassify(event: SmartImportDoubtReclassifyEvent): void {
+    const next = reclassifyDoubt(event.issue, event.nature);
+    for (const row of this.session.rows) {
+      row.issues = row.issues.map((issue) => (issue === event.issue ? next : issue));
+    }
+    this.refreshRows();
   }
 
   ignoreAllInvalid(): void {

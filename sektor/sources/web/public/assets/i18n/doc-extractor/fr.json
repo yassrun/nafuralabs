@@ -220,6 +220,16 @@
         "dblclickHint": "Double-cliquez pour corriger",
         "recordHeader": "En-tête du document"
       },
+      "doubts": {
+        "extraction": "Doutes d’extraction",
+        "sourceGap": "Manques de la source",
+        "extractionHint": "On n’est pas sûr d’avoir bien lu",
+        "sourceGapHint": "Le fichier ne le contient pas",
+        "reclassifyAsExtraction": "Classer en doute d’extraction",
+        "reclassifyAsSourceGap": "Classer en manque source",
+        "bannerExtraction": "{count, plural, one {1 doute d’extraction} other {# doutes d’extraction}}",
+        "bannerSourceGap": "{count, plural, one {1 manque de la source} other {# manques de la source}}"
+      },
       "edit": {
         "hint": "Modifiez les champs puis enregistrez.",
         "save": "Enregistrer",

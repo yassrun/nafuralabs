@@ -2,11 +2,13 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 
-import type { FieldIssue } from '../../doc-extractor/models/extraction.model';
 import type { UiArrayColumn } from '../../doc-extractor/models/ui-schema.model';
 import type { SmartImportRow, SmartImportRowStatus } from '../models/smart-import.model';
-import { formatIssueMessage } from '../utils/issue-display.util';
 import { getRelativeValue } from '../utils/tree-flatten.util';
+import {
+  SmartImportDoubtListsComponent,
+  type SmartImportDoubtReclassifyEvent,
+} from './smart-import-doubt-lists.component';
 
 export interface SmartImportDataTableRowEvent {
   index: number;
@@ -16,7 +18,7 @@ export interface SmartImportDataTableRowEvent {
 @Component({
   selector: 'nf-smart-import-data-table',
   standalone: true,
-  imports: [CommonModule, TranslateModule],
+  imports: [CommonModule, TranslateModule, SmartImportDoubtListsComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="wrap">
@@ -52,11 +54,10 @@ export interface SmartImportDataTableRowEvent {
               @if (entry.row.issues.length > 0 && entry.row.status === 'NEEDS_REVIEW') {
                 <tr class="issues-row">
                   <td [attr.colspan]="columns.length + 1">
-                    <ul>
-                      @for (issue of entry.row.issues; track issue.path + issue.kind) {
-                        <li>{{ humanIssue(issue) }}</li>
-                      }
-                    </ul>
+                    <nf-smart-import-doubt-lists
+                      [issues]="entry.row.issues"
+                      [columns]="columns"
+                      (reclassify)="reclassify.emit($event)" />
                   </td>
                 </tr>
               }
@@ -89,7 +90,7 @@ export interface SmartImportDataTableRowEvent {
     .badge[data-status='IGNORED'] { color: var(--nf-color-text-secondary); }
     .badge[data-status='FAILED'] { color: var(--nf-color-danger-700, #b91c1c); }
     .issues-row td { padding-top: 0; background: transparent; }
-    .issues-row ul { margin: 0 0 .5rem 110px; padding-left: 1rem; color: var(--nf-color-danger-700, #b91c1c); font-size: .8rem; }
+    .issues-row nf-smart-import-doubt-lists { display: block; margin-left: 110px; }
   `],
 })
 export class SmartImportDataTableComponent {
@@ -98,6 +99,7 @@ export class SmartImportDataTableComponent {
   @Input() title = '';
   @Input() filter: SmartImportRowStatus | 'ALL' = 'ALL';
   @Output() readonly rowActivate = new EventEmitter<SmartImportDataTableRowEvent>();
+  @Output() readonly reclassify = new EventEmitter<SmartImportDoubtReclassifyEvent>();
 
   get visibleEntries(): Array<{ index: number; row: SmartImportRow }> {
     return this.rows
@@ -117,9 +119,5 @@ export class SmartImportDataTableComponent {
 
   isMuted(status: SmartImportRowStatus): boolean {
     return status === 'IGNORED' || status === 'DUPLICATE';
-  }
-
-  humanIssue(issue: FieldIssue): string {
-    return formatIssueMessage(issue, { columns: this.columns });
   }
 }

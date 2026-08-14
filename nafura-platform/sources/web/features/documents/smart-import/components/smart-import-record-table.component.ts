@@ -5,12 +5,15 @@ import { TranslateModule } from '@ngx-translate/core';
 import type { FieldIssue } from '../../doc-extractor/models/extraction.model';
 import type { UiArrayColumn, UiSchema } from '../../doc-extractor/models/ui-schema.model';
 import type { SmartImportRow, SmartImportRowStatus } from '../models/smart-import.model';
-import { formatIssueMessage } from '../utils/issue-display.util';
 import { getRelativeValue } from '../utils/tree-flatten.util';
 import {
   SmartImportDataTableComponent,
   type SmartImportDataTableRowEvent,
 } from './smart-import-data-table.component';
+import {
+  SmartImportDoubtListsComponent,
+  type SmartImportDoubtReclassifyEvent,
+} from './smart-import-doubt-lists.component';
 
 export interface SmartImportRecordHeaderEvent {
   rootData: Record<string, unknown>;
@@ -19,7 +22,7 @@ export interface SmartImportRecordHeaderEvent {
 @Component({
   selector: 'nf-smart-import-record-table',
   standalone: true,
-  imports: [CommonModule, TranslateModule, SmartImportDataTableComponent],
+  imports: [CommonModule, TranslateModule, SmartImportDataTableComponent, SmartImportDoubtListsComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="record">
@@ -47,11 +50,11 @@ export interface SmartImportRecordHeaderEvent {
           </div>
         }
         @if (headerIssues.length > 0) {
-          <ul class="issues">
-            @for (issue of headerIssues; track issue.path + issue.kind) {
-              <li>{{ humanIssue(issue) }}</li>
-            }
-          </ul>
+          <nf-smart-import-doubt-lists
+            [issues]="headerIssues"
+            [columns]="columns"
+            [uiSchema]="uiSchema"
+            (reclassify)="reclassify.emit($event)" />
         }
       </section>
 
@@ -60,7 +63,8 @@ export interface SmartImportRecordHeaderEvent {
         [rows]="rows"
         [columns]="columns"
         [filter]="filter"
-        (rowActivate)="rowActivate.emit($event)" />
+        (rowActivate)="rowActivate.emit($event)"
+        (reclassify)="reclassify.emit($event)" />
     </div>
   `,
   styles: [`
@@ -97,12 +101,6 @@ export interface SmartImportRecordHeaderEvent {
       color: var(--nf-color-text-secondary);
       font-size: .875rem;
     }
-    .issues {
-      margin: .65rem 0 0;
-      padding-left: 1.1rem;
-      color: var(--nf-color-danger-700, #b91c1c);
-      font-size: .8rem;
-    }
   `],
 })
 export class SmartImportRecordTableComponent {
@@ -115,14 +113,11 @@ export class SmartImportRecordTableComponent {
   @Input() headerIssues: FieldIssue[] = [];
   @Output() readonly headerActivate = new EventEmitter<SmartImportRecordHeaderEvent>();
   @Output() readonly rowActivate = new EventEmitter<SmartImportDataTableRowEvent>();
+  @Output() readonly reclassify = new EventEmitter<SmartImportDoubtReclassifyEvent>();
 
   displayValue(data: Record<string, unknown>, path: string): string {
     const value = getRelativeValue(data, path);
     if (value == null || value === '') return '—';
     return String(value);
-  }
-
-  humanIssue(issue: FieldIssue): string {
-    return formatIssueMessage(issue, { uiSchema: this.uiSchema, columns: this.columns });
   }
 }

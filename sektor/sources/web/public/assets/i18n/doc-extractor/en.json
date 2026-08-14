@@ -220,6 +220,16 @@
         "dblclickHint": "Double-click to edit",
         "recordHeader": "Document header"
       },
+      "doubts": {
+        "extraction": "Extraction doubts",
+        "sourceGap": "Source gaps",
+        "extractionHint": "We are not sure we read it correctly",
+        "sourceGapHint": "The file does not contain it",
+        "reclassifyAsExtraction": "Mark as extraction doubt",
+        "reclassifyAsSourceGap": "Mark as source gap",
+        "bannerExtraction": "{count, plural, one {1 extraction doubt} other {# extraction doubts}}",
+        "bannerSourceGap": "{count, plural, one {1 source gap} other {# source gaps}}"
+      },
       "edit": {
         "hint": "Edit the fields, then save.",
         "save": "Save",

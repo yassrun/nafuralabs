@@ -162,6 +162,19 @@ export function partitionDoubts(issues: FieldIssue[]): {
   return { extraction, sourceGap };
 }
 
+/** Two counters. Never a fused percent. */
+export function summarizeDoubts(issues: FieldIssue[]): {
+  extraction: number;
+  sourceGap: number;
+} {
+  const { extraction, sourceGap } = partitionDoubts(issues);
+  return { extraction: extraction.length, sourceGap: sourceGap.length };
+}
+
+export function reclassifyDoubt(issue: FieldIssue, nature: DoubtNature): FieldIssue {
+  return { ...issue, nature };
+}
+
 export interface ExtractionValidation {
   state: ExtractionValidationState;
   issues: FieldIssue[];
