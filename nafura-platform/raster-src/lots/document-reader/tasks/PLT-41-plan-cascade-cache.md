@@ -1,6 +1,6 @@
 ---
 id: PLT-41
-status: review
+status: done-agent
 context: nafura
 type: feature
 priority: P1
@@ -36,4 +36,13 @@ tags: [platform, documents, doc-extractor]
 14/08 20:26  WIP perdu au rebase SEKTOR-105 ; récupéré stash@{1} sur staging
 14/08 20:28  preuve  :doc-extractor:test VERT ; :etudes:test grid+orchestrator VERT
 14/08 20:28  décision  heuristique = match d'en-têtes seulement (pas positionnel) ; CSV reste hors sonde (AC-6)
+14/08 20:36  spec · constat d'écart PLT-41 : LOT.md inchangé. Livré = contrat (plan typé, cascade, cache tenant, pas d'aplatissement si grille). Dette hors slice : arrayPath front encore singulier (PLT-42) · carte des doutes (PLT-43) · bascule écrans (PLT-44). Pas de retour exec.
 ```
+
+## Rapport de livraison
+
+ce qui a changé      `ReadingPlan` + cascade + cache tenant dans `doc-extractor`. Grille exécutée sans aplatir.
+critères prouvés     voir PLT-45
+décidé seul          voir journal PLT-41
+écarts / dette       voir PLT-45
+

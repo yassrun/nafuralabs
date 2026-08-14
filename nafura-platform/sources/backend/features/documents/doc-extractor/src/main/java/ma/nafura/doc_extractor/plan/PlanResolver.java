@@ -38,14 +38,20 @@ public class PlanResolver {
         String fingerprint = LayoutFingerprint.of(rows);
 
         Optional<ReadingPlan> heuristic = HeuristicPlanFactory.fromGrid(rows, schema);
-        if (heuristic.isPresent() && validator.validate(heuristic.get(), columns).accepted()) {
-            cache.put(tenantId, fingerprint, heuristic.get());
-            return Optional.of(new Resolved(heuristic.get(), Palier.HEURISTIC));
+        if (heuristic.isPresent()) {
+            ReadingPlan candidate = DefinitionPlanBridge.applyFlatDefaults(heuristic.get(), schema);
+            if (validator.validate(candidate, columns).accepted()) {
+                cache.put(tenantId, fingerprint, candidate);
+                return Optional.of(new Resolved(candidate, Palier.HEURISTIC));
+            }
         }
 
         Optional<ReadingPlan> cached = cache.get(tenantId, fingerprint);
-        if (cached.isPresent() && validator.validate(cached.get(), columns).accepted()) {
-            return Optional.of(new Resolved(cached.get(), Palier.CACHE));
+        if (cached.isPresent()) {
+            ReadingPlan candidate = DefinitionPlanBridge.applyFlatDefaults(cached.get(), schema);
+            if (validator.validate(candidate, columns).accepted()) {
+                return Optional.of(new Resolved(candidate, Palier.CACHE));
+            }
         }
 
         return Optional.empty();
@@ -61,12 +67,13 @@ public class PlanResolver {
         if (palier != Palier.IA && palier != Palier.VISION) {
             return Optional.empty();
         }
+        ReadingPlan candidate = DefinitionPlanBridge.applyFlatDefaults(plan, null);
         int columns = columnCount(rows);
-        if (!validator.validate(plan, columns).accepted()) {
+        if (!validator.validate(candidate, columns).accepted()) {
             return Optional.empty();
         }
-        cache.put(tenantId, LayoutFingerprint.of(rows), plan);
-        return Optional.of(new Resolved(plan, palier));
+        cache.put(tenantId, LayoutFingerprint.of(rows), candidate);
+        return Optional.of(new Resolved(candidate, palier));
     }
 
     static int columnCount(List<GridRow> rows) {

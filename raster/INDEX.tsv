@@ -1,10 +1,11 @@
 id	status	priority	context	assignee	gate	type	agent_type	sprint	project	lot	souslot	title
-PLT-41	review	P1	nafura	agent	none	feature	exec	2026-W33	nafura-platform	document-reader		Plan, cascade, cache
-PLT-42	todo	P1	nafura	agent	none	feature	exec	2026-W33	nafura-platform	document-reader		Plan ↔ Definition
+PLT-42	review	P1	nafura	agent	none	feature	exec	2026-W33	nafura-platform	document-reader		Plan ↔ Definition
 PLT-43	todo	P1	nafura	agent	none	feature	exec	2026-W33	nafura-platform	document-reader		Carte des doutes
 PLT-44	todo	P1	nafura	agent	none	feature	exec	2026-W33	nafura-platform	document-reader		Bascule vague 1 — liste puis arbre
 PLT-39	done-agent	P1	nafura	agent	none	tech	exec	2026-W33	nafura-platform	document-reader		Socle grille dans doc-extractor
 PLT-40	done-agent	P1	nafura	me	none	physical	exec	2026-W33	nafura-platform	document-reader		Trancher O1 — cache de plans par tenant ou mu…
+PLT-41	done-agent	P1	nafura	agent	none	feature	exec	2026-W33	nafura-platform	document-reader		Plan, cascade, cache
+PLT-45	done-agent	P1	nafura	agent	none	qa	qa	2026-W33	nafura-platform	document-reader		QA — Plan, cascade, cache
 SEKTOR-104	done-agent	P1	nafura	agent	none	tech	exec	2026-W33	sektor	monter-angular-22		Drop PrimeNG — nf-tree-table en mat-table
 SEKTOR-97	done-agent	P1	nafura	agent	none	tech	exec	2026-W33	sektor	monter-angular-22		Angular 21 → 22
 SEKTOR-102	done-agent	P1	nafura	agent	none	tech	exec	2026-W33	sektor	plier-archi	domain-objets	Ranger les objets domain par agrégat

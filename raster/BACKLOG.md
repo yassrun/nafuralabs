@@ -31,11 +31,12 @@
 - `document-reader` lot
   - ✓ `PLT-39` tech — Socle grille dans doc-extractor
   - ✓ `PLT-40` physical — Trancher O1 — cache de plans par tenant ou mu…
-  - ◐ `PLT-41` feature — Plan, cascade, cache
-  - · `PLT-42` feature — Plan ↔ Definition
+  - ✓ `PLT-41` feature — Plan, cascade, cache
+  - ◐ `PLT-42` feature — Plan ↔ Definition
   - · `PLT-43` feature — Carte des doutes
   - · `PLT-44` feature — Bascule vague 1 — liste puis arbre
+  - ✓ `PLT-45` qa — QA — Plan, cascade, cache
 
 ---
 
-**15 live · 2 projets**
+**16 live · 2 projets**

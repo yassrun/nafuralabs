@@ -7,6 +7,7 @@ import type { FieldIssue } from '../../doc-extractor/models/extraction.model';
 import type { JsonSchemaObject } from '../../doc-extractor/models/json-schema.model';
 import {
   DEFAULT_SMART_IMPORT_CONFIG,
+  primaryArrayPath,
   schemaViewFromDefinition,
   type ExtractionDefinition,
   type ReviewedExtraction,
@@ -39,7 +40,7 @@ export class SmartImportOrchestratorService {
     const config = this.resolveConfig(definition);
     config.importPolicy =
       definition.presentationSchema?.importPolicy === 'STRICT' ? 'STRICT' : config.importPolicy;
-    return { schema, config, arrayPath: definition.arrayPath };
+    return { schema, config, arrayPath: primaryArrayPath(definition) };
   }
 
   async prepare(
@@ -116,7 +117,8 @@ export class SmartImportOrchestratorService {
       }
 
       const data = this.extractObject(response.data);
-      const rawRows = data[definition.arrayPath];
+      const arrayPath = primaryArrayPath(definition);
+      const rawRows = data[arrayPath];
       if (!Array.isArray(rawRows) || rawRows.length === 0) {
         throw new SmartImportError('NO_ROWS', 'platform.smartImport.errors.noRows');
       }
@@ -124,7 +126,7 @@ export class SmartImportOrchestratorService {
       const seenFileKeys = new Set<string>();
       const itemSchema = this.itemSchema(
         definition.dataSchema as unknown as Record<string, unknown>,
-        definition.arrayPath,
+        arrayPath,
       );
       const deepRootIssues = validateObjectDeep(
         data,
@@ -163,7 +165,7 @@ export class SmartImportOrchestratorService {
       return {
         definition,
         schema,
-        arrayPath: definition.arrayPath,
+        arrayPath,
         config,
         rows,
         phase: 'REVIEWING',
@@ -254,8 +256,8 @@ export class SmartImportOrchestratorService {
     allIssues: FieldIssue[],
     seenFileKeys: Set<string>,
   ): SmartImportRow {
-    const pathPrefix = `${definition.arrayPath}[${sourceIndex}]`;
-    const scopedBackend = issuesForRootIndex(allIssues, definition.arrayPath, sourceIndex);
+    const pathPrefix = `${primaryArrayPath(definition)}[${sourceIndex}]`;
+    const scopedBackend = issuesForRootIndex(allIssues, primaryArrayPath(definition), sourceIndex);
     const deepIssues = validateObjectDeep(data, schema, pathPrefix, sourceIndex);
     const issues = [
       ...scopedBackend,

@@ -105,6 +105,20 @@ class PlanCascadeTest {
         assertThat(data.path("items").path(0).path("qty").asText()).isEqualTo("2");
     }
 
+    @Test
+    void flatImportIsDefaultComplexCase() throws Exception {
+        JsonNode schema = itemsSchema();
+        List<GridRow> matching = List.of(
+                GridRow.of("s", 1, List.of("name", "qty")),
+                GridRow.of("s", 2, List.of("Widget", "2")));
+        ReadingPlan plan = resolver.resolve(matching, schema, "t-a").orElseThrow().plan();
+        assertThat(plan.rowClasses()).containsExactly(new ReadingPlan.RowClass("record", "default"));
+        assertThat(plan.hierarchy()).isEqualTo(ReadingPlan.Hierarchy.NONE);
+        assertThat(plan.anchors()).isEmpty();
+        assertThat(plan.depivot()).isEqualTo(ReadingPlan.Depivot.RESERVED);
+        assertThat(plan.arrayPaths()).containsExactly("items");
+    }
+
     private static ReadingPlan samplePlan() {
         return new ReadingPlan(
                 "grid",
