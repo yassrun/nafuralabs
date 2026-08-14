@@ -7,6 +7,19 @@
 > Regen : `node raster/regen.mjs` / `node raster/t.mjs index`.
 > Inbox : `raster/inbox.md`.
 
+## nafura-platform
+
+- `document-reader` lot
+  - ✓ `PLT-39` tech — Socle grille dans doc-extractor
+  - ✓ `PLT-40` physical — Trancher O1 — cache de plans par tenant ou mu…
+  - ✓ `PLT-41` feature — Plan, cascade, cache
+  - ✓ `PLT-42` feature — Plan ↔ Definition
+  - ✓ `PLT-43` feature — Carte des doutes
+  - ◐ `PLT-44` feature — Bascule vague 1 — liste puis arbre
+  - ✓ `PLT-45` qa — QA — Plan, cascade, cache
+  - ✓ `PLT-46` qa — QA — Plan ↔ Definition
+  - ✓ `PLT-47` qa — QA — Carte des doutes
+
 ## sektor
 
 - `monter-angular-22` lot
@@ -26,18 +39,6 @@
   - ✓ `socle` sous-lot
     - ✓ `SEKTOR-98` tech — Socle compile sans jars BC
 
-## nafura-platform
-
-- `document-reader` lot
-  - ✓ `PLT-39` tech — Socle grille dans doc-extractor
-  - ✓ `PLT-40` physical — Trancher O1 — cache de plans par tenant ou mu…
-  - ✓ `PLT-41` feature — Plan, cascade, cache
-  - ✓ `PLT-42` feature — Plan ↔ Definition
-  - ◐ `PLT-43` feature — Carte des doutes
-  - · `PLT-44` feature — Bascule vague 1 — liste puis arbre
-  - ✓ `PLT-45` qa — QA — Plan, cascade, cache
-  - ✓ `PLT-46` qa — QA — Plan ↔ Definition
-
 ---
 
-**17 live · 2 projets**
+**18 live · 2 projets**

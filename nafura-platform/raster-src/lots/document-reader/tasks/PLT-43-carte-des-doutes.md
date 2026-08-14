@@ -1,6 +1,6 @@
 ---
 id: PLT-43
-status: review
+status: done-agent
 context: nafura
 type: feature
 priority: P1
@@ -35,4 +35,6 @@ tags: [platform, documents, doc-extractor, ux]
 14/08 21:30  tsk3  split UI : nf-smart-import-doubt-lists dans data/tree/record-table ; bannière 2 compteurs ; fallback reclasse
 14/08 21:30  preuve  doubt-natures.spec summarize 4/75 sans percent · reclassify 5/74
 14/08 21:30  décision  pas de 4e table ; filtre NEEDS_REVIEW reste au grain ligne (pas un % fusionné)
+14/08 21:32  spec · constat d'écart PLT-43 : LOT.md AC-5 inchangé. Canvas validé me. Deux natures API + 2 compteurs écran + reclasse. Dette : pas d'e2e du dialogue (il faut un extract). Pas de retour exec.
+14/08 21:33  orch · QA PLT-47 pass → done-agent
 ```
