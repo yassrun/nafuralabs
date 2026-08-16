@@ -160,6 +160,8 @@ Objectif : tu planifies **un lot ou deux**, l'orchestrateur déroule sans prompt
 
 La collision qui casse le parallèle n'est pas logique (`blocked_by:` la couvre) mais **physique** : deux agents sur le même fichier. Le lot est la plus grosse frontière tenable sans déclarer un périmètre de fichiers par task ; le CH est déjà une frontière de périmètre côté Pact, donc fan-outer dessus n'invente rien.
 
+**Livraison Git : une branche par sous-lot, dans son propre `git worktree`, hors du dépôt.** Une branche n'isole pas — deux agents dans le même répertoire s'écrasent quel que soit le checkout. Le code part sur la branche ; les tasks restent sur l'arbre d'intégration via le CLI, sinon « ce qui tourne » n'existe plus. Merge sous-lot → lot → intégration ; **aucun agent ne pousse**.
+
 **`<projet>/ROADMAP.md`** — l'ordre des lots, **écrit à la main**, hors `raster-src/`, non indexé. La roadmap est un **acte**, pas un calcul : elle porte des lots qui n'ont encore ni task ni dossier. Un marqueur `<!-- borne -->` sépare ce que l'orchestrateur peut ouvrir seul de ce qu'il ne peut pas. **Déplacer la borne = planifier.**
 
 Détail : [`raster/AGENTS.md`](raster/AGENTS.md) §7.
