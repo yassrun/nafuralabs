@@ -74,6 +74,7 @@ Elles s'imposent à tous les BC.
 | Contexte | Rôle |
 |----------|------|
 | **socle** | chrome : nav, capture, détail, vues générées |
-| **work** | contrat des tickets : arbre, types, statuts, sprint |
+| **work** | contrat des tickets : arbre, types, statuts, sprint, readiness |
+| **orchestration** | la conduite : fenêtre, borne, boucle, rôles d'agent |
 
 <!-- /généré -->

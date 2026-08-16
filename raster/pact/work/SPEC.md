@@ -11,14 +11,14 @@ Le travail a un endroit, un parent, un type, un statut. Le sprint est un **champ
 
 - Scanne **uniquement** `**/raster-src/lots/**/tasks/*.md`
 - Dérive l'arbre **projet → lot → sous-lot → task** depuis **le chemin**
-- Promeut une ligne d'inbox en task rattachée à un lot
-- Engage une task sur une semaine (`sprint: YYYY-Wnn`)
-- Régénère INDEX · BACKLOG · SPRINT
+- **Écrit** les tasks : `new` · `promote` · `sprint` · `status` · `approve` — seule voie
+- Calcule la **readiness** au grain du sous-lot : ce qui est lançable maintenant
+- Régénère INDEX · BACKLOG · SPRINT après chaque écriture
 
 ## Limites
 
-**owns** — schéma de la task, scan, dérivation de l'arbre, promote, sprint, archive
-**not_owns** — le chrome et la capture (socle) · le contenu Pact (`pact/` n'est jamais scanné)
+**owns** — schéma de la task, scan, dérivation de l'arbre, **écriture**, promote, sprint, **readiness**, archive
+**not_owns** — le chrome et la capture (socle) · la fenêtre, la borne, la conduite des agents (**orchestration**) · le contenu Pact (`pact/` n'est jamais scanné)
 
 Un dossier est un projet Raster **ssi** `<projet>/raster-src/lots` existe. Pas `docs/specs`, pas `pact/`.
 
@@ -55,7 +55,8 @@ sprint: Wnn    = sprint (hors done-agent / done-me)
 
 `review` = l'exec a fini, la main passe au spec puis au QA.
 `done-agent` = **le QA** l'a posé sur feature/bug — jamais l'exec.
-`done-me` = tu confirmes → archive.
+`done-me` = **ne se pose pas.** Il résulte de `approve`, et seulement sur un `done-agent` sous `gate: me`.
+Sur `gate: none`, `done-agent` bascule **seul** en `done-me` : personne ne t'attendait.
 
 ## Règles
 
@@ -70,6 +71,10 @@ sprint: Wnn    = sprint (hors done-agent / done-me)
 - **R-3** Un dossier sans task n'apparaît nulle part — le « sous-lot au cas où » est impossible, pas interdit.
 - **R-4** Branché Pact, le nom du sous-lot est **identique** au nom du CH.
 - **R-5** Pas d'`estimate`, pas de compteur dérivé dans le frontmatter.
+- **R-6** **Une task ne s'écrit que par le CLI.** Composer du frontmatter à la main est une faute, pas un raccourci.
+- **R-7** Une commande qui **refuse n'écrit rien** — ni fichier, ni dossier, ni ligne d'inbox consommée. La validation précède toute écriture.
+- **R-8** L'id est **borné avant** d'être utilisé : `NEXT` est bumpé avant l'écriture du fichier. Sur-allouer est sans conséquence ; réattribuer ne l'est pas.
+- **R-9** La readiness est **dérivée**, jamais stockée. `blocked_by:` interne à un sous-lot = ordre ; hors du sous-lot = blocage. `status: blocked` = blocage **externe** à Raster.
 
 Soumis à `POL-FICHIER-SSOT` · `POL-VUES-GENEREES` · `POL-CAPTURE-INBOX` · `POL-SANS-BASE`.
 

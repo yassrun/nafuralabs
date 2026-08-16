@@ -341,6 +341,30 @@ Ce qu'il porte, la boucle et rien d'autre :
 
 « Pas de spawn SDK » (l'ancien contrat de l'app, brief copié à coller dans Cursor) **tombe** : il supposait que tu sois devant l'écran à chaque lancement.
 
+### Comment les agents livrent
+
+**Une branche par sous-lot, dans son propre `git worktree`.**
+
+Une branche seule n'isole pas : deux execs lancés en parallèle dans le même répertoire de travail s'écrasent quoi qu'il arrive — il n'y a qu'un checkout. Le worktree donne à chaque exec **son** répertoire.
+
+| | Nom | Qui la tient |
+|--|-----|--------------|
+| Branche sous-lot | `<lot-slug>/<CH-nn-TYPE-slug>` | l'**exec** du sous-lot |
+| Branche lot | `lot/<lot-slug>` | l'**orchestrateur** du lot |
+| Intégration | `staging` | toi |
+
+Merge : sous-lot → lot quand le sous-lot est `done` · lot → intégration quand l'orchestrateur libère le lot.
+
+**Les worktrees vivent HORS du dépôt** — `../.raster-worktrees/<projet>/<CH-slug>`. Un worktree posé dedans serait scanné par le walker (`**/raster-src/lots/**`) et **chaque task apparaîtrait en double**, une fois par branche vivante.
+
+**Le code part sur la branche ; les tasks restent sur l'intégration.** Un exec écrit son code dans son worktree, mais son `status`, son journal et son rapport passent par `t.mjs`, qui écrit dans l'arbre d'intégration. Sinon tu ne vois rien avancer : tout arriverait d'un bloc au merge, et « ce qui tourne » n'existerait plus. C'est la règle §0.1-9 qui rend ça tenable — le CLI est le seul à écrire une task, donc lui seul a besoin de savoir où.
+
+**Aucun agent ne pousse.** Merges locaux uniquement. `git push` est ton geste, jamais le leur.
+
+Deux sous-lots d'un même lot ne devraient pas se croiser (le CH est une frontière de périmètre côté Pact). S'ils se croisent quand même, ça sort en **conflit de merge** sur la branche du lot — visible, au bon endroit, tenu par celui qui possède le lot. C'est tout l'intérêt : le worktree transforme une collision silencieuse en conflit déclaré.
+
+*(2026-08-16 — décidé. Dette : les vues générées (`INDEX` · `BACKLOG` · `SPRINT`) sont regénérées à chaque écriture ; plusieurs execs qui écrivent en même temps sur l'arbre d'intégration peuvent se croiser dessus. À sérialiser côté CLI.)*
+
 ### Readiness — calculée, jamais stockée
 
 **Grain = le sous-lot.** Il est **lançable** si toute task dont il dépend *hors de lui* est `done-agent` \| `done-me` (ou absente). À l'intérieur, `blocked_by:` ne fait qu'**ordonner** — les tasks sont en série, l'exec suit l'ordre.
@@ -362,7 +386,7 @@ Ce qui manquait n'était pas d'avoir une seule notion, c'était que **ni l'une n
 
 | Date | Décision |
 |------|----------|
-| 2026-08-16 | **Écriture = CLI seul** (§0.1-9) · orchestration : lot = isolation, sous-lot = fan-out, task = série (§7) · **`ROADMAP.md`** écrit à la main + **borne** d'autonomie · skill `orchestration` = la boucle, **jamais** les règles (Cursor ne lit pas les skills) |
+| 2026-08-16 | **Écriture = CLI seul** (§0.1-9) · orchestration : lot = isolation, sous-lot = fan-out, task = série (§7) · **`ROADMAP.md`** écrit à la main + **borne** d'autonomie · skill `orchestration` = la boucle, **jamais** les règles (Cursor ne lit pas les skills) · livraison : **worktree + branche par sous-lot**, hors dépôt, aucun agent ne pousse |
 | 2026-08-13 | Orchestrateur Raster (`nafura-orch`) · exec → `review` · spec consolide SPEC+UX · QA pose `done-agent` sur feature/bug |
 | 2026-08-13 | `type: qa` · `agent_type:` spec \| exec \| qa · QA = task dédiée (`review` / `gate: qa` legacy) |
 | 2026-08-13 | **`raster-src/`** obligatoire par projet · **`raster/`** = projet Raster · **`pact/`** si app/site |
