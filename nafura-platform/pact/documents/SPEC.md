@@ -69,7 +69,7 @@ Retirée = plus de ligne. Les octets partent à la dernière référence du tena
 déposé → retiré
 ```
 
-Retiré = ligne marquée. Les octets partent à la dernière référence du tenant (pièce ou tenu). `archivé` existe dans le code, **sans transition**.
+Retiré = ligne marquée. Les octets partent à la dernière référence du tenant (pièce ou tenu).
 
 ## Règles
 
