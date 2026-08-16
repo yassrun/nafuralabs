@@ -412,18 +412,7 @@ export class DocExtractionWorkspaceComponent {
    * Handle settings button click from context bar
    */
   onOpenSettings(): void {
-    const domainKey = this.contextBarDomainKey();
-    const docTypeKey = this.contextBarDocTypeKey();
-    const version = this.contextBarVersion();
-
-    if (domainKey && docTypeKey) {
-      this.router.navigate(['/doc-extractor/doc-types', domainKey, docTypeKey], {
-        queryParams: { version },
-      });
-    } else {
-      // If no docType selected, navigate to doc types list
-      this.router.navigate(['/doc-extractor/doc-types']);
-    }
+    this.router.navigate(['/doc-extractor/settings/general']);
   }
 
   async addDocumentFromPicker(fileInput: HTMLInputElement): Promise<void> {
@@ -938,20 +927,7 @@ export class DocExtractionWorkspaceComponent {
   }
 
   openSettings(): void {
-    const def = this.definition();
-    const version = this.currentDocTypeVersion();
-    if (!def || !version) return;
-
-    this.router.navigate(
-      ['/doc-extractor', 'doc-types', def.domainKey, def.docTypeKey],
-      {
-        queryParams: { version },
-      }
-    );
-  }
-
-  onCreateCustomDocType(): void {
-    this.router.navigate(['/doc-extractor/doc-types'], { queryParams: { create: true } });
+    this.router.navigate(['/doc-extractor/settings/general']);
   }
 
   getStatusInfo(status: ExtractionStatus): { label: string; tooltip: string } | null {

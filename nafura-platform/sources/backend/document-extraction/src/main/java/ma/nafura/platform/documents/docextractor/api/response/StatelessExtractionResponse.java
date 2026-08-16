@@ -22,7 +22,6 @@ public record StatelessExtractionResponse(
         Instant createdAt
 ) {
     public enum Outcome {
-        SCHEMA_PROPOSAL_PENDING,
         COMPLETED,
         REVIEW_REQUIRED,
         REJECTED,

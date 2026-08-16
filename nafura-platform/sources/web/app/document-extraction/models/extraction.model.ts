@@ -223,7 +223,6 @@ export interface ExtractionResponse {
 }
 
 export type StatelessExtractionOutcome =
-  | 'SCHEMA_PROPOSAL_PENDING'
   | 'COMPLETED'
   | 'REVIEW_REQUIRED'
   | 'REJECTED'

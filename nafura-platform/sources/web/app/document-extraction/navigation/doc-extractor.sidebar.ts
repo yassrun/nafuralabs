@@ -6,8 +6,7 @@
  * Core collects and composes all module declarations.
  * 
  * Navigation Structure (V1):
- * - Extraction: Entry point for doc type selection, extraction workflow, and records
- * - Document Types: Browse system (Doxura) and custom (tenant) doc type definitions
+ * - Extraction: Entry point for extraction and records
  * - Settings: Workspace/tenant settings
  */
 
@@ -35,15 +34,6 @@ const docExtractorNodes: SidebarNode[] = [
         permissions: [DocExtractorPermissions.EXTRACTION.READ],
         order: 10,
         tooltip: 'Start extracting data from documents',
-      },
-      {
-        id: 'doc-extractor.doc-types',
-        label: 'docExtractor.navigation.docTypes',
-        icon: 'file-text',
-        route: '/doc-extractor/doc-types',
-        permissions: [DocExtractorPermissions.EXTRACTION.READ],
-        order: 20,
-        tooltip: 'Browse and manage document type definitions',
       },
       {
         id: 'doc-extractor.settings',

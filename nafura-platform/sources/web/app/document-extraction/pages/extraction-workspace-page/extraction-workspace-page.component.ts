@@ -346,11 +346,6 @@ export class ExtractionWorkspacePage implements OnInit {
           return;
         }
 
-        if (response.outcome === 'SCHEMA_PROPOSAL_PENDING') {
-          this.snackBar.open('A schema proposal is ready for review.', 'Dismiss', { duration: 5000 });
-          return;
-        }
-
         const extractedData = response.data;
         if (!extractedData) {
           this.snackBar.open('The extractor returned no data.', 'Dismiss', { duration: 5000 });
@@ -598,14 +593,7 @@ export class ExtractionWorkspacePage implements OnInit {
   }
 
   onNavigateToSettings(): void {
-    const def = this.definition();
-    if (def) {
-      this.router.navigate(['/doc-extractor/doc-types', def.domainKey, def.docTypeKey], {
-        queryParams: { version: def.version },
-      });
-    } else {
-      this.router.navigate(['/doc-extractor/settings/general']);
-    }
+    this.router.navigate(['/doc-extractor/settings/general']);
   }
 
   // Helpers
@@ -658,7 +646,7 @@ export class ExtractionWorkspacePage implements OnInit {
       if (!persistOnValidate) {
         if (res?.dataJson) {
           this.snackBar.open(
-            'Extraction validated. Corrected data is ready for the calling application.',
+            'Corrected data is ready for the calling application.',
             'Dismiss',
             { duration: 5000 }
           );

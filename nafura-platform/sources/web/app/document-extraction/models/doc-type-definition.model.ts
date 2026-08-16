@@ -1,9 +1,8 @@
 import { JsonSchemaRoot } from './json-schema.model';
 import { UiSchema } from './ui-schema.model';
-import { BuilderState } from './builder-state.model';
 
 /**
- * Version status for workflow control.
+ * Version status of a provided schema (received, not composed here).
  */
 export type DocTypeStatus = 'DRAFT' | 'PUBLISHED' | 'DEPRECATED';
 
@@ -27,7 +26,6 @@ export interface DocTypeDefinition {
   tenantId?: string;
   jsonSchema: JsonSchemaRoot;
   uiSchema: UiSchema;
-  builderState?: BuilderState;
   promptTemplate?: string;
   createdAt?: string;
   createdBy?: string;
@@ -74,42 +72,5 @@ export interface DocTypesByDomain {
 export interface DomainListItem {
   domainKey: string;
   label: string;
-}
-
-/**
- * Request to create a new DocType (v1 draft).
- */
-export interface CreateDocTypeRequest {
-  domainKey: string;
-  docTypeKey: string;
-  name: string;
-  description?: string;
-  promptTemplate?: string;
-  builderState?: BuilderState;
-}
-
-/**
- * Request to clone an existing version to a new draft.
- */
-export interface CloneDocTypeRequest {
-  fromVersionId: string;
-}
-
-/**
- * Request to save a draft.
- */
-export interface SaveDraftRequest {
-  name?: string;
-  description?: string;
-  promptTemplate?: string;
-  builderState: BuilderState;
-}
-
-/**
- * Validation result from backend.
- */
-export interface ValidationResult {
-  isValid: boolean;
-  errors: string[];
 }
 

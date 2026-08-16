@@ -1,6 +1,4 @@
 id	status	priority	context	assignee	gate	type	agent_type	sprint	project	lot	souslot	title
-PLT-101	doing	P1	nafura	agent	none	feature	exec	2026-W33	nafura-platform	document-extraction	CH-03-EVOL-hors-spec	Aligner le code sur la SPEC
-PLT-98	doing	P1	nafura	agent	none	feature	exec	2026-W33	nafura-platform	documents	CH-09-EVOL-archive	Appliquer la decision archive
 PLT-95	doing	P1	nafura	agent	none	feature	exec	2026-W33	nafura-platform	impression	CH-02-EVOL-sans-facture	Sortir la forme facture du jar
 PLT-121	todo	P1	nafura	agent	none	spec	spec		nafura-platform	approbation	CH-00-INIT-approbation	SPEC + geler AC — approbation
 PLT-122	todo	P1	nafura	agent	none	tech	exec		nafura-platform	approbation	CH-00-INIT-approbation	Baseline e2e approbation
@@ -23,8 +21,6 @@ PLT-107	todo	P2	nafura	agent	none	tech	exec		nafura-platform	commentaire	CH-01-T
 PLT-129	todo	P2	nafura	agent	none	qa	qa		nafura-platform	conversation	CH-00-INIT-conversation	Preuves — baseline conversation
 PLT-130	todo	P2	nafura	agent	none	spec	spec		nafura-platform	conversation	CH-01-TECHNICAL-plier	SPEC + geler AC — plier conversation
 PLT-131	todo	P2	nafura	agent	none	tech	exec		nafura-platform	conversation	CH-01-TECHNICAL-plier	Plier l arbre conversation
-PLT-102	todo	P2	nafura	agent	none	qa	qa	2026-W33	nafura-platform	document-extraction	CH-03-EVOL-hors-spec	Preuves — hors spec
-PLT-99	todo	P2	nafura	agent	none	qa	qa	2026-W33	nafura-platform	documents	CH-09-EVOL-archive	Preuves — archive
 PLT-117	todo	P2	nafura	agent	none	qa	qa		nafura-platform	identite	CH-00-INIT-identite	Preuves — baseline identite
 PLT-118	todo	P2	nafura	agent	none	spec	spec		nafura-platform	identite	CH-01-TECHNICAL-plier	SPEC + geler AC — plier identite
 PLT-119	todo	P2	nafura	agent	none	tech	exec		nafura-platform	identite	CH-01-TECHNICAL-plier	Plier l arbre identite

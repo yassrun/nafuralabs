@@ -1,5 +1,4 @@
 import { CommonModule } from '@angular/common';
-import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { FormArray, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -13,15 +12,12 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { DocTypeDefinition } from '../../models/doc-type-definition.model';
-import { DocumentWorkflowStatus } from '../../models/document-workflow.model';
 import { ExtractionDraft, ExtractedRecord, ExtractionValidation, FieldIssue } from '../../models/extraction.model';
 import { JsonSchemaArray } from '../../models/json-schema.model';
 import { DocumentValidationService } from '../../services/document-validation.service';
-import { ExtractionService } from '../../services/extraction.service';
 import { JsonSchemaFormBuilder } from '../../utils/json-schema-form-builder';
 import { DynamicArrayTableComponent } from '../dynamic-array-table/dynamic-array-table.component';
 import { DynamicFormRendererComponent } from '../dynamic-form-renderer/dynamic-form-renderer.component';
-import { TenantContextService } from '../../../../../core/tenant/tenant.context';
 
 export interface DynamicRecordDialogData {
   definition: DocTypeDefinition;
@@ -66,9 +62,7 @@ export class DynamicRecordDialogComponent {
   private readonly dialogRef = inject(MatDialogRef<DynamicRecordDialogComponent, DynamicRecordDialogResult | undefined>);
   // Exposed to template for conditional labels
   readonly data = inject<DynamicRecordDialogData>(MAT_DIALOG_DATA);
-  private readonly extractionService = inject(ExtractionService);
   private readonly snackBar = inject(MatSnackBar);
-  private readonly tenantContext = inject(TenantContextService);
   private readonly validationService = inject(DocumentValidationService);
   private readonly translate = inject(TranslateService);
 
@@ -88,14 +82,7 @@ export class DynamicRecordDialogComponent {
     return this.validationService.validateDocument(data, this.definition.jsonSchema, this.uiSchema);
   });
   
-  readonly canValidate = computed(() => {
-    const result = this.validationResult();
-    const workflowState = this.validationService.buildWorkflowState(
-      result,
-      DocumentWorkflowStatus.DRAFT
-    );
-    return this.validationService.canValidate(workflowState);
-  });
+  readonly canApply = computed(() => this.validationResult().isValid);
 
   readonly validationErrors = computed(() => {
     return this.validationResult().errors;
@@ -241,11 +228,10 @@ export class DynamicRecordDialogComponent {
     }
   }
 
-  validateAndSave(): void {
+  applyEdits(): void {
     if (this.saving()) return;
 
-    // Check validation state using DocumentValidationService
-    if (!this.canValidate()) {
+    if (!this.canApply()) {
       const errorCount = this.validationResult().errorCount;
       const message = errorCount > 0
         ? this.translate.instant('docExtractor.workflow.validation.errorsCount', { count: errorCount })
@@ -254,7 +240,6 @@ export class DynamicRecordDialogComponent {
       return;
     }
 
-    // Also check form validity as a secondary check
     const ok = JsonSchemaFormBuilder.markAllAndValidate(this.form);
     if (!ok) {
       this.snackBar.open(
@@ -269,53 +254,7 @@ export class DynamicRecordDialogComponent {
       form: this.form,
       schema: this.definition.jsonSchema,
     });
-
-    if (this.data.persistOnValidate === false) {
-      this.dialogRef.close({ dataJson });
-      return;
-    }
-
-    const tenantId = this.tenantContext.tenantId();
-    if (!tenantId) {
-      this.snackBar.open(
-        this.translate.instant('docExtractor.messages.tenantIdRequired'),
-        this.translate.instant('docExtractor.messages.dismiss'),
-        { duration: 5000 }
-      );
-      return;
-    }
-
-    const request =
-      this.data.mode === 'create'
-        ? { 
-            draftId: this.data.draft!.draftId, 
-            dataJson,
-            domainKey: this.definition.domainKey,
-            docTypeKey: this.definition.docTypeKey,
-            docTypeVersion: this.data.lockedDocTypeVersion,
-            tenantId
-          }
-        : { 
-            recordId: this.data.record!.recordId, 
-            dataJson,
-            domainKey: this.definition.domainKey,
-            docTypeKey: this.definition.docTypeKey,
-            docTypeVersion: this.data.lockedDocTypeVersion,
-            tenantId
-          };
-
-    this.saving.set(true);
-    this.extractionService.validate(request).subscribe({
-      next: (record) => {
-        this.saving.set(false);
-        this.dialogRef.close({ record, dataJson });
-      },
-      error: (err: unknown) => {
-        this.saving.set(false);
-        const msg = this.humanizeHttpError(err);
-        this.snackBar.open(msg, this.translate.instant('docExtractor.messages.dismiss'), { duration: 8000 });
-      },
-    });
+    this.dialogRef.close({ dataJson });
   }
 
   issuesForArray(arrayPath: string): FieldIssue[] {
@@ -329,16 +268,6 @@ export class DynamicRecordDialogComponent {
   private rowIndexFromPath(fieldPath: string): number | null {
     const match = fieldPath.match(/\[(\d+)\]/);
     return match ? Number(match[1]) : null;
-  }
-
-  private humanizeHttpError(err: unknown): string {
-    if (err instanceof HttpErrorResponse) {
-      const serverMsg =
-        (typeof err.error === 'string' && err.error) ||
-        (err.error && typeof err.error === 'object' && 'message' in err.error ? String((err.error as any).message) : '');
-      return serverMsg || this.translate.instant('docExtractor.messages.requestFailed', { status: err.status });
-    }
-    return this.translate.instant('docExtractor.messages.unexpectedError');
   }
 }
 

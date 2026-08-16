@@ -264,12 +264,6 @@ export class ExtractionEntryPage {
     this.clearSearch();
   }
 
-  onCreateCustomDocType(): void {
-    this.router.navigate(['/doc-extractor/doc-types'], {
-      queryParams: { create: true },
-    });
-  }
-
   clearSearch(): void {
     this.searchQuery.setValue('');
     this.showSearchResults.set(false);

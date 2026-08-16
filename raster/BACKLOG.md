@@ -33,14 +33,6 @@
   - · `CH-01-TECHNICAL-plier` sous-lot
     - · `PLT-130` spec — SPEC + geler AC — plier conversation
     - · `PLT-131` tech — Plier l arbre conversation
-- `document-extraction` lot
-  - · `CH-03-EVOL-hors-spec` sous-lot
-    - ▸ `PLT-101` feature — Aligner le code sur la SPEC
-    - · `PLT-102` qa — Preuves — hors spec
-- `documents` lot
-  - · `CH-09-EVOL-archive` sous-lot
-    - ▸ `PLT-98` feature — Appliquer la decision archive
-    - · `PLT-99` qa — Preuves — archive
 - `identite` lot
   - · `CH-00-INIT-identite` sous-lot
     - · `PLT-115` spec — SPEC + geler AC — identite
@@ -87,4 +79,4 @@
 
 ---
 
-**41 live · 2 projets**
+**37 live · 2 projets**
