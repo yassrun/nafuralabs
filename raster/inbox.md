@@ -1,34 +1,3 @@
 # INBOX
 
 <!-- Capture globale Raster — task draft : une ligne = description, @tag optionnel, pas d'ID. -->
-- Remettre le bandeau d'invitation collègues (onboarding shell) — désactivé 14/08, code conservé `invite-team-banner` @feature
-- SEKTOR-100 : etudes/build.gradle garde `project(':sektor:achats|chantiers|marches')` — drop hors slice Études↔Catalogue @tech
-- PLT-33 (`done-me`) blocked_by `PLT-32` id inconnu — `raster/t.mjs check` rouge hors Sektor @tech
-- venue-catalog web encore Angular 19 après SEKTOR-94…97 (platform peers 22) — monter 19→22 @tech
-- SEKTOR-95/97 : @storybook/angular 8 peer `<20` — monter Storybook 9 ou laisser `--legacy-peer-deps` @tech
-- SEKTOR-95/97 : @zxing/ngx-scanner encore ^19 sous Angular 22 @tech
-- SEKTOR-96/97 : NG21+ Signal unique symbol — 2 copies @angular incompatibles. Junction locale `nafura-platform/sources/web/node_modules/@angular` → Sektor. `npm i` platform **suit** la junction et casse le CLI Sektor — recréer la junction seulement après les installs. `ng serve` Vite prebundle = 2e copie (NG0203 page blanche) ; workaround cursor : `prebundle: false` dans `sektor/sources/web/angular.json`. @tech
-- SEKTOR-97 : lucide-angular peer `13.x - 21.x` sous Angular 22 — `--legacy-peer-deps` @tech
-- SEKTOR-97 : Angular CLI 22 exige Node ≥ 22.22.3 (machine passée 22.15 → 22.23.2 via winget) @tech
-- SEKTOR-86 : tsconfig garde @core/@lib/@features/@services — platform anatomy les importe encore (drop = rewrite platform, hors lot) @tech
-- SEKTOR-85 / aligner-arbre : catalogue/configuration — 4 dossiers uom encore dupliqués (uom, unit-of-measures, uo-mcategories, uom-categories) — fusionner plus tard @tech
-- SEKTOR-92 : clash materiel — fiche dans catalogue/materiel, GMAO dans catalogue/materiel-parc — trancher un nom unique plus tard @tech
-- SEKTOR-89 : etudes/tmp/etudes-cp (142 jars classpath) étaient trackés ; git rm pour débloquer git mv etudes @tech
-- SEKTOR-88 : changelog SQL `app/src/main/resources/db/changelog/data/v1.1/002_l4_etude_permissions.sql` encore dans app/ (hors move Java etudes) @tech
-- SEKTOR-87 : `ErpApplication` ne scanne toujours pas `ma.nafura.sektor` (préexistant) @tech
-- Rotationner creds.env + deepseek_api_key.txt — poussés sur 7 branches GitHub, valides ou non à vérifier @physical
-- SEKTOR-81 : `cd sektor && ./gradlew build` compile + substitution VERT ; tests unitaires item/approbations/catalogue/etudes rouges (mockito, assertions, UUID `0000000000v1`) — jamais joués au lot 0 (OOM). Hors étapes. @bug
-- Après PLT-12, chemins `secrets/` encore cités : docs/AGENTS.md · docs/README.md · nafura-platform/ops/dev-staging-local.sh (ENV_FILE + nafura.secrets) · nafura-platform/ops/scripts/vault-seed-from-local.sh (défaut) · .cursor/rules/cursor-qa-browser.mdc · sektor/README.md · platform/backend/features/collaboration/notification/README.md @tech
-- nafura-platform/ops/README.md cite encore `toolchain/ops/` et `secrets/nafura.secrets` (hors étapes PLT-22 — le ticket nomme AGENTS.md) @tech
-- PLT-23 : `platform/{core,features,integrations,build}` non suivis (sorties Gradle) — supprimés avec `platform/` ; pas de source perdue @tech
-- PLT-24/31 : `nafura-platform/ops/lifecycle/build.gradle` chemins `platform/backend/` (collectMigrations fallback) — `projectDir` `:tools:lifecycle` corrigé PLT-31 @tech
-- PLT-31 : mentions `products/` restantes dans docs historiques (PLATFORM_IMPORTS, venue-catalog/docs, comments SQL/TS, tickets de déménagement, relevé lot 0) — pas des chemins live @tech
-- SEKTOR-80 : `sektor/docs` → `Desktop/nafuralabs-archives/sektor-docs-extraction/` (14/08). `tools/` déjà absent. @tech
-- PLT-30 : `raster/README.md` + dir `web/` busy (node) ; `settings.gradle.kts` venue projectDir mis à jour (hors étapes mais requis pour le build) @tech
-- PLT-21 : `toolchain/scripts/` (5 scripts P1 encoding) et `tools/scripts/generate-ai-schema.mjs` hors étapes — déplacés vers `nafura-platform/ops/legacy-toolchain-scripts/` et `legacy-tools-scripts/` pour ne pas les perdre ; à ranger ou jeter @tech
-- SEKTOR-80 : `sektor/docs` archivé hors dépôt 14/08.
-- PLT-32 : `cd sektor/web && npm run build` (prod) compile VERT ; budget initial 3.17 MB > 3.00 MB — hors étapes. `build:dev` VERT. @tech
-- PLT-32 : docs historiques `./gradlew` racine (PLATFORM_IMPORTS, ETAT-DES-LIEUX, recettes blanner, lifecycle README chemins `products/` / `tools/lifecycle`) — pas des chemins live @tech
-- PLT-35 : `mbs-studio/README.md` cite encore `toolchain/ops/nlops.sh` (live = `nafura-platform/ops/nlops.sh`) @tech
-- PLT-36 : `devAuthBypass` toujours dans les `environment*.ts` (tous `false`) ; le mint mock est mort — activer le flag throw. @tech
-- PLT-38 : leftovers `web/` racine jetés. Venue `@angular/animations` ajouté — plus hoisté depuis les workspaces racine. @tech
