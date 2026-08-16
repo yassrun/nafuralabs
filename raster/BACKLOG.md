@@ -9,9 +9,6 @@
 
 ## nafura-platform
 
-- `cadre` lot
-  - ✓ `CH-02-EVOL-imprimer` sous-lot
-    - ✓ `PLT-81` spec — Trancher : imprimer dans le CADRE ?
 - `document-reader` lot
   - ✓ `PLT-39` tech — Socle grille dans doc-extractor
   - ✓ `PLT-40` physical — Trancher O1 — cache de plans par tenant ou mu…
@@ -73,12 +70,6 @@
   - ✓ `socle` sous-lot
     - ✓ `SEKTOR-98` tech — Socle compile sans jars BC
 
-## raster
-
-- `orchestration` lot
-  - ✓ `CH-01-EVOL-spawn-worktree` sous-lot
-    - ✓ `RAS-96` tech — Spawn d'un orchestrateur par lot
-
 ---
 
-**40 live · 3 projets**
+**38 live · 2 projets**

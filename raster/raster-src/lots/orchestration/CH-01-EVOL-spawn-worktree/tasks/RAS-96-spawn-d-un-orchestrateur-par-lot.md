@@ -1,6 +1,6 @@
 ---
 id: RAS-96
-status: done-agent
+status: done-me
 context: nafura
 type: tech
 agent_type: exec
@@ -36,6 +36,7 @@ Recommandé : **B pour un premier essai**, avec une commande inoffensive (`git r
 ```
 16/08 13:45  posée
 16/08 13:57  status → done-agent
+16/08 13:59  toi · approuvée → done-me
 ```
 
 ## Rapport de livraison
