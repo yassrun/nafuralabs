@@ -8,6 +8,8 @@ import static org.mockito.Mockito.when;
 
 import io.minio.MinioClient;
 import io.minio.ObjectWriteResponse;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.OffsetDateTime;
@@ -16,9 +18,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import ma.nafura.platform.collaboration.docmanager.api.response.DocumentResponse;
 import ma.nafura.platform.collaboration.docmanager.attachment.AttachmentServiceImpl;
 import ma.nafura.platform.collaboration.docmanager.attachment.LocalFileStorageService;
 import ma.nafura.platform.collaboration.docmanager.config.MinioProperties;
+import ma.nafura.platform.collaboration.docmanager.domain.enums.DocumentStatus;
 import ma.nafura.platform.collaboration.docmanager.domain.enums.DocumentType;
 import ma.nafura.platform.collaboration.docmanager.domain.model.Document;
 import ma.nafura.platform.collaboration.docmanager.domain.model.RecordAttachment;
@@ -143,6 +147,37 @@ class DocumentsBaselineTest {
                 UUID.fromString("cccccccc-cccc-cccc-cccc-cccccccccccc"));
 
         assertThat(deposited.getStorageKey()).startsWith(TENANT_A + "/");
+    }
+
+    @Test
+    void archiveAbsent() {
+        MinioProperties props = new MinioProperties();
+        props.setBucket("documents");
+        DocumentService originals = new DocumentService(
+                documentRepository, new MinioDocumentStorage(minioClient, props));
+
+        Document deposited = originals.uploadDocument(
+                TENANT_A,
+                BYTES,
+                "note.txt",
+                "text/plain",
+                DocumentType.OTHER,
+                OffsetDateTime.now(),
+                UUID.fromString("cccccccc-cccc-cccc-cccc-cccccccccccc"));
+
+        assertThat(deposited.getStatus()).isEqualTo(DocumentStatus.UPLOADED);
+        assertThat(DocumentStatus.values())
+                .extracting(Enum::name)
+                .containsExactlyInAnyOrder("UPLOADED", "DELETED");
+        assertThatThrownBy(() -> DocumentStatus.valueOf("ARCHIVED"))
+                .isInstanceOf(IllegalArgumentException.class);
+
+        assertThat(DocumentResponse.class.getDeclaredFields())
+                .extracting(Field::getName)
+                .noneMatch(n -> n.toLowerCase().contains("archiv"));
+        assertThat(DocumentService.class.getDeclaredMethods())
+                .extracting(Method::getName)
+                .noneMatch(n -> n.toLowerCase().contains("archiv"));
     }
 
     private MockMultipartFile file() {

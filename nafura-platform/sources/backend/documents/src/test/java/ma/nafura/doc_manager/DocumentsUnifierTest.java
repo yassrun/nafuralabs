@@ -160,6 +160,20 @@ class DocumentsUnifierTest {
         assertThat(usage.usageBytesOfCurrentTenant()).isZero();
     }
 
+    @Test
+    void tenuRetrait() {
+        Document tenu = deposit(TENANT_A);
+        String key = tenu.getStorageKey();
+        assertThat(files.getResource(key)).isPresent();
+        assertThat(usage.usageBytesOfCurrentTenant()).isEqualTo(BYTES.length);
+
+        documents.deleteDocument(tenu.getId(), TENANT_A);
+
+        assertThat(tenus.get(tenu.getId()).getStatus()).isEqualTo(DocumentStatus.DELETED);
+        assertThat(files.getResource(key)).isEmpty();
+        assertThat(usage.usageBytesOfCurrentTenant()).isZero();
+    }
+
     private Document deposit(UUID tenant) {
         return documents.uploadDocument(
                 tenant,

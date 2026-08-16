@@ -22,6 +22,7 @@ const TESTS = [
   "ma.nafura.platform.collaboration.docmanager.DocumentsBaselineTest.deuxTenants",
   "ma.nafura.platform.collaboration.docmanager.DocumentsBaselineTest.retirerPiece",
   "ma.nafura.platform.collaboration.docmanager.DocumentsBaselineTest.originalCleTenant",
+  "ma.nafura.platform.collaboration.docmanager.DocumentsBaselineTest.archiveAbsent",
   "ma.nafura.platform.collaboration.docmanager.DocumentsDownloadTenantTest.downloadProprietaire",
   "ma.nafura.platform.collaboration.docmanager.DocumentsDownloadTenantTest.downloadAutreTenant",
   "ma.nafura.platform.collaboration.docmanager.DocumentsOctetsUniquesTest.memeFichierDeuxPieces",
@@ -42,6 +43,7 @@ const TESTS = [
   "ma.nafura.platform.collaboration.docmanager.DocumentsUnifierTest.piecePuisTenu",
   "ma.nafura.platform.collaboration.docmanager.DocumentsUnifierTest.unifierDeuxTenants",
   "ma.nafura.platform.collaboration.docmanager.DocumentsUnifierTest.unifierDerniereReference",
+  "ma.nafura.platform.collaboration.docmanager.DocumentsUnifierTest.tenuRetrait",
 ];
 
 function xmlFiles() {
