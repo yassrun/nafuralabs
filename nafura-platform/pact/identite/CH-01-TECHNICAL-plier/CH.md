@@ -1,0 +1,38 @@
+# CH-01-TECHNICAL — plier l'arbre
+
+**Type :** `TECHNICAL`
+**Cible :** BC `identite`
+**Qualification :** le contrat est posé ; le code de **ce** BC vit encore sous `core/identity`. Aucune règle ne change.
+
+## Pourquoi
+
+Un contexte Pact a un arbre (`ARCHI_BLUEPRINT`). Tant que le code de ce BC porte le nom de son ancien paquet, le prochain Change travaille dans le mauvais dossier.
+
+## Aujourd'hui
+
+Backend `sources/backend/core/identity/`. Web et e2e à relever au spec.
+
+## Attendu
+
+Le module Gradle et le web de **ce** BC vivent sous `identite`. Les packages Java, les routes HTTP et les noms de scénarios **ne bougent pas**.
+
+## Critères d'acceptation (gelés)
+
+- **AC-1** Le module Gradle de ce BC est `sources/backend/identite/`, inclus `:platform:identite`.
+- **AC-2** Le web de ce BC est sous `sources/web/app/identite/`.
+- **AC-3** Les e2e restent sous `e2e/identite/` et leurs noms sont inchangés.
+- **AC-4** La suite e2e existante reste verte.
+- **AC-5** Les FQCN Java et les routes HTTP ne changent pas.
+
+## Preuves attendues
+
+| Scénario | État initial | AC |
+|----------|--------------|----|
+| `identite-plier-arbre` | sources actuelles | AC-1, AC-2, AC-3, AC-5 |
+| suite `identite-*` | inchangée | AC-4 |
+
+Aucun patch SPEC : un TECHNICAL ne change pas les règles.
+
+## Hors périmètre
+
+Renommer les packages · refondre l'intérieur `api/domain/…` · toucher au comportement

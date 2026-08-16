@@ -1,1 +1,40 @@
 id	status	priority	context	assignee	gate	type	agent_type	sprint	project	lot	souslot	title
+PLT-121	todo	P1	nafura	agent	none	spec	spec		nafura-platform	approbation	CH-00-INIT-approbation	SPEC + geler AC — approbation
+PLT-122	todo	P1	nafura	agent	none	tech	exec		nafura-platform	approbation	CH-00-INIT-approbation	Baseline e2e approbation
+PLT-103	todo	P1	nafura	agent	none	spec	spec		nafura-platform	commentaire	CH-00-INIT-commentaire	SPEC + geler AC — commentaire
+PLT-104	todo	P1	nafura	agent	none	tech	exec		nafura-platform	commentaire	CH-00-INIT-commentaire	Baseline e2e commentaire
+PLT-127	todo	P1	nafura	agent	none	spec	spec		nafura-platform	conversation	CH-00-INIT-conversation	SPEC + geler AC — conversation
+PLT-128	todo	P1	nafura	agent	none	tech	exec		nafura-platform	conversation	CH-00-INIT-conversation	Baseline e2e conversation
+PLT-100	todo	P1	nafura	agent	none	spec	spec		nafura-platform	document-extraction	CH-03-EVOL-hors-spec	SPEC + geler AC — builder et workflow
+PLT-101	todo	P1	nafura	agent	none	feature	exec		nafura-platform	document-extraction	CH-03-EVOL-hors-spec	Aligner le code sur la SPEC
+PLT-97	todo	P1	nafura	agent	none	spec	spec		nafura-platform	documents	CH-09-EVOL-archive	SPEC + geler AC — archive : transition ou drop
+PLT-98	todo	P1	nafura	agent	none	feature	exec		nafura-platform	documents	CH-09-EVOL-archive	Appliquer la decision archive
+PLT-115	todo	P1	nafura	agent	none	spec	spec		nafura-platform	identite	CH-00-INIT-identite	SPEC + geler AC — identite
+PLT-116	todo	P1	nafura	agent	none	tech	exec		nafura-platform	identite	CH-00-INIT-identite	Baseline e2e identite
+PLT-94	todo	P1	nafura	agent	none	spec	spec		nafura-platform	impression	CH-02-EVOL-sans-facture	SPEC + geler AC — impression sans facture
+PLT-95	todo	P1	nafura	agent	none	feature	exec		nafura-platform	impression	CH-02-EVOL-sans-facture	Sortir la forme facture du jar
+PLT-109	todo	P1	nafura	agent	none	spec	spec		nafura-platform	notification	CH-00-INIT-notification	SPEC + geler AC — notification
+PLT-110	todo	P1	nafura	agent	none	tech	exec		nafura-platform	notification	CH-00-INIT-notification	Baseline e2e notification
+PLT-123	todo	P2	nafura	agent	none	qa	qa		nafura-platform	approbation	CH-00-INIT-approbation	Preuves — baseline approbation
+PLT-124	todo	P2	nafura	agent	none	spec	spec		nafura-platform	approbation	CH-01-TECHNICAL-plier	SPEC + geler AC — plier approbation
+PLT-125	todo	P2	nafura	agent	none	tech	exec		nafura-platform	approbation	CH-01-TECHNICAL-plier	Plier l arbre approbation
+PLT-105	todo	P2	nafura	agent	none	qa	qa		nafura-platform	commentaire	CH-00-INIT-commentaire	Preuves — baseline commentaire
+PLT-106	todo	P2	nafura	agent	none	spec	spec		nafura-platform	commentaire	CH-01-TECHNICAL-plier	SPEC + geler AC — plier commentaire
+PLT-107	todo	P2	nafura	agent	none	tech	exec		nafura-platform	commentaire	CH-01-TECHNICAL-plier	Plier l arbre commentaire
+PLT-129	todo	P2	nafura	agent	none	qa	qa		nafura-platform	conversation	CH-00-INIT-conversation	Preuves — baseline conversation
+PLT-130	todo	P2	nafura	agent	none	spec	spec		nafura-platform	conversation	CH-01-TECHNICAL-plier	SPEC + geler AC — plier conversation
+PLT-131	todo	P2	nafura	agent	none	tech	exec		nafura-platform	conversation	CH-01-TECHNICAL-plier	Plier l arbre conversation
+PLT-102	todo	P2	nafura	agent	none	qa	qa		nafura-platform	document-extraction	CH-03-EVOL-hors-spec	Preuves — hors spec
+PLT-99	todo	P2	nafura	agent	none	qa	qa		nafura-platform	documents	CH-09-EVOL-archive	Preuves — archive
+PLT-117	todo	P2	nafura	agent	none	qa	qa		nafura-platform	identite	CH-00-INIT-identite	Preuves — baseline identite
+PLT-118	todo	P2	nafura	agent	none	spec	spec		nafura-platform	identite	CH-01-TECHNICAL-plier	SPEC + geler AC — plier identite
+PLT-119	todo	P2	nafura	agent	none	tech	exec		nafura-platform	identite	CH-01-TECHNICAL-plier	Plier l arbre identite
+PLT-96	todo	P2	nafura	agent	none	qa	qa		nafura-platform	impression	CH-02-EVOL-sans-facture	Preuves — impression sans facture
+PLT-111	todo	P2	nafura	agent	none	qa	qa		nafura-platform	notification	CH-00-INIT-notification	Preuves — baseline notification
+PLT-112	todo	P2	nafura	agent	none	spec	spec		nafura-platform	notification	CH-01-TECHNICAL-plier	SPEC + geler AC — plier notification
+PLT-113	todo	P2	nafura	agent	none	tech	exec		nafura-platform	notification	CH-01-TECHNICAL-plier	Plier l arbre notification
+PLT-108	todo	P2	nafura	agent	none	spec	spec		nafura-platform	socle	CH-05-EVOL-consommateur-commentaire	SPEC — consommateur commentaire
+PLT-114	todo	P2	nafura	agent	none	spec	spec		nafura-platform	socle	CH-06-EVOL-consommateur-notification	SPEC — consommateur notification
+PLT-120	todo	P2	nafura	agent	none	spec	spec		nafura-platform	socle	CH-07-EVOL-consommateur-identite	SPEC — consommateur identite
+PLT-126	todo	P2	nafura	agent	none	spec	spec		nafura-platform	socle	CH-08-EVOL-consommateur-approbation	SPEC — consommateur approbation
+PLT-132	todo	P2	nafura	agent	none	spec	spec		nafura-platform	socle	CH-09-EVOL-consommateur-conversation	SPEC — consommateur conversation
