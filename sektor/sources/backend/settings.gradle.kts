@@ -7,7 +7,12 @@ pluginManagement {
     }
 }
 
-includeBuild("../../../nafura-platform/sources/backend")
+includeBuild("../../../nafura-platform/sources/backend") {
+    dependencySubstitution {
+        substitute(module("ma.nafuralabs:doc-extractor"))
+            .using(project(":platform:document-extraction"))
+    }
+}
 
 fun includeSektorModule(name: String) {
     val path = ":sektor:$name"

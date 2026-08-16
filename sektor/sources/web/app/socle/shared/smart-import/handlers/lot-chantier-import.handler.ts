@@ -5,7 +5,7 @@ import {
   type ChantierLotTreeNodeInput,
   type ChantierLotTreePosteInput,
 } from '@app/chantiers/services/chantier-lot-api.service';
-import type { ExtractionDefinition } from '@platform/features/documents/smart-import';
+import type { ExtractionDefinition } from '@platform/app/document-extraction/smart-import';
 import { LOT_CHANTIER_EXTRACTION_SCHEMA } from '../../extraction-schemas';
 import { normalizeText } from '../../utils/extraction-json.utils';
 import {

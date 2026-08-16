@@ -10,7 +10,7 @@ import type { Fournisseur } from '@app/achats/models';
 import {
   SmartImportTriggerComponent,
   type ReviewedExtraction,
-} from '@platform/features/documents/smart-import';
+} from '@platform/app/document-extraction/smart-import';
 import {
   FOURNISSEUR_IMPORT_DEFINITION,
   FournisseurImportService,

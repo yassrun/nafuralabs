@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 
 import type { FournisseurCreate } from '@app/achats/models';
 import { FournisseurApiService } from '@app/achats/fournisseurs/services/fournisseur-api.service';
-import type { ExtractionDefinition } from '@platform/features/documents/smart-import';
+import type { ExtractionDefinition } from '@platform/app/document-extraction/smart-import';
 import { normalizeText } from '../../utils/extraction-json.utils';
 
 import { FOURNISSEUR_EXTRACTION_SCHEMA } from '../../extraction-schemas';

@@ -3,7 +3,7 @@ import {
   reclassifyDoubt,
   summarizeDoubts,
   type FieldIssue,
-} from '@platform/features/documents/doc-extractor/models/extraction.model';
+} from '@platform/app/document-extraction/models/extraction.model';
 
 function villaIssues(): FieldIssue[] {
   const extraction: FieldIssue[] = [

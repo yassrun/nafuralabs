@@ -166,6 +166,21 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(error);
     }
 
+    @ExceptionHandler(StorageQuotaExceededException.class)
+    public ResponseEntity<ApiError> handleStorageQuotaExceeded(
+            StorageQuotaExceededException ex,
+            HttpServletRequest request) {
+        log.warn("Storage quota exceeded: {}", ex.getMessage());
+        ApiError error = ApiError.simple(
+                "STORAGE_QUOTA_EXCEEDED",
+                "error.storageQuotaExceeded",
+                ex.getMessage() != null && !ex.getMessage().isBlank()
+                        ? ex.getMessage()
+                        : "Tenant storage quota exceeded",
+                correlationId(request));
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleUnhandled(
             Exception ex,

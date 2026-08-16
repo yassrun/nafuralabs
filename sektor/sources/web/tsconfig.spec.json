@@ -8,7 +8,7 @@
     "src/**/*.spec.ts",
     "src/**/*.d.ts",
     "app/**/*.spec.ts",
-    "../../../nafura-platform/sources/web/features/administration/templates/**/*.spec.ts"
+    "../../../nafura-platform/sources/web/app/impression/templates/**/*.spec.ts"
   ],
   "angularCompilerOptions": {
     "extendedDiagnostics": {

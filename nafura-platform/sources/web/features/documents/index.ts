@@ -1,4 +1,4 @@
 /**
- * Platform documents feature: doc-extractor.
+ * Compat — le BC vit sous app/document-extraction.
  */
-export * from './doc-extractor';
+export * from '../../app/document-extraction';

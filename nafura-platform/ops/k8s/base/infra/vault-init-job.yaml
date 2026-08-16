@@ -166,7 +166,7 @@ spec:
                 ai_user=nafura_ai ai_user_password=nafura_ai
               vault kv put "secret/nafura/${ENV}/apps/sektor-btp/object-storage" \
                 endpoint="http://minio.${INFRA_NS}.svc:9000" \
-                bucket=nafura-documents user=minioadmin password=minioadmin
+                bucket=documents user=minioadmin password=minioadmin
 
               vault policy write sektor-btp-backend - <<POL
               path "secret/data/nafura/${ENV}/apps/sektor-btp/*" { capabilities = ["read"] }

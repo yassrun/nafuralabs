@@ -33,7 +33,7 @@ import {
   SmartImportTriggerComponent,
   type ExtractionDefinition,
   type ReviewedExtraction,
-} from '@platform/features/documents/smart-import';
+} from '@platform/app/document-extraction/smart-import';
 import { buildReceptionDetailConfig } from '../config/detail/detail.config';
 import { ReceptionFacade } from '../services/reception.facade';
 

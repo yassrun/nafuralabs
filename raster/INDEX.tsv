@@ -1,4 +1,7 @@
 id	status	priority	context	assignee	gate	type	agent_type	sprint	project	lot	souslot	title
+PLT-73	done-agent	P0	nafura	agent	none	spec	spec	2026-W33	nafura-platform	documents	CH-04-EVOL-taille-max	SPEC — taille max
+PLT-74	done-agent	P0	nafura	agent	none	feature	exec	2026-W33	nafura-platform	documents	CH-04-EVOL-taille-max	Refuser au-delà de 50 Mio
+PLT-75	done-agent	P0	nafura	agent	none	qa	qa	2026-W33	nafura-platform	documents	CH-04-EVOL-taille-max	QA — taille max
 PLT-39	done-agent	P1	nafura	agent	none	tech	exec	2026-W33	nafura-platform	document-reader		Socle grille dans doc-extractor
 PLT-40	done-agent	P1	nafura	me	none	physical	exec	2026-W33	nafura-platform	document-reader		Trancher O1 — cache de plans par tenant ou mu…
 PLT-41	done-agent	P1	nafura	agent	none	feature	exec	2026-W33	nafura-platform	document-reader		Plan, cascade, cache
@@ -9,6 +12,19 @@ PLT-45	done-agent	P1	nafura	agent	none	qa	qa	2026-W33	nafura-platform	document-r
 PLT-46	done-agent	P1	nafura	agent	none	qa	qa	2026-W33	nafura-platform	document-reader		QA — Plan ↔ Definition
 PLT-47	done-agent	P1	nafura	agent	none	qa	qa	2026-W33	nafura-platform	document-reader		QA — Carte des doutes
 PLT-48	done-agent	P1	nafura	agent	none	qa	qa	2026-W33	nafura-platform	document-reader		QA — Bascule vague 1
+PLT-76	done-agent	P1	nafura	agent	none	spec	spec	2026-W33	nafura-platform	documents	CH-05-EVOL-quota	SPEC — quota
+PLT-77	done-agent	P1	nafura	agent	none	feature	exec	2026-W33	nafura-platform	documents	CH-05-EVOL-quota	Appliquer le quota
+PLT-78	done-agent	P1	nafura	agent	none	qa	qa	2026-W33	nafura-platform	documents	CH-05-EVOL-quota	QA — quota
+PLT-82	done-agent	P1	nafura	agent	none	spec	spec	2026-W34	nafura-platform	documents	CH-07-EVOL-unifier	SPEC — unifier pièce et original
+PLT-83	done-agent	P1	nafura	agent	none	feature	exec	2026-W34	nafura-platform	documents	CH-07-EVOL-unifier	Unifier les deux formes
+PLT-84	done-agent	P1	nafura	agent	none	qa	qa	2026-W34	nafura-platform	documents	CH-07-EVOL-unifier	QA — unifier
+PLT-89	done-agent	P1	nafura	agent	none	spec	spec	2026-W34	nafura-platform	documents	CH-08-TECHNICAL-plier	SPEC — plier documents
+PLT-90	done-agent	P1	nafura	agent	none	tech	exec	2026-W34	nafura-platform	documents	CH-08-TECHNICAL-plier	Plier l'arbre documents
+PLT-86	done-agent	P1	nafura	agent	none	spec	spec	2026-W34	nafura-platform	impression	CH-00-INIT-impression	SPEC — INIT impression
+PLT-87	done-agent	P1	nafura	agent	none	tech	exec	2026-W34	nafura-platform	impression	CH-00-INIT-impression	Baseline impression
+PLT-88	done-agent	P1	nafura	agent	none	qa	qa	2026-W34	nafura-platform	impression	CH-00-INIT-impression	QA — INIT impression
+PLT-91	done-agent	P1	nafura	agent	none	spec	spec	2026-W34	nafura-platform	impression	CH-01-TECHNICAL-plier	SPEC — plier impression
+PLT-92	done-agent	P1	nafura	agent	none	tech	exec	2026-W34	nafura-platform	impression	CH-01-TECHNICAL-plier	Plier l'arbre impression
 SEKTOR-104	done-agent	P1	nafura	agent	none	tech	exec	2026-W33	sektor	monter-angular-22		Drop PrimeNG — nf-tree-table en mat-table
 SEKTOR-97	done-agent	P1	nafura	agent	none	tech	exec	2026-W33	sektor	monter-angular-22		Angular 21 → 22
 SEKTOR-102	done-agent	P1	nafura	agent	none	tech	exec	2026-W33	sektor	plier-archi	domain-objets	Ranger les objets domain par agrégat
@@ -18,3 +34,7 @@ SEKTOR-99	done-agent	P1	nafura	agent	none	tech	exec	2026-W33	sektor	plier-archi	
 SEKTOR-105	done-agent	P1	nafura	agent	none	tech	exec	2026-W33	sektor	plier-archi	ports-adapters	Ranger ports / adapters par exécuteur
 SEKTOR-103	done-agent	P1	nafura	agent	none	tech	exec	2026-W33	sektor	plier-archi	seeders	Ranger les seeders dans `seeders/`
 SEKTOR-98	done-agent	P1	nafura	agent	none	tech	exec	2026-W33	sektor	plier-archi	socle	Socle compile sans jars BC
+PLT-85	done-agent	P1	nafura	agent	none	spec	spec	2026-W34	nafura-platform	socle	CH-04-EVOL-consommateur-impression	SPEC — consommateur impression
+PLT-81	done-agent	P2	nafura	agent	me	spec	spec	2026-W33	nafura-platform	cadre	CH-02-EVOL-imprimer	Trancher : imprimer dans le CADRE ?
+PLT-79	done-agent	P2	nafura	agent	none	spec	spec	2026-W33	nafura-platform	documents	CH-06-TECHNICAL-seau	SPEC — un seau documents
+PLT-80	done-agent	P2	nafura	agent	none	tech	exec	2026-W33	nafura-platform	documents	CH-06-TECHNICAL-seau	Aligner le seau `documents`

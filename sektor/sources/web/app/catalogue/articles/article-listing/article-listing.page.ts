@@ -10,7 +10,7 @@ import type { ListingActionEvent } from '@platform/lib/anatomy/types';
 import {
   SmartImportTriggerComponent,
   type ReviewedExtraction,
-} from '@platform/features/documents/smart-import';
+} from '@platform/app/document-extraction/smart-import';
 import {
   ARTICLE_IMPORT_DEFINITION,
   ArticleImportService,

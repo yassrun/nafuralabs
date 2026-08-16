@@ -2,7 +2,7 @@ import { LOT_CHANTIER_EXTRACTION_SCHEMA } from './lot-chantier.schema';
 import type {
   JsonSchemaArray,
   JsonSchemaObject,
-} from '@platform/features/documents/doc-extractor/models/json-schema.model';
+} from '@platform/app/document-extraction/models/json-schema.model';
 
 describe('LOT_CHANTIER_EXTRACTION_SCHEMA', () => {
   it('extracts business values without document codes', () => {

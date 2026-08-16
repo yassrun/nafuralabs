@@ -93,7 +93,7 @@ ai_user_password=nafura_ai
 
 [staging/apps/sektor-btp/object-storage]
 endpoint=http://minio.nafura-infra-staging.svc:9000
-bucket=nafura-documents
+bucket=documents
 user=minioadmin
 password=minioadmin
 

@@ -2,8 +2,8 @@ import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 import { TenantContextService } from '@platform/core/tenant/tenant.context';
-import { ExtractionService } from '@platform/features/documents/doc-extractor/services/extraction.service';
-import type { StatelessExtractionResponse } from '@platform/features/documents/doc-extractor/models/extraction.model';
+import { ExtractionService } from '@platform/app/document-extraction/services/extraction.service';
+import type { StatelessExtractionResponse } from '@platform/app/document-extraction/models/extraction.model';
 import { toReviewDefinition } from '../extraction-schemas/extraction-schema.types';
 
 import type {

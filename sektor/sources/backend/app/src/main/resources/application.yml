@@ -127,7 +127,7 @@ app:
       endpoint: ${DOCUMENTS_MINIO_ENDPOINT:http://localhost:9000}
       access-key: ${MINIO_ROOT_USER:minioadmin}
       secret-key: ${MINIO_ROOT_PASSWORD:minioadmin}
-      bucket: ${DOCUMENTS_MINIO_BUCKET:nafura-erp}
+      bucket: ${DOCUMENTS_MINIO_BUCKET:documents}
       region: us-east-1
     local:
       base-path: ${APP_STORAGE_LOCAL_PATH:${java.io.tmpdir}/nafura-attachments}
@@ -141,7 +141,7 @@ documents:
     endpoint: ${DOCUMENTS_MINIO_ENDPOINT:http://localhost:9000}
     accessKey: ${MINIO_ROOT_USER:minioadmin}
     secretKey: ${MINIO_ROOT_PASSWORD:minioadmin}
-    bucket: ${DOCUMENTS_MINIO_BUCKET:nafura-erp}
+    bucket: ${DOCUMENTS_MINIO_BUCKET:documents}
     secure: false
 
 ai:

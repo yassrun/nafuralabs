@@ -1,5 +1,2 @@
-/**
- * Doc Extractor feature - public API.
- */
-
-export * from './routes/doc-extractor.routes';
+/** Compat — SSOT : `sources/web/app/document-extraction`. */
+export * from '../../../app/document-extraction';

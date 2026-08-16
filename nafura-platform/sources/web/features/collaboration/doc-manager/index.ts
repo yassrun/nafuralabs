@@ -1,2 +1,4 @@
-export * from './services/attachment-api.service';
-export * from './components/attachment-list.component';
+/**
+ * Compat — le BC documents vit sous app/documents.
+ */
+export * from '../../../app/documents';

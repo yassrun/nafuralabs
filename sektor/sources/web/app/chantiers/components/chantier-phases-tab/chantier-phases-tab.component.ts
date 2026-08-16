@@ -20,7 +20,7 @@ import type { LotChantier, PhaseChantier } from '@app/chantiers/models';
 import { DocScanButtonComponent } from '@app/socle/shared/components/doc-scan-button/doc-scan-button.component';
 import { ErpDocScanService } from '@app/socle/shared/services/erp-doc-scan.service';
 import { TenantContextService } from '@platform/core/tenant/tenant.context';
-import { DocTypeService } from '@platform/features/documents/doc-extractor/services/doc-type.service';
+import { DocTypeService } from '@platform/app/document-extraction/services/doc-type.service';
 import { PHASE_STATUS_KEYS } from '@app/socle/shell/i18n-labels';
 
 import { ChantierLotApiService } from '../../services/chantier-lot-api.service';

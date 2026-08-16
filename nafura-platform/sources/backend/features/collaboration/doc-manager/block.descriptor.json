@@ -1,16 +1,16 @@
 {
   "id": "doc-manager",
   "name": "Document Manager",
-  "description": "Document management",
+  "description": "Husk — documents + impression",
   "type": "feature",
   "layer": "feature",
   "group": "collaboration",
   "provides": {
     "backend": {
       "gradle": ":platform:features:collaboration:doc-manager",
-      "packages": ["ma.nafura.platform.collaboration.docmanager"]
+      "packages": []
     }
   },
-  "requires": { "core": ["tenancy"], "features": [] },
+  "requires": { "core": [], "features": ["documents", "impression"] },
   "manifest": { "key": "doc-manager" }
 }

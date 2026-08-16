@@ -1,7 +1,7 @@
-import type { DocTypeDefinition } from '@platform/features/documents/doc-extractor/models/doc-type-definition.model';
-import type { ExtractionValidation } from '@platform/features/documents/doc-extractor/models/extraction.model';
-import type { JsonSchemaRoot } from '@platform/features/documents/doc-extractor/models/json-schema.model';
-import type { UiSchema } from '@platform/features/documents/doc-extractor/models/ui-schema.model';
+import type { DocTypeDefinition } from '@platform/app/document-extraction/models/doc-type-definition.model';
+import type { ExtractionValidation } from '@platform/app/document-extraction/models/extraction.model';
+import type { JsonSchemaRoot } from '@platform/app/document-extraction/models/json-schema.model';
+import type { UiSchema } from '@platform/app/document-extraction/models/ui-schema.model';
 
 export interface LookupEntry {
   key: string;

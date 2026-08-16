@@ -13,7 +13,7 @@
   },
   "requires": {
     "core": ["tenancy", "authorization", "framework"],
-    "features": ["llm-provider", "doc-manager"]
+    "features": ["llm-provider", "documents"]
   },
   "manifest": { "key": "usage" }
 }

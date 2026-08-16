@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 
 import type { ClientVenteCreate } from '@app/ventes/models';
 import { ClientApiService } from '@app/ventes/clients/services/client-api.service';
-import type { ExtractionDefinition } from '@platform/features/documents/smart-import';
+import type { ExtractionDefinition } from '@platform/app/document-extraction/smart-import';
 import { normalizeText } from '../../utils/extraction-json.utils';
 
 import { CLIENT_EXTRACTION_SCHEMA } from '../../extraction-schemas';

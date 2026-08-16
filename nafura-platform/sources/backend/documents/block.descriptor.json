@@ -1,0 +1,16 @@
+{
+  "id": "documents",
+  "name": "Documents",
+  "description": "Conserver un fichier",
+  "type": "feature",
+  "layer": "feature",
+  "group": "documents",
+  "provides": {
+    "backend": {
+      "gradle": ":platform:documents",
+      "packages": ["ma.nafura.platform.collaboration.docmanager"]
+    }
+  },
+  "requires": { "core": ["tenancy"], "features": [] },
+  "manifest": { "key": "documents" }
+}

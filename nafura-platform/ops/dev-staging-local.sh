@@ -82,7 +82,7 @@ KEYCLOAK_CLIENT_ID=erp-web
 
 # S3 API (port 9000 via ingress s3.*) — pas minio.* qui sert la console (9001)
 DOCUMENTS_MINIO_ENDPOINT=http://s3.nafuralabs.staging
-DOCUMENTS_MINIO_BUCKET=nafura-documents
+DOCUMENTS_MINIO_BUCKET=documents
 MINIO_ROOT_USER=minioadmin
 MINIO_ROOT_PASSWORD=minioadmin
 

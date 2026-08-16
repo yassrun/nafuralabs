@@ -12,7 +12,7 @@ import type { Employe } from '@app/rh/models';
 import {
   SmartImportTriggerComponent,
   type ReviewedExtraction,
-} from '@platform/features/documents/smart-import';
+} from '@platform/app/document-extraction/smart-import';
 import {
   EMPLOYE_IMPORT_DEFINITION,
   EmployeImportService,

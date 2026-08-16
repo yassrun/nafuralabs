@@ -6,7 +6,7 @@ import type { ArticleCreate } from '@app/catalogue/articles/models';
 import { ArticlesApiService } from '@app/catalogue/articles/services/article-api.service';
 import { ItemCategoriesApiService } from '@app/catalogue/configuration/item-categories/services/item-category-api.service';
 import { UnitOfMeasuresApiService } from '@app/catalogue/configuration/unit-of-measures/services/unit-of-measure-api.service';
-import type { ExtractionDefinition } from '@platform/features/documents/smart-import';
+import type { ExtractionDefinition } from '@platform/app/document-extraction/smart-import';
 import { normalizeText, toNumber } from '../../utils/extraction-json.utils';
 
 import { ARTICLE_EXTRACTION_SCHEMA } from '../../extraction-schemas';

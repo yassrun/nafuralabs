@@ -7,7 +7,7 @@ dependencies {
     implementation project(':platform:core:authorization')
     implementation project(':platform:core:tenancy')
     implementation project(':platform:features:ai:llm-provider')
-    implementation project(':platform:features:collaboration:doc-manager')
+    implementation project(':platform:documents')
 
     api 'org.springframework.boot:spring-boot-starter-data-jpa'
     api 'org.springframework.boot:spring-boot-starter-web'

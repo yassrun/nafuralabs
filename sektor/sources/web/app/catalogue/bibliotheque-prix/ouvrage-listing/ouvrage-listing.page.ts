@@ -9,7 +9,7 @@ import {
 import {
   SmartImportTriggerComponent,
   type ReviewedExtraction,
-} from '@platform/features/documents/smart-import';
+} from '@platform/app/document-extraction/smart-import';
 import {
   OUVRAGE_IMPORT_DEFINITION,
   OuvrageImportService,

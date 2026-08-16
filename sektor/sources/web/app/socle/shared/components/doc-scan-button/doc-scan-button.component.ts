@@ -16,9 +16,9 @@ import { firstValueFrom } from 'rxjs';
 import { ButtonComponent, IconComponent } from '@platform/lib/anatomy/components';
 import { PermissionService } from '@platform/core/security/services/permission.service';
 import { TenantContextService } from '@platform/core/tenant/tenant.context';
-import { DocTypeService } from '@platform/features/documents/doc-extractor/services/doc-type.service';
-import type { JsonSchemaRoot } from '@platform/features/documents/doc-extractor/models/json-schema.model';
-import type { UiSchema } from '@platform/features/documents/doc-extractor/models/ui-schema.model';
+import { DocTypeService } from '@platform/app/document-extraction/services/doc-type.service';
+import type { JsonSchemaRoot } from '@platform/app/document-extraction/models/json-schema.model';
+import type { UiSchema } from '@platform/app/document-extraction/models/ui-schema.model';
 
 import { ErpDocScanService } from '../../services/erp-doc-scan.service';
 

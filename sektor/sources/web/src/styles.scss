@@ -19,7 +19,7 @@
 /* ═══════════════════════════════════════════════════════════════════════════
    Feature Layouts (Domain-specific utilities)
    ═══════════════════════════════════════════════════════════════════════════ */
-@use '../../../../nafura-platform/sources/web/features/documents/doc-extractor/layout' as doc-layout;
+@use '../../../../nafura-platform/sources/web/app/document-extraction/layout' as doc-layout;
 
 /* Shared design system tokens used by framework features */
 @use '../../../../nafura-platform/sources/web/lib/design-system/tokens' as shared-tokens;

@@ -3,7 +3,7 @@ import {
   readingDefaults,
   resolvedArrayPaths,
   type ExtractionDefinition,
-} from '@platform/features/documents/smart-import';
+} from '@platform/app/document-extraction/smart-import';
 
 describe('ExtractionDefinition reading defaults', () => {
   it('treats a flat list as the default complex-case settings', () => {

@@ -1,0 +1,16 @@
+{
+  "id": "impression",
+  "name": "Impression",
+  "description": "Produire une page",
+  "type": "feature",
+  "layer": "feature",
+  "group": "impression",
+  "provides": {
+    "backend": {
+      "gradle": ":platform:impression",
+      "packages": ["ma.nafura.platform.collaboration.docmanager"]
+    }
+  },
+  "requires": { "core": ["tenancy"], "features": [] },
+  "manifest": { "key": "impression" }
+}
