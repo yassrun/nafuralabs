@@ -1,6 +1,7 @@
 ---
+
 id: PLT-40
-status: done-agent
+status: done-me
 context: nafura
 type: physical
 priority: P1

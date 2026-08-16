@@ -1,6 +1,7 @@
 ---
+
 id: PLT-42
-status: done-agent
+status: done-me
 context: nafura
 type: feature
 priority: P1

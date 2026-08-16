@@ -1,6 +1,7 @@
 ---
+
 id: PLT-45
-status: done-agent
+status: done-me
 context: nafura
 type: qa
 priority: P1
