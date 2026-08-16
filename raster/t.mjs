@@ -19,6 +19,21 @@ import {
   approve,
   RefusError,
 } from "./write.mjs";
+import {
+  addWorktree,
+  removeWorktree,
+  listWorktrees,
+  formatWorktrees,
+  WorktreeError,
+} from "./worktree.mjs";
+import {
+  start,
+  stop,
+  waitFor,
+  list as running,
+  formatRunning,
+  SpawnError,
+} from "./spawn.mjs";
 import { listRasterProjects } from "./walk-tasks.mjs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -75,6 +90,14 @@ function usage() {
     sprint <id> [YYYY-Wnn]      défaut = semaine courante
     status <id> <statut>        todo|doing|blocked|review|done-agent
     approve <id>                done-agent + gate:me → done-me
+
+  exécution — la commande d'agent vient de RASTER_AGENT_CMD, jamais du dépôt
+    worktree list                       les worktrees d'agent (hors dépôt)
+    worktree add <projet> <lot> [CH]    crée branche + worktree
+    worktree rm  <projet> <lot> [CH]    retire le worktree, garde la branche
+    run <projet> <lot> [CH]             lance un orchestrateur sur le lot
+    running                             les lots tenus
+    stop <projet> <lot>                 arrête et libère le lot
 
   archive
     sweep [--dry]               supprime les done-me · Git porte l'histoire
@@ -180,17 +203,76 @@ function run() {
     return 0;
   }
 
+  if (cmd === "worktree") {
+    const [sub, project, lot, souslot] = pos;
+    if (sub === "list" || !sub) {
+      console.log(formatWorktrees(listWorktrees()));
+      return 0;
+    }
+    if (sub === "add") {
+      const r = addWorktree(project, lot, souslot);
+      console.log(`${r.branch}  ${r.path}${r.cree ? "" : "  (existait déjà)"}`);
+      return 0;
+    }
+    if (sub === "rm") {
+      const r = removeWorktree(project, lot, souslot, { force: flags.force === true });
+      console.log(r.retire ? `retiré  ${r.path}` : `rien à retirer  ${r.path}`);
+      return 0;
+    }
+    console.error(`worktree : sous-commande inconnue "${sub}"`);
+    return 1;
+  }
+
+  // `run` ATTEND son agent : l'état vit en mémoire, rendre la main l'orphelinerait.
+  if (cmd === "run") {
+    const [project, lot, souslot] = pos;
+    const r = start({ project, lot, souslot: souslot || "" });
+    console.log(`▸ ${r.project}/${r.lot}  pid ${r.pid}  ${r.branch}\n  ${r.cwd}\n`);
+    return waitFor(project, lot, {
+      onLigne: (s) => process.stdout.write(s),
+    }).then(({ code }) => {
+      console.log(`\n${code === 0 ? "fini" : `échec (code ${code})`} — ${lot}`);
+      return code === 0 ? 0 : 1;
+    });
+  }
+
+  if (cmd === "running") {
+    const rows = running();
+    if (flags.json) console.log(JSON.stringify(rows, null, 2));
+    else {
+      console.log(formatRunning(rows));
+      if (!rows.length) {
+        console.log("(l'état vit dans le processus qui a lancé — voir l'app)");
+      }
+    }
+    return 0;
+  }
+
+  if (cmd === "stop") {
+    const r = stop(pos[0], pos[1]);
+    console.log(`arrêté  ${r.project}/${r.lot}`);
+    return 0;
+  }
+
   console.error(`commande inconnue : ${cmd}`);
   usage();
   return 1;
 }
 
-try {
-  process.exit(run());
-} catch (e) {
-  if (e instanceof RefusError) {
+/** Un refus est une erreur d'appel, pas une panne : code 2, pas de pile. */
+function onErreur(e) {
+  if (e instanceof RefusError || e instanceof WorktreeError || e instanceof SpawnError) {
     console.error(`refus — ${e.message}`);
     process.exit(2);
   }
   throw e;
+}
+
+try {
+  const r = run();
+  // `run` est la seule commande asynchrone : elle attend son agent.
+  if (r instanceof Promise) r.then((code) => process.exit(code), onErreur);
+  else process.exit(r);
+} catch (e) {
+  onErreur(e);
 }

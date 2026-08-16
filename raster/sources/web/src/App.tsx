@@ -7,6 +7,7 @@ import {
   statusGlyph,
   taskAgentType,
   type AgentFilter,
+  type Lance,
   type Ready,
   type Task,
   type ViewId,
@@ -28,6 +29,9 @@ export default function App() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [ready, setReady] = useState<Ready[]>([]);
   const [inboxLines, setInboxLines] = useState<string[]>([]);
+  const [running, setRunning] = useState<Lance[]>([]);
+  const [recent, setRecent] = useState<Lance[]>([]);
+  const [spawnPret, setSpawnPret] = useState(false);
   const [projects, setProjects] = useState<string[]>([]);
   const [sprint, setSprint] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -41,17 +45,21 @@ export default function App() {
   const [busy, setBusy] = useState(false);
 
   const refresh = useCallback(async () => {
-    const [meta, t, r, i] = await Promise.all([
+    const [meta, t, r, i, run] = await Promise.all([
       api.meta(),
       api.tasks(),
       api.ready(),
       api.inbox(),
+      api.running(),
     ]);
     setSprint(meta.sprint);
     setProjects(meta.projects);
     setTasks(t.tasks);
     setReady(r.ready);
     setInboxLines(i.lines);
+    setRunning(run.running);
+    setRecent(run.recent);
+    setSpawnPret(run.spawnPret);
     setFilterProject((prev) =>
       prev === ALL || meta.projects.includes(prev) ? prev : meta.projects[0] || prev
     );
@@ -62,6 +70,25 @@ export default function App() {
       .catch((e) => setError(e instanceof Error ? e.message : String(e)))
       .finally(() => setLoading(false));
   }, [refresh]);
+
+  /**
+   * Un agent qui tourne produit de la sortie en continu ; rien ne nous la pousse.
+   * On sonde uniquement tant qu'un lot est tenu — sinon l'app resterait bruyante
+   * pour rien.
+   */
+  useEffect(() => {
+    if (running.length === 0) return;
+    const h = window.setInterval(() => {
+      api
+        .running()
+        .then((r) => {
+          setRunning(r.running);
+          setRecent(r.recent);
+        })
+        .catch(() => {});
+    }, 2000);
+    return () => window.clearInterval(h);
+  }, [running.length]);
 
   /** Toute mutation renvoie l'état complet — pas de re-fetch en cascade. */
   const applyMutation = (m: { tasks: Task[]; ready: Ready[]; lines: string[] }) => {
@@ -184,6 +211,7 @@ export default function App() {
           {(
             [
               ["toi", "Toi", enAttente.length],
+              ["encours", "En cours", running.length],
               ["inbox", "Inbox", inboxLines.length],
               ["backlog", "Backlog", 0],
               ["sprint", "Sprint", 0],
@@ -236,7 +264,7 @@ export default function App() {
         >
           Capturer
         </button>
-        {view !== "inbox" && view !== "toi" ? (
+        {view !== "inbox" && view !== "toi" && view !== "encours" ? (
           <AgentFilterBar
             value={agentFilter}
             onChange={(v) => {
@@ -250,6 +278,10 @@ export default function App() {
             ? "raster/inbox.md (global)"
             : view === "toi"
               ? "ce qui attend une décision"
+              : view === "encours"
+                ? spawnPret
+                  ? "RASTER_AGENT_CMD posée — le lancement est réel"
+                  : "RASTER_AGENT_CMD absente — le lancement refusera"
               : `filtre · ${filterProject === ALL ? "All" : filterProject}`}
         </div>
       </div>
@@ -265,7 +297,7 @@ export default function App() {
 
       <div className="layout">
         <main className="main">
-          {view !== "inbox" && view !== "toi" ? (
+          {view !== "inbox" && view !== "toi" && view !== "encours" ? (
             <ProjectTabs
               projects={projects}
               active={filterProject}
@@ -287,6 +319,23 @@ export default function App() {
               rows={enAttente}
               selectedId={selectedId}
               onSelect={select}
+            />
+          ) : null}
+
+          {view === "encours" ? (
+            <EnCoursView
+              running={running}
+              recent={recent}
+              spawnPret={spawnPret}
+              busy={busy}
+              onStop={(p, l) => {
+                setBusy(true);
+                api
+                  .stopRun(p, l)
+                  .then((r) => setRunning(r.running))
+                  .catch((e) => setError(e instanceof Error ? e.message : String(e)))
+                  .finally(() => setBusy(false));
+              }}
             />
           ) : null}
 
@@ -323,6 +372,8 @@ export default function App() {
               onSelect={select}
               onCommit={(id) => void mutate(() => api.commitSprint(id))}
               busy={busy}
+              spawnPret={spawnPret}
+              onLance={setRunning}
             />
           ) : null}
 
@@ -455,6 +506,101 @@ function ToiView({
           </div>
         ))}
       </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------- ce qui tourne */
+
+/**
+ * Le dernier constat de la revue : l'app n'avait aucune notion d'exécution.
+ * L'état vient du serveur et n'est jamais écrit sur disque — un processus mort
+ * ne doit pas laisser un `doing` menteur dans une task.
+ */
+function EnCoursView({
+  running,
+  recent,
+  spawnPret,
+  busy,
+  onStop,
+}: {
+  running: Lance[];
+  recent: Lance[];
+  spawnPret: boolean;
+  busy: boolean;
+  onStop: (project: string, lot: string) => void;
+}) {
+  return (
+    <section>
+      <h2>En cours — {running.length} lot(s) tenu(s)</h2>
+      {!spawnPret ? (
+        <div className="callout danger">
+          <strong>Aucune commande d'agent configurée.</strong> Poser{" "}
+          <code>RASTER_AGENT_CMD</code> dans l'environnement local avant de lancer
+          le serveur. Raster ne stocke ni commande ni clé — le CADRE dit « le
+          dépôt suffit à lire, pas à exécuter ».
+        </div>
+      ) : null}
+
+      {running.length === 0 ? (
+        <div className="callout">
+          Rien ne tourne. Un lot se lance depuis le Backlog, sur un sous-lot
+          lançable.
+        </div>
+      ) : (
+        <div className="stack" style={{ gap: 12 }}>
+          {running.map((r) => (
+            <div key={`${r.project}//${r.lot}`} className="list-panel">
+              <div className="row feature">
+                <span className="att-mark att-q">▸</span>
+                <strong className="row-title">
+                  {r.project} / {r.lot}
+                </strong>
+                <span className="pill info">{r.branch}</span>
+                <span className="faint">pid {r.pid}</span>
+                <span className="row-actions">
+                  <button
+                    type="button"
+                    className="btn danger"
+                    disabled={busy}
+                    onClick={() => onStop(r.project, r.lot)}
+                  >
+                    Arrêter
+                  </button>
+                </span>
+              </div>
+              <div className="faint" style={{ padding: "0 8px 6px" }}>
+                {r.cwd}
+              </div>
+              <pre className="launch-brief">
+                {r.sortie.length ? r.sortie.join("\n") : "(pas encore de sortie)"}
+              </pre>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {recent.length ? (
+        <details className="fold" style={{ marginTop: 16 }}>
+          <summary>Derniers lots terminés</summary>
+          <div className="stack" style={{ gap: 8, paddingTop: 8 }}>
+            {recent
+              .slice()
+              .reverse()
+              .map((r, i) => (
+                <div key={`${r.lot}-${i}`} className="row">
+                  <span className={`pill ${r.etat === "fini" ? "ok" : "warn"}`}>
+                    {r.etat}
+                  </span>
+                  <span className="row-title">
+                    {r.project} / {r.lot}
+                  </span>
+                  <span className="faint">{r.branch}</span>
+                </div>
+              ))}
+          </div>
+        </details>
+      ) : null}
     </section>
   );
 }
@@ -715,6 +861,8 @@ function Backlog({
   onSelect,
   onCommit,
   busy,
+  spawnPret,
+  onLance,
 }: {
   project: string;
   tasks: Task[];
@@ -724,6 +872,8 @@ function Backlog({
   onSelect: (id: string) => void;
   onCommit: (id: string) => void;
   busy: boolean;
+  spawnPret: boolean;
+  onLance: (r: Lance[]) => void;
 }) {
   const groups = groupTree(tasks);
   const byLot = new Map<string, Group[]>();
@@ -765,7 +915,7 @@ function Backlog({
                         <strong className="row-title">{g.souslot}</strong>
                         <span className="pill">{g.tasks.length} task(s)</span>
                         <span className="row-actions">
-                          <OrchLaunchButton group={g} kids={g.tasks} busy={busy} />
+                          <OrchLaunchButton group={g} kids={g.tasks} busy={busy} spawnPret={spawnPret} onLance={onLance} />
                         </span>
                       </div>
                     ) : null}
@@ -984,35 +1134,73 @@ function Rows({
   );
 }
 
+/**
+ * Un bouton, deux mondes : si le serveur a une commande d'agent, il **lance**.
+ * Sinon il retombe sur le brief à coller — parce qu'un bouton qui échoue
+ * silencieusement est pire qu'un bouton qui dit ce qu'il sait faire.
+ */
 function OrchLaunchButton({
   group,
   kids,
   busy = false,
+  spawnPret = false,
+  onLance,
 }: {
   group: { project: string; lot: string; souslot: string };
   kids: Task[];
   busy?: boolean;
+  spawnPret?: boolean;
+  onLance?: (running: Lance[]) => void;
 }) {
-  const [copied, setCopied] = useState(false);
+  const [etat, setEtat] = useState<"" | "copie" | "lance" | "refus">("");
+  const [msg, setMsg] = useState("");
+
+  const lancer = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!spawnPret) {
+      try {
+        await navigator.clipboard.writeText(orchLaunchBrief(group, kids));
+        setEtat("copie");
+        window.setTimeout(() => setEtat(""), 2000);
+      } catch {
+        setEtat("");
+      }
+      return;
+    }
+    try {
+      const r = await api.run(group.project, group.lot, group.souslot);
+      onLance?.(r.running);
+      setEtat("lance");
+      window.setTimeout(() => setEtat(""), 2000);
+    } catch (err) {
+      setEtat("refus");
+      setMsg(err instanceof Error ? err.message : String(err));
+    }
+  };
+
   return (
-    <button
-      type="button"
-      className="btn compact"
-      disabled={busy}
-      title="Copie un brief d'orchestration — le spawn arrive avec le lot orchestration"
-      onClick={async (e) => {
-        e.stopPropagation();
-        try {
-          await navigator.clipboard.writeText(orchLaunchBrief(group, kids));
-          setCopied(true);
-          window.setTimeout(() => setCopied(false), 2000);
-        } catch {
-          setCopied(false);
+    <>
+      <button
+        type="button"
+        className={spawnPret ? "btn primary compact" : "btn compact"}
+        disabled={busy}
+        title={
+          spawnPret
+            ? "Lance un orchestrateur sur ce lot, dans son worktree"
+            : "RASTER_AGENT_CMD absente — copie un brief à coller"
         }
-      }}
-    >
-      {copied ? "Brief copié" : "Orchestrer"}
-    </button>
+        onClick={(e) => void lancer(e)}
+      >
+        {etat === "copie"
+          ? "Brief copié"
+          : etat === "lance"
+            ? "Lancé"
+            : spawnPret
+              ? "Lancer"
+              : "Orchestrer"}
+      </button>
+      {etat === "refus" ? <span className="pill warn">{msg}</span> : null}
+    </>
   );
 }
 

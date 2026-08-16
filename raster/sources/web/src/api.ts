@@ -36,7 +36,26 @@ export type Ready = {
   gates: string[];
 };
 
-export type ViewId = "toi" | "inbox" | "backlog" | "sprint" | "done-agent";
+/** Un lot tenu par un orchestrateur. L'etat vit dans le serveur, jamais sur disque. */
+export type Lance = {
+  project: string;
+  lot: string;
+  branch: string;
+  cwd: string;
+  pid: number;
+  depuis: string;
+  etat: string;
+  code: number | null;
+  sortie: string[];
+};
+
+export type ViewId =
+  | "toi"
+  | "encours"
+  | "inbox"
+  | "backlog"
+  | "sprint"
+  | "done-agent";
 
 const glyph: Record<string, string> = {
   todo: "·",
@@ -154,6 +173,19 @@ export const api = {
       `/api/tasks/${encodeURIComponent(id)}/commit-sprint`,
       { method: "POST", body: "{}" }
     ),
+  running: () =>
+    json<{ running: Lance[]; recent: Lance[]; spawnPret: boolean }>("/api/running"),
+  /** Lance un orchestrateur sur un lot. Refuse sans RASTER_AGENT_CMD. */
+  run: (project: string, lot: string, souslot = "") =>
+    json<{ lance: Lance; running: Lance[] }>("/api/run", {
+      method: "POST",
+      body: JSON.stringify({ project, lot, souslot }),
+    }),
+  stopRun: (project: string, lot: string) =>
+    json<{ running: Lance[] }>("/api/stop", {
+      method: "POST",
+      body: JSON.stringify({ project, lot }),
+    }),
   /** Le seul chemin vers `done-me` — jamais un select. */
   approve: (id: string) =>
     json<Mutation>(`/api/tasks/${encodeURIComponent(id)}/approve`, {

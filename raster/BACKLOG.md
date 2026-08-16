@@ -73,6 +73,12 @@
   - ✓ `socle` sous-lot
     - ✓ `SEKTOR-98` tech — Socle compile sans jars BC
 
+## raster
+
+- `orchestration` lot
+  - ✓ `CH-01-EVOL-spawn-worktree` sous-lot
+    - ✓ `RAS-96` tech — Spawn d'un orchestrateur par lot
+
 ---
 
-**39 live · 2 projets**
+**40 live · 3 projets**

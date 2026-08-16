@@ -32,6 +32,15 @@ import {
 } from "../../../write.mjs";
 import { readiness } from "../../../ready.mjs";
 import { window_ } from "../../../roadmap.mjs";
+import {
+  agentCommand,
+  list as runningLots,
+  recent as recentLots,
+  start as startLot,
+  stop as stopLot,
+  SpawnError,
+} from "../../../spawn.mjs";
+import { WorktreeError } from "../../../worktree.mjs";
 import { regen, isoWeekInfo } from "../../../regen.mjs";
 
 export type TaskDto = {
@@ -257,6 +266,39 @@ export function rasterApiPlugin(repoRoot?: string): Plugin {
             return send(res, 200, { windows: projets.map((x) => window_(x)) });
           }
 
+          /**
+           * L'état d'exécution vit dans CE processus (AC-4). Le serveur est le
+           * seul à vivre assez longtemps pour le tenir — d'où `spawnPret`, qui
+           * dit à l'UI si le bouton « Lancer » a une chance de marcher.
+           */
+          if (req.method === "GET" && url === "/api/running") {
+            return send(res, 200, {
+              running: runningLots(),
+              recent: recentLots(),
+              spawnPret: agentCommand() !== null,
+            });
+          }
+
+          if (req.method === "POST" && url === "/api/run") {
+            const b = (await readJson(req)) as {
+              project?: string;
+              lot?: string;
+              souslot?: string;
+            };
+            const r = startLot({
+              project: b.project || "",
+              lot: b.lot || "",
+              souslot: b.souslot || "",
+            });
+            return send(res, 200, { ok: true, lance: r, running: runningLots() });
+          }
+
+          if (req.method === "POST" && url === "/api/stop") {
+            const b = (await readJson(req)) as { project?: string; lot?: string };
+            stopLot(b.project || "", b.lot || "");
+            return send(res, 200, { ok: true, running: runningLots() });
+          }
+
           if (req.method === "GET" && url === "/api/inbox") {
             return send(res, 200, { lines: readGlobalInbox(root) });
           }
@@ -322,8 +364,14 @@ export function rasterApiPlugin(repoRoot?: string): Plugin {
 
           return send(res, 404, { error: "unknown api route" });
         } catch (e) {
-          // Un refus du CLI est une erreur de l'appelant, pas une panne serveur.
-          if (e instanceof RefusError) return send(res, 400, { error: e.message });
+          // Un refus est une erreur de l'appelant, pas une panne serveur.
+          if (
+            e instanceof RefusError ||
+            e instanceof SpawnError ||
+            e instanceof WorktreeError
+          ) {
+            return send(res, 400, { error: e.message });
+          }
           console.error(e);
           return send(res, 500, {
             error: e instanceof Error ? e.message : "server error",

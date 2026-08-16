@@ -20,13 +20,16 @@
    L'UI. Vue Toi, question et rapport affichés, readiness dans l'arbre, serveur repassé par `t.mjs`.
    Revue du 16/08, 8 constats. Wireframe : [`pact/socle/ux/decision-wireframe.canvas.tsx`](pact/socle/ux/decision-wireframe.canvas.tsx).
 
+5. **orchestration** — `CH-01-EVOL-spawn-worktree`
+   Le spawn réel et les worktrees. C'est la seule chose qui **exécute** quelque chose : la commande
+   d'agent et sa clé vivent hors du dépôt, et Raster refuse de démarrer plutôt que de les stocker.
+   `gate: me` sur le spawn — tu vois le rapport avant que ça puisse lancer.
+
 <!-- borne -->
 
 ## Pas encore
 
-5. **orchestration** — le spawn réel et les worktrees.
-   Suppose un processus et une clé de modèle. Reste sous la borne **exprès** : c'est la seule chose
-   qui exécute quelque chose, et le CADRE dit « le dépôt suffit à lire, pas à exécuter ».
+Rien. Le chantier est ouvert jusqu'au bout.
 
 ---
 

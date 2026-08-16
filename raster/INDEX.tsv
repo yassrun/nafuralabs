@@ -27,6 +27,7 @@ PLT-91	done-agent	P1	nafura	agent	none	spec	spec	2026-W34	nafura-platform	impres
 PLT-92	done-agent	P1	nafura	agent	none	tech	exec	2026-W34	nafura-platform	impression	CH-01-TECHNICAL-plier	Plier l'arbre impression
 SEKTOR-104	done-agent	P1	nafura	agent	none	tech	exec	2026-W33	sektor	monter-angular-22		Drop PrimeNG — nf-tree-table en mat-table
 SEKTOR-97	done-agent	P1	nafura	agent	none	tech	exec	2026-W33	sektor	monter-angular-22		Angular 21 → 22
+RAS-96	done-agent	P1	nafura	agent	me	tech	exec		raster	orchestration	CH-01-EVOL-spawn-worktree	Spawn d'un orchestrateur par lot
 SEKTOR-102	done-agent	P1	nafura	agent	none	tech	exec	2026-W33	sektor	plier-archi	domain-objets	Ranger les objets domain par agrégat
 SEKTOR-100	done-agent	P1	nafura	agent	none	tech	exec	2026-W33	sektor	plier-archi	etudes-catalogue	Études consomme catalogue.api seulement
 SEKTOR-101	done-agent	P1	nafura	agent	none	tech	exec	2026-W33	sektor	plier-archi	etudes-catalogue	Garde : socle sans BC, Études hors item.*
