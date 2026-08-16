@@ -2,6 +2,7 @@ id	status	priority	context	assignee	gate	type	agent_type	sprint	project	lot	sous
 PLT-73	done-agent	P0	nafura	agent	none	spec	spec	2026-W33	nafura-platform	documents	CH-04-EVOL-taille-max	SPEC — taille max
 PLT-74	done-agent	P0	nafura	agent	none	feature	exec	2026-W33	nafura-platform	documents	CH-04-EVOL-taille-max	Refuser au-delà de 50 Mio
 PLT-75	done-agent	P0	nafura	agent	none	qa	qa	2026-W33	nafura-platform	documents	CH-04-EVOL-taille-max	QA — taille max
+RAS-78	done-agent	P1	nafura	agent	me	spec	spec		raster	cadre	CH-01-EVOL-orchestration-autonome	Porter le mode autonome dans le CADRE
 PLT-39	done-agent	P1	nafura	agent	none	tech	exec	2026-W33	nafura-platform	document-reader		Socle grille dans doc-extractor
 PLT-40	done-agent	P1	nafura	me	none	physical	exec	2026-W33	nafura-platform	document-reader		Trancher O1 — cache de plans par tenant ou mu…
 PLT-41	done-agent	P1	nafura	agent	none	feature	exec	2026-W33	nafura-platform	document-reader		Plan, cascade, cache

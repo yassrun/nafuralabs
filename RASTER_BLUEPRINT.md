@@ -142,4 +142,24 @@ Raster **synchronise** : scan `**/raster-src/lots/**/tasks/*.md` → INDEX / Spr
 - IDs par projet (`SEKTOR`, `RAS`, `PLT`, `OPS`, …).  
 - `done-me` → le fichier **sort du dépôt** (`t.mjs sweep`). Git porte l'histoire, pas d'archive. `<projet>/raster-src/NEXT` garde la borne haute des IDs.
 
+- **Écriture = CLI.** Une task ne s'écrit pas à la main : `t.mjs` alloue l'ID, pose les enums, crée le dossier, regen. Le fichier reste le SSOT — mais il est *produit*, pas *tapé*. Sans ça, pas d'orchestration parallèle. `AGENTS.md` §0.1-9.
+
 Walker : tout `<projet>/raster-src/lots/` (peers, y compris `raster/raster-src/`).
+
+---
+
+## Orchestration (2026-08-16)
+
+Objectif : tu planifies **un lot ou deux**, l'orchestrateur déroule sans prompt.
+
+| Niveau | Rôle | Concurrence |
+|--------|------|-------------|
+| **Lot** | isolation — un seul orchestrateur y écrit | parallèle entre lots |
+| **Sous-lot** | grain de fan-out — un exec | parallèle dans le lot |
+| **Task** | unité de travail | **série** dans le sous-lot |
+
+La collision qui casse le parallèle n'est pas logique (`blocked_by:` la couvre) mais **physique** : deux agents sur le même fichier. Le lot est la plus grosse frontière tenable sans déclarer un périmètre de fichiers par task ; le CH est déjà une frontière de périmètre côté Pact, donc fan-outer dessus n'invente rien.
+
+**`<projet>/ROADMAP.md`** — l'ordre des lots, **écrit à la main**, hors `raster-src/`, non indexé. La roadmap est un **acte**, pas un calcul : elle porte des lots qui n'ont encore ni task ni dossier. Un marqueur `<!-- borne -->` sépare ce que l'orchestrateur peut ouvrir seul de ce qu'il ne peut pas. **Déplacer la borne = planifier.**
+
+Détail : [`raster/AGENTS.md`](raster/AGENTS.md) §7.

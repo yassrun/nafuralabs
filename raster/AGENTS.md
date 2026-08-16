@@ -39,6 +39,17 @@
    **Contrepartie :** `<projet>/raster-src/NEXT` garde la **borne haute des IDs**. Sans lui, un id supprimé serait réattribué — la règle « IDs immuables » n'aurait plus rien pour la tenir.
 7. Toute task a un **`type:`** `spec` | `feature` | `bug` | `tech` | `physical` | `qa` et un **`agent_type:`** `spec` | `exec` | `qa` (dérivé du type si absent). **`kind` n’existe plus** : lot et sous-lot sont des **dossiers**, pas des tickets (§2).
 8. Status : `todo` \| `doing` \| `blocked` \| `review` \| `done-agent` \| `done-me`. Nav : Inbox · Backlog · Sprint · **Done agent**. DOR/DOD : `raster/pact/work/SPEC.md`.
+   **`done-me` ne se pose pas — il se gagne.** Il sort du sélecteur de status : ce n'est pas un état qu'on choisit, c'est le résultat d'une approbation. À `done-agent`, la **gate** décide seule de la suite :
+
+   | `gate:` | Après `done-agent` | Toi |
+   |---------|--------------------|-----|
+   | `none` | → **`done-me`** immédiat, puis sweep | rien — tu n'as jamais été requis |
+   | `me` | reste **`done-agent`**, la task **t'attend** | ton approbation pose `done-me` |
+
+   Conséquence assumée : une task `gate: none` sort du dépôt **sans que tu la voies**. C'est le prix du mode autonome, et c'est pour ça que la gate est le seul champ qui compte au découpage.
+9. **Une task ne s'écrit jamais à la main — le CLI est la seule voie d'écriture.** `t.mjs` possède le frontmatter et l'arborescence : `new` (alloue l'ID depuis `NEXT`, pose les enums, crée le dossier), `promote` (ligne d'inbox → task), `sprint`, `status`. Chaque commande regen. Un agent qui compose du frontmatter à la main n'est pas rapide, il est faux : `check` refuse.
+   **Pourquoi :** un agent oublie `sprint:`, retombe sur l'inbox, invente un enum. À un agent tu relis ; à dix en parallèle, tu ne relis plus. L'orchestration autonome (§7) n'existe que si l'écriture est mécanique.
+   *(2026-08-16 — décidé. `t.mjs` n'expose encore que `index` / `check` / `sweep` : les commandes d'écriture sont à implémenter.)*
 
 ### 0.2 Critère sous-lot — **mode Raster seul uniquement**
 
@@ -89,7 +100,7 @@ Un flux est indépendant si **les 3** sont vrais :
   sources/                        # runtimes — NAFURALABS.md § Intérieur
     backend/                      # Gradle ici — un seul
     web/
-  ROADMAP.md                      # optionnel (hors raster-src)
+  ROADMAP.md                      # ordre des lots — écrit à la main (hors raster-src) — §7
 ```
 
 ### Projet Raster (`raster/`)
@@ -177,6 +188,23 @@ décidé seul          les arbitrages pris sans toi
 
 **Le rapport n’est pas du confort.** En mode autonome tu ne valides plus **avant** : il est la seule chose qui te dit ce qui a été décidé sans toi.
 
+### `## Question` — obligatoire dès qu'une task t'attend
+
+Toute task qui te rend la main (`gate: me` à `done-agent`, ou `blocked` externe, ou question bloquante) porte une section `## Question` :
+
+```markdown
+## Question
+
+<la décision attendue, une phrase>
+
+- **A** — … (conséquence)
+- **B** — … (conséquence)
+
+Recommandé : A — <pourquoi, une ligne>
+```
+
+**Sans elle, l'attente est muette.** L'UI n'aurait qu'un `gate: me` à afficher, et tu devrais ouvrir le fichier pour savoir ce qu'on te demande — donc tu ne le ferais pas. Une task qui t'attend sans question posée est une task mal rendue : l'agent doit la formuler **avant** de te repasser la main.
+
 **Pas de section « Critères d’acceptation ».** Ils vivent dans `CH.md` (`AC-1`, `AC-2`) ; la task les **référence**. Un critère recopié est un critère qui divergera.
 
 Enums fermés — ne jamais inventer. Pas de compteurs dérivés dans le frontmatter.
@@ -258,10 +286,83 @@ IDs **immuables**. Jamais renumérotés / réutilisés.
 
 ---
 
+## 7. Orchestration
+
+> Objectif : tu planifies **un lot ou deux**, l'orchestrateur déroule sans attendre de prompt. Tu n'interviens qu'aux trois endroits du §0.1-2.
+
+**Unité d'isolation = le lot.** Un lot n'est jamais travaillé par deux orchestrateurs à la fois : celui qui le tient possède son périmètre d'écriture. Deux lots indépendants tournent en parallèle.
+
+**Pourquoi le lot, et pas la task :** la collision qui casse le travail parallèle n'est pas logique (`blocked_by:` la couvre déjà), elle est **physique** — deux agents qui éditent le même fichier. Le lot est la plus grosse frontière qu'on tient sans avoir à déclarer un périmètre de fichiers task par task.
+
+**Grain de fan-out = le sous-lot.** L'orchestrateur du lot lance **un exec par sous-lot ouvert**, en parallèle ; à l'intérieur d'un sous-lot les tasks se déroulent en **série**. Deux lots planifiés = autant d'agents que de sous-lots ouverts.
+
+Le CH est déjà la frontière de périmètre côté Pact (`PACT_BLUEPRINT.md`) : fan-outer dessus ne crée pas de nouvelle notion, et deux CH d'un même lot ne se marchent pas dessus par construction. C'est ce qui permet à l'orchestrateur de ne **jamais arbitrer** une collision — s'il devait le faire, il le ferait seul, et tu le découvrirais au rapport.
+
+| Niveau | Rôle | Concurrence |
+|--------|------|-------------|
+| **Lot** | isolation — un seul orchestrateur | parallèle entre lots |
+| **Sous-lot** | grain de fan-out — un exec | parallèle dans le lot |
+| **Task** | unité de travail | **série** dans le sous-lot |
+
+### Roadmap — `<projet>/ROADMAP.md`
+
+**Écrite à la main, hors `raster-src/`.** Les lots dans l'ordre, et ce qui bloque quoi. C'est le **seul** endroit où tu planifies, et ce que l'orchestrateur lit pour savoir quel lot ouvrir quand il en libère un.
+
+**Pourquoi à la main et pas dérivée d'un `after:` :** la roadmap est un **acte**, pas un calcul. Elle porte ce que tu veux — y compris des lots qui n'ont encore aucune task, ni dossier. Un ordre dérivé ne dirait que ce qui existe déjà, donc jamais l'intention. Et ça garde les chapeaux sans frontmatter (§2).
+
+**Raster ne l'indexe pas.** `ROADMAP.md` n'est ni Backlog ni Sprint : un lot inscrit sans task n'apparaît nulle part ailleurs. Cohérent avec « seule la task est un ticket ».
+
+### La borne
+
+`ROADMAP.md` porte un marqueur unique `<!-- borne -->`. **Au-dessus : ouvert à l'orchestrateur. En dessous : pas encore.** Il enchaîne les lots dans cette fenêtre sans rien te demander, puis s'arrête à la borne et te le dit.
+
+**Déplacer la borne est ton acte de planification** — le seul geste. Un lot ou deux d'avance, et tu peux partir.
+
+Une borne, pas un flux continu : ton autonomie est bornée par ta **décision**, pas par ta présence. Un découpage raté ne se propage pas au-delà de la fenêtre que tu as ouverte.
+
+### Le skill et les agents
+
+Boucle = **skill `orchestration`** (`.claude/skills/orchestration/`). Rôles lancés = **subagents** (`.claude/agents/` : `exec`, `spec`, `qa`) — le fan-out par sous-lot n'a personne à lancer sans eux, et un rôle redécrit à chaque lancement dérive.
+
+**Le skill ne possède aucune règle.** Un skill n'est lu que par Claude Code ; **Cursor ne le voit pas**. Tout ce que les deux doivent savoir reste dans ce fichier — le skill y **renvoie**. Une règle recopiée dans le skill, c'est Cursor qui orchestre avec une règle en moins.
+
+Ce qu'il porte, la boucle et rien d'autre :
+
+1. lire `ROADMAP.md` → premier lot au-dessus de la **borne**
+2. sous-lots ouverts de ce lot
+3. **un subagent par sous-lot**, en parallèle — tasks en série à l'intérieur
+4. collecter les **rapports de livraison** (§2)
+5. libérer le lot → suivant
+6. s'arrêter à la borne, sur `gate: me`, ou sur question bloquante (§0.1-2)
+
+### Qui appuie sur le bouton
+
+**L'app lance l'orchestrateur d'un lot** — un bouton, un spawn côté serveur, et c'est *lui* qui fan-oute sur les sous-lots. L'UI ne lance jamais un exec directement : elle redécrirait la boucle du skill, et deux boucles finissent par diverger.
+
+« Pas de spawn SDK » (l'ancien contrat de l'app, brief copié à coller dans Cursor) **tombe** : il supposait que tu sois devant l'écran à chaque lancement.
+
+### Readiness — calculée, jamais stockée
+
+**Grain = le sous-lot.** Il est **lançable** si toute task dont il dépend *hors de lui* est `done-agent` \| `done-me` (ou absente). À l'intérieur, `blocked_by:` ne fait qu'**ordonner** — les tasks sont en série, l'exec suit l'ordre.
+
+**`status: blocked` = blocage externe uniquement.** J'attends un client, une signature, une livraison — quelque chose que Raster ne voit pas. Un sous-lot dont une task est `blocked` n'est pas lançable, quels que soient ses `blocked_by`.
+
+| Notion | Qui la pose | Portée |
+|--------|-------------|--------|
+| `blocked_by:` | toi / l'agent au découpage | **interne** — calculé, jamais affiché comme un état posé |
+| `status: blocked` | toi | **externe** — hors Raster |
+
+Ce qui manquait n'était pas d'avoir une seule notion, c'était que **ni l'une ni l'autre n'était calculée** et que rien ne disait laquelle sert à quoi. Readiness reste dérivée : rien dans le frontmatter (§2).
+
+*(2026-08-16 — décidé. Reste : implémenter.)*
+
+---
+
 ## Changelog
 
 | Date | Décision |
 |------|----------|
+| 2026-08-16 | **Écriture = CLI seul** (§0.1-9) · orchestration : lot = isolation, sous-lot = fan-out, task = série (§7) · **`ROADMAP.md`** écrit à la main + **borne** d'autonomie · skill `orchestration` = la boucle, **jamais** les règles (Cursor ne lit pas les skills) |
 | 2026-08-13 | Orchestrateur Raster (`nafura-orch`) · exec → `review` · spec consolide SPEC+UX · QA pose `done-agent` sur feature/bug |
 | 2026-08-13 | `type: qa` · `agent_type:` spec \| exec \| qa · QA = task dédiée (`review` / `gate: qa` legacy) |
 | 2026-08-13 | **`raster-src/`** obligatoire par projet · **`raster/`** = projet Raster · **`pact/`** si app/site |

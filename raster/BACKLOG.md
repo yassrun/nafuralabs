@@ -73,6 +73,12 @@
   - ✓ `socle` sous-lot
     - ✓ `SEKTOR-98` tech — Socle compile sans jars BC
 
+## raster
+
+- `cadre` lot
+  - ✓ `CH-01-EVOL-orchestration-autonome` sous-lot
+    - ✓ `RAS-78` spec — Porter le mode autonome dans le CADRE
+
 ---
 
-**39 live · 2 projets**
+**40 live · 3 projets**
