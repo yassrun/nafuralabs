@@ -29,6 +29,11 @@
    Le balayage du 16/08 a orphelin des `blocked_by`. Une dépendance satisfaite devenait
    une dépendance inconnue, donc bloquante — `SEKTOR-97` s'est retrouvé inlançable.
 
+7. **work** puis **socle** — `CH-04-CORRECTION-sans-sprint` · `CH-03-CORRECTION-sans-vue-sprint`
+   `sprint:` n'est lu par personne qui décide : ni la readiness, ni la fenêtre, ni le skill,
+   ni les agents. La borne pilote depuis le 16/08 ; la semaine ISO est restée par inertie.
+   **À n'ouvrir qu'une fois les agents de nettoyage rendus** — ils appellent encore `t.mjs sprint`.
+
 <!-- borne -->
 
 ## Pas encore

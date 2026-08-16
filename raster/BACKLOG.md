@@ -35,13 +35,11 @@
     - · `PLT-131` tech — Plier l arbre conversation
 - `document-extraction` lot
   - · `CH-03-EVOL-hors-spec` sous-lot
-    - · `PLT-100` spec — SPEC + geler AC — builder et workflow
-    - · `PLT-101` feature — Aligner le code sur la SPEC
+    - ▸ `PLT-101` feature — Aligner le code sur la SPEC
     - · `PLT-102` qa — Preuves — hors spec
 - `documents` lot
   - · `CH-09-EVOL-archive` sous-lot
-    - · `PLT-97` spec — SPEC + geler AC — archive : transition ou drop
-    - · `PLT-98` feature — Appliquer la decision archive
+    - ▸ `PLT-98` feature — Appliquer la decision archive
     - · `PLT-99` qa — Preuves — archive
 - `identite` lot
   - · `CH-00-INIT-identite` sous-lot
@@ -53,8 +51,7 @@
     - · `PLT-119` tech — Plier l arbre identite
 - `impression` lot
   - · `CH-02-EVOL-sans-facture` sous-lot
-    - · `PLT-94` spec — SPEC + geler AC — impression sans facture
-    - · `PLT-95` feature — Sortir la forme facture du jar
+    - ▸ `PLT-95` feature — Sortir la forme facture du jar
     - · `PLT-96` qa — Preuves — impression sans facture
 - `notification` lot
   - · `CH-00-INIT-notification` sous-lot
@@ -76,6 +73,18 @@
   - · `CH-09-EVOL-consommateur-conversation` sous-lot
     - · `PLT-132` spec — SPEC — consommateur conversation
 
+## raster
+
+- `socle` lot
+  - · `CH-03-CORRECTION-sans-vue-sprint` sous-lot
+    - · `RAS-105` spec — SPEC + geler AC — retirer la vue Sprint
+    - · `RAS-106` tech — Retirer la vue, le bouton et la route
+- `work` lot
+  - · `CH-04-CORRECTION-sans-sprint` sous-lot
+    - · `RAS-102` spec — SPEC + geler AC — retirer le sprint du contrat
+    - · `RAS-103` tech — Retirer le champ, la commande et SPRINT.md
+    - · `RAS-104` qa — Preuves — plus de sprint dans le moteur
+
 ---
 
-**39 live · 1 projets**
+**41 live · 2 projets**
