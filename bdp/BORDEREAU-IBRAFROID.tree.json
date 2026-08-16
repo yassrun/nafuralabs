@@ -1,0 +1,351 @@
+{
+  "lots": [
+    {
+      "code": "100",
+      "libelle": "Gros-œuvres",
+      "children": [],
+      "postes": [
+        {
+          "code": "101",
+          "libelle": "Fouilles en pleine masse en TT",
+          "unite": "M3",
+          "quantite": 900.0
+        },
+        {
+          "code": "102",
+          "libelle": "Fouilles en tranchées/en trous TT",
+          "unite": "M3",
+          "quantite": 850.0
+        },
+        {
+          "code": "103",
+          "libelle": "Evacuation aux DP",
+          "unite": "M3",
+          "quantite": 1750.0
+        },
+        {
+          "code": "104",
+          "libelle": "Remblai Compacté GNF 0/60",
+          "unite": "M3",
+          "quantite": 2200.0
+        },
+        {
+          "code": "105",
+          "libelle": "Remblai compacté GNB 0/31,5",
+          "unite": "M3",
+          "quantite": 600.0
+        },
+        {
+          "code": "106",
+          "libelle": "Béton de Propreté",
+          "unite": "M3",
+          "quantite": 75.0
+        },
+        {
+          "code": "107",
+          "libelle": "Gros béton",
+          "unite": "M3",
+          "quantite": 50.0
+        },
+        {
+          "code": "108",
+          "libelle": "Mise à la Terre",
+          "unite": "ENS",
+          "quantite": 1.0
+        },
+        {
+          "code": "109A",
+          "libelle": "Pour béton armé en Fondation :",
+          "unite": "M3",
+          "quantite": 360.0
+        },
+        {
+          "code": "109B",
+          "libelle": "PV pour incorporation d'hydrofuge",
+          "unite": "M3",
+          "quantite": 50.0
+        },
+        {
+          "code": "110",
+          "libelle": "Armature en Fondation pour B.A en Acier TOR",
+          "unite": "KG",
+          "quantite": 35000.0
+        },
+        {
+          "code": "111",
+          "libelle": "Regards en béton banché",
+          "unite": "U",
+          "quantite": 20.0
+        },
+        {
+          "code": "112a",
+          "libelle": "PVC Ø 200",
+          "unite": "ML",
+          "quantite": 90.0
+        },
+        {
+          "code": "112b",
+          "libelle": "PVC Ø 315",
+          "unite": "ML",
+          "quantite": 100.0
+        },
+        {
+          "code": "113a",
+          "libelle": "PVC Ø 160 - PN10",
+          "unite": "ML",
+          "quantite": 2800.0
+        },
+        {
+          "code": "113b",
+          "libelle": "Sable d'enrobage des buses PVC Ø 160",
+          "unite": "M3",
+          "quantite": 360.0
+        },
+        {
+          "code": "113c",
+          "libelle": "Chape en béton armé ép 10cm",
+          "unite": "M2",
+          "quantite": 1650.0
+        },
+        {
+          "code": "113d",
+          "libelle": "Pare vapeur Chape 40 aluminium",
+          "unite": "M2",
+          "quantite": 1650.0
+        },
+        {
+          "code": "114",
+          "libelle": "Film de polyane sous dallage",
+          "unite": "M2",
+          "quantite": 2915.0
+        },
+        {
+          "code": "115",
+          "libelle": "Forme en Béton de 13 cm yc armatures",
+          "unite": "M2",
+          "quantite": 115.0
+        },
+        {
+          "code": "116",
+          "libelle": "Dallage de 20 cm y-c armatures",
+          "unite": "M2",
+          "quantite": 2800.0
+        },
+        {
+          "code": "117",
+          "libelle": "Banquettes de protection panneaux",
+          "unite": "ML",
+          "quantite": 540.0
+        },
+        {
+          "code": "118",
+          "libelle": "Couvre joint de dilatations en inox",
+          "unite": "ML",
+          "quantite": 8.0
+        },
+        {
+          "code": "119A",
+          "libelle": "Pour béton armé en élévation :",
+          "unite": "M3",
+          "quantite": 210.0
+        },
+        {
+          "code": "119B",
+          "libelle": "PV pour incorporation d'hydrofuge",
+          "unite": "M3",
+          "quantite": 50.0
+        },
+        {
+          "code": "120",
+          "libelle": "Armature en élévation pour B.A en Acier TOR",
+          "unite": "KG",
+          "quantite": 25000.0
+        },
+        {
+          "code": "121a",
+          "libelle": "(20+5)",
+          "unite": "M2",
+          "quantite": 180.0
+        },
+        {
+          "code": "121b",
+          "libelle": "(25+5)",
+          "unite": "M2",
+          "quantite": 75.0
+        },
+        {
+          "code": "122a",
+          "libelle": "épaisseur de 10cm",
+          "unite": "M2",
+          "quantite": 190.0
+        },
+        {
+          "code": "122b",
+          "libelle": "épaisseur de 20cm",
+          "unite": "M2",
+          "quantite": 1900.0
+        },
+        {
+          "code": "122c",
+          "libelle": "épaisseur de 35cm",
+          "unite": "M2",
+          "quantite": 18.0
+        },
+        {
+          "code": "122d",
+          "libelle": "épaisseur de 40cm",
+          "unite": "M2",
+          "quantite": 22.0
+        },
+        {
+          "code": "123",
+          "libelle": "Murs double en agglos",
+          "unite": "M2",
+          "quantite": 150.0
+        },
+        {
+          "code": "124",
+          "libelle": "Enduits extérieurs sur Murs",
+          "unite": "M2",
+          "quantite": 2200.0
+        },
+        {
+          "code": "125",
+          "libelle": "Enduits intérieurs sur Murs et plafonds",
+          "unite": "M2",
+          "quantite": 3500.0
+        },
+        {
+          "code": "126",
+          "libelle": "Façon d'appuis de fenêtres",
+          "unite": "ML",
+          "quantite": 15.0
+        },
+        {
+          "code": "127",
+          "libelle": "Couronnement d'acrotères",
+          "unite": "ML",
+          "quantite": 95.0
+        },
+        {
+          "code": "128",
+          "libelle": "Gaines techniques de ventilation",
+          "unite": "ML",
+          "quantite": 20.0
+        },
+        {
+          "code": "129",
+          "libelle": "Renformis de béton",
+          "unite": "M2",
+          "quantite": 6.0
+        },
+        {
+          "code": "130",
+          "libelle": "Dallette en béton armé",
+          "unite": "M2",
+          "quantite": 6.0
+        },
+        {
+          "code": "131",
+          "libelle": "Baguettes d'angle",
+          "unite": "ML",
+          "quantite": 30.0
+        },
+        {
+          "code": "132",
+          "libelle": "Pose et scellement des précadres",
+          "unite": "U",
+          "quantite": 20.0
+        },
+        {
+          "code": "133",
+          "libelle": "Souches en terrasse",
+          "unite": "U",
+          "quantite": 2.0
+        },
+        {
+          "code": "134",
+          "libelle": "Socles en béton armé",
+          "unite": "M2",
+          "quantite": 20.0
+        },
+        {
+          "code": "135",
+          "libelle": "Polystyrène pour joint de dilatation",
+          "unite": "M2",
+          "quantite": 5.0
+        },
+        {
+          "code": "136",
+          "libelle": "Arrase étanche sous murs en agglos",
+          "unite": "M2",
+          "quantite": 60.0
+        }
+      ]
+    },
+    {
+      "code": "200",
+      "libelle": "ETANCHEITE",
+      "children": [],
+      "postes": [
+        {
+          "code": "201",
+          "libelle": "Forme de pente et chape de lissage",
+          "unite": "M2",
+          "quantite": 345.0
+        },
+        {
+          "code": "202",
+          "libelle": "Etanchéité bicouche",
+          "unite": "M2",
+          "quantite": 345.0
+        },
+        {
+          "code": "203",
+          "libelle": "Protection lourde",
+          "unite": "M2",
+          "quantite": 345.0
+        },
+        {
+          "code": "204",
+          "libelle": "Relief bicouche SBS",
+          "unite": "ML",
+          "quantite": 110.0
+        },
+        {
+          "code": "205",
+          "libelle": "Solins grillagés",
+          "unite": "ML",
+          "quantite": 110.0
+        },
+        {
+          "code": "206",
+          "libelle": "Fourniture et pose de gargouilles et crapaudines",
+          "unite": "U",
+          "quantite": 5.0
+        },
+        {
+          "code": "207",
+          "libelle": "Etanchéité légère",
+          "unite": "M2",
+          "quantite": 70.0
+        }
+      ]
+    }
+  ],
+  "_meta": {
+    "source": "BORDEREAU IBRAFROID.pdf",
+    "model": "deepseek-v4-flash",
+    "finish_reason": "stop",
+    "usage": {
+      "prompt_tokens": 2985,
+      "completion_tokens": 2477,
+      "total_tokens": 5462,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      },
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 2985
+    }
+  }
+}

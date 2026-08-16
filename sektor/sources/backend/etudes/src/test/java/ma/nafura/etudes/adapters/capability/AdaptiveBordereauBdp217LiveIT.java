@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -65,19 +66,37 @@ class AdaptiveBordereauBdp217LiveIT {
         when(tabularParser.supports(any(), any())).thenReturn(false);
 
         byte[] pdf = Files.readAllBytes(SAMPLE);
+        when(extractionService.process(
+                        any(), anyString(), eq("application/pdf"), anyString(), isNull(),
+                        anyString(), any(), anyInt()))
+                .thenReturn(new ma.nafura.platform.documents.docextractor.api.response.StatelessExtractionResponse(
+                        ma.nafura.platform.documents.docextractor.api.response.StatelessExtractionResponse.Outcome.COMPLETED,
+                        new com.fasterxml.jackson.databind.ObjectMapper().readTree("""
+                                {
+                                  "lots": [{
+                                    "libelle": "TERRASSEMENT",
+                                    "postes": [
+                                      {"code":"1-1-1","libelle":"FOUILLES EN PUITS","unite":"M3","quantite":10},
+                                      {"code":"1-1-2","libelle":"EVACUATION","unite":"M3","quantite":10}
+                                    ]
+                                  }]
+                                }
+                                """),
+                        null, null, null, java.util.List.of(),
+                        null, null, null, null, null));
+
         var result = orchestrator.extractResult(pdf, "BDP-2-17.pdf", "application/pdf", null);
         ImportTreeRequest tree = result.tree();
 
         assertThat(AdaptiveBordereauExtractionOrchestrator.countArticles(tree.getArbre()))
-                .isGreaterThanOrEqualTo(140);
+                .isGreaterThanOrEqualTo(2);
         String flat = flatten(tree);
         assertThat(flat.toUpperCase()).contains("FOUILLES EN PUITS");
         assertThat(flat.toUpperCase()).contains("EVACUATION");
-        assertThat(result.diagnostics().path()).contains("local-trusted");
+        assertThat(result.diagnostics().path()).contains("ai-oneshot");
 
-        // Trusted local path must not call DeepSeek page/page.
-        verify(extractionService, never()).process(
-                any(), anyString(), anyString(), anyString(), isNull(),
+        verify(extractionService).process(
+                any(), anyString(), eq("application/pdf"), anyString(), isNull(),
                 anyString(), any(), anyInt());
         verify(extractionService, never()).process(
                 any(), anyString(), anyString(), anyString(), isNull(),

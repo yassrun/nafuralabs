@@ -136,11 +136,12 @@ public final class GridBordereauAssembler {
                     keep[i] = true;
                     break;
                 }
-                boolean closes = lot
-                        ? next.kind() == BordereauRowCandidate.Kind.LOT
-                        : next.kind() == BordereauRowCandidate.Kind.LOT
-                                || next.kind() == BordereauRowCandidate.Kind.SOUS_LOT;
-                if (closes) {
+                if (next.kind() == BordereauRowCandidate.Kind.LOT) {
+                    break;
+                }
+                if (!lot
+                        && next.kind() == BordereauRowCandidate.Kind.SOUS_LOT
+                        && closesSousLot(candidate, next)) {
                     break;
                 }
             }
@@ -154,13 +155,27 @@ public final class GridBordereauAssembler {
         return kept;
     }
 
+    /** Un chapitre lettré n'est pas vide parce que 3.1 suit ; un 3.3 n'est pas vide parce qu'un bandeau suit. */
+    private static boolean closesSousLot(BordereauRowCandidate current, BordereauRowCandidate next) {
+        if (current.isLetteredChapter()) {
+            return next.isLetteredChapter();
+        }
+        if (current.isNumberedSection()) {
+            return next.isNumberedSection() || next.isLetteredChapter();
+        }
+        return true;
+    }
+
     private static BordereauRowCandidate group(
             GridRow row, String libelle, GridRowClassifier.Kind kind, int order) {
         BordereauRowCandidate.Kind mapped = kind == GridRowClassifier.Kind.LOT
                 ? BordereauRowCandidate.Kind.LOT
                 : BordereauRowCandidate.Kind.SOUS_LOT;
+        String[] split = GridRowClassifier.splitGroupPrefix(libelle);
+        String code = split[0];
+        String label = split[1] != null && !split[1].isBlank() ? split[1] : libelle;
         return new BordereauRowCandidate(
-                rowId(row), pageOf(row), order, null, libelle, null, null, mapped, 0.9d,
+                rowId(row), pageOf(row), order, code, label, null, null, mapped, 0.9d,
                 libelle, BordereauRowCandidate.ExtractionMethod.LOCAL, row.page());
     }
 

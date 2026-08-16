@@ -118,14 +118,11 @@ export class DecompositionWorkspaceComponent {
     return ids;
   });
 
-  readonly filterArticleIds = computed(() => {
-    if (!this.filtreAlertes()) return null;
+  /** Compte affiché à côté de « Afficher les alertes » — ne filtre plus l’arbre. */
+  readonly filtreAlerteCount = computed(() => {
     const fromCouverture = this.articlesAlerteIds();
-    if (fromCouverture.length) return fromCouverture;
-    const fromGate = this.alertesConsultation()
-      .map((a) => a.noeudId)
-      .filter((id): id is string => !!id);
-    return fromGate.length ? fromGate : [];
+    if (fromCouverture.length) return fromCouverture.length;
+    return this.alertesConsultation().filter((a) => !!a.noeudId).length;
   });
 
   constructor() {
@@ -226,8 +223,8 @@ export class DecompositionWorkspaceComponent {
       PosteChiffrageDrawerResult | null
     >(PosteChiffrageDrawerComponent, {
       panelClass: 'poste-chiffrage-drawer-panel',
-      width: 'min(720px, 100vw)',
-      maxWidth: '100vw',
+      width: 'min(64rem, 96vw)',
+      maxWidth: '96vw',
       height: '100vh',
       maxHeight: '100vh',
       position: { right: '0', top: '0' },

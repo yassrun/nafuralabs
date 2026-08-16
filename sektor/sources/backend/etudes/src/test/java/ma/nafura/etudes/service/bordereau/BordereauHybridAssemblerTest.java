@@ -220,6 +220,47 @@ class BordereauHybridAssemblerTest {
         assertThat(prompt).contains("r0").contains("r1").contains("GROUPES").contains("ARTICLES");
     }
 
+    @Test
+    void assembleLocalOnly_nestsLetteredChapterAboveNumberedSections() {
+        List<BordereauRowCandidate> rows = List.of(
+                new BordereauRowCandidate(
+                        "g0", 1, 0, "3", "3- ELECTRICITE", null, null,
+                        BordereauRowCandidate.Kind.LOT, 0.9, "3- ELECTRICITE"),
+                new BordereauRowCandidate(
+                        "g1", 1, 1, "A", "ELECTRICITE - COURANTS FORTS", null, null,
+                        BordereauRowCandidate.Kind.SOUS_LOT, 0.85, "A- ELECTRICITE - COURANTS FORTS"),
+                new BordereauRowCandidate(
+                        "g2", 1, 2, "3.1", "TABLEAUX ELECTRIQUES", null, null,
+                        BordereauRowCandidate.Kind.SECTION, 0.8, "3.1 TABLEAUX"),
+                new BordereauRowCandidate(
+                        "r0", 1, 3, "3.1.1", "TABLEAU TEVO", "E", new BigDecimal("1"),
+                        BordereauRowCandidate.Kind.ARTICLE, 0.9, "3.1.1"),
+                new BordereauRowCandidate(
+                        "g3", 1, 4, "3.2", "Coffrets de branchement", null, null,
+                        BordereauRowCandidate.Kind.SECTION, 0.8, "3.2 Coffrets"),
+                new BordereauRowCandidate(
+                        "r1", 1, 5, "3.2.1", "BOITE DE COUPURE", "U", new BigDecimal("3"),
+                        BordereauRowCandidate.Kind.ARTICLE, 0.9, "3.2.1"));
+        BordereauParseResult parse = new BordereauParseResult(
+                1, 400, rows, Set.of(1), BordereauParseResult.Quality.USABLE, null);
+
+        ImportTreeRequest tree = assembler.assembleLocalOnly(parse);
+        assertThat(tree.getArbre()).hasSize(1);
+        ImportNoeudDto lot = tree.getArbre().get(0);
+        assertThat(lot.getLibelle()).containsIgnoringCase("ELECTRICITE");
+        assertThat(lot.getEnfants()).hasSize(1);
+        ImportNoeudDto chapitreA = lot.getEnfants().get(0);
+        assertThat(chapitreA.getType()).isEqualTo(DpgfNoeud.TYPE_SOUS_LOT);
+        assertThat(chapitreA.getCode()).isEqualTo("A");
+        assertThat(chapitreA.getLibelle()).containsIgnoringCase("COURANTS FORTS");
+        assertThat(chapitreA.getEnfants())
+                .filteredOn(n -> DpgfNoeud.TYPE_SOUS_LOT.equals(n.getType()))
+                .extracting(ImportNoeudDto::getCode)
+                .containsExactly("3.1", "3.2");
+        ImportNoeudDto tableaux = chapitreA.getEnfants().get(0);
+        assertThat(tableaux.getEnfants()).extracting(ImportNoeudDto::getCode).containsExactly("3.1.1");
+    }
+
     private static BordereauParseResult sampleParse() {
         List<BordereauRowCandidate> rows = List.of(
                 new BordereauRowCandidate(

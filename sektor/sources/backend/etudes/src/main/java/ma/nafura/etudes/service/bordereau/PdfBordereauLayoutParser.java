@@ -64,6 +64,10 @@ public class PdfBordereauLayoutParser {
     private static final Pattern LOT_HEADER = Pattern.compile(
             "^(?:LOT\\s*N?[°ºo]?\\s*\\d|LOT\\s*[:\\-–]|LOT\\s+\\d)",
             Pattern.CASE_INSENSITIVE);
+    /** « A- ELECTRICITE - COURANTS FORTS » — chapitre lettré entre le lot et 3.1. */
+    private static final Pattern LETTER_CHAPTER = Pattern.compile(
+            "^([A-Za-z])\\s*[\u2013\u2014/-]\\s+(.+)$",
+            Pattern.DOTALL);
     private static final Pattern HEADER_NOISE = Pattern.compile(
             "(BORDEREAU\\s+DES\\s+PRIX|DESIGNATION\\s+DES|MONTANT\\s+TOTAL|PRIX\\s+UNITAIRE|"
                     + "DETAIL\\s+ESTIMATIF|QUANTITE|N[°ºo]|UNITE)",
@@ -725,6 +729,9 @@ public class PdfBordereauLayoutParser {
         if (LOT_HEADER.matcher(trimmed).find() && trimmed.length() < 80) {
             return BordereauRowCandidate.Kind.LOT;
         }
+        if (LETTER_CHAPTER.matcher(trimmed).matches() && trimmed.length() < 90) {
+            return BordereauRowCandidate.Kind.SOUS_LOT;
+        }
         return null;
     }
 
@@ -931,6 +938,10 @@ public class PdfBordereauLayoutParser {
     }
 
     private static String extractLeadingCode(String text) {
+        Matcher letter = LETTER_CHAPTER.matcher(text.trim());
+        if (letter.matches()) {
+            return letter.group(1).toUpperCase(Locale.ROOT);
+        }
         Matcher m = CODE_PREFIX.matcher(text.trim());
         if (m.matches()) {
             return compactCode(m.group(1));
@@ -942,6 +953,10 @@ public class PdfBordereauLayoutParser {
     }
 
     private static String stripLeadingCode(String text) {
+        Matcher letter = LETTER_CHAPTER.matcher(text.trim());
+        if (letter.matches()) {
+            return letter.group(2).trim();
+        }
         Matcher m = CODE_PREFIX.matcher(text.trim());
         if (m.matches()) {
             return m.group(2).trim();

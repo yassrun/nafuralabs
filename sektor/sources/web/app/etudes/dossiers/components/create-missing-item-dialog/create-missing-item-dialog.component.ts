@@ -1,4 +1,5 @@
 
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -19,6 +20,8 @@ export interface CreateMissingItemDialogData {
   type: string;
   unite: string;
   rendement: number;
+  /** PU déjà chiffré sur le poste — préremplit le tarif catalogue. */
+  prixUnitaire?: number;
   uniteOptions: { code: string; id?: string }[];
   /** catalogue = créer item + tarif ; poste = composant manuel uniquement. */
   mode?: CreateMissingItemMode;
@@ -172,7 +175,10 @@ export class CreateMissingItemDialogComponent {
     this.data.unite ||
     this.data.uniteOptions[0]?.code ||
     'U';
-  prixUnitaire = '0';
+  prixUnitaire =
+    this.data.prixUnitaire != null && Number.isFinite(this.data.prixUnitaire)
+      ? String(this.data.prixUnitaire)
+      : '0';
 
   isCatalogue(): boolean {
     return (this.data.mode ?? 'catalogue') === 'catalogue';
@@ -205,25 +211,32 @@ export class CreateMissingItemDialogComponent {
       return;
     }
 
-    const uom = this.data.uniteOptions.find((u) => u.code === this.unite);
+    const uom = this.data.uniteOptions.find(
+      (u) => u.code.trim().toUpperCase() === this.unite.trim().toUpperCase(),
+    );
     try {
       const item = await this.itemsApi.create({
-        name: this.name.trim(),
+        name: this.name.trim().slice(0, 255),
         nature: this.nature,
         isActive: true,
         unitOfMeasureId: uom?.id,
-        code: undefined,
+        code: `ETU-${Date.now().toString(36).toUpperCase().slice(-8)}`,
+        prixUnitaire: prix,
       });
-      const today = new Date().toISOString().slice(0, 10);
-      const currencyId = await this.resolveReferenceCurrencyId();
-      const payload: ItemPriceCreate = {
-        itemId: item.id,
-        priceType: 'ACHAT_STANDARD',
-        currencyId,
-        unitPrice: prix,
-        effectiveFrom: today,
-      };
-      await this.pricesApi.create(payload);
+      try {
+        const today = new Date().toISOString().slice(0, 10);
+        const currencyId = await this.resolveReferenceCurrencyId();
+        const payload: ItemPriceCreate = {
+          itemId: item.id,
+          priceType: 'ACHAT_STANDARD',
+          currencyId,
+          unitPrice: prix,
+          effectiveFrom: today,
+        };
+        await this.pricesApi.create(payload);
+      } catch {
+        /* article créé — le PU du poste reste la source si le tarif échoue */
+      }
       this.dialogRef.close({
         itemId: item.id,
         code: item.code,
@@ -234,17 +247,14 @@ export class CreateMissingItemDialogComponent {
         sourcePrix: 'TARIF',
       });
     } catch (e) {
-      const err = e as { error?: { message?: string; code?: string } };
-      this.erreur.set(
-        err?.error?.message ?? err?.error?.code ?? 'Impossible de créer l’article catalogue.',
-      );
+      this.erreur.set(catalogCreateError(e));
     } finally {
       this.saving.set(false);
     }
   }
 
   private async resolveReferenceCurrencyId(): Promise<string> {
-    const page = await this.currenciesApi.getAll({ page: 0, pageSize: 100 });
+    const page = await this.currenciesApi.getAll({ page: 1, pageSize: 100 });
     const items = page.items as Array<{ id: string; code?: string; isReference?: boolean }>;
     const ref =
       items.find((c) => c.isReference === true)
@@ -259,4 +269,28 @@ export class CreateMissingItemDialogComponent {
   close(): void {
     this.dialogRef.close(null);
   }
+}
+
+function catalogCreateError(e: unknown): string {
+  if (e instanceof HttpErrorResponse) {
+    const body = e.error;
+    if (body && typeof body === 'object') {
+      const parsed = body as {
+        message?: string;
+        code?: string;
+        fieldErrors?: Array<{ field?: string; message?: string }>;
+      };
+      const fields = (parsed.fieldErrors ?? [])
+        .map((f) => [f.field, f.message].filter(Boolean).join(' : '))
+        .filter(Boolean)
+        .join(' · ');
+      if (fields) return fields;
+      if (parsed.message) return parsed.message;
+      if (parsed.code) return parsed.code;
+    }
+    if (e.status === 0) return 'Réseau : la création n’a pas atteint le serveur. Réessaie.';
+    if (e.message) return e.message;
+  }
+  if (e instanceof Error && e.message) return e.message;
+  return 'Impossible de créer l’article catalogue.';
 }

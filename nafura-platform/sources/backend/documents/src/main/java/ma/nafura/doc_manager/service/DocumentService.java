@@ -105,7 +105,8 @@ public class DocumentService {
             
             String checksum = ContentFingerprint.sha256(fileBytes);
 
-            var existingKey = index.keyFor(tenantId, checksum);
+            var existingKey = index.keyFor(tenantId, checksum)
+                    .filter(documentStorage::exists);
             quota.refuseIfNewObjectExceeds(fileBytes.length, existingKey.isPresent());
             String storageKey = existingKey.orElse(null);
             boolean storedNow = storageKey == null;

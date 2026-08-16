@@ -121,7 +121,9 @@ public class DocumentExtractionJob {
     }
 
     public boolean peutRelancer() {
-        return STATUS_FAILED.equals(status) || STATUS_CANCELLED.equals(status);
+        return STATUS_FAILED.equals(status)
+                || STATUS_CANCELLED.equals(status)
+                || STATUS_SUCCEEDED.equals(status);
     }
 
     @PrePersist

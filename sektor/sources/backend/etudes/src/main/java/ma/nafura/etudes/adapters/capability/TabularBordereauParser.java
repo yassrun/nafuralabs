@@ -35,6 +35,9 @@ public class TabularBordereauParser {
             Pattern.CASE_INSENSITIVE);
     private static final Pattern SOUS_LOT = Pattern.compile("SOUS\\s*LOT", Pattern.CASE_INSENSITIVE);
     private static final Pattern LOT = Pattern.compile("\\bLOT\\b", Pattern.CASE_INSENSITIVE);
+    private static final Pattern LETTER_CHAPTER = Pattern.compile(
+            "^([A-Za-z])\\s*[\u2013\u2014/-]\\s+(.+)$",
+            Pattern.DOTALL);
 
     /** Mêmes seuils que le chemin PDF : les deux sources doivent juger une lecture pareillement. */
     private static final int MIN_ARTICLE_CANDIDATES = PdfBordereauLayoutParser.MIN_ARTICLE_CANDIDATES;
@@ -178,6 +181,22 @@ public class TabularBordereauParser {
         }
         if (SOUS_LOT.matcher(up).find()) {
             return group("g" + order, page, order, joined, BordereauRowCandidate.Kind.SOUS_LOT);
+        }
+        Matcher letter = LETTER_CHAPTER.matcher(joined.trim());
+        if (letter.matches()) {
+            return new BordereauRowCandidate(
+                    "g" + order,
+                    page,
+                    order,
+                    letter.group(1).toUpperCase(Locale.ROOT),
+                    letter.group(2).trim(),
+                    null,
+                    null,
+                    BordereauRowCandidate.Kind.SOUS_LOT,
+                    0.8,
+                    raw,
+                    BordereauRowCandidate.ExtractionMethod.TABLE,
+                    raw);
         }
         if (LOT.matcher(up).find() && !up.contains("SOUS")) {
             return group("g" + order, page, order, joined, BordereauRowCandidate.Kind.LOT);

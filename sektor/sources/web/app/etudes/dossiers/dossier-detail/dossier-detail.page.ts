@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import { map } from 'rxjs';
 
 import {
@@ -72,6 +73,7 @@ export class DossierDetailPage {
   private readonly nav = inject(Router);
   private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly printDialog = inject(PrintDialogService);
+  private readonly translate = inject(TranslateService);
   private readonly decomposition = viewChild(DecompositionWorkspaceComponent);
 
   readonly dossier = signal<DossierEtude | undefined>(undefined);
@@ -615,20 +617,33 @@ export class DossierDetailPage {
       message?: string;
       error?: { message?: string; code?: string } | string;
     };
-    if (err?.status === 409) {
-      return "Ce dossier a été modifié entre-temps par quelqu'un d'autre. Rechargez la page avant de reprendre — vos modifications n'ont pas été enregistrées.";
-    }
     if (err?.status === 403) {
       return "Vous n'avez pas la permission nécessaire pour cette action.";
     }
     const code = typeof err?.error === 'object' ? err?.error?.code : undefined;
-    if (code === 'etudes.bordereau.remplacement_non_confirme') {
+    const apiMsg = typeof err?.error === 'object' ? err?.error?.message : typeof err?.error === 'string' ? err.error : undefined;
+    const domain =
+      (apiMsg?.startsWith('etudes.') ? apiMsg : undefined) ??
+      (code?.startsWith('etudes.') ? code : undefined);
+    if (domain === 'etudes.bordereau.remplacement_non_confirme') {
       return 'Confirmez le remplacement du bordereau existant (structure et chiffrage seront effacés).';
     }
-    if (code === 'etudes.bordereau.structure_verrouillee') {
+    if (domain === 'etudes.bordereau.structure_verrouillee') {
       return 'La structure est figée. Réouvrez le bordereau pour modifier lots et postes.';
     }
-    const apiMsg = typeof err?.error === 'object' ? err?.error?.message : typeof err?.error === 'string' ? err.error : undefined;
-    return apiMsg ?? code ?? err?.message ?? 'Une erreur est survenue.';
+    if (domain) {
+      return this.libelleErreur(domain) ?? domain;
+    }
+    if (err?.status === 409) {
+      return "Ce dossier a été modifié entre-temps par quelqu'un d'autre. Rechargez la page avant de reprendre — vos modifications n'ont pas été enregistrées.";
+    }
+    return this.libelleErreur(apiMsg) ?? this.libelleErreur(code) ?? err?.message ?? 'Une erreur est survenue.';
+  }
+
+  private libelleErreur(key: string | undefined): string | undefined {
+    if (!key) return undefined;
+    if (!key.startsWith('etudes.')) return key;
+    const translated = this.translate.instant(key);
+    return translated !== key ? translated : key;
   }
 }

@@ -60,7 +60,10 @@ public final class GridRowClassifier {
     private static final Pattern SOUS_LOT_KEYWORD =
             Pattern.compile("^\\s*SOUS[\\s-]?LOT\\b", Pattern.CASE_INSENSITIVE);
     private static final Pattern PREFIX =
-            Pattern.compile("^\\s*(\\d+(?:[-.]\\d+)*|[a-zA-Z])\\s*[-\u2013/]\\s*(.+)$");
+            Pattern.compile("^\\s*(\\d+(?:[-.]\\d+)*|[A-Za-z])\\s*[-\\u2013/]\\s*(.+)$");
+    /** « 3.2 Coffrets » / « 3.1. TABLEAUX » — numéro de section sans tiret séparateur. */
+    private static final Pattern SECTION_TITLE =
+            Pattern.compile("^\\s*(\\d+(?:[-.]\\d+)+)\\.?\\s+(.+)$");
     private static final Pattern ROMAN = Pattern.compile("^\\s*([IVX]{1,5})\\s*[-\u2013/]");
     /** Folio réimprimé « IV/1 », « IV/15 » — pas un lot. */
     private static final Pattern PAGE_MARK =
@@ -285,8 +288,13 @@ public final class GridRowClassifier {
         String token = null;
         if (prefix.matches()) {
             token = prefix.group(1);
-        } else if (!code.isEmpty() && code.length() <= 12 && !code.contains(" ")) {
-            token = code;
+        } else {
+            Matcher section = SECTION_TITLE.matcher(designation);
+            if (section.matches()) {
+                token = section.group(1);
+            } else if (!code.isEmpty() && code.length() <= 12 && !code.contains(" ")) {
+                token = code;
+            }
         }
         if (token == null || token.isEmpty()) {
             return null;
@@ -401,6 +409,21 @@ public final class GridRowClassifier {
         } catch (NumberFormatException e) {
             return null;
         }
+    }
+
+    static String[] splitGroupPrefix(String designation) {
+        if (designation == null || designation.isBlank()) {
+            return new String[] {null, designation};
+        }
+        Matcher m = PREFIX.matcher(designation.trim());
+        if (m.matches()) {
+            return new String[] {m.group(1), m.group(2).trim()};
+        }
+        m = SECTION_TITLE.matcher(designation.trim());
+        if (m.matches()) {
+            return new String[] {m.group(1), m.group(2).trim()};
+        }
+        return new String[] {null, designation};
     }
 
     static Matcher sectionMajor(String designation) {

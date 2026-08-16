@@ -6,7 +6,14 @@
         <span class="arbre__compte">
           {{ compteExploitables() }} article{{ compteExploitables() === 1 ? '' : 's' }}
           @if (compteIgnores() > 0) {
-            <span class="arbre__compte-warn"> · {{ compteIgnores() }} à corriger</span>
+            <button
+              type="button"
+              class="arbre__compte-warn"
+              (click)="revelerIncomplets()"
+              [attr.title]="'Voir les ' + compteIgnores() + ' lignes à corriger'"
+            >
+              · {{ compteIgnores() }} à corriger
+            </button>
           }
         </span>
       }

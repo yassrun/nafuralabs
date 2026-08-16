@@ -77,6 +77,26 @@ public record BordereauRowCandidate(
         return kind == Kind.ARTICLE || (kind == Kind.AMBIGUOUS && hasPricing());
     }
 
+    /** Chapitre lettré « A- COURANTS FORTS » — entre le lot et les sections 3.1 / 3.2. */
+    public boolean isLetteredChapter() {
+        String c = code == null ? "" : code.trim();
+        if (c.matches("(?i)^[A-Z]$")) {
+            return true;
+        }
+        String lib = libelle == null ? "" : libelle.trim();
+        return lib.matches("(?i)^[A-Z]\\s*[\u2013\u2014/-].+");
+    }
+
+    /** Section numérotée « 3.1 TABLEAUX » / « 3.2- Coffrets ». */
+    public boolean isNumberedSection() {
+        String c = code == null ? "" : code.trim().replaceAll("\\s+", "");
+        if (c.matches("\\d+[.\\-]\\d+.*")) {
+            return true;
+        }
+        String lib = libelle == null ? "" : libelle.trim();
+        return lib.matches("(?i)^\\d+[.\\-]\\d+\\b.*");
+    }
+
     public boolean isDeterministic() {
         return method == ExtractionMethod.PDFBOX
                 || method == ExtractionMethod.TABLE

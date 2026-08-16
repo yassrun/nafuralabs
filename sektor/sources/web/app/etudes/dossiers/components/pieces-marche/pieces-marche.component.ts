@@ -7,6 +7,7 @@ import {
   input,
   output,
   signal,
+  viewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -76,6 +77,8 @@ export class PiecesMarcheComponent {
 
   readonly change = output<void>();
   readonly voieChange = output<'auto' | 'manuel'>();
+
+  private readonly arbre = viewChild(BordereauArbreComponent);
 
   readonly acceptFiles =
     '.pdf,.xlsx,.xls,.csv,.doc,.docx,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
@@ -329,6 +332,11 @@ export class PiecesMarcheComponent {
       }
     } catch (e) {
       this.erreur.set(this.messageErreur(e));
+      try {
+        await this.charger(this.dossierId());
+      } catch {
+        /* l'erreur de dépôt prime */
+      }
     } finally {
       this.envoiSlot.set(null);
     }
@@ -549,10 +557,12 @@ export class PiecesMarcheComponent {
       this.dpgfIdLocal.set(saved.dpgfId);
       this.resetExtractionState();
       if (saved.articlesIgnores > 0) {
+        this.voie.set('manuel');
+        this.voieChange.emit('manuel');
         this.info.set(
           `${saved.articlesAcceptes} article${saved.articlesAcceptes > 1 ? 's' : ''} importé${
             saved.articlesAcceptes > 1 ? 's' : ''
-          } — ${saved.articlesIgnores} ignoré${saved.articlesIgnores > 1 ? 's' : ''} (unité ou quantité manquante). Passez en manuel : les lignes concernées sont marquées dans l’arbre.`,
+          } — ${saved.articlesIgnores} à corriger (unité ou quantité manquante). Les lignes restent dans l’arbre, marquées « incomplet ». Cliquez « ${saved.articlesIgnores} à corriger » pour les voir.`,
         );
       } else {
         this.info.set(
@@ -613,6 +623,10 @@ export class PiecesMarcheComponent {
   annulerExtraction(): void {
     this.resetExtractionState();
     this.info.set(undefined);
+  }
+
+  voirLignesACorriger(): void {
+    this.arbre()?.revelerIncomplets();
   }
 
   /** Polling jusqu'à terminal (SUCCEEDED / FAILED / CANCELLED). Vision multi-pages = long. */
@@ -724,9 +738,10 @@ export class PiecesMarcheComponent {
   private messageErreur(e: unknown): string {
     const err = e as {
       status?: number;
+      statusText?: string;
       message?: string;
       name?: string;
-      error?: { message?: string; code?: string };
+      error?: { message?: string; code?: string; error?: string } | string;
     };
     // Backend coupé / CORS / network (status 0 seulement — pas les 4xx/5xx Angular « Http failure »).
     if (
@@ -741,15 +756,31 @@ export class PiecesMarcheComponent {
     if (err?.status === 403) {
       return "Vous n'avez pas la permission de déposer des pièces.";
     }
-    if (err?.status === 413 || err?.error?.code === 'PAYLOAD_TOO_LARGE') {
+    const body = err?.error;
+    const fromBody =
+      typeof body === 'string'
+        ? body
+        : body && typeof body === 'object'
+          ? (body.code ?? body.message ?? body.error)
+          : undefined;
+    const domain =
+      typeof body === 'object' && body && typeof body.message === 'string' && body.message.startsWith('etudes.')
+        ? body.message
+        : typeof fromBody === 'string' && fromBody.startsWith('etudes.')
+          ? fromBody
+          : undefined;
+    if (err?.status === 413 || fromBody === 'PAYLOAD_TOO_LARGE') {
       return 'Fichier trop volumineux — utilisez un PDF de moins de 50 Mo.';
     }
-    const code = err?.error?.code ?? err?.error?.message;
+    const code = domain ?? fromBody;
     if (code === 'etudes.bordereau.aucune_piece_stockee') {
       return 'Aucun BDP stocké à l’étape Documents. Revenez en arrière et déposez le bordereau.';
     }
     if (code === 'etudes.document.telechargement_impossible') {
-      return 'Ce fichier a été déposé avant le stockage MinIO — retirez-le et déposez-le à nouveau à l’étape Documents.';
+      return 'Le fichier n’a pas pu être relu dans le stockage. Retirez-le et déposez-le à nouveau.';
+    }
+    if (code === 'etudes.document.lecture_impossible') {
+      return 'Impossible de lire le fichier déposé — réessayez avec un PDF.';
     }
     if (code === 'etudes.bordereau.aucun_article_exploitable') {
       return 'Aucun article exploitable après validation — chaque article doit avoir une unité et une quantité > 0.';
@@ -757,7 +788,16 @@ export class PiecesMarcheComponent {
     if (code === 'etudes.bordereau.arbre_vide') {
       return 'Arbre vide — ajoutez au moins un lot et un article.';
     }
-    const raw = code ?? '';
+    if (code === 'etudes.dossier.verrouille') {
+      return 'Ce dossier est verrouillé — les pièces ne peuvent plus être modifiées.';
+    }
+    if (err?.status === 409) {
+      return 'Ce dossier a été modifié entre-temps. Rechargez la page, puis réessayez.';
+    }
+    const raw = (typeof code === 'string' ? code : '') || '';
+    if (raw.toUpperCase() === 'CONFLICT') {
+      return 'Ce dossier a été modifié entre-temps. Rechargez la page, puis réessayez.';
+    }
     if (
       raw.includes('EXTRACTION_TIMEOUT') ||
       raw.includes('EOF') ||
@@ -768,6 +808,6 @@ export class PiecesMarcheComponent {
     if (e instanceof Error && e.message === 'EXTRACTION_TIMEOUT') {
       return 'Extraction encore en cours après plusieurs minutes — réessayez plus tard.';
     }
-    return code ?? 'Échec de l’opération.';
+    return (typeof code === 'string' ? code : undefined) ?? 'Échec de l’opération.';
   }
 }

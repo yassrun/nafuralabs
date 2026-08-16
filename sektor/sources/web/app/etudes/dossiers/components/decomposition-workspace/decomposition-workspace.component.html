@@ -28,7 +28,7 @@
             Afficher les alertes
             @if (filtreAlertes()) {
               <span class="workspace__filtre-count">
-                ({{ filterArticleIds()?.length ?? 0 }})
+                ({{ filtreAlerteCount() }})
               </span>
             }
           </label>
@@ -68,7 +68,6 @@
       [expandArticleIds]="expandArticleIds()"
       [searchQuery]="search()"
       [reloadToken]="treeReloadToken()"
-      [filterArticleIds]="filterArticleIds()"
       (posteSelect)="onSelectPoste($event)"
       (change)="onTreeChange()"
     />

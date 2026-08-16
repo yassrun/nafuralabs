@@ -52,6 +52,10 @@ import { buildComposantDirtyKey } from '../../utils/poste-dirty.util';
 import { toUniteOptions, type UniteOption } from '../../utils/unite-options.util';
 import { CpsDescriptifDialogComponent } from '../cps-descriptif-dialog/cps-descriptif-dialog.component';
 import {
+  CatalogItemPickDialogComponent,
+  type CatalogItemPickDialogResult,
+} from '../catalog-item-pick-dialog/catalog-item-pick-dialog.component';
+import {
   CreateMissingItemDialogComponent,
   type CreateMissingItemDialogResult,
 } from '../create-missing-item-dialog/create-missing-item-dialog.component';
@@ -74,6 +78,7 @@ const TYPE_LABELS: Record<ComposantDPU['type'], string> = {
 const SOURCE_LABELS: Record<string, string> = {
   MANUEL: 'Manuel',
   CATALOGUE: 'Catalogue',
+  TARIF: 'Catalogue',
   CONSULTE: 'Consulté',
   BIBLIOTHEQUE: 'Bibliothèque',
 };
@@ -503,7 +508,9 @@ export class PosteDecompositionPanelComponent {
       );
       const texte = propose?.texte?.trim() ?? '';
       if (!texte) {
-        this.toast.info('Aucune section CPS pertinente pour cet article.');
+        this.toast.info(
+          'Pas de descriptif CPS pour cet article — ce n’est pas bloquant. Extraire les composants se fait depuis le libellé.',
+        );
         return;
       }
 
@@ -541,9 +548,14 @@ export class PosteDecompositionPanelComponent {
       const cpsId = this.cpsDocumentId();
       const loader = () =>
         this.dossierApi.proposerDecomposition(dossierId, articleId, cpsId);
-      const propose = await this.proposeCache.getOrLoad(dossierId, articleId, cpsId, loader);
+      let propose = await this.proposeCache.getOrLoad(dossierId, articleId, cpsId, loader);
       if (!propose || (!(propose.matched?.length) && !(propose.missing?.length))) {
-        this.toast.info('Aucun composant détecté pour cet article.');
+        propose = await this.proposeCache.refresh(dossierId, articleId, cpsId, loader);
+      }
+      if (!propose || (!(propose.matched?.length) && !(propose.missing?.length))) {
+        this.toast.info(
+          'Aucun composant détecté à partir du libellé. Ajoutez-les à la main, ou saisissez un descriptif puis réessayez.',
+        );
         return;
       }
 
@@ -658,6 +670,7 @@ export class PosteDecompositionPanelComponent {
         type: row.type,
         unite: row.unite,
         rendement: row.quantite,
+        prixUnitaire: row.prixUnitaire,
         uniteOptions: this.uniteOptions(),
         mode: 'catalogue',
       },
@@ -806,6 +819,56 @@ export class PosteDecompositionPanelComponent {
       ]),
     );
     this.markDpuDirty();
+  }
+
+  async ajouterDepuisCatalogue(): Promise<void> {
+    if (!this.canMutate()) return;
+    if (!this.estDecompose()) {
+      const ok = await this.passerEnDecomposition({ skipConfirm: true });
+      if (!ok) return;
+    }
+    const result = (await firstValueFrom(
+      this.dialog
+        .open(CatalogItemPickDialogComponent, {
+          width: '36rem',
+          autoFocus: false,
+          restoreFocus: true,
+          data: { uniteOptions: this.uniteOptions() },
+        })
+        .afterClosed(),
+    )) as CatalogItemPickDialogResult | null;
+    if (!result?.itemId) return;
+    if (this.composants().some((c) => c.itemId === result.itemId)) {
+      this.toast.info('Ce composant catalogue est déjà dans le poste.');
+      return;
+    }
+    const id = safeRandomUUID();
+    this.composantsBrouillon.set(
+      this.dpuMath.recomputeTotals([
+        ...this.composants(),
+        {
+          id,
+          type: result.type,
+          referenceType: 'ITEM',
+          itemId: result.itemId,
+          ouvrageId: null,
+          libelle: result.name,
+          articleOuPosteId: result.name,
+          quantite: result.quantite,
+          unite: result.unite,
+          prixUnitaire: result.prixUnitaire,
+          total: Math.round(result.quantite * result.prixUnitaire * 100) / 100,
+          sourcePrix: result.sourcePrix,
+        },
+      ]),
+    );
+    this.composantsLabels.update((current) => {
+      const next = new Map(current);
+      next.set(id, result.name);
+      return next;
+    });
+    this.markDpuDirty();
+    this.toast.success('Composant ajouté depuis le catalogue — enregistrez le poste.');
   }
 
   async modifierSousDetail(row: ComposantDPU): Promise<void> {

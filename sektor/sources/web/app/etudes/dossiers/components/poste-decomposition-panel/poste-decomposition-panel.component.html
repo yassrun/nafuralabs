@@ -71,10 +71,23 @@
                   icon="sparkles"
                   [loading]="propositionCps()"
                   [disabled]="chargement() || sauvegarde() || propositionCps() || extractionComposants()"
-                  tooltip="Affiche le descriptif technique du CPS pour cet article"
+                  tooltip="Affiche le descriptif technique du CPS pour cet article (optionnel)"
                   (clicked)="proposerDepuisCps()"
                 >
                   Voir le descriptif CPS
+                </nf-button>
+              }
+              @if (modifiable() && dossierId()) {
+                <nf-button
+                  variant="secondary"
+                  size="sm"
+                  icon="sparkles"
+                  [loading]="extractionComposants()"
+                  [disabled]="chargement() || sauvegarde() || propositionCps() || extractionComposants()"
+                  tooltip="Propose une décomposition à partir du libellé, même sans descriptif CPS"
+                  (clicked)="extraireComposants()"
+                >
+                  Extraire les composants
                 </nf-button>
               }
             </div>
@@ -99,7 +112,7 @@
                 icon="sparkles"
                 [loading]="propositionCps()"
                 [disabled]="chargement() || sauvegarde() || propositionCps() || extractionComposants()"
-                tooltip="Affiche le descriptif technique du CPS pour cet article"
+                tooltip="Affiche le descriptif technique du CPS pour cet article (optionnel)"
                 (clicked)="proposerDepuisCps()"
               >
                 Voir le descriptif CPS
@@ -112,7 +125,7 @@
                 icon="sparkles"
                 [loading]="extractionComposants()"
                 [disabled]="chargement() || sauvegarde() || propositionCps() || extractionComposants()"
-                tooltip="Détecte les composants catalogue consultables à partir du CPS"
+                tooltip="Propose une décomposition à partir du libellé, du descriptif et du CPS s’il est disponible"
                 (clicked)="extraireComposants()"
               >
                 Extraire les composants
@@ -165,6 +178,9 @@
                   Rafraîchir les prix
                 </nf-button>
               }
+              <nf-button variant="secondary" size="sm" (clicked)="ajouterDepuisCatalogue()">
+                Depuis le catalogue
+              </nf-button>
               <nf-button variant="primary" size="sm" (clicked)="ajouterSousDetail()">
                 Ajouter un composant
               </nf-button>
@@ -320,33 +336,31 @@
           <div class="poste__vide poste__vide--decompo">
             <p>Décomposez ce poste</p>
             <p>
-              Extraire les composants depuis le CPS, ou ajoutez-les à la main (matières,
-              main-d’œuvre, matériel, sous-traitance).
+              L’IA propose une décomposition à partir du libellé (descriptif et CPS s’ils sont
+              là), ou ajoutez les composants à la main (matières, main-d’œuvre, matériel,
+              sous-traitance).
             </p>
-            @if (modifiable()) {
+            @if (modifiable() && dossierId()) {
               <div class="poste__vide-actions">
-                @if (peutProposerCps()) {
-                  <nf-button
-                    variant="primary"
-                    size="sm"
-                    icon="sparkles"
-                    [loading]="extractionComposants()"
-                    [disabled]="
-                      chargement() || sauvegarde() || propositionCps() || extractionComposants()
-                    "
-                    tooltip="Détecte les composants catalogue consultables à partir du CPS"
-                    (clicked)="extraireComposants()"
-                  >
-                    Extraire depuis le CPS
-                  </nf-button>
-                  <nf-button variant="secondary" size="sm" (clicked)="ajouterSousDetail()">
-                    Ajouter manuellement
-                  </nf-button>
-                } @else {
-                  <nf-button variant="primary" size="sm" (clicked)="ajouterSousDetail()">
-                    Ajouter un composant
-                  </nf-button>
-                }
+                <nf-button
+                  variant="primary"
+                  size="sm"
+                  icon="sparkles"
+                  [loading]="extractionComposants()"
+                  [disabled]="
+                    chargement() || sauvegarde() || propositionCps() || extractionComposants()
+                  "
+                  tooltip="Propose une décomposition à partir du libellé, du descriptif et du CPS s’il est disponible"
+                  (clicked)="extraireComposants()"
+                >
+                  Extraire les composants
+                </nf-button>
+                <nf-button variant="secondary" size="sm" (clicked)="ajouterDepuisCatalogue()">
+                  Depuis le catalogue
+                </nf-button>
+                <nf-button variant="secondary" size="sm" (clicked)="ajouterSousDetail()">
+                  Ajouter manuellement
+                </nf-button>
               </div>
             }
           </div>
@@ -397,13 +411,13 @@
                     @if (modifiable()) {
                       <td class="actions">
                         <span class="poste__row-actions">
-                          @if (estSuggereParIa(row) && !estComposantCatalogue(row)) {
+                          @if (!estComposantCatalogue(row)) {
                             <nf-button
                               variant="ghost"
                               size="sm"
                               (clicked)="ajouterComposantAuCatalogue(row)"
                             >
-                              Catalogue
+                              Créer dans le catalogue
                             </nf-button>
                           }
                           @if (row.sourcePrix !== 'CONSULTE') {
@@ -438,13 +452,12 @@
                           </button>
                           <button
                             type="button"
-                            mat-icon-button
                             class="poste__icon-btn poste__icon-btn--danger"
-                            matTooltip="Supprimer"
                             [attr.aria-label]="'Supprimer ' + libelleComposant(row)"
                             (click)="supprimerSousDetail(row)"
                           >
                             <mat-icon>delete</mat-icon>
+                            <span>Supprimer</span>
                           </button>
                         </span>
                       </td>
@@ -481,13 +494,13 @@
                 <p class="card__total">{{ row.total | number: '1.2-2' }} MAD</p>
                 @if (modifiable()) {
                   <div class="card__actions">
-                    @if (estSuggereParIa(row) && !estComposantCatalogue(row)) {
+                    @if (!estComposantCatalogue(row)) {
                       <nf-button
                         variant="ghost"
                         size="sm"
                         (clicked)="ajouterComposantAuCatalogue(row)"
                       >
-                        Catalogue
+                        Créer dans le catalogue
                       </nf-button>
                     }
                     @if (row.sourcePrix !== 'CONSULTE') {
@@ -517,13 +530,12 @@
                     </button>
                     <button
                       type="button"
-                      mat-icon-button
                       class="poste__icon-btn poste__icon-btn--danger"
-                      matTooltip="Supprimer"
                       aria-label="Supprimer"
                       (click)="supprimerSousDetail(row)"
                     >
                       <mat-icon>delete</mat-icon>
+                      <span>Supprimer</span>
                     </button>
                   </div>
                 }

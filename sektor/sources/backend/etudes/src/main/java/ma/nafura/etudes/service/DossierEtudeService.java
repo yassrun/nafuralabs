@@ -41,6 +41,7 @@ import ma.nafura.etudes.service.port.bc.ChainageAvalPort;
 import ma.nafura.etudes.service.port.capability.EtudeApprovalPort;
 import ma.nafura.etudes.service.port.bc.EtudeClientPort;
 import ma.nafura.platform.framework.context.TenantContext;
+import ma.nafura.platform.framework.context.UserContext;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -353,7 +354,9 @@ public class DossierEtudeService {
                 ? dossier.getValidationEtape()
                 : DossierEtude.VALIDATION_N1;
 
-        if (StringUtils.hasText(dossier.getApprovalRequestId()) && approvalPort.isAvailable()) {
+        if (StringUtils.hasText(dossier.getApprovalRequestId())
+                && approvalPort.isAvailable()
+                && !UserContext.isOwnerOrSuperAdmin()) {
             approvalPort.approuverEtape(dossier.getApprovalRequestId(), approbateur, approbateur, null);
         }
 
@@ -382,7 +385,9 @@ public class DossierEtudeService {
         if (dossier.getStatus() != StatutDossierEtude.EN_VALIDATION) {
             throw new IllegalStateException("etudes.dossier.refus_hors_etat");
         }
-        if (StringUtils.hasText(dossier.getApprovalRequestId()) && approvalPort.isAvailable()) {
+        if (StringUtils.hasText(dossier.getApprovalRequestId())
+                && approvalPort.isAvailable()
+                && !UserContext.isOwnerOrSuperAdmin()) {
             approvalPort.refuser(dossier.getApprovalRequestId(), null, null, motif.trim());
         }
         dossier.setMotifRefus(motif.trim());
@@ -421,7 +426,7 @@ public class DossierEtudeService {
                 && dossier.getStatus() != StatutDossierEtude.DEVIS_GENERE) {
             throw new IllegalStateException("etudes.dossier.devis_hors_etat");
         }
-        return tenterGenerationDevis(dossier);
+        return exigenceGenerationDevis(dossier);
     }
 
     @Transactional(readOnly = true)
@@ -842,7 +847,23 @@ public class DossierEtudeService {
                 dossier.getDpgfId(), tenantId());
     }
 
+    /** Best-effort après validation interne : le dossier reste VALIDEE si le client n'est pas encore lié. */
     private DossierEtude tenterGenerationDevis(DossierEtude dossier) {
+        if (dossier.getDevisGenereId() != null) {
+            return exigenceGenerationDevis(dossier);
+        }
+        if (dossier.getDpgfId() == null || !StringUtils.hasText(dossier.getClientId())) {
+            return dossier;
+        }
+        try {
+            clientPort.requireClientRole(dossier.getClientId());
+        } catch (RuntimeException ignored) {
+            return dossier;
+        }
+        return exigenceGenerationDevis(dossier);
+    }
+
+    private DossierEtude exigenceGenerationDevis(DossierEtude dossier) {
         if (dossier.getDevisGenereId() != null) {
             if (dossier.getStatus() == StatutDossierEtude.VALIDEE
                     && dossier.getStatus().peutTransitionnerVers(StatutDossierEtude.DEVIS_GENERE)) {
@@ -910,6 +931,9 @@ public class DossierEtudeService {
     }
 
     private void assertPeutApprouver(DossierEtude dossier, String approbateur) {
+        if (UserContext.isOwnerOrSuperAdmin()) {
+            return;
+        }
         if (!StringUtils.hasText(approbateur)) {
             return;
         }

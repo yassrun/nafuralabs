@@ -85,6 +85,17 @@ public class UserContext {
         return USER_ROLE.get();
     }
 
+    /** Tenant OWNER — lab / PME : peut trancher une approbation sans être l'approbateur N+1. */
+    public static boolean isTenantOwner() {
+        String role = getUserRole();
+        return role != null && "OWNER".equalsIgnoreCase(role);
+    }
+
+    /** Mode B QA owner is provisioned as SUPER_ADMIN; treat as owner for lab four-eyes bypass. */
+    public static boolean isOwnerOrSuperAdmin() {
+        return isSuperAdmin() || isTenantOwner();
+    }
+
     public static void setUserId(UUID userId) {
         USER_ID.set(userId);
     }

@@ -86,10 +86,18 @@ public class BordereauHybridAssembler {
         int byCodeSous = countKind(byCode.getArbre(), DpgfNoeud.TYPE_SOUS_LOT);
         int seqSous = countKind(sequential.getArbre(), DpgfNoeud.TYPE_SOUS_LOT);
 
+        boolean hasLetteredChapter = false;
+        for (BordereauRowCandidate row : parse.rows()) {
+            if (row.isLetteredChapter()) {
+                hasLetteredChapter = true;
+                break;
+            }
+        }
         // Villa / tableurs : bandeaux SOUS_LOT sans code (« MENUISERIE BOIS »). Le rattachement
         // par préfixe de code les ignore et plaque tous les articles sous le LOT → 1.7 puis 1.2
         // sans parent. L'ordre documentaire les conserve.
-        boolean preferSequential = seqSous > byCodeSous
+        // BDP lettré (A- COURANTS FORTS → 3.1 / 3.2) : l'ordre documentaire nest le chapitre.
+        boolean preferSequential = (seqSous > byCodeSous || (hasLetteredChapter && seqSous >= byCodeSous))
                 && seqArticles >= Math.max(1, (expected + 1) / 2)
                 && seqArticles >= (int) Math.floor(byCodeArticles * 0.9);
         if (preferSequential) {
@@ -183,27 +191,40 @@ public class BordereauHybridAssembler {
         }
 
         Map<String, ImportNoeudDto> sectionByKey = new LinkedHashMap<>();
+        Map<String, ImportNoeudDto> chapitreByLot = new LinkedHashMap<>();
+        String cursorLot = lotsByKey.isEmpty() ? null : lotsByKey.keySet().iterator().next();
         for (BordereauRowCandidate row : parse.rows()) {
-            if (row.kind() != BordereauRowCandidate.Kind.SECTION) {
-                continue;
-            }
             if (PdfBordereauLayoutParser.isMarketTitleNoise(row.libelle())) {
                 continue;
             }
-            if (isTopLevelSection(row.code())) {
-                continue; // already used as lot label
-            }
-            String lotKey = leadingLotKey(row.code());
-            if (lotKey == null || !lotsByKey.containsKey(lotKey)) {
+            if (row.kind() == BordereauRowCandidate.Kind.LOT) {
+                String key = extractLotKey(row);
+                if (key != null && lotsByKey.containsKey(key)) {
+                    cursorLot = key;
+                }
                 continue;
             }
-            String sectionKey = compactCode(row.code());
-            if (sectionKey == null || sectionByKey.containsKey(sectionKey)) {
+            if (row.kind() == BordereauRowCandidate.Kind.SOUS_LOT) {
+                String keyFromLibelle = lotKeyFromSousLotLibelle(row.libelle());
+                if (keyFromLibelle != null && lotsByKey.containsKey(keyFromLibelle)) {
+                    cursorLot = keyFromLibelle;
+                    continue;
+                }
+                if (row.isLetteredChapter() && cursorLot != null && lotsByKey.containsKey(cursorLot)) {
+                    ImportNoeudDto chapter = newGroup(DpgfNoeud.TYPE_SOUS_LOT, row);
+                    lotsByKey.get(cursorLot).getEnfants().add(chapter);
+                    chapitreByLot.put(cursorLot, chapter);
+                    continue;
+                }
+                if (row.isNumberedSection()) {
+                    attachNumberedSection(row, lotsByKey, sectionByKey, chapitreByLot);
+                }
                 continue;
             }
-            ImportNoeudDto section = newGroup(DpgfNoeud.TYPE_SOUS_LOT, row);
-            lotsByKey.get(lotKey).getEnfants().add(section);
-            sectionByKey.put(sectionKey, section);
+            if (row.kind() != BordereauRowCandidate.Kind.SECTION) {
+                continue;
+            }
+            attachNumberedSection(row, lotsByKey, sectionByKey, chapitreByLot);
         }
 
         for (BordereauRowCandidate row : parse.articleCandidates()) {
@@ -221,7 +242,7 @@ public class BordereauHybridAssembler {
             }
             String sectionKey = sectionKeyForArticle(row.code());
             ImportNoeudDto section = sectionKey != null ? sectionByKey.get(sectionKey) : null;
-            if (section != null && lot.getEnfants().contains(section)) {
+            if (section != null) {
                 section.getEnfants().add(article);
             } else {
                 lot.getEnfants().add(article);
@@ -406,6 +427,7 @@ public class BordereauHybridAssembler {
     private ImportTreeRequest assembleSequential(BordereauParseResult parse) {
         ImportTreeRequest tree = new ImportTreeRequest();
         ImportNoeudDto currentLot = null;
+        ImportNoeudDto currentChapitre = null;
         ImportNoeudDto currentSousLot = null;
 
         for (BordereauRowCandidate row : parse.rows()) {
@@ -415,10 +437,12 @@ public class BordereauHybridAssembler {
                 }
                 currentLot = newGroup(DpgfNoeud.TYPE_LOT, row);
                 tree.getArbre().add(currentLot);
+                currentChapitre = null;
                 currentSousLot = null;
                 continue;
             }
-            if (row.kind() == BordereauRowCandidate.Kind.SOUS_LOT) {
+            if (row.kind() == BordereauRowCandidate.Kind.SOUS_LOT
+                    || row.kind() == BordereauRowCandidate.Kind.SECTION) {
                 if (PdfBordereauLayoutParser.isMarketTitleNoise(row.libelle())) {
                     continue;
                 }
@@ -430,27 +454,15 @@ public class BordereauHybridAssembler {
                             chapterKey,
                             chapterTitleFromSousLot(row.libelle()));
                     tree.getArbre().add(currentLot);
+                    currentChapitre = null;
                     currentSousLot = null;
-                } else {
-                    // Sous-section (ex. 1-05 MAÇONNERIES) → enfant, pas racine
-                    if (currentLot == null) {
-                        currentLot = newGroup(DpgfNoeud.TYPE_LOT, "1", "Lot 1");
-                        tree.getArbre().add(currentLot);
-                    }
-                    currentSousLot = newGroup(DpgfNoeud.TYPE_SOUS_LOT, row);
-                    currentLot.getEnfants().add(currentSousLot);
-                }
-                continue;
-            }
-            if (row.kind() == BordereauRowCandidate.Kind.SECTION) {
-                if (PdfBordereauLayoutParser.isMarketTitleNoise(row.libelle())) {
                     continue;
                 }
                 if (isTopLevelSection(row.code()) && currentLot == null
                         && looksLikeLotChapterTitle(row.libelle())) {
-                    // « 1 - TERRASSEMENT - GROS-ŒUVRE » devient le lot racine
                     currentLot = newGroup(DpgfNoeud.TYPE_LOT, row);
                     tree.getArbre().add(currentLot);
+                    currentChapitre = null;
                     currentSousLot = null;
                     continue;
                 }
@@ -458,8 +470,30 @@ public class BordereauHybridAssembler {
                     currentLot = newGroup(DpgfNoeud.TYPE_LOT, "1", "Lot 1");
                     tree.getArbre().add(currentLot);
                 }
-                currentSousLot = newGroup(DpgfNoeud.TYPE_SOUS_LOT, row);
-                currentLot.getEnfants().add(currentSousLot);
+                ImportNoeudDto group = newGroup(DpgfNoeud.TYPE_SOUS_LOT, row);
+                if (row.isLetteredChapter()) {
+                    currentChapitre = group;
+                    currentLot.getEnfants().add(group);
+                    currentSousLot = group;
+                } else if (row.isNumberedSection()) {
+                    ImportNoeudDto parent = currentLot;
+                    if (currentChapitre != null && sectionBelongsToLot(row, currentLot)) {
+                        parent = currentChapitre;
+                    }
+                    parent.getEnfants().add(group);
+                    currentSousLot = group;
+                } else {
+                    ImportNoeudDto parent;
+                    if (currentSousLot != null && isNumberedGroup(currentSousLot)) {
+                        parent = currentSousLot;
+                    } else if (currentChapitre != null) {
+                        parent = currentChapitre;
+                    } else {
+                        parent = currentLot;
+                    }
+                    parent.getEnfants().add(group);
+                    currentSousLot = group;
+                }
                 continue;
             }
             if (!row.looksLikeArticle()) {
@@ -484,6 +518,59 @@ public class BordereauHybridAssembler {
             tree.getArbre().addAll(flatFallback(parse));
         }
         return tree;
+    }
+
+    private void attachNumberedSection(
+            BordereauRowCandidate row,
+            Map<String, ImportNoeudDto> lotsByKey,
+            Map<String, ImportNoeudDto> sectionByKey,
+            Map<String, ImportNoeudDto> chapitreByLot) {
+        if (isTopLevelSection(row.code())) {
+            return;
+        }
+        String lotKey = leadingLotKey(row.code());
+        if (lotKey == null || !lotsByKey.containsKey(lotKey)) {
+            return;
+        }
+        String sectionKey = compactCode(row.code());
+        if (sectionKey == null || sectionByKey.containsKey(sectionKey)) {
+            return;
+        }
+        ImportNoeudDto section = newGroup(DpgfNoeud.TYPE_SOUS_LOT, row);
+        ImportNoeudDto parent = chapitreByLot.getOrDefault(lotKey, lotsByKey.get(lotKey));
+        parent.getEnfants().add(section);
+        sectionByKey.put(sectionKey, section);
+    }
+
+    private static boolean sectionBelongsToLot(BordereauRowCandidate row, ImportNoeudDto lot) {
+        if (lot == null) {
+            return false;
+        }
+        String sectionLot = leadingLotKey(row.code());
+        if (sectionLot == null) {
+            return true;
+        }
+        String lotCode = lot.getCode();
+        if (lotCode == null || lotCode.isBlank()) {
+            return true;
+        }
+        String lotKey = leadingLotKey(lotCode);
+        if (lotKey == null) {
+            lotKey = compactCode(lotCode);
+        }
+        return sectionLot.equals(lotKey);
+    }
+
+    private static boolean isNumberedGroup(ImportNoeudDto node) {
+        if (node == null) {
+            return false;
+        }
+        String c = node.getCode() == null ? "" : node.getCode().trim();
+        if (c.matches("\\d+[.\\-]\\d+.*")) {
+            return true;
+        }
+        String lib = node.getLibelle() == null ? "" : node.getLibelle().trim();
+        return lib.matches("(?i)^\\d+[.\\-]\\d+\\b.*");
     }
 
     private static String extractLotKey(BordereauRowCandidate row) {
@@ -643,7 +730,8 @@ public class BordereauHybridAssembler {
         sb.append("Candidats extraits d'un bordereau BTP (")
                 .append(parse.pageCount())
                 .append(" pages).\n");
-        sb.append("Assigne chaque article à un lot / sous-lot. N'invente aucune valeur article.\n");
+        sb.append("Assigne chaque article à un lot / sous-lot / chapitre lettré (A-).\n");
+        sb.append("Un A- / B- est parent des sections 3.1, 3.2 — ne les mets pas au même niveau.\n");
         sb.append("Conserve les libellés fournis tels quels (déjà complets).\n\n");
 
         sb.append("GROUPES détectés :\n");

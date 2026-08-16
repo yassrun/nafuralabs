@@ -486,13 +486,29 @@
     background: color-mix(in srgb, var(--nf-color-bg-subtle) 70%, transparent);
   }
 
+  td:nth-child(2) {
+    max-width: 22rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   .num {
     text-align: end;
   }
 
   .actions {
+    position: sticky;
+    right: 0;
+    z-index: 1;
+    min-width: 11rem;
     text-align: end;
     white-space: nowrap;
+    background: var(--nf-color-surface, #fff);
+    box-shadow: -8px 0 10px -8px color-mix(in srgb, #000 18%, transparent);
+  }
+
+  tbody tr:hover .actions {
+    background: color-mix(in srgb, var(--nf-color-bg-subtle) 70%, var(--nf-color-surface, #fff));
   }
 }
 
@@ -594,9 +610,30 @@
   }
 }
 
-.poste__icon-btn--danger:hover mat-icon,
-.poste__icon-btn--danger:focus-visible mat-icon {
+.poste__icon-btn--danger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  width: auto;
+  height: 1.85rem;
+  padding: 0 0.45rem;
+  border: 0;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--nf-color-danger-600, #c0392b) 8%, transparent);
   color: var(--nf-color-danger-600, #c0392b);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 650;
+
+  mat-icon {
+    color: inherit;
+  }
+
+  &:hover,
+  &:focus-visible {
+    background: color-mix(in srgb, var(--nf-color-danger-600, #c0392b) 16%, transparent);
+  }
 }
 
 .sr-only {

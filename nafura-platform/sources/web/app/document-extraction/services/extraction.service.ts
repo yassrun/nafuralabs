@@ -10,7 +10,7 @@ import {
   StatelessExtractionResponse,
 } from '../models/extraction.model';
 import { ExtractionResponse } from '../models/extraction.model';
-import { ApiConfigService } from '../../../../core/config/api-config.service';
+import { ApiConfigService } from '@core/config/api-config.service';
 
 @Injectable({ providedIn: 'root' })
 export class ExtractionService {

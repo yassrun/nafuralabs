@@ -6,6 +6,10 @@ import {
   countExploitableArticles,
   countExploitableInNodes,
   countIgnoredArticles,
+  collectNonExploitableArticleKeys,
+  collectAllExpandableKeys,
+  expandAncestorsOfNonExploitable,
+  filterTreeByArticleIds,
   importArbreToTreeNodes,
   importKeyToPath,
   isArticleExploitable,
@@ -117,8 +121,118 @@ describe('article exploitable (aligné backend)', () => {
     expect(nodes[0].children?.[1].data.nonExploitable).toBe(true);
   });
 
+  it('déplie uniquement les ancêtres des articles incomplets', () => {
+    const arbre: ImportNoeudPreview[] = [
+      {
+        type: 'LOT',
+        code: '1',
+        libelle: 'Terrassement',
+        enfants: [
+          {
+            type: 'SOUS_LOT',
+            code: 'A',
+            libelle: 'Chapitre',
+            enfants: [
+              {
+                type: 'ARTICLE',
+                code: '1.1',
+                libelle: 'OK',
+                unite: 'm2',
+                quantite: 10,
+              },
+            ],
+          },
+        ],
+      },
+      {
+        type: 'LOT',
+        code: '3',
+        libelle: 'Électricité',
+        enfants: [
+          {
+            type: 'SOUS_LOT',
+            code: 'B',
+            libelle: 'Appareillage',
+            enfants: [
+              {
+                type: 'ARTICLE',
+                code: '3.9.3',
+                libelle: 'Sans qté',
+                unite: 'u',
+                quantite: 0,
+              },
+            ],
+          },
+        ],
+      },
+    ];
+    const nodes = importArbreToTreeNodes(arbre);
+    const expanded = expandAncestorsOfNonExploitable(nodes);
+    const incompleteKeys = collectNonExploitableArticleKeys(nodes);
+
+    expect(incompleteKeys.length).toBe(1);
+    expect(expanded.has(nodes[0].key)).toBe(false);
+    expect(expanded.has(nodes[1].key)).toBe(true);
+    expect(expanded.has(nodes[1].children![0].key)).toBe(true);
+  });
+
   it('récupère le chemin depuis une clé import', () => {
     expect(importKeyToPath('/0-0-1/1-2-ART')).toEqual([0, 2]);
     expect(importKeyToPath('invalid')).toBeNull();
+  });
+});
+
+describe('filtre arbre Coût', () => {
+  function article(id: string, code: string): NfTreeNode<BordereauTreeRow> {
+    return {
+      key: id,
+      leaf: true,
+      data: {
+        key: id,
+        id,
+        type: 'ARTICLE',
+        code,
+        libelle: code,
+        depth: 2,
+      },
+    };
+  }
+
+  const lot: NfTreeNode<BordereauTreeRow> = {
+    key: 'lot6',
+    leaf: false,
+    data: { key: 'lot6', id: 'lot6', type: 'LOT', code: '6', libelle: 'REVETEMENTS', depth: 0 },
+    children: [
+      {
+        key: 'sl61',
+        leaf: false,
+        data: {
+          key: 'sl61',
+          id: 'sl61',
+          type: 'SOUS_LOT',
+          code: '6.1',
+          libelle: 'REVETEMENTS',
+          depth: 1,
+        },
+        children: [
+          article('a611', '6.1.1'),
+          article('a612', '6.1.2'),
+          article('a613', '6.1.3'),
+        ],
+      },
+    ],
+  };
+
+  it('un filtre sur le seul article chiffré masque les frères — ne pas l’appliquer tel quel', () => {
+    const filtered = filterTreeByArticleIds([lot], new Set(['a611']));
+    const sl = filtered[0]?.children?.[0];
+    expect(sl?.children?.map((c) => c.data.code)).toEqual(['6.1.1']);
+  });
+
+  it('déplie tout l’arbre pour l’étape Coût', () => {
+    const keys = collectAllExpandableKeys([lot]);
+    expect(keys.has('lot6')).toBe(true);
+    expect(keys.has('sl61')).toBe(true);
+    expect(keys.has('a611')).toBe(false);
   });
 });

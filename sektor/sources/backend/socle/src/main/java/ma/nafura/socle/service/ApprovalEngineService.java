@@ -280,6 +280,9 @@ public class ApprovalEngineService {
     }
 
     private void assertCurrentUserMayDecide(ApprovalRequest request, ApprovalWorkflow workflow, String actionUserId) {
+        if (UserContext.isOwnerOrSuperAdmin()) {
+            return;
+        }
         String roleRef = effectiveRoleAtStep(workflow, request, request.getEtapeCouranteIndex());
         LocalDate onDate = LocalDate.now();
         Optional<ApproverResolutionPort.Resolved> resolved =

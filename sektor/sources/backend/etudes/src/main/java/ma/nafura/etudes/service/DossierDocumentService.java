@@ -59,23 +59,28 @@ public class DossierDocumentService {
      */
     @Transactional
     public DossierDocument deposer(UUID dossierEtudeId, MultipartFile file, String type) {
-        UUID tenant = tenantId();
-        String typeNormalise = StringUtils.hasText(type)
-                ? type.trim().toUpperCase()
-                : DossierDocument.TYPE_AUTRE;
-
         byte[] contenu;
         try {
             contenu = file.getBytes();
         } catch (IOException e) {
             throw new IllegalArgumentException("etudes.document.lecture_impossible", e);
         }
+        return deposer(dossierEtudeId, contenu, file.getOriginalFilename(), file.getContentType(), type);
+    }
+
+    @Transactional
+    public DossierDocument deposer(
+            UUID dossierEtudeId, byte[] contenu, String nomFichier, String contentType, String type) {
+        UUID tenant = tenantId();
+        String typeNormalise = StringUtils.hasText(type)
+                ? type.trim().toUpperCase()
+                : DossierDocument.TYPE_AUTRE;
 
         Document stored = documentService.uploadDocument(
                 tenant,
                 contenu,
-                file.getOriginalFilename(),
-                file.getContentType(),
+                nomFichier,
+                contentType,
                 DocumentType.OTHER,
                 OffsetDateTime.now(),
                 null);
@@ -85,7 +90,7 @@ public class DossierDocumentService {
                 .tenantId(tenant)
                 .dossierEtudeId(dossierEtudeId)
                 .documentId(stored.getId().toString())
-                .nomFichier(file.getOriginalFilename())
+                .nomFichier(nomFichier)
                 .type(typeNormalise)
                 .ordre(ordre)
                 .build());

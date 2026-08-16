@@ -86,6 +86,13 @@
 
 .arbre__compte-warn {
   color: var(--nf-color-danger-600, #c0392b);
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .arbre__warn-tag {

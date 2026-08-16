@@ -13,7 +13,12 @@
       />
     } @else {
       <header class="dossier__entete">
-        <h1 class="dossier__titre">{{ dossier()?.numero }} — {{ dossier()?.objet }}</h1>
+        <h1
+          class="dossier__titre"
+          [attr.title]="(dossier()?.numero ?? '') + ' — ' + (dossier()?.objet ?? '')"
+        >
+          {{ dossier()?.numero }} — {{ dossier()?.objet }}
+        </h1>
         <span class="dossier__statut" [attr.data-statut]="dossier()?.status">
           {{ statutLabel() }}
         </span>

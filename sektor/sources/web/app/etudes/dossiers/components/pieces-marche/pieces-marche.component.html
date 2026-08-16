@@ -356,7 +356,7 @@
                 {{ articlesExploitables() }} article{{ articlesExploitables() === 1 ? '' : 's' }}
                 exploitable{{ articlesExploitables() === 1 ? '' : 's' }}
                 @if (articlesIgnores() > 0) {
-                  — {{ articlesIgnores() }} à corriger (unité / quantité)
+                  — {{ articlesIgnores() }} à corriger (unité / quantité). Les lignes sont dépliées et marquées « incomplet ».
                 }
                 @if (pieceExtraction()?.nomFichier; as nom) {
                   · {{ nom }}
@@ -372,6 +372,16 @@
               >
                 Annuler
               </nf-button>
+              @if (articlesIgnores() > 0) {
+                <nf-button
+                  variant="secondary"
+                  size="sm"
+                  [disabled]="phase() === 'saving'"
+                  (clicked)="voirLignesACorriger()"
+                >
+                  Voir les {{ articlesIgnores() }} à corriger
+                </nf-button>
+              }
               <nf-button
                 variant="secondary"
                 size="sm"

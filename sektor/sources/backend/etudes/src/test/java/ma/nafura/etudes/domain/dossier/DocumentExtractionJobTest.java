@@ -15,7 +15,7 @@ class DocumentExtractionJobTest {
 
         job.setStatus(DocumentExtractionJob.STATUS_SUCCEEDED);
         assertThat(job.estTerminal()).isTrue();
-        assertThat(job.peutRelancer()).isFalse();
+        assertThat(job.peutRelancer()).isTrue();
 
         job.setStatus(DocumentExtractionJob.STATUS_FAILED);
         assertThat(job.peutRelancer()).isTrue();

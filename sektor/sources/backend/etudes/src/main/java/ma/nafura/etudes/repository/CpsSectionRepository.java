@@ -42,4 +42,41 @@ public interface CpsSectionRepository extends JpaRepository<CpsSection, UUID> {
             @Param("cpsDocumentId") UUID cpsDocumentId,
             @Param("requete") String requete,
             @Param("limite") int limite);
+
+    /**
+     * Correspondance de numerotation bordereau ↔ CPS ({@code 6.1.3} / {@code 6-1-3}).
+     * Les doublons de sommaire (contenu quasi vide) passent apres la prescription.
+     */
+    @Query(value = """
+            SELECT s.* FROM cps_sections s
+            WHERE s.tenant_id = :tenantId
+              AND s.cps_document_id = :cpsDocumentId
+              AND replace(lower(coalesce(s.numero, '')), '-', '.') = lower(:code)
+            ORDER BY length(s.contenu) DESC
+            LIMIT :limite
+            """, nativeQuery = true)
+    List<CpsSection> trouverParNumero(
+            @Param("tenantId") UUID tenantId,
+            @Param("cpsDocumentId") UUID cpsDocumentId,
+            @Param("code") String code,
+            @Param("limite") int limite);
+
+    /**
+     * FTS en OU ({@code to_tsquery} déjà construit, lexèmes sûrs). Un AND sur le libellé
+     * BDP entier (dimensions, « y compris », « importation ») rate une section CPS qui
+     * porte le même numéro et le même matériau.
+     */
+    @Query(value = """
+            SELECT s.* FROM cps_sections s
+            WHERE s.tenant_id = :tenantId
+              AND s.cps_document_id = :cpsDocumentId
+              AND s.contenu_tsv @@ to_tsquery('french', :tsquery)
+            ORDER BY ts_rank(s.contenu_tsv, to_tsquery('french', :tsquery)) DESC
+            LIMIT :limite
+            """, nativeQuery = true)
+    List<CpsSection> rechercherTsQuery(
+            @Param("tenantId") UUID tenantId,
+            @Param("cpsDocumentId") UUID cpsDocumentId,
+            @Param("tsquery") String tsquery,
+            @Param("limite") int limite);
 }

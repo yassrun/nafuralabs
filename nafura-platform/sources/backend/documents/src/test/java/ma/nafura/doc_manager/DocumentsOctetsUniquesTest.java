@@ -63,6 +63,8 @@ class DocumentsOctetsUniquesTest {
     private AttachmentServiceImpl attachments;
     private AtomicInteger uploads;
     private DocumentService documents;
+    private DocumentStorage storage;
+    private final Map<String, byte[]> stored = new LinkedHashMap<>();
 
     @BeforeEach
     void setUp() {
@@ -73,26 +75,34 @@ class DocumentsOctetsUniquesTest {
         stubPieces();
         stubOriginals();
         uploads = new AtomicInteger();
-        DocumentStorage storage = new DocumentStorage() {
+        stored.clear();
+        storage = new DocumentStorage() {
             @Override
             public String upload(UUID tenantId, UUID documentId, String fileName,
                     InputStream inputStream, String contentType) {
                 uploads.incrementAndGet();
-                return tenantId + "/" + documentId + "/" + fileName;
+                String key = tenantId + "/" + documentId + "/" + fileName;
+                stored.put(key, BYTES);
+                return key;
             }
 
             @Override
             public InputStream download(String storageKey) {
-                return new ByteArrayInputStream(BYTES);
+                byte[] data = stored.get(storageKey);
+                if (data == null) {
+                    throw new IllegalStateException("missing " + storageKey);
+                }
+                return new ByteArrayInputStream(data);
             }
 
             @Override
             public void delete(String storageKey) {
+                stored.remove(storageKey);
             }
 
             @Override
             public boolean exists(String storageKey) {
-                return true;
+                return stored.containsKey(storageKey);
             }
         };
         documents = new DocumentService(documentRepository, storage);
@@ -104,6 +114,7 @@ class DocumentsOctetsUniquesTest {
         UserContext.clear();
         pieces.clear();
         originals.clear();
+        stored.clear();
     }
 
     @Test
@@ -146,6 +157,18 @@ class DocumentsOctetsUniquesTest {
         assertThat(first.getId()).isNotEqualTo(second.getId());
         assertThat(second.getStorageKey()).isEqualTo(first.getStorageKey());
         assertThat(uploads.get()).isEqualTo(1);
+    }
+
+    @Test
+    void reuploadSiObjetAbsentDuStockage() {
+        Document first = deposit(TENANT_A);
+        storage.delete(first.getStorageKey());
+
+        Document second = deposit(TENANT_A);
+
+        assertThat(uploads.get()).isEqualTo(2);
+        assertThat(second.getStorageKey()).isNotEqualTo(first.getStorageKey());
+        assertThat(storage.exists(second.getStorageKey())).isTrue();
     }
 
     private Document deposit(UUID tenant) {

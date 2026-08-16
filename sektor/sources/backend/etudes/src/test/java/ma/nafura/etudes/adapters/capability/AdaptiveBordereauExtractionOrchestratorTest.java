@@ -79,37 +79,25 @@ class AdaptiveBordereauExtractionOrchestratorTest {
     }
 
     @Test
-    void extract_adaptivePdf_usesVisionThenClassify() throws Exception {
+    void extract_adaptivePdf_usesAiOneshot() throws Exception {
         when(tabularParser.supports(any(), any())).thenReturn(false);
-        when(layoutParser.parse(any(), any())).thenReturn(usableParseWithGroups());
         when(extractionService.process(
                         any(), anyString(), eq("application/pdf"), anyString(), isNull(),
-                        anyString(), any(), anyInt(), eq(true)))
+                        anyString(), any(), anyInt()))
                 .thenReturn(new StatelessExtractionResponse(
                         StatelessExtractionResponse.Outcome.COMPLETED,
                         mapper.readTree("""
                                 {
-                                  "groups": [{"code":"1","libelle":"TERRASSEMENT","kind":"LOT"}],
-                                  "articles": [
-                                    {"code":"1-1-1","libelle":"FOUILLES EN PUITS ET EN TRANCHEES","unite":"M3","quantite":10,"page":1},
-                                    {"code":"1-1-2","libelle":"EVACUATION AUX DECHARGES","unite":"M3","quantite":10,"page":1},
-                                    {"code":"1-1-3","libelle":"BETON ARME","unite":"M3","quantite":70,"page":1},
-                                    {"code":"1-1-4","libelle":"ARMATURES","unite":"KG","quantite":500,"page":1},
-                                    {"code":"1-1-5","libelle":"SCELLEMENTS","unite":"U","quantite":40,"page":1},
-                                    {"code":"1-1-6","libelle":"REGARDS","unite":"U","quantite":5,"page":1},
-                                    {"code":"1-1-7","libelle":"CANALISATION","unite":"ML","quantite":40,"page":1},
-                                    {"code":"1-1-8","libelle":"DALLAGE","unite":"M2","quantite":100,"page":1}
-                                  ]
+                                  "lots": [{
+                                    "code": "1",
+                                    "libelle": "TERRASSEMENT",
+                                    "postes": [
+                                      {"code":"1-1-1","libelle":"FOUILLES EN PUITS ET EN TRANCHEES","unite":"M3","quantite":10}
+                                    ]
+                                  }]
                                 }
                                 """),
                         null, null, null, List.of(),
-                        null, null, null, null, null));
-        when(extractionService.process(
-                        any(), anyString(), eq("text/plain"), anyString(), isNull(),
-                        anyString(), any(), anyInt()))
-                .thenReturn(new StatelessExtractionResponse(
-                        StatelessExtractionResponse.Outcome.REJECTED,
-                        null, null, null, null, List.of(),
                         null, null, null, null, null));
 
         byte[] pdf = minimalOnePagePdf();
@@ -117,11 +105,12 @@ class AdaptiveBordereauExtractionOrchestratorTest {
         ImportTreeRequest tree = result.tree();
 
         assertThat(tree.getArbre()).isNotEmpty();
+        assertThat(tree.getArbre().get(0).getLibelle()).isEqualTo("TERRASSEMENT");
         assertThat(AdaptiveBordereauExtractionOrchestrator.countArticles(tree.getArbre()))
-                .isGreaterThanOrEqualTo(3);
-        String joined = flattenLibelles(tree);
-        assertThat(joined.toUpperCase()).contains("FOUILLES");
-        assertThat(result.diagnostics().path()).contains("adaptive-vision");
+                .isEqualTo(1);
+        assertThat(flattenLibelles(tree).toUpperCase()).contains("FOUILLES");
+        assertThat(result.diagnostics().path()).contains("ai-oneshot");
+        verify(layoutParser, never()).parse(any(), any());
         verify(extractionService, never()).process(
                 any(), anyString(), eq("application/pdf"), anyString(), isNull(),
                 anyString(), any(), anyInt(), eq(true));
@@ -169,18 +158,8 @@ class AdaptiveBordereauExtractionOrchestratorTest {
     }
 
     @Test
-    void extract_lowCoverage_fallsBackToLegacy() throws Exception {
+    void extract_lowCoverage_usesAiOneshot() throws Exception {
         when(tabularParser.supports(any(), any())).thenReturn(false);
-        when(layoutParser.parse(any(), any())).thenReturn(BordereauParseResult.insufficient(
-                2, 10, List.of(), "corrupt_layout"));
-        // Vision chunks empty or weak → legacy whole-doc
-        when(extractionService.process(
-                        any(), anyString(), eq("application/pdf"), anyString(), isNull(),
-                        anyString(), any(), anyInt(), eq(true)))
-                .thenReturn(new StatelessExtractionResponse(
-                        StatelessExtractionResponse.Outcome.TECHNICAL_FAILURE,
-                        null, null, null, null, List.of(),
-                        null, null, null, null, null));
         when(extractionService.process(
                         any(), anyString(), eq("application/pdf"), anyString(), isNull(),
                         anyString(), any(), anyInt()))
@@ -332,47 +311,24 @@ class AdaptiveBordereauExtractionOrchestratorTest {
     }
 
     @Test
-    void extract_dirtyTextLayer_escalatesToVision() throws Exception {
-        // Adaptive PDF always vision; ensure full libellés win over truncated PDFBox fragments.
-        List<BordereauRowCandidate> rows = new java.util.ArrayList<>();
-        for (int i = 0; i < 25; i++) {
-            rows.add(new BordereauRowCandidate(
-                    "r" + i, 1, i, "1-" + i, "DANS TERRAIN FRAGMENT " + i, "M3", new BigDecimal("1"),
-                    BordereauRowCandidate.Kind.ARTICLE, 0.7, "r" + i));
-        }
-        BordereauParseResult dirty = new BordereauParseResult(
-                1, 100, rows, Set.of(1), BordereauParseResult.Quality.USABLE, null);
-
+    void extract_dirtyTextLayer_usesAiOneshot() throws Exception {
         when(tabularParser.supports(any(), any())).thenReturn(false);
-        when(layoutParser.parse(any(), any())).thenReturn(dirty);
         when(extractionService.process(
                         any(), anyString(), eq("application/pdf"), anyString(), isNull(),
-                        anyString(), any(), anyInt(), eq(true)))
+                        anyString(), any(), anyInt()))
                 .thenReturn(new StatelessExtractionResponse(
                         StatelessExtractionResponse.Outcome.COMPLETED,
                         mapper.readTree("""
                                 {
-                                  "groups": [{"code":"1","libelle":"LOT 1 TERRASSEMENT","kind":"LOT"}],
-                                  "articles": [
-                                    {"code":"1-1","libelle":"FOUILLES EN PUITS","unite":"M3","quantite":12,"page":1},
-                                    {"code":"1-2","libelle":"EVACUATION DEBLAIS","unite":"M3","quantite":10,"page":1},
-                                    {"code":"1-3","libelle":"BETON ARME","unite":"M3","quantite":70,"page":1},
-                                    {"code":"1-4","libelle":"ARMATURES ACIER","unite":"KG","quantite":500,"page":1},
-                                    {"code":"1-5","libelle":"SCELLEMENTS","unite":"U","quantite":40,"page":1},
-                                    {"code":"1-6","libelle":"REGARDS BETON","unite":"U","quantite":5,"page":1},
-                                    {"code":"1-7","libelle":"CANALISATION PVC","unite":"ML","quantite":40,"page":1},
-                                    {"code":"1-8","libelle":"DALLAGE BETON","unite":"M2","quantite":100,"page":1}
-                                  ]
+                                  "lots": [{
+                                    "libelle": "LOT 1 TERRASSEMENT",
+                                    "postes": [
+                                      {"code":"1-1","libelle":"FOUILLES EN PUITS","unite":"M3","quantite":12}
+                                    ]
+                                  }]
                                 }
                                 """),
                         null, null, null, List.of(),
-                        null, null, null, null, null));
-        when(extractionService.process(
-                        any(), anyString(), eq("text/plain"), anyString(), isNull(),
-                        anyString(), any(), anyInt()))
-                .thenReturn(new StatelessExtractionResponse(
-                        StatelessExtractionResponse.Outcome.REJECTED,
-                        null, null, null, null, List.of(),
                         null, null, null, null, null));
 
         byte[] pdf = minimalOnePagePdf();
@@ -380,11 +336,8 @@ class AdaptiveBordereauExtractionOrchestratorTest {
         ImportTreeRequest tree = result.tree();
 
         assertThat(tree.getArbre()).isNotEmpty();
-        String dirtyFlat = flattenLibelles(tree).toUpperCase();
-        assertThat(dirtyFlat.contains("FOUILLES EN PUITS") || dirtyFlat.contains("DANS TERRAIN"))
-                .as("vision LLM or local dirty labels")
-                .isTrue();
-        assertThat(result.diagnostics().path()).contains("adaptive-vision");
+        assertThat(flattenLibelles(tree).toUpperCase()).contains("FOUILLES EN PUITS");
+        assertThat(result.diagnostics().path()).contains("ai-oneshot");
     }
 
     private static String flattenLibelles(ImportTreeRequest tree) {

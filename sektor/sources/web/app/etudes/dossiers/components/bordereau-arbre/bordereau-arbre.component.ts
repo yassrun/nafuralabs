@@ -4,6 +4,7 @@ import {
   Component,
   computed,
   effect,
+  ElementRef,
   inject,
   input,
   output,
@@ -29,8 +30,13 @@ import { DpgfApiService } from '../../../metres/services/dpgf-api.service';
 import {
   applyTreeRollupPostes,
   applyTreeRollupTotals,
+  collectAllExpandableKeys,
+  collectNonExploitableArticleKeys,
   countArticlesInNodes,
   countExploitableInNodes,
+  expandAncestors,
+  expandAncestorsOfNonExploitable,
+  filterTreeByArticleIds,
   getImportNoeudAt,
   importArbreToTreeNodes,
   importKeyToPath,
@@ -123,6 +129,10 @@ export class BordereauArbreComponent {
     const ids = this.filterArticleIds();
     if (ids?.length) {
       const allowed = new Set(ids);
+      // Étape Coût : un filtre « alertes » ne doit pas masquer les postes à chiffrer.
+      if (this.selectionEnabled()) {
+        for (const id of collectIncompleteArticleIds(list)) allowed.add(id);
+      }
       list = filterTreeByArticleIds(list, allowed);
     }
     const q = this.searchQuery().trim().toLowerCase();
@@ -266,6 +276,7 @@ export class BordereauArbreComponent {
   private lastDraftToken = -1;
   private lastEmittedFocusId: string | null = null;
   private lastExpandFingerprint = '';
+  private readonly host = inject(ElementRef<HTMLElement>);
 
   constructor() {
     void this.chargerUnites();
@@ -307,7 +318,9 @@ export class BordereauArbreComponent {
         if (focusId === this.lastEmittedFocusId) return;
         const match = findRowById(nodes, focusId);
         if (!match) return;
-        this.expandedKeys.set(expandAncestors(nodes, match.key));
+        const keys = new Set(this.expandedKeys());
+        for (const k of expandAncestors(nodes, match.key)) keys.add(k);
+        this.expandedKeys.set(keys);
         this.lastEmittedFocusId = focusId;
         if (match.type === 'ARTICLE') {
           this.posteSelect.emit(match);
@@ -322,29 +335,33 @@ export class BordereauArbreComponent {
       });
     });
     effect(() => {
-      if (!this.selectionEnabled()) return;
       const nodes = this.nodes();
       const fromGate = this.expandArticleIds();
+      const selectionOn = this.selectionEnabled();
       untracked(() => {
-        if (!nodes.length || this.isDraft()) return;
-        const ids =
-          fromGate.length > 0
-            ? [...fromGate]
-            : collectIncompleteArticleIds(nodes).slice(0, 40);
-        if (ids.length === 0) {
-          this.lastExpandFingerprint = '';
+        if (!nodes.length) return;
+        const warnKeys = collectNonExploitableArticleKeys(nodes);
+        const costIds =
+          selectionOn && !this.isDraft()
+            ? collectIncompleteArticleIds(nodes).slice(0, 40)
+            : [];
+        const ids = fromGate.length > 0 ? [...fromGate] : costIds;
+        const fp = `${warnKeys.join(',')}|${ids.join(',')}|${nodes.length}`;
+        if (fp === this.lastExpandFingerprint) return;
+        if (warnKeys.length === 0 && ids.length === 0) {
+          this.lastExpandFingerprint = fp;
           return;
         }
-        const fp = `${ids.join(',')}|${nodes.length}`;
-        if (fp === this.lastExpandFingerprint) return;
         this.lastExpandFingerprint = fp;
         const keys = new Set(this.expandedKeys());
+        for (const k of expandAncestorsOfNonExploitable(nodes)) keys.add(k);
         for (const id of ids) {
           const match = findRowById(nodes, id);
           if (!match) continue;
           for (const k of expandAncestors(nodes, match.key)) keys.add(k);
         }
         this.expandedKeys.set(keys);
+        if (warnKeys.length > 0) this.scrollToFirstIncomplete();
       });
     });
   }
@@ -629,21 +646,19 @@ export class BordereauArbreComponent {
   }
 
   expandAll(): void {
-    const keys = new Set<string>();
-    const walk = (list: NfTreeNode<BordereauTreeRow>[]) => {
-      for (const n of list) {
-        if (n.children?.length) {
-          keys.add(n.key);
-          walk(n.children);
-        }
-      }
-    };
-    walk(this.nodes());
-    this.expandedKeys.set(keys);
+    this.expandedKeys.set(collectAllExpandableKeys(this.nodes()));
   }
 
   collapseAll(): void {
     this.expandedKeys.set(new Set());
+  }
+
+  /** Déplie le chemin jusqu’aux articles « incomplet » et scroll vers le premier. */
+  revelerIncomplets(): void {
+    const nodes = this.nodes();
+    const keys = expandAncestorsOfNonExploitable(nodes);
+    this.expandedKeys.set(keys);
+    this.scrollToFirstIncomplete();
   }
 
   stop(event: Event): void {
@@ -662,8 +677,8 @@ export class BordereauArbreComponent {
     applyTreeRollupPostes(nodes);
     this.nodes.set(nodes);
     if (resetExpand) {
-      // Collapsed by default — user expands via chevrons / expand-all.
-      this.expandedKeys.set(new Set());
+      this.expandedKeys.set(expandAncestorsOfNonExploitable(nodes));
+      this.scrollToFirstIncomplete();
     }
   }
 
@@ -679,6 +694,14 @@ export class BordereauArbreComponent {
       }
     };
     walk(this.draftLocal());
+  }
+
+  private scrollToFirstIncomplete(): void {
+    queueMicrotask(() => {
+      this.host.nativeElement
+        .querySelector('.arbre__row--warn')
+        ?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    });
   }
 
   private toImportNoeud(result: BordereauNoeudDialogResult): ImportNoeudPreview {
@@ -760,9 +783,11 @@ export class BordereauArbreComponent {
         };
         walk(nodes);
         this.expandedKeys.set(valid);
+      } else if (this.selectionEnabled()) {
+        this.expandedKeys.set(collectAllExpandableKeys(nodes));
       } else {
-        // Collapsed by default (lots only).
-        this.expandedKeys.set(new Set());
+        this.expandedKeys.set(expandAncestorsOfNonExploitable(nodes));
+        this.scrollToFirstIncomplete();
       }
     } catch (e) {
       this.erreur.set(this.msg(e));
@@ -787,28 +812,6 @@ function filterTree(
     const children = node.children?.length ? filterTree(node.children, query) : [];
     const hay = `${node.data.code} ${node.data.libelle}`.toLowerCase();
     if (hay.includes(query) || children.length) {
-      out.push({
-        ...node,
-        children: children.length ? children : undefined,
-        leaf: !children.length,
-      });
-    }
-  }
-  return out;
-}
-
-function filterTreeByArticleIds(
-  nodes: NfTreeNode<BordereauTreeRow>[],
-  allowed: Set<string>,
-): NfTreeNode<BordereauTreeRow>[] {
-  const out: NfTreeNode<BordereauTreeRow>[] = [];
-  for (const node of nodes) {
-    const children = node.children?.length
-      ? filterTreeByArticleIds(node.children, allowed)
-      : [];
-    const keepArticle =
-      node.data.type === 'ARTICLE' && node.data.id != null && allowed.has(node.data.id);
-    if (keepArticle || children.length) {
       out.push({
         ...node,
         children: children.length ? children : undefined,
@@ -858,27 +861,4 @@ function collectIncompleteArticleIds(nodes: NfTreeNode<BordereauTreeRow>[]): str
   };
   walk(nodes);
   return ids;
-}
-
-function expandAncestors(
-  nodes: NfTreeNode<BordereauTreeRow>[],
-  targetKey: string,
-): Set<string> {
-  const keys = new Set<string>();
-  const walk = (list: NfTreeNode<BordereauTreeRow>[], trail: string[]): boolean => {
-    for (const node of list) {
-      const next = [...trail, node.key];
-      if (node.key === targetKey) {
-        trail.forEach((k) => keys.add(k));
-        return true;
-      }
-      if (node.children?.length && walk(node.children, next)) {
-        keys.add(node.key);
-        return true;
-      }
-    }
-    return false;
-  };
-  walk(nodes, []);
-  return keys;
 }

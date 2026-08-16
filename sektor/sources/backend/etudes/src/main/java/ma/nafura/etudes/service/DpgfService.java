@@ -18,6 +18,7 @@ import ma.nafura.etudes.api.request.DpgfNoeudCreateDto;
 import ma.nafura.etudes.api.request.DpgfNoeudUpdateDto;
 import ma.nafura.etudes.api.request.ImportNoeudDto;
 import ma.nafura.etudes.api.request.ImportTreeRequest;
+import ma.nafura.etudes.service.bordereau.ArticleCodeUniquifier;
 import ma.nafura.etudes.domain.dpu.EstimationSaisieEn;
 import ma.nafura.etudes.domain.dpu.OrigineCout;
 import ma.nafura.etudes.domain.dpgf.Dpgf;
@@ -152,10 +153,11 @@ public class DpgfService {
     }
 
     /**
-     * CrÃ©e un DPGF depuis un arbre extrait d'un bordereau (sans mÃ©trÃ© amont).
+     * Crée un DPGF depuis un arbre extrait d'un bordereau (sans métré amont).
      *
-     * <p>Les lignes sans unitÃ© / quantitÃ© positive (totaux, titres) sont ignorÃ©es â€” elles
-     * bloqueraient le gate bordereau sans Ãªtre chiffrables.
+     * <p>Les articles sans unité / quantité positive restent dans l'arbre (marqués incomplets)
+     * pour correction manuelle. Ils sont comptés dans {@code articlesIgnores} et le gate
+     * bordereau les signale.
      */
     @Transactional
     public ImportResult createFromImport(ImportTreeRequest request, String projetNom, BigDecimal tvaTaux) {
@@ -178,6 +180,7 @@ public class DpgfService {
                 .build();
         Dpgf saved = repository.save(entity);
 
+        ArticleCodeUniquifier.uniquify(request.getArbre());
         ImportPersistStats stats = new ImportPersistStats();
         int ordreRacine = 0;
         for (ImportNoeudDto racine : request.getArbre()) {
@@ -201,6 +204,7 @@ public class DpgfService {
         // would StaleStateException on already-cascaded children (ERP-65).
         noeudRepository.deleteAllByDpgfIdAndTenantId(dpgfId, tenantId());
 
+        ArticleCodeUniquifier.uniquify(request.getArbre());
         ImportPersistStats stats = new ImportPersistStats();
         int ordreRacine = 0;
         for (ImportNoeudDto racine : request.getArbre()) {
@@ -223,10 +227,10 @@ public class DpgfService {
         String libelle = StringUtils.hasText(dto.getLibelle()) ? dto.getLibelle().trim() : "Sans libellÃ©";
         String code = StringUtils.hasText(dto.getCode()) ? dto.getCode().trim() : String.valueOf(ordre + 1);
 
-        if (DpgfNoeud.TYPE_ARTICLE.equals(type) && !articleExploitable(dto)) {
+        boolean articleIncomplet =
+                DpgfNoeud.TYPE_ARTICLE.equals(type) && !articleExploitable(dto);
+        if (articleIncomplet) {
             stats.articlesIgnores++;
-            // Les enfants d'un article non exploitable ne sont pas attendus ; on les ignore aussi.
-            return;
         }
 
         DpgfNoeud noeud = DpgfNoeud.builder()
@@ -249,7 +253,7 @@ public class DpgfService {
                 .ordre(dto.getOrdre() != null ? dto.getOrdre() : ordre)
                 .build();
         DpgfNoeud saved = noeudRepository.save(noeud);
-        if (DpgfNoeud.TYPE_ARTICLE.equals(type)) {
+        if (DpgfNoeud.TYPE_ARTICLE.equals(type) && !articleIncomplet) {
             stats.articlesAcceptes++;
         }
 

@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Locale;
+import ma.nafura.etudes.api.request.ImportNoeudDto;
+import ma.nafura.etudes.api.request.ImportTreeRequest;
+import ma.nafura.etudes.domain.dpgf.DpgfNoeud;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -59,6 +62,33 @@ class PdfBordereauLayoutParserGridPathTest {
         assertThat(result.groupingCandidates())
                 .anyMatch(g -> g.kind() == BordereauRowCandidate.Kind.LOT
                         && g.libelle().contains("TERRASSEMENT"));
+    }
+
+    @Test
+    @DisplayName("chapitre A- COURANTS FORTS porte les sections 3.1 / 3.2 / 3.3")
+    void nestLetteredChapterAboveNumberedSections() {
+        assertThat(result.groupingCandidates())
+                .anyMatch(g -> g.isLetteredChapter()
+                        && g.libelle() != null
+                        && g.libelle().toUpperCase(Locale.ROOT).contains("COURANTS FORTS"));
+
+        ImportTreeRequest tree = new BordereauHybridAssembler().assembleLocalOnly(result);
+        ImportNoeudDto lotElec = tree.getArbre().stream()
+                .filter(n -> n.getLibelle() != null
+                        && n.getLibelle().toUpperCase(Locale.ROOT).contains("ELECTRICITE"))
+                .findFirst()
+                .orElseThrow();
+        ImportNoeudDto chapitreA = lotElec.getEnfants().stream()
+                .filter(n -> n.getLibelle() != null
+                        && n.getLibelle().toUpperCase(Locale.ROOT).contains("COURANTS FORTS"))
+                .findFirst()
+                .orElseThrow();
+        assertThat(chapitreA.getType()).isEqualTo(DpgfNoeud.TYPE_SOUS_LOT);
+        assertThat(chapitreA.getCode()).isEqualToIgnoringCase("A");
+        assertThat(chapitreA.getEnfants())
+                .filteredOn(n -> DpgfNoeud.TYPE_SOUS_LOT.equals(n.getType()))
+                .extracting(ImportNoeudDto::getCode)
+                .contains("3.1", "3.2", "3.3");
     }
 
     @Test

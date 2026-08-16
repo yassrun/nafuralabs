@@ -131,29 +131,80 @@ public class CpsService {
     /**
      * Sections du CPS pertinentes pour un article.
      *
-     * <p>La requete combine le code et le libelle : le code remonte les sections dont la
-     * numerotation correspond (ponderation 'A'), le libelle rattrape les cas ou la numerotation
-     * du CPS et celle du bordereau divergent — ce qui est frequent.
+     * <p>Ordre : (1) même numéro que l'article — c'est la correspondance BDP ↔ CCTP ;
+     * (2) plein texte en OU sur les mots porteurs du libellé ; (3) websearch du libellé
+     * entier en dernier recours. Un AND sur « REVETEMENT … 20X20X1,2 CM Y COMPRIS PLINTHES »
+     * rate la section 6.1.3 du CPS, qui existe pourtant.
      */
     @Transactional(readOnly = true)
     public List<CpsSection> rechercherPourArticle(UUID cpsDocumentId, DpgfNoeud article, int limite) {
-        String requete = construireRequete(article);
-        if (requete.isBlank()) {
+        if (cpsDocumentId == null) {
             return List.of();
         }
-        List<CpsSection> hits = sectionRepository.rechercher(tenantId(), cpsDocumentId, requete, limite);
-        if (!hits.isEmpty()) {
-            return hits;
+        UUID indexId = resoudreIndexId(cpsDocumentId);
+        UUID tenant = tenantId();
+        int cap = Math.max(1, limite);
+        List<CpsSection> out = new ArrayList<>();
+
+        String code = article != null ? normaliserCodePourRecherche(article.getCode()) : "";
+        if (StringUtils.hasText(code)) {
+            ajouterUniques(out, sectionRepository.trouverParNumero(tenant, indexId, code, cap), cap);
         }
-        // Fallback : le code bordereau (ex. 1-1-3) peut encore diverger du CPS après normalisation.
-        // On retente sur le libellé seul — c'est le rappel le plus fiable.
+        if (!out.isEmpty()) {
+            return out;
+        }
+
+        String tsquery = construireTsQueryOr(article);
+        if (StringUtils.hasText(tsquery)) {
+            ajouterUniques(out, sectionRepository.rechercherTsQuery(tenant, indexId, tsquery, cap), cap);
+        }
+        if (out.size() >= cap) {
+            return out;
+        }
+
         String libelleSeul = article != null && StringUtils.hasText(article.getLibelle())
                 ? article.getLibelle().trim()
                 : "";
-        if (libelleSeul.isBlank() || libelleSeul.equals(requete)) {
-            return hits;
+        if (StringUtils.hasText(libelleSeul)) {
+            ajouterUniques(out, sectionRepository.rechercher(tenant, indexId, libelleSeul, cap), cap);
         }
-        return sectionRepository.rechercher(tenantId(), cpsDocumentId, libelleSeul, limite);
+        return out;
+    }
+
+    /** Accepte l'id {@link CpsDocument} ou l'id de la pièce {@link DossierDocument}. */
+    private UUID resoudreIndexId(UUID cpsDocumentId) {
+        UUID tenant = tenantId();
+        if (cpsDocumentId == null) {
+            return null;
+        }
+        if (sectionRepository.countByTenantIdAndCpsDocumentId(tenant, cpsDocumentId) > 0) {
+            return cpsDocumentId;
+        }
+        return cpsDocumentRepository
+                .findByTenantIdAndDossierDocumentId(tenant, cpsDocumentId)
+                .map(CpsDocument::getId)
+                .orElse(cpsDocumentId);
+    }
+
+    private static void ajouterUniques(List<CpsSection> out, List<CpsSection> plus, int cap) {
+        if (plus == null || plus.isEmpty()) {
+            return;
+        }
+        java.util.Set<UUID> vus = new java.util.HashSet<>();
+        for (CpsSection s : out) {
+            if (s.getId() != null) {
+                vus.add(s.getId());
+            }
+        }
+        for (CpsSection s : plus) {
+            if (out.size() >= cap) {
+                return;
+            }
+            if (s == null || (s.getId() != null && !vus.add(s.getId()))) {
+                continue;
+            }
+            out.add(s);
+        }
     }
 
     /**
@@ -225,6 +276,40 @@ public class CpsService {
         }
         return sb.toString().trim();
     }
+
+    /**
+     * Mots porteurs du libellé, en OU pour {@code to_tsquery('french', …)}.
+     *
+     * <p>On écarte dimensions, unités et mots-outils BDP (« y compris », « importation »)
+     * qui ne figurent pas dans le CCTP et faisaient échouer un AND.
+     */
+    static String construireTsQueryOr(DpgfNoeud article) {
+        if (article == null || !StringUtils.hasText(article.getLibelle())) {
+            return "";
+        }
+        String fold = java.text.Normalizer.normalize(article.getLibelle(), java.text.Normalizer.Form.NFD)
+                .replaceAll("\\p{M}+", "")
+                .toLowerCase(java.util.Locale.ROOT);
+        String[] brut = fold.split("[^a-z0-9]+");
+        java.util.LinkedHashSet<String> mots = new java.util.LinkedHashSet<>();
+        for (String m : brut) {
+            if (m.length() < 3 || STOP_RECHERCHE.contains(m) || m.matches("\\d+[x×]\\d+.*") || m.chars().allMatch(Character::isDigit)) {
+                continue;
+            }
+            mots.add(m);
+            if (mots.size() >= 8) {
+                break;
+            }
+        }
+        return String.join(" | ", mots);
+    }
+
+    private static final java.util.Set<String> STOP_RECHERCHE = java.util.Set.of(
+            "de", "du", "des", "la", "le", "les", "en", "et", "ou", "un", "une",
+            "d", "l", "y", "pour", "par", "avec", "sans", "sur", "aux", "au", "a",
+            "cm", "mm", "ml", "m2", "m3", "kg", "u",
+            "compris", "ycompris", "importation", "import",
+            "fourniture", "pose");
 
     /** Aligne la numerotation bordereau sur celle du CPS pour le tsquery. */
     static String normaliserCodePourRecherche(String code) {

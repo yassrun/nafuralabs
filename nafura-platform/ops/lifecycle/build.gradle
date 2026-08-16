@@ -59,6 +59,9 @@ def gradleProjectToDiskPath = { String projectPath ->
 
     switch (parts[0]) {
         case 'platform':
+            if (parts.size() == 2 && parts[1] in ['document-extraction', 'documents', 'impression']) {
+                return "nafura-platform/sources/backend/${parts[1]}"
+            }
             if (parts.size() < 3) {
                 return null
             }
@@ -79,7 +82,7 @@ def gradleProjectToDiskPath = { String projectPath ->
             if (parts.size() < 2) {
                 return null
             }
-            return "sektor/sources/backend/modules/${parts[1]}"
+            return "sektor/sources/backend/${parts[1]}"
         case 'venue-catalog':
             if (parts.size() < 2) {
                 return null
@@ -263,6 +266,10 @@ def discoverSqlSources = { String scopedAppId = null ->
 
         selectedFiles.each { File sqlFile ->
             def relativePath = backendRoot.toPath().relativize(sqlFile.toPath()).toString().replace('\\', '/')
+            if (relativePath.contains('cursor_qa')) {
+                logger.lifecycle("Skipping local QA seed (not for staging/prod): ${relativePath}")
+                return
+            }
             def content = sqlFile.getText('UTF-8')
             def disableSplitStatements = content.contains('DO $$')
             selections << [
@@ -337,9 +344,9 @@ def migrationSortKey = { String relativePath ->
         layerRank = 35
     } else if (lower.startsWith('nafura-platform/')) {
         layerRank = 45
-    } else if (lower ==~ ~'^[^/]+/sources/backend/modules/[^/]+/.*') {
+    } else if (lower ==~ ~'^[^/]+/sources/backend/(?:modules/)?[^/]+/.*') {
         // Topological order from the Gradle graph — see productModuleRank above.
-        def moduleMatch = (lower =~ ~'^[^/]+/sources/backend/modules/([^/]+)/')
+        def moduleMatch = (lower =~ ~'^[^/]+/sources/backend/(?:modules/)?([^/]+)/')
         if (moduleMatch.find()) {
             // getOrDefault, not Groovy's get(key, default) — the latter mutates the map.
             moduleRank = productModuleRank.getOrDefault(moduleMatch.group(1), 500) as int

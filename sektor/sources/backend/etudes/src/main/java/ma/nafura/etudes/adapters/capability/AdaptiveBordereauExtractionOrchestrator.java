@@ -1,6 +1,7 @@
 package ma.nafura.etudes.adapters.capability;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import java.util.stream.Collectors;
 import ma.nafura.etudes.api.request.ImportNoeudDto;
 import ma.nafura.etudes.api.request.ImportTreeRequest;
 import ma.nafura.etudes.domain.dpgf.DpgfNoeud;
+import ma.nafura.etudes.service.bordereau.ArticleCodeUniquifier;
 import ma.nafura.etudes.service.bordereau.BordereauCandidateMerger;
 import ma.nafura.etudes.service.bordereau.BordereauExtractResult;
 import ma.nafura.etudes.service.bordereau.BordereauExtractionDiagnostics;
@@ -32,6 +34,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
 
 /**
  * Pipeline adaptatif :
@@ -47,6 +52,7 @@ public class AdaptiveBordereauExtractionOrchestrator {
     private static final Logger log = LoggerFactory.getLogger(AdaptiveBordereauExtractionOrchestrator.class);
 
     private static final int BORDEREAU_MAX_PROMPT_CHARS = 60_000;
+    private static final int PDF_TEXT_MIN_CHARS = 200;
     private static final int HYBRID_MAX_PROMPT_CHARS = 80_000;
     /** Repair ciblé (pages faibles) : petits paquets. */
     private static final int CHUNK_MAX_PAGES = 3;
@@ -67,7 +73,8 @@ public class AdaptiveBordereauExtractionOrchestrator {
             }
             """;
 
-    private static final String SOUS_LOT_SCHEMA = """
+    /** Dernier niveau de regroupement (3.1, 3.2) — postes seulement. */
+    private static final String SECTION_SCHEMA = """
             {
               "type": "object",
               "properties": {
@@ -81,6 +88,26 @@ public class AdaptiveBordereauExtractionOrchestrator {
               "required": ["libelle"]
             }
             """.formatted(POSTE_SCHEMA);
+
+    /** Chapitre sous le lot (A- COURANTS FORTS) — peut porter des sections. */
+    private static final String SOUS_LOT_SCHEMA = """
+            {
+              "type": "object",
+              "properties": {
+                "code": { "type": "string" },
+                "libelle": { "type": "string" },
+                "children": {
+                  "type": "array",
+                  "items": %s
+                },
+                "postes": {
+                  "type": "array",
+                  "items": %s
+                }
+              },
+              "required": ["libelle"]
+            }
+            """.formatted(SECTION_SCHEMA, POSTE_SCHEMA);
 
     private static final String BORDEREAU_SCHEMA = """
             {
@@ -128,12 +155,27 @@ public class AdaptiveBordereauExtractionOrchestrator {
                           "properties": {
                             "code": { "type": "string" },
                             "libelle": { "type": "string" },
+                            "children": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "code": { "type": "string" },
+                                  "libelle": { "type": "string" },
+                                  "articleRowIds": {
+                                    "type": "array",
+                                    "items": { "type": "string" }
+                                  }
+                                },
+                                "required": ["libelle", "articleRowIds"]
+                              }
+                            },
                             "articleRowIds": {
                               "type": "array",
                               "items": { "type": "string" }
                             }
                           },
-                          "required": ["libelle", "articleRowIds"]
+                          "required": ["libelle"]
                         }
                       },
                       "articleRowIds": {
@@ -301,16 +343,27 @@ public class AdaptiveBordereauExtractionOrchestrator {
                     fileBytes, fileName, mimeType, tenantId, unitCodes, startedNanos, "legacy-non-pdf");
         }
 
-        // PDF : vision page/page → texte complet → assemblage IA (évite libellés PDFBox tronqués).
-        return extractVisionThenAssemble(
-                fileBytes,
-                fileName,
-                mimeType,
-                tenantId,
-                unitCodes,
-                startedNanos,
-                "adaptive-vision",
-                progress);
+        // PDF : un appel DeepSeek sur le document (prompt bdp/*.tree.json).
+        // Vision page/page seulement si cet appel échoue (scan, JSON vide).
+        progress.report(20, "Extraction IA…");
+        try {
+            return extractLegacy(
+                    fileBytes, fileName, mimeType, tenantId, unitCodes, startedNanos, "ai-oneshot");
+        } catch (BordereauExtractionFailedException ex) {
+            log.warn(
+                    "Bordereau AI oneshot failed (file={}): {} — falling back to vision",
+                    fileName,
+                    ex.getMessage());
+            return extractVisionThenAssemble(
+                    fileBytes,
+                    fileName,
+                    mimeType,
+                    tenantId,
+                    unitCodes,
+                    startedNanos,
+                    "adaptive-vision",
+                    progress);
+        }
     }
 
     private BordereauExtractResult finalizeFromParse(
@@ -447,17 +500,6 @@ public class AdaptiveBordereauExtractionOrchestrator {
         return new BordereauExtractResult(tree, diagnostics);
     }
 
-    private static double truncatedLibelleRatio(BordereauParseResult parse) {
-        var articles = parse.articleCandidates();
-        if (articles.isEmpty()) {
-            return 1.0;
-        }
-        long truncated = articles.stream()
-                .filter(a -> BordereauRowCandidate.looksTruncated(a.libelle()))
-                .count();
-        return truncated / (double) articles.size();
-    }
-
     private static int progressFloor(String path) {
         return path != null && path.contains("vision") ? 88 : 70;
     }
@@ -507,29 +549,6 @@ public class AdaptiveBordereauExtractionOrchestrator {
                 pages,
                 chunks.size(),
                 pathPrefix);
-
-        // Après fix géométrie : si les libellés locaux sont complets, pas besoin de 16 appels LLM.
-        if (layoutHint.usableForHybrid() && truncatedLibelleRatio(layoutHint) < 0.12) {
-            log.info(
-                    "Bordereau local text layer trusted (file={}, articles={}, truncRatio={})",
-                    fileName,
-                    layoutHint.articleCandidates().size(),
-                    String.format(Locale.ROOT, "%.2f", truncatedLibelleRatio(layoutHint)));
-            progress.report(40, "Parse local fiable…");
-            return finalizeFromParse(
-                    layoutHint,
-                    fileName,
-                    tenantId,
-                    unitCodes,
-                    parseMs,
-                    0,
-                    0,
-                    0,
-                    pathPrefix + "+local-trusted",
-                    startedNanos,
-                    false,
-                    progress);
-        }
 
         if (chunks.isEmpty()) {
             log.warn("Bordereau vision chunks empty (file={}) — fallback local/legacy", fileName);
@@ -808,10 +827,26 @@ public class AdaptiveBordereauExtractionOrchestrator {
             long startedNanos,
             String path) {
         String instructions = buildInstructions(codes);
+        byte[] payload = fileBytes;
+        String payloadName = fileName;
+        String payloadMime = mimeType;
+        if (isPdf(mimeType, fileName)) {
+            String text = pdfTextLayer(fileBytes);
+            int dense = text.replaceAll("\\s", "").length();
+            if (dense >= PDF_TEXT_MIN_CHARS) {
+                payload = text.getBytes(StandardCharsets.UTF_8);
+                payloadName = (fileName == null ? "bordereau" : fileName) + ".txt";
+                payloadMime = "text/plain";
+                log.info(
+                        "Bordereau AI oneshot using PDF text layer (file={}, chars={})",
+                        fileName,
+                        text.length());
+            }
+        }
         StatelessExtractionResponse response = extractionService.process(
-                fileBytes,
-                fileName,
-                mimeType,
+                payload,
+                payloadName,
+                payloadMime,
                 BORDEREAU_SCHEMA,
                 null,
                 instructions,
@@ -847,6 +882,20 @@ public class AdaptiveBordereauExtractionOrchestrator {
                 tree.getArbre() != null ? tree.getArbre().size() : 0,
                 articles);
         return new BordereauExtractResult(tree, diagnostics);
+    }
+
+    private static String pdfTextLayer(byte[] pdfBytes) {
+        if (pdfBytes == null || pdfBytes.length == 0) {
+            return "";
+        }
+        try (PDDocument doc = Loader.loadPDF(pdfBytes)) {
+            PDFTextStripper stripper = new PDFTextStripper();
+            stripper.setSortByPosition(true);
+            String text = stripper.getText(doc);
+            return text == null ? "" : text;
+        } catch (IOException | RuntimeException ex) {
+            return "";
+        }
     }
 
     private ImportTreeRequest extractLegacySilent(
@@ -889,6 +938,8 @@ public class AdaptiveBordereauExtractionOrchestrator {
                 - Ne crée JAMAIS un lot dont le libellé est le titre du marché
                   (ex. « TRAVAUX DE CONSTRUCTION… », « PLATEFORME AGRO… »,
                   « …RABAT-LOT-AMENAGEMENTS… »).
+                - Un chapitre lettré (A-, B-) est un child du lot, pas un lot.
+                  Les sections 3.1 / 3.2 sont des children de ce chapitre.
                 """;
     }
 
@@ -903,6 +954,8 @@ public class AdaptiveBordereauExtractionOrchestrator {
                 N'invente aucune valeur. Ignore PU, montants, totaux et en-têtes marché répétés.
                 Le titre long du marché n'est PAS un lot.
                 kind des groups : LOT | SOUS_LOT | SECTION.
+                Conserve les chapitres lettrés (A-, B-) comme SOUS_LOT, parents des
+                sections 3.1 / 3.2. Ne les omets pas.
                 """.formatted(startPage, endPage);
     }
 
@@ -925,36 +978,38 @@ public class AdaptiveBordereauExtractionOrchestrator {
                 ? "M3, M2, ML, KG, T, U, FF, H, J, L, ENS"
                 : String.join(", ", codes);
         return """
-                Ce document est un bordereau de prix BTP (ou la partie « bordereau / détail
-                estimatif » d'un dossier de consultation).
+                Tu copies un bordereau de prix BTP. Tu n'interprètes pas, tu n'embellis pas.
 
-                PRIORITÉ ABSOLUE — les postes (articles structurels) :
-                - Extrais TOUTES les lignes de postes avec code, libellé, unité et quantité.
-                - IGNORE les prix unitaires, montants HT et totaux : ils seront chiffrés plus tard.
-                - Un résultat avec seulement des en-têtes de lots / sous-lots et 0 postes
-                  est INACCEPTABLE.
-                - Si le document est long, privilégie la complétude des postes plutôt que
-                  une hiérarchie fine.
+                SORTIE — un seul JSON :
+                { "lots": [ { "code", "libelle", "children": [ …même forme… ],
+                  "postes": [ { "code", "libelle", "unite", "quantite" } ] } ] }
+                children peut s'imbriquer. postes = feuilles chiffrables.
 
-                HIERARCHIE (2 niveaux max) :
-                - "lots" = lots racines uniquement (ex. « LOT 1 : Terrassement »).
-                - "children" = sous-lots / sections SANS unité ni quantité
-                  (ex. « SOUS LOT N° 2 »). Ne mets JAMAIS un sous-lot dans "lots".
-                - "postes" = articles chiffrables ; rattache-les au lot ou au sous-lot
-                  auquel ils appartiennent.
-                - Un sous-lot n'a PAS de "children" imbriqués : seulement des "postes".
-                - Ne PAS aplatir les postes dans le tableau "lots".
+                LOTS RACINES — uniquement les têtes de lot du marché, exemples :
+                « 1- TERRASSEMENT », « 3- ELECTRICITE », « 100-Gros-œuvres », « 200-ETANCHEITE ».
+                Un article (101, 112, 132, 3.1.1, 2.2.5) n'est JAMAIS un lot, même en haut de page.
+                Après un saut de page, RESTE dans le lot courant jusqu'au prochain vrai lot.
+                « LOT N° 1 : … » qui enveloppe des lots déjà numérotés (100-, 200-) n'est PAS un lot.
 
-                Pour le champ « unite », utilise UNIQUEMENT un code du référentiel suivant
-                (respecte la casse) : %s.
-                Exemples de mapping : m³/M3 → M3 ; m² → M2 ; ml → ML ; kg → KG ; u/unité → U ;
-                forfait → FF ; heures → H ; jours → J.
-                Si l'unité du document ne correspond à aucun code, choisis le code le plus proche
-                ou laisse null — n'invente pas de libellé libre.
+                CHILDREN : chapitre A-/B- ; section sans mesure (1-1, 3.1) ; parent de variantes
+                sans quantité (109, 112) ; bandeau sans numéro (« CABLES U1000 RO2V ») sans code
+                sous la section ; SOUS LOT N° x — child du lot, pas un lot racine.
 
-                N'extrais QUE la structure du bordereau (lots, sous-lots, postes) —
-                pas les descriptifs techniques longs du CCTP.
-                N'invente aucune valeur : laisse vide ce qui n'est pas lisible.
+                POSTES : ligne avec unité et/ou quantité (y compris 0 ou négatif).
+                Variante a)/b)/A-/B- chiffrée = poste du parent-child, codes DISTINCTS
+                (4.2.1a / 4.2.1b, 109A / 109B) — jamais le même code sur deux postes.
+                Article simple (101, 132, 201) = poste du lot, pas un lot à un seul poste.
+
+                INTERDIT : inventer un parent absent (pas de « 3.7 APPAREILLAGE » si le texte
+                va de 3.6.5 à 3.7.1) ; dupliquer un code ; extraire PU, montants, totaux, TVA,
+                titres de marché, pieds de page. Des dizaines d'articles dans "lots" = échec.
+
+                COMPLÉTUDE : tous les postes. Libellé complet depuis le début.
+
+                Pour « unite », UNIQUEMENT : %s.
+                m³/m3 → M3 ; m²/m2 → M2 ; ml → ML ; kg → KG ; u/unité → U ; ens → ENS
+                (E seulement si le document écrit E). quantite = nombre. Conserve les négatifs.
+                N'invente aucune valeur.
                 """.formatted(referentiel);
     }
 
@@ -1051,6 +1106,7 @@ public class AdaptiveBordereauExtractionOrchestrator {
             return;
         }
         walkNormalize(tree.getArbre(), codes);
+        ArticleCodeUniquifier.uniquify(tree.getArbre());
     }
 
     private void walkNormalize(List<ImportNoeudDto> noeuds, List<String> codes) {

@@ -29,7 +29,7 @@ export interface BordereauTreeRow {
   forfaitOffreId?: string | null;
   prixDpuId?: string | null;
   depth: number;
-  /** ARTICLE sans unité ou quantité ≤ 0 — exclu à la persistance. */
+  /** ARTICLE sans unité ou quantité ≤ 0 — à corriger, reste dans l’arbre. */
   nonExploitable?: boolean;
 }
 
@@ -185,6 +185,58 @@ export function importArbreToTreeNodes(
   });
 }
 
+/** Clés des articles marqués « incomplet » (unité / quantité). */
+export function collectNonExploitableArticleKeys(
+  nodes: NfTreeNode<BordereauTreeRow>[],
+): string[] {
+  const keys: string[] = [];
+  const walk = (list: NfTreeNode<BordereauTreeRow>[]) => {
+    for (const node of list) {
+      if (node.data.type === 'ARTICLE' && node.data.nonExploitable) {
+        keys.push(node.key);
+      }
+      if (node.children?.length) walk(node.children);
+    }
+  };
+  walk(nodes);
+  return keys;
+}
+
+/** Ancêtres à déplier pour rendre `targetKey` visible. */
+export function expandAncestors(
+  nodes: NfTreeNode<BordereauTreeRow>[],
+  targetKey: string,
+): Set<string> {
+  const keys = new Set<string>();
+  const walk = (list: NfTreeNode<BordereauTreeRow>[], trail: string[]): boolean => {
+    for (const node of list) {
+      const next = [...trail, node.key];
+      if (node.key === targetKey) {
+        trail.forEach((k) => keys.add(k));
+        return true;
+      }
+      if (node.children?.length && walk(node.children, next)) {
+        keys.add(node.key);
+        return true;
+      }
+    }
+    return false;
+  };
+  walk(nodes, []);
+  return keys;
+}
+
+/** Déplie uniquement le chemin jusqu’aux articles incomplets (pas tout l’arbre). */
+export function expandAncestorsOfNonExploitable(
+  nodes: NfTreeNode<BordereauTreeRow>[],
+): Set<string> {
+  const keys = new Set<string>();
+  for (const target of collectNonExploitableArticleKeys(nodes)) {
+    for (const k of expandAncestors(nodes, target)) keys.add(k);
+  }
+  return keys;
+}
+
 export function collectExpandKeys(nodes: NfTreeNode<BordereauTreeRow>[], maxDepth = 1): Set<string> {
   const keys = new Set<string>();
   const walk = (list: NfTreeNode<BordereauTreeRow>[]) => {
@@ -197,6 +249,47 @@ export function collectExpandKeys(nodes: NfTreeNode<BordereauTreeRow>[], maxDept
   };
   walk(nodes);
   return keys;
+}
+
+/** Toutes les clés dépliables — étape Coût : tout l’arbre reste visible. */
+export function collectAllExpandableKeys(nodes: NfTreeNode<BordereauTreeRow>[]): Set<string> {
+  const keys = new Set<string>();
+  const walk = (list: NfTreeNode<BordereauTreeRow>[]) => {
+    for (const node of list) {
+      if (node.children?.length) {
+        keys.add(node.key);
+        walk(node.children);
+      }
+    }
+  };
+  walk(nodes);
+  return keys;
+}
+
+/**
+ * Garde uniquement les articles dont l’id est dans `allowed`, plus leurs ancêtres.
+ * Un filtre trop étroit (ex. seul l’article déjà décomposé) fait disparaître les frères.
+ */
+export function filterTreeByArticleIds(
+  nodes: NfTreeNode<BordereauTreeRow>[],
+  allowed: Set<string>,
+): NfTreeNode<BordereauTreeRow>[] {
+  const out: NfTreeNode<BordereauTreeRow>[] = [];
+  for (const node of nodes) {
+    const children = node.children?.length
+      ? filterTreeByArticleIds(node.children, allowed)
+      : [];
+    const keepArticle =
+      node.data.type === 'ARTICLE' && node.data.id != null && allowed.has(node.data.id);
+    if (keepArticle || children.length) {
+      out.push({
+        ...node,
+        children: children.length ? children : undefined,
+        leaf: !children.length,
+      });
+    }
+  }
+  return out;
 }
 
 export function countArticlesInNodes(nodes: NfTreeNode<BordereauTreeRow>[]): number {

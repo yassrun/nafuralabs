@@ -35,6 +35,11 @@ spec:
           {{- with secret "secret/data/nafura/prod/platform/integrations/ai/gemini" -}}
           export AI_GEMINI_API_KEY="{{ .Data.data.api_key }}"
           {{- end }}
+        vault.hashicorp.com/agent-inject-secret-app-ai-deepseek: secret/data/nafura/prod/platform/integrations/ai/deepseek
+        vault.hashicorp.com/agent-inject-template-app-ai-deepseek: |
+          {{- with secret "secret/data/nafura/prod/platform/integrations/ai/deepseek" -}}
+          export AI_DEEPSEEK_API_KEY="{{ .Data.data.api_key }}"
+          {{- end }}
         vault.hashicorp.com/agent-inject-secret-app-keycloak: secret/data/nafura/prod/platform/iam/keycloak
         vault.hashicorp.com/agent-inject-template-app-keycloak: |
           {{- with secret "secret/data/nafura/prod/platform/iam/keycloak" -}}
@@ -58,3 +63,7 @@ spec:
               value: https://iam.nafuralabs.com/realms/iam-portal
             - name: APP_FRONTEND_BASE_URL
               value: https://sektor.nafuralabs.com
+            - name: AI_PROVIDER
+              value: deepseek
+            - name: AI_DEEPSEEK_MODEL
+              value: deepseek-v4-flash

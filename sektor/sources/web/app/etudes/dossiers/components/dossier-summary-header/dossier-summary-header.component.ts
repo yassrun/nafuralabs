@@ -24,6 +24,9 @@ import {
   imports: [CommonModule, RouterLink, MadCurrencyPipe],
   templateUrl: './dossier-summary-header.component.html',
   styleUrl: './dossier-summary-header.component.scss',
+  host: {
+    '[class.dsh-host--compact]': 'etapeUi() === 2 || etapeUi() === 3',
+  },
 })
 export class DossierSummaryHeaderComponent {
   readonly synthese = input.required<DossierEtudeSynthese>();

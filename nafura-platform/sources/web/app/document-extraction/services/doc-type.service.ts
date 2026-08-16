@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { DocTypeDefinition, DocTypeListItem, DocTypesByDomain, DomainListItem } from '../models/doc-type-definition.model';
-import { ApiConfigService } from '../../../../core/config/api-config.service';
+import { ApiConfigService } from '@core/config/api-config.service';
 
 @Injectable({ providedIn: 'root' })
 export class DocTypeService {

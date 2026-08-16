@@ -77,13 +77,15 @@ public class DocExtractorDecompositionNeedsAdapter implements DecompositionNeeds
                 RESPONSE_SCHEMA,
                 null,
                 """
-                Tu analyses un poste de bordereau BTP et les sections CPS fournies.
-                Extrais les composants physiques ou de main-d'œuvre nécessaires pour
-                réaliser UNE unité du poste. Types autorisés : MATIERE, MAIN_DOEUVRE,
-                MATERIEL, SOUS_TRAITANCE. Donne un rendement (quantité pour 1 unité
-                du poste). N'invente aucun prix ni identifiant catalogue. Si le CPS
-                indique une classe (ex. béton B35), inclus-la dans la désignation.
-                S'il n'y a rien d'exploitable, renvoie une liste vide.
+                Tu analyses un poste de bordereau BTP. Le descriptif technique et les
+                sections CPS sont optionnels : s'ils manquent, décompose à partir du
+                code et du libellé (composition type d'un tel poste BTP). Extrais les
+                composants physiques ou de main-d'œuvre nécessaires pour réaliser UNE
+                unité du poste. Types autorisés : MATIERE, MAIN_DOEUVRE, MATERIEL,
+                SOUS_TRAITANCE. Donne un rendement (quantité pour 1 unité du poste).
+                N'invente aucun prix ni identifiant catalogue. Si le CPS indique une
+                classe (ex. béton B35), inclus-la dans la désignation. Renvoie une
+                liste vide seulement si le libellé est vide ou hors sujet.
                 """,
                 tenantId,
                 40_000);

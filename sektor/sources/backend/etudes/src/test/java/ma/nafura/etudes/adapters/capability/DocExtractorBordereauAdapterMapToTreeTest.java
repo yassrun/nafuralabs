@@ -88,6 +88,51 @@ class DocExtractorBordereauAdapterMapToTreeTest {
     }
 
     @Test
+    void mapToTree_nestsLetteredChapterAboveNumberedSections() throws Exception {
+        var data = mapper.readTree("""
+                {
+                  "lots": [
+                    {
+                      "code": "3",
+                      "libelle": "ELECTRICITE",
+                      "children": [
+                        {
+                          "code": "A",
+                          "libelle": "ELECTRICITE - COURANTS FORTS",
+                          "children": [
+                            {
+                              "code": "3.1",
+                              "libelle": "TABLEAUX ELECTRIQUES",
+                              "postes": [
+                                {
+                                  "code": "3.1.1",
+                                  "libelle": "TABLEAU TEVO",
+                                  "unite": "E",
+                                  "quantite": 1
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+                """);
+
+        ImportTreeRequest tree = orchestrator.mapToTree(data);
+        ImportNoeudDto lot = tree.getArbre().get(0);
+        assertThat(lot.getEnfants()).hasSize(1);
+        ImportNoeudDto chapitreA = lot.getEnfants().get(0);
+        assertThat(chapitreA.getType()).isEqualTo(DpgfNoeud.TYPE_SOUS_LOT);
+        assertThat(chapitreA.getCode()).isEqualTo("A");
+        assertThat(chapitreA.getEnfants()).hasSize(1);
+        ImportNoeudDto tableaux = chapitreA.getEnfants().get(0);
+        assertThat(tableaux.getCode()).isEqualTo("3.1");
+        assertThat(tableaux.getEnfants()).extracting(ImportNoeudDto::getCode).containsExactly("3.1.1");
+    }
+
+    @Test
     void mapToTree_allowsPostesDirectlyUnderLot() throws Exception {
         var data = mapper.readTree("""
                 {

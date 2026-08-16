@@ -40,7 +40,7 @@ public class MinioDocumentStorage implements DocumentStorage {
     @Override
     public String upload(UUID tenantId, UUID documentId, String fileName, InputStream inputStream, String contentType) {
         try {
-            String storageKey = buildStorageKey(tenantId, documentId, fileName);
+            String storageKey = buildStorageKey(tenantId, documentId);
             
             minioClient.putObject(
                 PutObjectArgs.builder()
@@ -114,19 +114,19 @@ public class MinioDocumentStorage implements DocumentStorage {
         }
     }
     
-    private String buildStorageKey(UUID tenantId, UUID documentId, String fileName) {
+    /**
+     * Object keys stay ASCII (UUIDs + digits). The original filename is metadata on
+     * {@code Document.fileName} — putting {@code N°} in the key makes MinIO put/get miss.
+     */
+    static String buildStorageKey(UUID tenantId, UUID documentId) {
         LocalDate now = LocalDate.now();
         String year = now.format(YEAR_FORMATTER);
         String month = now.format(MONTH_FORMATTER);
-        
-        // Format: {tenantId}/{yyyy}/{mm}/{documentId}/{originalFileName}
-        return String.format("%s/%s/%s/%s/%s", 
-            tenantId.toString(), 
-            year, 
-            month, 
-            documentId.toString(), 
-            fileName
-        );
+        return String.format("%s/%s/%s/%s",
+            tenantId.toString(),
+            year,
+            month,
+            documentId.toString());
     }
 
     /** True when nginx/MinIO (or similar) rejected the body as too large (HTTP 413). */

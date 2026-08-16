@@ -172,6 +172,12 @@ public class OpenAiCompatibleProvider implements AiProvider {
             body.put("response_format", Map.of("type", "json_object"));
         }
 
+        // V4 flash/pro think by default ; reasoning eats max_tokens and returns empty content.
+        if ("deepseek".equals(providerName)) {
+            body.put("thinking", Map.of("type", "disabled"));
+            body.put("max_tokens", 65_536);
+        }
+
         return body;
     }
 

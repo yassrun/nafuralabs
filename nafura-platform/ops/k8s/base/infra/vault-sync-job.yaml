@@ -42,6 +42,7 @@ spec:
               path "secret/data/nafura/$ENV/apps/$APP/*" { capabilities = ["read"] }
               path "secret/data/nafura/$ENV/platform/integrations/email/brevo" { capabilities = ["read"] }
               path "secret/data/nafura/$ENV/platform/integrations/ai/gemini" { capabilities = ["read"] }
+              path "secret/data/nafura/$ENV/platform/integrations/ai/deepseek" { capabilities = ["read"] }
               path "secret/data/nafura/$ENV/platform/iam/keycloak" { capabilities = ["read"] }
               path "secret/data/nafura/$ENV/platform/security/invitation" { capabilities = ["read"] }
               path "secret/data/nafura/$ENV/platform/iam/clients/$APP" { capabilities = ["read"] }

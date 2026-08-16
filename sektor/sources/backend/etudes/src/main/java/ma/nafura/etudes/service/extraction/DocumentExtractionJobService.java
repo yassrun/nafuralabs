@@ -115,11 +115,18 @@ public class DocumentExtractionJobService {
 
     @Transactional
     public ExtractionJobDto enqueueCpsIndex(UUID dossierId, UUID pieceId) {
+        return enqueueCpsIndex(dossierId, pieceId, null);
+    }
+
+    @Transactional
+    public ExtractionJobDto enqueueCpsIndex(UUID dossierId, UUID pieceId, byte[] contenu) {
         DossierDocument piece = requirePiece(dossierId, pieceId);
         if (!piece.contientCps()) {
             throw new IllegalArgumentException("etudes.document.pas_un_cps");
         }
-        byte[] contenu = documentService.chargerContenu(piece);
+        if (contenu == null || contenu.length == 0) {
+            contenu = documentService.chargerContenu(piece);
+        }
         String hash = sha256(contenu);
         String idempotency = idempotencyKey(
                 piece.getTenantId(), piece.getId(), DocumentExtractionJob.TYPE_CPS_INDEX, hash);

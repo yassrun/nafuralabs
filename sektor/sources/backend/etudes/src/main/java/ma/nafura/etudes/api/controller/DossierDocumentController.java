@@ -1,5 +1,6 @@
 package ma.nafura.etudes.api.controller;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -17,6 +18,8 @@ import ma.nafura.etudes.service.extraction.DocumentExtractionJobService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;
 import ma.nafura.platform.framework.context.TenantContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,6 +35,8 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/api/v1/etudes/dossiers/{dossierId}/documents")
 @SecuredResource(domain = "etudes", feature = "etudes", resource = "dossier")
 public class DossierDocumentController {
+
+    private static final Logger log = LoggerFactory.getLogger(DossierDocumentController.class);
 
     private final DossierDocumentService service;
     private final BordereauImportService bordereauImportService;
@@ -65,14 +70,25 @@ public class DossierDocumentController {
             @RequestParam("file") MultipartFile file,
             @RequestParam("type") String type) {
         try {
-            DossierDocument piece = service.deposer(dossierId, file, type);
+            byte[] contenu = file.getBytes();
+            DossierDocument piece = service.deposer(
+                    dossierId, contenu, file.getOriginalFilename(), file.getContentType(), type);
             if (piece.contientCps()) {
-                extractionJobService.enqueueCpsIndex(dossierId, piece.getId());
+                try {
+                    extractionJobService.enqueueCpsIndex(dossierId, piece.getId(), contenu);
+                } catch (RuntimeException ex) {
+                    log.warn(
+                            "Indexation CPS non démarrée après dépôt pieceId={}: {}",
+                            piece.getId(),
+                            ex.getMessage());
+                }
             }
             return ResponseEntity.status(HttpStatus.CREATED).body(piece);
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.badRequest()
                     .body(Map.of("code", ex.getMessage() != null ? ex.getMessage() : "etudes.document.erreur"));
+        } catch (IOException ex) {
+            return ResponseEntity.badRequest().body(Map.of("code", "etudes.document.lecture_impossible"));
         }
     }
 

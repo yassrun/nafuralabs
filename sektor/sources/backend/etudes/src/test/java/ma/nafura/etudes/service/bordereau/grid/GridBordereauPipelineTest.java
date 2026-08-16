@@ -73,6 +73,18 @@ class GridBordereauPipelineTest {
     }
 
     @Test
+    @DisplayName("chapitre lettré A- COURANTS FORTS et sections 3.2 / 3.3 ne sont pas jetés")
+    void conserveLeChapitreLettreEtLesSections() {
+        assertThat(kind(BordereauRowCandidate.Kind.SOUS_LOT))
+                .anyMatch(g -> g.isLetteredChapter()
+                        && g.libelle() != null
+                        && g.libelle().toUpperCase(Locale.ROOT).contains("COURANTS FORTS"));
+        assertThat(kind(BordereauRowCandidate.Kind.SOUS_LOT))
+                .extracting(BordereauRowCandidate::code)
+                .contains("3.1", "3.2", "3.3");
+    }
+
+    @Test
     @DisplayName("un article porte son code et son libellé, la mesure venant de la ligne suivante")
     void replieLArticleSurDeuxLignes() {
         BordereauRowCandidate fouilles = articles().stream()

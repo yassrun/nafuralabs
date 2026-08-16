@@ -45,4 +45,26 @@ class TabularBordereauParserTest {
                 "a.xlsx")).isTrue();
         assertThat(parser.supports("application/pdf", "a.pdf")).isFalse();
     }
+
+    @Test
+    void parse_csv_keepsLetteredChapterAsSousLot() {
+        String csv = """
+                Spreadsheet file: bdp.csv
+
+                3- ELECTRICITE
+                A- ELECTRICITE - COURANTS FORTS
+                3.1	TABLEAUX ELECTRIQUES
+                3.1.1	TABLEAU TEVO	E	1
+                """;
+        BordereauParseResult parse = parser.parse(
+                csv.getBytes(StandardCharsets.UTF_8), "bdp.csv", "text/csv");
+
+        assertThat(parse.groupingCandidates())
+                .anySatisfy(g -> {
+                    assertThat(g.isLetteredChapter()).isTrue();
+                    assertThat(g.code()).isEqualTo("A");
+                    assertThat(g.libelle()).containsIgnoringCase("COURANTS FORTS");
+                    assertThat(g.kind()).isEqualTo(BordereauRowCandidate.Kind.SOUS_LOT);
+                });
+    }
 }

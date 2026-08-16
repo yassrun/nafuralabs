@@ -3,7 +3,7 @@
     <div class="dsh__top">
       <div class="dsh__identity">
         <div class="dsh__title-row">
-          <h1 class="dsh__titre">{{ s.numero }} — {{ s.objet }}</h1>
+          <h1 class="dsh__titre" [attr.title]="s.numero + ' — ' + s.objet">{{ s.numero }} — {{ s.objet }}</h1>
           <div class="dsh__badges">
             <span class="dsh__pill" [attr.data-variant]="statutVariant()">{{ statutLabel() }}</span>
             <span class="dsh__pill dsh__pill--phase">{{ phaseLabel() }}</span>

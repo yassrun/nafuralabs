@@ -18,23 +18,29 @@
 
 .dsh__identity {
   min-width: 0;
-  flex: 1 1 16rem;
+  flex: 1 1 18rem;
 }
 
 .dsh__title-row {
   display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.4rem 0.65rem;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.35rem;
 }
 
 .dsh__titre {
   margin: 0;
+  width: 100%;
+  min-width: 0;
   font-size: 1.125rem;
   font-weight: 650;
   line-height: 1.25;
   color: var(--nf-color-text-primary);
-  overflow-wrap: anywhere;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
 }
 
 .dsh__meta {
@@ -119,6 +125,7 @@
   align-items: center;
   gap: 0.65rem 1rem;
   margin-left: auto;
+  flex: 0 1 auto;
 }
 
 .dsh__kpis {
@@ -198,6 +205,30 @@
     border-color: var(--nf-color-border);
     color: var(--nf-color-text-secondary);
   }
+}
+
+:host.dsh-host--compact .dsh {
+  gap: 0.2rem;
+  margin-bottom: 0.25rem;
+  padding-bottom: 0.3rem;
+}
+
+:host.dsh-host--compact .dsh__titre {
+  font-size: 0.95rem;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+}
+
+:host.dsh-host--compact .dsh__actions {
+  display: none;
+}
+
+:host.dsh-host--compact .dsh__kpis {
+  gap: 0.4rem 0.85rem;
+}
+
+:host.dsh-host--compact .dsh__kpi-value {
+  font-size: 0.82rem;
 }
 
 @media (max-width: 720px) {
