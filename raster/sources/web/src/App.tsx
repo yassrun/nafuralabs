@@ -36,7 +36,7 @@ export default function App() {
   const [sprint, setSprint] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedLine, setSelectedLine] = useState<string | null>(null);
-  const [filterProject, setFilterProject] = useState("raster");
+  const [filterProject, setFilterProject] = useState("");
   const [agentFilter, setAgentFilter] = useState<AgentFilter>("all");
   const [draft, setDraft] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -61,7 +61,9 @@ export default function App() {
     setRecent(run.recent);
     setSpawnPret(run.spawnPret);
     setFilterProject((prev) =>
-      prev === ALL || meta.projects.includes(prev) ? prev : meta.projects[0] || prev
+      prev === ALL || meta.projects.includes(prev)
+        ? prev
+        : projetPorteur(meta.projects, t.tasks)
     );
   }, []);
 
@@ -161,7 +163,7 @@ export default function App() {
       setSelectedId(null);
     }
     if (v === "backlog" && filterProject === ALL) {
-      setFilterProject(projects.includes("raster") ? "raster" : projects[0] || "raster");
+      setFilterProject(projetPorteur(projects, tasks));
     }
   };
 
@@ -319,6 +321,8 @@ export default function App() {
               rows={enAttente}
               selectedId={selectedId}
               onSelect={select}
+              total={tasks.length}
+              onBacklog={() => setViewSafe("backlog")}
             />
           ) : null}
 
@@ -346,7 +350,9 @@ export default function App() {
               projects={projects}
               tasks={tasks}
               busy={busy}
-              defaultProject={filterProject === ALL ? "raster" : filterProject}
+              defaultProject={
+                filterProject === ALL ? projetPorteur(projects, tasks) : filterProject
+              }
               onSelectLine={setSelectedLine}
               onPromote={(line, project, parent) =>
                 void mutate(
@@ -364,7 +370,9 @@ export default function App() {
 
           {view === "backlog" ? (
             <Backlog
-              project={filterProject === ALL ? projects[0] || "raster" : filterProject}
+              project={
+                filterProject === ALL ? projetPorteur(projects, tasks) : filterProject
+              }
               tasks={scopedTasks.filter(visible)}
               readyByKey={readyByKey}
               sprint={sprint}
@@ -440,6 +448,20 @@ export default function App() {
   );
 }
 
+/**
+ * Le projet à ouvrir par défaut : **celui qui porte du travail**.
+ *
+ * Le socle ne connaît le nom d'aucun projet — en coder un en dur l'a fait
+ * s'ouvrir sur `raster` vide alors que `nafura-platform` en portait 39.
+ * Tous vides : le premier, plutôt que rien.
+ */
+export function projetPorteur(projects: string[], tasks: Task[]): string {
+  const n = new Map<string, number>();
+  for (const t of tasks) n.set(t.project, (n.get(t.project) || 0) + 1);
+  const porteur = projects.find((p) => (n.get(p) || 0) > 0);
+  return porteur || projects[0] || "";
+}
+
 function idNum(id: string) {
   const m = id.match(/-(\d+)$/);
   return m ? Number(m[1]) : 0;
@@ -459,18 +481,35 @@ function ToiView({
   rows,
   selectedId,
   onSelect,
+  total = 0,
+  onBacklog,
 }: {
   rows: Task[];
   selectedId: string | null;
   onSelect: (id: string) => void;
+  total?: number;
+  onBacklog?: () => void;
 }) {
   if (rows.length === 0) {
     return (
       <section>
         <h2>Toi</h2>
-        <div className="callout">
-          Rien ne t'attend. Les agents avancent ou la fenêtre est fermée — dans
-          les deux cas tu n'as rien à faire.
+        <div className="callout stack">
+          <div>
+            Rien ne t'attend. Les agents avancent ou la fenêtre est fermée — dans
+            les deux cas tu n'as rien à faire.
+          </div>
+          {/* Sans ça, un backlog plein derrière un « Toi » vide donne une app morte. */}
+          {total > 0 ? (
+            <div className="row">
+              <span className="faint">
+                {total} task(s) ouvertes ailleurs.
+              </span>
+              <button type="button" className="btn" onClick={onBacklog}>
+                Voir le backlog
+              </button>
+            </div>
+          ) : null}
         </div>
       </section>
     );
