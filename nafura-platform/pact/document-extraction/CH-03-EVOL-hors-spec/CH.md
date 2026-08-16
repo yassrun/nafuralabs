@@ -14,18 +14,36 @@ Du code qu'aucun contrat ne couvre n'est ni maintenu ni supprimable : personne n
 
 ## Attendu
 
-**Le spec tranche pour chacun** : dans le contrat avec ses règles, ou hors du BC. Le code suit.
+Les deux hors du BC. **Builder** → le produit. **Workflow** (brouillon / validé / refusé) → contexte Approbation. Le code suit.
 
 ## Critères d'acceptation (gelés)
 
-- **AC-1** Pour `builder` comme pour `workflow`, la SPEC dit explicitement `owns` ou `not_owns`.
-- **AC-2** Ce qui est `not_owns` nomme qui s'en charge à la place.
-- **AC-3** Le code aligné : rien d'exposé qui ne soit dans le contrat.
-- **AC-4** La suite e2e `extraction-*` reste verte.
+- **AC-1** La SPEC dit `not_owns` pour le builder (composer / cataloguer / versionner un type de document) et pour le workflow de décision (brouillon / validé / refusé).
+- **AC-2** Le builder nomme **le produit**. Le workflow nomme le **contexte Approbation** (non spécifié).
+- **AC-3** Rien d'exposé par ce BC qui compose un type ou qui fait décider un résultat (accepter / refuser).
+- **AC-4** La suite e2e `lecture-*` reste verte.
 
 ## Preuves attendues
 
-Revue de SPEC pour AC-1, AC-2. Suite `extraction-*` pour AC-4.
+Revue de SPEC pour AC-1, AC-2.
+
+Scénarios e2e (projet `nafura-platform/e2e/`, pas par BC) :
+
+| Scénario | État initial | AC |
+|----------|--------------|----|
+| `extraction-builder-hors-contrat` | un tenant, une extraction joignable | AC-3 |
+| `extraction-workflow-hors-contrat` | une extraction **réussie** (structure + doutes publiés) | AC-3 |
+| `lecture-heuristique-sans-modele` | xlsx grille + schéma titres connus | AC-4 |
+| `lecture-cache-deux-tenants` | même empreinte, tenant A puis B | AC-4 |
+| `lecture-frontiere-produit` | compile : zéro type métier produit dans l'extraction | AC-4 |
+| `lecture-carte-deux-natures` | un brouillon avec les deux natures | AC-4 |
+| `lecture-sans-grille-vers-modele` | image / scan sans grille détectée | AC-4 |
+
+Les deux scénarios `extraction-*-hors-contrat` **échouent sur la version d'avant** (builder et workflow encore exposés) et passent après l'alignement.
+
+**POL-*** applicables (référence, pas recopie) : `POL-TENANT-ISOLATION` · `POL-ERREUR-CODE` · `POL-PAS-METIER-PRODUIT`.
+
+Canvas : inchangé — [`../ux/carte-des-doutes-wireframe.canvas.tsx`](../ux/carte-des-doutes-wireframe.canvas.tsx). Aucun écran nouveau.
 
 ## Hors périmètre
 

@@ -7,8 +7,6 @@
  * Route Structure (V1):
  * - /extraction                              - Entry page (discovery + fast path)
  * - /extraction/workspace/:domain/:docType   - Workspace for specific doc type (includes records)
- * - /doc-types                               - Document type definitions
- * - /doc-types/:domainKey/:docTypeKey        - Document type builder/editor
  * - /settings                                - General extraction settings
  */
 
@@ -73,26 +71,6 @@ export const DOC_EXTRACTOR_ROUTES: Routes = [
         path: 'records',
         redirectTo: 'extraction',
         pathMatch: 'full',
-      },
-
-      // Document Types Page (definitions management)
-      {
-        path: 'doc-types',
-        loadComponent: () =>
-          import('../pages/doc-types-page/doc-types-page.component').then(
-            m => m.DocTypesPage
-          ),
-        canActivate: [permissionGuard([DocExtractorPermissions.EXTRACTION.READ])],
-      },
-
-      // Document Type Builder / Editor (moved out of Settings)
-      {
-        path: 'doc-types/:domainKey/:docTypeKey',
-        loadComponent: () =>
-          import('../pages/extraction-settings-doc-type-page/extraction-settings-doc-type-page.component').then(
-            m => m.ExtractionSettingsDocTypePage
-          ),
-        canActivate: [permissionGuard([DocExtractorPermissions.EXTRACTION.READ])],
       },
 
       // Extraction Settings

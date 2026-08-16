@@ -5,10 +5,20 @@
  * Determines validation state and completeness state.
  */
 
-import { Injectable, inject } from '@angular/core';
-import { ValidationState, CompletenessState, DocumentWorkflowState, DocumentWorkflowStatus } from '../models/document-workflow.model';
+import { Injectable } from '@angular/core';
 import { JsonSchema, JsonSchemaArray, JsonSchemaObject } from '../models/json-schema.model';
 import { UiSchema } from '../models/ui-schema.model';
+
+/** Field-level check — not a decision on the extraction result. */
+export enum ValidationState {
+  VALID = 'VALID',
+  INVALID = 'INVALID',
+}
+
+export enum CompletenessState {
+  COMPLETE = 'COMPLETE',
+  PARTIAL = 'PARTIAL',
+}
 
 export interface ValidationError {
   field: string;
@@ -161,32 +171,7 @@ export class DocumentValidationService {
       completenessState,
     };
   }
-  
-  /**
-   * Build workflow state from validation result and current status.
-   */
-  buildWorkflowState(
-    validationResult: ValidationResult,
-    currentStatus: DocumentWorkflowStatus = DocumentWorkflowStatus.DRAFT
-  ): DocumentWorkflowState {
-    return {
-      status: currentStatus,
-      validationState: validationResult.validationState,
-      completenessState: validationResult.completenessState,
-      errorCount: validationResult.errorCount > 0 ? validationResult.errorCount : undefined,
-    };
-  }
-  
-  /**
-   * Check if document can be validated (transition to VALIDATED).
-   */
-  canValidate(workflowState: DocumentWorkflowState): boolean {
-    return (
-      workflowState.status === DocumentWorkflowStatus.DRAFT &&
-      workflowState.validationState === ValidationState.VALID
-    );
-  }
-  
+
   /**
    * Type guard to check if schema is an object schema.
    */

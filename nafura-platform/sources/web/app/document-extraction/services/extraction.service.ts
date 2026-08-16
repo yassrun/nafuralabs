@@ -5,8 +5,6 @@ import { Observable } from 'rxjs';
 import {
   ExportRequest,
   ExtractedRecord,
-  ExtractionDraft,
-  ValidateRequest,
   RecordSearchRequest,
   RecordSearchResponse,
   StatelessExtractionResponse,
@@ -41,30 +39,6 @@ export class ExtractionService {
     };
 
     return mockTenantUuidMap[tenantId] || tenantId; // Fallback to original if not mapped
-  }
-
-  uploadDraft(args: {
-    file: File;
-    domainKey: string;
-    docTypeKey: string;
-    docTypeVersion: number;
-  }): Observable<ExtractionDraft> {
-    const formData = new FormData();
-    formData.append('file', args.file);
-    formData.append('domainKey', args.domainKey);
-    formData.append('docTypeKey', args.docTypeKey);
-    formData.append('docTypeVersion', String(args.docTypeVersion));
-
-    return this.http.post<ExtractionDraft>(`${this.apiBaseUrl}/api/extractions/draft`, formData);
-  }
-
-  validate(request: ValidateRequest): Observable<ExtractedRecord> {
-    // Convert tenantId to UUID format for backend
-    const convertedRequest = {
-      ...request,
-      tenantId: this.toTenantUuid(request.tenantId),
-    };
-    return this.http.post<ExtractedRecord>(`${this.apiBaseUrl}/api/extractions/validate`, convertedRequest);
   }
 
   listSession(args: {
@@ -178,21 +152,6 @@ export class ExtractionService {
 
     return this.http.post<StatelessExtractionResponse>(
       `${this.apiBaseUrl}/api/stateless-extractions`,
-      formData
-    );
-  }
-
-  proposeSchema(args: {
-    file: File;
-    instructions?: string;
-  }): Observable<StatelessExtractionResponse> {
-    const formData = new FormData();
-    formData.append('file', args.file);
-    if (args.instructions?.trim()) {
-      formData.append('instructions', args.instructions.trim());
-    }
-    return this.http.post<StatelessExtractionResponse>(
-      `${this.apiBaseUrl}/api/stateless-extractions/propose-schema`,
       formData
     );
   }

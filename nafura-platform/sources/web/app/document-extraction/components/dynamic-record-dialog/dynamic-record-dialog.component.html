@@ -79,7 +79,7 @@
   <!-- Sticky Footer -->
   <div class="editor-dialog__footer">
     <div class="footer__helper">
-      @if (canValidate()) {
+      @if (canApply()) {
         <span class="footer__helper-text">{{ 'docExtractor.dialog.readyToValidate' | translate }}</span>
       } @else {
         <div class="footer__helper-content">
@@ -131,13 +131,13 @@
         mat-flat-button
         color="primary"
         type="button"
-        (click)="validateAndSave()"
-        [disabled]="saving() || !canValidate()"
-        [matTooltip]="!canValidate() ? ('docExtractor.workflow.actions.validateDisabledTooltip' | translate) : ''"
+        (click)="applyEdits()"
+        [disabled]="saving() || !canApply()"
+        [matTooltip]="!canApply() ? ('docExtractor.workflow.actions.validateDisabledTooltip' | translate) : ''"
         class="footer__action footer__action--primary"
       >
         <mat-icon>check_circle</mat-icon>
-        {{ 'docExtractor.dialog.validate' | translate }}
+        {{ 'docExtractor.workflow.actions.close' | translate }}
       </button>
     </div>
   </div>

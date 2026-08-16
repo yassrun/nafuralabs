@@ -58,21 +58,6 @@ public class StatelessExtractionController {
         );
     }
 
-    @PostMapping(value = "/propose-schema", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public StatelessExtractionResponse proposeSchema(
-            @RequestParam("file") MultipartFile file,
-            @RequestParam(value = "instructions", required = false) String instructions
-    ) throws Exception {
-        validateFile(file);
-        return extractionService.proposeSchemas(
-                file.getBytes(),
-                file.getOriginalFilename(),
-                file.getContentType(),
-                instructions,
-                currentTenantId()
-        );
-    }
-
     private String currentTenantId() {
         return TenantContext.getTenantId() == null
                 ? null

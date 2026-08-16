@@ -9,6 +9,7 @@ Tirer d'un **document** une **structure** (liste ou arbre) selon un **plan d'ext
 
 ## Ce que ça fait
 
+- Reçoit un **schéma** du produit (champs attendus) — ne le compose pas
 - Détecte une **grille** dans le fichier (tableau à colonnes)
 - Compile un **plan d'extraction** typé : colonnes liées à des champs, classes de lignes, hiérarchie
 - Exécute le plan sur la grille → enregistrements
@@ -24,9 +25,10 @@ Tirer d'un **document** une **structure** (liste ou arbre) selon un **plan d'ext
 | Ce que document-extraction ne fait pas | Qui s'en charge |
 |----------------------------------------|-----------------|
 | Interpréter un devis, un article, un nœud métier | **le produit** |
+| Composer, cataloguer ou versionner un type de document (builder, schéma d'écran, colonnes de liste) | **le produit** |
 | Conserver le fichier comme pièce jointe | **documents** |
 | Prévenir quelqu'un | **contexte Notification** (non spécifié) |
-| Décider une demande | **contexte Approbation** (non spécifié) |
+| Décider une demande (accepter / refuser un résultat : brouillon, validé, refusé) | **contexte Approbation** (non spécifié) |
 
 ## Intervenants
 
@@ -39,7 +41,7 @@ Tirer d'un **document** une **structure** (liste ou arbre) selon un **plan d'ext
 | Objet | Forme | Obligations |
 |-------|-------|-------------|
 | **Grille** | lignes × cellules texte | obtenue du fichier ; vide = pas de palier grille |
-| **Plan d'extraction** | source, liaisons colonne→champ, classes de lignes, hiérarchie (`NONE` \| `LEARNED`), chemins de collections | typé, borné ; jamais du code généré |
+| **Plan d'extraction** | source, liaisons colonne→champ, classes de lignes, hiérarchie (`NONE` \| `LEARNED`), chemins de collections | typé, borné ; jamais du code généré ; le schéma des champs vient du produit |
 | **Empreinte** | signature de la trame | clé de cache **avec** le tenant (`POL-TENANT-ISOLATION`) |
 | **Résultat** | enregistrements (liste ou arbre) | produit du plan appliqué à la grille |
 | **Doute** | nature `extraction` \| `manque-source`, champ, ligne | une nature, jamais les deux à la fois |
@@ -55,6 +57,8 @@ déposée → en cours → réussie | échouée
 ```
 
 Relancer depuis `échouée`. Pas depuis `en cours`.
+
+C'est le seul cycle de ce BC. Pas de brouillon / validé / refusé sur le résultat.
 
 **Plan**
 

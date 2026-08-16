@@ -43,7 +43,6 @@ export class ExtractionDiscoveryComponent {
   
   @Input() docTypesByDomain: DocTypesByDomain | null = null;
   @Output() selectDocType = new EventEmitter<{ domainKey: string; docTypeKey: string }>();
-  @Output() createCustom = new EventEmitter<void>();
 
   private readonly domainsSignal = signal<DomainListItem[]>([]);
   readonly selectedDomain = signal<string | null>(null);

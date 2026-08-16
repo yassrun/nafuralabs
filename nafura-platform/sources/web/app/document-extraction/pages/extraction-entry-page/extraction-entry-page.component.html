@@ -100,7 +100,7 @@
     <div class="discovery">
       <div class="discovery__header">
         <h2>Start a new extraction</h2>
-        <p>Choose a category or create a custom document type.</p>
+        <p>Choose a category to start extracting.</p>
       </div>
 
       @if (loading()) {
@@ -125,24 +125,6 @@
               </div>
             </mat-card>
           }
-
-          <!-- Custom card -->
-          <mat-card class="domain-card domain-card--custom" matRipple (click)="onCreateCustomDocType()">
-            <div class="domain-card__badge">MOST FLEXIBLE</div>
-            <div class="domain-card__icon-wrapper">
-              <mat-icon>add_circle_outline</mat-icon>
-            </div>
-            <mat-card-header>
-              <mat-card-title>Custom Document Type</mat-card-title>
-              <mat-card-subtitle>
-                Define your own schema and extraction rules.<br>
-                <span class="effort-hint">Best for advanced use cases.</span>
-              </mat-card-subtitle>
-            </mat-card-header>
-            <div class="domain-card__footer">
-              <button mat-button color="primary">CREATE FROM SCRATCH</button>
-            </div>
-          </mat-card>
         </div>
       }
     </div>
@@ -203,9 +185,6 @@
             <mat-icon>search_off</mat-icon>
             <h3>No templates found</h3>
             <p>No templates are available for this category yet.</p>
-            <button mat-stroked-button color="primary" (click)="onCreateCustomDocType()">
-              Create Custom Document Type
-            </button>
           </div>
         }
       </div>

@@ -86,17 +86,6 @@ public class StatelessExtractionService {
             }
             """;
 
-    private static final String SCHEMA_PROPOSAL_RESPONSE_SCHEMA = """
-            {
-              "type": "object",
-              "properties": {
-                "dataSchemaJson": { "type": "string" },
-                "presentationSchemaJson": { "type": "string" }
-              },
-              "required": ["dataSchemaJson", "presentationSchemaJson"]
-            }
-            """;
-
     private final LlmService llmService;
     private final SchemaValidator schemaValidator;
     private final ObjectMapper objectMapper;
@@ -162,7 +151,7 @@ public class StatelessExtractionService {
             return failure(
                     "REQUEST",
                     "SCHEMA_REQUIRED",
-                    "inlineSchema is required for extraction. Use /propose-schema first for unknown documents.",
+                    "inlineSchema is required for extraction. The product provides the schema.",
                     false
             );
         }
@@ -190,61 +179,6 @@ public class StatelessExtractionService {
                 return failure("LLM", "EXTRACTION_TIMEOUT", safeMessage(cause), true);
             }
             return failure("LLM", "LLM_PROVIDER_ERROR", safeMessage(cause), isRetryable(cause));
-        }
-    }
-
-    public StatelessExtractionResponse proposeSchemas(
-            byte[] fileBytes,
-            String fileName,
-            String mimeType,
-            String instructions,
-            String tenantId
-    ) {
-        try {
-            LlmRequest request = baseRequest(fileBytes, fileName, mimeType);
-            request.setSystemInstruction("""
-                    Analyze the supplied document and propose two JSON documents.
-                    dataSchemaJson must be a JSON Schema object using only object, array, string, number,
-                    integer, boolean, required, properties, items, enum and string format=date.
-                    presentationSchemaJson must be a small presentation hint object with rootView
-                    (auto, form, table or treeTable), labelField, columns, hiddenFields and readOnlyFields.
-                    Never emit UI code. Return each JSON document serialized as a JSON string.
-                    """ + optionalInstructions(instructions));
-            request.setResponseSchema(SCHEMA_PROPOSAL_RESPONSE_SCHEMA);
-
-            LlmResponse llm = call(request, tenantId, "propose-schema");
-            JsonNode envelope = objectMapper.readTree(llm.getContent());
-            JsonNode dataSchema = parseEmbeddedJson(envelope, "dataSchemaJson");
-            JsonNode proposedPresentation = parseEmbeddedJson(envelope, "presentationSchemaJson");
-
-            if (!dataSchema.isObject() || !"object".equals(dataSchema.path("type").asText())) {
-                return failure("SCHEMA", "INVALID_SCHEMA_PROPOSAL",
-                        "The proposed data schema is not an object schema.", false);
-            }
-
-            return new StatelessExtractionResponse(
-                    StatelessExtractionResponse.Outcome.SCHEMA_PROPOSAL_PENDING,
-                    null,
-                    dataSchema,
-                    proposedPresentation,
-                    null,
-                    List.of(),
-                    llm.getRequestId(),
-                    llm.getProvider(),
-                    llm.getModel(),
-                    llm.getCostUsd(),
-                    llm.getCreatedAt()
-            );
-        } catch (java.util.concurrent.TimeoutException e) {
-            return failure("LLM", "SCHEMA_PROPOSAL_TIMEOUT", "Schema proposal timed out.", true);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return failure("SYSTEM", "INTERRUPTED", "Schema proposal was interrupted.", true);
-        } catch (Exception e) {
-            Throwable cause = e instanceof java.util.concurrent.ExecutionException && e.getCause() != null
-                    ? e.getCause()
-                    : e;
-            return failure("LLM", "INVALID_SCHEMA_PROPOSAL", safeMessage(cause), isRetryable(cause));
         }
     }
 
@@ -528,14 +462,6 @@ public class StatelessExtractionService {
                 .tenantId(tenantId)
                 .build();
         return llmService.callLlm(request, context).get(timeoutSeconds, TimeUnit.SECONDS);
-    }
-
-    private JsonNode parseEmbeddedJson(JsonNode envelope, String field) throws Exception {
-        JsonNode node = envelope.get(field);
-        if (node == null || !node.isTextual()) {
-            throw new IllegalArgumentException("Missing " + field + " in schema proposal");
-        }
-        return objectMapper.readTree(node.asText());
     }
 
     private StatelessExtractionResponse failure(
