@@ -25,6 +25,10 @@
    d'agent et sa clé vivent hors du dépôt, et Raster refuse de démarrer plutôt que de les stocker.
    `gate: me` sur le spawn — tu vois le rapport avant que ça puisse lancer.
 
+6. **work** — `CH-03-CORRECTION-sweep-blocked-by`
+   Le balayage du 16/08 a orphelin des `blocked_by`. Une dépendance satisfaite devenait
+   une dépendance inconnue, donc bloquante — `SEKTOR-97` s'est retrouvé inlançable.
+
 <!-- borne -->
 
 ## Pas encore

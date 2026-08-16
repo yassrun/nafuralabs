@@ -1,4 +1,5 @@
 ---
+
 id: SEKTOR-97
 status: done-agent
 context: nafura
@@ -7,7 +8,6 @@ priority: P1
 assignee: agent
 gate: none
 sprint: 2026-W33
-blocked_by: [SEKTOR-96]
 ---
 
 # Angular 21 → 22
