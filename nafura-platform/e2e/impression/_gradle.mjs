@@ -20,6 +20,7 @@ const LOCK = path.join(RESULTS, "..", "impression-e2e.lock");
 const TESTS = [
   "ma.nafura.platform.collaboration.docmanager.ImpressionBaselineTest.rendrePdf",
   "ma.nafura.platform.collaboration.docmanager.ImpressionBaselineTest.deuxTenants",
+  "ma.nafura.platform.collaboration.docmanager.ImpressionBaselineTest.typeOpaque",
 ];
 
 function xmlFiles() {

@@ -23,7 +23,6 @@ import ma.nafura.etudes.service.DpgfService;
 import ma.nafura.etudes.service.gate.ResultatGate;
 import ma.nafura.platform.collaboration.docmanager.template.AmountInWords;
 import ma.nafura.platform.collaboration.docmanager.template.EntityDataProvider;
-import ma.nafura.platform.collaboration.docmanager.template.PrintDocument;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Component;
 
@@ -83,7 +82,7 @@ public class EtudesEntityDataProvider implements EntityDataProvider {
     }
 
     @Override
-    public Optional<PrintDocument> getDocument(String entityType, UUID entityId) {
+    public Optional<Object> getDocument(String entityType, UUID entityId) {
         if (!EtudesPrintEntityTypes.DEVIS.equals(entityType) || entityId == null) {
             // Bordereau and synthèse are study internals, not counterparty documents:
             // they have no client block and no legal totals to normalise.
@@ -93,7 +92,7 @@ public class EtudesEntityDataProvider implements EntityDataProvider {
     }
 
     @Override
-    public Optional<PrintDocument> getSampleDocument(String entityType) {
+    public Optional<Object> getSampleDocument(String entityType) {
         if (!EtudesPrintEntityTypes.DEVIS.equals(entityType)) {
             return Optional.empty();
         }

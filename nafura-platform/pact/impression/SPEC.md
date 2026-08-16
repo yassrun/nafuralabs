@@ -9,7 +9,7 @@ Produire une **page** ou un **PDF** à partir d'un **modèle** et de **données*
 
 ## Ce que ça fait
 
-- Reçoit un modèle (HTML) et des données
+- Reçoit un modèle (HTML) et un sac de données opaque
 - Remplit le modèle, y pose le chrome du tenant (identité, pied de page)
 - Rend un PDF
 - Range le modèle par tenant ; un `type` texte dit à quoi le produit l'accroche
@@ -22,7 +22,7 @@ Produire une **page** ou un **PDF** à partir d'un **modèle** et de **données*
 
 | Ce que impression ne fait pas | Qui s'en charge |
 |------------------------------|-----------------|
-| Le texte métier d'une facture, d'un devis | **le produit** |
+| La forme d'un document métier (facture, devis, …) | **le produit** |
 | Interpréter les données (lignes, TVA, client) | **le produit** |
 | Conserver le PDF comme fichier | **documents** |
 | L'engin d'hébergement (Gotenberg) | **ops** |
@@ -38,10 +38,12 @@ Produire une **page** ou un **PDF** à partir d'un **modèle** et de **données*
 | Objet | Forme | Obligations |
 |-------|-------|-------------|
 | **Modèle** | HTML + `type` (texte opaque) | rangé dans le tenant courant |
-| **Données** | valeurs fournies par le produit | cette app ne les interprète pas |
+| **Données** | sac de valeurs fourni par le produit | opaque : cette app ne lit aucun champ |
 | **Page** | PDF (octets) | produit du modèle rempli + chrome du tenant |
 
 `type` n'est pas un catalogue de cette app (`facture_client` est un mot du produit).
+
+Noms interdits comme types de ce BC : `PrintDocument`, et tout type qui nomme une TVA, une ligne, un total, un client de facture.
 
 ## États
 
@@ -61,9 +63,9 @@ présent → retiré
 
 ## Règles
 
-- **INV-1** Cette app ne connaît aucun objet métier d'un produit. `type` est opaque.
+- **INV-1** Cette app ne connaît aucun objet métier d'un produit. `type` est opaque. Aucun type de ce BC ne s'appelle `PrintDocument` ni ne nomme une TVA, une ligne, un total.
 - **INV-2** Métadonnées du modèle portent le tenant (`POL-TENANT-ISOLATION`).
-- **R-1** Rendre exige un modèle du tenant courant et `P-IMPRESSION-RENDRE`. Le résultat est un PDF.
+- **R-1** Rendre exige un modèle du tenant courant et `P-IMPRESSION-RENDRE`. Le résultat est un PDF. L'entrée est le modèle + le sac opaque — pas un objet facture.
 - **R-2** Lister / lire un modèle : seulement dans le tenant courant. `P-IMPRESSION-MODELE-LIRE`.
 - **R-3** Un modèle de A n'est pas servi à B.
 

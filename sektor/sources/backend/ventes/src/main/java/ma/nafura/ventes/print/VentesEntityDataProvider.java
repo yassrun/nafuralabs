@@ -2,7 +2,6 @@ package ma.nafura.ventes.print;
 
 import ma.nafura.platform.collaboration.docmanager.template.AmountInWords;
 import ma.nafura.platform.collaboration.docmanager.template.EntityDataProvider;
-import ma.nafura.platform.collaboration.docmanager.template.PrintDocument;
 import ma.nafura.platform.collaboration.docmanager.template.SampleRecord;
 import ma.nafura.ventes.domain.facture.FactureClient;
 import ma.nafura.ventes.domain.facture.FactureClientLigne;
@@ -52,7 +51,7 @@ public class VentesEntityDataProvider implements EntityDataProvider {
     }
 
     @Override
-    public Optional<PrintDocument> getDocument(String entityType, UUID entityId) {
+    public Optional<Object> getDocument(String entityType, UUID entityId) {
         if (!supports(entityType) || entityId == null) {
             return Optional.empty();
         }
@@ -60,7 +59,7 @@ public class VentesEntityDataProvider implements EntityDataProvider {
     }
 
     @Override
-    public Optional<PrintDocument> getSampleDocument(String entityType) {
+    public Optional<Object> getSampleDocument(String entityType) {
         return supports(entityType) ? Optional.of(toPrintDocument(sampleFacture())) : Optional.empty();
     }
 

@@ -40,16 +40,15 @@ public interface EntityDataProvider {
     }
 
     /**
-     * Normalised projection exposed as {@code ${document.*}}. Implement it for every type you
-     * support: it is what lets a shared header, footer or line table work across document types.
-     * Empty = the type has no normalised view yet and shared fragments will render blank.
+     * Sac opaque exposé comme {@code ${document.*}}. Cette app ne lit aucun champ.
+     * Empty = pas de sac document pour ce type.
      */
-    default Optional<PrintDocument> getDocument(String entityType, UUID entityId) {
+    default Optional<Object> getDocument(String entityType, UUID entityId) {
         return Optional.empty();
     }
 
     /** Sample counterpart of {@link #getDocument}, used by the editor preview. */
-    default Optional<PrintDocument> getSampleDocument(String entityType) {
+    default Optional<Object> getSampleDocument(String entityType) {
         return Optional.empty();
     }
 

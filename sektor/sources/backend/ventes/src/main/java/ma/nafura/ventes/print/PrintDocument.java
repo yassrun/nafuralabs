@@ -1,18 +1,13 @@
-package ma.nafura.platform.collaboration.docmanager.template;
+package ma.nafura.ventes.print;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import ma.nafura.platform.collaboration.docmanager.template.AmountInWords;
 
 /**
- * Normalised view of any printable business document, exposed to templates as
- * {@code ${document.*}} alongside the type-specific {@code ${entity.*}}.
- *
- * <p>This is what makes a shared header, footer or line table work across devis, facture,
- * bordereau and whatever comes next: without it every type names its fields differently and no
- * fragment can be reused. Product modules map their entity into this shape; fields that do not
- * apply stay {@code null} and fragments guard them with {@code th:if}.
+ * Forme facture — appartient au produit, pas au jar impression.
  */
 public record PrintDocument(
         String type,
@@ -28,7 +23,6 @@ public record PrintDocument(
         String mentions,
         String statut,
         Integer version,
-        /** Type-specific extras that do not fit the contract, still reachable as document.extra.x */
         Map<String, Object> extra) {
 
     public PrintDocument {
@@ -40,7 +34,6 @@ public record PrintDocument(
         return new Builder();
     }
 
-    /** Counterparty of the document (client, and later supplier for purchase documents). */
     public record Party(
             String raisonSociale,
             String ice,
@@ -50,7 +43,6 @@ public record PrintDocument(
             String telephone,
             String email) {}
 
-    /** One priced line. {@code montantHt} is authoritative: never recomputed by templates. */
     public record Line(
             String code,
             String designation,
@@ -60,11 +52,7 @@ public record PrintDocument(
             BigDecimal montantHt,
             BigDecimal tauxTva) {}
 
-    /**
-     * Document totals. {@code enLettres} is produced server-side by {@link AmountInWords} —
-     * spelling an amount is a legal requirement on invoices and must not be left to whoever
-     * writes the template.
-     */
+    /** {@code enLettres} via {@link AmountInWords}. */
     public record Totals(
             BigDecimal ht,
             BigDecimal tva,

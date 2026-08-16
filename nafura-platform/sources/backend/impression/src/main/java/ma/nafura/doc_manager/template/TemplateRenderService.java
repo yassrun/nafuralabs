@@ -53,8 +53,19 @@ public class TemplateRenderService {
     public byte[] render(UUID templateId, String entityType, UUID entityId) {
         DocumentTemplate template = getTemplateForTenant(templateId);
         String type = entityType != null ? entityType : template.getEntityType();
-        Map<String, Object> variables = variableResolver.resolve(type, entityId);
-        return toPdf(template, processTemplate(template.getTemplateBody(), variables));
+        return renderOpaque(template, variableResolver.resolve(type, entityId));
+    }
+
+    /**
+     * Rendre un modèle avec un sac opaque. Cette app ne lit aucun champ du sac.
+     */
+    public byte[] renderOpaque(UUID templateId, Map<String, Object> bag) {
+        return renderOpaque(getTemplateForTenant(templateId), bag);
+    }
+
+    private byte[] renderOpaque(DocumentTemplate template, Map<String, Object> bag) {
+        Map<String, Object> opaque = bag != null ? bag : Map.of();
+        return toPdf(template, processTemplate(template.getTemplateBody(), opaque));
     }
 
     /**

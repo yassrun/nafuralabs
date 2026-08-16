@@ -44,7 +44,7 @@ public class TemplateVariableResolver {
     }
 
     /**
-     * Build the full variable map for Thymeleaf: entity, document, tenant, today, now, currentUser.
+     * Build the full variable map for Thymeleaf: entity, opaque document bag, tenant, today, now, currentUser.
      */
     public Map<String, Object> resolve(String entityType, UUID entityId) {
         Map<String, Object> vars = commonVariables();

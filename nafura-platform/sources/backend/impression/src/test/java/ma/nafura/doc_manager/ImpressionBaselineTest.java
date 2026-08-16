@@ -102,6 +102,16 @@ class ImpressionBaselineTest {
     }
 
     @Test
+    void typeOpaque() {
+        Map<String, Object> bag = new LinkedHashMap<>();
+        bag.put("titre", "Sac opaque");
+        byte[] pdf = render.renderOpaque(TEMPLATE_ID, bag);
+
+        assertThat(new String(pdf, StandardCharsets.US_ASCII)).startsWith("%PDF");
+        assertThat(bag.keySet()).doesNotContain("tva", "lignes", "totaux", "client");
+    }
+
+    @Test
     void deuxTenants() {
         TenantContext.setTenantId(TENANT_B);
         Page<DocumentTemplate> listedB = templates.list(null, PageRequest.of(0, 20));

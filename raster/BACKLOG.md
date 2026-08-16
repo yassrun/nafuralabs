@@ -41,10 +41,6 @@
   - · `CH-01-TECHNICAL-plier` sous-lot
     - · `PLT-118` spec — SPEC + geler AC — plier identite
     - · `PLT-119` tech — Plier l arbre identite
-- `impression` lot
-  - · `CH-02-EVOL-sans-facture` sous-lot
-    - ▸ `PLT-95` feature — Sortir la forme facture du jar
-    - · `PLT-96` qa — Preuves — impression sans facture
 - `notification` lot
   - · `CH-00-INIT-notification` sous-lot
     - · `PLT-109` spec — SPEC + geler AC — notification
@@ -79,4 +75,4 @@
 
 ---
 
-**37 live · 2 projets**
+**35 live · 2 projets**

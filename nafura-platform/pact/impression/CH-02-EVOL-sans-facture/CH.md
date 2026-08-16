@@ -2,11 +2,11 @@
 
 **Type :** `EVOL`
 **Cible :** BC `impression`
-**Qualification :** le BC rend une page, mais son contrat porte encore la forme d'une facture — `PrintDocument`, TVA, lignes.
+**Qualification :** `EVOL` — baseline posée (CH-00) ; le contrat porte encore `PrintDocument` / TVA / lignes.
 
 ## Pourquoi
 
-Imprimer est une capacité de plateforme. Y laisser la TVA et les lignes de facture, c'est y laisser du métier : le prochain produit qui imprime autre chose devra le contourner. La forme facture appartient à **Sektor**, qui la garde.
+Imprimer est une capacité de plateforme. Y laisser la TVA et les lignes, c'est y laisser du métier. La forme facture appartient à **Sektor**, qui la garde.
 
 ## Aujourd'hui
 
@@ -14,24 +14,36 @@ Imprimer est une capacité de plateforme. Y laisser la TVA et les lignes de fact
 
 ## Attendu
 
-Le BC reçoit un **type opaque** : des données qu'il place dans un modèle sans les comprendre. Plus de `PrintDocument` dans `impression`. Sektor garde la forme facture chez lui.
+Le BC reçoit un **sac opaque** : des données qu'il place dans un modèle sans les comprendre. Plus de `PrintDocument` dans `impression`. Sektor garde la forme facture chez lui.
 
 ## Critères d'acceptation (gelés)
 
-- **AC-1** Aucun type nommant une notion de facturation (TVA, lignes, totaux) ne subsiste dans le jar `impression`.
-- **AC-2** Le contrat d'entrée du rendu est opaque : le BC ne lit aucun champ métier.
-- **AC-3** La SPEC `impression` dit en `not_owns` que la forme d'un document métier appartient au produit.
+- **AC-1** Aucun type du jar `impression` ne s'appelle `PrintDocument` ni ne nomme une TVA, une ligne, un total. (`INV-1`)
+- **AC-2** Le contrat d'entrée du rendu est un modèle + un sac opaque : le BC ne lit aucun champ métier (TVA, lignes, totaux, client). (`INV-1`, `R-1`)
+- **AC-3** La SPEC `impression` dit en `not_owns` que la forme d'un document métier appartient au produit. (`POL-PAS-METIER-PRODUIT`)
 - **AC-4** La suite e2e `impression-*` reste verte.
-- **AC-5** Sektor imprime toujours une facture, sans régression.
+- **AC-5** Sektor imprime toujours une facture, sans régression. Preuve = **non-régression produit** — pas un e2e `nafura-platform/e2e`.
 
 ## Preuves attendues
 
 | Scénario | État initial | AC |
 |----------|--------------|----|
-| `impression-type-opaque` | contrat actuel | AC-1, AC-2 |
-| suite `impression-*` | inchangée | AC-4 |
+| `impression-type-opaque` | jar `impression` avec `PrintDocument` présent — l'ancienne vérité doit échouer | AC-1, AC-2 |
+| suite `impression-*` (`impression-rendre-pdf`, `impression-deux-tenants`, `impression-frontiere-produit`, `impression-plier-arbre`) | inchangée | AC-4 |
+| revue de SPEC | SPEC `impression` patchée | AC-3 |
+| non-régression Sektor | un tenant Sektor, une facture client imprimable (l'exec choisit l'id) | AC-5 |
 
-Revue de SPEC pour AC-3.
+`impression-type-opaque` observe l'absence de `PrintDocument` et des types TVA / ligne / total dans le jar `impression`, et un rendu qui n'exige aucun de ces champs. Discrimination : rouge tant que `PrintDocument` est dans le jar.
+
+AC-5 s'exerce sur le chemin d'impression facture **déjà là chez Sektor**. Ce n'est pas un scénario `nafura-platform/e2e`. Déplacer la forme vers Sektor n'est pas refondre la facture.
+
+Canvas inchangé : [`../ux/page-rendue-wireframe.canvas.tsx`](../ux/page-rendue-wireframe.canvas.tsx) — écran de config hors périmètre.
+
+## Politiques
+
+`POL-TENANT-ISOLATION` · `POL-ERREUR-CODE` · `POL-PAS-METIER-PRODUIT`
+
+Actions inchangées : `P-IMPRESSION-RENDRE` · `P-IMPRESSION-MODELE-LIRE`.
 
 ## Hors périmètre
 
