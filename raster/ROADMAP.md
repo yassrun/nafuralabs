@@ -16,16 +16,17 @@
    Le BC qui porte la conduite. SPEC, lecture de la roadmap et de la borne, skill `orchestration` + agents.
    Dépend de la readiness (RAS-85 ← RAS-81) : première dépendance croisée entre sous-lots.
 
+4. **socle** — `CH-01-EVOL-panneau-decision`
+   L'UI. Vue Toi, question et rapport affichés, readiness dans l'arbre, serveur repassé par `t.mjs`.
+   Revue du 16/08, 8 constats. Wireframe : [`pact/socle/ux/decision-wireframe.canvas.tsx`](pact/socle/ux/decision-wireframe.canvas.tsx).
+
 <!-- borne -->
 
 ## Pas encore
 
-4. **orchestration** — le spawn réel et les worktrees.
-   Suppose un processus et une clé de modèle : `gate: me` au CADRE (« le dépôt suffit à lire, pas à exécuter »).
-
-5. **socle** — l'UI. Readiness affichée, vue exécution, rapports de livraison lisibles,
-   serveur repassé par `t.mjs`, briefs morts retirés. Revue du 16/08, 8 constats.
-   Wireframe : [`pact/socle/ux/decision-wireframe.canvas.tsx`](pact/socle/ux/decision-wireframe.canvas.tsx).
+5. **orchestration** — le spawn réel et les worktrees.
+   Suppose un processus et une clé de modèle. Reste sous la borne **exprès** : c'est la seule chose
+   qui exécute quelque chose, et le CADRE dit « le dépôt suffit à lire, pas à exécuter ».
 
 ---
 

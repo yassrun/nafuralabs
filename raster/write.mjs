@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /**
  * raster write — le SEUL chemin d'écriture d'une task.
  *

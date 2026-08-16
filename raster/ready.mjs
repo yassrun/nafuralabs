@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /**
  * raster ready — quels sous-lots sont lançables maintenant.
  *

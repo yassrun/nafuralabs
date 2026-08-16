@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /**
  * Regen Raster orchestrator views from product lot tasks.
  * Walks every NafuraLabs project (IT or not):

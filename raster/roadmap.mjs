@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /**
  * raster roadmap — la fenêtre de travail et sa borne.
  *

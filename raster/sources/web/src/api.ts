@@ -16,9 +16,27 @@ export type Task = {
   title: string;
   project: string;
   file: string;
+  /** Sections du corps du .md — l'app les jetait. */
+  question: string;
+  rapport: string;
+  /** Derive : cette task te rend la main. */
+  attend: boolean;
 };
 
-export type ViewId = "inbox" | "backlog" | "sprint" | "done-agent";
+/** Verdict par sous-lot — calcule par `t.mjs ready`, jamais stocke. */
+export type Ready = {
+  key: string;
+  project: string;
+  lot: string;
+  souslot: string;
+  ouvert: boolean;
+  lancable: boolean;
+  raisons: string[];
+  restant: number;
+  gates: string[];
+};
+
+export type ViewId = "toi" | "inbox" | "backlog" | "sprint" | "done-agent";
 
 const glyph: Record<string, string> = {
   todo: "·",
@@ -48,30 +66,25 @@ export function taskAgentType(t: {
   return "exec";
 }
 
-export function skillForAgentType(agent: string) {
-  if (agent === "spec") return "nafura-spec";
-  if (agent === "qa") return "nafura-qa";
-  if (agent === "orch") return "nafura-orch";
-  return "nafura-exec";
+/** Les agents reels vivent dans `.claude/agents/`. Plus de `nafura-*` fantomes. */
+export function agentFile(agent: string) {
+  return `.claude/agents/${agent}.md`;
 }
 
 export function launchBrief(t: Task) {
   const agent = taskAgentType(t);
-  const skill = skillForAgentType(agent);
   const blocked = (t.blocked_by || []).join(", ") || "—";
   return [
-    `# Raster — lancer agent ${agent}`,
-    `skill: @${skill}`,
+    `# Raster — lancer un agent ${agent}`,
+    `agent: @${agent}   (${agentFile(agent)})`,
     `id: ${t.id}`,
     `type: ${t.type || "—"}`,
-    `agent_type: ${agent}`,
     `file: ${t.file}`,
     `blocked_by: ${blocked}`,
     `status: ${t.status}`,
     "",
     "PÉRIMÈTRE = ce que tes étapes nomment. Autre chose → une ligne d'inbox, pas un détour.",
-    "",
-    "Coller ce brief dans Cursor et suivre le skill. Pas de spawn SDK.",
+    "Statuts par commande : node raster/t.mjs status <id> <statut>.",
   ].join("\n");
 }
 
@@ -81,15 +94,12 @@ export function orchLaunchBrief(
 ) {
   const lines =
     kids.length > 0
-      ? kids.map(
-          (k) => `- ${k.id}  type:${k.type || "—"}  ${k.status}  ${k.title}`
-        )
+      ? kids.map((k) => `- ${k.id}  type:${k.type || "—"}  ${k.status}  ${k.title}`)
       : ["- (aucune task)"];
   const where = [group.lot, group.souslot].filter(Boolean).join("/");
   return [
-    `# Raster — orchestrer le sous-lot`,
-    `skill: @nafura-orch`,
-    `agent_type: orch`,
+    `# Raster — orchestrer un sous-lot`,
+    `skill: /orchestration   (.claude/skills/orchestration/SKILL.md)`,
     `projet: ${group.project}`,
     `sous-lot: ${where}`,
     `pact: ${group.project}/pact/${group.lot}/${group.souslot}/CH.md`,
@@ -97,19 +107,14 @@ export function orchLaunchBrief(
     "Tasks du Change :",
     ...lines,
     "",
-    "Cycle : spec → exec → spec (constat d'écart) → qa → done-agent.",
-    "Uniquement ce sous-lot. Ne pas coder. Ne pas poser done-agent sur feature/bug.",
-    "Coller ce brief dans Cursor. Pas de spawn SDK.",
+    "Un seul sous-lot. Tasks en série. Ne pas coder, ne pas poser done-me.",
   ].join("\n");
 }
 
 async function json<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url, {
     ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...(init?.headers || {}),
-    },
+    headers: { "Content-Type": "application/json", ...(init?.headers || {}) },
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: res.statusText }));
@@ -118,10 +123,13 @@ async function json<T>(url: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+/** Toute mutation renvoie l'etat complet — le serveur regen avant de repondre. */
+type Mutation = { tasks: Task[]; ready: Ready[]; lines: string[] };
+
 export const api = {
-  meta: () =>
-    json<{ sprint: string; projects: string[] }>("/api/meta"),
+  meta: () => json<{ sprint: string; projects: string[] }>("/api/meta"),
   tasks: () => json<{ tasks: Task[] }>("/api/tasks"),
+  ready: () => json<{ ready: Ready[] }>("/api/ready"),
   inbox: () => json<{ lines: string[] }>("/api/inbox"),
   capture: (line: string) =>
     json<{ lines: string[] }>("/api/inbox", {
@@ -130,25 +138,34 @@ export const api = {
     }),
   /** target = "<lot>" ou "<lot>/<sous-lot>" — un dossier. */
   promote: (line: string, project: string, target: string) =>
-    json<{ id: string; file: string; lines: string[]; tasks: Task[] }>(
-      "/api/inbox/promote",
-      {
-        method: "POST",
-        body: JSON.stringify({ line, project, target }),
-      }
-    ),
-  patchTask: (id: string, body: { status?: string; sprint?: string | null }) =>
-    json<{ tasks: Task[] }>(`/api/tasks/${encodeURIComponent(id)}`, {
+    json<Mutation & { id: string; file: string }>("/api/inbox/promote", {
+      method: "POST",
+      body: JSON.stringify({ line, project, target }),
+    }),
+  patchTask: (id: string, body: { status?: string; sprint?: string }) =>
+    json<Mutation>(`/api/tasks/${encodeURIComponent(id)}`, {
       method: "PATCH",
       body: JSON.stringify(body),
     }),
   deleteTask: (id: string) =>
-    json<{ tasks: Task[] }>(`/api/tasks/${encodeURIComponent(id)}`, {
-      method: "DELETE",
-    }),
+    json<Mutation>(`/api/tasks/${encodeURIComponent(id)}`, { method: "DELETE" }),
   commitSprint: (id: string) =>
-    json<{ tasks: Task[]; sprint: string }>(
+    json<Mutation & { sprint: string }>(
       `/api/tasks/${encodeURIComponent(id)}/commit-sprint`,
       { method: "POST", body: "{}" }
     ),
+  /** Le seul chemin vers `done-me` — jamais un select. */
+  approve: (id: string) =>
+    json<Mutation>(`/api/tasks/${encodeURIComponent(id)}/approve`, {
+      method: "POST",
+      body: "{}",
+    }),
 };
+
+/** Ce qu'on te demande, en une ligne, pour la file d'attente. */
+export function demande(t: Task): string {
+  if (t.status === "blocked") return "Bloqué dehors — débloquer";
+  if (t.status === "done-agent" && t.gate === "me") return "Approuver";
+  if (t.question) return "Trancher";
+  return "Regarder";
+}

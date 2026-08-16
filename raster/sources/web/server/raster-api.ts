@@ -1,3 +1,13 @@
+/**
+ * API locale de Raster — lecture des fichiers, écriture DÉLÉGUÉE au CLI.
+ *
+ * Le serveur n'écrit plus aucune task lui-même (`AGENTS.md` §0.1-9). Il appelait
+ * `fs.writeFileSync` en trois endroits et réimplémentait l'allocation d'id : deux
+ * chemins d'écriture pour une règle qui en veut un. Tout passe désormais par
+ * `raster/write.mjs`, le même que la ligne de commande.
+ *
+ * Seule exception : la capture d'inbox, qui n'est pas une task.
+ */
 import fs from "node:fs";
 import path from "node:path";
 import type { Plugin } from "vite";
@@ -8,11 +18,21 @@ import {
   treeFromPath,
 } from "../../../walk-tasks.mjs";
 import {
-  expectedAgentType,
   inferWorkType,
   parseListField,
   resolveAgentType,
 } from "../../../agent-type.mjs";
+import {
+  createTask,
+  promoteLine,
+  setStatus,
+  setSprint,
+  approve,
+  RefusError,
+} from "../../../write.mjs";
+import { readiness } from "../../../ready.mjs";
+import { window_ } from "../../../roadmap.mjs";
+import { regen, isoWeekInfo } from "../../../regen.mjs";
 
 export type TaskDto = {
   id: string;
@@ -31,6 +51,23 @@ export type TaskDto = {
   title: string;
   project: string;
   file: string;
+  /** Sections du corps — l'app les jetait, alors qu'elles portent l'essentiel. */
+  question: string;
+  rapport: string;
+  /** Dérivé : cette task attend une décision de l'humain. */
+  attend: boolean;
+};
+
+export type ReadyDto = {
+  key: string;
+  project: string;
+  lot: string;
+  souslot: string;
+  ouvert: boolean;
+  lancable: boolean;
+  raisons: string[];
+  restant: number;
+  gates: string[];
 };
 
 function repoRootFromConfig(root: string) {
@@ -63,44 +100,60 @@ function parseFrontmatter(raw: string) {
   return fm;
 }
 
-function parseBlockedBy(raw: string | undefined): string[] {
-  return parseListField(raw);
+/** Découpe le corps sur les `## `. Une section absente rend "". */
+function section(body: string, name: string): string {
+  const lines = (body || "").split(/\r?\n/);
+  const out: string[] = [];
+  let inside = false;
+  for (const l of lines) {
+    const h = l.match(/^##\s+(.+?)\s*$/);
+    if (h) {
+      inside = h[1].toLowerCase().startsWith(name.toLowerCase());
+      continue;
+    }
+    if (inside) out.push(l);
+  }
+  return out.join("\n").trim();
 }
 
 function loadTasks(repoRoot: string): TaskDto[] {
-  const files = collectTaskFiles(repoRoot);
   const tasks: TaskDto[] = [];
-  for (const file of files) {
+  for (const file of collectTaskFiles(repoRoot)) {
     const fm = parseFrontmatter(fs.readFileSync(file, "utf8"));
     if (!fm?.id || fm.status === "done" || fm.status === "done-me") continue;
     const rel = path.relative(repoRoot, file).replace(/\\/g, "/");
     const { project, lot, souslot } = treeFromPath(repoRoot, file);
     const type = inferWorkType(fm);
     const agent_type = resolveAgentType(type, fm.agent_type);
+    const status = fm.status || "todo";
+    const gate = fm.gate || "none";
     tasks.push({
       id: fm.id,
-      status: fm.status || "todo",
+      status,
       priority: fm.priority || "P3",
       context: fm.context || "nafura",
       assignee: fm.assignee || "",
-      gate: fm.gate || "",
+      gate,
       type,
       agent_type,
       sprint: fm.sprint || "",
       lot,
       souslot,
-      blocked_by: parseBlockedBy(fm.blocked_by),
+      blocked_by: parseListField(fm.blocked_by),
       tags: parseListField(fm.tags),
       title: fm._title,
       project,
       file: rel,
+      question: section(fm._body, "Question"),
+      rapport: section(fm._body, "Rapport"),
+      // Trois façons de te rendre la main (`AGENTS.md` §0.1-2).
+      attend:
+        (status === "done-agent" && gate === "me") ||
+        status === "blocked" ||
+        (gate === "me" && section(fm._body, "Question") !== ""),
     });
   }
   return tasks;
-}
-
-function listProjects(repoRoot: string): string[] {
-  return listRasterProjects(repoRoot);
 }
 
 function parseInboxLines(raw: string): string[] {
@@ -112,233 +165,29 @@ function parseInboxLines(raw: string): string[] {
     .filter(Boolean);
 }
 
-/** Global orchestrator inbox — not tied to a product. */
 function readGlobalInbox(repoRoot: string): string[] {
   const file = path.join(repoRoot, "raster", "inbox.md");
   if (!fs.existsSync(file)) return [];
   return parseInboxLines(fs.readFileSync(file, "utf8"));
 }
 
+/** La capture n'est pas une task : c'est la seule écriture qui reste ici. */
 function writeGlobalInbox(repoRoot: string, lines: string[]) {
   const dir = path.join(repoRoot, "raster");
   fs.mkdirSync(dir, { recursive: true });
-  const file = path.join(dir, "inbox.md");
-  const body = [
-    "# INBOX",
-    "",
-    "<!-- Capture globale Raster — une ligne, @tag optionnel, pas d'ID. -->",
-    "<!-- Promote → <projet>/raster-src/lots/<lot>/<sous-lot?>/tasks/ -->",
-    "",
-    ...lines.map((l) => `- ${l}`),
-    "",
-  ].join("\n");
-  fs.writeFileSync(file, body, "utf8");
-}
-
-const PROJECT_PREFIX: Record<string, string> = {
-  "sektor-btp": "ERP",
-  sektor: "SEKTOR",
-  raster: "RAS",
-  personal: "PER",
-  ops: "OPS",
-  "mbs-website": "MBS",
-  "nafuralabs-migration": "MIG",
-  "nafura-platform": "PLT",
-};
-
-function projectPrefix(project: string) {
-  return PROJECT_PREFIX[project] || project.slice(0, 3).toUpperCase();
-}
-
-function slugify(title: string) {
-  return title
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 48) || "task";
-}
-
-function journalStamp() {
-  const d = new Date();
-  return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
-}
-
-/** Racine d'un projet : peer à la racine du monorepo. */
-function projectRootFor(repoRoot: string, project: string): string {
-  return path.join(repoRoot, project);
-}
-
-/**
- * Prochain id. Le backlog live n'est PAS la borne haute : `done-me` sort du dépôt
- * (`t.mjs sweep`), donc `<projet>/raster-src/NEXT` garde le maximum atteint.
- */
-function nextIdForPrefix(repoRoot: string, prefix: string, project?: string): string {
-  const files = collectTaskFiles(repoRoot, { includeArchive: true });
-  let max = 0;
-  const re = new RegExp(`^${prefix}-(\\d+)$`);
-  for (const file of files) {
-    const base = path.basename(file);
-    const m = base.match(new RegExp(`^(${prefix})-(\\d+)-`));
-    if (m) max = Math.max(max, Number(m[2]));
-    const fm = parseFrontmatter(fs.readFileSync(file, "utf8"));
-    if (fm?.id) {
-      const idm = fm.id.match(re);
-      if (idm) max = Math.max(max, Number(idm[1]));
-    }
-  }
-  if (project) {
-    const counter = path.join(projectRootFor(repoRoot, project), "raster-src", "NEXT");
-    if (fs.existsSync(counter)) {
-      const n = Number(fs.readFileSync(counter, "utf8").trim());
-      if (Number.isFinite(n)) max = Math.max(max, n);
-    }
-  }
-  return `${prefix}-${String(max + 1).padStart(2, "0")}`;
-}
-
-function parseInboxTags(line: string): { title: string; tags: string[] } {
-  const tags: string[] = [];
-  const title = line
-    .replace(/(?:^|\s)@([a-zA-Z0-9_-]+)/g, (_, t: string) => {
-      tags.push(t);
-      return "";
-    })
-    .replace(/\s+/g, " ")
-    .trim();
-  return { title: title || line.trim(), tags };
-}
-
-function promoteInboxLine(
-  repoRoot: string,
-  line: string,
-  project: string,
-  target: string
-): { id: string; file: string; lines: string[]; tasks: TaskDto[] } {
-  const projects = listProjects(repoRoot);
-  if (!projects.includes(project)) {
-    throw new Error(`unknown project: ${project}`);
-  }
-  // target = "<lot>" ou "<lot>/<sous-lot>" — un DOSSIER, plus un ticket chapeau.
-  if (!target?.trim()) {
-    throw new Error("pas de lot cible — laisser en inbox (non promu)");
-  }
-  const inbox = readGlobalInbox(repoRoot);
-  const idx = inbox.indexOf(line);
-  if (idx < 0) throw new Error("line not in inbox");
-
-  const { title, tags } = parseInboxTags(line);
-  const asBug =
-    tags.some((t) => t.toLowerCase() === "bug") || /^bug/i.test(title);
-  const asSpec =
-    tags.some((t) => t.toLowerCase() === "spec") || /^spec/i.test(title);
-  const asPhysical =
-    tags.some((t) => t.toLowerCase() === "physical") ||
-    /^physical/i.test(title);
-  const asTech =
-    tags.some((t) => t.toLowerCase() === "tech") || /^tech/i.test(title);
-  const asQa =
-    tags.some((t) => t.toLowerCase() === "qa") || /^qa/i.test(title);
-  const workType = asPhysical
-    ? "physical"
-    : asBug
-      ? "bug"
-      : asSpec
-        ? "spec"
-        : asTech
-          ? "tech"
-          : asQa
-            ? "qa"
-            : "feature";
-  const agentType = expectedAgentType(workType);
-
-  const projectRoot = projectRootFor(repoRoot, project);
-  const dir = path.join(projectRoot, "raster-src", "lots", ...target.split("/"), "tasks");
-  if (!fs.existsSync(path.dirname(dir))) {
-    throw new Error(`lot inconnu: ${target}`);
-  }
-
-  const prefix = projectPrefix(project);
-  const id = nextIdForPrefix(repoRoot, prefix, project);
-  const slug = slugify(title);
-  fs.mkdirSync(dir, { recursive: true });
-  const rel = path
-    .relative(repoRoot, path.join(dir, `${id}-${slug}.md`))
-    .replace(/\\/g, "/");
-  const abs = path.join(repoRoot, rel);
-  if (fs.existsSync(abs)) throw new Error(`file exists: ${rel}`);
-
-  const tagLine = tags.length > 0 ? `tags: [${tags.join(", ")}]
-` : "";
-  const body = `---
-id: ${id}
-status: todo
-context: nafura
-type: ${workType}
-agent_type: ${agentType}
-priority: P2
-assignee: agent
-gate: none
-${tagLine}---
-
-# ${title}
-
-> Promu depuis inbox Raster.
-
-## Étapes
-- [ ] …
-
-## Journal
-\`\`\`
-${journalStamp()}  balayage · promu depuis inbox → ${target}
-\`\`\`
-`;
-  fs.writeFileSync(abs, body, "utf8");
-
-  const remaining = inbox.filter((_, i) => i !== idx);
-  writeGlobalInbox(repoRoot, remaining);
-
-  return {
-    id,
-    file: rel,
-    lines: remaining,
-    tasks: loadTasks(repoRoot),
-  };
-}
-
-function isoWeekId(d = new Date()) {
-  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-  const day = date.getUTCDay() || 7;
-  date.setUTCDate(date.getUTCDate() + 4 - day);
-  const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
-  const week = Math.ceil(((date.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
-  return `${date.getUTCFullYear()}-W${week}`;
-}
-
-function setFrontmatterField(raw: string, key: string, value: string | null) {
-  if (!raw.startsWith("---")) return raw;
-  const end = raw.indexOf("\n---", 4);
-  if (end < 0) return raw;
-  const block = raw.slice(4, end).replace(/\r/g, "");
-  const rest = raw.slice(end + 4);
-  const lines = block.split("\n");
-  let found = false;
-  const next = lines.map((line) => {
-    const m = line.match(/^([a-z_]+):\s*(.*)$/);
-    if (!m || m[1] !== key) return line;
-    found = true;
-    if (value === null) return null;
-    return `${key}: ${value}`;
-  }).filter((l): l is string => l !== null);
-  if (!found && value !== null) next.push(`${key}: ${value}`);
-  return `---\n${next.join("\n")}\n---${rest}`;
-}
-
-function findTaskFile(repoRoot: string, id: string): string | null {
-  const tasks = loadTasks(repoRoot);
-  const t = tasks.find((x) => x.id === id);
-  return t ? path.join(repoRoot, t.file) : null;
+  fs.writeFileSync(
+    path.join(dir, "inbox.md"),
+    [
+      "# INBOX",
+      "",
+      "<!-- Capture globale Raster — une ligne, @tag optionnel, pas d'ID. -->",
+      "<!-- Promote → <projet>/raster-src/lots/<lot>/<sous-lot?>/tasks/ -->",
+      "",
+      ...lines.map((l) => `- ${l}`),
+      "",
+    ].join("\n"),
+    "utf8"
+  );
 }
 
 function readJson(req: IncomingMessage): Promise<unknown> {
@@ -368,6 +217,19 @@ export function rasterApiPlugin(repoRoot?: string): Plugin {
     name: "raster-local-api",
     configureServer(server) {
       const root = repoRoot || repoRootFromConfig(server.config.root);
+
+      /** Après toute mutation : regen, puis on rend l'état complet. */
+      const after = (res: ServerResponse, extra: Record<string, unknown> = {}) => {
+        regen();
+        return send(res, 200, {
+          ok: true,
+          tasks: loadTasks(root),
+          ready: readiness(),
+          lines: readGlobalInbox(root),
+          ...extra,
+        });
+      };
+
       server.middlewares.use(async (req, res, next) => {
         const url = req.url || "";
         if (!url.startsWith("/api/")) return next();
@@ -375,8 +237,8 @@ export function rasterApiPlugin(repoRoot?: string): Plugin {
         try {
           if (req.method === "GET" && url === "/api/meta") {
             return send(res, 200, {
-              sprint: isoWeekId(),
-              projects: listProjects(root),
+              sprint: isoWeekInfo().id,
+              projects: listRasterProjects(root),
               repoRoot: root,
             });
           }
@@ -385,112 +247,83 @@ export function rasterApiPlugin(repoRoot?: string): Plugin {
             return send(res, 200, { tasks: loadTasks(root) });
           }
 
+          if (req.method === "GET" && url === "/api/ready") {
+            return send(res, 200, { ready: readiness() });
+          }
+
+          if (req.method === "GET" && url.startsWith("/api/window")) {
+            const p = new URL(url, "http://x").searchParams.get("projet") || "";
+            const projets = p ? [p] : listRasterProjects(root);
+            return send(res, 200, { windows: projets.map((x) => window_(x)) });
+          }
+
           if (req.method === "GET" && url === "/api/inbox") {
             return send(res, 200, { lines: readGlobalInbox(root) });
           }
 
           if (req.method === "POST" && url === "/api/inbox") {
             const body = (await readJson(req)) as { line?: string };
-            if (!body.line?.trim()) {
-              return send(res, 400, { error: "line required" });
-            }
-            const lines = [body.line.trim(), ...readGlobalInbox(root)];
-            writeGlobalInbox(root, lines);
+            if (!body.line?.trim()) return send(res, 400, { error: "line required" });
+            writeGlobalInbox(root, [body.line.trim(), ...readGlobalInbox(root)]);
             return send(res, 200, { lines: readGlobalInbox(root) });
           }
 
           if (req.method === "POST" && url === "/api/inbox/promote") {
-            const body = (await readJson(req)) as {
+            const b = (await readJson(req)) as {
               line?: string;
               project?: string;
               target?: string;
             };
-            if (!body.line?.trim() || !body.project?.trim()) {
+            if (!b.line?.trim() || !b.project?.trim()) {
               return send(res, 400, { error: "line + project required" });
             }
-            if (!body.target?.trim()) {
-              return send(res, 400, {
-                error: "sans lot cible → rester inbox, non promu",
-              });
+            if (!b.target?.trim()) {
+              return send(res, 400, { error: "sans lot cible → rester inbox, non promu" });
             }
-            const result = promoteInboxLine(
-              root,
-              body.line.trim(),
-              body.project.trim(),
-              body.target.trim()
-            );
-            return send(res, 200, result);
+            const r = promoteLine(b.line.trim(), b.project.trim(), b.target.trim());
+            return after(res, { id: r.id, file: r.file });
           }
 
-          const patch = url.match(/^\/api\/tasks\/([^/]+)$/);
-          if (req.method === "PATCH" && patch) {
-            const id = decodeURIComponent(patch[1]);
-            const file = findTaskFile(root, id);
-            if (!file) return send(res, 404, { error: "not found" });
-            const body = (await readJson(req)) as {
-              status?: string;
-              sprint?: string | null;
-            };
-            let raw = fs.readFileSync(file, "utf8");
-            if (body.status) raw = setFrontmatterField(raw, "status", body.status);
-            if (body.sprint !== undefined) {
-              raw = setFrontmatterField(
-                raw,
-                "sprint",
-                body.sprint === null || body.sprint === "" ? null : body.sprint
-              );
-            }
-            // append journal
-            const note = `${String(new Date().getDate()).padStart(2, "0")}/${String(new Date().getMonth() + 1).padStart(2, "0")} ${String(new Date().getHours()).padStart(2, "0")}:${String(new Date().getMinutes()).padStart(2, "0")}  raster-web · ${body.status ? `status→${body.status}` : ""}${body.sprint ? ` sprint→${body.sprint}` : body.sprint === null ? " sprint cleared" : ""}`.trim();
-            if (raw.includes("## Journal\n```")) {
-              raw = raw.replace(
-                /## Journal\n```\n/,
-                `## Journal\n\`\`\`\n${note}\n`
-              );
-            }
-            fs.writeFileSync(file, raw, "utf8");
-            return send(res, 200, { ok: true, tasks: loadTasks(root) });
+          if (req.method === "POST" && url === "/api/tasks") {
+            const b = (await readJson(req)) as Record<string, unknown>;
+            const r = createTask(b as never);
+            return after(res, { id: r.id, file: r.file });
           }
 
-          if (req.method === "DELETE" && patch) {
-            const id = decodeURIComponent(patch[1]);
-            const tasks = loadTasks(root);
-            const target = tasks.find((t) => t.id === id);
-            if (!target) return send(res, 404, { error: "not found" });
-            // Les chapeaux sont des DOSSIERS : une task n'a jamais d'enfants.
-            const f = path.join(root, target.file);
-            if (fs.existsSync(f)) fs.unlinkSync(f);
-            return send(res, 200, { ok: true, tasks: loadTasks(root) });
+          const one = url.match(/^\/api\/tasks\/([^/?]+)$/);
+          if (req.method === "PATCH" && one) {
+            const id = decodeURIComponent(one[1]);
+            const b = (await readJson(req)) as { status?: string; sprint?: string };
+            const out: Record<string, unknown> = {};
+            if (b.status) out.status = setStatus(id, b.status).status;
+            if (b.sprint !== undefined) out.sprint = setSprint(id, b.sprint).sprint;
+            return after(res, out);
           }
 
-          const commit = url.match(/^\/api\/tasks\/([^/]+)\/commit-sprint$/);
-          if (req.method === "POST" && commit) {
-            const id = decodeURIComponent(commit[1]);
-            const sprint = isoWeekId();
-            const tasks = loadTasks(root);
-            const target = tasks.find((t) => t.id === id);
-            if (!target) return send(res, 404, { error: "not found" });
-            // Tout fichier sous tasks/ EST une task — donc sprintable.
-            const ids = new Set<string>([id]);
-            for (const tid of ids) {
-              const file = findTaskFile(root, tid);
-              if (!file) continue;
-              let raw = fs.readFileSync(file, "utf8");
-              raw = setFrontmatterField(raw, "sprint", sprint);
-              const note = `${String(new Date().getDate()).padStart(2, "0")}/${String(new Date().getMonth() + 1).padStart(2, "0")} ${String(new Date().getHours()).padStart(2, "0")}:${String(new Date().getMinutes()).padStart(2, "0")}  raster-web · commit sprint ${sprint}`;
-              if (raw.includes("## Journal\n```")) {
-                raw = raw.replace(
-                  /## Journal\n```\n/,
-                  `## Journal\n\`\`\`\n${note}\n`
-                );
-              }
-              fs.writeFileSync(file, raw, "utf8");
+          if (req.method === "DELETE" && one) {
+            const id = decodeURIComponent(one[1]);
+            const t = loadTasks(root).find((x) => x.id === id);
+            if (!t) return send(res, 404, { error: "not found" });
+            // Abandon = delete. Les chapeaux sont des dossiers : jamais d'enfants.
+            fs.unlinkSync(path.join(root, t.file));
+            return after(res);
+          }
+
+          const sub = url.match(/^\/api\/tasks\/([^/?]+)\/(commit-sprint|approve)$/);
+          if (req.method === "POST" && sub) {
+            const id = decodeURIComponent(sub[1]);
+            if (sub[2] === "approve") {
+              const r = approve(id);
+              return after(res, { status: r.status });
             }
-            return send(res, 200, { ok: true, sprint, tasks: loadTasks(root) });
+            const r = setSprint(id);
+            return after(res, { sprint: r.sprint });
           }
 
           return send(res, 404, { error: "unknown api route" });
         } catch (e) {
+          // Un refus du CLI est une erreur de l'appelant, pas une panne serveur.
+          if (e instanceof RefusError) return send(res, 400, { error: e.message });
           console.error(e);
           return send(res, 500, {
             error: e instanceof Error ? e.message : "server error",

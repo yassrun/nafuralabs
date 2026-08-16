@@ -726,3 +726,118 @@ h3 {
   color: #7a4a05;
   font-weight: 600;
 }
+
+/* ------------------------------------------------------------------ */
+/* Panneau de décision — CH-01-EVOL-panneau-decision                   */
+/* En mode autonome tu n'appuies plus sur « Lancer », tu arbitres.      */
+/* ------------------------------------------------------------------ */
+
+.nav-n {
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background: var(--warn);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.nav button.active .nav-n {
+  background: #fff;
+  color: var(--ink);
+}
+
+/* Une ligne qui t'attend ne doit pas ressembler aux autres. */
+.row.attente {
+  cursor: pointer;
+  border-left: 3px solid var(--warn);
+  background: #fffdf7;
+}
+
+.row.attente.selected {
+  background: #fff7e6;
+}
+
+.att-mark {
+  width: 18px;
+  text-align: center;
+  font-weight: 700;
+}
+
+.att-ok { color: var(--accent); }
+.att-q { color: var(--warn); }
+.att-ext { color: var(--danger); }
+
+/* La gate devient un bandeau — une pilule parmi quatre ne se voit pas. */
+.bandeau {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  background: #fdf0d5;
+  color: #7a4a05;
+}
+
+.bandeau strong {
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* La question passe avant l'identité, le type et le chemin. */
+.callout.question {
+  border-left: 3px solid var(--warn);
+  background: #fffbf0;
+}
+
+.q-head {
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.q-body {
+  margin: 0;
+  font-family: var(--font);
+  font-size: 13px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Ce qui sert au debug se replie ; ce qui sert à décider reste ouvert. */
+.fold {
+  border-top: 1px solid var(--line);
+  padding-top: 8px;
+}
+
+.fold > summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.fold > summary::-webkit-details-marker {
+  display: none;
+}
+
+.fold > summary::before {
+  content: "▸ ";
+  color: var(--faint);
+}
+
+.fold[open] > summary::before {
+  content: "▾ ";
+}
+
+/* Readiness — calculée, jamais posée à la main. */
+.pill.ok {
+  background: #e7f4ec;
+  color: var(--ok);
+  font-weight: 600;
+}
+
+.pill.warn {
+  background: #fdf3dd;
+  color: var(--warn);
+}
