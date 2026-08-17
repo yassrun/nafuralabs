@@ -27,7 +27,7 @@ help:
 	@echo "SCOPE=front|back|full  APP=$(APP)"
 	@echo "  make -C nafura-platform/ops dev-up  SCOPE=front|back|full   # process locaux → infra staging"
 	@echo "  make -C nafura-platform/ops stg-up  SCOPE=front|back|full   # build + deploy pods staging"
-	@echo "  make -C nafura-platform/ops prod-up SCOPE=front|back|full   # build + push + deploy pods prod"
+	@echo "  make -C nafura-platform/ops prod-up SCOPE=front|back|full   # prod (front = image web only)"
 	@echo ""
 	@echo "Bas niveau (ENV=$(ENV)):"
 	@echo "  clean-env bootstrap-env infra-up infra-wait preflight"
@@ -65,15 +65,12 @@ stg-up:
 	$(MAKE) _cluster-up ENV=staging KUBE_CONTEXT=$(or $(KUBE_CONTEXT),docker-desktop) \
 	  BUILD_IMAGES=true PUSH_IMAGES= SCOPE=$(SCOPE) APP=$(APP)
 
-# Build + push + deploy pods prod.
+# Build + push + deploy pods prod. REGISTRY_PASS optional : lu depuis le secret k8s si vide.
 prod-up:
 	@case "$(SCOPE)" in \
 	  front|back|full) ;; \
 	  *) echo "ERROR: SCOPE must be front|back|full (got: $(SCOPE))" >&2; exit 1 ;; \
 	esac
-	@if [ -z "$(REGISTRY_PASS)" ]; then \
-	  echo "ERROR: REGISTRY_PASS is required for prod-up" >&2; exit 1; \
-	fi
 	$(MAKE) _cluster-up ENV=prod KUBE_CONTEXT=$(or $(KUBE_CONTEXT),nafura-vps-prod) \
 	  BUILD_IMAGES=true PUSH_IMAGES=true SCOPE=$(SCOPE) APP=$(APP) REGISTRY_PASS=$(REGISTRY_PASS)
 

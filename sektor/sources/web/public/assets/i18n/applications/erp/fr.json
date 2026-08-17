@@ -756,6 +756,8 @@
       "voir_dans_arbre": "Voir dans l’arbre",
       "passer_manuel": "Passer en manuel pour corriger",
       "voir_tout": "Voir tout",
+      "voir_details": "Voir les détails",
+      "details_titre": "Détail des erreurs",
       "replier": "Replier",
       "verifier": "Vérifier le chiffrage",
       "incomplet_cout": "chiffrage incomplet — décomposez, forfaitisez ou estimez les postes restants.",

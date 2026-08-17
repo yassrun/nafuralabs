@@ -18,8 +18,10 @@ CLI deploy : infra partagée (1× par cluster) + produits (indépendants).
 ```bash
 make -C nafura-platform/ops dev-up  SCOPE=full APP=sektor-btp          # itérer
 make -C nafura-platform/ops stg-up  SCOPE=full APP=sektor-btp          # valider staging
-REGISTRY_PASS=*** make -C nafura-platform/ops prod-up SCOPE=full APP=sektor-btp   # prod
+REGISTRY_PASS=*** make -C nafura-platform/ops prod-up SCOPE=front APP=sektor-btp  # prod, image web only
 ```
+
+Windows : `powershell -File nafura-platform/ops/prod-up.ps1 -Scope front` (Git bash + kubectl Windows ; `REGISTRY_PASS` lu dans le cluster si vide).
 
 Itérer → `dev-up` · Valider → `stg-up` · Promouvoir → `prod-up`.
 

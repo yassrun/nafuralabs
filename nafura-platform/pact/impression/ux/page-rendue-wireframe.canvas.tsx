@@ -18,7 +18,8 @@ import {
  * Preview IDE : canvases/page-rendue-wireframe.canvas.tsx
  *
  * Décisions UX
- * - Pas d'écran platform « mes modèles » : le produit demande une page
+ * - Le produit demande une page (ce canvas). L'admin des modèles est un autre flux :
+ *   ux/admin-modeles-wireframe.canvas.tsx
  * - Chrome (logo, pied) vient du tenant, pas du métier
  * - Fallback : le produit appelle l'API sans ce cadre
  * - Autre tenant : pas la page de A — pas un message métier

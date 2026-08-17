@@ -33,7 +33,9 @@ secret/nafura/{env}/
 │   │   └── clients/{app-id}   # client_secret (OAuth backend clients)
 │   ├── integrations/
 │   │   ├── email/brevo        # api_key
-│   │   └── ai/gemini          # api_key
+│   │   └── ai/
+│   │       ├── gemini         # api_key
+│   │       └── deepseek       # api_key (Sektor : AI_PROVIDER=deepseek)
 │   └── security/invitation    # token_secret
 └── apps/
     └── {app-id}/
@@ -47,7 +49,7 @@ secret/nafura/{env}/
 | postgres pod | `platform/data/postgres` |
 | keycloak pod | `platform/iam/keycloak` |
 | minio pod | `platform/storage/minio` |
-| `{app}-backend` | `apps/{app}/*`, `platform/integrations/email/brevo`, `platform/integrations/ai/gemini`, `platform/iam/keycloak`, `platform/security/invitation`, `platform/iam/clients/{app}` |
+| `{app}-backend` | `apps/{app}/*`, `platform/integrations/email/brevo`, `platform/integrations/ai/gemini`, `platform/integrations/ai/deepseek`, `platform/iam/keycloak`, `platform/security/invitation`, `platform/iam/clients/{app}` |
 
 Créer le fichier s'il n'existe pas, avec au minimum les sections pour ton `ENV` :
 
@@ -78,6 +80,9 @@ secret_key=minioadmin
 api_key=
 
 [staging/platform/integrations/ai/gemini]
+api_key=
+
+[staging/platform/integrations/ai/deepseek]
 api_key=
 
 [staging/platform/security/invitation]

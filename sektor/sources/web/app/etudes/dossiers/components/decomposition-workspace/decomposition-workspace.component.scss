@@ -1,7 +1,7 @@
 :host {
   display: flex;
   flex-direction: column;
-  min-height: 0;
+  min-height: 16rem;
   height: 100%;
 }
 
@@ -25,7 +25,7 @@
 
 .workspace__master > app-bordereau-arbre {
   flex: 1 1 0;
-  min-height: 0;
+  min-height: 16rem;
 }
 
 .workspace__couverture {
@@ -60,33 +60,21 @@
   font-weight: 500;
 }
 
-.workspace__filtre {
+.workspace__details {
+  appearance: none;
+  border: 0;
+  background: transparent;
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
+  font: inherit;
   font-size: 0.75rem;
-  color: var(--nf-color-text-secondary);
+  font-weight: 600;
+  color: var(--nf-color-primary-700, #1d4ed8);
   cursor: pointer;
-  user-select: none;
-}
-
-.workspace__alertes {
-  flex-shrink: 0;
-  margin: 0 0 0.5rem;
-  padding: 0.55rem 0.75rem 0.55rem 1.25rem;
-  border: 1px solid color-mix(in srgb, var(--nf-color-warning-700, #92400e) 35%, transparent);
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--nf-color-warning-700, #92400e) 8%, transparent);
-  font-size: 0.75rem;
-  display: grid;
-  gap: 0.25rem;
-  max-height: 7rem;
-  overflow: auto;
-
-  .code {
-    font-family: ui-monospace, monospace;
-    margin-right: 0.35rem;
-  }
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  padding: 0;
 }
 
 .workspace__search {

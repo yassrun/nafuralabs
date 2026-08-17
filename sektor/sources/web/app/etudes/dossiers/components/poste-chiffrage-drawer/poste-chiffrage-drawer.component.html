@@ -25,35 +25,37 @@
     </nf-button>
   </header>
 
-  <div class="poste-drawer__mode" role="group" aria-label="Origine du coût">
-    <button
-      type="button"
-      class="poste-drawer__toggle"
-      [class.poste-drawer__toggle--active]="origine() === 'DECOMPOSE'"
-      [disabled]="!data.modifiable || closing()"
-      (click)="setOrigine('DECOMPOSE')"
-    >
-      Je décompose
-    </button>
-    <button
-      type="button"
-      class="poste-drawer__toggle"
-      [class.poste-drawer__toggle--active]="origine() === 'FORFAIT'"
-      [disabled]="!data.modifiable || closing()"
-      (click)="setOrigine('FORFAIT')"
-    >
-      Forfait
-    </button>
-    <button
-      type="button"
-      class="poste-drawer__toggle"
-      [class.poste-drawer__toggle--active]="origine() === 'ESTIME'"
-      [disabled]="!data.modifiable || closing()"
-      (click)="setOrigine('ESTIME')"
-    >
-      J’estime
-    </button>
-  </div>
+  @if (!guestReadOnly) {
+    <div class="poste-drawer__mode" role="group" aria-label="Origine du coût">
+      <button
+        type="button"
+        class="poste-drawer__toggle"
+        [class.poste-drawer__toggle--active]="origine() === 'DECOMPOSE'"
+        [disabled]="!data.modifiable || closing()"
+        (click)="setOrigine('DECOMPOSE')"
+      >
+        Je décompose
+      </button>
+      <button
+        type="button"
+        class="poste-drawer__toggle"
+        [class.poste-drawer__toggle--active]="origine() === 'FORFAIT'"
+        [disabled]="!data.modifiable || closing()"
+        (click)="setOrigine('FORFAIT')"
+      >
+        Forfait
+      </button>
+      <button
+        type="button"
+        class="poste-drawer__toggle"
+        [class.poste-drawer__toggle--active]="origine() === 'ESTIME'"
+        [disabled]="!data.modifiable || closing()"
+        (click)="setOrigine('ESTIME')"
+      >
+        J’estime
+      </button>
+    </div>
+  }
 
   <div class="poste-drawer__body">
     <app-poste-decomposition-panel
@@ -65,53 +67,97 @@
       [margeDefaut]="data.margeDefaut"
       [tvaDefaut]="data.tvaDefaut"
       [embedded]="true"
+      [externalDpu]="data.externalDpu ?? null"
+      [guestReadOnly]="guestReadOnly"
+      [externalDescriptifCps]="data.externalDescriptifCps ?? null"
       (dirtyChange)="onDirty($event)"
       (origineChange)="onOrigine($event)"
     />
 
-    <details class="poste-drawer__fold">
-      <summary>Avis d’exécution</summary>
-      <div class="poste-drawer__fold-body">
-        @if (posteDraft().id && data.dossierId) {
-          <app-poste-avis-panel
-            [dossierId]="data.dossierId"
-            [noeudId]="posteDraft().id!"
-            [modifiable]="data.modifiable"
-            [peutPoser]="true"
-            [peutTraiter]="data.modifiable"
-            [embedded]="true"
-          />
-        } @else {
-          <p class="poste-drawer__fold-empty">Enregistrez le poste pour poser un avis.</p>
-        }
-      </div>
-    </details>
+    @if (!guestReadOnly) {
+      <details class="poste-drawer__fold">
+        <summary>Avis d’exécution</summary>
+        <div class="poste-drawer__fold-body">
+          @if (posteDraft().id && data.dossierId) {
+            <app-poste-avis-panel
+              [dossierId]="data.dossierId"
+              [noeudId]="posteDraft().id!"
+              [modifiable]="data.modifiable"
+              [peutPoser]="true"
+              [peutTraiter]="data.modifiable"
+              [embedded]="true"
+            />
+          } @else {
+            <p class="poste-drawer__fold-empty">Enregistrez le poste pour poser un avis.</p>
+          }
+        </div>
+      </details>
+    }
 
-    <details class="poste-drawer__fold">
-      <summary>Commentaires d’équipe</summary>
+    <details class="poste-drawer__fold" [open]="guestReadOnly">
+      <summary>{{ guestReadOnly ? 'Commentaires' : 'Commentaires d’équipe' }}</summary>
       <div class="poste-drawer__fold-body">
-        <nf-comment-thread-panel
-          [entityType]="commentEntityType"
-          [entityId]="commentEntityId"
-          [readonly]="!data.modifiable"
-          [title]="'etudes.poste.comments.title' | translate"
-          [placeholder]="'etudes.poste.comments.placeholder' | translate"
-          [emptyLabel]="'etudes.poste.comments.empty' | translate"
-          [loadingLabel]="'etudes.poste.comments.loading' | translate"
-          [addLabel]="'etudes.poste.comments.add' | translate"
-          [editLabel]="'etudes.poste.comments.edit' | translate"
-          [deleteLabel]="'etudes.poste.comments.delete' | translate"
-          [saveLabel]="'etudes.poste.comments.save' | translate"
-          [cancelLabel]="'etudes.poste.comments.cancel' | translate"
-          [editedLabel]="'etudes.poste.comments.edited' | translate"
-        />
+        @if (guestReadOnly) {
+          @if (guestCommentError()) {
+            <p class="poste-drawer__fold-empty" role="alert">{{ guestCommentError() }}</p>
+          }
+          @if (!guestComments().length) {
+            <p class="poste-drawer__fold-empty">Aucun commentaire pour l’instant.</p>
+          }
+          <ul class="poste-drawer__guest-comments">
+            @for (c of guestComments(); track c.id) {
+              <li>
+                <strong>{{ c.author }}</strong>
+                @if (c.createdAt) {
+                  <time>{{ c.createdAt | date: 'short' }}</time>
+                }
+                <p>{{ c.body }}</p>
+              </li>
+            }
+          </ul>
+          <label class="poste-drawer__guest-compose">
+            <span>Ajouter un commentaire</span>
+            <textarea
+              rows="3"
+              [ngModel]="guestCommentDraft()"
+              (ngModelChange)="guestCommentDraft.set($event)"
+              placeholder="Votre remarque sur ce poste"
+            ></textarea>
+          </label>
+          <nf-button
+            variant="primary"
+            size="sm"
+            [disabled]="guestCommentBusy() || !guestCommentDraft().trim()"
+            (clicked)="submitGuestComment()"
+          >
+            {{ guestCommentBusy() ? 'Envoi…' : 'Envoyer' }}
+          </nf-button>
+        } @else {
+          <nf-comment-thread-panel
+            [entityType]="commentEntityType"
+            [entityId]="commentEntityId"
+            [readonly]="!data.modifiable"
+            [title]="'etudes.poste.comments.title' | translate"
+            [placeholder]="'etudes.poste.comments.placeholder' | translate"
+            [emptyLabel]="'etudes.poste.comments.empty' | translate"
+            [loadingLabel]="'etudes.poste.comments.loading' | translate"
+            [addLabel]="'etudes.poste.comments.add' | translate"
+            [editLabel]="'etudes.poste.comments.edit' | translate"
+            [deleteLabel]="'etudes.poste.comments.delete' | translate"
+            [saveLabel]="'etudes.poste.comments.save' | translate"
+            [cancelLabel]="'etudes.poste.comments.cancel' | translate"
+            [editedLabel]="'etudes.poste.comments.edited' | translate"
+          />
+        }
       </div>
     </details>
   </div>
 
   <footer class="poste-drawer__footer">
     <span class="poste-drawer__footer-status">
-      @if (closing() || panel()?.sauvegarde()) {
+      @if (guestReadOnly) {
+        Lecture — vous pouvez commenter ce poste
+      } @else if (closing() || panel()?.sauvegarde()) {
         Enregistrement…
       } @else if (dirty()) {
         Modifications non enregistrées
@@ -122,7 +168,7 @@
       }
     </span>
     <div class="poste-drawer__footer-actions">
-      @if (data.modifiable) {
+      @if (data.modifiable && !guestReadOnly) {
         <nf-button
           variant="primary"
           size="sm"

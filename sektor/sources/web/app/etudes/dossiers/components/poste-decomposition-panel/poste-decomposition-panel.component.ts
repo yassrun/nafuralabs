@@ -136,6 +136,11 @@ export class PosteDecompositionPanelComponent {
   readonly tvaDefaut = input(20);
   /** true dans le drawer : chrome identité / save géré par le shell. */
   readonly embedded = input(false);
+  /** Portail invité : DPU déjà dans le snapshot, pas d’appel authentifié. */
+  readonly externalDpu = input<PrixDPU | null>(null);
+  readonly guestReadOnly = input(false);
+  /** Texte CPS déjà résolu (portail invité) — pas d’appel authentifié. */
+  readonly externalDescriptifCps = input<string | null>(null);
 
   readonly change = output<void>();
   readonly dirtyChange = output<boolean>();
@@ -190,6 +195,11 @@ export class PosteDecompositionPanelComponent {
   readonly peutProposerCps = computed(
     () => !!this.dossierId() && !!this.cpsDocumentId() && this.modifiable(),
   );
+  readonly descriptifGuest = computed(() => {
+    const cps = this.externalDescriptifCps()?.trim();
+    if (cps) return cps;
+    return this.commentaire().trim();
+  });
   /** L5 — au moins un ITEM gelé → CTA refresh dispo si étude modifiable. */
   readonly peutRafraichirPrix = computed(
     () =>
@@ -310,7 +320,10 @@ export class PosteDecompositionPanelComponent {
   );
 
   constructor() {
-    void this.chargerUnites();
+    effect(() => {
+      if (this.guestReadOnly() || this.externalDpu()) return;
+      untracked(() => void this.chargerUnites());
+    });
     effect(() => {
       this.dirtyChange.emit(this.modificationsEnAttente());
     });
@@ -1211,6 +1224,23 @@ export class PosteDecompositionPanelComponent {
   }
 
   private async chargerDpu(noeudId: string): Promise<void> {
+    const external = this.externalDpu();
+    if (external || this.guestReadOnly()) {
+      const seq = ++this.loadSeq;
+      this.chargement.set(true);
+      this.erreur.set(undefined);
+      this.statut.set('idle');
+      try {
+        if (external) this.applyDpu(external);
+        else this.dpu.set(null);
+      } finally {
+        if (seq === this.loadSeq) {
+          this.chargement.set(false);
+          this.captureDpuInitial();
+        }
+      }
+      return;
+    }
     const seq = ++this.loadSeq;
     this.chargement.set(true);
     this.erreur.set(undefined);

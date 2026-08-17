@@ -18,6 +18,8 @@ Vocabulaire **canonique** (préférer ces commandes Make). Scope = `front` | `ba
 | **`stg-up`** | Build + **deploy pods** staging | Oui (`:staging`) | `sektor-staging` (Docker Desktop) |
 | **`prod-up`** | Build + push registry + **deploy pods** prod | Oui (`:prod`) | `sektor-prod` (OVH VPS) |
 
+`SCOPE=front` = image **web** seulement. `SCOPE=back` = backend (+ lifecycle Sektor). `SCOPE=full` = tout. Windows : `powershell -File nafura-platform/ops/prod-up.ps1 -Scope front` (Git bash, pas le `bash` WSL).
+
 ```bash
 make -C nafura-platform/ops dev-up  SCOPE=front|back|full APP=sektor-btp
 make -C nafura-platform/ops stg-up  SCOPE=front|back|full APP=sektor-btp
@@ -26,7 +28,7 @@ REGISTRY_PASS=*** make -C nafura-platform/ops prod-up SCOPE=front|back|full APP=
 
 | Scope | `dev-up` | `stg-up` / `prod-up` |
 |-------|----------|----------------------|
-| `front` | Front local → API staging (ou back local) | `release-frontend` (+ build image) |
+| `front` | Front local → API staging (ou back local) | `release-frontend` (image **web** only) |
 | `back` | Back local → Postgres/Keycloak/MinIO staging | `release-backend` (migrate + image + rollout) |
 | `full` | Front + back locaux (Mode B) | `release-app` (migrate + back + front) |
 
@@ -52,7 +54,7 @@ Prérequis `dev-up` : infra staging déjà up (`bootstrap-env` / pods `nafura-in
 
 ## Règles impératives pour les agents
 
-1. **Toujours** passer par `nlops.sh` ou `make` — ne pas réinventer des `kubectl apply` ad hoc sauf debug ciblé.
+1. **Toujours** passer par `nlops.sh` ou `make` — ne pas réinventer des `kubectl apply` ad hoc sauf debug ciblé. **Windows :** `powershell -File nafura-platform/ops/prod-up.ps1 -Scope front|back|full` (le `bash` système est souvent WSL, mauvais kubectl).
 2. **Toujours** fixer `ENV` (`staging` | `prod` | `demo`) avant toute op bas niveau ; pour le cycle de vie préférer `dev-up` / `stg-up` / `prod-up`.
 3. **Toujours** utiliser `KUBE_CONTEXT` quand le cluster cible n’est pas le contexte kubectl par défaut :
    - Docker Desktop → `KUBE_CONTEXT=docker-desktop`
@@ -109,6 +111,7 @@ Référence complète : [nafura-platform/ops/secrets/README.md](nafura-platform/
 Exemples prod :
 - Brevo : `platform/integrations/email/brevo` → champ `api_key`
 - Gemini : `platform/integrations/ai/gemini` → champ `api_key`
+- DeepSeek : `platform/integrations/ai/deepseek` → champ `api_key` (Sektor prod : `AI_PROVIDER=deepseek`)
 - DB Sektor : `apps/sektor-btp/database`
 
 Migration legacy : `ENV=prod bash nafura-platform/ops/scripts/vault-migrate-platform-paths.sh`
@@ -361,7 +364,13 @@ DNS A → IP VPS `54.36.183.106` (ingress nginx k3s).
 ```bash
 REGISTRY_PASS=*** make -C nafura-platform/ops prod-up SCOPE=full  APP=sektor-btp
 REGISTRY_PASS=*** make -C nafura-platform/ops prod-up SCOPE=back  APP=sektor-btp
-REGISTRY_PASS=*** make -C nafura-platform/ops prod-up SCOPE=front APP=sektor-btp
+REGISTRY_PASS=*** make -C nafura-platform/ops prod-up SCOPE=front APP=sektor-btp   # image web only
+```
+
+Windows (Git bash, pas le `bash` WSL) : `REGISTRY_PASS` peut rester vide — lu depuis le secret k8s `nafura-registry`.
+
+```powershell
+powershell -File nafura-platform/ops/prod-up.ps1 -Scope front
 ```
 
 Namespace neuf requis pour PVC réduits (on ne peut pas shrink un PVC existant).

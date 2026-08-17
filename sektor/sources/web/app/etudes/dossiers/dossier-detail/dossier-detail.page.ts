@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
 import { map } from 'rxjs';
 
@@ -28,6 +29,7 @@ import {
 } from '../components/gate-blocage/gate-blocage.component';
 import { DecompositionWorkspaceComponent } from '../components/decomposition-workspace/decomposition-workspace.component';
 import { DossierSummaryHeaderComponent } from '../components/dossier-summary-header/dossier-summary-header.component';
+import { ShareGuestLinkDialogComponent } from '../components/share-guest-link-dialog/share-guest-link-dialog.component';
 import { PiecesMarcheComponent } from '../components/pieces-marche/pieces-marche.component';
 import { SyntheseValidationPanelComponent } from '../components/synthese-validation-panel/synthese-validation-panel.component';
 import {
@@ -71,6 +73,7 @@ export class DossierDetailPage {
   private readonly api = inject(DossierEtudeApiService);
   private readonly route = inject(ActivatedRoute);
   private readonly nav = inject(Router);
+  private readonly dialog = inject(MatDialog);
   private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly printDialog = inject(PrintDialogService);
   private readonly translate = inject(TranslateService);
@@ -203,6 +206,22 @@ export class DossierDetailPage {
 
   /** CTA « Soumettre » : footer wizard (dernier step) + header — seulement à la Synthèse. */
   readonly peutSoumettre = computed(() => this.modifiable() && this.etapeUi() === 4);
+
+  /** Partager : étape Coût verte (pas d’anomalie bloquante, hors alerte qualité). */
+  readonly coutEtapeVerte = computed(() => {
+    if (!this.dossier()?.dpgfId) return false;
+    if ((this.synthese()?.nombreArticles ?? 0) === 0) return false;
+    const etapes = backendGateEtapesForUi(3);
+    const relevant = this.gates().filter((g) => etapes.includes(g.etape));
+    if (relevant.length === 0) return false;
+    for (const g of relevant) {
+      for (const p of g.problemes) {
+        if (estAlerteQualiteChiffrage(p.message)) continue;
+        return false;
+      }
+    }
+    return true;
+  });
 
   readonly messageVerrou = computed(() => {
     const statut = this.dossier()?.status;
@@ -375,6 +394,17 @@ export class DossierDetailPage {
     this.erreur.set(undefined);
     try {
       switch (action) {
+        case 'PARTAGER':
+          if (!this.coutEtapeVerte()) return;
+          this.dialog.open(ShareGuestLinkDialogComponent, {
+            data: {
+              dossierId: dossier.id,
+              numero: dossier.numero,
+              objet: dossier.objet,
+              suggestedEmail: undefined,
+            },
+          });
+          break;
         case 'IMPRIMER_BORDEREAU':
           if (!dossier.dpgfId) {
             this.erreur.set('Aucun bordereau (DPGF) lié à ce dossier.');

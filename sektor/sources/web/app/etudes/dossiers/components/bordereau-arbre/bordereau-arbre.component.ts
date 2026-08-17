@@ -26,6 +26,7 @@ import { ConfirmDialogService } from '@platform/lib/anatomy';
 
 import { UnitOfMeasuresApiService } from '@app/catalogue/configuration/unit-of-measures/services/unit-of-measure-api.service';
 
+import type { NoeudDPGF } from '@app/etudes/models';
 import { DpgfApiService } from '../../../metres/services/dpgf-api.service';
 import {
   applyTreeRollupPostes,
@@ -102,6 +103,10 @@ export class BordereauArbreComponent {
   readonly reloadToken = input(0);
   /** Filtre articles avec composants non consultés (ids). */
   readonly filterArticleIds = input<string[] | null>(null);
+  /** Arbre déjà chargé (portail invité) — pas d’appel DPGF authentifié. */
+  readonly externalHierarchie = input<NoeudDPGF[] | null>(null);
+  /** Clic simple ouvre le poste (invité) — sinon double-clic comme l’étape Coût. */
+  readonly openOnClick = input(false);
 
   readonly change = output<void>();
   readonly posteSelect = output<BordereauTreeRow | null>();
@@ -234,7 +239,9 @@ export class BordereauArbreComponent {
       return `${row.libelle} — article non exploitable (unité et quantité > 0 requises)`;
     }
     if (this.selectionEnabled() && row.type === 'ARTICLE') {
-      return `${row.libelle} — double-clic pour ouvrir le chiffrage`;
+      return this.openOnClick()
+        ? `${row.libelle} — clic pour ouvrir le détail`
+        : `${row.libelle} — double-clic pour ouvrir le chiffrage`;
     }
     return row.libelle || null;
   };
@@ -279,8 +286,12 @@ export class BordereauArbreComponent {
   private readonly host = inject(ElementRef<HTMLElement>);
 
   constructor() {
-    void this.chargerUnites();
     effect(() => {
+      if (this.externalHierarchie() != null) return;
+      untracked(() => void this.chargerUnites());
+    });
+    effect(() => {
+      const external = this.externalHierarchie();
       const draft = this.draftArbre();
       const draftToken = this.draftToken();
       const id = this.dpgfId();
@@ -288,6 +299,16 @@ export class BordereauArbreComponent {
       // `untracked` : `charger()` passe par les intercepteurs HTTP, qui lisent des
       // signaux globaux (token / tenant). Sans ça l’arbre se recharge en boucle.
       untracked(() => {
+        if (external != null) {
+          const nodes = noeudsDpgfToTreeNodes(external);
+          applyTreeRollupTotals(nodes);
+          applyTreeRollupPostes(nodes);
+          this.nodes.set(nodes);
+          this.expandedKeys.set(collectAllExpandableKeys(nodes));
+          this.tableEpoch.update((e) => e + 1);
+          this.chargement.set(false);
+          return;
+        }
         if (draft != null) {
           // Reseed seulement sur nouvelle extraction (token), pas sur chaque edit locale.
           if (draftToken !== this.lastDraftToken) {
@@ -411,9 +432,17 @@ export class BordereauArbreComponent {
     this.tableEpoch.update((e) => e + 1);
   }
 
+  onRowClick(row: BordereauTreeRow): void {
+    if (!this.openOnClick()) return;
+    this.emitPoste(row);
+  }
+
   onRowDblClick(row: BordereauTreeRow): void {
     if (!this.selectionEnabled()) return;
-    // Lots / sous-lots : navigation seule — ouverture chiffrage = double-clic ARTICLE.
+    this.emitPoste(row);
+  }
+
+  private emitPoste(row: BordereauTreeRow): void {
     if (row.type !== 'ARTICLE') return;
     this.posteSelect.emit(row);
   }

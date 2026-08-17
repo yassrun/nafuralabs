@@ -1,6 +1,6 @@
-# SPRINT 2026-W33                         lun 10/08 → dim 16/08
+# SPRINT 2026-W34                         lun 17/08 → dim 23/08
 
-  (aucune tâche commitée — Commit = poser `sprint: 2026-W33`)
+  (aucune tâche commitée — Commit = poser `sprint: 2026-W34`)
 
   tasks P1 prêtes (hors features) :
   · PLT-121  SPEC + geler AC — approbation     [agent]   spec   gate:none

@@ -39,6 +39,8 @@ export class DossierSummaryHeaderComponent {
   readonly anomaliesEtape = input<number | undefined>(undefined);
   /** Étape UI wizard (1–4) — évite « Soumettre » trop tôt dans le header. */
   readonly etapeUi = input(1);
+  /** Lien invité : seulement quand l’étape Coût est verte (gates OK). */
+  readonly canShare = input(false);
 
   readonly action = output<string>();
   readonly focusAnomalies = output<void>();
@@ -127,6 +129,7 @@ export class DossierSummaryHeaderComponent {
 
   readonly showPrintBordereau = computed(() => this.hasDpgf());
   readonly showPrintSynthese = computed(() => true);
+  readonly showPartager = computed(() => true);
 
   emitAction(code?: string): void {
     const action = code ?? this.actionEffective() ?? this.synthese().actionPrincipale;

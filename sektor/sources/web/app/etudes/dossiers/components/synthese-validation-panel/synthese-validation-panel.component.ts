@@ -9,6 +9,7 @@ import {
   output,
   signal,
 } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 
 import { MadCurrencyPipe } from '@platform/lib/anatomy/pipes/mad-currency.pipe';
 import { TranslateModule } from '@ngx-translate/core';
@@ -24,6 +25,7 @@ import {
 import { DpgfApiService, type DpgfLotTotal } from '../../../metres/services/dpgf-api.service';
 import { DpuApiService } from '@app/catalogue/bibliotheque-prix/services/dpu-api.service';
 import { GateBlocageComponent } from '../gate-blocage/gate-blocage.component';
+import { openGateProblemesDialog } from '../gate-blocage/gate-problemes-dialog.component';
 import { RattrapagePanelComponent } from '../rattrapage-panel/rattrapage-panel.component';
 import { CapitalisationPanelComponent } from '../capitalisation-panel/capitalisation-panel.component';
 
@@ -53,6 +55,7 @@ export class SyntheseValidationPanelComponent {
   private readonly dpgfApi = inject(DpgfApiService);
   private readonly dpuApi = inject(DpuApiService);
   private readonly dossierApi = inject(DossierEtudeApiService);
+  private readonly dialog = inject(MatDialog);
 
   readonly dossier = input.required<DossierEtude>();
   readonly gates = input<ResultatGate[]>([]);
@@ -195,6 +198,14 @@ export class SyntheseValidationPanelComponent {
 
   corrigerConsultation(probleme: ProblemeGate): void {
     this.corriger.emit({ ...probleme, etape: 4 });
+  }
+
+  ouvrirDetailsConsultation(): void {
+    const gate = this.gateConsultation();
+    if (!gate?.problemes.length) return;
+    void openGateProblemesDialog(this.dialog, gate.problemes).then((picked) => {
+      if (picked) this.corrigerConsultation(picked);
+    });
   }
 
   readonly pretASoumettre = computed(

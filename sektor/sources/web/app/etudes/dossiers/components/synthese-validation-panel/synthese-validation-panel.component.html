@@ -153,26 +153,10 @@
               } @else {
                 Certains prix étaient manuels au moment de la soumission.
               }
+              <button type="button" class="link" (click)="ouvrirDetailsConsultation()">
+                {{ 'etudes.gate.voir_details' | translate }} ({{ gate.problemes.length }})
+              </button>
             </p>
-            <ul class="synthese__liste">
-              @for (p of gate.problemes; track p.noeudId ?? p.message) {
-                <li>
-                  @if (p.codeArticle) {
-                    <span class="code">{{ p.codeArticle }}</span>
-                  }
-                  <span>{{ p.message | translate }}</span>
-                  @if (modifiable() && p.noeudId) {
-                    <button
-                      type="button"
-                      class="link"
-                      (click)="corrigerConsultation(p)"
-                    >
-                      Corriger
-                    </button>
-                  }
-                </li>
-              }
-            </ul>
           } @else {
             <p class="synthese__ok">Tous les composants décomposés ont un prix consulté.</p>
           }

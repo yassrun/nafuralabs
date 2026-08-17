@@ -12,7 +12,9 @@ import ma.nafura.etudes.api.request.DossierEtudeCreateDto;
 import ma.nafura.etudes.api.request.DossierEtudeUpdateDto;
 import ma.nafura.etudes.api.request.DossierGagneDto;
 import ma.nafura.etudes.api.request.DossierPerduDto;
+import ma.nafura.etudes.api.dto.GuestLinkCreatedDto;
 import ma.nafura.etudes.api.request.EtapeRequest;
+import ma.nafura.etudes.api.request.GuestLinkCreateDto;
 import ma.nafura.etudes.api.request.RefusRequest;
 import ma.nafura.etudes.domain.dossier.DossierEtude;
 import ma.nafura.etudes.domain.dossier.StatutDossierEtude;
@@ -36,16 +38,19 @@ public class DossierEtudeController {
     private final DecompositionProposeService decompositionProposeService;
     private final ma.nafura.etudes.service.SyntheseCoutAffaireService syntheseCoutAffaireService;
     private final ma.nafura.etudes.service.DpuService dpuService;
+    private final ma.nafura.etudes.service.guest.GuestAccessService guestAccessService;
 
     public DossierEtudeController(
             DossierEtudeService service,
             DecompositionProposeService decompositionProposeService,
             ma.nafura.etudes.service.SyntheseCoutAffaireService syntheseCoutAffaireService,
-            ma.nafura.etudes.service.DpuService dpuService) {
+            ma.nafura.etudes.service.DpuService dpuService,
+            ma.nafura.etudes.service.guest.GuestAccessService guestAccessService) {
         this.service = service;
         this.decompositionProposeService = decompositionProposeService;
         this.syntheseCoutAffaireService = syntheseCoutAffaireService;
         this.dpuService = dpuService;
+        this.guestAccessService = guestAccessService;
     }
 
     @GetMapping
@@ -217,6 +222,19 @@ public class DossierEtudeController {
                     .orElseGet(() -> ResponseEntity.noContent().build());
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.badRequest().body(Map.of("code", ex.getMessage()));
+        }
+    }
+
+    @PostMapping("/{id}/guest-links")
+    @RequirePermission("etude.update")
+    public ResponseEntity<?> createGuestLink(
+            @PathVariable UUID id, @Valid @RequestBody GuestLinkCreateDto body) {
+        try {
+            GuestLinkCreatedDto created = guestAccessService.create(id, body);
+            return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("code", ex.getMessage() != null ? ex.getMessage() : "etudes.guest.erreur"));
         }
     }
 

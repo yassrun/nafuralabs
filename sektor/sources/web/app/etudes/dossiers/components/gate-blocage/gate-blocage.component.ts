@@ -1,15 +1,16 @@
-import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 
 import type { ProblemeGate, ResultatGate } from '@app/etudes/models';
 
-const PREVIEW_LIMIT = 8;
+import { openGateProblemesDialog } from './gate-problemes-dialog.component';
 
 export type GatePresentation = 'soft' | 'hard' | 'ok' | 'hidden';
 
 /**
  * Bannière des gates — soft (incomplet), hard (blocage), ok (prêt).
- * Rendu seul de `GET /dossiers/{id}/gates` (clés i18n `etudes.gate.*`).
+ * Une ligne à l’écran ; le détail des erreurs s’ouvre en popup.
  */
 @Component({
   selector: 'app-gate-blocage',
@@ -20,6 +21,8 @@ export type GatePresentation = 'soft' | 'hard' | 'ok' | 'hidden';
   styleUrl: './gate-blocage.component.scss',
 })
 export class GateBlocageComponent {
+  private readonly dialog = inject(MatDialog);
+
   readonly resultat = input.required<ResultatGate | undefined>();
   /** soft = résumé neutre ; hard = liste bloquante ; ok = prêt ; hidden = rien. */
   readonly presentation = input<GatePresentation>('hard');
@@ -32,9 +35,6 @@ export class GateBlocageComponent {
   readonly verifier = output<void>();
   /** Soft résumé cliqué → focus premier nœud. */
   readonly focusResume = output<void>();
-
-  readonly expandAll = signal(false);
-  readonly softListeOuverte = signal(false);
 
   readonly problemes = computed(() => this.resultat()?.problemes ?? []);
 
@@ -80,7 +80,6 @@ export class GateBlocageComponent {
     if (this.mode() === 'soft') {
       const hasPoste = list.some((p) => !!p.noeudId);
       if (hasPoste) return 'etudes.gate.incomplet_cout';
-      // Alerte qualité seule (ex. trop d’estimés) — pas « postes à chiffrer ».
       return list[0]?.message ?? 'etudes.gate.incomplet_cout';
     }
     if (list.length === 0) return '';
@@ -101,28 +100,15 @@ export class GateBlocageComponent {
     return best;
   });
 
-  readonly showListe = computed(() => {
-    if (this.mode() === 'hard') return true;
-    if (this.mode() === 'soft') return this.softListeOuverte();
-    return false;
-  });
-
-  readonly problemesVisibles = computed(() => {
-    const list = this.problemes();
-    if (this.expandAll() || list.length <= PREVIEW_LIMIT) return list;
-    return list.slice(0, PREVIEW_LIMIT);
-  });
-
-  readonly resteCache = computed(() => Math.max(0, this.problemes().length - PREVIEW_LIMIT));
-
   readonly showPasserManuel = computed(
     () =>
       this.structureVerrouilleeAuto() && this.mode() === 'hard' && this.aDesProblemes(),
   );
 
-  onCorriger(p: ProblemeGate): void {
-    if (!p.noeudId) return;
-    this.corriger.emit(p);
+  openDetails(): void {
+    void openGateProblemesDialog(this.dialog, this.problemes()).then((picked) => {
+      if (picked?.noeudId) this.corriger.emit(picked);
+    });
   }
 
   onPasserManuel(): void {
@@ -135,16 +121,5 @@ export class GateBlocageComponent {
 
   onFocusResume(): void {
     this.focusResume.emit();
-    if (this.mode() === 'soft') {
-      this.softListeOuverte.set(true);
-    }
-  }
-
-  toggleSoftListe(): void {
-    this.softListeOuverte.update((v) => !v);
-  }
-
-  toggleExpand(): void {
-    this.expandAll.update((v) => !v);
   }
 }

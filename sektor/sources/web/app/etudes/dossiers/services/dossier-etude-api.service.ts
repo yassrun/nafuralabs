@@ -14,6 +14,7 @@ import type {
   TypeDossierDocument,
 } from '@app/etudes/models';
 import type { ImportNoeudPreview } from '../utils/bordereau-tree.util';
+import type { GuestLinkCreate, GuestLinkCreated } from './guest-access-api.service';
 
 export interface ExtractionJobDto {
   id: string;
@@ -713,6 +714,10 @@ export class DossierEtudeApiService extends FeatureApiService<
         this.resolveUrl(`${this.basePath}/${dossierId}/capitalisation`),
       ),
     );
+  }
+
+  createGuestLink(id: string, body: GuestLinkCreate): Promise<GuestLinkCreated> {
+    return this.post<GuestLinkCreated>(`${this.basePath}/${id}/guest-links`, body);
   }
 
   async capitalisationVerser(

@@ -190,6 +190,55 @@
   color: var(--nf-color-text-secondary);
 }
 
+.poste-drawer__guest-comments {
+  list-style: none;
+  margin: 0 0 0.85rem;
+  padding: 0;
+  display: grid;
+  gap: 0.65rem;
+
+  li {
+    padding: 0.55rem 0.65rem;
+    border: 1px solid var(--nf-color-border, #e2e8f0);
+    border-radius: 0.5rem;
+    background: var(--nf-color-bg-subtle, #f8fafc);
+  }
+
+  strong {
+    font-size: 0.8125rem;
+  }
+
+  time {
+    margin-left: 0.4rem;
+    font-size: 0.75rem;
+    color: var(--nf-color-text-secondary, #64748b);
+  }
+
+  p {
+    margin: 0.3rem 0 0;
+    font-size: 0.875rem;
+    white-space: pre-wrap;
+  }
+}
+
+.poste-drawer__guest-compose {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 0.55rem;
+  font-size: 0.8125rem;
+
+  textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.5rem 0.6rem;
+    border: 1px solid var(--nf-color-border, #cbd5e1);
+    border-radius: 0.45rem;
+    font: inherit;
+    resize: vertical;
+  }
+}
+
 .poste-drawer__fold .nf-comment-thread__title {
   display: none;
 }

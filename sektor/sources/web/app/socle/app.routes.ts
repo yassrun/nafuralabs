@@ -244,6 +244,22 @@ const ACTIVE_APP_ZONE_CONFIG = resolveApplicationZoneConfig(ACTIVE_APPLICATION_I
 export const APP_ROUTES = [
   ...ONBOARDING_V2_ROUTES,
   {
+    path: 'p/c/:token',
+    loadComponent: () =>
+      import('@app/etudes/dossiers/pages/guest-portal/guest-portal.page').then(
+        (m) => m.GuestPortalPage,
+      ),
+    data: { purpose: 'CLIENT_VIEW' },
+  },
+  {
+    path: 'p/f/:token',
+    loadComponent: () =>
+      import('@app/etudes/dossiers/pages/guest-portal/guest-portal.page').then(
+        (m) => m.GuestPortalPage,
+      ),
+    data: { purpose: 'FOURNISSEUR_UPLOAD' },
+  },
+  {
     path: 'invite/accept',
     loadComponent: () =>
       import('@app/socle/onboarding/onboarding-layout.component').then(

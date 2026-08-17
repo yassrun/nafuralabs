@@ -73,8 +73,23 @@
           </div>
         </div>
 
-        @if (showPrintBordereau() || showPrintSynthese() || showReouvrir() || showRefuser() || showMarquerPerdu() || showCta()) {
+        @if (showPartager() || showPrintBordereau() || showPrintSynthese() || showReouvrir() || showRefuser() || showMarquerPerdu() || showCta()) {
           <div class="dsh__actions">
+            @if (showPartager()) {
+              <button
+                type="button"
+                class="dsh__btn dsh__btn--ghost"
+                [disabled]="!canShare()"
+                [attr.title]="
+                  canShare()
+                    ? 'Créer un lien invité (24 h)'
+                    : 'Disponible quand l’étape Coût est verte — tous les postes chiffrés'
+                "
+                (click)="canShare() && emitAction('PARTAGER')"
+              >
+                Partager
+              </button>
+            }
             @if (showPrintBordereau()) {
               <button type="button" class="dsh__btn dsh__btn--ghost" (click)="emitAction('IMPRIMER_BORDEREAU')">
                 Imprimer bordereau

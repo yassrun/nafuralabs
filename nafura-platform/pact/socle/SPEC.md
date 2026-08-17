@@ -56,6 +56,7 @@ Pas de rôle `estimeur`, `conducteur`, ni aucun rôle métier d'un produit.
 | `P-DOCUMENT-MESURER` | documents | admin-tenant, utilisateur | — |
 | `P-IMPRESSION-RENDRE` | impression | admin-tenant, utilisateur | — |
 | `P-IMPRESSION-MODELE-LIRE` | impression | admin-tenant, utilisateur | — |
+| `P-IMPRESSION-MODELE-ECRIRE` | impression | admin-tenant | utilisateur |
 
 Le BC écrit « la transition exige `P-…` ». Il ne redéfinit pas les rôles.
 

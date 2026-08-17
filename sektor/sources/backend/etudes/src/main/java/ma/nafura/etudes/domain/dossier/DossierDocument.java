@@ -34,6 +34,7 @@ public class DossierDocument {
     public static final String TYPE_PLAN = "PLAN";
     public static final String TYPE_REGLEMENT = "REGLEMENT";
     public static final String TYPE_AUTRE = "AUTRE";
+    public static final String TYPE_DEVIS_FOURNISSEUR = "DEVIS_FOURNISSEUR";
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

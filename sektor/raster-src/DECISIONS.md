@@ -2,6 +2,8 @@
 
 > Jusqu’au CADRE. Le CADRE § Vocabulaire reprendra ces termes ; jusque-là c’est la loi des dossiers.
 > Pas dans `PACT_BLUEPRINT.md` (méthode, pas le produit).
+>
+> Produit études (cycle poste / articles / ouvrages, chrome) : [`DECISIONS-PRODUIT.md`](DECISIONS-PRODUIT.md) — avant SPEC.
 
 Gelé 14/08/2026.
 
@@ -12,7 +14,7 @@ Gelé 14/08/2026.
 ```text
 socle/            kernel app · ICE/RC (type) · approbations · analytics/pilotage
 catalogue/        articles · UoM · stock · mouvements · ouvrages / bibliothèque-prix
-etudes/           dossiers · devis · mètres · AO clients  — pas la bibliothèque
+etudes/           dossiers · devis · AO clients  — pas la bibliothèque · mètres à sortir (voir DECISIONS-PRODUIT)
 chantiers/
 marches/
 achats/           + fournisseurs

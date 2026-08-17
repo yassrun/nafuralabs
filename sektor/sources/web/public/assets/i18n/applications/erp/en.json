@@ -756,6 +756,8 @@
       "voir_dans_arbre": "Show in tree",
       "passer_manuel": "Switch to manual to fix",
       "voir_tout": "Show all",
+      "voir_details": "View details",
+      "details_titre": "Error details",
       "replier": "Collapse",
       "verifier": "Verify costing",
       "incomplet_cout": "costing incomplete — break down, lump-sum, or estimate remaining items.",

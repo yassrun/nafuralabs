@@ -1,0 +1,79 @@
+<div class="gp" [class.gp--client]="isClient() && snapshot() && !error() && !mismatch()">
+  <header class="gp__brand">
+    <div class="gp__logo-wrap">
+      <img class="gp__mark" src="/assets/branding/sektor-icon.svg" alt="" width="28" height="28" />
+      <div class="gp__wordmark">
+        <span class="gp__logo">Sektor</span>
+        <span class="gp__by">by nafuralabs</span>
+      </div>
+    </div>
+    @if (snapshot()?.tenantNom; as tenant) {
+      <p class="gp__tenant">{{ tenant }}</p>
+    }
+  </header>
+
+  @if (loading()) {
+    <p class="gp__status" role="status">Chargement…</p>
+  } @else if (error()) {
+    <section class="gp__card" aria-labelledby="gp-error-title">
+      <h1 id="gp-error-title">Lien invalide ou expiré</h1>
+      <p>{{ error() }}</p>
+    </section>
+  } @else if (mismatch()) {
+    <section class="gp__card" aria-labelledby="gp-mismatch-title">
+      <h1 id="gp-mismatch-title">Lien invalide ou expiré</h1>
+      <p>Ce lien n’est pas destiné à cette page.</p>
+    </section>
+  } @else if (snapshot(); as s) {
+    <section class="gp__card gp__intro">
+      <h1>{{ s.numero }} — {{ s.objet }}</h1>
+      @if (s.clientNom) {
+        <p class="gp__meta">{{ s.clientNom }}</p>
+      }
+      @if (isClient() && s.totalHt != null) {
+        <p class="gp__total">Total HT {{ s.totalHt | mad }}</p>
+      }
+      @if (isClient()) {
+        <p class="gp__hint">Cliquez un article pour voir la décomposition, les frais généraux, la marge et commenter.</p>
+      }
+    </section>
+
+    @if (isClient()) {
+      <section class="gp__workspace" aria-label="Bordereau chiffré">
+        @if (!hierarchie().length) {
+          <p class="gp__status">Aucun bordereau à afficher.</p>
+        } @else {
+          <app-bordereau-arbre
+            [externalHierarchie]="hierarchie()"
+            [modifiable]="false"
+            [selectionEnabled]="true"
+            [openOnClick]="true"
+            [selectedKey]="selectedKey()"
+            (posteSelect)="onSelectPoste($event)"
+          />
+        }
+      </section>
+    } @else {
+      <section class="gp__card" aria-labelledby="gp-upload-title">
+        <h2 id="gp-upload-title">Déposer votre devis</h2>
+        @if (uploaded()) {
+          <p class="gp__ok" role="status">Devis reçu. Merci.</p>
+        } @else {
+          <p>Envoyez votre offre (PDF ou tableur). Zenith Studio la recevra sur ce dossier.</p>
+          @if (uploadError()) {
+            <p class="gp__err" role="alert">{{ uploadError() }}</p>
+          }
+          <label class="gp__file">
+            <input
+              type="file"
+              accept=".pdf,.xlsx,.xls,.doc,.docx,application/pdf"
+              [disabled]="uploading()"
+              (change)="onFile($event)"
+            />
+            <span>{{ uploading() ? 'Envoi…' : 'Choisir un fichier' }}</span>
+          </label>
+        }
+      </section>
+    }
+  }
+</div>

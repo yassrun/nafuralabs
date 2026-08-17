@@ -84,7 +84,7 @@ export class PiecesMarcheComponent {
     '.pdf,.xlsx,.xls,.csv,.doc,.docx,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
   readonly typesAjout = TYPES_DOSSIER_DOCUMENT.filter(
-    (t) => t.value !== 'CPS_ET_BORDEREAU',
+    (t) => t.value !== 'CPS_ET_BORDEREAU' && t.value !== 'DEVIS_FOURNISSEUR',
   );
 
   readonly pieces = signal<DossierDocument[]>([]);

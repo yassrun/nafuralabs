@@ -15,6 +15,8 @@ REGISTRY="${REGISTRY:-${REGISTRY_HOST}/nafura}"
 BUILD_IMAGES="${BUILD_IMAGES:-false}"
 PUSH_IMAGES="${PUSH_IMAGES:-false}"
 RESET_DB="${RESET_DB:-false}"
+# front = image web only ; back = backend (+ lifecycle Sektor) ; full = tout.
+IMAGE_SCOPE="${IMAGE_SCOPE:-full}"
 REGISTRY_USER="${REGISTRY_USER:-nafura}"
 REGISTRY_PASS="${REGISTRY_PASS:-}"
 SECRETS_FILE="${SECRETS_FILE:-$ROOT/nafura-platform/ops/secrets/nafura.secrets}"
@@ -100,6 +102,36 @@ image_ref() {
   fi
 }
 
+# Prod push : REGISTRY_PASS, sinon le secret k8s `nafura-registry` déjà sur le cluster.
+ensure_registry_pass() {
+  [[ -n "$REGISTRY_PASS" ]] && return 0
+  uses_remote_registry || return 0
+  local ns raw
+  ns="$(infra_namespace_for_env "$ENV")"
+  raw="$(KUBECTL get secret nafura-registry -n "$ns" -o jsonpath='{.data.\.dockerconfigjson}' 2>/dev/null || true)"
+  if [[ -z "$raw" ]]; then
+    echo "ERROR: REGISTRY_PASS unset and secret nafura-registry missing in $ns" >&2
+    exit 1
+  fi
+  REGISTRY_PASS="$(printf '%s' "$raw" | python3 -c '
+import sys, json, base64
+cfg = json.loads(base64.b64decode(sys.stdin.read().strip()))
+for auth in (cfg.get("auths") or {}).values():
+    pwd = auth.get("password") or ""
+    if not pwd and auth.get("auth"):
+        dec = base64.b64decode(auth["auth"]).decode()
+        pwd = dec.split(":", 1)[1] if ":" in dec else ""
+    if pwd:
+        print(pwd)
+        break
+' 2>/dev/null || true)"
+  if [[ -z "$REGISTRY_PASS" ]]; then
+    echo "ERROR: could not decode registry password from nafura-registry (install python3, or set REGISTRY_PASS)" >&2
+    exit 1
+  fi
+  echo "REGISTRY_PASS taken from cluster secret nafura-registry (len=${#REGISTRY_PASS})"
+}
+
 usage() {
   cat <<EOF
 Usage: ENV=staging|prod|demo $0 <command> [args]
@@ -119,8 +151,8 @@ Cluster / infra (once per env, or after clean-env):
   preflight                  Check injector, namespaces, optional images
 
 Images (local tags on staging, private registry on prod/demo):
-  build-images [app-id]      Backend + web (+ keycloak if sektor/erp)
-  push-images  [app-id]      Push to REGISTRY (prod/demo; needs REGISTRY_PASS)
+  build-images [app-id]      Images for IMAGE_SCOPE (front|back|full, default full)
+  push-images  [app-id]      Push to REGISTRY (prod/demo; REGISTRY_PASS or cluster secret)
   build-push   [app-id]      build-images + push-images
 
 Database:
@@ -139,7 +171,7 @@ Workflows:
   onboard-app      <app-id>   First time: provision-db ? migrate ? deploy
   release-app      <app-id>   migrate ? deploy-backend ? deploy-frontend
   release-backend  <app-id>   migrate ? deploy-backend
-  release-frontend <app-id>   deploy-frontend only
+  release-frontend <app-id>   [build web only] + deploy-frontend
 
 Cycle de vie (préférer Make, depuis la racine du repo) :
   make -C nafura-platform/ops dev-up  SCOPE=front|back|full   # process locaux → infra staging
@@ -150,10 +182,11 @@ Cycle de vie (préférer Make, depuis la racine du repo) :
 
 Flags (env vars):
   KUBE_CONTEXT=<name>       kubectl context (e.g. nafura-vps-prod, docker-desktop)
-  BUILD_IMAGES=true          With release-app, build images first
-  PUSH_IMAGES=true           With release-app, push to REGISTRY
+  BUILD_IMAGES=true          With release-*, build images first
+  PUSH_IMAGES=true           With release-*, push to REGISTRY
+  IMAGE_SCOPE=front|back|full  What to build (release-frontend forces front)
   RESET_DB=true              With reset-app, drop and recreate database
-  REGISTRY_PASS=…            Required for prod push / make -C nafura-platform/ops prod-up
+  REGISTRY_PASS=…            Prod push ; if empty, read cluster secret nafura-registry
 
 Examples ? new Docker Desktop cluster:
   ENV=staging $0 clean-env
@@ -400,10 +433,7 @@ ensure_registry_pull_secret() {
   if [[ "$ENV" != "prod" && "$ENV" != "demo" ]]; then
     return 0
   fi
-  if [[ -z "$REGISTRY_PASS" ]]; then
-    echo "WARN: REGISTRY_PASS not set ? skip imagePullSecret for $ns" >&2
-    return 0
-  fi
+  ensure_registry_pass
   KUBECTL create secret docker-registry nafura-registry     --docker-server="$REGISTRY_HOST"     --docker-username="$REGISTRY_USER"     --docker-password="$REGISTRY_PASS"     -n "$ns" --dry-run=client -o yaml | KUBECTL apply -f -
   KUBECTL patch serviceaccount default -n "$ns"     -p '{"imagePullSecrets":[{"name":"nafura-registry"}]}' 2>/dev/null || true
 }
@@ -557,47 +587,49 @@ preflight() {
   echo "=== Preflight done ==="
 }
 
-build_sektor_images() {
-  local tag
+build_sektor_web_image() {
+  local tag web_img
   tag="$(image_tag_for_env)"
-  local backend_img web_img keycloak_img lifecycle_img
-  backend_img="$(image_ref sektor-btp-backend "$tag")"
   web_img="$(image_ref sektor-btp-web "$tag")"
-  keycloak_img="$(image_ref nafura-keycloak "$tag")"
-  lifecycle_img="$(image_ref nafura-lifecycle "$tag")"
-
-  echo "Building backend ? $backend_img"
-  (cd "$ROOT/sektor/sources/backend" && "$GRADLEW_SEKTOR" :sektor:app:bootJar --no-daemon)
-  docker build -t "$backend_img" -f "$ROOT/sektor/ops/Dockerfile.jar" \
-    "$ROOT/sektor/sources/backend/app/build/libs"
-
-  echo "Building frontend ? $web_img"
+  echo "Building frontend -> $web_img"
   case "$ENV" in
     staging) (cd "$ROOT/sektor/sources/web" && npm run build:staging) ;;
     *) (cd "$ROOT/sektor/sources/web" && npm run build:prod) ;;
   esac
   docker build -t "$web_img" -f "$ROOT/sektor/ops/Dockerfile.web" "$ROOT"
+}
 
-  echo "Building keycloak ? $keycloak_img"
-  docker build -t "$keycloak_img" -f "$ROOT/nafura-platform/ops/keycloak/Dockerfile" "$ROOT/nafura-platform/ops/keycloak"
+build_sektor_backend_images() {
+  local tag backend_img lifecycle_img
+  tag="$(image_tag_for_env)"
+  backend_img="$(image_ref sektor-btp-backend "$tag")"
+  lifecycle_img="$(image_ref nafura-lifecycle "$tag")"
 
-  echo "Building lifecycle ? $lifecycle_img"
+  echo "Building backend -> $backend_img"
+  (cd "$ROOT/sektor/sources/backend" && "$GRADLEW_SEKTOR" :sektor:app:bootJar --no-daemon)
+  docker build -t "$backend_img" -f "$ROOT/sektor/ops/Dockerfile.jar" \
+    "$ROOT/sektor/sources/backend/app/build/libs"
+
+  echo "Building lifecycle -> $lifecycle_img"
   (cd "$ROOT/nafura-platform/ops/lifecycle" && "$GRADLEW_PLATFORM" -p "$ROOT/nafura-platform/ops/lifecycle" collectMigrations -PappId=sektor-btp --no-daemon)
   docker build -t "$lifecycle_img" -f "$ROOT/nafura-platform/ops/lifecycle/Dockerfile" "$ROOT/nafura-platform/ops/lifecycle"
+}
 
+build_sektor_images() {
+  local tag keycloak_img
+  tag="$(image_tag_for_env)"
+  keycloak_img="$(image_ref nafura-keycloak "$tag")"
+  build_sektor_backend_images
+  build_sektor_web_image
+  echo "Building keycloak -> $keycloak_img"
+  docker build -t "$keycloak_img" -f "$ROOT/nafura-platform/ops/keycloak/Dockerfile" "$ROOT/nafura-platform/ops/keycloak"
   echo "Build complete."
 }
 
-build_venue_catalog_images() {
-  local tag
+build_venue_catalog_web_image() {
+  local tag web_img
   tag="$(image_tag_for_env)"
-  local backend_img web_img
-  backend_img="$(image_ref venue-catalog-backend "$tag")"
   web_img="$(image_ref venue-catalog-web "$tag")"
-
-  echo "Building backend -> $backend_img"
-  docker build -t "$backend_img" -f "$ROOT/venue-catalog/Dockerfile" "$ROOT"
-
   echo "Building web (Angular)…"
   case "$ENV" in
     staging) (cd "$ROOT/venue-catalog/sources/web" && npm run build:staging) ;;
@@ -605,7 +637,19 @@ build_venue_catalog_images() {
   esac
   echo "Building web image -> $web_img"
   docker build -t "$web_img" -f "$ROOT/venue-catalog/Dockerfile.web" "$ROOT"
+}
 
+build_venue_catalog_backend_image() {
+  local tag backend_img
+  tag="$(image_tag_for_env)"
+  backend_img="$(image_ref venue-catalog-backend "$tag")"
+  echo "Building backend -> $backend_img"
+  docker build -t "$backend_img" -f "$ROOT/venue-catalog/Dockerfile" "$ROOT"
+}
+
+build_venue_catalog_images() {
+  build_venue_catalog_backend_image
+  build_venue_catalog_web_image
   echo "Build complete (backend + web)."
 }
 
@@ -624,10 +668,25 @@ build_vitrine_images() {
 
 build_images() {
   local app_id="${1:-sektor-btp}"
+  local scope="${2:-$IMAGE_SCOPE}"
   require_env
   case "$app_id" in
-    sektor-btp|erp) build_sektor_images ;;
-    venue-catalog) build_venue_catalog_images ;;
+    sektor-btp|erp)
+      case "$scope" in
+        front) build_sektor_web_image ;;
+        back) build_sektor_backend_images ;;
+        full) build_sektor_images ;;
+        *) echo "ERROR: IMAGE_SCOPE must be front|back|full (got: $scope)" >&2; exit 1 ;;
+      esac
+      ;;
+    venue-catalog)
+      case "$scope" in
+        front) build_venue_catalog_web_image ;;
+        back) build_venue_catalog_backend_image ;;
+        full) build_venue_catalog_images ;;
+        *) echo "ERROR: IMAGE_SCOPE must be front|back|full (got: $scope)" >&2; exit 1 ;;
+      esac
+      ;;
     mbs-studio|corporate) build_vitrine_images "$app_id" ;;
     *)
       echo "ERROR: build-images not implemented for $app_id" >&2
@@ -638,28 +697,45 @@ build_images() {
 
 push_images() {
   local app_id="${1:-sektor-btp}"
+  local scope="${2:-$IMAGE_SCOPE}"
   require_env
   if ! uses_remote_registry; then
     echo "staging uses local Docker tags ? skip push (set ENV=prod for VPS registry)"
     return 0
   fi
-  if [[ -n "$REGISTRY_PASS" ]]; then
-    echo "$REGISTRY_PASS" | docker login "$REGISTRY_HOST" -u "$REGISTRY_USER" --password-stdin
-  else
-    echo "WARN: REGISTRY_PASS not set ? docker login may fail" >&2
-  fi
+  ensure_registry_pass
+  echo "$REGISTRY_PASS" | docker login "$REGISTRY_HOST" -u "$REGISTRY_USER" --password-stdin
   local tag
   tag="$(image_tag_for_env)"
   case "$app_id" in
     sektor-btp|erp)
-      docker push "$(image_ref sektor-btp-backend "$tag")"
-      docker push "$(image_ref sektor-btp-web "$tag")"
-      docker push "$(image_ref nafura-keycloak "$tag")"
-      docker push "$(image_ref nafura-lifecycle "$tag")"
+      case "$scope" in
+        front)
+          docker push "$(image_ref sektor-btp-web "$tag")"
+          ;;
+        back)
+          docker push "$(image_ref sektor-btp-backend "$tag")"
+          docker push "$(image_ref nafura-lifecycle "$tag")"
+          ;;
+        full)
+          docker push "$(image_ref sektor-btp-backend "$tag")"
+          docker push "$(image_ref sektor-btp-web "$tag")"
+          docker push "$(image_ref nafura-keycloak "$tag")"
+          docker push "$(image_ref nafura-lifecycle "$tag")"
+          ;;
+        *) echo "ERROR: IMAGE_SCOPE must be front|back|full (got: $scope)" >&2; exit 1 ;;
+      esac
       ;;
     venue-catalog)
-      docker push "$(image_ref venue-catalog-backend "$tag")"
-      docker push "$(image_ref venue-catalog-web "$tag")"
+      case "$scope" in
+        front) docker push "$(image_ref venue-catalog-web "$tag")" ;;
+        back) docker push "$(image_ref venue-catalog-backend "$tag")" ;;
+        full)
+          docker push "$(image_ref venue-catalog-backend "$tag")"
+          docker push "$(image_ref venue-catalog-web "$tag")"
+          ;;
+        *) echo "ERROR: IMAGE_SCOPE must be front|back|full (got: $scope)" >&2; exit 1 ;;
+      esac
       ;;
     mbs-studio|corporate)
       docker push "$(image_ref "${app_id}-web" "$tag")"
@@ -874,9 +950,10 @@ onboard_app() {
 
 release_backend() {
   local app_id="${1:?app id required}"
+  IMAGE_SCOPE=back
   if [[ "$BUILD_IMAGES" == "true" ]]; then
-    build_images "$app_id"
-    [[ "$PUSH_IMAGES" == "true" ]] && push_images "$app_id"
+    build_images "$app_id" back
+    [[ "$PUSH_IMAGES" == "true" ]] && push_images "$app_id" back
   fi
   migrate_app "$app_id"
   deploy_backend "$app_id"
@@ -885,9 +962,10 @@ release_backend() {
 
 release_frontend() {
   local app_id="${1:?app id required}"
+  IMAGE_SCOPE=front
   if [[ "$BUILD_IMAGES" == "true" ]]; then
-    build_images "$app_id"
-    [[ "$PUSH_IMAGES" == "true" ]] && push_images "$app_id"
+    build_images "$app_id" front
+    [[ "$PUSH_IMAGES" == "true" ]] && push_images "$app_id" front
   fi
   deploy_frontend "$app_id"
   echo "Frontend release complete."
@@ -900,8 +978,9 @@ release_app() {
     return 0
   fi
   if [[ "$BUILD_IMAGES" == "true" ]]; then
-    build_images "$app_id"
-    [[ "$PUSH_IMAGES" == "true" ]] && push_images "$app_id"
+    IMAGE_SCOPE=full
+    build_images "$app_id" full
+    [[ "$PUSH_IMAGES" == "true" ]] && push_images "$app_id" full
   fi
   echo "Release $app_id: migrate ? backend ? frontend"
   provision_db "$app_id"

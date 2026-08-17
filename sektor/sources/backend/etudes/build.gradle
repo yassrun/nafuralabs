@@ -10,7 +10,9 @@ dependencies {
     implementation project(':sektor:socle')
     implementation 'ma.nafuralabs:framework:0.1.0-SNAPSHOT'
     implementation 'ma.nafuralabs:authorization:0.1.0-SNAPSHOT'
+    implementation 'ma.nafuralabs:tenancy:0.1.0-SNAPSHOT'
     implementation 'ma.nafuralabs:doc-manager:0.1.0-SNAPSHOT'
+    implementation 'ma.nafuralabs:comment:0.1.0-SNAPSHOT'
     implementation 'ma.nafuralabs:doc-extractor:0.1.0-SNAPSHOT'
     // Lecture des classeurs comme grille de cellules (XlsxGridSource).
     implementation 'org.apache.poi:poi:5.2.5'

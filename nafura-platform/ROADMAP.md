@@ -9,14 +9,17 @@
 Trois dettes de contrat sur des BC déjà pactés. Chacune tient en un Change, et chacune
 **tranche une question** plutôt que d'ajouter du comportement.
 
-1. **impression** — `CH-02-EVOL-sans-facture`
-   Sortir `PrintDocument`, la TVA et les lignes du jar : le rendu reçoit un type **opaque**.
-   Sektor garde la forme facture.
+1. **impression** — `CH-03-EVOL-admin-et-rendu`
+   Admin des modèles + visualisation → PDF. Preuves : devis et bordereau (BPD).
+   Engin platform ; le produit fournit les HTML, n'imprime pas.
 
-2. **documents** — `CH-09-EVOL-archive`
+2. **impression** — `CH-02-EVOL-sans-facture` — **fait** (PLT-94…96)
+   Sortir `PrintDocument`, la TVA et les lignes du jar : le rendu reçoit un type **opaque**.
+
+3. **documents** — `CH-09-EVOL-archive`
    « archivé » : transition d'un cycle de vie, ou reste à jeter. Le spec tranche, une seule vérité survit.
 
-3. **document-extraction** — `CH-03-EVOL-hors-spec`
+4. **document-extraction** — `CH-03-EVOL-hors-spec`
    `builder` et `workflow` : dans la SPEC avec leurs règles, ou hors du BC. Le code suit.
 
 <!-- borne -->

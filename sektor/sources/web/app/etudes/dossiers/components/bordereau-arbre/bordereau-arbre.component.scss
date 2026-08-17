@@ -1,7 +1,7 @@
 :host {
   display: flex;
   flex-direction: column;
-  min-height: 0;
+  min-height: 16rem;
   flex: 1 1 auto;
 }
 
@@ -11,7 +11,7 @@
   background: transparent;
   padding: 0;
   flex: 1 1 auto;
-  min-height: 0;
+  min-height: 16rem;
   display: flex;
   flex-direction: column;
 }
@@ -154,7 +154,7 @@
 .arbre__table {
   min-width: 0;
   flex: 1 1 auto;
-  min-height: 0;
+  min-height: 14rem;
   /* Le scroll vit dans nf-tree-table — pas de 2e conteneur overflow. */
   overflow: hidden;
   display: flex;
@@ -282,7 +282,7 @@
     border-radius: 8px;
     background: var(--nf-color-surface, #fff);
     flex: 1 1 auto;
-    min-height: 0;
+    min-height: 12rem;
     height: 100%;
     max-height: 100%;
   }

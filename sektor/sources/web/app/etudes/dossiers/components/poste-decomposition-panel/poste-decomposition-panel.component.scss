@@ -218,6 +218,21 @@
   gap: 0.5rem;
 }
 
+.poste__descriptif-cps {
+  margin: 0;
+  max-height: 16rem;
+  overflow: auto;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--nf-color-border, #e2e8f0);
+  border-radius: 8px;
+  background: var(--nf-color-bg-subtle, #f8fafc);
+  white-space: pre-wrap;
+  font: inherit;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--nf-color-text-primary, #111827);
+}
+
 .poste__section-actions--fold {
   display: flex;
   justify-content: flex-end;

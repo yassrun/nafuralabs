@@ -205,6 +205,11 @@
     border-color: var(--nf-color-border);
     color: var(--nf-color-text-secondary);
   }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
 }
 
 :host.dsh-host--compact .dsh {
@@ -220,7 +225,7 @@
 }
 
 :host.dsh-host--compact .dsh__actions {
-  display: none;
+  display: flex;
 }
 
 :host.dsh-host--compact .dsh__kpis {

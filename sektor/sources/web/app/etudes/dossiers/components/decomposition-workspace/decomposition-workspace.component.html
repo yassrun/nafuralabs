@@ -18,35 +18,13 @@
             </span>
           }
         </div>
-        @if (peutFiltrerAlertes()) {
-          <label class="workspace__filtre">
-            <input
-              type="checkbox"
-              [ngModel]="filtreAlertes()"
-              (ngModelChange)="filtreAlertes.set($event)"
-            />
-            Afficher les alertes
-            @if (filtreAlertes()) {
-              <span class="workspace__filtre-count">
-                ({{ filtreAlerteCount() }})
-              </span>
-            }
-          </label>
+        @if (alertesConsultation().length > 0) {
+          <button type="button" class="workspace__details" (click)="ouvrirDetailsAlertes()">
+            {{ 'etudes.gate.voir_details' | translate }}
+            <span class="workspace__filtre-count">({{ alertesConsultation().length }})</span>
+          </button>
         }
       </div>
-    }
-
-    @if (filtreAlertes() && alertesConsultation().length > 0) {
-      <ul class="workspace__alertes">
-        @for (a of alertesConsultation(); track a.noeudId ?? a.message) {
-          <li>
-            @if (a.codeArticle) {
-              <span class="code">{{ a.codeArticle }}</span>
-            }
-            <span>{{ a.message | translate }}</span>
-          </li>
-        }
-      </ul>
     }
 
     <label class="workspace__search">
@@ -64,7 +42,7 @@
       [modifiable]="modifiable()"
       [selectionEnabled]="true"
       [selectedKey]="selectedKey()"
-      [focusNoeudId]="focusNoeudId()"
+      [focusNoeudId]="arbreFocusId()"
       [expandArticleIds]="expandArticleIds()"
       [searchQuery]="search()"
       [reloadToken]="treeReloadToken()"

@@ -540,7 +540,8 @@ export type TypeDossierDocument =
   | 'CPT'
   | 'PLAN'
   | 'REGLEMENT'
-  | 'AUTRE';
+  | 'AUTRE'
+  | 'DEVIS_FOURNISSEUR';
 
 export const TYPES_DOSSIER_DOCUMENT: { value: TypeDossierDocument; label: string }[] = [
   { value: 'BORDEREAU', label: 'Bordereau (BPU / DQE)' },
@@ -550,6 +551,7 @@ export const TYPES_DOSSIER_DOCUMENT: { value: TypeDossierDocument; label: string
   { value: 'PLAN', label: 'Plans' },
   { value: 'REGLEMENT', label: 'Règlement de consultation' },
   { value: 'AUTRE', label: 'Autre pièce' },
+  { value: 'DEVIS_FOURNISSEUR', label: 'Devis fournisseur' },
 ];
 
 export interface DossierDocument {

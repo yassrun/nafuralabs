@@ -25,6 +25,7 @@ import { resolveOrigineCout } from '../../utils/poste-chiffrage-mode.util';
 import { DpuApiService } from '@app/catalogue/bibliotheque-prix/services/dpu-api.service';
 import { DpgfApiService } from '../../../metres/services/dpgf-api.service';
 import { BordereauArbreComponent } from '../bordereau-arbre/bordereau-arbre.component';
+import { openGateProblemesDialog } from '../gate-blocage/gate-problemes-dialog.component';
 import {
   PosteChiffrageDrawerComponent,
   type PosteChiffrageDrawerData,
@@ -63,7 +64,7 @@ export class DecompositionWorkspaceComponent {
   readonly selectedKey = signal<string | null>(null);
   readonly search = signal('');
   readonly treeReloadToken = signal(0);
-  readonly filtreAlertes = signal(false);
+  readonly alerteFocusId = signal<string | null>(null);
   readonly totalComposants = signal(0);
   readonly consultes = signal(0);
   readonly articlesAlerteIds = signal<string[]>([]);
@@ -104,6 +105,8 @@ export class DecompositionWorkspaceComponent {
   );
 
   /** Articles gate à révéler dans l’arbre (expand ciblé, max perf). */
+  readonly arbreFocusId = computed(() => this.alerteFocusId() ?? this.focusNoeudId());
+
   readonly expandArticleIds = computed(() => {
     const gate = this.consultationGate();
     if (!gate) return [] as string[];
@@ -118,13 +121,6 @@ export class DecompositionWorkspaceComponent {
     return ids;
   });
 
-  /** Compte affiché à côté de « Afficher les alertes » — ne filtre plus l’arbre. */
-  readonly filtreAlerteCount = computed(() => {
-    const fromCouverture = this.articlesAlerteIds();
-    if (fromCouverture.length) return fromCouverture.length;
-    return this.alertesConsultation().filter((a) => !!a.noeudId).length;
-  });
-
   constructor() {
     effect(() => {
       const id = this.dpgfId();
@@ -134,10 +130,12 @@ export class DecompositionWorkspaceComponent {
       if (id) untracked(() => void this.refreshCouverture(id, token));
     });
 
-    effect(() => {
-      if (!this.peutFiltrerAlertes() && this.filtreAlertes()) {
-        this.filtreAlertes.set(false);
-      }
+  }
+
+  ouvrirDetailsAlertes(): void {
+    void openGateProblemesDialog(this.dialog, this.alertesConsultation()).then((picked) => {
+      if (!picked?.noeudId) return;
+      this.alerteFocusId.set(picked.noeudId);
     });
   }
 

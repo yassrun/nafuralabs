@@ -30,48 +30,19 @@
             {{ 'etudes.gate.verifier' | translate }}
           </button>
         }
-        <button type="button" class="gate-blocage__more" (click)="toggleSoftListe()">
-          @if (softListeOuverte()) {
-            {{ 'etudes.gate.replier' | translate }}
-          } @else {
-            {{ 'etudes.gate.voir_tout' | translate }} ({{ problemes().length }})
-          }
+      }
+
+      @if (mode() !== 'ok' && aDesProblemes()) {
+        <button type="button" class="gate-blocage__more" (click)="openDetails()">
+          {{ 'etudes.gate.voir_details' | translate }}
         </button>
       }
 
       @if (showPasserManuel()) {
         <button type="button" class="gate-blocage__cta" (click)="onPasserManuel()">
-          {{ 'etudes.gate.passer_manuel' | translate }} ({{ problemes().length }})
+          {{ 'etudes.gate.passer_manuel' | translate }}
         </button>
       }
     </div>
-
-    @if (showListe()) {
-      <ul class="gate-blocage__liste">
-        @for (p of problemesVisibles(); track p.noeudId ?? p.message + p.codeArticle) {
-          <li class="gate-blocage__item">
-            @if (p.codeArticle) {
-              <span class="gate-blocage__code">{{ p.codeArticle }}</span>
-            }
-            <span class="gate-blocage__libelle">{{ p.libelle || (p.message | translate) }}</span>
-            @if (p.noeudId) {
-              <button type="button" class="gate-blocage__link" (click)="onCorriger(p)">
-                {{ 'etudes.gate.voir_dans_arbre' | translate }}
-              </button>
-            }
-          </li>
-        }
-      </ul>
-
-      @if (resteCache() > 0) {
-        <button type="button" class="gate-blocage__more" (click)="toggleExpand()">
-          @if (expandAll()) {
-            {{ 'etudes.gate.replier' | translate }}
-          } @else {
-            {{ 'etudes.gate.voir_tout' | translate }} ({{ resteCache() }})
-          }
-        </button>
-      }
-    }
   </div>
 }

@@ -1,5 +1,6 @@
 package ma.nafura.etudes.repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -15,4 +16,6 @@ public interface PrixDpuRepository extends JpaRepository<PrixDpu, UUID> {
     Optional<PrixDpu> findByDpgfNoeudIdAndTenantId(UUID dpgfNoeudId, UUID tenantId);
 
     List<PrixDpu> findByTenantIdAndOuvrageIdOrderByUpdatedAtDesc(UUID tenantId, UUID ouvrageId);
+
+    List<PrixDpu> findByTenantIdAndDpgfNoeudIdIn(UUID tenantId, Collection<UUID> dpgfNoeudIds);
 }

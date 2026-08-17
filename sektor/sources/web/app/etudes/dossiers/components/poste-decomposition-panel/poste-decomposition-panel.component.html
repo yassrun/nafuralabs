@@ -56,9 +56,19 @@
 
     <section
       class="poste__commentaire"
-      [class.poste__commentaire--secondaire]="estEstime()"
+      [class.poste__commentaire--secondaire]="estEstime() && !guestReadOnly()"
       aria-labelledby="descriptif-poste-title"
     >
+      @if (guestReadOnly()) {
+        <div class="poste__section-head">
+          <h4 id="descriptif-poste-title">Descriptif CPS</h4>
+        </div>
+        @if (descriptifGuest()) {
+          <pre class="poste__descriptif-cps">{{ descriptifGuest() }}</pre>
+        } @else {
+          <p class="poste__etat">Aucun descriptif CPS pour cet article.</p>
+        }
+      } @else {
       @if (estEstime()) {
         <details class="poste__descriptif-fold">
           <summary id="descriptif-poste-title">Descriptif technique</summary>
@@ -141,6 +151,7 @@
           [ngModel]="commentaire()"
           (ngModelChange)="onCommentaireChange($event)"
         ></textarea>
+      }
       }
     </section>
 
