@@ -1,5 +1,4 @@
 id	status	priority	context	assignee	gate	type	agent_type	sprint	project	lot	souslot	title
-PLT-125	doing	P2	nafura	agent	none	tech	exec	2026-W34	nafura-platform	approbation	CH-01-TECHNICAL-plier	Plier l arbre approbation
 RAS-102	todo	P1	nafura	agent	none	spec	spec		raster	work	CH-04-CORRECTION-sans-sprint	SPEC + geler AC — retirer le sprint du contrat
 RAS-103	todo	P1	nafura	agent	none	tech	exec		raster	work	CH-04-CORRECTION-sans-sprint	Retirer le champ, la commande et SPRINT.md
 PLT-130	todo	P2	nafura	agent	none	spec	spec		nafura-platform	conversation	CH-01-TECHNICAL-plier	SPEC + geler AC — plier conversation

@@ -9,9 +9,6 @@
 
 ## nafura-platform
 
-- `approbation` lot
-  - · `CH-01-TECHNICAL-plier` sous-lot
-    - ▸ `PLT-125` tech — Plier l arbre approbation
 - `conversation` lot
   - · `CH-01-TECHNICAL-plier` sous-lot
     - · `PLT-130` spec — SPEC + geler AC — plier conversation
@@ -50,4 +47,4 @@
 
 ---
 
-**17 live · 2 projets**
+**16 live · 2 projets**
