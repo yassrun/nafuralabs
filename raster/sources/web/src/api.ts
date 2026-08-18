@@ -7,7 +7,6 @@ export type Task = {
   gate: string;
   type: string;
   agent_type: string;
-  sprint: string;
   /** Chapeaux derives du CHEMIN — lot et sous-lot sont des dossiers, pas des tickets. */
   lot: string;
   souslot: string;
@@ -54,7 +53,6 @@ export type ViewId =
   | "encours"
   | "inbox"
   | "backlog"
-  | "sprint"
   | "done-agent";
 
 const glyph: Record<string, string> = {
@@ -146,7 +144,7 @@ async function json<T>(url: string, init?: RequestInit): Promise<T> {
 type Mutation = { tasks: Task[]; ready: Ready[]; lines: string[] };
 
 export const api = {
-  meta: () => json<{ sprint: string; projects: string[] }>("/api/meta"),
+  meta: () => json<{ projects: string[] }>("/api/meta"),
   tasks: () => json<{ tasks: Task[] }>("/api/tasks"),
   ready: () => json<{ ready: Ready[] }>("/api/ready"),
   inbox: () => json<{ lines: string[] }>("/api/inbox"),
@@ -161,18 +159,13 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ line, project, target }),
     }),
-  patchTask: (id: string, body: { status?: string; sprint?: string }) =>
+  patchTask: (id: string, body: { status?: string }) =>
     json<Mutation>(`/api/tasks/${encodeURIComponent(id)}`, {
       method: "PATCH",
       body: JSON.stringify(body),
     }),
   deleteTask: (id: string) =>
     json<Mutation>(`/api/tasks/${encodeURIComponent(id)}`, { method: "DELETE" }),
-  commitSprint: (id: string) =>
-    json<Mutation & { sprint: string }>(
-      `/api/tasks/${encodeURIComponent(id)}/commit-sprint`,
-      { method: "POST", body: "{}" }
-    ),
   running: () =>
     json<{ running: Lance[]; recent: Lance[]; spawnPret: boolean }>("/api/running"),
   /** Lance un orchestrateur sur un lot. Refuse sans RASTER_AGENT_CMD. */

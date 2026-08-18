@@ -9,7 +9,6 @@ assignee: agent
 gate: none
 blocked_by: [PLT-104]
 tags: [platform, commentaire]
-sprint: 2026-W34
 ---
 
 # Preuves — baseline commentaire

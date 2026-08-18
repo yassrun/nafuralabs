@@ -12,10 +12,10 @@ import { fileURLToPath } from "node:url";
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 
 const ROOTS = [
-  "nafura-platform/sources/backend/features/ai/ai-conversation/src/main",
-  "nafura-platform/sources/backend/features/ai/ai-agent-api/src/main",
-  "nafura-platform/sources/backend/features/ai/ai-agent-runtime/src/main",
-  "nafura-platform/sources/web/features/ai/ai-conversation",
+  "nafura-platform/sources/backend/conversation/ai-conversation/src/main",
+  "nafura-platform/sources/backend/conversation/ai-agent-api/src/main",
+  "nafura-platform/sources/backend/conversation/ai-agent-runtime/src/main",
+  "nafura-platform/sources/web/app/conversation",
 ];
 
 function walk(target, acc = []) {

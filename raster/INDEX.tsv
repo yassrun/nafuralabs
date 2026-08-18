@@ -1,17 +1,1 @@
-id	status	priority	context	assignee	gate	type	agent_type	sprint	project	lot	souslot	title
-RAS-102	todo	P1	nafura	agent	none	spec	spec		raster	work	CH-04-CORRECTION-sans-sprint	SPEC + geler AC — retirer le sprint du contrat
-RAS-103	todo	P1	nafura	agent	none	tech	exec		raster	work	CH-04-CORRECTION-sans-sprint	Retirer le champ, la commande et SPRINT.md
-PLT-130	todo	P2	nafura	agent	none	spec	spec		nafura-platform	conversation	CH-01-TECHNICAL-plier	SPEC + geler AC — plier conversation
-PLT-131	todo	P2	nafura	agent	none	tech	exec		nafura-platform	conversation	CH-01-TECHNICAL-plier	Plier l arbre conversation
-PLT-118	todo	P2	nafura	agent	none	spec	spec		nafura-platform	identite	CH-01-TECHNICAL-plier	SPEC + geler AC — plier identite
-PLT-119	todo	P2	nafura	agent	none	tech	exec		nafura-platform	identite	CH-01-TECHNICAL-plier	Plier l arbre identite
-PLT-112	todo	P2	nafura	agent	none	spec	spec		nafura-platform	notification	CH-01-TECHNICAL-plier	SPEC + geler AC — plier notification
-PLT-113	todo	P2	nafura	agent	none	tech	exec		nafura-platform	notification	CH-01-TECHNICAL-plier	Plier l arbre notification
-RAS-105	todo	P2	nafura	agent	none	spec	spec		raster	socle	CH-03-CORRECTION-sans-vue-sprint	SPEC + geler AC — retirer la vue Sprint
-RAS-106	todo	P2	nafura	agent	none	tech	exec		raster	socle	CH-03-CORRECTION-sans-vue-sprint	Retirer la vue, le bouton et la route
-PLT-108	todo	P2	nafura	agent	none	spec	spec		nafura-platform	socle	CH-05-EVOL-consommateur-commentaire	SPEC — consommateur commentaire
-PLT-114	todo	P2	nafura	agent	none	spec	spec		nafura-platform	socle	CH-06-EVOL-consommateur-notification	SPEC — consommateur notification
-PLT-120	todo	P2	nafura	agent	none	spec	spec		nafura-platform	socle	CH-07-EVOL-consommateur-identite	SPEC — consommateur identite
-PLT-126	todo	P2	nafura	agent	none	spec	spec		nafura-platform	socle	CH-08-EVOL-consommateur-approbation	SPEC — consommateur approbation
-PLT-132	todo	P2	nafura	agent	none	spec	spec		nafura-platform	socle	CH-09-EVOL-consommateur-conversation	SPEC — consommateur conversation
-RAS-104	todo	P2	nafura	agent	none	qa	qa		raster	work	CH-04-CORRECTION-sans-sprint	Preuves — plus de sprint dans le moteur
+id	status	priority	context	assignee	gate	type	agent_type	project	lot	souslot	title

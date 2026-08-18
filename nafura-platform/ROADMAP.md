@@ -22,8 +22,6 @@ Trois dettes de contrat sur des BC déjà pactés. Chacune tient en un Change, e
 4. **document-extraction** — `CH-03-EVOL-hors-spec`
    `builder` et `workflow` : dans la SPEC avec leurs règles, ou hors du BC. Le code suit.
 
-<!-- borne -->
-
 ## 2 — Reste du CADRE platform
 
 Cinq BC annoncés par le CADRE, aucun contracté. Même rythme pour tous : **trois sous-lots**.
@@ -46,6 +44,15 @@ et il attend l'INIT : on ne déplace pas ce qui n'a pas de contrat.
 | 7 | **approbation** | `workflow` | tout le jar, ou la seule part qui fait décider. **Pas de lot workflow à côté** : un besoin, faire décider |
 | 8 | **conversation** | `ai-conversation` · `ai-agent-api` · `ai-agent-runtime` · `llm-provider` | quels jars entrent. `llm-provider` peut relever du socle ou d'ops |
 
+1. **commentaire** — INIT + plier clos
+2. **notification** — INIT clos · plier restant
+3. **identite** — INIT clos · plier restant
+4. **approbation** — INIT + plier clos
+5. **conversation** — INIT clos · plier restant
+6. **socle** — consommateurs des cinq BC
+
+<!-- borne -->
+
 ## Hors roadmap
 
 **Husk et les packages docmanager** — pas de lot. Après, ou jamais. Les inscrire ici en ferait
@@ -53,9 +60,6 @@ une dette qu'on regarde ; les laisser dehors est la décision.
 
 ---
 
-**État au 2026-08-16.** 39 tasks, 18 sous-lots. 8 lançables tout de suite : les trois du
-nettoyage et les cinq INIT. Les 10 autres attendent leur INIT — c'est voulu, et c'est
-`node raster/t.mjs ready nafura-platform` qui le dit.
-
-Les cinq nouveaux BC n'ont pas encore de `SPEC.md` : c'est la première étape de leur INIT.
-`check` les signale en erreur jusque-là.
+**État au 2026-08-18.** Nettoyage et les cinq INIT sont clos. Borne sous la section 2 :
+pliers restants + consommateurs socle. Raster « plus de sprint » attend que ces agents
+soient rendus.

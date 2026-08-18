@@ -8,7 +8,6 @@ priority: P1
 assignee: agent
 gate: none
 tags: [platform, identite]
-sprint: 2026-W34
 ---
 
 # SPEC + geler AC — identite

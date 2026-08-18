@@ -4,7 +4,7 @@ plugins {
 
 dependencies {
     implementation project(':platform:core:framework')
-    implementation project(':platform:core:identity')
+    implementation project(':platform:identite:identity')
     implementation project(':platform:core:tenancy')
 
     api 'org.springframework.boot:spring-boot-starter-security'

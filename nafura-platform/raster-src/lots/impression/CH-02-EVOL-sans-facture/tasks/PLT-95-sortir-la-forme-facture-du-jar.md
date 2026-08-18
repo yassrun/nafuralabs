@@ -9,7 +9,6 @@ assignee: agent
 gate: none
 blocked_by: [PLT-94]
 tags: [platform, impression]
-sprint: 2026-W33
 ---
 
 # Sortir la forme facture du jar

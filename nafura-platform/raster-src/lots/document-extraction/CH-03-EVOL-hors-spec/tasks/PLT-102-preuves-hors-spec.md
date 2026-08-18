@@ -1,4 +1,5 @@
 ---
+
 id: PLT-102
 status: done-me
 context: nafura
@@ -9,7 +10,6 @@ assignee: agent
 gate: none
 blocked_by: [PLT-101]
 tags: [platform, extraction]
-sprint: 2026-W33
 ---
 
 # Preuves — hors spec

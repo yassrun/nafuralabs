@@ -5,7 +5,7 @@
  * Projet Raster = raster/ (scanné via raster/raster-src/).
  * Sync: any task file on a project appears in INDEX/BACKLOG after regen.
  * Skips: lots/_archive
- * Writes: INDEX.tsv, SPRINT.md, BACKLOG.md under repo-root raster/ (orchestrateur)
+ * Writes: INDEX.tsv, BACKLOG.md under repo-root raster/ (orchestrateur)
  *
  *   node raster/regen.mjs
  *   node raster/t.mjs index
@@ -76,7 +76,6 @@ function loadTasks() {
       gate: fm.gate || "",
       type,
       agent_type,
-      sprint: fm.sprint || "",
       blocked_by: fm.blocked_by || "",
       title: shortTitle(fm._title),
       titleFull: fm._title,
@@ -133,7 +132,7 @@ export function isoWeekInfo(d = new Date()) {
 function writeIndex(tasks) {
   const sorted = [...tasks].sort(sortTasks);
   const header =
-    "id\tstatus\tpriority\tcontext\tassignee\tgate\ttype\tagent_type\tsprint\tproject\tlot\tsouslot\ttitle";
+    "id\tstatus\tpriority\tcontext\tassignee\tgate\ttype\tagent_type\tproject\tlot\tsouslot\ttitle";
   const rows = sorted.map((t) =>
     [
       t.id,
@@ -144,7 +143,6 @@ function writeIndex(tasks) {
       t.gate,
       t.type,
       t.agent_type,
-      t.sprint,
       t.project,
       t.lot,
       t.souslot,
@@ -157,74 +155,6 @@ function writeIndex(tasks) {
     "utf8"
   );
   return sorted.length;
-}
-
-function padId(id) {
-  return id.padEnd(7);
-}
-
-function writeSprint(tasks) {
-  const { id, label } = isoWeekInfo();
-  const committed = tasks
-    .filter(
-      (t) =>
-        t.sprint === id &&
-        t.status !== "done-agent" &&
-        t.status !== "done-me" &&
-        t.status !== "done"
-    )
-    .sort(sortTasks);
-  const readyP1 = tasks
-    .filter((t) => !t.sprint && t.priority === "P1" && t.status === "todo")
-    .sort(sortTasks);
-
-  const lines = [`# SPRINT ${id}                         ${label}`, ""];
-
-  if (committed.length === 0) {
-    lines.push(`  (aucune tâche commitée — Commit = poser \`sprint: ${id}\`)`);
-    lines.push("");
-    if (readyP1.length) {
-      lines.push("  tasks P1 prêtes (hors features) :");
-      for (const t of readyP1) {
-        const who = t.assignee ? `[${t.assignee}]` : "";
-        const gate = t.gate ? `gate:${t.gate}` : "";
-        const agent = t.agent_type ? t.agent_type : "";
-        lines.push(
-          `  ${GLYPH[t.status] || "·"} ${padId(t.id)}  ${t.title.padEnd(32).slice(0, 32)}  ${who.padEnd(8)}  ${agent.padEnd(5)}  ${gate}`
-        );
-      }
-      lines.push("");
-    }
-  } else {
-    for (const t of committed) {
-      const who = t.assignee ? `[${t.assignee}]` : "";
-      const gate = t.gate ? `gate:${t.gate}` : "";
-      const agent = t.agent_type ? t.agent_type : "";
-      lines.push(
-        `${GLYPH[t.status] || "·"} ${padId(t.id)}  ${t.title.padEnd(32).slice(0, 32)}  ${t.priority}  ${who.padEnd(8)}  ${agent.padEnd(5)}  ${gate}`
-      );
-    }
-    lines.push("");
-  }
-
-  const counts = {
-    committed: committed.length,
-    doing: committed.filter((t) => t.status === "doing").length,
-    review: committed.filter((t) => t.status === "review").length,
-    blocked: committed.filter((t) => t.status === "blocked").length,
-  };
-  lines.push(
-    "  ────────────────────────────────────────────────────────────────"
-  );
-  lines.push(
-    `  committed  ${counts.committed}   doing ${counts.doing}   review ${counts.review}   blocked ${counts.blocked}`
-  );
-  lines.push(
-    "  ────────────────────────────────────────────────────────────────"
-  );
-  lines.push("");
-
-  fs.writeFileSync(path.join(RASTER_ROOT, "SPRINT.md"), lines.join("\n"), "utf8");
 }
 
 function byId(a, b) {
@@ -267,7 +197,6 @@ function writeBacklog(tasks) {
     "> Orchestrateur. Source canon = `<projet>/raster-src/lots/…`.",
     "> Arbre = **le chemin** (lot / sous-lot / tasks) — pas un champ `parent:`.",
     "> Lot et sous-lot sont des **dossiers** : leur état est dérivé, jamais stocké.",
-    "> Sprint = champ `sprint:` sur la **task** seulement.",
     "> Regen : `node raster/regen.mjs` / `node raster/t.mjs index`.",
     "> Inbox : `raster/inbox.md`.",
     "",
@@ -310,7 +239,6 @@ function writeBacklog(tasks) {
 export function regen() {
   const tasks = loadTasks();
   const n = writeIndex(tasks);
-  writeSprint(tasks);
   writeBacklog(tasks);
   return { tasks: n, projects: new Set(tasks.map((t) => t.project)).size };
 }
@@ -322,6 +250,6 @@ const isDirect =
 if (isDirect) {
   const r = regen();
   console.log(
-    `regen ok — ${r.tasks} tasks, ${r.projects} projects → INDEX.tsv SPRINT.md BACKLOG.md`
+    `regen ok — ${r.tasks} tasks, ${r.projects} projects → INDEX.tsv BACKLOG.md`
   );
 }

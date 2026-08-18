@@ -9,7 +9,7 @@ export const ADMINISTRATION_ROUTES: Routes = [
   {
     path: 'members',
     loadChildren: () =>
-      import('./iam/members/members.routes').then((m) => m.MEMBERS_ROUTES),
+      import('../../app/identite/members.routes').then((m) => m.MEMBERS_ROUTES),
   },
   {
     path: 'roles',

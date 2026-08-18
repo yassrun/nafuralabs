@@ -9,7 +9,6 @@ assignee: agent
 gate: none
 blocked_by: [PLT-95]
 tags: [platform, impression]
-sprint: 2026-W33
 ---
 
 # Preuves — impression sans facture

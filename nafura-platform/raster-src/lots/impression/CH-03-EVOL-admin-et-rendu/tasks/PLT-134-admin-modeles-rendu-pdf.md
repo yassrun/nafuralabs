@@ -9,7 +9,6 @@ assignee: agent
 gate: none
 blocked_by: [PLT-133]
 tags: [platform, impression]
-sprint: 2026-W34
 ---
 
 # Admin modèles + rendu PDF

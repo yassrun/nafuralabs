@@ -33,7 +33,6 @@ export default function App() {
   const [recent, setRecent] = useState<Lance[]>([]);
   const [spawnPret, setSpawnPret] = useState(false);
   const [projects, setProjects] = useState<string[]>([]);
-  const [sprint, setSprint] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedLine, setSelectedLine] = useState<string | null>(null);
   const [filterProject, setFilterProject] = useState("");
@@ -52,7 +51,6 @@ export default function App() {
       api.inbox(),
       api.running(),
     ]);
-    setSprint(meta.sprint);
     setProjects(meta.projects);
     setTasks(t.tasks);
     setReady(r.ready);
@@ -158,7 +156,7 @@ export default function App() {
       setSelectedId(null);
       setSelectedLine(null);
     }
-    if (v === "sprint" || v === "done-agent") {
+    if (v === "done-agent") {
       setFilterProject(ALL);
       setSelectedId(null);
     }
@@ -207,7 +205,7 @@ export default function App() {
         <div className="brand">
           <h1>Raster</h1>
           <span className="tag">local</span>
-          <span className="hint">orchestrateur · {sprint}</span>
+          <span className="hint">orchestrateur</span>
         </div>
         <nav className="nav">
           {(
@@ -216,7 +214,6 @@ export default function App() {
               ["encours", "En cours", running.length],
               ["inbox", "Inbox", inboxLines.length],
               ["backlog", "Backlog", 0],
-              ["sprint", "Sprint", 0],
               ["done-agent", "Done agent", 0],
             ] as const
           ).map(([id, label, n]) => (
@@ -303,7 +300,7 @@ export default function App() {
             <ProjectTabs
               projects={projects}
               active={filterProject}
-              showAll={view === "sprint" || view === "done-agent"}
+              showAll={view === "done-agent"}
               counts={Object.fromEntries(
                 projects.map((p) => [p, scopedTasks.filter((t) => t.project === p).length])
               )}
@@ -375,29 +372,11 @@ export default function App() {
               }
               tasks={scopedTasks.filter(visible)}
               readyByKey={readyByKey}
-              sprint={sprint}
               selectedId={selectedId}
               onSelect={select}
-              onCommit={(id) => void mutate(() => api.commitSprint(id))}
               busy={busy}
               spawnPret={spawnPret}
               onLance={setRunning}
-            />
-          ) : null}
-
-          {view === "sprint" ? (
-            <Rows
-              heading={`Sprint ${sprint}`}
-              empty={`Rien dans ${sprint} — commit depuis Backlog.`}
-              tasks={scopedTasks.filter(
-                (t) => isSprintRow(t, sprint) && visible(t)
-              )}
-              allTasks={tasks}
-              selectedId={selectedId}
-              onSelect={select}
-              showProject={filterProject === ALL}
-              showOrch
-              busy={busy}
             />
           ) : null}
 
@@ -425,7 +404,6 @@ export default function App() {
               busy={busy}
               confirmDelete={confirmDelete}
               setConfirmDelete={setConfirmDelete}
-              onCommit={(id) => void mutate(() => api.commitSprint(id))}
               onStatus={(s) =>
                 selected && void mutate(() => api.patchTask(selected.id, { status: s }))
               }
@@ -467,15 +445,11 @@ function idNum(id: string) {
   return m ? Number(m[1]) : 0;
 }
 
-function isSprintRow(t: Task, week: string) {
-  return t.sprint === week && t.status !== "done-agent";
-}
-
 /* ---------------------------------------------------------------- vue Toi */
 
 /**
  * La seule vue qui compte en mode autonome : ce qui attend une décision.
- * Elle passe avant Backlog et Sprint — tu n'ouvres plus l'app pour piloter.
+ * Elle passe avant Backlog — tu n'ouvres plus l'app pour piloter.
  */
 function ToiView({
   rows,
@@ -653,7 +627,6 @@ function Detail({
   busy,
   confirmDelete,
   setConfirmDelete,
-  onCommit,
   onStatus,
   onApprove,
   onDelete,
@@ -664,7 +637,6 @@ function Detail({
   busy: boolean;
   confirmDelete: boolean;
   setConfirmDelete: (v: boolean) => void;
-  onCommit: (id: string) => void;
   onStatus: (status: string) => void;
   onApprove: () => void;
   onDelete: () => void;
@@ -762,11 +734,6 @@ function Detail({
             <span className="pill">{task.priority}</span>
             <span className="pill">[{task.assignee}]</span>
             <span className="pill">gate:{task.gate}</span>
-            {task.sprint ? (
-              <span className="pill info">{task.sprint}</span>
-            ) : (
-              <span className="pill">backlog</span>
-            )}
           </div>
           {r ? (
             <div className="faint">
@@ -801,17 +768,6 @@ function Detail({
           seulement sur un <code>done-agent</code> sous <code>gate: me</code>.
         </div>
       </div>
-
-      {!task.sprint ? (
-        <button
-          type="button"
-          className="btn"
-          disabled={busy}
-          onClick={() => onCommit(task.id)}
-        >
-          → Sprint
-        </button>
-      ) : null}
 
       <details className="fold">
         <summary>Abandon</summary>
@@ -895,10 +851,8 @@ function Backlog({
   project,
   tasks,
   readyByKey,
-  sprint,
   selectedId,
   onSelect,
-  onCommit,
   busy,
   spawnPret,
   onLance,
@@ -906,10 +860,8 @@ function Backlog({
   project: string;
   tasks: Task[];
   readyByKey: Map<string, Ready>;
-  sprint: string;
   selectedId: string | null;
   onSelect: (id: string) => void;
-  onCommit: (id: string) => void;
   busy: boolean;
   spawnPret: boolean;
   onLance: (r: Lance[]) => void;
@@ -926,7 +878,7 @@ function Backlog({
       <h2>Backlog</h2>
       <p className="muted">
         {project} · l'arbre est le <code>chemin</code> · le lot isole, le sous-lot
-        se lance · Commit = <code>sprint:</code> → {sprint || "sprint"}
+        se lance
       </p>
       <div className="list-panel backlog-tree">
         {tasks.length === 0 ? (
@@ -965,8 +917,6 @@ function Backlog({
                         depth={g.souslot ? 2 : 1}
                         selectedId={selectedId}
                         onSelect={onSelect}
-                        onCommit={onCommit}
-                        busy={busy}
                       />
                     ))}
                   </div>
@@ -1002,15 +952,11 @@ function BacklogRow({
   depth,
   selectedId,
   onSelect,
-  onCommit,
-  busy,
 }: {
   task: Task;
   depth: number;
   selectedId: string | null;
   onSelect: (id: string) => void;
-  onCommit: (id: string) => void;
-  busy: boolean;
 }) {
   return (
     <div
@@ -1030,25 +976,11 @@ function BacklogRow({
       </button>
       <span className="row-title">{task.title}</span>
       {task.attend ? <span className="pill mine">t'attend</span> : null}
-      <span className="row-actions">
-        {task.sprint ? (
-          <span className="pill info">{task.sprint}</span>
-        ) : (
-          <button
-            type="button"
-            className="btn"
-            disabled={busy}
-            onClick={() => onCommit(task.id)}
-          >
-            → Sprint
-          </button>
-        )}
-      </span>
     </div>
   );
 }
 
-/* ------------------------------------------------- sprint / done-agent */
+/* ------------------------------------------------- done-agent */
 
 function Rows({
   heading,

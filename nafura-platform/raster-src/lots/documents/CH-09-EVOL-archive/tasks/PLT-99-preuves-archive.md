@@ -9,7 +9,6 @@ assignee: agent
 gate: none
 blocked_by: [PLT-98]
 tags: [platform, documents]
-sprint: 2026-W33
 ---
 
 # Preuves — archive

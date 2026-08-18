@@ -12,8 +12,8 @@ import { fileURLToPath } from "node:url";
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 
 const ROOTS = [
-  "nafura-platform/sources/backend/core/identity/src/main/java",
-  "nafura-platform/sources/backend/features/administration/iam/src/main/java",
+  "nafura-platform/sources/backend/identite/identity/src/main/java",
+  "nafura-platform/sources/backend/identite/iam/src/main/java",
 ];
 
 function walk(target, acc = []) {

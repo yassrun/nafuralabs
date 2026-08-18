@@ -11,7 +11,6 @@
  *
  *   node raster/t.mjs new raster work/CH-02-… "Titre" --type tech
  *   node raster/t.mjs promote "ligne" raster work/CH-02-…
- *   node raster/t.mjs sprint RAS-79
  *   node raster/t.mjs status RAS-79 doing
  *   node raster/t.mjs approve RAS-78
  */
@@ -19,7 +18,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { collectTaskFiles, treeFromPath } from "./walk-tasks.mjs";
-import { parseFrontmatter, isoWeekInfo } from "./regen.mjs";
+import { parseFrontmatter } from "./regen.mjs";
 import { expectedAgentType } from "./agent-type.mjs";
 
 const RASTER_ROOT = path.dirname(fileURLToPath(import.meta.url));
@@ -383,15 +382,6 @@ export function setStatus(id, status) {
       : `status → done-agent · gate none → done-me`
   );
   return { id, status: final, file: rel(file) };
-}
-
-export function setSprint(id, week) {
-  const w = week || isoWeekInfo().id;
-  if (!/^\d{4}-W\d{1,2}$/.test(w)) refuse(`semaine "${w}" mal formée — attendu YYYY-Wnn`);
-  const { file } = findTask(id);
-  patchFrontmatter(file, { sprint: w });
-  appendJournal(file, `sprint → ${w}`);
-  return { id, sprint: w, file: rel(file) };
 }
 
 /** Le seul chemin vers `done-me` : ton approbation d'un `done-agent` sous `gate: me`. */

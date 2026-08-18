@@ -2,7 +2,7 @@ import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 
 import { TranslateModule } from '@ngx-translate/core';
 
-import { NotificationBellCloseService } from '@platform/features/collaboration/notification/services/notification-bell-close.service';
+import { NotificationBellCloseService } from '@platform/app/notification/services/notification-bell-close.service';
 
 import type { ErpAlert } from './erp-notifications.service';
 import { ErpNotificationsService } from './erp-notifications.service';

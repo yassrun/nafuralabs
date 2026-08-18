@@ -1,4 +1,5 @@
 ---
+
 id: PLT-100
 status: done-me
 context: nafura
@@ -8,7 +9,6 @@ priority: P1
 assignee: agent
 gate: none
 tags: [platform, extraction]
-sprint: 2026-W33
 ---
 
 # SPEC + geler AC — builder et workflow

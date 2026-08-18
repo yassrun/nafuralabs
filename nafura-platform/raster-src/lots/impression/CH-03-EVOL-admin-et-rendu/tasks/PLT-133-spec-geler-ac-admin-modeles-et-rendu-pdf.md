@@ -8,7 +8,6 @@ priority: P1
 assignee: agent
 gate: none
 tags: [platform, impression]
-sprint: 2026-W34
 ---
 
 # SPEC + geler AC — admin modèles et rendu PDF

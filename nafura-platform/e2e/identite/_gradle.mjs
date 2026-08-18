@@ -13,7 +13,7 @@ const BACKEND = path.resolve(
 );
 const RESULTS = path.join(
   BACKEND,
-  "features/administration/iam/build/test-results/test"
+  "identite/iam/build/test-results/test"
 );
 const LOCK = path.join(RESULTS, "..", "identite-e2e.lock");
 
@@ -48,7 +48,7 @@ function xmlHasFailures() {
 }
 
 function runGradle() {
-  const args = [":platform:features:administration:iam:test"];
+  const args = [":platform:identite:iam:test"];
   for (const t of TESTS) args.push("--tests", t);
   return spawnSync(
     process.platform === "win32" ? "gradlew.bat" : "./gradlew",

@@ -39,7 +39,7 @@ test("AC-5 — l'allocation d'id n'est plus dupliquée dans le serveur", () => {
 
 test("AC-5 — les mutations passent par les modules du CLI", () => {
   const src = read(API);
-  for (const fn of ["createTask", "promoteLine", "setStatus", "setSprint", "approve"]) {
+  for (const fn of ["createTask", "promoteLine", "setStatus", "approve"]) {
     assert.ok(src.includes(fn), `${fn} non importé par le serveur`);
   }
   assert.ok(src.includes("RefusError"), "un refus du CLI doit remonter en 400");

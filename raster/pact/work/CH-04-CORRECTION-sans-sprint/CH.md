@@ -4,6 +4,8 @@
 **Cible :** BC `work`
 **Qualification :** `sprint:` n'est plus lu par personne qui décide. Il coûte une écriture et promet un sens qu'il n'a plus.
 
+**Politiques applicables :** `POL-FICHIER-SSOT` · `POL-VUES-GENEREES` · `POL-ECRITURE-CLI`
+
 ## Pourquoi
 
 Le pilotage est passé à la **borne** le 2026-08-16. Depuis, plus rien dans le chemin de décision ne consulte `sprint:` :
@@ -29,16 +31,16 @@ Le champ, la commande et la vue générée disparaissent. La borne dit ce qui es
 
 ## Critères d'acceptation (gelés)
 
-- **AC-1** Aucune occurrence de `sprint` dans les fichiers de task, ni dans `write.mjs`, `regen.mjs`, `check.mjs`, `t.mjs`.
-- **AC-2** `t.mjs sprint` n'existe plus, et l'aide ne le propose plus.
-- **AC-3** `SPRINT.md` est supprimé, et plus rien ne le génère.
-- **AC-4** `INDEX.tsv` n'a plus de colonne `sprint`.
-- **AC-5** `check` reste au même nombre d'erreurs qu'avant le Change — la suppression ne casse rien.
-- **AC-6** La SPEC `work` ne mentionne plus le sprint, ni dans les données, ni dans les états.
+- **AC-1** Aucune clé `sprint:` dans le frontmatter des fichiers `**/raster-src/lots/**/tasks/*.md`. Aucune occurrence de `sprint` dans `raster/write.mjs`, `raster/regen.mjs`, `raster/check.mjs`, `raster/t.mjs`.
+- **AC-2** `node raster/t.mjs sprint` n'existe plus. `node raster/t.mjs -h` ne propose plus `sprint`.
+- **AC-3** `raster/SPRINT.md` est absent du dépôt. Ni `raster/regen.mjs` ni `node raster/t.mjs index` ne le génèrent.
+- **AC-4** L'en-tête de `raster/INDEX.tsv` n'a plus de colonne `sprint`.
+- **AC-5** `node raster/t.mjs check` reste au même nombre d'erreurs qu'avant le Change — la suppression ne casse rien.
+- **AC-6** `raster/pact/work/SPEC.md` ne mentionne plus le sprint — ni Données, ni États, ni owns, ni commandes, ni Liens. INV-3 ne dit plus « sprintable ».
 
 ## Preuves attendues
 
-`raster/e2e/work/` — un test d'absence, qui échoue si `sprint` réapparaît dans le moteur. Plus la suite existante, verte.
+`raster/e2e/work/` — test d'absence, état initial = dépôt après RAS-103. Échoue si `sprint` réapparaît dans `raster/write.mjs`, `raster/regen.mjs`, `raster/check.mjs` ou `raster/t.mjs` ; si `raster/SPRINT.md` est présent ; si `raster/INDEX.tsv` porte une colonne `sprint`. Plus la suite existante, verte.
 
 ## Hors périmètre
 

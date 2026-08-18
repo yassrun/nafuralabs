@@ -112,9 +112,9 @@ import { ChantierDrilldownService } from '@app/socle/shell/chantier-drilldown.se
 import {
   NOTIFICATION_BELL_ADAPTER,
   NOTIFICATION_BELL_DROPDOWN,
-} from '@platform/features/collaboration/notification/notification-bell.adapter';
-import { NotificationStreamService } from '@platform/features/collaboration/notification/services/notification-stream.service';
-import { NotificationUnreadService } from '@platform/features/collaboration/notification/services/notification-unread.service';
+} from '@platform/app/notification/notification-bell.adapter';
+import { NotificationStreamService } from '@platform/app/notification/services/notification-stream.service';
+import { NotificationUnreadService } from '@platform/app/notification/services/notification-unread.service';
 import { CHANTIER_ROW_NAVIGATOR } from '@platform/lib/anatomy/tokens/chantier-row-navigator.token';
 import { LOOKUP_LIST_ROUTES } from '@platform/lib/anatomy/tokens/lookup-list-routes.token';
 import { ERP_LOOKUP_LIST_ROUTES } from '@app/socle/shared/config/erp-lookup-list-routes';

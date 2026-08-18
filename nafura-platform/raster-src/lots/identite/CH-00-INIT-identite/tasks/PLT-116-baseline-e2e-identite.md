@@ -9,7 +9,6 @@ assignee: agent
 gate: none
 blocked_by: [PLT-115]
 tags: [platform, identite]
-sprint: 2026-W34
 ---
 
 # Baseline e2e identite

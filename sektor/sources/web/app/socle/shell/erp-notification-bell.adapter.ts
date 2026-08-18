@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 
-import type { NotificationBellAdapter } from '@platform/features/collaboration/notification/notification-bell.adapter';
+import type { NotificationBellAdapter } from '@platform/app/notification/notification-bell.adapter';
 
 import { ErpNotificationsService } from './erp-notifications.service';
 

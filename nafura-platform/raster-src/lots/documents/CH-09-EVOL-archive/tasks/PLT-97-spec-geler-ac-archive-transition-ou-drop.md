@@ -8,7 +8,6 @@ priority: P1
 assignee: agent
 gate: none
 tags: [platform, documents]
-sprint: 2026-W33
 ---
 
 # SPEC + geler AC — archive : transition ou drop

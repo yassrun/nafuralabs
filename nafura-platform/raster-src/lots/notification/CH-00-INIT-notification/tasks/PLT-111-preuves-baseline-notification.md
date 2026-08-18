@@ -9,7 +9,6 @@ assignee: agent
 gate: none
 blocked_by: [PLT-110]
 tags: [platform, notification]
-sprint: 2026-W34
 ---
 
 # Preuves — baseline notification

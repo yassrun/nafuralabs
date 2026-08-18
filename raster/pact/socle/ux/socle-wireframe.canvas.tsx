@@ -16,16 +16,16 @@ import {
  * Socle Raster — chrome. SSOT: raster/pact/socle/ux/socle-wireframe.canvas.tsx
  *
  * Décisions UX
- * - Nav V1 = Inbox · Backlog · Sprint · Done agent
+ * - Nav = Toi · En cours · Inbox · Backlog · Done agent — plus de vue Sprint
  * - Capture sticky globale (pas par projet)
  * - Pas d’auth, pas de BDD
  * - Détail à droite ; CTA agent + fallback fichier/CLI
  */
 
-type ViewId = "inbox" | "backlog" | "sprint" | "done-agent";
+type ViewId = "toi" | "encours" | "inbox" | "backlog" | "done-agent";
 
 export default function SocleWireframe() {
-  const [view, setView] = useCanvasState<ViewId>("socle-view", "inbox");
+  const [view, setView] = useCanvasState<ViewId>("socle-view", "toi");
 
   return (
     <Stack gap={16} style={{ maxWidth: 880 }}>
@@ -38,15 +38,17 @@ export default function SocleWireframe() {
         <Button>ok</Button>
       </Row>
       <Row gap={8}>
-        {(["inbox", "backlog", "sprint", "done-agent"] as ViewId[]).map((id) => (
-          <Button
-            key={id}
-            variant={view === id ? "primary" : "secondary"}
-            onClick={() => setView(id)}
-          >
-            {id}
-          </Button>
-        ))}
+        {(["toi", "encours", "inbox", "backlog", "done-agent"] as ViewId[]).map(
+          (id) => (
+            <Button
+              key={id}
+              variant={view === id ? "primary" : "secondary"}
+              onClick={() => setView(id)}
+            >
+              {id}
+            </Button>
+          )
+        )}
       </Row>
       <Divider />
       <H2>
@@ -55,7 +57,7 @@ export default function SocleWireframe() {
       <Row gap={12}>
         <Stack gap={8} style={{ flex: 1 }}>
           <Text>Liste / arbre (contenu = BC work)</Text>
-          <Pill>filtre projet : backlog + sprint seulement</Pill>
+          <Pill>filtre projet : backlog + done-agent seulement</Pill>
         </Stack>
         <Stack gap={8} style={{ width: 240 }}>
           <Text weight="semibold">Détail</Text>

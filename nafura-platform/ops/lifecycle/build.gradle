@@ -68,6 +68,9 @@ def gradleProjectToDiskPath = { String projectPath ->
             if (parts[1] == 'core') {
                 return "nafura-platform/sources/backend/core/${parts[2]}"
             }
+            if (parts[1] == 'identite') {
+                return "nafura-platform/sources/backend/identite/${parts[2]}"
+            }
             if (parts[1] == 'integrations') {
                 return "nafura-platform/sources/backend/integrations/${parts[2]}"
             }
@@ -112,19 +115,19 @@ def gradleProjectToDiskPath = { String projectPath ->
 def mavenArtifactToPlatformProject = [
         'framework'          : 'platform:core:framework',
         'authorization'      : 'platform:core:authorization',
-        'identity'           : 'platform:core:identity',
+        'identity'           : 'platform:identite:identity',
         'scope'              : 'platform:core:scope',
         'tenancy'            : 'platform:core:tenancy',
         'observability'      : 'platform:core:observability',
         'job-runner'         : 'platform:core:job-runner',
         'settings'           : 'platform:features:configuration:settings',
         'sysconfig'          : 'platform:features:configuration:sysconfig',
-        'iam'                : 'platform:features:administration:iam',
+        'iam'                : 'platform:identite:iam',
         'subscription'       : 'platform:features:administration:subscription',
         'usage'              : 'platform:features:administration:usage',
-        'ai-agent-api'       : 'platform:features:ai:ai-agent-api',
-        'ai-agent-runtime'   : 'platform:features:ai:ai-agent-runtime',
-        'ai-conversation'    : 'platform:features:ai:ai-conversation',
+        'ai-agent-api'       : 'platform:conversation:ai-agent-api',
+        'ai-agent-runtime'   : 'platform:conversation:ai-agent-runtime',
+        'ai-conversation'    : 'platform:conversation:ai-conversation',
         'llm-provider'       : 'platform:features:ai:llm-provider',
         'app-settings'       : 'platform:features:app-settings',
         'user-settings'      : 'platform:features:user-settings',
@@ -133,7 +136,7 @@ def mavenArtifactToPlatformProject = [
         'doc-manager'        : 'platform:impression',
         'documents'          : 'platform:documents',
         'impression'         : 'platform:impression',
-        'notification'       : 'platform:features:collaboration:notification',
+        'notification'       : 'platform:notification',
         'tagging'            : 'platform:features:collaboration:tagging',
         'workflow'           : 'platform:approbation',
         'webhook'            : 'platform:features:collaboration:webhook',
@@ -324,20 +327,22 @@ def migrationSortKey = { String relativePath ->
 
     int layerRank = 50
     int moduleRank = 500
-    if (lower.startsWith('nafura-platform/sources/backend/core/')) {
+    if (lower.startsWith('nafura-platform/sources/backend/core/') ||
+            lower.startsWith('nafura-platform/sources/backend/identite/identity/')) {
         layerRank = 10
     } else if (lower.startsWith('nafura-platform/sources/backend/features/configuration/')) {
         layerRank = 25
     } else if (lower.startsWith('nafura-platform/sources/backend/features/business/')) {
         layerRank = 30
-    } else if (lower.startsWith('nafura-platform/sources/backend/features/administration/')) {
+    } else if (lower.startsWith('nafura-platform/sources/backend/features/administration/') ||
+            lower.startsWith('nafura-platform/sources/backend/identite/iam/')) {
         layerRank = 35
-    } else if (lower.startsWith('nafura-platform/sources/backend/features/ai/ai-conversation/')) {
+    } else if (lower.startsWith('nafura-platform/sources/backend/conversation/ai-conversation/')) {
         // Keep AI migrations appended (to avoid reindexing existing app changelogs)
         // while guaranteeing conversation schema exists before agent runtime schema.
         layerRank = 95
         moduleRank = 10
-    } else if (lower.startsWith('nafura-platform/sources/backend/features/ai/ai-agent-runtime/')) {
+    } else if (lower.startsWith('nafura-platform/sources/backend/conversation/ai-agent-runtime/')) {
         layerRank = 95
         moduleRank = 20
     } else if (lower.startsWith('nafura-platform/sources/backend/features/')) {

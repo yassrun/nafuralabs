@@ -357,7 +357,7 @@ export const APP_ROUTES = [
         path: 'notifications',
         canActivate: [authGuard],
         loadChildren: () =>
-          import('@platform/features/notifications/notifications.routes').then(
+          import('@platform/app/notification/notifications.routes').then(
             (m) => m.NOTIFICATIONS_ROUTES
           ),
       },

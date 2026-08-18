@@ -9,7 +9,6 @@ assignee: agent
 gate: none
 blocked_by: [PLT-122]
 tags: [platform, approbation]
-sprint: 2026-W34
 ---
 
 # Preuves — baseline approbation

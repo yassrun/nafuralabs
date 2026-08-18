@@ -9,7 +9,6 @@ assignee: agent
 gate: none
 blocked_by: [PLT-116]
 tags: [platform, identite]
-sprint: 2026-W34
 ---
 
 # Preuves — baseline identite

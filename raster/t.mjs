@@ -3,7 +3,7 @@
  * Raster CLI — la seule voie d'écriture d'une task (`AGENTS.md` §0.1-9).
  *
  * Lecture :  index · check · ready · window
- * Écriture : new · promote · sprint · status · approve   (chacune régénère)
+ * Écriture : new · promote · status · approve   (chacune régénère)
  * Archive :  sweep
  */
 import { regen } from "./regen.mjs";
@@ -14,7 +14,6 @@ import { window_, formatWindow } from "./roadmap.mjs";
 import {
   createTask,
   promoteLine,
-  setSprint,
   setStatus,
   approve,
   RefusError,
@@ -76,7 +75,7 @@ function usage() {
   console.log(`usage: node raster/t.mjs <commande>
 
   lecture
-    index                       regen INDEX.tsv + SPRINT.md + BACKLOG.md
+    index                       regen INDEX.tsv + BACKLOG.md
     check                       valide le canon — sort en 1 si erreur
     ready [projet] [--json]     sous-lots lançables maintenant
     window [projet] [--json]    fenêtre de la roadmap (au-dessus de la borne)
@@ -87,7 +86,6 @@ function usage() {
         [--assignee me|agent|either] [--gate none|me] [--context nafura|saham|personal]
         [--blocked-by ID,ID] [--tags a,b] [--note "…"] [--nouveau-lot]
     promote "<ligne inbox>" <projet> <lot[/sous-lot]>
-    sprint <id> [YYYY-Wnn]      défaut = semaine courante
     status <id> <statut>        todo|doing|blocked|review|done-agent
     approve <id>                done-agent + gate:me → done-me
 
@@ -114,7 +112,7 @@ function run() {
 
   if (cmd === "index") {
     const r = regen();
-    console.log(`INDEX/SPRINT/BACKLOG regen — ${r.tasks} live · ${r.projects} projets`);
+    console.log(`INDEX/BACKLOG regen — ${r.tasks} live · ${r.projects} projets`);
     return 0;
   }
 
@@ -179,13 +177,6 @@ function run() {
     });
     regen();
     console.log(`${r.id}  ${r.file}  · ligne retirée de raster/inbox.md`);
-    return 0;
-  }
-
-  if (cmd === "sprint") {
-    const r = setSprint(pos[0], pos[1]);
-    regen();
-    console.log(`${r.id}  sprint: ${r.sprint}`);
     return 0;
   }
 

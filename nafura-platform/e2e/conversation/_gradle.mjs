@@ -13,7 +13,7 @@ const BACKEND = path.resolve(
 );
 const RESULTS = path.join(
   BACKEND,
-  "features/ai/ai-conversation/build/test-results/test"
+  "conversation/ai-conversation/build/test-results/test"
 );
 const LOCK = path.join(RESULTS, "..", "conversation-e2e.lock");
 
@@ -48,7 +48,7 @@ function xmlHasFailures() {
 }
 
 function runGradle() {
-  const args = [":platform:features:ai:ai-conversation:test"];
+  const args = [":platform:conversation:ai-conversation:test"];
   for (const t of TESTS) args.push("--tests", t);
   return spawnSync(
     process.platform === "win32" ? "gradlew.bat" : "./gradlew",

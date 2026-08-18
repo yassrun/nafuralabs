@@ -94,8 +94,8 @@ function Nav({
         <Button variant="secondary">Done agent</Button>
       </Row>
       <Text size="small" tone="secondary">
-        « Sprint » cède la tête à « Toi » et « En cours ». La semaine ISO n'est
-        plus l'unité de pilotage — la borne l'est.
+        Plus de vue Sprint. Toi et En cours en tête — la borne pilote, pas la
+        semaine ISO.
       </Text>
       <Row gap={6}>
         {(Object.keys(ETAT_LABEL) as StateId[]).map((id) => (

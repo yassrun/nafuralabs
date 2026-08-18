@@ -20,3 +20,5 @@ conversation : statuts ARCHIVED/CLOSED dans l'enum, aucune transition exposée @
 conversation : actions d'une session nouvelle non listées via l'API agent (baseline sans tour, R-3) @platform
 identite : erreurs invite / retrait / jeton = message (IllegalArgumentException ; parfois INVALID_OR_EXPIRED_INVITATION) — pas un code métier — POL-ERREUR-CODE @platform
 identite : relancer l'invitation échoue si le courrier n'est pas parti alors que l'invite initiale crée quand même l'appartenance invitée @platform
+raster app : après CH-04, `setSprint` n'existe plus dans write.mjs — raster-api.ts / api.ts / e2e socle api-delegue importent encore commit-sprint → CH-03 RAS-105/106
+CADRE Raster : owns encore « vues dérivées INDEX, BACKLOG, SPRINT » et vocabulaire Sprint / unité sprintable — EVOL CADRE après clôture CH-03 chrome, pas un gate de ce sous-lot @raster

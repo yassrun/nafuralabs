@@ -13,8 +13,8 @@ Chaque capacité nomme au moins un BC consommateur. Sans consommateur, elle se s
 
 | Capacité | Mode | Consommée par |
 |----------|------|---------------|
-| **Tenant courant** — quel tenant est en train d'agir | `LOCAL` | document-extraction, documents, impression |
-| **Erreurs** — une erreur a un code et un message lisible | `LOCAL` | document-extraction, documents, impression |
+| **Tenant courant** — quel tenant est en train d'agir | `LOCAL` | document-extraction, documents, impression, commentaire, notification, identite, approbation, conversation |
+| **Erreurs** — une erreur a un code et un message lisible | `LOCAL` | document-extraction, documents, impression, commentaire, notification, identite, approbation, conversation |
 
 ## Contrats de consommation
 
@@ -57,6 +57,17 @@ Pas de rôle `estimeur`, `conducteur`, ni aucun rôle métier d'un produit.
 | `P-IMPRESSION-RENDRE` | impression | admin-tenant, utilisateur | — |
 | `P-IMPRESSION-MODELE-LIRE` | impression | admin-tenant, utilisateur | — |
 | `P-IMPRESSION-MODELE-ECRIRE` | impression | admin-tenant | utilisateur |
+| `P-COMMENTAIRE-LIRE` | commentaire | admin-tenant, utilisateur | — |
+| `P-COMMENTAIRE-ECRIRE` | commentaire | admin-tenant, utilisateur | — |
+| `P-NOTIFICATION-LIRE` | notification | admin-tenant, utilisateur | — |
+| `P-NOTIFICATION-MARQUER` | notification | admin-tenant, utilisateur | — |
+| `P-NOTIFICATION-DEPOSER` | notification | admin-tenant, utilisateur | — |
+| `P-IDENTITE-LIRE` | identite | admin-tenant | utilisateur |
+| `P-IDENTITE-GERER` | identite | admin-tenant | utilisateur |
+| `P-APPROBATION-LIRE` | approbation | admin-tenant, utilisateur | — |
+| `P-APPROBATION-DECIDER` | approbation | admin-tenant, utilisateur | — |
+| `P-CONVERSATION-LIRE` | conversation | admin-tenant, utilisateur | — |
+| `P-CONVERSATION-ECRIRE` | conversation | admin-tenant, utilisateur | — |
 
 Le BC écrit « la transition exige `P-…` ». Il ne redéfinit pas les rôles.
 

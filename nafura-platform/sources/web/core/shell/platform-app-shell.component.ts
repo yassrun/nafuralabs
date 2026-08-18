@@ -25,7 +25,7 @@ import { I18nService } from '../i18n';
 import { AuthFacade } from '../security/services/auth.facade';
 import { LanguageSelectorComponent } from '../components/language-selector/language-selector.component';
 import { AvatarComponent } from '../../lib/anatomy/components/atoms/avatar/avatar.component';
-import { NotificationBellComponent } from '../../features/collaboration/notification';
+import { NotificationBellComponent } from '../../app/notification';
 import { ChatPanelComponent } from '../../features/ai-assistant/chat-panel.component';
 import { CommandPaletteComponent } from './command-palette/command-palette.component';
 import { CommandPaletteService } from './command-palette/command-palette.service';
@@ -37,9 +37,9 @@ import {
   ConversationSession,
   AssistantBlock,
   AssistantLink,
-} from '../../features/ai/ai-conversation/services/conversation-api.service';
+} from '../../app/conversation/services/conversation-api.service';
 import { ONBOARDING_WIDGETS_PORT, SHELL_EXTENSIONS } from './shell-extensions';
-import { AssistantBlockRendererComponent } from '../../features/ai/ai-conversation/components/assistant-block-renderer.component';
+import { AssistantBlockRendererComponent } from '../../app/conversation/components/assistant-block-renderer.component';
 import {
   DEFAULT_PLATFORM_APP_SHELL_OPTIONS,
   PlatformAppShellOptions,

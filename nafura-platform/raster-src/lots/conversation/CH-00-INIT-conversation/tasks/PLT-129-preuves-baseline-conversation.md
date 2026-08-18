@@ -9,7 +9,6 @@ assignee: agent
 gate: none
 blocked_by: [PLT-128]
 tags: [platform, conversation]
-sprint: 2026-W34
 ---
 
 # Preuves — baseline conversation

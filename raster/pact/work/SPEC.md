@@ -5,19 +5,19 @@
 
 ## Intention
 
-Le travail a un endroit, un parent, un type, un statut. Le sprint est un **champ sur la task**, pas un dossier.
+Le travail a un endroit, un parent, un type, un statut.
 
 ## Ce que ça fait
 
 - Scanne **uniquement** `**/raster-src/lots/**/tasks/*.md`
 - Dérive l'arbre **projet → lot → sous-lot → task** depuis **le chemin**
-- **Écrit** les tasks : `new` · `promote` · `sprint` · `status` · `approve` — seule voie
+- **Écrit** les tasks : `new` · `promote` · `status` · `approve` — seule voie
 - Calcule la **readiness** au grain du sous-lot : ce qui est lançable maintenant
-- Régénère INDEX · BACKLOG · SPRINT après chaque écriture
+- Régénère INDEX · BACKLOG après chaque écriture
 
 ## Limites
 
-**owns** — schéma de la task, scan, dérivation de l'arbre, **écriture**, promote, sprint, **readiness**, archive
+**owns** — schéma de la task, scan, dérivation de l'arbre, **écriture**, promote, **readiness**, archive
 **not_owns** — le chrome et la capture (socle) · la fenêtre, la borne, la conduite des agents (**orchestration**) · le contenu Pact (`pact/` n'est jamais scanné)
 
 Un dossier est un projet Raster **ssi** `<projet>/raster-src/lots` existe. Pas `docs/specs`, pas `pact/`.
@@ -30,7 +30,7 @@ Un dossier est un projet Raster **ssi** `<projet>/raster-src/lots` existe. Pas `
 
 | Objet | Forme | Obligations |
 |-------|-------|-------------|
-| **Lot** | **dossier** | chapeau ; jamais `done` ; jamais de `sprint:` |
+| **Lot** | **dossier** | chapeau ; jamais `done` |
 | **Sous-lot** | **dossier** | branché Pact : son nom **est** celui du CH ; `done` **dérivé** ⇔ toutes ses tasks `done` |
 | **Task** | **fichier** | seul ticket. `id` · `status` · `type` · `agent_type` · `priority` · `assignee` · `gate` |
 | **Ligne d'inbox** | ligne | demande brute, sans ID, **seulement** dans `raster/inbox.md` |
@@ -48,9 +48,6 @@ ligne d'inbox → (promote) task todo
 feature | bug        todo → doing → review → done-agent → done-me → archive
 spec | tech | physical | qa   todo → doing → done-agent → done-me → archive
                             ↘ blocked
-
-sans sprint:   = backlog
-sprint: Wnn    = sprint (hors done-agent / done-me)
 ```
 
 `review` = l'exec a fini, la main passe au spec puis au QA.
@@ -62,7 +59,7 @@ Sur `gate: none`, `done-agent` bascule **seul** en `done-me` : personne ne t'att
 
 - **INV-1** Raster n'indexe jamais `pact/`.
 - **INV-2** **L'arbre est le chemin.** Pas de champ `parent:` — il ne peut donc pas mentir.
-- **INV-3** Seule la task est un ticket, et la seule chose sprintable.
+- **INV-3** Seule la task est un ticket. Un lot ou un sous-lot n'en est pas un.
 - **INV-4** L'état d'un chapeau est **dérivé**, jamais stocké : un lot n'est jamais `done`, un sous-lot l'est ⇔ toutes ses tasks le sont.
 - **INV-5** Inbox = **uniquement** `raster/inbox.md`. Une ligne = une demande brute, sans ID.
 - **INV-6** Un projet Raster existe ssi `<projet>/raster-src/lots` est présent.
@@ -80,6 +77,6 @@ Soumis à `POL-FICHIER-SSOT` · `POL-VUES-GENEREES` · `POL-CAPTURE-INBOX` · `P
 
 ## Liens
 
-- **publie** `INDEX.tsv` · `BACKLOG.md` · `SPRINT.md` sous `raster/`
+- **publie** `INDEX.tsv` · `BACKLOG.md` sous `raster/`
 - **consomme** socle (navigation, capture, détail)
 - Canvas : [`ux/work-wireframe.canvas.tsx`](ux/work-wireframe.canvas.tsx)

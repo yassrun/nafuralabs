@@ -9,7 +9,6 @@ assignee: agent
 gate: none
 blocked_by: [PLT-134]
 tags: [platform, impression]
-sprint: 2026-W34
 ---
 
 # Preuves — devis et bordereau

@@ -26,7 +26,6 @@ import {
   createTask,
   promoteLine,
   setStatus,
-  setSprint,
   approve,
   RefusError,
 } from "../../../write.mjs";
@@ -41,7 +40,7 @@ import {
   SpawnError,
 } from "../../../spawn.mjs";
 import { WorktreeError } from "../../../worktree.mjs";
-import { regen, isoWeekInfo } from "../../../regen.mjs";
+import { regen } from "../../../regen.mjs";
 
 export type TaskDto = {
   id: string;
@@ -52,7 +51,6 @@ export type TaskDto = {
   gate: string;
   type: string;
   agent_type: string;
-  sprint: string;
   lot: string;
   souslot: string;
   blocked_by: string[];
@@ -145,7 +143,6 @@ function loadTasks(repoRoot: string): TaskDto[] {
       gate,
       type,
       agent_type,
-      sprint: fm.sprint || "",
       lot,
       souslot,
       blocked_by: parseListField(fm.blocked_by),
@@ -246,7 +243,6 @@ export function rasterApiPlugin(repoRoot?: string): Plugin {
         try {
           if (req.method === "GET" && url === "/api/meta") {
             return send(res, 200, {
-              sprint: isoWeekInfo().id,
               projects: listRasterProjects(root),
               repoRoot: root,
             });
@@ -335,10 +331,9 @@ export function rasterApiPlugin(repoRoot?: string): Plugin {
           const one = url.match(/^\/api\/tasks\/([^/?]+)$/);
           if (req.method === "PATCH" && one) {
             const id = decodeURIComponent(one[1]);
-            const b = (await readJson(req)) as { status?: string; sprint?: string };
+            const b = (await readJson(req)) as { status?: string };
             const out: Record<string, unknown> = {};
             if (b.status) out.status = setStatus(id, b.status).status;
-            if (b.sprint !== undefined) out.sprint = setSprint(id, b.sprint).sprint;
             return after(res, out);
           }
 
@@ -351,15 +346,11 @@ export function rasterApiPlugin(repoRoot?: string): Plugin {
             return after(res);
           }
 
-          const sub = url.match(/^\/api\/tasks\/([^/?]+)\/(commit-sprint|approve)$/);
+          const sub = url.match(/^\/api\/tasks\/([^/?]+)\/approve$/);
           if (req.method === "POST" && sub) {
             const id = decodeURIComponent(sub[1]);
-            if (sub[2] === "approve") {
-              const r = approve(id);
-              return after(res, { status: r.status });
-            }
-            const r = setSprint(id);
-            return after(res, { sprint: r.sprint });
+            const r = approve(id);
+            return after(res, { status: r.status });
           }
 
           return send(res, 404, { error: "unknown api route" });

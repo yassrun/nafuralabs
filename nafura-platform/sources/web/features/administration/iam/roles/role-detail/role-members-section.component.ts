@@ -10,11 +10,11 @@ import { CommonModule } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { RolesApiService } from '../services/roles-api.service';
-import { MembersApiService } from '../../members/services/members-api.service';
+import { MembersApiService } from '../../../../../app/identite/services/members-api.service';
 import { ConfirmDialogService } from '@lib/anatomy/components';
 import { ToastService } from '@lib/anatomy/components';
 import { AddMembersDialogComponent } from '../components/add-members-dialog.component';
-import type { Member } from '../../members/models';
+import type { Member } from '../../../../../app/identite/models';
 
 export interface RoleMemberRow {
   userId: string;

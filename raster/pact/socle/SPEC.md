@@ -15,12 +15,12 @@ Chaque capacité nomme au moins un BC consommateur. Sans consommateur, elle se s
 
 | Capacité | Mode | Consommée par |
 |----------|------|---------------|
-| **Navigation** — **Toi** · Inbox · Backlog · Sprint · Done agent | `LOCAL` | work · orchestration |
+| **Navigation** — **Toi** · En cours · Inbox · Backlog · Done agent | `LOCAL` | work · orchestration |
 | **File d'attente** — ce qui te rend la main, avec ce qu'on te demande | `LOCAL` | work |
 | **Panneau de décision** — question, rapport de livraison, actions | `LOCAL` | work |
 | **Capture** — sticky, écrit une ligne d'inbox | `LOCAL` | work |
 | **Readiness affichée** — lançable / bloqué par, dans l'arbre | `LOCAL` | orchestration |
-| **Vues générées** — INDEX · BACKLOG · SPRINT | `LOCAL` | work |
+| **Vues générées** — INDEX · BACKLOG | `LOCAL` | work |
 | **Fallback manuel** — éditer le markdown, `node raster/t.mjs index` | `LOCAL` | work |
 
 Aucune capacité `PLATFORM_CONSUMED` ni `EXTERNAL_MANAGED` : le CADRE déclare zéro voisin.
@@ -39,7 +39,7 @@ Aucune capacité `PLATFORM_CONSUMED` ni `EXTERNAL_MANAGED` : le CADRE déclare z
 | ID | Règle |
 |----|-------|
 | `POL-FICHIER-SSOT` | La source est le fichier Git. Toute vue est **régénérable** ; aucune donnée ne vit que dans une vue. |
-| `POL-VUES-GENEREES` | `INDEX.tsv`, `BACKLOG.md`, `SPRINT.md` ne s'éditent **jamais** à la main. |
+| `POL-VUES-GENEREES` | `INDEX.tsv`, `BACKLOG.md` ne s'éditent **jamais** à la main. |
 | `POL-CAPTURE-INBOX` | La capture n'écrit **que** `raster/inbox.md`. Jamais un ticket, jamais un dossier. C'est la **seule** écriture directe que le socle conserve — une ligne d'inbox n'est pas une task. |
 | `POL-ECRITURE-CLI` | Aucune task ne s'écrit hors du CLI. Le socle appelle `write.mjs`, il ne touche pas aux fichiers de task. |
 | `POL-SANS-BASE` | Ni base de données, ni auth, ni état serveur. Un `git clone` suffit. |
