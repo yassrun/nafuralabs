@@ -8,7 +8,7 @@ dependencies {
     implementation project(':platform:features:ai:ai-agent-api')
     implementation project(':platform:features:ai:ai-conversation')
     implementation project(':platform:core:authorization')
-    implementation project(':platform:features:collaboration:workflow')
+    implementation project(':platform:approbation')
     implementation project(':platform:features:administration:subscription')
 
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'

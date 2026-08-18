@@ -11,7 +11,7 @@ import {
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 
 import { ButtonComponent, ConfirmDialogService } from '@platform/lib/anatomy';
-import { CommentThreadPanelComponent } from '@platform/features/collaboration/comment';
+import { CommentThreadPanelComponent } from '@platform/app/commentaire';
 import { TranslateModule } from '@ngx-translate/core';
 
 import type { PrixDPU } from '@app/etudes/models';

@@ -10,42 +10,17 @@
 ## nafura-platform
 
 - `approbation` lot
-  - · `CH-00-INIT-approbation` sous-lot
-    - · `PLT-121` spec — SPEC + geler AC — approbation
-    - · `PLT-122` tech — Baseline e2e approbation
-    - · `PLT-123` qa — Preuves — baseline approbation
   - · `CH-01-TECHNICAL-plier` sous-lot
-    - · `PLT-124` spec — SPEC + geler AC — plier approbation
-    - · `PLT-125` tech — Plier l arbre approbation
-- `commentaire` lot
-  - · `CH-00-INIT-commentaire` sous-lot
-    - · `PLT-103` spec — SPEC + geler AC — commentaire
-    - · `PLT-104` tech — Baseline e2e commentaire
-    - · `PLT-105` qa — Preuves — baseline commentaire
-  - · `CH-01-TECHNICAL-plier` sous-lot
-    - · `PLT-106` spec — SPEC + geler AC — plier commentaire
-    - · `PLT-107` tech — Plier l arbre commentaire
+    - ▸ `PLT-125` tech — Plier l arbre approbation
 - `conversation` lot
-  - · `CH-00-INIT-conversation` sous-lot
-    - · `PLT-127` spec — SPEC + geler AC — conversation
-    - · `PLT-128` tech — Baseline e2e conversation
-    - · `PLT-129` qa — Preuves — baseline conversation
   - · `CH-01-TECHNICAL-plier` sous-lot
     - · `PLT-130` spec — SPEC + geler AC — plier conversation
     - · `PLT-131` tech — Plier l arbre conversation
 - `identite` lot
-  - · `CH-00-INIT-identite` sous-lot
-    - · `PLT-115` spec — SPEC + geler AC — identite
-    - · `PLT-116` tech — Baseline e2e identite
-    - · `PLT-117` qa — Preuves — baseline identite
   - · `CH-01-TECHNICAL-plier` sous-lot
     - · `PLT-118` spec — SPEC + geler AC — plier identite
     - · `PLT-119` tech — Plier l arbre identite
 - `notification` lot
-  - · `CH-00-INIT-notification` sous-lot
-    - · `PLT-109` spec — SPEC + geler AC — notification
-    - · `PLT-110` tech — Baseline e2e notification
-    - · `PLT-111` qa — Preuves — baseline notification
   - · `CH-01-TECHNICAL-plier` sous-lot
     - · `PLT-112` spec — SPEC + geler AC — plier notification
     - · `PLT-113` tech — Plier l arbre notification
@@ -75,4 +50,4 @@
 
 ---
 
-**35 live · 2 projets**
+**17 live · 2 projets**

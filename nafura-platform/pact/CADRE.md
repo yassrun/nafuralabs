@@ -84,5 +84,6 @@ Elles s'imposent à tous les contextes.
 | **documents** | conserver un fichier |
 | **document-extraction** | tirer une structure d'un document |
 | **impression** | produire une page |
+| **approbation** | faire décider une demande |
 
 <!-- /généré -->

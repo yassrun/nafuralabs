@@ -26,10 +26,31 @@ Ce que l'INIT coupe : ce que commenter recouvre — et ce qu'il ne recouvre pas 
 - **AC-4** Un lecteur de la seule SPEC peut répondre : « ce besoin appartient-il à `commentaire` ? »
 - **AC-5** Aucune règle métier produit n'entre dans la SPEC.
 
+## Politiques
+
+`POL-TENANT-ISOLATION` · `POL-ERREUR-CODE` · `POL-PAS-METIER-PRODUIT`
+
 ## Preuves attendues
 
-`e2e/commentaire/` — baseline verte pour AC-3. Revue humaine pour AC-1, AC-2, AC-4, AC-5.
+Scénarios e2e (projet `nafura-platform/e2e/`, pas par BC) :
+
+| Scénario | État initial | AC |
+|----------|--------------|----|
+| `commentaire-poster-et-lire` | tenant A, une personne, enregistrement opaque | AC-3 |
+| `commentaire-deux-tenants` | même entité+id, A puis B | AC-3 |
+| `commentaire-auteur-seul` | un message d'Alice ; Bob dans le même tenant | AC-3 |
+| `commentaire-retirer` | un message présent chez A, posté par A | AC-3 |
+| `commentaire-repondre` | un message racine chez A | AC-3 |
+| `commentaire-frontiere-produit` | compile : zéro type métier produit dans commentaire | AC-3 |
+
+Les tests déjà verts du module `comment` **peuvent** servir s'ils assertent bien les AC — l'exec le déclare. Un test écrit directement vert sans avoir été vu rouge est refusé.
+
+**La règle de discrimination ne s'applique pas** (baseline). Substitut : le test a été vu rouge avant d'être vert.
+
+Revue humaine pour AC-1, AC-2, AC-4, AC-5.
 
 ## Hors périmètre
 
-Déplacer le code → `CH-01-TECHNICAL-plier` · refondre le comportement · brancher un nouveau consommateur
+Déplacer le code → `CH-01-TECHNICAL-plier` · refondre le comportement · brancher un nouveau consommateur · matrice socle (`P-…` commentaire) → `socle/CH-05-EVOL-consommateur-commentaire`
+
+Canvas : [`../ux/fil-commentaire-wireframe.canvas.tsx`](../ux/fil-commentaire-wireframe.canvas.tsx)

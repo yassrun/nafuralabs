@@ -8,8 +8,8 @@ dependencies {
     implementation project(':platform:core:identity')
     implementation project(':platform:impression')
     implementation project(':platform:features:collaboration:audit')
-    implementation project(':platform:features:collaboration:comment')
-    implementation project(':platform:features:collaboration:workflow')
+    implementation project(':platform:commentaire')
+    implementation project(':platform:approbation')
 
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'

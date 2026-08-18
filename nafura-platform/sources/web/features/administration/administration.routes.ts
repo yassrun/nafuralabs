@@ -50,7 +50,9 @@ export const ADMINISTRATION_ROUTES: Routes = [
   {
     path: 'workflows',
     loadChildren: () =>
-      import('./workflows/workflows.routes').then((m) => m.WORKFLOWS_ROUTES),
+      import('../../app/approbation/workflows/workflows.routes').then(
+        (m) => m.WORKFLOWS_ROUTES
+      ),
   },
   {
     path: 'scheduled-jobs',

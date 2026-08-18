@@ -1,8 +1,8 @@
 import { inject, Injectable } from '@angular/core';
 import { signal, computed } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
-import type { ApprovalRequestDto } from '@platform/features/collaboration/workflow/services/workflow-api.service';
-import { WorkflowApiService } from '@platform/features/collaboration/workflow/services/workflow-api.service';
+import type { ApprovalRequestDto } from '@platform/app/approbation/services/workflow-api.service';
+import { WorkflowApiService } from '@platform/app/approbation/services/workflow-api.service';
 
 @Injectable({ providedIn: 'root' })
 export class ApprovalsFacade {

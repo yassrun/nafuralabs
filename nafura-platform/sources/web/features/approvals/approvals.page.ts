@@ -9,7 +9,7 @@ import { LucideAngularModule, Check, X, ClipboardCheck } from 'lucide-angular';
 import { ToastService } from '@lib/anatomy';
 import { PageShellComponent, PageHeaderComponent } from '@lib/anatomy';
 import { TabsComponent, TabItem } from '@lib/anatomy/components/molecules/tabs';
-import type { ApprovalRequestDto } from '@platform/features/collaboration/workflow/services/workflow-api.service';
+import type { ApprovalRequestDto } from '@platform/app/approbation/services/workflow-api.service';
 import { ApprovalsFacade } from './services/approvals-facade.service';
 import { ApprovalCommentDialogComponent } from './components/approval-comment-dialog.component';
 import { getEntityDetailRoute } from './config/entity-type-routes.config';

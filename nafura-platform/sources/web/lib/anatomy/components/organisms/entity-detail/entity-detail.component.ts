@@ -90,8 +90,8 @@ import {
   ApprovalActionComponent,
   WorkflowApiService,
   WorkflowTemplateDto,
-} from '../../../../../features/collaboration/workflow';
-import { WorkflowTemplateSelectDialogComponent } from '../../../../../features/collaboration/workflow/components/workflow-template-select-dialog.component';
+} from '../../../../../app/approbation';
+import { WorkflowTemplateSelectDialogComponent } from '../../../../../app/approbation/components/workflow-template-select-dialog.component';
 import { ConfirmDialogService } from '../../services/confirm-dialog.service';
 
 import type {
