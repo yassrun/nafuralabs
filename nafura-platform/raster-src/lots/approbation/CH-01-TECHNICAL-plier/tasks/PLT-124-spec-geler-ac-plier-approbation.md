@@ -32,6 +32,7 @@ sprint: 2026-W34
 18/08 01:25  status → doing
 18/08 01:28  AC précisés (chemins réels collaboration/workflow, include, FQCN, 3 routes) · coupe web tranchée · SPEC intacte
 18/08 01:30  status → done-agent · gate none → done-me
+18/08 01:42  constat écart PLT-125 : livré = AC · sous-dossier workflows/ dans AC-2 · SPEC inchangée · pas de dette
 ```
 
 ## Rapport de livraison
