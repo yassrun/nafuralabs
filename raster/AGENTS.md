@@ -365,6 +365,64 @@ Deux sous-lots d'un même lot ne devraient pas se croiser (le CH est une fronti�
 
 *(2026-08-16 — décidé. Dette : les vues générées (`INDEX` · `BACKLOG` · `SPRINT`) sont regénérées à chaque écriture ; plusieurs execs qui écrivent en même temps sur l'arbre d'intégration peuvent se croiser dessus. À sérialiser côté CLI.)*
 
+### Le merge — une branche par session
+
+| | Nom | Qui la tient |
+|--|-----|--------------|
+| Branche sous-lot | `<lot-slug>/<CH-nn-TYPE-slug>` | l'**agent** du sous-lot |
+| Branche session | `session/<projet>-<date>` | l'**orchestrateur** de la session |
+| Intégration | `staging` | **toi** |
+
+Chaque sous-lot clos merge dans la branche de session. **Toi** tu merges la session dans `staging`, et tu pousses — `git push` reste ton geste, jamais le leur.
+
+**Pourquoi une branche de session et plus une branche de lot :** la branche doit correspondre à quelque chose que quelqu'un tient. Le lot n'est plus tenu par personne ; la session, si. Et c'est ce qui te donne **un seul diff à lire** avant de pousser, au lieu d'un par lot.
+
+`staging` ne bouge donc pas pendant qu'une session tourne. Deux sous-lots qui se croisent sortent en **conflit de merge sur la branche de session** — visible, au bon endroit, tenu par celui qui a lancé.
+
+*(2026-08-18 — décidé. Reste : implémenter.)*
+
+### La session — un orchestrateur, tout le front
+
+**Une session de travail = un seul agent d'orchestration.** Il prend le **front** de la fenêtre — les sous-lots lançables, **tous lots confondus** — et lance un sous-agent par sous-lot, chacun dans son worktree. Un bouton, une session, un interlocuteur.
+
+**Le lot cesse d'être une unité d'isolation.** Il lui reste deux rôles, tous deux passifs : un **rangement** dans l'arbre, et le **grain de la borne** (la roadmap cite des lots). Rien qu'un agent doive tenir.
+
+**Pourquoi :** §7 justifiait l'isolation par lot par la collision physique — deux agents sur le même fichier. Mais `worktree.mjs` crée un worktree **par sous-lot**. L'isolation physique était déjà au bon grain ; le lot ne protégeait plus rien, il **sérialisait** ce que les worktrees rendaient parallèle. Et c'est lui qui imposait un lancement par lot, donc une fenêtre de chat par lot.
+
+**L'exclusion suit la ressource.** *Un lot n'est tenu que par un orchestrateur* (ancien INV-3) est remplacé par : **un sous-lot n'est tenu que par un agent**. Un worktree est une ressource réelle ; un lot n'en était pas une.
+
+L'état tenu par le serveur est donc celui de la **session** et de ses sous-lots — plus des lots.
+
+*(2026-08-18 — décidé. Reste : implémenter.)*
+
+### L'amorçage — qui crée les nœuds
+
+**Un lot de la fenêtre sans sous-lot ouvert n'est pas un lot fini : il est *non découpé*.** Aujourd'hui les deux rendent `lancables: []` et l'orchestrateur s'arrête pareil — c'est pour ça qu'aucune session ne démarre sur un lot annoncé mais pas coupé. `window` doit distinguer les deux : **clos** · **non découpé** · **bloqué**.
+
+Sur un lot non découpé, l'orchestrateur lance un agent **`spec` d'amorçage**, périmètre : *couper ce lot*. Il lit `ROADMAP.md` et le Pact **en prose**, puis crée sous-lots et tasks **par le CLI** (§0.1-9). Rien d'écrit à la main, comme le reste.
+
+**C'est le seul endroit où un agent crée des nœuds** — partout ailleurs il ne fait que les parcourir. Donc la task d'amorçage porte **`gate: me`** : tu vois la coupe avant qu'elle ne se déroule. Le découpage est la décision qui engage tout le reste ; c'est le bon endroit pour la seule attente qu'on s'autorise en plus.
+
+**Pourquoi un agent et pas un format de roadmap :** la roadmap est un **acte**, en prose (`pact/orchestration/SPEC.md` INV-1). La rendre lisible par machine reviendrait à la transformer en calcul — précisément ce qu'on a refusé. Un agent la lit comme tu l'as écrite.
+
+Un lot n'est amorcé qu'une fois : dès qu'il porte un sous-lot ouvert, la boucle normale reprend.
+
+*(2026-08-18 — décidé. Reste : implémenter.)*
+
+### Le graphe — le nœud est le sous-lot
+
+**Une seule notion d'ordre.** Un graphe de sous-lots ; les **arêtes sont les `blocked_by:` qui sortent du sous-lot**. À l'intérieur, `blocked_by:` n'est qu'une chaîne de série — les tasks d'un sous-lot ne tournent jamais en parallèle, donc leur ordre n'est pas une arête.
+
+**Pourquoi le sous-lot :** c'est déjà le grain que la readiness calcule et celui que l'orchestrateur lance. Un nœud posé ailleurs ferait diverger le grain du graphe et le grain du fan-out.
+
+**Le front** = les sous-lots ouverts dont toutes les arêtes entrantes sont closes. C'est `ready`, nommé. Dérivé, jamais stocké.
+
+**`sprint:` est mort.** La semaine ISO était un ordre par calendrier que personne ne lit — ni la readiness, ni la fenêtre, ni le skill, ni les agents. Le front remplace la vue Sprint. L'arbre `projet → lot → sous-lot` reste un **rangement**, pas une file : une contenance ne dit rien sur l'ordre.
+
+**La borne n'est pas une arête.** Le graphe dit *ce qui peut*, la borne dit *ce qui est permis*. La numérotation de `ROADMAP.md` n'est lue par personne ; seule l'appartenance à la fenêtre l'est.
+
+*(2026-08-18 — décidé. Reste : implémenter la vue front et retirer Sprint de l'UI.)*
+
 ### Readiness — calculée, jamais stockée
 
 **Grain = le sous-lot.** Il est **lançable** si toute task dont il dépend *hors de lui* est `done-agent` \| `done-me` (ou absente). À l'intérieur, `blocked_by:` ne fait qu'**ordonner** — les tasks sont en série, l'exec suit l'ordre.
@@ -386,6 +444,11 @@ Ce qui manquait n'était pas d'avoir une seule notion, c'était que **ni l'une n
 
 | Date | Décision |
 |------|----------|
+| 2026-08-18 | **Deux volets** : **Plan** (lots, roadmap, borne) et **Session** (sous-lots qui partent) · **Session remplace Sprint** · la Session **est le front**, calculée depuis la borne — aucune sélection stockée |
+| 2026-08-18 | **Merge** : branche `session/<projet>-<date>` tenue par l’orchestrateur · les sous-lots y mergent · **plus de branche de lot** · toi seul merges la session dans `staging` et pousses |
+| 2026-08-18 | **Session** : **un seul** orchestrateur prend le **front** de la fenêtre, tous lots confondus, et fan-oute un agent par sous-lot · le **lot n’isole plus** (rangement + grain de la borne) · ancien INV-3 remplacé par « **un sous-lot, un agent** » |
+| 2026-08-18 | **Amorçage** : un lot de la fenêtre sans sous-lot ouvert est *non découpé*, pas fini · l’orchestrateur y lance un `spec` qui **coupe le lot** depuis la roadmap et le Pact, par le CLI · `gate: me` sur cette task — seul endroit où un agent crée des nœuds |
+| 2026-08-18 | **Raisonner graphe** : le nœud est le **sous-lot**, les arêtes sont les `blocked_by:` sortants · le **front** (= `ready`) remplace la vue Sprint · **`sprint:` supprimé** · la borne est une permission, pas une arête |
 | 2026-08-16 | **Écriture = CLI seul** (§0.1-9) · orchestration : lot = isolation, sous-lot = fan-out, task = série (§7) · **`ROADMAP.md`** écrit à la main + **borne** d'autonomie · skill `orchestration` = la boucle, **jamais** les règles (Cursor ne lit pas les skills) · livraison : **worktree + branche par sous-lot**, hors dépôt, aucun agent ne pousse |
 | 2026-08-13 | Orchestrateur Raster (`nafura-orch`) · exec → `review` · spec consolide SPEC+UX · QA pose `done-agent` sur feature/bug |
 | 2026-08-13 | `type: qa` · `agent_type:` spec \| exec \| qa · QA = task dédiée (`review` / `gate: qa` legacy) |

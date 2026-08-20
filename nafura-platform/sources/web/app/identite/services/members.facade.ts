@@ -4,7 +4,7 @@ import { GridFacade } from '@lib/anatomy';
 
 import type { Member, MemberInvite, MemberUpdate } from '../models';
 import { MembersApiService } from './members-api.service';
-import { RolesApiService } from '../../roles/services/roles-api.service';
+import { RolesApiService } from '../../../features/administration/iam/roles/services/roles-api.service';
 
 type MemberMutation = MemberInvite & Partial<MemberUpdate>;
 

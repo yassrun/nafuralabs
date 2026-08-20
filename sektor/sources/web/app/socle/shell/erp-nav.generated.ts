@@ -1,15 +1,11 @@
 /**
  * ERP Nafura — Navigation BTP Maroc
- * Structure complète — tous les modules métier ERP orientés BTP.
+ * Un item de premier niveau = un BC (labels métier). Voir sektor/raster-src/DECISIONS.md § Sidebar.
  *
- * Flux métier BTP :
- *   Chantiers → Études → Achats → Stock → Matériel → Marchés & facturation → Finance → RH/HSE → Rapports
+ * Cycle : Études → Catalogue → Achats → Chantiers → Marchés → Ventes → Finance → RH → HSE
+ * Socle : tableau de bord + pilotage / analytics
  *
- * Zones (4 max pour clarté visuelle) :
- *   work        → Tableau de bord
- *   operations  → Chantiers · Achats · Stock · Matériel
- *   business    → Études · Marchés & facturation · Finance
- *   people      → RH · HSE · Rapports
+ * Zones = id BC, labels vides → séparateurs seulement (pas operations/business/people).
  */
 
 import { GeneratedZoneConfig, SidebarNode } from '@platform/core/navigation/sidebar.types';
@@ -24,7 +20,7 @@ export const ERP_NAV_CONFIG_GENERATED: SidebarNode[] = [
     label: 'nav.dashboard',
     icon: 'layout-dashboard',
     route: '/dashboard',
-    zone: 'work',
+    zone: 'socle',
     order: 0,
   },
 
@@ -35,8 +31,8 @@ export const ERP_NAV_CONFIG_GENERATED: SidebarNode[] = [
     id: 'chantiers',
     label: 'nav.chantiers',
     icon: 'hard-hat',
-    zone: 'operations',
-    order: 10,
+    zone: 'chantiers',
+    order: 40,
     children: [
       {
         id: 'chantiers.execution',
@@ -136,8 +132,8 @@ export const ERP_NAV_CONFIG_GENERATED: SidebarNode[] = [
     id: 'achats',
     label: 'nav.achats',
     icon: 'shopping-cart',
-    zone: 'operations',
-    order: 20,
+    zone: 'achats',
+    order: 30,
     children: [
       {
         id: 'achats.expression',
@@ -202,17 +198,51 @@ export const ERP_NAV_CONFIG_GENERATED: SidebarNode[] = [
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // STOCK & LOGISTIQUE
+  // CATALOGUE — articles · stock · ouvrages · matériel
   // ═══════════════════════════════════════════════════════════════════════════
   {
-    id: 'stock',
-    label: 'nav.stock',
-    icon: 'warehouse',
-    zone: 'operations',
-    order: 30,
+    id: 'catalogue',
+    label: 'nav.catalogue',
+    icon: 'layers',
+    zone: 'catalogue',
+    order: 20,
     children: [
-
-      // Mouvements
+      {
+        id: 'catalogue.referentiel',
+        label: 'nav.catalogue.referentiel',
+        icon: 'package',
+        order: 5,
+        children: [
+          {
+            id: 'stock.catalogue.articles',
+            label: 'nav.stock.articles',
+            icon: 'package',
+            route: '/inventory/catalogue/articles',
+            order: 10,
+          },
+          {
+            id: 'stock.catalogue.familles',
+            label: 'nav.stock.familles',
+            icon: 'folder',
+            route: '/inventory/configuration/familles',
+            order: 20,
+          },
+          {
+            id: 'stock.catalogue.uom',
+            label: 'nav.stock.uom',
+            icon: 'ruler',
+            route: '/inventory/configuration/uom',
+            order: 40,
+          },
+          {
+            id: 'catalogue.ouvrages',
+            label: 'nav.etudes.bibliotheque',
+            icon: 'book-open',
+            route: '/etudes/bibliotheque-prix',
+            order: 50,
+          },
+        ],
+      },
       {
         id: 'stock.mouvements',
         label: 'nav.stock.mouvements',
@@ -295,37 +325,6 @@ export const ERP_NAV_CONFIG_GENERATED: SidebarNode[] = [
         ],
       },
 
-      // Catalogue Articles
-      {
-        id: 'stock.catalogue',
-        label: 'nav.stock.catalogue',
-        icon: 'layers',
-        order: 30,
-        children: [
-          {
-            id: 'stock.catalogue.articles',
-            label: 'nav.stock.articles',
-            icon: 'package',
-            route: '/inventory/catalogue/articles',
-            order: 10,
-          },
-          {
-            id: 'stock.catalogue.familles',
-            label: 'nav.stock.familles',
-            icon: 'folder',
-            route: '/inventory/configuration/familles',
-            order: 20,
-          },
-          {
-            id: 'stock.catalogue.uom',
-            label: 'nav.stock.uom',
-            icon: 'ruler',
-            route: '/inventory/configuration/uom',
-            order: 40,
-          },
-        ],
-      },
-
       // Configuration
       {
         id: 'stock.configuration',
@@ -357,19 +356,7 @@ export const ERP_NAV_CONFIG_GENERATED: SidebarNode[] = [
           },
         ],
       },
-    ],
-  },
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // MATÉRIEL & ÉQUIPEMENTS
-  // ═══════════════════════════════════════════════════════════════════════════
-  {
-    id: 'materiel',
-    label: 'nav.materiel',
-    icon: 'truck',
-    zone: 'operations',
-    order: 40,
-    children: [
       {
         id: 'materiel.exploitation',
         label: 'nav.materiel.exploitation',
@@ -452,52 +439,22 @@ export const ERP_NAV_CONFIG_GENERATED: SidebarNode[] = [
     id: 'etudes',
     label: 'nav.etudes',
     icon: 'compass',
-    zone: 'business',
-    order: 50,
+    zone: 'etudes',
+    order: 10,
     children: [
       {
-        id: 'etudes.chiffrage',
-        label: 'nav.etudes.chiffrage',
-        icon: 'calculator',
-        order: 10,
-        children: [
-          {
-            // Parcours unifié Étude / AO : dépôt pièces, bordereau, chiffrage.
-            id: 'etudes.dossiers',
-            label: 'nav.etudes.dossiers',
-            icon: 'clipboard-list',
-            route: '/etudes/dossiers',
-            order: 5,
-          },
-          {
-            id: 'etudes.bibliotheque',
-            label: 'nav.etudes.bibliotheque',
-            icon: 'book-open',
-            route: '/etudes/bibliotheque-prix',
-            order: 10,
-          },
-          {
-            id: 'etudes.catalogueConsole',
-            label: 'nav.etudes.catalogueConsole',
-            icon: 'library',
-            route: '/catalogue',
-            order: 12,
-          },
-          {
-            id: 'etudes.metres',
-            label: 'nav.etudes.metres',
-            icon: 'ruler',
-            route: '/etudes/metres',
-            order: 20,
-          },
-          {
-            id: 'etudes.devis',
-            label: 'nav.etudes.devis',
-            icon: 'file-text',
-            route: '/etudes/devis',
-            order: 30,
-          },
-        ],
+        id: 'etudes.dossiers',
+        label: 'nav.etudes.dossiers',
+        icon: 'clipboard-list',
+        route: '/etudes/dossiers',
+        order: 5,
+      },
+      {
+        id: 'etudes.devis',
+        label: 'nav.etudes.devis',
+        icon: 'file-text',
+        route: '/etudes/devis',
+        order: 30,
       },
     ],
   },
@@ -509,8 +466,8 @@ export const ERP_NAV_CONFIG_GENERATED: SidebarNode[] = [
     id: 'marches',
     label: 'nav.marches',
     icon: 'file-signature',
-    zone: 'business',
-    order: 55,
+    zone: 'marches',
+    order: 50,
     children: [
       {
         id: 'marches.sectionPublic',
@@ -576,6 +533,19 @@ export const ERP_NAV_CONFIG_GENERATED: SidebarNode[] = [
           },
         ],
       },
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // VENTES
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
+    id: 'ventes',
+    label: 'nav.ventes',
+    icon: 'briefcase-business',
+    zone: 'ventes',
+    order: 60,
+    children: [
       {
         id: 'ventes.cycleClient',
         label: 'nav.ventes.cycleClient',
@@ -659,7 +629,7 @@ export const ERP_NAV_CONFIG_GENERATED: SidebarNode[] = [
     id: 'finance',
     label: 'nav.finance',
     icon: 'landmark',
-    zone: 'business',
+    zone: 'finance',
     order: 70,
     children: [
 
@@ -861,7 +831,7 @@ export const ERP_NAV_CONFIG_GENERATED: SidebarNode[] = [
     id: 'rh',
     label: 'nav.rh',
     icon: 'users-round',
-    zone: 'people',
+    zone: 'rh',
     order: 80,
     children: [
       {
@@ -945,7 +915,7 @@ export const ERP_NAV_CONFIG_GENERATED: SidebarNode[] = [
     id: 'hse',
     label: 'nav.hse',
     icon: 'shield',
-    zone: 'people',
+    zone: 'hse',
     order: 90,
     children: [
       {
@@ -1037,7 +1007,7 @@ export const ERP_NAV_CONFIG_GENERATED: SidebarNode[] = [
     label: 'nav.pilotage',
     icon: 'gauge',
     zone: 'pilotage',
-    order: 90,
+    order: 100,
     children: [
       {
         id: 'pilotage.marges',
@@ -1126,7 +1096,7 @@ export const ERP_NAV_CONFIG_GENERATED: SidebarNode[] = [
     label: 'nav.analytics',
     icon: 'chart-bar',
     zone: 'pilotage',
-    order: 100,
+    order: 110,
     children: [
       {
         id: 'analytics.chantiers',
@@ -1168,11 +1138,17 @@ export const ERP_NAV_CONFIG_GENERATED: SidebarNode[] = [
 ];
 
 export const ERP_ZONE_CONFIG_GENERATED: GeneratedZoneConfig[] = [
-  { id: 'work',      label: 'zones.work',      order: 0 },
-  { id: 'operations', label: 'zones.operations', order: 1 },
-  { id: 'business',  label: 'zones.business',  order: 2 },
-  { id: 'people',    label: 'zones.people',    order: 3 },
-  { id: 'pilotage',  label: 'zones.pilotage',  order: 4 },
+  { id: 'socle', label: '', order: 0 },
+  { id: 'etudes', label: '', order: 10 },
+  { id: 'catalogue', label: '', order: 20 },
+  { id: 'achats', label: '', order: 30 },
+  { id: 'chantiers', label: '', order: 40 },
+  { id: 'marches', label: '', order: 50 },
+  { id: 'ventes', label: '', order: 60 },
+  { id: 'finance', label: '', order: 70 },
+  { id: 'rh', label: '', order: 80 },
+  { id: 'hse', label: '', order: 90 },
+  { id: 'pilotage', label: '', order: 100 },
 ];
 
 export const APP_NAVIGATION: SidebarNode[] = ERP_NAV_CONFIG_GENERATED;

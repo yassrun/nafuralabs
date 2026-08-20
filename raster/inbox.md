@@ -6,9 +6,11 @@ document-extraction : colonnes JPA `extracted_record.workflow_status` / `doc_typ
 document-extraction : libellés i18n validate/workflow encore présents alors que l'action décider n'est plus exposée @platform
 impression CH-03 : canvas « Proposer » (IA) — aucune capacité conversation/IA consommable ici ; livré le fallback manuel (textarea). Brancher Proposer quand le BC conversation sera consommable. @platform
 sektor études : à « Générer le devis » sans client Partner, demander si on crée le client (sinon on ne peut pas) — aujourd’hui bandeau + erreur, pas de création @sektor
-sektor études : retirer Métrés & Quantitatifs du menu et du code (entité, API, createFromMetre, metreId DPGF/devis/AO, seeds, lookups) — gelé dans raster-src/DECISIONS-PRODUIT.md @sektor
-sektor : sortir « Console catalogue Sektor » (/catalogue) du chrome tenant — interne Nafura G2, pas le catalogue articles client — gelé dans raster-src/DECISIONS-PRODUIT.md @sektor
-sektor études : journal produit avant Pact — cycle chiffrage poste décomposé / articles / ouvrages à confirmer dans raster-src/DECISIONS-PRODUIT.md (pas encore SPEC) @sektor
+sektor études : retirer Métrés & Quantitatifs du **code** (entité, API, createFromMetre, metreId…) — **hors menu** depuis 20/08 (sidebar BC) ; blast code encore inbox @sektor
+sektor : console `/catalogue` G2 hors chrome tenant — **hors menu** 20/08 ; Extraire identité Sektor sans ouvrir la console — gelé DECISIONS-PRODUIT @sektor
+sektor chrome : sidebar regroupée par BC (cycle Études→…→HSE, Catalogue = articles+stock+ouvrages+matériel, Ventes sorti de Marchés) — livré 20/08, routes inchangées ; gelé raster-src/DECISIONS.md @sektor
+sektor études : consultation liée à l’étude, paquet d’articles, identification des couverts ; obligatoire = min N devis (pas 100 % des articles) — gelé 20/08 dans raster-src/DECISIONS-PRODUIT.md — pas encore SPEC @sektor
+sektor catalogue : identité article unique (Sektor `cle_stable` PUBLIEE à Extraire, pas candidat G2) + normalisation IA + Item 1–1 + tiny spec (couleur ≠ 2ᵉ article) — gelé 20/08 dans raster-src/DECISIONS-PRODUIT.md ; reste match incertain, note d’emploi Extraire — pas encore SPEC @sektor
 commentaire : CommentServiceImplTest utilise entityType dpgf_noeud (mot produit) — hors scan main de la baseline INIT @platform
 commentaire : erreurs exposées = message / statut HTTP, pas de code — POL-ERREUR-CODE @platform
 approbation : `getEntityTypes` fuit un catalogue produit (Invoice, Quote, Receipt, Order, PurchaseOrder, Contract, Document) — POL-PAS-METIER-PRODUIT @platform

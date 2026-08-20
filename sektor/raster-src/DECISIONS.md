@@ -43,3 +43,19 @@ Socle : un type / identifiant légal. Pas une table « tiers ».
 ## finance
 
 Devises et taux (`currency/` backend, `finance/devises` web) → **finance**, pas catalogue.
+
+## Sidebar (chrome)
+
+Gelé 20/08/2026. **Un item de premier niveau = un BC.** Labels métier, pas le mot « BC ». Pas de zones Fiori `operations / business / people`.
+
+Ordre = cycle : Études → Catalogue → Achats → Chantiers → Marchés → Ventes → Finance → RH → HSE. Socle = tableau de bord + pilotage / analytics.
+
+| Item | Contient | Hors item |
+|------|----------|-----------|
+| Études | dossiers (étude = AO), devis | bibliothèque, `/catalogue` G2, mètres, listing AO legacy |
+| Catalogue | articles, familles, UoM, stock, mouvements, ouvrages, matériel | |
+| Achats | demandes, AO, commandes, fournisseurs | |
+| Marchés | contrats, avenants, cautions… | clients / factures ventes |
+| Ventes | clients, offres, factures | |
+
+Routes inchangées dans cette passe (`/inventory/…`, `/etudes/bibliotheque-prix`). Seulement le chrome.

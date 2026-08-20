@@ -165,3 +165,36 @@ La collision qui casse le parallèle n'est pas logique (`blocked_by:` la couvre)
 **`<projet>/ROADMAP.md`** — l'ordre des lots, **écrit à la main**, hors `raster-src/`, non indexé. La roadmap est un **acte**, pas un calcul : elle porte des lots qui n'ont encore ni task ni dossier. Un marqueur `<!-- borne -->` sépare ce que l'orchestrateur peut ouvrir seul de ce qu'il ne peut pas. **Déplacer la borne = planifier.**
 
 Détail : [`raster/AGENTS.md`](raster/AGENTS.md) §7.
+
+---
+
+## Le graphe (2026-08-18)
+
+**Le nœud est le sous-lot (CH).** Une seule notion d'ordre dans Raster : un graphe de sous-lots, dont les **arêtes sont les `blocked_by:` qui sortent du sous-lot**. À l'intérieur, `blocked_by:` n'est plus qu'une chaîne de série — les tasks d'un sous-lot ne sont jamais parallèles, donc leur ordre n'est pas une arête.
+
+**Pourquoi le sous-lot et pas la task :** c'est déjà le grain que `ready.mjs` calcule et celui que l'orchestrateur lance. Poser le nœud ailleurs ferait diverger le grain du graphe et le grain du fan-out, et il faudrait redire ce qu'un agent reçoit.
+
+**Le front est dérivé** — les sous-lots ouverts dont toutes les arêtes entrantes sont closes. Rien n'est stocké : pas de champ, pas de vue à commiter. C'est `ready` ; il ne restait qu'à le nommer et à l'afficher.
+
+**`sprint:` meurt.** Une semaine ISO est un ordre par calendrier que personne ne lit — ni la readiness, ni la fenêtre, ni le skill, ni les agents. Le **front** remplace la vue Sprint. L'arbre `projet → lot → sous-lot` reste ce qu'il est, un **rangement** : une contenance ne dit rien sur l'ordre, et l'afficher comme une file était le malentendu.
+
+**La borne n'est pas une arête.** Le graphe dit **ce qui peut**, la borne dit **ce qui est permis** — deux axes, pas deux ordres. La numérotation de `ROADMAP.md` n'est lue par personne : seule l'appartenance à la fenêtre l'est.
+
+**L'amorçage.** Un lot de la fenêtre **sans sous-lot ouvert** n'est pas un lot fini : il est **non découpé**. `window` distingue les trois cas — clos · non découpé · bloqué. Sur un lot non découpé, l'orchestrateur lance un agent **`spec` d'amorçage** dont le périmètre est *couper ce lot* : il lit `ROADMAP.md` et le Pact **en prose**, puis crée sous-lots et tasks par le CLI. C'est le **seul endroit où un agent crée des nœuds**, d'où le `gate: me` sur cette task — tu vois la coupe avant qu'elle ne se déroule. Rendre la roadmap lisible par machine aurait transformé un acte en calcul ; un agent la lit comme tu l'as écrite.
+
+**La session.** Une session de travail = **un seul** agent d'orchestration. Il prend le **front** de la fenêtre — les sous-lots lançables, **tous lots confondus** — et lance un sous-agent par sous-lot, chacun dans son worktree. **Le lot cesse d'être une unité d'isolation** : il ne lui reste qu'un rôle de rangement et le grain de la borne. L'isolation physique était déjà au grain du sous-lot (un worktree par sous-lot) ; le lot ne protégeait plus rien, il sérialisait ce que les worktrees rendaient parallèle — et c'est lui qui imposait un lancement, donc une fenêtre de chat, par lot. L'exclusion suit désormais la ressource réelle : **un sous-lot, un agent**.
+
+**Les deux volets — Plan et Session.** L'app a deux volets, et **Session remplace Sprint**.
+
+| | Contient | Grain |
+|---|---|---|
+| **Plan** | ce qui est prévu, dans l'ordre — `ROADMAP.md` et sa borne | **lot** |
+| **Session** | ce qui part maintenant | **sous-lot** |
+
+**Le grain du volet Session est le sous-lot**, parce que c'est ce qui se lance : un agent, un worktree. Un volet qui afficherait des lots afficherait quelque chose que rien n'exécute — c'était le défaut du Backlog, un arbre de rangement présenté comme une file.
+
+**La Session se remplit seule** : elle **est** le front. Tu déplaces la borne, Raster calcule les sous-lots lançables, la Session suit. Aucune sélection stockée — c'est précisément ce qui a tué `sprint:`, une étiquette posée à la main que plus rien ne relisait ensuite. Ton seul geste de planification reste la borne.
+
+
+
+

@@ -6,6 +6,19 @@
 > Regen : `node raster/regen.mjs` / `node raster/t.mjs index`.
 > Inbox : `raster/inbox.md`.
 
+## raster
+
+- `orchestration` lot
+  - · `CH-02-EVOL-plan-et-session` sous-lot
+    - · `RAS-107` spec — SPEC + geler AC — Plan, Session, front et amo…
+    - · `RAS-108` tech — plan distingue clos, non decoupe, bloque et l…
+    - · `RAS-109` feature — session start passe un brief sur stdin
+    - · `RAS-110` qa — Preuves — une session lance et les statuts bo…
+- `socle` lot
+  - · `CH-04-EVOL-volets-plan-session` sous-lot
+    - · `RAS-111` feature — Les deux volets — Plan et Session dans l'app
+    - · `RAS-112` qa — Preuves — Plan et Session a l'ecran
+
 ---
 
-**0 live · 0 projets**
+**6 live · 1 projets**
