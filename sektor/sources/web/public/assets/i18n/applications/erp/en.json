@@ -286,6 +286,7 @@
     "achats.referentiel": "Supplier master data",
     "achats.demandes": "Purchase Requests",
     "achats.appelsOffres": "Tenders",
+    "achats.consultations": "Consultations",
     "achats.commandes": "Purchase Orders",
     "achats.contrats": "Supplier Contracts",
     "achats.fournisseurs": "Suppliers",
@@ -328,7 +329,6 @@
     "etudes.dossiers": "Studies / client tenders",
     "etudes.bibliotheque": "Price Library",
     "etudes.catalogueConsole": "Sektor catalogue console",
-    "etudes.metres": "Quantities",
     "etudes.devis": "Estimates",
     "etudes.appelsOffresClients": "Client Tenders",
     "marches": "Contracts",
@@ -504,8 +504,6 @@
     "typeMo": "Labour",
     "typeMateriel": "Equipment",
     "typeSt": "Subcontract",
-    "metreDpgfTitle": "DPGF from quantity survey",
-    "metreDpgfSubtitle": "Price build-up from library (DPU) then estimate",
     "generateDpgf": "Generate / refresh DPGF",
     "createDevis": "Create estimate from this DPGF",
     "pdfDpgf": "PDF / print (CCAG-T summary)",
@@ -514,15 +512,10 @@
     "treeArticle": "Item",
     "totalHt": "Total excl. tax",
     "totalTtc": "Total incl. tax",
-    "backMetre": "Back to quantity survey",
-    "loadingMetre": "Loading quantity survey…",
-    "noMetre": "Quantity survey not found",
     "sommaireTitle": "Summary by lot (Morocco public works)",
     "printTitle": "DPGF — print",
     "toastDpgfOk": "DPGF saved",
-    "toastNeedDpgf": "Generate a DPGF before creating the estimate",
     "loadingDevis": "Creating estimate…",
-    "emptyDpgfHint": "No DPGF for this quantity survey — use « Generate / refresh DPGF ».",
     "dpgfCode": "Code",
     "dpgfLibelle": "Description",
     "tvaLine": "VAT {taux} %"
@@ -743,7 +736,9 @@
       },
       "consultation": {
         "prix_non_consulte": "At least one component has no consulted price.",
-        "forfait_non_rattache": "Lump sum is not linked to a consulted price."
+        "forfait_non_rattache": "Lump sum is not linked to a consulted price.",
+        "informative": "No consultation quote received — informational (optional consultation).",
+        "min_devis": "Not enough received consultation quotes (distinct suppliers) for the required minimum."
       },
       "chiffrage": {
         "prix_absent": "Unit selling price is missing or zero.",

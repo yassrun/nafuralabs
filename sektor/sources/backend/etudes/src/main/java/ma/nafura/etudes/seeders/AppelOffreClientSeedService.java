@@ -4,9 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 import ma.nafura.etudes.domain.appeloffre.AppelOffreClient;
-import ma.nafura.etudes.domain.metre.Metre;
 import ma.nafura.etudes.repository.AppelOffreClientRepository;
-import ma.nafura.etudes.repository.MetreRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,18 +14,12 @@ import ma.nafura.etudes.service.AppelOffreClientEmbeddedBuilder;
 public class AppelOffreClientSeedService {
 
     private final AppelOffreClientRepository repository;
-    private final MetreRepository metreRepository;
-    private final MetreSeedService metreSeedService;
     private final AppelOffreClientEmbeddedBuilder embeddedBuilder;
 
     public AppelOffreClientSeedService(
             AppelOffreClientRepository repository,
-            MetreRepository metreRepository,
-            MetreSeedService metreSeedService,
             AppelOffreClientEmbeddedBuilder embeddedBuilder) {
         this.repository = repository;
-        this.metreRepository = metreRepository;
-        this.metreSeedService = metreSeedService;
         this.embeddedBuilder = embeddedBuilder;
     }
 
@@ -37,16 +29,12 @@ public class AppelOffreClientSeedService {
         if (repository.countByTenantId(tenantId) > 0) {
             return;
         }
-        metreSeedService.seedIfEmpty();
         seedAoc001(tenantId);
         seedAoc006(tenantId);
         seedAoc009(tenantId);
     }
 
     private void seedAoc001(UUID tenantId) {
-        Metre metre = metreRepository
-                .findByTenantIdAndNumero(tenantId, "MET-2026-002")
-                .orElse(null);
         AppelOffreClient entity = AppelOffreClient.builder()
                 .tenantId(tenantId)
                 .numero("AOC-2026-0001")
@@ -64,8 +52,6 @@ public class AppelOffreClientSeedService {
                 .delaiExecutionJours(720)
                 .status(AppelOffreClient.STATUS_ATTRIBUE)
                 .devisNumero("DV-2026-0006")
-                .metreId(metre != null ? metre.getId().toString() : null)
-                .metreNumero(metre != null ? metre.getNumero() : "MET-2026-002")
                 .resultatRangNotre(1)
                 .resultatNbPlis(7)
                 .resultatAttributaire("SEYRURA BTP SARL")

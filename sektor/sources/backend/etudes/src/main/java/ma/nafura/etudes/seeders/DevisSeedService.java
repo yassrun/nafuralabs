@@ -17,10 +17,8 @@ import java.util.UUID;
 import ma.nafura.etudes.domain.devis.Devis;
 import ma.nafura.etudes.domain.devis.DevisLigne;
 import ma.nafura.etudes.domain.devis.DevisVersion;
-import ma.nafura.etudes.domain.metre.Metre;
 import ma.nafura.etudes.domain.ouvrage.Ouvrage;
 import ma.nafura.etudes.repository.DevisRepository;
-import ma.nafura.etudes.repository.MetreRepository;
 import ma.nafura.etudes.repository.OuvrageRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.core.io.ClassPathResource;
@@ -34,9 +32,7 @@ public class DevisSeedService {
     private static final int MONEY_SCALE = 2;
 
     private final DevisRepository repository;
-    private final MetreRepository metreRepository;
     private final OuvrageRepository ouvrageRepository;
-    private final MetreSeedService metreSeedService;
     private final ObjectMapper objectMapper;
 
     @PersistenceContext
@@ -44,14 +40,10 @@ public class DevisSeedService {
 
     public DevisSeedService(
             DevisRepository repository,
-            MetreRepository metreRepository,
             OuvrageRepository ouvrageRepository,
-            MetreSeedService metreSeedService,
             ObjectMapper objectMapper) {
         this.repository = repository;
-        this.metreRepository = metreRepository;
         this.ouvrageRepository = ouvrageRepository;
-        this.metreSeedService = metreSeedService;
         this.objectMapper = objectMapper;
     }
 
@@ -61,7 +53,6 @@ public class DevisSeedService {
         if (repository.countByTenantId(tenantId) > 0) {
             return;
         }
-        metreSeedService.seedIfEmpty();
         try (InputStream in = new ClassPathResource("seed/devis-seed.json").getInputStream()) {
             JsonNode root = objectMapper.readTree(in);
             for (JsonNode node : root.get("devis")) {
@@ -88,7 +79,6 @@ public class DevisSeedService {
                 .ville(textOrNull(node, "ville"))
                 .dateEmission(LocalDate.parse(node.get("dateEmission").asText()))
                 .dateValidite(LocalDate.parse(node.get("dateValidite").asText()))
-                .metreId(resolveMetreId(tenantId, textOrNull(node, "metreNumero")))
                 .bibliothequeReference(textOrNull(node, "bibliothequeReference"))
                 .conditionsPaiement(node.get("conditionsPaiement").asText())
                 .delaiExecutionJours(
@@ -152,16 +142,6 @@ public class DevisSeedService {
             }
         }
         return entity;
-    }
-
-    private UUID resolveMetreId(UUID tenantId, String numero) {
-        if (numero == null || numero.isBlank()) {
-            return null;
-        }
-        return metreRepository
-                .findByTenantIdAndNumero(tenantId, numero.trim())
-                .map(Metre::getId)
-                .orElse(null);
     }
 
     private UUID resolveOuvrageId(UUID tenantId, String code) {

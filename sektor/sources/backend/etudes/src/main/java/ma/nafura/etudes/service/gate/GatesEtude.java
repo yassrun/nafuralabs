@@ -251,16 +251,12 @@ public final class GatesEtude {
     }
 
     /**
-     * Étape 4 — consultation fournisseurs. <b>Non bloquante</b>. Couvre DECOMPOSE et FORFAIT.
+     * Étape 4 — consultation fournisseurs. Compteur = devis consultation reçus
+     * (fournisseurs distincts). {@code sourcePrix=CONSULTE} n'est plus une preuve.
+     * Optionnelle (défaut) = informative. Obligatoire = bloquante tant que recus &lt; min N.
      */
     @Component
     public static class GateConsultationFournisseurs implements EtapeGate {
-
-        private final PrixDpuRepository prixDpuRepository;
-
-        public GateConsultationFournisseurs(PrixDpuRepository prixDpuRepository) {
-            this.prixDpuRepository = prixDpuRepository;
-        }
 
         @Override
         public int etape() {
@@ -274,34 +270,25 @@ public final class GatesEtude {
 
         @Override
         public ResultatGate evaluer(ContexteGate contexte) {
-            List<DpgfNoeud> articles = contexte.articles();
-            List<ProblemeGate> pbs = new ArrayList<>();
-            for (DpgfNoeud a : articles) {
-                String origine = a.getOrigineCout();
-                if ("ESTIME".equals(origine)) {
-                    continue;
+            boolean obligatoire = contexte.consultationObligatoire();
+            int min = Math.max(1, contexte.consultationMinimum());
+            long recus = Math.max(0L, contexte.devisConsultationRecus());
+            if (!obligatoire) {
+                List<ProblemeGate> infos = new ArrayList<>();
+                if (recus == 0) {
+                    infos.add(new ProblemeGate(
+                            null, null, null, "etudes.gate.consultation.informative"));
                 }
-                if ("FORFAIT".equals(origine)) {
-                    // Forfait consultable : signaler si aucun partenaire / offre
-                    if (a.getForfaitPartnerId() == null && a.getForfaitOffreId() == null) {
-                        pbs.add(probleme(a, "etudes.gate.consultation.forfait_non_rattache"));
-                    }
-                    continue;
-                }
-                if (a.getPrixDpuId() == null) {
-                    continue;
-                }
-                PrixDpu dpu = prixDpuRepository.findById(a.getPrixDpuId()).orElse(null);
-                if (dpu == null || dpu.getComposants() == null) {
-                    continue;
-                }
-                boolean nonConsulte = dpu.getComposants().stream()
-                        .anyMatch(c -> !"CONSULTE".equals(c.getSourcePrix()));
-                if (nonConsulte) {
-                    pbs.add(probleme(a, "etudes.gate.consultation.prix_non_consulte"));
-                }
+                return new ResultatGate(etape(), false, infos);
             }
-            return new ResultatGate(etape(), false, pbs);
+            if (recus < min) {
+                return new ResultatGate(
+                        etape(),
+                        true,
+                        List.of(new ProblemeGate(
+                                null, null, null, "etudes.gate.consultation.min_devis")));
+            }
+            return ResultatGate.ok(etape());
         }
     }
 

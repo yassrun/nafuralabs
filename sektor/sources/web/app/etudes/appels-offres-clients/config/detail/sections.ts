@@ -32,7 +32,7 @@ export const SECTIONS: DetailSectionConfig<AppelOffreClient>[] = [
     id: 'etude',
     title: 'Étude',
     icon: 'book-open',
-    fields: ['metreId', 'devisId'],
+    fields: ['devisId'],
     columns: 2,
   },
   {

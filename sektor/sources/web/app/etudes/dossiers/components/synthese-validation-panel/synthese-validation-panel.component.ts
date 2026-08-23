@@ -22,7 +22,7 @@ import {
   type AvisExecutionResume,
   type SyntheseCoutAffaire,
 } from '../../services/dossier-etude-api.service';
-import { DpgfApiService, type DpgfLotTotal } from '../../../metres/services/dpgf-api.service';
+import { DpgfApiService, type DpgfLotTotal } from '../../../services/dpgf-api.service';
 import { DpuApiService } from '@app/catalogue/bibliotheque-prix/services/dpu-api.service';
 import { GateBlocageComponent } from '../gate-blocage/gate-blocage.component';
 import { openGateProblemesDialog } from '../gate-blocage/gate-problemes-dialog.component';

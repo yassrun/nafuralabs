@@ -21,7 +21,7 @@ import { ButtonComponent, ConfirmDialogService, ToastService } from '@platform/l
 import { MadCurrencyPipe } from '@platform/lib/anatomy/pipes/mad-currency.pipe';
 import { safeRandomUUID } from '@platform/core/util/uuid';
 
-import type { ComposantDPU, PrixDPU, SourcePrixComposant } from '@app/etudes/models';
+import type { ComposantDPU, DpuComposantType, PrixDPU, SourcePrixComposant } from '@app/etudes/models';
 import { DpuService } from '@app/etudes/services/dpu.service';
 import {
   composantLibelle,
@@ -31,10 +31,12 @@ import {
   toComposantDpuWrite,
 } from '@app/etudes/utils/composant-reference.util';
 import { DpuApiService } from '@app/catalogue/bibliotheque-prix/services/dpu-api.service';
+import { ItemsApiService } from '@app/catalogue/services/items-api.service';
+import { openConsultationDecompoDialog } from '../consultation-decompo-dialog/consultation-decompo-dialog.component';
 import { UnitOfMeasuresApiService } from '@app/catalogue/configuration/unit-of-measures/services/unit-of-measure-api.service';
-import { DpgfApiService } from '../../../metres/services/dpgf-api.service';
+import { DpgfApiService } from '../../../services/dpgf-api.service';
 import { DossierEtudeApiService } from '../../services/dossier-etude-api.service';
-import type { DecompositionComposantMatched } from '../../services/dossier-etude-api.service';
+import type { DecompositionComposantMatched, DecompositionPropose } from '../../services/dossier-etude-api.service';
 import { DecompositionProposeCache } from '../../services/decomposition-propose.cache';
 
 import type { BordereauTreeRow } from '../../utils/bordereau-tree.util';
@@ -55,10 +57,15 @@ import {
   CatalogItemPickDialogComponent,
   type CatalogItemPickDialogResult,
 } from '../catalog-item-pick-dialog/catalog-item-pick-dialog.component';
+import { dpuTypeToNature } from '@app/catalogue/components/article-picker/article-picker.component';
 import {
   CreateMissingItemDialogComponent,
   type CreateMissingItemDialogResult,
 } from '../create-missing-item-dialog/create-missing-item-dialog.component';
+import {
+  DecompositionSuggestionDialogComponent,
+  type DecompositionSuggestionDialogResult,
+} from '../decomposition-suggestion-dialog/decomposition-suggestion-dialog.component';
 import {
   PosteChiffrageDialogComponent,
   type PosteChiffrageDialogResult,
@@ -125,6 +132,7 @@ export class PosteDecompositionPanelComponent {
   private readonly dialog = inject(MatDialog);
   private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly toast = inject(ToastService);
+  private readonly itemsApi = inject(ItemsApiService);
 
   readonly poste = input<BordereauTreeRow | null>(null);
   readonly dossierId = input<string | null>(null);
@@ -562,38 +570,70 @@ export class PosteDecompositionPanelComponent {
       const loader = () =>
         this.dossierApi.proposerDecomposition(dossierId, articleId, cpsId);
       let propose = await this.proposeCache.getOrLoad(dossierId, articleId, cpsId, loader);
-      if (!propose || (!(propose.matched?.length) && !(propose.missing?.length))) {
+      if (!propose || !this.hasProposeRows(propose)) {
         propose = await this.proposeCache.refresh(dossierId, articleId, cpsId, loader);
       }
-      if (!propose || (!(propose.matched?.length) && !(propose.missing?.length))) {
+      if (!propose || !this.hasProposeRows(propose)) {
         this.toast.info(
           'Aucun composant détecté à partir du libellé. Ajoutez-les à la main, ou saisissez un descriptif puis réessayez.',
         );
         return;
       }
 
-      const suggestions: DecompositionComposantMatched[] = [
-        ...(propose.matched ?? []),
-        ...(propose.missing ?? []).map((row) => ({
-          type: row.type,
-          name: row.designation,
-          unite: row.unite,
-          rendement: row.rendement,
-          prixUnitaire: 0,
-          sourcePrix: 'MANUEL',
-          confiance: row.confiance,
-          suggereParIa: true,
-        })),
-      ];
-      // L'application des suggestions passe le poste en mode DECOMPOSE.
-      // Ne pas laisser le verrou "extraction en cours" bloquer cette mutation interne.
+      // Revue humaine : Extraire n'écrit pas tout seul (deux seaux + incertain).
       this.extractionComposants.set(false);
-      await this.appliquerSuggestions(suggestions, true);
+      while (propose && this.hasProposeRows(propose)) {
+        const ref = this.dialog.open(DecompositionSuggestionDialogComponent, {
+          width: 'min(46rem, 94vw)',
+          autoFocus: false,
+          restoreFocus: true,
+          data: {
+            code: poste.code ?? '',
+            libelle: poste.libelle ?? '',
+            propose,
+            uniteOptions: this.uniteOptions(),
+          },
+        });
+        const result = (await firstValueFrom(ref.afterClosed())) as
+          | DecompositionSuggestionDialogResult
+          | null;
+        if (!result) {
+          return;
+        }
+        if (result.regenerate) {
+          propose = await this.proposeCache.refresh(dossierId, articleId, cpsId, loader);
+          if (!this.hasProposeRows(propose)) {
+            this.toast.info(
+              'Aucun composant détecté à partir du libellé. Ajoutez-les à la main, ou saisissez un descriptif puis réessayez.',
+            );
+            return;
+          }
+          continue;
+        }
+        if (result.selected?.length) {
+          await this.appliquerSuggestions(result.selected, true);
+          const saved = await this.sauvegarderPoste();
+          if (!saved) {
+            this.toast.info(
+              'Composants Extraire en brouillon — enregistrez le poste pour la synthèse.',
+            );
+          }
+        }
+        return;
+      }
     } catch (e) {
       this.erreur.set(this.msg(e, 'Impossible d’extraire les composants.'));
     } finally {
       this.extractionComposants.set(false);
     }
+  }
+
+  private hasProposeRows(propose: DecompositionPropose | null | undefined): boolean {
+    return !!propose && (
+      (propose.matched?.length ?? 0) > 0 ||
+      (propose.missing?.length ?? 0) > 0 ||
+      (propose.uncertain?.length ?? 0) > 0
+    );
   }
 
   private async appliquerSuggestions(
@@ -656,7 +696,7 @@ export class PosteDecompositionPanelComponent {
     this.composantsLabels.set(labels);
     this.markDpuDirty();
     this.toast.success(
-      `${added.length} composant${added.length > 1 ? 's' : ''} ajouté${added.length > 1 ? 's' : ''} — enregistrez le poste.`,
+      `${added.length} composant${added.length > 1 ? 's' : ''} ajouté${added.length > 1 ? 's' : ''}.`,
     );
   }
 
@@ -670,6 +710,36 @@ export class PosteDecompositionPanelComponent {
 
   estComposantCatalogue(row: ComposantDPU): boolean {
     return estComposantItem(row);
+  }
+
+  async ajouterAConsultation(row: ComposantDPU): Promise<void> {
+    const dossierId = this.dossierId();
+    if (!dossierId || !row.itemId) return;
+    try {
+      const [item, dossier] = await Promise.all([
+        this.itemsApi.getById(row.itemId),
+        this.dossierApi.getById(dossierId),
+      ]);
+      const dpgfId = dossier.dpgfId;
+      if (!dpgfId) {
+        this.toast.info('Aucun bordereau pour ouvrir une consultation.');
+        return;
+      }
+      const cle = (item.cleStable || item.code || '').trim();
+      if (!cle) {
+        this.toast.info('Ce composant n’a pas encore de cle_stable.');
+        return;
+      }
+      const ok = await openConsultationDecompoDialog(this.dialog, {
+        dossierId,
+        dpgfId,
+        preselectedCles: [cle],
+        articleLibelle: item.name || cle,
+      });
+      if (ok) this.change.emit();
+    } catch {
+      this.toast.error('Impossible d’ouvrir la consultation.');
+    }
   }
 
   async ajouterComposantAuCatalogue(row: ComposantDPU): Promise<void> {
@@ -724,7 +794,14 @@ export class PosteDecompositionPanelComponent {
       return next;
     });
     this.markDpuDirty();
-    this.toast.success('Composant créé dans le catalogue et lié au poste.');
+    const saved = await this.sauvegarderPoste();
+    if (saved) {
+      this.toast.success('Composant créé dans le catalogue et lié au poste.');
+    } else {
+      this.toast.info(
+        'Article créé — enregistrez le poste pour le retirer des composants non rattachés.',
+      );
+    }
   }
 
   private async passerEnEstime(): Promise<boolean> {
@@ -834,7 +911,7 @@ export class PosteDecompositionPanelComponent {
     this.markDpuDirty();
   }
 
-  async ajouterDepuisCatalogue(): Promise<void> {
+  async ajouterDepuisCatalogue(ligneType?: DpuComposantType): Promise<void> {
     if (!this.canMutate()) return;
     if (!this.estDecompose()) {
       const ok = await this.passerEnDecomposition({ skipConfirm: true });
@@ -843,10 +920,14 @@ export class PosteDecompositionPanelComponent {
     const result = (await firstValueFrom(
       this.dialog
         .open(CatalogItemPickDialogComponent, {
-          width: '36rem',
+          width: '40rem',
           autoFocus: false,
           restoreFocus: true,
-          data: { uniteOptions: this.uniteOptions() },
+          data: {
+            uniteOptions: this.uniteOptions(),
+            context: 'dpu',
+            presetNature: dpuTypeToNature(ligneType),
+          },
         })
         .afterClosed(),
     )) as CatalogItemPickDialogResult | null;
@@ -913,16 +994,6 @@ export class PosteDecompositionPanelComponent {
               }
             : c,
         ),
-      ),
-    );
-    this.markDpuDirty();
-  }
-
-  async marquerConsulte(row: ComposantDPU): Promise<void> {
-    if (!this.canMutate() || !this.estDecompose()) return;
-    this.composantsBrouillon.set(
-      this.composants().map((c) =>
-        c.id === row.id ? { ...c, sourcePrix: 'CONSULTE' as const } : c,
       ),
     );
     this.markDpuDirty();

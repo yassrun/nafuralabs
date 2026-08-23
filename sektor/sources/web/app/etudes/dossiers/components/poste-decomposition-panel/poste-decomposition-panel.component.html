@@ -169,7 +169,7 @@
               Décomposition et consultations
             }
           </h4>
-          @if (modifiable() && estDecompose() && hasComposants()) {
+          @if (modifiable() && estDecompose()) {
             <div class="poste__section-actions">
               @if (peutRafraichirPrix()) {
                 <nf-button
@@ -189,12 +189,19 @@
                   Rafraîchir les prix
                 </nf-button>
               }
-              <nf-button variant="secondary" size="sm" (clicked)="ajouterDepuisCatalogue()">
+              <nf-button
+                variant="secondary"
+                size="sm"
+                data-testid="depuis-catalogue"
+                (clicked)="ajouterDepuisCatalogue()"
+              >
                 Depuis le catalogue
               </nf-button>
+              @if (hasComposants()) {
               <nf-button variant="primary" size="sm" (clicked)="ajouterSousDetail()">
                 Ajouter un composant
               </nf-button>
+              }
             </div>
           }
         </div>
@@ -366,7 +373,12 @@
                 >
                   Extraire les composants
                 </nf-button>
-                <nf-button variant="secondary" size="sm" (clicked)="ajouterDepuisCatalogue()">
+                <nf-button
+                  variant="secondary"
+                  size="sm"
+                  data-testid="depuis-catalogue"
+                  (clicked)="ajouterDepuisCatalogue()"
+                >
                   Depuis le catalogue
                 </nf-button>
                 <nf-button variant="secondary" size="sm" (clicked)="ajouterSousDetail()">
@@ -422,6 +434,13 @@
                     @if (modifiable()) {
                       <td class="actions">
                         <span class="poste__row-actions">
+                          <nf-button
+                            variant="ghost"
+                            size="sm"
+                            (clicked)="ajouterDepuisCatalogue(row.type)"
+                          >
+                            Depuis le catalogue
+                          </nf-button>
                           @if (!estComposantCatalogue(row)) {
                             <nf-button
                               variant="ghost"
@@ -430,16 +449,15 @@
                             >
                               Créer dans le catalogue
                             </nf-button>
-                          }
-                          @if (row.sourcePrix !== 'CONSULTE') {
-                            <button
-                              type="button"
-                              class="link"
-                              (click)="marquerConsulte(row)"
-                              [attr.aria-label]="'Marquer consulté ' + libelleComposant(row)"
+                          } @else if (dossierId()) {
+                            <nf-button
+                              variant="ghost"
+                              size="sm"
+                              data-testid="ouvrir-consultation-composant"
+                              (clicked)="ajouterAConsultation(row)"
                             >
-                              Consulté
-                            </button>
+                              Ajouter à une consultation
+                            </nf-button>
                           }
                           <button
                             type="button"
@@ -513,11 +531,6 @@
                       >
                         Créer dans le catalogue
                       </nf-button>
-                    }
-                    @if (row.sourcePrix !== 'CONSULTE') {
-                      <button type="button" class="link" (click)="marquerConsulte(row)">
-                        Consulté
-                      </button>
                     }
                     <button
                       type="button"

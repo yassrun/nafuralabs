@@ -198,6 +198,69 @@ class DpuServiceForNoeudTest {
         assertThat(service.findByDpgfNoeudId(noeudId).getDpgfNoeudId()).isEqualTo(noeudId);
     }
 
+    @Test
+    void appliquerPrixConsulte_ne_touche_que_l_identite() {
+        UUID dpgfId = UUID.randomUUID();
+        UUID noeudCiment = UUID.randomUUID();
+        UUID noeudPeinture = UUID.randomUUID();
+        UUID cimentItem = UUID.randomUUID();
+        UUID peintureItem = UUID.randomUUID();
+        UUID devisId = UUID.randomUUID();
+
+        when(noeudRepository.findByDpgfIdAndTenantIdOrderByOrdreAsc(dpgfId, TENANT))
+                .thenReturn(List.of(noeud(noeudCiment, DpgfNoeud.TYPE_ARTICLE), noeud(noeudPeinture, DpgfNoeud.TYPE_ARTICLE)));
+
+        ComposantDpu ciment = ComposantDpu.builder()
+                .itemId(cimentItem)
+                .libelle("Ciment")
+                .rendement(BigDecimal.ONE)
+                .unite("T")
+                .prixUnitaire(new BigDecimal("100"))
+                .total(new BigDecimal("100"))
+                .sourcePrix("TARIF")
+                .build();
+        ComposantDpu peinture = ComposantDpu.builder()
+                .itemId(peintureItem)
+                .libelle("Peinture")
+                .rendement(BigDecimal.ONE)
+                .unite("L")
+                .prixUnitaire(new BigDecimal("40"))
+                .total(new BigDecimal("40"))
+                .sourcePrix("TARIF")
+                .build();
+        PrixDpu dpuCiment = PrixDpu.builder()
+                .id(UUID.randomUUID())
+                .tenantId(TENANT)
+                .dpgfNoeudId(noeudCiment)
+                .fraisGenerauxPercent(BigDecimal.TEN)
+                .margeBeneficiairePercent(BigDecimal.TEN)
+                .tvaTaux(new BigDecimal("20"))
+                .composants(new ArrayList<>(List.of(ciment)))
+                .build();
+        PrixDpu dpuPeinture = PrixDpu.builder()
+                .id(UUID.randomUUID())
+                .tenantId(TENANT)
+                .dpgfNoeudId(noeudPeinture)
+                .fraisGenerauxPercent(BigDecimal.TEN)
+                .margeBeneficiairePercent(BigDecimal.TEN)
+                .tvaTaux(new BigDecimal("20"))
+                .composants(new ArrayList<>(List.of(peinture)))
+                .build();
+        when(repository.findByTenantIdAndDpgfNoeudIdIn(eq(TENANT), any()))
+                .thenReturn(List.of(dpuCiment, dpuPeinture));
+        when(noeudRepository.findByIdAndTenantId(any(), eq(TENANT))).thenReturn(Optional.empty());
+        when(repository.save(any(PrixDpu.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        int updated = service.appliquerPrixConsulte(
+                dpgfId, cimentItem, new BigDecimal("85.50"), devisId, "Consultation — ciment");
+
+        assertThat(updated).isEqualTo(1);
+        assertThat(ciment.getSourcePrix()).isEqualTo("CONSULTE");
+        assertThat(ciment.getPrixUnitaire()).isEqualByComparingTo("85.50");
+        assertThat(peinture.getSourcePrix()).isEqualTo("TARIF");
+        assertThat(peinture.getPrixUnitaire()).isEqualByComparingTo("40");
+    }
+
     private static DpgfNoeud noeud(UUID id, String type) {
         return DpgfNoeud.builder()
                 .id(id)

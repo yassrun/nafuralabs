@@ -1,0 +1,38 @@
+.cs-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.chips-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.cs-error,
+.cs-empty {
+  color: var(--nf-color-text-secondary, #5c6570);
+}
+
+.cs-list table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.cs-list th,
+.cs-list td {
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--nf-color-border, #e2e5e9);
+}
+
+.cs-row {
+  cursor: pointer;
+}
+
+.cs-row:hover {
+  background: var(--nf-color-surface-muted, #f4f6f8);
+}

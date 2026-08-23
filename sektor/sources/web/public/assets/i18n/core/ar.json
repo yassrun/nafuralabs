@@ -1875,12 +1875,6 @@
         "expire": "منتهي الصلاحية"
       }
     },
-    "metre": {
-      "status": {
-        "brouillon": "مسودة",
-        "termine": "منتهٍ"
-      }
-    },
     "ao_client": {
       "status": {
         "a_etudier": "للدراسة",

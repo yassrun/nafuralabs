@@ -29,6 +29,10 @@ public class Item {
     @Column(name = "code", length = 50)
     private String code;
 
+    /** Identité catalogue Sektor — 1 Item par tenant et par cle_stable. */
+    @Column(name = "cle_stable", nullable = false, length = 120)
+    private String cleStable;
+
     @Column(name = "name", nullable = false, length = 255)
     private String name;
 

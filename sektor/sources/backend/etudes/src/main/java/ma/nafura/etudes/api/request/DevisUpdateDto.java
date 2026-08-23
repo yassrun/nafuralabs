@@ -26,8 +26,6 @@ public class DevisUpdateDto {
 
     private LocalDate dateValidite;
 
-    private String metreId;
-
     private String dpgfId;
 
     private String bibliothequeReference;

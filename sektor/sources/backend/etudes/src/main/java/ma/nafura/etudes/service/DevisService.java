@@ -133,7 +133,6 @@ public class DevisService {
                 .ville(trimOrNull(request.getVille()))
                 .dateEmission(request.getDateEmission())
                 .dateValidite(request.getDateValidite())
-                .metreId(parseUuidOrNull(request.getMetreId()))
                 .dpgfId(parseUuidOrNull(request.getDpgfId()))
                 .bibliothequeReference(trimOrNull(request.getBibliothequeReference()))
                 .conditionsPaiement(request.getConditionsPaiement().trim())
@@ -211,7 +210,6 @@ public class DevisService {
                 .ville(trimOrNull(ville))
                 .dateEmission(today)
                 .dateValidite(today.plusMonths(2))
-                .metreId(dpgf.getMetreId())
                 .dpgfId(dpgf.getId())
                 .dossierEtudeId(dossierEtudeId)
                 .bibliothequeReference("DPGF " + dpgf.getNumero())
@@ -263,9 +261,6 @@ public class DevisService {
             entity.setDateValidite(request.getDateValidite());
         }
         assertDates(entity.getDateEmission(), entity.getDateValidite());
-        if (request.getMetreId() != null) {
-            entity.setMetreId(parseUuidOrNull(request.getMetreId()));
-        }
         if (request.getDpgfId() != null) {
             entity.setDpgfId(parseUuidOrNull(request.getDpgfId()));
         }

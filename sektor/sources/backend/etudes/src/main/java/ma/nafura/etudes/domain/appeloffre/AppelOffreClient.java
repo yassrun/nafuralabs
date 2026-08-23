@@ -99,12 +99,6 @@ public class AppelOffreClient {
     @Column(name = "devis_numero", length = 50)
     private String devisNumero;
 
-    @Column(name = "metre_id", length = 100)
-    private String metreId;
-
-    @Column(name = "metre_numero", length = 50)
-    private String metreNumero;
-
     @Column(name = "resultat_rang_notre")
     private Integer resultatRangNotre;
 

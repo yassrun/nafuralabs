@@ -88,6 +88,7 @@ class MaterielServiceTest {
         assertEquals(Nature.MATERIEL.name(), itemCaptor.getValue().getNature());
         assertEquals("ENG-001", itemCaptor.getValue().getCode());
         assertEquals(CATEGORY_ID, itemCaptor.getValue().getItemCategoryId());
+        assertEquals("pelle", itemCaptor.getValue().getCleStable());
     }
 
     @Test

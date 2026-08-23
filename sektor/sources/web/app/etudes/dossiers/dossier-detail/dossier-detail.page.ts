@@ -22,11 +22,14 @@ import {
 import type { WizardStepConfig } from '@platform/lib/anatomy';
 
 import type { DossierEtude, ProblemeGate, ResultatGate } from '@app/etudes/models';
+import { PartnersApiService } from '@app/socle/shared/services/partners-api.service';
+import { safeRandomUUID } from '@platform/core/util/uuid';
 
 import {
   GateBlocageComponent,
   type GatePresentation,
 } from '../components/gate-blocage/gate-blocage.component';
+import { openGateProblemesDialog } from '../components/gate-blocage/gate-problemes-dialog.component';
 import { DecompositionWorkspaceComponent } from '../components/decomposition-workspace/decomposition-workspace.component';
 import { DossierSummaryHeaderComponent } from '../components/dossier-summary-header/dossier-summary-header.component';
 import { ShareGuestLinkDialogComponent } from '../components/share-guest-link-dialog/share-guest-link-dialog.component';
@@ -77,6 +80,7 @@ export class DossierDetailPage {
   private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly printDialog = inject(PrintDialogService);
   private readonly translate = inject(TranslateService);
+  private readonly partnersApi = inject(PartnersApiService);
   private readonly decomposition = viewChild(DecompositionWorkspaceComponent);
 
   readonly dossier = signal<DossierEtude | undefined>(undefined);
@@ -207,21 +211,8 @@ export class DossierDetailPage {
   /** CTA « Soumettre » : footer wizard (dernier step) + header — seulement à la Synthèse. */
   readonly peutSoumettre = computed(() => this.modifiable() && this.etapeUi() === 4);
 
-  /** Partager : étape Coût verte (pas d’anomalie bloquante, hors alerte qualité). */
-  readonly coutEtapeVerte = computed(() => {
-    if (!this.dossier()?.dpgfId) return false;
-    if ((this.synthese()?.nombreArticles ?? 0) === 0) return false;
-    const etapes = backendGateEtapesForUi(3);
-    const relevant = this.gates().filter((g) => etapes.includes(g.etape));
-    if (relevant.length === 0) return false;
-    for (const g of relevant) {
-      for (const p of g.problemes) {
-        if (estAlerteQualiteChiffrage(p.message)) continue;
-        return false;
-      }
-    }
-    return true;
-  });
+  /** Partager : dossier existant (portail invité déjà branché). Plus « always disabled ». */
+  readonly peutPartager = computed(() => !!this.dossier()?.id);
 
   readonly messageVerrou = computed(() => {
     const statut = this.dossier()?.status;
@@ -340,7 +331,10 @@ export class DossierDetailPage {
       return;
     }
     const maxUi = backendToUiEtape(this.etapeBackend());
-    if (ui > maxUi) return;
+    if (ui > maxUi) {
+      // Voie manuelle : DPGF déjà créé à l’étape Documents — le stepper peut viser le bordereau.
+      if (!(ui === 2 && this.dossier()?.dpgfId)) return;
+    }
     await this.changerEtape(uiToBackendEtape(ui));
   }
 
@@ -395,7 +389,7 @@ export class DossierDetailPage {
     try {
       switch (action) {
         case 'PARTAGER':
-          if (!this.coutEtapeVerte()) return;
+          if (!this.peutPartager()) return;
           this.dialog.open(ShareGuestLinkDialogComponent, {
             data: {
               dossierId: dossier.id,
@@ -427,7 +421,8 @@ export class DossierDetailPage {
           await this.changerEtape(3);
           break;
         case 'VOIR_SYNTHESE':
-          await this.allerAEtapeUi(3);
+          // Même chemin que le footer — pas allerAEtapeUi(3) (maxUi bloque tant que backend < 5).
+          await this.suivant();
           break;
         case 'SOUMETTRE_CHIFFRAGE':
           await this.soumettre();
@@ -459,8 +454,7 @@ export class DossierDetailPage {
           break;
         }
         case 'GENERER_DEVIS':
-          this.dossier.set(await this.api.genererDevis(dossier.id));
-          await this.refreshSynthese(dossier.id);
+          await this.genererDevisOuCreerClient(dossier);
           break;
         case 'VOIR_DEVIS': {
           const devisId = this.synthese()?.devisGenereId ?? dossier.devisGenereId;
@@ -531,9 +525,14 @@ export class DossierDetailPage {
           }
           break;
         }
-        case 'CORRIGER_BORDEREAU':
+        case 'CORRIGER_BORDEREAU': {
+          if (!dossier.dpgfId) {
+            await this.api.initBordereauManuel(dossier.id);
+            await this.rechargerApresPieces();
+          }
           await this.changerEtape(2);
           break;
+        }
         case 'CORRIGER_CHIFFRAGE':
           await this.changerEtape(3);
           break;
@@ -578,14 +577,14 @@ export class DossierDetailPage {
   }
 
   focusPremierProblemeGate(): void {
-    const first = this.gateCourant()?.problemes.find((p) => !!p.noeudId);
-    if (first) {
-      this.corriger(first);
+    const problemes = this.gateCourant()?.problemes ?? [];
+    if (problemes.length === 0) {
+      if (this.structureAutoReadOnly()) this.passerBordereauManuel();
       return;
     }
-    if (this.structureAutoReadOnly()) {
-      this.passerBordereauManuel();
-    }
+    void openGateProblemesDialog(this.dialog, problemes).then((picked) => {
+      if (picked) this.corriger(picked);
+    });
   }
 
   async rechargerApresPieces(): Promise<void> {
@@ -603,6 +602,56 @@ export class DossierDetailPage {
     } catch (e) {
       this.erreur.set(this.messageErreur(e));
     }
+  }
+
+  /**
+   * Sans Partner : demander si on crée le client (raison sociale = MOA si présente),
+   * puis POST partners + générer. Annuler = pas de devis, bandeau conservé.
+   */
+  private async genererDevisOuCreerClient(dossier: DossierEtude): Promise<void> {
+    const syn = this.synthese();
+    const clientIdExistant = (syn?.clientId ?? dossier.clientId)?.trim();
+    if (clientIdExistant) {
+      this.dossier.set(await this.api.genererDevis(dossier.id));
+      await this.refreshSynthese(dossier.id);
+      return;
+    }
+
+    const moa = (syn?.clientNom ?? dossier.clientNom ?? '').trim();
+    const values = await this.confirmDialog.prompt({
+      title: 'Créer le client Partner',
+      confirmLabel: 'Créer et générer',
+      cancelLabel: 'Annuler',
+      icon: 'person_add',
+      fields: [
+        {
+          key: 'raisonSociale',
+          label: 'Raison sociale',
+          required: true,
+          initial: moa,
+        },
+      ],
+    });
+    if (!values) return;
+
+    const raison = values['raisonSociale']?.trim();
+    if (!raison) {
+      this.erreur.set('Indiquez la raison sociale du client.');
+      return;
+    }
+
+    const created = await this.partnersApi.create({
+      code: this.newPartnerCode(),
+      raisonSociale: raison,
+      roles: ['CLIENT'],
+    });
+    this.dossier.set(await this.api.genererDevis(dossier.id, { clientId: created.id }));
+    await this.refreshSynthese(dossier.id);
+  }
+
+  private newPartnerCode(): string {
+    const suffix = safeRandomUUID().replace(/-/g, '').slice(0, 8).toUpperCase();
+    return `CLI-${suffix}`;
   }
 
   private async refreshSynthese(id: string): Promise<void> {

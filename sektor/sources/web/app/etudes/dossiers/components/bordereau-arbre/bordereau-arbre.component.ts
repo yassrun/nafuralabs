@@ -27,7 +27,7 @@ import { ConfirmDialogService } from '@platform/lib/anatomy';
 import { UnitOfMeasuresApiService } from '@app/catalogue/configuration/unit-of-measures/services/unit-of-measure-api.service';
 
 import type { NoeudDPGF } from '@app/etudes/models';
-import { DpgfApiService } from '../../../metres/services/dpgf-api.service';
+import { DpgfApiService } from '../../../services/dpgf-api.service';
 import {
   applyTreeRollupPostes,
   applyTreeRollupTotals,

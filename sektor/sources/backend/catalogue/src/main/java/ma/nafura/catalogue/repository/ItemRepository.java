@@ -12,4 +12,10 @@ import java.util.UUID;
  */
 @Repository
 public interface ItemRepository extends TenantScopedRepository<Item, UUID> {
+
+    boolean existsByTenantIdAndCleStable(UUID tenantId, String cleStable);
+
+    boolean existsByTenantIdAndCode(UUID tenantId, String code);
+
+    java.util.Optional<Item> findByTenantIdAndCleStable(UUID tenantId, String cleStable);
 }

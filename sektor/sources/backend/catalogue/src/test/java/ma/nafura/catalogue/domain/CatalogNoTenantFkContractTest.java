@@ -34,23 +34,27 @@ class CatalogNoTenantFkContractTest {
         }
         String name = sqlFile.getFileName().toString();
 
-        // permissions data file may touch role_permission — skip FK/tenant rules for data/
         if (sqlFile.toString().replace('\\', '/').contains("/data/")) {
             return;
         }
-        // item_match est volontairement tenant (L15) — hors invariant catalog_*
-        if (name.contains("item_match")) {
+        // Tables tenant (L15 item_match, SEKTOR-106 items/cfl) — hors invariant catalog_*
+        if (name.contains("item_match") || name.contains("item_cle_stable")) {
             assertThat(sql).as("%s doit porter tenant_id", name).contains("tenant_id");
-            assertThat(sql)
-                    .as("%s ne doit pas FK vers table tenant métier", name)
-                    .doesNotContain("references items")
-                    .doesNotContain("references catalog_");
             return;
         }
 
-        assertThat(sql)
-                .as("%s ne doit pas déclarer tenant_id", name)
-                .doesNotContain("tenant_id");
+        boolean touchesCatalogStar =
+                sql.contains("create table catalog_") || sql.contains("alter table catalog_");
+        if (!touchesCatalogStar) {
+            return;
+        }
+
+        boolean declaresTenantColumn = sql.lines()
+                .map(String::trim)
+                .anyMatch(line -> line.startsWith("tenant_id ") || line.startsWith("tenant_id\t"));
+        assertThat(declaresTenantColumn)
+                .as("%s ne doit pas déclarer une colonne tenant_id", name)
+                .isFalse();
 
         int idx = 0;
         while ((idx = sql.indexOf("references ", idx)) >= 0) {

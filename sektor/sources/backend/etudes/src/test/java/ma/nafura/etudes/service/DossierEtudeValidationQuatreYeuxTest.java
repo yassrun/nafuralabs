@@ -109,6 +109,7 @@ class DossierEtudeValidationQuatreYeuxTest {
                 mock(AvisExecutionRepository.class),
                 mock(BudgetVentilationService.class),
                 mock(ma.nafura.etudes.service.port.bc.ChainageAvalPort.class),
+                mock(ma.nafura.etudes.service.ConsultationEtudeService.class),
                 List.of());
     }
 
@@ -191,7 +192,10 @@ class DossierEtudeValidationQuatreYeuxTest {
     @Test
     void niveauxApprobationPour_respecte_seuil() {
         ParametresEtudeService calc =
-                new ParametresEtudeService(org.mockito.Mockito.mock(TenantSettingReader.class));
+                new ParametresEtudeService(
+                        org.mockito.Mockito.mock(TenantSettingReader.class),
+                        org.mockito.Mockito.mock(
+                                ma.nafura.etudes.repository.ConsultationParametresRepository.class));
 
         assertThat(calc.niveauxApprobationPour(new BigDecimal("100000"))).isEqualTo(1);
         assertThat(calc.niveauxApprobationPour(new BigDecimal("500000"))).isEqualTo(2);

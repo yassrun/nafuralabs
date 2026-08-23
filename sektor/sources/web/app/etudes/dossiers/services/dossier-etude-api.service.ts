@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpParams } from '@angular/common/http';
+import { HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
 import { FeatureApiService } from '@platform/lib/anatomy';
@@ -61,12 +61,13 @@ export interface DecompositionComposantMatched {
   type: string;
   /** Vide / absent pour un composant manuel (hors catalogue). */
   itemId?: string;
+  cleStable?: string;
   code?: string;
   name: string;
   unite: string;
   rendement: number;
-  prixUnitaire: number;
-  sourcePrix: string;
+  prixUnitaire?: number | null;
+  sourcePrix?: string;
   prixSourceRefId?: string | null;
   prixDateSource?: string | null;
   prixCurrencyId?: string | null;
@@ -78,16 +79,27 @@ export interface DecompositionComposantMatched {
 export interface DecompositionComposantMissing {
   type: string;
   designation: string;
+  cleStable?: string;
   unite: string;
   rendement: number;
   confiance?: number;
   raison?: string;
 }
 
-/** Suggestion de décomposition (matched catalogue + missing à créer). */
+export interface DecompositionComposantIncertain {
+  type: string;
+  designation: string;
+  unite: string;
+  rendement: number;
+  confiance?: number;
+  identitesCandidates?: string[];
+}
+
+/** Suggestion Extraire : déjà tenant / à créer / incertain (2+ identités, pas de décision). */
 export interface DecompositionPropose {
   matched: DecompositionComposantMatched[];
   missing: DecompositionComposantMissing[];
+  uncertain?: DecompositionComposantIncertain[];
   confiance?: number;
 }
 
@@ -246,6 +258,43 @@ export interface ChargeEtudeCandidat {
   displayName: string;
 }
 
+export interface ConsultationEtudeLigne {
+  id?: string;
+  cleStable: string;
+  designation?: string | null;
+  quantite?: number | null;
+  unite?: string | null;
+  prixUnitaire: number;
+  itemId?: string | null;
+}
+
+export interface ConsultationEtudeDevis {
+  id: string;
+  partenaireId: string;
+  documentId?: string | null;
+  recuAt?: string | null;
+  hasLignes: boolean;
+  lignes: ConsultationEtudeLigne[];
+}
+
+export interface ConsultationIdentiteCouverte {
+  cleStable: string;
+  devisConsultationId?: string | null;
+  prixUnitaire: number;
+}
+
+export interface ConsultationEtude {
+  id: string;
+  dossierEtudeId: string;
+  statut: string;
+  paquetCleStables: string[];
+  partenaireIds: string[];
+  devis: ConsultationEtudeDevis[];
+  identitesCouvertes: ConsultationIdentiteCouverte[];
+  devisRecus: number;
+  fournisseursDistincts: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class DossierEtudeApiService extends FeatureApiService<
   DossierEtude,
@@ -298,8 +347,8 @@ export class DossierEtudeApiService extends FeatureApiService<
     return this.executeTransition(id, 'reouvrir-bordereau');
   }
 
-  genererDevis(id: string): Promise<DossierEtude> {
-    return this.executeTransition(id, 'generer-devis');
+  genererDevis(id: string, body?: { clientId?: string }): Promise<DossierEtude> {
+    return this.executeTransition(id, 'generer-devis', body);
   }
 
   /** L13 — affaire gagnée (DEVIS_GENERE → GAGNE). */
@@ -734,5 +783,56 @@ export class DossierEtudeApiService extends FeatureApiService<
         { selections },
       ),
     );
+  }
+
+  async getConsultation(dossierId: string): Promise<ConsultationEtude | null> {
+    try {
+      return await firstValueFrom(
+        this.http.get<ConsultationEtude>(
+          this.resolveUrl(`${this.basePath}/${dossierId}/consultation`),
+        ),
+      );
+    } catch (err) {
+      if (err instanceof HttpErrorResponse && err.status === 404) {
+        return null;
+      }
+      throw err;
+    }
+  }
+
+  openConsultation(
+    dossierId: string,
+    body?: { cleStables?: string[]; partenaireIds?: string[] },
+  ): Promise<ConsultationEtude> {
+    return this.post<ConsultationEtude>(`${this.basePath}/${dossierId}/consultation`, body ?? {});
+  }
+
+  replacePaquet(dossierId: string, cleStables: string[]): Promise<ConsultationEtude> {
+    return this.put<ConsultationEtude>(`${this.basePath}/${dossierId}/consultation/paquet`, {
+      cleStables,
+    });
+  }
+
+  inviteFournisseur(dossierId: string, partenaireId: string): Promise<ConsultationEtude> {
+    return this.post<ConsultationEtude>(`${this.basePath}/${dossierId}/consultation/fournisseurs`, {
+      partenaireId,
+    });
+  }
+
+  recevoirDevis(
+    dossierId: string,
+    body: {
+      partenaireId: string;
+      documentId?: string;
+      lignes?: Array<{ cleStable: string; designation?: string; prixUnitaire: number; unite?: string; quantite?: number }>;
+    },
+  ): Promise<ConsultationEtude> {
+    return this.post<ConsultationEtude>(`${this.basePath}/${dossierId}/consultation/devis`, body);
+  }
+
+  identifierConsultation(dossierId: string, cleStables: string[]): Promise<ConsultationEtude> {
+    return this.post<ConsultationEtude>(`${this.basePath}/${dossierId}/consultation/identifier`, {
+      cleStables,
+    });
   }
 }

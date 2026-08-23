@@ -28,6 +28,13 @@ export const ACHATS_ROUTES: Routes = [
       ),
   },
   {
+    path: 'achats/consultations',
+    loadChildren: () =>
+      import('./consultations/consultation.routes').then(
+        (m) => m.CONSULTATION_ROUTES,
+      ),
+  },
+  {
     path: 'achats/commandes',
     loadChildren: () =>
       import('./commandes/bc.routes').then(

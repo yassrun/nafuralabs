@@ -254,6 +254,17 @@
           }
         </div>
       }
+
+      @if (modifiable()) {
+        <div class="pieces__manuel-fallback">
+          <p class="pieces__aide pieces__aide--suite">
+            Pas de BDP ni de CPS ? Construisez le bordereau à la main.
+          </p>
+          <nf-button variant="secondary" [disabled]="initManuel()" (clicked)="demarrerManuel()">
+            {{ initManuel() ? 'Préparation…' : 'Bordereau manuel' }}
+          </nf-button>
+        </div>
+      }
     }
   } @else {
     @if (!(showPersistedTree() || enRevue())) {

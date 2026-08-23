@@ -17,6 +17,10 @@ public class ItemCreateDto {
     @Size(max = 50)
     private String code;
 
+    /** Identité Sektor. Si vide, dérivée du libellé (slug). Unique par tenant. */
+    @Size(max = 120)
+    private String cleStable;
+
     @NotBlank
     @Size(max = 255)
     private String name;

@@ -20,7 +20,6 @@ public class DpgfNoeudCreateDto {
     private String libelle;
 
     private String articleId;
-    private String metreLigneId;
     private BigDecimal quantite;
     private String unite;
     private BigDecimal prixUnitaire;

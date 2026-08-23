@@ -1881,12 +1881,6 @@
         "expire": "Expiré"
       }
     },
-    "metre": {
-      "status": {
-        "brouillon": "Brouillon",
-        "termine": "Terminé"
-      }
-    },
     "ao_client": {
       "status": {
         "a_etudier": "À étudier",

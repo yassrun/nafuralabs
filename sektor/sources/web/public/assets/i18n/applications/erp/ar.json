@@ -286,6 +286,7 @@
     "achats.referentiel": "مرجعية الموردين",
     "achats.demandes": "طلبات الشراء",
     "achats.appelsOffres": "طلبات العروض",
+    "achats.consultations": "الاستشارات",
     "achats.commandes": "سندات الطلب",
     "achats.contrats": "عقود الموردين",
     "achats.fournisseurs": "الموردون",
@@ -327,7 +328,6 @@
     "etudes.soumissions": "العروض والفرص",
     "etudes.dossiers": "دراسات / مناقصات العملاء",
     "etudes.bibliotheque": "مكتبة الأسعار",
-    "etudes.metres": "كشوف الكميات",
     "etudes.devis": "عروض الأسعار",
     "etudes.appelsOffresClients": "طلبات عروض الزبائن",
     "marches": "الصفقات",
@@ -503,8 +503,6 @@
     "typeMo": "يد عاملة",
     "typeMateriel": "معدات",
     "typeSt": "مقاولة من الباطن",
-    "metreDpgfTitle": "DPGF من كشف الكميات",
-    "metreDpgfSubtitle": "توليد الأسعار من المكتبة (DPU) ثم عرض السعر",
     "generateDpgf": "توليد / إعادة حساب DPGF",
     "createDevis": "إنشاء عرض سعر من DPGF",
     "pdfDpgf": "PDF / طباعة (ملخص CCAG-T)",
@@ -513,15 +511,10 @@
     "treeArticle": "الصنف",
     "totalHt": "الإجمالي بدون احتساب الضريبة",
     "totalTtc": "الإجمالي مع احتساب الضريبة",
-    "backMetre": "الرجوع إلى كشف الكميات",
-    "loadingMetre": "جاري تحميل كشف الكميات…",
-    "noMetre": "كشف الكميات غير موجود",
     "sommaireTitle": "الملخص حسب الدفعة (CCAG-T MA)",
     "printTitle": "DPGF — طباعة",
     "toastDpgfOk": "تم حفظ DPGF",
-    "toastNeedDpgf": "ولّد DPGF قبل إنشاء عرض السعر",
     "loadingDevis": "جاري إنشاء عرض السعر…",
-    "emptyDpgfHint": "لا يوجد DPGF لكشف الكميات هذا — استخدم «توليد / إعادة حساب DPGF».",
     "dpgfCode": "الرمز",
     "dpgfLibelle": "البيان",
     "tvaLine": "TVA {taux} %"
@@ -733,7 +726,9 @@
       },
       "consultation": {
         "prix_non_consulte": "مكون واحد على الأقل بلا سعر مُستشار.",
-        "forfait_non_rattache": "المبلغ الجزافي غير مرتبط بسعر مُستشار."
+        "forfait_non_rattache": "المبلغ الجزافي غير مرتبط بسعر مُستشار.",
+        "informative": "لا عرض استشارة مستلم — إعلامي (الاستشارة اختيارية).",
+        "min_devis": "عدد عروض الاستشارة المستلمة (موردون مختلفون) أقل من الحد الأدنى المطلوب."
       },
       "chiffrage": {
         "prix_absent": "سعر البيع الوحدوي ناقص أو صفر.",

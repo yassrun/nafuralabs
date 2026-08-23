@@ -12,15 +12,17 @@ import {
   createDetailFacadeFromCrud,
 } from '@platform/lib/anatomy';
 import type { DetailActionEvent } from '@platform/lib/anatomy/types';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { ItemPricesFacade } from '../services';
 import type { ItemPrice, ItemPriceCreate } from '../models';
 import { ITEM_PRICE_DETAIL_CONFIG } from '../config';
+import { ArticlePickerFieldComponent } from '@app/catalogue/components/article-picker/article-picker-field.component';
 
 @Component({
   selector: 'app-item-price-detail',
   standalone: true,
-  imports: [...ConfigDrivenDetailPageImports],
+  imports: [...ConfigDrivenDetailPageImports, FormsModule, ReactiveFormsModule, ArticlePickerFieldComponent],
   template: `
     <nf-page-shell scroll>
       <nf-page-header [config]="headerConfig"></nf-page-header>
@@ -33,6 +35,9 @@ import { ITEM_PRICE_DETAIL_CONFIG } from '../config';
         [loading]="isLoading()"
         [saving]="isSaving()"
         (action)="onAction($event)">
+        <ng-template nfField="itemId" let-control>
+          <app-article-picker-field [formControl]="$any(control)" context="lookup" />
+        </ng-template>
       </nf-entity-detail>
     </nf-page-shell>
   `,

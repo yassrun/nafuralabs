@@ -286,6 +286,7 @@
     "achats.referentiel": "Référentiel fournisseurs",
     "achats.demandes": "Demandes d'achat",
     "achats.appelsOffres": "Appels d'offres",
+    "achats.consultations": "Consultations",
     "achats.commandes": "Bons de commande",
     "achats.contrats": "Contrats fournisseurs",
     "achats.fournisseurs": "Fournisseurs",
@@ -328,7 +329,6 @@
     "etudes.dossiers": "Études / appels d'offres",
     "etudes.bibliotheque": "Bibliothèque de prix",
     "etudes.catalogueConsole": "Console catalogue Sektor",
-    "etudes.metres": "Métrés & Quantitatifs",
     "etudes.devis": "Devis",
     "etudes.appelsOffresClients": "Appels d'offres clients",
     "marches": "Marchés",
@@ -504,8 +504,6 @@
     "typeMo": "Main d'œuvre",
     "typeMateriel": "Matériel",
     "typeSt": "Sous-traitance",
-    "metreDpgfTitle": "DPGF depuis métré",
-    "metreDpgfSubtitle": "Génération prix depuis la bibliothèque (DPU) puis devis",
     "generateDpgf": "Générer / recalculer DPGF",
     "createDevis": "Créer devis depuis ce DPGF",
     "pdfDpgf": "PDF / impression (sommaire CCAG-T)",
@@ -514,15 +512,10 @@
     "treeArticle": "Article",
     "totalHt": "Total HT",
     "totalTtc": "Total TTC",
-    "backMetre": "Retour métré",
-    "loadingMetre": "Chargement du métré…",
-    "noMetre": "Métré introuvable",
     "sommaireTitle": "Sommaire par lot (CCAG-T MA)",
     "printTitle": "DPGF — impression",
     "toastDpgfOk": "DPGF enregistré",
-    "toastNeedDpgf": "Générez un DPGF avant de créer le devis",
     "loadingDevis": "Création du devis…",
-    "emptyDpgfHint": "Aucun DPGF pour ce métré — utilisez « Générer / recalculer DPGF ».",
     "dpgfCode": "Code",
     "dpgfLibelle": "Libellé",
     "tvaLine": "TVA {taux} %"
@@ -743,7 +736,9 @@
       },
       "consultation": {
         "prix_non_consulte": "Au moins un composant n'a pas de prix consulté.",
-        "forfait_non_rattache": "Forfait non rattaché à un prix consulté."
+        "forfait_non_rattache": "Forfait non rattaché à un prix consulté.",
+        "informative": "Aucun devis consultation reçu — informatif (consultation optionnelle).",
+        "min_devis": "Pas assez de devis consultation reçus (fournisseurs distincts) pour le minimum exigé."
       },
       "chiffrage": {
         "prix_absent": "Prix unitaire de vente manquant ou nul.",

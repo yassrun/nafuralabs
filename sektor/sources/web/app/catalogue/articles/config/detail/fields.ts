@@ -25,6 +25,15 @@ export function buildArticleFields(t: TranslateService): DetailFieldConfig<Artic
       validators: [{ type: 'maxLength', value: 200 }],
     },
     {
+      key: 'cleStable',
+      label: tr('inventory.catalogue.article.fields.cleStable'),
+      type: 'text',
+      readonlyOnEdit: true,
+      width: 'lg',
+      hint: tr('inventory.catalogue.article.fields.cleStableHint'),
+      validators: [{ type: 'maxLength', value: 120 }],
+    },
+    {
       key: 'description',
       label: tr('inventory.catalogue.article.fields.description'),
       type: 'textarea',

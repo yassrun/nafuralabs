@@ -17,7 +17,7 @@ import type { Article, ArticleCreate, ArticleQuery, ArticleUpdate } from '../mod
 export class ArticlesApiService extends FeatureApiService<Article, ArticleCreate, ArticleUpdate> {
   /** Alias path kept for routing; data comes from `/api/v1/items`. */
   protected override basePath = '/api/v1/items';
-  protected override searchFields = ['code', 'name', 'sku'];
+  protected override searchFields = ['code', 'name', 'sku', 'cleStable'];
 
   private readonly itemsApi = inject(ItemsApiService);
 

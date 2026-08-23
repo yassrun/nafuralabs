@@ -4,6 +4,7 @@
 > Pas dans `PACT_BLUEPRINT.md` (méthode, pas le produit).
 >
 > Produit études (cycle poste / articles / ouvrages, chrome) : [`DECISIONS-PRODUIT.md`](DECISIONS-PRODUIT.md) — avant SPEC.
+> Produit chantier (arbre du chantier, planning, ressources) : [`DECISIONS-PRODUIT-CHANTIER.md`](DECISIONS-PRODUIT-CHANTIER.md) — avant SPEC.
 
 Gelé 14/08/2026.
 
@@ -52,9 +53,9 @@ Ordre = cycle : Études → Catalogue → Achats → Chantiers → Marchés → 
 
 | Item | Contient | Hors item |
 |------|----------|-----------|
-| Études | dossiers (étude = AO), devis | bibliothèque, `/catalogue` G2, mètres, listing AO legacy |
+| Études | dossiers (étude = AO), devis **client** | bibliothèque, `/catalogue` G2, mètres, listing AO legacy, **consultations** |
 | Catalogue | articles, familles, UoM, stock, mouvements, ouvrages, matériel | |
-| Achats | demandes, AO, commandes, fournisseurs | |
+| Achats | demandes, AO, **consultations**, commandes, fournisseurs | |
 | Marchés | contrats, avenants, cautions… | clients / factures ventes |
 | Ventes | clients, offres, factures | |
 

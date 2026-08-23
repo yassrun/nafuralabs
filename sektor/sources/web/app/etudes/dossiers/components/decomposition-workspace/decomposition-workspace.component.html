@@ -27,20 +27,33 @@
       </div>
     }
 
-    <label class="workspace__search">
-      <span class="sr-only">Rechercher un poste</span>
-      <input
-        type="search"
-        placeholder="Rechercher un poste…"
-        [ngModel]="search()"
-        (ngModelChange)="search.set($event)"
-      />
-    </label>
+    <div class="workspace__toolbar">
+      <label class="workspace__search">
+        <span class="sr-only">Rechercher un poste</span>
+        <input
+          type="search"
+          placeholder="Rechercher un poste…"
+          [ngModel]="search()"
+          (ngModelChange)="search.set($event)"
+        />
+      </label>
+      @if (modifiable()) {
+        <nf-button
+          variant="secondary"
+          size="sm"
+          data-testid="ouvrir-consultations-etude"
+          (clicked)="ouvrirConsultation()"
+        >
+          Consultations
+        </nf-button>
+      }
+    </div>
 
     <app-bordereau-arbre
       [dpgfId]="dpgfId()"
       [modifiable]="modifiable()"
       [selectionEnabled]="true"
+      [openOnClick]="true"
       [selectedKey]="selectedKey()"
       [focusNoeudId]="arbreFocusId()"
       [expandArticleIds]="expandArticleIds()"

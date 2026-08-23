@@ -20,6 +20,8 @@ export interface CreateMissingItemDialogData {
   type: string;
   unite: string;
   rendement: number;
+  /** Identité Sektor déjà classée (Extraire) — pas un slug couleur. */
+  cleStable?: string | null;
   /** PU déjà chiffré sur le poste — préremplit le tarif catalogue. */
   prixUnitaire?: number;
   uniteOptions: { code: string; id?: string }[];
@@ -211,23 +213,18 @@ export class CreateMissingItemDialogComponent {
       return;
     }
 
-    const uom = this.data.uniteOptions.find(
-      (u) => u.code.trim().toUpperCase() === this.unite.trim().toUpperCase(),
-    );
     try {
-      const item = await this.itemsApi.create({
-        name: this.name.trim().slice(0, 255),
+      const created = await this.itemsApi.extraireCreer({
+        designation: this.name.trim().slice(0, 255),
         nature: this.nature,
-        isActive: true,
-        unitOfMeasureId: uom?.id,
-        code: `ETU-${Date.now().toString(36).toUpperCase().slice(-8)}`,
-        prixUnitaire: prix,
+        uniteCode: this.unite,
+        cleStable: this.data.cleStable ?? undefined,
       });
       try {
         const today = new Date().toISOString().slice(0, 10);
         const currencyId = await this.resolveReferenceCurrencyId();
         const payload: ItemPriceCreate = {
-          itemId: item.id,
+          itemId: created.itemId,
           priceType: 'ACHAT_STANDARD',
           currencyId,
           unitPrice: prix,
@@ -238,9 +235,9 @@ export class CreateMissingItemDialogComponent {
         /* article créé — le PU du poste reste la source si le tarif échoue */
       }
       this.dialogRef.close({
-        itemId: item.id,
-        code: item.code,
-        name: item.name,
+        itemId: created.itemId,
+        code: created.cleStable,
+        name: created.libelle,
         type: this.dpuType(),
         unite: this.unite,
         prixUnitaire: prix,

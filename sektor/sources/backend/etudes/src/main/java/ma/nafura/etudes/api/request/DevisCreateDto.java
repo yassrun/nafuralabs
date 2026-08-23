@@ -32,8 +32,6 @@ public class DevisCreateDto {
     @NotNull
     private LocalDate dateValidite;
 
-    private String metreId;
-
     private String dpgfId;
 
     private String bibliothequeReference;

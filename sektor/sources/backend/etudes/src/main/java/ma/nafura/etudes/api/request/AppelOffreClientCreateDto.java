@@ -34,8 +34,6 @@ public class AppelOffreClientCreateDto {
     private String status;
     private String devisId;
     private String devisNumero;
-    private String metreId;
-    private String metreNumero;
     private Integer resultatRangNotre;
     private Integer resultatNbPlis;
     private String resultatAttributaire;

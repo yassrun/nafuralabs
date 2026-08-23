@@ -93,14 +93,6 @@ export const FIELDS: DetailFieldConfig<AppelOffreClient>[] = [
     width: 'md',
   },
   {
-    key: 'metreId',
-    label: 'Métré associé',
-    type: 'select',
-    width: 'md',
-    lookupKey: 'metres',
-    clearable: true,
-  },
-  {
     key: 'devisId',
     label: 'Devis (offre)',
     type: 'select',

@@ -11,7 +11,6 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const AUTH_FILE = path.resolve(__dirname, '../.auth/erp-audit.json');
 const BASE = 'http://erp.nafura.local';
 
-const METRE_ID = '1d11c135-2a4f-43ed-99e0-6936b0c98bde';
 const DEVIS_ID = 'a06010d8-145b-40e5-909d-9232de2274fc';
 
 const results = [];
@@ -28,23 +27,6 @@ async function waitForApp(page) {
   if (await login.isVisible().catch(() => false)) {
     throw new Error('Session expired — re-run erp-audit-auth.setup.ts');
   }
-}
-
-async function checkMetreButtons(page) {
-  await page.goto(`${BASE}/etudes/metres/${METRE_ID}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
-  await waitForApp(page);
-
-  const dpgf = page.getByRole('button', { name: /^DPGF$/i });
-  const generate = page.getByRole('button', { name: /générer devis/i });
-
-  const dpgfVisible = await dpgf.isVisible().catch(() => false);
-  const generateVisible = await generate.isVisible().catch(() => false);
-
-  record(
-    'metre-dpgf-generate-buttons',
-    dpgfVisible && generateVisible,
-    `DPGF visible=${dpgfVisible}, Générer devis visible=${generateVisible}`,
-  );
 }
 
 async function checkDevisClient(page) {
@@ -213,7 +195,6 @@ async function main() {
   const page = await context.newPage();
 
   try {
-    await checkMetreButtons(page);
     await checkDevisClient(page);
   try {
     await checkSortieDepots(page);

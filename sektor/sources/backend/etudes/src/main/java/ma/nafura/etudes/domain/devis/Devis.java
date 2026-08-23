@@ -71,10 +71,6 @@ public class Devis {
     @Column(name = "date_validite", nullable = false)
     private LocalDate dateValidite;
 
-    @Column(name = "metre_id")
-    @JsonIgnore
-    private UUID metreId;
-
     @Column(name = "dpgf_id")
     @JsonIgnore
     private UUID dpgfId;
@@ -140,11 +136,6 @@ public class Devis {
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     private List<DevisVersion> historiqueVersions = new ArrayList<>();
-
-    @JsonProperty("metreId")
-    public String getMetreIdJson() {
-        return metreId != null ? metreId.toString() : null;
-    }
 
     @JsonProperty("dpgfId")
     public String getDpgfIdJson() {

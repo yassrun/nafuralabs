@@ -1,0 +1,69 @@
+<nf-page-shell>
+  <nf-page-header [config]="headerConfig"></nf-page-header>
+
+  @if (chargement()) {
+    <p>Chargement…</p>
+  } @else if (item(); as row) {
+    <div class="cs-fiche" data-testid="consultation-achat-fiche">
+      <div class="cs-pills">
+        <span class="pill">{{ row.numero }}</span>
+        <span class="pill">{{ row.fournisseurNom || '—' }}</span>
+        <span class="pill" [class.pill-warn]="!row.devisRecus">{{ statutLabel() }}</span>
+      </div>
+
+      <p class="cs-callout">
+        On importe le fichier. Import magique extrait les lignes. Pas de saisie manuelle des prix.
+      </p>
+
+      <div class="cs-import">
+        <h2>Déposer le devis</h2>
+        <nf-smart-import-trigger
+          [definition]="importDefinition"
+          (completed)="onSmartImportComplete($event)" />
+      </div>
+
+      @if (importHint(); as hint) {
+        <p class="cs-hint">{{ hint }}</p>
+      }
+
+      <h2>Extrait (revue confirmée)</h2>
+      @if (lignes().length === 0) {
+        <p class="cs-empty">Aucune ligne — un fichier sans extraction confirmée n’est pas un devis reçu.</p>
+      } @else {
+        <table data-testid="consultation-devis-lignes">
+          <thead>
+            <tr>
+              <th>Identité</th>
+              <th>Libellé</th>
+              <th>Qté</th>
+              <th>Unité</th>
+              <th>PU</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (ligne of lignes(); track $index) {
+              <tr>
+                <td>{{ ligne.identite || '—' }}</td>
+                <td>{{ ligne.libelle || '—' }}</td>
+                <td>{{ ligne.quantite ?? '—' }}</td>
+                <td>{{ ligne.unite || '—' }}</td>
+                <td>{{ ligne.prixUnitaire ?? '—' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+
+      @if (erreur(); as err) {
+        <p class="cs-error">{{ err }}</p>
+      }
+
+      <div class="cs-actions">
+        <nf-button type="button" variant="secondary" (clicked)="back()">Retour à la liste</nf-button>
+      </div>
+    </div>
+  } @else {
+    <p class="cs-error">{{ erreur() || 'Consultation introuvable.' }}</p>
+    <nf-button type="button" variant="secondary" (clicked)="back()">Retour à la liste</nf-button>
+  }
+</nf-page-shell>

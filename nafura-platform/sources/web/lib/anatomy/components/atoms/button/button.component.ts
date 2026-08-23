@@ -60,8 +60,12 @@ const LUCIDE_ICON_NAME_ALIASES: Record<string, string> = {
     MatTooltipModule,
     LucideAngularModule,
   ],
+  host: {
+    '(click)': 'onHostClick($event)',
+  },
   template: `
     <button
+      type="button"
       mat-button
       [class]="buttonClasses()"
       [disabled]="disabled() || loading()"
@@ -456,5 +460,13 @@ export class ButtonComponent implements AfterViewInit {
     if (!this.disabled() && !this.loading()) {
       this.clicked.emit(event);
     }
+  }
+
+  /** Clic MCP/a11y sur le host (pas l’inner button) — même sémantique que (clicked). */
+  onHostClick(event: MouseEvent): void {
+    if (this.disabled() || this.loading()) return;
+    if (event.target !== event.currentTarget) return;
+    const inner = (event.currentTarget as HTMLElement).querySelector('button');
+    inner?.click();
   }
 }

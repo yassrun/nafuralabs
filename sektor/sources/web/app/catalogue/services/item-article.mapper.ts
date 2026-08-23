@@ -29,6 +29,7 @@ export function itemToArticle(item: ItemApiRow): Article {
     id: item.id,
     code: item.code ?? '',
     name: item.name,
+    cleStable: item.cleStable,
     description: item.description,
     familleId: item.itemCategoryId ?? '',
     lotsUsage: item.usageLotCodes ?? [],
@@ -49,6 +50,7 @@ export function articleCreateToItem(data: ArticleCreate): ItemCreate {
   return {
     code: data.code,
     name: data.name,
+    cleStable: data.cleStable,
     description: data.description,
     itemCategoryId: data.familleId,
     unitOfMeasureId: data.uomId,
@@ -69,6 +71,7 @@ export function articleUpdateToItem(data: ArticleUpdate): ItemUpdate {
   const patch: ItemUpdate = {};
   if (data.code !== undefined) patch.code = data.code;
   if (data.name !== undefined) patch.name = data.name;
+  if (data.cleStable !== undefined) (patch as ItemCreate).cleStable = data.cleStable;
   if (data.description !== undefined) patch.description = data.description;
   if (data.familleId !== undefined) patch.itemCategoryId = data.familleId;
   if (data.uomId !== undefined) patch.unitOfMeasureId = data.uomId;

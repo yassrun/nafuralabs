@@ -1,12 +1,13 @@
 import { Component, OnDestroy, computed, effect, inject, input, signal, ChangeDetectionStrategy } from '@angular/core';
 
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subject, takeUntil } from 'rxjs';
 
 import { ButtonComponent, NfInputComponent, NfSelectComponent } from '@platform/lib/anatomy';
-import type { Article, InventoryTxLine } from '../../models';
-import { ArticleCatalogService } from '../../services/article-catalog.service';
+import type { InventoryTxLine } from '../../models';
+import { openCatalogItemPicker } from '@app/etudes/dossiers/components/catalog-item-pick-dialog/catalog-item-pick-dialog.component';
 
 export type EtatArticle = 'BON' | 'ABIME' | 'INUTILISABLE';
 
@@ -49,13 +50,15 @@ const ETAT_OPTIONS: { value: EtatArticle; labelKey: string }[] = [
             @for (line of lines(); track line.id; let i = $index) {
               <tr [class.rle__row--warn]="line.etatArticle === 'ABIME'" [class.rle__row--danger]="line.etatArticle === 'INUTILISABLE'">
                 <td>
-                  <nf-select
-                    class="rle__field"
-                    [options]="articleSelectOptions()"
-                    [ngModel]="line.articleId"
-                    (ngModelChange)="onArticleChange(i, $event)"
+                  <button
+                    type="button"
+                    class="rle__pick"
+                    data-testid="article-picker-open"
                     [disabled]="linesControl().disabled"
-                    [ngModelOptions]="{ standalone: true }" />
+                    (click)="pickArticle(i)"
+                  >
+                    {{ line.articleCode ? (line.articleCode + ' — ' + line.articleName) : 'Choisir un article' }}
+                  </button>
                 </td>
                 <td class="rle__muted">{{ line.articleName || ('inventory.common.dash' | translate) }}</td>
                 <td>
@@ -152,22 +155,30 @@ const ETAT_OPTIONS: { value: EtatArticle; labelKey: string }[] = [
     .rle__row--danger {
       background: color-mix(in srgb, var(--nf-danger) 8%, transparent);
     }
+    .rle__pick {
+      width: 100%;
+      min-width: 140px;
+      text-align: left;
+      padding: 0.5rem 0.65rem;
+      border: 1px solid var(--nf-border-default);
+      border-radius: 8px;
+      background: var(--nf-color-surface, #fff);
+      font: inherit;
+      cursor: pointer;
+    }
+    .rle__pick:disabled { opacity: 0.6; cursor: not-allowed; }
     .rle--readonly .rle__toolbar {
       display: none;
     }
   `,
 })
 export class RetourLinesEditorComponent implements OnDestroy {
-  private readonly articleCatalog = inject(ArticleCatalogService);
+  private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
 
   readonly linesControl = input.required<FormControl<RetourLine[] | null>>();
 
-  readonly articles = signal<Article[]>([]);
   readonly lines = signal<RetourLine[]>([]);
-  readonly articleSelectOptions = computed(() =>
-    this.articles().map((a) => ({ value: a.id, label: `${a.code} — ${a.name}` })),
-  );
   readonly etatOptions = computed(() =>
     ETAT_OPTIONS.map((opt) => ({
       value: opt.value,
@@ -191,9 +202,6 @@ export class RetourLinesEditorComponent implements OnDestroy {
       });
     });
 
-    effect(() => {
-      void this.loadArticles();
-    });
   }
 
   ngOnDestroy(): void {
@@ -201,9 +209,11 @@ export class RetourLinesEditorComponent implements OnDestroy {
     this.destroy$.complete();
   }
 
-  private async loadArticles(): Promise<void> {
-    const list = await this.articleCatalog.loadArticles({ activeOnly: true });
-    this.articles.set(list);
+  async pickArticle(index: number): Promise<void> {
+    if (this.linesControl().disabled) return;
+    const result = await openCatalogItemPicker(this.dialog, { context: 'stock', uniteOptions: [] });
+    if (!result?.itemId) return;
+    this.onArticlePicked(index, result);
   }
 
   addLine(): void {
@@ -231,18 +241,16 @@ export class RetourLinesEditorComponent implements OnDestroy {
     this.commit(next.map((l, i) => ({ ...l, lineNumber: i + 1 })));
   }
 
-  onArticleChange(index: number, articleId: string): void {
-    const art = this.articles().find((a) => a.id === articleId);
-    if (!art) {
-      this.patchLine(index, { articleId });
-      return;
-    }
+  onArticlePicked(
+    index: number,
+    result: { itemId: string; name: string; code?: string; unite: string; unitOfMeasureId?: string },
+  ): void {
     this.patchLine(index, {
-      articleId,
-      articleCode: art.code,
-      articleName: art.name,
-      uomId: art.uomId,
-      uomCode: art.uomCode,
+      articleId: result.itemId,
+      articleCode: result.code ?? '',
+      articleName: result.name,
+      uomId: result.unitOfMeasureId ?? '',
+      uomCode: result.unite,
     });
   }
 

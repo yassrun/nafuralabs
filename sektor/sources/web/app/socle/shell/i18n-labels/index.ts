@@ -112,7 +112,6 @@ import { JOURNAL_TYPE_KEYS } from './journal-type.keys';
 import { MOUVEMENT_TRESORERIE_TYPE_KEYS } from './mouvement-tresorerie-type.keys';
 import {
   DEVIS_STATUS_KEYS,
-  METRE_STATUS_KEYS,
   AO_CLIENT_STATUS_KEYS,
   AO_CLIENT_TYPE_KEYS,
 } from './etudes.keys';
@@ -186,7 +185,6 @@ export const I18N_LABEL_REGISTRY: Record<string, Readonly<Record<string, string>
   JOURNAL_TYPE_KEYS,
   MOUVEMENT_TRESORERIE_TYPE_KEYS,
   DEVIS_STATUS_KEYS,
-  METRE_STATUS_KEYS,
   AO_CLIENT_STATUS_KEYS,
   AO_CLIENT_TYPE_KEYS,
   MOA_TYPE_KEYS,

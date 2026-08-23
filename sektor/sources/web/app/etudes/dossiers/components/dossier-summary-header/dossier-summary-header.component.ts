@@ -39,7 +39,7 @@ export class DossierSummaryHeaderComponent {
   readonly anomaliesEtape = input<number | undefined>(undefined);
   /** Étape UI wizard (1–4) — évite « Soumettre » trop tôt dans le header. */
   readonly etapeUi = input(1);
-  /** Lien invité : seulement quand l’étape Coût est verte (gates OK). */
+  /** Lien invité : dès que le dossier existe (portail déjà branché). */
   readonly canShare = input(false);
 
   readonly action = output<string>();

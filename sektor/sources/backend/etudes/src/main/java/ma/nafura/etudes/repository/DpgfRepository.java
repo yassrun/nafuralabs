@@ -11,7 +11,5 @@ public interface DpgfRepository extends TenantScopedRepository<Dpgf, UUID> {
 
     List<Dpgf> findByTenantIdOrderByCreatedAtDesc(UUID tenantId);
 
-    List<Dpgf> findByTenantIdAndMetreIdOrderByCreatedAtDesc(UUID tenantId, UUID metreId);
-
     long countByTenantIdAndNumeroStartingWith(UUID tenantId, String prefix);
 }

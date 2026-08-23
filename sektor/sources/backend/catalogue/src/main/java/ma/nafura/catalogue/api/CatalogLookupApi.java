@@ -17,5 +17,9 @@ public interface CatalogLookupApi {
 
     CatalogItemSnapshot createAllege(String libelle, String nature, String uomCode);
 
+    Optional<CatalogItemSnapshot> findByCleStable(String cleStable);
+
+    IdentiteClasse classerIdentite(String designation, String nature);
+
     List<String> listActiveUnitCodes();
 }

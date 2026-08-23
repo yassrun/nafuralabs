@@ -279,53 +279,33 @@ class GatesEtudeTest {
     // â”€â”€ Ã‰tape 4 â€” non bloquante â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     @Test
-    void prix_non_consultes_avertissent_sans_bloquer() {
-        UUID dpuId = UUID.randomUUID();
-        DpgfNoeud a = article("1-1", "m3", "70", "DECOMPOSE");
-        a.setPrixDpuId(dpuId);
-        PrixDpu dpu = PrixDpu.builder().id(dpuId).build();
-        dpu.setComposants(List.of(ComposantDpu.builder().sourcePrix("MANUEL").build()));
-        lenient().when(prixDpuRepository.findById(any())).thenReturn(Optional.of(dpu));
+    void optionnelle_zero_devis_reste_informative() {
+        ResultatGate r = new GatesEtude.GateConsultationFournisseurs()
+                .evaluer(ContexteGate.avecConsultation(ContexteGate.deArticles(List.of()), 0, false, 5));
 
-        ResultatGate r = new GatesEtude.GateConsultationFournisseurs(prixDpuRepository)
-                .evaluer(ContexteGate.deArticles(List.of(a)));
-
-        assertThat(r.passe()).isFalse();
-        assertThat(r.autoriseLaSuite()).isTrue();
-    }
-
-    @Test
-    void articles_en_prix_fourni_sont_ignores_par_la_gate_consultation() {
-        UUID dpuId = UUID.randomUUID();
-        DpgfNoeud a = article("1-1", "m3", "70", ma.nafura.etudes.domain.dpu.OrigineCout.ESTIME.name());
-        a.setPrixDpuId(dpuId);
-        PrixDpu dpu = PrixDpu.builder().id(dpuId).build();
-        dpu.setComposants(List.of(ComposantDpu.builder().sourcePrix("MANUEL").build()));
-        lenient().when(prixDpuRepository.findById(any())).thenReturn(Optional.of(dpu));
-
-        ResultatGate r = new GatesEtude.GateConsultationFournisseurs(prixDpuRepository)
-                .evaluer(ContexteGate.deArticles(List.of(a)));
-
-        assertThat(r.passe()).isTrue();
-        assertThat(r.problemes()).isEmpty();
-    }
-
-    @Test
-    void prix_consultes_franchissent_la_gate_consultation_sans_bloquer_le_parcours() {
-        UUID dpuId = UUID.randomUUID();
-        DpgfNoeud a = article("1-1", "m3", "70", "DECOMPOSE");
-        a.setPrixDpuId(dpuId);
-        PrixDpu dpu = PrixDpu.builder().id(dpuId).build();
-        dpu.setComposants(List.of(ComposantDpu.builder().sourcePrix("CONSULTE").build()));
-        lenient().when(prixDpuRepository.findById(any())).thenReturn(Optional.of(dpu));
-
-        ResultatGate r = new GatesEtude.GateConsultationFournisseurs(prixDpuRepository)
-                .evaluer(ContexteGate.deArticles(List.of(a)));
-
-        assertThat(r.passe()).isTrue();
         assertThat(r.bloquant()).isFalse();
-        // La consultation reste non bloquante mÃªme si des prix manuels subsistent ailleurs :
-        // le chiffrage (Ã©tape 5) reste le seul verrou de soumission.
+        assertThat(r.autoriseLaSuite()).isTrue();
+        assertThat(r.problemes()).isNotEmpty();
+    }
+
+    @Test
+    void obligatoire_min2_un_devis_bloque() {
+        ResultatGate r = new GatesEtude.GateConsultationFournisseurs()
+                .evaluer(ContexteGate.avecConsultation(ContexteGate.deArticles(List.of()), 1, true, 2));
+
+        assertThat(r.bloquant()).isTrue();
+        assertThat(r.autoriseLaSuite()).isFalse();
+        assertThat(r.problemes()).singleElement()
+                .extracting(ResultatGate.ProblemeGate::message)
+                .isEqualTo("etudes.gate.consultation.min_devis");
+    }
+
+    @Test
+    void obligatoire_min2_deux_devis_passe() {
+        ResultatGate r = new GatesEtude.GateConsultationFournisseurs()
+                .evaluer(ContexteGate.avecConsultation(ContexteGate.deArticles(List.of()), 2, true, 2));
+
+        assertThat(r.passe()).isTrue();
         assertThat(r.autoriseLaSuite()).isTrue();
     }
 

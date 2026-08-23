@@ -106,8 +106,6 @@ public class AppelOffreClientService {
                 .status(status)
                 .devisId(trimOrNull(request.getDevisId()))
                 .devisNumero(trimOrNull(request.getDevisNumero()))
-                .metreId(trimOrNull(request.getMetreId()))
-                .metreNumero(trimOrNull(request.getMetreNumero()))
                 .resultatRangNotre(request.getResultatRangNotre())
                 .resultatNbPlis(request.getResultatNbPlis())
                 .resultatAttributaire(trimOrNull(request.getResultatAttributaire()))
@@ -169,12 +167,6 @@ public class AppelOffreClientService {
         }
         if (request.getDevisNumero() != null) {
             entity.setDevisNumero(trimOrNull(request.getDevisNumero()));
-        }
-        if (request.getMetreId() != null) {
-            entity.setMetreId(trimOrNull(request.getMetreId()));
-        }
-        if (request.getMetreNumero() != null) {
-            entity.setMetreNumero(trimOrNull(request.getMetreNumero()));
         }
         if (request.getResultatRangNotre() != null) {
             entity.setResultatRangNotre(request.getResultatRangNotre());

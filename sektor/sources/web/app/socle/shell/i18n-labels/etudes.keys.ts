@@ -4,7 +4,6 @@
  *
  * Replaces hardcoded FR maps at:
  *   - web/app/applications/erp/pages/etudes/devis/config/listing/columns.ts → STATUS_LABELS
- *   - web/app/applications/erp/pages/etudes/metres/config/listing/columns.ts → STATUS_LABELS
  *   - web/app/applications/erp/pages/etudes/appels-offres-clients/config/listing/columns.ts → STATUS_LABELS, TYPE_LABELS
  */
 
@@ -25,13 +24,6 @@ export const DEVIS_STATUS_KEYS: Record<DevisStatus, string> = {
   PERDU:       'enum.devis.status.perdu',
   ANNULE:      'enum.devis.status.annule',
   EXPIRE:      'enum.devis.status.expire',
-};
-
-export type MetreStatus = 'BROUILLON' | 'TERMINE';
-
-export const METRE_STATUS_KEYS: Record<MetreStatus, string> = {
-  BROUILLON: 'enum.metre.status.brouillon',
-  TERMINE:   'enum.metre.status.termine',
 };
 
 export type AoClientStatus =

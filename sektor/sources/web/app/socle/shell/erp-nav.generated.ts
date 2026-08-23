@@ -155,6 +155,13 @@ export const ERP_NAV_CONFIG_GENERATED: SidebarNode[] = [
             route: '/achats/appels-offres',
             order: 20,
           },
+          {
+            id: 'achats.consultations',
+            label: 'nav.achats.consultations',
+            icon: 'file-text',
+            route: '/achats/consultations',
+            order: 30,
+          },
         ],
       },
       {

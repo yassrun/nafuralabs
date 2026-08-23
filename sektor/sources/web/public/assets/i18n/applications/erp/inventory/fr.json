@@ -332,6 +332,8 @@
         "fields": {
           "code": "Code",
           "name": "Désignation",
+          "cleStable": "Identité Sektor",
+          "cleStableHint": "cle_stable catalogue — un Item par tenant. Vide = dérivée du libellé.",
           "description": "Description",
           "familleId": "Famille",
           "lotsUsage": "Lots d'usage",
@@ -359,6 +361,7 @@
           "columns": {
             "code": "Code",
             "name": "Désignation",
+            "cleStable": "Identité",
             "familleName": "Famille",
             "lotsUsage": "Lots d'usage",
             "articleType": "Type",

@@ -88,11 +88,17 @@ export class DossierCreatePage implements OnInit {
       !!this.objet().trim() &&
       !!this.clientNom().trim() &&
       !!this.chargeEtudeUserId() &&
-      !!this.dateLimiteDepot() &&
       !this.enCours() &&
       this.cpsPhase() !== 'uploading' &&
       this.cpsPhase() !== 'indexing',
   );
+
+  /** Fill natif / autocomplete : synchronise le signal même si ngModel n’a pas vu le change. */
+  onTexteNatif(field: 'objet' | 'clientNom', event: Event): void {
+    const value = (event.target as HTMLInputElement | null)?.value ?? '';
+    if (field === 'objet') this.objet.set(value);
+    else this.clientNom.set(value);
+  }
 
   readonly hasPendingIa = computed(() =>
     (Object.keys(this.iaFields()) as IaFieldKey[]).some((k) => this.iaPending(k)),
@@ -205,7 +211,7 @@ export class DossierCreatePage implements OnInit {
       clientNom: this.clientNom().trim(),
       chargeEtudeUserId: chargeId,
       chargeEtudeNom: charge?.displayName ?? charge?.email,
-      dateLimiteDepot: this.dateLimiteDepot(),
+      dateLimiteDepot: this.dateLimiteDepot() || undefined,
       aoReference: this.aoReference().trim() || undefined,
       aoType: this.aoType(),
       ville: this.ville().trim() || undefined,

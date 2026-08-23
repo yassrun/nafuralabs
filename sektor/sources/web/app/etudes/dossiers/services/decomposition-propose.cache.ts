@@ -86,6 +86,10 @@ export class DecompositionProposeCache {
   }
 
   private count(value?: DecompositionPropose | null): number {
-    return (value?.matched?.length ?? 0) + (value?.missing?.length ?? 0);
+    return (
+      (value?.matched?.length ?? 0) +
+      (value?.missing?.length ?? 0) +
+      (value?.uncertain?.length ?? 0)
+    );
   }
 }

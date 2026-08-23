@@ -141,7 +141,7 @@ export class PiecesMarcheComponent {
   readonly aide = computed(() =>
     this.mode() === 'bordereau'
       ? 'Construisez l’arbre du bordereau : extraction automatique depuis le BDP déjà déposé, ou saisie manuelle.'
-      : 'Déposez chaque pièce attendue. BDP et CPS sont obligatoires ; d’autres slots peuvent venir du CPS (à valider) ou être ajoutés manuellement.',
+      : 'Déposez chaque pièce attendue. BDP et CPS alimentent l’IA ; sans PDF, utilisez Bordereau manuel.',
   );
 
   readonly enRevue = computed(() => this.phase() === 'review' || this.phase() === 'saving');

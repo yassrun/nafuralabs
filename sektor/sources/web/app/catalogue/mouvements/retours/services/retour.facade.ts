@@ -3,8 +3,6 @@ import { TranslateService } from '@ngx-translate/core';
 import type { CrudStyleFacade } from '@platform/lib/anatomy';
 import type { ListResponse, LookupContext } from '@platform/lib/anatomy/types';
 import type { InventoryTx, InventoryTxLine, Location, MotifMouvement } from '../../../models';
-import { isStockableNature } from '../../../models';
-import { ArticleCatalogService } from '../../../services/article-catalog.service';
 import { InventoryLookupsService } from '../../../services/inventory-lookups.service';
 import { InventoryMovementApiService } from '../../../services/inventory-movement-api.service';
 import { loadMovementPage } from '../../../services/movement-facade.util';
@@ -25,7 +23,6 @@ export interface RetourTxLine extends InventoryTxLine {
 export class RetourFacade implements CrudStyleFacade<InventoryTx, Partial<InventoryTx>> {
   private readonly movementApi = inject(InventoryMovementApiService);
   private readonly lookupsService = inject(InventoryLookupsService);
-  private readonly articleCatalog = inject(ArticleCatalogService);
   private readonly motifsApi = inject(MotifsApiService);
 
   private locationsCache: Location[] = [];
@@ -44,29 +41,21 @@ export class RetourFacade implements CrudStyleFacade<InventoryTx, Partial<Invent
   }
 
   async ensureLookups(): Promise<void> {
-    const [locations, articles, motifs] = await Promise.all([
+    const [locations, motifs] = await Promise.all([
       this.lookupsService.loadLocations(),
-      this.articleCatalog.loadArticles({ activeOnly: true }),
       this.motifsApi.listByTxType('RETOUR'),
     ]);
     this.locationsCache = locations;
     this.motifsCache = motifs;
     const chantiers = locations.filter((l) => l.type === 'CHANTIER');
     const depots = locations.filter((l) => l.type === 'DEPOT' || l.type === 'ENTREPOT');
-    const matCons = articles.filter(
-      (a) => isStockableNature(a.nature),
-    );
     this.lookupsSignal.set({
       chantierLocations: chantiers.map((l) => ({
         key: l.id,
         value: l.projectRef ? `${l.name} (${l.projectRef})` : l.name,
       })),
       depotLocations: depots.map((l) => ({ key: l.id, value: l.name })),
-      articlesMatCons: matCons.map((a) => ({
-        key: a.id,
-        value: `${a.code} — ${a.name}`,
-        data: { uomCode: a.uomCode, uomId: a.uomId },
-      })),
+      articlesMatCons: [],
       motifsRetour: motifs.map((m) => ({ key: m.id, value: `${m.code} — ${m.name}` })),
       retourTypes: [
         { key: 'RETOUR_CHANTIER', value: 'Retour chantier' },

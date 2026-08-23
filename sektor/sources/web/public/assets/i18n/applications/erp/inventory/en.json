@@ -332,6 +332,8 @@
         "fields": {
           "code": "Code",
           "name": "Designation",
+          "cleStable": "Sektor identity",
+          "cleStableHint": "Catalogue cle_stable — one Item per tenant. Empty = derived from the name.",
           "description": "Description",
           "familleId": "Family",
           "lotsUsage": "Usage packages",
@@ -359,6 +361,7 @@
           "columns": {
             "code": "Code",
             "name": "Designation",
+            "cleStable": "Identity",
             "familleName": "Family",
             "lotsUsage": "Usage packages",
             "articleType": "Type",

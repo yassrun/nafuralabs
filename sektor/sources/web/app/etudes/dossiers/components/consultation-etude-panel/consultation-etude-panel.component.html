@@ -1,0 +1,139 @@
+<section class="consult" aria-label="Consultation études">
+  <div class="consult__head">
+    <div>
+      <h4>Consultation du dossier</h4>
+      <p class="consult__hint">
+        Un paquet d’identités, plusieurs postes. Inviter ≠ consulté. Fichier lié compte pour le min
+        N ; sans lignes il n’identifie pas.
+      </p>
+    </div>
+    @if (consultation(); as c) {
+      <span class="consult__badge">{{ c.devisRecus }} devis reçu{{ c.devisRecus > 1 ? 's' : '' }}</span>
+    } @else {
+      <span class="consult__badge">Vide</span>
+    }
+  </div>
+
+  @if (erreur(); as msg) {
+    <p class="consult__erreur" role="alert">{{ msg }}</p>
+  }
+
+  @if (chargement()) {
+    <p class="consult__etat">Chargement…</p>
+  }
+
+  @if (!consultation()) {
+    <div class="consult__form">
+      <label>
+        Paquet (cles stables, séparées par une virgule)
+        <input
+          type="text"
+          [ngModel]="paquetSaisi()"
+          (ngModelChange)="paquetSaisi.set($event)"
+          [disabled]="!modifiable() || saving()"
+          placeholder="ciment-cpj-45, peinture-acrylique"
+        />
+      </label>
+      @if (modifiable()) {
+        <nf-button variant="primary" size="sm" [disabled]="saving()" (clicked)="ouvrir()">
+          Ouvrir la consultation
+        </nf-button>
+      }
+    </div>
+  } @else {
+    <div class="consult__form">
+      <label>
+        Paquet
+        <input
+          type="text"
+          [ngModel]="paquetSaisi()"
+          (ngModelChange)="paquetSaisi.set($event)"
+          [disabled]="!modifiable() || saving()"
+        />
+      </label>
+      @if (modifiable()) {
+        <nf-button variant="secondary" size="sm" [disabled]="saving()" (clicked)="sauverPaquet()">
+          Enregistrer le paquet
+        </nf-button>
+      }
+    </div>
+
+    <p class="consult__hint">
+      Invités : {{ consultation()!.partenaireIds.length || 'aucun' }} · consultés =
+      {{ consultation()!.devisRecus }} (devis lié)
+    </p>
+
+    @if (modifiable()) {
+      <div class="consult__form consult__form--row">
+        <input
+          type="text"
+          [ngModel]="partenaireSaisi()"
+          (ngModelChange)="partenaireSaisi.set($event)"
+          [disabled]="saving()"
+          placeholder="ID fiche fournisseur"
+        />
+        <nf-button variant="secondary" size="sm" [disabled]="saving()" (clicked)="inviter()">
+          Inviter
+        </nf-button>
+      </div>
+
+      <div class="consult__form">
+        <label>
+          Enregistrer un devis reçu
+          <input
+            type="text"
+            [ngModel]="devisPartenaireId()"
+            (ngModelChange)="devisPartenaireId.set($event)"
+            [disabled]="saving()"
+            placeholder="ID fournisseur consulté"
+          />
+        </label>
+        <label>
+          Lignes (manuel) — une par ligne : cle_stable=prix
+          <textarea
+            rows="3"
+            [ngModel]="devisLignesSaisies()"
+            (ngModelChange)="devisLignesSaisies.set($event)"
+            [disabled]="saving()"
+            placeholder="ciment-cpj-45=85.50"
+          ></textarea>
+        </label>
+        <nf-button variant="primary" size="sm" [disabled]="saving()" (clicked)="recevoirDevis()">
+          Enregistrer le devis
+        </nf-button>
+      </div>
+    }
+
+    <h5>Identifier les couverts</h5>
+    @if (identitesEligibles().length === 0) {
+      <p class="consult__etat">
+        Aucune ligne de prix. Un fichier lié compte pour le min N mais n’identifie pas d’article.
+      </p>
+    } @else {
+      <ul class="consult__list">
+        @for (row of identitesEligibles(); track row.cle) {
+          <li class="consult__row">
+            <label>
+              <input
+                type="checkbox"
+                [checked]="!!cochees()[row.cle]"
+                [disabled]="!modifiable() || saving()"
+                (change)="toggleCle(row.cle, $any($event.target).checked)"
+              />
+              {{ row.cle }}
+              <span class="consult__pu">{{ row.pu }}</span>
+              @if (couvertes().has(row.cle)) {
+                <span class="consult__tag">CONSULTE</span>
+              }
+            </label>
+          </li>
+        }
+      </ul>
+      @if (modifiable()) {
+        <nf-button variant="primary" size="sm" [disabled]="saving()" (clicked)="appliquer()">
+          Appliquer le prix consulté
+        </nf-button>
+      }
+    }
+  }
+</section>

@@ -1880,12 +1880,6 @@
         "expire": "Expired"
       }
     },
-    "metre": {
-      "status": {
-        "brouillon": "Draft",
-        "termine": "Completed"
-      }
-    },
     "ao_client": {
       "status": {
         "a_etudier": "To study",

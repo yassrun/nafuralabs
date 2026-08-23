@@ -78,7 +78,11 @@
       "fournisseurDetailTitle": "Supplier details",
       "fournisseurDetailCrumb": "Details",
       "fournisseurEditTitle": "Edit supplier",
-      "fournisseurEditCrumb": "Edit"
+      "fournisseurEditCrumb": "Edit",
+      "consultationsListTitle": "Consultations",
+      "consultationsListCrumb": "Consultations",
+      "consultationNewTitle": "New consultation",
+      "consultationNewCrumb": "New"
     },
     "rubrique": {
       "MATERIAUX": "Materials",

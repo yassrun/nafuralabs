@@ -35,4 +35,20 @@ public class TenantSettingReader {
                 settingKey.trim());
         return values.stream().filter(StringUtils::hasText).findFirst();
     }
+
+    public void upsert(UUID tenantId, String settingKey, String value) {
+        if (tenantId == null || !StringUtils.hasText(settingKey)) {
+            throw new IllegalArgumentException("etudes.parametre.cle_requise");
+        }
+        jdbcTemplate.update(
+                """
+                INSERT INTO tenant_setting (id, tenant_id, setting_key, value)
+                VALUES (?, ?, ?, ?)
+                ON CONFLICT (tenant_id, setting_key) DO UPDATE SET value = EXCLUDED.value
+                """,
+                UUID.randomUUID(),
+                tenantId,
+                settingKey.trim(),
+                value);
+    }
 }

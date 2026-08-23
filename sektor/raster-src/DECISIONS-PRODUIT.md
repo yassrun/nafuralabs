@@ -1,13 +1,13 @@
 # Décisions produit — Sektor Études (avant Pact)
 
-> Journal vivant **avant** CADRE / SPEC / CH / PLAN.
-> Pas du code. Pas un ticket. On gèle ici, on spécifie après.
+> Journal vivant **avant** CADRE / SPEC / CH.
+> Pas du code. Découpage Raster (sans Pact) : lot `etudes/` — SEKTOR-106…112.
 >
 > Arbre des dossiers code : [`DECISIONS.md`](DECISIONS.md).
 >
 > Comment continuer : ajouter une entrée datée sous **Gelé** ou **Ouvert**. Une fois gelé, on ne rejoue pas le débat dans le chat — on amende ce fichier.
 
-Dernière passe : 20/08/2026 (identité + consultation fournisseurs).
+Dernière passe : 23/08/2026 (picker article partagé — pas de dump, filtres serveur, 3 pieds).
 
 ---
 
@@ -57,8 +57,8 @@ Interdit dans ce cycle :
 
 ### Chrome études
 
-- **Métrés & Quantitatifs** (`/etudes/metres`) : hors menu **et** hors code. Ancien takeoff (L×l×h → DPGF `createFromMetre`). Le chemin dossier vit par `createEmpty` / `createFromImport` avec `metreId = null`. Blast : API `/etudes/metres`, entité, `createFromMetre`, `metreId` sur DPGF / devis / AO, seeds, lookups. Pas encore implémenté — inbox.
-- **Console catalogue Sektor** (`/catalogue`) : **pas dans le chrome tenant**. Outil interne Nafura (candidats / éditions G2). Hors chrome études. Amendé 20/08 : Extraire **utilise** l’identité Sektor, sans ouvrir cette console. Pas encore implémenté — inbox.
+- **Métrés & Quantitatifs** (`/etudes/metres`) : hors menu **et** hors code. Livré 20/08 (SEKTOR-111). Ancien takeoff (L×l×h → DPGF `createFromMetre`). Le chemin dossier vit par `createEmpty` / `createFromImport`. Dette : changelog v1.0 crée encore `metrees` puis `023_drop_metres` les droppe — inbox.
+- **Console catalogue Sektor** (`/catalogue`) : **pas dans le chrome tenant**. Outil interne Nafura (candidats / éditions G2). Extraire publie l’identité sans ouvrir cette console — livré 20/08 (SEKTOR-108, QA PASS).
 
 ### Extraire les composants
 
@@ -152,82 +152,130 @@ Variante d’achat (2 SKU fournisseur, 2 stocks) = **sous** l’identité, pas u
 
 ---
 
-## Gelé (20/08/2026) — consultation fournisseurs (décompo)
+## Gelé (22/08/2026) — consultation = objet Achats
 
-Aujourd’hui « Consulté » se coche **à la main** sur la ligne DPU. Ça ne veut plus rien dire. Un fournisseur est consulté **quand un devis reçu est lié à la consultation études**.
+**Casse le gel 20/08** (objet `ConsultationEtude` collé au dossier, panneau sur la page Coût, saisie `cle=prix`). Walk 22/08 : le panneau mange l’arbre ; la DA est un objet **chantier** (approbation → BC) — ce n’est pas une consultation.
 
-### Paramètre tenant
-
-| Paramètre | Valeurs | Effet |
-|-----------|---------|--------|
-| Consultation | **optionnelle** (défaut) ou **obligatoire** | Optionnelle → gate informative. Obligatoire → gate **bloquante**. |
-| Minimum | **entier** ≥ 1 (pas un choix 1/2/3) | Si obligatoire : au moins **N devis reçus**, **N fournisseurs distincts**. |
-
-Le minimum ne compte que si obligatoire. Optionnel + min 5 n’empêche pas de valider.
-
-### Qui on consulte
-
-- Un fournisseur **de la table fournisseurs** (fiche achats). Pas un nom tapé, pas un e-mail seul.
-- On l’invite dans une **consultation études** du dossier (pas un AO achats, pas le devis **client**).
-
-### Où est le devis fournisseur aujourd’hui (constat)
-
-| Objet | Où | Compte comme « consulté » ? |
-|-------|-----|-----------------------------|
-| PDF déposé via portail invité | `DossierDocument` type `DEVIS_FOURNISSEUR` sur le dossier | **Non** — pas de fournisseur, pas de lien consultation |
-| `OffreFournisseur` | Achats, sous un **AO achat** | **Non** — autre flux (acheter, pas chiffrer) |
-| Flag `CONSULTE` | `sourcePrix` sur `ComposantDpu`, bouton manuel | **Non** — cible à remplacer |
-| Devis **client** | `DevisService` (offre au maître d’ouvrage) | **Non** |
-
-### Cible
-
-1. Créer / ouvrir la **consultation études** du dossier.
-2. Choisir 1–N fournisseurs (fiches existantes).
-3. Recevoir un **devis** (fichier ou saisie) **lié** à cette consultation **et** à ce fournisseur.
-4. Ce lien = « ce fournisseur a été consulté ». Compteur = nombre de devis reçus distincts (un par fournisseur).
-5. Si obligatoire et min = N → **N devis consultation reçus** (étude) avant de passer. Moins = gate bloquante. **Pas** « tous les articles décomposés identifiés ».
-6. Identifier **quels articles de l’étude** sont couverts par ces devis → eux seuls reçoivent le prix consulté. Les autres restent tarif / manuel.
-7. Les lignes du devis alimentent le catalogue fournisseur (identité Sektor, déjà gelé).
-
-Un PDF orphelin sur le dossier **ne compte pas**.
-
-### Objets (pas le flag, pas l’AO achats)
-
-Oui : il faut un **devis consultation**, pas seulement un document sur le dossier.
+### Ce que c’est / ce que ce n’est pas
 
 | Objet | Rôle |
 |-------|------|
-| **Consultation études** | L’appel, **lié à l’étude**. Paquet d’articles (plusieurs postes). Pas un AO achats. |
-| **Devis consultation** | Devis **reçu**, lié à la consultation **et** à une fiche fournisseur. Compte pour le min N. |
-| **Articles identifiés** | Sous-ensemble d’identités de **cette étude** couvertes par le(s) devis. C’est **ça** qui rend un article « consulté ». |
+| **Consultation** | Demande de **prix fournisseur**. Panier d’articles + **un** fournisseur (fiche achats). Vit dans **Achats**. Peut exister **sans** étude et **sans** chantier. |
+| **Demande d’achat** | Besoin d’**acheter** pour un **chantier** → BC. Pas une consultation. |
+| **Appel d’offres achats** | Consultation **chantier** qui finit en attribution / BC. Pas le flux étude. |
+| **Devis client** | Offre au maître d’ouvrage, menu Études. |
 
-On **ne réutilise pas** `OffreFournisseur` (AO achats) ni le devis **client**. Inviter sans devis reçu **ne compte pas**. Un fournisseur = au plus un devis consultation qui compte (pas 2 PDF du même = 2 consultations).
+Cycle consultation : **demande** → **devis reçu**. Le devis se **importe** (fichier). **Import magique** extrait les lignes (libellé, qté, PU). Pas de saisie `cle_stable=prix`. Pas de checkbox « identifier » à la main.
 
-### Grain — lié à l’étude, pas à un article ni à un poste
+### Chrome
 
-On ne lance **pas** une consultation par article, ni par poste. On groupe.
+- **Liste** = sous-menu **Achats** (à côté Demandes / Appels d’offres). **Pas** un item Études.
+- **Geste étude** = overlay depuis l’article / le composant. L’arbre **reste visible**. Panneau dans la page Coût : interdit.
 
-- La **consultation** est accrochée à **l’étude** (dossier).
-- Le **périmètre** = un **paquet d’articles** (identités), pris sur **plusieurs postes** de la décompo (2 ou 3, ou plus).
-- Le **devis consultation** répond à ce paquet.
-- Ensuite on **identifie** dans l’étude **quels articles** ont été couverts par au moins un devis. Ceux-là sont consultés. Les autres postes / articles restent non consultés (tarif / manuel).
+**Overlay (gelé 23/08 — casse le formulaire 22/08)**
 
-Même identité sur trois postes (ex. ciment) : **une** identification dans l’étude, pas trois consultations.
+Pas un formulaire « fournisseur + cases + deux CTA ». Clic sur un article / composant → **d’abord la liste** des consultations **déjà liées à cette étude**.
 
-**Obligatoire = min N devis, pas 100 % des articles.** Comme SAP (RFQ = paquet) et les ERP BTP (consultation par lot). L’identification sert à **appliquer le prix**, pas à une 2ᵉ gate. Variante plus tard : les articles **mis dans le paquet** devraient revenir sur le devis (couverture du RFQ, pas de tout le DPGF).
+1. Chaque ligne : n° · fournisseur · ce composant **déjà dans le panier ou pas**.
+2. Clic une consultation → **ses articles** (panier), pas un dropdown.
+3. S’il n’est pas dedans → l’ajouter à celle-là.
+4. **Créer** seulement si aucune ne convient (fournisseur + l’article courant, pas tout l’arbre à cocher).
+5. IA propose (déjà chez Lafarge / créer chez X). Le fallback manuel = cette liste, pas un select.
 
-Interdit : une consultation « pour le poste 3.2 » ou « pour la ligne peinture du DPU ».
+Interdit dans l’overlay : deux selects + checkboxes de toutes les identités + « Créer » et « Ajouter à » côte à côte.
+
+### Grain
+
+Une consultation = **un fournisseur + un paquet** d’identités (`cle_stable`) prises sur **plusieurs postes**. Pas une consultation par ligne DPU / par poste. Ciment sur 3 postes = une ligne de panier.
+
+### Lien étude (la seule diff)
+
+Sans lien étude : la consultation vit dans Achats, pas de flag sur un arbre.
+
+Liée à une étude : pour chaque **article du panier**, si **N devis reçus** (import magique, lignes extraites) le couvrent → flag **CONSULTÉ** sur le composant + prix consulté. Peinture dans le même appel, 0 devis → pas flaguée.
+
+N = paramètre tenant (inchangé 20/08) :
+
+| Paramètre | Valeurs | Effet |
+|-----------|---------|--------|
+| Consultation | **optionnelle** (défaut) ou **obligatoire** | Optionnelle → pas de gate. Obligatoire → gate **bloquante** sur l’étude. |
+| Minimum | **entier** ≥ 1 | Si obligatoire : au moins **N devis reçus** (imports extraits) sur les consultations **liées** à l’étude. |
+
+Le flag est **sur l’article**, pas sur la consultation.
+
+### Interdit
+
+- Réutiliser la DA ou `OffreFournisseur` AO.
+- Coller la consultation au dossier comme agrégat Études.
+- Menu Consultation sous Études (à côté Devis client).
+- Saisir les lignes de devis à la main comme chemin principal.
+
+---
+
+## Gelé (23/08/2026) — picker article partagé
+
+**Casse le dump actuel** (`CatalogItemPickDialog` → `getAll({ page: 1, pageSize: 40 })` à l’ouverture ; selects stock qui chargent tout le catalogue).
+
+Ancrage QA : [`lots/etudes/picker-article/CONTRAT.md`](lots/etudes/picker-article/CONTRAT.md) (`AC-1`…`AC-14`).
+Canvas : [`lots/etudes/picker-article/ux/picker-article-wireframe.canvas.tsx`](lots/etudes/picker-article/ux/picker-article-wireframe.canvas.tsx).
+Ne pas dupliquer `etude-decompo-wireframe` ni `articles-fiche-wireframe`.
+
+### Ce que c’est / ce que ce n’est pas
+
+| Objet | Rôle |
+|-------|------|
+| **Picker article** | Recherche à la demande d’un article **déjà sur le tenant**. Un composant, plusieurs pieds. |
+| **Extraire** | Chemin **IA**. Deux seaux, pas une recherche. Inchangé. |
+| **Créer dans le catalogue** | Hors de ce picker. Reste Extraire / fiche articles. |
+
+### Ouverture
+
+Aucun GET catalogue tant qu’il n’y a pas **≥ 2 caractères** **ou** un filtre posé (nature, famille, lot d’usage). Prompt de saisie, pas une liste.
+
+### Recherche
+
+As-you-type, debounce ~300 ms, **code + désignation** uniquement. Code exact en tête. Actifs seulement par défaut. Unité + PU sur chaque hit. ↑↓ + Entrée.
+
+### Filtres — serveur, pas une page de 20–40 puis filtre client
+
+| Axe | Quoi |
+|-----|------|
+| **Nature** | Type composant (`Nature`) — chips. |
+| **Famille** | Arbre `item_categories`. Parent **inclut** les enfants. |
+| **Lot d’usage** | GROS_OEUVRE, VRD, FINITIONS, SECOND_OEUVRE, TECHNIQUE. |
+
+**Pas** de triplet Catégorie / Famille / Type : catégorie et famille = le même arbre ; type = nature.
+
+Pagination / scroll — **pas** un plafond 40.
+
+### Pied selon le contexte
+
+| Contexte | Rendu |
+|----------|--------|
+| DPU / étude | article + qty + PU tarif → **Ajouter au poste**. Nature **pré-remplie** si ouverture depuis une ligne matière / MO / matériel / ST. |
+| Réception / retour / transfert | article seul ; natures **stockables** (MATIERE, CONSOMMABLE, CARBURANT, OUTILLAGE). |
+| Tarif / solde / lookup `items` | article seul. |
+
+### Interdit
+
+- Dump à l’ouverture.
+- Filtrer famille / nature / usageLot **après** une page client.
+- CTA Extraire / « Créer » **dans** ce picker.
+- Un dialog études parallèle au picker stock.
+
+### Hors v1
+
+SKU / `cleStable` dans la barre · filtre fournisseur · filtre unité · listing articles encore filtré client.
 
 ---
 
 ## Aujourd’hui dans le code (constat, pas une spec)
 
-Pendant Extraire / DPU :
+Pendant Extraire / DPU (livré 20/08, QA PASS SEKTOR-106…108) :
 
-- Matché → `itemId` sur le composant (LIKE nom/code tenant, score ≥ 0.5 + prix consultable). **Pas** l’identité Sektor.
-- Manquant → dialog **Ajouter au poste** (`mode: poste`) ou **Créer dans le catalogue** (`mode: catalogue`) = Item tenant seul, **sans** fiche Sektor.
-- Ligne DPU déjà manuelle → bouton **Créer dans le catalogue** (`ajouterComposantAuCatalogue`).
-- **Consulté** → bouton `marquerConsulte` qui pose `sourcePrix=CONSULTE` sans devis. Gate étape 4 **non bloquante**.
+- Extraire : IA (`ExtraireIdentiteService`) → seaux DEJA_TENANT / A_CREER / INCERTAIN. LIKE n’est plus la décision.
+- Créer (humain confirme) : `POST /api/v1/items/extraire-creer` — PUBLIER Sektor puis Item 1–1. Pas G2, pas `items.create`.
+- **Consulté** → plus le bouton `marquerConsulte`. Gate 4 compte les **devis consultation reçus** (SEKTOR-109/110, `review` en attente QA). Identification + CONSULTE = SEKTOR-112.
 
 Après étude :
 
@@ -244,9 +292,8 @@ Catalogue fournisseur :
 
 Consultation / devis fournisseur :
 
-- Portail invité `FOURNISSEUR_UPLOAD` → fichier `DEVIS_FOURNISSEUR` sur le dossier, **sans** `fournisseur_id`.
-- `OffreFournisseur` = réponses d’un AO **achats**, pas la consultation études.
-- `ComposantDpu.offreFournisseurId` existe ; le bouton Consulté ne le renseigne pas.
+- Livré 20/08 (SEKTOR-109/110/112) : objet **collé au dossier** + panneau page Coût — **à remplacer** (gel 22/08).
+- `OffreFournisseur` = AO **achats** chantier, pas ce flux. DA = chantier → BC, pas ce flux.
 
 ---
 
@@ -264,9 +311,10 @@ Cocher / amender ici, ne pas re-débattre à l’aveugle.
 - [x] Création Extraire : **tranché 20/08** — **PUBLIEE** tout de suite. L’IA a déjà décidé que c’est un article à ajouter ; pas une proposition G2.
 - [x] Binding : **tranché 20/08** — 1 Item tenant **par** `cle_stable` (1–1). Tiny spec (couleur, RAL) ≠ 2ᵉ Item. Variante d’achat sous l’identité, plus tard, si SKU/stock l’exigent.
 - [ ] Tiny spec Extraire : la coller en **note d’emploi** sur le composant dès v1, ou seulement le lien identité (couleur perdue jusqu’à la variante d’achat) ?
-- [x] Consultation : **tranché 20/08** — optionnelle/obligatoire + **min entier** ; objet **devis consultation** ; grain = **étude** + paquet d’articles (plusieurs postes) ; ensuite **identifier** les articles de l’étude couverts. Pas une consult par article/poste. Pas `OffreFournisseur` achats.
-- [x] Consultation obligatoire : **tranché 20/08** — le min **N devis reçus** suffit. On n’oblige pas chaque article décomposé à être identifié. Identification = appliquer le prix. Couverture du **paquet** (lignes envoyées) = plus tard, pas tout le DPGF.
-- [ ] Devis reçu : **fichier** (portail) suffisant une fois lié, ou lignes de prix saisies / extraites obligatoires pour **identifier** un article ?
+- [x] Consultation : **retranché 22/08** — objet **Achats** (pas DA, pas AO, pas collé au dossier). Menu Achats. Popup décompo. Devis = **import magique**. Lien étude → flag CONSULTÉ sur l’article après N devis. Pas une consult par ligne.
+- [x] Consultation obligatoire : **tranché 20/08, inchangé** — min **N devis reçus**. On n’oblige pas 100 % des articles décomposés.
+- [x] Devis reçu : **tranché 22/08** — on **importe** le fichier ; Import magique **extrait** les lignes. Fichier sans extraction n’identifie pas / ne flague pas.
+- [x] Picker article : **tranché 23/08** — composant **partagé** (pas un dialog études). Pas de dump à l’ouverture. Recherche code + désignation. Filtres serveur nature / famille / lot d’usage. 3 pieds (DPU, stock, lookup). Extraire reste le chemin IA.
 
 ---
 

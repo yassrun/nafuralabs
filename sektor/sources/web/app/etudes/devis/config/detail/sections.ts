@@ -26,7 +26,6 @@ export const SECTIONS: DetailSectionConfig<Devis>[] = [
     fields: [
       'dateEmission',
       'dateValidite',
-      'metreId',
       'delaiExecutionJours',
       'conditionsPaiement',
     ],

@@ -3,8 +3,6 @@ import { Injectable, inject } from '@angular/core';
 import type { LookupContext } from '@platform/lib/anatomy/types';
 
 import { ErpLookupService } from '../../socle/shared/services/erp-lookup.service';
-import { itemToArticle, type ItemApiRow } from './item-article.mapper';
-import { isStockableNature } from '../models';
 import type { Location } from '../models';
 
 /**
@@ -22,16 +20,11 @@ export class InventoryLookupsService {
   }
 
   async buildReceptionLookups(): Promise<LookupContext> {
-    const [locationsDepot, chantiersLookup, fournisseursLookup, itemRows] = await Promise.all([
+    const [locationsDepot, chantiersLookup, fournisseursLookup] = await Promise.all([
       this.erpLookup.locationDepots(),
       this.erpLookup.chantiers(),
       this.erpLookup.partnersByRole('FOURNISSEUR'),
-      this.erpLookup.items(),
     ]);
-
-    const articles = itemRows
-      .map((row) => itemToArticle(row.data as unknown as ItemApiRow))
-      .filter((a) => a.isActive && isStockableNature(a.nature));
 
     return {
       locationsDepot: locationsDepot.map((l) => ({ key: l.key, value: l.value })),
@@ -52,11 +45,7 @@ export class InventoryLookupsService {
         'Finitions',
         'VRD',
       ].map((phase) => ({ key: phase, value: phase })),
-      articlesAll: articles.map((a) => ({
-        key: a.id,
-        value: `${a.code} — ${a.name}`,
-        data: { uomCode: a.uomCode, uomId: a.uomId, prix: a.prixUnitaire },
-      })),
+      articlesAll: [],
     };
   }
 }

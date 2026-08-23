@@ -12,11 +12,6 @@ export const ETUDES_ROUTES: Routes = [
     pathMatch: 'full',
   },
   {
-    path: 'etudes/metres',
-    loadChildren: () =>
-      import('./metres/metres.routes').then((m) => m.METRES_ROUTES),
-  },
-  {
     path: 'etudes/devis',
     loadChildren: () =>
       import('./devis/devis.routes').then((m) => m.DEVIS_ROUTES),

@@ -17,6 +17,9 @@ import ma.nafura.etudes.domain.dpgf.DpgfNoeud;
  * @param clientValide the clientId résout un Partner CLIENT du tenant (info ; Partner exigé au devis)
  * @param avisOuverts nombre d'avis OUVERT (L8 — informatif)
  * @param avisEcartes nombre d'avis ECARTE (L8 — informatif)
+ * @param devisConsultationRecus nombre de devis consultation reçus (fournisseurs distincts)
+ * @param consultationObligatoire paramètre tenant — si faux, la gate 4 reste informative
+ * @param consultationMinimum entier ≥ 1 ; ne compte que si obligatoire
  */
 public record ContexteGate(
         List<DpgfNoeud> articles,
@@ -28,23 +31,29 @@ public record ContexteGate(
         boolean hasClientId,
         boolean clientValide,
         long avisOuverts,
-        long avisEcartes) {
+        long avisEcartes,
+        long devisConsultationRecus,
+        boolean consultationObligatoire,
+        int consultationMinimum) {
 
     /** Factories de tests : client considéré valide pour ne pas polluer les autres gates. */
     public static ContexteGate deArticles(List<DpgfNoeud> articles) {
-        return new ContexteGate(articles, articles, 0L, false, false, List.of(), true, true, 0L, 0L);
+        return new ContexteGate(
+                articles, articles, 0L, false, false, List.of(), true, true, 0L, 0L, 0L, false, 1);
     }
 
     public static ContexteGate deNoeuds(List<DpgfNoeud> noeuds) {
         List<DpgfNoeud> articles = noeuds.stream()
                 .filter(n -> DpgfNoeud.TYPE_ARTICLE.equals(n.getType()))
                 .toList();
-        return new ContexteGate(articles, noeuds, 0L, false, false, List.of(), true, true, 0L, 0L);
+        return new ContexteGate(
+                articles, noeuds, 0L, false, false, List.of(), true, true, 0L, 0L, 0L, false, 1);
     }
 
     public static ContexteGate documents(boolean hasBordereau, boolean hasCps) {
         long n = (hasBordereau ? 1 : 0) + (hasCps ? 1 : 0);
-        return new ContexteGate(List.of(), List.of(), n, hasBordereau, hasCps, List.of(), true, true, 0L, 0L);
+        return new ContexteGate(
+                List.of(), List.of(), n, hasBordereau, hasCps, List.of(), true, true, 0L, 0L, 0L, false, 1);
     }
 
     public static ContexteGate documents(
@@ -60,7 +69,10 @@ public record ContexteGate(
                 true,
                 true,
                 0L,
-                0L);
+                0L,
+                0L,
+                false,
+                1);
     }
 
     public static ContexteGate avecClient(
@@ -75,7 +87,10 @@ public record ContexteGate(
                 hasClientId,
                 clientValide,
                 base.avisOuverts(),
-                base.avisEcartes());
+                base.avisEcartes(),
+                base.devisConsultationRecus(),
+                base.consultationObligatoire(),
+                base.consultationMinimum());
     }
 
     public static ContexteGate avecAvis(ContexteGate base, long ouverts, long ecartes) {
@@ -89,6 +104,27 @@ public record ContexteGate(
                 base.hasClientId(),
                 base.clientValide(),
                 ouverts,
-                ecartes);
+                ecartes,
+                base.devisConsultationRecus(),
+                base.consultationObligatoire(),
+                base.consultationMinimum());
+    }
+
+    public static ContexteGate avecConsultation(
+            ContexteGate base, long recus, boolean obligatoire, int minimum) {
+        return new ContexteGate(
+                base.articles(),
+                base.noeuds(),
+                base.nombreDocuments(),
+                base.hasBordereau(),
+                base.hasCps(),
+                base.piecesAttendues(),
+                base.hasClientId(),
+                base.clientValide(),
+                base.avisOuverts(),
+                base.avisEcartes(),
+                recus,
+                obligatoire,
+                minimum);
     }
 }

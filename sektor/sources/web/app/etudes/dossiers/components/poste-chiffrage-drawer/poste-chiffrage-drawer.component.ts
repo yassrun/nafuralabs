@@ -50,7 +50,7 @@ export interface PosteChiffrageDrawerData {
 
 export interface PosteChiffrageDrawerResult {
   saved: boolean;
-  /** Présent uniquement si saved — pour patcher la tree à la fermeture. */
+  /** Snapshot du poste persisté (saveAndClose **ou** Extraire/auto-save puis ✕). */
   snapshot?: PosteSaveSnapshot;
 }
 
@@ -155,8 +155,8 @@ export class PosteChiffrageDrawerComponent {
   }
 
   /**
-   * CTA unique : persiste la copie, ferme, et renvoie le snapshot pour la tree.
-   * Sans save → `{ saved: false }` → tree intacte.
+   * CTA unique : persiste, ferme, snapshot pour la tree.
+   * Close propre (pas dirty) : snapshot du poste déjà persisté (Extraire).
    */
   async saveAndClose(): Promise<void> {
     if (this.closing()) return;
@@ -166,7 +166,8 @@ export class PosteChiffrageDrawerComponent {
       return;
     }
     if (!this.dirty()) {
-      this.dialogRef.close({ saved: false });
+      const snapshot = (await panel.sauvegarderPoste()) ?? undefined;
+      this.dialogRef.close({ saved: false, snapshot });
       return;
     }
     this.closing.set(true);
@@ -181,7 +182,7 @@ export class PosteChiffrageDrawerComponent {
     }
   }
 
-  /** Abandon (✕) — tree non touchée. */
+  /** ✕ — si Extraire a déjà persisté, renvoyer le snapshot pour l’arbre. */
   async requestClose(): Promise<void> {
     if (this.closing()) return;
     if (this.dirty()) {
@@ -195,7 +196,10 @@ export class PosteChiffrageDrawerComponent {
       });
       if (!ok) return;
     }
-    this.dialogRef.close({ saved: false });
+    const snapshot = this.dirty()
+      ? undefined
+      : ((await this.panel()?.sauvegarderPoste()) ?? undefined);
+    this.dialogRef.close({ saved: false, snapshot });
   }
 
   /** Appelé par le workspace avant de quitter l’étape. */

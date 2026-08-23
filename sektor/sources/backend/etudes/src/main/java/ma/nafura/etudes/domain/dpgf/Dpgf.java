@@ -34,10 +34,6 @@ public class Dpgf implements AuditableEtude {
     @Column(name = "numero", nullable = false, length = 50)
     private String numero;
 
-    @Column(name = "metre_id")
-    @JsonIgnore
-    private UUID metreId;
-
     @Column(name = "projet_nom", length = 500)
     private String projetNom;
 
@@ -79,11 +75,6 @@ public class Dpgf implements AuditableEtude {
     @JsonProperty("hierarchie")
     @Transient
     private List<DpgfNoeud> hierarchie;
-
-    @JsonProperty("metreId")
-    public String getMetreIdJson() {
-        return metreId != null ? metreId.toString() : null;
-    }
 
     @PrePersist
     protected void onCreate() {

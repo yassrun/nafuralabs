@@ -3,13 +3,10 @@ import { TranslateService } from '@ngx-translate/core';
 import type { CrudStyleFacade } from '@platform/lib/anatomy';
 import type { ListResponse, LookupContext } from '@platform/lib/anatomy/types';
 import type {
-  Article,
   InventoryTx,
   Location,
   MotifMouvement,
 } from '../../../models';
-import { isStockableNature } from '../../../models';
-import { ArticleCatalogService } from '../../../services/article-catalog.service';
 import { InventoryLookupsService } from '../../../services/inventory-lookups.service';
 import { InventoryMovementApiService } from '../../../services/inventory-movement-api.service';
 import {
@@ -27,7 +24,6 @@ export interface TransfertListItem extends InventoryTx {
 export class TransfertFacade implements CrudStyleFacade<InventoryTx, Partial<InventoryTx>> {
   private readonly movementApi = inject(InventoryMovementApiService);
   private readonly lookupsService = inject(InventoryLookupsService);
-  private readonly articleCatalog = inject(ArticleCatalogService);
   private readonly motifsApi = inject(MotifsApiService);
 
   private locationsCache: Location[] = [];
@@ -46,9 +42,8 @@ export class TransfertFacade implements CrudStyleFacade<InventoryTx, Partial<Inv
   }
 
   async ensureLookups(): Promise<void> {
-    const [locations, articles, motifs] = await Promise.all([
+    const [locations, motifs] = await Promise.all([
       this.lookupsService.loadLocations(),
-      this.articleCatalog.loadArticles({ activeOnly: true }),
       this.motifsApi.listByTxType('TRANSFERT'),
     ]);
     this.locationsCache = locations;
@@ -56,9 +51,6 @@ export class TransfertFacade implements CrudStyleFacade<InventoryTx, Partial<Inv
 
     const allLocations = locations.filter((l) => l.isActive);
     const chantierLocations = allLocations.filter((l) => l.type === 'CHANTIER');
-    const matCons = articles.filter(
-      (a) => isStockableNature(a.nature),
-    );
 
     this.lookupsSignal.set({
       allLocations: allLocations.map((l) => ({
@@ -74,11 +66,7 @@ export class TransfertFacade implements CrudStyleFacade<InventoryTx, Partial<Inv
         key: m.id,
         value: `${m.code} — ${m.name}`,
       })),
-      articlesMatCons: matCons.map((a) => ({
-        key: a.id,
-        value: `${a.code} — ${a.name}`,
-        data: { uomCode: a.uomCode, uomId: a.uomId, prix: a.prixUnitaire },
-      })),
+      articlesMatCons: [],
     });
   }
 

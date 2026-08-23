@@ -114,6 +114,7 @@ class DossierEtudeChainageAvalTest {
                 mock(AvisExecutionRepository.class),
                 budgetVentilationService,
                 chainageAvalPort,
+                mock(ConsultationEtudeService.class),
                 List.of());
         when(repository.save(any(DossierEtude.class))).thenAnswer(inv -> inv.getArgument(0));
     }

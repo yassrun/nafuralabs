@@ -41,6 +41,9 @@ class ItemServiceTest {
     @Mock
     private ma.nafura.catalogue.repository.UnitOfMeasureRepository unitOfMeasureRepository;
 
+    @Mock
+    private ma.nafura.catalogue.repository.ItemCategoryRepository itemCategoryRepository;
+
     @InjectMocks
     private ItemService service;
 
@@ -64,6 +67,7 @@ class ItemServiceTest {
 
         Item mapped = Item.builder().name("Sable").nature("MATIERE").build();
         when(mapper.toEntity(dto)).thenReturn(mapped);
+        when(repository.existsByTenantIdAndCleStable(eq(TENANT_ID), anyString())).thenReturn(false);
         when(repository.save(any(Item.class))).thenAnswer(inv -> {
             Item saved = inv.getArgument(0);
             if (saved.getId() == null) {
@@ -99,5 +103,146 @@ class ItemServiceTest {
         });
 
         assertThrows(IllegalArgumentException.class, () -> service.create(dto));
+    }
+
+    @Test
+    void createRefusesDuplicateCleStableOnTenant() {
+        ItemCreateDto dto = new ItemCreateDto();
+        dto.setName("Peinture acrylique intérieure");
+        dto.setCleStable("peinture-acrylique-interieure");
+        dto.setNature("MATIERE");
+
+        Item mapped = Item.builder().name(dto.getName()).nature("MATIERE").build();
+        when(mapper.toEntity(dto)).thenReturn(mapped);
+        when(repository.existsByTenantIdAndCleStable(TENANT_ID, "peinture-acrylique-interieure"))
+                .thenReturn(true);
+
+        IllegalStateException ex = assertThrows(IllegalStateException.class, () -> service.create(dto));
+        assertEquals("item.cle_stable.duplicate", ex.getMessage());
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void createWithoutCodeDerivesUniqueTenantCodeFromCleStable() {
+        ItemCreateDto dto = new ItemCreateDto();
+        dto.setName("Peinture acrylique intérieure");
+        dto.setCleStable("peinture-acrylique-interieure");
+        dto.setNature("MATIERE");
+
+        Item mapped = Item.builder().name(dto.getName()).nature("MATIERE").build();
+        when(mapper.toEntity(dto)).thenReturn(mapped);
+        when(repository.existsByTenantIdAndCleStable(TENANT_ID, "peinture-acrylique-interieure"))
+                .thenReturn(false);
+        when(repository.existsByTenantIdAndCode(TENANT_ID, "PEINTURE-ACRYLIQUE-I")).thenReturn(false);
+        when(repository.save(any(Item.class))).thenAnswer(inv -> {
+            Item saved = inv.getArgument(0);
+            if (saved.getId() == null) {
+                saved.setId(UUID.randomUUID());
+            }
+            return saved;
+        });
+        when(usageLotRepository.findByItemId(any())).thenReturn(List.of());
+
+        Item created = service.create(dto);
+
+        assertEquals("PEINTURE-ACRYLIQUE-I", created.getCode());
+        assertEquals("peinture-acrylique-interieure", created.getCleStable());
+    }
+
+    @Test
+    void createWithoutCodeSuffixesWhenTenantCodeTaken() {
+        ItemCreateDto dto = new ItemCreateDto();
+        dto.setName("Peinture red");
+        dto.setCleStable("peinture-red-1787250968");
+        dto.setNature("MATIERE");
+
+        Item mapped = Item.builder().name(dto.getName()).nature("MATIERE").build();
+        when(mapper.toEntity(dto)).thenReturn(mapped);
+        when(repository.existsByTenantIdAndCleStable(TENANT_ID, "peinture-red-1787250968"))
+                .thenReturn(false);
+        when(repository.existsByTenantIdAndCode(TENANT_ID, "PEINTURE-RED-1787250")).thenReturn(true);
+        when(repository.existsByTenantIdAndCode(TENANT_ID, "PEINTURE-RED-17872-2")).thenReturn(false);
+        when(repository.save(any(Item.class))).thenAnswer(inv -> {
+            Item saved = inv.getArgument(0);
+            if (saved.getId() == null) {
+                saved.setId(UUID.randomUUID());
+            }
+            return saved;
+        });
+        when(usageLotRepository.findByItemId(any())).thenReturn(List.of());
+
+        Item created = service.create(dto);
+
+        assertEquals("PEINTURE-RED-17872-2", created.getCode());
+    }
+
+    @Test
+    void createWithoutCodeDoesNotEmitDoubleHyphenOnCollision() {
+        ItemCreateDto dto = new ItemCreateDto();
+        dto.setName("Peinture Extraire");
+        dto.setCleStable("peinture-extraire-132-aaaa");
+        dto.setNature("MATIERE");
+
+        Item mapped = Item.builder().name(dto.getName()).nature("MATIERE").build();
+        when(mapper.toEntity(dto)).thenReturn(mapped);
+        when(repository.existsByTenantIdAndCleStable(TENANT_ID, "peinture-extraire-132-aaaa"))
+                .thenReturn(false);
+        when(repository.existsByTenantIdAndCode(TENANT_ID, "PEINTURE-EXTRAIRE-13")).thenReturn(true);
+        when(repository.existsByTenantIdAndCode(TENANT_ID, "PEINTURE-EXTRAIRE-2")).thenReturn(false);
+        when(repository.save(any(Item.class))).thenAnswer(inv -> {
+            Item saved = inv.getArgument(0);
+            if (saved.getId() == null) {
+                saved.setId(UUID.randomUUID());
+            }
+            return saved;
+        });
+        when(usageLotRepository.findByItemId(any())).thenReturn(List.of());
+
+        Item created = service.create(dto);
+
+        assertEquals("PEINTURE-EXTRAIRE-2", created.getCode());
+        assertFalse(created.getCode().contains("--"));
+    }
+
+    @Test
+    void bindFournisseurRefDoesNotCreateItem() {
+        Item existing = Item.builder()
+                .id(UUID.randomUUID())
+                .cleStable("ciment-cpj-45")
+                .name("Ciment CPJ 45")
+                .build();
+        when(repository.findByTenantIdAndCleStable(TENANT_ID, "ciment-cpj-45"))
+                .thenReturn(Optional.of(existing));
+        when(usageLotRepository.findByItemId(existing.getId())).thenReturn(List.of());
+
+        Item bound = service.bindFournisseurRef("ciment-cpj-45", "SKU-CIM-45");
+
+        assertEquals(existing.getId(), bound.getId());
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void bindFournisseurRefUnknownIdentiteDoesNotCreateItem() {
+        when(repository.findByTenantIdAndCleStable(TENANT_ID, "inconnu")).thenReturn(Optional.empty());
+
+        IllegalArgumentException ex =
+                assertThrows(IllegalArgumentException.class, () -> service.bindFournisseurRef("inconnu", "SKU-X"));
+        assertEquals("item.identite.introuvable", ex.getMessage());
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void searchPickerWithoutQueryOrFilterReturnsEmptyWithoutScan() {
+        var page = service.searchPicker(null, null, null, null, null, 0, 20);
+        assertTrue(page.isEmpty());
+        assertEquals(0, page.getTotalElements());
+        verify(repository, never()).findAll(any(org.springframework.data.jpa.domain.Specification.class), any(org.springframework.data.domain.Pageable.class));
+    }
+
+    @Test
+    void searchPickerSingleCharWithoutFilterReturnsEmpty() {
+        var page = service.searchPicker("x", "  ", null, "", null, 0, 20);
+        assertTrue(page.isEmpty());
+        verify(repository, never()).findAll(any(org.springframework.data.jpa.domain.Specification.class), any(org.springframework.data.domain.Pageable.class));
     }
 }

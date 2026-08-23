@@ -54,9 +54,6 @@ public class DpgfNoeud {
     @Column(name = "article_id")
     private UUID articleId;
 
-    @Column(name = "metre_ligne_id")
-    private UUID metreLigneId;
-
     @Column(name = "quantite", precision = 18, scale = 4)
     private BigDecimal quantite;
 
@@ -125,11 +122,6 @@ public class DpgfNoeud {
     @JsonProperty("articleId")
     public String getArticleIdJson() {
         return articleId != null ? articleId.toString() : null;
-    }
-
-    @JsonProperty("metreLigneId")
-    public String getMetreLigneIdJson() {
-        return metreLigneId != null ? metreLigneId.toString() : null;
     }
 
     @JsonProperty("prixUnitaire")

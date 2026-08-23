@@ -9,6 +9,7 @@ public final class CatalogueSource {
     public static final String OFFRE_RETENUE = "OFFRE_RETENUE";
     public static final String FACTURE = "FACTURE";
     public static final String CONTRAT = "CONTRAT";
+    public static final String CONSULTATION_ETUDES = "CONSULTATION_ETUDES";
     public static final String IMPORT_CATALOGUE = "IMPORT_CATALOGUE";
 
     private CatalogueSource() {}

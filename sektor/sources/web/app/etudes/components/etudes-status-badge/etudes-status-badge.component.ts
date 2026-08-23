@@ -5,20 +5,17 @@ import { TranslateService } from '@ngx-translate/core';
 import {
   AO_CLIENT_STATUS_KEYS,
   DEVIS_STATUS_KEYS,
-  METRE_STATUS_KEYS,
 } from '@app/socle/shell/i18n-labels';
 
 import type {
   AOClientStatus,
   DevisStatus,
-  MetreStatus,
 } from '../../models';
 
-type AnyStatus = DevisStatus | AOClientStatus | MetreStatus | string;
+type AnyStatus = DevisStatus | AOClientStatus | string;
 
 const KEY_LOOKUP: Record<string, string> = {
   ...(DEVIS_STATUS_KEYS as Record<string, string>),
-  ...(METRE_STATUS_KEYS as Record<string, string>),
   ...(AO_CLIENT_STATUS_KEYS as Record<string, string>),
 };
 

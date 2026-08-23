@@ -7,6 +7,7 @@ import { firstValueFrom } from 'rxjs';
 import { ButtonComponent } from '@platform/lib/anatomy';
 
 import type {
+  DecompositionComposantIncertain,
   DecompositionComposantMatched,
   DecompositionComposantMissing,
   DecompositionPropose,
@@ -50,13 +51,14 @@ export interface DecompositionSuggestionDialogResult {
       </header>
 
       <div class="decomp-suggest__body">
-        @if (matched().length === 0 && missing().length === 0) {
+        @if (matched().length === 0 && missing().length === 0 && uncertain().length === 0) {
           <p class="decomp-suggest__empty">Aucun composant exploitable détecté pour ce poste.</p>
         }
 
         @if (matched().length > 0) {
           <section aria-labelledby="matched-title">
-            <h3 id="matched-title">Catalogue (consultables)</h3>
+            <h3 id="matched-title">Déjà sur le tenant</h3>
+            <p class="decomp-suggest__hint">Identité déjà liée — pas de création.</p>
             <ul class="decomp-suggest__list">
               @for (row of matched(); track trackMatched($index, row); let i = $index) {
                 <li>
@@ -70,8 +72,15 @@ export interface DecompositionSuggestionDialogResult {
                       <strong>{{ row.name }}</strong>
                       <span class="decomp-suggest__sub">
                         {{ row.type }} · {{ row.rendement | number: '1.2-4' }}
-                        {{ row.unite }} · {{ row.prixUnitaire | number: '1.2-2' }} MAD
-                        ({{ row.sourcePrix }})
+                        {{ row.unite }}
+                        @if (row.cleStable) {
+                          · {{ row.cleStable }}
+                        }
+                        @if (row.prixUnitaire != null) {
+                          · {{ row.prixUnitaire | number: '1.2-2' }} MAD ({{ row.sourcePrix }})
+                        } @else {
+                          · identité liée, sans tarif
+                        }
                       </span>
                     </span>
                   </label>
@@ -83,9 +92,9 @@ export interface DecompositionSuggestionDialogResult {
 
         @if (missing().length > 0) {
           <section aria-labelledby="missing-title">
-            <h3 id="missing-title">Absents du catalogue</h3>
+            <h3 id="missing-title">À créer</h3>
             <p class="decomp-suggest__hint">
-              Ajoutez le composant au poste (manuel) ou créez-le dans le catalogue avec un tarif.
+              Proposition seulement — Extraire n’écrit pas tout seul. Confirmez pour créer, ou ajoutez au poste.
             </p>
             <ul class="decomp-suggest__list">
               @for (row of missing(); track row.designation + $index; let i = $index) {
@@ -94,6 +103,9 @@ export interface DecompositionSuggestionDialogResult {
                     <strong>{{ row.designation }}</strong>
                     <span class="decomp-suggest__sub">
                       {{ row.type }} · {{ row.rendement | number: '1.2-4' }} {{ row.unite }}
+                      @if (row.cleStable) {
+                        · identité {{ row.cleStable }}
+                      }
                     </span>
                   </div>
                   <div class="decomp-suggest__actions">
@@ -109,16 +121,40 @@ export interface DecompositionSuggestionDialogResult {
             </ul>
           </section>
         }
+
+        @if (uncertain().length > 0) {
+          <section aria-labelledby="uncertain-title">
+            <h3 id="uncertain-title">Identité incertaine</h3>
+            <p class="decomp-suggest__hint">
+              Plusieurs identités possibles — pas de lien ni de création automatique.
+            </p>
+            <ul class="decomp-suggest__list">
+              @for (row of uncertain(); track row.designation + $index) {
+                <li class="decomp-suggest__card">
+                  <div class="decomp-suggest__info">
+                    <strong>{{ row.designation }}</strong>
+                    <span class="decomp-suggest__sub">
+                      {{ row.type }} · {{ row.rendement | number: '1.2-4' }} {{ row.unite }}
+                      @if (row.identitesCandidates?.length) {
+                        · {{ row.identitesCandidates.join(', ') }}
+                      }
+                    </span>
+                  </div>
+                </li>
+              }
+            </ul>
+          </section>
+        }
       </div>
 
       <footer class="decomp-suggest__footer">
         <nf-button variant="secondary" (clicked)="close()">Annuler</nf-button>
         <nf-button
           variant="primary"
-          [disabled]="selectedCount() === 0"
+          [disabled]="pendingCount() === 0"
           (clicked)="confirm()"
         >
-          Ajouter {{ selectedCount() }} composant{{ selectedCount() > 1 ? 's' : '' }}
+          Ajouter {{ pendingCount() }} composant{{ pendingCount() > 1 ? 's' : '' }}
         </nf-button>
       </footer>
     </div>
@@ -240,10 +276,18 @@ export class DecompositionSuggestionDialogComponent {
 
   readonly matched = signal<DecompositionComposantMatched[]>([...(this.data.propose.matched ?? [])]);
   readonly missing = signal<DecompositionComposantMissing[]>([...(this.data.propose.missing ?? [])]);
+  readonly uncertain = signal<DecompositionComposantIncertain[]>([
+    ...(this.data.propose.uncertain ?? []),
+  ]);
   readonly selected = signal<boolean[]>(this.matched().map(() => true));
 
   selectedCount(): number {
     return this.selected().filter(Boolean).length;
+  }
+
+  /** Matched cochés + « à créer » encore manuels (poste only, pas d’article). */
+  pendingCount(): number {
+    return this.selectedCount() + this.missing().length;
   }
 
   trackMatched(index: number, row: DecompositionComposantMatched): string {
@@ -276,6 +320,7 @@ export class DecompositionSuggestionDialogComponent {
         type: row.type,
         unite: row.unite,
         rendement: row.rendement,
+        cleStable: row.cleStable,
         uniteOptions: this.data.uniteOptions,
         mode,
       },
@@ -302,8 +347,19 @@ export class DecompositionSuggestionDialogComponent {
 
   confirm(): void {
     const selected = this.matched().filter((_, i) => this.selected()[i]);
-    if (!selected.length) return;
-    this.dialogRef.close({ selected });
+    const leftoverLibre: DecompositionComposantMatched[] = this.missing().map((row) => ({
+      type: row.type,
+      itemId: '',
+      name: row.designation,
+      unite: row.unite,
+      rendement: row.rendement,
+      sourcePrix: 'MANUEL',
+      confiance: row.confiance,
+      suggereParIa: true,
+    }));
+    const all = [...selected, ...leftoverLibre];
+    if (!all.length) return;
+    this.dialogRef.close({ selected: all });
   }
 
   regenerate(): void {

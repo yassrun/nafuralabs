@@ -28,7 +28,6 @@ const ROUTES = [
   { path: '/inventory/configuration/depots', module: 'stock' },
   { path: '/inventory/configuration/depots/new', module: 'stock' },
   { path: '/materiel/parc', module: 'materiel' },
-  { path: '/etudes/metres', module: 'etudes' },
   { path: '/etudes/devis', module: 'etudes' },
   { path: '/marches/contrats', module: 'marches' },
   { path: '/ventes/clients', module: 'ventes' },

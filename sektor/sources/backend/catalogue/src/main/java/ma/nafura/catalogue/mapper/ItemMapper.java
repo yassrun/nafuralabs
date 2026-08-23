@@ -28,6 +28,7 @@ public interface ItemMapper extends EntityMapper<Item, ItemCreateDto, ItemUpdate
     @Mapping(target = "tenantId", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "cleStable", ignore = true)
     void updateEntity(ItemUpdateDto updateDto, @MappingTarget Item entity);
 
     @Override

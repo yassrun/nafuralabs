@@ -78,7 +78,11 @@
       "fournisseurDetailTitle": "تفاصيل المورد",
       "fournisseurDetailCrumb": "التفاصيل",
       "fournisseurEditTitle": "تعديل المورد",
-      "fournisseurEditCrumb": "تعديل"
+      "fournisseurEditCrumb": "تعديل",
+      "consultationsListTitle": "الاستشارات",
+      "consultationsListCrumb": "الاستشارات",
+      "consultationNewTitle": "استشارة جديدة",
+      "consultationNewCrumb": "جديدة"
     },
     "rubrique": {
       "MATERIAUX": "مواد",

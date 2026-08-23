@@ -4,6 +4,8 @@ export interface Article {
   id: string;
   code: string;
   name: string;
+  /** Identité catalogue Sektor (`cle_stable`) — 1 Item par tenant. */
+  cleStable?: string;
   description?: string;
   familleId: string;
   familleName?: string;
@@ -38,6 +40,7 @@ export type ArticleListItem = Pick<
   | 'id'
   | 'code'
   | 'name'
+  | 'cleStable'
   | 'familleId'
   | 'familleName'
   | 'lotsUsage'

@@ -12,6 +12,7 @@ import ma.nafura.etudes.api.request.DossierEtudeCreateDto;
 import ma.nafura.etudes.api.request.DossierEtudeUpdateDto;
 import ma.nafura.etudes.api.request.DossierGagneDto;
 import ma.nafura.etudes.api.request.DossierPerduDto;
+import ma.nafura.etudes.api.request.GenererDevisDto;
 import ma.nafura.etudes.api.dto.GuestLinkCreatedDto;
 import ma.nafura.etudes.api.request.EtapeRequest;
 import ma.nafura.etudes.api.request.GuestLinkCreateDto;
@@ -156,8 +157,10 @@ public class DossierEtudeController {
 
     @PostMapping("/{id}/generer-devis")
     @RequirePermission("etude.submit")
-    public ResponseEntity<DossierEtude> genererDevis(@PathVariable UUID id) {
-        return ResponseEntity.ok(service.genererDevis(id));
+    public ResponseEntity<DossierEtude> genererDevis(
+            @PathVariable UUID id, @RequestBody(required = false) GenererDevisDto body) {
+        String clientId = body != null ? body.getClientId() : null;
+        return ResponseEntity.ok(service.genererDevis(id, clientId));
     }
 
     @PostMapping("/{id}/annuler")

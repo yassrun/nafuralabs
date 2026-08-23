@@ -1,5 +1,5 @@
 /**
- * Études workflow QA — MET-2026-001 → devis → PDF / convert chantier
+ * Études workflow QA — devis → PDF / convert chantier
  * Run: node web/tests/e2e/scripts/verify-etudes-workflow-20260620.mjs
  */
 import { chromium } from 'playwright';
@@ -12,8 +12,6 @@ const AUTH_FILE = path.resolve(__dirname, '../.auth/erp-audit.json');
 const BASE = process.env.ERP_BASE ?? 'http://erp.nafura.local';
 const API_BASE = process.env.ERP_API_BASE ?? 'http://api.erp.nafura.local';
 
-const METRE_ID = '1d11c135-2a4f-43ed-99e0-6936b0c98bde';
-const METRE_NUMERO = 'MET-2026-001';
 const DPGF_ID = '6673b558-ea3f-4476-8a23-162b196ba745';
 const DEVIS_ID = 'a06010d8-145b-40e5-909d-9232de2274fc';
 const DEVIS_NUMERO = 'DV-2026-0001';
@@ -21,7 +19,7 @@ const DEVIS_NUMERO = 'DV-2026-0001';
 const results = {
   deployed: 'dev-20260619230406',
   at: new Date().toISOString(),
-  seeds: { METRE_ID, METRE_NUMERO, DPGF_ID, DEVIS_ID, DEVIS_NUMERO },
+  seeds: { DPGF_ID, DEVIS_ID, DEVIS_NUMERO },
   steps: [],
   bugs: [],
 };
@@ -64,7 +62,7 @@ async function api(method, urlPath, body) {
 
 async function dismissTours(page) {
   await page.addInitScript(() => {
-    for (const tour of ['shell', 'chantiers', 'situations', 'erp', 'dashboard', 'etudes', 'devis', 'metres']) {
+    for (const tour of ['shell', 'chantiers', 'situations', 'erp', 'dashboard', 'etudes', 'devis']) {
       localStorage.setItem(`nafura-tour-seen-${tour}`, 'true');
     }
     for (const key of Object.keys(localStorage)) {
@@ -97,13 +95,6 @@ async function main() {
     process.exit(1);
   }
 
-  const metreApi = await api('GET', `/api/v1/etudes/metres/${METRE_ID}`);
-  step(
-    'api-metre',
-    metreApi.ok && metreApi.body?.numero === METRE_NUMERO,
-    metreApi.ok ? `numero=${metreApi.body?.numero} status=${metreApi.body?.status}` : `HTTP ${metreApi.status}`,
-  );
-
   const devisApi = await api('GET', `/api/v1/etudes/devis/${DEVIS_ID}`);
   step(
     'api-devis',
@@ -119,30 +110,7 @@ async function main() {
   await dismissTours(page);
 
   try {
-    // 1. MET detail — Générer devis
-    await page.goto(`${BASE}/etudes/metres/${METRE_ID}`, { waitUntil: 'domcontentloaded', timeout: 45000 });
-    await waitForApp(page);
-
-    const genDevisBtn = page
-      .locator('nf-entity-detail nf-button button')
-      .filter({ hasText: /Générer devis/i })
-      .first();
-    const genVisible = await genDevisBtn.isVisible().catch(() => false);
-    step('met-generate-devis-visible', genVisible, genVisible ? 'Bouton Générer devis visible' : 'Bouton absent');
-
-    if (genVisible) {
-      await genDevisBtn.click();
-      await page.waitForTimeout(2000);
-      const url = page.url();
-      const navigated = url.includes('/etudes/devis/new') && url.includes(`metreId=${METRE_ID}`);
-      step(
-        'met-generate-devis-click',
-        navigated,
-        navigated ? `Navigation OK → ${url}` : `URL inattendue: ${url}`,
-      );
-    }
-
-    // 2. Devis detail — Imprimer (header) + action bar PDF if deployed
+    // Devis detail — Imprimer (header) + action bar PDF if deployed
     await page.goto(`${BASE}/etudes/devis/${DEVIS_ID}`, { waitUntil: 'domcontentloaded', timeout: 45000 });
     await waitForApp(page);
 

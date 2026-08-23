@@ -9,7 +9,6 @@ import java.util.UUID;
 import ma.nafura.etudes.domain.dpgf.DpgfNoeud;
 import ma.nafura.etudes.repository.DpgfNoeudRepository;
 import ma.nafura.etudes.repository.DpgfRepository;
-import ma.nafura.etudes.repository.OuvrageRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -23,8 +22,6 @@ class DpgfServiceBuildTreeTest {
                 mock(DpgfRepository.class),
                 mock(DpgfNoeudRepository.class),
                 mock(ma.nafura.etudes.repository.DossierEtudeRepository.class),
-                mock(MetreService.class),
-                mock(OuvrageRepository.class),
                 new DpgfAgregationService(),
                 mock(ParametresEtudeService.class),
                 new DpuCalculator(),

@@ -1,0 +1,36 @@
+<nf-page-shell>
+  <nf-page-header [config]="headerConfig"></nf-page-header>
+
+  <form class="cs-form" (ngSubmit)="submit()">
+    <label>
+      Fournisseur
+      <select [ngModel]="fournisseurId()" (ngModelChange)="fournisseurId.set($event)" name="fournisseurId" required>
+        <option value="">— fiche Achats —</option>
+        @for (f of fournisseurs(); track f.id) {
+          <option [value]="f.id">{{ f.raisonSociale }} ({{ f.code }})</option>
+        }
+      </select>
+    </label>
+
+    <label>
+      Panier (cle_stable, une par ligne)
+      <textarea
+        [ngModel]="clesText()"
+        (ngModelChange)="clesText.set($event)"
+        name="clesStables"
+        rows="5"
+        placeholder="ciment-cpj-45"></textarea>
+    </label>
+
+    <p class="cs-hint">Lien étude : aucun. La consultation vit dans Achats.</p>
+
+    @if (erreur(); as err) {
+      <p class="cs-error">{{ err }}</p>
+    }
+
+    <div class="cs-actions">
+      <nf-button type="submit" variant="primary" [disabled]="saving()">Créer</nf-button>
+      <nf-button type="button" variant="secondary" (clicked)="cancel()">Annuler</nf-button>
+    </div>
+  </form>
+</nf-page-shell>

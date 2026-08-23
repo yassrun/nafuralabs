@@ -12,11 +12,8 @@ export const FIELDS: DetailFieldConfig<ItemPrice>[] = [
     type: 'select',
     required: true,
     width: 'md',
-    lookupKey: 'items',
-    lookupEndpoint: '/api/v1/items/lookup',
     lookupDisplayField: 'name',
     lookupValueField: 'id',
-    searchable: true,
     referenceRoute: '/inventory/catalogue/articles',
   },
   {

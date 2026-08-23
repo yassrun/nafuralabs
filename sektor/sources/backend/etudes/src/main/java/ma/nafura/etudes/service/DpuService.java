@@ -688,6 +688,46 @@ public class DpuService {
         }
     }
 
+    /**
+     * Applique le PU consulté à tous les composants ITEM de ce DPGF qui portent cette identité.
+     * Même identité sur 3 postes = un prix, N lignes DPU.
+     */
+    @Transactional
+    public int appliquerPrixConsulte(
+            UUID dpgfId, UUID itemId, BigDecimal prixUnitaire, UUID devisId, String libelleSource) {
+        if (dpgfId == null || itemId == null || prixUnitaire == null) {
+            return 0;
+        }
+        UUID tenant = tenantId();
+        List<DpgfNoeud> noeuds = noeudRepository.findByDpgfIdAndTenantIdOrderByOrdreAsc(dpgfId, tenant);
+        List<UUID> noeudIds = noeuds.stream().map(DpgfNoeud::getId).toList();
+        if (noeudIds.isEmpty()) {
+            return 0;
+        }
+        List<PrixDpu> dpus = repository.findByTenantIdAndDpgfNoeudIdIn(tenant, noeudIds);
+        int updated = 0;
+        for (PrixDpu dpu : dpus) {
+            boolean changed = false;
+            for (ComposantDpu composant : dpu.getComposants()) {
+                if (itemId.equals(composant.getItemId())) {
+                    composant.setSourcePrix(CatalogPriceSource.CONSULTE);
+                    composant.setPrixUnitaire(prixUnitaire);
+                    composant.setPrixSourceRefId(devisId);
+                    composant.setPrixLibelleSource(libelleSource);
+                    changed = true;
+                    updated++;
+                }
+            }
+            if (changed) {
+                calculator.recomputeLineTotals(dpu.getComposants());
+                applyTotals(dpu);
+                repository.save(dpu);
+                syncNoeudFromPrixDpu(dpu);
+            }
+        }
+        return updated;
+    }
+
     private PrixDpu requirePrixDpu(UUID id) {
         return repository
                 .findByIdAndTenantId(id, tenantId())

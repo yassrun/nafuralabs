@@ -28,8 +28,6 @@ export type DevisStatus =
 
 export type DevisLigneType = 'CHAPITRE' | 'OUVRAGE' | 'TEXTE';
 
-export type MetreStatus = 'BROUILLON' | 'TERMINE';
-
 /** DPU — composantes déboursé sec (chiffrage CCAG-T / entreprise) */
 export type DpuComposantType =
   | 'MATIERE'
@@ -110,7 +108,6 @@ export interface NoeudDPGF {
   libelle: string;
   enfants?: NoeudDPGF[];
   articleId?: string;
-  metreLigneId?: string;
   quantite?: number;
   unite?: string;
   prixUnitaire?: number;
@@ -135,7 +132,6 @@ export interface NoeudDPGF {
 export interface DPGF {
   id: string;
   numero: string;
-  metreId: string;
   projetNom?: string;
   devisId?: string;
   hierarchie: NoeudDPGF[];
@@ -226,50 +222,6 @@ export type OuvrageListItem = Pick<
 export type OuvrageCreate = Omit<Ouvrage, 'id' | 'derniereMaj' | 'sousTotalDebourse'>;
 export type OuvrageUpdate = Partial<OuvrageCreate>;
 
-// ─── MÉTRÉS ───────────────────────────────────────────────────────────────────
-
-export interface MetreLigne {
-  id: string;
-  metreId: string;
-  ouvrageId?: string;
-  ouvrageCode?: string;
-  designationLibre?: string;
-  unite: string;
-  /** Regroupement DPGF (défaut 01 / 01.01 si absent) */
-  lotCode?: string;
-  sousLotCode?: string;
-  lotLibelle?: string;
-  sousLotLibelle?: string;
-  longueur?: number;
-  largeur?: number;
-  hauteur?: number;
-  nombre?: number;
-  formule?: string;
-  quantiteCalculee: number;
-  notes?: string;
-}
-
-export interface Metre {
-  id: string;
-  numero: string;
-  projetNom: string;
-  ville?: string;
-  dateMetre: string;
-  metreurId: string;
-  metreurName?: string;
-  notes?: string;
-  status: MetreStatus;
-  lignes: MetreLigne[];
-}
-
-export interface MetreListItem extends Omit<Metre, 'lignes'> {
-  nbLignes: number;
-  quantiteTotaleEstimee: number;
-}
-
-export type MetreCreate = Omit<Metre, 'id' | 'numero'>;
-export type MetreUpdate = Partial<MetreCreate>;
-
 // ─── DEVIS ────────────────────────────────────────────────────────────────────
 
 export interface DevisLigne {
@@ -319,7 +271,6 @@ export interface Devis {
   ville?: string;
   dateEmission: string;
   dateValidite: string;
-  metreId?: string;
   dpgfId?: string;
   dossierEtudeId?: string | null;
   bibliothequeReference?: string;
@@ -389,8 +340,6 @@ export interface AppelOffreClient {
   status: AOClientStatus;
   devisId?: string;
   devisNumero?: string;
-  metreId?: string;
-  metreNumero?: string;
   resultatRangNotre?: number;
   resultatNbPlis?: number;
   resultatAttributaire?: string;

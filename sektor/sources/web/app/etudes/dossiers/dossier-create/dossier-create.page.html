@@ -76,6 +76,7 @@
           placeholder="Construction d'un ensemble résidentiel — lot gros œuvre"
           [ngModel]="objet()"
           (ngModelChange)="objet.set($event)"
+          (input)="onTexteNatif('objet', $event)"
         />
       </label>
 
@@ -101,6 +102,7 @@
           placeholder="Commune de Casablanca"
           [ngModel]="clientNom()"
           (ngModelChange)="clientNom.set($event)"
+          (input)="onTexteNatif('clientNom', $event)"
         />
         <span class="creer__hint">Pas de Partner ici — création client à la conclusion du marché.</span>
       </label>

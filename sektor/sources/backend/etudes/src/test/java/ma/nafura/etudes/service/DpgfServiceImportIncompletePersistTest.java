@@ -17,7 +17,6 @@ import ma.nafura.etudes.domain.dpgf.DpgfNoeud;
 import ma.nafura.etudes.repository.DossierEtudeRepository;
 import ma.nafura.etudes.repository.DpgfNoeudRepository;
 import ma.nafura.etudes.repository.DpgfRepository;
-import ma.nafura.etudes.repository.OuvrageRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,8 +51,6 @@ class DpgfServiceImportIncompletePersistTest {
                 repository,
                 noeudRepository,
                 mock(DossierEtudeRepository.class),
-                mock(MetreService.class),
-                mock(OuvrageRepository.class),
                 new DpgfAgregationService(),
                 mock(ParametresEtudeService.class),
                 new DpuCalculator(),

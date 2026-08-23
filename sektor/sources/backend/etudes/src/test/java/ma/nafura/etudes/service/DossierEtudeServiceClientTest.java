@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.UUID;
 import ma.nafura.etudes.api.request.DossierEtudeCreateDto;
 import ma.nafura.etudes.api.request.DossierEtudeUpdateDto;
+import ma.nafura.etudes.domain.devis.Devis;
 import ma.nafura.etudes.domain.dossier.DossierEtude;
 import ma.nafura.etudes.domain.dossier.StatutDossierEtude;
 import ma.nafura.etudes.repository.AppelOffreClientRepository;
@@ -111,6 +112,7 @@ class DossierEtudeServiceClientTest {
                 org.mockito.Mockito.mock(ma.nafura.etudes.repository.AvisExecutionRepository.class),
                 org.mockito.Mockito.mock(BudgetVentilationService.class),
                 org.mockito.Mockito.mock(ma.nafura.etudes.service.port.bc.ChainageAvalPort.class),
+                org.mockito.Mockito.mock(ma.nafura.etudes.service.ConsultationEtudeService.class),
                 java.util.List.of());
     }
 
@@ -221,5 +223,57 @@ class DossierEtudeServiceClientTest {
         assertThatThrownBy(() -> service.create(dto))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("etudes.client.id_invalide");
+    }
+
+    @Test
+    void genererDevis_sansClient_refuse() {
+        UUID id = UUID.randomUUID();
+        DossierEtude dossier = DossierEtude.builder()
+                .id(id)
+                .tenantId(TENANT)
+                .numero("DE-0009")
+                .objet("Sans client")
+                .status(StatutDossierEtude.VALIDEE)
+                .dpgfId(UUID.randomUUID())
+                .clientNom("MOA texte")
+                .build();
+        when(repository.findByIdAndTenantId(id, TENANT)).thenReturn(Optional.of(dossier));
+        when(devisService.createFromDossier(dossier))
+                .thenThrow(new IllegalArgumentException("etudes.gate.chiffrage.client_manquant"));
+
+        assertThatThrownBy(() -> service.genererDevis(id, null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("etudes.gate.chiffrage.client_manquant");
+    }
+
+    @Test
+    void genererDevis_clientIdFourni_lieEtGenere() {
+        UUID id = UUID.randomUUID();
+        UUID devisId = UUID.randomUUID();
+        DossierEtude dossier = DossierEtude.builder()
+                .id(id)
+                .tenantId(TENANT)
+                .numero("DE-0010")
+                .objet("Lier client")
+                .status(StatutDossierEtude.VALIDEE)
+                .dpgfId(UUID.randomUUID())
+                .clientNom("Commune de Tanger")
+                .build();
+        when(repository.findByIdAndTenantId(id, TENANT)).thenReturn(Optional.of(dossier));
+        when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(clientPort.requireClientRole(CLIENT.toString()))
+                .thenReturn(new EtudeClientPort.ClientSnapshot(CLIENT, "CLI-001", "Commune de Tanger"));
+        when(devisService.createFromDossier(any())).thenAnswer(inv -> {
+            DossierEtude d = inv.getArgument(0);
+            assertThat(d.getClientId()).isEqualTo(CLIENT.toString());
+            return Devis.builder().id(devisId).numero("DV-0010").build();
+        });
+
+        DossierEtude out = service.genererDevis(id, CLIENT.toString());
+
+        assertThat(out.getClientId()).isEqualTo(CLIENT.toString());
+        assertThat(out.getClientNom()).isEqualTo("Commune de Tanger");
+        assertThat(out.getDevisGenereId()).isEqualTo(devisId);
+        assertThat(out.getStatus()).isEqualTo(StatutDossierEtude.DEVIS_GENERE);
     }
 }

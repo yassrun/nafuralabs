@@ -1,19 +1,20 @@
-import { Component, OnDestroy, computed, effect, inject, input, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, effect, inject, input, signal, ChangeDetectionStrategy } from '@angular/core';
 
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 import { Subject, startWith, takeUntil } from 'rxjs';
 
-import { ButtonComponent, NfInputComponent, NfSelectComponent } from '@platform/lib/anatomy';
-import type { Article, InventoryTxLine } from '../../models';
-import { ArticleCatalogService } from '../../services/article-catalog.service';
+import { ButtonComponent, NfInputComponent } from '@platform/lib/anatomy';
+import type { InventoryTxLine } from '../../models';
 import { StockQueryService } from '../../services/stock-query.service';
 import { StockQtyCellComponent } from '../stock-qty-cell/stock-qty-cell.component';
+import { openCatalogItemPicker } from '@app/etudes/dossiers/components/catalog-item-pick-dialog/catalog-item-pick-dialog.component';
 
 @Component({
   selector: 'app-transfert-lines-editor',
   standalone: true,
-  imports: [FormsModule, ReactiveFormsModule, StockQtyCellComponent, TranslateModule, ButtonComponent, NfInputComponent, NfSelectComponent],
+  imports: [FormsModule, ReactiveFormsModule, StockQtyCellComponent, TranslateModule, ButtonComponent, NfInputComponent],
   template: `
     <div class="trl" [class.trl--readonly]="linesControl().disabled">
       <div class="trl__toolbar">
@@ -39,13 +40,15 @@ import { StockQtyCellComponent } from '../stock-qty-cell/stock-qty-cell.componen
             @for (line of lines(); track line.id; let i = $index) {
               <tr [class.trl__row--warn]="isShort(line)">
                 <td>
-                  <nf-select
-                    class="trl__field"
-                    [options]="articleSelectOptions()"
-                    [ngModel]="line.articleId"
-                    (ngModelChange)="onArticleChange(i, $event)"
+                  <button
+                    type="button"
+                    class="trl__pick"
+                    data-testid="article-picker-open"
                     [disabled]="linesControl().disabled"
-                    [ngModelOptions]="{ standalone: true }" />
+                    (click)="pickArticle(i)"
+                  >
+                    {{ line.articleCode ? (line.articleCode + ' — ' + line.articleName) : 'Choisir un article' }}
+                  </button>
                 </td>
                 <td class="trl__muted">{{ line.articleName || ('inventory.common.dash' | translate) }}</td>
                 <td>
@@ -131,6 +134,18 @@ import { StockQtyCellComponent } from '../stock-qty-cell/stock-qty-cell.componen
     .trl__row--warn {
       background: color-mix(in srgb, var(--nf-warning, var(--nf-color-warning-500)) 8%, transparent);
     }
+    .trl__pick {
+      width: 100%;
+      min-width: 140px;
+      text-align: left;
+      padding: 0.5rem 0.65rem;
+      border: 1px solid var(--nf-border-default);
+      border-radius: 8px;
+      background: var(--nf-color-surface, #fff);
+      font: inherit;
+      cursor: pointer;
+    }
+    .trl__pick:disabled { opacity: 0.6; cursor: not-allowed; }
     .trl--readonly .trl__toolbar {
       display: none;
     }
@@ -138,17 +153,13 @@ import { StockQtyCellComponent } from '../stock-qty-cell/stock-qty-cell.componen
 })
 export class TransfertLinesEditorComponent implements OnDestroy {
   private readonly stockQuery = inject(StockQueryService);
-  private readonly articleCatalog = inject(ArticleCatalogService);
+  private readonly dialog = inject(MatDialog);
 
   readonly linesControl = input.required<FormControl<InventoryTxLine[] | null>>();
 
   readonly headerForm = input<FormGroup | null>(null);
 
-  readonly articles = signal<Article[]>([]);
   readonly lines = signal<InventoryTxLine[]>([]);
-  readonly articleSelectOptions = computed(() =>
-    this.articles().map((a) => ({ value: a.id, label: `${a.code} — ${a.name}` })),
-  );
 
   private readonly destroy$ = new Subject<void>();
   private linesSubSetup = false;
@@ -184,9 +195,6 @@ export class TransfertLinesEditorComponent implements OnDestroy {
         });
     });
 
-    effect(() => {
-      void this.loadArticles();
-    });
   }
 
   ngOnDestroy(): void {
@@ -194,9 +202,11 @@ export class TransfertLinesEditorComponent implements OnDestroy {
     this.destroy$.complete();
   }
 
-  private async loadArticles(): Promise<void> {
-    const list = await this.articleCatalog.loadArticles({ activeOnly: true });
-    this.articles.set(list);
+  async pickArticle(index: number): Promise<void> {
+    if (this.linesControl().disabled) return;
+    const result = await openCatalogItemPicker(this.dialog, { context: 'stock', uniteOptions: [] });
+    if (!result?.itemId) return;
+    this.onArticlePicked(index, result);
   }
 
   sourceLocationId(): string | null {
@@ -245,21 +255,19 @@ export class TransfertLinesEditorComponent implements OnDestroy {
     this.commit(next.map((l, i) => ({ ...l, lineNumber: i + 1 })));
   }
 
-  onArticleChange(index: number, articleId: string): void {
-    const art = this.articles().find((a) => a.id === articleId);
-    if (!art) {
-      this.patchLine(index, { articleId });
-      return;
-    }
-    const unitPrice = art.prixUnitaire ?? 0;
+  onArticlePicked(
+    index: number,
+    result: { itemId: string; name: string; code?: string; unite: string; unitOfMeasureId?: string; prixUnitaire: number },
+  ): void {
+    const unitPrice = result.prixUnitaire ?? 0;
     const line = this.lines()[index];
     const qty = line?.quantity ?? 0;
     this.patchLine(index, {
-      articleId,
-      articleCode: art.code,
-      articleName: art.name,
-      uomId: art.uomId,
-      uomCode: art.uomCode,
+      articleId: result.itemId,
+      articleCode: result.code ?? '',
+      articleName: result.name,
+      uomId: result.unitOfMeasureId ?? '',
+      uomCode: result.unite,
       unitPrice,
       totalPrice: Math.round(qty * unitPrice * 100) / 100,
     });

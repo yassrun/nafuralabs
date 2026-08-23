@@ -6,6 +6,8 @@ export interface Item {
   id: string;
   code?: string;
   name: string;
+  /** Identité catalogue Sektor — unique par tenant. */
+  cleStable?: string;
   description?: string;
   itemCategoryId?: string;
   unitOfMeasureId?: string;

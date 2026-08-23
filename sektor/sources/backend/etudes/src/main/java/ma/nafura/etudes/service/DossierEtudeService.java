@@ -73,6 +73,7 @@ public class DossierEtudeService {
     private final AvisExecutionRepository avisExecutionRepository;
     private final BudgetVentilationService budgetVentilationService;
     private final ChainageAvalPort chainageAvalPort;
+    private final ConsultationEtudeService consultationEtudeService;
     private final Map<Integer, EtapeGate> gatesParEtape;
 
     public DossierEtudeService(
@@ -93,6 +94,7 @@ public class DossierEtudeService {
             AvisExecutionRepository avisExecutionRepository,
             BudgetVentilationService budgetVentilationService,
             ChainageAvalPort chainageAvalPort,
+            @Lazy ConsultationEtudeService consultationEtudeService,
             List<EtapeGate> gates) {
         this.repository = repository;
         this.noeudRepository = noeudRepository;
@@ -111,6 +113,7 @@ public class DossierEtudeService {
         this.avisExecutionRepository = avisExecutionRepository;
         this.budgetVentilationService = budgetVentilationService;
         this.chainageAvalPort = chainageAvalPort;
+        this.consultationEtudeService = consultationEtudeService;
         this.gatesParEtape = gates.stream()
                 .collect(Collectors.toMap(EtapeGate::etape, Function.identity()));
     }
@@ -418,6 +421,15 @@ public class DossierEtudeService {
     /** Relance idempotente : VALIDEE → DEVIS_GENERE si le devis n'existe pas encore. */
     @Transactional
     public DossierEtude genererDevis(UUID id) {
+        return genererDevis(id, null);
+    }
+
+    /**
+     * {@code clientId} : Partner CLIENT déjà créé. Ignoré si le dossier en a déjà un.
+     * Permet de lier après validation (PUT en-tête refusé — {@code VALIDEE} n'est pas modifiable).
+     */
+    @Transactional
+    public DossierEtude genererDevis(UUID id, String clientId) {
         DossierEtude dossier = requireDossier(id);
         if (dossier.getStatus() == StatutDossierEtude.DEVIS_GENERE && dossier.getDevisGenereId() != null) {
             return dossier;
@@ -425,6 +437,10 @@ public class DossierEtudeService {
         if (dossier.getStatus() != StatutDossierEtude.VALIDEE
                 && dossier.getStatus() != StatutDossierEtude.DEVIS_GENERE) {
             throw new IllegalStateException("etudes.dossier.devis_hors_etat");
+        }
+        if (!StringUtils.hasText(dossier.getClientId()) && StringUtils.hasText(clientId)) {
+            appliquerMoa(dossier, clientId.trim(), null);
+            repository.save(dossier);
         }
         return exigenceGenerationDevis(dossier);
     }
@@ -669,8 +685,11 @@ public class DossierEtudeService {
     private ContexteGate chargerContexte(DossierEtude dossier) {
         var pieces = documentRepository.findByTenantIdAndDossierEtudeIdOrderByOrdreAsc(
                 tenantId(), dossier.getId());
-        boolean hasBordereau = pieces.stream().anyMatch(DossierDocument::contientBordereau);
-        boolean hasCps = pieces.stream().anyMatch(DossierDocument::contientCps);
+        // Voie manuelle (init-bordereau-manuel) : un DPGF existe déjà — BDP/CPS deviennent optionnels.
+        boolean hasDpgf = dossier.getDpgfId() != null;
+        boolean hasBordereau =
+                hasDpgf || pieces.stream().anyMatch(DossierDocument::contientBordereau);
+        boolean hasCps = hasDpgf || pieces.stream().anyMatch(DossierDocument::contientCps);
         List<DossierPieceAttendue> piecesAttendues =
                 pieceAttendueRepository.findByTenantIdAndDossierEtudeIdOrderByCreatedAtAsc(
                         tenantId(), dossier.getId());
@@ -691,6 +710,7 @@ public class DossierEtudeService {
                 tenantId(), dossier.getId(), "OUVERT");
         long avisEcartes = avisExecutionRepository.countByTenantIdAndDossierEtudeIdAndStatut(
                 tenantId(), dossier.getId(), "ECARTE");
+        long devisRecus = consultationEtudeService.countDevisRecus(dossier.getId());
         return new ContexteGate(
                 articles,
                 noeuds,
@@ -701,7 +721,10 @@ public class DossierEtudeService {
                 hasClientId,
                 clientValide,
                 avisOuverts,
-                avisEcartes);
+                avisEcartes,
+                devisRecus,
+                parametres.consultationObligatoire(),
+                parametres.consultationMinimum());
     }
 
     private AppelOffreClient creerAocLie(DossierEtudeCreateDto dto, String donneurOrdre) {

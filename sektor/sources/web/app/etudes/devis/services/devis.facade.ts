@@ -12,7 +12,6 @@ import type {
 import { ApiConfigService } from '@platform/core/config/api-config.service';
 
 import { DevisApiService } from './devis-api.service';
-import { MetreApiService } from '../../metres/services/metre-api.service';
 import {
   ErpLookupService,
   partnerLookupLabel,
@@ -21,7 +20,6 @@ import {
 @Injectable({ providedIn: 'root' })
 export class DevisFacade extends GridFacade<Devis, DevisCreate, DevisUpdate> {
   protected override api = inject(DevisApiService);
-  private readonly metreApi = inject(MetreApiService);
   private readonly erpLookup = inject(ErpLookupService);
   private readonly http = inject(HttpClient);
   private readonly apiConfig = inject(ApiConfigService);
@@ -31,9 +29,8 @@ export class DevisFacade extends GridFacade<Devis, DevisCreate, DevisUpdate> {
 
   override async ensureLookups(): Promise<void> {
     if (this.lookupsSignal()['clients']) return;
-    const [{ items: devis }, { items: metres }, partners] = await Promise.all([
+    const [{ items: devis }, partners] = await Promise.all([
       this.api.getAll({ page: 0, pageSize: 500 }),
-      this.metreApi.getAll({ page: 0, pageSize: 500 }),
       this.erpLookup.partnersByRole('CLIENT'),
     ]);
     const clientMap = new Map<string, LookupItem>();
@@ -51,10 +48,6 @@ export class DevisFacade extends GridFacade<Devis, DevisCreate, DevisUpdate> {
     }
     this.lookupsSignal.set({
       clients: [...clientMap.values()],
-      metres: metres.map((m) => ({
-        key: m.id,
-        value: `${m.numero} — ${m.projetNom}`,
-      })),
       partnerContacts: this.lookupsSignal()['partnerContacts'] ?? [],
     });
   }

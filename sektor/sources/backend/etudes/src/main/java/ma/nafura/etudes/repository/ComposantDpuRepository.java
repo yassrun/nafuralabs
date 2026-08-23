@@ -28,4 +28,6 @@ public interface ComposantDpuRepository extends JpaRepository<ComposantDpu, UUID
             @Param("tenantId") UUID tenantId, @Param("dpgfId") UUID dpgfId);
 
     List<ComposantDpu> findByIdInAndTenantId(List<UUID> ids, UUID tenantId);
+
+    List<ComposantDpu> findByTenantIdAndItemId(UUID tenantId, UUID itemId);
 }

@@ -92,15 +92,6 @@ export const FIELDS: DetailFieldConfig<Devis>[] = [
     width: 'md',
   },
   {
-    key: 'metreId',
-    label: 'Métré associé',
-    type: 'select',
-    width: 'md',
-    lookupKey: 'metres',
-    clearable: true,
-    visible: (form) => !!form.metreId,
-  },
-  {
     key: 'conditionsPaiement',
     label: 'Conditions de paiement',
     type: 'textarea',

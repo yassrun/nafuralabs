@@ -16,16 +16,17 @@ import { MatDialog, type MatDialogRef } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 
-import { ConfirmDialogService } from '@platform/lib/anatomy';
+import { ButtonComponent, ConfirmDialogService } from '@platform/lib/anatomy';
 
 import type { ResultatGate } from '@app/etudes/models';
 
 import type { BordereauTreeRow } from '../../utils/bordereau-tree.util';
 import { resolveOrigineCout } from '../../utils/poste-chiffrage-mode.util';
 import { DpuApiService } from '@app/catalogue/bibliotheque-prix/services/dpu-api.service';
-import { DpgfApiService } from '../../../metres/services/dpgf-api.service';
+import { DpgfApiService } from '../../../services/dpgf-api.service';
 import { BordereauArbreComponent } from '../bordereau-arbre/bordereau-arbre.component';
 import { openGateProblemesDialog } from '../gate-blocage/gate-problemes-dialog.component';
+import { openConsultationDecompoDialog } from '../consultation-decompo-dialog/consultation-decompo-dialog.component';
 import {
   PosteChiffrageDrawerComponent,
   type PosteChiffrageDrawerData,
@@ -36,7 +37,7 @@ import {
   selector: 'app-decomposition-workspace',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslateModule, BordereauArbreComponent],
+  imports: [FormsModule, TranslateModule, BordereauArbreComponent, ButtonComponent],
   templateUrl: './decomposition-workspace.component.html',
   styleUrl: './decomposition-workspace.component.scss',
 })
@@ -130,6 +131,14 @@ export class DecompositionWorkspaceComponent {
       if (id) untracked(() => void this.refreshCouverture(id, token));
     });
 
+  }
+
+  async ouvrirConsultation(): Promise<void> {
+    const ok = await openConsultationDecompoDialog(this.dialog, {
+      dossierId: this.dossierId(),
+      dpgfId: this.dpgfId(),
+    });
+    if (ok) this.change.emit();
   }
 
   ouvrirDetailsAlertes(): void {
@@ -241,12 +250,13 @@ export class DecompositionWorkspaceComponent {
       this.selectedKey.set(null);
       this.drawerDirty.set(false);
       this.dirtyChange.emit(false);
-      // Tree touchée uniquement si enregistrement réussi.
+      // Extraire / créer / ajouter persisté en base puis ✕ (« Tout est à jour ») :
+      // saved=false mais le DPGF a changé — recharger l’arbre + synthèse.
       if (result?.saved && result.snapshot) {
         this.arbre()?.applyPosteSnapshot(result.snapshot);
-        this.treeReloadToken.update((n) => n + 1);
-        this.change.emit();
       }
+      this.treeReloadToken.update((n) => n + 1);
+      this.change.emit();
     } catch {
       this.drawerRef = null;
       this.openingKey = null;

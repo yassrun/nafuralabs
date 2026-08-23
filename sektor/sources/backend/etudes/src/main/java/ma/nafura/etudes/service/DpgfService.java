@@ -5,12 +5,10 @@ import java.math.RoundingMode;
 import java.time.Year;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import ma.nafura.etudes.api.dto.DpgfLotTotalDto;
@@ -23,13 +21,9 @@ import ma.nafura.etudes.domain.dpu.EstimationSaisieEn;
 import ma.nafura.etudes.domain.dpu.OrigineCout;
 import ma.nafura.etudes.domain.dpgf.Dpgf;
 import ma.nafura.etudes.domain.dpgf.DpgfNoeud;
-import ma.nafura.etudes.domain.metre.Metre;
-import ma.nafura.etudes.domain.metre.MetreLigne;
-import ma.nafura.etudes.domain.ouvrage.Ouvrage;
 import ma.nafura.etudes.repository.DossierEtudeRepository;
 import ma.nafura.etudes.repository.DpgfNoeudRepository;
 import ma.nafura.etudes.repository.DpgfRepository;
-import ma.nafura.etudes.repository.OuvrageRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,8 +37,6 @@ public class DpgfService {
     private final DpgfRepository repository;
     private final DpgfNoeudRepository noeudRepository;
     private final DossierEtudeRepository dossierEtudeRepository;
-    private final MetreService metreService;
-    private final OuvrageRepository ouvrageRepository;
     private final DpgfAgregationService agregationService;
     private final ParametresEtudeService parametresEtudeService;
     private final DpuCalculator dpuCalculator;
@@ -54,8 +46,6 @@ public class DpgfService {
             DpgfRepository repository,
             DpgfNoeudRepository noeudRepository,
             DossierEtudeRepository dossierEtudeRepository,
-            MetreService metreService,
-            OuvrageRepository ouvrageRepository,
             DpgfAgregationService agregationService,
             ParametresEtudeService parametresEtudeService,
             DpuCalculator dpuCalculator,
@@ -63,8 +53,6 @@ public class DpgfService {
         this.repository = repository;
         this.noeudRepository = noeudRepository;
         this.dossierEtudeRepository = dossierEtudeRepository;
-        this.metreService = metreService;
-        this.ouvrageRepository = ouvrageRepository;
         this.agregationService = agregationService;
         this.parametresEtudeService = parametresEtudeService;
         this.dpuCalculator = dpuCalculator;
@@ -72,11 +60,8 @@ public class DpgfService {
     }
 
     @Transactional(readOnly = true)
-    public List<Dpgf> list(UUID metreId) {
-        UUID tenantId = tenantId();
-        List<Dpgf> rows = metreId != null
-                ? repository.findByTenantIdAndMetreIdOrderByCreatedAtDesc(tenantId, metreId)
-                : repository.findByTenantIdOrderByCreatedAtDesc(tenantId);
+    public List<Dpgf> list() {
+        List<Dpgf> rows = repository.findByTenantIdOrderByCreatedAtDesc(tenantId());
         rows.forEach(d -> d.setHierarchie(List.of()));
         return rows;
     }
@@ -99,39 +84,7 @@ public class DpgfService {
         return agregationService.totauxByLot(entity.getHierarchie());
     }
 
-    @Transactional
-    public Dpgf createFromMetre(UUID metreId, BigDecimal tvaTaux) {
-        Metre metre = metreService.getById(metreId);
-        if (metre.getLignes() == null || metre.getLignes().isEmpty()) {
-            metre.setLignes(new ArrayList<>(metreService.listLignes(metreId)));
-        }
-        UUID tenantId = tenantId();
-        BigDecimal effectiveTva = tvaTaux != null ? tvaTaux : parametresEtudeService.tvaTauxDefaut();
-
-        Dpgf entity = Dpgf.builder()
-                .tenantId(tenantId)
-                .numero(nextNumero(tenantId))
-                .metreId(metre.getId())
-                .projetNom(metre.getProjetNom())
-                .tvaTaux(effectiveTva)
-                .totalHt(BigDecimal.ZERO)
-                .totalTva(BigDecimal.ZERO)
-                .totalTtc(BigDecimal.ZERO)
-                .noeuds(new ArrayList<>())
-                .build();
-
-        Map<UUID, Ouvrage> ouvragesById = loadOuvrages(metre.getLignes(), tenantId);
-        Dpgf saved = repository.save(entity);
-        buildAndPersistNoeudsFromMetre(saved, metre, ouvragesById, tenantId);
-
-        attachArbre(saved);
-        List<DpgfNoeud> hierarchie = saved.getHierarchie();
-        agregationService.applyHeaderTotals(saved, hierarchie);
-        saved = repository.save(saved);
-        return saved;
-    }
-
-    /** DPGF vide rattachÃ© au dossier (mode manuel Ã©tape 2). */
+    /** DPGF vide rattaché au dossier (mode manuel étape 2). */
     @Transactional
     public Dpgf createEmpty(String projetNom, BigDecimal tvaTaux) {
         UUID tenantId = tenantId();
@@ -139,7 +92,6 @@ public class DpgfService {
         Dpgf entity = Dpgf.builder()
                 .tenantId(tenantId)
                 .numero(nextNumero(tenantId))
-                .metreId(null)
                 .projetNom(projetNom)
                 .tvaTaux(effectiveTva)
                 .totalHt(BigDecimal.ZERO)
@@ -170,7 +122,6 @@ public class DpgfService {
         Dpgf entity = Dpgf.builder()
                 .tenantId(tenantId)
                 .numero(nextNumero(tenantId))
-                .metreId(null)
                 .projetNom(projetNom)
                 .tvaTaux(effectiveTva)
                 .totalHt(BigDecimal.ZERO)
@@ -325,7 +276,6 @@ public class DpgfService {
                 .code(request.getCode().trim())
                 .libelle(request.getLibelle().trim())
                 .articleId(parseUuidOrNull(request.getArticleId()))
-                .metreLigneId(parseUuidOrNull(request.getMetreLigneId()))
                 .quantite(request.getQuantite())
                 .unite(trimOrNull(request.getUnite()))
                 .prixUnitaire(request.getPrixUnitaire())
@@ -365,8 +315,7 @@ public class DpgfService {
                 || request.getQuantite() != null
                 || request.getUnite() != null
                 || request.getOrdre() != null
-                || request.getArticleId() != null
-                || request.getMetreLigneId() != null;
+                || request.getArticleId() != null;
         if (structureChange) {
             assertStructureEditable(noeud.getDpgf().getId());
         } else {
@@ -381,9 +330,6 @@ public class DpgfService {
         }
         if (request.getArticleId() != null) {
             noeud.setArticleId(parseUuidOrNull(request.getArticleId()));
-        }
-        if (request.getMetreLigneId() != null) {
-            noeud.setMetreLigneId(parseUuidOrNull(request.getMetreLigneId()));
         }
         if (request.getQuantite() != null) {
             noeud.setQuantite(request.getQuantite());
@@ -572,137 +518,6 @@ public class DpgfService {
             deleteDescendants(child.getId(), tenantId);
             noeudRepository.delete(child);
         }
-    }
-
-    private void buildAndPersistNoeudsFromMetre(
-            Dpgf dpgf,
-            Metre metre,
-            Map<UUID, Ouvrage> ouvragesById,
-            UUID tenantId) {
-        Map<String, Map<String, List<MetreLigne>>> groups = groupLignes(metre.getLignes());
-        int lotOrdinal = 0;
-        int lotOrder = 0;
-
-        for (Map.Entry<String, Map<String, List<MetreLigne>>> lotEntry : groups.entrySet()) {
-            lotOrdinal++;
-            lotOrder++;
-            String lotKey = lotEntry.getKey();
-            Map<String, List<MetreLigne>> sousMap = lotEntry.getValue();
-            MetreLigne firstLigne = sousMap.values().iterator().next().get(0);
-
-            DpgfNoeud lot = noeudRepository.save(DpgfNoeud.builder()
-                    .tenantId(tenantId)
-                    .dpgf(dpgf)
-                    .parentId(null)
-                    .type(DpgfNoeud.TYPE_LOT)
-                    .code(lotKey)
-                    .libelle(firstLigne.getLotLibelle() != null ? firstLigne.getLotLibelle() : "Lot " + lotKey)
-                    .ordre(lotOrder)
-                    .build());
-
-            int sousOrdinal = 0;
-            int sousOrder = 0;
-            for (Map.Entry<String, List<MetreLigne>> sousEntry : sousMap.entrySet()) {
-                sousOrdinal++;
-                sousOrder++;
-                String sousKey = sousEntry.getKey();
-                List<MetreLigne> lignes = sousEntry.getValue();
-                MetreLigne firstSous = lignes.get(0);
-
-                DpgfNoeud sousLot = noeudRepository.save(DpgfNoeud.builder()
-                        .tenantId(tenantId)
-                        .dpgf(dpgf)
-                        .parentId(lot.getId())
-                        .type(DpgfNoeud.TYPE_SOUS_LOT)
-                        .code(sousKey)
-                        .libelle(firstSous.getSousLotLibelle() != null
-                                ? firstSous.getSousLotLibelle()
-                                : "Sous-lot " + sousKey)
-                        .ordre(sousOrder)
-                        .build());
-
-                int artOrdinal = 0;
-                int artOrder = 0;
-                for (MetreLigne ligne : lignes) {
-                    artOrdinal++;
-                    artOrder++;
-                    Ouvrage ouv = ligne.getOuvrageRefId() != null
-                            ? ouvragesById.get(ligne.getOuvrageRefId())
-                            : null;
-                    BigDecimal pu = ouv != null && ouv.getPrixUnitaireHt() != null
-                            ? ouv.getPrixUnitaireHt()
-                            : BigDecimal.ZERO;
-                    BigDecimal qte = ligne.getQuantiteCalculee() != null
-                            ? ligne.getQuantiteCalculee()
-                            : BigDecimal.ZERO;
-                    BigDecimal total = qte.multiply(pu).setScale(MONEY_SCALE, RoundingMode.HALF_UP);
-                    String code = String.format(
-                            Locale.ROOT,
-                            "%02d.%02d.%03d",
-                            lotOrdinal,
-                            sousOrdinal,
-                            artOrdinal);
-
-                    String libelle = ligne.getDesignationLibre();
-                    if (!StringUtils.hasText(libelle) && ouv != null) {
-                        libelle = ouv.getDesignation();
-                    }
-                    if (!StringUtils.hasText(libelle)) {
-                        libelle = "â€”";
-                    }
-
-                    noeudRepository.save(DpgfNoeud.builder()
-                            .tenantId(tenantId)
-                            .dpgf(dpgf)
-                            .parentId(sousLot.getId())
-                            .type(DpgfNoeud.TYPE_ARTICLE)
-                            .code(code)
-                            .libelle(libelle)
-                            .articleId(ligne.getOuvrageRefId())
-                            .metreLigneId(ligne.getId())
-                            .quantite(qte)
-                            .unite(ligne.getUnite() != null
-                                    ? ligne.getUnite()
-                                    : (ouv != null ? ouv.getUnite() : "U"))
-                            .prixUnitaire(pu)
-                            .total(total)
-                            .ordre(artOrder)
-                            .build());
-                }
-            }
-        }
-    }
-
-    private Map<String, Map<String, List<MetreLigne>>> groupLignes(List<MetreLigne> lignes) {
-        Map<String, Map<String, List<MetreLigne>>> groups = new TreeMap<>();
-        if (lignes == null) {
-            return groups;
-        }
-        for (MetreLigne ligne : lignes) {
-            String lot = StringUtils.hasText(ligne.getLotCode()) ? ligne.getLotCode().trim() : "01";
-            String sous = StringUtils.hasText(ligne.getSousLotCode()) ? ligne.getSousLotCode().trim() : "01.01";
-            groups.computeIfAbsent(lot, k -> new TreeMap<>())
-                    .computeIfAbsent(sous, k -> new ArrayList<>())
-                    .add(ligne);
-        }
-        return groups;
-    }
-
-    private Map<UUID, Ouvrage> loadOuvrages(List<MetreLigne> lignes, UUID tenantId) {
-        if (lignes == null || lignes.isEmpty()) {
-            return Map.of();
-        }
-        List<UUID> ids = lignes.stream()
-                .map(MetreLigne::getOuvrageRefId)
-                .filter(id -> id != null)
-                .distinct()
-                .toList();
-        if (ids.isEmpty()) {
-            return Map.of();
-        }
-        return ouvrageRepository.findAllById(ids).stream()
-                .filter(o -> tenantId.equals(o.getTenantId()))
-                .collect(Collectors.toMap(Ouvrage::getId, o -> o, (a, b) -> a, HashMap::new));
     }
 
     private void attachArbre(Dpgf entity) {

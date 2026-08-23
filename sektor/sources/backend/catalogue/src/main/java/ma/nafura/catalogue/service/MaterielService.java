@@ -177,6 +177,7 @@ public class MaterielService {
         itemDto.setItemCategoryId(request.getItemCategoryId());
         itemDto.setNature(Nature.MATERIEL.name());
         itemDto.setIsActive(request.getIsActive() != null ? request.getIsActive() : Boolean.TRUE);
+        itemDto.setCleStable(CatalogSlug.from(request.getName().trim()));
         return itemService.create(itemDto);
     }
 

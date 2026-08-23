@@ -44,36 +44,24 @@ const QA = {
       puVente: 72,
     },
   ],
-  metreLignes: [
+  postes: [
     {
       poste: '1.1',
       designation: 'Fondations BA',
       ouvrageCode: 'BPU-BA-001',
       quantite: 1000,
-      lotCode: '1',
-      sousLotCode: '1.1',
-      lotLibelle: 'Lot 1 — Gros œuvre',
-      sousLotLibelle: 'Fondations',
     },
     {
       poste: '2.1',
       designation: 'Murs agglos',
       ouvrageCode: 'BPU-MAC-002',
       quantite: 3200,
-      lotCode: '2',
-      sousLotCode: '2.1',
-      lotLibelle: 'Lot 2 — Maçonnerie',
-      sousLotLibelle: 'Murs porteurs',
     },
     {
       poste: '3.1',
       designation: 'Enduits façade',
       ouvrageCode: 'BPU-ENL-003',
       quantite: 2800,
-      lotCode: '3',
-      sousLotCode: '3.1',
-      lotLibelle: 'Lot 3 — Façades',
-      sousLotLibelle: 'Enduits',
     },
   ],
   devisVersionNote: 'Révision quantités lot terrassement',
@@ -266,233 +254,6 @@ async function ensureClient(request, session, log) {
   return created.body?.id ?? null;
 }
 
-async function findMetre(request, session) {
-  const list = await apiJson(request, session, 'GET', `/api/v1/etudes/metres?search=${encodeURIComponent(QA.projetNom)}`);
-  if (!list.ok) return null;
-  const items = Array.isArray(list.body) ? list.body : [];
-  return items.find((m) => m.projetNom === QA.projetNom) ?? null;
-}
-
-function metreLignePayload(spec, ouvrageIds) {
-  const ouvrageId = ouvrageIds[spec.ouvrageCode];
-  const ouvrage = QA.ouvrages.find((o) => o.code === spec.ouvrageCode);
-  return {
-    ouvrageId,
-    ouvrageCode: spec.ouvrageCode,
-    designationLibre: spec.designation,
-    unite: ouvrage?.unite ?? 'U',
-    lotCode: spec.lotCode,
-    sousLotCode: spec.sousLotCode,
-    lotLibelle: spec.lotLibelle,
-    sousLotLibelle: spec.sousLotLibelle,
-    quantiteCalculee: spec.quantite,
-    formule: 'Q',
-  };
-}
-
-async function ensureMetre(request, session, ouvrageIds, log) {
-  const existing = await findMetre(request, session);
-  if (existing) {
-    log.push({
-      step: 'metre-qa',
-      ok: true,
-      action: 'exists',
-      id: existing.id,
-      numero: existing.numero,
-    });
-    return existing;
-  }
-
-  const created = await apiJson(request, session, 'POST', '/api/v1/etudes/metres', {
-    projetNom: QA.projetNom,
-    ville: 'Rabat',
-    dateMetre: '2026-06-01',
-    metreurId: 'emp-qa-karim',
-    metreurName: 'Karim Benali',
-    notes: 'Métré QA — groupe scolaire 12 classes',
-    status: 'TERMINE',
-    lignes: QA.metreLignes.map((l) => metreLignePayload(l, ouvrageIds)),
-  });
-  log.push({
-    step: 'metre-qa',
-    ok: created.ok,
-    status: created.status,
-    action: created.ok ? 'created' : 'failed',
-    id: created.body?.id,
-    numero: created.body?.numero,
-    body: created.ok ? undefined : created.body,
-  });
-  return created.ok ? created.body : null;
-}
-
-function countNodes(hierarchie) {
-  return (hierarchie ?? []).reduce((n, x) => n + 1 + countNodes(x.enfants), 0);
-}
-
-function findLotNode(hierarchie, lotCode) {
-  return (hierarchie ?? []).find((n) => n.type === 'LOT' && n.code === lotCode);
-}
-
-async function ensureDpgfTree(request, session, dpgfId, ouvrageIds, log) {
-  const arbre = await apiJson(request, session, 'GET', `/api/v1/etudes/dpgf/${dpgfId}/arbre`);
-  if (!arbre.ok) {
-    log.push({ step: 'dpgf-arbre', ok: false, status: arbre.status, body: arbre.body });
-    return null;
-  }
-
-  let hierarchie = arbre.body.hierarchie ?? [];
-  const articleCount = collectArticleNodes(hierarchie).length;
-
-  if (articleCount < QA.metreLignes.length) {
-    for (const spec of QA.metreLignes) {
-      const arbreNow = await apiJson(request, session, 'GET', `/api/v1/etudes/dpgf/${dpgfId}/arbre`);
-      if (arbreNow.ok) hierarchie = arbreNow.body.hierarchie ?? hierarchie;
-
-      const ouvrage = QA.ouvrages.find((o) => o.code === spec.ouvrageCode);
-      const existingArticle = collectArticleNodes(hierarchie).find(
-        (n) => n.code === spec.poste || n.libelle === spec.designation,
-      );
-      if (existingArticle) {
-        log.push({ step: `dpgf-poste-${spec.poste}`, ok: true, action: 'exists', nodeId: existingArticle.id });
-        continue;
-      }
-
-      let lot = findLotNode(hierarchie, spec.lotCode);
-      if (!lot) {
-        const lotRes = await apiJson(request, session, 'POST', `/api/v1/etudes/dpgf/${dpgfId}/noeuds`, {
-          type: 'LOT',
-          code: spec.lotCode,
-          libelle: spec.lotLibelle,
-          ordre: Number(spec.lotCode),
-        });
-        log.push({
-          step: `dpgf-lot-${spec.lotCode}`,
-          ok: lotRes.ok,
-          status: lotRes.status,
-          action: lotRes.ok ? 'created' : 'failed',
-          body: lotRes.ok ? undefined : lotRes.body,
-        });
-        if (!lotRes.ok) continue;
-        lot = lotRes.body;
-        const arbreRefresh = await apiJson(request, session, 'GET', `/api/v1/etudes/dpgf/${dpgfId}/arbre`);
-        if (arbreRefresh.ok) hierarchie = arbreRefresh.body.hierarchie ?? hierarchie;
-        lot = findLotNode(hierarchie, spec.lotCode) ?? lot;
-      }
-
-      const sousRes = await apiJson(request, session, 'POST', `/api/v1/etudes/dpgf/${dpgfId}/noeuds`, {
-        parentId: lot.id,
-        type: 'SOUS_LOT',
-        code: spec.sousLotCode,
-        libelle: spec.sousLotLibelle,
-        ordre: 1,
-      });
-      if (!sousRes.ok) {
-        log.push({
-          step: `dpgf-sous-${spec.poste}`,
-          ok: false,
-          status: sousRes.status,
-          body: sousRes.body,
-        });
-        continue;
-      }
-
-      const totalHt = spec.quantite * ouvrage.puVente;
-      const artRes = await apiJson(request, session, 'POST', `/api/v1/etudes/dpgf/${dpgfId}/noeuds`, {
-        parentId: sousRes.body.id,
-        type: 'ARTICLE',
-        code: spec.poste,
-        libelle: spec.designation,
-        articleId: ouvrageIds[spec.ouvrageCode],
-        quantite: spec.quantite,
-        unite: ouvrage.unite,
-        prixUnitaire: ouvrage.puVente,
-        total: totalHt,
-        ordre: 1,
-      });
-      log.push({
-        step: `dpgf-poste-${spec.poste}`,
-        ok: artRes.ok,
-        status: artRes.status,
-        action: artRes.ok ? 'created' : 'failed',
-        nodeId: artRes.body?.id,
-        body: artRes.ok ? undefined : artRes.body,
-      });
-      if (artRes.ok) {
-        const arbreRefresh = await apiJson(request, session, 'GET', `/api/v1/etudes/dpgf/${dpgfId}/arbre`);
-        if (arbreRefresh.ok) hierarchie = arbreRefresh.body.hierarchie ?? hierarchie;
-      }
-    }
-  } else {
-    for (const spec of QA.metreLignes) {
-      const node = collectArticleNodes(hierarchie).find((n) => n.libelle === spec.designation);
-      if (!node || node.code === spec.poste) continue;
-      const updated = await apiJson(request, session, 'PUT', `/api/v1/etudes/dpgf-noeuds/${node.id}`, {
-        code: spec.poste,
-      });
-      log.push({
-        step: `dpgf-poste-${spec.poste}`,
-        ok: updated.ok,
-        status: updated.status,
-        action: updated.ok ? 'code-updated' : 'failed',
-        body: updated.ok ? undefined : updated.body,
-      });
-    }
-  }
-
-  const refreshed = await apiJson(request, session, 'GET', `/api/v1/etudes/dpgf/${dpgfId}/arbre`);
-  const totaux = await apiJson(request, session, 'GET', `/api/v1/etudes/dpgf/${dpgfId}/totaux`);
-  if (refreshed.ok) {
-    log.push({
-      step: 'dpgf-totaux',
-      ok: true,
-      nodeCount: countNodes(refreshed.body.hierarchie),
-      totalHt: refreshed.body.totalHt ?? refreshed.body.totalHT,
-      totalTtc: refreshed.body.totalTtc ?? refreshed.body.totalTTC,
-      lots: totaux.ok ? totaux.body : undefined,
-    });
-    return refreshed.body;
-  }
-  return arbre.body;
-}
-
-async function ensureDpgf(request, session, metreId, ouvrageIds, log) {
-  const list = await apiJson(request, session, 'GET', `/api/v1/etudes/dpgf?metreId=${metreId}`);
-  const items = Array.isArray(list.body) ? list.body : [];
-  let dpgf = items[0] ?? null;
-
-  if (!dpgf) {
-    const created = await apiJson(
-      request,
-      session,
-      'POST',
-      `/api/v1/etudes/dpgf?fromMetreId=${metreId}&tvaTaux=20`,
-    );
-    log.push({
-      step: 'dpgf-create',
-      ok: created.ok,
-      status: created.status,
-      action: created.ok ? 'created' : 'failed',
-      id: created.body?.id,
-      numero: created.body?.numero,
-      body: created.ok ? undefined : created.body,
-    });
-    if (!created.ok) return null;
-    dpgf = created.body;
-  } else {
-    log.push({ step: 'dpgf-create', ok: true, action: 'exists', id: dpgf.id, numero: dpgf.numero });
-  }
-
-  return ensureDpgfTree(request, session, dpgf.id, ouvrageIds, log);
-}
-
-function collectArticleNodes(hierarchie, acc = []) {
-  for (const node of hierarchie ?? []) {
-    if (node.type === 'ARTICLE') acc.push(node);
-    if (node.enfants?.length) collectArticleNodes(node.enfants, acc);
-  }
-  return acc;
-}
-
 async function findDevis(request, session, clientId) {
   const list = await apiJson(request, session, 'GET', `/api/v1/etudes/devis?search=${encodeURIComponent(QA.devisObjet)}`);
   if (!list.ok) return null;
@@ -509,7 +270,7 @@ async function findDevis(request, session, clientId) {
 }
 
 function buildDevisLignes(ouvrageIds) {
-  const goLines = QA.metreLignes.map((spec, idx) => {
+  const goLines = QA.postes.map((spec, idx) => {
     const ouvrage = QA.ouvrages.find((o) => o.code === spec.ouvrageCode);
     const totalHt = spec.quantite * ouvrage.puVente;
     return {
@@ -533,7 +294,7 @@ function buildDevisLignes(ouvrageIds) {
       ordre: 1,
       type: 'CHAPITRE',
       code: 'LOT-GO',
-      designation: 'Lot gros œuvre — métré QA',
+      designation: 'Lot gros œuvre',
     },
     ...goLines,
   ];
@@ -562,7 +323,7 @@ function buildDevisLignes(ouvrageIds) {
   return lignes;
 }
 
-async function ensureDevis(request, session, clientId, metre, dpgf, ouvrageIds, log) {
+async function ensureDevis(request, session, clientId, ouvrageIds, log) {
   let devis = await findDevis(request, session, clientId);
   const payload = {
     clientId: clientId,
@@ -572,8 +333,6 @@ async function ensureDevis(request, session, clientId, metre, dpgf, ouvrageIds, 
     ville: 'Rabat',
     dateEmission: '2026-06-10',
     dateValidite: '2026-09-10',
-    metreId: metre?.id,
-    dpgfId: dpgf?.id,
     bibliothequeReference: 'BPU QA SEYRURA 2026',
     conditionsPaiement: '30 % acompte, 60 % situations mensuelles, 10 % retenue de garantie 12 mois',
     delaiExecutionJours: 540,
@@ -655,16 +414,9 @@ async function main() {
     ids.ouvrages = await ensureOuvrages(request, session, log);
     ids.clientId = await ensureClient(request, session, log);
 
-    const metre = await ensureMetre(request, session, ids.ouvrages, log);
-    ids.metreId = metre?.id;
-    ids.metreNumero = metre?.numero;
-
-    const dpgf = metre ? await ensureDpgf(request, session, metre.id, ids.ouvrages, log) : null;
-    ids.dpgfId = dpgf?.id;
-    ids.dpgfNumero = dpgf?.numero;
-
-    const devis =
-      metre && ids.clientId ? await ensureDevis(request, session, ids.clientId, metre, dpgf, ids.ouvrages, log) : null;
+    const devis = ids.clientId
+      ? await ensureDevis(request, session, ids.clientId, ids.ouvrages, log)
+      : null;
     ids.devisId = devis?.id;
     ids.devisNumero = devis?.numero;
     ids.devisVersion = devis?.version;
@@ -681,7 +433,6 @@ async function main() {
     apiPaths: {
       ouvrages: '/api/v1/etudes/ouvrages',
       bibliothequePrix: '/api/v1/etudes/bibliotheque-prix',
-      metres: '/api/v1/etudes/metres',
       dpgf: '/api/v1/etudes/dpgf',
       dpgfNoeuds: '/api/v1/etudes/dpgf-noeuds',
       devis: '/api/v1/etudes/devis',

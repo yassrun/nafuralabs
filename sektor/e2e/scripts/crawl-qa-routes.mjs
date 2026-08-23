@@ -55,7 +55,6 @@ const ROUTES = [
   { path: '/materiel/maintenance/plans', module: '04-materiel' },
   { path: '/materiel/carburant/carnets', module: '04-materiel' },
   { path: '/etudes/bibliotheque-prix', module: '05-etudes' },
-  { path: '/etudes/metres', module: '05-etudes' },
   { path: '/etudes/devis', module: '05-etudes' },
   { path: '/etudes/appels-offres-clients', module: '05-etudes' },
   { path: '/marches/contrats', module: '06-marches' },

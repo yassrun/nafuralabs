@@ -1,9 +1,13 @@
 package ma.nafura.etudes.service;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 import java.util.UUID;
+import ma.nafura.etudes.domain.consultation.ConsultationParametres;
+import ma.nafura.etudes.repository.ConsultationParametresRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Source unique des défauts FG / marge / TVA pour le chiffrage (lot 1 T1.9).
@@ -60,10 +64,20 @@ public class ParametresEtudeService {
     public static final String MODE_CREATION_LIBRE = "LIBRE";
     public static final String MODE_CREATION_CONTROLEE = "CONTROLEE";
 
-    private final TenantSettingReader tenantSettingReader;
+    public static final String KEY_CONSULTATION_MODE = "etudes.consultation.mode";
+    public static final String KEY_CONSULTATION_MINIMUM = "etudes.consultation.minimum";
+    public static final String CONSULTATION_OPTIONNELLE = "OPTIONNELLE";
+    public static final String CONSULTATION_OBLIGATOIRE = "OBLIGATOIRE";
+    public static final int DEFAULT_CONSULTATION_MINIMUM = 1;
 
-    public ParametresEtudeService(TenantSettingReader tenantSettingReader) {
+    private final TenantSettingReader tenantSettingReader;
+    private final ConsultationParametresRepository consultationParametres;
+
+    public ParametresEtudeService(
+            TenantSettingReader tenantSettingReader,
+            ConsultationParametresRepository consultationParametres) {
         this.tenantSettingReader = tenantSettingReader;
+        this.consultationParametres = consultationParametres;
     }
 
     public BigDecimal fraisGenerauxPercentDefaut() {
@@ -122,6 +136,55 @@ public class ParametresEtudeService {
 
     public boolean creationArticleControlee() {
         return MODE_CREATION_CONTROLEE.equals(creationArticleMode());
+    }
+
+    public String consultationMode() {
+        return consultationRow()
+                .map(ConsultationParametres::getMode)
+                .map(String::trim)
+                .map(String::toUpperCase)
+                .filter(v -> CONSULTATION_OPTIONNELLE.equals(v) || CONSULTATION_OBLIGATOIRE.equals(v))
+                .orElse(CONSULTATION_OPTIONNELLE);
+    }
+
+    public boolean consultationObligatoire() {
+        return CONSULTATION_OBLIGATOIRE.equals(consultationMode());
+    }
+
+    public int consultationMinimum() {
+        return consultationRow()
+                .map(ConsultationParametres::getMinimum)
+                .filter(v -> v >= 1)
+                .orElse(DEFAULT_CONSULTATION_MINIMUM);
+    }
+
+    @Transactional
+    public void setConsultation(String mode, int minimum) {
+        UUID tenant = tenantIdOrNull();
+        if (tenant == null) {
+            throw new IllegalStateException("etudes.parametre.tenant_requis");
+        }
+        String normalized = mode != null ? mode.trim().toUpperCase() : CONSULTATION_OPTIONNELLE;
+        if (!CONSULTATION_OPTIONNELLE.equals(normalized) && !CONSULTATION_OBLIGATOIRE.equals(normalized)) {
+            throw new IllegalArgumentException("etudes.consultation.mode_invalide");
+        }
+        if (minimum < 1) {
+            throw new IllegalArgumentException("etudes.consultation.minimum_invalide");
+        }
+        ConsultationParametres row = consultationParametres
+                .findById(tenant)
+                .orElseGet(() -> ConsultationParametres.builder().tenantId(tenant).build());
+        row.setMode(normalized);
+        row.setMinimum(minimum);
+        consultationParametres.save(row);
+    }
+
+    private Optional<ConsultationParametres> consultationRow() {
+        UUID tenant = tenantIdOrNull();
+        if (tenant == null) {
+            return Optional.empty();
+        }
+        return consultationParametres.findById(tenant);
     }
 
     /** Nombre de niveaux à figer à la soumission selon le montant HT. */

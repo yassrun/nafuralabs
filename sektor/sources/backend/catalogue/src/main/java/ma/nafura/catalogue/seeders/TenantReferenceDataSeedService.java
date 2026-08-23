@@ -82,11 +82,18 @@ public class TenantReferenceDataSeedService implements CatalogueOnboardingPort {
         try (InputStream in = new ClassPathResource(resource).getInputStream()) {
             List<JsonNode> nodes = objectMapper.readValue(in, new TypeReference<>() {});
             for (JsonNode node : nodes) {
+                String name = node.get("name").asText();
+                String cle = ma.nafura.catalogue.service.CatalogSlug.from(name);
+                if (itemRepository.existsByTenantIdAndCleStable(tenantId, cle)) {
+                    cle = ma.nafura.catalogue.service.CatalogSlug.from(
+                            node.get("code").asText() + "-" + name);
+                }
                 itemRepository.save(Item.builder()
                     .tenantId(tenantId)
                     .code(node.get("code").asText())
-                    .name(node.get("name").asText())
+                    .name(name)
                     .description(node.has("description") ? node.get("description").asText() : null)
+                    .cleStable(cle)
                     .isActive(true)
                     .build());
             }

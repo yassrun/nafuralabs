@@ -11,6 +11,7 @@ import ma.nafura.catalogue.api.CatalogItemSnapshot;
 import ma.nafura.catalogue.api.CatalogLookupApi;
 import ma.nafura.catalogue.api.CatalogPriceContext;
 import ma.nafura.catalogue.api.CatalogPriceSnapshot;
+import ma.nafura.catalogue.api.IdentiteClasse;
 import ma.nafura.catalogue.domain.article.Item;
 import ma.nafura.catalogue.domain.article.UnitOfMeasure;
 import ma.nafura.catalogue.repository.ItemRepository;
@@ -32,16 +33,19 @@ public class CatalogLookupApiImpl implements CatalogLookupApi {
     private final UnitOfMeasureRepository unitOfMeasureRepository;
     private final ResolutionPrixService resolutionPrixService;
     private final ItemService itemService;
+    private final ExtraireIdentiteService extraireIdentiteService;
 
     public CatalogLookupApiImpl(
             ItemRepository itemRepository,
             UnitOfMeasureRepository unitOfMeasureRepository,
             ResolutionPrixService resolutionPrixService,
-            ItemService itemService) {
+            ItemService itemService,
+            ExtraireIdentiteService extraireIdentiteService) {
         this.itemRepository = itemRepository;
         this.unitOfMeasureRepository = unitOfMeasureRepository;
         this.resolutionPrixService = resolutionPrixService;
         this.itemService = itemService;
+        this.extraireIdentiteService = extraireIdentiteService;
     }
 
     @Override
@@ -90,7 +94,8 @@ public class CatalogLookupApiImpl implements CatalogLookupApi {
                         item.getCode(),
                         item.getName(),
                         uniteOf(item),
-                        item.getNature()));
+                        item.getNature(),
+                        item.getCleStable()));
     }
 
     @Override
@@ -130,7 +135,29 @@ public class CatalogLookupApiImpl implements CatalogLookupApi {
                 item.getCode(),
                 item.getName(),
                 uniteOf(item),
-                item.getNature());
+                item.getNature(),
+                item.getCleStable());
+    }
+
+    @Override
+    public Optional<CatalogItemSnapshot> findByCleStable(String cleStable) {
+        if (!StringUtils.hasText(cleStable)) {
+            return Optional.empty();
+        }
+        return itemRepository
+                .findByTenantIdAndCleStable(TenantContext.getTenantId(), cleStable.trim())
+                .map(item -> new CatalogItemSnapshot(
+                        item.getId().toString(),
+                        item.getCode(),
+                        item.getName(),
+                        uniteOf(item),
+                        item.getNature(),
+                        item.getCleStable()));
+    }
+
+    @Override
+    public IdentiteClasse classerIdentite(String designation, String nature) {
+        return extraireIdentiteService.classer(designation, nature);
     }
 
     @Override

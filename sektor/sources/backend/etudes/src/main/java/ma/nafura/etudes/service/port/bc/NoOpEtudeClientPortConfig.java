@@ -16,6 +16,18 @@ import org.springframework.util.StringUtils;
 public class NoOpEtudeClientPortConfig {
 
     @Bean
+    @ConditionalOnMissingBean(EtudeFournisseurPort.class)
+    public EtudeFournisseurPort noOpEtudeFournisseurPort() {
+        return partenaireId -> {
+            if (partenaireId == null) {
+                throw new IllegalArgumentException("etudes.consultation.fournisseur.requis");
+            }
+            return new EtudeFournisseurPort.FournisseurSnapshot(
+                    partenaireId, "NOOP", "Fournisseur " + partenaireId);
+        };
+    }
+
+    @Bean
     @ConditionalOnMissingBean(EtudeClientPort.class)
     public EtudeClientPort noOpEtudeClientPort() {
         return new EtudeClientPort() {

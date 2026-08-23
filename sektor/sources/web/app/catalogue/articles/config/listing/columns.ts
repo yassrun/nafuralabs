@@ -33,6 +33,15 @@ export function buildArticleColumns(t: TranslateService): ColumnConfig[] {
       sortable: true,
     },
     {
+      key: 'cleStable',
+      label: tr('inventory.catalogue.article.list.columns.cleStable'),
+      field: 'cleStable',
+      type: 'text',
+      sortable: true,
+      width: '180px',
+      transform: (v: unknown) => (v as string) || '—',
+    },
+    {
       key: 'familleName',
       label: tr('inventory.catalogue.article.list.columns.familleName'),
       field: 'familleName',
