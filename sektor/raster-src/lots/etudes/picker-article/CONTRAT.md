@@ -7,13 +7,13 @@
 
 **Qualification : EVOL.** Le picker actuel dump 40 items à l’ouverture ; le comportement visé (recherche à la demande, filtres serveur, un composant partagé) n’existe pas.
 
-Gelé le **23/08/2026**. Les tasks exec **référencent** `AC-n` ; elles ne les recopient pas.
+Gelé le **23/08/2026**. Re-gelé le **23/08/2026** (AC-1 / AC-12 preset). Re-gelé le **23/08/2026** : AC-12 = CTA header, pas de preset ligne. Les tasks exec **référencent** `AC-n` ; elles ne les recopient pas.
 
 ---
 
 ## Intention
 
-Un **seul** picker article, cœur commun catalogue, pas un dialog études. Extraire reste le chemin IA. Ce picker est le **fallback manuel** (« Depuis le catalogue »).
+Un **seul** picker article, cœur commun catalogue, pas un dialog études. Extraire reste le chemin IA. Ce picker est le **fallback manuel** (« Ajouter depuis le catalogue », CTA en tête du panneau — pas sur chaque ligne).
 
 Pas de dump à l’ouverture. Recherche as-you-type sur code + désignation. Filtres nature / famille / lot d’usage **côté serveur**. Pagination. Pied selon le contexte d’ouverture.
 
@@ -43,7 +43,7 @@ Pas de dump à l’ouverture. Recherche as-you-type sur code + désignation. Fil
 
 **AC-11 — Pied lookup.** Contexte tarif / solde / lookup `items` : pick article seul.
 
-**AC-12 — Nature pré-remplie.** Ouverture depuis une ligne DPU matière / MO / matériel / ST : le chip nature du type de ligne est déjà posé (MATIERE / MAIN_DOEUVRE / MATERIEL / SOUS_TRAITANCE). L’humain peut le changer ou le retirer.
+**AC-12 — Ajout DPU depuis le header.** Le picker DPU s’ouvre par **« Ajouter depuis le catalogue »** en tête du panneau (état vide et tableau rempli). Pas de CTA sur chaque ligne — ce n’est pas un remplacement. À l’ouverture : **aucun** chip nature pré-rempli. Un chip **posé par l’humain** déclenche la recherche.
 
 **AC-13 — Vide.** 0 hit : message clair. **Pas** de CTA Extraire / « Créer dans le catalogue » dans ce picker.
 

@@ -2,6 +2,8 @@ package ma.nafura.chantiers.domain.chantier;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
@@ -41,6 +43,15 @@ public class ChantierLot {
     @Column(name = "parent_lot_id", length = 100)
     private String parentLotId;
 
+    /** VENDU (copié du devis validé) ou INTERNE (ajouté au chantier). Jamais nul. */
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private NatureLigne nature;
+
+    /** Lien retour vers le nœud DPGF d'origine — posé à la copie, jamais réécrit. VENDU seulement. */
+    @Column(name = "dpgf_noeud_id")
+    private UUID dpgfNoeudId;
+
     @Column(length = 30)
     private String unite;
 
@@ -74,6 +85,9 @@ public class ChantierLot {
         updatedAt = now;
         if (avancementPercent == null) {
             avancementPercent = BigDecimal.ZERO;
+        }
+        if (nature == null) {
+            nature = NatureLigne.DEFAUT_SAISIE;
         }
     }
 

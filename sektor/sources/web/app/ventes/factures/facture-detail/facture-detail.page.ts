@@ -87,6 +87,12 @@ export class FactureDetailPage extends ConfigDrivenDetailPage<FactureClient> {
       : this.translate.instant('ventes.facture.detailTitle');
   }
 
+  protected override async loadItem(id: string): Promise<void> {
+    await super.loadItem(id);
+    const item = this.item();
+    if (item) this.crud.ensureClientLookup(item);
+  }
+
   asFormControl(control: unknown): FormControl {
     return control as FormControl;
   }

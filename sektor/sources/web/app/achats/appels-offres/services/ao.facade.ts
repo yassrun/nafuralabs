@@ -24,14 +24,8 @@ export class AoFacade extends GridFacade<AppelOffre, AppelOffreCreate, AppelOffr
   override readonly lookups = computed(() => this.lookupsSignal());
 
   override async ensureLookups(): Promise<void> {
-    if (this.lookupsSignal()['fournisseurs']) return;
-    const res = await this.partnersApi.listByRole('FOURNISSEUR', { page: 0, pageSize: 500 });
-    this.lookupsSignal.set({
-      fournisseurs: res.items.map((f) => ({
-        key: f.id,
-        value: `${f.code} — ${f.raisonSociale}`,
-      })),
-    });
+    if (this.lookupsSignal()['chantiers']) return;
+    this.lookupsSignal.set({ chantiers: [] });
   }
 
   async changeStatus(id: string, next: AOStatus): Promise<AppelOffre> {
@@ -55,12 +49,17 @@ export class AoFacade extends GridFacade<AppelOffre, AppelOffreCreate, AppelOffr
     fournisseurId: string,
     overrideJustification?: string,
   ): Promise<{ ao: AppelOffre; bc: BonCommande | null }> {
-    const partner = (await this.partnersApi.listByRole('FOURNISSEUR', { page: 0, pageSize: 500 }))
-      .items.find((p) => p.id === fournisseurId);
+    let raisonSociale: string | undefined;
+    try {
+      const partner = await this.partnersApi.getById(fournisseurId);
+      raisonSociale = partner.raisonSociale;
+    } catch {
+      raisonSociale = undefined;
+    }
     const { ao, bc } = await this.api.attribuer(
       aoId,
       fournisseurId,
-      partner?.raisonSociale,
+      raisonSociale,
     );
     if (overrideJustification?.trim()) {
       this.audit.log(

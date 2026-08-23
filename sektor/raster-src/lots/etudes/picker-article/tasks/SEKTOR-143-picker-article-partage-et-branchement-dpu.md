@@ -1,6 +1,6 @@
 ---
 id: SEKTOR-143
-status: review
+status: done-me
 context: nafura
 type: feature
 agent_type: exec
@@ -36,11 +36,20 @@ tags: [sektor, ux, catalogue]
 23/08 18:45  VU VERT : node sektor/e2e/scripts/verify-picker-article-143.mjs
              PASS picker vide à l’ouverture, hits après saisie, pied DPU
 23/08 18:07  status → review
+23/08 18:38  status → doing
+23/08 18:50  QA FAIL = trous de preuves (AC-8, 9 qty+PU, 12, 13 message, 14). UI déjà là.
+             Discrimination : pas de rouge-avant produit — trou de test, pas comportement nouveau.
+             Script étendu : picker-clavier, qty+PU pied, 0 hit, erreur+Relancer, chip preset/humain.
+             1er run clavier : ↑ depuis l’input search rouge (avalé) — pas un trou UI.
+             Vert 18:52 : node sektor/e2e/scripts/verify-picker-article-143.mjs
+23/08 18:52  status → review
+23/08 18:43  status → review
+23/08 18:45  status → done-agent · gate none → done-me
 ```
 
 ## Rapport de livraison
 
-ce qui a changé      `app-article-picker` sous `catalogue/` ; `CatalogItemPickDialog` consommateur (pied DPU). Plus de `getAll(40)` à l’ouverture. Nature de ligne passée depuis `poste-decomposition-panel`.
-critères prouvés     AC-1…9, 12…14 → `verify-picker-article-143.mjs` : rouge (dump 40 / timeout catalogue) puis vert 18:45 (vide, pas Extraire/Créer, hits unité+PU, Ajouter au poste). Browser Mode B : ouverture vide + hits.
-décidé seul          Chip nature pré-rempli (AC-12) ne déclenche pas la search (`filtersTouched`). Search seulement après saisie ≥2 ou filtre posé par l’humain.
-écarts / dette       Spec Playwright non écrite (crash C:/ vs c:/ déjà inbox). Script = preuve.
+ce qui a changé      `verify-picker-article-143.mjs` seulement. Pas de patch composant / CONTRAT / canvas.
+critères prouvés     AC-8 `picker-clavier` (↓↑ Entrée, dialog se ferme). AC-9 qty + PU tarif + CTA. AC-12 chip pré-rempli depuis la ligne, pas de search ; chip humain → GET `/items/search`. AC-13 0 hit + message, pas Extraire/Créer. AC-14 abort réseau → message + Relancer, dialog ouvert.
+décidé seul          Clavier asserté sur `.ap` (l’input `type=search` avale ↑). AC-12 via CTA **ligne** DPU (contrat), pas le CTA vide sans `ligneType`.
+écarts / dette       Spec Playwright non écrite (inbox). AC-7 toujours un `\d` dans le hit. Debounce 300 ms non isolé.

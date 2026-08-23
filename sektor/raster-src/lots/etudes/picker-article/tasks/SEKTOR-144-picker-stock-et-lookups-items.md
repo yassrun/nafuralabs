@@ -1,6 +1,6 @@
 ---
 id: SEKTOR-144
-status: review
+status: done-me
 context: nafura
 type: feature
 agent_type: exec
@@ -33,6 +33,7 @@ tags: [sektor, ux, catalogue]
 23/08 19:00  VU VERT : node sektor/e2e/scripts/verify-picker-article-144.mjs
              PASS stock natures stockables, lookup article seul, pas de dump
 23/08 19:01  status → review
+23/08 18:45  status → done-agent · gate none → done-me
 ```
 
 ## Rapport de livraison

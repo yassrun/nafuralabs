@@ -55,10 +55,7 @@ export class UomFacade implements PartialCrudFacade<UomConfig, UomCreate> {
   readonly lookups = computed(() => this.lookupsSignal());
 
   async ensureLookups(): Promise<void> {
-    const catRes = await this.catApi.getAll({ page: 0, pageSize: 500 });
-    this.lookupsSignal.set({
-      uomCategory: catRes.items.map((c) => ({ key: c.id, value: c.name })),
-    });
+    this.lookupsSignal.set({ uomCategory: [] });
   }
 
   async loadItems(): Promise<ListResponse<UomListItem>> {

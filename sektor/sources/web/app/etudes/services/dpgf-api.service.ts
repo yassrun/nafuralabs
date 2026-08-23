@@ -4,6 +4,21 @@ import { firstValueFrom } from 'rxjs';
 import { FeatureApiService } from '@platform/lib/anatomy';
 import type { DPGF, NoeudDPGF } from '@app/etudes/models';
 
+/**
+ * AC-2 / AC-16 — le poste du devis d'origine d'une ligne vendue du chantier, retrouvé depuis le
+ * seul identifiant que cette ligne conserve.
+ */
+export interface PosteOrigine {
+  posteId: string;
+  code: string;
+  libelle: string;
+  type: string;
+  dpgfId?: string | null;
+  dossierId?: string | null;
+  dossierNumero?: string | null;
+  dossierObjet?: string | null;
+}
+
 export interface DpgfLotTotal {
   code: string;
   libelle: string;
@@ -14,6 +29,11 @@ export interface DpgfLotTotal {
 export class DpgfApiService extends FeatureApiService<DPGF> {
   protected override basePath = '/api/v1/etudes/dpgf';
   protected override searchFields = ['numero', 'projetNom'];
+
+  /** AC-2 / AC-16 — remonter d'une ligne vendue au poste du devis dont elle a été copiée. */
+  async origineDuPoste(noeudId: string): Promise<PosteOrigine> {
+    return this.get<PosteOrigine>(`${this.basePath}/noeuds/${noeudId}/origine`);
+  }
 
   async getArbre(id: string): Promise<DPGF> {
     return this.get<DPGF>(`${this.basePath}/${id}/arbre`);

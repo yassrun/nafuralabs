@@ -71,6 +71,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { MatTabsModule } from '@angular/material/tabs';
 import { LOOKUP_LIST_ROUTES } from '../../../tokens/lookup-list-routes.token';
+import { LOOKUP_SEARCHERS } from '../../../tokens/lookup-searchers.token';
 import { LookupReferenceNavigationService } from '../../../services/lookup-reference-navigation.service';
 
 import { MatDialog } from '@angular/material/dialog';
@@ -81,6 +82,7 @@ import { IceInputComponent } from '../../atoms/ice-input/ice-input.component';
 import { RibInputComponent } from '../../atoms/rib-input/rib-input.component';
 import { PhoneMaInputComponent } from '../../atoms/phone-ma-input/phone-ma-input.component';
 import { MoneyInputComponent } from '../../atoms/money-input/money-input.component';
+import { NfSelectComponent, type NfSelectOption } from '../../atoms/select';
 import { PermissionService } from '../../../../../core/security/services/permission.service';
 import { FieldTemplateDirective } from './field-template.directive';
 import { AuditTimelineComponent } from '../../../../../features/collaboration/audit';
@@ -147,6 +149,7 @@ const WIDTH_TO_COLUMNS: Record<DetailFieldWidth, number> = {
     RibInputComponent,
     PhoneMaInputComponent,
     MoneyInputComponent,
+    NfSelectComponent,
     FormErrorSummaryComponent,
   ],
   templateUrl: './entity-detail.component.html',
@@ -200,6 +203,7 @@ export class EntityDetailComponent<TItem = Record<string, unknown>>
   private readonly locale = inject(LOCALE_ID);
   private readonly router = inject(Router);
   private readonly lookupListRoutes = inject(LOOKUP_LIST_ROUTES);
+  private readonly lookupSearchers = inject(LOOKUP_SEARCHERS, { optional: true });
   private readonly lookupRefNav = inject(LookupReferenceNavigationService);
   private readonly workflowApi = inject(WorkflowApiService);
   private readonly dialog = inject(MatDialog);
@@ -894,6 +898,36 @@ export class EntityDetailComponent<TItem = Record<string, unknown>>
       label: item.value,
       value: item.key,
     }));
+  }
+
+  toNfSelectOptions(field: DetailFieldConfig<TItem>): NfSelectOption[] {
+    return this.getOptions(field).map((opt) => ({
+      value: opt.value == null ? '' : String(opt.value),
+      label: String(opt.label ?? ''),
+    }));
+  }
+
+  lookupSearchFn(
+    field: DetailFieldConfig<TItem>,
+  ): ((query: string) => Promise<NfSelectOption[]>) | undefined {
+    const key = field.lookupKey?.trim();
+    if (!key || !this.lookupSearchers) return undefined;
+    const fn = this.lookupSearchers[key];
+    return fn ? (query) => fn(query) : undefined;
+  }
+
+  lookupSelectedLabel(field: DetailFieldConfig<TItem>): string | undefined {
+    const item = this.item();
+    if (!item) return undefined;
+    const record = item as Record<string, unknown>;
+    const key = field.key;
+    if (key.endsWith('Id')) {
+      const name = record[`${key.slice(0, -2)}Name`];
+      if (typeof name === 'string' && name.trim()) return name.trim();
+    }
+    const current = this.form.get(field.key)?.value;
+    const hit = this.getOptions(field).find((o) => String(o.value) === String(current ?? ''));
+    return hit ? String(hit.label) : undefined;
   }
 
   getFilteredOptions(field: DetailFieldConfig<TItem>): Array<{ label: string; value: unknown }> {

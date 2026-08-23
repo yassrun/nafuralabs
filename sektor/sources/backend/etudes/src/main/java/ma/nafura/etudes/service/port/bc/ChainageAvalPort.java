@@ -6,8 +6,11 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Port L13 — création atomique chantier + marché + budget hors module etudes.
+ * Port L13 — création du chantier et de son arbre hors module etudes.
  * Implémenté dans {@code backend/app} ; NoOp pour tests module.
+ *
+ * <p><b>Aucun marché ici</b> (AC-10) : le marché naît à la notification, pas à la conversion.
+ * Le port ne crée que le chantier, son arbre et son budget prévisionnel.
  */
 public interface ChainageAvalPort {
 
@@ -23,14 +26,22 @@ public interface ChainageAvalPort {
             String chantierVille,
             LocalDate dateDemarrage,
             Integer dureeMois,
-            String marcheIntitule,
+            /** Référence de vente portée par le chantier — pas un contrat de marché (AC-10). */
             String marcheReference,
             BigDecimal montantHt,
             BigDecimal tauxTva,
             List<LotProjection> lots,
             List<BudgetRubrique> budget) {}
 
+    /**
+     * Un nœud du DPGF projeté vers l'aval.
+     *
+     * @param dpgfNoeudId identifiant du nœud d'origine — le lien retour que la ligne vendue du
+     *     chantier conserve (AC-2). {@code null} seulement pour un lot d'accueil créé par
+     *     l'humain au moment de la conversion (AC-12) : celui-ci n'est pas vendu, il est interne.
+     */
     record LotProjection(
+            UUID dpgfNoeudId,
             String code,
             String designation,
             String type,
@@ -44,5 +55,6 @@ public interface ChainageAvalPort {
     record BudgetRubrique(
             String rubrique, String label, BigDecimal previsionnelHt, boolean nonFiable, String sourceOrigine) {}
 
-    record ConversionResult(String chantierId, String marcheId) {}
+    /** AC-10 — la conversion ne rend qu'un chantier. Aucun marché n'existe après elle. */
+    record ConversionResult(String chantierId) {}
 }

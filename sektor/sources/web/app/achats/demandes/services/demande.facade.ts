@@ -8,7 +8,6 @@ import type {
   DemandeAchatCreate,
   DemandeAchatUpdate,
 } from '@app/achats/models';
-import { PartnersApiService } from '@app/socle/shared/services/partners-api.service';
 import { ErpAuditService, AuditAction } from '@app/socle/shell/erp-audit.service';
 
 import { DemandeApiService } from './demande-api.service';
@@ -16,7 +15,6 @@ import { DemandeApiService } from './demande-api.service';
 @Injectable({ providedIn: 'root' })
 export class DemandeFacade extends GridFacade<DemandeAchat, DemandeAchatCreate, DemandeAchatUpdate> {
   protected override api = inject(DemandeApiService);
-  private readonly partnersApi = inject(PartnersApiService);
   private readonly audit = inject(ErpAuditService);
   private readonly locale = inject(LOCALE_ID);
 
@@ -24,14 +22,8 @@ export class DemandeFacade extends GridFacade<DemandeAchat, DemandeAchatCreate, 
   override readonly lookups = computed(() => this.lookupsSignal());
 
   override async ensureLookups(): Promise<void> {
-    if (this.lookupsSignal()['fournisseurs']) return;
-    const res = await this.partnersApi.listByRole('FOURNISSEUR', { page: 0, pageSize: 500 });
-    this.lookupsSignal.set({
-      fournisseurs: res.items.map((f) => ({
-        key: f.id,
-        value: `${f.code} — ${f.raisonSociale}`,
-      })),
-    });
+    if (this.lookupsSignal()['chantiers']) return;
+    this.lookupsSignal.set({ chantiers: [] });
   }
 
   async changeStatus(id: string, next: DAStatus, note?: string): Promise<DemandeAchat> {

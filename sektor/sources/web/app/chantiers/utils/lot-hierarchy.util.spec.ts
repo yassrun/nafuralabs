@@ -13,6 +13,7 @@ describe('lot-hierarchy.util', () => {
     code,
     designation: code,
     parentLotId,
+    nature: 'INTERNE',
     avancementPercent: 0,
     ordre,
   });
@@ -22,6 +23,7 @@ describe('lot-hierarchy.util', () => {
     lotId,
     code,
     designation: code,
+    nature: 'INTERNE',
     ordre: 1,
   });
 

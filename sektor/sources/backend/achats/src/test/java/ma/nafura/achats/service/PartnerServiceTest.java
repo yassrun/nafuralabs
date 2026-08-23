@@ -20,6 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
 
 @ExtendWith(MockitoExtension.class)
 class PartnerServiceTest {
@@ -67,5 +68,19 @@ class PartnerServiceTest {
         assertThrows(
                 IllegalArgumentException.class,
                 () -> service.addRole(partnerId, PartnerRoleType.CLIENT));
+    }
+
+    @Test
+    void listByRoleWithQueryUsesSearchRepository() {
+        when(partnerRepository.findByTenantIdAndRoleAndQuery(
+                        eq(TENANT_ID), eq(PartnerRoleType.CLIENT), eq("CLI"), any()))
+                .thenReturn(Page.empty());
+
+        service.listByRole(PartnerRoleType.CLIENT, 0, 20, null, "CLI");
+
+        verify(partnerRepository)
+                .findByTenantIdAndRoleAndQuery(
+                        eq(TENANT_ID), eq(PartnerRoleType.CLIENT), eq("CLI"), any());
+        verify(partnerRepository, never()).findByTenantIdAndRole(any(), any(), any());
     }
 }

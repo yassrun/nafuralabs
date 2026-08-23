@@ -2,10 +2,6 @@ import { Injectable, inject, signal, computed } from '@angular/core';
 
 import { GridFacade } from '@platform/lib/anatomy';
 import type { ListQuery, ListResponse, LookupContext } from '@platform/lib/anatomy/types';
-import { ItemCategoriesApiService } from '../../configuration/item-categories/services/item-category-api.service';
-import { UnitOfMeasuresApiService } from '../../configuration/unit-of-measures/services/unit-of-measure-api.service';
-import type { ItemCategory } from '../../configuration/item-categories/models';
-import type { UnitOfMeasure } from '../../configuration/unit-of-measures/models';
 import { StockQueryService } from '../../services/stock-query.service';
 import { NatureApiService } from '../../services/nature-api.service';
 import { ArticlesApiService } from './article-api.service';
@@ -14,8 +10,6 @@ import type { Article, ArticleCreate, ArticleUpdate } from '../models';
 @Injectable({ providedIn: 'root' })
 export class ArticlesFacade extends GridFacade<Article, ArticleCreate, ArticleUpdate> {
   protected override api = inject(ArticlesApiService);
-  private readonly categoriesApi = inject(ItemCategoriesApiService);
-  private readonly uomApi = inject(UnitOfMeasuresApiService);
   private readonly naturesApi = inject(NatureApiService);
   private readonly stockQuery = inject(StockQueryService);
 
@@ -33,19 +27,10 @@ export class ArticlesFacade extends GridFacade<Article, ArticleCreate, ArticleUp
   }
 
   override async ensureLookups(): Promise<void> {
-    const [categories, uoms, natures] = await Promise.all([
-      this.categoriesApi.getAll({ page: 0, pageSize: 200 }),
-      this.uomApi.getAll({ page: 0, pageSize: 200 }),
-      this.naturesApi.list(),
-    ]);
+    const natures = await this.naturesApi.list();
     this.lookupsSignal.set({
-      familleArticle: (categories.items as ItemCategory[]).map((c) => ({
-        key: c.id,
-        value: c.name ?? c.code ?? c.id,
-      })),
-      unitOfMeasure: (uoms.items as UnitOfMeasure[])
-        .filter((u) => u.isActive !== false)
-        .map((u) => ({ key: u.id, value: `${u.code ?? ''} — ${u.name}`.trim() })),
+      familleArticle: [],
+      unitOfMeasure: [],
       articleNatures: natures.map((n) => ({
         key: n.code,
         value: n.libelle,

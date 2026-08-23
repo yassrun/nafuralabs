@@ -12,7 +12,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
-import { map } from 'rxjs';
+import { firstValueFrom, map } from 'rxjs';
 
 import {
   ConfirmDialogService,
@@ -37,8 +37,16 @@ import { PiecesMarcheComponent } from '../components/pieces-marche/pieces-marche
 import { SyntheseValidationPanelComponent } from '../components/synthese-validation-panel/synthese-validation-panel.component';
 import {
   DossierEtudeApiService,
+  PostesOrphelinsError,
+  type ConversionRequest,
   type DossierEtudeSynthese,
+  type PlacementPosteOrphelin,
 } from '../services/dossier-etude-api.service';
+import {
+  ConversionChantierDialogComponent,
+  type ConversionChantierDialogResult,
+} from '../components/conversion-chantier-dialog/conversion-chantier-dialog.component';
+import { PostesOrphelinsDialogComponent } from '../components/postes-orphelins-dialog/postes-orphelins-dialog.component';
 import {
   backendGateEtapesForUi,
   backendToUiEtape,
@@ -503,18 +511,10 @@ export class DossierDetailPage {
           break;
         }
         case 'CONVERTIR': {
-          const ok = await this.confirmDialog.confirm({
-            title: 'Créer chantier et marché',
-            message:
-              'Conversion atomique : chantier, marché et budget prévisionnel (déboursé). Continuer ?',
-            variant: 'default',
-            confirmLabel: 'Convertir',
-          });
-          if (!ok) return;
-          const result = await this.api.convertir(dossier.id);
+          const chantierId = await this.convertirEnChantier(dossier);
           await this.refreshSynthese(dossier.id);
-          if (result.chantierId) {
-            void this.nav.navigate(['/chantiers', result.chantierId]);
+          if (chantierId) {
+            void this.nav.navigate(['/chantiers', chantierId]);
           }
           break;
         }
@@ -652,6 +652,59 @@ export class DossierDetailPage {
   private newPartnerCode(): string {
     const suffix = safeRandomUUID().replace(/-/g, '').slice(0, 8).toUpperCase();
     return `CLI-${suffix}`;
+  }
+
+  /**
+   * AC-13 — l'écran demande code chantier, date de démarrage et durée, puis convertit.
+   * AC-12 — si le devis contient des postes sans lot parent, le serveur s'arrête avant de rien
+   * créer et les nomme ; on les affiche, l'humain les place, et on rejoue. S'il abandonne, on
+   * n'appelle plus : rien n'est créé et l'étude reste gagnée.
+   *
+   * @returns l'identifiant du chantier créé, ou `null` si l'humain a abandonné.
+   */
+  private async convertirEnChantier(dossier: DossierEtude): Promise<string | null> {
+    const saisie = await firstValueFrom(
+      this.dialog
+        .open<
+          ConversionChantierDialogComponent,
+          unknown,
+          ConversionChantierDialogResult | null
+        >(ConversionChantierDialogComponent, {
+          // Laissé vide, le serveur retombe sur la date d'attribution de l'étude.
+          data: { defaultLabel: dossier.objet },
+          autoFocus: 'first-tabbable',
+        })
+        .afterClosed(),
+    );
+    if (!saisie) return null;
+
+    const body: ConversionRequest = { ...saisie };
+    for (;;) {
+      try {
+        const result = await this.api.convertir(dossier.id, body);
+        return result.chantierId;
+      } catch (err) {
+        if (!(err instanceof PostesOrphelinsError)) throw err;
+        const placements = await firstValueFrom(
+          this.dialog
+            .open<
+              PostesOrphelinsDialogComponent,
+              unknown,
+              PlacementPosteOrphelin[] | null
+            >(PostesOrphelinsDialogComponent, {
+              data: { postes: err.postes, lotsDisponibles: err.lotsDisponibles },
+              autoFocus: 'first-tabbable',
+            })
+            .afterClosed(),
+        );
+        // Abandon : rien n'a été créé côté serveur, l'étude reste GAGNE.
+        if (!placements) return null;
+        body.placementsPostesOrphelins = [
+          ...(body.placementsPostesOrphelins ?? []),
+          ...placements,
+        ];
+      }
+    }
   }
 
   private async refreshSynthese(id: string): Promise<void> {

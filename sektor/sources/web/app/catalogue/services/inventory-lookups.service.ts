@@ -20,24 +20,10 @@ export class InventoryLookupsService {
   }
 
   async buildReceptionLookups(): Promise<LookupContext> {
-    const [locationsDepot, chantiersLookup, fournisseursLookup] = await Promise.all([
-      this.erpLookup.locationDepots(),
-      this.erpLookup.chantiers(),
-      this.erpLookup.partnersByRole('FOURNISSEUR'),
-    ]);
-
     return {
-      locationsDepot: locationsDepot.map((l) => ({ key: l.key, value: l.value })),
-      chantiersLookup: chantiersLookup.map((c) => ({
-        key: c.key,
-        value: c.value,
-        data: c.data as Record<string, unknown> | undefined,
-      })),
-      fournisseursLookup: fournisseursLookup.map((f) => ({
-        key: f.key,
-        value: f.value,
-        data: { ice: (f.data as Record<string, unknown> | undefined)?.['ice'] },
-      })),
+      locationsDepot: [],
+      chantiersLookup: [],
+      fournisseursLookup: [],
       phasesLookup: [
         'GO — Fondations',
         'Structure R+3',

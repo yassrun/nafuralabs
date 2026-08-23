@@ -9,6 +9,7 @@ import {
   signal,
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
@@ -22,7 +23,8 @@ import {
 } from '@platform/lib/anatomy/components';
 import { ConfirmDialogService, ToastService } from '@platform/lib/anatomy';
 import { MadCurrencyPipe } from '@platform/lib/anatomy/pipes/mad-currency.pipe';
-import type { LotChantier, PosteBudgetaire } from '@app/chantiers/models';
+import type { LotChantier, NatureLigne, PosteBudgetaire } from '@app/chantiers/models';
+import { DpgfApiService } from '@app/etudes/services/dpgf-api.service';
 import {
   LOT_CHANTIER_IMPORT_DEFINITION,
   LotChantierImportService,
@@ -101,6 +103,18 @@ import {
               @case ('code') {
                 <span class="code-muted">{{ rowCode(row) }}</span>
               }
+              @case ('nature') {
+                <span class="nature-cell">
+                  <nf-badge [variant]="natureBadgeVariant(rowNature(row))">
+                    {{ natureLabelKey(rowNature(row)) | translate }}
+                  </nf-badge>
+                  @if (rowDpgfNoeudId(row); as origine) {
+                    <button type="button" class="row-action" (click)="ouvrirOrigine(origine)"
+                      [attr.title]="'chantiers.chantier.detail.lots.origineAction' | translate"
+                      [attr.aria-label]="'chantiers.chantier.detail.lots.origineAction' | translate">↗</button>
+                  }
+                </span>
+              }
               @case ('quantite') {
                 {{ rowQuantite(row) }}
               }
@@ -161,6 +175,7 @@ import {
     .lots-count { font-size: 0.8125rem; color: var(--nf-color-text-secondary); }
     .linklike { border: none; background: transparent; color: var(--nf-color-primary-600); cursor: pointer; font-size: 0.8125rem; padding: 0; }
     .linklike:hover { text-decoration: underline; }
+    .nature-cell { display: inline-flex; align-items: center; gap: 0.35rem; }
     .code-muted { font-size: 0.75rem; white-space: nowrap; color: var(--nf-color-text-tertiary, var(--nf-color-text-secondary)); font-variant-numeric: tabular-nums; }
     .lots-total { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.75rem 1rem; font-weight: 700; color: var(--nf-color-text-primary); }
     .lots-total strong { font-variant-numeric: tabular-nums; }
@@ -184,6 +199,8 @@ export class ChantierLotsTabComponent {
   private readonly toast = inject(ToastService);
   private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly lotImporter = inject(LotChantierImportService);
+  private readonly dpgfApi = inject(DpgfApiService);
+  private readonly nav = inject(Router);
   readonly importDefinition = LOT_CHANTIER_IMPORT_DEFINITION;
 
   readonly loading = signal(false);
@@ -196,6 +213,7 @@ export class ChantierLotsTabComponent {
     { key: 'type', label: 'chantiers.chantier.detail.lots.typeColumn', width: '7rem' },
     { key: 'designation', label: 'chantiers.chantier.detail.columns.designation', width: '22rem' },
     { key: 'code', label: 'chantiers.chantier.detail.columns.code', width: '7rem' },
+    { key: 'nature', label: 'chantiers.chantier.detail.lots.natureColumn', width: '8rem' },
     { key: 'quantite', label: 'chantiers.chantier.detail.columns.quantite', align: 'end', width: '6rem' },
     { key: 'unite', label: 'chantiers.chantier.detail.columns.unite', width: '6rem' },
     { key: 'prixUnitaireHt', label: 'chantiers.chantier.detail.columns.prixUnitaireHt', align: 'end', width: '9rem' },
@@ -312,15 +330,13 @@ export class ChantierLotsTabComponent {
         const lotId = result.targetLotId;
         if (!lotId) return;
         const postes = this.postesByLotId()[lotId] ?? [];
-        const quantite = result.quantite ?? 0;
-        const prixUnitaireHt = result.prixUnitaireHt ?? 0;
+        // Saisie : le poste cree est interne (AC-3), il porte quantite et unite mais aucun
+        // prix de vente (AC-4). Le vendu ne naît que de la copie du devis validé.
         await this.posteApi.createForLot(lotId, {
           ...(result.code ? { code: result.code } : {}),
           designation: result.designation,
-          quantite,
+          quantite: result.quantite ?? 0,
           unite: result.unite,
-          prixUnitaireHt,
-          montantHt: Math.round(quantite * prixUnitaireHt * 100) / 100,
           ordre: postes.length + 1,
         });
         this.toast.success(this.translate.instant('chantiers.chantier.detail.lots.posteCreateSuccess'));
@@ -378,6 +394,45 @@ export class ChantierLotsTabComponent {
     return row.poste?.designation ?? row.lot?.designation ?? '—';
   }
 
+  /** AC-16 — vendu ou interne, d'un coup d'oeil. Vocabulaire affiché : vendu / interne. */
+  rowNature(row: LotHierarchyRow): NatureLigne {
+    return row.poste?.nature ?? row.lot?.nature ?? 'INTERNE';
+  }
+
+  natureBadgeVariant(nature: NatureLigne): 'success' | 'default' {
+    return nature === 'VENDU' ? 'success' : 'default';
+  }
+
+  natureLabelKey(nature: NatureLigne): string {
+    return nature === 'VENDU'
+      ? 'chantiers.chantier.detail.lots.natureVendu'
+      : 'chantiers.chantier.detail.lots.natureInterne';
+  }
+
+  /** AC-2 — le lien retour, présent sur les seules lignes vendues. */
+  rowDpgfNoeudId(row: LotHierarchyRow): string | null {
+    return row.poste?.dpgfNoeudId ?? row.lot?.dpgfNoeudId ?? null;
+  }
+
+  /**
+   * AC-16 — depuis une ligne vendue, on remonte au poste du devis d'origine. Le chantier ne
+   * connaît que l'identifiant du nœud ; l'étude qui le contient est résolue côté serveur.
+   */
+  async ouvrirOrigine(dpgfNoeudId: string): Promise<void> {
+    try {
+      const origine = await this.dpgfApi.origineDuPoste(dpgfNoeudId);
+      if (!origine.dossierId) {
+        this.toast.error(this.translate.instant('chantiers.chantier.detail.lots.origineIntrouvable'));
+        return;
+      }
+      void this.nav.navigate(['/etudes/dossiers', origine.dossierId], {
+        queryParams: { poste: origine.posteId },
+      });
+    } catch {
+      this.toast.error(this.translate.instant('chantiers.chantier.detail.lots.origineIntrouvable'));
+    }
+  }
+
   rowQuantite(row: LotHierarchyRow): string | number {
     const q = row.poste?.quantite ?? row.lot?.quantite;
     return q ?? '—';
@@ -416,6 +471,7 @@ export class ChantierLotsTabComponent {
         mode,
         lots: this.lots(),
         isEdit: true,
+        nature: lot.nature,
         initial: { code: lot.code, designation: lot.designation },
       },
       autoFocus: 'first-tabbable',
@@ -424,6 +480,7 @@ export class ChantierLotsTabComponent {
     if (!result) return;
     try {
       await this.lotApi.updateForChantier(this.chantierId(), lot.id, {
+        nature: lot.nature,
         code: result.code,
         designation: result.designation,
       });
@@ -440,6 +497,7 @@ export class ChantierLotsTabComponent {
         mode: 'poste',
         lots: this.lots(),
         isEdit: true,
+        nature: poste.nature,
         initial: {
           code: poste.code,
           designation: poste.designation,
@@ -453,15 +511,23 @@ export class ChantierLotsTabComponent {
     const result = await firstValueFrom(ref.afterClosed());
     if (!result) return;
     const quantite = result.quantite ?? 0;
+    // AC-4 — le prix de vente n'existe que sur un poste vendu ; le dialogue ne le renvoie pas
+    // pour un interne, et le service ne l'envoie pas non plus.
+    const vendu = poste.nature === 'VENDU';
     const prixUnitaireHt = result.prixUnitaireHt ?? 0;
     try {
       await this.posteApi.updatePoste(poste.id, {
+        nature: poste.nature,
         code: result.code,
         designation: result.designation,
         unite: result.unite,
         quantite,
-        prixUnitaireHt,
-        montantHt: Math.round(quantite * prixUnitaireHt * 100) / 100,
+        ...(vendu
+          ? {
+              prixUnitaireHt,
+              montantHt: Math.round(quantite * prixUnitaireHt * 100) / 100,
+            }
+          : {}),
       });
       this.toast.success(this.translate.instant('chantiers.chantier.detail.lots.updateSuccess'));
       await this.reload();

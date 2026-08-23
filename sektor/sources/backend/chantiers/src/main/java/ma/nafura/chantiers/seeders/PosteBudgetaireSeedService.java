@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import ma.nafura.chantiers.domain.budget.PosteBudgetaire;
+import ma.nafura.chantiers.domain.chantier.NatureLigne;
 import ma.nafura.chantiers.repository.PosteBudgetaireRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.core.io.ClassPathResource;
@@ -22,6 +23,11 @@ public class PosteBudgetaireSeedService {
         this.objectMapper = objectMapper;
     }
 
+    /**
+     * Jeu de démonstration : ces postes ne viennent d'aucune étude, donc ils sont
+     * {@link NatureLigne#INTERNE} (AC-14, conséquence d'AC-3) — sans lien retour et sans prix de
+     * vente (AC-4). Aucune ligne sans nature (AC-1).
+     */
     @Transactional
     public void seedIfEmpty() {
         if (repository.countByTenantId(TenantContext.getTenantId()) > 0) {
@@ -43,18 +49,12 @@ public class PosteBudgetaireSeedService {
                         .lotId(node.get("lotId").asText())
                         .code(node.get("code").asText())
                         .designation(node.get("designation").asText())
+                        .nature(NatureLigne.INTERNE)
+                        .dpgfNoeudId(null)
                         .unite(textOrNull(node, "unite"))
                         .quantite(
                                 node.hasNonNull("quantite")
                                         ? new BigDecimal(node.get("quantite").asText())
-                                        : null)
-                        .prixUnitaireHt(
-                                node.hasNonNull("prixUnitaireHt")
-                                        ? new BigDecimal(node.get("prixUnitaireHt").asText())
-                                        : null)
-                        .montantHt(
-                                node.hasNonNull("montantHt")
-                                        ? new BigDecimal(node.get("montantHt").asText())
                                         : null)
                         .ordre(node.path("ordre").asInt(0))
                         .build();

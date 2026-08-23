@@ -3,7 +3,6 @@ import { Injectable, LOCALE_ID, computed, inject, signal } from '@angular/core';
 import { GridFacade } from '@platform/lib/anatomy';
 import type { LookupContext } from '@platform/lib/anatomy/types';
 import { BankReconciliationApiService } from '@app/finance/services/bank-reconciliation-api.service';
-import { ErpLookupService, partnerLookupLabel } from '@app/socle/shared/services/erp-lookup.service';
 import type {
   Encaissement,
   FactureClient,
@@ -21,7 +20,6 @@ export class FactureFacade extends GridFacade<
   FactureUpdate
 > {
   protected override api = inject(FactureApiService);
-  private readonly erpLookup = inject(ErpLookupService);
   private readonly bankApi = inject(BankReconciliationApiService);
   private readonly audit = inject(ErpAuditService);
   private readonly locale = inject(LOCALE_ID);
@@ -30,29 +28,31 @@ export class FactureFacade extends GridFacade<
   override readonly lookups = computed(() => this.lookupsSignal());
 
   override async ensureLookups(): Promise<void> {
-    if (this.lookupsSignal()['clients']) return;
-    const [clients, chantiers, bankAccounts] = await Promise.all([
-      this.erpLookup.partnersByRole('CLIENT'),
-      this.erpLookup.chantiers(),
-      this.bankApi.listAccounts(),
-    ]);
+    if (this.lookupsSignal()['chantiers']) return;
+    const bankAccounts = await this.bankApi.listAccounts();
     const banques = bankAccounts.filter((b) => b.type === 'BANQUE');
     this.lookupsSignal.set({
-      clients: clients.map((c) => ({
-        key: c.key,
-        value: partnerLookupLabel(c),
-        data: { ice: (c.data as Record<string, unknown> | undefined)?.['ice'] },
-      })),
-      chantiers: chantiers.map((c) => ({
-        key: c.key,
-        value: c.value,
-      })),
+      clients: this.lookupsSignal()['clients'] ?? [],
+      chantiers: [],
       banques: banques.map((b) => ({
         key: b.id,
         value: b.libelle,
         data: { code: b.code },
       })),
     });
+  }
+
+  ensureClientLookup(facture: FactureClient): void {
+    if (!facture.clientId) return;
+    const base = { ...this.lookupsSignal() };
+    const clients = [...(base['clients'] ?? [])];
+    if (!clients.some((c) => c.key === facture.clientId)) {
+      clients.push({
+        key: facture.clientId,
+        value: facture.clientName?.trim() || facture.clientId,
+      });
+      this.lookupsSignal.set({ ...base, clients });
+    }
   }
 
   async emit(id: string): Promise<FactureClient> {

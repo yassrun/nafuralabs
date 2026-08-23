@@ -55,7 +55,8 @@ public class ChantierSeedService {
                                         ? new BigDecimal(node.get("tauxRg").asText())
                                         : null)
                         .avancementPercent(new BigDecimal(node.path("avancementPercent").asText("0")))
-                        .status(node.path("status").asText(Chantier.STATUS_EN_COURS))
+                        // AC-8 — un chantier sans statut explicite n'est pas un chantier demarre.
+                        .status(node.path("status").asText(Chantier.STATUS_EN_PREPARATION))
                         .active(true)
                         .build();
                 repository.save(entity);

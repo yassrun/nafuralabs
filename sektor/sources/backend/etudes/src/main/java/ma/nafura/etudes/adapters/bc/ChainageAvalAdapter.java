@@ -17,16 +17,25 @@ import ma.nafura.chantiers.service.ChantierService;
 import ma.nafura.chantiers.service.PosteBudgetaireService;
 import ma.nafura.etudes.domain.dpgf.DpgfNoeud;
 import ma.nafura.etudes.service.port.bc.ChainageAvalPort;
-import ma.nafura.marches.api.request.ContratMarcheCreateDto;
-import ma.nafura.marches.domain.contrat.ContratMarche;
-import ma.nafura.marches.service.ContratMarcheService;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 /**
- * L13 — adapter app : création atomique chantier → marché → lots/postes → budget.
+ * L13 — adapter app : création atomique chantier → arbre (lots / postes) → budget.
+ *
+ * <p>Trois choses que cet adapter ne fait <b>pas</b>, et qui sont des critères, pas des détails :
+ *
+ * <ul>
+ *   <li><b>AC-8</b> — il ne démarre pas le chantier. Celui-ci naît {@code EN_PREPARATION} ; c'est
+ *       l'ordre de service qui le passe {@code EN_COURS}, ailleurs.
+ *   <li><b>AC-10</b> — il ne crée aucun {@code ContratMarche}. Le marché naît à la notification.
+ *       La référence de vente, jusque-là, est le devis validé.
+ *   <li><b>AC-12</b> — il ne rattrape aucun poste orphelin. Le placement a été tranché par
+ *       l'humain avant l'appel ; s'il reste un article sans lot d'accueil ici, c'est un bug
+ *       amont et la transaction échoue plutôt que de forger un « Lot principal ».
+ * </ul>
  */
 @Component
 @Primary
@@ -35,19 +44,16 @@ public class ChainageAvalAdapter implements ChainageAvalPort {
     private final ChantierService chantierService;
     private final ChantierLotService lotService;
     private final PosteBudgetaireService posteService;
-    private final ContratMarcheService marcheService;
     private final BudgetChantierService budgetService;
 
     public ChainageAvalAdapter(
             ChantierService chantierService,
             ChantierLotService lotService,
             PosteBudgetaireService posteService,
-            ContratMarcheService marcheService,
             BudgetChantierService budgetService) {
         this.chantierService = chantierService;
         this.lotService = lotService;
         this.posteService = posteService;
-        this.marcheService = marcheService;
         this.budgetService = budgetService;
     }
 
@@ -66,7 +72,8 @@ public class ChainageAvalAdapter implements ChainageAvalPort {
         chantierDto.setMontantHt(command.montantHt());
         chantierDto.setTauxTva(command.tauxTva());
         chantierDto.setDescription(command.objet());
-        chantierDto.setStatus("EN_COURS");
+        // AC-8 — un chantier gagné n'est pas un chantier démarré.
+        chantierDto.setStatus(Chantier.STATUS_EN_PREPARATION);
         Chantier chantier = chantierService.create(chantierDto);
 
         Map<String, String> lotIdByCode = new HashMap<>();
@@ -76,14 +83,23 @@ public class ChainageAvalAdapter implements ChainageAvalPort {
                 lotDto.setCode(lot.code());
                 lotDto.setDesignation(lot.designation());
                 lotDto.setUnite(lot.unite());
-                lotDto.setQuantite(lot.quantite());
-                lotDto.setPrixUnitaireHt(lot.prixUnitaireHt());
-                lotDto.setMontantHt(lot.montantHt());
                 lotDto.setOrdre(lot.ordre());
                 if (StringUtils.hasText(lot.parentCode()) && lotIdByCode.containsKey(lot.parentCode())) {
                     lotDto.setParentLotId(lotIdByCode.get(lot.parentCode()));
                 }
-                ChantierLot created = lotService.create(chantier.getId(), lotDto);
+                ChantierLot created;
+                if (lot.dpgfNoeudId() != null) {
+                    // Copie depuis le devis validé : seul producteur de lignes vendues (AC-3),
+                    // et le lien retour vers le nœud DPGF est posé ici, une fois (AC-2).
+                    lotDto.setQuantite(lot.quantite());
+                    lotDto.setPrixUnitaireHt(lot.prixUnitaireHt());
+                    lotDto.setMontantHt(lot.montantHt());
+                    created = lotService.copierLotVendu(chantier.getId(), lotDto, lot.dpgfNoeudId());
+                } else {
+                    // Lot d'accueil décidé par l'humain (AC-12) : il ne vient pas du devis, donc
+                    // il est interne (AC-3) et ne porte pas de prix de vente (AC-4).
+                    created = lotService.create(chantier.getId(), lotDto);
+                }
                 lotIdByCode.put(lot.code(), created.getId());
             }
         }
@@ -94,17 +110,11 @@ public class ChainageAvalAdapter implements ChainageAvalPort {
             String parentLotId = StringUtils.hasText(article.parentCode())
                     ? lotIdByCode.get(article.parentCode())
                     : null;
-            if (parentLotId == null && !lotIdByCode.isEmpty()) {
-                parentLotId = lotIdByCode.values().iterator().next();
-            }
             if (parentLotId == null) {
-                ChantierLotCreateDto root = new ChantierLotCreateDto();
-                root.setCode("LOT-1");
-                root.setDesignation("Lot principal");
-                root.setOrdre(0);
-                ChantierLot created = lotService.create(chantier.getId(), root);
-                parentLotId = created.getId();
-                lotIdByCode.put("LOT-1", parentLotId);
+                // AC-12 — aucun rattrapage en silence. Le placement se décide devant l'humain,
+                // avant que quoi que ce soit ne soit créé ; arrivé ici, il est trop tard.
+                throw new IllegalStateException(
+                        "chantiers.conversion.poste_sans_lot_daccueil: " + article.code());
             }
             PosteBudgetaireCreateDto posteDto = new PosteBudgetaireCreateDto();
             posteDto.setCode(article.code());
@@ -114,23 +124,8 @@ public class ChainageAvalAdapter implements ChainageAvalPort {
             posteDto.setPrixUnitaireHt(article.prixUnitaireHt());
             posteDto.setMontantHt(article.montantHt());
             posteDto.setOrdre(article.ordre());
-            posteService.create(parentLotId, posteDto);
+            posteService.copierPosteVendu(parentLotId, posteDto, article.dpgfNoeudId());
         }
-
-        ContratMarcheCreateDto marcheDto = new ContratMarcheCreateDto();
-        marcheDto.setIntitule(command.marcheIntitule());
-        marcheDto.setReference(command.marcheReference());
-        marcheDto.setChantierId(chantier.getId());
-        marcheDto.setChantierCode(chantier.getCode());
-        marcheDto.setChantierNom(chantier.getLabel());
-        marcheDto.setClientId(command.clientId());
-        marcheDto.setClientNom(command.clientName());
-        marcheDto.setMontantHt(command.montantHt());
-        marcheDto.setTauxTva(command.tauxTva());
-        marcheDto.setDateNotification(command.dateDemarrage());
-        marcheDto.setDateDemarrage(command.dateDemarrage());
-        marcheDto.setDureeMois(command.dureeMois());
-        ContratMarche marche = marcheService.create(marcheDto);
 
         BudgetChantierUpsertDto budgetDto = new BudgetChantierUpsertDto();
         BigDecimal totalPrev = BigDecimal.ZERO;
@@ -156,6 +151,6 @@ public class ChainageAvalAdapter implements ChainageAvalPort {
         budgetDto.setReviseHt(totalPrev);
         budgetService.upsert(chantier.getId(), budgetDto);
 
-        return new ConversionResult(chantier.getId(), marche.getId());
+        return new ConversionResult(chantier.getId());
     }
 }

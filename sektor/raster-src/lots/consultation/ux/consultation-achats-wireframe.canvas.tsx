@@ -139,12 +139,17 @@ function PopupCreer() {
             Composant : Ciment CPJ 45 (postes 01.01.01–03)
           </Text>
           <Text>
-            CS-2026-0015 — Lafarge — 4 articles — Ciment déjà dedans
+            CS-2026-0015 — Lafarge — Demande — 4 articles — Ciment déjà dedans
+            · œil → fiche Achats
           </Text>
           <Text>
-            CS-2026-0016 — Sika — 2 articles — Ciment pas encore
+            CS-2026-0016 — Sika — Devis reçu — 2 articles — Ciment pas encore
+            · œil → fiche Achats
           </Text>
-          <Text tone="secondary">Clic une ligne = voir son panier.</Text>
+          <Text tone="secondary">
+            Clic une ligne = voir son panier. Œil = ouvrir la fiche consultation
+            (nouvel onglet), comme sur le nf-select.
+          </Text>
           <Row gap={8}>
             <Button variant="primary" onClick={() => setPane("detail")}>
               Ouvrir CS-2026-0016
@@ -159,7 +164,7 @@ function PopupCreer() {
       {pane === "detail" && (
         <Stack gap={10}>
           <H2>CS-2026-0016 — Sika</H2>
-          <Text>Liée à cette étude. Devis : 0.</Text>
+          <Text>Statut : Devis reçu. Liée à cette étude. Devis : 1. Œil / Voir la fiche → Achats.</Text>
           <H2>Articles du panier</H2>
           <Text>Peinture acrylique — postes 01.01.04</Text>
           <Text>Enduit — postes 01.02.01</Text>

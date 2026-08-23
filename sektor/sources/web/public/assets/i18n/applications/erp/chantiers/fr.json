@@ -241,6 +241,12 @@
           "promptPrixUnitaireHt": "Prix unitaire HT (MAD)",
           "technicalCodeHint": "Code technique généré automatiquement — non modifiable.",
           "groupHint": "Un lot (ou sous-lot) est un regroupement : son montant est calculé à partir de ses postes. Ajoutez ensuite des postes pour renseigner quantités et prix.",
+          "interneHint": "Ligne interne : elle porte une quantité et un coût, jamais un prix de vente, et n'entre pas dans une situation de travaux.",
+          "natureColumn": "Nature",
+          "natureVendu": "Vendu",
+          "natureInterne": "Interne",
+          "origineAction": "Voir le poste du devis d'origine",
+          "origineIntrouvable": "Le poste du devis d'origine est introuvable.",
           "totalLabel": "Total marché HT",
           "collapseLot": "Réduire le lot",
           "expandLot": "Développer le lot",
@@ -509,9 +515,6 @@
         "debut": "Début",
         "quantite": "Quantité",
         "dependances": "Dépendances"
-      },
-      "placeholder": {
-        "backToPlanning": "Retour planning"
       }
     },
     "situation": {

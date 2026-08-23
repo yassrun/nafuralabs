@@ -306,6 +306,14 @@ Le DPU de l'étude décompose déjà chaque poste en `MATIERE` / `MAIN_DOEUVRE` 
 - **Valeur acquise** : avancement × déboursé prévu, comparé au réel. C'est ce qui distingue « j'ai dépensé » de « j'ai trop dépensé pour ce que j'ai fait ».
 - L'agrégat **par rubrique** reste calculable — le compte d'exploitation global se dérive, il ne se stocke pas.
 
+### Amendements (23/08/2026) — remontés depuis le contrat `budget-et-marge`
+
+**Une cinquième part : le non ventilé.** Les quatre rubriques du DPU ne couvrent pas tout. Un poste chiffré au forfait (`ESTIME`), ou décomposé sans composants, n'a **aucune** rubrique où poser son déboursé. Il tombe dans une part **non ventilée**, explicite. Sans elle, ces postes seraient soit perdus, soit rangés de force dans une rubrique fausse.
+
+**« Valeur acquise » est un nom de calcul, pas un libellé.** Le terme reste dans ce journal — il dit précisément de quoi on parle. Il **ne s'affiche jamais** : à l'écran on lit *déboursé*, *marge*, *écart*, *avancement*. § Simplicité l'emporte sur le vocabulaire du gel.
+
+**Un coût qui arrive sans nœud** tombe sur un nœud interne « Frais de chantier », créé **à la première imputation de ce type** — pas d'office à la conversion, qui doit rester une copie fidèle du devis.
+
 ### Le prix à payer
 
 Le réel doit savoir **sur quel nœud** il tombe : un pointage, une facture fournisseur, une sortie de magasin portent une imputation. C'est le vrai coût de la décision — et l'endroit où la plupart des ERP BTP lâchent. *(Comment : § suivant.)*

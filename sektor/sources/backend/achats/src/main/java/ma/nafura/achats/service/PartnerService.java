@@ -53,7 +53,12 @@ public class PartnerService extends PartnerServiceBase {
     }
 
     @Transactional(readOnly = true)
-    public Page<Partner> listByRole(PartnerRoleType role, int page, int size, Sort sort) {
+    public Page<Partner> listByRole(PartnerRoleType role, int page, int size, Sort sort, String q) {
+        String query = q == null ? null : q.trim();
+        if (query != null && !query.isEmpty()) {
+            Pageable pageable = PageRequest.of(page, size);
+            return partnerRepository.findByTenantIdAndRoleAndQuery(tenantId(), role, query, pageable);
+        }
         Pageable pageable = sort != null ? PageRequest.of(page, size, sort) : PageRequest.of(page, size);
         return partnerRepository.findByTenantIdAndRole(tenantId(), role, pageable);
     }

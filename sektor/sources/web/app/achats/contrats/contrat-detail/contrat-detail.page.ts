@@ -37,6 +37,12 @@ export class ContratDetailPage extends ConfigDrivenDetailPage<ContratAchat> {
     const item = this.item();
     return item ? `${item.numero} — ${item.fournisseurName ?? ''}` : this.translate.instant('achats.contrat.detailTitle');
   }
+
+  protected override async loadItem(id: string): Promise<void> {
+    await super.loadItem(id);
+    const item = this.item();
+    if (item) this.crud.ensureFournisseurLookup(item);
+  }
   protected override async handleCustomAction(event: DetailActionEvent<ContratAchat>): Promise<void> {
     const item = event.item;
     const statusMap: Partial<Record<string, ContratAchatStatus>> = { signer: 'SIGNE', activer: 'EN_COURS', resilier: 'RESILIE' };

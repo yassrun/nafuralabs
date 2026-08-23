@@ -2,7 +2,11 @@
  * Preuve SEKTOR-143 — picker partagé + DPU (AC-1…9, 12…14).
  * Run: node sektor/e2e/scripts/verify-picker-article-143.mjs
  *
- * Baseline vu rouge : ouverture dump GET /api/v1/items (pageSize 40), liste déjà remplie.
+ * Scénarios CONTRAT : picker-ouverture-vide · picker-recherche-code-exact (partiel)
+ *   picker-dpu-ajouter-au-poste · picker-clavier · picker-aucun-resultat · picker-erreur-reseau
+ *
+ * Baseline historique AC-1 : dump GET /api/v1/items (pageSize 40).
+ * AC-8/9/12/13/14 : trous de preuve sur comportement déjà livré (pas un correctif produit).
  */
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
@@ -32,6 +36,10 @@ function headers(session) {
     'Content-Type': 'application/json',
     Accept: 'application/json',
   };
+}
+
+function assert(cond, msg) {
+  if (!cond) throw new Error(msg);
 }
 
 async function seedDossierCout(h, suffix) {
@@ -100,6 +108,47 @@ async function seedDossierCout(h, suffix) {
   return { dossierId, articleLibelle: `Beton picker 143 ${suffix}` };
 }
 
+async function assertNoExtraireCreer(dialog, where) {
+  const extraire = dialog.getByRole('button', { name: /Extraire|Créer dans le catalogue/i });
+  assert((await extraire.count()) === 0, `AC-13 ${where}: CTA Extraire / Créer présent`);
+}
+
+async function openDossierPicker(page, dossierId, articleLibelle) {
+  await page.goto(`${APP_BASE}/etudes/dossiers/${dossierId}`, { waitUntil: 'domcontentloaded' });
+  const article = page.getByText(articleLibelle).first();
+  await article.waitFor({ timeout: 25000 });
+  await article.click();
+  const drawer = page.locator('.poste-drawer');
+  try {
+    await drawer.waitFor({ timeout: 15000 });
+  } catch {
+    const body = (await page.locator('body').innerText()).slice(0, 800);
+    throw new Error(`drawer introuvable url=${page.url()} body=${body}`);
+  }
+  await page.getByRole('heading', { name: articleLibelle }).waitFor({ timeout: 15000 });
+  const decompo = page.getByRole('button', { name: /Je décompose/i });
+  const catalogueBtn = page.getByRole('button', { name: /Ajouter depuis le catalogue/i });
+  await Promise.race([
+    decompo.waitFor({ state: 'visible', timeout: 15000 }),
+    catalogueBtn.waitFor({ state: 'visible', timeout: 15000 }),
+  ]);
+  if (await decompo.isVisible().catch(() => false)) {
+    await decompo.click();
+    const continuer = page.getByRole('button', { name: /^Continuer$/i });
+    try {
+      await continuer.waitFor({ state: 'visible', timeout: 4000 });
+      await continuer.click();
+    } catch {
+      /* déjà en décompo */
+    }
+  }
+  await page.getByRole('button', { name: /Ajouter depuis le catalogue/i }).first().waitFor({ timeout: 15000 });
+  await page.getByRole('button', { name: /Ajouter depuis le catalogue/i }).first().click();
+  const dialog = page.locator('app-catalog-item-pick-dialog');
+  await dialog.waitFor({ timeout: 10000 });
+  return dialog;
+}
+
 async function main() {
   const sessionRes = await fetch(`${API_BASE}/api/public/dev/cursor-session`, {
     method: 'POST',
@@ -129,71 +178,115 @@ async function main() {
   });
 
   try {
-    await page.goto(`${APP_BASE}/etudes/dossiers/${dossierId}`, { waitUntil: 'domcontentloaded' });
-    const article = page.getByText(articleLibelle).first();
-    await article.waitFor({ timeout: 25000 });
-    await article.click();
-    const drawer = page.locator('.poste-drawer');
-    try {
-      await drawer.waitFor({ timeout: 15000 });
-    } catch (e) {
-      const body = (await page.locator('body').innerText()).slice(0, 800);
-      throw new Error(`drawer introuvable url=${page.url()} body=${body}`);
-    }
-    await page.getByRole('heading', { name: articleLibelle }).waitFor({ timeout: 15000 });
-    const decompo = page.getByRole('button', { name: /Je décompose/i });
-    const catalogueBtn = page.getByRole('button', { name: /Depuis le catalogue/i });
-    await Promise.race([
-      decompo.waitFor({ state: 'visible', timeout: 15000 }),
-      catalogueBtn.waitFor({ state: 'visible', timeout: 15000 }),
-    ]);
-    if (await decompo.isVisible().catch(() => false)) {
-      await decompo.click();
-      const continuer = page.getByRole('button', { name: /^Continuer$/i });
-      try {
-        await continuer.waitFor({ state: 'visible', timeout: 4000 });
-        await continuer.click();
-      } catch {
-        /* déjà en décompo */
-      }
-    }
-    await page.getByRole('button', { name: /Depuis le catalogue/i }).first().waitFor({ timeout: 15000 });
-    await page.getByRole('button', { name: /Depuis le catalogue/i }).first().click();
-
-    const dialog = page.locator('app-catalog-item-pick-dialog');
-    await dialog.waitFor({ timeout: 10000 });
-
-    const dumpOnOpen = itemListGets.length > 0;
-    if (dumpOnOpen) {
-      throw new Error(
-        `VU ROUGE AC-1: dump GET /api/v1/items à l’ouverture (${itemListGets[0]})`,
-      );
-    }
-    if (itemSearchGets.length > 0) {
-      throw new Error(`AC-1: search appelée trop tôt à l’ouverture (${itemSearchGets[0]})`);
-    }
-
+    const dialog = await openDossierPicker(page, dossierId, articleLibelle);
     const hits = dialog.locator('[data-testid="article-picker-hit"]');
-    if ((await hits.count()) > 0) {
-      throw new Error(`AC-1: liste déjà remplie à l’ouverture (${await hits.count()} hits)`);
-    }
+    const q = dialog.getByTestId('article-picker-q');
 
-    const extraire = dialog.getByRole('button', { name: /Extraire|Créer dans le catalogue/i });
-    if ((await extraire.count()) > 0) {
-      throw new Error('AC-13: CTA Extraire / Créer présent dans le picker');
+    /* —— picker-ouverture-vide (AC-1) —— */
+    if (itemListGets.length > 0) {
+      throw new Error(`VU ROUGE AC-1: dump GET /api/v1/items à l’ouverture (${itemListGets[0]})`);
     }
+    assert(itemSearchGets.length === 0, `AC-1: search appelée trop tôt à l’ouverture (${itemSearchGets[0]})`);
+    assert((await hits.count()) === 0, `AC-1: liste déjà remplie à l’ouverture (${await hits.count()} hits)`);
+    await assertNoExtraireCreer(dialog, 'ouverture');
+    console.log('PASS picker-ouverture-vide AC-1');
 
-    await dialog.getByRole('searchbox').or(dialog.locator('input[type="search"]')).first().fill('ci');
+    /* —— picker-aucun-resultat (AC-13) —— */
+    await q.fill('zzqxnevermatch143xyz');
     await page.waitForTimeout(450);
-    await hits.first().waitFor({ timeout: 8000 });
-    const first = hits.first();
-    const text = await first.innerText();
-    if (!/\d/.test(text)) {
-      throw new Error(`AC-7: hit sans PU/unité visible: ${text.slice(0, 120)}`);
-    }
-    await dialog.getByRole('button', { name: /Ajouter au poste/i }).waitFor({ timeout: 5000 });
+    await dialog.getByText(/Aucun article ne correspond/i).waitFor({ timeout: 8000 });
+    assert((await hits.count()) === 0, `AC-13: hits présents alors que 0 attendu (${await hits.count()})`);
+    await assertNoExtraireCreer(dialog, '0 hit');
+    console.log('PASS picker-aucun-resultat AC-13');
 
-    console.log(`PASS SEKTOR-143 — picker vide à l’ouverture, hits après saisie, pied DPU`);
+    /* —— picker-erreur-reseau (AC-14) —— */
+    await page.route('**/api/v1/items/search**', (route) => route.abort());
+    await q.fill('ci');
+    await page.waitForTimeout(450);
+    await dialog.getByRole('button', { name: /Relancer/i }).waitFor({ timeout: 8000 });
+    assert(
+      await dialog.getByText(/catalogue n.a pas répondu/i).count(),
+      'AC-14: message d’échec réseau absent',
+    );
+    await dialog.waitFor({ state: 'visible', timeout: 2000 });
+    await page.unroute('**/api/v1/items/search**');
+    await dialog.getByRole('button', { name: /Relancer/i }).click();
+    await hits.first().waitFor({ timeout: 8000 });
+    await dialog.waitFor({ state: 'visible', timeout: 2000 });
+    console.log('PASS picker-erreur-reseau AC-14');
+
+    /* —— hits + pied DPU (AC-7, AC-9) —— */
+    const firstText = await hits.first().innerText();
+    assert(/\d/.test(firstText), `AC-7: hit sans PU/unité visible: ${firstText.slice(0, 120)}`);
+    const qty = dialog.getByLabel(/Quantité/i);
+    await qty.waitFor({ timeout: 5000 });
+    const qtyVal = await qty.inputValue();
+    assert(qtyVal !== '', `AC-9: qty vide au pied DPU`);
+    const tarif = dialog.locator('.ap__prix');
+    await tarif.waitFor({ timeout: 5000 });
+    const tarifText = await tarif.innerText();
+    assert(/Tarif/i.test(tarifText), `AC-9: libellé Tarif absent (${tarifText.slice(0, 80)})`);
+    assert(/\d/.test(tarifText), `AC-9: PU tarif non visible (${tarifText.slice(0, 80)})`);
+    await dialog.getByRole('button', { name: /Ajouter au poste/i }).waitFor({ timeout: 5000 });
+    console.log('PASS picker-dpu-ajouter-au-poste AC-9 (qty + PU tarif + CTA)');
+
+    /* —— picker-clavier (AC-8) —— */
+    async function waitHitFocused(index, msg) {
+      const start = Date.now();
+      while (Date.now() - start < 2000) {
+        const sel = await hits.nth(index).getAttribute('aria-selected');
+        if (sel === 'true') return;
+        await page.waitForTimeout(50);
+      }
+      const states = [];
+      const n = Math.min(await hits.count(), 4);
+      for (let i = 0; i < n; i += 1) {
+        states.push(`${i}=${await hits.nth(i).getAttribute('aria-selected')}`);
+      }
+      throw new Error(`${msg} [${states.join(' ')}]`);
+    }
+    assert((await hits.count()) >= 2, `AC-8: besoin de ≥2 hits, got ${await hits.count()}`);
+    await waitHitFocused(0, 'AC-8: premier hit non focusé après search');
+    const ap = dialog.locator('.ap');
+    await ap.focus();
+    await page.keyboard.press('ArrowDown');
+    await waitHitFocused(1, 'AC-8: ↓ n’a pas déplacé le focus sur le 2ᵉ hit');
+    await page.keyboard.press('ArrowUp');
+    await waitHitFocused(0, 'AC-8: ↑ n’a pas ramené le focus sur le 1ᵉʳ hit');
+    await page.keyboard.press('Enter');
+    await dialog.waitFor({ state: 'hidden', timeout: 8000 });
+    console.log('PASS picker-clavier AC-8');
+
+    /* —— AC-12 : ouverture header, aucun preset nature —— */
+    const searchBeforeReopen = itemSearchGets.length;
+    await page.getByTestId('depuis-catalogue').click();
+    await dialog.waitFor({ timeout: 10000 });
+    await page.waitForTimeout(400);
+    assert(
+      itemSearchGets.length === searchBeforeReopen,
+      `AC-12: ouverture header a déclenché search (${itemSearchGets[itemSearchGets.length - 1]})`,
+    );
+    assert(
+      (await dialog.locator('.ap__chip--on').count()) === 0,
+      'AC-12: un chip nature est pré-rempli à l’ouverture header',
+    );
+    const searchBeforeHuman = itemSearchGets.length;
+    await dialog.getByTestId('article-picker-nature-MATIERE').click();
+    await page.waitForTimeout(400);
+    assert(
+      itemSearchGets.length > searchBeforeHuman,
+      'AC-12: chip posé par l’humain n’a pas déclenché GET /items/search',
+    );
+    const lastSearch = itemSearchGets[itemSearchGets.length - 1] || '';
+    assert(
+      lastSearch.includes('nature=MATIERE'),
+      `AC-12: search humain sans nature=MATIERE (${lastSearch})`,
+    );
+    console.log('PASS picker-dpu-ajouter-au-poste AC-12 (header, pas de preset, chip humain)');
+
+    console.log(
+      'PASS SEKTOR-143 — vide, 0 hit, erreur+Relancer, qty+PU, clavier, header sans preset',
+    );
   } finally {
     await browser.close();
   }

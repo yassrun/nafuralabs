@@ -17,6 +17,14 @@ export type ChantierType =
 
 export type PhaseChantierStatus = 'PLANIFIE' | 'EN_COURS' | 'TERMINE' | 'EN_RETARD';
 
+/**
+ * Nature d'une ligne de l'arbre du chantier — AC-1.
+ * `VENDU` : copiée du devis validé, garde le lien vers le nœud DPGF d'origine, entre en situation.
+ * `INTERNE` : ajoutée au chantier (installation, repli, régie, base vie, aléas), jamais facturée,
+ * pas de prix de vente.
+ */
+export type NatureLigne = 'VENDU' | 'INTERNE';
+
 export type SituationStatus =
   | 'BROUILLON'
   | 'SOUMISE'
@@ -77,9 +85,15 @@ export interface LotChantier {
   code: string;
   parentLotId?: string;
   designation: string;
+  /** Vendu ou interne — AC-1. Rendue par l'API de lecture, jamais choisie par la saisie (AC-3). */
+  nature: NatureLigne;
+  /** Nœud du devis dont la ligne vendue est copiée — AC-2. Absent sur une ligne interne. */
+  dpgfNoeudId?: string;
   unite?: string;
   quantite?: number;
+  /** Prix de vente — lignes vendues seulement (AC-4). */
   prixUnitaireHt?: number;
+  /** Montant vendu — lignes vendues seulement (AC-4). */
   montantHt?: number;
   avancementPercent: number;
   ordre: number;
@@ -90,9 +104,15 @@ export interface PosteBudgetaire {
   lotId: string;
   code: string;
   designation: string;
+  /** Vendu ou interne — AC-1. Rendue par l'API de lecture, jamais choisie par la saisie (AC-3). */
+  nature: NatureLigne;
+  /** Nœud du devis dont la ligne vendue est copiée — AC-2. Absent sur une ligne interne. */
+  dpgfNoeudId?: string;
   unite?: string;
   quantite?: number;
+  /** Prix de vente — lignes vendues seulement (AC-4). */
   prixUnitaireHt?: number;
+  /** Montant vendu — lignes vendues seulement (AC-4). */
   montantHt?: number;
   ordre: number;
 }

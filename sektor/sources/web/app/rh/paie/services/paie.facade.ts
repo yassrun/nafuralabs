@@ -2,7 +2,6 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 
 import { GridFacade } from '@platform/lib/anatomy';
 import type { LookupContext } from '@platform/lib/anatomy/types';
-import { EmployeApiService } from '@app/rh/employes/services/employe-api.service';
 import type { FichePaie, FichePaieCreate, FichePaieUpdate } from '@app/rh/models';
 
 import { PaieApiService } from './paie-api.service';
@@ -11,7 +10,6 @@ import { ErpAuditService } from '@app/socle/shell/erp-audit.service';
 @Injectable({ providedIn: 'root' })
 export class PaieFacade extends GridFacade<FichePaie, FichePaieCreate, FichePaieUpdate> {
   protected override api = inject(PaieApiService);
-  private readonly employeApi = inject(EmployeApiService);
   private readonly audit = inject(ErpAuditService);
 
   private readonly lookupsSignal = signal<LookupContext>({});
@@ -19,17 +17,7 @@ export class PaieFacade extends GridFacade<FichePaie, FichePaieCreate, FichePaie
 
   override async ensureLookups(): Promise<void> {
     if (this.lookupsSignal()['employes']) return;
-    try {
-      const { items: employes } = await this.employeApi.getAll();
-      this.lookupsSignal.set({
-        employes: employes.map((e) => ({
-          key: e.id,
-          value: `${e.matricule} — ${e.nom} ${e.prenom}`,
-        })),
-      });
-    } catch {
-      this.lookupsSignal.set({ employes: [] });
-    }
+    this.lookupsSignal.set({ employes: [] });
   }
 
   async valider(id: string): Promise<FichePaie> {

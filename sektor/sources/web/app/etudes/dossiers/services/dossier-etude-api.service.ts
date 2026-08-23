@@ -16,6 +16,61 @@ import type {
 import type { ImportNoeudPreview } from '../utils/bordereau-tree.util';
 import type { GuestLinkCreate, GuestLinkCreated } from './guest-access-api.service';
 
+/** AC-12 — un poste du devis sans lot parent, nommé par le serveur pour que l'humain le place. */
+export interface PosteOrphelin {
+  posteId: string;
+  code: string;
+  designation: string;
+}
+
+/** AC-12 — la décision de l'humain pour un poste orphelin : un lot existant, ou un lot à créer. */
+export interface PlacementPosteOrphelin {
+  posteId: string;
+  lotCode?: string;
+  nouveauLotCode?: string;
+  nouveauLotDesignation?: string;
+}
+
+/** AC-12 — un lot du devis, offert comme destination. L'humain peut aussi créer le lot d'accueil. */
+export interface LotDaccueilPossible {
+  code: string;
+  designation: string;
+}
+
+/** AC-13 — ce que l'écran de conversion demande. Aucun champ ne suppose un planning. */
+export interface ConversionRequest {
+  chantierLabel?: string;
+  chantierCode?: string;
+  chantierVille?: string;
+  dateDemarrage?: string;
+  dureeMois?: number;
+  marcheReference?: string;
+  montantHt?: number;
+  tauxTva?: number;
+  placementsPostesOrphelins?: PlacementPosteOrphelin[];
+}
+
+/** AC-10 — la conversion ne rend qu'un chantier. Aucun marché n'en sort. */
+export interface ConversionResult {
+  dossierId: string;
+  chantierId: string;
+  status: string;
+}
+
+/**
+ * AC-12 — la conversion s'est arrêtée avant de rien créer : des postes doivent être placés.
+ * Portée telle quelle jusqu'à l'écran, qui les nomme.
+ */
+export class PostesOrphelinsError extends Error {
+  constructor(
+    readonly postes: PosteOrphelin[],
+    readonly lotsDisponibles: LotDaccueilPossible[],
+  ) {
+    super('etudes.dossier.postes_orphelins');
+    this.name = 'PostesOrphelinsError';
+  }
+}
+
 export interface ExtractionJobDto {
   id: string;
   dossierEtudeId: string;
@@ -375,17 +430,31 @@ export class DossierEtudeApiService extends FeatureApiService<
     return this.executeTransition(id, 'perdu', body);
   }
 
-  /** L13 — conversion atomique chantier + marché + budget. */
-  convertir(
-    id: string,
-    body: Record<string, unknown> = {},
-  ): Promise<{
-    dossierId: string;
-    chantierId: string;
-    marcheId: string;
-    status: string;
-  }> {
-    return this.executeTransition(id, 'convertir', body);
+  /**
+   * L13 — conversion de l'étude gagnée : chantier `EN_PREPARATION`, son arbre, son budget.
+   * Aucun marché n'en sort (AC-10) : le marché naît à la notification.
+   */
+  async convertir(id: string, body: ConversionRequest = {}): Promise<ConversionResult> {
+    try {
+      return await this.executeTransition<ConversionResult>(
+        id,
+        'convertir',
+        body as unknown as Record<string, unknown>,
+      );
+    } catch (err) {
+      // AC-12 — 422 nommant les postes sans lot d'accueil : rien n'a été créé côté serveur.
+      if (
+        err instanceof HttpErrorResponse &&
+        err.status === 422 &&
+        err.error?.code === 'etudes.dossier.postes_orphelins'
+      ) {
+        throw new PostesOrphelinsError(
+          (err.error.postesOrphelins ?? []) as PosteOrphelin[],
+          (err.error.lotsDisponibles ?? []) as LotDaccueilPossible[],
+        );
+      }
+      throw err;
+    }
   }
 
   listerDocuments(dossierId: string): Promise<DossierDocument[]> {

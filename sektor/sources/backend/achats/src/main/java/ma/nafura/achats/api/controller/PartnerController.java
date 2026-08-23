@@ -30,9 +30,12 @@ public class PartnerController extends PartnerControllerBase {
             @RequestParam PartnerRoleType role,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "20") int size,
-            @RequestParam(value = "sort", required = false) String sort) {
+            @RequestParam(value = "sort", required = false) String sort,
+            @RequestParam(value = "q", required = false) String q,
+            @RequestParam(value = "search", required = false) String search) {
         Sort sortObj = sort != null && !sort.isBlank() ? parseSort(sort) : null;
-        return ResponseEntity.ok(service.listByRole(role, page, size, sortObj));
+        String effectiveQ = q != null && !q.isBlank() ? q : search;
+        return ResponseEntity.ok(service.listByRole(role, page, size, sortObj, effectiveQ));
     }
 
     @GetMapping("/{id}/roles")

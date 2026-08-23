@@ -183,18 +183,12 @@ export class AvancementFacade extends GridFacade<
   override async ensureLookups(): Promise<void> {
     await this.context.ensureBaseData();
     this.lookupsSignal.set({
-      chantiers: this.chantiers().map((chantier) => ({
-        key: chantier.id,
-        value: `${chantier.code} - ${chantier.name}`,
-      })),
+      chantiers: [],
       lots: this.context.getLots().map((lot) => ({
         key: lot.id,
         value: `${lot.code} - ${lot.designation}`,
       })),
-      employees: this.employees().map((employee) => ({
-        key: employee.id,
-        value: employee.name,
-      })),
+      employees: [],
     });
   }
 

@@ -26,6 +26,7 @@ describe('LotChantierImportService', () => {
           chantierId: 'ch-001',
           code: '01',
           designation: request.lots[0]?.designation ?? '',
+          nature: 'INTERNE',
           avancementPercent: 0,
           ordre: 1,
           depth: 0,
@@ -65,10 +66,13 @@ describe('LotChantierImportService', () => {
     const treeArg = lotApi.createTree.calls.argsFor(0)[1];
     expect(treeArg.lots[0]).toEqual(jasmine.objectContaining({
       designation: 'Revêtement sol',
-      postes: [jasmine.objectContaining({ designation: 'Carreaux RDC', montantHt: 100000 })],
+      postes: [jasmine.objectContaining({ designation: 'Carreaux RDC', quantite: 100, unite: 'm²' })],
       children: [jasmine.objectContaining({ designation: 'Revêtement sous-sol' })],
     }));
     expect(JSON.stringify(treeArg)).not.toContain('"code"');
+    // AC-3 / AC-4 — un import manuel produit de l'interne : aucun prix de vente ne part.
+    expect(JSON.stringify(treeArg)).not.toContain('prixUnitaireHt');
+    expect(JSON.stringify(treeArg)).not.toContain('montantHt');
   });
 
   it('keeps the screen context explicit and skips existing roots', async () => {
@@ -77,6 +81,7 @@ describe('LotChantierImportService', () => {
       chantierId: 'ch-001',
       code: '01',
       designation: 'Revêtement sol',
+      nature: 'INTERNE',
       avancementPercent: 0,
       ordre: 1,
     }]);

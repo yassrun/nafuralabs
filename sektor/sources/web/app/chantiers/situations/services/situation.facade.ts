@@ -2,7 +2,6 @@ import { Injectable, LOCALE_ID, computed, inject, signal } from '@angular/core';
 
 import { GridFacade } from '@platform/lib/anatomy';
 import type { LookupContext } from '@platform/lib/anatomy/types';
-import { ErpLookupService, partnerLookupLabel } from '@app/socle/shared/services/erp-lookup.service';
 import type {
   FactureClient,
   LotChantier,
@@ -12,6 +11,7 @@ import type {
   SituationUpdate,
 } from '@app/chantiers/models';
 import { ErpAuditService, AuditAction } from '@app/socle/shell/erp-audit.service';
+import { ChantierApiService } from '@app/chantiers/services/chantier-api.service';
 import { ChantierLotApiService } from '@app/chantiers/services/chantier-lot-api.service';
 
 import { SituationApiService } from './situation-api.service';
@@ -23,7 +23,7 @@ export class SituationFacade extends GridFacade<
   SituationUpdate
 > {
   protected override api = inject(SituationApiService);
-  private readonly erpLookup = inject(ErpLookupService);
+  private readonly chantierApi = inject(ChantierApiService);
   private readonly lotApi = inject(ChantierLotApiService);
   private readonly audit = inject(ErpAuditService);
   private readonly locale = inject(LOCALE_ID);
@@ -33,34 +33,29 @@ export class SituationFacade extends GridFacade<
 
   override async ensureLookups(): Promise<void> {
     if (this.lookupsSignal()['chantiers']) return;
-    const [chantiers, clients, employees] = await Promise.all([
-      this.api.lookupChantiers(),
-      this.erpLookup.partnersByRole('CLIENT'),
-      this.erpLookup.employes('ACTIF'),
-    ]);
     this.lookupsSignal.set({
-      chantiers: chantiers.map((c) => ({
-        key: c.id,
-        value: `${c.code} — ${c.name}`,
-        data: {
-          clientId: c.clientId,
-          clientName: c.clientName,
-          tvaTaux: c.tvaTaux,
-          retenueGarantie: c.cautionGarantie ?? 7,
-          avancePercue: c.avancePercue ?? 0,
-          status: c.status,
-        },
-      })),
-      clients: clients.map((c) => ({
-        key: c.key,
-        value: partnerLookupLabel(c),
-      })),
-      employees: employees.map((e) => ({
-        key: e.key,
-        value: e.value,
-        data: { matricule: (e.data as Record<string, unknown> | undefined)?.['matricule'] },
-      })),
+      chantiers: [],
+      clients: [],
+      employees: [],
     });
+  }
+
+  /** GET chantier by id for TVA / RG prefill — not a collection dump. */
+  async loadChantierPrefill(chantierId: string): Promise<{
+    tvaTaux: number;
+    retenueGarantie: number;
+    avancePercue?: number;
+  } | null> {
+    try {
+      const c = await this.chantierApi.getById(chantierId);
+      return {
+        tvaTaux: c.tvaTaux ?? 20,
+        retenueGarantie: c.cautionGarantie ?? 7,
+        avancePercue: c.avancePercue ?? 0,
+      };
+    } catch {
+      return null;
+    }
   }
 
   /** Bonjour-de-route pour les composants de page : récupère lots du chantier. */

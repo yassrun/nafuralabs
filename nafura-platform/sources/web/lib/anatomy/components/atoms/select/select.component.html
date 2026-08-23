@@ -5,29 +5,90 @@
   </label>
 
   <div class="nf-select-row">
-    <select
-      [id]="id"
-      [value]="value()"
-      [disabled]="disabled"
-      [required]="required"
-      [attr.aria-invalid]="shouldShowError()"
-      [attr.aria-required]="required"
-      [attr.aria-describedby]="shouldShowError() ? id + '-error' : null"
-      class="nf-select-field"
-      (change)="onValueChange($event)"
-      (focus)="onFocus()"
-      (blur)="onBlur()"
-    >
-      <option value="" *ngIf="placeholder" [disabled]="!!value()">{{ placeholder }}</option>
-      <option
-        *ngFor="let option of displayOptions()"
-        [value]="option.value"
-        [disabled]="option.disabled || false"
-        [selected]="option.value === value()"
+    <ng-container *ngIf="isCombobox(); else nativeSelect">
+      <div class="nf-combobox">
+        <input
+          [id]="id"
+          type="text"
+          role="combobox"
+          autocomplete="off"
+          [attr.aria-expanded]="comboOpen()"
+          [attr.aria-controls]="id + '-list'"
+          [attr.aria-activedescendant]="comboOpen() && comboHits()[comboActive()] ? id + '-opt-' + comboActive() : null"
+          [attr.aria-invalid]="shouldShowError()"
+          [attr.aria-required]="required"
+          [attr.aria-describedby]="shouldShowError() ? id + '-error' : null"
+          class="nf-select-field nf-combobox__input"
+          [value]="comboInputValue()"
+          [placeholder]="comboPlaceholder()"
+          [disabled]="disabled"
+          (focus)="onComboFocus()"
+          (input)="onComboInput($event)"
+          (keydown)="onComboKeydown($event)"
+          (blur)="onComboBlur()"
+        />
+        <ul
+          *ngIf="comboOpen()"
+          [id]="id + '-list'"
+          role="listbox"
+          class="nf-combobox__list"
+        >
+          <li *ngIf="comboEmptyHint()" class="nf-combobox__hint" role="presentation">
+            Taper au moins 2 caractères
+          </li>
+          <li *ngIf="comboError()" class="nf-combobox__hint nf-combobox__hint--error" role="alert">
+            {{ comboError() }}
+            <button
+              type="button"
+              class="nf-combobox__retry"
+              (mousedown)="$event.preventDefault(); retryComboSearch()"
+            >
+              Réessayer
+            </button>
+          </li>
+          <li *ngIf="comboNoHits()" class="nf-combobox__hint" role="presentation">
+            Aucun résultat
+          </li>
+          <li
+            *ngFor="let opt of comboHits(); let i = index"
+            [id]="id + '-opt-' + i"
+            role="option"
+            class="nf-combobox__opt"
+            [class.nf-combobox__opt--active]="i === comboActive()"
+            [attr.aria-selected]="i === comboActive()"
+            (mousedown)="$event.preventDefault(); pickCombo(opt)"
+          >
+            {{ opt.label }}
+          </li>
+        </ul>
+      </div>
+    </ng-container>
+
+    <ng-template #nativeSelect>
+      <select
+        [id]="id"
+        [value]="value()"
+        [disabled]="disabled"
+        [required]="required"
+        [attr.aria-invalid]="shouldShowError()"
+        [attr.aria-required]="required"
+        [attr.aria-describedby]="shouldShowError() ? id + '-error' : null"
+        class="nf-select-field"
+        (change)="onValueChange($event)"
+        (focus)="onFocus()"
+        (blur)="onBlur()"
       >
-        {{ option.label }}
-      </option>
-    </select>
+        <option value="" *ngIf="placeholder" [disabled]="!!value()">{{ placeholder }}</option>
+        <option
+          *ngFor="let option of displayOptions()"
+          [value]="option.value"
+          [disabled]="option.disabled || false"
+          [selected]="option.value === value()"
+        >
+          {{ option.label }}
+        </option>
+      </select>
+    </ng-template>
 
     <button
       *ngIf="hasListShortcut()"

@@ -10,11 +10,7 @@
 
 - `chantiers` lot
   - · `arbre-et-conversion` sous-lot
-    - · `SEKTOR-146` spec — CONTRAT — arbre vendu / interne et conversion…
-    - · `SEKTOR-147` tech — Nœud vendu ou interne, avec lien retour vers …
-    - · `SEKTOR-148` feature — Conversion GAGNE — chantier EN_PREPARATION, s…
-    - · `SEKTOR-149` tech — Un seul écran chantier — supprimer le placeho…
-    - · `SEKTOR-150` qa — Preuves — arbre vendu / interne et conversion
+    - ▸ `SEKTOR-150` qa — Preuves — arbre vendu / interne et conversion
   - · `avancement-et-attachement` sous-lot
     - · `SEKTOR-151` spec — CONTRAT — avancement en quantité, une seule v…
     - · `SEKTOR-152` tech — AvancementPhysique — la quantité fait foi, le…
@@ -23,10 +19,8 @@
   - · `budget-et-marge` sous-lot
     - · `SEKTOR-159` feature — Marge et valeur acquise par nœud
     - · `SEKTOR-160` qa — Preuves — marge par lot et valeur acquise
-    - · `SEKTOR-161` spec — CONTRAT — budget par nœud, décomposé du DPU
     - · `SEKTOR-162` feature — Copier le déboursé du DPU sur les nœuds à la …
   - · `frontieres-bc` sous-lot
-    - · `SEKTOR-163` spec — CONTRAT — frontières ST et pilotage
     - · `SEKTOR-164` tech — Contrat de sous-traitance typé côté Achats
     - · `SEKTOR-165` tech — Le pilotage portefeuille remonte au socle
     - · `SEKTOR-166` qa — Preuves — frontières tenues
@@ -35,12 +29,11 @@
     - · `SEKTOR-156` feature — La situation se monte depuis les attachements…
     - · `SEKTOR-157` feature — Pénalités de retard et RAS dans les retenues
     - · `SEKTOR-158` qa — Preuves — décompte cumulatif jusqu'à la facture
-- `etudes` lot
-  - · `picker-article` sous-lot
-    - ◐ `SEKTOR-142` feature — API recherche items serveur
-    - ◐ `SEKTOR-143` feature — Picker article partagé et branchement DPU
-    - ◐ `SEKTOR-144` feature — Picker stock et lookups items
-    - · `SEKTOR-145` qa — Preuves picker article partagé
+- `lookups` lot
+  - ▸ `SEKTOR-169` feature — Combobox anatomy et œil fiche
+  - ▸ `SEKTOR-170` feature — Client et fournisseur sur les écrans
+  - ◐ `SEKTOR-171` feature — Reste lookupKeys et filtres listing
+  - ✕ `SEKTOR-172` qa — Preuves lookup combobox
 
 ## raster
 
@@ -57,4 +50,4 @@
 
 ---
 
-**31 live · 2 projets**
+**25 live · 2 projets**

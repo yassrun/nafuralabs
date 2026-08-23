@@ -25,7 +25,7 @@ import {
 } from '@platform/lib/anatomy';
 
 import type { Chantier, ChantierStatus } from '@app/chantiers/models';
-import { ErpLookupService } from '@app/socle/shared/services/erp-lookup.service';
+import { ErpLookupService, partnerSelectOptions } from '@app/socle/shared/services/erp-lookup.service';
 import { ErpAuditService } from '@app/socle/shell/erp-audit.service';
 import { ChantierApiService } from '../services/chantier-api.service';
 
@@ -112,6 +112,8 @@ interface ClientOption {
                 [required]="true"
                 lookupKey="clients"
                 [listShortcut]="{ label: ('chantiers.chantier.edit.viewClients' | translate) }"
+                [lookupSearch]="searchClients"
+                [selectedLabel]="draft.clientName"
               />
               <div class="field">
                 <label for="ce-mref">{{ 'chantiers.chantier.edit.fields.marcheRef' | translate }}</label>
@@ -280,7 +282,6 @@ export class ChantierEditPage {
   }));
 
   constructor() {
-    void this.loadClients();
     effect(() => {
       const id = this.paramId();
       if (!id) {
@@ -292,8 +293,15 @@ export class ChantierEditPage {
     });
   }
 
-  private async loadClients(): Promise<void> {
-    const clients = await this.erpLookup.partnersByRole('CLIENT');
+  searchClients = (q: string) =>
+    this.erpLookup.partnersByRole('CLIENT', q).then((items) => {
+      this.setClients(items);
+      return partnerSelectOptions(items);
+    });
+
+  private setClients(
+    clients: Awaited<ReturnType<ErpLookupService['partnersByRole']>>,
+  ): void {
     this._clients.set(
       clients.map((c) => ({
         id: String(c.key),
@@ -324,6 +332,13 @@ export class ChantierEditPage {
     this.draft.status = c.status;
     this.draft.clientId = c.clientId ?? '';
     this.draft.clientName = c.clientName ?? '';
+    if (this.draft.clientId) {
+      this._clients.set([
+        { id: this.draft.clientId, code: '', name: this.draft.clientName },
+      ]);
+    } else {
+      this._clients.set([]);
+    }
     this.draft.marcheReference = c.marcheReference ?? '';
     this.draft.adresse = c.adresse ?? '';
     this.draft.ville = c.ville;

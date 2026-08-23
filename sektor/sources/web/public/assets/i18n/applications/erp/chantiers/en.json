@@ -241,6 +241,12 @@
           "promptPrixUnitaireHt": "Unit price excl. VAT (MAD)",
           "technicalCodeHint": "Technical code generated automatically — not editable.",
           "groupHint": "A lot (or sub-lot) is a grouping: its amount is computed from its work packages. Add work packages afterwards to set quantities and prices.",
+          "interneHint": "Internal line: it carries a quantity and a cost, never a selling price, and never enters a progress statement.",
+          "natureColumn": "Nature",
+          "natureVendu": "Sold",
+          "natureInterne": "Internal",
+          "origineAction": "Open the source quote line",
+          "origineIntrouvable": "The source quote line could not be found.",
           "totalLabel": "Total contract excl. VAT",
           "collapseLot": "Collapse lot",
           "expandLot": "Expand lot",
@@ -509,9 +515,6 @@
         "debut": "Start",
         "quantite": "Quantity",
         "dependances": "Dependencies"
-      },
-      "placeholder": {
-        "backToPlanning": "Back to schedule"
       }
     },
     "situation": {

@@ -1,6 +1,7 @@
 package ma.nafura.chantiers.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
@@ -18,6 +19,7 @@ import ma.nafura.chantiers.api.request.ChantierLotTreePosteCreateDto;
 import ma.nafura.chantiers.api.request.ChantierLotTreeRequestDto;
 import ma.nafura.chantiers.api.request.PosteBudgetaireCreateDto;
 import ma.nafura.chantiers.domain.chantier.ChantierLot;
+import ma.nafura.chantiers.domain.chantier.NatureLigne;
 import ma.nafura.chantiers.domain.budget.PosteBudgetaire;
 import ma.nafura.chantiers.repository.ChantierLotRepository;
 import ma.nafura.chantiers.repository.PosteBudgetaireRepository;
@@ -158,11 +160,12 @@ class ChantierLotServiceTest {
                     .build();
         });
 
+        // Import d'arbre = saisie : le poste est interne (AC-3) et ne porte pas de prix de
+        // vente (AC-4).
         ChantierLotTreePosteCreateDto poste = new ChantierLotTreePosteCreateDto();
         poste.setDesignation("Porte bois");
         poste.setUnite("U");
         poste.setQuantite(BigDecimal.ONE);
-        poste.setPrixUnitaireHt(new BigDecimal("1000"));
 
         ChantierLotTreeNodeCreateDto l3 = new ChantierLotTreeNodeCreateDto();
         l3.setDesignation("Cadres");
@@ -238,6 +241,101 @@ class ChantierLotServiceTest {
         assertThrows(IllegalArgumentException.class, () -> service.createTree(CHANTIER_ID, treeRequest));
     }
 
+    /** AC-3 — la saisie ne produit que de l'interne, AC-1 la nature est toujours posee. */
+    @Test
+    void saisieProduitUnLotInterneSansOrigine() {
+        ChantierLot created = service.create(CHANTIER_ID, request("Installation de chantier", null));
+
+        assertEquals(NatureLigne.INTERNE, created.getNature());
+        assertNull(created.getDpgfNoeudId());
+        assertNull(created.getPrixUnitaireHt());
+        assertNull(created.getMontantHt());
+    }
+
+    /** AC-3 — une demande explicite de vendu est refusee, pas convertie en silence. */
+    @Test
+    void saisieRefuseUnVenduDemandeExplicitement() {
+        ChantierLotCreateDto request = request("Faux vendu", null);
+        request.setNature("VENDU");
+
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class, () -> service.create(CHANTIER_ID, request));
+        assertEquals("chantiers.arbre.vendu_par_saisie_refuse", ex.getMessage());
+    }
+
+    /** AC-4 — un montant vendu pose sur une ligne interne est refuse. */
+    @Test
+    void saisieRefuseUnPrixDeVente() {
+        ChantierLotCreateDto request = request("Base vie", null);
+        request.setMontantHt(new BigDecimal("50000"));
+
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class, () -> service.create(CHANTIER_ID, request));
+        assertEquals("chantiers.arbre.interne_sans_prix_de_vente", ex.getMessage());
+    }
+
+    /** AC-2, AC-3 — la copie est le seul producteur de vendu, et elle pose le lien retour. */
+    @Test
+    void copieProduitUnLotVenduAvecSonOrigine() {
+        UUID origine = UUID.fromString("00000000-0000-4000-8000-0000000000cc");
+        ChantierLotCreateDto request = request("Gros oeuvre", null);
+        request.setQuantite(new BigDecimal("2"));
+        request.setPrixUnitaireHt(new BigDecimal("2500"));
+
+        ChantierLot created = service.copierLotVendu(CHANTIER_ID, request, origine);
+
+        assertEquals(NatureLigne.VENDU, created.getNature());
+        assertEquals(origine, created.getDpgfNoeudId());
+        assertEquals(new BigDecimal("2500"), created.getPrixUnitaireHt());
+        assertEquals(0, new BigDecimal("5000").compareTo(created.getMontantHt()));
+    }
+
+    /** AC-2 — un vendu sans origine n'existe pas. */
+    @Test
+    void copieRefuseUnVenduSansOrigine() {
+        ChantierLotCreateDto request = request("Gros oeuvre", null);
+
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> service.copierLotVendu(CHANTIER_ID, request, null));
+        assertEquals("chantiers.arbre.vendu_sans_origine", ex.getMessage());
+    }
+
+    /** AC-1 — la nature et l'origine sont rendues par l'endpoint de lecture de l'arbre. */
+    @Test
+    void arbreRendLaNatureDeChaqueLigne() {
+        when(posteBudgetaireService.create(any(), any())).thenAnswer(invocation -> {
+            String lotId = invocation.getArgument(0);
+            PosteBudgetaireCreateDto dto = invocation.getArgument(1);
+            return PosteBudgetaire.builder()
+                    .id(lotId + "-poste-1")
+                    .tenantId(TENANT_ID)
+                    .lotId(lotId)
+                    .code("01")
+                    .designation(dto.getDesignation())
+                    .nature(NatureLigne.INTERNE)
+                    .ordre(1)
+                    .build();
+        });
+
+        ChantierLotTreePosteCreateDto poste = new ChantierLotTreePosteCreateDto();
+        poste.setDesignation("Base vie");
+
+        ChantierLotTreeNodeCreateDto l1 = new ChantierLotTreeNodeCreateDto();
+        l1.setDesignation("Installation");
+        l1.setPostes(List.of(poste));
+
+        ChantierLotTreeRequestDto treeRequest = new ChantierLotTreeRequestDto();
+        treeRequest.setLots(List.of(l1));
+
+        ChantierLotTreeResponseDto response = service.createTree(CHANTIER_ID, treeRequest);
+
+        assertEquals(NatureLigne.INTERNE, response.getLots().get(0).getNature());
+        assertNull(response.getLots().get(0).getDpgfNoeudId());
+        assertEquals(
+                NatureLigne.INTERNE, response.getLots().get(0).getPostes().get(0).getNature());
+    }
+
     private static ChantierLotCreateDto request(String designation, String code) {
         ChantierLotCreateDto request = new ChantierLotCreateDto();
         request.setDesignation(designation);
@@ -253,6 +351,7 @@ class ChantierLotServiceTest {
                 .code(code)
                 .designation(code)
                 .parentLotId(parentLotId)
+                .nature(NatureLigne.INTERNE)
                 .ordre(ordre)
                 .build();
     }

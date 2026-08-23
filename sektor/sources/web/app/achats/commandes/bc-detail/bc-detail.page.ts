@@ -122,6 +122,7 @@ export class BcDetailPage extends ConfigDrivenDetailPage<BonCommande> {
         this.receptions.set([]);
         return;
       }
+      this.crud.ensureFournisseurLookup(bc);
       sub = matchingSvc.loadMatchingForBc(bc.id).subscribe((m) => this.matchSummary.set(m));
       void this.loadReceptions(bc.id);
     });

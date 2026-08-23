@@ -2,6 +2,8 @@ package ma.nafura.chantiers.domain.budget;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
@@ -13,6 +15,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ma.nafura.chantiers.domain.chantier.NatureLigne;
 
 @Entity
 @Table(name = "postes_budgetaires")
@@ -37,6 +40,15 @@ public class PosteBudgetaire {
 
     @Column(nullable = false, length = 500)
     private String designation;
+
+    /** VENDU (copié du devis validé) ou INTERNE (ajouté au chantier). Jamais nul. */
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private NatureLigne nature;
+
+    /** Lien retour vers le nœud DPGF d'origine — posé à la copie, jamais réécrit. VENDU seulement. */
+    @Column(name = "dpgf_noeud_id")
+    private UUID dpgfNoeudId;
 
     @Column(length = 30)
     private String unite;
@@ -66,6 +78,9 @@ public class PosteBudgetaire {
             createdAt = now;
         }
         updatedAt = now;
+        if (nature == null) {
+            nature = NatureLigne.DEFAUT_SAISIE;
+        }
     }
 
     @PreUpdate

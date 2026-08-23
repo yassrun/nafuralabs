@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 import ma.nafura.etudes.api.dto.DpgfLotTotalDto;
+import ma.nafura.etudes.api.dto.PosteOrigineDto;
 import ma.nafura.etudes.api.request.DpgfNoeudCreateDto;
 import ma.nafura.etudes.domain.dpgf.Dpgf;
 import ma.nafura.etudes.domain.dpgf.DpgfNoeud;
@@ -41,6 +42,16 @@ public class DpgfController {
     @RequirePermission("etudes.read")
     public ResponseEntity<Dpgf> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(service.getById(id));
+    }
+
+    /**
+     * AC-2 / AC-16 — le poste du devis d'origine d'une ligne vendue du chantier. L'écran chantier
+     * ne connaît que l'identifiant du nœud ; il vient ici chercher de quoi ouvrir l'étude.
+     */
+    @GetMapping("/noeuds/{noeudId}/origine")
+    @RequirePermission("etudes.read")
+    public ResponseEntity<PosteOrigineDto> origineDuPoste(@PathVariable UUID noeudId) {
+        return ResponseEntity.ok(service.origineDuPoste(noeudId));
     }
 
     @GetMapping("/{id}/arbre")

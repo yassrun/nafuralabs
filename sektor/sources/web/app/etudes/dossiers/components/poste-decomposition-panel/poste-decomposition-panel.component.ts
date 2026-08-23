@@ -21,7 +21,7 @@ import { ButtonComponent, ConfirmDialogService, ToastService } from '@platform/l
 import { MadCurrencyPipe } from '@platform/lib/anatomy/pipes/mad-currency.pipe';
 import { safeRandomUUID } from '@platform/core/util/uuid';
 
-import type { ComposantDPU, DpuComposantType, PrixDPU, SourcePrixComposant } from '@app/etudes/models';
+import type { ComposantDPU, PrixDPU, SourcePrixComposant } from '@app/etudes/models';
 import { DpuService } from '@app/etudes/services/dpu.service';
 import {
   composantLibelle,
@@ -57,7 +57,6 @@ import {
   CatalogItemPickDialogComponent,
   type CatalogItemPickDialogResult,
 } from '../catalog-item-pick-dialog/catalog-item-pick-dialog.component';
-import { dpuTypeToNature } from '@app/catalogue/components/article-picker/article-picker.component';
 import {
   CreateMissingItemDialogComponent,
   type CreateMissingItemDialogResult,
@@ -911,7 +910,7 @@ export class PosteDecompositionPanelComponent {
     this.markDpuDirty();
   }
 
-  async ajouterDepuisCatalogue(ligneType?: DpuComposantType): Promise<void> {
+  async ajouterDepuisCatalogue(): Promise<void> {
     if (!this.canMutate()) return;
     if (!this.estDecompose()) {
       const ok = await this.passerEnDecomposition({ skipConfirm: true });
@@ -926,7 +925,6 @@ export class PosteDecompositionPanelComponent {
           data: {
             uniteOptions: this.uniteOptions(),
             context: 'dpu',
-            presetNature: dpuTypeToNature(ligneType),
           },
         })
         .afterClosed(),

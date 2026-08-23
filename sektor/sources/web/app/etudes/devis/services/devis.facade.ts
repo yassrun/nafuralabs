@@ -12,15 +12,10 @@ import type {
 import { ApiConfigService } from '@platform/core/config/api-config.service';
 
 import { DevisApiService } from './devis-api.service';
-import {
-  ErpLookupService,
-  partnerLookupLabel,
-} from '@app/socle/shared/services/erp-lookup.service';
 
 @Injectable({ providedIn: 'root' })
 export class DevisFacade extends GridFacade<Devis, DevisCreate, DevisUpdate> {
   protected override api = inject(DevisApiService);
-  private readonly erpLookup = inject(ErpLookupService);
   private readonly http = inject(HttpClient);
   private readonly apiConfig = inject(ApiConfigService);
 
@@ -28,26 +23,9 @@ export class DevisFacade extends GridFacade<Devis, DevisCreate, DevisUpdate> {
   override readonly lookups = computed(() => this.lookupsSignal());
 
   override async ensureLookups(): Promise<void> {
-    if (this.lookupsSignal()['clients']) return;
-    const [{ items: devis }, partners] = await Promise.all([
-      this.api.getAll({ page: 0, pageSize: 500 }),
-      this.erpLookup.partnersByRole('CLIENT'),
-    ]);
-    const clientMap = new Map<string, LookupItem>();
-    for (const p of partners) {
-      const label = partnerLookupLabel(p);
-      const id = String(p.key);
-      clientMap.set(id, { key: id, value: label });
-    }
-    for (const d of devis) {
-      if (!d.clientId || clientMap.has(d.clientId)) continue;
-      clientMap.set(d.clientId, {
-        key: d.clientId,
-        value: d.clientName ? `${d.clientName}` : d.clientId,
-      });
-    }
+    if (this.lookupsSignal()['clients'] !== undefined) return;
     this.lookupsSignal.set({
-      clients: [...clientMap.values()],
+      clients: [],
       partnerContacts: this.lookupsSignal()['partnerContacts'] ?? [],
     });
   }

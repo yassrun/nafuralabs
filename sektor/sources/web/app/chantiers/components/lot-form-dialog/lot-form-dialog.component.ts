@@ -5,7 +5,7 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { TranslateModule } from '@ngx-translate/core';
 
 import { ButtonComponent, NfInputComponent } from '@platform/lib/anatomy';
-import type { LotChantier } from '@app/chantiers/models';
+import type { LotChantier, NatureLigne } from '@app/chantiers/models';
 import { BPU_UNITS } from '../../constants/bpu-units';
 import { lotDepth, MAX_LOT_DEPTH } from '../../utils/lot-hierarchy.util';
 
@@ -17,6 +17,11 @@ export interface LotFormDialogData {
   defaultParentLotId?: string;
   defaultTargetLotId?: string;
   isEdit?: boolean;
+  /**
+   * Nature de la ligne editee. Absente en creation : la saisie ne produit que de l'interne (AC-3),
+   * et un interne ne porte pas de prix de vente (AC-4) — le champ prix n'est alors pas offert.
+   */
+  nature?: NatureLigne;
   initial?: {
     code?: string;
     designation?: string;
@@ -33,6 +38,7 @@ export interface LotFormDialogResult {
   designation: string;
   quantite?: number;
   unite?: string;
+  /** Renseigne uniquement quand la ligne editee est vendue (AC-4). */
   prixUnitaireHt?: number;
   parentLotId?: string;
   targetLotId?: string;
@@ -109,13 +115,17 @@ export interface LotFormDialogResult {
           </label>
         </div>
 
-        <nf-input
-          [label]="'chantiers.chantier.detail.lots.promptPrixUnitaireHt' | translate"
-          type="number"
-          [ngModel]="prixUnitaireHt()"
-          (ngModelChange)="prixUnitaireHt.set($event)"
-          required>
-        </nf-input>
+        @if (showPrixVente()) {
+          <nf-input
+            [label]="'chantiers.chantier.detail.lots.promptPrixUnitaireHt' | translate"
+            type="number"
+            [ngModel]="prixUnitaireHt()"
+            (ngModelChange)="prixUnitaireHt.set($event)"
+            required>
+          </nf-input>
+        } @else {
+          <p class="form-hint">{{ 'chantiers.chantier.detail.lots.interneHint' | translate }}</p>
+        }
       } @else {
         <p class="form-hint">{{ 'chantiers.chantier.detail.lots.groupHint' | translate }}</p>
       }
@@ -155,6 +165,11 @@ export class LotFormDialogComponent {
   readonly unite = signal<string>(this.data.initial?.unite ?? 'U');
   readonly prixUnitaireHt = signal(this.data.initial?.prixUnitaireHt != null ? String(this.data.initial.prixUnitaireHt) : '');
   readonly parentLotId = signal(this.data.defaultParentLotId ?? '');
+  /**
+   * AC-4 — seule une ligne deja vendue affiche et renvoie un prix de vente. Toute creation par
+   * saisie produit un interne (AC-3) : pas de champ prix, donc rien a refuser cote serveur.
+   */
+  readonly showPrixVente = signal(this.data.nature === 'VENDU');
   readonly targetLotId = signal(this.data.defaultTargetLotId ?? '');
 
   private readonly lotsById = computed(() => {
@@ -213,8 +228,11 @@ export class LotFormDialogComponent {
       if (!this.data.isEdit && !this.targetLotId()) return false;
       if (!this.unite().trim()) return false;
       const q = this.parseNumber(this.quantite());
-      const pu = this.parseNumber(this.prixUnitaireHt());
-      if (!Number.isFinite(q) || q <= 0 || !Number.isFinite(pu) || pu < 0) return false;
+      if (!Number.isFinite(q) || q <= 0) return false;
+      if (this.showPrixVente()) {
+        const pu = this.parseNumber(this.prixUnitaireHt());
+        if (!Number.isFinite(pu) || pu < 0) return false;
+      }
     }
 
     return true;
@@ -230,7 +248,8 @@ export class LotFormDialogComponent {
       designation: this.designation().trim(),
       quantite: isPoste ? this.parseNumber(this.quantite()) : undefined,
       unite: isPoste ? this.unite().trim() : undefined,
-      prixUnitaireHt: isPoste ? this.parseNumber(this.prixUnitaireHt()) : undefined,
+      prixUnitaireHt:
+        isPoste && this.showPrixVente() ? this.parseNumber(this.prixUnitaireHt()) : undefined,
       parentLotId: this.data.mode === 'sousLot' ? this.parentLotId() : undefined,
       targetLotId: isPoste ? this.targetLotId() : undefined,
     });

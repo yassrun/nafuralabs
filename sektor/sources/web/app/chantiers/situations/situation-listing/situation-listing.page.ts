@@ -8,6 +8,9 @@ import {
   ConfigDrivenListingPage,
   ConfigDrivenListingPageImports,
   ConfigDrivenListingPageStyles,
+  LOOKUP_SEARCHERS,
+  NfSelectComponent,
+  type LookupSearchFn,
 } from '@platform/lib/anatomy';
 
 import type { Situation } from '@app/chantiers/models';
@@ -32,7 +35,7 @@ interface QuickFilterChip {
 @Component({
   selector: 'app-situation-listing',
   standalone: true,
-  imports: [FormsModule, ButtonComponent, ...ConfigDrivenListingPageImports],
+  imports: [FormsModule, ButtonComponent, NfSelectComponent, ...ConfigDrivenListingPageImports],
   templateUrl: './situation-listing.page.html',
   styleUrls: ['./situation-listing.page.scss'],
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -41,6 +44,7 @@ interface QuickFilterChip {
 export class SituationListingPage extends ConfigDrivenListingPage<Situation> {
   readonly facade = inject(SituationFacade);
   private readonly translate = inject(TranslateService);
+  private readonly lookupSearchers = inject(LOOKUP_SEARCHERS, { optional: true });
   readonly config = buildSituationsListingConfig(this.translate);
   readonly headerTitle = this.translate.instant('chantiers.situation.title');
 
@@ -57,9 +61,8 @@ export class SituationListingPage extends ConfigDrivenListingPage<Situation> {
   ];
 
   readonly currentChip = computed(() => this.quickFilter());
-  readonly chantierOptions = computed(
-    () => (this.facade.lookups()?.['chantiers'] ?? []) as { key: string; value: string }[],
-  );
+  readonly searchChantiers: LookupSearchFn = (q) =>
+    this.lookupSearchers?.['chantiers']?.(q) ?? Promise.resolve([]);
 
   selectChip(id: QuickFilter): void {
     this.quickFilter.set(id);

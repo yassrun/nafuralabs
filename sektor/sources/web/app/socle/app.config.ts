@@ -117,7 +117,10 @@ import { NotificationStreamService } from '@platform/app/notification/services/n
 import { NotificationUnreadService } from '@platform/app/notification/services/notification-unread.service';
 import { CHANTIER_ROW_NAVIGATOR } from '@platform/lib/anatomy/tokens/chantier-row-navigator.token';
 import { LOOKUP_LIST_ROUTES } from '@platform/lib/anatomy/tokens/lookup-list-routes.token';
+import { LOOKUP_SEARCHERS } from '@platform/lib/anatomy/tokens/lookup-searchers.token';
 import { ERP_LOOKUP_LIST_ROUTES } from '@app/socle/shared/config/erp-lookup-list-routes';
+import { ErpLookupService } from '@app/socle/shared/services/erp-lookup.service';
+import { buildErpLookupSearchers } from '@app/socle/shared/services/erp-lookup-searchers';
 import { environment } from '../../src/environments/environment';
 import { TranslateMessageFormatCompiler } from 'ngx-translate-messageformat-compiler';
 import {
@@ -321,6 +324,11 @@ export const appConfig: ApplicationConfig = {
     {
       provide: LOOKUP_LIST_ROUTES,
       useValue: ERP_LOOKUP_LIST_ROUTES,
+    },
+    {
+      provide: LOOKUP_SEARCHERS,
+      useFactory: (erp: ErpLookupService) => buildErpLookupSearchers(erp),
+      deps: [ErpLookupService],
     },
 
     {

@@ -241,6 +241,12 @@
           "promptPrixUnitaireHt": "سعر الوحدة بدون ضريبة (MAD)",
           "technicalCodeHint": "رمز تقني يُنشأ تلقائيًا — غير قابل للتعديل.",
           "groupHint": "الدفعة (أو الدفعة الفرعية) هي تجميع: يُحتسب مبلغها من بنودها. أضف البنود لاحقًا لإدخال الكميات والأسعار.",
+          "interneHint": "بند داخلي: يحمل كمية وتكلفة دون سعر بيع، ولا يدخل في كشف الأشغال.",
+          "natureColumn": "الطبيعة",
+          "natureVendu": "مباع",
+          "natureInterne": "داخلي",
+          "origineAction": "عرض بند العرض الأصلي",
+          "origineIntrouvable": "تعذر العثور على بند العرض الأصلي.",
           "totalLabel": "إجمالي الصفقة بدون ضريبة",
           "collapseLot": "طي الدفعة",
           "expandLot": "توسيع الدفعة",
@@ -509,9 +515,6 @@
         "debut": "البداية",
         "quantite": "الكمية",
         "dependances": "التبعيات"
-      },
-      "placeholder": {
-        "backToPlanning": "الرجوع إلى التخطيط"
       }
     },
     "situation": {

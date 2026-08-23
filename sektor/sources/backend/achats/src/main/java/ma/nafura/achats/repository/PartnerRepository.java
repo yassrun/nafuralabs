@@ -25,4 +25,32 @@ public interface PartnerRepository extends TenantScopedRepository<Partner, UUID>
             @Param("tenantId") UUID tenantId,
             @Param("role") PartnerRoleType role,
             Pageable pageable);
+
+    @Query(
+            value =
+                    """
+                    SELECT DISTINCT p FROM Partner p
+                    JOIN PartnerRole pr ON pr.partnerId = p.id AND pr.tenantId = p.tenantId
+                    WHERE p.tenantId = :tenantId AND pr.role = :role
+                      AND (
+                        LOWER(p.code) LIKE LOWER(CONCAT('%', :q, '%'))
+                        OR LOWER(p.raisonSociale) LIKE LOWER(CONCAT('%', :q, '%'))
+                      )
+                    ORDER BY CASE WHEN LOWER(p.code) = LOWER(:q) THEN 0 ELSE 1 END, p.raisonSociale
+                    """,
+            countQuery =
+                    """
+                    SELECT COUNT(DISTINCT p) FROM Partner p
+                    JOIN PartnerRole pr ON pr.partnerId = p.id AND pr.tenantId = p.tenantId
+                    WHERE p.tenantId = :tenantId AND pr.role = :role
+                      AND (
+                        LOWER(p.code) LIKE LOWER(CONCAT('%', :q, '%'))
+                        OR LOWER(p.raisonSociale) LIKE LOWER(CONCAT('%', :q, '%'))
+                      )
+                    """)
+    Page<Partner> findByTenantIdAndRoleAndQuery(
+            @Param("tenantId") UUID tenantId,
+            @Param("role") PartnerRoleType role,
+            @Param("q") String q,
+            Pageable pageable);
 }

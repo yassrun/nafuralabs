@@ -80,6 +80,12 @@ function assertChromeOverlay139() {
   if (!/articleCourant|articleCle|preselectedCles/.test(src)) {
     throw new Error('create : article courant pas posé');
   }
+  if (!/statutLabel/.test(src)) {
+    throw new Error('VU ROUGE : statut absent des lignes overlay');
+  }
+  if (!/data-cs-fiche|Voir la fiche/.test(src)) {
+    throw new Error('VU ROUGE : lien fiche (œil) absent');
+  }
 }
 
 async function createItem(h, name, cleStable) {
@@ -183,6 +189,12 @@ async function proveBrowserOverlay(
     }
     if (!text.includes(numeroDedans) || !text.includes(numeroPasEncore)) {
       throw new Error(`browser : liées de cette étude absentes — ${text.slice(0, 400)}`);
+    }
+    if ((await overlay.locator('[data-cs-fiche]').count()) < 1) {
+      throw new Error('browser : œil fiche absent');
+    }
+    if ((await overlay.locator('[data-cs-statut]').count()) < 1) {
+      throw new Error('browser : statut absent');
     }
     if (/Identités de la décompo|Ajouter à une consultation/.test(text) && /Créer une consultation/.test(text)) {
       throw new Error(`VU ROUGE browser : deux CTA + cases encore côte à côte — ${text.slice(0, 400)}`);

@@ -7,7 +7,7 @@
 >
 > Comment continuer : ajouter une entrée datée sous **Gelé** ou **Ouvert**. Une fois gelé, on ne rejoue pas le débat dans le chat — on amende ce fichier.
 
-Dernière passe : 23/08/2026 (picker article partagé — pas de dump, filtres serveur, 3 pieds).
+Dernière passe : 23/08/2026 (lookup combobox partagé — pas un picker ; œil fiche si id).
 
 ---
 
@@ -37,7 +37,7 @@ Ordre voulu. Ce qui n’est pas dans cette liste n’est pas le flux.
 4. **Trancher chaque proposition de création, pendant le chiffrage** :
    - **Créer l’article** → d’abord s’assurer (IA) que l’identité n’existe **pas déjà** sur Sektor. Si elle y est → Item tenant lié seulement. Si absente → **PUBLIER** Sektor, puis Item. Puis tarif, lien DPU.
    - **Ajouter au poste seulement** → composant manuel, one-shot, pas d’article.
-   - **Depuis le catalogue** → picker explicite d’un article déjà là.
+   - **Ajouter depuis le catalogue** → picker explicite d’un article déjà là (CTA en tête du panneau, pas sur la ligne).
 5. **Ajuster** rendements / PU / sous-détail, **enregistrer le DPU**.
 6. **Chiffrer le poste** (coût → PV / marge). Le poste reste une ligne d’étude.
 7. Répéter 1–6 sur les autres postes.
@@ -64,7 +64,7 @@ Interdit dans ce cycle :
 
 - Pas une recherche catalogue d’abord. IA (libellé + descriptif **sauvé** + extraits CPS) puis **normalisation d’identité**.
 - « Voir le descriptif CPS » = viewer, ne copie pas dans le textarea.
-- « Depuis le catalogue » = picker explicite, pas le chemin Extraire.
+- « Ajouter depuis le catalogue » = picker explicite en tête du panneau, pas le chemin Extraire, pas un swap de ligne.
 
 ### UI bordereau
 
@@ -176,7 +176,7 @@ Cycle consultation : **demande** → **devis reçu**. Le devis se **importe** (f
 
 Pas un formulaire « fournisseur + cases + deux CTA ». Clic sur un article / composant → **d’abord la liste** des consultations **déjà liées à cette étude**.
 
-1. Chaque ligne : n° · fournisseur · ce composant **déjà dans le panier ou pas**.
+1. Chaque ligne : n° · fournisseur · **statut** · ce composant **déjà dans le panier ou pas** · **œil** vers la fiche Achats (`/achats/consultations/:id`, nouvel onglet, même geste que le nf-select).
 2. Clic une consultation → **ses articles** (panier), pas un dropdown.
 3. S’il n’est pas dedans → l’ajouter à celle-là.
 4. **Créer** seulement si aucune ne convient (fournisseur + l’article courant, pas tout l’arbre à cocher).
@@ -230,7 +230,7 @@ Ne pas dupliquer `etude-decompo-wireframe` ni `articles-fiche-wireframe`.
 
 ### Ouverture
 
-Aucun GET catalogue tant qu’il n’y a pas **≥ 2 caractères** **ou** un filtre posé (nature, famille, lot d’usage). Prompt de saisie, pas une liste.
+Aucun GET catalogue tant qu’il n’y a pas **≥ 2 caractères** **ou** un filtre posé (nature, famille, lot d’usage). Prompt de saisie, pas une liste. Ouverture DPU = header, **sans** chip nature pré-rempli ; un chip posé par l’humain déclenche.
 
 ### Recherche
 
@@ -252,7 +252,7 @@ Pagination / scroll — **pas** un plafond 40.
 
 | Contexte | Rendu |
 |----------|--------|
-| DPU / étude | article + qty + PU tarif → **Ajouter au poste**. Nature **pré-remplie** si ouverture depuis une ligne matière / MO / matériel / ST. |
+| DPU / étude | article + qty + PU tarif → **Ajouter au poste**. Ouverture **header** seulement (« Ajouter depuis le catalogue ») — pas de CTA ligne, pas de nature pré-remplie. |
 | Réception / retour / transfert | article seul ; natures **stockables** (MATIERE, CONSOMMABLE, CARBURANT, OUTILLAGE). |
 | Tarif / solde / lookup `items` | article seul. |
 
@@ -266,6 +266,43 @@ Pagination / scroll — **pas** un plafond 40.
 ### Hors v1
 
 SKU / `cleStable` dans la barre · filtre fournisseur · filtre unité · listing articles encore filtré client.
+
+---
+
+## Gelé (23/08/2026) — lookup combobox
+
+**Casse le dump actuel** (selects client / fournisseur / chantier qui chargent 200–500 partenaires ; `searchable` = filtre local ; œil = toujours la liste).
+
+Ancrage QA : [`lots/lookups/CONTRAT.md`](lots/lookups/CONTRAT.md) (`AC-1`…`AC-14`).
+Canvas : [`lots/lookups/ux/lookup-combobox-wireframe.canvas.tsx`](lots/lookups/ux/lookup-combobox-wireframe.canvas.tsx).
+Ne pas recoller le picker article ici.
+
+### Trois gestes
+
+| Cas | Contrôle |
+|-----|----------|
+| Enum fermé | select natif, **pas** d’œil |
+| FK métier (client, fournisseur, chantier, employé…) | **combobox** inline, recherche serveur ≥ 2 car. |
+| Article | **picker** overlay — déjà gelé, hors de ce lot |
+
+### Œil
+
+| Champ | Clic œil |
+|-------|----------|
+| Valeur posée + route fiche | nouvel onglet **fiche** `/{ressource}/{id}` |
+| Vide + route liste | nouvel onglet **liste** (comportement actuel) |
+| Pas de route / enum | pas d’œil |
+
+### Interdit
+
+- Dump `pageSize: 500` à l’ouverture d’un FK.
+- Picker overlay pour un client / fournisseur.
+- CTA Créer dans le combobox v1.
+- Re-discuter le picker article.
+
+### Hors v1
+
+CTA + / créer depuis le champ · ICE comme axe dédié · `partnerContacts` · `nf-form` custom sans `lookupKey`.
 
 ---
 
@@ -315,6 +352,7 @@ Cocher / amender ici, ne pas re-débattre à l’aveugle.
 - [x] Consultation obligatoire : **tranché 20/08, inchangé** — min **N devis reçus**. On n’oblige pas 100 % des articles décomposés.
 - [x] Devis reçu : **tranché 22/08** — on **importe** le fichier ; Import magique **extrait** les lignes. Fichier sans extraction n’identifie pas / ne flague pas.
 - [x] Picker article : **tranché 23/08** — composant **partagé** (pas un dialog études). Pas de dump à l’ouverture. Recherche code + désignation. Filtres serveur nature / famille / lot d’usage. 3 pieds (DPU, stock, lookup). Extraire reste le chemin IA.
+- [x] Lookups FK : **tranché 23/08** — **combobox** anatomy (pas un picker, pas un `<select>` natif). Pas de dump. Recherche serveur ≥ 2 car. Œil → fiche si id, liste si vide. Enums = select natif sans œil. Article reste le picker. Ancrage [`lots/lookups/CONTRAT.md`](lots/lookups/CONTRAT.md).
 
 ---
 

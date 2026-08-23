@@ -15,6 +15,7 @@ import ma.nafura.chantiers.api.request.ChantierLotTreeRequestDto;
 import ma.nafura.chantiers.api.request.ChantierLotUpdateDto;
 import ma.nafura.chantiers.api.request.PosteBudgetaireCreateDto;
 import ma.nafura.chantiers.domain.chantier.ChantierLot;
+import ma.nafura.chantiers.domain.chantier.NatureLigne;
 import ma.nafura.chantiers.domain.budget.PosteBudgetaire;
 import ma.nafura.chantiers.repository.ChantierLotRepository;
 import ma.nafura.chantiers.repository.PosteBudgetaireRepository;
@@ -60,8 +61,32 @@ public class ChantierLotService {
         return repository.findByTenantIdAndChantierIdOrderByOrdreAscCodeAsc(tenantId(), chantierId);
     }
 
+    /**
+     * Création par saisie — écran chantier, API, import. Produit toujours une ligne
+     * {@link NatureLigne#INTERNE} (AC-3) ; une demande explicite de vendu est refusée, jamais
+     * convertie en silence.
+     */
     @Transactional
     public ChantierLot create(String chantierId, ChantierLotCreateDto request) {
+        refuserVenduParSaisie(request.getNature());
+        refuserVenteSurInterne(request.getPrixUnitaireHt(), request.getMontantHt());
+        return persist(chantierId, request, NatureLigne.INTERNE, null);
+    }
+
+    /**
+     * Copie d'un nœud du devis validé — seul producteur de lignes {@link NatureLigne#VENDU}
+     * (AC-3). Le lien retour vers le nœud DPGF est obligatoire (AC-2).
+     */
+    @Transactional
+    public ChantierLot copierLotVendu(String chantierId, ChantierLotCreateDto request, UUID dpgfNoeudId) {
+        if (dpgfNoeudId == null) {
+            throw new IllegalArgumentException("chantiers.arbre.vendu_sans_origine");
+        }
+        return persist(chantierId, request, NatureLigne.VENDU, dpgfNoeudId);
+    }
+
+    private ChantierLot persist(
+            String chantierId, ChantierLotCreateDto request, NatureLigne nature, UUID dpgfNoeudId) {
         chantierService.getById(chantierId);
         UUID tenantId = tenantId();
         String parentLotId = trimOrNull(request.getParentLotId());
@@ -96,10 +121,12 @@ public class ChantierLotService {
                 .code(code)
                 .designation(request.getDesignation().trim())
                 .parentLotId(parentLotId)
+                .nature(nature)
+                .dpgfNoeudId(dpgfNoeudId)
                 .unite(trimOrNull(request.getUnite()))
                 .quantite(request.getQuantite())
-                .prixUnitaireHt(request.getPrixUnitaireHt())
-                .montantHt(resolveMontantHt(request))
+                .prixUnitaireHt(nature.estVendu() ? request.getPrixUnitaireHt() : null)
+                .montantHt(nature.estVendu() ? resolveMontantHt(request) : null)
                 .avancementPercent(
                         request.getAvancementPercent() != null
                                 ? request.getAvancementPercent()
@@ -148,6 +175,9 @@ public class ChantierLotService {
         }
         if (request.getQuantite() != null) {
             entity.setQuantite(request.getQuantite());
+        }
+        if (entity.getNature() == NatureLigne.INTERNE) {
+            refuserVenteSurInterne(request.getPrixUnitaireHt(), request.getMontantHt());
         }
         if (request.getPrixUnitaireHt() != null) {
             entity.setPrixUnitaireHt(request.getPrixUnitaireHt());
@@ -208,6 +238,8 @@ public class ChantierLotService {
             posteDto.setDesignation(posteNode.getDesignation());
             posteDto.setUnite(posteNode.getUnite());
             posteDto.setQuantite(posteNode.getQuantite());
+            // Saisie / import : la ligne est interne, elle ne porte pas de prix de vente (AC-4).
+            // Un prix envoyé ici est refusé par PosteBudgetaireService.create, pas ignoré.
             posteDto.setPrixUnitaireHt(posteNode.getPrixUnitaireHt());
             posteDto.setMontantHt(posteNode.getMontantHt());
             posteDto.setOrdre(posteOrdre++);
@@ -229,6 +261,8 @@ public class ChantierLotService {
                 .code(created.getCode())
                 .designation(created.getDesignation())
                 .parentLotId(created.getParentLotId())
+                .nature(created.getNature())
+                .dpgfNoeudId(created.getDpgfNoeudId())
                 .avancementPercent(created.getAvancementPercent())
                 .ordre(created.getOrdre())
                 .depth(depth)
@@ -322,6 +356,8 @@ public class ChantierLotService {
                 .lotId(poste.getLotId())
                 .code(poste.getCode())
                 .designation(poste.getDesignation())
+                .nature(poste.getNature())
+                .dpgfNoeudId(poste.getDpgfNoeudId())
                 .unite(poste.getUnite())
                 .quantite(poste.getQuantite())
                 .prixUnitaireHt(poste.getPrixUnitaireHt())
@@ -358,6 +394,24 @@ public class ChantierLotService {
             return request.getQuantite().multiply(request.getPrixUnitaireHt());
         }
         return null;
+    }
+
+    /**
+     * AC-3 — une demande de créer un vendu à la main est refusée, avec un message explicite.
+     * Elle n'est pas silencieusement convertie en interne.
+     */
+    private static void refuserVenduParSaisie(String natureDemandee) {
+        NatureLigne demandee = NatureLigne.parse(natureDemandee);
+        if (demandee != null && demandee.estVendu()) {
+            throw new IllegalArgumentException("chantiers.arbre.vendu_par_saisie_refuse");
+        }
+    }
+
+    /** AC-4 — un montant vendu posé sur une ligne interne est refusé. */
+    private static void refuserVenteSurInterne(BigDecimal prixUnitaireHt, BigDecimal montantHt) {
+        if (prixUnitaireHt != null || montantHt != null) {
+            throw new IllegalArgumentException("chantiers.arbre.interne_sans_prix_de_vente");
+        }
     }
 
     private static String trimOrNull(String value) {

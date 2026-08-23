@@ -1,6 +1,6 @@
 ---
 id: SEKTOR-142
-status: review
+status: done-me
 context: nafura
 type: feature
 agent_type: exec
@@ -36,6 +36,7 @@ tags: [sektor, ux, catalogue]
 23/08 17:50  VU VERT : node sektor/e2e/scripts/verify-picker-article-142.mjs
              PASS search vide=0 exact=ART-P142-mt61lg4t nature=1 pageTotal=39
 23/08 17:49  status → review
+23/08 18:45  status → done-agent · gate none → done-me
 ```
 
 ## Rapport de livraison

@@ -35,4 +35,4 @@ Gel § **Le budget vit sur l'arbre** + § **Le réel s'impute à l'activité**, 
 
 ## Décisions ouvertes
 
-Aucune.
+Une, ouverte par le contrat : où tombe un coût réel qui arrive **sans nœud** ? Le gel interdit le coût sans imputation et prévoit un repli sur un nœud interne, sans dire qui le crée ni quand. Options et recommandation : [`tasks/SEKTOR-161-…`](tasks/SEKTOR-161-contrat-budget-par-n-ud-decompose-du-dpu.md) § Question. **SEKTOR-159 attend cette réponse** (AC-11) — SEKTOR-162 non.

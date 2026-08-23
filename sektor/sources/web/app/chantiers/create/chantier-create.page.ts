@@ -26,7 +26,7 @@ import {
 } from '@platform/lib/anatomy';
 
 import type { Chantier, ChantierStatus } from '@app/chantiers/models';
-import { ErpLookupService } from '@app/socle/shared/services/erp-lookup.service';
+import { ErpLookupService, partnerSelectOptions } from '@app/socle/shared/services/erp-lookup.service';
 import { ErpAuditService } from '@app/socle/shell/erp-audit.service';
 import { ClientApiService } from '@app/ventes/clients/services/client-api.service';
 import { DevisApiService } from '@app/etudes/devis/services/devis-api.service';
@@ -110,6 +110,8 @@ function addMonthsIso(from: Date, months: number): string {
             [required]="true"
             lookupKey="clients"
             [listShortcut]="{ label: 'chantiers.create.clientListShortcut' | translate }"
+            [lookupSearch]="searchClients"
+            [selectedLabel]="draft.clientName"
           />
           <nf-button variant="ghost" class="client-create" (clicked)="createClientInline()">
             {{ 'chantiers.create.clientCreateCta' | translate }}
@@ -350,12 +352,10 @@ export class ChantierCreatePage {
   }
 
   private async loadLookups(): Promise<void> {
-    const [clients, employees, chantiersRes] = await Promise.all([
-      this.erpLookup.partnersByRole('CLIENT'),
+    const [employees, chantiersRes] = await Promise.all([
       this.erpLookup.employes('ACTIF'),
       this.chantierApi.getAll(),
     ]);
-    this.setClients(clients);
     this._employees.set(
       employees.map((e) => ({
         id: String(e.key),
@@ -379,20 +379,17 @@ export class ChantierCreatePage {
       if (devis.tvaTaux != null) this.draft.tvaTaux = Number(devis.tvaTaux);
       if (devis.clientId) {
         const raw = devis.clientId.trim();
-        const nameHint = (devis.clientName ?? '').trim().toLowerCase();
-        const client =
-          this._clients().find((c) => c.id === raw) ??
-          this._clients().find((c) => c.code.toUpperCase() === raw.toUpperCase()) ??
-          (nameHint
-            ? this._clients().find(
-                (c) =>
-                  c.name.toLowerCase().includes(nameHint) ||
-                  nameHint.includes(c.name.toLowerCase().slice(0, 8)),
-              )
-            : undefined);
-        this.draft.clientId = client?.id ?? raw;
-        this.draft.clientName = client?.name ?? devis.clientName ?? '';
-        if (client) this.onClientChange(client.id);
+        this.draft.clientId = raw;
+        this.draft.clientName = (devis.clientName ?? '').trim();
+        if (this.draft.clientId) {
+          this._clients.set([
+            {
+              id: this.draft.clientId,
+              code: '',
+              name: this.draft.clientName,
+            },
+          ]);
+        }
       }
       if (devis.numero) {
         this.draft.marcheReference = `${devis.numero} V${devis.version ?? 1}`;
@@ -403,9 +400,16 @@ export class ChantierCreatePage {
     }
   }
 
+  searchClients = (q: string) =>
+    this.erpLookup.partnersByRole('CLIENT', q).then((items) => {
+      this.setClients(items);
+      return partnerSelectOptions(items);
+    });
+
   private async reloadClients(): Promise<void> {
-    const clients = await this.erpLookup.partnersByRole('CLIENT');
-    this.setClients(clients);
+    if (!this.draft.clientId) return;
+    const item = await this.erpLookup.partnerById(this.draft.clientId);
+    if (item) this.setClients([item]);
   }
 
   private setClients(
@@ -450,7 +454,9 @@ export class ChantierCreatePage {
         ville: '',
         actif: true,
       });
-      await this.reloadClients();
+      this._clients.set([
+        { id: created.id, code: created.code ?? '', name: created.nom },
+      ]);
       this.draft.clientId = created.id;
       this.draft.clientName = created.nom;
       this.toast.success(t('chantiers.create.clientCreateSuccess'));

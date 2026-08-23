@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { LookupService } from '@platform/lib/anatomy';
 import type { LookupItem } from '@platform/lib/anatomy/types';
 
-import type { PartnerRoleType } from './partners-api.service';
+import { PartnersApiService, type PartnerRoleType } from './partners-api.service';
 
 export interface ErpLookupRequest {
   /** Cache key — include filters in the key when params vary. */
@@ -25,6 +25,7 @@ const DEPOT_LOCATION_TYPES = new Set(['DEPOT', 'ENTREPOT', 'TRANSIT', 'VIRTUEL']
 @Injectable({ providedIn: 'root' })
 export class ErpLookupService {
   private readonly lookup = inject(LookupService);
+  private readonly partnersApi = inject(PartnersApiService);
 
   fetch(request: ErpLookupRequest): Promise<LookupItem[]> {
     return this.lookup.get({
@@ -66,18 +67,35 @@ export class ErpLookupService {
   }
 
   partnersByRole(role: PartnerRoleType, search?: string): Promise<LookupItem[]> {
+    const q = search?.trim() ?? '';
+    if (search !== undefined && q.length < 2) {
+      return Promise.resolve([]);
+    }
     return this.fetch({
-      key: search ? `partners:${role}:${search}` : `partners:${role}`,
+      key: q ? `partners:${role}:${q}` : `partners:${role}`,
       endpoint: '/api/v1/partners',
       params: {
         role,
         page: 0,
-        size: 200,
-        ...(search ? { q: search } : {}),
+        size: q ? 50 : 200,
+        ...(q ? { q } : {}),
       },
       displayField: 'raisonSociale',
       valueField: 'id',
-    });
+    }).then((items) => (q ? exactCodeFirst(items, q) : items));
+  }
+
+  async partnerById(id: string): Promise<LookupItem | null> {
+    try {
+      const p = await this.partnersApi.getById(id);
+      return {
+        key: p.id,
+        value: p.code ? `${p.code} — ${p.raisonSociale}` : p.raisonSociale,
+        data: p as unknown as Record<string, unknown>,
+      };
+    } catch {
+      return null;
+    }
   }
 
   employes(statut?: string, search?: string): Promise<LookupItem[]> {
@@ -132,6 +150,96 @@ export class ErpLookupService {
       valueField: 'id',
     });
   }
+
+  devis(search?: string): Promise<LookupItem[]> {
+    return this.lookup.get({
+      key: search ? `devis:${search}` : 'devis',
+      endpoint: '/api/v1/etudes/devis',
+      params: { page: 0, size: 50, ...(search ? { q: search } : {}) },
+      transform: (response) =>
+        extractRecords(response).map((row) => {
+          const numero = String(row['numero'] ?? '').trim();
+          const objet = String(row['objet'] ?? '').trim();
+          const label = [numero, objet].filter(Boolean).join(' — ') || String(row['id'] ?? '');
+          return { key: String(row['id'] ?? ''), value: label, data: row };
+        }),
+    });
+  }
+
+  factures(search?: string): Promise<LookupItem[]> {
+    return this.lookup.get({
+      key: search ? `factures:${search}` : 'factures',
+      endpoint: '/api/v1/factures-client',
+      params: { page: 0, size: 50, ...(search ? { q: search } : {}) },
+      transform: (response) =>
+        extractRecords(response).map((row) => {
+          const numero = String(row['numero'] ?? '').trim();
+          const client = String(row['clientName'] ?? row['clientNom'] ?? '').trim();
+          const label = [numero, client].filter(Boolean).join(' — ') || String(row['id'] ?? '');
+          return { key: String(row['id'] ?? ''), value: label, data: row };
+        }),
+    });
+  }
+
+  uoms(search?: string): Promise<LookupItem[]> {
+    return this.fetch({
+      key: search ? `uoms:${search}` : 'uoms',
+      endpoint: '/api/v1/units-of-measure',
+      params: { page: 0, size: 50, ...(search ? { q: search } : {}) },
+      displayField: 'name',
+      valueField: 'id',
+    });
+  }
+
+  uomCategories(search?: string): Promise<LookupItem[]> {
+    return this.fetch({
+      key: search ? `uomCategories:${search}` : 'uomCategories',
+      endpoint: '/api/v1/uom-categories',
+      params: { page: 0, size: 50, ...(search ? { q: search } : {}) },
+      displayField: 'name',
+      valueField: 'id',
+    });
+  }
+
+  itemCategories(search?: string): Promise<LookupItem[]> {
+    return this.fetch({
+      key: search ? `itemCategories:${search}` : 'itemCategories',
+      endpoint: '/api/v1/item-categories/lookup',
+      params: search ? { q: search, size: 50 } : { size: 50 },
+      displayField: 'label',
+      valueField: 'id',
+    });
+  }
+
+  motifs(search?: string): Promise<LookupItem[]> {
+    return this.fetch({
+      key: search ? `motifs:${search}` : 'motifs',
+      endpoint: '/api/v1/motifs',
+      params: { page: 0, size: 50, ...(search ? { q: search } : {}) },
+      displayField: 'libelle',
+      valueField: 'id',
+    });
+  }
+
+  inventoryTxes(search?: string): Promise<LookupItem[]> {
+    return this.fetch({
+      key: search ? `inventoryTxes:${search}` : 'inventoryTxes',
+      endpoint: '/api/v1/inventory-txs',
+      params: { page: 0, size: 50, ...(search ? { q: search } : {}) },
+      displayField: 'numero',
+      valueField: 'id',
+    });
+  }
+
+  paymentTerms(search?: string): Promise<LookupItem[]> {
+    return this.fetch({
+      key: search ? `paymentTerms:${search}` : 'paymentTerms',
+      endpoint: '/api/v1/payment-terms',
+      params: { page: 0, size: 50, ...(search ? { q: search } : {}) },
+      displayField: 'libelle',
+      valueField: 'id',
+    });
+  }
 }
 
 function extractRecords(response: unknown): Record<string, unknown>[] {
@@ -159,4 +267,26 @@ export function partnerLookupLabel(item: LookupItem): string {
   const data = item.data as Record<string, unknown> | undefined;
   const code = data?.['code'];
   return code ? `${String(code)} — ${item.value}` : item.value;
+}
+
+export function partnerSelectOptions(
+  items: LookupItem[],
+): Array<{ value: string; label: string }> {
+  return items.map((p) => ({ value: String(p.key), label: partnerLookupLabel(p) }));
+}
+
+export function lookupSelectOptions(
+  items: LookupItem[],
+): Array<{ value: string; label: string }> {
+  return items.map((item) => ({ value: String(item.key), label: item.value }));
+}
+
+function exactCodeFirst(items: LookupItem[], query: string): LookupItem[] {
+  const needle = query.trim().toLowerCase();
+  if (!needle) return items;
+  return [...items].sort((a, b) => {
+    const ac = String((a.data as Record<string, unknown> | undefined)?.['code'] ?? '').toLowerCase();
+    const bc = String((b.data as Record<string, unknown> | undefined)?.['code'] ?? '').toLowerCase();
+    return (ac === needle ? 0 : 1) - (bc === needle ? 0 : 1);
+  });
 }

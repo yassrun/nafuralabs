@@ -36,21 +36,18 @@ function asObjectArray(value: unknown): Record<string, unknown>[] {
   );
 }
 
+/**
+ * Un poste importe est saisi, pas vendu : l'import manuel produit une ligne interne (AC-3), et un
+ * interne ne porte ni prix unitaire de vente ni montant vendu (AC-4). Le prix eventuellement
+ * extrait du document n'est donc pas transmis.
+ */
 function mapPoste(row: Record<string, unknown>): NestedPoste | null {
   const designation = asTrimmedString(row['designation']);
   if (!designation) return null;
-  const quantite = asNumber(row['quantite']);
-  const prixUnitaireHt = asNumber(row['prixUnitaireHt']);
-  const montantHt =
-    quantite != null && prixUnitaireHt != null
-      ? Math.round(quantite * prixUnitaireHt * 100) / 100
-      : undefined;
   return {
     designation,
     unite: asTrimmedString(row['unite']),
-    quantite,
-    prixUnitaireHt,
-    montantHt,
+    quantite: asNumber(row['quantite']),
   };
 }
 

@@ -17,7 +17,6 @@ export class ChantierLookupService {
   }
 
   async asLookupContext(key = 'chantiers'): Promise<LookupContext> {
-    const options = await this.listOptions();
-    return { [key]: options };
+    return { [key]: [] };
   }
 }

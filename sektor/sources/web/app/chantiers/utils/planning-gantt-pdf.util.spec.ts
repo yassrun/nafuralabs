@@ -14,13 +14,13 @@ describe('planning-gantt-pdf.util', () => {
   const fixtureText = VILLA_HASSAN_GANTT_FIXTURE;
 
   const rootLots: LotChantier[] = [
-    { id: 'l01', chantierId: 'ch-001', code: 'L01', designation: 'Menuiserie', avancementPercent: 0, ordre: 1 },
-    { id: 'l02', chantierId: 'ch-001', code: 'L02', designation: 'Faux plafonds', avancementPercent: 0, ordre: 2 },
-    { id: 'l03', chantierId: 'ch-001', code: 'L03', designation: 'Revêtements', avancementPercent: 0, ordre: 3 },
-    { id: 'l04', chantierId: 'ch-001', code: 'L04', designation: 'Électricité', avancementPercent: 0, ordre: 4 },
-    { id: 'l05', chantierId: 'ch-001', code: 'L05', designation: 'Plomberie', avancementPercent: 0, ordre: 5 },
-    { id: 'l06', chantierId: 'ch-001', code: 'L06', designation: 'Peinture', avancementPercent: 0, ordre: 6 },
-    { id: 'l08', chantierId: 'ch-001', code: 'L08', designation: 'Piscine', avancementPercent: 0, ordre: 8 },
+    { id: 'l01', chantierId: 'ch-001', code: 'L01', designation: 'Menuiserie', nature: 'INTERNE', avancementPercent: 0, ordre: 1 },
+    { id: 'l02', chantierId: 'ch-001', code: 'L02', designation: 'Faux plafonds', nature: 'INTERNE', avancementPercent: 0, ordre: 2 },
+    { id: 'l03', chantierId: 'ch-001', code: 'L03', designation: 'Revêtements', nature: 'INTERNE', avancementPercent: 0, ordre: 3 },
+    { id: 'l04', chantierId: 'ch-001', code: 'L04', designation: 'Électricité', nature: 'INTERNE', avancementPercent: 0, ordre: 4 },
+    { id: 'l05', chantierId: 'ch-001', code: 'L05', designation: 'Plomberie', nature: 'INTERNE', avancementPercent: 0, ordre: 5 },
+    { id: 'l06', chantierId: 'ch-001', code: 'L06', designation: 'Peinture', nature: 'INTERNE', avancementPercent: 0, ordre: 6 },
+    { id: 'l08', chantierId: 'ch-001', code: 'L08', designation: 'Piscine', nature: 'INTERNE', avancementPercent: 0, ordre: 8 },
   ];
 
   it('parses Hassan Gantt fixture with ISO dates', () => {

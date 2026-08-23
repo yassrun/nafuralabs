@@ -1,14 +1,13 @@
 import { Injectable, LOCALE_ID, computed, inject, signal } from '@angular/core';
 
 import { GridFacade } from '@platform/lib/anatomy';
-import type { LookupContext } from '@platform/lib/anatomy/types';
+import type { LookupContext, LookupItem } from '@platform/lib/anatomy/types';
 import type {
   BCStatus,
   BonCommande,
   BonCommandeCreate,
   BonCommandeUpdate,
 } from '@app/achats/models';
-import { PartnersApiService } from '@app/socle/shared/services/partners-api.service';
 import { ErpAuditService } from '@app/socle/shell/erp-audit.service';
 
 import {
@@ -22,7 +21,6 @@ export type { ApiReceptionAchat, ReceptionAchatCreatePayload };
 @Injectable({ providedIn: 'root' })
 export class BcFacade extends GridFacade<BonCommande, BonCommandeCreate, BonCommandeUpdate> {
   protected override api = inject(BcApiService);
-  private readonly partnersApi = inject(PartnersApiService);
   private readonly audit = inject(ErpAuditService);
   private readonly locale = inject(LOCALE_ID);
 
@@ -30,14 +28,21 @@ export class BcFacade extends GridFacade<BonCommande, BonCommandeCreate, BonComm
   override readonly lookups = computed(() => this.lookupsSignal());
 
   override async ensureLookups(): Promise<void> {
-    if (this.lookupsSignal()['fournisseurs']) return;
-    const res = await this.partnersApi.listByRole('FOURNISSEUR', { page: 0, pageSize: 500 });
-    this.lookupsSignal.set({
-      fournisseurs: res.items.map((f) => ({
-        key: f.id,
-        value: `${f.code} — ${f.raisonSociale}`,
-      })),
-    });
+    if (this.lookupsSignal()['fournisseurs'] !== undefined) return;
+    this.lookupsSignal.set({ fournisseurs: [] });
+  }
+
+  ensureFournisseurLookup(bc: BonCommande): void {
+    if (!bc.fournisseurId) return;
+    const base = { ...this.lookupsSignal() };
+    const fournisseurs: LookupItem[] = [...(base['fournisseurs'] ?? [])];
+    if (!fournisseurs.some((f) => f.key === bc.fournisseurId)) {
+      fournisseurs.push({
+        key: bc.fournisseurId,
+        value: bc.fournisseurName?.trim() || bc.fournisseurId,
+      });
+      this.lookupsSignal.set({ ...base, fournisseurs });
+    }
   }
 
   async changeStatus(id: string, next: BCStatus): Promise<BonCommande> {

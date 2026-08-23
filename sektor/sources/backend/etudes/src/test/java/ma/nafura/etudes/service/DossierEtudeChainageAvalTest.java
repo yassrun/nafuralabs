@@ -3,7 +3,9 @@ package ma.nafura.etudes.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -16,6 +18,8 @@ import ma.nafura.etudes.api.dto.DossierConversionResultDto;
 import ma.nafura.etudes.api.request.DossierConvertirDto;
 import ma.nafura.etudes.api.request.DossierGagneDto;
 import ma.nafura.etudes.api.request.DossierPerduDto;
+import ma.nafura.etudes.api.request.PlacementPosteOrphelinDto;
+import ma.nafura.etudes.domain.dpgf.DpgfNoeud;
 import ma.nafura.etudes.domain.dossier.DossierEtude;
 import ma.nafura.etudes.domain.dossier.StatutDossierEtude;
 import ma.nafura.etudes.repository.AppelOffreClientRepository;
@@ -25,6 +29,7 @@ import ma.nafura.etudes.repository.DossierDocumentRepository;
 import ma.nafura.etudes.repository.DossierEtudeRepository;
 import ma.nafura.etudes.repository.DossierPieceAttendueRepository;
 import ma.nafura.etudes.repository.DpgfNoeudRepository;
+import ma.nafura.etudes.service.DossierEtudeService.PostesOrphelinsException;
 import ma.nafura.etudes.service.port.bc.ChainageAvalPort;
 import ma.nafura.etudes.service.port.capability.EtudeApprovalPort;
 import ma.nafura.etudes.service.port.bc.EtudeClientPort;
@@ -42,6 +47,8 @@ class DossierEtudeChainageAvalTest {
 
     private static final UUID TENANT = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
     private static final UUID DOSSIER_ID = UUID.fromString("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
+    private static final UUID DPGF_ID = UUID.fromString("cccccccc-cccc-cccc-cccc-cccccccccccc");
+    private static final UUID ORPHELIN_ID = UUID.fromString("ffffffff-ffff-ffff-ffff-ffffffffffff");
 
     @Mock
     private DossierEtudeRepository repository;
@@ -116,7 +123,9 @@ class DossierEtudeChainageAvalTest {
                 chainageAvalPort,
                 mock(ConsultationEtudeService.class),
                 List.of());
-        when(repository.save(any(DossierEtude.class))).thenAnswer(inv -> inv.getArgument(0));
+        lenient()
+                .when(repository.save(any(DossierEtude.class)))
+                .thenAnswer(inv -> inv.getArgument(0));
     }
 
     @AfterEach
@@ -167,43 +176,219 @@ class DossierEtudeChainageAvalTest {
                 .hasMessageContaining("gagne_hors_etat");
     }
 
+    /** AC-7, AC-13 — l'etude gagnee se convertit, avec ce que l'humain complete. */
     @Test
     void convertir_appellePortEtPasseConvertie() {
         DossierEtude dossier = dossier(StatutDossierEtude.GAGNE);
         dossier.setClientId("client-1");
         dossier.setClientNom("MOA");
         dossier.setMontantAttribue(new BigDecimal("100000"));
-        when(repository.findByIdAndTenantId(DOSSIER_ID, TENANT)).thenReturn(Optional.of(dossier));
+        when(repository.lockByIdAndTenantId(DOSSIER_ID, TENANT)).thenReturn(Optional.of(dossier));
         when(parametres.tvaTauxDefaut()).thenReturn(new BigDecimal("20"));
         when(budgetVentilationService.ventiler(any())).thenReturn(List.of());
         when(chainageAvalPort.convert(any()))
-                .thenReturn(new ChainageAvalPort.ConversionResult("CH-1", "MA-1"));
+                .thenReturn(new ChainageAvalPort.ConversionResult("CH-1"));
 
-        DossierConversionResultDto result = service.convertir(DOSSIER_ID, new DossierConvertirDto());
+        DossierConvertirDto body = new DossierConvertirDto();
+        body.setChantierCode("CH-2026-009");
+        body.setDateDemarrage(LocalDate.of(2026, 9, 1));
+        body.setDureeMois(8);
+
+        DossierConversionResultDto result = service.convertir(DOSSIER_ID, body);
 
         assertThat(result.getChantierId()).isEqualTo("CH-1");
-        assertThat(result.getMarcheId()).isEqualTo("MA-1");
         assertThat(result.getStatus()).isEqualTo("CONVERTIE");
         assertThat(dossier.getChantierGenereId()).isEqualTo("CH-1");
         assertThat(dossier.getStatus()).isEqualTo(StatutDossierEtude.CONVERTIE);
+        // AC-10 — rien du cote contractuel : aucun marche n'a ete memorise.
+        assertThat(dossier.getMarcheGenereId()).isNull();
 
         ArgumentCaptor<ChainageAvalPort.ConversionCommand> cap =
                 ArgumentCaptor.forClass(ChainageAvalPort.ConversionCommand.class);
         verify(chainageAvalPort).convert(cap.capture());
         assertThat(cap.getValue().montantHt()).isEqualByComparingTo("100000");
         assertThat(cap.getValue().clientId()).isEqualTo("client-1");
+        // AC-13 — code chantier, date de demarrage et duree portes tels quels ; aucune zone.
+        assertThat(cap.getValue().chantierCode()).isEqualTo("CH-2026-009");
+        assertThat(cap.getValue().dateDemarrage()).isEqualTo(LocalDate.of(2026, 9, 1));
+        assertThat(cap.getValue().dureeMois()).isEqualTo(8);
     }
 
+    /** AC-7 — depuis un statut autre que GAGNE, refus avec un message metier. */
     @Test
-    void convertir_idempotentSiDejaChantier() {
-        DossierEtude dossier = dossier(StatutDossierEtude.GAGNE);
+    void convertir_horsEtat_refuse() {
+        DossierEtude dossier = dossier(StatutDossierEtude.DEVIS_GENERE);
+        when(repository.lockByIdAndTenantId(DOSSIER_ID, TENANT)).thenReturn(Optional.of(dossier));
+
+        assertThatThrownBy(() -> service.convertir(DOSSIER_ID, new DossierConvertirDto()))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("convertir_hors_etat");
+        verify(chainageAvalPort, never()).convert(any());
+    }
+
+    /**
+     * AC-9 — rejouer sur une etude deja convertie renvoie le chantier deja cree. Un seul
+     * comportement : ni second chantier, ni refus.
+     */
+    @Test
+    void convertir_rejoue_renvoieLeChantierDejaCree() {
+        DossierEtude dossier = dossier(StatutDossierEtude.CONVERTIE);
         dossier.setChantierGenereId("CH-EXIST");
-        dossier.setMarcheGenereId("MA-EXIST");
-        when(repository.findByIdAndTenantId(DOSSIER_ID, TENANT)).thenReturn(Optional.of(dossier));
+        when(repository.lockByIdAndTenantId(DOSSIER_ID, TENANT)).thenReturn(Optional.of(dossier));
 
         DossierConversionResultDto result = service.convertir(DOSSIER_ID, new DossierConvertirDto());
+
         assertThat(result.getChantierId()).isEqualTo("CH-EXIST");
+        assertThat(result.getStatus()).isEqualTo("CONVERTIE");
+        assertThat(dossier.getStatus()).isEqualTo(StatutDossierEtude.CONVERTIE);
+        verify(chainageAvalPort, never()).convert(any());
+    }
+
+    /**
+     * AC-12 — un poste sans lot parent arrete la conversion AVANT toute creation, et est nomme.
+     * Le port n'est jamais appele : ni chantier, ni arbre, ni budget.
+     */
+    @Test
+    void convertir_posteOrphelin_arreteAvantTouteCreationEtLeNomme() {
+        DossierEtude dossier = dossierAvecDpgf();
+        when(repository.lockByIdAndTenantId(DOSSIER_ID, TENANT)).thenReturn(Optional.of(dossier));
+        when(noeudRepository.findByDpgfIdAndTenantIdOrderByOrdreAsc(DPGF_ID, TENANT))
+                .thenReturn(noeudsAvecUnOrphelin());
+
+        assertThatThrownBy(() -> service.convertir(DOSSIER_ID, new DossierConvertirDto()))
+                .isInstanceOf(PostesOrphelinsException.class)
+                .satisfies(ex -> {
+                    PostesOrphelinsException orph = (PostesOrphelinsException) ex;
+                    assertThat(orph.getPostes()).hasSize(1);
+                    assertThat(orph.getPostes().get(0).code()).isEqualTo("A-ORPH");
+                    assertThat(orph.getPostes().get(0).designation()).isEqualTo("Poste sans lot");
+                    assertThat(orph.getLotsDisponibles()).extracting("code").containsExactly("L01");
+                });
+
+        verify(chainageAvalPort, never()).convert(any());
+        // Abandon : rien n'a ete cree, l'etude reste GAGNE.
         assertThat(dossier.getStatus()).isEqualTo(StatutDossierEtude.GAGNE);
+        assertThat(dossier.getChantierGenereId()).isNull();
+    }
+
+    /** AC-12 — place sur un lot existant du devis, la conversion reprend et aboutit. */
+    @Test
+    void convertir_posteOrphelin_placeSurUnLotExistant_aboutit() {
+        DossierEtude dossier = dossierAvecDpgf();
+        when(repository.lockByIdAndTenantId(DOSSIER_ID, TENANT)).thenReturn(Optional.of(dossier));
+        when(noeudRepository.findByDpgfIdAndTenantIdOrderByOrdreAsc(DPGF_ID, TENANT))
+                .thenReturn(noeudsAvecUnOrphelin());
+        when(parametres.tvaTauxDefaut()).thenReturn(new BigDecimal("20"));
+        when(budgetVentilationService.ventiler(any())).thenReturn(List.of());
+        when(chainageAvalPort.convert(any()))
+                .thenReturn(new ChainageAvalPort.ConversionResult("CH-2"));
+
+        PlacementPosteOrphelinDto placement = new PlacementPosteOrphelinDto();
+        placement.setPosteId(ORPHELIN_ID);
+        placement.setLotCode("L01");
+        DossierConvertirDto body = new DossierConvertirDto();
+        body.setPlacementsPostesOrphelins(List.of(placement));
+
+        DossierConversionResultDto result = service.convertir(DOSSIER_ID, body);
+
+        assertThat(result.getChantierId()).isEqualTo("CH-2");
+        ArgumentCaptor<ChainageAvalPort.ConversionCommand> cap =
+                ArgumentCaptor.forClass(ChainageAvalPort.ConversionCommand.class);
+        verify(chainageAvalPort).convert(cap.capture());
+        ChainageAvalPort.LotProjection orphelin = cap.getValue().lots().stream()
+                .filter(l -> ORPHELIN_ID.equals(l.dpgfNoeudId()))
+                .findFirst()
+                .orElseThrow();
+        assertThat(orphelin.parentCode()).isEqualTo("L01");
+    }
+
+    /**
+     * AC-12 — le lot d'accueil cree par l'humain ne vient pas du devis : il part sans origine,
+     * donc interne (AC-3), et accueille le poste.
+     */
+    @Test
+    void convertir_posteOrphelin_placeDansUnLotDAccueilCree_aboutit() {
+        DossierEtude dossier = dossierAvecDpgf();
+        when(repository.lockByIdAndTenantId(DOSSIER_ID, TENANT)).thenReturn(Optional.of(dossier));
+        when(noeudRepository.findByDpgfIdAndTenantIdOrderByOrdreAsc(DPGF_ID, TENANT))
+                .thenReturn(noeudsAvecUnOrphelin());
+        when(parametres.tvaTauxDefaut()).thenReturn(new BigDecimal("20"));
+        when(budgetVentilationService.ventiler(any())).thenReturn(List.of());
+        when(chainageAvalPort.convert(any()))
+                .thenReturn(new ChainageAvalPort.ConversionResult("CH-3"));
+
+        PlacementPosteOrphelinDto placement = new PlacementPosteOrphelinDto();
+        placement.setPosteId(ORPHELIN_ID);
+        placement.setNouveauLotCode("L99");
+        placement.setNouveauLotDesignation("Divers");
+        DossierConvertirDto body = new DossierConvertirDto();
+        body.setPlacementsPostesOrphelins(List.of(placement));
+
+        service.convertir(DOSSIER_ID, body);
+
+        ArgumentCaptor<ChainageAvalPort.ConversionCommand> cap =
+                ArgumentCaptor.forClass(ChainageAvalPort.ConversionCommand.class);
+        verify(chainageAvalPort).convert(cap.capture());
+        ChainageAvalPort.LotProjection accueil = cap.getValue().lots().stream()
+                .filter(l -> "L99".equals(l.code()))
+                .findFirst()
+                .orElseThrow();
+        assertThat(accueil.dpgfNoeudId()).isNull();
+        assertThat(accueil.type()).isEqualTo(DpgfNoeud.TYPE_LOT);
+        assertThat(accueil.designation()).isEqualTo("Divers");
+        ChainageAvalPort.LotProjection orphelin = cap.getValue().lots().stream()
+                .filter(l -> ORPHELIN_ID.equals(l.dpgfNoeudId()))
+                .findFirst()
+                .orElseThrow();
+        assertThat(orphelin.parentCode()).isEqualTo("L99");
+    }
+
+    private DossierEtude dossierAvecDpgf() {
+        DossierEtude dossier = dossier(StatutDossierEtude.GAGNE);
+        dossier.setClientId("client-1");
+        dossier.setClientNom("MOA");
+        dossier.setDpgfId(DPGF_ID);
+        dossier.setMontantAttribue(new BigDecimal("100000"));
+        return dossier;
+    }
+
+    /** Un devis avec un lot, un article bien range dessous, et un article sans lot parent. */
+    private static List<DpgfNoeud> noeudsAvecUnOrphelin() {
+        UUID lotId = UUID.fromString("dddddddd-dddd-dddd-dddd-dddddddddddd");
+        DpgfNoeud lot = DpgfNoeud.builder()
+                .id(lotId)
+                .tenantId(TENANT)
+                .code("L01")
+                .libelle("Gros oeuvre")
+                .type(DpgfNoeud.TYPE_LOT)
+                .ordre(0)
+                .build();
+        DpgfNoeud article = DpgfNoeud.builder()
+                .id(UUID.fromString("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"))
+                .tenantId(TENANT)
+                .parentId(lotId)
+                .code("A-01")
+                .libelle("Beton")
+                .type(DpgfNoeud.TYPE_ARTICLE)
+                .unite("m3")
+                .quantite(new BigDecimal("10"))
+                .prixUnitaire(new BigDecimal("1500"))
+                .total(new BigDecimal("15000"))
+                .ordre(1)
+                .build();
+        DpgfNoeud orphelin = DpgfNoeud.builder()
+                .id(ORPHELIN_ID)
+                .tenantId(TENANT)
+                .code("A-ORPH")
+                .libelle("Poste sans lot")
+                .type(DpgfNoeud.TYPE_ARTICLE)
+                .unite("U")
+                .quantite(BigDecimal.ONE)
+                .prixUnitaire(new BigDecimal("500"))
+                .total(new BigDecimal("500"))
+                .ordre(2)
+                .build();
+        return List.of(lot, article, orphelin);
     }
 
     private static DossierEtude dossier(StatutDossierEtude status) {

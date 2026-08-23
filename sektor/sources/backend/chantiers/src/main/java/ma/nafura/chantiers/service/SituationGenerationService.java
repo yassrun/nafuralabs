@@ -11,6 +11,7 @@ import java.util.UUID;
 import ma.nafura.chantiers.domain.avancement.AvancementPhysique;
 import ma.nafura.chantiers.domain.chantier.Chantier;
 import ma.nafura.chantiers.domain.chantier.ChantierLot;
+import ma.nafura.chantiers.domain.chantier.NatureLigne;
 import ma.nafura.chantiers.domain.situation.SituationLigne;
 import ma.nafura.chantiers.domain.situation.SituationTravaux;
 import ma.nafura.chantiers.repository.AvancementPhysiqueRepository;
@@ -62,10 +63,15 @@ public class SituationGenerationService {
                             "Situation numero " + numeroOrdre + " already exists for chantier " + chantierId);
                 });
 
+        // AC-5 — le balayage des travaux à facturer ne retient que les lignes vendues :
+        // une ligne interne (installation, repli, régie, base vie, aléas) n'entre jamais
+        // dans une situation ni dans le cumul valorisé au client.
         List<ChantierLot> lots =
-                lotRepository.findByTenantIdAndChantierIdOrderByOrdreAscCodeAsc(tenantId, chantierId);
+                lotRepository.findByTenantIdAndChantierIdOrderByOrdreAscCodeAsc(tenantId, chantierId).stream()
+                        .filter(lot -> lot.getNature() == NatureLigne.VENDU)
+                        .toList();
         if (lots.isEmpty()) {
-            throw new IllegalStateException("No lots found for chantier " + chantierId);
+            throw new IllegalStateException("chantiers.situation.aucune_ligne_vendue: " + chantierId);
         }
 
         Map<String, BigDecimal> cumulByLot = computeValidatedCumuls(tenantId, chantierId);

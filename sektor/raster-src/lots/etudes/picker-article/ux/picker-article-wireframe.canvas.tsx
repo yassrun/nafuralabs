@@ -68,7 +68,8 @@ export default function PickerArticleWireframe() {
       <H1>Picker article partagé</H1>
       <Text tone="secondary">
         Un composant catalogue. Extraire reste le chemin IA. Ce picker est le
-        fallback manuel — « Depuis le catalogue ». Pas un dialog études.
+        fallback manuel — « Ajouter depuis le catalogue » en tête du panneau,
+        pas sur chaque ligne. Pas un dialog études.
       </Text>
 
       <Callout tone="info" title="AI-first, manuel en fallback">
@@ -106,7 +107,9 @@ export default function PickerArticleWireframe() {
       <Stack gap={6}>
         <Text>
           Pas de dump à l’ouverture : aucun GET tant que ≥ 2 caractères ou un
-          filtre (nature, famille, lot d’usage). Prompt de saisie, pas une liste.
+          filtre posé par l’humain (nature, famille, lot d’usage). Ouverture
+          DPU depuis le header, sans chip nature pré-rempli. Prompt de saisie,
+          pas une liste.
         </Text>
         <Text>
           Recherche as-you-type, debounce ~300 ms, code + désignation. Code
@@ -123,8 +126,8 @@ export default function PickerArticleWireframe() {
         </Text>
         <Text>
           Pied selon le contexte : DPU = qty + PU tarif + « Ajouter au poste »
-          (nature pré-remplie depuis la ligne) ; stock = natures stockables, pick
-          seul ; tarif / solde / lookup items = article seul.
+          (ouvert depuis le header, pas de nature pré-remplie) ; stock = natures
+          stockables, pick seul ; tarif / solde / lookup items = article seul.
         </Text>
         <Text>
           0 hit : message clair. Créer / Extraire restent ailleurs (décompo,
@@ -216,13 +219,13 @@ function VueOuverture() {
         Aucun GET catalogue. Le prompt demande une saisie ou un filtre — ce
         n’est pas un dump de 40 articles.
       </Callout>
-      <DialogShell title="Choisir un article" context="DPU · ligne matière">
+      <DialogShell title="Choisir un article" context="DPU · Ajouter depuis le catalogue">
         <Stack gap={12}>
           <SearchBar
             value=""
             placeholder="Code ou désignation — 2 caractères min., ou poser un filtre"
           />
-          <NatureChips natures={NATURES} active="MATIERE" />
+          <NatureChips natures={NATURES} />
           <FilterRow famille="Toutes" lot="Tous" />
           <Text tone="tertiary" size="small">
             Saisir ou filtrer pour chercher. Extraire reste dans le panneau
@@ -361,13 +364,13 @@ function VueDpu() {
   return (
     <Stack gap={12}>
       <Callout tone="info" title="Pied étude">
-        Ouvert depuis une ligne matière : chip MATIERE déjà posé. Qty + PU
-        tarif, puis Ajouter au poste.
+        Ouvert depuis « Ajouter depuis le catalogue » en tête du panneau. Pas
+        de chip nature pré-rempli. Qty + PU tarif, puis Ajouter au poste.
       </Callout>
-      <DialogShell title="Choisir un article" context="DPU · ligne MATIERE">
+      <DialogShell title="Choisir un article" context="DPU">
         <Stack gap={12}>
           <SearchBar value="ciment" placeholder="" />
-          <NatureChips natures={NATURES} active="MATIERE" />
+          <NatureChips natures={NATURES} />
           <Table
             headers={["Code", "Désignation", "Unité", "PU"]}
             rows={[HITS[0]]}

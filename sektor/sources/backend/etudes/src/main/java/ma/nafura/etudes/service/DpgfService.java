@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import ma.nafura.etudes.api.dto.DpgfLotTotalDto;
+import ma.nafura.etudes.api.dto.PosteOrigineDto;
 import ma.nafura.etudes.api.request.DpgfNoeudCreateDto;
 import ma.nafura.etudes.api.request.DpgfNoeudUpdateDto;
 import ma.nafura.etudes.api.request.ImportNoeudDto;
@@ -650,6 +651,34 @@ public class DpgfService {
             return null;
         }
         return value.trim();
+    }
+
+    /**
+     * AC-2 / AC-16 — remonter d'une ligne vendue du chantier au poste du devis dont elle a été
+     * copiée. La ligne ne conserve que l'identifiant du nœud DPGF ; c'est ici qu'on retrouve le
+     * bordereau, puis l'étude à ouvrir.
+     */
+    @Transactional(readOnly = true)
+    public PosteOrigineDto origineDuPoste(UUID noeudId) {
+        UUID tenantId = tenantId();
+        DpgfNoeud noeud = noeudRepository
+                .findByIdAndTenantId(noeudId, tenantId)
+                .orElseThrow(() -> new IllegalArgumentException("etudes.dpgf.noeud_introuvable"));
+        UUID dpgfId = noeud.getDpgf() != null ? noeud.getDpgf().getId() : null;
+        PosteOrigineDto.PosteOrigineDtoBuilder out = PosteOrigineDto.builder()
+                .posteId(noeud.getId())
+                .code(noeud.getCode())
+                .libelle(noeud.getLibelle())
+                .type(noeud.getType())
+                .dpgfId(dpgfId);
+        if (dpgfId != null) {
+            dossierEtudeRepository
+                    .findByTenantIdAndDpgfId(tenantId, dpgfId)
+                    .ifPresent(dossier -> out.dossierId(dossier.getId())
+                            .dossierNumero(dossier.getNumero())
+                            .dossierObjet(dossier.getObjet()));
+        }
+        return out.build();
     }
 
     private UUID tenantId() {

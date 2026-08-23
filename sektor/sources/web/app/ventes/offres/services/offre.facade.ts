@@ -2,7 +2,6 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 
 import { GridFacade } from '@platform/lib/anatomy';
 import type { LookupContext } from '@platform/lib/anatomy/types';
-import { ErpLookupService, partnerLookupLabel } from '@app/socle/shared/services/erp-lookup.service';
 import type {
   BonCommandeClient,
   OffreCommerciale,
@@ -16,26 +15,15 @@ import { OffreApiService } from './offre-api.service';
 @Injectable({ providedIn: 'root' })
 export class OffreFacade extends GridFacade<OffreCommerciale, OffreCreate, OffreUpdate> {
   protected override api = inject(OffreApiService);
-  private readonly erpLookup = inject(ErpLookupService);
 
   private readonly lookupsSignal = signal<LookupContext>({});
   override readonly lookups = computed(() => this.lookupsSignal());
 
   override async ensureLookups(): Promise<void> {
     if (this.lookupsSignal()['clients']) return;
-    const [clients, chantiers] = await Promise.all([
-      this.erpLookup.partnersByRole('CLIENT'),
-      this.erpLookup.chantiers(),
-    ]);
     this.lookupsSignal.set({
-      clients: clients.map((c) => ({
-        key: c.key,
-        value: partnerLookupLabel(c),
-      })),
-      chantiers: chantiers.map((c) => ({
-        key: c.key,
-        value: c.value,
-      })),
+      clients: [],
+      chantiers: [],
     });
   }
 

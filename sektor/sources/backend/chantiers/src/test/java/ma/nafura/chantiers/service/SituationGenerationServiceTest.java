@@ -16,6 +16,7 @@ import java.util.UUID;
 import ma.nafura.chantiers.domain.avancement.AvancementPhysique;
 import ma.nafura.chantiers.domain.chantier.Chantier;
 import ma.nafura.chantiers.domain.chantier.ChantierLot;
+import ma.nafura.chantiers.domain.chantier.NatureLigne;
 import ma.nafura.chantiers.domain.situation.SituationLigne;
 import ma.nafura.chantiers.domain.situation.SituationTravaux;
 import ma.nafura.chantiers.repository.AvancementPhysiqueRepository;
@@ -85,6 +86,7 @@ class SituationGenerationServiceTest {
                 .chantierId(CHANTIER_ID)
                 .code("L01")
                 .designation("Terrassement")
+                .nature(NatureLigne.VENDU)
                 .unite("m3")
                 .quantite(new BigDecimal("1000"))
                 .prixUnitaireHt(new BigDecimal("120"))
@@ -97,6 +99,7 @@ class SituationGenerationServiceTest {
                 .chantierId(CHANTIER_ID)
                 .code("L02")
                 .designation("Fondations")
+                .nature(NatureLigne.VENDU)
                 .unite("m3")
                 .quantite(new BigDecimal("500"))
                 .prixUnitaireHt(new BigDecimal("200"))
@@ -199,6 +202,108 @@ class SituationGenerationServiceTest {
         assertEquals(new BigDecimal("80"), savedLignes.get(1).getQuantiteCumulee());
         assertEquals(new BigDecimal("50"), savedLignes.get(1).getQuantitePrecedente());
         assertEquals(new BigDecimal("16000.00"), savedLignes.get(1).getMontantHt());
+    }
+
+    /** AC-5 — le balayage des travaux a facturer ne retient que les lignes vendues. */
+    @Test
+    void generateEcarteLesLignesInternes() {
+        Chantier chantier = Chantier.builder()
+                .id(CHANTIER_ID)
+                .tenantId(TENANT_ID)
+                .code("CH-2025-001")
+                .label("Residence Yasmine")
+                .tauxRg(new BigDecimal("7"))
+                .tauxAvance(BigDecimal.ZERO)
+                .tauxTva(new BigDecimal("20"))
+                .build();
+
+        ChantierLot vendu = ChantierLot.builder()
+                .id("lot-vendu")
+                .tenantId(TENANT_ID)
+                .chantierId(CHANTIER_ID)
+                .code("L01")
+                .designation("Terrassement")
+                .nature(NatureLigne.VENDU)
+                .dpgfNoeudId(UUID.fromString("00000000-0000-4000-8000-0000000000aa"))
+                .unite("m3")
+                .quantite(new BigDecimal("1000"))
+                .prixUnitaireHt(new BigDecimal("120"))
+                .ordre(1)
+                .build();
+
+        ChantierLot interne = ChantierLot.builder()
+                .id("lot-interne")
+                .tenantId(TENANT_ID)
+                .chantierId(CHANTIER_ID)
+                .code("L99")
+                .designation("Installation de chantier")
+                .nature(NatureLigne.INTERNE)
+                .unite("ft")
+                .quantite(new BigDecimal("1"))
+                .ordre(2)
+                .build();
+
+        when(chantierService.getById(CHANTIER_ID)).thenReturn(chantier);
+        when(situationRepository.findByTenantIdAndChantierIdAndNumeroOrdre(TENANT_ID, CHANTIER_ID, 1))
+                .thenReturn(Optional.empty());
+        when(lotRepository.findByTenantIdAndChantierIdOrderByOrdreAscCodeAsc(TENANT_ID, CHANTIER_ID))
+                .thenReturn(List.of(vendu, interne));
+        when(avancementRepository.findByTenantIdAndChantierIdAndStatusOrderByDateSaisieAscCreatedAtAsc(
+                        TENANT_ID, CHANTIER_ID, AvancementPhysique.STATUS_VALIDE))
+                .thenReturn(List.of(
+                        AvancementPhysique.builder()
+                                .id("av-vendu")
+                                .tenantId(TENANT_ID)
+                                .chantierId(CHANTIER_ID)
+                                .lotId("lot-vendu")
+                                .dateSaisie(java.time.LocalDate.of(2026, 2, 20))
+                                .quantiteRealisee(new BigDecimal("100"))
+                                .status(AvancementPhysique.STATUS_VALIDE)
+                                .build(),
+                        AvancementPhysique.builder()
+                                .id("av-interne")
+                                .tenantId(TENANT_ID)
+                                .chantierId(CHANTIER_ID)
+                                .lotId("lot-interne")
+                                .dateSaisie(java.time.LocalDate.of(2026, 2, 20))
+                                .quantiteRealisee(new BigDecimal("1"))
+                                .status(AvancementPhysique.STATUS_VALIDE)
+                                .build()));
+        when(situationRepository.save(any(SituationTravaux.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(ligneRepository.save(any(SituationLigne.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        SituationTravaux generated = service.generate(CHANTIER_ID, 1);
+
+        ArgumentCaptor<SituationLigne> ligneCaptor = ArgumentCaptor.forClass(SituationLigne.class);
+        verify(ligneRepository, org.mockito.Mockito.times(1)).save(ligneCaptor.capture());
+        assertEquals("lot-vendu", ligneCaptor.getValue().getLotId());
+        // 100 x 120 : la ligne interne n'ajoute rien au cumul valorise au client.
+        assertEquals(new BigDecimal("12000.00"), generated.getCumulCourantHt());
+    }
+
+    /** AC-5 — un chantier qui n'a que des lignes internes n'a rien a facturer. */
+    @Test
+    void generateRefuseUnChantierSansAucuneLigneVendue() {
+        when(chantierService.getById(CHANTIER_ID))
+                .thenReturn(Chantier.builder().id(CHANTIER_ID).tenantId(TENANT_ID).build());
+        when(situationRepository.findByTenantIdAndChantierIdAndNumeroOrdre(TENANT_ID, CHANTIER_ID, 1))
+                .thenReturn(Optional.empty());
+        when(lotRepository.findByTenantIdAndChantierIdOrderByOrdreAscCodeAsc(TENANT_ID, CHANTIER_ID))
+                .thenReturn(List.of(ChantierLot.builder()
+                        .id("lot-interne")
+                        .tenantId(TENANT_ID)
+                        .chantierId(CHANTIER_ID)
+                        .code("L99")
+                        .designation("Base vie")
+                        .nature(NatureLigne.INTERNE)
+                        .ordre(1)
+                        .build()));
+
+        IllegalStateException ex =
+                assertThrows(IllegalStateException.class, () -> service.generate(CHANTIER_ID, 1));
+        assertEquals("chantiers.situation.aucune_ligne_vendue: " + CHANTIER_ID, ex.getMessage());
     }
 
     @Test

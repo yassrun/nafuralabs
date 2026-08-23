@@ -1,4 +1,4 @@
-import { Component, input, output, signal, effect } from '@angular/core';
+import { Component, input, output, signal, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -8,6 +8,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { TranslateModule } from '@ngx-translate/core';
 import { FilterFieldConfig, LookupContext } from '../../../types';
 import { ButtonComponent } from '../../atoms/button';
+import { NfSelectComponent } from '../../atoms/select';
+import { LOOKUP_SEARCHERS } from '../../../tokens/lookup-searchers.token';
+import type { LookupSearchFn } from '../../../tokens/lookup-searchers.token';
 
 /**
  * Filter Builder Component (nf-filter-builder)
@@ -28,6 +31,7 @@ import { ButtonComponent } from '../../atoms/button';
     MatButtonModule,
     TranslateModule,
     ButtonComponent,
+    NfSelectComponent,
   ],
   template: `
     <div class="nf-filter-builder" (click)="$event.stopPropagation()">
@@ -37,6 +41,16 @@ import { ButtonComponent } from '../../atoms/button';
           <div class="nf-filter-builder__field">
             @switch (filter.type) {
               @case ('select') {
+                @if (isLookupCombobox(filter)) {
+                  <nf-select
+                    [label]="filter.label | translate"
+                    [placeholder]="(filter.placeholder ?? 'All') | translate"
+                    [lookupKey]="filter.lookupKey"
+                    [lookupSearch]="lookupSearchFn(filter)"
+                    [ngModel]="comboValue(filter.key)"
+                    (ngModelChange)="setValue(filter.key, $event)"
+                  />
+                } @else {
                 <mat-form-field appearance="outline" subscriptSizing="dynamic">
                   <mat-label>{{ filter.label | translate }}</mat-label>
                   <mat-select
@@ -49,6 +63,7 @@ import { ButtonComponent } from '../../atoms/button';
                     }
                   </mat-select>
                 </mat-form-field>
+                }
               }
               @case ('text') {
                 <mat-form-field appearance="outline" subscriptSizing="dynamic">
@@ -75,6 +90,16 @@ import { ButtonComponent } from '../../atoms/button';
                 </mat-form-field>
               }
               @default {
+                @if (isLookupCombobox(filter)) {
+                  <nf-select
+                    [label]="filter.label | translate"
+                    [placeholder]="(filter.placeholder ?? 'All') | translate"
+                    [lookupKey]="filter.lookupKey"
+                    [lookupSearch]="lookupSearchFn(filter)"
+                    [ngModel]="comboValue(filter.key)"
+                    (ngModelChange)="setValue(filter.key, $event)"
+                  />
+                } @else {
                 <mat-form-field appearance="outline" subscriptSizing="dynamic">
                   <mat-label>{{ filter.label | translate }}</mat-label>
                   <mat-select
@@ -87,6 +112,7 @@ import { ButtonComponent } from '../../atoms/button';
                     }
                   </mat-select>
                 </mat-form-field>
+                }
               }
             }
           </div>
@@ -128,8 +154,10 @@ import { ButtonComponent } from '../../atoms/button';
       min-width: 0;
     }
 
-    .nf-filter-builder__field mat-form-field {
+    .nf-filter-builder__field mat-form-field,
+    .nf-filter-builder__field nf-select {
       width: 100%;
+      display: block;
     }
 
     .nf-filter-builder__actions {
@@ -143,6 +171,8 @@ import { ButtonComponent } from '../../atoms/button';
   `],
 })
 export class FilterBuilderComponent {
+  private readonly lookupSearchers = inject(LOOKUP_SEARCHERS, { optional: true });
+
   filters = input.required<FilterFieldConfig[]>();
   values = input<Record<string, unknown>>({});
   lookups = input<LookupContext>({});
@@ -170,6 +200,22 @@ export class FilterBuilderComponent {
       ...prev,
       [key]: value === '' || value === undefined ? null : value,
     }));
+  }
+
+  isLookupCombobox(filter: FilterFieldConfig): boolean {
+    const key = filter.lookupKey?.trim();
+    return !!key && key !== 'items';
+  }
+
+  lookupSearchFn(filter: FilterFieldConfig): LookupSearchFn | undefined {
+    const key = filter.lookupKey?.trim();
+    if (!key || !this.lookupSearchers) return undefined;
+    return this.lookupSearchers[key];
+  }
+
+  comboValue(key: string): string {
+    const value = this.getValue(key);
+    return value == null ? '' : String(value);
   }
 
   getOptions(filter: FilterFieldConfig): Array<{ label: string; value: unknown }> {

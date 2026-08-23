@@ -365,6 +365,21 @@
 
               <!-- Select -->
               @case ('select') {
+                @if (field.lookupKey) {
+                  <nf-select
+                    [label]="field.label | translate"
+                    [placeholder]="(field.placeholder || '') | translate"
+                    [formControlName]="field.key"
+                    [options]="toNfSelectOptions(field)"
+                    [lookupKey]="field.lookupKey"
+                    [listRoute]="field.listRoute || field.referenceRoute"
+                    [lookupSearch]="lookupSearchFn(field)"
+                    [selectedLabel]="lookupSelectedLabel(field)"
+                    [required]="!!field.required"
+                    [disabled]="isViewMode()"
+                    [error]="getErrorMessage(field) || null"
+                  />
+                } @else {
                 <mat-form-field appearance="outline" class="nf-entity-detail__mat-field">
                   <mat-label>{{ field.label | translate }}</mat-label>
                   <mat-select
@@ -415,6 +430,7 @@
                   }
                   <mat-error>{{ getErrorMessage(field) }}</mat-error>
                 </mat-form-field>
+                }
               }
 
               <!-- Multi-Select -->

@@ -36,6 +36,9 @@ describe('saisie-line.util', () => {
         lotId: 'lot-child',
         code: '1.1',
         designation: 'Porte palière',
+        // Vendu : seule une ligne vendue porte un prix de vente (AC-4).
+        nature: 'VENDU',
+        dpgfNoeudId: '11111111-1111-1111-1111-111111111111',
         unite: 'U',
         quantite: 8,
         prixUnitaireHt: 1000,

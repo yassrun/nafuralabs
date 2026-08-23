@@ -4,6 +4,7 @@ import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angu
 import { firstValueFrom } from 'rxjs';
 
 import { ButtonComponent, ToastService } from '@platform/lib/anatomy';
+import { AuthFacade } from '@platform/core/security/services/auth.facade';
 import { FournisseurApiService } from '@app/achats/fournisseurs/services/fournisseur-api.service';
 import type { Fournisseur } from '@app/achats/models';
 import {
@@ -54,7 +55,7 @@ type OverlayPane = 'liste' | 'detail' | 'creer';
           } @else {
             <ul class="cs-liees">
               @for (row of liees(); track row.id) {
-                <li>
+                <li class="cs-liee-row">
                   <button
                     type="button"
                     class="cs-liee"
@@ -67,6 +68,9 @@ type OverlayPane = 'liste' | 'detail' | 'creer';
                       <span>{{ row.fournisseurNom }}</span>
                     </span>
                     <span class="cs-liee-meta">
+                      <span class="cs-statut" [attr.data-cs-statut]="row.statut">{{
+                        statutLabel(row)
+                      }}</span>
                       {{ row.clesStables.length }}
                       article{{ row.clesStables.length > 1 ? 's' : '' }}
                       @if (articleCle()) {
@@ -78,6 +82,20 @@ type OverlayPane = 'liste' | 'detail' | 'creer';
                       }
                     </span>
                   </button>
+                  <button
+                    type="button"
+                    class="cs-eye"
+                    data-cs-fiche
+                    aria-label="Voir la fiche"
+                    title="Voir la fiche"
+                    (click)="ouvrirFiche(row, $event)"
+                  >
+                    <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                      <path
+                        d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"
+                      />
+                    </svg>
+                  </button>
                 </li>
               }
             </ul>
@@ -88,7 +106,8 @@ type OverlayPane = 'liste' | 'detail' | 'creer';
       @if (pane() === 'detail' && selected(); as sel) {
         <div data-cs-pane="detail" class="cs-pane">
           <p class="cs-hint">
-            Liée à cette étude.
+            <span class="cs-statut" [attr.data-cs-statut]="sel.statut">{{ statutLabel(sel) }}</span>
+            · liée à cette étude.
             @if (sel.devisRecus) {
               Devis : {{ sel.devisRecus }}.
             } @else {
@@ -151,6 +170,9 @@ type OverlayPane = 'liste' | 'detail' | 'creer';
               Ajouter {{ articleLibelle() }}
             </nf-button>
           }
+          <nf-button variant="secondary" [disabled]="saving()" (clicked)="ouvrirFiche(sel)">
+            Voir la fiche
+          </nf-button>
           <nf-button variant="secondary" [disabled]="saving()" (clicked)="retourListe()">
             Retour liste
           </nf-button>
@@ -168,7 +190,9 @@ type OverlayPane = 'liste' | 'detail' | 'creer';
   `,
   styles: `
     .cs-overlay {
-      min-width: min(32rem, 92vw);
+      min-width: 0;
+      width: 100%;
+      box-sizing: border-box;
       max-width: 92vw;
       padding: 1rem 1.1rem 1.1rem;
       display: flex;
@@ -211,6 +235,7 @@ type OverlayPane = 'liste' | 'detail' | 'creer';
       gap: 0.65rem;
       min-height: 0;
       overflow: auto;
+      overflow-x: hidden;
     }
     .cs-liees,
     .cs-panier {
@@ -221,8 +246,16 @@ type OverlayPane = 'liste' | 'detail' | 'creer';
       flex-direction: column;
       gap: 0.4rem;
     }
-    .cs-liee {
+    .cs-liee-row {
+      display: flex;
+      align-items: stretch;
+      gap: 0.35rem;
       width: 100%;
+      min-width: 0;
+    }
+    .cs-liee {
+      flex: 1 1 auto;
+      min-width: 0;
       text-align: left;
       display: flex;
       flex-direction: column;
@@ -233,6 +266,30 @@ type OverlayPane = 'liste' | 'detail' | 'creer';
       background: var(--nf-color-surface, #fff);
       cursor: pointer;
     }
+    .cs-eye {
+      flex: 0 0 2.5rem;
+      width: 2.5rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--nf-color-border, #d1d5db);
+      border-radius: 0.35rem;
+      background: var(--nf-color-background, #fff);
+      color: var(--nf-color-text-muted, #64748b);
+      cursor: pointer;
+    }
+    .cs-eye:hover {
+      color: var(--nf-color-primary, #3b82f6);
+      border-color: var(--nf-color-primary, #3b82f6);
+      background: var(--nf-color-primary-50, #eff6ff);
+    }
+    .cs-statut {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: var(--nf-color-text-secondary, #5c6570);
+    }
     .cs-liee:hover {
       border-color: var(--nf-color-text-secondary, #5c6570);
     }
@@ -242,6 +299,17 @@ type OverlayPane = 'liste' | 'detail' | 'creer';
       gap: 0.5rem;
       align-items: baseline;
       flex-wrap: wrap;
+      min-width: 0;
+    }
+    .cs-liee-main span {
+      min-width: 0;
+      flex: 1 1 auto;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .cs-liees {
+      min-width: 0;
     }
     .cs-liee-meta {
       font-size: 0.8125rem;
@@ -283,6 +351,7 @@ export class ConsultationDecompoDialogComponent {
   private readonly api = inject(ConsultationAchatApiService);
   private readonly fournisseursApi = inject(FournisseurApiService);
   private readonly toast = inject(ToastService);
+  private readonly auth = inject(AuthFacade);
 
   readonly pane = signal<OverlayPane>('liste');
   readonly liees = signal<ConsultationAchat[]>([]);
@@ -325,6 +394,26 @@ export class ConsultationDecompoDialogComponent {
     const cle = this.articleCle();
     if (!cle) return false;
     return (row.clesStables ?? []).includes(cle);
+  }
+
+  statutLabel(row: ConsultationAchat): string {
+    const code = (row.statut ?? '').toUpperCase();
+    const n = row.devisRecus ?? 0;
+    if (code === 'DEVIS_RECU' || n > 0) {
+      return n > 1 ? `${n} devis reçus` : 'Devis reçu';
+    }
+    return 'Demande';
+  }
+
+  ouvrirFiche(row: ConsultationAchat, event?: Event): void {
+    event?.preventDefault();
+    event?.stopPropagation();
+    this.auth.persistSessionForNewTab();
+    window.open(
+      `${window.location.origin}/achats/consultations/${row.id}`,
+      '_blank',
+      'noopener',
+    );
   }
 
   ouvrirDetail(row: ConsultationAchat): void {
@@ -432,7 +521,8 @@ export function openConsultationDecompoDialog(
     boolean | undefined
   >(ConsultationDecompoDialogComponent, {
     data,
-    width: 'min(36rem, 94vw)',
+    width: '36rem',
+    maxWidth: '94vw',
     maxHeight: '80vh',
     autoFocus: 'first-tabbable',
     restoreFocus: true,

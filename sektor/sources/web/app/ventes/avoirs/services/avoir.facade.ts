@@ -2,7 +2,6 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 
 import { GridFacade } from '@platform/lib/anatomy';
 import type { LookupContext } from '@platform/lib/anatomy/types';
-import { PartnersApiService } from '@app/socle/shared/services/partners-api.service';
 import type {
   Avoir,
   AvoirCreate,
@@ -11,40 +10,19 @@ import type {
 } from '@app/ventes/models';
 
 import { AvoirClientApiService } from './avoir-client-api.service';
-import { FactureClientApiService } from '@app/ventes/factures/services/facture-client-api.service';
 
 @Injectable({ providedIn: 'root' })
 export class AvoirFacade extends GridFacade<Avoir, AvoirCreate, AvoirUpdate> {
   protected override api = inject(AvoirClientApiService);
-  private readonly partnersApi = inject(PartnersApiService);
-  private readonly factureApi = inject(FactureClientApiService);
 
   private readonly lookupsSignal = signal<LookupContext>({});
   override readonly lookups = computed(() => this.lookupsSignal());
 
   override async ensureLookups(): Promise<void> {
     if (this.lookupsSignal()['clients']) return;
-    const [clientsRes, facturesRes] = await Promise.all([
-      this.partnersApi.listByRole('CLIENT', { page: 0, pageSize: 500 }),
-      this.factureApi.getAll({ page: 0, pageSize: 500 }),
-    ]);
     this.lookupsSignal.set({
-      clients: clientsRes.items.map((c) => ({
-        key: c.id,
-        value: `${c.code} — ${c.raisonSociale}`,
-        data: { ice: c.ice },
-      })),
-      factures: facturesRes.items.map((f) => ({
-        key: f.id,
-        value: `${f.numero} — ${f.clientName ?? ''}`,
-        data: {
-          clientId: f.clientId,
-          clientName: f.clientName,
-          totalHt: f.totalHt,
-          netAPayerTtc: f.netAPayerTtc,
-          numero: f.numero,
-        },
-      })),
+      clients: [],
+      factures: [],
     });
   }
 

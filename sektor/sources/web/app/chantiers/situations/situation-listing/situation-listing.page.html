@@ -2,17 +2,14 @@
   <nf-page-header [config]="headerConfig"></nf-page-header>
 
   <div class="situations-toolbar">
-    @if (chantierOptions().length > 0) {
-      <select
-        class="chantier-select"
-        [ngModel]="selectedChantier()"
-        (ngModelChange)="onChantierChange($event)">
-        <option value="">Tous les chantiers</option>
-        @for (opt of chantierOptions(); track opt.key) {
-          <option [value]="opt.key">{{ opt.value }}</option>
-        }
-      </select>
-    }
+    <nf-select
+      class="chantier-select"
+      lookupKey="chantiers"
+      placeholder="Tous les chantiers"
+      [lookupSearch]="searchChantiers"
+      [ngModel]="selectedChantier()"
+      (ngModelChange)="onChantierChange($event)">
+    </nf-select>
   </div>
 
   <div class="situations-chips">

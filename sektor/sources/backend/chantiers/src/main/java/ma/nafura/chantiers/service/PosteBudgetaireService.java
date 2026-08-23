@@ -7,6 +7,7 @@ import java.util.UUID;
 import ma.nafura.chantiers.api.request.PosteBudgetaireCreateDto;
 import ma.nafura.chantiers.api.request.PosteBudgetaireUpdateDto;
 import ma.nafura.chantiers.domain.chantier.ChantierLot;
+import ma.nafura.chantiers.domain.chantier.NatureLigne;
 import ma.nafura.chantiers.domain.budget.PosteBudgetaire;
 import ma.nafura.chantiers.repository.ChantierLotRepository;
 import ma.nafura.chantiers.repository.PosteBudgetaireRepository;
@@ -39,8 +40,33 @@ public class PosteBudgetaireService {
         return repository.findByTenantIdAndLotIdOrderByOrdreAscCodeAsc(tenantId(), lot.getId());
     }
 
+    /**
+     * Création par saisie — écran chantier, API, import. Produit toujours une ligne
+     * {@link NatureLigne#INTERNE} (AC-3) ; une demande explicite de vendu est refusée, jamais
+     * convertie en silence.
+     */
     @Transactional
     public PosteBudgetaire create(String lotId, PosteBudgetaireCreateDto request) {
+        refuserVenduParSaisie(request.getNature());
+        refuserVenteSurInterne(request.getPrixUnitaireHt(), request.getMontantHt());
+        return persist(lotId, request, NatureLigne.INTERNE, null);
+    }
+
+    /**
+     * Copie d'un poste du devis validé — seul producteur de lignes {@link NatureLigne#VENDU}
+     * (AC-3). Le lien retour vers le nœud DPGF est obligatoire (AC-2).
+     */
+    @Transactional
+    public PosteBudgetaire copierPosteVendu(
+            String lotId, PosteBudgetaireCreateDto request, UUID dpgfNoeudId) {
+        if (dpgfNoeudId == null) {
+            throw new IllegalArgumentException("chantiers.arbre.vendu_sans_origine");
+        }
+        return persist(lotId, request, NatureLigne.VENDU, dpgfNoeudId);
+    }
+
+    private PosteBudgetaire persist(
+            String lotId, PosteBudgetaireCreateDto request, NatureLigne nature, UUID dpgfNoeudId) {
         requireLot(lotId);
         UUID tenantId = tenantId();
         String code = StringUtils.hasText(request.getCode())
@@ -65,10 +91,12 @@ public class PosteBudgetaireService {
                 .lotId(lotId)
                 .code(code)
                 .designation(request.getDesignation().trim())
+                .nature(nature)
+                .dpgfNoeudId(dpgfNoeudId)
                 .unite(trimOrNull(request.getUnite()))
                 .quantite(request.getQuantite())
-                .prixUnitaireHt(request.getPrixUnitaireHt())
-                .montantHt(resolveMontantHt(request))
+                .prixUnitaireHt(nature.estVendu() ? request.getPrixUnitaireHt() : null)
+                .montantHt(nature.estVendu() ? resolveMontantHt(request) : null)
                 .ordre(ordre)
                 .build();
         return repository.save(entity);
@@ -97,6 +125,9 @@ public class PosteBudgetaireService {
         }
         if (request.getQuantite() != null) {
             entity.setQuantite(request.getQuantite());
+        }
+        if (entity.getNature() == NatureLigne.INTERNE) {
+            refuserVenteSurInterne(request.getPrixUnitaireHt(), request.getMontantHt());
         }
         if (request.getPrixUnitaireHt() != null) {
             entity.setPrixUnitaireHt(request.getPrixUnitaireHt());
@@ -143,6 +174,24 @@ public class PosteBudgetaireService {
                         .orElse(0)
                 + 1;
         return String.format(Locale.ROOT, "%02d", next);
+    }
+
+    /**
+     * AC-3 — une demande de créer un vendu à la main est refusée, avec un message explicite.
+     * Elle n'est pas silencieusement convertie en interne.
+     */
+    private static void refuserVenduParSaisie(String natureDemandee) {
+        NatureLigne demandee = NatureLigne.parse(natureDemandee);
+        if (demandee != null && demandee.estVendu()) {
+            throw new IllegalArgumentException("chantiers.arbre.vendu_par_saisie_refuse");
+        }
+    }
+
+    /** AC-4 — un montant vendu posé sur une ligne interne est refusé. */
+    private static void refuserVenteSurInterne(BigDecimal prixUnitaireHt, BigDecimal montantHt) {
+        if (prixUnitaireHt != null || montantHt != null) {
+            throw new IllegalArgumentException("chantiers.arbre.interne_sans_prix_de_vente");
+        }
     }
 
     private static int numericCode(String value) {

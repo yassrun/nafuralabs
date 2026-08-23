@@ -22,6 +22,7 @@ import ma.nafura.etudes.domain.dossier.StatutDossierEtude;
 import ma.nafura.etudes.service.DecompositionProposeService;
 import ma.nafura.etudes.service.DossierEtudeService;
 import ma.nafura.etudes.service.DossierEtudeService.GateNonFranchieException;
+import ma.nafura.etudes.service.DossierEtudeService.PostesOrphelinsException;
 import ma.nafura.etudes.service.gate.ResultatGate;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;
@@ -259,6 +260,20 @@ public class DossierEtudeController {
      * Un gate non franchi renvoie 422 avec la <b>liste des articles fautifs</b>, pour que
      * l'interface affiche des liens cliquables plutôt qu'un bouton grisé sans explication.
      */
+    /**
+     * AC-12 — des postes du devis n'ont pas de lot d'accueil : la conversion s'est arrêtée avant
+     * de rien créer, et renvoie 422 avec la <b>liste nommée</b> des postes à placer. L'écran les
+     * affiche ; l'humain place, ou abandonne — et dans ce cas rien n'existe.
+     */
+    @ExceptionHandler(PostesOrphelinsException.class)
+    public ResponseEntity<Map<String, Object>> onPostesOrphelins(PostesOrphelinsException ex) {
+        return ResponseEntity.unprocessableEntity()
+                .body(Map.of(
+                        "code", ex.getMessage(),
+                        "postesOrphelins", ex.getPostes(),
+                        "lotsDisponibles", ex.getLotsDisponibles()));
+    }
+
     @ExceptionHandler(GateNonFranchieException.class)
     public ResponseEntity<Map<String, Object>> onGateNonFranchie(GateNonFranchieException ex) {
         return ResponseEntity.unprocessableEntity()

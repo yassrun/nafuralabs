@@ -6,8 +6,11 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -19,6 +22,7 @@ import ma.nafura.etudes.api.request.DossierEtudeCreateDto;
 import ma.nafura.etudes.api.request.DossierEtudeUpdateDto;
 import ma.nafura.etudes.api.request.DossierGagneDto;
 import ma.nafura.etudes.api.request.DossierPerduDto;
+import ma.nafura.etudes.api.request.PlacementPosteOrphelinDto;
 import ma.nafura.etudes.domain.dossier.MotifPerte;
 import ma.nafura.etudes.domain.appeloffre.AppelOffreClient;
 import ma.nafura.etudes.domain.devis.Devis;
@@ -550,29 +554,44 @@ public class DossierEtudeService {
     }
 
     /**
-     * L13 — conversion atomique chantier + marché + budget.
-     * Guichet unique : statut GAGNE (ou MARCHE_EXISTANT déjà GAGNE).
+     * L13 — conversion de l'étude gagnée en chantier.
+     *
+     * <p>Trois garde-fous, dans cet ordre :
+     *
+     * <ol>
+     *   <li><b>AC-9</b> — une étude déjà convertie <b>renvoie son chantier</b>. Un seul
+     *       comportement : jamais un second chantier, jamais un refus. Le verrou pessimiste sur
+     *       la ligne du dossier fait que deux appels concurrents se rangent derrière ce cas.
+     *   <li><b>AC-7</b> — depuis tout autre statut que {@code GAGNE}, refus avec un message
+     *       métier.
+     *   <li><b>AC-12</b> — un poste du devis sans lot parent arrête la conversion <b>avant</b>
+     *       toute création, et est nommé. Rien n'est rattaché par défaut.
+     * </ol>
+     *
+     * <p><b>AC-10</b> — aucun marché n'est créé : le marché naît à la notification.
      */
     @Transactional
     public DossierConversionResultDto convertir(UUID id, DossierConvertirDto body) {
-        DossierEtude dossier = requireDossier(id);
-        if (dossier.getStatus() != StatutDossierEtude.GAGNE) {
-            throw new IllegalStateException("etudes.dossier.convertir_hors_etat");
-        }
+        DossierEtude dossier = repository
+                .lockByIdAndTenantId(id, tenantId())
+                .orElseThrow(() -> new IllegalArgumentException("etudes.dossier.introuvable"));
         if (StringUtils.hasText(dossier.getChantierGenereId())) {
             return DossierConversionResultDto.builder()
                     .dossierId(dossier.getId())
                     .chantierId(dossier.getChantierGenereId())
-                    .marcheId(dossier.getMarcheGenereId())
                     .status(dossier.getStatus().name())
                     .build();
+        }
+        if (dossier.getStatus() != StatutDossierEtude.GAGNE) {
+            throw new IllegalStateException("etudes.dossier.convertir_hors_etat");
         }
         if (!StringUtils.hasText(dossier.getClientId())) {
             throw new IllegalArgumentException("etudes.dossier.client_requis");
         }
 
         List<DpgfNoeud> noeuds = chargerNoeuds(dossier);
-        List<ChainageAvalPort.LotProjection> lots = projeterLots(noeuds);
+        List<ChainageAvalPort.LotProjection> lots =
+                placerPostesOrphelins(projeterLots(noeuds), body.getPlacementsPostesOrphelins());
         List<ChainageAvalPort.BudgetRubrique> budget = budgetVentilationService.ventiler(noeuds);
 
         BigDecimal montant = body.getMontantHt() != null
@@ -586,9 +605,6 @@ public class DossierEtudeService {
         String label = StringUtils.hasText(body.getChantierLabel())
                 ? body.getChantierLabel().trim()
                 : dossier.getObjet();
-        String marcheIntitule = StringUtils.hasText(body.getMarcheIntitule())
-                ? body.getMarcheIntitule().trim()
-                : label;
         String marcheRef = StringUtils.hasText(body.getMarcheReference())
                 ? body.getMarcheReference().trim()
                 : dossier.getReferenceMarche();
@@ -606,7 +622,6 @@ public class DossierEtudeService {
                                 ? body.getDateDemarrage()
                                 : dossier.getDateAttribution(),
                         body.getDureeMois(),
-                        marcheIntitule,
                         marcheRef,
                         montant,
                         body.getTauxTva() != null ? body.getTauxTva() : parametres.tvaTauxDefaut(),
@@ -614,7 +629,7 @@ public class DossierEtudeService {
                         budget));
 
         dossier.setChantierGenereId(result.chantierId());
-        dossier.setMarcheGenereId(result.marcheId());
+        // AC-10 — pas de marché à la conversion : rien à mémoriser côté contractuel.
         if (dossier.getDevisGenereId() != null) {
             devisRepository
                     .findByIdAndTenantId(dossier.getDevisGenereId(), tenantId())
@@ -627,9 +642,115 @@ public class DossierEtudeService {
         return DossierConversionResultDto.builder()
                 .dossierId(converted.getId())
                 .chantierId(result.chantierId())
-                .marcheId(result.marcheId())
                 .status(converted.getStatus().name())
                 .build();
+    }
+
+    /**
+     * AC-12 — un arbre bancal se répare devant l'humain, jamais en silence.
+     *
+     * <p>Un article du devis dont le parent n'est pas un lot identifiable est <b>orphelin</b>.
+     * Tant qu'un seul orphelin n'a pas reçu de décision, la conversion s'arrête ici — donc
+     * <b>avant</b> le moindre appel au port, donc avant qu'aucun chantier, arbre ou budget
+     * n'existe — et les orphelins sont nommés dans l'exception. Si l'humain abandonne, il ne
+     * rappelle simplement pas : rien n'a été créé et l'étude reste {@code GAGNE}.
+     *
+     * <p>Placer, ce n'est pas deviner : chaque poste est rattaché nommément, à un lot existant du
+     * devis ou à un lot d'accueil que l'humain crée. Ce lot d'accueil ne vient pas du devis : il
+     * naît sans origine, donc interne (AC-3).
+     */
+    private List<ChainageAvalPort.LotProjection> placerPostesOrphelins(
+            List<ChainageAvalPort.LotProjection> lots, List<PlacementPosteOrphelinDto> placements) {
+
+        Set<String> codesDeLot = new LinkedHashSet<>();
+        List<LotDaccueilPossible> lotsExistants = new ArrayList<>();
+        for (ChainageAvalPort.LotProjection n : lots) {
+            if (DpgfNoeud.TYPE_LOT.equals(n.type()) || DpgfNoeud.TYPE_SOUS_LOT.equals(n.type())) {
+                codesDeLot.add(n.code());
+                lotsExistants.add(new LotDaccueilPossible(n.code(), n.designation()));
+            }
+        }
+
+        Map<UUID, PlacementPosteOrphelinDto> parPoste = new LinkedHashMap<>();
+        for (PlacementPosteOrphelinDto p : placements != null ? placements : List.<PlacementPosteOrphelinDto>of()) {
+            if (p != null && p.getPosteId() != null) {
+                parPoste.put(p.getPosteId(), p);
+            }
+        }
+
+        List<PosteOrphelin> nonPlaces = new ArrayList<>();
+        Map<String, ChainageAvalPort.LotProjection> lotsDAccueil = new LinkedHashMap<>();
+        Map<UUID, String> parentChoisi = new LinkedHashMap<>();
+        int ordreAccueil = lots.size();
+
+        for (ChainageAvalPort.LotProjection article : lots) {
+            if (!DpgfNoeud.TYPE_ARTICLE.equals(article.type())) {
+                continue;
+            }
+            if (StringUtils.hasText(article.parentCode()) && codesDeLot.contains(article.parentCode())) {
+                continue;
+            }
+            PlacementPosteOrphelinDto choix = parPoste.get(article.dpgfNoeudId());
+            if (choix == null) {
+                nonPlaces.add(new PosteOrphelin(article.dpgfNoeudId(), article.code(), article.designation()));
+                continue;
+            }
+            if (StringUtils.hasText(choix.getLotCode())) {
+                String code = choix.getLotCode().trim();
+                if (!codesDeLot.contains(code)) {
+                    throw new IllegalArgumentException("etudes.dossier.placement_lot_inconnu: " + code);
+                }
+                parentChoisi.put(article.dpgfNoeudId(), code);
+            } else if (StringUtils.hasText(choix.getNouveauLotCode())) {
+                String code = choix.getNouveauLotCode().trim();
+                if (codesDeLot.contains(code)) {
+                    throw new IllegalArgumentException("etudes.dossier.placement_lot_deja_pris: " + code);
+                }
+                lotsDAccueil.computeIfAbsent(code, c -> new ChainageAvalPort.LotProjection(
+                        null,
+                        c,
+                        StringUtils.hasText(choix.getNouveauLotDesignation())
+                                ? choix.getNouveauLotDesignation().trim()
+                                : c,
+                        DpgfNoeud.TYPE_LOT,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        ordreAccueil));
+                parentChoisi.put(article.dpgfNoeudId(), code);
+            } else {
+                throw new IllegalArgumentException(
+                        "etudes.dossier.placement_incomplet: " + article.code());
+            }
+        }
+
+        if (!nonPlaces.isEmpty()) {
+            throw new PostesOrphelinsException(nonPlaces, lotsExistants);
+        }
+        if (parentChoisi.isEmpty()) {
+            return lots;
+        }
+
+        List<ChainageAvalPort.LotProjection> out = new ArrayList<>(lotsDAccueil.values());
+        for (ChainageAvalPort.LotProjection n : lots) {
+            String parent = parentChoisi.get(n.dpgfNoeudId());
+            out.add(parent == null
+                    ? n
+                    : new ChainageAvalPort.LotProjection(
+                            n.dpgfNoeudId(),
+                            n.code(),
+                            n.designation(),
+                            n.type(),
+                            parent,
+                            n.unite(),
+                            n.quantite(),
+                            n.prixUnitaireHt(),
+                            n.montantHt(),
+                            n.ordre()));
+        }
+        return out;
     }
 
     private List<ChainageAvalPort.LotProjection> projeterLots(List<DpgfNoeud> noeuds) {
@@ -642,6 +763,7 @@ public class DossierEtudeService {
         for (DpgfNoeud n : noeuds) {
             String parentCode = n.getParentId() != null ? codeById.get(n.getParentId()) : null;
             out.add(new ChainageAvalPort.LotProjection(
+                    n.getId(),
                     n.getCode(),
                     n.getLibelle(),
                     n.getType(),
@@ -1006,6 +1128,37 @@ public class DossierEtudeService {
     }
 
     /** Portée par l'exception pour que le contrôleur renvoie la liste des articles fautifs. */
+    /** AC-12 — un poste du devis sans lot parent, nommé pour que l'humain le place. */
+    public record PosteOrphelin(UUID posteId, String code, String designation) {}
+
+    /** AC-12 — un lot du devis, offert comme destination possible. L'humain peut aussi en créer un. */
+    public record LotDaccueilPossible(String code, String designation) {}
+
+    /**
+     * AC-12 — la conversion s'est arrêtée <b>avant de rien créer</b> parce que des postes du
+     * devis n'ont pas de lot d'accueil. L'exception les nomme : c'est ce que l'écran affiche.
+     */
+    public static class PostesOrphelinsException extends RuntimeException {
+        private final transient List<PosteOrphelin> postes;
+        private final transient List<LotDaccueilPossible> lotsDisponibles;
+
+        public PostesOrphelinsException(
+                List<PosteOrphelin> postes, List<LotDaccueilPossible> lotsDisponibles) {
+            super("etudes.dossier.postes_orphelins");
+            this.postes = List.copyOf(postes);
+            this.lotsDisponibles = List.copyOf(lotsDisponibles);
+        }
+
+        public List<PosteOrphelin> getPostes() {
+            return postes;
+        }
+
+        /** Les lots du devis. L'humain choisit l'un d'eux, ou crée le lot d'accueil. */
+        public List<LotDaccueilPossible> getLotsDisponibles() {
+            return lotsDisponibles;
+        }
+    }
+
     public static class GateNonFranchieException extends RuntimeException {
         private final transient ResultatGate resultat;
 

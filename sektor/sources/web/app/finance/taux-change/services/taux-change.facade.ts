@@ -40,13 +40,9 @@ export class TauxChangeFacade extends GridFacade<
       const res = await this.deviseApi.getAll({ page: 1, pageSize: 500 });
       const devises = res.items;
       this.devisesSignal.set(devises);
-      const deviseLookup = devises.map((d) => ({
-        key: d.code,
-        value: `${d.code} — ${d.libelle}`,
-      }));
       this.lookupsSignal.set({
         tauxChangeSource: SOURCES,
-        deviseCode: deviseLookup,
+        deviseCode: [],
       });
     }
   }

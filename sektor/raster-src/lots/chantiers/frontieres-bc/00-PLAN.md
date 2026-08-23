@@ -32,4 +32,4 @@ Gels § **Frontière ST** et § **Les cinq derniers points / pilotage et KPI**. 
 
 ## Décisions ouvertes
 
-Aucune.
+Une, ouverte par le contrat : jusqu'où va la coupe pilotage ? Le gel nomme deux contrôleurs, mais la consolidation multi-chantiers est un motif uniforme (six `/api/v1/<domaine>/analytics`, huit `/api/v1/<domaine>/kpis`). Options et recommandation : [`tasks/SEKTOR-163-…`](tasks/SEKTOR-163-contrat-frontieres-st-et-pilotage.md) § Question. **SEKTOR-165 attend cette réponse** — SEKTOR-164 non.

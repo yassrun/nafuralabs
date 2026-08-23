@@ -101,6 +101,7 @@
   min-width: 500px !important;
   max-width: 560px;
   max-height: min(80vh, 420px);
+  overflow: visible;
 }
 
 @media (max-width: 640px) {

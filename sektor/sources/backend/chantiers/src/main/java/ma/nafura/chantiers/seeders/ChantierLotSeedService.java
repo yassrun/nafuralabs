@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import ma.nafura.chantiers.domain.chantier.ChantierLot;
+import ma.nafura.chantiers.domain.chantier.NatureLigne;
 import ma.nafura.chantiers.repository.ChantierLotRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.core.io.ClassPathResource;
@@ -22,6 +23,11 @@ public class ChantierLotSeedService {
         this.objectMapper = objectMapper;
     }
 
+    /**
+     * Jeu de démonstration : ces chantiers ne viennent d'aucune étude, donc toutes leurs lignes
+     * sont {@link NatureLigne#INTERNE} (AC-14, conséquence d'AC-3) — sans lien retour et sans
+     * prix de vente (AC-4). Aucune ligne sans nature (AC-1).
+     */
     @Transactional
     public void seedIfEmpty() {
         if (repository.countByTenantId(TenantContext.getTenantId()) > 0) {
@@ -36,6 +42,8 @@ public class ChantierLotSeedService {
                         .chantierId(node.get("chantierId").asText())
                         .code(node.get("code").asText())
                         .designation(node.get("designation").asText())
+                        .nature(NatureLigne.INTERNE)
+                        .dpgfNoeudId(null)
                         .unite(textOrNull(node, "unite"))
                         .quantite(
                                 node.hasNonNull("quantite")

@@ -385,13 +385,10 @@ export class SituationDetailPage extends ConfigDrivenDetailPage<Situation> {
       const form = this.detailComponent?.form;
       if (!form) return;
 
-      const chantierLookups = this.crud.lookups()['chantiers'] ?? [];
-      const chantierEntry = chantierLookups.find((c) => c.key === chantierId);
-      const tvaTaux: number = (chantierEntry?.data as Record<string, number> | undefined)?.['tvaTaux'] ?? 20;
-      const retenueGarantiePercent: number =
-        (chantierEntry?.data as Record<string, number> | undefined)?.['retenueGarantie'] ?? 7;
-      const retenueAvancePercent: number | undefined =
-        (chantierEntry?.data as Record<string, number | undefined> | undefined)?.['avancePercue'] ?? undefined;
+      const prefill = await this.crud.loadChantierPrefill(chantierId);
+      const tvaTaux: number = prefill?.tvaTaux ?? 20;
+      const retenueGarantiePercent: number = prefill?.retenueGarantie ?? 7;
+      const retenueAvancePercent: number | undefined = prefill?.avancePercue;
 
       const [lots, cumulPrecedentHt] = await Promise.all([
         this.fetchLots(chantierId),

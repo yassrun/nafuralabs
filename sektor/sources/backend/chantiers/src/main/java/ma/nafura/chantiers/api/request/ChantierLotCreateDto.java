@@ -16,6 +16,12 @@ public class ChantierLotCreateDto {
 
     private String parentLotId;
 
+    /**
+     * Nature demandée. Seul {@code INTERNE} est accepté : la copie depuis le devis validé est le
+     * seul producteur de lignes vendues (AC-3). Absent = interne.
+     */
+    private String nature;
+
     private String unite;
 
     private BigDecimal quantite;

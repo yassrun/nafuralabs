@@ -2,7 +2,6 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 
 import { GridFacade } from '@platform/lib/anatomy';
 import type { LookupContext } from '@platform/lib/anatomy/types';
-import { EmployeApiService } from '@app/rh/employes/services/employe-api.service';
 import type { Conge, CongeCreate, CongeUpdate } from '@app/rh/models';
 import { ErpAuditService } from '@app/socle/shell/erp-audit.service';
 
@@ -11,7 +10,6 @@ import { CongeApiService } from './conge-api.service';
 @Injectable({ providedIn: 'root' })
 export class CongeFacade extends GridFacade<Conge, CongeCreate, CongeUpdate> {
   protected override api = inject(CongeApiService);
-  private readonly employeApi = inject(EmployeApiService);
   private readonly audit = inject(ErpAuditService);
 
   private readonly lookupsSignal = signal<LookupContext>({});
@@ -19,17 +17,7 @@ export class CongeFacade extends GridFacade<Conge, CongeCreate, CongeUpdate> {
 
   override async ensureLookups(): Promise<void> {
     if (this.lookupsSignal()['employes']) return;
-    try {
-      const { items: employes } = await this.employeApi.getAll();
-      this.lookupsSignal.set({
-        employes: employes.map((e) => ({
-          key: e.id,
-          value: `${e.matricule} — ${e.nom} ${e.prenom}`,
-        })),
-      });
-    } catch {
-      this.lookupsSignal.set({ employes: [] });
-    }
+    this.lookupsSignal.set({ employes: [] });
   }
 
   async approuver(id: string): Promise<Conge> {
