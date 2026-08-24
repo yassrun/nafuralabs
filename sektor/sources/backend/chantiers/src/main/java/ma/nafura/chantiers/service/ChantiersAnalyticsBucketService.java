@@ -29,14 +29,17 @@ public class ChantiersAnalyticsBucketService {
     private final ChantierRepository chantierRepository;
     private final ChantierSeedService chantierSeedService;
     private final SituationTravauxRepository situationRepository;
+    private final AvancementLectureService avancementLectureService;
 
     public ChantiersAnalyticsBucketService(
             ChantierRepository chantierRepository,
             ChantierSeedService chantierSeedService,
-            SituationTravauxRepository situationRepository) {
+            SituationTravauxRepository situationRepository,
+            AvancementLectureService avancementLectureService) {
         this.chantierRepository = chantierRepository;
         this.chantierSeedService = chantierSeedService;
         this.situationRepository = situationRepository;
+        this.avancementLectureService = avancementLectureService;
     }
 
     @Transactional(readOnly = true)
@@ -70,8 +73,8 @@ public class ChantiersAnalyticsBucketService {
             if (isTermine(c.getStatus())) {
                 agg.chantiersTermines++;
             }
-            agg.avancementSum = agg.avancementSum.add(
-                    c.getAvancementPercent() != null ? c.getAvancementPercent() : BigDecimal.ZERO);
+            BigDecimal avancementLu = avancementLectureService.hydrateArbre(c.getId());
+            agg.avancementSum = agg.avancementSum.add(avancementLu != null ? avancementLu : BigDecimal.ZERO);
         }
 
         for (SituationTravaux s : situations) {

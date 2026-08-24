@@ -2,7 +2,14 @@ import { Injectable } from '@angular/core';
 
 import { FeatureApiService } from '@platform/lib/anatomy';
 
-import type { BudgetLigne, BudgetRubrique, ChantierBudget } from '../models';
+import type {
+  BudgetArbre,
+  BudgetLigne,
+  BudgetRubrique,
+  ChantierBudget,
+  CoutReelDraft,
+  DebourseNoeudDraft,
+} from '../models';
 
 export interface ApiBudgetLigne {
   id?: string;
@@ -32,23 +39,6 @@ export interface ApiBudgetChantier {
   realiseHt?: number;
   resteAEngagerHt?: number;
   lignes: ApiBudgetLigne[];
-}
-
-export interface ApiBudgetUpsert {
-  previsionnelHt?: number;
-  reviseHt?: number;
-  lignes: Array<{
-    id?: string;
-    rubrique: string;
-    label: string;
-    lot?: string;
-    previsionnelHt: number;
-    reviseHt: number;
-    engageHt?: number;
-    realiseHt?: number;
-    posteBudgetaireId?: string;
-    ordre?: number;
-  }>;
 }
 
 export function apiBudgetToChantierBudget(api: ApiBudgetChantier): ChantierBudget {
@@ -98,32 +88,48 @@ export function apiBudgetToChantierBudget(api: ApiBudgetChantier): ChantierBudge
   };
 }
 
-export function chantierBudgetToApiUpsert(budget: ChantierBudget): ApiBudgetUpsert {
-  return {
-    previsionnelHt: budget.budgetInitialHt,
-    reviseHt: budget.budgetReviseHt,
-    lignes: budget.lignes.map((line, index) => ({
-      rubrique: line.rubrique,
-      label: line.label,
-      lot: line.lot,
-      previsionnelHt: line.initialHt,
-      reviseHt: line.reviseHt,
-      engageHt: line.engageHt,
-      realiseHt: line.realiseHt,
-      ordre: index + 1,
-    })),
-  };
-}
-
 @Injectable({ providedIn: 'root' })
 export class BudgetApiService extends FeatureApiService<ApiBudgetChantier> {
   protected override basePath = '/api/v1/chantiers';
+  private readonly postesPath = '/api/v1/postes-budgetaires';
 
+  /**
+   * Vue par rubrique du chantier — **calculée** par le serveur depuis l'arbre. Il n'existe plus
+   * d'écriture jumelle : le budget par rubrique n'est plus stocké nulle part.
+   */
   async getByChantierId(chantierId: string): Promise<ApiBudgetChantier> {
     return this.get<ApiBudgetChantier>(`${this.basePath}/${encodeURIComponent(chantierId)}/budget`);
   }
 
-  async upsert(chantierId: string, body: ApiBudgetUpsert): Promise<ApiBudgetChantier> {
-    return this.post<ApiBudgetChantier>(`${this.basePath}/${encodeURIComponent(chantierId)}/budget`, body);
+  /** L'arbre du chantier avec, à chaque étage, déboursé, marge, avancement et écart. */
+  async getArbre(chantierId: string): Promise<BudgetArbre> {
+    return this.get<BudgetArbre>(`${this.basePath}/${encodeURIComponent(chantierId)}/budget-arbre`);
+  }
+
+  /** Saisie du déboursé d'un noeud interne — refusée sur un noeud vendu, dont le prévu est copié. */
+  async saisirDebourse(draft: DebourseNoeudDraft): Promise<void> {
+    await this.put<unknown>(`${this.postesPath}/${encodeURIComponent(draft.noeudId)}/debourse`, {
+      rubriques: draft.rubriques.map((r) => ({ rubrique: r.rubrique, montantHt: r.montantHt })),
+    });
+  }
+
+  /** Révision d'un noeud : elle se pose à côté du prévu, elle ne le réécrit jamais. */
+  async reviserDebourse(draft: DebourseNoeudDraft): Promise<void> {
+    await this.put<unknown>(
+      `${this.postesPath}/${encodeURIComponent(draft.noeudId)}/debourse/revision`,
+      { rubriques: draft.rubriques.map((r) => ({ rubrique: r.rubrique, montantHt: r.montantHt })) },
+    );
+  }
+
+  /** Imputation d'un coût réel. Sans noeud, il tombe sur « Frais de chantier ». */
+  async imputerCoutReel(chantierId: string, draft: CoutReelDraft): Promise<void> {
+    await this.post<unknown>(`${this.basePath}/${encodeURIComponent(chantierId)}/couts-reels`, {
+      posteId: draft.noeudId,
+      rubrique: draft.rubrique,
+      montantHt: draft.montantHt,
+      dateCout: draft.dateCout,
+      libelle: draft.libelle,
+      source: draft.source,
+    });
   }
 }

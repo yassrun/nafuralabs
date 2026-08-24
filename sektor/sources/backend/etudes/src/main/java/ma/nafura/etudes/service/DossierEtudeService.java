@@ -75,7 +75,7 @@ public class DossierEtudeService {
     private final ChargeEtudeService chargeEtudeService;
     private final DossierIntervenantService intervenantService;
     private final AvisExecutionRepository avisExecutionRepository;
-    private final BudgetVentilationService budgetVentilationService;
+    private final DebourseDuNoeudService debourseDuNoeudService;
     private final ChainageAvalPort chainageAvalPort;
     private final ConsultationEtudeService consultationEtudeService;
     private final Map<Integer, EtapeGate> gatesParEtape;
@@ -96,7 +96,7 @@ public class DossierEtudeService {
             ChargeEtudeService chargeEtudeService,
             DossierIntervenantService intervenantService,
             AvisExecutionRepository avisExecutionRepository,
-            BudgetVentilationService budgetVentilationService,
+            DebourseDuNoeudService debourseDuNoeudService,
             ChainageAvalPort chainageAvalPort,
             @Lazy ConsultationEtudeService consultationEtudeService,
             List<EtapeGate> gates) {
@@ -115,7 +115,7 @@ public class DossierEtudeService {
         this.chargeEtudeService = chargeEtudeService;
         this.intervenantService = intervenantService;
         this.avisExecutionRepository = avisExecutionRepository;
-        this.budgetVentilationService = budgetVentilationService;
+        this.debourseDuNoeudService = debourseDuNoeudService;
         this.chainageAvalPort = chainageAvalPort;
         this.consultationEtudeService = consultationEtudeService;
         this.gatesParEtape = gates.stream()
@@ -564,8 +564,9 @@ public class DossierEtudeService {
      *       la ligne du dossier fait que deux appels concurrents se rangent derrière ce cas.
      *   <li><b>AC-7</b> — depuis tout autre statut que {@code GAGNE}, refus avec un message
      *       métier.
-     *   <li><b>AC-12</b> — un poste du devis sans lot parent arrête la conversion <b>avant</b>
-     *       toute création, et est nommé. Rien n'est rattaché par défaut.
+     *   <li><b>AC-12</b> — un poste ou un sous-lot du devis sans lot parent identifiable arrête
+     *       la conversion <b>avant</b> toute création, et est nommé. Rien n'est rattaché par
+     *       défaut.
      * </ol>
      *
      * <p><b>AC-10</b> — aucun marché n'est créé : le marché naît à la notification.
@@ -591,8 +592,7 @@ public class DossierEtudeService {
 
         List<DpgfNoeud> noeuds = chargerNoeuds(dossier);
         List<ChainageAvalPort.LotProjection> lots =
-                placerPostesOrphelins(projeterLots(noeuds), body.getPlacementsPostesOrphelins());
-        List<ChainageAvalPort.BudgetRubrique> budget = budgetVentilationService.ventiler(noeuds);
+                placerNoeudsOrphelins(projeterLots(noeuds), body.getPlacementsPostesOrphelins());
 
         BigDecimal montant = body.getMontantHt() != null
                 ? body.getMontantHt()
@@ -625,8 +625,7 @@ public class DossierEtudeService {
                         marcheRef,
                         montant,
                         body.getTauxTva() != null ? body.getTauxTva() : parametres.tvaTauxDefaut(),
-                        lots,
-                        budget));
+                        lots));
 
         dossier.setChantierGenereId(result.chantierId());
         // AC-10 — pas de marché à la conversion : rien à mémoriser côté contractuel.
@@ -649,17 +648,22 @@ public class DossierEtudeService {
     /**
      * AC-12 — un arbre bancal se répare devant l'humain, jamais en silence.
      *
-     * <p>Un article du devis dont le parent n'est pas un lot identifiable est <b>orphelin</b>.
-     * Tant qu'un seul orphelin n'a pas reçu de décision, la conversion s'arrête ici — donc
-     * <b>avant</b> le moindre appel au port, donc avant qu'aucun chantier, arbre ou budget
-     * n'existe — et les orphelins sont nommés dans l'exception. Si l'humain abandonne, il ne
-     * rappelle simplement pas : rien n'a été créé et l'étude reste {@code GAGNE}.
+     * <p>Un nœud du devis dont le parent n'est pas identifiable est <b>orphelin</b>. Tant qu'un
+     * seul orphelin n'a pas reçu de décision, la conversion s'arrête ici — donc <b>avant</b> le
+     * moindre appel au port, donc avant qu'aucun chantier, arbre ou budget n'existe — et les
+     * orphelins sont nommés dans l'exception. Si l'humain abandonne, il ne rappelle simplement
+     * pas : rien n'a été créé et l'étude reste {@code GAGNE}.
      *
-     * <p>Placer, ce n'est pas deviner : chaque poste est rattaché nommément, à un lot existant du
+     * <p><b>Tout nœud, pas seulement les postes</b> (amendement du 24/08 après QA). Un
+     * {@code SOUS_LOT} dont le lot parent est introuvable relève du même traitement : le laisser
+     * remonter à la racine changerait la hiérarchie sans que personne ne le voie. Un {@code LOT},
+     * lui, n'a légitimement jamais de parent — il n'est jamais orphelin.
+     *
+     * <p>Placer, ce n'est pas deviner : chaque nœud est rattaché nommément, à un lot existant du
      * devis ou à un lot d'accueil que l'humain crée. Ce lot d'accueil ne vient pas du devis : il
      * naît sans origine, donc interne (AC-3).
      */
-    private List<ChainageAvalPort.LotProjection> placerPostesOrphelins(
+    private List<ChainageAvalPort.LotProjection> placerNoeudsOrphelins(
             List<ChainageAvalPort.LotProjection> lots, List<PlacementPosteOrphelinDto> placements) {
 
         Set<String> codesDeLot = new LinkedHashSet<>();
@@ -684,7 +688,10 @@ public class DossierEtudeService {
         int ordreAccueil = lots.size();
 
         for (ChainageAvalPort.LotProjection article : lots) {
-            if (!DpgfNoeud.TYPE_ARTICLE.equals(article.type())) {
+            // Un LOT n'a jamais de parent par construction (validateTypeParent) : il n'est pas
+            // orphelin. Les ARTICLE et les SOUS_LOT, si — même règle pour les deux.
+            if (!DpgfNoeud.TYPE_ARTICLE.equals(article.type())
+                    && !DpgfNoeud.TYPE_SOUS_LOT.equals(article.type())) {
                 continue;
             }
             if (StringUtils.hasText(article.parentCode()) && codesDeLot.contains(article.parentCode())) {
@@ -718,7 +725,9 @@ public class DossierEtudeService {
                         null,
                         null,
                         null,
-                        ordreAccueil));
+                        ordreAccueil,
+                        // Un lot d'accueil ne vient pas du devis : rien à copier.
+                        null));
                 parentChoisi.put(article.dpgfNoeudId(), code);
             } else {
                 throw new IllegalArgumentException(
@@ -748,7 +757,8 @@ public class DossierEtudeService {
                             n.quantite(),
                             n.prixUnitaireHt(),
                             n.montantHt(),
-                            n.ordre()));
+                            n.ordre(),
+                            n.debourse()));
         }
         return out;
     }
@@ -772,7 +782,10 @@ public class DossierEtudeService {
                     n.getQuantite(),
                     n.getPrixUnitaire(),
                     n.getTotal(),
-                    ordre++));
+                    ordre++,
+                    // Le déboursé décomposé descend avec le nœud : il n'est plus ré-agrégé en
+                    // un total par rubrique au niveau chantier (budget-et-marge AC-1, AC-8).
+                    debourseDuNoeudService.debourseDuNoeud(n)));
         }
         return out;
     }

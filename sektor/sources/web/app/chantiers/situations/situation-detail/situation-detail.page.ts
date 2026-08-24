@@ -85,46 +85,65 @@ export class SituationDetailPage extends ConfigDrivenDetailPage<Situation> {
   /** Lignes en cours d'édition (signal alimenté par le tableau de saisie). */
   readonly currentLignes = signal<SituationLigne[]>([]);
 
-  /** Valeurs courantes des paramètres décompte (TVA, retenue, avance). */
+  /** Valeurs courantes des paramètres décompte (TVA, retenue, avance, pénalités, RAS). */
   readonly currentParams = signal<{
     retenueGarantiePercent: number;
     retenueAvancePercent?: number;
     tvaTaux: number;
     cumulPrecedentHt: number;
+    penalitesRetardHt?: number;
+    rasTaux?: number;
   }>({
     retenueGarantiePercent: 7,
     retenueAvancePercent: undefined,
     tvaTaux: 20,
     cumulPrecedentHt: 0,
+    penalitesRetardHt: 0,
+    rasTaux: undefined,
   });
 
   readonly decompteLive = computed<DecompteValues>(() => {
     const lignes = this.currentLignes();
     const p = this.currentParams();
-    const cumulCourantHt =
+    // Chaque ligne porte déjà le montant de la période (AC-3) : leur somme EST
+    // travauxPeriodeHt, pas un cumul — le cumul s'obtient en y ajoutant cumulPrecedentHt (AC-6).
+    const travauxPeriodeHt =
       Math.round(
         lignes.reduce((s, l) => s + (l.montantHt || 0), 0) * 100,
       ) / 100;
-    const travauxPeriodeHt =
-      Math.round((cumulCourantHt - p.cumulPrecedentHt) * 100) / 100;
+    const cumulCourantHt =
+      Math.round((p.cumulPrecedentHt + travauxPeriodeHt) * 100) / 100;
+    // AC-10 — pénalités déduites en premier, RG et avance sur l'assiette réduite.
+    const penalitesRetardHt = p.penalitesRetardHt || 0;
+    const assietteRetenues =
+      Math.round((travauxPeriodeHt - penalitesRetardHt) * 100) / 100;
     const retenueGarantieMontant =
-      Math.round((travauxPeriodeHt * p.retenueGarantiePercent) / 100 * 100) /
+      Math.round((assietteRetenues * p.retenueGarantiePercent) / 100 * 100) /
       100;
     const retenueAvanceMontant = p.retenueAvancePercent
       ? Math.round(
-          (travauxPeriodeHt * p.retenueAvancePercent) / 100 * 100,
+          (assietteRetenues * p.retenueAvancePercent) / 100 * 100,
         ) / 100
       : 0;
     const netAPayerHt =
       Math.round(
-        (travauxPeriodeHt - retenueGarantieMontant - retenueAvanceMontant) * 100,
+        (travauxPeriodeHt -
+          penalitesRetardHt -
+          retenueGarantieMontant -
+          retenueAvanceMontant) *
+          100,
       ) / 100;
     const netAPayerTtc =
       Math.round(netAPayerHt * (1 + p.tvaTaux / 100) * 100) / 100;
+    // AC-9, AC-11 — RAS informative, dérivée du net TTC, ne le réduit jamais.
+    const rasMontant = p.rasTaux
+      ? Math.round((netAPayerTtc * p.rasTaux) / 100 * 100) / 100
+      : 0;
     return {
       cumulCourantHt,
       cumulPrecedentHt: p.cumulPrecedentHt,
       travauxPeriodeHt,
+      penalitesRetardHt,
       retenueGarantiePercent: p.retenueGarantiePercent,
       retenueGarantieMontant,
       retenueAvancePercent: p.retenueAvancePercent,
@@ -132,6 +151,8 @@ export class SituationDetailPage extends ConfigDrivenDetailPage<Situation> {
       netAPayerHt,
       tvaTaux: p.tvaTaux,
       netAPayerTtc,
+      rasTaux: p.rasTaux,
+      rasMontant,
     };
   });
 
@@ -146,6 +167,8 @@ export class SituationDetailPage extends ConfigDrivenDetailPage<Situation> {
           retenueAvancePercent: item.retenueAvancePercent,
           tvaTaux: item.tvaTaux ?? 20,
           cumulPrecedentHt: item.cumulPrecedentHt ?? 0,
+          penalitesRetardHt: item.penalitesRetardHt ?? 0,
+          rasTaux: item.rasTaux,
         });
         this.lastPrefilledChantierId = item.chantierId ?? null;
       }
@@ -411,6 +434,7 @@ export class SituationDetailPage extends ConfigDrivenDetailPage<Situation> {
         retenueAvancePercent: retenueAvancePercent || undefined,
         tvaTaux,
         cumulPrecedentHt,
+        penalitesRetardHt: 0,
       });
 
       this.applyLignes(lignes);
@@ -423,7 +447,7 @@ export class SituationDetailPage extends ConfigDrivenDetailPage<Situation> {
   private generateLignesFromLots(lots: LotChantier[]): SituationLigne[] {
     const previousLignes = this.currentLignes();
     return lots.map((lot) => {
-      const previous = previousLignes.find((l) => l.lotId === lot.id);
+      const previous = previousLignes.find((l) => l.noeudId === lot.id);
       const quantiteCumulee =
         lot.avancementPercent > 0
           ? Math.round(
@@ -433,8 +457,8 @@ export class SituationDetailPage extends ConfigDrivenDetailPage<Situation> {
       const prixUnitaire = lot.prixUnitaireHt ?? 0;
       return {
         id: previous?.id ?? safeRandomUUID(),
-        lotId: lot.id,
-        lotCode: lot.code,
+        noeudId: lot.id,
+        code: lot.code,
         designation: lot.designation,
         unite: lot.unite,
         quantiteTotale: lot.quantite,

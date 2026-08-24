@@ -12,4 +12,7 @@ public interface AttachementLigneRepository extends TenantScopedRepository<Attac
     List<AttachementLigne> findByTenantIdAndAttachementIdOrderByOrdreAsc(UUID tenantId, String attachementId);
 
     void deleteByTenantIdAndAttachementId(UUID tenantId, String attachementId);
+
+    /** Contrat {@code situation-et-retenues}, AC-3 — les lignes des attachements consommés. */
+    List<AttachementLigne> findByTenantIdAndAttachementIdInOrderByOrdreAsc(UUID tenantId, List<String> attachementIds);
 }

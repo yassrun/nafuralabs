@@ -9,12 +9,12 @@ import lombok.Data;
 public class SituationLigneDto {
 
     private String id;
-    private String lotId;
-    private String lotCode;
-    private String posteBudgetaireId;
+    private String noeudId;
+    private String code;
     private String designation;
     private String unite;
     private BigDecimal quantiteTotale;
+    private BigDecimal quantitePeriode;
     private BigDecimal quantitePrecedente;
     private BigDecimal quantiteCumulee;
     private BigDecimal prixUnitaire;

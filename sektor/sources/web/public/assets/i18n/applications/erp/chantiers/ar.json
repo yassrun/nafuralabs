@@ -598,26 +598,37 @@
     },
     "attachement": {
       "title": "المرفقات",
+      "zone": "المنطقة",
       "list": {
         "searchPlaceholder": "الورش، التاريخ…",
         "allStatuses": "جميع الحالات",
         "signedShort": "✍️ موقَّع",
         "columns": {
+          "code": "الرمز",
           "designation": "التسمية",
           "unite": "الوحدة",
-          "qteExecutee": "الكمية المنفذة"
+          "qteExecutee": "الكمية المنجزة"
         },
         "emptyState": "لم يتم العثور على أي مرفق.",
-        "saisieCta": "إدخال ميداني"
+        "saisieCta": "مرفق جديد"
       },
       "saisie": {
-        "addLine": "سطر",
+        "title": "مرفق جديد",
+        "subtitle": "الفترة، مبنية من تصريحات التقدم",
+        "periodeDebut": "من",
+        "periodeFin": "إلى",
         "meteoEnsoleille": "مشمس",
-        "lignesExecutees": "الأسطر المنفذة",
-        "designationPlaceholder": "التسمية",
-        "unitePlaceholder": "الوحدة",
-        "signatureMoeTitle": "توقيع MOE (تجريبي)",
-        "signatureMoeHint": "وقّع داخل الإطار أدناه (معاينة PNG خفيفة، تُحفظ مع المسودة)."
+        "monterCta": "بناء المرفق",
+        "montage": "جارٍ البناء…",
+        "lignesTitle": "كميات الفترة",
+        "sansZone": "بدون منطقة",
+        "soumettreCta": "إرسال لتوقيع MOE",
+        "contesterCta": "اعتراض — رجوع إلى التصريح",
+        "lienSignatureCta": "الحصول على رابط التوقيع",
+        "lienSignatureHint": "رابط لاستعمال واحد، صالح لمدة 7 أيام — يُرسل إلى MOE:",
+        "figeHint": "موقَّع: لا شيء يتغير هنا بعد الآن. يُسوّى الفرق في الفترة الموالية.",
+        "periodeSansQuantite": "لم يتم التصريح بأي كمية خلال هذه الفترة.",
+        "periodeChevauchante": "هذه الفترة تتداخل مع مرفق موجود."
       }
     },
     "sousTraitance": {

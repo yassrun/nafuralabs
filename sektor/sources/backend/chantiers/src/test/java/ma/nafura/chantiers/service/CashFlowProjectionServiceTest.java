@@ -53,6 +53,9 @@ class CashFlowProjectionServiceTest {
     @Mock
     private FichePaieSeedService fichePaieSeedService;
 
+    @Mock
+    private AvancementLectureService avancementLectureService;
+
     private CashFlowProjectionService service;
     private final UUID tenantId = UUID.randomUUID();
 
@@ -67,7 +70,8 @@ class CashFlowProjectionServiceTest {
                 chantierRepository,
                 chantierSeedService,
                 fichePaieRepository,
-                fichePaieSeedService);
+                fichePaieSeedService,
+                avancementLectureService);
     }
 
     @AfterEach

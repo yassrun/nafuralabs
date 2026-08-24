@@ -42,7 +42,7 @@ public class ChantierSummaryReadService {
 
         BigDecimal avancement = chantier.getAvancementPercent() != null
                 ? chantier.getAvancementPercent().setScale(1, RoundingMode.HALF_UP)
-                : BigDecimal.ZERO;
+                : null;
 
         return ChantierSummaryDto.builder()
                 .chantier(chantier)

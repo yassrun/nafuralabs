@@ -1,20 +1,19 @@
 import { Injectable, LOCALE_ID, computed, inject, signal } from '@angular/core';
 
 import {
+  type BudgetArbre,
   type BudgetFilters,
   type BudgetRevisionDraft,
   type BudgetRubrique,
   type ChantierBudget,
   type ChantierBudgetStatus,
+  type CoutReelDraft,
+  type DebourseNoeudDraft,
 } from '../models';
 import { ErpAuditService } from '@app/socle/shell/erp-audit.service';
 import { ChantierApiService } from '../../services/chantier-api.service';
 
-import {
-  apiBudgetToChantierBudget,
-  BudgetApiService,
-  chantierBudgetToApiUpsert,
-} from './budget-api.service';
+import { apiBudgetToChantierBudget, BudgetApiService } from './budget-api.service';
 
 /**
  * Input describing a stock outflow validated for a chantier. The Budget facade
@@ -24,7 +23,7 @@ import {
 export interface ConsommationChantierInput {
   /** Chantier id (preferred) or chantier code — both are matched. */
   chantierId: string;
-  /** Rubrique target (MATERIAUX, MO, SOUS_TRAITANCE, …). */
+  /** Rubrique cible (MATIERE, MAIN_DOEUVRE, MATERIEL, SOUS_TRAITANCE). */
   rubrique: string;
   /** Montant HT (qte × prixPMP) à incrémenter dans réalisé. */
   montantHt: number;
@@ -114,6 +113,7 @@ export class BudgetFacade {
   private readonly chantierApi = inject(ChantierApiService);
   private readonly locale = inject(LOCALE_ID);
   private readonly budgetsState = signal<ChantierBudget[]>([]);
+  private readonly arbresState = signal<Record<string, BudgetArbre>>({});
   private readonly filtersState = signal<BudgetFilters>(DEFAULT_FILTERS);
 
   readonly filters = this.filtersState.asReadonly();
@@ -265,7 +265,7 @@ export class BudgetFacade {
   }> {
     return this.budgetsState()
       .map((b) => {
-        const mat = b.lignes.find((l) => l.rubrique === 'MATERIAUX');
+        const mat = b.lignes.find((l) => l.rubrique === 'MATIERE');
         const stockHt = mat?.realiseMatiereStockHt ?? 0;
         const revise = mat?.reviseHt ?? 0;
         const ratioStockVsRevise = revise ? stockHt / revise : 0;
@@ -383,59 +383,53 @@ export class BudgetFacade {
     return anyUpdated;
   }
 
-  saveRevision(draft: BudgetRevisionDraft): void {
-    this.budgetsState.update((current) =>
-      current.map((budget) => {
-        if (budget.id !== draft.chantierId) return budget;
+  /** L'arbre du chantier : déboursé, marge, avancement et écart à chaque étage. */
+  async loadArbre(chantierId: string): Promise<BudgetArbre | undefined> {
+    try {
+      const arbre = await this.budgetApi.getArbre(chantierId);
+      this.arbresState.update((current) => ({ ...current, [chantierId]: arbre }));
+      return arbre;
+    } catch {
+      return this.arbresState()[chantierId];
+    }
+  }
 
-        const previousTotal = budget.budgetReviseHt;
-        const lignes = budget.lignes.map((line) => {
-          const next = draft.lignes.find((item) => item.rubrique === line.rubrique);
-          if (!next) return line;
-          const reviseHt = next.reviseHt;
-          return {
-            ...line,
-            reviseHt,
-            resteHt: reviseHt - line.engageHt,
-            ecartHt: reviseHt - line.realiseHt,
-            ecartPercent: reviseHt ? Number((((reviseHt - line.realiseHt) / reviseHt) * 100).toFixed(1)) : 0,
-          };
-        });
+  arbre(chantierId: string): BudgetArbre | undefined {
+    return this.arbresState()[chantierId];
+  }
 
-        const nextBudget = computeDerived({
-          ...budget,
-          lignes,
-          revisions: [
-            {
-              id: `r-${Date.now()}`,
-              date: new Date().toISOString().slice(0, 10),
-              ancienBudgetTotal: previousTotal,
-              nouveauBudgetTotal: lignes.reduce((sum, line) => sum + line.reviseHt, 0),
-              motif: draft.motif,
-              pieceName: draft.pieceName,
-            },
-            ...budget.revisions,
-          ],
-        });
+  /**
+   * Réviser le déboursé d'un **noeud**.
+   *
+   * <p>Le prévu n'est jamais réécrit : la correction se pose à côté, et l'écart entre les deux
+   * reste lisible. Le budget par rubrique agrégé au chantier n'existe plus — il n'y a donc plus
+   * rien à écrire à ce niveau, et ce qui remonte est recalculé depuis l'arbre.
+   */
+  async reviserNoeud(draft: BudgetRevisionDraft): Promise<void> {
+    await this.budgetApi.reviserDebourse({
+      noeudId: draft.noeudId,
+      rubriques: draft.lignes
+        .filter((ligne) => ligne.rubrique !== 'NON_VENTILE')
+        .map((ligne) => ({ rubrique: ligne.rubrique, montantHt: ligne.reviseHt })),
+    });
+    this.audit?.log('UPDATE', 'BUDGET_NOEUD', draft.noeudId, draft.motif, 'Révision du déboursé');
+    await this.refresh(draft.chantierId);
+  }
 
-        const updated = {
-          ...nextBudget,
-          alerte: nextBudget.consommationPercent > 90 || nextBudget.margeProjeteePercent < 5,
-          alertMessage:
-            nextBudget.consommationPercent > 100
-              ? 'Le niveau de consommation depasse le budget revise.'
-              : nextBudget.margeProjeteePercent < 5
-                ? 'La marge projetee est sous le seuil de vigilance.'
-                : budget.alertMessage,
-        };
+  /** Saisir le déboursé d'un noeud interne — il n'a aucune étude derrière lui. */
+  async saisirDebourseInterne(chantierId: string, draft: DebourseNoeudDraft): Promise<void> {
+    await this.budgetApi.saisirDebourse(draft);
+    await this.refresh(chantierId);
+  }
 
-        void this.budgetApi
-          .upsert(draft.chantierId, chantierBudgetToApiUpsert(updated))
-          .then((api) => apiBudgetToChantierBudget(api))
-          .catch(() => undefined);
+  /** Imputer un coût réel. Sans noeud, il tombe sur « Frais de chantier » et reste ré-imputable. */
+  async imputerCoutReel(chantierId: string, draft: CoutReelDraft): Promise<void> {
+    await this.budgetApi.imputerCoutReel(chantierId, draft);
+    await this.refresh(chantierId);
+  }
 
-        return updated;
-      })
-    );
+  private async refresh(chantierId: string): Promise<void> {
+    await this.loadArbre(chantierId);
+    await this.loadBudgetFromApi(chantierId);
   }
 }

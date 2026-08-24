@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -64,7 +65,13 @@ public class ChantierLot {
     @Column(name = "montant_ht", precision = 18, scale = 4)
     private BigDecimal montantHt;
 
-    @Column(name = "avancement_percent", nullable = false, precision = 8, scale = 4)
+    /**
+     * Avancement lu, jamais stocké (AC-2 / AC-3 du contrat avancement-et-attachement) :
+     * {@code fait / prévu}, pondéré au montant vendu des enfants (AC-4). Peuplé à la lecture par
+     * {@link ma.nafura.chantiers.service.AvancementLectureService} ; {@code null} quand aucun
+     * enfant vendu ne porte de poids — pas un 0 % mensonger (AC-4).
+     */
+    @Transient
     private BigDecimal avancementPercent;
 
     @Column(nullable = false)
@@ -83,9 +90,6 @@ public class ChantierLot {
             createdAt = now;
         }
         updatedAt = now;
-        if (avancementPercent == null) {
-            avancementPercent = BigDecimal.ZERO;
-        }
         if (nature == null) {
             nature = NatureLigne.DEFAUT_SAISIE;
         }

@@ -12,6 +12,12 @@
     <span>{{ 'chantiers.situation.detail.decompte.travauxPeriodeHt' | translate }}</span>
     <strong>{{ v().travauxPeriodeHt | number: '1.2-2' }} MAD</strong>
   </div>
+  @if ((v().penalitesRetardHt || 0) > 0) {
+    <div class="dc__row dc__row--minus">
+      <span>– Pénalités de retard</span>
+      <span>{{ v().penalitesRetardHt | number: '1.2-2' }} MAD</span>
+    </div>
+  }
   <div class="dc__row dc__row--minus">
     <span>– Retenue garantie ({{ v().retenueGarantiePercent }}%)</span>
     <span>{{ v().retenueGarantieMontant | number: '1.2-2' }} MAD</span>
@@ -36,6 +42,12 @@
     <span>{{ 'chantiers.situation.detail.decompte.netTtc' | translate }}</span>
     <strong>{{ v().netAPayerTtc | number: '1.2-2' }} MAD</strong>
   </div>
+  @if ((v().rasTaux || 0) > 0) {
+    <div class="dc__row dc__row--info">
+      <span>RAS ({{ v().rasTaux }}%) — retenue par le client au règlement</span>
+      <span>{{ v().rasMontant | number: '1.2-2' }} MAD</span>
+    </div>
+  }
   <div class="dc__legal">
     Retenue garantie {{ v().retenueGarantiePercent }}% conformément à l'article du marché.
   </div>

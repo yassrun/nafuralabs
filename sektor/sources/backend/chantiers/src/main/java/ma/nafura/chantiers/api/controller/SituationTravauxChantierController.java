@@ -43,7 +43,10 @@ public class SituationTravauxChantierController {
     @PostMapping("/generate")
     @RequirePermission("chantiers.create")
     public ResponseEntity<SituationTravauxDto> generate(
-            @PathVariable String chantierId, @RequestParam(name = "numero") int numero) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.generate(chantierId, numero));
+            @PathVariable String chantierId,
+            @RequestParam(name = "numero") int numero,
+            @RequestParam(name = "penalitesRetardHt", required = false) BigDecimal penalitesRetardHt) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(service.generate(chantierId, numero, penalitesRetardHt));
     }
 }

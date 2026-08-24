@@ -66,6 +66,14 @@
       }
     }
 
+    // AC-11 — RAS : ligne informative, jamais déduite du net à payer ci-dessus.
+    &--info {
+      margin-top: 4px;
+      font-size: 11px;
+      font-style: italic;
+      color: var(--nf-color-text-muted);
+    }
+
     &--final {
       margin-top: 6px;
       padding: 8px 12px;

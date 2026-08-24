@@ -1161,3 +1161,58 @@ test.describe('SEKTOR-150 — arbre vendu / interne et conversion depuis GAGNE',
     expect(page.url()).toContain('poste=');
   });
 });
+
+// ══════════════════════════════════════════════════════════════════════════════
+// SEKTOR-173 — AC-12 étendu : un sous-lot ne remonte jamais à la racine en silence
+// ══════════════════════════════════════════════════════════════════════════════
+
+test.describe('SEKTOR-173 — sous-lot et ordre du bordereau', () => {
+  /**
+   * Le sous-lot est affiché **avant** son lot parent (`ordre` plus petit) — ce que
+   * produit une renumérotation manuelle du bordereau, ou une extraction IA qui suit
+   * la mise en page du PDF plutôt que la hiérarchie.
+   *
+   * Sa donnée est parfaitement valide : `validateTypeParent` exige un parent pour
+   * tout `SOUS_LOT`. C'est la conversion qui, en un seul passage, ne le trouvait pas
+   * encore et créait le sous-lot à la racine, **sans rien dire**.
+   */
+  test('chantier-conversion-sous-lot-avant-son-parent', async ({ request }) => {
+    const session = await cursorSession(request);
+    test.skip(!session, 'cursor-session indisponible — backend Mode B non déployé');
+    if (!session) return;
+    const s = suffix();
+
+    const etude = await seedEtudeGagneeArbreProfond(request, session, s);
+
+    // On inverse l'ordre d'affichage : le sous-lot passe devant son lot.
+    const majOrdre = async (code: string, ordre: number) => {
+      const res = await request.put(
+        `${API_BASE}/api/v1/etudes/dpgf-noeuds/${etude.noeudIdByCode[code]}`,
+        { headers: headers(session), data: { ordre } },
+      );
+      expect(res.ok(), await res.text()).toBeTruthy();
+    };
+    await majOrdre('1.A', 0); // le sous-lot d'abord…
+    await majOrdre('1', 1); // …son lot parent ensuite
+
+    const ok = await convertir(request, session, etude.dossierId, {
+      chantierCode: `CH-173-${s}`,
+      ...CONVERSION_MINIMALE,
+    });
+    expect(ok.status, JSON.stringify(ok.body)).toBe(200);
+    const chantierId = ok.body['chantierId'] as string;
+
+    const lots = await lireLots(request, session, chantierId);
+    const lot1 = lots.find((l) => l.code === '1');
+    const sousLot = lots.find((l) => l.code === '1.A');
+    expect(lot1, 'le lot 1 doit exister').toBeTruthy();
+    expect(sousLot, 'le sous-lot 1.A doit exister').toBeTruthy();
+
+    // Le cœur du bug : le sous-lot garde son parent malgré l'ordre inversé.
+    expect(sousLot!.parentLotId).toBe(lot1!.id);
+
+    // Et il n'est donc pas devenu une racine.
+    const racines = lots.filter((l) => !l.parentLotId).map((l) => l.code).sort();
+    expect(racines).toEqual(['1', '2']);
+  });
+});

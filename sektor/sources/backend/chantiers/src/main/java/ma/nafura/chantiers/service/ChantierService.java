@@ -29,17 +29,17 @@ public class ChantierService {
 
     private final ChantierRepository repository;
     private final ChantierSeedService seedService;
-    private final ChantierProgressSyncService progressSyncService;
+    private final AvancementLectureService avancementLectureService;
     private final ChantierScopeService scopeService;
 
     public ChantierService(
             ChantierRepository repository,
             ChantierSeedService seedService,
-            ChantierProgressSyncService progressSyncService,
+            AvancementLectureService avancementLectureService,
             ChantierScopeService scopeService) {
         this.repository = repository;
         this.seedService = seedService;
-        this.progressSyncService = progressSyncService;
+        this.avancementLectureService = avancementLectureService;
         this.scopeService = scopeService;
     }
 
@@ -57,6 +57,7 @@ public class ChantierService {
             String term = search.trim().toLowerCase(Locale.ROOT);
             rows = rows.stream().filter(c -> matchesSearch(c, term)).toList();
         }
+        rows.forEach(this::hydrateAvancement);
         return rows;
     }
 
@@ -72,13 +73,22 @@ public class ChantierService {
                 .toList();
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Chantier getById(String id) {
         seedService.seedIfEmpty();
-        progressSyncService.syncFromAvancements(id);
         Chantier chantier = resolve(id).orElseThrow(() -> new IllegalArgumentException("Chantier not found"));
         scopeService.assertCanAccess(chantier.getId());
+        hydrateAvancement(chantier);
         return chantier;
+    }
+
+    /**
+     * AC-2, AC-3, AC-4 — l'avancement du chantier ne se stocke plus : il se lit, pondéré au
+     * montant vendu de ses lots racines. Ne persiste rien, {@code avancementPercent} est
+     * {@code @Transient}.
+     */
+    private void hydrateAvancement(Chantier chantier) {
+        chantier.setAvancementPercent(avancementLectureService.hydrateArbre(chantier.getId()));
     }
 
     @Transactional
@@ -119,7 +129,6 @@ public class ChantierService {
                 .tauxRg(request.getTauxRg())
                 .tauxRas(request.getTauxRas())
                 .tauxAvance(request.getTauxAvance())
-                .avancementPercent(defaultRate(request.getAvancementPercent(), BigDecimal.ZERO))
                 .status(resolveBackendStatus(request.getStatus(), Chantier.STATUS_BROUILLON))
                 .societeId(trimOrNull(request.getSocieteId()))
                 .active(request.getActive() == null || request.getActive())
@@ -206,9 +215,6 @@ public class ChantierService {
         }
         if (request.getTauxAvance() != null) {
             entity.setTauxAvance(request.getTauxAvance());
-        }
-        if (request.getAvancementPercent() != null) {
-            entity.setAvancementPercent(request.getAvancementPercent());
         }
         if (request.getStatus() != null) {
             entity.setStatus(resolveBackendStatus(request.getStatus(), entity.getStatus()));

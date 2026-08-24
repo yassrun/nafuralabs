@@ -35,7 +35,7 @@
         }
         @for (line of displayLines(); track trackById($index, line); let i = $index) {
           <tr [class.lst__row--alert]="alerteRegression(line)">
-            <td class="lst__cell-strong">{{ line.lotCode || '—' }}</td>
+            <td class="lst__cell-strong">{{ line.code || '—' }}</td>
             <td>
               <div class="lst__designation">{{ line.designation }}</div>
             </td>

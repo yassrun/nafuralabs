@@ -598,26 +598,37 @@
     },
     "attachement": {
       "title": "As-built records",
+      "zone": "Zone",
       "list": {
         "searchPlaceholder": "Site, date…",
         "allStatuses": "All statuses",
         "signedShort": "✍️ Signed",
         "columns": {
+          "code": "Code",
           "designation": "Description",
           "unite": "Unit",
-          "qteExecutee": "Executed qty"
+          "qteExecutee": "Quantity done"
         },
         "emptyState": "No as-built record found.",
-        "saisieCta": "Field entry"
+        "saisieCta": "New record"
       },
       "saisie": {
-        "addLine": "Line",
+        "title": "New as-built record",
+        "subtitle": "The period, built from progress declarations",
+        "periodeDebut": "From",
+        "periodeFin": "To",
         "meteoEnsoleille": "Sunny",
-        "lignesExecutees": "Executed lines",
-        "designationPlaceholder": "Description",
-        "unitePlaceholder": "Unit",
-        "signatureMoeTitle": "MOE signature (demo)",
-        "signatureMoeHint": "Sign in the box below (lightweight PNG preview, stored with the draft)."
+        "monterCta": "Build the record",
+        "montage": "Building…",
+        "lignesTitle": "Quantities for the period",
+        "sansZone": "No zone",
+        "soumettreCta": "Submit for site-manager signature",
+        "contesterCta": "Dispute — back to the declaration",
+        "lienSignatureCta": "Get the signature link",
+        "lienSignatureHint": "Single-use link, valid 7 days — share it with the site manager:",
+        "figeHint": "Signed: nothing changes here anymore. The difference is settled on the next period.",
+        "periodeSansQuantite": "No quantity was declared for this period.",
+        "periodeChevauchante": "This period overlaps an existing record."
       }
     },
     "sousTraitance": {

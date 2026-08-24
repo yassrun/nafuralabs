@@ -34,7 +34,7 @@ public class ChantierLotService {
     private final ChantierLotRepository repository;
     private final ChantierService chantierService;
     private final ChantierLotSeedService seedService;
-    private final ChantierProgressSyncService progressSyncService;
+    private final AvancementLectureService avancementLectureService;
     private final PosteBudgetaireRepository posteRepository;
     private final PosteBudgetaireService posteBudgetaireService;
 
@@ -42,23 +42,24 @@ public class ChantierLotService {
             ChantierLotRepository repository,
             ChantierService chantierService,
             ChantierLotSeedService seedService,
-            ChantierProgressSyncService progressSyncService,
+            AvancementLectureService avancementLectureService,
             PosteBudgetaireRepository posteRepository,
             PosteBudgetaireService posteBudgetaireService) {
         this.repository = repository;
         this.chantierService = chantierService;
         this.seedService = seedService;
-        this.progressSyncService = progressSyncService;
+        this.avancementLectureService = avancementLectureService;
         this.posteRepository = posteRepository;
         this.posteBudgetaireService = posteBudgetaireService;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<ChantierLot> listByChantier(String chantierId) {
         seedService.seedIfEmpty();
         chantierService.getById(chantierId);
-        progressSyncService.syncFromAvancements(chantierId);
-        return repository.findByTenantIdAndChantierIdOrderByOrdreAscCodeAsc(tenantId(), chantierId);
+        List<ChantierLot> lots = repository.findByTenantIdAndChantierIdOrderByOrdreAscCodeAsc(tenantId(), chantierId);
+        avancementLectureService.hydrate(lots);
+        return lots;
     }
 
     /**
@@ -127,10 +128,6 @@ public class ChantierLotService {
                 .quantite(request.getQuantite())
                 .prixUnitaireHt(nature.estVendu() ? request.getPrixUnitaireHt() : null)
                 .montantHt(nature.estVendu() ? resolveMontantHt(request) : null)
-                .avancementPercent(
-                        request.getAvancementPercent() != null
-                                ? request.getAvancementPercent()
-                                : BigDecimal.ZERO)
                 .ordre(ordre)
                 .build();
         return repository.save(entity);
@@ -187,9 +184,6 @@ public class ChantierLotService {
         } else if (request.getQuantite() != null && request.getPrixUnitaireHt() != null) {
             entity.setMontantHt(request.getQuantite().multiply(request.getPrixUnitaireHt()));
         }
-        if (request.getAvancementPercent() != null) {
-            entity.setAvancementPercent(request.getAvancementPercent());
-        }
         if (request.getOrdre() != null) {
             entity.setOrdre(request.getOrdre());
         }
@@ -222,7 +216,6 @@ public class ChantierLotService {
         createDto.setDesignation(node.getDesignation());
         createDto.setParentLotId(parentLotId);
         createDto.setOrdre(ordre);
-        createDto.setAvancementPercent(BigDecimal.ZERO);
 
         ChantierLot created = create(chantierId, createDto);
 

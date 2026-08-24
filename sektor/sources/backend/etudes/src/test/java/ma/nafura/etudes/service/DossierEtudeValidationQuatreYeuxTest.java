@@ -107,7 +107,7 @@ class DossierEtudeValidationQuatreYeuxTest {
                 chargeEtudeService,
                 intervenantService,
                 mock(AvisExecutionRepository.class),
-                mock(BudgetVentilationService.class),
+                mock(DebourseDuNoeudService.class),
                 mock(ma.nafura.etudes.service.port.bc.ChainageAvalPort.class),
                 mock(ma.nafura.etudes.service.ConsultationEtudeService.class),
                 List.of());

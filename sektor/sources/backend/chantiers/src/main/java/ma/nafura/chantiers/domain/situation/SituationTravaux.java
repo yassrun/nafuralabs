@@ -65,6 +65,10 @@ public class SituationTravaux {
     @Column(name = "travaux_periode_ht", nullable = false, precision = 18, scale = 4)
     private BigDecimal travauxPeriodeHt;
 
+    /** AC-8 — montant saisi, jamais dérivé d'un planning, zéro par défaut. Figé à VALIDEE_MOA. */
+    @Column(name = "penalites_retard_ht", nullable = false, precision = 18, scale = 4)
+    private BigDecimal penalitesRetardHt;
+
     @Column(name = "retenue_garantie_percent", nullable = false, precision = 8, scale = 4)
     private BigDecimal retenueGarantiePercent;
 
@@ -85,6 +89,17 @@ public class SituationTravaux {
 
     @Column(name = "net_a_payer_ttc", nullable = false, precision = 18, scale = 4)
     private BigDecimal netAPayerTtc;
+
+    /**
+     * AC-9 — dérivée de {@code Chantier.tauxRas} à la génération, jamais saisie sur la
+     * situation. AC-11 — purement informative : ne réduit jamais {@code netAPayerTtc}, ni ce que
+     * lit {@code SituationToFacturePort}.
+     */
+    @Column(name = "ras_taux", precision = 8, scale = 4)
+    private BigDecimal rasTaux;
+
+    @Column(name = "ras_montant", nullable = false, precision = 18, scale = 4)
+    private BigDecimal rasMontant;
 
     @Column(nullable = false, length = 20)
     private String status;
@@ -126,6 +141,9 @@ public class SituationTravaux {
         if (travauxPeriodeHt == null) {
             travauxPeriodeHt = BigDecimal.ZERO;
         }
+        if (penalitesRetardHt == null) {
+            penalitesRetardHt = BigDecimal.ZERO;
+        }
         if (retenueGarantiePercent == null) {
             retenueGarantiePercent = BigDecimal.ZERO;
         }
@@ -140,6 +158,9 @@ public class SituationTravaux {
         }
         if (netAPayerTtc == null) {
             netAPayerTtc = BigDecimal.ZERO;
+        }
+        if (rasMontant == null) {
+            rasMontant = BigDecimal.ZERO;
         }
         if (!StringUtils.hasText(status)) {
             status = STATUS_BROUILLON;

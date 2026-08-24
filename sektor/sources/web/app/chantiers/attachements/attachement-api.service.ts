@@ -2,14 +2,19 @@ import { Injectable } from '@angular/core';
 
 import { FeatureApiService } from '@platform/lib/anatomy';
 
-import type { Attachement, AttachementLigne, AttachementStatus, MeteoCode } from './attachement.models';
+import type { Attachement, AttachementLigne, AttachementStatus, MeteoCode, ZoneChantier } from './attachement.models';
 
 interface ApiAttachementLigne {
-  posteCode: string;
+  id: string;
+  noeudId: string;
+  code: string;
   designation: string;
-  quantiteExecutee: number;
   unite: string;
-  zone?: string;
+  quantitePeriode: number;
+  prixUnitaireVendu?: number;
+  montantHt?: number;
+  zoneId?: string;
+  zoneLibelle?: string;
 }
 
 interface ApiAttachement {
@@ -17,7 +22,8 @@ interface ApiAttachement {
   numero: string;
   chantierId: string;
   chantierCode?: string;
-  date: string;
+  dateDebut: string;
+  dateFin: string;
   meteoCode?: MeteoCode;
   temperatureC?: number;
   effectifPresent: number;
@@ -26,13 +32,43 @@ interface ApiAttachement {
   signatureMoeDataUrl?: string;
 }
 
+interface ApiZoneChantier {
+  id: string;
+  chantierId: string;
+  designation: string;
+  parentZoneId?: string;
+  ordre: number;
+}
+
+/** AC-19 — le jeton n'est rendu qu'une fois, à la génération du lien. */
+export interface LienSignature {
+  token: string;
+  url: string;
+  expiresAt: string;
+}
+
+/** AC-10, AC-11 — une période, jamais une grille de lignes : le montage est fait côté serveur. */
 export interface AttachementCreateInput {
-  date: string;
+  dateDebut: string;
+  dateFin: string;
   meteoCode?: MeteoCode;
   temperatureC?: number;
   effectifPresent: number;
-  lignes: AttachementLigne[];
-  signatureMoeDataUrl?: string;
+}
+
+function apiLigneToUi(row: ApiAttachementLigne): AttachementLigne {
+  return {
+    id: row.id,
+    noeudId: row.noeudId,
+    code: row.code,
+    designation: row.designation,
+    unite: row.unite,
+    quantitePeriode: Number(row.quantitePeriode ?? 0),
+    prixUnitaireVendu: row.prixUnitaireVendu != null ? Number(row.prixUnitaireVendu) : undefined,
+    montantHt: row.montantHt != null ? Number(row.montantHt) : undefined,
+    zoneId: row.zoneId,
+    zoneLibelle: row.zoneLibelle,
+  };
 }
 
 function apiToUi(row: ApiAttachement): Attachement {
@@ -41,19 +77,24 @@ function apiToUi(row: ApiAttachement): Attachement {
     numero: row.numero,
     chantierId: row.chantierId,
     chantierCode: row.chantierCode ?? row.chantierId,
-    date: row.date,
+    dateDebut: row.dateDebut,
+    dateFin: row.dateFin,
     meteoCode: row.meteoCode,
     temperatureC: row.temperatureC,
     effectifPresent: Number(row.effectifPresent ?? 0),
-    lignes: (row.lignes ?? []).map((l) => ({
-      posteCode: l.posteCode,
-      designation: l.designation,
-      quantiteExecutee: Number(l.quantiteExecutee ?? 0),
-      unite: l.unite,
-      zone: l.zone,
-    })),
+    lignes: (row.lignes ?? []).map(apiLigneToUi),
     status: row.status,
     signatureMoeDataUrl: row.signatureMoeDataUrl,
+  };
+}
+
+function apiZoneToUi(row: ApiZoneChantier): ZoneChantier {
+  return {
+    id: row.id,
+    chantierId: row.chantierId,
+    designation: row.designation,
+    parentZoneId: row.parentZoneId,
+    ordre: row.ordre,
   };
 }
 
@@ -71,6 +112,7 @@ export class AttachementApiService extends FeatureApiService<Attachement, Attach
     return (rows ?? []).map(apiToUi);
   }
 
+  /** AC-11 — le montage se fait côté serveur depuis les déclarations de la période. */
   async createForChantier(chantierId: string, body: AttachementCreateInput): Promise<Attachement> {
     const row = await this.post<ApiAttachement>(`${this.basePath}/${chantierId}/attachements`, body);
     return apiToUi(row);
@@ -79,5 +121,29 @@ export class AttachementApiService extends FeatureApiService<Attachement, Attach
   async soumettreSignature(id: string): Promise<Attachement> {
     const row = await this.post<ApiAttachement>(`/api/v1/attachements/${id}/soumettre-signature`, {});
     return apiToUi(row);
+  }
+
+  /** AC-17 — retour en brouillon + remontage depuis les déclarations. */
+  async contester(id: string): Promise<Attachement> {
+    const row = await this.post<ApiAttachement>(`/api/v1/attachements/${id}/contester`, {});
+    return apiToUi(row);
+  }
+
+  /** AC-14 — la zone facultative d'une ligne, choisie dans le référentiel du chantier. */
+  async assignerZone(attachementId: string, ligneId: string, zoneId: string | null): Promise<Attachement> {
+    const row = await this.put<ApiAttachement>(`/api/v1/attachements/${attachementId}/lignes/${ligneId}/zone`, {
+      zoneId,
+    });
+    return apiToUi(row);
+  }
+
+  async listZones(chantierId: string): Promise<ZoneChantier[]> {
+    const rows = await this.get<ApiZoneChantier[]>(`${this.basePath}/${chantierId}/zones`);
+    return (rows ?? []).map(apiZoneToUi);
+  }
+
+  /** AC-19 — jeton aléatoire, distinct de l'id de l'attachement, rendu une seule fois. */
+  async genererLienSignature(attachementId: string): Promise<LienSignature> {
+    return this.post<LienSignature>(`/api/v1/attachements/${attachementId}/lien-signature`, {});
   }
 }

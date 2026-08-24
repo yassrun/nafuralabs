@@ -22,6 +22,7 @@ public class SituationTravauxDto {
     private BigDecimal cumulPrecedentHt;
     private BigDecimal cumulCourantHt;
     private BigDecimal travauxPeriodeHt;
+    private BigDecimal penalitesRetardHt;
     private BigDecimal retenueGarantiePercent;
     private BigDecimal retenueGarantieMontant;
     private BigDecimal retenueAvancePercent;
@@ -29,6 +30,8 @@ public class SituationTravauxDto {
     private BigDecimal netAPayerHt;
     private BigDecimal tvaTaux;
     private BigDecimal netAPayerTtc;
+    private BigDecimal rasTaux;
+    private BigDecimal rasMontant;
     private String status;
     private String factureId;
     private String approbateurMOAName;

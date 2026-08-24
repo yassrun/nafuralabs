@@ -7,6 +7,7 @@ import ma.nafura.chantiers.service.AvancementPhysiqueService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -36,5 +37,13 @@ public class AvancementPhysiqueItemController {
     @RequirePermission("chantiers.update")
     public ResponseEntity<AvancementPhysiqueDto> valider(@PathVariable String id) {
         return ResponseEntity.ok(service.valider(id));
+    }
+
+    /** AC-7 — une déclaration s'annule tant qu'aucun attachement signé ne l'a reprise. */
+    @DeleteMapping("/{id}")
+    @RequirePermission("chantiers.delete")
+    public ResponseEntity<Void> annuler(@PathVariable String id) {
+        service.annuler(id);
+        return ResponseEntity.noContent().build();
     }
 }

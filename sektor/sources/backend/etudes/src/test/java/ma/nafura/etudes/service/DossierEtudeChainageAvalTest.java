@@ -93,7 +93,7 @@ class DossierEtudeChainageAvalTest {
     private DossierIntervenantService intervenantService;
 
     @Mock
-    private BudgetVentilationService budgetVentilationService;
+    private DebourseDuNoeudService debourseDuNoeudService;
 
     @Mock
     private ChainageAvalPort chainageAvalPort;
@@ -119,7 +119,7 @@ class DossierEtudeChainageAvalTest {
                 chargeEtudeService,
                 intervenantService,
                 mock(AvisExecutionRepository.class),
-                budgetVentilationService,
+                debourseDuNoeudService,
                 chainageAvalPort,
                 mock(ConsultationEtudeService.class),
                 List.of());
@@ -185,7 +185,6 @@ class DossierEtudeChainageAvalTest {
         dossier.setMontantAttribue(new BigDecimal("100000"));
         when(repository.lockByIdAndTenantId(DOSSIER_ID, TENANT)).thenReturn(Optional.of(dossier));
         when(parametres.tvaTauxDefaut()).thenReturn(new BigDecimal("20"));
-        when(budgetVentilationService.ventiler(any())).thenReturn(List.of());
         when(chainageAvalPort.convert(any()))
                 .thenReturn(new ChainageAvalPort.ConversionResult("CH-1"));
 
@@ -279,7 +278,6 @@ class DossierEtudeChainageAvalTest {
         when(noeudRepository.findByDpgfIdAndTenantIdOrderByOrdreAsc(DPGF_ID, TENANT))
                 .thenReturn(noeudsAvecUnOrphelin());
         when(parametres.tvaTauxDefaut()).thenReturn(new BigDecimal("20"));
-        when(budgetVentilationService.ventiler(any())).thenReturn(List.of());
         when(chainageAvalPort.convert(any()))
                 .thenReturn(new ChainageAvalPort.ConversionResult("CH-2"));
 
@@ -313,7 +311,6 @@ class DossierEtudeChainageAvalTest {
         when(noeudRepository.findByDpgfIdAndTenantIdOrderByOrdreAsc(DPGF_ID, TENANT))
                 .thenReturn(noeudsAvecUnOrphelin());
         when(parametres.tvaTauxDefaut()).thenReturn(new BigDecimal("20"));
-        when(budgetVentilationService.ventiler(any())).thenReturn(List.of());
         when(chainageAvalPort.convert(any()))
                 .thenReturn(new ChainageAvalPort.ConversionResult("CH-3"));
 

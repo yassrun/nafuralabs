@@ -27,16 +27,19 @@ public class PilotageMargeService {
     private final ChantierSeedService chantierSeedService;
     private final ContratMarcheRepository contratMarcheRepository;
     private final ContratMarcheSeedService contratMarcheSeedService;
+    private final AvancementLectureService avancementLectureService;
 
     public PilotageMargeService(
             ChantierRepository chantierRepository,
             ChantierSeedService chantierSeedService,
             ContratMarcheRepository contratMarcheRepository,
-            ContratMarcheSeedService contratMarcheSeedService) {
+            ContratMarcheSeedService contratMarcheSeedService,
+            AvancementLectureService avancementLectureService) {
         this.chantierRepository = chantierRepository;
         this.chantierSeedService = chantierSeedService;
         this.contratMarcheRepository = contratMarcheRepository;
         this.contratMarcheSeedService = contratMarcheSeedService;
+        this.avancementLectureService = avancementLectureService;
     }
 
     @Transactional(readOnly = true)
@@ -66,7 +69,8 @@ public class PilotageMargeService {
             BigDecimal montantMarcheHt = marche != null && marche.getMontantHt() != null
                     ? marche.getMontantHt()
                     : (c.getMontantHt() != null ? c.getMontantHt() : BigDecimal.ZERO);
-            BigDecimal avancement = c.getAvancementPercent() != null ? c.getAvancementPercent() : BigDecimal.ZERO;
+            BigDecimal avancementLu = avancementLectureService.hydrateArbre(c.getId());
+            BigDecimal avancement = avancementLu != null ? avancementLu : BigDecimal.ZERO;
             BigDecimal cumulFactureHt = montantMarcheHt.signum() > 0
                     ? montantMarcheHt.multiply(avancement).divide(BigDecimal.valueOf(100), 0, RoundingMode.HALF_UP)
                     : BigDecimal.ZERO;

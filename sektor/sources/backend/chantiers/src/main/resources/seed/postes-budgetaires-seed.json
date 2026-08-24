@@ -7,7 +7,13 @@
       "designation": "Terrassements généraux",
       "unite": "m3",
       "quantite": "1200",
-      "ordre": 1
+      "ordre": 1,
+      "debourse": {
+        "MATIERE": "48000.00",
+        "MAIN_DOEUVRE": "96000.00",
+        "MATERIEL": "180000.00",
+        "SOUS_TRAITANCE": "0.00"
+      }
     },
     {
       "id": "ch-001-lot-01-poste-02",
@@ -16,7 +22,13 @@
       "designation": "Fondations et soubassements",
       "unite": "m3",
       "quantite": "980",
-      "ordre": 2
+      "ordre": 2,
+      "debourse": {
+        "MATIERE": "392000.00",
+        "MAIN_DOEUVRE": "147000.00",
+        "MATERIEL": "49000.00",
+        "SOUS_TRAITANCE": "0.00"
+      }
     },
     {
       "id": "ch-001-lot-01-poste-03",
@@ -25,7 +37,13 @@
       "designation": "Élévation béton armé",
       "unite": "m3",
       "quantite": "1020",
-      "ordre": 3
+      "ordre": 3,
+      "debourse": {
+        "MATIERE": "459000.00",
+        "MAIN_DOEUVRE": "204000.00",
+        "MATERIEL": "61200.00",
+        "SOUS_TRAITANCE": "0.00"
+      }
     },
     {
       "id": "ch-001-lot-02-poste-01",
@@ -34,7 +52,13 @@
       "designation": "Couverture étanchéité",
       "unite": "m2",
       "quantite": "980",
-      "ordre": 1
+      "ordre": 1,
+      "debourse": {
+        "MATIERE": "117600.00",
+        "MAIN_DOEUVRE": "78400.00",
+        "MATERIEL": "29400.00",
+        "SOUS_TRAITANCE": "0.00"
+      }
     },
     {
       "id": "ch-001-lot-02-poste-02",
@@ -43,7 +67,13 @@
       "designation": "Menuiseries extérieures",
       "unite": "m2",
       "quantite": "1460",
-      "ordre": 2
+      "ordre": 2,
+      "debourse": {
+        "MATIERE": "175200.00",
+        "MAIN_DOEUVRE": "116800.00",
+        "MATERIEL": "43800.00",
+        "SOUS_TRAITANCE": "0.00"
+      }
     }
   ]
 }

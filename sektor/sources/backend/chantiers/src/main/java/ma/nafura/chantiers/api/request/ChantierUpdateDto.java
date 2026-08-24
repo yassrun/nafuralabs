@@ -64,8 +64,6 @@ public class ChantierUpdateDto {
     @JsonAlias("avancePercue")
     private BigDecimal tauxAvance;
 
-    private BigDecimal avancementPercent;
-
     private String status;
 
     private String societeId;

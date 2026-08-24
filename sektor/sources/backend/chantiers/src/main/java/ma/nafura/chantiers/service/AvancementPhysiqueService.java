@@ -1,21 +1,20 @@
 package ma.nafura.chantiers.service;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import ma.nafura.chantiers.api.dto.AvancementPhysiqueDto;
 import ma.nafura.chantiers.api.request.AvancementPhysiqueCreateDto;
 import ma.nafura.chantiers.api.request.AvancementPhysiqueEntryDto;
 import ma.nafura.chantiers.api.request.AvancementPhysiqueUpdateDto;
+import ma.nafura.chantiers.domain.attachement.AttachementChantier;
 import ma.nafura.chantiers.domain.avancement.AvancementPhysique;
+import ma.nafura.chantiers.domain.budget.PosteBudgetaire;
 import ma.nafura.chantiers.domain.chantier.Chantier;
 import ma.nafura.chantiers.domain.chantier.ChantierLot;
-import ma.nafura.chantiers.domain.budget.PosteBudgetaire;
+import ma.nafura.chantiers.domain.chantier.NatureLigne;
+import ma.nafura.chantiers.repository.AttachementChantierRepository;
 import ma.nafura.chantiers.repository.AvancementPhysiqueRepository;
 import ma.nafura.chantiers.repository.ChantierLotRepository;
 import ma.nafura.chantiers.repository.PosteBudgetaireRepository;
@@ -24,28 +23,50 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+/**
+ * La quantité fait foi, le pourcentage se calcule — contrat {@code avancement-et-attachement},
+ * AC-1 à AC-9.
+ *
+ * <p>Une déclaration porte un **nœud feuille** (poste, ou lot sans enfant), une quantité et une
+ * date (AC-1). Le pourcentage n'est jamais écrit : {@link AvancementLectureService} le dérive à
+ * la lecture (AC-2, AC-3). Un dépassement de la quantité prévue est refusé (AC-5), un nœud sans
+ * quantité prévue n'accepte aucune déclaration (AC-6), et un nœud déjà repris par un attachement
+ * signé est figé (AC-7). Palier 1 : aucune activité n'existe, donc {@link
+ * ActiviteCouvertureService} ne couvre jamais rien — la porte d'AC-9 est posée, sans effet.
+ */
 @Service
 public class AvancementPhysiqueService {
 
-    private static final BigDecimal ONE_HUNDRED = new BigDecimal("100");
+    static final String ERR_NOEUD_REQUIS = "chantiers.avancement.noeud_requis";
+    static final String ERR_LOT_A_DES_ENFANTS = "chantiers.avancement.lot_a_des_enfants";
+    static final String ERR_QUANTITE_PREVUE_MANQUANTE = "chantiers.avancement.quantite_prevue_manquante";
+    static final String ERR_DEPASSEMENT = "chantiers.avancement.depassement_quantite_prevue";
+    static final String ERR_NOEUD_COUVERT_PAR_ACTIVITE = "chantiers.avancement.noeud_couvert_par_activite";
+    static final String ERR_DECLARATION_FIGEE = "chantiers.avancement.declaration_figee_par_attachement";
 
     private final AvancementPhysiqueRepository repository;
     private final ChantierService chantierService;
     private final ChantierLotRepository lotRepository;
     private final PosteBudgetaireRepository posteRepository;
-    private final ChantierProgressSyncService progressSyncService;
+    private final AttachementChantierRepository attachementRepository;
+    private final AvancementLectureService avancementLectureService;
+    private final ActiviteCouvertureService activiteCouvertureService;
 
     public AvancementPhysiqueService(
             AvancementPhysiqueRepository repository,
             ChantierService chantierService,
             ChantierLotRepository lotRepository,
             PosteBudgetaireRepository posteRepository,
-            ChantierProgressSyncService progressSyncService) {
+            AttachementChantierRepository attachementRepository,
+            AvancementLectureService avancementLectureService,
+            ActiviteCouvertureService activiteCouvertureService) {
         this.repository = repository;
         this.chantierService = chantierService;
         this.lotRepository = lotRepository;
         this.posteRepository = posteRepository;
-        this.progressSyncService = progressSyncService;
+        this.attachementRepository = attachementRepository;
+        this.avancementLectureService = avancementLectureService;
+        this.activiteCouvertureService = activiteCouvertureService;
     }
 
     @Transactional(readOnly = true)
@@ -54,74 +75,34 @@ public class AvancementPhysiqueService {
         UUID tenantId = tenantId();
         List<AvancementPhysique> rows =
                 repository.findByTenantIdAndChantierIdOrderByDateSaisieDescCreatedAtDesc(tenantId, chantierId);
-        Map<String, ChantierLot> lotsById = indexLots(tenantId, chantierId);
-        Map<String, BigDecimal> runningCumuls = new HashMap<>();
-        Map<String, BigDecimal> cumulsByRowId = new HashMap<>();
-        List<AvancementPhysiqueDto> dtos = new ArrayList<>();
-
-        List<AvancementPhysique> chronological = rows.stream()
-                .sorted(Comparator
-                        .comparing(AvancementPhysique::getLotId, Comparator.nullsLast(String::compareTo))
-                        .thenComparing(AvancementPhysique::getPosteId, Comparator.nullsLast(String::compareTo))
-                        .thenComparing(AvancementPhysique::getDateSaisie)
-                        .thenComparing(AvancementPhysique::getCreatedAt))
-                .toList();
-
-        for (AvancementPhysique row : chronological) {
-            String key = progressKey(row.getLotId(), row.getPosteId());
-            BigDecimal previous = runningCumuls.getOrDefault(key, BigDecimal.ZERO);
-            BigDecimal cumul = previous.add(row.getQuantiteRealisee());
-            runningCumuls.put(key, cumul);
-            cumulsByRowId.put(row.getId(), cumul);
-        }
-
-        for (AvancementPhysique row : rows) {
-            dtos.add(toDto(
-                    row,
-                    chantier,
-                    lotsById.get(row.getLotId()),
-                    cumulsByRowId.getOrDefault(row.getId(), row.getQuantiteRealisee())));
-        }
-        return dtos;
+        return rows.stream().map(row -> toDto(row, chantier)).toList();
     }
 
     @Transactional
     public List<AvancementPhysiqueDto> create(String chantierId, AvancementPhysiqueCreateDto request) {
         Chantier chantier = chantierService.getById(chantierId);
         UUID tenantId = tenantId();
-        Map<String, ChantierLot> lotsById = indexLots(tenantId, chantierId);
         List<AvancementPhysique> created = new ArrayList<>();
 
-        for (int index = 0; index < request.getEntries().size(); index++) {
-            AvancementPhysiqueEntryDto entry = request.getEntries().get(index);
-            validateEntry(entry);
-
-            ChantierLot lot = resolveLot(tenantId, chantierId, entry, lotsById);
-            PosteBudgetaire poste = resolvePoste(tenantId, entry);
-            if (lot == null && poste != null) {
-                lot = lotsById.get(poste.getLotId());
+        for (AvancementPhysiqueEntryDto entry : request.getEntries()) {
+            if (entry.getQuantiteRealisee() == null || entry.getQuantiteRealisee().compareTo(BigDecimal.ZERO) <= 0) {
+                throw new IllegalArgumentException("chantiers.avancement.quantite_positive_requise");
             }
 
-            String resolvedLotId = lot != null
-                    ? lot.getId()
-                    : poste != null
-                            ? poste.getLotId()
-                            : trimOrNull(entry.getLotId());
-
-            BigDecimal previousCumul = computePreviousCumul(tenantId, resolvedLotId, entry.getPosteId());
-            BigDecimal quantite = entry.getQuantiteRealisee();
-            BigDecimal cumul = previousCumul.add(quantite);
-            BigDecimal pourcentage = computePourcentage(cumul, lot, poste);
+            Noeud noeud = resolveNoeud(tenantId, chantierId, entry.getLotId(), entry.getPosteId());
+            garderContreDoubleImputation(noeud);
+            garderQuantitePrevue(noeud);
+            BigDecimal dejaFait = quantiteFaiteCumulee(noeud);
+            garderContreDepassement(noeud, dejaFait, entry.getQuantiteRealisee());
 
             AvancementPhysique entity = AvancementPhysique.builder()
-                    .id(buildId(chantierId, index))
+                    .id(buildId(chantierId))
                     .tenantId(tenantId)
                     .chantierId(chantierId)
-                    .lotId(resolvedLotId)
-                    .posteId(poste != null ? poste.getId() : trimOrNull(entry.getPosteId()))
+                    .lotId(noeud.lotId())
+                    .posteId(noeud.posteId())
                     .dateSaisie(request.getDate())
-                    .quantiteRealisee(quantite)
-                    .pourcentage(pourcentage)
+                    .quantiteRealisee(entry.getQuantiteRealisee())
                     .notes(trimOrNull(entry.getNotes()))
                     .status(request.getStatus().trim())
                     .saisieParId(request.getSaisieParId().trim())
@@ -130,58 +111,40 @@ public class AvancementPhysiqueService {
             created.add(repository.save(entity));
         }
 
-        progressSyncService.syncFromAvancements(chantierId);
-
-        return created.stream()
-                .map(row -> toDto(
-                        row,
-                        chantier,
-                        lotsById.get(row.getLotId()),
-                        computeCumulForRow(tenantId, row)))
-                .toList();
+        return created.stream().map(row -> toDto(row, chantier)).toList();
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<AvancementPhysiqueDto> findDernierByChantier(String chantierId) {
-        progressSyncService.syncFromAvancements(chantierId);
         Chantier chantier = chantierService.getById(chantierId);
         UUID tenantId = tenantId();
         List<AvancementPhysique> rows =
                 repository.findByTenantIdAndChantierIdOrderByDateSaisieDescCreatedAtDesc(tenantId, chantierId);
-        Map<String, ChantierLot> lotsById = indexLots(tenantId, chantierId);
-        Map<String, AvancementPhysique> dernierByKey = new HashMap<>();
-
+        java.util.Map<String, AvancementPhysique> dernierByKey = new java.util.LinkedHashMap<>();
         for (AvancementPhysique row : rows) {
-            String key = progressKey(row.getLotId(), row.getPosteId());
-            dernierByKey.putIfAbsent(key, row);
+            dernierByKey.putIfAbsent(progressKey(row.getLotId(), row.getPosteId()), row);
         }
-
-        return dernierByKey.values().stream()
-                .sorted(Comparator
-                        .comparing(AvancementPhysique::getDateSaisie)
-                        .reversed()
-                        .thenComparing(AvancementPhysique::getCreatedAt, Comparator.reverseOrder()))
-                .map(row -> toDto(
-                        row,
-                        chantier,
-                        lotsById.get(row.getLotId()),
-                        computeCumulForRow(tenantId, row)))
-                .toList();
+        return dernierByKey.values().stream().map(row -> toDto(row, chantier)).toList();
     }
 
     @Transactional
     public AvancementPhysiqueDto update(String id, AvancementPhysiqueUpdateDto request) {
         AvancementPhysique entity = getById(id);
-        Chantier chantier = chantierService.getById(entity.getChantierId());
         UUID tenantId = tenantId();
+        Chantier chantier = chantierService.getById(entity.getChantierId());
+        Noeud noeud = resolveNoeud(tenantId, entity.getChantierId(), entity.getLotId(), entity.getPosteId());
+        garderContreModificationFigee(noeud, entity);
 
         if (request.getDate() != null) {
             entity.setDateSaisie(request.getDate());
         }
         if (request.getQuantiteRealisee() != null) {
             if (request.getQuantiteRealisee().compareTo(BigDecimal.ZERO) <= 0) {
-                throw new IllegalArgumentException("quantiteRealisee must be positive");
+                throw new IllegalArgumentException("chantiers.avancement.quantite_positive_requise");
             }
+            BigDecimal dejaFaitHorsCetteLigne = quantiteFaiteCumulee(noeud)
+                    .subtract(entity.getQuantiteRealisee());
+            garderContreDepassement(noeud, dejaFaitHorsCetteLigne, request.getQuantiteRealisee());
             entity.setQuantiteRealisee(request.getQuantiteRealisee());
         }
         if (request.getNotes() != null) {
@@ -191,14 +154,8 @@ public class AvancementPhysiqueService {
             entity.setStatus(request.getStatus().trim());
         }
 
-        ChantierLot lot = resolveLotForEntity(tenantId, entity);
-        PosteBudgetaire poste = resolvePosteForEntity(tenantId, entity);
-        BigDecimal cumul = computeUpdatedCumul(tenantId, entity);
-        entity.setPourcentage(computePourcentage(cumul, lot, poste));
-
         AvancementPhysique saved = repository.save(entity);
-        progressSyncService.syncFromAvancements(saved.getChantierId());
-        return toDto(saved, chantier, lot, cumul);
+        return toDto(saved, chantier);
     }
 
     @Transactional
@@ -206,13 +163,18 @@ public class AvancementPhysiqueService {
         AvancementPhysique entity = getById(id);
         entity.setStatus(AvancementPhysique.STATUS_VALIDE);
         AvancementPhysique saved = repository.save(entity);
-
-        progressSyncService.syncFromAvancements(saved.getChantierId());
-
         Chantier chantier = chantierService.getById(saved.getChantierId());
-        ChantierLot lot = resolveLotForEntity(tenantId(), saved);
-        BigDecimal cumul = computeCumulForRow(tenantId(), saved);
-        return toDto(saved, chantier, lot, cumul);
+        return toDto(saved, chantier);
+    }
+
+    /** AC-7 — une déclaration s'annule tant qu'aucun attachement signé ne l'a reprise. */
+    @Transactional
+    public void annuler(String id) {
+        AvancementPhysique entity = getById(id);
+        UUID tenantId = tenantId();
+        Noeud noeud = resolveNoeud(tenantId, entity.getChantierId(), entity.getLotId(), entity.getPosteId());
+        garderContreModificationFigee(noeud, entity);
+        repository.delete(entity);
     }
 
     private AvancementPhysique getById(String id) {
@@ -221,135 +183,141 @@ public class AvancementPhysiqueService {
                 .orElseThrow(() -> new IllegalArgumentException("Avancement not found: " + id));
     }
 
-    private ChantierLot resolveLotForEntity(UUID tenantId, AvancementPhysique entity) {
-        if (!StringUtils.hasText(entity.getLotId())) {
-            return null;
-        }
-        return lotRepository.findByIdAndTenantId(entity.getLotId(), tenantId).orElse(null);
-    }
+    // ── AC-1 : résolution du nœud feuille ───────────────────────────────────
 
-    private PosteBudgetaire resolvePosteForEntity(UUID tenantId, AvancementPhysique entity) {
-        if (!StringUtils.hasText(entity.getPosteId())) {
-            return null;
-        }
-        return posteRepository.findByIdAndTenantId(entity.getPosteId(), tenantId).orElse(null);
-    }
+    private Noeud resolveNoeud(UUID tenantId, String chantierId, String lotIdRaw, String posteIdRaw) {
+        String posteId = trimOrNull(posteIdRaw);
+        String lotId = trimOrNull(lotIdRaw);
 
-    private BigDecimal computeUpdatedCumul(UUID tenantId, AvancementPhysique row) {
-        if (!StringUtils.hasText(row.getLotId())) {
-            return row.getQuantiteRealisee();
+        if (StringUtils.hasText(posteId)) {
+            PosteBudgetaire poste = posteRepository
+                    .findByIdAndTenantId(posteId, tenantId)
+                    .orElseThrow(() -> new IllegalArgumentException("Poste not found: " + posteId));
+            return new Noeud(poste.getLotId(), poste.getId(), poste.getQuantite(), poste.getNature());
         }
-        BigDecimal previous = repository.findByTenantIdAndLotIdOrderByDateSaisieAscCreatedAtAsc(tenantId, row.getLotId())
-                .stream()
-                .filter(item -> !item.getId().equals(row.getId()))
-                .filter(item -> !StringUtils.hasText(row.getPosteId()) || row.getPosteId().equals(item.getPosteId()))
-                .map(AvancementPhysique::getQuantiteRealisee)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-        return previous.add(row.getQuantiteRealisee());
-    }
 
-    private Map<String, ChantierLot> indexLots(UUID tenantId, String chantierId) {
-        Map<String, ChantierLot> lotsById = new HashMap<>();
-        for (ChantierLot lot : lotRepository.findByTenantIdAndChantierIdOrderByOrdreAscCodeAsc(tenantId, chantierId)) {
-            lotsById.put(lot.getId(), lot);
-        }
-        return lotsById;
-    }
-
-    private static void validateEntry(AvancementPhysiqueEntryDto entry) {
-        if (!StringUtils.hasText(entry.getLotId()) && !StringUtils.hasText(entry.getPosteId())) {
-            throw new IllegalArgumentException("Each entry must reference a lotId or posteId");
-        }
-        if (entry.getQuantiteRealisee() == null || entry.getQuantiteRealisee().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("quantiteRealisee must be positive");
-        }
-    }
-
-    private ChantierLot resolveLot(
-            UUID tenantId, String chantierId, AvancementPhysiqueEntryDto entry, Map<String, ChantierLot> lotsById) {
-        if (!StringUtils.hasText(entry.getLotId())) {
-            return null;
-        }
-        ChantierLot lot = lotsById.get(entry.getLotId().trim());
-        if (lot == null) {
-            lot = lotRepository
-                    .findByIdAndTenantId(entry.getLotId().trim(), tenantId)
+        if (StringUtils.hasText(lotId)) {
+            ChantierLot lot = lotRepository
+                    .findByIdAndTenantId(lotId, tenantId)
                     .filter(item -> chantierId.equals(item.getChantierId()))
-                    .orElseThrow(() -> new IllegalArgumentException("Lot not found for chantier: " + entry.getLotId()));
+                    .orElseThrow(() -> new IllegalArgumentException("Lot not found for chantier: " + lotId));
+            boolean aDesSousLots = !lotRepository.findByTenantIdAndParentLotId(tenantId, lotId).isEmpty();
+            boolean aDesPostes =
+                    !posteRepository.findByTenantIdAndLotIdOrderByOrdreAscCodeAsc(tenantId, lotId).isEmpty();
+            if (aDesSousLots || aDesPostes) {
+                throw new IllegalArgumentException(ERR_LOT_A_DES_ENFANTS + ": " + lotId);
+            }
+            return new Noeud(lot.getId(), null, lot.getQuantite(), lot.getNature());
         }
-        return lot;
+
+        throw new IllegalArgumentException(ERR_NOEUD_REQUIS);
     }
 
-    private PosteBudgetaire resolvePoste(UUID tenantId, AvancementPhysiqueEntryDto entry) {
-        if (!StringUtils.hasText(entry.getPosteId())) {
-            return null;
+    // ── AC-9 : jamais deux portes sur le même nœud ──────────────────────────
+
+    private void garderContreDoubleImputation(Noeud noeud) {
+        List<String> activites = activiteCouvertureService.activitesCouvrant(noeud.id());
+        if (!activites.isEmpty()) {
+            throw new IllegalArgumentException(
+                    ERR_NOEUD_COUVERT_PAR_ACTIVITE + ": " + String.join(", ", activites));
         }
-        return posteRepository
-                .findByIdAndTenantId(entry.getPosteId().trim(), tenantId)
-                .orElseThrow(() -> new IllegalArgumentException("Poste not found: " + entry.getPosteId()));
     }
 
-    private BigDecimal computePreviousCumul(UUID tenantId, String lotId, String posteId) {
-        if (!StringUtils.hasText(lotId)) {
-            return BigDecimal.ZERO;
+    // ── AC-6 : pas de quantité prévue, pas de déclaration ───────────────────
+
+    private void garderQuantitePrevue(Noeud noeud) {
+        if (noeud.quantitePrevue() == null || noeud.quantitePrevue().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException(ERR_QUANTITE_PREVUE_MANQUANTE + ": " + noeud.id());
         }
-        return repository.findByTenantIdAndLotIdOrderByDateSaisieAscCreatedAtAsc(tenantId, lotId).stream()
-                .filter(row -> !StringUtils.hasText(posteId) || posteId.equals(row.getPosteId()))
-                .map(AvancementPhysique::getQuantiteRealisee)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    private BigDecimal computeCumulForRow(UUID tenantId, AvancementPhysique row) {
-        if (!StringUtils.hasText(row.getLotId())) {
-            return row.getQuantiteRealisee();
+    // ── AC-5 : dépassement refusé, la sortie est l'avenant ──────────────────
+
+    private void garderContreDepassement(Noeud noeud, BigDecimal dejaFait, BigDecimal quantiteAjoutee) {
+        BigDecimal base = dejaFait != null ? dejaFait : BigDecimal.ZERO;
+        BigDecimal nouveauCumul = base.add(quantiteAjoutee);
+        if (nouveauCumul.compareTo(noeud.quantitePrevue()) > 0) {
+            BigDecimal resteAFaire = noeud.quantitePrevue().subtract(base).max(BigDecimal.ZERO);
+            throw new IllegalArgumentException(
+                    ERR_DEPASSEMENT
+                            + ": reste_a_faire=" + resteAFaire
+                            + " noeud=" + noeud.id()
+                            + " — la quantité au-delà du prévu relève de l'avenant ou des travaux supplémentaires");
         }
-        return repository.findByTenantIdAndLotIdOrderByDateSaisieAscCreatedAtAsc(tenantId, row.getLotId()).stream()
-                .filter(item -> isSameOrBefore(item, row))
-                .filter(item -> !StringUtils.hasText(row.getPosteId()) || row.getPosteId().equals(item.getPosteId()))
-                .map(AvancementPhysique::getQuantiteRealisee)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    private static boolean isSameOrBefore(AvancementPhysique candidate, AvancementPhysique target) {
-        int dateCompare = candidate.getDateSaisie().compareTo(target.getDateSaisie());
-        if (dateCompare < 0) {
-            return true;
+    // ── AC-7 : figé dès qu'un attachement signé l'a repris ──────────────────
+
+    private void garderContreModificationFigee(Noeud noeud, AvancementPhysique row) {
+        // Seuls les nœuds vendus entrent dans un attachement (AC-13) : un interne n'est jamais figé.
+        if (noeud.nature() != NatureLigne.VENDU) {
+            return;
         }
-        if (dateCompare > 0) {
-            return false;
+        boolean figee = attachementRepository
+                .existsByTenantIdAndChantierIdAndDateDebutLessThanEqualAndDateFinGreaterThanEqualAndStatusIn(
+                        tenantId(),
+                        row.getChantierId(),
+                        row.getDateSaisie(),
+                        row.getDateSaisie(),
+                        AttachementChantier.STATUTS_FIGES);
+        if (figee) {
+            throw new IllegalStateException(ERR_DECLARATION_FIGEE + ": " + row.getId());
         }
-        return !candidate.getCreatedAt().isAfter(target.getCreatedAt());
     }
 
-    private static BigDecimal computePourcentage(BigDecimal cumul, ChantierLot lot, PosteBudgetaire poste) {
-        BigDecimal reference = BigDecimal.ZERO;
-        if (poste != null && poste.getQuantite() != null) {
-            reference = poste.getQuantite();
-        } else if (lot != null && lot.getQuantite() != null) {
-            reference = lot.getQuantite();
-        }
-        if (reference.compareTo(BigDecimal.ZERO) <= 0) {
-            return BigDecimal.ZERO;
-        }
-        BigDecimal percent = cumul.multiply(ONE_HUNDRED).divide(reference, 4, RoundingMode.HALF_UP);
-        return percent.min(ONE_HUNDRED);
+    private BigDecimal quantiteFaiteCumulee(Noeud noeud) {
+        return noeud.posteId() != null
+                ? avancementLectureService.quantiteFaiteCumuleePoste(noeud.posteId())
+                : avancementLectureService.quantiteFaiteCumuleeLotFeuille(noeud.lotId());
     }
 
-    private static AvancementPhysiqueDto toDto(
-            AvancementPhysique row, Chantier chantier, ChantierLot lot, BigDecimal cumulQuantite) {
+    private AvancementPhysiqueDto toDto(AvancementPhysique row, Chantier chantier) {
+        UUID tenantId = tenantId();
+        String lotCode = null;
+        String lotDesignation = null;
+        BigDecimal quantitePrevue = null;
+        BigDecimal cumul = BigDecimal.ZERO;
+
+        if (StringUtils.hasText(row.getPosteId())) {
+            PosteBudgetaire poste = posteRepository.findByIdAndTenantId(row.getPosteId(), tenantId).orElse(null);
+            if (poste != null) {
+                quantitePrevue = poste.getQuantite();
+            }
+            cumul = avancementLectureService.quantiteFaiteCumuleePoste(row.getPosteId());
+        } else if (StringUtils.hasText(row.getLotId())) {
+            cumul = avancementLectureService.quantiteFaiteCumuleeLotFeuille(row.getLotId());
+        }
+        if (StringUtils.hasText(row.getLotId())) {
+            ChantierLot lot = lotRepository.findByIdAndTenantId(row.getLotId(), tenantId).orElse(null);
+            if (lot != null) {
+                lotCode = lot.getCode();
+                lotDesignation = lot.getDesignation();
+                if (quantitePrevue == null && !StringUtils.hasText(row.getPosteId())) {
+                    quantitePrevue = lot.getQuantite();
+                }
+            }
+        }
+
+        BigDecimal pourcentage = AvancementLectureService.pourcentage(quantitePrevue, cumul);
+        BigDecimal resteAFaire = quantitePrevue != null
+                ? quantitePrevue.subtract(cumul).max(BigDecimal.ZERO)
+                : null;
+
         return AvancementPhysiqueDto.builder()
                 .id(row.getId())
                 .chantierId(row.getChantierId())
                 .chantierCode(chantier.getCode())
                 .chantierName(chantier.getLabel())
                 .lotId(row.getLotId())
-                .lotCode(lot != null ? lot.getCode() : null)
-                .lotDesignation(lot != null ? lot.getDesignation() : null)
+                .lotCode(lotCode)
+                .lotDesignation(lotDesignation)
                 .posteId(row.getPosteId())
                 .date(row.getDateSaisie())
                 .quantiteRealisee(row.getQuantiteRealisee())
-                .cumulQuantite(cumulQuantite)
-                .pourcentage(row.getPourcentage())
+                .cumulQuantite(cumul)
+                .quantitePrevue(quantitePrevue)
+                .pourcentage(pourcentage)
+                .resteAFaire(resteAFaire)
                 .saisieParId(row.getSaisieParId())
                 .saisieParName(row.getSaisieParName())
                 .notes(row.getNotes())
@@ -364,8 +332,8 @@ public class AvancementPhysiqueService {
         return (lotId != null ? lotId : "") + "::" + (posteId != null ? posteId : "");
     }
 
-    private static String buildId(String chantierId, int index) {
-        return chantierId + "-av-" + UUID.randomUUID().toString().substring(0, 8) + "-" + (index + 1);
+    private static String buildId(String chantierId) {
+        return chantierId + "-av-" + UUID.randomUUID();
     }
 
     private static String trimOrNull(String value) {
@@ -377,5 +345,12 @@ public class AvancementPhysiqueService {
 
     private static UUID tenantId() {
         return TenantContext.getTenantId();
+    }
+
+    /** Le nœud feuille d'une déclaration (AC-1) : soit un poste, soit un lot sans enfant. */
+    private record Noeud(String lotId, String posteId, BigDecimal quantitePrevue, NatureLigne nature) {
+        String id() {
+            return posteId != null ? posteId : lotId;
+        }
     }
 }

@@ -62,6 +62,31 @@ public class PosteBudgetaire {
     @Column(name = "montant_ht", precision = 18, scale = 4)
     private BigDecimal montantHt;
 
+    // ── Instantané du déboursé (AC-3, AC-5, AC-6) ────────────────────────────
+    // Les montants vivent dans DebourseNoeud, une ligne par rubrique. Ce qui suit dit
+    // seulement d'où ils viennent et quand ils ont été copiés — jamais combien.
+
+    /** DECOMPOSE / FORFAIT / ESTIME à la copie, SAISI sur un nœud interne. */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "debourse_origine", length = 20)
+    private OrigineDebourse debourseOrigine;
+
+    /** Le coût vient d'une déduction (`coutDeduit`) : signalé à l'écran, ni corrigé ni caché. */
+    @Column(name = "debourse_non_fiable", nullable = false)
+    @Builder.Default
+    private Boolean debourseNonFiable = false;
+
+    /** Date de la copie — l'instantané est daté, et rien ne le rafraîchit ensuite (AC-5). */
+    @Column(name = "debourse_copie_le")
+    private OffsetDateTime debourseCopieLe;
+
+    /** Le {@code PrixDpu} dont vient la copie, et sa version au moment où elle a été prise. */
+    @Column(name = "debourse_prix_dpu_id")
+    private UUID deboursePrixDpuId;
+
+    @Column(name = "debourse_prix_dpu_version")
+    private Long deboursePrixDpuVersion;
+
     @Column(nullable = false)
     private int ordre;
 
@@ -80,6 +105,9 @@ public class PosteBudgetaire {
         updatedAt = now;
         if (nature == null) {
             nature = NatureLigne.DEFAUT_SAISIE;
+        }
+        if (debourseNonFiable == null) {
+            debourseNonFiable = false;
         }
     }
 

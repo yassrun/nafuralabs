@@ -64,6 +64,9 @@ const COMPANY = {
             <tr><td>{{ 'chantiers.situation.print.cumulPrecedent' | translate:{ n: sit()!.numeroOrdre - 1 } }}</td><td class="num">{{ sit()!.cumulPrecedentHt | mad:2 }}</td></tr>
             <tr class="accent"><td><strong>Cumul courant HT</strong></td><td class="num"><strong>{{ sit()!.cumulCourantHt | mad:2 }}</strong></td></tr>
             <tr><td>{{ 'chantiers.situation.print.travauxPeriodeHt' | translate }}</td><td class="num">{{ sit()!.travauxPeriodeHt | mad:2 }}</td></tr>
+            @if (sit()!.penalitesRetardHt) {
+              <tr class="deduction"><td>Pénalités de retard</td><td class="num">− {{ sit()!.penalitesRetardHt | mad:2 }}</td></tr>
+            }
             <tr class="deduction"><td>{{ 'chantiers.situation.print.retenueGarantiePct' | translate:{ pct: sit()!.retenueGarantiePercent } }}</td><td class="num">− {{ sit()!.retenueGarantieMontant | mad:2 }}</td></tr>
             @if (sit()!.retenueAvanceMontant) {
               <tr class="deduction"><td>Remboursement avance {{ sit()!.retenueAvancePercent }}%</td><td class="num">− {{ sit()!.retenueAvanceMontant | mad:2 }}</td></tr>
@@ -71,6 +74,9 @@ const COMPANY = {
             <tr class="subtotal"><td><strong>{{ 'chantiers.situation.print.netHt' | translate }}</strong></td><td class="num"><strong>{{ sit()!.netAPayerHt | mad:2 }}</strong></td></tr>
             <tr><td>TVA {{ sit()!.tvaTaux }}%</td><td class="num">{{ (sit()!.netAPayerTtc - sit()!.netAPayerHt) | mad:2 }}</td></tr>
             <tr class="total"><td><strong>{{ 'chantiers.situation.print.netTtc' | translate }}</strong></td><td class="num"><strong>{{ sit()!.netAPayerTtc | mad:2 }}</strong></td></tr>
+            @if (sit()!.rasTaux) {
+              <tr class="info"><td>RAS {{ sit()!.rasTaux }}% (retenue par le client au règlement)</td><td class="num">{{ sit()!.rasMontant | mad:2 }}</td></tr>
+            }
           </tbody>
         </table>
 
@@ -123,6 +129,7 @@ const COMPANY = {
     .recap .deduction td { color: var(--nf-color-danger-700); }
     .recap .subtotal td { border-top: 2px solid var(--nf-text-primary); border-bottom: 2px solid var(--nf-text-primary); font-size: 11pt; }
     .recap .total td { background: var(--nf-text-primary); color: var(--nf-color-primary-contrast); font-size: 12pt; border: none; padding: 8px 10px; }
+    .recap .info td { color: var(--nf-color-text-muted); font-style: italic; font-size: 9pt; }
     .notes { border: 1px solid var(--nf-color-border); border-radius: 4px; padding: 0.5rem; margin-bottom: 1rem; font-size: 9.5pt; }
     .signatures { display: flex; gap: 2rem; margin-bottom: 1.5rem; }
     .sig-block { flex: 1; border: 1px solid var(--nf-color-text-muted); padding: 0.6rem; text-align: center; }

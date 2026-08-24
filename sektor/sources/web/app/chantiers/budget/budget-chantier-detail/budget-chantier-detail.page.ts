@@ -15,7 +15,19 @@ import { PrintService } from '@app/socle/shared/services';
 import { EcartCellComponent } from '../components/ecart-cell/ecart-cell.component';
 import { ConsommationProgressComponent } from '../components/consommation-progress/consommation-progress.component';
 import { ReviserBudgetDialogComponent } from '../components/reviser-budget-dialog/reviser-budget-dialog.component';
-import type { BudgetLineItemDrilldown, BudgetLigne, BudgetRevisionDraft } from '../models';
+
+/** Les postes de l'arbre, à plat. Un lot vaut la somme de ses enfants : il ne se révise pas. */
+function aplatirPostes(noeuds: BudgetNoeud[]): BudgetNoeud[] {
+  const out: BudgetNoeud[] = [];
+  for (const noeud of noeuds) {
+    if (noeud.type === 'POSTE') {
+      out.push(noeud);
+    }
+    out.push(...aplatirPostes(noeud.enfants ?? []));
+  }
+  return out;
+}
+import type { BudgetLineItemDrilldown, BudgetLigne, BudgetNoeud, BudgetRevisionDraft } from '../models';
 import { BudgetFacade } from '../services';
 import { BudgetEvolutionChartComponent } from './components/budget-evolution-chart/budget-evolution-chart.component';
 import { EngagementsListComponent } from './components/engagements-list/engagements-list.component';
@@ -304,7 +316,7 @@ export class BudgetChantierDetailPage {
   );
 
   readonly activeTab = signal<DetailTab>('rubriques');
-  readonly expandedRubrique = signal<string | null>('MATERIAUX');
+  readonly expandedRubrique = signal<string | null>('MATIERE');
   readonly tabs = computed<Array<{ id: DetailTab; label: string }>>(() => [
     { id: 'rubriques', label: this.translate.instant('chantiers.budget.detail.tabs.rubriques') },
     { id: 'lots', label: this.translate.instant('chantiers.budget.detail.tabs.lots') },
@@ -315,11 +327,18 @@ export class BudgetChantierDetailPage {
 
   readonly budget = computed(() => this.facade.getBudgetById(this.budgetId()));
 
+  /** L'arbre du chantier — la seule source des chiffres ; la vue par rubrique en dérive. */
+  readonly arbre = computed(() => this.facade.arbre(this.budgetId()));
+
+  /** Les noeuds révisables, à plat : réviser est un geste sur un noeud, pas sur le chantier. */
+  readonly noeudsRevisables = computed(() => aplatirPostes(this.arbre()?.lots ?? []));
+
   constructor() {
     effect(() => {
       const id = this.budgetId();
       if (id) {
         void this.facade.loadBudgetFromApi(id);
+        void this.facade.loadArbre(id);
       }
     });
   }
@@ -368,19 +387,24 @@ export class BudgetChantierDetailPage {
     return `${new Intl.NumberFormat(this.locale).format(value)} ${unit}`;
   }
 
-  async openRevisionDialog(): Promise<void> {
-    const chantier = this.budget();
-    if (!chantier) return;
+  /**
+   * Réviser un noeud. Le déboursé prévu d'un noeud vendu est une copie datée du DPU : il ne se
+   * réécrit pas. La correction se pose à côté, sur le noeud, rubrique par rubrique.
+   */
+  async openRevisionDialog(noeud?: BudgetNoeud): Promise<void> {
+    const chantierId = this.budgetId();
+    const cible = noeud ?? this.noeudsRevisables()[0];
+    if (!chantierId || !cible) return;
 
     const dialogRef = this.dialog.open(ReviserBudgetDialogComponent, {
       width: '900px',
       maxWidth: '96vw',
-      data: { chantier },
+      data: { chantierId, noeud: cible },
     });
 
     const result = await firstValueFrom(dialogRef.afterClosed());
     if (result) {
-      this.facade.saveRevision(result as BudgetRevisionDraft);
+      await this.facade.reviserNoeud(result as BudgetRevisionDraft);
     }
   }
 

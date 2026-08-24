@@ -13,7 +13,9 @@ public class AttachementChantierDto {
     private String numero;
     private String chantierId;
     private String chantierCode;
-    private LocalDate date;
+    /** AC-10 — la période couverte, pas un jour. */
+    private LocalDate dateDebut;
+    private LocalDate dateFin;
     private String meteoCode;
     private Integer temperatureC;
     private Integer effectifPresent;

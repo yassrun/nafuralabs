@@ -142,6 +142,14 @@
       border-top: 2px solid var(--nf-color-primary-500);
       border-bottom: 2px solid var(--nf-color-primary-500);
     }
+
+    // AC-11 — RAS : ligne informative, jamais déduite du net TTC ci-dessus.
+    .info td {
+      font-size: 9pt;
+      font-style: italic;
+      color: var(--nf-color-text-muted);
+      border-bottom: none;
+    }
   }
 
   &__footer {

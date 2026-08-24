@@ -42,7 +42,7 @@ class ChantierLotServiceTest {
     @Mock private ChantierLotRepository repository;
     @Mock private ChantierService chantierService;
     @Mock private ChantierLotSeedService seedService;
-    @Mock private ChantierProgressSyncService progressSyncService;
+    @Mock private AvancementLectureService avancementLectureService;
     @Mock private PosteBudgetaireRepository posteRepository;
     @Mock private PosteBudgetaireService posteBudgetaireService;
 

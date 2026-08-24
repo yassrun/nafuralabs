@@ -10,7 +10,8 @@ public class SignAttachementInfoDto {
     private String attachementId;
     private String numero;
     private String chantierCode;
-    private String date;
+    private String dateDebut;
+    private String dateFin;
     private String status;
     private String role;
 }

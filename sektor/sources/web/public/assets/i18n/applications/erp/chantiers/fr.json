@@ -598,26 +598,37 @@
     },
     "attachement": {
       "title": "Attachements",
+      "zone": "Zone",
       "list": {
         "searchPlaceholder": "Chantier, date…",
         "allStatuses": "Tous les statuts",
         "signedShort": "✍️ Signé",
         "columns": {
+          "code": "Code",
           "designation": "Désignation",
           "unite": "Unité",
-          "qteExecutee": "Qté exécutée"
+          "qteExecutee": "Quantité faite"
         },
         "emptyState": "Aucun attachement trouvé.",
-        "saisieCta": "Saisie terrain"
+        "saisieCta": "Nouvel attachement"
       },
       "saisie": {
-        "addLine": "Ligne",
+        "title": "Nouvel attachement",
+        "subtitle": "La période, montée depuis les déclarations d'avancement",
+        "periodeDebut": "Du",
+        "periodeFin": "Au",
         "meteoEnsoleille": "Ensoleillé",
-        "lignesExecutees": "Lignes exécutées",
-        "designationPlaceholder": "Désignation",
-        "unitePlaceholder": "Unité",
-        "signatureMoeTitle": "Signature MOE (démo)",
-        "signatureMoeHint": "Signez dans le cadre ci-dessous (aperçu PNG léger, stocké avec le brouillon)."
+        "monterCta": "Monter l'attachement",
+        "montage": "Montage…",
+        "lignesTitle": "Quantités de la période",
+        "sansZone": "Sans zone",
+        "soumettreCta": "Soumettre pour signature MOE",
+        "contesterCta": "Contester — retour à la déclaration",
+        "lienSignatureCta": "Obtenir le lien de signature",
+        "lienSignatureHint": "Lien à usage unique, valable 7 jours — à transmettre au MOE :",
+        "figeHint": "Signé : plus rien ne se corrige ici. L'écart se règle sur la période suivante.",
+        "periodeSansQuantite": "Aucune quantité n'a été déclarée sur cette période.",
+        "periodeChevauchante": "Cette période chevauche un attachement existant."
       }
     },
     "sousTraitance": {

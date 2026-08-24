@@ -151,11 +151,14 @@ export interface AvancementLot {
 
 export interface SituationLigne {
   id: string;
-  lotId: string;
-  lotCode?: string;
+  /** Le nœud de l'arbre (poste ou lot-feuille) dont vient la ligne — AC-2. */
+  noeudId: string;
+  code?: string;
   designation: string;
   unite?: string;
   quantiteTotale?: number;
+  /** Somme des quantités d'attachement du nœud, sur la période consommée — AC-3. */
+  quantitePeriode?: number;
   quantitePrecedente?: number;
   quantiteCumulee: number;
   prixUnitaire: number;
@@ -182,6 +185,8 @@ export interface Situation {
   cumulPrecedentHt: number;
   cumulCourantHt: number;
   travauxPeriodeHt: number;
+  /** AC-8 — montant saisi, jamais dérivé d'un planning, zéro par défaut. */
+  penalitesRetardHt?: number;
   retenueGarantiePercent: number;
   retenueGarantieMontant: number;
   retenueAvancePercent?: number;
@@ -189,6 +194,9 @@ export interface Situation {
   netAPayerHt: number;
   tvaTaux: number;
   netAPayerTtc: number;
+  /** AC-9, AC-11 — dérivée de Chantier.tauxRas, informative, ne réduit jamais netAPayerTtc. */
+  rasTaux?: number;
+  rasMontant?: number;
   status: SituationStatus;
   factureId?: string;
   approbateurMOAName?: string;

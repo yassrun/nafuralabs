@@ -72,12 +72,12 @@ interface SituationQuery extends ListQuery {
 
 interface ApiSituationLigne {
   id: string;
-  lotId?: string;
-  lotCode?: string;
-  posteBudgetaireId?: string;
+  noeudId?: string;
+  code?: string;
   designation: string;
   unite?: string;
   quantiteTotale?: number;
+  quantitePeriode?: number;
   quantitePrecedente?: number;
   quantiteCumulee: number;
   prixUnitaire: number;
@@ -97,6 +97,7 @@ interface ApiSituation {
   cumulPrecedentHt: number;
   cumulCourantHt: number;
   travauxPeriodeHt: number;
+  penalitesRetardHt?: number;
   retenueGarantiePercent: number;
   retenueGarantieMontant: number;
   retenueAvancePercent?: number;
@@ -104,6 +105,8 @@ interface ApiSituation {
   netAPayerHt: number;
   tvaTaux: number;
   netAPayerTtc: number;
+  rasTaux?: number;
+  rasMontant?: number;
   status: string;
   factureId?: string;
   approbateurMOAName?: string;
@@ -126,11 +129,12 @@ function daysBetween(from: string, to: Date): number {
 function apiLigneToModel(row: ApiSituationLigne): Situation['lignes'][number] {
   return {
     id: row.id,
-    lotId: row.lotId ?? '',
-    lotCode: row.lotCode,
+    noeudId: row.noeudId ?? '',
+    code: row.code,
     designation: row.designation,
     unite: row.unite,
     quantiteTotale: row.quantiteTotale,
+    quantitePeriode: Number(row.quantitePeriode ?? 0),
     quantitePrecedente: Number(row.quantitePrecedente ?? 0),
     quantiteCumulee: Number(row.quantiteCumulee ?? 0),
     prixUnitaire: Number(row.prixUnitaire ?? 0),
@@ -152,6 +156,7 @@ function apiToSituation(row: ApiSituation, includeLignes = true): Situation {
     cumulPrecedentHt: Number(row.cumulPrecedentHt ?? 0),
     cumulCourantHt: Number(row.cumulCourantHt ?? 0),
     travauxPeriodeHt: Number(row.travauxPeriodeHt ?? 0),
+    penalitesRetardHt: Number(row.penalitesRetardHt ?? 0),
     retenueGarantiePercent: Number(row.retenueGarantiePercent ?? 0),
     retenueGarantieMontant: Number(row.retenueGarantieMontant ?? 0),
     retenueAvancePercent: row.retenueAvancePercent,
@@ -159,6 +164,8 @@ function apiToSituation(row: ApiSituation, includeLignes = true): Situation {
     netAPayerHt: Number(row.netAPayerHt ?? 0),
     tvaTaux: Number(row.tvaTaux ?? 20),
     netAPayerTtc: Number(row.netAPayerTtc ?? 0),
+    rasTaux: row.rasTaux,
+    rasMontant: Number(row.rasMontant ?? 0),
     status: row.status as Situation['status'],
     factureId: row.factureId,
     approbateurMOAName: row.approbateurMOAName,
@@ -316,9 +323,16 @@ export class SituationApiService extends FeatureApiService<
 
   override async create(data: SituationCreate): Promise<Situation> {
     const numeroOrdre = Number(data.numeroOrdre ?? 1);
-    const row = await this.post<ApiSituation>(
-      `/api/v1/chantiers/${data.chantierId}/situations/generate?numero=${numeroOrdre}`,
-      {},
+    // AC-8 — le montant de pénalités, s'il est saisi, part avec la génération ; zéro par défaut.
+    const params = new HttpParams()
+      .set('numero', numeroOrdre)
+      .set('penalitesRetardHt', String(data.penalitesRetardHt ?? 0));
+    const row = await firstValueFrom(
+      this.http.post<ApiSituation>(
+        this.resolveUrl(`/api/v1/chantiers/${data.chantierId}/situations/generate`),
+        {},
+        { params },
+      ),
     );
     return apiToSituation(row, true);
   }

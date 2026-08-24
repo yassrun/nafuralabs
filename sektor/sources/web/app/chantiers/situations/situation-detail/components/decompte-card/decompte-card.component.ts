@@ -11,6 +11,8 @@ export interface DecompteValues {
   cumulCourantHt: number;
   cumulPrecedentHt: number;
   travauxPeriodeHt: number;
+  /** AC-8 — montant saisi, zéro par défaut, déduit avant RG et avance (AC-10). */
+  penalitesRetardHt?: number;
   retenueGarantiePercent: number;
   retenueGarantieMontant: number;
   retenueAvancePercent?: number;
@@ -18,6 +20,9 @@ export interface DecompteValues {
   netAPayerHt: number;
   tvaTaux: number;
   netAPayerTtc: number;
+  /** AC-9, AC-11 — informative : ne déduit jamais netAPayerTtc, retenue par le client au règlement. */
+  rasTaux?: number;
+  rasMontant?: number;
 }
 
 @Component({

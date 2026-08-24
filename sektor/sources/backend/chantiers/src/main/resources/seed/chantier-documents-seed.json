@@ -32,59 +32,5 @@
       "uploadedPar": "Khalid Naciri",
       "tags": ["signé"]
     }
-  ],
-  "attachements": [
-    {
-      "id": "att-001",
-      "chantierId": "ch-001",
-      "numero": "ATT-CH-2025-001-2026-05-08",
-      "date": "2026-05-08",
-      "meteoCode": "SOLEIL",
-      "temperatureC": 24,
-      "effectifPresent": 22,
-      "status": "SIGNE_MOE",
-      "lignes": [
-        {
-          "posteCode": "03.02.01",
-          "designation": "Cloisons carreaux de plâtre ep. 10",
-          "quantiteExecutee": 180,
-          "unite": "m²",
-          "zone": "Niveau 3 — Aile Est"
-        },
-        {
-          "posteCode": "03.04.01",
-          "designation": "Enduit de ciment façade",
-          "quantiteExecutee": 95,
-          "unite": "m²",
-          "zone": "Façade Nord"
-        }
-      ]
-    },
-    {
-      "id": "att-002",
-      "chantierId": "ch-001",
-      "numero": "ATT-CH-2025-001-2026-05-07",
-      "date": "2026-05-07",
-      "meteoCode": "NUAGEUX",
-      "temperatureC": 20,
-      "effectifPresent": 18,
-      "status": "CONTRESIGNE_MOA",
-      "lignes": [
-        {
-          "posteCode": "03.02.01",
-          "designation": "Cloisons carreaux de plâtre ep. 10",
-          "quantiteExecutee": 160,
-          "unite": "m²",
-          "zone": "Niveau 3 — Aile Ouest"
-        },
-        {
-          "posteCode": "07.01.03",
-          "designation": "Colonne plomberie DN50",
-          "quantiteExecutee": 12,
-          "unite": "ml",
-          "zone": "Gaine technique"
-        }
-      ]
-    }
   ]
 }

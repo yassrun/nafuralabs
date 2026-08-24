@@ -1,4 +1,4 @@
-package ma.nafura.chantiers.domain.budget;
+package ma.nafura.chantiers.domain.chantier;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -6,7 +6,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
-import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -14,13 +13,21 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * AC-14 du contrat {@code avancement-et-attachement} — le référentiel de zones du chantier.
+ *
+ * <p>Arborescent (bâtiment › niveau › zone via {@code parentZoneId}), tenu au **chantier**, et
+ * **vide par défaut** : un chantier sans zone déclarée produit ses attachements normalement, sans
+ * zone. Ce sous-lot est le premier consommateur — le seul référentiel de zones du produit, aucun
+ * autre module n'en crée un second.
+ */
 @Entity
-@Table(name = "budget_chantiers")
+@Table(name = "zones_chantier")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class BudgetChantier {
+public class ZoneChantier {
 
     @Id
     @Column(length = 100)
@@ -32,11 +39,14 @@ public class BudgetChantier {
     @Column(name = "chantier_id", nullable = false, length = 100)
     private String chantierId;
 
-    @Column(name = "previsionnel_ht", nullable = false, precision = 18, scale = 4)
-    private BigDecimal previsionnelHt;
+    @Column(nullable = false, length = 500)
+    private String designation;
 
-    @Column(name = "revise_ht", nullable = false, precision = 18, scale = 4)
-    private BigDecimal reviseHt;
+    @Column(name = "parent_zone_id", length = 100)
+    private String parentZoneId;
+
+    @Column(nullable = false)
+    private int ordre;
 
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
@@ -51,12 +61,6 @@ public class BudgetChantier {
             createdAt = now;
         }
         updatedAt = now;
-        if (previsionnelHt == null) {
-            previsionnelHt = BigDecimal.ZERO;
-        }
-        if (reviseHt == null) {
-            reviseHt = BigDecimal.ZERO;
-        }
     }
 
     @PreUpdate

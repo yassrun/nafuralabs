@@ -14,6 +14,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Une ligne d'attachement — contrat {@code avancement-et-attachement}, AC-11 à AC-14.
+ *
+ * <p>Montée depuis les déclarations d'avancement de la période, jamais tapée : elle ne porte que
+ * le lien vers son nœud, la quantité de la période et une zone facultative. Code, désignation,
+ * unité et prix unitaire vendu sont **lus sur le nœud** à la lecture (AC-12) — jamais recopiés
+ * ici, pour ne jamais diverger de l'arbre du chantier.
+ */
 @Entity
 @Table(name = "attachement_lignes")
 @Data
@@ -32,20 +40,17 @@ public class AttachementLigne {
     @Column(name = "attachement_id", nullable = false, length = 100)
     private String attachementId;
 
-    @Column(name = "poste_code", nullable = false, length = 50)
-    private String posteCode;
+    /** Le nœud de l'arbre du chantier dont vient la ligne — un poste, ou un lot-feuille (AC-12). */
+    @Column(name = "noeud_id", nullable = false, length = 100)
+    private String noeudId;
 
-    @Column(nullable = false, length = 500)
-    private String designation;
+    /** AC-11 — somme des déclarations du nœud sur la période de l'attachement. */
+    @Column(name = "quantite_periode", nullable = false, precision = 18, scale = 4)
+    private BigDecimal quantitePeriode;
 
-    @Column(name = "quantite_executee", nullable = false, precision = 18, scale = 4)
-    private BigDecimal quantiteExecutee;
-
-    @Column(nullable = false, length = 30)
-    private String unite;
-
-    @Column(length = 200)
-    private String zone;
+    /** AC-14 — facultative, prise dans le référentiel de zones du chantier. */
+    @Column(name = "zone_id", length = 100)
+    private String zoneId;
 
     @Column(nullable = false)
     private Integer ordre;
@@ -63,8 +68,8 @@ public class AttachementLigne {
             createdAt = now;
         }
         updatedAt = now;
-        if (quantiteExecutee == null) {
-            quantiteExecutee = BigDecimal.ZERO;
+        if (quantitePeriode == null) {
+            quantitePeriode = BigDecimal.ZERO;
         }
         if (ordre == null) {
             ordre = 0;

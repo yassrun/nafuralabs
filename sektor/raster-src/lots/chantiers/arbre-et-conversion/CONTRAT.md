@@ -9,6 +9,8 @@
 
 Gelé le **23/08/2026**. Les tasks exec **référencent** `AC-n` ; elles ne les recopient pas.
 
+> **Amendé une seconde fois (24/08/2026, après QA)** — AC-12 ne nommait que les *postes* orphelins. La QA a montré qu'un **sous-lot** orphelin est remonté à la racine en silence par `ChainageAvalAdapter`. L'AC couvre désormais tout nœud. Porté par SEKTOR-173.
+>
 > **Amendé à l'approbation (23/08/2026)** — deux corrections portées par l'approbateur, pas par l'auteur du contrat :
 > **AC-9** disait « renvoie le chantier déjà créé, **ou** est refusée » : un critère à deux issues n'est pas testable. Une seule retenue.
 > **AC-12** exigeait un refus sec « rejouable après correction du devis ». Impossible : `GAGNE` ne transitionne que vers `CONVERTIE`, le devis n'est plus modifiable — l'utilisateur se serait retrouvé sans issue. Remplacé par un placement explicite des postes orphelins par l'humain, au moment de la conversion.
@@ -63,6 +65,8 @@ Et un chemin d'entrée unique : l'étude **gagnée** arme la création, un humai
 **AC-12 — Un arbre bancal se répare devant l'humain, jamais en silence.** Le rattrapage actuel — un poste sans parent tombe sur le premier lot trouvé, sinon un « Lot principal » est forgé — **disparaît**.
 
 Si un ou plusieurs postes du devis n'ont pas de lot parent identifiable, la conversion **s'arrête avant de rien créer** et les **nomme** à l'écran. L'humain les **place** : il choisit un lot existant, ou crée le lot d'accueil. La conversion reprend alors et aboutit. S'il refuse, rien n'est créé — ni chantier, ni arbre, ni budget — et l'étude reste `GAGNE`.
+
+**Le cas vaut pour tout nœud, pas seulement les postes.** Un **sous-lot** dont le lot parent n'est pas identifiable relève du même traitement : nommé, placé par l'humain, jamais remonté à la racine en silence. Une hiérarchie qui change sans que personne ne le voie est précisément ce que cet AC interdit.
 
 **Pourquoi pas un simple refus :** une étude `GAGNE` ne transitionne que vers `CONVERTIE` (`StatutDossierEtude`) — elle **ne peut plus être corrigée**. Un refus sec enfermerait l'utilisateur : conversion impossible, devis non modifiable, aucune sortie. Le placement à la conversion est la seule issue qui ne demande ni nouvelle version de devis ni déblocage de statut.
 

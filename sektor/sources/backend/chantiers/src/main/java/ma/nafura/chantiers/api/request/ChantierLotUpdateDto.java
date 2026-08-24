@@ -18,7 +18,5 @@ public class ChantierLotUpdateDto {
 
     private BigDecimal montantHt;
 
-    private BigDecimal avancementPercent;
-
     private Integer ordre;
 }

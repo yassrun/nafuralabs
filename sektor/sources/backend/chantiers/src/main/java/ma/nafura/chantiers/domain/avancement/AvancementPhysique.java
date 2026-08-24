@@ -50,9 +50,6 @@ public class AvancementPhysique {
     @Column(name = "quantite_realisee", nullable = false, precision = 18, scale = 4)
     private BigDecimal quantiteRealisee;
 
-    @Column(nullable = false, precision = 8, scale = 4)
-    private BigDecimal pourcentage;
-
     @Column(length = 2000)
     private String notes;
 
@@ -89,9 +86,6 @@ public class AvancementPhysique {
         updatedAt = now;
         if (quantiteRealisee == null) {
             quantiteRealisee = BigDecimal.ZERO;
-        }
-        if (pourcentage == null) {
-            pourcentage = BigDecimal.ZERO;
         }
         if (!StringUtils.hasText(status)) {
             status = STATUS_BROUILLON;

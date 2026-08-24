@@ -47,7 +47,7 @@
       <tbody>
         @for (l of situation().lignes; track l.id) {
           <tr>
-            <td>{{ l.lotCode }}</td>
+            <td>{{ l.code }}</td>
             <td>{{ l.designation }}</td>
             <td>{{ l.unite }}</td>
             <td class="r">{{ l.quantiteTotale | number: '1.0-2' }}</td>
@@ -81,6 +81,12 @@
         <td>{{ 'chantiers.situation.decomptePrint.travauxPeriodeHt' | translate }}</td>
         <td class="r">{{ situation().travauxPeriodeHt | number: '1.2-2' }} MAD</td>
       </tr>
+      @if ((situation().penalitesRetardHt ?? 0) > 0) {
+        <tr>
+          <td>– Pénalités de retard</td>
+          <td class="r">{{ situation().penalitesRetardHt | number: '1.2-2' }} MAD</td>
+        </tr>
+      }
       <tr>
         <td>– Retenue garantie ({{ situation().retenueGarantiePercent }}%)</td>
         <td class="r">{{ situation().retenueGarantieMontant | number: '1.2-2' }} MAD</td>
@@ -103,6 +109,12 @@
         <td>{{ 'chantiers.situation.decomptePrint.netTtc' | translate }}</td>
         <td class="r">{{ situation().netAPayerTtc | number: '1.2-2' }} MAD</td>
       </tr>
+      @if ((situation().rasTaux ?? 0) > 0) {
+        <tr class="info">
+          <td>RAS ({{ situation().rasTaux }}%) — retenue par le client au règlement</td>
+          <td class="r">{{ situation().rasMontant | number: '1.2-2' }} MAD</td>
+        </tr>
+      }
     </table>
   </section>
 

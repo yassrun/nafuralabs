@@ -40,6 +40,7 @@ public class CashFlowProjectionService {
     private final ChantierSeedService chantierSeedService;
     private final FichePaieRepository fichePaieRepository;
     private final FichePaieSeedService fichePaieSeedService;
+    private final AvancementLectureService avancementLectureService;
 
     public CashFlowProjectionService(
             FactureMarcheRepository factureMarcheRepository,
@@ -49,7 +50,8 @@ public class CashFlowProjectionService {
             ChantierRepository chantierRepository,
             ChantierSeedService chantierSeedService,
             FichePaieRepository fichePaieRepository,
-            FichePaieSeedService fichePaieSeedService) {
+            FichePaieSeedService fichePaieSeedService,
+            AvancementLectureService avancementLectureService) {
         this.factureMarcheRepository = factureMarcheRepository;
         this.factureMarcheSeedService = factureMarcheSeedService;
         this.factureFournisseurRepository = factureFournisseurRepository;
@@ -58,6 +60,7 @@ public class CashFlowProjectionService {
         this.chantierSeedService = chantierSeedService;
         this.fichePaieRepository = fichePaieRepository;
         this.fichePaieSeedService = fichePaieSeedService;
+        this.avancementLectureService = avancementLectureService;
     }
 
     @Transactional(readOnly = true)
@@ -121,7 +124,8 @@ public class CashFlowProjectionService {
                     .filter(c -> Chantier.STATUS_EN_COURS.equals(c.getStatus()))
                     .map(c -> {
                         BigDecimal budget = c.getMontantHt() != null ? c.getMontantHt() : BigDecimal.ZERO;
-                        BigDecimal av = c.getAvancementPercent() != null ? c.getAvancementPercent() : BigDecimal.ZERO;
+                        BigDecimal avLu = avancementLectureService.hydrateArbre(c.getId());
+                        BigDecimal av = avLu != null ? avLu : BigDecimal.ZERO;
                         return budget.multiply(av)
                                 .divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP)
                                 .multiply(BigDecimal.valueOf(0.008 * phase * (1 + (idx % 3) * 0.03)));

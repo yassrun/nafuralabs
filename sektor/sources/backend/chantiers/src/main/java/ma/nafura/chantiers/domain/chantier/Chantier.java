@@ -119,7 +119,13 @@ public class Chantier implements Persistable<String> {
     @JsonProperty("avancePercue")
     private BigDecimal tauxAvance;
 
-    @Column(name = "avancement_percent", nullable = false, precision = 8, scale = 4)
+    /**
+     * Avancement lu, jamais stocké (AC-2 / AC-3 du contrat avancement-et-attachement) : moyenne
+     * des lots racines, pondérée à leur montant vendu (AC-4). Peuplé à la lecture par
+     * {@link ma.nafura.chantiers.service.AvancementLectureService} ; {@code null} tant qu'aucun
+     * nœud vendu ne porte de poids.
+     */
+    @Transient
     private BigDecimal avancementPercent;
 
     @Column(nullable = false, length = 40)
@@ -189,9 +195,6 @@ public class Chantier implements Persistable<String> {
         }
         if (tauxTva == null) {
             tauxTva = new BigDecimal("20");
-        }
-        if (avancementPercent == null) {
-            avancementPercent = BigDecimal.ZERO;
         }
         if (status == null || status.isBlank()) {
             status = STATUS_BROUILLON;

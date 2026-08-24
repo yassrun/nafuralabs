@@ -2,9 +2,7 @@ package ma.nafura.chantiers.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import ma.nafura.chantiers.api.dto.SituationConvertToFactureDto;
@@ -12,11 +10,9 @@ import ma.nafura.chantiers.api.dto.SituationFactureSummaryDto;
 import ma.nafura.chantiers.api.dto.SituationLigneDto;
 import ma.nafura.chantiers.api.dto.SituationTravauxDto;
 import ma.nafura.chantiers.domain.chantier.Chantier;
-import ma.nafura.chantiers.domain.chantier.ChantierLot;
 import ma.nafura.chantiers.domain.situation.SituationLigne;
 import ma.nafura.chantiers.domain.situation.SituationTravaux;
 import ma.nafura.chantiers.service.port.bc.SituationToFacturePort;
-import ma.nafura.chantiers.repository.ChantierLotRepository;
 import ma.nafura.chantiers.repository.SituationLigneRepository;
 import ma.nafura.chantiers.repository.SituationTravauxRepository;
 import ma.nafura.platform.framework.context.TenantContext;
@@ -33,7 +29,6 @@ public class SituationTravauxService {
 
     private final SituationTravauxRepository situationRepository;
     private final SituationLigneRepository ligneRepository;
-    private final ChantierLotRepository lotRepository;
     private final ChantierService chantierService;
     private final SituationGenerationService generationService;
     private final Optional<SituationToFacturePort> situationToFacturePort;
@@ -42,14 +37,12 @@ public class SituationTravauxService {
     public SituationTravauxService(
             SituationTravauxRepository situationRepository,
             SituationLigneRepository ligneRepository,
-            ChantierLotRepository lotRepository,
             ChantierService chantierService,
             SituationGenerationService generationService,
             Optional<SituationToFacturePort> situationToFacturePort,
             ErpNotificationPublisher erpNotificationPublisher) {
         this.situationRepository = situationRepository;
         this.ligneRepository = ligneRepository;
-        this.lotRepository = lotRepository;
         this.chantierService = chantierService;
         this.generationService = generationService;
         this.situationToFacturePort = situationToFacturePort;
@@ -60,11 +53,10 @@ public class SituationTravauxService {
     public List<SituationTravauxDto> listByChantier(String chantierId) {
         Chantier chantier = chantierService.getById(chantierId);
         UUID tenantId = tenantId();
-        Map<String, ChantierLot> lotsById = indexLots(tenantId, chantierId);
         return situationRepository
                 .findByTenantIdAndChantierIdOrderByNumeroOrdreDesc(tenantId, chantierId)
                 .stream()
-                .map(row -> toDto(row, chantier, lotsById, false))
+                .map(row -> toDto(row, chantier, false))
                 .toList();
     }
 
@@ -73,16 +65,22 @@ public class SituationTravauxService {
         UUID tenantId = tenantId();
         SituationTravaux situation = getEntity(situationId, tenantId);
         Chantier chantier = chantierService.getById(situation.getChantierId());
-        Map<String, ChantierLot> lotsById = indexLots(tenantId, situation.getChantierId());
-        return toDto(situation, chantier, lotsById, true);
+        return toDto(situation, chantier, true);
     }
 
     @Transactional
     public SituationTravauxDto generate(String chantierId, int numeroOrdre) {
-        SituationTravaux situation = generationService.generate(chantierId, numeroOrdre);
+        return generate(chantierId, numeroOrdre, null);
+    }
+
+    /** AC-8 — le montant de pénalités est saisi ici, à la génération. */
+    @Transactional
+    public SituationTravauxDto generate(String chantierId, int numeroOrdre, BigDecimal penalitesRetardHt) {
+        SituationTravaux situation = penalitesRetardHt != null
+                ? generationService.generate(chantierId, numeroOrdre, penalitesRetardHt)
+                : generationService.generate(chantierId, numeroOrdre);
         Chantier chantier = chantierService.getById(chantierId);
-        Map<String, ChantierLot> lotsById = indexLots(tenantId(), chantierId);
-        return toDto(situation, chantier, lotsById, true);
+        return toDto(situation, chantier, true);
     }
 
     @Transactional
@@ -132,8 +130,7 @@ public class SituationTravauxService {
         situationRepository.save(situation);
 
         Chantier chantier = chantierService.getById(situation.getChantierId());
-        Map<String, ChantierLot> lotsById = indexLots(tenantId, situation.getChantierId());
-        SituationTravauxDto dto = toDto(situation, chantier, lotsById, true);
+        SituationTravauxDto dto = toDto(situation, chantier, true);
         publishSituationEvent(
                 dto,
                 "REJETEE",
@@ -162,8 +159,9 @@ public class SituationTravauxService {
         }
 
         Chantier chantier = chantierService.getById(situation.getChantierId());
-        Map<String, ChantierLot> lotsById = indexLots(tenantId, situation.getChantierId());
-        SituationTravauxDto situationDto = toDto(situation, chantier, lotsById, true);
+        // AC-11 — le port reçoit netAPayerHt/netAPayerTtc calculés sans la RAS ; la RAS n'est
+        // qu'une ligne informative du DTO, jamais lue par SituationToFacturePort.
+        SituationTravauxDto situationDto = toDto(situation, chantier, true);
 
         SituationFactureSummaryDto factureSummary;
         if (situationToFacturePort.isPresent()) {
@@ -197,7 +195,7 @@ public class SituationTravauxService {
         situationRepository.save(situation);
 
         return SituationConvertToFactureDto.builder()
-                .situation(toDto(situation, chantier, lotsById, true))
+                .situation(toDto(situation, chantier, true))
                 .factureId(factureSummary.getId())
                 .facture(factureSummary)
                 .build();
@@ -238,8 +236,7 @@ public class SituationTravauxService {
         situationRepository.save(situation);
 
         Chantier chantier = chantierService.getById(situation.getChantierId());
-        Map<String, ChantierLot> lotsById = indexLots(tenantId, situation.getChantierId());
-        return toDto(situation, chantier, lotsById, true);
+        return toDto(situation, chantier, true);
     }
 
     private SituationTravaux getEntity(String situationId, UUID tenantId) {
@@ -248,26 +245,12 @@ public class SituationTravauxService {
                 .orElseThrow(() -> new IllegalArgumentException("Situation not found: " + situationId));
     }
 
-    private Map<String, ChantierLot> indexLots(UUID tenantId, String chantierId) {
-        Map<String, ChantierLot> lotsById = new HashMap<>();
-        for (ChantierLot lot : lotRepository.findByTenantIdAndChantierIdOrderByOrdreAscCodeAsc(tenantId, chantierId)) {
-            lotsById.put(lot.getId(), lot);
-        }
-        return lotsById;
-    }
-
-    private SituationTravauxDto toDto(
-            SituationTravaux situation,
-            Chantier chantier,
-            Map<String, ChantierLot> lotsById,
-            boolean includeLignes) {
+    private SituationTravauxDto toDto(SituationTravaux situation, Chantier chantier, boolean includeLignes) {
         List<SituationLigne> lignes = includeLignes
                 ? ligneRepository.findByTenantIdAndSituationIdOrderByOrdreAsc(tenantId(), situation.getId())
                 : List.of();
 
-        List<SituationLigneDto> ligneDtos = lignes.stream()
-                .map(ligne -> toLigneDto(ligne, lotsById.get(ligne.getLotId())))
-                .toList();
+        List<SituationLigneDto> ligneDtos = lignes.stream().map(this::toLigneDto).toList();
 
         return SituationTravauxDto.builder()
                 .id(situation.getId())
@@ -282,6 +265,7 @@ public class SituationTravauxService {
                 .cumulPrecedentHt(situation.getCumulPrecedentHt())
                 .cumulCourantHt(situation.getCumulCourantHt())
                 .travauxPeriodeHt(situation.getTravauxPeriodeHt())
+                .penalitesRetardHt(situation.getPenalitesRetardHt())
                 .retenueGarantiePercent(situation.getRetenueGarantiePercent())
                 .retenueGarantieMontant(situation.getRetenueGarantieMontant())
                 .retenueAvancePercent(situation.getRetenueAvancePercent())
@@ -289,6 +273,8 @@ public class SituationTravauxService {
                 .netAPayerHt(situation.getNetAPayerHt())
                 .tvaTaux(situation.getTvaTaux())
                 .netAPayerTtc(situation.getNetAPayerTtc())
+                .rasTaux(situation.getRasTaux())
+                .rasMontant(situation.getRasMontant())
                 .status(situation.getStatus())
                 .factureId(situation.getFactureId())
                 .approbateurMOAName(situation.getApprobateurMoaName())
@@ -304,15 +290,16 @@ public class SituationTravauxService {
         return ligneRepository.findByTenantIdAndSituationIdOrderByOrdreAsc(tenantId(), situationId).size();
     }
 
-    private static SituationLigneDto toLigneDto(SituationLigne ligne, ChantierLot lot) {
+    /** AC-2 — code, désignation, unité et prix sont déjà résolus sur le nœud à la génération. */
+    private SituationLigneDto toLigneDto(SituationLigne ligne) {
         return SituationLigneDto.builder()
                 .id(ligne.getId())
-                .lotId(ligne.getLotId())
-                .lotCode(lot != null ? lot.getCode() : null)
-                .posteBudgetaireId(ligne.getPosteBudgetaireId())
+                .noeudId(ligne.getNoeudId())
+                .code(ligne.getCode())
                 .designation(ligne.getDesignation())
                 .unite(ligne.getUnite())
                 .quantiteTotale(ligne.getQuantiteTotale())
+                .quantitePeriode(ligne.getQuantitePeriode())
                 .quantitePrecedente(ligne.getQuantitePrecedente())
                 .quantiteCumulee(ligne.getQuantiteCumulee())
                 .prixUnitaire(ligne.getPrixUnitaire())

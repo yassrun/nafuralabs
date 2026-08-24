@@ -8,6 +8,7 @@ import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -31,6 +32,15 @@ public class AttachementChantier {
     public static final String STATUS_CONTESTE = "CONTESTE";
     public static final String STATUS_CLOS = "CLOS";
 
+    /**
+     * AC-15 — la signature MOE fige tout : ses lignes, sa période, et les déclarations qu'il
+     * reprend (AC-7 du contrat avancement-et-attachement). Tout statut atteint à partir de
+     * {@code SIGNE_MOE} est figeant ; {@code BROUILLON} et {@code EN_ATTENTE_MOE} ne le sont pas
+     * encore (AC-17 — le désaccord s'y règle par retour à la déclaration).
+     */
+    public static final List<String> STATUTS_FIGES = List.of(
+            STATUS_SIGNE_MOE, STATUS_EN_ATTENTE_MOA, STATUS_CONTRESIGNE_MOA, STATUS_CONTESTE, STATUS_CLOS);
+
     @Id
     @Column(length = 100)
     private String id;
@@ -44,8 +54,12 @@ public class AttachementChantier {
     @Column(nullable = false, length = 120)
     private String numero;
 
-    @Column(nullable = false)
-    private LocalDate date;
+    /** AC-10 — l'attachement couvre une période, pas un jour. Bornes incluses. */
+    @Column(name = "date_debut", nullable = false)
+    private LocalDate dateDebut;
+
+    @Column(name = "date_fin", nullable = false)
+    private LocalDate dateFin;
 
     @Column(name = "meteo_code", length = 20)
     private String meteoCode;
@@ -61,6 +75,14 @@ public class AttachementChantier {
 
     @Column(name = "signature_moe_data_url", columnDefinition = "TEXT")
     private String signatureMoeDataUrl;
+
+    /**
+     * Contrat {@code situation-et-retenues}, AC-4 — l'attachement une fois consommé par une
+     * situation ne l'est plus jamais par une suivante. {@code null} tant qu'aucune situation ne
+     * l'a repris.
+     */
+    @Column(name = "situation_id", length = 100)
+    private String situationId;
 
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;

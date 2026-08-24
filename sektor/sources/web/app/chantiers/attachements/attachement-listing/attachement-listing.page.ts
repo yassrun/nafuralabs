@@ -24,6 +24,7 @@ const STATUS_CSS: Record<string, string> = {
   EN_ATTENTE_MOA: 'badge--warning',
   CONTRESIGNE_MOA: 'badge--success',
   CONTESTE: 'badge--danger',
+  CLOS: 'badge--secondary',
 };
 
 @Component({
@@ -57,7 +58,7 @@ const STATUS_CSS: Record<string, string> = {
                 <span class="sep">·</span>
                 <span class="chantier-code">{{ a.chantierCode }}</span>
                 <span class="sep">·</span>
-                <span class="date">{{ a.date | date:'dd/MM/yyyy' }}</span>
+                <span class="date">{{ a.dateDebut | date:'dd/MM/yyyy' }} – {{ a.dateFin | date:'dd/MM/yyyy' }}</span>
                 @if (a.meteoCode) { <span class="meteo">{{ meteoEmoji(a.meteoCode) }} {{ a.temperatureC }}°C</span> }
               </div>
               <div class="att-right">
@@ -71,20 +72,20 @@ const STATUS_CSS: Record<string, string> = {
 
             <table class="lignes-table">
               <thead><tr>
-                <th>Poste</th>
+                <th>{{ 'chantiers.attachement.list.columns.code' | translate }}</th>
                 <th>{{ 'chantiers.attachement.list.columns.designation' | translate }}</th>
                 <th class="num">{{ 'chantiers.attachement.list.columns.qteExecutee' | translate }}</th>
                 <th>{{ 'chantiers.attachement.list.columns.unite' | translate }}</th>
-                <th>Zone</th>
+                <th>{{ 'chantiers.attachement.zone' | translate }}</th>
               </tr></thead>
               <tbody>
-                @for (l of a.lignes; track l.posteCode) {
+                @for (l of a.lignes; track l.id) {
                   <tr>
-                    <td class="code">{{ l.posteCode }}</td>
+                    <td class="code">{{ l.code }}</td>
                     <td>{{ l.designation }}</td>
-                    <td class="num">{{ l.quantiteExecutee }}</td>
+                    <td class="num">{{ l.quantitePeriode }}</td>
                     <td>{{ l.unite }}</td>
-                    <td class="zone">{{ l.zone ?? '—' }}</td>
+                    <td class="zone">{{ l.zoneLibelle ?? '—' }}</td>
                   </tr>
                 }
               </tbody>
@@ -177,7 +178,8 @@ export class AttachementListingPage implements OnInit {
     if (!q) return list;
     return list.filter(a =>
       a.chantierCode.toLowerCase().includes(q) ||
-      a.date.includes(q) ||
+      a.dateDebut.includes(q) ||
+      a.dateFin.includes(q) ||
       a.numero.toLowerCase().includes(q),
     );
   });

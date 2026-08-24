@@ -7,10 +7,16 @@ import { TranslateModule } from '@ngx-translate/core';
 
 import { ButtonComponent, NfInputComponent, NfTextareaComponent } from '@platform/lib/anatomy';
 
-import type { BudgetRevisionDraft, ChantierBudget } from '../../models';
+import type { BudgetNoeud, BudgetRevisionDraft } from '../../models';
 
+/**
+ * Réviser, c'est désormais un geste **sur un noeud** : le budget par rubrique agrégé au chantier
+ * n'existe plus. Le prévu affiché à gauche est la copie du DPU — il ne bouge pas ; seule la
+ * colonne de droite est saisie.
+ */
 interface ReviserBudgetDialogData {
-  chantier: ChantierBudget;
+  chantierId: string;
+  noeud: BudgetNoeud;
 }
 
 @Component({
@@ -30,7 +36,7 @@ interface ReviserBudgetDialogData {
       <header>
         <div>
           <p>{{ 'chantiers.budget.reviser.title' | translate }}</p>
-          <h2>{{ data.chantier.code }} · {{ data.chantier.name }}</h2>
+          <h2>{{ data.noeud.code }} · {{ data.noeud.designation }}</h2>
         </div>
         <nf-button variant="ghost" icon="x" (clicked)="close()" [attr.aria-label]="'common.close' | translate"></nf-button>
       </header>
@@ -38,8 +44,8 @@ interface ReviserBudgetDialogData {
       <section class="grid">
         <div class="row row--head">
           <span>Rubrique</span>
-          <span>{{ 'chantiers.budget.reviser.before' | translate }}</span>
-          <span>{{ 'chantiers.budget.reviser.after' | translate }}</span>
+          <span>Déboursé prévu</span>
+          <span>Déboursé révisé</span>
         </div>
         @for (line of lines(); track line.rubrique) {
           <div class="row">
@@ -90,13 +96,19 @@ export class ReviserBudgetDialogComponent {
   private readonly dialogRef = inject(MatDialogRef<ReviserBudgetDialogComponent, BudgetRevisionDraft | null>);
   readonly data = inject<ReviserBudgetDialogData>(MAT_DIALOG_DATA);
 
+  /**
+   * Le non ventilé est exclu : c'est le constat d'un chiffrage qu'on n'a pas su décomposer, pas
+   * une case où poser un montant.
+   */
   readonly lines = signal(
-    this.data.chantier.lignes.map((line) => ({
-      rubrique: line.rubrique,
-      label: line.label,
-      before: line.reviseHt,
-      after: line.reviseHt,
-    }))
+    this.data.noeud.rubriques
+      .filter((rubrique) => rubrique.rubrique !== 'NON_VENTILE')
+      .map((rubrique) => ({
+        rubrique: rubrique.rubrique,
+        label: rubrique.label,
+        before: rubrique.prevuHt,
+        after: rubrique.reviseHt,
+      })),
   );
   readonly motif = signal('');
   readonly pieceName = signal('');
@@ -116,7 +128,8 @@ export class ReviserBudgetDialogComponent {
 
   save(): void {
     this.dialogRef.close({
-      chantierId: this.data.chantier.id,
+      chantierId: this.data.chantierId,
+      noeudId: this.data.noeud.id,
       motif: this.motif().trim(),
       pieceName: this.pieceName().trim() || undefined,
       lignes: this.lines().map((line) => ({ rubrique: line.rubrique, reviseHt: line.after })),
