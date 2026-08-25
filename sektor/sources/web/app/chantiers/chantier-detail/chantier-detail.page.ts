@@ -37,6 +37,7 @@ import { ErpAuditService } from '@app/socle/shell/erp-audit.service';
 import { AuthFacade } from '@platform/core/security/services/auth.facade';
 import type { RecordAttachmentDto } from '@platform/features/collaboration/doc-manager/services/attachment-api.service';
 import { DocumentsApiService } from '../documents/services/documents-api.service';
+import { chantierToMarcheDraft } from './chantier-marche-draft';
 
 type DetailTab = 'overview' | 'lots' | 'budget' | 'situations' | 'documents' | 'photos' | 'equipe';
 
@@ -736,23 +737,7 @@ export class ChantierDetailPage {
     });
     if (!confirmed) return;
     try {
-      await this.contratApi.create({
-        numero: c.marcheReference?.trim() || `MAR-${c.code}`,
-        intitule: c.name,
-        chantierId: c.id,
-        chantierCode: c.code,
-        chantierNom: c.name,
-        clientId: c.clientId,
-        clientNom: c.clientName ?? '',
-        type: 'FORFAIT',
-        nature: 'PRIVE_PME',
-        montantInitialHt: c.budgetHt,
-        tvaTaux: c.tvaTaux,
-        retenueGarantieTaux: 7,
-        retenueSourceTaux: 0,
-        dateOrdreService: c.dateOrdreService ?? c.dateDebut,
-        status: 'EN_EXECUTION',
-      } as Partial<Marche>);
+      await this.contratApi.create(chantierToMarcheDraft(c));
       const { items } = await this.contratApi.getAll();
       this.marchesCache.set(items);
       this.toast.success(this.translate.instant('chantiers.chantier.detail.marche.createSuccess'));

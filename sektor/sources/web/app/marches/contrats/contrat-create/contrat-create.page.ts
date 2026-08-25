@@ -13,10 +13,7 @@ import {
 import { ChantierApiService } from '../../../chantiers/services/chantier-api.service';
 import { ContratMarcheApiService } from '../services/contrat-marche-api.service';
 import type { MarcheNature, MarcheType } from '../../models';
-
-function todayIso(): string {
-  return new Date().toISOString().slice(0, 10);
-}
+import { ordreServicePrefill } from './contrat-create-prefill';
 
 @Component({
   selector: 'app-contrat-create',
@@ -149,7 +146,7 @@ export class ContratCreatePage implements OnInit {
     montantInitialHt: 0,
     tvaTaux: 20,
     retenueGarantieTaux: 7,
-    dateOrdreService: todayIso(),
+    dateOrdreService: '',
     status: 'BROUILLON' as const,
   };
 
@@ -200,7 +197,7 @@ export class ContratCreatePage implements OnInit {
     this.draft.chantierNom = c.name;
     this.draft.montantInitialHt = c.budgetHt;
     this.draft.tvaTaux = c.tvaTaux;
-    this.draft.dateOrdreService = c.dateOrdreService ?? c.dateDebut ?? todayIso();
+    this.draft.dateOrdreService = ordreServicePrefill(c);
 
     if (!this.draft.intitule.trim()) {
       this.draft.intitule = c.name;
@@ -232,7 +229,7 @@ export class ContratCreatePage implements OnInit {
       status,
     } = this.draft;
 
-    if (!chantierId || !intitule.trim() || montantInitialHt <= 0) {
+    if (!chantierId || !intitule.trim() || montantInitialHt <= 0 || !dateOrdreService) {
       this.toast.error(this.translate.instant('marches.contrat.create.errors.required'));
       return;
     }
