@@ -38,6 +38,10 @@ import { AuthFacade } from '@platform/core/security/services/auth.facade';
 import type { RecordAttachmentDto } from '@platform/features/collaboration/doc-manager/services/attachment-api.service';
 import { DocumentsApiService } from '../documents/services/documents-api.service';
 import { chantierToMarcheDraft } from './chantier-marche-draft';
+import {
+  resolveActiveSituationReference,
+  resolveRetenueGarantiePercent,
+} from './situation-draft-policy';
 
 type DetailTab = 'overview' | 'lots' | 'budget' | 'situations' | 'documents' | 'photos' | 'equipe';
 
@@ -269,8 +273,6 @@ const STATUS_VARIANT: Record<ChantierStatus, BadgeVariant> = {
             } @else {
               <p class="tab-hint">{{ 'chantiers.chantier.detail.situations.noReference' | translate }}</p>
               <nf-button variant="primary" icon="file-plus" iconLibrary="lucide" (clicked)="creerMarche()">
-                  {{ 'chantiers.chantier.detail.situations.generateCta' | translate }}
-                </nf-button>
                 {{ 'chantiers.chantier.detail.marche.createAction' | translate }}
               </nf-button>
             }
@@ -519,28 +521,7 @@ export class ChantierDetailPage {
   });
 
   readonly activeSituationReference = computed(() => {
-    const chantier = this.chantier();
-    const marche = this.marchePourChantier();
-    if (marche) {
-      return {
-        id: marche.id,
-        numero: marche.numero,
-        montantHt: marche.montantTotalHt,
-        labelKey: 'chantiers.chantier.detail.labels.marche',
-        hintKey: 'chantiers.chantier.detail.situations.hint',
-      };
-    }
-    const reference = chantier?.marcheReference?.trim();
-    if (chantier?.id && reference) {
-      return {
-        id: `vente-ref:${chantier.id}`,
-        numero: reference,
-        montantHt: chantier.budgetHt,
-        labelKey: 'chantiers.chantier.detail.labels.referenceVente',
-        hintKey: 'chantiers.chantier.detail.situations.hintSansMarche',
-      };
-    }
-    return null;
+    return resolveActiveSituationReference(this.chantier(), this.marchePourChantier());
   });
 
   readonly canGenerateSituationDraft = computed(() => this.activeSituationReference() != null);
@@ -770,7 +751,7 @@ export class ChantierDetailPage {
       cumulSituationsFactureHt: c.cumulSituationsHt ?? 0,
       revisionKHt: 0,
       penalitesHt: 0,
-      retenueGarantiePercent: c.cautionGarantie ?? m.retenueGarantieTaux,
+      retenueGarantiePercent: resolveRetenueGarantiePercent(c, this.marchePourChantier()),
       tvaTaux: c.tvaTaux,
       lots: lots.map((l) => ({
         code: l.code,
