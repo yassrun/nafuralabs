@@ -90,7 +90,11 @@ export type AgentFilter = "all" | "spec" | "exec" | "qa";
 export function taskAgentType(t: {
   type?: string;
   agent_type?: string;
+  status?: string;
 }): "spec" | "exec" | "qa" {
+  // `agent_type` décrit l'auteur attendu de la tâche, mais après livraison
+  // d'une feature/bug le prochain acteur est toujours QA.
+  if (t.status === "review") return "qa";
   const a = (t.agent_type || "").toLowerCase();
   if (a === "spec" || a === "exec" || a === "qa") return a;
   const ty = (t.type || "").toLowerCase();

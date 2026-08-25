@@ -1,6 +1,6 @@
 ---
 id: SEKTOR-171
-status: review
+status: done-me
 context: nafura
 type: feature
 agent_type: exec
@@ -36,6 +36,7 @@ tags: [sektor, ux]
 23/08 20:25  status → review
 25/08 14:04  status → done-agent · gate none → done-me
 25/08 14:30  status → review
+25/08 18:19  status → done-agent · gate none → done-me
 ```
 
 ## Rapport de livraison

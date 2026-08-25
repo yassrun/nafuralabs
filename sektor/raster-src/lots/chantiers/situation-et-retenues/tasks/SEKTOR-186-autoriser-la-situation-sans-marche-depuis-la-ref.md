@@ -37,6 +37,8 @@ tags: [chantiers, situations, ux, audit]
 25/08 13:50  status → review
 25/08 14:02  status → done-agent · gate none → done-me
 25/08 14:31  status → review
+25/08 18:19  status → doing
+25/08 18:44  status → review
 ```
 
 ## Rapport de livraison
@@ -46,3 +48,9 @@ tags: [chantiers, situations, ux, audit]
 - Sans marché notifié, l'onglet Situations laisse générer le brouillon et conserve `Créer le marché` comme action secondaire au lieu d'un écran mort.
 - Le brouillon affiche `Référence de vente` quand il n'y a pas de marché, avec messages FR/EN/AR dédiés pour le cas sans marché et pour l'absence totale de référence active.
 - Preuves exécutées : `get_errors` verts sur `chantier-detail.page.ts` et les traductions FR/EN/AR ; grep ciblé confirmant `canGenerateSituationDraft()` et `activeSituationReference()` à la place du garde-fou exclusif sur `marchePourChantier()`.
+
+## Rapport de correction CODE — 25/08
+- Commit intégré : `2c7fad1`.
+- HTML du CTA corrigé et politique de brouillon extraite/testée.
+- Référence active sans marché conservée ; retenue résolue chantier → marché → défaut 7 %, sans variable implicite.
+- Preuves agent : assertions runtime et compilation TypeScript ciblée vertes.

@@ -24,11 +24,6 @@
     - ◐ `SEKTOR-184` bug — Supprimer l'onglet Phases et unifier le plann…
   - · `situation-et-retenues` sous-lot
     - ◐ `SEKTOR-186` bug — Autoriser la situation sans marché depuis la …
-- `lookups` lot
-  - ◐ `SEKTOR-169` feature — Combobox anatomy et œil fiche
-  - ◐ `SEKTOR-170` feature — Client et fournisseur sur les écrans
-  - ◐ `SEKTOR-171` feature — Reste lookupKeys et filtres listing
-  - ◐ `SEKTOR-172` qa — Preuves lookup combobox
 
 ## raster
 
@@ -45,4 +40,4 @@
 
 ---
 
-**20 live · 2 projets**
+**16 live · 2 projets**

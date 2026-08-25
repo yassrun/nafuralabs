@@ -1,6 +1,6 @@
 ---
 id: SEKTOR-172
-status: review
+status: done-me
 context: nafura
 type: qa
 agent_type: qa
@@ -34,6 +34,7 @@ tags: [sektor, ux]
 25/08 14:56  169.mjs PASS · 170.mjs PASS · 171.mjs PASS sur le checkout courant
 25/08 14:04  status → done-agent · gate none → done-me
 25/08 14:30  status → review
+25/08 18:19  status → done-agent · gate none → done-me
 ```
 
 ## Rapport de livraison

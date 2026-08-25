@@ -37,6 +37,8 @@ tags: [chantiers, navigation, ux, audit]
 25/08 13:57  status → review
 25/08 14:02  status → done-agent · gate none → done-me
 25/08 14:31  status → review
+25/08 18:19  status → doing
+25/08 18:44  status → review
 ```
 
 ## Rapport de livraison
@@ -46,3 +48,9 @@ tags: [chantiers, navigation, ux, audit]
 - `attachement-listing.page.ts` et `journal-chantier.page.ts` affichent un filtre chantier visible et réversible, et `attachement-saisie.page.ts` préremplit le chantier demandé.
 - `situation-listing.page.ts` consomme aussi `?chantierId=` à l'ouverture pour garder le filtre visible dans le sélecteur.
 - Preuves exécutées : `get_errors` verts sur les pages touchées et les traductions FR/EN/AR ; grep ciblé confirmant `openAvancement`, `openAttachements`, `openJournal`, `clearChantierFilter` et l'usage de `chantierId` sur les vues aval.
+
+## Rapport de correction CODE — 25/08
+- Commit intégré : `4eefa3d`.
+- Correction du mélange `||` / `??` dans le journal et du conflit `route` dans la liste des situations.
+- Le filtre `chantierId` reste visible, synchronisé dans l'URL et réversible.
+- Preuve intégrée : `verify-chantier-context-navigation-187.mjs` PASS.

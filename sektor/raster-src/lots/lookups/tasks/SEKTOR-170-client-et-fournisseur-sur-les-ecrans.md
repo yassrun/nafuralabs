@@ -1,6 +1,6 @@
 ---
 id: SEKTOR-170
-status: review
+status: done-me
 context: nafura
 type: feature
 agent_type: exec
@@ -37,6 +37,7 @@ tags: [sektor, ux]
 25/08 14:56  preuve 170 rejouée VERT après alignement du script sur buildErpLookupSearchers + erp-lookup-searchers.ts
 25/08 14:04  status → done-agent · gate none → done-me
 25/08 14:30  status → review
+25/08 18:19  status → done-agent · gate none → done-me
 ```
 
 ## Rapport de livraison

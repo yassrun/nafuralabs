@@ -31,6 +31,8 @@ tags: [chantiers, ux, frontend]
 25/08 13:24  status → review
 25/08 13:40  status → done-agent · gate none → done-me
 25/08 14:31  status → review
+25/08 18:19  status → doing
+25/08 18:44  status → review
 ```
 
 ## Rapport de livraison
@@ -40,3 +42,9 @@ tags: [chantiers, ux, frontend]
 - Traductions FR/EN/AR ajoutées pour `EN_PREPARATION` et `Non défini`.
 - Preuves exécutées : `get_errors` sur les fichiers touchés, puis `npm run build:dev` dans `sektor/sources/web`.
 - Résultat build : plus aucune erreur sur ce slice ; seul reste l'erreur préexistante `app/socle/approbations/components/submit-approval-button/submit-approval-button.component.ts:131` (`TS2366`).
+
+## Rapport de correction CODE — 25/08
+- Commit intégré : `8cdab48`.
+- Suppression des derniers fallbacks `dateOrdreService ?? dateDebut` et `dateOrdreService ?? dateDebut ?? todayIso()`.
+- Création de marché centralisée dans un mapper qui conserve uniquement les dates contractuelles explicites.
+- Preuves agent : 5 tests ciblés verts et scan des fallbacks interdits vide.

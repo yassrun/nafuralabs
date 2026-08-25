@@ -38,6 +38,8 @@ tags: [chantiers, planning, ux, frontend]
 25/08 13:36  status → review
 25/08 14:02  status → done-agent · gate none → done-me
 25/08 14:31  status → review
+25/08 18:18  status → doing
+25/08 18:19  status → review
 ```
 
 ## Rapport de livraison
