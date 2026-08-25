@@ -46,7 +46,8 @@
         "print": "Imprimer",
         "export": "Exporter Excel",
         "voirPlanning": "Voir planning",
-        "voirDetail": "Voir le détail"
+        "voirDetail": "Voir le détail",
+        "clearChantierFilter": "Voir tous les chantiers"
       },
       "filters": {
         "allStatuses": "Tous les statuts",
@@ -55,6 +56,7 @@
       },
       "fields": {
         "code": "Code",
+        "chantier": "Chantier",
         "codeChantier": "Code chantier",
         "name": "Chantier",
         "designation": "Désignation",
@@ -106,6 +108,7 @@
           "type": "Type",
           "client": "Client",
           "ville": "Ville",
+          "venteHt": "Vente HT",
           "budgetHt": "Budget HT",
           "avancement": "Avancement",
           "status": "Statut",
@@ -145,6 +148,7 @@
         },
         "sections": {
           "equipe": "Équipe",
+          "workflow": "Flux chantier",
           "calendrier": "Calendrier",
           "finances": "Finances",
           "description": "Description",
@@ -152,6 +156,7 @@
           "brouillonCalcule": "Brouillon calculé",
           "parLot": "Par lot"
         },
+        "workflowHint": "Suivez le parcours terrain sans repasser par les listings portefeuille : arbre, saisie d'avancement, attachements, situations et journal.",
         "labels": {
           "chefChantier": "Chef chantier",
           "conducteurTravaux": "Conducteur travaux",
@@ -160,6 +165,10 @@
           "debut": "Début",
           "finPrevue": "Fin prévue",
           "finReelle": "Fin réelle",
+          "venteHt": "Vente HT",
+          "venteTtc": "Vente TTC",
+          "budgetReviseHt": "Budget révisé HT",
+          "budgetReviseTtc": "Budget révisé TTC",
           "budgetHt": "Budget HT",
           "budgetTtc": "Budget TTC",
           "tva": "TVA",
@@ -170,6 +179,7 @@
           "factureHt": "Facturé HT",
           "encaisseTtc": "Encaissé TTC",
           "marche": "Marché",
+          "referenceVente": "Référence de vente",
           "travauxPeriodeHt": "Travaux période HT",
           "revisionK": "Révision K",
           "penalites": "Pénalités",
@@ -205,8 +215,10 @@
         },
         "situations": {
           "hint": "Génération d'un brouillon de situation à partir de l'avancement physique et des lots.",
+          "hintSansMarche": "Le chantier reste facturable sans marché notifié : le brouillon se génère depuis la référence de vente active.",
           "generateCta": "Générer situation N (brouillon)",
           "noMarche": "Aucun marché n'est encore lié à ce chantier — créez le marché pour générer les situations.",
+          "noReference": "Aucune référence de vente active n'est disponible pour générer la situation. Créez le marché ou renseignez la référence de vente du chantier.",
           "linkAll": "Voir toutes les situations de travaux pour ce chantier →"
         },
         "documents": {
@@ -247,7 +259,7 @@
           "natureInterne": "Interne",
           "origineAction": "Voir le poste du devis d'origine",
           "origineIntrouvable": "Le poste du devis d'origine est introuvable.",
-          "totalLabel": "Total marché HT",
+          "totalLabel": "Total vendu HT",
           "collapseLot": "Réduire le lot",
           "expandLot": "Développer le lot",
           "rowsCount": "{count} ligne(s)",

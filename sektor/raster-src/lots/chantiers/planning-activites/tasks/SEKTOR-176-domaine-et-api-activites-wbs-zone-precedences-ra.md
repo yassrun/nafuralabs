@@ -11,7 +11,7 @@ gate: none
 
 # Domaine et API activités — WBS zone précédences rattachements
 
-> AC-1..AC-8 CONTRAT planning-activites
+> Domaine, API et preuves attendues décrits dans `00-PLAN.md`.
 
 ## Étapes
 
@@ -30,6 +30,8 @@ gate: none
 25/08 11:35  e2e scripts/verify-planning-activites-20260825.mjs écrit (scénarios 2+4) — API 8082 down, non joué live
 25/08 11:35  rouge-avant documenté : POST /activites → 404
 25/08 11:34  status → review
+25/08 13:33  status → done-agent · gate none → done-me
+25/08 14:31  status → review
 ```
 
 ## Rapport de livraison

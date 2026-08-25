@@ -12,7 +12,7 @@ blocked_by: [SEKTOR-176, SEKTOR-177]
 
 # Front Gantt activités — remplace coquille phases
 
-> AC-12
+> Résultat du Gantt activités décrit dans `00-PLAN.md`.
 
 ## Étapes
 
@@ -29,6 +29,8 @@ blocked_by: [SEKTOR-176, SEKTOR-177]
 25/08 11:38  smoke UI non joué : 4200 et 8082 down
 25/08 11:34  status → doing
 25/08 11:35  status → review
+25/08 13:33  status → done-agent · gate none → done-me
+25/08 14:31  status → review
 ```
 
 ## Rapport de livraison

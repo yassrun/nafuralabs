@@ -248,7 +248,7 @@ export class ChantierEditPage {
     code: '',
     name: '',
     description: '',
-    status: 'EN_COURS' as ChantierStatus,
+    status: 'EN_PREPARATION' as ChantierStatus,
     clientId: '',
     clientName: '',
     marcheReference: '',
@@ -263,6 +263,7 @@ export class ChantierEditPage {
 
   readonly statusOptions: { v: ChantierStatus; labelKey: string }[] = [
     { v: 'PROSPECT', labelKey: 'chantiers.status.prospect' },
+    { v: 'EN_PREPARATION', labelKey: 'chantiers.status.enPreparation' },
     { v: 'EN_COURS', labelKey: 'chantiers.status.enCours' },
     { v: 'SUSPENDU', labelKey: 'chantiers.status.suspendu' },
     { v: 'TERMINE', labelKey: 'chantiers.status.termine' },

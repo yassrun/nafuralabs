@@ -46,7 +46,8 @@
         "print": "Print",
         "export": "Export to Excel",
         "voirPlanning": "View schedule",
-        "voirDetail": "View detail"
+        "voirDetail": "View details",
+        "clearChantierFilter": "Show all sites"
       },
       "filters": {
         "allStatuses": "All statuses",
@@ -55,6 +56,7 @@
       },
       "fields": {
         "code": "Code",
+        "chantier": "Site",
         "codeChantier": "Site code",
         "name": "Site",
         "designation": "Description",
@@ -106,6 +108,7 @@
           "type": "Type",
           "client": "Customer",
           "ville": "City",
+          "venteHt": "Sales excl. VAT",
           "budgetHt": "Budget excl. VAT",
           "avancement": "Progress",
           "status": "Status",
@@ -145,6 +148,7 @@
         },
         "sections": {
           "equipe": "Team",
+          "workflow": "Site workflow",
           "calendrier": "Schedule",
           "finances": "Finance",
           "description": "Description",
@@ -152,6 +156,7 @@
           "brouillonCalcule": "Computed draft",
           "parLot": "By work package"
         },
+        "workflowHint": "Follow the field workflow without going back through portfolio listings: tree, progress entry, work logs, certificates, and journal.",
         "labels": {
           "chefChantier": "Site foreman",
           "conducteurTravaux": "Works supervisor",
@@ -160,6 +165,10 @@
           "debut": "Start",
           "finPrevue": "Planned end",
           "finReelle": "Actual end",
+          "venteHt": "Sales excl. VAT",
+          "venteTtc": "Sales incl. VAT",
+          "budgetReviseHt": "Revised budget excl. VAT",
+          "budgetReviseTtc": "Revised budget incl. VAT",
           "budgetHt": "Budget excl. VAT",
           "budgetTtc": "Budget incl. VAT",
           "tva": "VAT",
@@ -170,6 +179,7 @@
           "factureHt": "Invoiced excl. VAT",
           "encaisseTtc": "Collected incl. VAT",
           "marche": "Contract",
+          "referenceVente": "Sales reference",
           "travauxPeriodeHt": "Period works excl. VAT",
           "revisionK": "Price revision K",
           "penalites": "Penalties",
@@ -205,8 +215,10 @@
         },
         "situations": {
           "hint": "Draft situation generation from physical progress and work packages.",
+          "hintSansMarche": "The site remains billable without a notified contract: the draft is generated from the active sales reference.",
           "generateCta": "Generate certificate N (draft)",
           "noMarche": "No contract is linked to this site yet — create the contract to generate certificates.",
+          "noReference": "No active sales reference is available to generate the certificate. Create the contract or fill in the site's sales reference.",
           "linkAll": "View all progress certificates for this site →"
         },
         "documents": {
@@ -247,7 +259,7 @@
           "natureInterne": "Internal",
           "origineAction": "Open the source quote line",
           "origineIntrouvable": "The source quote line could not be found.",
-          "totalLabel": "Total contract excl. VAT",
+          "totalLabel": "Total sales excl. VAT",
           "collapseLot": "Collapse lot",
           "expandLot": "Expand lot",
           "rowsCount": "{count} row(s)",

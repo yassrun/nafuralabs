@@ -1,19 +1,18 @@
 ---
 id: SEKTOR-169
-status: doing
+status: review
 context: nafura
 type: feature
 agent_type: exec
 priority: P1
 assignee: agent
 gate: none
-blocked_by: [SEKTOR-168]
 tags: [sektor, ux, anatomy]
 ---
 
 # Combobox anatomy et œil fiche
 
-> `nf-select` + `lookupKey` entité = combobox. Carte fiche. Œil : id → fiche, vide → liste. Réf. CONTRAT AC-1 AC-2 AC-5 AC-6 AC-7 AC-8 AC-14.
+> `nf-select` + `lookupKey` entité = combobox. Carte fiche. Œil : id → fiche, vide → liste. Preuves détaillées dans le plan du lot.
 
 ## Étapes
 
@@ -34,6 +33,9 @@ tags: [sektor, ux, anatomy]
 23/08 19:21  status → review
 23/08 20:31  status → doing
              QA 172 : AC-5 / lookup-clavier absent de 169.mjs (pas onComboKeydown / ↑↓ / Entrée / Échap)
+25/08 14:56  preuve 169 rejouée VERT après ajout des assertions clavier dans verify-lookup-combobox-169.mjs
+25/08 14:04  status → done-agent · gate none → done-me
+25/08 14:30  status → review
 ```
 
 ## Rapport de livraison
@@ -41,4 +43,4 @@ tags: [sektor, ux, anatomy]
 ce qui a changé      `nf-select` devient combobox dès qu’un `lookupKey` est posé (sinon `<select>` natif). Œil : id → `{liste}/{id}`, vide → liste. Orphelin : « Enregistrement introuvable », pas d’UUID nu. `nf-entity-detail` branche `nf-select` sur les champs lookup.
 critères prouvés     AC-1,2,5,6,7,8,14 → `sektor/e2e/scripts/verify-lookup-combobox-169.mjs` VERT. Discrimination : absence de `role="combobox"` / min 2 / `{list}/{id}` ferait échouer le script.
 décidé seul          Combobox dès `lookupKey` renseigné (pas seulement si la clé est dans la carte) — l’œil reste masqué si aucune route. `selectedLabel` pour un libellé connu hors options.
-écarts / dette       Hits encore filtrés en local sur les `options` dumpées — la recherche serveur est SEKTOR-170. Pas de `ng test` anatomy isolé ; preuve source + util.
+écarts / dette       Hits encore filtrés en local sur les `options` dumpées — la recherche serveur est SEKTOR-170. Pas de `ng test` anatomy isolé ; preuve source + util. Couverture AC-5 désormais rejouée dans 169.mjs.

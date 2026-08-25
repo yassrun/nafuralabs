@@ -12,7 +12,7 @@ blocked_by: [SEKTOR-176]
 
 # Avancement activité — remontée nœud et couverture
 
-> AC-8..AC-11
+> Avancement et couverture attendus décrits dans `00-PLAN.md`.
 
 ## Étapes
 
@@ -30,6 +30,8 @@ blocked_by: [SEKTOR-176]
 25/08 11:36  tests verts : ActiviteCouvertureServiceTest, ActiviteAvancementServiceTest, enregistrerDepuisActivite_passeLaGardeCouverture
 25/08 11:34  status → doing
 25/08 11:34  status → review
+25/08 13:33  status → done-agent · gate none → done-me
+25/08 14:31  status → review
 ```
 
 ## Rapport de livraison

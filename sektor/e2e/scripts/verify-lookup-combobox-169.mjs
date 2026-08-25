@@ -49,6 +49,11 @@ if (!util.includes('LOOKUP_COMBO_MIN_CHARS = 2')) {
 if (!util.includes('filterLookupHits') || !util.includes('return []')) {
   fail('filterLookupHits missing empty-before-min (dump on open)');
 }
+for (const token of ['onComboKeydown', "event.key === 'ArrowDown'", "event.key === 'ArrowUp'", "event.key === 'Enter'", "event.key === 'Escape'"]) {
+  if (!selectTs.includes(token)) {
+    fail(`keyboard combobox behavior missing: ${token}`);
+  }
+}
 if (!util.includes('resolveLookupEyeRoute') || !util.includes('${list}/${id}')) {
   fail('eye fiche path `{list}/{id}` missing');
 }
@@ -60,5 +65,5 @@ if (!util.includes('Enregistrement introuvable')) {
 }
 
 console.log(
-  'PASS  combobox anatomy: lookupKey -> combobox, min 2 chars, eye fiche/liste, orphan, entity-detail wired'
+  'PASS  combobox anatomy: lookupKey -> combobox, min 2 chars, clavier, eye fiche/liste, orphan, entity-detail wired'
 );

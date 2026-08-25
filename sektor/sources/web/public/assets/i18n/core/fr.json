@@ -1689,6 +1689,7 @@
     "chantier": {
       "status": {
         "prospect": "Prospect",
+        "en_preparation": "En préparation",
         "en_cours": "En cours",
         "suspendu": "Suspendu",
         "termine": "Terminé",

@@ -12,7 +12,7 @@ blocked_by: [SEKTOR-178]
 
 # Workspace Gantt — créer et éditer l'activité dans le drawer
 
-> AC-13 AC-14 AC-15 AC-19 canvas planning-workspace-wireframe
+> Parcours attendu décrit dans `00-PLAN.md` et `planning-workspace-wireframe`.
 
 ## Étapes
 
@@ -30,6 +30,8 @@ blocked_by: [SEKTOR-178]
 25/08 12:20  CTA + empty sans API ; drawer activite-drawer (libellé/dates/parent/zone) ; lots hors Gantt ; i18n activité
 25/08 12:01  status → review
 25/08 12:01  status → review
+25/08 13:33  status → done-agent · gate none → done-me
+25/08 14:30  status → review
 ```
 
 ## Rapport de livraison

@@ -523,8 +523,14 @@
   "chantiers": {
     "status": {
       "prospect": "Prospect",
+      "enPreparation": "Preparation",
       "enCours": "In progress",
       "suspendu": "Suspended"
+    },
+    "common": {
+      "values": {
+        "notDefined": "Not defined"
+      }
     },
     "create": {
       "title": "New project",

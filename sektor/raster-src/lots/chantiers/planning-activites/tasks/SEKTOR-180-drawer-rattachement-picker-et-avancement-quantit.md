@@ -12,7 +12,7 @@ blocked_by: [SEKTOR-179]
 
 # Drawer rattachement picker et avancement quantité
 
-> AC-16 AC-17 AC-18 scénarios 6-7
+> Drawer, rattachement et scénarios de preuve décrits dans `00-PLAN.md`.
 
 ## Étapes
 
@@ -31,6 +31,8 @@ blocked_by: [SEKTOR-179]
 25/08 12:01  status → doing
 25/08 12:01  status → review
 25/08 12:40  picker + reste + message métier ; qté faite / % ; e2e scénario 8 écrit ; 8082/4200 down
+25/08 13:33  status → done-agent · gate none → done-me
+25/08 14:31  status → review
 ```
 
 ## Rapport de livraison

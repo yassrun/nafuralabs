@@ -49,11 +49,27 @@ export type Lance = {
 };
 
 export type ViewId =
-  | "toi"
-  | "encours"
-  | "inbox"
-  | "backlog"
-  | "done-agent";
+  | "session"
+  | "plan"
+  | "sublot"
+  | "deliveries";
+
+export type WindowLot = {
+  lot: string;
+  existe: boolean;
+  lancables: Ready[];
+  bloques: Ready[];
+};
+
+export type ProjectWindow = {
+  project: string;
+  fichier: string | null;
+  borne: boolean;
+  fenetre: string[];
+  fermes: string[];
+  note: string;
+  lots: WindowLot[];
+};
 
 const glyph: Record<string, string> = {
   todo: "·",
@@ -147,6 +163,10 @@ export const api = {
   meta: () => json<{ projects: string[] }>("/api/meta"),
   tasks: () => json<{ tasks: Task[] }>("/api/tasks"),
   ready: () => json<{ ready: Ready[] }>("/api/ready"),
+  windows: (project = "") =>
+    json<{ windows: ProjectWindow[] }>(
+      `/api/window${project ? `?projet=${encodeURIComponent(project)}` : ""}`
+    ),
   inbox: () => json<{ lines: string[] }>("/api/inbox"),
   capture: (line: string) =>
     json<{ lines: string[] }>("/api/inbox", {

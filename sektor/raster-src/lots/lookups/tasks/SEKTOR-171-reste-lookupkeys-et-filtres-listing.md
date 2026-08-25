@@ -7,13 +7,13 @@ agent_type: exec
 priority: P1
 assignee: agent
 gate: none
-blocked_by: [SEKTOR-168, SEKTOR-170]
+blocked_by: [SEKTOR-170]
 tags: [sektor, ux]
 ---
 
 # Reste lookupKeys et filtres listing
 
-> Tous les `lookupKey` de `ERP_LOOKUP_LIST_ROUTES` + filtres listing. Pas `items` / picker. Réf. CONTRAT AC-12 AC-13.
+> Tous les `lookupKey` de `ERP_LOOKUP_LIST_ROUTES` et les filtres de listing. Pas `items` / picker. Preuves détaillées dans le plan du lot.
 
 ## Étapes
 
@@ -34,6 +34,8 @@ tags: [sektor, ux]
 23/08 20:44  preuve verify-lookup-combobox-171.mjs VERT
              (discriminerait LOOKUP_SEARCHERS sans chantiers, filter-builder sans nf-select, dumps pageSize 500, listing situations caché si dump vide, picker items absent)
 23/08 20:25  status → review
+25/08 14:04  status → done-agent · gate none → done-me
+25/08 14:30  status → review
 ```
 
 ## Rapport de livraison
@@ -42,4 +44,3 @@ ce qui a changé      Tous les `lookupKey` de `ERP_LOOKUP_LIST_ROUTES` sauf `ite
 critères prouvés     AC-12, AC-13 → `sektor/e2e/scripts/verify-lookup-combobox-171.mjs` VERT. Scénario `lookup-filtre-listing`. Discrimination : searchers sans `chantiers` / filter-builder sans `nf-select` / dump `pageSize: 500` / listing caché si options vides ferait échouer le script. Picker article inchangé.
 décidé seul          Préremplissage situation : GET chantier par id, fallback TVA 20 % / RG 7 % si échec. `conditionPaiementType` / `ouvrageCategory` / `tauxChangeSource` ont un searcher (payment-terms / ouvrages / devises) donc combobox listing comme les autres clés. Convertisseur taux de change : GET devises conservé pour le widget, `deviseCode` du combobox reste vide. Avancement : `ensureBaseData` dump encore les chantiers pour l'espace de saisie (pas le filtre listing). Réception : cache locations pour libellés de lignes, lookups combobox vides.
 écarts / dette       GET collections encore présents hors combobox : cache noms de dépôts (mouvements), convertisseur devises, workspace avancement. Hors AC-12.
-

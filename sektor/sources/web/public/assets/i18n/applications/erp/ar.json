@@ -522,8 +522,14 @@
   "chantiers": {
     "status": {
       "prospect": "محتمل",
+      "enPreparation": "قيد التحضير",
       "enCours": "قيد التنفيذ",
       "suspendu": "معلَّق"
+    },
+    "common": {
+      "values": {
+        "notDefined": "غير محدد"
+      }
     },
     "create": {
       "title": "ورش جديد",

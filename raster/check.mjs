@@ -175,9 +175,8 @@ function checkTickets(err, warn) {
     if (execCount >= 2 && !fs.existsSync(plan)) {
       err(rel(dir), `${execCount} tasks exec — \`00-PLAN.md\` obligatoire`);
     }
-    if (execCount < 2 && fs.existsSync(plan)) {
-      warn(rel(plan), "une seule task exec — le PLAN n'a rien à ordonner");
-    }
+    // Un sous-lot peut ne garder qu'une task active après `sweep` : son plan
+    // reste la frontière de livraison et Git porte les tasks déjà closes.
   }
 
   return tasks;

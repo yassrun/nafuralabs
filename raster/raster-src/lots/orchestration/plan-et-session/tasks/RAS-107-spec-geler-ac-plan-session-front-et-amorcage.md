@@ -9,7 +9,7 @@ assignee: agent
 gate: me
 ---
 
-# SPEC + geler AC — Plan, Session, front et amorcage
+# Planifier les vues Plan, Session et l’amorçage
 
 > 2 lignes max.
 

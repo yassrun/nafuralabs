@@ -33,6 +33,7 @@ const CH_CREATE = 'sektor/sources/web/app/chantiers/create/chantier-create.page.
 const CH_EDIT = 'sektor/sources/web/app/chantiers/edit/chantier-edit.page.ts';
 const APP = 'sektor/sources/web/app/socle/app.config.ts';
 const ERP = 'sektor/sources/web/app/socle/shared/services/erp-lookup.service.ts';
+const SEARCHERS = 'sektor/sources/web/app/socle/shared/services/erp-lookup-searchers.ts';
 const CTRL =
   'sektor/sources/backend/achats/src/main/java/ma/nafura/achats/api/controller/PartnerController.java';
 const REPO =
@@ -54,6 +55,7 @@ const chCreate = read(CH_CREATE);
 const chEdit = read(CH_EDIT);
 const app = read(APP);
 const erp = read(ERP);
+const searchers = read(SEARCHERS);
 const ctrl = read(CTRL);
 const repo = read(REPO);
 const selectHtml = read(SELECT_HTML);
@@ -99,8 +101,13 @@ if (!chCreate.includes('[lookupSearch]') || !chEdit.includes('[lookupSearch]')) 
 if (!app.includes('LOOKUP_SEARCHERS')) {
   fail('app.config does not provide LOOKUP_SEARCHERS');
 }
-if (!app.includes("clients:") || !app.includes('fournisseurs:')) {
-  fail('LOOKUP_SEARCHERS missing clients/fournisseurs factories');
+if (!app.includes('buildErpLookupSearchers')) {
+  fail('app.config does not wire buildErpLookupSearchers');
+}
+for (const key of ['clients', 'fournisseurs']) {
+  if (!searchers.includes(`${key},`) && !searchers.includes(`${key}:`)) {
+    fail(`erp-lookup-searchers missing ${key}`);
+  }
 }
 
 if (!erp.includes('q.length < 2') || !erp.includes('Promise.resolve([])')) {

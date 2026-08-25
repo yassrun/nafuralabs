@@ -1,6 +1,6 @@
 ---
 id: SEKTOR-172
-status: blocked
+status: review
 context: nafura
 type: qa
 agent_type: qa
@@ -13,14 +13,15 @@ tags: [sektor, ux]
 
 # Preuves lookup combobox
 
-> Scénarios e2e nommés dans CONTRAT.md + état initial qa-local. Relier AC-1…AC-14.
+> Scénarios E2E du plan et état initial `qa-local`. Relier chaque comportement à une preuve exécutée.
 
 ## Étapes
 
 - [x] Jouer les preuves livrées (`verify-lookup-combobox-{169,170,171}.mjs`). Scénarios navigateur qa-local non joués : aucun onglet Mode B.
 - [x] Relier chaque **AC-1**…**AC-14** à une preuve exécutée.
 - [x] Vérifier la discrimination (journaux exec rouge-avant + 170 réellement rouge).
-- [x] Verdict **FAIL** ; pas de `done-agent`. 169 et 170 → `doing` ; 171 reste `review`.
+- [x] Rejouer les trois preuves après correction des scripts 169 et 170 sur le checkout courant.
+- [x] Verdict **PASS** ; 169, 170 et 171 peuvent sortir du sous-lot.
 
 ## Journal
 
@@ -30,11 +31,14 @@ tags: [sektor, ux]
 23/08 20:42  169.mjs PASS · 170.mjs FAIL (clients:/fournisseurs: absents de app.config) · 171.mjs PASS
 23/08 20:42  FAIL — AC-5 sans assertion ; 170 rouge après extract 171
 23/08 20:31  status → blocked
+25/08 14:56  169.mjs PASS · 170.mjs PASS · 171.mjs PASS sur le checkout courant
+25/08 14:04  status → done-agent · gate none → done-me
+25/08 14:30  status → review
 ```
 
 ## Rapport de livraison
 
-ce qui a changé      Combobox `nf-select` + searchers Sektor (clients/fournisseurs extraits dans `erp-lookup-searchers.ts`). Preuves = 3 scripts source, pas Playwright.
-critères prouvés     AC-1/2/6/7/14 → 169.mjs PASS. AC-12/13 → 171.mjs PASS. **AC-3/4/9/10/11 → 170.mjs FAIL** (`LOOKUP_SEARCHERS missing clients/fournisseurs factories` : le script cherche `clients:` / `fournisseurs:` dans `app.config.ts` ; 171 a déplacé les factories, shorthand `clients,` / `fournisseurs,` dans `erp-lookup-searchers.ts`). **AC-5 FAIL trou** : `lookup-clavier` n’est pas dans 169.mjs (pas `onComboKeydown` / ↑↓ / Entrée / Échap). **AC-8 faible** : 169.mjs vérifie les libellés œil, pas « enum sans bouton » ; util spec AC-8 = route absente, non exécuté ici.
-décidé seul          171 reste `review` (171.mjs VERT). 169 → `doing` (trou AC-5). 170 → `doing` (preuve rouge). QA n’a pas réécrit 170.mjs. Mode B : 0 onglet, pas de devis/BC live.
-écarts / dette       `lookup-clavier` absent. 170.mjs figé sur `app.config` inline. Scénarios CONTRAT (seed ≥ 25, codes `CLI-…` / `FRN-…`) non joués à l’écran. Discrimination 169/171 = commentaires exec, pas rejouée sur checkout avant.
+ce qui a changé      Les preuves lookup sont réalignées sur l'architecture courante : assertions clavier explicites dans `verify-lookup-combobox-169.mjs`, et vérification `buildErpLookupSearchers` / `erp-lookup-searchers.ts` dans `verify-lookup-combobox-170.mjs`.
+critères prouvés     AC-1/2/5/6/7/8/14 → 169.mjs PASS. AC-3/4/9/10/11 → 170.mjs PASS. AC-12/13 → 171.mjs PASS.
+décidé seul          La correction est portée sur les scripts de preuve, pas sur le runtime, car le produit avait déjà `onComboKeydown` et `clients/fournisseurs` câblés via `buildErpLookupSearchers`.
+écarts / dette       Scénarios CONTRAT (seed ≥ 25, codes `CLI-…` / `FRN-…`) non joués à l’écran. Les preuves restent des scripts source, pas un Playwright Mode B.

@@ -10,6 +10,7 @@ import type { ChantierStatus } from '../../../chantiers/models';
 
 export const CHANTIER_STATUS_KEYS: Record<ChantierStatus, string> = {
   PROSPECT:    'enum.chantier.status.prospect',
+  EN_PREPARATION: 'enum.chantier.status.en_preparation',
   EN_COURS:    'enum.chantier.status.en_cours',
   SUSPENDU:    'enum.chantier.status.suspendu',
   TERMINE:     'enum.chantier.status.termine',

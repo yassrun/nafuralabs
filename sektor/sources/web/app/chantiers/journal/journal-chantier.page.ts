@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FilterResetComponent } from '@platform/lib/anatomy/components/molecules/filter-reset/filter-reset.component';
 
@@ -94,6 +95,10 @@ function todayIso(): string {
           <option value="">{{ 'chantiers.journal.filters.allTypes' | translate }}</option>
           @for (t of typeEntries(); track t[0]) { <option [value]="t[0]">{{ t[1] }}</option> }
         </select>
+        @if (filteredChantierCode()) {
+          <span class="context-chip">{{ 'chantiers.common.fields.chantier' | translate }}: {{ filteredChantierCode() }}</span>
+          <button type="button" class="context-link" (click)="clearChantierFilter()">{{ 'chantiers.common.actions.clearChantierFilter' | translate }}</button>
+        }
         <span class="count">{{ entries().length <= 1 ? entries().length + ' événement' : entries().length + ' événements' }}</span>
         <nf-filter-reset [active]="hasFilter()" (reset)="resetFilters()"></nf-filter-reset>
         <nf-button variant="primary" iconLibrary="lucide" icon="plus" (clicked)="openCreateForm()">
@@ -176,6 +181,9 @@ function todayIso(): string {
     .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; }
     .search { flex: 1; min-width: 180px; max-width: 280px; padding: 7px 12px; border: 1px solid var(--nf-color-border); border-radius: 6px; font-size: 13px; }
     select { padding: 7px 10px; border: 1px solid var(--nf-color-border); border-radius: 6px; font-size: 13px; background: var(--nf-color-surface); }
+    .context-chip { padding: 4px 10px; border-radius: 999px; background: var(--nf-color-bg-subtle); color: var(--nf-color-text-secondary); font-size: 12px; font-weight: 600; }
+    .context-link { border: none; background: transparent; color: var(--nf-color-primary-600); cursor: pointer; font-size: 12px; font-weight: 600; }
+    .context-link:hover { text-decoration: underline; }
     .count { font-size: 13px; color: var(--nf-color-text-secondary); }
     .create-panel {
       background: var(--nf-color-surface); border: 1px solid var(--nf-color-border); border-radius: 0.75rem;
@@ -220,14 +228,24 @@ export class JournalChantierPage implements OnInit {
   private readonly journalApi = inject(JournalChantierApiService);
   private readonly toast = inject(ToastService);
   private readonly auth = inject(AuthFacade);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
   readonly search = signal('');
   readonly filterType = signal<JournalEventType | ''>('');
+  readonly filteredChantierId = signal(this.route.snapshot.queryParamMap.get('chantierId')?.trim() ?? '');
   readonly loading = signal(true);
   readonly showCreateForm = signal(false);
   readonly creating = signal(false);
   readonly chantiers = signal<Chantier[]>([]);
   private readonly all = signal<JournalEntry[]>([]);
+  readonly filteredChantierCode = computed(() => {
+    const chantierId = this.filteredChantierId();
+    if (!chantierId) return '';
+    return this.chantiers().find((chantier) => chantier.id === chantierId)?.code
+      ?? this.all().find((entry) => entry.chantierId === chantierId)?.chantierCode
+      ?? chantierId;
+  });
 
   createDraft = {
     chantierId: '',
@@ -281,7 +299,7 @@ export class JournalChantierPage implements OnInit {
 
   openCreateForm(): void {
     this.createDraft = {
-      chantierId: this.chantiers()[0]?.id ?? '',
+      chantierId: this.filteredChantierId() || this.chantiers()[0]?.id ?? '',
       type: 'AUTRE',
       date: todayIso(),
       contenu: '',
@@ -332,7 +350,9 @@ export class JournalChantierPage implements OnInit {
   readonly entries = computed(() => {
     const q = this.search().toLowerCase().trim();
     const t = this.filterType();
+    const chantierId = this.filteredChantierId();
     let list = [...this.all()].sort((a, b) => b.date.localeCompare(a.date));
+    if (chantierId) list = list.filter(e => e.chantierId === chantierId);
     if (t) list = list.filter(e => e.type === t);
     if (!q) return list;
     return list.filter(e =>
@@ -350,5 +370,15 @@ export class JournalChantierPage implements OnInit {
   resetFilters(): void {
     this.search.set('');
     this.filterType.set('');
+  }
+
+  clearChantierFilter(): void {
+    this.filteredChantierId.set('');
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { chantierId: null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
   }
 }

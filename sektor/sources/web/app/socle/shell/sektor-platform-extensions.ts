@@ -57,8 +57,8 @@ export const SEKTOR_ONBOARDING_TOURS: Tour[] = [
     id: 'chantiers',
     name: 'Tour Chantiers',
     steps: [
-      { id: 'ch-1', title: 'Module Chantiers', body: 'Vos projets de construction : fiche détail avec onglets Lots / Phases / Budget / Situations / Documents.', route: '/chantiers', position: 'center' },
-      { id: 'ch-2', title: 'Planning Gantt', body: 'Visualisez toutes vos phases sur un Gantt interactif.', route: '/chantiers/planning', position: 'center' },
+      { id: 'ch-1', title: 'Module Chantiers', body: 'Vos projets de construction : fiche détail avec onglets Lots / Budget / Situations / Documents et accès au planning activités.', route: '/chantiers', position: 'center' },
+      { id: 'ch-2', title: 'Planning Gantt', body: 'Visualisez les activités chantier sur un Gantt interactif et rattachez-les à l\'arbre quand le planning est utile.', route: '/chantiers/planning', position: 'center' },
       { id: 'ch-3', title: 'Attachements & Journal', body: 'Saisissez les quantités exécutées par poste et les événements chantier.', position: 'center' },
     ],
   },

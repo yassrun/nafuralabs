@@ -17,6 +17,7 @@ export interface ApiChantier {
   longitude?: number;
   marcheReference?: string;
   marcheNumero?: string;
+  dateOrdreService?: string;
   dateDebut?: string;
   dateDemarrage?: string;
   dateFinPrevue?: string;
@@ -54,8 +55,9 @@ function num(value: number | string | undefined | null, fallback = 0): number {
 export function mapBackendStatusToUi(status: string | undefined): ChantierStatus {
   switch ((status ?? '').toUpperCase()) {
     case 'BROUILLON':
-    case 'EN_PREPARATION':
       return 'PROSPECT';
+    case 'EN_PREPARATION':
+      return 'EN_PREPARATION';
     case 'EN_COURS':
       return 'EN_COURS';
     case 'SUSPENDU':
@@ -73,6 +75,7 @@ export function mapBackendStatusToUi(status: string | undefined): ChantierStatus
 export function mapUiStatusToBackend(status: ChantierStatus | string | undefined): string {
   switch (status) {
     case 'PROSPECT':
+    case 'EN_PREPARATION':
       return 'EN_PREPARATION';
     case 'RECEPTIONNE':
       return 'RECEPTIONNE_PROVISOIRE';
@@ -102,8 +105,9 @@ export function chantierToUi(row: ApiChantier): Chantier {
     latitude: row.latitude,
     longitude: row.longitude,
     marcheReference: row.marcheReference ?? row.marcheNumero,
+    dateOrdreService: row.dateOrdreService,
     dateDebut,
-    dateFinPrevue: row.dateFinPrevue ?? dateDebut,
+    dateFinPrevue: row.dateFinPrevue,
     dateFinReelle: row.dateFinReelle,
     budgetHt: num(row.budgetHt ?? row.montantHt),
     tvaTaux: num(row.tvaTaux ?? row.tauxTva, 20),

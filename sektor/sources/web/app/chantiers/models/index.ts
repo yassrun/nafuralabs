@@ -1,5 +1,6 @@
 export type ChantierStatus =
   | 'PROSPECT'
+  | 'EN_PREPARATION'
   | 'EN_COURS'
   | 'SUSPENDU'
   | 'TERMINE'
@@ -57,7 +58,7 @@ export interface Chantier {
   dateBcClient?: string;
   dateOrdreService?: string;
   dateDebut: string;
-  dateFinPrevue: string;
+  dateFinPrevue?: string;
   dateFinReelle?: string;
   dateReception?: string;
   budgetHt: number;

@@ -523,8 +523,14 @@
   "chantiers": {
     "status": {
       "prospect": "Prospect",
+      "enPreparation": "En préparation",
       "enCours": "En cours",
       "suspendu": "Suspendu"
+    },
+    "common": {
+      "values": {
+        "notDefined": "Non défini"
+      }
     },
     "create": {
       "title": "Nouveau chantier",

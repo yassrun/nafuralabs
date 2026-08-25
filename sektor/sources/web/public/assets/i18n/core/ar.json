@@ -1683,6 +1683,7 @@
     "chantier": {
       "status": {
         "prospect": "محتمل",
+        "en_preparation": "قيد التحضير",
         "en_cours": "قيد التنفيذ",
         "suspendu": "معلق",
         "termine": "منتهٍ",

@@ -43,10 +43,10 @@ test("preuve 2 — le projet retenu porte du travail", () => {
   assert.equal(projetPorteur(projects, tasks), "b-plein");
 });
 
-test("preuve 2 — l'ordre des projets départage, pas le volume", () => {
+test("preuve 2 — le projet le plus actif gagne", () => {
   const projects = ["a", "b"];
   const tasks = [t("b"), t("b"), t("a")];
-  assert.equal(projetPorteur(projects, tasks), "a", "le premier qui porte gagne");
+  assert.equal(projetPorteur(projects, tasks), "b", "le volume actif doit départager");
 });
 
 test("preuve 3 — tous vides : le premier, sans erreur", () => {

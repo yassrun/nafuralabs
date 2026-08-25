@@ -45,12 +45,10 @@ test("preuve 5 — les mutations passent par les modules du CLI", () => {
   assert.ok(src.includes("RefusError"), "un refus du CLI doit remonter en 400");
 });
 
-test("preuve 3 — aucun sélecteur ne propose done-me", () => {
+test("preuve 3 — la nouvelle UI ne propose aucune mutation directe vers done-me", () => {
   const app = read(APP);
-  const choices = app.match(/STATUS_CHOICES[\s\S]*?\];/);
-  assert.ok(choices, "STATUS_CHOICES introuvable");
-  assert.ok(!choices[0].includes("done-me"), "done-me proposé dans un select");
-  assert.ok(choices[0].includes("done-agent"), "done-agent doit rester posable");
+  assert.ok(!app.includes("api.patchTask"), "un sélecteur de statut manuel est revenu");
+  assert.ok(app.includes("api.approve"), "l'approbation doit rester l'unique geste final");
 });
 
 test("preuve 3 — l'approbation existe et n'est pas un status déguisé", () => {
@@ -81,7 +79,7 @@ test("preuve 2 — le serveur expose les sections du corps du .md", () => {
   assert.ok(read(APP).includes("task.rapport"), "le rapport n'est pas affiché");
 });
 
-test("preuve 1 — la vue Toi est dérivée, pas filtrée à la main", () => {
+test("preuve 1 — les décisions de Session sont dérivées, pas filtrées à la main", () => {
   assert.ok(read(API).includes("attend:"), "le champ `attend` doit venir du serveur");
-  assert.ok(read(APP).includes("t.attend"), "la file d'attente doit s'appuyer dessus");
+  assert.ok(read(APP).includes("task.attend"), "le panneau À toi doit s'appuyer dessus");
 });

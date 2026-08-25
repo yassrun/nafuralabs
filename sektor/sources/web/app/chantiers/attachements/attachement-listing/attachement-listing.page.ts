@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal, OnInit } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FilterResetComponent } from '@platform/lib/anatomy/components/molecules/filter-reset/filter-reset.component';
 
@@ -44,6 +44,10 @@ const STATUS_CSS: Record<string, string> = {
           <option value="">{{ 'chantiers.attachement.list.allStatuses' | translate }}</option>
           @for (s of statusEntries(); track s[0]) { <option [value]="s[0]">{{ s[1] }}</option> }
         </select>
+        @if (filteredChantierCode()) {
+          <span class="context-chip">{{ 'chantiers.common.fields.chantier' | translate }}: {{ filteredChantierCode() }}</span>
+          <button type="button" class="context-link" (click)="clearChantierFilter()">{{ 'chantiers.common.actions.clearChantierFilter' | translate }}</button>
+        }
         <span class="count">{{ filtered().length <= 1 ? filtered().length + ' attachement' : filtered().length + ' attachements' }}</span>
         <nf-filter-reset [active]="hasFilter()" (reset)="resetFilters()"></nf-filter-reset>
         <nf-button variant="primary" icon="plus" iconLibrary="lucide" (clicked)="goToSaisie()">{{ 'chantiers.attachement.list.saisieCta' | translate }}</nf-button>
@@ -102,6 +106,9 @@ const STATUS_CSS: Record<string, string> = {
     .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; }
     .search { flex: 1; min-width: 180px; max-width: 280px; padding: 7px 12px; border: 1px solid var(--nf-color-border); border-radius: 6px; font-size: 13px; }
     select { padding: 7px 10px; border: 1px solid var(--nf-color-border); border-radius: 6px; font-size: 13px; background: var(--nf-color-surface); }
+    .context-chip { padding: 4px 10px; border-radius: 999px; background: var(--nf-color-bg-subtle); color: var(--nf-color-text-secondary); font-size: 12px; font-weight: 600; }
+    .context-link { border: none; background: transparent; color: var(--nf-color-primary-600); cursor: pointer; font-size: 12px; font-weight: 600; }
+    .context-link:hover { text-decoration: underline; }
     .count { font-size: 13px; color: var(--nf-color-text-secondary); }
     .sig { font-size: 11px; font-weight: 600; color: var(--nf-color-primary-700); }
     .att-list { display: flex; flex-direction: column; gap: 0.875rem; }
@@ -135,8 +142,15 @@ export class AttachementListingPage implements OnInit {
   private readonly api = inject(AttachementApiService);
   private readonly translate = inject(TranslateService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   private readonly items = signal<Attachement[]>([]);
+  readonly filteredChantierId = signal(this.route.snapshot.queryParamMap.get('chantierId')?.trim() ?? '');
+  readonly filteredChantierCode = computed(() => {
+    const chantierId = this.filteredChantierId();
+    if (!chantierId) return '';
+    return this.items().find((item) => item.chantierId === chantierId)?.chantierCode ?? chantierId;
+  });
 
   readonly pageHeaderConfig = {
     title: "Carnets d'attachement",
@@ -173,7 +187,9 @@ export class AttachementListingPage implements OnInit {
   readonly filtered = computed(() => {
     const q = this.search().toLowerCase().trim();
     const st = this.filterStatus();
+    const chantierId = this.filteredChantierId();
     let list: Attachement[] = this.items();
+    if (chantierId) list = list.filter(a => a.chantierId === chantierId);
     if (st) list = list.filter(a => a.status === st);
     if (!q) return list;
     return list.filter(a =>
@@ -200,7 +216,20 @@ export class AttachementListingPage implements OnInit {
   }
 
   goToSaisie(): void {
-    void this.router.navigate(['/chantiers/attachements/saisie']);
+    const chantierId = this.filteredChantierId();
+    void this.router.navigate(['/chantiers/attachements/saisie'], {
+      queryParams: chantierId ? { chantierId } : undefined,
+    });
+  }
+
+  clearChantierFilter(): void {
+    this.filteredChantierId.set('');
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { chantierId: null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
   }
 
 }

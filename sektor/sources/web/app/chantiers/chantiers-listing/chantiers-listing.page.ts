@@ -14,6 +14,7 @@ import {
 
 const STATUS_CSS: Record<ChantierStatus, string> = {
   PROSPECT: 'info',
+  EN_PREPARATION: 'warning',
   EN_COURS: 'success',
   SUSPENDU: 'warning',
   TERMINE: 'info',
@@ -63,7 +64,7 @@ const STATUS_CSS: Record<ChantierStatus, string> = {
               <th>{{ 'chantiers.chantier.list.columns.type' | translate }}</th>
               <th>{{ 'chantiers.chantier.list.columns.client' | translate }}</th>
               <th>{{ 'chantiers.chantier.list.columns.ville' | translate }}</th>
-              <th class="num">{{ 'chantiers.chantier.list.columns.budgetHt' | translate }}</th>
+              <th class="num">{{ 'chantiers.chantier.list.columns.venteHt' | translate }}</th>
               <th class="center">{{ 'chantiers.chantier.list.columns.avancement' | translate }}</th>
               <th>{{ 'chantiers.chantier.list.columns.status' | translate }}</th>
               <th>{{ 'chantiers.chantier.list.columns.dateDebut' | translate }}</th>
@@ -187,7 +188,7 @@ export class ChantiersListingPage {
   private readonly fmt = new Intl.NumberFormat(this.locale, { maximumFractionDigits: 0 });
 
   readonly allStatuses: ChantierStatus[] = [
-    'EN_COURS', 'PROSPECT', 'SUSPENDU', 'TERMINE', 'RECEPTIONNE', 'CLOTURE', 'ANNULE',
+    'EN_PREPARATION', 'EN_COURS', 'PROSPECT', 'SUSPENDU', 'TERMINE', 'RECEPTIONNE', 'CLOTURE', 'ANNULE',
   ];
 
   readonly search = signal('');

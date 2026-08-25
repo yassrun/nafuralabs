@@ -1,6 +1,6 @@
-
-import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 
 import {
@@ -41,9 +41,10 @@ interface QuickFilterChip {
   changeDetection: ChangeDetectionStrategy.Eager,
   styles: [ConfigDrivenListingPageStyles],
 })
-export class SituationListingPage extends ConfigDrivenListingPage<Situation> {
+export class SituationListingPage extends ConfigDrivenListingPage<Situation> implements AfterViewInit {
   readonly facade = inject(SituationFacade);
   private readonly translate = inject(TranslateService);
+  private readonly route = inject(ActivatedRoute);
   private readonly lookupSearchers = inject(LOOKUP_SEARCHERS, { optional: true });
   readonly config = buildSituationsListingConfig(this.translate);
   readonly headerTitle = this.translate.instant('chantiers.situation.title');
@@ -74,5 +75,12 @@ export class SituationListingPage extends ConfigDrivenListingPage<Situation> {
     this.selectedChantier.set(chantierId);
     const filters = chantierId ? { chantierId } : { chantierId: undefined };
     this.listingComponent?.onFilterChange(filters);
+  }
+
+  ngAfterViewInit(): void {
+    const chantierId = this.route.snapshot.queryParamMap.get('chantierId')?.trim() ?? '';
+    if (chantierId) {
+      queueMicrotask(() => this.onChantierChange(chantierId));
+    }
   }
 }

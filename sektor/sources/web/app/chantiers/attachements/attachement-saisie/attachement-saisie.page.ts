@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { ButtonComponent, PageHeaderComponent, PageShellComponent } from '@platform/lib/anatomy';
@@ -28,7 +28,7 @@ const STATUTS_FIGES = new Set([
       <nf-page-header [config]="pageHeaderConfig"></nf-page-header>
 
       <div class="toolbar">
-        <a routerLink="/chantiers/attachements" class="link-back">← Liste</a>
+        <a routerLink="/chantiers/attachements" [queryParams]="backQueryParams()" class="link-back">← Liste</a>
       </div>
 
       @if (!result()) {
@@ -155,6 +155,7 @@ export class AttachementSaisiePage {
   private readonly chantierApi = inject(ChantierApiService);
   private readonly attachementApi = inject(AttachementApiService);
   private readonly translate = inject(TranslateService);
+  private readonly route = inject(ActivatedRoute);
 
   readonly pageHeaderConfig = {
     title: this.translate.instant('chantiers.attachement.saisie.title'),
@@ -188,11 +189,19 @@ export class AttachementSaisiePage {
     return !!r && STATUTS_FIGES.has(r.status);
   });
 
+  readonly backQueryParams = computed(() => {
+    const chantierId = this.chantierId();
+    return chantierId ? { chantierId } : undefined;
+  });
+
   constructor() {
+    const requestedChantierId = this.route.snapshot.queryParamMap.get('chantierId')?.trim() ?? '';
     void this.chantierApi.getAll().then(({ items }) => {
       const active = items.filter((c) => c.status === 'EN_COURS');
       this.chantiersList.set(active);
-      if (active.length) {
+      if (requestedChantierId && active.some((chantier) => chantier.id === requestedChantierId)) {
+        this.chantierId.set(requestedChantierId);
+      } else if (active.length) {
         this.chantierId.set(active[0].id);
       }
     });
