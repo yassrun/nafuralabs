@@ -1,9 +1,9 @@
 # Contrat — Picker article partagé
 
-> Sektor n’est pas pacté. Ce fichier est le **seul ancrage QA** (`AC-n` gelés).
+> Ce sous-lot est autonome. Ce fichier est le **seul ancrage QA** (`AC-n` gelés).
 > Journal produit : [`DECISIONS-PRODUIT.md`](../../../DECISIONS-PRODUIT.md) § 23/08/2026.
 > Canvas : [`ux/picker-article-wireframe.canvas.tsx`](ux/picker-article-wireframe.canvas.tsx).
-> Pas de `CADRE.md` / `SPEC.md` / `pact/<bc>/CH-*`.
+> Les preuves attendues vivent dans ce sous-lot.
 
 **Qualification : EVOL.** Le picker actuel dump 40 items à l’ouverture ; le comportement visé (recherche à la demande, filtres serveur, un composant partagé) n’existe pas.
 

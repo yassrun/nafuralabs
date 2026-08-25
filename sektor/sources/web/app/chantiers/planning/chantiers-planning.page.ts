@@ -13,7 +13,7 @@ import {
   viewChild,
   ChangeDetectionStrategy
 } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { gantt, type GanttStatic } from 'dhtmlx-gantt';
 
@@ -22,7 +22,7 @@ import { BadgeComponent, ConfigDrivenDashboardPageImports, EmptyStateComponent, 
 import type { PlanningGranularity } from '../models';
 import { GanttLegendComponent } from './components/gantt-legend/gantt-legend.component';
 import { GanttToolbarComponent } from './components/gantt-toolbar/gantt-toolbar.component';
-import { PhaseDrawerComponent } from './components/phase-drawer/phase-drawer.component';
+import { ActiviteDrawerComponent } from './components/activite-drawer/activite-drawer.component';
 import { type PlanningDataset, type PlanningTask, PlanningFacade } from './services/planning.facade';
 
 @Component({
@@ -34,7 +34,7 @@ import { type PlanningDataset, type PlanningTask, PlanningFacade } from './servi
     BadgeComponent,
     GanttToolbarComponent,
     GanttLegendComponent,
-    PhaseDrawerComponent,
+    ActiviteDrawerComponent,
     TranslateModule
 ],
   templateUrl: './chantiers-planning.page.html',
@@ -43,6 +43,7 @@ import { type PlanningDataset, type PlanningTask, PlanningFacade } from './servi
 })
 export class ChantiersPlanningPage {
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
   private readonly locale = inject(LOCALE_ID);
   private readonly translate = inject(TranslateService);
@@ -58,8 +59,8 @@ export class ChantiersPlanningPage {
       ? `Planning ${this.facade.summary().monoChantier?.code}`
       : 'Planning chantiers',
     subtitle: this.facade.summary().monoChantier
-      ? `${this.facade.summary().monoChantier?.name} · zoom mono-chantier`
-      : 'Vue Gantt consolidée multi-chantiers avec dépendances et édition des dates',
+      ? `${this.facade.summary().monoChantier?.name} · activités du chantier`
+      : 'Gantt des activités — lots hors calendrier',
     icon: 'event',
   }));
 
@@ -73,6 +74,11 @@ export class ChantiersPlanningPage {
   private lastRangeKey = '';
 
   constructor() {
+    const chantierFilter = this.route.snapshot.queryParamMap.get('chantier');
+    if (chantierFilter) {
+      this.facade.setSelectedChantiers([chantierFilter]);
+    }
+
     effect(() => {
       const host = this.ganttHost()?.nativeElement;
       const dataset = this.dataset();
@@ -91,12 +97,15 @@ export class ChantiersPlanningPage {
         return;
       }
 
-      queueMicrotask(() => {
-        this.renderGantt(host, dataset, granularity, range.start, range.end);
-        if (this.lastRangeKey !== rangeKey) {
-          this.ganttInstance.showDate(new Date(Math.max(new Date().getTime(), range.start.getTime())));
-          this.lastRangeKey = rangeKey;
-        }
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          this.renderGantt(host, dataset, granularity, range.start, range.end);
+          if (this.lastRangeKey !== rangeKey) {
+            const focus = dataset.tasks[0]?.start_date ?? range.start;
+            this.ganttInstance.showDate(focus);
+            this.lastRangeKey = rangeKey;
+          }
+        });
       });
     });
 
@@ -149,9 +158,11 @@ export class ChantiersPlanningPage {
     void this.router.navigate(['/chantiers', chantierId]);
   }
 
-  onEmptyStateAction(): void {
-    const mono = this.summary().monoChantier;
-    void this.router.navigate(mono ? ['/chantiers', mono.id] : ['/chantiers']);
+  async onNewActivite(): Promise<void> {
+    const res = await this.facade.openCreate();
+    if (!res.ok) {
+      this.toast.error(res.message ?? this.translate.instant('chantiers.planning.filterRequired'));
+    }
   }
 
   @HostListener('window:resize')
@@ -176,10 +187,10 @@ export class ChantiersPlanningPage {
 
     if (event.key === 'Enter' && this.facade.selectedTaskId()) {
       const taskId = this.facade.selectedTaskId();
-      if (taskId && !this.facade.selectedPhaseDetail()) {
-        const match = this.dataset().tasks.find((task) => task.id === taskId && task.recordType === 'PHASE');
+      if (taskId && !this.facade.drawerOpen()) {
+        const match = this.dataset().tasks.find((task) => task.id === taskId && task.recordType === 'ACTIVITE');
         if (match) {
-          this.facade.openPhase(taskId);
+          void this.facade.openActivite(taskId);
         }
       }
     }
@@ -194,6 +205,10 @@ export class ChantiersPlanningPage {
   ): void {
     this.configureGantt(granularity, rangeStart, rangeEnd);
 
+    host.style.width = '100%';
+    host.style.height = host.style.height || '68vh';
+    host.style.minHeight = '68vh';
+
     if (!this.ganttInitialized) {
       this.ganttInstance.init(host);
       this.attachGanttEvents();
@@ -202,6 +217,7 @@ export class ChantiersPlanningPage {
 
     this.ganttInstance.clearAll();
     this.ganttInstance.parse({ data: dataset.tasks, links: dataset.links });
+    this.ganttInstance.setSizes();
     this.ganttInstance.render();
   }
 
@@ -223,7 +239,7 @@ export class ChantiersPlanningPage {
     this.ganttInstance.config.columns = [
       {
         name: 'text',
-        label: 'Chantier / lot / phase',
+        label: 'Activité',
         tree: true,
         width: 280,
         resize: true,
@@ -247,7 +263,7 @@ export class ChantiersPlanningPage {
       `planning-task planning-task--${task.recordType.toLowerCase()} planning-task--${task.status.toLowerCase()}`;
     this.ganttInstance.templates.grid_row_class = (_start, _end, task: PlanningTask) => `planning-row planning-row--${task.recordType.toLowerCase()}`;
     this.ganttInstance.templates.task_text = (_start, _end, task: PlanningTask) =>
-      task.recordType === 'PHASE' ? `${Math.round(task.progress * 100)}%` : '';
+      task.recordType === 'ACTIVITE' ? `${Math.round(task.progress * 100)}%` : '';
     this.ganttInstance.templates.tooltip_text = (_start, _end, task: PlanningTask) =>
       `<div class="planning-tooltip"><strong>${task.text}</strong><br/>${this.formatUiDate(task.start_date)} → ${this.formatUiDate(new Date(task.end_date.getTime() - 86400000))}<br/>Avancement: ${Math.round(task.progress * 100)}%</div>`;
 
@@ -314,8 +330,8 @@ export class ChantiersPlanningPage {
           this.onOpenChantier(task.chantierId);
           return false;
         }
-        if (task.recordType === 'PHASE') {
-          this.facade.openPhase(String(id));
+        if (task.recordType === 'ACTIVITE') {
+          void this.facade.openActivite(String(id));
         }
         return true;
       }),
@@ -331,16 +347,16 @@ export class ChantiersPlanningPage {
     this.ganttEventIds.push(
       this.ganttInstance.attachEvent('onAfterTaskDrag', (id: string | number) => {
         const task = this.ganttInstance.getTask(id) as PlanningTask;
-        if (task.recordType !== 'PHASE') {
+        if (task.recordType !== 'ACTIVITE') {
           return true;
         }
-        void this.handlePhaseDrag(String(id), task);
+        void this.handleActiviteDrag(String(id), task);
         return true;
       }),
     );
   }
 
-  private async handlePhaseDrag(id: string, task: PlanningTask): Promise<void> {
+  private async handleActiviteDrag(id: string, task: PlanningTask): Promise<void> {
     const endDate = new Date(task.end_date.getTime() - 86400000);
     const confirmed = await this.confirmDialog.confirm({
       title: 'Confirmer le décalage',
@@ -353,9 +369,9 @@ export class ChantiersPlanningPage {
       return;
     }
 
-    const res = this.facade.updatePhaseDates(id, task.start_date, endDate);
+    const res = await this.facade.updateActiviteDates(id, task.start_date, endDate);
     if (!res.ok) {
-      this.toast.error(res.message ?? 'Replanification refusée pour motif médical / HSE.');
+      this.toast.error(res.message ?? 'Replanification refusée.');
       this.revertGanttRender();
     }
   }

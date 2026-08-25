@@ -498,8 +498,12 @@
       }
     },
     "planning": {
-      "title": "Planning Gantt",
-      "empty": "Aucune phase planifiée pour cette sélection",
+      "title": "Planning",
+      "empty": "Aucune activité",
+      "emptyHint": "Le chantier se facture déjà sans planning. Ici on planifie le terrain — coffrage, coulage, repli.",
+      "newActivite": "Nouvelle activité",
+      "lotsHorsGantt": "Lots hors Gantt — ils restent dans l'arbre",
+      "filterRequired": "Filtrez un chantier pour créer une activité.",
       "toolbar": {
         "periode": "Période",
         "ceMois": "Ce mois",
@@ -510,11 +514,29 @@
         "pleinEcran": "Plein écran"
       },
       "drawer": {
-        "title": "Détail phase",
-        "equipe": "Équipe",
+        "title": "Activité",
+        "libelle": "Libellé",
         "debut": "Début",
-        "quantite": "Quantité",
-        "dependances": "Dépendances"
+        "fin": "Fin",
+        "parent": "Sous",
+        "parentNone": "(aucune — racine)",
+        "zone": "Zone",
+        "zoneNone": "(aucune — facultatif)",
+        "save": "Enregistrer",
+        "cancel": "Annuler",
+        "rattacherApres": "Rattacher au bordereau : après enregistrement, même drawer.",
+        "travauxLies": "Travaux liés",
+        "aucunRattachement": "Aucun poste lié — activité interne / jalon",
+        "ajouterPoste": "Ajouter un poste",
+        "choisirArbre": "Choisir dans l'arbre…",
+        "quantitePrevue": "Quantité prévue",
+        "lier": "Lier",
+        "detacher": "Détacher",
+        "avancement": "Avancement",
+        "quantiteFaite": "Quantité faite",
+        "percentJalon": "Avancement (%)",
+        "date": "Date",
+        "declarer": "Déclarer"
       }
     },
     "situation": {

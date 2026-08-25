@@ -39,5 +39,11 @@ public interface EtudeApprovalPort {
     /** Refuse la demande ouverte. */
     ApprovalSnapshot refuser(String requestId, String userId, String userNom, String motif);
 
+    /** Approuve les étapes restantes jusqu'à clôture. No-op si déjà close. */
+    ApprovalSnapshot cloreApprouvee(String requestId, String userId, String userNom, String commentaire);
+
+    /** Annule la demande ouverte. No-op si déjà close. */
+    ApprovalSnapshot annuler(String requestId, String userId, String userNom, String motif);
+
     Optional<ApprovalSnapshot> trouverOuverte(UUID dossierId);
 }

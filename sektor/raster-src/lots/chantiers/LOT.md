@@ -1,7 +1,7 @@
 # Chantiers — raffinement du BC
 
 > Le chantier a **son** arbre, le planning est une **couche d'activités**, et tout marche **sans planning** au palier 1.
-> **Pas de Pact.** Contrat = [`DECISIONS-PRODUIT-CHANTIER.md`](../../DECISIONS-PRODUIT-CHANTIER.md) — 14 gels du 23/08/2026.
+> **Raster autonome.** Contrat = [`DECISIONS-PRODUIT-CHANTIER.md`](../../DECISIONS-PRODUIT-CHANTIER.md) — 14 gels du 23/08/2026.
 
 La contrainte qui prime : **un chantier créé depuis une étude est facturable le jour même, sans qu'une seule activité existe.** PME marocaine, pas de planificateur.
 
@@ -15,17 +15,17 @@ La contrainte qui prime : **un chantier créé depuis une étude est facturable 
 | `budget-et-marge` | déboursé copié du DPU par nœud, marge et valeur acquise | `arbre` |
 | `frontieres-bc` | contrat ST typé côté Achats, pilotage portefeuille au socle | — |
 
-## Pas encore coupé — vague 2 (paliers 2 et 3)
+## Sous-lots — vague 2 (paliers 2 et 3)
 
-Nommé, pas découpé : ces sous-lots n'existeront que quand la vague 1 tient.
+Mode : contrats écrits sans agent spec · **1 exec code / sous-lot** · QA Raster seulement si argent (pas sur planning).
 
-| À venir | Quoi |
-|---------|------|
-| `planning-activites` | activités, WBS libre + zone, rattachement `0..n` nœuds avec quotité, remontée d'avancement |
-| `capacite-et-engagement` | affectation MO / matériel (lecture RH), besoins ST et matière poussés en aval |
-| `baseline-et-os` | baseline figée à l'OS, prolongation, intempéries depuis le journal |
-| `pointage-impute` | le pointage RH troque `posteBudgetaireId` contre l'imputation activité |
-| `matiere-et-magasin` | besoin → DA → livraison directe **ou** magasin chantier (`catalogue/`) |
+| Sous-lot | Quoi | Dépend de |
+|----------|------|-----------|
+| `planning-activites` | activités, WBS libre + zone, rattachement `0..n` + quotité, remontée d'avancement · [`CONTRAT.md`](planning-activites/CONTRAT.md) | vague 1 |
+| `capacite-et-engagement` | affectation MO / matériel (lecture RH), besoins ST et matière poussés en aval | `planning-activites` |
+| `baseline-et-os` | baseline figée à l'OS, prolongation, intempéries depuis le journal | `planning-activites` |
+| `pointage-impute` | le pointage RH troque `posteBudgetaireId` contre l'imputation activité | `planning-activites` |
+| `matiere-et-magasin` | besoin → DA → livraison directe **ou** magasin chantier (`catalogue/`) | `capacite-et-engagement` |
 
 ## Hors lot
 

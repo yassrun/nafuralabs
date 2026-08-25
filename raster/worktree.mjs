@@ -10,8 +10,8 @@
  * branche vivante. Voir `AGENTS.md` §7.
  *
  *   node raster/t.mjs worktree list
- *   node raster/t.mjs worktree add raster socle CH-01-EVOL-panneau-decision
- *   node raster/t.mjs worktree rm  raster socle CH-01-EVOL-panneau-decision
+ *   node raster/t.mjs worktree add raster socle panneau-decision
+ *   node raster/t.mjs worktree rm  raster socle panneau-decision
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -89,7 +89,7 @@ export function listWorktrees() {
 
 /**
  * Crée le worktree d'un sous-lot. Idempotent : s'il existe déjà, on le rend.
- * Refuse tout emplacement à l'intérieur du dépôt (AC-1).
+ * Refuse tout emplacement à l'intérieur du dépôt.
  */
 export function addWorktree(project, lot, souslot, { base = "HEAD" } = {}) {
   if (!project || !lot) fail("projet et lot requis");

@@ -1,10 +1,10 @@
 # Document reader — moteur unique dans doc-extractor
 
 > La plateforme lit une **grille** ; le produit interprète. L’IA compile un plan, elle ne lit pas les données.
-> Pas de Pact pour l’instant. Contrat = ce fichier. Archive : `Desktop/nafuralabs-archives/sektor-btp-docs-specs/lots/cadrage/document-reader/`.
+> Ce fichier décrit le périmètre durable du lot. Archive historique : `Desktop/nafuralabs-archives/sektor-btp-docs-specs/lots/cadrage/document-reader/`.
 
 **Où :** `nafura-platform/sources/backend/features/documents/doc-extractor/` (+ UI `smart-import`).
-**Pas dans ce lot :** lecteur d’ancres (vague 2) · rapprochement BL/facture · matrice / blocs multiples (vague 3) · découverte de schéma · reprise d’onboarding · écrans demandeurs (`ecrans-lecture-documents`) · CADRE / SPEC Pact.
+**Pas dans ce lot :** lecteur d’ancres (vague 2) · rapprochement BL/facture · matrice / blocs multiples (vague 3) · découverte de schéma · reprise d’onboarding · écrans demandeurs (`ecrans-lecture-documents`).
 
 ## Constat
 

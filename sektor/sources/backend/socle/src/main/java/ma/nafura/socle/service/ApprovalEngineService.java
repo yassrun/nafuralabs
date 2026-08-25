@@ -151,9 +151,49 @@ public class ApprovalEngineService {
         return decide(requestId, action, true);
     }
 
+    /**
+     * Approuve l'étape courante puis les suivantes jusqu'à {@code APPROUVE}.
+     * No-op si la demande est déjà close.
+     */
+    @Transactional
+    public ApprovalRequestDto approveRemaining(String requestId, ApprovalActionDto action) {
+        ApprovalRequest request = resolveRequest(requestId);
+        if (!OPEN_STATUSES.contains(request.getStatus())) {
+            return toDto(request);
+        }
+        ApprovalRequestDto dto = approve(requestId, action);
+        int guard = 0;
+        while (isOpenStatus(dto.getStatus()) && guard++ < 16) {
+            dto = approve(requestId, action);
+        }
+        return dto;
+    }
+
     @Transactional
     public ApprovalRequestDto reject(String requestId, ApprovalActionDto action) {
         return decide(requestId, action, false);
+    }
+
+    /** Annule une demande ouverte. No-op si déjà close. */
+    @Transactional
+    public ApprovalRequestDto cancel(String requestId, ApprovalActionDto action) {
+        ApprovalRequest request = resolveRequest(requestId);
+        if (!OPEN_STATUSES.contains(request.getStatus())) {
+            return toDto(request);
+        }
+        String userId = resolveUserId(action);
+        String userNom = resolveUserNom(action, userId);
+        eventService.appendEvent(
+                requestId,
+                ApprovalEvent.ACTION_ANNULE,
+                userId,
+                userNom,
+                action != null ? action.getCommentaire() : null,
+                action != null ? action.getPayloadJson() : null);
+        request.setStatus(ApprovalRequest.STATUS_ANNULE);
+        request.setDateCloture(LocalDate.now());
+        requestRepository.save(request);
+        return toDto(request);
     }
 
     @Transactional
@@ -554,6 +594,11 @@ public class ApprovalEngineService {
             return action.getUserNom();
         }
         return userId;
+    }
+
+    private boolean isOpenStatus(String status) {
+        return ApprovalRequest.STATUS_EN_COURS.equals(status)
+                || ApprovalRequest.STATUS_EN_ATTENTE.equals(status);
     }
 
     private String mapStatusForUi(String status) {

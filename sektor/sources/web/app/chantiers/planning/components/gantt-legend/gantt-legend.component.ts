@@ -3,7 +3,7 @@ import { Component, input, output, ChangeDetectionStrategy } from '@angular/core
 
 import { ButtonComponent } from '@platform/lib/anatomy/components';
 
-import type { PhaseChantierStatus } from '../../../models';
+import type { ActiviteStatus } from '../../../services/activite-api.service';
 import type { PlanningLegendItem } from '../../services/planning.facade';
 
 @Component({
@@ -92,5 +92,5 @@ import type { PlanningLegendItem } from '../../services/planning.facade';
 })
 export class GanttLegendComponent {
   readonly items = input.required<readonly PlanningLegendItem[]>();
-  readonly toggle = output<PhaseChantierStatus>();
+  readonly toggle = output<ActiviteStatus>();
 }

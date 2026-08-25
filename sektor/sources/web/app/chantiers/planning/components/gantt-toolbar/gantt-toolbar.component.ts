@@ -5,7 +5,7 @@ import { TranslateModule } from '@ngx-translate/core';
 
 import { ButtonComponent } from '@platform/lib/anatomy/components';
 
-import type { Chantier, PlanningDisplayMode, PlanningGranularity, PlanningPeriodPreset } from '../../../models';
+import type { Chantier, PlanningGranularity, PlanningPeriodPreset } from '../../../models';
 
 @Component({
   selector: 'app-gantt-toolbar',
@@ -43,19 +43,18 @@ import type { Chantier, PlanningDisplayMode, PlanningGranularity, PlanningPeriod
         </select>
       </label>
 
-      <label class="gantt-toolbar__field">
-        <span>Affichage</span>
-        <select [ngModel]="displayMode()" (ngModelChange)="displayModeChange.emit($event)">
-          <option value="PHASES">Phases</option>
-          <option value="LOTS">Lots</option>
-          <option value="BOTH">Phases + Lots</option>
-        </select>
-      </label>
-
       <div class="gantt-toolbar__actions">
+        <nf-button
+          variant="primary"
+          icon="plus"
+          data-testid="planning-new-activite"
+          [disabled]="!canCreate()"
+          (clicked)="newActiviteClick.emit()">
+          {{ 'chantiers.planning.newActivite' | translate }}
+        </nf-button>
         <nf-button variant="secondary" icon="calendar" (clicked)="todayClick.emit()">Aujourd'hui</nf-button>
         <nf-button variant="secondary" icon="download" (clicked)="exportClick.emit()">Exporter PDF</nf-button>
-        <nf-button variant="primary" icon="fullscreen" (clicked)="fullscreenClick.emit()">{{ 'chantiers.planning.toolbar.pleinEcran' | translate }}</nf-button>
+        <nf-button variant="secondary" icon="fullscreen" (clicked)="fullscreenClick.emit()">{{ 'chantiers.planning.toolbar.pleinEcran' | translate }}</nf-button>
       </div>
     </div>
   `,
@@ -64,7 +63,7 @@ import type { Chantier, PlanningDisplayMode, PlanningGranularity, PlanningPeriod
     `
       .gantt-toolbar {
         display: grid;
-        grid-template-columns: minmax(16rem, 2fr) repeat(3, minmax(10rem, 1fr)) auto;
+        grid-template-columns: minmax(16rem, 2fr) repeat(2, minmax(10rem, 1fr)) auto;
         gap: 0.9rem;
         align-items: end;
       }
@@ -124,14 +123,14 @@ export class GanttToolbarComponent {
   readonly chantiers = input.required<readonly Chantier[]>();
   readonly selectedChantierIds = input.required<readonly string[]>();
   readonly granularity = input.required<PlanningGranularity>();
-  readonly displayMode = input.required<PlanningDisplayMode>();
   readonly periodPreset = input.required<PlanningPeriodPreset>();
+  readonly canCreate = input(false);
 
   readonly selectedChantiersChange = output<string[]>();
   readonly granularityChange = output<PlanningGranularity>();
-  readonly displayModeChange = output<PlanningDisplayMode>();
   readonly periodPresetChange = output<PlanningPeriodPreset>();
   readonly todayClick = output<void>();
   readonly exportClick = output<void>();
   readonly fullscreenClick = output<void>();
+  readonly newActiviteClick = output<void>();
 }

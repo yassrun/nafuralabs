@@ -1,10 +1,10 @@
 # Contrat — Le décompte cumulatif, lu depuis les attachements, et sa cascade de retenues
 
-> Sektor n'est pas pacté. Ce fichier est le **seul ancrage QA** (`AC-n` gelés).
+> Ce sous-lot est autonome. Ce fichier est le **seul ancrage QA** (`AC-n` gelés).
 > Journal produit : [`DECISIONS-PRODUIT-CHANTIER.md`](../../../DECISIONS-PRODUIT-CHANTIER.md) — § Simplicité, § Les cinq derniers points / situation et attachement.
 > Plan du sous-lot : [`00-PLAN.md`](00-PLAN.md).
 > Contrats voisins, à ne pas contredire : [`../arbre-et-conversion/CONTRAT.md`](../arbre-et-conversion/CONTRAT.md) — nature `VENDU` / `INTERNE`, **AC-5 : un interne n'entre jamais dans une situation** · [`../budget-et-marge/CONTRAT.md`](../budget-et-marge/CONTRAT.md) — déboursé et marge par nœud, non touchés ici · [`../avancement-et-attachement/CONTRAT.md`](../avancement-et-attachement/CONTRAT.md) — **le contrat dont celui-ci hérite directement** : l'attachement est une période, ses lignes pointent un nœud, seuls les vendus y entrent (son AC-13), et il est **signé par le MOE** via un lien à jeton sécurisé (son AC-15, AC-19) — c'est ce document signé qui fait foi, jamais une ressaisie.
-> Pas de `CADRE.md` / `SPEC.md` / `pact/<bc>/CH-*`. Pas de canvas : les écrans existent déjà (situations, workflow) ; les `AC-n` disent ce qu'ils portent, pas leur maquette.
+> Les preuves attendues vivent ici. Pas de canvas : les écrans existent déjà (situations, workflow).
 
 **Qualification : EVOL.** Le modèle `SituationTravaux` est juste — décompte **cumulatif** (`cumulPrecedentHt` / `cumulCourantHt` / `travauxPeriodeHt`), workflow `BROUILLON → SOUMISE → VALIDEE_MOA → FACTUREE → PAYEE` (+ `REJETEE`). Ce qui ne va pas : `SituationGenerationService` monte ses lignes depuis `ChantierLot` (les **lots seuls**, `quantite × prixUnitaireHt`) et depuis `AvancementPhysique` directement — jamais depuis un attachement, jamais depuis un poste. Un poste vendu placé sous un lot d'accueil interne (le cas d'AC-12 du contrat `arbre-et-conversion`) n'est donc représenté nulle part dans une situation aujourd'hui. Les retenues s'arrêtent à RG et avance ; pénalités de retard et RAS sont absentes alors que `Chantier` porte déjà `tauxRas`.
 

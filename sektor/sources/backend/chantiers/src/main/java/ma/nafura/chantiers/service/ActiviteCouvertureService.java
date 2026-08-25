@@ -1,25 +1,45 @@
 package ma.nafura.chantiers.service;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import ma.nafura.chantiers.domain.activite.ActiviteRattachement;
+import ma.nafura.chantiers.repository.ActiviteRattachementRepository;
+import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 /**
- * AC-9 du contrat {@code avancement-et-attachement} — « un nœud couvert par au moins une activité
- * ne se déclare plus en direct ». La règle est posée ici, dans le garde-fou de la déclaration
- * ({@link AvancementPhysiqueService}), avant même que l'activité existe.
- *
- * <p><b>Palier 1 : aucune activité n'existe.</b> Cette implémentation rend toujours une liste
- * vide — aucun nœud n'est jamais couvert, donc la déclaration directe reste ouverte partout,
- * exactement l'état d'aujourd'hui. Le palier 2 la remplacera par une vraie lecture du planning ;
- * la porte est déjà là, le mécanisme de remontée ne l'est pas (hors périmètre de ce contrat).
+ * AC-8 — un nœud couvert par ≥1 activité refuse la déclaration directe.
+ * Palier 1 : aucune activité → liste vide → comportement inchangé (AC-11).
  */
 @Service
 public class ActiviteCouvertureService {
 
+    private final ActiviteRattachementRepository rattachementRepository;
+
+    public ActiviteCouvertureService(ActiviteRattachementRepository rattachementRepository) {
+        this.rattachementRepository = rattachementRepository;
+    }
+
     /**
-     * @return les identifiants des activités qui couvrent ce nœud — toujours vide au palier 1.
+     * @return les identifiants des activités qui couvrent ce nœud (poste ou lot-feuille).
      */
     public List<String> activitesCouvrant(String noeudId) {
-        return List.of();
+        if (!StringUtils.hasText(noeudId)) {
+            return List.of();
+        }
+        UUID tenantId = TenantContext.getTenantId();
+        Set<String> ids = new LinkedHashSet<>();
+        for (ActiviteRattachement r : rattachementRepository.findByTenantIdAndPosteId(tenantId, noeudId)) {
+            ids.add(r.getActiviteId());
+        }
+        for (ActiviteRattachement r :
+                rattachementRepository.findByTenantIdAndLotIdAndPosteIdIsNull(tenantId, noeudId)) {
+            ids.add(r.getActiviteId());
+        }
+        return new ArrayList<>(ids);
     }
 }

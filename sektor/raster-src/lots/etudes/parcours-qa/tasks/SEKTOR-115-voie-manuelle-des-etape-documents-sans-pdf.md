@@ -14,7 +14,7 @@ tags: [etudes, qa-parcours]
 
 > Sans BDP+CPS, Continuer reste bloque, le stepper refuse de sauter, Corriger le bordereau no-op, Manuel n existe qu a letape 2. Fallback manuel des letape 1.
 
-Contrat : [`DECISIONS-PRODUIT.md`](../../../../DECISIONS-PRODUIT.md) — AI-first, **manuel en fallback**. Pas de Pact.
+Contrat : [`DECISIONS-PRODUIT.md`](../../../../DECISIONS-PRODUIT.md) — AI-first, **manuel en fallback**. Raster autonome.
 
 ## Étapes
 

@@ -32,4 +32,7 @@ public interface AvancementPhysiqueRepository extends TenantScopedRepository<Ava
 
     List<AvancementPhysique> findByTenantIdAndChantierIdAndStatusOrderByDateSaisieAscCreatedAtAsc(
             UUID tenantId, String chantierId, String status);
+
+    /** Quantités déclarées depuis une activité (AC-9 — % dérivé fait/prévu de cette activité). */
+    List<AvancementPhysique> findByTenantIdAndActiviteId(UUID tenantId, String activiteId);
 }

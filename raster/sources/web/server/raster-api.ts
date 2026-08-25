@@ -263,7 +263,7 @@ export function rasterApiPlugin(repoRoot?: string): Plugin {
           }
 
           /**
-           * L'état d'exécution vit dans CE processus (AC-4). Le serveur est le
+           * L'état d'exécution vit dans CE processus. Le serveur est le
            * seul à vivre assez longtemps pour le tenir — d'où `spawnPret`, qui
            * dit à l'UI si le bouton « Lancer » a une chance de marcher.
            */

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -24,6 +25,7 @@ import ma.nafura.etudes.repository.DpgfNoeudRepository;
 import ma.nafura.etudes.service.port.capability.EtudeApprovalPort;
 import ma.nafura.etudes.service.port.bc.EtudeClientPort;
 import ma.nafura.platform.framework.context.TenantContext;
+import ma.nafura.platform.framework.context.UserContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -89,8 +91,8 @@ class DossierEtudeValidationQuatreYeuxTest {
     @BeforeEach
     void setUp() {
         TenantContext.setTenantId(TENANT);
-        when(parametres.auteurPeutValider()).thenReturn(false);
-        when(approvalPort.isAvailable()).thenReturn(false);
+        lenient().when(parametres.auteurPeutValider()).thenReturn(false);
+        lenient().when(approvalPort.isAvailable()).thenReturn(false);
         service = new DossierEtudeService(
                 repository,
                 noeudRepository,
@@ -116,6 +118,7 @@ class DossierEtudeValidationQuatreYeuxTest {
     @AfterEach
     void tearDown() {
         TenantContext.clear();
+        UserContext.clear();
     }
 
     @Test
@@ -187,6 +190,40 @@ class DossierEtudeValidationQuatreYeuxTest {
 
         assertThat(n1.getStatus()).isEqualTo(StatutDossierEtude.EN_VALIDATION);
         assertThat(n1.getValidationEtape()).isEqualTo(DossierEtude.VALIDATION_N2);
+    }
+
+    @Test
+    void owner_derniereEtape_clotureLaDemandeMoteur() {
+        when(approvalPort.isAvailable()).thenReturn(true);
+        UserContext.setSuperAdmin(true);
+        DossierEtude dossier = dossierEnValidation(1);
+        dossier.setApprovalRequestId("apr-walk");
+        when(repository.findByIdAndTenantId(DOSSIER_ID, TENANT)).thenReturn(Optional.of(dossier));
+        when(repository.save(any(DossierEtude.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        DossierEtude result = service.valider(DOSSIER_ID, "owner");
+
+        assertThat(result.getStatus()).isEqualTo(StatutDossierEtude.VALIDEE);
+        verify(approvalPort).cloreApprouvee("apr-walk", "owner", "owner", null);
+        org.mockito.Mockito.verify(approvalPort, org.mockito.Mockito.never())
+                .approuverEtape(any(), any(), any(), any());
+    }
+
+    @Test
+    void owner_n1_avanceLeMoteurSansClore() {
+        when(approvalPort.isAvailable()).thenReturn(true);
+        UserContext.setSuperAdmin(true);
+        DossierEtude dossier = dossierEnValidation(2);
+        dossier.setApprovalRequestId("apr-walk");
+        when(repository.findByIdAndTenantId(DOSSIER_ID, TENANT)).thenReturn(Optional.of(dossier));
+        when(repository.save(any(DossierEtude.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        DossierEtude n1 = service.valider(DOSSIER_ID, "owner");
+
+        assertThat(n1.getStatus()).isEqualTo(StatutDossierEtude.EN_VALIDATION);
+        verify(approvalPort).approuverEtape("apr-walk", "owner", "owner", null);
+        org.mockito.Mockito.verify(approvalPort, org.mockito.Mockito.never())
+                .cloreApprouvee(any(), any(), any(), any());
     }
 
     @Test

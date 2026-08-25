@@ -12,7 +12,7 @@ tags: [sektor]
 
 # Lookup combobox partagé — contrat et canvas
 
-> Combobox FK (recherche serveur, œil fiche). Pas un picker. Sektor pas pacté : contrat = DECISIONS-PRODUIT + canvas du lot.
+> Combobox FK (recherche serveur, œil fiche). Pas un picker. Dans Raster : contrat = DECISIONS-PRODUIT + canvas du lot.
 
 ## Étapes
 

@@ -498,8 +498,12 @@
       }
     },
     "planning": {
-      "title": "Gantt schedule",
-      "empty": "No phase scheduled for this selection",
+      "title": "Schedule",
+      "empty": "No activity",
+      "emptyHint": "The site can already be billed without a schedule. Here you plan the work — formwork, pouring, demobilization.",
+      "newActivite": "New activity",
+      "lotsHorsGantt": "Lots stay in the tree — not on the Gantt",
+      "filterRequired": "Filter one site to create an activity.",
       "toolbar": {
         "periode": "Period",
         "ceMois": "This month",
@@ -510,11 +514,29 @@
         "pleinEcran": "Full screen"
       },
       "drawer": {
-        "title": "Phase detail",
-        "equipe": "Team",
+        "title": "Activity",
+        "libelle": "Label",
         "debut": "Start",
-        "quantite": "Quantity",
-        "dependances": "Dependencies"
+        "fin": "End",
+        "parent": "Under",
+        "parentNone": "(none — root)",
+        "zone": "Zone",
+        "zoneNone": "(none — optional)",
+        "save": "Save",
+        "cancel": "Cancel",
+        "rattacherApres": "Link a bill item after saving, in the same drawer.",
+        "travauxLies": "Linked work",
+        "aucunRattachement": "No linked item — internal / milestone activity",
+        "ajouterPoste": "Add an item",
+        "choisirArbre": "Pick from the tree…",
+        "quantitePrevue": "Planned quantity",
+        "lier": "Link",
+        "detacher": "Unlink",
+        "avancement": "Progress",
+        "quantiteFaite": "Quantity done",
+        "percentJalon": "Progress (%)",
+        "date": "Date",
+        "declarer": "Record"
       }
     },
     "situation": {

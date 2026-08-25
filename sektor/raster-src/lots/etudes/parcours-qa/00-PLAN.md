@@ -12,7 +12,7 @@ Walk QA 20/08 DE-0012 (`qa@nafuralabs.local`) : étape 1 impasse sans BDP+CPS ; 
 
 ## Approche technique
 
-Front `etudes/dossiers/` : `pieces-marche`, `dossier-detail`, `bordereau-arbre`, header, page create. API `init-bordereau-manuel` déjà là. Pas de Pact — contrat `DECISIONS-PRODUIT.md` (manuel fallback + consultation).
+Front `etudes/dossiers/` : `pieces-marche`, `dossier-detail`, `bordereau-arbre`, header, page create. API `init-bordereau-manuel` déjà là. Raster autonome — contrat `DECISIONS-PRODUIT.md` (manuel fallback + consultation).
 
 ## Tasks
 

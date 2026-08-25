@@ -1,7 +1,7 @@
 # ROADMAP — Sektor
 
 > Ordre des lots. **Écrite à la main**, hors `raster-src/`, non indexée.
-> Au-dessus de la borne : ouvert à l’orchestrateur. Pas de Pact sur ce travail.
+> Au-dessus de la borne : ouvert à l’orchestrateur.
 
 ## Ouvert
 

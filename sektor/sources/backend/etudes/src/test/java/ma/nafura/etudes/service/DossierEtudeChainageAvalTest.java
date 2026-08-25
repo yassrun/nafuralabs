@@ -3,6 +3,7 @@ package ma.nafura.etudes.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -240,6 +241,21 @@ class DossierEtudeChainageAvalTest {
         assertThat(result.getChantierId()).isEqualTo("CH-EXIST");
         assertThat(result.getStatus()).isEqualTo("CONVERTIE");
         assertThat(dossier.getStatus()).isEqualTo(StatutDossierEtude.CONVERTIE);
+        verify(chainageAvalPort, never()).convert(any());
+    }
+
+    @Test
+    void convertir_rejoue_clotureLaDemandeMoteurResiduelle() {
+        DossierEtude dossier = dossier(StatutDossierEtude.CONVERTIE);
+        dossier.setChantierGenereId("CH-EXIST");
+        dossier.setApprovalRequestId("apr-walk");
+        when(repository.lockByIdAndTenantId(DOSSIER_ID, TENANT)).thenReturn(Optional.of(dossier));
+        when(approvalPort.isAvailable()).thenReturn(true);
+
+        DossierConversionResultDto result = service.convertir(DOSSIER_ID, new DossierConvertirDto());
+
+        assertThat(result.getChantierId()).isEqualTo("CH-EXIST");
+        verify(approvalPort).cloreApprouvee(eq("apr-walk"), any(), any(), eq("Étude déjà convertie"));
         verify(chainageAvalPort, never()).convert(any());
     }
 

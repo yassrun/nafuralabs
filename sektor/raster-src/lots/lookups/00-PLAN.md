@@ -1,7 +1,7 @@
 # Lookup combobox
 
 > Un combobox anatomy, pas un picker. Œil → fiche si id, liste si vide. Client / fournisseur d’abord.
-> **Pas de Pact.** Contrat [`CONTRAT.md`](CONTRAT.md) · journal [`DECISIONS-PRODUIT.md`](../../DECISIONS-PRODUIT.md) § 23/08 lookups.
+> **Raster autonome.** Contrat [`CONTRAT.md`](CONTRAT.md) · journal [`DECISIONS-PRODUIT.md`](../../DECISIONS-PRODUIT.md) § 23/08 lookups.
 
 ## Verdict
 

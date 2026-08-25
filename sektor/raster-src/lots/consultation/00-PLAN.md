@@ -12,7 +12,7 @@ Walk 22/08 : panneau page Coût mange l’arbre ; DA = chantier → BC ; gel 20/
 
 ## Approche technique
 
-Nouveau agrégat **achats/** (pas `consultations_etudes` dossier, pas DA, pas `OffreFournisseur`). Chrome `erp-nav` Achats / expression. Études consomme (overlay + flag). Lab Liquibase clean. Pas de Pact. Contrat [`DECISIONS-PRODUIT.md`](../../DECISIONS-PRODUIT.md) § 22/08 + overlay 23/08.
+Nouveau agrégat **achats/** (pas `consultations_etudes` dossier, pas DA, pas `OffreFournisseur`). Chrome `erp-nav` Achats / expression. Études consomme (overlay + flag). Lab Liquibase clean. Raster autonome. Contrat [`DECISIONS-PRODUIT.md`](../../DECISIONS-PRODUIT.md) § 22/08 + overlay 23/08.
 
 ## Tasks
 

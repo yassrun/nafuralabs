@@ -1,6 +1,6 @@
 # Plier Sektor sur Archi
 
-> Même comportement. Le code suit [`ARCHI_BLUEPRINT.md`](../../../../ARCHI_BLUEPRINT.md). Arbre des dossiers : [`DECISIONS.md`](../../DECISIONS.md). Pas de Pact.
+> Même comportement. Le code suit [`ARCHI_BLUEPRINT.md`](../../../../ARCHI_BLUEPRINT.md). Arbre des dossiers : [`DECISIONS.md`](../../DECISIONS.md). Raster autonome.
 
 Canon : Gateway fan-out · Socle n’est pas la porte métier · un BC publie `api` · un pair ne voit que ça · externe partagé = platform · externe d’un BC = `adapters/` de ce BC.
 

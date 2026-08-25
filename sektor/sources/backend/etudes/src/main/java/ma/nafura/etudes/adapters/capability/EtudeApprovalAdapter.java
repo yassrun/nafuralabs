@@ -88,6 +88,25 @@ public class EtudeApprovalAdapter implements EtudeApprovalPort {
     }
 
     @Override
+    public ApprovalSnapshot cloreApprouvee(
+            String requestId, String userId, String userNom, String commentaire) {
+        ApprovalActionDto action = new ApprovalActionDto();
+        action.setUserId(userId);
+        action.setUserNom(userNom);
+        action.setCommentaire(commentaire);
+        return toSnapshot(engine.approveRemaining(requestId, action));
+    }
+
+    @Override
+    public ApprovalSnapshot annuler(String requestId, String userId, String userNom, String motif) {
+        ApprovalActionDto action = new ApprovalActionDto();
+        action.setUserId(userId);
+        action.setUserNom(userNom);
+        action.setCommentaire(motif);
+        return toSnapshot(engine.cancel(requestId, action));
+    }
+
+    @Override
     public Optional<ApprovalSnapshot> trouverOuverte(UUID dossierId) {
         return requestRepository
                 .findByTenantIdAndEntityTypeAndEntityIdAndStatusIn(

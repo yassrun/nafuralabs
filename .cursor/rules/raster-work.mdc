@@ -1,0 +1,31 @@
+---
+description: Canon Raster autonome — projets, lots, sous-lots, plans, Tasks, agents et chemins
+alwaysApply: true
+---
+
+# Où écrire quoi
+
+Canon : `RASTER_BLUEPRINT.md`, `raster/AGENTS.md`, `OPS_BLUEPRINT.md` et `ARCHI_BLUEPRINT.md`.
+
+| Élément | Chemin |
+|---|---|
+| Inbox globale | `raster/inbox.md` |
+| Roadmap projet | `<projet>/ROADMAP.md` |
+| Lot | `<projet>/raster-src/lots/<lot>/` |
+| Sous-lot | `<projet>/raster-src/lots/<lot>/<sous-lot>/` |
+| Plan | `<sous-lot>/00-PLAN.md` |
+| UX | `<sous-lot>/ux/*.canvas.tsx` |
+| Tasks | `<lot-ou-sous-lot>/tasks/{ID}-{slug}.md` |
+| Preuves e2e | `<projet>/e2e/` |
+| Code | `<projet>/sources/` |
+
+Lot et sous-lot sont des dossiers. Task est le seul ticket.
+Le CLI crée les Tasks et possède leur frontmatter.
+Le Plan, l’UX et le code sont édités directement.
+
+Avant de rendre la main :
+
+```bash
+node raster/t.mjs check
+```
+

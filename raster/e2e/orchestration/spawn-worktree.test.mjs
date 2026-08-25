@@ -1,10 +1,10 @@
 /**
- * Preuve CH-01-EVOL-spawn-worktree — AC-1 · AC-2 · AC-6.
+ * Preuve Raster— preuve 1 · preuve 2 · preuve 6.
  * Run: node --test raster/e2e/orchestration/spawn-worktree.test.mjs
  *
  * Tout ce qui est testé ici REFUSE avant de toucher à git : aucun worktree n'est
  * créé, aucun processus n'est lancé. Les preuves qui demandent un vrai worktree
- * (AC-3 double lancement, AC-4 libération, AC-5 arrêt) sont dans le rapport de
+ * (preuve 3 double lancement, preuve 4 libération, preuve 5 arrêt) sont dans le rapport de
  * RAS-99 — elles coûtent un checkout de 6 775 fichiers, trop cher pour une suite.
  */
 import assert from "node:assert/strict";
@@ -25,19 +25,19 @@ import { agentCommand, start, SpawnError } from "../../spawn.mjs";
 
 const read = (p) => fs.readFileSync(path.join(REPO_ROOT, p), "utf8");
 
-test("AC-1 — le worktree par défaut est hors du dépôt", () => {
+test("preuve 1 — le worktree par défaut est hors du dépôt", () => {
   delete process.env.RASTER_WORKTREES;
   assert.equal(insideRepo(worktreeRoot()), false);
-  assert.equal(insideRepo(worktreePath("raster", "socle", "CH-01")), false);
+  assert.equal(insideRepo(worktreePath("raster", "socle", "panneau-decision")), false);
 });
 
-test("AC-1 — un emplacement DANS le dépôt est refusé", () => {
+test("preuve 1 — un emplacement DANS le dépôt est refusé", () => {
   const avant = process.env.RASTER_WORKTREES;
   process.env.RASTER_WORKTREES = path.join(REPO_ROOT, "raster", "wt");
   try {
-    assert.equal(insideRepo(worktreePath("raster", "socle", "CH-01")), true);
+    assert.equal(insideRepo(worktreePath("raster", "socle", "panneau-decision")), true);
     assert.throws(
-      () => addWorktree("raster", "socle", "CH-01"),
+      () => addWorktree("raster", "socle", "panneau-decision"),
       WorktreeError,
       "un worktree dans le dépôt ferait compter chaque task deux fois"
     );
@@ -54,11 +54,11 @@ test("insideRepo ne confond pas le dépôt lui-même avec son intérieur", () =>
 });
 
 test("la branche suit le sous-lot, ou le lot à défaut", () => {
-  assert.equal(branchName("socle", "CH-01-EVOL-x"), "socle/CH-01-EVOL-x");
+  assert.equal(branchName("socle", "panneau-decision"), "socle/panneau-decision");
   assert.equal(branchName("socle", ""), "lot/socle");
 });
 
-test("AC-2 — sans RASTER_AGENT_CMD, il n'y a pas de commande", () => {
+test("preuve 2 — sans RASTER_AGENT_CMD, il n'y a pas de commande", () => {
   const avant = process.env.RASTER_AGENT_CMD;
   delete process.env.RASTER_AGENT_CMD;
   try {
@@ -71,7 +71,7 @@ test("AC-2 — sans RASTER_AGENT_CMD, il n'y a pas de commande", () => {
   }
 });
 
-test("AC-2 — le spawn refuse, et refuse AVANT de créer un worktree", () => {
+test("preuve 2 — le spawn refuse, et refuse AVANT de créer un worktree", () => {
   const avant = process.env.RASTER_AGENT_CMD;
   delete process.env.RASTER_AGENT_CMD;
   try {
@@ -101,7 +101,7 @@ test("la commande est découpée en respectant les guillemets", () => {
   }
 });
 
-test("AC-6 — aucun agent ne pousse : rien n'invoque push ni merge", () => {
+test("preuve 6 — aucun agent ne pousse : rien n'invoque push ni merge", () => {
   // `spawn.mjs` n'appelle pas git du tout — il délègue l'isolation à worktree.mjs.
   const src = read("raster/spawn.mjs");
   assert.ok(!/"git"|'git'/.test(src), "spawn.mjs ne doit pas invoquer git");
@@ -114,7 +114,7 @@ test("AC-6 — aucun agent ne pousse : rien n'invoque push ni merge", () => {
   assert.ok(verbes.length > 0, "aucune invocation git détectée — le test ne prouve rien");
 });
 
-test("AC-4 — aucun état d'exécution n'est écrit dans un fichier", () => {
+test("preuve 4 — aucun état d'exécution n'est écrit dans un fichier", () => {
   const src = read("raster/spawn.mjs");
   assert.ok(
     !/writeFileSync|appendFileSync/.test(src),

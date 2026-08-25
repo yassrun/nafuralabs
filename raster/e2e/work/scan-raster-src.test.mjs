@@ -1,5 +1,5 @@
 /**
- * INIT proof — walker reads raster-src peers, never pact/.
+ * Walker proof — only raster-src task trees are indexed.
  * Run: node --test raster/e2e/work/scan-raster-src.test.mjs
  */
 import assert from "node:assert/strict";
@@ -26,8 +26,8 @@ test("le walker ne remonte que les .md sous tasks/, à plat comme en sous-lot", 
       fs.writeFileSync(path.join(tmp, p), body);
     };
     mk("lots/leave/tasks/A-1.md");
-    mk("lots/leave/CH-01-EVOL-x/tasks/A-2.md");
-    mk("lots/leave/CH-01-EVOL-x/00-PLAN.md"); // hors tasks/ → ignoré
+    mk("lots/leave/approval/tasks/A-2.md");
+    mk("lots/leave/approval/00-PLAN.md"); // hors tasks/ → ignoré
     mk("lots/leave/README.md"); // hors tasks/ → ignoré
     mk("lots/leave/tasks/notes.txt"); // pas .md → ignoré
     mk("lots/_archive/tasks/A-9.md"); // archive → ignoré
@@ -36,7 +36,7 @@ test("le walker ne remonte que les .md sous tasks/, à plat comme en sous-lot", 
       .map((f) => path.relative(tmp, f).replace(/\\/g, "/"))
       .sort();
     assert.deepEqual(found, [
-      "lots/leave/CH-01-EVOL-x/tasks/A-2.md",
+      "lots/leave/approval/tasks/A-2.md",
       "lots/leave/tasks/A-1.md",
     ]);
   } finally {
@@ -56,14 +56,6 @@ test("projectFromPath lit le projet dans le chemin", () => {
     ),
     "mbs-website"
   );
-});
-
-test("scan never includes pact/", () => {
-  const files = collectTaskFiles(REPO);
-  const pactHit = files
-    .map((f) => path.relative(REPO, f).replace(/\\/g, "/"))
-    .filter((f) => /(^|\/)pact\//.test(f));
-  assert.deepEqual(pactHit, []);
 });
 
 test("tout ce qui est scanné vit sous raster-src/lots/**/tasks/", () => {
@@ -103,12 +95,12 @@ test("scan does not include docs/specs tickets", () => {
 test("l'arbre est dans le chemin — pas dans un champ parent:", () => {
   const f = path.join(
     REPO,
-    "conges/raster-src/lots/leave/CH-01-EVOL-justificatif/tasks/CNG-9-x.md"
+    "conges/raster-src/lots/leave/justificatif/tasks/CNG-9-x.md"
   );
   assert.deepEqual(treeFromPath(REPO, f), {
     project: "conges",
     lot: "leave",
-    souslot: "CH-01-EVOL-justificatif",
+    souslot: "justificatif",
   });
 
   const flat = path.join(REPO, "compta/raster-src/lots/tva/tasks/CPT-1-x.md");

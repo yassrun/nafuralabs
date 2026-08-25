@@ -1,9 +1,9 @@
 # Contrat — Lookup combobox
 
-> Sektor n’est pas pacté. Ce fichier est le **seul ancrage QA** (`AC-n` gelés).
+> Ce sous-lot est autonome. Ce fichier est le **seul ancrage QA** (`AC-n` gelés).
 > Journal produit : [`DECISIONS-PRODUIT.md`](../../DECISIONS-PRODUIT.md) § 23/08/2026 lookups.
 > Canvas : [`ux/lookup-combobox-wireframe.canvas.tsx`](ux/lookup-combobox-wireframe.canvas.tsx).
-> Pas de `CADRE.md` / `SPEC.md` / `pact/<bc>/CH-*`.
+> Les preuves attendues vivent dans ce sous-lot.
 
 **Qualification : EVOL.** Le select actuel dump 200–500 partenaires, n’a pas de champ de recherche (ou filtre local d’un dump), et l’œil ouvre la **liste** — pas la fiche de l’enregistrement choisi.
 

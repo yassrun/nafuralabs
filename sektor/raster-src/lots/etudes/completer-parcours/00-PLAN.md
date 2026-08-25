@@ -12,7 +12,7 @@ Walk QA 20/08 DE-0036 : footer Continuer focus sans changer d’étape ; header 
 
 ## Approche technique
 
-Front `dossier-detail` (`suivant`, `onHeaderAction`), wizard-shell / `nf-button-list`, `decomposition-workspace` (close drawer / reload DPGF). Pas de Pact.
+Front `dossier-detail` (`suivant`, `onHeaderAction`), wizard-shell / `nf-button-list`, `decomposition-workspace` (close drawer / reload DPGF). Raster autonome.
 
 ## Tasks
 

@@ -1,5 +1,5 @@
 /**
- * Preuve CH-04 — AC-1…4 : le champ, la commande et SPRINT.md n'existent plus.
+ * Preuve Raster— preuve 1…4 : le champ, la commande et SPRINT.md n'existent plus.
  * Run: node --test raster/e2e/work/sans-sprint.test.mjs
  *
  * Échoue si `sprint` réapparaît dans le moteur, si SPRINT.md est présent,
@@ -24,7 +24,7 @@ function frontmatterBlock(raw) {
   return raw.slice(4, end).replace(/\r/g, "");
 }
 
-test("AC-1 — aucune occurrence de sprint dans le moteur", () => {
+test("preuve 1 — aucune occurrence de sprint dans le moteur", () => {
   for (const name of MOTEUR) {
     const src = fs.readFileSync(path.join(RASTER, name), "utf8");
     assert.ok(
@@ -34,7 +34,7 @@ test("AC-1 — aucune occurrence de sprint dans le moteur", () => {
   }
 });
 
-test("AC-1 — aucune clé sprint: dans le frontmatter des tasks", () => {
+test("preuve 1 — aucune clé sprint: dans le frontmatter des tasks", () => {
   const hits = [];
   for (const file of collectTaskFiles(REPO)) {
     const block = frontmatterBlock(fs.readFileSync(file, "utf8"));
@@ -45,7 +45,7 @@ test("AC-1 — aucune clé sprint: dans le frontmatter des tasks", () => {
   assert.deepEqual(hits, [], `clé sprint: encore présente : ${hits.join(" | ")}`);
 });
 
-test("AC-2 — t.mjs sprint n'existe plus, -h ne la propose pas", () => {
+test("preuve 2 — t.mjs sprint n'existe plus, -h ne la propose pas", () => {
   const help = spawnSync(process.execPath, ["raster/t.mjs", "-h"], {
     cwd: REPO,
     encoding: "utf8",
@@ -64,7 +64,7 @@ test("AC-2 — t.mjs sprint n'existe plus, -h ne la propose pas", () => {
   );
 });
 
-test("AC-3 — SPRINT.md est absent et index ne le régénère pas", async () => {
+test("preuve 3 — SPRINT.md est absent et index ne le régénère pas", async () => {
   const { regen } = await import("../../regen.mjs");
   regen();
   assert.ok(
@@ -73,7 +73,7 @@ test("AC-3 — SPRINT.md est absent et index ne le régénère pas", async () =>
   );
 });
 
-test("AC-4 — INDEX.tsv n'a plus de colonne sprint", () => {
+test("preuve 4 — INDEX.tsv n'a plus de colonne sprint", () => {
   const header = fs.readFileSync(path.join(RASTER, "INDEX.tsv"), "utf8").split("\n")[0];
   const cols = header.split("\t");
   assert.ok(!cols.includes("sprint"), `colonne sprint encore dans l'en-tête : ${header}`);

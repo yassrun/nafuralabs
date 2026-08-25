@@ -1,40 +1,34 @@
-# <Titre du CH>
+# <Sous-lot>
 
-> Une ligne : ce que ce Change rend vrai.
-> **Obligatoire seulement si le CH a ≥ 2 tasks exec.** Une seule task n'a rien à ordonner.
-> Éphémère : il meurt avec le CH. *Si une ligne est encore vraie dans deux ans, elle appartient à la SPEC ou au `CH.md`.*
+> Résultat livrable en une phrase.
 
-## Verdict
+## Intention
 
-Pourquoi maintenant. Ce qui commande l'ordre des tasks.
+Pourquoi ce sous-lot existe et ce qui sera vrai lorsqu’il sera livré.
 
-## Constat
+## Périmètre
 
-Faits vérifiés. Bloquants d'abord.
+- Inclus
+- Exclus
 
-## Approche technique
+## Approche
 
-Périmètre code · couches et fichiers touchés · ordre d'attaque.
-C'est ici que le concret a le droit d'exister — pas dans la SPEC.
+Découpage d’exécution, risques et décisions techniques locales.
 
 ## Tasks
 
-Une ligne = **un fichier** `tasks/{ID}-….md`.
-Une task par **résultat vérifiable tout seul**. Sinon c'est une étape du plan interne de l'exec, pas un ticket.
+| # | Task | agent_type | blocked_by |
+|---|---|---|---|
+| 1 | Clarifier le résultat | spec | — |
+| 2 | Implémenter | exec | 1 |
+| 3 | Vérifier | qa | 2 |
 
-| # | Task | blocked_by | // OK |
-|---|------|------------|-------|
-| 1 | … | — | — |
-| 2 | … | 1 | non |
-| 3 | … | 1 | **oui** avec 2 |
+## Preuves attendues
 
-`// OK` = parallélisable avec la ligne indiquée.
-Au promote : les `#` deviennent des ids réels dans `blocked_by: […]`.
-
-## Couverture
-
-Couvre `AC-n` … de [`CH.md`](…). Trous connus, s'il y en a.
+- Commande, scénario ou observation qui démontre le résultat.
+- État initial nécessaire.
+- Résultat attendu.
 
 ## Décisions ouvertes
 
-ADR, ou « aucune — prêt à découper ».
+Uniquement les décisions qui empêchent le plan de se dérouler.

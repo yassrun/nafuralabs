@@ -1,7 +1,7 @@
 # Budget et marge
 
 > Le budget vit sur l'arbre, décomposé du DPU. La marge devient lisible par lot.
-> **Pas de Pact.** Contrat `CONTRAT.md` (SEKTOR-161) · journal [`DECISIONS-PRODUIT-CHANTIER.md`](../../../DECISIONS-PRODUIT-CHANTIER.md) § budget sur l'arbre.
+> **Raster autonome.** Contrat `CONTRAT.md` (SEKTOR-161) · journal [`DECISIONS-PRODUIT-CHANTIER.md`](../../../DECISIONS-PRODUIT-CHANTIER.md) § budget sur l'arbre.
 
 ## Verdict
 

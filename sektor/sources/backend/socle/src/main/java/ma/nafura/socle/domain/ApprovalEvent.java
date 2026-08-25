@@ -29,6 +29,7 @@ public class ApprovalEvent {
     public static final String ACTION_DELEGUE = "DELEGUE";
     public static final String ACTION_COMMENTE = "COMMENTE";
     public static final String ACTION_ESCALADE = "ESCALADE";
+    public static final String ACTION_ANNULE = "ANNULE";
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

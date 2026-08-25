@@ -1,10 +1,10 @@
 # Contrat — Budget par nœud, décomposé du DPU
 
-> Sektor n'est pas pacté. Ce fichier est le **seul ancrage QA** (`AC-n` gelés).
+> Ce sous-lot est autonome. Ce fichier est le **seul ancrage QA** (`AC-n` gelés).
 > Journal produit : [`DECISIONS-PRODUIT-CHANTIER.md`](../../../DECISIONS-PRODUIT-CHANTIER.md) — § Simplicité, § Le budget vit sur l'arbre, § Le réel s'impute à l'activité (**et son amendement palier 1**).
 > Plan du sous-lot : [`00-PLAN.md`](00-PLAN.md).
 > Contrat voisin, à ne pas contredire : [`../arbre-et-conversion/CONTRAT.md`](../arbre-et-conversion/CONTRAT.md) — il livre la nature `VENDU` / `INTERNE` et `dpgfNoeudId` sur l'arbre, et **nomme ce budget en hors périmètre**. Ce contrat le reprend.
-> Pas de `CADRE.md` / `SPEC.md` / `pact/<bc>/CH-*`. Pas de canvas : l'écran budget existe déjà, les `AC-n` disent son **contenu**, pas sa maquette.
+> Les preuves attendues vivent ici. Pas de canvas : l'écran budget existe déjà.
 
 **Qualification : EVOL.** Le budget existe (`BudgetChantier` / `BudgetLigne`, ventilé par `BudgetVentilationService` à la conversion) mais il est **agrégé au chantier**. Ce qui n'existe pas : le déboursé **sur le nœud**, la marge par poste et par lot, la valeur acquise, et l'imputation du réel.
 

@@ -1,5 +1,5 @@
 /**
- * Preuve CH-02 — AC-1 · AC-3 : une commande qui refuse n'écrit rien.
+ * Preuve Raster— preuve 1 · preuve 3 : une commande qui refuse n'écrit rien.
  * Run: node --test raster/e2e/work/ecriture-refus.test.mjs
  *
  * Les cas testés refusent AVANT toute écriture, donc les lancer sur le dépôt réel
@@ -13,7 +13,7 @@ import test from "node:test";
 import { createTask, setStatus, RefusError, slugify, TYPES } from "../../write.mjs";
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
-const CIBLE = "work/CH-02-EVOL-ecriture-et-readiness";
+const CIBLE = "work/ecriture-et-readiness";
 
 /** Empreinte du dossier de tasks — doit être identique après chaque refus. */
 function empreinte() {
@@ -21,7 +21,7 @@ function empreinte() {
   return fs.existsSync(dir) ? fs.readdirSync(dir).sort().join("|") : "";
 }
 
-test("AC-1 — un enum inconnu est refusé, et rien n'est écrit", () => {
+test("preuve 1 — un enum inconnu est refusé, et rien n'est écrit", () => {
   const avant = empreinte();
   for (const bad of [
     { type: "bidule" },
@@ -39,7 +39,7 @@ test("AC-1 — un enum inconnu est refusé, et rien n'est écrit", () => {
   assert.equal(empreinte(), avant);
 });
 
-test("AC-1 — un lot inexistant est refusé sans --nouveau-lot", () => {
+test("preuve 1 — un lot inexistant est refusé sans --nouveau-lot", () => {
   const avant = empreinte();
   assert.throws(
     () => createTask({ project: "raster", target: "lot-qui-nexiste-pas", title: "Refus" }),
@@ -48,7 +48,7 @@ test("AC-1 — un lot inexistant est refusé sans --nouveau-lot", () => {
   assert.equal(empreinte(), avant);
 });
 
-test("AC-1 — un couple type/agent_type incohérent est refusé", () => {
+test("preuve 1 — un couple type/agent_type incohérent est refusé", () => {
   assert.throws(
     () =>
       createTask({
@@ -68,7 +68,7 @@ test("AC-1 — un couple type/agent_type incohérent est refusé", () => {
   });
 });
 
-test("AC-1 — un blocked_by inconnu est refusé", () => {
+test("preuve 1 — un blocked_by inconnu est refusé", () => {
   const avant = empreinte();
   assert.throws(
     () =>
@@ -83,20 +83,20 @@ test("AC-1 — un blocked_by inconnu est refusé", () => {
   assert.equal(empreinte(), avant);
 });
 
-test("AC-1 — un titre vide est refusé", () => {
+test("preuve 1 — un titre vide est refusé", () => {
   assert.throws(
     () => createTask({ project: "raster", target: CIBLE, title: "   " }),
     RefusError
   );
 });
 
-test("AC-3 — `done-me` ne se pose pas par `status`", () => {
+test("preuve 3 — `done-me` ne se pose pas par `status`", () => {
   assert.throws(() => setStatus("RAS-79", "done-me"), RefusError);
   assert.throws(() => setStatus("RAS-79", "termine"), RefusError);
 });
 
 test("le slug est stable, sans accent ni ponctuation", () => {
-  assert.equal(slugify("Écriture et readiness — CH-02"), "ecriture-et-readiness-ch-02");
+  assert.equal(slugify("Écriture et readiness"), "ecriture-et-readiness");
   assert.equal(slugify("  "), "task");
   assert.ok(slugify("x".repeat(200)).length <= 48);
 });

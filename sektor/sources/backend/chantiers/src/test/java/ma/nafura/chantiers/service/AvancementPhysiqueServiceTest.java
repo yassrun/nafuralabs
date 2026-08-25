@@ -190,6 +190,28 @@ class AvancementPhysiqueServiceTest {
                 .hasMessageContaining("act-terrassement");
     }
 
+    /** AC-10 — la remontée depuis l'activité passe la garde couverture. */
+    @Test
+    void enregistrementDepuisActivite_passeLaGardeCouverture() {
+        when(activiteCouvertureService.activitesCouvrant(POSTE)).thenReturn(List.of("act-coffrage"));
+        when(avancementLectureService.quantiteFaiteCumuleePoste(POSTE)).thenReturn(BigDecimal.ZERO);
+
+        AvancementPhysiqueDto dto = service.enregistrerDepuisActivite(
+                CHANTIER,
+                LOT,
+                POSTE,
+                "act-coffrage",
+                LocalDate.of(2026, 9, 6),
+                new BigDecimal("10"),
+                null,
+                AvancementPhysique.STATUS_BROUILLON,
+                "user-1",
+                "QA");
+
+        assertThat(dto.getQuantiteRealisee()).isEqualByComparingTo("10");
+        assertThat(stockage.getFirst().getActiviteId()).isEqualTo("act-coffrage");
+    }
+
     /** AC-7 — une déclaration reprise par un attachement signé ne se corrige plus. */
     @Test
     void correction_apresAttachementSigne_estRefusee() {

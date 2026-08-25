@@ -1,9 +1,9 @@
 /**
- * Preuve CH-00-INIT-conduite — AC-2 : le défaut est FERMÉ.
+ * Preuve Raster— preuve 2 : le défaut est FERMÉ.
  * Run: node --test raster/e2e/orchestration/roadmap-borne.test.mjs
  *
  * Un ROADMAP.md mal formé ne doit jamais élargir l'autonomie : l'erreur sûre
- * est de ne rien lancer (`pact/orchestration/SPEC.md` INV-2).
+ * est de ne rien lancer.
  */
 import assert from "node:assert/strict";
 import test from "node:test";
@@ -24,21 +24,21 @@ const ROADMAP = `# ROADMAP — essai
 4. **socle** — l'UI
 `;
 
-test("AC-2 — la borne coupe la roadmap en deux", () => {
+test("preuve 2 — la borne coupe la roadmap en deux", () => {
   const r = parseRoadmap(ROADMAP);
   assert.equal(r.borne, true);
   assert.deepEqual(r.fenetre, ["cadre", "work"]);
   assert.deepEqual(r.fermes, ["orchestration", "socle"]);
 });
 
-test("AC-2 — sans marqueur, la fenêtre est VIDE (pas ouverte)", () => {
+test("preuve 2 — sans marqueur, la fenêtre est VIDE (pas ouverte)", () => {
   const r = parseRoadmap(ROADMAP.replace("<!-- borne -->", ""));
   assert.equal(r.borne, false);
   assert.deepEqual(r.fenetre, [], "un fichier sans borne n'ouvre rien");
   assert.ok(r.note.includes("fenêtre vide"));
 });
 
-test("AC-2 — borne en tête : fenêtre vide", () => {
+test("preuve 2 — borne en tête : fenêtre vide", () => {
   const r = parseRoadmap(`<!-- borne -->\n\n1. **work** — plus tard\n`);
   assert.equal(r.borne, true);
   assert.deepEqual(r.fenetre, []);

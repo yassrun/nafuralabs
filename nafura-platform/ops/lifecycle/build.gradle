@@ -59,7 +59,9 @@ def gradleProjectToDiskPath = { String projectPath ->
 
     switch (parts[0]) {
         case 'platform':
-            if (parts.size() == 2 && parts[1] in ['document-extraction', 'documents', 'impression']) {
+            if (parts.size() == 2 && parts[1] in [
+                    'document-extraction', 'documents', 'impression',
+                    'notification', 'commentaire', 'approbation']) {
                 return "nafura-platform/sources/backend/${parts[1]}"
             }
             if (parts.size() < 3) {
@@ -79,6 +81,9 @@ def gradleProjectToDiskPath = { String projectPath ->
                     return "nafura-platform/sources/backend/features/${parts[2]}"
                 }
                 return "nafura-platform/sources/backend/features/${parts[2..-1].join('/')}"
+            }
+            if (parts[1] == 'conversation') {
+                return "nafura-platform/sources/backend/conversation/${parts[2]}"
             }
             return null
         case 'sektor':
@@ -274,7 +279,9 @@ def discoverSqlSources = { String scopedAppId = null ->
                 return
             }
             def content = sqlFile.getText('UTF-8')
-            def disableSplitStatements = content.contains('DO $$')
+            // Any $$ dollar-quote (DO $$ / FUNCTION … AS $$) — Liquibase splitStatements
+            // otherwise cuts the body at the first semicolon inside the function.
+            def disableSplitStatements = content.contains('$$')
             selections << [
                     source: sqlFile,
                     relativePath: relativePath,

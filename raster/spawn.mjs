@@ -11,7 +11,7 @@
  *   node raster/t.mjs stop raster socle
  *
  * L'état est EN MÉMOIRE. Un processus mort ne doit jamais laisser un `doing`
- * menteur dans un fichier de task (`CH-01-EVOL-spawn-worktree` AC-4).
+ * menteur dans un fichier de task.
  *
  * Conséquence assumée : l'état appartient au processus qui a lancé. Le serveur
  * de l'app vit longtemps, donc `running` / `stop` y ont un sens. En ligne de
@@ -37,7 +37,7 @@ const MAX_LIGNES = 400;
 
 /**
  * La commande vient de l'environnement, jamais du dépôt.
- * Rien de configuré ⇒ on refuse en le disant (AC-2).
+ * Rien de configuré ⇒ on refuse en le disant.
  */
 export function agentCommand() {
   const raw = (process.env.RASTER_AGENT_CMD || "").trim();
@@ -68,7 +68,7 @@ export function list() {
  * Lance un orchestrateur sur un lot. Un worktree par sous-lot est créé si un
  * sous-lot est donné ; sinon on travaille sur une branche de lot.
  *
- * Ne fait AUCUN git push, AUCUN merge (AC-6) : le brief passé à l'agent le dit,
+ * Ne fait AUCUN git push, AUCUN merge : le brief passé à l'agent le dit,
  * et Raster ne l'exécute pas à sa place.
  */
 export function start({ project, lot, souslot = "", brief = "" }) {

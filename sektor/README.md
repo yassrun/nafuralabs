@@ -8,7 +8,6 @@ Deploy : [nafura-platform/ops/AGENTS.md](../nafura-platform/ops/AGENTS.md).
 ```
 sektor/
 ├── raster-src/               # tickets SEKTOR-*
-├── pact/                     # pas encore pacté
 ├── ops/                      # Dockerfiles + k8s/overlays/
 ├── e2e/                      # preuves — racine projet, pas sources/
 └── sources/

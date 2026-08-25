@@ -12,7 +12,7 @@ tags: [sektor, ux, catalogue]
 
 # Picker article partagé — contrat et canvas
 
-> Recherche as-you-type code+désignation ; filtres serveur nature/famille/lot d usage ; pagination. Dialog DPU + selects stock (réception, retour, transfert, tarifs). Pas de dump à l ouverture. Sektor pas pacté : contrat = DECISIONS-PRODUIT + canvas sous-lot.
+> Recherche as-you-type code+désignation ; filtres serveur nature/famille/lot d usage ; pagination. Dialog DPU + selects stock (réception, retour, transfert, tarifs). Pas de dump à l ouverture. Dans Raster : contrat = DECISIONS-PRODUIT + canvas sous-lot.
 
 ## Étapes
 
@@ -50,4 +50,4 @@ Recommandé : A — le gel suit ta demande (pas de dump, 3 pieds, Extraire = che
 ce qui a changé      CONTRAT.md (AC gelés) · canvas lot + preview · DECISIONS-PRODUIT § 23/08 · LOT.md · 00-PLAN.md · tasks 142–145.
 critères gelés       AC-1 ouverture vide · AC-2 recherche code+nom · AC-3 filtres serveur · AC-4 pas de triplet · AC-5 pagination · AC-6 actifs · AC-7 unité+PU · AC-8 clavier · AC-9 pied DPU · AC-10 pied stock · AC-11 pied lookup · AC-12 nature pré-remplie · AC-13 vide sans CTA créer · AC-14 erreur+relance.
 décidé seul          Lookups = même geste (144, pas dette). HTTP 200 vide plutôt que 400. Nature pré-remplie = un chip type DPU (pas le seau stockable). Scroll = load more, pas de pages numérotées imposées.
-écarts / dette       Hors v1 nommé : SKU/cleStable barre, filtre fournisseur, filtre unité, listing articles encore client. Pas de Pact (interdit sur ce travail).
+écarts / dette       Hors v1 nommé : SKU/cleStable barre, filtre fournisseur, filtre unité, listing articles encore client. Raster autonome (interdit sur ce travail).

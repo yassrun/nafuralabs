@@ -498,8 +498,12 @@
       }
     },
     "planning": {
-      "title": "مخطط Gantt",
-      "empty": "لا توجد مرحلة مخططة لهذا التحديد",
+      "title": "التخطيط",
+      "empty": "لا توجد أي نشاط",
+      "emptyHint": "يمكن فوترة الورش دون تخطيط. هنا تُخطَّط الأشغال — الشد، الصب، الفك.",
+      "newActivite": "نشاط جديد",
+      "lotsHorsGantt": "الحصص تبقى في الشجرة — ليست على مخطط غانت",
+      "filterRequired": "صفِّ ورشاً واحداً لإنشاء نشاط.",
       "toolbar": {
         "periode": "الفترة",
         "ceMois": "هذا الشهر",
@@ -510,11 +514,29 @@
         "pleinEcran": "ملء الشاشة"
       },
       "drawer": {
-        "title": "تفاصيل المرحلة",
-        "equipe": "الفريق",
+        "title": "نشاط",
+        "libelle": "التسمية",
         "debut": "البداية",
-        "quantite": "الكمية",
-        "dependances": "التبعيات"
+        "fin": "النهاية",
+        "parent": "تحت",
+        "parentNone": "(بدون — جذر)",
+        "zone": "المنطقة",
+        "zoneNone": "(بدون — اختياري)",
+        "save": "حفظ",
+        "cancel": "إلغاء",
+        "rattacherApres": "اربط بنداً بعد الحفظ، من نفس الدرج.",
+        "travauxLies": "أشغال مرتبطة",
+        "aucunRattachement": "لا بند مرتبط — نشاط داخلي / معلم",
+        "ajouterPoste": "إضافة بند",
+        "choisirArbre": "اختر من الشجرة…",
+        "quantitePrevue": "الكمية المخططة",
+        "lier": "ربط",
+        "detacher": "فك",
+        "avancement": "التقدم",
+        "quantiteFaite": "الكمية المنجزة",
+        "percentJalon": "التقدم (%)",
+        "date": "التاريخ",
+        "declarer": "تسجيل"
       }
     },
     "situation": {

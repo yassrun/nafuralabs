@@ -8,4 +8,4 @@ L'app Raster vit dans le **projet** [`raster/`](../../raster/). Ce dossier ne co
 | Moteur, contrat, vues | [`raster/`](../../raster/) |
 | Tickets | `<projet>/raster-src/lots/…/tasks/` |
 | Inbox | `raster/inbox.md` |
-| Canvas | `raster/pact/<ctx>/ux/*.canvas.tsx` |
+| Canvas | `raster/raster-src/lots/<lot>/<sous-lot>/ux/*.canvas.tsx` |

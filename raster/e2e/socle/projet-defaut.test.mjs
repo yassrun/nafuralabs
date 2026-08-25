@@ -1,5 +1,5 @@
 /**
- * Preuve CH-02-CORRECTION — AC-1 · AC-2 · AC-3.
+ * Preuve Raster— preuve 1 · preuve 2 · preuve 3.
  * Run: node --test raster/e2e/socle/projet-defaut.test.mjs
  *
  * Le choix du projet par défaut est une fonction pure : on la teste sur des
@@ -37,23 +37,23 @@ function chargerProjetPorteur() {
 const projetPorteur = chargerProjetPorteur();
 const t = (project) => ({ project });
 
-test("AC-2 — le projet retenu porte du travail", () => {
+test("preuve 2 — le projet retenu porte du travail", () => {
   const projects = ["a-vide", "b-plein", "c-vide"];
   const tasks = [t("b-plein"), t("b-plein")];
   assert.equal(projetPorteur(projects, tasks), "b-plein");
 });
 
-test("AC-2 — l'ordre des projets départage, pas le volume", () => {
+test("preuve 2 — l'ordre des projets départage, pas le volume", () => {
   const projects = ["a", "b"];
   const tasks = [t("b"), t("b"), t("a")];
   assert.equal(projetPorteur(projects, tasks), "a", "le premier qui porte gagne");
 });
 
-test("AC-3 — tous vides : le premier, sans erreur", () => {
+test("preuve 3 — tous vides : le premier, sans erreur", () => {
   assert.equal(projetPorteur(["x", "y"], []), "x");
 });
 
-test("AC-3 — aucun projet : chaîne vide, pas d'exception", () => {
+test("preuve 3 — aucun projet : chaîne vide, pas d'exception", () => {
   assert.equal(projetPorteur([], []), "");
 });
 
@@ -61,7 +61,7 @@ test("une task d'un projet absent de la liste ne le fait pas élire", () => {
   assert.equal(projetPorteur(["a", "b"], [t("fantome")]), "a");
 });
 
-test("AC-1 — aucun nom de projet en dur dans le front", () => {
+test("preuve 1 — aucun nom de projet en dur dans le front", () => {
   for (const f of fs.readdirSync(SRC)) {
     if (!/\.tsx?$/.test(f)) continue;
     const src = fs.readFileSync(path.join(SRC, f), "utf8");

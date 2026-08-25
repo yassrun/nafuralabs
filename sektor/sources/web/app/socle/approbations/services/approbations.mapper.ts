@@ -73,7 +73,9 @@ export interface ApiApprovalAction {
 
 function mapStatus(status: ApiApprovalRequest['status']): ApprovalStatus {
   if (status === 'EN_COURS' || status === 'EN_ATTENTE') return 'EN_ATTENTE';
-  if (status === 'APPROUVE' || status === 'REJETE' || status === 'EXPIRE') return status;
+  if (status === 'APPROUVE' || status === 'REJETE' || status === 'EXPIRE' || status === 'ANNULE') {
+    return status;
+  }
   return 'EN_ATTENTE';
 }
 

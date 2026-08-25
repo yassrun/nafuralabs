@@ -1,21 +1,20 @@
 # Blueprint — Ops
 
 **Statut :** figé (dossier · envs) · **reste à détailler**  
-**Ops** = comment on **fait tourner** un projet Pact (deploy, env, secrets, runbooks).  
-Pact : [`PACT_BLUEPRINT.md`](PACT_BLUEPRINT.md) · Raster : [`RASTER_BLUEPRINT.md`](RASTER_BLUEPRINT.md) · Archi : [`ARCHI_BLUEPRINT.md`](ARCHI_BLUEPRINT.md).
+**Ops** = comment on **fait tourner** un projet logiciel (deploy, env, secrets, runbooks).
+Raster : [`RASTER_BLUEPRINT.md`](RASTER_BLUEPRINT.md) · Archi : [`ARCHI_BLUEPRINT.md`](ARCHI_BLUEPRINT.md).
 
 ---
 
 ## Règle figée
 
-**Tout projet Pact (app ou site) a un dossier `ops/`.**  
+**Toute app ou tout site déployé a un dossier `ops/`.**
 Pas de projet `ops/` peer. Comptage Raster-only (compta, perso) : **pas** d’`ops/`.
 
 ```text
-<projet Pact>/
+<projet>/
 ├── raster-src/     # obligatoire (tout projet)
-├── pact/           # app / site
-├── ops/            # obligatoire si Pact
+├── ops/            # obligatoire si déployé
 ├── e2e/
 └── sources/        # runtimes — [`NAFURALABS.md`](NAFURALABS.md) § Intérieur
 ```
@@ -76,7 +75,7 @@ Lab / hybrid seulement. **Jamais** sur pods staging/prod K8s (`NAFURA_DEV_CURSOR
 
 Aujourd’hui (Sektor) : **1 tenant QA** `qa-local` · **1 user** `qa@nafuralabs.local` · auto-login agents (`start:erp:cursor` / `cursor-session`). Suffit pour un agent unique.
 
-**Idée à raffiner :** worker **par projet Pact** — users **par rôle** (matrice socle) + jeux de scénarios. Voir [`PACT_BLUEPRINT.md`](PACT_BLUEPRINT.md) § rôles.
+**Idée à raffiner :** worker **par projet** — users **par rôle** + jeux de scénarios.
 
 ---
 
@@ -95,7 +94,7 @@ Migrate **avant** le backend si le schéma change.
 
 ## Infra — partagée, pas recopiée par produit
 
-**Qui possède :** tout ce qui sert **plusieurs** projets Pact = `nafura-platform/ops/`.  
+**Qui possède :** tout ce qui sert **plusieurs** projets = `nafura-platform/ops/`.
 Ce qui meurt avec **une** app = `<app>/ops/`.
 
 Ça ne change **pas** si le cluster grandit (VPS → managed K8s OVH). On change **où** ça tourne (`KUBE_CONTEXT`), pas **qui** possède.
@@ -108,11 +107,11 @@ Ce qui meurt avec **une** app = `<app>/ops/`.
 **Interdit :** un Postgres + Keycloak **dans** chaque projet « au cas où le scaling ». Drift + RAM.  
 **Autorisé plus tard :** extraire **un** datastore d’une app (ex. Postgres dédié Sektor) = change **TECHNICAL** platform/ops + `sektor/ops` — pas un nouveau BC.
 
-Docs, notifs, IAM : **infra + BC platform**, pas recopiés dans l’app. Détail conso : [`PACT_BLUEPRINT.md`](PACT_BLUEPRINT.md) § BC vs lib.
+Docs, notifs, IAM : **infra + modules platform**, pas recopiés dans l’app.
 
 ---
 
-## Postgres — 1 instance, 1 **base** par projet Pact
+## Postgres — 1 instance, 1 **base** par projet
 
 Pas 1 pod Postgres par projet (VPS).  
 Pas non plus N apps dans **le même** `public` schema.
@@ -120,14 +119,14 @@ Pas non plus N apps dans **le même** `public` schema.
 | Couche | Choix figé (maintenant) |
 |--------|-------------------------|
 | Processus | **1** Postgres (pod / service) dans `nafura-platform/ops` |
-| Isolation **inter-apps** | **1 database** par projet Pact (`nafura_erp`, `nafura_venue_catalog`, …) |
+| Isolation **inter-apps** | **1 database** par projet (`nafura_erp`, `nafura_venue_catalog`, …) |
 | Isolation **tenants** (dans Sektor) | affaire du **BC / socle** de l’app (`tenant_id` ou schema-par-tenant) — **pas** un pod PG par client |
 
 `provision-db` = `CREATE DATABASE`, pas un nouveau StatefulSet.
 
 **Pas comme docs/notifs :** l’app **se connecte en JDBC** à *sa* database. La platform ne proxy pas le SQL. L’instance PG est partagée ; le **contenu** de `nafura_erp` reste à Sektor.
 
-**Scaling Postgres plus tard** (sans changer Pact) :
+**Scaling Postgres plus tard** :
 
 1. Plus de disque / RAM sur **la même** instance  
 2. Opérateur (CloudNativePG, etc.) **un** cluster, toujours N databases  
@@ -164,7 +163,7 @@ image lifecycle → Job K8s  <app>-lifecycle
 backend rollout
 ```
 
-- **1 Job par projet Pact**, dans **son** namespace, contre **sa** database.
+- **1 Job par projet**, dans **son** namespace, contre **sa** database.
 - L’outil (collect + image) = `nafura-platform/ops` (aujourd’hui `tools/lifecycle`).
 - Les fichiers SQL = avec le **code qui possède les tables** (`<app>` ; platform si tables platform dans cette base).
 - Lab : changelogs **clean** (create/alter/drop assumés) — pas de dual-write « pour la prod métier ».

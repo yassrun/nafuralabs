@@ -1,6 +1,6 @@
 # Études — décisions 20/08 + parcours QA
 
-> Identité Extraire + consultation + blast mètres. **Pas de Pact.** Contrat = [`DECISIONS-PRODUIT.md`](../../DECISIONS-PRODUIT.md).
+> Identité Extraire + consultation + blast mètres. **Raster autonome.** Contrat = [`DECISIONS-PRODUIT.md`](../../DECISIONS-PRODUIT.md).
 
 Sous-lots :
 

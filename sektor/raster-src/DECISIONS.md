@@ -1,7 +1,7 @@
 # Décisions figées — Sektor (code)
 
 > Jusqu’au CADRE. Le CADRE § Vocabulaire reprendra ces termes ; jusque-là c’est la loi des dossiers.
-> Pas dans `PACT_BLUEPRINT.md` (méthode, pas le produit).
+> Ce fichier porte les décisions produit, pas les règles du moteur Raster.
 >
 > Produit études (cycle poste / articles / ouvrages, chrome) : [`DECISIONS-PRODUIT.md`](DECISIONS-PRODUIT.md) — avant SPEC.
 > Produit chantier (arbre du chantier, planning, ressources) : [`DECISIONS-PRODUIT-CHANTIER.md`](DECISIONS-PRODUIT-CHANTIER.md) — avant SPEC.

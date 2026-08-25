@@ -1,9 +1,9 @@
 # Contrat — Arbre du chantier : vendu / interne, et conversion depuis GAGNE
 
-> Sektor n'est pas pacté. Ce fichier est le **seul ancrage QA** (`AC-n` gelés).
+> Ce sous-lot est autonome. Ce fichier est le **seul ancrage QA** (`AC-n` gelés).
 > Journal produit : [`DECISIONS-PRODUIT-CHANTIER.md`](../../../DECISIONS-PRODUIT-CHANTIER.md) — § Simplicité, § L'arbre du chantier, § Le déclencheur, § Le marché naît à la notification, § Les cinq derniers points / doublons web.
 > Plan du sous-lot : [`00-PLAN.md`](00-PLAN.md).
-> Pas de `CADRE.md` / `SPEC.md` / `pact/<bc>/CH-*`. Pas de canvas : aucun écran neuf ici.
+> Les preuves attendues vivent ici. Pas de canvas : aucun écran neuf.
 
 **Qualification : EVOL.** La conversion existe (`ChainageAvalAdapter`, L13) et crée déjà chantier → marché → lots / postes → budget. Ce qui n'existe pas : la **nature** du nœud, le **lien retour** vers le poste vendu, la naissance en **préparation**, et le refus d'un arbre bancal.
 

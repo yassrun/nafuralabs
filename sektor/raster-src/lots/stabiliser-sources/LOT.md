@@ -1,6 +1,6 @@
 # Stabiliser les sources Sektor
 
-> Ranger le code sur la cible `socle` + dossiers métier **actuels**. Pas de Pact. Pas de nouveaux BC.
+> Ranger le code sur la cible `socle` + dossiers métier **actuels**. Raster autonome. Pas de nouveaux BC.
 
 ## Cible
 
@@ -19,4 +19,4 @@ sektor/sources/
 
 **Pas dans ce lot :** CADRE / SPEC / CH · extraire anatomy / platform · fusionner item+stock+catalogue · publier un package npm.
 
-Les dossiers métier d’aujourd’hui **ne sont pas des BC**. On les garde comme noms de code jusqu’au Pact, plus tard.
+Les dossiers métier d’aujourd’hui **ne sont pas des BC**. On les garde comme noms de code jusqu’à une décision explicite.

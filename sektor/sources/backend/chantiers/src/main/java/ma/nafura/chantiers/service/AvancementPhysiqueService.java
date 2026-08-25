@@ -91,27 +91,87 @@ public class AvancementPhysiqueService {
 
             Noeud noeud = resolveNoeud(tenantId, chantierId, entry.getLotId(), entry.getPosteId());
             garderContreDoubleImputation(noeud);
-            garderQuantitePrevue(noeud);
-            BigDecimal dejaFait = quantiteFaiteCumulee(noeud);
-            garderContreDepassement(noeud, dejaFait, entry.getQuantiteRealisee());
-
-            AvancementPhysique entity = AvancementPhysique.builder()
-                    .id(buildId(chantierId))
-                    .tenantId(tenantId)
-                    .chantierId(chantierId)
-                    .lotId(noeud.lotId())
-                    .posteId(noeud.posteId())
-                    .dateSaisie(request.getDate())
-                    .quantiteRealisee(entry.getQuantiteRealisee())
-                    .notes(trimOrNull(entry.getNotes()))
-                    .status(request.getStatus().trim())
-                    .saisieParId(request.getSaisieParId().trim())
-                    .saisieParName(trimOrNull(request.getSaisieParName()))
-                    .build();
-            created.add(repository.save(entity));
+            created.add(persistDeclaration(
+                    chantierId,
+                    tenantId,
+                    noeud,
+                    request.getDate(),
+                    entry.getQuantiteRealisee(),
+                    trimOrNull(entry.getNotes()),
+                    request.getStatus().trim(),
+                    request.getSaisieParId().trim(),
+                    trimOrNull(request.getSaisieParName()),
+                    null));
         }
 
         return created.stream().map(row -> toDto(row, chantier)).toList();
+    }
+
+    /**
+     * Remontée activité → nœud (AC-10). Passe la garde couverture (AC-8) : la déclaration vient
+     * de l'activité qui couvre le nœud, pas d'une saisie parallèle.
+     */
+    @Transactional
+    public AvancementPhysiqueDto enregistrerDepuisActivite(
+            String chantierId,
+            String lotId,
+            String posteId,
+            String activiteId,
+            java.time.LocalDate date,
+            BigDecimal quantiteRealisee,
+            String notes,
+            String status,
+            String saisieParId,
+            String saisieParName) {
+        Chantier chantier = chantierService.getById(chantierId);
+        UUID tenantId = tenantId();
+        if (quantiteRealisee == null || quantiteRealisee.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("chantiers.avancement.quantite_positive_requise");
+        }
+        Noeud noeud = resolveNoeud(tenantId, chantierId, lotId, posteId);
+        AvancementPhysique saved = persistDeclaration(
+                chantierId,
+                tenantId,
+                noeud,
+                date,
+                quantiteRealisee,
+                trimOrNull(notes),
+                StringUtils.hasText(status) ? status.trim() : AvancementPhysique.STATUS_BROUILLON,
+                saisieParId.trim(),
+                trimOrNull(saisieParName),
+                activiteId);
+        return toDto(saved, chantier);
+    }
+
+    private AvancementPhysique persistDeclaration(
+            String chantierId,
+            UUID tenantId,
+            Noeud noeud,
+            java.time.LocalDate date,
+            BigDecimal quantiteRealisee,
+            String notes,
+            String status,
+            String saisieParId,
+            String saisieParName,
+            String activiteId) {
+        garderQuantitePrevue(noeud);
+        BigDecimal dejaFait = quantiteFaiteCumulee(noeud);
+        garderContreDepassement(noeud, dejaFait, quantiteRealisee);
+        AvancementPhysique entity = AvancementPhysique.builder()
+                .id(buildId(chantierId))
+                .tenantId(tenantId)
+                .chantierId(chantierId)
+                .lotId(noeud.lotId())
+                .posteId(noeud.posteId())
+                .activiteId(activiteId)
+                .dateSaisie(date)
+                .quantiteRealisee(quantiteRealisee)
+                .notes(notes)
+                .status(status)
+                .saisieParId(saisieParId)
+                .saisieParName(saisieParName)
+                .build();
+        return repository.save(entity);
     }
 
     @Transactional(readOnly = true)

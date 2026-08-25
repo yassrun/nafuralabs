@@ -74,7 +74,7 @@ export function stripBlockedBy(raw, ids) {
  * Une task supprimée est une dépendance **satisfaite** : plus personne ne doit
  * l'attendre. Sans ce nettoyage, la readiness la reverrait comme un bloqueur
  * *inconnu* — donc bloquant — et le sous-lot deviendrait inlançable pour
- * toujours (`CH-03-CORRECTION-sweep-blocked-by`).
+ * toujours ; une dépendance satisfaite disparaît du graphe actif.
  *
  * Passe AVANT la suppression : interrompu au milieu, mieux vaut un fichier
  * encore là qu'une référence orpheline.

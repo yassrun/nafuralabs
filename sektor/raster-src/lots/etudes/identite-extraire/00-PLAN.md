@@ -1,6 +1,6 @@
 # Identité Extraire
 
-> Un article = une identité Sektor (`cle_stable`). Extraire classe, l’humain crée. Pas de Pact — contrat [`DECISIONS-PRODUIT.md`](../../../DECISIONS-PRODUIT.md).
+> Un article = une identité Sektor (`cle_stable`). Extraire classe, l’humain crée. Raster autonome — contrat [`DECISIONS-PRODUIT.md`](../../../DECISIONS-PRODUIT.md).
 
 ## Verdict
 

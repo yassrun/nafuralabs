@@ -1,5 +1,5 @@
 /**
- * Preuve CH-01-EVOL-panneau-decision — AC-3 · AC-5 · AC-6.
+ * Preuve Raster— preuve 3 · preuve 5 · preuve 6.
  * Run: node --test raster/e2e/socle/api-delegue.test.mjs
  *
  * Ces trois critères sont **structurels** : ils disent ce que le code n'a plus le
@@ -19,7 +19,7 @@ const API = "raster/sources/web/server/raster-api.ts";
 const FRONT_API = "raster/sources/web/src/api.ts";
 const APP = "raster/sources/web/src/App.tsx";
 
-test("AC-5 — le serveur n'écrit plus de task lui-même", () => {
+test("preuve 5 — le serveur n'écrit plus de task lui-même", () => {
   const src = read(API);
   const writes = [...src.matchAll(/fs\.writeFileSync\([^)]*/g)].map((m) => m[0]);
   // La capture d'inbox n'est pas une task : c'est la seule écriture tolérée.
@@ -31,13 +31,13 @@ test("AC-5 — le serveur n'écrit plus de task lui-même", () => {
   );
 });
 
-test("AC-5 — l'allocation d'id n'est plus dupliquée dans le serveur", () => {
+test("preuve 5 — l'allocation d'id n'est plus dupliquée dans le serveur", () => {
   const src = read(API);
   assert.ok(!/nextIdForPrefix|PROJECT_PREFIX/.test(src), "id alloué côté serveur");
   assert.ok(!/setFrontmatterField/.test(src), "patch de frontmatter côté serveur");
 });
 
-test("AC-5 — les mutations passent par les modules du CLI", () => {
+test("preuve 5 — les mutations passent par les modules du CLI", () => {
   const src = read(API);
   for (const fn of ["createTask", "promoteLine", "setStatus", "approve"]) {
     assert.ok(src.includes(fn), `${fn} non importé par le serveur`);
@@ -45,7 +45,7 @@ test("AC-5 — les mutations passent par les modules du CLI", () => {
   assert.ok(src.includes("RefusError"), "un refus du CLI doit remonter en 400");
 });
 
-test("AC-3 — aucun sélecteur ne propose done-me", () => {
+test("preuve 3 — aucun sélecteur ne propose done-me", () => {
   const app = read(APP);
   const choices = app.match(/STATUS_CHOICES[\s\S]*?\];/);
   assert.ok(choices, "STATUS_CHOICES introuvable");
@@ -53,12 +53,12 @@ test("AC-3 — aucun sélecteur ne propose done-me", () => {
   assert.ok(choices[0].includes("done-agent"), "done-agent doit rester posable");
 });
 
-test("AC-3 — l'approbation existe et n'est pas un status déguisé", () => {
+test("preuve 3 — l'approbation existe et n'est pas un status déguisé", () => {
   assert.ok(read(FRONT_API).includes("/approve"), "route approve absente du client");
   assert.ok(read(APP).includes("onApprove"), "action Approuver absente de l'UI");
 });
 
-test("AC-6 — aucun brief ne référence un skill inexistant", () => {
+test("preuve 6 — aucun brief ne référence un skill inexistant", () => {
   const src = read(FRONT_API);
   const morts = [...src.matchAll(/nafura-(spec|exec|qa|orch)/g)].map((m) => m[0]);
   assert.deepEqual(morts, [], `skills fantômes cités : ${morts.join(", ")}`);
@@ -74,14 +74,14 @@ test("AC-6 — aucun brief ne référence un skill inexistant", () => {
   }
 });
 
-test("AC-2 — le serveur expose les sections du corps du .md", () => {
+test("preuve 2 — le serveur expose les sections du corps du .md", () => {
   const src = read(API);
   assert.ok(/question:\s*section\(/.test(src), "section Question non exposée");
   assert.ok(/rapport:\s*section\(/.test(src), "section Rapport non exposée");
   assert.ok(read(APP).includes("task.rapport"), "le rapport n'est pas affiché");
 });
 
-test("AC-1 — la vue Toi est dérivée, pas filtrée à la main", () => {
+test("preuve 1 — la vue Toi est dérivée, pas filtrée à la main", () => {
   assert.ok(read(API).includes("attend:"), "le champ `attend` doit venir du serveur");
   assert.ok(read(APP).includes("t.attend"), "la file d'attente doit s'appuyer dessus");
 });

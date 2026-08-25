@@ -5,7 +5,7 @@
  * Un marqueur `<!-- borne -->` la coupe en deux : au-dessus, l'orchestrateur peut
  * ouvrir seul ; en dessous, non.
  *
- * LE DÉFAUT EST FERMÉ (`pact/orchestration/SPEC.md` INV-2). Pas de fichier, pas de
+ * LE DÉFAUT EST FERMÉ. Pas de fichier, pas de
  * marqueur, marqueur en tête : fenêtre VIDE. Un fichier mal formé ne doit jamais
  * élargir l'autonomie — l'erreur sûre est de ne rien lancer.
  *

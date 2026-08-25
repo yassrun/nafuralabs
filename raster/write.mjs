@@ -9,8 +9,8 @@
  * qui refuse ne laisse rien derrière elle — ni fichier, ni dossier, ni ligne
  * d'inbox consommée.
  *
- *   node raster/t.mjs new raster work/CH-02-… "Titre" --type tech
- *   node raster/t.mjs promote "ligne" raster work/CH-02-…
+ *   node raster/t.mjs new raster work/ecriture-readiness "Titre" --type tech
+ *   node raster/t.mjs promote "ligne" raster work/ecriture-readiness
  *   node raster/t.mjs status RAS-79 doing
  *   node raster/t.mjs approve RAS-78
  */

@@ -19,4 +19,4 @@ backend/                         web/app/
   hse/                             hse/
 ```
 
-Hors lot : implémenter le type ICE/RC (déjà déclaré au socle). Pact.
+Hors lot : implémenter le type ICE/RC (déjà déclaré au socle). Décision différée.

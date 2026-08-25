@@ -43,6 +43,18 @@ public class NoOpEtudeApprovalPortConfig {
             }
 
             @Override
+            public ApprovalSnapshot cloreApprouvee(
+                    String requestId, String userId, String userNom, String commentaire) {
+                return new ApprovalSnapshot(requestId, "APPROUVE", 1, 2, null, null);
+            }
+
+            @Override
+            public ApprovalSnapshot annuler(
+                    String requestId, String userId, String userNom, String motif) {
+                return new ApprovalSnapshot(requestId, "ANNULE", 0, 2, null, null);
+            }
+
+            @Override
             public Optional<ApprovalSnapshot> trouverOuverte(UUID dossierId) {
                 return Optional.empty();
             }

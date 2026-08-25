@@ -1,7 +1,7 @@
 # Avancement et attachement
 
 > Une seule vérité : la quantité. Le pourcentage se calcule. L'attachement lit, il ne ressaisit pas.
-> **Pas de Pact.** Contrat `CONTRAT.md` (SEKTOR-151) · journal [`DECISIONS-PRODUIT-CHANTIER.md`](../../../DECISIONS-PRODUIT-CHANTIER.md) § avancement en quantité.
+> **Raster autonome.** Contrat `CONTRAT.md` (SEKTOR-151) · journal [`DECISIONS-PRODUIT-CHANTIER.md`](../../../DECISIONS-PRODUIT-CHANTIER.md) § avancement en quantité.
 
 ## Verdict
 

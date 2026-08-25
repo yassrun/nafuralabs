@@ -2,13 +2,15 @@
 
 <!-- Capture globale Raster — task draft : une ligne = description, @tag optionnel, pas d'ID. -->
 sektor picker-article : sorties / pertes / inventaire / inventory-tx-panel / etat-stock encore `loadArticles` dump GET /items — hors SEKTOR-144 (réception/retour/transfert seulement) @sektor
+sektor chantiers vague 2 : couper planning-activites / capacite-et-engagement / baseline-et-os / pointage-impute / matiere-et-magasin depuis DECISIONS-PRODUIT-CHANTIER (gels planning) — amorçage SEKTOR-175 @sektor
+sektor chantiers vague 2 : mode humain — contrats écrits par toi (gels déjà figés) ; 1 agent exec/code par sous-lot ; pas de spec agent ; QA seulement si argent (pas sur planning/Gantt) @sektor
 sektor picker-article : import BL réception résolvait les lignes via dump `articlesAll` (GET /items size 500) — dump retiré pour AC-10 ; matching code à rebrancher sur `/items/search` @sektor
 sektor picker-article : filtres listing stock-balances / inventory-tx-lines encore `lookupKey: items` — pas le détail tarif/solde ; listing articles hors v1 @sektor
 sektor e2e completer-parcours / parcours-qa : specs attendent encore `app-consultation-etude-panel` (retiré SEKTOR-136). Preuve 136 = `verify-consultation-achat-136.mjs`. @sektor
 sektor e2e parcours-qa-*.spec.ts : `npx playwright test` crash « Requiring @playwright/test second time » (chemins C:/ vs c:/). Preuves 115/119–123 = Mode B 20/08. Specs non réécrits. @sektor
 sektor e2e SEKTOR-137 : spec Playwright optionnelle (même crash C:/ vs c:/). Preuve = `node sektor/e2e/scripts/verify-consultation-achat-137.mjs`. SEKTOR-110 e2e compte encore `consultations_etudes` — gate 137 ne les voit plus. @sektor
 sektor e2e SEKTOR-136 : chrome overlay assert encore le formulaire select+cases+deux CTA (cassé par SEKTOR-139). Preuve overlay = `node sektor/e2e/scripts/verify-consultation-achat-139.mjs`. Spec Playwright 139 non écrite (C:/ vs c:/). @sektor
-sektor : portail invité chrome-less (lien email+token, vue client + dépôt devis fournisseur) — livré hors Pact (Sektor pas encore pacté) @sektor
+sektor : portail invité chrome-less (lien email+token, vue client + dépôt devis fournisseur) — vérifier puis rattacher au lot concerné @sektor
 document-extraction : colonnes JPA `extracted_record.workflow_status` / `doc_type_definition.builder_state` encore en base alors que compose/décider ne sont plus exposés — drop lab à trancher @platform
 document-extraction : libellés i18n validate/workflow encore présents alors que l'action décider n'est plus exposée @platform
 impression CH-03 : canvas « Proposer » (IA) — aucune capacité conversation/IA consommable ici ; livré le fallback manuel (textarea). Brancher Proposer quand le BC conversation sera consommable. @platform
@@ -44,3 +46,5 @@ sektor études : le DPGF **refuse** un `ARTICLE` sans parent (`DpgfService.valid
 sektor e2e : la ligne « `npx playwright test` ne résout pas `@playwright/test` pour les specs sous `sektor/e2e/` » est **périmée** — `npx playwright test --list chantiers-arbre-et-conversion` depuis `sektor/sources/web` découvre les 11 tests sans broncher (24/08). @sektor
 sektor chantiers : `SignaturePublicController` (`/api/v1/sign/{token}`) n'a **aucune page front qui le consomme** — ni avant ni après SEKTOR-174 (jeton durci). Il n'existe nulle part dans le repo d'écran où le MOE dessine et dépose sa signature. AC-15/AC-19 du contrat avancement-et-attachement sont vérifiables en API/unitaire, pas de bout en bout au navigateur. @sektor
 sektor chantiers : le référentiel `ZoneChantier` (AC-14, avancement-et-attachement) n'a que son CRUD API (`/api/v1/chantiers/{id}/zones`) — aucun écran pour créer/organiser les zones (bâtiment › niveau › zone). La page d'attachement ne fait que lire la liste dans un `<select>`. @sektor
+sektor planning-activites : rejouer `node sektor/e2e/scripts/verify-planning-activites-20260825.mjs` + smoke UI `/chantiers/planning` après boot lab (8082/4200 down le 25/08 à la livraison SEKTOR-176/177/178) @sektor
+sektor planning-activites : e2e scénario 8 `node sektor/e2e/scripts/verify-planning-chantier-planifie-20260825.mjs` prêt — 8082 et 4200 down le 25/08 à la livraison SEKTOR-179/180, pas de vert inventé. Rejouer après boot lab (+ Playwright si `start:erp:cursor`). @sektor

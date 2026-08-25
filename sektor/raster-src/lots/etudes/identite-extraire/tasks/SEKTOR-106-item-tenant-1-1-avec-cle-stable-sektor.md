@@ -12,7 +12,7 @@ tags: [etudes, catalogue]
 
 # Item tenant 1-1 avec cle_stable Sektor
 
-> Gelé DECISIONS-PRODUIT.md 20/08 — identité canonique = cle_stable ; Item 1-1 ; pas de Pact.
+> Gelé DECISIONS-PRODUIT.md 20/08 — identité canonique = cle_stable ; Item 1-1 ; Raster autonome.
 
 Contrat : [`sektor/raster-src/DECISIONS-PRODUIT.md`](../../../../DECISIONS-PRODUIT.md) § Identité. Pas de SPEC / CH.
 

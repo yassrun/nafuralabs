@@ -1,10 +1,10 @@
 # Contrat — L'avancement en quantité, l'attachement qui lit
 
-> Sektor n'est pas pacté. Ce fichier est le **seul ancrage QA** (`AC-n` gelés).
+> Ce sous-lot est autonome. Ce fichier est le **seul ancrage QA** (`AC-n` gelés).
 > Journal produit : [`DECISIONS-PRODUIT-CHANTIER.md`](../../../DECISIONS-PRODUIT-CHANTIER.md) — § Simplicité, § L'avancement se saisit en quantité, § Le réel s'impute à l'activité (**son amendement palier 1 / palier 2**), § Les cinq derniers points / situation et attachement.
 > Plan du sous-lot : [`00-PLAN.md`](00-PLAN.md).
 > Contrats voisins, à ne pas contredire : [`../arbre-et-conversion/CONTRAT.md`](../arbre-et-conversion/CONTRAT.md) — nature `VENDU` / `INTERNE`, et **AC-5 : un interne n'entre jamais dans une situation** · [`../budget-et-marge/CONTRAT.md`](../budget-et-marge/CONTRAT.md) — son **AC-13** (valeur acquise) consomme l'avancement du nœud **en quantité** que ce contrat pose.
-> Pas de `CADRE.md` / `SPEC.md` / `pact/<bc>/CH-*`. Pas de canvas : les deux écrans existent, les `AC-n` disent ce qu'ils portent, pas leur maquette.
+> Les preuves attendues vivent ici. Pas de canvas : les deux écrans existent déjà.
 
 **Qualification : EVOL.** L'avancement existe (`AvancementPhysique`, saisi sur `lotId` / `posteId` — déjà le palier 1) et l'attachement aussi, signature MOE par lien public comprise (`SignaturePublicController`). Ce qui n'existe pas : **une seule vérité**. Le pourcentage est stocké à trois endroits, le dépassement est écrasé en silence, et l'attachement rouvre une saisie de quantités à côté de celle du terrain.
 

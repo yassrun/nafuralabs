@@ -1,65 +1,16 @@
 # ROADMAP — nafura-platform
 
-> L'ordre des lots. **Écrite à la main**, hors `raster-src/`, **non indexée** par Raster.
-> Ce qui est **au-dessus de la borne** est ouvert à l'orchestrateur ; en dessous, non.
-> Déplacer la borne = planifier. Contrat : [`raster/AGENTS.md`](../raster/AGENTS.md) §7.
+> Le Plan du projet Platform. Les lots au-dessus de la borne sont autorisés.
+> Déplacer la borne est un geste humain.
 
-## 1 — Nettoyage
+## Ouvert
 
-Trois dettes de contrat sur des BC déjà pactés. Chacune tient en un Change, et chacune
-**tranche une question** plutôt que d'ajouter du comportement.
-
-1. **impression** — `CH-03-EVOL-admin-et-rendu`
-   Admin des modèles + visualisation → PDF. Preuves : devis et bordereau (BPD).
-   Engin platform ; le produit fournit les HTML, n'imprime pas.
-
-2. **impression** — `CH-02-EVOL-sans-facture` — **fait** (PLT-94…96)
-   Sortir `PrintDocument`, la TVA et les lignes du jar : le rendu reçoit un type **opaque**.
-
-3. **documents** — `CH-09-EVOL-archive`
-   « archivé » : transition d'un cycle de vie, ou reste à jeter. Le spec tranche, une seule vérité survit.
-
-4. **document-extraction** — `CH-03-EVOL-hors-spec`
-   `builder` et `workflow` : dans la SPEC avec leurs règles, ou hors du BC. Le code suit.
-
-## 2 — Reste du CADRE platform
-
-Cinq BC annoncés par le CADRE, aucun contracté. Même rythme pour tous : **trois sous-lots**.
-
-```
-lot <bc>
-  CH-00-INIT-<bc>                        spec · tech (baseline e2e) · qa
-  CH-01-TECHNICAL-plier                  spec · tech
-  socle CH-0n-EVOL-consommateur-<bc>     spec
-```
-
-L'INIT **coupe** — c'est lui qui dit ce qui entre dans le BC. Le plier ne bouge que du code,
-et il attend l'INIT : on ne déplace pas ce qui n'a pas de contrat.
-
-| # | Lot | Jars | Ce que l'INIT tranche |
-|---|-----|------|------------------------|
-| 4 | **commentaire** | `collaboration/comment` | ce que commenter recouvre — mention, notification, modération dedans ou dehors |
-| 5 | **notification** | `collaboration/notification` | notifier ou transporter : le canal appartient-il au BC ou à ops |
-| 6 | **identite** | `core/identity` · `iam` · `settings` | les trois jars d'un coup. **Pas de 2ᵉ lot iam.** Si `settings` n'est pas « qui est là », il part en `not_owns` |
-| 7 | **approbation** | `workflow` | tout le jar, ou la seule part qui fait décider. **Pas de lot workflow à côté** : un besoin, faire décider |
-| 8 | **conversation** | `ai-conversation` · `ai-agent-api` · `ai-agent-runtime` · `llm-provider` | quels jars entrent. `llm-provider` peut relever du socle ou d'ops |
-
-1. **commentaire** — INIT + plier clos
-2. **notification** — INIT clos · plier restant
-3. **identite** — INIT clos · plier restant
-4. **approbation** — INIT + plier clos
-5. **conversation** — INIT clos · plier restant
-6. **socle** — consommateurs des cinq BC
+Aucun sous-lot actif. Le prochain travail sera découpé depuis le besoin courant,
+puis créé dans `nafura-platform/raster-src/` par le CLI Raster.
 
 <!-- borne -->
 
-## Hors roadmap
+## Pas encore
 
-**Husk et les packages docmanager** — pas de lot. Après, ou jamais. Les inscrire ici en ferait
-une dette qu'on regarde ; les laisser dehors est la décision.
-
----
-
-**État au 2026-08-18.** Nettoyage et les cinq INIT sont clos. Borne sous la section 2 :
-pliers restants + consommateurs socle. Raster « plus de sprint » attend que ces agents
-soient rendus.
+- Stabiliser les APIs Platform consommées par Sektor.
+- Continuer le pliage architectural uniquement lorsqu’une preuve existante protège le comportement.

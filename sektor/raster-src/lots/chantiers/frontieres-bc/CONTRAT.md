@@ -1,9 +1,9 @@
 # Contrat — Frontières BC : sous-traitance et pilotage
 
-> Sektor n'est pas pacté. Ce fichier est le **seul ancrage QA** (`AC-n` gelés).
+> Ce sous-lot est autonome. Ce fichier est le **seul ancrage QA** (`AC-n` gelés).
 > Journal produit : [`DECISIONS-PRODUIT-CHANTIER.md`](../../../DECISIONS-PRODUIT-CHANTIER.md) § **Frontière ST** · § **Les cinq derniers points / Pilotage et KPI**.
 > Loi des dossiers : [`DECISIONS.md`](../../../DECISIONS.md) — « Socle = tableau de bord + pilotage / analytics », « Web suit le backend ».
-> Plan : [`00-PLAN.md`](00-PLAN.md). Pas de `CADRE.md` / `SPEC.md` / `pact/<bc>/CH-*`. Pas de canvas — aucun écran nouveau.
+> Plan : [`00-PLAN.md`](00-PLAN.md). Pas de canvas — aucun écran nouveau.
 
 **Qualification : TECH.** Deux frontières mal placées. Le comportement visible ne change pas ; ce qui change, c'est **qui possède quoi**.
 

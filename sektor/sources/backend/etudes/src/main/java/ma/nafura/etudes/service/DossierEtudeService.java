@@ -361,16 +361,13 @@ public class DossierEtudeService {
                 ? dossier.getValidationEtape()
                 : DossierEtude.VALIDATION_N1;
 
-        if (StringUtils.hasText(dossier.getApprovalRequestId())
-                && approvalPort.isAvailable()
-                && !UserContext.isOwnerOrSuperAdmin()) {
-            approvalPort.approuverEtape(dossier.getApprovalRequestId(), approbateur, approbateur, null);
-        }
-
         intervenantService.enregistrerApprobateur(dossier.getId(), approbateur, approbateur);
 
         int niveaux = dossier.getNiveauxApprobation() != null ? dossier.getNiveauxApprobation() : 2;
-        if (DossierEtude.VALIDATION_N1.equals(etape) && niveaux > 1) {
+        boolean derniereEtape = !(DossierEtude.VALIDATION_N1.equals(etape) && niveaux > 1);
+        synchroniserDecisionMoteur(dossier, approbateur, derniereEtape);
+
+        if (!derniereEtape) {
             dossier.setValidationEtape(DossierEtude.VALIDATION_N2);
             dossier.setMotifRefus(null);
             return repository.save(dossier);
@@ -392,9 +389,7 @@ public class DossierEtudeService {
         if (dossier.getStatus() != StatutDossierEtude.EN_VALIDATION) {
             throw new IllegalStateException("etudes.dossier.refus_hors_etat");
         }
-        if (StringUtils.hasText(dossier.getApprovalRequestId())
-                && approvalPort.isAvailable()
-                && !UserContext.isOwnerOrSuperAdmin()) {
+        if (StringUtils.hasText(dossier.getApprovalRequestId()) && approvalPort.isAvailable()) {
             approvalPort.refuser(dossier.getApprovalRequestId(), null, null, motif.trim());
         }
         dossier.setMotifRefus(motif.trim());
@@ -523,6 +518,7 @@ public class DossierEtudeService {
     public DossierEtude annuler(UUID id) {
         DossierEtude dossier = requireDossier(id);
         dossier.setValidationEtape(null);
+        annulerDemandeResiduelle(dossier, "Étude annulée");
         return transitionner(dossier, StatutDossierEtude.ANNULE);
     }
 
@@ -577,6 +573,7 @@ public class DossierEtudeService {
                 .lockByIdAndTenantId(id, tenantId())
                 .orElseThrow(() -> new IllegalArgumentException("etudes.dossier.introuvable"));
         if (StringUtils.hasText(dossier.getChantierGenereId())) {
+            cloreDemandeResiduelle(dossier, "Étude déjà convertie");
             return DossierConversionResultDto.builder()
                     .dossierId(dossier.getId())
                     .chantierId(dossier.getChantierGenereId())
@@ -638,6 +635,7 @@ public class DossierEtudeService {
                     });
         }
         DossierEtude converted = transitionner(dossier, StatutDossierEtude.CONVERTIE);
+        cloreDemandeResiduelle(converted, "Étude convertie en chantier");
         return DossierConversionResultDto.builder()
                 .dossierId(converted.getId())
                 .chantierId(result.chantierId())
@@ -1086,6 +1084,68 @@ public class DossierEtudeService {
                     StringUtils.hasText(dossier.getChantierGenereId()) ? "VOIR_CHANTIER" : "CONSULTER";
             default -> "CONSULTER";
         };
+    }
+
+    /**
+     * Owner / SuperAdmin peuvent trancher le dossier sans être N+1, mais la demande
+     * moteur doit suivre : sinon l'inbox Approbations reste ouverte après VALIDEE / CONVERTIE.
+     */
+    private void synchroniserDecisionMoteur(DossierEtude dossier, String approbateur, boolean derniereEtape) {
+        if (!StringUtils.hasText(dossier.getApprovalRequestId()) || !approvalPort.isAvailable()) {
+            return;
+        }
+        if (derniereEtape) {
+            approvalPort.cloreApprouvee(
+                    dossier.getApprovalRequestId(), approbateur, approbateur, null);
+        } else {
+            approvalPort.approuverEtape(
+                    dossier.getApprovalRequestId(), approbateur, approbateur, null);
+        }
+    }
+
+    /** Filet : une étude déjà validée / convertie ne laisse aucune demande ouverte. */
+    private void cloreDemandeResiduelle(DossierEtude dossier, String motif) {
+        if (!approvalPort.isAvailable()) {
+            return;
+        }
+        String requestId = dossier.getApprovalRequestId();
+        if (!StringUtils.hasText(requestId)) {
+            requestId = approvalPort
+                    .trouverOuverte(dossier.getId())
+                    .map(EtudeApprovalPort.ApprovalSnapshot::requestId)
+                    .orElse(null);
+        }
+        if (!StringUtils.hasText(requestId)) {
+            return;
+        }
+        approvalPort.cloreApprouvee(requestId, acteurCourant(), acteurCourant(), motif);
+    }
+
+    private void annulerDemandeResiduelle(DossierEtude dossier, String motif) {
+        if (!approvalPort.isAvailable()) {
+            return;
+        }
+        String requestId = dossier.getApprovalRequestId();
+        if (!StringUtils.hasText(requestId)) {
+            requestId = approvalPort
+                    .trouverOuverte(dossier.getId())
+                    .map(EtudeApprovalPort.ApprovalSnapshot::requestId)
+                    .orElse(null);
+        }
+        if (!StringUtils.hasText(requestId)) {
+            return;
+        }
+        approvalPort.annuler(requestId, acteurCourant(), acteurCourant(), motif);
+        dossier.setApprovalRequestId(null);
+    }
+
+    private String acteurCourant() {
+        String email = UserContext.getUserEmail();
+        if (StringUtils.hasText(email)) {
+            return email;
+        }
+        UUID userId = UserContext.getUserIdOrNull();
+        return userId != null ? userId.toString() : "system";
     }
 
     private void assertPeutApprouver(DossierEtude dossier, String approbateur) {

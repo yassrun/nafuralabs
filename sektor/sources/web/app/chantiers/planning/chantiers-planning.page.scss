@@ -42,6 +42,8 @@ nf-page-shell {
 }
 
 .planning-gantt {
+  width: 100%;
+  height: 68vh;
   min-height: 68vh;
 }
 
@@ -97,7 +99,13 @@ nf-page-shell {
     opacity: 0.82;
   }
 
-  .planning-task--phase .gantt_task_line {
+  .planning-summary__hint {
+  align-self: center;
+  font-size: 0.82rem;
+  color: var(--nf-color-text-secondary);
+}
+
+.planning-task--activite .gantt_task_line {
     border-radius: 999px;
     border-width: 0;
     box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);

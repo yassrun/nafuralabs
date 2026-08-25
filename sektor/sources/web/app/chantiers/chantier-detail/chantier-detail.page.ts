@@ -91,6 +91,9 @@ const STATUS_VARIANT: Record<ChantierStatus, BadgeVariant> = {
               </article>
             </div>
             <nf-badge [variant]="statusVariant(c.status)">{{ statusLabel(c.status) }}</nf-badge>
+            <nf-button variant="secondary" size="sm" icon="event" (clicked)="openPlanning()">
+              {{ 'chantiers.planning.title' | translate }}
+            </nf-button>
           </div>
         </section>
 
@@ -517,6 +520,12 @@ export class ChantierDetailPage {
     } catch {
       this.toast.warning(this.translate.instant('chantiers.documents.create.errors.syncFailed'));
     }
+  }
+
+  openPlanning(): void {
+    const c = this.chantier();
+    if (!c?.id) return;
+    void this.router.navigate(['/chantiers/planning'], { queryParams: { chantier: c.id } });
   }
 
   goBack(): void {

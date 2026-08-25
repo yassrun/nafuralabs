@@ -1,6 +1,6 @@
-# Décisions produit — Sektor Chantier (avant Pact)
+# Décisions produit — Sektor Chantier
 
-> Journal vivant **avant** CADRE / SPEC / CH. **Pas de Pact sur Sektor pour le moment.**
+> Journal vivant des décisions produit Sektor.
 > Pas du code. Produit études : [`DECISIONS-PRODUIT.md`](DECISIONS-PRODUIT.md) · arbre des dossiers : [`DECISIONS.md`](DECISIONS.md).
 >
 > Comment continuer : ajouter une entrée datée sous **Gelé** ou **Ouvert**. Une fois gelé, on ne rejoue pas le débat dans le chat — on amende ce fichier.

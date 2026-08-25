@@ -1,7 +1,7 @@
 # Frontières BC
 
 > Le contrat ST retourne chez Achats, typé. Le pilotage portefeuille remonte au socle.
-> **Pas de Pact.** Contrat `CONTRAT.md` (SEKTOR-163) · journal [`DECISIONS-PRODUIT-CHANTIER.md`](../../../DECISIONS-PRODUIT-CHANTIER.md) § frontière ST, § pilotage.
+> **Raster autonome.** Contrat `CONTRAT.md` (SEKTOR-163) · journal [`DECISIONS-PRODUIT-CHANTIER.md`](../../../DECISIONS-PRODUIT-CHANTIER.md) § frontière ST, § pilotage.
 
 ## Verdict
 

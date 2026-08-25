@@ -1,11 +1,11 @@
 # Blueprint — Archi
 
 **Statut :** figé (2026-08-14)  
-**Archi** = comment on **coupe le code** d’une app Pact (packages, dépendances, APIs).  
-Pact dit le contrat : [`PACT_BLUEPRINT.md`](PACT_BLUEPRINT.md). Archi dit la forme du code.  
+**Archi** = comment on **coupe le code** d’une app (packages, dépendances, APIs).
+Archi décrit la forme du code et les frontières publiées.
 Ops : [`OPS_BLUEPRINT.md`](OPS_BLUEPRINT.md). Raster : [`RASTER_BLUEPRINT.md`](RASTER_BLUEPRINT.md).
 
-Pas dans le CADRE, pas dans une SPEC, pas dans un `00-PLAN.md`. Arbre **produit** (quels BC) : CADRE + `DECISIONS.md` du projet jusqu’au CADRE.
+Pas dans un `00-PLAN.md`. Les décisions durables de découpage vivent dans `DECISIONS.md` du projet.
 
 ---
 
@@ -23,9 +23,9 @@ Pas dans le CADRE, pas dans une SPEC, pas dans un `00-PLAN.md`. Arbre **produit*
       external X                    Keycloak / MinIO / …
 ```
 
-- **Gateway** = entrée client. Il **fan-out** vers les `BC API` et vers `Socle API` (session, who-am-I, erreurs). Ce n’est pas un contexte Pact.
+- **Gateway** = entrée client. Il **fan-out** vers les `BC API` et vers `Socle API` (session, who-am-I, erreurs).
 - **Socle** n’est pas la porte métier. Interdit : `Gateway → Socle API` comme unique entrée, Socle qui route vers les BC.
-- **BC API** = surface **publiée** du BC. Pas une chaîne `BC API → BC API → BC API`. Un BC délivre de la valeur sans un autre BC ; seul le socle est une dépendance dure ([Pact — Règle BC](PACT_BLUEPRINT.md#règle-bc)).
+- **BC API** = surface **publiée** du BC. Pas une chaîne `BC API → BC API → BC API`. Un BC délivre de la valeur sans un autre BC ; seul le socle est une dépendance dure.
 - Trait **pointillé** entre deux `BC API` seulement s’il existe un fait publié (id, snapshot, commande). Jamais comme topologie principale.
 
 Surfaces back / front / mobile = **la même app**, le **même** BC. Un module Gradle / package npm n’est pas un BC.
@@ -73,13 +73,13 @@ Web : mêmes noms de dossiers que le backend (`sources/web/app/<bc>/` = `sources
 
 ## Socle
 
-Contexte **transverse**. Même *forme* Pact qu’un BC (SPEC + canvas), job différent : capacités, politiques, rôles — pas d’objets métier / machine d’états.
+Contexte **transverse**. Même forme de code qu’un BC, job différent : capacités, politiques et rôles — pas d’objets métier ni de machine d’états.
 
 Un BC **consomme** le Socle (auth, tenant, erreurs, audit, nav, ICE/RC, approbations).  
-Capacité déjà là → déclaration dans la SPEC (`Liens: consomme`).  
-Capacité neuve → `EVOL` socle **d’abord**, Change du BC ensuite.
+Une capacité consommée est déclarée dans les décisions durables du projet et couverte par une preuve d’intégration.
+Une capacité neuve est livrée dans le socle avant son consommateur.
 
-Le Socle **contraint** (`POL-*`, matrice allow/deny). Le BC référence les IDs, il ne les recopie pas.
+Le Socle contraint via des politiques et une matrice allow/deny partagées.
 
 **Anti-obésité :** toute capacité du Socle nomme au moins un BC consommateur. Le Socle ne route pas le métier. Le Socle ne dépend pas d’un BC (sens actuel `socle → catalogue|chantiers|…` = dette).
 
@@ -119,7 +119,7 @@ Pas d’HTTP BC → BC. Un process (modulaire monolith) : le consommateur appell
 
 Le consommateur a un `port` + un adapter. L’adapter cible **uniquement** `<voisin>/api`. Jamais `domain` / `repository` / `services` du voisin.
 
-Gradle : `implementation project(':sektor:catalogue')` n’est pas un lien Pact. Cible = dépendre du contrat `api` seulement (jar `*-api` si on veut le rendre checkable). Aujourd’hui les modules injectent encore `ItemRepository`, `ChantierService`, etc. — **dette**, pas le modèle.
+Gradle : `implementation project(':sektor:catalogue')` ne suffit pas à exprimer une frontière. Cible = dépendre de l’API publiée seulement (jar `*-api` si on veut le rendre checkable). Aujourd’hui les modules injectent encore `ItemRepository`, `ChantierService`, etc. — **dette**, pas le modèle.
 
 Web : `app/etudes/` parle à `/api/etudes/…`. Un libellé article = snapshot déjà dans l’étude, ou appel à **l’API Catalogue**.
 
@@ -142,4 +142,4 @@ Web : `app/etudes/` parle à `/api/etudes/…`. Un libellé article = snapshot d
 
 Niveau **agent** aujourd’hui. Check Gradle / package (un BC ne compile que contre `socle` + `*:api` des pairs) : **à construire**.
 
-Arbre des dossiers Sektor (catalogue, études, …) : [`sektor/raster-src/DECISIONS.md`](sektor/raster-src/DECISIONS.md) jusqu’au CADRE.
+Arbre des dossiers Sektor (catalogue, études, …) : [`sektor/raster-src/DECISIONS.md`](sektor/raster-src/DECISIONS.md).

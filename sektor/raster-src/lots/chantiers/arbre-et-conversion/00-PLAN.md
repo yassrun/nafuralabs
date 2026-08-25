@@ -1,7 +1,7 @@
 # Arbre et conversion
 
 > Le chantier a son arbre : copié du devis validé, puis libre. Deux natures de nœud — vendu, interne.
-> **Pas de Pact.** Contrat `CONTRAT.md` (SEKTOR-146) · journal [`DECISIONS-PRODUIT-CHANTIER.md`](../../../DECISIONS-PRODUIT-CHANTIER.md) § arbre, § déclencheur.
+> **Raster autonome.** Contrat `CONTRAT.md` (SEKTOR-146) · journal [`DECISIONS-PRODUIT-CHANTIER.md`](../../../DECISIONS-PRODUIT-CHANTIER.md) § arbre, § déclencheur.
 
 ## Verdict
 

@@ -1,7 +1,7 @@
 # Situation et retenues
 
 > Le décompte cumulatif marocain, monté depuis les attachements signés.
-> **Pas de Pact.** Contrat `CONTRAT.md` (SEKTOR-155) · journal [`DECISIONS-PRODUIT-CHANTIER.md`](../../../DECISIONS-PRODUIT-CHANTIER.md) § les cinq derniers points.
+> **Raster autonome.** Contrat `CONTRAT.md` (SEKTOR-155) · journal [`DECISIONS-PRODUIT-CHANTIER.md`](../../../DECISIONS-PRODUIT-CHANTIER.md) § les cinq derniers points.
 
 ## Verdict
 

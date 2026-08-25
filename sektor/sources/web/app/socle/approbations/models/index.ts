@@ -15,7 +15,7 @@ export type ApprovalEntityType =
   | 'CONTRAT_ST'
   | 'ETUDE_PRIX';
 
-export type ApprovalStatus = 'EN_ATTENTE' | 'APPROUVE' | 'REJETE' | 'EXPIRE';
+export type ApprovalStatus = 'EN_ATTENTE' | 'APPROUVE' | 'REJETE' | 'EXPIRE' | 'ANNULE';
 export type ApprovalDecision = 'APPROUVE' | 'REJETE' | 'DELEGUE' | 'ESCALADE';
 
 export interface ApprovalEtape {
@@ -37,7 +37,8 @@ export type ApprovalJournalAction =
   | 'DEMANDE_COMPLEMENT'
   | 'DELEGUE'
   | 'COMMENTE'
-  | 'ESCALADE';
+  | 'ESCALADE'
+  | 'ANNULE';
 
 /** Journal immuable + hash chaîné SHA-256 (M-APR-03 / M-APR-08). */
 export interface ApprovalJournalEntry {

@@ -91,9 +91,9 @@ function usage() {
 
   exécution — la commande d'agent vient de RASTER_AGENT_CMD, jamais du dépôt
     worktree list                       les worktrees d'agent (hors dépôt)
-    worktree add <projet> <lot> [CH]    crée branche + worktree
-    worktree rm  <projet> <lot> [CH]    retire le worktree, garde la branche
-    run <projet> <lot> [CH]             lance un orchestrateur sur le lot
+    worktree add <projet> <lot> [sous-lot]    crée branche + worktree
+    worktree rm  <projet> <lot> [sous-lot]    retire le worktree, garde la branche
+    run <projet> <lot> [sous-lot]             lance un orchestrateur
     running                             les lots tenus
     stop <projet> <lot>                 arrête et libère le lot
 

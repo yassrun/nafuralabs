@@ -118,7 +118,7 @@ Package Java `ma.nafura.erp` (et `ma.nafura.sektor` kernel) :
 
 ## Interdit (tout le lot)
 
-- Pact (CADRE, SPEC, CH)
+- Plans, décisions et preuves Raster
 - Inventer / renommer un BC
 - Déplacer anatomy / platform
 - Changer un comportement métier

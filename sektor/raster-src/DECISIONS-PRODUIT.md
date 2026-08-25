@@ -1,7 +1,7 @@
-# Décisions produit — Sektor Études (avant Pact)
+# Décisions produit — Sektor Études
 
 > Journal vivant **avant** CADRE / SPEC / CH.
-> Pas du code. Découpage Raster (sans Pact) : lot `etudes/` — SEKTOR-106…112.
+> Pas du code. Découpage Raster : lot `etudes/` — SEKTOR-106…112.
 >
 > Arbre des dossiers code : [`DECISIONS.md`](DECISIONS.md).
 >
@@ -358,6 +358,6 @@ Cocher / amender ici, ne pas re-débattre à l’aveugle.
 
 ## Hors sujet de ce fichier (déjà ailleurs)
 
-- Pact Sektor : pas encore. Ce journal nourrira le CADRE / SPEC études + catalogue.
-- Portail invité : inbox, livré hors Pact.
+- Ce journal nourrit les plans et décisions des lots Études et Catalogue.
+- Portail invité : inbox, livré hors backlog actif.
 - Impression PDF / Gotenberg : lot platform, pas ici.

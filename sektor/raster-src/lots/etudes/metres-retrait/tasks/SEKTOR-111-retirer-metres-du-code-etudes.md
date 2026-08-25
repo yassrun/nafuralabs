@@ -51,4 +51,4 @@ Contrat : [`DECISIONS-PRODUIT.md`](../../../../DECISIONS-PRODUIT.md) § Chrome �
 - `ng build` bloqué par `catalogue/item-article.mapper.ts` `cleStable` (Extraire/Item, hors périmètre) — inbox.
 - Clés i18n `etudesDpu.generateDpgf` / `createDevis` orphelines (DPGF hors métré, non branchées).
 - Lab : appliquer 023 (ou `dropAll`) avant boot back.
-- `DECISIONS-PRODUIT.md` dit encore « Pas encore implémenté — inbox » (non patché : pas Pact, journal produit gelé).
+- `DECISIONS-PRODUIT.md` dit encore « Pas encore implémenté — inbox » (journal produit gelé).

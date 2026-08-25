@@ -1,7 +1,7 @@
 # Picker article partagé
 
 > Un picker catalogue, trois pieds. Pas de dump. Filtres serveur. Extraire reste le chemin IA.
-> **Pas de Pact.** Contrat [`CONTRAT.md`](CONTRAT.md) · journal [`DECISIONS-PRODUIT.md`](../../../DECISIONS-PRODUIT.md) § 23/08.
+> **Raster autonome.** Contrat [`CONTRAT.md`](CONTRAT.md) · journal [`DECISIONS-PRODUIT.md`](../../../DECISIONS-PRODUIT.md) § 23/08.
 
 ## Verdict
 

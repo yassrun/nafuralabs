@@ -2,7 +2,7 @@
  * Raster file walker — tickets only.
  * A Raster project exists iff `<projet>/raster-src/lots` exists.
  * Scan : <projet>/raster-src/lots/** /tasks/*.md
- * Never scans pact/, docs/specs, or <projet>/raster/lots.
+ * Never scans docs or legacy ticket trees.
  */
 import fs from "node:fs";
 import path from "node:path";

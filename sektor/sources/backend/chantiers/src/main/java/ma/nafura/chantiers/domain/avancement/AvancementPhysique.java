@@ -44,6 +44,10 @@ public class AvancementPhysique {
     @Column(name = "poste_id", length = 100)
     private String posteId;
 
+    /** Remontée depuis une activité (AC-10) — null si déclaration directe palier 1. */
+    @Column(name = "activite_id", length = 100)
+    private String activiteId;
+
     @Column(name = "date_saisie", nullable = false)
     private LocalDate dateSaisie;
 

@@ -31,7 +31,7 @@ Pas d’HTTP BC→BC. Packages Java `item` peuvent rester *dans* le jar Catalogu
 
 ## Couverture
 
-Pas de CH (Sektor non pacté). Preuve = compile + bootJar + garde. Autres paires (ChainageAval, clients) = inbox.
+Pas de CH (Sektor). Preuve = compile + bootJar + garde. Autres paires (ChainageAval, clients) = inbox.
 
 ## Décisions ouvertes
 
