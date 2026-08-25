@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 
 import {
@@ -44,7 +44,7 @@ interface QuickFilterChip {
 export class SituationListingPage extends ConfigDrivenListingPage<Situation> implements AfterViewInit {
   readonly facade = inject(SituationFacade);
   private readonly translate = inject(TranslateService);
-  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly lookupSearchers = inject(LOOKUP_SEARCHERS, { optional: true });
   readonly config = buildSituationsListingConfig(this.translate);
   readonly headerTitle = this.translate.instant('chantiers.situation.title');
@@ -75,6 +75,12 @@ export class SituationListingPage extends ConfigDrivenListingPage<Situation> imp
     this.selectedChantier.set(chantierId);
     const filters = chantierId ? { chantierId } : { chantierId: undefined };
     this.listingComponent?.onFilterChange(filters);
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { chantierId: chantierId || null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
   }
 
   ngAfterViewInit(): void {

@@ -299,7 +299,7 @@ export class JournalChantierPage implements OnInit {
 
   openCreateForm(): void {
     this.createDraft = {
-      chantierId: this.filteredChantierId() || this.chantiers()[0]?.id ?? '',
+      chantierId: this.filteredChantierId() || (this.chantiers()[0]?.id ?? ''),
       type: 'AUTRE',
       date: todayIso(),
       contenu: '',
