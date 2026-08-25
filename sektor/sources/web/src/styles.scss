@@ -36,6 +36,7 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
 @import '@fortawesome/fontawesome-free/css/all.css';
+@import 'dhtmlx-gantt/codebase/dhtmlxgantt.css';
 
 /* ═══════════════════════════════════════════════════════════════════════════
    Engine Theme Overrides (Tomic Single Source of Truth)
@@ -366,4 +367,3 @@ html .mat-mdc-slide-toggle.mat-warn {
     flex-direction: row-reverse;
   }
 }
-

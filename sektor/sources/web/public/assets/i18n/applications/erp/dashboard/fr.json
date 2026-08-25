@@ -357,7 +357,8 @@
         "enAttente": "En attente d'approbation",
         "approuve": "Approuvé",
         "rejete": "Rejeté",
-        "expire": "Expiré"
+        "expire": "Expiré",
+        "annule": "Annulé"
       },
       "audit": {
         "submitDetail": "Soumis pour approbation",

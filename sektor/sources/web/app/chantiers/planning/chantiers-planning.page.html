@@ -18,7 +18,7 @@
     </app-gantt-toolbar>
 
     <div class="planning-summary">
-      <nf-badge variant="info">{{ summary().chantierCount }} chantiers</nf-badge>
+      <nf-badge variant="info">{{ summary().chantierCount }} {{ summary().chantierCount > 1 ? 'chantiers' : 'chantier' }}</nf-badge>
       <nf-badge variant="default">{{ summary().activiteCount }} activités</nf-badge>
       <nf-badge [variant]="summary().lateCount ? 'warning' : 'success'">{{ summary().lateCount }} retards</nf-badge>
       <nf-badge variant="default">Avancement moyen {{ summary().completion }}%</nf-badge>

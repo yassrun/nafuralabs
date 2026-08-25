@@ -136,6 +136,7 @@ export class SubmitApprovalButtonComponent {
       case 'APPROUVE': return 'dashboard.approbations.pill.approuve';
       case 'REJETE': return 'dashboard.approbations.pill.rejete';
       case 'EXPIRE': return 'dashboard.approbations.pill.expire';
+      case 'ANNULE': return 'dashboard.approbations.pill.annule';
     }
   }
 

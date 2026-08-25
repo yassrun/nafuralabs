@@ -32,6 +32,8 @@ blocked_by: [SEKTOR-178]
 25/08 12:01  status → review
 25/08 13:33  status → done-agent · gate none → done-me
 25/08 14:30  status → review
+25/08 20:30  status → doing
+25/08 20:46  status → review
 ```
 
 ## Rapport de livraison
@@ -40,3 +42,9 @@ ce qui a changé — `chantiers/planning/` : CTA **Nouvelle activité**, empty s
 critères prouvés — AC-13 CTA/empty · AC-14 drawer par libellé · AC-15 pas de barres lot · AC-19 rename/i18n (preuve e2e scénario 8 sur SEKTOR-180)
 décidé seul — resté sur l’arbre de session (176–178 déjà là, pas de worktree vide) ; CTA n’est actif qu’en filtre mono-chantier ; sections rattachement déjà dans le même drawer (canvas unique)
 écarts / dette — empty « via l’API » prouvé rouge-avant par constat 178 ; run e2e+UI sur 180
+
+## Rapport de correction UX — 25/08
+- Le listbox multiple est remplacé par un combobox chantier compact ; la sélection est synchronisée dans `?chantier=` et survit au rechargement.
+- Filtres et actions ont une hiérarchie responsive en deux lignes sur écran moyen ; statistiques et légende sont compactées.
+- Cliquer une activité ouvre le drawer complet avec libellé, dates, parent, zone, rattachement et avancement.
+- Preuves : parcours navigateur CH-2026-001 → CH-2026-003, URL mise à jour, reload conservé, drawer Coffrage R+1 ouvert.

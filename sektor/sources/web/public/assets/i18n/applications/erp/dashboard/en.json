@@ -357,7 +357,8 @@
         "enAttente": "Pending approval",
         "approuve": "Approved",
         "rejete": "Rejected",
-        "expire": "Expired"
+        "expire": "Expired",
+        "annule": "Cancelled"
       },
       "audit": {
         "submitDetail": "Submitted for approval",

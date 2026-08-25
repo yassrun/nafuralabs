@@ -1,6 +1,3 @@
-import 'dhtmlx-gantt/codebase/dhtmlxgantt.css';
-
-
 import {
   Component,
   DestroyRef,
@@ -71,7 +68,6 @@ export class ChantiersPlanningPage {
   private readonly ganttInstance: GanttStatic = gantt;
   private ganttInitialized = false;
   private ganttEventIds: string[] = [];
-  private lastRangeKey = '';
 
   constructor() {
     const chantierFilter = this.route.snapshot.queryParamMap.get('chantier');
@@ -84,8 +80,6 @@ export class ChantiersPlanningPage {
       const dataset = this.dataset();
       const granularity = this.facade.granularity();
       const range = this.facade.effectiveRange();
-      const rangeKey = `${range.start.toISOString()}-${range.end.toISOString()}-${granularity}-${dataset.tasks.length}`;
-
       if (!host) {
         return;
       }
@@ -100,11 +94,6 @@ export class ChantiersPlanningPage {
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           this.renderGantt(host, dataset, granularity, range.start, range.end);
-          if (this.lastRangeKey !== rangeKey) {
-            const focus = dataset.tasks[0]?.start_date ?? range.start;
-            this.ganttInstance.showDate(focus);
-            this.lastRangeKey = rangeKey;
-          }
         });
       });
     });
@@ -120,6 +109,12 @@ export class ChantiersPlanningPage {
   onSelectChantiers(ids: string[]): void {
     this.facade.setSelectedChantiers(ids);
     this.facade.clearCustomRange();
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { chantier: ids[0] ?? null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
   }
 
   onGranularityChange(value: PlanningGranularity): void {
@@ -168,7 +163,7 @@ export class ChantiersPlanningPage {
   @HostListener('window:resize')
   onResize(): void {
     if (this.ganttInitialized) {
-      this.ganttInstance.render();
+      this.ganttInstance.setSizes();
     }
   }
 
@@ -206,8 +201,9 @@ export class ChantiersPlanningPage {
     this.configureGantt(granularity, rangeStart, rangeEnd);
 
     host.style.width = '100%';
-    host.style.height = host.style.height || '68vh';
-    host.style.minHeight = '68vh';
+    const ganttHeight = Math.min(680, Math.max(360, 116 + dataset.tasks.length * 48));
+    host.style.height = `${ganttHeight}px`;
+    host.style.minHeight = '360px';
 
     if (!this.ganttInitialized) {
       this.ganttInstance.init(host);
@@ -219,6 +215,11 @@ export class ChantiersPlanningPage {
     this.ganttInstance.parse({ data: dataset.tasks, links: dataset.links });
     this.ganttInstance.setSizes();
     this.ganttInstance.render();
+    const firstActivityDate = dataset.tasks.reduce(
+      (earliest, task) => task.start_date < earliest ? task.start_date : earliest,
+      dataset.tasks[0]?.start_date ?? rangeStart,
+    );
+    this.ganttInstance.showDate(firstActivityDate);
   }
 
   private configureGantt(granularity: PlanningGranularity, rangeStart: Date, rangeEnd: Date): void {
@@ -231,7 +232,7 @@ export class ChantiersPlanningPage {
     this.ganttInstance.config['drag_progress'] = false;
     this.ganttInstance.config['drag_resize'] = true;
     this.ganttInstance.config['drag_move'] = true;
-    this.ganttInstance.config['grid_width'] = 360;
+    this.ganttInstance.config['grid_width'] = 488;
     this.ganttInstance.config['row_height'] = 48;
     this.ganttInstance.config['bar_height'] = 20;
     this.ganttInstance.config['show_progress'] = true;
@@ -241,14 +242,28 @@ export class ChantiersPlanningPage {
         name: 'text',
         label: 'Activité',
         tree: true,
-        width: 280,
+        width: 220,
         resize: true,
         template: (task: PlanningTask) => task.text,
       },
       {
+        name: 'start_date',
+        label: 'Début',
+        width: 88,
+        align: 'center',
+        template: (task: PlanningTask) => this.formatGridDate(task.start_date),
+      },
+      {
+        name: 'end_date',
+        label: 'Fin',
+        width: 88,
+        align: 'center',
+        template: (task: PlanningTask) => this.formatGridDate(new Date(task.end_date.getTime() - 86400000)),
+      },
+      {
         name: 'progress',
         label: 'Avanc.',
-        width: 76,
+        width: 88,
         align: 'center',
         template: (task: PlanningTask) => `${Math.round((task.progress ?? 0) * 100)}%`,
       },
@@ -288,35 +303,31 @@ export class ChantiersPlanningPage {
 
     switch (granularity) {
       case 'DAY':
-        config['scale_unit'] = 'day';
-        config['step'] = 1;
-        config['date_scale'] = '%d %M';
-        config['subscales'] = [];
+        config['scales'] = [{ unit: 'day', step: 1, format: '%d %M' }];
         config['min_column_width'] = 60;
         break;
       case 'MONTH':
-        config['scale_unit'] = 'month';
-        config['step'] = 1;
-        config['date_scale'] = '%F %Y';
-        config['subscales'] = [{ unit: 'week', step: 1, date: 'S%W' }];
+        config['scales'] = [
+          { unit: 'month', step: 1, format: '%F %Y' },
+          { unit: 'week', step: 1, format: 'S%W' },
+        ];
         config['min_column_width'] = 120;
         break;
       case 'QUARTER':
-        config['scale_unit'] = 'month';
-        config['step'] = 3;
-        config['date_scale'] = '%m';
-        config['subscales'] = [{ unit: 'month', step: 1, date: '%M' }];
+        config['scales'] = [
+          {
+            unit: 'quarter',
+            step: 1,
+            format: (date: Date) => `T${Math.floor(date.getMonth() / 3) + 1} ${date.getFullYear()}`,
+          },
+          { unit: 'month', step: 1, format: '%M' },
+        ];
         config['min_column_width'] = 140;
-        templates['scale_cell_class'] = (date: Date) => `planning-scale-quarter planning-scale-quarter--q${Math.floor(date.getMonth() / 3) + 1}`;
-        templates['date_scale'] = (date: Date) => `T${Math.floor(date.getMonth() / 3) + 1} ${date.getFullYear()}`;
         break;
       case 'WEEK':
       default:
-        config['scale_unit'] = 'week';
-        config['step'] = 1;
-        config['date_scale'] = 'Semaine %W';
-        config['subscales'] = [{ unit: 'day', step: 1, date: '%d %M' }];
-        config['min_column_width'] = 80;
+        config['scales'] = [{ unit: 'week', step: 1, format: 'Sem. %W' }];
+        config['min_column_width'] = 104;
         break;
     }
   }
@@ -388,6 +399,13 @@ export class ChantiersPlanningPage {
       day: '2-digit',
       month: 'short',
       year: 'numeric',
+    }).format(value);
+  }
+
+  private formatGridDate(value: Date): string {
+    return new Intl.DateTimeFormat(this.locale, {
+      day: '2-digit',
+      month: 'short',
     }).format(value);
   }
 }
