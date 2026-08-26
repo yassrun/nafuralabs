@@ -28,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Local Mode B only: provision tenant {@code qa-local} + owner {@code qa@…}
- * and run the same onboarding preset as a real owner (including {@code seedReferenceData}).
+ * plus narrow role users, then the same onboarding preset as a real owner.
  */
 @Slf4j
 @Component
@@ -51,7 +51,7 @@ public class QaLocalProvisioner implements ApplicationRunner {
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
-        AppUser owner = ensureOwner();
+        AppUser owner = ensureUser(QaLocalConstants.OWNER_EMAIL, QaLocalConstants.OWNER_NAME);
         Tenant tenant = ensureTenant(owner);
         ensureMembership(tenant.getId(), owner.getId());
         ensureGlobalRole(owner.getId(), "SUPER_ADMIN");
@@ -59,6 +59,12 @@ public class QaLocalProvisioner implements ApplicationRunner {
         ensureTenantRole(tenant.getId(), owner.getId(), "SUPER_ADMIN");
         ensureTenantRole(tenant.getId(), owner.getId(), "BTP_INGENIEUR");
         upsertSetting(tenant.getId(), "etudes.auteurPeutValider", "true");
+
+        for (QaLocalConstants.RoleUser roleUser : QaLocalConstants.ROLE_USERS) {
+            AppUser user = ensureUser(roleUser.email(), roleUser.name());
+            ensureMembership(tenant.getId(), user.getId());
+            ensureTenantRole(tenant.getId(), user.getId(), roleUser.tenantRoleCode());
+        }
 
         ApplyPresetRequest preset = new ApplyPresetRequest(
             new SocietePresetDto(QaLocalConstants.TENANT_NAME, QA_ICE, "SARL"),
@@ -70,28 +76,32 @@ public class QaLocalProvisioner implements ApplicationRunner {
         );
         var applied = presetOrchestrator.applyPreset(tenant.getId(), preset);
         log.info(
-            "QA local ready tenant={} key={} owner={} steps={}",
+            "QA local ready tenant={} key={} owner={} roles={} steps={}",
             tenant.getId(),
             tenant.getKey(),
             owner.getEmail(),
+            QaLocalConstants.ROLE_USERS.size(),
             applied.completedSteps()
         );
     }
 
-    private AppUser ensureOwner() {
-        return appUserRepository.findByEmailIgnoreCase(QaLocalConstants.OWNER_EMAIL)
+    private AppUser ensureUser(String email, String name) {
+        return appUserRepository.findByEmailIgnoreCase(email)
             .map(existing -> {
-                if (!QaLocalConstants.OWNER_NAME.equals(existing.getName())
-                    || !"ACTIVE".equalsIgnoreCase(existing.getStatus())) {
-                    existing.setName(QaLocalConstants.OWNER_NAME);
-                    existing.setStatus("ACTIVE");
-                    return appUserRepository.save(existing);
+                boolean dirty = false;
+                if (!name.equals(existing.getName())) {
+                    existing.setName(name);
+                    dirty = true;
                 }
-                return existing;
+                if (!"ACTIVE".equalsIgnoreCase(existing.getStatus())) {
+                    existing.setStatus("ACTIVE");
+                    dirty = true;
+                }
+                return dirty ? appUserRepository.save(existing) : existing;
             })
             .orElseGet(() -> appUserRepository.save(AppUser.builder()
-                .email(QaLocalConstants.OWNER_EMAIL)
-                .name(QaLocalConstants.OWNER_NAME)
+                .email(email)
+                .name(name)
                 .status("ACTIVE")
                 .build()));
     }

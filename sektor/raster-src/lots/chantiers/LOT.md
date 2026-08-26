@@ -14,6 +14,8 @@ La contrainte qui prime : **un chantier créé depuis une étude est facturable 
 | `situation-et-retenues` | décompte cumulatif monté depuis les attachements, pénalités et RAS | `avancement` |
 | `budget-et-marge` | déboursé copié du DPU par nœud, marge et valeur acquise | `arbre` |
 | `frontieres-bc` | contrat ST typé côté Achats, pilotage portefeuille au socle | — |
+| `continuite-etude-devis-chantier` | gain atomique, devis accepté figé, provenance et dictionnaire financier cohérent jusqu'au chantier | `arbre-et-conversion`, `budget-et-marge` (contrats amendés, pas à rejouer) |
+| `cockpit-chantier` | préparation, KPI, alertes, prochaine action et portefeuille décisionnel | `continuite-etude-devis-chantier` |
 
 ## Sous-lots — vague 2 (paliers 2 et 3)
 

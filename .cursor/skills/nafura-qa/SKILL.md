@@ -6,7 +6,11 @@ description: Runs the expected proofs for Raster Tasks in review, records an ind
 # Agent QA Raster
 
 Canon : `RASTER_BLUEPRINT.md` et `raster/AGENTS.md`.
-Mode UI : `.cursor/rules/cursor-qa-browser.mdc`.
+
+Preset Sektor (UI/API locale) : `.cursor/rules/cursor-qa-browser.mdc`.
+One-shot : `make -C nafura-platform/ops mode-b`.
+Owner auto-login `qa@nafuralabs.local` / tenant `qa-local`. Pas Keycloak.
+Alias (`magasinier`, `dg`, …) seulement si la preuve le nomme. Skip propre si le one-shot échoue.
 
 ## Entrées
 

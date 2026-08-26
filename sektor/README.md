@@ -32,22 +32,26 @@ REGISTRY_PASS=*** make -C nafura-platform/ops prod-up SCOPE=full APP=sektor-btp 
 
 ### Mode B + Cursor QA (skip Keycloak)
 
+Contrat agents : [`.cursor/rules/cursor-qa-browser.mdc`](../.cursor/rules/cursor-qa-browser.mdc).
+
 Un seul compte local pour humain + agents : **`qa@nafuralabs.local`** / tenant **`qa-local`**.
-Au boot (`NAFURA_DEV_CURSOR_AUTH_ENABLED=true`), le backend provisionne le tenant et exécute
-le **même preset onboarding** qu’un owner (`applyPreset` / `seedReferenceData`) — sans wizard UI.
+**Auto-login conservé** (`start:erp:cursor` → `POST /api/public/dev/cursor-session`). Pas de mot de passe, pas Keycloak.
+
+Au boot (`NAFURA_DEV_CURSOR_AUTH_ENABLED=true`), `QaLocalProvisioner` (Java, idempotent) crée le tenant, l’owner (`OWNER` + `SUPER_ADMIN` + `BTP_INGENIEUR`), les **users par rôle** (ingénieur, conducteur, directeur, DAF, DG, chef de chantier, magasinier) et exécute le **même preset onboarding** qu’un owner réel (`applyPreset` / `seedReferenceData`) — sans wizard UI. Un employé RH est lié à chaque identité.
+
+Le preset **ne contient pas** le graphe métier (chantier converti, BL, approbations) : ça se fabrique dans la preuve via l’API. Ne pas activer `NAFURA_DEMO_RUNTIME_SEED`.
 
 ```bash
-ENV=staging KUBE_CONTEXT=docker-desktop bash nafura-platform/ops/nlops.sh dev-up sektor-btp full
-set -a; source nafura-platform/ops/secrets/dev-staging-local.env; set +a   # NAFURA_DEV_CURSOR_AUTH_ENABLED=true
-cd sektor/sources/backend && ./gradlew.bat :sektor:app:bootRun
-cd sektor/sources/web && npm run start:erp:cursor
-# → http://127.0.0.1:4200 auto-login (pas de Keycloak)
+make -C nafura-platform/ops mode-b
+# → http://127.0.0.1:4200 auto-login owner
+# Stop: make -C nafura-platform/ops mode-b-stop
 ```
 
-API sans browser :
+API sans browser (back déjà up via `mode-b`) :
 
 ```bash
-eval "$(bash nafura-platform/ops/qa-token.sh)"
+eval "$(bash nafura-platform/ops/qa-token.sh)"                 # owner
+eval "$(bash nafura-platform/ops/qa-token.sh magasinier)"      # alias IAM
 curl -s -H "Authorization: Bearer $TOKEN" -H "X-Tenant-Id: $TENANT_ID" "http://localhost:8082/api/..."
 ```
 

@@ -17,7 +17,7 @@ Ces fichiers sous `.cursor/rules/` sont `alwaysApply` pour Cursor ; **Claude doi
 |------|---------|
 | `.cursor/rules/raster-work.mdc` | projets, lots, sous-lots, plans, Tasks et agents |
 | `.cursor/rules/ux-canvas-wireframes.mdc` | Canvas UX ; preview = copie `canvases/` ; pas Figma SSOT |
-| `.cursor/rules/cursor-qa-browser.mdc` | QA Mode B : auth Cursor, `127.0.0.1:4200`, pas Keycloak |
+| `.cursor/rules/cursor-qa-browser.mdc` | QA Mode B : `make mode-b`, preset `qa-local` + auto-login `qa@…`, pas Keycloak |
 | `.cursor/rules/lab-mode-no-prod-data.mdc` | Lab métier : Liquibase clean, liberté refonte ; prod réelle = vitrines MBS/corpo only |
 
 ## Chemins critiques (rappel)
@@ -45,6 +45,6 @@ Sektor live :
 
 - **Raster actif.** Les documents historiques hors dépôt restent des références, jamais une source de vérité.
 - Archive : `…/lots/_archive/qa-local-auth-seed/` — auth QA unique + seed (`qa@nafuralabs.local` / `qa-local`)
-- QA Mode B : `npm run start:erp:cursor` · `eval "$(bash nafura-platform/ops/qa-token.sh)"` · rule `.cursor/rules/cursor-qa-browser.mdc`
+- QA Mode B : `make -C nafura-platform/ops mode-b` · auto-login owner `qa@nafuralabs.local` · rôles opt-in `qa-token.sh magasinier` · rule `.cursor/rules/cursor-qa-browser.mdc`
 - e2e : `sektor/e2e/` — par **projet**, pas par BC
 - Les cas de QA manuelle sont sortis du dépôt (`Desktop/nafuralabs-archives/sektor-web-docs/qa/`) : ils redeviennent des **e2e**, pas des documents.

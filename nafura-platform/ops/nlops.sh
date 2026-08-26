@@ -174,7 +174,9 @@ Workflows:
   release-frontend <app-id>   [build web only] + deploy-frontend
 
 Cycle de vie (préférer Make, depuis la racine du repo) :
-  make -C nafura-platform/ops dev-up  SCOPE=front|back|full   # process locaux → infra staging
+  make -C nafura-platform/ops mode-b            # one-shot Sektor Mode B (lance bootRun + cursor)
+  make -C nafura-platform/ops mode-b-stop
+  make -C nafura-platform/ops dev-up  SCOPE=front|back|full   # prep only
   make -C nafura-platform/ops stg-up  SCOPE=front|back|full   # build + pods staging
   make -C nafura-platform/ops prod-up SCOPE=front|back|full   # build + push + pods prod
 

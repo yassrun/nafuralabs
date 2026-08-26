@@ -13,7 +13,7 @@ REGISTRY_PASS ?=
         onboard-app provision-db drop-db migrate deploy \
         deploy-backend deploy-frontend reset-app clean-app \
         release-app release-backend release-frontend \
-        dev-up stg-up prod-up
+        dev-up stg-up prod-up mode-b mode-b-stop
 
 NLops = ENV=$(ENV) BUILD_IMAGES=$(BUILD_IMAGES) PUSH_IMAGES=$(PUSH_IMAGES) RESET_DB=$(RESET_DB) \
 	KUBE_CONTEXT=$(KUBE_CONTEXT) REGISTRY_PASS=$(REGISTRY_PASS) \
@@ -25,7 +25,9 @@ help:
 	@echo "  # ou : cd nafura-platform && make <cible>"
 	@echo ""
 	@echo "SCOPE=front|back|full  APP=$(APP)"
-	@echo "  make -C nafura-platform/ops dev-up  SCOPE=front|back|full   # process locaux → infra staging"
+	@echo "  make -C nafura-platform/ops mode-b                 # one-shot Sektor Mode B (bootRun + cursor front)"
+	@echo "  make -C nafura-platform/ops mode-b-stop"
+	@echo "  make -C nafura-platform/ops dev-up  SCOPE=front|back|full   # prep only (recette, ne lance pas)"
 	@echo "  make -C nafura-platform/ops stg-up  SCOPE=front|back|full   # build + deploy pods staging"
 	@echo "  make -C nafura-platform/ops prod-up SCOPE=front|back|full   # prod (front = image web only)"
 	@echo ""
@@ -40,7 +42,8 @@ help:
 	@echo "Flags: BUILD_IMAGES=true PUSH_IMAGES=true RESET_DB=true KUBE_CONTEXT=… REGISTRY_PASS=…"
 	@echo ""
 	@echo "Examples:"
-	@echo "  make -C nafura-platform/ops dev-up SCOPE=full APP=sektor-btp"
+	@echo "  make -C nafura-platform/ops mode-b"
+	@echo "  make -C nafura-platform/ops mode-b-stop"
 	@echo "  make -C nafura-platform/ops stg-up SCOPE=back APP=sektor-btp"
 	@echo "  REGISTRY_PASS=*** make -C nafura-platform/ops prod-up SCOPE=full APP=sektor-btp"
 	@echo "  make -C nafura-platform/ops bootstrap-env ENV=staging KUBE_CONTEXT=docker-desktop"
@@ -55,6 +58,14 @@ dev-up:
 	esac
 	ENV=staging KUBE_CONTEXT=$(or $(KUBE_CONTEXT),docker-desktop) \
 	  bash ./nlops.sh dev-up $(APP) $(SCOPE)
+
+# One-shot Sektor Mode B: env + PF + bootRun + start:erp:cursor (idempotent if already up).
+mode-b:
+	KUBE_CONTEXT=$(or $(KUBE_CONTEXT),docker-desktop) ENV=staging \
+	  bash ./mode-b.sh start $(APP) full
+
+mode-b-stop:
+	bash ./mode-b.sh stop
 
 # Build images + deploy pods staging.
 stg-up:

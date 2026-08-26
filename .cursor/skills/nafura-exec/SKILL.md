@@ -7,6 +7,11 @@ description: Implements Raster feature, bug and tech Tasks in one sub-lot worktr
 
 Canon : `RASTER_BLUEPRINT.md` et `raster/AGENTS.md`.
 
+UI/API Sektor locale : `.cursor/rules/cursor-qa-browser.mdc`.
+One-shot : `make -C nafura-platform/ops mode-b` (stop : `mode-b-stop`).
+Même preset que QA — auto-login `qa@nafuralabs.local` / `qa-local`, pas Keycloak.
+Token d’alias (`qa-token.sh magasinier`) seulement si la preuve le demande.
+
 ## Entrées
 
 `00-PLAN.md`, la Task, les preuves attendues, les éléments UX concernés et le périmètre de fichiers.

@@ -1,35 +1,101 @@
 ---
-description: Mode B Cursor QA — auth + browser pour QA locale Sektor (ne jamais omettre)
+description: Mode B Cursor QA — preset qa-local, auto-login owner, rôles opt-in (ne jamais omettre)
 alwaysApply: true
 ---
 
 # Cursor QA / Browser (Mode B)
 
-Quand tu debugues l’UI locale (`127.0.0.1:4200`) ou l’API (`localhost:8082`) :
+SSOT pour **tous** les agents (Spec, Code, QA, Orch, ce chat) dès qu’on touche l’UI ou l’API **Sektor locale**.
 
-## Auth — user QA local (pas Keycloak)
+Pas Keycloak. Auto-login **conservé** sur l’owner.
 
-- Owner / tenant : `qa@nafuralabs.local` sur tenant `qa-local` (seed onboarding à boot)
-- Flag backend : `NAFURA_DEV_CURSOR_AUTH_ENABLED=true` (via `nafura-platform/ops/secrets/dev-staging-local.env`)
-- Front QA : `cd sektor/sources/web && npm run start:erp:cursor` (`environment.cursor.ts` → `cursorAuthAutoLogin: true`)
-- Endpoint session : `POST http://localhost:8082/api/public/dev/cursor-session` → Bearer JWT HS256
-- CLI token : `eval "$(bash nafura-platform/ops/qa-token.sh)"` → `$TOKEN` + `$TENANT_ID`
-- Doc : `sektor/README.md` § Mode B + Cursor QA
-- Déprécié : `cursor.qa@nafuralabs.local` (alias remappé vers `qa@…`)
+## Identité du preset
+
+| | |
+|---|---|
+| Tenant | `qa-local` |
+| Auto-login | `qa@nafuralabs.local` (`OWNER` + `SUPER_ADMIN` + `BTP_INGENIEUR`) |
+| Front | `npm run start:erp:cursor` → `POST /api/public/dev/cursor-session` |
+| Mot de passe | aucun — JWT HS256 local |
+
+Déprécié : `cursor.qa@nafuralabs.local` (remappé vers `qa@…`).
+
+### Users par rôle (opt-in, pas l’auto-login)
+
+Seedés au boot sur le **même** tenant. Un rôle IAM chacun, **sans** SUPER_ADMIN.
+
+| Alias `qa-token.sh` / `?role=` | Email | Rôle |
+|---|---|---|
+| `owner` (défaut) | `qa@nafuralabs.local` | OWNER |
+| `ingenieur` | `qa.ingenieur@nafuralabs.local` | `BTP_INGENIEUR` |
+| `conducteur` | `qa.conducteur@nafuralabs.local` | `BTP_CONDUCTEUR_TRAVAUX` |
+| `directeur` | `qa.directeur@nafuralabs.local` | `BTP_DIRECTEUR_TRAVAUX` |
+| `daf` | `qa.daf@nafuralabs.local` | `BTP_DAF` |
+| `dg` | `qa.dg@nafuralabs.local` | `BTP_DG` |
+| `chef-chantier` | `qa.chef-chantier@nafuralabs.local` | `BTP_CHEF_CHANTIER` |
+| `magasinier` | `qa.magasinier@nafuralabs.local` | `BTP_MAGASINIER` |
+
+Chaque identité a un **employé RH** lié (`QaLocalEmployeProvisioner`) pour les affectations chantier.
+
+## Boot — ce que le preset crée
+
+Flag : `NAFURA_DEV_CURSOR_AUTH_ENABLED=true` (`nafura-platform/ops/secrets/dev-staging-local.env`).  
+Java : `QaLocalProvisioner` + employés RH, à chaque boot (idempotent). **Pas** un changelog Liquibase.
+
+1. Tenant `qa-local` + owner + users du tableau
+2. Onboarding owner (`applyPreset` / `seedReferenceData`) : UoM, emplacements, plan comptable, numérotation, articles de référence
+3. Employés RH liés
+
+**Pas dans le preset :** graphe métier (chantier converti, BL en cours, chaîne d’approbation). Ça se **fabrique dans la preuve** via l’API. Ne pas activer `NAFURA_DEMO_RUNTIME_SEED`.
+
+## Front + API — one-shot
+
+```bash
+make -C nafura-platform/ops mode-b
+# → http://127.0.0.1:4200  (auto-login owner)
+# → http://localhost:8082
+# Stop: make -C nafura-platform/ops mode-b-stop
+```
+
+Idempotent si 8082/4200 sont déjà up. Prérequis : infra staging (`bootstrap-env`), namespace `nafura-infra-staging`.
+
+- UI : **`http://127.0.0.1:4200`** (pas `localhost` si flaky)
+- API : `http://localhost:8082`
+
+Changer d’identité = **nouveau token**, pas un login écran. Le front auto-login reste owner.
 
 ## Browser MCP — ordre obligatoire
 
-1. `browser_tabs` **list** d’abord — réutiliser un onglet déjà ouvert / authentifié
-2. URL : **`http://127.0.0.1:4200`** (pas `localhost` si flaky)
-3. `browser_lock` **avant** interactions sur un onglet existant
-4. Si `chrome-error://` ou connexion morte : **ne pas boucler** — passer à l’API avec token QA
-5. Ne pas inventer un login Keycloak pour le QA agent
+1. `browser_tabs` **list** — réutiliser un onglet déjà ouvert / authentifié
+2. URL **`http://127.0.0.1:4200`**
+3. `browser_lock` **avant** d’interagir sur un onglet existant
+4. Si `chrome-error://` ou connexion morte : **ne pas boucler** — passer à l’API avec le token
+5. Ne pas inventer un login Keycloak
 
 ## API sans browser
 
 ```bash
-eval "$(bash nafura-platform/ops/qa-token.sh)"
+eval "$(bash nafura-platform/ops/qa-token.sh)"              # owner
+eval "$(bash nafura-platform/ops/qa-token.sh magasinier)"   # alias
+eval "$(bash nafura-platform/ops/qa-token.sh qa.dg@nafuralabs.local)"
+bash nafura-platform/ops/qa-token.sh --list
 curl -s -H "Authorization: Bearer $TOKEN" -H "X-Tenant-Id: $TENANT_ID" "http://localhost:8082/api/..."
 ```
 
-Ne jamais activer `NAFURA_DEV_CURSOR_AUTH_ENABLED` sur staging/prod K8s.
+Équivalent : `POST /api/public/dev/cursor-session?role=magasinier` (allowlist only ; alias inconnu → 400).
+
+## Par rôle d’agent
+
+- **Spec** — défaut = owner. Si la preuve discrimine un rôle, **nommer l’alias** (`magasinier`, `dg`, …).
+- **Code** — lancer `make -C nafura-platform/ops mode-b` si 8082/4200 down. Token d’alias seulement quand la preuve le demande.
+- **QA** — même commande. Owner sauf si la preuve nomme un alias. Skip propre si le one-shot échoue.
+- **Orch** — au passage de main Sektor : `make -C nafura-platform/ops mode-b`. Jamais « ouvre Keycloak ».
+
+## Interdit
+
+- `NAFURA_DEV_CURSOR_AUTH_ENABLED` sur pods staging/prod K8s
+- Login Keycloak pour un agent QA local
+- Inventer un email hors tableau (`qa.pointeur@…`, etc.)
+- Traiter le dump demo (`seedIfEmpty`) comme le preset QA
+
+Doc humaine : `sektor/README.md` § Mode B + Cursor QA.

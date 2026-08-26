@@ -73,9 +73,9 @@ Ne pas faire phase 2/3 à chaque fix UI.
 
 Lab / hybrid seulement. **Jamais** sur pods staging/prod K8s (`NAFURA_DEV_CURSOR_AUTH_ENABLED` interdit hors local).
 
-Aujourd’hui (Sektor) : **1 tenant QA** `qa-local` · **1 user** `qa@nafuralabs.local` · auto-login agents (`start:erp:cursor` / `cursor-session`). Suffit pour un agent unique.
+Aujourd’hui (Sektor) : one-shot **`make -C nafura-platform/ops mode-b`** · tenant **`qa-local`** · auto-login **`qa@nafuralabs.local`** · users par rôle opt-in (`qa-token.sh magasinier`) · contrat `.cursor/rules/cursor-qa-browser.mdc`.
 
-**Idée à raffiner :** worker **par projet** — users **par rôle** + jeux de scénarios.
+Graphe métier (chantier converti, BL, approbations) : **pas** dans le preset — les preuves le fabriquent via l’API. Ne pas activer `NAFURA_DEMO_RUNTIME_SEED`.
 
 ---
 

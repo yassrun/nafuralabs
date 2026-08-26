@@ -11,19 +11,21 @@ CLI deploy : infra partagée (1× par cluster) + produits (indépendants).
 
 | Commande | Effet |
 |----------|-------|
-| **`make -C nafura-platform/ops dev-up SCOPE=front\|back\|full`** | Process **locaux** (ng serve / bootRun) → infra **staging** — **sans** rebuild image |
+| **`make -C nafura-platform/ops mode-b`** | One-shot Sektor Mode B : env + PF + bootRun + `start:erp:cursor` |
+| **`make -C nafura-platform/ops mode-b-stop`** | Arrête 8082 / 4200 + port-forwards |
+| **`make -C nafura-platform/ops dev-up SCOPE=front\|back\|full`** | Prep Mode B seulement (recette, ne lance pas) |
 | **`make -C nafura-platform/ops stg-up SCOPE=front\|back\|full`** | Build images + **deploy pods** staging |
 | **`make -C nafura-platform/ops prod-up SCOPE=front\|back\|full`** | Build + push + **deploy pods** prod (`REGISTRY_PASS` requis) |
 
 ```bash
-make -C nafura-platform/ops dev-up  SCOPE=full APP=sektor-btp          # itérer
+make -C nafura-platform/ops mode-b
 make -C nafura-platform/ops stg-up  SCOPE=full APP=sektor-btp          # valider staging
 REGISTRY_PASS=*** make -C nafura-platform/ops prod-up SCOPE=front APP=sektor-btp  # prod, image web only
 ```
 
 Windows : `powershell -File nafura-platform/ops/prod-up.ps1 -Scope front` (Git bash + kubectl Windows ; `REGISTRY_PASS` lu dans le cluster si vide).
 
-Itérer → `dev-up` · Valider → `stg-up` · Promouvoir → `prod-up`.
+Itérer → `mode-b` · Valider → `stg-up` · Promouvoir → `prod-up`.
 
 ## Environnements
 

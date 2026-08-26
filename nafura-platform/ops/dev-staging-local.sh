@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 # Mode B helpers — process locaux branchés sur infra staging (Docker Desktop).
 # Usage:
-#   bash toolchain/ops/dev-staging-local.sh [app-id] [front|back|full]
-#   bash toolchain/ops/dev-staging-local.sh stop
+#   bash nafura-platform/ops/dev-staging-local.sh start [app-id] [front|back|full]
+#   bash nafura-platform/ops/dev-staging-local.sh [app-id] [front|back|full]   # prep + recette, ne lance pas
+#   bash nafura-platform/ops/dev-staging-local.sh stop
+# One-shot agents : make -C nafura-platform/ops mode-b
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -10,9 +12,16 @@ CTX="${KUBE_CONTEXT:-docker-desktop}"
 INFRA_NS="nafura-infra-staging"
 PF_DIR="${TMPDIR:-/tmp}/nafura-dev-up"
 PF_PID_FILE="${PF_DIR}/port-forward.pids"
-ENV_FILE="${ROOT}/secrets/dev-staging-local.env"
+APP_PID_FILE="${PF_DIR}/mode-b.pids"
+ENV_FILE="${ROOT}/nafura-platform/ops/secrets/dev-staging-local.env"
+SECRETS_FILE="${SECRETS_FILE:-$ROOT/nafura-platform/ops/secrets/nafura.secrets}"
+BACK_URL="${NAFURA_QA_API_BASE:-http://localhost:8082}"
+FRONT_URL="${NAFURA_QA_FRONT_BASE:-http://127.0.0.1:4200}"
+BACK_HEALTH="${BACK_URL%/}/actuator/health"
+BACK_LOG="${PF_DIR}/bootRun.log"
+FRONT_LOG="${PF_DIR}/ng-cursor.log"
 
-mkdir -p "$PF_DIR"
+mkdir -p "$PF_DIR" "$(dirname "$ENV_FILE")"
 
 die() { echo "ERROR: $*" >&2; exit 1; }
 
@@ -26,9 +35,172 @@ stop_port_forwards() {
   fi
 }
 
+kill_port() {
+  local port="$1"
+  local pid
+  if command -v lsof >/dev/null 2>&1; then
+    while read -r pid; do
+      [[ -n "${pid:-}" ]] && kill "$pid" 2>/dev/null || true
+    done < <(lsof -t -iTCP:"$port" -sTCP:LISTEN 2>/dev/null || true)
+  fi
+  if command -v netstat >/dev/null 2>&1; then
+    while read -r pid; do
+      [[ -n "${pid:-}" && "$pid" != "0" ]] || continue
+      taskkill //F //PID "$pid" >/dev/null 2>&1 || kill -9 "$pid" 2>/dev/null || true
+    done < <(netstat -ano 2>/dev/null | awk -v p=":${port}" '
+      $0 ~ p && /LISTENING/ { print $NF }
+    ' | sort -u)
+  fi
+}
+
+stop_app_processes() {
+  if [[ -f "$APP_PID_FILE" ]]; then
+    while read -r pid; do
+      [[ -n "${pid:-}" ]] && kill "$pid" 2>/dev/null || true
+    done <"$APP_PID_FILE"
+    rm -f "$APP_PID_FILE"
+  fi
+  kill_port 8082
+  kill_port 4200
+  echo "Stopped Mode B app processes (8082 / 4200)."
+}
+
+http_up() {
+  local url="$1"
+  curl -sf -o /dev/null --connect-timeout 2 "$url" 2>/dev/null
+}
+
+# Mode B is ready only when cursor-session mints (provisioner finished), not mere Tomcat up.
+session_up() {
+  curl -sf -o /dev/null --connect-timeout 2 -X POST \
+    "${BACK_URL%/}/api/public/dev/cursor-session" 2>/dev/null
+}
+
+wait_http() {
+  local url="$1"
+  local timeout="${2:-180}"
+  local label="${3:-$url}"
+  local pid="${4:-}"
+  local check="${5:-http}"
+  local elapsed=0
+  while (( elapsed < timeout )); do
+    if [[ -n "$pid" ]] && ! kill -0 "$pid" 2>/dev/null; then
+      echo "ERROR: process $pid exited while waiting for $label" >&2
+      return 1
+    fi
+    if [[ "$check" == "session" ]]; then
+      if session_up; then
+        echo "Ready: cursor-session"
+        return 0
+      fi
+    elif http_up "$url"; then
+      echo "Ready: $label"
+      return 0
+    fi
+    sleep 3
+    elapsed=$((elapsed + 3))
+  done
+  echo "ERROR: timeout waiting for $label (${timeout}s)" >&2
+  return 1
+}
+
+wait_tcp() {
+  local host="$1"
+  local port="$2"
+  local timeout="${3:-30}"
+  local elapsed=0
+  while (( elapsed < timeout )); do
+    if (echo >/dev/tcp/"$host"/"$port") >/dev/null 2>&1; then
+      echo "Ready: $host:$port"
+      return 0
+    fi
+    sleep 1
+    elapsed=$((elapsed + 1))
+  done
+  echo "ERROR: timeout waiting for $host:$port (${timeout}s)" >&2
+  return 1
+}
+
+gradlew_sektor() {
+  if [[ -f "$ROOT/sektor/sources/backend/gradlew" ]]; then
+    echo "$ROOT/sektor/sources/backend/gradlew"
+  elif [[ -f "$ROOT/sektor/sources/backend/gradlew.bat" ]]; then
+    echo "$ROOT/sektor/sources/backend/gradlew.bat"
+  else
+    die "gradlew missing under sektor/sources/backend"
+  fi
+}
+
+start_sektor_app() {
+  local gw
+  gw="$(gradlew_sektor)"
+  : >"$APP_PID_FILE"
+
+  if [[ "$SCOPE" == "back" || "$SCOPE" == "full" ]]; then
+    if session_up; then
+      echo "Backend already up: cursor-session"
+    else
+      echo "Starting backend → $BACK_LOG"
+      (
+        trap '' HUP
+        set -a
+        # shellcheck disable=SC1090
+        source "$ENV_FILE"
+        set +a
+        cd "$ROOT/sektor/sources/backend"
+        exec "$gw" :sektor:app:bootRun
+      ) >>"$BACK_LOG" 2>&1 &
+      local back_pid=$!
+      disown "$back_pid" 2>/dev/null || true
+      echo "$back_pid" >>"$APP_PID_FILE"
+      wait_http "$BACK_HEALTH" 240 "cursor-session" "$back_pid" session || {
+        echo "See $BACK_LOG" >&2
+        exit 1
+      }
+    fi
+  fi
+
+  if [[ "$SCOPE" == "front" || "$SCOPE" == "full" ]]; then
+    if http_up "$FRONT_URL"; then
+      echo "Frontend already up: $FRONT_URL"
+    else
+      echo "Starting frontend → $FRONT_LOG"
+      (
+        trap '' HUP
+        cd "$ROOT/sektor/sources/web"
+        exec npm run start:erp:cursor
+      ) >>"$FRONT_LOG" 2>&1 &
+      local front_pid=$!
+      disown "$front_pid" 2>/dev/null || true
+      echo "$front_pid" >>"$APP_PID_FILE"
+      wait_http "$FRONT_URL" 180 "$FRONT_URL" "$front_pid" || {
+        echo "See $FRONT_LOG" >&2
+        exit 1
+      }
+    fi
+  fi
+
+  cat <<EOF
+
+=== Mode B running ===
+  App:  $FRONT_URL   (auto-login qa@nafuralabs.local)
+  API:  $BACK_URL
+  Token: eval "\$(bash nafura-platform/ops/qa-token.sh)"
+  Stop:  make -C nafura-platform/ops mode-b-stop
+
+EOF
+}
+
 if [[ "${1:-}" == "stop" ]]; then
+  stop_app_processes
   stop_port_forwards
   exit 0
+fi
+
+RUN_APP=0
+if [[ "${1:-}" == "start" ]]; then
+  RUN_APP=1
+  shift
 fi
 
 APP_ID="${1:-sektor-btp}"
@@ -46,7 +218,10 @@ kubectl --context="$CTX" get ns "$INFRA_NS" >/dev/null 2>&1 \
 read_secret_field() {
   local section="$1"
   local key="$2"
-  local secrets_file="$ROOT/secrets/nafura.secrets"
+  local secrets_file="$SECRETS_FILE"
+  if [[ ! -f "$secrets_file" && -f "$ROOT/secrets/nafura.secrets" ]]; then
+    secrets_file="$ROOT/secrets/nafura.secrets"
+  fi
   [[ -f "$secrets_file" ]] || return 0
   awk -v sec="[$section]" -v key="$key" '
     $0 == sec { in_sec=1; next }
@@ -199,32 +374,41 @@ EOF
 
 start_port_forwards() {
   local postgres_pid redis_pid=""
-  stop_port_forwards
-  : >"$PF_PID_FILE"
+  if netstat -ano 2>/dev/null | grep -qE ':5432[ ].*LISTENING'; then
+    echo "Port-forward already listening on 5432 — leaving it."
+  else
+    stop_port_forwards
+    : >"$PF_PID_FILE"
 
-  kubectl --context="$CTX" -n "$INFRA_NS" port-forward svc/postgres 5432:5432 \
-    >/tmp/nafura-pf-postgres.log 2>&1 &
-  postgres_pid=$!
-  echo "$postgres_pid" >>"$PF_PID_FILE"
+    nohup kubectl --context="$CTX" -n "$INFRA_NS" port-forward svc/postgres 5432:5432 \
+      >/tmp/nafura-pf-postgres.log 2>&1 &
+    postgres_pid=$!
+    disown "$postgres_pid" 2>/dev/null || true
+    echo "$postgres_pid" >>"$PF_PID_FILE"
+
+    sleep 1
+    if ! kill -0 "$postgres_pid" 2>/dev/null; then
+      die "postgres port-forward failed — see /tmp/nafura-pf-postgres.log"
+    fi
+    echo "Port-forward: localhost:5432 → $INFRA_NS/postgres (pid $postgres_pid)"
+  fi
 
   if [[ "$APP_ID" == "venue-catalog" ]]; then
-    kubectl --context="$CTX" -n "$INFRA_NS" port-forward svc/redis 6380:6379 \
-      >/tmp/nafura-pf-redis.log 2>&1 &
-    redis_pid=$!
-    echo "$redis_pid" >>"$PF_PID_FILE"
-  fi
-
-  sleep 1
-  if ! kill -0 "$postgres_pid" 2>/dev/null; then
-    die "postgres port-forward failed — see /tmp/nafura-pf-postgres.log"
-  fi
-  if [[ -n "$redis_pid" ]]; then
-    if ! kill -0 "$redis_pid" 2>/dev/null; then
-      die "redis port-forward failed — see /tmp/nafura-pf-redis.log"
+    if netstat -ano 2>/dev/null | grep -qE ':6380[ ].*LISTENING'; then
+      echo "Port-forward already listening on 6380 — leaving it."
+    else
+      nohup kubectl --context="$CTX" -n "$INFRA_NS" port-forward svc/redis 6380:6379 \
+        >/tmp/nafura-pf-redis.log 2>&1 &
+      redis_pid=$!
+      disown "$redis_pid" 2>/dev/null || true
+      echo "$redis_pid" >>"$PF_PID_FILE"
+      sleep 1
+      if ! kill -0 "$redis_pid" 2>/dev/null; then
+        die "redis port-forward failed — see /tmp/nafura-pf-redis.log"
+      fi
+      echo "Port-forward: localhost:6380 → $INFRA_NS/redis (pid $redis_pid)"
     fi
-    echo "Port-forward: localhost:6380 → $INFRA_NS/redis (pid $redis_pid)"
   fi
-  echo "Port-forward: localhost:5432 → $INFRA_NS/postgres (pid $postgres_pid)"
 }
 
 print_recipe_sektor() {
@@ -365,6 +549,7 @@ esac
 
 if [[ "$SCOPE" == "back" || "$SCOPE" == "full" ]]; then
   start_port_forwards
+  wait_tcp 127.0.0.1 5432 30 || die "Postgres port-forward not accepting connections on 5432"
 fi
 
 cat <<EOF
@@ -373,9 +558,22 @@ cat <<EOF
 Mode B: process locaux → infra staging (pas de rebuild image).
 
 Env file : $ENV_FILE
-Stop PF  : bash toolchain/ops/dev-staging-local.sh stop
+Stop     : make -C nafura-platform/ops mode-b-stop
+# (legacy) bash nafura-platform/ops/dev-staging-local.sh stop
 
 EOF
+
+if [[ "$RUN_APP" == "1" ]]; then
+  case "$APP_ID" in
+    sektor-btp|erp)
+      start_sektor_app
+      ;;
+    *)
+      die "mode-b start only supports sektor-btp (got: $APP_ID) — use make dev-up for the recipe"
+      ;;
+  esac
+  exit 0
+fi
 
 case "$APP_ID" in
   sektor-btp|erp) print_recipe_sektor ;;
@@ -384,4 +582,5 @@ case "$APP_ID" in
 esac
 
 echo ""
+echo "One-shot Sektor: make -C nafura-platform/ops mode-b"
 echo "Validation pods: make -C nafura-platform/ops stg-up SCOPE=$SCOPE APP=$APP_ID"

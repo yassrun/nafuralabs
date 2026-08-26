@@ -279,28 +279,17 @@ make -C nafura-platform/ops stg-up SCOPE=front APP=sektor-btp
 BUILD_IMAGES=true KUBE_CONTEXT=docker-desktop ENV=staging bash nafura-platform/ops/nlops.sh release-app sektor-btp
 ```
 
-### B2 — Itération locale sans image (`dev-up`)
+### B2 — Itération locale (`mode-b`)
 
-Infra staging **déjà up**. Process locaux branchés sur Postgres / Keycloak / MinIO staging.
+Infra staging **déjà up**. One-shot :
 
 ```bash
-# Prépare env + port-forward Postgres
-ENV=staging KUBE_CONTEXT=docker-desktop bash nafura-platform/ops/nlops.sh dev-up sektor-btp full
-# ou: make -C nafura-platform/ops dev-up SCOPE=full APP=sektor-btp
-
-# Terminal 1 — backend
-set -a; source nafura-platform/ops/secrets/dev-staging-local.env; set +a
-cd sektor/sources/backend && ./gradlew.bat :sektor:app:bootRun
-
-# Terminal 2 — frontend (Cursor QA — auto-login qa@nafuralabs.local)
-cd sektor/sources/web && npm run start:erp:cursor
-# Keycloak staging-local (manuel) : npm run start:erp:staging-local
-
-# Stop port-forward
-bash nafura-platform/ops/dev-staging-local.sh stop
+make -C nafura-platform/ops mode-b
+# → http://127.0.0.1:4200 · http://localhost:8082 · auto-login qa@
+# Stop: make -C nafura-platform/ops mode-b-stop
 ```
 
-URLs : `http://127.0.0.1:4200` · API `http://localhost:8082` · Cursor QA skip Keycloak
+`dev-up` sans `mode-b` = prep + recette seulement (ne lance pas bootRun / ng).
 
 Venue Catalog (Mode B — backend local + console Angular, infra staging) :
 

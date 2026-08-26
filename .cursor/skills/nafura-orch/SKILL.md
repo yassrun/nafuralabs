@@ -34,6 +34,8 @@ Orchestrator est un rôle de Run, jamais un `agent_type` de Task.
 | Code | plan, Task, preuves attendues, UX utile, périmètre |
 | QA | Task en review, preuves attendues, environnement |
 
+Sektor locale : passer Mode B — `make -C nafura-platform/ops mode-b` (`.cursor/rules/cursor-qa-browser.mdc`). Jamais « ouvre Keycloak ».
+
 ## Interdit
 
 Coder, produire un verdict QA, déplacer la borne, poser `done-me`, pousser.
