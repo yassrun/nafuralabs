@@ -79,6 +79,12 @@ export class ChantierApiService extends FeatureApiService<Chantier, Partial<Chan
     return chantierToUi(row);
   }
 
+  /** AC-6 — démarrage par ordre de service : référence + date d'effet, atomique. */
+  async demarrerAvecOs(id: string, os: { osReference: string; osDateEffet: string }): Promise<Chantier> {
+    const row = await this.post<ApiChantier>(`${this.basePath}/${id}/demarrer-os`, os);
+    return chantierToUi(row);
+  }
+
   async suspendre(id: string): Promise<Chantier> {
     const row = await this.post<ApiChantier>(`${this.basePath}/${id}/suspendre`, {});
     return chantierToUi(row);

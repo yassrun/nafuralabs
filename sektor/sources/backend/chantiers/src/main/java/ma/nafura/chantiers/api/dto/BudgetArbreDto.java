@@ -25,6 +25,9 @@ public class BudgetArbreDto {
     private String name;
     private String client;
 
+    /** Statut métier réel du chantier — identique sur toutes les lectures (AC-14). */
+    private String status;
+
     /** Les lots racines. Chaque nœud porte ses enfants, jusqu'aux postes. */
     private List<NoeudDto> lots;
 

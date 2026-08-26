@@ -113,6 +113,7 @@ class DossierEtudeServiceClientTest {
                 org.mockito.Mockito.mock(DebourseDuNoeudService.class),
                 org.mockito.Mockito.mock(ma.nafura.etudes.service.port.bc.ChainageAvalPort.class),
                 org.mockito.Mockito.mock(ma.nafura.etudes.service.ConsultationEtudeService.class),
+                org.mockito.Mockito.mock(ma.nafura.etudes.service.TransitionEtudeService.class),
                 java.util.List.of());
     }
 

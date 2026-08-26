@@ -75,6 +75,26 @@ class ChainageAvalAdapterTest {
         assertThat(cap.getValue().getStatus()).isNotEqualTo(Chantier.STATUS_EN_COURS);
     }
 
+    /** AC-9 — le snapshot commercial voyage avec la commande, posé tel quel sur le chantier. */
+    @Test
+    void poseLeSnapshotCommercialSurLeChantier() {
+        when(chantierService.create(any())).thenReturn(chantier());
+        when(lotService.copierLotVendu(any(), any(), any())).thenReturn(lotCree("ch-1-lot-01"));
+
+        adapter().convert(commande(List.of(lotProjete(), articleProjete("L01", debourseDecompose()))));
+
+        ArgumentCaptor<ChantierCreateDto> cap = ArgumentCaptor.forClass(ChantierCreateDto.class);
+        verify(chantierService).create(cap.capture());
+        assertThat(cap.getValue().getDossierEtudeId()).isNotNull();
+        assertThat(cap.getValue().getDevisId())
+                .isEqualTo(UUID.fromString("12345678-1234-1234-1234-123456789012"));
+        assertThat(cap.getValue().getDevisNumero()).isEqualTo("DV-2026-0002");
+        assertThat(cap.getValue().getDevisVersion()).isEqualTo(3);
+        assertThat(cap.getValue().getSourceVente()).isEqualTo("DEVIS");
+        assertThat(cap.getValue().getMontantVenteInitialHt()).isEqualByComparingTo("15000");
+        assertThat(cap.getValue().getDebourseInitialHt()).isEqualByComparingTo("9000");
+    }
+
     /** AC-10 — la conversion ne rend qu'un chantier ; rien du côté contractuel. */
     @Test
     void aucunMarcheNiIdentifiantDeMarcheEnSortie() {
@@ -349,6 +369,14 @@ class ChainageAvalAdapterTest {
                 "M-42",
                 new BigDecimal("15000"),
                 new BigDecimal("20"),
-                lots);
+                lots,
+                // AC-9 — snapshot commercial (provenance + montants initiaux)
+                UUID.fromString("12345678-1234-1234-1234-123456789012"),
+                "DV-2026-0002",
+                3,
+                LocalDate.of(2026, 8, 1),
+                "DEVIS",
+                new BigDecimal("15000"),
+                new BigDecimal("9000"));
     }
 }

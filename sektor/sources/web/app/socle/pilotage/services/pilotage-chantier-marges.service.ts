@@ -61,8 +61,10 @@ export function buildPilotageMargeRows(
   return chantiers.map((c) => {
     const marche = marches.find((m) => m.chantierId === c.id);
     const montantMarcheHt = marche?.montantTotalHt ?? c.budgetHt;
-    const cumulFactureHt = marche?.cumulFactureHt ?? c.facturesEmisesHt;
-    const cumulEncaisseHt = marche?.cumulEncaisseHt ?? c.encaissementsTtc;
+    // AC-14 — l'absence d'un réel chantier ne devient pas un faux zéro sur la fiche ; l'agrégat
+    // de portefeuille retombe sur 0 faute de mieux (frontière socle — dette nommée).
+    const cumulFactureHt = marche?.cumulFactureHt ?? c.facturesEmisesHt ?? 0;
+    const cumulEncaisseHt = marche?.cumulEncaisseHt ?? c.encaissementsTtc ?? 0;
     const pctFacture = montantMarcheHt > 0 ? Math.round((cumulFactureHt / montantMarcheHt) * 100) : 0;
     const diffFactureAvancement = pctFacture - c.avancementPercent;
     const coutEstime = montantMarcheHt * (1 - COUT_CIBLE_RATIO);

@@ -138,21 +138,33 @@ export const DEVIS_DETAIL_CONFIG = buildDetailConfig<Devis>(
           showInModes: ['edit', 'view'],
           permission: 'etudes.devis.update',
           visible: (ctx) => {
+            // AC-5 — un devis approuvé est figé : plus de version concurrente.
             const s = (ctx.item as Devis | undefined)?.status;
-            return !!s && s !== 'BROUILLON' && s !== 'ANNULE' && s !== 'PERDU' && s !== 'EXPIRE';
+            return (
+              !!s &&
+              s !== 'BROUILLON' &&
+              s !== 'APPROUVE' &&
+              s !== 'ANNULE' &&
+              s !== 'PERDU' &&
+              s !== 'EXPIRE'
+            );
           },
         },
         {
-          id: 'convert_chantier',
-          label: 'Convertir en chantier',
-          icon: 'hard-hat',
-          scope: 'edit+view',
-          variant: 'primary',
+          // AC-5 — le devis approuvé ne se convertit pas lui-même : il ouvre l'étude (porte du
+          // gain) ou le chantier déjà né. Le gain est un geste de l'étude, pas du devis.
+          id: 'open_etude_chantier',
+          label: 'Ouvrir étude / chantier',
+          icon: 'external-link',
+          scope: 'view',
+          variant: 'stroked',
           position: 'right',
-          order: 90,
-          showInModes: ['edit', 'view'],
-          permission: 'chantiers.chantier.create',
-          visible: (ctx) => (ctx.item as Devis | undefined)?.status === 'APPROUVE',
+          order: 80,
+          showInModes: ['view'],
+          visible: (ctx) => {
+            const d = ctx.item as Devis | undefined;
+            return !!d && (d.status === 'APPROUVE' || !!d.dossierEtudeId);
+          },
         },
       ],
     },

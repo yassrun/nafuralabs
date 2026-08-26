@@ -47,7 +47,8 @@
         "export": "Export to Excel",
         "voirPlanning": "View schedule",
         "voirDetail": "View details",
-        "clearChantierFilter": "Show all sites"
+        "clearChantierFilter": "Show all sites",
+        "retry": "Retry"
       },
       "filters": {
         "allStatuses": "All statuses",
@@ -89,6 +90,10 @@
         "fournisseur": "Supplier",
         "montant": "Amount",
         "date": "Date"
+      },
+      "values": {
+        "notAvailable": "Not available",
+        "notDefined": "Not defined"
       }
     },
     "chantier": {
@@ -123,10 +128,14 @@
           "avancement": "Progress",
           "budgetHt": "Budget excl. VAT",
           "factureHt": "Invoiced excl. VAT",
-          "encaisseTtc": "Collected incl. VAT"
+          "encaisseTtc": "Collected incl. VAT",
+          "venteActiveHt": "Active sale excl. VAT",
+          "budgetReviseHt": "Revised budget excl. VAT",
+          "margeProjetee": "Projected margin"
         },
         "tabs": {
           "overview": "Overview",
+          "pilotage": "Pilot",
           "equipe": "Team",
           "lots": "Work packages",
           "phases": "Phases",
@@ -154,9 +163,16 @@
           "description": "Description",
           "syntheseBudget": "Budget summary",
           "brouillonCalcule": "Computed draft",
-          "parLot": "By work package"
+          "parLot": "By work package",
+          "provenance": "Commercial source"
         },
         "workflowHint": "Follow the field workflow without going back through portfolio listings: tree, progress entry, work logs, certificates, and journal.",
+        "provenance": {
+          "devisSource": "Site created from the won study — accepted quote.",
+          "openDevis": "Open quote",
+          "openEtude": "Open study",
+          "sansEtude": "No study / quote source (direct creation)."
+        },
         "labels": {
           "chefChantier": "Site foreman",
           "conducteurTravaux": "Works supervisor",
@@ -187,7 +203,10 @@
           "netHt": "Net excl. VAT",
           "tvaMontant": "VAT {percent}%",
           "netTtc": "Net incl. VAT",
-          "montantHtPeriode": "Period amount excl. VAT"
+          "montantHtPeriode": "Period amount excl. VAT",
+          "venteActiveHt": "Active sale excl. VAT",
+          "debourseInitialHt": "Initial direct cost excl. VAT",
+          "margeProjetee": "Projected margin"
         },
         "columns": {
           "code": "Code",
@@ -1009,6 +1028,269 @@
         "definitive": "Final",
         "totalCautions": "Total bonds"
       }
+    },
+    "cockpit": {
+      "erreurIdentite": "Unable to load the chantier",
+      "erreurIdentiteDetail": "Chantier not found or access denied.",
+      "suspendu": "Chantier suspended — only authorised actions are available.",
+      "aFaire": "What to do now",
+      "aucuneAction": "No action required right now.",
+      "ouvrir": "Open",
+      "gerer": "Manage",
+      "voir": "View",
+      "kpi": {
+        "venteActive": "Active sale HT",
+        "budgetRevise": "Revised budget HT",
+        "margeProjetee": "Projected margin",
+        "avancement": "Progress",
+        "echeance": "Due",
+        "retard": "late",
+        "restants": "remaining"
+      },
+      "os": {
+        "reference": "Work order reference",
+        "referencePh": "e.g. OS-2026-001",
+        "dateEffet": "Effective date",
+        "enregistrerEtDemarrer": "Save work order and start",
+        "champsRequis": "Reference and effective date are required.",
+        "bloqueurs": "Preparation incomplete",
+        "echec": "Start failed — reload the cockpit."
+      },
+      "preparation": {
+        "titre": "Preparation",
+        "identite": "Client identity",
+        "vente": "Sale reference",
+        "arbre": "Work breakdown",
+        "budget": "Initial budget",
+        "responsables": "Responsible staff",
+        "dates": "Planned dates",
+        "os": "Work order",
+        "planning": "Schedule",
+        "action": {
+          "identite": "Complete identity",
+          "vente": "Set the sale",
+          "arbre": "Build the tree",
+          "budget": "Set initial budget",
+          "responsables": "Assign responsible staff",
+          "dates": "Set the dates",
+          "os": "Enter the work order",
+          "planning": "Create the schedule"
+        },
+        "raison": {
+          "identite": "Client and identity required.",
+          "vente": "Sale reference required (accepted quote).",
+          "arbre": "At least one usable node required.",
+          "budget": "Initial debourse required.",
+          "responsables": "Site manager and foreman required.",
+          "dates": "Valid start and end, end strictly after start.",
+          "os": "Work order required to start.",
+          "planning": "Schedule not created — recommended, never blocking.",
+          "indisponible": "Source unavailable — retry."
+        }
+      },
+      "flux": {
+        "titre": "Monthly flow",
+        "etape": "Step",
+        "action": "Go to step",
+        "etapeAvancement": "Progress",
+        "etapeAttachement": "Attachment",
+        "etapeSituation": "Situation",
+        "etapeComplete": "Monthly cycle complete",
+        "etapeLectureSeule": "Read only",
+        "etapeIndisponible": "Unavailable",
+        "etapeSuspendu": "Suspended"
+      },
+      "module": {
+        "arbre": "Tree",
+        "arbreResume": "Structure and amounts by lot",
+        "budget": "Budget",
+        "budgetResume": "Planned, revised and actual debourse",
+        "planning": "Schedule",
+        "planningResume": "Activities and deadlines",
+        "situations": "Situations",
+        "situationsResume": "Works by period and revisions"
+      },
+      "activite": {
+        "titre": "Recent activity"
+      },
+      "alerte": {
+        "margeNegative": "Projected margin is negative",
+        "margeBaisse": "Margin down versus initial",
+        "financeIncomplete": "Sale or budget unavailable",
+        "retard": "Contractual delay",
+        "sourceIndisponible": "Secondary source unavailable",
+        "action": {
+          "budget": "Open budget",
+          "etude": "Open study",
+          "planning": "Open schedule",
+          "reessayer": "Retry"
+        }
+      },
+      "action": {
+        "demarrer": "Start the chantier",
+        "preparer": "Prepare the chantier",
+        "equipe": "Manage the team",
+        "budget": "View budget",
+        "planning": "View schedule",
+        "avancement": "Enter progress",
+        "attachement": "Create attachment",
+        "situation": "Handle situation",
+        "situations": "View situations",
+        "documents": "View documents",
+        "reprendre": "Resume the chantier"
+      },
+      "filtres": {
+        "toutesAlertes": "All alerts",
+        "triCode": "Sort: code",
+        "triAlerte": "Sort: alert",
+        "triEcheance": "Sort: due",
+        "triMarge": "Sort: margin",
+        "triAvancement": "Sort: progress",
+        "enRetard": "Late",
+        "margeNegative": "Negative margin"
+      },
+      "cols": {
+        "responsable": "Manager",
+        "budgetRevise": "Revised budget",
+        "margeProjetee": "Projected margin",
+        "echeance": "Due",
+        "alerte": "Alert",
+        "prochaineAction": "Next action"
+      },
+      "finance": {
+        "venteAbsente": "Active sale missing",
+        "debourseAbsent": "Initial debourse missing",
+        "budgetAbsent": "Revised budget missing",
+        "margeIndisponible": "Margin not computable",
+        "accesRestreint": "Access restricted for this role",
+        "indisponible": "Finance unavailable"
+      },
+      "progress": {
+        "avancementAbsent": "Progress not recorded",
+        "factureNonTenue": "Billing not held at chantier",
+        "encaisseNonTenue": "Collections not held at chantier",
+        "indisponible": "Progress unavailable"
+      },
+      "schedule": {
+        "finPrevueAbsente": "Planned end missing"
+      },
+      "degradation": {
+        "synthese": "Summary unavailable",
+        "equipe": "Team unavailable",
+        "arbre": "Tree unavailable",
+        "finance": "Finance unavailable",
+        "progression": "Progress unavailable"
+      },
+      "portefeuille": {
+        "erreurChargement": "Portfolio loading failed — retry."
+      }
+    }
+  },
+  "cockpit": {
+    "erreurIdentite": "Unable to load the cockpit",
+    "erreurIdentiteDetail": "The site identity or status could not be loaded. Retry.",
+    "aFaire": "To do now",
+    "aucuneAction": "No action to process",
+    "ouvrir": "Open",
+    "gerer": "Manage",
+    "voir": "View",
+    "suspendu": "Site suspended — only compatible actions are available.",
+    "kpi": {
+      "venteActive": "Active sale excl. VAT",
+      "budgetRevise": "Revised budget excl. VAT",
+      "margeProjetee": "Projected margin",
+      "avancement": "Progress",
+      "echeance": "Deadline",
+      "retard": "late",
+      "restants": "remaining"
+    },
+    "preparation": {
+      "titre": "Prepare the start",
+      "identite": "Identity and client",
+      "action": {
+        "identite": "Fill identity",
+        "vente": "Check sales source",
+        "arbre": "Manage tree",
+        "budget": "Complete budget",
+        "responsables": "Manage team",
+        "dates": "Fill dates",
+        "os": "Record work order",
+        "planning": "Create schedule (recommended)"
+      },
+      "raison": {
+        "identite": "Client missing or incomplete",
+        "vente": "Sales reference missing",
+        "arbre": "No usable node",
+        "budget": "Initial direct cost missing",
+        "responsables": "Supervisor and site manager required",
+        "dates": "Invalid planned dates",
+        "os": "Work order required at start",
+        "planning": "No schedule — recommended, never blocking"
+      },
+      "vente": "Sales reference",
+      "arbre": "Site tree",
+      "budget": "Initial budget",
+      "responsables": "Managers",
+      "dates": "Planned dates",
+      "os": "Work order",
+      "planning": "Schedule"
+    },
+    "alerte": {
+      "margeNegative": "Negative projected margin",
+      "margeBaisse": "Margin down vs initial",
+      "financeIncomplete": "Sale or budget unavailable",
+      "retard": "Site late vs planned end",
+      "action": {
+        "budget": "Open budget",
+        "etude": "Check commercial source",
+        "planning": "Open schedule"
+      }
+    },
+    "flux": {
+      "titre": "Monthly flow",
+      "etape": "Step",
+      "action": "Act",
+      "etapeInconnue": "Progress",
+      "saisirAvancement": "chantiers.routes.avancementTitle"
+    },
+    "module": {
+      "arbre": "Tree",
+      "arbreResume": "Sold / internal, quote link",
+      "budget": "Budget & margin",
+      "budgetResume": "Direct cost, revisions, variances",
+      "planning": "Schedule",
+      "planningResume": "Activities and deadlines",
+      "situations": "Certificates",
+      "situationsResume": "Statements and retentions"
+    },
+    "activite": {
+      "titre": "Recent activity"
+    },
+    "cols": {
+      "responsable": "Manager",
+      "budgetRevise": "Revised budget",
+      "margeProjetee": "Projected margin",
+      "echeance": "Deadline",
+      "alerte": "Alert"
+    },
+    "filtres": {
+      "toutesAlertes": "All alerts",
+      "triCode": "Sort: code",
+      "triAlerte": "Sort: alert",
+      "triEcheance": "Sort: deadline",
+      "triMarge": "Sort: margin",
+      "triAvancement": "Sort: progress",
+      "enRetard": "Late",
+      "margeNegative": "Negative margin"
+    },
+    "os": {
+      "reference": "Work order reference",
+      "referencePh": "WO-2026-001",
+      "dateEffet": "Effective date",
+      "enregistrerEtDemarrer": "Record WO and start",
+      "champsRequis": "Reference and effective date are required.",
+      "bloqueurs": "Preparation incomplete",
+      "echec": "Start failed. Reload the cockpit."
     }
   }
 }

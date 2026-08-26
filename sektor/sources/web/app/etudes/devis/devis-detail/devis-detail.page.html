@@ -1,11 +1,16 @@
 <nf-page-shell scroll>
   <nf-page-header [config]="headerConfig">
-    @if (item(); as d) {
-      <nf-button actions variant="secondary" (clicked)="printDevis()">Imprimer</nf-button>
-      @if (d.dossierEtudeId) {
-        <nf-button actions variant="tertiary" (clicked)="openDossier()">Voir dossier</nf-button>
+    <ng-container actions>
+      @if (item(); as d) {
+        <nf-button variant="secondary" (clicked)="printDevis()">Imprimer</nf-button>
+        @if (d.chantierGenereId) {
+          <nf-button variant="secondary" (clicked)="openChantier()">Ouvrir le chantier</nf-button>
+        }
+        @if (d.dossierEtudeId) {
+          <nf-button variant="tertiary" (clicked)="openDossier()">Voir l'étude</nf-button>
+        }
       }
-    }
+    </ng-container>
   </nf-page-header>
   <div class="devis-screen">
     <nf-entity-detail

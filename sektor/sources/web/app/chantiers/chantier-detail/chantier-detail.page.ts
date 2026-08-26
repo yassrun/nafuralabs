@@ -16,6 +16,8 @@ import {
 import { PhotoChantierGalleryComponent } from '../components/photo-chantier-gallery/photo-chantier-gallery.component';
 import { ChantierLotsTabComponent } from '../components/chantier-lots-tab/chantier-lots-tab.component';
 import { ChantierEquipeTabComponent } from '../components/chantier-equipe-tab/chantier-equipe-tab.component';
+import { PilotageTabComponent } from '../components/pilotage-tab/pilotage-tab.component';
+import { safePortefeuilleReturnUrl } from '../chantiers-listing/portefeuille-state';
 import type { BadgeVariant } from '@platform/lib/anatomy/types';
 import { MadCurrencyPipe } from '@platform/lib/anatomy/pipes/mad-currency.pipe';
 
@@ -74,47 +76,23 @@ const STATUS_VARIANT: Record<ChantierStatus, BadgeVariant> = {
   selector: 'app-chantier-detail',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterLink, PageShellComponent, PageHeaderComponent, BadgeComponent, ButtonComponent, EmptyStateComponent, MadCurrencyPipe, TranslateModule, AttachmentListComponent, PhotoChantierGalleryComponent, ChantierLotsTabComponent, ChantierEquipeTabComponent],
+  imports: [CommonModule, RouterLink, PageShellComponent, PageHeaderComponent, BadgeComponent, ButtonComponent, EmptyStateComponent, MadCurrencyPipe, TranslateModule, AttachmentListComponent, PhotoChantierGalleryComponent, ChantierLotsTabComponent, ChantierEquipeTabComponent, PilotageTabComponent],
   template: `
     <nf-page-shell [scroll]="true">
       @if (chantier(); as c) {
         <nf-page-header [config]="headerConfig()"></nf-page-header>
 
-        <!-- Hero -->
-        <section class="hero">
-          <div class="hero__left">
-            <p class="hero__kicker">{{ c.code }} · {{ c.ville }}</p>
-            <h1 class="hero__title">{{ c.name }}</h1>
-            @if (c.marcheReference) {
-              <p class="hero__ref">{{ 'chantiers.chantier.detail.marcheRef' | translate:{ ref: c.marcheReference } }}</p>
+        <!-- AC-1 — une seule identité de page : le header porte code + nom. Ici seulement
+             le statut, le client et la source, sans second H1 ni code dupliqué. -->
+        <div class="chantier-meta">
+          <nf-badge [variant]="statusVariant(c.status)">{{ statusLabel(c.status) }}</nf-badge>
+          <span class="chantier-meta__client">{{ c.clientName ?? '—' }}</span>
+          @if (provenance(); as p) {
+            @if (p.sourceVente === 'DEVIS' && p.devisNumero) {
+              <span class="chantier-meta__src">· {{ p.devisNumero }}</span>
             }
-          </div>
-          <div class="hero__right">
-            <div class="kpis">
-              <article class="kpi">
-                <span class="kpi__label">{{ 'chantiers.chantier.detail.hero.avancement' | translate }}</span>
-                <strong class="kpi__value kpi__value--lg">{{ c.avancementPercent }}%</strong>
-                <div class="progress-bar"><div class="progress-fill" [style.width.%]="c.avancementPercent"></div></div>
-              </article>
-              <article class="kpi">
-                <span class="kpi__label">{{ budgetHtLabelKey() | translate }}</span>
-                <strong class="kpi__value">{{ displayBudgetHt() | mad }}</strong>
-              </article>
-              <article class="kpi">
-                <span class="kpi__label">{{ 'chantiers.chantier.detail.hero.factureHt' | translate }}</span>
-                <strong class="kpi__value">{{ c.facturesEmisesHt | mad }}</strong>
-              </article>
-              <article class="kpi">
-                <span class="kpi__label">{{ 'chantiers.chantier.detail.hero.encaisseTtc' | translate }}</span>
-                <strong class="kpi__value">{{ c.encaissementsTtc | mad }}</strong>
-              </article>
-            </div>
-            <nf-badge [variant]="statusVariant(c.status)">{{ statusLabel(c.status) }}</nf-badge>
-            <nf-button variant="secondary" size="sm" icon="event" (clicked)="openPlanning()">
-              {{ 'chantiers.planning.title' | translate }}
-            </nf-button>
-          </div>
-        </section>
+          }
+        </div>
 
         <!-- Tabs -->
         <nav class="tabs" role="tablist">
@@ -126,74 +104,15 @@ const STATUS_VARIANT: Record<ChantierStatus, BadgeVariant> = {
               [class.tab--active]="activeTab() === tab.id"
               [attr.aria-selected]="activeTab() === tab.id"
               (click)="setTab(tab.id)">
-              {{ tab.label }}
+              {{ tab.labelKey | translate }}
             </button>
           }
         </nav>
 
-        <!-- Tab: Vue d'ensemble -->
+        <!-- Tab: Pilotage (défaut — AC-16) — consomme strictement le read model cockpit -->
         @if (activeTab() === 'overview') {
           <section class="tab-panel">
-            <div class="info-grid">
-              <article class="info-card">
-                <h3>{{ 'chantiers.chantier.detail.sections.equipe' | translate }}</h3>
-                <p class="muted">{{ 'chantiers.chantier.detail.equipe.seeTab' | translate }}</p>
-                <nf-button variant="ghost" size="sm" type="button" (click)="setTab('equipe')">
-                  {{ 'chantiers.chantier.detail.tabs.equipe' | translate }}
-                </nf-button>
-              </article>
-              <article class="info-card">
-                <h3>{{ 'chantiers.chantier.detail.sections.workflow' | translate }}</h3>
-                <p class="muted">{{ 'chantiers.chantier.detail.workflowHint' | translate }}</p>
-                <div class="info-card__actions">
-                  <nf-button variant="ghost" size="sm" type="button" (click)="setTab('lots')">
-                    {{ 'chantiers.chantier.detail.tabs.lots' | translate }}
-                  </nf-button>
-                  <nf-button variant="ghost" size="sm" type="button" (click)="openAvancement()">
-                    {{ 'chantiers.routes.avancementTitle' | translate }}
-                  </nf-button>
-                  <nf-button variant="ghost" size="sm" type="button" (click)="openAttachements()">
-                    {{ 'chantiers.routes.attachementsTitle' | translate }}
-                  </nf-button>
-                  <nf-button variant="ghost" size="sm" type="button" (click)="setTab('situations')">
-                    {{ 'chantiers.chantier.detail.tabs.situations' | translate }}
-                  </nf-button>
-                  <nf-button variant="ghost" size="sm" type="button" (click)="openJournal()">
-                    {{ 'chantiers.routes.journalTitle' | translate }}
-                  </nf-button>
-                </div>
-              </article>
-              <article class="info-card">
-                <h3>{{ 'chantiers.chantier.detail.sections.calendrier' | translate }}</h3>
-                <dl>
-                  <dt>{{ 'chantiers.common.fields.client' | translate }}</dt><dd>{{ c.clientName ?? '—' }}</dd>
-                  <dt>{{ 'chantiers.chantier.detail.labels.ordreService' | translate }}</dt><dd>{{ c.dateOrdreService ? (c.dateOrdreService | date:'dd/MM/yyyy') : ('chantiers.common.values.notDefined' | translate) }}</dd>
-                  <dt>{{ 'chantiers.chantier.detail.labels.debut' | translate }}</dt><dd>{{ c.dateDebut ? (c.dateDebut | date:'dd/MM/yyyy') : ('chantiers.common.values.notDefined' | translate) }}</dd>
-                  <dt>{{ 'chantiers.chantier.detail.labels.finPrevue' | translate }}</dt><dd>{{ c.dateFinPrevue ? (c.dateFinPrevue | date:'dd/MM/yyyy') : ('chantiers.common.values.notDefined' | translate) }}</dd>
-                  @if (c.dateFinReelle) {
-                    <dt>{{ 'chantiers.chantier.detail.labels.finReelle' | translate }}</dt><dd>{{ c.dateFinReelle | date:'dd/MM/yyyy' }}</dd>
-                  }
-                </dl>
-              </article>
-              <article class="info-card">
-                <h3>{{ 'chantiers.chantier.detail.sections.finances' | translate }}</h3>
-                <dl>
-                  <dt>{{ budgetHtLabelKey() | translate }}</dt><dd>{{ displayBudgetHt() | mad }}</dd>
-                  <dt>{{ 'chantiers.chantier.detail.labels.tva' | translate }}</dt><dd>{{ c.tvaTaux }}%</dd>
-                  <dt>{{ 'chantiers.chantier.detail.labels.cautionGarantie' | translate }}</dt><dd>{{ c.cautionGarantie ?? 7 }}%</dd>
-                  @if (c.delaiPaiementJours) {
-                    <dt>{{ 'chantiers.chantier.detail.labels.delaiPaiement' | translate }}</dt>
-                    <dd>{{ 'chantiers.chantier.detail.labels.delaiPaiementJours' | translate:{ count: c.delaiPaiementJours } }}</dd>
-                  }
-                </dl>
-              </article>
-              @if (c.description) {
-                <article class="info-card info-card--full">
-                  <h3>{{ 'chantiers.chantier.detail.sections.description' | translate }}</h3>
-                  <p>{{ c.description }}</p>
-                </article>
-              }
-            </div>
+            <app-pilotage-tab [chantierId]="c.id" />
           </section>
         }
 
@@ -207,13 +126,25 @@ const STATUS_VARIANT: Record<ChantierStatus, BadgeVariant> = {
           <section class="tab-panel">
             <div class="info-grid">
               <article class="info-card">
+                <!-- AC-3/AC-12 — vente active et budget révisé nommés distinctement ; aucune absence en zéro. -->
                 <h3>{{ 'chantiers.chantier.detail.sections.syntheseBudget' | translate }}</h3>
                 <dl>
-                  <dt>{{ budgetHtLabelKey() | translate }}</dt><dd>{{ displayBudgetHt() | mad }}</dd>
-                  <dt>{{ budgetTtcLabelKey() | translate }}</dt><dd>{{ (displayBudgetHt() * (1 + c.tvaTaux / 100)) | mad }}</dd>
-                  <dt>{{ 'chantiers.chantier.detail.labels.situationsCumulHt' | translate }}</dt><dd>{{ c.cumulSituationsHt | mad }}</dd>
-                  <dt>{{ 'chantiers.chantier.detail.labels.factureHt' | translate }}</dt><dd>{{ c.facturesEmisesHt | mad }}</dd>
-                  <dt>{{ 'chantiers.chantier.detail.labels.encaisseTtc' | translate }}</dt><dd>{{ c.encaissementsTtc | mad }}</dd>
+                  <dt>{{ 'chantiers.chantier.detail.labels.venteActiveHt' | translate }}</dt>
+                  <dd>{{ venteActiveHt() != null ? (venteActiveHt()! | mad) : ('chantiers.common.values.notAvailable' | translate) }}</dd>
+                  <dt>{{ 'chantiers.chantier.detail.labels.budgetReviseHt' | translate }}</dt>
+                  <dd>{{ budgetReviseHt() != null ? (budgetReviseHt()! | mad) : ('chantiers.common.values.notAvailable' | translate) }}</dd>
+                  <dt>{{ 'chantiers.chantier.detail.labels.debourseInitialHt' | translate }}</dt>
+                  <dd>{{ debourseInitialHt() != null ? (debourseInitialHt()! | mad) : ('chantiers.common.values.notAvailable' | translate) }}</dd>
+                  @if (margeProjetee(); as m) {
+                    <dt>{{ 'chantiers.chantier.detail.labels.margeProjetee' | translate }}</dt>
+                    <dd>{{ m.valeur | mad }}<span class="pct-inline"> · {{ m.pct != null ? (m.pct | number:'1.0-2') + ' %' : '—' }}</span></dd>
+                  }
+                  <dt>{{ 'chantiers.chantier.detail.labels.situationsCumulHt' | translate }}</dt>
+                  <dd>{{ c.cumulSituationsHt != null ? (c.cumulSituationsHt | mad) : ('chantiers.common.values.notAvailable' | translate) }}</dd>
+                  <dt>{{ 'chantiers.chantier.detail.labels.factureHt' | translate }}</dt>
+                  <dd>{{ c.facturesEmisesHt != null ? (c.facturesEmisesHt | mad) : ('chantiers.common.values.notAvailable' | translate) }}</dd>
+                  <dt>{{ 'chantiers.chantier.detail.labels.encaisseTtc' | translate }}</dt>
+                  <dd>{{ c.encaissementsTtc != null ? (c.encaissementsTtc | mad) : ('chantiers.common.values.notAvailable' | translate) }}</dd>
                 </dl>
               </article>
             </div>
@@ -333,6 +264,12 @@ const STATUS_VARIANT: Record<ChantierStatus, BadgeVariant> = {
   `,
   styles: [`
     :host { display: block; height: 100%; }
+
+    .chantier-meta {
+      display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0 0.75rem;
+      font-size: 0.9rem; color: var(--nf-color-text-secondary);
+    }
+    .chantier-meta__src { color: var(--nf-color-text-muted); }
 
     .hero {
       display: grid;
@@ -460,14 +397,16 @@ export class ChantierDetailPage {
     { initialValue: this.route.snapshot.paramMap.get('id')?.trim() ?? '' },
   );
 
+  /** P1-16 — les onglets portent des CLÉS de libellé ; la traduction est rendue par le pipe
+   * (`| translate`) dans le template — réactive au chargement/au changement de langue. */
   readonly tabs = computed(() => ([
-    { id: 'overview' as DetailTab, label: this.translate.instant('chantiers.chantier.detail.tabs.overview') },
-    { id: 'equipe' as DetailTab, label: this.translate.instant('chantiers.chantier.detail.tabs.equipe') },
-    { id: 'lots' as DetailTab, label: this.translate.instant('chantiers.chantier.detail.tabs.lots') },
-    { id: 'budget' as DetailTab, label: this.translate.instant('chantiers.chantier.detail.tabs.budget') },
-    { id: 'situations' as DetailTab, label: this.translate.instant('chantiers.chantier.detail.tabs.situations') },
-    { id: 'documents' as DetailTab, label: this.translate.instant('chantiers.chantier.detail.tabs.documents') },
-    { id: 'photos' as DetailTab, label: this.translate.instant('chantiers.chantier.detail.tabs.photos') },
+    { id: 'overview' as DetailTab, labelKey: 'chantiers.chantier.detail.tabs.pilotage' },
+    { id: 'equipe' as DetailTab, labelKey: 'chantiers.chantier.detail.tabs.equipe' },
+    { id: 'lots' as DetailTab, labelKey: 'chantiers.chantier.detail.tabs.lots' },
+    { id: 'budget' as DetailTab, labelKey: 'chantiers.chantier.detail.tabs.budget' },
+    { id: 'situations' as DetailTab, labelKey: 'chantiers.chantier.detail.tabs.situations' },
+    { id: 'documents' as DetailTab, labelKey: 'chantiers.chantier.detail.tabs.documents' },
+    { id: 'photos' as DetailTab, labelKey: 'chantiers.chantier.detail.tabs.photos' },
   ]));
 
   constructor() {
@@ -528,6 +467,49 @@ export class ChantierDetailPage {
   readonly situationReferenceLabelKey = computed(() => this.activeSituationReference()?.labelKey ?? 'chantiers.chantier.detail.labels.reference');
   readonly situationHintKey = computed(() => this.activeSituationReference()?.hintKey ?? 'chantiers.chantier.detail.situations.hint');
 
+  /**
+   * AC-3/AC-12 — vente active HT : le devis accepté (snapshot), jamais un coût ni un fallback.
+   * AC-14 — absente si la source manque, jamais zéro.
+   */
+  readonly venteActiveHt = computed(() => {
+    const summary = this.summary();
+    if (summary?.montantVenteActifHt != null && summary.montantVenteActifHt > 0) {
+      return summary.montantVenteActifHt;
+    }
+    return null;
+  });
+
+  /** AC-12 — budget révisé HT : dernier coût prévu, dérivé de l'arbre. */
+  readonly budgetReviseHt = computed(() => {
+    const summary = this.summary();
+    if (summary?.budgetReviseHt != null) {
+      return summary.budgetReviseHt;
+    }
+    return summary?.budget.reviseHt ?? null;
+  });
+
+  /** AC-12 — déboursé initial (snapshot), absent en création directe. */
+  readonly debourseInitialHt = computed(() => this.summary()?.debourseInitialHt ?? null);
+
+  /** AC-12 — marge projetée valeur et taux (formules du dictionnaire, jamais saisies). */
+  readonly margeProjetee = computed(() => {
+    const s = this.summary();
+    if (s?.margeProjeteeHt == null) return null;
+    return { valeur: s.margeProjeteeHt, pct: s.margeProjeteePct ?? null };
+  });
+
+  /** AC-15 — provenance : ouvrir l'étude et le devis par identifiant exact du snapshot. */
+  readonly provenance = computed(() => {
+    const c = this.chantier();
+    return {
+      dossierEtudeId: c?.dossierEtudeId ?? null,
+      devisId: c?.devisId ?? null,
+      devisNumero: c?.devisNumero ?? null,
+      devisVersion: c?.devisVersion ?? null,
+      sourceVente: c?.sourceVente ?? null,
+    };
+  });
+
   readonly displayBudgetHt = computed(() => {
     const summary = this.summary();
     const chantier = this.chantier();
@@ -559,7 +541,8 @@ export class ChantierDetailPage {
 
   readonly headerConfig = computed(() => ({
     title: this.chantier()?.code ?? this.translate.instant('chantiers.chantier.detail.fallbackTitle'),
-    subtitle: this.chantier()?.name,
+    // P1-16 — la donnée chantier expose `label` (pas `name`) ; sous-titre jamais vide si label présent.
+    subtitle: this.chantier()?.label ?? this.chantier()?.name ?? undefined,
     icon: 'construction',
     breadcrumbs: [
       { label: this.translate.instant('chantiers.routes.chantiersCrumb'), route: '/chantiers' },
@@ -615,6 +598,18 @@ export class ChantierDetailPage {
     void this.router.navigate(['/chantiers/planning'], { queryParams: { chantier: c.id } });
   }
 
+  /** AC-15 — depuis le chantier, ouvrir le devis accepté par son identifiant exact. */
+  openDevis(): void {
+    const id = this.provenance()?.devisId;
+    if (id) void this.router.navigate(['/etudes/devis', id]);
+  }
+
+  /** AC-15 — depuis le chantier, ouvrir l'étude gagnée par son identifiant exact. */
+  openEtude(): void {
+    const id = this.provenance()?.dossierEtudeId;
+    if (id) void this.router.navigate(['/etudes/dossiers', id]);
+  }
+
   openAvancement(): void {
     const c = this.chantier();
     if (!c?.id) return;
@@ -634,7 +629,9 @@ export class ChantierDetailPage {
   }
 
   goBack(): void {
-    void this.router.navigate(['/chantiers']);
+    void this.router.navigateByUrl(
+      safePortefeuilleReturnUrl(this.route.snapshot.queryParamMap.get('returnUrl')),
+    );
   }
 
   editChantier(): void {

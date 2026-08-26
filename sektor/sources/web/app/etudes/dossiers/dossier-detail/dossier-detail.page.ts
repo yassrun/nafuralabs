@@ -472,22 +472,51 @@ export class DossierDetailPage {
           break;
         }
         case 'MARQUER_GAGNE': {
+          // AC-3 — le gain approuve le devis lié ; le montant attribué est pré-rempli du total
+          // devis et doit lui correspondre. AC-4 — une marge négative demande un motif réservé.
+          const synthese = this.synthese();
+          const devisId = synthese?.devisGenereId ?? dossier.devisGenereId;
+          if (!devisId) {
+            this.erreur.set('Aucun devis lié : générez d’abord le devis (AC-2).');
+            return;
+          }
+          const totalDevis = synthese?.totalHt ?? 0;
           const dateRaw = window.prompt(
             "Date d'attribution (AAAA-MM-JJ) :",
             new Date().toISOString().slice(0, 10),
           );
           if (!dateRaw?.trim()) return;
           const referenceMarche = window.prompt('Référence marché (optionnel) :') ?? undefined;
-          const montantRaw = window.prompt('Montant attribué HT (optionnel) :') ?? undefined;
+          const montantRaw =
+            window.prompt(
+              `Montant attribué HT — doit égaler le total devis ${totalDevis.toLocaleString('fr-FR')} MAD (AC-3) :`,
+              String(totalDevis),
+            ) ?? undefined;
           const montantAttribue =
             montantRaw?.trim() && !Number.isNaN(Number(montantRaw))
               ? Number(montantRaw)
               : undefined;
+          if (montantAttribue === undefined) {
+            this.erreur.set('Le montant attribué est obligatoire (AC-3).');
+            return;
+          }
+          const motifDerogation =
+            montantAttribue < totalDevis
+              ? (window.prompt(
+                  'Marge négative : motif de dérogation (réservé owner / dg, AC-4) :',
+                ) ?? undefined)
+              : undefined;
+          if (montantAttribue < totalDevis && !motifDerogation?.trim()) {
+            this.erreur.set('Motif de dérogation obligatoire pour une marge négative (AC-4).');
+            return;
+          }
           this.dossier.set(
             await this.api.marquerGagne(dossier.id, {
               dateAttribution: dateRaw.trim(),
               referenceMarche: referenceMarche?.trim() || undefined,
+              devisId,
               montantAttribue,
+              motifDerogation: motifDerogation?.trim() || undefined,
             }),
           );
           await this.refreshSynthese(dossier.id);
@@ -721,7 +750,14 @@ export class DossierDetailPage {
   private appliquerErreurTransition(e: unknown): void {
     const err = e as {
       status?: number;
-      error?: { message?: string; code?: string; gate?: ResultatGate };
+      error?: {
+        message?: string;
+        code?: string;
+        gate?: ResultatGate;
+        totalDevis?: number;
+        montantAttribue?: number;
+        debourseInitial?: number;
+      };
     };
     if (err?.status === 422 && err.error?.gate) {
       const gate = err.error.gate;
@@ -737,6 +773,24 @@ export class DossierDetailPage {
         tagged.problemes.length > 0
           ? `${tagged.problemes.length} point(s) empêchent de continuer — voir la liste ci-dessous.`
           : (err.error.code ?? 'Étape non franchie.'),
+      );
+      return;
+    }
+    // AC-3 — l'attribution diffère du total devis : montrer les deux montants, ne rien réécrire.
+    if (err?.status === 422 && err.error?.code === 'etudes.dossier.attribution_differente_du_devis') {
+      const total = err.error.totalDevis;
+      const attribue = err.error.montantAttribue;
+      this.erreur.set(
+        `Le montant attribué (${formatMontant(attribue)}) ne correspond pas au total du devis (${formatMontant(total)}). Corrigez la version du devis avant le gain (AC-3) — rien n'a été modifié.`,
+      );
+      return;
+    }
+    // AC-4 — marge négative refusée aux rôles ordinaires ; les montants expliquent le refus.
+    if (err?.status === 422 && err.error?.code === 'etudes.dossier.marge_negative_refusee') {
+      const attribue = err.error.montantAttribue;
+      const debourse = err.error.debourseInitial;
+      this.erreur.set(
+        `Marge initiale négative : vente ${formatMontant(attribue)} < déboursé initial ${formatMontant(debourse)}. Seul owner ou dg peut déroger, avec un motif (AC-4).`,
       );
       return;
     }
@@ -778,4 +832,10 @@ export class DossierDetailPage {
     const translated = this.translate.instant(key);
     return translated !== key ? translated : key;
   }
+}
+
+/** Format monétaire MAD pour les messages d'erreur du gain (AC-3/AC-4). */
+function formatMontant(v: number | undefined | null): string {
+  if (v === undefined || v === null || Number.isNaN(v)) return 'indisponible';
+  return `${v.toLocaleString('fr-FR', { maximumFractionDigits: 2 })} MAD`;
 }

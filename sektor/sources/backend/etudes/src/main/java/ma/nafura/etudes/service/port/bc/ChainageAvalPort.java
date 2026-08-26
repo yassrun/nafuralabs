@@ -21,6 +21,11 @@ public interface ChainageAvalPort {
 
     ConversionResult convert(ConversionCommand command);
 
+    /**
+     * Commande de conversion — le port transporte aussi le <b>snapshot commercial</b> que le
+     * chantier conserve (continuite-etude-devis-chantier AC-9, AC-10) : provenance immuable et
+     * montants initiaux, posés une seule fois à la création, jamais modifiables par la suite.
+     */
     record ConversionCommand(
             UUID dossierId,
             String clientId,
@@ -35,7 +40,22 @@ public interface ChainageAvalPort {
             String marcheReference,
             BigDecimal montantHt,
             BigDecimal tauxTva,
-            List<LotProjection> lots) {}
+            List<LotProjection> lots,
+            // ── Snapshot commercial (AC-9) ───────────────────────────────────────
+            /** Identifiant du devis accepté (source DEVIS) ; null en création directe. */
+            UUID devisId,
+            /** Numéro du devis accepté — copié, pas requêté (AC-15). */
+            String devisNumero,
+            /** Version du devis accepté au moment du gain. */
+            Integer devisVersion,
+            /** Date d'acceptation du devis (gain). */
+            LocalDate dateAcceptation,
+            /** Source de vente : {@code DEVIS} à la conversion, null en création directe. */
+            String sourceVente,
+            /** montantVenteInitialHt = total devis accepté = somme des vendus (AC-10). */
+            BigDecimal montantVenteInitialHt,
+            /** debourseInitialHt = somme des déboursés initiaux copiés sur les nœuds (AC-10). */
+            BigDecimal debourseInitialHt) {}
 
     /**
      * Un nœud du DPGF projeté vers l'aval.

@@ -13,7 +13,7 @@ describe('StockBudgetSyncService', () => {
 
     const ok = budget.recordConsommation({
       chantierId: 'ch-001',
-      rubrique: 'MATERIAUX',
+      rubrique: 'MATIERE',
       montantHt: 1900,
       articleId: 'art-ciment',
       articleLabel: 'Ciment CPJ 45',
@@ -25,7 +25,7 @@ describe('StockBudgetSyncService', () => {
 
     expect(ok).toBe(true);
     const b = budget.getBudgetById('ch-001');
-    const mat = b?.lignes.find((l) => l.rubrique === 'MATERIAUX');
+    const mat = b?.lignes.find((l) => l.rubrique === 'MATIERE');
     expect(mat?.realiseMatiereStockHt).toBeGreaterThan(0);
     const drill = mat?.drilldown?.find((d) => d.articleId === 'art-ciment');
     expect(drill?.qteRealiseeStock ?? 0).toBeGreaterThanOrEqual(2);

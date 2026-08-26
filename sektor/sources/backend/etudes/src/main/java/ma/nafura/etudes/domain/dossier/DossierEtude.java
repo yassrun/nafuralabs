@@ -161,6 +161,16 @@ public class DossierEtude implements AuditableEtude {
     @Column(name = "montant_attribue", precision = 18, scale = 4)
     private BigDecimal montantAttribue;
 
+    /**
+     * Empreinte canonique de la commande de gain acceptée.
+     *
+     * <p>Elle rend le geste idempotent sans créer une seconde vérité métier : seules les entrées
+     * de la commande sont hachées, les valeurs métier restent dans leurs colonnes dédiées et dans
+     * le journal de transition.
+     */
+    @Column(name = "gain_commande_empreinte", length = 64)
+    private String gainCommandeEmpreinte;
+
     @Column(name = "motif_perte", length = 40)
     private String motifPerte;
 

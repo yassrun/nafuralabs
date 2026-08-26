@@ -113,7 +113,10 @@ class DevisServiceClientTest {
         when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         when(jdbcTemplate.query(any(String.class), any(org.springframework.jdbc.core.RowMapper.class), any(), any()))
                 .thenReturn(java.util.List.of());
-        when(aocRepository.findByIdAndTenantId(any(), any())).thenReturn(java.util.Optional.empty());
+        // Le dossier de test n'a pas d'appel d'offres lié : ce stubbing est une garantie, pas un chemin pris.
+        org.mockito.Mockito.lenient()
+                .when(aocRepository.findByIdAndTenantId(any(), any()))
+                .thenReturn(java.util.Optional.empty());
 
         Devis devis = service.createFromDossier(dossier);
 

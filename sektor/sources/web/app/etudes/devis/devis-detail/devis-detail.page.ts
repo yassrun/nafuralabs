@@ -163,12 +163,25 @@ export class DevisDetailPage extends ConfigDrivenDetailPage<Devis> {
     if (id) void this.nav.navigate(['/etudes/dossiers', id]);
   }
 
+  /** AC-15 — depuis le devis approuvé, ouvrir le chantier né de la conversion. */
+  openChantier(): void {
+    const id = this.item()?.chantierGenereId;
+    if (id) void this.nav.navigate(['/chantiers', id]);
+  }
+
   protected override async handleCustomAction(
     event: DetailActionEvent<Devis>,
   ): Promise<void> {
     const item = event.item;
 
     if (event.actionId === 'new_version' && item) {
+      // AC-5 — le devis APPROUVE n'a plus de bouton « nouvelle version » (config visible=false) ;
+      // la garde reste pour un événement concurrent arrivé entre lecture et clic.
+      if (item.status === 'APPROUVE') {
+        this.showError('Devis approuvé — la version est figée (AC-5).');
+        await this.loadItem(this.itemId() ?? '');
+        return;
+      }
       const result = await this.confirmDialog.prompt({
         title: 'Modifications apportées dans cette nouvelle version :',
         fields: [{ key: 'modifications', label: 'Modifications', required: false }],
@@ -182,10 +195,18 @@ export class DevisDetailPage extends ConfigDrivenDetailPage<Devis> {
       return;
     }
 
-    if (event.actionId === 'convert_chantier' && item) {
-      this.nav.navigate(['/chantiers/new'], {
-        queryParams: { devisId: item.id },
-      });
+    // AC-5/AC-15 — le devis approuvé ouvre l'étude (source) ou le chantier né de la conversion ;
+    // il ne convertit pas lui-même. Navigation par identifiant exact, jamais par recherche.
+    if (event.actionId === 'open_etude_chantier' && item) {
+      if (item.chantierGenereId) {
+        this.nav.navigate(['/chantiers', item.chantierGenereId]);
+        return;
+      }
+      if (item.dossierEtudeId) {
+        this.nav.navigate(['/etudes/dossiers', item.dossierEtudeId]);
+        return;
+      }
+      this.showError('Aucune étude source ni chantier lié.');
       return;
     }
 

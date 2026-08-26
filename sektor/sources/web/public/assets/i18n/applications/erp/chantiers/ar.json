@@ -89,6 +89,10 @@
         "fournisseur": "المورد",
         "montant": "المبلغ",
         "date": "التاريخ"
+      },
+      "values": {
+        "notAvailable": "غير متاح",
+        "notDefined": "غير محدد"
       }
     },
     "chantier": {
@@ -123,10 +127,14 @@
           "avancement": "التقدم",
           "budgetHt": "الميزانية بدون احتساب الضريبة",
           "factureHt": "المفوتر بدون احتساب الضريبة",
-          "encaisseTtc": "المحصل مع احتساب الضريبة"
+          "encaisseTtc": "المحصل مع احتساب الضريبة",
+          "venteActiveHt": "البيع النشط بدون الضريبة",
+          "budgetReviseHt": "الميزانية المعدلة بدون الضريبة",
+          "margeProjetee": "الهامش المتوقع"
         },
         "tabs": {
           "overview": "نظرة عامة",
+          "pilotage": "القيادة",
           "equipe": "الفريق",
           "lots": "الدفعات",
           "phases": "المراحل",
@@ -154,9 +162,16 @@
           "description": "الوصف",
           "syntheseBudget": "الملخص المالي للميزانية",
           "brouillonCalcule": "مسودة محسوبة",
-          "parLot": "حسب الدفعة"
+          "parLot": "حسب الدفعة",
+          "provenance": "المصدر التجاري"
         },
         "workflowHint": "اتبع المسار الميداني دون الرجوع إلى لوائح المحفظة: الشجرة، إدخال التقدم، دفاتر التعلية، الكشوف، واليومية.",
+        "provenance": {
+          "devisSource": "ورش منبثق من دراسة فائزة — عرض سعر مقبول.",
+          "openDevis": "فتح عرض السعر",
+          "openEtude": "فتح الدراسة",
+          "sansEtude": "بدون دراسة / عرض سعر (إنشاء مباشر)."
+        },
         "labels": {
           "chefChantier": "رئيس الورش",
           "conducteurTravaux": "مدير الأشغال",
@@ -187,7 +202,10 @@
           "netHt": "الصافي بدون احتساب الضريبة",
           "tvaMontant": "TVA {percent}%",
           "netTtc": "الصافي مع احتساب الضريبة",
-          "montantHtPeriode": "مبلغ الفترة بدون احتساب الضريبة"
+          "montantHtPeriode": "مبلغ الفترة بدون احتساب الضريبة",
+          "venteActiveHt": "البيع النشط بدون الضريبة",
+          "debourseInitialHt": "التكلفة المباشرة الأولية بدون الضريبة",
+          "margeProjetee": "الهامش المتوقع"
         },
         "columns": {
           "code": "الرمز",
@@ -1030,6 +1048,113 @@
         "definitive": "نهائي",
         "totalCautions": "إجمالي الكفالات"
       }
+    }
+  },
+  "cockpit": {
+    "erreurIdentite": "تعذر تحميل لوحة القيادة",
+    "erreurIdentiteDetail": "تعذر تحميل هوية الورش أو حالته. أعد المحاولة.",
+    "aFaire": "ما يجب فعله الآن",
+    "aucuneAction": "لا توجد إجراءات للمعالجة",
+    "ouvrir": "فتح",
+    "gerer": "إدارة",
+    "voir": "عرض",
+    "suspendu": "الورش موقوف — تتوفر الإجراءات المتوافقة فقط.",
+    "kpi": {
+      "venteActive": "البيع النشط بدون الضريبة",
+      "budgetRevise": "الميزانية المعدلة بدون الضريبة",
+      "margeProjetee": "الهامش المتوقع",
+      "avancement": "التقدم",
+      "echeance": "الاستحقاق",
+      "retard": "متأخر",
+      "restants": "متبقٍ"
+    },
+    "preparation": {
+      "titre": "التحضير للبدء",
+      "identite": "الهوية والعميل",
+      "action": {
+        "identite": "ملء الهوية",
+        "vente": "التحقق من مصدر البيع",
+        "arbre": "إدارة الشجرة",
+        "budget": "إكمال الميزانية",
+        "responsables": "إدارة الفريق",
+        "dates": "ملء التواريخ",
+        "os": "تسجيل أمر الخدمة",
+        "planning": "إنشاء الجدولة (موصى به)"
+      },
+      "raison": {
+        "identite": "العميل مفقود أو غير مكتمل",
+        "vente": "مرجع البيع مفقود",
+        "arbre": "لا توجد عقدة قابلة للاستخدام",
+        "budget": "التكلفة الأولية مفقودة",
+        "responsables": "مطلوب المشرف ورئيس الورش",
+        "dates": "تواريخ مخططة غير صالحة",
+        "os": "أمر الخدمة مطلوب عند البدء",
+        "planning": "لا جدولة — موصى به، لا يمنع أبداً"
+      },
+      "vente": "مرجع البيع",
+      "arbre": "شجرة الورش",
+      "budget": "الميزانية الأولية",
+      "responsables": "المسؤولون",
+      "dates": "التواريخ المخططة",
+      "os": "أمر الخدمة",
+      "planning": "الجدولة"
+    },
+    "alerte": {
+      "margeNegative": "هامش متوقع سلبي",
+      "margeBaisse": "انخفاض الهامش عن الأولي",
+      "financeIncomplete": "البيع أو الميزانية غير متاح",
+      "retard": "الورش متأخر عن النهاية المخططة",
+      "action": {
+        "budget": "فتح الميزانية",
+        "etude": "التحقق من المصدر التجاري",
+        "planning": "فتح الجدولة"
+      }
+    },
+    "flux": {
+      "titre": "تدفق الشهر",
+      "etape": "المرحلة",
+      "action": "تنفيذ",
+      "etapeInconnue": "التقدم",
+      "saisirAvancement": "chantiers.routes.avancementTitle"
+    },
+    "module": {
+      "arbre": "الشجرة",
+      "arbreResume": "مباع / داخلي، رابط إلى عرض السعر",
+      "budget": "الميزانية والهامش",
+      "budgetResume": "التكلفة المباشرة، المراجعات، الفروقات",
+      "planning": "الجدولة",
+      "planningResume": "الأنشطة والآجال",
+      "situations": "الكشوف",
+      "situationsResume": "الحسابات والاستقطاعات"
+    },
+    "activite": {
+      "titre": "النشاط الأخير"
+    },
+    "cols": {
+      "responsable": "المسؤول",
+      "budgetRevise": "الميزانية المعدلة",
+      "margeProjetee": "الهامش المتوقع",
+      "echeance": "الاستحقاق",
+      "alerte": "تنبيه"
+    },
+    "filtres": {
+      "toutesAlertes": "كل التنبيهات",
+      "triCode": "ترتيب: الرمز",
+      "triAlerte": "ترتيب: التنبيه",
+      "triEcheance": "ترتيب: الاستحقاق",
+      "triMarge": "ترتيب: الهامش",
+      "triAvancement": "ترتيب: التقدم",
+      "enRetard": "متأخر",
+      "margeNegative": "هامش سلبي"
+    },
+    "os": {
+      "reference": "مرجع أمر الخدمة",
+      "referencePh": "OS-2026-001",
+      "dateEffet": "تاريخ السريان",
+      "enregistrerEtDemarrer": "تسجيل أمر الخدمة والبدء",
+      "champsRequis": "المرجع وتاريخ السريان إلزاميان.",
+      "bloqueurs": "التحضير غير مكتمل",
+      "echec": "فشل البدء. أعد تحميل لوحة القيادة."
     }
   }
 }

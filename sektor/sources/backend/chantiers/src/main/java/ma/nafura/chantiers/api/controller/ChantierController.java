@@ -2,9 +2,11 @@ package ma.nafura.chantiers.api.controller;
 
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Map;
 import ma.nafura.chantiers.api.dto.ChantierLookupDto;
 import ma.nafura.chantiers.api.dto.ChantierSummaryDto;
 import ma.nafura.chantiers.api.request.ChantierCreateDto;
+import ma.nafura.chantiers.api.request.ChantierDemarrerOsDto;
 import ma.nafura.chantiers.api.request.ChantierUpdateDto;
 import ma.nafura.chantiers.domain.chantier.Chantier;
 import ma.nafura.chantiers.service.ChantierService;
@@ -72,7 +74,7 @@ public class ChantierController {
     @PostMapping
     @RequirePermission("chantiers.create")
     public ResponseEntity<Chantier> create(@Valid @RequestBody ChantierCreateDto body) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(body));
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.createDirect(body));
     }
 
     @PutMapping("/{id}")
@@ -88,10 +90,19 @@ public class ChantierController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/{id}/demarrer")
+    /** AC-6 — le démarrage passe uniquement par l'ordre de service (référence + date d'effet). */
+    @PostMapping("/{id}/demarrer-os")
     @RequirePermission("chantiers.update")
-    public ResponseEntity<Chantier> demarrer(@PathVariable String id) {
-        return ResponseEntity.ok(service.demarrer(id));
+    public ResponseEntity<?> demarrerAvecOs(
+            @PathVariable String id, @Valid @RequestBody ChantierDemarrerOsDto body) {
+        try {
+            return ResponseEntity.ok(service.demarrerAvecOs(id, body));
+        } catch (ChantierService.PreparationIncompleteException ex) {
+            return ResponseEntity.unprocessableEntity()
+                    .body(Map.of("code", ex.getMessage(), "bloqueurs", ex.getCodes()));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(Map.of("code", ex.getMessage()));
+        }
     }
 
     @PostMapping("/{id}/suspendre")

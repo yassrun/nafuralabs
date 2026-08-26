@@ -13,10 +13,16 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import ma.nafura.chantiers.api.dto.ChantierLookupDto;
 import ma.nafura.chantiers.api.request.ChantierCreateDto;
+import ma.nafura.chantiers.api.request.ChantierDemarrerOsDto;
 import ma.nafura.chantiers.api.request.ChantierUpdateDto;
 import ma.nafura.chantiers.domain.chantier.Chantier;
+import ma.nafura.chantiers.domain.chantier.ChantierRoleCodes;
+import ma.nafura.chantiers.domain.chantier.JournalChantier;
+import ma.nafura.chantiers.repository.ChantierLotRepository;
 import ma.nafura.chantiers.repository.ChantierRepository;
+import ma.nafura.chantiers.repository.JournalChantierRepository;
 import ma.nafura.platform.framework.context.TenantContext;
+import ma.nafura.platform.framework.context.UserContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -31,16 +37,25 @@ public class ChantierService {
     private final ChantierSeedService seedService;
     private final AvancementLectureService avancementLectureService;
     private final ChantierScopeService scopeService;
+    private final ChantierAffectationService affectationService;
+    private final ChantierLotRepository lotRepository;
+    private final JournalChantierRepository journalRepository;
 
     public ChantierService(
             ChantierRepository repository,
             ChantierSeedService seedService,
             AvancementLectureService avancementLectureService,
-            ChantierScopeService scopeService) {
+            ChantierScopeService scopeService,
+            ChantierAffectationService affectationService,
+            ChantierLotRepository lotRepository,
+            JournalChantierRepository journalRepository) {
         this.repository = repository;
         this.seedService = seedService;
         this.avancementLectureService = avancementLectureService;
         this.scopeService = scopeService;
+        this.affectationService = affectationService;
+        this.lotRepository = lotRepository;
+        this.journalRepository = journalRepository;
     }
 
     @Transactional(readOnly = true)
@@ -93,6 +108,29 @@ public class ChantierService {
 
     @Transactional
     public Chantier create(ChantierCreateDto request) {
+        return createInterne(request);
+    }
+
+    /**
+     * Entrée publique de création directe : la provenance commerciale appartient exclusivement
+     * à l'adapter de conversion Étude → Chantier et ne peut jamais être fournie par le REST.
+     */
+    @Transactional
+    public Chantier createDirect(ChantierCreateDto request) {
+        if (request.getDossierEtudeId() != null
+                || request.getDevisId() != null
+                || StringUtils.hasText(request.getDevisNumero())
+                || request.getDevisVersion() != null
+                || request.getDateAcceptation() != null
+                || StringUtils.hasText(request.getSourceVente())
+                || request.getMontantVenteInitialHt() != null
+                || request.getDebourseInitialHt() != null) {
+            throw new IllegalArgumentException("chantiers.creation_directe.provenance_interdite");
+        }
+        return createInterne(request);
+    }
+
+    private Chantier createInterne(ChantierCreateDto request) {
         if (!StringUtils.hasText(request.getClientId())) {
             throw new IllegalArgumentException("Client is required");
         }
@@ -129,7 +167,19 @@ public class ChantierService {
                 .tauxRg(request.getTauxRg())
                 .tauxRas(request.getTauxRas())
                 .tauxAvance(request.getTauxAvance())
-                .status(resolveBackendStatus(request.getStatus(), Chantier.STATUS_BROUILLON))
+                // AC-9 — snapshot commercial posé une seule fois, à la conversion. L'édition
+                // (ChantierUpdateDto) n'a aucun de ces champs : ils ne peuvent pas être changés.
+                .dossierEtudeId(request.getDossierEtudeId())
+                .devisId(request.getDevisId())
+                .devisNumero(trimOrNull(request.getDevisNumero()))
+                .devisVersion(request.getDevisVersion())
+                .dateAcceptation(request.getDateAcceptation())
+                .sourceVente(trimOrNull(request.getSourceVente()))
+                .montantVenteInitialHt(request.getMontantVenteInitialHt())
+                .debourseInitialHt(request.getDebourseInitialHt())
+                // P2-24 : une création n'accepte que l'état initial — aucun statut non initial
+                // n'est transformé silencieusement (TERMINE/RECEPTIONNE/CLOTURE refusés).
+                .status(statutInitial(request.getStatus()))
                 .societeId(trimOrNull(request.getSocieteId()))
                 .active(request.getActive() == null || request.getActive())
                 .createdAt(now)
@@ -237,18 +287,90 @@ public class ChantierService {
         repository.delete(entity);
     }
 
+    /**
+     * AC-6 (cockpit-chantier) — le démarrage passe uniquement par l'ordre de service : référence
+     * et date d'effet, commande atomique {@code EN_PREPARATION → EN_COURS}, journalisée.
+     *
+     * <p>Vérifie d'abord la checklist de préparation (AC-5) : client, référence de vente (si
+     * chantier issu d'étude), arbre exploitable, déboursé initial, responsables conducteur +
+     * chef de chantier, dates prévues. Le planning n'est jamais exigé (AC-8). Un bloqueur restant
+     * renvoie la liste stable des codes ; aucune écriture n'est faite.
+     */
+    /**
+     * AC-6 — le démarrage passe uniquement par l'ordre de service, depuis EN_PREPARATION.
+     * BROUILLON n'est jamais démarrable (contrat AC-7 : le chantier naît EN_PREPARATION).
+     */
     @Transactional
-    public Chantier demarrer(String id) {
+    public Chantier demarrerAvecOs(String id, ChantierDemarrerOsDto os) {
         Chantier entity = getById(id);
-        String status = entity.getStatus();
-        if (!Chantier.STATUS_BROUILLON.equals(status) && !Chantier.STATUS_EN_PREPARATION.equals(status)) {
-            throw new IllegalStateException("Chantier cannot be started from status " + status);
+        if (!Chantier.STATUS_EN_PREPARATION.equals(entity.getStatus())) {
+            throw new IllegalStateException(
+                    "Chantier cannot be started from status " + entity.getStatus());
         }
+        List<String> bloqueurs = bloqueursDePreparation(entity);
+        if (!bloqueurs.isEmpty()) {
+            throw new PreparationIncompleteException(bloqueurs);
+        }
+        if (os == null || !StringUtils.hasText(os.getOsReference()) || os.getOsDateEffet() == null) {
+            throw new IllegalArgumentException("chantiers.demarrage.os_requis");
+        }
+        entity.setOsReference(os.getOsReference().trim());
+        entity.setOsDateEffet(os.getOsDateEffet());
         entity.setStatus(Chantier.STATUS_EN_COURS);
         if (entity.getDateDemarrage() == null) {
-            entity.setDateDemarrage(LocalDate.now());
+            entity.setDateDemarrage(os.getOsDateEffet());
         }
-        return repository.save(entity);
+        Chantier demarre = repository.save(entity);
+        journalRepository.save(JournalChantier.builder()
+                .id("jrn-" + UUID.randomUUID())
+                .tenantId(tenantId())
+                .chantierId(demarre.getId())
+                .date(os.getOsDateEffet())
+                .auteur(acteurCourant())
+                .contenu("Démarrage par OS " + os.getOsReference().trim()
+                        + " (effet " + os.getOsDateEffet() + ")")
+                .type("ORDRE_SERVICE")
+                .build());
+        return demarre;
+    }
+
+    /** Acteur courant — uid, sinon email, sinon system. */
+    private static String acteurCourant() {
+        UUID userId = UserContext.getUserIdOrNull();
+        if (userId != null) {
+            return userId.toString();
+        }
+        String email = UserContext.getUserEmail();
+        return StringUtils.hasText(email) ? email : "system";
+    }
+
+    /**
+     * AC-5 — les contrôleurs bloquants de la préparation, hors OS. Code unique partagé par la
+     * checklist du cockpit et la commande de démarrage (P1-5) via {@link PreparationRegles}.
+     */
+    public List<String> bloqueursDePreparation(Chantier chantier) {
+        long nbLots = lotRepository.countByTenantIdAndChantierId(tenantId(), chantier.getId());
+        List<ma.nafura.chantiers.api.dto.ChantierAffectationDto> affectations =
+                affectationService.listByChantier(chantier.getId());
+        boolean aConducteur = affectations.stream()
+                .anyMatch(a -> ChantierRoleCodes.BTP_CONDUCTEUR_TRAVAUX.equals(a.getRoleCode()));
+        boolean aChef = affectations.stream()
+                .anyMatch(a -> ChantierRoleCodes.BTP_CHEF_CHANTIER.equals(a.getRoleCode()));
+        return PreparationRegles.bloquants(chantier, nbLots, aConducteur, aChef);
+    }
+
+    /** AC-5/AC-7 — la préparation est incomplète : codes stables des bloqueurs à résoudre. */
+    public static class PreparationIncompleteException extends RuntimeException {
+        private final transient List<String> codes;
+
+        public PreparationIncompleteException(List<String> codes) {
+            super("chantiers.demarrage.preparation_incomplete");
+            this.codes = List.copyOf(codes);
+        }
+
+        public List<String> getCodes() {
+            return codes;
+        }
     }
 
     @Transactional
@@ -408,6 +530,22 @@ public class ChantierService {
             return repository.findByIdAndTenantId(guessed, tenantId);
         }
         return Optional.empty();
+    }
+
+    /**
+     * P2-24 — seuls les états initiaux (BROUILLON, EN_PREPARATION) sont acceptés à la création.
+     * Un statut non initial demandé est refusé explicitement plutôt que transformé en silence.
+     */
+    private String statutInitial(String requested) {
+        if (!StringUtils.hasText(requested)) {
+            return Chantier.STATUS_BROUILLON;
+        }
+        String normalized = requested.trim().toUpperCase(Locale.ROOT);
+        if (Chantier.STATUS_BROUILLON.equals(normalized)
+                || Chantier.STATUS_EN_PREPARATION.equals(normalized)) {
+            return normalized;
+        }
+        throw new IllegalArgumentException("chantiers.creation.statut_initial_invalide");
     }
 
     private String resolveBackendStatus(String requested, String fallback) {

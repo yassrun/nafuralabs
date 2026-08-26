@@ -233,6 +233,7 @@ public class DevisService {
     @Transactional
     public Devis update(UUID id, DevisUpdateDto request) {
         Devis entity = requireModifiable(id);
+        assertDevisNonFige(entity);
         UUID tenantId = tenantId();
 
         if (request.getClientId() != null) {
@@ -295,6 +296,7 @@ public class DevisService {
     @Transactional
     public void delete(UUID id) {
         Devis entity = requireModifiable(id);
+        assertDevisNonFige(entity);
         repository.delete(entity);
     }
 
@@ -307,9 +309,7 @@ public class DevisService {
     @Transactional
     public Devis createVersion(UUID id, String modifications) {
         Devis entity = requireDevis(id);
-        if (TERMINAL.contains(entity.getStatus())) {
-            throw new IllegalStateException("etudes.devis.version_statut_interdit");
-        }
+        assertDevisNonFige(entity);
         DevisVersion snapshot = DevisVersion.builder()
                 .tenantId(tenantId())
                 .devis(entity)
@@ -330,6 +330,7 @@ public class DevisService {
     @Transactional
     public Devis submit(UUID id) {
         Devis entity = requireDevis(id);
+        assertDevisNonFige(entity);
         if (!Devis.STATUS_BROUILLON.equals(entity.getStatus())) {
             throw new IllegalStateException("etudes.devis.emit_hors_brouillon");
         }
@@ -341,6 +342,7 @@ public class DevisService {
     @Transactional
     public Devis negotiate(UUID id) {
         Devis entity = requireDevis(id);
+        assertDevisNonFige(entity);
         if (!Devis.STATUS_EMIS.equals(entity.getStatus())) {
             throw new IllegalStateException("etudes.devis.negotiate_hors_emis");
         }
@@ -351,6 +353,7 @@ public class DevisService {
     @Transactional
     public Devis approve(UUID id) {
         Devis entity = requireDevis(id);
+        assertDevisNonFige(entity);
         if (!Devis.STATUS_EMIS.equals(entity.getStatus())
                 && !Devis.STATUS_NEGOCIATION.equals(entity.getStatus())) {
             throw new IllegalStateException("etudes.devis.approve_hors_etat");
@@ -372,6 +375,7 @@ public class DevisService {
             throw new IllegalArgumentException("etudes.devis.motif_perte_requis");
         }
         Devis entity = requireDevis(id);
+        assertDevisNonFige(entity);
         if (!Devis.STATUS_EMIS.equals(entity.getStatus())
                 && !Devis.STATUS_NEGOCIATION.equals(entity.getStatus())) {
             throw new IllegalStateException("etudes.devis.lose_hors_etat");
@@ -384,6 +388,7 @@ public class DevisService {
     @Transactional
     public Devis cancel(UUID id) {
         Devis entity = requireDevis(id);
+        assertDevisNonFige(entity);
         if (Devis.STATUS_APPROUVE.equals(entity.getStatus())
                 || TERMINAL.contains(entity.getStatus())) {
             throw new IllegalStateException("etudes.devis.cancel_hors_etat");
@@ -453,6 +458,35 @@ public class DevisService {
             throw new IllegalStateException("etudes.devis.non_modifiable");
         }
         return entity;
+    }
+
+    /**
+     * AC-5 (continuite-etude-devis-chantier) — un devis approuvé est figé : ses lignes, DPGF,
+     * version, client et montants ne sont plus modifiables, annulables, supprimables, ni
+     * re-négociables ; créer une version concurrente est refusé. A fortiori quand il est lié à
+     * une étude {@code GAGNE} ou {@code CONVERTIE}.
+     */
+    private void assertDevisNonFige(Devis entity) {
+        if (Devis.STATUS_APPROUVE.equals(entity.getStatus())) {
+            throw new IllegalStateException("etudes.devis.fige_approuve");
+        }
+        if (entity.getDossierEtudeId() != null && estLieAEtudeGagneeOuConvertie(entity)) {
+            throw new IllegalStateException("etudes.devis.fige_etude_gagnee");
+        }
+    }
+
+    /** Lit le statut du dossier lié (JDBC — évite une dépendance circulaire vers DossierEtudeService). */
+    private boolean estLieAEtudeGagneeOuConvertie(Devis entity) {
+        List<String> statuts = jdbcTemplate.query(
+                "SELECT status FROM dossiers_etude WHERE id = ? AND tenant_id = ?",
+                (rs, i) -> rs.getString(1),
+                entity.getDossierEtudeId(),
+                tenantId());
+        if (statuts.isEmpty()) {
+            return false;
+        }
+        String statut = statuts.getFirst();
+        return "GAGNE".equals(statut) || "CONVERTIE".equals(statut);
     }
 
     private void assertDates(LocalDate emission, LocalDate validite) {

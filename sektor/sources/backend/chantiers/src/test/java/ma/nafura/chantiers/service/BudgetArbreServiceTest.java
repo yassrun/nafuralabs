@@ -74,6 +74,7 @@ class BudgetArbreServiceTest {
                 .code("CH-2026-001")
                 .label("Résidence")
                 .clientName("MOA")
+                .status(Chantier.STATUS_EN_PREPARATION)
                 .build());
         when(lotRepository.findByTenantIdAndChantierIdOrderByOrdreAscCodeAsc(TENANT, CHANTIER))
                 .thenReturn(List.of(lot()));
@@ -99,6 +100,9 @@ class BudgetArbreServiceTest {
                         debourse(POSTE_INTERNE, RubriqueDebourse.MAIN_DOEUVRE, "2000.00", "2000.00")));
 
         BudgetArbreDto arbre = service.lireArbre(CHANTIER);
+
+        // AC-14 — la page budget porte le statut réel : EN_PREPARATION n'est jamais présenté EN_COURS.
+        assertThat(arbre.getStatus()).isEqualTo(Chantier.STATUS_EN_PREPARATION);
 
         BudgetArbreDto.NoeudDto lot = arbre.getLots().getFirst();
         assertThat(lot.getTotaux().getDeboursePrevuHt()).isEqualByComparingTo("12000.00");

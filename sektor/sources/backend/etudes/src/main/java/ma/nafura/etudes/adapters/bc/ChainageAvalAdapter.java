@@ -85,6 +85,15 @@ public class ChainageAvalAdapter implements ChainageAvalPort {
         chantierDto.setDescription(command.objet());
         // AC-8 — un chantier gagné n'est pas un chantier démarré.
         chantierDto.setStatus(Chantier.STATUS_EN_PREPARATION);
+        // AC-9 — le snapshot commercial voyage avec la commande ; l'adapter ne le recalcule pas.
+        chantierDto.setDossierEtudeId(command.dossierId());
+        chantierDto.setDevisId(command.devisId());
+        chantierDto.setDevisNumero(command.devisNumero());
+        chantierDto.setDevisVersion(command.devisVersion());
+        chantierDto.setDateAcceptation(command.dateAcceptation());
+        chantierDto.setSourceVente(command.sourceVente());
+        chantierDto.setMontantVenteInitialHt(command.montantVenteInitialHt());
+        chantierDto.setDebourseInitialHt(command.debourseInitialHt());
         Chantier chantier = chantierService.create(chantierDto);
 
         Map<String, String> lotIdByCode = new HashMap<>();

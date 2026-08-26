@@ -182,6 +182,28 @@ public class DossierEtudeController {
         }
     }
 
+    /** AC-3 — l'attribution diffère du total devis : l'écran montre les deux montants. */
+    @ExceptionHandler(DossierEtudeService.AttributionMismatchException.class)
+    public ResponseEntity<Map<String, Object>> onAttributionMismatch(
+            DossierEtudeService.AttributionMismatchException ex) {
+        return ResponseEntity.unprocessableEntity()
+                .body(Map.of(
+                        "code", ex.getMessage(),
+                        "totalDevis", ex.getTotalDevis(),
+                        "montantAttribue", ex.getMontantAttribue()));
+    }
+
+    /** AC-4 — marge négative refusée aux rôles ordinaires, avec les montants en explication. */
+    @ExceptionHandler(DossierEtudeService.MargeNegativeRefuseeException.class)
+    public ResponseEntity<Map<String, Object>> onMargeNegativeRefusee(
+            DossierEtudeService.MargeNegativeRefuseeException ex) {
+        return ResponseEntity.unprocessableEntity()
+                .body(Map.of(
+                        "code", ex.getMessage(),
+                        "montantAttribue", ex.getMontantAttribue(),
+                        "debourseInitial", ex.getDebourseInitial()));
+    }
+
     @PostMapping("/{id}/perdu")
     @RequirePermission("etude.update")
     public ResponseEntity<?> perdu(@PathVariable UUID id, @Valid @RequestBody DossierPerduDto body) {

@@ -112,6 +112,8 @@ public class BudgetArbreService {
                 .code(chantier.getCode())
                 .name(chantier.getLabel())
                 .client(chantier.getClientName())
+                // AC-14 — le statut réel du chantier, jamais un statut voisin ni un état de présentation.
+                .status(chantier.getStatus())
                 .lots(racinesDto)
                 .totaux(total.totaux())
                 .rubriques(total.rubriques())

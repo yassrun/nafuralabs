@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAlias;
 import jakarta.validation.constraints.NotBlank;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 import lombok.Data;
 
 @Data
@@ -63,6 +64,24 @@ public class ChantierCreateDto {
 
     @JsonAlias("cautionGarantie")
     private BigDecimal tauxRg;
+
+    // ── Snapshot commercial (AC-9) — posé par l'adapter de conversion, jamais par l'UI. ──
+
+    private UUID dossierEtudeId;
+
+    private UUID devisId;
+
+    private String devisNumero;
+
+    private Integer devisVersion;
+
+    private LocalDate dateAcceptation;
+
+    private String sourceVente;
+
+    private BigDecimal montantVenteInitialHt;
+
+    private BigDecimal debourseInitialHt;
 
     private BigDecimal tauxRas;
 

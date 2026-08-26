@@ -91,6 +91,14 @@ public class Chantier implements Persistable<String> {
     @JsonProperty("dateDebut")
     private LocalDate dateDemarrage;
 
+    /** Référence de l'ordre de service de démarrage (AC-6 cockpit). */
+    @Column(name = "os_reference", length = 100)
+    private String osReference;
+
+    /** Date d'effet de l'ordre de service (AC-6 cockpit). */
+    @Column(name = "os_date_effet")
+    private LocalDate osDateEffet;
+
     @Column(name = "duree_mois")
     private Integer dureeMois;
 
@@ -103,6 +111,37 @@ public class Chantier implements Persistable<String> {
     @Column(name = "montant_ht", nullable = false, precision = 18, scale = 4)
     @JsonProperty("budgetHt")
     private BigDecimal montantHt;
+
+    // ── Provenance commerciale et snapshot initial (continuite-etude-devis-chantier AC-9) ──
+    // Posés une seule fois à la conversion depuis une étude GAGNE ; immutables ensuite.
+    // Un chantier créé directement n'a aucune de ces références (AC-17).
+
+    @Column(name = "dossier_etude_id")
+    private UUID dossierEtudeId;
+
+    @Column(name = "devis_id")
+    private UUID devisId;
+
+    @Column(name = "devis_numero", length = 50)
+    private String devisNumero;
+
+    @Column(name = "devis_version")
+    private Integer devisVersion;
+
+    @Column(name = "date_acceptation")
+    private LocalDate dateAcceptation;
+
+    /** Source de vente : {@code DEVIS} à la conversion ; null en création directe. */
+    @Column(name = "source_vente", length = 20)
+    private String sourceVente;
+
+    /** Total HT de la version de devis approuvée et copiée — jamais recalculé (AC-10). */
+    @Column(name = "montant_vente_initial_ht", precision = 18, scale = 4)
+    private BigDecimal montantVenteInitialHt;
+
+    /** Somme des déboursés initiaux copiés sur les nœuds — jamais recalculé (AC-10). */
+    @Column(name = "debourse_initial_ht", precision = 18, scale = 4)
+    private BigDecimal debourseInitialHt;
 
     @Column(name = "taux_tva", nullable = false, precision = 8, scale = 4)
     @JsonProperty("tvaTaux")
@@ -170,17 +209,33 @@ public class Chantier implements Persistable<String> {
 
     @JsonProperty("facturesEmisesHt")
     public BigDecimal getFacturesEmisesHt() {
-        return BigDecimal.ZERO;
+        // AC-14 — le chantier ne tient pas ce chiffre : absent plutôt que faux zéro.
+        return null;
     }
 
     @JsonProperty("encaissementsTtc")
     public BigDecimal getEncaissementsTtc() {
-        return BigDecimal.ZERO;
+        return null;
     }
 
     @JsonProperty("cumulSituationsHt")
     public BigDecimal getCumulSituationsHt() {
-        return BigDecimal.ZERO;
+        return null;
+    }
+
+    /**
+     * AC-11 — vente active : le devis accepté tant qu'aucun marché n'est notifié. Le chantier ne
+     * sait pas encore si un marché existe ; sans snapshot (création directe), la valeur reste
+     * absente. Aucun fallback vers un autre montant.
+     */
+    @JsonProperty("montantVenteActifHt")
+    public BigDecimal getMontantVenteActifHt() {
+        return montantVenteInitialHt;
+    }
+
+    @JsonProperty("sourceVente")
+    public String getSourceVenteJson() {
+        return sourceVente;
     }
 
     @PrePersist

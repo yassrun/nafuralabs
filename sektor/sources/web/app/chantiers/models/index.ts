@@ -38,6 +38,8 @@ export interface Chantier {
   id: string;
   code: string;
   name: string;
+  /** P1-16 — libellé brut exposé par l'API (la donnée chantier porte `label`). */
+  label?: string;
   description?: string;
   type: ChantierType;
   clientId: string;
@@ -68,10 +70,20 @@ export interface Chantier {
   avancePercue?: number;
   delaiPaiementJours?: number;
   avancementPercent: number;
-  facturesEmisesHt: number;
-  encaissementsTtc: number;
-  cumulSituationsHt: number;
+  facturesEmisesHt?: number | null;
+  encaissementsTtc?: number | null;
+  cumulSituationsHt?: number | null;
   marge?: number;
+  // ── Snapshot commercial (continuite-etude-devis-chantier AC-9/AC-11) ──
+  dossierEtudeId?: string | null;
+  devisId?: string | null;
+  devisNumero?: string | null;
+  devisVersion?: number | null;
+  dateAcceptation?: string | null;
+  sourceVente?: string | null;
+  montantVenteInitialHt?: number | null;
+  montantVenteActifHt?: number | null;
+  debourseInitialHt?: number | null;
   status: ChantierStatus;
   /** Statut métier backend (BROUILLON, EN_COURS, …) — pour règles UI (ex. suppression). */
   lifecycleStatus?: string;

@@ -37,9 +37,19 @@ export interface ApiChantier {
   ingenieurName?: string;
   isActive?: boolean;
   active?: boolean;
-  facturesEmisesHt?: number | string;
-  encaissementsTtc?: number | string;
-  cumulSituationsHt?: number | string;
+  facturesEmisesHt?: number | string | null;
+  encaissementsTtc?: number | string | null;
+  cumulSituationsHt?: number | string | null;
+  // ── Snapshot commercial (continuite-etude-devis-chantier AC-9/AC-11) ──
+  dossierEtudeId?: string | null;
+  devisId?: string | null;
+  devisNumero?: string | null;
+  devisVersion?: number | null;
+  dateAcceptation?: string | null;
+  sourceVente?: string | null;
+  montantVenteInitialHt?: number | string | null;
+  montantVenteActifHt?: number | string | null;
+  debourseInitialHt?: number | string | null;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -116,14 +126,33 @@ export function chantierToUi(row: ApiChantier): Chantier {
       ? num(row.avancePercue ?? row.tauxAvance)
       : undefined,
     avancementPercent: Math.round(num(row.avancementPercent)),
-    facturesEmisesHt: num(row.facturesEmisesHt),
-    encaissementsTtc: num(row.encaissementsTtc),
-    cumulSituationsHt: num(row.cumulSituationsHt),
+    // AC-14 — une absence reste une absence : null, jamais un faux zéro.
+    facturesEmisesHt: nullableNum(row.facturesEmisesHt),
+    encaissementsTtc: nullableNum(row.encaissementsTtc),
+    cumulSituationsHt: nullableNum(row.cumulSituationsHt),
+    dossierEtudeId: row.dossierEtudeId ?? null,
+    devisId: row.devisId ?? null,
+    devisNumero: row.devisNumero ?? null,
+    devisVersion: row.devisVersion ?? null,
+    dateAcceptation: row.dateAcceptation ?? null,
+    sourceVente: row.sourceVente ?? null,
+    montantVenteInitialHt: nullableNum(row.montantVenteInitialHt),
+    montantVenteActifHt: nullableNum(row.montantVenteActifHt),
+    debourseInitialHt: nullableNum(row.debourseInitialHt),
     status: mapBackendStatusToUi(row.status),
     isActive: row.isActive ?? row.active ?? true,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };
+}
+
+/** Un montant absent ou null reste null — jamais converti en zéro (AC-14). */
+function nullableNum(value: number | string | null | undefined): number | null {
+  if (value === undefined || value === null || value === '') {
+    return null;
+  }
+  const n = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(n) ? n : null;
 }
 
 export function chantierCreateToApi(
@@ -174,18 +203,28 @@ export function chantierUpdateToApi(input: Partial<Chantier>): Record<string, un
   return body;
 }
 
-/** B-CHA-09 read model payload. */
+/** B-CHA-09 read model payload — dictionnaire financier canonique (AC-9 à AC-14). */
 export interface ApiChantierSummary {
   chantier: ApiChantier;
   budget?: {
     prevuHt?: number | string;
     reviseHt?: number | string;
     realiseHt?: number | string;
-    margeHt?: number | string;
+    margeHt?: number | string | null;
   };
   avancementPercent?: number | string;
   lotsCount?: number;
   openSituationsCount?: number;
+  montantVenteInitialHt?: number | string | null;
+  montantVenteActifHt?: number | string | null;
+  debourseInitialHt?: number | string | null;
+  budgetReviseHt?: number | string | null;
+  margeInitialeHt?: number | string | null;
+  margeInitialePct?: number | string | null;
+  margeProjeteeHt?: number | string | null;
+  margeProjeteePct?: number | string | null;
+  sourceVente?: string | null;
+  status?: string | null;
 }
 
 export interface ChantierSummary {
@@ -194,11 +233,21 @@ export interface ChantierSummary {
     prevuHt: number;
     reviseHt: number;
     realiseHt: number;
-    margeHt: number;
+    margeHt: number | null;
   };
   avancementPercent: number;
   lotsCount: number;
   openSituationsCount: number;
+  montantVenteInitialHt: number | null;
+  montantVenteActifHt: number | null;
+  debourseInitialHt: number | null;
+  budgetReviseHt: number | null;
+  margeInitialeHt: number | null;
+  margeInitialePct: number | null;
+  margeProjeteeHt: number | null;
+  margeProjeteePct: number | null;
+  sourceVente: string | null;
+  status: string | null;
 }
 
 export function chantierSummaryToUi(row: ApiChantierSummary): ChantierSummary {
@@ -209,10 +258,20 @@ export function chantierSummaryToUi(row: ApiChantierSummary): ChantierSummary {
       prevuHt: num(budget.prevuHt),
       reviseHt: num(budget.reviseHt),
       realiseHt: num(budget.realiseHt),
-      margeHt: num(budget.margeHt),
+      margeHt: nullableNum(budget.margeHt),
     },
     avancementPercent: Math.round(num(row.avancementPercent)),
     lotsCount: row.lotsCount ?? 0,
     openSituationsCount: row.openSituationsCount ?? 0,
+    montantVenteInitialHt: nullableNum(row.montantVenteInitialHt),
+    montantVenteActifHt: nullableNum(row.montantVenteActifHt),
+    debourseInitialHt: nullableNum(row.debourseInitialHt),
+    budgetReviseHt: nullableNum(row.budgetReviseHt),
+    margeInitialeHt: nullableNum(row.margeInitialeHt),
+    margeInitialePct: nullableNum(row.margeInitialePct),
+    margeProjeteeHt: nullableNum(row.margeProjeteeHt),
+    margeProjeteePct: nullableNum(row.margeProjeteePct),
+    sourceVente: row.sourceVente ?? null,
+    status: row.status ?? null,
   };
 }

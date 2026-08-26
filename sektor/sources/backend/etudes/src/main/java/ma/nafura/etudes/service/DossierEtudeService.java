@@ -1,9 +1,14 @@
 package ma.nafura.etudes.service;
 
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.LinkedHashMap;
@@ -23,6 +28,7 @@ import ma.nafura.etudes.api.request.DossierEtudeUpdateDto;
 import ma.nafura.etudes.api.request.DossierGagneDto;
 import ma.nafura.etudes.api.request.DossierPerduDto;
 import ma.nafura.etudes.api.request.PlacementPosteOrphelinDto;
+import ma.nafura.etudes.domain.audit.TransitionEtude;
 import ma.nafura.etudes.domain.dossier.MotifPerte;
 import ma.nafura.etudes.domain.appeloffre.AppelOffreClient;
 import ma.nafura.etudes.domain.devis.Devis;
@@ -60,6 +66,9 @@ import org.springframework.util.StringUtils;
 @Service
 public class DossierEtudeService {
 
+    /** AC-3 — tolérance d'écart entre montant attribué et total devis : 0,01 MAD. */
+    private static final BigDecimal SEUIL_ATTRIBUTION = new BigDecimal("0.01");
+
     private final DossierEtudeRepository repository;
     private final DpgfNoeudRepository noeudRepository;
     private final DossierDocumentRepository documentRepository;
@@ -78,6 +87,7 @@ public class DossierEtudeService {
     private final DebourseDuNoeudService debourseDuNoeudService;
     private final ChainageAvalPort chainageAvalPort;
     private final ConsultationEtudeService consultationEtudeService;
+    private final TransitionEtudeService transitionEtudeService;
     private final Map<Integer, EtapeGate> gatesParEtape;
 
     public DossierEtudeService(
@@ -99,6 +109,7 @@ public class DossierEtudeService {
             DebourseDuNoeudService debourseDuNoeudService,
             ChainageAvalPort chainageAvalPort,
             @Lazy ConsultationEtudeService consultationEtudeService,
+            TransitionEtudeService transitionEtudeService,
             List<EtapeGate> gates) {
         this.repository = repository;
         this.noeudRepository = noeudRepository;
@@ -118,6 +129,7 @@ public class DossierEtudeService {
         this.debourseDuNoeudService = debourseDuNoeudService;
         this.chainageAvalPort = chainageAvalPort;
         this.consultationEtudeService = consultationEtudeService;
+        this.transitionEtudeService = transitionEtudeService;
         this.gatesParEtape = gates.stream()
                 .collect(Collectors.toMap(EtapeGate::etape, Function.identity()));
     }
@@ -522,17 +534,189 @@ public class DossierEtudeService {
         return transitionner(dossier, StatutDossierEtude.ANNULE);
     }
 
-    /** L13 — affaire gagnée (DEVIS_GENERE → GAGNE). */
+    /** L13 — affaire gagnée (DEVIS_GENERE → GAGNE), AC-1 à AC-6 de continuite-etude-devis-chantier. */
     @Transactional
     public DossierEtude gagne(UUID id, DossierGagneDto body) {
         DossierEtude dossier = requireDossier(id);
+        UUID devisIdCommande = body.getDevisId() != null ? body.getDevisId() : dossier.getDevisGenereId();
+        String empreinteCommande = empreinteGain(devisIdCommande, body);
+        if (dossier.getStatus() == StatutDossierEtude.GAGNE
+                || dossier.getStatus() == StatutDossierEtude.CONVERTIE) {
+            if (StringUtils.hasText(dossier.getGainCommandeEmpreinte())
+                    && dossier.getGainCommandeEmpreinte().equals(empreinteCommande)) {
+                return dossier;
+            }
+            throw new IllegalStateException("etudes.dossier.gain_rejeu_divergent");
+        }
         if (dossier.getStatus() != StatutDossierEtude.DEVIS_GENERE) {
             throw new IllegalStateException("etudes.dossier.gagne_hors_etat");
         }
+
+        // AC-2 — un seul devis fait foi : même tenant, même étude, statut non terminal.
+        Devis devis = requireDevisPourGain(dossier, devisIdCommande);
+
+        // AC-3 — l'attribution correspond au document vendu, à 0,01 MAD près.
+        BigDecimal totalDevis = devis.getTotalHt() != null ? devis.getTotalHt() : BigDecimal.ZERO;
+        BigDecimal montant = body.getMontantAttribue();
+        if (montant == null) {
+            throw new IllegalArgumentException("etudes.dossier.attribution_requise");
+        }
+        if (montant.subtract(totalDevis).abs().compareTo(SEUIL_ATTRIBUTION) > 0) {
+            throw new AttributionMismatchException(totalDevis, montant);
+        }
+
+        // AC-4 — une marge négative est un acte explicite : refus aux rôles ordinaires.
+        BigDecimal debourseInitial = debourseInitialDuDevis(devis);
+        boolean margeNegative = montant.compareTo(debourseInitial) < 0;
+        String motifDerogation = trimOrNull(body.getMotifDerogation());
+        if (margeNegative) {
+            if (!peutDerogerMargeNegative()) {
+                throw new MargeNegativeRefuseeException(montant, debourseInitial);
+            }
+            if (!StringUtils.hasText(motifDerogation)) {
+                throw new IllegalArgumentException("etudes.dossier.derogation_motif_requis");
+            }
+        }
+
+        // AC-1 — commande atomique : approuver le devis ET gagner l'étude, même transaction.
+        UUID correlationId = UUID.randomUUID();
+        String ancienStatutDevis = devis.getStatus();
+        if (!Devis.STATUS_APPROUVE.equals(devis.getStatus())) {
+            devis.setStatus(Devis.STATUS_APPROUVE);
+            devisRepository.save(devis);
+        }
+
         dossier.setDateAttribution(body.getDateAttribution());
         dossier.setReferenceMarche(trimOrNull(body.getReferenceMarche()));
-        dossier.setMontantAttribue(body.getMontantAttribue());
-        return transitionner(dossier, StatutDossierEtude.GAGNE);
+        dossier.setMontantAttribue(montant);
+        // Le devis explicitement accepté devient immédiatement l'unique référence aval.
+        dossier.setDevisGenereId(devis.getId());
+        dossier.setGainCommandeEmpreinte(empreinteCommande);
+        DossierEtude gagne = transitionner(dossier, StatutDossierEtude.GAGNE);
+
+        // AC-6 — les deux transitions sont consignées après les deux écritures, avec la même
+        // corrélation : une panne avant ici n'écrit aucune ligne de journal.
+        BigDecimal marge = montant.subtract(debourseInitial);
+        transitionEtudeService.consignerGain(
+                TransitionEtude.ENTITE_DEVIS,
+                devis.getId().toString(),
+                ancienStatutDevis,
+                Devis.STATUS_APPROUVE,
+                correlationId,
+                margeNegative ? motifDerogation : null,
+                montant,
+                debourseInitial,
+                marge);
+        transitionEtudeService.consignerGain(
+                TransitionEtude.ENTITE_DOSSIER,
+                dossier.getId().toString(),
+                StatutDossierEtude.DEVIS_GENERE.name(),
+                StatutDossierEtude.GAGNE.name(),
+                correlationId,
+                margeNegative ? motifDerogation : null,
+                montant,
+                debourseInitial,
+                marge);
+        return gagne;
+    }
+
+    private static String empreinteGain(UUID devisId, DossierGagneDto body) {
+        String canonique = String.join(
+                "|",
+                valeurCanonique(devisId),
+                valeurCanonique(body.getDateAttribution()),
+                valeurCanonique(trimOrNull(body.getReferenceMarche())),
+                valeurCanonique(body.getMontantAttribue()),
+                valeurCanonique(trimOrNull(body.getMotifDerogation())));
+        try {
+            return HexFormat.of().formatHex(
+                    MessageDigest.getInstance("SHA-256").digest(canonique.getBytes(StandardCharsets.UTF_8)));
+        } catch (NoSuchAlgorithmException ex) {
+            throw new IllegalStateException("SHA-256 indisponible", ex);
+        }
+    }
+
+    private static String valeurCanonique(Object value) {
+        if (value == null) {
+            return "∅";
+        }
+        if (value instanceof BigDecimal decimal) {
+            return decimal.stripTrailingZeros().toPlainString();
+        }
+        return value.toString();
+    }
+
+    /** AC-2 — le devis faisant foi : présent, même tenant, même étude, non annulé/perdu/expiré. */
+    private Devis requireDevisPourGain(DossierEtude dossier, UUID devisIdExplicite) {
+        UUID devisId = devisIdExplicite != null ? devisIdExplicite : dossier.getDevisGenereId();
+        if (devisId == null) {
+            throw new IllegalArgumentException("etudes.dossier.gain_devis_requis");
+        }
+        Devis devis = devisRepository
+                .findByIdAndTenantId(devisId, tenantId())
+                .orElseThrow(() -> new IllegalArgumentException("etudes.dossier.gain_devis_introuvable"));
+        if (!dossier.getId().equals(devis.getDossierEtudeId())) {
+            throw new IllegalStateException("etudes.dossier.gain_devis_autre_etude");
+        }
+        if (Devis.STATUS_ANNULE.equals(devis.getStatus())
+                || Devis.STATUS_PERDU.equals(devis.getStatus())
+                || Devis.STATUS_EXPIRE.equals(devis.getStatus())) {
+            throw new IllegalStateException("etudes.dossier.gain_devis_termine");
+        }
+        return devis;
+    }
+
+    /** AC-4 — déboursé initial : coût établi du devis, même source que la conversion (budget-et-marge). */
+    private BigDecimal debourseInitialDuDevis(Devis devis) {
+        if (devis.getDpgfId() == null) {
+            return BigDecimal.ZERO;
+        }
+        List<DpgfNoeud> noeuds = noeudRepository.findByDpgfIdAndTenantIdOrderByOrdreAsc(
+                devis.getDpgfId(), tenantId());
+        return debourseDuNoeudService.sommeDebourseArticles(noeuds);
+    }
+
+    /** AC-4 — seul owner ou dg peut confirmer une marge négative. */
+    private static boolean peutDerogerMargeNegative() {
+        if (UserContext.isOwnerOrSuperAdmin()) {
+            return true;
+        }
+        String role = UserContext.getUserRole();
+        return "BTP_DG".equals(role);
+    }
+
+    /**
+     * AC-9 — la conversion lit le devis accepté du dossier (jamais un autre) : c'est la source
+     * commerciale que le chantier conservera. Une étude gagnée sans devis lié ne peut pas
+     * produire un chantier issu d'étude.
+     */
+    private Devis requireDevisPourConversion(DossierEtude dossier) {
+        if (dossier.getDevisGenereId() == null) {
+            throw new IllegalStateException("etudes.dossier.convertir_sans_devis");
+        }
+        return devisRepository
+                .findByIdAndTenantId(dossier.getDevisGenereId(), tenantId())
+                .orElseThrow(() -> new IllegalStateException("etudes.dossier.convertir_sans_devis"));
+    }
+
+    /**
+     * AC-10 — avant toute création, la vente initiale du chantier doit être identique au montant
+     * attribué, au total du devis accepté et à la somme de l'arbre vendu, au centime près.
+     * Toute divergence empêche la conversion : pas de correction, pas de ventilation silencieuse.
+     */
+    private void assertSnapshotVenteCoherent(
+            BigDecimal montant, BigDecimal totalDevis, BigDecimal totalArticles) {
+        boolean coherent = montant.subtract(totalDevis).abs().compareTo(SEUIL_ATTRIBUTION) <= 0
+                && montant.subtract(totalArticles).abs().compareTo(SEUIL_ATTRIBUTION) <= 0;
+        if (!coherent) {
+            throw new IllegalStateException(
+                    "etudes.dossier.snapshot_vente_incoherent: montant="
+                            + montant.toPlainString()
+                            + ", devis="
+                            + totalDevis.toPlainString()
+                            + ", arbre="
+                            + totalArticles.toPlainString());
+        }
     }
 
     /** L13 — affaire perdue (DEVIS_GENERE → PERDU). */
@@ -591,13 +775,20 @@ public class DossierEtudeService {
         List<ChainageAvalPort.LotProjection> lots =
                 placerNoeudsOrphelins(projeterLots(noeuds), body.getPlacementsPostesOrphelins());
 
+        BigDecimal totalArticles = totalHt(noeuds.stream()
+                .filter(n -> DpgfNoeud.TYPE_ARTICLE.equals(n.getType()))
+                .toList());
+        // AC-10 — la vente initiale est le total du devis accepté : jamais un montant libre.
+        Devis devis = requireDevisPourConversion(dossier);
+        BigDecimal totalDevis = devis.getTotalHt() != null ? devis.getTotalHt() : BigDecimal.ZERO;
         BigDecimal montant = body.getMontantHt() != null
                 ? body.getMontantHt()
                 : (dossier.getMontantAttribue() != null
                         ? dossier.getMontantAttribue()
-                        : totalHt(noeuds.stream()
-                                .filter(n -> DpgfNoeud.TYPE_ARTICLE.equals(n.getType()))
-                                .toList()));
+                        : totalArticles);
+        // AC-10 — montantVenteInitialHt = montant attribué = total devis = somme des vendus.
+        assertSnapshotVenteCoherent(montant, totalDevis, totalArticles);
+        BigDecimal debourseInitial = debourseDuNoeudService.sommeDebourseArticles(noeuds);
 
         String label = StringUtils.hasText(body.getChantierLabel())
                 ? body.getChantierLabel().trim()
@@ -622,7 +813,17 @@ public class DossierEtudeService {
                         marcheRef,
                         montant,
                         body.getTauxTva() != null ? body.getTauxTva() : parametres.tvaTauxDefaut(),
-                        lots));
+                        lots,
+                        // ── AC-9 — snapshot commercial immuable transmis au chantier ──
+                        devis.getId(),
+                        devis.getNumero(),
+                        devis.getVersion(),
+                        dossier.getDateAttribution() != null
+                                ? dossier.getDateAttribution()
+                                : LocalDate.now(),
+                        "DEVIS",
+                        montant,
+                        debourseInitial));
 
         dossier.setChantierGenereId(result.chantierId());
         // AC-10 — pas de marché à la conversion : rien à mémoriser côté contractuel.
@@ -1242,6 +1443,53 @@ public class DossierEtudeService {
 
         public ResultatGate getResultat() {
             return resultat;
+        }
+    }
+
+    /**
+     * AC-3 — le montant attribué diffère du total HT du devis accepté au-delà de 0,01 MAD.
+     * Porte les deux montants pour que l'écran les affiche et demande de corriger la version
+     * du devis ; rien n'est réécrit en silence.
+     */
+    public static class AttributionMismatchException extends RuntimeException {
+        private final transient BigDecimal totalDevis;
+        private final transient BigDecimal montantAttribue;
+
+        public AttributionMismatchException(BigDecimal totalDevis, BigDecimal montantAttribue) {
+            super("etudes.dossier.attribution_differente_du_devis");
+            this.totalDevis = totalDevis;
+            this.montantAttribue = montantAttribue;
+        }
+
+        public BigDecimal getTotalDevis() {
+            return totalDevis;
+        }
+
+        public BigDecimal getMontantAttribue() {
+            return montantAttribue;
+        }
+    }
+
+    /**
+     * AC-4 — la marge initiale est négative et l'acteur n'a pas le droit de déroger
+     * (ni owner, ni dg). Porte les montants pour l'explication.
+     */
+    public static class MargeNegativeRefuseeException extends RuntimeException {
+        private final transient BigDecimal montantAttribue;
+        private final transient BigDecimal debourseInitial;
+
+        public MargeNegativeRefuseeException(BigDecimal montantAttribue, BigDecimal debourseInitial) {
+            super("etudes.dossier.marge_negative_refusee");
+            this.montantAttribue = montantAttribue;
+            this.debourseInitial = debourseInitial;
+        }
+
+        public BigDecimal getMontantAttribue() {
+            return montantAttribue;
+        }
+
+        public BigDecimal getDebourseInitial() {
+            return debourseInitial;
         }
     }
 }

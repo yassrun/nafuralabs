@@ -406,13 +406,15 @@ export class DossierEtudeApiService extends FeatureApiService<
     return this.executeTransition(id, 'generer-devis', body);
   }
 
-  /** L13 — affaire gagnée (DEVIS_GENERE → GAGNE). */
+  /** L13/AC-1..AC-6 — affaire gagnée (DEVIS_GENERE → GAGNE), approbation atomique du devis. */
   marquerGagne(
     id: string,
     body: {
       dateAttribution: string;
       referenceMarche?: string | null;
+      devisId?: string | null;
       montantAttribue?: number | null;
+      motifDerogation?: string | null;
     },
   ): Promise<DossierEtude> {
     return this.executeTransition(id, 'gagne', body);

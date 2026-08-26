@@ -87,15 +87,23 @@ public class BudgetChantierService {
         throw new IllegalStateException("chantiers.budget.agregat_non_stocke");
     }
 
+    /**
+     * AC-14 — un écart en pourcentage sans base (déboursé nul ou absent) est indisponible,
+     * jamais « 0 % » par défaut.
+     */
     private static BigDecimal pourcent(BigDecimal ecart, BigDecimal base) {
         if (base == null || base.signum() == 0) {
-            return zero();
+            return null;
         }
         return scale(ecart).multiply(BigDecimal.valueOf(100)).divide(base, 1, RoundingMode.HALF_UP);
     }
 
+    /** Arrondi de présentation uniquement — une absence reste une absence. */
     private static BigDecimal scale(BigDecimal value) {
-        return (value != null ? value : BigDecimal.ZERO).setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+        if (value == null) {
+            return null;
+        }
+        return value.setScale(MONEY_SCALE, RoundingMode.HALF_UP);
     }
 
     private static BigDecimal zero() {

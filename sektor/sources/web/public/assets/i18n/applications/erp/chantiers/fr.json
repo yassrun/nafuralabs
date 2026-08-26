@@ -47,7 +47,8 @@
         "export": "Exporter Excel",
         "voirPlanning": "Voir planning",
         "voirDetail": "Voir le détail",
-        "clearChantierFilter": "Voir tous les chantiers"
+        "clearChantierFilter": "Voir tous les chantiers",
+        "retry": "Réessayer"
       },
       "filters": {
         "allStatuses": "Tous les statuts",
@@ -89,6 +90,10 @@
         "fournisseur": "Fournisseur",
         "montant": "Montant",
         "date": "Date"
+      },
+      "values": {
+        "notAvailable": "Non disponible",
+        "notDefined": "Non défini"
       }
     },
     "chantier": {
@@ -123,10 +128,14 @@
           "avancement": "Avancement",
           "budgetHt": "Budget HT",
           "factureHt": "Facturé HT",
-          "encaisseTtc": "Encaissé TTC"
+          "encaisseTtc": "Encaissé TTC",
+          "venteActiveHt": "Vente active HT",
+          "budgetReviseHt": "Budget révisé HT",
+          "margeProjetee": "Marge projetée"
         },
         "tabs": {
           "overview": "Vue d'ensemble",
+          "pilotage": "Pilotage",
           "equipe": "Équipe",
           "lots": "Lots",
           "phases": "Phases",
@@ -154,9 +163,16 @@
           "description": "Description",
           "syntheseBudget": "Synthèse budgétaire",
           "brouillonCalcule": "Brouillon calculé",
-          "parLot": "Par lot"
+          "parLot": "Par lot",
+          "provenance": "Source commerciale"
         },
         "workflowHint": "Suivez le parcours terrain sans repasser par les listings portefeuille : arbre, saisie d'avancement, attachements, situations et journal.",
+        "provenance": {
+          "devisSource": "Chantier issu de l'étude gagnée — devis accepté.",
+          "openDevis": "Ouvrir le devis",
+          "openEtude": "Ouvrir l'étude",
+          "sansEtude": "Sans étude / devis source (création directe)."
+        },
         "labels": {
           "chefChantier": "Chef chantier",
           "conducteurTravaux": "Conducteur travaux",
@@ -187,7 +203,10 @@
           "netHt": "Net HT",
           "tvaMontant": "TVA {percent}%",
           "netTtc": "Net TTC",
-          "montantHtPeriode": "Montant HT période"
+          "montantHtPeriode": "Montant HT période",
+          "venteActiveHt": "Vente active HT",
+          "debourseInitialHt": "Déboursé initial HT",
+          "margeProjetee": "Marge projetée"
         },
         "columns": {
           "code": "Code",
@@ -1032,6 +1051,269 @@
         "definitive": "Définitive",
         "totalCautions": "Total cautions"
       }
+    },
+    "cockpit": {
+      "erreurIdentite": "Impossible de charger le chantier",
+      "erreurIdentiteDetail": "Le chantier est introuvable ou l’accès est refusé.",
+      "suspendu": "Chantier suspendu — seuls les gestes autorisés sont disponibles.",
+      "aFaire": "À faire maintenant",
+      "aucuneAction": "Aucune action requise pour le moment.",
+      "ouvrir": "Ouvrir",
+      "gerer": "Gérer",
+      "voir": "Voir",
+      "kpi": {
+        "venteActive": "Vente active HT",
+        "budgetRevise": "Budget révisé HT",
+        "margeProjetee": "Marge projetée",
+        "avancement": "Avancement",
+        "echeance": "Échéance",
+        "retard": "de retard",
+        "restants": "restants"
+      },
+      "os": {
+        "reference": "Référence de l’ordre de service",
+        "referencePh": "Ex. OS-2026-001",
+        "dateEffet": "Date d’effet",
+        "enregistrerEtDemarrer": "Enregistrer l’OS et démarrer",
+        "champsRequis": "Référence et date d’effet sont requises.",
+        "bloqueurs": "Préparation incomplète",
+        "echec": "Démarrage impossible — rechargez le cockpit."
+      },
+      "preparation": {
+        "titre": "Préparation",
+        "identite": "Identité client",
+        "vente": "Référence vente",
+        "arbre": "Arbre des postes",
+        "budget": "Budget initial",
+        "responsables": "Responsables",
+        "dates": "Dates prévues",
+        "os": "Ordre de service",
+        "planning": "Planning",
+        "action": {
+          "identite": "Compléter l’identité",
+          "vente": "Renseigner la vente",
+          "arbre": "Construire l’arbre",
+          "budget": "Poser le budget initial",
+          "responsables": "Affecter les responsables",
+          "dates": "Renseigner les dates",
+          "os": "Saisir l’ordre de service",
+          "planning": "Créer le planning"
+        },
+        "raison": {
+          "identite": "Client et identité requis.",
+          "vente": "Référence de vente requise (devis accepté).",
+          "arbre": "Au moins un nœud exploitable requis.",
+          "budget": "Déboursé initial requis.",
+          "responsables": "Conducteur et chef de chantier requis.",
+          "dates": "Début et fin prévus valides, fin postérieure au début.",
+          "os": "Ordre de service requis au démarrage.",
+          "planning": "Planning non créé — recommandé, jamais bloquant.",
+          "indisponible": "Source indisponible — réessayez."
+        }
+      },
+      "flux": {
+        "titre": "Flux du mois",
+        "etape": "Étape",
+        "action": "Passer à l’étape",
+        "etapeAvancement": "Avancement",
+        "etapeAttachement": "Attachement",
+        "etapeSituation": "Situation",
+        "etapeComplete": "Cycle mensuel traité",
+        "etapeLectureSeule": "Lecture seule",
+        "etapeIndisponible": "Indisponible",
+        "etapeSuspendu": "Suspendu"
+      },
+      "module": {
+        "arbre": "Arbre",
+        "arbreResume": "Structure et montants par lot",
+        "budget": "Budget",
+        "budgetResume": "Déboursé prévu, révisé et réel",
+        "planning": "Planning",
+        "planningResume": "Activités et échéances",
+        "situations": "Situations",
+        "situationsResume": "Travaux par période et révisions"
+      },
+      "activite": {
+        "titre": "Activité récente"
+      },
+      "alerte": {
+        "margeNegative": "Marge projetée négative",
+        "margeBaisse": "Marge en baisse par rapport à l’initiale",
+        "financeIncomplete": "Vente ou budget indisponible",
+        "retard": "Retard contractuel",
+        "sourceIndisponible": "Source secondaire indisponible",
+        "action": {
+          "budget": "Ouvrir le budget",
+          "etude": "Ouvrir l’étude",
+          "planning": "Ouvrir le planning",
+          "reessayer": "Réessayer"
+        }
+      },
+      "action": {
+        "demarrer": "Démarrer le chantier",
+        "preparer": "Préparer le chantier",
+        "equipe": "Gérer l’équipe",
+        "budget": "Voir le budget",
+        "planning": "Voir le planning",
+        "avancement": "Saisir l’avancement",
+        "attachement": "Créer l’attachement",
+        "situation": "Traiter la situation",
+        "situations": "Voir les situations",
+        "documents": "Voir les documents",
+        "reprendre": "Reprendre le chantier"
+      },
+      "filtres": {
+        "toutesAlertes": "Toutes les alertes",
+        "triCode": "Tri : code",
+        "triAlerte": "Tri : alerte",
+        "triEcheance": "Tri : échéance",
+        "triMarge": "Tri : marge",
+        "triAvancement": "Tri : avancement",
+        "enRetard": "En retard",
+        "margeNegative": "Marge négative"
+      },
+      "cols": {
+        "responsable": "Responsable",
+        "budgetRevise": "Budget révisé",
+        "margeProjetee": "Marge projetée",
+        "echeance": "Échéance",
+        "alerte": "Alerte",
+        "prochaineAction": "Prochaine action"
+      },
+      "finance": {
+        "venteAbsente": "Vente active absente",
+        "debourseAbsent": "Déboursé initial absent",
+        "budgetAbsent": "Budget révisé absent",
+        "margeIndisponible": "Marge non calculable",
+        "accesRestreint": "Accès restreint à ce rôle",
+        "indisponible": "Finance indisponible"
+      },
+      "progress": {
+        "avancementAbsent": "Avancement non renseigné",
+        "factureNonTenue": "Facturation non tenue au chantier",
+        "encaisseNonTenue": "Encaissement non tenu au chantier",
+        "indisponible": "Progression indisponible"
+      },
+      "schedule": {
+        "finPrevueAbsente": "Fin prévue absente"
+      },
+      "degradation": {
+        "synthese": "Synthèse indisponible",
+        "equipe": "Équipe indisponible",
+        "arbre": "Arbre indisponible",
+        "finance": "Finance indisponible",
+        "progression": "Progression indisponible"
+      },
+      "portefeuille": {
+        "erreurChargement": "Le chargement du portefeuille a échoué — réessayez."
+      }
+    }
+  },
+  "cockpit": {
+    "erreurIdentite": "Impossible de charger le pilotage",
+    "erreurIdentiteDetail": "L'identité ou le statut du chantier n'a pas pu être chargé. Réessayez.",
+    "aFaire": "À faire maintenant",
+    "aucuneAction": "Aucune action à traiter",
+    "ouvrir": "Ouvrir",
+    "gerer": "Gérer",
+    "voir": "Voir",
+    "suspendu": "Chantier suspendu — seuls les gestes compatibles sont disponibles.",
+    "kpi": {
+      "venteActive": "Vente active HT",
+      "budgetRevise": "Budget révisé HT",
+      "margeProjetee": "Marge projetée",
+      "avancement": "Avancement",
+      "echeance": "Échéance",
+      "retard": "de retard",
+      "restants": "restants"
+    },
+    "preparation": {
+      "titre": "Préparer le démarrage",
+      "identite": "Identité et client",
+      "action": {
+        "identite": "Renseigner l'identité",
+        "vente": "Vérifier la source de vente",
+        "arbre": "Gérer l'arbre",
+        "budget": "Compléter le budget",
+        "responsables": "Gérer l'équipe",
+        "dates": "Renseigner les dates",
+        "os": "Saisir l'ordre de service",
+        "planning": "Créer le planning (recommandé)"
+      },
+      "raison": {
+        "identite": "Client absent ou incomplet",
+        "vente": "Référence de vente absente",
+        "arbre": "Aucun nœud exploitable",
+        "budget": "Déboursé initial absent",
+        "responsables": "Conducteur et chef de chantier requis",
+        "dates": "Dates prévues invalides",
+        "os": "Ordre de service requis au démarrage",
+        "planning": "Planning non créé — recommandé, jamais bloquant"
+      },
+      "vente": "Référence de vente",
+      "arbre": "Arbre du chantier",
+      "budget": "Budget initial",
+      "responsables": "Responsables",
+      "dates": "Dates prévues",
+      "os": "Ordre de service",
+      "planning": "Planning d'activités"
+    },
+    "alerte": {
+      "margeNegative": "Marge projetée négative",
+      "margeBaisse": "Marge en baisse par rapport à l'initiale",
+      "financeIncomplete": "Vente ou budget indisponible",
+      "retard": "Chantier en retard sur la fin prévue",
+      "action": {
+        "budget": "Ouvrir le budget",
+        "etude": "Vérifier la source commerciale",
+        "planning": "Ouvrir le planning"
+      }
+    },
+    "flux": {
+      "titre": "Flux du mois",
+      "etape": "Étape",
+      "action": "Agir",
+      "etapeInconnue": "Avancement",
+      "saisirAvancement": "chantiers.routes.avancementTitle"
+    },
+    "module": {
+      "arbre": "Arbre",
+      "arbreResume": "Vendu / interne, lien vers le devis",
+      "budget": "Budget & marge",
+      "budgetResume": "Déboursé, révisions, écarts",
+      "planning": "Planning",
+      "planningResume": "Activités et délais",
+      "situations": "Situations",
+      "situationsResume": "Décomptes et retenues"
+    },
+    "activite": {
+      "titre": "Activité récente"
+    },
+    "cols": {
+      "responsable": "Responsable",
+      "budgetRevise": "Budget révisé",
+      "margeProjetee": "Marge projetée",
+      "echeance": "Échéance",
+      "alerte": "Alerte"
+    },
+    "filtres": {
+      "toutesAlertes": "Toutes les alertes",
+      "triCode": "Tri : code",
+      "triAlerte": "Tri : alerte",
+      "triEcheance": "Tri : échéance",
+      "triMarge": "Tri : marge",
+      "triAvancement": "Tri : avancement",
+      "enRetard": "En retard",
+      "margeNegative": "Marge négative"
+    },
+    "os": {
+      "reference": "Référence de l'ordre de service",
+      "referencePh": "OS-2026-001",
+      "dateEffet": "Date d'effet",
+      "enregistrerEtDemarrer": "Enregistrer l'OS et démarrer",
+      "champsRequis": "Référence et date d'effet obligatoires.",
+      "bloqueurs": "Préparation incomplète",
+      "echec": "Le démarrage a échoué. Rechargez le cockpit."
     }
   }
 }
