@@ -63,9 +63,47 @@ async function main() {
     ok.push('daf : budget sans écriture terrain');
   } else throw new Error('daf perms ' + dafPerms.join(','));
 
-  console.log(`\nSEKTOR-200 RBAC (Mode B) : ${ok.length}/4 PASS · chantierId=${id}`);
-  console.log('Limite : le scope d\'accès du chef QA (affectation→userId) n\'est pas aligné en lab ;');
-  console.log('finance FORBIDDEN + actions terrain du chef sont prouvés par CockpitChantierServiceTest.');
+  // ── SEKTOR-209 revue 27/08 : matrice API du PORTEFEUILLE par rôle (écart 2) + absence
+  //    réelle des montants dans le JSON pour les rôles non autorisés (écart 9) ─────────────
+  const portefeuille = async (role) => {
+    const res = await api(await session(role), 'GET', '/api/v1/chantiers/portefeuille?page=0&size=10');
+    return { status: res.status, body: res.body };
+  };
+  const dafPf = await portefeuille('daf');
+  const ingPf = await portefeuille('ingenieur');
+  const chefPf = await portefeuille('chef-chantier');
+  const condPf = await portefeuille('conducteur');
+
+  console.log('portefeuille daf/ingenieur/chef/conducteur status:',
+      `${dafPf.status}/${ingPf.status}/${chefPf.status}/${condPf.status}`,
+      '· financeAutorisee:', `${dafPf.body?.financeAutorisee}/${ingPf.body?.financeAutorisee}/${chefPf.body?.financeAutorisee}/${condPf.body?.financeAutorisee}`);
+
+  if (dafPf.status === 200 && ingPf.status === 200 && chefPf.status === 200 && condPf.status === 200) {
+    ok.push('portefeuille : daf/ingenieur/chef/conducteur → 200 (plus de 403 de scope)');
+  } else throw new Error(`portefeuille 403: daf=${dafPf.status} ingenieur=${ingPf.status} chef=${chefPf.status} conducteur=${condPf.status}`);
+
+  if (dafPf.body?.financeAutorisee === true) ok.push('portefeuille daf : financeAutorisee=true');
+  else throw new Error('portefeuille daf financeAutorisee=' + dafPf.body?.financeAutorisee);
+
+  // Les rôles terrain/ingénieur ne reçoivent AUCUNE propriété financière dans le JSON
+  // (absente, pas null — @JsonInclude(NON_NULL) sur la ligne).
+  const cleFinance = (row) => ['montantVenteActifHt', 'budgetReviseHt', 'margeProjeteeHt', 'margeProjeteePct']
+      .filter((k) => Object.prototype.hasOwnProperty.call(row ?? {}, k));
+  const ingFinanceKeys = (ingPf.body?.items ?? []).flatMap(cleFinance);
+  const chefFinanceKeys = (chefPf.body?.items ?? []).flatMap(cleFinance);
+  const condFinanceKeys = (condPf.body?.items ?? []).flatMap(cleFinance);
+  if (ingPf.body?.financeAutorisee === false && ingFinanceKeys.length === 0) {
+    ok.push('portefeuille ingénieur : financeAutorisee=false, aucune clé financière dans le JSON');
+  } else throw new Error(`portefeuille ingénieur clés=${ingFinanceKeys.join(',')} flag=${ingPf.body?.financeAutorisee}`);
+  if (chefPf.body?.financeAutorisee === false && chefFinanceKeys.length === 0) {
+    ok.push('portefeuille chef : financeAutorisee=false, aucune clé financière dans le JSON');
+  } else throw new Error(`portefeuille chef clés=${chefFinanceKeys.join(',')} flag=${chefPf.body?.financeAutorisee}`);
+  if (condPf.body?.financeAutorisee === false && condFinanceKeys.length === 0) {
+    ok.push('portefeuille conducteur : financeAutorisee=false, aucune clé financière dans le JSON');
+  } else throw new Error(`portefeuille conducteur clés=${condFinanceKeys.join(',')} flag=${condPf.body?.financeAutorisee}`);
+
+  console.log(`\nSEKTOR-200 RBAC (Mode B) : ${ok.length}/9 PASS · chantierId=${id}`);
+  console.log('Portefeuille accessible par rôle (200) + montants absents du JSON hors finance.read.');
   process.exit(0);
 }
 main().catch((e) => { console.error('FAIL', e); process.exit(1); });

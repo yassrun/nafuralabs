@@ -221,7 +221,46 @@ async function main() {
   if (bad.status === 400 || bad.status === 404) pass('AC-22', `chantier inconnu → ${bad.status} (pas de faux cockpit)`);
   else fail('AC-22', 'erreur identité', '400/404', String(bad.status));
 
-  console.log('\n=== VERDICT COCKPIT AC-1..AC-22 (+P0-3) ===');
+  // ── SEKTOR-209 revue 27/08 — jamais « Démarrer » tant que la préparation bloque (P1-5) ──
+  // Chantier direct EN_PREPARATION sans dates ni responsables ni budget : la checklist est
+  // bloquante, l'action primaire doit être « préparer », pas « démarrer » (même règle que
+  // /demarrer-os qui répondrait 422).
+  const bloc = await api(oh, 'POST', '/api/v1/chantiers', {
+    label: `Bloqueurs ${suffix}`, clientId: 'cli-bloq', clientName: 'C', ville: 'R', montantHt: 100000,
+    status: 'EN_PREPARATION',
+  });
+  const ckBloc = await api(oh, 'GET', `/api/v1/chantiers/${bloc.body.id}/cockpit`);
+  const actionsBloc = ckBloc.body?.nextActions ?? [];
+  const primaireBloc = actionsBloc[0]?.libelle;
+  const bloqueursBloc = (ckBloc.body?.preparation ?? []).filter((p) => p.etat === 'BLOQUANT').map((p) => p.code);
+  const osBloc = await api(oh, 'POST', `/api/v1/chantiers/${bloc.body.id}/demarrer-os`, { osReference: 'OS-BLOCK', osDateEffet: '2026-09-01' });
+  if (primaireBloc === 'chantiers.cockpit.action.preparer'
+      && !(actionsBloc.some((a) => (a.libelle ?? '').includes('demarrer')))
+      && osBloc.status === 422) {
+    pass('P1-5', `préparation bloquante (${bloqueursBloc.join(',')}) → action « préparer », /demarrer-os 422 — jamais « Démarrer »`);
+  } else fail('P1-5', 'action primaire vs bloqueurs', 'preparer + pas de demarrer + OS 422',
+      `primaire=${primaireBloc} bloqueurs=[${bloqueursBloc.join(',')}] os=${osBloc.status}`);
+
+  // ── SEKTOR-209 revue 27/08 — flux non actionnable sur les états terminaux (P1-9/P1-8) ──
+  // Le chantier converti est EN_COURS : le conduire jusqu'à CLOS et vérifier que le flux
+  // mensuel redevient lecture seule et que plus aucune saisie opérationnelle n'est proposée.
+  const rp = await api(oh, 'POST', `/api/v1/chantiers/${id}/reception-provisoire`);
+  const rd = await api(oh, 'POST', `/api/v1/chantiers/${id}/reception-definitive`);
+  const cl = await api(oh, 'POST', `/api/v1/chantiers/${id}/clore`);
+  const ckClos = await api(oh, 'GET', `/api/v1/chantiers/${id}/cockpit`);
+  const fluxClos = ckClos.body?.progress?.fluxMois;
+  const routesClos = (ckClos.body?.nextActions ?? []).map((a) => a.route ?? '').join(',');
+  const permsClos = (ckClos.body?.nextActions ?? []).map((a) => a.permission ?? '').join(',');
+  const aSaisie = /\/saisie|avancements|attachements/.test(routesClos);
+  const aEcriture = permsClos.includes('chantiers.update');
+  if (cl.ok && ckClos.body?.identity?.status === 'CLOS'
+      && fluxClos?.actionnable === false
+      && !aSaisie && !aEcriture) {
+    pass('P1-9/P1-8', 'CLOS : flux lecture seule non actionnable, aucune saisie/écriture opérationnelle (consultation seule)');
+  } else fail('P1-9/P1-8', 'flux terminal', 'CLOS + flux non actionnable + consultation seule',
+      `status=${ckClos.body?.identity?.status} actionnable=${fluxClos?.actionnable} routes=${routesClos} perms=${permsClos} (${rp.status}/${rd.status}/${cl.status})`);
+
+  console.log('\n=== VERDICT COCKPIT AC-1..AC-22 (+P0-3, P1-5, P1-9/P1-8) ===');
   console.log(`PASS: ${PASSES} · FAIL: ${FAILS}`);
   const acs = [...new Set(verdicts.map((v) => v.split(' ')[1].split('/')[0]))];
   console.log(`AC couverts: ${acs.join(', ')}`);

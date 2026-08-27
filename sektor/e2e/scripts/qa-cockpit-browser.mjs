@@ -123,8 +123,25 @@ async function main() {
       ?? 'C:/Users/yassiveco/AppData/Local/ms-playwright/chromium-1228/chrome-win64/chrome.exe',
   });
 
+  // Le tour d'onboarding se lance à la première visite d'un module (backdrop plein écran qui
+  // intercepte les clics). On le neutralise au niveau du harnais (localStorage marqué « vu »)
+  // — isolation de test, pas un changement produit.
+  const nouveauContexte = async (viewport) => {
+    const ctx = await browser.newContext({ viewport });
+    await ctx.addInitScript(() => {
+      const origGet = Storage.prototype.getItem;
+      Storage.prototype.getItem = function (key) {
+        if (key === 'nafura-onboarding' || (typeof key === 'string' && key.startsWith('nafura-tour-seen-'))) {
+          return '1';
+        }
+        return origGet.call(this, key);
+      };
+    });
+    return ctx;
+  };
+
   // ── Desktop 1440×900 ──────────────────────────────────────────────────────
-  const ctxD = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  const ctxD = await nouveauContexte({ width: 1440, height: 900 });
   const pageD = await ctxD.newPage();
   await verifierCockpit(pageD, chantierId, 'desktop');
   await pageD.screenshot({ path: `${OUT_DIR}cockpit-desktop.png`, fullPage: false });
@@ -146,7 +163,7 @@ async function main() {
   await ctxD.close();
 
   // ── Mobile 390×844 ────────────────────────────────────────────────────────
-  const ctxM = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const ctxM = await nouveauContexte({ width: 390, height: 844 });
   const pageM = await ctxM.newPage();
   await verifierCockpit(pageM, chantierId, '390px');
   await pageM.screenshot({ path: `${OUT_DIR}cockpit-390.png` });
@@ -157,6 +174,41 @@ async function main() {
   else fail('AC-21 390px', 'portefeuille mobile', 'lignes', `${pfM.codes.length} (erreur=${pfM.erreur})`);
   await pageM.screenshot({ path: `${OUT_DIR}portefeuille-390.png` });
   await ctxM.close();
+
+  // ── SEKTOR-209 revue 27/08 — aller-retour fiche → portefeuille conservant l'état (P1-17) ──
+  // Départ `/chantiers?recherche=CH-&tri=marge&sens=desc`, ouverture d'une fiche, « Retour à la
+  // liste » → l'URL doit revenir avec le MÊME état (recherche, tri, sens).
+  const ctxR = await nouveauContexte({ width: 1440, height: 900 });
+  const pageR = await ctxR.newPage();
+  await pageR.goto(`${FRONT}/chantiers?recherche=CH-&tri=marge&sens=desc`, { waitUntil: 'domcontentloaded' });
+  const pfR0 = await attendreLignesPortefeuille(pageR);
+  const urlDepart = pageR.url();
+  if (pfR0.codes.length === 0) {
+    fail('P1-17 retour fiche', 'départ', 'lignes + recherche', `${pfR0.codes.length} · ${urlDepart}`);
+  } else {
+    // Laisser le sync d'URL (NavigationEnd) se stabiliser avant de cliquer une ligne.
+    await pageR.waitForTimeout(1200);
+    await pageR.locator('table tbody tr td .code').first().click({ timeout: 30000 });
+    await pageR.waitForSelector('section.kpis .kpi', { timeout: 60000 }).catch(() => {});
+    await pageR.waitForTimeout(800);
+    const urlFiche = pageR.url();
+    const backBtn = pageR.getByRole('button', { name: /Retour à la liste|back to list/i });
+    if (await backBtn.count().catch(() => 0) === 0) {
+      fail('P1-17 retour fiche', 'bouton retour', 'présent', 'absent');
+    } else {
+      await backBtn.first().click();
+      await pageR.waitForTimeout(1500);
+      const urlRetour = pageR.url();
+      if (urlDepart.includes('recherche=CH-') && urlDepart.includes('tri=marge') && urlDepart.includes('sens=desc')
+          && urlRetour.includes('recherche=CH-') && urlRetour.includes('tri=marge') && urlRetour.includes('sens=desc')) {
+        pass('P1-17 retour fiche', `départ ${urlDepart.slice(-48)} → fiche → retour ${urlRetour.slice(-48)} (état conservé)`);
+      } else {
+        fail('P1-17 retour fiche', 'état au retour', 'recherche/tri/sens conservés', `${urlDepart} → ${urlRetour}`);
+      }
+    }
+  }
+  await pageR.screenshot({ path: `${OUT_DIR}retour-fiche.png` });
+  await ctxR.close();
 
   await browser.close();
   console.log(`\n=== VERDICT QA NAVIGATEUR 209 ===\nPASS: ${PASSES} · FAIL: ${FAILS}`);

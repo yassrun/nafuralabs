@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { NavigationEnd, Router } from '@angular/router';
-import { ChangeDetectionStrategy, Component, LOCALE_ID, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, LOCALE_ID, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { first } from 'rxjs/operators';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FilterResetComponent } from '@platform/lib/anatomy/components/molecules/filter-reset/filter-reset.component';
@@ -240,6 +241,7 @@ import { buildPortefeuilleQueryParams, parsePortefeuilleState, portefeuilleRetur
 })
 export class ChantiersListingPage {
   protected readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly translate = inject(TranslateService);
   private readonly locale = inject(LOCALE_ID);
   private readonly portefeuilleApi = inject(PortefeuilleApiService);
@@ -275,7 +277,7 @@ export class ChantiersListingPage {
     // query params restaurés. Une fois le router stabilisé, l'URL porte réellement l'état.
     this.recharger({ sync: false });
     this.router.events
-      .pipe(first((e) => e instanceof NavigationEnd))
+      .pipe(first((e) => e instanceof NavigationEnd), takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.syncUrl());
   }
 
@@ -296,6 +298,13 @@ export class ChantiersListingPage {
   }
 
   private syncUrl(): void {
+    // Ne sync l'URL que sur la liste elle-même : le premier NavigationEnd peut arriver alors
+    // que le router pointe déjà sur une fiche (`/chantiers/:id`) ouverte depuis la liste — dans
+    // ce cas, naviguer `[]` écraserait les query params de la fiche (et son `returnUrl`).
+    const url = this.router.url;
+    if (url !== '/chantiers' && !url.startsWith('/chantiers?')) {
+      return;
+    }
     const f = this.filters();
     const params = buildPortefeuilleQueryParams({
       recherche: this.search(),
