@@ -339,15 +339,15 @@ Consultation / devis fournisseur :
 Cocher / amender ici, ne pas re-débattre à l’aveugle.
 
 - [ ] **Confirmer les 3 couches** (poste ≠ article ; composants = articles si réutilisables ; recette = ouvrage).
-- [ ] Manquant Extraire : rester **toujours demander** (catalogue vs poste) — ou un défaut (ex. poste-only, catalogue en 2ᵉ clic) ?
-- [ ] Capitalisation : rester **opt-in** après validation, ou un rappel / gate « X postes capitalisables » ?
+- [x] Manquant Extraire : **tranché 26/08** — toujours demander explicitement **poste seulement** ou **créer Catalogue et lier** ; aucun ajout implicite des manquants au bouton final. Contrat `raffinement-etude` AC-16.
+- [x] Capitalisation : **tranché 26/08** — reste opt-in après validation, avec rappel du nombre de postes capitalisables, jamais une gate ni une création automatique. Contrat `raffinement-etude` AC-27.
 - [ ] Composant manuel one-shot : peut-on le promouvoir article **plus tard** (après save), ou seulement au moment Extraire / bouton actuel ?
 - [ ] Ouvrage capitalisé : les composants non-articles restent manuels dans l’ouvrage, ou on force « créer l’article » avant versement ?
 - [x] Enrichissement G2 : **tranché 20/08** — créer un article = identité Sektor **PUBLIEE** tout de suite, puis tenant. Pas un candidat. La console `/catalogue` reste hors chrome tenant (fusion / retrait plus tard, pas Extraire).
-- [ ] Extraire, match **incertain** (2+ identités) : faire **trancher** l’utilisateur, ou prendre le meilleur score IA ?
+- [x] Extraire, match **incertain** : **tranché 26/08** — l'utilisateur choisit un candidat, recherche, garde au poste ou crée ; aucun meilleur score pris silencieusement. Contrat `raffinement-etude` AC-14.
 - [x] Création Extraire : **tranché 20/08** — **PUBLIEE** tout de suite. L’IA a déjà décidé que c’est un article à ajouter ; pas une proposition G2.
 - [x] Binding : **tranché 20/08** — 1 Item tenant **par** `cle_stable` (1–1). Tiny spec (couleur, RAL) ≠ 2ᵉ Item. Variante d’achat sous l’identité, plus tard, si SKU/stock l’exigent.
-- [ ] Tiny spec Extraire : la coller en **note d’emploi** sur le composant dès v1, ou seulement le lien identité (couleur perdue jusqu’à la variante d’achat) ?
+- [x] Tiny spec Extraire : **tranché 26/08** — conservée en note d'emploi sur le composant DPU dès v1 ; elle ne crée jamais une identité. Contrat `raffinement-etude` AC-17.
 - [x] Consultation : **retranché 22/08** — objet **Achats** (pas DA, pas AO, pas collé au dossier). Menu Achats. Popup décompo. Devis = **import magique**. Lien étude → flag CONSULTÉ sur l’article après N devis. Pas une consult par ligne.
 - [x] Consultation obligatoire : **tranché 20/08, inchangé** — min **N devis reçus**. On n’oblige pas 100 % des articles décomposés.
 - [x] Devis reçu : **tranché 22/08** — on **importe** le fichier ; Import magique **extrait** les lignes. Fichier sans extraction n’identifie pas / ne flague pas.

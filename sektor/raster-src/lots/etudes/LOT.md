@@ -16,5 +16,6 @@ Sous-lots :
 | `extraire-rattachement` | Extraire rattache + `ng build` cleStable |
 | `completer-parcours` | CTA Continuer / Voir la synthèse + PU arbre après Extraire (walk 2 DE-0036) |
 | `picker-article` | Picker **partagé** (DPU + stock + lookups) — pas de dump, filtres serveur, canvas 23/08 |
+| `raffinement-etude` | intégrité du parcours, IA explicable, création Catalogue fiable, workspace chiffrage, synthèse et mobile — contrat 26/08 |
 
-Hors lot (inbox, pas gelé) : Extraire incertain, tiny spec couleur, L9 `createAllege`, slug LLM, fichier vs lignes identifier, Mockito 21, Liquibase `metrees`.
+Hors lot (inbox, pas gelé) : L9 `createAllege`, slug LLM, fichier vs lignes identifier, Mockito 21, Liquibase `metrees`. Extraire incertain et tiny spec sont repris par `raffinement-etude`.

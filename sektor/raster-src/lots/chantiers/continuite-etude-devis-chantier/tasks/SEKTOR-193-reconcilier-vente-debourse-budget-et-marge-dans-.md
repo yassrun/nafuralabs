@@ -1,6 +1,6 @@
 ---
 id: SEKTOR-193
-status: todo
+status: done-me
 context: nafura
 type: bug
 agent_type: exec
@@ -37,8 +37,32 @@ Contrat : [`../CONTRAT.md`](../CONTRAT.md), dictionnaire financier et AC-10 à A
 
 ```
 26/08 12:17  posée
+26/08 13:21  status → doing
+26/08 13:21  status → doing
+26/08 13:55  backend read models réconciliés + tests verts → review
+26/08 13:30  status → review
+26/08 16:13  status → done-agent · gate none → done-me
 ```
 
 ## Rapport de livraison
 
-À compléter avec anciens champs retirés/conservés, preuves et impacts consommateurs.
+**Changements (backend chantiers — le web est porté par SEKTOR-194) :**
+
+- `ChantierSummaryDto` — dictionnaire financier canonique exposé : `montantVenteInitialHt`, `montantVenteActifHt` (AC-11 : devis accepté tant que pas de marché, sans fallback), `debourseInitialHt`, `budgetReviseHt`, `margeInitialeHt/Pct`, `margeProjeteeHt/Pct`, `sourceVente`, `status` (AC-2).
+- `ChantierSummaryReadService` — tous les montants dérivés des mêmes agrégats (snapshot AC-9 + arbre) ; marges par les formules du dictionnaire (AC-10), jamais saisies ; valeur non calculable = `null` (AC-14), jamais zéro ; `margeHt` hérité (revise − realise, sens ambigu) passé à `null`.
+- `Chantier` (entité) — `getFacturesEmisesHt()/getEncaissementsTtc()/getCumulSituationsHt()` passent de `ZERO` codé en dur à `null` (AC-14 : une absence n'est pas un zéro) ; `montantVenteActifHt` exposé en JSON ; `sourceVente` exposé.
+- `BudgetArbreDto` + `BudgetArbreService.lireArbre` — expose le `status` réel du chantier (AC-14 : un `EN_PREPARATION` n'est jamais présenté `EN_COURS` sur la page budget).
+- `BudgetChantierService` — `pourcent()` retourne `null` (indisponible) quand la base est nulle/0 au lieu de `0` ; `scale()` ne transforme plus une absence en zéro.
+
+**Anciens champs :** conservés mais neutralisés (`margeHt` → null), renommés côté API (`montantVenteActifHt` nouveau). `PilotageMargeService` (marge fictive 18 % cible) est **hors périmètre** : il relève de la frontière `frontieres-bc` (AC-11, départ au socle) — dette nommée.
+
+**Preuves exécutées :**
+
+- `ChantierSummaryReadServiceTest` : dictionnaire canonique complet (`737106 / 582600 / 154506 / 20,96 %`), absence de snapshot → vente et marges `null` (AC-17), vente absente → pourcentage `null` (AC-14), statut réel transmis.
+- `BudgetArbreServiceTest` : la page budget porte `EN_PREPARATION`.
+- `BudgetChantierServiceTest`, `ChantierServiceSnapshotTest`, `ChantiersNoEtudesDependencyTest` — verts.
+- Suite complète chantiers : **93 tests, 0 échec**. `node raster/t.mjs check` : 0 erreur.
+
+**Décidé seul :** ne pas retirer `budgetHt`/`montantHt` du JSON (compat web jusqu'à SEKTOR-194) ; la liste brute expose déjà la vraie vente via `montantVenteActifHt`.
+
+**Écarts / dette :** libellés et colonnes du web (liste « Vente HT » affichant budgetHt, hero de la fiche, page budget) alignés dans SEKTOR-194 ; `PilotageMargeService` et `ChantierKpiService` attendent la frontière `frontieres-bc`.

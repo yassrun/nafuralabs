@@ -1,6 +1,6 @@
 ---
 id: SEKTOR-191
-status: todo
+status: done-agent
 context: nafura
 type: feature
 agent_type: exec
@@ -36,8 +36,33 @@ Contrat : [`../CONTRAT.md`](../CONTRAT.md), AC-1 à AC-6.
 
 ```
 26/08 12:17  posée
+26/08 12:41  status → doing
+26/08 13:05  backend AC-1..AC-6 + tests verts → review
+26/08 13:07  status → review
+26/08 16:13  status → done-agent
 ```
 
 ## Rapport de livraison
 
-À compléter avec changements, commandes exécutées, décisions prises et écarts restants.
+**Changements (backend etudes uniquement — le web est porté par SEKTOR-194) :**
+
+- `api/request/DossierGagneDto.java` — `devisId` (optionnel, fallback `devisGenereId` du dossier), `montantAttribue` obligatoire, `motifDerogation` pour AC-4.
+- `service/DossierEtudeService.gagne()` — commande atomique AC-1..AC-6 :
+  - AC-2 : `requireDevisPourGain` — devis présent, même tenant, même étude, non annulé/perdu/expiré ;
+  - AC-3 : `montantAttribue` comparé au `totalHt` du devis à 0,01 près → `AttributionMismatchException` portant les deux montants (422) ;
+  - AC-4 : déboursé initial = `DebourseDuNoeudService.sommeDebourseArticles` du DPGF du devis ; marge négative refusée aux rôles ordinaires (`MargeNegativeRefuseeException`), `owner`/`dg` avec motif obligatoire journalisé ;
+  - AC-1 : le devis passe `APPROUVE` et l'étude `GAGNE` dans la même transaction ;
+  - AC-6 : journal `transitions_etude` (nouvelle table + entité + repo + service) — deux entrées devis/étude avec même `correlationId`, consignées après les deux écritures.
+- `service/DevisService.java` — AC-5 : `assertDevisNonFige` (refus `APPROUVE`, ou lié à une étude GAGNE/CONVERTIE via JDBC) branché sur update/delete/createVersion/submit/negotiate/approve/lose/cancel.
+- `api/controller/DossierEtudeController.java` — handlers 422 pour `AttributionMismatchException` et `MargeNegativeRefuseeException` (montants exposés).
+- Migration `etudes/.../db/changelog/schema/v1.2/001_transitions_etude.sql`.
+
+**Preuves exécutées :**
+
+- `.\gradlew.bat :sektor:etudes:test --tests ...` : `DossierEtudeChainageAvalTest` (gain nominal approuve le devis + corrélation, devis absent/autre étude/annulé, mismatch 737106/500000, marge négative ingénieur refusée / dg motif OK / dg sans motif refusé, panne à la seconde écriture, fallback devisGenereId), `DevisFigeTest` (8 refus AC-5), `DevisServiceClientTest`, `DossierEtudeServiceClientTest`, `DossierEtudeValidationQuatreYeuxTest` — **46 tests, tous verts**.
+- Suite complète etudes : 395 tests, 12 échecs **préexistants** (CapitalisationOuvrageServiceTest, GatesEtudeTest, OuvrageCompositeServiceTest, AdaptiveBordereauBdp217LiveIT) — vérifiés présents sans mes changements (21 échecs en base), aucun lié au périmètre.
+- `node raster/t.mjs check` : 0 erreur.
+
+**Décidé seul :** `devisId` optionnel au gain avec fallback `devisGenereId` (rétrocompat web jusqu'à SEKTOR-194) ; le journal des transitions est une table dédiée `transitions_etude` plutôt qu'un hook `audit_events` plateforme (acteur + ancien/nouveau statut + corrélation exigés par AC-6, absents du modèle plateforme).
+
+**Écarts / dette :** le web (`dossier-detail`) et les libellés/listes sont alignés dans SEKTOR-194 ; le snapshot chantier (montantVenteInitialHt, provenance) est posé par SEKTOR-192.
