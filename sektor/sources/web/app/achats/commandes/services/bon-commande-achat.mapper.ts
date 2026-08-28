@@ -29,6 +29,7 @@ export interface ApiBonCommandeAchat {
   chantierId?: string;
   chantierCode?: string;
   chantierName?: string;
+  noeudId?: string;
   daId?: string;
   daNumero?: string;
   aoId?: string;
@@ -88,6 +89,7 @@ export function bcToUi(row: ApiBonCommandeAchat): BonCommande {
     chantierId: row.chantierId,
     chantierCode: row.chantierCode,
     chantierName: row.chantierName,
+    noeudId: row.noeudId,
     daId: row.daId,
     daNumero: row.daNumero,
     aoId: row.aoId,
@@ -157,6 +159,7 @@ export function bcCreateToApi(
     chantierId: data.chantierId,
     chantierCode: data.chantierCode,
     chantierName: data.chantierName,
+    noeudId: data.noeudId,
     daId: data.daId,
     daNumero: data.daNumero,
     aoId: data.aoId,
@@ -187,6 +190,7 @@ export function bcUpdateToApi(data: BonCommandeUpdate): Partial<ApiBonCommandeAc
   if (data.chantierId !== undefined) body.chantierId = data.chantierId;
   if (data.chantierCode !== undefined) body.chantierCode = data.chantierCode;
   if (data.chantierName !== undefined) body.chantierName = data.chantierName;
+  if (data.noeudId !== undefined) body.noeudId = data.noeudId;
   if (data.daId !== undefined) body.daId = data.daId;
   if (data.daNumero !== undefined) body.daNumero = data.daNumero;
   if (data.aoId !== undefined) body.aoId = data.aoId;

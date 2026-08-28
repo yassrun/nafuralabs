@@ -790,9 +790,7 @@ public class DossierEtudeService {
         assertSnapshotVenteCoherent(montant, totalDevis, totalArticles);
         BigDecimal debourseInitial = debourseDuNoeudService.sommeDebourseArticles(noeuds);
 
-        String label = StringUtils.hasText(body.getChantierLabel())
-                ? body.getChantierLabel().trim()
-                : dossier.getObjet();
+        String label = resolveChantierLabel(body.getChantierLabel(), dossier.getObjet());
         String marcheRef = StringUtils.hasText(body.getMarcheReference())
                 ? body.getMarcheReference().trim()
                 : dossier.getReferenceMarche();
@@ -1391,6 +1389,24 @@ public class DossierEtudeService {
      */
     private String genererNumero(UUID tenantId) {
         return String.format("DE-%04d", repository.countByTenantId(tenantId) + 1);
+    }
+
+    /**
+     * AC-D2 — le libellé est obligatoire quand l'humain l'envoie ; absent du body, on retombe sur
+     * l'objet du dossier (scripts API / compat).
+     */
+    static String resolveChantierLabel(String chantierLabel, String objetDossier) {
+        if (chantierLabel != null) {
+            String trimmed = chantierLabel.trim();
+            if (!StringUtils.hasText(trimmed)) {
+                throw new IllegalArgumentException("etudes.dossier.libelle_chantier_requis");
+            }
+            return trimmed;
+        }
+        if (!StringUtils.hasText(objetDossier)) {
+            throw new IllegalArgumentException("etudes.dossier.libelle_chantier_requis");
+        }
+        return objetDossier.trim();
     }
 
     private static String trimOrNull(String v) {

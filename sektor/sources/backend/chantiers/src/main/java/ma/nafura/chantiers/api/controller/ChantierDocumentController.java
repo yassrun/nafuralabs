@@ -31,20 +31,20 @@ public class ChantierDocumentController {
     }
 
     @GetMapping
-    @RequirePermission("chantiers.read")
+    @RequirePermission("read")
     public ResponseEntity<List<DocumentChantierDto>> list(@PathVariable String chantierId) {
         return ResponseEntity.ok(service.listByChantier(chantierId));
     }
 
     @PostMapping
-    @RequirePermission("chantiers.create")
+    @RequirePermission("create")
     public ResponseEntity<DocumentChantierDto> create(
             @PathVariable String chantierId, @Valid @RequestBody DocumentChantierCreateDto body) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(chantierId, body));
     }
 
     @PutMapping("/{id}")
-    @RequirePermission("chantiers.update")
+    @RequirePermission("update")
     public ResponseEntity<DocumentChantierDto> update(
             @PathVariable String chantierId,
             @PathVariable String id,
@@ -53,7 +53,7 @@ public class ChantierDocumentController {
     }
 
     @DeleteMapping("/{id}")
-    @RequirePermission("chantiers.delete")
+    @RequirePermission("delete")
     public ResponseEntity<Void> delete(@PathVariable String chantierId, @PathVariable String id) {
         service.delete(chantierId, id);
         return ResponseEntity.noContent().build();

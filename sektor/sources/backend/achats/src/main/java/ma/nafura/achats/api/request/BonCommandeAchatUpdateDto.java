@@ -19,6 +19,8 @@ public class BonCommandeAchatUpdateDto {
 
     private String chantierName;
 
+    private String noeudId;
+
     private String daId;
 
     private String daNumero;

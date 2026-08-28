@@ -698,6 +698,30 @@
         "toasts": {
           "createSoon": "Subcontracting contract creation — coming soon."
         }
+      },
+      "create": {
+        "title": "New subcontract",
+        "subtitle": "Engage a sold node without a schedule",
+        "breadcrumb": "Create",
+        "submit": "Create contract",
+        "fields": {
+          "chantier": "Site",
+          "chantierPlaceholder": "Select a site",
+          "sousTraitant": "Subcontractor",
+          "objet": "Contract object",
+          "montantHt": "Amount excl. VAT (MAD)",
+          "dateDebut": "Start date",
+          "dateFin": "End date",
+          "noeud": "Sold node",
+          "noeudPlaceholder": "Select the node",
+          "bpu": "BPU (file)",
+          "bpuPlaceholder": "BPU-coffrage-2-3.pdf"
+        },
+        "errors": {
+          "required": "Site, node, subcontractor, object and amount are required.",
+          "failed": "Could not create the contract."
+        },
+        "success": "Subcontract created."
       }
     },
     "journal": {
@@ -807,7 +831,9 @@
           "chantierPlaceholder": "Select a site",
           "type": "Document type",
           "titre": "Title",
-          "file": "File"
+          "file": "File",
+          "noeud": "Node (optional)",
+          "noeudNone": "Whole site"
         },
         "errors": {
           "required": "Site, title and file are required.",
@@ -1137,6 +1163,10 @@
         "situation": "Handle situation",
         "situations": "View situations",
         "documents": "View documents",
+        "demandeAchat": "New purchase request",
+        "receptionBl": "Receive a delivery note",
+        "sousTraitance": "Subcontract",
+        "notifierMarche": "Notify the contract",
         "reprendre": "Resume the chantier"
       },
       "filtres": {
@@ -1253,6 +1283,23 @@
       "etapeInconnue": "Progress",
       "saisirAvancement": "chantiers.routes.avancementTitle"
     },
+    "action": {
+      "demarrer": "Start the chantier",
+      "preparer": "Prepare the chantier",
+      "equipe": "Manage the team",
+      "budget": "View budget",
+      "planning": "View schedule (recommended)",
+      "avancement": "Enter progress",
+      "attachement": "Create attachment",
+      "situation": "Handle situation",
+      "situations": "View situations",
+      "documents": "Documents",
+      "demandeAchat": "New purchase request",
+      "receptionBl": "Receive a delivery note",
+      "sousTraitance": "Subcontract",
+      "notifierMarche": "Notify the contract",
+      "reprendre": "Resume the chantier"
+    },
     "module": {
       "arbre": "Tree",
       "arbreResume": "Sold / internal, quote link",
@@ -1260,8 +1307,25 @@
       "budgetResume": "Direct cost, revisions, variances",
       "planning": "Schedule",
       "planningResume": "Activities and deadlines",
+      "planningRecommandeResume": "Recommended — never the only door to PR or subcontract",
       "situations": "Certificates",
-      "situationsResume": "Statements and retentions"
+      "situationsResume": "Statements and retentions",
+      "avancement": "Progress",
+      "avancementResume": "Enter today's quantities",
+      "demandeAchat": "Purchase request",
+      "demandeAchatResume": "Site PR, node already chosen",
+      "demandeAchatCount": "{{count}} PR",
+      "indisponible": "Unavailable",
+      "receptionBl": "Delivery notes",
+      "receptionBlResume": "Site DNs, direct delivery",
+      "documents": "Documents",
+      "documentsResume": "WO, drawings, minutes on the site",
+      "sousTraitance": "Subcontracting",
+      "sousTraitanceResume": "ST contract on a node",
+      "attachement": "Measurement book",
+      "attachementResume": "Monthly book",
+      "notifierMarche": "Contract",
+      "notifierMarcheResume": "Notify from the site, not at conversion"
     },
     "activite": {
       "titre": "Recent activity"

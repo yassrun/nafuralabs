@@ -434,11 +434,23 @@ Deux objets à tenir synchronisés, et la question « qui valide l'attachement S
 
 - Empaqueter des champs métier ST dans un champ `notes` (codec actuel).
 - Dupliquer la relation fournisseur, les attestations ou les factures côté `chantiers/`.
-- Une ST affectée à un chantier sans activité — elle est un **engagement** porté par le planning (§ capacité vs engagement).
+- Une ST affectée à un chantier sans activité **au palier 2** — elle est un engagement porté par le planning (§ capacité vs engagement). **Amendé palier 1 :** [`Gelé 27/08 ST sur nœud`](#gelé-27082026--st-palier-1-sur-le-nœud).
 
 ### Aujourd'hui dans le code (constat, pas une spec)
 
 `ChantierSousTraitanceService` (dans `achats/`) lit des `ContratFournisseur` filtrés sur `TYPE_SOUS_TRAITANCE` + `chantierId`, avec `ContratSousTraitanceNotes` qui **encode les champs ST dans `notes`**. Le web vit dans `chantiers/sous-traitance/`.
+
+---
+
+## Gelé (27/08/2026) — ST palier 1 sur le nœud
+
+Tranché **A** sur SEKTOR-220 (humain, 27/08).
+
+Au palier 1, le contrat ST s'accroche à un **nœud vendu** (poste 2.3 / 3), comme la DA. **Zéro activité exigée.** Refus si le nœud est `INTERNE` ou n'appartient pas au chantier.
+
+L'attachement ST (situation du sous-traitant) reste une **suite**. Le planning, plus tard, **date** l'engagement ; il ne le crée pas.
+
+Ça ne casse pas le gel « chantier facturable sans planning » : Al Qods mois 1 sous-traite le coffrage sans Gantt.
 
 ---
 
@@ -519,11 +531,11 @@ Le **journal de chantier** garde son rôle de fait quotidien (météo, effectif,
 
 ## Ouvert (prochain tour)
 
-Rien de bloquant. Ce qui reste se décide **au découpage**, pas ici :
-
+- **ST au palier 1.** Tranché **A** (27/08) : contrat sur le nœud, sans activité. Voir gel du même jour.
 - Le grain exact des activités livrées au palier 2 (durée minimale, jalons, liens FD/DD seuls ou les quatre types).
 - La reprise ou non de l'existant `chantiers/planning/` côté web (aucun backend derrière).
-- HSE et réception (PV, réserves) — un autre chapitre, pas celui-ci.
+- HSE et réception définitive / réserves — pas Al Qods mois 1. La **réception provisoire** (livraison) est dans `vie-de-chantier` AC-15.
+- Documents palier 1 (OS, plan, PV, BL) : rentrés dans `vie-de-chantier`, plus « hors lot » pour ces types.
 
 ---
 

@@ -46,6 +46,13 @@ public class ContratFournisseur {
     @Column(name = "chantier_id", length = 100)
     private String chantierId;
 
+    /** Nœud vendu (palier 1 ST). Obligatoire pour TYPE_SOUS_TRAITANCE. */
+    @Column(name = "noeud_id", length = 100)
+    private String noeudId;
+
+    @Column(name = "bpu_fichier", length = 500)
+    private String bpuFichier;
+
     @Column(name = "date_debut", nullable = false)
     private LocalDate dateDebut;
 

@@ -159,6 +159,7 @@
         "fields": {
           "numero": "PR #",
           "chantier": "Site",
+          "noeud": "Node",
           "dateBesoin": "Needed by date *",
           "demandeur": "Requester",
           "totalEstimeHt": "Estimated total ex. tax",
@@ -229,6 +230,7 @@
         "filters": {
           "status": "Status",
           "fournisseur": "Supplier",
+          "chantier": "Site",
           "rubrique": "Category",
           "dateFrom": "Created from",
           "dateTo": "Created to"
@@ -250,6 +252,7 @@
           "numero": "PO #",
           "fournisseur": "Supplier *",
           "chantier": "Site",
+          "noeud": "Node",
           "rubrique": "Category",
           "dateCreation": "Creation date",
           "dateLivraisonPrevue": "Expected delivery *",

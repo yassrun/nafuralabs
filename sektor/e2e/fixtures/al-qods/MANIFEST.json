@@ -1,0 +1,62 @@
+{
+  "scenario": "Groupe scolaire Al Qods",
+  "ste": "STE Al Binaa",
+  "generatedBy": "sektor/e2e/fixtures/al-qods/generate.mjs",
+  "files": [
+    "bdp/al-qods-bdp.csv",
+    "bdp/al-qods-bdp.pdf",
+    "cps/al-qods-cps.pdf",
+    "consultations/IM-01-devis-lafarge-ciment.pdf",
+    "consultations/IM-02-devis-holcim-ciment.pdf",
+    "consultations/IM-03-devis-vide.pdf",
+    "consultations/IM-04-devis-hors-panier-peinture.pdf",
+    "consultations/IM-05-devis-sonasid-acier.pdf",
+    "consultations/expected/IM-01.json",
+    "consultations/expected/IM-02.json",
+    "consultations/expected/IM-03.json",
+    "consultations/expected/IM-04.json",
+    "consultations/expected/IM-05.json",
+    "bl/BL-01-lafarge-ciment-40t.pdf",
+    "bl/expected/BL-01.json",
+    "bl/BL-02-acier-partiel-12t.pdf",
+    "bl/expected/BL-02.json",
+    "bl/BL-03-acier-ecart-30t.pdf",
+    "bl/expected/BL-03.json",
+    "bl/BL-04-mauvais-chantier.pdf",
+    "bl/expected/BL-04.json",
+    "da/DA-01-ciment-noeud-2-1.json",
+    "da/DA-02-acier-noeud-2-2.json",
+    "da/DA-03-base-vie-sans-noeud.json",
+    "st/BPU-coffrage-2-3.pdf",
+    "st/BPU-etancheite-3.pdf",
+    "docs/OS-ALQODS-001.pdf",
+    "docs/PV-coulage-2-1.pdf",
+    "photos/coulage-fondations.png",
+    "photos/bl-photo-terrain-ciment.png",
+    "photos/livraison-acier-partielle.png",
+    "bl/expected/BL-05-photo-terrain.json"
+  ],
+  "cas": {
+    "bdp": "bdp/al-qods-bdp.csv + bdp/al-qods-bdp.pdf",
+    "cps": "cps/al-qods-cps.pdf",
+    "importMagique": [
+      "IM-01",
+      "IM-02",
+      "IM-03",
+      "IM-04",
+      "IM-05"
+    ],
+    "bl": [
+      "BL-01",
+      "BL-02",
+      "BL-03",
+      "BL-04",
+      "BL-05"
+    ],
+    "da": [
+      "DA-01",
+      "DA-02",
+      "DA-03"
+    ]
+  }
+}

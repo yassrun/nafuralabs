@@ -21,6 +21,7 @@ export function buildBcFilters(t: TranslateService): FilterFieldConfig[] {
       ],
     },
     { key: 'fournisseurId', label: tr('achats.commande.list.filters.fournisseur'), type: 'select', lookupKey: 'fournisseurs' },
+    { key: 'chantierId', label: tr('achats.commande.list.filters.chantier'), type: 'select', lookupKey: 'chantiers' },
     {
       key: 'rubrique', label: tr('achats.commande.list.filters.rubrique'), type: 'select',
       options: [

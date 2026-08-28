@@ -34,6 +34,10 @@ public class DocumentChantier {
     @Column(name = "chantier_id", nullable = false, length = 100)
     private String chantierId;
 
+    /** Nœud facultatif (PV de coulage sur 2.1). Absent = document de chantier. */
+    @Column(name = "noeud_id", length = 100)
+    private String noeudId;
+
     @Column(nullable = false, length = 30)
     private String type;
 

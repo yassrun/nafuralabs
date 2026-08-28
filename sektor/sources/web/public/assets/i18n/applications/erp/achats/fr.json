@@ -159,6 +159,7 @@
         "fields": {
           "numero": "N° DA",
           "chantier": "Chantier",
+          "noeud": "Nœud",
           "dateBesoin": "Date besoin *",
           "demandeur": "Demandeur",
           "totalEstimeHt": "Total estimé HT",
@@ -229,6 +230,7 @@
         "filters": {
           "status": "Statut",
           "fournisseur": "Fournisseur",
+          "chantier": "Chantier",
           "rubrique": "Rubrique",
           "dateFrom": "Créé du",
           "dateTo": "Créé au"
@@ -250,6 +252,7 @@
           "numero": "N° BC",
           "fournisseur": "Fournisseur *",
           "chantier": "Chantier",
+          "noeud": "Nœud",
           "rubrique": "Rubrique",
           "dateCreation": "Date création",
           "dateLivraisonPrevue": "Livraison prévue *",

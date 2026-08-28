@@ -91,6 +91,9 @@ const STATUS_VARIANT: Record<ChantierStatus, BadgeVariant> = {
             @if (p.sourceVente === 'DEVIS' && p.devisNumero) {
               <span class="chantier-meta__src">· {{ p.devisNumero }}</span>
             }
+            @if (p.sourceVente === 'MARCHE') {
+              <span class="chantier-meta__src">· Marché</span>
+            }
           }
         </div>
 

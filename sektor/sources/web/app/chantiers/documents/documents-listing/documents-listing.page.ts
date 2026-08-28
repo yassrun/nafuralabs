@@ -22,7 +22,10 @@ import { FilterResetComponent } from '@platform/lib/anatomy/components/molecules
 import { AttachmentApiService } from '@platform/features/collaboration/doc-manager/services/attachment-api.service';
 import { ChantierApiService } from '../../services/chantier-api.service';
 import type { DocumentChantier, DocumentChantierType } from '../models';
+import { DOCUMENT_CHANTIER_PALIER_TYPES } from '../models';
 import { DocumentsApiService } from '../services/documents-api.service';
+import { BudgetApiService } from '../../budget/services/budget-api.service';
+import type { BudgetNoeud } from '../../budget/models';
 import {
   DOCUMENT_CATEGORIES,
   type DocumentCategory,
@@ -41,7 +44,19 @@ interface ChantierDocumentGroup {
   categoryCounts: Record<DocumentCategory, number>;
 }
 
+function flattenPostes(nodes: BudgetNoeud[] | undefined): BudgetNoeud[] {
+  const out: BudgetNoeud[] = [];
+  for (const node of nodes ?? []) {
+    if (node.type === 'POSTE') out.push(node);
+    out.push(...flattenPostes(node.enfants));
+  }
+  return out;
+}
+
 const TYPE_ICONS: Record<DocumentChantierType, string> = {
+  OS: '📝',
+  PV: '📋',
+  BL: '🚚',
   MARCHE: '📄',
   AVENANT: '📋',
   PV_RECEPTION: '✅',
@@ -157,7 +172,7 @@ function todayIso(): string {
             <label>
               <span>{{ 'chantiers.documents.create.fields.chantier' | translate }}</span>
               <select class="field" [(ngModel)]="uploadDraft.chantierId" name="chantierId"
-                [disabled]="!!routeChantierId()" required>
+                [disabled]="!!routeChantierId()" required (ngModelChange)="onUploadChantierChange($event)">
                 <option value="">{{ 'chantiers.documents.create.fields.chantierPlaceholder' | translate }}</option>
                 @for (chantier of chantiers(); track chantier.id) {
                   <option [value]="chantier.id">{{ chantier.code }} — {{ chantier.name }}</option>
@@ -167,8 +182,17 @@ function todayIso(): string {
             <label>
               <span>{{ 'chantiers.documents.create.fields.type' | translate }}</span>
               <select class="field" [(ngModel)]="uploadDraft.type" name="type">
-                @for (type of allTypes; track type) {
+                @for (type of palierTypes; track type) {
                   <option [value]="type">{{ typeLabel(type) }}</option>
+                }
+              </select>
+            </label>
+            <label>
+              <span>{{ 'chantiers.documents.create.fields.noeud' | translate }}</span>
+              <select class="field" [(ngModel)]="uploadDraft.noeudId" name="noeudId">
+                <option value="">{{ 'chantiers.documents.create.fields.noeudNone' | translate }}</option>
+                @for (node of uploadPostes(); track node.id) {
+                  <option [value]="node.id">{{ node.code }} — {{ node.designation }}</option>
                 }
               </select>
             </label>
@@ -411,6 +435,7 @@ export class DocumentsListingPage implements OnInit {
   private readonly api = inject(DocumentsApiService);
   private readonly attachmentApi = inject(AttachmentApiService);
   private readonly chantierApi = inject(ChantierApiService);
+  private readonly budgetApi = inject(BudgetApiService);
   private readonly translate = inject(TranslateService);
   private readonly toast = inject(ToastService);
   private readonly auth = inject(AuthFacade);
@@ -421,11 +446,7 @@ export class DocumentsListingPage implements OnInit {
   private selectedFile: File | null = null;
 
   readonly categories = DOCUMENT_CATEGORIES;
-  readonly allTypes: DocumentChantierType[] = [
-    'MARCHE', 'AVENANT', 'PV_RECEPTION', 'PLAN', 'PHOTO', 'BC', 'FACTURE',
-    'ATTESTATION_ASSURANCE', 'CAUTION_BANCAIRE', 'PPSPS', 'PLAN_PREVENTION',
-    'NOTE_CALCUL', 'AUTRE',
-  ];
+  readonly palierTypes = DOCUMENT_CHANTIER_PALIER_TYPES;
 
   readonly documents = signal<DocumentChantier[]>([]);
   readonly chantiers = signal<Chantier[]>([]);
@@ -444,11 +465,13 @@ export class DocumentsListingPage implements OnInit {
   readonly showUploadForm = signal(false);
   readonly uploading = signal(false);
   readonly previewedDocument = signal<DocumentChantier | null>(null);
+  readonly uploadPostes = signal<BudgetNoeud[]>([]);
 
   uploadDraft = {
     chantierId: '',
-    type: 'AUTRE' as DocumentChantierType,
+    type: 'OS' as DocumentChantierType,
     titre: '',
+    noeudId: '',
   };
 
   readonly headerConfig = {
@@ -501,6 +524,7 @@ export class DocumentsListingPage implements OnInit {
     const chantierId = this.route.snapshot.queryParamMap.get('chantierId')?.trim() ?? '';
     this.routeChantierId.set(chantierId);
     this.filterChantierId.set(chantierId);
+    if (chantierId) this.viewMode.set('documents');
     void this.load();
   }
 
@@ -599,12 +623,32 @@ export class DocumentsListingPage implements OnInit {
 
   openUploadForm(): void {
     this.uploadDraft = {
-      chantierId: this.routeChantierId() || this.filterChantierId() || this.chantiers()[0]?.id || '',
-      type: 'AUTRE',
+      chantierId: this.routeChantierId() || this.filterChantierId() || '',
+      type: 'OS',
       titre: '',
+      noeudId: '',
     };
     this.selectedFile = null;
     this.showUploadForm.set(true);
+    void this.loadUploadPostes(this.uploadDraft.chantierId);
+  }
+
+  onUploadChantierChange(chantierId: string): void {
+    this.uploadDraft.noeudId = '';
+    void this.loadUploadPostes(chantierId);
+  }
+
+  private async loadUploadPostes(chantierId: string): Promise<void> {
+    if (!chantierId) {
+      this.uploadPostes.set([]);
+      return;
+    }
+    try {
+      const arbre = await this.budgetApi.getArbre(chantierId);
+      this.uploadPostes.set(flattenPostes(arbre?.lots));
+    } catch {
+      this.uploadPostes.set([]);
+    }
   }
 
   closeUploadForm(): void {
@@ -621,7 +665,7 @@ export class DocumentsListingPage implements OnInit {
   }
 
   async submitUpload(): Promise<void> {
-    const { chantierId, type, titre } = this.uploadDraft;
+    const { chantierId, type, titre, noeudId } = this.uploadDraft;
     if (!chantierId || !titre.trim() || !this.selectedFile) {
       this.toast.error(this.translate.instant('chantiers.documents.create.errors.required'));
       return;
@@ -643,6 +687,7 @@ export class DocumentsListingPage implements OnInit {
         taille: this.selectedFile.size,
         uploadedAt: todayIso(),
         uploadedPar: this.auth.displayName(),
+        noeudId: noeudId || undefined,
       });
       this.toast.success(this.translate.instant('chantiers.documents.create.success'));
       this.closeUploadForm();

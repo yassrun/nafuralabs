@@ -25,6 +25,7 @@ export interface ApiDemandeAchat {
   chantierId?: string;
   chantierCode?: string;
   chantierName?: string;
+  noeudId?: string;
   dateBesoin: string;
   demandeurId: string;
   demandeurName?: string;
@@ -72,6 +73,7 @@ export function demandeToUi(row: ApiDemandeAchat): DemandeAchat {
     chantierId: row.chantierId,
     chantierCode: row.chantierCode,
     chantierName: row.chantierName,
+    noeudId: row.noeudId,
     dateBesoin: row.dateBesoin?.slice(0, 10) ?? row.dateBesoin,
     demandeurId: row.demandeurId,
     demandeurName: row.demandeurName,
@@ -128,6 +130,7 @@ export function demandeCreateToApi(data: DemandeAchatCreate): Omit<ApiDemandeAch
     chantierId: data.chantierId,
     chantierCode: data.chantierCode,
     chantierName: data.chantierName,
+    noeudId: data.noeudId,
     dateBesoin: data.dateBesoin,
     demandeurId: data.demandeurId,
     demandeurName: data.demandeurName,
@@ -150,6 +153,7 @@ export function demandeUpdateToApi(data: DemandeAchatUpdate): Partial<ApiDemande
   if (data.chantierId !== undefined) body.chantierId = data.chantierId;
   if (data.chantierCode !== undefined) body.chantierCode = data.chantierCode;
   if (data.chantierName !== undefined) body.chantierName = data.chantierName;
+  if (data.noeudId !== undefined) body.noeudId = data.noeudId;
   if (data.dateBesoin !== undefined) body.dateBesoin = data.dateBesoin;
   if (data.demandeurId !== undefined) body.demandeurId = data.demandeurId;
   if (data.demandeurName !== undefined) body.demandeurName = data.demandeurName;

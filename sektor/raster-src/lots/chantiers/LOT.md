@@ -16,6 +16,9 @@ La contrainte qui prime : **un chantier créé depuis une étude est facturable 
 | `frontieres-bc` | contrat ST typé côté Achats, pilotage portefeuille au socle | — |
 | `continuite-etude-devis-chantier` | gain atomique, devis accepté figé, provenance et dictionnaire financier cohérent jusqu'au chantier | `arbre-et-conversion`, `budget-et-marge` (contrats amendés, pas à rejouer) |
 | `cockpit-chantier` | préparation, KPI, alertes, prochaine action et portefeuille décisionnel | `continuite-etude-devis-chantier` |
+| `vie-de-chantier` | scénario Al Qods palier 1 : DA, BL, avancement, documents, ST sur poste, marché à la notification, preuve non superficielle | `cockpit-chantier` (consomme, n'attend pas 209) |
+| `dette-palier-1` | dette post-226 : résilience DA cockpit, CTA conversion sans marché, captures UI · [`dette-palier-1/CONTRAT.md`](dette-palier-1/CONTRAT.md) | `vie-de-chantier` (done-me) |
+| `situation-al-qods-mois-1` | Al Qods septembre : avancement → attachement signé → situation n°1 (RG/avance), sans marché · [`situation-al-qods-mois-1/CONTRAT.md`](situation-al-qods-mois-1/CONTRAT.md) | `vie-de-chantier`, `dette-palier-1` (done-me) |
 
 ## Sous-lots — vague 2 (paliers 2 et 3)
 
@@ -27,8 +30,10 @@ Mode : contrats écrits sans agent spec · **1 exec code / sous-lot** · QA Rast
 | `capacite-et-engagement` | affectation MO / matériel (lecture RH), besoins ST et matière poussés en aval | `planning-activites` |
 | `baseline-et-os` | baseline figée à l'OS, prolongation, intempéries depuis le journal | `planning-activites` |
 | `pointage-impute` | le pointage RH troque `posteBudgetaireId` contre l'imputation activité | `planning-activites` |
-| `matiere-et-magasin` | besoin → DA → livraison directe **ou** magasin chantier (`catalogue/`) | `capacite-et-engagement` |
+| `matiere-et-magasin` | magasin chantier comme chemin principal (`catalogue/`) | `capacite-et-engagement` |
 
 ## Hors lot
 
-HSE, réception (PV, réserves), documents et photos rattachés à l'activité : un autre chapitre.
+HSE, photos rattachées à l'activité, réception **définitive** / réserves : un autre chapitre.
+Documents palier 1 (OS, plan, PV, BL) et DA→BC→BL **direct** : `vie-de-chantier`.
+`etudes/finition-parcours` est en pause.

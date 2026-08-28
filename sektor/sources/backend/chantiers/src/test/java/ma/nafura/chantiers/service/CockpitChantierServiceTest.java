@@ -18,6 +18,7 @@ import ma.nafura.chantiers.repository.ChantierLotRepository;
 import ma.nafura.chantiers.repository.AttachementChantierRepository;
 import ma.nafura.chantiers.repository.AvancementPhysiqueRepository;
 import ma.nafura.chantiers.repository.JournalChantierRepository;
+import ma.nafura.chantiers.service.port.DemandeAchatCockpitPort;
 import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.platform.framework.context.UserContext;
 import org.junit.jupiter.api.AfterEach;
@@ -28,6 +29,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.beans.factory.ObjectProvider;
 
 /**
  * SEKTOR-196 — read model cockpit : checklist AC-5, alertes AC-9/AC-12/AC-13, prochaines
@@ -47,15 +49,19 @@ class CockpitChantierServiceTest {
     @Mock private JournalChantierRepository journalRepository;
     @Mock private AttachementChantierRepository attachementRepository;
     @Mock private AvancementPhysiqueRepository avancementRepository;
+    @Mock private ObjectProvider<DemandeAchatCockpitPort> demandeAchatPort;
+    @Mock private DemandeAchatCockpitPort demandeAchatCockpitPort;
 
     private CockpitChantierService service;
 
     @BeforeEach
     void setUp() {
         TenantContext.setTenantId(TENANT);
+        when(demandeAchatPort.getIfAvailable()).thenReturn(demandeAchatCockpitPort);
+        when(demandeAchatCockpitPort.compterParChantier(CHANTIER)).thenReturn(0L);
         service = new CockpitChantierService(
                 chantierService, summaryService, affectationService, lotRepository,
-                journalRepository, attachementRepository, avancementRepository);
+                journalRepository, attachementRepository, avancementRepository, demandeAchatPort);
     }
 
     @AfterEach
@@ -247,7 +253,14 @@ class CockpitChantierServiceTest {
         CockpitChantierDto dto2 = service.lireCockpit(CHANTIER);
         assertThat(dto2.getNextActions().get(0).getLibelle())
                 .isEqualTo("chantiers.cockpit.action.avancement");
-        assertThat(dto2.getNextActions().size()).isLessThanOrEqualTo(4);
+        assertThat(dto2.getNextActions()).extracting(CockpitChantierDto.NextActionDto::getLibelle)
+                .contains(
+                        "chantiers.cockpit.action.avancement",
+                        "chantiers.cockpit.action.demandeAchat",
+                        "chantiers.cockpit.action.receptionBl",
+                        "chantiers.cockpit.action.documents",
+                        "chantiers.cockpit.action.sousTraitance");
+        assertThat(dto2.getNextActions()).allMatch(a -> a.getRoute() != null && a.getRoute().contains(CHANTIER));
     }
 
     @Test
@@ -336,7 +349,7 @@ class CockpitChantierServiceTest {
                 .allMatch(a -> !"chantiers.update".equals(a.getPermission()));
     }
 
-    /** AC-20 — chef de chantier : écriture terrain, pas de budget. */
+    /** AC-20 / vie-de-chantier AC-3 — chef : avancement, docs, BL ; pas DA, ST, situation, marché. */
     @Test
     void prochaineAction_chefChantier_ecritureSansBudget() {
         UserContext.setUserRole("BTP_CHEF_CHANTIER");
@@ -344,8 +357,80 @@ class CockpitChantierServiceTest {
         prepare(cours, summaryCanonique());
         CockpitChantierDto dto = service.lireCockpit(CHANTIER);
         assertThat(dto.getNextActions())
-                .anyMatch(a -> "chantiers.update".equals(a.getPermission()))
+                .extracting(CockpitChantierDto.NextActionDto::getLibelle)
+                .contains(
+                        "chantiers.cockpit.action.avancement",
+                        "chantiers.cockpit.action.documents",
+                        "chantiers.cockpit.action.receptionBl")
+                .doesNotContain(
+                        "chantiers.cockpit.action.demandeAchat",
+                        "chantiers.cockpit.action.sousTraitance",
+                        "chantiers.cockpit.action.situation",
+                        "chantiers.cockpit.action.attachement",
+                        "chantiers.cockpit.action.notifierMarche");
+        assertThat(dto.getNextActions())
                 .noneMatch(a -> "chantiers.budget.read".equals(a.getPermission()));
+    }
+
+    @Test
+    void prochaineAction_conducteur_daEtAvancement() {
+        UserContext.setUserRole("BTP_CONDUCTEUR_TRAVAUX");
+        Chantier cours = chantier(Chantier.STATUS_EN_COURS);
+        prepare(cours, summaryCanonique());
+        CockpitChantierDto dto = service.lireCockpit(CHANTIER);
+        assertThat(dto.getNextActions())
+                .extracting(CockpitChantierDto.NextActionDto::getLibelle)
+                .contains(
+                        "chantiers.cockpit.action.avancement",
+                        "chantiers.cockpit.action.demandeAchat",
+                        "chantiers.cockpit.action.sousTraitance",
+                        "chantiers.cockpit.action.attachement",
+                        "chantiers.cockpit.action.situation",
+                        "chantiers.cockpit.action.notifierMarche");
+        assertThat(dto.getNextActions()).allMatch(a -> a.getRoute().contains(CHANTIER));
+    }
+
+    @Test
+    void prochaineAction_conducteur_apresNotification_sansNotifierMarche() {
+        UserContext.setUserRole("BTP_CONDUCTEUR_TRAVAUX");
+        Chantier cours = chantier(Chantier.STATUS_EN_COURS);
+        cours.setSourceVente(Chantier.SOURCE_MARCHE);
+        prepare(cours, summaryCanonique());
+        CockpitChantierDto dto = service.lireCockpit(CHANTIER);
+        assertThat(dto.getNextActions())
+                .extracting(CockpitChantierDto.NextActionDto::getLibelle)
+                .doesNotContain("chantiers.cockpit.action.notifierMarche");
+    }
+
+    @Test
+    void finance_sourceVente_suitNotification() {
+        UserContext.setUserRole("OWNER");
+        Chantier devis = chantier(Chantier.STATUS_EN_COURS);
+        devis.setSourceVente(Chantier.SOURCE_DEVIS);
+        prepare(devis, summaryCanonique());
+        assertThat(service.lireCockpit(CHANTIER).getFinance().getMontantVenteActifHt().getSource())
+                .isEqualTo(Chantier.SOURCE_DEVIS);
+
+        Chantier marche = chantier(Chantier.STATUS_EN_COURS);
+        marche.setSourceVente(Chantier.SOURCE_MARCHE);
+        prepare(marche, summaryCanonique());
+        assertThat(service.lireCockpit(CHANTIER).getFinance().getMontantVenteActifHt().getSource())
+                .isEqualTo(Chantier.SOURCE_MARCHE);
+    }
+
+    @Test
+    void prochaineAction_magasinier_receptionSansSituation() {
+        UserContext.setUserRole("BTP_MAGASINIER");
+        Chantier cours = chantier(Chantier.STATUS_EN_COURS);
+        prepare(cours, summaryCanonique());
+        CockpitChantierDto dto = service.lireCockpit(CHANTIER);
+        assertThat(dto.getNextActions())
+                .extracting(CockpitChantierDto.NextActionDto::getLibelle)
+                .contains("chantiers.cockpit.action.receptionBl")
+                .doesNotContain(
+                        "chantiers.cockpit.action.situation",
+                        "chantiers.cockpit.action.attachement",
+                        "chantiers.cockpit.action.demandeAchat");
     }
 
     /** AC-20 — daf : budget lisible, aucune écriture terrain. */
@@ -381,6 +466,50 @@ class CockpitChantierServiceTest {
                                     || a.getRoute().contains("attachements/saisie")
                                     || a.getRoute().contains("demarrer-os")));
         }
+    }
+
+    @Test
+    void ops_enCours_compteLesDemandesAchat() {
+        UserContext.setUserRole("OWNER");
+        Chantier cours = chantier(Chantier.STATUS_EN_COURS);
+        prepare(cours, summaryCanonique());
+        when(demandeAchatCockpitPort.compterParChantier(CHANTIER)).thenReturn(3L);
+
+        CockpitChantierDto dto = service.lireCockpit(CHANTIER);
+
+        assertThat(dto.getOps()).isNotNull();
+        assertThat(dto.getOps().getDemandesAchat().getEtat()).isEqualTo("AVAILABLE");
+        assertThat(dto.getOps().getDemandesAchat().getValeur()).isEqualTo(3L);
+    }
+
+    /** SEKTOR-227 — panne Achats : NOT_AVAILABLE sur la tuile DA, cockpit lisible, pas de faux zéro. */
+    @Test
+    void ops_panneAchats_demandesIndisponibles_pasDeFauxZero() {
+        UserContext.setUserRole("OWNER");
+        Chantier cours = chantier(Chantier.STATUS_EN_COURS);
+        prepare(cours, summaryCanonique());
+        when(demandeAchatCockpitPort.compterParChantier(CHANTIER))
+                .thenThrow(new IllegalStateException("achats HS"));
+
+        CockpitChantierDto dto = service.lireCockpit(CHANTIER);
+
+        assertThat(dto.getIdentity()).isNotNull();
+        assertThat(dto.getFinance().getMontantVenteActifHt().getEtat()).isEqualTo("AVAILABLE");
+        assertThat(dto.getOps().getDemandesAchat().getEtat()).isEqualTo("NOT_AVAILABLE");
+        assertThat(dto.getOps().getDemandesAchat().getValeur()).isNull();
+        assertThat(dto.getOps().getDemandesAchat().getCause())
+                .isEqualTo("chantiers.cockpit.ops.demandesAchat.indisponible");
+        assertThat(dto.getDegradations()).extracting(CockpitChantierDto.DegradationDto::getSection)
+                .contains("chantiers.cockpit.degradation.demandesAchat");
+    }
+
+    @Test
+    void ops_enPreparation_absent() {
+        UserContext.setUserRole("OWNER");
+        Chantier prep = chantier(Chantier.STATUS_EN_PREPARATION);
+        prepare(prep, summaryCanonique());
+
+        assertThat(service.lireCockpit(CHANTIER).getOps()).isNull();
     }
 
     @Test

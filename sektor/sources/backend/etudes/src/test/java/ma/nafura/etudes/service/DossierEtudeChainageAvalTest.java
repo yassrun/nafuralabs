@@ -728,6 +728,25 @@ class DossierEtudeChainageAvalTest {
         assertThat(orphelin.parentCode()).isEqualTo("L99");
     }
 
+    /** AC-D2 — libellé chantier obligatoire quand envoyé explicitement vide. */
+    @Test
+    void convertir_libelleVide_refuse() {
+        DossierEtude dossier = dossierAvecDpgf();
+        Devis devis = devis(Devis.STATUS_APPROUVE, new BigDecimal("15500"));
+        when(repository.lockByIdAndTenantId(DOSSIER_ID, TENANT)).thenReturn(Optional.of(dossier));
+        when(devisRepository.findByIdAndTenantId(DEVIS_ID, TENANT)).thenReturn(Optional.of(devis));
+        when(noeudRepository.findByDpgfIdAndTenantIdOrderByOrdreAsc(DPGF_ID, TENANT))
+                .thenReturn(noeudsSomme(new BigDecimal("15500")));
+
+        DossierConvertirDto body = new DossierConvertirDto();
+        body.setChantierLabel("   ");
+
+        assertThatThrownBy(() -> service.convertir(DOSSIER_ID, body))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("libelle_chantier_requis");
+        verify(chainageAvalPort, never()).convert(any());
+    }
+
     private DossierEtude dossierAvecDpgf() {
         DossierEtude dossier = dossier(StatutDossierEtude.GAGNE);
         dossier.setClientId("client-1");

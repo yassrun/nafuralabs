@@ -59,12 +59,14 @@ public class DemandeAchatService {
     @Transactional
     public DemandeAchat create(DemandeAchatCreateDto request) {
         UUID tenantId = tenantId();
+        String chantierId = requireChantierId(request.getChantierId());
         DemandeAchat entity = DemandeAchat.builder()
                 .tenantId(tenantId)
                 .numero(nextNumero(tenantId))
-                .chantierId(trimOrNull(request.getChantierId()))
+                .chantierId(chantierId)
                 .chantierCode(trimOrNull(request.getChantierCode()))
                 .chantierName(trimOrNull(request.getChantierName()))
+                .noeudId(trimOrNull(request.getNoeudId()))
                 .dateBesoin(request.getDateBesoin())
                 .demandeurId(request.getDemandeurId().trim())
                 .demandeurName(trimOrNull(request.getDemandeurName()))
@@ -90,13 +92,16 @@ public class DemandeAchatService {
     public DemandeAchat update(UUID id, DemandeAchatUpdateDto request) {
         DemandeAchat entity = getById(id);
         if (request.getChantierId() != null) {
-            entity.setChantierId(trimOrNull(request.getChantierId()));
+            entity.setChantierId(requireChantierId(request.getChantierId()));
         }
         if (request.getChantierCode() != null) {
             entity.setChantierCode(trimOrNull(request.getChantierCode()));
         }
         if (request.getChantierName() != null) {
             entity.setChantierName(trimOrNull(request.getChantierName()));
+        }
+        if (request.getNoeudId() != null) {
+            entity.setNoeudId(trimOrNull(request.getNoeudId()));
         }
         if (request.getDateBesoin() != null) {
             entity.setDateBesoin(request.getDateBesoin());
@@ -297,6 +302,14 @@ public class DemandeAchatService {
         for (DemandeAchatLigne ligne : entity.getLignes()) {
             ligne.setDemande(entity);
         }
+    }
+
+    private String requireChantierId(String chantierId) {
+        String trimmed = trimOrNull(chantierId);
+        if (trimmed == null) {
+            throw new IllegalArgumentException("achats.demande.chantier_requis");
+        }
+        return trimmed;
     }
 
     private String trimOrNull(String value) {

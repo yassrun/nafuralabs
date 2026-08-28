@@ -149,12 +149,15 @@ async function main() {
     pass('AC-7/AC-10', 'cockpit EN_COURS, action primaire priorité 1');
   } else fail('AC-7/AC-10', 'cockpit EN_COURS', 'EN_COURS + priorité 1', `${ck2.body?.identity?.status}`);
 
-  // ── AC-9/AC-10 — alertes = faits, ≤4 actions ────────────────────────────────
+  // ── AC-9/AC-10 — alertes = faits ; EN_COURS ouvre les ops (plus de plafond 4)
   const alerts = ck2.body?.alerts ?? [];
   const next = ck2.body?.nextActions ?? [];
-  if (Array.isArray(alerts) && next.length >= 1 && next.length <= 4) {
-    pass('AC-9/AC-10', `alertes ${alerts.length} (codes stables), ≤4 actions (${next.length})`);
-  } else fail('AC-9/AC-10', 'alertes/actions', 'alerts + ≤4 actions', `${alerts.length}/${next.length}`);
+  const nextLabels = next.map((a) => a.libelle);
+  if (Array.isArray(alerts) && next.length >= 1
+      && nextLabels.includes('chantiers.cockpit.action.avancement')
+      && nextLabels.includes('chantiers.cockpit.action.demandeAchat')) {
+    pass('AC-9/AC-10', `alertes ${alerts.length}, ops ${next.length} (DA + avancement)`);
+  } else fail('AC-9/AC-10', 'alertes/actions', 'alerts + DA + avancement', `${alerts.length}/${nextLabels.join(',')}`);
 
   // ── AC-15 — flux du mois actionnable (route réelle) ─────────────────────────
   if (ck2.body?.progress?.fluxMois?.actionnable && /^\/chantiers\//.test(ck2.body?.progress?.fluxMois?.premiereAction ?? '')) {

@@ -13,7 +13,9 @@ import ma.nafura.marches.domain.contrat.BpuLigne;
 import ma.nafura.marches.domain.contrat.ContratMarche;
 import ma.nafura.marches.repository.BpuLigneRepository;
 import ma.nafura.marches.repository.ContratMarcheRepository;
+import ma.nafura.marches.service.port.ChantierVentePort;
 import ma.nafura.platform.framework.context.TenantContext;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -25,14 +27,17 @@ public class ContratMarcheService {
     private final ContratMarcheRepository contratRepository;
     private final BpuLigneRepository ligneRepository;
     private final ContratMarcheSeedService seedService;
+    private final ObjectProvider<ChantierVentePort> chantierVentePort;
 
     public ContratMarcheService(
             ContratMarcheRepository contratRepository,
             BpuLigneRepository ligneRepository,
-            ContratMarcheSeedService seedService) {
+            ContratMarcheSeedService seedService,
+            ObjectProvider<ChantierVentePort> chantierVentePort) {
         this.contratRepository = contratRepository;
         this.ligneRepository = ligneRepository;
         this.seedService = seedService;
+        this.chantierVentePort = chantierVentePort;
     }
 
     @Transactional(readOnly = true)
@@ -169,7 +174,19 @@ public class ContratMarcheService {
             entity.setDateNotification(java.time.LocalDate.now());
         }
         entity.setUpdatedAt(OffsetDateTime.now());
-        return contratRepository.save(entity);
+        ContratMarche saved = contratRepository.save(entity);
+        basculerVenteChantier(saved.getChantierId());
+        return saved;
+    }
+
+    private void basculerVenteChantier(String chantierId) {
+        if (!StringUtils.hasText(chantierId)) {
+            return;
+        }
+        ChantierVentePort port = chantierVentePort.getIfAvailable();
+        if (port != null) {
+            port.basculerVersMarche(chantierId.trim());
+        }
     }
 
     @Transactional

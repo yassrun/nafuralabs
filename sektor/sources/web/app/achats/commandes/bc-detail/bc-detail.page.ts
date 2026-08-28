@@ -12,6 +12,7 @@ import {
 } from '@platform/lib/anatomy';
 import type { DetailActionEvent, LookupItem } from '@platform/lib/anatomy/types';
 import type { BCStatus, BonCommande, BonCommandeCreate, MatchingReception, BCLigne } from '@app/achats/models';
+import type { DemandeAchat } from '@app/achats/models';
 import { MatchingService } from '@app/achats/services/matching.service';
 import type { Location } from '@app/catalogue/models';
 import { ErpLookupService } from '@app/socle/shared/services/erp-lookup.service';
@@ -24,6 +25,7 @@ import {
   extractLines,
 } from '@app/socle/shared/utils/extraction-json.utils';
 
+import { DemandeApiService } from '@app/achats/demandes/services/demande-api.service';
 import { BcFacade, type ApiReceptionAchat } from '../services';
 import { buildBcDetailConfig } from '../config';
 
@@ -99,6 +101,7 @@ export class BcDetailPage extends ConfigDrivenDetailPage<BonCommande> {
   private readonly matchingSvc = inject(MatchingService);
   private readonly erpLookup = inject(ErpLookupService);
   private readonly translate = inject(TranslateService);
+  private readonly demandeApi = inject(DemandeApiService);
 
   readonly matchSummary = signal<MatchingReception | null>(null);
   readonly receptions = signal<ApiReceptionAchat[]>([]);
@@ -133,6 +136,57 @@ export class BcDetailPage extends ConfigDrivenDetailPage<BonCommande> {
     lookups: () => this.crud.lookups(),
   });
   readonly config = buildBcDetailConfig(this.translate);
+
+  override ngOnInit(): void {
+    super.ngOnInit();
+    if (this.mode() !== 'create') return;
+    void this.prefillFromQuery();
+  }
+
+  private async prefillFromQuery(): Promise<void> {
+    const q = this.route.snapshot.queryParamMap;
+    const daId = q.get('daId')?.trim();
+    const daNumero = q.get('daNumero')?.trim();
+    const chantierId = q.get('chantierId')?.trim();
+    const noeudId = q.get('noeudId')?.trim();
+    const current = this.item() ?? ({} as BonCommande);
+    let patch: Partial<BonCommande> = {
+      ...current,
+      ...(daId ? { daId } : {}),
+      ...(daNumero ? { daNumero } : {}),
+      ...(chantierId ? { chantierId } : {}),
+      ...(noeudId ? { noeudId } : {}),
+    };
+    if (daId) {
+      try {
+        const da: DemandeAchat = await this.demandeApi.getById(daId);
+        patch = {
+          ...patch,
+          daId: da.id,
+          daNumero: da.numero,
+          chantierId: patch.chantierId || da.chantierId,
+          noeudId: patch.noeudId || da.noeudId,
+          lignes: (da.lignes ?? []).map((l) => ({
+            id: '',
+            bcId: '',
+            articleId: l.articleId,
+            articleCode: l.articleCode,
+            articleName: l.articleName,
+            quantite: l.quantite,
+            quantiteLivree: 0,
+            quantiteFacturee: 0,
+            uomCode: l.uomCode,
+            prixUnitaireHt: l.prixEstimeHt ?? 0,
+            totalHt: l.totalEstimeHt ?? (l.quantite * (l.prixEstimeHt ?? 0)),
+            notes: l.notes,
+          })),
+        };
+      } catch {
+        // DA introuvable : on garde les query params.
+      }
+    }
+    this.item.set({ ...current, ...patch } as BonCommande);
+  }
 
   get headerTitle(): string {
     if (this.mode() === 'create') return this.translate.instant('achats.commande.createTitle');
@@ -188,7 +242,7 @@ export class BcDetailPage extends ConfigDrivenDetailPage<BonCommande> {
     this.receptionLines.update((rows) =>
       rows.map((r, i) =>
         i === index
-          ? { ...r, quantiteRecue: Number.isFinite(qty) ? Math.min(Math.max(0, qty), r.remaining) : 0 }
+          ? { ...r, quantiteRecue: Number.isFinite(qty) ? Math.max(0, qty) : 0 }
           : r,
       ),
     );
@@ -198,8 +252,11 @@ export class BcDetailPage extends ConfigDrivenDetailPage<BonCommande> {
     const bc = this.item();
     const dest = this.destLocationId().trim();
     if (!bc?.id) return;
-    if (!dest) {
-      this.showError('Sélectionnez un dépôt ou chantier de destination.');
+    const over = this.receptionLines().find((l) => l.quantiteRecue > l.remaining);
+    if (over) {
+      this.showError(
+        `Écart BL : ${over.quantiteRecue} reçus pour ${over.remaining} restants sur ${over.articleLabel}. Refusé.`,
+      );
       return;
     }
     const lignes = this.receptionLines()
@@ -216,7 +273,7 @@ export class BcDetailPage extends ConfigDrivenDetailPage<BonCommande> {
     this.receptionSaving.set(true);
     try {
       await this.crud.createReception(bc.id, {
-        destLocationId: dest,
+        ...(dest ? { destLocationId: dest } : {}),
         blNumero: this.blNumero().trim() || undefined,
         dateReception: new Date().toISOString().slice(0, 10),
         lignes,
@@ -226,7 +283,11 @@ export class BcDetailPage extends ConfigDrivenDetailPage<BonCommande> {
       this.showReceptionForm.set(false);
       await this.loadReceptions(bc.id);
       this.matchingSvc.loadMatchingForBc(bc.id).subscribe((m) => this.matchSummary.set(m));
-      this.showSuccess('Réception enregistrée — mouvement stock RECEPTION créé.');
+      this.showSuccess(
+        dest
+          ? 'Réception enregistrée — mouvement stock RECEPTION créé.'
+          : 'Réception directe chantier — sans magasin.',
+      );
     } catch (e) {
       this.showError((e as Error).message ?? 'Erreur réception');
     } finally {

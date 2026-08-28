@@ -17,6 +17,7 @@ interface ApiDocumentChantier {
   id: string;
   chantierId: string;
   chantierCode?: string;
+  noeudId?: string;
   type: string;
   titre: string;
   fichier: string;
@@ -32,6 +33,7 @@ function apiToUi(row: ApiDocumentChantier): DocumentChantier {
     id: row.id,
     chantierId: row.chantierId,
     chantierCode: row.chantierCode ?? row.chantierId,
+    noeudId: row.noeudId || undefined,
     type: row.type as DocumentChantier['type'],
     titre: row.titre,
     fichier: row.fichier,
@@ -86,6 +88,7 @@ export class DocumentsApiService extends FeatureApiService<DocumentChantier, nev
       uploadedAt: string;
       uploadedPar: string;
       tags?: string[];
+      noeudId?: string;
     },
   ): Promise<DocumentChantier> {
     const row = await this.post<ApiDocumentChantier>(`${this.basePath}/${chantierId}/documents`, data);

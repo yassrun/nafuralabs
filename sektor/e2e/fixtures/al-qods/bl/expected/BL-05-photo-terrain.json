@@ -1,0 +1,32 @@
+{
+  "cas": "BL-05",
+  "fichierNom": "photos/bl-photo-terrain-ciment.png",
+  "kind": "photo-terrain",
+  "notes": "Photo generee : OCR peut lire 'BL N 44012' et 40 t. Gold canonique = BL-01 PDF. Si Extraire rate la photo, le cas PDF reste valable.",
+  "attenduExtraction": {
+    "blReference": "44012",
+    "date": null,
+    "issuer": "Ciments Lafarge Maroc",
+    "sender": {
+      "name": "Ciments Lafarge Maroc"
+    },
+    "receiver": {
+      "name": "STE Al Binaa"
+    },
+    "items": [
+      {
+        "itemReference": null,
+        "itemDesignation": "Ciment CPJ 45",
+        "quantity": 40,
+        "uom": "t"
+      }
+    ]
+  },
+  "attenduMetier": {
+    "noeud": "2.1",
+    "bcQte": 40,
+    "recu": 40,
+    "resteALivrer": 0,
+    "destination": "DIRECT_CHANTIER"
+  }
+}

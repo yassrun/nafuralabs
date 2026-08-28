@@ -1,0 +1,28 @@
+{
+  "cas": "IM-01",
+  "fichierNom": "IM-01-devis-lafarge-ciment.pdf",
+  "fournisseur": "Ciments Lafarge Maroc",
+  "clesStables": [
+    "ciment-cpj-45"
+  ],
+  "attendu": {
+    "devisRecusDelta": 1,
+    "statut": "DEVIS_RECU",
+    "lignes": [
+      {
+        "identite": "ciment-cpj-45",
+        "libelle": "Ciment CPJ 45",
+        "quantite": 40,
+        "unite": "t",
+        "prixUnitaire": 1083.75
+      },
+      {
+        "identite": "sable-0-5",
+        "libelle": "Sable 0/5",
+        "quantite": 80,
+        "unite": "m3",
+        "prixUnitaire": 95
+      }
+    ]
+  }
+}

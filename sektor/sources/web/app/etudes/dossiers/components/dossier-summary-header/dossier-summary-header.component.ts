@@ -104,7 +104,7 @@ export class DossierSummaryHeaderComponent {
       case 'MARQUER_GAGNE':
         return 'Marquer gagné';
       case 'CONVERTIR':
-        return 'Créer chantier et marché';
+        return 'Créer le chantier';
       case 'VOIR_CHANTIER':
         return 'Ouvrir le chantier';
       default:

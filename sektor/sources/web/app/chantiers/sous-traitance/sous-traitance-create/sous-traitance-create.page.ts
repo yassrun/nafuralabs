@@ -1,13 +1,24 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { ButtonComponent, PageHeaderComponent, PageShellComponent, ToastService } from '@platform/lib/anatomy';
 import type { Chantier } from '@app/chantiers/models';
 import { ChantierApiService } from '../../services/chantier-api.service';
+import { BudgetApiService } from '../../budget/services/budget-api.service';
+import type { BudgetNoeud } from '../../budget/models';
 import { SousTraitanceApiService } from '../services/sous-traitance-api.service';
+
+function flattenPostesVendus(nodes: BudgetNoeud[] | undefined): BudgetNoeud[] {
+  const out: BudgetNoeud[] = [];
+  for (const node of nodes ?? []) {
+    if (node.type === 'POSTE' && node.nature !== 'INTERNE') out.push(node);
+    out.push(...flattenPostesVendus(node.enfants));
+  }
+  return out;
+}
 
 function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
@@ -36,10 +47,19 @@ function addMonthsIso(from: string, months: number): string {
 
       <div class="panel">
         <label>{{ 'chantiers.sousTraitance.create.fields.chantier' | translate }}</label>
-        <select class="fld" [(ngModel)]="draft.chantierId" name="chantierId" required>
+        <select class="fld" [(ngModel)]="draft.chantierId" name="chantierId" required
+          [disabled]="!!routeChantierId" (ngModelChange)="onChantierChange($event)">
           <option value="">{{ 'chantiers.sousTraitance.create.fields.chantierPlaceholder' | translate }}</option>
           @for (c of chantiers(); track c.id) {
             <option [value]="c.id">{{ c.code }} — {{ c.name }}</option>
+          }
+        </select>
+
+        <label>{{ 'chantiers.sousTraitance.create.fields.noeud' | translate }}</label>
+        <select class="fld" [(ngModel)]="draft.noeudId" name="noeudId" required>
+          <option value="">{{ 'chantiers.sousTraitance.create.fields.noeudPlaceholder' | translate }}</option>
+          @for (n of postes(); track n.id) {
+            <option [value]="n.id">{{ n.code }} — {{ n.designation }}</option>
           }
         </select>
 
@@ -51,6 +71,10 @@ function addMonthsIso(from: string, months: number): string {
 
         <label>{{ 'chantiers.sousTraitance.create.fields.montantHt' | translate }}</label>
         <input class="fld" type="number" min="0" step="0.01" [(ngModel)]="draft.montantHt" name="montantHt" required />
+
+        <label>{{ 'chantiers.sousTraitance.create.fields.bpu' | translate }}</label>
+        <input class="fld" type="text" [(ngModel)]="draft.bpuFichier" name="bpuFichier"
+          [placeholder]="'chantiers.sousTraitance.create.fields.bpuPlaceholder' | translate" />
 
         <div class="row">
           <div>
@@ -88,19 +112,25 @@ function addMonthsIso(from: string, months: number): string {
 })
 export class SousTraitanceCreatePage implements OnInit {
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly translate = inject(TranslateService);
   private readonly chantierApi = inject(ChantierApiService);
+  private readonly budgetApi = inject(BudgetApiService);
   private readonly api = inject(SousTraitanceApiService);
   private readonly toast = inject(ToastService);
 
   readonly chantiers = signal<Chantier[]>([]);
+  readonly postes = signal<BudgetNoeud[]>([]);
   readonly saving = signal(false);
+  routeChantierId = '';
 
   draft = {
     chantierId: '',
+    noeudId: '',
     sousTraitantNom: '',
     objet: '',
     montantHt: 0,
+    bpuFichier: '',
     dateDebut: todayIso(),
     dateFin: addMonthsIso(todayIso(), 3),
   };
@@ -116,15 +146,36 @@ export class SousTraitanceCreatePage implements OnInit {
   };
 
   ngOnInit(): void {
+    const fromRoute = this.route.snapshot.queryParamMap.get('chantierId')?.trim() ?? '';
+    const noeudFromRoute = this.route.snapshot.queryParamMap.get('noeudId')?.trim() ?? '';
+    if (fromRoute) {
+      this.routeChantierId = fromRoute;
+      this.draft.chantierId = fromRoute;
+      this.draft.noeudId = noeudFromRoute;
+      void this.loadPostes(fromRoute);
+    }
     void this.chantierApi.getAll().then(
-      (res) => {
-        this.chantiers.set(res.items);
-        if (res.items[0]) {
-          this.draft.chantierId = res.items[0].id;
-        }
-      },
+      (res) => this.chantiers.set(res.items),
       () => this.chantiers.set([]),
     );
+  }
+
+  onChantierChange(chantierId: string): void {
+    this.draft.noeudId = '';
+    void this.loadPostes(chantierId);
+  }
+
+  private async loadPostes(chantierId: string): Promise<void> {
+    if (!chantierId) {
+      this.postes.set([]);
+      return;
+    }
+    try {
+      const arbre = await this.budgetApi.getArbre(chantierId);
+      this.postes.set(flattenPostesVendus(arbre?.lots));
+    } catch {
+      this.postes.set([]);
+    }
   }
 
   cancel(): void {
@@ -132,8 +183,8 @@ export class SousTraitanceCreatePage implements OnInit {
   }
 
   async submit(): Promise<void> {
-    const { chantierId, sousTraitantNom, objet, montantHt, dateDebut, dateFin } = this.draft;
-    if (!chantierId || !sousTraitantNom.trim() || !objet.trim() || montantHt <= 0) {
+    const { chantierId, noeudId, sousTraitantNom, objet, montantHt, bpuFichier, dateDebut, dateFin } = this.draft;
+    if (!chantierId || !noeudId || !sousTraitantNom.trim() || !objet.trim() || montantHt <= 0) {
       this.toast.error(this.translate.instant('chantiers.sousTraitance.create.errors.required'));
       return;
     }
@@ -149,7 +200,8 @@ export class SousTraitanceCreatePage implements OnInit {
         dateFin,
         status: 'BROUILLON',
         declarationArt187: false,
-        avancementPercent: 0,
+        noeudId,
+        bpuFichier: bpuFichier.trim() || undefined,
       });
       this.toast.success(this.translate.instant('chantiers.sousTraitance.create.success'));
       void this.router.navigate(['/chantiers/sous-traitance']);

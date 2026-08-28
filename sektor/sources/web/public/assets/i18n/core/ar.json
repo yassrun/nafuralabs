@@ -1899,6 +1899,9 @@
     },
     "document_chantier": {
       "type": {
+        "os": "أمر خدمة",
+        "pv": "محضر",
+        "bl": "وصل تسليم",
         "marche": "عقد",
         "avenant": "ملحق",
         "pv_reception": "محضر تسلّم",

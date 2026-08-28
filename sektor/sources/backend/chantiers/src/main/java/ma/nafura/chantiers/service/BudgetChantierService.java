@@ -50,8 +50,7 @@ public class BudgetChantierService {
                     .label(rubrique.getLabel())
                     .previsionnelHt(scale(rubrique.getPrevuHt()))
                     .reviseHt(revise)
-                    // L'engagé vient des commandes et contrats d'Achats : personne ne l'alimente
-                    // ici. Il vaut zéro et le dit — il n'est pas tenu (hors périmètre nommé).
+                    // Engagé par nœud (BC Achats) : pas ventilé ici par rubrique.
                     .engageHt(zero())
                     .realiseHt(reel)
                     .resteHt(revise)
@@ -70,7 +69,7 @@ public class BudgetChantierService {
                 .client(arbre.getClient())
                 .previsionnelHt(scale(totaux.getDeboursePrevuHt()))
                 .reviseHt(revise)
-                .engageHt(zero())
+                .engageHt(scale(totaux.getEngageHt() != null ? totaux.getEngageHt() : zero()))
                 .realiseHt(scale(totaux.getDebourseReelHt()))
                 .resteAEngagerHt(revise)
                 .lignes(lignes)

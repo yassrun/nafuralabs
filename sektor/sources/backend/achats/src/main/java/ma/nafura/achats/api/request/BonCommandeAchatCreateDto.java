@@ -23,6 +23,8 @@ public class BonCommandeAchatCreateDto {
 
     private String chantierName;
 
+    private String noeudId;
+
     private String daId;
 
     private String daNumero;

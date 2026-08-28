@@ -86,7 +86,7 @@ type StatusFilter = 'ALL' | ContratSousTraitanceStatus;
               <th>Objet</th>
               <th class="num">{{ 'chantiers.sousTraitance.list.columns.montantHt' | translate }}</th>
               <th>RG</th>
-              <th class="center">Avancement</th>
+              <th>Nœud</th>
               <th>{{ 'chantiers.sousTraitance.list.columns.debut' | translate }}</th>
               <th>Fin</th>
               <th>Statut</th>
@@ -103,12 +103,7 @@ type StatusFilter = 'ALL' | ContratSousTraitanceStatus;
                 <td class="objet">{{ c.objet }}</td>
                 <td class="num">{{ c.montantHt | mad }}</td>
                 <td>{{ c.retenueGarantieTaux }}%</td>
-                <td class="center">
-                  <div class="progress-wrap">
-                    <div class="progress-bar"><div class="progress-fill" [style.width.%]="c.avancementPercent"></div></div>
-                    <span>{{ c.avancementPercent }}%</span>
-                  </div>
-                </td>
+                <td class="mono">{{ c.noeudId || '—' }}</td>
                 <td class="date">{{ c.dateDebut | date: 'dd/MM/yy' }}</td>
                 <td class="date">{{ c.dateFin | date: 'dd/MM/yy' }}</td>
                 <td><span class="badge {{ statusCss(c.status) }}">{{ statusLabel(c.status) }}</span></td>
@@ -353,7 +348,11 @@ export class SousTraitanceListingPage {
   readonly hasFilter = computed(() => !!this.search().trim() || this.statusFilter() !== 'ALL');
 
   constructor() {
-    void this.service.getAll().then(
+    const chantierId = this.route.snapshot.queryParamMap.get('chantierId')?.trim() ?? '';
+    const load = chantierId
+      ? this.service.listByChantier(chantierId).then((items) => ({ items, total: items.length }))
+      : this.service.getAll();
+    void load.then(
       (res) => this._all.set(res.items),
       () => this.toast.error('Impossible de charger les contrats sous-traitance.'),
     );
@@ -376,6 +375,10 @@ export class SousTraitanceListingPage {
   }
 
   onCreate(): void {
-    void this.router.navigate(['/chantiers/sous-traitance/new']);
+    const chantierId = this.route.snapshot.queryParamMap.get('chantierId')?.trim() ?? '';
+    void this.router.navigate(
+      ['/chantiers/sous-traitance/new'],
+      chantierId ? { queryParams: { chantierId } } : {},
+    );
   }
 }

@@ -19,11 +19,12 @@ import { ChantierApiService } from '../../services/chantier-api.service';
 import type {
   CockpitAlerte,
   CockpitChantier,
+  CockpitCompteur,
   CockpitMontant,
   CockpitNextAction,
   CockpitPreparation,
 } from '../../services/cockpit.model';
-import { cockpitModuleRoutes, resolveCockpitRoute } from './cockpit-routes';
+import { cockpitModuleRoutes, resolveCockpitRoute, type CockpitModuleRoute } from './cockpit-routes';
 
 /**
  * Cockpit chantier (SEKTOR-197) — surface de décision qui consomme strictement le read model
@@ -106,6 +107,15 @@ import { cockpitModuleRoutes, resolveCockpitRoute } from './cockpit-routes';
             <button type="button" class="action-primaire" (click)="executerAction(a)">
               {{ a.libelle | translate }}
             </button>
+            @if (actionsSecondaires().length) {
+              <div class="actions-secondaires">
+                @for (s of actionsSecondaires(); track s.libelle) {
+                  <button type="button" class="action-secondaire" (click)="executerAction(s)">
+                    {{ s.libelle | translate }}
+                  </button>
+                }
+              </div>
+            }
           } @else {
             <p class="muted">{{ 'chantiers.cockpit.aucuneAction' | translate }}</p>
           }
@@ -165,6 +175,11 @@ import { cockpitModuleRoutes, resolveCockpitRoute } from './cockpit-routes';
         @for (m of modules(); track m.route) {
           <article class="module-card">
             <h4>{{ m.titre | translate }}</h4>
+            @if (m.compteur) {
+              <p class="module-compteur" [class.module-compteur--indispo]="m.compteur.etat === 'NOT_AVAILABLE'">
+                {{ afficheCompteur(m.compteur) }}
+              </p>
+            }
             <p class="muted">{{ m.resume | translate }}</p>
             <nf-button variant="secondary" size="sm" (clicked)="ouvrirRoute(m.route)">
               {{ 'chantiers.cockpit.voir' | translate }}
@@ -201,7 +216,7 @@ import { cockpitModuleRoutes, resolveCockpitRoute } from './cockpit-routes';
     @media (max-width: 480px) {
       .kpis { grid-template-columns: 1fr; }
       .kpi { padding: 0.6rem 0.85rem; }
-      .action-primaire, .check-action, .alerte__action, .os-form nf-button { min-height: 44px; }
+      .action-primaire, .action-secondaire, .check-action, .alerte__action, .os-form nf-button { min-height: 44px; }
     }
     .kpi { background: var(--nf-color-surface); border: 1px solid var(--nf-color-border); border-radius: 0.75rem; padding: 0.75rem 1rem; }
     .kpi__label { display: block; font-size: 0.72rem; color: var(--nf-color-text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
@@ -217,6 +232,15 @@ import { cockpitModuleRoutes, resolveCockpitRoute } from './cockpit-routes';
 
     .action-primaire { width: 100%; padding: 0.85rem 1rem; border: none; border-radius: 0.6rem; background: var(--nf-color-primary-600); color: #fff; font-weight: 600; font-size: 0.95rem; cursor: pointer; }
     .action-primaire:hover { background: var(--nf-color-primary-700); }
+    .actions-secondaires { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.6rem; }
+    .action-secondaire {
+      padding: 0.45rem 0.7rem; border: 1px solid var(--nf-color-border); border-radius: 0.5rem;
+      background: var(--nf-color-surface); font-size: 0.82rem; cursor: pointer;
+    }
+    .action-secondaire:hover { background: var(--nf-color-bg-subtle); }
+    @media (max-width: 480px) {
+      .action-secondaire { min-height: 44px; }
+    }
 
     .os-form { display: flex; flex-direction: column; gap: 0.5rem; }
     .os-form label { font-size: 0.8rem; color: var(--nf-color-text-secondary); }
@@ -246,6 +270,8 @@ import { cockpitModuleRoutes, resolveCockpitRoute } from './cockpit-routes';
     .cockpit__modules { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-top: 1rem; }
     .module-card { background: var(--nf-color-surface); border: 1px solid var(--nf-color-border); border-radius: 0.75rem; padding: 1rem 1.25rem; }
     .module-card h4 { margin: 0 0 0.4rem; font-size: 0.95rem; }
+    .module-compteur { margin: 0 0 0.35rem; font-size: 1rem; font-weight: 700; }
+    .module-compteur--indispo { color: var(--nf-color-text-muted); font-weight: 600; font-style: italic; }
     .module-card p { margin: 0 0 0.75rem; font-size: 0.82rem; }
 
     .feed { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.85rem; }
@@ -303,8 +329,15 @@ export class PilotageTabComponent {
   readonly alerts = computed(() => this.cockpit()?.alerts ?? []);
   readonly preparation = computed(() => this.cockpit()?.preparation ?? []);
   readonly actionPrimaire = computed<CockpitNextAction | null>(
-    () => (this.cockpit()?.nextActions ?? []).find((a) => a.priorite === 1) ?? null,
+    () => {
+      const actions = this.cockpit()?.nextActions ?? [];
+      return actions.find((a) => a.priorite === 1) ?? actions[0] ?? null;
+    },
   );
+  readonly actionsSecondaires = computed<CockpitNextAction[]>(() => {
+    const primaire = this.actionPrimaire();
+    return (this.cockpit()?.nextActions ?? []).filter((a) => a !== primaire);
+  });
   readonly prepCount = computed(
     () => this.preparation().filter((p) => p.etat === 'OK').length,
   );
@@ -353,10 +386,28 @@ export class PilotageTabComponent {
   }
 
   /** P1-10 — routes canoniques vérifiées (cockpit-routes.spec) : aucune route morte. */
-  readonly modules = computed(() => {
+  readonly modules = computed((): Array<CockpitModuleRoute & { compteur?: CockpitCompteur | null }> => {
     const c = this.cockpit();
-    return c ? cockpitModuleRoutes(this.chantierId()) : [];
+    if (!c) return [];
+    return cockpitModuleRoutes(
+      this.chantierId(),
+      c.identity?.status,
+      (c.nextActions ?? []).map((a) => a.libelle),
+    ).map((m) => {
+      if (m.moduleKey === 'demandeAchat' && c.ops?.demandesAchat) {
+        return { ...m, compteur: c.ops.demandesAchat };
+      }
+      return m;
+    });
   });
+
+  afficheCompteur(c: CockpitCompteur): string {
+    if (c.etat === 'NOT_AVAILABLE') {
+      return this.translate.instant('chantiers.cockpit.module.indisponible');
+    }
+    const count = c.valeur ?? 0;
+    return this.translate.instant('chantiers.cockpit.module.demandeAchatCount', { count });
+  }
 
   afficheMontant(m: CockpitMontant | null | undefined): string {
     if (!m) return '—';

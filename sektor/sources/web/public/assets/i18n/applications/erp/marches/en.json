@@ -88,19 +88,24 @@
         "title": "New contract",
         "subtitle": "Create a contract linked to a site",
         "breadcrumb": "New",
-        "submit": "Create contract",
+        "submit": "Save draft",
+        "submitNotify": "Create and notify",
         "success": "Contract created.",
+        "notifySuccess": "Contract created and notified. Active sale switched on the site.",
         "fields": {
           "chantier": "Site",
           "chantierPlaceholder": "Select a site…",
           "client": "Customer / MOA",
           "numero": "Contract no. (optional)",
+          "reference": "MOA / specs reference",
           "intitule": "Title",
           "type": "Contract type",
           "nature": "Nature",
           "montantInitialHt": "Initial amount excl. VAT",
           "tvaTaux": "VAT (%)",
           "retenueGarantieTaux": "Retention guarantee (%)",
+          "tauxAvance": "Advance (%)",
+          "dureeMois": "Execution period (months)",
           "dateOrdreService": "Service order date"
         },
         "errors": {
@@ -111,6 +116,9 @@
       "detail": {
         "headerTitleFallback": "Contract",
         "headerCrumbFallback": "Details",
+        "notifier": "Notify the contract",
+        "notifySuccess": "Contract notified. Active sale switched on the site.",
+        "notifyFailed": "Unable to notify the contract.",
         "ras": "RAS 5%",
         "kpis": {
           "montantInitialHt": "Initial amount excl. VAT",

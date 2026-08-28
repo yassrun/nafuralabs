@@ -27,7 +27,7 @@ public class DemandeAchatController {
     }
 
     @GetMapping
-    @RequirePermission("achats.demande-achat.read")
+    @RequirePermission("read")
     public ResponseEntity<List<DemandeAchat>> list(
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String chantierId,
@@ -38,39 +38,39 @@ public class DemandeAchatController {
     }
 
     @GetMapping("/{id}")
-    @RequirePermission("achats.demande-achat.read")
+    @RequirePermission("read")
     public ResponseEntity<DemandeAchat> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(service.getById(id));
     }
 
     @PostMapping
-    @RequirePermission("achats.demande-achat.create")
+    @RequirePermission("create")
     public ResponseEntity<DemandeAchat> create(@Valid @RequestBody DemandeAchatCreateDto body) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(body));
     }
 
     @PutMapping("/{id}")
-    @RequirePermission("achats.demande-achat.update")
+    @RequirePermission("update")
     public ResponseEntity<DemandeAchat> update(
             @PathVariable UUID id, @Valid @RequestBody DemandeAchatUpdateDto body) {
         return ResponseEntity.ok(service.update(id, body));
     }
 
     @DeleteMapping("/{id}")
-    @RequirePermission("achats.demande-achat.delete")
+    @RequirePermission("delete")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{id}/submit")
-    @RequirePermission("achats.demande-achat.update")
+    @RequirePermission("update")
     public ResponseEntity<DemandeAchat> submit(@PathVariable UUID id) {
         return ResponseEntity.ok(service.submit(id));
     }
 
     @PostMapping("/{id}/approve")
-    @RequirePermission("achats.demande-achat.update")
+    @RequirePermission("update")
     public ResponseEntity<DemandeAchat> approve(
             @PathVariable UUID id, @RequestBody(required = false) DemandeAchatApproveDto body) {
         String approbateurId = body != null ? body.getApprobateurId() : null;
@@ -79,14 +79,14 @@ public class DemandeAchatController {
     }
 
     @PostMapping("/{id}/reject")
-    @RequirePermission("achats.demande-achat.update")
+    @RequirePermission("update")
     public ResponseEntity<DemandeAchat> reject(
             @PathVariable UUID id, @Valid @RequestBody DemandeAchatRejectDto body) {
         return ResponseEntity.ok(service.reject(id, body.getMotifRejet()));
     }
 
     @PostMapping("/{id}/convert-to-ao")
-    @RequirePermission("achats.demande-achat.update")
+    @RequirePermission("update")
     public ResponseEntity<DemandeAchat> convertToAo(@PathVariable UUID id) {
         return ResponseEntity.ok(service.convertToAo(id));
     }

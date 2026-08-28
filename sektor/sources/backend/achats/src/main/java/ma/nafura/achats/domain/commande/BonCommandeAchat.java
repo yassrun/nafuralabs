@@ -58,6 +58,9 @@ public class BonCommandeAchat {
     @Column(name = "chantier_name", length = 255)
     private String chantierName;
 
+    @Column(name = "noeud_id", length = 100)
+    private String noeudId;
+
     @Column(name = "da_id", length = 100)
     private String daId;
 

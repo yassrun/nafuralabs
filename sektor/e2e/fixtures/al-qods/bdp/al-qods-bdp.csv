@@ -1,0 +1,12 @@
+Spreadsheet file: al-qods-bdp.csv
+
+1 TERRASSEMENT
+1	Terrassement general	fft	1,00
+
+2 GROS OEUVRE
+2.1	Beton B25 fondations	m3	180,00
+2.2	Acier HA	t	25,00
+2.3	Coffrage	m2	850,00
+
+3 ETANCHEITE
+3	Etancheite toiture	m2	420,00

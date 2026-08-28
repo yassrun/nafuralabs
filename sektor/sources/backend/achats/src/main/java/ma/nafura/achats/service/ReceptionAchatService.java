@@ -16,7 +16,9 @@ import ma.nafura.achats.domain.commande.BonCommandeAchatLigne;
 import ma.nafura.achats.domain.reception.ReceptionAchat;
 import ma.nafura.achats.domain.reception.ReceptionAchatLigne;
 import ma.nafura.achats.repository.ReceptionAchatRepository;
+import ma.nafura.achats.service.port.ReceptionImputationChantierPort;
 import ma.nafura.platform.framework.context.TenantContext;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -24,17 +26,22 @@ import org.springframework.util.StringUtils;
 @Service
 public class ReceptionAchatService {
 
+    public static final String ERR_QTE_EXCEDE_RESTE = "achats.reception.ecart_qte";
+
     private final ReceptionAchatRepository repository;
     private final BonCommandeAchatService bonCommandeService;
     private final ReceptionStockMovementService receptionStockMovementService;
+    private final ObjectProvider<ReceptionImputationChantierPort> imputationPort;
 
     public ReceptionAchatService(
             ReceptionAchatRepository repository,
             BonCommandeAchatService bonCommandeService,
-            ReceptionStockMovementService receptionStockMovementService) {
+            ReceptionStockMovementService receptionStockMovementService,
+            ObjectProvider<ReceptionImputationChantierPort> imputationPort) {
         this.repository = repository;
         this.bonCommandeService = bonCommandeService;
         this.receptionStockMovementService = receptionStockMovementService;
+        this.imputationPort = imputationPort;
     }
 
     @Transactional(readOnly = true)
@@ -80,7 +87,7 @@ public class ReceptionAchatService {
             BigDecimal remaining = bcLigne.getQuantite().subtract(bcLigne.getQuantiteLivree());
             if (qty.compareTo(remaining) > 0) {
                 throw new IllegalStateException(
-                        "Received quantity exceeds remaining for line " + bcLigne.getId());
+                        ERR_QTE_EXCEDE_RESTE + ": recu=" + qty + " reste=" + remaining + " ligne=" + bcLigne.getId());
             }
             bcLigne.setQuantiteLivree(bcLigne.getQuantiteLivree().add(qty));
             ReceptionAchatLigne recLigne = ReceptionAchatLigne.builder()
@@ -96,9 +103,43 @@ public class ReceptionAchatService {
         recomputeBcDelivery(bc);
         repository.save(reception);
         bonCommandeService.saveAfterReception(bc);
-        receptionStockMovementService.createAndValidateReception(
-                reception, bc, request.getDestLocationId(), ligneById);
+        if (request.getDestLocationId() != null) {
+            receptionStockMovementService.createAndValidateReception(
+                    reception, bc, request.getDestLocationId(), ligneById);
+        }
+        imputerChantier(bc, reception, ligneById);
         return reception;
+    }
+
+    private void imputerChantier(
+            BonCommandeAchat bc,
+            ReceptionAchat reception,
+            Map<UUID, BonCommandeAchatLigne> ligneById) {
+        if (!StringUtils.hasText(bc.getChantierId())) {
+            return;
+        }
+        ReceptionImputationChantierPort port = imputationPort.getIfAvailable();
+        if (port == null) {
+            return;
+        }
+        for (ReceptionAchatLigne recLigne : reception.getLignes()) {
+            BonCommandeAchatLigne bcLigne = ligneById.get(recLigne.getBonCommandeLigneId());
+            if (bcLigne == null) {
+                continue;
+            }
+            BigDecimal pu = bcLigne.getPrixUnitaireHt() != null ? bcLigne.getPrixUnitaireHt() : BigDecimal.ZERO;
+            BigDecimal montant = pu.multiply(recLigne.getQuantiteRecue()).setScale(4, RoundingMode.HALF_UP);
+            String libelle = StringUtils.hasText(reception.getBlNumero())
+                    ? "BL " + reception.getBlNumero()
+                    : reception.getNumero();
+            port.imputerReel(
+                    bc.getChantierId(),
+                    bc.getNoeudId(),
+                    montant,
+                    reception.getDateReception(),
+                    libelle,
+                    "RECEPTION_BL:" + reception.getId());
+        }
     }
 
     private void recomputeBcDelivery(BonCommandeAchat bc) {

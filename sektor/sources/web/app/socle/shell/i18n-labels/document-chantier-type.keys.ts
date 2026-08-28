@@ -8,6 +8,9 @@
 import type { DocumentChantierType } from '../../../chantiers/documents/models';
 
 export const DOCUMENT_CHANTIER_TYPE_KEYS: Record<DocumentChantierType, string> = {
+  OS:                   'enum.document_chantier.type.os',
+  PV:                   'enum.document_chantier.type.pv',
+  BL:                   'enum.document_chantier.type.bl',
   MARCHE:               'enum.document_chantier.type.marche',
   AVENANT:              'enum.document_chantier.type.avenant',
   PV_RECEPTION:         'enum.document_chantier.type.pv_reception',

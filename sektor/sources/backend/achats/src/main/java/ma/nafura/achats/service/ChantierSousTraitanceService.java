@@ -13,7 +13,9 @@ import ma.nafura.achats.api.request.ContratFournisseurCreateDto;
 import ma.nafura.achats.api.request.ContratSousTraitanceCreateDto;
 import ma.nafura.achats.domain.contrat.ContratFournisseur;
 import ma.nafura.achats.repository.ContratFournisseurRepository;
+import ma.nafura.achats.service.port.NoeudChantierPort;
 import ma.nafura.platform.framework.context.TenantContext;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -22,22 +24,27 @@ import ma.nafura.achats.seeders.ContratFournisseurSousTraitanceSeedService;
 @Service
 public class ChantierSousTraitanceService {
 
+    static final String ERR_NOEUD_REQUIS = "achats.st.noeud_requis";
+
     private static final BigDecimal ZERO = BigDecimal.ZERO;
 
     private final ContratFournisseurRepository repository;
     private final ContratFournisseurService contratFournisseurService;
     private final ContratFournisseurSousTraitanceSeedService seedService;
     private final ContratSousTraitanceNotes notesCodec;
+    private final ObjectProvider<NoeudChantierPort> noeudPort;
 
     public ChantierSousTraitanceService(
             ContratFournisseurRepository repository,
             ContratFournisseurService contratFournisseurService,
             ContratFournisseurSousTraitanceSeedService seedService,
-            ContratSousTraitanceNotes notesCodec) {
+            ContratSousTraitanceNotes notesCodec,
+            ObjectProvider<NoeudChantierPort> noeudPort) {
         this.repository = repository;
         this.contratFournisseurService = contratFournisseurService;
         this.seedService = seedService;
         this.notesCodec = notesCodec;
+        this.noeudPort = noeudPort;
     }
 
     @Transactional(readOnly = true)
@@ -66,7 +73,20 @@ public class ChantierSousTraitanceService {
     @Transactional
     public ContratSousTraitanceDto create(String chantierId, ContratSousTraitanceCreateDto request) {
         seedService.seedIfEmpty();
+        if (!StringUtils.hasText(chantierId)) {
+            throw new IllegalArgumentException("achats.st.chantier_requis");
+        }
         String normalizedChantierId = chantierId.trim();
+        String noeudId = request.getNoeudId() == null ? null : request.getNoeudId().trim();
+        if (!StringUtils.hasText(noeudId)) {
+            throw new IllegalArgumentException(ERR_NOEUD_REQUIS);
+        }
+        NoeudChantierPort port = noeudPort.getIfAvailable();
+        if (port != null) {
+            port.requirePosteVendu(normalizedChantierId, noeudId);
+        }
+
+        String bpu = StringUtils.hasText(request.getBpuFichier()) ? request.getBpuFichier().trim() : null;
 
         ContratFournisseur entity;
         if (request.getContratId() != null) {
@@ -75,13 +95,15 @@ public class ChantierSousTraitanceService {
                 throw new IllegalArgumentException("Contract is not a sous-traitance contract");
             }
             entity.setChantierId(normalizedChantierId);
+            entity.setNoeudId(noeudId);
+            entity.setBpuFichier(bpu);
             entity.setNotes(notesCodec.build(
                     request.getObjet(),
                     request.getSousTraitantNom(),
                     request.getIce(),
                     null,
                     null,
-                    request.getAvancementPercent()));
+                    null));
             entity.setUpdatedAt(OffsetDateTime.now());
             entity = repository.save(entity);
         } else {
@@ -101,13 +123,12 @@ public class ChantierSousTraitanceService {
                     request.getIce(),
                     null,
                     null,
-                    request.getAvancementPercent()));
+                    null));
             entity = contratFournisseurService.create(createDto);
-            if (StringUtils.hasText(request.getStatus()) || request.getDateSignature() != null) {
-                entity.setStatus(mapStatusToBackend(request.getStatus(), entity.getStatus()));
-                entity.setUpdatedAt(OffsetDateTime.now());
-                entity = repository.save(entity);
-            }
+            entity.setNoeudId(noeudId);
+            entity.setBpuFichier(bpu);
+            entity.setUpdatedAt(OffsetDateTime.now());
+            entity = repository.save(entity);
         }
         return toDto(entity);
     }
@@ -156,7 +177,8 @@ public class ChantierSousTraitanceService {
                 .dateSignature(dateSignature)
                 .dateDebut(entity.getDateDebut())
                 .dateFin(entity.getDateFin())
-                .avancementPercent(meta.avancementPercent() != null ? meta.avancementPercent() : ZERO)
+                .noeudId(entity.getNoeudId())
+                .bpuFichier(entity.getBpuFichier())
                 .status(mapStatusToFrontend(entity.getStatus()))
                 .declarationArt187(Boolean.TRUE.equals(entity.getArt187Declare()))
                 .build();

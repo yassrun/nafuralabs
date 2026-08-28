@@ -31,4 +31,6 @@ public class DocumentChantierCreateDto {
     private String uploadedPar;
 
     private List<String> tags;
+
+    private String noeudId;
 }

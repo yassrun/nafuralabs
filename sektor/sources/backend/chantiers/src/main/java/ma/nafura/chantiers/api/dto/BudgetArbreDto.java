@@ -72,6 +72,9 @@ public class BudgetArbreDto {
         private BigDecimal debourseReviseHt;
         private BigDecimal debourseReelHt;
 
+        /** Commandes Achats envoyées sur ce nœud (hors brouillon / annulé). */
+        private BigDecimal engageHt;
+
         /** Vendu − déboursé prévu, en valeur et en pourcentage du vendu (AC-12). */
         private BigDecimal margePrevueHt;
 

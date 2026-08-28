@@ -152,7 +152,7 @@ export interface ReceptionAchatLignePayload {
 }
 
 export interface ReceptionAchatCreatePayload {
-  destLocationId: string;
+  destLocationId?: string;
   dateReception?: string;
   blNumero?: string;
   notes?: string;

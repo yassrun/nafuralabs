@@ -46,6 +46,10 @@ public class DemandeAchat {
     @Column(name = "chantier_name", length = 255)
     private String chantierName;
 
+    /** Nœud vendu du chantier. Absent = besoin interne (base vie), pas un poste vendu. */
+    @Column(name = "noeud_id", length = 100)
+    private String noeudId;
+
     @Column(name = "date_besoin", nullable = false)
     private LocalDate dateBesoin;
 

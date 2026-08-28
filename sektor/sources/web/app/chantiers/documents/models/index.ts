@@ -1,8 +1,12 @@
 export type DocumentChantierType =
+  | 'OS'
+  | 'PLAN'
+  | 'PV'
+  | 'BL'
+  | 'AUTRE'
   | 'MARCHE'
   | 'AVENANT'
   | 'PV_RECEPTION'
-  | 'PLAN'
   | 'PHOTO'
   | 'BC'
   | 'FACTURE'
@@ -10,13 +14,22 @@ export type DocumentChantierType =
   | 'CAUTION_BANCAIRE'
   | 'PPSPS'
   | 'PLAN_PREVENTION'
-  | 'NOTE_CALCUL'
-  | 'AUTRE';
+  | 'NOTE_CALCUL';
+
+/** Types utiles palier 1 (AC-10). Les autres restent listables. */
+export const DOCUMENT_CHANTIER_PALIER_TYPES: DocumentChantierType[] = [
+  'OS',
+  'PLAN',
+  'PV',
+  'BL',
+  'AUTRE',
+];
 
 export interface DocumentChantier {
   id: string;
   chantierId: string;
   chantierCode: string;
+  noeudId?: string;
   type: DocumentChantierType;
   titre: string;
   fichier: string;

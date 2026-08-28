@@ -15,4 +15,6 @@ public class DocumentChantierUpdateDto {
     private LocalDate uploadedAt;
     private String uploadedPar;
     private List<String> tags;
+
+    private String noeudId;
 }

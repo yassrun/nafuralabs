@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+import ma.nafura.achats.repository.BonCommandeAchatRepository;
 import ma.nafura.chantiers.api.dto.BudgetArbreDto;
 import ma.nafura.chantiers.domain.budget.CoutReelNoeud;
 import ma.nafura.chantiers.domain.budget.DebourseNoeud;
@@ -55,6 +56,7 @@ class BudgetArbreServiceTest {
     @Mock private DebourseNoeudRepository debourseRepository;
     @Mock private CoutReelNoeudRepository coutReelRepository;
     @Mock private AvancementLectureService avancementLectureService;
+    @Mock private BonCommandeAchatRepository bonCommandeRepository;
 
     private BudgetArbreService service;
 
@@ -67,7 +69,8 @@ class BudgetArbreServiceTest {
                 posteRepository,
                 debourseRepository,
                 coutReelRepository,
-                avancementLectureService);
+                avancementLectureService,
+                bonCommandeRepository);
 
         when(chantierService.getById(CHANTIER)).thenReturn(Chantier.builder()
                 .id(CHANTIER)
@@ -82,6 +85,8 @@ class BudgetArbreServiceTest {
                 .thenReturn(List.of(posteVendu(POSTE_A, "10000.00", "100"), posteVendu(POSTE_B, "5000.00", "50"), posteInterne()));
         when(coutReelRepository.findByTenantIdAndPosteIdIn(eq(TENANT), any())).thenReturn(List.of());
         when(debourseRepository.findByTenantIdAndPosteIdIn(eq(TENANT), any())).thenReturn(List.of());
+        when(bonCommandeRepository.findByTenantIdAndChantierIdOrderByCreatedAtDesc(TENANT, CHANTIER))
+                .thenReturn(List.of());
     }
 
     @AfterEach

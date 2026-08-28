@@ -1,0 +1,33 @@
+{
+  "cas": "BL-02",
+  "fichierNom": "BL-02-acier-partiel-12t.pdf",
+  "kind": "partiel",
+  "attenduExtraction": {
+    "blReference": "55101",
+    "date": "2026-10-05",
+    "issuer": "Sonasid",
+    "sender": {
+      "name": "Sonasid",
+      "address": "Jorf Lasfar"
+    },
+    "receiver": {
+      "name": "STE Al Binaa",
+      "address": "Chantier Groupe scolaire Al Qods, Rabat"
+    },
+    "items": [
+      {
+        "itemReference": "acier-ha",
+        "itemDesignation": "Acier HA Fe E500",
+        "quantity": 12,
+        "uom": "t"
+      }
+    ]
+  },
+  "attenduMetier": {
+    "noeud": "2.2",
+    "bcQte": 25,
+    "recu": 12,
+    "resteALivrer": 13,
+    "avancementAcierInterdit": 25
+  }
+}

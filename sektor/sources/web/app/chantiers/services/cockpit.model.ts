@@ -87,6 +87,16 @@ export interface CockpitActivityFeed {
   contenu?: string | null;
 }
 
+export interface CockpitCompteur {
+  valeur?: number | null;
+  etat: 'AVAILABLE' | 'NOT_AVAILABLE';
+  cause?: string | null;
+}
+
+export interface CockpitOps {
+  demandesAchat?: CockpitCompteur | null;
+}
+
 export interface CockpitChantier {
   identity?: CockpitIdentity | null;
   schedule?: CockpitSchedule | null;
@@ -96,4 +106,5 @@ export interface CockpitChantier {
   alerts: CockpitAlerte[];
   nextActions: CockpitNextAction[];
   activityFeed: CockpitActivityFeed[];
+  ops?: CockpitOps | null;
 }

@@ -29,20 +29,20 @@ public class ChantierSousTraitanceController {
     }
 
     @GetMapping
-    @RequirePermission("chantiers.read")
+    @RequirePermission("read")
     public ResponseEntity<List<ContratSousTraitanceDto>> list(@PathVariable String chantierId) {
         return ResponseEntity.ok(service.listByChantier(chantierId));
     }
 
     @PostMapping
-    @RequirePermission("chantiers.create")
+    @RequirePermission("create")
     public ResponseEntity<ContratSousTraitanceDto> create(
             @PathVariable String chantierId, @Valid @RequestBody ContratSousTraitanceCreateDto body) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(chantierId, body));
     }
 
     @GetMapping("/synthese")
-    @RequirePermission("chantiers.read")
+    @RequirePermission("read")
     public ResponseEntity<SousTraitanceSyntheseDto> synthese(@PathVariable String chantierId) {
         return ResponseEntity.ok(service.synthese(chantierId));
     }

@@ -14,6 +14,8 @@ public class DemandeAchatUpdateDto {
 
     private String chantierName;
 
+    private String noeudId;
+
     private LocalDate dateBesoin;
 
     private String demandeurId;

@@ -27,7 +27,7 @@ public class ChantierDocumentListingController {
     }
 
     @GetMapping("/documents")
-    @RequirePermission("chantiers.read")
+    @RequirePermission("read")
     public ResponseEntity<Page<DocumentChantierDto>> listAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "48") int size,

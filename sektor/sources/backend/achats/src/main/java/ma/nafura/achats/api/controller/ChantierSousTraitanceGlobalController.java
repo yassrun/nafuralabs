@@ -22,7 +22,7 @@ public class ChantierSousTraitanceGlobalController {
     }
 
     @GetMapping
-    @RequirePermission("chantiers.read")
+    @RequirePermission("read")
     public ResponseEntity<List<ContratSousTraitanceDto>> listAll() {
         return ResponseEntity.ok(service.listAll());
     }

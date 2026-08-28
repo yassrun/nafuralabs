@@ -20,7 +20,9 @@ interface ApiContratSousTraitance {
   dateSignature?: string;
   dateDebut: string;
   dateFin: string;
-  avancementPercent: number;
+  noeudId?: string;
+  bpuFichier?: string;
+  avancementPercent?: number;
   status: string;
   declarationArt187: boolean;
 }
@@ -47,7 +49,8 @@ function apiToContrat(row: ApiContratSousTraitance): ContratSousTraitance {
     dateSignature: row.dateSignature,
     dateDebut: row.dateDebut,
     dateFin: row.dateFin,
-    avancementPercent: Number(row.avancementPercent ?? 0),
+    noeudId: row.noeudId ?? '',
+    bpuFichier: row.bpuFichier,
     status: row.status as ContratSousTraitance['status'],
     declarationArt187: Boolean(row.declarationArt187),
   };
@@ -91,7 +94,8 @@ export class SousTraitanceApiService extends FeatureApiService<
         retenueGarantieTaux: data.retenueGarantieTaux,
         status: data.status,
         declarationArt187: data.declarationArt187,
-        avancementPercent: data.avancementPercent,
+        noeudId: data.noeudId,
+        bpuFichier: data.bpuFichier,
       },
     );
     return apiToContrat(row);

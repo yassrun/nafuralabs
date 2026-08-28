@@ -10,6 +10,9 @@ describe('document category utilities', () => {
     expect(categoryForType('MARCHE')).toBe('CONTRACTS');
     expect(categoryForType('PLAN')).toBe('PLANS_STUDIES');
     expect(categoryForType('PV_RECEPTION')).toBe('EXECUTION');
+    expect(categoryForType('OS')).toBe('EXECUTION');
+    expect(categoryForType('PV')).toBe('EXECUTION');
+    expect(categoryForType('BL')).toBe('PURCHASES_FINANCE');
     expect(categoryForType('FACTURE')).toBe('PURCHASES_FINANCE');
     expect(categoryForType('PPSPS')).toBe('HSE_ADMIN');
     expect(categoryForType('AUTRE')).toBe('OTHER');

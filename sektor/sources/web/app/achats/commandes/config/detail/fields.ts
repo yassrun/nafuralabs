@@ -8,6 +8,7 @@ export function buildBcFields(t: TranslateService): DetailFieldConfig[] {
     { key: 'numero', label: tr('achats.commande.form.fields.numero'), type: 'text', readonly: true },
     { key: 'fournisseurId', label: tr('achats.commande.form.fields.fournisseur'), type: 'select', lookupKey: 'fournisseurs', required: true },
     { key: 'chantierId', label: tr('achats.commande.form.fields.chantier'), type: 'select', lookupKey: 'chantiers' },
+    { key: 'noeudId', label: tr('achats.commande.form.fields.noeud'), type: 'text' },
     {
       key: 'rubrique', label: tr('achats.commande.form.fields.rubrique'), type: 'select', required: true,
       options: [

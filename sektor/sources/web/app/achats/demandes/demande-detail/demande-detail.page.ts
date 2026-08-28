@@ -43,6 +43,20 @@ export class DemandeDetailPage extends ConfigDrivenDetailPage<DemandeAchat> {
   });
   readonly config = buildDemandeDetailConfig(this.translate);
 
+  override ngOnInit(): void {
+    super.ngOnInit();
+    if (this.mode() !== 'create') return;
+    const chantierId = this.route.snapshot.queryParamMap.get('chantierId')?.trim();
+    const noeudId = this.route.snapshot.queryParamMap.get('noeudId')?.trim();
+    if (!chantierId && !noeudId) return;
+    const current = this.item() ?? ({} as DemandeAchat);
+    this.item.set({
+      ...current,
+      ...(chantierId ? { chantierId } : {}),
+      ...(noeudId ? { noeudId } : {}),
+    });
+  }
+
   get headerTitle(): string {
     if (this.mode() === 'create') return this.translate.instant('achats.demande.createTitle');
     const item = this.item();
@@ -95,7 +109,7 @@ export class DemandeDetailPage extends ConfigDrivenDetailPage<DemandeAchat> {
 
     if (event.actionId === 'convertir_bc' && item) {
       await this.router.navigate(['/achats/commandes/new'], {
-        queryParams: { daId: item.id, daNumero: item.numero, chantierId: item.chantierId },
+        queryParams: { daId: item.id, daNumero: item.numero, chantierId: item.chantierId, noeudId: item.noeudId },
       });
       return;
     }

@@ -69,6 +69,11 @@ const TABS: { id: DetailTab; labelKey: string }[] = [
           </div>
           <div class="hero__right">
             <span class="badge badge--{{ statusVariant(m.status) }}">{{ MARCHE_STATUS_KEYS[m.status] | translate }}</span>
+            @if (m.status === 'BROUILLON') {
+              <nf-button variant="primary" [disabled]="notifying()" (clicked)="notifier()">
+                {{ 'marches.contrat.detail.notifier' | translate }}
+              </nf-button>
+            }
           </div>
         </section>
 
@@ -329,6 +334,7 @@ const TABS: { id: DetailTab; labelKey: string }[] = [
     :host { display: block; height: 100%; }
     .hero { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; padding: 1.1rem 1.4rem; border-radius: 1rem; margin-bottom: 1rem; background: linear-gradient(135deg, rgba(30,64,175,0.06), rgba(255,255,255,0.98)); border: 1px solid rgba(30,64,175,0.1); }
     .hero__left { flex: 1; min-width: 0; }
+    .hero__right { display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem; }
     .hero__kicker { margin: 0 0 0.25rem; font-size: 0.8rem; color: var(--nf-color-text-secondary); display: flex; align-items: center; gap: 0.5rem; }
     .hero__title { margin: 0 0 0.25rem; font-size: 1.25rem; font-weight: 700; color: var(--nf-color-text-primary); }
     .hero__sub { margin: 0; font-size: 0.82rem; color: var(--nf-color-text-secondary); }
@@ -405,6 +411,7 @@ export class ContratDetailPage implements OnInit {
   readonly tabs = TABS;
   readonly activeTab = signal<DetailTab>('identite');
   readonly marche = signal<Marche | undefined>(undefined);
+  readonly notifying = signal(false);
   readonly avenants = signal<Avenant[]>([]);
   readonly factures = signal<FactureMarche[]>([]);
   readonly cautions = signal<CautionBancaire[]>([]);
@@ -498,4 +505,19 @@ export class ContratDetailPage implements OnInit {
   }
 
   goBack(): void { void this.router.navigate(['/marches/contrats']); }
+
+  async notifier(): Promise<void> {
+    const m = this.marche();
+    if (!m || m.status !== 'BROUILLON') return;
+    this.notifying.set(true);
+    try {
+      const updated = await this.api.notifier(m.id);
+      this.marche.set(updated);
+      this.toast.success(this.translate.instant('marches.contrat.detail.notifySuccess'));
+    } catch {
+      this.toast.error(this.translate.instant('marches.contrat.detail.notifyFailed'));
+    } finally {
+      this.notifying.set(false);
+    }
+  }
 }

@@ -770,6 +770,15 @@
       "id_invalide": "Invalid client identifier.",
       "introuvable": "Client not found in the Partner directory.",
       "role_invalide": "This partner does not have the Client role."
+    },
+    "conversion": {
+      "cta": "Create the project",
+      "title": "Create the project",
+      "hintNoMarche": "No contract is created here — the contract is created at notification. Sales reference remains the approved quote.",
+      "libelleRequired": "Project label is required.",
+      "codeOptional": "Optional — generated if empty.",
+      "dateOptional": "Optional — before the work order.",
+      "dureeOptional": "Optional — before the work order."
     }
   }
 }

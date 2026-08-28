@@ -17,6 +17,8 @@ public class DemandeAchatCreateDto {
 
     private String chantierName;
 
+    private String noeudId;
+
     @NotNull
     private LocalDate dateBesoin;
 

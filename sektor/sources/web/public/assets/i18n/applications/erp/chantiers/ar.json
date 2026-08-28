@@ -1125,7 +1125,9 @@
       "planning": "الجدولة",
       "planningResume": "الأنشطة والآجال",
       "situations": "الكشوف",
-      "situationsResume": "الحسابات والاستقطاعات"
+      "situationsResume": "الحسابات والاستقطاعات",
+      "demandeAchatCount": "{{count}} طلب شراء",
+      "indisponible": "غير متاح"
     },
     "activite": {
       "titre": "النشاط الأخير"

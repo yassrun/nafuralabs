@@ -1,0 +1,21 @@
+{
+  "cas": "IM-02",
+  "fichierNom": "IM-02-devis-holcim-ciment.pdf",
+  "fournisseur": "Holcim Maroc",
+  "clesStables": [
+    "ciment-cpj-45"
+  ],
+  "attendu": {
+    "devisRecusDelta": 1,
+    "composantCiment": "CONSULTE",
+    "lignes": [
+      {
+        "identite": "ciment-cpj-45",
+        "libelle": "Ciment CPJ 45",
+        "quantite": 40,
+        "unite": "t",
+        "prixUnitaire": 1050
+      }
+    ]
+  }
+}

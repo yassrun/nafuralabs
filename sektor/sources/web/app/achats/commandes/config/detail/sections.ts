@@ -9,7 +9,7 @@ export function buildBcSections(t: TranslateService): DetailSectionConfig[] {
       id: 'entete',
       title: tr('achats.commande.form.sections.entete'),
       icon: 'file-text',
-      fields: ['numero', 'fournisseurId', 'chantierId', 'rubrique'],
+      fields: ['numero', 'fournisseurId', 'chantierId', 'noeudId', 'rubrique'],
       columns: 2,
     },
     {

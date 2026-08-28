@@ -21,9 +21,9 @@
         <h3>Nouvelle réception</h3>
         <div class="bc-rec-form__row">
           <label>
-            Dépôt / chantier destination *
+            Dépôt / magasin (optionnel)
             <select [value]="destLocationId()" (change)="destLocationId.set($any($event.target).value)">
-              <option value="">— Choisir —</option>
+              <option value="">Livraison directe chantier — sans magasin</option>
               @for (loc of locations(); track loc.id) {
                 <option [value]="loc.id">{{ loc.code }} — {{ loc.name }} ({{ loc.type }})</option>
               }
@@ -51,7 +51,6 @@
                   <input
                     type="number"
                     min="0"
-                    [max]="l.remaining"
                     [value]="l.quantiteRecue"
                     (input)="updateLineQty(i, $any($event.target).value)"
                     class="bc-rec-qty-input" />

@@ -1,0 +1,20 @@
+{
+  "cas": "IM-05",
+  "fichierNom": "IM-05-devis-sonasid-acier.pdf",
+  "fournisseur": "Sonasid",
+  "clesStables": [
+    "acier-ha"
+  ],
+  "attendu": {
+    "devisRecusDelta": 1,
+    "lignes": [
+      {
+        "identite": "acier-ha",
+        "libelle": "Acier HA Fe E500",
+        "quantite": 25,
+        "unite": "t",
+        "prixUnitaire": 9800
+      }
+    ]
+  }
+}

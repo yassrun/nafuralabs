@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 
@@ -22,7 +22,7 @@ export interface ConversionChantierDialogData {
 
 export interface ConversionChantierDialogResult {
   chantierCode?: string;
-  chantierLabel?: string;
+  chantierLabel: string;
   dateDemarrage?: string;
   dureeMois?: number;
 }
@@ -44,31 +44,39 @@ export interface ConversionChantierDialogResult {
       </p>
 
       <nf-input
-        label="Code chantier"
-        [ngModel]="chantierCode()"
-        (ngModelChange)="chantierCode.set($event)">
-      </nf-input>
-
-      <nf-input
         label="Libellé du chantier"
+        [required]="true"
         [ngModel]="chantierLabel()"
         (ngModelChange)="chantierLabel.set($event)">
       </nf-input>
 
-      <div class="grid-2">
-        <nf-input
-          label="Date de démarrage"
-          type="date"
-          [ngModel]="dateDemarrage()"
-          (ngModelChange)="dateDemarrage.set($event)">
-        </nf-input>
+      <nf-input
+        label="Code chantier"
+        [ngModel]="chantierCode()"
+        (ngModelChange)="chantierCode.set($event)">
+      </nf-input>
+      <p class="hint hint--muted">Facultatif — généré si vide.</p>
 
-        <nf-input
-          label="Durée (mois)"
-          type="number"
-          [ngModel]="dureeMois()"
-          (ngModelChange)="dureeMois.set($event)">
-        </nf-input>
+      <div class="grid-2">
+        <div>
+          <nf-input
+            label="Date de démarrage"
+            type="date"
+            [ngModel]="dateDemarrage()"
+            (ngModelChange)="dateDemarrage.set($event)">
+          </nf-input>
+          <p class="hint hint--muted">Facultatif — avant l'OS.</p>
+        </div>
+
+        <div>
+          <nf-input
+            label="Durée (mois)"
+            type="number"
+            [ngModel]="dureeMois()"
+            (ngModelChange)="dureeMois.set($event)">
+          </nf-input>
+          <p class="hint hint--muted">Facultatif — avant l'OS.</p>
+        </div>
       </div>
 
       <p class="hint hint--muted">
@@ -77,7 +85,7 @@ export interface ConversionChantierDialogResult {
 
       <footer>
         <nf-button variant="secondary" (clicked)="close()">Annuler</nf-button>
-        <nf-button variant="primary" (clicked)="save()">Convertir</nf-button>
+        <nf-button variant="primary" [disabled]="!canConvert()" (clicked)="save()">Convertir</nf-button>
       </footer>
     </div>
   `,
@@ -88,7 +96,7 @@ export interface ConversionChantierDialogResult {
       header h2 { margin: 0; font-size: 1.125rem; color: var(--nf-text-primary); }
       .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
       .hint { margin: 0; font-size: 0.8125rem; color: var(--nf-text-secondary, var(--nf-color-text-secondary)); }
-      .hint--muted { font-style: italic; }
+      .hint--muted { font-style: italic; margin-top: -0.5rem; }
       footer { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 0.25rem; }
     `,
   ],
@@ -103,11 +111,16 @@ export class ConversionChantierDialogComponent {
   readonly dateDemarrage = signal(this.data.defaultDateDemarrage ?? '');
   readonly dureeMois = signal('');
 
+  readonly canConvert = computed(() => !!this.chantierLabel().trim());
+
   save(): void {
+    const label = this.chantierLabel().trim();
+    if (!label) return;
+
     const duree = Number.parseInt(this.dureeMois(), 10);
     this.dialogRef.close({
       chantierCode: this.chantierCode().trim() || undefined,
-      chantierLabel: this.chantierLabel().trim() || undefined,
+      chantierLabel: label,
       dateDemarrage: this.dateDemarrage().trim() || undefined,
       dureeMois: Number.isFinite(duree) ? duree : undefined,
     });

@@ -1,0 +1,31 @@
+{
+  "cas": "IM-04",
+  "fichierNom": "IM-04-devis-hors-panier-peinture.pdf",
+  "fournisseur": "Holcim Maroc",
+  "clesStables": [
+    "ciment-cpj-45"
+  ],
+  "note": "PARTIAL : ciment matché, peinture hors panier DPU — ne pas créer un article catalogue.",
+  "attendu": {
+    "importPolicy": "PARTIAL",
+    "lignes": [
+      {
+        "identite": "ciment-cpj-45",
+        "libelle": "Ciment CPJ 45",
+        "quantite": 40,
+        "unite": "t",
+        "prixUnitaire": 1065
+      },
+      {
+        "identite": "peinture-ext",
+        "libelle": "Peinture facade acrylique",
+        "quantite": 120,
+        "unite": "kg",
+        "prixUnitaire": 42
+      }
+    ],
+    "horsPanier": [
+      "peinture-ext"
+    ]
+  }
+}

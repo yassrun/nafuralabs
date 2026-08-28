@@ -1,0 +1,30 @@
+{
+  "cas": "BL-04",
+  "fichierNom": "BL-04-mauvais-chantier.pdf",
+  "kind": "mauvais-chantier",
+  "attenduExtraction": {
+    "blReference": "99001",
+    "date": "2026-09-12",
+    "issuer": "Ciments Lafarge Maroc",
+    "sender": {
+      "name": "Ciments Lafarge Maroc",
+      "address": "Usine Bouskoura"
+    },
+    "receiver": {
+      "name": "STE Al Binaa",
+      "address": "Chantier Lycee Ibn Sina, Kenitra"
+    },
+    "items": [
+      {
+        "itemReference": "ciment-cpj-45",
+        "itemDesignation": "Ciment CPJ 45",
+        "quantity": 10,
+        "uom": "t"
+      }
+    ]
+  },
+  "attenduMetier": {
+    "outcome": "REFUS",
+    "raison": "destinataire != Al Qods"
+  }
+}

@@ -1904,6 +1904,9 @@
     },
     "document_chantier": {
       "type": {
+        "os": "Service order",
+        "pv": "Site report",
+        "bl": "Delivery note",
         "marche": "Contract",
         "avenant": "Amendment",
         "pv_reception": "Acceptance report",

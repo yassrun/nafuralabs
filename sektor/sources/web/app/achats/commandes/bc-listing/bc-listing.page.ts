@@ -1,5 +1,5 @@
 
-import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, AfterViewInit, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import {ConfigDrivenListingPage,
@@ -24,7 +24,7 @@ type QuickFilter = 'ALL' | 'A_VALIDER' | 'EN_COURS_LIVRAISON' | 'EN_RETARD' | 'A
   changeDetection: ChangeDetectionStrategy.Eager,
   styles: [ConfigDrivenListingPageStyles],
 })
-export class BcListingPage extends ConfigDrivenListingPage<BonCommande> {
+export class BcListingPage extends ConfigDrivenListingPage<BonCommande> implements AfterViewInit {
   readonly facade = inject(BcFacade);
   private readonly translate = inject(TranslateService);
   readonly config = buildBcListingConfig(this.translate);
@@ -39,6 +39,13 @@ export class BcListingPage extends ConfigDrivenListingPage<BonCommande> {
     { id: 'A_FACTURER' as QuickFilter, labelKey: 'achats.commande.chips.aFacturer' },
   ];
   readonly currentChip = computed(() => this.quickFilter());
+
+  ngAfterViewInit(): void {
+    const chantierId = this.route.snapshot.queryParamMap.get('chantierId')?.trim();
+    if (chantierId) {
+      this.listingComponent?.onFilterChange({ chantierId });
+    }
+  }
 
   selectChip(id: QuickFilter): void {
     this.quickFilter.set(id);

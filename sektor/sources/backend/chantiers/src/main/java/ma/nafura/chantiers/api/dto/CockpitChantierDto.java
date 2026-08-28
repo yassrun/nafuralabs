@@ -29,6 +29,8 @@ public class CockpitChantierDto {
     private List<ActivityFeedDto> activityFeed;
     /** P1-13 — sources secondaires indisponibles (section + cause), jamais de faux zéro. */
     private List<DegradationDto> degradations;
+    /** SEKTOR-227 — compteurs ops quotidiennes (DA…) pour les tuiles EN_COURS. */
+    private OpsDto ops;
 
     @Data
     @Builder
@@ -134,6 +136,21 @@ public class CockpitChantierDto {
     @Builder
     public static class DegradationDto {
         private String section;
+        private String cause;
+    }
+
+    /** SEKTOR-227 — résumé ops (tuile DA…) : valeur ou NOT_AVAILABLE, jamais un faux zéro. */
+    @Data
+    @Builder
+    public static class OpsDto {
+        private CompteurDto demandesAchat;
+    }
+
+    @Data
+    @Builder
+    public static class CompteurDto {
+        private Long valeur;
+        private String etat;
         private String cause;
     }
 

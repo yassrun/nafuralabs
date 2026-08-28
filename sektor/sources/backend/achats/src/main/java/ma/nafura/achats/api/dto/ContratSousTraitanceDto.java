@@ -23,7 +23,8 @@ public class ContratSousTraitanceDto {
     private LocalDate dateSignature;
     private LocalDate dateDebut;
     private LocalDate dateFin;
-    private BigDecimal avancementPercent;
+    private String noeudId;
+    private String bpuFichier;
     private String status;
     private Boolean declarationArt187;
 }

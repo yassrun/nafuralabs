@@ -24,6 +24,7 @@ export interface DemandeAchat {
   chantierId?: string;
   chantierCode?: string;
   chantierName?: string;
+  noeudId?: string;
   dateBesoin: string;
   demandeurId: string;
   demandeurName?: string;
@@ -157,6 +158,7 @@ export interface BonCommande {
   chantierId?: string;
   chantierCode?: string;
   chantierName?: string;
+  noeudId?: string;
   daId?: string;
   daNumero?: string;
   aoId?: string;

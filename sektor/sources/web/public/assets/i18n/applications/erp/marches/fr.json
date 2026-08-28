@@ -88,19 +88,24 @@
         "title": "Nouveau contrat de marché",
         "subtitle": "Créer un contrat lié à un chantier",
         "breadcrumb": "Nouveau",
-        "submit": "Créer le contrat",
+        "submit": "Enregistrer le brouillon",
+        "submitNotify": "Créer et notifier",
         "success": "Contrat de marché créé.",
+        "notifySuccess": "Marché créé et notifié. La vente active du chantier a basculé.",
         "fields": {
           "chantier": "Chantier",
           "chantierPlaceholder": "Sélectionner un chantier…",
           "client": "Client / MOA",
           "numero": "N° marché (optionnel)",
+          "reference": "Référence MOA / CPS",
           "intitule": "Intitulé",
           "type": "Type de marché",
           "nature": "Nature",
           "montantInitialHt": "Montant initial HT",
           "tvaTaux": "TVA (%)",
           "retenueGarantieTaux": "Retenue de garantie (%)",
+          "tauxAvance": "Avance (%)",
+          "dureeMois": "Délai d’exécution (mois)",
           "dateOrdreService": "Date ordre de service"
         },
         "errors": {
@@ -111,6 +116,9 @@
       "detail": {
         "headerTitleFallback": "Marché",
         "headerCrumbFallback": "Détail",
+        "notifier": "Notifier le marché",
+        "notifySuccess": "Marché notifié. La vente active du chantier a basculé.",
+        "notifyFailed": "Impossible de notifier le marché.",
         "ras": "RAS 5%",
         "kpis": {
           "montantInitialHt": "Montant initial HT",

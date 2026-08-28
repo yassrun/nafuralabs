@@ -1,0 +1,35 @@
+{
+  "cas": "BL-01",
+  "fichierNom": "BL-01-lafarge-ciment-40t.pdf",
+  "kind": "happy",
+  "attenduExtraction": {
+    "blReference": "44012",
+    "date": "2026-09-12",
+    "issuer": "Ciments Lafarge Maroc",
+    "sender": {
+      "name": "Ciments Lafarge Maroc",
+      "address": "Usine Bouskoura, Casablanca"
+    },
+    "receiver": {
+      "name": "STE Al Binaa",
+      "address": "Chantier Groupe scolaire Al Qods, Rabat"
+    },
+    "items": [
+      {
+        "itemReference": "ciment-cpj-45",
+        "itemDesignation": "Ciment CPJ 45",
+        "quantity": 40,
+        "uom": "t",
+        "unitPrice": 1083.75,
+        "totalPrice": 43350
+      }
+    ]
+  },
+  "attenduMetier": {
+    "noeud": "2.1",
+    "bcQte": 40,
+    "recu": 40,
+    "resteALivrer": 0,
+    "destination": "DIRECT_CHANTIER"
+  }
+}

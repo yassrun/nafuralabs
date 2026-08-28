@@ -22,4 +22,6 @@ public interface DemandeAchatRepository extends TenantScopedRepository<DemandeAc
             UUID tenantId, String status, String chantierId);
 
     long countByTenantId(UUID tenantId);
+
+    long countByTenantIdAndChantierId(UUID tenantId, String chantierId);
 }

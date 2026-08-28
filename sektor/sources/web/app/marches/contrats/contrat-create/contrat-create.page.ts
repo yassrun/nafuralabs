@@ -53,6 +53,9 @@ import { ordreServicePrefill } from './contrat-create-prefill';
         <label>{{ 'marches.contrat.create.fields.numero' | translate }}</label>
         <input class="fld" type="text" [(ngModel)]="draft.numero" name="numero" />
 
+        <label>{{ 'marches.contrat.create.fields.reference' | translate }}</label>
+        <input class="fld" type="text" [(ngModel)]="draft.reference" name="reference" />
+
         <label>{{ 'marches.contrat.create.fields.intitule' | translate }}</label>
         <input class="fld" type="text" [(ngModel)]="draft.intitule" name="intitule" required />
 
@@ -89,6 +92,17 @@ import { ordreServicePrefill } from './contrat-create-prefill';
           </div>
         </div>
 
+        <div class="row">
+          <div>
+            <label>{{ 'marches.contrat.create.fields.tauxAvance' | translate }}</label>
+            <input class="fld" type="number" min="0" max="100" step="0.01" [(ngModel)]="draft.tauxAvance" name="tauxAvance" />
+          </div>
+          <div>
+            <label>{{ 'marches.contrat.create.fields.dureeMois' | translate }}</label>
+            <input class="fld" type="number" min="1" step="1" [(ngModel)]="draft.dureeMois" name="dureeMois" />
+          </div>
+        </div>
+
         <label>{{ 'marches.contrat.create.fields.dateOrdreService' | translate }}</label>
         <input class="fld" type="date" [(ngModel)]="draft.dateOrdreService" name="dateOrdreService" required />
 
@@ -96,8 +110,11 @@ import { ordreServicePrefill } from './contrat-create-prefill';
           <nf-button variant="secondary" (clicked)="cancel()">
             {{ 'marches.common.actions.cancel' | translate }}
           </nf-button>
-          <nf-button variant="primary" [disabled]="saving()" (clicked)="submit()">
+          <nf-button variant="secondary" [disabled]="saving()" (clicked)="submit(false)">
             {{ 'marches.contrat.create.submit' | translate }}
+          </nf-button>
+          <nf-button variant="primary" [disabled]="saving()" (clicked)="submit(true)">
+            {{ 'marches.contrat.create.submitNotify' | translate }}
           </nf-button>
         </div>
       </div>
@@ -135,6 +152,7 @@ export class ContratCreatePage implements OnInit {
 
   draft = {
     numero: '',
+    reference: '',
     intitule: '',
     chantierId: '',
     clientId: '',
@@ -146,6 +164,8 @@ export class ContratCreatePage implements OnInit {
     montantInitialHt: 0,
     tvaTaux: 20,
     retenueGarantieTaux: 7,
+    tauxAvance: 0,
+    dureeMois: 0,
     dateOrdreService: '',
     status: 'BROUILLON' as const,
   };
@@ -165,15 +185,15 @@ export class ContratCreatePage implements OnInit {
     void this.chantierApi.getAll().then(
       (res) => {
         this.chantiers.set(res.items);
-        const initialId = chantierIdParam && res.items.some((c) => c.id === chantierIdParam)
-          ? chantierIdParam
-          : res.items[0]?.id ?? '';
-        if (initialId) {
-          this.draft.chantierId = initialId;
-          this.applyChantierPrefill(initialId);
+        if (chantierIdParam) {
+          this.draft.chantierId = chantierIdParam;
+          this.applyChantierPrefill(chantierIdParam);
         }
       },
-      () => this.chantiers.set([]),
+      () => {
+        this.chantiers.set([]);
+        if (chantierIdParam) this.draft.chantierId = chantierIdParam;
+      },
     );
   }
 
@@ -195,7 +215,7 @@ export class ContratCreatePage implements OnInit {
     this.draft.clientNom = c.clientName ?? '';
     this.draft.chantierCode = c.code;
     this.draft.chantierNom = c.name;
-    this.draft.montantInitialHt = c.budgetHt;
+    this.draft.montantInitialHt = c.montantVenteActifHt ?? c.montantVenteInitialHt ?? c.budgetHt;
     this.draft.tvaTaux = c.tvaTaux;
     this.draft.dateOrdreService = ordreServicePrefill(c);
 
@@ -205,13 +225,16 @@ export class ContratCreatePage implements OnInit {
     if (!this.draft.numero.trim() && c.marcheReference?.trim()) {
       this.draft.numero = c.marcheReference.trim();
     }
+    if (!this.draft.reference.trim() && c.marcheReference?.trim()) {
+      this.draft.reference = c.marcheReference.trim();
+    }
   }
 
   cancel(): void {
     void this.router.navigate(['/marches/contrats']);
   }
 
-  async submit(): Promise<void> {
+  async submit(notify = false): Promise<void> {
     const {
       chantierId,
       intitule,
@@ -221,10 +244,13 @@ export class ContratCreatePage implements OnInit {
       chantierCode,
       chantierNom,
       numero,
+      reference,
       type,
       nature,
       tvaTaux,
       retenueGarantieTaux,
+      tauxAvance,
+      dureeMois,
       dateOrdreService,
       status,
     } = this.draft;
@@ -238,6 +264,7 @@ export class ContratCreatePage implements OnInit {
     try {
       const created = await this.api.create({
         numero: numero.trim() || undefined,
+        reference: reference.trim() || undefined,
         intitule: intitule.trim(),
         chantierId,
         chantierCode,
@@ -250,10 +277,17 @@ export class ContratCreatePage implements OnInit {
         tvaTaux,
         retenueGarantieTaux,
         retenueSourceTaux: 0,
+        avanceForfaitairePercent: tauxAvance || undefined,
+        delaiExecutionMois: dureeMois || undefined,
         dateOrdreService,
         status,
       });
-      this.toast.success(this.translate.instant('marches.contrat.create.success'));
+      if (notify) {
+        await this.api.notifier(created.id);
+        this.toast.success(this.translate.instant('marches.contrat.create.notifySuccess'));
+      } else {
+        this.toast.success(this.translate.instant('marches.contrat.create.success'));
+      }
       void this.router.navigate(['/marches/contrats', created.id]);
     } catch {
       this.toast.error(this.translate.instant('marches.contrat.create.errors.failed'));

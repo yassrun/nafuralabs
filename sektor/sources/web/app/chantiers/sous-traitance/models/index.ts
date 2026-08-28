@@ -15,7 +15,8 @@ export interface ContratSousTraitance {
   dateSignature?: string;
   dateDebut: string;
   dateFin: string;
-  avancementPercent: number;
+  noeudId: string;
+  bpuFichier?: string;
   status: ContratSousTraitanceStatus;
   declarationArt187: boolean;
 }

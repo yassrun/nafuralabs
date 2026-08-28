@@ -97,6 +97,22 @@ public class ChantierService {
         return chantier;
     }
 
+    /** AC-12 — la vente active bascule au marché à la notification, pas à la conversion. */
+    @Transactional
+    public void basculerVenteVersMarche(String chantierId) {
+        if (!StringUtils.hasText(chantierId)) {
+            throw new IllegalArgumentException("chantiers.vente.chantier_requis");
+        }
+        Chantier chantier = resolve(chantierId.trim())
+                .orElseThrow(() -> new IllegalArgumentException("Chantier not found"));
+        if (Chantier.SOURCE_MARCHE.equals(chantier.getSourceVente())) {
+            return;
+        }
+        chantier.setSourceVente(Chantier.SOURCE_MARCHE);
+        chantier.setUpdatedAt(OffsetDateTime.now());
+        repository.save(chantier);
+    }
+
     /**
      * AC-2, AC-3, AC-4 — l'avancement du chantier ne se stocke plus : il se lit, pondéré au
      * montant vendu de ses lots racines. Ne persiste rien, {@code avancementPercent} est

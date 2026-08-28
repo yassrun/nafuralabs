@@ -37,6 +37,9 @@ public class Chantier implements Persistable<String> {
     public static final String STATUS_RECEPTION_DEFINITIF = "RECEPTIONNE_DEFINITIF";
     public static final String STATUS_CLOS = "CLOS";
 
+    public static final String SOURCE_DEVIS = "DEVIS";
+    public static final String SOURCE_MARCHE = "MARCHE";
+
     @Id
     @Column(length = 100)
     private String id;

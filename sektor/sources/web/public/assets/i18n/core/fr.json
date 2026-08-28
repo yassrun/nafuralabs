@@ -1905,6 +1905,9 @@
     },
     "document_chantier": {
       "type": {
+        "os": "Ordre de service",
+        "pv": "PV",
+        "bl": "Bon de livraison",
         "marche": "Marché",
         "avenant": "Avenant",
         "pv_reception": "PV de réception",

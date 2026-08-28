@@ -1,0 +1,18 @@
+{
+  "cas": "DA-02",
+  "role": "conducteur",
+  "payload": {
+    "chantierCode": "RESOLVE",
+    "noeudCode": "2.2",
+    "dateBesoin": "2026-10-01",
+    "lignes": [
+      {
+        "articleCode": "acier-ha",
+        "articleName": "Acier HA Fe E500",
+        "quantite": 25,
+        "uomCode": "t",
+        "prixEstimeHt": 9800
+      }
+    ]
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "cas": "DA-03",
+  "role": "conducteur",
+  "notes": "Besoin chantier générique (base vie) — noeudId absent, autorisé, hors attachement.",
+  "payload": {
+    "chantierCode": "RESOLVE",
+    "noeudCode": null,
+    "dateBesoin": "2026-09-02",
+    "lignes": [
+      {
+        "articleCode": "cloture-chantier",
+        "articleName": "Cloture provisoire chantier",
+        "quantite": 80,
+        "uomCode": "ml",
+        "prixEstimeHt": 45
+      }
+    ]
+  }
+}

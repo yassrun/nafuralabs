@@ -6,13 +6,17 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 import ma.nafura.chantiers.api.dto.DocumentChantierDto;
 import ma.nafura.chantiers.api.request.DocumentChantierCreateDto;
 import ma.nafura.chantiers.api.request.DocumentChantierUpdateDto;
+import ma.nafura.chantiers.domain.budget.PosteBudgetaire;
 import ma.nafura.chantiers.domain.chantier.Chantier;
 import ma.nafura.chantiers.domain.chantier.DocumentChantier;
+import ma.nafura.chantiers.repository.ChantierLotRepository;
 import ma.nafura.chantiers.repository.DocumentChantierRepository;
+import ma.nafura.chantiers.repository.PosteBudgetaireRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,20 +31,50 @@ import ma.nafura.chantiers.seeders.ChantierDocumentsSeedService;
 @Service
 public class DocumentChantierService {
 
+    static final String ERR_CHANTIER_REQUIS = "chantiers.document.chantier_requis";
+    static final String ERR_TYPE_INCONNU = "chantiers.document.type_inconnu";
+    static final String ERR_NOEUD_INCONNU = "chantiers.document.noeud_inconnu";
+    static final String ERR_NOEUD_HORS_CHANTIER = "chantiers.document.noeud_hors_chantier";
+
+    /** Palier 1 (OS, PLAN, PV, BL, AUTRE) + types historiques conservés. */
+    static final Set<String> TYPES = Set.of(
+            "OS",
+            "PLAN",
+            "PV",
+            "BL",
+            "AUTRE",
+            "MARCHE",
+            "AVENANT",
+            "PV_RECEPTION",
+            "PHOTO",
+            "BC",
+            "FACTURE",
+            "ATTESTATION_ASSURANCE",
+            "CAUTION_BANCAIRE",
+            "PPSPS",
+            "PLAN_PREVENTION",
+            "NOTE_CALCUL");
+
     private final DocumentChantierRepository repository;
     private final ChantierService chantierService;
     private final ChantierDocumentsSeedService seedService;
     private final ObjectMapper objectMapper;
+    private final PosteBudgetaireRepository posteRepository;
+    private final ChantierLotRepository lotRepository;
 
     public DocumentChantierService(
             DocumentChantierRepository repository,
             ChantierService chantierService,
             ChantierDocumentsSeedService seedService,
-            ObjectMapper objectMapper) {
+            ObjectMapper objectMapper,
+            PosteBudgetaireRepository posteRepository,
+            ChantierLotRepository lotRepository) {
         this.repository = repository;
         this.chantierService = chantierService;
         this.seedService = seedService;
         this.objectMapper = objectMapper;
+        this.posteRepository = posteRepository;
+        this.lotRepository = lotRepository;
     }
 
     @Transactional(readOnly = true)
@@ -107,12 +141,18 @@ public class DocumentChantierService {
 
     @Transactional
     public DocumentChantierDto create(String chantierId, DocumentChantierCreateDto body) {
-        Chantier chantier = chantierService.getById(chantierId);
+        if (!StringUtils.hasText(chantierId)) {
+            throw new IllegalArgumentException(ERR_CHANTIER_REQUIS);
+        }
+        Chantier chantier = chantierService.getById(chantierId.trim());
+        String type = requireType(body.getType());
+        String noeudId = resolveNoeud(chantier.getId(), body.getNoeudId());
         DocumentChantier entity = DocumentChantier.builder()
                 .id("doc-" + UUID.randomUUID())
                 .tenantId(tenantId())
-                .chantierId(chantierId)
-                .type(body.getType().trim())
+                .chantierId(chantier.getId())
+                .noeudId(noeudId)
+                .type(type)
                 .titre(body.getTitre().trim())
                 .fichier(body.getFichier().trim())
                 .storageKey(StringUtils.hasText(body.getStorageKey()) ? body.getStorageKey().trim() : null)
@@ -129,7 +169,10 @@ public class DocumentChantierService {
         Chantier chantier = chantierService.getById(chantierId);
         DocumentChantier entity = getEntity(chantierId, id);
         if (StringUtils.hasText(body.getType())) {
-            entity.setType(body.getType().trim());
+            entity.setType(requireType(body.getType()));
+        }
+        if (body.getNoeudId() != null) {
+            entity.setNoeudId(resolveNoeud(chantierId, body.getNoeudId()));
         }
         if (StringUtils.hasText(body.getTitre())) {
             entity.setTitre(body.getTitre().trim());
@@ -178,6 +221,7 @@ public class DocumentChantierService {
                 .id(row.getId())
                 .chantierId(row.getChantierId())
                 .chantierCode(chantier.getCode())
+                .noeudId(row.getNoeudId())
                 .type(row.getType())
                 .titre(row.getTitre())
                 .fichier(row.getFichier())
@@ -187,6 +231,29 @@ public class DocumentChantierService {
                 .uploadedPar(row.getUploadedPar())
                 .tags(tagsFromJson(row.getTags()))
                 .build();
+    }
+
+    private String requireType(String type) {
+        String normalized = type == null ? "" : type.trim().toUpperCase(Locale.ROOT);
+        if (!TYPES.contains(normalized)) {
+            throw new IllegalArgumentException(ERR_TYPE_INCONNU + ": " + type);
+        }
+        return normalized;
+    }
+
+    private String resolveNoeud(String chantierId, String raw) {
+        if (!StringUtils.hasText(raw)) {
+            return null;
+        }
+        String noeudId = raw.trim();
+        PosteBudgetaire poste = posteRepository
+                .findByIdAndTenantId(noeudId, tenantId())
+                .orElseThrow(() -> new IllegalArgumentException(ERR_NOEUD_INCONNU + ": " + noeudId));
+        lotRepository
+                .findByIdAndTenantId(poste.getLotId(), tenantId())
+                .filter(lot -> chantierId.equals(lot.getChantierId()))
+                .orElseThrow(() -> new IllegalArgumentException(ERR_NOEUD_HORS_CHANTIER + ": " + noeudId));
+        return noeudId;
     }
 
     private String tagsToJson(List<String> tags) {

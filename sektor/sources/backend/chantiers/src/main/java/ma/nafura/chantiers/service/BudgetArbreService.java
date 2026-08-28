@@ -9,6 +9,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import ma.nafura.achats.domain.commande.BonCommandeAchat;
+import ma.nafura.achats.repository.BonCommandeAchatRepository;
 import ma.nafura.chantiers.api.dto.BudgetArbreDto;
 import ma.nafura.chantiers.domain.budget.CoutReelNoeud;
 import ma.nafura.chantiers.domain.budget.DebourseNoeud;
@@ -51,6 +53,7 @@ public class BudgetArbreService {
     private final DebourseNoeudRepository debourseRepository;
     private final CoutReelNoeudRepository coutReelRepository;
     private final AvancementLectureService avancementLectureService;
+    private final BonCommandeAchatRepository bonCommandeRepository;
 
     public BudgetArbreService(
             ChantierService chantierService,
@@ -58,13 +61,15 @@ public class BudgetArbreService {
             PosteBudgetaireRepository posteRepository,
             DebourseNoeudRepository debourseRepository,
             CoutReelNoeudRepository coutReelRepository,
-            AvancementLectureService avancementLectureService) {
+            AvancementLectureService avancementLectureService,
+            BonCommandeAchatRepository bonCommandeRepository) {
         this.chantierService = chantierService;
         this.lotRepository = lotRepository;
         this.posteRepository = posteRepository;
         this.debourseRepository = debourseRepository;
         this.coutReelRepository = coutReelRepository;
         this.avancementLectureService = avancementLectureService;
+        this.bonCommandeRepository = bonCommandeRepository;
     }
 
     @Transactional(readOnly = true)
@@ -97,7 +102,8 @@ public class BudgetArbreService {
         Contexte contexte = new Contexte(
             grouperDebourses(tenantId, tousLesPostes),
             grouperCoutsReels(tenantId, tousLesPostes),
-            quantitesFaites(tousLesPostes));
+            quantitesFaites(tousLesPostes),
+            grouperEngages(tenantId, chantierId));
 
         List<BudgetArbreDto.NoeudDto> racinesDto = new ArrayList<>();
         for (ChantierLot racine : racines) {
@@ -197,6 +203,7 @@ public class BudgetArbreService {
                     .build());
         }
 
+        BigDecimal engage = contexte.engageParPoste().getOrDefault(poste.getId(), BigDecimal.ZERO);
         return BudgetArbreDto.NoeudDto.builder()
                 .id(poste.getId())
                 .type("POSTE")
@@ -208,7 +215,7 @@ public class BudgetArbreService {
                 .unite(poste.getUnite())
                 .quantitePrevue(quantitePrevue)
                 .quantiteFaite(quantiteFaite)
-                .totaux(totaux(vendu, prevu, revise, reel, avancement, debourseFait))
+                .totaux(totaux(vendu, prevu, revise, reel, avancement, debourseFait, engage))
                 .rubriques(rubriques)
                 .enfants(List.of())
                 .build();
@@ -242,7 +249,8 @@ public class BudgetArbreService {
             BigDecimal revise,
             BigDecimal reel,
             BigDecimal avancement,
-            BigDecimal debourseFait) {
+            BigDecimal debourseFait,
+            BigDecimal engage) {
         BigDecimal margePrevue = vendu.subtract(prevu);
         BigDecimal margeReelle = vendu.subtract(reel);
         return BudgetArbreDto.TotauxDto.builder()
@@ -250,6 +258,7 @@ public class BudgetArbreService {
                 .deboursePrevuHt(argent(prevu))
                 .debourseReviseHt(argent(revise))
                 .debourseReelHt(argent(reel))
+                .engageHt(argent(engage))
                 .margePrevueHt(argent(margePrevue))
                 .margePrevuePercent(pourcentDuVendu(margePrevue, vendu))
                 .margeReelleHt(argent(margeReelle))
@@ -296,6 +305,22 @@ public class BudgetArbreService {
         return out;
     }
 
+    private Map<String, BigDecimal> grouperEngages(UUID tenantId, String chantierId) {
+        Map<String, BigDecimal> out = new HashMap<>();
+        for (BonCommandeAchat bc :
+                bonCommandeRepository.findByTenantIdAndChantierIdOrderByCreatedAtDesc(tenantId, chantierId)) {
+            if (BonCommandeAchat.STATUS_BROUILLON.equals(bc.getStatus())
+                    || BonCommandeAchat.STATUS_ANNULE.equals(bc.getStatus())) {
+                continue;
+            }
+            if (!StringUtils.hasText(bc.getNoeudId()) || bc.getTotalHt() == null) {
+                continue;
+            }
+            out.merge(bc.getNoeudId(), bc.getTotalHt(), BigDecimal::add);
+        }
+        return out;
+    }
+
     /**
      * La quantité faite de chaque poste : le cumul de ses déclarations (AC-3 du contrat
      * avancement-et-attachement — source unique, {@link AvancementLectureService}), pas la
@@ -320,7 +345,8 @@ public class BudgetArbreService {
     private record Contexte(
             Map<String, List<DebourseNoeud>> debourses,
             Map<String, List<CoutReelNoeud>> coutsReels,
-            Map<String, BigDecimal> quantitesFaites) {}
+            Map<String, BigDecimal> quantitesFaites,
+            Map<String, BigDecimal> engageParPoste) {}
 
     private static final class Montants {
         BigDecimal prevu = BigDecimal.ZERO;
@@ -350,6 +376,7 @@ public class BudgetArbreService {
         BigDecimal prevu = BigDecimal.ZERO;
         BigDecimal revise = BigDecimal.ZERO;
         BigDecimal reel = BigDecimal.ZERO;
+        BigDecimal engage = BigDecimal.ZERO;
         BigDecimal debourseFait = BigDecimal.ZERO;
         final Map<RubriqueDebourse, Montants> parRubrique = new EnumMap<>(RubriqueDebourse.class);
 
@@ -360,6 +387,7 @@ public class BudgetArbreService {
                 prevu = prevu.add(nz(totaux.getDeboursePrevuHt()));
                 revise = revise.add(nz(totaux.getDebourseReviseHt()));
                 reel = reel.add(nz(totaux.getDebourseReelHt()));
+                engage = engage.add(nz(totaux.getEngageHt()));
                 debourseFait = debourseFait.add(nz(totaux.getDebourseFaitHt()));
             }
             for (BudgetArbreDto.RubriqueTotalDto r : rubriques != null ? rubriques : List.<BudgetArbreDto.RubriqueTotalDto>of()) {
@@ -374,7 +402,7 @@ public class BudgetArbreService {
             BigDecimal avancement = prevu.signum() > 0
                     ? debourseFait.multiply(CENT).divide(prevu, PERCENT_SCALE, RoundingMode.HALF_UP)
                     : BigDecimal.ZERO;
-            return BudgetArbreService.totaux(vendu, prevu, revise, reel, avancement, debourseFait);
+            return BudgetArbreService.totaux(vendu, prevu, revise, reel, avancement, debourseFait, engage);
         }
 
         List<BudgetArbreDto.RubriqueTotalDto> rubriques() {

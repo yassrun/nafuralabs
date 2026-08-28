@@ -32,7 +32,7 @@ public class BonCommandeAchatController {
     }
 
     @GetMapping
-    @RequirePermission("achats.bon-commande-achat.read")
+    @RequirePermission("read")
     public ResponseEntity<List<BonCommandeAchat>> list(
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String fournisseurId,
@@ -45,39 +45,39 @@ public class BonCommandeAchatController {
     }
 
     @GetMapping("/{id}")
-    @RequirePermission("achats.bon-commande-achat.read")
+    @RequirePermission("read")
     public ResponseEntity<BonCommandeAchat> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(service.getById(id));
     }
 
     @PostMapping
-    @RequirePermission("achats.bon-commande-achat.create")
+    @RequirePermission("create")
     public ResponseEntity<BonCommandeAchat> create(@Valid @RequestBody BonCommandeAchatCreateDto body) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(body));
     }
 
     @PutMapping("/{id}")
-    @RequirePermission("achats.bon-commande-achat.update")
+    @RequirePermission("update")
     public ResponseEntity<BonCommandeAchat> update(
             @PathVariable UUID id, @Valid @RequestBody BonCommandeAchatUpdateDto body) {
         return ResponseEntity.ok(service.update(id, body));
     }
 
     @DeleteMapping("/{id}")
-    @RequirePermission("achats.bon-commande-achat.delete")
+    @RequirePermission("delete")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{id}/submit")
-    @RequirePermission("achats.bon-commande-achat.update")
+    @RequirePermission("update")
     public ResponseEntity<BonCommandeAchat> submit(@PathVariable UUID id) {
         return ResponseEntity.ok(service.submit(id));
     }
 
     @PostMapping("/{id}/approve")
-    @RequirePermission("achats.bon-commande-achat.update")
+    @RequirePermission("update")
     public ResponseEntity<BonCommandeAchat> approve(
             @PathVariable UUID id, @RequestBody(required = false) BonCommandeAchatApproveDto body) {
         String validateurId = body != null ? body.getValidateurId() : null;
@@ -86,37 +86,37 @@ public class BonCommandeAchatController {
     }
 
     @PostMapping("/{id}/send")
-    @RequirePermission("achats.bon-commande-achat.update")
+    @RequirePermission("update")
     public ResponseEntity<BonCommandeAchat> send(@PathVariable UUID id) {
         return ResponseEntity.ok(service.send(id));
     }
 
     @PostMapping("/{id}/cancel")
-    @RequirePermission("achats.bon-commande-achat.update")
+    @RequirePermission("update")
     public ResponseEntity<BonCommandeAchat> cancel(@PathVariable UUID id) {
         return ResponseEntity.ok(service.cancel(id));
     }
 
     @PostMapping("/{id}/close")
-    @RequirePermission("achats.bon-commande-achat.update")
+    @RequirePermission("update")
     public ResponseEntity<BonCommandeAchat> close(@PathVariable UUID id) {
         return ResponseEntity.ok(service.close(id));
     }
 
     @PostMapping("/{id}/acknowledge-reception")
-    @RequirePermission("achats.bon-commande-achat.update")
+    @RequirePermission("update")
     public ResponseEntity<BonCommandeAchat> acknowledgeReception(@PathVariable UUID id) {
         return ResponseEntity.ok(service.acknowledgeReception(id));
     }
 
     @GetMapping("/{id}/receptions")
-    @RequirePermission("achats.bon-commande-achat.read")
+    @RequirePermission("read")
     public ResponseEntity<List<ReceptionAchat>> listReceptions(@PathVariable UUID id) {
         return ResponseEntity.ok(receptionService.listByBonCommande(id));
     }
 
     @PostMapping("/{id}/receptions")
-    @RequirePermission("achats.bon-commande-achat.update")
+    @RequirePermission("update")
     public ResponseEntity<ReceptionAchat> createReception(
             @PathVariable UUID id, @Valid @RequestBody ReceptionAchatCreateDto body) {
         return ResponseEntity.status(HttpStatus.CREATED).body(receptionService.create(id, body));

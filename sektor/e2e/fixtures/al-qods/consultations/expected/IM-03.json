@@ -1,0 +1,14 @@
+{
+  "cas": "IM-03",
+  "fichierNom": "IM-03-devis-vide.pdf",
+  "fournisseur": "Ciments Lafarge Maroc",
+  "clesStables": [
+    "ciment-cpj-45"
+  ],
+  "attendu": {
+    "postStatus": 400,
+    "devisRecusDelta": 0,
+    "statutInchange": "DEMANDE",
+    "lignes": []
+  }
+}

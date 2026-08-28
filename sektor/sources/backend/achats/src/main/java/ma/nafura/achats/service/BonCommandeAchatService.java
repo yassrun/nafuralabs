@@ -20,7 +20,10 @@ import ma.nafura.achats.domain.commande.BonCommandeAchat;
 import ma.nafura.achats.domain.commande.BonCommandeAchatLigne;
 import ma.nafura.achats.domain.appeloffre.OffreFournisseur;
 import ma.nafura.achats.domain.appeloffre.OffreFournisseurLigne;
+import ma.nafura.achats.domain.demande.DemandeAchat;
+import ma.nafura.achats.domain.demande.DemandeAchatLigne;
 import ma.nafura.achats.repository.BonCommandeAchatRepository;
+import ma.nafura.achats.repository.DemandeAchatRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.platform.framework.event.ErpNotificationPublisher;
 import org.springframework.stereotype.Service;
@@ -32,14 +35,17 @@ import ma.nafura.achats.seeders.BonCommandeAchatSeedService;
 public class BonCommandeAchatService {
 
     private final BonCommandeAchatRepository repository;
+    private final DemandeAchatRepository demandeRepository;
     private final BonCommandeAchatSeedService seedService;
     private final ErpNotificationPublisher erpNotificationPublisher;
 
     public BonCommandeAchatService(
             BonCommandeAchatRepository repository,
+            DemandeAchatRepository demandeRepository,
             BonCommandeAchatSeedService seedService,
             ErpNotificationPublisher erpNotificationPublisher) {
         this.repository = repository;
+        this.demandeRepository = demandeRepository;
         this.seedService = seedService;
         this.erpNotificationPublisher = erpNotificationPublisher;
     }
@@ -76,16 +82,48 @@ public class BonCommandeAchatService {
     public BonCommandeAchat create(BonCommandeAchatCreateDto request) {
         UUID tenantId = tenantId();
         BigDecimal tvaTaux = request.getTvaTaux() != null ? request.getTvaTaux() : new BigDecimal("20");
+        String chantierId = trimOrNull(request.getChantierId());
+        String chantierCode = trimOrNull(request.getChantierCode());
+        String chantierName = trimOrNull(request.getChantierName());
+        String noeudId = trimOrNull(request.getNoeudId());
+        String daId = trimOrNull(request.getDaId());
+        String daNumero = trimOrNull(request.getDaNumero());
+        List<BonCommandeAchatLigneInputDto> lignes = request.getLignes();
+        DemandeAchat da = null;
+        if (daId != null) {
+            da = demandeRepository
+                    .findByIdAndTenantId(UUID.fromString(daId), tenantId)
+                    .orElseThrow(() -> new IllegalArgumentException("Demande achat not found"));
+            if (chantierId == null) {
+                chantierId = da.getChantierId();
+            }
+            if (chantierCode == null) {
+                chantierCode = da.getChantierCode();
+            }
+            if (chantierName == null) {
+                chantierName = da.getChantierName();
+            }
+            if (noeudId == null) {
+                noeudId = da.getNoeudId();
+            }
+            if (daNumero == null) {
+                daNumero = da.getNumero();
+            }
+            if (lignes == null || lignes.isEmpty()) {
+                lignes = lignesFromDemande(da);
+            }
+        }
         BonCommandeAchat entity = BonCommandeAchat.builder()
                 .tenantId(tenantId)
                 .numero(nextNumero(tenantId))
                 .fournisseurId(request.getFournisseurId().trim())
                 .fournisseurName(trimOrNull(request.getFournisseurName()))
-                .chantierId(trimOrNull(request.getChantierId()))
-                .chantierCode(trimOrNull(request.getChantierCode()))
-                .chantierName(trimOrNull(request.getChantierName()))
-                .daId(trimOrNull(request.getDaId()))
-                .daNumero(trimOrNull(request.getDaNumero()))
+                .chantierId(chantierId)
+                .chantierCode(chantierCode)
+                .chantierName(chantierName)
+                .noeudId(noeudId)
+                .daId(daId)
+                .daNumero(daNumero)
                 .aoId(trimOrNull(request.getAoId()))
                 .aoNumero(trimOrNull(request.getAoNumero()))
                 .contratId(trimOrNull(request.getContratId()))
@@ -103,10 +141,16 @@ public class BonCommandeAchatService {
                 .notes(trimOrNull(request.getNotes()))
                 .lignes(new ArrayList<>())
                 .build();
-        applyLignes(entity, request.getLignes(), tenantId);
+        applyLignes(entity, lignes, tenantId);
         recomputeTotals(entity);
         BonCommandeAchat saved = repository.save(entity);
         attachLigneBcIds(saved);
+        if (da != null) {
+            da.setBcId(saved.getId().toString());
+            da.setBcNumero(saved.getNumero());
+            da.setStatus(DemandeAchat.STATUS_CONVERTIE);
+            demandeRepository.save(da);
+        }
         return saved;
     }
 
@@ -127,6 +171,9 @@ public class BonCommandeAchatService {
         }
         if (request.getChantierName() != null) {
             entity.setChantierName(trimOrNull(request.getChantierName()));
+        }
+        if (request.getNoeudId() != null) {
+            entity.setNoeudId(trimOrNull(request.getNoeudId()));
         }
         if (request.getDaId() != null) {
             entity.setDaId(trimOrNull(request.getDaId()));
@@ -395,6 +442,29 @@ public class BonCommandeAchatService {
             return repository.findByTenantIdAndChantierIdOrderByCreatedAtDesc(tenantId, chantierId.trim());
         }
         return repository.findByTenantIdOrderByCreatedAtDesc(tenantId);
+    }
+
+    private List<BonCommandeAchatLigneInputDto> lignesFromDemande(DemandeAchat da) {
+        List<BonCommandeAchatLigneInputDto> out = new ArrayList<>();
+        if (da.getLignes() == null) {
+            return out;
+        }
+        for (DemandeAchatLigne daLigne : da.getLignes()) {
+            BonCommandeAchatLigneInputDto line = new BonCommandeAchatLigneInputDto();
+            line.setArticleId(daLigne.getArticleId());
+            line.setArticleCode(daLigne.getArticleCode());
+            line.setArticleName(daLigne.getArticleName());
+            line.setQuantite(daLigne.getQuantite());
+            line.setUomCode(daLigne.getUomCode());
+            BigDecimal pu = daLigne.getPrixEstimeHt() != null ? daLigne.getPrixEstimeHt() : BigDecimal.ZERO;
+            line.setPrixUnitaireHt(pu);
+            line.setTotalHt(daLigne.getTotalEstimeHt() != null
+                    ? daLigne.getTotalEstimeHt()
+                    : pu.multiply(daLigne.getQuantite()));
+            line.setNotes(daLigne.getNotes());
+            out.add(line);
+        }
+        return out;
     }
 
     private void applyLignes(

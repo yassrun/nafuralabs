@@ -1,0 +1,33 @@
+{
+  "cas": "BL-03",
+  "fichierNom": "BL-03-acier-ecart-30t.pdf",
+  "kind": "ecart",
+  "attenduExtraction": {
+    "blReference": "55102",
+    "date": "2026-10-06",
+    "issuer": "Sonasid",
+    "sender": {
+      "name": "Sonasid",
+      "address": "Jorf Lasfar"
+    },
+    "receiver": {
+      "name": "STE Al Binaa",
+      "address": "Chantier Groupe scolaire Al Qods, Rabat"
+    },
+    "items": [
+      {
+        "itemReference": "acier-ha",
+        "itemDesignation": "Acier HA Fe E500",
+        "quantity": 30,
+        "uom": "t"
+      }
+    ]
+  },
+  "attenduMetier": {
+    "noeud": "2.2",
+    "bcQte": 25,
+    "recuPropose": 30,
+    "outcome": "REFUS_OU_ECART_TRACE",
+    "interdit": "OK silencieux"
+  }
+}

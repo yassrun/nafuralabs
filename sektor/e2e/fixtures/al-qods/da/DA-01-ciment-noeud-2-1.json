@@ -1,0 +1,19 @@
+{
+  "cas": "DA-01",
+  "role": "conducteur",
+  "notes": "articleId résolu au runtime (catalogue Item ciment-cpj-45). noeudId obligatoire pour 2.1.",
+  "payload": {
+    "chantierCode": "RESOLVE",
+    "noeudCode": "2.1",
+    "dateBesoin": "2026-09-10",
+    "lignes": [
+      {
+        "articleCode": "ciment-cpj-45",
+        "articleName": "Ciment CPJ 45",
+        "quantite": 40,
+        "uomCode": "t",
+        "prixEstimeHt": 1083.75
+      }
+    ]
+  }
+}

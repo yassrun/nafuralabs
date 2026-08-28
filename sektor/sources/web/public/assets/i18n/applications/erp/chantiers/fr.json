@@ -712,10 +712,14 @@
           "objet": "Objet du contrat",
           "montantHt": "Montant HT (MAD)",
           "dateDebut": "Date de début",
-          "dateFin": "Date de fin"
+          "dateFin": "Date de fin",
+          "noeud": "Poste vendu",
+          "noeudPlaceholder": "Sélectionner le nœud",
+          "bpu": "BPU (fichier)",
+          "bpuPlaceholder": "BPU-coffrage-2-3.pdf"
         },
         "errors": {
-          "required": "Renseignez le chantier, le sous-traitant, l'objet et le montant.",
+          "required": "Renseignez le chantier, le nœud, le sous-traitant, l'objet et le montant.",
           "failed": "Impossible de créer le contrat."
         },
         "success": "Contrat sous-traitance créé."
@@ -828,7 +832,9 @@
           "chantierPlaceholder": "Sélectionner un chantier",
           "type": "Type de document",
           "titre": "Titre",
-          "file": "Fichier"
+          "file": "Fichier",
+          "noeud": "Nœud (facultatif)",
+          "noeudNone": "Tout le chantier"
         },
         "errors": {
           "required": "Renseignez le chantier, le titre et le fichier.",
@@ -1130,8 +1136,25 @@
         "budgetResume": "Déboursé prévu, révisé et réel",
         "planning": "Planning",
         "planningResume": "Activités et échéances",
+        "planningRecommandeResume": "Recommandé — jamais la seule porte vers DA ou ST",
         "situations": "Situations",
-        "situationsResume": "Travaux par période et révisions"
+        "situationsResume": "Travaux par période et révisions",
+        "avancement": "Avancement",
+        "avancementResume": "Saisir les quantités du jour",
+        "demandeAchat": "Demande d’achat",
+        "demandeAchatResume": "DA du chantier, nœud déjà choisi",
+        "demandeAchatCount": "{{count}} DA",
+        "indisponible": "Indisponible",
+        "receptionBl": "Réceptions BL",
+        "receptionBlResume": "BL du chantier, livraison directe",
+        "documents": "Documents",
+        "documentsResume": "OS, plans, PV rattachés au chantier",
+        "sousTraitance": "Sous-traitance",
+        "sousTraitanceResume": "Contrat ST sur un poste",
+        "attachement": "Attachement",
+        "attachementResume": "Carnet du mois",
+        "notifierMarche": "Marché",
+        "notifierMarcheResume": "Notifier depuis le chantier, pas à la conversion"
       },
       "activite": {
         "titre": "Activité récente"
@@ -1160,6 +1183,10 @@
         "situation": "Traiter la situation",
         "situations": "Voir les situations",
         "documents": "Voir les documents",
+        "demandeAchat": "Nouvelle DA",
+        "receptionBl": "Réceptionner un BL",
+        "sousTraitance": "Contrat ST",
+        "notifierMarche": "Notifier le marché",
         "reprendre": "Reprendre le chantier"
       },
       "filtres": {
@@ -1276,6 +1303,23 @@
       "etapeInconnue": "Avancement",
       "saisirAvancement": "chantiers.routes.avancementTitle"
     },
+    "action": {
+      "demarrer": "Démarrer le chantier",
+      "preparer": "Préparer le chantier",
+      "equipe": "Gérer l’équipe",
+      "budget": "Voir le budget",
+      "planning": "Voir le planning (recommandé)",
+      "avancement": "Saisir l’avancement",
+      "attachement": "Créer l’attachement",
+      "situation": "Traiter la situation",
+      "situations": "Voir les situations",
+      "documents": "Documents",
+      "demandeAchat": "Nouvelle DA",
+      "receptionBl": "Réceptionner un BL",
+      "sousTraitance": "Contrat ST",
+      "notifierMarche": "Notifier le marché",
+      "reprendre": "Reprendre le chantier"
+    },
     "module": {
       "arbre": "Arbre",
       "arbreResume": "Vendu / interne, lien vers le devis",
@@ -1283,8 +1327,25 @@
       "budgetResume": "Déboursé, révisions, écarts",
       "planning": "Planning",
       "planningResume": "Activités et délais",
+      "planningRecommandeResume": "Recommandé — jamais la seule porte vers DA ou ST",
       "situations": "Situations",
-      "situationsResume": "Décomptes et retenues"
+      "situationsResume": "Décomptes et retenues",
+      "avancement": "Avancement",
+      "avancementResume": "Saisir les quantités du jour",
+      "demandeAchat": "Demande d’achat",
+      "demandeAchatResume": "DA du chantier, nœud déjà choisi",
+      "demandeAchatCount": "{{count}} DA",
+      "indisponible": "Indisponible",
+      "receptionBl": "Réceptions BL",
+      "receptionBlResume": "BL du chantier, livraison directe",
+      "documents": "Documents",
+      "documentsResume": "OS, plans, PV rattachés au chantier",
+      "sousTraitance": "Sous-traitance",
+      "sousTraitanceResume": "Contrat ST sur un poste",
+      "attachement": "Attachement",
+      "attachementResume": "Carnet du mois",
+      "notifierMarche": "Marché",
+      "notifierMarcheResume": "Notifier depuis le chantier, pas à la conversion"
     },
     "activite": {
       "titre": "Activité récente"

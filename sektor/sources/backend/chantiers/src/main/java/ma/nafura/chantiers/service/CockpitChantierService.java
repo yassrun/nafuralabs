@@ -17,7 +17,9 @@ import ma.nafura.chantiers.repository.ChantierLotRepository;
 import ma.nafura.chantiers.repository.AttachementChantierRepository;
 import ma.nafura.chantiers.repository.AvancementPhysiqueRepository;
 import ma.nafura.chantiers.repository.JournalChantierRepository;
+import ma.nafura.chantiers.service.port.DemandeAchatCockpitPort;
 import ma.nafura.platform.framework.context.TenantContext;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,6 +50,7 @@ public class CockpitChantierService {
     private final JournalChantierRepository journalRepository;
     private final AttachementChantierRepository attachementRepository;
     private final AvancementPhysiqueRepository avancementRepository;
+    private final ObjectProvider<DemandeAchatCockpitPort> demandeAchatPort;
 
     public CockpitChantierService(
             ChantierService chantierService,
@@ -56,7 +59,8 @@ public class CockpitChantierService {
             ChantierLotRepository lotRepository,
             JournalChantierRepository journalRepository,
             AttachementChantierRepository attachementRepository,
-            AvancementPhysiqueRepository avancementRepository) {
+            AvancementPhysiqueRepository avancementRepository,
+            ObjectProvider<DemandeAchatCockpitPort> demandeAchatPort) {
         this.chantierService = chantierService;
         this.summaryService = summaryService;
         this.affectationService = affectationService;
@@ -64,6 +68,7 @@ public class CockpitChantierService {
         this.journalRepository = journalRepository;
         this.attachementRepository = attachementRepository;
         this.avancementRepository = avancementRepository;
+        this.demandeAchatPort = demandeAchatPort;
     }
 
     @Transactional(readOnly = true)
@@ -113,6 +118,7 @@ public class CockpitChantierService {
                 .activityFeed(lireSansPlanter(
                         () -> activite(chantierId),
                         "chantiers.cockpit.degradation.activite", degradations, List.of()))
+                .ops(ops(chantier, degradations))
                 .degradations(degradations)
                 .build();
     }
@@ -157,6 +163,34 @@ public class CockpitChantierService {
                 .build();
     }
 
+    /** SEKTOR-227 — compteur DA pour tuile cockpit EN_COURS ; NOT_AVAILABLE si Achats down. */
+    private CockpitChantierDto.OpsDto ops(
+            Chantier chantier, List<CockpitChantierDto.DegradationDto> degradations) {
+        if (!Chantier.STATUS_EN_COURS.equals(chantier.getStatus())) {
+            return null;
+        }
+        CockpitChantierDto.CompteurDto demandes = lireSansPlanter(
+                () -> compteurDemandesAchat(chantier.getId()),
+                "chantiers.cockpit.degradation.demandesAchat", degradations,
+                compteurIndisponible("chantiers.cockpit.ops.demandesAchat.indisponible"));
+        return CockpitChantierDto.OpsDto.builder().demandesAchat(demandes).build();
+    }
+
+    private CockpitChantierDto.CompteurDto compteurDemandesAchat(String chantierId) {
+        DemandeAchatCockpitPort port = demandeAchatPort.getIfAvailable();
+        if (port == null) {
+            throw new IllegalStateException("achats.cockpit.demandes_indisponibles");
+        }
+        long count = port.compterParChantier(chantierId);
+        return CockpitChantierDto.CompteurDto.builder()
+                .valeur(count).etat(AVAILABLE).build();
+    }
+
+    private static CockpitChantierDto.CompteurDto compteurIndisponible(String cause) {
+        return CockpitChantierDto.CompteurDto.builder()
+                .etat(NOT_AVAILABLE).cause(cause).build();
+    }
+
     // ── Identité ──────────────────────────────────────────────────────────────
 
     private static CockpitChantierDto.IdentityDto identite(Chantier c, OffsetDateTime fraicheur) {
@@ -199,8 +233,11 @@ public class CockpitChantierService {
     private CockpitChantierDto.FinanceDto finance(
             ChantierSummaryDto s, Chantier c, OffsetDateTime fraicheur) {
         boolean peutVoirFinance = peutVoirFinance();
+        String venteSource = Chantier.SOURCE_MARCHE.equals(c.getSourceVente())
+                ? Chantier.SOURCE_MARCHE
+                : Chantier.SOURCE_DEVIS;
         CockpitChantierDto.MontantDto vente = montant(
-                s.getMontantVenteActifHt(), MAD, HT, fraicheur, "DEVIS",
+                s.getMontantVenteActifHt(), MAD, HT, fraicheur, venteSource,
                 peutVoirFinance, "chantiers.cockpit.finance.venteAbsente");
         CockpitChantierDto.MontantDto debourse = montant(
                 s.getDebourseInitialHt(), MAD, HT, fraicheur, "SNAPSHOT",

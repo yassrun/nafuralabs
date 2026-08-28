@@ -9,7 +9,7 @@ export function buildDemandeSections(t: TranslateService): DetailSectionConfig[]
       id: 'entete',
       title: tr('achats.demande.form.sections.entete'),
       icon: 'shopping-cart',
-      fields: ['numero', 'chantierId', 'dateBesoin', 'demandeurName', 'totalEstimeHt'],
+      fields: ['numero', 'chantierId', 'noeudId', 'dateBesoin', 'demandeurName', 'totalEstimeHt'],
       columns: 3,
     },
     {

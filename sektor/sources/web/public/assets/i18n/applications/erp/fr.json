@@ -770,6 +770,15 @@
       "id_invalide": "Identifiant client invalide.",
       "introuvable": "Client introuvable dans le référentiel Partner.",
       "role_invalide": "Ce partenaire n'a pas le rôle Client."
+    },
+    "conversion": {
+      "cta": "Créer le chantier",
+      "title": "Créer le chantier",
+      "hintNoMarche": "Aucun marché n'est créé ici — le marché naît à la notification. La vente reste le devis validé.",
+      "libelleRequired": "Le libellé du chantier est obligatoire.",
+      "codeOptional": "Facultatif — généré si vide.",
+      "dateOptional": "Facultatif — avant l'OS.",
+      "dureeOptional": "Facultatif — avant l'OS."
     }
   }
 }

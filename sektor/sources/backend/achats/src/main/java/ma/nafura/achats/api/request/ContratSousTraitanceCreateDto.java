@@ -39,5 +39,8 @@ public class ContratSousTraitanceCreateDto {
 
     private Boolean declarationArt187;
 
-    private BigDecimal avancementPercent;
+    @NotBlank
+    private String noeudId;
+
+    private String bpuFichier;
 }
