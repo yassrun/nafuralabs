@@ -7,8 +7,11 @@
 
 import { ApplicationConfig, provideZoneChangeDetection, APP_INITIALIZER, inject } from '@angular/core';
 import { registerLocaleData } from '@angular/common';
+import { MatPaginatorIntl } from '@angular/material/paginator';
 import localeFr from '@angular/common/locales/fr';
 import localeFrMA from '@angular/common/locales/fr-MA';
+
+import { FrMatPaginatorIntl } from '@app/socle/shared/i18n/fr-mat-paginator-intl';
 
 registerLocaleData(localeFr);
 registerLocaleData(localeFrMA, 'fr-MA');
@@ -218,6 +221,7 @@ export const appConfig: ApplicationConfig = {
     // Locale MAD / fr-MA — dynamique : LOCALE_ID lit la préférence persistée
     // au bootstrap (cf. locale-id.factory.ts). Currency = MAD (constant Round 1).
     ...provideDynamicLocaleId(),
+    { provide: MatPaginatorIntl, useClass: FrMatPaginatorIntl },
 
     // Angular 19 core providers
     provideZoneChangeDetection({ eventCoalescing: true }),

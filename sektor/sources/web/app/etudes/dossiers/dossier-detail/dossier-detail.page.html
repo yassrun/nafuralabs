@@ -1,7 +1,8 @@
 @if (chargement()) {
   <p class="dossier__etat">Chargement du dossier…</p>
 } @else if (dossier()) {
-  <div class="dossier">
+  <div class="dossier dossier--with-agent">
+    <div class="dossier__main">
     @if (synthese(); as syn) {
       <app-dossier-summary-header
         [synthese]="syn"
@@ -115,12 +116,19 @@
             [dossier]="dossier()!"
             [gates]="gates()"
             [modifiable]="modifiable()"
+            [decisionsCatalogue]="synthese()?.decisionsCatalogue ?? []"
             (corriger)="corriger($event)"
             (change)="rechargerApresPieces()"
           />
         }
       </section>
     </nf-wizard-shell>
+    </div>
+    <app-dossier-agent-panel
+      class="dossier__agent"
+      [dossierId]="dossier()!.id"
+      [modifiable]="modifiable()"
+    />
   </div>
 } @else {
   <p class="dossier__erreur" role="alert">{{ erreur() ?? 'Dossier introuvable.' }}</p>

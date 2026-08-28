@@ -18,6 +18,11 @@ Sans budget par nœud, la marge n'existe qu'au chantier — donc trop tard. Le D
 
 Copier le déboursé du DPU sur chaque nœud vendu à la conversion — instantané daté, l'étude ne rétro-alimente plus. Nœud interne : budget saisi. L'agrégat par rubrique au chantier cesse d'être stocké, il se dérive. Imputation palier 1 sur le nœud, valeur acquise = avancement × déboursé prévu.
 
+## Preuves Mode B (28/08/2026)
+
+- `sektor/e2e/scripts/verify-budget-et-marge-248.mjs` — AC-1..15 (API, sans PAR_JOUR composant)
+- Agrégat : `verify-budget-et-marge.mjs` — **PASS**
+
 ## Tasks
 
 | # | Task | blocked_by | // OK |

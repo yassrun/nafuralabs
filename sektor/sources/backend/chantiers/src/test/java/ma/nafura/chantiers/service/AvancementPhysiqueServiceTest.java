@@ -121,6 +121,17 @@ class AvancementPhysiqueServiceTest {
         assertThat(result.getFirst().getQuantiteRealisee()).isEqualByComparingTo("40");
     }
 
+    /** AC-1 — un pourcentage fourni en entrée est refusé, jamais ignoré. */
+    @Test
+    void declaration_avecPourcentage_estRefusee() {
+        AvancementPhysiqueCreateDto dto = createDto(null, POSTE, "10");
+        dto.getEntries().getFirst().setPourcentage(new BigDecimal("50"));
+
+        assertThatThrownBy(() -> service.create(CHANTIER, dto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining(AvancementPhysiqueService.ERR_POURCENTAGE_INTERDIT);
+    }
+
     /** AC-1 — un lot qui porte des postes ne se déclare pas en direct : son avancement se calcule. */
     @Test
     void declaration_surLotAvecEnfants_estRefusee() {

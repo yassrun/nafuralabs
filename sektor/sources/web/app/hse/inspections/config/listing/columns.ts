@@ -16,7 +16,7 @@ function translateOrEmpty(t: TranslateService, key: string): string {
 }
 
 export function buildInspectionColumns(t: TranslateService): ColumnConfig[] {
-  const tr = (k: string) => t.instant(k);
+  const tr = (k: string, params?: Record<string, unknown>) => t.instant(k, params);
   const locale = resolveLocale(t);
   const fmtDate = (v: unknown): string => {
     if (!v) return '—';
@@ -40,7 +40,7 @@ export function buildInspectionColumns(t: TranslateService): ColumnConfig[] {
     { key: 'thematique', label: tr('hse.inspection.list.columns.thematique'), field: 'thematique', type: 'text', sortable: false },
     {
       key: 'noteGlobale', label: tr('hse.inspection.list.columns.note'), field: 'noteGlobale', type: 'text', width: '80px',
-      transform: (v) => (v != null && v !== undefined && v !== '') ? tr('hse.inspection.list.transform.noteSuffix').replace('{n}', String(v)) : '—',
+      transform: (v) => (v != null && v !== undefined && v !== '') ? tr('hse.inspection.list.transform.noteSuffix', { n: v }) : '—',
     },
     { key: 'nbNonConformites', label: tr('hse.inspection.list.columns.nc'), field: 'nbNonConformites', type: 'number', sortable: true, width: '60px' },
     {

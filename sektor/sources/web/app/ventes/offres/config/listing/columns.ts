@@ -20,7 +20,7 @@ function translateOrFallback(t: TranslateService, key: string, value: unknown): 
 }
 
 export function buildOffreColumns(t: TranslateService): ColumnConfig[] {
-  const tr = (k: string) => t.instant(k);
+  const tr = (k: string, params?: Record<string, unknown>) => t.instant(k, params);
   const locale = resolveLocale(t);
   const fmtDate = (v: unknown): string => {
     if (!v) return '—';
@@ -86,9 +86,9 @@ export function buildOffreColumns(t: TranslateService): ColumnConfig[] {
       width: '100px',
       transform: (v) => {
         const n = Number(v);
-        if (n > 0) return tr('ventes.offre.list.transform.joursPositif').replace('{n}', String(n));
+        if (n > 0) return tr('ventes.offre.list.transform.joursPositif', { n });
         if (n === 0) return tr('ventes.offre.list.transform.joursAujourdhui');
-        return tr('ventes.offre.list.transform.joursExpire').replace('{n}', String(Math.abs(n)));
+        return tr('ventes.offre.list.transform.joursExpire', { n: Math.abs(n) });
       },
     },
     {

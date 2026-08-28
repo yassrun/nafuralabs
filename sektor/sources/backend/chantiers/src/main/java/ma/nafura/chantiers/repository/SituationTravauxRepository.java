@@ -22,6 +22,9 @@ public interface SituationTravauxRepository extends TenantScopedRepository<Situa
     long countByTenantIdAndChantierIdAndStatusNotIn(
             UUID tenantId, String chantierId, Collection<String> statuses);
 
+    java.util.Optional<SituationTravaux> findFirstByTenantIdAndChantierIdAndStatusOrderByNumeroOrdreDesc(
+            UUID tenantId, String chantierId, String status);
+
     @Query("SELECT COALESCE(SUM(s.netAPayerHt), 0) FROM SituationTravaux s "
             + "WHERE s.tenantId = :tenantId AND s.chantierId = :chantierId "
             + "AND s.status IN ('FACTUREE', 'PAYEE')")

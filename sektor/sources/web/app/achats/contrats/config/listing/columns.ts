@@ -21,7 +21,7 @@ const CT_TYPE_KEYS: Record<string, string> = {
 };
 
 export function buildContratColumns(t: TranslateService): ColumnConfig[] {
-  const tr = (k: string) => t.instant(k);
+  const tr = (k: string, params?: Record<string, unknown>) => t.instant(k, params);
   const locale = resolveLocale(t);
   const fmtDate = (v: unknown) => v ? new Date(v as string).toLocaleDateString(locale) : '—';
   const fmtMad = (v: unknown) =>
@@ -45,7 +45,7 @@ export function buildContratColumns(t: TranslateService): ColumnConfig[] {
     },
     {
       key: 'joursRestants', label: tr('achats.contrat.list.columns.joursRestants'), field: 'joursRestants', type: 'badge', width: '100px',
-      transform: (v) => v != null ? tr('achats.contrat.list.transform.joursSuffix').replace('{n}', String(v)) : '—',
+      transform: (v) => v != null ? tr('achats.contrat.list.transform.joursSuffix', { n: v }) : '—',
       badgeVariant: (v) => { const n = Number(v); return n < 0 ? 'danger' : n < 30 ? 'warning' : 'default'; },
     },
     {

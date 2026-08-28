@@ -106,6 +106,10 @@ export function buildDossierListingConfig() {
         viewModeToggle: false,
         refresh: true,
       },
+      pagination: {
+        defaultPageSize: 20,
+        pageSizeOptions: [20],
+      },
       emptyState: {
         icon: 'calculate',
         title: "Aucune étude / appel d'offres",

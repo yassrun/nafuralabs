@@ -100,6 +100,7 @@
             <nf-data-table
               [items]="items()"
               [columns]="visibleColumns()"
+              [paginateAfter]="0"
               [loading]="isRefreshing()"
               [selectable]="selectableMode()"
               [selection]="effectiveTableSelection()"
@@ -163,6 +164,7 @@
         [page]="currentPage()"
         [pageSize]="pageSize()"
         [pageSizeOptions]="config().pagination.pageSizeOptions"
+        [showPageSize]="config().pagination.pageSizeOptions.length > 1"
         (pageChange)="onPageChange($event)">
       </nf-pagination>
     </div>

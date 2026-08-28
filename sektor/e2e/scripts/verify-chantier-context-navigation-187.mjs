@@ -27,6 +27,10 @@ const journal = read('sektor/sources/web/app/chantiers/journal/journal-chantier.
 const situations = read('sektor/sources/web/app/chantiers/situations/situation-listing/situation-listing.page.ts');
 
 expectSource('fiche chantier', detail, [
+  "(clicked)=\"openAvancement()\"",
+  "(clicked)=\"openAttachements()\"",
+  "(clicked)=\"openJournal()\"",
+  'contractDateLabel(',
   "navigate(['/chantiers/avancements/saisie', c.id])",
   "navigate(['/chantiers/attachements'], { queryParams: { chantierId: c.id } })",
   "navigate(['/chantiers/journal'], { queryParams: { chantierId: c.id } })",

@@ -84,6 +84,19 @@ public class ComposantDpu {
     @Builder.Default
     private Boolean horsReferentiel = false;
 
+    /** SEKTOR-215 — trace décision Catalogue (composant autrefois LIBRE). */
+    @Column(name = "decision_catalogue", length = 30)
+    private String decisionCatalogue;
+
+    @Column(name = "decision_catalogue_motif", length = 500)
+    private String decisionCatalogueMotif;
+
+    @Column(name = "decision_catalogue_par", length = 100)
+    private String decisionCataloguePar;
+
+    @Column(name = "decision_catalogue_at")
+    private OffsetDateTime decisionCatalogueAt;
+
     /**
      * L10 — sous-traitance : remonter le prix de vente du sous-ouvrage (FG+marge inclus).
      * Défaut false = déboursé uniquement (anti marge-sur-marge).

@@ -36,6 +36,7 @@ export function buildDevisColumns(t: TranslateService): ColumnConfig[] {
       type: 'text',
       sortable: true,
       width: '140px',
+      cellAction: 'view',
     },
     {
       key: 'version',

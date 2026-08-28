@@ -27,6 +27,10 @@ export function buildDevisListingConfig(t: TranslateService) {
         viewModeToggle: false,
         refresh: true,
       },
+      pagination: {
+        defaultPageSize: 20,
+        pageSizeOptions: [20],
+      },
       emptyState: {
         icon: 'file-text',
         title: 'Aucun devis',

@@ -17,6 +17,7 @@ import ma.nafura.chantiers.domain.attachement.AttachementChantier;
 import ma.nafura.chantiers.domain.attachement.AttachementSignatureToken;
 import ma.nafura.chantiers.repository.AttachementSignatureTokenRepository;
 import ma.nafura.platform.framework.context.TenantContext;
+import ma.nafura.platform.framework.context.UserContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -120,9 +121,12 @@ public class AttachementSignatureService {
 
     private <T> T withTenant(AttachementSignatureToken token, Supplier<T> action) {
         TenantContext.setTenantId(token.getTenantId());
+        // Le jeton public remplace l'identité : pas de UserContext HTTP, mais lecture chantier requise.
+        UserContext.setSuperAdmin(true);
         try {
             return action.get();
         } finally {
+            UserContext.clear();
             TenantContext.clear();
         }
     }

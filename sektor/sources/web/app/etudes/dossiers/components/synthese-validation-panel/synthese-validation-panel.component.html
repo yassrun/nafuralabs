@@ -99,6 +99,42 @@
       (change)="change.emit()"
     />
 
+    @if (decisionsCatalogue().length > 0) {
+      <article class="synthese__card" aria-label="Décisions Catalogue">
+        <h4>Décisions Catalogue</h4>
+        <table class="synthese__table">
+          <thead>
+            <tr>
+              <th scope="col">Composant</th>
+              <th scope="col">Décision</th>
+              <th scope="col">Item</th>
+              <th scope="col">Par</th>
+              <th scope="col">Quand</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (d of decisionsCatalogue(); track d.composantId) {
+              <tr>
+                <td>{{ d.libelle }}</td>
+                <td>{{ decisionLabel(d.decision, d.motif) }}</td>
+                <td>
+                  @if (d.itemId) {
+                    <a [routerLink]="['/inventory/catalogue/articles', d.itemId]">
+                      {{ d.itemCode ?? d.itemName ?? d.itemId }}
+                    </a>
+                  } @else {
+                    —
+                  }
+                </td>
+                <td>{{ d.acteur ?? '—' }}</td>
+                <td>{{ d.date ? (d.date | date: 'dd/MM HH:mm') : '—' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </article>
+    }
+
     <app-capitalisation-panel
       [dossierId]="dossier().id"
       [statut]="statut()"

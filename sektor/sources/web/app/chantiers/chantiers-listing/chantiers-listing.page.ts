@@ -17,6 +17,7 @@ import {
   type PortefeuilleRow,
 } from '../services/portefeuille-api.service';
 import { buildPortefeuilleQueryParams, parsePortefeuilleState, portefeuilleReturnUrl } from './portefeuille-state';
+import { formatPercentDisplay } from '@app/socle/shared/utils/percent-display.util';
 
 /**
  * Portefeuille chantier décisionnel (cockpit-chantier AC-18/AC-19) — même read model que le
@@ -106,6 +107,13 @@ import { buildPortefeuilleQueryParams, parsePortefeuilleState, portefeuilleRetur
             </tr>
           </thead>
           <tbody>
+            @if (chargement()) {
+              <tr>
+                <td [attr.colspan]="financeAutorisee() ? 12 : 9" class="loading">
+                  {{ 'Loading' | translate }}…
+                </td>
+              </tr>
+            } @else {
             @for (c of rows(); track c.id) {
               <tr (click)="open(c)">
                 <td><strong class="code">{{ c.code }}</strong></td>
@@ -125,7 +133,7 @@ import { buildPortefeuilleQueryParams, parsePortefeuilleState, portefeuilleRetur
                         [class.progress-fill--done]="(c.avancementPercent ?? 0) >= 100">
                       </div>
                     </div>
-                    <span class="pct">{{ c.avancementPercent != null ? c.avancementPercent + '%' : '—' }}</span>
+                    <span class="pct">{{ formatPercentDisplay(c.avancementPercent) }}</span>
                   </div>
                 </td>
                 <td class="date">{{ fmtEcheance(c) }}</td>
@@ -153,7 +161,9 @@ import { buildPortefeuilleQueryParams, parsePortefeuilleState, portefeuilleRetur
             } @empty {
               <tr>
                 <td [attr.colspan]="financeAutorisee() ? 12 : 9" class="empty">
-                  @if (!hasFilter()) {
+                  @if (erreur()) {
+                    <span class="muted">—</span>
+                  } @else if (!hasFilter()) {
                     <p class="empty__title">{{ 'chantiers.chantier.list.emptyFirstTitle' | translate }}</p>
                     <p class="empty__hint">{{ 'chantiers.chantier.list.emptyFirstHint' | translate }}</p>
                     <nf-button variant="primary" class="empty__cta" (clicked)="router.navigate(['/chantiers/new'])">
@@ -164,6 +174,7 @@ import { buildPortefeuilleQueryParams, parsePortefeuilleState, portefeuilleRetur
                   }
                 </td>
               </tr>
+            }
             }
           </tbody>
         </table>
@@ -231,6 +242,7 @@ import { buildPortefeuilleQueryParams, parsePortefeuilleState, portefeuilleRetur
     .badge--secondary { background: var(--nf-color-bg-muted); color: var(--nf-color-text-secondary); }
 
     .empty { padding: 32px; text-align: center; color: var(--nf-color-text-muted); }
+    .loading { padding: 32px; text-align: center; color: var(--nf-color-text-secondary); font-size: 13px; }
     .empty__title { margin: 0 0 8px; font-size: 15px; font-weight: 600; color: var(--nf-color-text-primary); }
     .empty__hint { margin: 0 0 16px; font-size: 13px; color: var(--nf-color-text-secondary); }
     .empty__cta { margin: 0 auto; display: inline-block; }
@@ -260,6 +272,8 @@ export class ChantiersListingPage {
   readonly total = signal(0);
   readonly rows = signal<PortefeuilleRow[]>([]);
   readonly financeAutorisee = signal(false);
+  /** AC-12 — chargement distinct du vide et de l'erreur. */
+  readonly chargement = signal(true);
   /** P1-21 — erreur de chargement distincte d'une liste vide. */
   readonly erreur = signal<string | null>(null);
 
@@ -323,6 +337,7 @@ export class ChantiersListingPage {
     if (options?.sync !== false) this.syncUrl();
     const f = this.filters();
     const recherche = this.search().trim();
+    this.chargement.set(true);
     this.erreur.set(null);
     this.portefeuilleApi
       .lister({
@@ -341,10 +356,12 @@ export class ChantiersListingPage {
         this.rows.set(p.items);
         this.total.set(p.total);
         this.financeAutorisee.set(p.financeAutorisee);
+        this.chargement.set(false);
       })
       // P1-21 — une erreur API n'est jamais confondue avec une liste vide.
       .catch(() => {
         this.erreur.set('chantiers.portefeuille.erreurChargement');
+        this.chargement.set(false);
       });
   }
 
@@ -366,6 +383,9 @@ export class ChantiersListingPage {
   readonly pages = computed(() => Math.max(1, Math.ceil(this.total() / this.pageSize())));
 
   readonly countLabel = computed(() => {
+    if (this.chargement()) {
+      return `${this.translate.instant('Loading')}…`;
+    }
     const n = this.total();
     const key = n <= 1 ? 'chantiers.chantier.list.countOne' : 'chantiers.chantier.list.countOther';
     return this.translate.instant(key, { count: n });
@@ -428,8 +448,9 @@ export class ChantiersListingPage {
   fmtMarge(v: number | null | undefined, pct: number | null | undefined): string {
     const base = this.fmtMontant(v);
     if (base === '—') return '—';
-    return pct != null ? `${base} · ${pct.toLocaleString('fr-FR', { maximumFractionDigits: 2 })} %` : base;
+    return pct != null ? `${base} · ${formatPercentDisplay(pct)}` : base;
   }
+  protected readonly formatPercentDisplay = formatPercentDisplay;
   fmtEcheance(c: PortefeuilleRow): string {
     // P2-23 — même convention que le cockpit : magnitude positive + `enRetard` pour la direction.
     if (c.joursRestantsOuRetard == null) return '—';

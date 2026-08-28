@@ -275,6 +275,175 @@ class SituationGenerationServiceTest {
         assertEquals(new BigDecimal("946.20"), totals.rasMontant());
     }
 
+    /**
+     * AC-M7..M10 / gold {@code fixtures/al-qods/situation-mois1/expected/situation-1.json} — deux
+     * nœuds vendus, 1ère période cumul zéro, RG + avance sur taux chantier.
+     */
+    @Test
+    void generateAlQodsMois1FromSignedAttachement() {
+        Chantier chantier = chantier();
+
+        AttachementChantier attachement = AttachementChantier.builder()
+                .id("att-sept")
+                .tenantId(TENANT_ID)
+                .chantierId(CHANTIER_ID)
+                .status(AttachementChantier.STATUS_SIGNE_MOE)
+                .dateDebut(LocalDate.of(2026, 9, 1))
+                .dateFin(LocalDate.of(2026, 9, 30))
+                .build();
+
+        AttachementLigne ligne21 = AttachementLigne.builder()
+                .id("att-sept-l-21")
+                .tenantId(TENANT_ID)
+                .attachementId("att-sept")
+                .noeudId("poste-2-1")
+                .quantitePeriode(new BigDecimal("40"))
+                .ordre(0)
+                .build();
+        AttachementLigne ligne23 = AttachementLigne.builder()
+                .id("att-sept-l-23")
+                .tenantId(TENANT_ID)
+                .attachementId("att-sept")
+                .noeudId("poste-2-3")
+                .quantitePeriode(new BigDecimal("120"))
+                .ordre(1)
+                .build();
+
+        when(chantierService.getById(CHANTIER_ID)).thenReturn(chantier);
+        when(situationRepository.findByTenantIdAndChantierIdAndNumeroOrdre(TENANT_ID, CHANTIER_ID, 1))
+                .thenReturn(Optional.empty());
+        when(attachementRepository.findByTenantIdAndChantierIdAndStatusInAndSituationIdIsNullOrderByDateDebutAsc(
+                        TENANT_ID, CHANTIER_ID, AttachementChantier.STATUTS_FIGES))
+                .thenReturn(List.of(attachement));
+        when(attachementLigneRepository.findByTenantIdAndAttachementIdInOrderByOrdreAsc(
+                        TENANT_ID, List.of("att-sept")))
+                .thenReturn(List.of(ligne21, ligne23));
+        when(posteRepository.findByIdAndTenantId("poste-2-1", TENANT_ID))
+                .thenReturn(Optional.of(PosteBudgetaire.builder()
+                        .id("poste-2-1")
+                        .code("2.1")
+                        .designation("Béton B25 fondations")
+                        .unite("m³")
+                        .prixUnitaireHt(new BigDecimal("1530"))
+                        .build()));
+        when(posteRepository.findByIdAndTenantId("poste-2-3", TENANT_ID))
+                .thenReturn(Optional.of(PosteBudgetaire.builder()
+                        .id("poste-2-3")
+                        .code("2.3")
+                        .designation("Coffrage")
+                        .unite("m²")
+                        .prixUnitaireHt(new BigDecimal("121.13"))
+                        .build()));
+        when(situationRepository.save(any(SituationTravaux.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(ligneRepository.save(any(SituationLigne.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(attachementRepository.save(any(AttachementChantier.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        SituationTravaux generated = service.generate(CHANTIER_ID, 1);
+
+        assertEquals(LocalDate.of(2026, 9, 1), generated.getDatePeriodeDebut());
+        assertEquals(LocalDate.of(2026, 9, 30), generated.getDatePeriodeFin());
+        assertEquals(new BigDecimal("0.00"), generated.getCumulPrecedentHt());
+        assertEquals(new BigDecimal("75735.60"), generated.getTravauxPeriodeHt());
+        assertEquals(new BigDecimal("75735.60"), generated.getCumulCourantHt());
+        assertEquals(new BigDecimal("5301.49"), generated.getRetenueGarantieMontant());
+        assertEquals(new BigDecimal("7573.56"), generated.getRetenueAvanceMontant());
+        assertEquals(new BigDecimal("62860.55"), generated.getNetAPayerHt());
+        assertEquals(new BigDecimal("75432.66"), generated.getNetAPayerTtc());
+    }
+
+    /**
+     * AC-M2-4 / gold {@code fixtures/al-qods/situation-mois2/expected/situation-2.json} — 2e période :
+     * cumulPrecedentHt = cumulCourantHt n°1, quantités précédentes par nœud, RG/avance sur travaux octobre.
+     */
+    @Test
+    void generateAlQodsMois2CumulativeFromOctoberAttachement() {
+        Chantier chantier = chantier();
+
+        SituationTravaux situation1 = SituationTravaux.builder()
+                .id("ch-001-sit-01")
+                .tenantId(TENANT_ID)
+                .chantierId(CHANTIER_ID)
+                .numeroOrdre(1)
+                .cumulCourantHt(new BigDecimal("75735.60"))
+                .build();
+        SituationLigne ligne1Sit1 = SituationLigne.builder()
+                .id("sit-01-l-21")
+                .tenantId(TENANT_ID)
+                .situationId("ch-001-sit-01")
+                .noeudId("poste-2-1")
+                .code("2.1")
+                .quantitePeriode(new BigDecimal("40"))
+                .quantitePrecedente(BigDecimal.ZERO)
+                .quantiteCumulee(new BigDecimal("40"))
+                .ordre(1)
+                .build();
+
+        AttachementChantier attachementOct = AttachementChantier.builder()
+                .id("att-oct")
+                .tenantId(TENANT_ID)
+                .chantierId(CHANTIER_ID)
+                .status(AttachementChantier.STATUS_SIGNE_MOE)
+                .dateDebut(LocalDate.of(2026, 10, 1))
+                .dateFin(LocalDate.of(2026, 10, 31))
+                .build();
+        AttachementLigne ligneOct = AttachementLigne.builder()
+                .id("att-oct-l-21")
+                .tenantId(TENANT_ID)
+                .attachementId("att-oct")
+                .noeudId("poste-2-1")
+                .quantitePeriode(new BigDecimal("10"))
+                .ordre(0)
+                .build();
+
+        when(chantierService.getById(CHANTIER_ID)).thenReturn(chantier);
+        when(situationRepository.findByTenantIdAndChantierIdAndNumeroOrdre(TENANT_ID, CHANTIER_ID, 2))
+                .thenReturn(Optional.empty());
+        when(situationRepository.findByTenantIdAndChantierIdAndNumeroOrdre(TENANT_ID, CHANTIER_ID, 1))
+                .thenReturn(Optional.of(situation1));
+        when(ligneRepository.findByTenantIdAndSituationIdOrderByOrdreAsc(TENANT_ID, "ch-001-sit-01"))
+                .thenReturn(List.of(ligne1Sit1));
+        when(attachementRepository.findByTenantIdAndChantierIdAndStatusInAndSituationIdIsNullOrderByDateDebutAsc(
+                        TENANT_ID, CHANTIER_ID, AttachementChantier.STATUTS_FIGES))
+                .thenReturn(List.of(attachementOct));
+        when(attachementLigneRepository.findByTenantIdAndAttachementIdInOrderByOrdreAsc(
+                        TENANT_ID, List.of("att-oct")))
+                .thenReturn(List.of(ligneOct));
+        when(posteRepository.findByIdAndTenantId("poste-2-1", TENANT_ID))
+                .thenReturn(Optional.of(PosteBudgetaire.builder()
+                        .id("poste-2-1")
+                        .code("2.1")
+                        .designation("Béton B25 fondations")
+                        .unite("m³")
+                        .prixUnitaireHt(new BigDecimal("1530"))
+                        .build()));
+        when(situationRepository.save(any(SituationTravaux.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(ligneRepository.save(any(SituationLigne.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(attachementRepository.save(any(AttachementChantier.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        SituationTravaux generated = service.generate(CHANTIER_ID, 2);
+
+        assertEquals(LocalDate.of(2026, 10, 1), generated.getDatePeriodeDebut());
+        assertEquals(LocalDate.of(2026, 10, 31), generated.getDatePeriodeFin());
+        assertEquals(new BigDecimal("75735.60"), generated.getCumulPrecedentHt());
+        assertEquals(new BigDecimal("15300.00"), generated.getTravauxPeriodeHt());
+        assertEquals(new BigDecimal("91035.60"), generated.getCumulCourantHt());
+        assertEquals(new BigDecimal("1071.00"), generated.getRetenueGarantieMontant());
+        assertEquals(new BigDecimal("1530.00"), generated.getRetenueAvanceMontant());
+        assertEquals(new BigDecimal("12699.00"), generated.getNetAPayerHt());
+        assertEquals(new BigDecimal("15238.80"), generated.getNetAPayerTtc());
+
+        ArgumentCaptor<SituationLigne> ligneCaptor = ArgumentCaptor.forClass(SituationLigne.class);
+        verify(ligneRepository).save(ligneCaptor.capture());
+        assertEquals(new BigDecimal("40"), ligneCaptor.getValue().getQuantitePrecedente());
+        assertEquals(new BigDecimal("50"), ligneCaptor.getValue().getQuantiteCumulee());
+    }
+
     /** AC-12 — sans pénalités ni RAS, la cascade reste calculable, RAS à zéro. */
     @Test
     void computeFinancialTotalsAtZeroPenalitesEtRas() {

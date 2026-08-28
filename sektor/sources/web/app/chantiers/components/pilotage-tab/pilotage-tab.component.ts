@@ -140,13 +140,25 @@ import { cockpitModuleRoutes, resolveCockpitRoute, type CockpitModuleRoute } fro
         @if (preparation().length) {
           <section class="panel panel--preparation">
             <h3>{{ 'chantiers.cockpit.preparation.titre' | translate }}
-              <span class="prep-count">{{ prepCount() }}/{{ preparation().length }}</span>
+              @if (preparationResume(); as resume) {
+                <span class="prep-count">
+                  {{ resume.prerequisOk }}/{{ resume.prerequisTotal }}
+                  {{ 'chantiers.cockpit.preparation.prerequis' | translate }}
+                </span>
+                @for (code of resume.recommandationsEnAttente; track code) {
+                  <span class="prep-reco">{{ recoLabel(code) | translate }}</span>
+                }
+              }
             </h3>
             <ul class="checklist">
               @for (p of preparation(); track p.code) {
-                <li class="check-item check-item--{{ prepCss(p.etat) }}">
+                <li class="check-item check-item--{{ prepCss(p.etat) }}"
+                    [class.check-item--recommande]="p.categorie === 'RECOMMANDE'">
                   <span class="check-icon" aria-hidden="true">{{ prepIcon(p.etat) }}</span>
                   <span class="check-label">{{ p.libelle | translate }}</span>
+                  @if (p.categorie === 'RECOMMANDE') {
+                    <span class="check-badge">{{ 'chantiers.cockpit.preparation.badgeRecommande' | translate }}</span>
+                  }
                   @if (p.etat === 'BLOQUANT' || p.etat === 'A_FAIRE') {
                     <button type="button" class="check-action" (click)="ouvrirRoute(p.action)">
                       {{ 'chantiers.cockpit.gerer' | translate }}
@@ -256,8 +268,18 @@ import { cockpitModuleRoutes, resolveCockpitRoute, type CockpitModuleRoute } fro
     .alerte__action { margin-left: auto; background: none; border: none; color: inherit; font-weight: 600; cursor: pointer; text-decoration: underline; }
 
     .prep-count { font-size: 0.75rem; color: var(--nf-color-text-muted); margin-left: 0.5rem; }
+    .prep-reco {
+      font-size: 0.72rem; font-weight: 600; color: var(--nf-color-warning-700);
+      background: var(--nf-color-warning-100); border-radius: 999px; padding: 0.15rem 0.55rem;
+      margin-left: 0.35rem;
+    }
     .checklist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.4rem; }
-    .check-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.88rem; }
+    .check-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.88rem; flex-wrap: wrap; }
+    .check-item--recommande { color: var(--nf-color-text-secondary); }
+    .check-badge {
+      font-size: 0.68rem; font-weight: 600; color: var(--nf-color-warning-700);
+      background: var(--nf-color-warning-100); border-radius: 999px; padding: 0.1rem 0.45rem;
+    }
     .check-icon { width: 1.15rem; text-align: center; font-weight: 700; }
     .check-item--OK .check-icon { color: var(--nf-color-success-600); }
     .check-item--BLOQUANT .check-icon { color: var(--nf-color-danger-600); }
@@ -328,6 +350,7 @@ export class PilotageTabComponent {
 
   readonly alerts = computed(() => this.cockpit()?.alerts ?? []);
   readonly preparation = computed(() => this.cockpit()?.preparation ?? []);
+  readonly preparationResume = computed(() => this.cockpit()?.preparationResume ?? null);
   readonly actionPrimaire = computed<CockpitNextAction | null>(
     () => {
       const actions = this.cockpit()?.nextActions ?? [];
@@ -338,9 +361,13 @@ export class PilotageTabComponent {
     const primaire = this.actionPrimaire();
     return (this.cockpit()?.nextActions ?? []).filter((a) => a !== primaire);
   });
-  readonly prepCount = computed(
-    () => this.preparation().filter((p) => p.etat === 'OK').length,
-  );
+
+  /** Libellé i18n pour une recommandation en attente (ex. planning). */
+  recoLabel(code: string): string {
+    return code === 'planning'
+      ? 'chantiers.cockpit.preparation.recommandePlanning'
+      : 'chantiers.cockpit.preparation.recommandeGenerique';
+  }
 
   /**
    * AC-6 — le formulaire OS s'affiche quand le chantier est EN_PREPARATION et que tous les

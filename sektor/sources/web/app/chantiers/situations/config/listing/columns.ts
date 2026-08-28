@@ -23,7 +23,7 @@ function translateOrEmpty(t: TranslateService, key: string): string {
 }
 
 export function buildSituationsColumns(t: TranslateService): ColumnConfig[] {
-  const tr = (k: string) => t.instant(k);
+  const tr = (k: string, params?: Record<string, unknown>) => t.instant(k, params);
   const locale = resolveLocale(t);
   const fmtDate = (v: unknown): string => {
     if (typeof v !== 'string' || !v) return '—';
@@ -145,7 +145,7 @@ export function buildSituationsColumns(t: TranslateService): ColumnConfig[] {
         if (v == null || v === '') return '—';
         const n = Number(v);
         return Number.isFinite(n)
-          ? tr('chantiers.situation.list.delai.joursShort').replace('{n}', String(n))
+          ? tr('chantiers.situation.list.delai.joursShort', { n })
           : '—';
       },
     },

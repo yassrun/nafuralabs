@@ -48,6 +48,8 @@ Risque : retoucher le cockpit (AC-15) pendant que SEKTOR-209 attend une gate hum
 
 Voir les scénarios du contrat. État initial : graphe créé par API sur `qa-local`, pas un seed favorable. Résultat : gain refusé à 100 % de coûts non établis ; conversion sans le mot marché ; devis et étude cliquables depuis le chantier ; décision Catalogue visible après conversion.
 
+**Preuves (28/08)** — agrégat SEKTOR-219 : 6 scripts e2e · 59 PASS · `node raster/t.mjs check` OK. Mobile 390 : non automatisé.
+
 ## Décisions ouvertes
 
 Une seule, portée par SEKTOR-212 :

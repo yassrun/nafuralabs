@@ -18,7 +18,8 @@ La contrainte qui prime : **un chantier créé depuis une étude est facturable 
 | `cockpit-chantier` | préparation, KPI, alertes, prochaine action et portefeuille décisionnel | `continuite-etude-devis-chantier` |
 | `vie-de-chantier` | scénario Al Qods palier 1 : DA, BL, avancement, documents, ST sur poste, marché à la notification, preuve non superficielle | `cockpit-chantier` (consomme, n'attend pas 209) |
 | `dette-palier-1` | dette post-226 : résilience DA cockpit, CTA conversion sans marché, captures UI · [`dette-palier-1/CONTRAT.md`](dette-palier-1/CONTRAT.md) | `vie-de-chantier` (done-me) |
-| `situation-al-qods-mois-1` | Al Qods septembre : avancement → attachement signé → situation n°1 (RG/avance), sans marché · [`situation-al-qods-mois-1/CONTRAT.md`](situation-al-qods-mois-1/CONTRAT.md) | `vie-de-chantier`, `dette-palier-1` (done-me) |
+| `situation-al-qods-mois-1` | Al Qods septembre : avancement → attachement signé → situation n°1 (RG/avance), sans marché · [`situation-al-qods-mois-1/CONTRAT.md`](situation-al-qods-mois-1/CONTRAT.md) · preuve `verify-alqods-situation-mois1-235.mjs` | `vie-de-chantier`, `dette-palier-1` (**done-me**) |
+| `situation-al-qods-mois-2` | Al Qods octobre : attachement neuve → situation n°2 cumul · [`situation-al-qods-mois-2/CONTRAT.md`](situation-al-qods-mois-2/CONTRAT.md) · preuve `verify-alqods-situation-mois2-238.mjs` | `situation-al-qods-mois-1` (**done-me**) |
 
 ## Sous-lots — vague 2 (paliers 2 et 3)
 

@@ -1,0 +1,8 @@
+{
+  "noeudsExclus": ["installation", "3-etancheite"],
+  "naturesExclues": ["INTERNE"],
+  "regles": [
+    "Nœud INTERNE (Installation) déclaré au budget mais absent de l'attachement client",
+    "Poste 3 étanchéité : contrat ST possible, 0 m² déclaré en septembre → absent"
+  ]
+}

@@ -24,6 +24,8 @@ public class CockpitChantierDto {
     private FinanceDto finance;
     private ProgressDto progress;
     private List<PreparationDto> preparation;
+    /** AC-15 — ratio prérequis vs recommandations, calculé côté serveur. */
+    private PreparationResumeDto preparationResume;
     private List<AlerteDto> alerts;
     private List<NextActionDto> nextActions;
     private List<ActivityFeedDto> activityFeed;
@@ -106,10 +108,22 @@ public class CockpitChantierDto {
     @Builder
     public static class PreparationDto {
         private String code;
+        /** {@code PREREQUIS | RECOMMANDE} — seuls les prérequis entrent dans le ratio. */
+        private String categorie;
         private String etat;
         private String libelle;
         private String action;
         private String raison;
+    }
+
+    /** AC-15 — compteur prérequis du stade courant, hors items recommandés (ex. planning). */
+    @Data
+    @Builder
+    public static class PreparationResumeDto {
+        private int prerequisOk;
+        private int prerequisTotal;
+        /** Codes des recommandations encore en attente (ex. {@code planning}). */
+        private List<String> recommandationsEnAttente;
     }
 
     /** AC-9 — l'alerte porte date, valeur observée, règle/seuil et identifiant source. */

@@ -4,7 +4,7 @@ export const ETUDES_ROUTES: Routes = [
   {
     path: 'etudes',
     pathMatch: 'full',
-    redirectTo: 'etudes/devis',
+    redirectTo: 'etudes/dossiers',
   },
   {
     path: 'etudes/appels-offres',

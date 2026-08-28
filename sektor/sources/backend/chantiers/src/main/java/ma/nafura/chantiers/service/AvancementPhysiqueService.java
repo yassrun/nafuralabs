@@ -38,6 +38,7 @@ import org.springframework.util.StringUtils;
 public class AvancementPhysiqueService {
 
     static final String ERR_NOEUD_REQUIS = "chantiers.avancement.noeud_requis";
+    static final String ERR_POURCENTAGE_INTERDIT = "chantiers.avancement.pourcentage_interdit";
     static final String ERR_LOT_A_DES_ENFANTS = "chantiers.avancement.lot_a_des_enfants";
     static final String ERR_QUANTITE_PREVUE_MANQUANTE = "chantiers.avancement.quantite_prevue_manquante";
     static final String ERR_DEPASSEMENT = "chantiers.avancement.depassement_quantite_prevue";
@@ -85,6 +86,9 @@ public class AvancementPhysiqueService {
         List<AvancementPhysique> created = new ArrayList<>();
 
         for (AvancementPhysiqueEntryDto entry : request.getEntries()) {
+            if (entry.getPourcentage() != null) {
+                throw new IllegalArgumentException(ERR_POURCENTAGE_INTERDIT);
+            }
             if (entry.getQuantiteRealisee() == null || entry.getQuantiteRealisee().compareTo(BigDecimal.ZERO) <= 0) {
                 throw new IllegalArgumentException("chantiers.avancement.quantite_positive_requise");
             }
@@ -199,6 +203,9 @@ public class AvancementPhysiqueService {
             entity.setDateSaisie(request.getDate());
         }
         if (request.getQuantiteRealisee() != null) {
+            if (request.getPourcentage() != null) {
+                throw new IllegalArgumentException(ERR_POURCENTAGE_INTERDIT);
+            }
             if (request.getQuantiteRealisee().compareTo(BigDecimal.ZERO) <= 0) {
                 throw new IllegalArgumentException("chantiers.avancement.quantite_positive_requise");
             }

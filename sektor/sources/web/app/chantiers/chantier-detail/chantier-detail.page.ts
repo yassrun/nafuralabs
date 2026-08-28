@@ -39,6 +39,7 @@ import { ErpAuditService } from '@app/socle/shell/erp-audit.service';
 import { AuthFacade } from '@platform/core/security/services/auth.facade';
 import type { RecordAttachmentDto } from '@platform/features/collaboration/doc-manager/services/attachment-api.service';
 import { DocumentsApiService } from '../documents/services/documents-api.service';
+import { DossierEtudeApiService } from '@app/etudes/dossiers/services/dossier-etude-api.service';
 import { chantierToMarcheDraft } from './chantier-marche-draft';
 import {
   resolveActiveSituationReference,
@@ -88,8 +89,17 @@ const STATUS_VARIANT: Record<ChantierStatus, BadgeVariant> = {
           <nf-badge [variant]="statusVariant(c.status)">{{ statusLabel(c.status) }}</nf-badge>
           <span class="chantier-meta__client">{{ c.clientName ?? '—' }}</span>
           @if (provenance(); as p) {
-            @if (p.sourceVente === 'DEVIS' && p.devisNumero) {
-              <span class="chantier-meta__src">· {{ p.devisNumero }}</span>
+            @if (p.dossierEtudeId && etudeNumero()) {
+              <span class="chantier-meta__sep" aria-hidden="true">·</span>
+              <button type="button" class="chantier-meta__link" (click)="openEtude()">
+                {{ etudeNumero() }}
+              </button>
+            }
+            @if (p.devisId && p.devisNumero) {
+              <span class="chantier-meta__sep" aria-hidden="true">·</span>
+              <button type="button" class="chantier-meta__link" (click)="openDevis()">
+                {{ p.devisNumero }}
+              </button>
             }
             @if (p.sourceVente === 'MARCHE') {
               <span class="chantier-meta__src">· Marché</span>
@@ -116,6 +126,25 @@ const STATUS_VARIANT: Record<ChantierStatus, BadgeVariant> = {
         @if (activeTab() === 'overview') {
           <section class="tab-panel">
             <app-pilotage-tab [chantierId]="c.id" />
+            <article class="workflow-card">
+              <h3>{{ 'chantiers.chantier.detail.sections.workflow' | translate }}</h3>
+              <p class="tab-hint">{{ 'chantiers.chantier.detail.workflowHint' | translate }}</p>
+              <dl class="contract-dates">
+                <dt>{{ 'chantiers.chantier.detail.labels.ordreService' | translate }}</dt>
+                <dd>{{ contractDateLabel(c.dateOrdreService) }}</dd>
+                <dt>{{ 'chantiers.chantier.detail.labels.debut' | translate }}</dt>
+                <dd>{{ contractDateLabel(c.dateDebut) }}</dd>
+                <dt>{{ 'chantiers.chantier.detail.labels.finPrevue' | translate }}</dt>
+                <dd>{{ contractDateLabel(c.dateFinPrevue) }}</dd>
+              </dl>
+              <div class="workflow-actions">
+                <nf-button variant="secondary" (clicked)="setTab('lots')">{{ 'chantiers.chantier.detail.workflowActions.arbre' | translate }}</nf-button>
+                <nf-button variant="secondary" (clicked)="openAvancement()">{{ 'chantiers.chantier.detail.workflowActions.avancement' | translate }}</nf-button>
+                <nf-button variant="secondary" (clicked)="openAttachements()">{{ 'chantiers.chantier.detail.workflowActions.attachements' | translate }}</nf-button>
+                <nf-button variant="secondary" (clicked)="setTab('situations')">{{ 'chantiers.chantier.detail.workflowActions.situations' | translate }}</nf-button>
+                <nf-button variant="secondary" (clicked)="openJournal()">{{ 'chantiers.chantier.detail.workflowActions.journal' | translate }}</nf-button>
+              </div>
+            </article>
           </section>
         }
 
@@ -249,6 +278,15 @@ const STATUS_VARIANT: Record<ChantierStatus, BadgeVariant> = {
         <div class="actions">
           <nf-button variant="secondary" icon="arrow-left" iconLibrary="lucide" (clicked)="goBack()">{{ 'chantiers.common.actions.backToList' | translate }}</nf-button>
           <nf-button variant="secondary" icon="pencil" iconLibrary="lucide" (clicked)="editChantier()">{{ 'chantiers.chantier.detail.actions.edit' | translate }}</nf-button>
+          @if (canReceptionProvisoire()) {
+            <nf-button variant="primary" icon="clipboard-check" iconLibrary="lucide" (clicked)="receptionProvisoire()">{{ 'chantiers.chantier.detail.actions.receptionProvisoire' | translate }}</nf-button>
+          }
+          @if (canReceptionDefinitive()) {
+            <nf-button variant="primary" icon="badge-check" iconLibrary="lucide" (clicked)="receptionDefinitive()">{{ 'chantiers.chantier.detail.actions.receptionDefinitive' | translate }}</nf-button>
+          }
+          @if (canCloreChantier()) {
+            <nf-button variant="secondary" icon="archive" iconLibrary="lucide" (clicked)="cloreChantier()">{{ 'chantiers.chantier.detail.actions.clore' | translate }}</nf-button>
+          }
           @if (canDeleteChantier()) {
             <nf-button variant="danger" icon="trash-2" iconLibrary="lucide" (clicked)="deleteChantier()">{{ 'chantiers.common.actions.delete' | translate }}</nf-button>
           }
@@ -273,6 +311,29 @@ const STATUS_VARIANT: Record<ChantierStatus, BadgeVariant> = {
       font-size: 0.9rem; color: var(--nf-color-text-secondary);
     }
     .chantier-meta__src { color: var(--nf-color-text-muted); }
+    .chantier-meta__sep { color: var(--nf-color-text-muted); }
+    .chantier-meta__link {
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: var(--nf-color-primary-700, #1d4ed8);
+      font: inherit;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .chantier-meta__link:hover { text-decoration: underline; }
+
+    .workflow-card {
+      margin-top: 1.25rem; padding: 1rem 1.25rem; border: 1px solid var(--nf-color-border-subtle);
+      border-radius: var(--nf-radius-md); background: var(--nf-color-surface-raised);
+    }
+    .workflow-card h3 { margin: 0 0 0.5rem; font-size: 1rem; }
+    .contract-dates {
+      display: grid; grid-template-columns: auto 1fr; gap: 0.35rem 1rem; margin: 0.75rem 0 1rem;
+      font-size: 0.9rem;
+    }
+    .contract-dates dt { color: var(--nf-color-text-secondary); }
+    .workflow-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 
     .hero {
       display: grid;
@@ -386,6 +447,7 @@ export class ChantierDetailPage {
   private readonly audit = inject(ErpAuditService);
   private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly documentsApi = inject(DocumentsApiService);
+  private readonly dossierApi = inject(DossierEtudeApiService);
   private readonly auth = inject(AuthFacade);
 
   readonly marchesCache = signal<Marche[]>([]);
@@ -393,7 +455,12 @@ export class ChantierDetailPage {
   readonly situationDraft = signal<SituationDraftBrouillon | null>(null);
   readonly chantier = signal<Chantier | undefined>(undefined);
   readonly canDeleteChantier = computed(() => this.chantier()?.lifecycleStatus === 'BROUILLON');
+  readonly canReceptionProvisoire = computed(() => this.chantier()?.lifecycleStatus === 'EN_COURS');
+  readonly canReceptionDefinitive = computed(() => this.chantier()?.lifecycleStatus === 'RECEPTIONNE_PROVISOIRE');
+  readonly canCloreChantier = computed(() => this.chantier()?.lifecycleStatus === 'RECEPTIONNE_DEFINITIF');
   readonly summary = signal<ChantierSummary | undefined>(undefined);
+  /** Numéro dossier étude (snapshot) — chargé depuis l'API quand dossierEtudeId est présent. */
+  readonly etudeNumero = signal<string | null>(null);
 
   readonly paramId = toSignal(
     this.route.paramMap.pipe(map((pm) => pm.get('id')?.trim() ?? '')),
@@ -433,6 +500,7 @@ export class ChantierDetailPage {
       if (!id) {
         this.chantier.set(undefined);
         this.summary.set(undefined);
+        this.etudeNumero.set(null);
         return;
       }
       void this.chantierApi
@@ -443,13 +511,20 @@ export class ChantierDetailPage {
             ...s.chantier,
             avancementPercent: s.avancementPercent,
           });
+          void this.loadEtudeNumero(s.chantier.dossierEtudeId);
         })
         .catch(() => {
           this.summary.set(undefined);
           void this.chantierApi
             .getById(id)
-            .then((c) => this.chantier.set(c))
-            .catch(() => this.chantier.set(undefined));
+            .then((c) => {
+              this.chantier.set(c);
+              void this.loadEtudeNumero(c.dossierEtudeId);
+            })
+            .catch(() => {
+              this.chantier.set(undefined);
+              this.etudeNumero.set(null);
+            });
         });
     });
   }
@@ -595,6 +670,20 @@ export class ChantierDetailPage {
     }
   }
 
+  /** AC-8 — charge le numéro étude du snapshot pour lien cliquable sur la fiche chantier. */
+  private async loadEtudeNumero(dossierEtudeId: string | null | undefined): Promise<void> {
+    if (!dossierEtudeId) {
+      this.etudeNumero.set(null);
+      return;
+    }
+    try {
+      const syn = await this.dossierApi.synthese(dossierEtudeId);
+      this.etudeNumero.set(syn.numero ?? null);
+    } catch {
+      this.etudeNumero.set(null);
+    }
+  }
+
   openPlanning(): void {
     const c = this.chantier();
     if (!c?.id) return;
@@ -629,6 +718,14 @@ export class ChantierDetailPage {
     const c = this.chantier();
     if (!c?.id) return;
     void this.router.navigate(['/chantiers/journal'], { queryParams: { chantierId: c.id } });
+  }
+
+  /** AC-183 — date contractuelle absente : « Non défini », jamais un fallback inventé. */
+  contractDateLabel(value?: string | null): string {
+    if (!value?.trim()) {
+      return this.translate.instant('chantiers.common.values.notDefined');
+    }
+    return value.slice(0, 10);
   }
 
   goBack(): void {
@@ -704,6 +801,69 @@ export class ChantierDetailPage {
     const normalized = message.toLowerCase();
     return normalized.includes('only draft chantiers can be deleted')
         || normalized.includes('seuls les chantiers brouillon');
+  }
+
+  async receptionProvisoire(): Promise<void> {
+    const c = this.chantier();
+    if (!c?.id || !this.canReceptionProvisoire()) return;
+    const confirmed = await this.confirmDialog.confirm({
+      title: this.translate.instant('chantiers.chantier.detail.actions.receptionProvisoireTitle'),
+      message: this.translate.instant('chantiers.chantier.detail.actions.receptionProvisoireConfirm', { code: c.code }),
+      confirmLabel: this.translate.instant('chantiers.chantier.detail.actions.receptionProvisoireAction'),
+      cancelLabel: this.translate.instant('chantiers.chantier.detail.cancel'),
+      icon: 'clipboard-check',
+    });
+    if (!confirmed) return;
+    try {
+      const updated = await this.chantierApi.receptionProvisoire(c.id);
+      this.chantier.set(updated);
+      this.audit.log('UPDATE', 'chantier', c.id, c.code, 'reception-provisoire');
+      this.toast.success(this.translate.instant('chantiers.chantier.detail.actions.receptionProvisoireSuccess'));
+    } catch {
+      this.toast.error(this.translate.instant('chantiers.chantier.detail.actions.receptionProvisoireFailed'));
+    }
+  }
+
+  async receptionDefinitive(): Promise<void> {
+    const c = this.chantier();
+    if (!c?.id || !this.canReceptionDefinitive()) return;
+    const confirmed = await this.confirmDialog.confirm({
+      title: this.translate.instant('chantiers.chantier.detail.actions.receptionDefinitiveTitle'),
+      message: this.translate.instant('chantiers.chantier.detail.actions.receptionDefinitiveConfirm', { code: c.code }),
+      confirmLabel: this.translate.instant('chantiers.chantier.detail.actions.receptionDefinitiveAction'),
+      cancelLabel: this.translate.instant('chantiers.chantier.detail.cancel'),
+      icon: 'badge-check',
+    });
+    if (!confirmed) return;
+    try {
+      const updated = await this.chantierApi.receptionDefinitive(c.id);
+      this.chantier.set(updated);
+      this.audit.log('UPDATE', 'chantier', c.id, c.code, 'reception-definitive');
+      this.toast.success(this.translate.instant('chantiers.chantier.detail.actions.receptionDefinitiveSuccess'));
+    } catch {
+      this.toast.error(this.translate.instant('chantiers.chantier.detail.actions.receptionDefinitiveFailed'));
+    }
+  }
+
+  async cloreChantier(): Promise<void> {
+    const c = this.chantier();
+    if (!c?.id || !this.canCloreChantier()) return;
+    const confirmed = await this.confirmDialog.confirm({
+      title: this.translate.instant('chantiers.chantier.detail.actions.cloreTitle'),
+      message: this.translate.instant('chantiers.chantier.detail.actions.cloreConfirm', { code: c.code }),
+      confirmLabel: this.translate.instant('chantiers.chantier.detail.actions.cloreAction'),
+      cancelLabel: this.translate.instant('chantiers.chantier.detail.cancel'),
+      icon: 'archive',
+    });
+    if (!confirmed) return;
+    try {
+      const updated = await this.chantierApi.clore(c.id);
+      this.chantier.set(updated);
+      this.audit.log('UPDATE', 'chantier', c.id, c.code, 'clore');
+      this.toast.success(this.translate.instant('chantiers.chantier.detail.actions.cloreSuccess'));
+    } catch {
+      this.toast.error(this.translate.instant('chantiers.chantier.detail.actions.cloreFailed'));
+    }
   }
 
   async creerMarche(): Promise<void> {

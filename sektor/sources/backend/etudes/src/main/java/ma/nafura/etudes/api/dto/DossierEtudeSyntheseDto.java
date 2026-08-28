@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.Builder;
 import lombok.Value;
+import ma.nafura.etudes.api.dto.DecisionCatalogueTraceDto;
 import ma.nafura.etudes.domain.dossier.StatutDossierEtude;
 import ma.nafura.etudes.service.gate.ResultatGate;
 
@@ -49,4 +50,6 @@ public class DossierEtudeSyntheseDto {
     List<ResultatGate> gates;
     /** CTA principal conseillé pour l'UI. */
     String actionPrincipale;
+    /** Traces décision Catalogue (SEKTOR-215 AC-10). */
+    List<DecisionCatalogueTraceDto> decisionsCatalogue;
 }

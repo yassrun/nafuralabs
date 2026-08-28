@@ -4,6 +4,7 @@
  *
  * 1) Rejoue les 5 preuves unitaires 221–225 (indépendantes).
  * 2) Fabrique un graphe Al Qods complet (pas DE-0103) et les discriminants acte 3.
+ * 3) Rejoue la chaîne situation mois 1 + mois 2 (238 agrège 235 + 237).
  */
 import { spawnSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
@@ -18,6 +19,13 @@ const UNIT_SCRIPTS = [
   'verify-alqods-documents-223.mjs',
   'verify-alqods-st-coffrage-224.mjs',
   'verify-alqods-marche-notification-225.mjs',
+];
+
+const SITUATION_SCRIPTS = ['verify-alqods-situation-mois2-238.mjs'];
+
+const ACTE4_SCRIPTS = [
+  'verify-alqods-reception-provisoire-242.mjs',
+  'verify-alqods-cloture-chantier-245.mjs',
 ];
 
 async function json(res) {
@@ -70,6 +78,38 @@ function runUnitScripts() {
     }
   }
   console.log('\nok unitaires 221–225');
+}
+
+function runSituationScripts() {
+  console.log('\n=== Chaîne situation mois 1 + mois 2 (238) ===');
+  for (const script of SITUATION_SCRIPTS) {
+    console.log(`\n--- ${script} ---`);
+    const r = spawnSync(process.execPath, [join(ROOT, 'e2e/scripts', script)], {
+      cwd: ROOT,
+      stdio: 'inherit',
+      env: process.env,
+    });
+    if (r.status !== 0) {
+      throw new Error(`${script} → échec (code ${r.status ?? 'signal'})`);
+    }
+  }
+  console.log('\nok situation mois 1 + mois 2');
+}
+
+function runActe4Scripts() {
+  console.log('\n=== Acte 4–5 réception et clôture (242 + 245) ===');
+  for (const script of ACTE4_SCRIPTS) {
+    console.log(`\n--- ${script} ---`);
+    const r = spawnSync(process.execPath, [join(ROOT, 'e2e/scripts', script)], {
+      cwd: ROOT,
+      stdio: 'inherit',
+      env: process.env,
+    });
+    if (r.status !== 0) {
+      throw new Error(`${script} → échec (code ${r.status ?? 'signal'})`);
+    }
+  }
+  console.log('\nok acte 4 réception provisoire');
 }
 
 async function creerAlQodsComplet(h, suffix) {
@@ -267,7 +307,7 @@ async function acte3Discriminants(h, suffix) {
   if (clore.status !== 409 && clore.status !== 422) {
     throw new Error(`POST /clore depuis EN_COURS attendu 409/422, obtenu ${clore.status} ${clore.text?.slice(0, 200)}`);
   }
-  console.log('PASS alqods-reception-provisoire : /clore refusé depuis EN_COURS');
+  console.log('PASS alqods-reception-provisoire : /clore refusé depuis EN_COURS (détail acte 4 → 242)');
 
   const daf = await session('daf');
   const chef = await session('chef-chantier');
@@ -311,6 +351,8 @@ async function main() {
   }
 
   runUnitScripts();
+  runSituationScripts();
+  runActe4Scripts();
   const oh = await session();
   const chantierId = await acte3Discriminants(oh, Date.now().toString(36));
 

@@ -7,6 +7,7 @@ import java.util.Set;
 import ma.nafura.chantiers.api.dto.CockpitChantierDto;
 import ma.nafura.chantiers.domain.chantier.Chantier;
 import ma.nafura.platform.framework.context.UserContext;
+import org.springframework.util.StringUtils;
 
 /** Décision unique des actions cockpit/portefeuille, basée sur statut, readiness et permissions. */
 public final class ChantierActionDecision {
@@ -36,9 +37,83 @@ public final class ChantierActionDecision {
 
     public static List<CockpitChantierDto.NextActionDto> actions(
             Chantier chantier, long nbLots, boolean aConducteur, boolean aChefChantier) {
-        return actionsBrutes(chantier, nbLots, aConducteur, aChefChantier).stream()
+        return actions(chantier, nbLots, aConducteur, aChefChantier, false, null);
+    }
+
+    /**
+     * AC-M11 — après clôture avancement + attachement + situation du mois, la prochaine action
+     * pointe un trou réel (soumission MOA, BL…), jamais « saisir l'avancement » du mois clos.
+     */
+    public static List<CockpitChantierDto.NextActionDto> actions(
+            Chantier chantier,
+            long nbLots,
+            boolean aConducteur,
+            boolean aChefChantier,
+            boolean cycleMensuelComplet,
+            String situationBrouillonId) {
+        List<CockpitChantierDto.NextActionDto> raw = actionsBrutes(chantier, nbLots, aConducteur, aChefChantier)
+                .stream()
                 .filter(a -> autorise(a.getPermission(), rolesPour(a.getLibelle())))
                 .toList();
+        if (!cycleMensuelComplet || !Chantier.STATUS_EN_COURS.equals(chantier.getStatus())) {
+            return raw;
+        }
+        return prioriserApresCycleMensuel(raw, chantier.getId(), situationBrouillonId);
+    }
+
+    private static List<CockpitChantierDto.NextActionDto> prioriserApresCycleMensuel(
+            List<CockpitChantierDto.NextActionDto> raw, String chantierId, String situationBrouillonId) {
+        List<CockpitChantierDto.NextActionDto> restantes = new ArrayList<>(raw);
+        restantes.removeIf(a -> "chantiers.cockpit.action.avancement".equals(a.getLibelle()));
+
+        List<CockpitChantierDto.NextActionDto> out = new ArrayList<>();
+        int priorite = 1;
+        if (StringUtils.hasText(situationBrouillonId)
+                && autorise("chantiers.update", ROLES_MOIS)) {
+            out.add(action(
+                    priorite++,
+                    "chantiers.cockpit.action.soumettreSituation",
+                    "/chantiers/situations/" + situationBrouillonId,
+                    "chantiers.update",
+                    chantierId));
+        } else {
+            for (CockpitChantierDto.NextActionDto actionBl : raw) {
+                if ("chantiers.cockpit.action.receptionBl".equals(actionBl.getLibelle())) {
+                    out.add(reprioriser(actionBl, priorite++));
+                    break;
+                }
+            }
+        }
+        for (CockpitChantierDto.NextActionDto actionRestante : restantes) {
+            boolean dejaPresente = false;
+            for (CockpitChantierDto.NextActionDto existante : out) {
+                if (existante.getLibelle().equals(actionRestante.getLibelle())) {
+                    dejaPresente = true;
+                    break;
+                }
+            }
+            if (dejaPresente) {
+                continue;
+            }
+            out.add(reprioriser(actionRestante, priorite++));
+        }
+        for (CockpitChantierDto.NextActionDto actionAvancement : raw) {
+            if ("chantiers.cockpit.action.avancement".equals(actionAvancement.getLibelle())) {
+                out.add(reprioriser(actionAvancement, priorite));
+                break;
+            }
+        }
+        return out;
+    }
+
+    private static CockpitChantierDto.NextActionDto reprioriser(
+            CockpitChantierDto.NextActionDto a, int priorite) {
+        return CockpitChantierDto.NextActionDto.builder()
+                .priorite(priorite)
+                .libelle(a.getLibelle())
+                .route(a.getRoute())
+                .permission(a.getPermission())
+                .build();
     }
 
     public static CockpitChantierDto.NextActionDto premiereAction(
@@ -105,7 +180,8 @@ public final class ChantierActionDecision {
             case "chantiers.cockpit.action.receptionBl" -> ROLES_RECEPTION;
             case "chantiers.cockpit.action.documents" -> ROLES_DOCUMENTS;
             case "chantiers.cockpit.action.attachement",
-                    "chantiers.cockpit.action.situation" -> ROLES_MOIS;
+                    "chantiers.cockpit.action.situation",
+                    "chantiers.cockpit.action.soumettreSituation" -> ROLES_MOIS;
             case "chantiers.cockpit.action.budget" -> ROLES_FINANCE;
             case "chantiers.cockpit.action.notifierMarche" -> ROLES_MARCHE;
             default -> Set.of();

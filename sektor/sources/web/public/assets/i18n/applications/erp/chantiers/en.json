@@ -167,6 +167,13 @@
           "provenance": "Commercial source"
         },
         "workflowHint": "Follow the field workflow without going back through portfolio listings: tree, progress entry, work logs, certificates, and journal.",
+        "workflowActions": {
+          "arbre": "Tree / work packages",
+          "avancement": "Enter progress",
+          "attachements": "Work logs",
+          "situations": "Payment certificates",
+          "journal": "Site journal"
+        },
         "provenance": {
           "devisSource": "Site created from the won study — accepted quote.",
           "openDevis": "Open quote",
@@ -367,7 +374,25 @@
           "importFallbackAi": "Local extraction insufficient — falling back to AI…"
         },
         "actions": {
-          "edit": "Edit"
+          "edit": "Edit",
+          "receptionProvisoire": "Provisional acceptance",
+          "receptionProvisoireTitle": "Provisional acceptance",
+          "receptionProvisoireConfirm": "Confirm provisional acceptance for site {code}? Field operations (progress, purchases, attachments) will no longer be offered.",
+          "receptionProvisoireAction": "Confirm acceptance",
+          "receptionProvisoireSuccess": "Provisional acceptance recorded.",
+          "receptionProvisoireFailed": "Could not record provisional acceptance.",
+          "receptionDefinitive": "Final acceptance",
+          "receptionDefinitiveTitle": "Final acceptance",
+          "receptionDefinitiveConfirm": "Confirm final acceptance for site {code}? Reserves lifted and operational warranty ended.",
+          "receptionDefinitiveAction": "Confirm",
+          "receptionDefinitiveSuccess": "Final acceptance recorded.",
+          "receptionDefinitiveFailed": "Could not record final acceptance.",
+          "clore": "Close site",
+          "cloreTitle": "Close site",
+          "cloreConfirm": "Permanently close site {code}? It will become read-only.",
+          "cloreAction": "Close",
+          "cloreSuccess": "Site closed.",
+          "cloreFailed": "Could not close site."
         },
         "deleteConfirm": "Delete site {code} — {name}? This cannot be undone.",
         "deleteSuccess": "Site deleted.",
@@ -1084,6 +1109,10 @@
       },
       "preparation": {
         "titre": "Preparation",
+        "prerequis": "prerequisites",
+        "badgeRecommande": "recommended",
+        "recommandePlanning": "schedule recommended",
+        "recommandeGenerique": "recommended",
         "identite": "Client identity",
         "vente": "Sale reference",
         "arbre": "Work breakdown",
@@ -1121,6 +1150,8 @@
         "etapeAvancement": "Progress",
         "etapeAttachement": "Attachment",
         "etapeSituation": "Situation",
+        "etapeSoumettreSituation": "Submit to client",
+        "etapeTrouReel": "Next operational gap",
         "etapeComplete": "Monthly cycle complete",
         "etapeLectureSeule": "Read only",
         "etapeIndisponible": "Unavailable",
@@ -1161,6 +1192,7 @@
         "avancement": "Enter progress",
         "attachement": "Create attachment",
         "situation": "Handle situation",
+        "soumettreSituation": "Submit situation to client",
         "situations": "View situations",
         "documents": "View documents",
         "demandeAchat": "New purchase request",

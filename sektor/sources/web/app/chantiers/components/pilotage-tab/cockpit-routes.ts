@@ -70,7 +70,7 @@ export function cockpitModuleRoutes(
       route: `/chantiers/attachements/saisie?chantierId=${id}`,
     });
   }
-  if (has('chantiers.cockpit.action.situation')) {
+  if (has('chantiers.cockpit.action.situation') || has('chantiers.cockpit.action.soumettreSituation')) {
     modules.push({
       titre: 'chantiers.cockpit.module.situations',
       resume: 'chantiers.cockpit.module.situationsResume',

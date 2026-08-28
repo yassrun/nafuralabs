@@ -1,0 +1,98 @@
+<aside class="agent" aria-label="Agent du dossier ouvert" data-testid="dossier-agent-panel">
+  @if (chargement()) {
+    <p class="agent__etat">Chargement de l’agent…</p>
+  } @else if (contexte(); as ctx) {
+    <header class="agent__head">
+      <p class="agent__kicker">Dossier compris</p>
+      <h2 class="agent__titre" data-testid="dossier-agent-titre">
+        {{ ctx.numero }} · {{ ctx.objet }}
+      </h2>
+      <p class="agent__hint">Trois gestes bornés — pas de chat générique.</p>
+    </header>
+
+    @if (ctx.provenance.length > 0) {
+      <section class="agent__provenance" aria-label="Provenance CPS → DPGF → coût">
+        <h3 class="agent__section-title">Provenance</h3>
+        <ol class="agent__chain">
+          @for (step of ctx.provenance; track step.etape) {
+            <li class="agent__chain-step">
+              <span class="agent__chain-etape">{{ step.etape }}</span>
+              <span class="agent__chain-lib">{{ step.libelle }}</span>
+              @if (step.reference) {
+                <span class="agent__chain-ref">{{ step.reference }}</span>
+              }
+            </li>
+          }
+        </ol>
+      </section>
+    }
+
+    <section class="agent__actions" aria-label="Actions contextuelles">
+      <h3 class="agent__section-title">Gestes</h3>
+      <div class="agent__buttons">
+        <nf-button
+          variant="primary"
+          [loading]="actionEnCours() === 'chiffrage'"
+          [disabled]="!!actionEnCours()"
+          (clicked)="lancerAction('chiffrage')"
+        >
+          Contrôler le chiffrage
+        </nf-button>
+        <nf-button
+          variant="secondary"
+          [loading]="actionEnCours() === 'incoherences'"
+          [disabled]="!!actionEnCours()"
+          (clicked)="lancerAction('incoherences')"
+        >
+          Détecter les incohérences
+        </nf-button>
+        <nf-button
+          variant="secondary"
+          [loading]="actionEnCours() === 'rattachements'"
+          [disabled]="!!actionEnCours()"
+          (clicked)="lancerAction('rattachements')"
+        >
+          Proposer rattachements catalogue
+        </nf-button>
+      </div>
+    </section>
+
+    <section class="agent__journal" aria-label="Journal des suggestions">
+      <h3 class="agent__section-title">Journal</h3>
+      @if (ctx.journal.length === 0) {
+        <p class="agent__etat">Aucune suggestion — lancez un geste ci-dessus.</p>
+      } @else {
+        <ul class="agent__journal-list">
+          @for (s of ctx.journal; track s.id) {
+            <li class="agent__journal-row" [attr.data-etat]="s.etat">
+              <div class="agent__journal-main">
+                <span class="agent__journal-lib">{{ s.libelle }}</span>
+                <span class="agent__journal-meta">
+                  {{ libelleEtat(s.etat) }}
+                  @if (s.acteur) {
+                    · {{ s.acteur }}
+                  }
+                  · {{ formatDate(s.date) }}
+                </span>
+                @if (s.correctionNote) {
+                  <span class="agent__journal-correction">→ {{ s.correctionNote }}</span>
+                }
+              </div>
+              @if (s.etat === 'EN_ATTENTE' && modifiable()) {
+                <div class="agent__journal-actions">
+                  <button type="button" class="agent__link" (click)="accepter(s)">Accepter</button>
+                  <button type="button" class="agent__link" (click)="refuser(s)">Refuser</button>
+                  <button type="button" class="agent__link" (click)="corriger(s)">Corriger</button>
+                </div>
+              }
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  }
+
+  @if (erreur(); as msg) {
+    <p class="agent__erreur" role="alert">{{ msg }}</p>
+  }
+</aside>

@@ -186,7 +186,14 @@ public class DpuService {
         applyTotals(entity);
         PrixDpu saved = repository.save(entity);
         syncNoeudFromPrixDpu(saved);
-        return line;
+        UUID lineId = line.getId();
+        if (lineId != null) {
+            return line;
+        }
+        return saved.getComposants().stream()
+                .filter(c -> c.getLibelle().equals(line.getLibelle()))
+                .reduce((first, second) -> second)
+                .orElse(line);
     }
 
     @Transactional

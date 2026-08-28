@@ -35,6 +35,7 @@ import { DossierSummaryHeaderComponent } from '../components/dossier-summary-hea
 import { ShareGuestLinkDialogComponent } from '../components/share-guest-link-dialog/share-guest-link-dialog.component';
 import { PiecesMarcheComponent } from '../components/pieces-marche/pieces-marche.component';
 import { SyntheseValidationPanelComponent } from '../components/synthese-validation-panel/synthese-validation-panel.component';
+import { DossierAgentPanelComponent } from '../components/dossier-agent-panel/dossier-agent-panel.component';
 import {
   DossierEtudeApiService,
   PostesOrphelinsError,
@@ -76,6 +77,7 @@ import { labelStatutDossier } from '../utils/dossier-status.util';
     DecompositionWorkspaceComponent,
     SyntheseValidationPanelComponent,
     DossierSummaryHeaderComponent,
+    DossierAgentPanelComponent,
   ],
   templateUrl: './dossier-detail.page.html',
   styleUrl: './dossier-detail.page.scss',

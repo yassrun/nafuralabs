@@ -140,6 +140,7 @@ export function chantierToUi(row: ApiChantier): Chantier {
     montantVenteActifHt: nullableNum(row.montantVenteActifHt),
     debourseInitialHt: nullableNum(row.debourseInitialHt),
     status: mapBackendStatusToUi(row.status),
+    lifecycleStatus: row.status,
     isActive: row.isActive ?? row.active ?? true,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,

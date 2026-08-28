@@ -35,4 +35,10 @@ public class DossierGagneDto {
 
     /** Motif obligatoire de la dérogation de marge négative (AC-4). */
     private String motifDerogation;
+
+    /**
+     * SEKTOR-211 — acceptation auditée des warnings commerciaux (coûts partiellement non établis).
+     * Requiert {@link #motifDerogation}.
+     */
+    private Boolean acceptWarnings;
 }

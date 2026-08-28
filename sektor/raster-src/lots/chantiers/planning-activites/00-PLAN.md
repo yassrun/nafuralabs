@@ -16,6 +16,12 @@
 
 Canvas : [`ux/planning-workspace-wireframe.canvas.tsx`](ux/planning-workspace-wireframe.canvas.tsx).
 
+## Preuves Mode B (28/08/2026)
+
+- `sektor/e2e/scripts/verify-planning-activites-20260825.mjs` — **PASS** (176/177)
+- `sektor/e2e/scripts/verify-planning-chantier-planifie-20260825.mjs` — **PASS** API (179/180) · Playwright skip (binaire absent)
+- SEKTOR-184 : grep `chantier-detail.page.ts` sans onglet `phases` — **PASS**
+
 ## Hors sous-lot
 
 Capacité / engagement / baseline / pointage / magasin → autres dossiers vague 2.

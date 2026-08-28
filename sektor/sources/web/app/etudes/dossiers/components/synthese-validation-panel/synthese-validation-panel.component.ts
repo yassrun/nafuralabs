@@ -9,6 +9,7 @@ import {
   output,
   signal,
 } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 
 import { MadCurrencyPipe } from '@platform/lib/anatomy/pipes/mad-currency.pipe';
@@ -20,6 +21,7 @@ import { resolveOrigineCout } from '../../utils/poste-chiffrage-mode.util';
 import {
   DossierEtudeApiService,
   type AvisExecutionResume,
+  type DecisionCatalogueTrace,
   type SyntheseCoutAffaire,
 } from '../../services/dossier-etude-api.service';
 import { DpgfApiService, type DpgfLotTotal } from '../../../services/dpgf-api.service';
@@ -42,6 +44,7 @@ const ORIGINE_LABELS: Record<string, string> = {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
+    RouterLink,
     MadCurrencyPipe,
     TranslateModule,
     GateBlocageComponent,
@@ -60,6 +63,7 @@ export class SyntheseValidationPanelComponent {
   readonly dossier = input.required<DossierEtude>();
   readonly gates = input<ResultatGate[]>([]);
   readonly modifiable = input(true);
+  readonly decisionsCatalogue = input<DecisionCatalogueTrace[]>([]);
 
   readonly corriger = output<ProblemeGate>();
   readonly change = output<void>();
@@ -74,6 +78,21 @@ export class SyntheseValidationPanelComponent {
   readonly composantsConsultes = signal(0);
 
   readonly statut = computed(() => this.dossier().status);
+
+  readonly decisionLabel = (decision: string, motif?: string | null): string => {
+    switch (decision) {
+      case 'CREE_ET_LIE':
+        return 'Créé et lié';
+      case 'RATTACHE_EXISTANT':
+        return 'Rattaché existant';
+      case 'POSTE_SEULEMENT':
+        return 'Poste seulement';
+      case 'IGNORE_MOTIF':
+        return motif ? `Ignoré · ${motif}` : 'Ignoré';
+      default:
+        return decision;
+    }
+  };
 
   readonly totalHt = computed(() =>
     this.totaux().reduce((acc, lot) => acc + Number(lot.total ?? 0), 0),

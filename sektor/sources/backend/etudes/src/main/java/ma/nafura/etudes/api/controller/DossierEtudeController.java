@@ -21,6 +21,9 @@ import ma.nafura.etudes.domain.dossier.DossierEtude;
 import ma.nafura.etudes.domain.dossier.StatutDossierEtude;
 import ma.nafura.etudes.service.DecompositionProposeService;
 import ma.nafura.etudes.service.DossierEtudeService;
+import ma.nafura.etudes.service.CompletudeEtudeService;
+import ma.nafura.etudes.service.CompletudeGateException;
+import ma.nafura.etudes.service.WarningsNonAcceptesException;
 import ma.nafura.etudes.service.DossierEtudeService.GateNonFranchieException;
 import ma.nafura.etudes.service.DossierEtudeService.PostesOrphelinsException;
 import ma.nafura.etudes.service.gate.ResultatGate;
@@ -41,18 +44,21 @@ public class DossierEtudeController {
     private final ma.nafura.etudes.service.SyntheseCoutAffaireService syntheseCoutAffaireService;
     private final ma.nafura.etudes.service.DpuService dpuService;
     private final ma.nafura.etudes.service.guest.GuestAccessService guestAccessService;
+    private final CompletudeEtudeService completudeEtudeService;
 
     public DossierEtudeController(
             DossierEtudeService service,
             DecompositionProposeService decompositionProposeService,
             ma.nafura.etudes.service.SyntheseCoutAffaireService syntheseCoutAffaireService,
             ma.nafura.etudes.service.DpuService dpuService,
-            ma.nafura.etudes.service.guest.GuestAccessService guestAccessService) {
+            ma.nafura.etudes.service.guest.GuestAccessService guestAccessService,
+            CompletudeEtudeService completudeEtudeService) {
         this.service = service;
         this.decompositionProposeService = decompositionProposeService;
         this.syntheseCoutAffaireService = syntheseCoutAffaireService;
         this.dpuService = dpuService;
         this.guestAccessService = guestAccessService;
+        this.completudeEtudeService = completudeEtudeService;
     }
 
     @GetMapping
@@ -112,6 +118,14 @@ public class DossierEtudeController {
     @RequirePermission("etude.read")
     public ResponseEntity<DossierEtudeSyntheseDto> synthese(@PathVariable UUID id) {
         return ResponseEntity.ok(service.synthese(id));
+    }
+
+    /** SEKTOR-211 — read model unique de complétude (AC-1 à AC-4). */
+    @GetMapping("/{id}/completude")
+    @RequirePermission("etude.read")
+    public ResponseEntity<ma.nafura.etudes.api.dto.completude.CompletudeEtude> completude(
+            @PathVariable UUID id) {
+        return ResponseEntity.ok(completudeEtudeService.evaluer(id));
     }
 
     @GetMapping("/{id}/synthese-cout")
@@ -300,5 +314,19 @@ public class DossierEtudeController {
     public ResponseEntity<Map<String, Object>> onGateNonFranchie(GateNonFranchieException ex) {
         return ResponseEntity.unprocessableEntity()
                 .body(Map.of("code", ex.getMessage(), "gate", ex.getResultat()));
+    }
+
+    /** SEKTOR-211 — contrôle BLOCKING actif avant gain ou conversion. */
+    @ExceptionHandler(CompletudeGateException.class)
+    public ResponseEntity<Map<String, Object>> onCompletudeGate(CompletudeGateException ex) {
+        return ResponseEntity.unprocessableEntity()
+                .body(Map.of("code", ex.getMessage(), "controles", ex.getControles()));
+    }
+
+    /** SEKTOR-211 — warnings commerciaux non acceptés. */
+    @ExceptionHandler(WarningsNonAcceptesException.class)
+    public ResponseEntity<Map<String, Object>> onWarningsNonAcceptes(WarningsNonAcceptesException ex) {
+        return ResponseEntity.unprocessableEntity()
+                .body(Map.of("code", ex.getMessage(), "controles", ex.getControles()));
     }
 }

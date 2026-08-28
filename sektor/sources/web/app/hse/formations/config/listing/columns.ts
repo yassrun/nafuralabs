@@ -15,7 +15,7 @@ function translateOrEmpty(t: TranslateService, key: string): string {
 }
 
 export function buildFormationColumns(t: TranslateService): ColumnConfig[] {
-  const tr = (k: string) => t.instant(k);
+  const tr = (k: string, params?: Record<string, unknown>) => t.instant(k, params);
   const locale = resolveLocale(t);
   const fmtDate = (v: unknown): string => {
     if (!v) return '—';
@@ -28,7 +28,7 @@ export function buildFormationColumns(t: TranslateService): ColumnConfig[] {
     { key: 'dateDebut', label: tr('hse.formation.list.columns.dateDebut'), field: 'dateDebut', type: 'text', sortable: true, width: '120px', transform: fmtDate },
     {
       key: 'dureeHeures', label: tr('hse.formation.list.columns.duree'), field: 'dureeHeures', type: 'text', width: '80px',
-      transform: (v) => v != null ? tr('hse.formation.list.transform.heuresSuffix').replace('{n}', String(v)) : '—',
+      transform: (v) => v != null ? tr('hse.formation.list.transform.heuresSuffix', { n: v }) : '—',
     },
     { key: 'formateur', label: tr('hse.formation.list.columns.formateur'), field: 'formateur', type: 'text', sortable: true, transform: (v) => String(v ?? '—') },
     { key: 'nbParticipants', label: tr('hse.formation.list.columns.participants'), field: 'nbParticipants', type: 'number', sortable: true, width: '110px' },

@@ -37,9 +37,20 @@
             <span class="dsh__sep" aria-hidden="true">·</span>
             <span>Maj {{ s.updatedAt | date: 'short' }}</span>
           }
-          @if (s.devisNumero) {
+          @if (s.devisNumero && s.devisGenereId) {
+            <span class="dsh__sep" aria-hidden="true">·</span>
+            <a class="dsh__client-link" [routerLink]="['/etudes/devis', s.devisGenereId]">
+              {{ s.devisNumero }}
+            </a>
+          } @else if (s.devisNumero) {
             <span class="dsh__sep" aria-hidden="true">·</span>
             <span>Devis {{ s.devisNumero }}</span>
+          }
+          @if (s.chantierGenereId) {
+            <span class="dsh__sep" aria-hidden="true">·</span>
+            <a class="dsh__client-link" [routerLink]="['/chantiers', s.chantierGenereId]">
+              Chantier
+            </a>
           }
           @if (s.prochainApprobateurNom || s.prochainApprobateurRole) {
             <span class="dsh__sep" aria-hidden="true">·</span>

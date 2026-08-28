@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -17,6 +18,7 @@ import ma.nafura.etudes.api.request.RattrapageIgnorerDto;
 import ma.nafura.etudes.api.request.RattrapageRapprocherDto;
 import ma.nafura.etudes.domain.appeloffre.ReferenceType;
 import ma.nafura.etudes.domain.dpu.ComposantDpu;
+import ma.nafura.etudes.domain.dpu.DecisionCatalogue;
 import ma.nafura.etudes.domain.dossier.DemandeCreationArticle;
 import ma.nafura.etudes.domain.dossier.DossierEtude;
 import ma.nafura.etudes.repository.ComposantDpuRepository;
@@ -82,8 +84,22 @@ public class RattrapageComposantService {
     public int ignorer(UUID dossierId, RattrapageIgnorerDto body) {
         DossierEtude dossier = requireDossierModifiable(dossierId);
         List<ComposantDpu> comps = loadOwnedLibres(dossier, body.getComposantIds());
+        String motif = body.getMotif().trim();
         for (ComposantDpu c : comps) {
             c.setHorsReferentiel(true);
+            enregistrerDecision(c, DecisionCatalogue.IGNORE_MOTIF, motif, c.getItemId());
+        }
+        composantRepository.saveAll(comps);
+        return comps.size();
+    }
+
+    @Transactional
+    public int posteSeulement(UUID dossierId, List<UUID> composantIds) {
+        DossierEtude dossier = requireDossierModifiable(dossierId);
+        List<ComposantDpu> comps = loadOwnedLibres(dossier, composantIds);
+        for (ComposantDpu c : comps) {
+            c.setHorsReferentiel(true);
+            enregistrerDecision(c, DecisionCatalogue.POSTE_SEULEMENT, null, null);
         }
         composantRepository.saveAll(comps);
         return comps.size();
@@ -92,12 +108,23 @@ public class RattrapageComposantService {
     @Transactional
     public int rapprocher(UUID dossierId, RattrapageRapprocherDto body) {
         DossierEtude dossier = requireDossierModifiable(dossierId);
+        UUID itemId = body.getItemId();
         CatalogItemSnapshot item = catalogLookupApi
-                .getItem(body.getItemId())
+                .getItem(itemId)
                 .orElseThrow(() -> new IllegalArgumentException("etudes.rattrapage.item_introuvable"));
-        List<ComposantDpu> comps = loadOwnedLibres(dossier, body.getComposantIds());
-        lierVersItem(comps, UUID.fromString(item.itemId()), item.name());
-        return comps.size();
+        List<ComposantDpu> comps = loadOwnedComposants(dossier, body.getComposantIds());
+        if (comps.isEmpty()) {
+            throw new IllegalArgumentException("etudes.rattrapage.composants_introuvables");
+        }
+        if (dejaRattache(comps, itemId, DecisionCatalogue.RATTACHE_EXISTANT)) {
+            return comps.size();
+        }
+        List<ComposantDpu> libres = comps.stream().filter(this::estLibreRattrapable).toList();
+        if (libres.isEmpty()) {
+            throw new IllegalArgumentException("etudes.rattrapage.composants_introuvables");
+        }
+        lierVersItem(libres, UUID.fromString(item.itemId()), item.name(), DecisionCatalogue.RATTACHE_EXISTANT);
+        return libres.size();
     }
 
     /**
@@ -107,20 +134,33 @@ public class RattrapageComposantService {
     @Transactional
     public Object creerOuDemander(UUID dossierId, RattrapageCreerDto body) {
         DossierEtude dossier = requireDossierModifiable(dossierId);
-        List<ComposantDpu> comps = loadOwnedLibres(dossier, body.getComposantIds());
+        List<ComposantDpu> comps = loadOwnedComposants(dossier, body.getComposantIds());
         if (comps.isEmpty()) {
             throw new IllegalArgumentException("etudes.rattrapage.composants_introuvables");
         }
+        if (dejaRattache(comps, null, DecisionCatalogue.CREE_ET_LIE)) {
+            ComposantDpu first = comps.get(0);
+            return Map.of(
+                    "itemId", first.getItemId(),
+                    "name", first.getLibelle(),
+                    "aCompleter", Boolean.TRUE,
+                    "composantsLies", comps.size(),
+                    "idempotent", Boolean.TRUE);
+        }
+        List<ComposantDpu> libres = comps.stream().filter(this::estLibreRattrapable).toList();
+        if (libres.isEmpty()) {
+            throw new IllegalArgumentException("etudes.rattrapage.composants_introuvables");
+        }
         if (parametres.creationArticleControlee()) {
-            return creerDemande(dossier, body, comps);
+            return creerDemande(dossier, body, libres);
         }
         CatalogItemSnapshot item = catalogLookupApi.createAllege(body.getLibelle(), body.getNature(), body.getUomCode());
-        lierVersItem(comps, UUID.fromString(item.itemId()), item.name());
+        lierVersItem(libres, UUID.fromString(item.itemId()), item.name(), DecisionCatalogue.CREE_ET_LIE);
         return Map.of(
                 "itemId", UUID.fromString(item.itemId()),
                 "name", item.name(),
                 "aCompleter", Boolean.TRUE,
-                "composantsLies", comps.size());
+                "composantsLies", libres.size());
     }
 
     private DemandeCreationArticle creerDemande(
@@ -139,7 +179,8 @@ public class RattrapageComposantService {
         return demandeRepository.save(demande);
     }
 
-    private void lierVersItem(List<ComposantDpu> comps, UUID itemId, String itemName) {
+    private void lierVersItem(
+            List<ComposantDpu> comps, UUID itemId, String itemName, DecisionCatalogue decision) {
         CatalogPriceSnapshot resolu = gelPrixService.resoudre(itemId);
         for (ComposantDpu c : comps) {
             c.setReferenceType(ReferenceType.ITEM.name());
@@ -154,8 +195,37 @@ public class RattrapageComposantService {
                 BigDecimal rendement = c.getRendement() != null ? c.getRendement() : BigDecimal.ZERO;
                 c.setTotal(rendement.multiply(resolu.unitPrice()));
             }
+            enregistrerDecision(c, decision, null, itemId);
         }
         composantRepository.saveAll(comps);
+    }
+
+    private void enregistrerDecision(
+            ComposantDpu c, DecisionCatalogue decision, String motif, UUID itemId) {
+        c.setDecisionCatalogue(decision.name());
+        c.setDecisionCatalogueMotif(StringUtils.hasText(motif) ? motif.trim() : null);
+        UUID userId = UserContext.getUserIdOrNull();
+        c.setDecisionCataloguePar(userId != null ? userId.toString() : null);
+        c.setDecisionCatalogueAt(OffsetDateTime.now());
+        if (itemId != null) {
+            c.setItemId(itemId);
+        }
+    }
+
+    private static boolean dejaRattache(
+            List<ComposantDpu> comps, UUID itemId, DecisionCatalogue decisionAttendue) {
+        if (comps.isEmpty()) {
+            return false;
+        }
+        for (ComposantDpu c : comps) {
+            if (!decisionAttendue.name().equals(c.getDecisionCatalogue()) || c.getItemId() == null) {
+                return false;
+            }
+            if (itemId != null && !itemId.equals(c.getItemId())) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private List<ComposantDpu> loadLibres(DossierEtude dossier) {
@@ -166,13 +236,27 @@ public class RattrapageComposantService {
     }
 
     private List<ComposantDpu> loadOwnedLibres(DossierEtude dossier, List<UUID> ids) {
+        List<ComposantDpu> selected = loadOwnedComposants(dossier, ids);
+        List<ComposantDpu> libres = selected.stream().filter(this::estLibreRattrapable).toList();
+        if (libres.isEmpty()) {
+            throw new IllegalArgumentException("etudes.rattrapage.composants_introuvables");
+        }
+        return libres;
+    }
+
+    private List<ComposantDpu> loadOwnedComposants(DossierEtude dossier, List<UUID> ids) {
         if (ids == null || ids.isEmpty()) {
             throw new IllegalArgumentException("etudes.rattrapage.composants_requis");
         }
-        List<ComposantDpu> all = loadLibres(dossier);
+        if (dossier.getDpgfId() == null) {
+            return List.of();
+        }
+        UUID tenant = tenantId();
         Map<UUID, ComposantDpu> byId = new LinkedHashMap<>();
-        for (ComposantDpu c : all) {
-            byId.put(c.getId(), c);
+        for (ComposantDpu c : composantRepository.findByIdInAndTenantId(ids, tenant)) {
+            if (composantRepository.belongsToDossier(c.getId(), tenant, dossier.getDpgfId())) {
+                byId.put(c.getId(), c);
+            }
         }
         List<ComposantDpu> selected = new ArrayList<>();
         for (UUID id : ids) {
@@ -181,10 +265,13 @@ public class RattrapageComposantService {
                 selected.add(c);
             }
         }
-        if (selected.isEmpty()) {
-            throw new IllegalArgumentException("etudes.rattrapage.composants_introuvables");
-        }
         return selected;
+    }
+
+    private boolean estLibreRattrapable(ComposantDpu c) {
+        return "LIBRE".equals(c.getReferenceType())
+                && !Boolean.TRUE.equals(c.getHorsReferentiel())
+                && c.getDecisionCatalogue() == null;
     }
 
     static List<RattrapageGroupeDto> grouper(List<ComposantDpu> libres) {

@@ -167,6 +167,13 @@
           "provenance": "Source commerciale"
         },
         "workflowHint": "Suivez le parcours terrain sans repasser par les listings portefeuille : arbre, saisie d'avancement, attachements, situations et journal.",
+        "workflowActions": {
+          "arbre": "Arbre / lots",
+          "avancement": "Saisir avancement",
+          "attachements": "Attachements",
+          "situations": "Situations",
+          "journal": "Journal"
+        },
         "provenance": {
           "devisSource": "Chantier issu de l'étude gagnée — devis accepté.",
           "openDevis": "Ouvrir le devis",
@@ -367,7 +374,25 @@
           "importFallbackAi": "Extraction locale insuffisante — bascule vers l'IA…"
         },
         "actions": {
-          "edit": "Modifier"
+          "edit": "Modifier",
+          "receptionProvisoire": "Réception provisoire",
+          "receptionProvisoireTitle": "Réception provisoire",
+          "receptionProvisoireConfirm": "Confirmer la réception provisoire du chantier {code} ? Les opérations terrain (avancement, achats, attachements) ne seront plus proposées.",
+          "receptionProvisoireAction": "Confirmer la réception",
+          "receptionProvisoireSuccess": "Réception provisoire enregistrée.",
+          "receptionProvisoireFailed": "Impossible d'enregistrer la réception provisoire.",
+          "receptionDefinitive": "Réception définitive",
+          "receptionDefinitiveTitle": "Réception définitive",
+          "receptionDefinitiveConfirm": "Confirmer la réception définitive du chantier {code} ? Levée de réserves et fin de garantie opérationnelle.",
+          "receptionDefinitiveAction": "Confirmer",
+          "receptionDefinitiveSuccess": "Réception définitive enregistrée.",
+          "receptionDefinitiveFailed": "Impossible d'enregistrer la réception définitive.",
+          "clore": "Clôturer le chantier",
+          "cloreTitle": "Clôture du chantier",
+          "cloreConfirm": "Clôturer définitivement le chantier {code} ? Le chantier passera en lecture seule.",
+          "cloreAction": "Clôturer",
+          "cloreSuccess": "Chantier clôturé.",
+          "cloreFailed": "Impossible de clôturer le chantier."
         },
         "deleteConfirm": "Supprimer le chantier {code} — {name} ? Cette action est irréversible.",
         "deleteSuccess": "Chantier supprimé.",
@@ -1087,6 +1112,10 @@
       },
       "preparation": {
         "titre": "Préparation",
+        "prerequis": "prérequis",
+        "badgeRecommande": "recommandé",
+        "recommandePlanning": "planning recommandé",
+        "recommandeGenerique": "recommandé",
         "identite": "Identité client",
         "vente": "Référence vente",
         "arbre": "Arbre des postes",
@@ -1124,6 +1153,8 @@
         "etapeAvancement": "Avancement",
         "etapeAttachement": "Attachement",
         "etapeSituation": "Situation",
+        "etapeSoumettreSituation": "Soumettre au MOA",
+        "etapeTrouReel": "Prochain trou opérationnel",
         "etapeComplete": "Cycle mensuel traité",
         "etapeLectureSeule": "Lecture seule",
         "etapeIndisponible": "Indisponible",
@@ -1181,6 +1212,7 @@
         "avancement": "Saisir l’avancement",
         "attachement": "Créer l’attachement",
         "situation": "Traiter la situation",
+        "soumettreSituation": "Soumettre la situation au MOA",
         "situations": "Voir les situations",
         "documents": "Voir les documents",
         "demandeAchat": "Nouvelle DA",

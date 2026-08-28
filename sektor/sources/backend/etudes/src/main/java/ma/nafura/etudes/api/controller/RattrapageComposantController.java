@@ -6,6 +6,7 @@ import java.util.UUID;
 import ma.nafura.etudes.api.dto.RattrapageResumeDto;
 import ma.nafura.etudes.api.request.RattrapageCreerDto;
 import ma.nafura.etudes.api.request.RattrapageIgnorerDto;
+import ma.nafura.etudes.api.request.RattrapagePosteSeulementDto;
 import ma.nafura.etudes.api.request.RattrapageRapprocherDto;
 import ma.nafura.etudes.service.RattrapageComposantService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
@@ -37,6 +38,20 @@ public class RattrapageComposantController {
             @PathVariable UUID dossierId, @Valid @RequestBody RattrapageIgnorerDto body) {
         try {
             int n = service.ignorer(dossierId, body);
+            return ResponseEntity.ok(Map.of("updated", n));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(Map.of("code", ex.getMessage()));
+        } catch (IllegalStateException ex) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("code", ex.getMessage()));
+        }
+    }
+
+    @PostMapping("/poste-seulement")
+    @RequirePermission("etude.update")
+    public ResponseEntity<?> posteSeulement(
+            @PathVariable UUID dossierId, @Valid @RequestBody RattrapagePosteSeulementDto body) {
+        try {
+            int n = service.posteSeulement(dossierId, body.getComposantIds());
             return ResponseEntity.ok(Map.of("updated", n));
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.badRequest().body(Map.of("code", ex.getMessage()));

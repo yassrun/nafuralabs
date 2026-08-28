@@ -1,0 +1,17 @@
+{
+  "periode": { "debut": "2026-09-01", "fin": "2026-09-30" },
+  "numeroOrdre": 1,
+  "cumulPrecedentHt": 0,
+  "cumulCourantHt": 75735.6,
+  "tauxRg": 7,
+  "tauxAvance": 10,
+  "lignes": [
+    { "noeud": "2.1", "qte": 40, "unite": "m³", "puVendu": 1530, "montantHt": 61200 },
+    { "noeud": "2.3", "qte": 120, "unite": "m²", "puVendu": 121.13, "montantHt": 14535.6 }
+  ],
+  "travauxPeriodeHt": 75735.6,
+  "retenueGarantieMontant": 5301.49,
+  "retenueAvanceMontant": 7573.56,
+  "netAPayerHt": 62860.55,
+  "netAPayerTtc": 75432.66
+}

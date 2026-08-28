@@ -7,12 +7,12 @@
 
 C'est la sortie argent du palier 1. Le modèle en place est **juste** — ce sous-lot ne le refait pas, il le branche et complète les retenues.
 
-## Constat
+## Constat (28/08/2026)
 
-- `SituationTravaux` porte déjà `cumulPrecedentHt` / `cumulCourantHt` / `travauxPeriodeHt` : le décompte est **cumulatif**, conforme.
-- Workflow présent : `BROUILLON → SOUMISE → VALIDEE_MOA → FACTUREE → PAYEE`, plus `REJETEE`.
-- Retenues présentes : RG et avance. **Absentes** : pénalités de retard et RAS — alors que `Chantier` porte déjà `tauxRas`.
-- Les lignes de situation ne viennent pas des attachements.
+- **Livré** : lignes depuis attachements signés (SEKTOR-156, preuves Al Qods mois 1/2).
+- **Livré** : cascade pénalités + RAS (`SituationGenerationService.computeFinancialTotals`, SEKTOR-157).
+- **Preuves** : `verify-alqods-situation-mois1-233.mjs`, `verify-situation-retenues-al-qods-241.mjs`, agrégat `verify-situation-et-retenues.mjs`.
+- Sous-lot scénario : [`../retenues-cascade-al-qods/`](../retenues-cascade-al-qods/).
 
 ## Approche technique
 

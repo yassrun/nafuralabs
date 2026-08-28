@@ -223,6 +223,34 @@ export interface RattrapageResume {
   demandesOuvertes: DemandeCreationArticle[];
 }
 
+/** SEKTOR-218 — agent contextuel du dossier ouvert (AC-16). */
+export interface DossierAgentProvenanceEtape {
+  etape: string;
+  libelle: string;
+  reference?: string | null;
+  source?: string | null;
+}
+
+export interface DossierAgentSuggestion {
+  id: string;
+  actionType: string;
+  libelle: string;
+  etat: 'EN_ATTENTE' | 'ACCEPTEE' | 'REFUSEE' | 'CORRIGEE' | string;
+  acteur?: string | null;
+  date?: string | null;
+  correctionNote?: string | null;
+  provenanceJson?: string | null;
+}
+
+export interface DossierAgentContext {
+  dossierId: string;
+  numero: string;
+  objet: string;
+  provenance: DossierAgentProvenanceEtape[];
+  journal: DossierAgentSuggestion[];
+  chatGenerique: boolean;
+}
+
 /** L12 — versement bibliothèque après VALIDEE. */
 export interface CapitalisationRendementLigne {
   libelle: string;
@@ -269,8 +297,22 @@ export type RattrapageCreerResult =
       name: string;
       aCompleter?: boolean;
       composantsLies: number;
+      idempotent?: boolean;
     }
   | DemandeCreationArticle;
+
+/** Trace décision Catalogue sur composant autrefois LIBRE (SEKTOR-215). */
+export interface DecisionCatalogueTrace {
+  composantId: string;
+  libelle: string;
+  decision: 'POSTE_SEULEMENT' | 'CREE_ET_LIE' | 'RATTACHE_EXISTANT' | 'IGNORE_MOTIF' | string;
+  itemId?: string | null;
+  itemCode?: string | null;
+  itemName?: string | null;
+  acteur?: string | null;
+  date?: string | null;
+  motif?: string | null;
+}
 
 /** Synthèse agrégée pour l'entête du dossier. */
 export interface DossierEtudeSynthese {
@@ -305,6 +347,7 @@ export interface DossierEtudeSynthese {
   updatedAt?: string | null;
   gates: ResultatGate[];
   actionPrincipale: string;
+  decisionsCatalogue?: DecisionCatalogueTrace[];
 }
 
 export interface ChargeEtudeCandidat {
@@ -788,11 +831,12 @@ export class DossierEtudeApiService extends FeatureApiService<
   async rattrapageIgnorer(
     dossierId: string,
     composantIds: string[],
+    motif: string,
   ): Promise<{ updated: number }> {
     return firstValueFrom(
       this.http.post<{ updated: number }>(
         this.resolveUrl(`${this.basePath}/${dossierId}/rattrapage/ignorer`),
-        { composantIds },
+        { composantIds, motif },
       ),
     );
   }
@@ -823,6 +867,79 @@ export class DossierEtudeApiService extends FeatureApiService<
       this.http.post<RattrapageCreerResult>(
         this.resolveUrl(`${this.basePath}/${dossierId}/rattrapage/creer`),
         body,
+      ),
+    );
+  }
+
+  /** SEKTOR-218 — contexte agent du dossier ouvert. */
+  getAgentContext(dossierId: string): Promise<DossierAgentContext> {
+    return firstValueFrom(
+      this.http.get<DossierAgentContext>(
+        this.resolveUrl(`${this.basePath}/${dossierId}/agent`),
+      ),
+    );
+  }
+
+  agentChiffrage(dossierId: string): Promise<DossierAgentSuggestion[]> {
+    return firstValueFrom(
+      this.http.post<DossierAgentSuggestion[]>(
+        this.resolveUrl(`${this.basePath}/${dossierId}/agent/actions/chiffrage`),
+        {},
+      ),
+    );
+  }
+
+  agentIncoherences(dossierId: string): Promise<DossierAgentSuggestion[]> {
+    return firstValueFrom(
+      this.http.post<DossierAgentSuggestion[]>(
+        this.resolveUrl(`${this.basePath}/${dossierId}/agent/actions/incoherences`),
+        {},
+      ),
+    );
+  }
+
+  agentRattachements(dossierId: string): Promise<DossierAgentSuggestion[]> {
+    return firstValueFrom(
+      this.http.post<DossierAgentSuggestion[]>(
+        this.resolveUrl(`${this.basePath}/${dossierId}/agent/actions/rattachements-catalogue`),
+        {},
+      ),
+    );
+  }
+
+  agentAccepter(dossierId: string, suggestionId: string): Promise<DossierAgentSuggestion> {
+    return firstValueFrom(
+      this.http.post<DossierAgentSuggestion>(
+        this.resolveUrl(
+          `${this.basePath}/${dossierId}/agent/suggestions/${suggestionId}/accepter`,
+        ),
+        {},
+      ),
+    );
+  }
+
+  agentRefuser(dossierId: string, suggestionId: string): Promise<DossierAgentSuggestion> {
+    return firstValueFrom(
+      this.http.post<DossierAgentSuggestion>(
+        this.resolveUrl(
+          `${this.basePath}/${dossierId}/agent/suggestions/${suggestionId}/refuser`,
+        ),
+        {},
+      ),
+    );
+  }
+
+  agentCorriger(
+    dossierId: string,
+    suggestionId: string,
+    note: string,
+  ): Promise<DossierAgentSuggestion> {
+    return firstValueFrom(
+      this.http.post<DossierAgentSuggestion>(
+        this.resolveUrl(
+          `${this.basePath}/${dossierId}/agent/suggestions/${suggestionId}/corriger`,
+        ),
+        { note },
       ),
     );
   }

@@ -52,7 +52,9 @@ import ma.nafura.etudes.service.port.capability.EtudeApprovalPort;
 import ma.nafura.etudes.service.port.bc.EtudeClientPort;
 import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.platform.framework.context.UserContext;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -68,6 +70,11 @@ public class DossierEtudeService {
 
     /** AC-3 — tolérance d'écart entre montant attribué et total devis : 0,01 MAD. */
     private static final BigDecimal SEUIL_ATTRIBUTION = new BigDecimal("0.01");
+
+    /** Bornes les retentes sur {@code dossiers_etude_numero_uk} en génération auto. */
+    private static final int MAX_NUMERO_AUTO_RETRIES = 10;
+
+    private static final String CONSTRAINT_NUMERO_UK = "dossiers_etude_numero_uk";
 
     private final DossierEtudeRepository repository;
     private final DpgfNoeudRepository noeudRepository;
@@ -88,6 +95,8 @@ public class DossierEtudeService {
     private final ChainageAvalPort chainageAvalPort;
     private final ConsultationEtudeService consultationEtudeService;
     private final TransitionEtudeService transitionEtudeService;
+    private final CompletudeEtudeService completudeEtudeService;
+    private final DecisionCatalogueService decisionCatalogueService;
     private final Map<Integer, EtapeGate> gatesParEtape;
 
     public DossierEtudeService(
@@ -110,6 +119,8 @@ public class DossierEtudeService {
             ChainageAvalPort chainageAvalPort,
             @Lazy ConsultationEtudeService consultationEtudeService,
             TransitionEtudeService transitionEtudeService,
+            CompletudeEtudeService completudeEtudeService,
+            DecisionCatalogueService decisionCatalogueService,
             List<EtapeGate> gates) {
         this.repository = repository;
         this.noeudRepository = noeudRepository;
@@ -130,6 +141,8 @@ public class DossierEtudeService {
         this.chainageAvalPort = chainageAvalPort;
         this.consultationEtudeService = consultationEtudeService;
         this.transitionEtudeService = transitionEtudeService;
+        this.completudeEtudeService = completudeEtudeService;
+        this.decisionCatalogueService = decisionCatalogueService;
         this.gatesParEtape = gates.stream()
                 .collect(Collectors.toMap(EtapeGate::etape, Function.identity()));
     }
@@ -165,10 +178,24 @@ public class DossierEtudeService {
     @Transactional
     public DossierEtude create(DossierEtudeCreateDto dto) {
         UUID tenant = tenantId();
-        String numero = StringUtils.hasText(dto.getNumero())
-                ? dto.getNumero().trim()
-                : genererNumero(tenant);
-        if (repository.existsByTenantIdAndNumero(tenant, numero)) {
+        if (StringUtils.hasText(dto.getNumero())) {
+            return persisterCreation(dto, tenant, dto.getNumero().trim(), false);
+        }
+        for (int attempt = 1; attempt <= MAX_NUMERO_AUTO_RETRIES; attempt++) {
+            try {
+                return persisterCreation(dto, tenant, genererNumero(tenant), true);
+            } catch (DataIntegrityViolationException ex) {
+                if (!isNumeroUniqueViolation(ex) || attempt == MAX_NUMERO_AUTO_RETRIES) {
+                    throw ex;
+                }
+            }
+        }
+        throw new IllegalStateException("etudes.dossier.numero_auto_epuise");
+    }
+
+    private DossierEtude persisterCreation(
+            DossierEtudeCreateDto dto, UUID tenant, String numero, boolean numeroAuto) {
+        if (!numeroAuto && repository.existsByTenantIdAndNumero(tenant, numero)) {
             throw new IllegalArgumentException("etudes.dossier.numero_existe");
         }
 
@@ -461,10 +488,8 @@ public class DossierEtudeService {
         DossierEtude dossier = requireDossier(id);
         List<ResultatGate> gates = evaluerGates(id);
         ContexteGate contexte = chargerContexte(dossier);
-        int anomalies = (int) gates.stream()
-                .filter(g -> g.bloquant() && !g.problemes().isEmpty())
-                .mapToLong(g -> g.problemes().size())
-                .sum();
+        var completude = completudeEtudeService.evaluer(dossier);
+        int anomalies = completudeEtudeService.anomaliesAffichees(completude);
         BigDecimal totalHt = totalHt(contexte.articles());
         String devisNumero = null;
         if (dossier.getDevisGenereId() != null) {
@@ -523,6 +548,7 @@ public class DossierEtudeService {
                 .updatedAt(dossier.getUpdatedAt())
                 .gates(gates)
                 .actionPrincipale(actionPrincipale(dossier, anomalies))
+                .decisionsCatalogue(decisionCatalogueService.listerPourDossier(dossier))
                 .build();
     }
 
@@ -551,6 +577,11 @@ public class DossierEtudeService {
         if (dossier.getStatus() != StatutDossierEtude.DEVIS_GENERE) {
             throw new IllegalStateException("etudes.dossier.gagne_hors_etat");
         }
+
+        assertCompletudePourTransition(
+                completudeEtudeService.evaluer(dossier),
+                body.getAcceptWarnings(),
+                trimOrNull(body.getMotifDerogation()));
 
         // AC-2 — un seul devis fait foi : même tenant, même étude, statut non terminal.
         Devis devis = requireDevisPourGain(dossier, devisIdCommande);
@@ -597,13 +628,15 @@ public class DossierEtudeService {
         // AC-6 — les deux transitions sont consignées après les deux écritures, avec la même
         // corrélation : une panne avant ici n'écrit aucune ligne de journal.
         BigDecimal marge = montant.subtract(debourseInitial);
+        String motifAudit = motifDerogationPourAudit(
+                margeNegative, motifDerogation, body.getAcceptWarnings());
         transitionEtudeService.consignerGain(
                 TransitionEtude.ENTITE_DEVIS,
                 devis.getId().toString(),
                 ancienStatutDevis,
                 Devis.STATUS_APPROUVE,
                 correlationId,
-                margeNegative ? motifDerogation : null,
+                motifAudit,
                 montant,
                 debourseInitial,
                 marge);
@@ -613,7 +646,7 @@ public class DossierEtudeService {
                 StatutDossierEtude.DEVIS_GENERE.name(),
                 StatutDossierEtude.GAGNE.name(),
                 correlationId,
-                margeNegative ? motifDerogation : null,
+                motifAudit,
                 montant,
                 debourseInitial,
                 marge);
@@ -627,7 +660,8 @@ public class DossierEtudeService {
                 valeurCanonique(body.getDateAttribution()),
                 valeurCanonique(trimOrNull(body.getReferenceMarche())),
                 valeurCanonique(body.getMontantAttribue()),
-                valeurCanonique(trimOrNull(body.getMotifDerogation())));
+                valeurCanonique(trimOrNull(body.getMotifDerogation())),
+                valeurCanonique(body.getAcceptWarnings()));
         try {
             return HexFormat.of().formatHex(
                     MessageDigest.getInstance("SHA-256").digest(canonique.getBytes(StandardCharsets.UTF_8)));
@@ -771,9 +805,12 @@ public class DossierEtudeService {
             throw new IllegalArgumentException("etudes.dossier.client_requis");
         }
 
+        DossierConvertirDto payload = body != null ? body : new DossierConvertirDto();
+        assertCompletudePourConversion(completudeEtudeService.evaluer(dossier));
+
         List<DpgfNoeud> noeuds = chargerNoeuds(dossier);
         List<ChainageAvalPort.LotProjection> lots =
-                placerNoeudsOrphelins(projeterLots(noeuds), body.getPlacementsPostesOrphelins());
+                placerNoeudsOrphelins(projeterLots(noeuds), payload.getPlacementsPostesOrphelins());
 
         BigDecimal totalArticles = totalHt(noeuds.stream()
                 .filter(n -> DpgfNoeud.TYPE_ARTICLE.equals(n.getType()))
@@ -781,8 +818,8 @@ public class DossierEtudeService {
         // AC-10 — la vente initiale est le total du devis accepté : jamais un montant libre.
         Devis devis = requireDevisPourConversion(dossier);
         BigDecimal totalDevis = devis.getTotalHt() != null ? devis.getTotalHt() : BigDecimal.ZERO;
-        BigDecimal montant = body.getMontantHt() != null
-                ? body.getMontantHt()
+        BigDecimal montant = payload.getMontantHt() != null
+                ? payload.getMontantHt()
                 : (dossier.getMontantAttribue() != null
                         ? dossier.getMontantAttribue()
                         : totalArticles);
@@ -790,9 +827,9 @@ public class DossierEtudeService {
         assertSnapshotVenteCoherent(montant, totalDevis, totalArticles);
         BigDecimal debourseInitial = debourseDuNoeudService.sommeDebourseArticles(noeuds);
 
-        String label = resolveChantierLabel(body.getChantierLabel(), dossier.getObjet());
-        String marcheRef = StringUtils.hasText(body.getMarcheReference())
-                ? body.getMarcheReference().trim()
+        String label = resolveChantierLabel(payload.getChantierLabel(), dossier.getObjet());
+        String marcheRef = StringUtils.hasText(payload.getMarcheReference())
+                ? payload.getMarcheReference().trim()
                 : dossier.getReferenceMarche();
 
         ChainageAvalPort.ConversionResult result = chainageAvalPort.convert(
@@ -802,15 +839,15 @@ public class DossierEtudeService {
                         dossier.getClientNom(),
                         dossier.getObjet(),
                         label,
-                        trimOrNull(body.getChantierCode()),
-                        trimOrNull(body.getChantierVille()),
-                        body.getDateDemarrage() != null
-                                ? body.getDateDemarrage()
+                        trimOrNull(payload.getChantierCode()),
+                        trimOrNull(payload.getChantierVille()),
+                        payload.getDateDemarrage() != null
+                                ? payload.getDateDemarrage()
                                 : dossier.getDateAttribution(),
-                        body.getDureeMois(),
+                        payload.getDureeMois(),
                         marcheRef,
                         montant,
-                        body.getTauxTva() != null ? body.getTauxTva() : parametres.tvaTauxDefaut(),
+                        payload.getTauxTva() != null ? payload.getTauxTva() : parametres.tvaTauxDefaut(),
                         lots,
                         // ── AC-9 — snapshot commercial immuable transmis au chantier ──
                         devis.getId(),
@@ -1006,6 +1043,40 @@ public class DossierEtudeService {
         if (!r.autoriseLaSuite()) {
             throw new GateNonFranchieException(r);
         }
+    }
+
+    /** SEKTOR-211 — gate gain : BLOCKING refusé ; WARNING exige acceptation auditée. */
+    private void assertCompletudePourTransition(
+            ma.nafura.etudes.api.dto.completude.CompletudeEtude completude,
+            Boolean acceptWarnings,
+            String motifDerogation) {
+        var bloquants = completudeEtudeService.controlesBloquants(completude);
+        if (!bloquants.isEmpty()) {
+            throw new CompletudeGateException(bloquants);
+        }
+        var warnings = completudeEtudeService.controlesWarnings(completude);
+        if (!warnings.isEmpty()) {
+            if (!Boolean.TRUE.equals(acceptWarnings) || !StringUtils.hasText(motifDerogation)) {
+                throw new WarningsNonAcceptesException(warnings);
+            }
+        }
+    }
+
+    /** SEKTOR-211 — conversion depuis GAGNE : seuls les BLOCKING restent interdits. */
+    private void assertCompletudePourConversion(
+            ma.nafura.etudes.api.dto.completude.CompletudeEtude completude) {
+        var bloquants = completudeEtudeService.controlesBloquants(completude);
+        if (!bloquants.isEmpty()) {
+            throw new CompletudeGateException(bloquants);
+        }
+    }
+
+    private static String motifDerogationPourAudit(
+            boolean margeNegative, String motifDerogation, Boolean acceptWarnings) {
+        if (margeNegative || Boolean.TRUE.equals(acceptWarnings)) {
+            return motifDerogation;
+        }
+        return null;
     }
 
     /**
@@ -1389,6 +1460,21 @@ public class DossierEtudeService {
      */
     private String genererNumero(UUID tenantId) {
         return String.format("DE-%04d", repository.countByTenantId(tenantId) + 1);
+    }
+
+    private static boolean isNumeroUniqueViolation(DataIntegrityViolationException ex) {
+        Throwable cause = ex.getCause();
+        while (cause != null) {
+            if (cause instanceof ConstraintViolationException cve) {
+                String name = cve.getConstraintName();
+                if (name != null && name.toLowerCase(Locale.ROOT).contains(CONSTRAINT_NUMERO_UK)) {
+                    return true;
+                }
+            }
+            cause = cause.getCause();
+        }
+        String message = ex.getMessage();
+        return message != null && message.toLowerCase(Locale.ROOT).contains(CONSTRAINT_NUMERO_UK);
     }
 
     /**

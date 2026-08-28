@@ -130,10 +130,15 @@ export class RattrapagePanelComponent {
 
   async ignorer(g: RattrapageGroupe): Promise<void> {
     if (!this.modifiable() || this.saving()) return;
+    const motif = window.prompt(`Motif d'ignorance pour « ${g.libelle} » :`, 'Équivalent local');
+    if (!motif?.trim()) {
+      this.toast.error('Motif requis pour ignorer un composant LIBRE.');
+      return;
+    }
     this.saving.set(true);
     try {
-      await this.dossierApi.rattrapageIgnorer(this.dossierId(), g.composantIds);
-      this.toast.success(`Ignoré — hors référentiel (×${g.count})`);
+      await this.dossierApi.rattrapageIgnorer(this.dossierId(), g.composantIds, motif.trim());
+      this.toast.success(`Ignoré — ${motif.trim()} (×${g.count})`);
       await this.reload();
       this.change.emit();
     } catch (e) {

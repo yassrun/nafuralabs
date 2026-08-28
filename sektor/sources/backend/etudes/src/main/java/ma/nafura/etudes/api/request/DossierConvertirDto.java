@@ -32,4 +32,10 @@ public class DossierConvertirDto {
      * premier appel : c'est le refus nominatif du serveur qui apprend à l'humain quoi placer.
      */
     private List<PlacementPosteOrphelinDto> placementsPostesOrphelins;
+
+    /** SEKTOR-211 — acceptation auditée des warnings commerciaux avant conversion. */
+    private Boolean acceptWarnings;
+
+    /** Motif obligatoire lorsque {@link #acceptWarnings} est vrai. */
+    private String motifDerogation;
 }

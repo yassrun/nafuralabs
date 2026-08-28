@@ -166,6 +166,13 @@
           "provenance": "المصدر التجاري"
         },
         "workflowHint": "اتبع المسار الميداني دون الرجوع إلى لوائح المحفظة: الشجرة، إدخال التقدم، دفاتر التعلية، الكشوف، واليومية.",
+        "workflowActions": {
+          "arbre": "الشجرة / الحزم",
+          "avancement": "إدخال التقدم",
+          "attachements": "دفاتر التعلية",
+          "situations": "الكشوف",
+          "journal": "اليومية"
+        },
         "provenance": {
           "devisSource": "ورش منبثق من دراسة فائزة — عرض سعر مقبول.",
           "openDevis": "فتح عرض السعر",
@@ -1070,6 +1077,10 @@
     },
     "preparation": {
       "titre": "التحضير للبدء",
+      "prerequis": "المتطلبات",
+      "badgeRecommande": "موصى به",
+      "recommandePlanning": "جدولة موصى بها",
+      "recommandeGenerique": "موصى به",
       "identite": "الهوية والعميل",
       "action": {
         "identite": "ملء الهوية",

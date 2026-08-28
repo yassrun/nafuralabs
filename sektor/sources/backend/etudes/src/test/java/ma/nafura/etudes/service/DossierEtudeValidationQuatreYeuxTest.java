@@ -113,6 +113,8 @@ class DossierEtudeValidationQuatreYeuxTest {
                 mock(ma.nafura.etudes.service.port.bc.ChainageAvalPort.class),
                 mock(ma.nafura.etudes.service.ConsultationEtudeService.class),
                 mock(ma.nafura.etudes.service.TransitionEtudeService.class),
+                mock(CompletudeEtudeService.class),
+                mock(DecisionCatalogueService.class),
                 List.of());
     }
 

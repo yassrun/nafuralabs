@@ -7,8 +7,9 @@ import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.util.Set;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import ma.nafura.chantiers.api.dto.ChantierAffectationDto;
 import ma.nafura.chantiers.api.dto.ChantierSummaryDto;
@@ -18,6 +19,8 @@ import ma.nafura.chantiers.repository.ChantierLotRepository;
 import ma.nafura.chantiers.repository.AttachementChantierRepository;
 import ma.nafura.chantiers.repository.AvancementPhysiqueRepository;
 import ma.nafura.chantiers.repository.JournalChantierRepository;
+import ma.nafura.chantiers.repository.SituationTravauxRepository;
+import ma.nafura.chantiers.domain.situation.SituationTravaux;
 import ma.nafura.chantiers.service.port.DemandeAchatCockpitPort;
 import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.platform.framework.context.UserContext;
@@ -49,6 +52,7 @@ class CockpitChantierServiceTest {
     @Mock private JournalChantierRepository journalRepository;
     @Mock private AttachementChantierRepository attachementRepository;
     @Mock private AvancementPhysiqueRepository avancementRepository;
+    @Mock private SituationTravauxRepository situationRepository;
     @Mock private ObjectProvider<DemandeAchatCockpitPort> demandeAchatPort;
     @Mock private DemandeAchatCockpitPort demandeAchatCockpitPort;
 
@@ -59,9 +63,15 @@ class CockpitChantierServiceTest {
         TenantContext.setTenantId(TENANT);
         when(demandeAchatPort.getIfAvailable()).thenReturn(demandeAchatCockpitPort);
         when(demandeAchatCockpitPort.compterParChantier(CHANTIER)).thenReturn(0L);
+        when(situationRepository.findFirstByTenantIdAndChantierIdAndStatusOrderByNumeroOrdreDesc(
+                org.mockito.ArgumentMatchers.eq(TENANT),
+                org.mockito.ArgumentMatchers.eq(CHANTIER),
+                org.mockito.ArgumentMatchers.eq(SituationTravaux.STATUS_BROUILLON)))
+                .thenReturn(Optional.empty());
         service = new CockpitChantierService(
                 chantierService, summaryService, affectationService, lotRepository,
-                journalRepository, attachementRepository, avancementRepository, demandeAchatPort);
+                journalRepository, attachementRepository, avancementRepository, situationRepository,
+                demandeAchatPort);
     }
 
     @AfterEach
@@ -304,6 +314,65 @@ class CockpitChantierServiceTest {
         assertThat(flux.getEtape()).isEqualTo("chantiers.cockpit.flux.etapeSituation");
     }
 
+    /** AC-M11 — après situation n°1, le flux ne renvoie plus « avancement » comme prochaine étape. */
+    @Test
+    void flux_apresSituationN1_soumettreSituationPasAvancement() {
+        UserContext.setUserRole("BTP_CONDUCTEUR_TRAVAUX");
+        Chantier cours = chantier(Chantier.STATUS_EN_COURS);
+        ChantierSummaryDto s = ChantierSummaryDto.builder()
+                .montantVenteActifHt(new BigDecimal("737106.00"))
+                .montantVenteInitialHt(new BigDecimal("737106.00"))
+                .debourseInitialHt(new BigDecimal("582600.00"))
+                .budgetReviseHt(new BigDecimal("582600.00"))
+                .margeInitialeHt(new BigDecimal("154506.00"))
+                .margeProjeteeHt(new BigDecimal("154506.00"))
+                .margeProjeteePct(new BigDecimal("20.96"))
+                .sourceVente("DEVIS")
+                .openSituationsCount(1L)
+                .build();
+        prepare(cours, s);
+        when(avancementRepository.findByTenantIdAndChantierIdAndDateSaisieBetween(
+                org.mockito.ArgumentMatchers.eq(TENANT), org.mockito.ArgumentMatchers.eq(CHANTIER),
+                org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any()))
+                .thenReturn(List.of(ma.nafura.chantiers.domain.avancement.AvancementPhysique.builder()
+                        .id("av-1").build()));
+        when(attachementRepository
+                .findByTenantIdAndChantierIdAndDateDebutLessThanEqualAndDateFinGreaterThanEqual(
+                        org.mockito.ArgumentMatchers.eq(TENANT), org.mockito.ArgumentMatchers.eq(CHANTIER),
+                        org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any()))
+                .thenReturn(List.of(ma.nafura.chantiers.domain.attachement.AttachementChantier.builder()
+                        .id("att-1").build()));
+        when(situationRepository.findFirstByTenantIdAndChantierIdAndStatusOrderByNumeroOrdreDesc(
+                TENANT, CHANTIER, SituationTravaux.STATUS_BROUILLON))
+                .thenReturn(Optional.of(SituationTravaux.builder().id("sit-1").build()));
+
+        CockpitChantierDto.FluxMensuelDto flux = service.lireCockpit(CHANTIER).getProgress().getFluxMois();
+        CockpitChantierDto dto = service.lireCockpit(CHANTIER);
+
+        assertThat(flux.getEtape()).isEqualTo("chantiers.cockpit.flux.etapeSoumettreSituation");
+        assertThat(flux.getPremiereAction()).contains("sit-1");
+        assertThat(flux.isActionnable()).isTrue();
+        assertThat(dto.getNextActions().getFirst().getLibelle())
+                .isEqualTo("chantiers.cockpit.action.soumettreSituation");
+        assertThat(dto.getNextActions().getFirst().getLibelle())
+                .isNotEqualTo("chantiers.cockpit.action.avancement");
+    }
+
+    /** AC-M12 — DAF : budget oui, pas réception BL. */
+    @Test
+    void prochaineAction_daf_pasReceptionBl() {
+        UserContext.setUserRole("BTP_DAF");
+        UserContext.setPermissions(Set.of("chantiers.chantiers.chantier.budget.read"));
+        Chantier cours = chantier(Chantier.STATUS_EN_COURS);
+        prepare(cours, summaryCanonique());
+
+        CockpitChantierDto dto = service.lireCockpit(CHANTIER);
+
+        assertThat(dto.getNextActions())
+                .extracting(CockpitChantierDto.NextActionDto::getLibelle)
+                .doesNotContain("chantiers.cockpit.action.receptionBl");
+    }
+
     @Test
     void flux_terminal_estToujoursLectureSeule() {
         UserContext.setUserRole("OWNER");
@@ -528,6 +597,61 @@ class CockpitChantierServiceTest {
         assertThat(alerte.getValeurObservee()).isEqualByComparingTo("-50000.00");
         assertThat(alerte.getRegle()).isNotBlank();
         assertThat(alerte.getSourceId()).isNotBlank();
+    }
+
+    @Test
+    void checklist_EN_COURS_sansPlanning_ratioPrerequisComplet_planningRecommande() {
+        UserContext.setUserRole("OWNER");
+        Chantier c = chantier(Chantier.STATUS_EN_COURS);
+        c.setClientId("client-1");
+        c.setSourceVente("DEVIS");
+        c.setDevisId(UUID.fromString("00000000-0000-0000-0000-0000000000d1"));
+        c.setMontantVenteInitialHt(new BigDecimal("737106.00"));
+        c.setDebourseInitialHt(new BigDecimal("582600.00"));
+        c.setDateDemarrage(LocalDate.of(2026, 9, 1));
+        c.setDateFinPrevue(LocalDate.of(2027, 5, 1));
+        c.setOsReference("OS-2026-001");
+        c.setOsDateEffet(LocalDate.of(2026, 9, 1));
+        prepare(c, summaryCanonique());
+        when(affectationService.listByChantier(CHANTIER)).thenReturn(List.of(
+                ChantierAffectationDto.builder().roleCode("BTP_CONDUCTEUR_TRAVAUX").build(),
+                ChantierAffectationDto.builder().roleCode("BTP_CHEF_CHANTIER").build()));
+        when(lotRepository.countByTenantIdAndChantierId(TENANT, CHANTIER)).thenReturn(3L);
+
+        CockpitChantierDto dto = service.lireCockpit(CHANTIER);
+
+        assertThat(parCode(dto, "planning").getCategorie()).isEqualTo("RECOMMANDE");
+        assertThat(parCode(dto, "planning").getEtat()).isEqualTo("A_FAIRE");
+        assertThat(dto.getPreparationResume()).isNotNull();
+        assertThat(dto.getPreparationResume().getPrerequisOk())
+                .isEqualTo(dto.getPreparationResume().getPrerequisTotal());
+        assertThat(dto.getPreparationResume().getRecommandationsEnAttente())
+                .containsExactly("planning");
+        assertThat(dto.getNextActions()).noneMatch(a ->
+                "chantiers.cockpit.action.demarrer".equals(a.getLibelle()));
+    }
+
+    @Test
+    void checklist_EN_PREPARATION_sansDates_datesBloquantes_pasDemarrer() {
+        UserContext.setUserRole("OWNER");
+        Chantier c = chantier(Chantier.STATUS_EN_PREPARATION);
+        c.setClientId("client-1");
+        c.setDebourseInitialHt(new BigDecimal("582600.00"));
+        prepare(c, summaryCanonique());
+        when(lotRepository.countByTenantIdAndChantierId(TENANT, CHANTIER)).thenReturn(1L);
+        when(affectationService.listByChantier(CHANTIER)).thenReturn(List.of(
+                ChantierAffectationDto.builder().roleCode("BTP_CONDUCTEUR_TRAVAUX").build(),
+                ChantierAffectationDto.builder().roleCode("BTP_CHEF_CHANTIER").build()));
+
+        CockpitChantierDto dto = service.lireCockpit(CHANTIER);
+
+        assertThat(parCode(dto, "dates_prevues").getEtat()).isEqualTo("BLOQUANT");
+        assertThat(dto.getPreparationResume().getPrerequisOk())
+                .isLessThan(dto.getPreparationResume().getPrerequisTotal());
+        assertThat(dto.getNextActions().getFirst().getLibelle())
+                .isEqualTo("chantiers.cockpit.action.preparer");
+        assertThat(dto.getNextActions()).noneMatch(a ->
+                "chantiers.cockpit.action.demarrer".equals(a.getLibelle()));
     }
 
     private static CockpitChantierDto.PreparationDto parCode(CockpitChantierDto dto, String code) {

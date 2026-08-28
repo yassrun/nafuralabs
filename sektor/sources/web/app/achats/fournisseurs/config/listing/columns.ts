@@ -5,7 +5,7 @@ import type { ColumnConfig } from '@platform/lib/anatomy/types';
 const NOTATION_LABELS: Record<number, string> = { 1: '★', 2: '★★', 3: '★★★', 4: '★★★★', 5: '★★★★★' };
 
 export function buildFournisseurColumns(t: TranslateService): ColumnConfig[] {
-  const tr = (k: string) => t.instant(k);
+  const tr = (k: string, params?: Record<string, unknown>) => t.instant(k, params);
   return [
     { key: 'code', label: tr('achats.fournisseur.list.columns.code'), field: 'code', type: 'text', sortable: true, width: '90px' },
     { key: 'raisonSociale', label: tr('achats.fournisseur.list.columns.raisonSociale'), field: 'raisonSociale', type: 'text', sortable: true },
@@ -28,7 +28,7 @@ export function buildFournisseurColumns(t: TranslateService): ColumnConfig[] {
     {
       key: 'delaiLivraisonMoyen', label: tr('achats.fournisseur.list.columns.delaiLivraisonMoyen'), field: 'delaiLivraisonMoyen', type: 'text',
       sortable: true, width: '110px',
-      transform: (v) => v != null ? tr('achats.fournisseur.list.transform.joursSuffix').replace('{n}', String(v)) : '—',
+      transform: (v) => v != null ? tr('achats.fournisseur.list.transform.joursSuffix', { n: v }) : '—',
     },
     {
       key: 'isActive', label: tr('achats.fournisseur.list.columns.status'), field: 'isActive', type: 'badge', sortable: true, width: '90px',

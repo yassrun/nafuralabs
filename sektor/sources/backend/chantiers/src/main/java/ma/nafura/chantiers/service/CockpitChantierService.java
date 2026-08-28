@@ -17,6 +17,8 @@ import ma.nafura.chantiers.repository.ChantierLotRepository;
 import ma.nafura.chantiers.repository.AttachementChantierRepository;
 import ma.nafura.chantiers.repository.AvancementPhysiqueRepository;
 import ma.nafura.chantiers.repository.JournalChantierRepository;
+import ma.nafura.chantiers.repository.SituationTravauxRepository;
+import ma.nafura.chantiers.domain.situation.SituationTravaux;
 import ma.nafura.chantiers.service.port.DemandeAchatCockpitPort;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.beans.factory.ObjectProvider;
@@ -50,6 +52,7 @@ public class CockpitChantierService {
     private final JournalChantierRepository journalRepository;
     private final AttachementChantierRepository attachementRepository;
     private final AvancementPhysiqueRepository avancementRepository;
+    private final SituationTravauxRepository situationRepository;
     private final ObjectProvider<DemandeAchatCockpitPort> demandeAchatPort;
 
     public CockpitChantierService(
@@ -60,6 +63,7 @@ public class CockpitChantierService {
             JournalChantierRepository journalRepository,
             AttachementChantierRepository attachementRepository,
             AvancementPhysiqueRepository avancementRepository,
+            SituationTravauxRepository situationRepository,
             ObjectProvider<DemandeAchatCockpitPort> demandeAchatPort) {
         this.chantierService = chantierService;
         this.summaryService = summaryService;
@@ -68,6 +72,7 @@ public class CockpitChantierService {
         this.journalRepository = journalRepository;
         this.attachementRepository = attachementRepository;
         this.avancementRepository = avancementRepository;
+        this.situationRepository = situationRepository;
         this.demandeAchatPort = demandeAchatPort;
     }
 
@@ -98,7 +103,15 @@ public class CockpitChantierService {
                 .anyMatch(a -> "BTP_CONDUCTEUR_TRAVAUX".equals(a.getRoleCode()));
         boolean aChefChantier = affectations.stream()
                 .anyMatch(a -> "BTP_CHEF_CHANTIER".equals(a.getRoleCode()));
+        long openSituations = summary != null ? summary.getOpenSituationsCount() : 0L;
+        String situationBrouillonId = lireSansPlanter(
+                () -> idSituationBrouillon(chantierId),
+                "chantiers.cockpit.degradation.situations", degradations);
+        boolean cycleMensuelComplet = cycleMensuelComplet(
+                aAvancementPeriode, aAttachementPeriode, openSituations);
 
+        List<CockpitChantierDto.PreparationDto> preparationItems =
+                preparation(chantier, nbLots, aConducteur, aChefChantier, degradations);
         return CockpitChantierDto.builder()
                 .identity(identite(chantier, fraicheur))
                 .schedule(calendrier(chantier))
@@ -108,13 +121,19 @@ public class CockpitChantierService {
                         financeIndisponible(fraicheur)))
                 .progress(lireSansPlanter(
                         () -> progression(chantier, summary, fraicheur,
-                                aAvancementPeriode, aAttachementPeriode),
+                                aAvancementPeriode, aAttachementPeriode, situationBrouillonId),
                         "chantiers.cockpit.degradation.progression", degradations,
                         progressionIndisponible(fraicheur)))
-                .preparation(preparation(chantier, nbLots, aConducteur, aChefChantier, degradations))
+                .preparation(preparationItems)
+                .preparationResume(resumePreparation(preparationItems))
                 .alerts(alertes(chantier, summary, degradations))
                 .nextActions(ChantierActionDecision.actions(
-                        chantier, nbLots != null ? nbLots : 0, aConducteur, aChefChantier))
+                        chantier,
+                        nbLots != null ? nbLots : 0,
+                        aConducteur,
+                        aChefChantier,
+                        cycleMensuelComplet,
+                        situationBrouillonId))
                 .activityFeed(lireSansPlanter(
                         () -> activite(chantierId),
                         "chantiers.cockpit.degradation.activite", degradations, List.of()))
@@ -286,7 +305,7 @@ public class CockpitChantierService {
 
     private CockpitChantierDto.ProgressDto progression(
             Chantier c, ChantierSummaryDto s, OffsetDateTime fraicheur,
-            Boolean aAvancementPeriode, Boolean aAttachementPeriode) {
+            Boolean aAvancementPeriode, Boolean aAttachementPeriode, String situationBrouillonId) {
         BigDecimal avancement = c.getAvancementPercent() != null
                 ? c.getAvancementPercent().setScale(1, RoundingMode.HALF_UP)
                 : null;
@@ -303,7 +322,7 @@ public class CockpitChantierService {
         // AC-15/P1-9 — le flux mensuel est calculé sur de vraies données : la première rupture
         // réelle de la séquence avancement → attachement → situation, jamais « AVANCEMENT » en dur.
         CockpitChantierDto.FluxMensuelDto flux = fluxMensuel(
-                s, c, aAvancementPeriode, aAttachementPeriode);
+                s, c, aAvancementPeriode, aAttachementPeriode, situationBrouillonId);
         return CockpitChantierDto.ProgressDto.builder()
                 .avancementPercent(av)
                 .factureHt(facture)
@@ -318,11 +337,11 @@ public class CockpitChantierService {
      * résout l'étape. {@code premiereAction} est une ROUTE réelle (jamais une clé de libellé) ;
      * {@code etape} est une clé de libellé consommée par l'UI.
      */
-    private static CockpitChantierDto.FluxMensuelDto fluxMensuel(
+    private CockpitChantierDto.FluxMensuelDto fluxMensuel(
             ChantierSummaryDto s, Chantier c,
-            Boolean aAvancementPeriode, Boolean aAttachementPeriode) {
+            Boolean aAvancementPeriode, Boolean aAttachementPeriode, String situationBrouillonId) {
         String periode = periodeCourante();
-        long situationsOuvertes = s.getOpenSituationsCount();
+        long situationsOuvertes = s != null ? s.getOpenSituationsCount() : 0L;
         if (estTerminal(c.getStatus())) {
             return CockpitChantierDto.FluxMensuelDto.builder()
                     .etape("chantiers.cockpit.flux.etapeLectureSeule").periode(periode)
@@ -360,9 +379,31 @@ public class CockpitChantierService {
                     .premiereAction("/chantiers/situations?chantierId={id}")
                     .actionnable(true).build();
         }
+        if (situationBrouillonId != null && !situationBrouillonId.isBlank()) {
+            return CockpitChantierDto.FluxMensuelDto.builder()
+                    .etape("chantiers.cockpit.flux.etapeSoumettreSituation").periode(periode)
+                    .premiereAction("/chantiers/situations/" + situationBrouillonId)
+                    .actionnable(true).build();
+        }
         return CockpitChantierDto.FluxMensuelDto.builder()
-                .etape("chantiers.cockpit.flux.etapeComplete").periode(periode)
-                .actionnable(false).build();
+                .etape("chantiers.cockpit.flux.etapeTrouReel").periode(periode)
+                .premiereAction("/achats/commandes?chantierId={id}")
+                .actionnable(true).build();
+    }
+
+    private static boolean cycleMensuelComplet(
+            Boolean aAvancementPeriode, Boolean aAttachementPeriode, long openSituations) {
+        return Boolean.TRUE.equals(aAvancementPeriode)
+                && Boolean.TRUE.equals(aAttachementPeriode)
+                && openSituations > 0;
+    }
+
+    private String idSituationBrouillon(String chantierId) {
+        return situationRepository
+                .findFirstByTenantIdAndChantierIdAndStatusOrderByNumeroOrdreDesc(
+                        tenantId(), chantierId, SituationTravaux.STATUS_BROUILLON)
+                .map(SituationTravaux::getId)
+                .orElse(null);
     }
 
     private boolean aAttachementPeriode(String chantierId) {
@@ -447,9 +488,10 @@ public class CockpitChantierService {
                 c.getOsReference() == null || c.getOsDateEffet() == null,
                 "chantiers.cockpit.preparation.os", "chantiers.cockpit.preparation.action.os",
                 "chantiers.cockpit.preparation.raison.os"));
-        // Planning — jamais bloquant (AC-8).
+        // Planning — jamais bloquant, hors ratio prérequis (AC-15).
         out.add(CockpitChantierDto.PreparationDto.builder()
                 .code("planning")
+                .categorie("RECOMMANDE")
                 .etat("A_FAIRE")
                 .libelle("chantiers.cockpit.preparation.planning")
                 .action("chantiers.cockpit.preparation.action.planning")
@@ -458,10 +500,42 @@ public class CockpitChantierService {
         return out;
     }
 
+    /**
+     * AC-15 — ratio prérequis du stade courant : seuls les items {@code PREREQUIS} comptent ;
+     * les {@code NON_APPLICABLE} sont exclus ; le planning reste recommandé.
+     */
+    static CockpitChantierDto.PreparationResumeDto resumePreparation(
+            List<CockpitChantierDto.PreparationDto> items) {
+        int ok = 0;
+        int total = 0;
+        List<String> recoPending = new ArrayList<>();
+        for (CockpitChantierDto.PreparationDto p : items) {
+            if ("RECOMMANDE".equals(p.getCategorie())) {
+                if ("A_FAIRE".equals(p.getEtat())) {
+                    recoPending.add(p.getCode());
+                }
+                continue;
+            }
+            if ("NON_APPLICABLE".equals(p.getEtat())) {
+                continue;
+            }
+            total++;
+            if ("OK".equals(p.getEtat())) {
+                ok++;
+            }
+        }
+        return CockpitChantierDto.PreparationResumeDto.builder()
+                .prerequisOk(ok)
+                .prerequisTotal(total)
+                .recommandationsEnAttente(recoPending)
+                .build();
+    }
+
     private static CockpitChantierDto.PreparationDto prep(
             String code, boolean bloquant, String libelle, String action, String raison) {
         return CockpitChantierDto.PreparationDto.builder()
                 .code(code)
+                .categorie("PREREQUIS")
                 .etat(bloquant ? "BLOQUANT" : "OK")
                 .libelle(libelle).action(action).raison(raison).build();
     }
@@ -471,13 +545,15 @@ public class CockpitChantierService {
             String raison) {
         String etat = nonApplicable ? "NON_APPLICABLE" : (bloquant ? "BLOQUANT" : "OK");
         return CockpitChantierDto.PreparationDto.builder()
-                .code(code).etat(etat).libelle(libelle).action(action).raison(raison).build();
+                .code(code).categorie("PREREQUIS").etat(etat)
+                .libelle(libelle).action(action).raison(raison).build();
     }
 
     private static CockpitChantierDto.PreparationDto prepIndisponible(
             String code, String libelle, String action) {
         return CockpitChantierDto.PreparationDto.builder()
-                .code(code).etat("INDISPONIBLE").libelle(libelle).action(action)
+                .code(code).categorie("PREREQUIS").etat("INDISPONIBLE")
+                .libelle(libelle).action(action)
                 .raison("chantiers.cockpit.preparation.raison.indisponible").build();
     }
 

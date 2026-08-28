@@ -1,0 +1,7 @@
+{
+  "periode": { "debut": "2026-09-01", "fin": "2026-09-30" },
+  "lignes": [
+    { "noeud": "2.1", "qte": 40, "unite": "m³" },
+    { "noeud": "2.3", "qte": 120, "unite": "m²" }
+  ]
+}

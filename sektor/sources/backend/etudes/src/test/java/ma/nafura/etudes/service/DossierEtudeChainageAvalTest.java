@@ -33,6 +33,12 @@ import ma.nafura.etudes.repository.DossierDocumentRepository;
 import ma.nafura.etudes.repository.DossierEtudeRepository;
 import ma.nafura.etudes.repository.DossierPieceAttendueRepository;
 import ma.nafura.etudes.repository.DpgfNoeudRepository;
+import ma.nafura.etudes.api.dto.completude.CompletudeCompteursDto;
+import ma.nafura.etudes.api.dto.completude.CompletudeEtude;
+import ma.nafura.etudes.api.dto.completude.ControleEtude;
+import ma.nafura.etudes.api.dto.completude.SeveriteControle;
+import ma.nafura.etudes.service.CompletudeGateException;
+import ma.nafura.etudes.service.WarningsNonAcceptesException;
 import ma.nafura.etudes.service.DossierEtudeService.AttributionMismatchException;
 import ma.nafura.etudes.service.DossierEtudeService.MargeNegativeRefuseeException;
 import ma.nafura.etudes.service.DossierEtudeService.PostesOrphelinsException;
@@ -110,11 +116,15 @@ class DossierEtudeChainageAvalTest {
     @Mock
     private TransitionEtudeService transitionEtudeService;
 
+    @Mock
+    private CompletudeEtudeService completudeEtudeService;
+
     private DossierEtudeService service;
 
     @BeforeEach
     void setUp() {
         TenantContext.setTenantId(TENANT);
+        stubCompletudeVide();
         service = new DossierEtudeService(
                 repository,
                 noeudRepository,
@@ -135,6 +145,8 @@ class DossierEtudeChainageAvalTest {
                 chainageAvalPort,
                 mock(ConsultationEtudeService.class),
                 transitionEtudeService,
+                completudeEtudeService,
+                mock(DecisionCatalogueService.class),
                 List.of());
         lenient()
                 .when(repository.save(any(DossierEtude.class)))
@@ -847,6 +859,106 @@ class DossierEtudeChainageAvalTest {
     /** Un devis EMIS lié au dossier, total 737106 — valeurs discriminantes du contrat. */
     private static Devis devis(String statut) {
         return devis(statut, new BigDecimal("737106.00"));
+    }
+
+    /** SEKTOR-211 — 100 % coûts non établis : gain refusé avec ETU-130. */
+    @Test
+    void gagne_completudeBloquante_refuse() {
+        DossierEtude dossier = dossier(StatutDossierEtude.DEVIS_GENERE);
+        ControleEtude controle = ControleEtude.builder()
+                .code(CompletudeEtudeService.ETU_130)
+                .severite(SeveriteControle.BLOCKING)
+                .build();
+        CompletudeEtude completude = completudeAvec(controle);
+        when(repository.findByIdAndTenantId(DOSSIER_ID, TENANT)).thenReturn(Optional.of(dossier));
+        when(completudeEtudeService.evaluer(dossier)).thenReturn(completude);
+        when(completudeEtudeService.controlesBloquants(completude)).thenReturn(List.of(controle));
+
+        assertThatThrownBy(() -> service.gagne(DOSSIER_ID, gainStandard()))
+                .isInstanceOf(CompletudeGateException.class);
+        verify(devisRepository, never()).save(any());
+    }
+
+    /** SEKTOR-211 — warning commercial accepté avec motif aboutit. */
+    @Test
+    void gagne_warningAccepte_avecMotif_aboutit() {
+        DossierEtude dossier = dossier(StatutDossierEtude.DEVIS_GENERE);
+        Devis devis = devis(Devis.STATUS_EMIS);
+        when(repository.findByIdAndTenantId(DOSSIER_ID, TENANT)).thenReturn(Optional.of(dossier));
+        when(devisRepository.findByIdAndTenantId(DEVIS_ID, TENANT)).thenReturn(Optional.of(devis));
+        when(completudeEtudeService.evaluer(dossier))
+                .thenReturn(completudeAvec(ControleEtude.builder()
+                        .code(CompletudeEtudeService.ETU_120)
+                        .severite(SeveriteControle.WARNING)
+                        .build()));
+        when(completudeEtudeService.controlesBloquants(any())).thenReturn(List.of());
+        when(completudeEtudeService.controlesWarnings(any()))
+                .thenReturn(List.of(ControleEtude.builder()
+                        .code(CompletudeEtudeService.ETU_120)
+                        .severite(SeveriteControle.WARNING)
+                        .build()));
+
+        DossierGagneDto body = gainStandard();
+        body.setAcceptWarnings(true);
+        body.setMotifDerogation("Hypothèse commerciale validée");
+
+        DossierEtude out = service.gagne(DOSSIER_ID, body);
+
+        assertThat(out.getStatus()).isEqualTo(StatutDossierEtude.GAGNE);
+    }
+
+    /** SEKTOR-211 — warning sans acceptation refusé. */
+    @Test
+    void gagne_warningSansAcceptation_refuse() {
+        DossierEtude dossier = dossier(StatutDossierEtude.DEVIS_GENERE);
+        when(repository.findByIdAndTenantId(DOSSIER_ID, TENANT)).thenReturn(Optional.of(dossier));
+        when(completudeEtudeService.evaluer(dossier))
+                .thenReturn(completudeAvec(ControleEtude.builder()
+                        .code(CompletudeEtudeService.ETU_120)
+                        .severite(SeveriteControle.WARNING)
+                        .build()));
+        when(completudeEtudeService.controlesBloquants(any())).thenReturn(List.of());
+        when(completudeEtudeService.controlesWarnings(any()))
+                .thenReturn(List.of(ControleEtude.builder()
+                        .code(CompletudeEtudeService.ETU_120)
+                        .severite(SeveriteControle.WARNING)
+                        .build()));
+
+        assertThatThrownBy(() -> service.gagne(DOSSIER_ID, gainStandard()))
+                .isInstanceOf(WarningsNonAcceptesException.class);
+    }
+
+    private void stubCompletudeVide() {
+        CompletudeEtude vide = CompletudeEtude.builder()
+                .compteurs(CompletudeCompteursDto.builder()
+                        .bloquants(0)
+                        .warnings(0)
+                        .infos(0)
+                        .total(0)
+                        .parPhase(List.of())
+                        .build())
+                .controles(List.of())
+                .build();
+        lenient().when(completudeEtudeService.evaluer(any(DossierEtude.class))).thenReturn(vide);
+        lenient().when(completudeEtudeService.evaluer(any(UUID.class))).thenReturn(vide);
+        lenient().when(completudeEtudeService.anomaliesAffichees(any())).thenReturn(0);
+        lenient().when(completudeEtudeService.controlesBloquants(any())).thenReturn(List.of());
+        lenient().when(completudeEtudeService.controlesWarnings(any())).thenReturn(List.of());
+    }
+
+    private static CompletudeEtude completudeAvec(ControleEtude controle) {
+        int bloquants = controle.getSeverite() == SeveriteControle.BLOCKING ? 1 : 0;
+        int warnings = controle.getSeverite() == SeveriteControle.WARNING ? 1 : 0;
+        return CompletudeEtude.builder()
+                .controles(List.of(controle))
+                .compteurs(CompletudeCompteursDto.builder()
+                        .bloquants(bloquants)
+                        .warnings(warnings)
+                        .infos(0)
+                        .total(bloquants + warnings)
+                        .parPhase(List.of())
+                        .build())
+                .build();
     }
 
     /** Un devis EMIS lié au dossier avec un total HT donné (AC-3 / AC-4). */

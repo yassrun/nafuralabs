@@ -114,6 +114,8 @@ class DossierEtudeServiceClientTest {
                 org.mockito.Mockito.mock(ma.nafura.etudes.service.port.bc.ChainageAvalPort.class),
                 org.mockito.Mockito.mock(ma.nafura.etudes.service.ConsultationEtudeService.class),
                 org.mockito.Mockito.mock(ma.nafura.etudes.service.TransitionEtudeService.class),
+                org.mockito.Mockito.mock(CompletudeEtudeService.class),
+                org.mockito.Mockito.mock(DecisionCatalogueService.class),
                 java.util.List.of());
     }
 
@@ -135,7 +137,6 @@ class DossierEtudeServiceClientTest {
 
     @Test
     void create_avecMoaTexte_sansPartner() {
-        when(repository.existsByTenantIdAndNumero(any(), any())).thenReturn(false);
         when(repository.countByTenantId(TENANT)).thenReturn(0L);
         when(repository.save(any())).thenAnswer(inv -> {
             DossierEtude d = inv.getArgument(0);
@@ -160,7 +161,6 @@ class DossierEtudeServiceClientTest {
 
     @Test
     void create_avecClient_normaliseDepuisPort() {
-        when(repository.existsByTenantIdAndNumero(any(), any())).thenReturn(false);
         when(repository.countByTenantId(TENANT)).thenReturn(0L);
         when(repository.save(any())).thenAnswer(inv -> {
             DossierEtude d = inv.getArgument(0);

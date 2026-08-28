@@ -27,7 +27,7 @@ function translateOrEmpty(t: TranslateService, key: string): string {
 }
 
 export function buildFactureColumns(t: TranslateService): ColumnConfig[] {
-  const tr = (key: string) => t.instant(key);
+  const tr = (key: string, params?: Record<string, unknown>) => t.instant(key, params);
   const locale = resolveLocale(t);
   const fmtDate = (v: unknown): string => {
     if (typeof v !== 'string' || !v) return '—';
@@ -125,7 +125,7 @@ export function buildFactureColumns(t: TranslateService): ColumnConfig[] {
       transform: (v: unknown) => {
         const n = Number(v ?? 0);
         if (n <= 0) return '—';
-        return tr('ventes.facture.list.transform.retardJ').replace('{n}', String(n));
+        return tr('ventes.facture.list.transform.retardJ', { n });
       },
     },
     {

@@ -16,7 +16,7 @@ function translateOrEmpty(t: TranslateService, key: string): string {
 }
 
 export function buildDemandeColumns(t: TranslateService): ColumnConfig[] {
-  const tr = (k: string) => t.instant(k);
+  const tr = (k: string, params?: Record<string, unknown>) => t.instant(k, params);
   const locale = resolveLocale(t);
   const fmtDate = (v: unknown): string => {
     if (!v) return '—';
@@ -51,7 +51,7 @@ export function buildDemandeColumns(t: TranslateService): ColumnConfig[] {
     },
     {
       key: 'delaiAttente', label: tr('achats.demande.list.columns.delaiAttente'), field: 'delaiAttente', type: 'badge', width: '100px',
-      transform: (v) => v != null ? tr('achats.demande.list.transform.joursSuffix').replace('{n}', String(v)) : '—',
+      transform: (v) => v != null ? tr('achats.demande.list.transform.joursSuffix', { n: v }) : '—',
       badgeVariant: (v) => {
         if (v == null) return 'default';
         const n = Number(v);

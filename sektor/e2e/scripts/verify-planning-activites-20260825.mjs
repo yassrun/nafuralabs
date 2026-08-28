@@ -94,19 +94,26 @@ async function seedChantier(h, s) {
   const clientId = partner.body.id;
 
   await api(h, 'PUT', `/api/v1/etudes/dossiers/${dossierId}/etape`, { etape: 2 });
-  await api(h, 'POST', `/api/v1/etudes/dossiers/${dossierId}/soumettre`);
+  const soumis = await api(h, 'POST', `/api/v1/etudes/dossiers/${dossierId}/soumettre`);
+  if (!soumis.ok) throw new Error(`soumettre ${soumis.status} ${soumis.text?.slice(0, 200)}`);
   let valider = await api(h, 'POST', `/api/v1/etudes/dossiers/${dossierId}/valider`);
   if (valider.body?.status === 'EN_VALIDATION') {
     valider = await api(h, 'POST', `/api/v1/etudes/dossiers/${dossierId}/valider`);
   }
   if (valider.body?.status !== 'VALIDEE') {
-    throw new Error(`étude non VALIDEE: ${valider.body?.status}`);
+    throw new Error(`étude non VALIDEE: ${valider.body?.status} ${valider.text?.slice(0, 200)}`);
   }
-  await api(h, 'POST', `/api/v1/etudes/dossiers/${dossierId}/generer-devis`, { clientId });
+  const devisGen = await api(h, 'POST', `/api/v1/etudes/dossiers/${dossierId}/generer-devis`, { clientId });
+  if (!devisGen.ok) throw new Error(`generer-devis ${devisGen.status} ${devisGen.text}`);
+  const devisId = devisGen.body?.devisGenereId ?? devisGen.body?.id;
+  const devisDetail = await api(h, 'GET', `/api/v1/etudes/devis/${devisId}`);
+  const total = devisDetail.body?.totalHt ?? devisDetail.body?.totalHT;
+  await api(h, 'POST', `/api/v1/etudes/devis/${devisId}/submit`);
   const gagne = await api(h, 'POST', `/api/v1/etudes/dossiers/${dossierId}/gagne`, {
     dateAttribution: '2026-08-25',
     referenceMarche: `MA-PL-${s}`,
-    montantAttribue: 100000,
+    devisId,
+    montantAttribue: total,
   });
   if (!gagne.ok || gagne.body?.status !== 'GAGNE') {
     throw new Error(`gagne KO: ${gagne.status} ${gagne.body?.status}`);

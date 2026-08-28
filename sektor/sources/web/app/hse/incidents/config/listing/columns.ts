@@ -20,7 +20,7 @@ function translateOrEmpty(t: TranslateService, key: string): string {
 }
 
 export function buildIncidentColumns(t: TranslateService): ColumnConfig[] {
-  const tr = (k: string) => t.instant(k);
+  const tr = (k: string, params?: Record<string, unknown>) => t.instant(k, params);
   const locale = resolveLocale(t);
   const fmtDate = (v: unknown): string => {
     if (!v) return '—';
@@ -57,7 +57,7 @@ export function buildIncidentColumns(t: TranslateService): ColumnConfig[] {
     },
     {
       key: 'joursArret', label: tr('hse.incident.list.columns.joursArret'), field: 'joursArret', type: 'text', width: '100px',
-      transform: (v) => (v != null && v !== undefined && v !== '') ? tr('hse.incident.list.transform.joursSuffix').replace('{n}', String(v)) : '—',
+      transform: (v) => (v != null && v !== undefined && v !== '') ? tr('hse.incident.list.transform.joursSuffix', { n: v }) : '—',
     },
     {
       key: 'status', label: tr('hse.incident.list.columns.statut'), field: 'status', type: 'badge', sortable: true, width: '140px',

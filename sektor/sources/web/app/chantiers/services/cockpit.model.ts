@@ -55,10 +55,18 @@ export interface CockpitProgress {
 
 export interface CockpitPreparation {
   code: string;
+  /** PREREQUIS | RECOMMANDE — seuls les prérequis entrent dans le ratio serveur. */
+  categorie?: 'PREREQUIS' | 'RECOMMANDE' | null;
   etat: 'BLOQUANT' | 'A_FAIRE' | 'OK' | 'NON_APPLICABLE' | 'INDISPONIBLE';
   libelle: string;
   action: string;
   raison?: string | null;
+}
+
+export interface CockpitPreparationResume {
+  prerequisOk: number;
+  prerequisTotal: number;
+  recommandationsEnAttente: string[];
 }
 
 export interface CockpitAlerte {
@@ -103,6 +111,8 @@ export interface CockpitChantier {
   finance?: CockpitFinance | null;
   progress?: CockpitProgress | null;
   preparation: CockpitPreparation[];
+  /** AC-15 — ratio prérequis vs recommandations, calculé côté serveur. */
+  preparationResume?: CockpitPreparationResume | null;
   alerts: CockpitAlerte[];
   nextActions: CockpitNextAction[];
   activityFeed: CockpitActivityFeed[];

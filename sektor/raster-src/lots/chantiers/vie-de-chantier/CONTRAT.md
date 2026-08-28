@@ -140,4 +140,4 @@ Le détail vivant est [`SCENARIO.md`](SCENARIO.md). Noms stables :
 | `alqods-documents-os-pv` | OS + PV depuis cockpit | AC-10, AC-11 |
 | `alqods-marche-notification` | vente bascule devis → marché | AC-12 |
 | `alqods-roles` | chef / magasinier / daf | AC-3 |
-| `alqods-reception-provisoire` | pas de clore depuis EN_COURS | AC-15 |
+| `alqods-reception-provisoire` | PV + POST réception, cockpit lecture seule, /clore refusé | AC-15 |
