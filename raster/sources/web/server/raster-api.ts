@@ -177,6 +177,23 @@ function readGlobalInbox(repoRoot: string): string[] {
   return parseInboxLines(fs.readFileSync(file, "utf8"));
 }
 
+function hasTag(line: string, tag: string) {
+  const norm = tag.trim().toLowerCase();
+  if (!norm) return false;
+  const tags = [...line.matchAll(/(?:^|\s)@([a-zA-Z0-9_-]+)/g)].map((m) =>
+    m[1].toLowerCase()
+  );
+  return tags.includes(norm);
+}
+
+function normalizeCaptureLine(line: string, project: string) {
+  const base = line.trim().replace(/\s+/g, " ");
+  const p = project.trim();
+  if (!p) return base;
+  if (hasTag(base, p)) return base;
+  return `${base} @${p}`;
+}
+
 /** La capture n'est pas une task : c'est la seule écriture qui reste ici. */
 function writeGlobalInbox(repoRoot: string, lines: string[]) {
   const dir = path.join(repoRoot, "raster");
@@ -194,6 +211,27 @@ function writeGlobalInbox(repoRoot: string, lines: string[]) {
     ].join("\n"),
     "utf8"
   );
+}
+
+function replaceInboxLine(repoRoot: string, oldLine: string, newLine: string) {
+  const trimmedOld = oldLine.trim();
+  const trimmedNew = newLine.trim();
+  if (!trimmedOld || !trimmedNew) throw new Error("oldLine/newLine required");
+  const lines = readGlobalInbox(repoRoot);
+  const next = lines.map((line) => (line === trimmedOld ? trimmedNew : line));
+  if (next.every((line) => line !== trimmedNew) && !lines.includes(trimmedOld)) {
+    throw new Error("ligne introuvable dans l'inbox");
+  }
+  writeGlobalInbox(repoRoot, next);
+  return readGlobalInbox(repoRoot);
+}
+
+function deleteInboxLine(repoRoot: string, line: string) {
+  const trimmed = line.trim();
+  if (!trimmed) throw new Error("line required");
+  const lines = readGlobalInbox(repoRoot).filter((item) => item !== trimmed);
+  writeGlobalInbox(repoRoot, lines);
+  return readGlobalInbox(repoRoot);
 }
 
 function readJson(req: IncomingMessage): Promise<unknown> {
@@ -300,10 +338,25 @@ export function rasterApiPlugin(repoRoot?: string): Plugin {
           }
 
           if (req.method === "POST" && url === "/api/inbox") {
+            const body = (await readJson(req)) as { line?: string; project?: string };
+            if (!body.line?.trim()) return send(res, 400, { error: "line required" });
+            const line = normalizeCaptureLine(body.line, body.project || "");
+            writeGlobalInbox(root, [line, ...readGlobalInbox(root)]);
+            return send(res, 200, { lines: readGlobalInbox(root) });
+          }
+
+          if (req.method === "POST" && url === "/api/inbox/update") {
+            const body = (await readJson(req)) as { oldLine?: string; newLine?: string };
+            if (!body.oldLine?.trim() || !body.newLine?.trim()) {
+              return send(res, 400, { error: "oldLine + newLine required" });
+            }
+            return send(res, 200, { lines: replaceInboxLine(root, body.oldLine, body.newLine) });
+          }
+
+          if (req.method === "POST" && url === "/api/inbox/delete") {
             const body = (await readJson(req)) as { line?: string };
             if (!body.line?.trim()) return send(res, 400, { error: "line required" });
-            writeGlobalInbox(root, [body.line.trim(), ...readGlobalInbox(root)]);
-            return send(res, 200, { lines: readGlobalInbox(root) });
+            return send(res, 200, { lines: deleteInboxLine(root, body.line) });
           }
 
           if (req.method === "POST" && url === "/api/inbox/promote") {
@@ -318,7 +371,11 @@ export function rasterApiPlugin(repoRoot?: string): Plugin {
             if (!b.target?.trim()) {
               return send(res, 400, { error: "sans lot cible → rester inbox, non promu" });
             }
-            const r = promoteLine(b.line.trim(), b.project.trim(), b.target.trim());
+            const r = promoteLine(b.line.trim(), b.project.trim(), b.target.trim(), {
+              type: "spec",
+              assignee: "agent",
+              gate: "none",
+            });
             return after(res, { id: r.id, file: r.file });
           }
 

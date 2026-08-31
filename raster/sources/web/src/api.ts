@@ -50,6 +50,7 @@ export type Lance = {
 
 export type ViewId =
   | "session"
+  | "ready"
   | "plan"
   | "sublot"
   | "captures"
@@ -173,9 +174,19 @@ export const api = {
       `/api/window${project ? `?projet=${encodeURIComponent(project)}` : ""}`
     ),
   inbox: () => json<{ lines: string[] }>("/api/inbox"),
-  capture: (line: string) =>
+  capture: (line: string, project = "") =>
     json<{ lines: string[] }>("/api/inbox", {
       method: "POST",
+      body: JSON.stringify({ line, project }),
+    }),
+  updateInbox: (oldLine: string, newLine: string) =>
+    json<{ lines: string[] }>('/api/inbox/update', {
+      method: 'POST',
+      body: JSON.stringify({ oldLine, newLine }),
+    }),
+  deleteInbox: (line: string) =>
+    json<{ lines: string[] }>('/api/inbox/delete', {
+      method: 'POST',
       body: JSON.stringify({ line }),
     }),
   /** target = "<lot>" ou "<lot>/<sous-lot>" — un dossier. */

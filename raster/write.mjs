@@ -283,19 +283,17 @@ function dropInboxLine(line) {
   fs.writeFileSync(INBOX, kept.join("\n"), "utf8");
 }
 
-/** `@tag` dans la ligne → type quand il en nomme un, tag sinon. */
+/** `@tag` dans la ligne : métadonnées de recherche, pas un type de task. */
 function readTags(line) {
   const tags = [];
-  let type = "";
   const title = line
     .replace(/(?:^|\s)@([a-zA-Z0-9_-]+)/g, (_, t) => {
-      if (!type && TYPES.includes(t.toLowerCase())) type = t.toLowerCase();
-      else tags.push(t);
+      tags.push(t);
       return " ";
     })
     .replace(/\s+/g, " ")
     .trim();
-  return { title: title || line.trim(), type: type || "feature", tags };
+  return { title: title || line.trim(), tags };
 }
 
 /** Une ligne d'inbox devient une task. La ligne ne part que si la task est écrite. */
@@ -303,14 +301,24 @@ export function promoteLine(line, project, target, opts = {}) {
   const lines = readInbox();
   const found = lines.find((l) => l === line.trim());
   if (!found) refuse(`ligne absente de raster/inbox.md : "${line}"`);
-  const { title, type, tags } = readTags(found);
+  const { title, tags } = readTags(found);
+  const {
+    type = "spec",
+    priority = "P2",
+    assignee = "agent",
+    gate = "none",
+    ...rest
+  } = opts;
   const res = createTask({
     project,
     target,
     title,
     type,
     tags,
-    ...opts,
+    priority,
+    assignee,
+    gate,
+    ...rest,
   });
   dropInboxLine(found);
   return res;

@@ -86,6 +86,7 @@ function usage() {
         [--assignee me|agent|either] [--gate none|me] [--context nafura|saham|personal]
         [--blocked-by ID,ID] [--tags a,b] [--note "…"] [--nouveau-lot]
     promote "<ligne inbox>" <projet> <lot[/sous-lot]>
+      [--priority P0..P3] [--assignee me|agent|either] [--gate none|me]
     status <id> <statut>        todo|doing|blocked|review|done-agent
     approve <id>                done-agent + gate:me → done-me
 
@@ -171,6 +172,7 @@ function run() {
   if (cmd === "promote") {
     const [line, project, target] = pos;
     const r = promoteLine(line, project, target, {
+      type: "spec",
       priority: flags.priority || "P2",
       assignee: flags.assignee || "agent",
       gate: flags.gate || "none",
