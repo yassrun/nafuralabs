@@ -63,15 +63,17 @@ import { openCatalogItemPicker } from '@app/etudes/dossiers/components/catalog-i
                   @if (line.articleId && line.articleCode) {
                     <span class="inv__article-code">{{ line.articleCode }}</span>
                   } @else {
-                    <button
-                      type="button"
+                    <nf-button
                       class="inv__pick"
+                      variant="secondary"
+                      size="sm"
+                      [fullWidth]="true"
                       data-testid="article-picker-open"
                       [disabled]="linesControl().disabled"
-                      (click)="pickArticle(i)"
+                      (clicked)="pickArticle(i)"
                     >
                       {{ 'Choisir un article' }}
-                    </button>
+                    </nf-button>
                   }
                 </td>
                 <td class="inv__muted">{{ line.articleName || ('inventory.common.dash' | translate) }}</td>
@@ -173,19 +175,7 @@ import { openCatalogItemPicker } from '@app/etudes/dossiers/components/catalog-i
       max-width: 120px;
     }
     .inv__pick {
-      width: 100%;
       min-width: 140px;
-      text-align: left;
-      padding: 0.5rem 0.65rem;
-      border: 1px solid var(--nf-border-default);
-      border-radius: 8px;
-      background: var(--nf-color-surface, #fff);
-      font: inherit;
-      cursor: pointer;
-    }
-    .inv__pick:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
     }
     .inv__muted {
       color: var(--nf-text-secondary, var(--nf-text-muted));

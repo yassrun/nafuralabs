@@ -55,15 +55,17 @@ const CAUSE_OPTIONS: { value: CauseDetaillee; labelKey: string }[] = [
             @for (line of lines(); track line.id; let i = $index) {
               <tr>
                 <td>
-                  <button
-                    type="button"
+                  <nf-button
                     class="ple__pick"
+                    variant="secondary"
+                    size="sm"
+                    [fullWidth]="true"
                     data-testid="article-picker-open"
                     [disabled]="linesControl().disabled"
-                    (click)="pickArticle(i)"
+                    (clicked)="pickArticle(i)"
                   >
                     {{ line.articleCode ? (line.articleCode + ' — ' + line.articleName) : 'Choisir un article' }}
-                  </button>
+                  </nf-button>
                 </td>
                 <td class="ple__muted">{{ line.articleName || ('inventory.common.dash' | translate) }}</td>
                 <td>
@@ -160,19 +162,11 @@ const CAUSE_OPTIONS: { value: CauseDetaillee; labelKey: string }[] = [
       max-width: 160px;
     }
     .ple__pick {
-      width: 100%;
       min-width: 140px;
-      text-align: left;
-      padding: 0.5rem 0.65rem;
-      border: 1px solid var(--nf-border-default);
-      border-radius: 8px;
-      background: var(--nf-color-surface, #fff);
-      font: inherit;
-      cursor: pointer;
     }
-    .ple__pick:disabled {
+    .ple__pick:disabled,
+    .ple__pick[disabled] {
       opacity: 0.6;
-      cursor: not-allowed;
     }
     .ple__muted {
       color: var(--nf-text-secondary, var(--nf-text-muted));

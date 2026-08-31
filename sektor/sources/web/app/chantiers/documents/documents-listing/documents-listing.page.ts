@@ -17,7 +17,22 @@ import { AuthFacade } from '@platform/core/security/services/auth.facade';
 import { ERP_ATTACHMENT_ENTITY_TYPES } from '@app/socle/shared/config/attachment-detail.config';
 import { DOCUMENT_CHANTIER_TYPE_KEYS } from '@app/socle/shell/i18n-labels';
 import type { Chantier } from '@app/chantiers/models';
-import { ButtonComponent, LOOKUP_SEARCHERS, NfSelectComponent, PageHeaderComponent, PageShellComponent, ToastService, type LookupSearchFn } from '@platform/lib/anatomy';
+import {
+  ButtonComponent,
+  ConfirmDialogService,
+  LOOKUP_SEARCHERS,
+  NfSelectComponent,
+  PageHeaderComponent,
+  PageShellComponent,
+  PaginationComponent,
+  TabsComponent,
+  ToastService,
+  type LookupSearchFn,
+  type NfSelectOption,
+  type PageChangeEvent,
+  type PageHeaderAction,
+  type TabItem,
+} from '@platform/lib/anatomy';
 import { FilterResetComponent } from '@platform/lib/anatomy/components/molecules/filter-reset/filter-reset.component';
 import { AttachmentApiService } from '@platform/features/collaboration/doc-manager/services/attachment-api.service';
 import { ChantierApiService } from '../../services/chantier-api.service';
@@ -103,11 +118,13 @@ function todayIso(): string {
     FilterResetComponent,
     ButtonComponent,
     NfSelectComponent,
+    TabsComponent,
+    PaginationComponent,
     TranslateModule,
   ],
   template: `
     <nf-page-shell scroll>
-      <nf-page-header [config]="headerConfig"></nf-page-header>
+      <nf-page-header [config]="headerConfig()" (actionClick)="onHeaderAction($event)"></nf-page-header>
 
       @if (routeChantierId() && selectedChantier(); as chantier) {
         <div class="scope-banner">
@@ -115,27 +132,18 @@ function todayIso(): string {
             <span class="scope-label">{{ 'chantiers.documents.scope.label' | translate }}</span>
             <strong>{{ chantier.code }} — {{ chantier.name }}</strong>
           </div>
-          <button type="button" class="link-button" (click)="leaveChantierScope()">
+          <nf-button variant="ghost" size="sm" (clicked)="leaveChantierScope()">
             {{ 'chantiers.documents.scope.viewAll' | translate }}
-          </button>
+          </nf-button>
         </div>
       }
 
-      <div class="topbar">
-        <div class="view-switch" role="tablist" [attr.aria-label]="'chantiers.documents.views.label' | translate">
-          <button type="button" role="tab" [class.active]="viewMode() === 'chantiers'"
-            [attr.aria-selected]="viewMode() === 'chantiers'" (click)="viewMode.set('chantiers')">
-            {{ 'chantiers.documents.views.byChantier' | translate }}
-          </button>
-          <button type="button" role="tab" [class.active]="viewMode() === 'documents'"
-            [attr.aria-selected]="viewMode() === 'documents'" (click)="viewMode.set('documents')">
-            {{ 'chantiers.documents.views.allDocuments' | translate }}
-          </button>
-        </div>
-        <nf-button variant="primary" iconLibrary="lucide" icon="plus" (clicked)="openUploadForm()">
-          {{ 'chantiers.documents.create.cta' | translate }}
-        </nf-button>
-      </div>
+      <nf-tabs
+        class="view-tabs"
+        [tabs]="viewTabs()"
+        [activeTab]="viewMode()"
+        (tabChange)="onViewTabChange($event)"
+      />
 
       <section class="filters" [attr.aria-label]="'chantiers.documents.filters.label' | translate">
         <input class="search" type="search" [placeholder]="'chantiers.documents.filters.search' | translate"
@@ -150,12 +158,13 @@ function todayIso(): string {
           [placeholder]="'chantiers.documents.filters.allChantiers' | translate"
           [disabled]="!!routeChantierId()"
         />
-        <select [value]="filterCategory()" (change)="setCategoryFilter($any($event.target).value)">
-          <option value="">{{ 'chantiers.documents.filters.allCategories' | translate }}</option>
-          @for (category of categories; track category) {
-            <option [value]="category">{{ categoryLabel(category) }}</option>
-          }
-        </select>
+        <nf-select
+          class="filter-category"
+          [options]="categoryOptions()"
+          [ngModel]="filterCategory()"
+          (ngModelChange)="setCategoryFilter($event)"
+          [placeholder]="'chantiers.documents.filters.allCategories' | translate"
+        />
         <input type="date" [value]="dateFrom()" [attr.aria-label]="'chantiers.documents.filters.dateFrom' | translate"
           (change)="dateFrom.set($any($event.target).value); applyFilters()" />
         <input type="date" [value]="dateTo()" [attr.aria-label]="'chantiers.documents.filters.dateTo' | translate"
@@ -170,8 +179,8 @@ function todayIso(): string {
         <section class="upload-panel">
           <div class="panel-heading">
             <h2>{{ 'chantiers.documents.create.title' | translate }}</h2>
-            <button type="button" class="icon-button" (click)="closeUploadForm()"
-              [attr.aria-label]="'chantiers.common.actions.cancel' | translate">×</button>
+            <nf-button variant="ghost" icon="x" size="sm" (clicked)="closeUploadForm()"
+              [attr.aria-label]="'chantiers.common.actions.cancel' | translate"></nf-button>
           </div>
           <div class="form-grid">
             <label>
@@ -189,20 +198,19 @@ function todayIso(): string {
             </label>
             <label>
               <span>{{ 'chantiers.documents.create.fields.type' | translate }}</span>
-              <select class="field" [(ngModel)]="uploadDraft.type" name="type">
-                @for (type of palierTypes; track type) {
-                  <option [value]="type">{{ typeLabel(type) }}</option>
-                }
-              </select>
+              <nf-select
+                [options]="typeOptions()"
+                [(ngModel)]="uploadDraft.type"
+                name="type"
+              />
             </label>
             <label>
               <span>{{ 'chantiers.documents.create.fields.noeud' | translate }}</span>
-              <select class="field" [(ngModel)]="uploadDraft.noeudId" name="noeudId">
-                <option value="">{{ 'chantiers.documents.create.fields.noeudNone' | translate }}</option>
-                @for (node of uploadPostes(); track node.id) {
-                  <option [value]="node.id">{{ node.code }} — {{ node.designation }}</option>
-                }
-              </select>
+              <nf-select
+                [options]="noeudOptions()"
+                [(ngModel)]="uploadDraft.noeudId"
+                name="noeudId"
+              />
             </label>
             <label>
               <span>{{ 'chantiers.documents.create.fields.titre' | translate }}</span>
@@ -241,9 +249,9 @@ function todayIso(): string {
                   <span class="chantier-code">{{ group.code }}</span>
                   <h2>{{ group.name }}</h2>
                 </div>
-                <button type="button" class="link-button" (click)="showChantierDocuments(group.chantierId)">
+                <nf-button variant="ghost" size="sm" (clicked)="showChantierDocuments(group.chantierId)">
                   {{ 'chantiers.documents.actions.showAll' | translate:{ count: group.documents.length } }}
-                </button>
+                </nf-button>
               </header>
               <div class="folder-grid">
                 @for (category of categories; track category) {
@@ -302,15 +310,20 @@ function todayIso(): string {
                   <td>{{ document.uploadedPar }}</td>
                   <td>{{ document.uploadedAt | date:'dd/MM/yyyy' }}</td>
                   <td class="actions-cell">
-                    <details>
-                      <summary [attr.aria-label]="'chantiers.documents.columns.actions' | translate">⋮</summary>
-                      <div class="action-menu">
-                        <button type="button" (click)="preview(document)">{{ 'chantiers.documents.actions.preview' | translate }}</button>
-                        <button type="button" (click)="downloadDoc(document)">{{ 'attachments.download' | translate }}</button>
-                        <button type="button" (click)="renameDoc(document)">{{ 'chantiers.documents.actions.rename' | translate }}</button>
-                        <button type="button" class="danger" (click)="deleteDoc(document)">{{ 'chantiers.common.actions.delete' | translate }}</button>
-                      </div>
-                    </details>
+                    <div class="row-actions">
+                      <nf-button variant="ghost" size="sm" (clicked)="preview(document)">
+                        {{ 'chantiers.documents.actions.preview' | translate }}
+                      </nf-button>
+                      <nf-button variant="ghost" size="sm" (clicked)="downloadDoc(document)">
+                        {{ 'attachments.download' | translate }}
+                      </nf-button>
+                      <nf-button variant="ghost" size="sm" (clicked)="renameDoc(document)">
+                        {{ 'chantiers.documents.actions.rename' | translate }}
+                      </nf-button>
+                      <nf-button variant="danger" size="sm" (clicked)="deleteDoc(document)">
+                        {{ 'chantiers.common.actions.delete' | translate }}
+                      </nf-button>
+                    </div>
                   </td>
                 </tr>
               }
@@ -319,16 +332,14 @@ function todayIso(): string {
         </div>
       }
 
-      @if (totalPages() > 1) {
-        <nav class="pagination" [attr.aria-label]="'chantiers.documents.pagination.label' | translate">
-          <button type="button" [disabled]="page() === 1" (click)="changePage(page() - 1)">
-            {{ 'chantiers.documents.pagination.previous' | translate }}
-          </button>
-          <span>{{ 'chantiers.documents.pagination.status' | translate:{ page: page(), pages: totalPages() } }}</span>
-          <button type="button" [disabled]="page() === totalPages()" (click)="changePage(page() + 1)">
-            {{ 'chantiers.documents.pagination.next' | translate }}
-          </button>
-        </nav>
+      @if (total() > 0) {
+        <nf-pagination
+          [total]="total()"
+          [page]="page()"
+          [pageSize]="pageSize()"
+          [pageSizeOptions]="[25, 50, 100]"
+          (pageChange)="onPageChange($event)"
+        />
       }
 
       @if (previewedDocument(); as document) {
@@ -337,7 +348,7 @@ function todayIso(): string {
             [attr.aria-label]="'chantiers.documents.actions.preview' | translate" (click)="$event.stopPropagation()">
             <header>
               <div><strong>{{ document.titre }}</strong><small>{{ document.fichier }}</small></div>
-              <button type="button" class="icon-button" (click)="closePreview()">×</button>
+              <nf-button variant="ghost" icon="x" size="sm" (clicked)="closePreview()"></nf-button>
             </header>
             <div class="preview-body">
               @if (isImage(document)) {
@@ -363,25 +374,20 @@ function todayIso(): string {
   `,
   styles: [`
     :host { display: block; height: 100%; }
-    button, input, select { font: inherit; }
-    .scope-banner, .topbar, .filters, .panel-heading, .upload-actions, .chantier-section > header,
-    .preview-modal > header, .preview-modal > footer, .pagination { display: flex; align-items: center; }
+    input, .field { font: inherit; }
+    .scope-banner, .filters, .panel-heading, .upload-actions, .chantier-section > header,
+    .preview-modal > header, .preview-modal > footer { display: flex; align-items: center; }
     .scope-banner { justify-content: space-between; padding: .75rem 1rem; margin-bottom: 1rem; border: 1px solid var(--nf-color-primary-200, #bfdbfe); border-radius: .75rem; background: var(--nf-color-primary-50, #eff6ff); }
     .scope-banner > div { display: grid; gap: .15rem; }
     .scope-label { color: var(--nf-color-text-secondary); font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; }
-    .topbar { justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
-    .view-switch { display: inline-flex; padding: 3px; border: 1px solid var(--nf-color-border); border-radius: .6rem; background: var(--nf-color-bg-muted); }
-    .view-switch button { border: 0; border-radius: .45rem; padding: .45rem .8rem; color: var(--nf-color-text-secondary); background: transparent; cursor: pointer; }
-    .view-switch button.active { color: var(--nf-color-text-primary); background: var(--nf-color-surface); box-shadow: 0 1px 3px rgba(0,0,0,.08); font-weight: 600; }
+    .view-tabs { display: block; margin-bottom: 1rem; }
     .filters { gap: .6rem; flex-wrap: wrap; padding: .75rem; margin-bottom: 1rem; border: 1px solid var(--nf-color-border); border-radius: .75rem; background: var(--nf-color-surface); }
-    .filters input, .filters select, .field { min-height: 38px; padding: .45rem .65rem; border: 1px solid var(--nf-color-border); border-radius: .45rem; background: var(--nf-color-surface); color: var(--nf-color-text-primary); }
+    .filters input, .field { min-height: 38px; padding: .45rem .65rem; border: 1px solid var(--nf-color-border); border-radius: .45rem; background: var(--nf-color-surface); color: var(--nf-color-text-primary); }
     .filters .search { flex: 1 1 220px; }
     .filters .count { margin-inline-start: auto; color: var(--nf-color-text-secondary); font-size: .8rem; white-space: nowrap; }
-    .link-button { padding: 0; border: 0; color: var(--nf-color-primary-600, #2563eb); background: transparent; cursor: pointer; font-weight: 600; }
     .upload-panel { padding: 1rem 1.25rem; margin-bottom: 1rem; border: 1px solid var(--nf-color-border); border-radius: .75rem; background: var(--nf-color-surface); }
     .panel-heading { justify-content: space-between; margin-bottom: 1rem; }
     .panel-heading h2 { margin: 0; font-size: 1rem; }
-    .icon-button { border: 0; background: transparent; cursor: pointer; font-size: 1.4rem; color: var(--nf-color-text-secondary); }
     .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .8rem; }
     .form-grid label { display: grid; gap: .35rem; color: var(--nf-color-text-secondary); font-size: .8rem; font-weight: 600; }
     .upload-actions { justify-content: flex-end; gap: .5rem; margin-top: 1rem; }
@@ -410,15 +416,8 @@ function todayIso(): string {
     tbody tr:last-child td { border-bottom: 0; }
     .document-title { display: flex; align-items: center; gap: .55rem; max-width: 320px; padding: 0; border: 0; text-align: start; background: transparent; cursor: pointer; }
     .type-badge { display: inline-block; padding: .15rem .4rem; border-radius: .35rem; background: var(--nf-color-bg-muted); white-space: nowrap; }
-    .actions-cell { position: relative; width: 32px; }
-    details summary { cursor: pointer; list-style: none; font-size: 1.2rem; }
-    .action-menu { position: absolute; z-index: 5; inset-inline-end: .6rem; min-width: 150px; display: grid; padding: .3rem; border: 1px solid var(--nf-color-border); border-radius: .5rem; background: var(--nf-color-surface); box-shadow: 0 8px 24px rgba(0,0,0,.14); }
-    .action-menu button { padding: .45rem .6rem; border: 0; border-radius: .3rem; text-align: start; background: transparent; cursor: pointer; }
-    .action-menu button:hover { background: var(--nf-color-bg-muted); }
-    .action-menu .danger { color: var(--nf-color-danger-600, #dc2626); }
-    .pagination { justify-content: center; gap: 1rem; margin-top: 1rem; color: var(--nf-color-text-secondary); font-size: .82rem; }
-    .pagination button { padding: .4rem .7rem; border: 1px solid var(--nf-color-border); border-radius: .4rem; background: var(--nf-color-surface); cursor: pointer; }
-    .pagination button:disabled { opacity: .45; cursor: default; }
+    .actions-cell { white-space: nowrap; }
+    .row-actions { display: flex; flex-wrap: wrap; gap: .25rem; justify-content: flex-end; }
     .modal-backdrop { position: fixed; z-index: 1000; inset: 0; display: grid; place-items: center; padding: 2rem; background: rgba(15,23,42,.55); }
     .preview-modal { width: min(900px, 96vw); height: min(720px, 90vh); display: grid; grid-template-rows: auto 1fr auto; overflow: hidden; border-radius: .8rem; background: var(--nf-color-surface); box-shadow: 0 24px 60px rgba(0,0,0,.25); }
     .preview-modal > header, .preview-modal > footer { justify-content: space-between; gap: 1rem; padding: .8rem 1rem; border-bottom: 1px solid var(--nf-color-border); }
@@ -433,8 +432,6 @@ function todayIso(): string {
       .form-grid { grid-template-columns: 1fr; }
       .table-wrap { overflow-x: auto; }
       table { min-width: 760px; }
-      .topbar { align-items: stretch; flex-direction: column; }
-      .view-switch { align-self: flex-start; }
       .modal-backdrop { padding: .5rem; }
     }
   `],
@@ -446,6 +443,7 @@ export class DocumentsListingPage implements OnInit {
   private readonly budgetApi = inject(BudgetApiService);
   private readonly translate = inject(TranslateService);
   private readonly toast = inject(ToastService);
+  private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly auth = inject(AuthFacade);
   private readonly route = inject(ActivatedRoute);
   private readonly sanitizer = inject(DomSanitizer);
@@ -462,7 +460,7 @@ export class DocumentsListingPage implements OnInit {
   readonly loading = signal(true);
   readonly total = signal(0);
   readonly page = signal(1);
-  readonly pageSize = 48;
+  readonly pageSize = signal(50);
   readonly viewMode = signal<ViewMode>('chantiers');
   readonly routeChantierId = signal('');
   readonly filterChantierId = signal('');
@@ -488,14 +486,44 @@ export class DocumentsListingPage implements OnInit {
   readonly searchChantiers: LookupSearchFn = (q) =>
     this.lookupSearchers?.['chantiers']?.(q) ?? Promise.resolve([]);
 
-  readonly headerConfig = {
+  readonly headerConfig = computed(() => ({
     title: this.translate.instant('chantiers.documents.title'),
     subtitle: this.translate.instant('chantiers.documents.subtitle'),
     breadcrumbs: [
       { label: this.translate.instant('chantiers.routes.chantiersCrumb'), route: '/chantiers' },
       { label: this.translate.instant('chantiers.documents.title') },
     ],
-  };
+    primaryAction: {
+      label: this.translate.instant('chantiers.documents.create.cta'),
+      icon: 'add',
+      id: 'upload',
+    },
+  }));
+
+  readonly viewTabs = computed<TabItem[]>(() => [
+    { id: 'chantiers', label: this.translate.instant('chantiers.documents.views.byChantier') },
+    { id: 'documents', label: this.translate.instant('chantiers.documents.views.allDocuments') },
+  ]);
+
+  readonly categoryOptions = computed<NfSelectOption[]>(() => [
+    { value: '', label: this.translate.instant('chantiers.documents.filters.allCategories') },
+    ...this.categories.map((category) => ({
+      value: category,
+      label: this.categoryLabel(category),
+    })),
+  ]);
+
+  readonly typeOptions = computed<NfSelectOption[]>(() =>
+    this.palierTypes.map((type) => ({ value: type, label: this.typeLabel(type) })),
+  );
+
+  readonly noeudOptions = computed<NfSelectOption[]>(() => [
+    { value: '', label: this.translate.instant('chantiers.documents.create.fields.noeudNone') },
+    ...this.uploadPostes().map((node) => ({
+      value: node.id,
+      label: `${node.code} — ${node.designation}`,
+    })),
+  ]);
 
   readonly selectedChantier = computed(() => this.scopedChantier());
 
@@ -527,7 +555,7 @@ export class DocumentsListingPage implements OnInit {
     });
   });
 
-  readonly totalPages = computed(() => Math.max(1, Math.ceil(this.total() / this.pageSize)));
+  readonly totalPages = computed(() => Math.max(1, Math.ceil(this.total() / this.pageSize())));
   readonly hasFilters = computed(() =>
     !!this.search() || !!this.filterCategory() || !!this.uploadedBy() || !!this.dateFrom()
     || !!this.dateTo() || this.filterChantierId() !== this.routeChantierId(),
@@ -551,12 +579,24 @@ export class DocumentsListingPage implements OnInit {
     void this.load();
   }
 
+  onHeaderAction(event: { type: 'primary' | 'secondary'; action: PageHeaderAction }): void {
+    if (event.type === 'primary' || event.action.id === 'upload') {
+      this.openUploadForm();
+    }
+  }
+
+  onViewTabChange(tabId: string): void {
+    if (tabId === 'chantiers' || tabId === 'documents') {
+      this.viewMode.set(tabId);
+    }
+  }
+
   private async load(): Promise<void> {
     this.loading.set(true);
     try {
       const response = await this.api.list({
         page: this.page(),
-        pageSize: this.pageSize,
+        pageSize: this.pageSize(),
         search: this.search(),
         chantierId: this.filterChantierId(),
         types: typesForCategory(this.filterCategory()),
@@ -659,9 +699,9 @@ export class DocumentsListingPage implements OnInit {
     this.applyFilters();
   }
 
-  changePage(page: number): void {
-    if (page < 1 || page > this.totalPages()) return;
-    this.page.set(page);
+  onPageChange(event: PageChangeEvent): void {
+    this.page.set(event.page);
+    this.pageSize.set(event.pageSize);
     void this.load();
   }
 
@@ -779,10 +819,20 @@ export class DocumentsListingPage implements OnInit {
   }
 
   async renameDoc(document: DocumentChantier): Promise<void> {
-    const title = window.prompt(
-      this.translate.instant('chantiers.documents.actions.renamePrompt'),
-      document.titre,
-    )?.trim();
+    const values = await this.confirmDialog.prompt({
+      title: this.translate.instant('chantiers.documents.actions.renamePrompt'),
+      fields: [
+        {
+          key: 'titre',
+          label: this.translate.instant('chantiers.documents.create.fields.titre'),
+          required: true,
+          initial: document.titre,
+        },
+      ],
+      confirmLabel: this.translate.instant('chantiers.common.actions.save'),
+      cancelLabel: this.translate.instant('chantiers.common.actions.cancel'),
+    });
+    const title = values?.['titre']?.trim();
     if (!title || title === document.titre) return;
     try {
       await this.api.updateForChantier(document.chantierId, document.id, { titre: title });
@@ -794,9 +844,14 @@ export class DocumentsListingPage implements OnInit {
   }
 
   async deleteDoc(document: DocumentChantier): Promise<void> {
-    const confirmed = window.confirm(
-      this.translate.instant('chantiers.documents.actions.deleteConfirm', { title: document.titre }),
-    );
+    const confirmed = await this.confirmDialog.confirm({
+      title: this.translate.instant('chantiers.common.actions.delete'),
+      message: this.translate.instant('chantiers.documents.actions.deleteConfirm', { title: document.titre }),
+      confirmLabel: this.translate.instant('chantiers.common.actions.delete'),
+      cancelLabel: this.translate.instant('chantiers.common.actions.cancel'),
+      variant: 'danger',
+      icon: 'delete',
+    });
     if (!confirmed) return;
     try {
       await this.api.deleteForChantier(document.chantierId, document.id);

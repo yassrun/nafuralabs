@@ -4,23 +4,27 @@
   <section class="cat">
     <div class="cat__toolbar">
       <div class="cat__tabs" role="tablist">
-        <button
+        <nf-button
           type="button"
-          class="cat__tab"
-          [class.cat__tab--active]="tab() === 'file'"
-          (click)="setTab('file')"
+          [variant]="tab() === 'file' ? 'primary' : 'secondary'"
+          size="sm"
+          role="tab"
+          [attr.aria-selected]="tab() === 'file'"
+          (clicked)="setTab('file')"
         >
           Candidats
           <span class="cat__count">{{ candidats().length }}</span>
-        </button>
-        <button
+        </nf-button>
+        <nf-button
           type="button"
-          class="cat__tab"
-          [class.cat__tab--active]="tab() === 'editions'"
-          (click)="setTab('editions')"
+          [variant]="tab() === 'editions' ? 'primary' : 'secondary'"
+          size="sm"
+          role="tab"
+          [attr.aria-selected]="tab() === 'editions'"
+          (clicked)="setTab('editions')"
         >
           Éditions
-        </button>
+        </nf-button>
       </div>
       <div class="cat__actions">
         <nf-button variant="secondary" [loading]="chargement()" (clicked)="refresh()">

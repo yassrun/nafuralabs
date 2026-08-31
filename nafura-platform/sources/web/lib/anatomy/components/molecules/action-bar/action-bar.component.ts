@@ -70,12 +70,26 @@ export type ActionBarSpacing = 'sm' | 'md' | 'lg';
     .nf-action-bar--lg {
       gap: 16px;
     }
+
+    /* AC-4 homogenisation-ux — form long */
+    .nf-action-bar--sticky {
+      position: sticky;
+      bottom: 0;
+      z-index: 2;
+      padding-top: 0.75rem;
+      padding-bottom: 0.75rem;
+      margin-top: 1rem;
+      border-top: 1px solid var(--nf-border-default, var(--nf-color-bg-muted, #e5e7eb));
+      background: var(--nf-surface-page, var(--nf-color-surface, #fff));
+    }
   `],
 })
 export class ActionBarComponent {
   // Inputs
   align = input<ActionBarAlign>('right');
   spacing = input<ActionBarSpacing>('md');
+  /** Sticky bottom bar for long scrolling forms (homogenisation-ux AC-4). */
+  sticky = input(false);
 
   // Computed classes
   actionBarClasses = computed(() => {
@@ -83,6 +97,9 @@ export class ActionBarComponent {
       'nf-action-bar',
       `nf-action-bar--${this.align()}`,
       `nf-action-bar--${this.spacing()}`,
-    ].join(' ');
+      this.sticky() ? 'nf-action-bar--sticky' : '',
+    ]
+      .filter(Boolean)
+      .join(' ');
   });
 }

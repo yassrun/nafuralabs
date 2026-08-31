@@ -1,4 +1,18 @@
 id	status	priority	context	assignee	gate	type	agent_type	project	lot	souslot	title
+SEKTOR-296	doing	P0	nafura	agent	none	feature	exec	sektor	homogenisation-ux	achats-residuel	selects detail et bc-detail action-bar
+SEKTOR-293	doing	P0	nafura	agent	none	feature	exec	sektor	homogenisation-ux	catalogue-residuel	etat-stocks tree console line-editors nf-chrome
+SEKTOR-285	doing	P0	nafura	agent	none	feature	exec	sektor	homogenisation-ux	etudes-chrome	dossier-create nf-action-bar nf-button nf-select
+SEKTOR-289	review	P0	nafura	agent	none	feature	exec	sektor	homogenisation-ux	chantiers-chrome	documents-listing rewrite nf-chrome
+SEKTOR-290	review	P0	nafura	agent	none	feature	exec	sektor	homogenisation-ux	chantiers-chrome	listings et toolbars selects vers nf-select
+SEKTOR-291	review	P0	nafura	agent	none	feature	exec	sektor	homogenisation-ux	chantiers-chrome	edit et avancement-saisie nf-action-bar sticky
+SEKTOR-286	review	P0	nafura	agent	none	feature	exec	sektor	homogenisation-ux	etudes-chrome	pieces bordereau summary decomposition nf-chrome
+SEKTOR-294	review	P1	nafura	agent	none	feature	exec	sektor	homogenisation-ux	catalogue-residuel	dumps residuels vers search picker
+SEKTOR-287	review	P1	nafura	agent	none	feature	exec	sektor	homogenisation-ux	etudes-chrome	devis-from-dpgf et selects dialogs restants
+SEKTOR-297	todo	P0	nafura	agent	none	qa	qa	sektor	homogenisation-ux	achats-residuel	Preuves homog achats
+SEKTOR-295	todo	P0	nafura	agent	none	qa	qa	sektor	homogenisation-ux	catalogue-residuel	Preuves homog catalogue
+SEKTOR-292	todo	P0	nafura	agent	none	qa	qa	sektor	homogenisation-ux	chantiers-chrome	Preuves homog chantiers
+SEKTOR-288	todo	P0	nafura	agent	none	qa	qa	sektor	homogenisation-ux	etudes-chrome	Preuves homog etudes
+SEKTOR-298	todo	P0	nafura	agent	none	qa	qa	sektor	homogenisation-ux	preuves-homog	Scripts verify-homog Mode B et gates rg
 RAS-109	todo	P0	nafura	agent	none	feature	exec	raster	orchestration	plan-et-session	session start passe un brief sur stdin
 RAS-107	todo	P1	nafura	agent	me	spec	spec	raster	orchestration	plan-et-session	Planifier les vues Plan, Session et l’amorçage
 RAS-108	todo	P1	nafura	agent	none	tech	exec	raster	orchestration	plan-et-session	plan distingue clos, non decoupe, bloque et l…

@@ -11,10 +11,7 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { firstValueFrom } from 'rxjs';
 
 import {
@@ -22,7 +19,7 @@ import {
   type NfTreeNode,
   type NfTreeTableColumn,
 } from '@platform/lib/anatomy/components';
-import { ConfirmDialogService } from '@platform/lib/anatomy';
+import { ButtonComponent, ConfirmDialogService } from '@platform/lib/anatomy';
 
 import { UnitOfMeasuresApiService } from '@app/catalogue/configuration/unit-of-measures/services/unit-of-measure-api.service';
 
@@ -68,9 +65,7 @@ import {
   imports: [
     CommonModule,
     TreeTableComponent,
-    MatButtonModule,
-    MatIconModule,
-    MatTooltipModule,
+    ButtonComponent,
   ],
   templateUrl: './bordereau-arbre.component.html',
   styleUrl: './bordereau-arbre.component.scss',

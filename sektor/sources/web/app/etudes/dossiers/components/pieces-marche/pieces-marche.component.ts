@@ -10,11 +10,14 @@ import {
   viewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
 
-import { ButtonComponent, ConfirmDialogService } from '@platform/lib/anatomy';
+import {
+  ButtonComponent,
+  ConfirmDialogService,
+  IconComponent,
+  NfSelectComponent,
+  type NfSelectOption,
+} from '@platform/lib/anatomy';
 
 import { TYPES_DOSSIER_DOCUMENT } from '@app/etudes/models';
 import type {
@@ -49,11 +52,10 @@ export type ExtractionPhase = 'idle' | 'running' | 'review' | 'saving' | 'error'
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ButtonComponent,
+    IconComponent,
+    NfSelectComponent,
     BordereauArbreComponent,
     FormsModule,
-    MatButtonModule,
-    MatIconModule,
-    MatTooltipModule,
   ],
   templateUrl: './pieces-marche.component.html',
   styleUrl: './pieces-marche.component.scss',
@@ -86,6 +88,12 @@ export class PiecesMarcheComponent {
   readonly typesAjout = TYPES_DOSSIER_DOCUMENT.filter(
     (t) => t.value !== 'CPS_ET_BORDEREAU' && t.value !== 'DEVIS_FOURNISSEUR',
   );
+
+  readonly ajoutTypeOptions: NfSelectOption[] = [
+    ...this.typesAjout.map((t) => ({ value: t.value, label: t.label })),
+    { value: 'CAUTION', label: 'Caution' },
+    { value: 'ATTESTATION', label: 'Attestation' },
+  ];
 
   readonly pieces = signal<DossierDocument[]>([]);
   readonly slotsAttendus = signal<DossierPieceAttendue[]>([]);

@@ -2,11 +2,18 @@ import { CommonModule } from '@angular/common';
 import { NavigationEnd, Router } from '@angular/router';
 import { ChangeDetectionStrategy, Component, DestroyRef, LOCALE_ID, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
 import { first } from 'rxjs/operators';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FilterResetComponent } from '@platform/lib/anatomy/components/molecules/filter-reset/filter-reset.component';
 
-import { PageHeaderComponent, PageShellComponent, ButtonComponent } from '@platform/lib/anatomy';
+import {
+  PageHeaderComponent,
+  PageShellComponent,
+  ButtonComponent,
+  NfSelectComponent,
+  type NfSelectOption,
+} from '@platform/lib/anatomy';
 import type { ChantierStatus } from '@app/chantiers/models';
 import {
   CHANTIER_STATUS_KEYS,
@@ -28,7 +35,16 @@ import { formatPercentDisplay } from '@app/socle/shared/utils/percent-display.ut
 @Component({
   selector: 'app-chantiers-listing',
   standalone: true,
-  imports: [CommonModule, PageShellComponent, PageHeaderComponent, FilterResetComponent, ButtonComponent, TranslateModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    PageShellComponent,
+    PageHeaderComponent,
+    FilterResetComponent,
+    ButtonComponent,
+    NfSelectComponent,
+    TranslateModule,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <nf-page-shell scroll>
@@ -41,24 +57,26 @@ import { formatPercentDisplay } from '@app/socle/shared/utils/percent-display.ut
           [placeholder]="'chantiers.chantier.list.searchPlaceholder' | translate"
           [value]="search()"
           (input)="search.set($any($event.target).value); debouncedReload()" />
-        <select [value]="filters().status" (change)="setStatus($any($event.target).value)">
-          <option value="">{{ 'chantiers.common.filters.allStatuses' | translate }}</option>
-          @for (s of allStatuses; track s) {
-            <option [value]="s">{{ statusLabel(s) }}</option>
-          }
-        </select>
-        <select [value]="filters().alerte" (change)="setAlerte($any($event.target).value)">
-          <option value="">{{ 'chantiers.cockpit.filtres.toutesAlertes' | translate }}</option>
-          <option value="CRITICAL">CRITICAL</option>
-          <option value="WARNING">WARNING</option>
-        </select>
-        <select [value]="filters().tri" (change)="setTri($any($event.target).value)">
-          <option value="code">{{ 'chantiers.cockpit.filtres.triCode' | translate }}</option>
-          <option value="alerte">{{ 'chantiers.cockpit.filtres.triAlerte' | translate }}</option>
-          <option value="echeance">{{ 'chantiers.cockpit.filtres.triEcheance' | translate }}</option>
-          <option value="marge">{{ 'chantiers.cockpit.filtres.triMarge' | translate }}</option>
-          <option value="avancement">{{ 'chantiers.cockpit.filtres.triAvancement' | translate }}</option>
-        </select>
+        <nf-select
+          class="toolbar-select"
+          [options]="statusFilterOptions()"
+          [ngModel]="filters().status"
+          (ngModelChange)="setStatus($event)"
+          [placeholder]="'chantiers.common.filters.allStatuses' | translate"
+        />
+        <nf-select
+          class="toolbar-select"
+          [options]="alerteFilterOptions()"
+          [ngModel]="filters().alerte"
+          (ngModelChange)="setAlerte($event)"
+          [placeholder]="'chantiers.cockpit.filtres.toutesAlertes' | translate"
+        />
+        <nf-select
+          class="toolbar-select"
+          [options]="triFilterOptions()"
+          [ngModel]="filters().tri"
+          (ngModelChange)="setTri($event)"
+        />
         <label class="check">
           <input type="checkbox" [checked]="filters().enRetard" (change)="toggleRetard($any($event.target).checked)" />
           {{ 'chantiers.cockpit.filtres.enRetard' | translate }}
@@ -199,7 +217,7 @@ import { formatPercentDisplay } from '@app/socle/shared/utils/percent-display.ut
 
     .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
     .search { flex: 1; min-width: 180px; max-width: 240px; padding: 7px 12px; border: 1px solid var(--nf-color-border); border-radius: 6px; font-size: 13px; }
-    select { padding: 7px 10px; border: 1px solid var(--nf-color-border); border-radius: 6px; font-size: 13px; background: var(--nf-color-surface); cursor: pointer; }
+    .toolbar-select { min-width: 140px; }
     .check { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; color: var(--nf-color-text-secondary); }
     .count { font-size: 13px; color: var(--nf-color-text-secondary); }
 
@@ -210,7 +228,7 @@ import { formatPercentDisplay } from '@app/socle/shared/utils/percent-display.ut
       .table-wrap { max-width: 100%; }
       table { min-width: 760px; }
       .toolbar { align-items: stretch; }
-      .toolbar select, .toolbar .search, .toolbar nf-button { min-height: 44px; }
+      .toolbar .search, .toolbar nf-button, .toolbar-select { min-height: 44px; }
       .check { min-height: 44px; align-items: center; }
     }
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -263,6 +281,25 @@ export class ChantiersListingPage {
   readonly allStatuses: ChantierStatus[] = [
     'EN_PREPARATION', 'EN_COURS', 'PROSPECT', 'SUSPENDU', 'TERMINE', 'RECEPTIONNE', 'CLOTURE', 'ANNULE',
   ];
+
+  readonly statusFilterOptions = computed<NfSelectOption[]>(() => [
+    { value: '', label: this.translate.instant('chantiers.common.filters.allStatuses') },
+    ...this.allStatuses.map((s) => ({ value: s, label: this.statusLabel(s) })),
+  ]);
+
+  readonly alerteFilterOptions = computed<NfSelectOption[]>(() => [
+    { value: '', label: this.translate.instant('chantiers.cockpit.filtres.toutesAlertes') },
+    { value: 'CRITICAL', label: 'CRITICAL' },
+    { value: 'WARNING', label: 'WARNING' },
+  ]);
+
+  readonly triFilterOptions = computed<NfSelectOption[]>(() => [
+    { value: 'code', label: this.translate.instant('chantiers.cockpit.filtres.triCode') },
+    { value: 'alerte', label: this.translate.instant('chantiers.cockpit.filtres.triAlerte') },
+    { value: 'echeance', label: this.translate.instant('chantiers.cockpit.filtres.triEcheance') },
+    { value: 'marge', label: this.translate.instant('chantiers.cockpit.filtres.triMarge') },
+    { value: 'avancement', label: this.translate.instant('chantiers.cockpit.filtres.triAvancement') },
+  ]);
 
   readonly search = signal('');
   readonly filters = signal<{ status: string; alerte: string; tri: string; sens: string; enRetard: boolean; margeNegative: boolean }>({

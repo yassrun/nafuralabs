@@ -24,7 +24,9 @@ import {
   KpiStripComponent,
   EntityListingComponent,
   ColumnTemplateDirective,
+  NfSelectComponent,
   buildListingConfig,
+  type NfSelectOption,
 } from '@platform/lib/anatomy';
 import type { KpiItem, ListingPageConfig, ListingActionEvent } from '@platform/lib/anatomy/types';
 
@@ -47,6 +49,7 @@ import { buildEtatStocksColumns } from './config';
     KpiStripComponent,
     EntityListingComponent,
     ColumnTemplateDirective,
+    NfSelectComponent,
     LocationTypeBadgeComponent,
     QuantityStatusCellComponent,
     MadCurrencyPipe,
@@ -65,52 +68,40 @@ import { buildEtatStocksColumns } from './config';
         <div class="etat-filters">
           <div class="etat-filters__group">
             <label class="etat-filters__label">{{ 'inventory.suivi.etatStock.filters.location' | translate }}</label>
-            <select
+            <nf-select
               class="etat-filters__select"
+              [options]="locationTypeOptions()"
               [ngModel]="filters().locationType"
-              (ngModelChange)="onLocationTypeChange($event)">
-              <option value="ALL">{{ 'inventory.suivi.etatStock.filters.statutAll' | translate }}</option>
-              <option value="DEPOT">{{ 'inventory.enums.locationType.DEPOT' | translate }} / {{ 'inventory.enums.locationType.ENTREPOT' | translate }} / {{ 'inventory.enums.locationType.TRANSIT' | translate }}</option>
-              <option value="CHANTIER">{{ 'inventory.enums.locationType.CHANTIER' | translate }}</option>
-            </select>
+              (ngModelChange)="onLocationTypeChange($event)" />
           </div>
 
           <div class="etat-filters__group">
             <label class="etat-filters__label">{{ 'inventory.suivi.etatStock.columns.locationName' | translate }}</label>
-            <select
+            <nf-select
               class="etat-filters__select"
+              [options]="locationOptions()"
+              [placeholder]="'inventory.suivi.etatStock.filters.locationPlaceholder' | translate"
               [ngModel]="filters().locationId ?? ''"
-              (ngModelChange)="onLocationChange($event)">
-              <option value="">{{ 'inventory.suivi.etatStock.filters.locationPlaceholder' | translate }}</option>
-              @for (loc of locations(); track loc.id) {
-                <option [value]="loc.id">{{ loc.name }}</option>
-              }
-            </select>
+              (ngModelChange)="onLocationChange($event)" />
           </div>
 
           <div class="etat-filters__group">
             <label class="etat-filters__label">{{ 'inventory.suivi.etatStock.filters.famille' | translate }}</label>
-            <select
+            <nf-select
               class="etat-filters__select"
+              [options]="familleOptions()"
+              [placeholder]="'inventory.suivi.etatStock.filters.famillePlaceholder' | translate"
               [ngModel]="filters().familleId ?? ''"
-              (ngModelChange)="onFamilleChange($event)">
-              <option value="">{{ 'inventory.suivi.etatStock.filters.famillePlaceholder' | translate }}</option>
-              @for (fam of families(); track fam.id) {
-                <option [value]="fam.id">{{ fam.name }}</option>
-              }
-            </select>
+              (ngModelChange)="onFamilleChange($event)" />
           </div>
 
           <div class="etat-filters__group">
             <label class="etat-filters__label">{{ 'inventory.suivi.etatStock.filters.statut' | translate }}</label>
-            <select
+            <nf-select
               class="etat-filters__select"
+              [options]="stockStatusOptions()"
               [ngModel]="filters().stockStatus"
-              (ngModelChange)="onStockStatusChange($event)">
-              <option value="all">{{ 'inventory.suivi.etatStock.filters.statutAll' | translate }}</option>
-              <option value="alert">{{ 'inventory.suivi.etatStock.filters.statutBelowMin' | translate }}</option>
-              <option value="exhausted">{{ 'inventory.suivi.etatStock.filters.statutRupture' | translate }}</option>
-            </select>
+              (ngModelChange)="onStockStatusChange($event)" />
           </div>
 
           <div class="etat-filters__group etat-filters__group--search">
@@ -218,6 +209,11 @@ import { buildEtatStocksColumns } from './config';
 
     .etat-filters__select,
     .etat-filters__input {
+      width: 100%;
+      min-width: 150px;
+    }
+
+    .etat-filters__input {
       padding: 8px 12px;
       border: 1px solid var(--nf-color-border);
       border-radius: var(--nf-radius-sm, 4px);
@@ -226,7 +222,6 @@ import { buildEtatStocksColumns } from './config';
       transition: border-color 0.2s ease;
     }
 
-    .etat-filters__select:focus,
     .etat-filters__input:focus {
       outline: none;
       border-color: var(--nf-color-primary);
@@ -299,6 +294,35 @@ export class EtatStocksPage implements OnInit {
 
   readonly locations = signal<Location[]>([]);
   readonly families = signal<{ id: string; name: string }[]>([]);
+
+  readonly locationTypeOptions = computed<NfSelectOption[]>(() => [
+    { value: 'ALL', label: this.translate.instant('inventory.suivi.etatStock.filters.statutAll') },
+    {
+      value: 'DEPOT',
+      label: [
+        this.translate.instant('inventory.enums.locationType.DEPOT'),
+        this.translate.instant('inventory.enums.locationType.ENTREPOT'),
+        this.translate.instant('inventory.enums.locationType.TRANSIT'),
+      ].join(' / '),
+    },
+    { value: 'CHANTIER', label: this.translate.instant('inventory.enums.locationType.CHANTIER') },
+  ]);
+
+  readonly locationOptions = computed<NfSelectOption[]>(() => [
+    { value: '', label: this.translate.instant('inventory.suivi.etatStock.filters.locationPlaceholder') },
+    ...this.locations().map((loc) => ({ value: loc.id, label: loc.name })),
+  ]);
+
+  readonly familleOptions = computed<NfSelectOption[]>(() => [
+    { value: '', label: this.translate.instant('inventory.suivi.etatStock.filters.famillePlaceholder') },
+    ...this.families().map((fam) => ({ value: fam.id, label: fam.name })),
+  ]);
+
+  readonly stockStatusOptions = computed<NfSelectOption[]>(() => [
+    { value: 'all', label: this.translate.instant('inventory.suivi.etatStock.filters.statutAll') },
+    { value: 'alert', label: this.translate.instant('inventory.suivi.etatStock.filters.statutBelowMin') },
+    { value: 'exhausted', label: this.translate.instant('inventory.suivi.etatStock.filters.statutRupture') },
+  ]);
 
   readonly kpiItems = computed<KpiItem[]>(() => {
     const k = this.kpis();

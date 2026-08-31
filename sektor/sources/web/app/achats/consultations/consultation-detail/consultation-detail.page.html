@@ -91,17 +91,15 @@
           />
 
           @if (contactsEmail().length > 1) {
-            <select
-              data-testid="consultation-destinataire-contact"
+            <nf-select
+              [label]="'achats.consultation.destinataires.contactPlaceholder' | translate"
+              [placeholder]="'achats.consultation.destinataires.contactPlaceholder' | translate"
+              [options]="contactSelectOptions()"
               [ngModel]="draftContactId()"
               (ngModelChange)="draftContactId.set($event)"
               name="destinataireContactId"
-            >
-              <option value="">{{ 'achats.consultation.destinataires.contactPlaceholder' | translate }}</option>
-              @for (c of contactsEmail(); track c.id) {
-                <option [value]="c.id">{{ c.nom }} — {{ c.email }}</option>
-              }
-            </select>
+              data-testid="consultation-destinataire-contact"
+            />
           }
 
           <nf-button

@@ -87,54 +87,56 @@
         @if (showPartager() || showPrintBordereau() || showPrintSynthese() || showReouvrir() || showRefuser() || showMarquerPerdu() || showCta()) {
           <div class="dsh__actions">
             @if (showPartager()) {
-              <button
+              <nf-button
                 type="button"
-                class="dsh__btn dsh__btn--ghost"
+                variant="ghost"
+                size="sm"
                 [disabled]="!canShare()"
                 [attr.title]="
                   canShare()
                     ? 'Créer un lien invité (24 h)'
                     : 'Partage indisponible pour ce dossier'
                 "
-                (click)="canShare() && emitAction('PARTAGER')"
+                (clicked)="canShare() && emitAction('PARTAGER')"
               >
                 Partager
-              </button>
+              </nf-button>
             }
             @if (showPrintBordereau()) {
-              <button type="button" class="dsh__btn dsh__btn--ghost" (click)="emitAction('IMPRIMER_BORDEREAU')">
+              <nf-button type="button" variant="ghost" size="sm" (clicked)="emitAction('IMPRIMER_BORDEREAU')">
                 Imprimer bordereau
-              </button>
+              </nf-button>
             }
             @if (showPrintSynthese()) {
-              <button type="button" class="dsh__btn dsh__btn--ghost" (click)="emitAction('IMPRIMER_SYNTHESE')">
+              <nf-button type="button" variant="ghost" size="sm" (clicked)="emitAction('IMPRIMER_SYNTHESE')">
                 Imprimer synthèse
-              </button>
+              </nf-button>
             }
             @if (showReouvrir()) {
-              <button type="button" class="dsh__btn dsh__btn--ghost" (click)="emitAction('REOUVRIR_BORDEREAU')">
+              <nf-button type="button" variant="ghost" size="sm" (clicked)="emitAction('REOUVRIR_BORDEREAU')">
                 Réouvrir le bordereau
-              </button>
+              </nf-button>
             }
             @if (showRefuser()) {
-              <button type="button" class="dsh__btn dsh__btn--ghost" (click)="emitAction('REFUSER')">
+              <nf-button type="button" variant="ghost" size="sm" (clicked)="emitAction('REFUSER')">
                 Refuser
-              </button>
+              </nf-button>
             }
             @if (showMarquerPerdu()) {
-              <button type="button" class="dsh__btn dsh__btn--ghost" (click)="emitAction('MARQUER_PERDU')">
+              <nf-button type="button" variant="ghost" size="sm" (clicked)="emitAction('MARQUER_PERDU')">
                 Marquer perdu
-              </button>
+              </nf-button>
             }
             @if (showCta()) {
-              <button
+              <nf-button
                 type="button"
-                class="dsh__btn dsh__btn--primary"
+                variant="primary"
+                size="sm"
                 [attr.data-testid]="actionEffective() === 'GENERER_DEVIS' ? 'dossier-cta-generer-devis' : null"
-                (click)="emitAction()"
+                (clicked)="emitAction()"
               >
                 {{ ctaLabel() }}
-              </button>
+              </nf-button>
             }
           </div>
         }

@@ -5,6 +5,7 @@ import { RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import {
+  ActionBarComponent,
   ButtonComponent,
   ConfigDrivenDetailPage,
   ConfigDrivenDetailPageImports,
@@ -42,7 +43,7 @@ interface ReceptionLineDraft {
 @Component({
   selector: 'app-bc-detail',
   standalone: true,
-  imports: [CommonModule, DecimalPipe, FormsModule, RouterLink, TranslateModule, ButtonComponent, NfSelectComponent, DocScanButtonComponent, ...ConfigDrivenDetailPageImports, SubmitApprovalButtonComponent],
+  imports: [CommonModule, DecimalPipe, FormsModule, RouterLink, TranslateModule, ActionBarComponent, ButtonComponent, NfSelectComponent, DocScanButtonComponent, ...ConfigDrivenDetailPageImports, SubmitApprovalButtonComponent],
   templateUrl: './bc-detail.page.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styles: [ConfigDrivenDetailPageStyles, `
@@ -92,10 +93,7 @@ interface ReceptionLineDraft {
     .bc-rec-form input { padding: 6px 8px; border: 1px solid var(--nf-color-border); border-radius: 4px; min-width: 180px; }
     .bc-rec-form nf-select { min-width: 280px; }
     .bc-rec-qty-input { width: 80px; text-align: right; min-width: 0; }
-    .bc-rec-form__actions { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
-    .bc-rec-form button { padding: 6px 12px; border-radius: 4px; border: none; cursor: pointer; font-size: 13px; }
-    .bc-rec-form button.primary { background: var(--nf-color-success-600); color: var(--nf-color-surface); }
-    .bc-rec-form button.secondary { background: var(--nf-color-border); color: var(--nf-text-primary); }
+    .bc-rec-form nf-action-bar { margin-top: 0.75rem; }
     .bc-rec-list { margin: 0.5rem 0 0; padding-left: 1.25rem; font-size: 12px; color: var(--nf-color-text-secondary); }
   `],
 })

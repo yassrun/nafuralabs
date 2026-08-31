@@ -2,10 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import type { CrudStyleFacade } from '@platform/lib/anatomy';
 import type { ListResponse, LookupContext } from '@platform/lib/anatomy/types';
-import type { Article, InventoryTx, Location, MotifMouvement } from '../../../models';
-import { isStockableNature } from '../../../models';
-import { ArticleCatalogService } from '../../../services/article-catalog.service';
-import { InventoryLookupsService } from '../../../services/inventory-lookups.service';
+import type { InventoryTx, Location, MotifMouvement } from '../../../models';
 import { InventoryMovementApiService } from '../../../services/inventory-movement-api.service';
 import {
   loadMovementPage,
@@ -14,6 +11,8 @@ import {
 import type { ApiInventoryTxRow } from '../../../services/inventory-tx.mapper';
 import { MotifsApiService } from '../../../services/motifs-api.service';
 import { ReservationStockService } from '../../../services/reservation-stock.service';
+import { ItemsApiService } from '../../../services/items-api.service';
+import { itemToArticle, type ItemApiRow } from '../../../services/item-article.mapper';
 import { BudgetFacade } from '@app/chantiers/budget/services';
 import { InventoryTxesFacade } from '../../inventory-txes/services/inventory-tx.facade';
 
@@ -24,9 +23,8 @@ export interface SortieListItem extends InventoryTx {
 @Injectable({ providedIn: 'root' })
 export class SortieFacade implements CrudStyleFacade<InventoryTx, Partial<InventoryTx>> {
   private readonly movementApi = inject(InventoryMovementApiService);
-  private readonly lookupsService = inject(InventoryLookupsService);
-  private readonly articleCatalog = inject(ArticleCatalogService);
   private readonly motifsApi = inject(MotifsApiService);
+  private readonly itemsApi = inject(ItemsApiService);
   private readonly budgetFacade = inject(BudgetFacade);
   private readonly inventoryTxes = inject(InventoryTxesFacade);
   private readonly reservations = inject(ReservationStockService);
@@ -34,7 +32,6 @@ export class SortieFacade implements CrudStyleFacade<InventoryTx, Partial<Invent
 
   private locationsCache: Location[] = [];
   private motifsCache: MotifMouvement[] = [];
-  private articlesCache: Article[] = [];
 
   private lookupsSignal = signal<LookupContext>({});
 
@@ -48,26 +45,17 @@ export class SortieFacade implements CrudStyleFacade<InventoryTx, Partial<Invent
   }
 
   async ensureLookups(): Promise<void> {
-    const [, , articles, motifs] = await Promise.all([
+    const [, motifs] = await Promise.all([
       this.budgetFacade.loadListingFromApi(),
-      Promise.resolve([]),
-      this.articleCatalog.loadArticles({ activeOnly: true }),
       this.motifsApi.listByTxType('SORTIE'),
     ]);
     this.locationsCache = [];
     this.motifsCache = motifs;
-    this.articlesCache = articles;
-    const matCons = articles.filter(
-      (a) => isStockableNature(a.nature),
-    );
+    // Articles for lines: picker/search — no articlesMatCons dump (AC-8).
     this.lookupsSignal.set({
       sourceLocations: [],
       chantiersBudget: [],
-      articlesMatCons: matCons.map((a) => ({
-        key: a.id,
-        value: `${a.code} — ${a.name}`,
-        data: { uomCode: a.uomCode, uomId: a.uomId, prix: a.pmp ?? a.prixUnitaire },
-      })),
+      articlesMatCons: [],
       motifsSortie: [],
     });
   }
@@ -237,8 +225,23 @@ export class SortieFacade implements CrudStyleFacade<InventoryTx, Partial<Invent
         updated.chantierBudgetId,
         updated.lines.map((l) => ({ articleId: l.articleId, qte: l.quantity })),
       );
+      const articleIds = [...new Set(updated.lines.map((l) => l.articleId).filter(Boolean))];
+      const articleById = new Map(
+        (
+          await Promise.all(
+            articleIds.map(async (id) => {
+              try {
+                const row = (await this.itemsApi.getById(id)) as ItemApiRow;
+                return [id, itemToArticle(row)] as const;
+              } catch {
+                return null;
+              }
+            }),
+          )
+        ).filter((e): e is readonly [string, ReturnType<typeof itemToArticle>] => e != null),
+      );
       const lines = updated.lines.map((l) => {
-        const art = this.articlesCache.find((a) => a.id === l.articleId);
+        const art = articleById.get(l.articleId);
         const prixUnitaireHt = l.unitPrice ?? art?.pmp ?? art?.prixUnitaire ?? 0;
         return {
           articleId: l.articleId,

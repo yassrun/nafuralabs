@@ -13,6 +13,7 @@ import {
   PageShellComponent,
   ToastService,
   type LookupSearchFn,
+  type NfSelectOption,
 } from '@platform/lib/anatomy';
 import { MadCurrencyPipe } from '@platform/lib/anatomy/pipes/mad-currency.pipe';
 import { AuthFacade } from '@platform/core/security/services/auth.facade';
@@ -100,10 +101,13 @@ function todayIso(): string {
       <div class="toolbar">
         <input class="search" type="search" placeholder="Chantier, titre, type…"
           [value]="search()" (input)="search.set($any($event.target).value)" />
-        <select [value]="filterType()" (change)="filterType.set($any($event.target).value)">
-          <option value="">{{ 'chantiers.journal.filters.allTypes' | translate }}</option>
-          @for (t of typeEntries(); track t[0]) { <option [value]="t[0]">{{ t[1] }}</option> }
-        </select>
+        <nf-select
+          class="toolbar-select"
+          [options]="typeFilterOptions()"
+          [ngModel]="filterType()"
+          (ngModelChange)="filterType.set($event)"
+          [placeholder]="'chantiers.journal.filters.allTypes' | translate"
+        />
         @if (filteredChantierCode()) {
           <span class="context-chip">{{ 'chantiers.common.fields.chantier' | translate }}: {{ filteredChantierCode() }}</span>
           <button type="button" class="context-link" (click)="clearChantierFilter()">{{ 'chantiers.common.actions.clearChantierFilter' | translate }}</button>
@@ -129,11 +133,12 @@ function todayIso(): string {
             (ngModelChange)="onCreateChantierChange($event)"
           />
           <label>{{ 'chantiers.journal.create.fields.type' | translate }}</label>
-          <select class="fld" [(ngModel)]="createDraft.type" name="type">
-            @for (t of typeEntries(); track t[0]) {
-              <option [value]="t[0]">{{ t[1] }}</option>
-            }
-          </select>
+          <nf-select
+            class="fld"
+            [options]="typeCreateOptions()"
+            [(ngModel)]="createDraft.type"
+            name="type"
+          />
           <label>{{ 'chantiers.journal.create.fields.date' | translate }}</label>
           <input class="fld" type="date" [(ngModel)]="createDraft.date" name="date" required />
           <label>{{ 'chantiers.journal.create.fields.contenu' | translate }}</label>
@@ -192,7 +197,7 @@ function todayIso(): string {
     :host { display: block; height: 100%; }
     .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; }
     .search { flex: 1; min-width: 180px; max-width: 280px; padding: 7px 12px; border: 1px solid var(--nf-color-border); border-radius: 6px; font-size: 13px; }
-    select { padding: 7px 10px; border: 1px solid var(--nf-color-border); border-radius: 6px; font-size: 13px; background: var(--nf-color-surface); }
+    .toolbar-select { min-width: 160px; }
     .context-chip { padding: 4px 10px; border-radius: 999px; background: var(--nf-color-bg-subtle); color: var(--nf-color-text-secondary); font-size: 12px; font-weight: 600; }
     .context-link { border: none; background: transparent; color: var(--nf-color-primary-600); cursor: pointer; font-size: 12px; font-weight: 600; }
     .context-link:hover { text-decoration: underline; }
@@ -385,6 +390,15 @@ export class JournalChantierPage implements OnInit {
     const types: JournalEventType[] = ['VISITE_MOA', 'INTEMPERIE', 'LIVRAISON', 'INCIDENT', 'ORDRE_SERVICE', 'REUNION', 'CONSTAT', 'AUTRE'];
     return types.map((t) => [t, this.trEnum(t)]);
   });
+
+  readonly typeFilterOptions = computed<NfSelectOption[]>(() => [
+    { value: '', label: this.translate.instant('chantiers.journal.filters.allTypes') },
+    ...this.typeEntries().map(([value, label]) => ({ value, label })),
+  ]);
+
+  readonly typeCreateOptions = computed<NfSelectOption[]>(() =>
+    this.typeEntries().map(([value, label]) => ({ value, label })),
+  );
 
   readonly entries = computed(() => {
     const q = this.search().toLowerCase().trim();

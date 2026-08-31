@@ -18,7 +18,9 @@ import {ConfigDrivenDetailPage,
   ButtonComponent,
   LOOKUP_SEARCHERS,
   NfSelectComponent,
-  type LookupSearchFn} from '@platform/lib/anatomy';
+  type LookupSearchFn,
+  type NfSelectOption,
+} from '@platform/lib/anatomy';
 import { ItemsApiService } from '@app/catalogue/services/items-api.service';
 import { openCatalogItemPicker } from '@app/etudes/dossiers/components/catalog-item-pick-dialog/catalog-item-pick-dialog.component';
 import type { PageHeaderConfig } from '@platform/lib/anatomy/components/molecules/page-header/page-header.component';
@@ -327,6 +329,10 @@ export class FournisseurDetailPage extends ConfigDrivenDetailPage<Fournisseur> {
   readonly config = buildFournisseurDetailConfig(this.translate);
   readonly tabs = TABS;
   readonly attestationTypes = ATTESTATION_TYPES;
+  readonly attestationTypeOptions: NfSelectOption[] = ATTESTATION_TYPES.map((type) => ({
+    value: type,
+    label: ATTESTATION_TYPE_LABELS[type],
+  }));
 
   readonly partner = signal<Partner | null>(null);
   readonly activeTab = signal<DetailTab>('informations');
@@ -404,6 +410,10 @@ export class FournisseurDetailPage extends ConfigDrivenDetailPage<Fournisseur> {
 
   attestationTypeLabel(type: AttestationFournisseurType): string {
     return ATTESTATION_TYPE_LABELS[type] ?? type;
+  }
+
+  onAttestationTypeChange(value: string): void {
+    this.attestationDraft.type = value as AttestationFournisseurType;
   }
 
   attestationStatusLabel(status: AttestationFournisseurStatus, present: boolean): string {

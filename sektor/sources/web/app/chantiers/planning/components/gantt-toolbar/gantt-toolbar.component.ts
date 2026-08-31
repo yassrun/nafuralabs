@@ -1,51 +1,46 @@
 
-import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, inject, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { ButtonComponent } from '@platform/lib/anatomy/components';
+import { ButtonComponent, NfSelectComponent, type NfSelectOption } from '@platform/lib/anatomy/components';
 
 import type { Chantier, PlanningGranularity, PlanningPeriodPreset } from '../../../models';
 
 @Component({
   selector: 'app-gantt-toolbar',
   standalone: true,
-  imports: [FormsModule, ButtonComponent, TranslateModule],
+  imports: [FormsModule, ButtonComponent, NfSelectComponent, TranslateModule],
   template: `
     <div class="gantt-toolbar">
       <div class="gantt-toolbar__filters">
         <label class="gantt-toolbar__field gantt-toolbar__field--wide">
           <span>Chantier</span>
-          <select
+          <nf-select
             aria-label="Chantier"
+            [options]="chantierOptions()"
             [ngModel]="selectedChantierIds()[0] ?? ''"
-            (ngModelChange)="selectedChantiersChange.emit($event ? [$event] : [])">
-            <option value="">Tous les chantiers</option>
-            @for (chantier of chantiers(); track chantier.id) {
-              <option [value]="chantier.id">{{ chantier.code }} — {{ chantier.name }}</option>
-            }
-          </select>
+            (ngModelChange)="selectedChantiersChange.emit($event ? [$event] : [])"
+            [placeholder]="'Tous les chantiers'"
+          />
         </label>
 
         <label class="gantt-toolbar__field">
           <span>{{ 'chantiers.planning.toolbar.periode' | translate }}</span>
-          <select [ngModel]="periodPreset()" (ngModelChange)="periodPresetChange.emit($event)">
-            <option value="THIS_MONTH">{{ 'chantiers.planning.toolbar.ceMois' | translate }}</option>
-            <option value="THIS_QUARTER">{{ 'chantiers.planning.toolbar.ceTrimestre' | translate }}</option>
-            <option value="THIS_YEAR">{{ 'chantiers.planning.toolbar.cetteAnnee' | translate }}</option>
-            <option value="ROLLING_6_MONTHS">6 mois glissants</option>
-            <option value="ALL">{{ 'chantiers.planning.toolbar.tout' | translate }}</option>
-          </select>
+          <nf-select
+            [options]="periodOptions()"
+            [ngModel]="periodPreset()"
+            (ngModelChange)="periodPresetChange.emit($event)"
+          />
         </label>
 
         <label class="gantt-toolbar__field">
           <span>{{ 'chantiers.planning.toolbar.granularite' | translate }}</span>
-          <select [ngModel]="granularity()" (ngModelChange)="granularityChange.emit($event)">
-            <option value="DAY">Jour</option>
-            <option value="WEEK">Semaine</option>
-            <option value="MONTH">Mois</option>
-            <option value="QUARTER">Trimestre</option>
-          </select>
+          <nf-select
+            [options]="granularityOptions()"
+            [ngModel]="granularity()"
+            (ngModelChange)="granularityChange.emit($event)"
+          />
         </label>
       </div>
 
@@ -64,7 +59,7 @@ import type { Chantier, PlanningGranularity, PlanningPeriodPreset } from '../../
       </div>
     </div>
   `,
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styles: [
     `
       .gantt-toolbar {
@@ -92,16 +87,6 @@ import type { Chantier, PlanningGranularity, PlanningPeriodPreset } from '../../
         font-weight: 700;
         letter-spacing: 0.02em;
         color: var(--nf-text-secondary);
-      }
-
-      .gantt-toolbar__field select {
-        min-height: 2.85rem;
-        border: 1px solid color-mix(in srgb, var(--nf-primary, var(--nf-color-primary-600)) 14%, var(--nf-color-border));
-        border-radius: 0.75rem;
-        background: var(--nf-color-surface);
-        padding: 0.65rem 0.8rem;
-        font: inherit;
-        color: var(--nf-text-primary);
       }
 
       .gantt-toolbar__actions {
@@ -139,6 +124,8 @@ import type { Chantier, PlanningGranularity, PlanningPeriodPreset } from '../../
   ],
 })
 export class GanttToolbarComponent {
+  private readonly translate = inject(TranslateService);
+
   readonly chantiers = input.required<readonly Chantier[]>();
   readonly selectedChantierIds = input.required<readonly string[]>();
   readonly granularity = input.required<PlanningGranularity>();
@@ -152,4 +139,24 @@ export class GanttToolbarComponent {
   readonly exportClick = output<void>();
   readonly fullscreenClick = output<void>();
   readonly newActiviteClick = output<void>();
+
+  readonly chantierOptions = computed<NfSelectOption[]>(() => [
+    { value: '', label: 'Tous les chantiers' },
+    ...this.chantiers().map((c) => ({ value: c.id, label: `${c.code} — ${c.name}` })),
+  ]);
+
+  readonly periodOptions = computed<NfSelectOption[]>(() => [
+    { value: 'THIS_MONTH', label: this.translate.instant('chantiers.planning.toolbar.ceMois') },
+    { value: 'THIS_QUARTER', label: this.translate.instant('chantiers.planning.toolbar.ceTrimestre') },
+    { value: 'THIS_YEAR', label: this.translate.instant('chantiers.planning.toolbar.cetteAnnee') },
+    { value: 'ROLLING_6_MONTHS', label: '6 mois glissants' },
+    { value: 'ALL', label: this.translate.instant('chantiers.planning.toolbar.tout') },
+  ]);
+
+  readonly granularityOptions = computed<NfSelectOption[]>(() => [
+    { value: 'DAY', label: 'Jour' },
+    { value: 'WEEK', label: 'Semaine' },
+    { value: 'MONTH', label: 'Mois' },
+    { value: 'QUARTER', label: 'Trimestre' },
+  ]);
 }

@@ -3,7 +3,7 @@ import { AfterViewInit, Component, ElementRef, inject, viewChild, ChangeDetectio
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 
-import { ButtonComponent } from '@platform/lib/anatomy';
+import { ButtonComponent, NfSelectComponent, type NfSelectOption } from '@platform/lib/anatomy';
 
 import type { DpuComposantType } from '@app/etudes/models';
 import type { UniteOption } from '../../utils/unite-options.util';
@@ -52,7 +52,7 @@ const TYPES: { value: DpuComposantType; label: string }[] = [
 @Component({
   selector: 'app-sous-detail-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatDialogModule, ButtonComponent],
+  imports: [CommonModule, FormsModule, MatDialogModule, ButtonComponent, NfSelectComponent],
   template: `
     <div class="dialog-shell">
       <header>
@@ -60,14 +60,14 @@ const TYPES: { value: DpuComposantType; label: string }[] = [
         <nf-button variant="ghost" (clicked)="close()" aria-label="Fermer">✕</nf-button>
       </header>
 
-      <label class="field">
-        <span>Type *</span>
-        <select name="type" [(ngModel)]="type">
-          @for (t of types; track t.value) {
-            <option [ngValue]="t.value">{{ t.label }}</option>
-          }
-        </select>
-      </label>
+      <nf-select
+        label="Type *"
+        name="type"
+        [options]="typeOptions"
+        [ngModel]="type"
+        (ngModelChange)="onTypeChange($event)"
+        [required]="true"
+      />
 
       <label class="field">
         <span>Désignation *</span>
@@ -83,15 +83,14 @@ const TYPES: { value: DpuComposantType; label: string }[] = [
       </label>
 
       <div class="grid-3">
-        <label class="field">
-          <span>Unité *</span>
-          <select name="unite" [(ngModel)]="unite">
-            <option value="">—</option>
-            @for (u of data.uniteOptions; track u.code) {
-              <option [ngValue]="u.code">{{ u.code }}</option>
-            }
-          </select>
-        </label>
+        <nf-select
+          label="Unité *"
+          name="unite"
+          [options]="uniteOptions"
+          [ngModel]="unite"
+          (ngModelChange)="unite = $event"
+          [required]="true"
+        />
         <label class="field">
           <span>Quantité *</span>
           <input name="quantite" type="number" step="any" min="0" [(ngModel)]="quantite" required />
@@ -109,14 +108,13 @@ const TYPES: { value: DpuComposantType; label: string }[] = [
         </label>
       </div>
 
-      <label class="field">
-        <span>Source du prix</span>
-        <select name="sourcePrix" [(ngModel)]="sourcePrix">
-          @for (s of sources; track s.value) {
-            <option [ngValue]="s.value">{{ s.label }}</option>
-          }
-        </select>
-      </label>
+      <nf-select
+        label="Source du prix"
+        name="sourcePrix"
+        [options]="sourceOptions"
+        [ngModel]="sourcePrix"
+        (ngModelChange)="sourcePrix = $event"
+      />
 
       <p class="total" aria-live="polite">
         Montant
@@ -208,6 +206,18 @@ export class SousDetailDialogComponent implements AfterViewInit {
 
   readonly types = TYPES;
   readonly sources = SOURCES;
+  readonly typeOptions: NfSelectOption[] = TYPES.map((t) => ({
+    value: t.value,
+    label: t.label,
+  }));
+  readonly sourceOptions: NfSelectOption[] = SOURCES.map((s) => ({
+    value: s.value,
+    label: s.label,
+  }));
+  readonly uniteOptions: NfSelectOption[] = [
+    { value: '', label: '—' },
+    ...this.data.uniteOptions.map((u) => ({ value: u.code, label: u.code })),
+  ];
   type: DpuComposantType = this.data.initial?.type ?? 'MATIERE';
   designation = this.data.initial?.designation ?? '';
   unite = this.data.initial?.unite ?? this.data.uniteOptions[0]?.code ?? '';
@@ -220,6 +230,10 @@ export class SousDetailDialogComponent implements AfterViewInit {
   get title(): string {
     if (this.data.mode === 'edit') return 'Modifier le composant';
     return this.data.premier ? 'Premier composant' : 'Ajouter un composant';
+  }
+
+  onTypeChange(value: string): void {
+    this.type = (value as DpuComposantType) || 'MATIERE';
   }
 
   ngAfterViewInit(): void {

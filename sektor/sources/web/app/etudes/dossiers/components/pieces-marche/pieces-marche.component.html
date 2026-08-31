@@ -32,41 +32,39 @@
       }
     </div>
     @if (mode() === 'bordereau' && (showPersistedTree() || enRevue())) {
-      <div class="pieces__toolbar">
+        <div class="pieces__toolbar">
         <div class="pieces__voies pieces__voies--inline" role="group" aria-label="Mode de construction">
-          <button
+          <nf-button
             type="button"
-            class="pieces__voie"
-            [class.pieces__voie--active]="voie() === 'auto'"
+            [variant]="voie() === 'auto' ? 'primary' : 'secondary'"
+            size="sm"
             [disabled]="extractionEnCours() || phase() === 'saving'"
-            (click)="setVoie('auto')"
+            (clicked)="setVoie('auto')"
           >
             Automatique
-          </button>
-          <button
+          </nf-button>
+          <nf-button
             type="button"
-            class="pieces__voie"
-            [class.pieces__voie--active]="voie() === 'manuel'"
+            [variant]="voie() === 'manuel' ? 'primary' : 'secondary'"
+            size="sm"
             [disabled]="extractionEnCours() || phase() === 'saving'"
-            (click)="setVoie('manuel')"
+            (clicked)="setVoie('manuel')"
           >
             Manuel
-          </button>
+          </nf-button>
         </div>
         @if (voie() === 'auto' && !enRevue() && sourceBordereauPiece(); as piece) {
           @if (modifiable()) {
-            <button
+            <nf-button
               type="button"
-              class="pieces__toolbar-btn"
+              variant="secondary"
+              size="sm"
               [disabled]="extractionEnCours()"
-              (click)="extraire(piece)"
+              [loading]="extractionEnCours() && pieceExtraction()?.id === piece.id"
+              (clicked)="extraire(piece)"
             >
-              {{
-                extractionEnCours() && pieceExtraction()?.id === piece.id
-                  ? 'Extraction…'
-                  : 'Ré-extraire'
-              }}
-            </button>
+              Ré-extraire
+            </nf-button>
           }
         }
       </div>
@@ -96,17 +94,23 @@
           </p>
         </div>
         <div class="pieces__prop-actions">
-          <button type="button" class="pieces__btn" [disabled]="propositionBusy()" (click)="discardProposition()">
-            Ignorer
-          </button>
-          <button
+          <nf-button
             type="button"
-            class="pieces__btn pieces__btn--primary"
+            variant="secondary"
             [disabled]="propositionBusy()"
-            (click)="applyProposition()"
+            (clicked)="discardProposition()"
           >
-            {{ propositionBusy() ? 'Application…' : 'Appliquer' }}
-          </button>
+            Ignorer
+          </nf-button>
+          <nf-button
+            type="button"
+            variant="primary"
+            [disabled]="propositionBusy()"
+            [loading]="propositionBusy()"
+            (clicked)="applyProposition()"
+          >
+            Appliquer
+          </nf-button>
         </div>
       </aside>
     }
@@ -145,20 +149,20 @@
 
             @if (piece) {
               <div class="pieces__zone-fichier">
-                <mat-icon class="pieces__zone-icone" aria-hidden="true">description</mat-icon>
+                <nf-icon name="description" class="pieces__zone-icone" aria-hidden="true"></nf-icon>
                 <span class="pieces__nom">{{ nomFichierAffiche(piece.nomFichier) || piece.documentId }}</span>
                 @if (modifiable()) {
-                  <button
+                  <nf-button
                     type="button"
-                    mat-icon-button
-                    class="pieces__icon-btn pieces__icon-btn--danger"
-                    matTooltip="Retirer"
+                    variant="danger"
+                    size="sm"
+                    icon="trash-2"
+                    iconLibrary="lucide"
+                    tooltip="Retirer"
                     aria-label="Retirer le document"
                     [disabled]="!!envoiSlot()"
-                    (click)="supprimer(piece)"
-                  >
-                    <mat-icon>delete</mat-icon>
-                  </button>
+                    (clicked)="supprimer(piece)"
+                  ></nf-button>
                 }
               </div>
               @if (modifiable()) {
@@ -174,7 +178,7 @@
               }
             } @else if (modifiable()) {
               <label class="pieces__zone-drop">
-                <mat-icon aria-hidden="true">upload_file</mat-icon>
+                <nf-icon name="upload_file" aria-hidden="true"></nf-icon>
                 <span class="pieces__zone-drop-main">
                   {{ busy ? 'Envoi…' : 'Glissez-déposez le fichier ici' }}
                 </span>
@@ -192,12 +196,17 @@
 
             @if (modifiable() && slot.type !== 'BORDEREAU' && slot.type !== 'CPS') {
               <div class="pieces__zone-meta">
-                <button type="button" class="pieces__link" (click)="basculerObligatoire(slot)">
+                <nf-button type="button" variant="ghost" size="sm" (clicked)="basculerObligatoire(slot)">
                   {{ slot.obligatoire ? 'Rendre optionnel' : 'Rendre obligatoire' }}
-                </button>
-                <button type="button" class="pieces__link pieces__link--danger" (click)="retirerSlot(slot)">
+                </nf-button>
+                <nf-button
+                  type="button"
+                  variant="danger"
+                  size="sm"
+                  (clicked)="retirerSlot(slot)"
+                >
                   Retirer le slot
-                </button>
+                </nf-button>
               </div>
             }
           </div>
@@ -207,21 +216,17 @@
       @if (modifiable()) {
         <div class="pieces__ajout">
           @if (!ajoutOuvert()) {
-            <button type="button" class="pieces__btn" (click)="ajoutOuvert.set(true)">
+            <nf-button type="button" variant="secondary" (clicked)="ajoutOuvert.set(true)">
               Ajouter une pièce
-            </button>
+            </nf-button>
           } @else {
             <div class="pieces__ajout-form">
-              <label>
-                <span>Type</span>
-                <select [ngModel]="ajoutType()" (ngModelChange)="ajoutType.set($event)">
-                  @for (t of typesAjout; track t.value) {
-                    <option [value]="t.value">{{ t.label }}</option>
-                  }
-                  <option value="CAUTION">Caution</option>
-                  <option value="ATTESTATION">Attestation</option>
-                </select>
-              </label>
+              <nf-select
+                label="Type"
+                [options]="ajoutTypeOptions"
+                [ngModel]="ajoutType()"
+                (ngModelChange)="ajoutType.set($event)"
+              />
               <label>
                 <span>Libellé</span>
                 <input
@@ -240,15 +245,17 @@
                 Obligatoire
               </label>
               <div class="pieces__ajout-actions">
-                <button type="button" class="pieces__btn" (click)="ajoutOuvert.set(false)">Annuler</button>
-                <button
+                <nf-button type="button" variant="secondary" (clicked)="ajoutOuvert.set(false)">
+                  Annuler
+                </nf-button>
+                <nf-button
                   type="button"
-                  class="pieces__btn pieces__btn--primary"
+                  variant="primary"
                   [disabled]="propositionBusy()"
-                  (click)="ajouterPiece()"
+                  (clicked)="ajouterPiece()"
                 >
                   Ajouter
-                </button>
+                </nf-button>
               </div>
             </div>
           }
@@ -269,24 +276,24 @@
   } @else {
     @if (!(showPersistedTree() || enRevue())) {
       <div class="pieces__voies" role="group" aria-label="Mode de construction">
-        <button
+        <nf-button
           type="button"
-          class="pieces__voie"
-          [class.pieces__voie--active]="voie() === 'auto'"
+          [variant]="voie() === 'auto' ? 'primary' : 'secondary'"
+          size="sm"
           [disabled]="extractionEnCours() || phase() === 'saving'"
-          (click)="setVoie('auto')"
+          (clicked)="setVoie('auto')"
         >
           Automatique
-        </button>
-        <button
+        </nf-button>
+        <nf-button
           type="button"
-          class="pieces__voie"
-          [class.pieces__voie--active]="voie() === 'manuel'"
+          [variant]="voie() === 'manuel' ? 'primary' : 'secondary'"
+          size="sm"
           [disabled]="extractionEnCours() || phase() === 'saving'"
-          (click)="setVoie('manuel')"
+          (clicked)="setVoie('manuel')"
         >
           Manuel
-        </button>
+        </nf-button>
       </div>
     }
 

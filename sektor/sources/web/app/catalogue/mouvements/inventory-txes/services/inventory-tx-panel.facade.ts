@@ -2,9 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 
 import type { LookupContext } from '@platform/lib/anatomy/types';
-import type { Article, InventoryTx, TxType } from '@app/catalogue/models';
-import { ArticleCatalogService } from '@app/catalogue/services/article-catalog.service';
-import { InventoryLookupsService } from '@app/catalogue/services/inventory-lookups.service';
+import type { InventoryTx, TxType } from '@app/catalogue/models';
 import { InventoryMovementApiService } from '@app/catalogue/services/inventory-movement-api.service';
 
 const TX_TYPES: TxType[] = ['RECEPTION', 'SORTIE', 'TRANSFERT', 'RETOUR', 'PERTE', 'INVENTAIRE'];
@@ -12,11 +10,8 @@ const TX_TYPES: TxType[] = ['RECEPTION', 'SORTIE', 'TRANSFERT', 'RETOUR', 'PERTE
 @Injectable({ providedIn: 'root' })
 export class InventoryTxPanelFacade {
   private readonly movementApi = inject(InventoryMovementApiService);
-  private readonly lookupsService = inject(InventoryLookupsService);
-  private readonly articleCatalog = inject(ArticleCatalogService);
   private readonly translate = inject(TranslateService);
 
-  private articlesCache: Article[] = [];
   private lookupsSignal = signal<LookupContext>({});
 
   readonly lookups = computed(() => this.lookupsSignal());
@@ -35,19 +30,14 @@ export class InventoryTxPanelFacade {
   }
 
   async ensureLookups(): Promise<void> {
-    const articles = await this.articleCatalog.loadArticles({ activeOnly: true });
-    this.articlesCache = articles;
+    // Articles: line editors use openCatalogItemPicker / searchPicker — no dump.
     this.lookupsSignal.set({
       txTypes: TX_TYPES.map((t) => ({
         key: t,
         value: this.translate.instant(`inventory.enums.txType.${t}`),
       })),
       locations: [],
-      articlesMatCons: articles.map((a) => ({
-        key: a.id,
-        value: `${a.code} — ${a.name}`,
-        data: { uomCode: a.uomCode, uomId: a.uomId, prix: a.pmp ?? a.prixUnitaire },
-      })),
+      articlesMatCons: [],
     });
   }
 

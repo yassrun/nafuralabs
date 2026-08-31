@@ -14,6 +14,7 @@ import {
   LOOKUP_SEARCHERS,
   NfSelectComponent,
   type LookupSearchFn,
+  type NfSelectOption,
 } from '@platform/lib/anatomy';
 import { FieldTemplateDirective } from '@platform/lib/anatomy/components/organisms/entity-detail';
 import {
@@ -110,8 +111,7 @@ import {
         gap: 0.75rem;
         align-items: flex-end;
       }
-      .cs-dest-add nf-select,
-      .cs-dest-add select {
+      .cs-dest-add nf-select {
         min-width: 16rem;
       }
       .cs-dest-actions {
@@ -119,13 +119,6 @@ import {
         flex-wrap: wrap;
         gap: 0.75rem;
         align-items: center;
-      }
-      .cs-dest-add select {
-        height: 2.5rem;
-        padding: 0 0.65rem;
-        border: 1px solid var(--nf-color-border, #d1d5db);
-        border-radius: 0.35rem;
-        background: var(--nf-color-surface, #fff);
       }
       .cs-dest-table td nf-smart-import-trigger {
         display: inline-flex;
@@ -219,6 +212,13 @@ export class ConsultationDetailPage extends ConfigDrivenDetailPage<ConsultationA
         ? 'achats.consultation.destinataires.devisRecu'
         : 'achats.consultation.destinataires.enAttente';
     return this.translate.instant(key);
+  }
+
+  contactSelectOptions(): NfSelectOption[] {
+    return this.contactsEmail().map((c) => ({
+      value: c.id,
+      label: `${c.nom} — ${c.email ?? ''}`.trim(),
+    }));
   }
 
   async onFournisseurChange(id: string): Promise<void> {

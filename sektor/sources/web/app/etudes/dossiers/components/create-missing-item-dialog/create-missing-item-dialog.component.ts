@@ -4,7 +4,7 @@ import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/cor
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 
-import { ButtonComponent } from '@platform/lib/anatomy';
+import { ButtonComponent, NfSelectComponent, type NfSelectOption } from '@platform/lib/anatomy';
 
 import type { DpuComposantType } from '@app/etudes/models';
 import { NATURE_TYPE_DPU, normalizeNature, type Nature } from '@app/catalogue/models';
@@ -54,7 +54,7 @@ const NATURE_OPTIONS: { value: Nature; label: string }[] = [
 @Component({
   selector: 'app-create-missing-item-dialog',
   standalone: true,
-  imports: [FormsModule, MatDialogModule, ButtonComponent],
+  imports: [FormsModule, MatDialogModule, ButtonComponent, NfSelectComponent],
   template: `
     <div class="dialog-shell">
       <header>
@@ -68,22 +68,22 @@ const NATURE_OPTIONS: { value: Nature; label: string }[] = [
       </label>
 
       <div class="grid-2">
-        <label class="field">
-          <span>Nature *</span>
-          <select name="type" [(ngModel)]="nature">
-            @for (t of natures; track t.value) {
-              <option [ngValue]="t.value">{{ t.label }}</option>
-            }
-          </select>
-        </label>
-        <label class="field">
-          <span>Unité *</span>
-          <select name="unite" [(ngModel)]="unite">
-            @for (u of data.uniteOptions; track u.code) {
-              <option [ngValue]="u.code">{{ u.code }}</option>
-            }
-          </select>
-        </label>
+        <nf-select
+          label="Nature *"
+          name="type"
+          [options]="natureOptions"
+          [ngModel]="nature"
+          (ngModelChange)="onNatureChange($event)"
+          [required]="true"
+        />
+        <nf-select
+          label="Unité *"
+          name="unite"
+          [options]="uniteOptions"
+          [ngModel]="unite"
+          (ngModelChange)="unite = $event"
+          [required]="true"
+        />
       </div>
 
       <label class="field">
@@ -168,6 +168,14 @@ export class CreateMissingItemDialogComponent {
   private readonly currenciesApi = inject(CurrenciesApiService);
 
   readonly natures = NATURE_OPTIONS;
+  readonly natureOptions: NfSelectOption[] = NATURE_OPTIONS.map((t) => ({
+    value: t.value,
+    label: t.label,
+  }));
+  readonly uniteOptions: NfSelectOption[] = this.data.uniteOptions.map((u) => ({
+    value: u.code,
+    label: u.code,
+  }));
   readonly saving = signal(false);
   readonly erreur = signal<string | undefined>(undefined);
 
@@ -184,6 +192,10 @@ export class CreateMissingItemDialogComponent {
 
   isCatalogue(): boolean {
     return (this.data.mode ?? 'catalogue') === 'catalogue';
+  }
+
+  onNatureChange(value: string): void {
+    this.nature = normalizeNature(value);
   }
 
   private dpuType(): DpuComposantType {

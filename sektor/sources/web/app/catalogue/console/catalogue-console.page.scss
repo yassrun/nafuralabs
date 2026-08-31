@@ -16,21 +16,6 @@
   gap: 0.35rem;
 }
 
-.cat__tab {
-  border: 1px solid var(--nf-color-border, #e2e8f0);
-  background: transparent;
-  border-radius: 6px;
-  padding: 0.4rem 0.75rem;
-  cursor: pointer;
-  font: inherit;
-}
-
-.cat__tab--active {
-  background: var(--nf-color-primary, #0f172a);
-  color: #fff;
-  border-color: transparent;
-}
-
 .cat__count {
   margin-left: 0.35rem;
   opacity: 0.85;

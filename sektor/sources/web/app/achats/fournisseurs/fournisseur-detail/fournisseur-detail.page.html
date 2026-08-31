@@ -103,10 +103,10 @@
                 </td>
                 <td>
                   <div class="row-actions">
-                    <nf-button type="button" class="btn btn--sm" (clicked)="startEditAttestation(row)" variant="secondary">
+                    <nf-button type="button" size="sm" (clicked)="startEditAttestation(row)" variant="secondary">
                       Modifier
                     </nf-button>
-                    <nf-button type="button" class="btn btn--sm btn--danger" (clicked)="deleteAttestation(row)" variant="danger">
+                    <nf-button type="button" size="sm" (clicked)="deleteAttestation(row)" variant="danger">
                       Supprimer
                     </nf-button>
                   </div>
@@ -122,14 +122,16 @@
       <article class="form-card">
         <h4>{{ editingAttestationId() ? 'Modifier attestation' : 'Nouvelle attestation' }}</h4>
         <div class="form-grid">
-          <div class="field">
-            <label for="att-type">Type</label>
-            <select id="att-type" [(ngModel)]="attestationDraft.type" [disabled]="!!editingAttestationId()">
-              @for (type of attestationTypes; track type) {
-                <option [ngValue]="type">{{ attestationTypeLabel(type) }}</option>
-              }
-            </select>
-          </div>
+          <nf-select
+            id="att-type"
+            label="Type"
+            [options]="attestationTypeOptions"
+            [ngModel]="attestationDraft.type"
+            (ngModelChange)="onAttestationTypeChange($event)"
+            [disabled]="!!editingAttestationId()"
+            name="attestationType"
+            data-testid="att-type"
+          />
           <div class="field">
             <label for="att-emission">Date émission</label>
             <input id="att-emission" type="date" [(ngModel)]="attestationDraft.dateEmission" />
@@ -144,10 +146,10 @@
           </div>
         </div>
         <div class="form-actions">
-          <nf-button type="button" class="btn btn--primary" (clicked)="saveAttestation()" variant="primary">Enregistrer</nf-button>
           @if (editingAttestationId()) {
-            <nf-button type="button" class="btn" (clicked)="cancelAttestationForm()" variant="secondary">Annuler</nf-button>
+            <nf-button type="button" (clicked)="cancelAttestationForm()" variant="secondary">Annuler</nf-button>
           }
+          <nf-button type="button" (clicked)="saveAttestation()" variant="primary">Enregistrer</nf-button>
         </div>
       </article>
     </section>
@@ -202,10 +204,10 @@
                 </td>
                 <td>
                   <div class="row-actions">
-                    <nf-button type="button" class="btn btn--sm" (clicked)="startEditCatalogue(row)" variant="secondary">
+                    <nf-button type="button" size="sm" (clicked)="startEditCatalogue(row)" variant="secondary">
                       Modifier
                     </nf-button>
-                    <nf-button type="button" class="btn btn--sm btn--danger" (clicked)="deleteCatalogue(row)" variant="danger">
+                    <nf-button type="button" size="sm" (clicked)="deleteCatalogue(row)" variant="danger">
                       Supprimer
                     </nf-button>
                   </div>
@@ -286,10 +288,10 @@
           </div>
         </div>
         <div class="form-actions">
-          <nf-button type="button" class="btn btn--primary" (clicked)="saveCatalogue()" variant="primary">Enregistrer</nf-button>
           @if (editingCatalogueId()) {
-            <nf-button type="button" class="btn" (clicked)="cancelCatalogueForm()" variant="secondary">Annuler</nf-button>
+            <nf-button type="button" (clicked)="cancelCatalogueForm()" variant="secondary">Annuler</nf-button>
           }
+          <nf-button type="button" (clicked)="saveCatalogue()" variant="primary">Enregistrer</nf-button>
         </div>
       </article>
     </section>

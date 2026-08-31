@@ -2,7 +2,6 @@
  * Famille Article — arbre visible (nf-tree-table), même principe que l'étude / lots chantier.
  */
 
-import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -19,9 +18,11 @@ import {
   ConfirmDialogService,
   PageHeaderComponent,
   PageShellComponent,
+  ButtonComponent,
+  NfSelectComponent,
+  type NfSelectOption,
 } from '@platform/lib/anatomy';
 import {
-  ButtonComponent,
   TreeTableComponent,
   type NfTreeNode,
   type NfTreeTableColumn,
@@ -39,8 +40,9 @@ import type { FamilleArticleConfig } from '../models';
     PageShellComponent,
     PageHeaderComponent,
     TreeTableComponent,
-    ButtonComponent
-],
+    ButtonComponent,
+    NfSelectComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <nf-page-shell scroll>
@@ -59,12 +61,12 @@ import type { FamilleArticleConfig } from '../models';
           {{ 'inventory.configuration.famille.tree.addChild' | translate }}
         </nf-button>
         <span class="fa-toolbar__spacer"></span>
-        <button type="button" class="fa-link" (click)="collapseAll()">
+        <nf-button variant="ghost" size="sm" (clicked)="collapseAll()">
           {{ 'inventory.configuration.famille.tree.collapseAll' | translate }}
-        </button>
-        <button type="button" class="fa-link" (click)="expandAll()">
+        </nf-button>
+        <nf-button variant="ghost" size="sm" (clicked)="expandAll()">
           {{ 'inventory.configuration.famille.tree.expandAll' | translate }}
-        </button>
+        </nf-button>
       </div>
 
       <div class="fa-layout">
@@ -92,21 +94,21 @@ import type { FamilleArticleConfig } from '../models';
                 }
                 @case ('actions') {
                   <span class="fa-actions" (click)="$event.stopPropagation()">
-                    <button
-                      type="button"
-                      class="fa-row-action"
+                    <nf-button
+                      variant="ghost"
+                      size="sm"
+                      icon="plus"
+                      iconLibrary="lucide"
                       [disabled]="!!row.parentId || facade.hasChildren(row.id)"
-                      [attr.title]="'inventory.configuration.famille.tree.addChild' | translate"
-                      (click)="onAddChildFor(row)">
-                      +
-                    </button>
-                    <button
-                      type="button"
-                      class="fa-row-action fa-row-action--danger"
-                      [attr.title]="'common.actions.delete' | translate"
-                      (click)="onDeleteNodeRequested(row.id)">
-                      ×
-                    </button>
+                      [tooltip]="'inventory.configuration.famille.tree.addChild' | translate"
+                      (clicked)="onAddChildFor(row)" />
+                    <nf-button
+                      variant="ghost"
+                      size="sm"
+                      icon="x"
+                      iconLibrary="lucide"
+                      [tooltip]="'common.actions.delete' | translate"
+                      (clicked)="onDeleteNodeRequested(row.id)" />
                   </span>
                 }
               }
@@ -144,18 +146,11 @@ import type { FamilleArticleConfig } from '../models';
 
             <label class="fa-field">
               <span class="fa-field__label">{{ 'inventory.configuration.famille.fields.parentId' | translate }}</span>
-              <select
-                class="fa-field__input"
+              <nf-select
+                [options]="parentSelectOptions()"
                 [ngModel]="draftParentId()"
                 (ngModelChange)="draftParentId.set($event)"
-                [disabled]="facade.isSaving() || facade.hasChildren(famille.id)">
-                <option [ngValue]="''">{{ 'inventory.configuration.famille.fields.parentNone' | translate }}</option>
-                @for (opt of parentOptions(); track opt.value) {
-                  @if (opt.value !== famille.id) {
-                    <option [ngValue]="opt.value">{{ opt.label }}</option>
-                  }
-                }
-              </select>
+                [disabled]="facade.isSaving() || facade.hasChildren(famille.id)" />
             </label>
 
             <label class="fa-field fa-field--checkbox">
@@ -195,15 +190,6 @@ import type { FamilleArticleConfig } from '../models';
       margin-bottom: 0.75rem;
     }
     .fa-toolbar__spacer { flex: 1 1 auto; }
-    .fa-link {
-      border: none;
-      background: transparent;
-      color: var(--nf-color-primary-600, var(--nf-color-primary));
-      cursor: pointer;
-      font-size: 0.8125rem;
-      padding: 0;
-    }
-    .fa-link:hover { text-decoration: underline; }
     .fa-layout {
       display: grid;
       grid-template-columns: minmax(320px, 1.4fr) minmax(280px, 1fr);
@@ -263,19 +249,7 @@ import type { FamilleArticleConfig } from '../models';
       color: var(--nf-color-text-tertiary, var(--nf-color-text-secondary));
       white-space: nowrap;
     }
-    .fa-actions { white-space: nowrap; }
-    .fa-row-action {
-      border: none;
-      background: transparent;
-      cursor: pointer;
-      font-size: 1rem;
-      line-height: 1;
-      padding: 0 0.35rem;
-      color: var(--nf-color-text-secondary);
-    }
-    .fa-row-action:disabled { opacity: 0.35; cursor: not-allowed; }
-    .fa-row-action:hover:not(:disabled) { color: var(--nf-color-text-primary); }
-    .fa-row-action--danger:hover:not(:disabled) { color: var(--nf-color-danger-600, #c0392b); }
+    .fa-actions { white-space: nowrap; display: inline-flex; gap: 0.15rem; }
     :host ::ng-deep .fa-row--selected {
       background: color-mix(in srgb, var(--nf-color-primary-600, #2563eb) 10%, transparent);
     }
@@ -321,6 +295,20 @@ export class FamilleTreePage implements OnInit {
   });
 
   readonly parentOptions = computed(() => this.facade.rootOptions());
+
+  readonly parentSelectOptions = computed<NfSelectOption[]>(() => {
+    const familleId = this.selectedId();
+    const none: NfSelectOption = {
+      value: '',
+      label: this.translate.instant('inventory.configuration.famille.fields.parentNone'),
+    };
+    return [
+      none,
+      ...this.parentOptions()
+        .filter((opt) => opt.value !== familleId)
+        .map((opt) => ({ value: opt.value, label: opt.label })),
+    ];
+  });
 
   readonly canSave = computed(() => {
     const famille = this.selectedFamille();

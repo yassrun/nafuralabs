@@ -9,7 +9,7 @@
 .saisie-page {
   display: grid;
   gap: 1.25rem;
-  padding: 1rem 1rem 6.5rem;
+  padding: 1rem 1rem 1.5rem;
 }
 
 .saisie-page--error {
@@ -154,26 +154,8 @@
   color: var(--nf-color-text-secondary);
 }
 
-.saisie-page__sticky-bar {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 30;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.85rem;
-  padding: 0.85rem 1rem calc(0.85rem + env(safe-area-inset-bottom));
-  background: color-mix(in srgb, var(--nf-color-bg-subtle) 94%, transparent);
-  border-top: 1px solid var(--nf-color-border);
-  backdrop-filter: blur(12px);
-}
-
-.sticky-bar__secondary,
-.sticky-bar__primary {
-  width: 100%;
-  min-height: 3rem;
-  border-radius: 1rem;
+.saisie-page__action-bar {
+  margin-top: 1.25rem;
 }
 
 @media (max-width: 960px) {
@@ -197,9 +179,5 @@
 
   .saisie-page__meta {
     grid-template-columns: 1fr;
-  }
-
-  .saisie-page__sticky-bar {
-    grid-template-columns: 1fr 1fr;
   }
 }

@@ -9,6 +9,7 @@ import {
 import { RouterLink } from '@angular/router';
 
 import { MadCurrencyPipe } from '@platform/lib/anatomy/pipes/mad-currency.pipe';
+import { ButtonComponent } from '@platform/lib/anatomy';
 
 import type { DossierEtudeSynthese } from '../../services/dossier-etude-api.service';
 import {
@@ -21,7 +22,7 @@ import {
   selector: 'app-dossier-summary-header',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterLink, MadCurrencyPipe],
+  imports: [CommonModule, RouterLink, MadCurrencyPipe, ButtonComponent],
   templateUrl: './dossier-summary-header.component.html',
   styleUrl: './dossier-summary-header.component.scss',
   host: {

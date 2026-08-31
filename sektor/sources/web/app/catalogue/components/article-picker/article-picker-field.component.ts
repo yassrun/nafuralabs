@@ -33,15 +33,16 @@ import type { ArticlePickerContext } from './article-picker.component';
   ],
   template: `
     <div class="apf">
-      <button
-        type="button"
-        class="apf__btn"
+      <nf-button
+        variant="secondary"
+        size="sm"
+        [fullWidth]="true"
         data-testid="article-picker-open"
         [disabled]="disabled"
-        (click)="open()"
+        (clicked)="open()"
       >
         {{ label() || 'Choisir un article' }}
-      </button>
+      </nf-button>
       @if (value && !disabled) {
         <nf-button variant="ghost" size="sm" (clicked)="clear()">Effacer</nf-button>
       }
@@ -49,18 +50,7 @@ import type { ArticlePickerContext } from './article-picker.component';
   `,
   styles: `
     .apf { display: flex; align-items: center; gap: 0.5rem; width: 100%; }
-    .apf__btn {
-      flex: 1;
-      min-width: 12rem;
-      text-align: left;
-      padding: 0.5rem 0.75rem;
-      border: 1px solid var(--nf-color-border, #d1d5db);
-      border-radius: 8px;
-      background: var(--nf-color-surface, #fff);
-      font: inherit;
-      cursor: pointer;
-    }
-    .apf__btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .apf nf-button:first-child { flex: 1; min-width: 12rem; }
   `,
 })
 export class ArticlePickerFieldComponent implements ControlValueAccessor, OnDestroy {

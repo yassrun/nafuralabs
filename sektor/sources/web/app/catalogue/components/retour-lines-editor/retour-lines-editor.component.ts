@@ -50,15 +50,17 @@ const ETAT_OPTIONS: { value: EtatArticle; labelKey: string }[] = [
             @for (line of lines(); track line.id; let i = $index) {
               <tr [class.rle__row--warn]="line.etatArticle === 'ABIME'" [class.rle__row--danger]="line.etatArticle === 'INUTILISABLE'">
                 <td>
-                  <button
-                    type="button"
+                  <nf-button
                     class="rle__pick"
+                    variant="secondary"
+                    size="sm"
+                    [fullWidth]="true"
                     data-testid="article-picker-open"
                     [disabled]="linesControl().disabled"
-                    (click)="pickArticle(i)"
+                    (clicked)="pickArticle(i)"
                   >
                     {{ line.articleCode ? (line.articleCode + ' — ' + line.articleName) : 'Choisir un article' }}
-                  </button>
+                  </nf-button>
                 </td>
                 <td class="rle__muted">{{ line.articleName || ('inventory.common.dash' | translate) }}</td>
                 <td>
@@ -156,17 +158,8 @@ const ETAT_OPTIONS: { value: EtatArticle; labelKey: string }[] = [
       background: color-mix(in srgb, var(--nf-danger) 8%, transparent);
     }
     .rle__pick {
-      width: 100%;
       min-width: 140px;
-      text-align: left;
-      padding: 0.5rem 0.65rem;
-      border: 1px solid var(--nf-border-default);
-      border-radius: 8px;
-      background: var(--nf-color-surface, #fff);
-      font: inherit;
-      cursor: pointer;
     }
-    .rle__pick:disabled { opacity: 0.6; cursor: not-allowed; }
     .rle--readonly .rle__toolbar {
       display: none;
     }

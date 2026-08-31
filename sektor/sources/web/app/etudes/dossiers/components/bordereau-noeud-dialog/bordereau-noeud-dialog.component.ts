@@ -3,7 +3,7 @@ import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 
-import { ButtonComponent } from '@platform/lib/anatomy';
+import { ButtonComponent, NfSelectComponent, type NfSelectOption } from '@platform/lib/anatomy';
 
 import type { UniteOption } from '../../utils/unite-options.util';
 import { mapToReferentialCode, uniteOptionsForValue } from '../../utils/unite-options.util';
@@ -39,7 +39,7 @@ export interface BordereauNoeudDialogResult {
 @Component({
   selector: 'app-bordereau-noeud-dialog',
   standalone: true,
-  imports: [FormsModule, MatDialogModule, ButtonComponent],
+  imports: [FormsModule, MatDialogModule, ButtonComponent, NfSelectComponent],
   template: `
     <div class="dialog-shell">
       <header>
@@ -48,14 +48,14 @@ export interface BordereauNoeudDialogResult {
       </header>
 
       @if (data.mode === 'create' && data.allowedTypes.length > 1) {
-        <label class="field">
-          <span>Type *</span>
-          <select name="type" [(ngModel)]="type">
-            @for (t of data.allowedTypes; track t) {
-              <option [ngValue]="t">{{ typeLabel(t) }}</option>
-            }
-          </select>
-        </label>
+        <nf-select
+          label="Type *"
+          name="type"
+          [options]="typeOptions"
+          [ngModel]="type"
+          (ngModelChange)="onTypeChange($event)"
+          [required]="true"
+        />
       } @else {
         <p class="type-badge">{{ typeLabel(type) }}</p>
       }
@@ -72,15 +72,14 @@ export interface BordereauNoeudDialogResult {
 
       @if (type === 'ARTICLE') {
         <div class="grid-2">
-          <label class="field">
-            <span>Unité *</span>
-            <select name="unite" [(ngModel)]="unite">
-              <option value="">—</option>
-              @for (u of uniteSelectOptions; track u.code) {
-                <option [ngValue]="u.code">{{ u.label }}</option>
-              }
-            </select>
-          </label>
+          <nf-select
+            label="Unité *"
+            name="unite"
+            [options]="uniteNfOptions"
+            [ngModel]="unite"
+            (ngModelChange)="unite = $event"
+            [required]="true"
+          />
           <label class="field">
             <span>Quantité *</span>
             <input name="quantite" type="number" step="any" min="0" [(ngModel)]="quantite" required />
@@ -186,6 +185,14 @@ export class BordereauNoeudDialogComponent {
     this.data.uniteOptions,
     this.data.initial?.unite,
   );
+  readonly uniteNfOptions: NfSelectOption[] = [
+    { value: '', label: '—' },
+    ...this.uniteSelectOptions.map((u) => ({ value: u.code, label: u.label })),
+  ];
+  readonly typeOptions: NfSelectOption[] = this.data.allowedTypes.map((t) => ({
+    value: t,
+    label: this.typeLabel(t),
+  }));
 
   get title(): string {
     if (this.data.mode === 'edit') return 'Modifier le nœud';
@@ -197,6 +204,10 @@ export class BordereauNoeudDialogComponent {
       default:
         return 'Ajouter un lot';
     }
+  }
+
+  onTypeChange(value: string): void {
+    this.type = (value as BordereauNoeudType) || this.data.defaultType;
   }
 
   typeLabel(t: BordereauNoeudType): string {

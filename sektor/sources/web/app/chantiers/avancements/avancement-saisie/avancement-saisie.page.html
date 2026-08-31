@@ -61,17 +61,15 @@
         }
 
         @if (additionalLines().length > 0) {
-          <label class="saisie-page__add-lot">
-            <span>{{ 'chantiers.avancement.fields.addLine' | translate }}</span>
-            <select (ngModelChange)="$event && facade.addLine($event)" [ngModel]="null">
-              <option [ngValue]="null">{{ 'chantiers.avancement.fields.pickAdditionalLine' | translate }}</option>
-              @for (line of additionalLines(); track line.key) {
-                <option [ngValue]="line.key">
-                  {{ line.poste ? line.poste.code + ' — ' + line.poste.designation : line.lot.code + ' — ' + line.lot.designation }}
-                </option>
-              }
-            </select>
-          </label>
+          <div class="saisie-page__add-lot">
+            <nf-select
+              [label]="'chantiers.avancement.fields.addLine' | translate"
+              [placeholder]="'chantiers.avancement.fields.pickAdditionalLine' | translate"
+              [options]="additionalLineOptions()"
+              [ngModel]="null"
+              (ngModelChange)="$event && facade.addLine($event)"
+            />
+          </div>
         }
       </section>
     </main>
@@ -104,13 +102,13 @@
     </aside>
   </div>
 
-  <footer class="saisie-page__sticky-bar">
-    <nf-button variant="secondary" class="sticky-bar__secondary" (clicked)="saveDraft()">
+  <nf-action-bar align="right" [sticky]="true" class="saisie-page__action-bar">
+    <nf-button variant="secondary" (clicked)="saveDraft()">
       {{ 'chantiers.avancement.saveDraft' | translate }}
     </nf-button>
-    <nf-button variant="primary" class="sticky-bar__primary" (clicked)="validate()">
+    <nf-button variant="primary" (clicked)="validate()">
       {{ isEditing() ? ('chantiers.avancement.saveEdit' | translate) : ('chantiers.avancement.validate' | translate) }}
     </nf-button>
-  </footer>
+  </nf-action-bar>
 </section>
 }

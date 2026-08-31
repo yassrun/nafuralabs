@@ -14,6 +14,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { map } from 'rxjs/operators';
 
 import {
+  ActionBarComponent,
   ButtonComponent,
   EmptyStateComponent,
   NfSelectComponent,
@@ -44,6 +45,7 @@ interface ClientOption {
     PageShellComponent,
     PageHeaderComponent,
     ButtonComponent,
+    ActionBarComponent,
     EmptyStateComponent,
     NfSelectComponent,
     VilleMaSelectComponent
@@ -79,12 +81,15 @@ interface ClientOption {
                 <input id="ce-code" type="text" class="fld fld--readonly" [value]="draft.code" readonly />
               </div>
               <div class="field">
-                <label for="ce-st">{{ 'chantiers.common.fields.statut' | translate }} <span class="required" aria-hidden="true">*</span></label>
-                <select id="ce-st" [(ngModel)]="draft.status" name="st" class="fld" required>
-                  @for (opt of statusOptions; track opt.v) {
-                    <option [ngValue]="opt.v">{{ opt.labelKey | translate }}</option>
-                  }
-                </select>
+                <nf-select
+                  id="ce-st"
+                  [(ngModel)]="draft.status"
+                  name="st"
+                  class="fld"
+                  [label]="'chantiers.common.fields.statut' | translate"
+                  [options]="statusSelectOptions()"
+                  [required]="true"
+                />
               </div>
               <div class="field field--full">
                 <label for="ce-name">{{ 'chantiers.chantier.edit.fields.name' | translate }} <span class="required" aria-hidden="true">*</span></label>
@@ -178,12 +183,12 @@ interface ClientOption {
             <p class="required-hint">{{ 'chantiers.chantier.detail.equipe.seeTab' | translate }}</p>
           </section>
 
-          <div class="nav-actions">
+          <nf-action-bar align="right" [sticky]="true">
             <nf-button variant="secondary" (clicked)="goBack()">{{ 'chantiers.common.actions.cancel' | translate }}</nf-button>
             <nf-button variant="primary" (clicked)="submit()" [disabled]="saving()">
               {{ 'chantiers.chantier.edit.submit' | translate }}
             </nf-button>
-          </div>
+          </nf-action-bar>
         </div>
       }
     </nf-page-shell>
@@ -208,7 +213,6 @@ interface ClientOption {
     .fld--readonly { background: var(--nf-color-bg-subtle); color: var(--nf-color-text-secondary); }
     .client-select { display: block; min-width: 0; }
     .err { width: min(100%, 880px); box-sizing: border-box; padding: 0.75rem 1rem; border: 1px solid var(--nf-color-danger-200); border-radius: 0.5rem; background: var(--nf-color-danger-50); color: var(--nf-color-danger-700); font-size: 0.88rem; margin: 0 0 0.75rem; }
-    .nav-actions { position: sticky; bottom: 0; z-index: 2; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 0.5rem; align-items: center; margin-top: 1rem; padding: 0.75rem 0; border-top: 1px solid var(--nf-color-bg-muted); background: var(--nf-color-surface); }
     @media (max-width: 720px) {
       .field-grid, .field-grid--three { grid-template-columns: 1fr; }
       .field--full { grid-column: auto; }
@@ -271,6 +275,13 @@ export class ChantierEditPage {
     { v: 'CLOTURE', labelKey: 'chantiers.status.cloture' },
     { v: 'ANNULE', labelKey: 'chantiers.status.annule' },
   ];
+
+  statusSelectOptions(): NfSelectOption[] {
+    return this.statusOptions.map((opt) => ({
+      value: opt.v,
+      label: this.translate.instant(opt.labelKey),
+    }));
+  }
 
   readonly headerConfig = computed(() => ({
     title: this.translate.instant('chantiers.chantier.edit.title'),

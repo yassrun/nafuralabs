@@ -40,15 +40,17 @@ import { openCatalogItemPicker } from '@app/etudes/dossiers/components/catalog-i
             @for (line of lines(); track line.id; let i = $index) {
               <tr [class.trl__row--warn]="isShort(line)">
                 <td>
-                  <button
-                    type="button"
+                  <nf-button
                     class="trl__pick"
+                    variant="secondary"
+                    size="sm"
+                    [fullWidth]="true"
                     data-testid="article-picker-open"
                     [disabled]="linesControl().disabled"
-                    (click)="pickArticle(i)"
+                    (clicked)="pickArticle(i)"
                   >
                     {{ line.articleCode ? (line.articleCode + ' — ' + line.articleName) : 'Choisir un article' }}
-                  </button>
+                  </nf-button>
                 </td>
                 <td class="trl__muted">{{ line.articleName || ('inventory.common.dash' | translate) }}</td>
                 <td>
@@ -135,17 +137,8 @@ import { openCatalogItemPicker } from '@app/etudes/dossiers/components/catalog-i
       background: color-mix(in srgb, var(--nf-warning, var(--nf-color-warning-500)) 8%, transparent);
     }
     .trl__pick {
-      width: 100%;
       min-width: 140px;
-      text-align: left;
-      padding: 0.5rem 0.65rem;
-      border: 1px solid var(--nf-border-default);
-      border-radius: 8px;
-      background: var(--nf-color-surface, #fff);
-      font: inherit;
-      cursor: pointer;
     }
-    .trl__pick:disabled { opacity: 0.6; cursor: not-allowed; }
     .trl--readonly .trl__toolbar {
       display: none;
     }

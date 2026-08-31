@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { ButtonComponent, EmptyStateComponent, NfSelectComponent } from '@platform/lib/anatomy/components';
+import { ButtonComponent, EmptyStateComponent, NfSelectComponent, ActionBarComponent, type NfSelectOption } from '@platform/lib/anatomy/components';
 import { LOOKUP_SEARCHERS, type LookupSearchFn } from '@platform/lib/anatomy';
 import { ConfirmDialogService, ToastService } from '@platform/lib/anatomy';
 import { AvancementFacade } from '../services';
@@ -13,9 +13,18 @@ import { LotSaisieCardComponent } from './components/lot-saisie-card/lot-saisie-
 @Component({
   selector: 'app-avancement-saisie',
   standalone: true,
-  imports: [FormsModule, RouterLink, TranslateModule, ButtonComponent, EmptyStateComponent, NfSelectComponent, LotSaisieCardComponent],
+  imports: [
+    FormsModule,
+    RouterLink,
+    TranslateModule,
+    ButtonComponent,
+    EmptyStateComponent,
+    NfSelectComponent,
+    ActionBarComponent,
+    LotSaisieCardComponent,
+  ],
   templateUrl: './avancement-saisie.page.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrls: ['./avancement-saisie.page.scss'],
 })
 export class AvancementSaisiePage {
@@ -46,6 +55,15 @@ export class AvancementSaisiePage {
 
   readonly searchChantiers: LookupSearchFn = (q) =>
     this.lookupSearchers?.['chantiers']?.(q) ?? Promise.resolve([]);
+
+  additionalLineOptions(): NfSelectOption[] {
+    return this.additionalLines().map((line) => ({
+      value: line.key,
+      label: line.poste
+        ? `${line.poste.code} — ${line.poste.designation}`
+        : `${line.lot.code} — ${line.lot.designation}`,
+    }));
+  }
 
   constructor() {
     const chantierId = this.route.snapshot.paramMap.get('chantierId');

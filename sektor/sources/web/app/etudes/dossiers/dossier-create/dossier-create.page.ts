@@ -11,6 +11,12 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { AuthFacade } from '@platform/core/security/services/auth.facade';
+import {
+  ActionBarComponent,
+  ButtonComponent,
+  NfSelectComponent,
+  type NfSelectOption,
+} from '@platform/lib/anatomy';
 
 import type { MarchePropose } from '@app/etudes/models';
 
@@ -49,7 +55,13 @@ type CpsPhase = 'idle' | 'uploading' | 'indexing' | 'ready' | 'partial' | 'error
   selector: 'app-dossier-create',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, DecimalPipe],
+  imports: [
+    FormsModule,
+    DecimalPipe,
+    ActionBarComponent,
+    ButtonComponent,
+    NfSelectComponent,
+  ],
   templateUrl: './dossier-create.page.html',
   styleUrl: './dossier-create.page.scss',
 })
@@ -74,6 +86,18 @@ export class DossierCreatePage implements OnInit {
   readonly ingenieurs = signal<ChargeEtudeCandidat[]>([]);
   readonly enCours = signal(false);
   readonly erreur = signal<string | undefined>(undefined);
+
+  readonly aoTypeOptions: NfSelectOption[] = [
+    { value: 'PUBLIC', label: 'Public' },
+    { value: 'PRIVE', label: 'Privé' },
+  ];
+
+  readonly chargeEtudeOptions = computed<NfSelectOption[]>(() =>
+    this.ingenieurs().map((ing) => ({
+      value: ing.userId,
+      label: `${ing.displayName} — ${ing.email}`,
+    })),
+  );
 
   /** Draft créé silencieusement pour uploader le CPS avant finalize. */
   readonly draftId = signal<string | null>(null);

@@ -11,13 +11,10 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { firstValueFrom } from 'rxjs';
 
-import { ButtonComponent, ConfirmDialogService, ToastService } from '@platform/lib/anatomy';
+import { ButtonComponent, ConfirmDialogService, NfSelectComponent, ToastService } from '@platform/lib/anatomy';
 import { MadCurrencyPipe } from '@platform/lib/anatomy/pipes/mad-currency.pipe';
 import { safeRandomUUID } from '@platform/core/util/uuid';
 
@@ -113,10 +110,8 @@ export interface PosteSaveSnapshot {
     CommonModule,
     FormsModule,
     ButtonComponent,
+    NfSelectComponent,
     MadCurrencyPipe,
-    MatButtonModule,
-    MatIconModule,
-    MatTooltipModule,
   ],
   templateUrl: './poste-decomposition-panel.component.html',
   styleUrl: './poste-decomposition-panel.component.scss',
@@ -159,6 +154,10 @@ export class PosteDecompositionPanelComponent {
   /** Prix de vente saisi quand estimationSaisieEn = VENTE. */
   readonly venteSaisie = signal<number | null>(null);
   readonly estimationSaisieEn = signal<EstimationSaisieEnUi>('COUT');
+  readonly estimationSaisieOptions = [
+    { value: 'COUT', label: 'Coût unitaire' },
+    { value: 'VENTE', label: 'Prix de vente HT' },
+  ];
   /** Repère conservé lors du passage ESTIME → DECOMPOSE. */
   readonly estimationRepere = signal<number | null>(null);
   readonly forfaitPartnerId = signal<string | null>(null);
@@ -457,17 +456,18 @@ export class PosteDecompositionPanelComponent {
     this.markDpuDirty();
   }
 
-  setEstimationSaisieEn(value: EstimationSaisieEnUi): void {
+  setEstimationSaisieEn(value: string | EstimationSaisieEnUi): void {
     if (!this.canMutate() || !this.estEstime()) return;
-    if (this.estimationSaisieEn() === value) return;
-    if (value === 'VENTE') {
+    const next: EstimationSaisieEnUi = value === 'VENTE' ? 'VENTE' : 'COUT';
+    if (this.estimationSaisieEn() === next) return;
+    if (next === 'VENTE') {
       if (this.venteSaisie() == null) {
         this.venteSaisie.set(this.prixVenteHt());
       }
     } else if (this.prixFourni() == null) {
       this.prixFourni.set(this.coutUnitaireActif());
     }
-    this.estimationSaisieEn.set(value);
+    this.estimationSaisieEn.set(next);
     this.markDpuDirty();
   }
 

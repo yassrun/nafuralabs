@@ -44,8 +44,12 @@
       }
       @if (hasPendingIa()) {
         <div class="creer__cps-actions">
-          <button type="button" class="creer__bouton" (click)="accepterTout()">Tout accepter</button>
-          <button type="button" class="creer__bouton" (click)="ignorerTout()">Tout ignorer</button>
+          <nf-button variant="ghost" size="sm" type="button" (clicked)="accepterTout()">
+            Tout accepter
+          </nf-button>
+          <nf-button variant="secondary" size="sm" type="button" (clicked)="ignorerTout()">
+            Tout ignorer
+          </nf-button>
         </div>
       }
     </div>
@@ -59,8 +63,12 @@
           @if (iaPending('objet')) {
             <span class="creer__ia-badge">IA</span>
             <span class="creer__ia-actions">
-              <button type="button" class="creer__ia-ok" (click)="accepter('objet')">Accepter</button>
-              <button type="button" class="creer__ia-no" (click)="ignorer('objet')">Ignorer</button>
+              <nf-button variant="ghost" size="sm" type="button" (clicked)="accepter('objet')">
+                Accepter
+              </nf-button>
+              <nf-button variant="secondary" size="sm" type="button" (clicked)="ignorer('objet')">
+                Ignorer
+              </nf-button>
             </span>
           } @else if (iaStatus('objet') === 'accepted') {
             <span class="creer__ia-badge creer__ia-badge--ok">accepté</span>
@@ -86,8 +94,12 @@
           @if (iaPending('clientNom')) {
             <span class="creer__ia-badge">IA</span>
             <span class="creer__ia-actions">
-              <button type="button" class="creer__ia-ok" (click)="accepter('clientNom')">Accepter</button>
-              <button type="button" class="creer__ia-no" (click)="ignorer('clientNom')">Ignorer</button>
+              <nf-button variant="ghost" size="sm" type="button" (clicked)="accepter('clientNom')">
+                Accepter
+              </nf-button>
+              <nf-button variant="secondary" size="sm" type="button" (clicked)="ignorer('clientNom')">
+                Ignorer
+              </nf-button>
             </span>
           } @else if (iaStatus('clientNom') === 'accepted') {
             <span class="creer__ia-badge creer__ia-badge--ok">accepté</span>
@@ -107,26 +119,23 @@
         <span class="creer__hint">Pas de Partner ici — création client à la conclusion du marché.</span>
       </label>
 
-      <label class="creer__champ">
-        <span class="creer__label">Chargé d’étude <span aria-hidden="true">*</span></span>
-        <select
+      <div class="creer__champ">
+        <nf-select
           name="chargeEtude"
-          required
-          [ngModel]="chargeEtudeUserId()"
+          label="Chargé d’étude"
+          placeholder="Sélectionner un ingénieur (BTP_INGENIEUR)"
+          [required]="true"
+          [options]="chargeEtudeOptions()"
+          [ngModel]="chargeEtudeUserId() ?? ''"
           (ngModelChange)="chargeEtudeUserId.set($event || null)"
-        >
-          <option [ngValue]="null" disabled>Sélectionner un ingénieur (BTP_INGENIEUR)</option>
-          @for (ing of ingenieurs(); track ing.userId) {
-            <option [ngValue]="ing.userId">{{ ing.displayName }} — {{ ing.email }}</option>
-          }
-        </select>
+        />
         @if (ingenieurs().length === 0) {
           <span class="creer__hint">
             Aucun utilisateur avec le rôle Ingénieur. Affectez le rôle BTP_INGENIEUR dans
             Administration → Membres.
           </span>
         }
-      </label>
+      </div>
 
       <label class="creer__champ" [attr.data-ia]="iaStatus('dateLimiteDepot')">
         <span class="creer__label-row">
@@ -134,8 +143,22 @@
           @if (iaPending('dateLimiteDepot')) {
             <span class="creer__ia-badge">IA</span>
             <span class="creer__ia-actions">
-              <button type="button" class="creer__ia-ok" (click)="accepter('dateLimiteDepot')">Accepter</button>
-              <button type="button" class="creer__ia-no" (click)="ignorer('dateLimiteDepot')">Ignorer</button>
+              <nf-button
+                variant="ghost"
+                size="sm"
+                type="button"
+                (clicked)="accepter('dateLimiteDepot')"
+              >
+                Accepter
+              </nf-button>
+              <nf-button
+                variant="secondary"
+                size="sm"
+                type="button"
+                (clicked)="ignorer('dateLimiteDepot')"
+              >
+                Ignorer
+              </nf-button>
             </span>
           } @else if (iaStatus('dateLimiteDepot') === 'accepted') {
             <span class="creer__ia-badge creer__ia-badge--ok">accepté</span>
@@ -164,8 +187,17 @@
             @if (iaPending('aoReference')) {
               <span class="creer__ia-badge">IA</span>
               <span class="creer__ia-actions">
-                <button type="button" class="creer__ia-ok" (click)="accepter('aoReference')">Accepter</button>
-                <button type="button" class="creer__ia-no" (click)="ignorer('aoReference')">Ignorer</button>
+                <nf-button variant="ghost" size="sm" type="button" (clicked)="accepter('aoReference')">
+                  Accepter
+                </nf-button>
+                <nf-button
+                  variant="secondary"
+                  size="sm"
+                  type="button"
+                  (clicked)="ignorer('aoReference')"
+                >
+                  Ignorer
+                </nf-button>
               </span>
             } @else if (iaStatus('aoReference') === 'accepted') {
               <span class="creer__ia-badge creer__ia-badge--ok">accepté</span>
@@ -182,14 +214,18 @@
           />
         </label>
 
-        <label class="creer__champ" [attr.data-ia]="iaStatus('aoType')">
+        <div class="creer__champ" [attr.data-ia]="iaStatus('aoType')">
           <span class="creer__label-row">
             <span class="creer__label">Type</span>
             @if (iaPending('aoType')) {
               <span class="creer__ia-badge">IA</span>
               <span class="creer__ia-actions">
-                <button type="button" class="creer__ia-ok" (click)="accepter('aoType')">Accepter</button>
-                <button type="button" class="creer__ia-no" (click)="ignorer('aoType')">Ignorer</button>
+                <nf-button variant="ghost" size="sm" type="button" (clicked)="accepter('aoType')">
+                  Accepter
+                </nf-button>
+                <nf-button variant="secondary" size="sm" type="button" (clicked)="ignorer('aoType')">
+                  Ignorer
+                </nf-button>
               </span>
             } @else if (iaStatus('aoType') === 'accepted') {
               <span class="creer__ia-badge creer__ia-badge--ok">accepté</span>
@@ -198,15 +234,13 @@
           @if (iaPending('aoType')) {
             <p class="creer__ia-hint">Proposition : {{ iaValue('aoType') }}</p>
           }
-          <select
+          <nf-select
             name="aoType"
+            [options]="aoTypeOptions"
             [ngModel]="aoType()"
-            (ngModelChange)="aoType.set($event)"
-          >
-            <option value="PUBLIC">Public</option>
-            <option value="PRIVE">Privé</option>
-          </select>
-        </label>
+            (ngModelChange)="aoType.set($event === 'PRIVE' ? 'PRIVE' : 'PUBLIC')"
+          />
+        </div>
 
         <label class="creer__champ" [attr.data-ia]="iaStatus('ville')">
           <span class="creer__label-row">
@@ -214,8 +248,12 @@
             @if (iaPending('ville')) {
               <span class="creer__ia-badge">IA</span>
               <span class="creer__ia-actions">
-                <button type="button" class="creer__ia-ok" (click)="accepter('ville')">Accepter</button>
-                <button type="button" class="creer__ia-no" (click)="ignorer('ville')">Ignorer</button>
+                <nf-button variant="ghost" size="sm" type="button" (clicked)="accepter('ville')">
+                  Accepter
+                </nf-button>
+                <nf-button variant="secondary" size="sm" type="button" (clicked)="ignorer('ville')">
+                  Ignorer
+                </nf-button>
               </span>
             } @else if (iaStatus('ville') === 'accepted') {
               <span class="creer__ia-badge creer__ia-badge--ok">accepté</span>
@@ -238,8 +276,22 @@
             @if (iaPending('dateOuverturePlis')) {
               <span class="creer__ia-badge">IA</span>
               <span class="creer__ia-actions">
-                <button type="button" class="creer__ia-ok" (click)="accepter('dateOuverturePlis')">Accepter</button>
-                <button type="button" class="creer__ia-no" (click)="ignorer('dateOuverturePlis')">Ignorer</button>
+                <nf-button
+                  variant="ghost"
+                  size="sm"
+                  type="button"
+                  (clicked)="accepter('dateOuverturePlis')"
+                >
+                  Accepter
+                </nf-button>
+                <nf-button
+                  variant="secondary"
+                  size="sm"
+                  type="button"
+                  (clicked)="ignorer('dateOuverturePlis')"
+                >
+                  Ignorer
+                </nf-button>
               </span>
             } @else if (iaStatus('dateOuverturePlis') === 'accepted') {
               <span class="creer__ia-badge creer__ia-badge--ok">accepté</span>
@@ -262,8 +314,22 @@
             @if (iaPending('delaiExecutionJours')) {
               <span class="creer__ia-badge">IA</span>
               <span class="creer__ia-actions">
-                <button type="button" class="creer__ia-ok" (click)="accepter('delaiExecutionJours')">Accepter</button>
-                <button type="button" class="creer__ia-no" (click)="ignorer('delaiExecutionJours')">Ignorer</button>
+                <nf-button
+                  variant="ghost"
+                  size="sm"
+                  type="button"
+                  (clicked)="accepter('delaiExecutionJours')"
+                >
+                  Accepter
+                </nf-button>
+                <nf-button
+                  variant="secondary"
+                  size="sm"
+                  type="button"
+                  (clicked)="ignorer('delaiExecutionJours')"
+                >
+                  Ignorer
+                </nf-button>
               </span>
             } @else if (iaStatus('delaiExecutionJours') === 'accepted') {
               <span class="creer__ia-badge creer__ia-badge--ok">accepté</span>
@@ -287,8 +353,22 @@
             @if (iaPending('estimationMoaHt')) {
               <span class="creer__ia-badge">IA</span>
               <span class="creer__ia-actions">
-                <button type="button" class="creer__ia-ok" (click)="accepter('estimationMoaHt')">Accepter</button>
-                <button type="button" class="creer__ia-no" (click)="ignorer('estimationMoaHt')">Ignorer</button>
+                <nf-button
+                  variant="ghost"
+                  size="sm"
+                  type="button"
+                  (clicked)="accepter('estimationMoaHt')"
+                >
+                  Accepter
+                </nf-button>
+                <nf-button
+                  variant="secondary"
+                  size="sm"
+                  type="button"
+                  (clicked)="ignorer('estimationMoaHt')"
+                >
+                  Ignorer
+                </nf-button>
               </span>
             } @else if (iaStatus('estimationMoaHt') === 'accepted') {
               <span class="creer__ia-badge creer__ia-badge--ok">accepté</span>
@@ -313,8 +393,22 @@
             @if (iaPending('cautionProvisoire')) {
               <span class="creer__ia-badge">IA</span>
               <span class="creer__ia-actions">
-                <button type="button" class="creer__ia-ok" (click)="accepter('cautionProvisoire')">Accepter</button>
-                <button type="button" class="creer__ia-no" (click)="ignorer('cautionProvisoire')">Ignorer</button>
+                <nf-button
+                  variant="ghost"
+                  size="sm"
+                  type="button"
+                  (clicked)="accepter('cautionProvisoire')"
+                >
+                  Accepter
+                </nf-button>
+                <nf-button
+                  variant="secondary"
+                  size="sm"
+                  type="button"
+                  (clicked)="ignorer('cautionProvisoire')"
+                >
+                  Ignorer
+                </nf-button>
               </span>
             } @else if (iaStatus('cautionProvisoire') === 'accepted') {
               <span class="creer__ia-badge creer__ia-badge--ok">accepté</span>
@@ -339,8 +433,22 @@
             @if (iaPending('cautionDefinitive')) {
               <span class="creer__ia-badge">IA</span>
               <span class="creer__ia-actions">
-                <button type="button" class="creer__ia-ok" (click)="accepter('cautionDefinitive')">Accepter</button>
-                <button type="button" class="creer__ia-no" (click)="ignorer('cautionDefinitive')">Ignorer</button>
+                <nf-button
+                  variant="ghost"
+                  size="sm"
+                  type="button"
+                  (clicked)="accepter('cautionDefinitive')"
+                >
+                  Accepter
+                </nf-button>
+                <nf-button
+                  variant="secondary"
+                  size="sm"
+                  type="button"
+                  (clicked)="ignorer('cautionDefinitive')"
+                >
+                  Ignorer
+                </nf-button>
               </span>
             } @else if (iaStatus('cautionDefinitive') === 'accepted') {
               <span class="creer__ia-badge creer__ia-badge--ok">accepté</span>
@@ -361,15 +469,16 @@
       </div>
     </fieldset>
 
-    <div class="creer__actions">
-      <button type="button" class="creer__bouton" (click)="annuler()">Annuler</button>
-      <button
+    <nf-action-bar align="right" [sticky]="true">
+      <nf-button variant="secondary" type="button" (clicked)="annuler()">Annuler</nf-button>
+      <nf-button
+        variant="primary"
         type="submit"
-        class="creer__bouton creer__bouton--principal"
         [disabled]="!peutCreer()"
+        [loading]="enCours()"
       >
-        {{ enCours() ? 'Enregistrement…' : 'Créer et commencer' }}
-      </button>
-    </div>
+        Créer et commencer
+      </nf-button>
+    </nf-action-bar>
   </form>
 </section>

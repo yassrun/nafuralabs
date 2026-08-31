@@ -210,14 +210,12 @@
           <div class="poste__fourni">
             <label class="poste__field poste__field--base">
               <span>Base de saisie</span>
-              <select
+              <nf-select
                 [disabled]="!modifiable()"
+                [options]="estimationSaisieOptions"
                 [ngModel]="estimationSaisieEn()"
                 (ngModelChange)="setEstimationSaisieEn($event)"
-              >
-                <option value="COUT">Coût unitaire</option>
-                <option value="VENTE">Prix de vente HT</option>
-              </select>
+              />
             </label>
             <div class="poste__fourni-grid">
               @if (estimationSaisieEn() === 'VENTE') {
@@ -452,35 +450,37 @@
                               Ajouter à une consultation
                             </nf-button>
                           }
-                          <button
+                          <nf-button
                             type="button"
-                            mat-icon-button
-                            class="poste__icon-btn"
-                            matTooltip="Modifier"
+                            variant="ghost"
+                            size="sm"
+                            icon="pencil"
+                            iconLibrary="lucide"
+                            tooltip="Modifier"
                             [attr.aria-label]="'Modifier ' + libelleComposant(row)"
-                            (click)="modifierSousDetail(row)"
-                          >
-                            <mat-icon>edit</mat-icon>
-                          </button>
-                          <button
+                            (clicked)="modifierSousDetail(row)"
+                          ></nf-button>
+                          <nf-button
                             type="button"
-                            mat-icon-button
-                            class="poste__icon-btn"
-                            matTooltip="Dupliquer"
+                            variant="ghost"
+                            size="sm"
+                            icon="copy"
+                            iconLibrary="lucide"
+                            tooltip="Dupliquer"
                             [attr.aria-label]="'Dupliquer ' + libelleComposant(row)"
-                            (click)="dupliquerSousDetail(row)"
-                          >
-                            <mat-icon>content_copy</mat-icon>
-                          </button>
-                          <button
+                            (clicked)="dupliquerSousDetail(row)"
+                          ></nf-button>
+                          <nf-button
                             type="button"
-                            class="poste__icon-btn poste__icon-btn--danger"
+                            variant="danger"
+                            size="sm"
+                            icon="trash-2"
+                            iconLibrary="lucide"
                             [attr.aria-label]="'Supprimer ' + libelleComposant(row)"
-                            (click)="supprimerSousDetail(row)"
+                            (clicked)="supprimerSousDetail(row)"
                           >
-                            <mat-icon>delete</mat-icon>
-                            <span>Supprimer</span>
-                          </button>
+                            Supprimer
+                          </nf-button>
                         </span>
                       </td>
                     }
@@ -525,35 +525,37 @@
                         Créer dans le catalogue
                       </nf-button>
                     }
-                    <button
+                    <nf-button
                       type="button"
-                      mat-icon-button
-                      class="poste__icon-btn"
-                      matTooltip="Modifier"
+                      variant="ghost"
+                      size="sm"
+                      icon="pencil"
+                      iconLibrary="lucide"
+                      tooltip="Modifier"
                       aria-label="Modifier"
-                      (click)="modifierSousDetail(row)"
-                    >
-                      <mat-icon>edit</mat-icon>
-                    </button>
-                    <button
+                      (clicked)="modifierSousDetail(row)"
+                    ></nf-button>
+                    <nf-button
                       type="button"
-                      mat-icon-button
-                      class="poste__icon-btn"
-                      matTooltip="Dupliquer"
+                      variant="ghost"
+                      size="sm"
+                      icon="copy"
+                      iconLibrary="lucide"
+                      tooltip="Dupliquer"
                       aria-label="Dupliquer"
-                      (click)="dupliquerSousDetail(row)"
-                    >
-                      <mat-icon>content_copy</mat-icon>
-                    </button>
-                    <button
+                      (clicked)="dupliquerSousDetail(row)"
+                    ></nf-button>
+                    <nf-button
                       type="button"
-                      class="poste__icon-btn poste__icon-btn--danger"
+                      variant="danger"
+                      size="sm"
+                      icon="trash-2"
+                      iconLibrary="lucide"
                       aria-label="Supprimer"
-                      (click)="supprimerSousDetail(row)"
+                      (clicked)="supprimerSousDetail(row)"
                     >
-                      <mat-icon>delete</mat-icon>
-                      <span>Supprimer</span>
-                    </button>
+                      Supprimer
+                    </nf-button>
                   </div>
                 }
               </li>

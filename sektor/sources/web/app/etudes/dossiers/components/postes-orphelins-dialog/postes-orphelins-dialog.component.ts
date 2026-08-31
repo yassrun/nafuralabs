@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 
-import { ButtonComponent, NfInputComponent } from '@platform/lib/anatomy';
+import { ButtonComponent, NfInputComponent, NfSelectComponent, type NfSelectOption } from '@platform/lib/anatomy';
 
 import type {
   LotDaccueilPossible,
@@ -40,7 +40,7 @@ const NOUVEAU = '__nouveau__';
 @Component({
   selector: 'app-postes-orphelins-dialog',
   standalone: true,
-  imports: [FormsModule, MatDialogModule, ButtonComponent, NfInputComponent],
+  imports: [FormsModule, MatDialogModule, ButtonComponent, NfInputComponent, NfSelectComponent],
   template: `
     <div class="dialog-shell">
       <header>
@@ -61,18 +61,12 @@ const NOUVEAU = '__nouveau__';
               <span>{{ ligne.poste.designation }}</span>
             </div>
 
-            <label class="field">
-              <span>Lot d'accueil</span>
-              <select
-                [ngModel]="ligne.choix"
-                (ngModelChange)="setChoix(ligne.poste.posteId, $event)">
-                <option value="">— Choisir —</option>
-                @for (lot of data.lotsDisponibles; track lot.code) {
-                  <option [value]="lot.code">{{ lot.code }} · {{ lot.designation }}</option>
-                }
-                <option [value]="NOUVEAU">Créer un lot d'accueil…</option>
-              </select>
-            </label>
+            <nf-select
+              label="Lot d'accueil"
+              [options]="lotOptions"
+              [ngModel]="ligne.choix"
+              (ngModelChange)="setChoix(ligne.poste.posteId, $event)"
+            />
 
             @if (ligne.choix === NOUVEAU) {
               <div class="grid-2">
@@ -129,6 +123,15 @@ export class PostesOrphelinsDialogComponent {
   readonly data = inject<PostesOrphelinsDialogData>(MAT_DIALOG_DATA);
 
   readonly NOUVEAU = NOUVEAU;
+
+  readonly lotOptions: NfSelectOption[] = [
+    { value: '', label: '— Choisir —' },
+    ...this.data.lotsDisponibles.map((lot) => ({
+      value: lot.code,
+      label: `${lot.code} · ${lot.designation}`,
+    })),
+    { value: NOUVEAU, label: "Créer un lot d'accueil…" },
+  ];
 
   readonly lignes = signal<LignePlacement[]>(
     this.data.postes.map((poste) => ({

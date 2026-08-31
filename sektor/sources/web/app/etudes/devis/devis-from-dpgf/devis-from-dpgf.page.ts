@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 
-import { PageShellComponent } from '@platform/lib/anatomy';
+import { PageShellComponent, ButtonComponent } from '@platform/lib/anatomy';
 
 import {
   ClientPartnerSelectComponent,
@@ -21,6 +21,7 @@ import { DevisApiService } from '../services/devis-api.service';
     FormsModule,
     TranslateModule,
     PageShellComponent,
+    ButtonComponent,
     ClientPartnerSelectComponent
 ],
   template: `
@@ -40,15 +41,16 @@ import { DevisApiService } from '../services/devis-api.service';
           (selectionChange)="onClient($event)"
         />
         <div class="from-dpgf__actions">
-          <button type="button" class="btn" (click)="annuler()">Annuler</button>
-          <button
+          <nf-button variant="secondary" type="button" (clicked)="annuler()">Annuler</nf-button>
+          <nf-button
+            variant="primary"
             type="button"
-            class="btn btn--primary"
             [disabled]="!clientId() || enCours()"
-            (click)="generer()"
+            [loading]="enCours()"
+            (clicked)="generer()"
           >
-            {{ enCours() ? 'Génération…' : 'Créer le devis' }}
-          </button>
+            Créer le devis
+          </nf-button>
         </div>
       </section>
     </nf-page-shell>
@@ -69,22 +71,6 @@ import { DevisApiService } from '../services/devis-api.service';
         display: flex;
         gap: 12px;
         justify-content: flex-end;
-      }
-      .btn {
-        border: 1px solid var(--nf-color-border);
-        border-radius: 6px;
-        background: transparent;
-        padding: 8px 16px;
-        cursor: pointer;
-      }
-      .btn--primary {
-        border-color: var(--nf-color-primary-600);
-        background: var(--nf-color-primary-600);
-        color: #fff;
-      }
-      .btn:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
       }
     `,
   ],

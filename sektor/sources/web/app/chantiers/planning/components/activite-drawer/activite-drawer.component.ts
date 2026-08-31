@@ -1,15 +1,21 @@
 import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { BadgeComponent, ButtonComponent, DrawerComponent } from '@platform/lib/anatomy/components';
+import {
+  BadgeComponent,
+  ButtonComponent,
+  DrawerComponent,
+  NfSelectComponent,
+  type NfSelectOption,
+} from '@platform/lib/anatomy/components';
 
 import { PlanningFacade, toIsoDate } from '../../services/planning.facade';
 
 @Component({
   selector: 'app-activite-drawer',
   standalone: true,
-  imports: [DrawerComponent, BadgeComponent, ButtonComponent, FormsModule, TranslateModule],
+  imports: [DrawerComponent, BadgeComponent, ButtonComponent, NfSelectComponent, FormsModule, TranslateModule],
   template: `
     <nf-drawer
       [open]="facade.drawerOpen()"
@@ -52,28 +58,22 @@ import { PlanningFacade, toIsoDate } from '../../services/planning.facade';
 
           <label class="activite-drawer__field">
             <span>{{ 'chantiers.planning.drawer.parent' | translate }}</span>
-            <select
+            <nf-select
+              [options]="parentOptions()"
               [ngModel]="draft.parentActiviteId"
               (ngModelChange)="facade.patchDraft({ parentActiviteId: $event })"
-              name="parentActiviteId">
-              <option value="">{{ 'chantiers.planning.drawer.parentNone' | translate }}</option>
-              @for (opt of facade.parentOptions(); track opt.id) {
-                <option [value]="opt.id">{{ opt.libelle }}</option>
-              }
-            </select>
+              name="parentActiviteId"
+            />
           </label>
 
           <label class="activite-drawer__field">
             <span>{{ 'chantiers.planning.drawer.zone' | translate }}</span>
-            <select
+            <nf-select
+              [options]="zoneOptions()"
               [ngModel]="draft.zoneId"
               (ngModelChange)="facade.patchDraft({ zoneId: $event })"
-              name="zoneId">
-              <option value="">{{ 'chantiers.planning.drawer.zoneNone' | translate }}</option>
-              @for (zone of facade.zoneOptions(); track zone.id) {
-                <option [value]="zone.id">{{ zone.designation }}</option>
-              }
-            </select>
+              name="zoneId"
+            />
           </label>
 
           @if (facade.drawerMode() === 'create') {
@@ -100,16 +100,13 @@ import { PlanningFacade, toIsoDate } from '../../services/planning.facade';
 
               <label class="activite-drawer__field">
                 <span>{{ 'chantiers.planning.drawer.ajouterPoste' | translate }}</span>
-                <select
+                <nf-select
                   data-testid="activite-noeud-picker"
+                  [options]="noeudOptions()"
                   [ngModel]="noeudId()"
                   (ngModelChange)="noeudId.set($event)"
-                  name="noeudId">
-                  <option value="">{{ 'chantiers.planning.drawer.choisirArbre' | translate }}</option>
-                  @for (n of facade.noeudOptions(); track n.id) {
-                    <option [value]="n.id">{{ n.code }} {{ n.designation }} · restants {{ n.reste }} {{ n.unite }}</option>
-                  }
-                </select>
+                  name="noeudId"
+                />
               </label>
               <label class="activite-drawer__field">
                 <span>{{ 'chantiers.planning.drawer.quantitePrevue' | translate }}</span>
@@ -196,8 +193,7 @@ import { PlanningFacade, toIsoDate } from '../../services/planning.facade';
       .activite-drawer__eyebrow { margin: 0; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--nf-text-secondary, var(--nf-color-text-secondary)); }
       .activite-drawer__field { display: grid; gap: 0.3rem; }
       .activite-drawer__field span { font-size: 0.78rem; font-weight: 600; color: var(--nf-color-text-secondary); }
-      .activite-drawer__field input,
-      .activite-drawer__field select {
+      .activite-drawer__field input {
         min-height: 2.6rem;
         border: 1px solid color-mix(in srgb, var(--nf-primary, var(--nf-color-primary-600)) 14%, var(--nf-color-border));
         border-radius: 0.75rem;
@@ -223,6 +219,7 @@ import { PlanningFacade, toIsoDate } from '../../services/planning.facade';
 })
 export class ActiviteDrawerComponent {
   readonly facade = inject(PlanningFacade);
+  private readonly translate = inject(TranslateService);
 
   readonly noeudId = signal('');
   readonly quantitePrevue = signal(0);
@@ -232,6 +229,24 @@ export class ActiviteDrawerComponent {
 
   readonly rattachements = computed(() => this.facade.selectedActiviteDetail()?.activite.rattachements ?? []);
   readonly detail = computed(() => this.facade.selectedActiviteDetail());
+
+  readonly parentOptions = computed<NfSelectOption[]>(() => [
+    { value: '', label: this.translate.instant('chantiers.planning.drawer.parentNone') },
+    ...this.facade.parentOptions().map((opt) => ({ value: opt.id, label: opt.libelle })),
+  ]);
+
+  readonly zoneOptions = computed<NfSelectOption[]>(() => [
+    { value: '', label: this.translate.instant('chantiers.planning.drawer.zoneNone') },
+    ...this.facade.zoneOptions().map((zone) => ({ value: zone.id, label: zone.designation })),
+  ]);
+
+  readonly noeudOptions = computed<NfSelectOption[]>(() => [
+    { value: '', label: this.translate.instant('chantiers.planning.drawer.choisirArbre') },
+    ...this.facade.noeudOptions().map((n) => ({
+      value: n.id,
+      label: `${n.code} ${n.designation} · restants ${n.reste} ${n.unite}`,
+    })),
+  ]);
 
   readonly drawerTitle = computed(() =>
     this.facade.drawerMode() === 'create' ? 'Nouvelle activité' : this.facade.draft()?.libelle || 'Activité',

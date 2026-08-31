@@ -60,12 +60,17 @@
             }
           </tbody>
         </table>
-        <div class="bc-rec-form__actions">
-          <nf-button type="button" class="primary" [disabled]="receptionSaving()" (clicked)="submitReception()" variant="secondary">
-            {{ receptionSaving() ? 'Enregistrement…' : 'Valider réception' }}
+        <nf-action-bar align="right">
+          <nf-button type="button" variant="secondary" (clicked)="showReceptionForm.set(false)">Annuler</nf-button>
+          <nf-button
+            type="button"
+            variant="primary"
+            [disabled]="receptionSaving()"
+            [loading]="receptionSaving()"
+            (clicked)="submitReception()">
+            Valider réception
           </nf-button>
-          <nf-button type="button" class="secondary" (clicked)="showReceptionForm.set(false)" variant="secondary">Annuler</nf-button>
-        </div>
+        </nf-action-bar>
       </section>
     }
 

@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FilterResetComponent } from '@platform/lib/anatomy/components/molecules/filter-reset/filter-reset.component';
 
-import { ButtonComponent, PageHeaderComponent, PageShellComponent } from '@platform/lib/anatomy';
+import { ButtonComponent, NfSelectComponent, PageHeaderComponent, PageShellComponent, type NfSelectOption } from '@platform/lib/anatomy';
 import { AttachementApiService } from '../attachement-api.service';
 import { ATTACHEMENT_STATUS_KEYS } from '@app/socle/shell/i18n-labels';
 import {
@@ -31,7 +32,17 @@ const STATUS_CSS: Record<string, string> = {
   selector: 'app-attachement-listing',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterLink, PageShellComponent, PageHeaderComponent, FilterResetComponent, ButtonComponent, TranslateModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterLink,
+    PageShellComponent,
+    PageHeaderComponent,
+    FilterResetComponent,
+    ButtonComponent,
+    NfSelectComponent,
+    TranslateModule,
+  ],
   template: `
     <nf-page-shell scroll>
       <nf-page-header [config]="pageHeaderConfig"></nf-page-header>
@@ -40,10 +51,13 @@ const STATUS_CSS: Record<string, string> = {
         <input class="search" type="search"
           [placeholder]="'chantiers.attachement.list.searchPlaceholder' | translate"
           [value]="search()" (input)="search.set($any($event.target).value)" />
-        <select [value]="filterStatus()" (change)="filterStatus.set($any($event.target).value)">
-          <option value="">{{ 'chantiers.attachement.list.allStatuses' | translate }}</option>
-          @for (s of statusEntries(); track s[0]) { <option [value]="s[0]">{{ s[1] }}</option> }
-        </select>
+        <nf-select
+          class="toolbar-select"
+          [options]="statusFilterOptions()"
+          [ngModel]="filterStatus()"
+          (ngModelChange)="filterStatus.set($event)"
+          [placeholder]="'chantiers.attachement.list.allStatuses' | translate"
+        />
         @if (filteredChantierCode()) {
           <span class="context-chip">{{ 'chantiers.common.fields.chantier' | translate }}: {{ filteredChantierCode() }}</span>
           <button type="button" class="context-link" (click)="clearChantierFilter()">{{ 'chantiers.common.actions.clearChantierFilter' | translate }}</button>
@@ -105,7 +119,7 @@ const STATUS_CSS: Record<string, string> = {
     :host { display: block; height: 100%; }
     .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; }
     .search { flex: 1; min-width: 180px; max-width: 280px; padding: 7px 12px; border: 1px solid var(--nf-color-border); border-radius: 6px; font-size: 13px; }
-    select { padding: 7px 10px; border: 1px solid var(--nf-color-border); border-radius: 6px; font-size: 13px; background: var(--nf-color-surface); }
+    .toolbar-select { min-width: 160px; }
     .context-chip { padding: 4px 10px; border-radius: 999px; background: var(--nf-color-bg-subtle); color: var(--nf-color-text-secondary); font-size: 12px; font-weight: 600; }
     .context-link { border: none; background: transparent; color: var(--nf-color-primary-600); cursor: pointer; font-size: 12px; font-weight: 600; }
     .context-link:hover { text-decoration: underline; }
@@ -171,6 +185,11 @@ export class AttachementListingPage implements OnInit {
       return [status, resolved === key ? String(status) : resolved];
     });
   });
+
+  readonly statusFilterOptions = computed<NfSelectOption[]>(() => [
+    { value: '', label: this.translate.instant('chantiers.attachement.list.allStatuses') },
+    ...this.statusEntries().map(([value, label]) => ({ value, label })),
+  ]);
 
   ngOnInit(): void {
     void this.load();
